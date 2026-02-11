@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { Category, buildCategoryTree } from "@/lib/utils";
 import { 
@@ -102,7 +102,15 @@ interface SidebarProps {
   selectedTags?: string[];
 }
 
-export default function Sidebar({ categories, mobileOnly = false, availableTags: propTags, selectedTags: propSelectedTags }: SidebarProps) {
+export default function Sidebar(props: SidebarProps) {
+  return (
+    <Suspense fallback={<div className="w-[280px] bg-white h-screen lg:h-auto animate-pulse" />}>
+      <SidebarContent {...props} />
+    </Suspense>
+  );
+}
+
+function SidebarContent({ categories, mobileOnly = false, availableTags: propTags, selectedTags: propSelectedTags }: SidebarProps) {
   const dbTree = buildCategoryTree(categories);
   const router = useRouter();
   const { availableTags: contextTags } = useSidebar();
