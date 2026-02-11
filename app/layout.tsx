@@ -5,10 +5,12 @@ import { CartProvider } from "@/context/CartContext";
 import { ToastProvider } from "@/context/ToastContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { SidebarProvider } from "@/context/SidebarContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import { AIContextProvider } from "@/context/AIContext"; // Nova Camada de Persistência
 import Footer from "@/components/Footer";
 import ProductPreview from "@/components/ProductPreview";
 import AIOverlay from "@/components/AIOverlay"; // Nova Interface de Preview
+import ThemeRenderer from "@/app/components/ThemeRenderer";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import { getCategories } from "@/lib/db";
 
@@ -98,31 +100,26 @@ export default async function RootLayout({
       <body
         className={`antialiased flex flex-col min-h-screen overflow-x-hidden`}
       >
-        <AuthProvider>
-          <CartProvider>
-            <ToastProvider>
-              <Suspense>
+        <ThemeProvider>
+          <AuthProvider>
+            <CartProvider>
+              <ToastProvider>
                 <SidebarProvider>
                   <AIContextProvider>
-                    <AIOverlay /> {/* Nova Interface de Preview */}
-                    <div className="flex flex-col min-h-screen">
-                      {/* Header será renderizado dentro das páginas ou layout específico se necessário, 
-                          mas geralmente o Header é global. Se não houver Header aqui, 
-                          ele deve estar sendo importado em outro lugar ou o layout espera que as páginas o tenham.
-                          Vou assumir que o Header é parte do children ou layout padrão.
-                          Mas para o FloatingWhatsApp, coloco no nível global. */}
-                      <main className="flex-grow">
-                        {children}
-                      </main>
-                      <Footer />
-                      <FloatingWhatsApp />
+                    <ThemeRenderer />
+                    <ProductPreview />
+                    <AIOverlay /> {/* Novo Preview AI */}
+                    <div className="flex-grow">
+                      {children}
                     </div>
+                    <Footer />
+                    <FloatingWhatsApp />
                   </AIContextProvider>
                 </SidebarProvider>
-              </Suspense>
-            </ToastProvider>
-          </CartProvider>
-        </AuthProvider>
+              </ToastProvider>
+            </CartProvider>
+          </AuthProvider>
+        </ThemeProvider>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

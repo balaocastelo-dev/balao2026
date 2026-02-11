@@ -11,6 +11,11 @@ Este projeto é um e-commerce desenvolvido com Next.js, Tailwind CSS e TypeScrip
   - **Acesso Automático**: Usuários logados com `balaocastelo@gmail.com` têm acesso direto.
   - **Senha Dinâmica**: Outros usuários devem usar a senha do dia: `56676009` + data (ddmmyyyy).
   - Importação em Massa: Cole o texto com URLs de imagens, nomes e preços para popular o site.
+  - **Gerenciamento de Temas Visuais**:
+    - Acesso via `/admin/temas`.
+    - Permite alterar a aparência global do site (Padrões, Carnaval, Matrix, Mídia Personalizada).
+    - Suporte a upload de imagens/vídeos de fundo.
+    - Persistência global via banco de dados e cache local.
 - **Minha Conta**:
   - Histórico de pedidos com filtros (status, data, número) e paginação.
   - Carteira de Cupons ("Meus Cupons") com validação e adição de novos códigos.
@@ -20,6 +25,14 @@ Este projeto é um e-commerce desenvolvido com Next.js, Tailwind CSS e TypeScrip
 - **Responsividade**: Layout adaptado para Mobile e Desktop.
 
 ## Configuração e Instalação
+
+### Configuração do Banco de Dados (Temas e Cupons)
+Se encontrar erros como "Could not find the table...", execute o seguinte SQL no Supabase ou acesse `/admin/temas` e clique em "Reparar Banco de Dados".
+
+```sql
+-- Exemplo parcial (ver supabase/migrations/20260211_fix_and_setup_themes.sql para completo)
+CREATE TABLE IF NOT EXISTS public.site_settings (...);
+```
 
 1.  **Instale as dependências:**
     ```bash
