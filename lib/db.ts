@@ -473,6 +473,74 @@ export async function getOrders(): Promise<Order[]> {
     }
 }
 
+export async function getUserOrders(
+    userId: string, 
+    email: string,
+    filters: {
+        page?: number;
+        limit?: number;
+        status?: string;
+        search?: string;
+        startDate?: string;
+        endDate?: string;
+    } = {}
+): Promise<{ data: Order[], count: number }> {
+    try {
+        const { 
+            page = 1, 
+            limit = 20, 
+            status, 
+            search,
+            startDate,
+            endDate
+        } = filters;
+
+        const from = (page - 1) * limit;
+        const to = from + limit - 1;
+
+        let query = supabaseAdmin
+            .from('orders')
+            .select(`
+                *,
+                items:order_items(*)
+            `, { count: 'exact' })
+            .or(`user_id.eq.${userId},customer_email.eq.${email}`)
+            .order('created_at', { ascending: false })
+            .range(from, to);
+
+        if (status && status !== 'all') {
+            query = query.eq('status', status);
+        }
+
+        if (search) {
+            query = query.eq('id', search);
+        }
+
+        if (startDate) {
+            query = query.gte('created_at', startDate);
+        }
+
+        if (endDate) {
+            // Adjust end date to cover the full day
+            const end = new Date(endDate);
+            end.setHours(23, 59, 59, 999);
+            query = query.lte('created_at', end.toISOString());
+        }
+
+        const { data, error, count } = await query;
+
+        if (error) {
+            console.error("Supabase error (user orders):", error);
+            return { data: [], count: 0 };
+        }
+
+        return { data: data as Order[], count: count || 0 };
+    } catch (error) {
+        console.error("Error fetching user orders:", error);
+        return { data: [], count: 0 };
+    }
+}
+
 export async function updateOrderStatus(id: string, status: string) {
     try {
         const { error } = await supabaseAdmin

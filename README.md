@@ -7,8 +7,16 @@ Este projeto é um e-commerce desenvolvido com Next.js, Tailwind CSS e TypeScrip
 - **Catálogo de Produtos**: Listagem com filtro por categorias e busca.
 - **Página de Detalhes**: Visualização do produto com opção de compartilhamento e pré-visualização (OG Tags).
 - **Painel Administrativo**:
-  - Acesso secreto: Clique 5 vezes no logo ou digite `56676009` na busca.
+  - Acesso via `/admin/login`.
+  - **Acesso Automático**: Usuários logados com `balaocastelo@gmail.com` têm acesso direto.
+  - **Senha Dinâmica**: Outros usuários devem usar a senha do dia: `56676009` + data (ddmmyyyy).
   - Importação em Massa: Cole o texto com URLs de imagens, nomes e preços para popular o site.
+- **Minha Conta**:
+  - Histórico de pedidos com filtros (status, data, número) e paginação.
+  - Carteira de Cupons ("Meus Cupons") com validação e adição de novos códigos.
+- **Carrinho**:
+  - Aplicação de cupons com validação em tempo real.
+  - Notificações (Toasts) sobre cupons disponíveis.
 - **Responsividade**: Layout adaptado para Mobile e Desktop.
 
 ## Configuração e Instalação
@@ -39,8 +47,61 @@ Este projeto é um e-commerce desenvolvido com Next.js, Tailwind CSS e TypeScrip
 
 - `/app`: Páginas e rotas da aplicação (App Router).
 - `/components`: Componentes reutilizáveis (Header, Sidebar, ProductCard).
-- `/lib`: Utilitários e lógica de banco de dados (JSON local).
+- `/lib`: Utilitários e lógica de banco de dados (Supabase).
 - `/data`: Armazenamento local dos produtos (`products.json`).
+
+## API e Integração
+
+### Pedidos (`/api/user/orders`)
+
+Retorna os pedidos do usuário autenticado.
+
+**Método**: `GET`
+
+**Parâmetros de Query**:
+- `page`: Número da página (default: 1)
+- `limit`: Itens por página (default: 20)
+- `status`: Filtrar por status (ex: 'pending', 'paid')
+- `search`: Buscar por número do pedido
+- `startDate`: Data inicial (ISO)
+- `endDate`: Data final (ISO)
+
+**Exemplo de Resposta**:
+```json
+{
+  "orders": [...],
+  "pagination": {
+    "total": 50,
+    "page": 1,
+    "limit": 20,
+    "totalPages": 3
+  }
+}
+```
+
+### Cupons (`/api/user/coupons`)
+
+Gerencia os cupons na carteira do usuário.
+
+#### Listar Cupons
+**Método**: `GET`
+**Resposta**: Lista de cupons associados ao usuário.
+
+#### Adicionar Cupom
+**Método**: `POST`
+**Body**:
+```json
+{
+  "code": "DESCONTO10"
+}
+```
+**Resposta Sucesso**:
+```json
+{
+  "success": true,
+  "message": "Cupom adicionado com sucesso!"
+}
+```
 
 ## Importação de Produtos
 

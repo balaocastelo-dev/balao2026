@@ -101,3 +101,68 @@ export async function validateCoupon(code: string, cartTotal: number, items: any
       }
   };
 }
+
+export async function getCouponByCode(code: string) {
+    const { data: coupons, error } = await supabaseAdmin
+        .from('coupons')
+        .select('*')
+        .ilike('code', code)
+        .limit(1);
+
+    if (error || !coupons || coupons.length === 0) {
+        return null;
+    }
+    return coupons[0];
+}
+
+export async function getUserCoupons(userId: string) {
+    const { data, error } = await supabaseAdmin
+        .from('user_coupons')
+        .select(`
+            id,
+            status,
+            created_at,
+            coupon:coupons (
+                id,
+                code,
+                discount_type,
+                discount_value,
+                min_purchase_value,
+                expiration_date,
+                description,
+                status
+            )
+        `)
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data;
+}
+
+export async function assignCouponToUser(userId: string, couponId: string) {
+    // Check if already exists
+    const { data: existing } = await supabaseAdmin
+        .from('user_coupons')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('coupon_id', couponId)
+        .single();
+
+    if (existing) {
+        throw new Error("Você já possui este cupom em sua carteira.");
+    }
+
+    const { data, error } = await supabaseAdmin
+        .from('user_coupons')
+        .insert({
+            user_id: userId,
+            coupon_id: couponId,
+            status: 'available'
+        })
+        .select()
+        .single();
+
+    if (error) throw error;
+    return data;
+}

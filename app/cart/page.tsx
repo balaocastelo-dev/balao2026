@@ -2,7 +2,8 @@
 
 import Header from "@/components/Header";
 import { useCart } from "@/context/CartContext";
-import { Trash2, Minus, Plus, ArrowRight, ShoppingBag, Truck, CreditCard, User, Check, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { Trash2, Minus, Plus, ArrowRight, ShoppingBag, Truck, CreditCard, User, Check, ChevronLeft, ChevronRight, MapPin, Gift, X, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -10,6 +11,7 @@ import ApplyCoupon from "@/components/ApplyCoupon";
 
 export default function CartPage() {
   const { items, removeFromCart, updateQuantity, cartTotal, clearCart } = useCart();
+  const { user } = useAuth();
   const router = useRouter();
   
   const [step, setStep] = useState(1);
@@ -19,7 +21,76 @@ export default function CartPage() {
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [appliedCouponCode, setAppliedCouponCode] = useState("");
 
+  // User Coupons State
+  const [userCoupons, setUserCoupons] = useState<any[]>([]);
+  const [showCouponToast, setShowCouponToast] = useState(false);
+  const [showCouponModal, setShowCouponModal] = useState(false);
+
   const finalTotal = Math.max(0, cartTotal - couponDiscount);
+
+  // Fetch User Coupons
+  useEffect(() => {
+    if (user && items.length > 0) {
+        fetch('/api/user/coupons')
+            .then(res => res.json())
+            .then(data => {
+                if (data.coupons && data.coupons.length > 0) {
+                        // Filter valid coupons
+                        const valid = data.coupons.filter((c: any) => 
+                        c.status === 'available' && 
+                        c.coupon.status === 'active' && 
+                        (!c.coupon.expiration_date || new Date(c.coupon.expiration_date) > new Date())
+                        );
+                        setUserCoupons(valid);
+                        
+                        if (valid.length > 0) {
+                            // Check if toast was dismissed in session
+                            const dismissed = sessionStorage.getItem('coupon_toast_dismissed');
+                            if (!dismissed) setShowCouponToast(true);
+                        }
+                }
+            })
+            .catch(err => console.error(err));
+    }
+  }, [user, items.length]);
+
+  // Auto-dismiss toast
+  useEffect(() => {
+      if (showCouponToast) {
+          const timer = setTimeout(() => {
+              setShowCouponToast(false);
+          }, 5000);
+          return () => clearTimeout(timer);
+      }
+  }, [showCouponToast]);
+
+  const handleDismissToast = () => {
+      setShowCouponToast(false);
+      sessionStorage.setItem('coupon_toast_dismissed', 'true');
+  };
+
+  const handleSelectCouponFromModal = async (code: string) => {
+      // Validate against cart
+      setLoading(true);
+      try {
+          const res = await fetch('/api/coupons/validate', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ code, cartTotal, items })
+          });
+          const result = await res.json();
+          if (result.valid) {
+              handleApplyCoupon(result.discount, code);
+              setShowCouponModal(false);
+          } else {
+              alert(result.message || "Cupom inválido para este carrinho.");
+          }
+      } catch (error) {
+          console.error(error);
+      } finally {
+          setLoading(false);
+      }
+  };
 
   const handleApplyCoupon = (discount: number, code: string) => {
       setCouponDiscount(discount);
@@ -526,6 +597,87 @@ export default function CartPage() {
           </div>
         )}
       </main>
+
+      {/* Coupon Toast Notification */}
+      {showCouponToast && (
+          <div className="fixed top-24 right-4 bg-white shadow-lg rounded-lg p-4 border-l-4 border-[#E60012] z-50 animate-in slide-in-from-right duration-300 max-w-sm">
+              <div className="flex justify-between items-start gap-3">
+                  <div className="bg-red-50 p-2 rounded-full">
+                      <Gift size={20} className="text-[#E60012]" />
+                  </div>
+                  <div className="flex-1">
+                      <h4 className="font-bold text-gray-800">Cupons Disponíveis!</h4>
+                      <p className="text-sm text-gray-600 mb-2">Você tem {userCoupons.length} cupons para usar.</p>
+                      <button 
+                          onClick={() => {
+                              setShowCouponModal(true);
+                              setShowCouponToast(false);
+                          }}
+                          className="text-sm font-bold text-[#E60012] hover:underline"
+                      >
+                          Ver cupons
+                      </button>
+                  </div>
+                  <button onClick={handleDismissToast} className="text-gray-400 hover:text-gray-600">
+                      <X size={16} />
+                  </button>
+              </div>
+          </div>
+      )}
+
+      {/* Coupon Selection Modal */}
+      {showCouponModal && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+              <div className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[80vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
+                  <div className="p-4 border-b flex justify-between items-center bg-gray-50">
+                      <h3 className="font-bold text-lg flex items-center gap-2">
+                          <Gift className="text-[#E60012]" />
+                          Meus Cupons
+                      </h3>
+                      <button onClick={() => setShowCouponModal(false)} className="text-gray-500 hover:text-gray-700">
+                          <X size={24} />
+                      </button>
+                  </div>
+                  
+                  <div className="p-4 overflow-y-auto flex-1 space-y-3">
+                      {userCoupons.map((uc) => (
+                          <div key={uc.id} className="border border-gray-200 rounded-lg p-4 hover:border-red-200 transition-colors flex justify-between items-center group">
+                              <div>
+                                  <div className="font-mono font-bold text-gray-800 text-lg">{uc.coupon.code}</div>
+                                  <div className="text-[#E60012] font-bold text-sm">
+                                      {uc.coupon.discount_type === 'percentage' 
+                                          ? `${uc.coupon.discount_value}% OFF` 
+                                          : `R$ ${uc.coupon.discount_value.toFixed(2)} OFF`}
+                                  </div>
+                                  <p className="text-xs text-gray-500 mt-1">{uc.coupon.description}</p>
+                                  {uc.coupon.min_purchase_value > 0 && (
+                                      <p className="text-xs text-gray-400 mt-1">
+                                          Mínimo: R$ {uc.coupon.min_purchase_value.toFixed(2)}
+                                      </p>
+                                  )}
+                              </div>
+                              <button 
+                                  onClick={() => handleSelectCouponFromModal(uc.coupon.code)}
+                                  className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium group-hover:bg-[#E60012] group-hover:text-white transition-colors"
+                              >
+                                  Aplicar
+                              </button>
+                          </div>
+                      ))}
+                  </div>
+
+                  <div className="p-4 border-t bg-gray-50 text-center">
+                      <button 
+                          onClick={() => setShowCouponModal(false)}
+                          className="text-gray-500 hover:text-gray-700 text-sm font-medium"
+                      >
+                          Fechar
+                      </button>
+                  </div>
+              </div>
+          </div>
+      )}
+
     </div>
   );
 }
