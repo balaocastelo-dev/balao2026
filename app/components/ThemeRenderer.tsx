@@ -64,20 +64,41 @@ const ThemeRenderer = () => {
                 autoPlay 
                 loop 
                 muted 
-                className="w-full h-full object-cover opacity-50"
+                className="w-full h-full object-cover"
+                style={{ 
+                    opacity: (themeConfig.opacity || 50) / 100,
+                    filter: `blur(${themeConfig.blur || 0}px)`
+                }}
               />
             ) : (
               <div 
-                className="w-full h-full bg-cover bg-center opacity-50"
-                style={{ backgroundImage: `url(${themeConfig.customMediaUrl})` }}
+                className="w-full h-full bg-cover bg-center"
+                style={{ 
+                    backgroundImage: `url(${themeConfig.customMediaUrl})`,
+                    opacity: (themeConfig.opacity || 50) / 100,
+                    filter: `blur(${themeConfig.blur || 0}px)`
+                }}
               />
             )}
           </>
         )}
       </div>
 
+      {/* High Contrast Overlay */}
+      {themeConfig.highContrast && (
+        <div className="fixed inset-0 z-[9999] pointer-events-none mix-blend-difference bg-white opacity-20" />
+      )}
+      
+      {/* Global High Contrast Styles injection */}
+      {themeConfig.highContrast && (
+         <style dangerouslySetInnerHTML={{__html: `
+            html { filter: contrast(1.5) !important; }
+            img, video { filter: contrast(1.2) !important; }
+         `}} />
+      )}
+
       {/* Overlay Themes (Canvas) */}
-      {activeTheme === 'carnaval' && <CarnavalTheme />}
+      {activeTheme === 'carnaval' && <CarnavalTheme soundEnabled={themeConfig.carnavalSound} />}
       {activeTheme === 'matrix' && <MatrixTheme />}
     </>
   );

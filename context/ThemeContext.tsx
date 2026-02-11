@@ -9,6 +9,9 @@ interface ThemeConfig {
   customMediaUrl?: string;
   customMediaType?: 'image' | 'video';
   carnavalSound?: boolean;
+  highContrast?: boolean;
+  opacity?: number;
+  blur?: number;
 }
 
 interface ThemeContextType {

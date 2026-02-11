@@ -13,9 +13,17 @@ Este projeto é um e-commerce desenvolvido com Next.js, Tailwind CSS e TypeScrip
   - Importação em Massa: Cole o texto com URLs de imagens, nomes e preços para popular o site.
   - **Gerenciamento de Temas Visuais**:
     - Acesso via `/admin/temas`.
-    - Permite alterar a aparência global do site (Padrões, Carnaval, Matrix, Mídia Personalizada).
-    - Suporte a upload de imagens/vídeos de fundo.
-    - Persistência global via banco de dados e cache local.
+    - Permite alterar a aparência global do site com persistência em tempo real.
+    - **Temas Disponíveis**:
+      - Padrão do Sistema (Clean).
+      - Padrões Geométricos (5 variações CSS).
+      - **Carnaval Animado**: Partículas interativas com mouse e sons de festa (opcionais).
+      - **Matrix Rain**: Animação Canvas de chuva de código.
+      - **Mídia Personalizada**: Upload de imagens (com compressão automática WebP) e vídeos de até 50MB.
+    - **Acessibilidade**:
+      - Modo de Alto Contraste (filtro global e overlay).
+      - Controles de opacidade e blur para mídias personalizadas.
+      - Toggle de som para temas animados.
 - **Minha Conta**:
   - Histórico de pedidos com filtros (status, data, número) e paginação.
   - Carteira de Cupons ("Meus Cupons") com validação e adição de novos códigos.

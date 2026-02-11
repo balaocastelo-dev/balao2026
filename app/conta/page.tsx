@@ -344,7 +344,7 @@ export default function ContaPage() {
 
                         {/* Order Details Modal */}
                         {selectedOrder && (
-                            <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+                            <div className="fixed inset-0 bg-black/50 z-[2000] flex items-center justify-center p-4 animate-in fade-in duration-200">
                                 <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto flex flex-col">
                                     {/* Modal Header */}
                                     <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">

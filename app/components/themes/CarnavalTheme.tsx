@@ -16,9 +16,33 @@ interface Particle {
 
 const COLORS = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF'];
 
-const CarnavalTheme = () => {
+const CarnavalTheme = ({ soundEnabled }: { soundEnabled?: boolean }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mouseRef = useRef({ x: 0, y: 0 });
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    if (soundEnabled) {
+        if (!audioRef.current) {
+            audioRef.current = new Audio('/sounds/carnaval-loop.mp3');
+            audioRef.current.loop = true;
+            audioRef.current.volume = 0.3;
+        }
+        audioRef.current.play().catch(() => {
+            console.log("Autoplay blocked, waiting for interaction");
+        });
+    } else {
+        if (audioRef.current) {
+            audioRef.current.pause();
+        }
+    }
+
+    return () => {
+        if (audioRef.current) {
+            audioRef.current.pause();
+        }
+    };
+  }, [soundEnabled]);
 
   useEffect(() => {
     const canvas = canvasRef.current;

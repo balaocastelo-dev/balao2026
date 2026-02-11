@@ -14,14 +14,17 @@ import {
     Save, 
     Upload,
     Database,
-    AlertTriangle
+    AlertTriangle,
+    Loader2
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { compressImage } from '@/lib/utils';
 
 export default function ThemesPage() {
     const { activeTheme, themeConfig, setTheme } = useTheme();
     const [previewMode, setPreviewMode] = useState(false);
     const [customFile, setCustomFile] = useState<File | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
     const [dbSetupLoading, setDbSetupLoading] = useState(false);
     const [dbSetupMessage, setDbSetupMessage] = useState('');
     const supabase = createClient();
@@ -55,25 +58,29 @@ export default function ThemesPage() {
     };
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
+        const rawFile = e.target.files?.[0];
+        if (!rawFile) return;
 
         // Validation
-        if (file.size > 50 * 1024 * 1024) {
+        if (rawFile.size > 50 * 1024 * 1024) {
             alert('Arquivo muito grande. Máximo 50MB.');
             return;
         }
 
         const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm', 'video/quicktime'];
-        if (!validTypes.includes(file.type)) {
+        if (!validTypes.includes(rawFile.type)) {
             alert('Formato inválido.');
             return;
         }
 
-        setCustomFile(file);
-        
-        // Upload to Supabase Storage
+        setIsUploading(true);
+
         try {
+            // Compress image if applicable
+            const file = await compressImage(rawFile);
+            setCustomFile(file);
+            
+            // Upload to Supabase Storage
             const fileExt = file.name.split('.').pop();
             const fileName = `theme-media-${Date.now()}.${fileExt}`;
             const { data, error } = await supabase.storage
@@ -101,6 +108,8 @@ export default function ThemesPage() {
         } catch (err) {
             console.error(err);
             alert('Erro ao processar arquivo.');
+        } finally {
+            setIsUploading(false);
         }
     };
 
@@ -213,8 +222,17 @@ export default function ThemesPage() {
                                         onChange={handleFileUpload}
                                     />
                                     <div className="flex flex-col items-center gap-2 text-sm text-gray-600">
-                                        <Upload size={20} />
-                                        <span>Clique para enviar (Max 50MB)</span>
+                                        {isUploading ? (
+                                            <>
+                                                <Loader2 size={24} className="animate-spin text-[#E60012]" />
+                                                <span>Processando e enviando...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Upload size={20} />
+                                                <span>Clique para enviar (Max 50MB)</span>
+                                            </>
+                                        )}
                                     </div>
                                 </label>
                                 {themeConfig.customMediaUrl && (

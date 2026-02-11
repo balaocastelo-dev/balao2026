@@ -126,6 +126,76 @@ export function enhanceImageUrl(url: string): string {
   return enhancedUrl;
 }
 
+/**
+ * Compresses an image file using the Canvas API.
+ * Resizes large images to max 1920x1080 and converts to WebP with 0.8 quality.
+ */
+export async function compressImage(file: File): Promise<File> {
+  // Only compress images
+  if (!file.type.startsWith('image/')) return file;
+
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+      
+      // Max dimensions
+      const MAX_WIDTH = 1920;
+      const MAX_HEIGHT = 1080;
+      
+      if (width > height) {
+        if (width > MAX_WIDTH) {
+          height *= MAX_WIDTH / width;
+          width = MAX_WIDTH;
+        }
+      } else {
+        if (height > MAX_HEIGHT) {
+          width *= MAX_HEIGHT / height;
+          height = MAX_HEIGHT;
+        }
+      }
+      
+      canvas.width = width;
+      canvas.height = height;
+      
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        resolve(file); // Fallback to original
+        return;
+      }
+      
+      ctx.drawImage(img, 0, 0, width, height);
+      
+      // Convert to WebP
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const newFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".webp", {
+            type: "image/webp",
+            lastModified: Date.now(),
+          });
+          resolve(newFile);
+        } else {
+          resolve(file); // Fallback
+        }
+      }, 'image/webp', 0.8);
+    };
+    
+    img.onerror = (error) => {
+      URL.revokeObjectURL(url);
+      console.error("Image compression error:", error);
+      resolve(file); // Fallback
+    };
+    
+    img.src = url;
+  });
+}
+
 export function isLowResolution(url: string): boolean {
   const lowerUrl = url.toLowerCase();
   
