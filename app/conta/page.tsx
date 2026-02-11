@@ -15,7 +15,10 @@ import {
     ChevronRight,
     Loader2,
     Copy,
-    Check
+    Check,
+    X,
+    MapPin,
+    CreditCard
 } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/context/ToastContext";
@@ -33,6 +36,7 @@ export default function ContaPage() {
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [ordersPagination, setOrdersPagination] = useState({ page: 1, totalPages: 1, total: 0 });
   const [ordersFilter, setOrdersFilter] = useState({ status: "", search: "", startDate: "", endDate: "" });
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
 
   // Coupons State
   const [coupons, setCoupons] = useState<any[]>([]);
@@ -301,8 +305,10 @@ export default function ContaPage() {
                                                     {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(order.total)}
                                                 </span>
                                                 <div className="flex gap-2">
-                                                    {/* Link para detalhes se houver página de detalhes */}
-                                                    <button className="text-sm text-[#E60012] hover:underline font-medium">
+                                                    <button 
+                                                        onClick={() => setSelectedOrder(order)}
+                                                        className="text-sm text-[#E60012] hover:underline font-medium"
+                                                    >
                                                         Ver Detalhes
                                                     </button>
                                                 </div>
@@ -333,6 +339,138 @@ export default function ContaPage() {
                                 >
                                     <ChevronRight size={20} />
                                 </button>
+                            </div>
+                        )}
+
+                        {/* Order Details Modal */}
+                        {selectedOrder && (
+                            <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+                                <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto flex flex-col">
+                                    {/* Modal Header */}
+                                    <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
+                                        <div>
+                                            <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                                                Pedido #{selectedOrder.id.slice(0, 8)}
+                                            </h3>
+                                            <p className="text-sm text-gray-500">
+                                                Realizado em {new Date(selectedOrder.created_at).toLocaleString('pt-BR')}
+                                            </p>
+                                        </div>
+                                        <button 
+                                            onClick={() => setSelectedOrder(null)}
+                                            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                                        >
+                                            <X size={24} className="text-gray-500" />
+                                        </button>
+                                    </div>
+
+                                    {/* Modal Body */}
+                                    <div className="p-6 space-y-8">
+                                        
+                                        {/* Status Steps */}
+                                        <div className="w-full">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className="text-sm font-medium text-gray-900">Status Atual:</span>
+                                                <span className={`px-3 py-1 rounded-full text-sm font-bold uppercase ${
+                                                    selectedOrder.status === 'delivered' ? 'bg-green-100 text-green-700' :
+                                                    selectedOrder.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                                                    selectedOrder.status === 'paid' ? 'bg-blue-100 text-blue-700' :
+                                                    'bg-yellow-100 text-yellow-700'
+                                                }`}>
+                                                    {selectedOrder.status === 'pending' ? 'Pendente' :
+                                                     selectedOrder.status === 'paid' ? 'Pago' :
+                                                     selectedOrder.status === 'shipped' ? 'Enviado' :
+                                                     selectedOrder.status === 'delivered' ? 'Entregue' :
+                                                     selectedOrder.status === 'cancelled' ? 'Cancelado' : selectedOrder.status}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* Items */}
+                                        <div>
+                                            <h4 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                                <Package size={18} className="text-[#E60012]" />
+                                                Itens do Pedido
+                                            </h4>
+                                            <div className="space-y-4">
+                                                {selectedOrder.items?.map((item: any, idx: number) => (
+                                                    <div key={idx} className="flex gap-4 border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                                                        <div className="w-16 h-16 bg-gray-100 rounded-lg flex-shrink-0 relative overflow-hidden">
+                                                            {item.product_image ? (
+                                                                <Image 
+                                                                    src={item.product_image} 
+                                                                    alt={item.product_name} 
+                                                                    fill
+                                                                    className="object-cover"
+                                                                />
+                                                            ) : (
+                                                                <div className="w-full h-full flex items-center justify-center text-gray-300">
+                                                                    <Package size={24} />
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <p className="font-medium text-gray-900 line-clamp-2">{item.product_name}</p>
+                                                            <div className="flex justify-between items-center mt-1">
+                                                                <p className="text-sm text-gray-500">Qtd: {item.quantity}</p>
+                                                                <p className="font-medium text-gray-900">
+                                                                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.price)}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Info Grid */}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            {/* Delivery Info */}
+                                            <div className="bg-gray-50 p-4 rounded-lg">
+                                                <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
+                                                    <MapPin size={18} className="text-[#E60012]" />
+                                                    Entrega
+                                                </h4>
+                                                <div className="space-y-1 text-sm text-gray-600">
+                                                    <p className="font-medium text-gray-900">{selectedOrder.customer_name}</p>
+                                                    <p>{selectedOrder.shipping_address}</p>
+                                                    <p>{selectedOrder.shipping_city} - {selectedOrder.shipping_state}</p>
+                                                    <p>CEP: {selectedOrder.shipping_zip}</p>
+                                                </div>
+                                            </div>
+
+                                            {/* Payment Info */}
+                                            <div className="bg-gray-50 p-4 rounded-lg">
+                                                <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
+                                                    <CreditCard size={18} className="text-[#E60012]" />
+                                                    Pagamento
+                                                </h4>
+                                                <div className="space-y-2 text-sm">
+                                                    <div className="flex justify-between">
+                                                        <span className="text-gray-600">Método:</span>
+                                                        <span className="font-medium text-gray-900 uppercase">{selectedOrder.payment_method}</span>
+                                                    </div>
+                                                    <div className="flex justify-between pt-2 border-t border-gray-200">
+                                                        <span className="text-gray-900 font-bold">Total:</span>
+                                                        <span className="text-[#E60012] font-bold text-lg">
+                                                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(selectedOrder.total)}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Footer */}
+                                    <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end">
+                                        <button 
+                                            onClick={() => setSelectedOrder(null)}
+                                            className="px-6 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+                                        >
+                                            Fechar
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         )}
                     </div>
