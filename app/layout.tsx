@@ -11,6 +11,7 @@ import Footer from "@/components/Footer";
 import ProductPreview from "@/components/ProductPreview";
 import AIOverlay from "@/components/AIOverlay"; // Nova Interface de Preview
 import ThemeRenderer from "@/app/components/ThemeRenderer";
+import Sidebar from "@/components/Sidebar";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import { getCategories } from "@/lib/db";
 
@@ -107,6 +108,7 @@ export default async function RootLayout({
                 <SidebarProvider>
                   <AIContextProvider>
                     <ThemeRenderer />
+                    <Sidebar categories={categories} mobileOnly={true} />
                     <ProductPreview />
                     <AIOverlay /> {/* Novo Preview AI */}
                     <div className="flex-grow">
