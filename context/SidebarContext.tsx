@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, Suspense } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
 export interface FilterTag {
@@ -18,29 +18,36 @@ interface SidebarContextType {
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 
-export function SidebarProvider({ children }: { children: React.ReactNode }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [availableTags, setAvailableTags] = useState<FilterTag[]>([]);
+function SidebarLogic() {
+  const { closeSidebar, setAvailableTags } = useSidebar();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-
-  const toggleSidebar = () => setIsOpen(prev => !prev);
-  const closeSidebar = () => setIsOpen(false);
 
   // Close sidebar on route change
   useEffect(() => {
     closeSidebar();
-  }, [pathname, searchParams]);
+  }, [pathname, searchParams, closeSidebar]);
 
-  // Reset tags on route change (optional, but good practice to avoid stale tags)
-  // Mas se a nova página tiver tags, o FilterSyncer vai atualizar logo em seguida.
-  // Melhor resetar para evitar flash de tags da categoria anterior.
+  // Reset tags on route change
   useEffect(() => {
     setAvailableTags([]);
-  }, [pathname]);
+  }, [pathname, setAvailableTags]);
+
+  return null;
+}
+
+export function SidebarProvider({ children }: { children: React.ReactNode }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [availableTags, setAvailableTags] = useState<FilterTag[]>([]);
+
+  const toggleSidebar = () => setIsOpen(prev => !prev);
+  const closeSidebar = () => setIsOpen(false);
 
   return (
     <SidebarContext.Provider value={{ isOpen, toggleSidebar, closeSidebar, availableTags, setAvailableTags }}>
+      <Suspense fallback={null}>
+        <SidebarLogic />
+      </Suspense>
       {children}
     </SidebarContext.Provider>
   );
