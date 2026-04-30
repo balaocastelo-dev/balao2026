@@ -13,6 +13,7 @@ function ThankYouContent() {
   const searchParams = useSearchParams();
   const [pixPayload, setPixPayload] = useState("");
   const [copied, setCopied] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<'pending' | 'paid' | 'error'>('pending');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [qrCodeLibReady, setQrCodeLibReady] = useState(false);
   
@@ -21,32 +22,40 @@ function ThankYouContent() {
   const customerName = searchParams.get("name");
   const total = totalParam ? parseFloat(totalParam) : 0;
 
+  // Poll for payment status
+  useEffect(() => {
+    if (!orderId || paymentStatus === 'paid') return;
+
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/orders/status?orderId=${orderId}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.status === 'paid') {
+            setPaymentStatus('paid');
+            clearInterval(interval);
+          }
+        }
+      } catch (e) {
+        console.error("Error polling payment status:", e);
+      }
+    }, 5000); // Poll every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [orderId, paymentStatus]);
+
   useEffect(() => {
     if (total > 0) {
-      let txid = '';
-      if (orderId) {
-        const cleanOrder = orderId.slice(0, 8).replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-        let cleanName = '';
-        if (customerName) {
-           const firstName = customerName.split(' ')[0];
-           cleanName = firstName.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-        }
-        txid = `PED${cleanOrder}${cleanName}`.slice(0, 25);
-      } else {
-        const fallback = `PED${Date.now().toString(36).toUpperCase()}`;
-        txid = fallback.replace(/[^A-Z0-9]/g, '').slice(0, 25);
-      }
-
       const payload = generatePixPayload({
-        key: SITE_CONFIG.pix.key,
+        key: SITE_CONFIG.pix.cnpj, // Use the required CNPJ
         name: SITE_CONFIG.pix.name,
         city: SITE_CONFIG.pix.city,
         amount: total,
-        txid: txid
+        txid: orderId ? orderId.slice(0, 8).toUpperCase() : '***'
       });
       setPixPayload(payload);
     }
-  }, [total, orderId, customerName]);
+  }, [total, orderId]);
 
   useEffect(() => {
     if (pixPayload && canvasRef.current && (window as any).QRious) {
@@ -79,16 +88,21 @@ function ThankYouContent() {
           <CheckCircle className="text-green-600 w-10 h-10" />
         </div>
         
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">Pedido Realizado!</h1>
+        <h1 className="text-2xl font-bold text-gray-800 mb-2">
+          {paymentStatus === 'paid' ? 'Pagamento Confirmado!' : 'Pedido Realizado!'}
+        </h1>
         <p className="text-gray-600 mb-6">
-          Obrigado pela sua compra.
+          {paymentStatus === 'paid' 
+            ? 'Seu pagamento foi recebido com sucesso. Estamos preparando seu envio!' 
+            : 'Obrigado pela sua compra.'}
           {orderId && <span className="block text-sm font-medium mt-1">Pedido #{orderId.slice(0, 8)}</span>}
         </p>
 
         {/* Pix Payment Section */}
-        {pixPayload && (
-          <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 mb-8">
+        {pixPayload && paymentStatus !== 'paid' && (
+          <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 mb-8 animate-in fade-in duration-500">
             <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center justify-center gap-2">
+              <CreditCard className="text-[#E60012]" size={20} />
               Pagamento via Pix
             </h2>
             

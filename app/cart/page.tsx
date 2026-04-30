@@ -8,6 +8,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import ApplyCoupon from "@/components/ApplyCoupon";
+import { calculateShipping as getShippingOptions } from "@/lib/shipping";
 
 type ShippingOption = {
   name: string;
@@ -103,36 +104,7 @@ export default function CartPage() {
                   // Keep number and complement if already typed, or clear if needed
               }));
 
-              const isCampinas = data.localidade === "Campinas" && data.uf === "SP";
-              const isSP = data.uf === "SP";
-              const isSoutheast = ["RJ", "MG", "ES", "PR", "SC", "RS"].includes(data.uf);
-
-              let options: ShippingOption[] = [];
-              if (isCampinas) {
-                options = [
-                  {
-                    name: "Entrega Flash",
-                    days: "24 horas (podendo ser entregue no mesmo dia)",
-                    cost: 0,
-                  },
-                ];
-              } else if (isSP) {
-                options = [
-                  { name: "SEDEX", days: "1 a 2 dias úteis", cost: 18.9 },
-                  { name: "PAC", days: "4 a 5 dias úteis", cost: 12.5 },
-                ];
-              } else if (isSoutheast) {
-                options = [
-                  { name: "SEDEX", days: "2 a 4 dias úteis", cost: 28.9 },
-                  { name: "PAC", days: "6 a 8 dias úteis", cost: 19.5 },
-                ];
-              } else {
-                options = [
-                  { name: "SEDEX", days: "3 a 6 dias úteis", cost: 45.9 },
-                  { name: "PAC", days: "8 a 15 dias úteis", cost: 29.9 },
-                ];
-              }
-
+              const options = await getShippingOptions(cep, cartTotal);
               setShippingOptions(options);
               const cheapestOption = options.reduce((acc, current) => (current.cost < acc.cost ? current : acc), options[0]);
               setShippingSelected(cheapestOption);

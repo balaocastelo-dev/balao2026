@@ -21,6 +21,7 @@ export const SITE_CONFIG = {
   pix: {
     key: "34397947000108", // CNPJ
     name: "Balao da informatica castelo",
-    city: "CAMPINAS"
+    city: "CAMPINAS",
+    cnpj: "34397947000108"
   }
 };
