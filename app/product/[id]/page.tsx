@@ -91,6 +91,7 @@ export default async function ProductPage({ params }: Props) {
                 <div className="flex flex-col gap-4 md:gap-6">
                     <ProductMediaSwitcher
                       imageUrl={product.image}
+                      imageUrls={product.image_urls}
                       videoUrl={product.video_url}
                       productName={product.name}
                     />

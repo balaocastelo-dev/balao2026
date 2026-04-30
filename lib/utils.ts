@@ -3,6 +3,8 @@ export interface Product {
   name: string;
   price: string;
   image: string;
+  image_urls?: string[];
+  product_url?: string;
   category: string;
   slug: string;
   cost?: number;
@@ -234,48 +236,65 @@ export function buildCategoryTree(categories: Category[]): Category[] {
 }
 
 export function parseProducts(text: string): Product[] {
-
   const products: Product[] = [];
-  // Regex explanation:
-  // (https?:\/\/[^\s]+\.(?:jpg|png|jpeg|webp|gif)) -> Capture Group 1: Image URL
-  // \s+ -> Whitespace
-  // (.+?) -> Capture Group 2: Product Name (non-greedy)
-  // \s+ -> Whitespace
-  // (R\$\s*[\d\.,]+) -> Capture Group 3: Price
-  const regex = /(https?:\/\/[^\s]+)\s+(.+?)\s+(R\$\s*[\d\.,]+)/g;
-  
-  let match;
-  while ((match = regex.exec(text)) !== null) {
-    let image = match[1];
-    const name = match[2].trim();
-    const price = match[3];
+  const lines = text.split('\n');
 
-    // Enhance Image URL
-    image = enhanceImageUrl(image);
+  for (let line of lines) {
+    line = line.trim();
+    if (!line) continue;
 
-    // Filter Low Resolution (Disabled to prevent missing products)
-    // if (isLowResolution(image)) {
-    //    continue; // Skip this product
-    // }
-
-    // Clean up the image URL if it has extra garbage (though regex [^\s]+ should handle it)
-    // Clean up name if it captured too much (unlikely with non-greedy + following price)
+    // Try Tab separated first (common in copy-paste from spreadsheets/sites)
+    let parts = line.split('\t');
     
-    // Generate a simple ID and slug
-    const id = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15);
-    const slug = name
-      .toLowerCase()
-      .replace(/[^\w\s-]/g, "")
-      .replace(/\s+/g, "-");
+    // If only one part, try whitespace but be careful with product names
+    if (parts.length < 3) {
+        // Fallback to regex for space-separated format
+        // This handles: ImageURL Name Price
+        const regex = /(https?:\/\/[^\s]+)\s+(.+?)\s+(R\$\s*[\d\.,]+|[\d\.,]+)/;
+        const match = line.match(regex);
+        if (match) {
+            parts = [match[1], match[2], match[3]];
+        }
+    }
 
-    products.push({
-      id,
-      name,
-      price,
-      image,
-      category: "Hardware", // Default category as we don't have it in the input
-      slug,
-    });
+    if (parts.length >= 3) {
+      let productUrl = "";
+      let imageUrl = "";
+      let name = "";
+      let price = "";
+
+      if (parts.length >= 4) {
+        // Format: ProductURL ImageURL Name Price
+        productUrl = parts[0].trim();
+        imageUrl = parts[1].trim();
+        name = parts[2].trim();
+        price = parts[3].trim();
+      } else {
+        // Format: ImageURL Name Price
+        imageUrl = parts[0].trim();
+        name = parts[1].trim();
+        price = parts[2].trim();
+      }
+
+      if (imageUrl.startsWith('http') && name && price) {
+        const enhancedImage = enhanceImageUrl(imageUrl);
+        const id = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15);
+        const slug = name
+          .toLowerCase()
+          .replace(/[^\w\s-]/g, "")
+          .replace(/\s+/g, "-");
+
+        products.push({
+          id,
+          name,
+          price: price.startsWith('R$') ? price : `R$ ${price}`,
+          image: enhancedImage,
+          product_url: productUrl,
+          category: "Hardware",
+          slug,
+        });
+      }
+    }
   }
   
   return products;

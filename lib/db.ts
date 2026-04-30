@@ -99,6 +99,8 @@ export async function saveProducts(products: Product[]) {
         name: p.name,
         price: String(p.price),
         image: p.image,
+        image_urls: p.image_urls || [p.image],
+        product_url: p.product_url || null,
         category: p.category,
         slug: p.slug || p.name.toLowerCase().replace(/\s+/g, '-') + '-' + Math.random().toString(36).substring(2, 7)
      }));
@@ -148,6 +150,8 @@ export async function createProduct(product: Partial<Product>) {
             name: product.name,
             price: product.price,
             image: product.image,
+            image_urls: product.image_urls,
+            product_url: product.product_url,
             category: product.category,
             slug: product.slug,
             video_url: product.video_url
@@ -174,6 +178,8 @@ export async function updateProduct(id: string, updates: Partial<Product>) {
         if (updates.name !== undefined) dbUpdates.name = updates.name;
         if (updates.price !== undefined) dbUpdates.price = updates.price;
         if (updates.image !== undefined) dbUpdates.image = updates.image;
+        if (updates.image_urls !== undefined) dbUpdates.image_urls = updates.image_urls;
+        if (updates.product_url !== undefined) dbUpdates.product_url = updates.product_url;
         if (updates.category !== undefined) dbUpdates.category = updates.category;
         if (updates.slug !== undefined) dbUpdates.slug = updates.slug;
          if (updates.video_url !== undefined) dbUpdates.video_url = updates.video_url;

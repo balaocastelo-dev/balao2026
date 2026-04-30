@@ -123,8 +123,30 @@ export default function ImportPage() {
     const productsWithValidation = await Promise.all(
         products.map(async (p) => {
             const optimizedImage = optimizeUrl(p.image);
+            
+            let imageUrls = [optimizedImage];
+            
+            // If we have a product URL (e.g. Kabum), try to scrape all images
+            if (p.product_url && p.product_url.includes('kabum.com.br')) {
+                try {
+                    const scrapeRes = await fetch('/api/scrape/images', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ url: p.product_url })
+                    });
+                    if (scrapeRes.ok) {
+                        const scrapeData = await scrapeRes.json();
+                        if (scrapeData.images && scrapeData.images.length > 0) {
+                            imageUrls = scrapeData.images;
+                        }
+                    }
+                } catch (e) {
+                    console.error("Failed to scrape images for", p.name, e);
+                }
+            }
+
             const isValid = await validateImage(optimizedImage);
-            return { ...p, image: optimizedImage, imageValid: isValid };
+            return { ...p, image: optimizedImage, image_urls: imageUrls, imageValid: isValid };
         })
     );
 
@@ -150,6 +172,8 @@ export default function ImportPage() {
           name: p.name,
           price: p.newPrice, // Use calculated price
           image: p.image,
+          image_urls: p.image_urls,
+          product_url: p.product_url,
           category: p.category,
           slug: p.slug
       }));
@@ -355,13 +379,31 @@ export default function ImportPage() {
                             {getPreviewProducts().map((p, idx) => (
                                 <tr key={idx} className="bg-white border-b hover:bg-gray-50">
                                     <td className="px-4 py-3">
-                                        <div className="w-12 h-12 relative">
-                                            <img 
-                                                src={p.image} 
-                                                alt="" 
-                                                className="w-full h-full object-contain rounded border"
-                                            />
+                                        <div className="flex gap-1 overflow-x-auto max-w-[150px] py-1">
+                                            {p.image_urls && p.image_urls.length > 0 ? (
+                                                p.image_urls.map((img: string, i: number) => (
+                                                    <div key={i} className="w-10 h-10 relative flex-shrink-0">
+                                                        <img 
+                                                            src={img} 
+                                                            alt="" 
+                                                            className={`w-full h-full object-contain rounded border ${i === 0 ? 'border-red-500 ring-1 ring-red-500' : ''}`}
+                                                            title={i === 0 ? "Capa" : `Foto ${i+1}`}
+                                                        />
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="w-10 h-10 relative">
+                                                    <img 
+                                                        src={p.image} 
+                                                        alt="" 
+                                                        className="w-full h-full object-contain rounded border"
+                                                    />
+                                                </div>
+                                            )}
                                         </div>
+                                        {p.image_urls && p.image_urls.length > 1 && (
+                                            <span className="text-[10px] text-gray-400">{p.image_urls.length} fotos extraídas</span>
+                                        )}
                                     </td>
                                     <td className="px-4 py-3 font-medium text-gray-900 max-w-xs truncate" title={p.name}>
                                         {p.name}
