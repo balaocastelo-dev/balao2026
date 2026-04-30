@@ -125,11 +125,13 @@ export default function ImportPage() {
             const optimizedImage = optimizeUrl(p.image);
             
             let imageUrls = [optimizedImage];
+            let description = "";
+            let specs = {};
             
-            // If we have a product URL (e.g. Kabum), try to scrape all images
+            // If we have a product URL (e.g. Kabum), try to scrape all images and details
             if (p.product_url && p.product_url.includes('kabum.com.br')) {
                 try {
-                    const scrapeRes = await fetch('/api/scrape/images', {
+                    const scrapeRes = await fetch('/api/scrape/product', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ url: p.product_url })
@@ -139,14 +141,16 @@ export default function ImportPage() {
                         if (scrapeData.images && scrapeData.images.length > 0) {
                             imageUrls = scrapeData.images;
                         }
+                        if (scrapeData.description) description = scrapeData.description;
+                        if (scrapeData.specs) specs = scrapeData.specs;
                     }
                 } catch (e) {
-                    console.error("Failed to scrape images for", p.name, e);
+                    console.error("Failed to scrape details for", p.name, e);
                 }
             }
 
             const isValid = await validateImage(optimizedImage);
-            return { ...p, image: optimizedImage, image_urls: imageUrls, imageValid: isValid };
+            return { ...p, image: optimizedImage, image_urls: imageUrls, description, specs, imageValid: isValid };
         })
     );
 
@@ -174,6 +178,8 @@ export default function ImportPage() {
           image: p.image,
           image_urls: p.image_urls,
           product_url: p.product_url,
+          description: p.description,
+          specs: p.specs,
           category: p.category,
           slug: p.slug
       }));
@@ -407,6 +413,14 @@ export default function ImportPage() {
                                     </td>
                                     <td className="px-4 py-3 font-medium text-gray-900 max-w-xs truncate" title={p.name}>
                                         {p.name}
+                                        <div className="flex gap-1 mt-1">
+                                            {p.description && (
+                                                <span className="bg-green-100 text-green-700 text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase">Desc OK</span>
+                                            )}
+                                            {p.specs && Object.keys(p.specs).length > 0 && (
+                                                <span className="bg-blue-100 text-blue-700 text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase">Specs OK</span>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="px-4 py-3">{p.originalPrice}</td>
                                     <td className="px-4 py-3 font-bold text-gray-900">
