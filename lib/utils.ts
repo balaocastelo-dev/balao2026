@@ -278,15 +278,16 @@ export function parseProducts(text: string): Product[] {
 
       if (imageUrl.startsWith('http') && name && price) {
         const enhancedImage = enhanceImageUrl(imageUrl);
+        const finalName = name.replace(/kabum/gi, "Balão Info");
         const id = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15);
-        const slug = name
+        const slug = finalName
           .toLowerCase()
           .replace(/[^\w\s-]/g, "")
           .replace(/\s+/g, "-");
 
         products.push({
           id,
-          name,
+          name: finalName,
           price: price.startsWith('R$') ? price : `R$ ${price}`,
           image: enhancedImage,
           product_url: productUrl,
