@@ -79,8 +79,21 @@ export async function POST(request: Request) {
     // 4. Clean and Replace Brands
     const replaceBrand = (text: string) => {
         if (!text) return text;
-        // Case-insensitive replacement for Kabum with Balão Info
-        return text.replace(/kabum/gi, "Balão Info");
+        // List of brands to replace with "Balão.info"
+        const brands = [
+            /kabum/gi,
+            /tob pc´s/gi,
+            /tob/gi,
+            /alligator shop/gi,
+            /mrp informática/gi
+        ];
+        
+        let cleanedText = text;
+        brands.forEach(regex => {
+            cleanedText = cleanedText.replace(regex, "Balão.info");
+        });
+        
+        return cleanedText;
     };
 
     const finalDescription = replaceBrand(description);
