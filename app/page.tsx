@@ -179,7 +179,7 @@ export default async function Home(props: {
 
             {/* SEO Content Section */}
             {!search && !category && (
-                <SeoContent title="Balão da Informática: Sua Loja de Informática em Campinas e Região">
+                <SeoContent title="BALÃO DA INFORMÁTICA: SUA LOJA DE INFORMÁTICA EM CAMPINAS E REGIÃO">
                     <p className="text-gray-600 mb-4">
                         Bem-vindo ao <strong>Balão da Informática</strong>, sua referência em tecnologia e hardware em <strong>Campinas e RMC</strong>. Encontre as melhores marcas de peças, notebooks e PC Gamer com preço justo e garantia.
                     </p>
