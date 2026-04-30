@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { CheckCircle, Home, Copy, Check, MessageCircle } from "lucide-react";
+import { CheckCircle, Home, Copy, Check, MessageCircle, CreditCard } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense, useRef } from "react";
 import { generatePixPayload } from "@/lib/pix";
