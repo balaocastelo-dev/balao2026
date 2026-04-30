@@ -169,13 +169,29 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, orderId: order.id, total: expectedTotal });
 
-  } catch (error: unknown) {
-    console.error("Checkout error:", error);
+  } catch (error: any) {
+    console.error("Checkout error details:", error);
+    
+    // Check for common Supabase errors
+    let errorMessage = "Failed to process order";
+    let details = error instanceof Error ? error.message : JSON.stringify(error);
+    let hint = "Verifique se as tabelas 'orders' e 'order_items' existem no Supabase e se a chave de serviço (SERVICE_ROLE_KEY) está configurada.";
+
+    if (error?.code === '42P01') {
+        errorMessage = "Tabela não encontrada no banco de dados.";
+        hint = "Execute os scripts SQL no Supabase para criar as tabelas 'orders' e 'order_items'.";
+    } else if (error?.code === '23503') {
+        errorMessage = "Erro de integridade referencial.";
+        hint = "Verifique se os dados relacionados (como seller_id ou user_id) existem.";
+    } else if (error?.code === 'PGRST116') {
+        errorMessage = "Erro ao recuperar o pedido criado.";
+    }
+
     return NextResponse.json(
         { 
-            error: "Failed to process order", 
-            details: error instanceof Error ? error.message : JSON.stringify(error),
-            hint: "Verifique se as tabelas 'orders' e 'order_items' existem no Supabase e se a chave de serviço (SERVICE_ROLE_KEY) está configurada."
+            error: errorMessage, 
+            details: details,
+            hint: hint
         }, 
         { status: 500 }
     );

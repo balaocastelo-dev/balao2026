@@ -553,6 +553,8 @@ export interface Order {
 
 export async function createOrder(orderData: Omit<Order, 'id' | 'created_at' | 'updated_at'>, items: Omit<OrderItem, 'id' | 'order_id'>[]) {
     try {
+        console.log(`[DB] Tentando criar pedido para: ${orderData.customer_email}`);
+        
         // 1. Create Order
         const { data: order, error: orderError } = await supabaseAdmin
             .from('orders')
@@ -560,7 +562,12 @@ export async function createOrder(orderData: Omit<Order, 'id' | 'created_at' | '
             .select()
             .single();
 
-        if (orderError) throw orderError;
+        if (orderError) {
+            console.error("[DB] Erro ao inserir na tabela 'orders':", orderError);
+            throw orderError;
+        }
+
+        console.log(`[DB] Pedido criado com ID: ${order.id}. Inserindo ${items.length} itens...`);
 
         // 2. Create Order Items
         const itemsWithOrderId = items.map(item => ({
@@ -572,11 +579,15 @@ export async function createOrder(orderData: Omit<Order, 'id' | 'created_at' | '
             .from('order_items')
             .insert(itemsWithOrderId);
 
-        if (itemsError) throw itemsError;
+        if (itemsError) {
+            console.error("[DB] Erro ao inserir na tabela 'order_items':", itemsError);
+            throw itemsError;
+        }
 
+        console.log(`[DB] Itens inseridos com sucesso.`);
         return order;
     } catch (error) {
-        console.error("Error creating order:", error);
+        console.error("[DB] Erro fatal em createOrder:", error);
         throw error;
     }
 }
