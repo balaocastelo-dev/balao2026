@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { parseProducts, Product, Category, buildCategoryTree, CATEGORIES, enhanceImageUrl } from "@/lib/utils";
+import { parseProducts, Product, Category, buildCategoryTree, CATEGORIES } from "@/lib/utils";
 import { Upload, CheckCircle, AlertCircle, Search, Save } from "lucide-react";
 
 export default function ImportPage() {
@@ -101,10 +101,30 @@ export default function ImportPage() {
         }
 
         u.pathname = path;
-        return enhanceImageUrl(u.toString());
+        return u.toString();
     } catch {
         // Fallback for non-standard URLs: try basic regex cleanup
-        return enhanceImageUrl(url.replace(/[-_]\d+x\d+(?=\.[a-zA-Z0-9]+$)/, ''));
+        return url.replace(/[-_]\d+x\d+(?=\.[a-zA-Z0-9]+$)/, '');
+    }
+  };
+
+  const toKabumOriginalUrl = (url: string) => {
+    try {
+      const u = new URL(url);
+      const p = u.pathname;
+      let nextPath = p.replace(/_(m|p|peq|g)\.jpg$/i, "_original.jpg");
+      if (nextPath === p && /\.jpg$/i.test(p) && !/_original\.jpg$/i.test(p)) {
+        nextPath = p.replace(/\.jpg$/i, "_original.jpg");
+      }
+      u.pathname = nextPath;
+      u.search = "";
+      return u.toString();
+    } catch {
+      let next = url.replace(/_(m|p|peq|g)\.jpg$/i, "_original.jpg");
+      if (next === url && /\.jpg$/i.test(url) && !/_original\.jpg$/i.test(url)) {
+        next = url.replace(/\.jpg$/i, "_original.jpg");
+      }
+      return next;
     }
   };
 
@@ -122,12 +142,14 @@ export default function ImportPage() {
     // Verify if images are accessible and optimize URL
     const productsWithValidation = await Promise.all(
         products.map(async (p) => {
-            const optimizedImage = p.image ? optimizeUrl(p.image) : "";
-            
-            let imageUrls = optimizedImage ? [optimizedImage] : [];
+            let optimizedImage = optimizeUrl(p.image);
+            if (optimizedImage.includes("kabum.com.br") && optimizedImage.includes("images.kabum.com.br")) {
+              optimizedImage = toKabumOriginalUrl(optimizedImage);
+            }
+
+            let imageUrls = [optimizedImage];
             let description = "";
             let specs = {};
-            let primaryImage = optimizedImage;
             
             // If we have a product URL (e.g. Kabum), try to scrape all images and details
             if (p.product_url && p.product_url.includes('kabum.com.br')) {
@@ -140,7 +162,7 @@ export default function ImportPage() {
                     if (scrapeRes.ok) {
                         const scrapeData = await scrapeRes.json();
                         if (scrapeData.images && scrapeData.images.length > 0) {
-                            imageUrls = scrapeData.images.map((img: string) => optimizeUrl(img));
+                            imageUrls = scrapeData.images;
                         }
                         if (scrapeData.description) description = scrapeData.description;
                         if (scrapeData.specs) specs = scrapeData.specs;
@@ -150,8 +172,20 @@ export default function ImportPage() {
                 }
             }
 
-            primaryImage = imageUrls[0] || optimizedImage;
-            const isValid = primaryImage ? await validateImage(primaryImage) : false;
+            let primaryImage = imageUrls[0] || optimizedImage;
+            let isValid = primaryImage ? await validateImage(primaryImage) : false;
+
+            if (!isValid && imageUrls.length > 1) {
+              for (const candidate of imageUrls.slice(1, 6)) {
+                const ok = await validateImage(candidate);
+                if (ok) {
+                  primaryImage = candidate;
+                  isValid = true;
+                  break;
+                }
+              }
+            }
+
             return { ...p, image: primaryImage, image_urls: imageUrls, description, specs, imageValid: isValid };
         })
     );

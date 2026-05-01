@@ -147,7 +147,7 @@ export function enhanceImageUrl(url: string): string {
 
   // 1. Kabum: _m, _p, _peq -> _g
   if (enhancedUrl.includes('kabum.com.br')) {
-    enhancedUrl = enhancedUrl.replace(/_(m|p|peq)\./g, '_g.');
+    enhancedUrl = enhancedUrl.replace(/_(m|p|peq|g)\./g, '_original.');
   }
 
   // 2. Terabyte: _t or _small -> _g
@@ -270,25 +270,14 @@ export function parseProducts(text: string): Product[] {
         name = parts[2].trim();
         price = parts[3].trim();
       } else {
-        const first = parts[0].trim();
-        const second = parts[1].trim();
-        const third = parts[2].trim();
-
-        // Format: ProductURL Name Price
-        if (first.startsWith("http") && first.includes("/produto/") && !second.startsWith("http")) {
-          productUrl = first;
-          name = second;
-          price = third;
-        } else {
-          // Format: ImageURL Name Price
-          imageUrl = first;
-          name = second;
-          price = third;
-        }
+        // Format: ImageURL Name Price
+        imageUrl = parts[0].trim();
+        name = parts[1].trim();
+        price = parts[2].trim();
       }
 
-      if ((imageUrl.startsWith('http') || productUrl.startsWith("http")) && name && price) {
-        const enhancedImage = imageUrl.startsWith("http") ? enhanceImageUrl(imageUrl) : "";
+      if (imageUrl.startsWith('http') && name && price) {
+        const enhancedImage = enhanceImageUrl(imageUrl);
         
         // List of brands to replace with "Balão.info"
         const brands = [
