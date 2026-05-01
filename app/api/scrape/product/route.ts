@@ -22,13 +22,35 @@ export async function POST(request: Request) {
 
     const html = await response.text();
     
-    // 1. Extract Images
     const productIdMatch = url.match(/\/produto\/(\d+)\//);
     let uniqueImages: string[] = [];
     if (productIdMatch) {
         const productId = productIdMatch[1];
         const imageRegex = new RegExp(`https://images\\.kabum\\.com\\.br/produtos/fotos/${productId}/[^"\\s]+?\\.jpg`, 'gi');
         const matches = html.match(imageRegex) || [];
+        const miraklRegex = /https:\/\/images\d\.kabum\.com\.br\/produtos\/fotos\/sync_mirakl\/\d+\/xlarge\/[^"\s<>]+?\.(?:jpg|jpeg|png|webp)/gi;
+        const miraklMatches = html.match(miraklRegex) || [];
+
+        const toOriginalKabumImageUrl = (rawUrl: string) => {
+          const trimmed = rawUrl.trim();
+          try {
+            const u = new URL(trimmed);
+            const p = u.pathname;
+            let nextPath = p.replace(/_(m|p|peq|g)\.jpg$/i, '_original.jpg');
+            if (nextPath === p && /\.jpg$/i.test(p) && !/_original\.jpg$/i.test(p)) {
+              nextPath = p.replace(/\.jpg$/i, '_original.jpg');
+            }
+            u.pathname = nextPath;
+            u.search = '';
+            return u.toString();
+          } catch {
+            let next = trimmed.replace(/_(m|p|peq|g)\.jpg$/i, '_original.jpg');
+            if (next === trimmed && /\.jpg$/i.test(trimmed) && !/_original\.jpg$/i.test(trimmed)) {
+              next = trimmed.replace(/\.jpg$/i, '_original.jpg');
+            }
+            return next;
+          }
+        };
 
         const existsImage = async (imgUrl: string) => {
           try {
@@ -53,49 +75,34 @@ export async function POST(request: Request) {
           }
         };
 
-        const buildVariant = (raw: string, variant: 'original' | 'xlarge' | 'g') => {
-          const trimmed = raw.trim();
-          try {
-            const u = new URL(trimmed);
-            const p = u.pathname;
-            let nextPath = p.replace(/_(m|p|peq|g|xlarge|original)\.jpg$/i, `_${variant}.jpg`);
-            if (nextPath === p && /\.jpg$/i.test(p)) {
-              nextPath = p.replace(/\.jpg$/i, `_${variant}.jpg`);
-            }
-            u.pathname = nextPath;
-            u.search = '';
-            return u.toString();
-          } catch {
-            let next = trimmed.replace(/_(m|p|peq|g|xlarge|original)\.jpg$/i, `_${variant}.jpg`);
-            if (next === trimmed && /\.jpg$/i.test(trimmed)) {
-              next = trimmed.replace(/\.jpg$/i, `_${variant}.jpg`);
-            }
-            return next;
-          }
-        };
+        const uniqueList = (arr: string[]) => Array.from(new Set(arr.map(s => s.trim()).filter(Boolean)));
 
-        const getBestAvailable = async (raw: string) => {
-          const candidates = [
-            buildVariant(raw, 'original'),
-            buildVariant(raw, 'xlarge'),
-            buildVariant(raw, 'g'),
-          ];
-          for (const candidate of candidates) {
-            if (await existsImage(candidate)) return candidate;
-          }
-          return raw.trim();
-        };
+        const originals = Array.from(new Set(matches)).map(toOriginalKabumImageUrl);
+        const validatedOriginals: string[] = [];
 
-        const rawUnique = Array.from(new Set(matches.map(m => m.trim())));
-        const finalUrls: string[] = [];
-
-        for (const raw of rawUnique) {
-          if (finalUrls.length >= 20) break;
-          const best = await getBestAvailable(raw);
-          if (!finalUrls.includes(best)) finalUrls.push(best);
+        for (const img of originals) {
+          if (validatedOriginals.length >= 20) break;
+          if (await existsImage(img)) validatedOriginals.push(img);
         }
 
-        uniqueImages = finalUrls;
+        if (validatedOriginals.length > 0) {
+          uniqueImages = validatedOriginals;
+        } else {
+          const miraklCandidates = uniqueList(miraklMatches);
+          const validatedMirakl: string[] = [];
+
+          for (const img of miraklCandidates) {
+            if (validatedMirakl.length >= 20) break;
+            if (await existsImage(img)) validatedMirakl.push(img);
+          }
+
+          if (validatedMirakl.length > 0) {
+            uniqueImages = validatedMirakl;
+          } else {
+            uniqueImages = uniqueList(matches)
+              .map(img => img.replace(/_(m|p|peq)\.jpg$/i, '_g.jpg'));
+          }
+        }
     }
 
     // 2. Extract Description via JSON-LD

@@ -108,33 +108,24 @@ export default function ImportPage() {
     }
   };
 
-  const getKabumPreferredImageUrls = (url: string) => {
-    const buildVariant = (raw: string, variant: "original" | "xlarge" | "g") => {
-      try {
-        const u = new URL(raw);
-        const p = u.pathname;
-        let nextPath = p.replace(/_(m|p|peq|g|xlarge|original)\.jpg$/i, `_${variant}.jpg`);
-        if (nextPath === p && /\.jpg$/i.test(p)) {
-          nextPath = p.replace(/\.jpg$/i, `_${variant}.jpg`);
-        }
-        u.pathname = nextPath;
-        u.search = "";
-        return u.toString();
-      } catch {
-        let next = raw.replace(/_(m|p|peq|g|xlarge|original)\.jpg$/i, `_${variant}.jpg`);
-        if (next === raw && /\.jpg$/i.test(raw)) {
-          next = raw.replace(/\.jpg$/i, `_${variant}.jpg`);
-        }
-        return next;
+  const toKabumOriginalUrl = (url: string) => {
+    try {
+      const u = new URL(url);
+      const p = u.pathname;
+      let nextPath = p.replace(/_(m|p|peq|g)\.jpg$/i, "_original.jpg");
+      if (nextPath === p && /\.jpg$/i.test(p) && !/_original\.jpg$/i.test(p)) {
+        nextPath = p.replace(/\.jpg$/i, "_original.jpg");
       }
-    };
-
-    const candidates = [
-      buildVariant(url, "original"),
-      buildVariant(url, "xlarge"),
-      buildVariant(url, "g"),
-    ];
-    return Array.from(new Set(candidates));
+      u.pathname = nextPath;
+      u.search = "";
+      return u.toString();
+    } catch {
+      let next = url.replace(/_(m|p|peq|g)\.jpg$/i, "_original.jpg");
+      if (next === url && /\.jpg$/i.test(url) && !/_original\.jpg$/i.test(url)) {
+        next = url.replace(/\.jpg$/i, "_original.jpg");
+      }
+      return next;
+    }
   };
 
   const handleParse = async () => {
@@ -151,20 +142,17 @@ export default function ImportPage() {
     // Verify if images are accessible and optimize URL
     const productsWithValidation = await Promise.all(
         products.map(async (p) => {
-            let optimizedImage = optimizeUrl(p.image);
-            const isKabumImage = optimizedImage.includes("images.kabum.com.br");
-            if (isKabumImage) {
-              const candidates = getKabumPreferredImageUrls(optimizedImage);
-              for (const candidate of candidates) {
-                const ok = await validateImage(candidate);
-                if (ok) {
-                  optimizedImage = candidate;
-                  break;
-                }
-              }
-            }
+            const uniqueList = (arr: string[]) => Array.from(new Set(arr.filter(Boolean)));
+            const baseImage = optimizeUrl(p.image);
 
-            let imageUrls = [optimizedImage];
+            const localCandidates: string[] = [];
+            if (baseImage.includes("kabum.com.br") && baseImage.includes("images.kabum.com.br")) {
+              localCandidates.push(toKabumOriginalUrl(baseImage));
+              localCandidates.push(baseImage.replace(/_(m|p|peq)\.jpg$/i, "_g.jpg"));
+            }
+            localCandidates.push(baseImage);
+
+            let imageUrls = uniqueList(localCandidates);
             let description = "";
             let specs = {};
             
@@ -179,7 +167,7 @@ export default function ImportPage() {
                     if (scrapeRes.ok) {
                         const scrapeData = await scrapeRes.json();
                         if (scrapeData.images && scrapeData.images.length > 0) {
-                            imageUrls = scrapeData.images;
+                            imageUrls = uniqueList([...scrapeData.images, ...imageUrls]);
                         }
                         if (scrapeData.description) description = scrapeData.description;
                         if (scrapeData.specs) specs = scrapeData.specs;
@@ -189,7 +177,7 @@ export default function ImportPage() {
                 }
             }
 
-            let primaryImage = imageUrls[0] || optimizedImage;
+            let primaryImage = imageUrls[0] || baseImage;
             let isValid = primaryImage ? await validateImage(primaryImage) : false;
 
             if (!isValid && imageUrls.length > 1) {
