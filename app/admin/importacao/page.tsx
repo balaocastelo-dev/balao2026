@@ -108,24 +108,33 @@ export default function ImportPage() {
     }
   };
 
-  const toKabumOriginalUrl = (url: string) => {
-    try {
-      const u = new URL(url);
-      const p = u.pathname;
-      let nextPath = p.replace(/_(m|p|peq|g)\.jpg$/i, "_original.jpg");
-      if (nextPath === p && /\.jpg$/i.test(p) && !/_original\.jpg$/i.test(p)) {
-        nextPath = p.replace(/\.jpg$/i, "_original.jpg");
+  const getKabumPreferredImageUrls = (url: string) => {
+    const buildVariant = (raw: string, variant: "original" | "xlarge" | "g") => {
+      try {
+        const u = new URL(raw);
+        const p = u.pathname;
+        let nextPath = p.replace(/_(m|p|peq|g|xlarge|original)\.jpg$/i, `_${variant}.jpg`);
+        if (nextPath === p && /\.jpg$/i.test(p)) {
+          nextPath = p.replace(/\.jpg$/i, `_${variant}.jpg`);
+        }
+        u.pathname = nextPath;
+        u.search = "";
+        return u.toString();
+      } catch {
+        let next = raw.replace(/_(m|p|peq|g|xlarge|original)\.jpg$/i, `_${variant}.jpg`);
+        if (next === raw && /\.jpg$/i.test(raw)) {
+          next = raw.replace(/\.jpg$/i, `_${variant}.jpg`);
+        }
+        return next;
       }
-      u.pathname = nextPath;
-      u.search = "";
-      return u.toString();
-    } catch {
-      let next = url.replace(/_(m|p|peq|g)\.jpg$/i, "_original.jpg");
-      if (next === url && /\.jpg$/i.test(url) && !/_original\.jpg$/i.test(url)) {
-        next = url.replace(/\.jpg$/i, "_original.jpg");
-      }
-      return next;
-    }
+    };
+
+    const candidates = [
+      buildVariant(url, "original"),
+      buildVariant(url, "xlarge"),
+      buildVariant(url, "g"),
+    ];
+    return Array.from(new Set(candidates));
   };
 
   const handleParse = async () => {
@@ -143,8 +152,16 @@ export default function ImportPage() {
     const productsWithValidation = await Promise.all(
         products.map(async (p) => {
             let optimizedImage = optimizeUrl(p.image);
-            if (optimizedImage.includes("kabum.com.br") && optimizedImage.includes("images.kabum.com.br")) {
-              optimizedImage = toKabumOriginalUrl(optimizedImage);
+            const isKabumImage = optimizedImage.includes("images.kabum.com.br");
+            if (isKabumImage) {
+              const candidates = getKabumPreferredImageUrls(optimizedImage);
+              for (const candidate of candidates) {
+                const ok = await validateImage(candidate);
+                if (ok) {
+                  optimizedImage = candidate;
+                  break;
+                }
+              }
             }
 
             let imageUrls = [optimizedImage];

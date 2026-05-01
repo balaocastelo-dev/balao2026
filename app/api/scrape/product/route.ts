@@ -30,27 +30,6 @@ export async function POST(request: Request) {
         const imageRegex = new RegExp(`https://images\\.kabum\\.com\\.br/produtos/fotos/${productId}/[^"\\s]+?\\.jpg`, 'gi');
         const matches = html.match(imageRegex) || [];
 
-        const toOriginalKabumImageUrl = (rawUrl: string) => {
-          const trimmed = rawUrl.trim();
-          try {
-            const u = new URL(trimmed);
-            const p = u.pathname;
-            let nextPath = p.replace(/_(m|p|peq|g)\.jpg$/i, '_original.jpg');
-            if (nextPath === p && /\.jpg$/i.test(p) && !/_original\.jpg$/i.test(p)) {
-              nextPath = p.replace(/\.jpg$/i, '_original.jpg');
-            }
-            u.pathname = nextPath;
-            u.search = '';
-            return u.toString();
-          } catch {
-            let next = trimmed.replace(/_(m|p|peq|g)\.jpg$/i, '_original.jpg');
-            if (next === trimmed && /\.jpg$/i.test(trimmed) && !/_original\.jpg$/i.test(trimmed)) {
-              next = trimmed.replace(/\.jpg$/i, '_original.jpg');
-            }
-            return next;
-          }
-        };
-
         const existsImage = async (imgUrl: string) => {
           try {
             const head = await fetch(imgUrl, {
@@ -74,20 +53,49 @@ export async function POST(request: Request) {
           }
         };
 
-        const originals = Array.from(new Set(matches)).map(toOriginalKabumImageUrl);
-        const validatedOriginals: string[] = [];
+        const buildVariant = (raw: string, variant: 'original' | 'xlarge' | 'g') => {
+          const trimmed = raw.trim();
+          try {
+            const u = new URL(trimmed);
+            const p = u.pathname;
+            let nextPath = p.replace(/_(m|p|peq|g|xlarge|original)\.jpg$/i, `_${variant}.jpg`);
+            if (nextPath === p && /\.jpg$/i.test(p)) {
+              nextPath = p.replace(/\.jpg$/i, `_${variant}.jpg`);
+            }
+            u.pathname = nextPath;
+            u.search = '';
+            return u.toString();
+          } catch {
+            let next = trimmed.replace(/_(m|p|peq|g|xlarge|original)\.jpg$/i, `_${variant}.jpg`);
+            if (next === trimmed && /\.jpg$/i.test(trimmed)) {
+              next = trimmed.replace(/\.jpg$/i, `_${variant}.jpg`);
+            }
+            return next;
+          }
+        };
 
-        for (const img of originals) {
-          if (validatedOriginals.length >= 20) break;
-          if (await existsImage(img)) validatedOriginals.push(img);
+        const getBestAvailable = async (raw: string) => {
+          const candidates = [
+            buildVariant(raw, 'original'),
+            buildVariant(raw, 'xlarge'),
+            buildVariant(raw, 'g'),
+          ];
+          for (const candidate of candidates) {
+            if (await existsImage(candidate)) return candidate;
+          }
+          return raw.trim();
+        };
+
+        const rawUnique = Array.from(new Set(matches.map(m => m.trim())));
+        const finalUrls: string[] = [];
+
+        for (const raw of rawUnique) {
+          if (finalUrls.length >= 20) break;
+          const best = await getBestAvailable(raw);
+          if (!finalUrls.includes(best)) finalUrls.push(best);
         }
 
-        if (validatedOriginals.length > 0) {
-          uniqueImages = validatedOriginals;
-        } else {
-          uniqueImages = Array.from(new Set(matches))
-            .map(img => img.trim().replace(/_(m|p|peq)\.jpg$/i, '_g.jpg'));
-        }
+        uniqueImages = finalUrls;
     }
 
     // 2. Extract Description via JSON-LD

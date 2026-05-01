@@ -147,7 +147,7 @@ export function enhanceImageUrl(url: string): string {
 
   // 1. Kabum: _m, _p, _peq -> _g
   if (enhancedUrl.includes('kabum.com.br')) {
-    enhancedUrl = enhancedUrl.replace(/_(m|p|peq|g)\./g, '_original.');
+    enhancedUrl = enhancedUrl.replace(/_(m|p|peq|g|xlarge|original)\./g, '_original.');
   }
 
   // 2. Terabyte: _t or _small -> _g
