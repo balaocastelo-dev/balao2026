@@ -132,7 +132,7 @@ export default function ImportPage() {
 
   const handleParse = async () => {
     setStatus("loading");
-    setMessage("Verificando disponibilidade das imagens e otimizando resolução...");
+    setMessage("IA pensando... preparando reescrita das descrições e verificando imagens...");
 
     const products = parseProducts(text);
     if (products.length === 0) {
@@ -140,6 +140,9 @@ export default function ImportPage() {
         setMessage("Nenhum produto encontrado no texto.");
         return;
     }
+
+    const total = products.length;
+    let aiDone = 0;
 
     // Verify if images are accessible and optimize URL
     const productsWithValidation = await Promise.all(
@@ -172,6 +175,29 @@ export default function ImportPage() {
                 } catch (e) {
                     console.error("Failed to scrape details for", p.name, e);
                 }
+            }
+
+            if (description) {
+              try {
+                const aiRes = await fetch("/api/ai/rewrite-description", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    productName: p.name,
+                    rawText: description,
+                    specs,
+                  }),
+                });
+                if (aiRes.ok) {
+                  const aiData = await aiRes.json();
+                  if (aiData?.markdown) description = aiData.markdown;
+                }
+              } catch (e) {
+                console.error("IA rewrite falhou para", p.name, e);
+              } finally {
+                aiDone += 1;
+                setMessage(`IA pensando... (${aiDone}/${total})`);
+              }
             }
 
             let primaryImage = imageUrls[0] || optimizedImage;
