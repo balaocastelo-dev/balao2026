@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { formatImportedProductDescription } from '@/lib/ai-service';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,6 +35,7 @@ export async function POST(request: Request) {
 
     // 2. Extract Description via JSON-LD
     let description = "";
+    let productName = "";
     const jsonLdRegex = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/g;
     let match;
     while ((match = jsonLdRegex.exec(html)) !== null) {
@@ -41,6 +43,7 @@ export async function POST(request: Request) {
             const json = JSON.parse(match[1]);
             if (json['@type'] === 'Product' && json.description) {
                 description = json.description;
+                if (typeof json.name === "string") productName = json.name;
                 break;
             }
         } catch (e) {}
@@ -102,10 +105,15 @@ export async function POST(request: Request) {
         finalSpecs[replaceBrand(key)] = replaceBrand(value);
     });
 
+    const { description: formattedDescription } = await formatImportedProductDescription({
+        productName: replaceBrand(productName),
+        description: finalDescription
+    });
+
     return NextResponse.json({ 
       success: true, 
       images: uniqueImages,
-      description: finalDescription,
+      description: formattedDescription || finalDescription,
       specs: finalSpecs,
       count: uniqueImages.length
     });

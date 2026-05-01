@@ -1,6 +1,6 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { enrichProductWithAI } from '@/lib/ai-service';
+import { enrichProductWithAI, formatImportedProductDescription } from '@/lib/ai-service';
 
 // Mock GoogleGenerativeAI
 const mockGenerateContent = vi.fn();
@@ -85,5 +85,37 @@ describe('AI Service', () => {
     expect(result.source).toContain("AI Knowledge Base");
     // And should have some data
     expect(result.specs).toBeDefined();
+  });
+
+  it('should format imported description with emojis when API key is missing', async () => {
+    delete process.env.GOOGLE_API_KEY;
+    const result = await formatImportedProductDescription({
+      productName: 'Fonte 850W',
+      description: 'Eficiência 80 PLUS Ouro. Ventoinha de 120mm com baixo ruído. Proteções UVP OVP OPP.'
+    });
+
+    expect(result.source).toBe('heuristic');
+    expect(result.description).toContain('✅');
+    expect(result.description.split('\n').length).toBeGreaterThan(1);
+  });
+
+  it('should call Gemini API to format imported description when API key exists', async () => {
+    const mockResponse = {
+      response: {
+        text: () => JSON.stringify({
+          description: "✅ Linha 1\n🔌 Linha 2"
+        })
+      }
+    };
+    mockGenerateContent.mockResolvedValue(mockResponse);
+
+    const result = await formatImportedProductDescription({
+      productName: 'Fonte 850W',
+      description: 'Texto bruto'
+    });
+
+    expect(mockGetGenerativeModel).toHaveBeenCalledWith({ model: "gemini-1.5-flash" });
+    expect(result.source).toBe('Google Gemini 1.5 Flash');
+    expect(result.description).toContain('✅');
   });
 });

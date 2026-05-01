@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { parseProducts, Product, Category, buildCategoryTree, CATEGORIES } from "@/lib/utils";
+import { parseProducts, Product, Category, buildCategoryTree, CATEGORIES, enhanceImageUrl } from "@/lib/utils";
 import { Upload, CheckCircle, AlertCircle, Search, Save } from "lucide-react";
 
 export default function ImportPage() {
@@ -18,7 +18,6 @@ export default function ImportPage() {
   const [adjustmentScope, setAdjustmentScope] = useState<"all" | "high_value" | "low_value">("all");
   const [scopeThreshold, setScopeThreshold] = useState<number>(1000);
   const [migrateImages, setMigrateImages] = useState(false);
-  const [improveQuality, setImproveQuality] = useState(true);
   
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
@@ -102,10 +101,10 @@ export default function ImportPage() {
         }
 
         u.pathname = path;
-        return u.toString();
+        return enhanceImageUrl(u.toString());
     } catch {
         // Fallback for non-standard URLs: try basic regex cleanup
-        return url.replace(/[-_]\d+x\d+(?=\.[a-zA-Z0-9]+$)/, '');
+        return enhanceImageUrl(url.replace(/[-_]\d+x\d+(?=\.[a-zA-Z0-9]+$)/, ''));
     }
   };
 
@@ -128,6 +127,7 @@ export default function ImportPage() {
             let imageUrls = [optimizedImage];
             let description = "";
             let specs = {};
+            let primaryImage = optimizedImage;
             
             // If we have a product URL (e.g. Kabum), try to scrape all images and details
             if (p.product_url && p.product_url.includes('kabum.com.br')) {
@@ -140,7 +140,7 @@ export default function ImportPage() {
                     if (scrapeRes.ok) {
                         const scrapeData = await scrapeRes.json();
                         if (scrapeData.images && scrapeData.images.length > 0) {
-                            imageUrls = scrapeData.images;
+                            imageUrls = scrapeData.images.map((img: string) => optimizeUrl(img));
                         }
                         if (scrapeData.description) description = scrapeData.description;
                         if (scrapeData.specs) specs = scrapeData.specs;
@@ -150,8 +150,9 @@ export default function ImportPage() {
                 }
             }
 
-            const isValid = await validateImage(optimizedImage);
-            return { ...p, image: optimizedImage, image_urls: imageUrls, description, specs, imageValid: isValid };
+            primaryImage = imageUrls[0] || optimizedImage;
+            const isValid = await validateImage(primaryImage);
+            return { ...p, image: primaryImage, image_urls: imageUrls, description, specs, imageValid: isValid };
         })
     );
 
@@ -171,74 +172,19 @@ export default function ImportPage() {
 
   const handleConfirmImport = async () => {
     setStatus("loading");
-    setMessage("Processando produtos e otimizando imagens...");
-    
     try {
-      const previewProducts = getPreviewProducts();
-      const finalProducts = [];
-
-      for (let p of previewProducts) {
-          let mainImage = p.image;
-          let extraImages = p.image_urls || [];
-
-          // If improvement is enabled, process the main image and extra images
-          if (improveQuality) {
-              try {
-                  const improveRes = await fetch("/api/products/improve-image", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ 
-                          imageUrl: mainImage, 
-                          name: p.name,
-                          migrate: migrateImages // Use migrateImages flag to decide if it should be saved to Supabase
-                      }),
-                  });
-
-                  if (improveRes.ok) {
-                      const improveData = await improveRes.json();
-                      if (improveData.url) mainImage = improveData.url;
-                  }
-
-                  // Also improve extra images if they exist and are not too many (limit to 3 for performance)
-                  const improvedExtras = [];
-                  const extraLimit = extraImages.slice(0, 4);
-                  for (let extra of extraLimit) {
-                      const extraRes = await fetch("/api/products/improve-image", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ 
-                              imageUrl: extra, 
-                              name: p.name,
-                              migrate: migrateImages 
-                          }),
-                      });
-                      if (extraRes.ok) {
-                          const extraData = await extraRes.json();
-                          if (extraData.url) improvedExtras.push(extraData.url);
-                      } else {
-                          improvedExtras.push(extra);
-                      }
-                  }
-                  extraImages = improvedExtras;
-
-              } catch (e) {
-                  console.error("Failed to improve image for", p.name, e);
-              }
-          }
-
-          finalProducts.push({
-              id: p.id,
-              name: p.name,
-              price: p.newPrice,
-              image: mainImage,
-              image_urls: extraImages,
-              product_url: p.product_url,
-              description: p.description,
-              specs: p.specs,
-              category: p.category,
-              slug: p.slug
-          });
-      }
+      const finalProducts = getPreviewProducts().map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          price: p.newPrice, // Use calculated price
+          image: p.image,
+          image_urls: p.image_urls,
+          product_url: p.product_url,
+          description: p.description,
+          specs: p.specs,
+          category: p.category,
+          slug: p.slug
+      }));
 
       const res = await fetch("/api/products", {
         method: "POST",
@@ -408,7 +354,7 @@ export default function ImportPage() {
 
                     <div>
                         <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Opções Extras</label>
-                        <div className="flex flex-col gap-2">
+                        <div className="flex items-center h-[38px]">
                             <label className="flex items-center gap-2 cursor-pointer select-none">
                                 <input 
                                     type="checkbox" 
@@ -418,17 +364,6 @@ export default function ImportPage() {
                                 />
                                 <span className="text-sm text-gray-700 font-medium">
                                     Migrar imagens para Supabase
-                                </span>
-                            </label>
-                            <label className="flex items-center gap-2 cursor-pointer select-none">
-                                <input 
-                                    type="checkbox" 
-                                    checked={improveQuality} 
-                                    onChange={(e) => setImproveQuality(e.target.checked)}
-                                    className="w-4 h-4 text-[#E60012] rounded border-gray-300 focus:ring-[#E60012]"
-                                />
-                                <span className="text-sm text-gray-700 font-medium">
-                                    Upscaling AI & Melhorar Qualidade
                                 </span>
                             </label>
                         </div>

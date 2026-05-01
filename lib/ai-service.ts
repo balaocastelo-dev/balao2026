@@ -15,6 +15,92 @@ export interface AIEnrichmentResult {
     bullet_points?: string[];
 }
 
+export async function formatImportedProductDescription(input: {
+    productName?: string;
+    description: string;
+}): Promise<{ description: string; source: string }> {
+    const raw = (input.description || "").trim();
+    if (!raw) {
+        return { description: "", source: "empty" };
+    }
+
+    const apiKey = process.env.GOOGLE_API_KEY;
+    if (!apiKey) {
+        return { description: formatDescriptionWithEmojis(raw), source: "heuristic" };
+    }
+
+    try {
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+        const prompt = `
+Você é redator(a) de e-commerce.
+Reescreva o texto abaixo (pt-BR) para ficar mais legível, em tópicos curtos com emojis.
+Regras:
+- Use 6 a 10 linhas no máximo.
+- Cada linha deve começar com um emoji.
+- Não use HTML.
+- Não mencione lojas/marketplaces/concorrentes.
+- Não invente dados; reescreva apenas o que estiver no texto.
+- Retorne SOMENTE um JSON válido no formato: {"description":"..."}.
+
+Produto: ${JSON.stringify(input.productName || "")}
+Texto:
+${JSON.stringify(raw)}
+        `;
+
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+        const jsonStr = text.replace(/```json/gi, "").replace(/```/g, "").trim();
+        const data = JSON.parse(jsonStr);
+        const formatted = typeof data?.description === "string" ? data.description.trim() : "";
+
+        if (!formatted) {
+            return { description: formatDescriptionWithEmojis(raw), source: "heuristic" };
+        }
+
+        return { description: normalizeEmojiLines(formatted), source: "Google Gemini 1.5 Flash" };
+    } catch (error) {
+        return { description: formatDescriptionWithEmojis(raw), source: "heuristic" };
+    }
+}
+
+function normalizeEmojiLines(text: string): string {
+    const cleaned = text.replace(/\r\n/g, "\n").trim();
+    const lines = cleaned.split("\n").map(l => l.trim()).filter(Boolean);
+    return lines.join("\n");
+}
+
+function formatDescriptionWithEmojis(description: string): string {
+    const cleaned = description
+        .replace(/\s+/g, " ")
+        .replace(/compre agora[!.]*/gi, "")
+        .replace(/\s+\./g, ".")
+        .trim();
+
+    const chunks = cleaned
+        .split(/(?<=[.!?])\s+/)
+        .map(s => s.trim())
+        .filter(Boolean);
+
+    const picked = chunks.slice(0, 10);
+    const lines = picked.map(sentence => {
+        const lower = sentence.toLowerCase();
+        const emoji =
+            /(80\s*plus|certifica)/i.test(lower) ? "✅" :
+            /(pot[eê]ncia|\b\d+\s*w\b|\bw\b)/i.test(lower) ? "⚡" :
+            /(atx|padr[aã]o|compat|conector|eps|pci|sata|12v)/i.test(lower) ? "🔌" :
+            /(refrig|ventil|fan|silenc)/i.test(lower) ? "🧊" :
+            /(prote[cç][aã]o|uvp|ovp|opp|otp|scp|ocp)/i.test(lower) ? "🛡️" :
+            /(efici|energia|econom)/i.test(lower) ? "💡" :
+            "📌";
+        return `${emoji} ${sentence.replace(/\s+$/g, "")}`;
+    });
+
+    return normalizeEmojiLines(lines.join("\n"));
+}
+
 /**
  * Service to enrich product data using Google Gemini API.
  */
