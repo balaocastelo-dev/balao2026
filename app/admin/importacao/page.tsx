@@ -132,7 +132,7 @@ export default function ImportPage() {
 
   const handleParse = async () => {
     setStatus("loading");
-    setMessage("IA pensando... preparando reescrita das descrições e verificando imagens...");
+    setMessage("IA pensando... (0/0)");
 
     const products = parseProducts(text);
     if (products.length === 0) {
@@ -143,93 +143,120 @@ export default function ImportPage() {
 
     const total = products.length;
     let aiDone = 0;
+    let processed = 0;
 
-    // Verify if images are accessible and optimize URL
-    const productsWithValidation = await Promise.all(
-        products.map(async (p) => {
-            let optimizedImage = optimizeUrl(p.image);
-            if (optimizedImage.includes("kabum.com.br") && optimizedImage.includes("images.kabum.com.br")) {
-              optimizedImage = toKabumOriginalUrl(optimizedImage);
-            }
+    const updateRow = (id: string, patch: any) => {
+      setParsedProducts((prev) => prev.map((it: any) => (it.id === id ? { ...it, ...patch } : it)));
+    };
 
-            let imageUrls = [optimizedImage];
-            let description = "";
-            let specs = {};
-            
-            // If we have a product URL (e.g. Kabum), try to scrape all images and details
-            if (p.product_url && p.product_url.includes('kabum.com.br')) {
-                try {
-                    const scrapeRes = await fetch('/api/scrape/product', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ url: p.product_url })
-                    });
-                    if (scrapeRes.ok) {
-                        const scrapeData = await scrapeRes.json();
-                        if (scrapeData.images && scrapeData.images.length > 0) {
-                            imageUrls = scrapeData.images;
-                        }
-                        if (scrapeData.description) description = scrapeData.description;
-                        if (scrapeData.specs) specs = scrapeData.specs;
-                    }
-                } catch (e) {
-                    console.error("Failed to scrape details for", p.name, e);
-                }
-            }
+    const dedupeUrls = (urls: string[]) => Array.from(new Set((urls || []).map((u) => String(u || "").trim()).filter(Boolean)));
 
-            if (description) {
-              try {
-                const aiRes = await fetch("/api/ai/rewrite-description", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    productName: p.name,
-                    rawText: description,
-                    specs,
-                  }),
-                });
-                if (aiRes.ok) {
-                  const aiData = await aiRes.json();
-                  if (aiData?.markdown) description = aiData.markdown;
-                }
-              } catch (e) {
-                console.error("IA rewrite falhou para", p.name, e);
-              } finally {
-                aiDone += 1;
-                setMessage(`IA pensando... (${aiDone}/${total})`);
-              }
-            }
+    const initialRows = products.map((p) => {
+      let optimizedImage = optimizeUrl(p.image);
+      if (optimizedImage.includes("kabum.com.br") && optimizedImage.includes("images.kabum.com.br")) {
+        optimizedImage = toKabumOriginalUrl(optimizedImage);
+      }
 
-            let primaryImage = imageUrls[0] || optimizedImage;
-            let isValid = primaryImage ? await validateImage(primaryImage) : false;
+      return {
+        ...p,
+        image: optimizedImage,
+        image_urls: dedupeUrls([optimizedImage]),
+        description: "",
+        specs: {},
+        imageValid: false,
+        ai_status: "thinking",
+      };
+    });
 
-            if (!isValid && imageUrls.length > 1) {
-              for (const candidate of imageUrls.slice(1, 6)) {
-                const ok = await validateImage(candidate);
-                if (ok) {
-                  primaryImage = candidate;
-                  isValid = true;
-                  break;
-                }
-              }
-            }
-
-            return { ...p, image: primaryImage, image_urls: imageUrls, description, specs, imageValid: isValid };
-        })
-    );
-
-    // Filter out invalid images as requested
-    const validProducts = productsWithValidation.filter(r => r.imageValid && r.image);
-        
-    setParsedProducts(validProducts);
+    setParsedProducts(initialRows as any);
     setImportStep("preview");
+    setMessage(`IA pensando... (0/${total})`);
+
+    const tasks = initialRows.map(async (p: any) => {
+      try {
+        let imageUrls: string[] = Array.isArray(p.image_urls) ? p.image_urls : [];
+        let description = "";
+        let specs: any = {};
+
+        if (p.product_url && p.product_url.includes("kabum.com.br")) {
+          try {
+            const scrapeRes = await fetch("/api/scrape/product", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ url: p.product_url }),
+            });
+            if (scrapeRes.ok) {
+              const scrapeData = await scrapeRes.json();
+              if (Array.isArray(scrapeData.images) && scrapeData.images.length > 0) imageUrls = scrapeData.images;
+              if (scrapeData.description) description = scrapeData.description;
+              if (scrapeData.specs) specs = scrapeData.specs;
+            }
+          } catch (e) {
+            console.error("Failed to scrape details for", p.name, e);
+          }
+        }
+
+        imageUrls = dedupeUrls(imageUrls);
+        updateRow(p.id, { image_urls: imageUrls, specs });
+
+        if (description) {
+          try {
+            const aiRes = await fetch("/api/ai/rewrite-description", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ productName: p.name, rawText: description, specs }),
+            });
+            if (aiRes.ok) {
+              const aiData = await aiRes.json();
+              if (aiData?.markdown) {
+                description = aiData.markdown;
+                updateRow(p.id, { ai_status: "done", description });
+              } else {
+                updateRow(p.id, { ai_status: "error" });
+              }
+            } else {
+              updateRow(p.id, { ai_status: "error" });
+            }
+          } catch (e) {
+            console.error("IA rewrite falhou para", p.name, e);
+            updateRow(p.id, { ai_status: "error" });
+          } finally {
+            aiDone += 1;
+            setMessage(`IA pensando... (${aiDone}/${total})`);
+          }
+        } else {
+          updateRow(p.id, { ai_status: "error" });
+          aiDone += 1;
+          setMessage(`IA pensando... (${aiDone}/${total})`);
+        }
+
+        const validImageUrls: string[] = [];
+        for (const candidate of imageUrls) {
+          if (validImageUrls.length >= 12) break;
+          const ok = await validateImage(candidate);
+          if (ok) validImageUrls.push(candidate);
+        }
+
+        const primaryImage = validImageUrls[0] || "";
+        updateRow(p.id, {
+          image: primaryImage || p.image,
+          image_urls: validImageUrls.length > 0 ? validImageUrls : imageUrls,
+          imageValid: !!primaryImage,
+        });
+      } finally {
+        processed += 1;
+      }
+    });
+
+    await Promise.allSettled(tasks);
+
+    setParsedProducts((prev: any) => {
+      const filtered = prev.filter((r: any) => r.imageValid && r.image);
+      setMessage(`${filtered.length} produtos válidos encontrados.`);
+      return filtered;
+    });
+
     setStatus("idle");
-    
-    if (validProducts.length < productsWithValidation.length) {
-        setMessage(`${validProducts.length} produtos válidos encontrados. (${productsWithValidation.length - validProducts.length} removidos por imagem inválida/quebrada).`);
-    } else {
-        setMessage(`${validProducts.length} produtos encontrados com sucesso.`);
-    }
   };
 
   const handleConfirmImport = async () => {
@@ -496,7 +523,13 @@ export default function ImportPage() {
                                         )}
                                     </td>
                                     <td className="px-4 py-3">
-                                        <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">Pronto</span>
+                                        {p.ai_status === "thinking" ? (
+                                            <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">IA pensando...</span>
+                                        ) : p.ai_status === "error" ? (
+                                            <span className="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded">IA falhou</span>
+                                        ) : (
+                                            <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">IA OK</span>
+                                        )}
                                     </td>
                                 </tr>
                             ))}

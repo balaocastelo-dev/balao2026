@@ -12,6 +12,7 @@ export interface Product {
   video_url?: string;
   description?: string;
   specs?: Record<string, any>;
+  ai_status?: "thinking" | "done" | "error";
   created_at?: string;
 }
 
