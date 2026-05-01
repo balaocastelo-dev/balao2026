@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import sharp from 'sharp';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,87 +23,142 @@ export async function POST(request: Request) {
 
     const html = await response.text();
     
+    // 1. Extract Images
+    const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36';
+
+    const probeImage = async (imgUrl: string) => {
+      try {
+        const res = await fetch(imgUrl, {
+          method: 'GET',
+          headers: {
+            'User-Agent': userAgent,
+            Range: 'bytes=0-262143'
+          }
+        });
+        if (!res.ok) return { ok: false as const };
+
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType && !contentType.toLowerCase().startsWith('image/')) return { ok: false as const };
+
+        const buf = Buffer.from(await res.arrayBuffer());
+        if (buf.length < 15000) return { ok: false as const };
+
+        const meta = await sharp(buf).metadata().catch(() => null);
+        if (!meta?.width || !meta?.height) return { ok: false as const };
+        if (Math.min(meta.width, meta.height) < 600) return { ok: false as const };
+
+        return { ok: true as const, url: imgUrl };
+      } catch {
+        return { ok: false as const };
+      }
+    };
+
+    const toKabumOriginalUrl = (rawUrl: string) => {
+      const trimmed = rawUrl.trim();
+      try {
+        const u = new URL(trimmed);
+        const p = u.pathname;
+        let nextPath = p.replace(/_(m|p|peq|g)\.jpg$/i, '_original.jpg');
+        if (nextPath === p && /\.jpg$/i.test(p) && !/_original\.jpg$/i.test(p)) {
+          nextPath = p.replace(/\.jpg$/i, '_original.jpg');
+        }
+        u.pathname = nextPath;
+        u.search = '';
+        return u.toString();
+      } catch {
+        let next = trimmed.replace(/_(m|p|peq|g)\.jpg$/i, '_original.jpg');
+        if (next === trimmed && /\.jpg$/i.test(trimmed) && !/_original\.jpg$/i.test(trimmed)) {
+          next = trimmed.replace(/\.jpg$/i, '_original.jpg');
+        }
+        return next;
+      }
+    };
+
+    const toKabumGUrl = (rawUrl: string) => {
+      const trimmed = rawUrl.trim();
+      try {
+        const u = new URL(trimmed);
+        u.pathname = u.pathname.replace(/_(m|p|peq|original)\.jpg$/i, '_g.jpg');
+        u.search = '';
+        return u.toString();
+      } catch {
+        return trimmed.replace(/_(m|p|peq|original)\.jpg$/i, '_g.jpg');
+      }
+    };
+
+    const normalizeMiraklToXlarge = (rawUrl: string) => {
+      const trimmed = rawUrl.trim();
+      try {
+        const u = new URL(trimmed);
+        const parts = u.pathname.split('/').filter(Boolean);
+        const sizeIndex = parts.findIndex(p => p.toLowerCase() === 'small' || p.toLowerCase() === 'medium' || p.toLowerCase() === 'large' || p.toLowerCase() === 'xlarge' || p.toLowerCase() === 'mini' || p.toLowerCase() === 'thumb' || p.toLowerCase() === 'thumbnail');
+        if (sizeIndex >= 0) parts[sizeIndex] = 'xlarge';
+        u.pathname = `/${parts.join('/')}`;
+        u.search = '';
+        return u.toString();
+      } catch {
+        return trimmed.replace(/\/(small|medium|large|mini|thumb|thumbnail)\//i, '/xlarge/');
+      }
+    };
+
+    const tryMiraklWithHostFallback = async (miraklUrl: string) => {
+      const normalized = normalizeMiraklToXlarge(miraklUrl);
+      let base: URL;
+      try {
+        base = new URL(normalized);
+      } catch {
+        return null;
+      }
+
+      const hostMatch = base.hostname.match(/^images(\d)\.kabum\.com\.br$/i);
+      const preferred = hostMatch?.[1] ? [hostMatch[1]] : [];
+      const digits = Array.from({ length: 10 }, (_, i) => String(i));
+      const orderedDigits = Array.from(new Set([...preferred, '7', ...digits]));
+
+      for (const d of orderedDigits) {
+        const candidate = new URL(base.toString());
+        candidate.hostname = `images${d}.kabum.com.br`;
+        const probed = await probeImage(candidate.toString());
+        if (probed.ok) return probed.url;
+      }
+
+      return null;
+    };
+
     const productIdMatch = url.match(/\/produto\/(\d+)\//);
-    let uniqueImages: string[] = [];
-    if (productIdMatch) {
-        const productId = productIdMatch[1];
-        const imageRegex = new RegExp(`https://images\\.kabum\\.com\\.br/produtos/fotos/${productId}/[^"\\s]+?\\.jpg`, 'gi');
-        const matches = html.match(imageRegex) || [];
-        const miraklRegex = /https:\/\/images\d\.kabum\.com\.br\/produtos\/fotos\/sync_mirakl\/\d+\/xlarge\/[^"\s<>]+?\.(?:jpg|jpeg|png|webp)/gi;
-        const miraklMatches = html.match(miraklRegex) || [];
+    const productId = productIdMatch?.[1] || null;
 
-        const toOriginalKabumImageUrl = (rawUrl: string) => {
-          const trimmed = rawUrl.trim();
-          try {
-            const u = new URL(trimmed);
-            const p = u.pathname;
-            let nextPath = p.replace(/_(m|p|peq|g)\.jpg$/i, '_original.jpg');
-            if (nextPath === p && /\.jpg$/i.test(p) && !/_original\.jpg$/i.test(p)) {
-              nextPath = p.replace(/\.jpg$/i, '_original.jpg');
-            }
-            u.pathname = nextPath;
-            u.search = '';
-            return u.toString();
-          } catch {
-            let next = trimmed.replace(/_(m|p|peq|g)\.jpg$/i, '_original.jpg');
-            if (next === trimmed && /\.jpg$/i.test(trimmed) && !/_original\.jpg$/i.test(trimmed)) {
-              next = trimmed.replace(/\.jpg$/i, '_original.jpg');
-            }
-            return next;
-          }
-        };
+    const classicMatches = productId
+      ? (html.match(new RegExp(`https://images\\.kabum\\.com\\.br/produtos/fotos/${productId}/[^"\\s]+?\\.(?:jpg|jpeg|png|webp)`, 'gi')) || [])
+      : [];
 
-        const existsImage = async (imgUrl: string) => {
-          try {
-            const head = await fetch(imgUrl, {
-              method: 'HEAD',
-              headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-              }
-            });
-            if (head.ok) return true;
+    const miraklMatches = html.match(/https:\/\/images\d+\.kabum\.com\.br\/produtos\/fotos\/sync_mirakl\/\d+\/[^"'\s]+/gi) || [];
 
-            const get = await fetch(imgUrl, {
-              method: 'GET',
-              headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                Range: 'bytes=0-0'
-              }
-            });
-            return get.ok;
-          } catch {
-            return false;
-          }
-        };
+    const uniqueImages: string[] = [];
 
-        const uniqueList = (arr: string[]) => Array.from(new Set(arr.map(s => s.trim()).filter(Boolean)));
+    const originalCandidates = Array.from(new Set(classicMatches.map(toKabumOriginalUrl)));
+    for (const img of originalCandidates) {
+      if (uniqueImages.length >= 20) break;
+      const probed = await probeImage(img);
+      if (probed.ok) uniqueImages.push(probed.url);
+    }
 
-        const originals = Array.from(new Set(matches)).map(toOriginalKabumImageUrl);
-        const validatedOriginals: string[] = [];
+    if (uniqueImages.length === 0 && miraklMatches.length > 0) {
+      const uniqueMirakl = Array.from(new Set(miraklMatches.map(normalizeMiraklToXlarge)));
+      for (const img of uniqueMirakl) {
+        if (uniqueImages.length >= 20) break;
+        const resolved = await tryMiraklWithHostFallback(img);
+        if (resolved) uniqueImages.push(resolved);
+      }
+    }
 
-        for (const img of originals) {
-          if (validatedOriginals.length >= 20) break;
-          if (await existsImage(img)) validatedOriginals.push(img);
-        }
-
-        if (validatedOriginals.length > 0) {
-          uniqueImages = validatedOriginals;
-        } else {
-          const miraklCandidates = uniqueList(miraklMatches);
-          const validatedMirakl: string[] = [];
-
-          for (const img of miraklCandidates) {
-            if (validatedMirakl.length >= 20) break;
-            if (await existsImage(img)) validatedMirakl.push(img);
-          }
-
-          if (validatedMirakl.length > 0) {
-            uniqueImages = validatedMirakl;
-          } else {
-            uniqueImages = uniqueList(matches)
-              .map(img => img.replace(/_(m|p|peq)\.jpg$/i, '_g.jpg'));
-          }
-        }
+    if (uniqueImages.length === 0 && classicMatches.length > 0) {
+      const gCandidates = Array.from(new Set(classicMatches.map(toKabumGUrl)));
+      for (const img of gCandidates) {
+        if (uniqueImages.length >= 20) break;
+        const probed = await probeImage(img);
+        if (probed.ok) uniqueImages.push(probed.url);
+      }
     }
 
     // 2. Extract Description via JSON-LD

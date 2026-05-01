@@ -71,7 +71,9 @@ export default function ImportPage() {
     return new Promise((resolve) => {
       const img = new window.Image();
       img.onload = () => {
-        resolve(true);
+        const w = img.naturalWidth || 0;
+        const h = img.naturalHeight || 0;
+        resolve(w >= 600 && h >= 600);
       };
       img.onerror = () => resolve(false); 
       img.src = url;
@@ -142,17 +144,12 @@ export default function ImportPage() {
     // Verify if images are accessible and optimize URL
     const productsWithValidation = await Promise.all(
         products.map(async (p) => {
-            const uniqueList = (arr: string[]) => Array.from(new Set(arr.filter(Boolean)));
-            const baseImage = optimizeUrl(p.image);
-
-            const localCandidates: string[] = [];
-            if (baseImage.includes("kabum.com.br") && baseImage.includes("images.kabum.com.br")) {
-              localCandidates.push(toKabumOriginalUrl(baseImage));
-              localCandidates.push(baseImage.replace(/_(m|p|peq)\.jpg$/i, "_g.jpg"));
+            let optimizedImage = optimizeUrl(p.image);
+            if (optimizedImage.includes("kabum.com.br") && optimizedImage.includes("images.kabum.com.br")) {
+              optimizedImage = toKabumOriginalUrl(optimizedImage);
             }
-            localCandidates.push(baseImage);
 
-            let imageUrls = uniqueList(localCandidates);
+            let imageUrls = [optimizedImage];
             let description = "";
             let specs = {};
             
@@ -167,7 +164,7 @@ export default function ImportPage() {
                     if (scrapeRes.ok) {
                         const scrapeData = await scrapeRes.json();
                         if (scrapeData.images && scrapeData.images.length > 0) {
-                            imageUrls = uniqueList([...scrapeData.images, ...imageUrls]);
+                            imageUrls = scrapeData.images;
                         }
                         if (scrapeData.description) description = scrapeData.description;
                         if (scrapeData.specs) specs = scrapeData.specs;
@@ -177,7 +174,7 @@ export default function ImportPage() {
                 }
             }
 
-            let primaryImage = imageUrls[0] || baseImage;
+            let primaryImage = imageUrls[0] || optimizedImage;
             let isValid = primaryImage ? await validateImage(primaryImage) : false;
 
             if (!isValid && imageUrls.length > 1) {

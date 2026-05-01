@@ -147,7 +147,19 @@ export function enhanceImageUrl(url: string): string {
 
   // 1. Kabum: _m, _p, _peq -> _g
   if (enhancedUrl.includes('kabum.com.br')) {
-    enhancedUrl = enhancedUrl.replace(/_(m|p|peq|g|xlarge|original)\./g, '_original.');
+    enhancedUrl = enhancedUrl.replace(/_(m|p|peq|g)\./g, '_original.');
+
+    try {
+      const u = new URL(enhancedUrl);
+      if (/\/produtos\/fotos\/sync_mirakl\//i.test(u.pathname) && !/\/xlarge\//i.test(u.pathname)) {
+        u.pathname = u.pathname.replace(/\/(small|medium|large|mini|thumb|thumbnail)\//i, '/xlarge/');
+        enhancedUrl = u.toString();
+      }
+    } catch {
+      if (/\/produtos\/fotos\/sync_mirakl\//i.test(enhancedUrl) && !/\/xlarge\//i.test(enhancedUrl)) {
+        enhancedUrl = enhancedUrl.replace(/\/(small|medium|large|mini|thumb|thumbnail)\//i, '/xlarge/');
+      }
+    }
   }
 
   // 2. Terabyte: _t or _small -> _g
