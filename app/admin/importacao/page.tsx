@@ -122,9 +122,9 @@ export default function ImportPage() {
     // Verify if images are accessible and optimize URL
     const productsWithValidation = await Promise.all(
         products.map(async (p) => {
-            const optimizedImage = optimizeUrl(p.image);
+            const optimizedImage = p.image ? optimizeUrl(p.image) : "";
             
-            let imageUrls = [optimizedImage];
+            let imageUrls = optimizedImage ? [optimizedImage] : [];
             let description = "";
             let specs = {};
             let primaryImage = optimizedImage;
@@ -151,7 +151,7 @@ export default function ImportPage() {
             }
 
             primaryImage = imageUrls[0] || optimizedImage;
-            const isValid = await validateImage(primaryImage);
+            const isValid = primaryImage ? await validateImage(primaryImage) : false;
             return { ...p, image: primaryImage, image_urls: imageUrls, description, specs, imageValid: isValid };
         })
     );
