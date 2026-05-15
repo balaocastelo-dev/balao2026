@@ -19,6 +19,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/notebooks',
     '/seminovos',
     '/monteseupc',
+    '/monte-seu-pc',
     '/departamentos',
     '/fale-conosco',
     '/sobre-nos',

@@ -5,6 +5,7 @@ import Carousel from "@/components/Carousel";
 import ProductCarousel from "@/components/ProductCarousel";
 import SeoContent from "@/components/SeoContent";
 import JsonLd, { generateOrganizationSchema } from "@/components/JsonLd";
+import Link from "next/link";
 // InstagramFeed will be moved to Sidebar area
 // import InstagramFeed from "@/components/InstagramFeed";
 import { getProducts, getCarouselImages, getCategories, getHomeBlocks } from "@/lib/db";
@@ -138,6 +139,29 @@ export default async function Home(props: {
             </div> */}
         </div>
         <main className="flex-1 w-full min-w-0">
+            {!search && !category && (
+              <div className="mb-6">
+                <Link
+                  href="/monte-seu-pc"
+                  className="block rounded-2xl border border-red-200 bg-gradient-to-r from-red-600 to-red-700 text-white p-6 shadow-lg hover:shadow-xl transition-shadow"
+                >
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                      <div className="text-xs font-black uppercase tracking-widest text-red-100">Monte seu PC</div>
+                      <div className="text-2xl md:text-3xl font-black leading-tight">
+                        Monte seu PC com compatibilidade rigorosa
+                      </div>
+                      <div className="text-red-100 mt-1 text-sm">
+                        Fluxo sequencial: CPU → Placa-mãe → RAM → SSD/NVMe → GPU → Fonte → Gabinete.
+                      </div>
+                    </div>
+                    <div className="shrink-0 inline-flex items-center justify-center px-5 py-3 rounded-xl bg-white text-red-700 font-black">
+                      Começar agora
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            )}
             {/* Dynamic Home Blocks */}
             {!search && !category && (
                 <>
