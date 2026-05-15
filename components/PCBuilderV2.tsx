@@ -307,7 +307,7 @@ const detectWattage = (p: Product) => {
   return null;
 };
 
-const detectGpuTier = (p: Product): SpecSnapshot["gpuTier"] => {
+const detectGpuTier = (p: Product): 0 | 1 | 2 | 3 => {
   const t = getProductText(p);
   if (t.includes("RTX 4090") || t.includes("RX 7900 XTX") || t.includes("RTX 4080")) return 3;
   if (t.includes("RTX 4070") || t.includes("RX 7800") || t.includes("RTX 3080")) return 2;
@@ -420,7 +420,7 @@ const computeRecommendedPsuWattage = (cpu: Product | null, gpu: Product | null) 
 };
 
 const getBuildTier = (total: number, gpu: Product | null) => {
-  const tier = gpu ? detectGpuTier(gpu) : 0;
+  const tier = gpu ? (detectGpuTier(gpu) ?? 0) : 0;
   if (tier >= 3 || total >= 12000) return "Alto Nível";
   if (tier >= 1 || total >= 6000) return "Gamer Básico";
   return "Office";
