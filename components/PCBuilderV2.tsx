@@ -685,6 +685,41 @@ export default function PCBuilderV2({ products }: { products: Product[] }) {
     };
 
     try {
+      if (currentStepInfo.id === "motherboard" && cpuSnap?.socket) {
+        const wantedSocket = normalize(cpuSnap.socket);
+
+        const isMotherboardCandidate = (p: Product) => {
+          const c = normalize(p.category ?? "");
+          const isExact = currentStepInfo.exactCategories.some((cat) => normalize(cat) === c);
+          const name = normalize(p.name);
+          const keywordMatch = currentStepInfo.categoryKeywords.some((kw) => c.includes(normalize(kw)) || name.includes(normalize(kw)));
+          return isExact || keywordMatch;
+        };
+
+        const socketMatch = (p: Product) => {
+          const byDetect = detectSocket(p);
+          if (byDetect && normalize(byDetect) === wantedSocket) return true;
+          return getProductText(p).includes(wantedSocket);
+        };
+
+        const base = products.filter((p) => isMotherboardCandidate(p) && matchesSearch(p));
+        const strict = base.filter((p) => socketMatch(p));
+
+        if (strict.length > 0) {
+          return strict.sort((a, b) => {
+            const am = socketMatch(a) ? 1 : 0;
+            const bm = socketMatch(b) ? 1 : 0;
+            return bm - am;
+          });
+        }
+
+        return base.sort((a, b) => {
+          const am = socketMatch(a) ? 1 : 0;
+          const bm = socketMatch(b) ? 1 : 0;
+          return bm - am;
+        });
+      }
+
       return products.filter((p) => categoryMatches(p) && matchesSearch(p) && compatibilityOk(p));
     } catch {
       return [];
