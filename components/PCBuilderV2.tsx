@@ -523,6 +523,7 @@ export default function PCBuilderV2({ products }: { products: Product[] }) {
 
   const [currentStep, setCurrentStep] = useState<StepId>("cpu");
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchTouched, setSearchTouched] = useState(false);
   const [includeAssembly, setIncludeAssembly] = useState(false);
   const [selections, setSelections] = useState<BuilderSelections>({
     cpu: null,
@@ -623,6 +624,8 @@ export default function PCBuilderV2({ products }: { products: Product[] }) {
       setSelections((prev) => ({ ...prev, [currentStep]: [...currentIds, product.id] } as BuilderSelections));
       showToast(`${product.name} adicionado!`, "success");
       setSearchTerm("");
+      setSearchTouched(false);
+      advance();
       return;
     }
 
@@ -634,6 +637,7 @@ export default function PCBuilderV2({ products }: { products: Product[] }) {
       return next;
     });
     setSearchTerm("");
+    setSearchTouched(false);
     advance();
   };
 
@@ -673,6 +677,7 @@ export default function PCBuilderV2({ products }: { products: Product[] }) {
     setIncludeAssembly(false);
     setCurrentStep("cpu");
     setSearchTerm("");
+    setSearchTouched(false);
     showToast("Configuração limpa.", "success");
   };
 
@@ -727,11 +732,48 @@ export default function PCBuilderV2({ products }: { products: Product[] }) {
         const n = normalize(p.name);
         const exact = normalizedExact.some((x) => x === c);
         const keyword = normalizedKeywords.some((kw) => c.includes(kw) || n.includes(kw));
+        if (step.id === "cpu") {
+          return exact;
+        }
+
+        if (step.id === "ram") {
+          const t = getProductText(p);
+          const isNotebookRam =
+            t.includes("SODIMM") ||
+            t.includes("SO-DIMM") ||
+            t.includes("NOTEBOOK") ||
+            t.includes("LAPTOP");
+          if (isNotebookRam) return false;
+        }
+
         return exact || keyword;
       });
     }
     return result;
   }, [products]);
+
+  useEffect(() => {
+    const base = candidatesByStep[currentStep] ?? [];
+    let next = "";
+
+    if (currentStep === "motherboard" && cpuSnap?.socket) next = cpuSnap.socket;
+    else if (currentStep === "ram" && moboSnap?.ramType) next = moboSnap.ramType;
+    else if (currentStep === "storage") next = "NVME";
+    else if (currentStep === "gpu") next = gpuRequired ? "RTX" : "";
+    else if (currentStep === "psu") next = recommendedPsuW ? `${recommendedPsuW}W` : "650W";
+    else if (currentStep === "case") next = moboSnap?.formFactor ?? "ATX";
+    else if (currentStep === "cooling") next = "AIO";
+    else if (currentStep === "wifi") next = "WIFI";
+    else if (currentStep === "software") next = "WINDOWS";
+    else if (currentStep === "peripherals") next = "KIT";
+
+    const normalizedNext = normalize(next);
+    const canApply =
+      normalizedNext.length > 0 && base.some((p) => normalize(p.name).includes(normalizedNext));
+
+    setSearchTerm(canApply ? next : "");
+    setSearchTouched(false);
+  }, [currentStep, candidatesByStep, cpuSnap?.socket, moboSnap?.ramType, moboSnap?.formFactor, gpuRequired, recommendedPsuW]);
 
   const filtered = useMemo(() => {
     if (!currentStepInfo) return { items: [] as Product[], relaxedReason: "" };
@@ -1115,7 +1157,10 @@ export default function PCBuilderV2({ products }: { products: Product[] }) {
               type="text"
               placeholder={`Buscar em ${currentStepInfo?.label ?? "itens"}...`}
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTouched(true);
+                setSearchTerm(e.target.value);
+              }}
               className="w-full pl-10 pr-4 py-3 bg-zinc-50 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
             />
           </div>
