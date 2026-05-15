@@ -8,7 +8,7 @@ import JsonLd, { generateOrganizationSchema } from "@/components/JsonLd";
 import Link from "next/link";
 // InstagramFeed will be moved to Sidebar area
 // import InstagramFeed from "@/components/InstagramFeed";
-import { getProducts, getCarouselImages, getCategories, getHomeBlocks } from "@/lib/db";
+import { getProductsByCategories, getCarouselImages, getCategories, getHomeBlocks, getHomeBlockProductsByCategory } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { parsePriceToNumber, Product } from "@/lib/utils";
 
@@ -65,8 +65,7 @@ export default async function Home(props: {
           );
       })();
   } else {
-      // Otherwise fetch all products (for category browsing and home blocks)
-      productsPromise = getProducts();
+      productsPromise = Promise.resolve([]);
   }
 
   const [products, carouselImages, categories, homeBlocks] = await Promise.all([
@@ -103,14 +102,19 @@ export default async function Home(props: {
   }
 
   let filteredProducts = products;
+  let homeBlockProducts: Record<string, Product[]> = {};
 
   // If we are NOT searching, we might need to filter by category
   // (If we ARE searching, 'products' is already the search result from RPC)
   if (!search) {
-      filteredProducts = products.filter(p => {
-        if (category && category !== "Todos os Produtos" && !validCategories.has(p.category)) return false;
-        return true;
-      });
+      if (category && category !== "Todos os Produtos") {
+        const categoryList = Array.from(validCategories);
+        filteredProducts = await getProductsByCategories(categoryList);
+      } else {
+        const homeCategories = homeBlocks.map((b) => b.category_id).filter(Boolean);
+        homeBlockProducts = await getHomeBlockProductsByCategory(homeCategories, 12);
+        filteredProducts = [];
+      }
   }
 
   return (
@@ -167,7 +171,7 @@ export default async function Home(props: {
                 <>
                 {/* Dynamic Home Blocks */}
                 {homeBlocks.map(block => {
-                    const blockProducts = products.filter(p => p.category === block.category_id);
+                    const blockProducts = homeBlockProducts[block.category_id] || [];
                     if (blockProducts.length === 0) return null;
                     return (
                         <ProductCarousel 

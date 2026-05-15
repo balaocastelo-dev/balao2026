@@ -62,6 +62,80 @@ export async function getProductsByCategory(categorySlug: string): Promise<Produ
   }
 }
 
+export async function getProductsByCategories(categories: string[]): Promise<Product[]> {
+  try {
+    if (!categories || categories.length === 0) return [];
+
+    const pageSize = 1000;
+    let all: Product[] = [];
+    let from = 0;
+
+    while (true) {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .in("category", categories)
+        .order("created_at", { ascending: false })
+        .range(from, from + pageSize - 1);
+
+      if (error) {
+        console.error("Supabase error (getProductsByCategories):", error);
+        break;
+      }
+
+      const chunk = (data as Product[]) || [];
+      all = all.concat(chunk);
+      if (chunk.length < pageSize) break;
+      from += pageSize;
+    }
+
+    return all.sort((a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price));
+  } catch (error) {
+    console.error("Error fetching products by categories:", error);
+    return [];
+  }
+}
+
+export async function getProductsByExactCategory(category: string, limit = 12): Promise<Product[]> {
+  try {
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .eq("category", category)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error(`Error fetching products for exact category ${category}:`, error);
+      return [];
+    }
+
+    return (data as Product[]) || [];
+  } catch (error) {
+    console.error(`Error fetching products for exact category ${category}:`, error);
+    return [];
+  }
+}
+
+export async function getHomeBlockProductsByCategory(categories: string[], perCategoryLimit = 12): Promise<Record<string, Product[]>> {
+  try {
+    const unique = Array.from(new Set((categories || []).filter(Boolean)));
+    const entries = await Promise.all(
+      unique.map(async (category) => {
+        const products = await getProductsByExactCategory(category, perCategoryLimit);
+        return [category, products] as const;
+      })
+    );
+
+    const result: Record<string, Product[]> = {};
+    for (const [category, items] of entries) result[category] = items;
+    return result;
+  } catch (error) {
+    console.error("Error fetching home block products:", error);
+    return {};
+  }
+}
+
 export async function getProductById(id: string): Promise<Product | null> {
   try {
     // Try admin client first (more reliable on server)
