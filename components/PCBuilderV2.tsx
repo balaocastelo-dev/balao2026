@@ -257,6 +257,62 @@ const detectSocket = (p: Product) => {
   return null;
 };
 
+const detectChipset = (p: Product) => {
+  const spec = getSpecString(p, ["chipset", "motherboard_chipset"]);
+  if (spec) return normalize(spec).replace(/\s+/g, "");
+
+  const t = getProductText(p);
+  const intel = t.match(/\b([ZBH])\s?(\d{3})\b/);
+  if (intel) return `${intel[1]}${intel[2]}`;
+
+  const amd = t.match(/\b([ABX])\s?(\d{3})\b/);
+  if (amd) return `${amd[1]}${amd[2]}`;
+
+  return null;
+};
+
+const detectIntelCpuGen = (cpu: Product) => {
+  const name = normalize(cpu.name);
+  const m = name.match(/\bI[3579]-\s?(\d{4,5})\b/);
+  if (!m) return null;
+  const model = Number(m[1]);
+  if (!Number.isFinite(model)) return null;
+  if (model >= 14000) return 14;
+  if (model >= 13000) return 13;
+  if (model >= 12000) return 12;
+  if (model >= 11000) return 11;
+  if (model >= 10000) return 10;
+  return null;
+};
+
+const chipsetMatchesCpu = (cpu: Product, motherboard: Product) => {
+  const cpuSocket = detectSocket(cpu);
+  const chip = detectChipset(motherboard);
+  if (!cpuSocket || !chip) return true;
+
+  if (cpuSocket === "LGA1700") {
+    return /\b[ZBH](6\d{2}|7\d{2})\b/.test(chip);
+  }
+
+  if (cpuSocket === "AM5") {
+    return /\b(A620|B650|X670|X870|B850|A8\d{2}|B8\d{2}|X8\d{2})\b/.test(chip);
+  }
+
+  if (cpuSocket === "AM4") {
+    return /\b(A320|B350|X370|B450|X470|A520|B550|X570)\b/.test(chip);
+  }
+
+  if (cpuSocket === "LGA1200") {
+    return /\b[ZBH](4\d{2}|5\d{2})\b/.test(chip);
+  }
+
+  if (cpuSocket === "LGA1151") {
+    return /\b[ZBH](1\d{2}|2\d{2}|3\d{2})\b/.test(chip);
+  }
+
+  return true;
+};
+
 const detectRamType = (p: Product): SpecSnapshot["ramType"] => {
   const specRam = getSpecString(p, ["ram_type", "memory_type", "ddr", "ram"]);
   const t = normalize(`${specRam ?? ""} ${getProductText(p)}`);
@@ -318,12 +374,28 @@ const detectGpuTier = (p: Product): 0 | 1 | 2 | 3 => {
 const detectGpuLengthMm = (p: Product) => {
   const specL = getSpecNumber(p, ["length_mm", "gpu_length_mm", "comprimento_mm", "length"]);
   if (specL && specL > 0) return Math.round(specL);
+  const t = getProductText(p);
+  const m =
+    t.match(/\b(\d{2,3})\s*MM\b/) ||
+    t.match(/\b(\d{2,3})\s*(?:MILIMETROS|MILIMETRO)\b/);
+  if (m) {
+    const mm = Number(m[1]);
+    if (Number.isFinite(mm) && mm >= 150 && mm <= 450) return mm;
+  }
   return null;
 };
 
 const detectCaseMaxGpuLengthMm = (p: Product) => {
   const specL = getSpecNumber(p, ["gpu_max_length_mm", "max_gpu_length_mm", "gpu_clearance_mm", "max_gpu_mm"]);
   if (specL && specL > 0) return Math.round(specL);
+  const t = getProductText(p);
+  const m =
+    t.match(/\bGPU\b[\s\S]{0,20}\b(\d{2,3})\s*MM\b/) ||
+    t.match(/\bVGA\b[\s\S]{0,20}\b(\d{2,3})\s*MM\b/);
+  if (m) {
+    const mm = Number(m[1]);
+    if (Number.isFinite(mm) && mm >= 150 && mm <= 500) return mm;
+  }
   return null;
 };
 
@@ -359,8 +431,15 @@ const hasIntegratedVideo = (cpu: Product) => {
     return true;
   }
 
+  const socket = detectSocket(cpu);
+  const name = normalize(cpu.name);
+  if (socket === "AM5") {
+    if (/\b7500F\b/.test(name)) return false;
+    return true;
+  }
+
   if (/\bRYZEN\b/i.test(cpu.name)) {
-    if (/\bG\b/i.test(cpu.name)) return true;
+    if (/\bG\b/i.test(cpu.name) || /\bGE\b/i.test(cpu.name)) return true;
   }
 
   return undefined;
@@ -637,94 +716,102 @@ export default function PCBuilderV2({ products }: { products: Product[] }) {
 
   const currentStepInfo = STEPS.find((s) => s.id === currentStep);
 
-  const filteredProducts = useMemo(() => {
-    if (!currentStepInfo) return [];
-    const normalizedSearch = normalize(searchTerm);
+  const candidatesByStep = useMemo(() => {
+    const result = {} as Record<StepId, Product[]>;
+    for (const step of STEPS) {
+      const normalizedExact = step.exactCategories.map((c) => normalize(c));
+      const normalizedKeywords = step.categoryKeywords.map((k) => normalize(k));
 
-    const categoryMatches = (p: Product) => {
-      const c = normalize(p.category ?? "");
-      const isExact = currentStepInfo.exactCategories.some((cat) => normalize(cat) === c);
-      if (c && c !== "HARDWARE" && currentStepInfo.exactCategories.length > 0) return isExact;
-      const name = normalize(p.name);
-      return currentStepInfo.categoryKeywords.some((kw) => c.includes(normalize(kw)) || name.includes(normalize(kw)));
-    };
+      result[step.id] = products.filter((p) => {
+        const c = normalize(p.category ?? "");
+        const n = normalize(p.name);
+        const exact = normalizedExact.some((x) => x === c);
+        const keyword = normalizedKeywords.some((kw) => c.includes(kw) || n.includes(kw));
+        return exact || keyword;
+      });
+    }
+    return result;
+  }, [products]);
+
+  const filtered = useMemo(() => {
+    if (!currentStepInfo) return { items: [] as Product[], relaxedReason: "" };
+    const normalizedSearch = normalize(searchTerm);
+    const baseCandidates = candidatesByStep[currentStepInfo.id] ?? [];
 
     const matchesSearch = (p: Product) => {
       if (!normalizedSearch) return true;
       return normalize(p.name).includes(normalizedSearch);
     };
 
-    const compatibilityOk = (p: Product) => {
-      if (currentStepInfo.id === "motherboard") {
-        const socket = detectSocket(p);
-        if (cpuSnap?.socket && socket && normalize(socket) !== normalize(cpuSnap.socket)) return false;
-      }
-
-      if (currentStepInfo.id === "ram") {
-        const ramType = detectRamType(p);
-        if (moboSnap?.ramType && ramType && ramType !== moboSnap.ramType) return false;
-      }
-
-      if (currentStepInfo.id === "psu") {
-        if (!recommendedPsuW) return true;
-        const w = detectWattage(p);
-        if (w && w < recommendedPsuW) return false;
-      }
-
-      if (currentStepInfo.id === "case") {
-        const supports = detectCaseSupportFormFactors(p);
-        const moboFf = moboSnap?.formFactor;
-        if (moboFf && supports && !supports.some((x) => normalize(x).includes(normalize(moboFf)))) return false;
-
-        const maxLen = detectCaseMaxGpuLengthMm(p);
-        const gpuLen = selectedGpu ? detectGpuLengthMm(selectedGpu) : null;
-        if (maxLen && gpuLen && gpuLen > maxLen) return false;
-      }
-
-      return true;
+    const socketMatch = (p: Product, wantedSocket: string) => {
+      const byDetect = detectSocket(p);
+      if (byDetect && normalize(byDetect) === wantedSocket) return true;
+      return getProductText(p).includes(wantedSocket);
     };
 
+    const sortedBySocket = (items: Product[], wantedSocket: string) =>
+      items.sort((a, b) => (socketMatch(b, wantedSocket) ? 1 : 0) - (socketMatch(a, wantedSocket) ? 1 : 0));
+
     try {
-      if (currentStepInfo.id === "motherboard" && cpuSnap?.socket) {
+      if (currentStepInfo.id === "motherboard" && selectedCpu && cpuSnap?.socket) {
         const wantedSocket = normalize(cpuSnap.socket);
+        const searched = baseCandidates.filter(matchesSearch);
 
-        const isMotherboardCandidate = (p: Product) => {
-          const c = normalize(p.category ?? "");
-          const isExact = currentStepInfo.exactCategories.some((cat) => normalize(cat) === c);
-          const name = normalize(p.name);
-          const keywordMatch = currentStepInfo.categoryKeywords.some((kw) => c.includes(normalize(kw)) || name.includes(normalize(kw)));
-          return isExact || keywordMatch;
-        };
-
-        const socketMatch = (p: Product) => {
-          const byDetect = detectSocket(p);
-          if (byDetect && normalize(byDetect) === wantedSocket) return true;
-          return getProductText(p).includes(wantedSocket);
-        };
-
-        const base = products.filter((p) => isMotherboardCandidate(p) && matchesSearch(p));
-        const strict = base.filter((p) => socketMatch(p));
+        const strict = searched
+          .filter((p) => socketMatch(p, wantedSocket))
+          .filter((p) => chipsetMatchesCpu(selectedCpu, p));
 
         if (strict.length > 0) {
-          return strict.sort((a, b) => {
-            const am = socketMatch(a) ? 1 : 0;
-            const bm = socketMatch(b) ? 1 : 0;
-            return bm - am;
-          });
+          return { items: sortedBySocket(strict, wantedSocket), relaxedReason: "" };
         }
 
-        return base.sort((a, b) => {
-          const am = socketMatch(a) ? 1 : 0;
-          const bm = socketMatch(b) ? 1 : 0;
-          return bm - am;
-        });
+        const socketOnly = searched.filter((p) => socketMatch(p, wantedSocket));
+        if (socketOnly.length > 0) {
+          return { items: sortedBySocket(socketOnly, wantedSocket), relaxedReason: "Chipset não identificado/compatível em todos os itens; exibindo por socket." };
+        }
+
+        return { items: searched, relaxedReason: "Socket não identificado no catálogo; exibindo todas as placas-mãe encontradas." };
       }
 
-      return products.filter((p) => categoryMatches(p) && matchesSearch(p) && compatibilityOk(p));
+      if (currentStepInfo.id === "ram" && moboSnap?.ramType) {
+        const searched = baseCandidates.filter(matchesSearch);
+        const strict = searched.filter((p) => detectRamType(p) === moboSnap.ramType || getProductText(p).includes(moboSnap.ramType));
+        if (strict.length > 0) return { items: strict, relaxedReason: "" };
+        return { items: searched, relaxedReason: "DDR da placa-mãe não encontrado em todos os itens; exibindo todas as memórias." };
+      }
+
+      if (currentStepInfo.id === "psu" && recommendedPsuW) {
+        const searched = baseCandidates.filter(matchesSearch);
+        const strict = searched.filter((p) => {
+          const w = detectWattage(p);
+          if (!w) return false;
+          return w >= recommendedPsuW;
+        });
+        if (strict.length > 0) return { items: strict, relaxedReason: "" };
+        return { items: searched, relaxedReason: "Potência não encontrada em todas as fontes; exibindo todas as fontes." };
+      }
+
+      if (currentStepInfo.id === "case" && (moboSnap?.formFactor || selectedGpu)) {
+        const searched = baseCandidates.filter(matchesSearch);
+        const strict = searched.filter((p) => {
+          const supports = detectCaseSupportFormFactors(p);
+          const moboFf = moboSnap?.formFactor;
+          if (moboFf && supports && !supports.some((x) => normalize(x).includes(normalize(moboFf)))) return false;
+          const maxLen = detectCaseMaxGpuLengthMm(p);
+          const gpuLen = selectedGpu ? detectGpuLengthMm(selectedGpu) : null;
+          if (maxLen && gpuLen && gpuLen > maxLen) return false;
+          return true;
+        });
+        if (strict.length > 0) return { items: strict, relaxedReason: "" };
+        return { items: searched, relaxedReason: "Medidas/formato não encontrados em todos os gabinetes; exibindo todos os gabinetes." };
+      }
+
+      const items = baseCandidates.filter((p) => matchesSearch(p));
+      return { items, relaxedReason: "" };
     } catch {
-      return [];
+      return { items: [] as Product[], relaxedReason: "Erro ao calcular compatibilidade; tente novamente." };
     }
-  }, [products, currentStepInfo, searchTerm, cpuSnap?.socket, moboSnap?.ramType, moboSnap?.formFactor, recommendedPsuW, selectedGpu]);
+  }, [candidatesByStep, currentStepInfo, searchTerm, cpuSnap?.socket, moboSnap?.ramType, moboSnap?.formFactor, recommendedPsuW, selectedCpu, selectedGpu]);
 
   const totalPartsPrice =
     (selectedCpu ? parsePrice(selectedCpu.price) : 0) +
@@ -993,7 +1080,7 @@ export default function PCBuilderV2({ products }: { products: Product[] }) {
               {currentStepInfo?.icon && <currentStepInfo.icon className="text-red-600" />}
               {currentStepInfo?.label}
             </h1>
-            <p className="text-zinc-500 text-sm mt-1">{filteredProducts.length} produtos compatíveis encontrados</p>
+            <p className="text-zinc-500 text-sm mt-1">{filtered.items.length} produtos encontrados</p>
 
             {(cpuSnap?.socket || moboSnap?.ramType || recommendedPsuW || gpuRequired) && (
               <div className="mt-3 flex flex-wrap gap-2">
@@ -1047,8 +1134,15 @@ export default function PCBuilderV2({ products }: { products: Product[] }) {
             </div>
           )}
 
+          {filtered.relaxedReason && (
+            <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900">
+              <div className="text-sm font-bold">Compatibilidade relaxada</div>
+              <div className="text-xs mt-1">{filtered.relaxedReason}</div>
+            </div>
+          )}
+
           <div className="space-y-3">
-            {filteredProducts.map((product) => (
+            {filtered.items.map((product) => (
               <div
                 key={product.id}
                 className="group border border-zinc-200 rounded-xl p-4 hover:border-red-500 hover:shadow-md transition-all bg-white flex flex-col md:flex-row gap-4"
@@ -1101,7 +1195,7 @@ export default function PCBuilderV2({ products }: { products: Product[] }) {
               </div>
             ))}
 
-            {filteredProducts.length === 0 && (
+            {filtered.items.length === 0 && (
               <div className="py-12 text-center text-zinc-400">
                 <AlertCircle className="mx-auto mb-3 text-zinc-300" size={48} />
                 <p>Nenhum produto compatível encontrado.</p>
