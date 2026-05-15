@@ -774,8 +774,9 @@ export default function PCBuilderV2({ products }: { products: Product[] }) {
       }
 
       if (currentStepInfo.id === "ram" && moboSnap?.ramType) {
+        const wantedRamType = moboSnap.ramType;
         const searched = baseCandidates.filter(matchesSearch);
-        const strict = searched.filter((p) => detectRamType(p) === moboSnap.ramType || getProductText(p).includes(moboSnap.ramType));
+        const strict = searched.filter((p) => detectRamType(p) === wantedRamType || getProductText(p).includes(wantedRamType));
         if (strict.length > 0) return { items: strict, relaxedReason: "" };
         return { items: searched, relaxedReason: "DDR da placa-mãe não encontrado em todos os itens; exibindo todas as memórias." };
       }
