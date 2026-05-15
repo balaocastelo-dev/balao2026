@@ -1,4 +1,4 @@
-import { getProducts } from "@/lib/db";
+import { getProductsForPcBuilder } from "@/lib/db";
 import PCBuilderV2 from "@/components/PCBuilderV2";
 import { Monitor, Cpu, Settings } from "lucide-react";
 import Header from "@/components/Header";
@@ -9,7 +9,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 export const dynamic = 'force-dynamic';
 
 export default async function MonteSeuPCPage() {
-  const products = await getProducts();
+  const products = await getProductsForPcBuilder();
 
   const breadcrumbItems = [
     { name: 'Home', item: 'https://www.balao.info' },

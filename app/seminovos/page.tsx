@@ -2,7 +2,7 @@ import { SITE_CONFIG } from "@/lib/config";
 import React from "react";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
-import { getProducts, getCategories } from "@/lib/db";
+import { getCategories, getProductsByCategories } from "@/lib/db";
 import { Product, Category } from "@/lib/utils";
 import ProductCard from "@/components/ProductCard";
 import HeroCTA from "@/components/HeroCTA";
@@ -222,10 +222,7 @@ function BlockDelivery() {
 }
 
 export default async function SeminovosPage() {
-  const [allProducts, categories] = await Promise.all([
-    getProducts(),
-    getCategories(),
-  ]);
+  const categories = await getCategories();
 
   const rootCategory = categories.find(
     (c: Category) => c.slug === "semi-novo"
@@ -246,11 +243,7 @@ export default async function SeminovosPage() {
     }
   }
 
-  const seminovos = allProducts.filter((p: Product) => {
-    if (!rootCategory) return false;
-    if (!p.category) return false;
-    return validCategories.has(p.category);
-  });
+  const seminovos = rootCategory ? await getProductsByCategories(Array.from(validCategories)) : [];
 
   // Dividir produtos se necessário, ou mostrar todos em uma super grid
   // Vou mostrar todos em uma grid central poderosa
@@ -324,4 +317,3 @@ export default async function SeminovosPage() {
     </div>
   );
 }
-

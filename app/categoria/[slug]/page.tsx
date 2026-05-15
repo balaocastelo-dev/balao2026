@@ -2,10 +2,10 @@ import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import ProductList from "@/components/ProductList";
 import FilterSyncer from "@/components/FilterSyncer";
-import { getProducts, getCategories } from "@/lib/db";
+import { getCategories, getProductsByCategories, getProductsPage } from "@/lib/db";
 import { searchProducts } from "@/lib/searchUtils";
 import { extractTags, filterProductsByTags } from "@/lib/product-filters";
-import { parsePriceToNumber, type Category } from "@/lib/utils";
+import { parsePriceToNumber, type Category, type Product } from "@/lib/utils";
 import { Metadata } from "next";
 import JsonLd, { generateBreadcrumbSchema, generateOrganizationSchema, generateItemListSchema } from "@/components/JsonLd";
  
@@ -57,10 +57,7 @@ export default async function CategoriaPage({
   const { search, tags: tagsParam } = await searchParams;
   const selectedTags = tagsParam ? tagsParam.split(',') : [];
  
-  const [products, categories] = await Promise.all([
-    getProducts(),
-    getCategories(),
-  ]);
+  const categories = await getCategories();
  
   const findBySlug = (s: string, all: Category[]) =>
     all.find((c) => c.slug === s);
@@ -93,10 +90,13 @@ export default async function CategoriaPage({
     descendants.forEach((d) => validCategories.add(d));
   }
  
-  let filteredProducts = products.filter((p) => {
-    if (categoryName && categoryName !== "Todos os Produtos" && !validCategories.has(p.category)) return false;
-    return true;
-  });
+  let filteredProducts: Product[] = [];
+
+  if (categoryName && categoryName !== "Todos os Produtos") {
+    filteredProducts = await getProductsByCategories(Array.from(validCategories));
+  } else {
+    filteredProducts = await getProductsPage(600, 0);
+  }
  
   if (search) {
     filteredProducts = searchProducts(filteredProducts, search);

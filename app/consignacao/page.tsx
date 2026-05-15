@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import Header from '@/components/Header'
-import { getProducts } from '@/lib/db'
+import { getProductsByText } from '@/lib/db'
 import ProductCarousel from '@/components/ProductCarousel'
 import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from '@/components/JsonLd'
 import { 
@@ -497,7 +497,7 @@ function BlockUrgency() {
 }
 
 export default async function ConsignacaoPage() {
-  const allProducts = await getProducts()
+  const allProducts = await getProductsByText("notebook", 800)
   
   // Helper para filtrar o que aceitamos (simulação com produtos novos)
   const acceptedExamples = allProducts.filter(p => {

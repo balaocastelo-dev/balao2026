@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import Header from '@/components/Header'
-import { getProducts } from '@/lib/db'
+import { getProductsByText } from '@/lib/db'
 import ProductCarousel from '@/components/ProductCarousel'
 import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from '@/components/JsonLd'
 import { 
@@ -337,7 +337,7 @@ function BlockFAQ() {
 }
 
 export default async function AssistenciaGamesPage() {
-  const allProducts = await getProducts()
+  const allProducts = await getProductsByText("playstation", 800)
   
   // Filtrar produtos relacionados a console e playstation
   const gameProducts = allProducts.filter(p => {

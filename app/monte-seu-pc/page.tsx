@@ -1,4 +1,4 @@
-import { getProducts } from "@/lib/db";
+import { getProductsForPcBuilder } from "@/lib/db";
 import PCBuilderV2 from "@/components/PCBuilderV2";
 import Header from "@/components/Header";
 import JsonLd, { generateBreadcrumbSchema, generateOrganizationSchema } from "@/components/JsonLd";
@@ -8,7 +8,7 @@ import { Cpu, Settings, Wrench } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 export default async function MonteSeuPCPage() {
-  const products = await getProducts();
+  const products = await getProductsForPcBuilder();
 
   const breadcrumbItems = [
     { name: "Home", item: "https://www.balao.info" },

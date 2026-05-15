@@ -136,6 +136,118 @@ export async function getHomeBlockProductsByCategory(categories: string[], perCa
   }
 }
 
+export async function getProductsPage(limit = 200, offset = 0): Promise<Product[]> {
+  try {
+    const safeLimit = Math.min(Math.max(limit, 1), 2000);
+    const safeOffset = Math.max(offset, 0);
+
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .range(safeOffset, safeOffset + safeLimit - 1);
+
+    if (error) {
+      console.error("Error fetching products page:", error);
+      return [];
+    }
+
+    return (data as Product[]) || [];
+  } catch (error) {
+    console.error("Error fetching products page:", error);
+    return [];
+  }
+}
+
+export async function getProductsByText(term: string, limit = 300): Promise<Product[]> {
+  try {
+    const cleaned = String(term || "").trim();
+    if (!cleaned) return [];
+
+    const safeLimit = Math.min(Math.max(limit, 1), 2000);
+    const escaped = cleaned.replace(/,/g, " ").trim();
+    const q = `%${escaped}%`;
+
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .or(`name.ilike.${q},description.ilike.${q},category.ilike.${q}`)
+      .order("created_at", { ascending: false })
+      .limit(safeLimit);
+
+    if (error) {
+      console.error("Error fetching products by text:", error);
+      return [];
+    }
+
+    return (data as Product[]) || [];
+  } catch (error) {
+    console.error("Error fetching products by text:", error);
+    return [];
+  }
+}
+
+export async function getProductsForPcBuilder(): Promise<Product[]> {
+  const categories = [
+    "Processadores (CPU)",
+    "Processadores",
+    "Placas‑Mãe",
+    "Placas-Mãe",
+    "Placas Mãe",
+    "Memória RAM",
+    "SSD / HD / NVMe",
+    "Armazenamento",
+    "Placas de Vídeo (GPU)",
+    "Placas de Vídeo",
+    "Fontes de Alimentação",
+    "Fontes",
+    "Gabinetes",
+    "Watercoolers",
+    "Coolers",
+    "Air Coolers",
+    "Acessórios para Cooling",
+    "Rede & Conectividade",
+    "Adaptadores",
+    "Placas de Rede",
+    "Softwares",
+    "Licenças",
+    "Licencas",
+    "Periféricos",
+    "Teclados Gamer e Mecânicos",
+    "Mouses Gamer",
+    "Headsets e Fones",
+    "Mousepads",
+    "Controles / Joysticks",
+    "Volantes e Simuladores",
+    "Webcams",
+    "Microfones",
+    "Caixas de Som",
+  ];
+
+  return getProductsByCategories(categories);
+}
+
+export async function getLatestProductsForSitemap(limit = 1000): Promise<Pick<Product, "id" | "slug" | "created_at">[]> {
+  try {
+    const safeLimit = Math.min(Math.max(limit, 1), 1000);
+    const { data, error } = await supabase
+      .from("products")
+      .select("id,slug,created_at")
+      .order("created_at", { ascending: false })
+      .limit(safeLimit);
+
+    if (error) {
+      console.error("Error fetching products for sitemap:", error);
+      return [];
+    }
+
+    return ((data as any[]) || []).map((p) => ({ id: p.id, slug: p.slug, created_at: p.created_at }));
+  } catch (error) {
+    console.error("Error fetching products for sitemap:", error);
+    return [];
+  }
+}
+
 export async function getProductById(id: string): Promise<Product | null> {
   try {
     // Try admin client first (more reliable on server)

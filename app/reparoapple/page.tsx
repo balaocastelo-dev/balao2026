@@ -20,7 +20,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import ProductCarousel from '@/components/ProductCarousel'
-import { getProducts } from '@/lib/db'
+import { getProductsByText } from '@/lib/db'
 
 export const metadata: Metadata = {
   title: 'Conserto de iPhone e iPad em Campinas | Assistência Apple Especializada | Balão da Informática',
@@ -210,7 +210,7 @@ function BlockReviews() {
 }
 
 export default async function ReparoApplePage() {
-  const allProducts = await getProducts()
+  const allProducts = await getProductsByText("iphone", 600)
   
   // Filtrar produtos relacionados a iphone pro
   const appleProducts = allProducts.filter(p => {

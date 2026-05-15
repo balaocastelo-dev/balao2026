@@ -1,7 +1,7 @@
 import React from "react";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
-import { getProducts, getCategories } from "@/lib/db";
+import { getCategories, getProductsByCategories } from "@/lib/db";
 import { Product, Category } from "@/lib/utils";
 import ProductCard from "@/components/ProductCard";
 import { SITE_CONFIG } from "@/lib/config";
@@ -469,10 +469,7 @@ function BlockPayment() {
 }
 
 export default async function PcGamerPage() {
-  const [allProducts, categories] = await Promise.all([
-    getProducts(),
-    getCategories(),
-  ]);
+  const categories = await getCategories();
 
   const rootCategory = categories.find(
     (c: Category) => c.slug === "pc-gamer"
@@ -493,11 +490,7 @@ export default async function PcGamerPage() {
     }
   }
 
-  const gamerProducts = allProducts.filter((p: Product) => {
-    if (!rootCategory) return false;
-    if (!p.category) return false;
-    return validCategories.has(p.category);
-  });
+  const gamerProducts = rootCategory ? await getProductsByCategories(Array.from(validCategories)) : [];
 
   const breadcrumbItems = [
     { name: 'Home', item: 'https://www.balao.info' },

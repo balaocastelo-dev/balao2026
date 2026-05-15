@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next'
-import { getProducts, getCategories } from '@/lib/db'
+import { getLatestProductsForSitemap, getCategories } from '@/lib/db'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.balao.info'
@@ -44,11 +44,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }))
 
-  // Produtos (Limitado aos 1000 mais recentes para performance)
-  // Nota: getProducts já tem paginação interna, mas aqui vamos pegar tudo o que ele retornar
-  // Se getProducts retornar muitos, pode ser lento.
-  const products = await getProducts()
-  const productRoutes = products.slice(0, 1000).map((product) => ({
+  const products = await getLatestProductsForSitemap(1000)
+  const productRoutes = products.map((product) => ({
     url: `${baseUrl}/product/${product.slug || product.id}`,
     lastModified: new Date(product.created_at || new Date()),
     changeFrequency: 'weekly' as const,

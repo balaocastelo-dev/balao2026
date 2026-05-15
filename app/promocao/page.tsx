@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import Header from '@/components/Header'
-import { getProducts } from '@/lib/db'
+import { getProductsByCategories } from '@/lib/db'
 import ProductCarousel from '@/components/ProductCarousel'
 import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from '@/components/JsonLd'
 import { 
@@ -301,7 +301,23 @@ function BlockTestimonials() {
 }
 
 export default async function PromocaoPage() {
-  const allProducts = await getProducts()
+  const allProducts = await getProductsByCategories([
+    "Processadores (CPU)",
+    "Processadores",
+    "Placas‑Mãe",
+    "Placas-Mãe",
+    "Placas Mãe",
+    "Memória RAM",
+    "SSD / HD / NVMe",
+    "Armazenamento",
+    "Placas de Vídeo (GPU)",
+    "Placas de Vídeo",
+    "Periféricos",
+    "Monitores",
+    "PC Gamer",
+    "Computadores",
+    "Notebooks",
+  ])
   
   const hardwareProducts = getPromotionalProducts(allProducts, ['placa', 'video', 'processador', 'mae', 'ram', 'ssd', 'nvme'])
   const peripheralProducts = getPromotionalProducts(allProducts, ['teclado', 'mouse', 'headset', 'monitor', 'gamer'])
