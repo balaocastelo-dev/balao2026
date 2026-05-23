@@ -1,7 +1,7 @@
 import React from "react";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
-import { getCategories, getProductsByCategories } from "@/lib/db";
+import { getProducts, getCategories } from "@/lib/db";
 import { Product, Category } from "@/lib/utils";
 import ProductCard from "@/components/ProductCard";
 import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from "@/components/JsonLd";
@@ -376,25 +376,27 @@ function BlockPayment() {
 }
 
 export default async function NotebooksPage() {
-  const categories = await getCategories();
+  const [allProducts, categories] = await Promise.all([
+    getProducts(),
+    getCategories(),
+  ]);
 
-  const rootCategory = categories.find((c: Category) => c.slug === "notebooks");
-  const validCategories = new Set<string>();
-
-  if (rootCategory) {
-    validCategories.add(rootCategory.name);
-    const stack = [rootCategory.id];
-    while (stack.length > 0) {
-      const currentId = stack.pop() as string;
-      const children = categories.filter((c) => c.parent_id === currentId);
-      for (const child of children) {
-        validCategories.add(child.name);
-        stack.push(child.id);
-      }
-    }
-  }
-
-  const notebookProducts = rootCategory ? await getProductsByCategories(Array.from(validCategories)) : [];
+  // Filter logic for Notebooks (similar to PC Gamer but for Notebooks)
+  // We can look for "notebook" in category name or slug
+  const notebookProducts = allProducts.filter((p: Product) => {
+    const name = p.name.toLowerCase();
+    const category = p.category?.toLowerCase() || "";
+    // Basic filter for notebooks
+    return (
+      category.includes("notebook") || 
+      category.includes("laptop") || 
+      name.includes("notebook") ||
+      name.includes("macbook") ||
+      name.includes("dell") || // Often notebooks
+      name.includes("lenovo") // Often notebooks
+    ) && !category.includes("pc gamer") && !name.includes("pc gamer"); 
+    // Exclude PC Gamer explicitly if overlap exists, though unlikely with good categorization
+  });
 
   const breadcrumbItems = [
     { name: 'Home', item: 'https://www.balao.info' },

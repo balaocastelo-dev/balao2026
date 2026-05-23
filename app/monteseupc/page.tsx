@@ -1,15 +1,14 @@
-import { getProductsForPcBuilder } from "@/lib/db";
-import PCBuilderV2 from "@/components/PCBuilderV2";
+import { getProducts } from "@/lib/db";
+import PCBuilder from "@/components/PCBuilder";
 import { Monitor, Cpu, Settings } from "lucide-react";
 import Header from "@/components/Header";
 import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from "@/components/JsonLd";
-import ErrorBoundary from "@/components/ErrorBoundary";
 
 // Force dynamic rendering to ensure we get fresh products
 export const dynamic = 'force-dynamic';
 
 export default async function MonteSeuPCPage() {
-  const products = await getProductsForPcBuilder();
+  const products = await getProducts();
 
   const breadcrumbItems = [
     { name: 'Home', item: 'https://www.balao.info' },
@@ -47,9 +46,7 @@ export default async function MonteSeuPCPage() {
       </div>
 
       <div className="container mx-auto px-4 py-8 -mt-8 relative z-20">
-        <ErrorBoundary>
-          <PCBuilderV2 products={products} />
-        </ErrorBoundary>
+        <PCBuilder products={products} />
       </div>
       
       {/* Footer Info Section */}

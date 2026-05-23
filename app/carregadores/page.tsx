@@ -3,7 +3,7 @@ import React from "react";
 import { SITE_CONFIG } from "@/lib/config";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
-import { getProductsByText } from "@/lib/db";
+import { getProducts } from "@/lib/db";
 import { searchProducts } from "@/lib/searchUtils";
 import ProductCard from "@/components/ProductCard";
 import Image from "next/image";
@@ -455,7 +455,7 @@ function BlockContact() {
 }
 
 export default async function CarregadoresPage() {
-  const allProducts = await getProductsByText("notebook", 800);
+  const allProducts = await getProducts();
   const chargers = searchProducts(allProducts, "fonte notebook");
   const filteredChargers = chargers.slice(0, 12); // Show top 12 initially
 

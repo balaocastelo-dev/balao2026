@@ -21,7 +21,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import ProductCarousel from '@/components/ProductCarousel'
-import { getProductsByText } from '@/lib/db'
+import { getProducts } from '@/lib/db'
 
 export const metadata: Metadata = {
   title: 'Venda e Entrega de Toner em Campinas | Original e Compatível | Balão da Informática',
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
 }
 
 export default async function TonnerPage() {
-  const allProducts = await getProductsByText("toner", 800)
+  const allProducts = await getProducts()
   
   // Filtrar produtos relacionados a toner
   const tonerProducts = allProducts.filter(p => {

@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import Header from '@/components/Header'
-import { getProductsByCategories, getProductsByText } from '@/lib/db'
+import { getProducts } from '@/lib/db'
 import ProductCarousel from '@/components/ProductCarousel'
 import { ALL_SERVICES, SERVICE_CATEGORIES } from '../servicos-e-ofertas/data'
 import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from '@/components/JsonLd'
@@ -446,20 +446,7 @@ function BlockUrgency() {
 }
 
 export default async function ManutencaoPage() {
-  const allProducts = [
-    ...(await getProductsByCategories([
-      "SSD / HD / NVMe",
-      "Armazenamento",
-      "Memória RAM",
-      "Fontes de Alimentação",
-      "Fontes",
-      "Watercoolers",
-      "Coolers",
-      "Air Coolers",
-      "Acessórios para Cooling",
-    ])),
-    ...(await getProductsByText("pasta", 120)),
-  ]
+  const allProducts = await getProducts()
   
   // Helper para filtrar peças de reparo
   const repairParts = allProducts.filter(p => {

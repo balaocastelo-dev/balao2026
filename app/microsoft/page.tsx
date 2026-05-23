@@ -3,7 +3,7 @@ import { SITE_CONFIG } from "@/lib/config";
 import React from "react";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
-import { getProductsByText } from "@/lib/db";
+import { getProducts } from "@/lib/db";
 import { searchProducts } from "@/lib/searchUtils";
 import ProductCard from "@/components/ProductCard";
 import Image from "next/image";
@@ -436,8 +436,9 @@ function BlockContact() {
 }
 
 export default async function MicrosoftPage() {
-  const products = await getProductsByText("microsoft", 80);
-  const filteredProducts = products.slice(0, 8);
+  const allProducts = await getProducts();
+  const products = searchProducts(allProducts, "microsoft");
+  const filteredProducts = products.slice(0, 8); // Show top 8
 
   return (
     <main className="min-h-screen bg-white">
