@@ -182,14 +182,15 @@ function extractYouTubeVideoId(url: string): string | null {
   return null;
 }
 
-function isEmbeddableIframeUrl(url: string): boolean {
-  const u = String(url || "").trim();
-  if (!/^https:\/\//i.test(u)) return false;
-  const lower = u.toLowerCase();
-  if (lower.startsWith("https://www.youtube-nocookie.com/embed/")) return true;
-  if (lower.startsWith("https://www.youtube.com/embed/")) return true;
-  if (lower.startsWith("https://player.globo.com/")) return true;
-  return false;
+function isAllowedEmbedUrl(url: string): boolean {
+  const u = String(url || "").trim().toLowerCase();
+  if (!u) return false;
+  return (
+    u.startsWith("https://www.youtube-nocookie.com/embed/") ||
+    u.startsWith("https://www.youtube.com/embed/") ||
+    u.startsWith("https://player.globo.com/") ||
+    u.startsWith("https://globoplay.globo.com/")
+  );
 }
 
 function buildVideoSection(videoUrls: string[], title: string): { html: string; contentUrl: string; embedUrl?: string } | null {
@@ -206,21 +207,27 @@ function buildVideoSection(videoUrls: string[], title: string): { html: string; 
 <div class="video-embed">
   <iframe src="${embedUrl}" title="${cleanText(title)}" loading="lazy" referrerpolicy="no-referrer" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 </div>
+<p><a href="${watchUrl}" rel="nofollow noopener" target="_blank">Abrir no YouTube</a></p>
     `.trim();
     return { html, contentUrl: watchUrl, embedUrl };
   }
 
-  if (isEmbeddableIframeUrl(primary)) {
+  if (isAllowedEmbedUrl(primary)) {
     const html = `
 <h2>Assista ao vídeo</h2>
 <div class="video-embed">
   <iframe src="${primary}" title="${cleanText(title)}" loading="lazy" referrerpolicy="no-referrer" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
 </div>
+<p><a href="${primary}" rel="nofollow noopener" target="_blank">Abrir vídeo</a></p>
     `.trim();
     return { html, contentUrl: primary, embedUrl: primary };
   }
 
-  return null;
+  const html = `
+<h2>Assista ao vídeo</h2>
+<p><a href="${primary}" rel="nofollow noopener" target="_blank">Ver vídeo</a></p>
+  `.trim();
+  return { html, contentUrl: primary };
 }
 
 function buildArticleJsonLd(input: {

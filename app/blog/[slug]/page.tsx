@@ -26,6 +26,55 @@ function ogFallbackUrl(post: { slug: string; title: string; category: string; so
   return `/blog/api/og?title=${encodeURIComponent(t)}&category=${encodeURIComponent(c)}&source=${encodeURIComponent(s)}&seed=${encodeURIComponent(post.slug)}`;
 }
 
+function extractYouTubeVideoId(url: string): string | null {
+  const u = String(url || "").trim();
+  if (!u) return null;
+  const short = u.match(/youtu\.be\/([a-zA-Z0-9_-]{6,})/i);
+  if (short?.[1]) return short[1];
+  const watch = u.match(/[?&]v=([a-zA-Z0-9_-]{6,})/i);
+  if (watch?.[1]) return watch[1];
+  const embed = u.match(/youtube(?:-nocookie)?\.com\/embed\/([a-zA-Z0-9_-]{6,})/i);
+  if (embed?.[1]) return embed[1];
+  return null;
+}
+
+function isAllowedEmbedUrl(url: string): boolean {
+  const u = String(url || "").trim().toLowerCase();
+  if (!u) return false;
+  return (
+    u.startsWith("https://www.youtube-nocookie.com/embed/") ||
+    u.startsWith("https://www.youtube.com/embed/") ||
+    u.startsWith("https://player.globo.com/") ||
+    u.startsWith("https://globoplay.globo.com/")
+  );
+}
+
+function getVideoEmbed(post: { source_url: string | null; json_ld: any; title: string }): { embedUrl: string; openUrl: string; label: string } | null {
+  const fromJsonLd = post.json_ld?.video;
+  const embedUrl = typeof fromJsonLd?.embedUrl === "string" ? fromJsonLd.embedUrl : null;
+  const contentUrl = typeof fromJsonLd?.contentUrl === "string" ? fromJsonLd.contentUrl : null;
+
+  if (embedUrl && isAllowedEmbedUrl(embedUrl)) {
+    return { embedUrl, openUrl: contentUrl || embedUrl, label: "Abrir vídeo" };
+  }
+
+  const maybeUrl = contentUrl || post.source_url || "";
+  const yt = extractYouTubeVideoId(maybeUrl);
+  if (yt) {
+    return {
+      embedUrl: `https://www.youtube-nocookie.com/embed/${yt}`,
+      openUrl: `https://www.youtube.com/watch?v=${yt}`,
+      label: "Abrir no YouTube",
+    };
+  }
+
+  if (contentUrl && isAllowedEmbedUrl(contentUrl)) {
+    return { embedUrl: contentUrl, openUrl: contentUrl, label: "Abrir vídeo" };
+  }
+
+  return null;
+}
+
 export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await props.params;
   const post = await getBlogPostForPage(slug);
@@ -93,6 +142,7 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
     sourceDomain,
   });
   const imageUrl = post.cover_image || fallbackImageUrl;
+  const video = getVideoEmbed({ source_url: post.source_url, json_ld: post.json_ld, title: post.title });
   const url = `https://www.balao.info/blog/${post.slug}`;
 
   const breadcrumbs = generateBreadcrumbSchema([
@@ -149,18 +199,39 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
           {post.excerpt ? <p className="mt-3 text-neutral-700">{post.excerpt}</p> : null}
         </div>
 
-        <div className="relative aspect-[16/9] w-full">
-          <SafeImage
-            src={imageUrl}
-            fallbackSrc={fallbackImageUrl}
-            alt={post.title}
-            fill
-            sizes="(max-width: 1024px) 100vw, 900px"
-            className="object-contain"
-          />
-        </div>
+        {video ? (
+          <div className="relative aspect-[16/9] w-full bg-black">
+            <iframe
+              src={video.embedUrl}
+              title={post.title}
+              className="absolute inset-0 h-full w-full"
+              loading="lazy"
+              referrerPolicy="no-referrer"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
+          </div>
+        ) : (
+          <div className="relative aspect-[16/9] w-full">
+            <SafeImage
+              src={imageUrl}
+              fallbackSrc={fallbackImageUrl}
+              alt={post.title}
+              fill
+              sizes="(max-width: 1024px) 100vw, 900px"
+              className="object-contain"
+            />
+          </div>
+        )}
 
         <div className="p-6">
+          {video ? (
+            <div className="mb-6 text-sm font-semibold text-neutral-700">
+              <a href={video.openUrl} target="_blank" rel="noreferrer" className="underline hover:no-underline">
+                {video.label}
+              </a>
+            </div>
+          ) : null}
           <div className="prose prose-neutral max-w-none">
             <div dangerouslySetInnerHTML={{ __html: safeHtml }} />
           </div>

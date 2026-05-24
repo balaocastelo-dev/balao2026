@@ -13,7 +13,8 @@ export function sanitizeHtmlBasic(input: string): string {
     const allowed =
       lower.startsWith("https://www.youtube.com/embed/") ||
       lower.startsWith("https://www.youtube-nocookie.com/embed/") ||
-      lower.startsWith("https://player.globo.com/");
+      lower.startsWith("https://player.globo.com/") ||
+      lower.startsWith("https://globoplay.globo.com/");
     if (!allowed) return "";
 
     const titleMatch = match.match(/\stitle=["']([^"']+)["']/i);
