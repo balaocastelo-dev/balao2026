@@ -4,6 +4,7 @@ export type KabumProductData = {
   price: number | null;
   stock: string | null;
   title: string | null;
+  breadcrumbs?: string[];
   available: boolean;
   raw?: unknown;
 };
@@ -47,9 +48,32 @@ function findProductInJsonLd(blocks: unknown[]): any | null {
   return null;
 }
 
+function findBreadcrumbs(blocks: unknown[]): string[] {
+  for (const b of blocks) {
+    if (!b || typeof b !== 'object') continue;
+    const obj: any = b;
+    const candidates: any[] = [obj];
+    if (Array.isArray(obj['@graph'])) candidates.push(...obj['@graph']);
+    for (const node of candidates) {
+      if (!node || typeof node !== 'object') continue;
+      if ((node as any)['@type'] !== 'BreadcrumbList') continue;
+      const items = (node as any).itemListElement;
+      const arr = Array.isArray(items) ? items : [];
+      const names = arr
+        .map((it: any) => it?.item?.name || it?.name)
+        .filter(Boolean)
+        .map((s: any) => String(s).trim())
+        .filter(Boolean);
+      if (names.length) return names;
+    }
+  }
+  return [];
+}
+
 function extractKabumDataFromHtml(html: string): KabumProductData {
   const blocks = extractJsonLdBlocks(html);
   const product = findProductInJsonLd(blocks);
+  const breadcrumbs = findBreadcrumbs(blocks);
 
   let title: string | null = null;
   let price: number | null = null;
@@ -91,6 +115,7 @@ function extractKabumDataFromHtml(html: string): KabumProductData {
     price: price ?? null,
     stock,
     title,
+    breadcrumbs,
     available,
     raw: { jsonLdBlocks: blocks.length }
   };
@@ -146,4 +171,3 @@ export async function fetchKabumProductData(kabumUrl: string): Promise<KabumProd
     clearTimeout(timeout);
   }
 }
-

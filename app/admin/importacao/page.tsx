@@ -19,6 +19,9 @@ export default function ImportPage() {
   const [scopeThreshold, setScopeThreshold] = useState<number>(1000);
   const [migrateImages, setMigrateImages] = useState(false);
   const [autoCategory, setAutoCategory] = useState(true);
+  const [kabumImportUrl, setKabumImportUrl] = useState("https://www.kabum.com.br/promocao/COMPUTADORKABUM");
+  const [kabumImportLoading, setKabumImportLoading] = useState(false);
+  const [kabumImportMessage, setKabumImportMessage] = useState("");
   
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
@@ -36,6 +39,41 @@ export default function ImportPage() {
         }
     } catch (e) {
         console.error("Failed to fetch categories", e);
+    }
+  };
+
+  const handleKabumImport = async () => {
+    const url = kabumImportUrl.trim();
+    if (!url) return;
+    setKabumImportLoading(true);
+    setKabumImportMessage("");
+    try {
+      const res = await fetch("/api/admin/kabum-import", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          url,
+          maxPages: 10,
+          maxItems: 1000,
+          autoCategory: true,
+          fallbackCategory: selectedCategory,
+          maxParallel: 3,
+          delayMinMs: 800,
+          delayMaxMs: 1600
+        })
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        setKabumImportMessage(data?.error || "Falha ao importar da Kabum");
+        return;
+      }
+      setKabumImportMessage(
+        `Importação concluída: ${data?.imported || 0} importados, ${data?.skipped || 0} ignorados, ${data?.errored || 0} erros (páginas: ${data?.pagesFetched || 0}, URLs: ${data?.productUrlsFound || 0}).`
+      );
+    } catch (e: any) {
+      setKabumImportMessage(String(e?.message || e));
+    } finally {
+      setKabumImportLoading(false);
     }
   };
 
@@ -424,6 +462,37 @@ export default function ImportPage() {
 
         {importStep === "input" ? (
             <>
+                <div className="mb-6 p-4 rounded-lg border bg-gray-50">
+                    <div className="flex flex-col md:flex-row md:items-end gap-3">
+                        <div className="flex-1">
+                            <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">
+                                Importar direto da Kabum (promo/categoria)
+                            </label>
+                            <input
+                                className="w-full p-2 border rounded-md text-sm"
+                                value={kabumImportUrl}
+                                onChange={(e) => setKabumImportUrl(e.target.value)}
+                                placeholder="https://www.kabum.com.br/promocao/COMPUTADORKABUM"
+                            />
+                            <p className="mt-2 text-xs text-gray-500">
+                                Limite: 10 páginas ou 1000 itens (o que vier primeiro).
+                            </p>
+                        </div>
+                        <button
+                            onClick={handleKabumImport}
+                            disabled={!kabumImportUrl.trim() || kabumImportLoading}
+                            className="bg-[#111827] text-white px-6 py-2 rounded-md font-medium hover:bg-black transition-colors disabled:opacity-50 flex items-center gap-2"
+                        >
+                            Importar
+                            <Upload size={18} />
+                        </button>
+                    </div>
+                    {kabumImportMessage && (
+                        <div className={`mt-3 text-sm ${kabumImportMessage.startsWith("Importação concluída") ? "text-green-700" : "text-red-700"}`}>
+                            {kabumImportMessage}
+                        </div>
+                    )}
+                </div>
                 <div className="mb-6">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                         Cole o bloco de texto dos produtos:
