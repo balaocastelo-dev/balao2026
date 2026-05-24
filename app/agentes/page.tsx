@@ -62,7 +62,7 @@ function fmtMs(ms: number) {
 }
 
 export default async function AgentesPage() {
-  const h = headers();
+  const h = await headers();
   const host = h.get("x-forwarded-host") || h.get("host");
   const proto = h.get("x-forwarded-proto") || "https";
   const base = host ? `${proto}://${host}` : "https://www.balao.info";
