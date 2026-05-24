@@ -25,6 +25,8 @@ export type BlogPostView = {
   reading_time_minutes: number | null;
 };
 
+type PostKind = "rss" | "product";
+
 function sha256(input: string): string {
   return crypto.createHash("sha256").update(input).digest("hex");
 }
@@ -63,6 +65,88 @@ function cleanText(input: string | null | undefined): string {
     .replace(/\s+([,;:.!?)\]])/g, "$1")
     .replace(/([(\[])\s+/g, "$1")
     .trim();
+}
+
+function kindOfPost(p: BlogPostView): PostKind {
+  const category = (p.category || "").toLowerCase();
+  if (category.includes("ofertas balão") || category.includes("ofertas balao")) return "product";
+
+  const src = (p.source_url || "").toLowerCase();
+  if (src.includes("balao.info") && src.includes("/product/")) return "product";
+
+  return "rss";
+}
+
+function sortByPublishedDesc(posts: BlogPostView[]): BlogPostView[] {
+  return posts
+    .slice()
+    .sort((a, b) => (Date.parse(b.published_at) || 0) - (Date.parse(a.published_at) || 0));
+}
+
+function mixRssAndProductPosts(input: { rss: BlogPostView[]; products: BlogPostView[]; take: number; maxConsecutiveProducts?: number }): BlogPostView[] {
+  const take = Math.max(1, input.take);
+  const maxConsecutiveProducts = Math.max(1, Math.min(3, input.maxConsecutiveProducts ?? 1));
+
+  const rss = sortByPublishedDesc(input.rss);
+  const products = sortByPublishedDesc(input.products);
+
+  let i = 0;
+  let j = 0;
+  let lastKind: PostKind | null = null;
+  let streak = 0;
+  const out: BlogPostView[] = [];
+
+  while (out.length < take && (i < rss.length || j < products.length)) {
+    if (i >= rss.length) {
+      out.push(products[j++]!);
+      lastKind = "product";
+      streak = lastKind === "product" ? streak + 1 : 1;
+      continue;
+    }
+
+    if (j >= products.length) {
+      out.push(rss[i++]!);
+      lastKind = "rss";
+      streak = lastKind === "rss" ? streak + 1 : 1;
+      continue;
+    }
+
+    const nextR = rss[i]!;
+    const nextP = products[j]!;
+
+    const mustPickRss = lastKind === "product" && streak >= maxConsecutiveProducts;
+    if (mustPickRss) {
+      out.push(nextR);
+      i += 1;
+      lastKind = "rss";
+      streak = 1;
+      continue;
+    }
+
+    const tR = Date.parse(nextR.published_at) || 0;
+    const tP = Date.parse(nextP.published_at) || 0;
+
+    if (tP > tR) {
+      out.push(nextP);
+      j += 1;
+      if (lastKind === "product") streak += 1;
+      else {
+        lastKind = "product";
+        streak = 1;
+      }
+      continue;
+    }
+
+    out.push(nextR);
+    i += 1;
+    if (lastKind === "rss") streak += 1;
+    else {
+      lastKind = "rss";
+      streak = 1;
+    }
+  }
+
+  return out;
 }
 
 function isSupabaseReadable(): boolean {
@@ -232,7 +316,7 @@ export async function listBlogPostsForPage(input?: { category?: string; take?: n
   if (isSupabaseReadable()) {
     const dbPosts = await getBlogPosts({ limit: take, category });
     if (dbPosts.length > 0) {
-      return dbPosts.map((p) => ({
+      const mapped = dbPosts.map((p) => ({
         id: p.id,
         slug: p.slug,
         title: cleanText(p.title),
@@ -250,14 +334,24 @@ export async function listBlogPostsForPage(input?: { category?: string; take?: n
         json_ld: p.json_ld,
         reading_time_minutes: p.reading_time_minutes ?? null,
       }));
+
+      if (category) {
+        return sortByPublishedDesc(mapped).slice(0, take);
+      }
+
+      const rss = mapped.filter((p) => kindOfPost(p) === "rss");
+      const products = mapped.filter((p) => kindOfPost(p) === "product");
+      return mixRssAndProductPosts({ rss, products, take, maxConsecutiveProducts: 1 });
     }
   }
 
   const [rssPosts, productPosts] = await Promise.all([buildDynamicPosts(), buildDynamicProductPosts()]);
   const merged = rssPosts.concat(productPosts);
-  const filtered = category ? merged.filter((p) => p.category === category) : merged;
-  filtered.sort((a, b) => Date.parse(b.published_at) - Date.parse(a.published_at));
-  return filtered.slice(0, take);
+  if (category) {
+    return sortByPublishedDesc(merged.filter((p) => p.category === category)).slice(0, take);
+  }
+
+  return mixRssAndProductPosts({ rss: rssPosts, products: productPosts, take, maxConsecutiveProducts: 1 });
 }
 
 export async function getBlogPostForPage(slug: string): Promise<BlogPostView | null> {
