@@ -81,6 +81,42 @@ function cleanProductName(input: string): string {
   return s.length > 110 ? `${s.slice(0, 107).trim()}...` : s;
 }
 
+function cleanRssTitle(input: string, sourceUrl: string): string {
+  const base = cleanText(input).replace(/"+/g, '"').replace(/"/g, "").trim();
+  const domain = (() => {
+    try {
+      return new URL(sourceUrl).hostname.replace(/^www\./i, "");
+    } catch {
+      return "";
+    }
+  })();
+
+  const stripSuffix = (s: string, sep: string) => {
+    const parts = s.split(sep).map((p) => p.trim()).filter(Boolean);
+    if (parts.length <= 1) return s;
+    const last = parts[parts.length - 1] || "";
+    const lastClean = last.toLowerCase();
+    const looksLikeSite =
+      last.length <= 18 &&
+      !/\d/.test(last) &&
+      (lastClean.includes("adrenaline") ||
+        lastClean.includes("tecmundo") ||
+        lastClean.includes("canaltech") ||
+        (domain && (lastClean.includes(domain) || domain.includes(lastClean))));
+    return looksLikeSite ? parts.slice(0, -1).join(sep) : s;
+  };
+
+  const noSuffix = stripSuffix(stripSuffix(base, " | "), " - ").trim();
+  const clipped = noSuffix.length > 120 ? `${noSuffix.slice(0, 117).trim()}...` : noSuffix;
+  return clipped || base || "Notícia de tecnologia";
+}
+
+function clip(input: string, max: number): string {
+  const s = cleanText(input);
+  if (s.length <= max) return s;
+  return `${s.slice(0, Math.max(0, max - 1)).trim()}…`;
+}
+
 function safeParseJson(text: string): any {
   const cleaned = text.replace(/```json/gi, "").replace(/```/g, "").trim();
   return JSON.parse(cleaned);
@@ -92,7 +128,11 @@ function buildArticleJsonLd(input: {
   description: string;
   publishedAtIso: string;
   image?: string;
+  category?: string;
+  tags?: string[];
 }) {
+  const keywords = (input.tags || []).filter(Boolean).slice(0, 12);
+  const keywordString = keywords.length > 0 ? keywords.join(", ") : "informática, hardware, notebook, pc gamer, tecnologia";
   return {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
@@ -104,6 +144,8 @@ function buildArticleJsonLd(input: {
     description: input.description,
     datePublished: input.publishedAtIso,
     dateModified: input.publishedAtIso,
+    articleSection: input.category || "Tecnologia",
+    keywords: keywordString,
     author: {
       "@type": "Organization",
       name: "Balão da Informática",
@@ -231,14 +273,17 @@ Estrutura sugerida:
 
   const data = await generateFromAI(prompt);
 
-  const fallbackTitle = item.title.trim();
+  const fallbackTitle = cleanRssTitle(item.title, item.url);
   const title = (typeof data?.title === "string" && data.title.trim()) || fallbackTitle;
   const seoTitle =
     (typeof data?.seo_title === "string" && data.seo_title.trim()) ||
-    `Blog Balão da Informática: ${title}`.slice(0, 60);
+    clip(`${title} | Balão da Informática`, 60);
   const seoDescription =
     (typeof data?.seo_description === "string" && data.seo_description.trim()) ||
-    `Entenda ${title} e veja dicas práticas. Fale no WhatsApp 19 98751-0267.`;
+    clip(
+      `Entenda ${title} e veja dicas práticas para comprar notebook, PC Gamer e hardware. Atendimento no WhatsApp 19 98751-0267.`,
+      155,
+    );
   const category = (typeof data?.category === "string" && data.category.trim()) || "Notícias";
   const tags = Array.isArray(data?.tags) ? data.tags.filter((t: any) => typeof t === "string" && t.trim()).slice(0, 10) : [];
 
@@ -265,6 +310,8 @@ Estrutura sugerida:
       description: seoDescription,
       publishedAtIso: input.publishedAtIso,
       image: item.imageUrls?.[0],
+      category,
+      tags,
     }),
   };
 }
@@ -307,8 +354,11 @@ URL do produto: ${JSON.stringify(input.productUrl)}
     `${productName} | Guia e Dicas`.slice(0, 60);
   const seoDescription =
     (typeof data?.seo_description === "string" && data.seo_description.trim()) ||
-    `Entenda para quem o ${productName} é ideal e veja dicas de compra. Fale no WhatsApp 19 98751-0267.`;
-  const category = (typeof data?.category === "string" && data.category.trim()) || "Guia de Compra";
+    clip(
+      `Entenda para quem o ${productName} é ideal e veja dicas de compra de informática. Atendimento no WhatsApp 19 98751-0267.`,
+      155,
+    );
+  const category = (typeof data?.category === "string" && data.category.trim()) || String(product.category || "Guia de Compra");
   const tags = Array.isArray(data?.tags) ? data.tags.filter((t: any) => typeof t === "string" && t.trim()).slice(0, 10) : [];
 
   const rawHtml =
@@ -353,6 +403,8 @@ URL do produto: ${JSON.stringify(input.productUrl)}
       description: seoDescription,
       publishedAtIso: input.publishedAtIso,
       image: product.image || undefined,
+      category,
+      tags,
     }),
   };
 }

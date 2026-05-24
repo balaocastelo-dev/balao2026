@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import JsonLd, { generateBreadcrumbSchema, generateOrganizationSchema } from "@/components/JsonLd";
+import JsonLd, { generateBreadcrumbSchema, generateFAQSchema, generateOrganizationSchema } from "@/components/JsonLd";
 import { sanitizeHtmlBasic } from "@/lib/blog-sanitize";
 import SafeImage from "@/components/SafeImage";
 import { getBlogPostForPage } from "@/lib/blog-store";
+import { SITE_CONFIG } from "@/lib/config";
 
 export const runtime = "nodejs";
 export const revalidate = 300;
@@ -51,9 +52,27 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
       url: `/blog/${post.slug}`,
       title,
       description,
-      siteName: "BalãoNews",
+      siteName: SITE_CONFIG.name,
       images: [{ url: imageUrl }],
     },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [imageUrl],
+    },
+    keywords: [
+      "loja de informática",
+      "hardware",
+      "notebook",
+      "pc gamer",
+      "placa de vídeo",
+      "ssd",
+      "memória ram",
+      "periféricos",
+      category,
+    ],
+    robots: { index: true, follow: true },
   };
 }
 
@@ -83,16 +102,6 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
   ]);
 
   const org = generateOrganizationSchema();
-  const article = post.json_ld || {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: post.title,
-    datePublished: post.published_at,
-    dateModified: post.published_at,
-    mainEntityOfPage: url,
-    author: { "@type": "Organization", name: "Balão da Informática", url: "https://www.balao.info" },
-    publisher: { "@type": "Organization", name: "Balão da Informática", url: "https://www.balao.info" },
-  };
 
   const jsonLd = post.json_ld || {
     "@context": "https://schema.org",
@@ -111,9 +120,20 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
     },
   };
 
+  const faq = generateFAQSchema([
+    {
+      question: "Como escolher o melhor setup para meu uso?",
+      answer: `Chame no WhatsApp ${SITE_CONFIG.whatsapp.display} e diga seu objetivo (trabalho, games, estudo, criação). A Balão da Informática recomenda a melhor combinação de custo-benefício.`,
+    },
+    {
+      question: "Vocês ajudam a comparar modelos e indicar alternativa mais barata?",
+      answer: `Sim. Envie o link do produto e seu orçamento no WhatsApp ${SITE_CONFIG.whatsapp.display}. Você recebe opções equivalentes com foco em desempenho e compatibilidade.`,
+    },
+  ]);
+
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-8">
-      <JsonLd data={[org, breadcrumbs, jsonLd]} />
+      <JsonLd data={[org, breadcrumbs, jsonLd, faq]} />
 
       <article className="overflow-hidden rounded-md border border-neutral-200 bg-white">
         <div className="p-6">

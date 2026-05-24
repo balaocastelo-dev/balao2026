@@ -1,6 +1,9 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import SafeImage from "@/components/SafeImage";
+import JsonLd, { generateBreadcrumbSchema, generateFAQSchema, generateOrganizationSchema } from "@/components/JsonLd";
 import { listBlogPostsForPage } from "@/lib/blog-store";
+import { SITE_CONFIG } from "@/lib/config";
 
 export const runtime = "nodejs";
 export const revalidate = 60;
@@ -27,6 +30,48 @@ function getSourceDomain(sourceUrl: string | null | undefined): string | null {
   } catch {
     return null;
   }
+}
+
+function ogHomeFallbackUrl(seed: string) {
+  const t = "Blog Balão da Informática";
+  const c = "Tecnologia";
+  return `/blog/api/og?title=${encodeURIComponent(t)}&category=${encodeURIComponent(c)}&source=${encodeURIComponent("balao.info")}&seed=${encodeURIComponent(seed)}`;
+}
+
+export async function generateMetadata(props: { searchParams?: SearchParams }): Promise<Metadata> {
+  const sp = (await props.searchParams) ?? {};
+  const categoryRaw =
+    typeof sp.cat === "string" && sp.cat.trim()
+      ? sp.cat.trim()
+      : typeof sp.category === "string" && sp.category.trim()
+        ? sp.category.trim()
+        : undefined;
+
+  const title = categoryRaw
+    ? `${categoryRaw} — Notícias e Guias | Blog Balão da Informática`
+    : "Blog Balão da Informática — Notícias, Guias e Ofertas";
+
+  const description = categoryRaw
+    ? `Conteúdos de ${categoryRaw} com foco em compra de informática (notebook, PC Gamer, hardware). Atendimento rápido no WhatsApp ${SITE_CONFIG.whatsapp.display}.`
+    : `Notícias de tecnologia, guias de compra e ofertas de informática. Compare opções e chame no WhatsApp ${SITE_CONFIG.whatsapp.display} para escolher o melhor setup.`;
+
+  const canonical = categoryRaw ? `/blog?cat=${encodeURIComponent(categoryRaw)}` : "/blog";
+
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      type: "website",
+      locale: "pt_BR",
+      url: canonical,
+      title,
+      description,
+      siteName: SITE_CONFIG.name,
+      images: [{ url: ogHomeFallbackUrl(categoryRaw || "home") }],
+    },
+    robots: { index: true, follow: true },
+  };
 }
 
 export default async function BlogPage(props: { searchParams?: SearchParams }) {
@@ -69,8 +114,85 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
   const group4 = posts.slice(16, 26);
   const group5 = posts.slice(26, 29);
 
+  const breadcrumbs = generateBreadcrumbSchema([
+    { name: "Início", item: "https://www.balao.info" },
+    { name: "Blog", item: "https://www.balao.info/blog" },
+  ]);
+
+  const faq = generateFAQSchema([
+    {
+      question: "Como escolher um notebook ideal para meu uso?",
+      answer: `Fale no WhatsApp ${SITE_CONFIG.whatsapp.display} e diga seu objetivo (trabalho, estudo, games, edição). A Balão da Informática indica modelos com melhor custo-benefício e compatibilidade.`,
+    },
+    {
+      question: "Vocês ajudam a montar PC Gamer e escolher peças?",
+      answer: `Sim. Envie seu orçamento no WhatsApp ${SITE_CONFIG.whatsapp.display}. A equipe recomenda CPU, placa de vídeo, fonte, RAM e SSD pensando em desempenho e estabilidade.`,
+    },
+    {
+      question: "Como aproveitar promoções com segurança?",
+      answer: `Acompanhe as categorias do blog e a página de promoções. Se quiser, peça validação rápida no WhatsApp ${SITE_CONFIG.whatsapp.display} antes de fechar a compra.`,
+    },
+    {
+      question: "Atendem Campinas e região?",
+      answer: `Sim. A Balão da Informática fica em Campinas/SP e atende também online. Chame no WhatsApp ${SITE_CONFIG.whatsapp.display} para receber indicação e link direto do produto.`,
+    },
+  ]);
+
+  const org = generateOrganizationSchema();
+
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-8">
+      <JsonLd data={[org, breadcrumbs, faq]} />
+
+      <section className="mb-6 rounded-md border border-neutral-200 bg-white p-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-extrabold tracking-tight">Blog Balão da Informática</h1>
+            <p className="mt-2 text-sm text-neutral-700">
+              Notícias de tecnologia, guias de compra e ofertas para quem quer escolher <strong>notebook</strong>,{" "}
+              <strong>PC Gamer</strong>, <strong>hardware</strong> e periféricos com segurança.
+            </p>
+            <p className="mt-2 text-sm text-neutral-700">
+              Precisa de indicação rápida? Chame no WhatsApp <strong>{SITE_CONFIG.whatsapp.display}</strong>.
+            </p>
+          </div>
+          <div className="flex w-full flex-col gap-2 sm:w-auto">
+            <a
+              href={`https://wa.me/${SITE_CONFIG.whatsapp.number}`}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center justify-center rounded-md bg-[#e41e26] px-4 py-3 text-sm font-extrabold text-white hover:bg-[#c81920]"
+            >
+              Orçamento no WhatsApp
+            </a>
+            <Link href="/promocao" className="inline-flex items-center justify-center rounded-md border border-neutral-200 bg-white px-4 py-3 text-sm font-extrabold text-neutral-900 hover:bg-neutral-50">
+              Ver Promoções
+            </Link>
+          </div>
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-2 text-xs font-bold">
+          <Link href={{ pathname: "/blog", query: { cat: "Guia de Compra" } }} className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-2 hover:bg-neutral-100">
+            Guia de Compra
+          </Link>
+          <Link href={{ pathname: "/blog", query: { cat: "Hardware" } }} className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-2 hover:bg-neutral-100">
+            Hardware
+          </Link>
+          <Link href={{ pathname: "/blog", query: { cat: "Games" } }} className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-2 hover:bg-neutral-100">
+            Games
+          </Link>
+          <Link href={{ pathname: "/blog", query: { cat: "Mobile" } }} className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-2 hover:bg-neutral-100">
+            Mobile
+          </Link>
+          <Link href={{ pathname: "/blog", query: { cat: "Segurança" } }} className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-2 hover:bg-neutral-100">
+            Segurança
+          </Link>
+          <Link href={{ pathname: "/blog", query: { cat: "IA" } }} className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-2 hover:bg-neutral-100">
+            IA
+          </Link>
+        </div>
+      </section>
+
       {categoryRaw ? (
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-md border border-neutral-200 bg-white px-4 py-3">
           <div className="text-sm">
