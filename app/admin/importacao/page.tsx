@@ -201,7 +201,7 @@ export default function ImportPage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            products: initialRows.map((p: any) => ({ id: p.id, name: p.name })),
+            products: initialRows.map((p: any) => ({ id: p.id, name: p.name, kabumUrl: p.kabum_url || p.product_url || null })),
             categories: categoriesList,
             maxParallel: 10
           })
@@ -227,12 +227,13 @@ export default function ImportPage() {
         let description = "";
         let specs: any = {};
 
-        if (p.product_url && p.product_url.includes("kabum.com.br")) {
+        const sourceUrl = p.kabum_url || p.product_url;
+        if (sourceUrl && sourceUrl.includes("kabum.com.br")) {
           try {
             const scrapeRes = await fetch("/api/scrape/product", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ url: p.product_url }),
+              body: JSON.stringify({ url: sourceUrl }),
             });
             if (scrapeRes.ok) {
               const scrapeData = await scrapeRes.json();

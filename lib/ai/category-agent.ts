@@ -6,6 +6,11 @@ export type CategoryMatchResult = {
   reason: string;
 };
 
+export type CategoryAgentContext = {
+  kabumBreadcrumbs?: string[];
+  extraText?: string;
+};
+
 function safeJsonParse(input: string): any | null {
   try {
     return JSON.parse(input);
@@ -29,9 +34,19 @@ function scoreCategory(nameTokens: Set<string>, categoryName: string): number {
   return hit / catTokens.size;
 }
 
-function pickByKeywords(productName: string, categories: string[]): CategoryMatchResult {
-  const name = normalizeText(productName);
-  const nameTokens = new Set(tokenize(productName));
+function buildCombinedText(productName: string, ctx?: CategoryAgentContext): string {
+  const parts = [productName];
+  if (ctx?.kabumBreadcrumbs && ctx.kabumBreadcrumbs.length > 0) {
+    parts.push(ctx.kabumBreadcrumbs.join(' '));
+  }
+  if (ctx?.extraText) parts.push(ctx.extraText);
+  return parts.filter(Boolean).join(' ');
+}
+
+function pickByKeywords(productName: string, categories: string[], ctx?: CategoryAgentContext): CategoryMatchResult {
+  const combined = buildCombinedText(productName, ctx);
+  const name = normalizeText(combined);
+  const nameTokens = new Set(tokenize(combined));
 
   const keywordGroups: Array<{ patterns: RegExp[]; hints: string[] }> = [
     { patterns: [/\bfonte\b/, /\bpsu\b/], hints: ['fonte', 'energia'] },
@@ -70,6 +85,26 @@ function pickByKeywords(productName: string, categories: string[]): CategoryMatc
   if (fallback) return { category: fallback.raw, confidence: 0.2, reason: 'Fallback padrão' };
 
   return { category: categories[0] || null, confidence: 0.1, reason: 'Fallback padrão' };
+}
+
+function pickCandidateCategories(productName: string, categories: string[], ctx?: CategoryAgentContext): string[] {
+  const combined = buildCombinedText(productName, ctx);
+  const tokens = new Set(tokenize(combined));
+
+  const scored = categories
+    .map(c => ({ c, score: scoreCategory(tokens, c) }))
+    .sort((a, b) => b.score - a.score);
+
+  const top = scored.slice(0, 30).map(s => s.c);
+
+  const normalized = categories.map(c => ({ raw: c, norm: normalizeText(c) }));
+  const ensure = (needle: string) => {
+    const found = normalized.find(n => n.norm.includes(normalizeText(needle)));
+    if (found && !top.includes(found.raw)) top.push(found.raw);
+  };
+  ensure('hardware');
+
+  return Array.from(new Set(top));
 }
 
 async function callOpenAICompatibleChat(params: {
@@ -127,7 +162,11 @@ async function callOpenAICompatibleChat(params: {
   }
 }
 
-export async function categorizeProductName(productName: string, categories: string[]): Promise<CategoryMatchResult> {
+export async function categorizeProductName(
+  productName: string,
+  categories: string[],
+  ctx?: CategoryAgentContext
+): Promise<CategoryMatchResult> {
   const cleanCategories = (categories || []).map(c => String(c || '').trim()).filter(Boolean);
   if (!productName || cleanCategories.length === 0) {
     return { category: null, confidence: 0, reason: 'Sem dados' };
@@ -138,18 +177,22 @@ export async function categorizeProductName(productName: string, categories: str
   const model = process.env.LLAMA_MODEL;
 
   if (url && model) {
+    const candidateCategories = pickCandidateCategories(productName, cleanCategories, ctx);
     const prompt = [
       'Escolha a melhor categoria para o produto, usando apenas uma das opções abaixo.',
       '',
       `Produto: ${productName}`,
+      ctx?.kabumBreadcrumbs && ctx.kabumBreadcrumbs.length > 0
+        ? `Breadcrumbs Kabum: ${ctx.kabumBreadcrumbs.join(' > ')}`
+        : '',
       '',
       'Categorias:',
-      ...cleanCategories.map(c => `- ${c}`)
+      ...candidateCategories.map(c => `- ${c}`)
     ].join('\n');
 
     const result = await callOpenAICompatibleChat({ url, apiKey: apiKey || undefined, model, prompt });
     if (result?.category && cleanCategories.includes(result.category)) return result;
   }
 
-  return pickByKeywords(productName, cleanCategories);
+  return pickByKeywords(productName, cleanCategories, ctx);
 }
