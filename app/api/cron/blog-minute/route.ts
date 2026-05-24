@@ -7,6 +7,7 @@ import { hasBlogSourceItem, insertBlogPost, insertBlogSourceItem } from "@/lib/d
 import { hasAdmin } from "@/lib/supabase-admin";
 import { scrapeSiteProducts } from "@/lib/site-products";
 import { markAgentRunning, recordAgentRun } from "@/lib/ai/master-agent";
+import { readArticle } from "@/lib/article-reader";
 
 function isAuthorized(req: Request): boolean {
   const vercelCron = req.headers.get("x-vercel-cron");
@@ -215,9 +216,29 @@ async function insertRssPost(now: Date, feeds: string[], kind: "tech" | "campina
     const slug = buildSlug(item.title, sourceHash);
     const postUrl = `https://www.balao.info/blog/${slug}`;
 
-    const generated = await generateBlogPostFromRss(item, { slug, publishedAtIso, url: postUrl });
-    const cover = item.imageUrls?.[0] ? String(item.imageUrls[0]) : null;
-    const contentWithImages = interleaveImagesIntoHtml(generated.content_html, item.imageUrls || [], cover);
+    const article = await readArticle(item.url, { timeoutMs: 12000 });
+    const summaryText = String(item.summary || "")
+      .replace(/<[^>]*>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (article.wordCount < 120 && summaryText.length < 80) {
+      continue;
+    }
+
+    const coverFromFeed = item.imageUrls?.[0] ? String(item.imageUrls[0]) : null;
+    const coverFromPage = article.imageUrl ? String(article.imageUrl) : null;
+    const cover = coverFromFeed || coverFromPage;
+    const imageUrls = (item.imageUrls && item.imageUrls.length > 0 ? item.imageUrls : cover ? [cover] : []).slice(0, 6);
+
+    const generated = await generateBlogPostFromRss(item, {
+      slug,
+      publishedAtIso,
+      url: postUrl,
+      articleText: article.contentText,
+      articleTitle: article.title || undefined,
+      articleDescription: article.description || undefined,
+    });
+    const contentWithImages = interleaveImagesIntoHtml(generated.content_html, imageUrls || [], cover);
 
     const inserted = await insertBlogPost({
       slug,
@@ -292,10 +313,21 @@ async function insertCampinasVideoPost(now: Date) {
     const slug = buildSlug(item.title, sourceHash);
     const postUrl = `https://www.balao.info/blog/${slug}`;
 
-    const generated = await generateBlogPostFromRss(item, { slug, publishedAtIso, url: postUrl });
-    const cover = item.imageUrls?.[0] ? String(item.imageUrls[0]) : null;
-    const contentWithImages = interleaveImagesIntoHtml(generated.content_html, item.imageUrls || [], cover);
+    const article = await readArticle(item.url, { timeoutMs: 12000 });
+    const coverFromFeed = item.imageUrls?.[0] ? String(item.imageUrls[0]) : null;
+    const coverFromPage = article.imageUrl ? String(article.imageUrl) : null;
+    const cover = coverFromFeed || coverFromPage;
+    const imageUrls = (item.imageUrls && item.imageUrls.length > 0 ? item.imageUrls : cover ? [cover] : []).slice(0, 6);
 
+    const generated = await generateBlogPostFromRss(item, {
+      slug,
+      publishedAtIso,
+      url: postUrl,
+      articleText: article.contentText,
+      articleTitle: article.title || undefined,
+      articleDescription: article.description || undefined,
+    });
+    const contentWithImages = interleaveImagesIntoHtml(generated.content_html, imageUrls || [], cover);
     const inserted = await insertBlogPost({
       slug,
       title: generated.title,

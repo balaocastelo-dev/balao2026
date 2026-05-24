@@ -470,19 +470,70 @@ async function generateFromGroq(prompt: string) {
   return safeParseJson(text);
 }
 
+async function generateFromLlama(prompt: string) {
+  const url = process.env.LLAMA_API_URL;
+  const apiKey = process.env.LLAMA_API_KEY;
+  const model = process.env.LLAMA_MODEL;
+  if (!url || !model) return null;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+
+  try {
+    const res = await fetch(url.replace(/\/+$/, "") + "/v1/chat/completions", {
+      method: "POST",
+      signal: controller.signal,
+      headers: {
+        "content-type": "application/json",
+        ...(apiKey ? { authorization: `Bearer ${apiKey}` } : {}),
+      },
+      body: JSON.stringify({
+        model,
+        temperature: 0.6,
+        messages: [
+          { role: "system", content: "Você é um(a) redator(a) jornalístico(a) e SEO. Retorne apenas JSON válido." },
+          { role: "user", content: prompt },
+        ],
+      }),
+    });
+
+    if (!res.ok) return null;
+    const json: any = await res.json();
+    const content = json?.choices?.[0]?.message?.content;
+    if (typeof content !== "string" || !content.trim()) return null;
+    const start = content.indexOf("{");
+    const end = content.lastIndexOf("}");
+    if (start === -1 || end === -1 || end <= start) return null;
+    return safeParseJson(content.slice(start, end + 1));
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 async function generateFromAI(prompt: string) {
+  const fromLlama = await generateFromLlama(prompt);
+  if (fromLlama) return fromLlama;
   const fromGroq = await generateFromGroq(prompt);
   if (fromGroq) return fromGroq;
+  const fromGemini = await generateFromGemini(prompt);
+  if (fromGemini) return fromGemini;
   return null;
 }
 
-export async function generateBlogPostFromRss(item: RssItem, input: { slug: string; publishedAtIso: string; url: string }): Promise<GeneratedBlogPost> {
+export async function generateBlogPostFromRss(
+  item: RssItem,
+  input: { slug: string; publishedAtIso: string; url: string; articleText?: string; articleTitle?: string; articleDescription?: string },
+): Promise<GeneratedBlogPost> {
   const isCampinas =
     /campinas-regiao/i.test(item.url) ||
     /campinas-e-regiao/i.test(item.sourceFeed) ||
     /acidadeon\.com\/campinas/i.test(item.url) ||
     /cidadeon/i.test(item.sourceFeed);
   const videoHint = (item.videoUrls || []).slice(0, 2);
+  const articleText = typeof input.articleText === "string" ? input.articleText.trim() : "";
+  const articleTextClipped = articleText ? articleText.slice(0, 6000) : "";
   const prompt = `
 Você é redator(a) e editor(a) SEO do blog "Balão da Informática" (pt-BR).
 
@@ -491,6 +542,7 @@ Objetivo: criar um artigo ORIGINAL (não copiar o texto da fonte) a partir de um
 Regras obrigatórias:
 - Escreva em pt-BR, tom claro e profissional, com foco em clientes que precisam comprar/atualizar PC, notebook, hardware e periféricos.
 - Proibido copiar trechos do conteúdo original. Use apenas o assunto/ideia principal.
+- Nunca copie frases longas do texto original. Reescreva com suas palavras e estrutura.
 - Cite a fonte com link no final, em uma seção "Fonte".
 - Use HTML seguro e simples: p, h2, h3, ul, ol, li, strong, em, a, iframe (apenas se for embed permitido).
 - Use emojis nos títulos (h2/h3) para facilitar leitura.
@@ -512,6 +564,9 @@ Título: ${JSON.stringify(item.title)}
 URL: ${JSON.stringify(item.url)}
 Resumo/descrição (pode estar vazio): ${JSON.stringify(item.summary || "")}
 Vídeo (se houver): ${JSON.stringify(videoHint)}
+Título (página, se disponível): ${JSON.stringify(input.articleTitle || "")}
+Descrição (página, se disponível): ${JSON.stringify(input.articleDescription || "")}
+Texto principal extraído (página, se disponível — use só como referência de fatos, sem copiar): ${JSON.stringify(articleTextClipped)}
 
 Estrutura sugerida:
 - 📰 Resumo (2 parágrafos curtos)
