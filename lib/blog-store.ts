@@ -308,6 +308,43 @@ async function buildDynamicPosts(): Promise<BlogPostView[]> {
     all.push(...videoItems);
   } catch {}
 
+  try {
+    const isCampinasRegionText = (input: string) => {
+      const s = String(input || "").toLowerCase();
+      if (!s) return false;
+      const keywords = [
+        "campinas",
+        "sumaré",
+        "sumare",
+        "americana",
+        "hortolândia",
+        "hortolandia",
+        "valinhos",
+        "vinhedo",
+        "paulínia",
+        "paulinia",
+        "indaiatuba",
+        "santa bárbara",
+        "santa barbara",
+        "nova odessa",
+        "louveira",
+        "jaguariúna",
+        "jaguariuna",
+        "pedreira",
+        "cosmópolis",
+        "cosmopolis",
+      ];
+      return keywords.some((k) => s.includes(k));
+    };
+
+    const [bandItems, recordItems] = await Promise.all([
+      fetchRssItems("https://www.youtube.com/feeds/videos.xml?channel_id=UCoa-D_VfMkFrCYodrOC9-mA", 25).catch(() => []),
+      fetchRssItems("https://www.youtube.com/feeds/videos.xml?channel_id=UCuiLR4p6wQ3xLEm15pEn1Xw", 25).catch(() => []),
+    ]);
+
+    all.push(...bandItems.concat(recordItems).filter((i) => isCampinasRegionText(`${i.title} ${i.summary || ""} ${i.url}`)));
+  } catch {}
+
   const seen = new Set<string>();
   const uniq = all.filter((i) => {
     const key = i.url;

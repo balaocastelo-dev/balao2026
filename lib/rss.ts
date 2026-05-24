@@ -276,7 +276,7 @@ export async function fetchCampinasVideoItems(limit = 20): Promise<RssItem[]> {
         publishedAt: undefined,
         summary,
         imageUrls: image ? [normalizeUrl(image)] : [],
-        videoUrls: ogVideo ? [normalizeUrl(ogVideo)] : [],
+        videoUrls: ogVideo ? [normalizeUrl(ogVideo)] : [url],
         sourceFeed,
       });
     } catch {

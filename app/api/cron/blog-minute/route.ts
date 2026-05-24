@@ -61,6 +61,40 @@ function buildSlug(title: string, hash: string): string {
   return `${base}-${hash.slice(0, 8)}`;
 }
 
+function isCampinasRegionText(input: string): boolean {
+  const s = String(input || "").toLowerCase();
+  if (!s) return false;
+  const keywords = [
+    "campinas",
+    "sumaré",
+    "sumare",
+    "americana",
+    "hortolândia",
+    "hortolandia",
+    "valinhos",
+    "vinhedo",
+    "paulínia",
+    "paulinia",
+    "indaiatuba",
+    "santa bárbara",
+    "santa barbara",
+    "nova odessa",
+    "louveira",
+    "jaguariúna",
+    "jaguariuna",
+    "pedreira",
+    "cosmópolis",
+    "cosmopolis",
+    "itapira",
+    "mogi guaçu",
+    "mogi guacu",
+    "mogi mirim",
+    "monte mor",
+    "vinhedo",
+  ];
+  return keywords.some((k) => s.includes(k));
+}
+
 async function insertTrendPost(now: Date) {
   const brt = getBrtParts(now);
   const items = await fetchRssItems(getTrendsFeedUrl(), 25);
@@ -188,8 +222,25 @@ async function insertRssPost(now: Date, feeds: string[], kind: "tech" | "campina
 
 async function insertCampinasVideoPost(now: Date) {
   const brt = getBrtParts(now);
-  const items = await fetchCampinasVideoItems(40);
-  if (items.length === 0) return { inserted: 0, reason: "Sem itens de vídeo" };
+  const [g1Items, bandItems, recordItems] = await Promise.all([
+    fetchCampinasVideoItems(40),
+    fetchRssItems("https://www.youtube.com/feeds/videos.xml?channel_id=UCoa-D_VfMkFrCYodrOC9-mA", 40).catch(() => []),
+    fetchRssItems("https://www.youtube.com/feeds/videos.xml?channel_id=UCuiLR4p6wQ3xLEm15pEn1Xw", 40).catch(() => []),
+  ]);
+
+  const youtubeFiltered = bandItems
+    .concat(recordItems)
+    .filter((i) => isCampinasRegionText(`${i.title} ${i.summary || ""} ${i.url}`));
+
+  const combined = g1Items.concat(youtubeFiltered);
+  if (combined.length === 0) return { inserted: 0, reason: "Sem itens de vídeo" };
+
+  const seen = new Set<string>();
+  const items = combined.filter((i) => {
+    if (seen.has(i.url)) return false;
+    seen.add(i.url);
+    return true;
+  });
 
   const dayKey = brt.ymd;
   const startIdx = (brt.minute + brt.hour * 60) % items.length;
