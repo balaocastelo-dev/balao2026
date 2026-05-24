@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 import { supabaseAdmin } from './supabase-admin';
-import { Product, CarouselImage, Category, HomeBlock, UsedNotebook, parsePriceToNumber } from './utils';
+import { BlogPost, Product, CarouselImage, Category, HomeBlock, UsedNotebook, parsePriceToNumber } from './utils';
  
  
 
@@ -101,13 +101,6 @@ export async function saveProducts(products: Product[]) {
         image: p.image,
         image_urls: p.image_urls || [p.image],
         product_url: p.product_url || null,
-        kabum_url: p.kabum_url || null,
-        kabum_last_price: p.kabum_last_price ?? null,
-        kabum_last_stock: p.kabum_last_stock ?? null,
-        kabum_last_checked_at: p.kabum_last_checked_at ?? null,
-        kabum_sync_enabled: p.kabum_sync_enabled ?? null,
-        kabum_sync_status: p.kabum_sync_status ?? null,
-        kabum_sync_error: p.kabum_sync_error ?? null,
         description: p.description || null,
         specs: p.specs || null,
         category: p.category,
@@ -161,13 +154,6 @@ export async function createProduct(product: Partial<Product>) {
             image: product.image,
             image_urls: product.image_urls,
             product_url: product.product_url,
-            kabum_url: product.kabum_url,
-            kabum_last_price: product.kabum_last_price,
-            kabum_last_stock: product.kabum_last_stock,
-            kabum_last_checked_at: product.kabum_last_checked_at,
-            kabum_sync_enabled: product.kabum_sync_enabled,
-            kabum_sync_status: product.kabum_sync_status,
-            kabum_sync_error: product.kabum_sync_error,
             description: product.description,
             specs: product.specs,
             category: product.category,
@@ -198,13 +184,6 @@ export async function updateProduct(id: string, updates: Partial<Product>) {
         if (updates.image !== undefined) dbUpdates.image = updates.image;
         if (updates.image_urls !== undefined) dbUpdates.image_urls = updates.image_urls;
         if (updates.product_url !== undefined) dbUpdates.product_url = updates.product_url;
-        if (updates.kabum_url !== undefined) dbUpdates.kabum_url = updates.kabum_url;
-        if (updates.kabum_last_price !== undefined) dbUpdates.kabum_last_price = updates.kabum_last_price;
-        if (updates.kabum_last_stock !== undefined) dbUpdates.kabum_last_stock = updates.kabum_last_stock;
-        if (updates.kabum_last_checked_at !== undefined) dbUpdates.kabum_last_checked_at = updates.kabum_last_checked_at;
-        if (updates.kabum_sync_enabled !== undefined) dbUpdates.kabum_sync_enabled = updates.kabum_sync_enabled;
-        if (updates.kabum_sync_status !== undefined) dbUpdates.kabum_sync_status = updates.kabum_sync_status;
-        if (updates.kabum_sync_error !== undefined) dbUpdates.kabum_sync_error = updates.kabum_sync_error;
         if (updates.description !== undefined) dbUpdates.description = updates.description;
         if (updates.specs !== undefined) dbUpdates.specs = updates.specs;
         if (updates.category !== undefined) dbUpdates.category = updates.category;
@@ -549,6 +528,157 @@ export async function deleteCategory(id: string) {
         console.error("Error deleting category:", error);
         throw error;
     }
+}
+
+// --- Blog ---
+
+export async function getBlogPosts(input?: {
+  limit?: number;
+  category?: string;
+  query?: string;
+}): Promise<BlogPost[]> {
+  try {
+    const limit = Math.max(1, Math.min(100, input?.limit ?? 24));
+
+    let query = supabase
+      .from("blog_posts")
+      .select("*")
+      .eq("status", "published")
+      .order("published_at", { ascending: false })
+      .limit(limit);
+
+    if (input?.category) {
+      query = query.eq("category", input.category);
+    }
+
+    if (input?.query) {
+      query = query.ilike("title", `%${input.query}%`);
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      console.error("Supabase error (blog_posts):", error);
+      return [];
+    }
+    return (data as BlogPost[]) || [];
+  } catch (error) {
+    console.error("Error fetching blog posts:", error);
+    return [];
+  }
+}
+
+export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
+  try {
+    const { data, error } = await supabase
+      .from("blog_posts")
+      .select("*")
+      .eq("status", "published")
+      .eq("slug", slug)
+      .single();
+
+    if (error) {
+      return null;
+    }
+    return (data as BlogPost) || null;
+  } catch (error) {
+    console.error("Error fetching blog post by slug:", error);
+    return null;
+  }
+}
+
+export async function getBlogCategories(limit = 40): Promise<string[]> {
+  try {
+    const { data, error } = await supabase
+      .from("blog_posts")
+      .select("category")
+      .eq("status", "published")
+      .order("published_at", { ascending: false })
+      .limit(Math.max(1, Math.min(200, limit)));
+
+    if (error) {
+      console.error("Supabase error (blog categories):", error);
+      return [];
+    }
+
+    const categories = (data || [])
+      .map((row: any) => (typeof row?.category === "string" ? row.category.trim() : ""))
+      .filter(Boolean);
+
+    return Array.from(new Set(categories)).slice(0, limit);
+  } catch (error) {
+    console.error("Error fetching blog categories:", error);
+    return [];
+  }
+}
+
+export type NewBlogPost = {
+  slug: string;
+  title: string;
+  excerpt?: string | null;
+  content_html: string;
+  cover_image?: string | null;
+  category?: string | null;
+  tags?: string[] | null;
+  status: "draft" | "published";
+  published_at: string;
+  source_type: "manual" | "rss" | "product";
+  source_url?: string | null;
+  source_title?: string | null;
+  product_id?: string | null;
+  seo_title?: string | null;
+  seo_description?: string | null;
+  canonical_url?: string | null;
+  json_ld?: any;
+  reading_time_minutes?: number | null;
+  internal_links?: any;
+};
+
+export async function insertBlogPost(post: NewBlogPost): Promise<BlogPost> {
+  const { data, error } = await supabaseAdmin
+    .from("blog_posts")
+    .insert(post)
+    .select("*")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+  return data as BlogPost;
+}
+
+export async function hasBlogSourceItem(input: { source_type: "rss" | "product"; source_hash: string }): Promise<boolean> {
+  const { data, error } = await supabaseAdmin
+    .from("blog_source_items")
+    .select("id")
+    .eq("source_type", input.source_type)
+    .eq("source_hash", input.source_hash)
+    .limit(1);
+
+  if (error) {
+    return false;
+  }
+  return Array.isArray(data) && data.length > 0;
+}
+
+export async function insertBlogSourceItem(input: {
+  source_type: "rss" | "product";
+  source_url: string;
+  source_hash: string;
+  source_title?: string;
+  source_published_at?: string;
+}) {
+  const payload = {
+    source_type: input.source_type,
+    source_url: input.source_url,
+    source_hash: input.source_hash,
+    source_title: input.source_title || null,
+    source_published_at: input.source_published_at || null,
+  };
+
+  const { error } = await supabaseAdmin.from("blog_source_items").insert(payload);
+  if (error) {
+    throw error;
+  }
 }
 
 // --- Orders ---

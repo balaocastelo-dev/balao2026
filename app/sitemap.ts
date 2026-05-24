@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next'
-import { getProducts, getCategories } from '@/lib/db'
+import { getProducts, getCategories, getBlogPosts } from '@/lib/db'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.balao.info'
@@ -7,6 +7,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Rotas Estáticas
   const staticRoutes = [
     '',
+    '/blog',
     '/servicos-e-ofertas',
     '/promocao',
     '/manutencao',
@@ -54,5 +55,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }))
 
-  return [...staticRoutes, ...categoryRoutes, ...productRoutes]
+  const blogPosts = await getBlogPosts({ limit: 500 })
+  const blogRoutes = blogPosts.map((post) => ({
+    url: `${baseUrl}/blog/${post.slug}`,
+    lastModified: new Date(post.published_at || new Date()),
+    changeFrequency: 'weekly' as const,
+    priority: 0.65,
+  }))
+
+  return [...staticRoutes, ...categoryRoutes, ...productRoutes, ...blogRoutes]
 }

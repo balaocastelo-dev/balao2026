@@ -45,3 +45,24 @@ Este projeto é um e-commerce desenvolvido com Next.js, Tailwind CSS e TypeScrip
 ## Importação de Produtos
 
 No painel administrativo, use o formato de texto padrão (exemplo copiado de sites) contendo URL da imagem, Nome e Preço. O sistema extrairá automaticamente os dados.
+
+## Blog (www.balao.info/blog)
+
+- Rotas públicas: `/blog`, `/blog/[slug]`, `/blog/rss.xml`
+- Persistência: tabela `blog_posts` no Supabase (ver migration em `supabase/migrations/20260523_create_blog_tables.sql`)
+- SEO: sitemap global inclui posts do blog automaticamente
+
+### Agentes de IA (publicação automática)
+
+- Agente RSS: cria posts a partir de itens de feeds RSS (rota `/api/cron/blog-rss`)
+- Agente Produtos: cria posts a partir de um produto aleatório do catálogo (rota `/api/cron/blog-product`)
+- Agendamento: configurado em `vercel.json` para executar a cada 1 minuto
+
+### Variáveis de ambiente (mínimo)
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `GOOGLE_API_KEY` (para geração com IA)
+- `BLOG_RSS_FEEDS` (lista separada por vírgula com URLs de RSS/Atom)
+- `CRON_SECRET` (opcional, proteção extra para chamadas manuais; Vercel Cron usa `x-vercel-cron`)
