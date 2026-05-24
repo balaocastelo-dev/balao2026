@@ -26,6 +26,39 @@ function ogFallbackUrl(post: { slug: string; title: string; category: string; so
   return `/blog/api/og?title=${encodeURIComponent(t)}&category=${encodeURIComponent(c)}&source=${encodeURIComponent(s)}&seed=${encodeURIComponent(post.slug)}`;
 }
 
+function normalizeImageUrlForCompare(input: string): string {
+  const raw = String(input || "").trim();
+  if (!raw) return "";
+  try {
+    const u = new URL(raw);
+    return `${u.origin}${u.pathname}`.toLowerCase();
+  } catch {
+    return raw.replace(/[?#].*$/, "").trim().toLowerCase();
+  }
+}
+
+function stripFirstCoverImageFromHtml(inputHtml: string, coverImageUrl: string | null | undefined): string {
+  const cover = String(coverImageUrl || "").trim();
+  if (!cover) return inputHtml;
+  const coverKey = normalizeImageUrlForCompare(cover);
+  if (!coverKey) return inputHtml;
+
+  const imgRe = /<img\b[^>]*\bsrc\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s>]+))[^>]*>/gi;
+  let m: RegExpExecArray | null;
+  while ((m = imgRe.exec(inputHtml)) !== null) {
+    const src = String(m[1] || m[2] || m[3] || "").trim();
+    if (!src) continue;
+    if (normalizeImageUrlForCompare(src) !== coverKey) continue;
+
+    const start = m.index;
+    const end = start + m[0].length;
+    const out = `${inputHtml.slice(0, start)}${inputHtml.slice(end)}`.replace(/<p\b[^>]*>\s*<\/p>/gi, "");
+    return out;
+  }
+
+  return inputHtml;
+}
+
 export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await props.params;
   const post = await getBlogPostForPage(slug);
@@ -85,7 +118,7 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
   const category = (post.category || "Tecnologia").trim() || "Tecnologia";
   const published = post.published_at ? new Date(post.published_at) : new Date();
   const createdAt = post.created_at ? new Date(post.created_at) : new Date();
-  const safeHtml = sanitizeHtmlBasic(post.content_html || "");
+  const safeHtml = stripFirstCoverImageFromHtml(sanitizeHtmlBasic(post.content_html || ""), post.cover_image);
   const fallbackImageUrl = ogFallbackUrl({
     slug: post.slug,
     title: post.title,

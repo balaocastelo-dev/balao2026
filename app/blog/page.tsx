@@ -387,13 +387,13 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
 function PostListItem({ post }: { post: BlogCardPost }) {
   return (
     <article className="flex gap-4 p-4 hover:bg-neutral-50/70">
-      <div className="relative hidden h-[86px] w-[140px] flex-none sm:block">
+      <div className="relative h-[72px] w-[112px] flex-none sm:h-[86px] sm:w-[140px]">
         <SafeImage
           src={post.ogImageUrl || ogFallbackUrl(post)}
           fallbackSrc={ogFallbackUrl(post)}
           alt={post.title}
           fill
-          sizes="140px"
+          sizes="(max-width: 640px) 112px, 140px"
           className="object-contain"
         />
       </div>

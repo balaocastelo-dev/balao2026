@@ -182,8 +182,31 @@ function buildSlugFromRss(item: RssItem): string {
   return `${baseSlug}-${sourceHash}`;
 }
 
-function prependImagesToHtml(contentHtml: string, imageUrls: string[]): string {
-  const urls = (imageUrls || []).filter(Boolean).slice(0, 3);
+function extractFirstImageUrlFromHtml(html: string | null | undefined): string | null {
+  const input = String(html || "");
+  if (!input) return null;
+  const m = input.match(/<img\b[^>]*\bsrc\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s>]+))[^>]*>/i);
+  const src = (m?.[1] || m?.[2] || m?.[3] || "").trim();
+  return src ? src : null;
+}
+
+function normalizeImageUrlForCompare(input: string): string {
+  const raw = String(input || "").trim();
+  if (!raw) return "";
+  try {
+    const u = new URL(raw);
+    return `${u.origin}${u.pathname}`.toLowerCase();
+  } catch {
+    return raw.replace(/[?#].*$/, "").trim().toLowerCase();
+  }
+}
+
+function prependImagesToHtml(contentHtml: string, imageUrls: string[], coverImage: string | null): string {
+  const coverKey = coverImage ? normalizeImageUrlForCompare(coverImage) : "";
+  const urls = (imageUrls || [])
+    .filter(Boolean)
+    .filter((u) => (coverKey ? normalizeImageUrlForCompare(u) !== coverKey : true))
+    .slice(0, 3);
   if (urls.length === 0) return contentHtml;
   if (/<img\b/i.test(contentHtml)) return contentHtml;
 
@@ -230,7 +253,7 @@ async function buildDynamicPosts(): Promise<BlogPostView[]> {
     const postUrl = `https://www.balao.info/blog/${slug}`;
     const generated = await generateBlogPostFromRss(item, { slug, publishedAtIso, url: postUrl });
     const cover = item.imageUrls?.[0] ? String(item.imageUrls[0]) : null;
-    const contentWithImages = prependImagesToHtml(generated.content_html, item.imageUrls || []);
+    const contentWithImages = prependImagesToHtml(generated.content_html, item.imageUrls || [], cover);
 
     posts.push({
       id: sha256(`rss:${item.url}`),
@@ -322,7 +345,7 @@ export async function listBlogPostsForPage(input?: { category?: string; take?: n
         title: cleanText(p.title),
         excerpt: cleanText(p.excerpt || p.seo_description || ""),
         content_html: p.content_html,
-        cover_image: p.cover_image ? String(p.cover_image) : null,
+        cover_image: p.cover_image ? String(p.cover_image) : extractFirstImageUrlFromHtml(p.content_html),
         category: normalizeCategory(p.category),
         published_at: p.published_at,
         created_at: p.created_at,
@@ -358,13 +381,14 @@ export async function getBlogPostForPage(slug: string): Promise<BlogPostView | n
   if (isSupabaseReadable()) {
     const post = await getBlogPostBySlug(slug);
     if (post) {
+      const cover = post.cover_image ? String(post.cover_image) : extractFirstImageUrlFromHtml(post.content_html);
       return {
         id: post.id,
         slug: post.slug,
         title: cleanText(post.title),
         excerpt: cleanText(post.excerpt || post.seo_description || ""),
         content_html: post.content_html,
-        cover_image: post.cover_image ? String(post.cover_image) : null,
+        cover_image: cover,
         category: normalizeCategory(post.category),
         published_at: post.published_at,
         created_at: post.created_at,
