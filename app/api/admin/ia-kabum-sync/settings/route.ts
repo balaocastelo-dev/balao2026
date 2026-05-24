@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireAdminApiAuth } from '@/lib/admin/auth';
 import { supabaseAdmin, hasAdmin } from '@/lib/supabase-admin';
+import { repriceAllEnabledProducts } from '@/lib/kabum/sync-worker';
 
 function defaultSettingsRow() {
   return {
@@ -98,7 +99,16 @@ export async function POST(request: Request) {
       .single();
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json(data);
+    const repriced = await repriceAllEnabledProducts({
+      percentage: Number(data.percentage ?? percentage),
+      mode: data.mode,
+      min_margin: Number(data.min_margin ?? min_margin),
+      sync_interval_seconds: Number(data.sync_interval_seconds ?? sync_interval_seconds),
+      max_parallel_agents: Number(data.max_parallel_agents ?? max_parallel_agents),
+      is_active: Boolean(data.is_active ?? is_active)
+    }).catch(() => null);
+
+    return NextResponse.json({ ...data, repricedCount: repriced?.updated ?? 0 });
   }
 
   const { data, error } = await supabaseAdmin
@@ -115,6 +125,14 @@ export async function POST(request: Request) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data);
-}
+  const repriced = await repriceAllEnabledProducts({
+    percentage: Number(data.percentage ?? percentage),
+    mode: data.mode,
+    min_margin: Number(data.min_margin ?? min_margin),
+    sync_interval_seconds: Number(data.sync_interval_seconds ?? sync_interval_seconds),
+    max_parallel_agents: Number(data.max_parallel_agents ?? max_parallel_agents),
+    is_active: Boolean(data.is_active ?? is_active)
+  }).catch(() => null);
 
+  return NextResponse.json({ ...data, repricedCount: repriced?.updated ?? 0 });
+}

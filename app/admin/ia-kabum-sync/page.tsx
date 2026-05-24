@@ -16,6 +16,7 @@ type Settings = {
   sync_interval_seconds: number;
   max_parallel_agents: number;
   is_active: boolean;
+  repricedCount?: number;
 };
 
 type ProductRow = {
@@ -111,6 +112,7 @@ export default function IAKabumSyncPage() {
           const status = String(row.status || "");
           const pid = row.product_id || "";
           if (status === "success") showToast(`Sincronizado: ${pid}`, "success");
+          else if (status === "repriced") showToast(`Preço atualizado: ${pid}`, "success");
           else if (status === "manual_review") showToast(`Revisão manual: ${pid}`, "info");
           else if (status === "error") showToast(`Erro: ${pid}`, "error");
 
@@ -128,7 +130,7 @@ export default function IAKabumSyncPage() {
 
   const dashboard = useMemo(() => {
     const total = products.length;
-    const success = products.filter(p => p.kabum_sync_status === "success").length;
+    const success = products.filter(p => p.kabum_sync_status === "success" || p.kabum_sync_status === "repriced").length;
     const error = products.filter(p => p.kabum_sync_status === "error").length;
     const lastSync = products
       .map(p => p.kabum_last_checked_at)
@@ -171,7 +173,9 @@ export default function IAKabumSyncPage() {
       if (!res.ok) throw new Error("Falha ao salvar");
       const data = await res.json();
       setSettings(data);
-      showToast("Configurações salvas", "success");
+      const count = Number(data?.repricedCount || 0);
+      showToast(count > 0 ? `Configurações salvas (${count} preços atualizados)` : "Configurações salvas", "success");
+      await refreshAll();
     } catch {
       showToast("Erro ao salvar configurações", "error");
     } finally {
@@ -426,7 +430,7 @@ export default function IAKabumSyncPage() {
                 const pLogs = (logsByProduct.get(p.id) || []).slice(0, 3);
                 const status = p.kabum_sync_status || "-";
                 const isError = status === "error";
-                const isOk = status === "success";
+                const isOk = status === "success" || status === "repriced";
                 const isManual = status === "manual_review";
                 return (
                   <tr key={p.id} className="hover:bg-gray-50">
@@ -566,4 +570,3 @@ export default function IAKabumSyncPage() {
     </div>
   );
 }
-

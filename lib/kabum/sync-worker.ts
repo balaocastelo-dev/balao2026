@@ -324,3 +324,68 @@ export async function syncAllEnabledProducts(): Promise<{
   return { settings, total: ids.length, results };
 }
 
+export async function repriceAllEnabledProducts(inputSettings?: KabumSyncSettings): Promise<{
+  settings: KabumSyncSettings;
+  total: number;
+  updated: number;
+}> {
+  if (!hasAdmin) {
+    return { settings: inputSettings || getDefaultSettings(), total: 0, updated: 0 };
+  }
+
+  const settings = inputSettings || (await getSettings());
+
+  const { data, error } = await supabaseAdmin
+    .from('products')
+    .select('id,price,kabum_last_price,kabum_last_stock,kabum_url')
+    .eq('kabum_sync_enabled', true)
+    .not('kabum_url', 'is', null)
+    .not('kabum_last_price', 'is', null)
+    .limit(1000);
+
+  if (error) throw error;
+
+  const items = (data || []).map((r: any) => ({
+    id: String(r.id),
+    currentPrice: String(r.price || ''),
+    kabumLastPrice: Number(r.kabum_last_price),
+    kabumLastStock: r.kabum_last_stock == null ? null : String(r.kabum_last_stock),
+    kabumUrl: r.kabum_url == null ? null : String(r.kabum_url)
+  }));
+
+  let updated = 0;
+  for (const p of items) {
+    if (!Number.isFinite(p.kabumLastPrice) || p.kabumLastPrice <= 0) continue;
+    const suggested = calculateBalaoPrice(p.kabumLastPrice, settings);
+    if (!Number.isFinite(suggested) || suggested <= 0) continue;
+
+    const newPriceString = formatBRL(suggested);
+    const oldPriceNumber = parsePriceToNumber(p.currentPrice);
+
+    const { error: updError } = await supabaseAdmin
+      .from('products')
+      .update({
+        price: newPriceString,
+        kabum_sync_status: 'repriced',
+        kabum_sync_error: null
+      })
+      .eq('id', p.id);
+
+    if (updError) continue;
+
+    await logSync({
+      productId: p.id,
+      kabumUrl: p.kabumUrl,
+      oldBalaoPrice: Number.isFinite(oldPriceNumber) ? oldPriceNumber : null,
+      newBalaoPrice: suggested,
+      kabumPrice: p.kabumLastPrice,
+      kabumStock: p.kabumLastStock,
+      status: 'repriced',
+      errorMessage: null
+    });
+
+    updated += 1;
+  }
+
+  return { settings, total: items.length, updated };
+}
