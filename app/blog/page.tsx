@@ -331,6 +331,18 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
                     <div className="w-6 flex-none text-right text-sm font-extrabold text-[#e41e26]">
                       {idx + 1}
                     </div>
+                    <div className="relative h-12 w-12 flex-none overflow-hidden rounded border border-neutral-100 bg-white">
+                      <SafeImage
+                        src={p.ogImageUrl || ogFallbackUrl(p)}
+                        fallbackSrc={ogFallbackUrl(p)}
+                        alt={p.title}
+                        hoverPreviewEmbedUrl={p.videoEmbedUrl}
+                        hoverPreviewTitle={p.title}
+                        fill
+                        sizes="48px"
+                        className="object-contain"
+                      />
+                    </div>
                     <div className="min-w-0">
                       <Link href={`/blog/${p.slug}`} className="text-sm font-semibold hover:underline">
                         {p.title}
@@ -409,8 +421,8 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
 
 function PostListItem({ post }: { post: BlogCardPost }) {
   return (
-    <article className="flex gap-4 p-4 hover:bg-neutral-50/70">
-      <div className="relative hidden h-[86px] w-[140px] flex-none sm:block">
+    <article className="flex flex-col gap-3 p-4 hover:bg-neutral-50/70 sm:flex-row sm:gap-4">
+      <div className="relative h-[160px] w-full flex-none overflow-hidden rounded border border-neutral-100 bg-white sm:h-[86px] sm:w-[140px]">
         <SafeImage
           src={post.ogImageUrl || ogFallbackUrl(post)}
           fallbackSrc={ogFallbackUrl(post)}
@@ -418,7 +430,7 @@ function PostListItem({ post }: { post: BlogCardPost }) {
           hoverPreviewEmbedUrl={post.videoEmbedUrl}
           hoverPreviewTitle={post.title}
           fill
-          sizes="140px"
+          sizes="(max-width: 640px) 100vw, 140px"
           className="object-contain"
         />
       </div>

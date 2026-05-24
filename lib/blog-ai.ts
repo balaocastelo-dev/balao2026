@@ -203,29 +203,27 @@ function buildVideoSection(videoUrls: string[], title: string): { html: string; 
     const embedUrl = `https://www.youtube-nocookie.com/embed/${ytId}`;
     const watchUrl = `https://www.youtube.com/watch?v=${ytId}`;
     const html = `
-<h2>Assista ao vídeo</h2>
+<h2>🎥 Assista ao vídeo</h2>
 <div class="video-embed">
   <iframe src="${embedUrl}" title="${cleanText(title)}" loading="lazy" referrerpolicy="no-referrer" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 </div>
-<p><a href="${watchUrl}" rel="nofollow noopener" target="_blank">Abrir no YouTube</a></p>
     `.trim();
     return { html, contentUrl: watchUrl, embedUrl };
   }
 
   if (isAllowedEmbedUrl(primary)) {
     const html = `
-<h2>Assista ao vídeo</h2>
+<h2>🎥 Assista ao vídeo</h2>
 <div class="video-embed">
   <iframe src="${primary}" title="${cleanText(title)}" loading="lazy" referrerpolicy="no-referrer" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
 </div>
-<p><a href="${primary}" rel="nofollow noopener" target="_blank">Abrir vídeo</a></p>
     `.trim();
     return { html, contentUrl: primary, embedUrl: primary };
   }
 
   const html = `
-<h2>Assista ao vídeo</h2>
-<p><a href="${primary}" rel="nofollow noopener" target="_blank">Ver vídeo</a></p>
+<h2>🎥 Assista ao vídeo</h2>
+<p><a href="${primary}" rel="nofollow noopener" target="_blank">Abrir vídeo</a></p>
   `.trim();
   return { html, contentUrl: primary };
 }
@@ -287,29 +285,28 @@ function buildArticleJsonLd(input: {
 
 function buildFallbackRssHtml(input: { title: string; summary: string; sourceUrl: string; videoUrls?: string[] }): string {
   const summary = (input.summary || "").trim();
-  const lead = summary ? summary : `Veja os pontos principais sobre ${input.title} e como isso afeta compras e upgrades de informática.`;
+  const lead = summary ? summary : `Resumo rápido sobre ${input.title}.`;
   const video = buildVideoSection(input.videoUrls || [], input.title);
   return `
-<p><strong>${lead}</strong></p>
+<p><strong>📰 ${lead}</strong></p>
 ${video ? `\n${video.html}\n` : ""}
-<h2>O que aconteceu</h2>
-<p>O tema desta notícia envolve <strong>${input.title}</strong>. A seguir, reunimos os impactos práticos e o que vale monitorar antes de comprar ou atualizar seu setup.</p>
-<h2>Impacto para quem compra tecnologia</h2>
+<h2>🔎 O que aconteceu</h2>
+<p>O tema desta notícia envolve <strong>${input.title}</strong>. Abaixo está um resumo direto ao ponto, com os pontos mais importantes.</p>
+<h2>✅ Pontos principais</h2>
 <ul>
-  <li>Planejamento de upgrade: avalie custo-benefício e compatibilidade.</li>
-  <li>Escolha do hardware certo: priorize desempenho real para seu uso.</li>
-  <li>Garantia e suporte: compre com assistência e orientação técnica.</li>
+  <li>O que mudou e por quê.</li>
+  <li>O que vale acompanhar nas próximas horas/dias.</li>
+  <li>O que isso significa na prática para o leitor.</li>
 </ul>
-<h2>Checklist rápido</h2>
-<ol>
-  <li>Defina seu objetivo (trabalho, jogos, estudo, criação).</li>
-  <li>Confira CPU/GPU/RAM/SSD e compatibilidade.</li>
-  <li>Compare preço e disponibilidade.</li>
-</ol>
-<h2>Quer ajuda para escolher?</h2>
-<p>Fale com um especialista e receba indicação direta para o seu caso: <a href="${WHATSAPP_URL}" target="_blank" rel="noreferrer">WhatsApp 19 98751-0267</a>.</p>
+<h2>❓ Perguntas rápidas</h2>
+<ul>
+  <li><strong>Isso muda algo agora?</strong> Depende do seu caso — veja os pontos principais acima.</li>
+  <li><strong>Como acompanhar?</strong> Verifique a fonte e atualizações ao longo do dia.</li>
+</ul>
+<h2>📲 Quer ajuda rápida?</h2>
+<p>Chame no <a href="${WHATSAPP_URL}" target="_blank" rel="noreferrer">WhatsApp 19 98751-0267</a> e diga seu objetivo e orçamento.</p>
 <p>Atalhos úteis: <a href="${SITE_URL}/notebooks">Notebooks</a> • <a href="${SITE_URL}/pcgamer">PC Gamer</a> • <a href="${SITE_URL}/departamentos">Departamentos</a> • <a href="${SITE_URL}/promocao">Promoções</a></p>
-<h2>Fonte</h2>
+<h2>🔗 Fonte</h2>
 <p><a href="${input.sourceUrl}" rel="nofollow noopener" target="_blank">${input.sourceUrl}</a></p>
   `.trim();
 }
@@ -320,27 +317,21 @@ function buildFallbackTrendHtml(input: { query: string; dateIso: string; sourceU
   const dateText = Number.isFinite(date.getTime()) ? date.toLocaleDateString("pt-BR") : "";
   const queryEscaped = q || "tendência do dia";
   return `
-<p><strong>${queryEscaped}</strong> apareceu entre os assuntos em alta ${dateText ? `em ${dateText}` : "hoje"}. Abaixo, explicamos o que essa tendência pode indicar e como ela influencia decisões de compra de informática.</p>
-<h2>Por que isso está em alta?</h2>
+<p><strong>🔥 ${queryEscaped}</strong> apareceu entre os assuntos em alta ${dateText ? `em ${dateText}` : "hoje"}. Abaixo, um resumo prático do que isso pode indicar.</p>
+<h2>🔎 Por que isso está em alta?</h2>
 <p>Assuntos em alta normalmente se relacionam a lançamentos, promoções, atualizações de software, eventos e comparativos. Quando o tema envolve tecnologia, ele costuma gerar dúvidas sobre <strong>custo-benefício</strong>, compatibilidade e disponibilidade.</p>
-<h2>O que isso muda na hora de comprar</h2>
+<h2>✅ O que isso muda na hora de comprar</h2>
 <ul>
   <li><strong>Melhor momento de compra:</strong> tendências podem antecipar promoções e quedas de preço.</li>
   <li><strong>Compatibilidade:</strong> confira geração/soquete (CPU), padrão (RAM/SSD) e portas.</li>
   <li><strong>Uso real:</strong> priorize o que impacta seu dia a dia (trabalho, estudo, games, criação).</li>
 </ul>
-<h2>Checklist rápido (para decidir sem erro)</h2>
-<ol>
-  <li>Defina seu objetivo e seu orçamento.</li>
-  <li>Escolha uma configuração equilibrada (CPU/GPU/RAM/SSD).</li>
-  <li>Compare opções e valide compatibilidade antes de comprar.</li>
-</ol>
-<h2>Quer uma recomendação pronta?</h2>
+<h2>📲 Quer uma recomendação pronta?</h2>
 <p>Fale com um especialista e receba indicação direta com link do produto: <a href="${WHATSAPP_URL}" target="_blank" rel="noreferrer">WhatsApp 19 98751-0267</a>.</p>
 <p>Atalhos úteis: <a href="${SITE_URL}/notebooks">Notebooks</a> • <a href="${SITE_URL}/pcgamer">PC Gamer</a> • <a href="${SITE_URL}/departamentos">Departamentos</a> • <a href="${SITE_URL}/promocao">Promoções</a></p>
-<h2>Palavras-chave relacionadas</h2>
+<h2>🏷️ Palavras-chave relacionadas</h2>
 <p>${queryEscaped}, notebook, PC gamer, hardware, SSD, memória RAM, placa de vídeo.</p>
-<h2>Fonte</h2>
+<h2>🔗 Fonte</h2>
 <p><a href="${input.sourceUrl}" rel="nofollow noopener" target="_blank">${input.sourceUrl}</a></p>
   `.trim();
 }
@@ -398,16 +389,17 @@ export async function generateBlogPostFromRss(item: RssItem, input: { slug: stri
   const prompt = `
 Você é redator(a) e editor(a) SEO do blog "Balão da Informática" (pt-BR).
 
-Objetivo: criar um artigo ORIGINAL (não copiar o texto da fonte) a partir de uma notícia ${isCampinas ? "de Campinas e região (com foco local)" : "do mundo da tecnologia"}.
+Objetivo: criar um artigo ORIGINAL (não copiar o texto da fonte) a partir de uma notícia ${isCampinas ? "de Campinas e região (com foco local)" : "do mundo da tecnologia"}, com leitura fácil.
 
 Regras obrigatórias:
 - Escreva em pt-BR, tom claro e profissional, com foco em clientes que precisam comprar/atualizar PC, notebook, hardware e periféricos.
 - Proibido copiar trechos do conteúdo original. Use apenas o assunto/ideia principal.
 - Cite a fonte com link no final, em uma seção "Fonte".
-- Use HTML seguro e simples: p, h2, h3, ul, ol, li, strong, em, a, iframe (apenas se for YouTube).
+- Use HTML seguro e simples: p, h2, h3, ul, ol, li, strong, em, a, iframe (apenas se for embed permitido).
+- Use emojis nos títulos (h2/h3) para facilitar leitura.
 - Sempre que fizer sentido, inclua uma chamada para WhatsApp (${WHATSAPP_URL}) com o número 19 98751-0267.
 - Inclua links internos para o site ${SITE_URL} quando fizer sentido (ex.: /notebooks, /pcgamer, /departamentos).
-- Se houver vídeo, inclua uma seção "Assista ao vídeo" com embed do YouTube (iframe) e link.
+- Se houver vídeo, inclua uma seção "Assista ao vídeo" com embed (iframe).
 - Retorne SOMENTE um JSON válido no formato:
 {
   "title": "...",
@@ -425,14 +417,13 @@ Resumo/descrição (pode estar vazio): ${JSON.stringify(item.summary || "")}
 Vídeo (se houver): ${JSON.stringify(videoHint)}
 
 Estrutura sugerida:
-- Introdução (1-2 parágrafos)
-- Assista ao vídeo (h2, se houver)
-- O que aconteceu (h2)
-- Impacto para quem compra tecnologia (h2)
-- Dicas práticas / checklist (h2, lista)
-- Perguntas frequentes (h2, 2-4 perguntas com respostas curtas)
-- Call to action WhatsApp (h2)
-- Fonte (h2) com link para a URL acima
+- 📰 Resumo (1 parágrafo)
+- 🎥 Assista ao vídeo (h2, se houver)
+- 🔎 O que aconteceu (h2)
+- ✅ Pontos principais (h2, lista curta)
+- ❓ Perguntas rápidas (h2, 2-4 perguntas com respostas curtas)
+- 📲 WhatsApp (h2)
+- 🔗 Fonte (h2) com link para a URL acima
 `;
 
   const data = await generateFromAI(prompt);

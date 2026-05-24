@@ -102,6 +102,12 @@ function stripLeadingVideoSection(html: string): string {
   return out;
 }
 
+function stripH2Section(html: string, title: string): string {
+  const t = title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const re = new RegExp(`<h2[^>]*>\\s*${t}[^<]*<\\/h2>[\\s\\S]*?(?=<h2\\b|$)`, "i");
+  return html.replace(re, "");
+}
+
 export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await props.params;
   const post = await getBlogPostForPage(slug);
@@ -176,6 +182,8 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
   if (!video) {
     contentHtmlRaw = stripLeadingCoverImage(contentHtmlRaw, imageUrl);
   }
+  contentHtmlRaw = stripH2Section(contentHtmlRaw, "Impacto para quem compra tecnologia");
+  contentHtmlRaw = stripH2Section(contentHtmlRaw, "Checklist rápido");
   const safeHtml = sanitizeHtmlBasic(contentHtmlRaw);
   const url = `https://www.balao.info/blog/${post.slug}`;
 
@@ -259,13 +267,6 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
         )}
 
         <div className="p-6">
-          {video ? (
-            <div className="mb-6 text-sm font-semibold text-neutral-700">
-              <a href={video.openUrl} target="_blank" rel="noreferrer" className="underline hover:no-underline">
-                {video.label}
-              </a>
-            </div>
-          ) : null}
           <div className="prose prose-neutral max-w-none">
             <div dangerouslySetInnerHTML={{ __html: safeHtml }} />
           </div>

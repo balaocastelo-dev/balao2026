@@ -259,13 +259,38 @@ function buildSlugFromTrend(query: string, yyyymmdd: string): string {
   return `${baseSlug}-${yyyymmdd}-${sourceHash}`;
 }
 
-function prependImagesToHtml(contentHtml: string, imageUrls: string[]): string {
-  const urls = (imageUrls || []).filter(Boolean).slice(0, 3);
+function interleaveImagesIntoHtml(contentHtml: string, imageUrls: string[], coverUrl?: string | null): string {
+  const cover = String(coverUrl || "").trim();
+  const urls = (imageUrls || [])
+    .filter(Boolean)
+    .map((u) => String(u).trim())
+    .filter((u) => u && u !== cover)
+    .slice(0, 3);
+
   if (urls.length === 0) return contentHtml;
   if (/<img\b/i.test(contentHtml)) return contentHtml;
 
-  const imgs = urls.map((u) => `<p><img src="${u}" alt="" /></p>`).join("");
-  return `${imgs}${contentHtml}`;
+  const paragraphEnds = Array.from(contentHtml.matchAll(/<\/p>/gi)).map((m) => m.index ?? -1).filter((i) => i >= 0);
+  if (paragraphEnds.length === 0) {
+    const imgs = urls.map((u) => `<p><img src="${u}" alt="" loading="lazy" /></p>`).join("");
+    return `${imgs}${contentHtml}`;
+  }
+
+  let out = contentHtml;
+  let offset = 0;
+  let cursor = 0;
+
+  for (let i = 0; i < urls.length; i += 1) {
+    const idx = Math.min(cursor, paragraphEnds.length - 1);
+    const endPos = paragraphEnds[idx]!;
+    const insertAt = endPos + "</p>".length + offset;
+    const imgHtml = `\n<p><img src="${urls[i]}" alt="" loading="lazy" /></p>\n`;
+    out = out.slice(0, insertAt) + imgHtml + out.slice(insertAt);
+    offset += imgHtml.length;
+    cursor += 2;
+  }
+
+  return out;
 }
 
 async function buildDynamicTrendPosts(): Promise<BlogPostView[]> {
@@ -411,7 +436,7 @@ async function buildDynamicPosts(): Promise<BlogPostView[]> {
     const postUrl = `https://www.balao.info/blog/${slug}`;
     const generated = await generateBlogPostFromRss(item, { slug, publishedAtIso, url: postUrl });
     const cover = item.imageUrls?.[0] ? String(item.imageUrls[0]) : null;
-    const contentWithImages = prependImagesToHtml(generated.content_html, item.imageUrls || []);
+    const contentWithImages = interleaveImagesIntoHtml(generated.content_html, item.imageUrls || [], cover);
 
     posts.push({
       id: sha256(`rss:${item.url}`),
