@@ -338,8 +338,8 @@ async function buildDynamicPosts(): Promise<BlogPostView[]> {
     };
 
     const [bandItems, recordItems] = await Promise.all([
-      fetchRssItems("https://www.youtube.com/feeds/videos.xml?channel_id=UCoa-D_VfMkFrCYodrOC9-mA", 25).catch(() => []),
-      fetchRssItems("https://www.youtube.com/feeds/videos.xml?channel_id=UCuiLR4p6wQ3xLEm15pEn1Xw", 25).catch(() => []),
+      fetchRssItems("https://www.youtube.com/feeds/videos.xml?channel_id=UCoa-D_VfMkFrCYodrOC9-mA", 25).catch(() => [] as RssItem[]),
+      fetchRssItems("https://www.youtube.com/feeds/videos.xml?channel_id=UCuiLR4p6wQ3xLEm15pEn1Xw", 25).catch(() => [] as RssItem[]),
     ]);
 
     all.push(...bandItems.concat(recordItems).filter((i) => isCampinasRegionText(`${i.title} ${i.summary || ""} ${i.url}`)));
