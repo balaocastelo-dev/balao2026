@@ -148,9 +148,8 @@ export async function categorizeProductName(productName: string, categories: str
     ].join('\n');
 
     const result = await callOpenAICompatibleChat({ url, apiKey: apiKey || undefined, model, prompt });
-    if (result && cleanCategories.includes(result.category)) return result;
+    if (result?.category && cleanCategories.includes(result.category)) return result;
   }
 
   return pickByKeywords(productName, cleanCategories);
 }
-
