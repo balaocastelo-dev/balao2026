@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next'
 import { getProducts, getCategories } from '@/lib/db'
-import { listBlogPostsForPage } from '@/lib/blog-store'
+import { createClient } from '@/lib/supabase/server'
+import { BLOG_CATEGORIES } from '@/lib/blog/constants'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.balao.info'
@@ -9,6 +10,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes = [
     '',
     '/blog',
+    '/blog/campinas',
+    '/blog/videos',
     '/servicos-e-ofertas',
     '/promocao',
     '/manutencao',
@@ -56,13 +59,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }))
 
-  const blogPosts = await listBlogPostsForPage({ take: 500 })
-  const blogRoutes = blogPosts.map((post) => ({
-    url: `${baseUrl}/blog/${post.slug}`,
-    lastModified: new Date(post.published_at || new Date()),
-    changeFrequency: 'weekly' as const,
-    priority: 0.65,
+  const blogCategoryRoutes = BLOG_CATEGORIES.map((cat) => ({
+    url: `${baseUrl}/blog/categoria/${encodeURIComponent(cat)}`,
+    lastModified: new Date(),
+    changeFrequency: 'daily' as const,
+    priority: 0.7
   }))
 
-  return [...staticRoutes, ...categoryRoutes, ...productRoutes, ...blogRoutes]
+  let blogPostRoutes: MetadataRoute.Sitemap = []
+  try {
+    const supabase = await createClient()
+    const { data } = await supabase
+      .from('blog_posts')
+      .select('slug,updated_at,published_at')
+      .eq('status', 'published')
+      .order('published_at', { ascending: false, nullsFirst: false })
+      .limit(2000)
+    blogPostRoutes = (data || []).map((p: any) => ({
+      url: `${baseUrl}/blog/${p.slug}`,
+      lastModified: new Date(p.updated_at || p.published_at || new Date()),
+      changeFrequency: 'weekly' as const,
+      priority: 0.6
+    }))
+  } catch {
+    blogPostRoutes = []
+  }
+
+  return [...staticRoutes, ...categoryRoutes, ...productRoutes, ...blogCategoryRoutes, ...blogPostRoutes]
 }

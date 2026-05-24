@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowLeft, CheckCircle, Upload, Layout, Layers, ShoppingBag, Settings, Mail, Bot } from "lucide-react";
+import { ArrowLeft, CheckCircle, Upload, Layout, Layers, ShoppingBag, Settings, Mail, Bot, Newspaper } from "lucide-react";
 
 export default function AdminLayout({
   children,
@@ -12,6 +12,7 @@ export default function AdminLayout({
   const pathname = usePathname();
 
   const tabs = [
+    { name: "Blog", href: "/admin/blog", icon: Newspaper },
     { name: "Importação em Massa", href: "/admin/importacao", icon: Upload },
     { name: "Gerenciar Carrossel", href: "/admin/carrossel", icon: Layout },
     { name: "Gerenciar Categorias", href: "/admin/categorias", icon: Layers },

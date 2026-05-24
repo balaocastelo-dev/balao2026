@@ -5,13 +5,6 @@ export interface Product {
   image: string;
   image_urls?: string[];
   product_url?: string;
-  kabum_url?: string;
-  kabum_last_price?: number | null;
-  kabum_last_stock?: string | null;
-  kabum_last_checked_at?: string | null;
-  kabum_sync_enabled?: boolean | null;
-  kabum_sync_status?: string | null;
-  kabum_sync_error?: string | null;
   category: string;
   slug: string;
   cost?: number;
@@ -21,37 +14,6 @@ export interface Product {
   specs?: Record<string, any>;
   ai_status?: "thinking" | "done" | "error";
   created_at?: string;
-  originalPrice?: string;
-  newPrice?: string;
-  priceChange?: number;
-}
-
-export type BlogPostStatus = "draft" | "published";
-export type BlogPostSourceType = "manual" | "rss" | "product";
-
-export interface BlogPost {
-  id: string;
-  slug: string;
-  title: string;
-  excerpt?: string | null;
-  content_html: string;
-  cover_image?: string | null;
-  category?: string | null;
-  tags?: string[] | null;
-  status: BlogPostStatus;
-  published_at: string;
-  created_at: string;
-  updated_at: string;
-  source_type: BlogPostSourceType;
-  source_url?: string | null;
-  source_title?: string | null;
-  product_id?: string | null;
-  seo_title?: string | null;
-  seo_description?: string | null;
-  canonical_url?: string | null;
-  json_ld?: Record<string, any> | null;
-  reading_time_minutes?: number | null;
-  internal_links?: any;
 }
 
 export function parsePriceToNumber(price: unknown): number {

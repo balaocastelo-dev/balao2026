@@ -16,17 +16,16 @@ export default function LayoutWrapper({
 }) {
   const pathname = usePathname();
   const isRoletaPage = pathname === "/roleta";
-  const isBlogPage = pathname === "/blog" || pathname.startsWith("/blog/");
 
   return (
     <SidebarProvider>
-      {!isRoletaPage && !isBlogPage && <Sidebar categories={categories} mobileOnly />}
+      {!isRoletaPage && <Sidebar categories={categories} mobileOnly />}
       <div className="flex flex-col min-h-screen">
         <main className="flex-grow">
           {children}
         </main>
-        {!isRoletaPage && !isBlogPage && <Footer />}
-        {!isRoletaPage && !isBlogPage && <FloatingWhatsApp />}
+        {!isRoletaPage && <Footer />}
+        {!isRoletaPage && <FloatingWhatsApp />}
       </div>
     </SidebarProvider>
   );

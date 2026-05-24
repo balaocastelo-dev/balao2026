@@ -1,309 +1,163 @@
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import Link from "next/link";
-import JsonLd, { generateBreadcrumbSchema, generateFAQSchema, generateOrganizationSchema } from "@/components/JsonLd";
-import { sanitizeHtmlBasic } from "@/lib/blog-sanitize";
-import SafeImage from "@/components/SafeImage";
-import { getBlogPostForPage } from "@/lib/blog-store";
-import { SITE_CONFIG } from "@/lib/config";
+import Image from 'next/image';
+import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
+import BlogSidebar from '@/components/blog/BlogSidebar';
+import BlogPostCard from '@/components/blog/BlogPostCard';
+import BlogGallery from '@/components/blog/BlogGallery';
+import VideoEmbed from '@/components/blog/VideoEmbed';
+import JsonLd, { generateBreadcrumbSchema } from '@/components/JsonLd';
+import { getPopularPosts, getPostBySlug, getRelatedPosts } from '@/lib/blog/store';
+import { ensureFeaturedImageUrl, sanitizeHtmlBasic } from '@/lib/blog/utils';
 
-export const runtime = "nodejs";
-export const revalidate = 300;
+export const dynamic = 'force-dynamic';
 
-function getSourceDomain(sourceUrl: string | null | undefined): string | null {
-  if (!sourceUrl) return null;
-  try {
-    return new URL(sourceUrl).hostname.replace(/^www\./i, "");
-  } catch {
-    return null;
-  }
-}
+type Params = Promise<{ slug: string }>;
 
-function ogFallbackUrl(post: { slug: string; title: string; category: string; sourceDomain: string | null }) {
-  const t = post.title.slice(0, 140);
-  const c = post.category.slice(0, 32);
-  const s = (post.sourceDomain ?? "").slice(0, 48);
-  return `/blog/api/og?title=${encodeURIComponent(t)}&category=${encodeURIComponent(c)}&source=${encodeURIComponent(s)}&seed=${encodeURIComponent(post.slug)}`;
-}
-
-function extractYouTubeVideoId(url: string): string | null {
-  const u = String(url || "").trim();
-  if (!u) return null;
-  const short = u.match(/youtu\.be\/([a-zA-Z0-9_-]{6,})/i);
-  if (short?.[1]) return short[1];
-  const watch = u.match(/[?&]v=([a-zA-Z0-9_-]{6,})/i);
-  if (watch?.[1]) return watch[1];
-  const embed = u.match(/youtube(?:-nocookie)?\.com\/embed\/([a-zA-Z0-9_-]{6,})/i);
-  if (embed?.[1]) return embed[1];
-  return null;
-}
-
-function isAllowedEmbedUrl(url: string): boolean {
-  const u = String(url || "").trim().toLowerCase();
-  if (!u) return false;
-  return (
-    u.startsWith("https://www.youtube-nocookie.com/embed/") ||
-    u.startsWith("https://www.youtube.com/embed/") ||
-    u.startsWith("https://player.globo.com/") ||
-    u.startsWith("https://globoplay.globo.com/")
-  );
-}
-
-function getVideoEmbed(post: { source_url: string | null; json_ld: any; title: string }): { embedUrl: string; openUrl: string; label: string } | null {
-  const fromJsonLd = post.json_ld?.video;
-  const embedUrl = typeof fromJsonLd?.embedUrl === "string" ? fromJsonLd.embedUrl : null;
-  const contentUrl = typeof fromJsonLd?.contentUrl === "string" ? fromJsonLd.contentUrl : null;
-
-  if (embedUrl && isAllowedEmbedUrl(embedUrl)) {
-    return { embedUrl, openUrl: contentUrl || embedUrl, label: "Abrir vídeo" };
-  }
-
-  const maybeUrl = contentUrl || post.source_url || "";
-  const yt = extractYouTubeVideoId(maybeUrl);
-  if (yt) {
-    return {
-      embedUrl: `https://www.youtube-nocookie.com/embed/${yt}`,
-      openUrl: `https://www.youtube.com/watch?v=${yt}`,
-      label: "Abrir no YouTube",
-    };
-  }
-
-  if (contentUrl && isAllowedEmbedUrl(contentUrl)) {
-    return { embedUrl: contentUrl, openUrl: contentUrl, label: "Abrir vídeo" };
-  }
-
-  return null;
-}
-
-function stripLeadingCoverImage(html: string, coverUrl: string): string {
-  const u = String(coverUrl || "").trim();
-  if (!u) return html;
-  const escaped = u.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-  const patterns = [
-    new RegExp(`<a[^>]*>\\s*<img[^>]*src=["']${escaped}["'][^>]*>\\s*<\\/a>\\s*`, "i"),
-    new RegExp(`<p[^>]*>\\s*<img[^>]*src=["']${escaped}["'][^>]*>\\s*<\\/p>\\s*`, "i"),
-    new RegExp(`<img[^>]*src=["']${escaped}["'][^>]*>\\s*`, "i"),
-  ];
-
-  let out = html;
-  for (const re of patterns) {
-    const next = out.replace(re, "");
-    if (next !== out) return next;
-  }
-  return out;
-}
-
-function stripLeadingVideoSection(html: string): string {
-  let out = html;
-  out = out.replace(/^\s*<h2>\s*Assista ao vídeo\s*<\/h2>\s*/i, "");
-  out = out.replace(/^\s*<div[^>]*class=["'][^"']*video-embed[^"']*["'][^>]*>[\s\S]*?<\/div>\s*/i, "");
-  out = out.replace(/^\s*<p>\s*<a[^>]*>[^<]*<\/a>\s*<\/p>\s*/i, "");
-  return out;
-}
-
-function stripH2Section(html: string, title: string): string {
-  const t = title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const re = new RegExp(`<h2[^>]*>\\s*${t}[^<]*<\\/h2>[\\s\\S]*?(?=<h2\\b|$)`, "i");
-  return html.replace(re, "");
-}
-
-export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Params }): Promise<Metadata> {
   const { slug } = await props.params;
-  const post = await getBlogPostForPage(slug);
-  if (!post) {
-    return {
-      title: "Post não encontrado",
-      robots: { index: false, follow: false },
-    };
-  }
+  const post = await getPostBySlug(slug);
+  if (!post) return {};
 
-  const sourceDomain = getSourceDomain(post.source_url);
-  const category = (post.category || "Tecnologia").trim() || "Tecnologia";
   const title = post.seo_title || post.title;
-  const description = post.seo_description || post.excerpt || "Notícias e análises de tecnologia.";
-  const imageUrl = post.cover_image || ogFallbackUrl({ slug: post.slug, title: post.title, category, sourceDomain });
+  const description = post.seo_description || post.excerpt || '';
+  const image = ensureFeaturedImageUrl(post.featured_image, post.category);
+  const url = `https://www.balao.info/blog/${post.slug}`;
 
   return {
     title,
     description,
-    alternates: { canonical: post.canonical_url || `/blog/${post.slug}` },
+    alternates: { canonical: url },
     openGraph: {
-      type: "article",
-      locale: "pt_BR",
-      url: `/blog/${post.slug}`,
+      type: 'article',
+      url,
       title,
       description,
-      siteName: SITE_CONFIG.name,
-      images: [{ url: imageUrl }],
+      images: [{ url: image }]
     },
     twitter: {
-      card: "summary_large_image",
+      card: 'summary_large_image',
       title,
       description,
-      images: [imageUrl],
-    },
-    keywords: [
-      "loja de informática",
-      "hardware",
-      "notebook",
-      "pc gamer",
-      "placa de vídeo",
-      "ssd",
-      "memória ram",
-      "periféricos",
-      category,
-    ],
-    robots: { index: true, follow: true },
+      images: [image]
+    }
   };
 }
 
-export default async function BlogPostPage(props: { params: Promise<{ slug: string }> }) {
+export default async function BlogPostPage(props: { params: Params }) {
   const { slug } = await props.params;
-  const post = await getBlogPostForPage(slug);
+  const post = await getPostBySlug(slug);
   if (!post) notFound();
 
-  const sourceDomain = getSourceDomain(post.source_url);
-  const category = (post.category || "Tecnologia").trim() || "Tecnologia";
-  const published = post.published_at ? new Date(post.published_at) : new Date();
-  const createdAt = post.created_at ? new Date(post.created_at) : new Date();
-  const fallbackImageUrl = ogFallbackUrl({
-    slug: post.slug,
-    title: post.title,
-    category,
-    sourceDomain,
-  });
-  const imageUrl = post.cover_image || fallbackImageUrl;
-  const video = getVideoEmbed({ source_url: post.source_url, json_ld: post.json_ld, title: post.title });
-  let contentHtmlRaw = String(post.content_html || "");
-  if (video) {
-    contentHtmlRaw = stripLeadingVideoSection(contentHtmlRaw);
-  }
-  if (!video) {
-    contentHtmlRaw = stripLeadingCoverImage(contentHtmlRaw, imageUrl);
-  }
-  contentHtmlRaw = stripH2Section(contentHtmlRaw, "Impacto para quem compra tecnologia");
-  contentHtmlRaw = stripH2Section(contentHtmlRaw, "Checklist rápido");
-  const safeHtml = sanitizeHtmlBasic(contentHtmlRaw);
-  const url = `https://www.balao.info/blog/${post.slug}`;
-
-  const breadcrumbs = generateBreadcrumbSchema([
-    { name: "Início", item: "https://www.balao.info" },
-    { name: "Blog", item: "https://www.balao.info/blog" },
-    { name: post.title, item: url },
+  const [popular, related] = await Promise.all([
+    getPopularPosts(8),
+    getRelatedPosts({ postId: post.id, category: post.category, limit: 6 })
   ]);
 
-  const org = generateOrganizationSchema();
+  const featuredImage = ensureFeaturedImageUrl(post.featured_image, post.category);
+  const gallery = (post.gallery_images || []).filter(u => u && u !== featuredImage).slice(0, 12);
+  const contentHtml = sanitizeHtmlBasic(post.content);
 
-  const jsonLd = post.json_ld || {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
+  const articleJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
     headline: post.title,
-    description: post.excerpt || post.seo_description || "",
-    datePublished: (Number.isFinite(published.getTime()) ? published : createdAt).toISOString(),
-    dateModified: (Number.isFinite(published.getTime()) ? published : createdAt).toISOString(),
-    mainEntityOfPage: { "@type": "WebPage", "@id": url },
-    image: [imageUrl],
-    author: { "@type": "Organization", name: "Balão da Informática", url: "https://www.balao.info" },
+    datePublished: post.published_at || post.created_at,
+    dateModified: post.updated_at || post.created_at,
+    image: [featuredImage],
+    mainEntityOfPage: `https://www.balao.info/blog/${post.slug}`,
+    author: [{ '@type': 'Organization', name: 'Balão da Informática' }],
     publisher: {
-      "@type": "Organization",
-      name: "Balão da Informática",
-      logo: { "@type": "ImageObject", url: "https://www.balao.info/logo.png" },
-    },
+      '@type': 'Organization',
+      name: 'Balão da Informática',
+      logo: { '@type': 'ImageObject', url: 'https://www.balao.info/logo.png' }
+    }
   };
 
-  const faq = generateFAQSchema([
-    {
-      question: "Como escolher o melhor setup para meu uso?",
-      answer: `Chame no WhatsApp ${SITE_CONFIG.whatsapp.display} e diga seu objetivo (trabalho, games, estudo, criação). A Balão da Informática recomenda a melhor combinação de custo-benefício.`,
-    },
-    {
-      question: "Vocês ajudam a comparar modelos e indicar alternativa mais barata?",
-      answer: `Sim. Envie o link do produto e seu orçamento no WhatsApp ${SITE_CONFIG.whatsapp.display}. Você recebe opções equivalentes com foco em desempenho e compatibilidade.`,
-    },
+  const breadcrumb = generateBreadcrumbSchema([
+    { name: 'Início', item: 'https://www.balao.info' },
+    { name: 'Blog', item: 'https://www.balao.info/blog' },
+    { name: post.category, item: `https://www.balao.info/blog/categoria/${encodeURIComponent(post.category)}` },
+    { name: post.title, item: `https://www.balao.info/blog/${post.slug}` }
   ]);
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-8">
-      <JsonLd data={[org, breadcrumbs, jsonLd, faq]} />
-
-      <article className="overflow-hidden rounded-md border border-neutral-200 bg-white">
-        <div className="p-6">
-          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-neutral-600">
-            <Link href={{ pathname: "/blog", query: { cat: category } }} className="uppercase tracking-wide text-[#e41e26] hover:underline">
-              {category}
-            </Link>
-            {post.reading_time_minutes ? <span>{post.reading_time_minutes} min</span> : null}
-            {sourceDomain ? <span>{sourceDomain}</span> : null}
-            <span>{new Date(post.published_at ?? post.created_at).toLocaleDateString("pt-BR")}</span>
-          </div>
-          <h1 className="mt-3 text-3xl font-extrabold tracking-tight">{post.title}</h1>
-          {post.excerpt ? <p className="mt-3 text-neutral-700">{post.excerpt}</p> : null}
-        </div>
-
-        {video ? (
-          <div className="relative aspect-[16/9] w-full bg-black">
-            <iframe
-              src={video.embedUrl}
-              title={post.title}
-              className="absolute inset-0 h-full w-full"
-              loading="lazy"
-              referrerPolicy="no-referrer"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            />
-          </div>
-        ) : (
-          <div className="relative aspect-[16/9] w-full">
-            <SafeImage
-              src={imageUrl}
-              fallbackSrc={fallbackImageUrl}
-              alt={post.title}
-              fill
-              sizes="(max-width: 1024px) 100vw, 900px"
-              className="object-contain"
-            />
-          </div>
-        )}
-
-        <div className="p-6">
-          <div className="prose prose-neutral max-w-none">
-            <div dangerouslySetInnerHTML={{ __html: safeHtml }} />
-          </div>
-
-          <div className="mt-8 rounded-md border border-[#e41e26]/20 bg-neutral-50 p-4">
-            <div className="text-sm font-extrabold">Quer ajuda para escolher?</div>
-            <div className="mt-1 text-sm text-neutral-700">
-              Fale com um especialista e receba recomendação direta para o seu uso.
+    <main className="max-w-6xl mx-auto px-4 py-8">
+      <JsonLd data={[articleJsonLd, breadcrumb]} />
+      <div className="flex flex-col lg:flex-row gap-8">
+        <article className="flex-1 min-w-0">
+          <div className="bg-white rounded-xl border overflow-hidden">
+            <div className="relative w-full aspect-[16/9] bg-gray-100">
+              <Image
+                src={featuredImage}
+                alt={post.title}
+                fill
+                sizes="(max-width: 1024px) 100vw, 700px"
+                className="object-cover"
+                priority
+              />
             </div>
-            <a
-              href="https://wa.me/5519987510267"
-              target="_blank"
-              rel="noreferrer"
-              className="mt-3 inline-flex w-full items-center justify-center rounded-md bg-[#e41e26] px-4 py-3 text-sm font-extrabold text-white hover:bg-[#c81920]"
-            >
-              Chamar no WhatsApp 19 98751-0267
-            </a>
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              <Link href="/notebooks" className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs font-bold text-neutral-900 hover:bg-neutral-50">
-                Notebooks
-              </Link>
-              <Link href="/pcgamer" className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs font-bold text-neutral-900 hover:bg-neutral-50">
-                PC Gamer
-              </Link>
+
+            <div className="p-6">
+              <div className="flex flex-wrap items-center gap-2 text-xs mb-3">
+                <span className="font-semibold text-[#E60012]">{post.category}</span>
+                {post.published_at ? (
+                  <span className="text-gray-500">
+                    {new Date(post.published_at).toLocaleDateString('pt-BR')}
+                  </span>
+                ) : null}
+                {post.source_name ? <span className="text-gray-500">Fonte: {post.source_name}</span> : null}
+              </div>
+
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 leading-tight">
+                {post.title}
+              </h1>
+
+              {post.excerpt ? (
+                <p className="mt-3 text-base text-gray-700 leading-relaxed">{post.excerpt}</p>
+              ) : null}
+
+              {post.video_embed_url ? (
+                <div className="mt-6">
+                  <VideoEmbed url={post.video_embed_url} provider={post.video_provider} />
+                </div>
+              ) : null}
+
+              <div
+                className="prose max-w-none prose-headings:scroll-mt-24 prose-a:text-[#E60012] prose-a:font-semibold prose-strong:text-gray-900 mt-6"
+                dangerouslySetInnerHTML={{ __html: contentHtml }}
+              />
+
+              <BlogGallery images={gallery} title={post.title} />
+
+              {post.tags && post.tags.length ? (
+                <div className="mt-6 flex flex-wrap gap-2">
+                  {post.tags.slice(0, 12).map(t => (
+                    <span key={t} className="px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
             </div>
           </div>
 
-          {post.source_url ? (
-            <footer className="mt-10 border-t border-neutral-200 pt-4 text-sm text-neutral-600">
-              Fonte:{" "}
-              <a className="underline hover:no-underline" href={post.source_url} target="_blank" rel="noreferrer">
-                {post.source_url}
-              </a>
-            </footer>
+          {related.length ? (
+            <section className="mt-8">
+              <h2 className="text-base font-bold text-gray-900">Matérias relacionadas</h2>
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {related.map(p => (
+                  <BlogPostCard key={p.id} post={p} />
+                ))}
+              </div>
+            </section>
           ) : null}
+        </article>
+
+        <div className="w-full lg:w-80 flex-shrink-0">
+          <BlogSidebar popular={popular} />
         </div>
-      </article>
+      </div>
     </main>
   );
 }
+

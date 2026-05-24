@@ -2,8 +2,5 @@
   "framework": "nextjs",
   "buildCommand": "next build",
   "devCommand": "next dev",
-  "installCommand": "npm install",
-  "crons": [
-    { "path": "/api/cron/blog-minute", "schedule": "* * * * *" }
-  ]
+  "installCommand": "npm install"
 }
