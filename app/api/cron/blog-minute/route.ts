@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { fetchCampinasVideoItems, fetchRssItems } from "@/lib/rss";
+import { fetchCampinasVideoItems, fetchRssItems, type RssItem } from "@/lib/rss";
 import { slugify } from "@/lib/blog-utils";
 import { generateBlogPostFromProduct, generateBlogPostFromRss, generateBlogPostFromTrend } from "@/lib/blog-ai";
 import { hasBlogSourceItem, insertBlogPost, insertBlogSourceItem } from "@/lib/db";
@@ -224,8 +224,8 @@ async function insertCampinasVideoPost(now: Date) {
   const brt = getBrtParts(now);
   const [g1Items, bandItems, recordItems] = await Promise.all([
     fetchCampinasVideoItems(40),
-    fetchRssItems("https://www.youtube.com/feeds/videos.xml?channel_id=UCoa-D_VfMkFrCYodrOC9-mA", 40).catch(() => []),
-    fetchRssItems("https://www.youtube.com/feeds/videos.xml?channel_id=UCuiLR4p6wQ3xLEm15pEn1Xw", 40).catch(() => []),
+    fetchRssItems("https://www.youtube.com/feeds/videos.xml?channel_id=UCoa-D_VfMkFrCYodrOC9-mA", 40).catch(() => [] as RssItem[]),
+    fetchRssItems("https://www.youtube.com/feeds/videos.xml?channel_id=UCuiLR4p6wQ3xLEm15pEn1Xw", 40).catch(() => [] as RssItem[]),
   ]);
 
   const youtubeFiltered = bandItems
