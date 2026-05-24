@@ -600,11 +600,11 @@ export async function getBlogCategories(limit = 40): Promise<string[]> {
       return [];
     }
 
-    const categories = (data || [])
+    const categories: string[] = (data || [])
       .map((row: any) => (typeof row?.category === "string" ? row.category.trim() : ""))
-      .filter(Boolean);
+      .filter((v: any): v is string => typeof v === "string" && v.length > 0);
 
-    return Array.from(new Set(categories)).slice(0, limit);
+    return Array.from(new Set<string>(categories)).slice(0, limit);
   } catch (error) {
     console.error("Error fetching blog categories:", error);
     return [];
