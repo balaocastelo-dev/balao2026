@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import JsonLd, { generateBreadcrumbSchema, generateOrganizationSchema } from "@/components/JsonLd";
-import { getBlogPostBySlug } from "@/lib/db";
 import { sanitizeHtmlBasic } from "@/lib/blog-sanitize";
 import SafeImage from "@/components/SafeImage";
+import { getBlogPostForPage } from "@/lib/blog-store";
 
 export const runtime = "nodejs";
 export const revalidate = 300;
@@ -27,7 +27,7 @@ function ogFallbackUrl(post: { slug: string; title: string; category: string; so
 
 export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await props.params;
-  const post = await getBlogPostBySlug(slug);
+  const post = await getBlogPostForPage(slug);
   if (!post) {
     return {
       title: "Post não encontrado",
@@ -59,7 +59,7 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
 
 export default async function BlogPostPage(props: { params: Promise<{ slug: string }> }) {
   const { slug } = await props.params;
-  const post = await getBlogPostBySlug(slug);
+  const post = await getBlogPostForPage(slug);
   if (!post) notFound();
 
   const sourceDomain = getSourceDomain(post.source_url);

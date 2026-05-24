@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getBlogPosts } from "@/lib/db";
+import { listBlogPostsForPage } from "@/lib/blog-store";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +13,7 @@ function escapeXml(input: string): string {
 }
 
 export async function GET() {
-  const posts = await getBlogPosts({ limit: 50 });
+  const posts = await listBlogPostsForPage({ take: 50 });
   const site = "https://www.balao.info";
   const now = new Date().toUTCString();
 
@@ -53,4 +53,3 @@ ${items}
     },
   });
 }
-

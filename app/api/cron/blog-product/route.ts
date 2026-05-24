@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { hasAdmin } from "@/lib/supabase-admin";
 import { slugify } from "@/lib/blog-utils";
 import { generateBlogPostFromProduct } from "@/lib/blog-ai";
 import { hasBlogSourceItem, insertBlogPost, insertBlogSourceItem } from "@/lib/db";
@@ -44,6 +45,15 @@ export async function GET(req: Request) {
   try {
     if (!isAuthorized(req)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!hasAdmin) {
+      return NextResponse.json({
+        ok: true,
+        inserted: 0,
+        skipped: true,
+        reason: "Supabase admin não configurado. Blog funciona em modo dinâmico sem persistência.",
+      });
     }
 
     if (process.env.BLOG_AGENT_PRODUCT_ENABLED === "false") {
@@ -111,4 +121,3 @@ export async function GET(req: Request) {
     return NextResponse.json({ ok: false, error: error?.message || "Erro" }, { status: 500 });
   }
 }
-

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import SafeImage from "@/components/SafeImage";
-import { getBlogPosts } from "@/lib/db";
+import { listBlogPostsForPage } from "@/lib/blog-store";
 
 export const runtime = "nodejs";
 export const revalidate = 60;
@@ -38,7 +38,7 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
         ? sp.category.trim()
         : undefined;
 
-  const rawPosts = await getBlogPosts({ limit: 50, category: categoryRaw });
+  const rawPosts = await listBlogPostsForPage({ take: 50, category: categoryRaw });
 
   const posts: BlogCardPost[] = rawPosts.map((p) => {
     const createdAt = p.created_at ? new Date(p.created_at) : new Date();

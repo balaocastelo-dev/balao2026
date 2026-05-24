@@ -4,6 +4,7 @@ import { fetchRssItems } from "@/lib/rss";
 import { slugify } from "@/lib/blog-utils";
 import { generateBlogPostFromRss } from "@/lib/blog-ai";
 import { hasBlogSourceItem, insertBlogPost, insertBlogSourceItem } from "@/lib/db";
+import { hasAdmin } from "@/lib/supabase-admin";
 
 function isAuthorized(req: Request): boolean {
   const vercelCron = req.headers.get("x-vercel-cron");
@@ -30,6 +31,15 @@ export async function GET(req: Request) {
   try {
     if (!isAuthorized(req)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!hasAdmin) {
+      return NextResponse.json({
+        ok: true,
+        inserted: 0,
+        skipped: true,
+        reason: "Supabase admin não configurado. Blog funciona em modo dinâmico sem persistência.",
+      });
     }
 
     if (process.env.BLOG_AGENT_RSS_ENABLED === "false") {
