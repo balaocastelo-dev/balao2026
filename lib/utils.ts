@@ -1,3 +1,5 @@
+import { isValidKabumUrl } from '@/lib/kabum/validators';
+
 export interface Product {
   id: string;
   name: string;
@@ -282,6 +284,7 @@ export function parseProducts(text: string): Product[] {
       let imageUrl = "";
       let name = "";
       let price = "";
+      let kabumUrl: string | null = null;
 
       if (parts.length >= 4) {
         // Format: ProductURL ImageURL Name Price
@@ -297,6 +300,11 @@ export function parseProducts(text: string): Product[] {
       }
 
       if (imageUrl.startsWith('http') && name && price) {
+        if (productUrl && isValidKabumUrl(productUrl)) {
+          kabumUrl = productUrl;
+          productUrl = "";
+        }
+
         const enhancedImage = enhanceImageUrl(imageUrl);
         
         // List of brands to replace with "Balão.info"
@@ -327,6 +335,7 @@ export function parseProducts(text: string): Product[] {
           product_url: productUrl,
           category: "Hardware",
           slug,
+          kabum_url: kabumUrl,
         });
       }
     }

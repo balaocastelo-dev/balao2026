@@ -40,10 +40,13 @@ export default function ImportPage() {
 
   // Preview Logic
   const getPreviewProducts = () => {
+    const nowIso = new Date().toISOString();
     return parsedProducts.map((p: Product) => {
         // Fix: Use global regex for replace all dots, then replace comma with dot
         let priceNum = parseFloat(p.price.replace("R$", "").replace(/\./g, "").replace(",", ".").trim());
         if (isNaN(priceNum)) priceNum = 0;
+
+        const kabumLastPrice = p.kabum_url ? priceNum : null;
 
         let applyAdjustment = false;
         if (adjustmentScope === "all") applyAdjustment = true;
@@ -62,7 +65,12 @@ export default function ImportPage() {
             category: selectedCategory, // Apply selected category
             originalPrice: p.price,
             newPrice: newPriceFormatted,
-            priceChange: newPriceNum - priceNum
+            priceChange: newPriceNum - priceNum,
+            kabum_last_price: kabumLastPrice,
+            kabum_last_checked_at: p.kabum_url ? nowIso : null,
+            kabum_sync_enabled: p.kabum_url ? true : null,
+            kabum_sync_status: p.kabum_url ? "pending" : null,
+            kabum_sync_error: null
         };
     });
   };
@@ -269,6 +277,13 @@ export default function ImportPage() {
           image: p.image,
           image_urls: p.image_urls,
           product_url: p.product_url,
+          kabum_url: p.kabum_url || null,
+          kabum_last_price: typeof p.kabum_last_price === "number" ? p.kabum_last_price : null,
+          kabum_last_stock: p.kabum_last_stock || null,
+          kabum_last_checked_at: p.kabum_last_checked_at || null,
+          kabum_sync_enabled: typeof p.kabum_sync_enabled === "boolean" ? p.kabum_sync_enabled : null,
+          kabum_sync_status: p.kabum_sync_status || null,
+          kabum_sync_error: p.kabum_sync_error || null,
           description: p.description,
           specs: p.specs,
           category: p.category,
@@ -363,7 +378,7 @@ export default function ImportPage() {
                         onChange={(e) => setText(e.target.value)}
                     />
                     <p className="mt-2 text-xs text-gray-500">
-                        O sistema extrai automaticamente: URL da imagem, Nome do produto e Preço (R$).
+                        Aceita também formato com 4 colunas (Tab): Kabum URL, Image URL, Nome, Preço.
                     </p>
                 </div>
                 <div className="flex justify-end">

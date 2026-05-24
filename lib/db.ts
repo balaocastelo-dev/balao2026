@@ -101,6 +101,13 @@ export async function saveProducts(products: Product[]) {
         image: p.image,
         image_urls: p.image_urls || [p.image],
         product_url: p.product_url || null,
+        kabum_url: p.kabum_url || null,
+        kabum_last_price: p.kabum_last_price ?? null,
+        kabum_last_stock: p.kabum_last_stock ?? null,
+        kabum_last_checked_at: p.kabum_last_checked_at ?? null,
+        kabum_sync_enabled: p.kabum_sync_enabled ?? null,
+        kabum_sync_status: p.kabum_sync_status ?? null,
+        kabum_sync_error: p.kabum_sync_error ?? null,
         description: p.description || null,
         specs: p.specs || null,
         category: p.category,
@@ -154,6 +161,13 @@ export async function createProduct(product: Partial<Product>) {
             image: product.image,
             image_urls: product.image_urls,
             product_url: product.product_url,
+            kabum_url: product.kabum_url,
+            kabum_last_price: product.kabum_last_price,
+            kabum_last_stock: product.kabum_last_stock,
+            kabum_last_checked_at: product.kabum_last_checked_at,
+            kabum_sync_enabled: product.kabum_sync_enabled,
+            kabum_sync_status: product.kabum_sync_status,
+            kabum_sync_error: product.kabum_sync_error,
             description: product.description,
             specs: product.specs,
             category: product.category,
@@ -184,6 +198,13 @@ export async function updateProduct(id: string, updates: Partial<Product>) {
         if (updates.image !== undefined) dbUpdates.image = updates.image;
         if (updates.image_urls !== undefined) dbUpdates.image_urls = updates.image_urls;
         if (updates.product_url !== undefined) dbUpdates.product_url = updates.product_url;
+        if (updates.kabum_url !== undefined) dbUpdates.kabum_url = updates.kabum_url;
+        if (updates.kabum_last_price !== undefined) dbUpdates.kabum_last_price = updates.kabum_last_price;
+        if (updates.kabum_last_stock !== undefined) dbUpdates.kabum_last_stock = updates.kabum_last_stock;
+        if (updates.kabum_last_checked_at !== undefined) dbUpdates.kabum_last_checked_at = updates.kabum_last_checked_at;
+        if (updates.kabum_sync_enabled !== undefined) dbUpdates.kabum_sync_enabled = updates.kabum_sync_enabled;
+        if (updates.kabum_sync_status !== undefined) dbUpdates.kabum_sync_status = updates.kabum_sync_status;
+        if (updates.kabum_sync_error !== undefined) dbUpdates.kabum_sync_error = updates.kabum_sync_error;
         if (updates.description !== undefined) dbUpdates.description = updates.description;
         if (updates.specs !== undefined) dbUpdates.specs = updates.specs;
         if (updates.category !== undefined) dbUpdates.category = updates.category;
