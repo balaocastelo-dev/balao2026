@@ -3,6 +3,8 @@ import { fetchRssItems, type RssItem } from "@/lib/rss";
 import { slugify } from "@/lib/blog-utils";
 import { generateBlogPostFromRss } from "@/lib/blog-ai";
 import { getBlogPostBySlug, getBlogPosts } from "@/lib/db";
+import { scrapeSiteProducts } from "@/lib/site-products";
+import { generateBlogPostFromProduct } from "@/lib/blog-ai";
 
 export type BlogPostView = {
   id: string;
@@ -133,6 +135,60 @@ async function buildDynamicPosts(): Promise<BlogPostView[]> {
   return posts;
 }
 
+function buildSlugFromProductUrl(input: { name: string; url: string }): string {
+  const baseSlug = slugify(input.name).slice(0, 70);
+  const sourceHash = sha256(input.url).slice(0, 8);
+  return `${baseSlug}-${sourceHash}`;
+}
+
+async function buildDynamicProductPosts(): Promise<BlogPostView[]> {
+  const siteProducts = await scrapeSiteProducts({ take: 10 });
+  const now = Date.now();
+
+  const posts: BlogPostView[] = [];
+  for (let idx = 0; idx < siteProducts.length; idx += 1) {
+    const p = siteProducts[idx]!;
+    const slug = buildSlugFromProductUrl({ name: p.name, url: p.url });
+    const created = new Date(now - idx * 60_000).toISOString();
+    const url = `https://www.balao.info/blog/${slug}`;
+
+    const generated = await generateBlogPostFromProduct(
+      {
+        id: p.id,
+        name: p.name,
+        price: p.priceText || "",
+        image: p.imageUrl || "/logo.png",
+        product_url: p.url,
+        category: "Ofertas Balão",
+        slug,
+        description: p.description || undefined,
+      } as any,
+      { slug, publishedAtIso: created, url, productUrl: p.url },
+    );
+
+    posts.push({
+      id: sha256(`site-product-post:${p.url}`),
+      slug,
+      title: generated.title,
+      excerpt: generated.excerpt,
+      content_html: generated.content_html,
+      cover_image: p.imageUrl,
+      category: "Ofertas Balão",
+      published_at: created,
+      created_at: created,
+      updated_at: created,
+      source_url: p.url,
+      canonical_url: url,
+      seo_title: generated.seo_title,
+      seo_description: generated.seo_description,
+      json_ld: generated.json_ld,
+      reading_time_minutes: generated.reading_time_minutes,
+    });
+  }
+
+  return posts;
+}
+
 export async function listBlogPostsForPage(input?: { category?: string; take?: number }): Promise<BlogPostView[]> {
   const take = Math.max(1, Math.min(80, input?.take ?? 50));
   const category = input?.category ? normalizeCategory(input.category) : undefined;
@@ -161,8 +217,10 @@ export async function listBlogPostsForPage(input?: { category?: string; take?: n
     }
   }
 
-  const dyn = await buildDynamicPosts();
-  const filtered = category ? dyn.filter((p) => p.category === category) : dyn;
+  const [rssPosts, productPosts] = await Promise.all([buildDynamicPosts(), buildDynamicProductPosts()]);
+  const merged = rssPosts.concat(productPosts);
+  const filtered = category ? merged.filter((p) => p.category === category) : merged;
+  filtered.sort((a, b) => Date.parse(b.published_at) - Date.parse(a.published_at));
   return filtered.slice(0, take);
 }
 
@@ -191,6 +249,6 @@ export async function getBlogPostForPage(slug: string): Promise<BlogPostView | n
     }
   }
 
-  const posts = await buildDynamicPosts();
-  return posts.find((p) => p.slug === slug) || null;
+  const [rssPosts, productPosts] = await Promise.all([buildDynamicPosts(), buildDynamicProductPosts()]);
+  return rssPosts.concat(productPosts).find((p) => p.slug === slug) || null;
 }
