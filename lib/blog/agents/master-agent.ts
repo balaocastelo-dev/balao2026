@@ -26,6 +26,7 @@ import {
 } from '@/lib/blog/utils';
 import { llamaChatJson } from '@/lib/blog/agents/llama';
 import { DEFAULT_BLOG_RSS_FEEDS } from '@/lib/blog/constants';
+import { markAgentRunning, recordAgentRun } from '@/lib/ai/master-agent';
 
 type RewriteJson = {
   title: string;
@@ -264,42 +265,54 @@ async function insertWithUniqueSlug(params: {
 }
 
 export async function runBlogIngestionCycle(params?: { maxNewPosts?: number; force?: boolean }) {
+  const cycleStartedAtMs = Date.now();
+  markAgentRunning('agent.master');
   const maxNewPosts = Math.max(1, Math.min(50, params?.maxNewPosts ?? 8));
-  await ensureDefaultFeeds();
-  const feeds = (await adminListFeeds()).filter(f => Boolean(f.active));
-  const sorted = feeds.sort((a, b) => (b.priority || 0) - (a.priority || 0));
+  try {
+    await ensureDefaultFeeds();
+    const feeds = (await adminListFeeds()).filter(f => Boolean(f.active));
+    const sorted = feeds.sort((a, b) => (b.priority || 0) - (a.priority || 0));
 
-  let created = 0;
-  let skipped = 0;
-  let errors = 0;
+    let created = 0;
+    let skipped = 0;
+    let errors = 0;
 
-  for (const feed of sorted) {
-    if (created >= maxNewPosts) break;
+    for (const feed of sorted) {
+      if (created >= maxNewPosts) break;
 
-    try {
-      const intervalMin = Math.max(1, feed.fetch_interval || 15);
-      const last = feed.last_checked_at ? new Date(feed.last_checked_at).getTime() : 0;
-      const due = params?.force ? true : !last || Date.now() - last >= intervalMin * 60_000;
-      if (!due) continue;
+      try {
+        const intervalMin = Math.max(1, feed.fetch_interval || 15);
+        const last = feed.last_checked_at ? new Date(feed.last_checked_at).getTime() : 0;
+        const due = params?.force ? true : !last || Date.now() - last >= intervalMin * 60_000;
+        if (!due) continue;
 
-      const sourceName = feed.name || '';
-      const dailyLimit = Math.max(1, feed.daily_limit || 10);
-      const alreadyToday = sourceName ? await adminCountPostsTodayBySource(sourceName) : 0;
-      const remaining = Math.max(0, dailyLimit - alreadyToday);
-      if (remaining <= 0) {
-        await adminMarkFeedChecked(feed.id);
-        continue;
-      }
+        const sourceName = feed.name || '';
+        const dailyLimit = Math.max(1, feed.daily_limit || 10);
+        const alreadyToday = sourceName ? await adminCountPostsTodayBySource(sourceName) : 0;
+        const remaining = Math.max(0, dailyLimit - alreadyToday);
+        if (remaining <= 0) {
+          await adminMarkFeedChecked(feed.id);
+          continue;
+        }
 
-      const parsed = await fetchRssFeed(feed.url);
-      const items = parsed.items.slice(0, Math.max(1, remaining));
-      await adminInsertAgentLog({
-        agent_name: 'Agente Coletor RSS',
-        action: 'fetch_feed',
-        status: 'ok',
-        message: 'Feed lido com sucesso',
-        metadata: { feed_id: feed.id, url: feed.url, items: items.length }
-      });
+        const rssStartedAtMs = Date.now();
+        markAgentRunning('agent.rss-collector');
+        const parsed = await fetchRssFeed(feed.url);
+        const items = parsed.items.slice(0, Math.max(1, remaining));
+        recordAgentRun({
+          agentId: 'agent.rss-collector',
+          ok: true,
+          startedAtMs: rssStartedAtMs,
+          summary: `Feed lido: ${feed.name || parsed.sourceName} • items=${items.length}`,
+          meta: { feed_id: feed.id, url: feed.url, items: items.length }
+        });
+        await adminInsertAgentLog({
+          agent_name: 'Agente Coletor RSS',
+          action: 'fetch_feed',
+          status: 'ok',
+          message: 'Feed lido com sucesso',
+          metadata: { feed_id: feed.id, url: feed.url, items: items.length }
+        });
 
       for (const item of items) {
         if (created >= maxNewPosts) break;
@@ -309,7 +322,16 @@ export async function runBlogIngestionCycle(params?: { maxNewPosts?: number; for
           continue;
         }
 
+        const readerStartedAtMs = Date.now();
+        markAgentRunning('agent.article-reader');
         const article = await fetchAndExtractArticle(item.link);
+        recordAgentRun({
+          agentId: 'agent.article-reader',
+          ok: true,
+          startedAtMs: readerStartedAtMs,
+          summary: `Extração: ok • imagens=${article.images.length} • vídeo=${article.videoEmbedUrl ? 'sim' : 'não'}`,
+          meta: { source_url: item.link, images: article.images.length, has_video: Boolean(article.videoEmbedUrl) }
+        });
         await adminInsertAgentLog({
           agent_name: 'Agente Leitor de Matéria',
           action: 'extract_article',
@@ -337,14 +359,35 @@ export async function runBlogIngestionCycle(params?: { maxNewPosts?: number; for
           continue;
         }
 
+        const regionalStartedAtMs = Date.now();
+        markAgentRunning('agent.regional-campinas');
         const campinas = Boolean(feed.campinas_rule) || computeIsCampinas(`${item.title} ${item.summary} ${article.text}`);
+        recordAgentRun({
+          agentId: 'agent.regional-campinas',
+          ok: true,
+          startedAtMs: regionalStartedAtMs,
+          summary: campinas ? 'Campinas/RMC: sim' : 'Campinas/RMC: não',
+          meta: { campinas, feed_rule: Boolean(feed.campinas_rule) }
+        });
 
         const category = campinas ? 'Campinas e Região' : normalizeCategory(feed.category);
         const imageSource = article.ogImage || item.imageUrl;
         const featured = ensureFeaturedImageUrl(imageSource, category);
+        const videoStartedAtMs = Date.now();
+        markAgentRunning('agent.videos');
         const videoEmbedUrl = article.videoEmbedUrl;
         const videoProvider = guessVideoProvider(videoEmbedUrl);
+        recordAgentRun({
+          agentId: 'agent.videos',
+          ok: true,
+          startedAtMs: videoStartedAtMs,
+          summary: videoEmbedUrl ? `Vídeo: ${videoProvider || 'unknown'}` : 'Vídeo: nenhum',
+          meta: { video_embed_url: videoEmbedUrl || null, provider: videoProvider || null }
+        });
 
+        const rewriteStartedAtMs = Date.now();
+        markAgentRunning('agent.journalistic');
+        markAgentRunning('agent.seo-geo');
         const rewritten =
           (await rewriteWithLlama({
             titleHint: item.title,
@@ -354,6 +397,20 @@ export async function runBlogIngestionCycle(params?: { maxNewPosts?: number; for
             articleText,
             campinas
           })) || fallbackRewrite({ titleHint: item.title, categoryHint: category, articleText, campinas });
+        recordAgentRun({
+          agentId: 'agent.journalistic',
+          ok: true,
+          startedAtMs: rewriteStartedAtMs,
+          summary: `Reescrita: ok • categoria=${category}`,
+          meta: { source_url: item.link, campinas, category }
+        });
+        recordAgentRun({
+          agentId: 'agent.seo-geo',
+          ok: true,
+          startedAtMs: rewriteStartedAtMs,
+          summary: `SEO/GEO: seo=${rewritten.seo_score} geo=${rewritten.geo_score}`,
+          meta: { seo_score: rewritten.seo_score, geo_score: rewritten.geo_score }
+        });
 
         const plagiarism = estimatePlagiarismScore(articleText, stripTags(rewritten.content_html));
         const hasLlama = Boolean(process.env.LLAMA_API_URL && process.env.LLAMA_MODEL);
@@ -419,6 +476,8 @@ export async function runBlogIngestionCycle(params?: { maxNewPosts?: number; for
 
         try {
           if (featured.startsWith('http')) {
+            const imageStartedAtMs = Date.now();
+            markAgentRunning('agent.images');
             const variants = await ingestFeaturedImage({ postId: inserted.id, imageUrl: featured });
             const altText = await generateAltText({ title: rewritten.title, category });
             await adminUpdatePost(inserted.id, { featured_image: variants.coverUrl });
@@ -426,6 +485,13 @@ export async function runBlogIngestionCycle(params?: { maxNewPosts?: number; for
             await adminInsertMedia({ post_id: inserted.id, type: 'thumb', url: variants.thumbUrl, alt_text: altText, caption: null, provider: 'supabase' });
             await adminInsertMedia({ post_id: inserted.id, type: 'social', url: variants.socialUrl, alt_text: altText, caption: null, provider: 'supabase' });
             await adminInsertMedia({ post_id: inserted.id, type: 'og', url: variants.ogUrl, alt_text: altText, caption: null, provider: 'supabase' });
+            recordAgentRun({
+              agentId: 'agent.images',
+              ok: true,
+              startedAtMs: imageStartedAtMs,
+              summary: 'Imagem: otimizada + upload',
+              meta: { post_id: inserted.id, cover: variants.coverUrl }
+            });
           }
         } catch (e: any) {
           await adminInsertAgentLog({
@@ -464,18 +530,36 @@ export async function runBlogIngestionCycle(params?: { maxNewPosts?: number; for
         created++;
       }
 
-      await adminMarkFeedChecked(feed.id);
-    } catch (e: any) {
-      errors++;
-      await adminInsertAgentLog({
-        agent_name: 'Agente Mestre',
-        action: 'feed_cycle',
-        status: 'error',
-        message: 'Falha no ciclo do feed',
-        metadata: { feed_id: feed.id, url: feed.url, error: String(e?.message || e) }
-      });
+        await adminMarkFeedChecked(feed.id);
+      } catch (e: any) {
+        errors++;
+        await adminInsertAgentLog({
+          agent_name: 'Agente Mestre',
+          action: 'feed_cycle',
+          status: 'error',
+          message: 'Falha no ciclo do feed',
+          metadata: { feed_id: feed.id, url: feed.url, error: String(e?.message || e) }
+        });
+      }
     }
-  }
 
-  return { created, skipped, errors, feeds: feeds.length };
+    const result = { created, skipped, errors, feeds: feeds.length };
+    recordAgentRun({
+      agentId: 'agent.master',
+      ok: errors === 0,
+      startedAtMs: cycleStartedAtMs,
+      summary: `Cycle: created=${created} skipped=${skipped} errors=${errors}`,
+      meta: result
+    });
+    return result;
+  } catch (e: any) {
+    recordAgentRun({
+      agentId: 'agent.master',
+      ok: false,
+      startedAtMs: cycleStartedAtMs,
+      summary: 'Cycle falhou',
+      meta: { error: String(e?.message || e) }
+    });
+    throw e;
+  }
 }
