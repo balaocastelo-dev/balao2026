@@ -13,6 +13,24 @@ export const metadata: Metadata = {
     "entrega para todo o brasil",
     "retirada em loja campinas",
   ],
+  alternates: { canonical: "https://www.balao.info/envio-e-entrega" },
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    url: "https://www.balao.info/envio-e-entrega",
+    title: "Envio e Entrega | Balão da Informática",
+    description:
+      "Informações sobre frete, prazos e formas de entrega do Balão da Informática, com foco em entrega rápida para Campinas e região e envio para todo o Brasil.",
+    siteName: SITE_CONFIG.name,
+    images: [{ url: "/logo.png" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Envio e Entrega | Balão da Informática",
+    description:
+      "Informações sobre frete, prazos e formas de entrega do Balão da Informática, com foco em entrega rápida para Campinas e região e envio para todo o Brasil.",
+    images: ["/logo.png"],
+  },
 };
 
 import { Truck, Clock, MapPin } from "lucide-react";

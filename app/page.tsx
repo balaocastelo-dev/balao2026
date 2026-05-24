@@ -5,15 +5,46 @@ import Carousel from "@/components/Carousel";
 import ProductCarousel from "@/components/ProductCarousel";
 import SeoContent from "@/components/SeoContent";
 import JsonLd, { generateOrganizationSchema } from "@/components/JsonLd";
-// InstagramFeed will be moved to Sidebar area
-// import InstagramFeed from "@/components/InstagramFeed";
 import { getProducts, getCarouselImages, getCategories, getHomeBlocks } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { parsePriceToNumber, Product } from "@/lib/utils";
+import type { Metadata } from "next";
+import { SITE_CONFIG } from "@/lib/config";
 
 export const dynamic = 'force-dynamic';
 
 type SearchParams = Promise<{ category?: string; search?: string }>;
+
+export async function generateMetadata(props: { searchParams: SearchParams }): Promise<Metadata> {
+  const sp = await props.searchParams;
+  const hasFacet = Boolean((sp?.category || "").trim() || (sp?.search || "").trim());
+  const title = "Balão da Informática | Loja de Informática com Entrega Rápida em Campinas e Região";
+  const description =
+    "Loja de informática completa com entrega rápida para Campinas e região. PCs Gamer, notebooks, hardware, periféricos e assistência técnica especializada.";
+  const canonical = "https://www.balao.info/";
+
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      type: "website",
+      locale: "pt_BR",
+      url: canonical,
+      title,
+      description,
+      siteName: SITE_CONFIG.name,
+      images: [{ url: "/logo.png" }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ["/logo.png"],
+    },
+    robots: hasFacet ? { index: false, follow: true } : { index: true, follow: true },
+  };
+}
 
 export default async function Home(props: {
   searchParams: SearchParams;

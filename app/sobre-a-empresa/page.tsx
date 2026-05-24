@@ -12,6 +12,24 @@ export const metadata: Metadata = {
     "estrutura logística campinas",
     "entrega rápida informática",
   ],
+  alternates: { canonical: "https://www.balao.info/sobre-a-empresa" },
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    url: "https://www.balao.info/sobre-a-empresa",
+    title: "Sobre a Empresa | Balão da Informática",
+    description:
+      "Dados corporativos, estrutura logística e lojas do Balão da Informática, referência nacional em informática com entrega rápida para Campinas e região.",
+    siteName: SITE_CONFIG.name,
+    images: [{ url: "/logo.png" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Sobre a Empresa | Balão da Informática",
+    description:
+      "Dados corporativos, estrutura logística e lojas do Balão da Informática, referência nacional em informática com entrega rápida para Campinas e região.",
+    images: ["/logo.png"],
+  },
 };
 
 import { SITE_CONFIG } from "@/lib/config";

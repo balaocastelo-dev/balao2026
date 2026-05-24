@@ -43,11 +43,21 @@ export const metadata: Metadata = {
     "chave ativação windows",
     "licença vitalicia office",
   ],
+  alternates: { canonical: "https://www.balao.info/microsoft" },
   openGraph: {
     title: "Licenças Microsoft Originais em Campinas | Entrega Digital Imediata",
     description:
       "Garanta seu software original. Licenças Windows e Office com garantia e suporte técnico. Ativação online ou na loja.",
     type: "website",
+    url: "https://www.balao.info/microsoft",
+    siteName: SITE_CONFIG.name,
+    images: [{ url: "/logo.png" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Licenças Microsoft Originais em Campinas | Entrega Digital Imediata",
+    description: "Garanta seu software original. Licenças Windows e Office com garantia e suporte técnico. Ativação online ou na loja.",
+    images: ["/logo.png"],
   },
 };
 

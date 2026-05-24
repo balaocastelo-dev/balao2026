@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next'
-import { getProducts, getCategories } from '@/lib/db'
+import { getCategories, getProductsForSitemap } from '@/lib/db'
 import { listBlogPostsForPage } from '@/lib/blog-store'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -25,6 +25,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/fale-conosco',
     '/sobre-nos',
     '/sobre-a-empresa',
+    '/assistenciagames',
+    '/carregadores',
+    '/microsoft',
+    '/reparoapple',
+    '/telaiphone',
+    '/tonner',
     '/como-comprar',
     '/envio-e-entrega',
     '/trocas-e-devolucoes',
@@ -48,8 +54,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Produtos (Limitado aos 1000 mais recentes para performance)
   // Nota: getProducts já tem paginação interna, mas aqui vamos pegar tudo o que ele retornar
   // Se getProducts retornar muitos, pode ser lento.
-  const products = await getProducts()
-  const productRoutes = products.slice(0, 1000).map((product) => ({
+  const products = await getProductsForSitemap(1000)
+  const productRoutes = products.map((product) => ({
     url: `${baseUrl}/product/${product.slug || product.id}`,
     lastModified: new Date(product.created_at || new Date()),
     changeFrequency: 'weekly' as const,

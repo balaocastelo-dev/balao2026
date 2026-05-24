@@ -43,6 +43,32 @@ export async function getProducts(): Promise<Product[]> {
   }
 }
 
+export async function getProductsForSitemap(limit = 1000): Promise<Pick<Product, "id" | "slug" | "created_at">[]> {
+  try {
+    const take = Math.max(1, Math.min(5000, limit));
+    const { data, error } = await supabase
+      .from("products")
+      .select("id,slug,created_at")
+      .order("created_at", { ascending: false })
+      .limit(take);
+
+    if (error) {
+      return [];
+    }
+
+    const rows = (data as any[]) || [];
+    return rows
+      .map((r) => ({
+        id: String(r.id),
+        slug: String(r.slug || ""),
+        created_at: r.created_at ? String(r.created_at) : undefined,
+      }))
+      .filter((p) => p.id && p.slug);
+  } catch {
+    return [];
+  }
+}
+
 export async function getProductsByCategory(categorySlug: string): Promise<Product[]> {
   try {
     const { data, error } = await supabase

@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import type { Metadata } from "next";
 import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from "@/components/JsonLd";
+import { SITE_CONFIG } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "Sobre Nós | Balão da Informática",
@@ -13,6 +14,24 @@ export const metadata: Metadata = {
     "loja de informática brasil",
     "entrega rápida campinas",
   ],
+  alternates: { canonical: "https://www.balao.info/sobre-nos" },
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    url: "https://www.balao.info/sobre-nos",
+    title: "Sobre Nós | Balão da Informática",
+    description:
+      "Conheça a história, missão e valores do Balão da Informática, loja de informática com entrega rápida em Campinas e região e envio para todo o Brasil.",
+    siteName: SITE_CONFIG.name,
+    images: [{ url: "/logo.png" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Sobre Nós | Balão da Informática",
+    description:
+      "Conheça a história, missão e valores do Balão da Informática, loja de informática com entrega rápida em Campinas e região e envio para todo o Brasil.",
+    images: ["/logo.png"],
+  },
 };
 
 export default function SobreNosPage() {

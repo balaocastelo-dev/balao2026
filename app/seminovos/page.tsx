@@ -20,11 +20,21 @@ export const metadata: Metadata = {
     "notebook seminovo brasil",
     "entrega rápida notebook campinas",
   ],
+  alternates: { canonical: "https://www.balao.info/seminovos" },
   openGraph: {
     title: "Notebooks Seminovos em Campinas com Entrega Rápida | Balão da Informática",
     description:
       "Compre notebooks usados e seminovos com garantia em Campinas, estoque atualizado e entrega rápida para Campinas e região metropolitana.",
     type: "website",
+    url: "https://www.balao.info/seminovos",
+    siteName: SITE_CONFIG.name,
+    images: [{ url: "/logo.png" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Notebooks Seminovos em Campinas com Entrega Rápida | Balão da Informática",
+    description: "Compre notebooks usados e seminovos com garantia em Campinas, estoque atualizado e entrega rápida para Campinas e região metropolitana.",
+    images: ["/logo.png"],
   },
 };
 
@@ -324,4 +334,3 @@ export default async function SeminovosPage() {
     </div>
   );
 }
-

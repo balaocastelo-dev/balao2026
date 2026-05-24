@@ -39,11 +39,21 @@ export const metadata: Metadata = {
     "notebook gamer campinas",
     "loja de notebook campinas",
   ],
+  alternates: { canonical: "https://www.balao.info/notebooks" },
   openGraph: {
     title: "Notebooks em Campinas: Performance e Mobilidade | Balão da Informática",
     description:
       "Notebooks novos e seminovos com garantia, upgrade na hora e entrega rápida em Campinas.",
     type: "website",
+    url: "https://www.balao.info/notebooks",
+    siteName: SITE_CONFIG.name,
+    images: [{ url: "/logo.png" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Notebooks em Campinas: Performance e Mobilidade | Balão da Informática",
+    description: "Notebooks novos e seminovos com garantia, upgrade na hora e entrega rápida em Campinas.",
+    images: ["/logo.png"],
   },
 };
 

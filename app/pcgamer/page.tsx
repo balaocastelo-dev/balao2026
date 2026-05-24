@@ -105,11 +105,21 @@ export const metadata: Metadata = {
     "pc gamer montagem profissional",
     "pc gamer entrega rápida campinas",
   ],
+  alternates: { canonical: "https://www.balao.info/pcgamer" },
   openGraph: {
     title: "PC Gamer em Campinas com Entrega Rápida | Balão da Informática",
     description:
       "PC Gamer de alta performance com montagem profissional, garantia local e entrega rápida em Campinas e região.",
     type: "website",
+    url: "https://www.balao.info/pcgamer",
+    siteName: SITE_CONFIG.name,
+    images: [{ url: "/logo.png" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "PC Gamer em Campinas com Entrega Rápida | Balão da Informática",
+    description: "PC Gamer de alta performance com montagem profissional, garantia local e entrega rápida em Campinas e região.",
+    images: ["/logo.png"],
   },
 };
 

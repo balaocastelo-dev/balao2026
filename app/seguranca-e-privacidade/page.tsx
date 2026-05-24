@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import type { Metadata } from "next";
 import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from "@/components/JsonLd";
+import { SITE_CONFIG } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "Segurança e Privacidade | Balão da Informática",
@@ -12,6 +13,24 @@ export const metadata: Metadata = {
     "compras seguras online",
     "lgpd ecommerce",
   ],
+  alternates: { canonical: "https://www.balao.info/seguranca-e-privacidade" },
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    url: "https://www.balao.info/seguranca-e-privacidade",
+    title: "Segurança e Privacidade | Balão da Informática",
+    description:
+      "Política de privacidade, LGPD e certificados de segurança do Balão da Informática para compras online em todo o Brasil com foco em clientes de Campinas e região.",
+    siteName: SITE_CONFIG.name,
+    images: [{ url: "/logo.png" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Segurança e Privacidade | Balão da Informática",
+    description:
+      "Política de privacidade, LGPD e certificados de segurança do Balão da Informática para compras online em todo o Brasil com foco em clientes de Campinas e região.",
+    images: ["/logo.png"],
+  },
 };
 
 import { ShieldCheck, Lock, CreditCard } from "lucide-react";

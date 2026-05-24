@@ -245,11 +245,21 @@ export const metadata: Metadata = {
     "carregador samsung campinas",
     "carregador asus campinas",
   ],
+  alternates: { canonical: "https://www.balao.info/carregadores" },
   openGraph: {
     title: "Carregadores de Notebook em Campinas | Entrega Rápida",
     description:
       "Precisando de carregador urgente? Entregamos em até 60 minutos em Campinas e região. Todas as marcas e modelos com garantia.",
     type: "website",
+    url: "https://www.balao.info/carregadores",
+    siteName: SITE_CONFIG.name,
+    images: [{ url: "/logo.png" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Carregadores de Notebook em Campinas | Entrega Rápida",
+    description: "Precisando de carregador urgente? Entregamos em até 60 minutos em Campinas e região. Todas as marcas e modelos com garantia.",
+    images: ["/logo.png"],
   },
 };
 

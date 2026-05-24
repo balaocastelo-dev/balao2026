@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import type { Metadata } from "next";
 import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from "@/components/JsonLd";
+import { SITE_CONFIG } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: "Trocas e Devoluções | Balão da Informática",
@@ -12,6 +13,22 @@ export const metadata: Metadata = {
     "balão da informática trocas",
     "compras online campinas",
   ],
+  alternates: { canonical: "https://www.balao.info/trocas-e-devolucoes" },
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    url: "https://www.balao.info/trocas-e-devolucoes",
+    title: "Trocas e Devoluções | Balão da Informática",
+    description: "Política de trocas, devoluções e garantias do Balão da Informática para clientes de Campinas, região metropolitana e todo o Brasil.",
+    siteName: SITE_CONFIG.name,
+    images: [{ url: "/logo.png" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Trocas e Devoluções | Balão da Informática",
+    description: "Política de trocas, devoluções e garantias do Balão da Informática para clientes de Campinas, região metropolitana e todo o Brasil.",
+    images: ["/logo.png"],
+  },
 };
 
 import { RefreshCcw, AlertTriangle, CheckCircle } from "lucide-react";

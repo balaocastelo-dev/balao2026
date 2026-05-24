@@ -22,15 +22,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!product) {
     return {
       title: 'Produto não encontrado',
+      robots: { index: false, follow: false },
     };
   }
+
+  const canonical = `https://www.balao.info/product/${product.slug || product.id}`;
 
   return {
     title: `${product.name} | Balão da Informática`,
     description: `Compre ${product.name} por ${product.price}`,
+    alternates: { canonical },
     openGraph: {
       title: product.name,
       description: `Por apenas ${product.price} - ${product.category || "Hardware"}`,
+      url: canonical,
       images: [
         {
           url: product.image,
@@ -48,6 +53,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: `Por apenas ${product.price}`,
       images: [product.image],
     },
+    robots: { index: true, follow: true },
   };
 }
 

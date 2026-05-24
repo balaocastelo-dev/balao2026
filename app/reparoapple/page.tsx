@@ -21,6 +21,7 @@ import {
 import Link from 'next/link'
 import ProductCarousel from '@/components/ProductCarousel'
 import { getProducts } from '@/lib/db'
+import { SITE_CONFIG } from "@/lib/config";
 
 export const metadata: Metadata = {
   title: 'Conserto de iPhone e iPad em Campinas | Assistência Apple Especializada | Balão da Informática',
@@ -36,7 +37,23 @@ export const metadata: Metadata = {
     'vidro traseiro iphone',
     'loja apple campinas',
     'manutenção iphone'
-  ]
+  ],
+  alternates: { canonical: "https://www.balao.info/reparoapple" },
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    url: "https://www.balao.info/reparoapple",
+    title: "Conserto de iPhone e iPad em Campinas | Assistência Apple Especializada | Balão da Informática",
+    description: "Assistência Técnica Especializada Apple em Campinas. Troca de tela iPhone, bateria, conector de carga, Face ID e reparo de placa. Peças premium e garantia.",
+    siteName: SITE_CONFIG.name,
+    images: [{ url: "/logo.png" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Conserto de iPhone e iPad em Campinas | Assistência Apple Especializada | Balão da Informática",
+    description: "Assistência Técnica Especializada Apple em Campinas. Troca de tela iPhone, bateria, conector de carga, Face ID e reparo de placa. Peças premium e garantia.",
+    images: ["/logo.png"],
+  },
 }
 
 // Novos Blocos

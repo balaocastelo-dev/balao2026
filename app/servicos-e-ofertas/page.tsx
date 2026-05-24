@@ -44,13 +44,22 @@ export const metadata: Metadata = {
     'limpeza de pc gamer',
     'balão da informática serviços'
   ],
+  alternates: { canonical: 'https://www.balao.info/servicos-e-ofertas' },
   openGraph: {
     title: 'Serviços de TI e Ofertas Relâmpago | Balão da Informática',
     description:
       'Confira nossas ofertas imperdíveis e serviços de assistência técnica especializada em Campinas. Qualidade, garantia e preço justo.',
-    url: '/servicos-e-ofertas',
+    url: 'https://www.balao.info/servicos-e-ofertas',
     type: 'website',
-    images: ['/images/og-servicos.jpg']
+    siteName: SITE_CONFIG.name,
+    images: ['/logo.png']
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Serviços de TI e Ofertas Relâmpago | Balão da Informática',
+    description:
+      'Confira nossas ofertas imperdíveis e serviços de assistência técnica especializada em Campinas. Qualidade, garantia e preço justo.',
+    images: ['/logo.png']
   },
   robots: { index: true, follow: true }
 }

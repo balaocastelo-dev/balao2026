@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import Header from '@/components/Header'
+import { SITE_CONFIG } from "@/lib/config";
 import { 
   Printer, 
   Truck, 
@@ -37,7 +38,23 @@ export const metadata: Metadata = {
     'cartucho e toner',
     'toner compatível premium',
     'distribuidora de toner'
-  ]
+  ],
+  alternates: { canonical: "https://www.balao.info/tonner" },
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    url: "https://www.balao.info/tonner",
+    title: "Venda e Entrega de Toner em Campinas | Original e Compatível | Balão da Informática",
+    description: "Compre Toner HP, Brother, Samsung e Canon com entrega rápida em Campinas e envio para todo Brasil. Preços de atacado e varejo. Consulte nosso estoque!",
+    siteName: SITE_CONFIG.name,
+    images: [{ url: "/logo.png" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Venda e Entrega de Toner em Campinas | Original e Compatível | Balão da Informática",
+    description: "Compre Toner HP, Brother, Samsung e Canon com entrega rápida em Campinas e envio para todo Brasil. Preços de atacado e varejo. Consulte nosso estoque!",
+    images: ["/logo.png"],
+  },
 }
 
 export default async function TonnerPage() {

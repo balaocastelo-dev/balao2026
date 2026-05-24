@@ -3,6 +3,29 @@ import PCBuilder from "@/components/PCBuilder";
 import { Monitor, Cpu, Settings } from "lucide-react";
 import Header from "@/components/Header";
 import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from "@/components/JsonLd";
+import type { Metadata } from "next";
+import { SITE_CONFIG } from "@/lib/config";
+
+export const metadata: Metadata = {
+  title: "Monte seu PC Gamer em Campinas | Balão da Informática",
+  description: "Monte seu PC Gamer peça por peça, com verificação de compatibilidade e montagem profissional em Campinas.",
+  alternates: { canonical: "https://www.balao.info/monteseupc" },
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    url: "https://www.balao.info/monteseupc",
+    title: "Monte seu PC Gamer em Campinas | Balão da Informática",
+    description: "Monte seu PC Gamer peça por peça, com verificação de compatibilidade e montagem profissional em Campinas.",
+    siteName: SITE_CONFIG.name,
+    images: [{ url: "/logo.png" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Monte seu PC Gamer em Campinas | Balão da Informática",
+    description: "Monte seu PC Gamer peça por peça, com verificação de compatibilidade e montagem profissional em Campinas.",
+    images: ["/logo.png"],
+  },
+};
 
 // Force dynamic rendering to ensure we get fresh products
 export const dynamic = 'force-dynamic';

@@ -23,6 +23,12 @@ export const viewport: Viewport = {
   themeColor: "#E60012",
 };
 
+function getMetadataBase() {
+  const url = process.env.NEXT_PUBLIC_SITE_URL || "https://www.balao.info";
+  if (url.startsWith("http")) return new URL(url);
+  return new URL(`https://${url}`);
+}
+
 export const metadata: Metadata = {
   title: {
     template: "%s | Balão da Informática",
@@ -31,6 +37,7 @@ export const metadata: Metadata = {
   },
   description:
     "Loja de informática completa com entrega rápida para Campinas, Sumaré, Hortolândia, Paulínia, Valinhos, Vinhedo e todo o Brasil. PCs Gamer, notebooks, hardware, periféricos e assistência técnica especializada.",
+  metadataBase: getMetadataBase(),
   keywords: [
     "loja de informática",
     "loja de informática online",
@@ -54,9 +61,6 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
-  alternates: {
-    canonical: "https://www.balao.info",
-  },
   openGraph: {
     type: "website",
     locale: "pt_BR",
@@ -66,6 +70,15 @@ export const metadata: Metadata = {
     description:
       "Loja de informática em Campinas com foco em PCs Gamer, notebooks e hardware, entrega rápida na região de Campinas e envio para todo o Brasil.",
     siteName: "Balão da Informática",
+    images: [{ url: "/logo.png" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title:
+      "Balão da Informática | Loja de Informática com Entrega Rápida em Campinas e Região",
+    description:
+      "Loja de informática em Campinas com foco em PCs Gamer, notebooks e hardware, entrega rápida na região de Campinas e envio para todo o Brasil.",
+    images: ["/logo.png"],
   },
 };
 
@@ -73,77 +86,71 @@ import { SITE_CONFIG } from "@/lib/config";
 
 const jsonLd = {
   "@context": "https://schema.org",
-  "@type": "Store",
-  "name": SITE_CONFIG.name,
-  "image": "https://www.balao.info/logo.png",
-  "description": "Loja de informática em Campinas especializada em computadores, PC Gamer, notebooks, hardware e periféricos, com entrega rápida para Campinas e região.",
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": SITE_CONFIG.address,
-    "addressLocality": "Campinas",
-    "addressRegion": "SP",
-    "postalCode": "13025-000",
-    "addressCountry": "BR"
-  },
-  "geo": {
-    "@type": "GeoCoordinates",
-    "latitude": -22.9099,
-    "longitude": -47.0626
-  },
-  "url": "https://www.balao.info",
-  "telephone": `+55 ${SITE_CONFIG.phone.display}`,
-  "email": SITE_CONFIG.email,
-  "openingHoursSpecification": [
+  "@graph": [
     {
-      "@type": "OpeningHoursSpecification",
-      "dayOfWeek": [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday"
+      "@type": ["ComputerStore", "Store", "LocalBusiness"],
+      "@id": "https://www.balao.info/#store",
+      name: SITE_CONFIG.name,
+      image: "https://www.balao.info/logo.png",
+      description:
+        "Loja de informática em Campinas especializada em computadores, PC Gamer, notebooks, hardware e periféricos, com entrega rápida para Campinas e região.",
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: SITE_CONFIG.address,
+        addressLocality: "Campinas",
+        addressRegion: "SP",
+        postalCode: "13025-000",
+        addressCountry: "BR",
+      },
+      geo: {
+        "@type": "GeoCoordinates",
+        latitude: -22.9099,
+        longitude: -47.0626,
+      },
+      url: "https://www.balao.info",
+      telephone: `+${SITE_CONFIG.phone.number}`,
+      email: SITE_CONFIG.email,
+      priceRange: "$$",
+      openingHoursSpecification: [
+        {
+          "@type": "OpeningHoursSpecification",
+          dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+          opens: "09:00",
+          closes: "18:00",
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          dayOfWeek: "Saturday",
+          opens: "09:00",
+          closes: "13:00",
+        },
       ],
-      "opens": "09:00",
-      "closes": "18:00"
+      areaServed: ["Campinas", "Sumaré", "Hortolândia", "Paulínia", "Valinhos", "Vinhedo", "Brasil"],
+      sameAs: [SITE_CONFIG.social.instagram, SITE_CONFIG.social.facebook],
+      makesOffer: {
+        "@type": "OfferCatalog",
+        name: "Informática e Tecnologia",
+        itemListElement: [
+          { "@type": "Offer", name: "PC Gamer", category: "Computadores" },
+          { "@type": "Offer", name: "Notebooks", category: "Informática" },
+          { "@type": "Offer", name: "Periféricos e Acessórios", category: "Informática" },
+        ],
+      },
     },
     {
-      "@type": "OpeningHoursSpecification",
-      "dayOfWeek": "Saturday",
-      "opens": "09:00",
-      "closes": "13:00"
-    }
-  ],
-  "priceRange": "$$",
-  "areaServed": [
-    "Campinas",
-    "Sumaré",
-    "Hortolândia",
-    "Paulínia",
-    "Valinhos",
-    "Vinhedo",
-    "Brasil"
-  ],
-  "makesOffer": {
-    "@type": "OfferCatalog",
-    "name": "Informática e Tecnologia",
-    "itemListElement": [
-      {
-        "@type": "Offer",
-        "name": "PC Gamer",
-        "category": "Computadores"
+      "@type": "WebSite",
+      "@id": "https://www.balao.info/#website",
+      url: "https://www.balao.info",
+      name: SITE_CONFIG.name,
+      publisher: { "@id": "https://www.balao.info/#store" },
+      inLanguage: "pt-BR",
+      potentialAction: {
+        "@type": "SearchAction",
+        target: "https://www.balao.info/?search={search_term_string}",
+        "query-input": "required name=search_term_string",
       },
-      {
-        "@type": "Offer",
-        "name": "Notebooks",
-        "category": "Informática"
-      },
-      {
-        "@type": "Offer",
-        "name": "Periféricos e Acessórios",
-        "category": "Informática"
-      }
-    ]
-  }
+    },
+  ],
 };
 
 export default async function RootLayout({

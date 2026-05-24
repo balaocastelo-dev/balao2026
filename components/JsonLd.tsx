@@ -1,4 +1,4 @@
-import { Product } from "@/lib/utils";
+import { parsePriceToNumber, Product } from "@/lib/utils";
 import { SITE_CONFIG } from "@/lib/config";
 
 type JsonLdProps = {
@@ -21,7 +21,7 @@ export default function JsonLd({ data }: JsonLdProps) {
 export function generateOrganizationSchema() {
   return {
     "@context": "https://schema.org",
-    "@type": "ComputerStore",
+    "@type": ["ComputerStore", "Store", "LocalBusiness"],
     "@id": "https://www.balao.info/#organization",
     name: SITE_CONFIG.name,
     url: "https://www.balao.info",
@@ -34,13 +34,37 @@ export function generateOrganizationSchema() {
       streetAddress: SITE_CONFIG.address,
       addressLocality: "Campinas",
       addressRegion: "SP",
+      postalCode: "13025-000",
       addressCountry: "BR",
     },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: -22.9099,
+      longitude: -47.0626,
+    },
+    openingHoursSpecification: [
+      {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        opens: "09:00",
+        closes: "18:00",
+      },
+      {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: "Saturday",
+        opens: "09:00",
+        closes: "13:00",
+      },
+    ],
+    areaServed: ["Campinas", "Sumaré", "Hortolândia", "Paulínia", "Valinhos", "Vinhedo", "Brasil"],
     sameAs: [SITE_CONFIG.social.instagram, SITE_CONFIG.social.facebook],
   };
 }
 
 export function generateProductSchema(product: Product) {
+  const priceNumber = parsePriceToNumber(product.price);
+  const price = Number.isFinite(priceNumber) ? priceNumber.toFixed(2) : undefined;
+  const priceValidUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
   return {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -55,9 +79,11 @@ export function generateProductSchema(product: Product) {
       "@type": "Offer",
       url: `https://www.balao.info/product/${product.slug || product.id}`,
       priceCurrency: "BRL",
-      price: product.price,
+      ...(price ? { price } : {}),
+      priceValidUntil,
       availability: "https://schema.org/InStock",
       itemCondition: "https://schema.org/NewCondition",
+      seller: { "@id": "https://www.balao.info/#organization" },
     },
   };
 }
