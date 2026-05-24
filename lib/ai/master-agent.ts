@@ -1,3 +1,13 @@
+type EditorialPolicies = {
+  version: string;
+  mustHaveCoverImage: boolean;
+  forbidCoverInBody: boolean;
+  maxPlagiarismSimilarity: number;
+  allowedVideoHosts: string[];
+  requiredMobileImage: boolean;
+  regionalKeywords: string[];
+};
+
 export type MasterAgentId =
   | "cron.blog-minute"
   | "cron.blog-rss"
@@ -7,7 +17,15 @@ export type MasterAgentId =
   | "cron.process-emails"
   | "cron.marketing"
   | "admin.ia-kabum-sync"
-  | "ai.rewrite-description";
+  | "ai.rewrite-description"
+  | "agent.master"
+  | "agent.rss-collector"
+  | "agent.article-reader"
+  | "agent.images"
+  | "agent.videos"
+  | "agent.journalistic"
+  | "agent.seo-geo"
+  | "agent.regional-campinas";
 
 export type MasterAgentStatus = "idle" | "running" | "error" | "disabled";
 
@@ -35,6 +53,7 @@ export type MasterPolicies = {
   globalSeoRules: string[];
   globalGeoRules: string[];
   safetyRules: string[];
+  editorialPolicies: EditorialPolicies;
 };
 
 type AgentRuntime = {
@@ -43,6 +62,33 @@ type AgentRuntime = {
   runs: number;
   errors: number;
 };
+
+function getDefaultEditorialPolicies(): EditorialPolicies {
+  return {
+    version: "v1",
+    mustHaveCoverImage: true,
+    forbidCoverInBody: true,
+    maxPlagiarismSimilarity: 0.22,
+    allowedVideoHosts: ["youtube.com", "www.youtube.com", "youtu.be", "globoplay.globo.com", "www.youtube-nocookie.com"],
+    requiredMobileImage: true,
+    regionalKeywords: [
+      "campinas",
+      "rmc",
+      "castelo",
+      "sumaré",
+      "sumare",
+      "hortolândia",
+      "hortolandia",
+      "paulínia",
+      "paulinia",
+      "valinhos",
+      "vinhedo",
+      "indaiatuba",
+      "jaguariúna",
+      "jaguariuna",
+    ],
+  };
+}
 
 function getDefaultPolicies(): MasterPolicies {
   return {
@@ -55,7 +101,14 @@ function getDefaultPolicies(): MasterPolicies {
       "Fonte citada no final quando vier de RSS",
     ],
     globalGeoRules: ["Conteúdo local deve citar Campinas e região quando for pertinente", "Evitar generalizações e manter linguagem pt-BR"],
-    safetyRules: ["Nunca expor segredos/keys", "Evitar embeds fora da whitelist", "Não copiar texto integral da fonte"],
+    safetyRules: [
+      "Nunca expor segredos/keys",
+      "Evitar embeds fora da whitelist",
+      "Não copiar texto integral da fonte",
+      "Nunca publicar matéria sem imagem",
+      "Proibido repetir a imagem de capa no corpo",
+    ],
+    editorialPolicies: getDefaultEditorialPolicies(),
   };
 }
 
@@ -132,6 +185,70 @@ function getDefaultAgents(): MasterAgentSpec[] {
       kind: "api",
       integratedWithMaster: false,
       capabilities: ["reescrita", "SEO"],
+    },
+    {
+      id: "agent.master",
+      name: "Agente Mestre (editorial)",
+      schedule: null,
+      kind: "api",
+      integratedWithMaster: true,
+      capabilities: ["prioridades", "aprovação", "anti-plágio", "publicação", "supervisão"],
+    },
+    {
+      id: "agent.rss-collector",
+      name: "Agente Coletor RSS",
+      schedule: null,
+      kind: "api",
+      integratedWithMaster: true,
+      capabilities: ["monitora feeds", "evita duplicidade", "registra fontes"],
+    },
+    {
+      id: "agent.article-reader",
+      name: "Agente Leitor de Matéria",
+      schedule: null,
+      kind: "api",
+      integratedWithMaster: true,
+      capabilities: ["limpeza HTML", "extração título/autor/data", "conteúdo principal"],
+    },
+    {
+      id: "agent.images",
+      name: "Agente de Imagens",
+      schedule: null,
+      kind: "api",
+      integratedWithMaster: true,
+      capabilities: ["extrai imagens", "ALT text", "imagem principal", "prompt quando faltar"],
+    },
+    {
+      id: "agent.videos",
+      name: "Agente de Vídeos",
+      schedule: null,
+      kind: "api",
+      integratedWithMaster: true,
+      capabilities: ["valida embeds", "prioriza Campinas/RMC", "associa vídeos"],
+    },
+    {
+      id: "agent.journalistic",
+      name: "Agente Jornalístico",
+      schedule: null,
+      kind: "api",
+      integratedWithMaster: true,
+      capabilities: ["reescreve sem plágio", "novo título/subtítulo", "leitura rápida"],
+    },
+    {
+      id: "agent.seo-geo",
+      name: "Agente SEO/GEO",
+      schedule: null,
+      kind: "api",
+      integratedWithMaster: true,
+      capabilities: ["meta title/description", "slug", "schema.org", "FAQ", "Discover", "GEO"],
+    },
+    {
+      id: "agent.regional-campinas",
+      name: "Agente Regional Campinas/RMC",
+      schedule: null,
+      kind: "api",
+      integratedWithMaster: true,
+      capabilities: ["detectar relação regional", "contexto local", "priorizar termos locais"],
     },
   ];
 }
