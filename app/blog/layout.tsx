@@ -67,10 +67,6 @@ export default function BlogLayout({ children }: { children: React.ReactNode }) 
               <a href="/blog/feed.xml" className="hover:text-white">
                 RSS
               </a>
-              <span className="text-white/20">•</span>
-              <a href="https://wa.me/5519987510267" className="hover:text-white" target="_blank" rel="noreferrer">
-                WhatsApp
-              </a>
             </div>
           </div>
         </div>
@@ -111,8 +107,7 @@ export default function BlogLayout({ children }: { children: React.ReactNode }) 
 
       <footer className="border-t border-neutral-200 bg-white">
         <div className="mx-auto w-full max-w-6xl px-4 py-8 text-xs text-neutral-600">
-          Conteúdo automatizado a partir de fontes públicas (RSS/URLs) com reescrita por IA. Links
-          originais são mantidos como referência. Atendimento: WhatsApp 19 98751-0267.
+          Conteúdo automatizado a partir de fontes públicas (RSS/URLs). Atendimento: WhatsApp 19 98751-0267.
         </div>
       </footer>
     </div>

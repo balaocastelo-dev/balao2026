@@ -70,7 +70,7 @@ export async function generateMetadata(props: { searchParams?: SearchParams }): 
       title,
       description,
       siteName: SITE_CONFIG.name,
-      images: [{ url: ogHomeFallbackUrl(categoryRaw || "home") }],
+      images: [{ url: ogHomeFallbackUrl("home") }],
     },
     robots: { index: true, follow: true },
   };

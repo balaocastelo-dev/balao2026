@@ -59,6 +59,34 @@ function stripFirstCoverImageFromHtml(inputHtml: string, coverImageUrl: string |
   return inputHtml;
 }
 
+function isAllowedHref(href: string): boolean {
+  const h = String(href || "").trim();
+  if (!h) return false;
+  if (h.startsWith("#")) return true;
+  if (h.startsWith("/")) return true;
+  try {
+    const u = new URL(h);
+    const host = u.hostname.replace(/^www\./i, "").toLowerCase();
+    return host === "balao.info";
+  } catch {
+    return false;
+  }
+}
+
+function preventExternalNavigationInHtml(inputHtml: string): string {
+  const html = String(inputHtml || "");
+  if (!html) return html;
+
+  return html.replace(/<a\b[^>]*\bhref\s*=\s*(?:"([^"]*)"|'([^']*)')[^>]*>/gi, (m, h1, h2) => {
+    const href = String(h1 || h2 || "").trim();
+    if (isAllowedHref(href)) return m;
+    return m
+      .replace(/\s*\bhref\s*=\s*(?:"[^"]*"|'[^']*')/i, "")
+      .replace(/\s*\btarget\s*=\s*(?:"[^"]*"|'[^']*')/i, "")
+      .replace(/\s*\brel\s*=\s*(?:"[^"]*"|'[^']*')/i, "");
+  });
+}
+
 export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await props.params;
   const post = await getBlogPostForPage(slug);
@@ -118,7 +146,7 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
   const category = (post.category || "Tecnologia").trim() || "Tecnologia";
   const published = post.published_at ? new Date(post.published_at) : new Date();
   const createdAt = post.created_at ? new Date(post.created_at) : new Date();
-  const safeHtml = stripFirstCoverImageFromHtml(sanitizeHtmlBasic(post.content_html || ""), post.cover_image);
+  const safeHtml = preventExternalNavigationInHtml(stripFirstCoverImageFromHtml(sanitizeHtmlBasic(post.content_html || ""), post.cover_image));
   const fallbackImageUrl = ogFallbackUrl({
     slug: post.slug,
     title: post.title,
@@ -171,9 +199,7 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
       <article className="overflow-hidden rounded-md border border-neutral-200 bg-white">
         <div className="p-6">
           <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-neutral-600">
-            <Link href={{ pathname: "/blog", query: { cat: category } }} className="uppercase tracking-wide text-[#e41e26] hover:underline">
-              {category}
-            </Link>
+            <span className="uppercase tracking-wide text-[#e41e26]">{category}</span>
             {post.reading_time_minutes ? <span>{post.reading_time_minutes} min</span> : null}
             {sourceDomain ? <span>{sourceDomain}</span> : null}
             <span>{new Date(post.published_at ?? post.created_at).toLocaleDateString("pt-BR")}</span>
@@ -203,14 +229,9 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
             <div className="mt-1 text-sm text-neutral-700">
               Fale com um especialista e receba recomendação direta para o seu uso.
             </div>
-            <a
-              href="https://wa.me/5519987510267"
-              target="_blank"
-              rel="noreferrer"
-              className="mt-3 inline-flex w-full items-center justify-center rounded-md bg-[#e41e26] px-4 py-3 text-sm font-extrabold text-white hover:bg-[#c81920]"
-            >
-              Chamar no WhatsApp 19 98751-0267
-            </a>
+            <div className="mt-3 flex w-full items-center justify-center rounded-md bg-[#e41e26] px-4 py-3 text-sm font-extrabold text-white">
+              WhatsApp 19 98751-0267
+            </div>
             <div className="mt-3 grid grid-cols-2 gap-2">
               <Link href="/notebooks" className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs font-bold text-neutral-900 hover:bg-neutral-50">
                 Notebooks
@@ -223,10 +244,7 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
 
           {post.source_url ? (
             <footer className="mt-10 border-t border-neutral-200 pt-4 text-sm text-neutral-600">
-              Fonte:{" "}
-              <a className="underline hover:no-underline" href={post.source_url} target="_blank" rel="noreferrer">
-                {post.source_url}
-              </a>
+              Fonte: {post.source_url}
             </footer>
           ) : null}
         </div>
