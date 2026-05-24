@@ -190,6 +190,37 @@ function buildFallbackRssHtml(input: { title: string; summary: string; sourceUrl
   `.trim();
 }
 
+function buildFallbackTrendHtml(input: { query: string; dateIso: string; sourceUrl: string }): string {
+  const q = cleanText(input.query);
+  const date = new Date(input.dateIso);
+  const dateText = Number.isFinite(date.getTime()) ? date.toLocaleDateString("pt-BR") : "";
+  const queryEscaped = q || "tendência do dia";
+  return `
+<p><strong>${queryEscaped}</strong> apareceu entre os assuntos em alta ${dateText ? `em ${dateText}` : "hoje"}. Abaixo, explicamos o que essa tendência pode indicar e como ela influencia decisões de compra de informática.</p>
+<h2>Por que isso está em alta?</h2>
+<p>Assuntos em alta normalmente se relacionam a lançamentos, promoções, atualizações de software, eventos e comparativos. Quando o tema envolve tecnologia, ele costuma gerar dúvidas sobre <strong>custo-benefício</strong>, compatibilidade e disponibilidade.</p>
+<h2>O que isso muda na hora de comprar</h2>
+<ul>
+  <li><strong>Melhor momento de compra:</strong> tendências podem antecipar promoções e quedas de preço.</li>
+  <li><strong>Compatibilidade:</strong> confira geração/soquete (CPU), padrão (RAM/SSD) e portas.</li>
+  <li><strong>Uso real:</strong> priorize o que impacta seu dia a dia (trabalho, estudo, games, criação).</li>
+</ul>
+<h2>Checklist rápido (para decidir sem erro)</h2>
+<ol>
+  <li>Defina seu objetivo e seu orçamento.</li>
+  <li>Escolha uma configuração equilibrada (CPU/GPU/RAM/SSD).</li>
+  <li>Compare opções e valide compatibilidade antes de comprar.</li>
+</ol>
+<h2>Quer uma recomendação pronta?</h2>
+<p>Fale com um especialista e receba indicação direta com link do produto: <a href="${WHATSAPP_URL}" target="_blank" rel="noreferrer">WhatsApp 19 98751-0267</a>.</p>
+<p>Atalhos úteis: <a href="${SITE_URL}/notebooks">Notebooks</a> • <a href="${SITE_URL}/pcgamer">PC Gamer</a> • <a href="${SITE_URL}/departamentos">Departamentos</a> • <a href="${SITE_URL}/promocao">Promoções</a></p>
+<h2>Palavras-chave relacionadas</h2>
+<p>${queryEscaped}, notebook, PC gamer, hardware, SSD, memória RAM, placa de vídeo.</p>
+<h2>Fonte</h2>
+<p><a href="${input.sourceUrl}" rel="nofollow noopener" target="_blank">${input.sourceUrl}</a></p>
+  `.trim();
+}
+
 async function generateFromGemini(prompt: string) {
   const apiKey = process.env.GOOGLE_API_KEY;
   if (!apiKey) {
@@ -310,6 +341,125 @@ Estrutura sugerida:
       description: seoDescription,
       publishedAtIso: input.publishedAtIso,
       image: item.imageUrls?.[0],
+      category,
+      tags,
+    }),
+  };
+}
+
+function tagsFromQuery(query: string): string[] {
+  const stop = new Set([
+    "a",
+    "o",
+    "os",
+    "as",
+    "de",
+    "da",
+    "do",
+    "das",
+    "dos",
+    "em",
+    "no",
+    "na",
+    "nos",
+    "nas",
+    "para",
+    "por",
+    "com",
+    "e",
+    "ou",
+    "um",
+    "uma",
+    "uns",
+    "umas",
+    "que",
+    "como",
+    "vale",
+    "pena",
+  ]);
+
+  const cleaned = cleanText(query)
+    .toLowerCase()
+    .replace(/[^a-z0-9áéíóúàâêôãõç ]/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const words = cleaned
+    .split(" ")
+    .map((w) => w.trim())
+    .filter((w) => w.length >= 3 && !stop.has(w));
+
+  const uniq: string[] = [];
+  for (const w of words) {
+    if (uniq.includes(w)) continue;
+    uniq.push(w);
+  }
+  return uniq.slice(0, 10);
+}
+
+export async function generateBlogPostFromTrend(input: { query: string; publishedAtIso: string; url: string; sourceUrl: string }): Promise<GeneratedBlogPost> {
+  const query = cleanText(input.query);
+  const prompt = `
+Você é redator(a) e estrategista SEO do blog "Balão da Informática" (pt-BR).
+
+Objetivo: criar um artigo ORIGINAL e útil baseado em um termo em alta (Google Trends), com foco em intenção de compra.
+
+Regras obrigatórias:
+- Escreva em pt-BR.
+- Não invente fatos específicos. Fale de forma geral e prática.
+- Use HTML simples: p, h2, h3, ul, ol, li, strong, em, a.
+- Inclua 2-4 perguntas frequentes (h2) e um CTA para WhatsApp (${WHATSAPP_URL}) com 19 98751-0267.
+- Inclua 2-4 links internos para ${SITE_URL} (ex.: /notebooks, /pcgamer, /departamentos, /promocao).
+- Retorne SOMENTE um JSON válido no formato:
+{
+  "title": "...",
+  "seo_title": "...",
+  "seo_description": "...",
+  "category": "Topic Trens",
+  "tags": ["...", "..."],
+  "content_html": "..."
+}
+
+Termo em alta: ${JSON.stringify(query)}
+Fonte (apenas referência): ${JSON.stringify(input.sourceUrl)}
+`;
+
+  const data = await generateFromAI(prompt);
+  const title = (typeof data?.title === "string" && data.title.trim()) || `Em alta: ${cleanRssTitle(query, input.sourceUrl)}`;
+  const seoTitle =
+    (typeof data?.seo_title === "string" && data.seo_title.trim()) || clip(`${title} | Balão da Informática`, 60);
+  const seoDescription =
+    (typeof data?.seo_description === "string" && data.seo_description.trim()) ||
+    clip(
+      `Veja o que significa ${query} nas buscas e como isso afeta compras de informática. Atendimento no WhatsApp 19 98751-0267.`,
+      155,
+    );
+  const category = "Topic Trens";
+  const tags = Array.isArray(data?.tags) ? data.tags.filter((t: any) => typeof t === "string" && t.trim()).slice(0, 10) : tagsFromQuery(query);
+
+  const rawHtml =
+    (typeof data?.content_html === "string" && data.content_html.trim()) ||
+    buildFallbackTrendHtml({ query, dateIso: input.publishedAtIso, sourceUrl: input.sourceUrl });
+
+  const contentHtml = sanitizeHtmlBasic(rawHtml);
+  const excerpt = buildExcerptFromHtml(contentHtml, 180);
+  const readingTimeMinutes = estimateReadingTimeMinutesFromHtml(contentHtml);
+
+  return {
+    title,
+    seo_title: seoTitle,
+    seo_description: seoDescription,
+    category,
+    tags,
+    content_html: contentHtml,
+    excerpt,
+    reading_time_minutes: readingTimeMinutes,
+    json_ld: buildArticleJsonLd({
+      url: input.url,
+      title,
+      description: seoDescription,
+      publishedAtIso: input.publishedAtIso,
+      image: undefined,
       category,
       tags,
     }),

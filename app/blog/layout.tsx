@@ -85,6 +85,9 @@ export default function BlogLayout({ children }: { children: React.ReactNode }) 
             <Link href="/blog" className="hover:text-white">
               Início
             </Link>
+            <Link href={{ pathname: "/blog", query: { cat: "Topic Trens" } }} className="hover:text-white">
+              Topic Trens
+            </Link>
             <Link href={{ pathname: "/blog", query: { cat: "Hardware" } }} className="hover:text-white">
               Hardware
             </Link>
@@ -116,6 +119,9 @@ export default function BlogLayout({ children }: { children: React.ReactNode }) 
             <nav className="flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold text-neutral-300 md:hidden">
               <Link href="/blog" className="hover:text-white">
                 Início
+              </Link>
+              <Link href={{ pathname: "/blog", query: { cat: "Topic Trens" } }} className="hover:text-white">
+                Topic Trens
               </Link>
               <Link href={{ pathname: "/blog", query: { cat: "Hardware" } }} className="hover:text-white">
                 Hardware

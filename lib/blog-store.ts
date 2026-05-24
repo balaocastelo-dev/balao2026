@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { fetchRssItems, type RssItem } from "@/lib/rss";
 import { slugify } from "@/lib/blog-utils";
-import { generateBlogPostFromRss } from "@/lib/blog-ai";
+import { generateBlogPostFromRss, generateBlogPostFromTrend } from "@/lib/blog-ai";
 import { getBlogPostBySlug, getBlogPosts } from "@/lib/db";
 import { scrapeSiteProducts } from "@/lib/site-products";
 import { generateBlogPostFromProduct } from "@/lib/blog-ai";
@@ -182,6 +182,16 @@ function buildSlugFromRss(item: RssItem): string {
   return `${baseSlug}-${sourceHash}`;
 }
 
+function getTrendsFeedUrl(): string {
+  return "https://trends.google.com/trends/trendingsearches/daily/rss?geo=BR";
+}
+
+function buildSlugFromTrend(query: string, yyyymmdd: string): string {
+  const baseSlug = slugify(query).slice(0, 70);
+  const sourceHash = sha256(`${yyyymmdd}:${query}`).slice(0, 8);
+  return `${baseSlug}-${yyyymmdd}-${sourceHash}`;
+}
+
 function prependImagesToHtml(contentHtml: string, imageUrls: string[]): string {
   const urls = (imageUrls || []).filter(Boolean).slice(0, 3);
   if (urls.length === 0) return contentHtml;
@@ -189,6 +199,53 @@ function prependImagesToHtml(contentHtml: string, imageUrls: string[]): string {
 
   const imgs = urls.map((u) => `<p><img src="${u}" alt="" /></p>`).join("");
   return `${imgs}${contentHtml}`;
+}
+
+async function buildDynamicTrendPosts(): Promise<BlogPostView[]> {
+  try {
+    const yyyymmdd = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+    const items = await fetchRssItems(getTrendsFeedUrl(), 20);
+    const top = items.slice(0, 5);
+    const now = Date.now();
+
+    const posts: BlogPostView[] = [];
+    for (let idx = 0; idx < top.length; idx += 1) {
+      const item = top[idx]!;
+      const slug = buildSlugFromTrend(item.title, yyyymmdd);
+      const publishedAtIso = new Date(now - idx * 60_000).toISOString();
+      const postUrl = `https://www.balao.info/blog/${slug}`;
+
+      const generated = await generateBlogPostFromTrend({
+        query: item.title,
+        publishedAtIso,
+        url: postUrl,
+        sourceUrl: item.url,
+      });
+
+      posts.push({
+        id: sha256(`trend:${yyyymmdd}:${item.title}`),
+        slug,
+        title: generated.title,
+        excerpt: generated.excerpt,
+        content_html: generated.content_html,
+        cover_image: null,
+        category: normalizeCategory(generated.category),
+        published_at: publishedAtIso,
+        created_at: publishedAtIso,
+        updated_at: publishedAtIso,
+        source_url: item.url,
+        canonical_url: postUrl,
+        seo_title: generated.seo_title,
+        seo_description: generated.seo_description,
+        json_ld: generated.json_ld,
+        reading_time_minutes: generated.reading_time_minutes,
+      });
+    }
+
+    return posts;
+  } catch {
+    return [];
+  }
 }
 
 async function buildDynamicPosts(): Promise<BlogPostView[]> {
@@ -345,13 +402,14 @@ export async function listBlogPostsForPage(input?: { category?: string; take?: n
     }
   }
 
-  const [rssPosts, productPosts] = await Promise.all([buildDynamicPosts(), buildDynamicProductPosts()]);
-  const merged = rssPosts.concat(productPosts);
+  const [rssPosts, productPosts, trendPosts] = await Promise.all([buildDynamicPosts(), buildDynamicProductPosts(), buildDynamicTrendPosts()]);
+  const merged = rssPosts.concat(productPosts).concat(trendPosts);
   if (category) {
     return sortByPublishedDesc(merged.filter((p) => p.category === category)).slice(0, take);
   }
 
-  return mixRssAndProductPosts({ rss: rssPosts, products: productPosts, take, maxConsecutiveProducts: 1 });
+  const rssBucket = rssPosts.concat(trendPosts);
+  return mixRssAndProductPosts({ rss: rssBucket, products: productPosts, take, maxConsecutiveProducts: 1 });
 }
 
 export async function getBlogPostForPage(slug: string): Promise<BlogPostView | null> {
@@ -379,6 +437,6 @@ export async function getBlogPostForPage(slug: string): Promise<BlogPostView | n
     }
   }
 
-  const [rssPosts, productPosts] = await Promise.all([buildDynamicPosts(), buildDynamicProductPosts()]);
-  return rssPosts.concat(productPosts).find((p) => p.slug === slug) || null;
+  const [rssPosts, productPosts, trendPosts] = await Promise.all([buildDynamicPosts(), buildDynamicProductPosts(), buildDynamicTrendPosts()]);
+  return rssPosts.concat(productPosts).concat(trendPosts).find((p) => p.slug === slug) || null;
 }

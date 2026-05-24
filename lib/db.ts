@@ -621,7 +621,7 @@ export type NewBlogPost = {
   tags?: string[] | null;
   status: "draft" | "published";
   published_at: string;
-  source_type: "manual" | "rss" | "product";
+  source_type: "manual" | "rss" | "product" | "trend";
   source_url?: string | null;
   source_title?: string | null;
   product_id?: string | null;
@@ -646,7 +646,7 @@ export async function insertBlogPost(post: NewBlogPost): Promise<BlogPost> {
   return data as BlogPost;
 }
 
-export async function hasBlogSourceItem(input: { source_type: "rss" | "product"; source_hash: string }): Promise<boolean> {
+export async function hasBlogSourceItem(input: { source_type: "rss" | "product" | "trend"; source_hash: string }): Promise<boolean> {
   const { data, error } = await supabaseAdmin
     .from("blog_source_items")
     .select("id")
@@ -661,7 +661,7 @@ export async function hasBlogSourceItem(input: { source_type: "rss" | "product";
 }
 
 export async function insertBlogSourceItem(input: {
-  source_type: "rss" | "product";
+  source_type: "rss" | "product" | "trend";
   source_url: string;
   source_hash: string;
   source_title?: string;

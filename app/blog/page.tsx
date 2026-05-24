@@ -172,6 +172,9 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2 text-xs font-bold">
+          <Link href={{ pathname: "/blog", query: { cat: "Topic Trens" } }} className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-2 hover:bg-neutral-100">
+            Topic Trens
+          </Link>
           <Link href={{ pathname: "/blog", query: { cat: "Guia de Compra" } }} className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-2 hover:bg-neutral-100">
             Guia de Compra
           </Link>

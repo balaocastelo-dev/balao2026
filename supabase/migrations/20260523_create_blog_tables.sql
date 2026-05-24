@@ -13,7 +13,7 @@ create table if not exists public.blog_posts (
   published_at timestamptz not null default now(),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  source_type text not null default 'manual' check (source_type in ('manual', 'rss', 'product')),
+  source_type text not null default 'manual' check (source_type in ('manual', 'rss', 'product', 'trend')),
   source_url text,
   source_title text,
   product_id text,
@@ -44,13 +44,16 @@ alter table public.blog_posts add column if not exists json_ld jsonb;
 alter table public.blog_posts add column if not exists reading_time_minutes int;
 alter table public.blog_posts add column if not exists internal_links jsonb;
 
+alter table public.blog_posts drop constraint if exists blog_posts_source_type_check;
+alter table public.blog_posts add constraint blog_posts_source_type_check check (source_type in ('manual', 'rss', 'product', 'trend'));
+
 create index if not exists blog_posts_published_at_idx on public.blog_posts (published_at desc);
 create index if not exists blog_posts_status_idx on public.blog_posts (status);
 create index if not exists blog_posts_category_idx on public.blog_posts (category);
 
 create table if not exists public.blog_source_items (
   id uuid primary key default gen_random_uuid(),
-  source_type text not null check (source_type in ('rss', 'product')),
+  source_type text not null check (source_type in ('rss', 'product', 'trend')),
   source_url text not null,
   source_hash text not null,
   source_title text,
@@ -60,6 +63,9 @@ create table if not exists public.blog_source_items (
 );
 
 create index if not exists blog_source_items_created_at_idx on public.blog_source_items (created_at desc);
+
+alter table public.blog_source_items drop constraint if exists blog_source_items_source_type_check;
+alter table public.blog_source_items add constraint blog_source_items_source_type_check check (source_type in ('rss', 'product', 'trend'));
 
 alter table public.blog_posts enable row level security;
 alter table public.blog_source_items enable row level security;
