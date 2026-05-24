@@ -285,11 +285,14 @@ async function buildDynamicProductPosts(): Promise<BlogPostView[]> {
       { slug, publishedAtIso: created, url, productUrl: p.url },
     );
 
+    const priceText = String(p.priceText || "").trim();
+    const excerpt = priceText ? `${priceText} — ${generated.excerpt}` : generated.excerpt;
+
     posts.push({
       id: sha256(`site-product-post:${p.url}`),
       slug,
       title: generated.title,
-      excerpt: generated.excerpt,
+      excerpt,
       content_html: generated.content_html,
       cover_image: p.imageUrl,
       category: "Ofertas Balão",

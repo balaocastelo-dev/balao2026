@@ -84,10 +84,13 @@ export async function GET(req: Request) {
       productUrl,
     });
 
+    const priceText = String(product.price || "").trim();
+    const excerpt = priceText ? `${priceText} — ${generated.excerpt}` : generated.excerpt;
+
     const inserted = await insertBlogPost({
       slug,
       title: generated.title,
-      excerpt: generated.excerpt,
+      excerpt,
       content_html: generated.content_html,
       cover_image: product.image || null,
       category: generated.category,

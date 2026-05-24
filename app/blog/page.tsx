@@ -18,6 +18,7 @@ type BlogCardPost = {
   category: string;
   ogImageUrl: string | null;
   sourceDomain: string | null;
+  sourceUrl: string | null;
   publishedAt: Date | null;
   createdAt: Date;
   readingTimeMin: number | null;
@@ -38,24 +39,25 @@ function ogHomeFallbackUrl(seed: string) {
   return `/blog/api/og?title=${encodeURIComponent(t)}&category=${encodeURIComponent(c)}&source=${encodeURIComponent("balao.info")}&seed=${encodeURIComponent(seed)}`;
 }
 
+function extractPriceText(input: string): string | null {
+  const s = String(input || "");
+  const m = s.match(/R\$\s*[\d.\s]+(?:,\d{2})?/i);
+  const v = (m?.[0] || "").replace(/\s+/g, " ").trim();
+  return v ? v : null;
+}
+
+function isBalaoProductPromo(post: { category: string; sourceUrl: string | null; sourceDomain: string | null }): boolean {
+  if (post.sourceDomain !== "balao.info") return false;
+  const c = (post.category || "").toLowerCase();
+  if (c.includes("ofertas")) return true;
+  const u = String(post.sourceUrl || "").toLowerCase();
+  return u.includes("/product/");
+}
+
 export async function generateMetadata(props: { searchParams?: SearchParams }): Promise<Metadata> {
-  const sp = (await props.searchParams) ?? {};
-  const categoryRaw =
-    typeof sp.cat === "string" && sp.cat.trim()
-      ? sp.cat.trim()
-      : typeof sp.category === "string" && sp.category.trim()
-        ? sp.category.trim()
-        : undefined;
-
-  const title = categoryRaw
-    ? `${categoryRaw} — Notícias e Guias | Blog Balão da Informática`
-    : "Blog Balão da Informática — Notícias, Guias e Ofertas";
-
-  const description = categoryRaw
-    ? `Conteúdos de ${categoryRaw} com foco em compra de informática (notebook, PC Gamer, hardware). Atendimento rápido no WhatsApp ${SITE_CONFIG.whatsapp.display}.`
-    : `Notícias de tecnologia, guias de compra e ofertas de informática. Compare opções e chame no WhatsApp ${SITE_CONFIG.whatsapp.display} para escolher o melhor setup.`;
-
-  const canonical = categoryRaw ? `/blog?cat=${encodeURIComponent(categoryRaw)}` : "/blog";
+  const title = "Blog Balão da Informática — Notícias, Guias e Ofertas";
+  const description = `Notícias de tecnologia, guias de compra e ofertas de informática. Compare opções e chame no WhatsApp ${SITE_CONFIG.whatsapp.display} para escolher o melhor setup.`;
+  const canonical = "/blog";
 
   return {
     title,
@@ -75,15 +77,8 @@ export async function generateMetadata(props: { searchParams?: SearchParams }): 
 }
 
 export default async function BlogPage(props: { searchParams?: SearchParams }) {
-  const sp = (await props.searchParams) ?? {};
-  const categoryRaw =
-    typeof sp.cat === "string" && sp.cat.trim()
-      ? sp.cat.trim()
-      : typeof sp.category === "string" && sp.category.trim()
-        ? sp.category.trim()
-        : undefined;
-
-  const rawPosts = await listBlogPostsForPage({ take: 50, category: categoryRaw });
+  await props.searchParams;
+  const rawPosts = await listBlogPostsForPage({ take: 50 });
 
   const posts: BlogCardPost[] = rawPosts.map((p) => {
     const createdAt = p.created_at ? new Date(p.created_at) : new Date();
@@ -99,6 +94,7 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
       category,
       ogImageUrl,
       sourceDomain: getSourceDomain(p.source_url),
+      sourceUrl: p.source_url ? String(p.source_url) : null,
       publishedAt: Number.isFinite(publishedAt?.getTime()) ? publishedAt : null,
       createdAt: Number.isFinite(createdAt.getTime()) ? createdAt : new Date(),
       readingTimeMin: p.reading_time_minutes ?? null,
@@ -170,40 +166,7 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
             </Link>
           </div>
         </div>
-
-        <div className="mt-4 flex flex-wrap gap-2 text-xs font-bold">
-          <Link href={{ pathname: "/blog", query: { cat: "Guia de Compra" } }} className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-2 hover:bg-neutral-100">
-            Guia de Compra
-          </Link>
-          <Link href={{ pathname: "/blog", query: { cat: "Hardware" } }} className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-2 hover:bg-neutral-100">
-            Hardware
-          </Link>
-          <Link href={{ pathname: "/blog", query: { cat: "Games" } }} className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-2 hover:bg-neutral-100">
-            Games
-          </Link>
-          <Link href={{ pathname: "/blog", query: { cat: "Mobile" } }} className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-2 hover:bg-neutral-100">
-            Mobile
-          </Link>
-          <Link href={{ pathname: "/blog", query: { cat: "Segurança" } }} className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-2 hover:bg-neutral-100">
-            Segurança
-          </Link>
-          <Link href={{ pathname: "/blog", query: { cat: "IA" } }} className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-2 hover:bg-neutral-100">
-            IA
-          </Link>
-        </div>
       </section>
-
-      {categoryRaw ? (
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-md border border-neutral-200 bg-white px-4 py-3">
-          <div className="text-sm">
-            <span className="font-semibold">Categoria:</span>{" "}
-            <span className="font-semibold text-[#e41e26]">{categoryRaw}</span>
-          </div>
-          <Link href="/blog" className="text-sm font-semibold text-neutral-700 hover:underline">
-            Limpar filtro
-          </Link>
-        </div>
-      ) : null}
 
       <div className="grid gap-8 lg:grid-cols-12">
         <div className="lg:col-span-8">
@@ -343,10 +306,17 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
                     </div>
                     <div className="min-w-0 flex-1">
                       <h3 className="text-xs font-bold leading-tight hover:underline">{p.title}</h3>
-                      <div className="mt-1 flex items-center gap-2 text-[10px] font-semibold text-neutral-500">
-                        <span className="text-[#e41e26]">Oferta</span>
-                        <span>{new Date(p.publishedAt ?? p.createdAt).toLocaleDateString("pt-BR")}</span>
-                      </div>
+                      {isBalaoProductPromo(p) ? (
+                        <div className="mt-1 flex items-center gap-2 text-[10px] font-extrabold text-neutral-700">
+                          <span className="text-[#e41e26]">{extractPriceText(`${p.excerpt} ${p.title}`) || "Preço sob consulta"}</span>
+                          <span className="font-semibold text-neutral-500">{new Date(p.publishedAt ?? p.createdAt).toLocaleDateString("pt-BR")}</span>
+                        </div>
+                      ) : (
+                        <div className="mt-1 flex items-center gap-2 text-[10px] font-semibold text-neutral-500">
+                          <span className="text-[#e41e26]">Balão</span>
+                          <span>{new Date(p.publishedAt ?? p.createdAt).toLocaleDateString("pt-BR")}</span>
+                        </div>
+                      )}
                     </div>
                   </Link>
                 ))}

@@ -82,7 +82,7 @@ export async function GET(req: Request) {
     const inserted = await insertBlogPost({
       slug,
       title: generated.title,
-      excerpt: generated.excerpt,
+      excerpt: picked.priceText ? `${picked.priceText} — ${generated.excerpt}` : generated.excerpt,
       content_html: generated.content_html,
       cover_image: picked.imageUrl,
       category: generated.category || "Ofertas Balão",
