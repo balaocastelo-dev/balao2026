@@ -228,6 +228,106 @@ function buildVideoSection(videoUrls: string[], title: string): { html: string; 
   return { html, contentUrl: primary };
 }
 
+function extractListCount(input: string): number | null {
+  const s = cleanText(input);
+  const m = s.match(/(\d{1,2})\s+(sinais|dicas|ajustes|configura(c|ç)(o|õ)es|passos|motivos|itens|pontos)/i);
+  if (!m?.[1]) return null;
+  const n = Number(m[1]);
+  if (!Number.isFinite(n) || n < 3 || n > 12) return null;
+  return n;
+}
+
+function extractCandidatePoints(input: string): string[] {
+  const s = cleanText(input)
+    .replace(/\s*\(\s*imagem:[^)]+\)\s*/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!s) return [];
+
+  const raw = s
+    .replace(/(\s-\s)/g, " • ")
+    .replace(/[;·]/g, " • ")
+    .split("•")
+    .map((p) => p.trim())
+    .filter(Boolean);
+
+  const blacklist = /(whatsapp|promo|ofertas|canal do whatsapp|siga|assine|leia a mat(e|é)ria|imagem|freepik|cr(e|é)ditos)/i;
+  const out: string[] = [];
+  for (const item of raw) {
+    const t = item.replace(/^[\d.()-]+\s*/, "").trim();
+    if (t.length < 10 || t.length > 90) continue;
+    if (blacklist.test(t)) continue;
+    if (out.includes(t)) continue;
+    out.push(t);
+    if (out.length >= 10) break;
+  }
+  return out;
+}
+
+function buildReadablePointsSection(input: { title: string; summary: string }): string {
+  const title = cleanText(input.title);
+  const summary = cleanText(input.summary);
+  const n = extractListCount(`${title} ${summary}`) ?? (/\bsinais?\b/i.test(`${title} ${summary}`) ? 7 : 5);
+  const candidates = extractCandidatePoints(summary);
+  const points = (candidates.length >= 3 ? candidates : []).slice(0, n);
+
+  const isPhone = /\b(celular|smartphone|iphone|android|tela|notifica(c|ç)(a|ã)o)\b/i.test(`${title} ${summary}`);
+  const h2 = isPhone
+    ? `📱 ${Math.min(n, 9)} sinais de que talvez seja hora de usar menos o celular`
+    : `✅ ${Math.min(n, 9)} pontos principais sobre ${clip(title, 60)}`;
+
+  const blocks: string[] = [];
+  const used = new Set<string>();
+  for (let i = 0; i < Math.min(n, points.length); i += 1) {
+    const p = points[i]!;
+    if (used.has(p)) continue;
+    used.add(p);
+    blocks.push(`<h3>${i + 1}. ${clip(p, 90)}</h3><p>Na prática, observe como isso aparece no seu dia a dia e ajuste pequenos hábitos para recuperar foco e bem-estar.</p>`);
+  }
+
+  if (blocks.length === 0) {
+    const defaults = isPhone
+      ? [
+          "Ansiedade ao ficar sem o celular",
+          "Dificuldade de concentração",
+          "Alterações no sono",
+          "Irritabilidade e cansaço mental",
+          "Problemas nos relacionamentos",
+          "Procrastinação e perda de tempo",
+          "Dores e desconfortos físicos",
+        ]
+      : ["O que mudou", "Por que importa", "O que observar", "Como se preparar", "Próximos passos"];
+    for (let i = 0; i < Math.min(n, defaults.length); i += 1) {
+      blocks.push(`<h3>${i + 1}. ${defaults[i]}</h3><p>Resumo prático com foco no que você pode fazer agora, sem complicação.</p>`);
+    }
+  }
+
+  return `<h2>${h2}</h2>\n${blocks.join("\n")}`;
+}
+
+function stripHtmlTagsBasic(html: string): string {
+  return cleanText(String(html || "").replace(/<[^>]*>/g, " "));
+}
+
+function convertFirstMainListToNumberedH3(html: string): string {
+  const raw = String(html || "");
+  if (/<h3\b/i.test(raw)) return raw;
+
+  const ulMatch = raw.match(/<ul\b[^>]*>[\s\S]*?<\/ul>/i);
+  if (!ulMatch?.[0]) return raw;
+
+  const ulIdx = ulMatch.index ?? 0;
+  const before = raw.slice(Math.max(0, ulIdx - 240), ulIdx);
+  if (!/(pontos|sinais|dicas|ajustes|checklist)/i.test(before)) return raw;
+
+  const liMatches = Array.from(ulMatch[0].matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/gi));
+  const items = liMatches.map((m) => stripHtmlTagsBasic(m[1] || "")).filter((t) => t.length >= 6);
+  if (items.length < 4) return raw;
+
+  const blocks = items.slice(0, 9).map((t, idx) => `<h3>${idx + 1}. ${clip(t, 90)}</h3><p>Veja como esse ponto se aplica ao seu caso e use como referência na sua decisão.</p>`);
+  return raw.replace(ulMatch[0], blocks.join("\n"));
+}
+
 function buildArticleJsonLd(input: {
   url: string;
   title: string;
@@ -287,17 +387,14 @@ function buildFallbackRssHtml(input: { title: string; summary: string; sourceUrl
   const summary = (input.summary || "").trim();
   const lead = summary ? summary : `Resumo rápido sobre ${input.title}.`;
   const video = buildVideoSection(input.videoUrls || [], input.title);
+  const points = buildReadablePointsSection({ title: input.title, summary: summary || input.title });
   return `
 <p><strong>📰 ${lead}</strong></p>
+<p>Muitas vezes o excesso de informação ou de estímulos faz a gente perder o contexto. Abaixo, organizei os pontos em um formato fácil de ler.</p>
 ${video ? `\n${video.html}\n` : ""}
 <h2>🔎 O que aconteceu</h2>
-<p>O tema desta notícia envolve <strong>${input.title}</strong>. Abaixo está um resumo direto ao ponto, com os pontos mais importantes.</p>
-<h2>✅ Pontos principais</h2>
-<ul>
-  <li>O que mudou e por quê.</li>
-  <li>O que vale acompanhar nas próximas horas/dias.</li>
-  <li>O que isso significa na prática para o leitor.</li>
-</ul>
+<p>O tema desta notícia envolve <strong>${input.title}</strong>. Abaixo, os pontos principais em um formato rápido de consumir.</p>
+${points}
 <h2>❓ Perguntas rápidas</h2>
 <ul>
   <li><strong>Isso muda algo agora?</strong> Depende do seu caso — veja os pontos principais acima.</li>
@@ -417,10 +514,10 @@ Resumo/descrição (pode estar vazio): ${JSON.stringify(item.summary || "")}
 Vídeo (se houver): ${JSON.stringify(videoHint)}
 
 Estrutura sugerida:
-- 📰 Resumo (1 parágrafo)
+- 📰 Resumo (2 parágrafos curtos)
 - 🎥 Assista ao vídeo (h2, se houver)
 - 🔎 O que aconteceu (h2)
-- ✅ Pontos principais (h2, lista curta)
+- 📱/✅ Lista principal (h2) + itens em h3 numerados (ex.: "1. ...", "2. ...") com 1 parágrafo curto cada
 - ❓ Perguntas rápidas (h2, 2-4 perguntas com respostas curtas)
 - 📲 WhatsApp (h2)
 - 🔗 Fonte (h2) com link para a URL acima
@@ -452,6 +549,7 @@ Estrutura sugerida:
     rawHtml = `${video.html}\n${rawHtml}`;
   }
 
+  rawHtml = convertFirstMainListToNumberedH3(rawHtml);
   const contentHtml = sanitizeHtmlBasic(rawHtml);
   const excerpt = buildExcerptFromHtml(contentHtml, 180);
   const readingTimeMinutes = estimateReadingTimeMinutesFromHtml(contentHtml);
@@ -568,10 +666,11 @@ Fonte (apenas referência): ${JSON.stringify(input.sourceUrl)}
   const category = enforceAllowedCategory("Topic Trens", { title, sourceUrl: input.sourceUrl, kind: "trend" });
   const tags = Array.isArray(data?.tags) ? data.tags.filter((t: any) => typeof t === "string" && t.trim()).slice(0, 10) : tagsFromQuery(query);
 
-  const rawHtml =
+  let rawHtml =
     (typeof data?.content_html === "string" && data.content_html.trim()) ||
     buildFallbackTrendHtml({ query, dateIso: input.publishedAtIso, sourceUrl: input.sourceUrl });
 
+  rawHtml = convertFirstMainListToNumberedH3(rawHtml);
   const contentHtml = sanitizeHtmlBasic(rawHtml);
   const excerpt = buildExcerptFromHtml(contentHtml, 180);
   const readingTimeMinutes = estimateReadingTimeMinutesFromHtml(contentHtml);
@@ -642,7 +741,7 @@ URL do produto: ${JSON.stringify(input.productUrl)}
   const category = enforceAllowedCategory("Loja", { title, sourceUrl: input.productUrl, kind: "product" });
   const tags = Array.isArray(data?.tags) ? data.tags.filter((t: any) => typeof t === "string" && t.trim()).slice(0, 10) : [];
 
-  const rawHtml =
+  let rawHtml =
     (typeof data?.content_html === "string" && data.content_html.trim()) ||
     `
 <p><strong>${seoDescription}</strong></p>
@@ -661,6 +760,7 @@ URL do produto: ${JSON.stringify(input.productUrl)}
 <p>Atalhos úteis: <a href="${SITE_URL}/notebooks">Notebooks</a> • <a href="${SITE_URL}/pcgamer">PC Gamer</a> • <a href="${SITE_URL}/departamentos">Departamentos</a> • <a href="${SITE_URL}/promocao">Promoções</a></p>
     `.trim();
 
+  rawHtml = convertFirstMainListToNumberedH3(rawHtml);
   const contentHtmlBase = sanitizeHtmlBasic(rawHtml);
   const contentHtml =
     product.image && !/<img\b/i.test(contentHtmlBase)
