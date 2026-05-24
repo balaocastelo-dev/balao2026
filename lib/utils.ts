@@ -13,6 +13,13 @@ export interface Product {
   description?: string;
   specs?: Record<string, any>;
   ai_status?: "thinking" | "done" | "error";
+  kabum_url?: string;
+  kabum_last_price?: number | null;
+  kabum_last_stock?: string | null;
+  kabum_last_checked_at?: string | null;
+  kabum_sync_enabled?: boolean;
+  kabum_sync_status?: string | null;
+  kabum_sync_error?: string | null;
   created_at?: string;
 }
 
