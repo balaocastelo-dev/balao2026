@@ -5,6 +5,7 @@ export interface Product {
   image: string;
   image_urls?: string[];
   product_url?: string;
+  kabum_url?: string;
   category: string;
   slug: string;
   cost?: number;
