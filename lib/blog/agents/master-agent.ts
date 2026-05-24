@@ -1,11 +1,13 @@
 import { BLOG_CATEGORIES } from '@/lib/blog/constants';
 import {
+  adminCountPostsTodayBySource,
   adminFindPostBySourceUrl,
   adminInsertAgentLog,
   adminInsertMedia,
   adminInsertPost,
   adminListFeeds,
   adminMarkFeedChecked,
+  adminUpsertFeed,
   adminUpdatePost
 } from '@/lib/blog/admin-store';
 import { fetchAndExtractArticle } from '@/lib/blog/article';
@@ -23,6 +25,7 @@ import {
   stripTags
 } from '@/lib/blog/utils';
 import { llamaChatJson } from '@/lib/blog/agents/llama';
+import { DEFAULT_BLOG_RSS_FEEDS } from '@/lib/blog/constants';
 
 type RewriteJson = {
   title: string;
@@ -61,6 +64,43 @@ function estimatePlagiarismScore(sourceText: string, newText: string): number {
   const b = new Set(tokenize(newText));
   const sim = jaccard(a, b);
   return Math.max(0, Math.min(100, Math.round(sim * 100)));
+}
+
+async function ensureDefaultFeeds() {
+  const feeds = await adminListFeeds();
+  if (feeds.length > 0) return;
+
+  for (const f of DEFAULT_BLOG_RSS_FEEDS) {
+    try {
+      await adminUpsertFeed({
+        name: f.name,
+        url: f.url,
+        category: f.category,
+        language: f.language || 'pt-BR',
+        active: true,
+        priority: f.priority,
+        fetch_interval: f.fetch_interval,
+        daily_limit: f.daily_limit,
+        campinas_rule: Boolean(f.campinas_rule)
+      });
+    } catch (e: any) {
+      await adminInsertAgentLog({
+        agent_name: 'Agente Mestre',
+        action: 'seed_default_feeds',
+        status: 'warn',
+        message: 'Falha ao cadastrar feed padrão',
+        metadata: { name: f.name, url: f.url, error: String(e?.message || e) }
+      });
+    }
+  }
+
+  await adminInsertAgentLog({
+    agent_name: 'Agente Mestre',
+    action: 'seed_default_feeds',
+    status: 'ok',
+    message: 'Feeds padrão cadastrados',
+    metadata: { count: DEFAULT_BLOG_RSS_FEEDS.length }
+  });
 }
 
 async function generateAltText(params: { title: string; category: string }): Promise<string> {
@@ -225,6 +265,7 @@ async function insertWithUniqueSlug(params: {
 
 export async function runBlogIngestionCycle(params?: { maxNewPosts?: number; force?: boolean }) {
   const maxNewPosts = Math.max(1, Math.min(50, params?.maxNewPosts ?? 8));
+  await ensureDefaultFeeds();
   const feeds = (await adminListFeeds()).filter(f => Boolean(f.active));
   const sorted = feeds.sort((a, b) => (b.priority || 0) - (a.priority || 0));
 
@@ -241,8 +282,17 @@ export async function runBlogIngestionCycle(params?: { maxNewPosts?: number; for
       const due = params?.force ? true : !last || Date.now() - last >= intervalMin * 60_000;
       if (!due) continue;
 
+      const sourceName = feed.name || '';
+      const dailyLimit = Math.max(1, feed.daily_limit || 10);
+      const alreadyToday = sourceName ? await adminCountPostsTodayBySource(sourceName) : 0;
+      const remaining = Math.max(0, dailyLimit - alreadyToday);
+      if (remaining <= 0) {
+        await adminMarkFeedChecked(feed.id);
+        continue;
+      }
+
       const parsed = await fetchRssFeed(feed.url);
-      const items = parsed.items.slice(0, Math.max(1, feed.daily_limit || 10));
+      const items = parsed.items.slice(0, Math.max(1, remaining));
       await adminInsertAgentLog({
         agent_name: 'Agente Coletor RSS',
         action: 'fetch_feed',
@@ -272,6 +322,21 @@ export async function runBlogIngestionCycle(params?: { maxNewPosts?: number; for
             has_video: Boolean(article.videoEmbedUrl)
           }
         });
+
+        const minTextLen = 400;
+        const articleText = (article.text || item.summary || '').trim();
+        if (articleText.length < minTextLen) {
+          skipped++;
+          await adminInsertAgentLog({
+            agent_name: 'Agente Mestre',
+            action: 'skip_low_content',
+            status: 'warn',
+            message: 'Matéria ignorada por pouco conteúdo extraído',
+            metadata: { source_url: item.link, length: articleText.length }
+          });
+          continue;
+        }
+
         const campinas = Boolean(feed.campinas_rule) || computeIsCampinas(`${item.title} ${item.summary} ${article.text}`);
 
         const category = campinas ? 'Campinas e Região' : normalizeCategory(feed.category);
@@ -286,11 +351,11 @@ export async function runBlogIngestionCycle(params?: { maxNewPosts?: number; for
             sourceName: feed.name || parsed.sourceName,
             sourceUrl: item.link,
             categoryHint: category,
-            articleText: article.text || item.summary,
+            articleText,
             campinas
-          })) || fallbackRewrite({ titleHint: item.title, categoryHint: category, articleText: article.text || item.summary, campinas });
+          })) || fallbackRewrite({ titleHint: item.title, categoryHint: category, articleText, campinas });
 
-        const plagiarism = estimatePlagiarismScore(article.text || item.summary, stripTags(rewritten.content_html));
+        const plagiarism = estimatePlagiarismScore(articleText, stripTags(rewritten.content_html));
         const hasLlama = Boolean(process.env.LLAMA_API_URL && process.env.LLAMA_MODEL);
         await adminInsertAgentLog({
           agent_name: 'Agente Jornalístico',
@@ -307,8 +372,20 @@ export async function runBlogIngestionCycle(params?: { maxNewPosts?: number; for
           metadata: { seo_score: rewritten.seo_score, geo_score: rewritten.geo_score }
         });
 
-        const status: BlogPostStatus =
-          hasLlama && plagiarism <= 35 ? 'published' : 'draft';
+        const plagiarismMax = 55;
+        if (plagiarism > plagiarismMax) {
+          skipped++;
+          await adminInsertAgentLog({
+            agent_name: 'Agente Mestre',
+            action: 'skip_high_plagiarism',
+            status: 'warn',
+            message: 'Matéria ignorada por similaridade alta (estimativa)',
+            metadata: { source_url: item.link, plagiarism_score: plagiarism, max: plagiarismMax }
+          });
+          continue;
+        }
+
+        const status: BlogPostStatus = 'published';
 
         const baseSlug = slugify(rewritten.title);
         const nowIso = new Date().toISOString();
@@ -328,14 +405,14 @@ export async function runBlogIngestionCycle(params?: { maxNewPosts?: number; for
           video_embed_url: videoEmbedUrl,
           video_provider: videoProvider,
           author: article.author || item.author,
-          ai_generated: hasLlama,
+          ai_generated: hasLlama ? true : false,
           seo_title: rewritten.seo_title,
           seo_description: rewritten.seo_description,
           seo_keywords: rewritten.seo_keywords,
           geo_score: rewritten.geo_score,
           seo_score: rewritten.seo_score,
           plagiarism_score: plagiarism,
-          published_at: status === 'published' ? (article.publishedAt || item.publishedAt || nowIso) : null
+          published_at: article.publishedAt || item.publishedAt || nowIso
         };
 
         const inserted = await insertWithUniqueSlug({ baseSlug, payload: insertPayload });
@@ -373,6 +450,16 @@ export async function runBlogIngestionCycle(params?: { maxNewPosts?: number; for
             has_llama: hasLlama
           }
         });
+
+        if (!hasLlama) {
+          await adminInsertAgentLog({
+            agent_name: 'Agente Mestre',
+            action: 'llama_not_configured',
+            status: 'warn',
+            message: 'Publicado com fallback sem Llama (recomendado configurar LLAMA_API_URL/LLAMA_MODEL)',
+            metadata: { post_id: inserted.id, slug: inserted.slug }
+          });
+        }
 
         created++;
       }

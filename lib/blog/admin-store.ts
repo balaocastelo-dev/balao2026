@@ -11,6 +11,19 @@ export async function adminListFeeds(): Promise<BlogRssFeed[]> {
   return data as BlogRssFeed[];
 }
 
+export async function adminCountPostsTodayBySource(sourceName: string): Promise<number> {
+  const name = (sourceName || '').trim();
+  if (!name) return 0;
+  const start = new Date();
+  start.setUTCHours(0, 0, 0, 0);
+  const { count } = await supabaseAdmin
+    .from('blog_posts')
+    .select('*', { count: 'exact', head: true })
+    .eq('source_name', name)
+    .gte('created_at', start.toISOString());
+  return Number(count || 0);
+}
+
 export async function adminUpsertFeed(input: Partial<BlogRssFeed> & Pick<BlogRssFeed, 'name' | 'url' | 'category'>) {
   const payload: any = {
     id: input.id,

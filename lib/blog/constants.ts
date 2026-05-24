@@ -43,3 +43,61 @@ export const BLOG_CAMPINAS_KEYWORDS = [
   'indaiatuba',
   'jaguariúna'
 ];
+
+export const DEFAULT_BLOG_RSS_FEEDS: Array<{
+  name: string;
+  url: string;
+  category: BlogCategory;
+  priority: number;
+  fetch_interval: number;
+  daily_limit: number;
+  campinas_rule?: boolean;
+  language?: string;
+}> = [
+  {
+    name: 'G1 Campinas e Região',
+    url: 'https://g1.globo.com/rss/g1/sp/campinas-regiao/',
+    category: 'Campinas e Região',
+    priority: 100,
+    fetch_interval: 5,
+    daily_limit: 24,
+    campinas_rule: true,
+    language: 'pt-BR'
+  },
+  {
+    name: 'Tecnoblog',
+    url: 'https://tecnoblog.net/feed/',
+    category: 'Tecnologia',
+    priority: 80,
+    fetch_interval: 10,
+    daily_limit: 24,
+    language: 'pt-BR'
+  },
+  {
+    name: 'Canaltech',
+    url: 'https://canaltech.com.br/rss/',
+    category: 'Tecnologia',
+    priority: 70,
+    fetch_interval: 10,
+    daily_limit: 24,
+    language: 'pt-BR'
+  },
+  {
+    name: 'The Verge',
+    url: 'https://www.theverge.com/rss/index.xml',
+    category: 'Mercado Tech',
+    priority: 40,
+    fetch_interval: 20,
+    daily_limit: 24,
+    language: 'en'
+  },
+  {
+    name: 'IGN Brasil',
+    url: 'https://br.ign.com/rss.xml',
+    category: 'Games',
+    priority: 55,
+    fetch_interval: 15,
+    daily_limit: 24,
+    language: 'pt-BR'
+  }
+];
