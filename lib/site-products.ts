@@ -20,6 +20,66 @@ function normalizeUrl(url: string): string {
   return u;
 }
 
+function decodeHtmlEntities(input: string): string {
+  const map: Record<string, string> = {
+    "&quot;": '"',
+    "&#34;": '"',
+    "&apos;": "'",
+    "&#39;": "'",
+    "&amp;": "&",
+    "&lt;": "<",
+    "&gt;": ">",
+    "&nbsp;": " ",
+  };
+
+  let out = input;
+  for (const [k, v] of Object.entries(map)) {
+    out = out.split(k).join(v);
+  }
+
+  out = out.replace(/&#x([0-9a-f]+);/gi, (_, hex) => {
+    const code = Number.parseInt(String(hex), 16);
+    if (!Number.isFinite(code)) return _;
+    try {
+      return String.fromCodePoint(code);
+    } catch {
+      return _;
+    }
+  });
+
+  out = out.replace(/&#(\d+);/g, (_, dec) => {
+    const code = Number.parseInt(String(dec), 10);
+    if (!Number.isFinite(code)) return _;
+    try {
+      return String.fromCodePoint(code);
+    } catch {
+      return _;
+    }
+  });
+
+  return out;
+}
+
+function cleanText(input: string): string {
+  return decodeHtmlEntities(input)
+    .replace(/\s+/g, " ")
+    .replace(/\s+([,;:.!?)\]])/g, "$1")
+    .replace(/([(\[])\s+/g, "$1")
+    .replace(/(\d)\.(\d)"/g, "$1,$2\"")
+    .trim();
+}
+
+function cleanProductName(input: string): string {
+  const s = cleanText(input)
+    .replace(/"+/g, '"')
+    .replace(/"/g, "")
+    .replace(/\b([a-z0-9]{10,})\b/gi, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+
+  return s.length > 110 ? `${s.slice(0, 107).trim()}...` : s;
+}
+
 function uniqStrings(list: string[]): string[] {
   const seen = new Set<string>();
   const out: string[] = [];
@@ -51,14 +111,14 @@ function extractMeta(html: string, propOrName: string, isProperty: boolean): str
   const attr = isProperty ? "property" : "name";
   const re = new RegExp(`<meta\\s+[^>]*${attr}="${propOrName}"[^>]*content="([^"]+)"[^>]*>`, "i");
   const m = html.match(re);
-  return m?.[1] ? m[1].trim() : null;
+  return m?.[1] ? cleanText(m[1]) : null;
 }
 
 function extractTitle(html: string): string | null {
   const og = extractMeta(html, "og:title", true);
   if (og) return og;
   const m = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-  return m?.[1] ? m[1].replace(/\s+/g, " ").trim() : null;
+  return m?.[1] ? cleanText(m[1]) : null;
 }
 
 function extractPrice(html: string): string | null {
@@ -96,7 +156,8 @@ export async function scrapeSiteProducts(input?: { take?: number }): Promise<Sit
         const res = await fetch(fullUrl, { cache: "no-store" });
         if (!res.ok) return null;
         const html = await res.text();
-        const name = extractTitle(html) || "Produto";
+        const nameRaw = extractTitle(html) || "Produto";
+        const name = cleanProductName(nameRaw) || "Produto";
         const imageUrl = extractMeta(html, "og:image", true);
         const description = extractMeta(html, "description", false) || extractMeta(html, "og:description", true);
         const priceText = extractPrice(html);
@@ -106,7 +167,7 @@ export async function scrapeSiteProducts(input?: { take?: number }): Promise<Sit
           url: fullUrl,
           name,
           imageUrl: imageUrl ? normalizeUrl(imageUrl) : null,
-          description: description ? description.trim() : null,
+          description: description ? cleanText(description) : null,
           priceText,
         } satisfies SiteProduct;
       } catch {
@@ -117,4 +178,3 @@ export async function scrapeSiteProducts(input?: { take?: number }): Promise<Sit
 
   return products.filter(Boolean) as SiteProduct[];
 }
-

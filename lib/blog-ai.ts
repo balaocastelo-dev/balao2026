@@ -21,6 +21,66 @@ const WHATSAPP_NUMBER_E164 = "5519987510267";
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER_E164}`;
 const SITE_URL = "https://www.balao.info";
 
+function decodeHtmlEntities(input: string): string {
+  const map: Record<string, string> = {
+    "&quot;": '"',
+    "&#34;": '"',
+    "&apos;": "'",
+    "&#39;": "'",
+    "&amp;": "&",
+    "&lt;": "<",
+    "&gt;": ">",
+    "&nbsp;": " ",
+  };
+
+  let out = input;
+  for (const [k, v] of Object.entries(map)) {
+    out = out.split(k).join(v);
+  }
+
+  out = out.replace(/&#x([0-9a-f]+);/gi, (_, hex) => {
+    const code = Number.parseInt(String(hex), 16);
+    if (!Number.isFinite(code)) return _;
+    try {
+      return String.fromCodePoint(code);
+    } catch {
+      return _;
+    }
+  });
+
+  out = out.replace(/&#(\d+);/g, (_, dec) => {
+    const code = Number.parseInt(String(dec), 10);
+    if (!Number.isFinite(code)) return _;
+    try {
+      return String.fromCodePoint(code);
+    } catch {
+      return _;
+    }
+  });
+
+  return out;
+}
+
+function cleanText(input: string): string {
+  return decodeHtmlEntities(input)
+    .replace(/\s+/g, " ")
+    .replace(/\s+([,;:.!?)\]])/g, "$1")
+    .replace(/([(\[])\s+/g, "$1")
+    .replace(/(\d)\.(\d)"/g, "$1,$2\"")
+    .trim();
+}
+
+function cleanProductName(input: string): string {
+  const s = cleanText(input)
+    .replace(/"+/g, '"')
+    .replace(/"/g, "")
+    .replace(/\b([a-z0-9]{10,})\b/gi, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+
+  return s.length > 110 ? `${s.slice(0, 107).trim()}...` : s;
+}
+
 function safeParseJson(text: string): any {
   const cleaned = text.replace(/```json/gi, "").replace(/```/g, "").trim();
   return JSON.parse(cleaned);
@@ -210,6 +270,7 @@ Estrutura sugerida:
 }
 
 export async function generateBlogPostFromProduct(product: Product, input: { slug: string; publishedAtIso: string; url: string; productUrl: string }): Promise<GeneratedBlogPost> {
+  const productName = cleanProductName(String(product.name || ""));
   const prompt = `
 Você é redator(a) SEO do blog "Balão da Informática" (pt-BR).
 
@@ -232,7 +293,7 @@ Regras obrigatórias:
 }
 
 Produto:
-Nome: ${JSON.stringify(product.name)}
+Nome: ${JSON.stringify(productName)}
 Categoria: ${JSON.stringify(product.category)}
 Preço: ${JSON.stringify(product.price)}
 URL do produto: ${JSON.stringify(input.productUrl)}
@@ -240,13 +301,13 @@ URL do produto: ${JSON.stringify(input.productUrl)}
 
   const data = await generateFromAI(prompt);
 
-  const title = (typeof data?.title === "string" && data.title.trim()) || `Vale a pena: ${product.name}`;
+  const title = (typeof data?.title === "string" && data.title.trim()) || `Vale a pena: ${productName}`;
   const seoTitle =
     (typeof data?.seo_title === "string" && data.seo_title.trim()) ||
-    `${product.name} | Guia e Dicas`.slice(0, 60);
+    `${productName} | Guia e Dicas`.slice(0, 60);
   const seoDescription =
     (typeof data?.seo_description === "string" && data.seo_description.trim()) ||
-    `Entenda para quem o ${product.name} é ideal e veja dicas de compra. Fale no WhatsApp 19 98751-0267.`;
+    `Entenda para quem o ${productName} é ideal e veja dicas de compra. Fale no WhatsApp 19 98751-0267.`;
   const category = (typeof data?.category === "string" && data.category.trim()) || "Guia de Compra";
   const tags = Array.isArray(data?.tags) ? data.tags.filter((t: any) => typeof t === "string" && t.trim()).slice(0, 10) : [];
 
@@ -255,7 +316,7 @@ URL do produto: ${JSON.stringify(input.productUrl)}
     `
 <p><strong>${seoDescription}</strong></p>
 <h2>Para quem é ideal</h2>
-<p>O <strong>${product.name}</strong> é uma boa opção para quem busca desempenho e confiabilidade no dia a dia. Abaixo estão critérios práticos para decidir com segurança.</p>
+<p>O <strong>${productName}</strong> é uma boa opção para quem busca desempenho e confiabilidade no dia a dia. Abaixo estão critérios práticos para decidir com segurança.</p>
 <h2>O que avaliar antes de comprar</h2>
 <ul>
   <li>Compatibilidade com seu setup (placa-mãe, fonte, gabinete, portas).</li>
@@ -263,7 +324,7 @@ URL do produto: ${JSON.stringify(input.productUrl)}
   <li>Custo-benefício vs. alternativas.</li>
 </ul>
 <h2>Link do produto</h2>
-<p><a href="${input.productUrl}">${product.name}</a></p>
+<p><a href="${input.productUrl}">${productName}</a></p>
 <h2>Atendimento rápido</h2>
 <p>Quer indicação personalizada? <a href="${WHATSAPP_URL}" target="_blank" rel="noreferrer">WhatsApp 19 98751-0267</a>.</p>
 <p>Atalhos úteis: <a href="${SITE_URL}/notebooks">Notebooks</a> • <a href="${SITE_URL}/pcgamer">PC Gamer</a> • <a href="${SITE_URL}/departamentos">Departamentos</a> • <a href="${SITE_URL}/promocao">Promoções</a></p>
