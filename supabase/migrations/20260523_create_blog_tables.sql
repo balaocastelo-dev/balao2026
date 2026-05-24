@@ -25,6 +25,25 @@ create table if not exists public.blog_posts (
   internal_links jsonb
 );
 
+alter table public.blog_posts add column if not exists category text;
+alter table public.blog_posts add column if not exists excerpt text;
+alter table public.blog_posts add column if not exists cover_image text;
+alter table public.blog_posts add column if not exists tags text[] not null default '{}';
+alter table public.blog_posts add column if not exists status text not null default 'published';
+alter table public.blog_posts add column if not exists published_at timestamptz not null default now();
+alter table public.blog_posts add column if not exists created_at timestamptz not null default now();
+alter table public.blog_posts add column if not exists updated_at timestamptz not null default now();
+alter table public.blog_posts add column if not exists source_type text not null default 'manual';
+alter table public.blog_posts add column if not exists source_url text;
+alter table public.blog_posts add column if not exists source_title text;
+alter table public.blog_posts add column if not exists product_id text;
+alter table public.blog_posts add column if not exists seo_title text;
+alter table public.blog_posts add column if not exists seo_description text;
+alter table public.blog_posts add column if not exists canonical_url text;
+alter table public.blog_posts add column if not exists json_ld jsonb;
+alter table public.blog_posts add column if not exists reading_time_minutes int;
+alter table public.blog_posts add column if not exists internal_links jsonb;
+
 create index if not exists blog_posts_published_at_idx on public.blog_posts (published_at desc);
 create index if not exists blog_posts_status_idx on public.blog_posts (status);
 create index if not exists blog_posts_category_idx on public.blog_posts (category);
@@ -50,4 +69,3 @@ create policy "Public can read published blog posts"
 on public.blog_posts
 for select
 using (status = 'published');
-
