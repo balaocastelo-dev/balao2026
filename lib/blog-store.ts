@@ -16,6 +16,7 @@ export type BlogPostView = {
   created_at: string;
   updated_at: string;
   source_url: string | null;
+  canonical_url: string | null;
   seo_title: string | null;
   seo_description: string | null;
   json_ld: any;
@@ -110,6 +111,7 @@ async function buildDynamicPosts(): Promise<BlogPostView[]> {
       created_at: publishedAtIso,
       updated_at: publishedAtIso,
       source_url: item.url,
+      canonical_url: postUrl,
       seo_title: generated.seo_title,
       seo_description: generated.seo_description,
       json_ld: generated.json_ld,
@@ -139,6 +141,7 @@ export async function listBlogPostsForPage(input?: { category?: string; take?: n
         created_at: p.created_at,
         updated_at: p.updated_at,
         source_url: p.source_url ? String(p.source_url) : null,
+        canonical_url: p.canonical_url ? String(p.canonical_url) : `https://www.balao.info/blog/${p.slug}`,
         seo_title: p.seo_title ? String(p.seo_title) : null,
         seo_description: p.seo_description ? String(p.seo_description) : null,
         json_ld: p.json_ld,
@@ -168,6 +171,7 @@ export async function getBlogPostForPage(slug: string): Promise<BlogPostView | n
         created_at: post.created_at,
         updated_at: post.updated_at,
         source_url: post.source_url ? String(post.source_url) : null,
+        canonical_url: post.canonical_url ? String(post.canonical_url) : `https://www.balao.info/blog/${post.slug}`,
         seo_title: post.seo_title ? String(post.seo_title) : null,
         seo_description: post.seo_description ? String(post.seo_description) : null,
         json_ld: post.json_ld,
@@ -179,4 +183,3 @@ export async function getBlogPostForPage(slug: string): Promise<BlogPostView | n
   const posts = await buildDynamicPosts();
   return posts.find((p) => p.slug === slug) || null;
 }
-
