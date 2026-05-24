@@ -6,6 +6,7 @@ import { generateBlogPostFromProduct, generateBlogPostFromRss, generateBlogPostF
 import { hasBlogSourceItem, insertBlogPost, insertBlogSourceItem } from "@/lib/db";
 import { hasAdmin } from "@/lib/supabase-admin";
 import { scrapeSiteProducts } from "@/lib/site-products";
+import { markAgentRunning, recordAgentRun } from "@/lib/ai/master-agent";
 
 function isAuthorized(req: Request): boolean {
   const vercelCron = req.headers.get("x-vercel-cron");
@@ -400,13 +401,29 @@ async function insertBalaoProductPost(now: Date) {
 }
 
 export async function GET(req: Request) {
+  const startedAtMs = Date.now();
+  markAgentRunning("cron.blog-minute");
+  const respond = (data: any, status?: number) => {
+    const ok = Boolean(data?.ok);
+    const inserted = typeof data?.inserted === "number" ? data.inserted : undefined;
+    const summary = typeof data?.reason === "string" && data.reason ? data.reason : inserted === 1 ? "Inserido" : ok ? "OK" : "Erro";
+    recordAgentRun({
+      agentId: "cron.blog-minute",
+      ok,
+      startedAtMs,
+      summary,
+      meta: { inserted, kind: data?.kind, slot: data?.slot, feedUrl: data?.feedUrl, fallbackFrom: data?.fallbackFrom },
+    });
+    return NextResponse.json(data, status ? { status } : undefined);
+  };
+
   try {
     if (!isAuthorized(req)) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return respond({ ok: false, error: "Unauthorized" }, 401);
     }
 
     if (!hasAdmin) {
-      return NextResponse.json({
+      return respond({
         ok: true,
         inserted: 0,
         skipped: true,
@@ -420,7 +437,7 @@ export async function GET(req: Request) {
 
     if (brt.hour === 8 && brt.minute < 5) {
       const trend = await insertTrendPost(now);
-      if (trend.inserted === 1) return NextResponse.json({ ok: true, ...trend });
+      if (trend.inserted === 1) return respond({ ok: true, ...trend });
     }
 
     const techFeeds = [
@@ -441,30 +458,30 @@ export async function GET(req: Request) {
     const slot = minuteKey % 4;
     if (slot === 0) {
       const product = await insertBalaoProductPost(now);
-      if (product.inserted === 1) return NextResponse.json({ ok: true, ...product });
+      if (product.inserted === 1) return respond({ ok: true, ...product });
     }
 
     if (slot === 1) {
       const tech = await insertRssPost(now, techFeeds, "tech");
-      if (tech.inserted === 1) return NextResponse.json({ ok: true, ...tech });
+      if (tech.inserted === 1) return respond({ ok: true, ...tech });
     }
 
     if (slot === 2) {
       const campinasVideo = await insertCampinasVideoPost(now);
-      if (campinasVideo.inserted === 1) return NextResponse.json({ ok: true, ...campinasVideo });
+      if (campinasVideo.inserted === 1) return respond({ ok: true, ...campinasVideo });
 
       const campinas = await insertRssPost(now, campinasFeeds, "campinas");
-      if (campinas.inserted === 1) return NextResponse.json({ ok: true, ...campinas, fallbackFrom: "campinas-video" });
+      if (campinas.inserted === 1) return respond({ ok: true, ...campinas, fallbackFrom: "campinas-video" });
     }
 
     const general = await insertRssPost(now, generalFeeds.concat(techFeeds), "general");
-    if (general.inserted === 1) return NextResponse.json({ ok: true, ...general });
+    if (general.inserted === 1) return respond({ ok: true, ...general });
 
     const fallbackProduct = await insertBalaoProductPost(now);
-    if (fallbackProduct.inserted === 1) return NextResponse.json({ ok: true, ...fallbackProduct });
+    if (fallbackProduct.inserted === 1) return respond({ ok: true, ...fallbackProduct });
 
-    return NextResponse.json({ ok: true, inserted: 0, reason: "Nenhuma fonte gerou post", slot });
+    return respond({ ok: true, inserted: 0, reason: "Nenhuma fonte gerou post", slot });
   } catch (error: any) {
-    return NextResponse.json({ ok: false, error: error?.message || "Erro" }, { status: 500 });
+    return respond({ ok: false, error: error?.message || "Erro" }, 500);
   }
 }
