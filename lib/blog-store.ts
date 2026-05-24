@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { fetchRssItems, type RssItem } from "@/lib/rss";
+import { fetchCampinasVideoItems, fetchRssItems, type RssItem } from "@/lib/rss";
 import { slugify } from "@/lib/blog-utils";
 import { generateBlogPostFromRss, generateBlogPostFromTrend } from "@/lib/blog-ai";
 import { getBlogPostBySlug, getBlogPosts } from "@/lib/db";
@@ -302,6 +302,11 @@ async function buildDynamicPosts(): Promise<BlogPostView[]> {
       }
     }),
   );
+
+  try {
+    const videoItems = await fetchCampinasVideoItems(16);
+    all.push(...videoItems);
+  } catch {}
 
   const seen = new Set<string>();
   const uniq = all.filter((i) => {

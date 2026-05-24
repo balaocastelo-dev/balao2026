@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { fetchRssItems } from "@/lib/rss";
+import { fetchCampinasVideoItems, fetchRssItems } from "@/lib/rss";
 import { slugify } from "@/lib/blog-utils";
 import { generateBlogPostFromProduct, generateBlogPostFromRss, generateBlogPostFromTrend } from "@/lib/blog-ai";
 import { hasBlogSourceItem, insertBlogPost, insertBlogSourceItem } from "@/lib/db";
@@ -186,6 +186,64 @@ async function insertRssPost(now: Date, feeds: string[], kind: "tech" | "campina
   return { inserted: 0, reason: "Sem item elegível", kind, feedUrl };
 }
 
+async function insertCampinasVideoPost(now: Date) {
+  const brt = getBrtParts(now);
+  const items = await fetchCampinasVideoItems(40);
+  if (items.length === 0) return { inserted: 0, reason: "Sem itens de vídeo" };
+
+  const dayKey = brt.ymd;
+  const startIdx = (brt.minute + brt.hour * 60) % items.length;
+
+  for (let i = 0; i < items.length; i += 1) {
+    const item = items[(startIdx + i) % items.length]!;
+    const baseHash = sha256(`rss_video:${dayKey}:${item.url}`);
+    const exists = await hasBlogSourceItem({ source_type: "rss", source_hash: baseHash });
+    const sourceHash = exists ? sha256(`rss_video:${dayKey}:${brt.hour}:${brt.minute}:${item.url}`) : baseHash;
+
+    const publishedAtIso = now.toISOString();
+    const slug = buildSlug(item.title, sourceHash);
+    const postUrl = `https://www.balao.info/blog/${slug}`;
+
+    const generated = await generateBlogPostFromRss(item, { slug, publishedAtIso, url: postUrl });
+
+    const inserted = await insertBlogPost({
+      slug,
+      title: generated.title,
+      excerpt: generated.excerpt,
+      content_html: generated.content_html,
+      cover_image: item.imageUrls?.[0] ? String(item.imageUrls[0]) : null,
+      category: "Início",
+      tags: generated.tags,
+      status: "published",
+      published_at: publishedAtIso,
+      source_type: "rss",
+      source_url: item.url,
+      source_title: item.title,
+      product_id: null,
+      seo_title: generated.seo_title,
+      seo_description: generated.seo_description,
+      canonical_url: postUrl,
+      json_ld: generated.json_ld,
+      reading_time_minutes: generated.reading_time_minutes,
+      internal_links: null,
+    });
+
+    try {
+      await insertBlogSourceItem({
+        source_type: "rss",
+        source_url: item.url,
+        source_hash: sourceHash,
+        source_title: item.title,
+        source_published_at: publishedAtIso,
+      });
+    } catch {}
+
+    return { inserted: 1, slug: inserted.slug, id: inserted.id, kind: "campinas-video", feedUrl: item.sourceFeed };
+  }
+
+  return { inserted: 0, reason: "Sem item elegível", kind: "campinas-video" };
+}
+
 async function insertBalaoProductPost(now: Date) {
   const brt = getBrtParts(now);
   const products = await scrapeSiteProducts({ take: 30 });
@@ -303,8 +361,11 @@ export async function GET(req: Request) {
     }
 
     if (slot === 2) {
+      const campinasVideo = await insertCampinasVideoPost(now);
+      if (campinasVideo.inserted === 1) return NextResponse.json({ ok: true, ...campinasVideo });
+
       const campinas = await insertRssPost(now, campinasFeeds, "campinas");
-      if (campinas.inserted === 1) return NextResponse.json({ ok: true, ...campinas });
+      if (campinas.inserted === 1) return NextResponse.json({ ok: true, ...campinas, fallbackFrom: "campinas-video" });
     }
 
     const general = await insertRssPost(now, generalFeeds.concat(techFeeds), "general");
@@ -318,4 +379,3 @@ export async function GET(req: Request) {
     return NextResponse.json({ ok: false, error: error?.message || "Erro" }, { status: 500 });
   }
 }
-

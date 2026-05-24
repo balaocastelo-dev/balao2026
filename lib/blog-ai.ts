@@ -166,6 +166,48 @@ function safeParseJson(text: string): any {
   return JSON.parse(cleaned);
 }
 
+function extractYouTubeVideoId(url: string): string | null {
+  const u = String(url || "").trim();
+  if (!u) return null;
+
+  const short = u.match(/youtu\.be\/([a-zA-Z0-9_-]{6,})/i);
+  if (short?.[1]) return short[1];
+
+  const watch = u.match(/[?&]v=([a-zA-Z0-9_-]{6,})/i);
+  if (watch?.[1]) return watch[1];
+
+  const embed = u.match(/youtube(?:-nocookie)?\.com\/embed\/([a-zA-Z0-9_-]{6,})/i);
+  if (embed?.[1]) return embed[1];
+
+  return null;
+}
+
+function buildVideoSection(videoUrls: string[], title: string): { html: string; contentUrl: string; embedUrl?: string } | null {
+  const urls = (videoUrls || []).map((u) => String(u || "").trim()).filter(Boolean);
+  if (urls.length === 0) return null;
+
+  const primary = urls[0]!;
+  const ytId = extractYouTubeVideoId(primary);
+  if (ytId) {
+    const embedUrl = `https://www.youtube-nocookie.com/embed/${ytId}`;
+    const watchUrl = `https://www.youtube.com/watch?v=${ytId}`;
+    const html = `
+<h2>Assista ao vídeo</h2>
+<div class="video-embed">
+  <iframe src="${embedUrl}" title="${cleanText(title)}" loading="lazy" referrerpolicy="no-referrer" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+<p><a href="${watchUrl}" rel="nofollow noopener" target="_blank">Abrir no YouTube</a></p>
+    `.trim();
+    return { html, contentUrl: watchUrl, embedUrl };
+  }
+
+  const html = `
+<h2>Assista ao vídeo</h2>
+<p><a href="${primary}" rel="nofollow noopener" target="_blank">Ver vídeo</a></p>
+  `.trim();
+  return { html, contentUrl: primary };
+}
+
 function buildArticleJsonLd(input: {
   url: string;
   title: string;
@@ -174,10 +216,11 @@ function buildArticleJsonLd(input: {
   image?: string;
   category?: string;
   tags?: string[];
+  video?: { contentUrl: string; embedUrl?: string; thumbnailUrl?: string };
 }) {
   const keywords = (input.tags || []).filter(Boolean).slice(0, 12);
   const keywordString = keywords.length > 0 ? keywords.join(", ") : "informática, hardware, notebook, pc gamer, tecnologia";
-  return {
+  const base: any = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     mainEntityOfPage: {
@@ -205,13 +248,28 @@ function buildArticleJsonLd(input: {
     },
     image: input.image ? [input.image] : [`${SITE_URL}/logo.png`],
   };
+
+  if (input.video?.contentUrl) {
+    base.video = {
+      "@type": "VideoObject",
+      name: input.title,
+      uploadDate: input.publishedAtIso,
+      contentUrl: input.video.contentUrl,
+      thumbnailUrl: input.video.thumbnailUrl || input.image || `${SITE_URL}/logo.png`,
+      ...(input.video.embedUrl ? { embedUrl: input.video.embedUrl } : {}),
+    };
+  }
+
+  return base;
 }
 
-function buildFallbackRssHtml(input: { title: string; summary: string; sourceUrl: string }): string {
+function buildFallbackRssHtml(input: { title: string; summary: string; sourceUrl: string; videoUrls?: string[] }): string {
   const summary = (input.summary || "").trim();
   const lead = summary ? summary : `Veja os pontos principais sobre ${input.title} e como isso afeta compras e upgrades de informática.`;
+  const video = buildVideoSection(input.videoUrls || [], input.title);
   return `
 <p><strong>${lead}</strong></p>
+${video ? `\n${video.html}\n` : ""}
 <h2>O que aconteceu</h2>
 <p>O tema desta notícia envolve <strong>${input.title}</strong>. A seguir, reunimos os impactos práticos e o que vale monitorar antes de comprar ou atualizar seu setup.</p>
 <h2>Impacto para quem compra tecnologia</h2>
@@ -309,18 +367,25 @@ async function generateFromAI(prompt: string) {
 }
 
 export async function generateBlogPostFromRss(item: RssItem, input: { slug: string; publishedAtIso: string; url: string }): Promise<GeneratedBlogPost> {
+  const isCampinas =
+    /campinas-regiao/i.test(item.url) ||
+    /campinas-e-regiao/i.test(item.sourceFeed) ||
+    /acidadeon\.com\/campinas/i.test(item.url) ||
+    /cidadeon/i.test(item.sourceFeed);
+  const videoHint = (item.videoUrls || []).slice(0, 2);
   const prompt = `
 Você é redator(a) e editor(a) SEO do blog "Balão da Informática" (pt-BR).
 
-Objetivo: criar um artigo ORIGINAL (não copiar o texto da fonte) a partir de uma notícia do mundo da tecnologia.
+Objetivo: criar um artigo ORIGINAL (não copiar o texto da fonte) a partir de uma notícia ${isCampinas ? "de Campinas e região (com foco local)" : "do mundo da tecnologia"}.
 
 Regras obrigatórias:
 - Escreva em pt-BR, tom claro e profissional, com foco em clientes que precisam comprar/atualizar PC, notebook, hardware e periféricos.
 - Proibido copiar trechos do conteúdo original. Use apenas o assunto/ideia principal.
 - Cite a fonte com link no final, em uma seção "Fonte".
-- Use HTML seguro e simples: p, h2, h3, ul, ol, li, strong, em, a.
+- Use HTML seguro e simples: p, h2, h3, ul, ol, li, strong, em, a, iframe (apenas se for YouTube).
 - Sempre que fizer sentido, inclua uma chamada para WhatsApp (${WHATSAPP_URL}) com o número 19 98751-0267.
 - Inclua links internos para o site ${SITE_URL} quando fizer sentido (ex.: /notebooks, /pcgamer, /departamentos).
+- Se houver vídeo, inclua uma seção "Assista ao vídeo" com embed do YouTube (iframe) e link.
 - Retorne SOMENTE um JSON válido no formato:
 {
   "title": "...",
@@ -335,9 +400,11 @@ Conteúdo de entrada:
 Título: ${JSON.stringify(item.title)}
 URL: ${JSON.stringify(item.url)}
 Resumo/descrição (pode estar vazio): ${JSON.stringify(item.summary || "")}
+Vídeo (se houver): ${JSON.stringify(videoHint)}
 
 Estrutura sugerida:
 - Introdução (1-2 parágrafos)
+- Assista ao vídeo (h2, se houver)
 - O que aconteceu (h2)
 - Impacto para quem compra tecnologia (h2)
 - Dicas práticas / checklist (h2, lista)
@@ -363,9 +430,14 @@ Estrutura sugerida:
   const category = enforceAllowedCategory(categoryRaw, { title, sourceUrl: item.url, kind: "rss" });
   const tags = Array.isArray(data?.tags) ? data.tags.filter((t: any) => typeof t === "string" && t.trim()).slice(0, 10) : [];
 
-  const rawHtml =
+  const video = buildVideoSection(item.videoUrls || [], title);
+  let rawHtml =
     (typeof data?.content_html === "string" && data.content_html.trim()) ||
-    buildFallbackRssHtml({ title, summary: item.summary || "", sourceUrl: item.url });
+    buildFallbackRssHtml({ title, summary: item.summary || "", sourceUrl: item.url, videoUrls: item.videoUrls });
+
+  if (video && !/<iframe\b/i.test(rawHtml) && !rawHtml.includes(video.contentUrl)) {
+    rawHtml = `${video.html}\n${rawHtml}`;
+  }
 
   const contentHtml = sanitizeHtmlBasic(rawHtml);
   const excerpt = buildExcerptFromHtml(contentHtml, 180);
@@ -388,6 +460,7 @@ Estrutura sugerida:
       image: item.imageUrls?.[0],
       category,
       tags,
+      video: video ? { contentUrl: video.contentUrl, embedUrl: video.embedUrl, thumbnailUrl: item.imageUrls?.[0] } : undefined,
     }),
   };
 }
