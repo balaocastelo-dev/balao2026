@@ -1,12 +1,29 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import ShareButton from "@/components/ShareButton";
 import JsonLd, { generateBreadcrumbSchema, generateOrganizationSchema } from "@/components/JsonLd";
 import { getBlogPostBySlug } from "@/lib/db";
 import { sanitizeHtmlBasic } from "@/lib/blog-sanitize";
+import SafeImage from "@/components/SafeImage";
 
-export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+export const revalidate = 300;
+
+function getSourceDomain(sourceUrl: string | null | undefined): string | null {
+  if (!sourceUrl) return null;
+  try {
+    return new URL(sourceUrl).hostname.replace(/^www\./i, "");
+  } catch {
+    return null;
+  }
+}
+
+function ogFallbackUrl(post: { slug: string; title: string; category: string; sourceDomain: string | null }) {
+  const t = post.title.slice(0, 140);
+  const c = post.category.slice(0, 32);
+  const s = (post.sourceDomain ?? "").slice(0, 48);
+  return `/blog/api/og?title=${encodeURIComponent(t)}&category=${encodeURIComponent(c)}&source=${encodeURIComponent(s)}&seed=${encodeURIComponent(post.slug)}`;
+}
 
 export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await props.params;
@@ -18,22 +35,24 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
     };
   }
 
+  const sourceDomain = getSourceDomain(post.source_url);
+  const category = (post.category || "Tecnologia").trim() || "Tecnologia";
   const title = post.seo_title || post.title;
-  const description = post.seo_description || post.excerpt || "Blog do Balão da Informática.";
-  const url = `https://www.balao.info/blog/${post.slug}`;
+  const description = post.seo_description || post.excerpt || "Notícias e análises de tecnologia.";
+  const imageUrl = post.cover_image || ogFallbackUrl({ slug: post.slug, title: post.title, category, sourceDomain });
 
   return {
     title,
     description,
-    alternates: { canonical: post.canonical_url || url },
+    alternates: { canonical: post.canonical_url || `/blog/${post.slug}` },
     openGraph: {
       type: "article",
       locale: "pt_BR",
-      url,
+      url: `/blog/${post.slug}`,
       title,
       description,
-      siteName: "Balão da Informática",
-      images: post.cover_image ? [{ url: post.cover_image }] : undefined,
+      siteName: "BalãoNews",
+      images: [{ url: imageUrl }],
     },
   };
 }
@@ -43,9 +62,19 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
   const post = await getBlogPostBySlug(slug);
   if (!post) notFound();
 
-  const url = `https://www.balao.info/blog/${post.slug}`;
-  const published = new Date(post.published_at);
+  const sourceDomain = getSourceDomain(post.source_url);
+  const category = (post.category || "Tecnologia").trim() || "Tecnologia";
+  const published = post.published_at ? new Date(post.published_at) : new Date();
+  const createdAt = post.created_at ? new Date(post.created_at) : new Date();
   const safeHtml = sanitizeHtmlBasic(post.content_html || "");
+  const fallbackImageUrl = ogFallbackUrl({
+    slug: post.slug,
+    title: post.title,
+    category,
+    sourceDomain,
+  });
+  const imageUrl = post.cover_image || fallbackImageUrl;
+  const url = `https://www.balao.info/blog/${post.slug}`;
 
   const breadcrumbs = generateBreadcrumbSchema([
     { name: "Início", item: "https://www.balao.info" },
@@ -65,73 +94,90 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
     publisher: { "@type": "Organization", name: "Balão da Informática", url: "https://www.balao.info" },
   };
 
-  return (
-    <main className="container mx-auto px-4 py-10">
-      <JsonLd data={[org, breadcrumbs, article]} />
+  const jsonLd = post.json_ld || {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.excerpt || post.seo_description || "",
+    datePublished: (Number.isFinite(published.getTime()) ? published : createdAt).toISOString(),
+    dateModified: (Number.isFinite(published.getTime()) ? published : createdAt).toISOString(),
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    image: [imageUrl],
+    author: { "@type": "Organization", name: "Balão da Informática", url: "https://www.balao.info" },
+    publisher: {
+      "@type": "Organization",
+      name: "Balão da Informática",
+      logo: { "@type": "ImageObject", url: "https://www.balao.info/logo.png" },
+    },
+  };
 
-      <div className="max-w-3xl mx-auto">
-        <div className="flex items-center justify-between gap-4">
-          <Link href="/blog" className="text-sm font-bold text-[#E60012] hover:underline">
-            ← Voltar ao blog
-          </Link>
-          <ShareButton title={post.title} text={post.title} />
+  return (
+    <main className="mx-auto w-full max-w-5xl px-4 py-8">
+      <JsonLd data={[org, breadcrumbs, jsonLd]} />
+
+      <article className="overflow-hidden rounded-md border border-neutral-200 bg-white">
+        <div className="p-6">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-neutral-600">
+            <Link href={{ pathname: "/blog", query: { cat: category } }} className="uppercase tracking-wide text-[#e41e26] hover:underline">
+              {category}
+            </Link>
+            {post.reading_time_minutes ? <span>{post.reading_time_minutes} min</span> : null}
+            {sourceDomain ? <span>{sourceDomain}</span> : null}
+            <span>{new Date(post.published_at ?? post.created_at).toLocaleDateString("pt-BR")}</span>
+          </div>
+          <h1 className="mt-3 text-3xl font-extrabold tracking-tight">{post.title}</h1>
+          {post.excerpt ? <p className="mt-3 text-neutral-700">{post.excerpt}</p> : null}
         </div>
 
-        <header className="mt-6">
-          {post.category ? (
-            <Link
-              href={`/blog?category=${encodeURIComponent(post.category)}`}
-              className="inline-flex items-center rounded-full bg-red-50 text-[#E60012] px-3 py-1 text-xs font-black"
-            >
-              {post.category}
-            </Link>
-          ) : null}
+        <div className="relative aspect-[16/9] w-full">
+          <SafeImage
+            src={imageUrl}
+            fallbackSrc={fallbackImageUrl}
+            alt={post.title}
+            fill
+            sizes="(max-width: 1024px) 100vw, 900px"
+            className="object-contain"
+          />
+        </div>
 
-          <h1 className="mt-3 text-3xl md:text-5xl font-black tracking-tight text-gray-900">
-            {post.title}
-          </h1>
-
-          <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-gray-600">
-            <time dateTime={post.published_at}>
-              {Number.isFinite(published.getTime())
-                ? published.toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })
-                : post.published_at}
-            </time>
-            {post.reading_time_minutes ? <span>• {post.reading_time_minutes} min de leitura</span> : null}
-            <span className="text-gray-400">•</span>
-            <a className="font-bold text-[#E60012] hover:underline" href="https://wa.me/5519987510267" target="_blank" rel="noopener noreferrer">
-              WhatsApp 19 98751-0267
-            </a>
+        <div className="p-6">
+          <div className="prose prose-neutral max-w-none">
+            <div dangerouslySetInnerHTML={{ __html: safeHtml }} />
           </div>
-        </header>
 
-        <article
-          className="mt-8 rounded-2xl border border-gray-200 bg-white p-6 md:p-10 shadow-sm space-y-4
-          [&_h2]:text-xl [&_h2]:md:text-2xl [&_h2]:font-black [&_h2]:text-gray-900 [&_h2]:mt-8
-          [&_h3]:text-lg [&_h3]:font-black [&_h3]:text-gray-900 [&_h3]:mt-6
-          [&_p]:text-gray-800 [&_p]:leading-relaxed
-          [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:text-gray-800
-          [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:text-gray-800
-          [&_a]:text-[#E60012] [&_a]:font-bold [&_a]:underline"
-          dangerouslySetInnerHTML={{ __html: safeHtml }}
-        />
+          <div className="mt-8 rounded-md border border-[#e41e26]/20 bg-neutral-50 p-4">
+            <div className="text-sm font-extrabold">Quer ajuda para escolher?</div>
+            <div className="mt-1 text-sm text-neutral-700">
+              Fale com um especialista e receba recomendação direta para o seu uso.
+            </div>
+            <a
+              href="https://wa.me/5519987510267"
+              target="_blank"
+              rel="noreferrer"
+              className="mt-3 inline-flex w-full items-center justify-center rounded-md bg-[#e41e26] px-4 py-3 text-sm font-extrabold text-white hover:bg-[#c81920]"
+            >
+              Chamar no WhatsApp 19 98751-0267
+            </a>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <Link href="/notebooks" className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs font-bold text-neutral-900 hover:bg-neutral-50">
+                Notebooks
+              </Link>
+              <Link href="/pcgamer" className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs font-bold text-neutral-900 hover:bg-neutral-50">
+                PC Gamer
+              </Link>
+            </div>
+          </div>
 
-        <section className="mt-8 rounded-2xl border border-[#E60012]/20 bg-gradient-to-br from-red-50 to-white p-6 shadow-sm">
-          <h2 className="text-xl font-black text-gray-900">Fale com a Balão da Informática</h2>
-          <p className="mt-2 text-gray-700">
-            Quer recomendação personalizada para o seu caso? Envie sua dúvida e receba uma indicação objetiva.
-          </p>
-          <a
-            href="https://wa.me/5519987510267"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-[#E60012] px-5 py-3 font-black text-white hover:bg-red-700"
-          >
-            Chamar no WhatsApp
-          </a>
-        </section>
-      </div>
+          {post.source_url ? (
+            <footer className="mt-10 border-t border-neutral-200 pt-4 text-sm text-neutral-600">
+              Fonte:{" "}
+              <a className="underline hover:no-underline" href={post.source_url} target="_blank" rel="noreferrer">
+                {post.source_url}
+              </a>
+            </footer>
+          ) : null}
+        </div>
+      </article>
     </main>
   );
 }
-
