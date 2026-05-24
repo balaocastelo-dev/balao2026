@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { fetchRssItems, type RssItem } from "@/lib/rss";
+import { fetchRssItems, shouldSkipRssItemForBlog, type RssItem } from "@/lib/rss";
 import { slugify } from "@/lib/blog-utils";
 import { generateBlogPostFromRss } from "@/lib/blog-ai";
 import { getBlogPostBySlug, getBlogPosts } from "@/lib/db";
@@ -190,30 +190,6 @@ function extractFirstImageUrlFromHtml(html: string | null | undefined): string |
   return src ? src : null;
 }
 
-function normalizeImageUrlForCompare(input: string): string {
-  const raw = String(input || "").trim();
-  if (!raw) return "";
-  try {
-    const u = new URL(raw);
-    return `${u.origin}${u.pathname}`.toLowerCase();
-  } catch {
-    return raw.replace(/[?#].*$/, "").trim().toLowerCase();
-  }
-}
-
-function prependImagesToHtml(contentHtml: string, imageUrls: string[], coverImage: string | null): string {
-  const coverKey = coverImage ? normalizeImageUrlForCompare(coverImage) : "";
-  const urls = (imageUrls || [])
-    .filter(Boolean)
-    .filter((u) => (coverKey ? normalizeImageUrlForCompare(u) !== coverKey : true))
-    .slice(0, 3);
-  if (urls.length === 0) return contentHtml;
-  if (/<img\b/i.test(contentHtml)) return contentHtml;
-
-  const imgs = urls.map((u) => `<p><img src="${u}" alt="" /></p>`).join("");
-  return `${imgs}${contentHtml}`;
-}
-
 async function buildDynamicPosts(): Promise<BlogPostView[]> {
   const feeds = getDefaultFeeds();
   const all: RssItem[] = [];
@@ -247,20 +223,20 @@ async function buildDynamicPosts(): Promise<BlogPostView[]> {
   const posts: BlogPostView[] = [];
 
   for (const item of sorted.slice(0, 60)) {
+    if (shouldSkipRssItemForBlog(item)) continue;
     const slug = buildSlugFromRss(item);
     const publishedAt = item.publishedAt ? new Date(item.publishedAt) : new Date();
     const publishedAtIso = Number.isFinite(publishedAt.getTime()) ? publishedAt.toISOString() : nowIso;
     const postUrl = `https://www.balao.info/blog/${slug}`;
     const generated = await generateBlogPostFromRss(item, { slug, publishedAtIso, url: postUrl });
-    const cover = item.imageUrls?.[0] ? String(item.imageUrls[0]) : null;
-    const contentWithImages = prependImagesToHtml(generated.content_html, item.imageUrls || [], cover);
+    const cover = (item.imageUrls?.[0] ? String(item.imageUrls[0]) : null) || extractFirstImageUrlFromHtml(generated.content_html);
 
     posts.push({
       id: sha256(`rss:${item.url}`),
       slug,
       title: generated.title,
       excerpt: generated.excerpt,
-      content_html: contentWithImages,
+      content_html: generated.content_html,
       cover_image: cover,
       category: normalizeCategory(generated.category),
       published_at: publishedAtIso,
@@ -336,6 +312,39 @@ export async function listBlogPostsForPage(input?: { category?: string; take?: n
   const take = Math.max(1, Math.min(80, input?.take ?? 50));
   const category = input?.category ? normalizeCategory(input.category) : undefined;
 
+  const normalizeTextForMatch = (s: string) =>
+    String(s || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/\p{Diacritic}+/gu, "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+  const isThirdPartySalesPost = (p: BlogPostView) => {
+    const src = String(p.source_url || "").trim();
+    if (!src) return false;
+    const domain = (() => {
+      try {
+        return new URL(src).hostname.replace(/^www\./i, "").toLowerCase();
+      } catch {
+        return "";
+      }
+    })();
+    if (!domain || domain === "balao.info") return false;
+
+    const hay = normalizeTextForMatch(`${p.title} ${p.excerpt || ""}`);
+    const thirdPartyCommerceDomains =
+      /amazon\.|mercadolivre\.|meli\.|aliexpress\.|shopee\.|magazineluiza\.|magalu\.|kabum\.|americanas\.|submarino\.|casasbahia\.|pontofrio\.|extra\.|fastshop\.|carrefour\.|pichau\.|terabyte|alibaba\./i;
+    if (thirdPartyCommerceDomains.test(src)) return true;
+
+    const commerceSignals =
+      /\b(oferta|ofertas|promocao|promocoes|promo|cupom|cupons|desconto|descontos|cashback|frete gratis|melhor preco|preco|parcelad|compre|comprar|vale a pena|review de compra|onde comprar|link de compra)\b/i;
+    const hasPrice = /\br\$\s*\d/i.test(hay) || /\b\d{1,3}%\b/.test(hay);
+    if (commerceSignals.test(hay) && hasPrice) return true;
+    if (commerceSignals.test(normalizeTextForMatch(p.title)) && hasPrice) return true;
+    return false;
+  };
+
   if (isSupabaseReadable()) {
     const dbPosts = await getBlogPosts({ limit: take, category });
     if (dbPosts.length > 0) {
@@ -359,10 +368,10 @@ export async function listBlogPostsForPage(input?: { category?: string; take?: n
       }));
 
       if (category) {
-        return sortByPublishedDesc(mapped).slice(0, take);
+        return sortByPublishedDesc(mapped).filter((p) => !isThirdPartySalesPost(p)).slice(0, take);
       }
 
-      const rss = mapped.filter((p) => kindOfPost(p) === "rss");
+      const rss = mapped.filter((p) => kindOfPost(p) === "rss").filter((p) => !isThirdPartySalesPost(p));
       const products = mapped.filter((p) => kindOfPost(p) === "product");
       return mixRssAndProductPosts({ rss, products, take, maxConsecutiveProducts: 1 });
     }
@@ -371,10 +380,10 @@ export async function listBlogPostsForPage(input?: { category?: string; take?: n
   const [rssPosts, productPosts] = await Promise.all([buildDynamicPosts(), buildDynamicProductPosts()]);
   const merged = rssPosts.concat(productPosts);
   if (category) {
-    return sortByPublishedDesc(merged.filter((p) => p.category === category)).slice(0, take);
+    return sortByPublishedDesc(merged.filter((p) => p.category === category)).filter((p) => !isThirdPartySalesPost(p)).slice(0, take);
   }
 
-  return mixRssAndProductPosts({ rss: rssPosts, products: productPosts, take, maxConsecutiveProducts: 1 });
+  return mixRssAndProductPosts({ rss: rssPosts.filter((p) => !isThirdPartySalesPost(p)), products: productPosts, take, maxConsecutiveProducts: 1 });
 }
 
 export async function getBlogPostForPage(slug: string): Promise<BlogPostView | null> {

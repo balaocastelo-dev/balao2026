@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { fetchRssItems } from "@/lib/rss";
+import { fetchRssItems, shouldSkipRssItemForBlog } from "@/lib/rss";
 import { slugify } from "@/lib/blog-utils";
 import { generateBlogPostFromRss } from "@/lib/blog-ai";
 import { hasBlogSourceItem, insertBlogPost, insertBlogSourceItem } from "@/lib/db";
@@ -27,12 +27,12 @@ function sha256(input: string): string {
   return crypto.createHash("sha256").update(input).digest("hex");
 }
 
-function prependImagesToHtml(contentHtml: string, imageUrls: string[]): string {
-  const urls = (imageUrls || []).filter(Boolean).slice(0, 3);
-  if (urls.length === 0) return contentHtml;
-  if (/<img\b/i.test(contentHtml)) return contentHtml;
-  const imgs = urls.map((u) => `<p><img src="${u}" alt="" /></p>`).join("");
-  return `${imgs}${contentHtml}`;
+function extractFirstImageUrlFromHtml(html: string | null | undefined): string | null {
+  const input = String(html || "");
+  if (!input) return null;
+  const m = input.match(/<img\b[^>]*\bsrc\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s>]+))[^>]*>/i);
+  const src = (m?.[1] || m?.[2] || m?.[3] || "").trim();
+  return src ? src : null;
 }
 
 export async function GET(req: Request) {
@@ -72,6 +72,7 @@ export async function GET(req: Request) {
     }
 
     for (const item of items) {
+      if (shouldSkipRssItemForBlog(item)) continue;
       const sourceHash = sha256(item.url);
       const exists = await hasBlogSourceItem({ source_type: "rss", source_hash: sourceHash });
       if (exists) continue;
@@ -84,14 +85,13 @@ export async function GET(req: Request) {
       const postUrl = `https://www.balao.info/blog/${slug}`;
 
       const generated = await generateBlogPostFromRss(item, { slug, publishedAtIso, url: postUrl });
-      const cover = item.imageUrls?.[0] ? String(item.imageUrls[0]) : null;
-      const contentWithImages = prependImagesToHtml(generated.content_html, item.imageUrls || []);
+      const cover = (item.imageUrls?.[0] ? String(item.imageUrls[0]) : null) || extractFirstImageUrlFromHtml(generated.content_html);
 
       const inserted = await insertBlogPost({
         slug,
         title: generated.title,
         excerpt: generated.excerpt,
-        content_html: contentWithImages,
+        content_html: generated.content_html,
         cover_image: cover,
         category: generated.category,
         tags: generated.tags,

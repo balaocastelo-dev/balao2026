@@ -28,6 +28,14 @@ function getTagText(block: string, tag: string): string | undefined {
   return decodeHtmlEntities(raw);
 }
 
+function getTagHtml(block: string, tag: string): string | undefined {
+  const re = new RegExp(`<${tag}\\b[^>]*>([\\s\\S]*?)<\\/${tag}>`, "i");
+  const m = block.match(re);
+  if (!m) return undefined;
+  const raw = m[1].replace(/<!\[CDATA\[([\s\S]*?)\]\]>/gi, "$1").trim();
+  return decodeHtmlEntities(raw);
+}
+
 function getAtomLink(block: string): string | undefined {
   const mHref = block.match(/<link\b[^>]*href="([^"]+)"[^>]*\/?\s*>/i);
   if (mHref?.[1]) return mHref[1].trim();
@@ -70,6 +78,52 @@ function extractImageUrls(block: string): string[] {
     .slice(0, 6);
 }
 
+function getDomain(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./i, "").toLowerCase();
+  } catch {
+    return "";
+  }
+}
+
+function normalizeTextForMatch(input: string): string {
+  return String(input || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}+/gu, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export function shouldSkipRssItemForBlog(item: RssItem): boolean {
+  const url = String(item.url || "").trim();
+  const domain = getDomain(url);
+  if (!url) return true;
+  if (domain === "balao.info") return false;
+
+  const title = normalizeTextForMatch(item.title || "");
+  const summary = normalizeTextForMatch(item.summary || "");
+  const hay = `${title} ${summary}`.trim();
+
+  const isTooShort = summary.length < 80 && !/<(p|div|article|h\d|ul|ol|img)\b/i.test(String(item.summary || ""));
+  if (isTooShort) return true;
+
+  const thirdPartyCommerceDomains =
+    /amazon\.|mercadolivre\.|meli\.|aliexpress\.|shopee\.|magazineluiza\.|magalu\.|kabum\.|americanas\.|submarino\.|casasbahia\.|pontofrio\.|extra\.|fastshop\.|carrefour\.|pichau\.|terabyte|alibaba\./i;
+  if (thirdPartyCommerceDomains.test(url)) return true;
+
+  const commerceSignals =
+    /\b(oferta|ofertas|promocao|promocoes|promo|cupom|cupons|desconto|descontos|cashback|frete gratis|melhor preco|preco|parcelad|compre|comprar|vale a pena|review de compra|onde comprar|link de compra)\b/i;
+  const hasPrice = /\br\$\s*\d/i.test(hay) || /\b\d{1,3}%\b/.test(hay);
+  const hasAffiliate =
+    /\b(utm_source|utm_medium|utm_campaign|ref=|aff|affiliate|afiliad|clickid|gclid|fbclid|_branch_match_id)\b/i.test(url);
+
+  if (commerceSignals.test(hay) && (hasPrice || hasAffiliate)) return true;
+  if (commerceSignals.test(title) && (hasPrice || thirdPartyCommerceDomains.test(hay))) return true;
+
+  return false;
+}
+
 function parseRssItems(xml: string, feedUrl: string): RssItem[] {
   const items: RssItem[] = [];
 
@@ -79,9 +133,9 @@ function parseRssItems(xml: string, feedUrl: string): RssItem[] {
     const url = getTagText(block, "link");
     const pub = getTagText(block, "pubDate") || getTagText(block, "published") || getTagText(block, "updated");
     const summary =
-      getTagText(block, "description") ||
-      getTagText(block, "content:encoded") ||
-      getTagText(block, "content");
+      getTagHtml(block, "content:encoded") ||
+      getTagHtml(block, "description") ||
+      getTagHtml(block, "content");
 
     if (title && url) {
       const imageUrls = extractImageUrls(block);
@@ -94,7 +148,7 @@ function parseRssItems(xml: string, feedUrl: string): RssItem[] {
     const title = getTagText(block, "title");
     const url = getAtomLink(block);
     const pub = getTagText(block, "published") || getTagText(block, "updated");
-    const summary = getTagText(block, "summary") || getTagText(block, "content");
+    const summary = getTagHtml(block, "content") || getTagHtml(block, "summary") || getTagText(block, "summary") || getTagText(block, "content");
 
     if (title && url) {
       const imageUrls = extractImageUrls(block);
