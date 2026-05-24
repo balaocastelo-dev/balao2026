@@ -28,6 +28,33 @@ export type BlogPostView = {
 type PostKind = "rss" | "product";
 type AllowedCategory = "Início" | "Topic Trens" | "Hardware" | "Games" | "Mobile" | "Segurança" | "IA" | "Loja";
 
+type CacheEntry<T> = { at: number; value: T };
+
+const postBySlugCache = new Map<string, CacheEntry<BlogPostView>>();
+let dynamicRssCache: CacheEntry<BlogPostView[]> | null = null;
+let dynamicTrendCache: CacheEntry<BlogPostView[]> | null = null;
+let dynamicProductCache: CacheEntry<BlogPostView[]> | null = null;
+
+function getFresh<T>(entry: CacheEntry<T> | null, ttlMs: number): T | null {
+  if (!entry) return null;
+  if (Date.now() - entry.at > ttlMs) return null;
+  return entry.value;
+}
+
+function rememberPosts(posts: BlogPostView[]) {
+  const now = Date.now();
+  for (const p of posts) {
+    postBySlugCache.set(p.slug, { at: now, value: p });
+  }
+}
+
+function getCachedPostBySlug(slug: string): BlogPostView | null {
+  const hit = postBySlugCache.get(slug);
+  if (!hit) return null;
+  if (Date.now() - hit.at > 10 * 60_000) return null;
+  return hit.value;
+}
+
 function sha256(input: string): string {
   return crypto.createHash("sha256").update(input).digest("hex");
 }
@@ -242,6 +269,8 @@ function prependImagesToHtml(contentHtml: string, imageUrls: string[]): string {
 }
 
 async function buildDynamicTrendPosts(): Promise<BlogPostView[]> {
+  const cached = getFresh(dynamicTrendCache, 2 * 60_000);
+  if (cached) return cached;
   try {
     const yyyymmdd = new Date().toISOString().slice(0, 10).replace(/-/g, "");
     const items = await fetchRssItems(getTrendsFeedUrl(), 20);
@@ -282,6 +311,8 @@ async function buildDynamicTrendPosts(): Promise<BlogPostView[]> {
       });
     }
 
+    dynamicTrendCache = { at: Date.now(), value: posts };
+    rememberPosts(posts);
     return posts;
   } catch {
     return [];
@@ -289,6 +320,8 @@ async function buildDynamicTrendPosts(): Promise<BlogPostView[]> {
 }
 
 async function buildDynamicPosts(): Promise<BlogPostView[]> {
+  const cached = getFresh(dynamicRssCache, 30_000);
+  if (cached) return cached;
   const feeds = getDefaultFeeds();
   const all: RssItem[] = [];
 
@@ -400,6 +433,8 @@ async function buildDynamicPosts(): Promise<BlogPostView[]> {
     });
   }
 
+  dynamicRssCache = { at: Date.now(), value: posts };
+  rememberPosts(posts);
   return posts;
 }
 
@@ -410,6 +445,8 @@ function buildSlugFromProductUrl(input: { name: string; url: string }): string {
 }
 
 async function buildDynamicProductPosts(): Promise<BlogPostView[]> {
+  const cached = getFresh(dynamicProductCache, 10 * 60_000);
+  if (cached) return cached;
   const siteProducts = await scrapeSiteProducts({ take: 10 });
   const now = Date.now();
 
@@ -454,6 +491,8 @@ async function buildDynamicProductPosts(): Promise<BlogPostView[]> {
     });
   }
 
+  dynamicProductCache = { at: Date.now(), value: posts };
+  rememberPosts(posts);
   return posts;
 }
 
@@ -484,30 +523,41 @@ export async function listBlogPostsForPage(input?: { category?: string; take?: n
       }));
 
       if (category) {
-        return sortByPublishedDesc(mapped).slice(0, take);
+        const out = sortByPublishedDesc(mapped).slice(0, take);
+        rememberPosts(out);
+        return out;
       }
 
       const rss = mapped.filter((p) => kindOfPost(p) === "rss");
       const products = mapped.filter((p) => kindOfPost(p) === "product");
-      return mixRssAndProductPosts({ rss, products, take, maxConsecutiveProducts: 1 });
+      const out = mixRssAndProductPosts({ rss, products, take, maxConsecutiveProducts: 1 });
+      rememberPosts(out);
+      return out;
     }
   }
 
   const [rssPosts, productPosts, trendPosts] = await Promise.all([buildDynamicPosts(), buildDynamicProductPosts(), buildDynamicTrendPosts()]);
   const merged = rssPosts.concat(productPosts).concat(trendPosts);
   if (category) {
-    return sortByPublishedDesc(merged.filter((p) => p.category === category)).slice(0, take);
+    const out = sortByPublishedDesc(merged.filter((p) => p.category === category)).slice(0, take);
+    rememberPosts(out);
+    return out;
   }
 
   const rssBucket = rssPosts.concat(trendPosts);
-  return mixRssAndProductPosts({ rss: rssBucket, products: productPosts, take, maxConsecutiveProducts: 1 });
+  const out = mixRssAndProductPosts({ rss: rssBucket, products: productPosts, take, maxConsecutiveProducts: 1 });
+  rememberPosts(out);
+  return out;
 }
 
 export async function getBlogPostForPage(slug: string): Promise<BlogPostView | null> {
+  const cached = getCachedPostBySlug(slug);
+  if (cached) return cached;
+
   if (isSupabaseReadable()) {
     const post = await getBlogPostBySlug(slug);
     if (post) {
-      return {
+      const out = {
         id: post.id,
         slug: post.slug,
         title: cleanText(post.title),
@@ -525,9 +575,20 @@ export async function getBlogPostForPage(slug: string): Promise<BlogPostView | n
         json_ld: post.json_ld,
         reading_time_minutes: post.reading_time_minutes ?? null,
       };
+      postBySlugCache.set(out.slug, { at: Date.now(), value: out });
+      return out;
     }
   }
 
-  const [rssPosts, productPosts, trendPosts] = await Promise.all([buildDynamicPosts(), buildDynamicProductPosts(), buildDynamicTrendPosts()]);
-  return rssPosts.concat(productPosts).concat(trendPosts).find((p) => p.slug === slug) || null;
+  const [rssPosts, trendPosts] = await Promise.all([buildDynamicPosts(), buildDynamicTrendPosts()]);
+  const first = rssPosts.concat(trendPosts).find((p) => p.slug === slug) || null;
+  if (first) {
+    postBySlugCache.set(first.slug, { at: Date.now(), value: first });
+    return first;
+  }
+
+  const productPosts = await buildDynamicProductPosts();
+  const product = productPosts.find((p) => p.slug === slug) || null;
+  if (product) postBySlugCache.set(product.slug, { at: Date.now(), value: product });
+  return product;
 }

@@ -75,6 +75,33 @@ function getVideoEmbed(post: { source_url: string | null; json_ld: any; title: s
   return null;
 }
 
+function stripLeadingCoverImage(html: string, coverUrl: string): string {
+  const u = String(coverUrl || "").trim();
+  if (!u) return html;
+  const escaped = u.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  const patterns = [
+    new RegExp(`<a[^>]*>\\s*<img[^>]*src=["']${escaped}["'][^>]*>\\s*<\\/a>\\s*`, "i"),
+    new RegExp(`<p[^>]*>\\s*<img[^>]*src=["']${escaped}["'][^>]*>\\s*<\\/p>\\s*`, "i"),
+    new RegExp(`<img[^>]*src=["']${escaped}["'][^>]*>\\s*`, "i"),
+  ];
+
+  let out = html;
+  for (const re of patterns) {
+    const next = out.replace(re, "");
+    if (next !== out) return next;
+  }
+  return out;
+}
+
+function stripLeadingVideoSection(html: string): string {
+  let out = html;
+  out = out.replace(/^\s*<h2>\s*Assista ao vídeo\s*<\/h2>\s*/i, "");
+  out = out.replace(/^\s*<div[^>]*class=["'][^"']*video-embed[^"']*["'][^>]*>[\s\S]*?<\/div>\s*/i, "");
+  out = out.replace(/^\s*<p>\s*<a[^>]*>[^<]*<\/a>\s*<\/p>\s*/i, "");
+  return out;
+}
+
 export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await props.params;
   const post = await getBlogPostForPage(slug);
@@ -134,7 +161,6 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
   const category = (post.category || "Tecnologia").trim() || "Tecnologia";
   const published = post.published_at ? new Date(post.published_at) : new Date();
   const createdAt = post.created_at ? new Date(post.created_at) : new Date();
-  const safeHtml = sanitizeHtmlBasic(post.content_html || "");
   const fallbackImageUrl = ogFallbackUrl({
     slug: post.slug,
     title: post.title,
@@ -143,6 +169,14 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
   });
   const imageUrl = post.cover_image || fallbackImageUrl;
   const video = getVideoEmbed({ source_url: post.source_url, json_ld: post.json_ld, title: post.title });
+  let contentHtmlRaw = String(post.content_html || "");
+  if (video) {
+    contentHtmlRaw = stripLeadingVideoSection(contentHtmlRaw);
+  }
+  if (!video) {
+    contentHtmlRaw = stripLeadingCoverImage(contentHtmlRaw, imageUrl);
+  }
+  const safeHtml = sanitizeHtmlBasic(contentHtmlRaw);
   const url = `https://www.balao.info/blog/${post.slug}`;
 
   const breadcrumbs = generateBreadcrumbSchema([

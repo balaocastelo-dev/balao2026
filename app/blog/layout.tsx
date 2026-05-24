@@ -78,30 +78,12 @@ export default function BlogLayout({ children }: { children: React.ReactNode }) 
           <Link href="/blog" className="flex items-center gap-3">
             <Image src="/logo.png" alt="BalãoNews" width={210} height={44} priority className="h-8 w-auto" />
             <span className="hidden text-xs font-semibold text-neutral-300 sm:inline">
-              Informática • Hardware • Games • Ofertas
+              Informática • Ofertas
             </span>
           </Link>
           <nav className="hidden items-center gap-5 text-sm font-extrabold tracking-tight text-neutral-200 md:flex">
             <Link href="/blog" className="hover:text-white">
               Início
-            </Link>
-            <Link href={{ pathname: "/blog", query: { cat: "Topic Trens" } }} className="hover:text-white">
-              Topic Trens
-            </Link>
-            <Link href={{ pathname: "/blog", query: { cat: "Hardware" } }} className="hover:text-white">
-              Hardware
-            </Link>
-            <Link href={{ pathname: "/blog", query: { cat: "Games" } }} className="hover:text-white">
-              Games
-            </Link>
-            <Link href={{ pathname: "/blog", query: { cat: "Mobile" } }} className="hover:text-white">
-              Mobile
-            </Link>
-            <Link href={{ pathname: "/blog", query: { cat: "Segurança" } }} className="hover:text-white">
-              Segurança
-            </Link>
-            <Link href={{ pathname: "/blog", query: { cat: "IA" } }} className="hover:text-white">
-              IA
             </Link>
             <Link href={{ pathname: "/blog", query: { cat: "Loja" } }} className="hover:text-white">
               Loja
@@ -119,24 +101,6 @@ export default function BlogLayout({ children }: { children: React.ReactNode }) 
             <nav className="flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold text-neutral-300 md:hidden">
               <Link href="/blog" className="hover:text-white">
                 Início
-              </Link>
-              <Link href={{ pathname: "/blog", query: { cat: "Topic Trens" } }} className="hover:text-white">
-                Topic Trens
-              </Link>
-              <Link href={{ pathname: "/blog", query: { cat: "Hardware" } }} className="hover:text-white">
-                Hardware
-              </Link>
-              <Link href={{ pathname: "/blog", query: { cat: "Games" } }} className="hover:text-white">
-                Games
-              </Link>
-              <Link href={{ pathname: "/blog", query: { cat: "Mobile" } }} className="hover:text-white">
-                Mobile
-              </Link>
-              <Link href={{ pathname: "/blog", query: { cat: "Segurança" } }} className="hover:text-white">
-                Segurança
-              </Link>
-              <Link href={{ pathname: "/blog", query: { cat: "IA" } }} className="hover:text-white">
-                IA
               </Link>
               <Link href={{ pathname: "/blog", query: { cat: "Loja" } }} className="hover:text-white">
                 Loja
