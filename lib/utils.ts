@@ -6,6 +6,12 @@ export interface Product {
   image_urls?: string[];
   product_url?: string;
   kabum_url?: string;
+  kabum_last_price?: number | null;
+  kabum_last_stock?: string | null;
+  kabum_last_checked_at?: string | null;
+  kabum_sync_enabled?: boolean | null;
+  kabum_sync_status?: string | null;
+  kabum_sync_error?: string | null;
   category: string;
   slug: string;
   cost?: number;
@@ -15,6 +21,9 @@ export interface Product {
   specs?: Record<string, any>;
   ai_status?: "thinking" | "done" | "error";
   created_at?: string;
+  originalPrice?: string;
+  newPrice?: string;
+  priceChange?: number;
 }
 
 export type BlogPostStatus = "draft" | "published";
