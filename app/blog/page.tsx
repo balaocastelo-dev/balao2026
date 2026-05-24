@@ -21,6 +21,7 @@ type BlogCardPost = {
   publishedAt: Date | null;
   createdAt: Date;
   readingTimeMin: number | null;
+  videoEmbedUrl: string | null;
 };
 
 function getSourceDomain(sourceUrl: string | null | undefined): string | null {
@@ -30,6 +31,42 @@ function getSourceDomain(sourceUrl: string | null | undefined): string | null {
   } catch {
     return null;
   }
+}
+
+function extractYouTubeVideoId(url: string): string | null {
+  const u = String(url || "").trim();
+  if (!u) return null;
+  const short = u.match(/youtu\.be\/([a-zA-Z0-9_-]{6,})/i);
+  if (short?.[1]) return short[1];
+  const watch = u.match(/[?&]v=([a-zA-Z0-9_-]{6,})/i);
+  if (watch?.[1]) return watch[1];
+  const embed = u.match(/youtube(?:-nocookie)?\.com\/embed\/([a-zA-Z0-9_-]{6,})/i);
+  if (embed?.[1]) return embed[1];
+  return null;
+}
+
+function isAllowedEmbedUrl(url: string): boolean {
+  const u = String(url || "").trim().toLowerCase();
+  if (!u) return false;
+  return (
+    u.startsWith("https://www.youtube-nocookie.com/embed/") ||
+    u.startsWith("https://www.youtube.com/embed/") ||
+    u.startsWith("https://player.globo.com/") ||
+    u.startsWith("https://globoplay.globo.com/")
+  );
+}
+
+function getVideoEmbedUrlFromPost(post: { source_url: string | null; json_ld: any }): string | null {
+  const embedUrl = typeof post.json_ld?.video?.embedUrl === "string" ? post.json_ld.video.embedUrl : null;
+  if (embedUrl && isAllowedEmbedUrl(embedUrl)) return embedUrl;
+
+  const contentUrl = typeof post.json_ld?.video?.contentUrl === "string" ? post.json_ld.video.contentUrl : null;
+  const maybe = contentUrl || post.source_url || "";
+  const yt = extractYouTubeVideoId(maybe);
+  if (yt) return `https://www.youtube-nocookie.com/embed/${yt}`;
+
+  if (contentUrl && isAllowedEmbedUrl(contentUrl)) return contentUrl;
+  return null;
 }
 
 function ogHomeFallbackUrl(seed: string) {
@@ -102,6 +139,7 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
       publishedAt: Number.isFinite(publishedAt?.getTime()) ? publishedAt : null,
       createdAt: Number.isFinite(createdAt.getTime()) ? createdAt : new Date(),
       readingTimeMin: p.reading_time_minutes ?? null,
+      videoEmbedUrl: getVideoEmbedUrlFromPost({ source_url: p.source_url, json_ld: p.json_ld }),
     };
   });
 
@@ -395,6 +433,8 @@ function PostListItem({ post }: { post: BlogCardPost }) {
           src={post.ogImageUrl || ogFallbackUrl(post)}
           fallbackSrc={ogFallbackUrl(post)}
           alt={post.title}
+          hoverPreviewEmbedUrl={post.videoEmbedUrl}
+          hoverPreviewTitle={post.title}
           fill
           sizes="140px"
           className="object-contain"
@@ -435,12 +475,14 @@ function HeroCard({ post, size }: { post: BlogCardPost; size: "lg" | "sm" }) {
             src={imageUrl}
             fallbackSrc={ogFallbackUrl(post)}
             alt={post.title}
+            hoverPreviewEmbedUrl={post.videoEmbedUrl}
+            hoverPreviewTitle={post.title}
             fill
             sizes={size === "lg" ? "(max-width: 1024px) 100vw, 880px" : "(max-width: 1024px) 100vw, 420px"}
             className="object-contain"
             priority={size === "lg"}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 p-4">
             <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-white/80">
               <span className="uppercase tracking-wide text-[#ff3b3b]">{post.category}</span>
