@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Plus, RefreshCw, ToggleLeft, ToggleRight } from "lucide-react";
-import { BLOG_CATEGORIES } from "@/lib/blog/constants";
+import { BLOG_CATEGORIES, type BlogCategory } from "@/lib/blog/constants";
 
 type Feed = {
   id: string;
@@ -28,7 +28,7 @@ export default function AdminBlogRssPage() {
 
   const [name, setName] = useState("");
   const [url, setUrl] = useState("");
-  const [category, setCategory] = useState(BLOG_CATEGORIES[0]);
+  const [category, setCategory] = useState<BlogCategory>(BLOG_CATEGORIES[0]);
   const [priority, setPriority] = useState<number>(10);
   const [fetchInterval, setFetchInterval] = useState<number>(15);
   const [dailyLimit, setDailyLimit] = useState<number>(10);
@@ -153,7 +153,7 @@ export default function AdminBlogRssPage() {
             placeholder="URL do RSS/Atom"
             className="px-3 py-2 rounded-md border text-sm"
           />
-          <select value={category} onChange={(e) => setCategory(e.target.value)} className="px-3 py-2 rounded-md border text-sm">
+          <select value={category} onChange={(e) => setCategory(e.target.value as BlogCategory)} className="px-3 py-2 rounded-md border text-sm">
             {BLOG_CATEGORIES.map((c) => (
               <option key={c} value={c}>
                 {c}
@@ -253,4 +253,3 @@ export default function AdminBlogRssPage() {
     </div>
   );
 }
-
