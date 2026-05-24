@@ -20,15 +20,15 @@ function getTagText(block: string, tag: string): string | undefined {
   const m = block.match(re);
   if (!m) return undefined;
   const raw = m[1]
-    .replace(/<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>/gi, "$1")
+    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/gi, "$1")
     .replace(/<[^>]*>/g, " ")
-    .replace(/\\s+/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
   return decodeHtmlEntities(raw);
 }
 
 function getAtomLink(block: string): string | undefined {
-  const mHref = block.match(/<link\\b[^>]*href="([^"]+)"[^>]*\\/?\\s*>/i);
+  const mHref = block.match(/<link\b[^>]*href="([^"]+)"[^>]*\/?\s*>/i);
   if (mHref?.[1]) return mHref[1].trim();
   const mText = getTagText(block, "link");
   if (mText) return mText.trim();
@@ -38,7 +38,7 @@ function getAtomLink(block: string): string | undefined {
 function parseRssItems(xml: string, feedUrl: string): RssItem[] {
   const items: RssItem[] = [];
 
-  const rssItems = Array.from(xml.matchAll(/<item\\b[\\s\\S]*?<\\/item>/gi)).map((m) => m[0]);
+  const rssItems = Array.from(xml.matchAll(/<item\b[\s\S]*?<\/item>/gi)).map((m) => m[0]);
   for (const block of rssItems) {
     const title = getTagText(block, "title");
     const url = getTagText(block, "link");
@@ -53,7 +53,7 @@ function parseRssItems(xml: string, feedUrl: string): RssItem[] {
     }
   }
 
-  const atomEntries = Array.from(xml.matchAll(/<entry\\b[\\s\\S]*?<\\/entry>/gi)).map((m) => m[0]);
+  const atomEntries = Array.from(xml.matchAll(/<entry\b[\s\S]*?<\/entry>/gi)).map((m) => m[0]);
   for (const block of atomEntries) {
     const title = getTagText(block, "title");
     const url = getAtomLink(block);
@@ -99,4 +99,3 @@ export async function fetchRssItems(feedUrl: string, limit = 20): Promise<RssIte
 
   return sorted.slice(0, Math.max(1, Math.min(100, limit)));
 }
-
