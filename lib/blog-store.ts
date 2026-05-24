@@ -29,6 +29,42 @@ function sha256(input: string): string {
   return crypto.createHash("sha256").update(input).digest("hex");
 }
 
+function decodeHtmlEntities(input: string): string {
+  return input
+    .replace(/&quot;|&#34;/g, '"')
+    .replace(/&apos;|&#39;/g, "'")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => {
+      const code = Number.parseInt(String(hex), 16);
+      if (!Number.isFinite(code)) return _;
+      try {
+        return String.fromCodePoint(code);
+      } catch {
+        return _;
+      }
+    })
+    .replace(/&#(\d+);/g, (_, dec) => {
+      const code = Number.parseInt(String(dec), 10);
+      if (!Number.isFinite(code)) return _;
+      try {
+        return String.fromCodePoint(code);
+      } catch {
+        return _;
+      }
+    });
+}
+
+function cleanText(input: string | null | undefined): string {
+  return decodeHtmlEntities(String(input || ""))
+    .replace(/\s+/g, " ")
+    .replace(/\s+([,;:.!?)\]])/g, "$1")
+    .replace(/([(\[])\s+/g, "$1")
+    .trim();
+}
+
 function isSupabaseReadable(): boolean {
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!anon) return false;
@@ -199,8 +235,8 @@ export async function listBlogPostsForPage(input?: { category?: string; take?: n
       return dbPosts.map((p) => ({
         id: p.id,
         slug: p.slug,
-        title: p.title,
-        excerpt: (p.excerpt || p.seo_description || "").trim(),
+        title: cleanText(p.title),
+        excerpt: cleanText(p.excerpt || p.seo_description || ""),
         content_html: p.content_html,
         cover_image: p.cover_image ? String(p.cover_image) : null,
         category: normalizeCategory(p.category),
@@ -209,8 +245,8 @@ export async function listBlogPostsForPage(input?: { category?: string; take?: n
         updated_at: p.updated_at,
         source_url: p.source_url ? String(p.source_url) : null,
         canonical_url: p.canonical_url ? String(p.canonical_url) : `https://www.balao.info/blog/${p.slug}`,
-        seo_title: p.seo_title ? String(p.seo_title) : null,
-        seo_description: p.seo_description ? String(p.seo_description) : null,
+        seo_title: p.seo_title ? cleanText(String(p.seo_title)) : null,
+        seo_description: p.seo_description ? cleanText(String(p.seo_description)) : null,
         json_ld: p.json_ld,
         reading_time_minutes: p.reading_time_minutes ?? null,
       }));
@@ -231,8 +267,8 @@ export async function getBlogPostForPage(slug: string): Promise<BlogPostView | n
       return {
         id: post.id,
         slug: post.slug,
-        title: post.title,
-        excerpt: (post.excerpt || post.seo_description || "").trim(),
+        title: cleanText(post.title),
+        excerpt: cleanText(post.excerpt || post.seo_description || ""),
         content_html: post.content_html,
         cover_image: post.cover_image ? String(post.cover_image) : null,
         category: normalizeCategory(post.category),
@@ -241,8 +277,8 @@ export async function getBlogPostForPage(slug: string): Promise<BlogPostView | n
         updated_at: post.updated_at,
         source_url: post.source_url ? String(post.source_url) : null,
         canonical_url: post.canonical_url ? String(post.canonical_url) : `https://www.balao.info/blog/${post.slug}`,
-        seo_title: post.seo_title ? String(post.seo_title) : null,
-        seo_description: post.seo_description ? String(post.seo_description) : null,
+        seo_title: post.seo_title ? cleanText(String(post.seo_title)) : null,
+        seo_description: post.seo_description ? cleanText(String(post.seo_description)) : null,
         json_ld: post.json_ld,
         reading_time_minutes: post.reading_time_minutes ?? null,
       };
