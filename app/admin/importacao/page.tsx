@@ -18,6 +18,7 @@ export default function ImportPage() {
   const [adjustmentScope, setAdjustmentScope] = useState<"all" | "high_value" | "low_value">("all");
   const [scopeThreshold, setScopeThreshold] = useState<number>(1000);
   const [migrateImages, setMigrateImages] = useState(false);
+  const [autoCategory, setAutoCategory] = useState(true);
   
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
@@ -39,6 +40,14 @@ export default function ImportPage() {
   };
 
   // Preview Logic
+  const getCategoryOptions = () => {
+    if (categories && categories.length > 0) {
+      const names = categories.map(c => c?.name).filter(Boolean) as string[];
+      if (names.length > 0) return names;
+    }
+    return CATEGORIES;
+  };
+
   const getPreviewProducts = () => {
     const nowIso = new Date().toISOString();
     return parsedProducts.map((p: Product) => {
@@ -62,7 +71,7 @@ export default function ImportPage() {
 
         return {
             ...p,
-            category: selectedCategory, // Apply selected category
+            category: autoCategory && p.category ? p.category : selectedCategory,
             originalPrice: p.price,
             newPrice: newPriceFormatted,
             priceChange: newPriceNum - priceNum,
@@ -151,6 +160,7 @@ export default function ImportPage() {
 
     const total = products.length;
     let aiDone = 0;
+    let catDone = 0;
     let processed = 0;
 
     const updateRow = (id: string, patch: any) => {
@@ -178,7 +188,38 @@ export default function ImportPage() {
 
     setParsedProducts(initialRows as any);
     setImportStep("preview");
-    setMessage(`IA pensando... (0/${total})`);
+    const updateProgress = () => {
+      setMessage(`IA pensando... (${aiDone}/${total}) | Categorias... (${catDone}/${total})`);
+    };
+    updateProgress();
+
+    const categorizePromise = (async () => {
+      if (!autoCategory) return;
+      try {
+        const categoriesList = getCategoryOptions();
+        const res = await fetch("/api/admin/ai-categorize", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            products: initialRows.map((p: any) => ({ id: p.id, name: p.name })),
+            categories: categoriesList,
+            maxParallel: 10
+          })
+        });
+        const json = await res.json().catch(() => null);
+        const results = Array.isArray(json?.results) ? json.results : [];
+        for (const r of results) {
+          if (r?.id && r?.category) {
+            updateRow(String(r.id), { category: String(r.category) });
+          }
+          catDone += 1;
+          updateProgress();
+        }
+      } catch {
+        catDone = total;
+        updateProgress();
+      }
+    })();
 
     const tasks = initialRows.map(async (p: any) => {
       try {
@@ -230,12 +271,12 @@ export default function ImportPage() {
             updateRow(p.id, { ai_status: "error" });
           } finally {
             aiDone += 1;
-            setMessage(`IA pensando... (${aiDone}/${total})`);
+            updateProgress();
           }
         } else {
           updateRow(p.id, { ai_status: "error" });
           aiDone += 1;
-          setMessage(`IA pensando... (${aiDone}/${total})`);
+          updateProgress();
         }
 
         const validImageUrls: string[] = [];
@@ -256,7 +297,7 @@ export default function ImportPage() {
       }
     });
 
-    await Promise.allSettled(tasks);
+    await Promise.allSettled([categorizePromise, ...tasks]);
 
     setParsedProducts((prev: any) => {
       const filtered = prev.filter((r: any) => r.imageValid && r.image);
@@ -397,7 +438,9 @@ export default function ImportPage() {
                 {/* Preview & Settings */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 bg-gray-50 p-4 rounded-lg border">
                     <div>
-                        <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Categoria Destino</label>
+                        <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">
+                          {autoCategory ? "Categoria Padrão (fallback)" : "Categoria Destino"}
+                        </label>
                         <select
                             value={selectedCategory}
                             onChange={(e) => setSelectedCategory(e.target.value)}
@@ -458,7 +501,18 @@ export default function ImportPage() {
 
                     <div>
                         <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Opções Extras</label>
-                        <div className="flex items-center h-[38px]">
+                        <div className="space-y-2">
+                            <label className="flex items-center gap-2 cursor-pointer select-none">
+                                <input
+                                    type="checkbox"
+                                    checked={autoCategory}
+                                    onChange={(e) => setAutoCategory(e.target.checked)}
+                                    className="w-4 h-4 text-[#E60012] rounded border-gray-300 focus:ring-[#E60012]"
+                                />
+                                <span className="text-sm text-gray-700 font-medium">
+                                    Categoria automática por item (IA)
+                                </span>
+                            </label>
                             <label className="flex items-center gap-2 cursor-pointer select-none">
                                 <input 
                                     type="checkbox" 
@@ -482,6 +536,7 @@ export default function ImportPage() {
                             <tr>
                                 <th className="px-4 py-3">Imagem</th>
                                 <th className="px-4 py-3">Produto</th>
+                                <th className="px-4 py-3">Categoria</th>
                                 <th className="px-4 py-3">Preço Original</th>
                                 <th className="px-4 py-3">Novo Preço</th>
                                 <th className="px-4 py-3">Status</th>
@@ -527,6 +582,11 @@ export default function ImportPage() {
                                                 <span className="bg-blue-100 text-blue-700 text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase">Specs OK</span>
                                             )}
                                         </div>
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        <span className="text-xs font-medium text-gray-700">
+                                          {p.category || selectedCategory}
+                                        </span>
                                     </td>
                                     <td className="px-4 py-3">{p.originalPrice}</td>
                                     <td className="px-4 py-3 font-bold text-gray-900">
