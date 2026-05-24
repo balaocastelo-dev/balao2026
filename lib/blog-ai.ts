@@ -20,6 +20,7 @@ type GeneratedBlogPost = {
 const WHATSAPP_NUMBER_E164 = "5519987510267";
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER_E164}`;
 const SITE_URL = "https://www.balao.info";
+type AllowedCategory = "Início" | "Topic Trens" | "Hardware" | "Games" | "Mobile" | "Segurança" | "IA" | "Loja";
 
 function decodeHtmlEntities(input: string): string {
   const map: Record<string, string> = {
@@ -79,6 +80,49 @@ function cleanProductName(input: string): string {
     .trim();
 
   return s.length > 110 ? `${s.slice(0, 107).trim()}...` : s;
+}
+
+function enforceAllowedCategory(input: string, hint?: { title?: string; sourceUrl?: string; kind?: "rss" | "product" | "trend" }): AllowedCategory {
+  const kind = hint?.kind;
+  if (kind === "trend") return "Topic Trens";
+  if (kind === "product") return "Loja";
+
+  const raw = cleanText(input || "").toLowerCase();
+  const title = cleanText(hint?.title || "").toLowerCase();
+  const source = cleanText(hint?.sourceUrl || "").toLowerCase();
+
+  if (raw.includes("topic") || raw.includes("trend") || raw.includes("trens")) return "Topic Trens";
+  if (raw.includes("hardware")) return "Hardware";
+  if (raw.includes("game")) return "Games";
+  if (raw.includes("mobile") || raw.includes("celular") || raw.includes("smartphone")) return "Mobile";
+  if (raw.includes("segurança") || raw.includes("seguranca") || raw.includes("ciber")) return "Segurança";
+  if (raw === "ia" || raw.includes("inteligência artificial") || raw.includes("inteligencia artificial")) return "IA";
+  if (raw.includes("loja") || raw.includes("ofertas") || raw.includes("guia de compra")) return "Loja";
+
+  const looksCampinas =
+    source.includes("campinas") ||
+    title.includes("campinas") ||
+    title.includes("cambui") ||
+    title.includes("cambuí") ||
+    title.includes("campinas e região") ||
+    title.includes("campinas e regiao");
+  if (looksCampinas) return "Início";
+
+  if (
+    /gpu|placa de v|placa de ví|processador|intel|amd|ryzen|core i|ssd|nvme|mem[oó]ria|ram|fonte|placa-m[aã]e|motherboard|gabinete/i.test(
+      title,
+    )
+  ) {
+    return "Hardware";
+  }
+  if (/game|games|steam|xbox|playstation|ps5|nintendo|switch|fortnite|gta|cs2|valorant/i.test(title)) return "Games";
+  if (/android|iphone|ios|smartphone|celular|galaxy|xiaomi|motorola|samsung/i.test(title)) return "Mobile";
+  if (/seguran[cç]a|ciber|malware|phishing|ransomware|vazamento|hack/i.test(title)) return "Segurança";
+  if (/\bia\b|chatgpt|openai|gemini|llama|copilot|intelig[eê]ncia artificial/i.test(title)) return "IA";
+
+  if (source.includes("balao.info") && source.includes("/product/")) return "Loja";
+
+  return "Início";
 }
 
 function cleanRssTitle(input: string, sourceUrl: string): string {
@@ -315,7 +359,8 @@ Estrutura sugerida:
       `Entenda ${title} e veja dicas práticas para comprar notebook, PC Gamer e hardware. Atendimento no WhatsApp 19 98751-0267.`,
       155,
     );
-  const category = (typeof data?.category === "string" && data.category.trim()) || "Notícias";
+  const categoryRaw = (typeof data?.category === "string" && data.category.trim()) || "Início";
+  const category = enforceAllowedCategory(categoryRaw, { title, sourceUrl: item.url, kind: "rss" });
   const tags = Array.isArray(data?.tags) ? data.tags.filter((t: any) => typeof t === "string" && t.trim()).slice(0, 10) : [];
 
   const rawHtml =
@@ -434,7 +479,7 @@ Fonte (apenas referência): ${JSON.stringify(input.sourceUrl)}
       `Veja o que significa ${query} nas buscas e como isso afeta compras de informática. Atendimento no WhatsApp 19 98751-0267.`,
       155,
     );
-  const category = "Topic Trens";
+  const category = enforceAllowedCategory("Topic Trens", { title, sourceUrl: input.sourceUrl, kind: "trend" });
   const tags = Array.isArray(data?.tags) ? data.tags.filter((t: any) => typeof t === "string" && t.trim()).slice(0, 10) : tagsFromQuery(query);
 
   const rawHtml =
@@ -508,7 +553,7 @@ URL do produto: ${JSON.stringify(input.productUrl)}
       `Entenda para quem o ${productName} é ideal e veja dicas de compra de informática. Atendimento no WhatsApp 19 98751-0267.`,
       155,
     );
-  const category = (typeof data?.category === "string" && data.category.trim()) || String(product.category || "Guia de Compra");
+  const category = enforceAllowedCategory("Loja", { title, sourceUrl: input.productUrl, kind: "product" });
   const tags = Array.isArray(data?.tags) ? data.tags.filter((t: any) => typeof t === "string" && t.trim()).slice(0, 10) : [];
 
   const rawHtml =

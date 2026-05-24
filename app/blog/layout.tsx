@@ -103,7 +103,7 @@ export default function BlogLayout({ children }: { children: React.ReactNode }) 
             <Link href={{ pathname: "/blog", query: { cat: "IA" } }} className="hover:text-white">
               IA
             </Link>
-            <Link href="/" className="hover:text-white">
+            <Link href={{ pathname: "/blog", query: { cat: "Loja" } }} className="hover:text-white">
               Loja
             </Link>
           </nav>
@@ -138,7 +138,7 @@ export default function BlogLayout({ children }: { children: React.ReactNode }) 
               <Link href={{ pathname: "/blog", query: { cat: "IA" } }} className="hover:text-white">
                 IA
               </Link>
-              <Link href="/" className="hover:text-white">
+              <Link href={{ pathname: "/blog", query: { cat: "Loja" } }} className="hover:text-white">
                 Loja
               </Link>
             </nav>

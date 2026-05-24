@@ -26,6 +26,7 @@ export type BlogPostView = {
 };
 
 type PostKind = "rss" | "product";
+type AllowedCategory = "Início" | "Topic Trens" | "Hardware" | "Games" | "Mobile" | "Segurança" | "IA" | "Loja";
 
 function sha256(input: string): string {
   return crypto.createHash("sha256").update(input).digest("hex");
@@ -69,7 +70,7 @@ function cleanText(input: string | null | undefined): string {
 
 function kindOfPost(p: BlogPostView): PostKind {
   const category = (p.category || "").toLowerCase();
-  if (category.includes("ofertas balão") || category.includes("ofertas balao")) return "product";
+  if (category.includes("ofertas balão") || category.includes("ofertas balao") || category === "loja") return "product";
 
   const src = (p.source_url || "").toLowerCase();
   if (src.includes("balao.info") && src.includes("/product/")) return "product";
@@ -168,12 +169,51 @@ function getDefaultFeeds(): string[] {
     "https://www.adrenaline.com.br/feed/",
     "https://www.tecmundo.com.br/rss",
     "https://canaltech.com.br/rss/",
+    "https://olhardigital.com.br/feed/",
+    "https://www.hardware.com.br/feed/",
+    "https://g1.globo.com/dynamo/sp/campinas-e-regiao/rss2.xml",
+    "https://www.acidadeon.com/campinas/feed/",
   ];
 }
 
-function normalizeCategory(input: string | null | undefined): string {
-  const c = String(input || "").trim();
-  return c || "Tecnologia";
+function normalizeCategory(input: string | null | undefined, hint?: { title?: string; sourceUrl?: string }): AllowedCategory {
+  const c = cleanText(input || "");
+  const raw = c.toLowerCase();
+  const title = cleanText(hint?.title || "").toLowerCase();
+  const source = cleanText(hint?.sourceUrl || "").toLowerCase();
+
+  if (raw.includes("topic") || raw.includes("trend") || raw.includes("trens")) return "Topic Trens";
+  if (raw.includes("hardware")) return "Hardware";
+  if (raw.includes("game")) return "Games";
+  if (raw.includes("mobile") || raw.includes("celular") || raw.includes("smartphone")) return "Mobile";
+  if (raw.includes("segurança") || raw.includes("seguranca") || raw.includes("ciber")) return "Segurança";
+  if (raw === "ia" || raw.includes("inteligência artificial") || raw.includes("inteligencia artificial")) return "IA";
+  if (raw.includes("loja") || raw.includes("ofertas")) return "Loja";
+
+  const looksCampinas =
+    source.includes("campinas") ||
+    title.includes("campinas") ||
+    title.includes("cambui") ||
+    title.includes("cambuí") ||
+    title.includes("campinas e região") ||
+    title.includes("campinas e regiao");
+  if (looksCampinas) return "Início";
+
+  if (source.includes("balao.info") && source.includes("/product/")) return "Loja";
+
+  if (
+    /gpu|placa de v|placa de ví|processador|intel|amd|ryzen|core i|ssd|nvme|mem[oó]ria|ram|fonte|placa-m[aã]e|motherboard|gabinete/i.test(
+      title,
+    )
+  ) {
+    return "Hardware";
+  }
+  if (/game|games|steam|xbox|playstation|ps5|nintendo|switch|fortnite|gta|cs2|valorant/i.test(title)) return "Games";
+  if (/android|iphone|ios|smartphone|celular|galaxy|xiaomi|motorola|samsung/i.test(title)) return "Mobile";
+  if (/seguran[cç]a|ciber|malware|phishing|ransomware|vazamento|hack/i.test(title)) return "Segurança";
+  if (/\bia\b|chatgpt|openai|gemini|llama|copilot|intelig[eê]ncia artificial/i.test(title)) return "IA";
+
+  return "Início";
 }
 
 function buildSlugFromRss(item: RssItem): string {
@@ -229,7 +269,7 @@ async function buildDynamicTrendPosts(): Promise<BlogPostView[]> {
         excerpt: generated.excerpt,
         content_html: generated.content_html,
         cover_image: null,
-        category: normalizeCategory(generated.category),
+        category: normalizeCategory(generated.category, { title: generated.title, sourceUrl: item.url }),
         published_at: publishedAtIso,
         created_at: publishedAtIso,
         updated_at: publishedAtIso,
@@ -277,13 +317,22 @@ async function buildDynamicPosts(): Promise<BlogPostView[]> {
     return tb - ta;
   });
 
-  const nowIso = new Date().toISOString();
+  const now = Date.now();
+  const nowIso = new Date(now).toISOString();
+  const daySeed = new Date(now).toISOString().slice(0, 10);
+  const minuteOfDay = Math.floor((now - Date.parse(`${daySeed}T00:00:00.000Z`)) / 60_000);
+  const ordered = sorted
+    .map((i) => ({ i, h: sha256(`${daySeed}:${i.url}`) }))
+    .sort((a, b) => (a.h < b.h ? -1 : a.h > b.h ? 1 : 0))
+    .map((x) => x.i);
+  const offset = ordered.length > 0 ? ((minuteOfDay % ordered.length) + ordered.length) % ordered.length : 0;
+  const rotated = ordered.length > 0 ? ordered.slice(offset).concat(ordered.slice(0, offset)) : [];
   const posts: BlogPostView[] = [];
 
-  for (const item of sorted.slice(0, 60)) {
+  for (let idx = 0; idx < Math.min(60, rotated.length); idx += 1) {
+    const item = rotated[idx]!;
     const slug = buildSlugFromRss(item);
-    const publishedAt = item.publishedAt ? new Date(item.publishedAt) : new Date();
-    const publishedAtIso = Number.isFinite(publishedAt.getTime()) ? publishedAt.toISOString() : nowIso;
+    const publishedAtIso = new Date(now - idx * 60_000).toISOString();
     const postUrl = `https://www.balao.info/blog/${slug}`;
     const generated = await generateBlogPostFromRss(item, { slug, publishedAtIso, url: postUrl });
     const cover = item.imageUrls?.[0] ? String(item.imageUrls[0]) : null;
@@ -296,7 +345,7 @@ async function buildDynamicPosts(): Promise<BlogPostView[]> {
       excerpt: generated.excerpt,
       content_html: contentWithImages,
       cover_image: cover,
-      category: normalizeCategory(generated.category),
+      category: normalizeCategory(generated.category, { title: generated.title, sourceUrl: item.url }),
       published_at: publishedAtIso,
       created_at: publishedAtIso,
       updated_at: publishedAtIso,
@@ -350,7 +399,7 @@ async function buildDynamicProductPosts(): Promise<BlogPostView[]> {
       excerpt: generated.excerpt,
       content_html: generated.content_html,
       cover_image: p.imageUrl,
-      category: "Ofertas Balão",
+      category: "Loja",
       published_at: created,
       created_at: created,
       updated_at: created,
@@ -380,7 +429,7 @@ export async function listBlogPostsForPage(input?: { category?: string; take?: n
         excerpt: cleanText(p.excerpt || p.seo_description || ""),
         content_html: p.content_html,
         cover_image: p.cover_image ? String(p.cover_image) : null,
-        category: normalizeCategory(p.category),
+        category: normalizeCategory(p.category, { title: p.title, sourceUrl: p.source_url }),
         published_at: p.published_at,
         created_at: p.created_at,
         updated_at: p.updated_at,
@@ -423,7 +472,7 @@ export async function getBlogPostForPage(slug: string): Promise<BlogPostView | n
         excerpt: cleanText(post.excerpt || post.seo_description || ""),
         content_html: post.content_html,
         cover_image: post.cover_image ? String(post.cover_image) : null,
-        category: normalizeCategory(post.category),
+        category: normalizeCategory(post.category, { title: post.title, sourceUrl: post.source_url }),
         published_at: post.published_at,
         created_at: post.created_at,
         updated_at: post.updated_at,

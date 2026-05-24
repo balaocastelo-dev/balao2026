@@ -1,0 +1,321 @@
+import { NextResponse } from "next/server";
+import crypto from "crypto";
+import { fetchRssItems } from "@/lib/rss";
+import { slugify } from "@/lib/blog-utils";
+import { generateBlogPostFromProduct, generateBlogPostFromRss, generateBlogPostFromTrend } from "@/lib/blog-ai";
+import { hasBlogSourceItem, insertBlogPost, insertBlogSourceItem } from "@/lib/db";
+import { hasAdmin } from "@/lib/supabase-admin";
+import { scrapeSiteProducts } from "@/lib/site-products";
+
+function isAuthorized(req: Request): boolean {
+  const vercelCron = req.headers.get("x-vercel-cron");
+  if (vercelCron) return true;
+
+  const secret = process.env.CRON_SECRET;
+  if (!secret) return false;
+
+  const url = new URL(req.url);
+  const querySecret = url.searchParams.get("secret");
+  if (querySecret && querySecret === secret) return true;
+
+  const auth = req.headers.get("authorization");
+  if (auth && auth.startsWith("Bearer ") && auth.slice("Bearer ".length) === secret) return true;
+
+  return false;
+}
+
+function sha256(input: string): string {
+  return crypto.createHash("sha256").update(input).digest("hex");
+}
+
+function getBrtParts(now: Date): { hour: number; minute: number; ymd: string } {
+  const parts = new Intl.DateTimeFormat("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(now);
+
+  const get = (type: string) => parts.find((p) => p.type === type)?.value || "";
+  const year = get("year");
+  const month = get("month");
+  const day = get("day");
+  const hour = Number.parseInt(get("hour"), 10);
+  const minute = Number.parseInt(get("minute"), 10);
+  return {
+    hour: Number.isFinite(hour) ? hour : now.getUTCHours(),
+    minute: Number.isFinite(minute) ? minute : now.getUTCMinutes(),
+    ymd: `${year}${month}${day}`,
+  };
+}
+
+function getTrendsFeedUrl(): string {
+  return "https://trends.google.com/trends/trendingsearches/daily/rss?geo=BR";
+}
+
+function buildSlug(title: string, hash: string): string {
+  const base = slugify(title).slice(0, 80);
+  return `${base}-${hash.slice(0, 8)}`;
+}
+
+async function insertTrendPost(now: Date) {
+  const brt = getBrtParts(now);
+  const items = await fetchRssItems(getTrendsFeedUrl(), 25);
+  if (items.length === 0) return { inserted: 0, reason: "Sem itens Trends" };
+
+  const idx = (brt.minute + brt.hour * 60) % items.length;
+  const item = items[idx]!;
+
+  const dayKey = brt.ymd;
+  const baseHash = sha256(`trend:${dayKey}:${item.title}`);
+  const sourceHash = baseHash;
+  const exists = await hasBlogSourceItem({ source_type: "trend", source_hash: sourceHash });
+  if (exists) {
+    return { inserted: 0, reason: "Trend já usado" };
+  }
+
+  const publishedAtIso = now.toISOString();
+  const slug = buildSlug(`Em alta: ${item.title}`, sourceHash);
+  const postUrl = `https://www.balao.info/blog/${slug}`;
+
+  const generated = await generateBlogPostFromTrend({
+    query: item.title,
+    publishedAtIso,
+    url: postUrl,
+    sourceUrl: item.url,
+  });
+
+  const inserted = await insertBlogPost({
+    slug,
+    title: generated.title,
+    excerpt: generated.excerpt,
+    content_html: generated.content_html,
+    cover_image: null,
+    category: generated.category,
+    tags: generated.tags,
+    status: "published",
+    published_at: publishedAtIso,
+    source_type: "trend",
+    source_url: item.url,
+    source_title: item.title,
+    product_id: null,
+    seo_title: generated.seo_title,
+    seo_description: generated.seo_description,
+    canonical_url: postUrl,
+    json_ld: generated.json_ld,
+    reading_time_minutes: generated.reading_time_minutes,
+    internal_links: null,
+  });
+
+  try {
+    await insertBlogSourceItem({
+      source_type: "trend",
+      source_url: item.url,
+      source_hash: sourceHash,
+      source_title: item.title,
+      source_published_at: publishedAtIso,
+    });
+  } catch {}
+
+  return { inserted: 1, slug: inserted.slug, id: inserted.id, kind: "trend" };
+}
+
+async function insertRssPost(now: Date, feeds: string[], kind: "tech" | "campinas" | "general") {
+  const brt = getBrtParts(now);
+  if (feeds.length === 0) return { inserted: 0, reason: "Sem feeds" };
+
+  const feedIdx = (brt.minute + brt.hour * 60) % feeds.length;
+  const feedUrl = feeds[feedIdx]!;
+
+  const items = await fetchRssItems(feedUrl, 40);
+  if (items.length === 0) return { inserted: 0, reason: "Sem itens RSS", feedUrl };
+
+  const dayKey = brt.ymd;
+  const startIdx = (brt.minute + brt.hour * 60) % items.length;
+
+  for (let i = 0; i < items.length; i += 1) {
+    const item = items[(startIdx + i) % items.length]!;
+    const baseHash = sha256(`rss:${dayKey}:${item.url}`);
+    const exists = await hasBlogSourceItem({ source_type: "rss", source_hash: baseHash });
+    const sourceHash = exists ? sha256(`rss:${dayKey}:${brt.hour}:${brt.minute}:${item.url}`) : baseHash;
+
+    const publishedAtIso = now.toISOString();
+    const slug = buildSlug(item.title, sourceHash);
+    const postUrl = `https://www.balao.info/blog/${slug}`;
+
+    const generated = await generateBlogPostFromRss(item, { slug, publishedAtIso, url: postUrl });
+
+    const inserted = await insertBlogPost({
+      slug,
+      title: generated.title,
+      excerpt: generated.excerpt,
+      content_html: generated.content_html,
+      cover_image: item.imageUrls?.[0] ? String(item.imageUrls[0]) : null,
+      category: kind === "campinas" ? "Início" : generated.category,
+      tags: generated.tags,
+      status: "published",
+      published_at: publishedAtIso,
+      source_type: "rss",
+      source_url: item.url,
+      source_title: item.title,
+      product_id: null,
+      seo_title: generated.seo_title,
+      seo_description: generated.seo_description,
+      canonical_url: postUrl,
+      json_ld: generated.json_ld,
+      reading_time_minutes: generated.reading_time_minutes,
+      internal_links: null,
+    });
+
+    try {
+      await insertBlogSourceItem({
+        source_type: "rss",
+        source_url: item.url,
+        source_hash: sourceHash,
+        source_title: item.title,
+        source_published_at: publishedAtIso,
+      });
+    } catch {}
+
+    return { inserted: 1, slug: inserted.slug, id: inserted.id, kind, feedUrl };
+  }
+
+  return { inserted: 0, reason: "Sem item elegível", kind, feedUrl };
+}
+
+async function insertBalaoProductPost(now: Date) {
+  const brt = getBrtParts(now);
+  const products = await scrapeSiteProducts({ take: 30 });
+  if (products.length === 0) return { inserted: 0, reason: "Sem produtos do site" };
+
+  const idx = (brt.minute + brt.hour * 60) % products.length;
+  const picked = products[idx]!;
+
+  const dayKey = brt.ymd;
+  const baseHash = sha256(`product:${dayKey}:${picked.url}`);
+  const exists = await hasBlogSourceItem({ source_type: "product", source_hash: baseHash });
+  const sourceHash = exists ? sha256(`product:${dayKey}:${brt.hour}:${brt.minute}:${picked.url}`) : baseHash;
+
+  const publishedAtIso = now.toISOString();
+  const slug = buildSlug(picked.name, sourceHash);
+  const postUrl = `https://www.balao.info/blog/${slug}`;
+
+  const generated = await generateBlogPostFromProduct(
+    {
+      id: picked.id,
+      name: picked.name,
+      price: picked.priceText || "",
+      image: picked.imageUrl || "/logo.png",
+      category: "Loja",
+      slug,
+      product_url: picked.url,
+      description: picked.description || undefined,
+    } as any,
+    { slug, publishedAtIso, url: postUrl, productUrl: picked.url },
+  );
+
+  const inserted = await insertBlogPost({
+    slug,
+    title: generated.title,
+    excerpt: generated.excerpt,
+    content_html: generated.content_html,
+    cover_image: picked.imageUrl,
+    category: "Loja",
+    tags: generated.tags,
+    status: "published",
+    published_at: publishedAtIso,
+    source_type: "product",
+    source_url: picked.url,
+    source_title: picked.name,
+    product_id: picked.id,
+    seo_title: generated.seo_title,
+    seo_description: generated.seo_description,
+    canonical_url: postUrl,
+    json_ld: generated.json_ld,
+    reading_time_minutes: generated.reading_time_minutes,
+    internal_links: null,
+  });
+
+  try {
+    await insertBlogSourceItem({
+      source_type: "product",
+      source_url: picked.url,
+      source_hash: sourceHash,
+      source_title: picked.name,
+      source_published_at: publishedAtIso,
+    });
+  } catch {}
+
+  return { inserted: 1, slug: inserted.slug, id: inserted.id, kind: "product", url: picked.url };
+}
+
+export async function GET(req: Request) {
+  try {
+    if (!isAuthorized(req)) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!hasAdmin) {
+      return NextResponse.json({
+        ok: true,
+        inserted: 0,
+        skipped: true,
+        reason: "Supabase admin não configurado. O blog continua atualizando automaticamente em modo dinâmico.",
+      });
+    }
+
+    const now = new Date();
+    const brt = getBrtParts(now);
+    const minuteKey = Math.floor(now.getTime() / 60_000);
+
+    if (brt.hour === 8 && brt.minute < 5) {
+      const trend = await insertTrendPost(now);
+      if (trend.inserted === 1) return NextResponse.json({ ok: true, ...trend });
+    }
+
+    const techFeeds = [
+      "https://www.adrenaline.com.br/feed/",
+      "https://www.tecmundo.com.br/rss",
+      "https://canaltech.com.br/rss/",
+      "https://olhardigital.com.br/feed/",
+      "https://www.hardware.com.br/feed/",
+    ];
+
+    const campinasFeeds = ["https://g1.globo.com/dynamo/sp/campinas-e-regiao/rss2.xml", "https://www.acidadeon.com/campinas/feed/"];
+
+    const generalFeeds = [
+      "https://g1.globo.com/dynamo/rss2.xml",
+      "https://www.bbc.com/portuguese/index.xml",
+    ];
+
+    const slot = minuteKey % 4;
+    if (slot === 0) {
+      const product = await insertBalaoProductPost(now);
+      if (product.inserted === 1) return NextResponse.json({ ok: true, ...product });
+    }
+
+    if (slot === 1) {
+      const tech = await insertRssPost(now, techFeeds, "tech");
+      if (tech.inserted === 1) return NextResponse.json({ ok: true, ...tech });
+    }
+
+    if (slot === 2) {
+      const campinas = await insertRssPost(now, campinasFeeds, "campinas");
+      if (campinas.inserted === 1) return NextResponse.json({ ok: true, ...campinas });
+    }
+
+    const general = await insertRssPost(now, generalFeeds.concat(techFeeds), "general");
+    if (general.inserted === 1) return NextResponse.json({ ok: true, ...general });
+
+    const fallbackProduct = await insertBalaoProductPost(now);
+    if (fallbackProduct.inserted === 1) return NextResponse.json({ ok: true, ...fallbackProduct });
+
+    return NextResponse.json({ ok: true, inserted: 0, reason: "Nenhuma fonte gerou post", slot });
+  } catch (error: any) {
+    return NextResponse.json({ ok: false, error: error?.message || "Erro" }, { status: 500 });
+  }
+}
+

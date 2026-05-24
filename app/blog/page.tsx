@@ -175,9 +175,6 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
           <Link href={{ pathname: "/blog", query: { cat: "Topic Trens" } }} className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-2 hover:bg-neutral-100">
             Topic Trens
           </Link>
-          <Link href={{ pathname: "/blog", query: { cat: "Guia de Compra" } }} className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-2 hover:bg-neutral-100">
-            Guia de Compra
-          </Link>
           <Link href={{ pathname: "/blog", query: { cat: "Hardware" } }} className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-2 hover:bg-neutral-100">
             Hardware
           </Link>
@@ -192,6 +189,9 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
           </Link>
           <Link href={{ pathname: "/blog", query: { cat: "IA" } }} className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-2 hover:bg-neutral-100">
             IA
+          </Link>
+          <Link href={{ pathname: "/blog", query: { cat: "Loja" } }} className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-2 hover:bg-neutral-100">
+            Loja
           </Link>
         </div>
       </section>
