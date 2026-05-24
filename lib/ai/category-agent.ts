@@ -43,6 +43,38 @@ function buildCombinedText(productName: string, ctx?: CategoryAgentContext): str
   return parts.filter(Boolean).join(' ');
 }
 
+function normalizeList(list: string[]): string[] {
+  return (list || []).map(s => normalizeText(String(s || '').trim())).filter(Boolean);
+}
+
+function mapKabumBreadcrumbsToCategory(
+  kabumBreadcrumbs: string[],
+  categories: string[]
+): CategoryMatchResult | null {
+  const crumbs = normalizeList(kabumBreadcrumbs);
+  if (crumbs.length === 0) return null;
+
+  const tail = crumbs.slice(Math.max(0, crumbs.length - 4));
+  const scored = categories
+    .map(cat => {
+      const ncat = normalizeText(cat);
+      let hits = 0;
+      for (const c of tail) {
+        if (c && ncat.includes(c)) hits += 1;
+      }
+      const score = hits / tail.length;
+      return { cat, score, len: cat.length };
+    })
+    .sort((a, b) => b.score - a.score || b.len - a.len);
+
+  const best = scored[0];
+  if (best && best.score >= 0.6) {
+    return { category: best.cat, confidence: 0.92, reason: 'Mapeado por breadcrumbs Kabum' };
+  }
+
+  return null;
+}
+
 function pickByKeywords(productName: string, categories: string[], ctx?: CategoryAgentContext): CategoryMatchResult {
   const combined = buildCombinedText(productName, ctx);
   const name = normalizeText(combined);
@@ -170,6 +202,11 @@ export async function categorizeProductName(
   const cleanCategories = (categories || []).map(c => String(c || '').trim()).filter(Boolean);
   if (!productName || cleanCategories.length === 0) {
     return { category: null, confidence: 0, reason: 'Sem dados' };
+  }
+
+  if (ctx?.kabumBreadcrumbs && ctx.kabumBreadcrumbs.length > 0) {
+    const mapped = mapKabumBreadcrumbsToCategory(ctx.kabumBreadcrumbs, cleanCategories);
+    if (mapped) return mapped;
   }
 
   const url = process.env.LLAMA_API_URL;

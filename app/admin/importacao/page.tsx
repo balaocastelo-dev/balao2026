@@ -41,12 +41,26 @@ export default function ImportPage() {
 
   // Preview Logic
   const getCategoryOptions = () => {
-    if (categories && categories.length > 0) {
-      const names = categories.map(c => c?.name).filter(Boolean) as string[];
-      if (names.length > 0) return names;
-    }
-    return CATEGORIES;
+    const tree = buildCategoryTree(categories || []);
+    const flat: string[] = [];
+    const walk = (nodes: Category[], parentPath: string[], level = 0) => {
+      nodes.forEach(node => {
+        const pathParts = [...parentPath, node.name];
+        const path = pathParts.join(" > ");
+        flat.push(path);
+        if (node.children && node.children.length > 0) walk(node.children, pathParts, level + 1);
+      });
+    };
+    walk(tree, []);
+    return flat.length > 0 ? flat : CATEGORIES;
   };
+
+  useEffect(() => {
+    const options = getCategoryOptions();
+    if (options.length > 0 && !options.includes(selectedCategory)) {
+      setSelectedCategory(options[0]);
+    }
+  }, [categories]);
 
   const getPreviewProducts = () => {
     const nowIso = new Date().toISOString();
@@ -372,15 +386,16 @@ export default function ImportPage() {
   };
 
   const categoryTree = buildCategoryTree(categories);
-  const flatCategories: { name: string; level: number }[] = [];
+  const flatCategories: { label: string; value: string; level: number }[] = [];
   
-  const flatten = (nodes: Category[], level = 0) => {
+  const flatten = (nodes: Category[], parentPath: string[] = [], level = 0) => {
     nodes.forEach(node => {
-        flatCategories.push({ name: node.name, level });
-        if (node.children) flatten(node.children, level + 1);
+        const nextPath = [...parentPath, node.name];
+        flatCategories.push({ label: node.name, value: nextPath.join(" > "), level });
+        if (node.children) flatten(node.children, nextPath, level + 1);
     });
   };
-  flatten(categoryTree);
+  flatten(categoryTree, [], 0);
 
   return (
     <div className="animate-in fade-in duration-300">
@@ -449,9 +464,9 @@ export default function ImportPage() {
                         >
                             {flatCategories.length > 0 ? (
                                 flatCategories.map(c => (
-                                    <option key={c.name} value={c.name}>
+                                    <option key={c.value} value={c.value}>
                                         {/* Indentation */}
-                                        {'\u00A0'.repeat(c.level * 4)}{c.name}
+                                        {'\u00A0'.repeat(c.level * 4)}{c.label}
                                     </option>
                                 ))
                             ) : (
