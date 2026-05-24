@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
 import { sanitizeHtmlBasic } from "@/lib/blog-sanitize";
 import { buildExcerptFromHtml, estimateReadingTimeMinutesFromHtml } from "@/lib/blog-utils";
 import type { Product } from "@/lib/utils";
@@ -60,6 +61,33 @@ function buildArticleJsonLd(input: {
   };
 }
 
+function buildFallbackRssHtml(input: { title: string; summary: string; sourceUrl: string }): string {
+  const summary = (input.summary || "").trim();
+  const lead = summary ? summary : `Veja os pontos principais sobre ${input.title} e como isso afeta compras e upgrades de informática.`;
+  return `
+<p><strong>${lead}</strong></p>
+<h2>O que aconteceu</h2>
+<p>O tema desta notícia envolve <strong>${input.title}</strong>. A seguir, reunimos os impactos práticos e o que vale monitorar antes de comprar ou atualizar seu setup.</p>
+<h2>Impacto para quem compra tecnologia</h2>
+<ul>
+  <li>Planejamento de upgrade: avalie custo-benefício e compatibilidade.</li>
+  <li>Escolha do hardware certo: priorize desempenho real para seu uso.</li>
+  <li>Garantia e suporte: compre com assistência e orientação técnica.</li>
+</ul>
+<h2>Checklist rápido</h2>
+<ol>
+  <li>Defina seu objetivo (trabalho, jogos, estudo, criação).</li>
+  <li>Confira CPU/GPU/RAM/SSD e compatibilidade.</li>
+  <li>Compare preço e disponibilidade.</li>
+</ol>
+<h2>Quer ajuda para escolher?</h2>
+<p>Fale com um especialista e receba indicação direta para o seu caso: <a href="${WHATSAPP_URL}" target="_blank" rel="noreferrer">WhatsApp 19 98751-0267</a>.</p>
+<p>Atalhos úteis: <a href="${SITE_URL}/notebooks">Notebooks</a> • <a href="${SITE_URL}/pcgamer">PC Gamer</a> • <a href="${SITE_URL}/departamentos">Departamentos</a> • <a href="${SITE_URL}/promocao">Promoções</a></p>
+<h2>Fonte</h2>
+<p><a href="${input.sourceUrl}" rel="nofollow noopener" target="_blank">${input.sourceUrl}</a></p>
+  `.trim();
+}
+
 async function generateFromGemini(prompt: string) {
   const apiKey = process.env.GOOGLE_API_KEY;
   if (!apiKey) {
@@ -74,6 +102,33 @@ async function generateFromGemini(prompt: string) {
   const response = await result.response;
   const text = response.text();
   return safeParseJson(text);
+}
+
+async function generateFromGroq(prompt: string) {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) return null;
+
+  const client = new Groq({ apiKey });
+  const model = process.env.BLOG_AI_MODEL || "llama-3.1-70b-versatile";
+
+  const resp = await client.chat.completions.create({
+    model,
+    temperature: 0.6,
+    messages: [
+      { role: "system", content: "Você é um(a) redator(a) SEO especialista em tecnologia. Retorne apenas JSON válido." },
+      { role: "user", content: prompt },
+    ],
+  });
+
+  const text = resp.choices?.[0]?.message?.content || "";
+  if (!text.trim()) return null;
+  return safeParseJson(text);
+}
+
+async function generateFromAI(prompt: string) {
+  const fromGroq = await generateFromGroq(prompt);
+  if (fromGroq) return fromGroq;
+  return null;
 }
 
 export async function generateBlogPostFromRss(item: RssItem, input: { slug: string; publishedAtIso: string; url: string }): Promise<GeneratedBlogPost> {
@@ -114,7 +169,7 @@ Estrutura sugerida:
 - Fonte (h2) com link para a URL acima
 `;
 
-  const data = await generateFromGemini(prompt);
+  const data = await generateFromAI(prompt);
 
   const fallbackTitle = item.title.trim();
   const title = (typeof data?.title === "string" && data.title.trim()) || fallbackTitle;
@@ -129,7 +184,7 @@ Estrutura sugerida:
 
   const rawHtml =
     (typeof data?.content_html === "string" && data.content_html.trim()) ||
-    `<p>${seoDescription}</p><h2>Fale com a Balão da Informática</h2><p><a href="${WHATSAPP_URL}">WhatsApp 19 98751-0267</a></p><h2>Fonte</h2><p><a href="${item.url}" rel="nofollow noopener" target="_blank">${item.url}</a></p>`;
+    buildFallbackRssHtml({ title, summary: item.summary || "", sourceUrl: item.url });
 
   const contentHtml = sanitizeHtmlBasic(rawHtml);
   const excerpt = buildExcerptFromHtml(contentHtml, 180);
@@ -149,6 +204,7 @@ Estrutura sugerida:
       title,
       description: seoDescription,
       publishedAtIso: input.publishedAtIso,
+      image: item.imageUrls?.[0],
     }),
   };
 }
@@ -182,7 +238,7 @@ Preço: ${JSON.stringify(product.price)}
 URL do produto: ${JSON.stringify(input.productUrl)}
 `;
 
-  const data = await generateFromGemini(prompt);
+  const data = await generateFromAI(prompt);
 
   const title = (typeof data?.title === "string" && data.title.trim()) || `Vale a pena: ${product.name}`;
   const seoTitle =
@@ -196,9 +252,28 @@ URL do produto: ${JSON.stringify(input.productUrl)}
 
   const rawHtml =
     (typeof data?.content_html === "string" && data.content_html.trim()) ||
-    `<p>${seoDescription}</p><h2>Veja o produto</h2><p><a href="${input.productUrl}">${product.name}</a></p><h2>Fale com a Balão da Informática</h2><p><a href="${WHATSAPP_URL}">WhatsApp 19 98751-0267</a></p>`;
+    `
+<p><strong>${seoDescription}</strong></p>
+<h2>Para quem é ideal</h2>
+<p>O <strong>${product.name}</strong> é uma boa opção para quem busca desempenho e confiabilidade no dia a dia. Abaixo estão critérios práticos para decidir com segurança.</p>
+<h2>O que avaliar antes de comprar</h2>
+<ul>
+  <li>Compatibilidade com seu setup (placa-mãe, fonte, gabinete, portas).</li>
+  <li>Uso principal (trabalho, games, estudo, criação).</li>
+  <li>Custo-benefício vs. alternativas.</li>
+</ul>
+<h2>Link do produto</h2>
+<p><a href="${input.productUrl}">${product.name}</a></p>
+<h2>Atendimento rápido</h2>
+<p>Quer indicação personalizada? <a href="${WHATSAPP_URL}" target="_blank" rel="noreferrer">WhatsApp 19 98751-0267</a>.</p>
+<p>Atalhos úteis: <a href="${SITE_URL}/notebooks">Notebooks</a> • <a href="${SITE_URL}/pcgamer">PC Gamer</a> • <a href="${SITE_URL}/departamentos">Departamentos</a> • <a href="${SITE_URL}/promocao">Promoções</a></p>
+    `.trim();
 
-  const contentHtml = sanitizeHtmlBasic(rawHtml);
+  const contentHtmlBase = sanitizeHtmlBasic(rawHtml);
+  const contentHtml =
+    product.image && !/<img\b/i.test(contentHtmlBase)
+      ? `<p><img src="${product.image}" alt="" /></p>${contentHtmlBase}`
+      : contentHtmlBase;
   const excerpt = buildExcerptFromHtml(contentHtml, 180);
   const readingTimeMinutes = estimateReadingTimeMinutesFromHtml(contentHtml);
 
@@ -220,4 +295,3 @@ URL do produto: ${JSON.stringify(input.productUrl)}
     }),
   };
 }
-

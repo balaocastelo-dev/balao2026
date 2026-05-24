@@ -27,6 +27,14 @@ function sha256(input: string): string {
   return crypto.createHash("sha256").update(input).digest("hex");
 }
 
+function prependImagesToHtml(contentHtml: string, imageUrls: string[]): string {
+  const urls = (imageUrls || []).filter(Boolean).slice(0, 3);
+  if (urls.length === 0) return contentHtml;
+  if (/<img\b/i.test(contentHtml)) return contentHtml;
+  const imgs = urls.map((u) => `<p><img src="${u}" alt="" /></p>`).join("");
+  return `${imgs}${contentHtml}`;
+}
+
 export async function GET(req: Request) {
   try {
     if (!isAuthorized(req)) {
@@ -76,13 +84,15 @@ export async function GET(req: Request) {
       const postUrl = `https://www.balao.info/blog/${slug}`;
 
       const generated = await generateBlogPostFromRss(item, { slug, publishedAtIso, url: postUrl });
+      const cover = item.imageUrls?.[0] ? String(item.imageUrls[0]) : null;
+      const contentWithImages = prependImagesToHtml(generated.content_html, item.imageUrls || []);
 
       const inserted = await insertBlogPost({
         slug,
         title: generated.title,
         excerpt: generated.excerpt,
-        content_html: generated.content_html,
-        cover_image: null,
+        content_html: contentWithImages,
+        cover_image: cover,
         category: generated.category,
         tags: generated.tags,
         status: "published",

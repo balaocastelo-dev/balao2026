@@ -3,6 +3,7 @@ export type RssItem = {
   url: string;
   publishedAt?: string;
   summary?: string;
+  imageUrls?: string[];
   sourceFeed: string;
 };
 
@@ -35,6 +36,40 @@ function getAtomLink(block: string): string | undefined {
   return undefined;
 }
 
+function normalizeUrl(url: string): string {
+  return url.replace(/^http:\/\//i, "https://").trim();
+}
+
+function extractImageUrls(block: string): string[] {
+  const found: string[] = [];
+
+  const push = (u?: string) => {
+    const url = typeof u === "string" ? normalizeUrl(u) : "";
+    if (!url) return;
+    if (found.includes(url)) return;
+    found.push(url);
+  };
+
+  const enclosure = block.match(/<enclosure\b[^>]*url="([^"]+)"/i);
+  push(enclosure?.[1]);
+
+  const atomEnclosure = block.match(/<link\b[^>]*rel="enclosure"[^>]*href="([^"]+)"/i);
+  push(atomEnclosure?.[1]);
+
+  for (const m of block.matchAll(/<media:(?:content|thumbnail)\b[^>]*url="([^"]+)"/gi)) {
+    push(m[1]);
+  }
+
+  for (const m of block.matchAll(/<img\b[^>]*src="([^"]+)"/gi)) {
+    push(m[1]);
+  }
+
+  return found
+    .filter((u) => /^https?:\/\//i.test(u))
+    .filter((u) => !u.toLowerCase().startsWith("data:"))
+    .slice(0, 6);
+}
+
 function parseRssItems(xml: string, feedUrl: string): RssItem[] {
   const items: RssItem[] = [];
 
@@ -49,7 +84,8 @@ function parseRssItems(xml: string, feedUrl: string): RssItem[] {
       getTagText(block, "content");
 
     if (title && url) {
-      items.push({ title, url, publishedAt: pub, summary, sourceFeed: feedUrl });
+      const imageUrls = extractImageUrls(block);
+      items.push({ title, url, publishedAt: pub, summary, imageUrls, sourceFeed: feedUrl });
     }
   }
 
@@ -61,7 +97,8 @@ function parseRssItems(xml: string, feedUrl: string): RssItem[] {
     const summary = getTagText(block, "summary") || getTagText(block, "content");
 
     if (title && url) {
-      items.push({ title, url, publishedAt: pub, summary, sourceFeed: feedUrl });
+      const imageUrls = extractImageUrls(block);
+      items.push({ title, url, publishedAt: pub, summary, imageUrls, sourceFeed: feedUrl });
     }
   }
 
@@ -87,7 +124,8 @@ export async function fetchRssItems(feedUrl: string, limit = 20): Promise<RssIte
   const normalized = items
     .map((i) => ({
       ...i,
-      url: i.url.replace(/^http:\/\//i, "https://"),
+      url: normalizeUrl(i.url),
+      imageUrls: (i.imageUrls || []).map(normalizeUrl),
     }))
     .filter((i) => i.title && i.url);
 
