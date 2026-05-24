@@ -5,6 +5,7 @@ import { generateBlogPostFromRss } from "@/lib/blog-ai";
 import { getBlogPostBySlug, getBlogPosts } from "@/lib/db";
 import { scrapeSiteProducts } from "@/lib/site-products";
 import { generateBlogPostFromProduct } from "@/lib/blog-ai";
+import { cache } from "react";
 
 export type BlogPostView = {
   id: string;
@@ -26,6 +27,16 @@ export type BlogPostView = {
 };
 
 type PostKind = "rss" | "product";
+
+const getDbPostsCached = cache(async (limit: number, category: string | undefined, bucket: number) => {
+  void bucket;
+  return getBlogPosts({ limit, category });
+});
+
+const getDbPostBySlugCached = cache(async (slug: string, bucket: number) => {
+  void bucket;
+  return getBlogPostBySlug(slug);
+});
 
 function sha256(input: string): string {
   return crypto.createHash("sha256").update(input).digest("hex");
@@ -349,7 +360,8 @@ export async function listBlogPostsForPage(input?: { category?: string; take?: n
   };
 
   if (isSupabaseReadable()) {
-    const dbPosts = await getBlogPosts({ limit: take, category });
+    const bucket = Math.floor(Date.now() / 60_000);
+    const dbPosts = await getDbPostsCached(take, category, bucket);
     if (dbPosts.length > 0) {
       const mapped = dbPosts.map((p) => ({
         id: p.id,
@@ -391,7 +403,8 @@ export async function listBlogPostsForPage(input?: { category?: string; take?: n
 
 export async function getBlogPostForPage(slug: string): Promise<BlogPostView | null> {
   if (isSupabaseReadable()) {
-    const post = await getBlogPostBySlug(slug);
+    const bucket = Math.floor(Date.now() / 300_000);
+    const post = await getDbPostBySlugCached(slug, bucket);
     if (post) {
       const cover = post.cover_image ? String(post.cover_image) : extractFirstImageUrlFromHtml(post.content_html);
       return {

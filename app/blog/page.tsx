@@ -6,7 +6,7 @@ import { listBlogPostsForPage } from "@/lib/blog-store";
 import { SITE_CONFIG } from "@/lib/config";
 
 export const runtime = "nodejs";
-export const revalidate = 60;
+export const revalidate = 120;
 
 type SearchParams = Promise<{ cat?: string; category?: string }>;
 
@@ -272,7 +272,7 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
                       {idx + 1}
                     </div>
                     <div className="min-w-0">
-                      <Link href={`/blog/${p.slug}`} className="text-sm font-semibold hover:underline">
+                      <Link href={`/blog/${p.slug}`} prefetch className="text-sm font-semibold hover:underline">
                         {p.title}
                       </Link>
                       <div className="mt-1 text-xs font-semibold text-neutral-600">
@@ -293,7 +293,7 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
               </div>
               <div className="divide-y divide-neutral-200">
                 {balaoPosts.map((p) => (
-                  <Link key={p.id} href={`/blog/${p.slug}`} className="flex items-center gap-3 px-4 py-3 hover:bg-neutral-50">
+                  <Link key={p.id} href={`/blog/${p.slug}`} prefetch className="flex items-center gap-3 px-4 py-3 hover:bg-neutral-50">
                     <div className="relative h-12 w-12 flex-none overflow-hidden rounded border border-neutral-100 bg-white">
                       <SafeImage
                         src={p.ogImageUrl || ogFallbackUrl(p)}
@@ -374,7 +374,7 @@ function PostListItem({ post }: { post: BlogCardPost }) {
           <span>{new Date(post.publishedAt ?? post.createdAt).toLocaleDateString("pt-BR")}</span>
         </div>
         <h3 className="mt-1 text-base font-extrabold leading-snug">
-          <Link href={`/blog/${post.slug}`} className="hover:underline">
+          <Link href={`/blog/${post.slug}`} prefetch className="hover:underline">
             {post.title}
           </Link>
         </h3>
@@ -396,7 +396,7 @@ function HeroCard({ post, size }: { post: BlogCardPost; size: "lg" | "sm" }) {
   const imageUrl = post.ogImageUrl || ogFallbackUrl(post);
   return (
     <article className="overflow-hidden rounded-md border border-neutral-200 bg-white">
-      <Link href={`/blog/${post.slug}`} className="block">
+      <Link href={`/blog/${post.slug}`} prefetch className="block">
         <div className="relative aspect-[16/9]">
           <SafeImage
             src={imageUrl}
