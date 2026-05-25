@@ -1,32 +1,20 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { supabase } from "@/lib/supabase";
 import type { Product } from "@/lib/utils";
-import { buildPromoPopupProduct, scoreProductForPromo } from "@/lib/ai/visual-marketing-agent";
-
-function pickWeighted<T>(items: Array<{ item: T; weight: number }>, seed: number) {
-  const total = items.reduce((acc, v) => acc + v.weight, 0);
-  if (total <= 0) return items[seed % items.length]?.item ?? null;
-  let r = (seed % 100000) / 100000;
-  r *= total;
-  for (const it of items) {
-    r -= it.weight;
-    if (r <= 0) return it.item;
-  }
-  return items[items.length - 1]?.item ?? null;
-}
+import { buildPromoPopupProduct } from "@/lib/ai/visual-marketing-agent";
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const exclude = url.searchParams.get("exclude") || "";
   const nowSeed = Date.now();
 
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabase
     .from("products")
     .select(
-      "id,name,price,image,category,slug,cost,specs,description,originalPrice,newPrice,kabum_last_price,kabum_last_stock,created_at",
+      "id,name,price,image,category,slug,cost,specs,kabum_last_price,kabum_last_stock,created_at",
     )
     .order("created_at", { ascending: false })
-    .limit(250);
+    .limit(200);
 
   if (error) {
     return NextResponse.json({ error: "failed_fetch_products" }, { status: 500 });
@@ -46,14 +34,8 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "no_products" }, { status: 404 });
   }
 
-  const weighted = filtered
-    .map((p) => ({ item: p, weight: scoreProductForPromo(p) }))
-    .filter((x) => x.weight > 0)
-    .sort((a, b) => b.weight - a.weight)
-    .slice(0, 140);
-
   const pickSeed = Math.floor(nowSeed / 1000) + filtered.length;
-  const chosen = pickWeighted(weighted, pickSeed) || filtered[pickSeed % filtered.length];
+  const chosen = filtered[pickSeed % filtered.length];
   const payload = buildPromoPopupProduct(chosen, nowSeed);
 
   return NextResponse.json(payload, {
@@ -62,4 +44,3 @@ export async function GET(req: Request) {
     },
   });
 }
-
