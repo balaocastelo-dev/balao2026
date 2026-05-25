@@ -56,8 +56,24 @@ export async function createOrder({
       customerName: customer.name,
       customerEmail: customer.email,
       customerWhatsapp: customer.phone,
+      customerCpfCnpj: customer.cpf_cnpj,
+      address: {
+        street: customer.address,
+        cep: customer.cep,
+        city: customer.city,
+        state: customer.state,
+        number: customer.number,
+        complement: customer.complement
+      },
+      paymentMethod,
       total,
-      itemsCount: itemsData.length
+      items: itemsData.map((it) => ({
+        productId: it.product_id,
+        productName: it.product_name,
+        productImage: it.product_image,
+        quantity: it.quantity,
+        price: it.price
+      }))
     });
 
     return { success: true, orderId: order.id };

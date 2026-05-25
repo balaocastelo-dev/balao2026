@@ -264,3 +264,156 @@ export const getAdminNotificationTemplate = (title: string, data: any) => {
 
   return getBaseTemplate(content, "Notificação Admin");
 };
+
+export const getNewOrderAdminTemplate = (data: {
+  orderId: string;
+  origin?: string;
+  createdAt?: string;
+  customer: {
+    name: string;
+    email: string;
+    whatsapp?: string;
+    cpfCnpj?: string;
+  };
+  address?: {
+    street?: string;
+    number?: string;
+    complement?: string;
+    cep?: string;
+    city?: string;
+    state?: string;
+  };
+  shipping?: {
+    name?: string | null;
+    days?: string | null;
+    cost?: number | null;
+  };
+  paymentMethod?: string;
+  couponCode?: string | null;
+  discountValue?: number | null;
+  total: number;
+  items: Array<{
+    productId?: string;
+    productName: string;
+    productImage?: string;
+    quantity: number;
+    price: number;
+  }>;
+}) => {
+  const formatMoney = (value: number) => `R$ ${Number(value).toFixed(2).replace(".", ",")}`;
+
+  const itemsHtml = data.items
+    .map(
+      (item) => `
+    <tr>
+      <td width="70">
+        <img src="${item.productImage || "https://via.placeholder.com/60"}" class="product-img" alt="${item.productName}">
+      </td>
+      <td>
+        <span class="product-name">${item.productName}</span>
+        <span class="product-meta">Qtd: ${item.quantity}${item.productId ? ` • ID: ${item.productId}` : ""}</span>
+      </td>
+      <td style="text-align: right; font-weight: 600; white-space: nowrap;">
+        ${formatMoney(item.price)}
+      </td>
+    </tr>
+  `,
+    )
+    .join("");
+
+  const shippingCost = typeof data.shipping?.cost === "number" ? data.shipping.cost : null;
+  const discountValue = typeof data.discountValue === "number" ? data.discountValue : 0;
+  const totalRowExtras =
+    discountValue > 0 || (shippingCost !== null && shippingCost > 0)
+      ? `
+      ${discountValue > 0 ? `
+      <div class="total-row" style="color: #059669;">
+        <span>Desconto</span>
+        <span>- ${formatMoney(discountValue)}</span>
+      </div>` : ""}
+      ${shippingCost !== null && shippingCost > 0 ? `
+      <div class="total-row">
+        <span>Frete</span>
+        <span>${formatMoney(shippingCost)}</span>
+      </div>` : ""}
+    `
+      : "";
+
+  const address = data.address
+    ? `
+    <div class="info-box">
+      <span class="info-title">📍 Endereço</span>
+      ${data.address.street || ""}${data.address.number ? `, ${data.address.number}` : ""}${data.address.complement ? ` - ${data.address.complement}` : ""}<br>
+      ${(data.address.city || "")}${data.address.state ? `/${data.address.state}` : ""}<br>
+      ${data.address.cep ? `CEP: ${data.address.cep}` : ""}
+    </div>
+  `
+    : "";
+
+  const shipping = data.shipping?.name
+    ? `
+    <div class="info-box" style="border-color: #6d28d9; background-color: #f5f3ff;">
+      <span class="info-title" style="color: #6d28d9;">🚚 Entrega</span>
+      ${data.shipping.name}${data.shipping.days ? ` • ${data.shipping.days}` : ""}${shippingCost !== null ? ` • ${formatMoney(shippingCost)}` : ""}
+    </div>
+  `
+    : "";
+
+  const content = `
+    <div style="text-align: center; margin-bottom: 22px;">
+      <h1>Novo Pedido Emitido</h1>
+      <p style="color: #6b7280;">Pedido #${data.orderId.slice(0, 8)}${data.origin ? ` • ${data.origin}` : ""}</p>
+    </div>
+
+    <div style="background: #ffffff; border: 1px solid #e5e7eb; padding: 18px; border-radius: 10px;">
+      <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
+        <div>
+          <strong style="color:#111827;">Cliente</strong><br>
+          ${data.customer.name}<br>
+          ${data.customer.email}<br>
+          ${data.customer.whatsapp ? `${data.customer.whatsapp}<br>` : ""}
+          ${data.customer.cpfCnpj ? `CPF/CNPJ: ${data.customer.cpfCnpj}<br>` : ""}
+        </div>
+        <div>
+          <strong style="color:#111827;">Data</strong><br>
+          ${data.createdAt || new Date().toLocaleString("pt-BR")}
+        </div>
+        ${data.paymentMethod ? `
+        <div>
+          <strong style="color:#111827;">Pagamento</strong><br>
+          ${data.paymentMethod}
+        </div>` : ""}
+        ${data.couponCode ? `
+        <div>
+          <strong style="color:#111827;">Cupom</strong><br>
+          ${data.couponCode}
+        </div>` : ""}
+      </div>
+    </div>
+
+    ${address}
+    ${shipping}
+
+    <h2>🛒 Itens do Pedido</h2>
+    <table class="product-table">
+      <thead>
+        <tr>
+          <th colspan="2">Produto</th>
+          <th style="text-align: right;">Valor</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${itemsHtml}
+      </tbody>
+    </table>
+
+    <div class="total-section">
+      ${totalRowExtras}
+      <div class="total-final">
+        Total: ${formatMoney(data.total)}
+      </div>
+    </div>
+  `;
+
+  return getBaseTemplate(content, `Novo Pedido #${data.orderId.slice(0, 8)}`);
+};

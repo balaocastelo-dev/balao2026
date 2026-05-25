@@ -2,7 +2,7 @@
 import nodemailer from 'nodemailer';
 import { Resend } from 'resend';
 import { supabaseAdmin } from './supabase-admin';
-import { getAdminNotificationTemplate } from "@/lib/mail-templates";
+import { getAdminNotificationTemplate, getNewOrderAdminTemplate } from "@/lib/mail-templates";
 
 // Configuração do Resend
 const resendApiKey = process.env.RESEND_API_KEY;
@@ -141,18 +141,49 @@ export async function sendNewOrderNotification(data: {
     customerName: string;
     customerEmail: string;
     customerWhatsapp?: string;
+    customerCpfCnpj?: string;
+    address?: {
+        street?: string;
+        number?: string;
+        complement?: string;
+        cep?: string;
+        city?: string;
+        state?: string;
+    };
+    shipping?: {
+        name?: string | null;
+        days?: string | null;
+        cost?: number | null;
+    };
+    paymentMethod?: string;
+    couponCode?: string | null;
+    discountValue?: number | null;
     total: number;
-    itemsCount: number;
+    items: Array<{
+        productId?: string;
+        productName: string;
+        productImage?: string;
+        quantity: number;
+        price: number;
+    }>;
 }) {
     const subject = `[Pedido] Novo pedido #${data.orderId.slice(0, 8)}${data.origin ? ` (${data.origin})` : ""}`;
-    const html = getAdminNotificationTemplate("Novo Pedido Emitido", {
+    const html = getNewOrderAdminTemplate({
         orderId: data.orderId,
         origin: data.origin || "site",
-        customer: data.customerName,
-        email: data.customerEmail,
-        whatsapp: data.customerWhatsapp || "",
-        total: `R$ ${Number(data.total).toFixed(2).replace(".", ",")}`,
-        itens: data.itemsCount,
+        customer: {
+            name: data.customerName,
+            email: data.customerEmail,
+            whatsapp: data.customerWhatsapp,
+            cpfCnpj: data.customerCpfCnpj,
+        },
+        address: data.address,
+        shipping: data.shipping,
+        paymentMethod: data.paymentMethod,
+        couponCode: data.couponCode,
+        discountValue: data.discountValue,
+        total: data.total,
+        items: data.items,
     });
 
     const uniqueTargets = [...new Set(ORDER_NOTIFICATION_RECIPIENTS)];

@@ -165,8 +165,29 @@ export async function POST(req: Request) {
         customerName: String(customer.name ?? ""),
         customerEmail: customer.email,
         customerWhatsapp: String(customer.phone ?? ""),
+        address: {
+          street: String(customer.address ?? ""),
+          number: String(customer.number ?? ""),
+          complement: String(customer.complement ?? ""),
+          cep: String(customer.cep ?? ""),
+          city: String(customer.city ?? ""),
+          state: String(customer.state ?? ""),
+        },
+        shipping: {
+          name: typeof shippingOption?.name === "string" ? shippingOption.name : null,
+          days: typeof shippingOption?.days === "string" ? shippingOption.days : null,
+          cost: parsedShippingCost
+        },
+        couponCode: couponCode || null,
+        discountValue: typeof calculatedDiscount === "number" ? calculatedDiscount : null,
         total: expectedTotal,
-        itemsCount: orderItems.length
+        items: orderItems.map((it) => ({
+          productId: it.product_id,
+          productName: it.product_name,
+          productImage: it.product_image,
+          quantity: it.quantity,
+          price: it.price,
+        }))
     });
 
     return NextResponse.json({ success: true, orderId: order.id, total: expectedTotal });
