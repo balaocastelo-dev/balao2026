@@ -156,8 +156,8 @@ export default async function ProductPage({ params }: Props) {
             <div className="border-t border-gray-200 p-8">
                 <h2 className="text-xl font-bold mb-6">Detalhes do Produto</h2>
                 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div className="lg:col-span-2">
+                <div className="grid grid-cols-1 gap-8">
+                    <div>
                         <h3 className="text-lg font-bold mb-4 text-gray-800 border-b pb-2">Descrição</h3>
                         <div className="prose max-w-none text-gray-600">
                             {product.description ? (
@@ -176,24 +176,6 @@ export default async function ProductPage({ params }: Props) {
                             )}
                         </div>
                     </div>
-
-                    {product.specs && Object.keys(product.specs).length > 0 && (
-                        <div>
-                            <h3 className="text-lg font-bold mb-4 text-gray-800 border-b pb-2">Informações Técnicas</h3>
-                            <div className="bg-gray-50 rounded-lg overflow-hidden border border-gray-100">
-                                <table className="w-full text-sm">
-                                    <tbody>
-                                        {Object.entries(product.specs).map(([key, value]) => (
-                                            <tr key={key} className="border-b border-gray-200 last:border-0">
-                                                <td className="py-2 px-3 font-bold text-gray-700 bg-gray-100/50 w-1/3">{key}</td>
-                                                <td className="py-2 px-3 text-gray-600">{String(value)}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    )}
                 </div>
             </div>
           </div>
