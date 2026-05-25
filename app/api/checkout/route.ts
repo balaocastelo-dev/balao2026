@@ -149,6 +149,16 @@ export async function POST(req: Request) {
     const [primaryProduct] = await Promise.all([
       primaryProductId ? getProductById(primaryProductId) : Promise.resolve(null),
     ]);
+    const pickProductImage = (p: any) => {
+      const direct = typeof p?.image === "string" ? p.image.trim() : "";
+      if (direct) return direct;
+      const urls = p?.image_urls;
+      if (Array.isArray(urls)) {
+        const first = urls.find((u) => typeof u === "string" && u.trim().length > 0);
+        if (typeof first === "string") return first.trim();
+      }
+      return "";
+    };
     const relatedProducts = primaryProduct?.category
       ? (await getProductsByCategory(primaryProduct.category))
           .filter((p) => p && typeof p.id === "string" && p.id !== primaryProductId)
@@ -158,7 +168,7 @@ export async function POST(req: Request) {
             slug: typeof (p as any).slug === "string" ? (p as any).slug : null,
             name: String((p as any).name || ""),
             price: String((p as any).price || ""),
-            image: typeof (p as any).image === "string" ? (p as any).image : null,
+            image: pickProductImage(p) || null,
             category: typeof (p as any).category === "string" ? (p as any).category : null,
           }))
       : [];

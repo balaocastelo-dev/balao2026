@@ -218,6 +218,16 @@ export const getOrderCustomerWhatsAppTemplate = (
   }>,
   opts: { whatsappNumber: string },
 ) => {
+  const normalizeUrl = (raw: unknown) => {
+    if (typeof raw !== "string") return "";
+    const url = raw.trim();
+    if (!url) return "";
+    if (url.startsWith("//")) return `https:${url}`;
+    if (url.startsWith("http://")) return `https://${url.slice("http://".length)}`;
+    if (url.startsWith("/")) return `https://www.balao.info${url}`;
+    return url;
+  };
+
   const orderShort = String(order.id || "").slice(0, 8);
   const firstName = String(order.customer_name || "").split(" ")[0] || "cliente";
 
@@ -226,7 +236,7 @@ export const getOrderCustomerWhatsAppTemplate = (
       (item) => `
     <tr>
       <td width="70">
-        <img src="${item.product_image || "https://via.placeholder.com/60"}" class="product-img" alt="${item.product_name}">
+        <img src="${normalizeUrl(item.product_image) || "https://via.placeholder.com/60"}" class="product-img" alt="${item.product_name}">
       </td>
       <td>
         <span class="product-name">${item.product_name}</span>
@@ -247,7 +257,7 @@ export const getOrderCustomerWhatsAppTemplate = (
       return `
       <tr>
         <td width="70">
-          <img src="${p.image || "https://via.placeholder.com/60"}" class="product-img" alt="${p.name}">
+          <img src="${normalizeUrl(p.image) || "https://via.placeholder.com/60"}" class="product-img" alt="${p.name}">
         </td>
         <td>
           <span class="product-name">${p.name}</span>

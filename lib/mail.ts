@@ -3,6 +3,7 @@ import nodemailer from 'nodemailer';
 import { Resend } from 'resend';
 import { supabaseAdmin } from './supabase-admin';
 import { getAdminNotificationTemplate, getNewOrderAdminTemplate } from "@/lib/mail-templates";
+import { SITE_CONFIG } from "@/lib/config";
 
 // Configuração do Resend
 const resendApiKey = process.env.RESEND_API_KEY;
@@ -46,11 +47,17 @@ export async function sendEmail({ to, subject, html, eventType = 'general', camp
     if (resend) {
         try {
             console.log('[Mail] Tentando envio via Resend...');
+            const rawFrom = process.env.RESEND_FROM;
+            const from =
+                typeof rawFrom === "string" && rawFrom.includes("<")
+                    ? rawFrom
+                    : `${fromName} <${(typeof rawFrom === "string" && rawFrom.trim().length > 0) ? rawFrom.trim() : SITE_CONFIG.email}>`;
             const { data, error } = await resend.emails.send({
-                from: `${fromName} <onboarding@resend.dev>`, // Domínio padrão de teste do Resend
-                to: [to], // No modo teste do Resend, só entrega para o e-mail da conta. Em produção, precisa verificar domínio.
+                from,
+                to: [to],
                 subject: subject,
                 html: html,
+                replyTo: SITE_CONFIG.email,
             });
 
             if (error) {
