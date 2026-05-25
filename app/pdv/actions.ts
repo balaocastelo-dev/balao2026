@@ -1,8 +1,9 @@
 "use server";
 
-import { createOrder as createDbOrder } from "@/lib/db";
-import { sendNewOrderNotification } from "@/lib/mail";
+import { createOrder as createDbOrder, getProductById, getProductsByCategory } from "@/lib/db";
+import { sendEmail, sendNewOrderNotification } from "@/lib/mail";
 import { PdvCartItem, PdvCustomer } from "./store";
+import { getOrderCustomerWhatsAppTemplate } from "@/lib/mail-templates";
 
 export async function createOrder({
   customer,
@@ -49,6 +50,36 @@ export async function createOrder({
     }));
 
     const order = await createDbOrder(orderData, itemsData);
+
+    const primaryProductId = typeof itemsData?.[0]?.product_id === "string" ? itemsData[0].product_id : "";
+    const primaryProduct = primaryProductId ? await getProductById(primaryProductId) : null;
+    const relatedProducts = primaryProduct?.category
+      ? (await getProductsByCategory(primaryProduct.category))
+          .filter((p) => p && typeof p.id === "string" && p.id !== primaryProductId)
+          .slice(0, 3)
+          .map((p) => ({
+            id: String(p.id),
+            slug: typeof (p as any).slug === "string" ? (p as any).slug : null,
+            name: String((p as any).name || ""),
+            price: String((p as any).price || ""),
+            image: typeof (p as any).image === "string" ? (p as any).image : null,
+            category: typeof (p as any).category === "string" ? (p as any).category : null,
+          }))
+      : [];
+
+    const customerEmailHtml = getOrderCustomerWhatsAppTemplate(
+      { ...orderData, id: order.id, discount_value: 0 },
+      itemsData,
+      relatedProducts,
+      { whatsappNumber: "19987510267" }
+    );
+
+    await sendEmail({
+      to: customer.email,
+      subject: `Confirmação de Pedido #${order.id.slice(0, 8)}`,
+      html: customerEmailHtml,
+      eventType: "order_confirmation"
+    });
 
     await sendNewOrderNotification({
       orderId: order.id,

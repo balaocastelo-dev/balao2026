@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { createOrder } from "@/lib/db";
+import { createOrder, getProductById, getProductsByCategory } from "@/lib/db";
 import { sendEmail, sendNewOrderNotification } from "@/lib/mail";
-import { getOrderConfirmationTemplate } from "@/lib/mail-templates";
+import { getOrderCustomerWhatsAppTemplate } from "@/lib/mail-templates";
 import { validateCoupon } from "@/lib/coupons";
 import { hasAdmin } from "@/lib/supabase-admin";
 
@@ -145,10 +145,33 @@ export async function POST(req: Request) {
 
     const order = await createOrder(orderData, orderItems);
 
+    const primaryProductId = typeof orderItems?.[0]?.product_id === "string" ? orderItems[0].product_id : "";
+    const [primaryProduct] = await Promise.all([
+      primaryProductId ? getProductById(primaryProductId) : Promise.resolve(null),
+    ]);
+    const relatedProducts = primaryProduct?.category
+      ? (await getProductsByCategory(primaryProduct.category))
+          .filter((p) => p && typeof p.id === "string" && p.id !== primaryProductId)
+          .slice(0, 3)
+          .map((p) => ({
+            id: String(p.id),
+            slug: typeof (p as any).slug === "string" ? (p as any).slug : null,
+            name: String((p as any).name || ""),
+            price: String((p as any).price || ""),
+            image: typeof (p as any).image === "string" ? (p as any).image : null,
+            category: typeof (p as any).category === "string" ? (p as any).category : null,
+          }))
+      : [];
+
     // 2. Send Emails (Customer + Admin Notification)
     
     // E-mail para o Cliente usando Template
-    const emailHtml = getOrderConfirmationTemplate({ ...orderData, id: order.id }, orderItems);
+    const emailHtml = getOrderCustomerWhatsAppTemplate(
+      { ...orderData, id: order.id, discount_value: calculatedDiscount },
+      orderItems,
+      relatedProducts,
+      { whatsappNumber: "19987510267" }
+    );
 
     // Envio assíncrono para não bloquear resposta (ou síncrono se crítico)
     // Aqui fazemos síncrono para garantir

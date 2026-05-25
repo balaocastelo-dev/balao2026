@@ -205,6 +205,163 @@ export const getOrderConfirmationTemplate = (order: any, items: any[]) => {
   return getBaseTemplate(content, `Pedido Confirmado #${order.id.slice(0, 8)}`, order.customer_email);
 };
 
+export const getOrderCustomerWhatsAppTemplate = (
+  order: any,
+  items: any[],
+  relatedProducts: Array<{
+    id: string;
+    slug?: string | null;
+    name: string;
+    price: string;
+    image?: string | null;
+    category?: string | null;
+  }>,
+  opts: { whatsappNumber: string },
+) => {
+  const orderShort = String(order.id || "").slice(0, 8);
+  const firstName = String(order.customer_name || "").split(" ")[0] || "cliente";
+
+  const itemsHtml = items
+    .map(
+      (item) => `
+    <tr>
+      <td width="70">
+        <img src="${item.product_image || "https://via.placeholder.com/60"}" class="product-img" alt="${item.product_name}">
+      </td>
+      <td>
+        <span class="product-name">${item.product_name}</span>
+        <span class="product-meta">Qtd: ${item.quantity}</span>
+      </td>
+      <td style="text-align: right; font-weight: 600; white-space: nowrap;">
+        R$ ${Number(item.price).toFixed(2).replace(".", ",")}
+      </td>
+    </tr>
+  `,
+    )
+    .join("");
+
+  const relatedHtml = (relatedProducts || [])
+    .slice(0, 3)
+    .map((p) => {
+      const href = `https://www.balao.info/product/${p.slug || p.id}`;
+      return `
+      <tr>
+        <td width="70">
+          <img src="${p.image || "https://via.placeholder.com/60"}" class="product-img" alt="${p.name}">
+        </td>
+        <td>
+          <span class="product-name">${p.name}</span>
+          <span class="product-meta">${p.price}</span>
+        </td>
+        <td style="text-align: right; white-space: nowrap;">
+          <a href="${href}" class="button" style="margin-top: 0; padding: 10px 14px; font-size: 14px;">Ver no site</a>
+        </td>
+      </tr>
+    `;
+    })
+    .join("");
+
+  const discountHtml =
+    typeof order.discount_value === "number" && order.discount_value > 0
+      ? `
+    <div class="total-row" style="color: #059669;">
+      <span>Desconto</span>
+      <span>- R$ ${Number(order.discount_value).toFixed(2).replace(".", ",")}</span>
+    </div>`
+      : "";
+
+  const shippingCost =
+    typeof order?.address?.shipping?.cost === "number" ? Number(order.address.shipping.cost) : null;
+  const shippingHtml =
+    order?.address?.shipping?.name || shippingCost !== null
+      ? `
+    <div class="info-box" style="border-color: #6d28d9; background-color: #f5f3ff;">
+      <span class="info-title" style="color: #6d28d9;">🚚 Entrega</span>
+      ${order.address?.shipping?.name ? `${order.address.shipping.name}` : ""}${order.address?.shipping?.days ? ` • ${order.address.shipping.days}` : ""}${shippingCost !== null ? ` • R$ ${shippingCost.toFixed(2).replace(".", ",")}` : ""}
+    </div>
+  `
+      : "";
+
+  const messageLines = [
+    `Olá! Fiz um pedido no Balão da Informática 🎈`,
+    `Pedido: #${orderShort}`,
+    `Nome: ${order.customer_name || ""}`,
+    `Email: ${order.customer_email || ""}`,
+    order.customer_whatsapp ? `WhatsApp: ${order.customer_whatsapp}` : "",
+    `Total: R$ ${Number(order.total).toFixed(2).replace(".", ",")}`,
+    `Quero informações sobre separação e rastreio, por favor.`,
+  ].filter((v) => typeof v === "string" && v.trim().length > 0);
+  const waText = encodeURIComponent(messageLines.join("\n"));
+  const waHref = `https://wa.me/55${opts.whatsappNumber}?text=${waText}`;
+
+  const content = `
+    <div style="text-align: center; margin-bottom: 22px;">
+      <img src="https://media.giphy.com/media/26tOZ42Mg6pbTUPHW/giphy.gif" alt="Parabéns" style="max-width: 220px; border-radius: 12px;">
+      <h1>Parabéns, ${firstName}! 🎉</h1>
+      <p style="color: #6b7280;">Seu pedido foi recebido com sucesso.</p>
+      <p style="color: #111827; font-weight: 800; font-size: 18px;">Pedido #${orderShort}</p>
+    </div>
+
+    <div class="info-box">
+      <span class="info-title">👤 Seus Dados</span>
+      <strong>${order.customer_name || ""}</strong><br>
+      ${order.customer_email || ""}<br>
+      ${order.customer_whatsapp ? `${order.customer_whatsapp}<br>` : ""}
+    </div>
+
+    <div class="info-box">
+      <span class="info-title">📍 Endereço de Entrega</span>
+      ${order.address?.street || ""}${order.address?.number ? `, ${order.address.number}` : ""} ${order.address?.complement ? `- ${order.address.complement}` : ""}<br>
+      ${order.address?.city || ""}/${order.address?.state || ""}<br>
+      ${order.address?.cep ? `CEP: ${order.address.cep}` : ""}
+    </div>
+
+    ${shippingHtml}
+
+    <h2>📦 Resumo do Pedido</h2>
+    <table class="product-table">
+      <thead>
+        <tr>
+          <th colspan="2">Produto</th>
+          <th style="text-align: right;">Valor</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${itemsHtml}
+      </tbody>
+    </table>
+
+    <div class="total-section">
+      ${discountHtml}
+      <div class="total-final">
+        Total: R$ ${Number(order.total).toFixed(2).replace(".", ",")}
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 26px;">
+      <a href="${waHref}" class="button">Chamar no WhatsApp sobre seu pedido</a>
+      <p style="font-size: 13px; color: #6b7280; margin-top: 10px;">
+        Use o botão para solicitar informações de separação e rastreio.
+      </p>
+    </div>
+
+    ${
+      relatedHtml
+        ? `
+    <h2>🛒 Veja outros produtos</h2>
+    <table class="product-table">
+      <tbody>
+        ${relatedHtml}
+      </tbody>
+    </table>
+    `
+        : ""
+    }
+  `;
+
+  return getBaseTemplate(content, `Pedido Confirmado #${orderShort}`, order.customer_email);
+};
+
 export const getWelcomeTemplate = (name: string, email: string) => {
   const content = `
     <div style="text-align: center; margin-bottom: 30px;">
