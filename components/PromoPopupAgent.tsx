@@ -45,11 +45,13 @@ export default function PromoPopupAgent() {
   const [open, setOpen] = useState(false);
   const [data, setData] = useState<PromoPopupProduct | null>(null);
   const timerRef = useRef<number | null>(null);
+  const loadStartRef = useRef<number>(0);
 
   const enabled = useMemo(() => shouldShowOnPath(pathname), [pathname]);
 
   useEffect(() => {
     if (!enabled) return;
+    loadStartRef.current = Date.now();
 
     const load = async () => {
       const lastId = typeof window !== "undefined" ? localStorage.getItem("promo_popup_last_product_id") || "" : "";
@@ -61,8 +63,10 @@ export default function PromoPopupAgent() {
       if (!json?.id) return;
       setData(json);
       localStorage.setItem("promo_popup_last_product_id", json.id);
-      window.setTimeout(() => setOpen(true), 650);
-      timerRef.current = window.setTimeout(() => setOpen(false), 14000);
+      const elapsed = Date.now() - loadStartRef.current;
+      const openDelay = Math.max(0, 3000 - elapsed);
+      window.setTimeout(() => setOpen(true), openDelay);
+      timerRef.current = window.setTimeout(() => setOpen(false), openDelay + 14000);
     };
 
     load().catch(() => {});
@@ -79,8 +83,7 @@ export default function PromoPopupAgent() {
   const frame = "bg-zinc-950/95 border border-red-600/60";
 
   const imageBlock = (
-    <div className="relative w-full overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_40%_20%,rgba(230,0,18,0.18),transparent_55%)]" />
+    <div className="relative w-full overflow-hidden rounded-xl border border-zinc-800 bg-transparent">
       <Image
         src={data.image}
         alt={data.title}
@@ -88,7 +91,7 @@ export default function PromoPopupAgent() {
         height={680}
         loading="lazy"
         sizes="(max-width: 640px) 92vw, 520px"
-        className="relative h-[210px] w-full object-contain p-3 sm:h-[240px]"
+        className="relative h-[240px] w-full object-contain bg-transparent sm:h-[280px]"
       />
       <div className="absolute left-3 top-3 flex items-center gap-2">
         <span className="rounded-full bg-red-600 px-3 py-1 text-[11px] font-extrabold tracking-wide text-white">
@@ -139,6 +142,7 @@ export default function PromoPopupAgent() {
           <Link
             href={data.url}
             prefetch
+            onClick={() => setOpen(false)}
             className="inline-flex items-center justify-center rounded-xl bg-red-600 px-4 py-3 text-sm font-extrabold tracking-wide text-white shadow-[0_12px_30px_rgba(230,0,18,0.35)] hover:bg-red-500 active:bg-red-700"
           >
             COMPRAR AGORA

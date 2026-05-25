@@ -214,7 +214,7 @@ export function buildPromoPopupProduct(product: Product, nowSeed: number): Promo
     specs: extractSpecs(product, seed),
     category: product.category,
     stock,
-    url: `/product/${product.slug || product.id}`,
+    url: `/product/${product.id}`,
     headline: pick(headlinePool, seed + 3),
     urgency,
     subline: `Desconto de ${discountPercent}% • ${installments.label}`,
