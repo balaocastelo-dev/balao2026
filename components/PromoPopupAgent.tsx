@@ -108,18 +108,10 @@ export default function PromoPopupAgent() {
             {data.title}
           </div>
         </div>
-        <button
-          type="button"
-          aria-label="Fechar"
-          onClick={() => setOpen(false)}
-          className="shrink-0 rounded-lg border border-zinc-700 bg-zinc-900/60 px-2 py-1 text-xs font-bold text-zinc-200 hover:bg-zinc-900"
-        >
-          ✕
-        </button>
       </div>
 
       <div className="rounded-xl border border-zinc-800 bg-zinc-950/70 p-3">
-        <div className="flex flex-nowrap items-center justify-between gap-3">
+        <div className="flex flex-nowrap items-center justify-between gap-3 lg:flex-col lg:items-stretch lg:justify-start">
           <div className="min-w-0">
             <div className="mt-1 whitespace-nowrap text-[34px] font-black leading-none tracking-tight text-red-500 sm:text-[42px]">
               {toMoneyBRL(data.price)}
@@ -129,7 +121,7 @@ export default function PromoPopupAgent() {
             href={data.url}
             prefetch
             onClick={() => setOpen(false)}
-            className="inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-xl bg-red-600 px-3 py-3 text-sm font-extrabold tracking-wide text-white shadow-[0_12px_30px_rgba(230,0,18,0.35)] hover:bg-red-500 active:bg-red-700 sm:px-4"
+            className="inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-xl bg-red-600 px-3 py-3 text-sm font-extrabold tracking-wide text-white shadow-[0_12px_30px_rgba(230,0,18,0.35)] hover:bg-red-500 active:bg-red-700 sm:px-4 lg:mt-3 lg:w-full"
           >
             COMPRAR AGORA
           </Link>
@@ -144,8 +136,16 @@ export default function PromoPopupAgent() {
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.98, y: 12 }}
       transition={{ type: "spring", stiffness: 520, damping: 36, mass: 0.7 }}
-      className={`w-[94vw] max-w-[560px] sm:max-w-[640px] lg:max-w-[740px] ${frame} ${glow} rounded-2xl p-4 sm:p-5`}
+      className={`relative w-[94vw] max-w-[560px] sm:max-w-[640px] lg:max-w-[740px] ${frame} ${glow} rounded-2xl p-4 sm:p-5`}
     >
+      <button
+        type="button"
+        aria-label="Fechar"
+        onClick={() => setOpen(false)}
+        className="absolute right-3 top-3 z-10 rounded-lg border border-zinc-700 bg-zinc-900/60 px-2 py-1 text-xs font-bold text-zinc-200 hover:bg-zinc-900"
+      >
+        ✕
+      </button>
       <div className="pointer-events-none absolute -inset-1 rounded-[18px] bg-[radial-gradient(circle_at_30%_20%,rgba(230,0,18,0.28),transparent_60%)]" />
       <div className="relative">
         <div className="grid gap-3 lg:grid-cols-[420px_1fr] lg:items-start">
