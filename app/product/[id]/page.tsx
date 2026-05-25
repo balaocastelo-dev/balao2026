@@ -15,6 +15,33 @@ type Props = {
   params: Promise<{ id: string }>;
 };
 
+function stripSpecsFromDescription(value: string | null | undefined) {
+  let text = typeof value === 'string' ? value : '';
+  text = text.replace(/\r\n/g, '\n').trim();
+  if (!text) return '';
+
+  const descHeader =
+    /(^|\n)##\s*📝?\s*Descrição do produto[^\n]*\n+/i;
+  const descHeaderSimple =
+    /(^|\n)##\s*Descrição[^\n]*\n+/i;
+
+  const m1 = text.match(descHeader);
+  if (m1?.index != null) {
+    return text.slice(m1.index + m1[0].length).trim();
+  }
+
+  const m2 = text.match(descHeaderSimple);
+  if (m2?.index != null) {
+    return text.slice(m2.index + m2[0].length).trim();
+  }
+
+  const withoutSpecs = text
+    .replace(/(^|\n)##\s*🧩?\s*Especificaç(?:õ|o)es[\s\S]*?(?=\n##\s|\s*$)/gi, '\n')
+    .trim();
+
+  return withoutSpecs;
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const product = await getProductById(id);
@@ -69,6 +96,7 @@ export default async function ProductPage({ params }: Props) {
   const cashPriceNum = parseFloat(product.price.replace("R$", "").replace(/\./g, "").replace(",", ".").trim());
   const listPriceNum = cashPriceNum / 0.85;
   const installmentValue = listPriceNum / 10;
+  const descriptionText = stripSpecsFromDescription(product.description);
 
   const category = categories.find(c => c.name === product.category);
   const categorySlug = category ? category.slug : 'todos-os-produtos';
@@ -160,8 +188,8 @@ export default async function ProductPage({ params }: Props) {
                     <div>
                         <h3 className="text-lg font-bold mb-4 text-gray-800 border-b pb-2">Descrição</h3>
                         <div className="prose max-w-none text-gray-600">
-                            {product.description ? (
-                                <div className="whitespace-pre-wrap">{product.description}</div>
+                            {descriptionText ? (
+                                <div className="whitespace-pre-wrap">{descriptionText}</div>
                             ) : (
                                 <>
                                     <p>
