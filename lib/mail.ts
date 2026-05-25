@@ -2,6 +2,7 @@
 import nodemailer from 'nodemailer';
 import { Resend } from 'resend';
 import { supabaseAdmin } from './supabase-admin';
+import { getAdminNotificationTemplate } from "@/lib/mail-templates";
 
 // Configuração do Resend
 const resendApiKey = process.env.RESEND_API_KEY;
@@ -130,6 +131,43 @@ export async function sendSystemNotification(event: string, data: any) {
         html,
         eventType: `system_${event}`
     });
+}
+
+const ORDER_NOTIFICATION_RECIPIENTS = ["balaocastelo@gmail.com", "tiagaskan@gmail.com"] as const;
+
+export async function sendNewOrderNotification(data: {
+    orderId: string;
+    origin?: string;
+    customerName: string;
+    customerEmail: string;
+    customerWhatsapp?: string;
+    total: number;
+    itemsCount: number;
+}) {
+    const subject = `[Pedido] Novo pedido #${data.orderId.slice(0, 8)}${data.origin ? ` (${data.origin})` : ""}`;
+    const html = getAdminNotificationTemplate("Novo Pedido Emitido", {
+        orderId: data.orderId,
+        origin: data.origin || "site",
+        customer: data.customerName,
+        email: data.customerEmail,
+        whatsapp: data.customerWhatsapp || "",
+        total: `R$ ${Number(data.total).toFixed(2).replace(".", ",")}`,
+        itens: data.itemsCount,
+    });
+
+    const uniqueTargets = [...new Set(ORDER_NOTIFICATION_RECIPIENTS)];
+    const results = await Promise.all(
+        uniqueTargets.map((to) =>
+            sendEmail({
+                to,
+                subject,
+                html,
+                eventType: "new_order_admin",
+            }),
+        ),
+    );
+
+    return { success: true, results, recipients: uniqueTargets };
 }
 
 /**

@@ -1,6 +1,7 @@
 "use server";
 
 import { createOrder as createDbOrder } from "@/lib/db";
+import { sendNewOrderNotification } from "@/lib/mail";
 import { PdvCartItem, PdvCustomer } from "./store";
 
 export async function createOrder({
@@ -48,6 +49,16 @@ export async function createOrder({
     }));
 
     const order = await createDbOrder(orderData, itemsData);
+
+    await sendNewOrderNotification({
+      orderId: order.id,
+      origin: "pdv",
+      customerName: customer.name,
+      customerEmail: customer.email,
+      customerWhatsapp: customer.phone,
+      total,
+      itemsCount: itemsData.length
+    });
 
     return { success: true, orderId: order.id };
   } catch (error: any) {

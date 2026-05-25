@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createOrder } from "@/lib/db";
-import { sendEmail, sendSystemNotification } from "@/lib/mail";
+import { sendEmail, sendNewOrderNotification } from "@/lib/mail";
 import { getOrderConfirmationTemplate } from "@/lib/mail-templates";
 import { validateCoupon } from "@/lib/coupons";
 import { hasAdmin } from "@/lib/supabase-admin";
@@ -159,12 +159,14 @@ export async function POST(req: Request) {
         eventType: 'order_confirmation'
     });
 
-    // Notificação para Admin
-    await sendSystemNotification('Novo Pedido Realizado', {
+    await sendNewOrderNotification({
         orderId: order.id,
-        customer: customer.name,
+        origin: "site",
+        customerName: String(customer.name ?? ""),
+        customerEmail: customer.email,
+        customerWhatsapp: String(customer.phone ?? ""),
         total: expectedTotal,
-        email: customer.email
+        itemsCount: orderItems.length
     });
 
     return NextResponse.json({ success: true, orderId: order.id, total: expectedTotal });
