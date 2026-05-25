@@ -84,14 +84,14 @@ export default function PromoPopupAgent() {
 
   const imageBlock = (
     <div className="relative w-full overflow-hidden rounded-xl border border-zinc-800 bg-white">
-      <div className="relative h-[300px] w-full sm:h-[380px] lg:h-[460px]">
+      <div className="relative h-[300px] w-full sm:h-[380px] lg:h-[420px]">
         <Image
           src={data.image}
           alt={data.title}
           fill
           loading="lazy"
           sizes="(max-width: 640px) 92vw, (max-width: 1024px) 640px, 740px"
-          className="object-cover object-center"
+          className="object-cover object-center lg:object-contain"
         />
       </div>
     </div>
@@ -119,9 +119,9 @@ export default function PromoPopupAgent() {
       </div>
 
       <div className="rounded-xl border border-zinc-800 bg-zinc-950/70 p-3">
-        <div className="flex items-end justify-between gap-3">
+        <div className="flex flex-nowrap items-center justify-between gap-3">
           <div className="min-w-0">
-            <div className="mt-1 text-[38px] font-black leading-none tracking-tight text-red-500 sm:text-[42px]">
+            <div className="mt-1 whitespace-nowrap text-[34px] font-black leading-none tracking-tight text-red-500 sm:text-[42px]">
               {toMoneyBRL(data.price)}
             </div>
           </div>
@@ -129,7 +129,7 @@ export default function PromoPopupAgent() {
             href={data.url}
             prefetch
             onClick={() => setOpen(false)}
-            className="inline-flex items-center justify-center rounded-xl bg-red-600 px-4 py-3 text-sm font-extrabold tracking-wide text-white shadow-[0_12px_30px_rgba(230,0,18,0.35)] hover:bg-red-500 active:bg-red-700"
+            className="inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-xl bg-red-600 px-3 py-3 text-sm font-extrabold tracking-wide text-white shadow-[0_12px_30px_rgba(230,0,18,0.35)] hover:bg-red-500 active:bg-red-700 sm:px-4"
           >
             COMPRAR AGORA
           </Link>
@@ -148,17 +148,10 @@ export default function PromoPopupAgent() {
     >
       <div className="pointer-events-none absolute -inset-1 rounded-[18px] bg-[radial-gradient(circle_at_30%_20%,rgba(230,0,18,0.28),transparent_60%)]" />
       <div className="relative">
-        {data.layout === "imageLeft" ? (
-          <div className="grid gap-3 sm:grid-cols-[220px_1fr]">
-            {imageBlock}
-            {contentBlock}
-          </div>
-        ) : (
-          <div className="flex flex-col gap-3">
-            {imageBlock}
-            {contentBlock}
-          </div>
-        )}
+        <div className="grid gap-3 lg:grid-cols-[420px_1fr] lg:items-start">
+          {imageBlock}
+          {contentBlock}
+        </div>
       </div>
     </motion.div>
   );
