@@ -371,7 +371,7 @@ export async function deleteUsedNotebook(id: string): Promise<void> {
 export async function addCarouselImage(imageUrl: string, title?: string, metadata?: any) {
     try {
         // Get max order to append to end
-        const { data: maxOrderData } = await supabase
+        const { data: maxOrderData } = await supabaseAdmin
             .from('carousel_images')
             .select('display_order')
             .order('display_order', { ascending: false })
@@ -379,7 +379,7 @@ export async function addCarouselImage(imageUrl: string, title?: string, metadat
         
         const nextOrder = (maxOrderData?.[0]?.display_order ?? -1) + 1;
 
-        const { data, error } = await supabase
+        const { data, error } = await supabaseAdmin
             .from('carousel_images')
             .insert({
                 image_url: imageUrl,
@@ -425,7 +425,7 @@ export async function saveImportHistory(history: {
 
 export async function deleteCarouselImage(id: string) {
     try {
-        const { error } = await supabase
+        const { error } = await supabaseAdmin
             .from('carousel_images')
             .delete()
             .eq('id', id);
@@ -439,7 +439,7 @@ export async function deleteCarouselImage(id: string) {
 
 export async function updateCarouselImage(id: string, updates: Partial<CarouselImage>) {
     try {
-        const { error } = await supabase
+        const { error } = await supabaseAdmin
             .from('carousel_images')
             .update(updates)
             .eq('id', id);

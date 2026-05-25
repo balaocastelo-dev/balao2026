@@ -166,10 +166,11 @@ export default function CarouselManager() {
   };
 
 
-  const fetchImages = async () => {
-    setLoading(true);
+  const fetchImages = async (options?: { silent?: boolean }) => {
+    const silent = options?.silent ?? false;
+    if (!silent) setLoading(true);
     try {
-      const res = await fetch("/api/carousel");
+      const res = await fetch("/api/carousel", { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
         // Ensure sorted by display_order
@@ -179,7 +180,7 @@ export default function CarouselManager() {
     } catch (error) {
       console.error("Failed to fetch images", error);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -238,7 +239,8 @@ export default function CarouselManager() {
     try {
       const res = await fetch(`/api/carousel?id=${id}`, { method: "DELETE" });
       if (res.ok) {
-        setImages(images.filter(img => img.id !== id));
+        setImages((prev) => prev.filter((img) => img.id !== id));
+        fetchImages({ silent: true });
       } else {
           console.error("Failed to delete");
       }
@@ -257,7 +259,8 @@ export default function CarouselManager() {
       });
 
       if (res.ok) {
-        setImages(images.map(img => img.id === image.id ? updatedImage : img));
+        setImages((prev) => prev.map((img) => (img.id === image.id ? updatedImage : img)));
+        fetchImages({ silent: true });
       }
     } catch (error) {
       console.error("Failed to toggle status", error);
