@@ -201,7 +201,7 @@ export function buildPromoPopupProduct(product: Product, nowSeed: number): Promo
   const urgency =
     stock !== null && stock <= 5 ? "ÚLTIMAS UNIDADES" : pick(urgencyPool, seed + 17);
 
-  const layout = (seed % 2 === 0 ? "imageTop" : "imageLeft") as const;
+  const layout: "imageTop" | "imageLeft" = seed % 2 === 0 ? "imageTop" : "imageLeft";
 
   return {
     id: product.id,
@@ -221,4 +221,3 @@ export function buildPromoPopupProduct(product: Product, nowSeed: number): Promo
     layout,
   };
 }
-
