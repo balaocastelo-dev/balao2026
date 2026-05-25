@@ -16,6 +16,7 @@ export type PromoPopupProduct = {
   headline: string;
   urgency: string;
   subline: string;
+  impactPhrase: string;
   layout: "imageTop" | "imageLeft";
 };
 
@@ -202,6 +203,19 @@ export function buildPromoPopupProduct(product: Product, nowSeed: number): Promo
     stock !== null && stock <= 5 ? "ÚLTIMAS UNIDADES" : pick(urgencyPool, seed + 17);
 
   const layout: "imageTop" | "imageLeft" = seed % 2 === 0 ? "imageTop" : "imageLeft";
+  const headline = pick(headlinePool, seed + 3);
+  const impactPool = [
+    "🔥 Upgrade agora com preço de ataque",
+    "⚡ Oferta ativa por tempo limitado",
+    "🎮 Setup gamer premium com desconto",
+    "🚀 Performance alta com economia real",
+    "💥 Preço especial para fechar hoje",
+    "🏷️ Promo exclusiva no Balão.info",
+  ] as const;
+  const impactPhrase =
+    discountPercent >= 20
+      ? `💥 ${discountPercent}% OFF para fechar agora`
+      : pick(impactPool, seed + 31);
 
   return {
     id: product.id,
@@ -215,9 +229,10 @@ export function buildPromoPopupProduct(product: Product, nowSeed: number): Promo
     category: product.category,
     stock,
     url: `/product/${product.id}`,
-    headline: pick(headlinePool, seed + 3),
+    headline,
     urgency,
     subline: `Desconto de ${discountPercent}% • ${installments.label}`,
+    impactPhrase,
     layout,
   };
 }

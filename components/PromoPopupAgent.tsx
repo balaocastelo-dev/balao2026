@@ -21,6 +21,7 @@ type PromoPopupProduct = {
   headline: string;
   urgency: string;
   subline: string;
+  impactPhrase: string;
   layout: "imageTop" | "imageLeft";
 };
 
@@ -66,7 +67,6 @@ export default function PromoPopupAgent() {
       const elapsed = Date.now() - loadStartRef.current;
       const openDelay = Math.max(0, 3000 - elapsed);
       window.setTimeout(() => setOpen(true), openDelay);
-      timerRef.current = window.setTimeout(() => setOpen(false), openDelay + 14000);
     };
 
     load().catch(() => {});
@@ -83,7 +83,7 @@ export default function PromoPopupAgent() {
   const frame = "bg-zinc-950/95 border border-red-600/60";
 
   const imageBlock = (
-    <div className="relative w-full overflow-hidden rounded-xl border border-zinc-800 bg-transparent">
+    <div className="relative w-full overflow-hidden rounded-xl border border-zinc-800 bg-white">
       <Image
         src={data.image}
         alt={data.title}
@@ -91,16 +91,8 @@ export default function PromoPopupAgent() {
         height={680}
         loading="lazy"
         sizes="(max-width: 640px) 92vw, 520px"
-        className="relative h-[240px] w-full object-contain bg-transparent sm:h-[280px]"
+        className="relative h-[260px] w-full object-contain bg-white p-2 sm:h-[320px] lg:h-[360px]"
       />
-      <div className="absolute left-3 top-3 flex items-center gap-2">
-        <span className="rounded-full bg-red-600 px-3 py-1 text-[11px] font-extrabold tracking-wide text-white">
-          {data.urgency}
-        </span>
-        <span className="rounded-full bg-zinc-900/90 px-3 py-1 text-[11px] font-bold tracking-wide text-zinc-200">
-          -{data.discountPercent}%
-        </span>
-      </div>
     </div>
   );
 
@@ -108,13 +100,12 @@ export default function PromoPopupAgent() {
     <div className="flex flex-col gap-3">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="text-[12px] font-extrabold tracking-[0.18em] text-red-500">
-            {data.headline}
+          <div className="text-[12px] font-extrabold tracking-wide text-red-500">
+            {data.impactPhrase}
           </div>
-          <div className="mt-1 line-clamp-2 text-[15px] font-extrabold text-white sm:text-[16px]">
+          <div className="mt-2 line-clamp-2 text-[16px] font-extrabold text-white sm:text-[18px]">
             {data.title}
           </div>
-          <div className="mt-1 text-[12px] font-semibold text-zinc-300">{data.subline}</div>
         </div>
         <button
           type="button"
@@ -129,14 +120,8 @@ export default function PromoPopupAgent() {
       <div className="rounded-xl border border-zinc-800 bg-zinc-950/70 p-3">
         <div className="flex items-end justify-between gap-3">
           <div className="min-w-0">
-            <div className="text-[12px] font-bold text-zinc-400 line-through">
-              {toMoneyBRL(data.oldPrice)}
-            </div>
-            <div className="mt-1 text-[34px] font-black leading-none tracking-tight text-red-500">
+            <div className="mt-1 text-[38px] font-black leading-none tracking-tight text-red-500 sm:text-[42px]">
               {toMoneyBRL(data.price)}
-            </div>
-            <div className="mt-1 text-[12px] font-semibold text-zinc-200">
-              {data.installments.label}
             </div>
           </div>
           <Link
@@ -149,26 +134,6 @@ export default function PromoPopupAgent() {
           </Link>
         </div>
       </div>
-
-      <div className="grid grid-cols-2 gap-2">
-        {data.specs.slice(0, 6).map((s, i) => (
-          <div
-            key={`${data.id}-${i}`}
-            className="flex items-start gap-2 rounded-lg border border-zinc-800 bg-zinc-950/50 px-3 py-2 text-[12px] font-semibold text-zinc-200"
-          >
-            <span className="mt-[2px] text-red-500">✔</span>
-            <span className="line-clamp-2">{s}</span>
-          </div>
-        ))}
-      </div>
-
-      <div className="flex items-center justify-between text-[11px] font-semibold text-zinc-400">
-        <div className="truncate">
-          {data.category}
-          {typeof data.stock === "number" ? ` • Estoque: ${data.stock}` : ""}
-        </div>
-        <div>Oferta por tempo limitado</div>
-      </div>
     </div>
   );
 
@@ -178,7 +143,7 @@ export default function PromoPopupAgent() {
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.98, y: 12 }}
       transition={{ type: "spring", stiffness: 520, damping: 36, mass: 0.7 }}
-      className={`w-[94vw] max-w-[560px] ${frame} ${glow} rounded-2xl p-4`}
+      className={`w-[94vw] max-w-[560px] sm:max-w-[640px] lg:max-w-[740px] ${frame} ${glow} rounded-2xl p-4 sm:p-5`}
     >
       <div className="pointer-events-none absolute -inset-1 rounded-[18px] bg-[radial-gradient(circle_at_30%_20%,rgba(230,0,18,0.28),transparent_60%)]" />
       <div className="relative">
