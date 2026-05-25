@@ -84,15 +84,16 @@ export default function PromoPopupAgent() {
 
   const imageBlock = (
     <div className="relative w-full overflow-hidden rounded-xl border border-zinc-800 bg-white">
-      <Image
-        src={data.image}
-        alt={data.title}
-        width={920}
-        height={680}
-        loading="lazy"
-        sizes="(max-width: 640px) 92vw, 520px"
-        className="relative h-[260px] w-full object-contain bg-white p-2 sm:h-[320px] lg:h-[360px]"
-      />
+      <div className="relative h-[300px] w-full sm:h-[380px] lg:h-[460px]">
+        <Image
+          src={data.image}
+          alt={data.title}
+          fill
+          loading="lazy"
+          sizes="(max-width: 640px) 92vw, (max-width: 1024px) 640px, 740px"
+          className="object-cover object-center"
+        />
+      </div>
     </div>
   );
 
@@ -179,7 +180,7 @@ export default function PromoPopupAgent() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           />
-          <div className="relative w-full max-w-[560px]">
+          <div className="relative w-full max-w-[740px]">
             <motion.div
               className="absolute -inset-2 rounded-[24px] bg-[conic-gradient(from_90deg,rgba(230,0,18,0.0),rgba(230,0,18,0.38),rgba(230,0,18,0.0))]"
               animate={{ opacity: [0.35, 0.55, 0.35] }}
