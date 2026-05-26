@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { parseProducts, Product, Category, buildCategoryTree, CATEGORIES } from "@/lib/utils";
-import { Upload, CheckCircle, AlertCircle, Search } from "lucide-react";
+import { Upload, CheckCircle, AlertCircle, Search, Save } from "lucide-react";
 
 export default function ImportPage() {
   const [categories, setCategories] = useState<Category[]>([]);
