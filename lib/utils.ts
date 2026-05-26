@@ -290,6 +290,22 @@ export function parseProducts(text: string): Product[] {
   const products: Product[] = [];
   const lines = text.split('\n');
 
+  const unwrap = (input: string) => {
+    let s = String(input || "").trim();
+    if (!s) return "";
+    if (s.startsWith("`") && s.endsWith("`") && s.length >= 2) s = s.slice(1, -1).trim();
+    if (s.startsWith('"') && s.endsWith('"') && s.length >= 2) s = s.slice(1, -1).trim();
+    if (s.startsWith("'") && s.endsWith("'") && s.length >= 2) s = s.slice(1, -1).trim();
+    return s;
+  };
+
+  const isHttpUrl = (s: string) => /^https?:\/\//i.test(s);
+  const isImageUrl = (s: string) =>
+    isHttpUrl(s) &&
+    (/\.(png|jpe?g|webp|gif)(\?|#|$)/i.test(s) ||
+      /mlstatic\.com/i.test(s) ||
+      /images\.kabum\.com\.br/i.test(s));
+
   for (let line of lines) {
     line = line.trim();
     if (!line) continue;
@@ -315,17 +331,45 @@ export function parseProducts(text: string): Product[] {
       let price = "";
 
       if (parts.length >= 4) {
-        // Format: ProductURL ImageURL Name Price
-        productUrl = parts[0].trim();
-        imageUrl = parts[1].trim();
-        name = parts[2].trim();
-        price = parts[3].trim();
+        const p0 = unwrap(parts[0]);
+        const p1 = unwrap(parts[1]);
+        const p2 = unwrap(parts[2]);
+        const p3 = unwrap(parts[3]);
+
+        const looksLikeImageFirst = isImageUrl(p0) && !isImageUrl(p2) && isHttpUrl(p2);
+        const looksLikeProductFirst = isHttpUrl(p0) && isImageUrl(p1);
+
+        if (looksLikeImageFirst) {
+          imageUrl = p0;
+          name = p1;
+          productUrl = p2;
+          price = p3;
+        } else if (looksLikeProductFirst) {
+          productUrl = p0;
+          imageUrl = p1;
+          name = p2;
+          price = p3;
+        } else {
+          const maybePrice = p3;
+          const urlCandidates = [p0, p1, p2].filter(isHttpUrl);
+          const img = urlCandidates.find(isImageUrl) || "";
+          const prod = urlCandidates.find((u) => u !== img) || "";
+          imageUrl = img || p1;
+          productUrl = prod || p0;
+          name = [p0, p1, p2].find((x) => !isHttpUrl(x)) || p2;
+          price = maybePrice;
+        }
       } else {
         // Format: ImageURL Name Price
-        imageUrl = parts[0].trim();
-        name = parts[1].trim();
-        price = parts[2].trim();
+        imageUrl = unwrap(parts[0]);
+        name = unwrap(parts[1]);
+        price = unwrap(parts[2]);
       }
+
+      productUrl = unwrap(productUrl);
+      imageUrl = unwrap(imageUrl);
+      name = unwrap(name);
+      price = unwrap(price);
 
       if (imageUrl.startsWith('http') && name && price) {
         const enhancedImage = enhanceImageUrl(imageUrl);
