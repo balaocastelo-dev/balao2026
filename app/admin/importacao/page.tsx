@@ -96,6 +96,9 @@ export default function ImportPage() {
   };
 
   const validateImage = (url: string): Promise<boolean> => {
+    if (typeof url === "string" && /mlstatic\.com/i.test(url)) {
+      return Promise.resolve(true);
+    }
     return new Promise((resolve) => {
       const img = new window.Image();
       img.onload = () => {
@@ -312,8 +315,8 @@ export default function ImportPage() {
     await Promise.allSettled([categorizePromise, ...tasks]);
 
     setParsedProducts((prev: any) => {
-      const filtered = prev.filter((r: any) => r.imageValid && r.image);
-      setMessage(`${filtered.length} produtos válidos encontrados.`);
+      const filtered = prev.filter((r: any) => r?.image);
+      setMessage(`${filtered.length} produtos encontrados.`);
       return filtered;
     });
 
