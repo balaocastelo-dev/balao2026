@@ -18,7 +18,6 @@ export default function ImportPage() {
   const [adjustmentScope, setAdjustmentScope] = useState<"all" | "high_value" | "low_value">("all");
   const [scopeThreshold, setScopeThreshold] = useState<number>(1000);
   const [migrateImages, setMigrateImages] = useState(false);
-  const [autoCategory, setAutoCategory] = useState(true);
   
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
@@ -85,7 +84,7 @@ export default function ImportPage() {
 
         return {
             ...p,
-            category: autoCategory && p.category ? p.category : selectedCategory,
+            category: selectedCategory,
             originalPrice: p.price,
             newPrice: newPriceFormatted,
             priceChange: newPriceNum - priceNum,
@@ -163,7 +162,7 @@ export default function ImportPage() {
 
   const handleParse = async () => {
     setStatus("loading");
-    setMessage("IA pensando... (0/0)");
+    setMessage("Analisando links... (0/0)");
 
     const products = parseProducts(text);
     if (products.length === 0) {
@@ -173,8 +172,6 @@ export default function ImportPage() {
     }
 
     const total = products.length;
-    let aiDone = 0;
-    let catDone = 0;
     let processed = 0;
 
     const updateRow = (id: string, patch: any) => {
@@ -182,6 +179,40 @@ export default function ImportPage() {
     };
 
     const dedupeUrls = (urls: string[]) => Array.from(new Set((urls || []).map((u) => String(u || "").trim()).filter(Boolean)));
+    const toTitleCaseKey = (k: string) => {
+      const s = String(k || "").trim();
+      if (!s) return "";
+      return s.charAt(0).toUpperCase() + s.slice(1);
+    };
+
+    const extractSpecsFromText = (input: string) => {
+      const t = String(input || "").replace(/\s+/g, " ").trim();
+      const out: Record<string, string> = {};
+      if (!t) return out;
+
+      const cpu = t.match(/\b(Intel\s+Core\s+i[3579]\b[^,]*)/i) || t.match(/\b(Ryzen\s+[3579]\b[^,]*)/i);
+      if (cpu?.[1]) out["Processador"] = cpu[1].trim();
+
+      const gpu = t.match(/\b(RTX\s*\d{3,4}\b[^,]*)/i) || t.match(/\b(GTX\s*\d{3,4}\b[^,]*)/i) || t.match(/\b(Radeon\s+RX\s*\d{3,4}\b[^,]*)/i);
+      if (gpu?.[1]) out["Placa de Vídeo"] = gpu[1].trim();
+
+      const ram = t.match(/\b(\d{1,3}\s?GB)\s*(?:de\s*)?RAM\b/i) || t.match(/\bRAM\s*(\d{1,3}\s?GB)\b/i);
+      if (ram?.[1]) out["Memória RAM"] = ram[1].replace(/\s+/g, " ").trim();
+
+      const ssd = t.match(/\b(\d{2,4}\s?GB|\d{1,2}\s?TB)\s*SSD\b/i);
+      if (ssd?.[1]) out["Armazenamento"] = `${ssd[1].replace(/\s+/g, " ").trim()} SSD`;
+
+      const hdd = t.match(/\b(\d{1,2}\s?TB)\s*HDD\b/i);
+      if (hdd?.[1] && !out["Armazenamento"]) out["Armazenamento"] = `${hdd[1].replace(/\s+/g, " ").trim()} HDD`;
+
+      const screen = t.match(/\b(\d{1,2}(?:[.,]\d)?)["']?\s*(?:pol|polegadas)?\b/i);
+      if (screen?.[1] && /tela/i.test(t)) out["Tela"] = `${screen[1].replace(",", ".")}\"`;
+
+      const os = t.match(/\b(Windows\s+11(?:\s+Home|\s+Pro)?|Windows\s+10(?:\s+Home|\s+Pro)?|Linux|KeepOS)\b/i);
+      if (os?.[1]) out["Sistema"] = os[1].trim();
+
+      return out;
+    };
 
     const initialRows = products.map((p) => {
       let optimizedImage = optimizeUrl(p.image);
@@ -203,46 +234,34 @@ export default function ImportPage() {
     setParsedProducts(initialRows as any);
     setImportStep("preview");
     const updateProgress = () => {
-      setMessage(`IA pensando... (${aiDone}/${total}) | Categorias... (${catDone}/${total})`);
+      setMessage(`Analisando links... (${processed}/${total})`);
     };
     updateProgress();
 
-    const categorizePromise = (async () => {
-      if (!autoCategory) return;
-      try {
-        const categoriesList = getCategoryOptions();
-        const res = await fetch("/api/admin/ai-categorize", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            products: initialRows.map((p: any) => ({ id: p.id, name: p.name, kabumUrl: p.kabum_url || p.product_url || null })),
-            categories: categoriesList,
-            maxParallel: 10
-          })
-        });
-        const json = await res.json().catch(() => null);
-        const results = Array.isArray(json?.results) ? json.results : [];
-        for (const r of results) {
-          if (r?.id && r?.category) {
-            updateRow(String(r.id), { category: String(r.category) });
-          }
-          catDone += 1;
-          updateProgress();
+    const maxParallelAgents = 6;
+    const runWithConcurrency = async <T,>(items: T[], limit: number, fn: (item: T) => Promise<void>) => {
+      const safeLimit = Math.max(1, Math.floor(limit || 1));
+      let idx = 0;
+      const workers = new Array(Math.min(safeLimit, items.length)).fill(null).map(async () => {
+        while (true) {
+          const current = idx++;
+          if (current >= items.length) break;
+          await fn(items[current]);
         }
-      } catch {
-        catDone = total;
-        updateProgress();
-      }
-    })();
+      });
+      await Promise.all(workers);
+    };
 
-    const tasks = initialRows.map(async (p: any) => {
+    await runWithConcurrency(initialRows as any[], maxParallelAgents, async (p: any) => {
       try {
         let imageUrls: string[] = Array.isArray(p.image_urls) ? p.image_urls : [];
-        let description = "";
-        let specs: any = {};
+        let descriptionRaw = "";
+        let specs: Record<string, any> = p.specs && typeof p.specs === "object" ? p.specs : {};
+        let name = String(p.name || "").trim();
+        let price = String(p.price || "").trim();
 
-        const sourceUrl = p.kabum_url || p.product_url;
-        if (sourceUrl && sourceUrl.includes("kabum.com.br")) {
+        const sourceUrl = String(p.product_url || p.kabum_url || "").trim();
+        if (sourceUrl && /^https?:\/\//i.test(sourceUrl)) {
           try {
             const scrapeRes = await fetch("/api/scrape/product", {
               method: "POST",
@@ -250,49 +269,37 @@ export default function ImportPage() {
               body: JSON.stringify({ url: sourceUrl }),
             });
             if (scrapeRes.ok) {
-              const scrapeData = await scrapeRes.json();
-              if (Array.isArray(scrapeData.images) && scrapeData.images.length > 0) imageUrls = scrapeData.images;
-              if (scrapeData.description) description = scrapeData.description;
-              if (scrapeData.specs) specs = scrapeData.specs;
+              const scrapeData = await scrapeRes.json().catch(() => null);
+              const scrapeTitle = String(scrapeData?.title || "").trim();
+              const scrapePrice = typeof scrapeData?.price === "number" ? scrapeData.price : null;
+              const scrapeDescription = String(scrapeData?.description || "").trim();
+              const scrapeSpecs = scrapeData?.specs && typeof scrapeData.specs === "object" ? (scrapeData.specs as Record<string, any>) : {};
+              const scrapeImages = Array.isArray(scrapeData?.images) ? scrapeData.images : [];
+
+              if (scrapeTitle && (scrapeTitle.length > name.length || !name)) name = scrapeTitle;
+              if ((!price || price === "R$" || price === "R$ 0" || price === "R$ 0,00") && scrapePrice != null) {
+                price = `R$ ${new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(scrapePrice)}`;
+              }
+              if (scrapeImages.length > 0) imageUrls = scrapeImages.map((u: any) => optimizeUrl(String(u || ""))).filter(Boolean);
+              if (scrapeDescription) descriptionRaw = scrapeDescription;
+              specs = { ...scrapeSpecs, ...specs };
             }
-          } catch (e) {
-            console.error("Failed to scrape details for", p.name, e);
-          }
+          } catch {}
+        }
+
+        const extractedFromName = extractSpecsFromText(name);
+        const extractedFromDesc = extractSpecsFromText(descriptionRaw);
+        const mergedSpecs = { ...specs, ...extractedFromName, ...extractedFromDesc };
+        const normalizedSpecs: Record<string, any> = {};
+        for (const [k, v] of Object.entries(mergedSpecs || {})) {
+          const key = toTitleCaseKey(String(k || ""));
+          const val = typeof v === "string" ? v.trim() : v;
+          if (!key || val == null || String(val).trim() === "") continue;
+          normalizedSpecs[key] = val;
         }
 
         imageUrls = dedupeUrls(imageUrls);
-        updateRow(p.id, { image_urls: imageUrls, specs });
-
-        if (description) {
-          try {
-            const aiRes = await fetch("/api/ai/rewrite-description", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ productName: p.name, rawText: description, specs }),
-            });
-            if (aiRes.ok) {
-              const aiData = await aiRes.json();
-              if (aiData?.markdown) {
-                description = aiData.markdown;
-                updateRow(p.id, { ai_status: "done", description });
-              } else {
-                updateRow(p.id, { ai_status: "error" });
-              }
-            } else {
-              updateRow(p.id, { ai_status: "error" });
-            }
-          } catch (e) {
-            console.error("IA rewrite falhou para", p.name, e);
-            updateRow(p.id, { ai_status: "error" });
-          } finally {
-            aiDone += 1;
-            updateProgress();
-          }
-        } else {
-          updateRow(p.id, { ai_status: "error" });
-          aiDone += 1;
-          updateProgress();
-        }
+        updateRow(p.id, { name, price, image_urls: imageUrls, specs: normalizedSpecs, category: selectedCategory });
 
         const validImageUrls: string[] = [];
         for (const candidate of imageUrls) {
@@ -301,18 +308,37 @@ export default function ImportPage() {
           if (ok) validImageUrls.push(candidate);
         }
 
-        const primaryImage = validImageUrls[0] || "";
+        const primaryImage = validImageUrls[0] || imageUrls[0] || "";
         updateRow(p.id, {
           image: primaryImage || p.image,
           image_urls: validImageUrls.length > 0 ? validImageUrls : imageUrls,
           imageValid: !!primaryImage,
         });
+
+        if (descriptionRaw) {
+          try {
+            const aiRes = await fetch("/api/ai/rewrite-description", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ productName: name, rawText: descriptionRaw, specs: normalizedSpecs }),
+            });
+            const aiData = await aiRes.json().catch(() => null);
+            if (aiRes.ok && aiData?.markdown) {
+              updateRow(p.id, { ai_status: "done", description: String(aiData.markdown || "") });
+            } else {
+              updateRow(p.id, { ai_status: "error" });
+            }
+          } catch {
+            updateRow(p.id, { ai_status: "error" });
+          }
+        } else {
+          updateRow(p.id, { ai_status: "error" });
+        }
       } finally {
         processed += 1;
+        updateProgress();
       }
     });
-
-    await Promise.allSettled([categorizePromise, ...tasks]);
 
     setParsedProducts((prev: any) => {
       const filtered = prev.filter((r: any) => r?.image);
@@ -452,7 +478,7 @@ export default function ImportPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 bg-gray-50 p-4 rounded-lg border">
                     <div>
                         <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">
-                          {autoCategory ? "Categoria Padrão (fallback)" : "Categoria Destino"}
+                          Categoria Destino
                         </label>
                         <select
                             value={selectedCategory}
@@ -515,17 +541,6 @@ export default function ImportPage() {
                     <div>
                         <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Opções Extras</label>
                         <div className="space-y-2">
-                            <label className="flex items-center gap-2 cursor-pointer select-none">
-                                <input
-                                    type="checkbox"
-                                    checked={autoCategory}
-                                    onChange={(e) => setAutoCategory(e.target.checked)}
-                                    className="w-4 h-4 text-[#E60012] rounded border-gray-300 focus:ring-[#E60012]"
-                                />
-                                <span className="text-sm text-gray-700 font-medium">
-                                    Categoria automática por item (IA)
-                                </span>
-                            </label>
                             <label className="flex items-center gap-2 cursor-pointer select-none">
                                 <input 
                                     type="checkbox" 
