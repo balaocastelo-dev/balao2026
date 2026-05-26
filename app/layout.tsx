@@ -13,7 +13,6 @@ import { CartProvider } from "@/context/CartContext";
 import { ToastProvider } from "@/context/ToastContext";
 import LayoutWrapper from "@/components/LayoutWrapper";
 import VisitorTracker from "@/components/VisitorTracker";
-import PromoPopupAgent from "@/components/PromoPopupAgent";
 
 import { getCategories } from "@/lib/db";
 import type { Category } from "@/lib/utils";
@@ -248,7 +247,6 @@ export default async function RootLayout({
           <ToastProvider>
             <Suspense>
               <LayoutWrapper categories={categories}>
-                <PromoPopupAgent />
                 {children}
               </LayoutWrapper>
             </Suspense>
