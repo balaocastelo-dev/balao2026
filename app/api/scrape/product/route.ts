@@ -239,7 +239,6 @@ export async function POST(request: Request) {
         if (!uniqueImages.includes(u)) uniqueImages.push(u);
       }
     }
-    const jsonLdRegex = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/g;
     const ogImageMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["'][^>]*>/i);
     if (ogImageMatch?.[1] && !uniqueImages.includes(ogImageMatch[1])) uniqueImages.push(ogImageMatch[1]);
 
@@ -287,7 +286,6 @@ export async function POST(request: Request) {
     }
     // If specs are empty, try another common pattern
     if (Object.keys(specs).length === 0) {
-        const tableRegex = /<tr[^>]*>\s*<td[^>]*>([^<]+)<\/td>\s*<td[^>]*>([^<]+)<\/td>\s*<\/tr>/gi;
         const tableRegex = /<tr[^>]*>\s*(?:<t[hd][^>]*>\s*([^<]+?)\s*<\/t[hd]>\s*){1,2}<t[hd][^>]*>\s*([^<]+?)\s*<\/t[hd]>\s*<\/tr>/gi;
         let match: RegExpExecArray | null = null;
         while ((match = tableRegex.exec(html)) !== null) {
@@ -295,10 +293,10 @@ export async function POST(request: Request) {
             const value = String(match[2] || '').trim();
             if (key && value && key.length < 80 && value.length < 800) specs[key] = value;
         }
+    }
 
     // 4. Clean and Replace Brands
     const replaceBrand = (text: string) => {
-        if (!text) return text;
         if (!text) return text;
         // List of brands to replace with "Balão.info"
         const brands = [
