@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowLeft, CheckCircle, Upload, Layout, Layers, ShoppingBag, Settings, Mail, Bot } from "lucide-react";
+import { ArrowLeft, CheckCircle, Upload, Layout, Layers, ShoppingBag, Settings, Mail } from "lucide-react";
 
 export default function AdminLayout({
   children,
@@ -17,7 +17,6 @@ export default function AdminLayout({
     { name: "Gerenciar Categorias", href: "/admin/categorias", icon: Layers },
     { name: "Gerenciar Pedidos", href: "/admin/pedidos", icon: ShoppingBag },
     { name: "Gerenciar Produtos", href: "/admin/produtos", icon: Settings },
-    { name: "IA Kabum Sync", href: "/admin/ia-kabum-sync", icon: Bot },
     { name: "Blocos da Home", href: "/admin/home-blocks", icon: Layout },
     { name: "Marketing & E-mail", href: "/admin/marketing", icon: Mail },
     { name: "Cupons", href: "/admin/cupons", icon: Settings },
