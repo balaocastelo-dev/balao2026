@@ -23,7 +23,7 @@ export default async function VitrineIndexPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {pages.map((p) => {
-          const hero = pickPcHeroImage({ categoria: p.categoria } as any);
+          const hero = (p as any)?.images?.hero || pickPcHeroImage({ categoria: p.categoria } as any);
           return (
             <Link
               key={p.id}

@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { buildRecommendedSlug, extractParts, makeCommercialCopy, normalizeInputText } from "@/lib/vitrine/core";
+import { buildRecommendedSlug, extractExtrasFromText, extractParts, makeCommercialCopy, normalizeInputText } from "@/lib/vitrine/core";
 import { getVitrinePageBySlug } from "@/lib/vitrine/db";
 import { VitrineCategory } from "@/lib/vitrine/types";
+import { scrapeUrlForVitrine } from "@/lib/vitrine/scrape";
 
 async function tryScrapeKabum(request: Request, input: string) {
   const url = String(input || "").trim();
@@ -45,13 +46,34 @@ export async function POST(request: Request) {
     const input = normalizeInputText(String(body?.input || body?.descricao || "").trim());
     const categoria = (body?.categoria ? String(body.categoria) : "") as VitrineCategory | "";
 
-    const scraped = await tryScrapeKabum(request, input);
-    const specsText = Object.entries(scraped.specs || {})
+    const isUrl = /^https?:\/\//i.test(input);
+    const urlScraped = isUrl ? await scrapeUrlForVitrine(input).catch(() => null) : null;
+    const kabumScraped = await tryScrapeKabum(request, input);
+
+    const urlSpecsText = urlScraped
+      ? Object.entries(urlScraped.specs || {})
+          .map(([k, v]) => `${k}: ${v}`)
+          .join("\n")
+      : "";
+    const kabumSpecsText = Object.entries(kabumScraped.specs || {})
       .map(([k, v]) => `${k}: ${v}`)
+      .join("\n");
+
+    const combined = [
+      nomePc,
+      input,
+      urlScraped?.title,
+      urlScraped?.description,
+      urlScraped?.text,
+      urlSpecsText,
+      kabumScraped.description,
+      kabumSpecsText,
+    ]
+      .filter(Boolean)
       .join(" ");
 
-    const combined = [nomePc, input, scraped.description, specsText].filter(Boolean).join(" ");
     const parts = extractParts(combined, categoria || undefined);
+    const extras = extractExtrasFromText([urlSpecsText, kabumSpecsText, urlScraped?.text || "", input].filter(Boolean).join("\n"));
     const baseSlug = buildRecommendedSlug(parts, nomePc || combined);
     const { slug, isUnique } = await ensureUniqueSlug(baseSlug);
     const copy = makeCommercialCopy(nomePc || "PC Exclusivo", parts);
@@ -61,9 +83,13 @@ export async function POST(request: Request) {
       slug,
       slugAvailable: isUnique,
       parts,
+      extras,
+      source_url: isUrl ? input : "",
       copy,
       scraped: {
-        images: scraped.images,
+        images: Array.from(
+          new Set([...(kabumScraped.images || []), ...((urlScraped?.images || []) as string[])]),
+        ),
       },
     });
   } catch (e: any) {

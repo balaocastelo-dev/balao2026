@@ -15,6 +15,7 @@ export interface VitrinePageRecord {
   slug: string;
   categoria: VitrineCategory;
   descricao_original: string;
+  source_url?: string;
   processador: string;
   placa_video: string;
   memoria_ram: string;
@@ -22,6 +23,9 @@ export interface VitrinePageRecord {
   sistema_operacional: string;
   resfriamento: string;
   aplicacoes: string[];
+  extras?: Record<string, string>;
+  images?: Record<string, string>;
+  image_prompts?: Record<string, string>;
   status: VitrineStatus;
   data_criacao: string;
   data_publicacao: string | null;
@@ -48,4 +52,3 @@ export interface VitrineCommercialCopy {
   applicationsText: string;
   shortDescription: string;
 }
-

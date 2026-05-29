@@ -9,12 +9,17 @@ function normalizeRow(row: DbRow): VitrinePageRecord {
   const aplicacoes =
     Array.isArray(aplicacoesRaw) ? aplicacoesRaw.map((v) => String(v)) : Array.isArray(aplicacoesRaw?.items) ? aplicacoesRaw.items : [];
 
+  const extras = row?.extras && typeof row.extras === "object" ? row.extras : {};
+  const images = row?.images && typeof row.images === "object" ? row.images : {};
+  const image_prompts = row?.image_prompts && typeof row.image_prompts === "object" ? row.image_prompts : {};
+
   return {
     id: String(row.id),
     nome_pc: String(row.nome_pc || ""),
     slug: String(row.slug || ""),
     categoria: row.categoria,
     descricao_original: String(row.descricao_original || ""),
+    source_url: row.source_url ? String(row.source_url) : undefined,
     processador: String(row.processador || ""),
     placa_video: String(row.placa_video || ""),
     memoria_ram: String(row.memoria_ram || ""),
@@ -22,6 +27,9 @@ function normalizeRow(row: DbRow): VitrinePageRecord {
     sistema_operacional: String(row.sistema_operacional || ""),
     resfriamento: String(row.resfriamento || ""),
     aplicacoes,
+    extras,
+    images,
+    image_prompts,
     status: row.status,
     data_criacao: String(row.data_criacao || row.created_at || ""),
     data_publicacao: row.data_publicacao ? String(row.data_publicacao) : null,
@@ -76,6 +84,7 @@ export async function createVitrinePage(payload: Partial<VitrinePageRecord>): Pr
     slug: payload.slug,
     categoria: payload.categoria,
     descricao_original: payload.descricao_original || "",
+    source_url: payload.source_url || null,
     processador: payload.processador || "",
     placa_video: payload.placa_video || "",
     memoria_ram: payload.memoria_ram || "",
@@ -83,6 +92,9 @@ export async function createVitrinePage(payload: Partial<VitrinePageRecord>): Pr
     sistema_operacional: payload.sistema_operacional || "",
     resfriamento: payload.resfriamento || "",
     aplicacoes: payload.aplicacoes || [],
+    extras: payload.extras || {},
+    images: payload.images || {},
+    image_prompts: payload.image_prompts || {},
     status: payload.status || ("rascunho" as VitrineStatus),
     data_publicacao: payload.status === "publicada" ? new Date().toISOString() : null,
   };
@@ -101,6 +113,7 @@ export async function updateVitrinePage(id: string, payload: Partial<VitrinePage
     "slug",
     "categoria",
     "descricao_original",
+    "source_url",
     "processador",
     "placa_video",
     "memoria_ram",
@@ -108,6 +121,9 @@ export async function updateVitrinePage(id: string, payload: Partial<VitrinePage
     "sistema_operacional",
     "resfriamento",
     "aplicacoes",
+    "extras",
+    "images",
+    "image_prompts",
     "status",
   ];
 
@@ -132,4 +148,3 @@ export async function deleteVitrinePage(id: string) {
   const { error } = await client.from("vitrine_pages").delete().eq("id", id);
   if (error) throw new Error(error.message);
 }
-

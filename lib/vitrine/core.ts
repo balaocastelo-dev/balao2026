@@ -194,6 +194,81 @@ export function extractParts(textInput: string, selectedCategory?: VitrineCatego
   return parts;
 }
 
+export function extractExtrasFromText(textInput: string) {
+  const raw = normalizeInputText(textInput);
+  const lines = raw
+    .replace(/\r/g, "")
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
+
+  const blob = raw.replace(/\s+/g, " ");
+  const norm = stripDiacritics(blob).toLowerCase();
+
+  const find = (labels: string[]) => {
+    for (const label of labels) {
+      const re = new RegExp(`${label}\\s*[:\\-]\\s*([^\\n\\r]+)`, "i");
+      const m = raw.match(re);
+      if (m?.[1]) return m[1].trim();
+    }
+    return "";
+  };
+
+  const fromLines = (labels: string[]) => {
+    const ls = labels.map((l) => stripDiacritics(l).toLowerCase());
+    for (const line of lines) {
+      const nl = stripDiacritics(line).toLowerCase();
+      for (const l of ls) {
+        if (nl.startsWith(l + ":") || nl.startsWith(l + " -") || nl.startsWith(l + "–")) {
+          const idx = line.indexOf(":");
+          if (idx >= 0) return line.slice(idx + 1).trim();
+          const dash = line.indexOf("-");
+          if (dash >= 0) return line.slice(dash + 1).trim();
+        }
+      }
+    }
+    return "";
+  };
+
+  const extras: Record<string, string> = {};
+
+  const gabinete = fromLines(["Gabinete"]) || find(["Gabinete"]);
+  if (gabinete) extras.gabinete = gabinete;
+
+  const fonte = fromLines(["Fonte", "Fonte de alimentação", "Fonte de alimentacao"]) || find(["Fonte de alimentação", "Fonte"]);
+  if (fonte) extras.fonte = fonte;
+
+  const placaMae =
+    fromLines(["Placa mãe", "Placa mae", "Motherboard"]) || find(["Placa mãe", "Placa mae", "Motherboard", "Chipset"]);
+  if (placaMae) extras.placa_mae = placaMae;
+
+  const monitor = fromLines(["Monitor"]) || find(["Monitor"]);
+  if (monitor) extras.monitor = monitor;
+
+  const teclado = fromLines(["Teclado"]) || find(["Teclado"]);
+  if (teclado) extras.teclado = teclado;
+
+  const mouse = fromLines(["Mouse"]) || find(["Mouse"]);
+  if (mouse) extras.mouse = mouse;
+
+  const mousepad = fromLines(["Mouse pad", "Mousepad"]) || find(["Mouse pad", "Mousepad"]);
+  if (mousepad) extras.mouse_pad = mousepad;
+
+  const headset = fromLines(["Headset"]) || find(["Headset"]);
+  if (headset) extras.headset = headset;
+
+  const soquete = norm.match(/\bsocket\s*[:\-]?\s*([a-z0-9]+)/i)?.[1] || "";
+  if (soquete) extras.socket = soquete.toUpperCase();
+
+  const chipset = norm.match(/\bchipset\s*[:\-]?\s*([a-z0-9 ]{2,30})/i)?.[1] || "";
+  if (chipset) extras.chipset = chipset.trim().toUpperCase();
+
+  const wifi = /\bwifi\b/.test(norm) ? "Wi‑Fi" : "";
+  if (wifi) extras.wifi = wifi;
+
+  return extras;
+}
+
 export function makeCommercialCopy(nomePc: string, parts: VitrineExtractedParts): VitrineCommercialCopy {
   const name = nomePc.trim() || "PC Exclusivo";
   const cpu = parts.processador || "Processador moderno";

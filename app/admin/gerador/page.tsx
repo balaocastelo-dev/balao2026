@@ -126,6 +126,7 @@ export default function AdminGeradorPage() {
   const [slugAvailable, setSlugAvailable] = useState(true);
 
   const [parts, setParts] = useState<VitrineExtractedParts>({});
+  const [extras, setExtras] = useState<Record<string, string>>({});
   const [applicationsText, setApplicationsText] = useState("");
   const [scrapedImages, setScrapedImages] = useState<string[]>([]);
 
@@ -166,7 +167,10 @@ export default function AdminGeradorPage() {
           categoria: p.categoria,
           aplicacoes: p.aplicacoes || [],
         });
+        setExtras((p as any).extras || {});
         setApplicationsText((p.aplicacoes || []).join(", "));
+        const storedHero = (p as any)?.images?.hero ? [String((p as any).images.hero)] : [];
+        setScrapedImages(storedHero);
         setSteps({ modelo: "done", pecas: "done", url: "done", pronta: p.status === "publicada" ? "done" : "idle" });
         setStatus("success");
         setMessage("Página carregada para edição.");
@@ -199,6 +203,7 @@ export default function AdminGeradorPage() {
     setSteps({ modelo: "done", pecas: "running", url: "idle", pronta: "idle" });
     const nextParts = data.parts as VitrineExtractedParts;
     setParts(nextParts);
+    setExtras((data?.extras && typeof data.extras === "object") ? data.extras : {});
     setApplicationsText(Array.isArray(nextParts.aplicacoes) ? nextParts.aplicacoes.join(", ") : "");
     setScrapedImages(Array.isArray(data?.scraped?.images) ? data.scraped.images : []);
 
@@ -217,6 +222,7 @@ export default function AdminGeradorPage() {
       slug: (slug || toSlug(nomePc)).trim(),
       categoria,
       descricao_original: descricaoOuLink,
+      source_url: /^https?:\/\//i.test(descricaoOuLink.trim()) ? descricaoOuLink.trim() : null,
       processador: String(parts.processador || ""),
       placa_video: String(parts.placa_video || ""),
       memoria_ram: String(parts.memoria_ram || ""),
@@ -227,6 +233,7 @@ export default function AdminGeradorPage() {
         .split(",")
         .map((s) => s.trim())
         .filter(Boolean),
+      extras,
       status: nextStatus,
     };
 
@@ -261,9 +268,33 @@ export default function AdminGeradorPage() {
       const saved = data.page as VitrinePageRecord;
       setPageId(saved.id);
       setSlug(saved.slug);
-      if (nextStatus === "publicada") setSteps((prev) => ({ ...prev, pronta: "done" }));
-      setStatus("success");
-      setMessage(nextStatus === "publicada" ? "Página publicada com sucesso!" : "Rascunho salvo.");
+      if (nextStatus === "publicada") {
+        setSteps((prev) => ({ ...prev, pronta: "done" }));
+        setMessage("Página publicada. Gerando imagens de IA...");
+        try {
+          const imgRes = await fetch("/api/vitrine/images/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: saved.id }),
+          });
+          const imgData = await imgRes.json().catch(() => null);
+          if (imgRes.ok && imgData?.success) {
+            const heroUrl = imgData?.page?.images?.hero ? [String(imgData.page.images.hero)] : [];
+            if (heroUrl.length > 0) setScrapedImages(heroUrl);
+            setMessage("Página publicada e imagens geradas com sucesso!");
+            setStatus("success");
+          } else {
+            setStatus("success");
+            setMessage("Página publicada. Imagens não foram geradas (verifique configuração do gerador).");
+          }
+        } catch {
+          setStatus("success");
+          setMessage("Página publicada. Imagens não foram geradas (verifique configuração do gerador).");
+        }
+      } else {
+        setStatus("success");
+        setMessage("Rascunho salvo.");
+      }
     } catch (e: any) {
       setStatus("error");
       setMessage(e?.message || "Falha ao salvar");
@@ -590,4 +621,3 @@ export default function AdminGeradorPage() {
     </div>
   );
 }
-

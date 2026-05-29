@@ -113,12 +113,12 @@ export default async function VitrineSlugPage(props: { params: Promise<{ slug: s
   };
 
   const copy = makeCommercialCopy(page.nome_pc, parts);
-  const hero = pickPcHeroImage(parts as any);
-  const cpuImg = pickComponentImage("cpu", parts as any);
-  const ramImg = pickComponentImage("ram", parts as any);
-  const storageImg = pickComponentImage("storage", parts as any);
-  const gpuImg = pickComponentImage("gpu", parts as any);
-  const coolingImg = pickComponentImage("cooling", parts as any);
+  const hero = (page as any)?.images?.hero || pickPcHeroImage(parts as any);
+  const cpuImg = (page as any)?.images?.cpu || pickComponentImage("cpu", parts as any);
+  const ramImg = (page as any)?.images?.ram || pickComponentImage("ram", parts as any);
+  const storageImg = (page as any)?.images?.storage || pickComponentImage("storage", parts as any);
+  const gpuImg = (page as any)?.images?.gpu || pickComponentImage("gpu", parts as any);
+  const coolingImg = (page as any)?.images?.cooling || pickComponentImage("cooling", parts as any);
 
   const apps = (page.aplicacoes || []).length > 0 ? page.aplicacoes : [
     "Edição de vídeo",

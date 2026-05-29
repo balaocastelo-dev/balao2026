@@ -140,7 +140,7 @@ export default function AdminPaginasPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {filtered.map((p) => {
           const url = `/vitrine/${p.slug}`;
-          const hero = pickPcHeroImage({ categoria: p.categoria } as any);
+          const hero = (p as any)?.images?.hero || pickPcHeroImage({ categoria: p.categoria } as any);
           return (
             <div key={p.id} className="bg-white border border-black/5 rounded-2xl shadow-sm overflow-hidden">
               <div className="p-5 border-b border-black/5">
@@ -233,4 +233,3 @@ export default function AdminPaginasPage() {
     </div>
   );
 }
-
