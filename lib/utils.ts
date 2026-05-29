@@ -99,6 +99,7 @@ export type BlogPost = {
   cover_image_url: string | null;
   cover_image_alt: string | null;
   category?: string | null;
+  canonical_url?: string | null;
   source_url: string | null;
   source_site: string | null;
   source_title: string | null;
@@ -106,6 +107,8 @@ export type BlogPost = {
   language: string;
   tags: string[];
   keywords: string[];
+  json_ld?: any;
+  reading_time_minutes?: number | null;
   status: BlogPostStatus | string;
   published_at: string | null;
   created_at: string;
