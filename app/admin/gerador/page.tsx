@@ -129,6 +129,7 @@ export default function AdminGeradorPage() {
   const [extras, setExtras] = useState<Record<string, string>>({});
   const [applicationsText, setApplicationsText] = useState("");
   const [scrapedImages, setScrapedImages] = useState<string[]>([]);
+  const [isGeneratingImages, setIsGeneratingImages] = useState(false);
 
   const [steps, setSteps] = useState<Record<"modelo" | "pecas" | "url" | "pronta", StepStatus>>({
     modelo: "idle",
@@ -183,7 +184,7 @@ export default function AdminGeradorPage() {
 
   const identify = async () => {
     setStatus("loading");
-    setMessage("Identificando modelo e componentes e gerando imagens...");
+    setMessage("Identificando modelo e componentes e gerando imagem principal...");
     setSteps({ modelo: "running", pecas: "idle", url: "idle", pronta: "idle" });
 
     const res = await fetch("/api/vitrine/identify", {
@@ -226,17 +227,66 @@ export default function AdminGeradorPage() {
     const hasReplicate = Boolean(diag?.hasReplicateToken);
     const hasSupabaseAdmin = Boolean(diag?.hasSupabaseUrl && diag?.hasSupabaseServiceRoleKey);
 
+    const tryParseRetryAfter = (msg: string) => {
+      const m = String(msg || "").match(/\"retry_after\"\\s*:\\s*(\\d+)/i);
+      const n = m?.[1] ? Number(m[1]) : 0;
+      return Number.isFinite(n) && n > 0 ? n : 0;
+    };
+
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+    const generateRemainingImages = async (id: string) => {
+      setIsGeneratingImages(true);
+      const keys = ["cpu", "gpu", "ram", "storage", "cooling", "case", "psu"];
+      for (const key of keys) {
+        for (let attempt = 1; attempt <= 3; attempt += 1) {
+          try {
+            setMessage(`Gerando imagens de IA (${key})...`);
+            const imgRes = await fetch("/api/vitrine/images/generate", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ id, keys: [key] }),
+            });
+            const imgData = await imgRes.json().catch(() => null);
+            const errMsg = imgData?.generated?.errors?.[key] ? String(imgData.generated.errors[key]) : "";
+            if (errMsg) {
+              const retryAfter = tryParseRetryAfter(errMsg);
+              if (retryAfter > 0 && attempt < 3) {
+                await sleep((retryAfter + 1) * 1000);
+                continue;
+              }
+            }
+            const heroUrl = imgData?.page?.images?.hero ? [String(imgData.page.images.hero)] : [];
+            if (heroUrl.length > 0) setScrapedImages(heroUrl);
+            break;
+          } catch {
+            break;
+          }
+        }
+      }
+      setIsGeneratingImages(false);
+      setMessage("Peças identificadas. Imagens em geração/atualização (pode levar alguns instantes dependendo do limite do provedor).");
+    };
+
     if (!hasReplicate || !hasSupabaseAdmin) {
       setMessage("Peças identificadas. Imagens não foram geradas (variáveis de ambiente do gerador não estão completas).");
-    } else if (data?.generated?.errors && Object.keys(data.generated.errors).length > 0) {
-      setMessage("Peças identificadas. Algumas imagens não foram geradas (verifique o modelo/token/limite do provedor).");
-    } else if (data?.generated?.error) {
-      setMessage("Peças identificadas. Imagens não foram geradas (verifique o modelo/token do provedor).");
-    } else if (data?.page?.images && Object.keys(data.page.images).length > 0) {
-      setMessage("Peças e imagens geradas. Você pode ajustar qualquer campo antes de publicar.");
-    } else {
-      setMessage("Peças identificadas. Imagens não foram geradas (verifique o modelo/token do provedor).");
+      return;
     }
+
+    if (data?.generated?.errors?.hero) {
+      setMessage("Peças identificadas. Imagem principal não foi gerada (limite do provedor). Tentando novamente em segundo plano...");
+      if (data?.page?.id) generateRemainingImages(String(data.page.id));
+      return;
+    }
+
+    if (data?.page?.images?.hero) {
+      setMessage("Peças identificadas e imagem principal gerada. Gerando imagens das peças em segundo plano...");
+      if (data?.page?.id) generateRemainingImages(String(data.page.id));
+      return;
+    }
+
+    setMessage("Peças identificadas. Iniciando geração de imagens em segundo plano...");
+    if (data?.page?.id) generateRemainingImages(String(data.page.id));
   };
 
   const save = async (nextStatus: VitrineStatus) => {
@@ -424,11 +474,11 @@ export default function AdminGeradorPage() {
               <div className="flex items-center justify-end gap-3 pt-2">
                 <button
                   onClick={identify}
-                  disabled={!nomePc.trim() && !descricaoOuLink.trim()}
+                  disabled={(!nomePc.trim() && !descricaoOuLink.trim()) || status === "loading" || isGeneratingImages}
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#d71920] text-white font-extrabold text-sm hover:bg-[#b9151b] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Wand2 size={18} />
-                  Identificar peças
+                  {status === "loading" || isGeneratingImages ? <Loader2 size={18} className="animate-spin" /> : <Wand2 size={18} />}
+                  {status === "loading" ? "Identificando..." : isGeneratingImages ? "Gerando imagens..." : "Identificar peças"}
                 </button>
               </div>
             </div>
