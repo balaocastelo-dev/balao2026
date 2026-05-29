@@ -74,7 +74,7 @@ function cleanText(input: string | null | undefined): string {
   return decodeHtmlEntities(String(input || ""))
     .replace(/\s+/g, " ")
     .replace(/\s+([,;:.!?)\]])/g, "$1")
-    .replace(/([(\[])\s+/g, "$1")
+    .replace(/([([\[])\s+/g, "$1")
     .trim();
 }
 
@@ -94,7 +94,12 @@ function sortByPublishedDesc(posts: BlogPostView[]): BlogPostView[] {
     .sort((a, b) => (Date.parse(b.published_at) || 0) - (Date.parse(a.published_at) || 0));
 }
 
-function mixRssAndProductPosts(input: { rss: BlogPostView[]; products: BlogPostView[]; take: number; maxConsecutiveProducts?: number }): BlogPostView[] {
+function mixRssAndProductPosts(input: {
+  rss: BlogPostView[];
+  products: BlogPostView[];
+  take: number;
+  maxConsecutiveProducts?: number;
+}): BlogPostView[] {
   const take = Math.max(1, input.take);
   const maxConsecutiveProducts = Math.max(1, Math.min(3, input.maxConsecutiveProducts ?? 1));
 
@@ -175,11 +180,7 @@ function getDefaultFeeds(): string[] {
 
   if (fromEnv.length > 0) return fromEnv;
 
-  return [
-    "https://www.adrenaline.com.br/feed/",
-    "https://www.tecmundo.com.br/rss",
-    "https://canaltech.com.br/rss/",
-  ];
+  return ["https://www.adrenaline.com.br/feed/", "https://www.tecmundo.com.br/rss", "https://canaltech.com.br/rss/"];
 }
 
 function normalizeCategory(input: string | null | undefined): string {
@@ -196,7 +197,7 @@ function buildSlugFromRss(item: RssItem): string {
 function extractFirstImageUrlFromHtml(html: string | null | undefined): string | null {
   const input = String(html || "");
   if (!input) return null;
-  const m = input.match(/<img\b[^>]*\bsrc\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s>]+))[^>]*>/i);
+  const m = input.match(/<img\b[^>]*\bsrc\s*=\s*(?:\"([^\"]+)\"|'([^']+)'|([^\s>]+))[^>]*>/i);
   const src = (m?.[1] || m?.[2] || m?.[3] || "").trim();
   return src ? src : null;
 }
@@ -371,7 +372,7 @@ export async function listBlogPostsForPage(input?: { category?: string; take?: n
         content_html: p.content_html,
         cover_image: p.cover_image ? String(p.cover_image) : extractFirstImageUrlFromHtml(p.content_html),
         category: normalizeCategory(p.category),
-        published_at: p.published_at,
+        published_at: p.published_at || p.created_at || p.updated_at,
         created_at: p.created_at,
         updated_at: p.updated_at,
         source_url: p.source_url ? String(p.source_url) : null,
@@ -395,10 +396,17 @@ export async function listBlogPostsForPage(input?: { category?: string; take?: n
   const [rssPosts, productPosts] = await Promise.all([buildDynamicPosts(), buildDynamicProductPosts()]);
   const merged = rssPosts.concat(productPosts);
   if (category) {
-    return sortByPublishedDesc(merged.filter((p) => p.category === category)).filter((p) => !isThirdPartySalesPost(p)).slice(0, take);
+    return sortByPublishedDesc(merged.filter((p) => p.category === category))
+      .filter((p) => !isThirdPartySalesPost(p))
+      .slice(0, take);
   }
 
-  return mixRssAndProductPosts({ rss: rssPosts.filter((p) => !isThirdPartySalesPost(p)), products: productPosts, take, maxConsecutiveProducts: 1 });
+  return mixRssAndProductPosts({
+    rss: rssPosts.filter((p) => !isThirdPartySalesPost(p)),
+    products: productPosts,
+    take,
+    maxConsecutiveProducts: 1,
+  });
 }
 
 export async function getBlogPostForPage(slug: string): Promise<BlogPostView | null> {
@@ -415,7 +423,7 @@ export async function getBlogPostForPage(slug: string): Promise<BlogPostView | n
         content_html: post.content_html,
         cover_image: cover,
         category: normalizeCategory(post.category),
-        published_at: post.published_at,
+        published_at: post.published_at || post.created_at || post.updated_at,
         created_at: post.created_at,
         updated_at: post.updated_at,
         source_url: post.source_url ? String(post.source_url) : null,
