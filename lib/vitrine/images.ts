@@ -182,10 +182,19 @@ async function uploadToSupabaseStorage(path: string, buf: Buffer, contentType: s
   const admin = getSupabaseAdminClient();
   const bucket = "vitrine";
 
-  const { data: buckets } = await admin.storage.listBuckets();
-  if (!buckets?.some((b) => b.name === bucket)) {
-    await admin.storage.createBucket(bucket, { public: true });
-  }
+  try {
+    const { data: buckets } = await admin.storage.listBuckets();
+    const exists = Boolean(buckets?.some((b: any) => b.name === bucket));
+    if (!exists) {
+      await admin.storage.createBucket(bucket, { public: true });
+    }
+
+    await admin.storage.updateBucket(bucket, {
+      public: true,
+      fileSizeLimit: 10485760,
+      allowedMimeTypes: ["image/png", "image/jpeg", "image/webp", "image/gif"],
+    });
+  } catch {}
 
   const { error: uploadError } = await admin.storage.from(bucket).upload(path, buf, {
     contentType,
@@ -196,6 +205,14 @@ async function uploadToSupabaseStorage(path: string, buf: Buffer, contentType: s
   const { data } = admin.storage.from(bucket).getPublicUrl(path);
   const publicUrl = data?.publicUrl || "";
   if (!publicUrl) throw new Error("Falha ao obter URL pública.");
+
+  try {
+    const head = await fetch(publicUrl, { method: "HEAD", cache: "no-store" });
+    if (!head.ok) throw new Error("not-public");
+  } catch {
+    await admin.storage.updateBucket(bucket, { public: true }).catch(() => null);
+  }
+
   return publicUrl;
 }
 
