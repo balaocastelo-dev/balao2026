@@ -195,21 +195,37 @@ export function extractParts(textInput: string, selectedCategory?: VitrineCatego
 }
 
 export function extractExtrasFromText(textInput: string) {
-  const raw = normalizeInputText(textInput);
+  const raw = String(textInput || "");
   const lines = raw
     .replace(/\r/g, "")
     .split("\n")
     .map((l) => l.trim())
     .filter(Boolean);
 
-  const blob = raw.replace(/\s+/g, " ");
-  const norm = stripDiacritics(blob).toLowerCase();
+  const blob = raw.replace(/[ \t]+/g, " ").replace(/\s*\n\s*/g, "\n");
+  const norm = stripDiacritics(blob.replace(/\s+/g, " ")).toLowerCase();
+
+  const sanitize = (value: string) => {
+    const v = String(value || "")
+      .replace(/\s+/g, " ")
+      .replace(/[•|]+/g, " ")
+      .trim();
+    if (!v) return "";
+    const cut = v
+      .split("  ")[0]
+      .split(" | ")[0]
+      .split(" Ir para ")[0]
+      .trim();
+    const capped = cut.length > 200 ? cut.slice(0, 200).trim() : cut;
+    if (/\bhttps?:\/\//i.test(capped)) return "";
+    return capped;
+  };
 
   const find = (labels: string[]) => {
     for (const label of labels) {
       const re = new RegExp(`${label}\\s*[:\\-]\\s*([^\\n\\r]+)`, "i");
       const m = raw.match(re);
-      if (m?.[1]) return m[1].trim();
+      if (m?.[1]) return sanitize(m[1]);
     }
     return "";
   };
@@ -221,9 +237,9 @@ export function extractExtrasFromText(textInput: string) {
       for (const l of ls) {
         if (nl.startsWith(l + ":") || nl.startsWith(l + " -") || nl.startsWith(l + "–")) {
           const idx = line.indexOf(":");
-          if (idx >= 0) return line.slice(idx + 1).trim();
+          if (idx >= 0) return sanitize(line.slice(idx + 1));
           const dash = line.indexOf("-");
-          if (dash >= 0) return line.slice(dash + 1).trim();
+          if (dash >= 0) return sanitize(line.slice(dash + 1));
         }
       }
     }

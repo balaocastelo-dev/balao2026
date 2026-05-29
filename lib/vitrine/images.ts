@@ -274,6 +274,16 @@ export function buildVitrineImagePrompts(page: VitrinePageRecord) {
   return prompts;
 }
 
+function parseRetryAfterSeconds(message: string) {
+  const m = String(message || "").match(/"retry_after"\s*:\s*(\d+)/i);
+  const n = m?.[1] ? Number(m[1]) : 0;
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+
+async function sleepMs(ms: number) {
+  await new Promise((r) => setTimeout(r, ms));
+}
+
 export async function generateAndUploadVitrineImages(input: {
   page: VitrinePageRecord;
   keys?: string[];
@@ -289,7 +299,23 @@ export async function generateAndUploadVitrineImages(input: {
     const prompt = prompts[key];
     usedPrompts[key] = prompt;
     try {
-      const generatedUrl = await generateImageUrlFromReplicate(prompt);
+      let generatedUrl = "";
+      let lastErr = "";
+      for (let attempt = 1; attempt <= 3; attempt += 1) {
+        try {
+          generatedUrl = await generateImageUrlFromReplicate(prompt);
+          break;
+        } catch (e: any) {
+          lastErr = String(e?.message || "Falha ao gerar imagem");
+          const retryAfter = parseRetryAfterSeconds(lastErr);
+          if (retryAfter > 0 && attempt < 3) {
+            await sleepMs((retryAfter + 1) * 1000);
+            continue;
+          }
+          throw e;
+        }
+      }
+      if (!generatedUrl) throw new Error(lastErr || "Falha ao gerar imagem");
       const { buf, contentType } = await downloadToBuffer(generatedUrl);
       const filePath = `vitrine/${input.page.id}/${key}.png`;
       const publicUrl = await uploadToSupabaseStorage(filePath, buf, contentType);

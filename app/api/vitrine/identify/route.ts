@@ -125,7 +125,7 @@ export async function POST(request: Request) {
     let generated: any = null;
     if (generateImages && page) {
       try {
-        generated = await generateAndUploadVitrineImages({ page });
+        generated = await generateAndUploadVitrineImages({ page, keys: ["hero"] });
         const mergedImages = { ...(page.images || {}), ...(generated.images || {}) };
         const mergedPrompts = { ...(page.image_prompts || {}), ...(generated.image_prompts || {}) };
         page = await updateVitrinePage(page.id, { images: mergedImages, image_prompts: mergedPrompts } as any);
