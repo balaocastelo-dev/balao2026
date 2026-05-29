@@ -118,85 +118,113 @@ export async function POST(request: Request) {
 
       const hostMatch = base.hostname.match(/^images(\d)\.kabum\.com\.br$/i);
       const preferred = hostMatch?.[1] ? [hostMatch[1]] : [];
-      const digits = Array.from({ length: 10 }, (_, i) => String(i));
-      const orderedDigits = Array.from(new Set([...preferred, '7', ...digits]));
+      const candidates = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+        .filter(n => !preferred.includes(n));
+      const order = [...preferred, ...candidates];
 
-      for (const d of orderedDigits) {
-        const candidate = new URL(base.toString());
-        candidate.hostname = `images${d}.kabum.com.br`;
-        const probed = await probeImage(candidate.toString());
+      for (const n of order) {
+        const u = new URL(base.toString());
+        u.hostname = `images${n}.kabum.com.br`;
+        const probed = await probeImage(u.toString());
         if (probed.ok) return probed.url;
       }
-
       return null;
     };
 
     const uniqueImages: string[] = [];
-    if (isKabum) {
-      const productIdMatch = inputUrl.match(/\/produto\/(\d+)\//);
-      const productId = productIdMatch?.[1] || null;
 
-      const classicMatches = productId
-        ? (html.match(new RegExp(`https://images\\.kabum\\.com\\.br/produtos/fotos/${productId}/[^"\\s]+?\\.(?:jpg|jpeg|png|webp)`, 'gi')) || [])
-        : [];
+    const urlRegex = /https?:\/\/[^\s"'<>]+/gi;
+    const candidatesFromHtml = html.match(urlRegex) || [];
 
-      const miraklMatches = html.match(/https:\/\/images\d+\.kabum\.com\.br\/produtos\/fotos\/sync_mirakl\/\d+\/[^"'\s]+/gi) || [];
+    const foundImageCandidates: string[] = [];
+    for (const raw of candidatesFromHtml) {
+      const u = raw.trim();
+      if (!u) continue;
+      if (/\.(png|jpe?g|webp|gif)(\?|#|$)/i.test(u)) foundImageCandidates.push(u);
+      if (/images\d\.kabum\.com\.br\/.+\.(png|jpe?g)(\?|#|$)/i.test(u)) foundImageCandidates.push(u);
+      if (/images\.kabum\.com\.br\/.+\.(png|jpe?g)(\?|#|$)/i.test(u)) foundImageCandidates.push(u);
+      if (/mirakl\.net\/.+\.(png|jpe?g|webp)(\?|#|$)/i.test(u)) foundImageCandidates.push(u);
+    }
 
-      const originalCandidates = Array.from(new Set(classicMatches.map(toKabumOriginalUrl)));
-      for (const img of originalCandidates) {
-        if (uniqueImages.length >= 20) break;
-        const probed = await probeImage(img);
-        if (probed.ok) uniqueImages.push(probed.url);
+    const normalizedCandidates = Array.from(new Set(foundImageCandidates));
+
+    const acceptedImages: string[] = [];
+    for (const cand of normalizedCandidates) {
+      if (acceptedImages.length >= 35) break;
+
+      let toProbe = cand;
+      let probed: { ok: boolean; url?: string } = { ok: false };
+
+      if (isKabum) {
+        const original = toKabumOriginalUrl(cand);
+        probed = await probeImage(original);
+        if (probed.ok) {
+          toProbe = original;
+        } else {
+          const g = toKabumGUrl(cand);
+          probed = await probeImage(g);
+          if (probed.ok) {
+            toProbe = g;
+          } else if (/mirakl\.net/i.test(cand)) {
+            const fallback = await tryMiraklWithHostFallback(cand);
+            if (fallback) {
+              probed = { ok: true, url: fallback };
+              toProbe = fallback;
+            }
+          }
+        }
+      } else {
+        probed = await probeImage(cand);
       }
 
-      if (uniqueImages.length === 0 && miraklMatches.length > 0) {
-        const uniqueMirakl = Array.from(new Set(miraklMatches.map(normalizeMiraklToXlarge)));
-        for (const img of uniqueMirakl) {
-          if (uniqueImages.length >= 20) break;
-          const resolved = await tryMiraklWithHostFallback(img);
-          if (resolved) uniqueImages.push(resolved);
-        }
-      }
-
-      if (uniqueImages.length === 0 && classicMatches.length > 0) {
-        const gCandidates = Array.from(new Set(classicMatches.map(toKabumGUrl)));
-        for (const img of gCandidates) {
-          if (uniqueImages.length >= 20) break;
-          const probed = await probeImage(img);
-          if (probed.ok) uniqueImages.push(probed.url);
-        }
+      if (probed.ok && toProbe && !acceptedImages.includes(toProbe)) {
+        acceptedImages.push(toProbe);
       }
     }
 
-    const extractJsonLdBlocks = (raw: string) => {
-      const blocks: unknown[] = [];
-      const jsonLdRegex = /<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi;
+    for (const u of acceptedImages) {
+      if (!uniqueImages.includes(u)) uniqueImages.push(u);
+    }
+
+    const extractJsonLdBlocks = (doc: string) => {
+      const blocks: any[] = [];
+      const re = /<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
       let m: RegExpExecArray | null = null;
-      while ((m = jsonLdRegex.exec(raw)) !== null) {
-        const t = String(m[1] || '').trim();
-        if (!t) continue;
+      while ((m = re.exec(doc)) !== null) {
+        const raw = (m[1] || '').trim();
+        if (!raw) continue;
         try {
-          blocks.push(JSON.parse(t));
-        } catch {}
+          blocks.push(JSON.parse(raw));
+        } catch {
+          // ignore
+        }
       }
       return blocks;
     };
 
-    const findProductJsonLd = (blocks: unknown[]): any | null => {
+    const findProductJsonLd = (blocks: any[]) => {
       const visit = (node: any): any | null => {
         if (!node) return null;
         if (Array.isArray(node)) {
           for (const it of node) {
-            const found = visit(it);
-            if (found) return found;
+            const r = visit(it);
+            if (r) return r;
           }
           return null;
         }
-        if (typeof node !== 'object') return null;
-        const t = node['@type'];
-        if (typeof t === 'string' && t.toLowerCase() === 'product') return node;
-        if (Array.isArray(t) && t.some((x: any) => String(x).toLowerCase() === 'product')) return node;
-        if (node['@graph']) return visit(node['@graph']);
+        if (typeof node === 'object') {
+          const t = node['@type'];
+          if (t === 'Product' || (Array.isArray(t) && t.includes('Product'))) return node;
+          const graph = node['@graph'];
+          if (graph) {
+            const r = visit(graph);
+            if (r) return r;
+          }
+          for (const v of Object.values(node)) {
+            const r = visit(v);
+            if (r) return r;
+          }
+        }
         return null;
       };
       for (const b of blocks) {
@@ -220,6 +248,7 @@ export async function POST(request: Request) {
     let description = "";
     let price: number | null = null;
     let currency: string | null = null;
+    const specs: Record<string, string> = {};
     if (productJson) {
       if (typeof productJson.name === 'string') title = String(productJson.name || '').trim();
       const offers = pickOffer(productJson.offers);
