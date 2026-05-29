@@ -85,6 +85,29 @@ export interface Coupon {
   updated_at?: string;
 }
 
+export type BlogPostStatus = "draft" | "published" | "archived";
+
+export type BlogPost = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  content_html: string;
+  cover_image_url: string | null;
+  cover_image_alt: string | null;
+  source_url: string | null;
+  source_site: string | null;
+  source_title: string | null;
+  source_published_at: string | null;
+  language: string;
+  tags: string[];
+  keywords: string[];
+  status: BlogPostStatus | string;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export const CATEGORIES = [
   "Todos os Produtos",
   "Computadores & Informática",
