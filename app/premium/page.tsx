@@ -55,59 +55,6 @@ function formatCurrency(value: number) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 }
 
-function scoreAsPremiumCandidate(product: Product) {
-  const n = normalize(product.name);
-  const c = normalize(product.category);
-  let score = 0;
-
-  const hasAny = (arr: string[]) => arr.some((term) => n.includes(term) || c.includes(term));
-  const hasAll = (arr: string[]) => arr.every((term) => n.includes(term) || c.includes(term));
-
-  if (hasAny(["pc gamer", "pc", "gamer", "workstation", "creator", "render", "edicao", "stream", "setup"])) score += 50;
-  if (hasAny(["rtx", "radeon", "core ultra", "ryzen", "threadripper"])) score += 25;
-  if (hasAll(["pc", "gamer"])) score += 30;
-  if (hasAny(["gabinete", "water", "cooler", "ddr5", "nvme"])) score += 10;
-
-  const price = parsePriceBRL(product.price);
-  if (price >= 4000) score += 15;
-  if (price >= 8000) score += 20;
-  if (price >= 12000) score += 25;
-  if (price === 0) score -= 20;
-
-  if (product.image) score += 5;
-  if (product.slug) score += 2;
-
-  return score;
-}
-
-function pickFeatured(products: Product[], count: number) {
-  const ranked = [...products]
-    .map((p) => ({ p, score: scoreAsPremiumCandidate(p) }))
-    .sort((a, b) => b.score - a.score)
-    .map(({ p }) => p);
-
-  const picked: Product[] = [];
-  const used = new Set<string>();
-
-  for (const p of ranked) {
-    if (picked.length >= count) break;
-    if (!p?.id || used.has(p.id)) continue;
-    used.add(p.id);
-    picked.push(p);
-  }
-
-  if (picked.length >= count) return picked;
-
-  for (const p of products) {
-    if (picked.length >= count) break;
-    if (!p?.id || used.has(p.id)) continue;
-    used.add(p.id);
-    picked.push(p);
-  }
-
-  return picked;
-}
-
 function buildWhatsAppLink(message: string) {
   return `https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(message)}`;
 }
@@ -131,12 +78,12 @@ function ProductTile({
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.10),_transparent_55%)] opacity-0 group-hover:opacity-100 transition-opacity" />
       <div className="relative p-5 sm:p-6 flex flex-col gap-4">
-        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl bg-zinc-900">
+        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl bg-zinc-900 p-3 sm:p-4">
           <Image
             src={imgSrc}
             alt={product.name || "Produto"}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+            className="object-contain transition-transform duration-500 group-hover:scale-[1.02]"
             sizes="(max-width: 768px) 100vw, 33vw"
           />
         </div>
@@ -167,23 +114,20 @@ function ProductTile({
 
 export default async function PremiumPage() {
   const products = await getProducts();
-  const pcPool = products.filter((p) => {
+  const pcGamerOnly = products.filter((p) => {
     const t = normalize(`${p?.name || ""} ${p?.category || ""}`);
-    return (
-      t.includes("pc ") ||
-      t.includes(" pc") ||
-      t.includes("pcgamer") ||
-      t.includes("pc gamer") ||
-      t.includes("computador") ||
-      t.includes("workstation") ||
-      t.includes("creator") ||
-      t.includes("setup")
-    );
+    return t.includes("pc gamer") || t.includes("pcgamer");
   });
-  const source = pcPool.length >= 6 ? pcPool : products;
-  const featured = pickFeatured(source, 5);
-  const featuredIds = new Set(featured.map((p) => p.id));
-  const stock = source.filter((p) => p?.id && !featuredIds.has(p.id)).slice(0, 12);
+  const sorted = [...pcGamerOnly].sort((a, b) => {
+    const priceA = parsePriceBRL(a.price);
+    const priceB = parsePriceBRL(b.price);
+    if (priceA === 0 && priceB === 0) return 0;
+    if (priceA === 0) return 1;
+    if (priceB === 0) return -1;
+    return priceB - priceA;
+  });
+  const featured = sorted.slice(0, 5);
+  const stock = sorted.slice(5, 17);
 
   const whatsAppDefault = buildWhatsAppLink(
     "Olá! Quero montar um PC Premium no Balão da Informática. Pode me ajudar com uma configuração ideal para meu uso e orçamento?"
@@ -259,16 +203,41 @@ export default async function PremiumPage() {
             </div>
 
             <div className="lg:col-span-7">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {featured.map((p, idx) => (
-                  <div key={p.id} className={idx === 0 ? "sm:col-span-2" : ""}>
-                    <ProductTile
-                      product={p}
-                      eyebrow={idx === 0 ? "Destaque premium" : "Em destaque"}
-                    />
+              {featured.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {featured.map((p, idx) => (
+                    <div key={p.id} className={idx === 0 ? "sm:col-span-2" : ""}>
+                      <ProductTile product={p} eyebrow={idx === 0 ? "PC gamer premium" : "PC gamer"} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur">
+                  <div className="text-2xl font-black tracking-tight">Sem PCs gamer cadastrados</div>
+                  <div className="text-sm text-zinc-300 mt-2 leading-relaxed">
+                    Cadastre produtos com a categoria ou nome contendo “PC Gamer” para aparecerem aqui, do mais caro para
+                    o mais barato.
                   </div>
-                ))}
-              </div>
+                  <div className="mt-5 flex flex-col sm:flex-row gap-3">
+                    <Link
+                      href="/admin/produtos"
+                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white text-black px-6 py-3 font-black hover:bg-zinc-200 transition-colors"
+                    >
+                      Cadastrar produtos
+                      <ArrowRight className="w-5 h-5" />
+                    </Link>
+                    <a
+                      href={whatsAppDefault}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/5 px-6 py-3 font-black hover:bg-white/10 transition-colors"
+                    >
+                      Pedir orçamento
+                      <MessageCircle className="w-5 h-5" />
+                    </a>
+                  </div>
+                </div>
+              )}
 
               <div className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
