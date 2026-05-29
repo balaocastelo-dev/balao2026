@@ -125,11 +125,11 @@ function ProductTile({
   return (
     <Link
       href={href}
-      className="group relative overflow-hidden rounded-3xl border border-white/10 bg-zinc-950/60 backdrop-blur transition-all hover:border-white/20 hover:-translate-y-0.5"
+      className="group relative overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(24,24,27,0.72),rgba(0,0,0,0.72))] backdrop-blur-xl transition-all hover:border-white/20 hover:-translate-y-0.5 hover:shadow-[0_24px_80px_rgba(0,0,0,0.55)]"
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.10),_transparent_55%)] opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.10),_transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity" />
       <div className="relative p-5 sm:p-6 flex flex-col gap-4">
-        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl bg-white border border-zinc-200 p-3 sm:p-4">
+        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl bg-white border border-zinc-200 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.18)]">
           <Image
             src={imgSrc}
             alt={product.name || "Produto"}
@@ -141,16 +141,18 @@ function ProductTile({
 
         <div className="flex flex-col gap-2">
           {eyebrow ? (
-            <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-400">
+            <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-zinc-400">
               {eyebrow}
             </div>
           ) : null}
-          <div className="text-lg sm:text-xl font-black tracking-tight text-white line-clamp-2">
+          <div className="text-lg sm:text-xl font-black tracking-tight text-white line-clamp-2 leading-snug">
             {product.name}
           </div>
-          <div className="flex items-baseline justify-between gap-3">
+          <div className="flex items-center justify-between gap-3">
             <div className="text-zinc-400 text-sm line-clamp-1">{product.category}</div>
-            <div className="text-white font-black">{priceLabel}</div>
+            <div className="shrink-0 rounded-full bg-white text-black px-3 py-1 text-sm font-black tracking-tight">
+              {priceLabel}
+            </div>
           </div>
         </div>
 
@@ -236,13 +238,13 @@ export default async function PremiumPage() {
       <JsonLd data={jsonLdData as any} />
       <Header />
 
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-hidden min-h-[92vh] flex items-center">
         <PremiumParallax />
 
-        <div className="container mx-auto px-4 py-14 sm:py-20 relative">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+        <div className="container mx-auto px-4 py-16 sm:py-24 relative">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
             <div className="lg:col-span-5 space-y-6">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-white/80">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-white/85 backdrop-blur">
                 <Sparkles className="w-4 h-4 text-white/80" />
                 Montagem premium em Campinas/SP
               </div>
@@ -255,15 +257,15 @@ export default async function PremiumPage() {
                 começa aqui.
               </h1>
 
-              <p className="text-lg sm:text-xl text-zinc-300 leading-relaxed max-w-xl">
-                Escolha uma máquina do nosso estoque ou peça um projeto sob medida. Montagem profissional, testes completos
-                e suporte de verdade.
+              <p className="text-lg sm:text-xl text-zinc-200/90 leading-relaxed max-w-[44rem]">
+                PCs gamer premium do estoque, com montagem profissional, testes completos e suporte real em Campinas. Se
+                quiser, montamos um projeto sob medida para seu uso e orçamento.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3">
                 <a
                   href="#estoque"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white text-black px-6 py-3 font-black tracking-tight hover:bg-zinc-200 transition-colors"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#E60012] to-red-500 text-white px-6 py-3 font-black tracking-tight shadow-[0_18px_70px_rgba(230,0,18,0.28)] hover:brightness-110 transition-all"
                 >
                   Ver PCs em estoque
                   <ArrowRight className="w-5 h-5" />
@@ -272,14 +274,14 @@ export default async function PremiumPage() {
                   href={whatsAppDefault}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/5 px-6 py-3 font-black tracking-tight hover:bg-white/10 transition-colors"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/5 px-6 py-3 font-black tracking-tight hover:bg-white/10 transition-colors backdrop-blur"
                 >
                   Falar no WhatsApp
                   <MessageCircle className="w-5 h-5" />
                 </a>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 pt-2">
+              <div className="grid grid-cols-2 gap-3 pt-4">
                 {[
                   { icon: BadgeCheck, title: "Acabamento premium", desc: "Cable management e estética impecável." },
                   { icon: ShieldCheck, title: "Testes completos", desc: "Validação de estabilidade antes da entrega." },
@@ -288,7 +290,7 @@ export default async function PremiumPage() {
                 ].map((item) => (
                   <div
                     key={item.title}
-                    className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur"
+                    className="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur transition-colors hover:border-white/15"
                   >
                     <div className="flex items-center gap-3">
                       <item.icon className="w-5 h-5 text-white/80" />
@@ -310,7 +312,7 @@ export default async function PremiumPage() {
                   ))}
                 </div>
               ) : (
-                <div className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur">
+                <div className="rounded-[28px] border border-white/10 bg-white/5 p-8 backdrop-blur">
                   <div className="text-2xl font-black tracking-tight">Sem PCs gamer cadastrados</div>
                   <div className="text-sm text-zinc-300 mt-2 leading-relaxed">
                     Cadastre produtos com a categoria ou nome contendo “PC Gamer” para aparecerem aqui, do mais caro para
@@ -319,7 +321,7 @@ export default async function PremiumPage() {
                   <div className="mt-5 flex flex-col sm:flex-row gap-3">
                     <Link
                       href="/admin/produtos"
-                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white text-black px-6 py-3 font-black hover:bg-zinc-200 transition-colors"
+                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white text-black px-6 py-3 font-black hover:bg-zinc-200 transition-colors shadow-[0_18px_70px_rgba(255,255,255,0.08)]"
                     >
                       Cadastrar produtos
                       <ArrowRight className="w-5 h-5" />
@@ -328,7 +330,7 @@ export default async function PremiumPage() {
                       href={whatsAppDefault}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/5 px-6 py-3 font-black hover:bg-white/10 transition-colors"
+                      className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/5 px-6 py-3 font-black hover:bg-white/10 transition-colors backdrop-blur"
                     >
                       Pedir orçamento
                       <MessageCircle className="w-5 h-5" />
@@ -337,7 +339,7 @@ export default async function PremiumPage() {
                 </div>
               )}
 
-              <div className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+              <div className="mt-6 rounded-[28px] border border-white/10 bg-white/5 p-6 backdrop-blur">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                   <div>
                     <div className="text-sm font-black tracking-tight">Quer um projeto único?</div>
@@ -351,7 +353,7 @@ export default async function PremiumPage() {
                     )}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#E60012] px-6 py-3 font-black hover:bg-red-700 transition-colors"
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#E60012] to-red-500 px-6 py-3 font-black hover:brightness-110 transition-all shadow-[0_18px_70px_rgba(230,0,18,0.22)]"
                   >
                     Montar comigo
                     <Cpu className="w-5 h-5" />
@@ -363,7 +365,8 @@ export default async function PremiumPage() {
         </div>
       </section>
 
-      <section id="estoque" className="py-14 sm:py-20 bg-zinc-950 border-t border-white/10">
+      <section id="estoque" className="relative py-14 sm:py-20 bg-zinc-950 border-t border-white/10 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_0%,rgba(255,255,255,0.06),transparent_40%),radial-gradient(circle_at_10%_30%,rgba(230,0,18,0.08),transparent_45%)]" />
         <div className="container mx-auto px-4">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
             <div>
@@ -385,7 +388,7 @@ export default async function PremiumPage() {
             ))}
           </div>
 
-          <div className="mt-10 rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+          <div className="mt-10 rounded-[28px] border border-white/10 bg-white/5 p-6 backdrop-blur">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
                 <div className="text-lg font-black">Não achou o ideal?</div>
@@ -396,7 +399,7 @@ export default async function PremiumPage() {
               <div className="flex flex-col sm:flex-row gap-3">
                 <Link
                   href="/monteseupc"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white text-black px-6 py-3 font-black hover:bg-zinc-200 transition-colors"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white text-black px-6 py-3 font-black hover:bg-zinc-200 transition-colors shadow-[0_18px_70px_rgba(255,255,255,0.08)]"
                 >
                   Montar agora
                   <ArrowRight className="w-5 h-5" />
@@ -405,7 +408,7 @@ export default async function PremiumPage() {
                   href={whatsAppDefault}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-6 py-3 font-black hover:bg-white/10 transition-colors"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-6 py-3 font-black hover:bg-white/10 transition-colors backdrop-blur"
                 >
                   Orçar no WhatsApp
                   <MessageCircle className="w-5 h-5" />
@@ -416,7 +419,8 @@ export default async function PremiumPage() {
         </div>
       </section>
 
-      <section className="py-14 sm:py-20 bg-black border-t border-white/10">
+      <section className="relative py-14 sm:py-20 bg-black border-t border-white/10 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(255,255,255,0.06),transparent_42%),radial-gradient(circle_at_85%_40%,rgba(167,139,250,0.08),transparent_45%)]" />
         <div className="container mx-auto px-4">
           <div className="text-center mb-10">
             <div className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400">Linhas premium</div>
@@ -452,7 +456,7 @@ export default async function PremiumPage() {
             ].map((line) => (
               <div
                 key={line.title}
-                className="rounded-3xl border border-white/10 bg-zinc-950 p-6 hover:border-white/20 transition-colors"
+                className="rounded-[28px] border border-white/10 bg-white/5 p-6 backdrop-blur hover:border-white/20 transition-colors"
               >
                 <div className="text-xl font-black tracking-tight">{line.title}</div>
                 <div className="text-sm text-zinc-300 mt-2 leading-relaxed">{line.desc}</div>
@@ -462,7 +466,7 @@ export default async function PremiumPage() {
                   )}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-white text-black px-5 py-3 font-black hover:bg-zinc-200 transition-colors w-full justify-center"
+                  className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-white text-black px-5 py-3 font-black hover:bg-zinc-200 transition-colors w-full justify-center shadow-[0_18px_70px_rgba(255,255,255,0.08)]"
                 >
                   Orçar agora
                   <ArrowRight className="w-5 h-5" />
@@ -473,7 +477,8 @@ export default async function PremiumPage() {
         </div>
       </section>
 
-      <section className="py-14 sm:py-20 bg-zinc-950 border-t border-white/10">
+      <section className="relative py-14 sm:py-20 bg-zinc-950 border-t border-white/10 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_10%,rgba(230,0,18,0.08),transparent_48%),radial-gradient(circle_at_90%_70%,rgba(255,255,255,0.05),transparent_52%)]" />
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
             <div className="lg:col-span-5">
@@ -508,7 +513,7 @@ export default async function PremiumPage() {
               ].map((card) => (
                 <div
                   key={card.title}
-                  className="rounded-3xl border border-white/10 bg-black p-6 hover:border-white/20 transition-colors"
+                  className="rounded-[28px] border border-white/10 bg-white/5 p-6 backdrop-blur hover:border-white/20 transition-colors"
                 >
                   <div className="text-sm font-black tracking-tight">{card.title}</div>
                   <div className="text-sm text-zinc-300 mt-3 leading-relaxed">{card.desc}</div>
@@ -519,7 +524,8 @@ export default async function PremiumPage() {
         </div>
       </section>
 
-      <section className="py-14 sm:py-20 bg-zinc-950 border-t border-white/10">
+      <section className="relative py-14 sm:py-20 bg-black border-t border-white/10 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_0%,rgba(167,139,250,0.08),transparent_45%),radial-gradient(circle_at_10%_60%,rgba(255,255,255,0.05),transparent_50%)]" />
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             <div className="lg:col-span-5">
@@ -553,7 +559,7 @@ export default async function PremiumPage() {
               ].map((step, idx) => (
                 <div
                   key={step.title}
-                  className="rounded-3xl border border-white/10 bg-black p-6 hover:border-white/20 transition-colors"
+                  className="rounded-[28px] border border-white/10 bg-white/5 p-6 backdrop-blur hover:border-white/20 transition-colors"
                 >
                   <div className="flex items-center justify-between">
                     <div className="text-sm font-black tracking-tight">{step.title}</div>
@@ -569,14 +575,15 @@ export default async function PremiumPage() {
         </div>
       </section>
 
-      <section className="py-14 sm:py-20 bg-black border-t border-white/10">
+      <section className="relative py-14 sm:py-20 bg-zinc-950 border-t border-white/10 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.05),transparent_45%)]" />
         <div className="container mx-auto px-4">
           <div className="text-center mb-10">
             <div className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400">FAQ</div>
             <h2 className="text-3xl sm:text-5xl font-black tracking-tight">Dúvidas rápidas</h2>
           </div>
 
-          <div className="max-w-3xl mx-auto divide-y divide-white/10 rounded-3xl border border-white/10 bg-zinc-950 overflow-hidden">
+          <div className="max-w-3xl mx-auto divide-y divide-white/10 rounded-[28px] border border-white/10 bg-white/5 backdrop-blur overflow-hidden">
             {[
               {
                 q: "Os produtos mostrados aqui são do meu estoque do site?",
@@ -607,9 +614,10 @@ export default async function PremiumPage() {
         </div>
       </section>
 
-      <section className="py-14 sm:py-20 bg-zinc-950 border-t border-white/10">
+      <section className="relative py-14 sm:py-20 bg-black border-t border-white/10 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_0%,rgba(230,0,18,0.12),transparent_42%),radial-gradient(circle_at_80%_80%,rgba(167,139,250,0.10),transparent_45%)]" />
         <div className="container mx-auto px-4">
-          <div className="rounded-[2.5rem] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.12),_transparent_55%)] p-8 sm:p-12">
+          <div className="rounded-[2.5rem] border border-white/10 bg-white/5 backdrop-blur p-8 sm:p-12 shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
               <div>
                 <div className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400">Último passo</div>
@@ -625,7 +633,7 @@ export default async function PremiumPage() {
                 href={whatsAppDefault}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#E60012] px-8 py-4 font-black text-lg hover:bg-red-700 transition-colors"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#E60012] to-red-500 px-8 py-4 font-black text-lg hover:brightness-110 transition-all shadow-[0_18px_70px_rgba(230,0,18,0.28)]"
               >
                 Chamar no WhatsApp
                 <MessageCircle className="w-6 h-6" />
