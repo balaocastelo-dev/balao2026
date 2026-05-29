@@ -149,6 +149,51 @@ function ProductTile({
   );
 }
 
+function FeaturedShowcase({ product }: { product: Product }) {
+  const href = `/product/${product.id}`;
+  const imgSrc = product.image || "/logo.png";
+  const priceNum = parsePriceToNumber(product.price);
+  const priceLabel = priceNum > 0 ? formatCurrency(priceNum) : product.price || "Consultar";
+
+  return (
+    <Link
+      href={href}
+      className="group relative overflow-hidden rounded-[32px] border border-amber-200/20 bg-[linear-gradient(180deg,rgba(24,24,27,0.70),rgba(0,0,0,0.78))] backdrop-blur-xl transition-all hover:border-amber-200/30 hover:shadow-[0_28px_110px_rgba(0,0,0,0.60)]"
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_10%,rgba(251,191,36,0.14),transparent_55%)] opacity-80" />
+      <div className="relative p-6 sm:p-7">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <div className="text-[11px] font-bold uppercase tracking-[0.24em] text-amber-200/85">
+              PC em destaque
+            </div>
+            <div className="mt-2 text-2xl sm:text-3xl font-black tracking-tight leading-tight line-clamp-2">
+              {product.name}
+            </div>
+          </div>
+          <div className="shrink-0 rounded-full bg-gradient-to-r from-amber-200 via-yellow-100 to-amber-200 text-black px-4 py-2 text-sm font-black tracking-tight">
+            {priceLabel}
+          </div>
+        </div>
+
+        <div className="mt-6 relative aspect-[16/10] w-full overflow-hidden rounded-3xl bg-white border border-zinc-200 p-5 shadow-[0_22px_80px_rgba(0,0,0,0.18)]">
+          <Image
+            src={imgSrc}
+            alt={product.name || "Produto"}
+            fill
+            className="object-contain transition-transform duration-500 group-hover:scale-[1.03]"
+            sizes="(max-width: 1024px) 100vw, 50vw"
+          />
+        </div>
+
+        <div className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-white text-black px-5 py-3 font-black tracking-tight shadow-[0_18px_70px_rgba(255,255,255,0.10)]">
+          Ver detalhes <ArrowRight className="w-5 h-5" />
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 function InfoTile({
   eyebrow,
   title,
@@ -255,6 +300,7 @@ export default async function PremiumPage() {
   const featured = sorted.slice(0, Math.min(featuredTarget, sorted.length));
   const remaining = sorted.slice(featured.length);
   const stock = shuffleCopy(remaining).slice(0, Math.min(listTarget - featured.length, remaining.length));
+  const heroShowcaseProduct = stock[0] || featured[0];
 
   const whatsAppDefault = buildWhatsAppLink(
     "Olá! Quero conhecer a categoria Premium do Balão da Informática. Pode me recomendar os melhores itens do estoque para o meu uso e orçamento?"
@@ -372,6 +418,12 @@ export default async function PremiumPage() {
                   </div>
                 ))}
               </div>
+
+              {heroShowcaseProduct ? (
+                <div className="pt-2">
+                  <FeaturedShowcase product={heroShowcaseProduct} />
+                </div>
+              ) : null}
             </div>
 
             <div className="lg:col-span-6">
