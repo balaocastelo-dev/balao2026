@@ -6,19 +6,17 @@ import { Upload, CheckCircle, AlertCircle, Search, Save } from "lucide-react";
 
 export default function ImportPage() {
   const [categories, setCategories] = useState<Category[]>([]);
-  
-  // Import State
+
   const [text, setText] = useState("");
   const [parsedProducts, setParsedProducts] = useState<Product[]>([]);
   const [importStep, setImportStep] = useState<"input" | "preview">("input");
-  
-  // Import Settings
+
   const [selectedCategory, setSelectedCategory] = useState("Hardware");
   const [priceAdjustment, setPriceAdjustment] = useState<number>(0);
   const [adjustmentScope, setAdjustmentScope] = useState<"all" | "high_value" | "low_value">("all");
   const [scopeThreshold, setScopeThreshold] = useState<number>(1000);
   const [migrateImages, setMigrateImages] = useState(false);
-  
+
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
 
@@ -28,345 +26,156 @@ export default function ImportPage() {
 
   const fetchCategories = async () => {
     try {
-        const res = await fetch("/api/categories");
-        if (res.ok) {
-            const data = await res.json();
-            setCategories(data);
-        }
+      const res = await fetch("/api/categories");
+      if (res.ok) {
+        const data = await res.json();
+        setCategories(data);
+      }
     } catch (e) {
-        console.error("Failed to fetch categories", e);
+      console.error("Failed to fetch categories", e);
     }
   };
-
-  // Preview Logic
-  const getCategoryOptions = () => {
-    const tree = buildCategoryTree(categories || []);
-    const flat: string[] = [];
-    const walk = (nodes: Category[], parentPath: string[], level = 0) => {
-      nodes.forEach(node => {
-        const pathParts = [...parentPath, node.name];
-        const path = pathParts.join(" > ");
-        flat.push(path);
-        if (node.children && node.children.length > 0) walk(node.children, pathParts, level + 1);
-      });
-    };
-    walk(tree, []);
-    return flat.length > 0 ? flat : CATEGORIES;
-  };
-
-  useEffect(() => {
-    const options = getCategoryOptions();
-    if (options.length > 0 && !options.includes(selectedCategory)) {
-      setSelectedCategory(options[0]);
-    }
-  }, [categories]);
 
   const getPreviewProducts = () => {
-    const nowIso = new Date().toISOString();
     return parsedProducts.map((p: Product) => {
-        // Fix: Use global regex for replace all dots, then replace comma with dot
-        let priceNum = parseFloat(p.price.replace("R$", "").replace(/\./g, "").replace(",", ".").trim());
-        if (isNaN(priceNum)) priceNum = 0;
+      let priceNum = parseFloat(p.price.replace("R$", "").replace(/\./g, "").replace(",", ".").trim());
+      if (isNaN(priceNum)) priceNum = 0;
 
-        const kabumLastPrice = p.kabum_url ? priceNum : null;
+      let applyAdjustment = false;
+      if (adjustmentScope === "all") applyAdjustment = true;
+      else if (adjustmentScope === "high_value" && priceNum >= scopeThreshold) applyAdjustment = true;
+      else if (adjustmentScope === "low_value" && priceNum < scopeThreshold) applyAdjustment = true;
 
-        let applyAdjustment = false;
-        if (adjustmentScope === "all") applyAdjustment = true;
-        else if (adjustmentScope === "high_value" && priceNum >= scopeThreshold) applyAdjustment = true;
-        else if (adjustmentScope === "low_value" && priceNum < scopeThreshold) applyAdjustment = true;
+      let newPriceNum = priceNum;
+      if (applyAdjustment) {
+        newPriceNum = priceNum * (1 + priceAdjustment / 100);
+      }
 
-        let newPriceNum = priceNum;
-        if (applyAdjustment) {
-            newPriceNum = priceNum * (1 + priceAdjustment / 100);
-        }
+      const newPriceFormatted = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
+        newPriceNum
+      );
 
-        const newPriceFormatted = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(newPriceNum);
-
-        return {
-            ...p,
-            category: selectedCategory,
-            originalPrice: p.price,
-            newPrice: newPriceFormatted,
-            priceChange: newPriceNum - priceNum,
-            kabum_last_price: kabumLastPrice,
-            kabum_last_checked_at: p.kabum_url ? nowIso : null,
-        };
-    });
-  };
-
-  const validateImage = (url: string): Promise<boolean> => {
-    if (typeof url === "string" && /mlstatic\.com/i.test(url)) {
-      return Promise.resolve(true);
-    }
-    return new Promise((resolve) => {
-      const img = new window.Image();
-      img.onload = () => {
-        const w = img.naturalWidth || 0;
-        const h = img.naturalHeight || 0;
-        resolve(w >= 600 && h >= 600);
+      return {
+        ...p,
+        category: selectedCategory,
+        originalPrice: p.price,
+        newPrice: newPriceFormatted,
+        priceChange: newPriceNum - priceNum,
       };
-      img.onerror = () => resolve(false); 
-      img.src = url;
     });
   };
 
   const optimizeUrl = (url: string) => {
     try {
-        const u = new URL(url);
-        
-        // 1. Remove common resize query parameters
-        const paramsToRemove = ['w', 'h', 'width', 'height', 'size', 'resize', 'format', 'quality', 'fit', 'crop', 'dpr', 'auto', 'v'];
-        paramsToRemove.forEach(p => u.searchParams.delete(p));
-
-        let path = u.pathname;
-
-        // 2. Handle Google/Blogspot image resizing (/sXXX/) -> switch to /s0/ (original)
-        if (/\/s\d+(-c)?\//.test(path)) {
-            path = path.replace(/\/s\d+(-c)?\//, '/s0/');
-        }
-        
-        // 3. Remove size suffixes in filename (e.g., image_50x50.jpg -> image.jpg)
-        // Matches _100x100, _thumb, -thumb, _small, .small before extension
-        const sizePattern = /[-_](?:\d+x\d+|thumb|thumbnail|small|medium|large|mini)(?=\.[a-zA-Z0-9]+$)/i;
-        if (sizePattern.test(path)) {
-             path = path.replace(sizePattern, '');
-        }
-
-        u.pathname = path;
-        return u.toString();
-    } catch {
-        // Fallback for non-standard URLs: try basic regex cleanup
-        return url.replace(/[-_]\d+x\d+(?=\.[a-zA-Z0-9]+$)/, '');
-    }
-  };
-
-  const toKabumOriginalUrl = (url: string) => {
-    try {
       const u = new URL(url);
-      const p = u.pathname;
-      let nextPath = p.replace(/_(m|p|peq|g)\.jpg$/i, "_original.jpg");
-      if (nextPath === p && /\.jpg$/i.test(p) && !/_original\.jpg$/i.test(p)) {
-        nextPath = p.replace(/\.jpg$/i, "_original.jpg");
+
+      const paramsToRemove = [
+        "w",
+        "h",
+        "width",
+        "height",
+        "size",
+        "resize",
+        "format",
+        "quality",
+        "fit",
+        "crop",
+        "dpr",
+        "auto",
+        "v",
+      ];
+      paramsToRemove.forEach((p) => u.searchParams.delete(p));
+
+      let path = u.pathname;
+
+      if (/\/s\d+(-c)?\//.test(path)) {
+        path = path.replace(/\/s\d+(-c)?\//, "/s0/");
       }
-      u.pathname = nextPath;
-      u.search = "";
+
+      const sizePattern = /[-_](?:\d+x\d+|thumb|thumbnail|small|medium|large|mini)(?=\.[a-zA-Z0-9]+$)/i;
+      if (sizePattern.test(path)) {
+        path = path.replace(sizePattern, "");
+      }
+
+      u.pathname = path;
       return u.toString();
     } catch {
-      let next = url.replace(/_(m|p|peq|g)\.jpg$/i, "_original.jpg");
-      if (next === url && /\.jpg$/i.test(url) && !/_original\.jpg$/i.test(url)) {
-        next = url.replace(/\.jpg$/i, "_original.jpg");
-      }
-      return next;
+      return url.replace(/[-_]\d+x\d+(?=\.[a-zA-Z0-9]+$)/, "");
     }
   };
 
   const handleParse = async () => {
     setStatus("loading");
-    setMessage("Analisando links... (0/0)");
+    setMessage("Buscando imagens do KaBuM (original.jpg) com importação paralela...");
 
     const products = parseProducts(text);
     if (products.length === 0) {
-        setStatus("error");
-        setMessage("Nenhum produto encontrado no texto.");
-        return;
+      setStatus("error");
+      setMessage("Nenhum produto encontrado no texto.");
+      return;
     }
 
-    const total = products.length;
-    let processed = 0;
+    const kabumUrls = products.map((p) => p.product_url).filter((u): u is string => Boolean(u && u.includes("kabum.com.br")));
 
-    const updateRow = (id: string, patch: any) => {
-      setParsedProducts((prev) => prev.map((it: any) => (it.id === id ? { ...it, ...patch } : it)));
-    };
-
-    const dedupeUrls = (urls: string[]) => Array.from(new Set((urls || []).map((u) => String(u || "").trim()).filter(Boolean)));
-    const toTitleCaseKey = (k: string) => {
-      const s = String(k || "").trim();
-      if (!s) return "";
-      return s.charAt(0).toUpperCase() + s.slice(1);
-    };
-
-    const extractSpecsFromText = (input: string) => {
-      const t = String(input || "").replace(/\s+/g, " ").trim();
-      const out: Record<string, string> = {};
-      if (!t) return out;
-
-      const cpu = t.match(/\b(Intel\s+Core\s+i[3579]\b[^,]*)/i) || t.match(/\b(Ryzen\s+[3579]\b[^,]*)/i);
-      if (cpu?.[1]) out["Processador"] = cpu[1].trim();
-
-      const gpu = t.match(/\b(RTX\s*\d{3,4}\b[^,]*)/i) || t.match(/\b(GTX\s*\d{3,4}\b[^,]*)/i) || t.match(/\b(Radeon\s+RX\s*\d{3,4}\b[^,]*)/i);
-      if (gpu?.[1]) out["Placa de Vídeo"] = gpu[1].trim();
-
-      const ram = t.match(/\b(\d{1,3}\s?GB)\s*(?:de\s*)?RAM\b/i) || t.match(/\bRAM\s*(\d{1,3}\s?GB)\b/i);
-      if (ram?.[1]) out["Memória RAM"] = ram[1].replace(/\s+/g, " ").trim();
-
-      const ssd = t.match(/\b(\d{2,4}\s?GB|\d{1,2}\s?TB)\s*SSD\b/i);
-      if (ssd?.[1]) out["Armazenamento"] = `${ssd[1].replace(/\s+/g, " ").trim()} SSD`;
-
-      const hdd = t.match(/\b(\d{1,2}\s?TB)\s*HDD\b/i);
-      if (hdd?.[1] && !out["Armazenamento"]) out["Armazenamento"] = `${hdd[1].replace(/\s+/g, " ").trim()} HDD`;
-
-      const screen = t.match(/\b(\d{1,2}(?:[.,]\d)?)["']?\s*(?:pol|polegadas)?\b/i);
-      if (screen?.[1] && /tela/i.test(t)) out["Tela"] = `${screen[1].replace(",", ".")}\"`;
-
-      const os = t.match(/\b(Windows\s+11(?:\s+Home|\s+Pro)?|Windows\s+10(?:\s+Home|\s+Pro)?|Linux|KeepOS)\b/i);
-      if (os?.[1]) out["Sistema"] = os[1].trim();
-
-      return out;
-    };
-
-    const initialRows = products.map((p) => {
-      let optimizedImage = optimizeUrl(p.image);
-      if (optimizedImage.includes("kabum.com.br") && optimizedImage.includes("images.kabum.com.br")) {
-        optimizedImage = toKabumOriginalUrl(optimizedImage);
-      }
-
-      return {
-        ...p,
-        image: optimizedImage,
-        image_urls: dedupeUrls([optimizedImage]),
-        description: "",
-        specs: {},
-        imageValid: false,
-        ai_status: "thinking",
-      };
-    });
-
-    setParsedProducts(initialRows as any);
-    setImportStep("preview");
-    const updateProgress = () => {
-      setMessage(`Analisando links... (${processed}/${total})`);
-    };
-    updateProgress();
-
-    const maxParallelAgents = 6;
-    const runWithConcurrency = async <T,>(items: T[], limit: number, fn: (item: T) => Promise<void>) => {
-      const safeLimit = Math.max(1, Math.floor(limit || 1));
-      let idx = 0;
-      const workers = new Array(Math.min(safeLimit, items.length)).fill(null).map(async () => {
-        while (true) {
-          const current = idx++;
-          if (current >= items.length) break;
-          await fn(items[current]);
-        }
-      });
-      await Promise.all(workers);
-    };
-
-    await runWithConcurrency(initialRows as any[], maxParallelAgents, async (p: any) => {
+    const scrapeMap = new Map<string, string[]>();
+    if (kabumUrls.length > 0) {
       try {
-        let imageUrls: string[] = Array.isArray(p.image_urls) ? p.image_urls : [];
-        let descriptionRaw = "";
-        let specs: Record<string, any> = p.specs && typeof p.specs === "object" ? p.specs : {};
-        let name = String(p.name || "").trim();
-        let price = String(p.price || "").trim();
-
-        const sourceUrl = String(p.product_url || p.kabum_url || "").trim();
-        if (sourceUrl && /^https?:\/\//i.test(sourceUrl)) {
-          try {
-            const scrapeRes = await fetch("/api/scrape/product", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ url: sourceUrl }),
-            });
-            if (scrapeRes.ok) {
-              const scrapeData = await scrapeRes.json().catch(() => null);
-              const scrapeTitle = String(scrapeData?.title || "").trim();
-              const scrapePrice = typeof scrapeData?.price === "number" ? scrapeData.price : null;
-              const scrapeDescription = String(scrapeData?.description || "").trim();
-              const scrapeSpecs = scrapeData?.specs && typeof scrapeData.specs === "object" ? (scrapeData.specs as Record<string, any>) : {};
-              const scrapeImages = Array.isArray(scrapeData?.images) ? scrapeData.images : [];
-
-              if (scrapeTitle && (scrapeTitle.length > name.length || !name)) name = scrapeTitle;
-              if ((!price || price === "R$" || price === "R$ 0" || price === "R$ 0,00") && scrapePrice != null) {
-                price = `R$ ${new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(scrapePrice)}`;
-              }
-              if (scrapeImages.length > 0) imageUrls = scrapeImages.map((u: any) => optimizeUrl(String(u || ""))).filter(Boolean);
-              if (scrapeDescription) descriptionRaw = scrapeDescription;
-              specs = { ...scrapeSpecs, ...specs };
-            }
-          } catch {}
-        }
-
-        const extractedFromName = extractSpecsFromText(name);
-        const extractedFromDesc = extractSpecsFromText(descriptionRaw);
-        const mergedSpecs = { ...specs, ...extractedFromName, ...extractedFromDesc };
-        const normalizedSpecs: Record<string, any> = {};
-        for (const [k, v] of Object.entries(mergedSpecs || {})) {
-          const key = toTitleCaseKey(String(k || ""));
-          const val = typeof v === "string" ? v.trim() : v;
-          if (!key || val == null || String(val).trim() === "") continue;
-          normalizedSpecs[key] = val;
-        }
-
-        imageUrls = dedupeUrls(imageUrls);
-        updateRow(p.id, { name, price, image_urls: imageUrls, specs: normalizedSpecs, category: selectedCategory });
-
-        const validImageUrls: string[] = [];
-        for (const candidate of imageUrls) {
-          if (validImageUrls.length >= 12) break;
-          const ok = await validateImage(candidate);
-          if (ok) validImageUrls.push(candidate);
-        }
-
-        const primaryImage = validImageUrls[0] || imageUrls[0] || "";
-        updateRow(p.id, {
-          image: primaryImage || p.image,
-          image_urls: validImageUrls.length > 0 ? validImageUrls : imageUrls,
-          imageValid: !!primaryImage,
+        const scrapeRes = await fetch("/api/scrape/products-batch", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            urls: kabumUrls,
+            concurrency: 12,
+            headConcurrency: 30,
+            imageLimit: 6,
+          }),
         });
-
-        if (descriptionRaw) {
-          try {
-            const aiRes = await fetch("/api/ai/rewrite-description", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ productName: name, rawText: descriptionRaw, specs: normalizedSpecs }),
-            });
-            const aiData = await aiRes.json().catch(() => null);
-            if (aiRes.ok && aiData?.markdown) {
-              updateRow(p.id, { ai_status: "done", description: String(aiData.markdown || "") });
-            } else {
-              updateRow(p.id, { ai_status: "error" });
+        if (scrapeRes.ok) {
+          const scrapeData = await scrapeRes.json();
+          if (scrapeData?.success && Array.isArray(scrapeData.results)) {
+            for (const r of scrapeData.results) {
+              if (r?.url && Array.isArray(r.images)) {
+                scrapeMap.set(r.url, r.images);
+              }
             }
-          } catch {
-            updateRow(p.id, { ai_status: "error" });
           }
-        } else {
-          updateRow(p.id, { ai_status: "error" });
         }
-      } finally {
-        processed += 1;
-        updateProgress();
+      } catch (e) {
+        console.error("Failed to batch scrape Kabum images", e);
       }
+    }
+
+    const withImages = products.map((p) => {
+      const imageUrls = p.product_url ? scrapeMap.get(p.product_url) || [] : [];
+      const mainImage = imageUrls[0] || (p.image ? optimizeUrl(p.image) : "");
+      return { ...p, image: mainImage, image_urls: imageUrls, imageValid: Boolean(mainImage) };
     });
 
-    setParsedProducts((prev: any) => {
-      const filtered = prev.filter((r: any) => r?.image);
-      setMessage(`${filtered.length} produtos encontrados.`);
-      return filtered;
-    });
+    const validProducts = withImages.filter((r) => r.imageValid && r.image);
 
+    setParsedProducts(validProducts);
+    setImportStep("preview");
     setStatus("idle");
+
+    if (validProducts.length < withImages.length) {
+      setMessage(
+        `${validProducts.length} produtos válidos encontrados. (${withImages.length - validProducts.length} removidos por imagem ausente).`
+      );
+    } else {
+      setMessage(`${validProducts.length} produtos encontrados com sucesso.`);
+    }
   };
 
   const handleConfirmImport = async () => {
     setStatus("loading");
     try {
       const finalProducts = getPreviewProducts().map((p: any) => ({
-          id: p.id,
-          name: p.name,
-          price: p.newPrice, // Use calculated price
-          image: p.image,
-          image_urls: p.image_urls,
-          product_url: p.product_url,
-          kabum_url: p.kabum_url || null,
-          kabum_last_price: typeof p.kabum_last_price === "number" ? p.kabum_last_price : null,
-          kabum_last_stock: p.kabum_last_stock || null,
-          kabum_last_checked_at: p.kabum_last_checked_at || null,
-          description: p.description,
-          specs: p.specs,
-          category: p.category,
-          slug: p.slug
+        id: p.id,
+        name: p.name,
+        price: p.newPrice,
+        image: p.image,
+        category: p.category,
+        slug: p.slug,
       }));
 
       const res = await fetch("/api/products", {
@@ -380,16 +189,15 @@ export default function ImportPage() {
         throw new Error(errorData.error || "Falha ao salvar");
       }
 
-      // Save History
       await fetch("/api/history", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            product_count: finalProducts.length,
-            price_percentage: priceAdjustment,
-            applied_category: selectedCategory,
-            applied_scope: adjustmentScope
-        })
+          product_count: finalProducts.length,
+          price_percentage: priceAdjustment,
+          applied_category: selectedCategory,
+          applied_scope: adjustmentScope,
+        }),
       });
 
       const data = await res.json();
@@ -398,8 +206,7 @@ export default function ImportPage() {
       setText("");
       setParsedProducts([]);
       setImportStep("input");
-      
-      // Reset settings
+
       setPriceAdjustment(0);
     } catch (e: any) {
       console.error(e);
@@ -409,255 +216,207 @@ export default function ImportPage() {
   };
 
   const categoryTree = buildCategoryTree(categories);
-  const flatCategories: { label: string; value: string; level: number }[] = [];
-  
-  const flatten = (nodes: Category[], parentPath: string[] = [], level = 0) => {
-    nodes.forEach(node => {
-        const nextPath = [...parentPath, node.name];
-        flatCategories.push({ label: node.name, value: nextPath.join(" > "), level });
-        if (node.children) flatten(node.children, nextPath, level + 1);
+  const flatCategories: { name: string; level: number }[] = [];
+
+  const flatten = (nodes: Category[], level = 0) => {
+    nodes.forEach((node) => {
+      flatCategories.push({ name: node.name, level });
+      if (node.children) flatten(node.children, level + 1);
     });
   };
-  flatten(categoryTree, [], 0);
+  flatten(categoryTree);
 
   return (
     <div className="animate-in fade-in duration-300">
-        <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <Upload className="text-[#E60012]" />
-                Importação de Produtos
-            </h2>
-            {importStep === "preview" && (
-                <button 
-                    onClick={() => setImportStep("input")}
-                    className="text-sm text-gray-500 hover:text-gray-800 underline"
-                >
-                    Voltar para edição
-                </button>
-            )}
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+          <Upload className="text-[#E60012]" />
+          Importação de Produtos
+        </h2>
+        {importStep === "preview" && (
+          <button onClick={() => setImportStep("input")} className="text-sm text-gray-500 hover:text-gray-800 underline">
+            Voltar para edição
+          </button>
+        )}
+      </div>
+
+      {message && (
+        <div
+          className={`mb-6 p-4 rounded-md border flex items-center gap-3 ${
+            status === "success"
+              ? "bg-green-50 border-green-200 text-green-700"
+              : status === "error"
+                ? "bg-red-50 border-red-200 text-red-700"
+                : "bg-blue-50 border-blue-200 text-blue-700"
+          }`}
+        >
+          {status === "success" ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
+          {message}
         </div>
+      )}
 
-        {/* Status Messages */}
-        {message && (
-            <div className={`mb-6 p-4 rounded-md border flex items-center gap-3 ${status === "success" ? "bg-green-50 border-green-200 text-green-700" : status === "error" ? "bg-red-50 border-red-200 text-red-700" : "bg-blue-50 border-blue-200 text-blue-700"}`}>
-                {status === "success" ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
-                {message}
+      {importStep === "input" ? (
+        <>
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Cole o bloco de texto dos produtos:</label>
+            <textarea
+              className="w-full h-64 p-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent font-mono text-sm"
+              placeholder={`Exemplo (TAB entre colunas):\nhttps://www.kabum.com.br/produto/895040\tFonte Cooler Master MWE Gold 850 V3...\t499,99\nhttps://www.kabum.com.br/produto/516056\tFonte Corsair CX Series CX650...\t359,79`}
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+            />
+            <p className="mt-2 text-xs text-gray-500">
+              Formato: URL do produto (KaBuM) + Nome + Preço. As imagens são buscadas automaticamente como original.jpg.
+            </p>
+          </div>
+          <div className="flex justify-end">
+            <button
+              onClick={handleParse}
+              disabled={!text.trim()}
+              className="bg-[#E60012] text-white px-6 py-2 rounded-md font-medium hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+            >
+              Processar Texto
+              <Search size={18} />
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 bg-gray-50 p-4 rounded-lg border">
+            <div>
+              <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Categoria Destino</label>
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="w-full p-2 border rounded-md text-sm"
+              >
+                {flatCategories.length > 0 ? (
+                  flatCategories.map((c) => (
+                    <option key={c.name} value={c.name}>
+                      {"\u00A0".repeat(c.level * 4)}{c.name}
+                    </option>
+                  ))
+                ) : (
+                  CATEGORIES.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))
+                )}
+              </select>
             </div>
-        )}
-
-        {importStep === "input" ? (
-            <>
-                <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Cole o bloco de texto dos produtos:
-                    </label>
-                    <textarea
-                        className="w-full h-64 p-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent font-mono text-sm"
-                        placeholder="Exemplo: imageCard src... https://... Nome do Produto R$ 100,00"
-                        value={text}
-                        onChange={(e) => setText(e.target.value)}
-                    />
-                    <p className="mt-2 text-xs text-gray-500">
-                        Aceita também formato com 4 colunas (Tab): Kabum URL, Image URL, Nome, Preço.
-                    </p>
+            <div>
+              <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Ajuste de Preço (%)</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  value={priceAdjustment}
+                  onChange={(e) => setPriceAdjustment(Number(e.target.value))}
+                  className="w-full p-2 border rounded-md text-sm"
+                  placeholder="0"
+                />
+                <span className="text-gray-500 text-sm">%</span>
+              </div>
+              <p className="text-[10px] text-gray-500 mt-1">Use valores negativos para desconto.</p>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Aplicar Ajuste Em</label>
+              <select
+                value={adjustmentScope}
+                onChange={(e) => setAdjustmentScope(e.target.value as any)}
+                className="w-full p-2 border rounded-md text-sm mb-2"
+              >
+                <option value="all">Todos os produtos</option>
+                <option value="high_value">Preço acima de...</option>
+                <option value="low_value">Preço abaixo de...</option>
+              </select>
+              {adjustmentScope !== "all" && (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-500">R$</span>
+                  <input
+                    type="number"
+                    value={scopeThreshold}
+                    onChange={(e) => setScopeThreshold(Number(e.target.value))}
+                    className="w-full p-1 border rounded text-sm"
+                  />
                 </div>
-                <div className="flex justify-end">
-                    <button
-                        onClick={handleParse}
-                        disabled={!text.trim()}
-                        className="bg-[#E60012] text-white px-6 py-2 rounded-md font-medium hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"
-                    >
-                        Processar Texto
-                        <Search size={18} />
-                    </button>
-                </div>
-            </>
-        ) : (
-            <>
-                {/* Preview & Settings */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 bg-gray-50 p-4 rounded-lg border">
-                    <div>
-                        <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">
-                          Categoria Destino
-                        </label>
-                        <select
-                            value={selectedCategory}
-                            onChange={(e) => setSelectedCategory(e.target.value)}
-                            className="w-full p-2 border rounded-md text-sm"
-                        >
-                            {flatCategories.length > 0 ? (
-                                flatCategories.map(c => (
-                                    <option key={c.value} value={c.value}>
-                                        {/* Indentation */}
-                                        {'\u00A0'.repeat(c.level * 4)}{c.label}
-                                    </option>
-                                ))
-                            ) : (
-                                // Fallback to static list if empty (loading or error)
-                                CATEGORIES.map(c => (
-                                    <option key={c} value={c}>{c}</option>
-                                ))
-                            )}
-                        </select>
-                    </div>
-                    <div>
-                        <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Ajuste de Preço (%)</label>
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="number"
-                                value={priceAdjustment}
-                                onChange={(e) => setPriceAdjustment(Number(e.target.value))}
-                                className="w-full p-2 border rounded-md text-sm"
-                                placeholder="0"
-                            />
-                            <span className="text-gray-500 text-sm">%</span>
-                        </div>
-                        <p className="text-[10px] text-gray-500 mt-1">Use valores negativos para desconto.</p>
-                    </div>
-                    <div>
-                        <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Aplicar Ajuste Em</label>
-                        <select
-                            value={adjustmentScope}
-                            onChange={(e) => setAdjustmentScope(e.target.value as any)}
-                            className="w-full p-2 border rounded-md text-sm mb-2"
-                        >
-                            <option value="all">Todos os produtos</option>
-                            <option value="high_value">Preço acima de...</option>
-                            <option value="low_value">Preço abaixo de...</option>
-                        </select>
-                        {adjustmentScope !== "all" && (
-                            <div className="flex items-center gap-2">
-                                    <span className="text-xs text-gray-500">R$</span>
-                                    <input 
-                                    type="number" 
-                                    value={scopeThreshold}
-                                    onChange={(e) => setScopeThreshold(Number(e.target.value))}
-                                    className="w-full p-1 border rounded text-sm"
-                                    />
-                            </div>
-                        )}
-                    </div>
+              )}
+            </div>
 
-                    <div>
-                        <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Opções Extras</label>
-                        <div className="space-y-2">
-                            <label className="flex items-center gap-2 cursor-pointer select-none">
-                                <input 
-                                    type="checkbox" 
-                                    checked={migrateImages} 
-                                    onChange={(e) => setMigrateImages(e.target.checked)}
-                                    className="w-4 h-4 text-[#E60012] rounded border-gray-300 focus:ring-[#E60012]"
-                                />
-                                <span className="text-sm text-gray-700 font-medium">
-                                    Migrar imagens para Supabase
-                                </span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Opções Extras</label>
+              <div className="flex items-center h-[38px]">
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={migrateImages}
+                    onChange={(e) => setMigrateImages(e.target.checked)}
+                    className="w-4 h-4 text-[#E60012] rounded border-gray-300 focus:ring-[#E60012]"
+                  />
+                  <span className="text-sm text-gray-700 font-medium">Migrar imagens para Supabase</span>
+                </label>
+              </div>
+            </div>
+          </div>
 
-                {/* Action Buttons */}
+          <div className="mb-6 overflow-x-auto">
+            <table className="w-full text-sm text-left text-gray-500">
+              <thead className="text-xs text-gray-700 uppercase bg-gray-100">
+                <tr>
+                  <th className="px-4 py-3">Imagem</th>
+                  <th className="px-4 py-3">Produto</th>
+                  <th className="px-4 py-3">Preço Original</th>
+                  <th className="px-4 py-3">Novo Preço</th>
+                  <th className="px-4 py-3">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {getPreviewProducts().map((p, idx) => (
+                  <tr key={idx} className="bg-white border-b hover:bg-gray-50">
+                    <td className="px-4 py-3">
+                      <div className="w-12 h-12 relative">
+                        <img src={p.image} alt="" className="w-full h-full object-contain rounded border" />
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 font-medium text-gray-900 max-w-xs truncate" title={p.name}>
+                      {p.name}
+                    </td>
+                    <td className="px-4 py-3">{p.originalPrice}</td>
+                    <td className="px-4 py-3 font-bold text-gray-900">
+                      {p.newPrice}
+                      {p.priceChange !== 0 && (
+                        <span className={`ml-2 text-xs ${p.priceChange > 0 ? "text-red-500" : "text-green-500"}`}>
+                          ({p.priceChange > 0 ? "+" : ""}{p.priceChange.toFixed(2)})
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">Pronto</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-                <div className="mb-6 overflow-x-auto">
-                    <table className="w-full text-sm text-left text-gray-500">
-                        <thead className="text-xs text-gray-700 uppercase bg-gray-100">
-                            <tr>
-                                <th className="px-4 py-3">Imagem</th>
-                                <th className="px-4 py-3">Produto</th>
-                                <th className="px-4 py-3">Categoria</th>
-                                <th className="px-4 py-3">Preço Original</th>
-                                <th className="px-4 py-3">Novo Preço</th>
-                                <th className="px-4 py-3">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {getPreviewProducts().map((p, idx) => (
-                                <tr key={idx} className="bg-white border-b hover:bg-gray-50">
-                                    <td className="px-4 py-3">
-                                        <div className="flex gap-1 overflow-x-auto max-w-[150px] py-1">
-                                            {p.image_urls && p.image_urls.length > 0 ? (
-                                                p.image_urls.map((img: string, i: number) => (
-                                                    <div key={i} className="w-10 h-10 relative flex-shrink-0">
-                                                        <img 
-                                                            src={img} 
-                                                            alt="" 
-                                                            className={`w-full h-full object-contain rounded border ${i === 0 ? 'border-red-500 ring-1 ring-red-500' : ''}`}
-                                                            title={i === 0 ? "Capa" : `Foto ${i+1}`}
-                                                        />
-                                                    </div>
-                                                ))
-                                            ) : (
-                                                <div className="w-10 h-10 relative">
-                                                    <img 
-                                                        src={p.image} 
-                                                        alt="" 
-                                                        className="w-full h-full object-contain rounded border"
-                                                    />
-                                                </div>
-                                            )}
-                                        </div>
-                                        {p.image_urls && p.image_urls.length > 1 && (
-                                            <span className="text-[10px] text-gray-400">{p.image_urls.length} fotos extraídas</span>
-                                        )}
-                                    </td>
-                                    <td className="px-4 py-3 font-medium text-gray-900 max-w-xs truncate" title={p.name}>
-                                        {p.name}
-                                        <div className="flex gap-1 mt-1">
-                                            {p.description && (
-                                                <span className="bg-green-100 text-green-700 text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase">Desc OK</span>
-                                            )}
-                                            {p.specs && Object.keys(p.specs).length > 0 && (
-                                                <span className="bg-blue-100 text-blue-700 text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase">Specs OK</span>
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        <span className="text-xs font-medium text-gray-700">
-                                          {p.category || selectedCategory}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-3">{p.originalPrice}</td>
-                                    <td className="px-4 py-3 font-bold text-gray-900">
-                                        {p.newPrice}
-                                        {p.priceChange !== 0 && (
-                                            <span className={`ml-2 text-xs ${p.priceChange > 0 ? 'text-red-500' : 'text-green-500'}`}>
-                                                ({p.priceChange > 0 ? '+' : ''}{p.priceChange.toFixed(2)})
-                                            </span>
-                                        )}
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        {p.ai_status === "thinking" ? (
-                                            <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">IA pensando...</span>
-                                        ) : p.ai_status === "error" ? (
-                                            <span className="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded">IA falhou</span>
-                                        ) : (
-                                            <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">IA OK</span>
-                                        )}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-
-                <div className="flex justify-end gap-4">
-                    <button
-                        onClick={() => setImportStep("input")}
-                        className="px-6 py-2 border border-gray-300 rounded-md font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                        Cancelar
-                    </button>
-                    <button
-                        onClick={handleConfirmImport}
-                        disabled={status === "loading"}
-                        className="bg-[#E60012] text-white px-6 py-2 rounded-md font-medium hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"
-                    >
-                        {status === "loading" ? "Salvando..." : "Confirmar Importação"}
-                        <Save size={18} />
-                    </button>
-                </div>
-            </>
-        )}
+          <div className="flex justify-end gap-4">
+            <button
+              onClick={() => setImportStep("input")}
+              className="px-6 py-2 border border-gray-300 rounded-md font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleConfirmImport}
+              disabled={status === "loading"}
+              className="bg-[#E60012] text-white px-6 py-2 rounded-md font-medium hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+            >
+              {status === "loading" ? "Salvando..." : "Confirmar Importação"}
+              <Save size={18} />
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
