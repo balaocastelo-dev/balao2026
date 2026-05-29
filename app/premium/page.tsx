@@ -7,10 +7,16 @@ import {
   Building2,
   CheckCircle2,
   Cpu,
+  Database,
+  Fan,
+  HardDrive,
   Headphones,
   LifeBuoy,
+  Monitor,
+  Server,
   ShieldCheck,
   Sparkles,
+  Zap,
   Wrench,
 } from "lucide-react";
 
@@ -95,10 +101,12 @@ function PremiumCard({
   title,
   description,
   cta,
+  href,
 }: {
   title: string;
   description: string;
   cta: string;
+  href: string;
 }) {
   return (
     <div className="group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-white/10 to-white/5 p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.02)] transition hover:border-white/20 hover:bg-white/10">
@@ -107,14 +115,14 @@ function PremiumCard({
       <p className="relative mt-3 text-sm leading-relaxed text-white/70">
         {description}
       </p>
-      <a
-        href="#monte"
+      <Link
+        href={href}
         className="relative mt-6 inline-flex items-center gap-2 rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm font-extrabold text-white/90 transition hover:border-white/20 hover:bg-black/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
         aria-label={cta}
       >
         {cta}
         <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
-      </a>
+      </Link>
     </div>
   );
 }
@@ -286,9 +294,7 @@ export default function PremiumPage() {
                   <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-red-300">
                     <card.icon className="h-5 w-5" />
                   </div>
-                  <h3 className="text-base font-extrabold text-white">
-                    {card.title}
-                  </h3>
+                  <h3 className="text-base font-extrabold text-white">{card.title}</h3>
                 </div>
                 <p className="mt-3 text-sm leading-relaxed text-white/70">
                   Experiência prática, organização e critérios de qualidade para
@@ -310,23 +316,93 @@ export default function PremiumPage() {
             <PremiumCard
               title="Balão Gamer"
               description="PCs para rodar seus jogos favoritos com desempenho, visual gamer e possibilidade de upgrade."
-              cta="Ver opções gamers"
+              cta="Personalizar este PC"
+              href="/premium?preset=gamer-start#monte"
             />
             <PremiumCard
               title="Balão Workstation"
               description="Máquinas para arquitetura, engenharia, edição, renderização e produtividade profissional."
-              cta="Montar workstation"
+              cta="Usar como base"
+              href="/premium?preset=workstation-pro#monte"
             />
             <PremiumCard
               title="Balão Creator"
               description="Computadores para criadores de conteúdo, lives, edição, design e produção audiovisual."
-              cta="Quero um PC creator"
+              cta="Personalizar este PC"
+              href="/premium?preset=gamer-ultra#monte"
             />
             <PremiumCard
               title="Balão Extreme"
               description="Projetos exclusivos para quem quer potência máxima e acabamento premium, do seu jeito."
-              cta="Criar projeto exclusivo"
+              cta="Personalizar este PC"
+              href="/premium?preset=extreme#monte"
             />
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-6xl px-4 pb-14 sm:px-6 lg:px-8 lg:pb-20">
+          <SectionTitle
+            kicker="Configuração detalhada"
+            title="Personalize peça por peça"
+            description="Escolha processador, placa de vídeo, memória, SSD, gabinete e muito mais. Depois envie sua configuração para um especialista do Balão da Informática montar o orçamento ideal."
+          />
+
+          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {[
+              {
+                title: "Processador",
+                icon: Cpu,
+                text: "Define o desempenho em jogos, multitarefas, edição e renderização.",
+              },
+              {
+                title: "Placa de vídeo",
+                icon: Monitor,
+                text: "Responsável por gráficos, FPS, resolução, edição, render e aceleração profissional.",
+              },
+              {
+                title: "Memória RAM",
+                icon: Database,
+                text: "Ajuda o PC a rodar vários programas, jogos, abas e transmissões ao mesmo tempo.",
+              },
+              {
+                title: "Armazenamento",
+                icon: HardDrive,
+                text: "SSD para velocidade e HD para arquivos, backup e grande capacidade.",
+              },
+              {
+                title: "Refrigeração",
+                icon: Fan,
+                text: "Ajuda o processador a manter desempenho estável em jogos e trabalhos pesados.",
+              },
+              {
+                title: "Fonte",
+                icon: Zap,
+                text: "Entrega energia com segurança para todos os componentes.",
+              },
+              {
+                title: "Gabinete",
+                icon: Server,
+                text: "Define visual, airflow, espaço interno e acabamento do projeto.",
+              },
+              {
+                title: "Orçamento",
+                icon: ShieldCheck,
+                text: "Você escolhe a faixa. A equipe ajusta as melhores peças dentro do seu objetivo.",
+              },
+            ].map((c) => (
+              <div
+                key={c.title}
+                className="rounded-3xl border border-white/10 bg-gradient-to-b from-white/10 to-white/5 p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.02)]"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-red-300">
+                    <c.icon className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-base font-extrabold text-white">{c.title}</h3>
+                </div>
+                <p className="mt-3 text-sm leading-relaxed text-white/70">{c.text}</p>
+              </div>
+            ))}
           </div>
         </section>
 
@@ -400,9 +476,7 @@ export default function PremiumPage() {
               >
                 <h3 className="text-xl font-extrabold text-white">{p.name}</h3>
                 <p className="mt-2 text-sm text-white/70">
-                  <span className="font-extrabold text-white/85">
-                    Indicado para:
-                  </span>{" "}
+                  <span className="font-extrabold text-white/85">Indicado para:</span>{" "}
                   {p.for}
                 </p>
                 <div className="mt-4 grid gap-2 text-sm text-white/75">
@@ -447,9 +521,7 @@ export default function PremiumPage() {
                 <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-red-500/10 text-sm font-extrabold text-red-200">
                   {i + 1}
                 </div>
-                <h3 className="mt-4 text-sm font-extrabold text-white">
-                  {step}
-                </h3>
+                <h3 className="mt-4 text-sm font-extrabold text-white">{step}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-white/70">
                   Alinhamento claro e execução profissional do início ao fim.
                 </p>
@@ -471,9 +543,7 @@ export default function PremiumPage() {
                 <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-red-300">
                   <ShieldCheck className="h-5 w-5" />
                 </div>
-                <h3 className="text-lg font-extrabold text-white">
-                  Confiança na prática
-                </h3>
+                <h3 className="text-lg font-extrabold text-white">Confiança na prática</h3>
               </div>
               <div className="mt-4 grid gap-2 text-sm text-white/75">
                 {[
@@ -498,9 +568,7 @@ export default function PremiumPage() {
                 <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-red-300">
                   <Wrench className="h-5 w-5" />
                 </div>
-                <h3 className="text-lg font-extrabold text-white">
-                  Montagem com padrão premium
-                </h3>
+                <h3 className="text-lg font-extrabold text-white">Montagem com padrão premium</h3>
               </div>
               <div className="mt-4 grid gap-2 text-sm text-white/75">
                 {[
@@ -611,9 +679,7 @@ export default function PremiumPage() {
                     </span>
                   </div>
                 </summary>
-                <div className="mt-3 text-sm leading-relaxed text-white/70">
-                  {item.a}
-                </div>
+                <div className="mt-3 text-sm leading-relaxed text-white/70">{item.a}</div>
               </details>
             ))}
           </div>
