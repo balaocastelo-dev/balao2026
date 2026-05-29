@@ -138,7 +138,7 @@ export default function ImportPage() {
             urls: kabumUrls,
             concurrency: 18,
             headConcurrency: 40,
-            imageLimit: 24
+            imageLimit: 60
           }),
         });
 

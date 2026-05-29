@@ -158,11 +158,11 @@ export async function POST(request: Request) {
 
     const concurrency = Number.isFinite(body.concurrency) ? Number(body.concurrency) : 10;
     const headConcurrency = Number.isFinite(body.headConcurrency) ? Number(body.headConcurrency) : 20;
-    const imageLimit = Number.isFinite(body.imageLimit) ? Number(body.imageLimit) : 12;
+    const imageLimit = Number.isFinite(body.imageLimit) ? Number(body.imageLimit) : 60;
 
     const safeConcurrency = Math.max(1, Math.min(30, concurrency));
     const safeHeadConcurrency = Math.max(1, Math.min(60, headConcurrency));
-    const safeImageLimit = Math.max(1, Math.min(24, imageLimit));
+    const safeImageLimit = Math.max(1, Math.min(60, imageLimit));
 
     const existsCache = new Map<string, Promise<boolean>>();
 
