@@ -109,9 +109,9 @@ function ProductTile({
   return (
     <Link
       href={href}
-      className="group relative overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(24,24,27,0.72),rgba(0,0,0,0.72))] backdrop-blur-xl transition-all hover:border-white/20 hover:-translate-y-0.5 hover:shadow-[0_24px_80px_rgba(0,0,0,0.55)]"
+      className="group relative overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(24,24,27,0.72),rgba(0,0,0,0.72))] backdrop-blur-xl transition-all hover:border-amber-200/20 hover:-translate-y-0.5 hover:shadow-[0_24px_80px_rgba(0,0,0,0.55)]"
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.10),_transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(251,191,36,0.14),_transparent_58%)] opacity-0 group-hover:opacity-100 transition-opacity" />
       <div className="relative p-5 sm:p-6 flex flex-col gap-4">
         <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl bg-white border border-zinc-200 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.18)]">
           <Image
@@ -125,7 +125,7 @@ function ProductTile({
 
         <div className="flex flex-col gap-2">
           {eyebrow ? (
-            <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-zinc-400">
+            <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-amber-200/80">
               {eyebrow}
             </div>
           ) : null}
@@ -134,7 +134,7 @@ function ProductTile({
           </div>
           <div className="flex items-center justify-between gap-3">
             <div className="text-zinc-400 text-sm line-clamp-1">{product.category}</div>
-            <div className="shrink-0 rounded-full bg-white text-black px-3 py-1 text-sm font-black tracking-tight">
+            <div className="shrink-0 rounded-full bg-gradient-to-r from-amber-200 via-yellow-100 to-amber-200 text-black px-3 py-1 text-sm font-black tracking-tight">
               {priceLabel}
             </div>
           </div>
@@ -165,8 +165,8 @@ function InfoTile({
   const content = (
     <div className="relative p-6 flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-zinc-400">{eyebrow}</div>
-        <Icon className="w-5 h-5 text-white/70" />
+        <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-amber-200/80">{eyebrow}</div>
+        <Icon className="w-5 h-5 text-amber-200/80" />
       </div>
       <div className="text-xl font-black tracking-tight">{title}</div>
       <div className="text-sm text-zinc-300 leading-relaxed">{desc}</div>
@@ -315,18 +315,18 @@ export default async function PremiumPage() {
 
         <div className="container mx-auto px-4 py-16 sm:py-24 relative">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
-            <div className="lg:col-span-5 space-y-6">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-white/85 backdrop-blur">
-                <Sparkles className="w-4 h-4 text-white/80" />
+            <div className="lg:col-span-6 space-y-6">
+              <div className="inline-flex items-center gap-2 rounded-full border border-amber-200/20 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-amber-100/90 backdrop-blur">
+                <Sparkles className="w-4 h-4 text-amber-200/80" />
                 Montagem premium em Campinas/SP
               </div>
 
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[0.95]">
-                Categoria{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-zinc-500">
+              <h1 className="text-6xl sm:text-7xl lg:text-8xl font-black tracking-tight leading-[0.92] max-w-none">
+                <span className="block">Categoria</span>
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-100 to-amber-400">
                   Premium
-                </span>{" "}
-                começa aqui.
+                </span>
+                <span className="block">começa aqui.</span>
               </h1>
 
               <p className="text-lg sm:text-xl text-zinc-200/90 leading-relaxed max-w-[44rem]">
@@ -337,7 +337,7 @@ export default async function PremiumPage() {
               <div className="flex flex-col sm:flex-row gap-3">
                 <a
                   href="#estoque"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#E60012] to-red-500 text-white px-6 py-3 font-black tracking-tight shadow-[0_18px_70px_rgba(230,0,18,0.28)] hover:brightness-110 transition-all"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#E60012] to-red-500 text-white px-6 py-3 font-black tracking-tight shadow-[0_18px_70px_rgba(230,0,18,0.28)] hover:brightness-110 transition-all ring-1 ring-amber-200/25"
                 >
                   Ver Premium em estoque
                   <ArrowRight className="w-5 h-5" />
@@ -346,7 +346,7 @@ export default async function PremiumPage() {
                   href={whatsAppDefault}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/5 px-6 py-3 font-black tracking-tight hover:bg-white/10 transition-colors backdrop-blur"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-amber-200/20 bg-white/5 px-6 py-3 font-black tracking-tight hover:bg-white/10 transition-colors backdrop-blur"
                 >
                   Falar no WhatsApp
                   <MessageCircle className="w-5 h-5" />
@@ -362,10 +362,10 @@ export default async function PremiumPage() {
                 ].map((item) => (
                   <div
                     key={item.title}
-                    className="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur transition-colors hover:border-white/15"
+                    className="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur transition-colors hover:border-amber-200/20"
                   >
                     <div className="flex items-center gap-3">
-                      <item.icon className="w-5 h-5 text-white/80" />
+                      <item.icon className="w-5 h-5 text-amber-200/80" />
                       <div className="text-sm font-black">{item.title}</div>
                     </div>
                     <div className="text-xs text-zinc-400 mt-2 leading-relaxed">{item.desc}</div>
@@ -374,7 +374,7 @@ export default async function PremiumPage() {
               </div>
             </div>
 
-            <div className="lg:col-span-7">
+            <div className="lg:col-span-6">
               {featured.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {featured.map((p) => (

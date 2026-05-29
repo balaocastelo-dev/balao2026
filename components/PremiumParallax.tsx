@@ -17,7 +17,7 @@ export default function PremiumParallax() {
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
       <motion.div style={{ opacity }} className="absolute inset-0">
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(255,255,255,0.10),transparent_40%),radial-gradient(circle_at_80%_35%,rgba(230,0,18,0.14),transparent_44%),radial-gradient(circle_at_50%_95%,rgba(167,139,250,0.14),transparent_48%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(255,255,255,0.10),transparent_40%),radial-gradient(circle_at_80%_35%,rgba(230,0,18,0.14),transparent_44%),radial-gradient(circle_at_55%_20%,rgba(251,191,36,0.12),transparent_42%),radial-gradient(circle_at_50%_95%,rgba(167,139,250,0.14),transparent_48%)]" />
       </motion.div>
 
       <motion.div
@@ -36,6 +36,11 @@ export default function PremiumParallax() {
       />
 
       <motion.div
+        style={{ y: y2, opacity }}
+        className="absolute top-10 left-1/2 -translate-x-1/2 h-[680px] w-[680px] rounded-full bg-[radial-gradient(circle_at_center,rgba(251,191,36,0.20),transparent_62%)] blur-[18px] mix-blend-screen"
+      />
+
+      <motion.div
         style={{ y: yText, opacity }}
         className="absolute left-1/2 top-20 -translate-x-1/2 text-[14vw] font-black tracking-tighter text-white/5 select-none whitespace-nowrap"
       >
@@ -44,7 +49,7 @@ export default function PremiumParallax() {
 
       <motion.div
         style={{ y: ySweep, opacity }}
-        className="absolute left-1/2 top-0 -translate-x-1/2 h-[520px] w-[120vw] -skew-y-6 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.10),transparent)] blur-[2px]"
+        className="absolute left-1/2 top-0 -translate-x-1/2 h-[520px] w-[120vw] -skew-y-6 bg-[linear-gradient(90deg,transparent,rgba(251,191,36,0.12),transparent)] blur-[2px]"
       />
 
       <div className="absolute inset-0 opacity-55 bg-[linear-gradient(to_right,rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:64px_64px]" />

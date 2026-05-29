@@ -241,14 +241,14 @@ export default function Header() {
           <Link
             href="/premium"
             className="flex items-center gap-3 group active:scale-95 transition-transform"
-            aria-label="Premium"
-            title="Premium"
+            aria-label="PCS Premium"
+            title="PCS Premium"
           >
             <div className="p-2 bg-gray-100 rounded-full text-amber-500 group-hover:bg-amber-100 group-hover:text-amber-600 transition-colors shadow-sm">
               <Crown size={20} className="md:w-5 md:h-5" strokeWidth={2.5} />
             </div>
             <div className="hidden lg:flex flex-col text-sm leading-tight">
-              <span className="text-gray-500">Acesso</span>
+              <span className="text-gray-500">PCS</span>
               <span className="font-bold text-gray-800 group-hover:text-amber-600 transition-colors">Premium</span>
             </div>
           </Link>
