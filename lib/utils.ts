@@ -14,6 +14,7 @@ export interface Product {
   product_url?: string;
   image_urls?: string[];
   imageValid?: boolean;
+  ai_status?: "thinking" | "done" | "error";
 }
 
 export interface UsedNotebook {
