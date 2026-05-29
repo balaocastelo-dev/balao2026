@@ -261,6 +261,7 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
           
           <div className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Serviços</div>
           <CustomLink href="/blog" icon={Book} label="Blog" />
+          <CustomLink href="/premium" icon={Star} label="Premium" />
           <CustomLink href="/servicos-e-ofertas" icon={Gift} label="Serviços e Ofertas" />
           <CustomLink href="/pcgamer" icon={Gamepad} label="PC Gamer" />
           <CustomLink href="/notebooks" icon={Laptop} label="Notebooks" />
@@ -348,6 +349,7 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
             
             <div className="px-4 mb-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Serviços</div>
             <CustomLink href="/blog" icon={Book} label="Blog" />
+            <CustomLink href="/premium" icon={Star} label="Premium" />
             <CustomLink href="/servicos-e-ofertas" icon={Gift} label="Serviços e Ofertas" />
             <CustomLink href="/pcgamer" icon={Gamepad} label="PC Gamer" />
             <CustomLink href="/notebooks" icon={Laptop} label="Notebooks" />

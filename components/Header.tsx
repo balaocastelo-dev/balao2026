@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Search, ShoppingCart, User, Menu, X, Loader2 } from "lucide-react";
+import { Search, ShoppingCart, User, Menu, X, Loader2, Crown } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
@@ -118,9 +118,7 @@ export default function Header() {
   };
 
   const handleCartMouseEnter = () => {
-    if (cartPreviewTimeoutRef.current) {
-      clearTimeout(cartPreviewTimeoutRef.current);
-    }
+    if (cartPreviewTimeoutRef.current) clearTimeout(cartPreviewTimeoutRef.current);
     setShowCartPreview(true);
   };
 
@@ -168,30 +166,45 @@ export default function Header() {
 
         {/* Search Bar (Desktop) */}
         <form 
-            ref={searchContainerRef}
-            onSubmit={handleSearch} 
-            className="flex-1 max-w-3xl relative hidden md:block"
+             ref={searchContainerRef}
+             onSubmit={handleSearch} 
+             className="hidden md:flex flex-1 max-w-xl relative"
         >
-          <div className="relative group">
-            <input
-                type="text"
-                placeholder="O que você procura hoje?"
-                className="w-full pl-6 pr-14 py-3 border-2 border-gray-200 rounded-full focus:outline-none focus:border-[#E60012] focus:ring-0 bg-gray-50 text-gray-800 placeholder-gray-400 text-base shadow-inner transition-all group-hover:border-gray-300"
-                value={searchQuery}
-                onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setShowPreview(true);
-                }}
-                onFocus={() => setShowPreview(true)}
-            />
-            <button 
-              type="button" 
+          <input
+              type="text"
+              placeholder="Buscar produtos..."
+              className="w-full pl-12 pr-24 py-3 border border-gray-300 rounded-full focus:outline-none focus:border-[#E60012] focus:ring-1 focus:ring-[#E60012] shadow-sm text-base"
+              value={searchQuery}
+              onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setShowPreview(true);
+              }}
+              onFocus={() => setShowPreview(true)}
+          />
+
+          {/* Search Icon */}
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+
+          {/* Clear Button */}
+          {searchQuery && (
+              <button
+                  type="button"
+                  onClick={clearSearch}
+                  className="absolute right-[88px] top-1/2 -translate-y-1/2 text-gray-400 p-2"
+              >
+                  {isLoading ? <Loader2 size={18} className="animate-spin" /> : <X size={18} />}
+              </button>
+          )}
+
+          {/* Search Button */}
+          <button
+              type="button"
               onClick={performSearch}
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#E60012] text-white p-2 rounded-full hover:bg-red-700 transition-colors shadow-md hover:shadow-lg z-10 cursor-pointer"
-            >
-                <Search size={20} strokeWidth={2.5} />
-            </button>
-          </div>
+              className="absolute right-3 top-1/2 -translate-y-1/2 bg-[#E60012] text-white px-4 py-2 rounded-full hover:bg-red-700 transition-colors flex items-center gap-2"
+          >
+              <Search size={18} />
+              <span className="hidden lg:inline font-semibold">Buscar</span>
+          </button>
 
           {/* Search Preview */}
           {showPreview && searchQuery.length >= 2 && (
@@ -222,6 +235,21 @@ export default function Header() {
                 <span className="font-bold text-gray-800 group-hover:text-[#E60012] transition-colors">
                   Fale Conosco
                 </span>
+            </div>
+          </Link>
+
+          <Link
+            href="/premium"
+            className="flex items-center gap-3 group active:scale-95 transition-transform"
+            aria-label="Premium"
+            title="Premium"
+          >
+            <div className="p-2 bg-gray-100 rounded-full text-amber-500 group-hover:bg-amber-100 group-hover:text-amber-600 transition-colors shadow-sm">
+              <Crown size={20} className="md:w-5 md:h-5" strokeWidth={2.5} />
+            </div>
+            <div className="hidden lg:flex flex-col text-sm leading-tight">
+              <span className="text-gray-500">Acesso</span>
+              <span className="font-bold text-gray-800 group-hover:text-amber-600 transition-colors">Premium</span>
             </div>
           </Link>
           
