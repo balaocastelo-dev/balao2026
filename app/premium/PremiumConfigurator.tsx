@@ -291,8 +291,8 @@ export default function PremiumConfigurator() {
   const motherboardItems = useMemo(() => toGridItems(filteredMotherboards), [filteredMotherboards]);
 
   useEffect(() => {
-    const allowedProcessorNames = new Set(filteredProcessors.map((p) => p.name));
-    const allowedMotherboardNames = new Set(filteredMotherboards.map((m) => m.name));
+    const allowedProcessorNames = new Set<string>(filteredProcessors.map((p) => p.name));
+    const allowedMotherboardNames = new Set<string>(filteredMotherboards.map((m) => m.name));
 
     setSelections((prev) => {
       const next: PremiumSelections = { ...prev };
