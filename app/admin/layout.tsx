@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowLeft, CheckCircle, Upload, Layout, Layers, ShoppingBag, Settings, Mail } from "lucide-react";
+import VitrineAdminShell from "@/components/admin/VitrineAdminShell";
 
 export default function AdminLayout({
   children,
@@ -11,8 +12,14 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
 
+  if (pathname === "/admin/gerador" || pathname === "/admin/paginas") {
+    return <VitrineAdminShell>{children}</VitrineAdminShell>;
+  }
+
   const tabs = [
     { name: "Importação em Massa", href: "/admin/importacao", icon: Upload },
+    { name: "Gerador de Páginas", href: "/admin/gerador", icon: Layout },
+    { name: "Minhas Páginas", href: "/admin/paginas", icon: Layout },
     { name: "Gerenciar Carrossel", href: "/admin/carrossel", icon: Layout },
     { name: "Gerenciar Categorias", href: "/admin/categorias", icon: Layers },
     { name: "Gerenciar Pedidos", href: "/admin/pedidos", icon: ShoppingBag },
