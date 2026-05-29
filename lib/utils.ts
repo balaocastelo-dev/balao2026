@@ -92,9 +92,13 @@ export type BlogPost = {
   title: string;
   slug: string;
   excerpt: string | null;
+  seo_title?: string | null;
+  seo_description?: string | null;
   content_html: string;
+  cover_image?: string | null;
   cover_image_url: string | null;
   cover_image_alt: string | null;
+  category?: string | null;
   source_url: string | null;
   source_site: string | null;
   source_title: string | null;
