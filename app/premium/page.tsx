@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import Header from "@/components/Header";
-import { getProducts } from "@/lib/db";
-import type { Product } from "@/lib/utils";
+import { getCategories, getProducts } from "@/lib/db";
+import { parsePriceToNumber, type Category, type Product } from "@/lib/utils";
 import { SITE_CONFIG } from "@/lib/config";
 import JsonLd from "@/components/JsonLd";
 import PremiumParallax from "@/components/PremiumParallax";
@@ -11,6 +11,7 @@ import {
   ArrowRight,
   BadgeCheck,
   Cpu,
+  type LucideIcon,
   MessageCircle,
   PackageCheck,
   ShieldCheck,
@@ -19,23 +20,17 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "PC Gamer Premium em Campinas | Montagem Profissional",
+  title: "Categoria Premium em Campinas | Balão da Informática",
   description:
-    "PC Gamer Premium em Campinas (Cambuí) com montagem profissional, testes completos, garantia e suporte real. Veja PCs gamer do nosso estoque e fale com um especialista.",
+    "Produtos Premium em Campinas (Cambuí): seleção especial do Balão da Informática com disponibilidade no site/estoque, garantia e suporte real. Confira a categoria Premium.",
   keywords: [
-    "pc gamer premium",
-    "pc gamer campinas",
-    "montagem de pc gamer campinas",
-    "computador gamer campinas",
-    "pc gamer em estoque",
-    "pc gamer pronto",
-    "pc gamer personalizado",
-    "workstation campinas",
-    "computador para arquitetura campinas",
-    "computador para engenharia campinas",
-    "pc para edição de vídeo",
-    "pc para streaming",
-    "pc gamer com garantia",
+    "categoria premium",
+    "produtos premium",
+    "premium campinas",
+    "premium cambuí",
+    "ofertas premium",
+    "linha premium",
+    "produto premium em estoque",
     "loja de informática campinas",
     "balão da informática",
     "cambuí campinas informática",
@@ -43,9 +38,9 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
   alternates: { canonical: "https://www.balao.info/premium" },
   openGraph: {
-    title: "PC Gamer Premium em Campinas | Balão da Informática",
+    title: "Categoria Premium em Campinas | Balão da Informática",
     description:
-      "PCs gamer premium do estoque, com montagem profissional e suporte real em Campinas. Escolha seu PC e finalize no WhatsApp.",
+      "Confira a categoria Premium do Balão da Informática: produtos premium do estoque, garantia e suporte real em Campinas.",
     type: "website",
     url: "https://www.balao.info/premium",
     images: [
@@ -59,9 +54,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "PC Gamer Premium em Campinas | Balão da Informática",
+    title: "Categoria Premium em Campinas | Balão da Informática",
     description:
-      "PCs gamer premium do estoque, com montagem profissional e suporte real em Campinas. Escolha seu PC e finalize no WhatsApp.",
+      "Confira a categoria Premium do Balão da Informática: produtos premium do estoque, garantia e suporte real em Campinas.",
     images: ["https://www.balao.info/logo.png"],
   },
   other: {
@@ -80,17 +75,6 @@ function normalize(text: string) {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .trim();
-}
-
-function parsePriceBRL(price: string): number {
-  const raw = (price || "").toString();
-  const cleaned = raw
-    .replace("R$", "")
-    .replace(/\s/g, "")
-    .replace(/\./g, "")
-    .replace(",", ".");
-  const num = Number.parseFloat(cleaned);
-  return Number.isFinite(num) ? num : 0;
 }
 
 function formatCurrency(value: number) {
@@ -119,7 +103,7 @@ function ProductTile({
 }) {
   const href = `/product/${product.id}`;
   const imgSrc = product.image || "/logo.png";
-  const priceNum = parsePriceBRL(product.price);
+  const priceNum = parsePriceToNumber(product.price);
   const priceLabel = priceNum > 0 ? formatCurrency(priceNum) : product.price || "Consultar";
 
   return (
@@ -165,27 +149,115 @@ function ProductTile({
   );
 }
 
+function InfoTile({
+  eyebrow,
+  title,
+  desc,
+  href,
+  icon: Icon,
+}: {
+  eyebrow: string;
+  title: string;
+  desc: string;
+  href?: string;
+  icon: LucideIcon;
+}) {
+  const content = (
+    <div className="relative p-6 flex flex-col gap-3">
+      <div className="flex items-center justify-between">
+        <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-zinc-400">{eyebrow}</div>
+        <Icon className="w-5 h-5 text-white/70" />
+      </div>
+      <div className="text-xl font-black tracking-tight">{title}</div>
+      <div className="text-sm text-zinc-300 leading-relaxed">{desc}</div>
+      {href ? (
+        <div className="mt-1 inline-flex items-center gap-2 text-sm font-black text-white">
+          Ver agora <ArrowRight className="w-4 h-4 text-white/80" />
+        </div>
+      ) : null}
+    </div>
+  );
+
+  const cls =
+    "relative overflow-hidden rounded-[28px] border border-white/10 bg-white/5 backdrop-blur hover:border-white/20 transition-colors";
+
+  if (href) {
+    const isExternal = href.startsWith("http://") || href.startsWith("https://");
+    if (isExternal) {
+      return (
+        <a href={href} target="_blank" rel="noopener noreferrer" className={cls}>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.10),_transparent_60%)] opacity-0 hover:opacity-100 transition-opacity" />
+          {content}
+        </a>
+      );
+    }
+
+    return (
+      <Link href={href} className={cls}>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.10),_transparent_60%)] opacity-0 hover:opacity-100 transition-opacity" />
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <div className={cls}>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.10),_transparent_60%)] opacity-0 hover:opacity-100 transition-opacity" />
+      {content}
+    </div>
+  );
+}
+
 export default async function PremiumPage() {
-  const products = await getProducts();
-  const pcGamerOnly = products.filter((p) => {
-    const t = normalize(`${p?.name || ""} ${p?.category || ""}`);
-    return t.includes("pc gamer") || t.includes("pcgamer");
+  const [products, categories] = await Promise.all([getProducts(), getCategories()]);
+
+  const findBySlug = (s: string, all: Category[]) => all.find((c) => c.slug === s);
+  const premiumCategory = findBySlug("premium", categories);
+
+  const getDescendantNames = (root: Category | undefined, all: Category[]) => {
+    if (!root) return [];
+    const descendants: string[] = [];
+    const stack = [root.id];
+    while (stack.length > 0) {
+      const currentId = stack.pop()!;
+      const children = all.filter((c) => c.parent_id === currentId);
+      children.forEach((child) => {
+        descendants.push(child.name);
+        stack.push(child.id);
+      });
+    }
+    return descendants;
+  };
+
+  const validCategories = new Set<string>();
+  if (premiumCategory?.name) {
+    validCategories.add(premiumCategory.name);
+    getDescendantNames(premiumCategory, categories).forEach((n) => validCategories.add(n));
+  }
+
+  const premiumOnly = products.filter((p) => {
+    if (validCategories.size > 0) return validCategories.has(p.category);
+    return normalize(p.category) === "premium";
   });
 
-  const selection = shuffleCopy(pcGamerOnly).slice(0, Math.min(17, pcGamerOnly.length));
-  const sortedSelection = [...selection].sort((a, b) => {
-    const priceA = parsePriceBRL(a.price);
-    const priceB = parsePriceBRL(b.price);
+  const sorted = [...premiumOnly].sort((a, b) => {
+    const priceA = parsePriceToNumber(a.price);
+    const priceB = parsePriceToNumber(b.price);
     if (priceA === 0 && priceB === 0) return 0;
     if (priceA === 0) return 1;
     if (priceB === 0) return -1;
     return priceB - priceA;
   });
-  const featured = sortedSelection.slice(0, 5);
-  const stock = sortedSelection.slice(5, 17);
+
+  const featuredTarget = 6;
+  const listTarget = 30;
+
+  const featured = sorted.slice(0, Math.min(featuredTarget, sorted.length));
+  const remaining = sorted.slice(featured.length);
+  const stock = shuffleCopy(remaining).slice(0, Math.min(listTarget - featured.length, remaining.length));
 
   const whatsAppDefault = buildWhatsAppLink(
-    "Olá! Quero montar um PC Premium no Balão da Informática. Pode me ajudar com uma configuração ideal para meu uso e orçamento?"
+    "Olá! Quero conhecer a categoria Premium do Balão da Informática. Pode me recomendar os melhores itens do estoque para o meu uso e orçamento?"
   );
 
   const displayedProducts = [...featured, ...stock].filter((p) => p?.id);
@@ -196,12 +268,12 @@ export default async function PremiumPage() {
       "@type": "WebPage",
       "@id": pageUrl,
       url: pageUrl,
-      name: "PC Gamer Premium em Campinas | Balão da Informática",
+      name: "Categoria Premium em Campinas | Balão da Informática",
       description:
-        "PC Gamer Premium em Campinas (Cambuí) com montagem profissional, testes completos e suporte real. Veja PCs gamer do estoque e peça orçamento.",
+        "Produtos Premium em Campinas (Cambuí): seleção especial do Balão da Informática com disponibilidade no site/estoque, garantia e suporte real.",
       inLanguage: "pt-BR",
       isPartOf: { "@type": "WebSite", "@id": storeUrl, url: storeUrl, name: SITE_CONFIG.name },
-      about: { "@type": "Thing", name: "PC Gamer Premium" },
+      about: { "@type": "Thing", name: "Categoria Premium" },
     },
     {
       "@type": "ComputerStore",
@@ -250,7 +322,7 @@ export default async function PremiumPage() {
               </div>
 
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[0.95]">
-                Seu PC{" "}
+                Categoria{" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-zinc-500">
                   Premium
                 </span>{" "}
@@ -258,8 +330,8 @@ export default async function PremiumPage() {
               </h1>
 
               <p className="text-lg sm:text-xl text-zinc-200/90 leading-relaxed max-w-[44rem]">
-                PCs gamer premium do estoque, com montagem profissional, testes completos e suporte real em Campinas. Se
-                quiser, montamos um projeto sob medida para seu uso e orçamento.
+                Uma seleção premium do nosso estoque. Itens escolhidos para quem quer qualidade, desempenho e segurança
+                na compra, com suporte de verdade em Campinas.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3">
@@ -267,7 +339,7 @@ export default async function PremiumPage() {
                   href="#estoque"
                   className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#E60012] to-red-500 text-white px-6 py-3 font-black tracking-tight shadow-[0_18px_70px_rgba(230,0,18,0.28)] hover:brightness-110 transition-all"
                 >
-                  Ver PCs em estoque
+                  Ver Premium em estoque
                   <ArrowRight className="w-5 h-5" />
                 </a>
                 <a
@@ -305,18 +377,33 @@ export default async function PremiumPage() {
             <div className="lg:col-span-7">
               {featured.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {featured.map((p, idx) => (
-                    <div key={p.id} className={idx === 0 ? "sm:col-span-2" : ""}>
-                      <ProductTile product={p} eyebrow={idx === 0 ? "PC gamer premium" : "PC gamer"} />
-                    </div>
+                  {featured.map((p) => (
+                    <ProductTile key={p.id} product={p} eyebrow="Premium" />
                   ))}
+                  {featured.length < featuredTarget ? (
+                    <>
+                      <InfoTile
+                        eyebrow="Categoria"
+                        title="Ver todos os Premium"
+                        desc="Abra a categoria Premium completa e navegue por todos os itens do estoque."
+                        href="/categoria/premium"
+                        icon={Sparkles}
+                      />
+                      <InfoTile
+                        eyebrow="Suporte"
+                        title="Ajuda para escolher"
+                        desc="Fale com um especialista e receba indicação do melhor Premium para seu uso e orçamento."
+                        href={whatsAppDefault}
+                        icon={MessageCircle}
+                      />
+                    </>
+                  ) : null}
                 </div>
               ) : (
                 <div className="rounded-[28px] border border-white/10 bg-white/5 p-8 backdrop-blur">
-                  <div className="text-2xl font-black tracking-tight">Sem PCs gamer cadastrados</div>
+                  <div className="text-2xl font-black tracking-tight">Sem produtos Premium cadastrados</div>
                   <div className="text-sm text-zinc-300 mt-2 leading-relaxed">
-                    Cadastre produtos com a categoria ou nome contendo “PC Gamer” para aparecerem aqui, do mais caro para
-                    o mais barato.
+                    Cadastre produtos na categoria Premium para aparecerem aqui automaticamente.
                   </div>
                   <div className="mt-5 flex flex-col sm:flex-row gap-3">
                     <Link
@@ -349,7 +436,7 @@ export default async function PremiumPage() {
                   </div>
                   <a
                     href={buildWhatsAppLink(
-                      "Olá! Quero um projeto exclusivo Premium. Meu uso é: (jogos/trabalho/edição). Meu orçamento é: (R$). Pode montar uma proposta com peças do estoque?"
+                      "Olá! Quero uma indicação de produtos da categoria Premium. Meu uso é: ( ). Meu orçamento é: (R$). Pode me ajudar?"
                     )}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -370,14 +457,14 @@ export default async function PremiumPage() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
             <div>
-              <div className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400">Seu próximo PC</div>
-              <h2 className="text-3xl sm:text-5xl font-black tracking-tight">Destaques do estoque</h2>
+              <div className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400">Seleção premium</div>
+              <h2 className="text-3xl sm:text-5xl font-black tracking-tight">Premium do estoque</h2>
             </div>
             <Link
-              href="/pcgamer"
+              href="/categoria/premium"
               className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 font-black hover:bg-white/10 transition-colors"
             >
-              Ver PC Gamer
+              Ver categoria Premium
               <ArrowRight className="w-5 h-5" />
             </Link>
           </div>
@@ -386,6 +473,31 @@ export default async function PremiumPage() {
             {stock.map((p) => (
               <ProductTile key={p.id} product={p} />
             ))}
+            {stock.length % 3 === 1 ? (
+              <>
+                <InfoTile
+                  eyebrow="Premium"
+                  title="Retire no Cambuí"
+                  desc="Loja física em Campinas para retirada e suporte presencial."
+                  icon={PackageCheck}
+                />
+                <InfoTile
+                  eyebrow="Garantia"
+                  title="Compra segura"
+                  desc="Suporte e pós-venda do Balão da Informática para te acompanhar."
+                  icon={ShieldCheck}
+                />
+              </>
+            ) : null}
+            {stock.length % 3 === 2 ? (
+              <InfoTile
+                eyebrow="WhatsApp"
+                title="Recomendação rápida"
+                desc="Diga seu objetivo e orçamento e a gente aponta o melhor Premium do estoque."
+                href={whatsAppDefault}
+                icon={MessageCircle}
+              />
+            ) : null}
           </div>
 
           <div className="mt-10 rounded-[28px] border border-white/10 bg-white/5 p-6 backdrop-blur">
@@ -393,7 +505,7 @@ export default async function PremiumPage() {
               <div>
                 <div className="text-lg font-black">Não achou o ideal?</div>
                 <div className="text-sm text-zinc-300">
-                  A gente monta um PC Premium com as peças certas para seu uso e orçamento.
+                  A gente te ajuda a escolher um Premium ideal para seu uso e orçamento.
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row gap-3">
@@ -436,22 +548,22 @@ export default async function PremiumPage() {
               {
                 title: "Balão Gamer",
                 desc: "FPS alto, visual gamer e upgrades planejados. Ideal para quem joga competitivo e quer um setup bonito.",
-                cta: "Quero um PC Gamer Premium",
+                cta: "Quero recomendações Premium",
               },
               {
                 title: "Balão Workstation",
                 desc: "Estabilidade e performance para AutoCAD, Revit, render e produtividade. Configuração pensada para trabalho.",
-                cta: "Quero uma Workstation Premium",
+                cta: "Quero opções Premium para trabalho",
               },
               {
                 title: "Balão Creator",
                 desc: "Edição, lives e criação de conteúdo com fluidez. Peças selecionadas para multitarefa e exportação rápida.",
-                cta: "Quero um PC Creator Premium",
+                cta: "Quero opções Premium para criação",
               },
               {
                 title: "Balão Extreme",
                 desc: "Projeto exclusivo para quem quer o máximo: potência, acabamento e estética de vitrine.",
-                cta: "Quero um projeto Extreme",
+                cta: "Quero um projeto Premium",
               },
             ].map((line) => (
               <div
@@ -484,19 +596,19 @@ export default async function PremiumPage() {
             <div className="lg:col-span-5">
               <div className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400">SEO e localização</div>
               <h2 className="text-3xl sm:text-5xl font-black tracking-tight mt-2">
-                PC Gamer Premium em Campinas é no Balão da Informática.
+                Produtos Premium em Campinas é no Balão da Informática.
               </h2>
               <p className="text-zinc-300 mt-4 leading-relaxed">
-                Se você busca <strong className="text-white">PC gamer premium</strong> em Campinas, com montagem
-                profissional, testes e suporte pós-venda, esta é a página certa. Estamos no <strong className="text-white">Cambuí</strong> e atendemos
-                Campinas e região, com envio para outras cidades.
+                Se você busca <strong className="text-white">produtos Premium</strong> em Campinas, com compra segura,
+                disponibilidade real no estoque e suporte pós-venda, esta é a página certa. Estamos no{" "}
+                <strong className="text-white">Cambuí</strong> e atendemos Campinas e região, com envio para outras cidades.
               </p>
             </div>
             <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
                 {
                   title: "Palavras-chave principais",
-                  desc: "pc gamer premium, pc gamer campinas, montagem de pc gamer, computador gamer em estoque, pc para streaming, pc para edição de vídeo.",
+                  desc: "categoria premium, produtos premium, premium em campinas, premium cambuí, itens premium em estoque, comprar premium.",
                 },
                 {
                   title: "Localização (GEO)",
@@ -504,11 +616,11 @@ export default async function PremiumPage() {
                 },
                 {
                   title: "Perfis de uso",
-                  desc: "Jogos competitivos, jogos pesados, criação de conteúdo, edição, arquitetura, engenharia e produtividade.",
+                  desc: "Upgrade premium, setup premium, trabalho, criação e alta performance com curadoria do Balão.",
                 },
                 {
                   title: "O que você recebe",
-                  desc: "Montagem com padrão premium, validação de compatibilidade, testes de estabilidade e suporte real.",
+                  desc: "Atendimento, suporte e recomendação certa para você comprar com tranquilidade.",
                 },
               ].map((card) => (
                 <div
@@ -591,7 +703,7 @@ export default async function PremiumPage() {
               },
               {
                 q: "Posso pedir um PC sob medida mesmo escolhendo um destaque?",
-                a: "Pode. Os destaques servem como base. A gente ajusta peça por peça conforme seu uso, estética e orçamento.",
+                a: "Pode. Os destaques servem como base. A gente ajusta a recomendação conforme seu uso, estética e orçamento.",
               },
               {
                 q: "Vocês verificam compatibilidade e estabilidade?",
