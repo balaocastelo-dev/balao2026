@@ -17,12 +17,14 @@ import {
 } from "lucide-react";
 import { SITE_CONFIG } from "@/lib/config";
 import { premiumPartsCatalog, PremiumPlatform } from "@/data/premiumPartsCatalog";
+import SafeImage from "@/components/SafeImage";
 
 type GridItem = {
   value: string;
   title: string;
   subtitle?: string;
   meta?: string;
+  priceLabel?: string;
 };
 
 type PremiumSelections = {
@@ -67,10 +69,10 @@ const presets: Record<string, Partial<PremiumSelections>> = {
   "gamer-start": {
     purpose: "Jogos competitivos",
     platform: "Intel",
-    processor: "Intel Core Ultra 5",
-    motherboard: "H810M",
-    waterCooler: "Vortex 360 ARGB",
-    gpu: "NVIDIA GeForce RTX 5060 8GB",
+    processor: "Intel Core Ultra 5 245KF",
+    motherboard: "MSI PRO H810M-B DDR5",
+    waterCooler: "Antec Vortex 360 ARGB",
+    gpu: "RTX 5060 8GB",
     memory: "16GB DDR5 6000MHz",
     ssd: "SSD NVMe 1TB",
     ssdQuantity: "1 unidade",
@@ -83,26 +85,26 @@ const presets: Record<string, Partial<PremiumSelections>> = {
   "gamer-pro": {
     purpose: "Jogos pesados",
     platform: "Intel",
-    processor: "Intel Core Ultra 7",
-    motherboard: "Asus Z890-P DDR5",
-    waterCooler: "Vortex 360 ARGB",
-    gpu: "NVIDIA GeForce RTX 5070 12GB",
+    processor: "Intel Core Ultra 7 265KF",
+    motherboard: "Asus Prime Z890-P WiFi DDR5",
+    waterCooler: "Antec Vortex 360 ARGB",
+    gpu: "RTX 5070 12GB",
     memory: "32GB DDR5 6000MHz",
     ssd: "SSD NVMe 1TB",
     ssdQuantity: "1 unidade",
     hd: "HD 2TB",
     hdQuantity: "1 unidade",
     powerSupply: "Fonte 800W 80 Plus Gold",
-    case: "Masterbox TD 500",
+    case: "Masterbox TD500 Mesh",
     budget: "R$ 9.000 a R$ 13.000",
   },
   "gamer-ultra": {
     purpose: "Streaming",
     platform: "AMD Ryzen",
     processor: "AMD Ryzen 9 9900X",
-    motherboard: "Asus X870",
-    waterCooler: "Corsair H150i",
-    gpu: "NVIDIA GeForce RTX 5070 Ti",
+    motherboard: "Asus Prime X870-P WiFi",
+    waterCooler: "Corsair iCUE H150i 360mm",
+    gpu: "RTX 5070 Ti 16GB",
     memory: "32GB DDR5 6000MHz",
     ssd: "SSD NVMe 2TB",
     ssdQuantity: "1 unidade",
@@ -115,16 +117,16 @@ const presets: Record<string, Partial<PremiumSelections>> = {
   extreme: {
     purpose: "Projeto extremo personalizado",
     platform: "Intel",
-    processor: "Intel Core Ultra 9",
-    motherboard: "Asus Z890-P DDR5",
+    processor: "Intel Core Ultra 9 285K",
+    motherboard: "Asus Prime Z890-P WiFi DDR5",
     waterCooler: "NZXT Kraken Elite 360",
-    gpu: "NVIDIA GeForce RTX 5090",
+    gpu: "RTX 5090 32GB",
     memory: "64GB DDR5 6000MHz",
     ssd: "SSD NVMe 4TB",
     ssdQuantity: "2 unidades",
     hd: "HD 8TB",
     hdQuantity: "1 unidade",
-    powerSupply: "Fonte 1200W Platinum",
+    powerSupply: "Fonte Asus ROG Thor 1200P2 Platinum",
     case: "Asus ROG Hyperion GR701",
     budget: "Acima de R$ 20.000",
   },
@@ -132,9 +134,9 @@ const presets: Record<string, Partial<PremiumSelections>> = {
     purpose: "Arquitetura",
     platform: "AMD Ryzen",
     processor: "AMD Ryzen 9 9950X",
-    motherboard: "Asus X870",
-    waterCooler: "Corsair H150i",
-    gpu: "NVIDIA GeForce RTX 5080",
+    motherboard: "Asus Prime X870-P WiFi",
+    waterCooler: "Corsair iCUE H150i 360mm",
+    gpu: "RTX 5080 16GB",
     memory: "64GB DDR5 6000MHz",
     ssd: "SSD NVMe 2TB",
     ssdQuantity: "1 unidade",
@@ -148,28 +150,42 @@ const presets: Record<string, Partial<PremiumSelections>> = {
     purpose: "Renderização pesada / Engenharia / Simulação",
     platform: "AMD Threadripper",
     processor: "AMD Ryzen Threadripper PRO 9995WX",
-    motherboard: "WRX90E-Sage SE",
-    waterCooler: "Corsair H150i",
-    gpu: "NVIDIA GeForce RTX 5090",
+    motherboard: "Asus Pro WS WRX90E-SAGE SE",
+    waterCooler: "Corsair iCUE H150i 360mm",
+    gpu: "RTX 5090 32GB",
     memory: "192GB DDR5",
     ssd: "SSD NVMe 8TB",
     ssdQuantity: "2 unidades",
     hd: "HD 20TB",
     hdQuantity: "1 unidade",
-    powerSupply: "Fonte 1200W Platinum",
+    powerSupply: "Fonte Asus ROG Thor 1200P2 Platinum",
     case: "Asus ROG Hyperion GR701",
     budget: "Acima de R$ 20.000",
   },
 };
 
+const brl = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+
+function formatPriceLabel(price?: number | null) {
+  if (price == null) return "Consultar valor";
+  return brl.format(price);
+}
+
 function toGridItems(
-  items: readonly { name: string; tier?: string; recommendedFor?: string; style?: string }[]
+  items: readonly {
+    name: string;
+    tier?: string;
+    recommendedFor?: string;
+    style?: string;
+    price?: number | null;
+  }[]
 ): GridItem[] {
   return items.map((i) => ({
     value: i.name,
     title: i.name,
     subtitle: i.tier || i.style,
     meta: i.recommendedFor,
+    priceLabel: formatPriceLabel(i.price),
   }));
 }
 
@@ -221,11 +237,16 @@ function ChoiceGrid({
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="text-sm font-extrabold text-white">{opt.title}</div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="text-sm font-extrabold text-white">{opt.title}</div>
+                    {opt.priceLabel ? (
+                      <div className="rounded-lg border border-white/10 bg-black/25 px-2 py-1 text-[11px] font-extrabold text-white/85">
+                        {opt.priceLabel}
+                      </div>
+                    ) : null}
+                  </div>
                   {opt.subtitle ? (
-                    <div className="mt-1 text-xs font-semibold text-white/60">
-                      {opt.subtitle}
-                    </div>
+                    <div className="mt-1 text-xs font-semibold text-white/60">{opt.subtitle}</div>
                   ) : null}
                 </div>
                 <span
@@ -266,6 +287,32 @@ export default function PremiumConfigurator() {
   const searchParams = useSearchParams();
 
   const [selections, setSelections] = useState<PremiumSelections>(() => defaultSelections());
+
+  const setupImages = useMemo(
+    () => [
+      {
+        src: "/images/premium/setups/setup-gamer-premium-01.webp",
+        alt: "Setup gamer premium em tons escuros com iluminação vermelha",
+      },
+      {
+        src: "/images/premium/setups/setup-gamer-premium-02.webp",
+        alt: "Setup gamer premium com PC iluminado em vermelho",
+      },
+      {
+        src: "/images/premium/setups/setup-workstation-premium.webp",
+        alt: "Setup workstation premium com dois monitores e iluminação vermelha",
+      },
+      {
+        src: "/images/premium/setups/setup-creator-premium.webp",
+        alt: "Setup creator premium para edição e produção",
+      },
+      {
+        src: "/images/premium/setups/setup-extreme-premium.webp",
+        alt: "PC premium com visual extremo e iluminação vermelha",
+      },
+    ],
+    []
+  );
 
   const platformItems: GridItem[] = premiumPartsCatalog.platforms.map((p) => ({
     value: p,
@@ -382,6 +429,55 @@ export default function PremiumConfigurator() {
 
   const budgetItems: GridItem[] = premiumPartsCatalog.budgets.map((b) => ({ value: b, title: b }));
 
+  const pricing = useMemo(() => {
+    const getItemPrice = (list: readonly { name: string; price?: number | null }[], name: string) =>
+      list.find((i) => i.name === name)?.price ?? null;
+
+    const parseQty = (label: string) => {
+      const m = label.match(/(\d+)/);
+      if (!m) return 0;
+      const n = Number(m[1]);
+      return Number.isFinite(n) ? n : 0;
+    };
+
+    const ssdQty = parseQty(selections.ssdQuantity);
+    const hdQty = selections.hdQuantity === "Nenhum" ? 0 : parseQty(selections.hdQuantity);
+
+    const parts: Array<{ label: string; price: number | null }> = [
+      { label: "Processador", price: getItemPrice(premiumPartsCatalog.processors, selections.processor) },
+      { label: "Placa-mãe", price: getItemPrice(premiumPartsCatalog.motherboards, selections.motherboard) },
+      { label: "Water cooler", price: getItemPrice(premiumPartsCatalog.waterCoolers, selections.waterCooler) },
+      { label: "Placa de vídeo", price: getItemPrice(premiumPartsCatalog.gpus, selections.gpu) },
+      { label: "Memória RAM", price: getItemPrice(premiumPartsCatalog.memories, selections.memory) },
+      { label: "Fonte", price: getItemPrice(premiumPartsCatalog.powerSupplies, selections.powerSupply) },
+      { label: "Gabinete", price: getItemPrice(premiumPartsCatalog.cases, selections.case) },
+    ];
+
+    const ssdUnit = getItemPrice(premiumPartsCatalog.ssds, selections.ssd);
+    const hdUnit = getItemPrice(premiumPartsCatalog.hds, selections.hd);
+
+    const missing = [
+      ...parts.filter((p) => p.price == null).map((p) => p.label),
+      ...(ssdUnit == null ? ["SSD"] : []),
+      ...(hdUnit == null ? ["HD"] : []),
+    ];
+
+    const subtotal =
+      parts.reduce((sum, p) => sum + (p.price ?? 0), 0) +
+      (ssdUnit != null ? ssdUnit * Math.max(1, ssdQty) : 0) +
+      (hdUnit != null ? hdUnit * Math.max(0, hdQty) : 0);
+
+    return {
+      subtotal,
+      missingCount: missing.length,
+      missingLabels: missing,
+      ssdQty: Math.max(1, ssdQty),
+      hdQty: Math.max(0, hdQty),
+      ssdUnit,
+      hdUnit,
+    };
+  }, [selections]);
+
   const summary = (
     <div className="rounded-3xl border border-white/10 bg-black/25 p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.02)] backdrop-blur-sm sm:p-6">
       <div className="flex items-start justify-between gap-4">
@@ -390,9 +486,12 @@ export default function PremiumConfigurator() {
           <div className="mt-1 text-xs text-white/60">Orçamento personalizado pelo WhatsApp</div>
         </div>
         <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-extrabold text-white/85">
-          Preço final sob consulta
+          {pricing.subtotal > 0 ? `Estimativa: ${brl.format(pricing.subtotal)}` : "Preço final sob consulta"}
         </div>
       </div>
+      {pricing.missingCount > 0 ? (
+        <div className="mt-3 text-xs text-white/55">Itens sob consulta: {pricing.missingCount}</div>
+      ) : null}
 
       <div className="mt-5">
         <SummaryRow label="Finalidade" value={selections.purpose} />
@@ -429,6 +528,25 @@ export default function PremiumConfigurator() {
 
   return (
     <div className="rounded-3xl border border-white/10 bg-gradient-to-b from-white/10 to-white/5 p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.02)] sm:p-8">
+      <div className="mb-8">
+        <div className="text-sm font-extrabold text-white/95">Imagens ilustrativas</div>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          {setupImages.map((img) => (
+            <div key={img.src} className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/30">
+              <div className="relative aspect-[16/10] w-full">
+                <SafeImage
+                  src={img.src}
+                  fallbackSrc="/images/pc.webp"
+                  alt={img.alt}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 220px"
+                  className="object-cover"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
       <div className="grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
         <div className="space-y-8">
           <ChoiceGrid
