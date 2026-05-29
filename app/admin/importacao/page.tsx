@@ -6,21 +6,21 @@ import { Upload, CheckCircle, AlertCircle, Search, Save } from "lucide-react";
 
 export default function ImportPage() {
   const [categories, setCategories] = useState<Category[]>([]);
-
+  
+  // Import State
   const [text, setText] = useState("");
   const [parsedProducts, setParsedProducts] = useState<Product[]>([]);
   const [importStep, setImportStep] = useState<"input" | "preview">("input");
-
+  
+  // Import Settings
   const [selectedCategory, setSelectedCategory] = useState("Hardware");
   const [priceAdjustment, setPriceAdjustment] = useState<number>(0);
   const [adjustmentScope, setAdjustmentScope] = useState<"all" | "high_value" | "low_value">("all");
   const [scopeThreshold, setScopeThreshold] = useState<number>(1000);
   const [migrateImages, setMigrateImages] = useState(false);
-
+  
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
-  const [analysisConcurrency, setAnalysisConcurrency] = useState<number>(18);
-  const [analysisBatchSize, setAnalysisBatchSize] = useState<number>(25);
 
   useEffect(() => {
     fetchCategories();
@@ -28,167 +28,167 @@ export default function ImportPage() {
 
   const fetchCategories = async () => {
     try {
-      const res = await fetch("/api/categories");
-      if (res.ok) {
-        const data = await res.json();
-        setCategories(data);
-      }
+        const res = await fetch("/api/categories");
+        if (res.ok) {
+            const data = await res.json();
+            setCategories(data);
+        }
     } catch (e) {
-      console.error("Failed to fetch categories", e);
+        console.error("Failed to fetch categories", e);
     }
   };
 
+  // Preview Logic
   const getPreviewProducts = () => {
     return parsedProducts.map((p: Product) => {
-      let priceNum = parseFloat(p.price.replace("R$", "").replace(/\./g, "").replace(",", ".").trim());
-      if (isNaN(priceNum)) priceNum = 0;
+        // Fix: Use global regex for replace all dots, then replace comma with dot
+        let priceNum = parseFloat(p.price.replace("R$", "").replace(/\./g, "").replace(",", ".").trim());
+        if (isNaN(priceNum)) priceNum = 0;
 
-      let applyAdjustment = false;
-      if (adjustmentScope === "all") applyAdjustment = true;
-      else if (adjustmentScope === "high_value" && priceNum >= scopeThreshold) applyAdjustment = true;
-      else if (adjustmentScope === "low_value" && priceNum < scopeThreshold) applyAdjustment = true;
+        let applyAdjustment = false;
+        if (adjustmentScope === "all") applyAdjustment = true;
+        else if (adjustmentScope === "high_value" && priceNum >= scopeThreshold) applyAdjustment = true;
+        else if (adjustmentScope === "low_value" && priceNum < scopeThreshold) applyAdjustment = true;
 
-      let newPriceNum = priceNum;
-      if (applyAdjustment) {
-        newPriceNum = priceNum * (1 + priceAdjustment / 100);
-      }
+        let newPriceNum = priceNum;
+        if (applyAdjustment) {
+            newPriceNum = priceNum * (1 + priceAdjustment / 100);
+        }
 
-      const newPriceFormatted = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
-        newPriceNum
-      );
+        const newPriceFormatted = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(newPriceNum);
 
-      return {
-        ...p,
-        category: selectedCategory,
-        originalPrice: p.price,
-        newPrice: newPriceFormatted,
-        priceChange: newPriceNum - priceNum,
+        return {
+            ...p,
+            category: selectedCategory, // Apply selected category
+            originalPrice: p.price,
+            newPrice: newPriceFormatted,
+            priceChange: newPriceNum - priceNum
+        };
+    });
+  };
+
+  const validateImage = (url: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const img = new window.Image();
+      img.onload = () => {
+        resolve(true);
       };
+      img.onerror = () => resolve(false); 
+      img.src = url;
     });
   };
 
   const optimizeUrl = (url: string) => {
     try {
-      const u = new URL(url);
+        const u = new URL(url);
+        
+        // 1. Remove common resize query parameters
+        const paramsToRemove = ['w', 'h', 'width', 'height', 'size', 'resize', 'format', 'quality', 'fit', 'crop', 'dpr', 'auto', 'v'];
+        paramsToRemove.forEach(p => u.searchParams.delete(p));
 
-      const paramsToRemove = [
-        "w",
-        "h",
-        "width",
-        "height",
-        "size",
-        "resize",
-        "format",
-        "quality",
-        "fit",
-        "crop",
-        "dpr",
-        "auto",
-        "v",
-      ];
-      paramsToRemove.forEach((p) => u.searchParams.delete(p));
+        let path = u.pathname;
 
-      let path = u.pathname;
+        // 2. Handle Google/Blogspot image resizing (/sXXX/) -> switch to /s0/ (original)
+        if (/\/s\d+(-c)?\//.test(path)) {
+            path = path.replace(/\/s\d+(-c)?\//, '/s0/');
+        }
+        
+        // 3. Remove size suffixes in filename (e.g., image_50x50.jpg -> image.jpg)
+        // Matches _100x100, _thumb, -thumb, _small, .small before extension
+        const sizePattern = /[-_](?:\d+x\d+|thumb|thumbnail|small|medium|large|mini)(?=\.[a-zA-Z0-9]+$)/i;
+        if (sizePattern.test(path)) {
+             path = path.replace(sizePattern, '');
+        }
 
-      if (/\/s\d+(-c)?\//.test(path)) {
-        path = path.replace(/\/s\d+(-c)?\//, "/s0/");
-      }
-
-      const sizePattern = /[-_](?:\d+x\d+|thumb|thumbnail|small|medium|large|mini)(?=\.[a-zA-Z0-9]+$)/i;
-      if (sizePattern.test(path)) {
-        path = path.replace(sizePattern, "");
-      }
-
-      u.pathname = path;
-      return u.toString();
+        u.pathname = path;
+        return u.toString();
     } catch {
-      return url.replace(/[-_]\d+x\d+(?=\.[a-zA-Z0-9]+$)/, "");
+        // Fallback for non-standard URLs: try basic regex cleanup
+        return url.replace(/[-_]\d+x\d+(?=\.[a-zA-Z0-9]+$)/, '');
     }
   };
 
   const handleParse = async () => {
     setStatus("loading");
-    setMessage("Analisando links... 0/0");
+    setMessage("Buscando todas as imagens em alta resolução (original.jpg) e preparando importação em lote...");
 
     const products = parseProducts(text);
     if (products.length === 0) {
-      setStatus("error");
-      setMessage("Nenhum produto encontrado no texto.");
-      return;
+        setStatus("error");
+        setMessage("Nenhum produto encontrado no texto.");
+        return;
     }
 
     const kabumUrls = Array.from(
-      new Set(products.map((p) => p.product_url).filter((u): u is string => Boolean(u && u.includes("kabum.com.br"))))
+      new Set(
+        products
+          .map((p) => p.product_url)
+          .filter((u): u is string => typeof u === "string" && u.includes("kabum.com.br"))
+      )
     );
 
-    const scrapeMap = new Map<string, string[]>();
+    const kabumImagesByUrl = new Map<string, string[]>();
+
     if (kabumUrls.length > 0) {
       try {
-        const safeConcurrency = Math.max(1, Math.min(30, Number(analysisConcurrency) || 1));
-        const safeBatchSize = Math.max(1, Math.min(80, Number(analysisBatchSize) || 1));
-        const headConcurrency = Math.max(1, Math.min(60, Math.ceil(safeConcurrency * 3)));
+        const scrapeRes = await fetch("/api/scrape/products-batch", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            urls: kabumUrls,
+            concurrency: 18,
+            headConcurrency: 40,
+            imageLimit: 24
+          }),
+        });
 
-        let done = 0;
-        setMessage(`Analisando links... ${done}/${kabumUrls.length}`);
+        if (scrapeRes.ok) {
+          const scrapeData = await scrapeRes.json();
+          const results = Array.isArray(scrapeData?.results) ? scrapeData.results : [];
 
-        for (let i = 0; i < kabumUrls.length; i += safeBatchSize) {
-          const batch = kabumUrls.slice(i, i + safeBatchSize);
-          const controller = new AbortController();
-          const timeout = window.setTimeout(() => controller.abort(), 45000);
-
-          try {
-            const scrapeRes = await fetch("/api/scrape/products-batch", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                urls: batch,
-                concurrency: safeConcurrency,
-                headConcurrency,
-                imageLimit: 6,
-              }),
-              signal: controller.signal,
-            });
-
-            if (scrapeRes.ok) {
-              const scrapeData = await scrapeRes.json();
-              if (scrapeData?.success && Array.isArray(scrapeData.results)) {
-                for (const r of scrapeData.results) {
-                  if (r?.url && Array.isArray(r.images)) {
-                    scrapeMap.set(r.url, r.images);
-                  }
-                }
-              }
-            }
-          } finally {
-            window.clearTimeout(timeout);
-          }
-
-          done += batch.length;
-          setMessage(`Analisando links... ${done}/${kabumUrls.length}`);
+          results.forEach((r: any) => {
+            const url = typeof r?.url === "string" ? r.url : "";
+            const imgs = Array.isArray(r?.images) ? r.images.filter((x: any) => typeof x === "string") : [];
+            if (url && imgs.length > 0) kabumImagesByUrl.set(url, imgs);
+          });
         }
       } catch (e) {
-        console.error("Failed to batch scrape Kabum images", e);
+        console.error("Failed to scrape batch images", e);
       }
     }
 
-    const withImages = products.map((p) => {
-      const imageUrls = p.product_url ? scrapeMap.get(p.product_url) || [] : [];
-      const mainImage = imageUrls[0] || (p.image ? optimizeUrl(p.image) : "");
-      return { ...p, image: mainImage, image_urls: imageUrls, imageValid: Boolean(mainImage) };
-    });
+    const productsWithValidation = await Promise.all(
+      products.map(async (p) => {
+        const productUrl = typeof p.product_url === "string" ? p.product_url : "";
+        const fromKabum = productUrl.includes("kabum.com.br");
 
-    const validProducts = withImages.filter((r) => r.imageValid && r.image);
+        const imageUrls = fromKabum ? (kabumImagesByUrl.get(productUrl) || []) : [];
+        const mainImage = imageUrls[0] || (p.image ? optimizeUrl(p.image) : "");
 
+        const isValid = fromKabum ? Boolean(mainImage) : (mainImage ? await validateImage(mainImage) : false);
+
+        const normalizedImageUrls =
+          imageUrls.length > 0
+            ? imageUrls
+            : mainImage
+              ? [mainImage]
+              : [];
+
+        return { ...p, image: mainImage, image_urls: normalizedImageUrls, imageValid: isValid };
+      })
+    );
+
+    // Filter out invalid images as requested
+    const validProducts = productsWithValidation.filter(r => r.imageValid && r.image);
+        
     setParsedProducts(validProducts);
     setImportStep("preview");
     setStatus("idle");
-
-    if (validProducts.length < withImages.length) {
-      setMessage(
-        `${validProducts.length} produtos válidos encontrados. (${withImages.length - validProducts.length} removidos por imagem ausente).`
-      );
+    
+    if (validProducts.length < productsWithValidation.length) {
+        setMessage(`${validProducts.length} produtos válidos encontrados. (${productsWithValidation.length - validProducts.length} removidos por imagem inválida/quebrada).`);
     } else {
-      setMessage(`${validProducts.length} produtos encontrados com sucesso.`);
+        setMessage(`${validProducts.length} produtos encontrados com sucesso.`);
     }
   };
 
@@ -196,12 +196,14 @@ export default function ImportPage() {
     setStatus("loading");
     try {
       const finalProducts = getPreviewProducts().map((p: any) => ({
-        id: p.id,
-        name: p.name,
-        price: p.newPrice,
-        image: p.image,
-        category: p.category,
-        slug: p.slug,
+          id: p.id,
+          name: p.name,
+          price: p.newPrice, // Use calculated price
+          image: p.image,
+          image_urls: Array.isArray(p.image_urls) && p.image_urls.length > 0 ? p.image_urls : (p.image ? [p.image] : []),
+          product_url: p.product_url,
+          category: p.category,
+          slug: p.slug
       }));
 
       const res = await fetch("/api/products", {
@@ -215,15 +217,16 @@ export default function ImportPage() {
         throw new Error(errorData.error || "Falha ao salvar");
       }
 
+      // Save History
       await fetch("/api/history", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          product_count: finalProducts.length,
-          price_percentage: priceAdjustment,
-          applied_category: selectedCategory,
-          applied_scope: adjustmentScope,
-        }),
+            product_count: finalProducts.length,
+            price_percentage: priceAdjustment,
+            applied_category: selectedCategory,
+            applied_scope: adjustmentScope
+        })
       });
 
       const data = await res.json();
@@ -232,7 +235,8 @@ export default function ImportPage() {
       setText("");
       setParsedProducts([]);
       setImportStep("input");
-
+      
+      // Reset settings
       setPriceAdjustment(0);
     } catch (e: any) {
       console.error(e);
@@ -243,236 +247,213 @@ export default function ImportPage() {
 
   const categoryTree = buildCategoryTree(categories);
   const flatCategories: { name: string; level: number }[] = [];
-
+  
   const flatten = (nodes: Category[], level = 0) => {
-    nodes.forEach((node) => {
-      flatCategories.push({ name: node.name, level });
-      if (node.children) flatten(node.children, level + 1);
+    nodes.forEach(node => {
+        flatCategories.push({ name: node.name, level });
+        if (node.children) flatten(node.children, level + 1);
     });
   };
   flatten(categoryTree);
 
   return (
     <div className="animate-in fade-in duration-300">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-          <Upload className="text-[#E60012]" />
-          Importação de Produtos
-        </h2>
-        {importStep === "preview" && (
-          <button onClick={() => setImportStep("input")} className="text-sm text-gray-500 hover:text-gray-800 underline">
-            Voltar para edição
-          </button>
-        )}
-      </div>
-
-      {message && (
-        <div
-          className={`mb-6 p-4 rounded-md border flex items-center gap-3 ${
-            status === "success"
-              ? "bg-green-50 border-green-200 text-green-700"
-              : status === "error"
-                ? "bg-red-50 border-red-200 text-red-700"
-                : "bg-blue-50 border-blue-200 text-blue-700"
-          }`}
-        >
-          {status === "success" ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
-          {message}
+        <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <Upload className="text-[#E60012]" />
+                Importação de Produtos
+            </h2>
+            {importStep === "preview" && (
+                <button 
+                    onClick={() => setImportStep("input")}
+                    className="text-sm text-gray-500 hover:text-gray-800 underline"
+                >
+                    Voltar para edição
+                </button>
+            )}
         </div>
-      )}
 
-      {importStep === "input" ? (
-        <>
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Cole o bloco de texto dos produtos:</label>
-            <textarea
-              className="w-full h-64 p-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent font-mono text-sm"
-              placeholder={`Exemplo (TAB entre colunas):\nhttps://www.kabum.com.br/produto/895040\tFonte Cooler Master MWE Gold 850 V3...\t499,99\nhttps://www.kabum.com.br/produto/516056\tFonte Corsair CX Series CX650...\t359,79`}
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-            />
-            <p className="mt-2 text-xs text-gray-500">
-              Formato: URL do produto (KaBuM) + Nome + Preço. As imagens são buscadas automaticamente como original.jpg.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 bg-gray-50 p-4 rounded-lg border">
-            <div>
-              <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">
-                Instâncias em paralelo
-              </label>
-              <input
-                type="number"
-                min={1}
-                max={30}
-                value={analysisConcurrency}
-                onChange={(e) => setAnalysisConcurrency(Number(e.target.value))}
-                className="w-full p-2 border rounded-md text-sm"
-              />
-              <div className="text-[10px] text-gray-500 mt-1">Recomendado: 12–24 (mais alto pode ser bloqueado).</div>
+        {/* Status Messages */}
+        {message && (
+            <div className={`mb-6 p-4 rounded-md border flex items-center gap-3 ${status === "success" ? "bg-green-50 border-green-200 text-green-700" : status === "error" ? "bg-red-50 border-red-200 text-red-700" : "bg-blue-50 border-blue-200 text-blue-700"}`}>
+                {status === "success" ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
+                {message}
             </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">
-                Tamanho do lote
-              </label>
-              <input
-                type="number"
-                min={1}
-                max={80}
-                value={analysisBatchSize}
-                onChange={(e) => setAnalysisBatchSize(Number(e.target.value))}
-                className="w-full p-2 border rounded-md text-sm"
-              />
-              <div className="text-[10px] text-gray-500 mt-1">Divide a análise em partes para não travar.</div>
-            </div>
-          </div>
-          <div className="flex justify-end">
-            <button
-              onClick={handleParse}
-              disabled={!text.trim()}
-              className="bg-[#E60012] text-white px-6 py-2 rounded-md font-medium hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"
-            >
-              Processar Texto
-              <Search size={18} />
-            </button>
-          </div>
-        </>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 bg-gray-50 p-4 rounded-lg border">
-            <div>
-              <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Categoria Destino</label>
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full p-2 border rounded-md text-sm"
-              >
-                {flatCategories.length > 0 ? (
-                  flatCategories.map((c) => (
-                    <option key={c.name} value={c.name}>
-                      {"\u00A0".repeat(c.level * 4)}{c.name}
-                    </option>
-                  ))
-                ) : (
-                  CATEGORIES.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))
-                )}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Ajuste de Preço (%)</label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  value={priceAdjustment}
-                  onChange={(e) => setPriceAdjustment(Number(e.target.value))}
-                  className="w-full p-2 border rounded-md text-sm"
-                  placeholder="0"
-                />
-                <span className="text-gray-500 text-sm">%</span>
-              </div>
-              <p className="text-[10px] text-gray-500 mt-1">Use valores negativos para desconto.</p>
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Aplicar Ajuste Em</label>
-              <select
-                value={adjustmentScope}
-                onChange={(e) => setAdjustmentScope(e.target.value as any)}
-                className="w-full p-2 border rounded-md text-sm mb-2"
-              >
-                <option value="all">Todos os produtos</option>
-                <option value="high_value">Preço acima de...</option>
-                <option value="low_value">Preço abaixo de...</option>
-              </select>
-              {adjustmentScope !== "all" && (
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-500">R$</span>
-                  <input
-                    type="number"
-                    value={scopeThreshold}
-                    onChange={(e) => setScopeThreshold(Number(e.target.value))}
-                    className="w-full p-1 border rounded text-sm"
-                  />
+        )}
+
+        {importStep === "input" ? (
+            <>
+                <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Cole o bloco de texto dos produtos:
+                    </label>
+                    <textarea
+                        className="w-full h-64 p-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent font-mono text-sm"
+                        placeholder={`Exemplo (TAB entre colunas):\nhttps://www.kabum.com.br/produto/895040\tFonte Cooler Master MWE Gold 850 V3...\t499,99\nhttps://www.kabum.com.br/produto/516056\tFonte Corsair CX Series CX650...\t359,79`}
+                        value={text}
+                        onChange={(e) => setText(e.target.value)}
+                    />
+                    <p className="mt-2 text-xs text-gray-500">
+                        Formato: URL do produto (KaBuM) + Nome + Preço. As imagens são buscadas automaticamente como original.jpg.
+                    </p>
                 </div>
-              )}
-            </div>
+                <div className="flex justify-end">
+                    <button
+                        onClick={handleParse}
+                        disabled={!text.trim()}
+                        className="bg-[#E60012] text-white px-6 py-2 rounded-md font-medium hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                    >
+                        Processar Texto
+                        <Search size={18} />
+                    </button>
+                </div>
+            </>
+        ) : (
+            <>
+                {/* Preview & Settings */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 bg-gray-50 p-4 rounded-lg border">
+                    <div>
+                        <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Categoria Destino</label>
+                        <select
+                            value={selectedCategory}
+                            onChange={(e) => setSelectedCategory(e.target.value)}
+                            className="w-full p-2 border rounded-md text-sm"
+                        >
+                            {flatCategories.length > 0 ? (
+                                flatCategories.map(c => (
+                                    <option key={c.name} value={c.name}>
+                                        {/* Indentation */}
+                                        {'\u00A0'.repeat(c.level * 4)}{c.name}
+                                    </option>
+                                ))
+                            ) : (
+                                // Fallback to static list if empty (loading or error)
+                                CATEGORIES.map(c => (
+                                    <option key={c} value={c}>{c}</option>
+                                ))
+                            )}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Ajuste de Preço (%)</label>
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="number"
+                                value={priceAdjustment}
+                                onChange={(e) => setPriceAdjustment(Number(e.target.value))}
+                                className="w-full p-2 border rounded-md text-sm"
+                                placeholder="0"
+                            />
+                            <span className="text-gray-500 text-sm">%</span>
+                        </div>
+                        <p className="text-[10px] text-gray-500 mt-1">Use valores negativos para desconto.</p>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Aplicar Ajuste Em</label>
+                        <select
+                            value={adjustmentScope}
+                            onChange={(e) => setAdjustmentScope(e.target.value as any)}
+                            className="w-full p-2 border rounded-md text-sm mb-2"
+                        >
+                            <option value="all">Todos os produtos</option>
+                            <option value="high_value">Preço acima de...</option>
+                            <option value="low_value">Preço abaixo de...</option>
+                        </select>
+                        {adjustmentScope !== "all" && (
+                            <div className="flex items-center gap-2">
+                                    <span className="text-xs text-gray-500">R$</span>
+                                    <input 
+                                    type="number" 
+                                    value={scopeThreshold}
+                                    onChange={(e) => setScopeThreshold(Number(e.target.value))}
+                                    className="w-full p-1 border rounded text-sm"
+                                    />
+                            </div>
+                        )}
+                    </div>
 
-            <div>
-              <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Opções Extras</label>
-              <div className="flex items-center h-[38px]">
-                <label className="flex items-center gap-2 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={migrateImages}
-                    onChange={(e) => setMigrateImages(e.target.checked)}
-                    className="w-4 h-4 text-[#E60012] rounded border-gray-300 focus:ring-[#E60012]"
-                  />
-                  <span className="text-sm text-gray-700 font-medium">Migrar imagens para Supabase</span>
-                </label>
-              </div>
-            </div>
-          </div>
+                    <div>
+                        <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Opções Extras</label>
+                        <div className="flex items-center h-[38px]">
+                            <label className="flex items-center gap-2 cursor-pointer select-none">
+                                <input 
+                                    type="checkbox" 
+                                    checked={migrateImages} 
+                                    onChange={(e) => setMigrateImages(e.target.checked)}
+                                    className="w-4 h-4 text-[#E60012] rounded border-gray-300 focus:ring-[#E60012]"
+                                />
+                                <span className="text-sm text-gray-700 font-medium">
+                                    Migrar imagens para Supabase
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
 
-          <div className="mb-6 overflow-x-auto">
-            <table className="w-full text-sm text-left text-gray-500">
-              <thead className="text-xs text-gray-700 uppercase bg-gray-100">
-                <tr>
-                  <th className="px-4 py-3">Imagem</th>
-                  <th className="px-4 py-3">Produto</th>
-                  <th className="px-4 py-3">Preço Original</th>
-                  <th className="px-4 py-3">Novo Preço</th>
-                  <th className="px-4 py-3">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {getPreviewProducts().map((p, idx) => (
-                  <tr key={idx} className="bg-white border-b hover:bg-gray-50">
-                    <td className="px-4 py-3">
-                      <div className="w-12 h-12 relative">
-                        <img src={p.image} alt="" className="w-full h-full object-contain rounded border" />
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 font-medium text-gray-900 max-w-xs truncate" title={p.name}>
-                      {p.name}
-                    </td>
-                    <td className="px-4 py-3">{p.originalPrice}</td>
-                    <td className="px-4 py-3 font-bold text-gray-900">
-                      {p.newPrice}
-                      {p.priceChange !== 0 && (
-                        <span className={`ml-2 text-xs ${p.priceChange > 0 ? "text-red-500" : "text-green-500"}`}>
-                          ({p.priceChange > 0 ? "+" : ""}{p.priceChange.toFixed(2)})
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">Pronto</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                {/* Action Buttons */}
 
-          <div className="flex justify-end gap-4">
-            <button
-              onClick={() => setImportStep("input")}
-              className="px-6 py-2 border border-gray-300 rounded-md font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={handleConfirmImport}
-              disabled={status === "loading"}
-              className="bg-[#E60012] text-white px-6 py-2 rounded-md font-medium hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"
-            >
-              {status === "loading" ? "Salvando..." : "Confirmar Importação"}
-              <Save size={18} />
-            </button>
-          </div>
-        </>
-      )}
+                <div className="mb-6 overflow-x-auto">
+                    <table className="w-full text-sm text-left text-gray-500">
+                        <thead className="text-xs text-gray-700 uppercase bg-gray-100">
+                            <tr>
+                                <th className="px-4 py-3">Imagem</th>
+                                <th className="px-4 py-3">Produto</th>
+                                <th className="px-4 py-3">Preço Original</th>
+                                <th className="px-4 py-3">Novo Preço</th>
+                                <th className="px-4 py-3">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {getPreviewProducts().map((p, idx) => (
+                                <tr key={idx} className="bg-white border-b hover:bg-gray-50">
+                                    <td className="px-4 py-3">
+                                        <div className="w-12 h-12 relative">
+                                            <img 
+                                                src={p.image} 
+                                                alt="" 
+                                                className="w-full h-full object-contain rounded border"
+                                            />
+                                        </div>
+                                    </td>
+                                    <td className="px-4 py-3 font-medium text-gray-900 max-w-xs truncate" title={p.name}>
+                                        {p.name}
+                                    </td>
+                                    <td className="px-4 py-3">{p.originalPrice}</td>
+                                    <td className="px-4 py-3 font-bold text-gray-900">
+                                        {p.newPrice}
+                                        {p.priceChange !== 0 && (
+                                            <span className={`ml-2 text-xs ${p.priceChange > 0 ? 'text-red-500' : 'text-green-500'}`}>
+                                                ({p.priceChange > 0 ? '+' : ''}{p.priceChange.toFixed(2)})
+                                            </span>
+                                        )}
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">Pronto</span>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="flex justify-end gap-4">
+                    <button
+                        onClick={() => setImportStep("input")}
+                        className="px-6 py-2 border border-gray-300 rounded-md font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                        Cancelar
+                    </button>
+                    <button
+                        onClick={handleConfirmImport}
+                        disabled={status === "loading"}
+                        className="bg-[#E60012] text-white px-6 py-2 rounded-md font-medium hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                    >
+                        {status === "loading" ? "Salvando..." : "Confirmar Importação"}
+                        <Save size={18} />
+                    </button>
+                </div>
+            </>
+        )}
     </div>
   );
 }

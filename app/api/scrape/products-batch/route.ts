@@ -113,21 +113,21 @@ async function pickExisting(
 ) {
   const { limit, exists, concurrency } = options;
   const uniqueCandidates = candidates.filter((u, idx) => candidates.indexOf(u) === idx);
-  const found: string[] = [];
+  const hits = new Set<string>();
 
   let idx = 0;
   const inFlight = new Set<Promise<void>>();
 
   const schedule = () => {
-    while (inFlight.size < concurrency && idx < uniqueCandidates.length && found.length < limit) {
+    while (inFlight.size < concurrency && idx < uniqueCandidates.length && hits.size < limit) {
       const candidate = uniqueCandidates[idx];
       idx += 1;
 
       let task: Promise<void>;
       task = (async () => {
-        if (found.length >= limit) return;
+        if (hits.size >= limit) return;
         const ok = await exists(candidate);
-        if (ok) found.push(candidate);
+        if (ok) hits.add(candidate);
       })().finally(() => {
         inFlight.delete(task);
       });
@@ -143,7 +143,8 @@ async function pickExisting(
     schedule();
   }
 
-  return found.slice(0, limit);
+  const ordered = uniqueCandidates.filter((u) => hits.has(u));
+  return ordered.slice(0, limit);
 }
 
 export async function POST(request: Request) {
@@ -157,11 +158,11 @@ export async function POST(request: Request) {
 
     const concurrency = Number.isFinite(body.concurrency) ? Number(body.concurrency) : 10;
     const headConcurrency = Number.isFinite(body.headConcurrency) ? Number(body.headConcurrency) : 20;
-    const imageLimit = Number.isFinite(body.imageLimit) ? Number(body.imageLimit) : 6;
+    const imageLimit = Number.isFinite(body.imageLimit) ? Number(body.imageLimit) : 12;
 
     const safeConcurrency = Math.max(1, Math.min(30, concurrency));
     const safeHeadConcurrency = Math.max(1, Math.min(60, headConcurrency));
-    const safeImageLimit = Math.max(1, Math.min(12, imageLimit));
+    const safeImageLimit = Math.max(1, Math.min(24, imageLimit));
 
     const existsCache = new Map<string, Promise<boolean>>();
 
