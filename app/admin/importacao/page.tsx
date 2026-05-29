@@ -19,6 +19,8 @@ export default function ImportPage() {
 
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [analysisConcurrency, setAnalysisConcurrency] = useState<number>(18);
+  const [analysisBatchSize, setAnalysisBatchSize] = useState<number>(25);
 
   useEffect(() => {
     fetchCategories();
@@ -106,7 +108,7 @@ export default function ImportPage() {
 
   const handleParse = async () => {
     setStatus("loading");
-    setMessage("Buscando imagens do KaBuM (original.jpg) com importação paralela...");
+    setMessage("Analisando links... 0/0");
 
     const products = parseProducts(text);
     if (products.length === 0) {
@@ -115,30 +117,54 @@ export default function ImportPage() {
       return;
     }
 
-    const kabumUrls = products.map((p) => p.product_url).filter((u): u is string => Boolean(u && u.includes("kabum.com.br")));
+    const kabumUrls = Array.from(
+      new Set(products.map((p) => p.product_url).filter((u): u is string => Boolean(u && u.includes("kabum.com.br"))))
+    );
 
     const scrapeMap = new Map<string, string[]>();
     if (kabumUrls.length > 0) {
       try {
-        const scrapeRes = await fetch("/api/scrape/products-batch", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            urls: kabumUrls,
-            concurrency: 12,
-            headConcurrency: 30,
-            imageLimit: 6,
-          }),
-        });
-        if (scrapeRes.ok) {
-          const scrapeData = await scrapeRes.json();
-          if (scrapeData?.success && Array.isArray(scrapeData.results)) {
-            for (const r of scrapeData.results) {
-              if (r?.url && Array.isArray(r.images)) {
-                scrapeMap.set(r.url, r.images);
+        const safeConcurrency = Math.max(1, Math.min(30, Number(analysisConcurrency) || 1));
+        const safeBatchSize = Math.max(1, Math.min(80, Number(analysisBatchSize) || 1));
+        const headConcurrency = Math.max(1, Math.min(60, Math.ceil(safeConcurrency * 3)));
+
+        let done = 0;
+        setMessage(`Analisando links... ${done}/${kabumUrls.length}`);
+
+        for (let i = 0; i < kabumUrls.length; i += safeBatchSize) {
+          const batch = kabumUrls.slice(i, i + safeBatchSize);
+          const controller = new AbortController();
+          const timeout = window.setTimeout(() => controller.abort(), 45000);
+
+          try {
+            const scrapeRes = await fetch("/api/scrape/products-batch", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                urls: batch,
+                concurrency: safeConcurrency,
+                headConcurrency,
+                imageLimit: 6,
+              }),
+              signal: controller.signal,
+            });
+
+            if (scrapeRes.ok) {
+              const scrapeData = await scrapeRes.json();
+              if (scrapeData?.success && Array.isArray(scrapeData.results)) {
+                for (const r of scrapeData.results) {
+                  if (r?.url && Array.isArray(r.images)) {
+                    scrapeMap.set(r.url, r.images);
+                  }
+                }
               }
             }
+          } finally {
+            window.clearTimeout(timeout);
           }
+
+          done += batch.length;
+          setMessage(`Analisando links... ${done}/${kabumUrls.length}`);
         }
       } catch (e) {
         console.error("Failed to batch scrape Kabum images", e);
@@ -268,6 +294,36 @@ export default function ImportPage() {
             <p className="mt-2 text-xs text-gray-500">
               Formato: URL do produto (KaBuM) + Nome + Preço. As imagens são buscadas automaticamente como original.jpg.
             </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 bg-gray-50 p-4 rounded-lg border">
+            <div>
+              <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">
+                Instâncias em paralelo
+              </label>
+              <input
+                type="number"
+                min={1}
+                max={30}
+                value={analysisConcurrency}
+                onChange={(e) => setAnalysisConcurrency(Number(e.target.value))}
+                className="w-full p-2 border rounded-md text-sm"
+              />
+              <div className="text-[10px] text-gray-500 mt-1">Recomendado: 12–24 (mais alto pode ser bloqueado).</div>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">
+                Tamanho do lote
+              </label>
+              <input
+                type="number"
+                min={1}
+                max={80}
+                value={analysisBatchSize}
+                onChange={(e) => setAnalysisBatchSize(Number(e.target.value))}
+                className="w-full p-2 border rounded-md text-sm"
+              />
+              <div className="text-[10px] text-gray-500 mt-1">Divide a análise em partes para não travar.</div>
+            </div>
           </div>
           <div className="flex justify-end">
             <button
