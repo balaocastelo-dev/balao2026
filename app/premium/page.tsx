@@ -1,740 +1,526 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
+import Header from "@/components/Header";
+import { getProducts } from "@/lib/db";
+import type { Product } from "@/lib/utils";
+import { SITE_CONFIG } from "@/lib/config";
 import {
   ArrowRight,
   BadgeCheck,
-  Building2,
-  CheckCircle2,
   Cpu,
-  Database,
-  Fan,
-  HardDrive,
-  Headphones,
-  LifeBuoy,
-  Monitor,
-  Server,
+  MessageCircle,
+  PackageCheck,
   ShieldCheck,
   Sparkles,
-  Zap,
   Wrench,
 } from "lucide-react";
 
-import Header from "@/components/Header";
-import { SITE_CONFIG } from "@/lib/config";
-import PremiumConfigurator from "./PremiumConfigurator";
-
-const canonical = "https://www.balao.info/premium";
-const metaTitle = "PC Gamer Premium em Campinas | Balão da Informática";
-const metaDescription =
-  "Monte seu PC gamer premium, workstation ou computador personalizado no Balão da Informática em Campinas. Atendimento especialista, montagem profissional e suporte.";
-
-const whatsappBaseText =
-  "Olá, quero montar um PC Premium no Balão da Informática";
-const whatsappHref = `https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(
-  whatsappBaseText
-)}`;
-
 export const metadata: Metadata = {
-  title: metaTitle,
-  description: metaDescription,
-  alternates: { canonical },
-  keywords: [
-    "PC gamer Campinas",
-    "computador gamer personalizado",
-    "workstation Campinas",
-    "montar PC gamer",
-    "loja de informática Campinas",
-    "PC para arquitetura",
-    "PC para edição de vídeo",
-    "PC para jogos",
-    "computador premium",
-  ],
+  title: "Premium | PCs de Alta Performance e Montagem Profissional",
+  description:
+    "Linha Premium do Balão da Informática: PCs gamer, workstations e máquinas sob medida com montagem profissional, testes completos e suporte real em Campinas.",
   robots: { index: true, follow: true },
   openGraph: {
+    title: "Premium | Balão da Informática",
+    description:
+      "PCs premium montados por especialistas. Escolha uma máquina em estoque ou peça um projeto sob medida via WhatsApp.",
     type: "website",
-    locale: "pt_BR",
-    url: canonical,
-    title: metaTitle,
-    description: metaDescription,
-    siteName: SITE_CONFIG.name,
-    images: [{ url: "/images/pc.webp" }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: metaTitle,
-    description: metaDescription,
-    images: ["/images/pc.webp"],
+    url: "https://www.balao.info/premium",
   },
 };
 
-function SectionTitle({
-  kicker,
-  title,
-  description,
+export const dynamic = "force-dynamic";
+
+function normalize(text: string) {
+  return (text || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+function parsePriceBRL(price: string): number {
+  const raw = (price || "").toString();
+  const cleaned = raw
+    .replace("R$", "")
+    .replace(/\s/g, "")
+    .replace(/\./g, "")
+    .replace(",", ".");
+  const num = Number.parseFloat(cleaned);
+  return Number.isFinite(num) ? num : 0;
+}
+
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
+}
+
+function scoreAsPremiumCandidate(product: Product) {
+  const n = normalize(product.name);
+  const c = normalize(product.category);
+  let score = 0;
+
+  const hasAny = (arr: string[]) => arr.some((term) => n.includes(term) || c.includes(term));
+  const hasAll = (arr: string[]) => arr.every((term) => n.includes(term) || c.includes(term));
+
+  if (hasAny(["pc gamer", "pc", "gamer", "workstation", "creator", "render", "edicao", "stream", "setup"])) score += 50;
+  if (hasAny(["rtx", "radeon", "core ultra", "ryzen", "threadripper"])) score += 25;
+  if (hasAll(["pc", "gamer"])) score += 30;
+  if (hasAny(["gabinete", "water", "cooler", "ddr5", "nvme"])) score += 10;
+
+  const price = parsePriceBRL(product.price);
+  if (price >= 4000) score += 15;
+  if (price >= 8000) score += 20;
+  if (price >= 12000) score += 25;
+  if (price === 0) score -= 20;
+
+  if (product.image) score += 5;
+  if (product.slug) score += 2;
+
+  return score;
+}
+
+function pickFeatured(products: Product[], count: number) {
+  const ranked = [...products]
+    .map((p) => ({ p, score: scoreAsPremiumCandidate(p) }))
+    .sort((a, b) => b.score - a.score)
+    .map(({ p }) => p);
+
+  const picked: Product[] = [];
+  const used = new Set<string>();
+
+  for (const p of ranked) {
+    if (picked.length >= count) break;
+    if (!p?.id || used.has(p.id)) continue;
+    used.add(p.id);
+    picked.push(p);
+  }
+
+  if (picked.length >= count) return picked;
+
+  for (const p of products) {
+    if (picked.length >= count) break;
+    if (!p?.id || used.has(p.id)) continue;
+    used.add(p.id);
+    picked.push(p);
+  }
+
+  return picked;
+}
+
+function buildWhatsAppLink(message: string) {
+  return `https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(message)}`;
+}
+
+function ProductTile({
+  product,
+  eyebrow,
 }: {
-  kicker?: string;
-  title: string;
-  description?: string;
+  product: Product;
+  eyebrow?: string;
 }) {
+  const href = `/product/${product.slug || product.id}`;
+  const imgSrc = product.image || "/logo.png";
+  const priceNum = parsePriceBRL(product.price);
+  const priceLabel = priceNum > 0 ? formatCurrency(priceNum) : product.price || "Consultar";
+
   return (
-    <div className="mx-auto max-w-3xl text-center">
-      {kicker ? (
-        <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-extrabold tracking-wide text-white/75">
-          <Sparkles className="h-4 w-4 text-red-300" />
-          {kicker}
+    <Link
+      href={href}
+      className="group relative overflow-hidden rounded-3xl border border-white/10 bg-zinc-950/60 backdrop-blur transition-all hover:border-white/20 hover:-translate-y-0.5"
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.10),_transparent_55%)] opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="relative p-5 sm:p-6 flex flex-col gap-4">
+        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl bg-zinc-900">
+          <Image
+            src={imgSrc}
+            alt={product.name || "Produto"}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+            sizes="(max-width: 768px) 100vw, 33vw"
+          />
         </div>
-      ) : null}
-      <h2 className="mt-4 text-balance text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-        {title}
-      </h2>
-      {description ? (
-        <p className="mt-4 text-pretty text-base leading-relaxed text-white/70 sm:text-lg">
-          {description}
-        </p>
-      ) : null}
-    </div>
-  );
-}
 
-function PremiumCard({
-  title,
-  description,
-  cta,
-  href,
-}: {
-  title: string;
-  description: string;
-  cta: string;
-  href: string;
-}) {
-  return (
-    <div className="group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-white/10 to-white/5 p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.02)] transition hover:border-white/20 hover:bg-white/10">
-      <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-red-500/10 blur-2xl" />
-      <h3 className="relative text-xl font-extrabold text-white">{title}</h3>
-      <p className="relative mt-3 text-sm leading-relaxed text-white/70">
-        {description}
-      </p>
-      <Link
-        href={href}
-        className="relative mt-6 inline-flex items-center gap-2 rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm font-extrabold text-white/90 transition hover:border-white/20 hover:bg-black/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-        aria-label={cta}
-      >
-        {cta}
-        <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
-      </Link>
-    </div>
-  );
-}
+        <div className="flex flex-col gap-2">
+          {eyebrow ? (
+            <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-400">
+              {eyebrow}
+            </div>
+          ) : null}
+          <div className="text-lg sm:text-xl font-black tracking-tight text-white line-clamp-2">
+            {product.name}
+          </div>
+          <div className="flex items-baseline justify-between gap-3">
+            <div className="text-zinc-400 text-sm line-clamp-1">{product.category}</div>
+            <div className="text-white font-black">{priceLabel}</div>
+          </div>
+        </div>
 
-function WhatsAppCta({
-  label,
-  text,
-  variant = "primary",
-}: {
-  label: string;
-  text: string;
-  variant?: "primary" | "secondary";
-}) {
-  const href = `https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(
-    text
-  )}`;
-  const className =
-    variant === "primary"
-      ? "inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-3 text-base font-extrabold text-white shadow-lg shadow-[#25D366]/20 transition hover:bg-[#128C7E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:w-auto"
-      : "inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-base font-extrabold text-white/90 transition hover:border-white/25 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:w-auto";
-
-  return (
-    <Link href={href} target="_blank" rel="noopener noreferrer" className={className}>
-      {label}
-      <ArrowRight className="h-5 w-5" />
+        <div className="mt-1 flex items-center justify-between text-sm">
+          <span className="text-zinc-400">Ver detalhes</span>
+          <ArrowRight className="w-4 h-4 text-white/80 transition-transform group-hover:translate-x-0.5" />
+        </div>
+      </div>
     </Link>
   );
 }
 
-export default function PremiumPage() {
+export default async function PremiumPage() {
+  const products = await getProducts();
+  const pcPool = products.filter((p) => {
+    const t = normalize(`${p?.name || ""} ${p?.category || ""}`);
+    return (
+      t.includes("pc ") ||
+      t.includes(" pc") ||
+      t.includes("pcgamer") ||
+      t.includes("pc gamer") ||
+      t.includes("computador") ||
+      t.includes("workstation") ||
+      t.includes("creator") ||
+      t.includes("setup")
+    );
+  });
+  const source = pcPool.length >= 6 ? pcPool : products;
+  const featured = pickFeatured(source, 5);
+  const featuredIds = new Set(featured.map((p) => p.id));
+  const stock = source.filter((p) => p?.id && !featuredIds.has(p.id)).slice(0, 12);
+
+  const whatsAppDefault = buildWhatsAppLink(
+    "Olá! Quero montar um PC Premium no Balão da Informática. Pode me ajudar com uma configuração ideal para meu uso e orçamento?"
+  );
+
   return (
-    <div className="min-h-screen bg-[#07070a] text-white font-sans">
+    <div className="bg-black text-white">
       <Header />
 
-      <main>
-        <section className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-black via-[#0b0b10] to-[#07070a]" />
-          <div
-            className="absolute inset-0 opacity-35 animate-stars pointer-events-none"
-            aria-hidden="true"
-          />
-          <div
-            className="absolute inset-x-0 top-0 h-64 bg-[radial-gradient(ellipse_at_top,rgba(230,0,18,0.25),rgba(0,0,0,0))]"
-            aria-hidden="true"
-          />
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(255,255,255,0.10),transparent_35%),radial-gradient(circle_at_80%_30%,rgba(230,0,18,0.20),transparent_40%),radial-gradient(circle_at_50%_100%,rgba(167,139,250,0.18),transparent_45%)]" />
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
 
-          <div className="relative mx-auto max-w-6xl px-4 pb-14 pt-10 sm:px-6 lg:px-8 lg:pb-20 lg:pt-16">
-            <div className="grid items-center gap-10 lg:grid-cols-2">
-              <div className="space-y-7">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-extrabold tracking-wide text-white/75">
-                  <BadgeCheck className="h-4 w-4 text-red-300" />
-                  Montagem premium em Campinas/SP
-                </div>
+        <div className="container mx-auto px-4 py-14 sm:py-20 relative">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+            <div className="lg:col-span-5 space-y-6">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-white/80">
+                <Sparkles className="w-4 h-4 text-white/80" />
+                Montagem premium em Campinas/SP
+              </div>
 
-                <div className="space-y-4">
-                  <h1 className="text-balance text-4xl font-extrabold tracking-tight sm:text-5xl">
-                    Seu PC Premium começa aqui.
-                  </h1>
-                  <p className="text-pretty text-base leading-relaxed text-white/70 sm:text-lg">
-                    Computadores gamers, workstations e máquinas personalizadas
-                    montadas por especialistas para quem exige desempenho,
-                    estética e confiança.
-                  </p>
-                </div>
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[0.95]">
+                Seu PC{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-zinc-500">
+                  Premium
+                </span>{" "}
+                começa aqui.
+              </h1>
 
-                <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                  <a
-                    href="#monte"
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-3 text-base font-extrabold text-white shadow-lg shadow-red-600/20 transition hover:bg-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:w-auto"
-                    aria-label="Montar meu PC Premium"
+              <p className="text-lg sm:text-xl text-zinc-300 leading-relaxed max-w-xl">
+                Escolha uma máquina do nosso estoque ou peça um projeto sob medida. Montagem profissional, testes completos
+                e suporte de verdade.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                <a
+                  href="#estoque"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white text-black px-6 py-3 font-black tracking-tight hover:bg-zinc-200 transition-colors"
+                >
+                  Ver PCs em estoque
+                  <ArrowRight className="w-5 h-5" />
+                </a>
+                <a
+                  href={whatsAppDefault}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/5 px-6 py-3 font-black tracking-tight hover:bg-white/10 transition-colors"
+                >
+                  Falar no WhatsApp
+                  <MessageCircle className="w-5 h-5" />
+                </a>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 pt-2">
+                {[
+                  { icon: BadgeCheck, title: "Acabamento premium", desc: "Cable management e estética impecável." },
+                  { icon: ShieldCheck, title: "Testes completos", desc: "Validação de estabilidade antes da entrega." },
+                  { icon: Wrench, title: "Projeto sob medida", desc: "Compatibilidade e upgrades planejados." },
+                  { icon: PackageCheck, title: "Loja física", desc: "Campinas com suporte e pós-venda." },
+                ].map((item) => (
+                  <div
+                    key={item.title}
+                    className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur"
                   >
-                    Montar meu PC Premium
-                    <ArrowRight className="h-5 w-5" />
-                  </a>
-                  <Link
-                    href={whatsappHref}
+                    <div className="flex items-center gap-3">
+                      <item.icon className="w-5 h-5 text-white/80" />
+                      <div className="text-sm font-black">{item.title}</div>
+                    </div>
+                    <div className="text-xs text-zinc-400 mt-2 leading-relaxed">{item.desc}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="lg:col-span-7">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {featured.map((p, idx) => (
+                  <div key={p.id} className={idx === 0 ? "sm:col-span-2" : ""}>
+                    <ProductTile
+                      product={p}
+                      eyebrow={idx === 0 ? "Destaque premium" : "Em destaque"}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                  <div>
+                    <div className="text-sm font-black tracking-tight">Quer um projeto único?</div>
+                    <div className="text-sm text-zinc-300">
+                      Diga seu uso e orçamento. A gente monta uma proposta com peças do nosso estoque.
+                    </div>
+                  </div>
+                  <a
+                    href={buildWhatsAppLink(
+                      "Olá! Quero um projeto exclusivo Premium. Meu uso é: (jogos/trabalho/edição). Meu orçamento é: (R$). Pode montar uma proposta com peças do estoque?"
+                    )}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-base font-extrabold text-white/90 transition hover:border-white/25 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:w-auto"
-                    aria-label="Falar com especialista no WhatsApp"
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#E60012] px-6 py-3 font-black hover:bg-red-700 transition-colors"
                   >
-                    Falar com especialista no WhatsApp
-                    <ArrowRight className="h-5 w-5" />
-                  </Link>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  {[
-                    { label: "Montagem especializada", icon: Wrench },
-                    { label: "Configuração personalizada", icon: Cpu },
-                    { label: "Suporte técnico", icon: LifeBuoy },
-                    { label: "Loja física em Campinas", icon: Building2 },
-                  ].map((item) => (
-                    <div
-                      key={item.label}
-                      className="rounded-2xl border border-white/10 bg-white/5 px-3 py-3 text-xs font-extrabold text-white/80 shadow-sm backdrop-blur-sm transition hover:border-white/20"
-                    >
-                      <div className="flex items-center gap-2">
-                        <item.icon className="h-4 w-4 text-red-300" />
-                        <span className="leading-tight">{item.label}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="relative">
-                <div className="absolute -inset-6 rounded-[2.5rem] bg-gradient-to-b from-red-500/15 to-transparent blur-2xl" />
-                <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-gradient-to-b from-white/10 to-white/5 p-4 shadow-2xl">
-                  <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl bg-black/30">
-                    <Image
-                      src="/images/pc.webp"
-                      alt="PC gamer premium montado pelo Balão da Informática"
-                      fill
-                      sizes="(max-width: 1024px) 100vw, 520px"
-                      className="object-cover opacity-95"
-                      priority
-                    />
-                    <div
-                      className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent"
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <div className="mt-4 grid grid-cols-2 gap-3">
-                    {[
-                      "Cable management e acabamento premium",
-                      "Testes completos antes da entrega",
-                      "Peças selecionadas e compatibilidade",
-                      "Upgrade e manutenção quando precisar",
-                    ].map((t) => (
-                      <div
-                        key={t}
-                        className="rounded-2xl border border-white/10 bg-black/20 px-3 py-3 text-xs font-semibold text-white/75"
-                      >
-                        <div className="flex items-start gap-2">
-                          <CheckCircle2 className="mt-0.5 h-4 w-4 text-red-300" />
-                          <span className="leading-snug">{t}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                    Montar comigo
+                    <Cpu className="w-5 h-5" />
+                  </a>
                 </div>
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
-          <SectionTitle
-            kicker="Autoridade e confiança"
-            title="Não é só um computador. É uma máquina montada por quem entende."
-            description="Há anos no ramo da informática, o Balão da Informática atende clientes que buscam computadores confiáveis, bonitos e preparados para jogos, trabalho, edição, engenharia, arquitetura, streaming e produtividade."
-          />
-
-          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              { title: "Atendimento especialista", icon: Headphones },
-              { title: "Loja física em Campinas", icon: Building2 },
-              { title: "Peças selecionadas", icon: BadgeCheck },
-              { title: "Testes antes da entrega", icon: ShieldCheck },
-              { title: "Suporte pós-venda", icon: LifeBuoy },
-              { title: "Upgrade e manutenção", icon: Wrench },
-            ].map((card) => (
-              <div
-                key={card.title}
-                className="group rounded-3xl border border-white/10 bg-gradient-to-b from-white/10 to-white/5 p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.02)] transition hover:-translate-y-0.5 hover:border-white/20"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-red-300">
-                    <card.icon className="h-5 w-5" />
-                  </div>
-                  <h3 className="text-base font-extrabold text-white">{card.title}</h3>
-                </div>
-                <p className="mt-3 text-sm leading-relaxed text-white/70">
-                  Experiência prática, organização e critérios de qualidade para
-                  você comprar com segurança.
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-6xl px-4 pb-14 sm:px-6 lg:px-8 lg:pb-20">
-          <SectionTitle
-            kicker="Linhas premium"
-            title="Escolha a linha certa para o seu estilo de uso"
-            description="Quatro linhas próprias do Balão da Informática para facilitar seu orçamento e acelerar a escolha do conjunto ideal."
-          />
-
-          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <PremiumCard
-              title="Balão Gamer"
-              description="PCs para rodar seus jogos favoritos com desempenho, visual gamer e possibilidade de upgrade."
-              cta="Personalizar este PC"
-              href="/premium?preset=gamer-start#monte"
-            />
-            <PremiumCard
-              title="Balão Workstation"
-              description="Máquinas para arquitetura, engenharia, edição, renderização e produtividade profissional."
-              cta="Usar como base"
-              href="/premium?preset=workstation-pro#monte"
-            />
-            <PremiumCard
-              title="Balão Creator"
-              description="Computadores para criadores de conteúdo, lives, edição, design e produção audiovisual."
-              cta="Personalizar este PC"
-              href="/premium?preset=gamer-ultra#monte"
-            />
-            <PremiumCard
-              title="Balão Extreme"
-              description="Projetos exclusivos para quem quer potência máxima e acabamento premium, do seu jeito."
-              cta="Personalizar este PC"
-              href="/premium?preset=extreme#monte"
-            />
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-6xl px-4 pb-14 sm:px-6 lg:px-8 lg:pb-20">
-          <SectionTitle
-            kicker="Configuração detalhada"
-            title="Personalize peça por peça"
-            description="Escolha processador, placa de vídeo, memória, SSD, gabinete e muito mais. Depois envie sua configuração para um especialista do Balão da Informática montar o orçamento ideal."
-          />
-
-          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {[
-              {
-                title: "Processador",
-                icon: Cpu,
-                text: "Define o desempenho em jogos, multitarefas, edição e renderização.",
-              },
-              {
-                title: "Placa de vídeo",
-                icon: Monitor,
-                text: "Responsável por gráficos, FPS, resolução, edição, render e aceleração profissional.",
-              },
-              {
-                title: "Memória RAM",
-                icon: Database,
-                text: "Ajuda o PC a rodar vários programas, jogos, abas e transmissões ao mesmo tempo.",
-              },
-              {
-                title: "Armazenamento",
-                icon: HardDrive,
-                text: "SSD para velocidade e HD para arquivos, backup e grande capacidade.",
-              },
-              {
-                title: "Refrigeração",
-                icon: Fan,
-                text: "Ajuda o processador a manter desempenho estável em jogos e trabalhos pesados.",
-              },
-              {
-                title: "Fonte",
-                icon: Zap,
-                text: "Entrega energia com segurança para todos os componentes.",
-              },
-              {
-                title: "Gabinete",
-                icon: Server,
-                text: "Define visual, airflow, espaço interno e acabamento do projeto.",
-              },
-              {
-                title: "Orçamento",
-                icon: ShieldCheck,
-                text: "Você escolhe a faixa. A equipe ajusta as melhores peças dentro do seu objetivo.",
-              },
-            ].map((c) => (
-              <div
-                key={c.title}
-                className="rounded-3xl border border-white/10 bg-gradient-to-b from-white/10 to-white/5 p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.02)]"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-red-300">
-                    <c.icon className="h-5 w-5" />
-                  </div>
-                  <h3 className="text-base font-extrabold text-white">{c.title}</h3>
-                </div>
-                <p className="mt-3 text-sm leading-relaxed text-white/70">{c.text}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section
-          id="monte"
-          className="scroll-mt-24 mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8 lg:py-20"
-        >
-          <SectionTitle
-            kicker="Orçamento sob medida"
-            title="Monte seu computador do seu jeito"
-            description="Selecione o que você busca e envie no WhatsApp. A equipe valida compatibilidade, sugere upgrades e monta a melhor opção no seu orçamento."
-          />
-          <div className="mt-10">
-            <PremiumConfigurator />
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-6xl px-4 pb-14 sm:px-6 lg:px-8 lg:pb-20">
-          <SectionTitle
-            kicker="Perfis recomendados"
-            title="Máquinas exemplo para você se orientar"
-            description="Sem preço fixo: cada projeto é ajustado conforme estoque, objetivo e estética desejada."
-          />
-
-          <div className="mt-10 grid gap-4 md:grid-cols-2">
-            {[
-              {
-                name: "PC Gamer Performance",
-                for: "Fortnite, Valorant, GTA V, CS2 e jogos competitivos.",
-                specs: [
-                  "Intel Core i5 ou Ryzen 5",
-                  "16GB RAM",
-                  "SSD NVMe",
-                  "Placa de vídeo dedicada",
-                ],
-              },
-              {
-                name: "PC Gamer Ultra",
-                for: "Full HD/2K, streaming e multitarefas.",
-                specs: [
-                  "Intel Core i7 ou Ryzen 7",
-                  "32GB RAM",
-                  "SSD NVMe 1TB",
-                  "GPU de alta performance",
-                ],
-              },
-              {
-                name: "Workstation Profissional",
-                for: "AutoCAD, Revit, SketchUp, Blender, Premiere e render.",
-                specs: [
-                  "Processador de alto desempenho",
-                  "32GB ou 64GB RAM",
-                  "SSD NVMe",
-                  "GPU profissional ou gamer de alta performance",
-                ],
-              },
-              {
-                name: "Projeto Exclusivo Premium",
-                for: "Setup único com gabinete diferenciado, RGB e acabamento premium.",
-                specs: [
-                  "Configuração 100% personalizada",
-                  "Montagem sob medida",
-                  "Organização de cabos",
-                  "Testes completos",
-                ],
-              },
-            ].map((p) => (
-              <div
-                key={p.name}
-                className="group rounded-3xl border border-white/10 bg-gradient-to-b from-white/10 to-white/5 p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.02)] transition hover:border-white/20"
-              >
-                <h3 className="text-xl font-extrabold text-white">{p.name}</h3>
-                <p className="mt-2 text-sm text-white/70">
-                  <span className="font-extrabold text-white/85">Indicado para:</span>{" "}
-                  {p.for}
-                </p>
-                <div className="mt-4 grid gap-2 text-sm text-white/75">
-                  {p.specs.map((s) => (
-                    <div key={s} className="flex items-start gap-2">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 text-red-300" />
-                      <span className="leading-snug">{s}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-6">
-                  <WhatsAppCta
-                    label="Solicitar orçamento"
-                    text={`Olá, quero solicitar orçamento para: ${p.name}. Meu uso: ${p.for}`}
-                    variant="secondary"
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-6xl px-4 pb-14 sm:px-6 lg:px-8 lg:pb-20">
-          <SectionTitle
-            kicker="Processo premium"
-            title="Como funciona seu projeto premium"
-            description="Um passo a passo simples, direto e com validação técnica para você receber um PC pronto para usar."
-          />
-
-          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-            {[
-              "Você fala com um especialista",
-              "Entendemos seu uso e orçamento",
-              "Escolhemos as peças ideais",
-              "Montamos e testamos sua máquina",
-              "Você recebe seu PC pronto para usar",
-            ].map((step, i) => (
-              <div
-                key={step}
-                className="group rounded-3xl border border-white/10 bg-gradient-to-b from-white/10 to-white/5 p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.02)] transition hover:-translate-y-0.5 hover:border-white/20"
-              >
-                <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-red-500/10 text-sm font-extrabold text-red-200">
-                  {i + 1}
-                </div>
-                <h3 className="mt-4 text-sm font-extrabold text-white">{step}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-white/70">
-                  Alinhamento claro e execução profissional do início ao fim.
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-6xl px-4 pb-14 sm:px-6 lg:px-8 lg:pb-20">
-          <SectionTitle
-            kicker="Garantias e suporte"
-            title="Compra segura, montagem profissional e suporte de verdade."
-            description="Conte com uma loja especializada em Campinas e um atendimento que acompanha você antes, durante e depois da compra."
-          />
-
-          <div className="mt-10 grid gap-4 lg:grid-cols-2">
-            <div className="rounded-3xl border border-white/10 bg-gradient-to-b from-white/10 to-white/5 p-6">
-              <div className="flex items-center gap-3">
-                <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-red-300">
-                  <ShieldCheck className="h-5 w-5" />
-                </div>
-                <h3 className="text-lg font-extrabold text-white">Confiança na prática</h3>
-              </div>
-              <div className="mt-4 grid gap-2 text-sm text-white/75">
-                {[
-                  "Loja física em Campinas",
-                  "Atendimento humano e direto",
-                  "Testes antes da entrega",
-                  "Possibilidade de upgrades",
-                  "Orientação para escolher o PC certo",
-                  "Suporte após a compra",
-                  "Opções para gamers, empresas e profissionais",
-                ].map((item) => (
-                  <div key={item} className="flex items-start gap-2">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 text-red-300" />
-                    <span className="leading-snug">{item}</span>
-                  </div>
-                ))}
-              </div>
+      <section id="estoque" className="py-14 sm:py-20 bg-zinc-950 border-t border-white/10">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
+            <div>
+              <div className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400">Seu próximo PC</div>
+              <h2 className="text-3xl sm:text-5xl font-black tracking-tight">Destaques do estoque</h2>
             </div>
-
-            <div className="rounded-3xl border border-white/10 bg-gradient-to-b from-white/10 to-white/5 p-6">
-              <div className="flex items-center gap-3">
-                <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-red-300">
-                  <Wrench className="h-5 w-5" />
-                </div>
-                <h3 className="text-lg font-extrabold text-white">Montagem com padrão premium</h3>
-              </div>
-              <div className="mt-4 grid gap-2 text-sm text-white/75">
-                {[
-                  "Compatibilidade e desempenho alinhados ao seu uso",
-                  "Acabamento e organização de cabos",
-                  "Refrigeração dimensionada para estabilidade",
-                  "Recomendações honestas para custo-benefício",
-                  "Checklist e validação antes de entregar",
-                ].map((item) => (
-                  <div key={item} className="flex items-start gap-2">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 text-red-300" />
-                    <span className="leading-snug">{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <Link
+              href="/pcgamer"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 font-black hover:bg-white/10 transition-colors"
+            >
+              Ver PC Gamer
+              <ArrowRight className="w-5 h-5" />
+            </Link>
           </div>
-        </section>
 
-        <section className="mx-auto max-w-6xl px-4 pb-14 sm:px-6 lg:px-8 lg:pb-20">
-          <div className="overflow-hidden rounded-[2.5rem] border border-white/10 bg-gradient-to-b from-white/10 to-white/5 p-6 sm:p-10">
-            <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {stock.map((p) => (
+              <ProductTile key={p.id} product={p} />
+            ))}
+          </div>
+
+          <div className="mt-10 rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
-                <h2 className="text-balance text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
-                  PC Gamer Premium em Campinas é no Balão da Informática
-                </h2>
-                <p className="mt-4 text-pretty text-sm leading-relaxed text-white/70 sm:text-base">
-                  Se você procura um PC gamer Campinas, uma workstation Campinas
-                  ou um computador gamer personalizado para jogos, trabalho,
-                  edição, arquitetura, engenharia ou streaming, o Balão da
-                  Informática monta a configuração ideal para o seu perfil.
-                  Nossa equipe ajuda você a escolher processador, placa de
-                  vídeo, memória RAM, SSD, gabinete, fonte e refrigeração de
-                  acordo com sua necessidade e orçamento, com montagem
-                  profissional e suporte real.
-                </p>
+                <div className="text-lg font-black">Não achou o ideal?</div>
+                <div className="text-sm text-zinc-300">
+                  A gente monta um PC Premium com as peças certas para seu uso e orçamento.
+                </div>
               </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {[
-                  "montar PC gamer com orientação",
-                  "PC para arquitetura e engenharia",
-                  "PC para edição de vídeo e criação",
-                  "computador premium com acabamento",
-                ].map((k) => (
-                  <div
-                    key={k}
-                    className="rounded-2xl border border-white/10 bg-black/20 px-4 py-4 text-sm font-semibold text-white/75"
-                  >
-                    {k}
-                  </div>
-                ))}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Link
+                  href="/monteseupc"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white text-black px-6 py-3 font-black hover:bg-zinc-200 transition-colors"
+                >
+                  Montar agora
+                  <ArrowRight className="w-5 h-5" />
+                </Link>
+                <a
+                  href={whatsAppDefault}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-6 py-3 font-black hover:bg-white/10 transition-colors"
+                >
+                  Orçar no WhatsApp
+                  <MessageCircle className="w-5 h-5" />
+                </a>
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="mx-auto max-w-6xl px-4 pb-14 sm:px-6 lg:px-8 lg:pb-20">
-          <SectionTitle
-            kicker="Dúvidas frequentes"
-            title="FAQ"
-            description="Respostas rápidas para você tomar a decisão com segurança."
-          />
+      <section className="py-14 sm:py-20 bg-black border-t border-white/10">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-10">
+            <div className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400">Linhas premium</div>
+            <h2 className="text-3xl sm:text-5xl font-black tracking-tight">Escolha a base. Personalize o resto.</h2>
+            <p className="text-zinc-300 mt-3 max-w-3xl mx-auto">
+              Quatro linhas autorais do Balão da Informática para acelerar sua escolha. Depois, ajustamos com peças do
+              nosso estoque, do seu jeito.
+            </p>
+          </div>
 
-          <div className="mt-10 grid gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               {
-                q: "O Balão monta PC gamer personalizado?",
-                a: "Sim. Você escolhe o perfil (gamer, workstation, creator) e a equipe ajusta as peças para desempenho, estética e orçamento.",
+                title: "Balão Gamer",
+                desc: "FPS alto, visual gamer e upgrades planejados. Ideal para quem joga competitivo e quer um setup bonito.",
+                cta: "Quero um PC Gamer Premium",
               },
               {
-                q: "Posso escolher as peças do meu computador?",
-                a: "Pode. Se quiser, você manda preferências de marcas e modelos e a equipe confirma compatibilidade e alternativas.",
+                title: "Balão Workstation",
+                desc: "Estabilidade e performance para AutoCAD, Revit, render e produtividade. Configuração pensada para trabalho.",
+                cta: "Quero uma Workstation Premium",
               },
               {
-                q: "Vocês ajudam a escolher a configuração ideal?",
-                a: "Sim. O atendimento é consultivo: entendemos seu uso, resolução, softwares e orçamento para indicar a melhor combinação de peças.",
+                title: "Balão Creator",
+                desc: "Edição, lives e criação de conteúdo com fluidez. Peças selecionadas para multitarefa e exportação rápida.",
+                cta: "Quero um PC Creator Premium",
               },
               {
-                q: "A máquina já vai pronta para usar?",
-                a: "Vai pronta: montagem, testes e validações. Se você precisar, também orientamos instalação e ajustes iniciais.",
+                title: "Balão Extreme",
+                desc: "Projeto exclusivo para quem quer o máximo: potência, acabamento e estética de vitrine.",
+                cta: "Quero um projeto Extreme",
+              },
+            ].map((line) => (
+              <div
+                key={line.title}
+                className="rounded-3xl border border-white/10 bg-zinc-950 p-6 hover:border-white/20 transition-colors"
+              >
+                <div className="text-xl font-black tracking-tight">{line.title}</div>
+                <div className="text-sm text-zinc-300 mt-2 leading-relaxed">{line.desc}</div>
+                <a
+                  href={buildWhatsAppLink(
+                    `Olá! ${line.cta} no Balão da Informática. Meu uso é: (jogos/trabalho/edição). Meu orçamento é: (R$). Pode sugerir uma configuração com peças do estoque?`
+                  )}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-white text-black px-5 py-3 font-black hover:bg-zinc-200 transition-colors w-full justify-center"
+                >
+                  Orçar agora
+                  <ArrowRight className="w-5 h-5" />
+                </a>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-14 sm:py-20 bg-zinc-950 border-t border-white/10">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <div className="lg:col-span-5">
+              <div className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400">Processo premium</div>
+              <h2 className="text-3xl sm:text-5xl font-black tracking-tight mt-2">
+                Montagem profissional, do primeiro orçamento ao pós-venda.
+              </h2>
+              <p className="text-zinc-300 mt-4 leading-relaxed">
+                Você não compra só peças. Você recebe uma máquina pronta, validada e acompanhada por quem monta e dá
+                suporte.
+              </p>
+            </div>
+            <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[
+                {
+                  title: "Entendimento do uso",
+                  desc: "Jogos, trabalho ou criação. A configuração nasce do seu objetivo, não de um template genérico.",
+                },
+                {
+                  title: "Peças do estoque",
+                  desc: "Priorizamos disponibilidade e custo-benefício, com alternativas equivalentes quando necessário.",
+                },
+                {
+                  title: "Montagem e acabamento",
+                  desc: "Organização, airflow e estética. Sem improviso, sem gambiarra.",
+                },
+                {
+                  title: "Testes e validação",
+                  desc: "Estabilidade antes de entregar. O objetivo é ligar e usar sem dor de cabeça.",
+                },
+              ].map((step, idx) => (
+                <div
+                  key={step.title}
+                  className="rounded-3xl border border-white/10 bg-black p-6 hover:border-white/20 transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm font-black tracking-tight">{step.title}</div>
+                    <div className="text-xs font-black text-white/70 rounded-full border border-white/15 bg-white/5 px-3 py-1">
+                      {String(idx + 1).padStart(2, "0")}
+                    </div>
+                  </div>
+                  <div className="text-sm text-zinc-300 mt-3 leading-relaxed">{step.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-14 sm:py-20 bg-black border-t border-white/10">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-10">
+            <div className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400">FAQ</div>
+            <h2 className="text-3xl sm:text-5xl font-black tracking-tight">Dúvidas rápidas</h2>
+          </div>
+
+          <div className="max-w-3xl mx-auto divide-y divide-white/10 rounded-3xl border border-white/10 bg-zinc-950 overflow-hidden">
+            {[
+              {
+                q: "Os produtos mostrados aqui são do meu estoque do site?",
+                a: "Sim. Esta página lista produtos carregados do mesmo catálogo do site. Se você cadastrar/atualizar no painel, aqui atualiza junto.",
               },
               {
-                q: "Posso montar um PC para trabalho profissional?",
-                a: "Sim. Workstations para arquitetura, engenharia, renderização, edição e produtividade profissional fazem parte do foco premium.",
+                q: "Posso pedir um PC sob medida mesmo escolhendo um destaque?",
+                a: "Pode. Os destaques servem como base. A gente ajusta peça por peça conforme seu uso, estética e orçamento.",
               },
               {
-                q: "Vocês atendem empresas?",
-                a: "Sim. Atendemos empresas com recomendações por perfil de uso, padronização, upgrades e suporte.",
+                q: "Vocês verificam compatibilidade e estabilidade?",
+                a: "Sim. A proposta passa por validação de compatibilidade e a montagem passa por testes antes da entrega.",
               },
               {
-                q: "Dá para fazer upgrade depois?",
-                a: "Dá. Projetamos pensando em expansão quando faz sentido (RAM, SSD, GPU, refrigeração), e também fazemos manutenção.",
-              },
-              {
-                q: "Como faço para pedir orçamento?",
-                a: "Clique em qualquer botão de WhatsApp, envie suas escolhas e a equipe retorna com a melhor proposta para seu uso.",
+                q: "Entregam só em Campinas?",
+                a: "Atendemos Campinas e região, e também enviamos para outras cidades. O melhor caminho é falar no WhatsApp para validar entrega e prazo.",
               },
             ].map((item) => (
-              <details
-                key={item.q}
-                className="group rounded-2xl border border-white/10 bg-gradient-to-b from-white/10 to-white/5 px-5 py-4 transition hover:border-white/20"
-              >
-                <summary className="cursor-pointer list-none text-sm font-extrabold text-white focus-visible:outline-none">
-                  <div className="flex items-center justify-between gap-4">
-                    <span>{item.q}</span>
-                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-black/20 text-white/70 transition group-open:rotate-45">
-                      +
-                    </span>
-                  </div>
+              <details key={item.q} className="group p-6">
+                <summary className="cursor-pointer list-none flex items-center justify-between gap-4">
+                  <div className="text-lg font-black">{item.q}</div>
+                  <div className="text-white/70 group-open:rotate-45 transition-transform">+</div>
                 </summary>
-                <div className="mt-3 text-sm leading-relaxed text-white/70">{item.a}</div>
+                <div className="mt-3 text-zinc-300 leading-relaxed">{item.a}</div>
               </details>
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6 lg:px-8">
-          <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-gradient-to-b from-red-600/20 via-white/10 to-white/5 p-7 sm:p-10">
-            <div className="absolute -left-24 -top-24 h-80 w-80 rounded-full bg-red-600/15 blur-3xl" />
-            <div className="relative grid gap-10 lg:grid-cols-2 lg:items-center">
+      <section className="py-14 sm:py-20 bg-zinc-950 border-t border-white/10">
+        <div className="container mx-auto px-4">
+          <div className="rounded-[2.5rem] border border-white/10 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.12),_transparent_55%)] p-8 sm:p-12">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
               <div>
-                <h2 className="text-balance text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-                  Pronto para montar seu novo PC Premium?
+                <div className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400">Último passo</div>
+                <h2 className="text-3xl sm:text-5xl font-black tracking-tight mt-2">
+                  Bora montar sua próxima máquina?
                 </h2>
-                <p className="mt-4 text-pretty text-base leading-relaxed text-white/75">
-                  Fale agora com o Balão da Informática e receba uma indicação de
-                  configuração de acordo com seu uso, estilo e orçamento.
+                <p className="text-zinc-300 mt-3 max-w-2xl leading-relaxed">
+                  Fale com um especialista e receba uma proposta coerente com seu uso, seu orçamento e as peças do nosso
+                  estoque.
                 </p>
-                <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                  <WhatsAppCta
-                    label="Chamar no WhatsApp"
-                    text={whatsappBaseText}
-                    variant="primary"
-                  />
-                  <a
-                    href="#monte"
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-base font-extrabold text-white/90 transition hover:border-white/25 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:w-auto"
-                    aria-label="Solicitar orçamento"
-                  >
-                    Solicitar orçamento
-                    <ArrowRight className="h-5 w-5" />
-                  </a>
-                </div>
               </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {[
-                  "Orçamento rápido no WhatsApp",
-                  "Sugestões por perfil de uso",
-                  "Montagem e testes profissionais",
-                  "Loja física em Campinas/SP",
-                ].map((b) => (
-                  <div
-                    key={b}
-                    className="rounded-2xl border border-white/10 bg-black/20 px-4 py-4 text-sm font-semibold text-white/80"
-                  >
-                    <div className="flex items-start gap-2">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 text-red-300" />
-                      <span className="leading-snug">{b}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <a
+                href={whatsAppDefault}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#E60012] px-8 py-4 font-black text-lg hover:bg-red-700 transition-colors"
+              >
+                Chamar no WhatsApp
+                <MessageCircle className="w-6 h-6" />
+              </a>
             </div>
           </div>
-        </section>
-      </main>
+        </div>
+      </section>
     </div>
   );
 }
