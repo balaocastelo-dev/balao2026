@@ -66,7 +66,7 @@ function ProductTile({
   product: Product;
   eyebrow?: string;
 }) {
-  const href = `/product/${product.slug || product.id}`;
+  const href = `/product/${product.id}`;
   const imgSrc = product.image || "/logo.png";
   const priceNum = parsePriceBRL(product.price);
   const priceLabel = priceNum > 0 ? formatCurrency(priceNum) : product.price || "Consultar";
