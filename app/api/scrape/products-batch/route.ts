@@ -206,7 +206,7 @@ export async function POST(request: Request) {
 
           const productId = extractKabumProductId(url);
           if (!productId) {
-            return { url, success: true, images: [], productId };
+            return { url, success: true, images: [] };
           }
 
           try {
