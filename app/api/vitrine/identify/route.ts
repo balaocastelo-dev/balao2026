@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { buildRecommendedSlug, extractExtrasFromText, extractParts, makeCommercialCopy, normalizeInputText } from "@/lib/vitrine/core";
-import { getVitrinePageBySlug } from "@/lib/vitrine/db";
+import { createVitrinePage, getVitrinePageBySlug, updateVitrinePage } from "@/lib/vitrine/db";
 import { VitrineCategory } from "@/lib/vitrine/types";
 import { scrapeUrlForVitrine } from "@/lib/vitrine/scrape";
+import { generateAndUploadVitrineImages } from "@/lib/vitrine/images";
 
 async function tryScrapeKabum(request: Request, input: string) {
   const url = String(input || "").trim();
@@ -45,6 +46,8 @@ export async function POST(request: Request) {
     const nomePc = String(body?.nomePc || body?.nome_pc || "").trim();
     const input = normalizeInputText(String(body?.input || body?.descricao || "").trim());
     const categoria = (body?.categoria ? String(body.categoria) : "") as VitrineCategory | "";
+    const generateImages = body?.generateImages === false ? false : true;
+    const persistDraft = body?.persistDraft === false ? false : true;
 
     const isUrl = /^https?:\/\//i.test(input);
     const urlScraped = isUrl ? await scrapeUrlForVitrine(input).catch(() => null) : null;
@@ -78,6 +81,59 @@ export async function POST(request: Request) {
     const { slug, isUnique } = await ensureUniqueSlug(baseSlug);
     const copy = makeCommercialCopy(nomePc || "PC Exclusivo", parts);
 
+    const scrapedImages = Array.from(
+      new Set([...(kabumScraped.images || []), ...((urlScraped?.images || []) as string[])]),
+    );
+
+    let page = await getVitrinePageBySlug(slug, true);
+    if (persistDraft) {
+      if (!page) {
+        page = await createVitrinePage({
+          nome_pc: nomePc || (urlScraped?.title || "PC Exclusivo"),
+          slug,
+          categoria: (parts.categoria || categoria || "PC Gamer") as any,
+          descricao_original: input,
+          source_url: isUrl ? input : "",
+          processador: parts.processador || "",
+          placa_video: parts.placa_video || "",
+          memoria_ram: parts.memoria_ram || "",
+          armazenamento: parts.armazenamento || "",
+          sistema_operacional: parts.sistema_operacional || "",
+          resfriamento: parts.resfriamento || "",
+          aplicacoes: parts.aplicacoes || [],
+          extras,
+          status: "rascunho",
+        } as any);
+      } else {
+        page = await updateVitrinePage(page.id, {
+          nome_pc: nomePc || page.nome_pc,
+          categoria: (parts.categoria || page.categoria) as any,
+          descricao_original: input || page.descricao_original,
+          source_url: isUrl ? input : page.source_url,
+          processador: parts.processador || page.processador,
+          placa_video: parts.placa_video || page.placa_video,
+          memoria_ram: parts.memoria_ram || page.memoria_ram,
+          armazenamento: parts.armazenamento || page.armazenamento,
+          sistema_operacional: parts.sistema_operacional || page.sistema_operacional,
+          resfriamento: parts.resfriamento || page.resfriamento,
+          aplicacoes: parts.aplicacoes || page.aplicacoes,
+          extras,
+        } as any);
+      }
+    }
+
+    let generated: any = null;
+    if (generateImages && page) {
+      try {
+        generated = await generateAndUploadVitrineImages({ page });
+        const mergedImages = { ...(page.images || {}), ...(generated.images || {}) };
+        const mergedPrompts = { ...(page.image_prompts || {}), ...(generated.image_prompts || {}) };
+        page = await updateVitrinePage(page.id, { images: mergedImages, image_prompts: mergedPrompts } as any);
+      } catch (e: any) {
+        generated = { error: e?.message || "Falha ao gerar imagens" };
+      }
+    }
+
     return NextResponse.json({
       success: true,
       slug,
@@ -85,12 +141,12 @@ export async function POST(request: Request) {
       parts,
       extras,
       source_url: isUrl ? input : "",
+      page,
       copy,
       scraped: {
-        images: Array.from(
-          new Set([...(kabumScraped.images || []), ...((urlScraped?.images || []) as string[])]),
-        ),
+        images: scrapedImages,
       },
+      generated,
     });
   } catch (e: any) {
     return NextResponse.json({ success: false, error: e?.message || "Falha ao identificar peças" }, { status: 500 });

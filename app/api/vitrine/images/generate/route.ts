@@ -30,4 +30,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error: e?.message || "Falha ao gerar imagens" }, { status: 500 });
   }
 }
-

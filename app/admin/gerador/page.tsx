@@ -183,13 +183,19 @@ export default function AdminGeradorPage() {
 
   const identify = async () => {
     setStatus("loading");
-    setMessage("Identificando modelo e componentes...");
+    setMessage("Identificando modelo e componentes e gerando imagens...");
     setSteps({ modelo: "running", pecas: "idle", url: "idle", pronta: "idle" });
 
     const res = await fetch("/api/vitrine/identify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nomePc, input: normalizeInputText(descricaoOuLink), categoria }),
+      body: JSON.stringify({
+        nomePc,
+        input: normalizeInputText(descricaoOuLink),
+        categoria,
+        persistDraft: true,
+        generateImages: true,
+      }),
     });
 
     const data = await res.json().catch(() => null);
@@ -205,7 +211,10 @@ export default function AdminGeradorPage() {
     setParts(nextParts);
     setExtras((data?.extras && typeof data.extras === "object") ? data.extras : {});
     setApplicationsText(Array.isArray(nextParts.aplicacoes) ? nextParts.aplicacoes.join(", ") : "");
-    setScrapedImages(Array.isArray(data?.scraped?.images) ? data.scraped.images : []);
+    if (data?.page?.id) setPageId(String(data.page.id));
+    const heroFromDb = data?.page?.images?.hero ? [String(data.page.images.hero)] : [];
+    const fallback = Array.isArray(data?.scraped?.images) ? data.scraped.images : [];
+    setScrapedImages(heroFromDb.length > 0 ? heroFromDb : fallback);
 
     setSteps({ modelo: "done", pecas: "done", url: "running", pronta: "idle" });
     setSlug(String(data.slug || ""));
@@ -213,7 +222,13 @@ export default function AdminGeradorPage() {
     setSteps({ modelo: "done", pecas: "done", url: "done", pronta: "idle" });
 
     setStatus("success");
-    setMessage("Peças identificadas. Você pode ajustar qualquer campo antes de gerar/publicar.");
+    if (data?.generated?.errors && Object.keys(data.generated.errors).length > 0) {
+      setMessage("Peças identificadas. Algumas imagens não foram geradas (verifique o token/limite do provedor).");
+    } else if (data?.generated?.error) {
+      setMessage("Peças identificadas. Imagens não foram geradas (verifique configuração do gerador).");
+    } else {
+      setMessage("Peças e imagens geradas. Você pode ajustar qualquer campo antes de publicar.");
+    }
   };
 
   const save = async (nextStatus: VitrineStatus) => {
@@ -270,26 +285,33 @@ export default function AdminGeradorPage() {
       setSlug(saved.slug);
       if (nextStatus === "publicada") {
         setSteps((prev) => ({ ...prev, pronta: "done" }));
-        setMessage("Página publicada. Gerando imagens de IA...");
-        try {
-          const imgRes = await fetch("/api/vitrine/images/generate", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: saved.id }),
-          });
-          const imgData = await imgRes.json().catch(() => null);
-          if (imgRes.ok && imgData?.success) {
-            const heroUrl = imgData?.page?.images?.hero ? [String(imgData.page.images.hero)] : [];
-            if (heroUrl.length > 0) setScrapedImages(heroUrl);
-            setMessage("Página publicada e imagens geradas com sucesso!");
-            setStatus("success");
-          } else {
+        const heroExists = (saved as any)?.images?.hero;
+        if (heroExists) {
+          setMessage("Página publicada com sucesso!");
+          setStatus("success");
+          setScrapedImages([String(heroExists)]);
+        } else {
+          setMessage("Página publicada. Gerando imagens de IA...");
+          try {
+            const imgRes = await fetch("/api/vitrine/images/generate", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ id: saved.id }),
+            });
+            const imgData = await imgRes.json().catch(() => null);
+            if (imgRes.ok && imgData?.success) {
+              const heroUrl = imgData?.page?.images?.hero ? [String(imgData.page.images.hero)] : [];
+              if (heroUrl.length > 0) setScrapedImages(heroUrl);
+              setMessage("Página publicada e imagens geradas com sucesso!");
+              setStatus("success");
+            } else {
+              setStatus("success");
+              setMessage("Página publicada. Imagens não foram geradas (verifique configuração do gerador).");
+            }
+          } catch {
             setStatus("success");
             setMessage("Página publicada. Imagens não foram geradas (verifique configuração do gerador).");
           }
-        } catch {
-          setStatus("success");
-          setMessage("Página publicada. Imagens não foram geradas (verifique configuração do gerador).");
         }
       } else {
         setStatus("success");
