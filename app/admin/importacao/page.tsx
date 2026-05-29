@@ -71,7 +71,9 @@ export default function ImportPage() {
     return new Promise((resolve) => {
       const img = new window.Image();
       img.onload = () => {
-        resolve(true);
+        const w = img.naturalWidth || 0;
+        const h = img.naturalHeight || 0;
+        resolve(w >= 600 && h >= 600);
       };
       img.onerror = () => resolve(false); 
       img.src = url;
@@ -108,9 +110,29 @@ export default function ImportPage() {
     }
   };
 
+  const toKabumOriginalUrl = (url: string) => {
+    try {
+      const u = new URL(url);
+      const p = u.pathname;
+      let nextPath = p.replace(/_(m|p|peq|g)\.jpg$/i, "_original.jpg");
+      if (nextPath === p && /\.jpg$/i.test(p) && !/_original\.jpg$/i.test(p)) {
+        nextPath = p.replace(/\.jpg$/i, "_original.jpg");
+      }
+      u.pathname = nextPath;
+      u.search = "";
+      return u.toString();
+    } catch {
+      let next = url.replace(/_(m|p|peq|g)\.jpg$/i, "_original.jpg");
+      if (next === url && /\.jpg$/i.test(url) && !/_original\.jpg$/i.test(url)) {
+        next = url.replace(/\.jpg$/i, "_original.jpg");
+      }
+      return next;
+    }
+  };
+
   const handleParse = async () => {
     setStatus("loading");
-    setMessage("Buscando todas as imagens em alta resolução (original.jpg) e preparando importação em lote...");
+    setMessage("IA pensando... (0/0)");
 
     const products = parseProducts(text);
     if (products.length === 0) {
@@ -119,77 +141,122 @@ export default function ImportPage() {
         return;
     }
 
-    const kabumUrls = Array.from(
-      new Set(
-        products
-          .map((p) => p.product_url)
-          .filter((u): u is string => typeof u === "string" && u.includes("kabum.com.br"))
-      )
-    );
+    const total = products.length;
+    let aiDone = 0;
+    let processed = 0;
 
-    const kabumImagesByUrl = new Map<string, string[]>();
+    const updateRow = (id: string, patch: any) => {
+      setParsedProducts((prev) => prev.map((it: any) => (it.id === id ? { ...it, ...patch } : it)));
+    };
 
-    if (kabumUrls.length > 0) {
-      try {
-        const scrapeRes = await fetch("/api/scrape/products-batch", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            urls: kabumUrls,
-            concurrency: 18,
-            headConcurrency: 40,
-            imageLimit: 60
-          }),
-        });
+    const dedupeUrls = (urls: string[]) => Array.from(new Set((urls || []).map((u) => String(u || "").trim()).filter(Boolean)));
 
-        if (scrapeRes.ok) {
-          const scrapeData = await scrapeRes.json();
-          const results = Array.isArray(scrapeData?.results) ? scrapeData.results : [];
-
-          results.forEach((r: any) => {
-            const url = typeof r?.url === "string" ? r.url : "";
-            const imgs = Array.isArray(r?.images) ? r.images.filter((x: any) => typeof x === "string") : [];
-            if (url && imgs.length > 0) kabumImagesByUrl.set(url, imgs);
-          });
-        }
-      } catch (e) {
-        console.error("Failed to scrape batch images", e);
+    const initialRows = products.map((p) => {
+      let optimizedImage = optimizeUrl(p.image);
+      if (optimizedImage.includes("kabum.com.br") && optimizedImage.includes("images.kabum.com.br")) {
+        optimizedImage = toKabumOriginalUrl(optimizedImage);
       }
-    }
 
-    const productsWithValidation = await Promise.all(
-      products.map(async (p) => {
-        const productUrl = typeof p.product_url === "string" ? p.product_url : "";
-        const fromKabum = productUrl.includes("kabum.com.br");
+      return {
+        ...p,
+        image: optimizedImage,
+        image_urls: dedupeUrls([optimizedImage]),
+        description: "",
+        specs: {},
+        imageValid: false,
+        ai_status: "thinking",
+      };
+    });
 
-        const imageUrls = fromKabum ? (kabumImagesByUrl.get(productUrl) || []) : [];
-        const mainImage = imageUrls[0] || (p.image ? optimizeUrl(p.image) : "");
-
-        const isValid = fromKabum ? Boolean(mainImage) : (mainImage ? await validateImage(mainImage) : false);
-
-        const normalizedImageUrls =
-          imageUrls.length > 0
-            ? imageUrls
-            : mainImage
-              ? [mainImage]
-              : [];
-
-        return { ...p, image: mainImage, image_urls: normalizedImageUrls, imageValid: isValid };
-      })
-    );
-
-    // Filter out invalid images as requested
-    const validProducts = productsWithValidation.filter(r => r.imageValid && r.image);
-        
-    setParsedProducts(validProducts);
+    setParsedProducts(initialRows as any);
     setImportStep("preview");
+    setMessage(`IA pensando... (0/${total})`);
+
+    const tasks = initialRows.map(async (p: any) => {
+      try {
+        let imageUrls: string[] = Array.isArray(p.image_urls) ? p.image_urls : [];
+        let description = "";
+        let specs: any = {};
+
+        if (p.product_url && p.product_url.includes("kabum.com.br")) {
+          try {
+            const scrapeRes = await fetch("/api/scrape/product", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ url: p.product_url }),
+            });
+            if (scrapeRes.ok) {
+              const scrapeData = await scrapeRes.json();
+              if (Array.isArray(scrapeData.images) && scrapeData.images.length > 0) imageUrls = scrapeData.images;
+              if (scrapeData.description) description = scrapeData.description;
+              if (scrapeData.specs) specs = scrapeData.specs;
+            }
+          } catch (e) {
+            console.error("Failed to scrape details for", p.name, e);
+          }
+        }
+
+        imageUrls = dedupeUrls(imageUrls);
+        updateRow(p.id, { image_urls: imageUrls, specs });
+
+        if (description) {
+          try {
+            const aiRes = await fetch("/api/ai/rewrite-description", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ productName: p.name, rawText: description, specs }),
+            });
+            if (aiRes.ok) {
+              const aiData = await aiRes.json();
+              if (aiData?.markdown) {
+                description = aiData.markdown;
+                updateRow(p.id, { ai_status: "done", description });
+              } else {
+                updateRow(p.id, { ai_status: "error" });
+              }
+            } else {
+              updateRow(p.id, { ai_status: "error" });
+            }
+          } catch (e) {
+            console.error("IA rewrite falhou para", p.name, e);
+            updateRow(p.id, { ai_status: "error" });
+          } finally {
+            aiDone += 1;
+            setMessage(`IA pensando... (${aiDone}/${total})`);
+          }
+        } else {
+          updateRow(p.id, { ai_status: "error" });
+          aiDone += 1;
+          setMessage(`IA pensando... (${aiDone}/${total})`);
+        }
+
+        const validImageUrls: string[] = [];
+        for (const candidate of imageUrls) {
+          if (validImageUrls.length >= 12) break;
+          const ok = await validateImage(candidate);
+          if (ok) validImageUrls.push(candidate);
+        }
+
+        const primaryImage = validImageUrls[0] || "";
+        updateRow(p.id, {
+          image: primaryImage || p.image,
+          image_urls: validImageUrls.length > 0 ? validImageUrls : imageUrls,
+          imageValid: !!primaryImage,
+        });
+      } finally {
+        processed += 1;
+      }
+    });
+
+    await Promise.allSettled(tasks);
+
+    setParsedProducts((prev: any) => {
+      const filtered = prev.filter((r: any) => r.imageValid && r.image);
+      setMessage(`${filtered.length} produtos válidos encontrados.`);
+      return filtered;
+    });
+
     setStatus("idle");
-    
-    if (validProducts.length < productsWithValidation.length) {
-        setMessage(`${validProducts.length} produtos válidos encontrados. (${productsWithValidation.length - validProducts.length} removidos por imagem inválida/quebrada).`);
-    } else {
-        setMessage(`${validProducts.length} produtos encontrados com sucesso.`);
-    }
   };
 
   const handleConfirmImport = async () => {
@@ -200,8 +267,10 @@ export default function ImportPage() {
           name: p.name,
           price: p.newPrice, // Use calculated price
           image: p.image,
-          image_urls: Array.isArray(p.image_urls) && p.image_urls.length > 0 ? p.image_urls : (p.image ? [p.image] : []),
+          image_urls: p.image_urls,
           product_url: p.product_url,
+          description: p.description,
+          specs: p.specs,
           category: p.category,
           slug: p.slug
       }));
@@ -289,12 +358,12 @@ export default function ImportPage() {
                     </label>
                     <textarea
                         className="w-full h-64 p-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent font-mono text-sm"
-                        placeholder={`Exemplo (TAB entre colunas):\nhttps://www.kabum.com.br/produto/895040\tFonte Cooler Master MWE Gold 850 V3...\t499,99\nhttps://www.kabum.com.br/produto/516056\tFonte Corsair CX Series CX650...\t359,79`}
+                        placeholder="Exemplo: imageCard src... https://... Nome do Produto R$ 100,00"
                         value={text}
                         onChange={(e) => setText(e.target.value)}
                     />
                     <p className="mt-2 text-xs text-gray-500">
-                        Formato: URL do produto (KaBuM) + Nome + Preço. As imagens são buscadas automaticamente como original.jpg.
+                        O sistema extrai automaticamente: URL da imagem, Nome do produto e Preço (R$).
                     </p>
                 </div>
                 <div className="flex justify-end">
@@ -407,16 +476,42 @@ export default function ImportPage() {
                             {getPreviewProducts().map((p, idx) => (
                                 <tr key={idx} className="bg-white border-b hover:bg-gray-50">
                                     <td className="px-4 py-3">
-                                        <div className="w-12 h-12 relative">
-                                            <img 
-                                                src={p.image} 
-                                                alt="" 
-                                                className="w-full h-full object-contain rounded border"
-                                            />
+                                        <div className="flex gap-1 overflow-x-auto max-w-[150px] py-1">
+                                            {p.image_urls && p.image_urls.length > 0 ? (
+                                                p.image_urls.map((img: string, i: number) => (
+                                                    <div key={i} className="w-10 h-10 relative flex-shrink-0">
+                                                        <img 
+                                                            src={img} 
+                                                            alt="" 
+                                                            className={`w-full h-full object-contain rounded border ${i === 0 ? 'border-red-500 ring-1 ring-red-500' : ''}`}
+                                                            title={i === 0 ? "Capa" : `Foto ${i+1}`}
+                                                        />
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="w-10 h-10 relative">
+                                                    <img 
+                                                        src={p.image} 
+                                                        alt="" 
+                                                        className="w-full h-full object-contain rounded border"
+                                                    />
+                                                </div>
+                                            )}
                                         </div>
+                                        {p.image_urls && p.image_urls.length > 1 && (
+                                            <span className="text-[10px] text-gray-400">{p.image_urls.length} fotos extraídas</span>
+                                        )}
                                     </td>
                                     <td className="px-4 py-3 font-medium text-gray-900 max-w-xs truncate" title={p.name}>
                                         {p.name}
+                                        <div className="flex gap-1 mt-1">
+                                            {p.description && (
+                                                <span className="bg-green-100 text-green-700 text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase">Desc OK</span>
+                                            )}
+                                            {p.specs && Object.keys(p.specs).length > 0 && (
+                                                <span className="bg-blue-100 text-blue-700 text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase">Specs OK</span>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="px-4 py-3">{p.originalPrice}</td>
                                     <td className="px-4 py-3 font-bold text-gray-900">
@@ -428,7 +523,13 @@ export default function ImportPage() {
                                         )}
                                     </td>
                                     <td className="px-4 py-3">
-                                        <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">Pronto</span>
+                                        {p.ai_status === "thinking" ? (
+                                            <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">IA pensando...</span>
+                                        ) : p.ai_status === "error" ? (
+                                            <span className="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded">IA falhou</span>
+                                        ) : (
+                                            <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">IA OK</span>
+                                        )}
                                     </td>
                                 </tr>
                             ))}

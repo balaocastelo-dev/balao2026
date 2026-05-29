@@ -275,73 +275,81 @@ export function parsePriceToNumber(value: unknown): number {
 }
 
 export function parseProducts(text: string): Product[] {
-  const products: Product[] = [];
+    const products: Product[] = [];
+    const lines = text.split('\n');
 
-  const lines = (text || "")
-    .split(/\r?\n/)
-    .map((l) => l.trim())
-    .filter(Boolean);
+    for (let line of lines) {
+      line = line.trim();
+      if (!line) continue;
 
-  const parseMoney = (raw: string) => {
-    const cleaned = raw
-      .replace("R$", "")
-      .replace(/\s/g, "")
-      .replace(/\./g, "")
-      .replace(",", ".");
-    const n = Number.parseFloat(cleaned);
-    if (!Number.isFinite(n)) return null;
-    return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n);
-  };
+      // Try Tab separated first (common in copy-paste from spreadsheets/sites)
+      let parts = line.split('\t');
 
-  for (const line of lines) {
-    const cols = line.split("\t").map((c) => c.trim()).filter(Boolean);
+      // If only one part, try whitespace but be careful with product names
+      if (parts.length < 3) {
+          // Fallback to regex for space-separated format
+          // This handles: ImageURL Name Price
+          const regex = /(https?:\/\/[^\s]+)\s+(.+?)\s+(R\$\s*[\d\.,]+|[\d\.,]+)/;
+          const match = line.match(regex);
+          if (match) {
+              parts = [match[1], match[2], match[3]];
+          }
+      }
 
-    let url = "";
-    let name = "";
-    let priceRaw = "";
+      if (parts.length >= 3) {
+        let productUrl = "";
+        let imageUrl = "";
+        let name = "";
+        let price = "";
 
-    if (cols.length >= 3) {
-      url = cols[0];
-      name = cols.slice(1, cols.length - 1).join(" ").trim();
-      priceRaw = cols[cols.length - 1];
-    } else {
-      const parts = line.split(/\s+/);
-      url = parts[0] || "";
-      priceRaw = parts[parts.length - 1] || "";
-      name = parts.slice(1, -1).join(" ").trim();
+        if (parts.length >= 4) {
+          // Format: ProductURL ImageURL Name Price
+          productUrl = parts[0].trim();
+          imageUrl = parts[1].trim();
+          name = parts[2].trim();
+          price = parts[3].trim();
+        } else {
+          // Format: ImageURL Name Price
+          imageUrl = parts[0].trim();
+          name = parts[1].trim();
+          price = parts[2].trim();
+        }
+
+        if (imageUrl.startsWith('http') && name && price) {
+          const enhancedImage = enhanceImageUrl(imageUrl);
+
+          // List of brands to replace with "Bal├úo.info"
+          const brands = [
+              /kabum/gi,
+              /tob pc┬┤s/gi,
+              /tob/gi,
+              /alligator shop/gi,
+              /mrp inform├ítica/gi
+          ];
+
+          let finalName = name;
+          brands.forEach(regex => {
+              finalName = finalName.replace(regex, "Bal├úo.info");
+          });
+
+          const id = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15);
+          const slug = finalName
+            .toLowerCase()
+            .replace(/[^\w\s-]/g, "")
+            .replace(/\s+/g, "-");
+
+          products.push({
+            id,
+            name: finalName,
+            price: price.startsWith('R$') ? price : `R$ ${price}`,
+            image: enhancedImage,
+            product_url: productUrl,
+            category: "Hardware",
+            slug,
+          });
+        }
+      }
     }
 
-    if (!url || !name || !priceRaw) continue;
-
-    const formattedPrice = parseMoney(priceRaw) || priceRaw;
-
-    const id =
-      typeof crypto !== "undefined" && crypto.randomUUID
-        ? crypto.randomUUID()
-        : Math.random().toString(36).substring(2, 15);
-
-    const slug = name
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^\w\s-]/g, "")
-      .trim()
-      .replace(/\s+/g, "-");
-
-    const isImageUrl = /\.(?:jpg|jpeg|png|webp|gif)(?:\?|#|$)/i.test(url);
-    const image = isImageUrl ? enhanceImageUrl(url) : "";
-    const product_url = !isImageUrl ? url : undefined;
-
-    products.push({
-      id,
-      name,
-      price: formattedPrice,
-      image,
-      product_url,
-      category: "Hardware",
-      slug,
-    });
+    return products;
   }
-
-  return products;
-}

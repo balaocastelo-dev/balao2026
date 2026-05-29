@@ -7,18 +7,13 @@ export async function POST(request: Request) {
   try {
     const { url } = await request.json();
 
-    const inputUrl = String(url || '').trim();
-    if (!inputUrl || !/^https?:\/\//i.test(inputUrl)) {
-      return NextResponse.json({ error: 'URL inválida.' }, { status: 400 });
+    if (!url || !url.includes('kabum.com.br')) {
+      return NextResponse.json({ error: 'URL inválida ou não suportada. Apenas Kabum é suportado no momento.' }, { status: 400 });
     }
 
-    const response = await fetch(inputUrl, {
+    const response = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
-        accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-        'accept-language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
-        pragma: 'no-cache',
-        'cache-control': 'no-cache'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
       }
     });
 
@@ -27,7 +22,6 @@ export async function POST(request: Request) {
     }
 
     const html = await response.text();
-    const isKabum = /kabum\.com\.br/i.test(inputUrl);
     
     // 1. Extract Images
     const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36';
@@ -118,209 +112,96 @@ export async function POST(request: Request) {
 
       const hostMatch = base.hostname.match(/^images(\d)\.kabum\.com\.br$/i);
       const preferred = hostMatch?.[1] ? [hostMatch[1]] : [];
-      const candidates = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-        .filter(n => !preferred.includes(n));
-      const order = [...preferred, ...candidates];
+      const digits = Array.from({ length: 10 }, (_, i) => String(i));
+      const orderedDigits = Array.from(new Set([...preferred, '7', ...digits]));
 
-      for (const n of order) {
-        const u = new URL(base.toString());
-        u.hostname = `images${n}.kabum.com.br`;
-        const probed = await probeImage(u.toString());
+      for (const d of orderedDigits) {
+        const candidate = new URL(base.toString());
+        candidate.hostname = `images${d}.kabum.com.br`;
+        const probed = await probeImage(candidate.toString());
         if (probed.ok) return probed.url;
       }
+
       return null;
     };
+
+    const productIdMatch = url.match(/\/produto\/(\d+)\//);
+    const productId = productIdMatch?.[1] || null;
+
+    const classicMatches = productId
+      ? (html.match(new RegExp(`https://images\\.kabum\\.com\\.br/produtos/fotos/${productId}/[^"\\s]+?\\.(?:jpg|jpeg|png|webp)`, 'gi')) || [])
+      : [];
+
+    const miraklMatches = html.match(/https:\/\/images\d+\.kabum\.com\.br\/produtos\/fotos\/sync_mirakl\/\d+\/[^"'\s]+/gi) || [];
 
     const uniqueImages: string[] = [];
 
-    const urlRegex = /https?:\/\/[^\s"'<>]+/gi;
-    const candidatesFromHtml = html.match(urlRegex) || [];
-
-    const foundImageCandidates: string[] = [];
-    for (const raw of candidatesFromHtml) {
-      const u = raw.trim();
-      if (!u) continue;
-      if (/\.(png|jpe?g|webp|gif)(\?|#|$)/i.test(u)) foundImageCandidates.push(u);
-      if (/images\d\.kabum\.com\.br\/.+\.(png|jpe?g)(\?|#|$)/i.test(u)) foundImageCandidates.push(u);
-      if (/images\.kabum\.com\.br\/.+\.(png|jpe?g)(\?|#|$)/i.test(u)) foundImageCandidates.push(u);
-      if (/mirakl\.net\/.+\.(png|jpe?g|webp)(\?|#|$)/i.test(u)) foundImageCandidates.push(u);
+    const originalCandidates = Array.from(new Set(classicMatches.map(toKabumOriginalUrl)));
+    for (const img of originalCandidates) {
+      if (uniqueImages.length >= 20) break;
+      const probed = await probeImage(img);
+      if (probed.ok) uniqueImages.push(probed.url);
     }
 
-    const normalizedCandidates = Array.from(new Set(foundImageCandidates));
-
-    const acceptedImages: string[] = [];
-    for (const cand of normalizedCandidates) {
-      if (acceptedImages.length >= 35) break;
-
-      let toProbe = cand;
-      let probed: { ok: boolean; url?: string } = { ok: false };
-
-      if (isKabum) {
-        const original = toKabumOriginalUrl(cand);
-        probed = await probeImage(original);
-        if (probed.ok) {
-          toProbe = original;
-        } else {
-          const g = toKabumGUrl(cand);
-          probed = await probeImage(g);
-          if (probed.ok) {
-            toProbe = g;
-          } else if (/mirakl\.net/i.test(cand)) {
-            const fallback = await tryMiraklWithHostFallback(cand);
-            if (fallback) {
-              probed = { ok: true, url: fallback };
-              toProbe = fallback;
-            }
-          }
-        }
-      } else {
-        probed = await probeImage(cand);
-      }
-
-      if (probed.ok && toProbe && !acceptedImages.includes(toProbe)) {
-        acceptedImages.push(toProbe);
+    if (uniqueImages.length === 0 && miraklMatches.length > 0) {
+      const uniqueMirakl = Array.from(new Set(miraklMatches.map(normalizeMiraklToXlarge)));
+      for (const img of uniqueMirakl) {
+        if (uniqueImages.length >= 20) break;
+        const resolved = await tryMiraklWithHostFallback(img);
+        if (resolved) uniqueImages.push(resolved);
       }
     }
 
-    for (const u of acceptedImages) {
-      if (!uniqueImages.includes(u)) uniqueImages.push(u);
+    if (uniqueImages.length === 0 && classicMatches.length > 0) {
+      const gCandidates = Array.from(new Set(classicMatches.map(toKabumGUrl)));
+      for (const img of gCandidates) {
+        if (uniqueImages.length >= 20) break;
+        const probed = await probeImage(img);
+        if (probed.ok) uniqueImages.push(probed.url);
+      }
     }
 
-    const extractJsonLdBlocks = (doc: string) => {
-      const blocks: any[] = [];
-      const re = /<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
-      let m: RegExpExecArray | null = null;
-      while ((m = re.exec(doc)) !== null) {
-        const raw = (m[1] || '').trim();
-        if (!raw) continue;
-        try {
-          blocks.push(JSON.parse(raw));
-        } catch {
-          // ignore
-        }
-      }
-      return blocks;
-    };
-
-    const findProductJsonLd = (blocks: any[]) => {
-      const visit = (node: any): any | null => {
-        if (!node) return null;
-        if (Array.isArray(node)) {
-          for (const it of node) {
-            const r = visit(it);
-            if (r) return r;
-          }
-          return null;
-        }
-        if (typeof node === 'object') {
-          const t = node['@type'];
-          if (t === 'Product' || (Array.isArray(t) && t.includes('Product'))) return node;
-          const graph = node['@graph'];
-          if (graph) {
-            const r = visit(graph);
-            if (r) return r;
-          }
-          for (const v of Object.values(node)) {
-            const r = visit(v);
-            if (r) return r;
-          }
-        }
-        return null;
-      };
-      for (const b of blocks) {
-        const found = visit(b as any);
-        if (found) return found;
-      }
-      return null;
-    };
-
-    const jsonLdBlocks = extractJsonLdBlocks(html);
-    const productJson = findProductJsonLd(jsonLdBlocks);
-
-    const pickOffer = (offers: any) => {
-      if (!offers) return null;
-      if (Array.isArray(offers)) return offers[0] || null;
-      return offers;
-    };
-
-    // 2. Extract Description / Title / Price via JSON-LD (fallbacks)
-    let title = "";
+    // 2. Extract Description via JSON-LD
     let description = "";
-    let price: number | null = null;
-    let currency: string | null = null;
-    const specs: Record<string, string> = {};
-    if (productJson) {
-      if (typeof productJson.name === 'string') title = String(productJson.name || '').trim();
-      const offers = pickOffer(productJson.offers);
-      if (offers) {
-        const rawPrice = offers.price ?? offers.lowPrice ?? offers.highPrice;
-        const parsed = typeof rawPrice === 'string' ? Number(String(rawPrice).replace(/\./g, '').replace(',', '.')) : Number(rawPrice);
-        if (Number.isFinite(parsed)) price = parsed;
-        if (typeof offers.priceCurrency === 'string') currency = offers.priceCurrency;
-      }
-      if (typeof productJson.description === 'string') description = String(productJson.description || '').trim();
-
-      const img = productJson.image;
-      const imgs = Array.isArray(img) ? img : img ? [img] : [];
-      for (const i of imgs) {
-        const u = String(i || '').trim();
-        if (!u) continue;
-        if (!uniqueImages.includes(u)) uniqueImages.push(u);
-      }
-    }
-    const ogImageMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["'][^>]*>/i);
-    if (ogImageMatch?.[1] && !uniqueImages.includes(ogImageMatch[1])) uniqueImages.push(ogImageMatch[1]);
-
-    const twitterImageMatch = html.match(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["'][^>]*>/i);
-    if (twitterImageMatch?.[1] && !uniqueImages.includes(twitterImageMatch[1])) uniqueImages.push(twitterImageMatch[1]);
-
-    const ogTitleMatch = html.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["'][^>]*>/i);
-    if (!title && ogTitleMatch?.[1]) title = ogTitleMatch[1].trim();
-
-    const titleTagMatch = html.match(/<title>([\s\S]*?)<\/title>/i);
-    if (!title && titleTagMatch?.[1]) title = titleTagMatch[1].replace(/\s+/g, ' ').trim();
-
-    if (!description) {
-      const metaDescMatch = html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["'][^>]*>/i);
-      if (metaDescMatch?.[1]) description = metaDescMatch[1].trim();
+    const jsonLdRegex = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/g;
+    let match;
+    while ((match = jsonLdRegex.exec(html)) !== null) {
+        try {
+            const json = JSON.parse(match[1]);
+            if (json['@type'] === 'Product' && json.description) {
+                description = json.description;
+                break;
+            }
+        } catch (e) {}
     }
 
-    if (!Number.isFinite(price as any)) {
-      const brlRegex = /R\$\s*([\d\.\,]+)/i;
-      const m = html.match(brlRegex);
-      if (m?.[1]) {
-        const normalized = m[1].replace(/\./g, '').replace(',', '.');
-        const parsed = Number(normalized);
-        if (Number.isFinite(parsed)) price = parsed;
-      }
-    }
     // 3. Extract Technical Specs
     // Kabum often uses a specific structure for specs. We'll try to find the section and extract key-values.
+    let specs: Record<string, string> = {};
     
     // Try to find the technical info section
-    if (isKabum) {
-      const specsSectionMatch = html.match(/Informações Técnicas([\s\S]*?)(?:<section|<\/main|$)/i);
-      if (specsSectionMatch) {
-          const specsContent = specsSectionMatch[1];
-          const pairRegex = /(?:- |<b>|<strong>)([^<:]+):?\s*(?:<\/b>|<\/strong>)?\s*([^<\n\r]+)/gi;
-          let match: RegExpExecArray | null = null;
-          while ((match = pairRegex.exec(specsContent)) !== null) {
-              const key = match[1].trim().replace(/^- /, '').replace(/:$/, '');
-              const value = match[2].trim();
-              if (key && value && key.length < 50 && value.length < 500) {
-                  specs[key] = value;
-              }
-          }
-      }
+    const specsSectionMatch = html.match(/Informações Técnicas([\s\S]*?)(?:<section|<\/main|$)/i);
+    if (specsSectionMatch) {
+        const specsContent = specsSectionMatch[1];
+        // Look for common patterns like - Key: Value or <b>Key:</b> Value
+        const pairRegex = /(?:- |<b>|<strong>)([^<:]+):?\s*(?:<\/b>|<\/strong>)?\s*([^<\n\r]+)/gi;
+        let pMatch;
+        while ((match = pairRegex.exec(specsContent)) !== null) {
+            const key = match[1].trim().replace(/^- /, '').replace(/:$/, '');
+            const value = match[2].trim();
+            if (key && value && key.length < 50 && value.length < 500) {
+                specs[key] = value;
+            }
+        }
     }
+
     // If specs are empty, try another common pattern
     if (Object.keys(specs).length === 0) {
-        const tableRegex = /<tr[^>]*>\s*(?:<t[hd][^>]*>\s*([^<]+?)\s*<\/t[hd]>\s*){1,2}<t[hd][^>]*>\s*([^<]+?)\s*<\/t[hd]>\s*<\/tr>/gi;
-        let match: RegExpExecArray | null = null;
+        const tableRegex = /<tr[^>]*>\s*<td[^>]*>([^<]+)<\/td>\s*<td[^>]*>([^<]+)<\/td>\s*<\/tr>/gi;
         while ((match = tableRegex.exec(html)) !== null) {
-            const key = String(match[1] || '').trim();
-            const value = String(match[2] || '').trim();
-            if (key && value && key.length < 80 && value.length < 800) specs[key] = value;
+            const key = match[1].trim();
+            const value = match[2].trim();
+            if (key && value) specs[key] = value;
         }
     }
 
@@ -344,7 +225,6 @@ export async function POST(request: Request) {
         return cleanedText;
     };
 
-    const finalTitle = replaceBrand(title);
     const finalDescription = replaceBrand(description);
     const finalSpecs: Record<string, string> = {};
     Object.entries(specs).forEach(([key, value]) => {
@@ -354,9 +234,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ 
       success: true, 
       images: uniqueImages,
-      title: finalTitle,
-      price: typeof price === 'number' && Number.isFinite(price) ? price : null,
-      currency: currency || (price != null ? 'BRL' : null),
       description: finalDescription,
       specs: finalSpecs,
       count: uniqueImages.length
