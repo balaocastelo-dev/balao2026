@@ -3,7 +3,7 @@ import { buildRecommendedSlug, extractExtrasFromText, extractParts, makeCommerci
 import { createVitrinePage, getVitrinePageBySlug, updateVitrinePage } from "@/lib/vitrine/db";
 import { VitrineCategory } from "@/lib/vitrine/types";
 import { scrapeUrlForVitrine } from "@/lib/vitrine/scrape";
-import { generateAndUploadVitrineImages } from "@/lib/vitrine/images";
+import { generateAndUploadVitrineImages, getVitrineImageGenerationDiagnostics } from "@/lib/vitrine/images";
 
 async function tryScrapeKabum(request: Request, input: string) {
   const url = String(input || "").trim();
@@ -147,6 +147,7 @@ export async function POST(request: Request) {
         images: scrapedImages,
       },
       generated,
+      diagnostics: getVitrineImageGenerationDiagnostics(),
     });
   } catch (e: any) {
     return NextResponse.json({ success: false, error: e?.message || "Falha ao identificar peças" }, { status: 500 });

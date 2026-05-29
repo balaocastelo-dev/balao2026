@@ -222,12 +222,20 @@ export default function AdminGeradorPage() {
     setSteps({ modelo: "done", pecas: "done", url: "done", pronta: "idle" });
 
     setStatus("success");
-    if (data?.generated?.errors && Object.keys(data.generated.errors).length > 0) {
-      setMessage("Peças identificadas. Algumas imagens não foram geradas (verifique o token/limite do provedor).");
+    const diag = data?.diagnostics;
+    const hasReplicate = Boolean(diag?.hasReplicateToken);
+    const hasSupabaseAdmin = Boolean(diag?.hasSupabaseUrl && diag?.hasSupabaseServiceRoleKey);
+
+    if (!hasReplicate || !hasSupabaseAdmin) {
+      setMessage("Peças identificadas. Imagens não foram geradas (variáveis de ambiente do gerador não estão completas).");
+    } else if (data?.generated?.errors && Object.keys(data.generated.errors).length > 0) {
+      setMessage("Peças identificadas. Algumas imagens não foram geradas (verifique o modelo/token/limite do provedor).");
     } else if (data?.generated?.error) {
-      setMessage("Peças identificadas. Imagens não foram geradas (verifique configuração do gerador).");
-    } else {
+      setMessage("Peças identificadas. Imagens não foram geradas (verifique o modelo/token do provedor).");
+    } else if (data?.page?.images && Object.keys(data.page.images).length > 0) {
       setMessage("Peças e imagens geradas. Você pode ajustar qualquer campo antes de publicar.");
+    } else {
+      setMessage("Peças identificadas. Imagens não foram geradas (verifique o modelo/token do provedor).");
     }
   };
 

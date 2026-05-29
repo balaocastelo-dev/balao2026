@@ -29,6 +29,25 @@ function getReplicatePromptKey() {
   return process.env.REPLICATE_IMAGE_PROMPT_KEY || "prompt";
 }
 
+export function getVitrineImageGenerationDiagnostics() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+  const serviceKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.SERVICE_ROLE_KEY ||
+    process.env.SUPABASE_SERVICE_KEY ||
+    "";
+  const replicateToken = getReplicateToken();
+
+  return {
+    hasSupabaseUrl: Boolean(supabaseUrl),
+    hasSupabaseServiceRoleKey: Boolean(serviceKey),
+    hasReplicateToken: Boolean(replicateToken),
+    replicateModel: getReplicateModel(),
+    replicatePromptKey: getReplicatePromptKey(),
+    usesReplicateVersionOverride: Boolean(process.env.REPLICATE_IMAGE_VERSION),
+  };
+}
+
 let replicateVersionCache: Record<string, string> | null = null;
 
 async function getReplicateLatestVersionId(model: string) {
