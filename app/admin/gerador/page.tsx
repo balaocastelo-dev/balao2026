@@ -182,6 +182,58 @@ export default function AdminGeradorPage() {
       });
   }, [editId]);
 
+  const tryParseRetryAfter = (msg: string) => {
+    const m = String(msg || "").match(/\"retry_after\"\\s*:\\s*(\\d+)/i);
+    const n = m?.[1] ? Number(m[1]) : 0;
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  };
+
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+  const upsertPage = async (nextStatus: VitrineStatus) => {
+    const payload = {
+      nome_pc: nomePc.trim(),
+      slug: (slug || toSlug(nomePc)).trim(),
+      categoria,
+      descricao_original: descricaoOuLink,
+      source_url: /^https?:\/\//i.test(descricaoOuLink.trim()) ? descricaoOuLink.trim() : null,
+      processador: String(parts.processador || ""),
+      placa_video: String(parts.placa_video || ""),
+      memoria_ram: String(parts.memoria_ram || ""),
+      armazenamento: String(parts.armazenamento || ""),
+      sistema_operacional: String(parts.sistema_operacional || ""),
+      resfriamento: String(parts.resfriamento || ""),
+      aplicacoes: applicationsText
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
+      extras,
+      status: nextStatus,
+    };
+
+    let res: Response;
+    if (pageId) {
+      res = await fetch(`/api/vitrine/pages/${pageId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } else {
+      res = await fetch("/api/vitrine/pages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    }
+
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data?.success) throw new Error(data?.error || "Falha ao salvar");
+    const saved = data.page as VitrinePageRecord;
+    setPageId(saved.id);
+    setSlug(saved.slug);
+    return saved;
+  };
+
   const identify = async () => {
     setStatus("loading");
     setMessage("Identificando modelo e componentes e gerando imagem principal...");
@@ -226,14 +278,6 @@ export default function AdminGeradorPage() {
     const diag = data?.diagnostics;
     const hasReplicate = Boolean(diag?.hasReplicateToken);
     const hasSupabaseAdmin = Boolean(diag?.hasSupabaseUrl && diag?.hasSupabaseServiceRoleKey);
-
-    const tryParseRetryAfter = (msg: string) => {
-      const m = String(msg || "").match(/\"retry_after\"\\s*:\\s*(\\d+)/i);
-      const n = m?.[1] ? Number(m[1]) : 0;
-      return Number.isFinite(n) && n > 0 ? n : 0;
-    };
-
-    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
     const generateRemainingImages = async (id: string) => {
       setIsGeneratingImages(true);
@@ -290,94 +334,106 @@ export default function AdminGeradorPage() {
   };
 
   const save = async (nextStatus: VitrineStatus) => {
-    const payload = {
-      nome_pc: nomePc.trim(),
-      slug: (slug || toSlug(nomePc)).trim(),
-      categoria,
-      descricao_original: descricaoOuLink,
-      source_url: /^https?:\/\//i.test(descricaoOuLink.trim()) ? descricaoOuLink.trim() : null,
-      processador: String(parts.processador || ""),
-      placa_video: String(parts.placa_video || ""),
-      memoria_ram: String(parts.memoria_ram || ""),
-      armazenamento: String(parts.armazenamento || ""),
-      sistema_operacional: String(parts.sistema_operacional || ""),
-      resfriamento: String(parts.resfriamento || ""),
-      aplicacoes: applicationsText
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean),
-      extras,
-      status: nextStatus,
-    };
+    if (nextStatus === "publicada") {
+      publish();
+      return;
+    }
 
-    if (!payload.nome_pc) {
+    if (!nomePc.trim()) {
       setStatus("error");
       setMessage("Informe o nome do PC.");
       return;
     }
 
     setStatus("loading");
-    setMessage(nextStatus === "publicada" ? "Publicando página..." : "Salvando rascunho...");
-
+    setMessage("Salvando rascunho...");
     try {
-      let res: Response;
-      if (pageId) {
-        res = await fetch(`/api/vitrine/pages/${pageId}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-      } else {
-        res = await fetch("/api/vitrine/pages", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-      }
-
-      const data = await res.json().catch(() => null);
-      if (!res.ok || !data?.success) throw new Error(data?.error || "Falha ao salvar");
-
-      const saved = data.page as VitrinePageRecord;
-      setPageId(saved.id);
-      setSlug(saved.slug);
-      if (nextStatus === "publicada") {
-        setSteps((prev) => ({ ...prev, pronta: "done" }));
-        const heroExists = (saved as any)?.images?.hero;
-        if (heroExists) {
-          setMessage("Página publicada com sucesso!");
-          setStatus("success");
-          setScrapedImages([String(heroExists)]);
-        } else {
-          setMessage("Página publicada. Gerando imagens de IA...");
-          try {
-            const imgRes = await fetch("/api/vitrine/images/generate", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ id: saved.id }),
-            });
-            const imgData = await imgRes.json().catch(() => null);
-            if (imgRes.ok && imgData?.success) {
-              const heroUrl = imgData?.page?.images?.hero ? [String(imgData.page.images.hero)] : [];
-              if (heroUrl.length > 0) setScrapedImages(heroUrl);
-              setMessage("Página publicada e imagens geradas com sucesso!");
-              setStatus("success");
-            } else {
-              setStatus("success");
-              setMessage("Página publicada. Imagens não foram geradas (verifique configuração do gerador).");
-            }
-          } catch {
-            setStatus("success");
-            setMessage("Página publicada. Imagens não foram geradas (verifique configuração do gerador).");
-          }
-        }
-      } else {
-        setStatus("success");
-        setMessage("Rascunho salvo.");
-      }
+      await upsertPage(nextStatus);
+      setStatus("success");
+      setMessage("Rascunho salvo.");
     } catch (e: any) {
       setStatus("error");
       setMessage(e?.message || "Falha ao salvar");
+    }
+  };
+
+  const publish = async () => {
+    if (!nomePc.trim()) {
+      setStatus("error");
+      setMessage("Informe o nome do PC.");
+      return;
+    }
+
+    setStatus("loading");
+    setIsGeneratingImages(true);
+    setMessage("Gerando imagens e publicando página...");
+
+    try {
+      const draft = await upsertPage("rascunho");
+
+      const requiredKeys: string[] = ["hero"];
+      if (String(parts.processador || "").trim()) requiredKeys.push("cpu");
+      if (String(parts.placa_video || "").trim()) requiredKeys.push("gpu");
+      if (String(parts.memoria_ram || "").trim()) requiredKeys.push("ram");
+      if (String(parts.armazenamento || "").trim()) requiredKeys.push("storage");
+      if (String(parts.resfriamento || "").trim()) requiredKeys.push("cooling");
+      if (String(extras?.gabinete || "").trim()) requiredKeys.push("case");
+      if (String(extras?.fonte || "").trim()) requiredKeys.push("psu");
+
+      let latestPage: any = draft;
+      for (const key of requiredKeys) {
+        let done = false;
+        for (let attempt = 1; attempt <= 3; attempt += 1) {
+          setMessage(`Gerando imagens de IA (${key})...`);
+          const imgRes = await fetch("/api/vitrine/images/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: draft.id, keys: [key] }),
+          });
+          const imgData = await imgRes.json().catch(() => null);
+          const errMsg = imgData?.generated?.errors?.[key] ? String(imgData.generated.errors[key]) : "";
+          if (!imgRes.ok || !imgData?.success || errMsg) {
+            const retryAfter = tryParseRetryAfter(errMsg || imgData?.error || "");
+            if (retryAfter > 0 && attempt < 3) {
+              await sleep((retryAfter + 1) * 1000);
+              continue;
+            }
+            throw new Error(errMsg || imgData?.error || `Falha ao gerar imagem (${key})`);
+          }
+
+          latestPage = imgData.page;
+          const heroUrl = latestPage?.images?.hero ? [String(latestPage.images.hero)] : [];
+          if (heroUrl.length > 0) setScrapedImages(heroUrl);
+          done = true;
+          break;
+        }
+        if (!done) throw new Error(`Falha ao gerar imagem (${key})`);
+      }
+
+      const generatedImages = latestPage?.images || {};
+      for (const key of requiredKeys) {
+        if (!String(generatedImages?.[key] || "").trim()) {
+          throw new Error("Imagens ainda não foram geradas. Tente novamente.");
+        }
+      }
+
+      setMessage("Publicando página...");
+      const pubRes = await fetch(`/api/vitrine/pages/${draft.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "publicada" }),
+      });
+      const pubData = await pubRes.json().catch(() => null);
+      if (!pubRes.ok || !pubData?.success) throw new Error(pubData?.error || "Falha ao publicar");
+
+      setSteps((prev) => ({ ...prev, pronta: "done" }));
+      setStatus("success");
+      setMessage("Página publicada com as imagens geradas.");
+    } catch (e: any) {
+      setStatus("error");
+      setMessage(e?.message || "Não foi possível publicar sem imagens.");
+    } finally {
+      setIsGeneratingImages(false);
     }
   };
 
@@ -594,7 +650,8 @@ export default function AdminGeradorPage() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <button
                 onClick={() => save("rascunho")}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-black/10 bg-white font-extrabold text-sm hover:bg-black/5"
+                disabled={status === "loading" || isGeneratingImages}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-black/10 bg-white font-extrabold text-sm hover:bg-black/5 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Save size={16} />
                 Salvar rascunho
@@ -611,10 +668,11 @@ export default function AdminGeradorPage() {
               </button>
               <button
                 onClick={() => save("publicada")}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-[#d71920] text-white font-extrabold text-sm hover:bg-[#b9151b]"
+                disabled={status === "loading" || isGeneratingImages}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-[#d71920] text-white font-extrabold text-sm hover:bg-[#b9151b] disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Send size={16} />
-                Publicar página
+                {status === "loading" || isGeneratingImages ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                {status === "loading" || isGeneratingImages ? "Publicando..." : "Publicar página"}
               </button>
             </div>
           </div>

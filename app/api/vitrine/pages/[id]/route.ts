@@ -18,6 +18,21 @@ export async function PATCH(request: Request, ctx: { params: Promise<{ id: strin
   try {
     const { id } = await ctx.params;
     const body = await request.json().catch(() => ({}));
+
+    const wantsPublished = String(body?.status || "") === "publicada";
+    const requireImages = body?.requireImages === false ? false : true;
+    if (wantsPublished && requireImages) {
+      const existing = await getVitrinePageById(id);
+      const nextImages = { ...(existing?.images || {}), ...(body?.images || {}) } as Record<string, any>;
+      const hero = String(nextImages?.hero || "").trim();
+      if (!hero) {
+        return NextResponse.json(
+          { success: false, error: "Imagens ainda não foram geradas (imagem principal)." },
+          { status: 409 },
+        );
+      }
+    }
+
     const page = await updateVitrinePage(id, body);
     return NextResponse.json({ success: true, page });
   } catch (e: any) {
@@ -34,4 +49,3 @@ export async function DELETE(_: Request, ctx: { params: Promise<{ id: string }> 
     return NextResponse.json({ success: false, error: e?.message || "Falha ao excluir página" }, { status: 500 });
   }
 }
-
