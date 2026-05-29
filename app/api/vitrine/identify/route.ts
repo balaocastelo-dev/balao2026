@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { buildRecommendedSlug, extractExtrasFromText, extractParts, makeCommercialCopy, normalizeInputText } from "@/lib/vitrine/core";
+import { buildRecommendedSlug, extractExtrasFromText, extractParts, makeCommercialCopy, normalizeInputText, pickComponentImage, pickPcHeroImage } from "@/lib/vitrine/core";
 import { createVitrinePage, getVitrinePageBySlug, updateVitrinePage } from "@/lib/vitrine/db";
 import { VitrineCategory } from "@/lib/vitrine/types";
 import { scrapeUrlForVitrine } from "@/lib/vitrine/scrape";
@@ -120,6 +120,31 @@ export async function POST(request: Request) {
           extras,
         } as any);
       }
+    }
+
+    if (page) {
+      const partsForImages = {
+        processador: page.processador,
+        placa_video: page.placa_video,
+        memoria_ram: page.memoria_ram,
+        armazenamento: page.armazenamento,
+        sistema_operacional: page.sistema_operacional,
+        resfriamento: page.resfriamento,
+        categoria: page.categoria,
+        aplicacoes: page.aplicacoes,
+      } as any;
+
+      const fallbackImages = {
+        hero: pickPcHeroImage(partsForImages),
+        cpu: pickComponentImage("cpu", partsForImages),
+        gpu: pickComponentImage("gpu", partsForImages),
+        ram: pickComponentImage("ram", partsForImages),
+        storage: pickComponentImage("storage", partsForImages),
+        cooling: pickComponentImage("cooling", partsForImages),
+      } as Record<string, string>;
+
+      const merged = { ...fallbackImages, ...(page.images || {}) };
+      page = await updateVitrinePage(page.id, { images: merged } as any);
     }
 
     let generated: any = null;

@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { VitrinePageRecord } from "./types";
+import { pickComponentImage, pickPcHeroImage } from "./core";
 
 function getSupabaseAdminClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -29,6 +30,17 @@ function getReplicatePromptKey() {
   return process.env.REPLICATE_IMAGE_PROMPT_KEY || "prompt";
 }
 
+function stableIndex(seed: string, modulo: number) {
+  const s = String(seed || "");
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i += 1) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  const n = Math.abs(h);
+  return modulo > 0 ? n % modulo : 0;
+}
+
 export function getVitrineImageGenerationDiagnostics() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
   const serviceKey =
@@ -49,6 +61,7 @@ export function getVitrineImageGenerationDiagnostics() {
 }
 
 let replicateVersionCache: Record<string, string> | null = null;
+let libraryCache: Record<string, string[]> | null = null;
 
 async function getReplicateLatestVersionId(model: string) {
   if (replicateVersionCache && replicateVersionCache[model]) return replicateVersionCache[model];
@@ -216,6 +229,40 @@ async function uploadToSupabaseStorage(path: string, buf: Buffer, contentType: s
   return publicUrl;
 }
 
+async function listLibraryUrls(folder: string) {
+  const admin = getSupabaseAdminClient();
+  const bucket = "vitrine";
+  const prefix = `library/${folder}`;
+
+  libraryCache = libraryCache || {};
+  if (libraryCache[prefix]) return libraryCache[prefix];
+
+  const { data, error } = await admin.storage.from(bucket).list(prefix, { limit: 100, sortBy: { column: "name", order: "asc" } } as any);
+  if (error) return [];
+  const names = (data || [])
+    .map((o: any) => String(o?.name || "").trim())
+    .filter(Boolean)
+    .filter((n: string) => !n.endsWith("/"));
+
+  const urls = names
+    .map((name: string) => admin.storage.from(bucket).getPublicUrl(`${prefix}/${name}`).data?.publicUrl || "")
+    .filter(Boolean);
+
+  libraryCache[prefix] = urls;
+  return urls;
+}
+
+async function pickLibraryImageUrl(key: string, page: VitrinePageRecord) {
+  const folder =
+    key === "hero" ? "pcs" : key === "cpu" ? "cpu" : key === "gpu" ? "gpu" : key === "ram" ? "ram" : key === "storage" ? "storage" : key === "cooling" ? "cooling" : "";
+  if (!folder) return "";
+
+  const urls = await listLibraryUrls(folder);
+  if (!urls || urls.length === 0) return "";
+  const seed = `${page.id}|${page.slug}|${key}|${page.processador}|${page.placa_video}|${page.memoria_ram}|${page.armazenamento}|${page.resfriamento}`;
+  return urls[stableIndex(seed, urls.length)] || "";
+}
+
 function baseStylePrompt() {
   return [
     "foto de produto premium",
@@ -284,6 +331,30 @@ async function sleepMs(ms: number) {
   await new Promise((r) => setTimeout(r, ms));
 }
 
+function buildLocalFallbackImages(page: VitrinePageRecord) {
+  const parts = {
+    processador: page.processador,
+    placa_video: page.placa_video,
+    memoria_ram: page.memoria_ram,
+    armazenamento: page.armazenamento,
+    sistema_operacional: page.sistema_operacional,
+    resfriamento: page.resfriamento,
+    categoria: page.categoria,
+    aplicacoes: page.aplicacoes,
+  } as any;
+
+  return {
+    hero: pickPcHeroImage(parts),
+    cpu: pickComponentImage("cpu", parts),
+    gpu: pickComponentImage("gpu", parts),
+    ram: pickComponentImage("ram", parts),
+    storage: pickComponentImage("storage", parts),
+    cooling: pickComponentImage("cooling", parts),
+    case: pickPcHeroImage(parts),
+    psu: pickPcHeroImage(parts),
+  } as Record<string, string>;
+}
+
 export async function generateAndUploadVitrineImages(input: {
   page: VitrinePageRecord;
   keys?: string[];
@@ -294,6 +365,8 @@ export async function generateAndUploadVitrineImages(input: {
   const images: Record<string, string> = {};
   const usedPrompts: Record<string, string> = {};
   const errors: Record<string, string> = {};
+  const warnings: Record<string, string> = {};
+  const localFallbacks = buildLocalFallbackImages(input.page);
 
   for (const key of keys) {
     const prompt = prompts[key];
@@ -321,9 +394,23 @@ export async function generateAndUploadVitrineImages(input: {
       const publicUrl = await uploadToSupabaseStorage(filePath, buf, contentType);
       images[key] = publicUrl;
     } catch (e: any) {
+      const libraryUrl = await pickLibraryImageUrl(key, input.page).catch(() => "");
+      if (libraryUrl) {
+        images[key] = libraryUrl;
+        warnings[key] = String(e?.message || "Falha ao gerar por IA, usando banco de imagens");
+        continue;
+      }
+
+      const fallback = String(localFallbacks[key] || "").trim();
+      if (fallback) {
+        images[key] = fallback;
+        warnings[key] = String(e?.message || "Falha ao gerar por IA, usando placeholder");
+        continue;
+      }
+
       errors[key] = String(e?.message || "Falha ao gerar/upload");
     }
   }
 
-  return { images, image_prompts: usedPrompts, errors };
+  return { images, image_prompts: usedPrompts, errors, warnings };
 }
