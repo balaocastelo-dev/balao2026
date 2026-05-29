@@ -75,6 +75,7 @@ function FieldRow({
   onChange,
   identified,
   placeholder,
+  imageUrl,
 }: {
   icon: any;
   label: string;
@@ -82,6 +83,7 @@ function FieldRow({
   onChange: (next: string) => void;
   identified: boolean;
   placeholder?: string;
+  imageUrl?: string;
 }) {
   return (
     <div className="flex items-start gap-3 py-3 border-b border-black/5 last:border-b-0">
@@ -106,6 +108,11 @@ function FieldRow({
           placeholder={placeholder}
         />
       </div>
+      {imageUrl ? (
+        <div className="w-14 h-14 rounded-xl border border-black/10 bg-white overflow-hidden flex items-center justify-center">
+          <img src={imageUrl} alt="" className="w-full h-full object-contain" />
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -130,6 +137,7 @@ export default function AdminGeradorPage() {
   const [applicationsText, setApplicationsText] = useState("");
   const [scrapedImages, setScrapedImages] = useState<string[]>([]);
   const [isGeneratingImages, setIsGeneratingImages] = useState(false);
+  const [generatedImages, setGeneratedImages] = useState<Record<string, string>>({});
 
   const [steps, setSteps] = useState<Record<"modelo" | "pecas" | "url" | "pronta", StepStatus>>({
     modelo: "idle",
@@ -170,7 +178,9 @@ export default function AdminGeradorPage() {
         });
         setExtras((p as any).extras || {});
         setApplicationsText((p.aplicacoes || []).join(", "));
-        const storedHero = (p as any)?.images?.hero ? [String((p as any).images.hero)] : [];
+        const storedImages = ((p as any)?.images && typeof (p as any).images === "object") ? (p as any).images : {};
+        setGeneratedImages(storedImages as any);
+        const storedHero = storedImages?.hero ? [String(storedImages.hero)] : [];
         setScrapedImages(storedHero);
         setSteps({ modelo: "done", pecas: "done", url: "done", pronta: p.status === "publicada" ? "done" : "idle" });
         setStatus("success");
@@ -265,6 +275,9 @@ export default function AdminGeradorPage() {
     setExtras((data?.extras && typeof data.extras === "object") ? data.extras : {});
     setApplicationsText(Array.isArray(nextParts.aplicacoes) ? nextParts.aplicacoes.join(", ") : "");
     if (data?.page?.id) setPageId(String(data.page.id));
+    if (data?.page?.images && typeof data.page.images === "object") {
+      setGeneratedImages(data.page.images as any);
+    }
     const heroFromDb = data?.page?.images?.hero ? [String(data.page.images.hero)] : [];
     const fallback = Array.isArray(data?.scraped?.images) ? data.scraped.images : [];
     setScrapedImages(heroFromDb.length > 0 ? heroFromDb : fallback);
@@ -299,6 +312,9 @@ export default function AdminGeradorPage() {
                 await sleep((retryAfter + 1) * 1000);
                 continue;
               }
+            }
+            if (imgData?.page?.images && typeof imgData.page.images === "object") {
+              setGeneratedImages((prev) => ({ ...prev, ...(imgData.page.images as any) }));
             }
             const heroUrl = imgData?.page?.images?.hero ? [String(imgData.page.images.hero)] : [];
             if (heroUrl.length > 0) setScrapedImages(heroUrl);
@@ -402,6 +418,9 @@ export default function AdminGeradorPage() {
           }
 
           latestPage = imgData.page;
+          if (latestPage?.images && typeof latestPage.images === "object") {
+            setGeneratedImages((prev) => ({ ...prev, ...(latestPage.images as any) }));
+          }
           const heroUrl = latestPage?.images?.hero ? [String(latestPage.images.hero)] : [];
           if (heroUrl.length > 0) setScrapedImages(heroUrl);
           done = true;
@@ -553,6 +572,7 @@ export default function AdminGeradorPage() {
                   onChange={(v) => setParts((p) => ({ ...p, processador: v }))}
                   identified={Boolean(parts.processador)}
                   placeholder="Ex: AMD Ryzen 7 7700"
+                  imageUrl={generatedImages.cpu}
                 />
                 <FieldRow
                   icon={Monitor}
@@ -561,6 +581,7 @@ export default function AdminGeradorPage() {
                   onChange={(v) => setParts((p) => ({ ...p, placa_video: v }))}
                   identified={Boolean(parts.placa_video)}
                   placeholder="Ex: NVIDIA GeForce RTX 5060 Ti 16GB"
+                  imageUrl={generatedImages.gpu}
                 />
                 <FieldRow
                   icon={MemoryStick}
@@ -569,6 +590,7 @@ export default function AdminGeradorPage() {
                   onChange={(v) => setParts((p) => ({ ...p, memoria_ram: v }))}
                   identified={Boolean(parts.memoria_ram)}
                   placeholder="Ex: 64GB DDR5"
+                  imageUrl={generatedImages.ram}
                 />
                 <FieldRow
                   icon={HardDrive}
@@ -577,6 +599,7 @@ export default function AdminGeradorPage() {
                   onChange={(v) => setParts((p) => ({ ...p, armazenamento: v }))}
                   identified={Boolean(parts.armazenamento)}
                   placeholder="Ex: 2TB NVMe"
+                  imageUrl={generatedImages.storage}
                 />
                 <FieldRow
                   icon={Tag}
@@ -593,6 +616,7 @@ export default function AdminGeradorPage() {
                   onChange={(v) => setParts((p) => ({ ...p, resfriamento: v }))}
                   identified={Boolean(parts.resfriamento)}
                   placeholder="Ex: Water Cooler 240mm"
+                  imageUrl={generatedImages.cooling}
                 />
                 <FieldRow
                   icon={Sparkles}
