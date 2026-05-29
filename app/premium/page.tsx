@@ -5,6 +5,8 @@ import Header from "@/components/Header";
 import { getProducts } from "@/lib/db";
 import type { Product } from "@/lib/utils";
 import { SITE_CONFIG } from "@/lib/config";
+import JsonLd from "@/components/JsonLd";
+import PremiumParallax from "@/components/PremiumParallax";
 import {
   ArrowRight,
   BadgeCheck,
@@ -17,16 +19,56 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Premium | PCs de Alta Performance e Montagem Profissional",
+  title: "PC Gamer Premium em Campinas | Montagem Profissional",
   description:
-    "Linha Premium do Balão da Informática: PCs gamer, workstations e máquinas sob medida com montagem profissional, testes completos e suporte real em Campinas.",
+    "PC Gamer Premium em Campinas (Cambuí) com montagem profissional, testes completos, garantia e suporte real. Veja PCs gamer do nosso estoque e fale com um especialista.",
+  keywords: [
+    "pc gamer premium",
+    "pc gamer campinas",
+    "montagem de pc gamer campinas",
+    "computador gamer campinas",
+    "pc gamer em estoque",
+    "pc gamer pronto",
+    "pc gamer personalizado",
+    "workstation campinas",
+    "computador para arquitetura campinas",
+    "computador para engenharia campinas",
+    "pc para edição de vídeo",
+    "pc para streaming",
+    "pc gamer com garantia",
+    "loja de informática campinas",
+    "balão da informática",
+    "cambuí campinas informática",
+  ],
   robots: { index: true, follow: true },
+  alternates: { canonical: "https://www.balao.info/premium" },
   openGraph: {
-    title: "Premium | Balão da Informática",
+    title: "PC Gamer Premium em Campinas | Balão da Informática",
     description:
-      "PCs premium montados por especialistas. Escolha uma máquina em estoque ou peça um projeto sob medida via WhatsApp.",
+      "PCs gamer premium do estoque, com montagem profissional e suporte real em Campinas. Escolha seu PC e finalize no WhatsApp.",
     type: "website",
     url: "https://www.balao.info/premium",
+    images: [
+      {
+        url: "https://www.balao.info/logo.png",
+        width: 512,
+        height: 512,
+        alt: "Balão da Informática",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "PC Gamer Premium em Campinas | Balão da Informática",
+    description:
+      "PCs gamer premium do estoque, com montagem profissional e suporte real em Campinas. Escolha seu PC e finalize no WhatsApp.",
+    images: ["https://www.balao.info/logo.png"],
+  },
+  other: {
+    "geo.region": "BR-SP",
+    "geo.placename": "Campinas",
+    "geo.position": "-22.9099;-47.0626",
+    ICBM: "-22.9099, -47.0626",
   },
 };
 
@@ -59,6 +101,15 @@ function buildWhatsAppLink(message: string) {
   return `https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(message)}`;
 }
 
+function shuffleCopy<T>(items: T[]): T[] {
+  const arr = [...items];
+  for (let i = arr.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
 function ProductTile({
   product,
   eyebrow,
@@ -78,7 +129,7 @@ function ProductTile({
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.10),_transparent_55%)] opacity-0 group-hover:opacity-100 transition-opacity" />
       <div className="relative p-5 sm:p-6 flex flex-col gap-4">
-        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl bg-zinc-900 p-3 sm:p-4">
+        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl bg-white border border-zinc-200 p-3 sm:p-4">
           <Image
             src={imgSrc}
             alt={product.name || "Produto"}
@@ -118,7 +169,9 @@ export default async function PremiumPage() {
     const t = normalize(`${p?.name || ""} ${p?.category || ""}`);
     return t.includes("pc gamer") || t.includes("pcgamer");
   });
-  const sorted = [...pcGamerOnly].sort((a, b) => {
+
+  const selection = shuffleCopy(pcGamerOnly).slice(0, Math.min(17, pcGamerOnly.length));
+  const sortedSelection = [...selection].sort((a, b) => {
     const priceA = parsePriceBRL(a.price);
     const priceB = parsePriceBRL(b.price);
     if (priceA === 0 && priceB === 0) return 0;
@@ -126,20 +179,65 @@ export default async function PremiumPage() {
     if (priceB === 0) return -1;
     return priceB - priceA;
   });
-  const featured = sorted.slice(0, 5);
-  const stock = sorted.slice(5, 17);
+  const featured = sortedSelection.slice(0, 5);
+  const stock = sortedSelection.slice(5, 17);
 
   const whatsAppDefault = buildWhatsAppLink(
     "Olá! Quero montar um PC Premium no Balão da Informática. Pode me ajudar com uma configuração ideal para meu uso e orçamento?"
   );
 
+  const displayedProducts = [...featured, ...stock].filter((p) => p?.id);
+  const pageUrl = "https://www.balao.info/premium";
+  const storeUrl = "https://www.balao.info";
+  const jsonLdData = [
+    {
+      "@type": "WebPage",
+      "@id": pageUrl,
+      url: pageUrl,
+      name: "PC Gamer Premium em Campinas | Balão da Informática",
+      description:
+        "PC Gamer Premium em Campinas (Cambuí) com montagem profissional, testes completos e suporte real. Veja PCs gamer do estoque e peça orçamento.",
+      inLanguage: "pt-BR",
+      isPartOf: { "@type": "WebSite", "@id": storeUrl, url: storeUrl, name: SITE_CONFIG.name },
+      about: { "@type": "Thing", name: "PC Gamer Premium" },
+    },
+    {
+      "@type": "ComputerStore",
+      "@id": storeUrl,
+      name: SITE_CONFIG.name,
+      url: storeUrl,
+      telephone: `+${SITE_CONFIG.phone.number}`,
+      email: SITE_CONFIG.email,
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: SITE_CONFIG.address,
+        addressLocality: "Campinas",
+        addressRegion: "SP",
+        addressCountry: "BR",
+      },
+      geo: { "@type": "GeoCoordinates", latitude: -22.9099, longitude: -47.0626 },
+      sameAs: [SITE_CONFIG.social.instagram, SITE_CONFIG.social.facebook],
+    },
+    {
+      "@type": "ItemList",
+      url: pageUrl,
+      numberOfItems: displayedProducts.length,
+      itemListElement: displayedProducts.map((p, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        url: `https://www.balao.info/product/${p.id}`,
+        name: p.name,
+      })),
+    },
+  ];
+
   return (
     <div className="bg-black text-white">
+      <JsonLd data={jsonLdData as any} />
       <Header />
 
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(255,255,255,0.10),transparent_35%),radial-gradient(circle_at_80%_30%,rgba(230,0,18,0.20),transparent_40%),radial-gradient(circle_at_50%_100%,rgba(167,139,250,0.18),transparent_45%)]" />
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
+        <PremiumParallax />
 
         <div className="container mx-auto px-4 py-14 sm:py-20 relative">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
@@ -371,6 +469,52 @@ export default async function PremiumPage() {
                 </a>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-14 sm:py-20 bg-zinc-950 border-t border-white/10">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+            <div className="lg:col-span-5">
+              <div className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400">SEO e localização</div>
+              <h2 className="text-3xl sm:text-5xl font-black tracking-tight mt-2">
+                PC Gamer Premium em Campinas é no Balão da Informática.
+              </h2>
+              <p className="text-zinc-300 mt-4 leading-relaxed">
+                Se você busca <strong className="text-white">PC gamer premium</strong> em Campinas, com montagem
+                profissional, testes e suporte pós-venda, esta é a página certa. Estamos no <strong className="text-white">Cambuí</strong> e atendemos
+                Campinas e região, com envio para outras cidades.
+              </p>
+            </div>
+            <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[
+                {
+                  title: "Palavras-chave principais",
+                  desc: "pc gamer premium, pc gamer campinas, montagem de pc gamer, computador gamer em estoque, pc para streaming, pc para edição de vídeo.",
+                },
+                {
+                  title: "Localização (GEO)",
+                  desc: `${SITE_CONFIG.address}. Atendimento em Campinas/SP e região.`,
+                },
+                {
+                  title: "Perfis de uso",
+                  desc: "Jogos competitivos, jogos pesados, criação de conteúdo, edição, arquitetura, engenharia e produtividade.",
+                },
+                {
+                  title: "O que você recebe",
+                  desc: "Montagem com padrão premium, validação de compatibilidade, testes de estabilidade e suporte real.",
+                },
+              ].map((card) => (
+                <div
+                  key={card.title}
+                  className="rounded-3xl border border-white/10 bg-black p-6 hover:border-white/20 transition-colors"
+                >
+                  <div className="text-sm font-black tracking-tight">{card.title}</div>
+                  <div className="text-sm text-zinc-300 mt-3 leading-relaxed">{card.desc}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
