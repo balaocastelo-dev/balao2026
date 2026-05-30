@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import SafeImage from "@/components/SafeImage";
+import Image from "next/image";
 import JsonLd, { generateBreadcrumbSchema, generateFAQSchema, generateOrganizationSchema } from "@/components/JsonLd";
 import { listBlogPostsForPage } from "@/lib/blog-store";
 import { SITE_CONFIG } from "@/lib/config";
@@ -8,7 +8,7 @@ import { SITE_CONFIG } from "@/lib/config";
 export const runtime = "nodejs";
 export const revalidate = 120;
 
-type SearchParams = Promise<{ cat?: string; category?: string }>;
+type SearchParams = { cat?: string; category?: string };
 
 type BlogCardPost = {
   id: string;
@@ -77,7 +77,6 @@ export async function generateMetadata(props: { searchParams?: SearchParams }): 
 }
 
 export default async function BlogPage(props: { searchParams?: SearchParams }) {
-  await props.searchParams;
   const rawPosts = await listBlogPostsForPage({ take: 50 });
 
   const posts: BlogCardPost[] = rawPosts.map((p) => {
@@ -173,7 +172,7 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
           {group1.length > 0 && (
             <section className="grid gap-4 sm:grid-cols-12">
               <div className="sm:col-span-12">
-                <HeroCard post={group1[0]} size="lg" />
+                <HeroCard post={group1[0]} size="lg" priority />
               </div>
               {group1[1] && (
                 <div className="sm:col-span-6">
@@ -272,7 +271,7 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
                       {idx + 1}
                     </div>
                     <div className="min-w-0">
-                      <Link href={`/blog/${p.slug}`} prefetch className="text-sm font-semibold hover:underline">
+                      <Link href={`/blog/${p.slug}`} prefetch={false} className="text-sm font-semibold hover:underline">
                         {p.title}
                       </Link>
                       <div className="mt-1 text-xs font-semibold text-neutral-600">
@@ -293,11 +292,10 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
               </div>
               <div className="divide-y divide-neutral-200">
                 {balaoPosts.map((p) => (
-                  <Link key={p.id} href={`/blog/${p.slug}`} prefetch className="flex items-center gap-3 px-4 py-3 hover:bg-neutral-50">
+                  <Link key={p.id} href={`/blog/${p.slug}`} prefetch={false} className="flex items-center gap-3 px-4 py-3 hover:bg-neutral-50">
                     <div className="relative h-12 w-12 flex-none overflow-hidden rounded border border-neutral-100 bg-white">
-                      <SafeImage
+                      <Image
                         src={p.ogImageUrl || ogFallbackUrl(p)}
-                        fallbackSrc={ogFallbackUrl(p)}
                         alt={p.title}
                         fill
                         sizes="48px"
@@ -358,9 +356,8 @@ function PostListItem({ post }: { post: BlogCardPost }) {
   return (
     <article className="flex gap-4 p-4 hover:bg-neutral-50/70">
       <div className="relative h-[72px] w-[112px] flex-none sm:h-[86px] sm:w-[140px]">
-        <SafeImage
+        <Image
           src={post.ogImageUrl || ogFallbackUrl(post)}
-          fallbackSrc={ogFallbackUrl(post)}
           alt={post.title}
           fill
           sizes="(max-width: 640px) 112px, 140px"
@@ -374,7 +371,7 @@ function PostListItem({ post }: { post: BlogCardPost }) {
           <span>{new Date(post.publishedAt ?? post.createdAt).toLocaleDateString("pt-BR")}</span>
         </div>
         <h3 className="mt-1 text-base font-extrabold leading-snug">
-          <Link href={`/blog/${post.slug}`} prefetch className="hover:underline">
+          <Link href={`/blog/${post.slug}`} prefetch={false} className="hover:underline">
             {post.title}
           </Link>
         </h3>
@@ -391,33 +388,33 @@ function ogFallbackUrl(post: { slug: string; title: string; category: string; so
   return `/blog/api/og?title=${encodeURIComponent(t)}&category=${encodeURIComponent(c)}&source=${encodeURIComponent(s)}&seed=${encodeURIComponent(post.slug)}`;
 }
 
-function HeroCard({ post, size }: { post: BlogCardPost; size: "lg" | "sm" }) {
+function HeroCard({ post, size, priority }: { post: BlogCardPost; size: "lg" | "sm"; priority?: boolean }) {
   const date = new Date(post.publishedAt ?? post.createdAt).toLocaleDateString("pt-BR");
   const imageUrl = post.ogImageUrl || ogFallbackUrl(post);
   return (
     <article className="overflow-hidden rounded-md border border-neutral-200 bg-white">
-      <Link href={`/blog/${post.slug}`} prefetch className="block">
+      <Link href={`/blog/${post.slug}`} prefetch={false} className="block">
         <div className="relative aspect-[16/9]">
-          <SafeImage
+          <Image
             src={imageUrl}
-            fallbackSrc={ogFallbackUrl(post)}
             alt={post.title}
             fill
             sizes={size === "lg" ? "(max-width: 1024px) 100vw, 880px" : "(max-width: 1024px) 100vw, 420px"}
             className="object-contain"
-            priority={size === "lg"}
+            priority={priority}
           />
-        </div>
-        <div className={size === "lg" ? "p-5" : "p-4"}>
-          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-neutral-600">
-            <span className="uppercase tracking-wide text-[#e41e26]">{post.category}</span>
-            {post.sourceDomain ? <span>{post.sourceDomain}</span> : null}
-            <span>{date}</span>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 p-4">
+            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-white/80">
+              <span className="uppercase tracking-wide text-[#ff3b3b]">{post.category}</span>
+              {post.sourceDomain ? <span className="text-white/70">{post.sourceDomain}</span> : null}
+              <span className="text-white/60">{date}</span>
+            </div>
+            <h2 className={size === "lg" ? "mt-2 text-2xl font-extrabold leading-snug text-white" : "mt-2 text-lg font-extrabold leading-snug text-white"}>
+              {post.title}
+            </h2>
+            <p className="mt-2 text-sm text-white/80 overflow-hidden max-h-[2.8rem]">{post.excerpt}</p>
           </div>
-          <h2 className={size === "lg" ? "mt-2 text-2xl font-extrabold leading-snug text-neutral-900" : "mt-2 text-lg font-extrabold leading-snug text-neutral-900"}>
-            {post.title}
-          </h2>
-          <p className="mt-2 text-sm text-neutral-700 overflow-hidden max-h-[2.8rem]">{post.excerpt}</p>
         </div>
       </Link>
     </article>

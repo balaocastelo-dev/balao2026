@@ -566,9 +566,12 @@ export async function getBlogPosts(input?: {
   try {
     const limit = Math.max(1, Math.min(100, input?.limit ?? 24));
 
+    const selectList =
+      "id,slug,title,excerpt,cover_image,category,published_at,created_at,updated_at,source_url,canonical_url,seo_title,seo_description,reading_time_minutes";
+
     let query = supabase
       .from("blog_posts")
-      .select("*")
+      .select(selectList)
       .eq("status", "published")
       .order("published_at", { ascending: false })
       .limit(limit);

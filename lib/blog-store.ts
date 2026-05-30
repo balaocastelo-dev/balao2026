@@ -172,6 +172,10 @@ function isSupabaseReadable(): boolean {
   return anon.length > 40;
 }
 
+function isDynamicFallbackEnabled(): boolean {
+  return process.env.BLOG_ENABLE_DYNAMIC_FALLBACK === "1";
+}
+
 function getDefaultFeeds(): string[] {
   const fromEnv = (process.env.BLOG_RSS_FEEDS || "")
     .split(",")
@@ -179,14 +183,6 @@ function getDefaultFeeds(): string[] {
     .filter(Boolean);
 
   if (fromEnv.length > 0) return fromEnv;
-
-  const mode = String(process.env.BLOG_RSS_AGENT_MODE || "campinas")
-    .trim()
-    .toLowerCase();
-
-  if (mode === "campinas") {
-    return ["https://pox.globo.com/rss/g1/sp/campinas-regiao"];
-  }
 
   return ["https://www.adrenaline.com.br/feed/", "https://www.tecmundo.com.br/rss", "https://canaltech.com.br/rss/"];
 }
@@ -377,8 +373,8 @@ export async function listBlogPostsForPage(input?: { category?: string; take?: n
         slug: p.slug,
         title: cleanText(p.title),
         excerpt: cleanText(p.excerpt || p.seo_description || ""),
-        content_html: p.content_html,
-        cover_image: p.cover_image ? String(p.cover_image) : extractFirstImageUrlFromHtml(p.content_html),
+        content_html: "",
+        cover_image: p.cover_image ? String(p.cover_image) : null,
         category: normalizeCategory(p.category),
         published_at: p.published_at || p.created_at || p.updated_at,
         created_at: p.created_at,
@@ -387,7 +383,7 @@ export async function listBlogPostsForPage(input?: { category?: string; take?: n
         canonical_url: p.canonical_url ? String(p.canonical_url) : `https://www.balao.info/blog/${p.slug}`,
         seo_title: p.seo_title ? cleanText(String(p.seo_title)) : null,
         seo_description: p.seo_description ? cleanText(String(p.seo_description)) : null,
-        json_ld: p.json_ld,
+        json_ld: null,
         reading_time_minutes: p.reading_time_minutes ?? null,
       }));
 
@@ -399,6 +395,10 @@ export async function listBlogPostsForPage(input?: { category?: string; take?: n
       const products = mapped.filter((p) => kindOfPost(p) === "product");
       return mixRssAndProductPosts({ rss, products, take, maxConsecutiveProducts: 1 });
     }
+  }
+
+  if (!isDynamicFallbackEnabled()) {
+    return [];
   }
 
   const [rssPosts, productPosts] = await Promise.all([buildDynamicPosts(), buildDynamicProductPosts()]);
@@ -442,6 +442,10 @@ export async function getBlogPostForPage(slug: string): Promise<BlogPostView | n
         reading_time_minutes: post.reading_time_minutes ?? null,
       };
     }
+  }
+
+  if (!isDynamicFallbackEnabled()) {
+    return null;
   }
 
   const [rssPosts, productPosts] = await Promise.all([buildDynamicPosts(), buildDynamicProductPosts()]);
