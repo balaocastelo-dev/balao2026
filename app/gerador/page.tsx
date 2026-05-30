@@ -7,7 +7,7 @@ import type { Product } from "@/lib/utils";
 import type { VitrineCategory, VitrinePageRecord, VitrineStatus } from "@/lib/vitrine/types";
 
 type GeneratorCategory = "Workstation" | "PC Gamer" | "Office";
-type PartKind = "cpu" | "ram" | "storage" | "gpu" | "cooling" | "other";
+type PartKind = "cpu" | "motherboard" | "ram" | "storage" | "gpu" | "psu" | "case" | "cooling" | "other";
 
 type PartBlock = {
   id: string;
@@ -117,9 +117,12 @@ export default function GeradorPage() {
 
   const [parts, setParts] = useState<PartBlock[]>([
     { id: id(), kind: "cpu", label: "Processador", productId: null, query: "" },
+    { id: id(), kind: "motherboard", label: "Placa-mãe", productId: null, query: "" },
     { id: id(), kind: "ram", label: "Memória", productId: null, query: "" },
     { id: id(), kind: "storage", label: "Armazenamento", productId: null, query: "" },
     { id: id(), kind: "gpu", label: "Placa de vídeo", productId: null, query: "" },
+    { id: id(), kind: "psu", label: "Fonte", productId: null, query: "" },
+    { id: id(), kind: "case", label: "Gabinete", productId: null, query: "" },
   ]);
 
   const mainProduct = useMemo(() => {
@@ -178,9 +181,12 @@ export default function GeradorPage() {
     setMainProductId(null);
     setParts([
       { id: id(), kind: "cpu", label: "Processador", productId: null, query: "" },
+      { id: id(), kind: "motherboard", label: "Placa-mãe", productId: null, query: "" },
       { id: id(), kind: "ram", label: "Memória", productId: null, query: "" },
       { id: id(), kind: "storage", label: "Armazenamento", productId: null, query: "" },
       { id: id(), kind: "gpu", label: "Placa de vídeo", productId: null, query: "" },
+      { id: id(), kind: "psu", label: "Fonte", productId: null, query: "" },
+      { id: id(), kind: "case", label: "Gabinete", productId: null, query: "" },
     ]);
   };
 
@@ -512,9 +518,12 @@ export default function GeradorPage() {
                               className="w-full px-3 py-2 rounded-xl border border-black/10 bg-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#d71920]/30"
                             >
                               <option value="cpu">CPU</option>
+                              <option value="motherboard">Placa-mãe</option>
                               <option value="ram">RAM</option>
                               <option value="storage">SSD/Armazenamento</option>
                               <option value="gpu">GPU</option>
+                              <option value="psu">Fonte</option>
+                              <option value="case">Gabinete</option>
                               <option value="cooling">Resfriamento</option>
                               <option value="other">Outro</option>
                             </select>

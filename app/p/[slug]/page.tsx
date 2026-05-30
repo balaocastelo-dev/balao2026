@@ -140,15 +140,63 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
 
   const extras = (page as any)?.extras && typeof (page as any).extras === "object" ? (page as any).extras : {};
   const extraParts: any[] = Array.isArray(extras?.parts) ? extras.parts : [];
-  const mappedKinds = new Set(["cpu", "ram", "storage", "gpu", "cooling"]);
-  const additional = extraParts
-    .filter((p) => p && typeof p === "object" && !mappedKinds.has(String(p.kind || "")))
+  const pickPartText = (kind: string) => {
+    const k = String(kind || "").toLowerCase();
+    if (k === "cpu") return copy.processorText;
+    if (k === "ram") return copy.ramText;
+    if (k === "storage") return copy.storageText;
+    if (k === "gpu") return copy.gpuText;
+    if (k === "cooling") return copy.coolingText;
+    return copy.shortDescription;
+  };
+
+  const pickHighlights = (kind: string) => {
+    const k = String(kind || "").toLowerCase();
+    if (k === "cpu") return ["Alta performance", "Multitarefas", "Eficiência"];
+    if (k === "motherboard") return ["Compatibilidade", "Estabilidade", "Conectividade"];
+    if (k === "ram") return ["Alta velocidade", "Mais fluidez", "Grande capacidade"];
+    if (k === "storage") return ["Inicialização rápida", "Carregamentos ágeis", "Muito espaço"];
+    if (k === "gpu") return ["IA", "Renderização", "Jogos"];
+    if (k === "psu") return ["Proteção", "Estabilidade", "Eficiência"];
+    if (k === "case") return ["Airflow", "Organização", "Acabamento"];
+    if (k === "cooling") return ["Temperaturas baixas", "Silêncio", "Performance contínua"];
+    return ["Compatível", "Desempenho", "Confiabilidade"];
+  };
+
+  const pickFallbackImage = (kind: string) => {
+    const k = String(kind || "").toLowerCase();
+    if (k === "cpu") return cpuImg;
+    if (k === "ram") return ramImg;
+    if (k === "storage") return storageImg;
+    if (k === "gpu") return gpuImg;
+    if (k === "cooling") return coolingImg;
+    return hero;
+  };
+
+  const normalizedParts = extraParts
+    .filter((p) => p && typeof p === "object")
     .map((p) => ({
+      kind: String(p.kind || "other"),
       label: String(p.label || "Peça"),
       name: String(p.product?.name || ""),
-      image: String(p.product?.image || ""),
+      image: String(p.product?.image || "").trim(),
     }))
-    .filter((p) => p.name && p.image);
+    .filter((p) => p.name);
+
+  const sections = (normalizedParts.length > 0
+    ? normalizedParts.map((p) => ({
+        title: p.label ? `${p.label}: ${p.name}` : p.name,
+        text: pickPartText(p.kind),
+        highlights: pickHighlights(p.kind),
+        imageSrc: p.image || pickFallbackImage(p.kind),
+      }))
+    : [
+        { title: `Processador ${page.processador || ""}`.trim(), text: copy.processorText, highlights: ["Alta performance", "Multitarefas avançadas", "Eficiência energética"], imageSrc: cpuImg },
+        { title: page.memoria_ram || "Memória RAM", text: copy.ramText, highlights: ["Alta velocidade", "Mais fluidez", "Grande capacidade"], imageSrc: ramImg },
+        { title: page.armazenamento || "Armazenamento", text: copy.storageText, highlights: ["Inicialização rápida", "Carregamentos ágeis", "Muito espaço"], imageSrc: storageImg },
+        { title: page.placa_video || "Placa de vídeo", text: copy.gpuText, highlights: ["IA", "Renderização", "Jogos"], imageSrc: gpuImg },
+        { title: page.resfriamento || "Resfriamento eficiente", text: copy.coolingText, highlights: ["Temperaturas baixas", "Operação silenciosa", "Performance contínua"], imageSrc: coolingImg },
+      ]).filter((s) => s.imageSrc)) as Array<{ title: string; text: string; highlights: string[]; imageSrc: string }>;
 
   const apps = (page.aplicacoes || []).length > 0 ? page.aplicacoes : [];
   const appIcons: Record<string, any> = {
@@ -169,23 +217,17 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
   };
 
   const buyHref = whatsappHref(page.nome_pc, priceText);
-
-  const baseSections = [
-    { title: `Processador ${page.processador || ""}`.trim(), text: copy.processorText, highlights: ["Alta performance", "Multitarefas avançadas", "Eficiência energética"], imageSrc: cpuImg },
-    { title: page.memoria_ram || "Memória RAM", text: copy.ramText, highlights: ["Alta velocidade", "Mais fluidez", "Grande capacidade"], imageSrc: ramImg },
-    { title: page.armazenamento || "Armazenamento", text: copy.storageText, highlights: ["Inicialização rápida", "Carregamentos ágeis", "Muito espaço"], imageSrc: storageImg },
-    { title: page.placa_video || "Placa de vídeo", text: copy.gpuText, highlights: ["IA", "Renderização", "Jogos"], imageSrc: gpuImg },
-    { title: page.resfriamento || "Resfriamento eficiente", text: copy.coolingText, highlights: ["Temperaturas baixas", "Operação silenciosa", "Performance contínua"], imageSrc: coolingImg },
-  ].filter((s) => s.imageSrc);
-
-  const extraSections = additional.map((p) => ({
-    title: p.label ? `${p.label}: ${p.name}` : p.name,
-    text: copy.shortDescription,
-    highlights: ["Compatível", "Desempenho", "Confiabilidade"],
-    imageSrc: p.image,
-  }));
-
-  const sections = baseSections.concat(extraSections);
+  const applicationIndex = String(sections.length + 2).padStart(2, "0");
+  const extraSpecItems = (() => {
+    const out: string[] = [];
+    for (const p of normalizedParts) {
+      const k = String(p.kind || "").toLowerCase();
+      if (k === "motherboard") out.push(p.name);
+      if (k === "psu") out.push(p.name);
+      if (k === "case") out.push(p.name);
+    }
+    return out.slice(0, 3);
+  })();
 
   return (
     <div className="bg-white">
@@ -235,6 +277,11 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
                 {page.armazenamento && <div className="bg-white rounded-xl border border-gray-100 shadow-sm px-4 py-3 font-bold text-gray-800">{page.armazenamento}</div>}
                 {page.sistema_operacional && <div className="bg-white rounded-xl border border-gray-100 shadow-sm px-4 py-3 font-bold text-gray-800">{page.sistema_operacional}</div>}
                 {page.resfriamento && <div className="bg-white rounded-xl border border-gray-100 shadow-sm px-4 py-3 font-bold text-gray-800">{page.resfriamento}</div>}
+                {extraSpecItems.map((t) => (
+                  <div key={t} className="bg-white rounded-xl border border-gray-100 shadow-sm px-4 py-3 font-bold text-gray-800">
+                    {t}
+                  </div>
+                ))}
               </div>
 
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
@@ -268,7 +315,7 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
             <div>
-              <div className="text-xs font-extrabold text-[#d71920] tracking-widest uppercase">07</div>
+              <div className="text-xs font-extrabold text-[#d71920] tracking-widest uppercase">{applicationIndex}</div>
               <h2 className="mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">
                 Para que essa máquina serve?
               </h2>
