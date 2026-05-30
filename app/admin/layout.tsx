@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowLeft, CheckCircle, Upload, Layout, Layers, ShoppingBag, Settings, Mail } from "lucide-react";
+import { ArrowLeft, CheckCircle, Upload, Layout, Layers, ShoppingBag, Settings } from "lucide-react";
 import VitrineAdminShell from "@/components/admin/VitrineAdminShell";
 
 export default function AdminLayout({
@@ -25,7 +25,6 @@ export default function AdminLayout({
     { name: "Gerenciar Pedidos", href: "/admin/pedidos", icon: ShoppingBag },
     { name: "Gerenciar Produtos", href: "/admin/produtos", icon: Settings },
     { name: "Blocos da Home", href: "/admin/home-blocks", icon: Layout },
-    { name: "Marketing & E-mail", href: "/admin/marketing", icon: Mail },
     { name: "Cupons", href: "/admin/cupons", icon: Settings },
     { name: "Barra (TopBar)", href: "/admin/barra", icon: Layout },
     { name: "Fechamento Assistência", href: "https://www.balao.info/fechamento", icon: CheckCircle },
