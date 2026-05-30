@@ -235,9 +235,16 @@ export function buildCategoryTree(categories: Category[]): Category[] {
     }
   });
 
-  // Recursive sort by display_order
+  const normalize = (s: unknown) =>
+    String(s || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/\p{Diacritic}+/gu, "")
+      .trim();
+
+  // Recursive sort alphabetically (pt-BR friendly)
   const sortRecursive = (nodes: Category[]) => {
-    nodes.sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+    nodes.sort((a, b) => normalize(a.name).localeCompare(normalize(b.name), "pt-BR"));
     nodes.forEach(node => {
       if (node.children && node.children.length > 0) {
           sortRecursive(node.children);

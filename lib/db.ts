@@ -458,7 +458,7 @@ export async function getCategories(): Promise<Category[]> {
         const { data, error } = await supabase
             .from('categories')
             .select('*')
-            .order('display_order', { ascending: true });
+            .order('name', { ascending: true });
 
         if (error) {
             console.error("Supabase error (categories):", error);

@@ -16,6 +16,7 @@ type PartBlock = {
   category: string;
   productId: string | null;
   query: string;
+  picking: boolean;
 };
 
 type SnapshotProduct = {
@@ -155,13 +156,13 @@ export default function GeradorPage() {
   const [mainProductId, setMainProductId] = useState<string | null>(null);
 
   const [parts, setParts] = useState<PartBlock[]>([
-    { id: id(), kind: "cpu", label: "Processador", category: "", productId: null, query: "" },
-    { id: id(), kind: "motherboard", label: "Placa-mãe", category: "", productId: null, query: "" },
-    { id: id(), kind: "ram", label: "Memória", category: "", productId: null, query: "" },
-    { id: id(), kind: "storage", label: "Armazenamento", category: "", productId: null, query: "" },
-    { id: id(), kind: "gpu", label: "Placa de vídeo", category: "", productId: null, query: "" },
-    { id: id(), kind: "psu", label: "Fonte", category: "", productId: null, query: "" },
-    { id: id(), kind: "case", label: "Gabinete", category: "", productId: null, query: "" },
+    { id: id(), kind: "cpu", label: "Processador", category: "", productId: null, query: "", picking: true },
+    { id: id(), kind: "motherboard", label: "Placa-mãe", category: "", productId: null, query: "", picking: true },
+    { id: id(), kind: "ram", label: "Memória", category: "", productId: null, query: "", picking: true },
+    { id: id(), kind: "storage", label: "Armazenamento", category: "", productId: null, query: "", picking: true },
+    { id: id(), kind: "gpu", label: "Placa de vídeo", category: "", productId: null, query: "", picking: true },
+    { id: id(), kind: "psu", label: "Fonte", category: "", productId: null, query: "", picking: true },
+    { id: id(), kind: "case", label: "Gabinete", category: "", productId: null, query: "", picking: true },
   ]);
 
   const mainProduct = useMemo(() => {
@@ -258,13 +259,13 @@ export default function GeradorPage() {
     setMainCategory("");
     setMainProductId(null);
     setParts([
-      { id: id(), kind: "cpu", label: "Processador", category: "", productId: null, query: "" },
-      { id: id(), kind: "motherboard", label: "Placa-mãe", category: "", productId: null, query: "" },
-      { id: id(), kind: "ram", label: "Memória", category: "", productId: null, query: "" },
-      { id: id(), kind: "storage", label: "Armazenamento", category: "", productId: null, query: "" },
-      { id: id(), kind: "gpu", label: "Placa de vídeo", category: "", productId: null, query: "" },
-      { id: id(), kind: "psu", label: "Fonte", category: "", productId: null, query: "" },
-      { id: id(), kind: "case", label: "Gabinete", category: "", productId: null, query: "" },
+      { id: id(), kind: "cpu", label: "Processador", category: "", productId: null, query: "", picking: true },
+      { id: id(), kind: "motherboard", label: "Placa-mãe", category: "", productId: null, query: "", picking: true },
+      { id: id(), kind: "ram", label: "Memória", category: "", productId: null, query: "", picking: true },
+      { id: id(), kind: "storage", label: "Armazenamento", category: "", productId: null, query: "", picking: true },
+      { id: id(), kind: "gpu", label: "Placa de vídeo", category: "", productId: null, query: "", picking: true },
+      { id: id(), kind: "psu", label: "Fonte", category: "", productId: null, query: "", picking: true },
+      { id: id(), kind: "case", label: "Gabinete", category: "", productId: null, query: "", picking: true },
     ]);
   };
 
@@ -398,6 +399,7 @@ export default function GeradorPage() {
       category: typeof sp?.category === "string" ? sp.category : "",
       productId: sp?.product?.id ? String(sp.product.id) : null,
       query: "",
+      picking: !sp?.product?.id,
     }));
     setParts(blocks.length > 0 ? blocks : parts);
     setMessage("");
@@ -631,7 +633,7 @@ export default function GeradorPage() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => setParts((prev) => prev.concat([{ id: id(), kind: "other", label: "Peça", category: "", productId: null, query: "" }]))}
+                    onClick={() => setParts((prev) => prev.concat([{ id: id(), kind: "other", label: "Peça", category: "", productId: null, query: "", picking: true }]))}
                     className="px-3 py-2 rounded-xl border border-black/10 text-sm font-extrabold hover:bg-gray-50"
                   >
                     Adicionar bloco
@@ -641,8 +643,14 @@ export default function GeradorPage() {
                 <div className="mt-3 space-y-3">
                   {parts.map((b) => {
                     const selectedProd = b.productId ? (products as any[]).find((p) => String(p.id) === String(b.productId)) : null;
+                    const showPicker = b.picking || !selectedProd;
                     return (
-                      <div key={b.id} className="rounded-2xl border border-black/10 bg-white p-4">
+                      <div
+                        key={b.id}
+                        className={`rounded-2xl border p-4 ${
+                          selectedProd && !showPicker ? "border-emerald-200 bg-emerald-50/40" : "border-black/10 bg-white"
+                        }`}
+                      >
                         <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
                           <div className="sm:col-span-2">
                             <select
@@ -687,8 +695,8 @@ export default function GeradorPage() {
                           </div>
                           <div className="sm:col-span-3">
                             {selectedProd ? (
-                              <div className="w-full px-3 py-2 rounded-xl border border-black/10 bg-gray-50 flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-lg bg-white border border-black/5 overflow-hidden flex items-center justify-center flex-shrink-0">
+                              <div className="w-full px-3 py-2 rounded-xl bg-white flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-white overflow-hidden flex items-center justify-center flex-shrink-0">
                                   {String((selectedProd as any)?.image || "").trim() ? (
                                     <img
                                       src={String((selectedProd as any).image)}
@@ -715,7 +723,16 @@ export default function GeradorPage() {
                               </div>
                             )}
                           </div>
-                          <div className="sm:col-span-1 flex items-center justify-end">
+                          <div className="sm:col-span-1 flex items-center justify-end gap-2">
+                            {selectedProd ? (
+                              <button
+                                type="button"
+                                onClick={() => setParts((prev) => prev.map((x) => (x.id === b.id ? { ...x, picking: true, query: "" } : x)))}
+                                className="px-3 py-2 rounded-xl border border-black/10 text-sm font-extrabold hover:bg-white"
+                              >
+                                Trocar
+                              </button>
+                            ) : null}
                             <button
                               type="button"
                               onClick={() => setParts((prev) => prev.filter((x) => x.id !== b.id))}
@@ -726,70 +743,80 @@ export default function GeradorPage() {
                           </div>
                         </div>
 
-                        <div className="mt-3">
-                          <input
-                            placeholder="Buscar produto no catálogo para este bloco..."
-                            value={b.query}
-                            onChange={(e) => setParts((prev) => prev.map((x) => (x.id === b.id ? { ...x, query: e.target.value } : x)))}
-                            className="w-full px-3 py-2 rounded-xl border border-black/10 bg-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#d71920]/30"
-                          />
-                          <div className="mt-2 max-h-40 overflow-auto rounded-xl border border-black/5 bg-white">
-                            {(products as any[])
-                              .filter((p) => {
-                                const q = normalizeText(b.query);
-                                const catOk = !String(b.category || "").trim()
-                                  ? true
-                                  : normalizeText(String(p?.category || "")) === normalizeText(String(b.category || ""));
-                                if (!catOk) return false;
+                        {showPicker ? (
+                          <div className="mt-3">
+                            <input
+                              placeholder="Buscar produto no catálogo para este bloco..."
+                              value={b.query}
+                              onChange={(e) =>
+                                setParts((prev) => prev.map((x) => (x.id === b.id ? { ...x, query: e.target.value, picking: true } : x)))
+                              }
+                              className="w-full px-3 py-2 rounded-xl border border-black/10 bg-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#d71920]/30"
+                            />
+                            <div className="mt-2 max-h-40 overflow-auto rounded-xl border border-black/5 bg-white">
+                              {(products as any[])
+                                .filter((p) => {
+                                  const q = normalizeText(b.query);
+                                  const catOk = !String(b.category || "").trim()
+                                    ? true
+                                    : normalizeText(String(p?.category || "")) === normalizeText(String(b.category || ""));
+                                  if (!catOk) return false;
 
-                                const pid = String(p?.id || "");
-                                const alreadyPicked = selectedProductIds.has(pid) && pid !== String(b.productId || "");
-                                if (alreadyPicked) return false;
+                                  const pid = String(p?.id || "");
+                                  const alreadyPicked = selectedProductIds.has(pid) && pid !== String(b.productId || "");
+                                  if (alreadyPicked) return false;
 
-                                if (!q) return true;
-                                return normalizeText(`${p?.name || ""} ${p?.category || ""} ${p?.id || ""}`).includes(q);
-                              })
-                              .slice(0, 25)
-                              .map((p) => (
-                                <button
-                                  key={String(p.id)}
-                                  type="button"
-                                  onClick={() =>
-                                    setParts((prev) =>
-                                      prev.map((x) =>
-                                        x.id === b.id
-                                          ? { ...x, productId: String(p.id), query: String(p.name || ""), category: x.category || String(p?.category || "") }
-                                          : x
-                                      ),
-                                    )
-                                  }
-                                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center justify-between gap-3"
-                                >
-                                  <div className="flex items-center gap-3 min-w-0">
-                                    <div className="w-10 h-10 rounded-lg bg-white border border-black/5 overflow-hidden flex items-center justify-center flex-shrink-0">
-                                      {String(p.image || "").trim() ? (
-                                        <img
-                                          src={String(p.image)}
-                                          alt={String(p.name || "Produto")}
-                                          className="w-full h-full object-contain bg-white"
-                                          loading="lazy"
-                                        />
-                                      ) : (
-                                        <div className="text-[10px] font-extrabold text-gray-400">SEM IMAGEM</div>
-                                      )}
-                                    </div>
-                                    <div className="min-w-0">
-                                      <div className="font-extrabold text-gray-900 whitespace-normal break-words leading-snug">
-                                        {String(p.name || "")}
+                                  if (!q) return true;
+                                  return normalizeText(`${p?.name || ""} ${p?.category || ""} ${p?.id || ""}`).includes(q);
+                                })
+                                .slice(0, 25)
+                                .map((p) => (
+                                  <button
+                                    key={String(p.id)}
+                                    type="button"
+                                    onClick={() =>
+                                      setParts((prev) =>
+                                        prev.map((x) =>
+                                          x.id === b.id
+                                            ? {
+                                                ...x,
+                                                productId: String(p.id),
+                                                query: "",
+                                                category: x.category || String(p?.category || ""),
+                                                picking: false,
+                                              }
+                                            : x
+                                        )
+                                      )
+                                    }
+                                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center justify-between gap-3"
+                                  >
+                                    <div className="flex items-center gap-3 min-w-0">
+                                      <div className="w-10 h-10 rounded-lg bg-white border border-black/5 overflow-hidden flex items-center justify-center flex-shrink-0">
+                                        {String(p.image || "").trim() ? (
+                                          <img
+                                            src={String(p.image)}
+                                            alt={String(p.name || "Produto")}
+                                            className="w-full h-full object-contain bg-white"
+                                            loading="lazy"
+                                          />
+                                        ) : (
+                                          <div className="text-[10px] font-extrabold text-gray-400">SEM IMAGEM</div>
+                                        )}
                                       </div>
-                                      <div className="text-xs text-gray-600 whitespace-normal break-words">{String(p.category || "")}</div>
+                                      <div className="min-w-0">
+                                        <div className="font-extrabold text-gray-900 whitespace-normal break-words leading-snug">
+                                          {String(p.name || "")}
+                                        </div>
+                                        <div className="text-xs text-gray-600 whitespace-normal break-words">{String(p.category || "")}</div>
+                                      </div>
                                     </div>
-                                  </div>
-                                  <div className="text-xs font-extrabold text-[#d71920]">{String(p.price || "").trim() || "Sob consulta"}</div>
-                                </button>
-                              ))}
+                                    <div className="text-xs font-extrabold text-[#d71920]">{String(p.price || "").trim() || "Sob consulta"}</div>
+                                  </button>
+                                ))}
+                            </div>
                           </div>
-                        </div>
+                        ) : null}
                       </div>
                     );
                   })}

@@ -235,32 +235,6 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
 
   return (
     <div className="bg-white">
-      <style jsx global>{`
-        @keyframes balao-cta-pulse {
-          0%,
-          100% {
-            transform: scale(1);
-            box-shadow: 0 10px 28px rgba(22, 163, 74, 0.28);
-          }
-          50% {
-            transform: scale(1.06);
-            box-shadow: 0 18px 46px rgba(22, 163, 74, 0.4);
-          }
-        }
-        .balao-cta-pulse {
-          animation: balao-cta-pulse 1.2s ease-in-out infinite;
-          will-change: transform;
-          transform-origin: center;
-        }
-        .balao-cta-pulse:hover {
-          animation-play-state: paused;
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .balao-cta-pulse {
-            animation: none;
-          }
-        }
-      `}</style>
       <header className="sticky top-0 z-20 bg-white/80 backdrop-blur border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-6">
           <Link href="/" className="flex items-center gap-3">
