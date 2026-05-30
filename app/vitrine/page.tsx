@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { listVitrinePagesPublic } from "@/lib/vitrine/db";
 import { pickPcHeroImage } from "@/lib/vitrine/core";
+import ShareButton from "@/components/ShareButton";
 
 export const dynamic = "force-dynamic";
 
@@ -56,35 +57,40 @@ export default async function VitrineIndexPage() {
           const n = parsePriceToNumber(priceText);
           const installment = n ? `12x de ${formatBRL(n / 12)} sem juros` : null;
           const pix = n ? `no Pix: ${formatBRL(n * 0.95)} (5% off)` : null;
+          const shareUrl = `https://www.balao.info/p/${p.slug}`;
           return (
-            <Link
-              key={p.id}
-              href={`/p/${p.slug}`}
-              className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow overflow-hidden"
-            >
-              <div className="p-5">
+            <div key={p.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+              <Link href={`/p/${p.slug}`} className="block p-5 group">
                 <div className="w-full h-44 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center overflow-hidden">
                   <Image src={hero} alt="" width={480} height={320} className="w-full h-full object-contain" />
                 </div>
-
                 <div className="mt-4">
                   <div className="text-lg font-extrabold text-gray-900 group-hover:text-[#d71920] transition-colors">
                     {p.nome_pc}
                   </div>
                   <div className="mt-2 text-sm text-gray-600">{p.categoria}</div>
-                  <div className="mt-2 text-xs font-bold text-gray-500">/p/{p.slug}</div>
-                  <div className="mt-3 rounded-xl border border-gray-100 bg-gray-50 px-3 py-2">
-                    <div className="text-sm font-extrabold text-[#d71920]">{priceText}</div>
-                    {installment ? <div className="mt-0.5 text-xs font-bold text-gray-700">{installment}</div> : null}
-                    {pix ? <div className="mt-0.5 text-xs font-bold text-gray-700">{pix}</div> : null}
-                  </div>
-                  <div className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-[#d71920]">
-                    Ver detalhes
-                    <span className="transition-transform group-hover:translate-x-1">→</span>
+                </div>
+              </Link>
+
+              <div className="px-5 pb-5">
+                <div className="rounded-xl border border-gray-100 bg-gray-50 px-3 py-3 text-center">
+                  <div className="text-base font-extrabold text-[#d71920]">{priceText}</div>
+                  {installment ? <div className="mt-1 text-xs font-bold text-gray-700">{installment}</div> : null}
+                  {pix ? <div className="mt-1 text-xs font-bold text-gray-700">{pix}</div> : null}
+                </div>
+
+                <div className="mt-3 flex items-center justify-center">
+                  <div
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                  >
+                    <ShareButton title={String(p.nome_pc || "")} text="" url={shareUrl} />
                   </div>
                 </div>
               </div>
-            </Link>
+            </div>
           );
         })}
       </div>

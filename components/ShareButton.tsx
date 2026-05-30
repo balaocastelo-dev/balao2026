@@ -4,13 +4,14 @@ import { Share2, Check } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/context/ToastContext";
 
-export default function ShareButton({ title, text }: { title: string, text: string }) {
+export default function ShareButton({ title, text, url }: { title: string; text: string; url?: string }) {
   const { showToast } = useToast();
   const [copied, setCopied] = useState(false);
 
   const handleShare = async () => {
+    const targetUrl = String(url || "").trim() || window.location.href;
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      await navigator.clipboard.writeText(targetUrl);
       setCopied(true);
       showToast("Link copiado para a área de transferência!", "success");
       
@@ -19,7 +20,7 @@ export default function ShareButton({ title, text }: { title: string, text: stri
       console.error("Failed to copy", err);
       // Fallback for older browsers or if clipboard permission denied
       const textArea = document.createElement("textarea");
-      textArea.value = window.location.href;
+      textArea.value = targetUrl;
       document.body.appendChild(textArea);
       textArea.select();
       try {

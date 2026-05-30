@@ -19,7 +19,6 @@ import {
   Monitor,
   Radio,
   Ruler,
-  Search,
   ShieldCheck,
   ShoppingCart,
   Truck,
@@ -33,6 +32,7 @@ import {
 import { getVitrinePageBySlug } from "@/lib/vitrine/db";
 import { makeCommercialCopy, pickComponentImage, pickPcHeroImage } from "@/lib/vitrine/core";
 import ProductMediaSwitcher from "@/components/ProductMediaSwitcher";
+import { enhanceImageUrl } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -192,8 +192,8 @@ function PieceRow({
             </div>
           </div>
           <div className="lg:ml-auto w-full lg:w-[380px]">
-            <div className="rounded-2xl bg-gray-50 border border-gray-200 p-4 flex items-center justify-center">
-              <Image src={imageSrc} alt="" width={900} height={700} className="w-full h-[300px] sm:h-[340px] object-contain" unoptimized />
+            <div className="rounded-2xl bg-gray-50 border border-gray-200 flex items-center justify-center overflow-hidden">
+              <Image src={imageSrc} alt="" width={900} height={700} className="w-full h-[320px] sm:h-[320px] object-contain" unoptimized />
             </div>
           </div>
         </div>
@@ -282,8 +282,8 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
   const mainImages: string[] = Array.isArray(mainProduct?.image_urls)
     ? (mainProduct.image_urls as any[]).map((u) => String(u || "").trim()).filter(Boolean)
     : [];
-  const heroPrimary = String(mainImages[0] || hero || "").trim();
-  const heroExtras = mainImages.slice(1, 8);
+  const heroPrimary = enhanceImageUrl(String(mainImages[0] || hero || "").trim());
+  const heroExtras = mainImages.slice(1, 8).map((u) => enhanceImageUrl(String(u || "").trim())).filter(Boolean);
   const extraParts: any[] = Array.isArray(extras?.parts) ? extras.parts : [];
   const pickPartText = (kind: string) => {
     const k = String(kind || "").toLowerCase();
@@ -335,14 +335,14 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
         name: p.name,
         text: pickPartText(p.kind),
         highlights: pickHighlights(p.kind),
-        imageSrc: p.image || pickFallbackImage(p.kind),
+        imageSrc: enhanceImageUrl(p.image || pickFallbackImage(p.kind)),
       }))
     : [
-        { kind: "cpu", label: "Processador", name: page.processador || "Processador", text: copy.processorText, highlights: ["Alta performance", "Multitarefas avançadas", "Eficiência energética"], imageSrc: cpuImg },
-        { kind: "ram", label: "Memória RAM", name: page.memoria_ram || "Memória RAM", text: copy.ramText, highlights: ["Alta velocidade", "Mais fluidez", "Grande capacidade"], imageSrc: ramImg },
-        { kind: "storage", label: "Armazenamento", name: page.armazenamento || "Armazenamento", text: copy.storageText, highlights: ["Inicialização rápida", "Carregamentos ágeis", "Muito espaço"], imageSrc: storageImg },
-        { kind: "gpu", label: "Placa de vídeo", name: page.placa_video || "Placa de vídeo", text: copy.gpuText, highlights: ["IA", "Renderização", "Jogos"], imageSrc: gpuImg },
-        { kind: "cooling", label: "Resfriamento", name: page.resfriamento || "Resfriamento eficiente", text: copy.coolingText, highlights: ["Temperaturas baixas", "Operação silenciosa", "Performance contínua"], imageSrc: coolingImg },
+        { kind: "cpu", label: "Processador", name: page.processador || "Processador", text: copy.processorText, highlights: ["Alta performance", "Multitarefas avançadas", "Eficiência energética"], imageSrc: enhanceImageUrl(cpuImg) },
+        { kind: "ram", label: "Memória RAM", name: page.memoria_ram || "Memória RAM", text: copy.ramText, highlights: ["Alta velocidade", "Mais fluidez", "Grande capacidade"], imageSrc: enhanceImageUrl(ramImg) },
+        { kind: "storage", label: "Armazenamento", name: page.armazenamento || "Armazenamento", text: copy.storageText, highlights: ["Inicialização rápida", "Carregamentos ágeis", "Muito espaço"], imageSrc: enhanceImageUrl(storageImg) },
+        { kind: "gpu", label: "Placa de vídeo", name: page.placa_video || "Placa de vídeo", text: copy.gpuText, highlights: ["IA", "Renderização", "Jogos"], imageSrc: enhanceImageUrl(gpuImg) },
+        { kind: "cooling", label: "Resfriamento", name: page.resfriamento || "Resfriamento eficiente", text: copy.coolingText, highlights: ["Temperaturas baixas", "Operação silenciosa", "Performance contínua"], imageSrc: enhanceImageUrl(coolingImg) },
       ]).filter((s) => s.imageSrc);
 
   const apps = (page.aplicacoes || []).length > 0 ? page.aplicacoes : [];
@@ -389,15 +389,6 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
             <Link href="/" className="hover:text-white">Loja</Link>
             <Link href="/fale-conosco" className="hover:text-white">Atendimento</Link>
           </nav>
-
-          <form action="/" method="GET" className="hidden md:flex flex-1 max-w-xl relative">
-            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50" />
-            <input
-              name="search"
-              placeholder="Buscar produtos..."
-              className="w-full pl-11 pr-4 py-2.5 rounded-full bg-white/10 border border-white/10 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[#E60012]/50"
-            />
-          </form>
 
           <div className="ml-auto flex items-center gap-2">
             <a
@@ -646,6 +637,9 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
 
               <div className="lg:col-span-5">
                 <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
+                  <div className="rounded-2xl border border-white/10 bg-white/5 overflow-hidden">
+                    <Image src={heroPrimary} alt="" width={900} height={700} className="w-full h-[220px] object-contain" unoptimized />
+                  </div>
                   <div className="text-white/70 text-xs font-extrabold uppercase tracking-wide">Produto</div>
                   <div className="mt-2 text-lg font-extrabold text-white whitespace-normal break-words">{page.nome_pc}</div>
                   <div className="mt-4 text-white/70 text-xs font-extrabold uppercase tracking-wide">Preço</div>

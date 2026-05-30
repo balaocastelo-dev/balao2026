@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { pickPcHeroImage, toSlug } from "@/lib/vitrine/core";
 import type { Product } from "@/lib/utils";
+import { enhanceImageUrl, isLowResolution } from "@/lib/utils";
 import type { VitrineCategory, VitrinePageRecord, VitrineStatus } from "@/lib/vitrine/types";
 
 type GeneratorCategory = "Workstation" | "PC Gamer" | "Office";
@@ -149,14 +150,18 @@ function pickDefaultCategoryFromList(kind: PartKind, categories: string[]) {
 
 function toSnapshotProduct(p: any): SnapshotProduct {
   const urls = Array.isArray(p?.image_urls) ? p.image_urls : [];
-  const merged = Array.from(
-    new Set([String(p?.image || "").trim(), ...urls.map((u: any) => String(u || "").trim())].filter(Boolean))
-  ).slice(0, 12);
+  const candidates = [String(p?.image || "").trim(), ...urls.map((u: any) => String(u || "").trim())]
+    .map((u) => enhanceImageUrl(u))
+    .filter(Boolean);
+  const merged = Array.from(new Set(candidates))
+    .sort((a, b) => Number(isLowResolution(a)) - Number(isLowResolution(b)))
+    .slice(0, 12);
+  const primary = String(merged[0] || "").trim();
   return {
     id: String(p?.id || ""),
     name: String(p?.name || ""),
     price: String(p?.price || ""),
-    image: String(p?.image || ""),
+    image: primary || String(p?.image || ""),
     image_urls: merged,
     product_url: p?.product_url ? String(p.product_url) : null,
     slug: typeof p?.slug === "string" ? p.slug : null,
