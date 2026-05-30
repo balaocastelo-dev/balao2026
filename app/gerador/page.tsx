@@ -15,6 +15,7 @@ type PartBlock = {
   label: string;
   category: string;
   productId: string | null;
+  customName: string;
   query: string;
   picking: boolean;
 };
@@ -156,13 +157,13 @@ export default function GeradorPage() {
   const [mainProductId, setMainProductId] = useState<string | null>(null);
 
   const [parts, setParts] = useState<PartBlock[]>([
-    { id: id(), kind: "cpu", label: "Processador", category: "", productId: null, query: "", picking: true },
-    { id: id(), kind: "motherboard", label: "Placa-mãe", category: "", productId: null, query: "", picking: true },
-    { id: id(), kind: "ram", label: "Memória", category: "", productId: null, query: "", picking: true },
-    { id: id(), kind: "storage", label: "Armazenamento", category: "", productId: null, query: "", picking: true },
-    { id: id(), kind: "gpu", label: "Placa de vídeo", category: "", productId: null, query: "", picking: true },
-    { id: id(), kind: "psu", label: "Fonte", category: "", productId: null, query: "", picking: true },
-    { id: id(), kind: "case", label: "Gabinete", category: "", productId: null, query: "", picking: true },
+    { id: id(), kind: "cpu", label: "Processador", category: "", productId: null, customName: "", query: "", picking: true },
+    { id: id(), kind: "motherboard", label: "Placa-mãe", category: "", productId: null, customName: "", query: "", picking: true },
+    { id: id(), kind: "ram", label: "Memória", category: "", productId: null, customName: "", query: "", picking: true },
+    { id: id(), kind: "storage", label: "Armazenamento", category: "", productId: null, customName: "", query: "", picking: true },
+    { id: id(), kind: "gpu", label: "Placa de vídeo", category: "", productId: null, customName: "", query: "", picking: true },
+    { id: id(), kind: "psu", label: "Fonte", category: "", productId: null, customName: "", query: "", picking: true },
+    { id: id(), kind: "case", label: "Gabinete", category: "", productId: null, customName: "", query: "", picking: true },
   ]);
 
   const mainProduct = useMemo(() => {
@@ -213,6 +214,23 @@ export default function GeradorPage() {
     );
   }, [allProductCategories]);
 
+  useEffect(() => {
+    if (products.length === 0) return;
+    setParts((prev) => {
+      let changed = false;
+      const out = prev.map((b) => {
+        if (!b.productId) return b;
+        if (String(b.customName || "").trim()) return b;
+        const p = (products as any[]).find((x) => String(x?.id || "") === String(b.productId));
+        const name = p?.name ? String(p.name) : "";
+        if (!name.trim()) return b;
+        changed = true;
+        return { ...b, customName: name };
+      });
+      return changed ? out : prev;
+    });
+  }, [products]);
+
   const selectedProductIds = useMemo(() => {
     const ids = new Set<string>();
     if (mainProductId) ids.add(String(mainProductId));
@@ -230,7 +248,10 @@ export default function GeradorPage() {
       if (!block.productId) continue;
       const p = byId.get(String(block.productId));
       if (!p) continue;
-      list.push({ kind: block.kind, label: block.label, category: block.category, product: toSnapshotProduct(p) });
+      const snap = toSnapshotProduct(p);
+      const override = String(block.customName || "").trim();
+      const nextSnap = override ? { ...snap, name: override } : snap;
+      list.push({ kind: block.kind, label: block.label, category: block.category, product: nextSnap });
     }
     return list;
   }, [parts, products]);
@@ -259,13 +280,13 @@ export default function GeradorPage() {
     setMainCategory("");
     setMainProductId(null);
     setParts([
-      { id: id(), kind: "cpu", label: "Processador", category: "", productId: null, query: "", picking: true },
-      { id: id(), kind: "motherboard", label: "Placa-mãe", category: "", productId: null, query: "", picking: true },
-      { id: id(), kind: "ram", label: "Memória", category: "", productId: null, query: "", picking: true },
-      { id: id(), kind: "storage", label: "Armazenamento", category: "", productId: null, query: "", picking: true },
-      { id: id(), kind: "gpu", label: "Placa de vídeo", category: "", productId: null, query: "", picking: true },
-      { id: id(), kind: "psu", label: "Fonte", category: "", productId: null, query: "", picking: true },
-      { id: id(), kind: "case", label: "Gabinete", category: "", productId: null, query: "", picking: true },
+      { id: id(), kind: "cpu", label: "Processador", category: "", productId: null, customName: "", query: "", picking: true },
+      { id: id(), kind: "motherboard", label: "Placa-mãe", category: "", productId: null, customName: "", query: "", picking: true },
+      { id: id(), kind: "ram", label: "Memória", category: "", productId: null, customName: "", query: "", picking: true },
+      { id: id(), kind: "storage", label: "Armazenamento", category: "", productId: null, customName: "", query: "", picking: true },
+      { id: id(), kind: "gpu", label: "Placa de vídeo", category: "", productId: null, customName: "", query: "", picking: true },
+      { id: id(), kind: "psu", label: "Fonte", category: "", productId: null, customName: "", query: "", picking: true },
+      { id: id(), kind: "case", label: "Gabinete", category: "", productId: null, customName: "", query: "", picking: true },
     ]);
   };
 
@@ -398,6 +419,7 @@ export default function GeradorPage() {
       label: String(sp?.label || "Peça"),
       category: typeof sp?.category === "string" ? sp.category : "",
       productId: sp?.product?.id ? String(sp.product.id) : null,
+      customName: sp?.product?.name ? String(sp.product.name) : "",
       query: "",
       picking: !sp?.product?.id,
     }));
@@ -633,7 +655,11 @@ export default function GeradorPage() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => setParts((prev) => prev.concat([{ id: id(), kind: "other", label: "Peça", category: "", productId: null, query: "", picking: true }]))}
+                    onClick={() =>
+                      setParts((prev) =>
+                        prev.concat([{ id: id(), kind: "other", label: "Peça", category: "", productId: null, customName: "", query: "", picking: true }])
+                      )
+                    }
                     className="px-3 py-2 rounded-xl border border-black/10 text-sm font-extrabold hover:bg-gray-50"
                   >
                     Adicionar bloco
@@ -709,10 +735,8 @@ export default function GeradorPage() {
                                   )}
                                 </div>
                                 <div className="min-w-0">
-                                  <div className="text-sm font-extrabold text-gray-900 whitespace-nowrap overflow-hidden text-ellipsis leading-snug">
-                                    {String((selectedProd as any)?.name || "")}
-                                  </div>
-                                  <div className="mt-0.5 text-xs font-extrabold text-[#d71920] whitespace-normal break-words">
+                                  <div className="text-xs font-extrabold text-gray-700">Selecionado</div>
+                                  <div className="mt-0.5 text-xs font-extrabold text-[#d71920]">
                                     {String((selectedProd as any)?.price || "").trim() || "Sob consulta"}
                                   </div>
                                 </div>
@@ -742,6 +766,43 @@ export default function GeradorPage() {
                             </button>
                           </div>
                         </div>
+
+                        {selectedProd ? (
+                          <div className="mt-3 rounded-xl border border-black/10 bg-white p-3">
+                            <div className="text-xs font-extrabold text-gray-700 uppercase tracking-wide">Peça selecionada</div>
+                            <div className="mt-2 grid grid-cols-1 sm:grid-cols-12 gap-3 items-start">
+                              <div className="sm:col-span-2">
+                                <div className="w-full aspect-square rounded-xl bg-white border border-black/5 overflow-hidden flex items-center justify-center p-2">
+                                  {String((selectedProd as any)?.image || "").trim() ? (
+                                    <img
+                                      src={String((selectedProd as any).image)}
+                                      alt={String((selectedProd as any)?.name || "Produto")}
+                                      className="w-full h-full object-contain bg-white"
+                                      loading="lazy"
+                                    />
+                                  ) : (
+                                    <div className="text-[10px] font-extrabold text-gray-400">SEM IMAGEM</div>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="sm:col-span-10">
+                                <div className="text-sm font-extrabold text-[#d71920]">
+                                  {String((selectedProd as any)?.price || "").trim() || "Sob consulta"}
+                                </div>
+                                <div className="mt-2">
+                                  <div className="text-xs font-extrabold text-gray-700 uppercase tracking-wide">Nome (editável)</div>
+                                  <textarea
+                                    rows={2}
+                                    value={String(b.customName || "")}
+                                    onChange={(e) => setParts((prev) => prev.map((x) => (x.id === b.id ? { ...x, customName: e.target.value } : x)))}
+                                    placeholder={String((selectedProd as any)?.name || "")}
+                                    className="mt-2 w-full px-3 py-2 rounded-xl border border-black/10 bg-white text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#d71920]/30"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ) : null}
 
                         {showPicker ? (
                           <div className="mt-3">
@@ -781,6 +842,7 @@ export default function GeradorPage() {
                                             ? {
                                                 ...x,
                                                 productId: String(p.id),
+                                                customName: String(p.name || ""),
                                                 query: "",
                                                 category: x.category || String(p?.category || ""),
                                                 picking: false,
