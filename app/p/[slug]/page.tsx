@@ -50,7 +50,7 @@ function Section({
   reverse?: boolean;
 }) {
   return (
-    <section className="py-8 sm:py-12">
+    <section className="py-4 sm:py-6">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className={`grid grid-cols-1 lg:grid-cols-2 gap-8 items-center ${reverse ? "lg:[&>*:first-child]:order-2" : ""}`}>
           <div>
@@ -256,7 +256,7 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
         </div>
       </header>
 
-      <section className="py-10 sm:py-12 bg-gradient-to-b from-gray-50 to-white">
+      <section className="py-5 sm:py-6 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             <div>
@@ -324,7 +324,7 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
         />
       ))}
 
-      <section className="py-12 sm:py-16 bg-gray-50">
+      <section className="py-6 sm:py-8 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
             <div>
