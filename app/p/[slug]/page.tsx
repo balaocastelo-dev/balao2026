@@ -198,7 +198,7 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
         { title: page.armazenamento || "Armazenamento", text: copy.storageText, highlights: ["Inicialização rápida", "Carregamentos ágeis", "Muito espaço"], imageSrc: storageImg },
         { title: page.placa_video || "Placa de vídeo", text: copy.gpuText, highlights: ["IA", "Renderização", "Jogos"], imageSrc: gpuImg },
         { title: page.resfriamento || "Resfriamento eficiente", text: copy.coolingText, highlights: ["Temperaturas baixas", "Operação silenciosa", "Performance contínua"], imageSrc: coolingImg },
-      ]).filter((s) => s.imageSrc)) as LandingSection[];
+      ]).filter((s) => s.imageSrc) as LandingSection[];
 
   const apps = (page.aplicacoes || []).length > 0 ? page.aplicacoes : [];
   const appIcons: Record<string, any> = {
