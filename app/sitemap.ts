@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next'
 import { getCategories, getProductsForSitemap } from '@/lib/db'
 import { listBlogPostsForPage } from '@/lib/blog-store'
+import { listVitrinePagesPublic } from '@/lib/vitrine/db'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.balao.info'
@@ -70,5 +71,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.65,
   }))
 
-  return [...staticRoutes, ...categoryRoutes, ...productRoutes, ...blogRoutes]
+  const vitrinePages = await listVitrinePagesPublic().catch(() => [])
+  const vitrineRoutes = vitrinePages.map((p) => ({
+    url: `${baseUrl}/p/${p.slug}`,
+    lastModified: new Date(p.data_publicacao || p.data_criacao || new Date()),
+    changeFrequency: 'weekly' as const,
+    priority: 0.7,
+  }))
+
+  return [...staticRoutes, ...categoryRoutes, ...productRoutes, ...blogRoutes, ...vitrineRoutes]
 }
