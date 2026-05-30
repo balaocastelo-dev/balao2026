@@ -233,7 +233,7 @@ export default function GeradorPage() {
       images.hero = pickPcHeroImage({ categoria: pickCategory(category) } as any);
     }
 
-    const payload: Partial<VitrinePageRecord> & { extras?: any; images?: any } = {
+    const payload: any = {
       nome_pc: main.name,
       slug,
       categoria: pickCategory(category),
