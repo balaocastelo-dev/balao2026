@@ -65,7 +65,7 @@ function Section({
               ))}
             </div>
           </div>
-          <div className="bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden flex items-center justify-center">
+          <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden flex items-center justify-center">
             <Image src={imageSrc} alt="" width={900} height={700} className="w-full h-[320px] sm:h-[420px] object-contain" unoptimized />
           </div>
         </div>
