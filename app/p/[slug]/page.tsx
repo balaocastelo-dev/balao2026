@@ -634,46 +634,109 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
           <div className="rounded-3xl border border-gray-200 bg-white shadow-xl p-6 sm:p-10">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               <div className="lg:col-span-7">
-                <div className="text-gray-600 text-xs font-extrabold uppercase tracking-wide">CTA final</div>
-                <h3 className="mt-2 text-2xl sm:text-3xl font-extrabold text-gray-900">Pronto para elevar seu desempenho?</h3>
-                <div className="mt-3 text-gray-700 leading-relaxed">Configuração pensada para performance e estabilidade no dia a dia.</div>
-                <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div className="inline-flex items-center gap-2 text-xs font-extrabold tracking-widest text-[#E60012] uppercase">
+                  <div className="w-7 h-7 rounded-full bg-[#E60012]/10 flex items-center justify-center">
+                    <BadgeCheck size={16} className="text-[#E60012]" />
+                  </div>
+                  CTA final
+                </div>
+
+                <h3 className="mt-4 text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900 leading-[1.05]">
+                  Pronto para
+                  <br />
+                  elevar seu <span className="text-[#E60012]">desempenho?</span>
+                </h3>
+                <div className="mt-4 text-base sm:text-lg text-gray-700 leading-relaxed">
+                  Configuração pensada para performance e estabilidade no dia a dia.
+                </div>
+
+                <div className="mt-6 grid grid-cols-1 gap-3 max-w-md">
                   {["Componentes premium", "Montagem profissional", "Suporte pós-venda"].map((t) => (
-                    <div key={t} className="rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2 flex items-center gap-2">
-                      <CheckCircle2 size={16} className="text-[#E60012]" />
-                      <div className="text-sm font-bold text-gray-900">{t}</div>
+                    <div key={t} className="rounded-2xl border border-gray-200 bg-white px-4 py-3 flex items-center gap-3 shadow-sm">
+                      <div className="w-9 h-9 rounded-full bg-[#E60012] text-white flex items-center justify-center">
+                        <CheckCircle2 size={18} />
+                      </div>
+                      <div className="text-sm font-extrabold text-gray-900">{t}</div>
                     </div>
                   ))}
+                </div>
+
+                <div className="mt-8 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {[
+                      { icon: ShieldCheck, title: "Peças selecionadas", text: "Máxima qualidade" },
+                      { icon: BadgeCheck, title: "Performance real", text: "Testado e aprovado" },
+                      { icon: Headphones, title: "Atendimento", text: "Especializado" },
+                    ].map((it) => (
+                      <div key={it.title} className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center flex-shrink-0 text-gray-900">
+                          <it.icon size={18} />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-xs font-extrabold text-gray-900">{it.title}</div>
+                          <div className="mt-0.5 text-xs text-gray-600">{it.text}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 
               <div className="lg:col-span-5">
-                <div className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm">
-                  <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden p-4">
-                    <Image src={heroPrimary} alt="" width={900} height={700} className="w-full h-[360px] sm:h-[420px] object-contain" unoptimized />
+                <div className="rounded-3xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+                  <div className="p-4">
+                    <div className="relative rounded-3xl border border-gray-200 bg-gradient-to-b from-gray-50 to-white overflow-hidden p-4">
+                      <div className="absolute inset-0 pointer-events-none">
+                        <div className="absolute inset-0 opacity-60 bg-[radial-gradient(circle_at_center,rgba(230,0,18,0.12),rgba(255,255,255,0)_60%)]" />
+                      </div>
+                      <div className="relative">
+                        <Image
+                          src={heroPrimary}
+                          alt=""
+                          width={900}
+                          height={700}
+                          className="w-full h-[420px] sm:h-[520px] object-contain"
+                          unoptimized
+                        />
+                        <div className="absolute left-4 bottom-4 rounded-2xl bg-white/95 backdrop-blur border border-gray-200 px-3 py-2 shadow-sm flex items-center gap-2">
+                          <ShieldCheck size={16} className="text-gray-900" />
+                          <div className="leading-tight">
+                            <div className="text-[10px] font-extrabold text-gray-900 uppercase">1 ano</div>
+                            <div className="text-[10px] font-bold text-gray-600 uppercase">de garantia</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="mt-4 text-gray-600 text-xs font-extrabold uppercase tracking-wide">Produto</div>
-                  <div className="mt-2 text-lg font-extrabold text-gray-900 whitespace-normal break-words">{page.nome_pc}</div>
-                  <div className="mt-4 text-gray-600 text-xs font-extrabold uppercase tracking-wide">Preço</div>
-                  <div className="mt-1 text-3xl font-extrabold text-gray-900">{priceText}</div>
-                  {installment ? <div className="mt-1 text-sm text-gray-600">{installment}</div> : null}
-                  <div className="mt-5 grid grid-cols-1 gap-2">
-                    <a
-                      href={buyHref || whatsHref}
-                      className="balao-cta-pulse inline-flex items-center justify-center gap-2 rounded-2xl bg-[#E60012] px-6 py-4 text-white font-extrabold shadow-lg hover:bg-red-700"
-                    >
-                      <ShoppingCart size={18} />
-                      Quero comprar agora
-                    </a>
-                    <a
-                      href={whatsHref}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center justify-center gap-2 rounded-2xl border border-gray-300 bg-white px-6 py-4 text-gray-900 font-extrabold hover:bg-gray-50"
-                    >
-                      <MessageCircle size={18} className="text-[#E60012]" />
-                      Falar no WhatsApp
-                    </a>
+
+                  <div className="px-6 pb-6">
+                    <div className="text-gray-600 text-xs font-extrabold uppercase tracking-wide">Produto</div>
+                    <div className="mt-2 text-base sm:text-lg font-extrabold text-gray-900 whitespace-normal break-words">
+                      {page.nome_pc}
+                    </div>
+
+                    <div className="mt-4 text-gray-600 text-xs font-extrabold uppercase tracking-wide">Preço</div>
+                    <div className="mt-1 text-3xl font-extrabold text-gray-900">{priceText}</div>
+                    {installment ? <div className="mt-1 text-sm text-gray-600">{installment}</div> : null}
+
+                    <div className="mt-5 grid grid-cols-1 gap-2">
+                      <a
+                        href={buyHref || whatsHref}
+                        className="balao-cta-pulse inline-flex items-center justify-center gap-2 rounded-2xl bg-[#E60012] px-6 py-4 text-white font-extrabold shadow-lg hover:bg-red-700"
+                      >
+                        <ShoppingCart size={18} />
+                        Quero comprar agora
+                      </a>
+                      <a
+                        href={whatsHref}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#E60012]/30 bg-white px-6 py-4 text-gray-900 font-extrabold hover:bg-gray-50"
+                      >
+                        <MessageCircle size={18} className="text-[#E60012]" />
+                        Falar no WhatsApp
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
