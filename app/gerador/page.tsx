@@ -13,6 +13,7 @@ type PartBlock = {
   id: string;
   kind: PartKind;
   label: string;
+  category: string;
   productId: string | null;
   query: string;
 };
@@ -54,6 +55,37 @@ function normalizeText(s: string) {
     .replace(/\p{Diacritic}+/gu, "")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function pickDefaultCategoryFromList(kind: PartKind, categories: string[]) {
+  const k = String(kind || "");
+  const targets =
+    k === "cpu"
+      ? ["processador", "cpu"]
+      : k === "motherboard"
+        ? ["placa mae", "placa-m", "motherboard"]
+        : k === "ram"
+          ? ["memoria", "ram", "ddr"]
+          : k === "storage"
+            ? ["ssd", "armazenamento", "nvme", "m.2", "hd"]
+            : k === "gpu"
+              ? ["placa de video", "gpu", "video", "rtx", "radeon"]
+              : k === "psu"
+                ? ["fonte", "psu"]
+                : k === "case"
+                  ? ["gabinete", "case"]
+                  : k === "cooling"
+                    ? ["cooler", "water", "resfriamento"]
+                    : [];
+
+  if (targets.length === 0) return "";
+  for (const cat of categories) {
+    const nc = normalizeText(cat);
+    for (const t of targets) {
+      if (nc.includes(t)) return cat;
+    }
+  }
+  return "";
 }
 
 function toSnapshotProduct(p: any): SnapshotProduct {
@@ -116,13 +148,13 @@ export default function GeradorPage() {
   const [mainProductId, setMainProductId] = useState<string | null>(null);
 
   const [parts, setParts] = useState<PartBlock[]>([
-    { id: id(), kind: "cpu", label: "Processador", productId: null, query: "" },
-    { id: id(), kind: "motherboard", label: "Placa-mãe", productId: null, query: "" },
-    { id: id(), kind: "ram", label: "Memória", productId: null, query: "" },
-    { id: id(), kind: "storage", label: "Armazenamento", productId: null, query: "" },
-    { id: id(), kind: "gpu", label: "Placa de vídeo", productId: null, query: "" },
-    { id: id(), kind: "psu", label: "Fonte", productId: null, query: "" },
-    { id: id(), kind: "case", label: "Gabinete", productId: null, query: "" },
+    { id: id(), kind: "cpu", label: "Processador", category: "", productId: null, query: "" },
+    { id: id(), kind: "motherboard", label: "Placa-mãe", category: "", productId: null, query: "" },
+    { id: id(), kind: "ram", label: "Memória", category: "", productId: null, query: "" },
+    { id: id(), kind: "storage", label: "Armazenamento", category: "", productId: null, query: "" },
+    { id: id(), kind: "gpu", label: "Placa de vídeo", category: "", productId: null, query: "" },
+    { id: id(), kind: "psu", label: "Fonte", category: "", productId: null, query: "" },
+    { id: id(), kind: "case", label: "Gabinete", category: "", productId: null, query: "" },
   ]);
 
   const mainProduct = useMemo(() => {
@@ -144,15 +176,45 @@ export default function GeradorPage() {
       .slice(0, 30);
   }, [products, mainSearch]);
 
+  const allProductCategories = useMemo(() => {
+    const set = new Set<string>();
+    for (const p of products as any[]) {
+      const c = String(p?.category || "").trim();
+      if (c) set.add(c);
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b, "pt-BR"));
+  }, [products]);
+
+  useEffect(() => {
+    if (allProductCategories.length === 0) return;
+    setParts((prev) =>
+      prev.map((b) => {
+        if (String(b.category || "").trim()) return b;
+        const picked = pickDefaultCategoryFromList(b.kind, allProductCategories);
+        if (!picked) return b;
+        return { ...b, category: picked };
+      })
+    );
+  }, [allProductCategories]);
+
+  const selectedProductIds = useMemo(() => {
+    const ids = new Set<string>();
+    if (mainProductId) ids.add(String(mainProductId));
+    for (const b of parts) {
+      if (b.productId) ids.add(String(b.productId));
+    }
+    return ids;
+  }, [mainProductId, parts]);
+
   const partsResolved = useMemo(() => {
-    const list: Array<{ kind: PartKind; label: string; product: SnapshotProduct }> = [];
+    const list: Array<{ kind: PartKind; label: string; category: string; product: SnapshotProduct }> = [];
     const byId = new Map<string, any>();
     for (const p of products as any[]) byId.set(String(p?.id || ""), p);
     for (const block of parts) {
       if (!block.productId) continue;
       const p = byId.get(String(block.productId));
       if (!p) continue;
-      list.push({ kind: block.kind, label: block.label, product: toSnapshotProduct(p) });
+      list.push({ kind: block.kind, label: block.label, category: block.category, product: toSnapshotProduct(p) });
     }
     return list;
   }, [parts, products]);
@@ -180,13 +242,13 @@ export default function GeradorPage() {
     setMainSearch("");
     setMainProductId(null);
     setParts([
-      { id: id(), kind: "cpu", label: "Processador", productId: null, query: "" },
-      { id: id(), kind: "motherboard", label: "Placa-mãe", productId: null, query: "" },
-      { id: id(), kind: "ram", label: "Memória", productId: null, query: "" },
-      { id: id(), kind: "storage", label: "Armazenamento", productId: null, query: "" },
-      { id: id(), kind: "gpu", label: "Placa de vídeo", productId: null, query: "" },
-      { id: id(), kind: "psu", label: "Fonte", productId: null, query: "" },
-      { id: id(), kind: "case", label: "Gabinete", productId: null, query: "" },
+      { id: id(), kind: "cpu", label: "Processador", category: "", productId: null, query: "" },
+      { id: id(), kind: "motherboard", label: "Placa-mãe", category: "", productId: null, query: "" },
+      { id: id(), kind: "ram", label: "Memória", category: "", productId: null, query: "" },
+      { id: id(), kind: "storage", label: "Armazenamento", category: "", productId: null, query: "" },
+      { id: id(), kind: "gpu", label: "Placa de vídeo", category: "", productId: null, query: "" },
+      { id: id(), kind: "psu", label: "Fonte", category: "", productId: null, query: "" },
+      { id: id(), kind: "case", label: "Gabinete", category: "", productId: null, query: "" },
     ]);
   };
 
@@ -232,7 +294,7 @@ export default function GeradorPage() {
     const baseSlug = toSlug(main.name);
     const slug = activeSlug || (activePageId ? baseSlug : ensureUniqueSlug(baseSlug));
 
-    const partsForDb = partsResolved.map((p) => ({ kind: p.kind, label: p.label, product: p.product }));
+    const partsForDb = partsResolved.map((p) => ({ kind: p.kind, label: p.label, category: p.category, product: p.product }));
     const columnParts = mapPartsToColumns(partsForDb.map((p) => ({ kind: p.kind, product: p.product })));
     const images = mapPartsToImages(main.image, partsForDb.map((p) => ({ kind: p.kind, product: p.product })));
     if (!String(images.hero || "").trim()) {
@@ -316,6 +378,7 @@ export default function GeradorPage() {
       id: id(),
       kind: (sp?.kind as PartKind) || "other",
       label: String(sp?.label || "Peça"),
+      category: typeof sp?.category === "string" ? sp.category : "",
       productId: sp?.product?.id ? String(sp.product.id) : null,
       query: "",
     }));
@@ -539,7 +602,7 @@ export default function GeradorPage() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => setParts((prev) => prev.concat([{ id: id(), kind: "other", label: "Peça", productId: null, query: "" }]))}
+                    onClick={() => setParts((prev) => prev.concat([{ id: id(), kind: "other", label: "Peça", category: "", productId: null, query: "" }]))}
                     className="px-3 py-2 rounded-xl border border-black/10 text-sm font-extrabold hover:bg-gray-50"
                   >
                     Adicionar bloco
@@ -552,7 +615,7 @@ export default function GeradorPage() {
                     return (
                       <div key={b.id} className="rounded-2xl border border-black/10 bg-white p-4">
                         <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
-                          <div className="sm:col-span-3">
+                          <div className="sm:col-span-2">
                             <select
                               value={b.kind}
                               onChange={(e) =>
@@ -571,7 +634,7 @@ export default function GeradorPage() {
                               <option value="other">Outro</option>
                             </select>
                           </div>
-                          <div className="sm:col-span-4">
+                          <div className="sm:col-span-3">
                             <input
                               value={b.label}
                               onChange={(e) => setParts((prev) => prev.map((x) => (x.id === b.id ? { ...x, label: e.target.value } : x)))}
@@ -579,7 +642,21 @@ export default function GeradorPage() {
                               placeholder="Título do bloco"
                             />
                           </div>
-                          <div className="sm:col-span-4">
+                          <div className="sm:col-span-3">
+                            <select
+                              value={b.category}
+                              onChange={(e) => setParts((prev) => prev.map((x) => (x.id === b.id ? { ...x, category: e.target.value } : x)))}
+                              className="w-full px-3 py-2 rounded-xl border border-black/10 bg-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#d71920]/30"
+                            >
+                              <option value="">Todas as categorias</option>
+                              {allProductCategories.map((c) => (
+                                <option key={c} value={c}>
+                                  {c}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="sm:col-span-3">
                             {selectedProd ? (
                               <div className="w-full px-3 py-2 rounded-xl border border-black/10 bg-gray-50 flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-lg bg-white border border-black/5 overflow-hidden flex items-center justify-center flex-shrink-0">
@@ -631,6 +708,15 @@ export default function GeradorPage() {
                             {(products as any[])
                               .filter((p) => {
                                 const q = normalizeText(b.query);
+                                const catOk = !String(b.category || "").trim()
+                                  ? true
+                                  : normalizeText(String(p?.category || "")) === normalizeText(String(b.category || ""));
+                                if (!catOk) return false;
+
+                                const pid = String(p?.id || "");
+                                const alreadyPicked = selectedProductIds.has(pid) && pid !== String(b.productId || "");
+                                if (alreadyPicked) return false;
+
                                 if (!q) return true;
                                 return normalizeText(`${p?.name || ""} ${p?.category || ""} ${p?.id || ""}`).includes(q);
                               })
@@ -641,7 +727,11 @@ export default function GeradorPage() {
                                   type="button"
                                   onClick={() =>
                                     setParts((prev) =>
-                                      prev.map((x) => (x.id === b.id ? { ...x, productId: String(p.id), query: String(p.name || "") } : x)),
+                                      prev.map((x) =>
+                                        x.id === b.id
+                                          ? { ...x, productId: String(p.id), query: String(p.name || ""), category: x.category || String(p?.category || "") }
+                                          : x
+                                      ),
                                     )
                                   }
                                   className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center justify-between gap-3"
