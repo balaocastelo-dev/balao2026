@@ -709,7 +709,7 @@ export default function GeradorPage() {
                                   )}
                                 </div>
                                 <div className="min-w-0">
-                                  <div className="text-sm font-extrabold text-gray-900 whitespace-normal break-words leading-snug">
+                                  <div className="text-sm font-extrabold text-gray-900 whitespace-nowrap overflow-hidden text-ellipsis leading-snug">
                                     {String((selectedProd as any)?.name || "")}
                                   </div>
                                   <div className="mt-0.5 text-xs font-extrabold text-[#d71920] whitespace-normal break-words">
