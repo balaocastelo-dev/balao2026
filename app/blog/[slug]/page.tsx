@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Header from "@/components/Header";
 import JsonLd, { generateBreadcrumbSchema, generateFAQSchema, generateOrganizationSchema } from "@/components/JsonLd";
 import { sanitizeHtmlBasic } from "@/lib/blog-sanitize";
 import SafeImage from "@/components/SafeImage";
@@ -193,62 +194,65 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
   ]);
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-8">
-      <JsonLd data={[org, breadcrumbs, jsonLd, faq]} />
+    <div className="min-h-screen flex flex-col font-sans">
+      <Header />
+      <main className="flex-1 mx-auto w-full max-w-5xl px-4 py-8">
+        <JsonLd data={[org, breadcrumbs, jsonLd, faq]} />
 
-      <article className="overflow-hidden rounded-md border border-neutral-200 bg-white">
-        <div className="p-6">
-          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-neutral-600">
-            <span className="uppercase tracking-wide text-[#e41e26]">{category}</span>
-            {post.reading_time_minutes ? <span>{post.reading_time_minutes} min</span> : null}
-            {sourceDomain ? <span>{sourceDomain}</span> : null}
-            <span>{new Date(post.published_at ?? post.created_at).toLocaleDateString("pt-BR")}</span>
-          </div>
-          <h1 className="mt-3 text-3xl font-extrabold tracking-tight">{post.title}</h1>
-          {post.excerpt ? <p className="mt-3 text-neutral-700">{post.excerpt}</p> : null}
-        </div>
-
-        <div className="relative aspect-[16/9] w-full">
-          <SafeImage
-            src={imageUrl}
-            fallbackSrc={fallbackImageUrl}
-            alt={post.title}
-            fill
-            sizes="(max-width: 1024px) 100vw, 900px"
-            className="object-contain"
-          />
-        </div>
-
-        <div className="p-6">
-          <div className="prose prose-neutral max-w-none">
-            <div dangerouslySetInnerHTML={{ __html: safeHtml }} />
+        <article className="overflow-hidden rounded-md border border-neutral-200 bg-white">
+          <div className="p-6">
+            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-neutral-600">
+              <span className="uppercase tracking-wide text-[#e41e26]">{category}</span>
+              {post.reading_time_minutes ? <span>{post.reading_time_minutes} min</span> : null}
+              {sourceDomain ? <span>{sourceDomain}</span> : null}
+              <span>{new Date(post.published_at ?? post.created_at).toLocaleDateString("pt-BR")}</span>
+            </div>
+            <h1 className="mt-3 text-3xl font-extrabold tracking-tight">{post.title}</h1>
+            {post.excerpt ? <p className="mt-3 text-neutral-700">{post.excerpt}</p> : null}
           </div>
 
-          <div className="mt-8 rounded-md border border-[#e41e26]/20 bg-neutral-50 p-4">
-            <div className="text-sm font-extrabold">Quer ajuda para escolher?</div>
-            <div className="mt-1 text-sm text-neutral-700">
-              Fale com um especialista e receba recomendação direta para o seu uso.
-            </div>
-            <div className="mt-3 flex w-full items-center justify-center rounded-md bg-[#e41e26] px-4 py-3 text-sm font-extrabold text-white">
-              WhatsApp 19 98751-0267
-            </div>
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              <Link href="/notebooks" className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs font-bold text-neutral-900 hover:bg-neutral-50">
-                Notebooks
-              </Link>
-              <Link href="/pcgamer" className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs font-bold text-neutral-900 hover:bg-neutral-50">
-                PC Gamer
-              </Link>
-            </div>
+          <div className="relative aspect-[16/9] w-full">
+            <SafeImage
+              src={imageUrl}
+              fallbackSrc={fallbackImageUrl}
+              alt={post.title}
+              fill
+              sizes="(max-width: 1024px) 100vw, 900px"
+              className="object-contain"
+            />
           </div>
 
-          {post.source_url ? (
-            <footer className="mt-10 border-t border-neutral-200 pt-4 text-sm text-neutral-600">
-              Fonte: {post.source_url}
-            </footer>
-          ) : null}
-        </div>
-      </article>
-    </main>
+          <div className="p-6">
+            <div className="prose prose-neutral max-w-none">
+              <div dangerouslySetInnerHTML={{ __html: safeHtml }} />
+            </div>
+
+            <div className="mt-8 rounded-md border border-[#e41e26]/20 bg-neutral-50 p-4">
+              <div className="text-sm font-extrabold">Quer ajuda para escolher?</div>
+              <div className="mt-1 text-sm text-neutral-700">
+                Fale com um especialista e receba recomendação direta para o seu uso.
+              </div>
+              <div className="mt-3 flex w-full items-center justify-center rounded-md bg-[#e41e26] px-4 py-3 text-sm font-extrabold text-white">
+                WhatsApp 19 98751-0267
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <Link href="/notebooks" className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs font-bold text-neutral-900 hover:bg-neutral-50">
+                  Notebooks
+                </Link>
+                <Link href="/pcgamer" className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs font-bold text-neutral-900 hover:bg-neutral-50">
+                  PC Gamer
+                </Link>
+              </div>
+            </div>
+
+            {post.source_url ? (
+              <footer className="mt-10 border-t border-neutral-200 pt-4 text-sm text-neutral-600">
+                Fonte: {post.source_url}
+              </footer>
+            ) : null}
+          </div>
+        </article>
+      </main>
+    </div>
   );
 }

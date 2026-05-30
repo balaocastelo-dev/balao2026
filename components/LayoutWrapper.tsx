@@ -25,8 +25,8 @@ export default function LayoutWrapper({
         <main className="flex-grow">
           {children}
         </main>
-        {!isRoletaPage && !isBlogPage && <Footer />}
-        {!isRoletaPage && !isBlogPage && <FloatingWhatsApp />}
+        {!isRoletaPage && <Footer />}
+        {!isRoletaPage && <FloatingWhatsApp />}
       </div>
     </SidebarProvider>
   );

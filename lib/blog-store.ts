@@ -173,7 +173,12 @@ function isSupabaseReadable(): boolean {
 }
 
 function isDynamicFallbackEnabled(): boolean {
-  return process.env.BLOG_ENABLE_DYNAMIC_FALLBACK === "1";
+  const raw = String(process.env.BLOG_ENABLE_DYNAMIC_FALLBACK || "")
+    .trim()
+    .toLowerCase();
+  if (!raw) return true;
+  if (raw === "1" || raw === "true" || raw === "yes") return true;
+  return false;
 }
 
 function getDefaultFeeds(): string[] {

@@ -231,7 +231,7 @@ export async function generateBlogPostFromRss(item: RssItem, input: { slug: stri
     if (feed.includes("pox.globo.com/rss/g1/sp/campinas-regiao") || url.includes("/sp/campinas-regiao/") || url.includes("campinas-regiao")) {
       return "Campinas e Região";
     }
-    return "Notícias";
+    return "Tecnologia";
   })();
 
   return {

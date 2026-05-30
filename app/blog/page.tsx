@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import Image from "next/image";
+import Header from "@/components/Header";
 import JsonLd, { generateBreadcrumbSchema, generateFAQSchema, generateOrganizationSchema } from "@/components/JsonLd";
 import { listBlogPostsForPage } from "@/lib/blog-store";
 import { SITE_CONFIG } from "@/lib/config";
@@ -136,219 +137,222 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
   const org = generateOrganizationSchema();
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 py-8">
-      <JsonLd data={[org, breadcrumbs, faq]} />
+    <div className="min-h-screen flex flex-col font-sans">
+      <Header />
+      <main className="flex-1 mx-auto w-full max-w-7xl px-4 py-8">
+        <JsonLd data={[org, breadcrumbs, faq]} />
 
-      <section className="mb-6 rounded-md border border-neutral-200 bg-white p-5">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0">
-            <h1 className="text-2xl font-extrabold tracking-tight">Blog Balão da Informática</h1>
-            <p className="mt-2 text-sm text-neutral-700">
-              Notícias de tecnologia, guias de compra e ofertas para quem quer escolher <strong>notebook</strong>,{" "}
-              <strong>PC Gamer</strong>, <strong>hardware</strong> e periféricos com segurança.
-            </p>
-            <p className="mt-2 text-sm text-neutral-700">
-              Precisa de indicação rápida? Chame no WhatsApp <strong>{SITE_CONFIG.whatsapp.display}</strong>.
-            </p>
+        <section className="mb-6 rounded-md border border-neutral-200 bg-white p-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <h1 className="text-2xl font-extrabold tracking-tight">Blog Balão da Informática</h1>
+              <p className="mt-2 text-sm text-neutral-700">
+                Notícias de tecnologia, guias de compra e ofertas para quem quer escolher <strong>notebook</strong>,{" "}
+                <strong>PC Gamer</strong>, <strong>hardware</strong> e periféricos com segurança.
+              </p>
+              <p className="mt-2 text-sm text-neutral-700">
+                Precisa de indicação rápida? Chame no WhatsApp <strong>{SITE_CONFIG.whatsapp.display}</strong>.
+              </p>
+            </div>
+            <div className="flex w-full flex-col gap-2 sm:w-auto">
+              <a
+                href={`https://wa.me/${SITE_CONFIG.whatsapp.number}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center rounded-md bg-[#e41e26] px-4 py-3 text-sm font-extrabold text-white hover:bg-[#c81920]"
+              >
+                Orçamento no WhatsApp
+              </a>
+              <Link href="/promocao" className="inline-flex items-center justify-center rounded-md border border-neutral-200 bg-white px-4 py-3 text-sm font-extrabold text-neutral-900 hover:bg-neutral-50">
+                Ver Promoções
+              </Link>
+            </div>
           </div>
-          <div className="flex w-full flex-col gap-2 sm:w-auto">
-            <a
-              href={`https://wa.me/${SITE_CONFIG.whatsapp.number}`}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center justify-center rounded-md bg-[#e41e26] px-4 py-3 text-sm font-extrabold text-white hover:bg-[#c81920]"
-            >
-              Orçamento no WhatsApp
-            </a>
-            <Link href="/promocao" className="inline-flex items-center justify-center rounded-md border border-neutral-200 bg-white px-4 py-3 text-sm font-extrabold text-neutral-900 hover:bg-neutral-50">
-              Ver Promoções
-            </Link>
-          </div>
-        </div>
-      </section>
+        </section>
 
-      <div className="grid gap-8 lg:grid-cols-12">
-        <div className="lg:col-span-8">
-          {group1.length > 0 && (
-            <section className="grid gap-4 sm:grid-cols-12">
-              <div className="sm:col-span-12">
-                <HeroCard post={group1[0]} size="lg" priority />
-              </div>
-              {group1[1] && (
-                <div className="sm:col-span-6">
-                  <HeroCard post={group1[1]} size="sm" />
+        <div className="grid gap-8 lg:grid-cols-12">
+          <div className="lg:col-span-8">
+            {group1.length > 0 && (
+              <section className="grid gap-4 sm:grid-cols-12">
+                <div className="sm:col-span-12">
+                  <HeroCard post={group1[0]} size="lg" priority />
                 </div>
-              )}
-              {group1[2] && (
-                <div className="sm:col-span-6">
-                  <HeroCard post={group1[2]} size="sm" />
-                </div>
-              )}
-            </section>
-          )}
+                {group1[1] && (
+                  <div className="sm:col-span-6">
+                    <HeroCard post={group1[1]} size="sm" />
+                  </div>
+                )}
+                {group1[2] && (
+                  <div className="sm:col-span-6">
+                    <HeroCard post={group1[2]} size="sm" />
+                  </div>
+                )}
+              </section>
+            )}
 
-          <section className="mt-8">
-            <div className="flex items-end justify-between">
-              <h2 className="text-lg font-extrabold tracking-tight">
-                <span className="inline-block border-l-4 border-[#e41e26] pl-3">Destaques</span>
-              </h2>
-            </div>
-            <div className="mt-4 divide-y divide-neutral-200 rounded-md border border-neutral-200 bg-white">
-              {group2.map((p) => (
-                <PostListItem key={p.id} post={p} />
-              ))}
-            </div>
-          </section>
-
-          {group3.length > 0 && (
-            <section className="mt-8 grid gap-4 sm:grid-cols-12">
-              <div className="sm:col-span-12">
-                <HeroCard post={group3[0]} size="lg" />
-              </div>
-              {group3[1] && (
-                <div className="sm:col-span-6">
-                  <HeroCard post={group3[1]} size="sm" />
-                </div>
-              )}
-              {group3[2] && (
-                <div className="sm:col-span-6">
-                  <HeroCard post={group3[2]} size="sm" />
-                </div>
-              )}
-            </section>
-          )}
-
-          <section className="mt-8">
-            <div className="flex items-end justify-between">
-              <h2 className="text-lg font-extrabold tracking-tight">
-                <span className="inline-block border-l-4 border-[#e41e26] pl-3">Mais Notícias</span>
-              </h2>
-            </div>
-            <div className="mt-4 divide-y divide-neutral-200 rounded-md border border-neutral-200 bg-white">
-              {group4.map((p) => (
-                <PostListItem key={p.id} post={p} />
-              ))}
-            </div>
-          </section>
-
-          {group5.length > 0 && (
-            <section className="mt-8 grid gap-4 sm:grid-cols-12">
-              <div className="sm:col-span-12">
-                <HeroCard post={group5[0]} size="lg" />
-              </div>
-              {group5[1] && (
-                <div className="sm:col-span-6">
-                  <HeroCard post={group5[1]} size="sm" />
-                </div>
-              )}
-              {group5[2] && (
-                <div className="sm:col-span-6">
-                  <HeroCard post={group5[2]} size="sm" />
-                </div>
-              )}
-            </section>
-          )}
-
-          {posts.length === 0 && (
-            <div className="mt-8 p-8 text-center text-sm text-neutral-600">
-              Ainda não há posts publicados. Aguarde a ingestão automática via RSS/Produtos.
-            </div>
-          )}
-        </div>
-
-        <aside className="lg:col-span-4">
-          <div className="sticky top-8 space-y-8">
-            <div className="rounded-md border border-neutral-200 bg-white">
-              <div className="border-b border-neutral-200 px-4 py-3">
-                <h2 className="text-sm font-extrabold tracking-tight">
-                  <span className="inline-block border-l-4 border-[#e41e26] pl-3">Em alta</span>
+            <section className="mt-8">
+              <div className="flex items-end justify-between">
+                <h2 className="text-lg font-extrabold tracking-tight">
+                  <span className="inline-block border-l-4 border-[#e41e26] pl-3">Destaques</span>
                 </h2>
               </div>
-              <ol className="divide-y divide-neutral-200">
-                {trending.slice(0, 5).map((p, idx) => (
-                  <li key={p.id} className="flex gap-3 px-4 py-3">
-                    <div className="w-6 flex-none text-right text-sm font-extrabold text-[#e41e26]">
-                      {idx + 1}
-                    </div>
-                    <div className="min-w-0">
-                      <Link href={`/blog/${p.slug}`} prefetch={false} className="text-sm font-semibold hover:underline">
-                        {p.title}
-                      </Link>
-                      <div className="mt-1 text-xs font-semibold text-neutral-600">
-                        {p.category}
-                        {p.sourceDomain ? ` • ${p.sourceDomain}` : ""}
+              <div className="mt-4 divide-y divide-neutral-200 rounded-md border border-neutral-200 bg-white">
+                {group2.map((p) => (
+                  <PostListItem key={p.id} post={p} />
+                ))}
+              </div>
+            </section>
+
+            {group3.length > 0 && (
+              <section className="mt-8 grid gap-4 sm:grid-cols-12">
+                <div className="sm:col-span-12">
+                  <HeroCard post={group3[0]} size="lg" />
+                </div>
+                {group3[1] && (
+                  <div className="sm:col-span-6">
+                    <HeroCard post={group3[1]} size="sm" />
+                  </div>
+                )}
+                {group3[2] && (
+                  <div className="sm:col-span-6">
+                    <HeroCard post={group3[2]} size="sm" />
+                  </div>
+                )}
+              </section>
+            )}
+
+            <section className="mt-8">
+              <div className="flex items-end justify-between">
+                <h2 className="text-lg font-extrabold tracking-tight">
+                  <span className="inline-block border-l-4 border-[#e41e26] pl-3">Mais Notícias</span>
+                </h2>
+              </div>
+              <div className="mt-4 divide-y divide-neutral-200 rounded-md border border-neutral-200 bg-white">
+                {group4.map((p) => (
+                  <PostListItem key={p.id} post={p} />
+                ))}
+              </div>
+            </section>
+
+            {group5.length > 0 && (
+              <section className="mt-8 grid gap-4 sm:grid-cols-12">
+                <div className="sm:col-span-12">
+                  <HeroCard post={group5[0]} size="lg" />
+                </div>
+                {group5[1] && (
+                  <div className="sm:col-span-6">
+                    <HeroCard post={group5[1]} size="sm" />
+                  </div>
+                )}
+                {group5[2] && (
+                  <div className="sm:col-span-6">
+                    <HeroCard post={group5[2]} size="sm" />
+                  </div>
+                )}
+              </section>
+            )}
+
+            {posts.length === 0 && (
+              <div className="mt-8 p-8 text-center text-sm text-neutral-600">
+                Ainda não há posts publicados. Aguarde a ingestão automática via RSS/Produtos.
+              </div>
+            )}
+          </div>
+
+          <aside className="lg:col-span-4">
+            <div className="sticky top-8 space-y-8">
+              <div className="rounded-md border border-neutral-200 bg-white">
+                <div className="border-b border-neutral-200 px-4 py-3">
+                  <h2 className="text-sm font-extrabold tracking-tight">
+                    <span className="inline-block border-l-4 border-[#e41e26] pl-3">Em alta</span>
+                  </h2>
+                </div>
+                <ol className="divide-y divide-neutral-200">
+                  {trending.slice(0, 5).map((p, idx) => (
+                    <li key={p.id} className="flex gap-3 px-4 py-3">
+                      <div className="w-6 flex-none text-right text-sm font-extrabold text-[#e41e26]">
+                        {idx + 1}
                       </div>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            </div>
-
-            <div className="rounded-md border border-neutral-200 bg-white">
-              <div className="border-b border-neutral-200 px-4 py-3">
-                <h2 className="text-sm font-extrabold tracking-tight">
-                  <span className="inline-block border-l-4 border-[#e41e26] pl-3">Ofertas Balão</span>
-                </h2>
+                      <div className="min-w-0">
+                        <Link href={`/blog/${p.slug}`} prefetch={false} className="text-sm font-semibold hover:underline">
+                          {p.title}
+                        </Link>
+                        <div className="mt-1 text-xs font-semibold text-neutral-600">
+                          {p.category}
+                          {p.sourceDomain ? ` • ${p.sourceDomain}` : ""}
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
               </div>
-              <div className="divide-y divide-neutral-200">
-                {balaoPosts.map((p) => (
-                  <Link key={p.id} href={`/blog/${p.slug}`} prefetch={false} className="flex items-center gap-3 px-4 py-3 hover:bg-neutral-50">
-                    <div className="relative h-12 w-12 flex-none overflow-hidden rounded border border-neutral-100 bg-white">
-                      <Image
-                        src={p.ogImageUrl || ogFallbackUrl(p)}
-                        alt={p.title}
-                        fill
-                        sizes="48px"
-                        className="object-contain"
-                      />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="text-xs font-bold leading-tight hover:underline">{p.title}</h3>
-                      {isBalaoProductPromo(p) ? (
-                        <div className="mt-1 flex items-center gap-2 text-[10px] font-extrabold text-neutral-700">
-                          <span className="text-[#e41e26]">{extractPriceText(`${p.excerpt} ${p.title}`) || "Preço sob consulta"}</span>
-                          <span className="font-semibold text-neutral-500">{new Date(p.publishedAt ?? p.createdAt).toLocaleDateString("pt-BR")}</span>
-                        </div>
-                      ) : (
-                        <div className="mt-1 flex items-center gap-2 text-[10px] font-semibold text-neutral-500">
-                          <span className="text-[#e41e26]">Balão</span>
-                          <span>{new Date(p.publishedAt ?? p.createdAt).toLocaleDateString("pt-BR")}</span>
-                        </div>
-                      )}
-                    </div>
-                  </Link>
-                ))}
 
-                <div className="p-4">
-                  <a
-                    href="https://wa.me/5519987510267"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="block rounded-md bg-[#e41e26] px-4 py-3 text-center text-sm font-extrabold text-white hover:bg-[#c81920]"
-                  >
-                    Comprar com ajuda no WhatsApp
-                  </a>
-                  <div className="mt-3 grid grid-cols-2 gap-2">
-                    <Link href="/notebooks" className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs font-bold text-neutral-900 hover:bg-neutral-50">
-                      Notebooks
+              <div className="rounded-md border border-neutral-200 bg-white">
+                <div className="border-b border-neutral-200 px-4 py-3">
+                  <h2 className="text-sm font-extrabold tracking-tight">
+                    <span className="inline-block border-l-4 border-[#e41e26] pl-3">Ofertas Balão</span>
+                  </h2>
+                </div>
+                <div className="divide-y divide-neutral-200">
+                  {balaoPosts.map((p) => (
+                    <Link key={p.id} href={`/blog/${p.slug}`} prefetch={false} className="flex items-center gap-3 px-4 py-3 hover:bg-neutral-50">
+                      <div className="relative h-12 w-12 flex-none overflow-hidden rounded border border-neutral-100 bg-white">
+                        <Image
+                          src={p.ogImageUrl || ogFallbackUrl(p)}
+                          alt={p.title}
+                          fill
+                          sizes="48px"
+                          className="object-contain"
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-xs font-bold leading-tight hover:underline">{p.title}</h3>
+                        {isBalaoProductPromo(p) ? (
+                          <div className="mt-1 flex items-center gap-2 text-[10px] font-extrabold text-neutral-700">
+                            <span className="text-[#e41e26]">{extractPriceText(`${p.excerpt} ${p.title}`) || "Preço sob consulta"}</span>
+                            <span className="font-semibold text-neutral-500">{new Date(p.publishedAt ?? p.createdAt).toLocaleDateString("pt-BR")}</span>
+                          </div>
+                        ) : (
+                          <div className="mt-1 flex items-center gap-2 text-[10px] font-semibold text-neutral-500">
+                            <span className="text-[#e41e26]">Balão</span>
+                            <span>{new Date(p.publishedAt ?? p.createdAt).toLocaleDateString("pt-BR")}</span>
+                          </div>
+                        )}
+                      </div>
                     </Link>
-                    <Link href="/pcgamer" className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs font-bold text-neutral-900 hover:bg-neutral-50">
-                      PC Gamer
-                    </Link>
-                    <Link href="/departamentos" className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs font-bold text-neutral-900 hover:bg-neutral-50">
-                      Departamentos
-                    </Link>
-                    <Link href="/promocao" className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs font-bold text-neutral-900 hover:bg-neutral-50">
-                      Promoções
-                    </Link>
+                  ))}
+
+                  <div className="p-4">
+                    <a
+                      href="https://wa.me/5519987510267"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="block rounded-md bg-[#e41e26] px-4 py-3 text-center text-sm font-extrabold text-white hover:bg-[#c81920]"
+                    >
+                      Comprar com ajuda no WhatsApp
+                    </a>
+                    <div className="mt-3 grid grid-cols-2 gap-2">
+                      <Link href="/notebooks" className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs font-bold text-neutral-900 hover:bg-neutral-50">
+                        Notebooks
+                      </Link>
+                      <Link href="/pcgamer" className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs font-bold text-neutral-900 hover:bg-neutral-50">
+                        PC Gamer
+                      </Link>
+                      <Link href="/departamentos" className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs font-bold text-neutral-900 hover:bg-neutral-50">
+                        Departamentos
+                      </Link>
+                      <Link href="/promocao" className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs font-bold text-neutral-900 hover:bg-neutral-50">
+                        Promoções
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </aside>
-      </div>
-    </main>
+          </aside>
+        </div>
+      </main>
+    </div>
   );
 }
 
