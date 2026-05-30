@@ -368,11 +368,11 @@ export default async function PremiumPage() {
               </div>
 
               <h1 className="text-6xl sm:text-7xl lg:text-8xl font-black tracking-tight leading-[0.92] max-w-none">
-                <span className="block">Categoria</span>
+                <span className="block">O seu sonho de ter um</span>
                 <span className="block text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-100 to-amber-400">
-                  Premium
+                  PC PREMIUM
                 </span>
-                <span className="block">começa aqui.</span>
+                <span className="block">se realiza aqui.</span>
               </h1>
 
               <p className="text-lg sm:text-xl text-zinc-200/90 leading-relaxed max-w-[44rem]">
