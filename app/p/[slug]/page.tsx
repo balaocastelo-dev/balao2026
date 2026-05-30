@@ -629,34 +629,34 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
         </div>
       </section>
 
-      <section className="py-10 sm:py-12 bg-[#0b0d10]">
+      <section className="py-10 sm:py-12 bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="rounded-3xl border border-white/10 bg-gradient-to-r from-[#0b0d10] via-[#0b0d10] to-[#E60012]/20 p-6 sm:p-10">
+          <div className="rounded-3xl border border-gray-200 bg-white shadow-xl p-6 sm:p-10">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               <div className="lg:col-span-7">
-                <div className="text-white/70 text-xs font-extrabold uppercase tracking-wide">CTA final</div>
-                <h3 className="mt-2 text-2xl sm:text-3xl font-extrabold text-white">Pronto para elevar seu desempenho?</h3>
-                <div className="mt-3 text-white/80 leading-relaxed">Configuração pensada para performance e estabilidade no dia a dia.</div>
+                <div className="text-gray-600 text-xs font-extrabold uppercase tracking-wide">CTA final</div>
+                <h3 className="mt-2 text-2xl sm:text-3xl font-extrabold text-gray-900">Pronto para elevar seu desempenho?</h3>
+                <div className="mt-3 text-gray-700 leading-relaxed">Configuração pensada para performance e estabilidade no dia a dia.</div>
                 <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-2">
                   {["Componentes premium", "Montagem profissional", "Suporte pós-venda"].map((t) => (
-                    <div key={t} className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 flex items-center gap-2">
+                    <div key={t} className="rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2 flex items-center gap-2">
                       <CheckCircle2 size={16} className="text-[#E60012]" />
-                      <div className="text-sm font-bold text-white/90">{t}</div>
+                      <div className="text-sm font-bold text-gray-900">{t}</div>
                     </div>
                   ))}
                 </div>
               </div>
 
               <div className="lg:col-span-5">
-                <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-                  <div className="rounded-2xl border border-white/10 bg-white overflow-hidden p-4">
-                    <Image src={heroPrimary} alt="" width={900} height={700} className="w-full h-[240px] object-contain" unoptimized />
+                <div className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm">
+                  <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden p-4">
+                    <Image src={heroPrimary} alt="" width={900} height={700} className="w-full h-[360px] sm:h-[420px] object-contain" unoptimized />
                   </div>
-                  <div className="text-white/70 text-xs font-extrabold uppercase tracking-wide">Produto</div>
-                  <div className="mt-2 text-lg font-extrabold text-white whitespace-normal break-words">{page.nome_pc}</div>
-                  <div className="mt-4 text-white/70 text-xs font-extrabold uppercase tracking-wide">Preço</div>
-                  <div className="mt-1 text-3xl font-extrabold text-white">{priceText}</div>
-                  {installment ? <div className="mt-1 text-sm text-white/70">{installment}</div> : null}
+                  <div className="mt-4 text-gray-600 text-xs font-extrabold uppercase tracking-wide">Produto</div>
+                  <div className="mt-2 text-lg font-extrabold text-gray-900 whitespace-normal break-words">{page.nome_pc}</div>
+                  <div className="mt-4 text-gray-600 text-xs font-extrabold uppercase tracking-wide">Preço</div>
+                  <div className="mt-1 text-3xl font-extrabold text-gray-900">{priceText}</div>
+                  {installment ? <div className="mt-1 text-sm text-gray-600">{installment}</div> : null}
                   <div className="mt-5 grid grid-cols-1 gap-2">
                     <a
                       href={buyHref || whatsHref}
@@ -669,9 +669,9 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
                       href={whatsHref}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-6 py-4 text-white font-extrabold hover:bg-white/15"
+                      className="inline-flex items-center justify-center gap-2 rounded-2xl border border-gray-300 bg-white px-6 py-4 text-gray-900 font-extrabold hover:bg-gray-50"
                     >
-                      <MessageCircle size={18} />
+                      <MessageCircle size={18} className="text-[#E60012]" />
                       Falar no WhatsApp
                     </a>
                   </div>
