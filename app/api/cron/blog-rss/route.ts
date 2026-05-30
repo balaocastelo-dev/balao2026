@@ -92,6 +92,116 @@ function isCampinasRegionItem(item: RssItem): boolean {
   return false;
 }
 
+function removeDangerousBlocks(input: string): string {
+  return String(input || "")
+    .replace(/<script\b[\s\S]*?<\/script>/gi, "")
+    .replace(/<style\b[\s\S]*?<\/style>/gi, "")
+    .replace(/<iframe\b[\s\S]*?<\/iframe>/gi, "")
+    .replace(/<object\b[\s\S]*?<\/object>/gi, "")
+    .replace(/<embed\b[\s\S]*?<\/embed>/gi, "")
+    .replace(/\son\w+="[^"]*"/gi, "")
+    .replace(/\son\w+='[^']*'/gi, "")
+    .replace(/\son\w+=\S+/gi, "");
+}
+
+function findTagBlock(html: string, tag: string, openTagMatch: RegExp): string | null {
+  const input = String(html || "");
+  if (!input) return null;
+
+  const openRe = new RegExp(`<${tag}\\b[^>]*>`, "ig");
+  let m: RegExpExecArray | null;
+  let startIdx = -1;
+  let startTag = "";
+  while ((m = openRe.exec(input)) !== null) {
+    const openTag = m[0] || "";
+    if (!openTagMatch.test(openTag)) continue;
+    startIdx = m.index;
+    startTag = openTag;
+    break;
+  }
+  if (startIdx < 0) return null;
+
+  const openOrCloseRe = new RegExp(`<${tag}\\b[^>]*>|</${tag}>`, "ig");
+  openOrCloseRe.lastIndex = startIdx + startTag.length;
+
+  let depth = 1;
+  let endIdx = -1;
+  while ((m = openOrCloseRe.exec(input)) !== null) {
+    const token = m[0] || "";
+    if (token.toLowerCase().startsWith(`</${tag}`)) depth -= 1;
+    else depth += 1;
+    if (depth === 0) {
+      endIdx = openOrCloseRe.lastIndex;
+      break;
+    }
+  }
+  if (endIdx < 0) return null;
+  return input.slice(startIdx, endIdx);
+}
+
+function stripWrapperTag(block: string): string {
+  const s = String(block || "").trim();
+  if (!s) return s;
+  const openEnd = s.indexOf(">");
+  const closeStart = s.lastIndexOf("</");
+  if (openEnd < 0 || closeStart < 0 || closeStart <= openEnd) return s;
+  return s.slice(openEnd + 1, closeStart).trim();
+}
+
+function normalizeArticleHtml(inputHtml: string): string {
+  const raw = removeDangerousBlocks(inputHtml);
+  const withBreaks = raw.replace(/<br\b[^>]*\/?>/gi, "\n");
+
+  let s = withBreaks
+    .replace(/<(p|h2|h3|ul|ol|li|strong|em|blockquote|figure|figcaption)\b[^>]*>/gi, "<$1>")
+    .replace(/<a\b[^>]*\bhref\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s>]+))[^>]*>/gi, (_m, h1, h2, h3) => {
+      const href = String(h1 || h2 || h3 || "").trim();
+      return href ? `<a href="${href}">` : "<a>";
+    })
+    .replace(/<img\b([^>]*?)>/gi, (m) => {
+      const srcMatch = m.match(/\bsrc\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s>]+))/i);
+      const altMatch = m.match(/\balt\s*=\s*(?:"([^"]*)"|'([^']*)')/i);
+      const src = String(srcMatch?.[1] || srcMatch?.[2] || srcMatch?.[3] || "").trim();
+      const alt = String(altMatch?.[1] || altMatch?.[2] || "").trim();
+      if (!src) return "";
+      const altAttr = alt ? ` alt="${alt.replace(/"/g, "")}"` : "";
+      return `<img src="${src}"${altAttr}>`;
+    });
+
+  s = s.replace(/<(?!\/?(?:p|h2|h3|ul|ol|li|strong|em|a|img|blockquote|figure|figcaption)\b)[^>]+>/gi, "");
+  s = s.replace(/\s+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+  return s;
+}
+
+async function fetchOriginalArticleHtml(url: string): Promise<string | null> {
+  const u = String(url || "").trim();
+  if (!u) return null;
+
+  const res = await fetch(u, {
+    headers: {
+      "user-agent": "balao-info-blog-bot/1.0 (+https://www.balao.info/blog)",
+      accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    },
+    cache: "no-store",
+  });
+
+  if (!res.ok) return null;
+  const html = await res.text();
+  const cleaned = removeDangerousBlocks(html);
+
+  const body =
+    findTagBlock(cleaned, "div", /\bitemprop=["']articleBody["']/i) ||
+    findTagBlock(cleaned, "div", /\bmc-article-body\b/i) ||
+    findTagBlock(cleaned, "div", /\bcontent-text__container\b/i) ||
+    findTagBlock(cleaned, "article", /<article\b/i) ||
+    "";
+
+  const inner = stripWrapperTag(body);
+  const normalized = normalizeArticleHtml(inner);
+  if (normalized.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim().length < 300) return null;
+  return normalized;
+}
+
 export async function GET(req: Request) {
   try {
     if (!isAuthorized(req)) {
@@ -159,6 +269,19 @@ export async function GET(req: Request) {
       const sourceHash = sha256(item.url);
       const exists = await hasBlogSourceItem({ source_type: "rss", source_hash: sourceHash });
       if (exists) continue;
+
+      if (process.env.BLOG_RSS_KEEP_ORIGINAL_FORMAT !== "false") {
+        try {
+          const original = await fetchOriginalArticleHtml(item.url);
+          if (original) {
+            (item as any).summary = original;
+            if (!Array.isArray(item.imageUrls) || item.imageUrls.length === 0) {
+              const firstImg = extractFirstImageUrlFromHtml(original);
+              if (firstImg) (item as any).imageUrls = [firstImg];
+            }
+          }
+        } catch {}
+      }
 
       const publishedAt = item.publishedAt ? new Date(item.publishedAt) : new Date();
       const publishedAtIso = Number.isFinite(publishedAt.getTime()) ? publishedAt.toISOString() : new Date().toISOString();
