@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { parseProducts, Product, Category, buildCategoryTree, CATEGORIES } from "@/lib/utils";
-import { Upload, CheckCircle, AlertCircle, Search, Save } from "lucide-react";
+import { Upload, CheckCircle, AlertCircle, Search, Save, X } from "lucide-react";
 
 export default function ImportPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -314,6 +314,19 @@ export default function ImportPage() {
     }
   };
 
+  const removePreviewImage = (productId: string, imageUrl: string) => {
+    setParsedProducts((prev: any) =>
+      prev.flatMap((it: any) => {
+        if (String(it?.id) !== String(productId)) return [it];
+        const currentUrls: string[] = Array.isArray(it?.image_urls) && it.image_urls.length > 0 ? it.image_urls : it?.image ? [String(it.image)] : [];
+        const nextUrls = currentUrls.filter((u) => String(u || "").trim() && String(u) !== String(imageUrl));
+        const nextPrimary = String(nextUrls[0] || "").trim();
+        if (!nextPrimary) return [];
+        return [{ ...it, image: nextPrimary, image_urls: nextUrls, imageValid: true }];
+      })
+    );
+  };
+
   const categoryTree = buildCategoryTree(categories);
   const flatCategories: { name: string; level: number }[] = [];
   
@@ -480,6 +493,14 @@ export default function ImportPage() {
                                             {p.image_urls && p.image_urls.length > 0 ? (
                                                 p.image_urls.map((img: string, i: number) => (
                                                     <div key={i} className="w-10 h-10 relative flex-shrink-0">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removePreviewImage(String((p as any).id), img)}
+                                                            className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-black/70 text-white flex items-center justify-center hover:bg-black"
+                                                            title="Remover foto"
+                                                        >
+                                                            <X size={10} />
+                                                        </button>
                                                         <img 
                                                             src={img} 
                                                             alt="" 
@@ -490,6 +511,14 @@ export default function ImportPage() {
                                                 ))
                                             ) : (
                                                 <div className="w-10 h-10 relative">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removePreviewImage(String((p as any).id), String(p.image))}
+                                                        className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-black/70 text-white flex items-center justify-center hover:bg-black"
+                                                        title="Remover foto"
+                                                    >
+                                                        <X size={10} />
+                                                    </button>
                                                     <img 
                                                         src={p.image} 
                                                         alt="" 
