@@ -406,12 +406,6 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
             <Image src="/logo.png" alt="Balão da Informática" width={160} height={40} className="h-8 w-auto" priority />
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-6 text-sm font-extrabold tracking-tight text-white/80">
-            <Link href="/" className="hover:text-white">Início</Link>
-            <Link href="/" className="hover:text-white">Loja</Link>
-            <Link href="/fale-conosco" className="hover:text-white">Atendimento</Link>
-          </nav>
-
           <div className="ml-auto flex items-center gap-2">
             <a
               href={whatsHref}
@@ -502,7 +496,7 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
 
             <div className="lg:col-span-6 order-1 lg:order-2">
               <div className="rounded-3xl border border-white/10 bg-gradient-to-b from-white/10 to-white/5 p-4 shadow-2xl">
-                <div className="rounded-2xl bg-[#0b0d10]/30 border border-white/10 p-4">
+                <div className="rounded-2xl bg-[#0b0d10]/30 border border-white/10 p-4 text-white">
                   <ProductMediaSwitcher
                     imageUrl={heroPrimary}
                     imageUrls={heroExtras}
@@ -699,7 +693,7 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
       </footer>
 
       <div className="fixed bottom-0 left-0 right-0 md:hidden z-40 border-t border-gray-200 bg-white/95 backdrop-blur">
-        <div className="px-4 py-3 flex items-center gap-3">
+        <div className="px-4 py-3 pr-24 flex items-center gap-3">
           <div className="min-w-0">
             <div className="text-[11px] font-extrabold text-gray-600 uppercase tracking-wide">Preço</div>
             <div className="text-lg font-extrabold text-gray-900 truncate">{priceText}</div>

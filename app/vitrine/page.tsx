@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { listVitrinePagesPublic } from "@/lib/vitrine/db";
+import { listVitrinePagesAdmin } from "@/lib/vitrine/db";
 import { pickPcHeroImage } from "@/lib/vitrine/core";
 import ShareButton from "@/components/ShareButton";
 
@@ -33,7 +33,7 @@ function priceTextFromRecord(p: any) {
 }
 
 export default async function VitrineIndexPage() {
-  const pages = await listVitrinePagesPublic().catch(() => []);
+  const pages = await listVitrinePagesAdmin().catch(() => []);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
