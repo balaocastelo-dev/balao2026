@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { toSlug } from "@/lib/vitrine/core";
+import { pickPcHeroImage, toSlug } from "@/lib/vitrine/core";
 import type { Product } from "@/lib/utils";
 import type { VitrineCategory, VitrinePageRecord, VitrineStatus } from "@/lib/vitrine/types";
 
@@ -229,6 +229,9 @@ export default function GeradorPage() {
     const partsForDb = partsResolved.map((p) => ({ kind: p.kind, label: p.label, product: p.product }));
     const columnParts = mapPartsToColumns(partsForDb.map((p) => ({ kind: p.kind, product: p.product })));
     const images = mapPartsToImages(main.image, partsForDb.map((p) => ({ kind: p.kind, product: p.product })));
+    if (!String(images.hero || "").trim()) {
+      images.hero = pickPcHeroImage({ categoria: pickCategory(category) } as any);
+    }
 
     const payload: Partial<VitrinePageRecord> & { extras?: any; images?: any } = {
       nome_pc: main.name,
