@@ -407,18 +407,17 @@ function HeroCard({ post, size }: { post: BlogCardPost; size: "lg" | "sm" }) {
             className="object-contain"
             priority={size === "lg"}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-4">
-            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-white/80">
-              <span className="uppercase tracking-wide text-[#ff3b3b]">{post.category}</span>
-              {post.sourceDomain ? <span className="text-white/70">{post.sourceDomain}</span> : null}
-              <span className="text-white/60">{date}</span>
-            </div>
-            <h2 className={size === "lg" ? "mt-2 text-2xl font-extrabold leading-snug text-white" : "mt-2 text-lg font-extrabold leading-snug text-white"}>
-              {post.title}
-            </h2>
-            <p className="mt-2 text-sm text-white/80 overflow-hidden max-h-[2.8rem]">{post.excerpt}</p>
+        </div>
+        <div className={size === "lg" ? "p-5" : "p-4"}>
+          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-neutral-600">
+            <span className="uppercase tracking-wide text-[#e41e26]">{post.category}</span>
+            {post.sourceDomain ? <span>{post.sourceDomain}</span> : null}
+            <span>{date}</span>
           </div>
+          <h2 className={size === "lg" ? "mt-2 text-2xl font-extrabold leading-snug text-neutral-900" : "mt-2 text-lg font-extrabold leading-snug text-neutral-900"}>
+            {post.title}
+          </h2>
+          <p className="mt-2 text-sm text-neutral-700 overflow-hidden max-h-[2.8rem]">{post.excerpt}</p>
         </div>
       </Link>
     </article>
