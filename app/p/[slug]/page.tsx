@@ -193,7 +193,7 @@ function PieceRow({
           </div>
           <div className="lg:ml-auto w-full lg:w-[380px]">
             <div className="rounded-2xl bg-gray-50 border border-gray-200 p-4 flex items-center justify-center">
-              <Image src={imageSrc} alt="" width={900} height={700} className="w-full h-[260px] object-contain" unoptimized />
+              <Image src={imageSrc} alt="" width={900} height={700} className="w-full h-[300px] sm:h-[340px] object-contain" unoptimized />
             </div>
           </div>
         </div>
@@ -497,7 +497,7 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
                     imageUrls={heroExtras}
                     productName={page.nome_pc}
                     variant="hero"
-                    heroHeightClassName="h-[420px] sm:h-[520px]"
+                    heroHeightClassName="h-[520px] sm:h-[620px]"
                     autoRotateMs={2000}
                     showBorder={false}
                     showBackground={false}

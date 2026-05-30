@@ -7,7 +7,19 @@ import type { Product } from "@/lib/utils";
 import type { VitrineCategory, VitrinePageRecord, VitrineStatus } from "@/lib/vitrine/types";
 
 type GeneratorCategory = "Workstation" | "PC Gamer" | "Office";
-type PartKind = "cpu" | "motherboard" | "ram" | "storage" | "gpu" | "psu" | "case" | "cooling" | "other";
+type PartKind =
+  | "cpu"
+  | "motherboard"
+  | "ram"
+  | "storage"
+  | "gpu"
+  | "psu"
+  | "cooling"
+  | "case"
+  | "monitor"
+  | "accessories"
+  | "peripherals"
+  | "other";
 
 type PartBlock = {
   id: string;
@@ -82,11 +94,29 @@ function pickDefaultCategoryFromList(kind: PartKind, categories: string[]) {
     const exact = categories.find((c) => normalizeText(c) === normalizeText("gabinete"));
     if (exact) return exact;
   }
+  if (k === "monitor") {
+    const exact = categories.find((c) => normalizeText(c) === normalizeText("monitor"));
+    if (exact) return exact;
+    const plural = categories.find((c) => normalizeText(c).includes("monitor"));
+    if (plural) return plural;
+  }
+  if (k === "accessories") {
+    const exact = categories.find((c) => normalizeText(c) === normalizeText("acessorios") || normalizeText(c) === normalizeText("acessórios"));
+    if (exact) return exact;
+    const hit = categories.find((c) => normalizeText(c).includes("acessor"));
+    if (hit) return hit;
+  }
+  if (k === "peripherals") {
+    const exact = categories.find((c) => normalizeText(c) === normalizeText("perifericos") || normalizeText(c) === normalizeText("periféricos"));
+    if (exact) return exact;
+    const hit = categories.find((c) => normalizeText(c).includes("perifer"));
+    if (hit) return hit;
+  }
   const targets =
     k === "cpu"
       ? ["processador", "cpu"]
       : k === "motherboard"
-        ? ["placa mae", "placa-m", "motherboard"]
+        ? ["placa mae", "placa-m", "motherboard", "placa-mae"]
         : k === "ram"
           ? ["memoria", "ram", "ddr"]
           : k === "storage"
@@ -99,6 +129,12 @@ function pickDefaultCategoryFromList(kind: PartKind, categories: string[]) {
                   ? ["gabinete", "case"]
                   : k === "cooling"
                     ? ["cooler", "water", "resfriamento"]
+                    : k === "monitor"
+                      ? ["monitor", "tela"]
+                      : k === "accessories"
+                        ? ["acessor", "adaptador", "cabo"]
+                        : k === "peripherals"
+                          ? ["perifer", "mouse", "teclado", "headset"]
                     : [];
 
   if (targets.length === 0) return "";
@@ -166,6 +202,7 @@ export default function GeradorPage() {
   const [message, setMessage] = useState("");
 
   const [products, setProducts] = useState<Product[]>([]);
+  const [siteCategories, setSiteCategories] = useState<string[]>([]);
   const [pages, setPages] = useState<VitrinePageRecord[]>([]);
   const [activePageId, setActivePageId] = useState<string | null>(null);
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
@@ -178,13 +215,17 @@ export default function GeradorPage() {
   const [mainCustomName, setMainCustomName] = useState<string>("");
 
   const [parts, setParts] = useState<PartBlock[]>([
-    { id: id(), kind: "cpu", label: "Processador", category: "", productId: null, customName: "", query: "", picking: true },
-    { id: id(), kind: "motherboard", label: "Placa-mãe", category: "", productId: null, customName: "", query: "", picking: true },
-    { id: id(), kind: "ram", label: "Memória", category: "", productId: null, customName: "", query: "", picking: true },
+    { id: id(), kind: "cpu", label: "CPU", category: "", productId: null, customName: "", query: "", picking: true },
+    { id: id(), kind: "motherboard", label: "Placa mãe", category: "", productId: null, customName: "", query: "", picking: true },
+    { id: id(), kind: "ram", label: "Memória RAM", category: "", productId: null, customName: "", query: "", picking: true },
     { id: id(), kind: "storage", label: "Armazenamento", category: "", productId: null, customName: "", query: "", picking: true },
     { id: id(), kind: "gpu", label: "Placa de vídeo", category: "", productId: null, customName: "", query: "", picking: true },
     { id: id(), kind: "psu", label: "Fonte", category: "", productId: null, customName: "", query: "", picking: true },
+    { id: id(), kind: "cooling", label: "Resfriamento", category: "", productId: null, customName: "", query: "", picking: true },
     { id: id(), kind: "case", label: "Gabinete", category: "", productId: null, customName: "", query: "", picking: true },
+    { id: id(), kind: "monitor", label: "Monitor", category: "", productId: null, customName: "", query: "", picking: true },
+    { id: id(), kind: "accessories", label: "Acessórios", category: "", productId: null, customName: "", query: "", picking: true },
+    { id: id(), kind: "peripherals", label: "Periféricos", category: "", productId: null, customName: "", query: "", picking: true },
   ]);
 
   const mainProduct = useMemo(() => {
@@ -225,26 +266,29 @@ export default function GeradorPage() {
       .slice(0, 30);
   }, [products, mainSearch, mainCategory]);
 
-  const allProductCategories = useMemo(() => {
+  const categoryOptions = useMemo(() => {
+    const fromDb = Array.isArray(siteCategories) ? siteCategories : [];
+    const trimmed = fromDb.map((c) => String(c || "").trim()).filter(Boolean);
+    if (trimmed.length > 0) return trimmed;
     const set = new Set<string>();
     for (const p of products as any[]) {
       const c = String(p?.category || "").trim();
       if (c) set.add(c);
     }
     return Array.from(set).sort((a, b) => a.localeCompare(b, "pt-BR"));
-  }, [products]);
+  }, [siteCategories, products]);
 
   useEffect(() => {
-    if (allProductCategories.length === 0) return;
+    if (categoryOptions.length === 0) return;
     setParts((prev) =>
       prev.map((b) => {
         if (String(b.category || "").trim()) return b;
-        const picked = pickDefaultCategoryFromList(b.kind, allProductCategories);
+        const picked = pickDefaultCategoryFromList(b.kind, categoryOptions);
         if (!picked) return b;
         return { ...b, category: picked };
       })
     );
-  }, [allProductCategories]);
+  }, [categoryOptions]);
 
   useEffect(() => {
     if (products.length === 0) return;
@@ -313,13 +357,17 @@ export default function GeradorPage() {
     setMainProductId(null);
     setMainCustomName("");
     setParts([
-      { id: id(), kind: "cpu", label: "Processador", category: "", productId: null, customName: "", query: "", picking: true },
-      { id: id(), kind: "motherboard", label: "Placa-mãe", category: "", productId: null, customName: "", query: "", picking: true },
-      { id: id(), kind: "ram", label: "Memória", category: "", productId: null, customName: "", query: "", picking: true },
+      { id: id(), kind: "cpu", label: "CPU", category: "", productId: null, customName: "", query: "", picking: true },
+      { id: id(), kind: "motherboard", label: "Placa mãe", category: "", productId: null, customName: "", query: "", picking: true },
+      { id: id(), kind: "ram", label: "Memória RAM", category: "", productId: null, customName: "", query: "", picking: true },
       { id: id(), kind: "storage", label: "Armazenamento", category: "", productId: null, customName: "", query: "", picking: true },
       { id: id(), kind: "gpu", label: "Placa de vídeo", category: "", productId: null, customName: "", query: "", picking: true },
       { id: id(), kind: "psu", label: "Fonte", category: "", productId: null, customName: "", query: "", picking: true },
+      { id: id(), kind: "cooling", label: "Resfriamento", category: "", productId: null, customName: "", query: "", picking: true },
       { id: id(), kind: "case", label: "Gabinete", category: "", productId: null, customName: "", query: "", picking: true },
+      { id: id(), kind: "monitor", label: "Monitor", category: "", productId: null, customName: "", query: "", picking: true },
+      { id: id(), kind: "accessories", label: "Acessórios", category: "", productId: null, customName: "", query: "", picking: true },
+      { id: id(), kind: "peripherals", label: "Periféricos", category: "", productId: null, customName: "", query: "", picking: true },
     ]);
   };
 
@@ -327,13 +375,22 @@ export default function GeradorPage() {
     setStatus("loading");
     setMessage("");
     try {
-      const [prodRes, pagesRes] = await Promise.all([fetch("/api/products", { cache: "no-store" }), fetch("/api/vitrine/pages", { cache: "no-store" })]);
+      const [prodRes, pagesRes, categoriesRes] = await Promise.all([
+        fetch("/api/products", { cache: "no-store" }),
+        fetch("/api/vitrine/pages", { cache: "no-store" }),
+        fetch("/api/categories", { cache: "no-store" }),
+      ]);
       const prod = await prodRes.json().catch(() => []);
       const pagesJson = await pagesRes.json().catch(() => null);
+      const categoriesJson = await categoriesRes.json().catch(() => []);
       if (!Array.isArray(prod)) throw new Error("Falha ao carregar produtos");
       if (!pagesRes.ok || !pagesJson?.success) throw new Error(pagesJson?.error || "Falha ao carregar páginas");
+      const dbCats: string[] = Array.isArray(categoriesJson)
+        ? categoriesJson.map((c: any) => String(c?.name || "").trim()).filter(Boolean)
+        : [];
       setProducts(prod);
       setPages(Array.isArray(pagesJson.pages) ? pagesJson.pages : []);
+      setSiteCategories(Array.from(new Set(dbCats)).sort((a, b) => a.localeCompare(b, "pt-BR")));
       setStatus("idle");
     } catch (e: any) {
       setStatus("error");
@@ -591,7 +648,7 @@ export default function GeradorPage() {
                   className="mt-2 w-full px-3 py-2 rounded-xl border border-black/10 bg-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#d71920]/30"
                 >
                   <option value="">Todas as categorias</option>
-                  {allProductCategories.map((c) => (
+                  {categoryOptions.map((c) => (
                     <option key={c} value={c}>
                       {c}
                     </option>
@@ -742,8 +799,11 @@ export default function GeradorPage() {
                               <option value="storage">SSD/Armazenamento</option>
                               <option value="gpu">GPU</option>
                               <option value="psu">Fonte</option>
-                              <option value="case">Gabinete</option>
                               <option value="cooling">Resfriamento</option>
+                              <option value="case">Gabinete</option>
+                              <option value="monitor">Monitor</option>
+                              <option value="accessories">Acessórios</option>
+                              <option value="peripherals">Periféricos</option>
                               <option value="other">Outro</option>
                             </select>
                           </div>
@@ -762,7 +822,7 @@ export default function GeradorPage() {
                               className="w-full px-3 py-2 rounded-xl border border-black/10 bg-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#d71920]/30"
                             >
                               <option value="">Todas as categorias</option>
-                              {allProductCategories.map((c) => (
+                              {categoryOptions.map((c) => (
                                 <option key={c} value={c}>
                                   {c}
                                 </option>

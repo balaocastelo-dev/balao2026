@@ -5,6 +5,32 @@ import { pickPcHeroImage } from "@/lib/vitrine/core";
 
 export const dynamic = "force-dynamic";
 
+function parsePriceToNumber(text: string): number {
+  const raw = String(text || "").trim();
+  if (!raw) return 0;
+  const cleaned = raw.replace(/R\$/gi, "").replace(/\s/g, "").replace(/[^\d,.\-]/g, "");
+  if (!cleaned) return 0;
+  const hasComma = cleaned.includes(",");
+  const hasDot = cleaned.includes(".");
+  let normalizedNum = cleaned;
+  if (hasComma && hasDot) normalizedNum = cleaned.replace(/\./g, "").replace(",", ".");
+  else if (hasComma && !hasDot) normalizedNum = cleaned.replace(",", ".");
+  const n = Number.parseFloat(normalizedNum);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function formatBRL(value: number) {
+  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
+}
+
+function priceTextFromRecord(p: any) {
+  const extras = p?.extras && typeof p.extras === "object" ? p.extras : {};
+  const direct = String(extras?.price_text || "").trim();
+  if (direct) return direct;
+  const mainPrice = extras?.main_product?.price ? String(extras.main_product.price).trim() : "";
+  return mainPrice || "Sob consulta";
+}
+
 export default async function VitrineIndexPage() {
   const pages = await listVitrinePagesPublic().catch(() => []);
 
@@ -26,6 +52,10 @@ export default async function VitrineIndexPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {pages.map((p) => {
           const hero = (p as any)?.images?.hero || pickPcHeroImage({ categoria: p.categoria } as any);
+          const priceText = priceTextFromRecord(p as any);
+          const n = parsePriceToNumber(priceText);
+          const installment = n ? `12x de ${formatBRL(n / 12)} sem juros` : null;
+          const pix = n ? `no Pix: ${formatBRL(n * 0.95)} (5% off)` : null;
           return (
             <Link
               key={p.id}
@@ -43,6 +73,11 @@ export default async function VitrineIndexPage() {
                   </div>
                   <div className="mt-2 text-sm text-gray-600">{p.categoria}</div>
                   <div className="mt-2 text-xs font-bold text-gray-500">/p/{p.slug}</div>
+                  <div className="mt-3 rounded-xl border border-gray-100 bg-gray-50 px-3 py-2">
+                    <div className="text-sm font-extrabold text-[#d71920]">{priceText}</div>
+                    {installment ? <div className="mt-0.5 text-xs font-bold text-gray-700">{installment}</div> : null}
+                    {pix ? <div className="mt-0.5 text-xs font-bold text-gray-700">{pix}</div> : null}
+                  </div>
                   <div className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-[#d71920]">
                     Ver detalhes
                     <span className="transition-transform group-hover:translate-x-1">→</span>
