@@ -6,7 +6,6 @@ import { getCategories, getProducts } from "@/lib/db";
 import { parsePriceToNumber, type Category, type Product } from "@/lib/utils";
 import { SITE_CONFIG } from "@/lib/config";
 import JsonLd from "@/components/JsonLd";
-import PremiumParallax from "@/components/PremiumParallax";
 import {
   ArrowRight,
   BadgeCheck,
@@ -352,8 +351,7 @@ export default async function PremiumPage() {
   ];
 
   return (
-    <div className="bg-black text-white relative isolate">
-      <PremiumParallax />
+    <div className="bg-black text-white">
       <JsonLd data={jsonLdData as any} />
       <Header />
 
