@@ -180,6 +180,14 @@ function getDefaultFeeds(): string[] {
 
   if (fromEnv.length > 0) return fromEnv;
 
+  const mode = String(process.env.BLOG_RSS_AGENT_MODE || "campinas")
+    .trim()
+    .toLowerCase();
+
+  if (mode === "campinas") {
+    return ["https://pox.globo.com/rss/g1/sp/campinas-regiao"];
+  }
+
   return ["https://www.adrenaline.com.br/feed/", "https://www.tecmundo.com.br/rss", "https://canaltech.com.br/rss/"];
 }
 

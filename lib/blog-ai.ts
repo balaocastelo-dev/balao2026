@@ -225,12 +225,20 @@ export async function generateBlogPostFromRss(item: RssItem, input: { slug: stri
   const excerptBase = buildExcerptFromHtml(contentHtml, 180);
   const seoDescription = clip(excerptBase || title, 155);
   const readingTimeMinutes = estimateReadingTimeMinutesFromHtml(contentHtml);
+  const category = (() => {
+    const feed = String(item.sourceFeed || "").toLowerCase();
+    const url = String(item.url || "").toLowerCase();
+    if (feed.includes("pox.globo.com/rss/g1/sp/campinas-regiao") || url.includes("/sp/campinas-regiao/") || url.includes("campinas-regiao")) {
+      return "Campinas e Região";
+    }
+    return "Notícias";
+  })();
 
   return {
     title,
     seo_title: seoTitle,
     seo_description: seoDescription,
-    category: "Notícias",
+    category,
     tags: [],
     content_html: contentHtml,
     excerpt: excerptBase,
@@ -241,7 +249,7 @@ export async function generateBlogPostFromRss(item: RssItem, input: { slug: stri
       description: seoDescription,
       publishedAtIso: input.publishedAtIso,
       image: item.imageUrls?.[0],
-      category: "Notícias",
+      category,
       tags: [],
     }),
   };

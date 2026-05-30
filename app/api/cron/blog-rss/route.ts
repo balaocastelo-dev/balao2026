@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { fetchRssItems, shouldSkipRssItemForBlog } from "@/lib/rss";
+import { fetchRssItems, shouldSkipRssItemForBlog, type RssItem } from "@/lib/rss";
 import { slugify } from "@/lib/blog-utils";
 import { generateBlogPostFromRss } from "@/lib/blog-ai";
 import { hasBlogSourceItem, insertBlogPost, insertBlogSourceItem } from "@/lib/db";
@@ -35,6 +35,63 @@ function extractFirstImageUrlFromHtml(html: string | null | undefined): string |
   return src ? src : null;
 }
 
+function normalizeTextForMatch(input: string): string {
+  return String(input || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}+/gu, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function parseCsvEnv(name: string): string[] {
+  return String(process.env[name] || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+function isCampinasRegionItem(item: RssItem): boolean {
+  const feed = String(item.sourceFeed || "").toLowerCase();
+  const url = String(item.url || "").toLowerCase();
+  if (feed.includes("pox.globo.com/rss/g1/sp/campinas-regiao") || url.includes("/sp/campinas-regiao/") || url.includes("campinas-regiao")) return true;
+
+  const keywords =
+    parseCsvEnv("BLOG_RSS_CAMPINAS_KEYWORDS").length > 0
+      ? parseCsvEnv("BLOG_RSS_CAMPINAS_KEYWORDS")
+      : [
+          "campinas",
+          "sumare",
+          "hortolandia",
+          "indaiatuba",
+          "americana",
+          "santa barbara d'oeste",
+          "santa barbara do oeste",
+          "valinhos",
+          "vinhedo",
+          "paulinia",
+          "jaguariuna",
+          "cosmopolis",
+          "nova odessa",
+          "monte mor",
+          "itapira",
+          "mogi guacu",
+          "mogi mirim",
+          "amparo",
+          "holambra",
+          "pedreira",
+          "limeira",
+          "piracicaba",
+        ];
+
+  const hay = normalizeTextForMatch(`${item.title || ""} ${item.summary || ""}`);
+  const hasKeyword = keywords.some((k) => hay.includes(normalizeTextForMatch(k)));
+  if (hasKeyword) return true;
+
+  if (url.includes("campinas") || url.includes("sumare") || url.includes("hortolandia") || url.includes("indaiatuba")) return true;
+  return false;
+}
+
 export async function GET(req: Request) {
   try {
     if (!isAuthorized(req)) {
@@ -54,24 +111,50 @@ export async function GET(req: Request) {
       return NextResponse.json({ ok: true, skipped: true, reason: "BLOG_AGENT_RSS_ENABLED=false" });
     }
 
-    const feeds = (process.env.BLOG_RSS_FEEDS || "")
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
+    const mode = String(process.env.BLOG_RSS_AGENT_MODE || "campinas")
+      .trim()
+      .toLowerCase();
 
-    if (feeds.length === 0) {
-      return NextResponse.json({ ok: false, error: "BLOG_RSS_FEEDS vazio" }, { status: 400 });
+    const feedsFromEnv = parseCsvEnv("BLOG_RSS_FEEDS");
+    const feeds =
+      feedsFromEnv.length > 0
+        ? feedsFromEnv
+        : mode === "campinas"
+          ? ["https://pox.globo.com/rss/g1/sp/campinas-regiao"]
+          : ["https://www.adrenaline.com.br/feed/", "https://www.tecmundo.com.br/rss", "https://canaltech.com.br/rss/"];
+
+    const startIndex = Math.abs(new Date().getUTCMinutes()) % feeds.length;
+
+    let items: RssItem[] = [];
+    let feedUrl = feeds[startIndex]!;
+    let lastError: string | null = null;
+    for (let attempt = 0; attempt < feeds.length; attempt += 1) {
+      const idx = (startIndex + attempt) % feeds.length;
+      const tryUrl = feeds[idx]!;
+      try {
+        const fetched = await fetchRssItems(tryUrl, 30);
+        feedUrl = tryUrl;
+        items = fetched;
+        if (items.length > 0) break;
+      } catch (e: any) {
+        lastError = e?.message ? String(e.message) : "RSS fetch failed";
+        continue;
+      }
     }
 
-    const feedIndex = Math.abs(new Date().getUTCMinutes()) % feeds.length;
-    const feedUrl = feeds[feedIndex];
-
-    const items = await fetchRssItems(feedUrl, 30);
     if (items.length === 0) {
+      if (lastError) {
+        return NextResponse.json({ ok: false, error: lastError, feedUrl }, { status: 502 });
+      }
       return NextResponse.json({ ok: true, inserted: 0, feedUrl, message: "Sem itens no feed" });
     }
 
-    for (const item of items) {
+    const filteredItems = mode === "campinas" ? items.filter(isCampinasRegionItem) : items;
+    if (filteredItems.length === 0) {
+      return NextResponse.json({ ok: true, inserted: 0, feedUrl, message: "Nenhum item da região encontrado no feed" });
+    }
+
+    for (const item of filteredItems) {
       if (shouldSkipRssItemForBlog(item)) continue;
       const sourceHash = sha256(item.url);
       const exists = await hasBlogSourceItem({ source_type: "rss", source_hash: sourceHash });
