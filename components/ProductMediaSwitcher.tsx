@@ -11,6 +11,7 @@ interface ProductMediaSwitcherProps {
   videoUrl?: string;
   productName: string;
   variant?: "square" | "hero";
+  heroHeightClassName?: string;
   autoRotateMs?: number;
   showBorder?: boolean;
   showBackground?: boolean;
@@ -24,6 +25,7 @@ export default function ProductMediaSwitcher({
   videoUrl,
   productName,
   variant = "square",
+  heroHeightClassName,
   autoRotateMs = 0,
   showBorder = true,
   showBackground = true,
@@ -59,7 +61,7 @@ export default function ProductMediaSwitcher({
   if (!hasVideo && allImages.length <= 1) {
     const baseBox =
       variant === "hero"
-        ? "relative w-full h-[960px] sm:h-[1320px] flex items-center justify-center"
+        ? `relative w-full ${heroHeightClassName || "h-[960px] sm:h-[1320px]"} flex items-center justify-center`
         : "relative aspect-square flex items-center justify-center";
     const borderBox = showBorder ? "border border-gray-100" : "";
     return (
@@ -87,7 +89,7 @@ export default function ProductMediaSwitcher({
           <div
             className={`${
               variant === "hero"
-                ? "relative w-full h-[960px] sm:h-[1320px] flex items-center justify-center"
+                ? `relative w-full ${heroHeightClassName || "h-[960px] sm:h-[1320px]"} flex items-center justify-center`
                 : "relative aspect-square flex items-center justify-center"
             } ${showBackground ? "bg-white" : "bg-transparent"} ${rounded ? "rounded-lg" : ""} ${showBorder ? "border border-gray-100" : ""} ${
               padding ? "p-4" : ""
