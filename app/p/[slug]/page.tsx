@@ -399,7 +399,7 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
   })();
 
   return (
-    <div className="min-h-screen text-gray-900 pb-24 md:pb-0 bg-fixed bg-no-repeat bg-cover bg-[linear-gradient(180deg,#ffffff_0%,#ffffff_22%,#0b0d10_52%,#ffffff_82%,#ffffff_100%)]">
+    <div className="text-gray-900 pb-24 md:pb-0 bg-[linear-gradient(180deg,#ffffff_0%,#ffffff_24%,#0b0d10_52%,#0b0d10_62%,#ffffff_88%,#ffffff_100%)]">
       <header className="sticky top-0 z-30 border-b border-white/10 bg-[#0b0d10]/90 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center gap-4">
           <Link href="/" className="flex items-center gap-3">
@@ -422,105 +422,103 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
 
       <section className="relative overflow-hidden bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
-          <div className="rounded-3xl border border-black/10 bg-[#0b0d10]/95 shadow-2xl p-5 sm:p-8">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
-              <div className="lg:col-span-6 order-2 lg:order-1">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-extrabold tracking-widest text-white">
-                  {badgeText(page.categoria)}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+            <div className="lg:col-span-6 order-2 lg:order-1">
+              <div className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/70 px-4 py-2 text-xs font-extrabold tracking-widest text-gray-900 backdrop-blur">
+                {badgeText(page.categoria)}
+              </div>
+
+              <h1 className="mt-4 text-3xl sm:text-5xl font-extrabold tracking-tight text-gray-900 whitespace-normal break-words">
+                {page.nome_pc}
+              </h1>
+              <p className="mt-4 text-base sm:text-lg text-gray-700 leading-relaxed">{copy.heroSubtitle}</p>
+
+              <div className="mt-6 rounded-3xl border border-black/10 bg-white/80 p-5 backdrop-blur">
+                <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+                  <div>
+                    <div className="text-xs font-extrabold text-gray-600 uppercase tracking-wide">Preço</div>
+                    <div className="mt-1 text-3xl sm:text-4xl font-extrabold text-gray-900">{priceText}</div>
+                    {installment ? <div className="mt-1 text-sm text-gray-600">{installment}</div> : null}
+                  </div>
+                  <div className="grid grid-cols-1 gap-2">
+                    <a
+                      href={buyHref || whatsHref}
+                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#E60012] px-5 py-3 text-white font-extrabold shadow-lg hover:bg-red-700"
+                    >
+                      <ShoppingCart size={18} />
+                      Quero comprar
+                    </a>
+                    <a
+                      href={whatsHref}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center justify-center gap-2 rounded-2xl border border-gray-300 bg-white px-5 py-3 text-gray-900 font-extrabold hover:bg-gray-50"
+                    >
+                      <MessageCircle size={18} className="text-[#E60012]" />
+                      Falar no WhatsApp
+                    </a>
+                  </div>
                 </div>
 
-                <h1 className="mt-4 text-3xl sm:text-5xl font-extrabold tracking-tight text-white whitespace-normal break-words">
-                  {page.nome_pc}
-                </h1>
-                <p className="mt-4 text-base sm:text-lg text-white/80 leading-relaxed">{copy.heroSubtitle}</p>
-
-                <div className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-5">
-                  <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-                    <div>
-                      <div className="text-xs font-extrabold text-white/60 uppercase tracking-wide">Preço</div>
-                      <div className="mt-1 text-3xl sm:text-4xl font-extrabold text-white">{priceText}</div>
-                      {installment ? <div className="mt-1 text-sm text-white/70">{installment}</div> : null}
+                <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {[
+                    { t: "Montagem profissional", i: CheckCircle2 },
+                    { t: "Garantia e testes", i: ShieldCheck },
+                    { t: "Suporte especializado", i: Headphones },
+                  ].map((b) => (
+                    <div key={b.t} className="rounded-2xl border border-black/10 bg-white/70 px-3 py-2 flex items-center gap-2">
+                      <b.i size={16} className="text-[#E60012]" />
+                      <div className="text-sm font-bold text-gray-900">{b.t}</div>
                     </div>
-                    <div className="grid grid-cols-1 gap-2">
-                      <a
-                        href={buyHref || whatsHref}
-                        className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#E60012] px-5 py-3 text-white font-extrabold shadow-lg hover:bg-red-700"
-                      >
-                        <ShoppingCart size={18} />
-                        Quero comprar
-                      </a>
-                      <a
-                        href={whatsHref}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-5 py-3 text-white font-extrabold hover:bg-white/15"
-                      >
-                        <MessageCircle size={18} />
-                        Falar no WhatsApp
-                      </a>
-                    </div>
-                  </div>
+                  ))}
+                </div>
 
-                  <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    {[
-                      { t: "Montagem profissional", i: CheckCircle2 },
-                      { t: "Garantia e testes", i: ShieldCheck },
-                      { t: "Suporte especializado", i: Headphones },
-                    ].map((b) => (
-                      <div key={b.t} className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 flex items-center gap-2">
-                        <b.i size={16} className="text-[#E60012]" />
-                        <div className="text-sm font-bold text-white/90">{b.t}</div>
+                <div className="mt-5 flex flex-wrap gap-2">
+                  {[
+                    { k: "cpu", label: "CPU", value: page.processador },
+                    { k: "gpu", label: "GPU", value: page.placa_video },
+                    { k: "ram", label: "RAM", value: page.memoria_ram },
+                    { k: "storage", label: "SSD", value: page.armazenamento },
+                    { k: "cooling", label: "Resfriamento", value: page.resfriamento || page.sistema_operacional },
+                  ]
+                    .filter((x) => String(x.value || "").trim())
+                    .slice(0, 6)
+                    .map((x) => (
+                      <div key={`${x.label}-${x.value}`} className="rounded-full border border-black/10 bg-white/70 px-3 py-1.5 flex items-center gap-2">
+                        <KindIcon kind={x.k} />
+                        <div className="text-xs font-extrabold text-gray-700">{x.label}</div>
+                        <div className="text-xs font-bold text-gray-900 truncate max-w-[260px]">{String(x.value || "")}</div>
                       </div>
                     ))}
-                  </div>
-
-                  <div className="mt-5 flex flex-wrap gap-2">
-                    {[
-                      { k: "cpu", label: "CPU", value: page.processador },
-                      { k: "gpu", label: "GPU", value: page.placa_video },
-                      { k: "ram", label: "RAM", value: page.memoria_ram },
-                      { k: "storage", label: "SSD", value: page.armazenamento },
-                      { k: "cooling", label: "Resfriamento", value: page.resfriamento || page.sistema_operacional },
-                    ]
-                      .filter((x) => String(x.value || "").trim())
-                      .slice(0, 6)
-                      .map((x) => (
-                        <div key={`${x.label}-${x.value}`} className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 flex items-center gap-2">
-                          <KindIcon kind={x.k} />
-                          <div className="text-xs font-extrabold text-white/80">{x.label}</div>
-                          <div className="text-xs font-bold text-white/90 truncate max-w-[260px]">{String(x.value || "")}</div>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="lg:col-span-6 order-1 lg:order-2">
-                <div className="rounded-3xl border border-white/10 bg-gradient-to-b from-white/10 to-white/5 p-4 shadow-2xl">
-                  <div className="rounded-2xl bg-[#0b0d10]/30 border border-white/10 p-4 text-white">
-                    <ProductMediaSwitcher
-                      imageUrl={heroPrimary}
-                      imageUrls={heroExtras}
-                      productName={page.nome_pc}
-                      variant="hero"
-                      heroHeightClassName="h-[520px] sm:h-[620px]"
-                      autoRotateMs={2000}
-                      showBorder={false}
-                      showBackground={false}
-                      padding={false}
-                      rounded={true}
-                    />
-                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              <TrustItem icon={Truck} title="Entrega rápida" text="Envio para todo o Brasil com rastreio." />
-              <TrustItem icon={ShieldCheck} title="Garantia" text="Compra segura e suporte pós-venda." />
-              <TrustItem icon={Headphones} title="Suporte especializado" text="Atendimento que entende de PC." />
-              <TrustItem icon={CreditCard} title="12x sem juros" text="Condições facilitadas no cartão." />
+            <div className="lg:col-span-6 order-1 lg:order-2">
+              <div className="rounded-3xl border border-black/10 bg-white/60 p-4 shadow-2xl backdrop-blur">
+                <div className="rounded-2xl bg-transparent border-0 p-0">
+                  <ProductMediaSwitcher
+                    imageUrl={heroPrimary}
+                    imageUrls={heroExtras}
+                    productName={page.nome_pc}
+                    variant="hero"
+                    heroHeightClassName="h-[520px] sm:h-[620px]"
+                    autoRotateMs={2000}
+                    showBorder={false}
+                    showBackground={false}
+                    padding={false}
+                    rounded={true}
+                  />
+                </div>
+              </div>
             </div>
+          </div>
+
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <TrustItem icon={Truck} title="Entrega rápida" text="Envio para todo o Brasil com rastreio." />
+            <TrustItem icon={ShieldCheck} title="Garantia" text="Compra segura e suporte pós-venda." />
+            <TrustItem icon={Headphones} title="Suporte especializado" text="Atendimento que entende de PC." />
+            <TrustItem icon={CreditCard} title="12x sem juros" text="Condições facilitadas no cartão." />
           </div>
         </div>
       </section>
@@ -547,12 +545,12 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
         </div>
       </section>
 
-      <section className="py-10 sm:py-12 bg-gray-50">
+      <section className="py-10 sm:py-12 bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-end justify-between gap-4">
             <div>
-              <div className="text-xs font-extrabold text-gray-600 uppercase tracking-wide">Componentes</div>
-              <h2 className="mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">Peças escolhidas para performance e estabilidade</h2>
+              <div className="text-xs font-extrabold text-white/70 uppercase tracking-wide">Componentes</div>
+              <h2 className="mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight text-white">Peças escolhidas para performance e estabilidade</h2>
             </div>
           </div>
 
