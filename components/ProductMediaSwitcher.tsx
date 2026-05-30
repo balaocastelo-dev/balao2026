@@ -13,6 +13,9 @@ interface ProductMediaSwitcherProps {
   variant?: "square" | "hero";
   autoRotateMs?: number;
   showBorder?: boolean;
+  showBackground?: boolean;
+  padding?: boolean;
+  rounded?: boolean;
 }
 
 export default function ProductMediaSwitcher({
@@ -23,6 +26,9 @@ export default function ProductMediaSwitcher({
   variant = "square",
   autoRotateMs = 0,
   showBorder = true,
+  showBackground = true,
+  padding = true,
+  rounded = true,
 }: ProductMediaSwitcherProps) {
   const hasVideo = !!videoUrl;
   const [showVideo, setShowVideo] = useState(false);
@@ -55,9 +61,11 @@ export default function ProductMediaSwitcher({
       variant === "hero"
         ? "relative w-full h-[960px] sm:h-[1320px] flex items-center justify-center"
         : "relative aspect-square flex items-center justify-center";
-    const borderBox = showBorder ? "border border-gray-100 rounded-lg" : "rounded-lg";
+    const borderBox = showBorder ? "border border-gray-100" : "";
     return (
-      <div className={`${baseBox} bg-white ${borderBox} p-4`}>
+      <div
+        className={`${baseBox} ${showBackground ? "bg-white" : "bg-transparent"} ${rounded ? "rounded-lg" : ""} ${borderBox} ${padding ? "p-4" : ""}`}
+      >
         <Image
           src={imageUrl}
           alt={productName}
@@ -81,7 +89,9 @@ export default function ProductMediaSwitcher({
               variant === "hero"
                 ? "relative w-full h-[960px] sm:h-[1320px] flex items-center justify-center"
                 : "relative aspect-square flex items-center justify-center"
-            } bg-white ${showBorder ? "border border-gray-100 rounded-lg" : "rounded-lg"} p-4`}
+            } ${showBackground ? "bg-white" : "bg-transparent"} ${rounded ? "rounded-lg" : ""} ${showBorder ? "border border-gray-100" : ""} ${
+              padding ? "p-4" : ""
+            }`}
           >
             <Image
               src={selectedImage}

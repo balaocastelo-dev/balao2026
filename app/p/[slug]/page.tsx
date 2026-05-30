@@ -50,9 +50,9 @@ function Section({
   reverse?: boolean;
 }) {
   return (
-    <section className="py-12 sm:py-16">
+    <section className="py-8 sm:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className={`grid grid-cols-1 lg:grid-cols-2 gap-10 items-center ${reverse ? "lg:[&>*:first-child]:order-2" : ""}`}>
+        <div className={`grid grid-cols-1 lg:grid-cols-2 gap-8 items-center ${reverse ? "lg:[&>*:first-child]:order-2" : ""}`}>
           <div>
             <h2 className="mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">{title}</h2>
             <p className="mt-4 text-gray-600 leading-relaxed">{text}</p>
@@ -256,10 +256,10 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
         </div>
       </header>
 
-      <section className="py-12 sm:py-16 bg-gradient-to-b from-gray-50 to-white">
+      <section className="py-10 sm:py-12 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+            <div>
               <ProductMediaSwitcher
                 imageUrl={heroPrimary}
                 imageUrls={heroExtras}
@@ -267,6 +267,9 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
                 variant="hero"
                 autoRotateMs={2000}
                 showBorder={false}
+                showBackground={false}
+                padding={false}
+                rounded={false}
               />
             </div>
             <div>

@@ -62,6 +62,26 @@ function normalizeText(s: string) {
 
 function pickDefaultCategoryFromList(kind: PartKind, categories: string[]) {
   const k = String(kind || "");
+  if (k === "storage") {
+    const exact = categories.find((c) => {
+      const n = normalizeText(c);
+      return n === normalizeText("ssd / nvme") || n === normalizeText("ssd/nvme") || n === normalizeText("ssd nvme");
+    });
+    if (exact) return exact;
+    const both = categories.find((c) => {
+      const n = normalizeText(c);
+      return n.includes("ssd") && (n.includes("nvme") || n.includes("m.2") || n.includes("m2"));
+    });
+    if (both) return both;
+  }
+  if (k === "psu") {
+    const exact = categories.find((c) => normalizeText(c) === normalizeText("fonte"));
+    if (exact) return exact;
+  }
+  if (k === "case") {
+    const exact = categories.find((c) => normalizeText(c) === normalizeText("gabinete"));
+    if (exact) return exact;
+  }
   const targets =
     k === "cpu"
       ? ["processador", "cpu"]
@@ -70,7 +90,7 @@ function pickDefaultCategoryFromList(kind: PartKind, categories: string[]) {
         : k === "ram"
           ? ["memoria", "ram", "ddr"]
           : k === "storage"
-            ? ["ssd", "armazenamento", "nvme", "m.2", "hd"]
+            ? ["ssd", "nvme", "armazenamento", "m.2", "hd"]
             : k === "gpu"
               ? ["placa de video", "gpu", "video", "rtx", "radeon"]
               : k === "psu"
@@ -155,6 +175,7 @@ export default function GeradorPage() {
   const [mainSearch, setMainSearch] = useState("");
   const [mainCategory, setMainCategory] = useState<string>("");
   const [mainProductId, setMainProductId] = useState<string | null>(null);
+  const [mainCustomName, setMainCustomName] = useState<string>("");
 
   const [parts, setParts] = useState<PartBlock[]>([
     { id: id(), kind: "cpu", label: "Processador", category: "", productId: null, customName: "", query: "", picking: true },
@@ -170,6 +191,17 @@ export default function GeradorPage() {
     if (!mainProductId) return null;
     return products.find((p: any) => String((p as any).id) === String(mainProductId)) || null;
   }, [products, mainProductId]);
+
+  useEffect(() => {
+    const next = mainProduct ? String((mainProduct as any)?.name || "") : "";
+    setMainCustomName(next);
+  }, [mainProductId]);
+
+  const effectiveMainName = useMemo(() => {
+    const override = String(mainCustomName || "").trim();
+    if (override) return override;
+    return String((mainProduct as any)?.name || "").trim();
+  }, [mainCustomName, mainProduct]);
 
   const mainPriceText = useMemo(() => {
     const raw = String((mainProduct as any)?.price || "").trim();
@@ -257,9 +289,9 @@ export default function GeradorPage() {
   }, [parts, products]);
 
   const computedSlug = useMemo(() => {
-    const name = String((mainProduct as any)?.name || "").trim();
+    const name = String(effectiveMainName || "").trim();
     return name ? toSlug(name) : "";
-  }, [mainProduct]);
+  }, [effectiveMainName]);
 
   const shareUrl = useMemo(() => {
     const s = activeSlug || computedSlug || "produto";
@@ -267,10 +299,10 @@ export default function GeradorPage() {
   }, [computedSlug, activeSlug]);
 
   const whatsHref = useMemo(() => {
-    const name = String((mainProduct as any)?.name || "").trim();
+    const name = String(effectiveMainName || "").trim();
     if (!name) return buildWhatsAppHref("um produto", "Sob consulta");
     return buildWhatsAppHref(name, mainPriceText);
-  }, [mainProduct, mainPriceText]);
+  }, [effectiveMainName, mainPriceText]);
 
   const resetForm = () => {
     setActivePageId(null);
@@ -279,6 +311,7 @@ export default function GeradorPage() {
     setMainSearch("");
     setMainCategory("");
     setMainProductId(null);
+    setMainCustomName("");
     setParts([
       { id: id(), kind: "cpu", label: "Processador", category: "", productId: null, customName: "", query: "", picking: true },
       { id: id(), kind: "motherboard", label: "Placa-mãe", category: "", productId: null, customName: "", query: "", picking: true },
@@ -329,18 +362,21 @@ export default function GeradorPage() {
       return;
     }
 
-    const baseSlug = toSlug(main.name);
+    const finalMainName = String(effectiveMainName || "").trim() || main.name;
+    const mainForDb = finalMainName ? { ...main, name: finalMainName } : main;
+
+    const baseSlug = toSlug(finalMainName);
     const slug = activeSlug || (activePageId ? baseSlug : ensureUniqueSlug(baseSlug));
 
     const partsForDb = partsResolved.map((p) => ({ kind: p.kind, label: p.label, category: p.category, product: p.product }));
     const columnParts = mapPartsToColumns(partsForDb.map((p) => ({ kind: p.kind, product: p.product })));
-    const images = mapPartsToImages(main.image, partsForDb.map((p) => ({ kind: p.kind, product: p.product })));
+    const images = mapPartsToImages(mainForDb.image, partsForDb.map((p) => ({ kind: p.kind, product: p.product })));
     if (!String(images.hero || "").trim()) {
       images.hero = pickPcHeroImage({ categoria: pickCategory(category) } as any);
     }
 
     const payload: any = {
-      nome_pc: main.name,
+      nome_pc: finalMainName,
       slug,
       categoria: pickCategory(category),
       descricao_original: "",
@@ -355,8 +391,8 @@ export default function GeradorPage() {
       extras: {
         generator: "gerador_v1",
         generator_category: category,
-        main_product: main,
-        price_text: main.price || "Sob consulta",
+        main_product: mainForDb,
+        price_text: mainForDb.price || "Sob consulta",
         whatsapp: {
           number: "5519987510267",
           cta_label: "Quero comprar",
@@ -411,6 +447,7 @@ export default function GeradorPage() {
     setMainProductId(nextMainId);
     setMainSearch(main?.name ? String(main.name) : "");
     setMainCategory(typeof main?.category === "string" ? main.category : "");
+    setMainCustomName(main?.name ? String(main.name) : "");
 
     const storedParts: any[] = Array.isArray(extras?.parts) ? extras.parts : [];
     const blocks: PartBlock[] = storedParts.map((sp) => ({
@@ -591,6 +628,19 @@ export default function GeradorPage() {
                         {String((mainProduct as any)?.price || "").trim() || "Sob consulta"}
                       </div>
                     </div>
+                  </div>
+                ) : null}
+                {mainProduct ? (
+                  <div className="mt-3 rounded-xl border border-black/10 bg-gray-50 p-3">
+                    <div className="text-xs font-extrabold text-gray-700 uppercase tracking-wide">Nome do produto (editável)</div>
+                    <textarea
+                      rows={2}
+                      value={mainCustomName}
+                      onChange={(e) => {
+                        setMainCustomName(e.target.value);
+                      }}
+                      className="mt-2 w-full px-3 py-2 rounded-xl border border-black/10 bg-white text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#d71920]/30"
+                    />
                   </div>
                 ) : null}
                 <div className="mt-2 max-h-64 overflow-auto rounded-xl border border-black/5 bg-white">
