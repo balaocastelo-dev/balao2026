@@ -208,13 +208,36 @@ export async function POST(request: Request) {
     // 4. Clean and Replace Brands
     const replaceBrand = (text: string) => {
         if (!text) return text;
-        // List of brands to replace with "Balão.info"
         const brands = [
+            /\bconnect\s*barra\s*inform[aá]tica\b/gi,
+            /\bkalango\s*games\b/gi,
+            /\b3green\s*force\b/gi,
+            /\b3green\b/gi,
+            /\bklv\s*notebook\b/gi,
+            /\bskill\b/gi,
+            /\bnext\s*pc\b/gi,
+            /\bnextpc\b/gi,
+            /\bmax\s*elite\b/gi,
+            /\bdream\s*computers?\b/gi,
+            /\bdreamcomputers\b/gi,
+            /\binfotech\b/gi,
+            /\bprime\s*shock!?\b/gi,
+            /\bmulti\s*pc\b/gi,
+            /\bmultipc\b/gi,
+            /\bneologic\b/gi,
+            /\bi\s*buy\s*power\b/gi,
+            /\bibuypower\b/gi,
+            /\balpha\s*pcs?\b/gi,
+            /\balphapcs\b/gi,
+            /\bstudio\s*pc\b/gi,
+            /\bstudiopc\b/gi,
+            /\btop\s*pc\b/gi,
+            /\btoppc\b/gi,
             /kabum/gi,
-            /tob pc´s/gi,
+            /\btob\s*pc[’'´`]?s\b/gi,
             /tob/gi,
             /alligator shop/gi,
-            /mrp informática/gi
+            /mrp inform[aá]tica/gi
         ];
         
         let cleanedText = text;
