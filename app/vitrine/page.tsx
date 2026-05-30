@@ -12,13 +12,15 @@ export default async function VitrineIndexPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-900">
-            Vitrine
-          </h1>
-          <p className="mt-2 text-gray-600 max-w-2xl">
-            Páginas exclusivas de PCs selecionados pela Balão da Informática.
-          </p>
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-900">Vitrine</h1>
+          <p className="mt-2 text-gray-600 max-w-2xl">Minhas páginas • Links em /p/&lt;slug&gt;</p>
         </div>
+        <Link
+          href="/gerador"
+          className="inline-flex items-center justify-center px-5 py-3 rounded-2xl bg-[#E60012] text-white font-extrabold shadow-sm hover:bg-red-700"
+        >
+          Ir para o Gerador
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -27,7 +29,7 @@ export default async function VitrineIndexPage() {
           return (
             <Link
               key={p.id}
-              href={`/vitrine/${p.slug}`}
+              href={`/p/${p.slug}`}
               className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow overflow-hidden"
             >
               <div className="p-5">
@@ -40,6 +42,7 @@ export default async function VitrineIndexPage() {
                     {p.nome_pc}
                   </div>
                   <div className="mt-2 text-sm text-gray-600">{p.categoria}</div>
+                  <div className="mt-2 text-xs font-bold text-gray-500">/p/{p.slug}</div>
                   <div className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-[#d71920]">
                     Ver detalhes
                     <span className="transition-transform group-hover:translate-x-1">→</span>
