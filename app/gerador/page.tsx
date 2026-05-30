@@ -44,6 +44,8 @@ type SnapshotProduct = {
   category?: string | null;
 };
 
+type SiteCategoryRow = { id: string; name: string; parent_id: string | null };
+
 function id() {
   if (typeof crypto !== "undefined" && (crypto as any).randomUUID) return (crypto as any).randomUUID();
   return Math.random().toString(36).slice(2);
@@ -175,6 +177,63 @@ function buildWhatsAppHref(productName: string, priceText: string) {
   return `https://wa.me/5519987510267?text=${encodeURIComponent(msg)}`;
 }
 
+function parsePriceToNumber(text: string): number {
+  const raw = String(text || "").trim();
+  if (!raw) return 0;
+  const cleaned = raw.replace(/R\$/gi, "").replace(/\s/g, "").replace(/[^\d,.\-]/g, "");
+  if (!cleaned) return 0;
+  const hasComma = cleaned.includes(",");
+  const hasDot = cleaned.includes(".");
+  let normalizedNum = cleaned;
+  if (hasComma && hasDot) normalizedNum = cleaned.replace(/\./g, "").replace(",", ".");
+  else if (hasComma && !hasDot) normalizedNum = cleaned.replace(",", ".");
+  const n = Number.parseFloat(normalizedNum);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function pickBestImageFromProduct(p: any): string {
+  const urls = Array.isArray(p?.image_urls) ? p.image_urls : [];
+  const candidates = [String(p?.image || "").trim(), ...urls.map((u: any) => String(u || "").trim())]
+    .map((u) => enhanceImageUrl(u))
+    .filter(Boolean);
+  const merged = Array.from(new Set(candidates)).sort((a, b) => Number(isLowResolution(a)) - Number(isLowResolution(b)));
+  return String(merged[0] || "").trim();
+}
+
+function buildCategoryDescendantsNormalized(rootName: string, rows: SiteCategoryRow[]) {
+  const root = String(rootName || "").trim();
+  if (!root) return null;
+  const byId = new Map<string, SiteCategoryRow>();
+  const byNormName = new Map<string, SiteCategoryRow>();
+  const childrenByParent = new Map<string, SiteCategoryRow[]>();
+  for (const r of rows || []) {
+    const id = String((r as any)?.id || "").trim();
+    if (!id) continue;
+    const name = String((r as any)?.name || "").trim();
+    const parentId = (r as any)?.parent_id ? String((r as any).parent_id) : null;
+    const row: SiteCategoryRow = { id, name, parent_id: parentId };
+    byId.set(id, row);
+    if (name) byNormName.set(normalizeText(name), row);
+    if (parentId) {
+      const list = childrenByParent.get(parentId) || [];
+      list.push(row);
+      childrenByParent.set(parentId, list);
+    }
+  }
+  const rootRow = byNormName.get(normalizeText(root)) || null;
+  if (!rootRow) return new Set([normalizeText(root)]);
+  const out = new Set<string>();
+  const stack = [rootRow.id];
+  while (stack.length) {
+    const id = stack.pop() as string;
+    const row = byId.get(id);
+    if (row?.name) out.add(normalizeText(row.name));
+    const kids = childrenByParent.get(id) || [];
+    for (const k of kids) stack.push(k.id);
+  }
+  return out;
+}
+
 function mapPartsToColumns(parts: Array<{ kind: PartKind; product: SnapshotProduct }>) {
   const out: Record<string, string> = {};
   for (const p of parts) {
@@ -207,7 +266,7 @@ export default function GeradorPage() {
   const [message, setMessage] = useState("");
 
   const [products, setProducts] = useState<Product[]>([]);
-  const [siteCategories, setSiteCategories] = useState<string[]>([]);
+  const [siteCategoryRows, setSiteCategoryRows] = useState<SiteCategoryRow[]>([]);
   const [pages, setPages] = useState<VitrinePageRecord[]>([]);
   const [activePageId, setActivePageId] = useState<string | null>(null);
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
@@ -216,8 +275,16 @@ export default function GeradorPage() {
 
   const [mainSearch, setMainSearch] = useState("");
   const [mainCategory, setMainCategory] = useState<string>("");
+  const [mainSort, setMainSort] = useState<"price_desc" | "price_asc">("price_desc");
   const [mainProductId, setMainProductId] = useState<string | null>(null);
   const [mainCustomName, setMainCustomName] = useState<string>("");
+
+  const [newMainName, setNewMainName] = useState("");
+  const [newMainPrice, setNewMainPrice] = useState("");
+  const [newMainCategory, setNewMainCategory] = useState("");
+  const [newMainImageUrl, setNewMainImageUrl] = useState("");
+  const [newMainUploading, setNewMainUploading] = useState(false);
+  const [newMainSaving, setNewMainSaving] = useState(false);
 
   const [parts, setParts] = useState<PartBlock[]>([
     { id: id(), kind: "cpu", label: "CPU", category: "", productId: null, customName: "", query: "", picking: true },
@@ -254,34 +321,37 @@ export default function GeradorPage() {
     return raw || "Sob consulta";
   }, [mainProduct]);
 
+  const mainCategoryNormalizedSet = useMemo(() => {
+    return buildCategoryDescendantsNormalized(String(mainCategory || "").trim(), siteCategoryRows);
+  }, [mainCategory, siteCategoryRows]);
+
   const filteredMainProducts = useMemo(() => {
     const q = normalizeText(mainSearch);
     const list = products as any[];
-    const byCategory = String(mainCategory || "").trim()
-      ? list.filter((p) => normalizeText(String(p?.category || "")) === normalizeText(String(mainCategory)))
+    const byCategory = mainCategoryNormalizedSet
+      ? list.filter((p) => mainCategoryNormalizedSet.has(normalizeText(String(p?.category || ""))))
       : list;
-    if (!q) return byCategory.slice(0, 20);
-    return list
-      .filter((p) => normalizeText(`${p?.name || ""} ${p?.category || ""} ${(p as any)?.id || ""}`).includes(q))
-      .filter((p) =>
-        String(mainCategory || "").trim()
-          ? normalizeText(String(p?.category || "")) === normalizeText(String(mainCategory))
-          : true
-      )
-      .slice(0, 30);
-  }, [products, mainSearch, mainCategory]);
+    const byQuery = q
+      ? byCategory.filter((p) => normalizeText(`${p?.name || ""} ${p?.category || ""} ${(p as any)?.id || ""}`).includes(q))
+      : byCategory;
+    const sorted = [...byQuery].sort((a, b) => {
+      const pa = parsePriceToNumber(String(a?.price || ""));
+      const pb = parsePriceToNumber(String(b?.price || ""));
+      return mainSort === "price_asc" ? pa - pb : pb - pa;
+    });
+    return sorted;
+  }, [products, mainSearch, mainCategoryNormalizedSet, mainSort]);
 
   const categoryOptions = useMemo(() => {
-    const fromDb = Array.isArray(siteCategories) ? siteCategories : [];
-    const trimmed = fromDb.map((c) => String(c || "").trim()).filter(Boolean);
-    if (trimmed.length > 0) return trimmed;
+    const trimmed = (siteCategoryRows || []).map((c) => String(c?.name || "").trim()).filter(Boolean);
+    if (trimmed.length > 0) return Array.from(new Set(trimmed)).sort((a, b) => a.localeCompare(b, "pt-BR"));
     const set = new Set<string>();
     for (const p of products as any[]) {
       const c = String(p?.category || "").trim();
       if (c) set.add(c);
     }
     return Array.from(set).sort((a, b) => a.localeCompare(b, "pt-BR"));
-  }, [siteCategories, products]);
+  }, [siteCategoryRows, products]);
 
   useEffect(() => {
     if (categoryOptions.length === 0) return;
@@ -359,8 +429,13 @@ export default function GeradorPage() {
     setCategory("Workstation");
     setMainSearch("");
     setMainCategory("");
+    setMainSort("price_desc");
     setMainProductId(null);
     setMainCustomName("");
+    setNewMainName("");
+    setNewMainPrice("");
+    setNewMainCategory("");
+    setNewMainImageUrl("");
     setParts([
       { id: id(), kind: "cpu", label: "CPU", category: "", productId: null, customName: "", query: "", picking: true },
       { id: id(), kind: "motherboard", label: "Placa mãe", category: "", productId: null, customName: "", query: "", picking: true },
@@ -390,12 +465,18 @@ export default function GeradorPage() {
       const categoriesJson = await categoriesRes.json().catch(() => []);
       if (!Array.isArray(prod)) throw new Error("Falha ao carregar produtos");
       if (!pagesRes.ok || !pagesJson?.success) throw new Error(pagesJson?.error || "Falha ao carregar páginas");
-      const dbCats: string[] = Array.isArray(categoriesJson)
-        ? categoriesJson.map((c: any) => String(c?.name || "").trim()).filter(Boolean)
+      const dbRows: SiteCategoryRow[] = Array.isArray(categoriesJson)
+        ? categoriesJson
+            .map((c: any) => ({
+              id: String(c?.id || "").trim(),
+              name: String(c?.name || "").trim(),
+              parent_id: c?.parent_id ? String(c.parent_id) : null,
+            }))
+            .filter((c: any) => c.id && c.name)
         : [];
       setProducts(prod);
       setPages(Array.isArray(pagesJson.pages) ? pagesJson.pages : []);
-      setSiteCategories(Array.from(new Set(dbCats)).sort((a, b) => a.localeCompare(b, "pt-BR")));
+      setSiteCategoryRows(dbRows);
       setStatus("idle");
     } catch (e: any) {
       setStatus("error");
@@ -415,6 +496,71 @@ export default function GeradorPage() {
       if (!taken.has(candidate)) return candidate;
     }
     return `${base}-${Date.now()}`;
+  };
+
+  const uploadNewMainFile = async (file: File) => {
+    setNewMainUploading(true);
+    setMessage("");
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      form.append("bucket", "products");
+      const res = await fetch("/api/upload", { method: "POST", body: form });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.url) throw new Error(data?.error || "Falha ao enviar imagem");
+      setNewMainImageUrl(String(data.url));
+    } catch (e: any) {
+      setStatus("error");
+      setMessage(e?.message || "Falha ao enviar imagem");
+    } finally {
+      setNewMainUploading(false);
+    }
+  };
+
+  const createNewMainProduct = async () => {
+    const name = String(newMainName || "").trim();
+    const price = String(newMainPrice || "").trim();
+    const cat = String(newMainCategory || "").trim();
+    const img = String(newMainImageUrl || "").trim();
+    if (!name || !img || !cat) {
+      setStatus("error");
+      setMessage("Preencha nome, categoria e imagem para criar o produto principal.");
+      return;
+    }
+    setNewMainSaving(true);
+    setMessage("");
+    try {
+      const payload: any = {
+        name,
+        price,
+        category: cat,
+        image: img,
+        image_urls: [img],
+        slug: toSlug(name),
+      };
+      const res = await fetch("/api/products", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.id) throw new Error(data?.error || "Falha ao criar produto");
+      await loadAll();
+      setMainProductId(String(data.id));
+      setMainSearch(String(data.name || ""));
+      setMainCategory(String(data.category || ""));
+      setMainCustomName(String(data.name || ""));
+      setNewMainName("");
+      setNewMainPrice("");
+      setNewMainCategory("");
+      setNewMainImageUrl("");
+      setStatus("idle");
+    } catch (e: any) {
+      setStatus("error");
+      setMessage(e?.message || "Falha ao criar produto");
+    } finally {
+      setNewMainSaving(false);
+    }
   };
 
   const save = async (nextStatus: VitrineStatus) => {
@@ -659,6 +805,14 @@ export default function GeradorPage() {
                     </option>
                   ))}
                 </select>
+                <select
+                  value={mainSort}
+                  onChange={(e) => setMainSort(e.target.value as any)}
+                  className="mt-2 w-full px-3 py-2 rounded-xl border border-black/10 bg-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#d71920]/30"
+                >
+                  <option value="price_desc">Preço: maior → menor</option>
+                  <option value="price_asc">Preço: menor → maior</option>
+                </select>
                 <input
                   value={mainSearch}
                   onChange={(e) => setMainSearch(e.target.value)}
@@ -668,9 +822,9 @@ export default function GeradorPage() {
                 {mainProduct ? (
                   <div className="mt-3 rounded-xl border border-black/5 bg-white p-3 flex items-center gap-3">
                     <div className="w-16 h-16 rounded-xl bg-white border border-black/5 overflow-hidden flex items-center justify-center flex-shrink-0">
-                      {String((mainProduct as any)?.image || "").trim() ? (
+                      {pickBestImageFromProduct(mainProduct as any) ? (
                         <img
-                          src={String((mainProduct as any).image)}
+                          src={pickBestImageFromProduct(mainProduct as any)}
                           alt={String((mainProduct as any)?.name || "Produto")}
                           className="w-full h-full object-contain bg-white"
                           loading="lazy"
@@ -717,9 +871,9 @@ export default function GeradorPage() {
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           <div className="w-12 h-12 rounded-lg bg-white border border-black/5 overflow-hidden flex items-center justify-center flex-shrink-0">
-                            {String(p.image || "").trim() ? (
+                            {pickBestImageFromProduct(p) ? (
                               <img
-                                src={String(p.image)}
+                                src={pickBestImageFromProduct(p)}
                                 alt={String(p.name || "Produto")}
                                 className="w-full h-full object-contain bg-white"
                                 loading="lazy"
@@ -739,6 +893,86 @@ export default function GeradorPage() {
                       </button>
                     );
                   })}
+                </div>
+
+                <div className="mt-3 rounded-2xl border border-black/10 bg-gray-50 p-4">
+                  <div className="text-xs font-extrabold text-gray-700 uppercase tracking-wide">Criar novo produto principal</div>
+                  <div className="mt-3 grid grid-cols-1 sm:grid-cols-12 gap-3">
+                    <div className="sm:col-span-5">
+                      <input
+                        value={newMainName}
+                        onChange={(e) => setNewMainName(e.target.value)}
+                        placeholder="Nome do produto"
+                        className="w-full px-3 py-2 rounded-xl border border-black/10 bg-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#d71920]/30"
+                      />
+                    </div>
+                    <div className="sm:col-span-3">
+                      <input
+                        value={newMainPrice}
+                        onChange={(e) => setNewMainPrice(e.target.value)}
+                        placeholder="Preço (ex: R$ 9.999,90)"
+                        className="w-full px-3 py-2 rounded-xl border border-black/10 bg-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#d71920]/30"
+                      />
+                    </div>
+                    <div className="sm:col-span-4">
+                      <select
+                        value={newMainCategory}
+                        onChange={(e) => setNewMainCategory(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl border border-black/10 bg-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#d71920]/30"
+                      >
+                        <option value="">Selecione a categoria</option>
+                        {categoryOptions.map((c) => (
+                          <option key={c} value={c}>
+                            {c}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 grid grid-cols-1 sm:grid-cols-12 gap-3 items-start">
+                    <div className="sm:col-span-8">
+                      <div
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          const f = e.dataTransfer?.files?.[0];
+                          if (f) uploadNewMainFile(f);
+                        }}
+                        className="rounded-2xl border border-black/10 bg-white p-4"
+                      >
+                        <div className="text-sm font-extrabold text-gray-900">Foto (arraste e solte)</div>
+                        <div className="mt-2 flex items-center gap-3">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const f = e.target.files?.[0];
+                              if (f) uploadNewMainFile(f);
+                            }}
+                            className="text-sm font-semibold"
+                          />
+                          {newMainUploading ? <div className="text-xs font-extrabold text-gray-600">Enviando...</div> : null}
+                        </div>
+                        {newMainImageUrl ? (
+                          <div className="mt-3 w-full h-44 rounded-2xl border border-black/5 bg-white overflow-hidden flex items-center justify-center">
+                            <img src={newMainImageUrl} alt="" className="w-full h-full object-contain bg-white" />
+                          </div>
+                        ) : null}
+                      </div>
+                    </div>
+                    <div className="sm:col-span-4">
+                      <button
+                        type="button"
+                        disabled={newMainUploading || newMainSaving}
+                        onClick={createNewMainProduct}
+                        className="w-full inline-flex items-center justify-center px-4 py-3 rounded-2xl bg-[#d71920] text-white text-sm font-extrabold hover:bg-[#b9151b] disabled:opacity-60"
+                      >
+                        Criar e selecionar
+                      </button>
+                      <div className="mt-2 text-xs text-gray-600">Nome + categoria + foto são obrigatórios.</div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -782,6 +1016,7 @@ export default function GeradorPage() {
                   {parts.map((b) => {
                     const selectedProd = b.productId ? (products as any[]).find((p) => String(p.id) === String(b.productId)) : null;
                     const showPicker = b.picking || !selectedProd;
+                    const blockCategorySet = buildCategoryDescendantsNormalized(String(b.category || "").trim(), siteCategoryRows);
                     return (
                       <div
                         key={b.id}
@@ -838,9 +1073,9 @@ export default function GeradorPage() {
                             {selectedProd ? (
                               <div className="w-full px-3 py-2 rounded-xl bg-white flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-lg bg-white overflow-hidden flex items-center justify-center flex-shrink-0">
-                                  {String((selectedProd as any)?.image || "").trim() ? (
+                                  {pickBestImageFromProduct(selectedProd as any) ? (
                                     <img
-                                      src={String((selectedProd as any).image)}
+                                      src={pickBestImageFromProduct(selectedProd as any)}
                                       alt={String((selectedProd as any)?.name || "Produto")}
                                       className="w-full h-full object-contain bg-white"
                                       loading="lazy"
@@ -888,9 +1123,9 @@ export default function GeradorPage() {
                             <div className="mt-2 grid grid-cols-1 sm:grid-cols-12 gap-3 items-start">
                               <div className="sm:col-span-2">
                                 <div className="w-full aspect-square rounded-xl bg-white border border-black/5 overflow-hidden flex items-center justify-center p-2">
-                                  {String((selectedProd as any)?.image || "").trim() ? (
+                                  {pickBestImageFromProduct(selectedProd as any) ? (
                                     <img
-                                      src={String((selectedProd as any).image)}
+                                      src={pickBestImageFromProduct(selectedProd as any)}
                                       alt={String((selectedProd as any)?.name || "Produto")}
                                       className="w-full h-full object-contain bg-white"
                                       loading="lazy"
@@ -935,7 +1170,9 @@ export default function GeradorPage() {
                                   const q = normalizeText(b.query);
                                   const catOk = !String(b.category || "").trim()
                                     ? true
-                                    : normalizeText(String(p?.category || "")) === normalizeText(String(b.category || ""));
+                                    : blockCategorySet
+                                      ? blockCategorySet.has(normalizeText(String(p?.category || "")))
+                                      : normalizeText(String(p?.category || "")) === normalizeText(String(b.category || ""));
                                   if (!catOk) return false;
 
                                   const pid = String(p?.id || "");
@@ -970,9 +1207,9 @@ export default function GeradorPage() {
                                   >
                                     <div className="flex items-center gap-3 min-w-0">
                                       <div className="w-10 h-10 rounded-lg bg-white border border-black/5 overflow-hidden flex items-center justify-center flex-shrink-0">
-                                        {String(p.image || "").trim() ? (
+                                        {pickBestImageFromProduct(p) ? (
                                           <img
-                                            src={String(p.image)}
+                                            src={pickBestImageFromProduct(p)}
                                             alt={String(p.name || "Produto")}
                                             className="w-full h-full object-contain bg-white"
                                             loading="lazy"

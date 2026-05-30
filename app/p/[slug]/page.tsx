@@ -180,7 +180,7 @@ function PieceRow({
             <div className="min-w-0">
               <div className="text-xs font-extrabold text-gray-600 uppercase tracking-wide">{label}</div>
               <div className="mt-1 text-lg sm:text-xl font-extrabold text-gray-900 whitespace-normal break-words">{name}</div>
-              <div className="mt-2 text-sm text-gray-600 leading-relaxed">{text}</div>
+              <div className="mt-2 text-sm text-gray-600 leading-relaxed">{String(text || "").slice(0, 100)}</div>
               <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {highlights.slice(0, 3).map((h) => (
                   <div key={h} className="rounded-2xl bg-gray-50 border border-gray-200 px-3 py-2 flex items-center gap-2">
@@ -192,8 +192,8 @@ function PieceRow({
             </div>
           </div>
           <div className="lg:ml-auto w-full lg:w-[380px]">
-            <div className="rounded-2xl bg-gray-50 border border-gray-200 flex items-center justify-center overflow-hidden">
-              <Image src={imageSrc} alt="" width={900} height={700} className="w-full h-[320px] sm:h-[320px] object-contain" unoptimized />
+            <div className="rounded-2xl bg-white border border-gray-200 flex items-center justify-center overflow-hidden p-4">
+              <Image src={imageSrc} alt="" width={900} height={700} className="w-full h-[340px] sm:h-[340px] object-contain" unoptimized />
             </div>
           </div>
         </div>
@@ -230,8 +230,7 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
   if (!page) return {};
 
   const title = `${page.nome_pc} | Balão da Informática`;
-  const description =
-    `Conheça o ${page.nome_pc} com ${page.processador || "processador moderno"}, ${page.placa_video || "placa de vídeo dedicada"}, ${page.memoria_ram || "memória rápida"}, ${page.armazenamento || "armazenamento rápido"} e ${page.sistema_operacional || "sistema atualizado"}.`;
+  const description = `${page.nome_pc}. Confira detalhes e compre direto no site da Balão da Informática.`;
   const canonical = `https://www.balao.info/p/${page.slug}`;
   const ogImage = (page as any)?.images?.hero || pickPcHeroImage({ categoria: page.categoria } as any);
 
@@ -285,14 +284,28 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
   const heroPrimary = enhanceImageUrl(String(mainImages[0] || hero || "").trim());
   const heroExtras = mainImages.slice(1, 8).map((u) => enhanceImageUrl(String(u || "").trim())).filter(Boolean);
   const extraParts: any[] = Array.isArray(extras?.parts) ? extras.parts : [];
-  const pickPartText = (kind: string) => {
+  const pieceText = (kind: string) => {
     const k = String(kind || "").toLowerCase();
-    if (k === "cpu") return copy.processorText;
-    if (k === "ram") return copy.ramText;
-    if (k === "storage") return copy.storageText;
-    if (k === "gpu") return copy.gpuText;
-    if (k === "cooling") return copy.coolingText;
-    return copy.shortDescription;
+    const base =
+      k === "cpu"
+        ? "Processamento rápido e estável para tarefas e jogos."
+        : k === "motherboard"
+          ? "Base confiável do sistema, com conexões e estabilidade."
+          : k === "ram"
+            ? "Mais fluidez para multitarefas e aplicativos pesados."
+            : k === "storage"
+              ? "Inicialização e carregamentos rápidos, com bom espaço."
+              : k === "gpu"
+                ? "Gráficos, render e IA com alto desempenho."
+                : k === "psu"
+                  ? "Energia estável e segura para os componentes."
+                  : k === "case"
+                    ? "Airflow e acabamento premium para o setup."
+                    : k === "cooling"
+                      ? "Temperaturas baixas para manter a performance."
+                      : "Componente selecionado para performance e estabilidade.";
+    const t = String(base || "").trim();
+    return t.length > 100 ? `${t.slice(0, 97).trimEnd()}...` : t;
   };
 
   const pickHighlights = (kind: string) => {
@@ -333,16 +346,16 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
         kind: p.kind,
         label: p.label || "Peça",
         name: p.name,
-        text: pickPartText(p.kind),
+        text: pieceText(p.kind),
         highlights: pickHighlights(p.kind),
         imageSrc: enhanceImageUrl(p.image || pickFallbackImage(p.kind)),
       }))
     : [
-        { kind: "cpu", label: "Processador", name: page.processador || "Processador", text: copy.processorText, highlights: ["Alta performance", "Multitarefas avançadas", "Eficiência energética"], imageSrc: enhanceImageUrl(cpuImg) },
-        { kind: "ram", label: "Memória RAM", name: page.memoria_ram || "Memória RAM", text: copy.ramText, highlights: ["Alta velocidade", "Mais fluidez", "Grande capacidade"], imageSrc: enhanceImageUrl(ramImg) },
-        { kind: "storage", label: "Armazenamento", name: page.armazenamento || "Armazenamento", text: copy.storageText, highlights: ["Inicialização rápida", "Carregamentos ágeis", "Muito espaço"], imageSrc: enhanceImageUrl(storageImg) },
-        { kind: "gpu", label: "Placa de vídeo", name: page.placa_video || "Placa de vídeo", text: copy.gpuText, highlights: ["IA", "Renderização", "Jogos"], imageSrc: enhanceImageUrl(gpuImg) },
-        { kind: "cooling", label: "Resfriamento", name: page.resfriamento || "Resfriamento eficiente", text: copy.coolingText, highlights: ["Temperaturas baixas", "Operação silenciosa", "Performance contínua"], imageSrc: enhanceImageUrl(coolingImg) },
+        { kind: "cpu", label: "Processador", name: page.processador || "Processador", text: pieceText("cpu"), highlights: ["Alta performance", "Multitarefas avançadas", "Eficiência energética"], imageSrc: enhanceImageUrl(cpuImg) },
+        { kind: "ram", label: "Memória RAM", name: page.memoria_ram || "Memória RAM", text: pieceText("ram"), highlights: ["Alta velocidade", "Mais fluidez", "Grande capacidade"], imageSrc: enhanceImageUrl(ramImg) },
+        { kind: "storage", label: "Armazenamento", name: page.armazenamento || "Armazenamento", text: pieceText("storage"), highlights: ["Inicialização rápida", "Carregamentos ágeis", "Muito espaço"], imageSrc: enhanceImageUrl(storageImg) },
+        { kind: "gpu", label: "Placa de vídeo", name: page.placa_video || "Placa de vídeo", text: pieceText("gpu"), highlights: ["IA", "Renderização", "Jogos"], imageSrc: enhanceImageUrl(gpuImg) },
+        { kind: "cooling", label: "Resfriamento", name: page.resfriamento || "Resfriamento eficiente", text: pieceText("cooling"), highlights: ["Temperaturas baixas", "Operação silenciosa", "Performance contínua"], imageSrc: enhanceImageUrl(coolingImg) },
       ]).filter((s) => s.imageSrc);
 
   const apps = (page.aplicacoes || []).length > 0 ? page.aplicacoes : [];
@@ -363,7 +376,16 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
     Estudos: Brain,
   };
 
-  const buyHref = whatsappHref(page.nome_pc, priceText);
+  const whatsHref = whatsappHref(page.nome_pc, priceText);
+  const buyHref = (() => {
+    const id = mainProduct?.id ? String(mainProduct.id).trim() : "";
+    const url = typeof mainProduct?.product_url === "string" ? String(mainProduct.product_url).trim() : "";
+    const internalUrl =
+      url && (url.startsWith("/product/") || url.includes("://www.balao.info/product/") || url.includes("://balao.info/product/") || url.includes("/product/"));
+    if (internalUrl) return url.startsWith("http") ? url : url;
+    if (id) return `/product/${id}`;
+    return null;
+  })();
   const installment = installmentLine(priceText);
   const extraSpecItems = (() => {
     const out: string[] = [];
@@ -392,7 +414,7 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
 
           <div className="ml-auto flex items-center gap-2">
             <a
-              href={buyHref}
+              href={whatsHref}
               target="_blank"
               rel="noreferrer"
               className="balao-cta-pulse inline-flex items-center justify-center gap-2 rounded-full bg-[#E60012] text-white font-extrabold px-4 py-2.5 shadow-lg hover:bg-red-700"
@@ -426,16 +448,14 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
                   </div>
                   <div className="grid grid-cols-1 gap-2">
                     <a
-                      href={buyHref}
-                      target="_blank"
-                      rel="noreferrer"
+                      href={buyHref || whatsHref}
                       className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#E60012] px-5 py-3 text-white font-extrabold shadow-lg hover:bg-red-700"
                     >
                       <ShoppingCart size={18} />
                       Quero comprar
                     </a>
                     <a
-                      href={buyHref}
+                      href={whatsHref}
                       target="_blank"
                       rel="noreferrer"
                       className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-5 py-3 text-white font-extrabold hover:bg-white/15"
@@ -565,16 +585,14 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
               <p className="mt-4 text-gray-600 leading-relaxed">{copy.applicationsText}</p>
               <div className="mt-6 flex flex-col sm:flex-row gap-3">
                 <a
-                  href={buyHref}
-                  target="_blank"
-                  rel="noreferrer"
+                  href={buyHref || whatsHref}
                   className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#E60012] px-6 py-4 text-white font-extrabold shadow-lg hover:bg-red-700"
                 >
                   <ShoppingCart size={18} />
                   Quero comprar
                 </a>
                 <a
-                  href={buyHref}
+                  href={whatsHref}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center justify-center gap-2 rounded-2xl border border-gray-300 bg-white px-6 py-4 text-gray-900 font-extrabold hover:bg-gray-50"
@@ -624,7 +642,7 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
               <div className="lg:col-span-7">
                 <div className="text-white/70 text-xs font-extrabold uppercase tracking-wide">CTA final</div>
                 <h3 className="mt-2 text-2xl sm:text-3xl font-extrabold text-white">Pronto para elevar seu desempenho?</h3>
-                <div className="mt-3 text-white/80 leading-relaxed">{copy.shortDescription}</div>
+                <div className="mt-3 text-white/80 leading-relaxed">Configuração pensada para performance e estabilidade no dia a dia.</div>
                 <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-2">
                   {["Componentes premium", "Montagem profissional", "Suporte pós-venda"].map((t) => (
                     <div key={t} className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 flex items-center gap-2">
@@ -637,8 +655,8 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
 
               <div className="lg:col-span-5">
                 <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-                  <div className="rounded-2xl border border-white/10 bg-white/5 overflow-hidden">
-                    <Image src={heroPrimary} alt="" width={900} height={700} className="w-full h-[220px] object-contain" unoptimized />
+                  <div className="rounded-2xl border border-white/10 bg-white overflow-hidden p-4">
+                    <Image src={heroPrimary} alt="" width={900} height={700} className="w-full h-[240px] object-contain" unoptimized />
                   </div>
                   <div className="text-white/70 text-xs font-extrabold uppercase tracking-wide">Produto</div>
                   <div className="mt-2 text-lg font-extrabold text-white whitespace-normal break-words">{page.nome_pc}</div>
@@ -647,16 +665,14 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
                   {installment ? <div className="mt-1 text-sm text-white/70">{installment}</div> : null}
                   <div className="mt-5 grid grid-cols-1 gap-2">
                     <a
-                      href={buyHref}
-                      target="_blank"
-                      rel="noreferrer"
+                      href={buyHref || whatsHref}
                       className="balao-cta-pulse inline-flex items-center justify-center gap-2 rounded-2xl bg-[#E60012] px-6 py-4 text-white font-extrabold shadow-lg hover:bg-red-700"
                     >
                       <ShoppingCart size={18} />
                       Quero comprar agora
                     </a>
                     <a
-                      href={buyHref}
+                      href={whatsHref}
                       target="_blank"
                       rel="noreferrer"
                       className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-6 py-4 text-white font-extrabold hover:bg-white/15"
@@ -675,7 +691,7 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
       <footer className="border-t border-gray-200 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 text-sm text-gray-600 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="font-semibold">Balão da Informática • WhatsApp (19) 98751-0267</div>
-          <a href={buyHref} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#E60012] text-white font-extrabold px-6 py-3 shadow-lg hover:bg-red-700">
+          <a href={whatsHref} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#E60012] text-white font-extrabold px-6 py-3 shadow-lg hover:bg-red-700">
             <MessageCircle size={18} />
             Falar no WhatsApp
           </a>
@@ -689,9 +705,7 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
             <div className="text-lg font-extrabold text-gray-900 truncate">{priceText}</div>
           </div>
           <a
-            href={buyHref}
-            target="_blank"
-            rel="noreferrer"
+            href={buyHref || whatsHref}
             className="ml-auto balao-cta-pulse inline-flex items-center justify-center gap-2 rounded-2xl bg-[#E60012] px-5 py-3 text-white font-extrabold shadow-lg"
           >
             <ShoppingCart size={18} />

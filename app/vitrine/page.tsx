@@ -40,14 +40,8 @@ export default async function VitrineIndexPage() {
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-900">Vitrine</h1>
-          <p className="mt-2 text-gray-600 max-w-2xl">Minhas páginas • Links em /p/&lt;slug&gt;</p>
+          <p className="mt-2 text-gray-600 max-w-2xl">Páginas publicadas</p>
         </div>
-        <Link
-          href="/gerador"
-          className="inline-flex items-center justify-center px-5 py-3 rounded-2xl bg-[#E60012] text-white font-extrabold shadow-sm hover:bg-red-700"
-        >
-          Ir para o Gerador
-        </Link>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
