@@ -15,6 +15,7 @@ import {
 
 import { getVitrinePageBySlug } from "@/lib/vitrine/db";
 import { makeCommercialCopy, pickComponentImage, pickPcHeroImage } from "@/lib/vitrine/core";
+import ProductMediaSwitcher from "@/components/ProductMediaSwitcher";
 
 export const dynamic = "force-dynamic";
 
@@ -63,8 +64,8 @@ function Section({
               ))}
             </div>
           </div>
-          <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden flex items-center justify-center">
-            <Image src={imageSrc} alt="" width={1200} height={900} className="w-full h-[640px] sm:h-[840px] object-contain" unoptimized />
+          <div className="bg-white rounded-2xl overflow-hidden flex items-center justify-center">
+            <Image src={imageSrc} alt="" width={1200} height={900} className="w-full h-[720px] sm:h-[960px] object-contain" unoptimized />
           </div>
         </div>
       </div>
@@ -137,6 +138,12 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
   const coolingImg = (page as any)?.images?.cooling || pickComponentImage("cooling", parts as any);
 
   const extras = (page as any)?.extras && typeof (page as any).extras === "object" ? (page as any).extras : {};
+  const mainProduct = extras?.main_product && typeof extras.main_product === "object" ? extras.main_product : null;
+  const mainImages: string[] = Array.isArray(mainProduct?.image_urls)
+    ? (mainProduct.image_urls as any[]).map((u) => String(u || "").trim()).filter(Boolean)
+    : [];
+  const heroPrimary = String(mainImages[0] || hero || "").trim();
+  const heroExtras = mainImages.slice(1, 8);
   const extraParts: any[] = Array.isArray(extras?.parts) ? extras.parts : [];
   const pickPartText = (kind: string) => {
     const k = String(kind || "").toLowerCase();
@@ -228,8 +235,34 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
 
   return (
     <div className="bg-white">
+      <style jsx global>{`
+        @keyframes balao-cta-pulse {
+          0%,
+          100% {
+            transform: scale(1);
+            box-shadow: 0 10px 28px rgba(22, 163, 74, 0.28);
+          }
+          50% {
+            transform: scale(1.06);
+            box-shadow: 0 18px 46px rgba(22, 163, 74, 0.4);
+          }
+        }
+        .balao-cta-pulse {
+          animation: balao-cta-pulse 1.2s ease-in-out infinite;
+          will-change: transform;
+          transform-origin: center;
+        }
+        .balao-cta-pulse:hover {
+          animation-play-state: paused;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .balao-cta-pulse {
+            animation: none;
+          }
+        }
+      `}</style>
       <header className="sticky top-0 z-20 bg-white/80 backdrop-blur border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-6">
           <Link href="/" className="flex items-center gap-3">
             <Image src="/logo.png" alt="Balão da Informática" width={160} height={40} className="h-8 w-auto" />
           </Link>
@@ -240,7 +273,7 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
           </nav>
           <a
             href={buyHref}
-            className="inline-flex items-center justify-center px-5 py-3 rounded-2xl bg-[#16a34a] text-white font-extrabold text-base shadow-lg hover:bg-green-700"
+            className="balao-cta-pulse inline-flex items-center justify-center px-8 py-5 rounded-3xl bg-[#16a34a] text-white font-extrabold text-xl shadow-lg hover:bg-green-700"
             target="_blank"
             rel="noreferrer"
           >
@@ -252,8 +285,15 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
       <section className="py-12 sm:py-16 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex items-center justify-center">
-              <Image src={hero} alt="" width={1400} height={1000} className="w-full h-[680px] sm:h-[920px] object-contain" unoptimized />
+            <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+              <ProductMediaSwitcher
+                imageUrl={heroPrimary}
+                imageUrls={heroExtras}
+                productName={page.nome_pc}
+                variant="hero"
+                autoRotateMs={2000}
+                showBorder={false}
+              />
             </div>
             <div>
               <div className="inline-flex items-center gap-2 rounded-full bg-red-50 text-[#d71920] px-4 py-2 text-xs font-extrabold">
@@ -284,7 +324,7 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
                 <a
                   href={buyHref}
-                  className="inline-flex items-center justify-center px-8 py-4 rounded-2xl bg-[#16a34a] text-white font-extrabold text-lg shadow-lg hover:bg-green-700 w-full sm:w-auto"
+                  className="balao-cta-pulse inline-flex items-center justify-center px-12 py-7 rounded-3xl bg-[#16a34a] text-white font-extrabold text-2xl shadow-lg hover:bg-green-700 w-full sm:w-auto"
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -320,7 +360,7 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
                   href={buyHref}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center justify-center px-8 py-4 rounded-2xl bg-[#16a34a] text-white font-extrabold text-lg shadow-lg hover:bg-green-700 w-full sm:w-auto"
+                  className="balao-cta-pulse inline-flex items-center justify-center px-12 py-7 rounded-3xl bg-[#16a34a] text-white font-extrabold text-2xl shadow-lg hover:bg-green-700 w-full sm:w-auto"
                 >
                   Quero comprar
                 </a>
@@ -339,7 +379,12 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
       <footer className="border-t border-gray-100 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 text-sm text-gray-600 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>Balão da Informática • WhatsApp (19) 98751-0267</div>
-          <a href={buyHref} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center px-6 py-3 rounded-2xl bg-[#16a34a] text-white font-extrabold text-base shadow-lg hover:bg-green-700">
+          <a
+            href={buyHref}
+            target="_blank"
+            rel="noreferrer"
+            className="balao-cta-pulse inline-flex items-center justify-center px-10 py-6 rounded-3xl bg-[#16a34a] text-white font-extrabold text-xl shadow-lg hover:bg-green-700"
+          >
             Quero comprar
           </a>
         </div>

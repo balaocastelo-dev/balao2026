@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { ChevronRight } from "lucide-react";
 import ProductVideo from "./ProductVideo";
@@ -10,6 +10,9 @@ interface ProductMediaSwitcherProps {
   imageUrls?: string[];
   videoUrl?: string;
   productName: string;
+  variant?: "square" | "hero";
+  autoRotateMs?: number;
+  showBorder?: boolean;
 }
 
 export default function ProductMediaSwitcher({
@@ -17,17 +20,44 @@ export default function ProductMediaSwitcher({
   imageUrls = [],
   videoUrl,
   productName,
+  variant = "square",
+  autoRotateMs = 0,
+  showBorder = true,
 }: ProductMediaSwitcherProps) {
   const hasVideo = !!videoUrl;
   const [showVideo, setShowVideo] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(imageUrl);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [userSelected, setUserSelected] = useState(false);
 
   // Combine primary image with extra images, filter duplicates
-  const allImages = Array.from(new Set([imageUrl, ...imageUrls])).filter(Boolean);
+  const allImages = useMemo(() => Array.from(new Set([imageUrl, ...imageUrls])).filter(Boolean), [imageUrl, imageUrls]);
+  const selectedImage = allImages[activeIndex] || imageUrl;
+
+  useEffect(() => {
+    setActiveIndex(0);
+    setUserSelected(false);
+    setShowVideo(false);
+  }, [allImages.join("|")]);
+
+  useEffect(() => {
+    if (!autoRotateMs) return;
+    if (showVideo) return;
+    if (userSelected) return;
+    if (allImages.length <= 1) return;
+    const t = window.setInterval(() => {
+      setActiveIndex((i) => (i + 1) % allImages.length);
+    }, autoRotateMs);
+    return () => window.clearInterval(t);
+  }, [autoRotateMs, showVideo, userSelected, allImages.length]);
 
   if (!hasVideo && allImages.length <= 1) {
+    const baseBox =
+      variant === "hero"
+        ? "relative w-full h-[960px] sm:h-[1320px] flex items-center justify-center"
+        : "relative aspect-square flex items-center justify-center";
+    const borderBox = showBorder ? "border border-gray-100 rounded-lg" : "rounded-lg";
     return (
-      <div className="relative aspect-square bg-white border border-gray-100 rounded-lg flex items-center justify-center p-4">
+      <div className={`${baseBox} bg-white ${borderBox} p-4`}>
         <Image
           src={imageUrl}
           alt={productName}
@@ -46,7 +76,13 @@ export default function ProductMediaSwitcher({
         {showVideo ? (
           <ProductVideo videoUrl={videoUrl as string} productName={productName} />
         ) : (
-          <div className="relative aspect-square bg-white border border-gray-100 rounded-lg flex items-center justify-center p-4">
+          <div
+            className={`${
+              variant === "hero"
+                ? "relative w-full h-[960px] sm:h-[1320px] flex items-center justify-center"
+                : "relative aspect-square flex items-center justify-center"
+            } bg-white ${showBorder ? "border border-gray-100 rounded-lg" : "rounded-lg"} p-4`}
+          >
             <Image
               src={selectedImage}
               alt={productName}
@@ -75,9 +111,18 @@ export default function ProductMediaSwitcher({
           {allImages.map((img, idx) => (
             <button
               key={idx}
-              onClick={() => setSelectedImage(img)}
-              className={`relative w-20 h-20 flex-shrink-0 bg-white border rounded-md overflow-hidden transition-all ${
-                selectedImage === img ? 'border-[#E60012] ring-1 ring-[#E60012]' : 'border-gray-200 opacity-70 hover:opacity-100'
+              onClick={() => {
+                setActiveIndex(idx);
+                setUserSelected(true);
+              }}
+              className={`relative w-20 h-20 flex-shrink-0 bg-white rounded-md overflow-hidden transition-all ${
+                selectedImage === img
+                  ? showBorder
+                    ? "border border-[#E60012] ring-1 ring-[#E60012]"
+                    : "ring-2 ring-[#E60012]"
+                  : showBorder
+                    ? "border border-gray-200 opacity-70 hover:opacity-100"
+                    : "opacity-70 hover:opacity-100"
               }`}
             >
               <Image

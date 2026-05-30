@@ -23,6 +23,7 @@ type SnapshotProduct = {
   name: string;
   price: string;
   image: string;
+  image_urls?: string[];
   product_url?: string | null;
   slug?: string | null;
   category?: string | null;
@@ -89,11 +90,16 @@ function pickDefaultCategoryFromList(kind: PartKind, categories: string[]) {
 }
 
 function toSnapshotProduct(p: any): SnapshotProduct {
+  const urls = Array.isArray(p?.image_urls) ? p.image_urls : [];
+  const merged = Array.from(
+    new Set([String(p?.image || "").trim(), ...urls.map((u: any) => String(u || "").trim())].filter(Boolean))
+  ).slice(0, 12);
   return {
     id: String(p?.id || ""),
     name: String(p?.name || ""),
     price: String(p?.price || ""),
     image: String(p?.image || ""),
+    image_urls: merged,
     product_url: p?.product_url ? String(p.product_url) : null,
     slug: typeof p?.slug === "string" ? p.slug : null,
     category: typeof p?.category === "string" ? p.category : null,
@@ -145,6 +151,7 @@ export default function GeradorPage() {
   const [category, setCategory] = useState<GeneratorCategory>("Workstation");
 
   const [mainSearch, setMainSearch] = useState("");
+  const [mainCategory, setMainCategory] = useState<string>("");
   const [mainProductId, setMainProductId] = useState<string | null>(null);
 
   const [parts, setParts] = useState<PartBlock[]>([
@@ -170,11 +177,19 @@ export default function GeradorPage() {
   const filteredMainProducts = useMemo(() => {
     const q = normalizeText(mainSearch);
     const list = products as any[];
-    if (!q) return list.slice(0, 20);
+    const byCategory = String(mainCategory || "").trim()
+      ? list.filter((p) => normalizeText(String(p?.category || "")) === normalizeText(String(mainCategory)))
+      : list;
+    if (!q) return byCategory.slice(0, 20);
     return list
       .filter((p) => normalizeText(`${p?.name || ""} ${p?.category || ""} ${(p as any)?.id || ""}`).includes(q))
+      .filter((p) =>
+        String(mainCategory || "").trim()
+          ? normalizeText(String(p?.category || "")) === normalizeText(String(mainCategory))
+          : true
+      )
       .slice(0, 30);
-  }, [products, mainSearch]);
+  }, [products, mainSearch, mainCategory]);
 
   const allProductCategories = useMemo(() => {
     const set = new Set<string>();
@@ -240,6 +255,7 @@ export default function GeradorPage() {
     setActiveSlug(null);
     setCategory("Workstation");
     setMainSearch("");
+    setMainCategory("");
     setMainProductId(null);
     setParts([
       { id: id(), kind: "cpu", label: "Processador", category: "", productId: null, query: "" },
@@ -372,6 +388,7 @@ export default function GeradorPage() {
     const nextMainId = main?.id ? String(main.id) : null;
     setMainProductId(nextMainId);
     setMainSearch(main?.name ? String(main.name) : "");
+    setMainCategory(typeof main?.category === "string" ? main.category : "");
 
     const storedParts: any[] = Array.isArray(extras?.parts) ? extras.parts : [];
     const blocks: PartBlock[] = storedParts.map((sp) => ({
@@ -507,6 +524,18 @@ export default function GeradorPage() {
 
               <div>
                 <div className="text-xs font-extrabold text-gray-700 uppercase tracking-wide">Produto principal</div>
+                <select
+                  value={mainCategory}
+                  onChange={(e) => setMainCategory(e.target.value)}
+                  className="mt-2 w-full px-3 py-2 rounded-xl border border-black/10 bg-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#d71920]/30"
+                >
+                  <option value="">Todas as categorias</option>
+                  {allProductCategories.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
                 <input
                   value={mainSearch}
                   onChange={(e) => setMainSearch(e.target.value)}
