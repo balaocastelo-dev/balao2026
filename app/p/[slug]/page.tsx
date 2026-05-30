@@ -36,27 +36,23 @@ function whatsappHref(nome: string, priceText: string) {
 }
 
 function Section({
-  index,
   title,
   text,
   highlights,
   imageSrc,
   reverse,
 }: {
-  index: number;
   title: string;
   text: string;
   highlights: string[];
   imageSrc: string;
   reverse?: boolean;
 }) {
-  const num = String(index).padStart(2, "0");
   return (
     <section className="py-12 sm:py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className={`grid grid-cols-1 lg:grid-cols-2 gap-10 items-center ${reverse ? "lg:[&>*:first-child]:order-2" : ""}`}>
           <div>
-            <div className="text-xs font-extrabold text-[#d71920] tracking-widest uppercase">{num}</div>
             <h2 className="mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">{title}</h2>
             <p className="mt-4 text-gray-600 leading-relaxed">{text}</p>
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -68,7 +64,7 @@ function Section({
             </div>
           </div>
           <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden flex items-center justify-center">
-            <Image src={imageSrc} alt="" width={900} height={700} className="w-full h-[320px] sm:h-[420px] object-contain" unoptimized />
+            <Image src={imageSrc} alt="" width={1200} height={900} className="w-full h-[640px] sm:h-[840px] object-contain" unoptimized />
           </div>
         </div>
       </div>
@@ -219,7 +215,6 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
   };
 
   const buyHref = whatsappHref(page.nome_pc, priceText);
-  const applicationIndex = String(sections.length + 2).padStart(2, "0");
   const extraSpecItems = (() => {
     const out: string[] = [];
     for (const p of normalizedParts) {
@@ -245,7 +240,7 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
           </nav>
           <a
             href={buyHref}
-            className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-[#16a34a] text-white font-extrabold text-sm hover:bg-green-700"
+            className="inline-flex items-center justify-center px-5 py-3 rounded-2xl bg-[#16a34a] text-white font-extrabold text-base shadow-lg hover:bg-green-700"
             target="_blank"
             rel="noreferrer"
           >
@@ -258,7 +253,7 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex items-center justify-center">
-              <Image src={hero} alt="" width={900} height={700} className="w-full h-[340px] sm:h-[460px] object-contain" unoptimized />
+              <Image src={hero} alt="" width={1400} height={1000} className="w-full h-[680px] sm:h-[920px] object-contain" unoptimized />
             </div>
             <div>
               <div className="inline-flex items-center gap-2 rounded-full bg-red-50 text-[#d71920] px-4 py-2 text-xs font-extrabold">
@@ -270,7 +265,7 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
               <p className="mt-4 text-gray-600 text-lg leading-relaxed">{copy.heroSubtitle}</p>
 
               <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="bg-white rounded-xl border border-gray-100 shadow-sm px-4 py-3 font-extrabold text-gray-900">
+                <div className="bg-red-50 rounded-xl border border-red-100 shadow-sm px-4 py-4 font-extrabold text-[#d71920] text-center text-2xl sm:text-3xl sm:col-span-2">
                   {priceText}
                 </div>
                 {page.processador && <div className="bg-white rounded-xl border border-gray-100 shadow-sm px-4 py-3 font-bold text-gray-800">{page.processador}</div>}
@@ -289,7 +284,7 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
                 <a
                   href={buyHref}
-                  className="inline-flex items-center justify-center px-5 py-3 rounded-xl bg-[#16a34a] text-white font-extrabold hover:bg-green-700"
+                  className="inline-flex items-center justify-center px-8 py-4 rounded-2xl bg-[#16a34a] text-white font-extrabold text-lg shadow-lg hover:bg-green-700 w-full sm:w-auto"
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -304,7 +299,6 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
       {sections.map((s, idx) => (
         <Section
           key={`${s.title}-${idx}`}
-          index={idx + 2}
           title={s.title}
           text={s.text}
           highlights={s.highlights}
@@ -317,7 +311,6 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
             <div>
-              <div className="text-xs font-extrabold text-[#d71920] tracking-widest uppercase">{applicationIndex}</div>
               <h2 className="mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">
                 Para que essa máquina serve?
               </h2>
@@ -327,7 +320,7 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
                   href={buyHref}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center justify-center px-5 py-3 rounded-xl bg-[#16a34a] text-white font-extrabold hover:bg-green-700"
+                  className="inline-flex items-center justify-center px-8 py-4 rounded-2xl bg-[#16a34a] text-white font-extrabold text-lg shadow-lg hover:bg-green-700 w-full sm:w-auto"
                 >
                   Quero comprar
                 </a>
@@ -346,7 +339,7 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
       <footer className="border-t border-gray-100 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 text-sm text-gray-600 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>Balão da Informática • WhatsApp (19) 98751-0267</div>
-          <a href={buyHref} target="_blank" rel="noreferrer" className="font-extrabold text-[#16a34a] hover:text-green-700">
+          <a href={buyHref} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center px-6 py-3 rounded-2xl bg-[#16a34a] text-white font-extrabold text-base shadow-lg hover:bg-green-700">
             Quero comprar
           </a>
         </div>
