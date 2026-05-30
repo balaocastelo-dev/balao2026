@@ -352,13 +352,12 @@ export default async function PremiumPage() {
   ];
 
   return (
-    <div className="bg-black text-white">
+    <div className="bg-black text-white relative isolate">
+      <PremiumParallax />
       <JsonLd data={jsonLdData as any} />
       <Header />
 
       <section className="relative overflow-hidden min-h-[92vh] flex items-center">
-        <PremiumParallax />
-
         <div className="container mx-auto px-4 py-16 sm:py-24 relative">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
             <div className="lg:col-span-6 space-y-6">
