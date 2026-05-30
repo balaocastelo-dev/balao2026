@@ -27,23 +27,23 @@ export default function VitrineAdminShell({ children }: { children: React.ReactN
     icon: any;
     disabled?: boolean;
   }> = [
-    { label: "Gerador de Páginas", href: "/admin/gerador", icon: FilePlus2 },
+    { label: "Gerador de Páginas", href: "/gerador", icon: FilePlus2 },
     { label: "Minhas Páginas", href: "/admin/paginas", icon: Files },
-    { label: "Modelos", href: "/admin/gerador?sec=modelos", icon: Layers, disabled: true },
-    { label: "Banners", href: "/admin/gerador?sec=banners", icon: ImageIcon, disabled: true },
-    { label: "Mídia", href: "/admin/gerador?sec=midia", icon: MonitorSmartphone, disabled: true },
-    { label: "Configurações", href: "/admin/gerador?sec=config", icon: Settings, disabled: true },
-    { label: "SEO & Analytics", href: "/admin/gerador?sec=seo", icon: BarChart3, disabled: true },
+    { label: "Modelos", href: "/gerador?sec=modelos", icon: Layers, disabled: true },
+    { label: "Banners", href: "/gerador?sec=banners", icon: ImageIcon, disabled: true },
+    { label: "Mídia", href: "/gerador?sec=midia", icon: MonitorSmartphone, disabled: true },
+    { label: "Configurações", href: "/gerador?sec=config", icon: Settings, disabled: true },
+    { label: "SEO & Analytics", href: "/gerador?sec=seo", icon: BarChart3, disabled: true },
   ];
 
   const topItems: Array<{ label: string; href: string; icon: any }> = [
-    { label: "Dashboard", href: "/admin/gerador", icon: LayoutDashboard },
+    { label: "Dashboard", href: "/gerador", icon: LayoutDashboard },
     { label: "Produtos", href: "/admin/produtos", icon: Boxes },
     { label: "Páginas", href: "/admin/paginas", icon: Files },
     { label: "Vendas", href: "/admin/pedidos", icon: DollarSign },
     { label: "Clientes", href: "/admin/pedidos", icon: Users },
-    { label: "Analytics", href: "/admin/gerador", icon: BarChart3 },
-    { label: "Configurações", href: "/admin/gerador", icon: Settings },
+    { label: "Analytics", href: "/gerador", icon: BarChart3 },
+    { label: "Configurações", href: "/gerador", icon: Settings },
   ];
 
   return (

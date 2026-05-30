@@ -108,7 +108,7 @@ export default function AdminPaginasPage() {
           </p>
         </div>
         <Link
-          href="/admin/gerador"
+          href="/gerador"
           className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-[#d71920] text-white font-extrabold text-sm hover:bg-[#b9151b]"
         >
           Criar nova página
@@ -172,7 +172,7 @@ export default function AdminPaginasPage() {
               <div className="p-5">
                 <div className="grid grid-cols-2 gap-2">
                   <Link
-                    href={`/admin/gerador?id=${encodeURIComponent(p.id)}`}
+                    href={`/gerador`}
                     className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl border border-black/10 bg-white font-extrabold text-sm hover:bg-black/5"
                   >
                     <Pencil size={16} />
