@@ -9,15 +9,12 @@ import JsonLd from "@/components/JsonLd";
 import {
   ArrowRight,
   BadgeCheck,
-  CreditCard,
   Cpu,
-  Headset,
   type LucideIcon,
   MessageCircle,
   PackageCheck,
   ShieldCheck,
   Sparkles,
-  Truck,
   Wrench,
 } from "lucide-react";
 
@@ -96,68 +93,161 @@ function shuffleCopy<T>(items: T[]): T[] {
   return arr;
 }
 
-function getProductImage(product: Product): string {
-  const urls = Array.isArray(product.image_urls) ? product.image_urls.filter(Boolean) : [];
-  return urls[0] || product.image || "/logo.png";
-}
-
-function PremiumProductCard({ product, badge }: { product: Product; badge?: string }) {
+function ProductTile({
+  product,
+  eyebrow,
+}: {
+  product: Product;
+  eyebrow?: string;
+}) {
   const href = `/product/${product.id}`;
-  const imgSrc = getProductImage(product);
+  const imgSrc = product.image || "/logo.png";
   const priceNum = parsePriceToNumber(product.price);
   const priceLabel = priceNum > 0 ? formatCurrency(priceNum) : product.price || "Consultar";
 
   return (
     <Link
       href={href}
-      className="group rounded-3xl border border-black/10 bg-white shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+      className="group relative overflow-hidden rounded-[28px] border border-black/10 bg-white transition-all hover:border-[#E60012]/25 hover:-translate-y-0.5 hover:shadow-[0_24px_80px_rgba(0,0,0,0.12)]"
     >
-      <div className="p-5">
-        <div className="flex items-center justify-between gap-3">
-          <div className="text-[10px] font-extrabold uppercase tracking-[0.22em] text-[#E60012]">
-            {badge || "EM ESTOQUE"}
-          </div>
-          <div className="h-8 w-8 rounded-xl bg-[#E60012]/10 border border-[#E60012]/15 flex items-center justify-center text-[#E60012]">
-            <Sparkles className="h-4 w-4" />
-          </div>
-        </div>
-
-        <div className="mt-4 relative aspect-[4/3] w-full rounded-2xl bg-gray-50 border border-black/5 overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(230,0,18,0.10),_transparent_58%)] opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="relative p-5 sm:p-6 flex flex-col gap-4">
+        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl bg-white border border-zinc-200 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.18)]">
           <Image
             src={imgSrc}
             alt={product.name || "Produto"}
             fill
-            unoptimized
-            className="object-contain p-4 transition-transform duration-500 group-hover:scale-[1.02]"
-            sizes="(max-width: 768px) 100vw, 25vw"
+            className="object-contain transition-transform duration-500 group-hover:scale-[1.02]"
+            sizes="(max-width: 768px) 100vw, 33vw"
           />
         </div>
 
-        <div className="mt-4">
-          <div className="text-sm text-gray-500 line-clamp-1">{product.category}</div>
-          <div className="mt-1 text-base font-extrabold tracking-tight text-gray-900 line-clamp-2 leading-snug">
+        <div className="flex flex-col gap-2">
+          {eyebrow ? (
+            <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#E60012]">
+              {eyebrow}
+            </div>
+          ) : null}
+          <div className="text-lg sm:text-xl font-black tracking-tight text-zinc-900 line-clamp-2 leading-snug">
             {product.name}
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <div className="text-zinc-600 text-sm line-clamp-1">{product.category}</div>
+            <div className="shrink-0 rounded-full bg-gradient-to-r from-amber-200 via-yellow-100 to-amber-200 text-black px-3 py-1 text-sm font-black tracking-tight">
+              {priceLabel}
+            </div>
           </div>
         </div>
 
-        <div className="mt-4 flex items-end justify-between gap-3">
-          <div className="text-lg font-black tracking-tight text-gray-900">{priceLabel}</div>
-          <div className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#E60012]/25 bg-white px-4 py-2 text-sm font-extrabold text-[#E60012] hover:bg-[#E60012]/5 transition-colors">
-            Ver detalhes <ArrowRight className="h-4 w-4" />
-          </div>
+        <div className="mt-1 flex items-center justify-between text-sm">
+          <span className="text-zinc-600">Ver detalhes</span>
+          <ArrowRight className="w-4 h-4 text-zinc-900/60 transition-transform group-hover:translate-x-0.5" />
         </div>
       </div>
     </Link>
   );
 }
 
-function InlineFeature({ icon: Icon, label }: { icon: LucideIcon; label: string }) {
+function FeaturedShowcase({ product }: { product: Product }) {
+  const href = `/product/${product.id}`;
+  const imgSrc = product.image || "/logo.png";
+  const priceNum = parsePriceToNumber(product.price);
+  const priceLabel = priceNum > 0 ? formatCurrency(priceNum) : product.price || "Consultar";
+
   return (
-    <div className="flex items-center gap-2 text-sm text-gray-700">
-      <div className="h-9 w-9 rounded-2xl bg-[#E60012]/10 border border-[#E60012]/15 flex items-center justify-center text-[#E60012]">
-        <Icon className="h-4 w-4" />
+    <Link
+      href={href}
+      className="group relative overflow-hidden rounded-[32px] border border-black/10 bg-white transition-all hover:border-[#E60012]/25 hover:shadow-[0_28px_110px_rgba(0,0,0,0.12)]"
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_10%,rgba(230,0,18,0.10),transparent_55%)] opacity-80" />
+      <div className="relative p-6 sm:p-7">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <div className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#E60012]">
+              PC em destaque
+            </div>
+            <div className="mt-2 text-2xl sm:text-3xl font-black tracking-tight leading-tight line-clamp-2">
+              {product.name}
+            </div>
+          </div>
+          <div className="shrink-0 rounded-full bg-gradient-to-r from-amber-200 via-yellow-100 to-amber-200 text-black px-4 py-2 text-sm font-black tracking-tight">
+            {priceLabel}
+          </div>
+        </div>
+
+        <div className="mt-6 relative aspect-[16/10] w-full overflow-hidden rounded-3xl bg-white border border-zinc-200 p-5 shadow-[0_22px_80px_rgba(0,0,0,0.18)]">
+          <Image
+            src={imgSrc}
+            alt={product.name || "Produto"}
+            fill
+            className="object-contain transition-transform duration-500 group-hover:scale-[1.03]"
+            sizes="(max-width: 1024px) 100vw, 50vw"
+          />
+        </div>
+
+        <div className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-[#E60012] text-white px-5 py-3 font-black tracking-tight shadow-[0_18px_70px_rgba(230,0,18,0.20)]">
+          Ver detalhes <ArrowRight className="w-5 h-5" />
+        </div>
       </div>
-      <div className="font-semibold">{label}</div>
+    </Link>
+  );
+}
+
+function InfoTile({
+  eyebrow,
+  title,
+  desc,
+  href,
+  icon: Icon,
+}: {
+  eyebrow: string;
+  title: string;
+  desc: string;
+  href?: string;
+  icon: LucideIcon;
+}) {
+  const content = (
+    <div className="relative p-6 flex flex-col gap-3">
+      <div className="flex items-center justify-between">
+        <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#E60012]">{eyebrow}</div>
+        <Icon className="w-5 h-5 text-[#E60012]" />
+      </div>
+      <div className="text-xl font-black tracking-tight">{title}</div>
+      <div className="text-sm text-zinc-600 leading-relaxed">{desc}</div>
+      {href ? (
+        <div className="mt-1 inline-flex items-center gap-2 text-sm font-black text-[#E60012]">
+          Ver agora <ArrowRight className="w-4 h-4 text-[#E60012]" />
+        </div>
+      ) : null}
+    </div>
+  );
+
+  const cls =
+    "relative overflow-hidden rounded-[28px] border border-black/10 bg-white hover:border-[#E60012]/25 transition-colors shadow-sm";
+
+  if (href) {
+    const isExternal = href.startsWith("http://") || href.startsWith("https://");
+    if (isExternal) {
+      return (
+        <a href={href} target="_blank" rel="noopener noreferrer" className={cls}>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(230,0,18,0.08),_transparent_60%)] opacity-0 hover:opacity-100 transition-opacity" />
+          {content}
+        </a>
+      );
+    }
+
+    return (
+      <Link href={href} className={cls}>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(230,0,18,0.08),_transparent_60%)] opacity-0 hover:opacity-100 transition-opacity" />
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <div className={cls}>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(230,0,18,0.08),_transparent_60%)] opacity-0 hover:opacity-100 transition-opacity" />
+      {content}
     </div>
   );
 }
@@ -210,12 +300,6 @@ export default async function PremiumPage() {
   const remaining = sorted.slice(featured.length);
   const stock = shuffleCopy(remaining).slice(0, Math.min(listTarget - featured.length, remaining.length));
   const heroShowcaseProduct = stock[0] || featured[0];
-  const premiumWithImages = shuffleCopy(
-    premiumOnly.filter((p) => Boolean(getProductImage(p) && getProductImage(p) !== "/logo.png")),
-  );
-  const heroImageProduct = premiumWithImages[0] || heroShowcaseProduct || premiumOnly[0];
-  const heroImageSrc = heroImageProduct ? getProductImage(heroImageProduct) : "/logo.png";
-  const lineImages = premiumWithImages.slice(1, 4).map((p) => getProductImage(p));
 
   const whatsAppDefault = buildWhatsAppLink(
     "Olá! Quero conhecer a categoria Premium do Balão da Informática. Pode me recomendar os melhores itens do estoque para o meu uso e orçamento?"
@@ -267,346 +351,458 @@ export default async function PremiumPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white text-gray-900">
+    <div className="bg-white text-zinc-950">
       <JsonLd data={jsonLdData as any} />
       <Header />
 
-      <main>
-        <section className="relative overflow-hidden bg-white">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(230,0,18,0.08),transparent_45%),radial-gradient(circle_at_80%_20%,rgba(0,0,0,0.04),transparent_55%)]" />
-          <div className="container mx-auto px-4 pt-10 pb-10 sm:pt-14 sm:pb-12 relative">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-              <div className="lg:col-span-6">
-                <div className="inline-flex items-center gap-2 rounded-full border border-[#E60012]/25 bg-white px-4 py-2 text-xs font-extrabold uppercase tracking-[0.22em] text-[#E60012] shadow-sm">
-                  <Sparkles className="h-4 w-4" />
-                  Premium
-                </div>
-
-                <h1 className="mt-5 text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.04] text-gray-900">
-                  O seu sonho de ter um <span className="text-[#E60012]">PC PREMIUM</span> se realiza aqui.
-                </h1>
-
-                <p className="mt-4 text-base sm:text-lg text-gray-600 leading-relaxed max-w-xl">
-                  Curadoria premium, peças em destaque real e montagem profissional com testes rigorosos. Performance,
-                  estabilidade e suporte que você sente a diferença.
-                </p>
-
-                <div className="mt-6 flex flex-col sm:flex-row gap-3">
-                  <a
-                    href="#estoque"
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#E60012] hover:bg-[#cc0010] text-white px-6 py-3 font-extrabold transition-colors shadow-[0_14px_30px_rgba(230,0,18,0.20)]"
-                  >
-                    Ver Premium em destaque <ArrowRight className="h-5 w-5" />
-                  </a>
-                  <a
-                    href={whatsAppDefault}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-black/10 bg-white px-6 py-3 font-extrabold text-gray-900 hover:bg-gray-50 transition-colors"
-                  >
-                    Falar no WhatsApp <MessageCircle className="h-5 w-5 text-[#E60012]" />
-                  </a>
-                </div>
-
-                <div className="mt-6 grid grid-cols-2 gap-3">
-                  <InlineFeature icon={BadgeCheck} label="Componentes de qualidade" />
-                  <InlineFeature icon={Wrench} label="Montagem profissional" />
-                  <InlineFeature icon={ShieldCheck} label="Garantia de verdade" />
-                  <InlineFeature icon={Headset} label="Suporte especializado" />
-                </div>
+      <section className="relative overflow-hidden min-h-[92vh] flex items-center">
+        <div className="container mx-auto px-4 py-16 sm:py-24 relative">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
+            <div className="lg:col-span-6 space-y-6">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#E60012]/15 bg-[#E60012]/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-[#E60012]">
+                <Sparkles className="w-4 h-4 text-[#E60012]" />
+                Montagem premium em Campinas/SP
               </div>
 
-              <div className="lg:col-span-6 relative">
-                <div className="relative mx-auto w-full max-w-[640px] aspect-[6/5] sm:aspect-[5/4]">
-                  <div className="absolute inset-0 rounded-[44px] bg-[radial-gradient(circle_at_30%_20%,rgba(230,0,18,0.10),transparent_55%),radial-gradient(circle_at_80%_80%,rgba(0,0,0,0.06),transparent_55%)]" />
-                  <div className="absolute inset-0 rounded-[44px] border border-black/10 bg-white shadow-[0_24px_90px_rgba(0,0,0,0.10)]" />
-                  <div className="absolute inset-0 p-6 sm:p-8">
-                    <div className="relative h-full w-full">
-                      <Image
-                        src={heroImageSrc}
-                        alt={heroImageProduct?.name || "PC Premium"}
-                        fill
-                        unoptimized
-                        priority
-                        className="object-contain drop-shadow-[0_24px_70px_rgba(0,0,0,0.25)]"
-                        sizes="(max-width: 1024px) 100vw, 50vw"
-                      />
-                    </div>
-                  </div>
-                </div>
+              <h1 className="text-6xl sm:text-7xl lg:text-8xl font-black tracking-tight leading-[0.92] max-w-none">
+                <span className="block">O seu sonho de ter um</span>
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-100 to-amber-400">
+                  PC PREMIUM
+                </span>
+                <span className="block">se realiza aqui.</span>
+              </h1>
 
-                <div className="hidden sm:block absolute right-2 top-8">
-                  <div className="w-56 rounded-3xl border border-black/10 bg-white p-4 shadow-sm">
-                    <div className="flex items-start gap-3">
-                      <div className="h-10 w-10 rounded-2xl bg-[#E60012]/10 border border-[#E60012]/15 flex items-center justify-center text-[#E60012]">
-                        <ShieldCheck className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <div className="text-sm font-extrabold text-gray-900">Montagem Profissional</div>
-                        <div className="mt-1 text-xs text-gray-600">
-                          Acabamento impecável e organização interna de alto nível.
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+              <p className="text-lg sm:text-xl text-zinc-600 leading-relaxed max-w-[44rem]">
+                Uma seleção premium do nosso estoque. Itens escolhidos para quem quer qualidade, desempenho e segurança
+                na compra, com suporte de verdade em Campinas.
+              </p>
 
-          <div className="border-t border-black/5 bg-white">
-            <div className="container mx-auto px-4 py-6">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {[
-                  { icon: Truck, title: "Envio rápido", desc: "Para todo o Brasil" },
-                  { icon: ShieldCheck, title: "Garantia total", desc: "Em todos os produtos" },
-                  { icon: Headset, title: "Suporte real", desc: "Antes e depois da compra" },
-                  { icon: CreditCard, title: "Até 12x sem juros", desc: "No cartão de crédito" },
-                ].map((b) => (
-                  <div key={b.title} className="flex items-center gap-3 rounded-3xl border border-black/10 bg-white px-4 py-4 shadow-sm">
-                    <div className="h-11 w-11 rounded-2xl bg-[#E60012]/10 border border-[#E60012]/15 flex items-center justify-center text-[#E60012]">
-                      <b.icon className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-extrabold text-gray-900">{b.title}</div>
-                      <div className="text-xs text-gray-600">{b.desc}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="estoque" className="py-10 sm:py-14 bg-white">
-          <div className="container mx-auto px-4">
-            <div className="flex items-end justify-between gap-4">
-              <div>
-                <div className="text-xs font-extrabold uppercase tracking-[0.2em] text-[#E60012]">Premium do estoque</div>
-                <h2 className="mt-2 text-2xl sm:text-3xl font-black tracking-tight text-gray-900">
-                  Premium em destaque
-                </h2>
-              </div>
-              <Link
-                href="/categoria/premium"
-                className="hidden sm:inline-flex items-center gap-2 text-sm font-extrabold text-gray-900 hover:text-[#E60012] transition-colors"
-              >
-                Ver todos os PCs Premium <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {displayedProducts.slice(0, 4).map((p) => (
-                <PremiumProductCard key={p.id} product={p} />
-              ))}
-            </div>
-
-            <div className="mt-6 sm:hidden">
-              <Link
-                href="/categoria/premium"
-                className="inline-flex items-center gap-2 text-sm font-extrabold text-gray-900 hover:text-[#E60012] transition-colors"
-              >
-                Ver todos os PCs Premium <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        <section className="py-10 sm:py-14 bg-gray-50 border-y border-black/5">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-              <div className="lg:col-span-8 rounded-[2rem] border border-black/10 bg-white p-6 sm:p-8 shadow-sm overflow-hidden relative">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(230,0,18,0.10),transparent_55%)]" />
-                <div className="relative grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                  <div>
-                    <div className="text-xs font-extrabold uppercase tracking-[0.22em] text-[#E60012]">Monte seu PC</div>
-                    <h3 className="mt-2 text-2xl sm:text-3xl font-black tracking-tight text-gray-900">
-                      Escolha a base. Personalize o resto.
-                    </h3>
-                    <p className="mt-3 text-sm sm:text-base text-gray-600 leading-relaxed">
-                      A gente recomenda a melhor configuração premium para seu uso e orçamento com as peças do nosso estoque.
-                    </p>
-                    <div className="mt-5 flex flex-col sm:flex-row gap-3">
-                      <Link
-                        href="/monteseupc"
-                        className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#E60012] hover:bg-[#cc0010] text-white px-6 py-3 font-extrabold transition-colors shadow-[0_14px_30px_rgba(230,0,18,0.20)]"
-                      >
-                        Montar agora <ArrowRight className="h-5 w-5" />
-                      </Link>
-                      <a
-                        href={whatsAppDefault}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-2 rounded-2xl border border-black/10 bg-white px-6 py-3 font-extrabold text-gray-900 hover:bg-gray-50 transition-colors"
-                      >
-                        Orçar no WhatsApp <MessageCircle className="h-5 w-5 text-[#E60012]" />
-                      </a>
-                    </div>
-                  </div>
-                  <div className="relative aspect-[4/3] w-full rounded-3xl border border-black/10 bg-gray-50 overflow-hidden">
-                    <Image
-                      src={heroImageSrc}
-                      alt="Ilustração Premium"
-                      fill
-                      unoptimized
-                      className="object-contain p-6"
-                      sizes="(max-width: 768px) 100vw, 40vw"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="lg:col-span-4 grid grid-cols-1 gap-4">
-                {[
-                  {
-                    title: "Balão Gamer",
-                    desc: "FPS alto e visual gamer.",
-                    img: lineImages[0] || heroImageSrc,
-                    msg: "Olá! Quero recomendações Premium para um PC Gamer. Meu orçamento é: (R$).",
-                  },
-                  {
-                    title: "Balão Workstation",
-                    desc: "Foco em trabalho e estabilidade.",
-                    img: lineImages[1] || heroImageSrc,
-                    msg: "Olá! Quero recomendações Premium para trabalho (Workstation). Meu orçamento é: (R$).",
-                  },
-                  {
-                    title: "Balão Creator",
-                    desc: "Edição, lives e criação.",
-                    img: lineImages[2] || heroImageSrc,
-                    msg: "Olá! Quero recomendações Premium para criação/edição/streaming. Meu orçamento é: (R$).",
-                  },
-                ].map((line) => (
-                  <div key={line.title} className="rounded-[1.75rem] border border-black/10 bg-white p-5 shadow-sm">
-                    <div className="flex items-center gap-4">
-                      <div className="relative h-16 w-16 rounded-2xl bg-gray-50 border border-black/5 overflow-hidden">
-                        <Image
-                          src={line.img}
-                          alt={line.title}
-                          fill
-                          unoptimized
-                          className="object-contain p-2"
-                          sizes="64px"
-                        />
-                      </div>
-                      <div>
-                        <div className="font-extrabold text-gray-900">{line.title}</div>
-                        <div className="text-sm text-gray-600">{line.desc}</div>
-                      </div>
-                    </div>
-                    <a
-                      href={buildWhatsAppLink(line.msg)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-[#E60012]/25 bg-white px-4 py-2.5 text-sm font-extrabold text-[#E60012] hover:bg-[#E60012]/5 transition-colors"
-                    >
-                      Orçar agora <ArrowRight className="h-4 w-4" />
-                    </a>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="py-10 sm:py-14 bg-white">
-          <div className="container mx-auto px-4">
-            <div className="text-xs font-extrabold uppercase tracking-[0.2em] text-[#E60012]">Nosso processo premium</div>
-            <h2 className="mt-2 text-2xl sm:text-3xl font-black tracking-tight text-gray-900">
-              Montagem profissional com padrão Balão
-            </h2>
-
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {[
-                { title: "Entendimento do uso", desc: "Seu objetivo define a configuração ideal." },
-                { title: "Peças do estoque", desc: "Disponibilidade real e custo-benefício." },
-                { title: "Montagem e acabamento", desc: "Organização, airflow e estética." },
-                { title: "Testes e validação", desc: "Estabilidade antes de entregar." },
-              ].map((step, idx) => (
-                <div key={step.title} className="rounded-3xl border border-black/10 bg-white p-5 shadow-sm">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm font-extrabold text-gray-900">{step.title}</div>
-                    <div className="h-9 w-9 rounded-2xl bg-[#E60012]/10 border border-[#E60012]/15 flex items-center justify-center text-[#E60012] font-black">
-                      {String(idx + 1).padStart(2, "0")}
-                    </div>
-                  </div>
-                  <div className="mt-3 text-sm text-gray-600 leading-relaxed">{step.desc}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="py-10 sm:py-14 bg-gray-50 border-t border-black/5">
-          <div className="container mx-auto px-4">
-            <div className="text-center">
-              <div className="text-xs font-extrabold uppercase tracking-[0.2em] text-[#E60012]">Dúvidas rápidas</div>
-              <h2 className="mt-2 text-2xl sm:text-3xl font-black tracking-tight text-gray-900">FAQ</h2>
-            </div>
-
-            <div className="mt-8 max-w-3xl mx-auto divide-y divide-black/10 rounded-[2rem] border border-black/10 bg-white overflow-hidden shadow-sm">
-              {[
-                {
-                  q: "Os produtos mostrados aqui são do estoque do site?",
-                  a: "Sim. Esta página lista produtos do mesmo catálogo do site. Atualizou no painel, atualiza aqui também.",
-                },
-                {
-                  q: "Posso pedir um PC sob medida mesmo escolhendo um destaque?",
-                  a: "Pode. Os destaques servem como base e a gente ajusta conforme seu uso, estética e orçamento.",
-                },
-                {
-                  q: "Vocês verificam compatibilidade e estabilidade?",
-                  a: "Sim. A proposta passa por validação de compatibilidade e a montagem passa por testes antes da entrega.",
-                },
-                {
-                  q: "Entregam só em Campinas?",
-                  a: "Atendemos Campinas e região, e também enviamos para outras cidades. Fale no WhatsApp para validar entrega e prazo.",
-                },
-              ].map((item) => (
-                <details key={item.q} className="group p-5 sm:p-6">
-                  <summary className="cursor-pointer list-none flex items-center justify-between gap-4">
-                    <div className="text-base sm:text-lg font-extrabold text-gray-900">{item.q}</div>
-                    <div className="h-8 w-8 rounded-2xl bg-[#E60012]/10 border border-[#E60012]/15 flex items-center justify-center text-[#E60012] group-open:rotate-45 transition-transform">
-                      +
-                    </div>
-                  </summary>
-                  <div className="mt-3 text-sm sm:text-base text-gray-600 leading-relaxed">{item.a}</div>
-                </details>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="py-10 sm:py-14 bg-white">
-          <div className="container mx-auto px-4">
-            <div className="rounded-[2.25rem] border border-black/10 bg-white p-6 sm:p-10 shadow-sm">
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-                <div>
-                  <div className="text-xs font-extrabold uppercase tracking-[0.2em] text-[#E60012]">Último passo</div>
-                  <h2 className="mt-2 text-2xl sm:text-3xl font-black tracking-tight text-gray-900">
-                    Bora montar sua próxima máquina?
-                  </h2>
-                  <p className="mt-3 text-sm sm:text-base text-gray-600 leading-relaxed max-w-2xl">
-                    Fale com um especialista e receba uma proposta coerente com seu uso, seu orçamento e as peças do nosso estoque.
-                  </p>
-                </div>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <a
+                  href="#estoque"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#E60012] to-red-500 text-white px-6 py-3 font-black tracking-tight shadow-[0_18px_70px_rgba(230,0,18,0.28)] hover:brightness-110 transition-all ring-1 ring-amber-200/25"
+                >
+                  Ver Premium em estoque
+                  <ArrowRight className="w-5 h-5" />
+                </a>
                 <a
                   href={whatsAppDefault}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#E60012] hover:bg-[#cc0010] text-white px-8 py-4 font-extrabold transition-colors shadow-[0_14px_30px_rgba(230,0,18,0.20)]"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-black/10 bg-white px-6 py-3 font-black tracking-tight hover:bg-zinc-50 transition-colors"
                 >
-                  Falar no WhatsApp <MessageCircle className="h-6 w-6" />
+                  Falar no WhatsApp
+                  <MessageCircle className="w-5 h-5" />
+                </a>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 pt-4">
+                {[
+                  { icon: BadgeCheck, title: "Acabamento premium", desc: "Cable management e estética impecável." },
+                  { icon: ShieldCheck, title: "Testes completos", desc: "Validação de estabilidade antes da entrega." },
+                  { icon: Wrench, title: "Projeto sob medida", desc: "Compatibilidade e upgrades planejados." },
+                  { icon: PackageCheck, title: "Loja física", desc: "Campinas com suporte e pós-venda." },
+                ].map((item) => (
+                  <div
+                    key={item.title}
+                    className="rounded-3xl border border-black/10 bg-white p-5 transition-colors hover:border-[#E60012]/20 hover:shadow-sm"
+                  >
+                    <div className="flex items-center gap-3">
+                      <item.icon className="w-5 h-5 text-[#E60012]" />
+                      <div className="text-sm font-black">{item.title}</div>
+                    </div>
+                    <div className="text-xs text-zinc-600 mt-2 leading-relaxed">{item.desc}</div>
+                  </div>
+                ))}
+              </div>
+
+              {heroShowcaseProduct ? (
+                <div className="pt-2">
+                  <FeaturedShowcase product={heroShowcaseProduct} />
+                </div>
+              ) : null}
+            </div>
+
+            <div className="lg:col-span-6">
+              {featured.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {featured.map((p) => (
+                    <ProductTile key={p.id} product={p} eyebrow="Premium" />
+                  ))}
+                  {featured.length < featuredTarget ? (
+                    <>
+                      <InfoTile
+                        eyebrow="Categoria"
+                        title="Ver todos os Premium"
+                        desc="Abra a categoria Premium completa e navegue por todos os itens do estoque."
+                        href="/categoria/premium"
+                        icon={Sparkles}
+                      />
+                      <InfoTile
+                        eyebrow="Suporte"
+                        title="Ajuda para escolher"
+                        desc="Fale com um especialista e receba indicação do melhor Premium para seu uso e orçamento."
+                        href={whatsAppDefault}
+                        icon={MessageCircle}
+                      />
+                    </>
+                  ) : null}
+                </div>
+              ) : (
+                <div className="rounded-[28px] border border-black/10 bg-zinc-50 p-8">
+                  <div className="text-2xl font-black tracking-tight">Sem produtos Premium cadastrados</div>
+                  <div className="text-sm text-zinc-600 mt-2 leading-relaxed">
+                    Cadastre produtos na categoria Premium para aparecerem aqui automaticamente.
+                  </div>
+                  <div className="mt-5 flex flex-col sm:flex-row gap-3">
+                    <Link
+                      href="/admin/produtos"
+                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#E60012] text-white px-6 py-3 font-black hover:brightness-110 transition-colors shadow-[0_18px_70px_rgba(230,0,18,0.18)]"
+                    >
+                      Cadastrar produtos
+                      <ArrowRight className="w-5 h-5" />
+                    </Link>
+                    <a
+                      href={whatsAppDefault}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-2 rounded-2xl border border-black/10 bg-white px-6 py-3 font-black hover:bg-zinc-50 transition-colors"
+                    >
+                      Pedir orçamento
+                      <MessageCircle className="w-5 h-5" />
+                    </a>
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-6 rounded-[28px] border border-black/10 bg-zinc-50 p-6">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                  <div>
+                    <div className="text-sm font-black tracking-tight">Quer um projeto único?</div>
+                    <div className="text-sm text-zinc-600">
+                      Diga seu uso e orçamento. A gente monta uma proposta com peças do nosso estoque.
+                    </div>
+                  </div>
+                  <a
+                    href={buildWhatsAppLink(
+                      "Olá! Quero uma indicação de produtos da categoria Premium. Meu uso é: ( ). Meu orçamento é: (R$). Pode me ajudar?"
+                    )}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#E60012] to-red-500 px-6 py-3 font-black hover:brightness-110 transition-all shadow-[0_18px_70px_rgba(230,0,18,0.22)]"
+                  >
+                    Montar comigo
+                    <Cpu className="w-5 h-5" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="estoque" className="relative py-14 sm:py-20 bg-white border-t border-black/10 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_0%,rgba(230,0,18,0.08),transparent_40%),radial-gradient(circle_at_10%_30%,rgba(0,0,0,0.04),transparent_45%)]" />
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
+            <div>
+              <div className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Seleção premium</div>
+              <h2 className="text-3xl sm:text-5xl font-black tracking-tight">Premium do estoque</h2>
+            </div>
+            <Link
+              href="/categoria/premium"
+              className="inline-flex items-center gap-2 rounded-2xl border border-black/10 bg-white px-5 py-3 font-black hover:bg-zinc-50 transition-colors"
+            >
+              Ver categoria Premium
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {stock.map((p) => (
+              <ProductTile key={p.id} product={p} />
+            ))}
+            {stock.length % 3 === 1 ? (
+              <>
+                <InfoTile
+                  eyebrow="Premium"
+                  title="Retire no Cambuí"
+                  desc="Loja física em Campinas para retirada e suporte presencial."
+                  icon={PackageCheck}
+                />
+                <InfoTile
+                  eyebrow="Garantia"
+                  title="Compra segura"
+                  desc="Suporte e pós-venda do Balão da Informática para te acompanhar."
+                  icon={ShieldCheck}
+                />
+              </>
+            ) : null}
+            {stock.length % 3 === 2 ? (
+              <InfoTile
+                eyebrow="WhatsApp"
+                title="Recomendação rápida"
+                desc="Diga seu objetivo e orçamento e a gente aponta o melhor Premium do estoque."
+                href={whatsAppDefault}
+                icon={MessageCircle}
+              />
+            ) : null}
+          </div>
+
+          <div className="mt-10 rounded-[28px] border border-black/10 bg-zinc-50 p-6">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <div className="text-lg font-black">Não achou o ideal?</div>
+                <div className="text-sm text-zinc-600">
+                  A gente te ajuda a escolher um Premium ideal para seu uso e orçamento.
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Link
+                  href="/monteseupc"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#E60012] text-white px-6 py-3 font-black hover:brightness-110 transition-colors shadow-[0_18px_70px_rgba(230,0,18,0.18)]"
+                >
+                  Montar agora
+                  <ArrowRight className="w-5 h-5" />
+                </Link>
+                <a
+                  href={whatsAppDefault}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-black/10 bg-white px-6 py-3 font-black hover:bg-zinc-50 transition-colors"
+                >
+                  Orçar no WhatsApp
+                  <MessageCircle className="w-5 h-5" />
                 </a>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
 
-            <div className="mt-8 text-center text-xs text-gray-500">
-              Loja física em Campinas (Cambuí) • {SITE_CONFIG.address}
+      <section className="relative py-14 sm:py-20 bg-zinc-50 border-t border-black/10 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(230,0,18,0.07),transparent_42%),radial-gradient(circle_at_85%_40%,rgba(0,0,0,0.03),transparent_45%)]" />
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-10">
+            <div className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Linhas premium</div>
+            <h2 className="text-3xl sm:text-5xl font-black tracking-tight">Escolha a base. Personalize o resto.</h2>
+            <p className="text-zinc-600 mt-3 max-w-3xl mx-auto">
+              Quatro linhas autorais do Balão da Informática para acelerar sua escolha. Depois, ajustamos com peças do
+              nosso estoque, do seu jeito.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              {
+                title: "Balão Gamer",
+                desc: "FPS alto, visual gamer e upgrades planejados. Ideal para quem joga competitivo e quer um setup bonito.",
+                cta: "Quero recomendações Premium",
+              },
+              {
+                title: "Balão Workstation",
+                desc: "Estabilidade e performance para AutoCAD, Revit, render e produtividade. Configuração pensada para trabalho.",
+                cta: "Quero opções Premium para trabalho",
+              },
+              {
+                title: "Balão Creator",
+                desc: "Edição, lives e criação de conteúdo com fluidez. Peças selecionadas para multitarefa e exportação rápida.",
+                cta: "Quero opções Premium para criação",
+              },
+              {
+                title: "Balão Extreme",
+                desc: "Projeto exclusivo para quem quer o máximo: potência, acabamento e estética de vitrine.",
+                cta: "Quero um projeto Premium",
+              },
+            ].map((line) => (
+              <div
+                key={line.title}
+                className="rounded-[28px] border border-black/10 bg-white p-6 hover:border-[#E60012]/20 transition-colors shadow-sm"
+              >
+                <div className="text-xl font-black tracking-tight">{line.title}</div>
+                <div className="text-sm text-zinc-600 mt-2 leading-relaxed">{line.desc}</div>
+                <a
+                  href={buildWhatsAppLink(
+                    `Olá! ${line.cta} no Balão da Informática. Meu uso é: (jogos/trabalho/edição). Meu orçamento é: (R$). Pode sugerir uma configuração com peças do estoque?`
+                  )}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-[#E60012] text-white px-5 py-3 font-black hover:brightness-110 transition-colors w-full justify-center shadow-[0_18px_70px_rgba(230,0,18,0.18)]"
+                >
+                  Orçar agora
+                  <ArrowRight className="w-5 h-5" />
+                </a>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="relative py-14 sm:py-20 bg-white border-t border-black/10 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_10%,rgba(230,0,18,0.08),transparent_48%),radial-gradient(circle_at_90%_70%,rgba(0,0,0,0.03),transparent_52%)]" />
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+            <div className="lg:col-span-5">
+              <div className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">SEO e localização</div>
+              <h2 className="text-3xl sm:text-5xl font-black tracking-tight mt-2">
+                Produtos Premium em Campinas é no Balão da Informática.
+              </h2>
+              <p className="text-zinc-700 mt-4 leading-relaxed">
+                Se você busca <strong className="text-zinc-900">produtos Premium</strong> em Campinas, com compra segura,
+                disponibilidade real no estoque e suporte pós-venda, esta é a página certa. Estamos no{" "}
+                <strong className="text-zinc-900">Cambuí</strong> e atendemos Campinas e região, com envio para outras cidades.
+              </p>
+            </div>
+            <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[
+                {
+                  title: "Palavras-chave principais",
+                  desc: "categoria premium, produtos premium, premium em campinas, premium cambuí, itens premium em estoque, comprar premium.",
+                },
+                {
+                  title: "Localização (GEO)",
+                  desc: `${SITE_CONFIG.address}. Atendimento em Campinas/SP e região.`,
+                },
+                {
+                  title: "Perfis de uso",
+                  desc: "Upgrade premium, setup premium, trabalho, criação e alta performance com curadoria do Balão.",
+                },
+                {
+                  title: "O que você recebe",
+                  desc: "Atendimento, suporte e recomendação certa para você comprar com tranquilidade.",
+                },
+              ].map((card) => (
+                <div
+                  key={card.title}
+                  className="rounded-[28px] border border-black/10 bg-zinc-50 p-6 hover:border-[#E60012]/15 transition-colors"
+                >
+                  <div className="text-sm font-black tracking-tight">{card.title}</div>
+                  <div className="text-sm text-zinc-600 mt-3 leading-relaxed">{card.desc}</div>
+                </div>
+              ))}
             </div>
           </div>
-        </section>
-      </main>
+        </div>
+      </section>
+
+      <section className="relative py-14 sm:py-20 bg-zinc-50 border-t border-black/10 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_0%,rgba(230,0,18,0.08),transparent_45%),radial-gradient(circle_at_10%_60%,rgba(0,0,0,0.03),transparent_50%)]" />
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <div className="lg:col-span-5">
+              <div className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Processo premium</div>
+              <h2 className="text-3xl sm:text-5xl font-black tracking-tight mt-2">
+                Montagem profissional, do primeiro orçamento ao pós-venda.
+              </h2>
+              <p className="text-zinc-600 mt-4 leading-relaxed">
+                Você não compra só peças. Você recebe uma máquina pronta, validada e acompanhada por quem monta e dá
+                suporte.
+              </p>
+            </div>
+            <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[
+                {
+                  title: "Entendimento do uso",
+                  desc: "Jogos, trabalho ou criação. A configuração nasce do seu objetivo, não de um template genérico.",
+                },
+                {
+                  title: "Peças do estoque",
+                  desc: "Priorizamos disponibilidade e custo-benefício, com alternativas equivalentes quando necessário.",
+                },
+                {
+                  title: "Montagem e acabamento",
+                  desc: "Organização, airflow e estética. Sem improviso, sem gambiarra.",
+                },
+                {
+                  title: "Testes e validação",
+                  desc: "Estabilidade antes de entregar. O objetivo é ligar e usar sem dor de cabeça.",
+                },
+              ].map((step, idx) => (
+                <div
+                  key={step.title}
+                  className="rounded-[28px] border border-black/10 bg-white p-6 hover:border-[#E60012]/15 transition-colors shadow-sm"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm font-black tracking-tight">{step.title}</div>
+                    <div className="text-xs font-black text-zinc-700 rounded-full border border-black/10 bg-zinc-50 px-3 py-1">
+                      {String(idx + 1).padStart(2, "0")}
+                    </div>
+                  </div>
+                  <div className="text-sm text-zinc-600 mt-3 leading-relaxed">{step.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="relative py-14 sm:py-20 bg-white border-t border-black/10 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(230,0,18,0.06),transparent_45%)]" />
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-10">
+            <div className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">FAQ</div>
+            <h2 className="text-3xl sm:text-5xl font-black tracking-tight">Dúvidas rápidas</h2>
+          </div>
+
+          <div className="max-w-3xl mx-auto divide-y divide-black/10 rounded-[28px] border border-black/10 bg-white overflow-hidden shadow-sm">
+            {[
+              {
+                q: "Os produtos mostrados aqui são do meu estoque do site?",
+                a: "Sim. Esta página lista produtos carregados do mesmo catálogo do site. Se você cadastrar/atualizar no painel, aqui atualiza junto.",
+              },
+              {
+                q: "Posso pedir um PC sob medida mesmo escolhendo um destaque?",
+                a: "Pode. Os destaques servem como base. A gente ajusta a recomendação conforme seu uso, estética e orçamento.",
+              },
+              {
+                q: "Vocês verificam compatibilidade e estabilidade?",
+                a: "Sim. A proposta passa por validação de compatibilidade e a montagem passa por testes antes da entrega.",
+              },
+              {
+                q: "Entregam só em Campinas?",
+                a: "Atendemos Campinas e região, e também enviamos para outras cidades. O melhor caminho é falar no WhatsApp para validar entrega e prazo.",
+              },
+            ].map((item) => (
+              <details key={item.q} className="group p-6">
+                <summary className="cursor-pointer list-none flex items-center justify-between gap-4">
+                  <div className="text-lg font-black">{item.q}</div>
+                  <div className="text-zinc-500 group-open:rotate-45 transition-transform">+</div>
+                </summary>
+                <div className="mt-3 text-zinc-600 leading-relaxed">{item.a}</div>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="relative py-14 sm:py-20 bg-zinc-50 border-t border-black/10 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_0%,rgba(230,0,18,0.10),transparent_42%),radial-gradient(circle_at_80%_80%,rgba(0,0,0,0.03),transparent_45%)]" />
+        <div className="container mx-auto px-4">
+          <div className="rounded-[2.5rem] border border-black/10 bg-white p-8 sm:p-12 shadow-[0_24px_80px_rgba(0,0,0,0.10)]">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+              <div>
+                <div className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Último passo</div>
+                <h2 className="text-3xl sm:text-5xl font-black tracking-tight mt-2">
+                  Bora montar sua próxima máquina?
+                </h2>
+                <p className="text-zinc-600 mt-3 max-w-2xl leading-relaxed">
+                  Fale com um especialista e receba uma proposta coerente com seu uso, seu orçamento e as peças do nosso
+                  estoque.
+                </p>
+              </div>
+              <a
+                href={whatsAppDefault}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#E60012] to-red-500 px-8 py-4 font-black text-lg hover:brightness-110 transition-all shadow-[0_18px_70px_rgba(230,0,18,0.28)]"
+              >
+                Chamar no WhatsApp
+                <MessageCircle className="w-6 h-6" />
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
