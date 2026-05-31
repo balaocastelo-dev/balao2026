@@ -51,7 +51,7 @@ export default function TopBar() {
   }, []);
 
   return (
-    <div className="w-full bg-zinc-950 text-white/85 text-xs md:text-sm overflow-hidden relative z-50 border-b border-white/10">
+    <div className="w-full bg-white text-gray-700 text-xs md:text-sm overflow-hidden relative z-50 border-b border-black/5">
       <div className="container mx-auto flex items-center justify-between px-3 py-2">
         <div className="hidden md:flex items-center gap-8">
           <div className="flex items-center gap-2 font-semibold">
@@ -75,14 +75,14 @@ export default function TopBar() {
             ))}
             {dolar && (
               <>
-                <span className="mx-2 text-white/25">|</span>
-                <span className="mx-4 font-bold text-white/90">Dólar: R$ {dolar}</span>
+                <span className="mx-2 text-gray-300">|</span>
+                <span className="mx-4 font-bold text-gray-900">Dólar: R$ {dolar}</span>
               </>
             )}
           </div>
         </div>
 
-        <div className="hidden md:flex items-center gap-2 font-extrabold text-white">
+        <div className="hidden md:flex items-center gap-2 font-extrabold text-gray-900">
           <Phone className="h-4 w-4 text-[#E60012]" />
           {SITE_CONFIG.phone.display}
         </div>

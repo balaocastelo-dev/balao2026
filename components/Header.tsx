@@ -139,15 +139,15 @@ export default function Header() {
   const activeCategory = searchParams.get("category") || "";
 
   return (
-    <header className="bg-zinc-950 sticky top-0 z-[900] shadow-[0_12px_40px_rgba(0,0,0,0.25)] flex flex-col">
+    <header className="bg-white sticky top-0 z-[900] shadow-sm border-b border-black/5 flex flex-col">
       <TopBar />
-      <div className="border-b border-white/10">
+      <div>
         <div className="container mx-auto px-4 py-4 flex items-center justify-between gap-4">
         
         {/* Mobile Menu Button - Optimized for Touch */}
         <button 
           onClick={toggleSidebar}
-          className="lg:hidden p-3 -ml-3 text-white/80 hover:text-white transition-colors active:scale-95"
+          className="lg:hidden p-3 -ml-3 text-gray-900 hover:text-[#E60012] transition-colors active:scale-95"
           aria-label="Abrir menu"
         >
             <Menu size={32} strokeWidth={2.5} />
@@ -171,6 +171,15 @@ export default function Header() {
              </div>
         </button>
 
+        <button
+          type="button"
+          onClick={toggleSidebar}
+          className="hidden md:inline-flex items-center gap-2 rounded-xl bg-[#E60012] hover:bg-[#cc0010] text-white px-4 py-3 font-extrabold transition-colors shadow-[0_14px_30px_rgba(230,0,18,0.18)]"
+        >
+          <Menu size={18} strokeWidth={2.5} />
+          Todas as categorias
+        </button>
+        
         
 
         {/* Search Bar (Desktop) */}
@@ -181,13 +190,12 @@ export default function Header() {
         >
           <input
             type="text"
-            placeholder="Buscar produtos..."
-            className="w-full pl-12 pr-28 py-3.5 border border-white/10 bg-white text-gray-900 rounded-full focus:outline-none focus:ring-2 focus:ring-[#E60012]/30 shadow-sm text-base placeholder:text-gray-400"
+            className="w-full pl-12 pr-28 py-3.5 border border-black/10 bg-white text-gray-900 rounded-full focus:outline-none focus:ring-2 focus:ring-[#E60012]/20 shadow-sm text-base placeholder:text-gray-400"
+            className="w-full pl-12 pr-28 py-3.5 border border-black/10 bg-white text-gray-900 rounded-full focus:outline-none focus:ring-2 focus:ring-[#E60012]/20 shadow-sm text-base placeholder:text-gray-400"
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
               setShowPreview(true);
-            }}
             onFocus={() => setShowPreview(true)}
           />
 
@@ -234,31 +242,15 @@ export default function Header() {
 
 
         {/* Actions */}
-        <div className="flex items-center gap-3 md:gap-6 text-white/90">
-
-          <button
-            type="button"
-            onClick={() => router.push("/#categorias")}
-            className="hidden lg:flex items-center gap-3 group active:scale-95 transition-transform"
-            aria-label="Ver departamentos"
-            title="Departamentos"
-          >
-            <div className="p-2 bg-white/5 rounded-full text-white/80 group-hover:bg-white/10 group-hover:text-white transition-colors border border-white/10">
-              <LayoutGrid size={20} className="md:w-5 md:h-5" strokeWidth={2.5} />
-            </div>
-            <div className="hidden xl:flex flex-col text-sm leading-tight text-left">
-              <span className="text-white/60">Departamentos</span>
-              <span className="font-extrabold text-white group-hover:text-[#E60012] transition-colors">Ver categorias</span>
-            </div>
-          </button>
+        <div className="flex items-center gap-3 md:gap-6 text-gray-900">
 
           <Link href="/fale-conosco" className="flex items-center gap-3 group active:scale-95 transition-transform">
-            <div className="p-2 bg-white/5 rounded-full text-white/80 group-hover:bg-white/10 group-hover:text-white transition-colors border border-white/10">
+            <div className="p-2 bg-gray-100 rounded-full text-gray-700 group-hover:bg-[#E60012] group-hover:text-white transition-colors shadow-sm">
                 <User size={20} className="md:w-5 md:h-5" strokeWidth={2.5} />
             </div>
             <div className="hidden lg:flex flex-col text-sm leading-tight">
-                <span className="text-white/60">Atendimento</span>
-                <span className="font-extrabold text-white group-hover:text-[#E60012] transition-colors">
+                <span className="text-gray-500">Atendimento</span>
+                <span className="font-extrabold text-gray-900 group-hover:text-[#E60012] transition-colors">
                   Fale Conosco
                 </span>
             </div>
@@ -270,12 +262,12 @@ export default function Header() {
             aria-label="PCS Premium"
             title="PCS Premium"
           >
-            <div className="p-2 bg-white/5 rounded-full text-amber-400 group-hover:bg-white/10 group-hover:text-amber-300 transition-colors border border-white/10">
+            <div className="p-2 bg-gray-100 rounded-full text-amber-600 group-hover:bg-amber-100 group-hover:text-amber-700 transition-colors shadow-sm">
               <Crown size={20} className="md:w-5 md:h-5" strokeWidth={2.5} />
             </div>
             <div className="hidden lg:flex flex-col text-sm leading-tight">
-              <span className="text-white/60">PCS</span>
-              <span className="font-extrabold text-white group-hover:text-amber-300 transition-colors">Premium</span>
+              <span className="text-gray-500">PCS</span>
+              <span className="font-extrabold text-gray-900 group-hover:text-amber-700 transition-colors">Premium</span>
             </div>
           </Link>
 
@@ -285,12 +277,12 @@ export default function Header() {
             aria-label="Promoções"
             title="Promoções"
           >
-            <div className="p-2 bg-white/5 rounded-full text-white/80 group-hover:bg-white/10 group-hover:text-white transition-colors border border-white/10">
+            <div className="p-2 bg-gray-100 rounded-full text-gray-700 group-hover:bg-[#E60012] group-hover:text-white transition-colors shadow-sm">
               <Tag size={20} className="md:w-5 md:h-5" strokeWidth={2.5} />
             </div>
             <div className="hidden xl:flex flex-col text-sm leading-tight">
-              <span className="text-white/60">Ver</span>
-              <span className="font-extrabold text-white group-hover:text-[#E60012] transition-colors">Promoções</span>
+              <span className="text-gray-500">Ver</span>
+              <span className="font-extrabold text-gray-900 group-hover:text-[#E60012] transition-colors">Promoções</span>
             </div>
           </Link>
 
@@ -308,15 +300,15 @@ export default function Header() {
           
           <div className="relative" onMouseEnter={handleCartMouseEnter} onMouseLeave={handleCartMouseLeave}>
             <Link href="/cart" id="cart-icon-container" className="relative group flex items-center gap-3 active:scale-95 transition-transform">
-               <div className="p-2 bg-white/5 rounded-full text-white/80 group-hover:bg-white/10 group-hover:text-white transition-colors border border-white/10">
+               <div className="p-2 bg-gray-100 rounded-full text-gray-700 group-hover:bg-[#E60012] group-hover:text-white transition-colors shadow-sm">
                   <ShoppingCart size={20} className="md:w-5 md:h-5" strokeWidth={2.5} />
                </div>
                <div className="hidden lg:flex flex-col text-sm leading-tight">
-                  <span className="text-white/60">Meu</span>
-                  <span className="font-extrabold text-white group-hover:text-[#E60012] transition-colors">Carrinho</span>
+                  <span className="text-gray-500">Meu</span>
+                  <span className="font-extrabold text-gray-900 group-hover:text-[#E60012] transition-colors">Carrinho</span>
               </div>
               {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 md:top-0 md:right-0 lg:left-7 lg:top-0 bg-[#E60012] text-white text-[10px] md:text-[11px] font-extrabold h-5 w-5 md:h-5 md:w-5 flex items-center justify-center rounded-full border-2 border-zinc-950 shadow-sm">
+                  <span className="absolute -top-1 -right-1 md:top-0 md:right-0 lg:left-7 lg:top-0 bg-[#E60012] text-white text-[10px] md:text-[11px] font-extrabold h-5 w-5 md:h-5 md:w-5 flex items-center justify-center rounded-full border-2 border-white shadow-sm">
                       {cartCount}
                   </span>
               )}
@@ -331,9 +323,9 @@ export default function Header() {
         </div>
       </div>
 
-      <nav className="hidden lg:block border-b border-white/10 bg-zinc-950/95">
+      <nav className="hidden lg:block border-t border-black/5 bg-white">
         <div className="container mx-auto px-4">
-          <div className="flex items-center gap-8 text-xs font-extrabold uppercase tracking-[0.18em] text-white/75">
+          <div className="flex items-center gap-8 text-xs font-extrabold uppercase tracking-[0.18em] text-gray-700">
             {[
               { label: "PC Gamer", href: "/pcgamer", active: pathname === "/pcgamer" },
               { label: "PC Profissional", href: "/premium", active: pathname === "/premium" },
@@ -349,7 +341,7 @@ export default function Header() {
                 href={item.href}
                 className={[
                   "group relative py-3 transition-colors",
-                  item.active ? "text-white" : "text-white/70 hover:text-white",
+                  item.active ? "text-gray-900" : "text-gray-600 hover:text-gray-900",
                 ].join(" ")}
               >
                 {item.label}
@@ -368,12 +360,12 @@ export default function Header() {
       </nav>
 
       {/* Mobile Search Bar (Full width below header on mobile) */}
-      <div className="md:hidden px-4 pb-4 pt-3 border-b border-white/10" ref={mobileSearchContainerRef}>
+      <div className="md:hidden px-4 pb-4 pt-3 border-t border-black/5" ref={mobileSearchContainerRef}>
           <form onSubmit={handleSearch} className="relative">
             <input
                 type="text"
                 placeholder="Buscar produtos..."
-                className="w-full pl-5 pr-14 py-3.5 border border-white/10 bg-white text-gray-900 rounded-full focus:outline-none focus:ring-2 focus:ring-[#E60012]/30 shadow-sm text-base placeholder:text-gray-400"
+                className="w-full pl-5 pr-14 py-3.5 border border-black/10 bg-white text-gray-900 rounded-full focus:outline-none focus:ring-2 focus:ring-[#E60012]/20 shadow-sm text-base placeholder:text-gray-400"
                 value={searchQuery}
                 onChange={(e) => {
                     setSearchQuery(e.target.value);
@@ -430,7 +422,7 @@ export default function Header() {
             </a>
             <Link
               href="/promocao"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-white/5 hover:bg-white/10 text-white px-4 py-3 font-extrabold border border-white/10 active:scale-[0.98] transition-all"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-white hover:bg-zinc-50 text-gray-900 px-4 py-3 font-extrabold border border-black/10 active:scale-[0.98] transition-all"
             >
               <Tag size={18} />
               Ofertas
