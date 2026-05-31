@@ -49,5 +49,5 @@ export const metadata: Metadata = {
 export const runtime = "nodejs";
 
 export default function BlogLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return <div className="min-h-screen bg-white text-zinc-950">{children}</div>;
 }

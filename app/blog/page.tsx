@@ -4,12 +4,14 @@ import Image from "next/image";
 import Header from "@/components/Header";
 import JsonLd, { generateBreadcrumbSchema, generateFAQSchema, generateOrganizationSchema } from "@/components/JsonLd";
 import { listBlogPostsForPage } from "@/lib/blog-store";
+import { getCategories, getProducts } from "@/lib/db";
+import { parsePriceToNumber, type Category, type Product } from "@/lib/utils";
 import { SITE_CONFIG } from "@/lib/config";
 
 export const runtime = "nodejs";
 export const revalidate = 120;
 
-type SearchParams = { cat?: string; category?: string };
+type SearchParams = { cat?: string; category?: string; q?: string };
 
 type BlogCardPost = {
   id: string;
@@ -32,6 +34,14 @@ function getSourceDomain(sourceUrl: string | null | undefined): string | null {
   } catch {
     return null;
   }
+}
+
+function normalize(text: string) {
+  return (text || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
 }
 
 function ogHomeFallbackUrl(seed: string) {
@@ -78,7 +88,11 @@ export async function generateMetadata(props: { searchParams?: SearchParams }): 
 }
 
 export default async function BlogPage(props: { searchParams?: SearchParams }) {
-  const rawPosts = await listBlogPostsForPage({ take: 50 });
+  const rawQ = props.searchParams?.q ?? "";
+  const q = normalize(rawQ);
+  const selectedCategory = (props.searchParams?.category || props.searchParams?.cat || "").trim();
+
+  const [rawPosts, products, categories] = await Promise.all([listBlogPostsForPage({ take: 70 }), getProducts(), getCategories()]);
 
   const posts: BlogCardPost[] = rawPosts.map((p) => {
     const createdAt = p.created_at ? new Date(p.created_at) : new Date();
@@ -101,14 +115,60 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
     };
   });
 
-  const trending = posts.slice(0, 10);
-  const balaoPosts = posts.filter((p) => p.sourceDomain === "balao.info").slice(0, 6);
+  const filtered = posts.filter((p) => {
+    if (selectedCategory) {
+      if (normalize(p.category) !== normalize(selectedCategory)) return false;
+    }
+    if (!q) return true;
+    const hay = normalize(`${p.title} ${p.excerpt} ${p.category}`);
+    return hay.includes(q);
+  });
 
-  const group1 = posts.slice(0, 3);
-  const group2 = posts.slice(3, 13);
-  const group3 = posts.slice(13, 16);
-  const group4 = posts.slice(16, 26);
-  const group5 = posts.slice(26, 29);
+  const trending = filtered.slice(0, 10);
+  const balaoPosts = filtered.filter((p) => p.sourceDomain === "balao.info").slice(0, 6);
+
+  const featuredPost = filtered[0] ?? null;
+  const latestPosts = filtered.slice(featuredPost ? 1 : 0, (featuredPost ? 1 : 0) + 8);
+
+  const categoriesSorted = (() => {
+    const counts = new Map<string, number>();
+    filtered.forEach((p) => {
+      const c = (p.category || "Tecnologia").trim() || "Tecnologia";
+      counts.set(c, (counts.get(c) || 0) + 1);
+    });
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([name]) => name)
+      .slice(0, 8);
+  })();
+
+  const findBySlug = (s: string, all: Category[]) => all.find((c) => c.slug === s);
+  const premiumCategory = findBySlug("premium", categories);
+  const getDescendantNames = (root: Category | undefined, all: Category[]) => {
+    if (!root) return [];
+    const descendants: string[] = [];
+    const stack = [root.id];
+    while (stack.length > 0) {
+      const currentId = stack.pop()!;
+      const children = all.filter((c) => c.parent_id === currentId);
+      children.forEach((child) => {
+        descendants.push(child.name);
+        stack.push(child.id);
+      });
+    }
+    return descendants;
+  };
+  const validCategories = new Set<string>();
+  if (premiumCategory?.name) {
+    validCategories.add(premiumCategory.name);
+    getDescendantNames(premiumCategory, categories).forEach((n) => validCategories.add(n));
+  }
+  const premiumProducts = (products as Product[]).filter((p) => {
+    if (validCategories.size > 0) return validCategories.has(p.category);
+    return normalize(p.category) === "premium";
+  });
+  const premiumImages = premiumProducts.map((p) => p.image).filter((img): img is string => Boolean(img));
+  const heroImage = premiumImages.length > 0 ? premiumImages[Math.floor(Math.random() * premiumImages.length)] : "/logo.png";
 
   const breadcrumbs = generateBreadcrumbSchema([
     { name: "Início", item: "https://www.balao.info" },
@@ -137,220 +197,201 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
   const org = generateOrganizationSchema();
 
   return (
-    <div className="min-h-screen flex flex-col font-sans">
+    <div className="min-h-screen flex flex-col font-sans bg-white text-zinc-950">
       <Header />
       <main className="flex-1 mx-auto w-full max-w-7xl px-4 py-8">
         <JsonLd data={[org, breadcrumbs, faq]} />
 
-        <section className="mb-6 rounded-md border border-neutral-200 bg-white p-5">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0">
-              <h1 className="text-2xl font-extrabold tracking-tight">Blog Balão da Informática</h1>
-              <p className="mt-2 text-sm text-neutral-700">
-                Notícias de tecnologia, guias de compra e ofertas para quem quer escolher <strong>notebook</strong>,{" "}
-                <strong>PC Gamer</strong>, <strong>hardware</strong> e periféricos com segurança.
+        <section className="relative overflow-hidden rounded-[28px] border border-black/10 bg-white p-6 sm:p-10 shadow-[0_24px_80px_rgba(0,0,0,0.08)]">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(230,0,18,0.10),transparent_40%),radial-gradient(circle_at_85%_55%,rgba(0,0,0,0.04),transparent_45%)]" />
+          <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-7">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#E60012]/15 bg-[#E60012]/5 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.22em] text-[#E60012]">
+                Blog Balão
+              </div>
+              <h1 className="mt-4 text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.02]">
+                Conteúdo que tecnologia com <span className="text-[#E60012]">performance</span>.
+              </h1>
+              <p className="mt-4 text-sm sm:text-base text-zinc-600 max-w-2xl">
+                Guias, dicas e novidades para escolher PC Gamer, notebooks, hardware e upgrades com mais segurança e custo-benefício.
               </p>
-              <p className="mt-2 text-sm text-neutral-700">
-                Precisa de indicação rápida? Chame no WhatsApp <strong>{SITE_CONFIG.whatsapp.display}</strong>.
-              </p>
+
+              <form method="get" action="/blog" className="mt-6 flex flex-col sm:flex-row gap-3">
+                {selectedCategory ? <input type="hidden" name="category" value={selectedCategory} /> : null}
+                <div className="flex-1 relative">
+                  <input
+                    name="q"
+                    defaultValue={rawQ}
+                    placeholder="Buscar artigos no blog…"
+                    className="w-full h-12 rounded-2xl border border-black/10 bg-white px-4 pr-12 text-sm font-semibold text-zinc-900 placeholder:text-zinc-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#E60012]/15"
+                  />
+                  <button
+                    type="submit"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-9 px-4 rounded-xl bg-[#E60012] text-white text-sm font-extrabold hover:brightness-110"
+                  >
+                    Buscar
+                  </button>
+                </div>
+                <a
+                  href={`https://wa.me/${SITE_CONFIG.whatsapp.number}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="h-12 inline-flex items-center justify-center rounded-2xl border border-black/10 bg-white px-5 text-sm font-extrabold text-zinc-900 hover:bg-zinc-50"
+                >
+                  Atendimento WhatsApp
+                </a>
+              </form>
+
+              <div className="mt-6">
+                <div className="text-xs font-extrabold text-zinc-700">Navegue por tópicos</div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Link
+                    href="/blog"
+                    className={`rounded-full border px-3 py-2 text-xs font-extrabold transition-colors ${
+                      !selectedCategory ? "border-[#E60012]/20 bg-[#E60012]/10 text-[#E60012]" : "border-black/10 bg-white text-zinc-800 hover:bg-zinc-50"
+                    }`}
+                  >
+                    Todos
+                  </Link>
+                  {categoriesSorted.map((c) => (
+                    <Link
+                      key={c}
+                      href={`/blog?category=${encodeURIComponent(c)}`}
+                      className={`rounded-full border px-3 py-2 text-xs font-extrabold transition-colors ${
+                        normalize(selectedCategory) === normalize(c)
+                          ? "border-[#E60012]/20 bg-[#E60012]/10 text-[#E60012]"
+                          : "border-black/10 bg-white text-zinc-800 hover:bg-zinc-50"
+                      }`}
+                    >
+                      {c}
+                    </Link>
+                  ))}
+                </div>
+              </div>
             </div>
-            <div className="flex w-full flex-col gap-2 sm:w-auto">
-              <a
-                href={`https://wa.me/${SITE_CONFIG.whatsapp.number}`}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center rounded-md bg-[#e41e26] px-4 py-3 text-sm font-extrabold text-white hover:bg-[#c81920]"
-              >
-                Orçamento no WhatsApp
-              </a>
-              <Link href="/promocao" className="inline-flex items-center justify-center rounded-md border border-neutral-200 bg-white px-4 py-3 text-sm font-extrabold text-neutral-900 hover:bg-neutral-50">
-                Ver Promoções
-              </Link>
+
+            <div className="lg:col-span-5">
+              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[28px] border border-black/10 bg-white shadow-[0_24px_80px_rgba(0,0,0,0.10)]">
+                <Image src={heroImage} alt="Ilustração de tecnologia" fill className="object-contain p-8" sizes="(max-width: 1024px) 100vw, 420px" unoptimized />
+              </div>
             </div>
           </div>
         </section>
 
-        <div className="grid gap-8 lg:grid-cols-12">
-          <div className="lg:col-span-8">
-            {group1.length > 0 && (
-              <section className="grid gap-4 sm:grid-cols-12">
-                <div className="sm:col-span-12">
-                  <HeroCard post={group1[0]} size="lg" priority />
-                </div>
-                {group1[1] && (
-                  <div className="sm:col-span-6">
-                    <HeroCard post={group1[1]} size="sm" />
-                  </div>
-                )}
-                {group1[2] && (
-                  <div className="sm:col-span-6">
-                    <HeroCard post={group1[2]} size="sm" />
-                  </div>
-                )}
-              </section>
-            )}
-
-            <section className="mt-8">
-              <div className="flex items-end justify-between">
-                <h2 className="text-lg font-extrabold tracking-tight">
-                  <span className="inline-block border-l-4 border-[#e41e26] pl-3">Destaques</span>
+        {featuredPost ? (
+          <section className="mt-8 rounded-[28px] border border-black/10 bg-white overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.08)]">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
+              <div className="lg:col-span-5 p-6 sm:p-8 flex flex-col justify-center">
+                <div className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-[#E60012]">Artigo em destaque</div>
+                <h2 className="mt-3 text-2xl sm:text-3xl font-black tracking-tight leading-tight">
+                  <Link href={`/blog/${featuredPost.slug}`} prefetch={false} className="hover:underline">
+                    {featuredPost.title}
+                  </Link>
                 </h2>
-              </div>
-              <div className="mt-4 divide-y divide-neutral-200 rounded-md border border-neutral-200 bg-white">
-                {group2.map((p) => (
-                  <PostListItem key={p.id} post={p} />
-                ))}
-              </div>
-            </section>
-
-            {group3.length > 0 && (
-              <section className="mt-8 grid gap-4 sm:grid-cols-12">
-                <div className="sm:col-span-12">
-                  <HeroCard post={group3[0]} size="lg" />
+                <p className="mt-3 text-sm text-zinc-600 leading-relaxed line-clamp-3">{featuredPost.excerpt}</p>
+                <div className="mt-6">
+                  <Link
+                    href={`/blog/${featuredPost.slug}`}
+                    prefetch={false}
+                    className="inline-flex items-center justify-center rounded-2xl bg-[#E60012] px-5 py-3 text-sm font-extrabold text-white hover:brightness-110"
+                  >
+                    Ler artigo completo →
+                  </Link>
                 </div>
-                {group3[1] && (
-                  <div className="sm:col-span-6">
-                    <HeroCard post={group3[1]} size="sm" />
-                  </div>
-                )}
-                {group3[2] && (
-                  <div className="sm:col-span-6">
-                    <HeroCard post={group3[2]} size="sm" />
-                  </div>
-                )}
-              </section>
-            )}
-
-            <section className="mt-8">
-              <div className="flex items-end justify-between">
-                <h2 className="text-lg font-extrabold tracking-tight">
-                  <span className="inline-block border-l-4 border-[#e41e26] pl-3">Mais Notícias</span>
-                </h2>
               </div>
-              <div className="mt-4 divide-y divide-neutral-200 rounded-md border border-neutral-200 bg-white">
-                {group4.map((p) => (
-                  <PostListItem key={p.id} post={p} />
-                ))}
-              </div>
-            </section>
-
-            {group5.length > 0 && (
-              <section className="mt-8 grid gap-4 sm:grid-cols-12">
-                <div className="sm:col-span-12">
-                  <HeroCard post={group5[0]} size="lg" />
-                </div>
-                {group5[1] && (
-                  <div className="sm:col-span-6">
-                    <HeroCard post={group5[1]} size="sm" />
-                  </div>
-                )}
-                {group5[2] && (
-                  <div className="sm:col-span-6">
-                    <HeroCard post={group5[2]} size="sm" />
-                  </div>
-                )}
-              </section>
-            )}
-
-            {posts.length === 0 && (
-              <div className="mt-8 p-8 text-center text-sm text-neutral-600">
-                Ainda não há posts publicados. Aguarde a ingestão automática via RSS/Produtos.
-              </div>
-            )}
-          </div>
-
-          <aside className="lg:col-span-4">
-            <div className="sticky top-8 space-y-8">
-              <div className="rounded-md border border-neutral-200 bg-white">
-                <div className="border-b border-neutral-200 px-4 py-3">
-                  <h2 className="text-sm font-extrabold tracking-tight">
-                    <span className="inline-block border-l-4 border-[#e41e26] pl-3">Em alta</span>
-                  </h2>
-                </div>
-                <ol className="divide-y divide-neutral-200">
-                  {trending.slice(0, 5).map((p, idx) => (
-                    <li key={p.id} className="flex gap-3 px-4 py-3">
-                      <div className="w-6 flex-none text-right text-sm font-extrabold text-[#e41e26]">
-                        {idx + 1}
-                      </div>
-                      <div className="min-w-0">
-                        <Link href={`/blog/${p.slug}`} prefetch={false} className="text-sm font-semibold hover:underline">
-                          {p.title}
-                        </Link>
-                        <div className="mt-1 text-xs font-semibold text-neutral-600">
-                          {p.category}
-                          {p.sourceDomain ? ` • ${p.sourceDomain}` : ""}
-                        </div>
-                      </div>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-
-              <div className="rounded-md border border-neutral-200 bg-white">
-                <div className="border-b border-neutral-200 px-4 py-3">
-                  <h2 className="text-sm font-extrabold tracking-tight">
-                    <span className="inline-block border-l-4 border-[#e41e26] pl-3">Ofertas Balão</span>
-                  </h2>
-                </div>
-                <div className="divide-y divide-neutral-200">
-                  {balaoPosts.map((p) => (
-                    <Link key={p.id} href={`/blog/${p.slug}`} prefetch={false} className="flex items-center gap-3 px-4 py-3 hover:bg-neutral-50">
-                      <div className="relative h-12 w-12 flex-none overflow-hidden rounded border border-neutral-100 bg-white">
-                        <Image
-                          src={p.ogImageUrl || ogFallbackUrl(p)}
-                          alt={p.title}
-                          fill
-                          sizes="48px"
-                          className="object-contain"
-                        />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <h3 className="text-xs font-bold leading-tight hover:underline">{p.title}</h3>
-                        {isBalaoProductPromo(p) ? (
-                          <div className="mt-1 flex items-center gap-2 text-[10px] font-extrabold text-neutral-700">
-                            <span className="text-[#e41e26]">{extractPriceText(`${p.excerpt} ${p.title}`) || "Preço sob consulta"}</span>
-                            <span className="font-semibold text-neutral-500">{new Date(p.publishedAt ?? p.createdAt).toLocaleDateString("pt-BR")}</span>
-                          </div>
-                        ) : (
-                          <div className="mt-1 flex items-center gap-2 text-[10px] font-semibold text-neutral-500">
-                            <span className="text-[#e41e26]">Balão</span>
-                            <span>{new Date(p.publishedAt ?? p.createdAt).toLocaleDateString("pt-BR")}</span>
-                          </div>
-                        )}
-                      </div>
-                    </Link>
-                  ))}
-
-                  <div className="p-4">
-                    <a
-                      href="https://wa.me/5519987510267"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="block rounded-md bg-[#e41e26] px-4 py-3 text-center text-sm font-extrabold text-white hover:bg-[#c81920]"
-                    >
-                      Comprar com ajuda no WhatsApp
-                    </a>
-                    <div className="mt-3 grid grid-cols-2 gap-2">
-                      <Link href="/notebooks" className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs font-bold text-neutral-900 hover:bg-neutral-50">
-                        Notebooks
-                      </Link>
-                      <Link href="/pcgamer" className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs font-bold text-neutral-900 hover:bg-neutral-50">
-                        PC Gamer
-                      </Link>
-                      <Link href="/departamentos" className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs font-bold text-neutral-900 hover:bg-neutral-50">
-                        Departamentos
-                      </Link>
-                      <Link href="/promocao" className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs font-bold text-neutral-900 hover:bg-neutral-50">
-                        Promoções
-                      </Link>
-                    </div>
-                  </div>
-                </div>
+              <div className="lg:col-span-7 relative min-h-[220px]">
+                <Image
+                  src={featuredPost.ogImageUrl || ogFallbackUrl(featuredPost)}
+                  alt={featuredPost.title}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 760px"
+                />
               </div>
             </div>
-          </aside>
-        </div>
+          </section>
+        ) : null}
+
+        <section className="mt-10">
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <div className="text-xs font-extrabold uppercase tracking-[0.22em] text-zinc-500">Últimos artigos</div>
+              <h2 className="mt-2 text-2xl font-black tracking-tight">Para ler agora</h2>
+            </div>
+            <Link href="/blog" className="text-sm font-extrabold text-[#E60012] hover:underline">
+              Ver todos →
+            </Link>
+          </div>
+
+          <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {latestPosts.map((p) => (
+              <article key={p.id} className="overflow-hidden rounded-[22px] border border-black/10 bg-white hover:shadow-[0_20px_70px_rgba(0,0,0,0.10)] transition-shadow">
+                <Link href={`/blog/${p.slug}`} prefetch={false} className="block">
+                  <div className="relative aspect-[16/10] bg-white">
+                    <Image src={p.ogImageUrl || ogFallbackUrl(p)} alt={p.title} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 300px" />
+                  </div>
+                  <div className="p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#E60012] line-clamp-1">{p.category}</div>
+                      {p.readingTimeMin ? <div className="text-[11px] font-bold text-zinc-500">{p.readingTimeMin} min</div> : null}
+                    </div>
+                    <h3 className="mt-2 text-sm font-black leading-snug line-clamp-2">{p.title}</h3>
+                    <p className="mt-2 text-xs text-zinc-600 line-clamp-2">{p.excerpt}</p>
+                    <div className="mt-3 text-[11px] font-semibold text-zinc-500">
+                      {new Date(p.publishedAt ?? p.createdAt).toLocaleDateString("pt-BR")}
+                    </div>
+                  </div>
+                </Link>
+              </article>
+            ))}
+          </div>
+
+          {filtered.length === 0 ? (
+            <div className="mt-8 rounded-[22px] border border-black/10 bg-white p-8 text-center text-sm text-zinc-600">
+              Nenhum artigo encontrado para este filtro.
+            </div>
+          ) : null}
+        </section>
+
+        <section className="mt-10 rounded-[28px] border border-black/10 bg-white p-6 sm:p-8 shadow-[0_24px_80px_rgba(0,0,0,0.08)]">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div className="flex items-start gap-4">
+              <div className="h-12 w-12 rounded-2xl bg-[#E60012]/10 border border-[#E60012]/15 flex items-center justify-center text-[#E60012] font-black">
+                ✉
+              </div>
+              <div>
+                <div className="text-lg font-black">Fique por dentro das novidades</div>
+                <div className="mt-1 text-sm text-zinc-600">Receba artigos, dicas e ofertas especiais direto no seu e-mail.</div>
+              </div>
+            </div>
+            <form className="flex w-full max-w-xl flex-col sm:flex-row gap-3">
+              <input
+                type="email"
+                placeholder="Seu melhor e-mail"
+                className="h-12 flex-1 rounded-2xl border border-black/10 bg-white px-4 text-sm font-semibold text-zinc-900 placeholder:text-zinc-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#E60012]/15"
+              />
+              <button type="button" className="h-12 rounded-2xl bg-[#E60012] px-6 text-sm font-extrabold text-white hover:brightness-110">
+                Inscrever-se
+              </button>
+            </form>
+          </div>
+        </section>
+
+        <section className="mt-10 rounded-[28px] border border-black/10 bg-white p-5 sm:p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { title: "Enviamos para todo o Brasil", desc: "Entrega rápida e rastreamento." },
+              { title: "Parcele em até 12x sem juros", desc: "No cartão de crédito." },
+              { title: "Garantia e qualidade", desc: "Produtos com suporte real." },
+              { title: "Suporte especializado", desc: "Atendimento técnico antes e depois da compra." },
+            ].map((b) => (
+              <div key={b.title} className="rounded-2xl border border-black/10 bg-zinc-50 p-4">
+                <div className="text-sm font-black">{b.title}</div>
+                <div className="mt-1 text-xs text-zinc-600">{b.desc}</div>
+              </div>
+            ))}
+          </div>
+        </section>
       </main>
     </div>
   );
