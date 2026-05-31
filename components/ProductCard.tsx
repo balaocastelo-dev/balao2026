@@ -9,7 +9,17 @@ import { ShoppingCart, Zap } from "lucide-react";
 import { animateAddToCart } from "@/lib/animations";
 import SafeImage from "@/components/SafeImage";
 
-export default function ProductCard({ product, variant = "grid" }: { product: Product, variant?: "grid" | "list" }) {
+export default function ProductCard({
+  product,
+  variant = "grid",
+  layout = "default",
+  badgeLabel,
+}: {
+  product: Product;
+  variant?: "grid" | "list";
+  layout?: "default" | "featured";
+  badgeLabel?: string;
+}) {
   const { addToCart } = useCart();
   const { showToast } = useToast();
   const imageRef = useRef<HTMLDivElement>(null);
@@ -27,7 +37,7 @@ export default function ProductCard({ product, variant = "grid" }: { product: Pr
   const formatBRL = (value: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 
-  const badgeText = pixPrice > 0 ? "PIX -15%" : "DESTAQUE";
+  const badgeText = badgeLabel || (pixPrice > 0 ? "PIX -15%" : "DESTAQUE");
 
   if (variant === "list") {
     return (
@@ -82,6 +92,67 @@ export default function ProductCard({ product, variant = "grid" }: { product: Pr
               <ShoppingCart size={16} />
               Comprar
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (layout === "featured") {
+    return (
+      <div className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-black/5 flex flex-col h-full group">
+        <Link href={`/product/${product.id}`} className="flex-1">
+          <div className="p-4">
+            <div className="inline-flex items-center rounded-full bg-zinc-950 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide text-white">
+              {badgeText}
+            </div>
+          </div>
+          <div ref={imageRef} className="relative mx-4 mb-4 rounded-2xl bg-zinc-50 border border-black/5 overflow-hidden pt-[72%]">
+            <SafeImage
+              src={product.image}
+              fallbackSrc="/logo.png"
+              alt={product.name}
+              fill
+              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+              className="object-contain p-4 group-hover:scale-[1.06] transition-transform duration-300"
+              priority={false}
+              unoptimized
+            />
+          </div>
+          <div className="px-4">
+            <h3 className="font-black text-gray-900 line-clamp-2 min-h-[44px] leading-snug text-sm sm:text-[15px] group-hover:text-[#E60012] transition-colors" title={product.name}>
+              {product.name}
+            </h3>
+            <div className="mt-3">
+              <div className="text-xl font-black tracking-tight text-gray-900">
+                {pixPrice > 0 ? formatBRL(pixPrice) : product.price}
+              </div>
+              {installment12 > 0 && (
+                <div className="mt-1 text-xs text-gray-600">
+                  12x de <span className="font-extrabold text-gray-900">{formatBRL(installment12)}</span> sem juros
+                </div>
+              )}
+            </div>
+          </div>
+        </Link>
+
+        <div className="p-4 pt-3 mt-auto">
+          <div className="grid grid-cols-2 gap-3">
+            <Link
+              href={`/product/${product.id}`}
+              className="inline-flex items-center justify-center rounded-xl border border-black/10 bg-white px-4 py-3 text-sm font-extrabold text-gray-900 hover:bg-zinc-50 transition-colors"
+            >
+              Ver detalhes
+            </Link>
+            <button
+              onClick={handleAddToCart}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#E60012] hover:bg-[#cc0010] px-4 py-3 text-sm font-extrabold text-white transition-colors shadow-[0_14px_30px_rgba(230,0,18,0.22)] active:scale-[0.98]"
+              aria-label="Adicionar ao carrinho"
+              title="Adicionar ao carrinho"
+            >
+              <ShoppingCart size={18} />
+              Comprar
+            </button>
+          </div>
         </div>
       </div>
     );

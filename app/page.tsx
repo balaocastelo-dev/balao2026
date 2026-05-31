@@ -3,6 +3,7 @@ import Sidebar from "@/components/Sidebar";
 import ProductList from "@/components/ProductList";
 import Carousel from "@/components/Carousel";
 import ProductCarousel from "@/components/ProductCarousel";
+import ProductCard from "@/components/ProductCard";
 import SeoContent from "@/components/SeoContent";
 import JsonLd, { generateOrganizationSchema } from "@/components/JsonLd";
 import HomeOfferTabs from "@/components/HomeOfferTabs";
@@ -13,7 +14,7 @@ import type { Metadata } from "next";
 import { SITE_CONFIG } from "@/lib/config";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, BadgeCheck, CreditCard, Headset, MapPin, ShieldCheck, Truck } from "lucide-react";
+import { ArrowRight, BadgeCheck, Briefcase, CircuitBoard, CreditCard, Cpu, Gamepad2, Headset, MapPin, Monitor, ShieldCheck, Truck, Wrench } from "lucide-react";
 
 export const dynamic = 'force-dynamic';
 
@@ -185,6 +186,11 @@ export default async function Home(props: {
     })
     .filter((t) => t.products.length > 0);
 
+  const pcFeatured = products
+    .filter((p) => /pc\s*gamer/i.test(String(p.category || "")) || /pc\s*gamer/i.test(String(p.name || "")))
+    .slice(0, 4);
+  const pcBadges = ["Mais vendido", "Custo benefício", "Alta performance", "Profissional"];
+
   return (
     <div className="min-h-screen bg-zinc-50 flex flex-col font-sans">
       <JsonLd data={generateOrganizationSchema()} />
@@ -192,116 +198,129 @@ export default async function Home(props: {
       
       {isHome && (
         <section className="relative overflow-hidden bg-zinc-950 border-b border-white/10">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(230,0,18,0.18),transparent_45%),radial-gradient(circle_at_85%_55%,rgba(255,255,255,0.08),transparent_45%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(230,0,18,0.22),transparent_48%),radial-gradient(circle_at_78%_42%,rgba(255,255,255,0.08),transparent_45%)]" />
+          <div className="absolute inset-0 opacity-60 bg-[linear-gradient(135deg,transparent_0%,rgba(230,0,18,0.22)_42%,transparent_75%)]" />
+          <div className="absolute -right-40 top-12 h-[520px] w-[520px] rotate-12 bg-[#E60012]/18 blur-2xl" />
           <div className="container mx-auto px-4 py-10 sm:py-14 relative">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
               <div className="lg:col-span-6">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-extrabold tracking-wide text-white/80">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-extrabold tracking-[0.18em] text-white/75">
                   <BadgeCheck className="h-4 w-4 text-[#E60012]" />
-                  Referência em tecnologia em Campinas
+                  ALTA PERFORMANCE. MÁXIMA EXPERIÊNCIA.
                 </div>
-                <h1 className="mt-4 text-3xl sm:text-5xl font-black tracking-tight text-white leading-[1.05]">
-                  Tecnologia de verdade para{" "}
-                  <span className="text-[#E60012]">trabalho</span>,{" "}
-                  <span className="text-[#E60012]">games</span> e{" "}
-                  <span className="text-[#E60012]">performance</span>.
+                <h1 className="mt-5 text-4xl sm:text-6xl font-black tracking-tight text-white leading-[0.98]">
+                  O PC IDEAL PARA{" "}
+                  <span className="block mt-2 text-[#E60012]">CADA JOGADOR E PROFISSIONAL.</span>
                 </h1>
                 <p className="mt-4 text-base sm:text-lg text-zinc-300 leading-relaxed max-w-xl">
-                  PCs Gamer, notebooks e hardware com compra segura, suporte especializado e entrega rápida na região.
+                  Computadores de alta performance montados com peças premium e garantia de verdade.
                 </p>
 
-                <div className="mt-7 flex flex-col sm:flex-row gap-3">
-                  <Link
-                    href={pcGamerCat?.slug ? `/categoria/${encodeURIComponent(pcGamerCat.slug)}` : "/pcgamer"}
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#E60012] hover:bg-[#cc0010] px-6 py-3.5 text-base font-extrabold text-white transition-colors shadow-[0_18px_60px_rgba(230,0,18,0.28)]"
-                  >
-                    Comprar agora
-                    <ArrowRight className="h-5 w-5" />
-                  </Link>
-                  <a
-                    href={whatsappHref}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 hover:bg-white/10 px-6 py-3.5 text-base font-extrabold text-white transition-colors"
-                  >
-                    Falar no WhatsApp
-                    <ArrowRight className="h-5 w-5" />
-                  </a>
+                <div className="mt-6 grid grid-cols-2 gap-3 max-w-xl">
+                  <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                    <div className="h-9 w-9 rounded-xl bg-[#E60012]/15 border border-[#E60012]/25 flex items-center justify-center text-[#E60012]">
+                      <CircuitBoard className="h-5 w-5" />
+                    </div>
+                    <div className="text-sm font-extrabold text-white">Peças Premium</div>
+                  </div>
+                  <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                    <div className="h-9 w-9 rounded-xl bg-[#E60012]/15 border border-[#E60012]/25 flex items-center justify-center text-[#E60012]">
+                      <Wrench className="h-5 w-5" />
+                    </div>
+                    <div className="text-sm font-extrabold text-white">Montagem Profissional</div>
+                  </div>
+                  <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                    <div className="h-9 w-9 rounded-xl bg-[#E60012]/15 border border-[#E60012]/25 flex items-center justify-center text-[#E60012]">
+                      <ShieldCheck className="h-5 w-5" />
+                    </div>
+                    <div className="text-sm font-extrabold text-white">Garantia de Verdade</div>
+                  </div>
+                  <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                    <div className="h-9 w-9 rounded-xl bg-[#E60012]/15 border border-[#E60012]/25 flex items-center justify-center text-[#E60012]">
+                      <Headset className="h-5 w-5" />
+                    </div>
+                    <div className="text-sm font-extrabold text-white">Suporte Especializado</div>
+                  </div>
                 </div>
 
-                <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-                    <div className="text-xs font-extrabold text-white">Entrega rápida</div>
-                    <div className="text-xs text-zinc-400">Campinas e região</div>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-                    <div className="text-xs font-extrabold text-white">Até 12x</div>
-                    <div className="text-xs text-zinc-400">sem juros</div>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-                    <div className="text-xs font-extrabold text-white">Suporte</div>
-                    <div className="text-xs text-zinc-400">especializado</div>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-                    <div className="text-xs font-extrabold text-white">Loja física</div>
-                    <div className="text-xs text-zinc-400">em Campinas</div>
-                  </div>
+                <div className="mt-8 flex flex-col sm:flex-row gap-3">
+                  <Link
+                    href="/pcgamer"
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#E60012] hover:bg-[#cc0010] px-7 py-4 text-base font-extrabold text-white transition-colors shadow-[0_18px_60px_rgba(230,0,18,0.28)]"
+                  >
+                    VER PC GAMER
+                    <ArrowRight className="h-5 w-5" />
+                  </Link>
+                  <Link
+                    href="/premium"
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 hover:bg-white/10 px-7 py-4 text-base font-extrabold text-white transition-colors"
+                  >
+                    VER PC PROFISSIONAL
+                    <ArrowRight className="h-5 w-5" />
+                  </Link>
                 </div>
               </div>
 
               <div className="lg:col-span-6">
-                <div className="relative rounded-[28px] border border-white/10 bg-white/5 overflow-hidden">
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(230,0,18,0.22),transparent_55%)]" />
-                  <div className="relative aspect-[16/11] sm:aspect-[16/10]">
-                    <Image
-                      src="/images/prizes/pc.webp"
-                      alt="PC Gamer Balão da Informática"
-                      fill
-                      className="object-cover"
-                      priority
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/10" />
-                  </div>
-                  <div className="relative p-5 sm:p-6">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <div className="text-xs font-extrabold uppercase tracking-[0.2em] text-white/60">
-                          Monte seu PC
-                        </div>
-                        <div className="text-lg sm:text-xl font-black text-white mt-1">
-                          PC Gamer sob medida
-                        </div>
-                        <div className="text-sm text-zinc-300 mt-1">
-                          Diga seu uso e orçamento. A gente recomenda as peças do estoque.
-                        </div>
-                      </div>
-                      <Link
-                        href="/montagempc"
-                        className="shrink-0 inline-flex items-center justify-center rounded-2xl bg-white text-black px-4 py-2 font-extrabold hover:bg-zinc-200 transition-colors"
-                      >
-                        Montar agora
-                      </Link>
+                <div className="relative">
+                  <div className="absolute -inset-6 rounded-[34px] bg-[linear-gradient(135deg,rgba(230,0,18,0.18),transparent_55%)]" />
+                  <div className="absolute -inset-3 rounded-[34px] border border-[#E60012]/25 rotate-[-2deg]" />
+                  <div className="relative rounded-[28px] border border-white/10 bg-black/30 overflow-hidden">
+                    <div className="absolute inset-0 bg-[linear-gradient(135deg,transparent_0%,rgba(230,0,18,0.22)_42%,transparent_75%)] opacity-60" />
+                    <div className="relative aspect-[16/11] sm:aspect-[16/10]">
+                      <Image
+                        src="/images/prizes/pc.webp"
+                        alt="PC Gamer Balão da Informática"
+                        fill
+                        className="object-contain p-6 sm:p-10"
+                        priority
+                      />
                     </div>
                   </div>
-                </div>
 
-                {carouselImages.length > 0 && (
-                  <div className="mt-5">
-                    <Carousel images={carouselImages} />
+                  <div className="absolute right-4 top-6 sm:right-6 sm:top-8 rounded-2xl border border-white/10 bg-black/55 backdrop-blur px-4 py-3 text-white">
+                    <div className="text-2xl font-black leading-none">+5</div>
+                    <div className="text-xs font-extrabold uppercase tracking-[0.2em] text-white/70 mt-1">ANOS</div>
+                    <div className="text-[11px] text-white/70 mt-2 leading-tight">
+                      DE MERCADO<br />E CONFIANÇA
+                    </div>
                   </div>
-                )}
+
+                  <div className="absolute right-4 bottom-6 sm:right-6 sm:bottom-8 rounded-2xl border border-white/10 bg-black/55 backdrop-blur px-4 py-3 text-white w-[180px]">
+                    <div className="flex items-end justify-between">
+                      <div className="text-lg font-black leading-none">4,9/5</div>
+                      <div className="text-xs text-white/70">Google</div>
+                    </div>
+                    <div className="mt-2 text-[#E60012] text-sm leading-none">★★★★★</div>
+                    <div className="mt-2 text-[11px] text-white/70">+1.200 clientes satisfeitos</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
           <div className="bg-white">
             <div className="container mx-auto px-4 py-6">
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 <div className="rounded-2xl border border-black/5 bg-white p-4 flex items-start gap-3">
                   <Truck className="h-5 w-5 text-[#E60012] mt-0.5" />
                   <div>
-                    <div className="text-sm font-extrabold text-gray-900">Entrega rápida</div>
-                    <div className="text-xs text-gray-600">Campinas e região</div>
+                    <div className="text-sm font-extrabold text-gray-900">Envio rápido</div>
+                    <div className="text-xs text-gray-600">para todo o Brasil</div>
+                  </div>
+                </div>
+                <div className="rounded-2xl border border-black/5 bg-white p-4 flex items-start gap-3">
+                  <ShieldCheck className="h-5 w-5 text-[#E60012] mt-0.5" />
+                  <div>
+                    <div className="text-sm font-extrabold text-gray-900">Garantia total</div>
+                    <div className="text-xs text-gray-600">compra segura</div>
+                  </div>
+                </div>
+                <div className="rounded-2xl border border-black/5 bg-white p-4 flex items-start gap-3">
+                  <Headset className="h-5 w-5 text-[#E60012] mt-0.5" />
+                  <div>
+                    <div className="text-sm font-extrabold text-gray-900">Suporte real</div>
+                    <div className="text-xs text-gray-600">antes e depois</div>
                   </div>
                 </div>
                 <div className="rounded-2xl border border-black/5 bg-white p-4 flex items-start gap-3">
@@ -309,27 +328,6 @@ export default async function Home(props: {
                   <div>
                     <div className="text-sm font-extrabold text-gray-900">Até 12x</div>
                     <div className="text-xs text-gray-600">sem juros</div>
-                  </div>
-                </div>
-                <div className="rounded-2xl border border-black/5 bg-white p-4 flex items-start gap-3">
-                  <Headset className="h-5 w-5 text-[#E60012] mt-0.5" />
-                  <div>
-                    <div className="text-sm font-extrabold text-gray-900">Suporte</div>
-                    <div className="text-xs text-gray-600">especializado</div>
-                  </div>
-                </div>
-                <div className="rounded-2xl border border-black/5 bg-white p-4 flex items-start gap-3">
-                  <ShieldCheck className="h-5 w-5 text-[#E60012] mt-0.5" />
-                  <div>
-                    <div className="text-sm font-extrabold text-gray-900">Compra segura</div>
-                    <div className="text-xs text-gray-600">checkout protegido</div>
-                  </div>
-                </div>
-                <div className="rounded-2xl border border-black/5 bg-white p-4 flex items-start gap-3">
-                  <MapPin className="h-5 w-5 text-[#E60012] mt-0.5" />
-                  <div>
-                    <div className="text-sm font-extrabold text-gray-900">Loja física</div>
-                    <div className="text-xs text-gray-600">Campinas • SP</div>
                   </div>
                 </div>
               </div>
@@ -348,99 +346,125 @@ export default async function Home(props: {
         <main className="flex-1 w-full min-w-0">
             {isHome && (
               <>
-                <section id="categorias" className="mt-2">
-                  <div className="flex items-end justify-between gap-4 px-4 lg:px-0">
+                <section className="mt-4 px-4 lg:px-0">
+                  <div className="flex items-end justify-between gap-4">
                     <div>
-                      <div className="text-xs font-extrabold uppercase tracking-[0.2em] text-gray-500">
-                        Explore rápido
+                      <div className="text-xs font-extrabold uppercase tracking-[0.2em] text-[#E60012]">
+                        ENCONTRE SEU PC
                       </div>
-                      <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-gray-900 mt-1">
-                        Categorias em destaque
+                      <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-gray-900 mt-2">
+                        PCs em destaque
                       </h2>
-                      <p className="text-sm text-gray-600 mt-2 max-w-2xl">
-                        Encontre o que você precisa com poucos cliques. Mais clareza, menos ruído.
-                      </p>
                     </div>
-                    <Link href="/departamentos" className="hidden sm:inline-flex items-center gap-2 text-sm font-extrabold text-[#E60012] hover:underline">
-                      Ver todos os departamentos
-                      <ArrowRight className="h-4 w-4" />
+                    <Link href="/pcgamer" className="hidden sm:inline-flex items-center gap-2 text-sm font-extrabold text-gray-900 hover:text-[#E60012] transition-colors">
+                      Ver todos <ArrowRight className="h-4 w-4" />
                     </Link>
                   </div>
 
-                  <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 px-4 lg:px-0">
-                    <Link
-                      href={pcGamerCat?.slug ? `/categoria/${encodeURIComponent(pcGamerCat.slug)}` : "/pcgamer"}
-                      className="group relative overflow-hidden rounded-[28px] border border-black/5 bg-white shadow-sm hover:shadow-md transition-shadow"
-                    >
-                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(230,0,18,0.16),transparent_55%)]" />
-                      <div className="relative p-6">
-                        <div className="text-xs font-extrabold uppercase tracking-[0.2em] text-gray-500">Performance</div>
-                        <div className="mt-2 text-xl font-black text-gray-900">PC Gamer</div>
-                        <div className="mt-2 text-sm text-gray-600 max-w-sm">
-                          Configurações prontas e upgrades com foco em FPS e estabilidade.
-                        </div>
-                        <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-[#E60012] px-4 py-2 text-sm font-extrabold text-white group-hover:bg-[#cc0010] transition-colors">
-                          Ver produtos
-                          <ArrowRight className="h-4 w-4" />
+                  <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {pcFeatured.length > 0 ? (
+                      pcFeatured.map((p, idx) => (
+                        <ProductCard key={p.id} product={p} layout="featured" badgeLabel={pcBadges[idx] || "Destaque"} />
+                      ))
+                    ) : (
+                      <div className="sm:col-span-2 lg:col-span-4 rounded-2xl border border-black/10 bg-white p-8 text-center text-gray-600">
+                        Nenhum PC Gamer encontrado para exibir aqui.
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-6 sm:hidden">
+                    <Link href="/pcgamer" className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white border border-black/10 px-5 py-3 font-extrabold text-gray-900 hover:bg-zinc-50 transition-colors">
+                      Ver todos <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </div>
+                </section>
+
+                <section className="mt-10 px-4 lg:px-0">
+                  <div className="relative overflow-hidden rounded-[28px] bg-zinc-950 border border-black/5">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(230,0,18,0.25),transparent_55%),radial-gradient(circle_at_85%_55%,rgba(255,255,255,0.08),transparent_55%)]" />
+                    <div className="absolute inset-0 opacity-60 bg-[linear-gradient(135deg,transparent_0%,rgba(230,0,18,0.24)_42%,transparent_75%)]" />
+                    <div className="relative px-6 py-8 sm:px-10 sm:py-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                      <div className="lg:col-span-7">
+                        <div className="text-xs font-extrabold uppercase tracking-[0.2em] text-white/70">MONTE SEU PC</div>
+                        <h3 className="mt-2 text-2xl sm:text-3xl font-black tracking-tight text-white">
+                          Monte seu PC do seu jeito!
+                        </h3>
+                        <p className="mt-2 text-sm sm:text-base text-zinc-300 leading-relaxed max-w-2xl">
+                          Escolha as peças do nosso estoque com ajuda de um especialista e garanta compatibilidade, desempenho e acabamento premium.
+                        </p>
+                        <div className="mt-5 flex flex-col sm:flex-row gap-3">
+                          <Link
+                            href="/montagempc"
+                            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#E60012] hover:bg-[#cc0010] px-6 py-3.5 text-sm font-extrabold text-white transition-colors shadow-[0_18px_60px_rgba(230,0,18,0.28)]"
+                          >
+                            Montar agora
+                            <ArrowRight className="h-5 w-5" />
+                          </Link>
+                          <a
+                            href={whatsappHref}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 hover:bg-white/10 px-6 py-3.5 text-sm font-extrabold text-white transition-colors"
+                          >
+                            Pedir ajuda no WhatsApp
+                            <ArrowRight className="h-5 w-5" />
+                          </a>
                         </div>
                       </div>
-                    </Link>
-
-                    <Link
-                      href={notebooksCat?.slug ? `/categoria/${encodeURIComponent(notebooksCat.slug)}` : "/notebooks"}
-                      className="group relative overflow-hidden rounded-[28px] border border-black/5 bg-white shadow-sm hover:shadow-md transition-shadow"
-                    >
-                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_25%,rgba(0,0,0,0.10),transparent_55%)]" />
-                      <div className="relative p-6">
-                        <div className="text-xs font-extrabold uppercase tracking-[0.2em] text-gray-500">Mobilidade</div>
-                        <div className="mt-2 text-xl font-black text-gray-900">Notebooks</div>
-                        <div className="mt-2 text-sm text-gray-600 max-w-sm">
-                          Trabalho, estudo e criação com ótimo custo-benefício.
+                      <div className="lg:col-span-5">
+                        <div className="relative w-full aspect-[16/10] rounded-[24px] border border-white/10 bg-black/30 overflow-hidden">
+                          <Image src="/images/prizes/pc.png" alt="Monte seu PC" fill className="object-contain p-6" />
                         </div>
-                        <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-extrabold text-gray-900 group-hover:bg-zinc-50 transition-colors">
-                          Ver ofertas
-                          <ArrowRight className="h-4 w-4" />
-                        </div>
-                      </div>
-                    </Link>
-
-                    <div className="grid grid-cols-1 gap-4">
-                      <Link
-                        href={hardwareCat?.slug ? `/categoria/${encodeURIComponent(hardwareCat.slug)}` : "/?category=Hardware"}
-                        className="group relative overflow-hidden rounded-[28px] border border-black/5 bg-white shadow-sm hover:shadow-md transition-shadow"
-                      >
-                        <div className="relative p-6">
-                          <div className="text-xs font-extrabold uppercase tracking-[0.2em] text-gray-500">Upgrade</div>
-                          <div className="mt-2 text-lg font-black text-gray-900">Hardware</div>
-                          <div className="mt-2 text-sm text-gray-600">Placas, SSDs, RAM e mais.</div>
-                          <div className="mt-4 inline-flex items-center gap-2 text-sm font-extrabold text-[#E60012]">
-                            Ver produtos <ArrowRight className="h-4 w-4" />
-                          </div>
-                        </div>
-                      </Link>
-                      <div className="grid grid-cols-2 gap-4">
-                        <Link
-                          href={monitorsCat?.slug ? `/categoria/${encodeURIComponent(monitorsCat.slug)}` : "/?category=Monitores"}
-                          className="group relative overflow-hidden rounded-[28px] border border-black/5 bg-white p-6 shadow-sm hover:shadow-md transition-shadow"
-                        >
-                          <div className="text-xs font-extrabold uppercase tracking-[0.2em] text-gray-500">Visual</div>
-                          <div className="mt-2 text-lg font-black text-gray-900">Monitores</div>
-                          <div className="mt-4 inline-flex items-center gap-2 text-sm font-extrabold text-[#E60012]">
-                            Ver <ArrowRight className="h-4 w-4" />
-                          </div>
-                        </Link>
-                        <Link
-                          href={accessoriesCat?.slug ? `/categoria/${encodeURIComponent(accessoriesCat.slug)}` : "/?category=Periféricos"}
-                          className="group relative overflow-hidden rounded-[28px] border border-black/5 bg-white p-6 shadow-sm hover:shadow-md transition-shadow"
-                        >
-                          <div className="text-xs font-extrabold uppercase tracking-[0.2em] text-gray-500">Setup</div>
-                          <div className="mt-2 text-lg font-black text-gray-900">Periféricos</div>
-                          <div className="mt-4 inline-flex items-center gap-2 text-sm font-extrabold text-[#E60012]">
-                            Ver <ArrowRight className="h-4 w-4" />
-                          </div>
-                        </Link>
                       </div>
                     </div>
+                  </div>
+                </section>
+
+                <section id="categorias" className="mt-10 px-4 lg:px-0">
+                  <div className="flex items-end justify-between gap-4">
+                    <div>
+                      <div className="text-xs font-extrabold uppercase tracking-[0.2em] text-[#E60012]">
+                        CATEGORIAS POPULARES
+                      </div>
+                      <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-gray-900 mt-2">
+                        O que você procura?
+                      </h2>
+                    </div>
+                    <Link href="/departamentos" className="hidden sm:inline-flex items-center gap-2 text-sm font-extrabold text-gray-900 hover:text-[#E60012] transition-colors">
+                      Ver todas categorias <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </div>
+
+                  <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
+                    {[
+                      { label: "PC Gamer", href: "/pcgamer", Icon: Gamepad2 },
+                      { label: "PC Profissional", href: "/premium", Icon: Briefcase },
+                      { label: "Workstation", href: "/vitrine", Icon: Cpu },
+                      { label: "Monitores", href: "/?category=Monitores", Icon: Monitor },
+                      { label: "Placas de Vídeo", href: "/?search=RTX", Icon: CircuitBoard },
+                      { label: "Periféricos", href: "/?category=Perif%C3%A9ricos", Icon: Gamepad2 },
+                      { label: "Hardware", href: "/?category=Hardware", Icon: Cpu },
+                    ].map(({ label, href, Icon }) => (
+                      <Link
+                        key={label}
+                        href={href}
+                        className="group rounded-2xl border border-black/5 bg-white p-4 hover:shadow-sm transition-shadow"
+                      >
+                        <div className="flex flex-col items-center text-center gap-3">
+                          <div className="h-12 w-12 rounded-full bg-zinc-950 text-white flex items-center justify-center border border-black/10 group-hover:bg-[#E60012] transition-colors">
+                            <Icon className="h-6 w-6" />
+                          </div>
+                          <div className="text-sm font-extrabold text-gray-900">{label}</div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+
+                  <div className="mt-6 sm:hidden">
+                    <Link href="/departamentos" className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white border border-black/10 px-5 py-3 font-extrabold text-gray-900 hover:bg-zinc-50 transition-colors">
+                      Ver todas categorias <ArrowRight className="h-4 w-4" />
+                    </Link>
                   </div>
                 </section>
 

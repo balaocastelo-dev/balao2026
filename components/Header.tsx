@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search, ShoppingCart, User, Menu, X, Loader2, Crown, MessageCircle, Tag, LayoutGrid } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -17,6 +17,7 @@ import { SITE_CONFIG } from "@/lib/config";
 export default function Header() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const { cartCount } = useCart();
   const { toggleSidebar } = useSidebar();
   const [logoClicks, setLogoClicks] = useState(0);
@@ -135,6 +136,7 @@ export default function Header() {
   const whatsappHref = `https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(
     SITE_CONFIG.whatsapp.messageDefault
   )}`;
+  const activeCategory = searchParams.get("category") || "";
 
   return (
     <header className="bg-zinc-950 sticky top-0 z-[900] shadow-[0_12px_40px_rgba(0,0,0,0.25)] flex flex-col">
@@ -329,18 +331,38 @@ export default function Header() {
         </div>
       </div>
 
-      <nav className="hidden lg:block border-b border-white/10">
-        <div className="container mx-auto px-4 py-2 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.18em] text-white/60">
-            <span className="inline-flex h-2 w-2 rounded-full bg-[#E60012]" />
-            Tecnologia • PC Gamer • Notebooks • Hardware
-          </div>
-          <div className="flex items-center gap-6 text-sm font-bold text-white/85">
-            <Link href="/pcgamer" className="hover:text-white transition-colors">PC Gamer</Link>
-            <Link href="/notebooks" className="hover:text-white transition-colors">Notebooks</Link>
-            <Link href="/servicos-e-ofertas" className="hover:text-white transition-colors">Serviços</Link>
-            <Link href="/vitrine" className="hover:text-white transition-colors">Vitrine</Link>
-            <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
+      <nav className="hidden lg:block border-b border-white/10 bg-zinc-950/95">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center gap-8 text-xs font-extrabold uppercase tracking-[0.18em] text-white/75">
+            {[
+              { label: "PC Gamer", href: "/pcgamer", active: pathname === "/pcgamer" },
+              { label: "PC Profissional", href: "/premium", active: pathname === "/premium" },
+              { label: "Workstation", href: "/vitrine", active: pathname?.startsWith("/vitrine") },
+              { label: "Monitores", href: "/?category=Monitores", active: pathname === "/" && activeCategory === "Monitores" },
+              { label: "Periféricos", href: "/?category=Perif%C3%A9ricos", active: pathname === "/" && activeCategory === "Periféricos" },
+              { label: "Hardware", href: "/?category=Hardware", active: pathname === "/" && activeCategory === "Hardware" },
+              { label: "Promoções", href: "/promocao", active: pathname === "/promocao" },
+              { label: "Contato", href: "/fale-conosco", active: pathname === "/fale-conosco" },
+            ].map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                className={[
+                  "group relative py-3 transition-colors",
+                  item.active ? "text-white" : "text-white/70 hover:text-white",
+                ].join(" ")}
+              >
+                {item.label}
+                <span
+                  className={[
+                    "absolute left-0 -bottom-px h-[2px] rounded-full bg-[#E60012] transition-all",
+                    item.active
+                      ? "w-full opacity-100 shadow-[0_0_18px_rgba(230,0,18,0.55)]"
+                      : "w-0 opacity-0 group-hover:w-full group-hover:opacity-100",
+                  ].join(" ")}
+                />
+              </Link>
+            ))}
           </div>
         </div>
       </nav>

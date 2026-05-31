@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { SITE_CONFIG } from "@/lib/config";
+import { Headset, Phone, ShieldCheck, Truck } from "lucide-react";
 
 export default function TopBar() {
   const [dolar, setDolar] = useState<string | null>(null);
@@ -50,23 +51,41 @@ export default function TopBar() {
   }, []);
 
   return (
-    <div className="w-full bg-[#E60012] text-white text-xs md:text-sm py-1 overflow-hidden relative z-50 border-b border-red-700">
-      <div className="container mx-auto flex items-center justify-between px-2">
-         {/* Marquee Container */}
-         <div className="flex-1 overflow-hidden whitespace-nowrap relative">
-            <div className="animate-marquee inline-block">
-              {messages?.map((m, idx) => (
-                <span key={idx} className="mx-4 font-semibold">{m}</span>
-              ))}
-              <span className="mx-2 text-red-200">|</span>
-               {dolar && (
-                <>
-                  <span className="mx-2 text-red-200">|</span>
-                  <span className="mx-4 font-bold text-yellow-300 bg-red-800 px-2 py-0.5 rounded">Dólar Hoje: R$ {dolar}</span>
-                </>
-              )}
-            </div>
-         </div>
+    <div className="w-full bg-zinc-950 text-white/85 text-xs md:text-sm overflow-hidden relative z-50 border-b border-white/10">
+      <div className="container mx-auto flex items-center justify-between px-3 py-2">
+        <div className="hidden md:flex items-center gap-8">
+          <div className="flex items-center gap-2 font-semibold">
+            <Truck className="h-4 w-4 text-[#E60012]" />
+            Atendemos todo o Brasil
+          </div>
+          <div className="flex items-center gap-2 font-semibold">
+            <ShieldCheck className="h-4 w-4 text-[#E60012]" />
+            Frete seguro para sua região
+          </div>
+          <div className="flex items-center gap-2 font-semibold">
+            <Headset className="h-4 w-4 text-[#E60012]" />
+            Atendimento especializado
+          </div>
+        </div>
+
+        <div className="md:hidden flex-1 overflow-hidden whitespace-nowrap relative">
+          <div className="animate-marquee inline-block">
+            {messages?.slice(0, 5).map((m, idx) => (
+              <span key={idx} className="mx-4 font-semibold">{m}</span>
+            ))}
+            {dolar && (
+              <>
+                <span className="mx-2 text-white/25">|</span>
+                <span className="mx-4 font-bold text-white/90">Dólar: R$ {dolar}</span>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="hidden md:flex items-center gap-2 font-extrabold text-white">
+          <Phone className="h-4 w-4 text-[#E60012]" />
+          {SITE_CONFIG.phone.display}
+        </div>
       </div>
       <style jsx>{`
         .animate-marquee {
