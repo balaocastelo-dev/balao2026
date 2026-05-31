@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowLeft, CheckCircle, Upload, Layout, Layers, ShoppingBag, Settings } from "lucide-react";
+import { ArrowLeft, CheckCircle, Upload, Layout, Layers, ShoppingBag, Settings, Sparkles } from "lucide-react";
 import VitrineAdminShell from "@/components/admin/VitrineAdminShell";
 
 export default function AdminLayout({
@@ -24,7 +24,6 @@ export default function AdminLayout({
     { name: "Gerenciar Pedidos", href: "/admin/pedidos", icon: ShoppingBag },
     { name: "Gerenciar Produtos", href: "/admin/produtos", icon: Settings },
     { name: "Blocos da Home", href: "/admin/home-blocks", icon: Layout },
-    { name: "Gerador", href: "/gerador", icon: Layout },
     { name: "Cupons", href: "/admin/cupons", icon: Settings },
     { name: "Barra (TopBar)", href: "/admin/barra", icon: Layout },
     { name: "Fechamento Assistência", href: "https://www.balao.info/fechamento", icon: CheckCircle },
@@ -36,9 +35,19 @@ export default function AdminLayout({
       <header className="bg-white shadow-sm border-b sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
              <div className="flex items-center gap-4">
-                <Link href="/" className="p-2 hover:bg-gray-100 rounded-full text-gray-600 transition-colors">
-                    <ArrowLeft size={20} />
-                </Link>
+                <div className="flex flex-col gap-1">
+                  <Link href="/" className="p-2 hover:bg-gray-100 rounded-full text-gray-600 transition-colors w-fit">
+                      <ArrowLeft size={20} />
+                  </Link>
+                  <Link
+                    href="/gerador"
+                    className="inline-flex items-center gap-2 px-2 py-1 rounded-md text-xs font-medium text-gray-600 hover:bg-gray-100 transition-colors w-fit"
+                    title="Abrir Gerador de Páginas"
+                  >
+                    <Sparkles size={14} />
+                    Gerador
+                  </Link>
+                </div>
                 <h1 className="text-xl font-bold text-gray-800">Painel Administrativo</h1>
              </div>
              <div className="flex gap-2">
