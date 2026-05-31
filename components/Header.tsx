@@ -172,21 +172,21 @@ export default function Header() {
         
 
         {/* Search Bar (Desktop) */}
-        <form 
-             ref={searchContainerRef}
-             onSubmit={handleSearch} 
-             className="hidden md:flex flex-1 max-w-xl relative"
-             className="hidden md:flex flex-1 max-w-xl relative"
+        <form
+          ref={searchContainerRef}
+          onSubmit={handleSearch}
+          className="hidden md:flex flex-1 max-w-xl relative"
+        >
           <input
-              type="text"
-              placeholder="Buscar produtos..."
-              className="w-full pl-12 pr-24 py-3 border border-gray-300 rounded-full focus:outline-none focus:border-[#E60012] focus:ring-1 focus:ring-[#E60012] shadow-sm text-base"
-              className="w-full pl-12 pr-28 py-3.5 border border-white/10 bg-white text-gray-900 rounded-full focus:outline-none focus:ring-2 focus:ring-[#E60012]/30 shadow-sm text-base placeholder:text-gray-400"
-              onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setShowPreview(true);
-              }}
-              onFocus={() => setShowPreview(true)}
+            type="text"
+            placeholder="Buscar produtos..."
+            className="w-full pl-12 pr-28 py-3.5 border border-white/10 bg-white text-gray-900 rounded-full focus:outline-none focus:ring-2 focus:ring-[#E60012]/30 shadow-sm text-base placeholder:text-gray-400"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setShowPreview(true);
+            }}
+            onFocus={() => setShowPreview(true)}
           />
 
 
