@@ -65,7 +65,7 @@ export default function Carousel({ images }: { images: CarouselImage[] }) {
 
   return (
     <div 
-      className="relative w-full h-40 md:h-64 lg:h-80 overflow-hidden rounded-xl shadow-lg group"
+      className="relative w-full h-44 md:h-64 lg:h-80 overflow-hidden rounded-[28px] shadow-lg group border border-white/10"
       onMouseEnter={() => setIsAutoPlay(false)}
       onMouseLeave={() => setIsAutoPlay(true)}
       onTouchStart={onTouchStart}
@@ -84,11 +84,12 @@ export default function Carousel({ images }: { images: CarouselImage[] }) {
                 alt={image.title || "Banner"}
                 fill
                 className="w-full h-full"
-                style={{ objectFit: "fill" }}
+                style={{ objectFit: "cover" }}
                 priority={currentIndex === 0}
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 100vw"
                 unoptimized
              />
+             <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/0 to-black/0" />
              {/* Title removed as requested */}
           </div>
         ))}
@@ -99,13 +100,13 @@ export default function Carousel({ images }: { images: CarouselImage[] }) {
         <>
           <button 
             onClick={(e) => { e.preventDefault(); prevSlide(); }}
-            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/35 hover:bg-black/55 text-white p-2.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur border border-white/10"
           >
             <ChevronLeft size={24} />
           </button>
           <button 
             onClick={(e) => { e.preventDefault(); nextSlide(); }}
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/35 hover:bg-black/55 text-white p-2.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur border border-white/10"
           >
             <ChevronRight size={24} />
           </button>
