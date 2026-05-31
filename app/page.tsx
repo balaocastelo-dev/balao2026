@@ -14,7 +14,7 @@ import type { Metadata } from "next";
 import { SITE_CONFIG } from "@/lib/config";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, BadgeCheck, Briefcase, CircuitBoard, CreditCard, Cpu, Gamepad2, Headset, MapPin, Monitor, ShieldCheck, Truck, Wrench } from "lucide-react";
+import { ArrowRight, BadgeCheck, Briefcase, CircuitBoard, CreditCard, Cpu, Gamepad2, Headset, MapPin, Monitor, ShieldCheck, Star, Truck, Wrench } from "lucide-react";
 
 export const dynamic = 'force-dynamic';
 
