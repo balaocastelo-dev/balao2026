@@ -190,12 +190,13 @@ export default function Header() {
         >
           <input
             type="text"
-            className="w-full pl-12 pr-28 py-3.5 border border-black/10 bg-white text-gray-900 rounded-full focus:outline-none focus:ring-2 focus:ring-[#E60012]/20 shadow-sm text-base placeholder:text-gray-400"
+            placeholder="O que você está buscando?"
             className="w-full pl-12 pr-28 py-3.5 border border-black/10 bg-white text-gray-900 rounded-full focus:outline-none focus:ring-2 focus:ring-[#E60012]/20 shadow-sm text-base placeholder:text-gray-400"
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
               setShowPreview(true);
+            }}
             onFocus={() => setShowPreview(true)}
           />
 
