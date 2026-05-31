@@ -284,7 +284,7 @@ export default async function Home(props: {
                         src={heroIllustration}
                         alt="PC Gamer Balão da Informática"
                         fill
-                        className="object-contain p-6 sm:p-10"
+                        className="object-contain p-6 sm:p-10 mix-blend-multiply contrast-125 saturate-125"
                         priority
                         unoptimized
                       />
@@ -427,7 +427,13 @@ export default async function Home(props: {
                       </div>
                       <div className="lg:col-span-5">
                         <div className="relative w-full aspect-[16/10] rounded-[24px] border border-white/10 bg-black/30 overflow-hidden">
-                          <Image src={buildIllustration} alt="Monte seu PC" fill className="object-contain p-6" unoptimized />
+                          <Image
+                            src={buildIllustration}
+                            alt="Monte seu PC"
+                            fill
+                            className="object-contain p-6 mix-blend-multiply contrast-125 saturate-125"
+                            unoptimized
+                          />
                         </div>
                       </div>
                     </div>
