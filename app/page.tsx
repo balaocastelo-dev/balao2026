@@ -191,6 +191,18 @@ export default async function Home(props: {
     .slice(0, 4);
   const pcBadges = ["Mais vendido", "Custo benefício", "Alta performance", "Profissional"];
 
+  const premiumProducts = products.filter(
+    (p) => /premium/i.test(String(p.category || "")) || /pcs?\s*premium/i.test(String(p.name || "")),
+  );
+  const pickIllustrationFromPremium = (seed: number) => {
+    const list = premiumProducts.filter((p) => typeof p?.image === "string" && p.image.trim());
+    if (list.length === 0) return null;
+    const index = Math.abs(seed) % list.length;
+    return list[index].image;
+  };
+  const heroIllustration = pickIllustrationFromPremium(1) || "/images/prizes/pc.webp";
+  const buildIllustration = pickIllustrationFromPremium(2) || "/images/prizes/pc.png";
+
   return (
     <div className="min-h-screen bg-zinc-50 flex flex-col font-sans">
       <JsonLd data={generateOrganizationSchema()} />
@@ -269,11 +281,12 @@ export default async function Home(props: {
                     <div className="absolute inset-0 bg-[linear-gradient(135deg,transparent_0%,rgba(230,0,18,0.22)_42%,transparent_75%)] opacity-60" />
                     <div className="relative aspect-[16/11] sm:aspect-[16/10]">
                       <Image
-                        src="/images/prizes/pc.webp"
+                        src={heroIllustration}
                         alt="PC Gamer Balão da Informática"
                         fill
                         className="object-contain p-6 sm:p-10"
                         priority
+                        unoptimized
                       />
                     </div>
                   </div>
@@ -414,7 +427,7 @@ export default async function Home(props: {
                       </div>
                       <div className="lg:col-span-5">
                         <div className="relative w-full aspect-[16/10] rounded-[24px] border border-white/10 bg-black/30 overflow-hidden">
-                          <Image src="/images/prizes/pc.png" alt="Monte seu PC" fill className="object-contain p-6" />
+                          <Image src={buildIllustration} alt="Monte seu PC" fill className="object-contain p-6" unoptimized />
                         </div>
                       </div>
                     </div>
