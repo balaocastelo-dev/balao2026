@@ -171,17 +171,6 @@ export default function Header() {
              </div>
         </button>
 
-        <button
-          type="button"
-          onClick={toggleSidebar}
-          className="hidden md:inline-flex items-center gap-2 rounded-xl bg-[#E60012] hover:bg-[#cc0010] text-white px-4 py-3 font-extrabold transition-colors shadow-[0_14px_30px_rgba(230,0,18,0.18)]"
-        >
-          <Menu size={18} strokeWidth={2.5} />
-          Todas as categorias
-        </button>
-        
-        
-
         {/* Search Bar (Desktop) */}
         <form
           ref={searchContainerRef}
