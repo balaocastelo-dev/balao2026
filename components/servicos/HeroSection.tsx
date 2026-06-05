@@ -32,7 +32,7 @@ export default function HeroSection({
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               {agendamentoLink ? (
-                <Link href="/(servicos)/agendamento" className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-lg bg-[#E60012] text-white font-semibold hover:bg-[#C81920] transition-colors">
+                <Link href="/reparoapple/agendamento" className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-lg bg-[#E60012] text-white font-semibold hover:bg-[#C81920] transition-colors">
                   <Calendar className="w-5 h-5" />
                   Agendar Diagnóstico Grátis
                 </Link>

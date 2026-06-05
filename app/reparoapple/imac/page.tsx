@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     'reparo imac',
     'loja imac campinas'
   ],
-  alternates: { canonical: "https://www.balao.info/(servicos)/imac" },
+  alternates: { canonical: "https://www.balao.info/reparoapple/imac" },
 }
 
 const imacServices = [

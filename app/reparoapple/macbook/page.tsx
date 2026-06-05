@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     'reparo placa macbook',
     'troca teclado macbook'
   ],
-  alternates: { canonical: "https://www.balao.info/(servicos)/macbook" },
+  alternates: { canonical: "https://www.balao.info/reparoapple/macbook" },
 }
 
 const macbookServices = [

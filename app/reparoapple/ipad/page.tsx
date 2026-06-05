@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     'reparo ipad',
     'loja ipad campinas'
   ],
-  alternates: { canonical: "https://www.balao.info/(servicos)/ipad" },
+  alternates: { canonical: "https://www.balao.info/reparoapple/ipad" },
 }
 
 const ipadServices = [

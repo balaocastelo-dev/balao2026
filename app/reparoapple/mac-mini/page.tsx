@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     'reparo mac mini',
     'loja mac mini campinas'
   ],
-  alternates: { canonical: "https://www.balao.info/(servicos)/mac-mini" },
+  alternates: { canonical: "https://www.balao.info/reparoapple/mac-mini" },
 }
 
 const macMiniServices = [

@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     'reparo apple watch',
     'loja apple watch campinas'
   ],
-  alternates: { canonical: "https://www.balao.info/(servicos)/apple-watch" },
+  alternates: { canonical: "https://www.balao.info/reparoapple/apple-watch" },
 }
 
 const appleWatchServices = [

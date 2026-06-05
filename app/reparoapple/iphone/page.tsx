@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     'loja apple campinas',
     'manutenção iphone'
   ],
-  alternates: { canonical: "https://www.balao.info/(servicos)/iphone" },
+  alternates: { canonical: "https://www.balao.info/reparoapple/iphone" },
 }
 
 const iphoneServices = [
