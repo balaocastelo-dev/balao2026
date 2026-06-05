@@ -99,14 +99,14 @@ export default function AgendamentoPage() {
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#E60012]/10 text-[#E60012] text-sm font-semibold mb-4">
-            <Calendar className="w-4 h-4" />
-            Agendamento Rápido
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#E60012]/10 text-[#E60012] text-sm font-semibold mb-4">
+              <Calendar className="w-4 h-4" />
+              Agendamento Rápido
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">Agende o seu reparo em Campinas</h1>
+            <p className="text-gray-600">Preencha o formulário abaixo e receba um horário para o seu reparo Apple.</p>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Agende o seu reparo em Campinas</h1>
-          <p className="text-gray-600">Preencha o formulário abaixo e receba um horário para o seu reparo Apple.</p>
-        </div>
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-bold text-gray-900 mb-2">Dispositivo</label>
