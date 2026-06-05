@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Phone, Calendar, Smartphone, Monitor, Clock, CheckCircle2 } from 'lucide-react'
+import { Phone, Calendar, Smartphone, Clock, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 
 export default function AgendamentoPage() {
@@ -107,121 +107,122 @@ export default function AgendamentoPage() {
             <p className="text-gray-600">Preencha o formulário abaixo e receba um horário para o seu reparo Apple.</p>
           </div>
           <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm font-bold text-gray-900 mb-2">Dispositivo</label>
-              <select
-                name="device"
-                value={formData.device}
-                onChange={handleChange}
-                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#E60012] focus:ring-1 focus:ring-[#E60012] transition-colors"
-                required
-              >
-                <option value="">Selecione o dispositivo</option>
-                {devices.map(device => (
-                  <option key={device} value={device}>{device}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-gray-900 mb-2">Problema</label>
-              <select
-                name="issue"
-                value={formData.issue}
-                onChange={handleChange}
-                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#E60012] focus:ring-1 focus:ring-[#E60012] transition-colors"
-                required
-              >
-                <option value="">Selecione o problema</option>
-                {issues.map(issue => (
-                  <option key={issue} value={issue}>{issue}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-gray-900 mb-2">Nome completo</label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Seu nome"
-                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#E60012] focus:ring-1 focus:ring-[#E60012] transition-colors"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-gray-900 mb-2">WhatsApp</label>
-              <input
-                type="tel"
-                name="whatsapp"
-                value={formData.whatsapp}
-                onChange={handleChange}
-                placeholder="(19) 99999-9999"
-                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#E60012] focus:ring-1 focus:ring-[#E60012] transition-colors"
-                required
-              />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block text-sm font-bold text-gray-900 mb-2">Data preferida</label>
-                <input
-                  type="date"
-                  name="date"
-                  value={formData.date}
+                <label className="block text-sm font-bold text-gray-900 mb-2">Dispositivo</label>
+                <select
+                  name="device"
+                  value={formData.device}
                   onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#E60012] focus:ring-1 focus:ring-[#E60012] transition-colors"
+                  required
+                >
+                  <option value="">Selecione o dispositivo</option>
+                  {devices.map(device => (
+                    <option key={device} value={device}>{device}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-900 mb-2">Problema</label>
+                <select
+                  name="issue"
+                  value={formData.issue}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#E60012] focus:ring-1 focus:ring-[#E60012] transition-colors"
+                  required
+                >
+                  <option value="">Selecione o problema</option>
+                  {issues.map(issue => (
+                    <option key={issue} value={issue}>{issue}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-900 mb-2">Nome completo</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Seu nome"
                   className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#E60012] focus:ring-1 focus:ring-[#E60012] transition-colors"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-900 mb-2">Horário preferido</label>
-                <select
-                  name="time"
-                  value={formData.time}
+                <label className="block text-sm font-bold text-gray-900 mb-2">WhatsApp</label>
+                <input
+                  type="tel"
+                  name="whatsapp"
+                  value={formData.whatsapp}
                   onChange={handleChange}
+                  placeholder="(19) 99999-9999"
                   className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#E60012] focus:ring-1 focus:ring-[#E60012] transition-colors"
                   required
-                >
-                  <option value="">Selecione o horário</option>
-                  {times.map(time => (
-                    <option key={time} value={time}>{time}</option>
-                  ))}
-                </select>
+                />
               </div>
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-gray-900 mb-2">Mensagem adicional (opcional)</label>
-              <textarea
-                name="message"
-                value={formData.message}
-                onChange={handleChange}
-                placeholder="Descreva mais detalhes do problema do seu dispositivo"
-                rows={4}
-                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#E60012] focus:ring-1 focus:ring-[#E60012] transition-colors resize-none"
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-lg bg-[#E60012] text-white font-bold hover:bg-[#c81920] transition-colors"
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-2">Data preferida</label>
+                  <input
+                    type="date"
+                    name="date"
+                    value={formData.date}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#E60012] focus:ring-1 focus:ring-[#E60012] transition-colors"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-900 mb-2">Horário preferido</label>
+                  <select
+                    name="time"
+                    value={formData.time}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#E60012] focus:ring-1 focus:ring-[#E60012] transition-colors"
+                    required
+                  >
+                    <option value="">Selecione o horário</option>
+                    {times.map(time => (
+                      <option key={time} value={time}>{time}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-900 mb-2">Mensagem adicional (opcional)</label>
+                <textarea
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  placeholder="Descreva mais detalhes do problema do seu dispositivo"
+                  rows={4}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#E60012] focus:ring-1 focus:ring-[#E60012] transition-colors resize-none"
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-lg bg-[#E60012] text-white font-bold hover:bg-[#c81920] transition-colors"
+              >
+                <Clock className="w-5 h-5" />
+                Agendar agora
+              </button>
+            </form>
+          </div>
+          <div className="mt-8 bg-gray-50 rounded-2xl border border-gray-100 p-6 text-center">
+            <Smartphone className="w-10 h-10 text-[#E60012] mx-auto mb-4" />
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Prefere falar diretamente?</h3>
+            <p className="text-gray-600 mb-4">Entre em contato conosco diretamente no WhatsApp.</p>
+            <Link
+              href="https://wa.me/5519987510267"
+              target="_blank"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg border border-[#E60012] text-[#E60012] font-bold hover:bg-[#E60012] hover:text-white transition-colors"
             >
-              <Clock className="w-5 h-5" />
-              Agendar agora
-            </button>
-          </form>
-        </div>
-        <div className="mt-8 bg-gray-50 rounded-2xl border border-gray-100 p-6 text-center">
-          <Smartphone className="w-10 h-10 text-[#E60012] mx-auto mb-4" />
-          <h3 className="text-lg font-bold text-gray-900 mb-2">Prefere falar diretamente?</h3>
-          <p className="text-gray-600 mb-4">Entre em contato conosco diretamente no WhatsApp.</p>
-          <Link
-            href="https://wa.me/5519987510267"
-            target="_blank"
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg border border-[#E60012] text-[#E60012] font-bold hover:bg-[#E60012] hover:text-white transition-colors"
-          >
-            <Phone className="w-5 h-5" />
-            Chamar no WhatsApp
-          </Link>
+              <Phone className="w-5 h-5" />
+              Chamar no WhatsApp
+            </Link>
+          </div>
         </div>
       </div>
     </div>
