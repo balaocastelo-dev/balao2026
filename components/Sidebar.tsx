@@ -279,8 +279,9 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
           <CustomLink href="/montagempc" icon={Cpu} label="Montagem PC Gamer" />
           <CustomLink href="/sistemas" icon={CircuitBoard} label="Sites & Sistemas" />
           <CustomLink href="/pcgamer3d" icon={Box} label="PC Gamer 3D" />
+                  <CustomLink href="/wendell/apple" icon={Laptop} label="Especialista Apple" />
 
-          {availableTags && availableTags.length > 0 && (
+            {availableTags && availableTags.length > 0 && (
             <div className="mt-4 pt-4 border-t border-gray-100 mx-4">
               <div className="flex items-center justify-between mb-3">
                  <div className="flex items-center gap-2 text-sm font-bold text-gray-700">
@@ -366,6 +367,7 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
             <CustomLink href="/montagempc" icon={Cpu} label="Montagem PC Gamer" />
             <CustomLink href="/sistemas" icon={CircuitBoard} label="Sites & Sistemas" />
             <CustomLink href="/pcgamer3d" icon={Box} label="PC Gamer 3D" />
+                  <CustomLink href="/wendell/apple" icon={Laptop} label="Especialista Apple" />
 
             {/* Mobile Filters */}
             {availableTags && availableTags.length > 0 && (
