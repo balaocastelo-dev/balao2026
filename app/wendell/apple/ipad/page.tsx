@@ -33,14 +33,14 @@ export const metadata: Metadata = {
     description:
       "iPad com tela quebrada, bateria ruim ou falha de carga? Fazemos reparo especializado em Campinas.",
     siteName: SITE_CONFIG.name,
-    images: [{ url: "/images/apple/ipad-hero.webp" }],
+    images: [{ url: "/images/apple/generated/ipad-hero.svg" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Assistência iPad em Campinas | Tela, Bateria e Conector",
     description:
       "iPad com tela quebrada, bateria ruim ou falha de carga? Fazemos reparo especializado em Campinas.",
-    images: ["/images/apple/ipad-hero.webp"],
+    images: ["/images/apple/generated/ipad-hero.svg"],
   },
 };
 
@@ -54,7 +54,7 @@ export default function IPadPage() {
       title="Assistência para"
       highlightedWord="iPad"
       description="Seu iPad merece um reparo ágil e bem executado. Trabalhamos com troca de tela, bateria, conector e reparos técnicos para clientes do Cambuí, Nova Campinas, Centro e bairros próximos."
-      heroImageSrc="/images/apple/ipad-hero.webp"
+      heroImageSrc="/images/apple/generated/ipad-hero.svg"
       heroImageAlt="Assistência técnica iPad em Campinas"
       heroCaption="Tela, bateria e conector com atendimento rápido para Campinas"
       whatsappHref={WHATSAPP_LINK}
@@ -72,21 +72,21 @@ export default function IPadPage() {
           title: "Troca de tela para iPad",
           description:
             "Resolvemos trincas, toque falhando e danos visuais com substituição técnica e acabamento limpo.",
-          imageSrc: "/images/apple/ipad-tela.png",
+          imageSrc: "/images/apple/generated/ipad-tela.svg",
           imageAlt: "Troca de tela de iPad",
         },
         {
           title: "Bateria nova para recuperar autonomia",
           description:
             "Se a bateria dura pouco ou o iPad desliga sozinho, realizamos a substituição com segurança.",
-          imageSrc: "/images/apple/ipad-bateria.png",
+          imageSrc: "/images/apple/generated/ipad-bateria.svg",
           imageAlt: "Troca de bateria de iPad",
         },
         {
           title: "Conector de carga com reparo preciso",
           description:
             "Para iPad que não carrega, carrega mal ou exige posição específica do cabo, fazemos o reparo correto.",
-          imageSrc: "/images/apple/ipad-carga.png",
+          imageSrc: "/images/apple/generated/ipad-carga.svg",
           imageAlt: "Reparo de conector de carga de iPad",
         },
       ]}

@@ -35,14 +35,14 @@ export const metadata: Metadata = {
     description:
       "Serviço especializado para MacBook Air e Pro em Campinas, com foco em tela, bateria, teclado e placa lógica.",
     siteName: SITE_CONFIG.name,
-    images: [{ url: "/images/apple/macbook-hero.webp" }],
+    images: [{ url: "/images/apple/generated/macbook-hero.svg" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Assistência MacBook em Campinas | Tela, Bateria e Placa",
     description:
       "Serviço especializado para MacBook Air e Pro em Campinas, com foco em tela, bateria, teclado e placa lógica.",
-    images: ["/images/apple/macbook-hero.webp"],
+    images: ["/images/apple/generated/macbook-hero.svg"],
   },
 };
 
@@ -56,7 +56,7 @@ export default function MacBookPage() {
       title="Assistência para"
       highlightedWord="MacBook"
       description="Seu MacBook Air ou Pro merece um atendimento técnico preciso. Fazemos reparos avançados, upgrades e manutenção com foco em desempenho, segurança e agilidade para clientes de Campinas, Cambuí e região."
-      heroImageSrc="/images/apple/macbook-hero.webp"
+      heroImageSrc="/images/apple/generated/macbook-hero.svg"
       heroImageAlt="Assistência técnica MacBook em Campinas"
       heroCaption="Troca de tela, bateria, teclado e placa com diagnóstico especializado"
       whatsappHref={WHATSAPP_LINK}
@@ -74,21 +74,21 @@ export default function MacBookPage() {
           title: "Troca de tela com acabamento profissional",
           description:
             "Substituímos telas quebradas, riscadas ou com falhas de imagem para devolver aparência e usabilidade ao seu MacBook.",
-          imageSrc: "/images/apple/macbook-tela.png",
+          imageSrc: "/images/apple/generated/macbook-tela.svg",
           imageAlt: "Troca de tela de MacBook",
         },
         {
           title: "Bateria nova para recuperar autonomia",
           description:
             "Quando a bateria descarrega rápido, estufa ou perde desempenho, fazemos a substituição com instalação segura.",
-          imageSrc: "/images/apple/macbook-bateria.png",
+          imageSrc: "/images/apple/generated/macbook-bateria.svg",
           imageAlt: "Troca de bateria de MacBook",
         },
         {
           title: "Reparo de placa para casos complexos",
           description:
             "Analisamos falhas de energia, aquecimento, não liga e outros defeitos eletrônicos com reparo em nível avançado.",
-          imageSrc: "/images/apple/macbook-placa.png",
+          imageSrc: "/images/apple/generated/macbook-placa.svg",
           imageAlt: "Reparo de placa lógica MacBook",
         },
       ]}

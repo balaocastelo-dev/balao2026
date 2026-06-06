@@ -35,14 +35,14 @@ export const metadata: Metadata = {
     description:
       "Mac Mini com defeito, lentidão ou falhas? Fazemos upgrade, manutenção e reparo técnico em Campinas.",
     siteName: SITE_CONFIG.name,
-    images: [{ url: "/images/apple/macmini-hero.webp" }],
+    images: [{ url: "/images/apple/generated/macmini-hero.svg" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Assistência Mac Mini em Campinas | Upgrade e Reparo",
     description:
       "Mac Mini com defeito, lentidão ou falhas? Fazemos upgrade, manutenção e reparo técnico em Campinas.",
-    images: ["/images/apple/macmini-hero.webp"],
+    images: ["/images/apple/generated/macmini-hero.svg"],
   },
 };
 
@@ -56,7 +56,7 @@ export default function MacMiniPage() {
       title="Assistência para"
       highlightedWord="Mac Mini"
       description="Seu Mac Mini pode ganhar mais velocidade e estabilidade com um atendimento técnico certo. Realizamos upgrades, reparos avançados e manutenção preventiva para clientes de Campinas, especialmente Cambuí e bairros vizinhos."
-      heroImageSrc="/images/apple/macmini-hero.webp"
+      heroImageSrc="/images/apple/generated/macmini-hero.svg"
       heroImageAlt="Assistência técnica Mac Mini em Campinas"
       heroCaption="Upgrade, limpeza e reparo eletrônico para recuperar desempenho"
       whatsappHref={WHATSAPP_LINK}
@@ -74,21 +74,21 @@ export default function MacMiniPage() {
           title: "Reparo de placa para Mac Mini",
           description:
             "Quando o equipamento não liga ou apresenta falhas graves, fazemos diagnóstico técnico e reparo avançado.",
-          imageSrc: "/images/apple/macmini-placa.png",
+          imageSrc: "/images/apple/generated/macmini-placa.svg",
           imageAlt: "Reparo de placa de Mac Mini",
         },
         {
           title: "Upgrade de hardware para mais velocidade",
           description:
             "Atualizações estratégicas deixam o Mac Mini mais rápido para trabalho, estudo e uso profissional.",
-          imageSrc: "/images/apple/macmini-upgrade.png",
+          imageSrc: "/images/apple/generated/macmini-upgrade.svg",
           imageAlt: "Upgrade de hardware Mac Mini",
         },
         {
           title: "Limpeza interna e manutenção preventiva",
           description:
             "Reduzimos aquecimento, ruídos e perda de desempenho com manutenção interna completa.",
-          imageSrc: "/images/apple/macmini-limpeza.png",
+          imageSrc: "/images/apple/generated/macmini-limpeza.svg",
           imageAlt: "Limpeza interna de Mac Mini",
         },
       ]}

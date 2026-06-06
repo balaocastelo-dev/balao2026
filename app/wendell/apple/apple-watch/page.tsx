@@ -33,14 +33,14 @@ export const metadata: Metadata = {
     description:
       "Apple Watch com tela quebrada, bateria ruim ou coroa digital travada? Atendemos Campinas com reparo especializado.",
     siteName: SITE_CONFIG.name,
-    images: [{ url: "/images/apple/watch-hero.webp" }],
+    images: [{ url: "/images/apple/generated/watch-hero.svg" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Assistência Apple Watch em Campinas | Tela, Bateria e Coroa",
     description:
       "Apple Watch com tela quebrada, bateria ruim ou coroa digital travada? Atendemos Campinas com reparo especializado.",
-    images: ["/images/apple/watch-hero.webp"],
+    images: ["/images/apple/generated/watch-hero.svg"],
   },
 };
 
@@ -54,7 +54,7 @@ export default function AppleWatchPage() {
       title="Assistência para"
       highlightedWord="Apple Watch"
       description="Seu Apple Watch precisa de cuidado técnico preciso. Fazemos reparos em tela, bateria, coroa digital e falhas eletrônicas para clientes do Cambuí, Centro e bairros próximos em Campinas."
-      heroImageSrc="/images/apple/watch-hero.webp"
+      heroImageSrc="/images/apple/generated/watch-hero.svg"
       heroImageAlt="Assistência técnica Apple Watch em Campinas"
       heroCaption="Tela, bateria e coroa digital com reparo especializado"
       whatsappHref={WHATSAPP_LINK}
@@ -72,21 +72,21 @@ export default function AppleWatchPage() {
           title: "Troca de tela com acabamento fino",
           description:
             "Corrigimos danos visuais e problemas de toque para devolver conforto e boa leitura no seu relógio.",
-          imageSrc: "/images/apple/watch-tela.png",
+          imageSrc: "/images/apple/generated/watch-tela.svg",
           imageAlt: "Troca de tela de Apple Watch",
         },
         {
           title: "Substituição de bateria",
           description:
             "Quando a autonomia cai ou o relógio desliga cedo, fazemos a troca para recuperar o uso no dia a dia.",
-          imageSrc: "/images/apple/watch-bateria.png",
+          imageSrc: "/images/apple/generated/watch-bateria.svg",
           imageAlt: "Troca de bateria de Apple Watch",
         },
         {
           title: "Reparo da coroa digital",
           description:
             "Se a coroa trava, falha ou perde resposta, realizamos o reparo para restaurar a navegação do aparelho.",
-          imageSrc: "/images/apple/watch-coroa.png",
+          imageSrc: "/images/apple/generated/watch-coroa.svg",
           imageAlt: "Reparo da coroa digital do Apple Watch",
         },
       ]}

@@ -47,7 +47,7 @@ const services = [
     title: "Assistência Mac Mini",
     description: "Upgrade, limpeza e reparo eletrônico para recuperar desempenho e estabilidade.",
     href: "/wendell/apple/mac-mini",
-    image: "/images/apple/macmini-hero.webp",
+    image: "/images/apple/generated/macmini-hero.svg",
     icon: Box,
     accent: "text-blue-700 bg-blue-50 border-blue-100",
   },
@@ -55,7 +55,7 @@ const services = [
     title: "Assistência iMac",
     description: "Tela, SSD, memória e placa lógica com atendimento técnico especializado.",
     href: "/wendell/apple/imac",
-    image: "/images/apple/imac-hero.webp",
+    image: "/images/apple/generated/imac-hero.svg",
     icon: Monitor,
     accent: "text-purple-700 bg-purple-50 border-purple-100",
   },
@@ -63,7 +63,7 @@ const services = [
     title: "Assistência iPad",
     description: "Troca de tela, bateria e conector para deixar seu iPad pronto para uso.",
     href: "/wendell/apple/ipad",
-    image: "/images/apple/ipad-hero.webp",
+    image: "/images/apple/generated/ipad-hero.svg",
     icon: Tablet,
     accent: "text-green-700 bg-green-50 border-green-100",
   },
@@ -71,7 +71,7 @@ const services = [
     title: "Assistência Apple Watch",
     description: "Tela, bateria, coroa digital e outros reparos com precisão.",
     href: "/wendell/apple/apple-watch",
-    image: "/images/apple/watch-hero.webp",
+    image: "/images/apple/generated/watch-hero.svg",
     icon: Watch,
     accent: "text-orange-700 bg-orange-50 border-orange-100",
   },
@@ -79,7 +79,7 @@ const services = [
     title: "Assistência MacBook",
     description: "Tela, bateria, teclado, SSD e placa lógica para Air e Pro.",
     href: "/wendell/apple/macbook",
-    image: "/images/apple/macbook-hero.webp",
+    image: "/images/apple/generated/macbook-hero.svg",
     icon: Laptop,
     accent: "text-violet-700 bg-violet-50 border-violet-100",
   },
@@ -108,14 +108,14 @@ export const metadata: Metadata = {
     description:
       "Página principal de assistência Apple em Campinas com links rápidos para MacBook, iMac, iPad, Apple Watch e Mac Mini.",
     siteName: SITE_CONFIG.name,
-    images: [{ url: "/images/apple/hub-hero.webp" }],
+    images: [{ url: "/images/apple/generated/hub-hero.svg" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Assistência Técnica Apple em Campinas | Especialista Apple",
     description:
       "Página principal de assistência Apple em Campinas com links rápidos para MacBook, iMac, iPad, Apple Watch e Mac Mini.",
-    images: ["/images/apple/hub-hero.webp"],
+    images: ["/images/apple/generated/hub-hero.svg"],
   },
 };
 
@@ -215,7 +215,7 @@ export default function AppleServicesPage() {
                 <div className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-white shadow-2xl">
                   <div className="relative aspect-[4/3]">
                     <Image
-                      src="/images/apple/hub-hero.webp"
+                      src="/images/apple/generated/hub-hero.svg"
                       alt="Especialista Apple em Campinas"
                       fill
                       priority

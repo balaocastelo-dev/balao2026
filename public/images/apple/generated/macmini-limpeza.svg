@@ -1,0 +1,68 @@
+
+  <svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1050" viewBox="0 0 1400 1050">
+    <defs>
+      <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#ffffff"/>
+        <stop offset="100%" stop-color="#eef2f7"/>
+      </linearGradient>
+      <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#3b82f6"/>
+        <stop offset="100%" stop-color="#1d4ed8"/>
+      </linearGradient>
+      <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#fdfdfd"/>
+        <stop offset="100%" stop-color="#d8dbe2"/>
+      </linearGradient>
+      <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+        <feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#000000" flood-opacity="0.18"/>
+      </filter>
+    </defs>
+    <rect width="1400" height="1050" fill="url(#bg)"/>
+    <ellipse cx="220" cy="80" rx="120" ry="34" fill="#ffffff"/>
+    <ellipse cx="520" cy="64" rx="140" ry="38" fill="#ffffff"/>
+    <ellipse cx="830" cy="68" rx="140" ry="38" fill="#ffffff"/>
+    <ellipse cx="1140" cy="82" rx="120" ry="34" fill="#ffffff"/>
+    <rect x="0" y="720" width="1400" height="330" fill="#f3f4f6"/>
+    <rect x="52" y="752" width="1296" height="246" rx="22" fill="#ffffff"/>
+    
+    <g transform="translate(420 110) scale(0.78)">
+      <g transform="translate(0 0)">
+        <path d="M55 10 C82 10 101 34 101 59 C101 86 83 108 55 133 C27 108 9 86 9 59 C9 34 28 10 55 10 Z" fill="#b51217"/>
+        <path d="M28 57 C28 38 40 24 55 18 C48 31 46 48 46 86 C38 78 28 66 28 57 Z" fill="#ffffff" opacity="0.98"/>
+        <path d="M45 18 C58 28 60 43 60 88 C55 94 55 94 50 88 C50 42 48 28 45 18 Z" fill="#ffffff" opacity="0.98"/>
+        <path d="M61 18 C73 28 77 42 77 79 C73 84 70 88 66 91 C66 42 64 27 61 18 Z" fill="#ffffff" opacity="0.98"/>
+        <path d="M77 24 C86 31 92 43 92 57 C92 67 84 79 71 92 C77 57 79 36 77 24 Z" fill="#ffffff" opacity="0.98"/>
+        <rect x="45" y="134" width="20" height="21" rx="2" fill="#b51217"/>
+        <path d="M52 133 L50 118 L60 118 L58 133 Z" fill="#b51217"/>
+      </g>
+      <text x="130" y="68" font-family="Arial, Helvetica, sans-serif" font-size="38" font-weight="800" fill="#b51217" letter-spacing="1.5">BALAO DA</text>
+      <text x="130" y="112" font-family="Arial, Helvetica, sans-serif" font-size="38" font-weight="800" fill="#b51217" letter-spacing="1.5">INFORMATICA</text>
+    </g>
+  
+    <g transform="translate(110 220)" filter="url(#shadow)">
+      <rect x="0" y="0" width="560" height="430" rx="36" fill="url(#metal)" stroke="#cbd5e1" stroke-width="3"/>
+      <rect x="24" y="24" width="512" height="382" rx="28" fill="none" stroke="#ffffff" stroke-opacity="0.55" stroke-width="2"/>
+      <rect x="36" y="36" width="145.6" height="68.8" rx="20" fill="#334155"/>
+      <circle cx="72.8" cy="47.3" r="15" fill="#111827"/>
+      <circle cx="106.4" cy="47.3" r="15" fill="#111827"/>
+      <circle cx="72.8" cy="47.3" r="6" fill="#93c5fd" opacity="0.9"/>
+      <circle cx="106.4" cy="47.3" r="6" fill="#93c5fd" opacity="0.9"/>
+      <rect x="36" y="126" width="488" height="264" rx="26" fill="url(#accent)" opacity="0.14"/>
+      <g transform="translate(76 154)">
+        
+    <rect x="30" y="90" width="250" height="120" rx="28" fill="#ffffff"/>
+    <rect x="280" y="122" width="52" height="54" rx="12" fill="#ffffff"/>
+    <path d="M332 150 C392 150 398 90 454 90" stroke="#3b82f6" stroke-width="20" fill="none" stroke-linecap="round"/>
+    <circle cx="478" cy="90" r="34" fill="#3b82f6"/>
+    <path d="M468 70 L454 94 H472 L464 112 L490 82 H472 L480 70 Z" fill="#ffffff"/>
+  
+      </g>
+    </g>
+    <g transform="translate(800 770)">
+      <rect x="0" y="0" width="500" height="180" rx="28" fill="#ffffff" filter="url(#shadow)"/>
+      <rect x="34" y="28" width="168" height="40" rx="20" fill="url(#accent)"/>
+      <text x="118" y="55" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" fill="#ffffff">Mac Mini</text>
+      <text x="34" y="106" font-family="Arial, Helvetica, sans-serif" font-size="36" font-weight="800" fill="#0f172a">Limpeza interna</text>
+      <text x="34" y="145" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="#4b5563">Prevencao e desempenho</text>
+    </g>
+  </svg>
