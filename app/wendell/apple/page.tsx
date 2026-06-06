@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import Header from "@/components/Header";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Monitor,
   Laptop,
@@ -55,23 +56,23 @@ function ServiceCard({
   icon: Icon,
   href,
   color,
-  image,
+  gradient,
 }: {
   title: string;
   description: string;
   icon: any;
   href: string;
   color: string;
-  image: string;
+  gradient: string;
 }) {
   return (
     <Link href={href} className="group">
       <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:border-gray-300 transition-all hover:scale-[1.02] shadow-lg hover:shadow-xl">
-        <div className="w-full h-48 rounded-xl mb-6 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-          <img src={image} alt={title} className="w-full h-full object-cover" />
+        <div className={`w-full h-48 rounded-xl mb-6 overflow-hidden bg-gradient-to-br ${gradient} flex items-center justify-center`}>
+          <Icon className={`w-20 h-20 text-${color}-600`} />
         </div>
-        <div className={`w-12 h-12 rounded-xl bg-${color}-500/10 border border-${color}-500/20 flex items-center justify-center mb-4 group-hover:bg-${color}-500/20 transition-colors`}>
-          <Icon className={`w-6 h-6 text-${color}-500`} />
+        <div className={`w-12 h-12 rounded-xl bg-${color}-50 border border-${color}-100 flex items-center justify-center mb-4 group-hover:bg-${color}-100 transition-colors`}>
+          <Icon className={`w-6 h-6 text-${color}-600`} />
         </div>
         <h3 className="text-2xl font-bold mb-3 text-gray-900">{title}</h3>
         <p className="text-gray-600 mb-6 leading-relaxed">{description}</p>
@@ -141,7 +142,7 @@ export default function AppleServicesPage() {
       icon: Box,
       href: "/wendell/apple/mac-mini",
       color: "blue",
-      image: "https://images.unsplash.com/photo-1517336714731-4896decb3c6e?w=800&h=600&fit=crop",
+      gradient: "from-blue-100 to-blue-200",
     },
     {
       title: "Assistência iMac",
@@ -149,7 +150,7 @@ export default function AppleServicesPage() {
       icon: Monitor,
       href: "/wendell/apple/imac",
       color: "purple",
-      image: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=800&h=600&fit=crop",
+      gradient: "from-purple-100 to-purple-200",
     },
     {
       title: "Assistência iPad",
@@ -157,7 +158,7 @@ export default function AppleServicesPage() {
       icon: Tablet,
       href: "/wendell/apple/ipad",
       color: "green",
-      image: "https://images.unsplash.com/photo-1544244015-09df4bd80b2e?w=800&h=600&fit=crop",
+      gradient: "from-green-100 to-green-200",
     },
     {
       title: "Assistência Apple Watch",
@@ -165,7 +166,7 @@ export default function AppleServicesPage() {
       icon: Watch,
       href: "/wendell/apple/apple-watch",
       color: "orange",
-      image: "https://images.unsplash.com/photo-1434493789847-2f02dc6ca258?w=800&h=600&fit=crop",
+      gradient: "from-orange-100 to-orange-200",
     },
     {
       title: "Assistência MacBook",
@@ -173,7 +174,7 @@ export default function AppleServicesPage() {
       icon: Laptop,
       href: "/wendell/apple/macbook",
       color: "violet",
-      image: "https://images.unsplash.com/photo-1517336714731-4896decb3c6e?w=800&h=600&fit=crop",
+      gradient: "from-violet-100 to-violet-200",
     },
   ];
 
