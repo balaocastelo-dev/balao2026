@@ -108,14 +108,14 @@ export const metadata: Metadata = {
     description:
       "Página principal de assistência Apple em Campinas com links rápidos para MacBook, iMac, iPad, Apple Watch e Mac Mini.",
     siteName: SITE_CONFIG.name,
-    images: [{ url: "/images/apple/generated/hub-hero.svg" }],
+    images: [{ url: "/images/apple/hub-hero-real.png" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Assistência Técnica Apple em Campinas | Especialista Apple",
     description:
       "Página principal de assistência Apple em Campinas com links rápidos para MacBook, iMac, iPad, Apple Watch e Mac Mini.",
-    images: ["/images/apple/generated/hub-hero.svg"],
+    images: ["/images/apple/hub-hero-real.png"],
   },
 };
 
@@ -215,7 +215,7 @@ export default function AppleServicesPage() {
                 <div className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-white shadow-2xl">
                   <div className="relative aspect-[4/3]">
                     <Image
-                      src="/images/apple/generated/hub-hero.svg"
+                      src="/images/apple/hub-hero-real.png"
                       alt="Especialista Apple em Campinas"
                       fill
                       priority
