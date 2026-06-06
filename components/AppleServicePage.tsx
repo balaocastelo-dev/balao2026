@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import Image from "next/image";
 import Link from "next/link";
 import { CheckCircle2, MapPin, Phone, type LucideIcon } from "lucide-react";
+import AppleReviewsCarousel, { type AppleReview } from "@/components/AppleReviewsCarousel";
 
 type ThemeClasses = {
   badge: string;
@@ -45,6 +46,7 @@ type AppleServicePageProps = {
   localDescription: string;
   ctaTitle: string;
   ctaDescription: string;
+  reviews?: AppleReview[];
 };
 
 const neighborhoods = [
@@ -56,6 +58,24 @@ const neighborhoods = [
   "Centro",
   "Proença",
   "Chácara da Barra",
+];
+
+const defaultReviews: AppleReview[] = [
+  {
+    name: "Julio Cesar",
+    model: "iPhone 14 Pro Max",
+    text: "A tela quebrou e eu precisava do celular pro trabalho. Trocado em 2h no Cambuí, serviço impecável.",
+  },
+  {
+    name: "Beatriz Oliveira",
+    model: "iPhone 12 Mini",
+    text: "Minha bateria estava estufando. Resolveram rápido, preço justo e o atendimento foi excelente.",
+  },
+  {
+    name: "Marcos Paulo",
+    model: "iPhone 13",
+    text: "Melhor assistência de Campinas. Atendimento claro, reparo rápido e resultado muito bom.",
+  },
 ];
 
 export default function AppleServicePage({
@@ -77,6 +97,7 @@ export default function AppleServicePage({
   localDescription,
   ctaTitle,
   ctaDescription,
+  reviews = defaultReviews,
 }: AppleServicePageProps) {
   return (
     <div className="min-h-screen bg-white text-gray-900">
@@ -131,9 +152,9 @@ export default function AppleServicePage({
 
                 <div className="mt-8 grid gap-3 sm:grid-cols-3">
                   {[
-                    "Orçamento rápido",
-                    "Atendimento com garantia",
-                    "Especialistas em Apple",
+                    "Reparo a partir de 60 minutos",
+                    "Motoboy grátis para retirada e entrega",
+                    "12x sem juros e orçamento sem compromisso",
                   ].map((item) => (
                     <div
                       key={item}
@@ -164,6 +185,15 @@ export default function AppleServicePage({
                       </p>
                       <p className="mt-2 text-xl font-bold text-white">{heroCaption}</p>
                     </div>
+                  </div>
+                </div>
+                <div className="mt-4 rounded-[1.5rem] border border-gray-200 bg-white p-5 shadow-xl lg:absolute lg:-bottom-4 lg:left-4 lg:right-4 lg:mt-0">
+                  <p className="text-sm font-extrabold uppercase tracking-wide text-gray-500">Diferenciais</p>
+                  <div className="mt-3 grid gap-2 text-sm font-semibold text-gray-700 sm:grid-cols-2">
+                    <div className="rounded-xl bg-gray-50 px-4 py-3">Reparo a partir de 60 minutos</div>
+                    <div className="rounded-xl bg-gray-50 px-4 py-3">Motoboy grátis para retirada e entrega</div>
+                    <div className="rounded-xl bg-gray-50 px-4 py-3">Orçamento sem compromisso</div>
+                    <div className="rounded-xl bg-gray-50 px-4 py-3">Conserto parcelado em 12x sem juros</div>
                   </div>
                 </div>
               </div>
@@ -261,7 +291,7 @@ export default function AppleServicePage({
                 <div className="mt-8 rounded-2xl bg-gray-900 p-6 text-white">
                   <h3 className="text-xl font-bold">Precisa resolver hoje?</h3>
                   <p className="mt-3 text-sm leading-6 text-white/80">
-                    Fale direto no WhatsApp para confirmar modelo, defeito e prazo estimado.
+                    Fale direto no WhatsApp para confirmar modelo, defeito, prazo a partir de 60 minutos e retirada por motoboy grátis.
                   </p>
                   <Link href={whatsappHref} target="_blank">
                     <span className="mt-5 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-gray-900">
@@ -271,6 +301,20 @@ export default function AppleServicePage({
                   </Link>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-white py-16 md:py-20">
+          <div className="container mx-auto px-4">
+            <div className="mx-auto mb-12 max-w-3xl text-center">
+              <h2 className="text-3xl font-black text-gray-900 md:text-4xl">Comentários 5 estrelas</h2>
+              <p className="mt-4 text-lg text-gray-600">
+                Veja relatos de clientes que procuraram atendimento rápido para equipamentos Apple.
+              </p>
+            </div>
+            <div className="mx-auto max-w-4xl">
+              <AppleReviewsCarousel reviews={reviews} />
             </div>
           </div>
         </section>
@@ -286,6 +330,12 @@ export default function AppleServicePage({
               <p className="mx-auto mt-5 max-w-2xl text-lg text-white/90 md:text-xl">
                 {ctaDescription}
               </p>
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm font-bold text-white/95">
+                <span className="rounded-full bg-white/10 px-4 py-2">Reparo a partir de 60 minutos</span>
+                <span className="rounded-full bg-white/10 px-4 py-2">Retirada e entrega com motoboy grátis</span>
+                <span className="rounded-full bg-white/10 px-4 py-2">Orçamento sem compromisso</span>
+                <span className="rounded-full bg-white/10 px-4 py-2">12x sem juros</span>
+              </div>
               <Link href={whatsappHref} target="_blank">
                 <span
                   className={`mt-8 inline-flex items-center gap-3 rounded-full bg-white px-10 py-5 text-lg font-black shadow-2xl ${theme.ctaButtonText}`}

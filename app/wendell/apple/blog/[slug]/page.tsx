@@ -9,7 +9,7 @@ import { getAppleRadarPostBySlug } from "@/lib/apple-news";
 import { sanitizeHtmlBasic } from "@/lib/blog-sanitize";
 
 export const runtime = "nodejs";
-export const revalidate = 900;
+export const revalidate = 1800;
 
 const fallbackImage = "/images/apple/hub-hero-real.png";
 
@@ -19,6 +19,12 @@ function formatDate(input: string) {
 
 function getRelatedLinks(category: string) {
   switch (category) {
+    case "iPhone":
+      return [
+        { href: "/wendell/apple/iphone", label: "Assistência iPhone" },
+        { href: "/wendell/apple", label: "Especialista Apple" },
+        { href: "/wendell/apple/blog", label: "Blog Apple" },
+      ];
     case "Mac":
       return [
         { href: "/wendell/apple/macbook", label: "Assistência MacBook" },
@@ -41,7 +47,7 @@ function getRelatedLinks(category: string) {
       return [
         { href: "/wendell/apple", label: "Especialista Apple" },
         { href: "/wendell/apple/blog", label: "Blog Apple" },
-        { href: "/reparoapple", label: "Reparo Apple" },
+        { href: "/wendell/apple/iphone", label: "Assistência iPhone" },
       ];
   }
 }
@@ -104,7 +110,7 @@ export default async function AppleBlogPostPage(props: { params: Promise<{ slug:
     {
       question: "Vocês atendem MacBook, iMac, iPad e Apple Watch?",
       answer:
-        "Sim. A Balão da Informática atende MacBook, iMac, iPad, Apple Watch e Mac Mini em Campinas.",
+        "Sim. A Balão da Informática atende iPhone, MacBook, iMac, iPad, Apple Watch e Mac Mini em Campinas.",
     },
   ]);
 
@@ -174,7 +180,8 @@ export default async function AppleBlogPostPage(props: { params: Promise<{ slug:
                 </h2>
                 <p className="mt-3 text-sm leading-6 text-gray-700">
                   Se a notícia despertou dúvida sobre atualização, troca, manutenção ou reparo, fale agora com a
-                  equipe da Balão da Informática e receba orientação pelo WhatsApp.
+                  equipe da Balão da Informática. Você pode pedir orçamento sem compromisso, retirada e entrega por
+                  motoboy grátis e parcelamento em até 12x sem juros.
                 </p>
                 <a
                   href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=Olá! Quero ajuda com um equipamento Apple.`}
@@ -205,6 +212,11 @@ export default async function AppleBlogPostPage(props: { params: Promise<{ slug:
                 <p className="mt-3 text-sm leading-6 text-white/85">
                   Atendemos clientes de Cambuí, Nova Campinas, Guanabara, Taquaral, Bosque, Centro e bairros próximos.
                 </p>
+                <div className="mt-4 grid gap-2 text-xs font-bold text-white/95">
+                  <div className="rounded-xl bg-white/10 px-3 py-2">Reparo a partir de 60 minutos</div>
+                  <div className="rounded-xl bg-white/10 px-3 py-2">Motoboy grátis para retirada e entrega</div>
+                  <div className="rounded-xl bg-white/10 px-3 py-2">Orçamento sem compromisso e 12x sem juros</div>
+                </div>
                 <Link href="/wendell/apple" className="mt-5 inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-extrabold text-gray-900">
                   Ver especialista Apple
                 </Link>
@@ -212,15 +224,13 @@ export default async function AppleBlogPostPage(props: { params: Promise<{ slug:
 
               {post.source_url ? (
                 <div className="rounded-[1.5rem] border border-neutral-200 bg-white p-5 text-sm text-neutral-700">
-                  <div className="font-extrabold text-gray-900">Fonte original</div>
-                  <a
-                    href={post.source_url}
-                    target="_blank"
-                    rel="nofollow noreferrer"
-                    className="mt-3 block break-all text-red-600 hover:underline"
-                  >
-                    {post.source_url}
-                  </a>
+                  <div className="font-extrabold text-gray-900">Fonte da notícia</div>
+                  <div className="mt-3 break-all text-gray-600">
+                    {post.source_domain || post.source_url}
+                  </div>
+                  <div className="mt-2 text-xs text-gray-500">
+                    A leitura continua aqui no blog, sem redirecionamento externo.
+                  </div>
                 </div>
               ) : null}
             </aside>

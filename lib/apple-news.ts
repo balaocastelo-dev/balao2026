@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { unstable_cache } from "next/cache";
 import { buildExcerptFromHtml, estimateReadingTimeMinutesFromHtml, slugify, stripHtmlToText } from "@/lib/blog-utils";
 import { sanitizeHtmlBasic } from "@/lib/blog-sanitize";
 import { fetchRssItems, type RssItem } from "@/lib/rss";
@@ -140,10 +141,8 @@ function normalizeArticleHtml(inputHtml: string): string {
   let s = raw
     .replace(/<br\b[^>]*\/?>/gi, "\n")
     .replace(/<(p|h2|h3|ul|ol|li|strong|em|blockquote|figure|figcaption)\b[^>]*>/gi, "<$1>")
-    .replace(/<a\b[^>]*\bhref\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s>]+))[^>]*>/gi, (_m, h1, h2, h3) => {
-      const href = String(h1 || h2 || h3 || "").trim();
-      return href ? `<a href="${href}">` : "<a>";
-    })
+    .replace(/<a\b[^>]*>/gi, "<span>")
+    .replace(/<\/a>/gi, "</span>")
     .replace(/<img\b([^>]*?)>/gi, (m) => {
       const srcMatch = m.match(/\bsrc\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s>]+))/i);
       const altMatch = m.match(/\balt\s*=\s*(?:"([^"]*)"|'([^']*)')/i);
@@ -154,7 +153,7 @@ function normalizeArticleHtml(inputHtml: string): string {
       return `<img src="${src}"${altAttr}>`;
     });
 
-  s = s.replace(/<(?!\/?(?:p|h2|h3|ul|ol|li|strong|em|a|img|blockquote|figure|figcaption)\b)[^>]+>/gi, "");
+  s = s.replace(/<(?!\/?(?:p|h2|h3|ul|ol|li|strong|em|span|img|blockquote|figure|figcaption)\b)[^>]+>/gi, "");
   s = s.replace(/\s+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
   return sanitizeHtmlBasic(s);
 }
@@ -246,6 +245,21 @@ function categorizeAppleNews(item: RssItem): string {
   return "Universo Apple";
 }
 
+function getCategoryCoverImage(category: string): string {
+  switch (category) {
+    case "iPhone":
+      return "/images/apple/subcategories/iphone-card.png";
+    case "iPad":
+      return "/images/apple/subcategories/ipad-card.png";
+    case "Apple Watch":
+      return "/images/apple/subcategories/watch-card.png";
+    case "Mac":
+      return "/images/apple/subcategories/macbook-card.png";
+    default:
+      return "/images/apple/hub-hero-real.png";
+  }
+}
+
 async function buildAppleRadarHtml(item: RssItem): Promise<string> {
   const fromSource = await fetchOriginalArticleHtml(item.url).catch(() => null);
   if (fromSource && stripHtmlToText(fromSource).length >= 500) return fromSource;
@@ -277,7 +291,7 @@ async function toApplePost(item: RssItem): Promise<AppleNewsPost> {
     title,
     excerpt,
     content_html: contentHtml,
-    cover_image: item.imageUrls?.[0] ? String(item.imageUrls[0]) : "/images/apple/hub-hero-real.png",
+    cover_image: getCategoryCoverImage(category),
     category,
     source_url: item.url,
     source_domain: sourceDomain,
@@ -291,11 +305,12 @@ async function toApplePost(item: RssItem): Promise<AppleNewsPost> {
   };
 }
 
-export async function listAppleRadarPosts(take = 30): Promise<AppleNewsPost[]> {
+const getCachedAppleRadarPosts = unstable_cache(
+  async () => {
   const allItems = await Promise.all(
     APPLE_RADAR_FEEDS.map(async (feedUrl) => {
       try {
-        return await fetchRssItems(feedUrl, 18);
+        return await fetchRssItems(feedUrl, 10);
       } catch {
         return [];
       }
@@ -313,9 +328,17 @@ export async function listAppleRadarPosts(take = 30): Promise<AppleNewsPost[]> {
       return true;
     })
     .sort((a, b) => (Date.parse(b.publishedAt || "") || 0) - (Date.parse(a.publishedAt || "") || 0))
-    .slice(0, Math.max(1, Math.min(80, take)));
+    .slice(0, 24);
 
   return await Promise.all(merged.map(toApplePost));
+  },
+  ["apple-radar-posts-pt"],
+  { revalidate: 1800 },
+);
+
+export async function listAppleRadarPosts(take = 30): Promise<AppleNewsPost[]> {
+  const posts = await getCachedAppleRadarPosts();
+  return posts.slice(0, Math.max(1, Math.min(posts.length, take)));
 }
 
 export async function getAppleRadarPostBySlug(slug: string): Promise<AppleNewsPost | null> {

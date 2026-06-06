@@ -37,6 +37,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/wendell/apple/macbook',
     '/wendell/apple/imac',
     '/wendell/apple/ipad',
+    '/wendell/apple/iphone',
     '/wendell/apple/apple-watch',
     '/wendell/apple/mac-mini',
     '/como-comprar',

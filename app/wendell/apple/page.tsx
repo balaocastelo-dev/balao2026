@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import JsonLd, { generateBreadcrumbSchema, generateFAQSchema, generateOrganizationSchema } from "@/components/JsonLd";
 import SafeImage from "@/components/SafeImage";
+import AppleReviewsCarousel, { type AppleReview } from "@/components/AppleReviewsCarousel";
 import {
   ArrowRight,
   BadgeCheck,
@@ -17,6 +18,7 @@ import {
   Newspaper,
   Phone,
   ShieldCheck,
+  Smartphone,
   Tablet,
   Watch,
   Wrench,
@@ -31,9 +33,9 @@ const WHATSAPP_LINK =
 const heroImage = "/images/apple/hub-hero-real.png";
 
 const trustPoints = [
-  "Atendimento Apple especializado",
-  "Diagnóstico rápido via WhatsApp",
-  "Campinas, Cambuí e bairros próximos",
+  "Reparo Apple a partir de 60 minutos",
+  "Retirada e entrega via motoboy grátis",
+  "Orçamento sem compromisso e 12x sem juros",
 ];
 
 const conversionCards = [
@@ -70,7 +72,25 @@ const processSteps = [
   },
   {
     title: "3. Siga para o orçamento",
-    description: "Você fala com a equipe e avança para diagnóstico, prazo e solução.",
+    description: "Você recebe orçamento sem compromisso e pode parcelar o conserto em até 12x sem juros.",
+  },
+];
+
+const reviews: AppleReview[] = [
+  {
+    name: "Julio Cesar",
+    model: "iPhone 14 Pro Max",
+    text: "A tela quebrou e eu precisava do celular pro trabalho. Trocado em 2h no Cambuí, serviço impecável.",
+  },
+  {
+    name: "Beatriz Oliveira",
+    model: "iPhone 12 Mini",
+    text: "Minha bateria estava estufando. Resolveram rápido, preço justo e o atendimento foi excelente.",
+  },
+  {
+    name: "Marcos Paulo",
+    model: "iPhone 13",
+    text: "Melhor assistência de Campinas. Atendimento claro, reparo rápido e resultado muito bom.",
   },
 ];
 
@@ -103,6 +123,15 @@ const services = [
     accent: "text-green-700 bg-green-50 border-green-100",
   },
   {
+    title: "Assistência iPhone",
+    description:
+      "Troca de tela, bateria, conector, câmera e reparos técnicos para quem precisa de solução rápida em iPhone.",
+    href: "/wendell/apple/iphone",
+    image: "/images/apple/subcategories/iphone-card.png",
+    icon: Smartphone,
+    accent: "text-sky-700 bg-sky-50 border-sky-100",
+  },
+  {
     title: "Assistência Apple Watch",
     description:
       "Tela, bateria, coroa digital e outros reparos para Apple Watch com atendimento rápido.",
@@ -125,11 +154,14 @@ const services = [
 export const metadata: Metadata = {
   title: "Assistência Apple em Campinas | Especialista Apple no Cambuí",
   description:
-    "Especialista Apple em Campinas para MacBook, iMac, iPad, Apple Watch e Mac Mini, com atendimento rápido no WhatsApp e foco em Cambuí e região.",
+    "Especialista Apple em Campinas para iPhone, MacBook, iMac, iPad, Apple Watch e Mac Mini, com reparo a partir de 60 minutos, motoboy grátis, orçamento sem compromisso e 12x sem juros.",
   keywords: [
     "assistência apple campinas",
     "especialista apple campinas",
     "assistência apple cambuí",
+    "assistência iphone campinas",
+    "conserto apple 12x sem juros campinas",
+    "reparo apple motoboy grátis campinas",
     "reparo macbook campinas",
     "reparo imac campinas",
     "reparo ipad campinas",
@@ -145,7 +177,7 @@ export const metadata: Metadata = {
     url: "https://www.balao.info/wendell/apple",
     title: "Assistência Apple em Campinas | Especialista Apple no Cambuí",
     description:
-      "Atendimento Apple para MacBook, iMac, iPad, Apple Watch e Mac Mini em Campinas.",
+      "Atendimento Apple para iPhone, MacBook, iMac, iPad, Apple Watch e Mac Mini em Campinas com motoboy grátis e 12x sem juros.",
     siteName: SITE_CONFIG.name,
     images: [{ url: heroImage }],
   },
@@ -153,7 +185,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Assistência Apple em Campinas | Especialista Apple no Cambuí",
     description:
-      "Atendimento Apple para MacBook, iMac, iPad, Apple Watch e Mac Mini em Campinas.",
+      "Atendimento Apple para iPhone, MacBook, iMac, iPad, Apple Watch e Mac Mini em Campinas com motoboy grátis e 12x sem juros.",
     images: [heroImage],
   },
 };
@@ -258,12 +290,17 @@ export default async function AppleServicesPage() {
     {
       question: "Quais equipamentos Apple vocês atendem?",
       answer:
-        "Atendemos MacBook, iMac, iPad, Apple Watch e Mac Mini com páginas dedicadas para cada tipo de serviço.",
+        "Atendemos iPhone, MacBook, iMac, iPad, Apple Watch e Mac Mini com páginas dedicadas para cada tipo de serviço.",
     },
     {
       question: "Como pedir orçamento rápido?",
       answer:
         "Clique nos botões de WhatsApp da página, envie o modelo do equipamento e descreva o defeito para receber orientação inicial.",
+    },
+    {
+      question: "Vocês fazem retirada e entrega?",
+      answer:
+        "Sim. Informamos retirada e entrega na casa do cliente via motoboy grátis, além de orçamento sem compromisso e possibilidade de parcelamento em até 12x sem juros.",
     },
   ]);
 
@@ -291,8 +328,9 @@ export default async function AppleServicesPage() {
                   </span>
                 </h1>
                 <p className="mt-6 max-w-2xl text-lg leading-8 text-gray-600 md:text-xl">
-                  Se você procura reparo de MacBook, iMac, iPad, Apple Watch ou Mac Mini em Campinas,
-                  aqui encontra atalhos rápidos para falar com a equipe, entender o serviço e pedir orçamento.
+                  Se você procura reparo de iPhone, MacBook, iMac, iPad, Apple Watch ou Mac Mini em Campinas,
+                  aqui encontra atendimento rápido, orçamento sem compromisso, retirada e entrega por motoboy grátis
+                  e conserto parcelado em até 12x sem juros.
                 </p>
                 <div className="mt-8 flex flex-col gap-4 sm:flex-row">
                   <Link href={WHATSAPP_LINK} target="_blank">
@@ -339,7 +377,7 @@ export default async function AppleServicesPage() {
                     </div>
                   </div>
                 </div>
-                <div className="absolute -bottom-4 left-4 right-4 rounded-[1.5rem] border border-gray-200 bg-white p-5 shadow-xl md:left-auto md:right-6 md:w-[340px]">
+                <div className="mt-4 rounded-[1.5rem] border border-gray-200 bg-white p-5 shadow-xl md:mt-5 lg:absolute lg:-bottom-4 lg:left-4 lg:right-4 lg:mt-0 lg:max-w-[360px] lg:left-auto lg:right-6">
                   <div className="flex items-start gap-3">
                     <div className="rounded-2xl bg-red-50 p-3 text-red-600">
                       <BadgeCheck className="h-6 w-6" />
@@ -348,7 +386,7 @@ export default async function AppleServicesPage() {
                   <p className="text-sm font-extrabold uppercase tracking-wide text-gray-500">Atendimento rápido</p>
                       <p className="mt-1 text-lg font-black text-gray-900">Quer resolver hoje?</p>
                       <p className="mt-2 text-sm text-gray-600">
-                        Envie o modelo do seu Apple e o defeito para receber o melhor direcionamento.
+                        Reparo a partir de 60 minutos, motoboy grátis, orçamento sem compromisso e 12x sem juros.
                       </p>
                     </div>
                   </div>
@@ -372,7 +410,7 @@ export default async function AppleServicesPage() {
                 Atendimento claro para você resolver sem complicação
               </h2>
               <p className="mt-4 text-lg text-gray-600">
-                Você encontra o serviço certo, vê fotos reais e fala direto com a equipe para agilizar diagnóstico e orçamento.
+                Você encontra o serviço certo, vê fotos reais e fala direto com a equipe para agilizar diagnóstico, orçamento e reparo.
               </p>
             </div>
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
@@ -438,6 +476,20 @@ export default async function AppleServicesPage() {
                 <p className="mt-4 text-lg text-gray-600">
                   Você conta com atendimento em Campinas para equipamentos Apple, com foco em Cambuí e bairros próximos.
                 </p>
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-4 text-sm font-bold text-red-700">
+                    Reparo Apple a partir de 60 minutos
+                  </div>
+                  <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-4 text-sm font-bold text-red-700">
+                    Retirada e entrega via motoboy grátis
+                  </div>
+                  <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-4 text-sm font-bold text-red-700">
+                    Orçamento sem compromisso
+                  </div>
+                  <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-4 text-sm font-bold text-red-700">
+                    Conserto em até 12x sem juros
+                  </div>
+                </div>
                 <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-3">
                   {["Cambuí", "Nova Campinas", "Guanabara", "Taquaral", "Bosque", "Centro"].map((item) => (
                     <div key={item} className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-semibold text-gray-700">
@@ -448,7 +500,7 @@ export default async function AppleServicesPage() {
                 <div className="mt-8 rounded-[1.5rem] bg-gray-900 p-6 text-white">
                   <h3 className="text-xl font-black">Quer um atendimento direto e sem enrolação?</h3>
                   <p className="mt-3 text-sm leading-6 text-white/85">
-                    Chame no WhatsApp, informe o equipamento Apple e receba o melhor direcionamento para diagnóstico e orçamento.
+                    Chame no WhatsApp, informe o equipamento Apple e receba prazo, orçamento e orientação para retirada ou entrega com motoboy grátis.
                   </p>
                   <Link
                     href={WHATSAPP_LINK}
@@ -495,6 +547,20 @@ export default async function AppleServicesPage() {
           </div>
         </section>
 
+        <section className="bg-white py-16 md:py-20">
+          <div className="container mx-auto px-4">
+            <div className="mx-auto mb-12 max-w-3xl text-center">
+              <h2 className="text-3xl font-black text-gray-900 md:text-4xl">Comentários 5 estrelas</h2>
+              <p className="mt-4 text-lg text-gray-600">
+                Veja avaliações de clientes que procuraram assistência Apple rápida em Campinas.
+              </p>
+            </div>
+            <div className="mx-auto max-w-4xl">
+              <AppleReviewsCarousel reviews={reviews} />
+            </div>
+          </div>
+        </section>
+
         <section className="bg-gradient-to-r from-red-600 to-red-700 py-16 md:py-20">
           <div className="container mx-auto px-4">
             <div className="mx-auto max-w-4xl text-center">
@@ -506,8 +572,14 @@ export default async function AppleServicesPage() {
                 Precisa de assistência Apple em Campinas?
               </h2>
               <p className="mx-auto mt-5 max-w-2xl text-lg text-white/90 md:text-xl">
-                Fale agora no WhatsApp e siga direto para a página do serviço ideal para o seu equipamento Apple.
+                Fale agora no WhatsApp para orçamento sem compromisso, reparo a partir de 60 minutos, motoboy grátis e parcelamento em até 12x sem juros.
               </p>
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm font-bold text-white/95">
+                <span className="rounded-full bg-white/10 px-4 py-2">A partir de 60 minutos</span>
+                <span className="rounded-full bg-white/10 px-4 py-2">Motoboy grátis</span>
+                <span className="rounded-full bg-white/10 px-4 py-2">Sem compromisso</span>
+                <span className="rounded-full bg-white/10 px-4 py-2">12x sem juros</span>
+              </div>
               <Link href={WHATSAPP_LINK} target="_blank">
                 <span className="mt-8 inline-flex items-center gap-3 rounded-full bg-white px-10 py-5 text-lg font-black text-red-700 shadow-2xl">
                   <Phone className="h-6 w-6" />

@@ -8,7 +8,7 @@ import { SITE_CONFIG } from "@/lib/config";
 import { listAppleRadarPosts } from "@/lib/apple-news";
 
 export const runtime = "nodejs";
-export const revalidate = 900;
+export const revalidate = 1800;
 
 function formatDate(input: string) {
   return new Date(input).toLocaleDateString("pt-BR");
@@ -41,11 +41,11 @@ export const metadata: Metadata = {
 };
 
 export default async function AppleBlogPage() {
-  const posts = await listAppleRadarPosts(36);
+  const posts = await listAppleRadarPosts(24);
   const featured = posts[0] || null;
   const sideFeatured = posts.slice(1, 3);
   const listPosts = posts.slice(3, 15);
-  const morePosts = posts.slice(15, 30);
+  const morePosts = posts.slice(15, 24);
   const categoryMap = new Map<string, number>();
   posts.forEach((post) => categoryMap.set(post.category, (categoryMap.get(post.category) || 0) + 1));
   const categories = Array.from(categoryMap.entries()).slice(0, 6);
@@ -94,8 +94,8 @@ export default async function AppleBlogPage() {
                 </span>
               </h1>
               <p className="mt-5 max-w-2xl text-lg leading-8 text-gray-600">
-                Acompanhe notícias sobre iPhone, iPad, Mac e Apple Watch em português. Se o seu equipamento
-                precisa de atenção, você também encontra atendimento Apple em Campinas.
+                Acompanhe notícias sobre iPhone, iPad, Mac e Apple Watch em português. Leia tudo sem sair do
+                blog e, se precisar, fale com a equipe para orçamento sem compromisso.
               </p>
               <div className="mt-8 flex flex-col gap-4 sm:flex-row">
                 <Link
@@ -113,7 +113,7 @@ export default async function AppleBlogPage() {
                 </Link>
               </div>
               <div className="mt-8 grid gap-3 sm:grid-cols-3">
-                {["iPhone, iPad e Mac", "Fontes em português", "Atendimento Apple em Campinas"].map((item) => (
+                {["Leitura sem sair do blog", "Fontes em português", "Atendimento Apple em Campinas"].map((item) => (
                   <div key={item} className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-4 text-sm font-semibold text-gray-700">
                     {item}
                   </div>
@@ -178,7 +178,7 @@ export default async function AppleBlogPage() {
               <section className="mt-8">
                 <div className="flex items-end justify-between">
                   <h2 className="text-lg font-extrabold tracking-tight">
-                    <span className="inline-block border-l-4 border-red-600 pl-3">Mais do Radar Apple</span>
+                    <span className="inline-block border-l-4 border-red-600 pl-3">Mais notícias Apple</span>
                   </h2>
                 </div>
                 <div className="mt-4 grid gap-4 md:grid-cols-2">
@@ -236,7 +236,7 @@ export default async function AppleBlogPage() {
                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/80">Atendimento rápido</p>
                 <h2 className="mt-3 text-2xl font-black">Precisa de assistencia Apple em Campinas?</h2>
                 <p className="mt-3 text-sm leading-6 text-white/90">
-                  Se o seu MacBook, iPad, iMac, Apple Watch ou Mac Mini precisa de reparo, fale agora com a equipe.
+                  Atendimento Apple com reparo a partir de 60 minutos, motoboy grátis, orçamento sem compromisso e até 12x sem juros.
                 </p>
                 <a
                   href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=Olá! Quero orçamento para um equipamento Apple.`}
@@ -246,7 +246,13 @@ export default async function AppleBlogPage() {
                 >
                   Solicitar atendimento
                 </a>
+                <div className="mt-4 grid gap-2 text-xs font-bold text-white/95">
+                  <div className="rounded-xl bg-white/10 px-3 py-2">Reparo a partir de 60 minutos</div>
+                  <div className="rounded-xl bg-white/10 px-3 py-2">Motoboy grátis para retirada e entrega</div>
+                  <div className="rounded-xl bg-white/10 px-3 py-2">Orçamento sem compromisso e 12x sem juros</div>
+                </div>
                 <div className="mt-5 grid grid-cols-2 gap-2 text-xs font-bold">
+                  <Link href="/wendell/apple/iphone" className="rounded-xl bg-white/10 px-3 py-3 hover:bg-white/15">iPhone</Link>
                   <Link href="/wendell/apple/macbook" className="rounded-xl bg-white/10 px-3 py-3 hover:bg-white/15">MacBook</Link>
                   <Link href="/wendell/apple/imac" className="rounded-xl bg-white/10 px-3 py-3 hover:bg-white/15">iMac</Link>
                   <Link href="/wendell/apple/ipad" className="rounded-xl bg-white/10 px-3 py-3 hover:bg-white/15">iPad</Link>
