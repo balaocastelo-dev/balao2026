@@ -1,24 +1,22 @@
 import { Metadata } from "next";
-import Header from "@/components/Header";
-import Link from "next/link";
 import {
-  Tablet,
-  Wrench,
-  CheckCircle2,
-  Phone,
-  Zap,
-  ShieldCheck,
-  Battery,
   Activity,
   AlertTriangle,
+  Battery,
+  ShieldCheck,
+  Tablet,
+  Zap,
 } from "lucide-react";
+import AppleServicePage from "@/components/AppleServicePage";
 import { SITE_CONFIG } from "@/lib/config";
 
-const WHATSAPP_LINK = "https://wa.me/5519987510267?text=Ol%C3%A1!%20Quero%20assist%C3%AAncia%20t%C3%A9cnica%20para%20iPad%20em%20Campinas!";
+const WHATSAPP_LINK =
+  "https://wa.me/5519987510267?text=Ol%C3%A1!%20Quero%20assist%C3%AAncia%20t%C3%A9cnica%20para%20iPad%20em%20Campinas!";
 
 export const metadata: Metadata = {
-  title: "Assistência iPad em Campinas | Troca de Tela e Bateria - Balão da Informática",
-  description: "Assistência técnica especializada em iPad em Campinas. Troca de tela, bateria, conector de carga, reparo de placa. Atendimento no Cambuí com garantia.",
+  title: "Assistência iPad em Campinas | Tela, Bateria e Conector",
+  description:
+    "Assistência técnica especializada em iPad em Campinas. Troca de tela, bateria, conector de carga e reparo de placa com atendimento no Cambuí e região.",
   keywords: [
     "assistência ipad campinas",
     "reparo ipad campinas",
@@ -31,134 +29,103 @@ export const metadata: Metadata = {
     type: "website",
     locale: "pt_BR",
     url: "https://www.balao.info/wendell/apple/ipad",
-    title: "Assistência iPad em Campinas | Troca de Tela e Bateria",
-    description: "Assistência técnica especializada em iPad em Campinas. Troca de tela, bateria, conector de carga.",
+    title: "Assistência iPad em Campinas | Tela, Bateria e Conector",
+    description:
+      "iPad com tela quebrada, bateria ruim ou falha de carga? Fazemos reparo especializado em Campinas.",
     siteName: SITE_CONFIG.name,
-    images: [{ url: "/logo.png" }],
+    images: [{ url: "/images/apple/ipad-hero.webp" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Assistência iPad em Campinas | Troca de Tela e Bateria",
-    description: "Assistência técnica especializada em iPad em Campinas.",
-    images: ["/logo.png"],
+    title: "Assistência iPad em Campinas | Tela, Bateria e Conector",
+    description:
+      "iPad com tela quebrada, bateria ruim ou falha de carga? Fazemos reparo especializado em Campinas.",
+    images: ["/images/apple/ipad-hero.webp"],
   },
 };
 
-function ServiceItem({ icon: Icon, title, desc }: { icon: any; title: string; desc: string }) {
-  return (
-    <div className="flex items-start gap-4 p-6 bg-white rounded-xl border border-gray-200 shadow-md">
-      <div className="w-12 h-12 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center shrink-0">
-        <Icon className="w-6 h-6 text-green-600" />
-      </div>
-      <div>
-        <h3 className="text-xl font-bold mb-3 text-gray-900">{title}</h3>
-        <p className="text-gray-600">{desc}</p>
-      </div>
-    </div>
-  );
-}
-
 export default function IPadPage() {
-  const services = [
-    { icon: Tablet, title: "Troca de Tela", desc: "Substituição de telas quebradas ou com touch defeituoso" },
-    { icon: Battery, title: "Troca de Bateria", desc: "Bateria nova para durar o dia todo" },
-    { icon: Zap, title: "Conector de Carga", desc: "Resolva problemas de carregamento" },
-    { icon: Activity, title: "Reparo de Placa", desc: "Diagnóstico e reparo avançado" },
-    { icon: ShieldCheck, title: "Home Button", desc: "Reparo ou substituição do botão home" },
-    { icon: AlertTriangle, title: "Problemas Diversos", desc: "Não liga, câmera defeituosa, som com problema" },
-  ];
-
   return (
-    <div className="min-h-screen flex flex-col bg-white font-sans text-gray-900">
-      <Header />
-
-      <main className="flex-1">
-        {/* Hero */}
-        <section className="relative py-20 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-white z-0" />
-          <div className="container mx-auto px-4 relative z-10">
-            <div className="max-w-3xl">
-              <Link href="/wendell/apple" className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-6">
-                ← Voltar para serviços Apple
-              </Link>
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-50 text-green-700 text-sm font-semibold mb-8 border border-green-100">
-                <Tablet className="w-4 h-4" />
-                <span>Assistência Especializada</span>
-              </div>
-              <h1 className="text-4xl md:text-6xl font-black mb-6 leading-tight text-gray-900">
-                Assistência para{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-green-700">
-                  iPad
-                </span>
-              </h1>
-              <p className="text-xl text-gray-600 mb-10 leading-relaxed">
-                Reparo profissional para seu iPad em Campinas. Troca de tela, bateria, conectores e muito mais.
-                Atendimento rápido e de qualidade no bairro Cambuí.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link href={WHATSAPP_LINK} target="_blank">
-                  <button className="inline-flex items-center justify-center gap-2 bg-green-600 text-white hover:bg-green-700 px-8 py-4 text-lg rounded-full font-bold transition-all w-full sm:w-auto shadow-lg">
-                    <Phone className="w-5 h-5" />
-                    Orçamento Gratuito
-                  </button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Services */}
-        <section className="py-20 bg-gray-50">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 text-gray-900">Serviços para iPad</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-              {services.map((service, idx) => (
-                <ServiceItem key={idx} {...service} />
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Why Us */}
-        <section className="py-20">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold mb-16 text-center text-gray-900">Por que confiar no nosso serviço?</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {[
-                  { icon: Wrench, title: "Especialistas Apple", desc: "Técnicos treinados e experientes" },
-                  { icon: CheckCircle2, title: "Garantia", desc: "Todos os serviços com garantia" },
-                  { icon: Zap, title: "Atendimento Rápido", desc: "Muitos reparos no mesmo dia" },
-                ].map((item, idx) => (
-                  <div key={idx} className="text-center p-8 bg-white rounded-2xl border border-gray-200 shadow-md">
-                    <item.icon className="w-12 h-12 mx-auto mb-6 text-green-600" />
-                    <h3 className="text-xl font-bold mb-3 text-gray-900">{item.title}</h3>
-                    <p className="text-gray-600">{item.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* CTA */}
-        <section className="py-20 bg-gradient-to-r from-green-600 to-green-700">
-          <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
-              Seu iPad quebrou?
-            </h2>
-            <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto">
-              Não se preocupe! Nós consertamos rapidinho!
-            </p>
-            <Link href={WHATSAPP_LINK} target="_blank">
-              <button className="inline-flex items-center gap-3 bg-white text-green-600 px-10 py-5 rounded-full font-black text-xl hover:bg-gray-100 transition-colors shadow-2xl">
-                <Phone className="w-6 h-6" />
-                Falar no WhatsApp
-              </button>
-            </Link>
-          </div>
-        </section>
-      </main>
-    </div>
+    <AppleServicePage
+      backHref="/wendell/apple"
+      backLabel="Voltar para Especialista Apple"
+      badgeIcon={Tablet}
+      badgeLabel="Assistência especializada para iPad"
+      title="Assistência para"
+      highlightedWord="iPad"
+      description="Seu iPad merece um reparo ágil e bem executado. Trabalhamos com troca de tela, bateria, conector e reparos técnicos para clientes do Cambuí, Nova Campinas, Centro e bairros próximos."
+      heroImageSrc="/images/apple/ipad-hero.webp"
+      heroImageAlt="Assistência técnica iPad em Campinas"
+      heroCaption="Tela, bateria e conector com atendimento rápido para Campinas"
+      whatsappHref={WHATSAPP_LINK}
+      theme={{
+        badge: "border-green-100 bg-green-50 text-green-700",
+        button: "bg-green-600 text-white hover:bg-green-700",
+        buttonSoft: "border border-green-200 bg-white text-green-700 hover:bg-green-50",
+        iconWrap: "bg-green-50",
+        icon: "text-green-600",
+        ctaBg: "bg-gradient-to-r from-green-600 to-green-700",
+        ctaButtonText: "text-green-700",
+      }}
+      highlights={[
+        {
+          title: "Troca de tela para iPad",
+          description:
+            "Resolvemos trincas, toque falhando e danos visuais com substituição técnica e acabamento limpo.",
+          imageSrc: "/images/apple/ipad-tela.png",
+          imageAlt: "Troca de tela de iPad",
+        },
+        {
+          title: "Bateria nova para recuperar autonomia",
+          description:
+            "Se a bateria dura pouco ou o iPad desliga sozinho, realizamos a substituição com segurança.",
+          imageSrc: "/images/apple/ipad-bateria.png",
+          imageAlt: "Troca de bateria de iPad",
+        },
+        {
+          title: "Conector de carga com reparo preciso",
+          description:
+            "Para iPad que não carrega, carrega mal ou exige posição específica do cabo, fazemos o reparo correto.",
+          imageSrc: "/images/apple/ipad-carga.png",
+          imageAlt: "Reparo de conector de carga de iPad",
+        },
+      ]}
+      services={[
+        {
+          icon: Tablet,
+          title: "Troca de tela",
+          description: "Substituição de tela quebrada, display falhando ou touch com defeito.",
+        },
+        {
+          icon: Battery,
+          title: "Troca de bateria",
+          description: "Mais autonomia para estudo, trabalho e uso diário do iPad.",
+        },
+        {
+          icon: Zap,
+          title: "Conector de carga",
+          description: "Correção de falhas de carga, mau contato e lentidão no carregamento.",
+        },
+        {
+          icon: Activity,
+          title: "Reparo de placa",
+          description: "Diagnóstico avançado para iPad sem ligar ou com defeitos complexos.",
+        },
+        {
+          icon: ShieldCheck,
+          title: "Botões e sensores",
+          description: "Atendimento para botão home, touch ID e outras falhas de usabilidade.",
+        },
+        {
+          icon: AlertTriangle,
+          title: "Problemas diversos",
+          description: "Câmeras, áudio, microfone, travamentos e falhas de sistema.",
+        },
+      ]}
+      localTitle="Reparo de iPad para Cambuí e região"
+      localDescription="Atendemos Campinas com foco especial em bairros próximos ao Cambuí, agilizando avaliação e contato para quem precisa de solução rápida."
+      ctaTitle="Seu iPad precisa voltar a funcionar sem dor de cabeça?"
+      ctaDescription="Fale no WhatsApp, descreva o defeito e receba orientação para agilizar o reparo."
+    />
   );
 }

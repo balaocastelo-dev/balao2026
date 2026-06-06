@@ -1,25 +1,23 @@
 import { Metadata } from "next";
-import Header from "@/components/Header";
-import Link from "next/link";
 import {
-  Monitor,
-  Wrench,
-  CheckCircle2,
-  Phone,
-  Zap,
-  ShieldCheck,
-  Cpu,
-  HardDrive,
   Activity,
   AlertTriangle,
+  Cpu,
+  HardDrive,
+  Monitor,
+  ShieldCheck,
+  Zap,
 } from "lucide-react";
+import AppleServicePage from "@/components/AppleServicePage";
 import { SITE_CONFIG } from "@/lib/config";
 
-const WHATSAPP_LINK = "https://wa.me/5519987510267?text=Ol%C3%A1!%20Quero%20assist%C3%AAncia%20t%C3%A9cnica%20para%20iMac%20em%20Campinas!";
+const WHATSAPP_LINK =
+  "https://wa.me/5519987510267?text=Ol%C3%A1!%20Quero%20assist%C3%AAncia%20t%C3%A9cnica%20para%20iMac%20em%20Campinas!";
 
 export const metadata: Metadata = {
-  title: "Assistência iMac em Campinas | Reparo de Tela e Placa - Balão da Informática",
-  description: "Assistência técnica especializada em iMac em Campinas. Troca de tela, reparo de placa, upgrade de SSD e memória. Atendimento no Cambuí com garantia.",
+  title: "Assistência iMac em Campinas | Tela, SSD e Reparo de Placa",
+  description:
+    "Assistência técnica especializada em iMac em Campinas. Troca de tela, upgrade de SSD, memória e reparo de placa com atendimento no Cambuí e região.",
   keywords: [
     "assistência imac campinas",
     "reparo imac campinas",
@@ -32,134 +30,108 @@ export const metadata: Metadata = {
     type: "website",
     locale: "pt_BR",
     url: "https://www.balao.info/wendell/apple/imac",
-    title: "Assistência iMac em Campinas | Reparo de Tela e Placa",
-    description: "Assistência técnica especializada em iMac em Campinas. Troca de tela, reparo de placa, upgrade de SSD.",
+    title: "Assistência iMac em Campinas | Tela, SSD e Reparo de Placa",
+    description:
+      "Seu iMac precisa de reparo, troca de tela ou upgrade? Atendemos Campinas com foco em qualidade e agilidade.",
     siteName: SITE_CONFIG.name,
-    images: [{ url: "/logo.png" }],
+    images: [{ url: "/images/apple/imac-hero.webp" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Assistência iMac em Campinas | Reparo de Tela e Placa",
-    description: "Assistência técnica especializada em iMac em Campinas.",
-    images: ["/logo.png"],
+    title: "Assistência iMac em Campinas | Tela, SSD e Reparo de Placa",
+    description:
+      "Seu iMac precisa de reparo, troca de tela ou upgrade? Atendemos Campinas com foco em qualidade e agilidade.",
+    images: ["/images/apple/imac-hero.webp"],
   },
 };
 
-function ServiceItem({ icon: Icon, title, desc }: { icon: any; title: string; desc: string }) {
-  return (
-    <div className="flex items-start gap-4 p-6 bg-white rounded-xl border border-gray-200 shadow-md">
-      <div className="w-12 h-12 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center shrink-0">
-        <Icon className="w-6 h-6 text-purple-600" />
-      </div>
-      <div>
-        <h3 className="text-xl font-bold mb-3 text-gray-900">{title}</h3>
-        <p className="text-gray-600">{desc}</p>
-      </div>
-    </div>
-  );
-}
-
 export default function IMacPage() {
-  const services = [
-    { icon: Monitor, title: "Troca de Tela", desc: "Substituição de telas quebradas ou com defeito" },
-    { icon: HardDrive, title: "Upgrade de SSD", desc: "Velocidade máxima com SSDs de alta performance" },
-    { icon: Cpu, title: "Upgrade de Memória", desc: "Aumente a RAM para melhor desempenho" },
-    { icon: Activity, title: "Reparo de Placa", desc: "Diagnóstico e reparo avançado de placa-mãe" },
-    { icon: ShieldCheck, title: "Limpeza Preventiva", desc: "Limpeza interna e manutenção para longevidade" },
-    { icon: AlertTriangle, title: "Problemas Diversos", desc: "Não liga, vídeo com defeito, superaquecimento" },
-  ];
-
   return (
-    <div className="min-h-screen flex flex-col bg-white font-sans text-gray-900">
-      <Header />
-
-      <main className="flex-1">
-        {/* Hero */}
-        <section className="relative py-20 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-white z-0" />
-          <div className="container mx-auto px-4 relative z-10">
-            <div className="max-w-3xl">
-              <Link href="/wendell/apple" className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-6">
-                ← Voltar para serviços Apple
-              </Link>
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-50 text-purple-700 text-sm font-semibold mb-8 border border-purple-100">
-                <Monitor className="w-4 h-4" />
-                <span>Assistência Especializada</span>
-              </div>
-              <h1 className="text-4xl md:text-6xl font-black mb-6 leading-tight text-gray-900">
-                Assistência para{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-purple-700">
-                  iMac
-                </span>
-              </h1>
-              <p className="text-xl text-gray-600 mb-10 leading-relaxed">
-                Reparo especializado para seu iMac em Campinas. Troca de tela, upgrades de desempenho e solução de
-                problemas complexos. Atendimento no bairro Cambuí com qualidade e garantia.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link href={WHATSAPP_LINK} target="_blank">
-                  <button className="inline-flex items-center justify-center gap-2 bg-purple-600 text-white hover:bg-purple-700 px-8 py-4 text-lg rounded-full font-bold transition-all w-full sm:w-auto shadow-lg">
-                    <Phone className="w-5 h-5" />
-                    Orçamento Gratuito
-                  </button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Services */}
-        <section className="py-20 bg-gray-50">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 text-gray-900">Serviços para iMac</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-              {services.map((service, idx) => (
-                <ServiceItem key={idx} {...service} />
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Why Us */}
-        <section className="py-20">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold mb-16 text-center text-gray-900">Por que confiar no nosso serviço?</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {[
-                  { icon: Wrench, title: "Especialistas Apple", desc: "Técnicos treinados e experientes" },
-                  { icon: CheckCircle2, title: "Garantia", desc: "Todos os serviços com garantia" },
-                  { icon: Zap, title: "Atendimento Rápido", desc: "Muitos reparos no mesmo dia" },
-                ].map((item, idx) => (
-                  <div key={idx} className="text-center p-8 bg-white rounded-2xl border border-gray-200 shadow-md">
-                    <item.icon className="w-12 h-12 mx-auto mb-6 text-purple-600" />
-                    <h3 className="text-xl font-bold mb-3 text-gray-900">{item.title}</h3>
-                    <p className="text-gray-600">{item.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* CTA */}
-        <section className="py-20 bg-gradient-to-r from-purple-600 to-purple-700">
-          <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
-              Seu iMac precisa de ajuda?
-            </h2>
-            <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto">
-              Entre em contato agora e vamos resolver o problema do seu iMac!
-            </p>
-            <Link href={WHATSAPP_LINK} target="_blank">
-              <button className="inline-flex items-center gap-3 bg-white text-purple-600 px-10 py-5 rounded-full font-black text-xl hover:bg-gray-100 transition-colors shadow-2xl">
-                <Phone className="w-6 h-6" />
-                Falar no WhatsApp
-              </button>
-            </Link>
-          </div>
-        </section>
-      </main>
-    </div>
+    <AppleServicePage
+      backHref="/wendell/apple"
+      backLabel="Voltar para Especialista Apple"
+      badgeIcon={Monitor}
+      badgeLabel="Assistência especializada para iMac"
+      title="Assistência para"
+      highlightedWord="iMac"
+      description="Se o seu iMac perdeu desempenho, quebrou a tela ou apresenta falhas técnicas, conte com uma equipe preparada para reparos, upgrades e manutenção completa em Campinas e região."
+      heroImageSrc="/images/apple/imac-hero.webp"
+      heroImageAlt="Assistência técnica iMac em Campinas"
+      heroCaption="Troca de tela, upgrade de SSD e reparo técnico com foco em performance"
+      whatsappHref={WHATSAPP_LINK}
+      theme={{
+        badge: "border-purple-100 bg-purple-50 text-purple-700",
+        button: "bg-purple-600 text-white hover:bg-purple-700",
+        buttonSoft: "border border-purple-200 bg-white text-purple-700 hover:bg-purple-50",
+        iconWrap: "bg-purple-50",
+        icon: "text-purple-600",
+        ctaBg: "bg-gradient-to-r from-purple-600 to-purple-700",
+        ctaButtonText: "text-purple-700",
+      }}
+      highlights={[
+        {
+          title: "Reparo de placa lógica para iMac",
+          description:
+            "Corrigimos falhas eletrônicas, problemas de inicialização e defeitos que exigem diagnóstico técnico detalhado.",
+          imageSrc: "/images/apple/imac-placa.png",
+          imageAlt: "Reparo de placa lógica de iMac",
+        },
+        {
+          title: "Troca de tela com instalação segura",
+          description:
+            "Substituímos telas com trincas, manchas, falhas de imagem ou danos físicos com acabamento profissional.",
+          imageSrc: "/images/apple/imac-tela.png",
+          imageAlt: "Troca de tela de iMac",
+        },
+        {
+          title: "Upgrade de SSD para mais velocidade",
+          description:
+            "Deixe o iMac mais rápido para abrir programas, arquivos e executar tarefas pesadas com mais fluidez.",
+          imageSrc: "/images/apple/imac-ssd.png",
+          imageAlt: "Upgrade de SSD em iMac",
+        },
+      ]}
+      services={[
+        {
+          icon: Monitor,
+          title: "Troca de tela",
+          description: "Reparo para telas quebradas, com manchas, listras ou falhas visuais.",
+        },
+        {
+          icon: HardDrive,
+          title: "Upgrade de SSD",
+          description: "Mais rapidez no sistema, inicialização e produtividade diária.",
+        },
+        {
+          icon: Cpu,
+          title: "Upgrade de memória",
+          description: "Aumente a capacidade de multitarefa e melhore o desempenho.",
+        },
+        {
+          icon: Activity,
+          title: "Reparo de placa lógica",
+          description: "Atendimento para iMac sem ligar, travando ou com defeitos de hardware.",
+        },
+        {
+          icon: ShieldCheck,
+          title: "Limpeza preventiva",
+          description: "Revisão interna para reduzir aquecimento e preservar a máquina.",
+        },
+        {
+          icon: Zap,
+          title: "Fonte e energia",
+          description: "Análise de falhas elétricas, reinícios e desligamentos inesperados.",
+        },
+        {
+          icon: AlertTriangle,
+          title: "Outros defeitos",
+          description: "Áudio, vídeo, lentidão, falhas de sistema ou comportamento anormal.",
+        },
+      ]}
+      localTitle="Atendimento de iMac para Campinas e entorno"
+      localDescription="Recebemos clientes do Cambuí e também de Nova Campinas, Taquaral, Guanabara, Centro, Bosque e bairros próximos com suporte técnico objetivo."
+      ctaTitle="Seu iMac merece voltar a trabalhar em alto nível"
+      ctaDescription="Entre em contato agora e envie os sintomas do equipamento para agilizar o diagnóstico e o atendimento."
+    />
   );
 }

@@ -1,25 +1,23 @@
 import { Metadata } from "next";
-import Header from "@/components/Header";
-import Link from "next/link";
 import {
-  Box,
-  Wrench,
-  CheckCircle2,
-  Phone,
-  Zap,
-  ShieldCheck,
-  Cpu,
-  HardDrive,
   Activity,
   AlertTriangle,
+  Box,
+  Cpu,
+  HardDrive,
+  ShieldCheck,
+  Zap,
 } from "lucide-react";
+import AppleServicePage from "@/components/AppleServicePage";
 import { SITE_CONFIG } from "@/lib/config";
 
-const WHATSAPP_LINK = "https://wa.me/5519987510267?text=Ol%C3%A1!%20Quero%20assist%C3%AAncia%20t%C3%A9cnica%20para%20Mac%20Mini%20em%20Campinas!";
+const WHATSAPP_LINK =
+  "https://wa.me/5519987510267?text=Ol%C3%A1!%20Quero%20assist%C3%AAncia%20t%C3%A9cnica%20para%20Mac%20Mini%20em%20Campinas!";
 
 export const metadata: Metadata = {
-  title: "Assistência Mac Mini em Campinas | Reparo e Upgrade - Balão da Informática",
-  description: "Assistência técnica especializada em Mac Mini em Campinas. Upgrades de memória, SSD, troca de fonte, reparo de placa. Atendimento no Cambuí com garantia.",
+  title: "Assistência Mac Mini em Campinas | Upgrade e Reparo",
+  description:
+    "Assistência técnica especializada em Mac Mini em Campinas. Upgrade de SSD, memória, reparo de placa e manutenção com atendimento no Cambuí e região.",
   keywords: [
     "assistência mac mini campinas",
     "reparo mac mini campinas",
@@ -33,134 +31,103 @@ export const metadata: Metadata = {
     type: "website",
     locale: "pt_BR",
     url: "https://www.balao.info/wendell/apple/mac-mini",
-    title: "Assistência Mac Mini em Campinas | Reparo e Upgrade",
-    description: "Assistência técnica especializada em Mac Mini em Campinas. Upgrades de memória, SSD, troca de fonte.",
+    title: "Assistência Mac Mini em Campinas | Upgrade e Reparo",
+    description:
+      "Mac Mini com defeito, lentidão ou falhas? Fazemos upgrade, manutenção e reparo técnico em Campinas.",
     siteName: SITE_CONFIG.name,
-    images: [{ url: "/logo.png" }],
+    images: [{ url: "/images/apple/macmini-hero.webp" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Assistência Mac Mini em Campinas | Reparo e Upgrade",
-    description: "Assistência técnica especializada em Mac Mini em Campinas.",
-    images: ["/logo.png"],
+    title: "Assistência Mac Mini em Campinas | Upgrade e Reparo",
+    description:
+      "Mac Mini com defeito, lentidão ou falhas? Fazemos upgrade, manutenção e reparo técnico em Campinas.",
+    images: ["/images/apple/macmini-hero.webp"],
   },
 };
 
-function ServiceItem({ icon: Icon, title, desc }: { icon: any; title: string; desc: string }) {
-  return (
-    <div className="flex items-start gap-4 p-6 bg-white rounded-xl border border-gray-200 shadow-md">
-      <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
-        <Icon className="w-6 h-6 text-blue-600" />
-      </div>
-      <div>
-        <h3 className="text-xl font-bold mb-3 text-gray-900">{title}</h3>
-        <p className="text-gray-600">{desc}</p>
-      </div>
-    </div>
-  );
-}
-
 export default function MacMiniPage() {
-  const services = [
-    { icon: HardDrive, title: "Upgrade de SSD", desc: "Aumente a velocidade do seu Mac Mini com SSDs de alta performance" },
-    { icon: Cpu, title: "Upgrade de Memória RAM", desc: "Mais memória para multitarefa e desempenho superior" },
-    { icon: Zap, title: "Troca de Fonte", desc: "Resolva problemas de energia com fontes compatíveis" },
-    { icon: Activity, title: "Reparo de Placa", desc: "Diagnóstico avançado e reparo de placa-mãe" },
-    { icon: ShieldCheck, title: "Limpeza e Manutenção", desc: "Limpeza interna, troca de pasta térmica e manutenção preventiva" },
-    { icon: AlertTriangle, title: "Resolução de Problemas", desc: "Sistema lento, não liga, superaquecimento e muito mais" },
-  ];
-
   return (
-    <div className="min-h-screen flex flex-col bg-white font-sans text-gray-900">
-      <Header />
-
-      <main className="flex-1">
-        {/* Hero */}
-        <section className="relative py-20 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-white z-0" />
-          <div className="container mx-auto px-4 relative z-10">
-            <div className="max-w-3xl">
-              <Link href="/wendell/apple" className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-6">
-                ← Voltar para serviços Apple
-              </Link>
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 text-blue-700 text-sm font-semibold mb-8 border border-blue-100">
-                <Box className="w-4 h-4" />
-                <span>Assistência Especializada</span>
-              </div>
-              <h1 className="text-4xl md:text-6xl font-black mb-6 leading-tight text-gray-900">
-                Assistência para{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-blue-700">
-                  Mac Mini
-                </span>
-              </h1>
-              <p className="text-xl text-gray-600 mb-10 leading-relaxed">
-                Reparo e upgrade profissional para seu Mac Mini em Campinas. Aumente a performance, resolva problemas e
-                dê uma nova vida ao seu dispositivo com nossa assistência especializada no bairro Cambuí.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link href={WHATSAPP_LINK} target="_blank">
-                  <button className="inline-flex items-center justify-center gap-2 bg-blue-600 text-white hover:bg-blue-700 px-8 py-4 text-lg rounded-full font-bold transition-all w-full sm:w-auto shadow-lg">
-                    <Phone className="w-5 h-5" />
-                    Orçamento Gratuito
-                  </button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Services */}
-        <section className="py-20 bg-gray-50">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 text-gray-900">Serviços para Mac Mini</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-              {services.map((service, idx) => (
-                <ServiceItem key={idx} {...service} />
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Why Us */}
-        <section className="py-20">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold mb-16 text-center text-gray-900">Por que confiar no nosso serviço?</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {[
-                  { icon: Wrench, title: "Especialistas Apple", desc: "Técnicos treinados e experientes" },
-                  { icon: CheckCircle2, title: "Garantia", desc: "Todos os serviços com garantia" },
-                  { icon: Zap, title: "Atendimento Rápido", desc: "Muitos upgrades no mesmo dia" },
-                ].map((item, idx) => (
-                  <div key={idx} className="text-center p-8 bg-white rounded-2xl border border-gray-200 shadow-md">
-                    <item.icon className="w-12 h-12 mx-auto mb-6 text-blue-600" />
-                    <h3 className="text-xl font-bold mb-3 text-gray-900">{item.title}</h3>
-                    <p className="text-gray-600">{item.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* CTA */}
-        <section className="py-20 bg-gradient-to-r from-blue-600 to-blue-700">
-          <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
-              Pronto para upgrade ou reparo?
-            </h2>
-            <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto">
-              Entre em contato agora e descubra como podemos ajudar seu Mac Mini!
-            </p>
-            <Link href={WHATSAPP_LINK} target="_blank">
-              <button className="inline-flex items-center gap-3 bg-white text-blue-600 px-10 py-5 rounded-full font-black text-xl hover:bg-gray-100 transition-colors shadow-2xl">
-                <Phone className="w-6 h-6" />
-                Falar no WhatsApp
-              </button>
-            </Link>
-          </div>
-        </section>
-      </main>
-    </div>
+    <AppleServicePage
+      backHref="/wendell/apple"
+      backLabel="Voltar para Especialista Apple"
+      badgeIcon={Box}
+      badgeLabel="Assistência especializada para Mac Mini"
+      title="Assistência para"
+      highlightedWord="Mac Mini"
+      description="Seu Mac Mini pode ganhar mais velocidade e estabilidade com um atendimento técnico certo. Realizamos upgrades, reparos avançados e manutenção preventiva para clientes de Campinas, especialmente Cambuí e bairros vizinhos."
+      heroImageSrc="/images/apple/macmini-hero.webp"
+      heroImageAlt="Assistência técnica Mac Mini em Campinas"
+      heroCaption="Upgrade, limpeza e reparo eletrônico para recuperar desempenho"
+      whatsappHref={WHATSAPP_LINK}
+      theme={{
+        badge: "border-blue-100 bg-blue-50 text-blue-700",
+        button: "bg-blue-600 text-white hover:bg-blue-700",
+        buttonSoft: "border border-blue-200 bg-white text-blue-700 hover:bg-blue-50",
+        iconWrap: "bg-blue-50",
+        icon: "text-blue-600",
+        ctaBg: "bg-gradient-to-r from-blue-600 to-blue-700",
+        ctaButtonText: "text-blue-700",
+      }}
+      highlights={[
+        {
+          title: "Reparo de placa para Mac Mini",
+          description:
+            "Quando o equipamento não liga ou apresenta falhas graves, fazemos diagnóstico técnico e reparo avançado.",
+          imageSrc: "/images/apple/macmini-placa.png",
+          imageAlt: "Reparo de placa de Mac Mini",
+        },
+        {
+          title: "Upgrade de hardware para mais velocidade",
+          description:
+            "Atualizações estratégicas deixam o Mac Mini mais rápido para trabalho, estudo e uso profissional.",
+          imageSrc: "/images/apple/macmini-upgrade.png",
+          imageAlt: "Upgrade de hardware Mac Mini",
+        },
+        {
+          title: "Limpeza interna e manutenção preventiva",
+          description:
+            "Reduzimos aquecimento, ruídos e perda de desempenho com manutenção interna completa.",
+          imageSrc: "/images/apple/macmini-limpeza.png",
+          imageAlt: "Limpeza interna de Mac Mini",
+        },
+      ]}
+      services={[
+        {
+          icon: HardDrive,
+          title: "Upgrade de SSD",
+          description: "Mais velocidade de sistema, aplicativos e abertura de arquivos.",
+        },
+        {
+          icon: Cpu,
+          title: "Upgrade de memória",
+          description: "Melhore multitarefa e desempenho para tarefas mais exigentes.",
+        },
+        {
+          icon: Zap,
+          title: "Fonte e energia",
+          description: "Tratamos falhas de alimentação, desligamentos e instabilidades.",
+        },
+        {
+          icon: Activity,
+          title: "Reparo de placa",
+          description: "Análise técnica para Mac Mini sem vídeo, sem ligar ou travando.",
+        },
+        {
+          icon: ShieldCheck,
+          title: "Manutenção preventiva",
+          description: "Troca de pasta térmica, limpeza e revisão geral do equipamento.",
+        },
+        {
+          icon: AlertTriangle,
+          title: "Problemas diversos",
+          description: "Lentidão, superaquecimento, ruídos e falhas intermitentes.",
+        },
+      ]}
+      localTitle="Mac Mini com suporte rápido em Campinas"
+      localDescription="Atendemos clientes do Cambuí, Centro, Guanabara, Taquaral, Nova Campinas e arredores com foco em agilidade e orientação clara para cada defeito."
+      ctaTitle="Quer deixar seu Mac Mini mais rápido ou consertar uma falha?"
+      ctaDescription="Mande seu modelo e o sintoma no WhatsApp para receber uma orientação inicial e agilizar o atendimento."
+    />
   );
 }
