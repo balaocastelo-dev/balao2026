@@ -37,14 +37,14 @@ export const metadata: Metadata = {
     locale: "pt_BR",
     url: "https://www.balao.info/wendell/apple",
     title: "Assistência Técnica Apple em Campinas | Especialista Apple",
-    description: "Assistência técnica especializada em Apple em Campinas. Reparo de Mac Mini, iMac, iPad, Apple Watch e MacBook. Atendimento rápido, peças de qualidade e garantia.",
+    description: "Assistência técnica especializada em Apple em Campinas. Reparo de Mac Mini, iMac, iPad, Apple Watch e MacBook.",
     siteName: SITE_CONFIG.name,
     images: [{ url: "/logo.png" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Assistência Técnica Apple em Campinas | Especialista Apple",
-    description: "Assistência técnica especializada em Apple em Campinas. Reparo de Mac Mini, iMac, iPad, Apple Watch e MacBook.",
+    description: "Assistência técnica especializada em Apple em Campinas.",
     images: ["/logo.png"],
   },
 };
@@ -55,22 +55,27 @@ function ServiceCard({
   icon: Icon,
   href,
   color,
+  image,
 }: {
   title: string;
   description: string;
   icon: any;
   href: string;
   color: string;
+  image: string;
 }) {
   return (
     <Link href={href} className="group">
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 hover:border-zinc-700 transition-all hover:scale-[1.02] shadow-lg">
-        <div className={`w-16 h-16 rounded-2xl bg-${color}-500/10 border border-${color}-500/20 flex items-center justify-center mb-6 group-hover:bg-${color}-500/20 transition-colors`}>
-          <Icon className={`w-8 h-8 text-${color}-500`} />
+      <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:border-gray-300 transition-all hover:scale-[1.02] shadow-lg hover:shadow-xl">
+        <div className="w-full h-48 rounded-xl mb-6 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+          <img src={image} alt={title} className="w-full h-full object-cover" />
         </div>
-        <h3 className="text-2xl font-bold mb-3 text-white">{title}</h3>
-        <p className="text-zinc-400 mb-6 leading-relaxed">{description}</p>
-        <div className="flex items-center gap-2 text-red-500 font-semibold">
+        <div className={`w-12 h-12 rounded-xl bg-${color}-500/10 border border-${color}-500/20 flex items-center justify-center mb-4 group-hover:bg-${color}-500/20 transition-colors`}>
+          <Icon className={`w-6 h-6 text-${color}-500`} />
+        </div>
+        <h3 className="text-2xl font-bold mb-3 text-gray-900">{title}</h3>
+        <p className="text-gray-600 mb-6 leading-relaxed">{description}</p>
+        <div className="flex items-center gap-2 text-red-600 font-semibold">
           Saiba mais
           <div className="transform group-hover:translate-x-1 transition-transform">→</div>
         </div>
@@ -83,22 +88,22 @@ function Features() {
   const features = [
     { icon: Wrench, title: "Técnicos Especializados", desc: "Equipe treinada e certificada em reparos Apple" },
     { icon: Zap, title: "Atendimento Rápido", desc: "Muitos serviços realizados no mesmo dia" },
-    { icon: ShieldCheck, title: "Garantia de Qualidade", desc: "Todas os reparos com garantia" },
+    { icon: ShieldCheck, title: "Garantia de Qualidade", desc: "Todos os reparos com garantia" },
     { icon: MapPin, title: "Localização Ideal", desc: "Atendimento no Cambuí, Campinas" },
   ];
 
   return (
-    <section className="py-20 bg-zinc-900/30">
+    <section className="py-20 bg-gray-50">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">Por que escolher nossa assistência Apple?</h2>
+        <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 text-gray-900">Por que escolher nossa assistência Apple?</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {features.map((feature, idx) => (
-            <div key={idx} className="text-center">
-              <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-6">
-                <feature.icon className="w-8 h-8 text-red-500" />
+            <div key={idx} className="text-center bg-white p-8 rounded-2xl border border-gray-200 shadow-md">
+              <div className="w-16 h-16 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center mx-auto mb-6">
+                <feature.icon className="w-8 h-8 text-red-600" />
               </div>
-              <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
-              <p className="text-zinc-400">{feature.desc}</p>
+              <h3 className="text-xl font-bold mb-3 text-gray-900">{feature.title}</h3>
+              <p className="text-gray-600">{feature.desc}</p>
             </div>
           ))}
         </div>
@@ -118,7 +123,7 @@ function CTA() {
           Não perca tempo! Entre em contato agora e agende seu orçamento gratuito.
         </p>
         <Link href={WHATSAPP_LINK} target="_blank">
-          <button className="inline-flex items-center gap-3 bg-white text-red-600 px-10 py-5 rounded-full font-black text-xl hover:bg-zinc-100 transition-colors shadow-2xl">
+          <button className="inline-flex items-center gap-3 bg-white text-red-600 px-10 py-5 rounded-full font-black text-xl hover:bg-gray-100 transition-colors shadow-2xl">
             <Phone className="w-6 h-6" />
             Falar com Especialista
           </button>
@@ -136,6 +141,7 @@ export default function AppleServicesPage() {
       icon: Box,
       href: "/wendell/apple/mac-mini",
       color: "blue",
+      image: "https://images.unsplash.com/photo-1517336714731-4896decb3c6e?w=800&h=600&fit=crop",
     },
     {
       title: "Assistência iMac",
@@ -143,6 +149,7 @@ export default function AppleServicesPage() {
       icon: Monitor,
       href: "/wendell/apple/imac",
       color: "purple",
+      image: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=800&h=600&fit=crop",
     },
     {
       title: "Assistência iPad",
@@ -150,6 +157,7 @@ export default function AppleServicesPage() {
       icon: Tablet,
       href: "/wendell/apple/ipad",
       color: "green",
+      image: "https://images.unsplash.com/photo-1544244015-09df4bd80b2e?w=800&h=600&fit=crop",
     },
     {
       title: "Assistência Apple Watch",
@@ -157,6 +165,7 @@ export default function AppleServicesPage() {
       icon: Watch,
       href: "/wendell/apple/apple-watch",
       color: "orange",
+      image: "https://images.unsplash.com/photo-1434493789847-2f02dc6ca258?w=800&h=600&fit=crop",
     },
     {
       title: "Assistência MacBook",
@@ -164,42 +173,43 @@ export default function AppleServicesPage() {
       icon: Laptop,
       href: "/wendell/apple/macbook",
       color: "violet",
+      image: "https://images.unsplash.com/photo-1517336714731-4896decb3c6e?w=800&h=600&fit=crop",
     },
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-black font-sans text-zinc-100">
+    <div className="min-h-screen flex flex-col bg-white font-sans text-gray-900">
       <Header />
 
       <main className="flex-1">
         {/* Hero */}
         <section className="relative py-20 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 via-black to-black z-0" />
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-white z-0" />
           <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-4xl">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-800 text-zinc-300 text-sm font-semibold mb-8 border border-zinc-700">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 text-gray-700 text-sm font-semibold mb-8 border border-gray-200">
                 <Wrench className="w-4 h-4" />
                 <span>Especialista Apple em Campinas</span>
               </div>
-              <h1 className="text-4xl md:text-6xl font-black mb-6 leading-tight">
+              <h1 className="text-4xl md:text-6xl font-black mb-6 leading-tight text-gray-900">
                 Assistência Técnica{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-red-600">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-700">
                   Especializada em Apple
                 </span>
               </h1>
-              <p className="text-xl text-zinc-400 mb-10 leading-relaxed">
+              <p className="text-xl text-gray-600 mb-10 leading-relaxed">
                 Reparos profissionais para Mac Mini, iMac, iPad, Apple Watch e MacBook em Campinas.
                 Atendimento rápido, peças de qualidade e garantia. Localizado no bairro Cambuí.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link href={WHATSAPP_LINK} target="_blank">
-                  <button className="inline-flex items-center justify-center gap-2 bg-red-600 text-white hover:bg-red-700 px-8 py-4 text-lg rounded-full font-bold transition-all w-full sm:w-auto">
+                  <button className="inline-flex items-center justify-center gap-2 bg-red-600 text-white hover:bg-red-700 px-8 py-4 text-lg rounded-full font-bold transition-all w-full sm:w-auto shadow-lg">
                     <Phone className="w-5 h-5" />
                     Orçamento Gratuito
                   </button>
                 </Link>
                 <Link href="#servicos">
-                  <button className="inline-flex items-center justify-center gap-2 border border-zinc-700 text-zinc-100 hover:bg-zinc-800 px-8 py-4 text-lg rounded-full font-semibold transition-all w-full sm:w-auto">
+                  <button className="inline-flex items-center justify-center gap-2 border border-gray-300 text-gray-800 hover:bg-gray-50 px-8 py-4 text-lg rounded-full font-semibold transition-all w-full sm:w-auto">
                     Ver Serviços
                   </button>
                 </Link>
@@ -209,10 +219,10 @@ export default function AppleServicesPage() {
         </section>
 
         {/* Services Grid */}
-        <section id="servicos" className="py-20">
+        <section id="servicos" className="py-20 bg-gray-50">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">Nossos Serviços Apple</h2>
-            <p className="text-zinc-400 text-center text-lg mb-16 max-w-2xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 text-gray-900">Nossos Serviços Apple</h2>
+            <p className="text-gray-600 text-center text-lg mb-16 max-w-2xl mx-auto">
               Escolha o seu dispositivo e descubra como podemos ajudar
             </p>
 
