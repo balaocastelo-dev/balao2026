@@ -23,9 +23,10 @@ export type AppleNewsPost = {
 };
 
 const APPLE_RADAR_FEEDS = [
-  "https://www.apple.com/newsroom/rss-feed.rss",
-  "https://feeds.macrumors.com/MacRumors-All",
-  "https://9to5mac.com/feed/",
+  "https://macmagazine.com.br/feed/",
+  "https://tecnoblog.net/feed/",
+  "https://feeds.feedburner.com/canaltechbr",
+  "https://www.tudocelular.com/feed/",
 ];
 
 const APPLE_KEYWORDS = [
@@ -76,6 +77,133 @@ function normalizeText(input: string): string {
     .trim();
 }
 
+function removeDangerousBlocks(input: string): string {
+  return String(input || "")
+    .replace(/<script\b[\s\S]*?<\/script>/gi, "")
+    .replace(/<style\b[\s\S]*?<\/style>/gi, "")
+    .replace(/<iframe\b[\s\S]*?<\/iframe>/gi, "")
+    .replace(/<object\b[\s\S]*?<\/object>/gi, "")
+    .replace(/<embed\b[\s\S]*?<\/embed>/gi, "")
+    .replace(/\son\w+="[^"]*"/gi, "")
+    .replace(/\son\w+='[^']*'/gi, "")
+    .replace(/\son\w+=\S+/gi, "");
+}
+
+function findTagBlock(html: string, tag: string, openTagMatch: RegExp): string | null {
+  const input = String(html || "");
+  if (!input) return null;
+
+  const openRe = new RegExp(`<${tag}\\b[^>]*>`, "ig");
+  let m: RegExpExecArray | null;
+  let startIdx = -1;
+  let startTag = "";
+
+  while ((m = openRe.exec(input)) !== null) {
+    const openTag = m[0] || "";
+    if (!openTagMatch.test(openTag)) continue;
+    startIdx = m.index;
+    startTag = openTag;
+    break;
+  }
+  if (startIdx < 0) return null;
+
+  const openOrCloseRe = new RegExp(`<${tag}\\b[^>]*>|</${tag}>`, "ig");
+  openOrCloseRe.lastIndex = startIdx + startTag.length;
+
+  let depth = 1;
+  let endIdx = -1;
+  while ((m = openOrCloseRe.exec(input)) !== null) {
+    const token = m[0] || "";
+    if (token.toLowerCase().startsWith(`</${tag}`)) depth -= 1;
+    else depth += 1;
+    if (depth === 0) {
+      endIdx = openOrCloseRe.lastIndex;
+      break;
+    }
+  }
+  if (endIdx < 0) return null;
+  return input.slice(startIdx, endIdx);
+}
+
+function stripWrapperTag(block: string): string {
+  const s = String(block || "").trim();
+  if (!s) return s;
+  const openEnd = s.indexOf(">");
+  const closeStart = s.lastIndexOf("</");
+  if (openEnd < 0 || closeStart < 0 || closeStart <= openEnd) return s;
+  return s.slice(openEnd + 1, closeStart).trim();
+}
+
+function normalizeArticleHtml(inputHtml: string): string {
+  const raw = removeDangerousBlocks(inputHtml);
+
+  let s = raw
+    .replace(/<br\b[^>]*\/?>/gi, "\n")
+    .replace(/<(p|h2|h3|ul|ol|li|strong|em|blockquote|figure|figcaption)\b[^>]*>/gi, "<$1>")
+    .replace(/<a\b[^>]*\bhref\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s>]+))[^>]*>/gi, (_m, h1, h2, h3) => {
+      const href = String(h1 || h2 || h3 || "").trim();
+      return href ? `<a href="${href}">` : "<a>";
+    })
+    .replace(/<img\b([^>]*?)>/gi, (m) => {
+      const srcMatch = m.match(/\bsrc\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s>]+))/i);
+      const altMatch = m.match(/\balt\s*=\s*(?:"([^"]*)"|'([^']*)')/i);
+      const src = String(srcMatch?.[1] || srcMatch?.[2] || srcMatch?.[3] || "").trim();
+      const alt = String(altMatch?.[1] || altMatch?.[2] || "").trim();
+      if (!src) return "";
+      const altAttr = alt ? ` alt="${alt.replace(/"/g, "")}"` : "";
+      return `<img src="${src}"${altAttr}>`;
+    });
+
+  s = s.replace(/<(?!\/?(?:p|h2|h3|ul|ol|li|strong|em|a|img|blockquote|figure|figcaption)\b)[^>]+>/gi, "");
+  s = s.replace(/\s+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+  return sanitizeHtmlBasic(s);
+}
+
+async function fetchOriginalArticleHtml(url: string): Promise<string | null> {
+  const u = String(url || "").trim();
+  if (!u) return null;
+
+  const res = await fetch(u, {
+    headers: {
+      "user-agent": "balao-info-apple-radar/1.0 (+https://www.balao.info/wendell/apple/blog)",
+      accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    },
+    cache: "no-store",
+  });
+
+  if (!res.ok) return null;
+  const html = await res.text();
+  const cleaned = removeDangerousBlocks(html);
+
+  const body =
+    findTagBlock(cleaned, "div", /\bentry-content\b/i) ||
+    findTagBlock(cleaned, "div", /\btd-post-content\b/i) ||
+    findTagBlock(cleaned, "div", /\bpost-content\b/i) ||
+    findTagBlock(cleaned, "div", /\bcontent-text\b/i) ||
+    findTagBlock(cleaned, "section", /\barticle-content\b/i) ||
+    findTagBlock(cleaned, "article", /<article\b/i) ||
+    "";
+
+  const inner = stripWrapperTag(body);
+  const normalized = normalizeArticleHtml(inner);
+  if (stripHtmlToText(normalized).length < 500) return null;
+  return normalized;
+}
+
+function hasPortugueseLanguageSignals(item: RssItem): boolean {
+  const hay = normalizeText(`${item.title || ""} ${stripHtmlToText(String(item.summary || ""))}`);
+  const signals = [" não ", " para ", " com ", " como ", " mais ", " será ", " lança ", " apple "];
+  const padded = ` ${hay} `;
+  return signals.some((signal) => padded.includes(signal));
+}
+
+function isCommercialAppleItem(item: RssItem): boolean {
+  const hay = normalizeText(`${item.title || ""} ${stripHtmlToText(String(item.summary || ""))} ${item.url || ""}`);
+  return /\b(oferta|ofertas|desconto|descontos|cupom|cupons|menor preco|menor preço|magalu|mercado livre|amazon|shopee|parcelado|cashback|achados)\b/i.test(
+    hay,
+  );
+}
+
 function getSourceDomain(sourceUrl: string | null | undefined): string | null {
   if (!sourceUrl) return null;
   try {
@@ -87,12 +215,18 @@ function getSourceDomain(sourceUrl: string | null | undefined): string | null {
 
 function isAppleNewsItem(item: RssItem): boolean {
   const domain = getSourceDomain(item.url) || getSourceDomain(item.sourceFeed) || "";
-  if (domain.includes("apple.com") || domain.includes("macrumors.com") || domain.includes("9to5mac.com")) {
-    return true;
-  }
+  if (!domain) return false;
+  if (isCommercialAppleItem(item)) return false;
 
   const hay = normalizeText(`${item.title || ""} ${item.summary || ""}`);
-  return APPLE_KEYWORDS.some((keyword) => hay.includes(normalizeText(keyword)));
+  const isPtSource =
+    domain.includes("macmagazine.com.br") ||
+    domain.includes("tecnoblog.net") ||
+    domain.includes("canaltech.com.br") ||
+    domain.includes("feedburner.com") ||
+    domain.includes("tudocelular.com");
+
+  return isPtSource && hasPortugueseLanguageSignals(item) && APPLE_KEYWORDS.some((keyword) => hay.includes(normalizeText(keyword)));
 }
 
 function categorizeAppleNews(item: RssItem): string {
@@ -112,76 +246,26 @@ function categorizeAppleNews(item: RssItem): string {
   return "Universo Apple";
 }
 
-function getServiceRecommendation(category: string): { title: string; href: string; label: string } {
-  switch (category) {
-    case "Mac":
-      return {
-        title: "Seu MacBook, iMac ou Mac Mini precisa de reparo?",
-        href: "/wendell/apple/macbook",
-        label: "Ver assistência Mac",
-      };
-    case "iPad":
-      return {
-        title: "Seu iPad está com tela quebrada, bateria ruim ou falha de carga?",
-        href: "/wendell/apple/ipad",
-        label: "Ver assistência iPad",
-      };
-    case "Apple Watch":
-      return {
-        title: "Apple Watch com tela, bateria ou coroa digital com defeito?",
-        href: "/wendell/apple/apple-watch",
-        label: "Ver assistência Apple Watch",
-      };
-    case "iPhone":
-      return {
-        title: "Também atendemos clientes que buscam suporte para dispositivos Apple em Campinas.",
-        href: "/reparoapple",
-        label: "Ver reparo Apple",
-      };
-    default:
-      return {
-        title: "Quer ajuda para decidir o melhor reparo ou suporte para seu equipamento Apple?",
-        href: "/wendell/apple",
-        label: "Ver especialista Apple",
-      };
-  }
+async function buildAppleRadarHtml(item: RssItem): Promise<string> {
+  const fromSource = await fetchOriginalArticleHtml(item.url).catch(() => null);
+  if (fromSource && stripHtmlToText(fromSource).length >= 500) return fromSource;
+
+  const fromFeed = normalizeArticleHtml(String(item.summary || ""));
+  if (stripHtmlToText(fromFeed).length >= 250) return fromFeed;
+
+  const fallback = sanitizeHtmlBasic(`<p>${clip(stripHtmlToText(String(item.summary || item.title || "")), 1200)}</p>`);
+  return fallback;
 }
 
-function buildAppleRadarHtml(item: RssItem, category: string): string {
-  const sourceDomain = getSourceDomain(item.url) || "fonte externa";
-  const sourceSummary = clip(stripHtmlToText(String(item.summary || "")), 520);
-  const service = getServiceRecommendation(category);
-
-  const html = `
-    <p><strong>Radar Apple:</strong> monitoramos automaticamente fontes do universo Apple para destacar lançamentos, atualizações e movimentos que podem impactar quem usa iPhone, iPad, Mac e Apple Watch.</p>
-    ${sourceSummary ? `<p>${sourceSummary}</p>` : ""}
-    <h2>Por que esta notícia importa</h2>
-    <p>Se você acompanha o ecossistema Apple, esta atualização ajuda a entender tendências de hardware, software e suporte técnico. Para quem depende do equipamento no trabalho, no estudo ou na rotina, acompanhar essas mudanças facilita decisões de manutenção, upgrade e troca de dispositivo.</p>
-    <h2>Leitura rápida do Radar</h2>
-    <ul>
-      <li>Categoria monitorada: <strong>${category}</strong>.</li>
-      <li>Fonte acompanhada pelo radar: <strong>${sourceDomain}</strong>.</li>
-      <li>Conteúdo publicado automaticamente com curadoria de notícias Apple.</li>
-    </ul>
-    <h2>Atendimento Apple em Campinas</h2>
-    <p>${service.title} <a href="${service.href}">${service.label}</a>.</p>
-    <p>Se preferir atendimento rápido, chame no WhatsApp <a href="https://wa.me/5519987510267" target="_blank" rel="noreferrer">19 98751-0267</a>.</p>
-    <h2>Fonte original</h2>
-    <p><a href="${item.url}" target="_blank" rel="nofollow noreferrer">${item.url}</a></p>
-  `.trim();
-
-  return sanitizeHtmlBasic(html);
-}
-
-function toApplePost(item: RssItem): AppleNewsPost {
+async function toApplePost(item: RssItem): Promise<AppleNewsPost> {
   const sourceHash = sha256(item.url).slice(0, 8);
   const title = decodeHtmlEntities(String(item.title || "Notícia Apple")).replace(/\s+/g, " ").trim();
   const slug = `${slugify(title).slice(0, 72)}-${sourceHash}`;
   const category = categorizeAppleNews(item);
-  const contentHtml = buildAppleRadarHtml(item, category);
+  const contentHtml = await buildAppleRadarHtml(item);
   const excerpt =
     buildExcerptFromHtml(contentHtml, 180) ||
-    `Acompanhe esta atualização do universo Apple e veja como ela pode impactar usuários em Campinas e região.`;
+    `Leia a notícia completa sobre Apple e acompanhe as principais atualizações do setor.`;
   const published = item.publishedAt ? new Date(item.publishedAt) : new Date();
   const publishedIso = Number.isFinite(published.getTime()) ? published.toISOString() : new Date().toISOString();
   const sourceDomain = getSourceDomain(item.url);
@@ -200,11 +284,8 @@ function toApplePost(item: RssItem): AppleNewsPost {
     source_feed: item.sourceFeed,
     published_at: publishedIso,
     created_at: publishedIso,
-    seo_title: clip(`${title} | Radar Apple Balão`, 60),
-    seo_description: clip(
-      `${excerpt} Leia o Radar Apple e fale com a Balão da Informática no WhatsApp 19 98751-0267.`,
-      155,
-    ),
+    seo_title: clip(`${title} | Blog Apple`, 60),
+    seo_description: clip(excerpt, 155),
     canonical_url: canonicalUrl,
     reading_time_minutes: estimateReadingTimeMinutesFromHtml(contentHtml),
   };
@@ -234,7 +315,7 @@ export async function listAppleRadarPosts(take = 30): Promise<AppleNewsPost[]> {
     .sort((a, b) => (Date.parse(b.publishedAt || "") || 0) - (Date.parse(a.publishedAt || "") || 0))
     .slice(0, Math.max(1, Math.min(80, take)));
 
-  return merged.map(toApplePost);
+  return await Promise.all(merged.map(toApplePost));
 }
 
 export async function getAppleRadarPostBySlug(slug: string): Promise<AppleNewsPost | null> {

@@ -19,7 +19,7 @@ const fallbackImage = "/images/apple/hub-hero-real.png";
 export const metadata: Metadata = {
   title: "Blog Apple em Campinas | Radar de Noticias Apple",
   description:
-    "Blog Apple da Balão da Informática com radar automático de notícias, novidades de iPhone, iPad, Mac, Apple Watch e CTA para assistência Apple em Campinas.",
+    "Blog Apple da Balão da Informática com notícias em português sobre iPhone, iPad, Mac e Apple Watch, além de atendimento Apple em Campinas.",
   alternates: { canonical: "https://www.balao.info/wendell/apple/blog" },
   openGraph: {
     type: "website",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     url: "https://www.balao.info/wendell/apple/blog",
     title: "Blog Apple em Campinas | Radar de Noticias Apple",
     description:
-      "Acompanhe notícias Apple atualizadas automaticamente e fale com especialistas em assistência Apple em Campinas.",
+      "Acompanhe notícias Apple em português e fale com especialistas em assistência Apple em Campinas.",
     siteName: SITE_CONFIG.name,
     images: [{ url: fallbackImage }],
   },
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Blog Apple em Campinas | Radar de Noticias Apple",
     description:
-      "Acompanhe notícias Apple atualizadas automaticamente e fale com especialistas em assistência Apple em Campinas.",
+      "Acompanhe notícias Apple em português e fale com especialistas em assistência Apple em Campinas.",
     images: [fallbackImage],
   },
 };
@@ -60,7 +60,7 @@ export default async function AppleBlogPage() {
     {
       question: "O blog Apple é atualizado automaticamente?",
       answer:
-        "Sim. O Radar Apple busca automaticamente notícias em feeds especializados do universo Apple e publica os destaques na página.",
+        "Sim. O blog reúne automaticamente notícias Apple em português publicadas por fontes especializadas.",
     },
     {
       question: "Posso falar com a loja direto pelo blog?",
@@ -85,17 +85,17 @@ export default async function AppleBlogPage() {
           <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
             <div className="p-6 md:p-10">
               <div className="inline-flex items-center gap-2 rounded-full border border-red-100 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700">
-                Radar Apple atualizado automaticamente
+                Notícias Apple em português
               </div>
               <h1 className="mt-5 text-4xl font-black tracking-tight text-gray-900 md:text-6xl">
-                Blog Apple com foco em
+                Blog Apple com
                 <span className="bg-gradient-to-r from-red-500 to-red-700 bg-clip-text text-transparent">
-                  {" "}novidades, confiança e conversão
+                  {" "}novidades, lançamentos e atualizações do dia a dia
                 </span>
               </h1>
               <p className="mt-5 max-w-2xl text-lg leading-8 text-gray-600">
-                Acompanhe notícias sobre iPhone, iPad, Mac e Apple Watch enquanto conduzimos o leitor para
-                orçamento, diagnóstico e atendimento Apple em Campinas, com foco no Cambuí e região.
+                Acompanhe notícias sobre iPhone, iPad, Mac e Apple Watch em português. Se o seu equipamento
+                precisa de atenção, você também encontra atendimento Apple em Campinas.
               </p>
               <div className="mt-8 flex flex-col gap-4 sm:flex-row">
                 <Link
@@ -113,7 +113,7 @@ export default async function AppleBlogPage() {
                 </Link>
               </div>
               <div className="mt-8 grid gap-3 sm:grid-cols-3">
-                {["iPhone, iPad e Mac", "Atualização automática", "CTA direto para conversão"].map((item) => (
+                {["iPhone, iPad e Mac", "Fontes em português", "Atendimento Apple em Campinas"].map((item) => (
                   <div key={item} className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-4 text-sm font-semibold text-gray-700">
                     {item}
                   </div>
@@ -134,7 +134,7 @@ export default async function AppleBlogPage() {
               <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
                 <p className="text-sm font-semibold uppercase tracking-[0.24em] text-white/80">Balão da Informática</p>
                 <p className="mt-2 max-w-md text-2xl font-black text-white">
-                  Conteúdo Apple pensado para atrair, educar e gerar contato comercial
+                  Novidades do universo Apple para acompanhar e decidir com mais segurança
                 </p>
               </div>
             </div>
@@ -168,7 +168,7 @@ export default async function AppleBlogPage() {
                 ))}
                 {posts.length === 0 ? (
                   <div className="p-8 text-center text-sm text-neutral-600">
-                    O Radar Apple nao encontrou itens no momento. Tente novamente em alguns minutos.
+                    Nenhuma notícia Apple em português foi encontrada neste momento. Tente novamente em alguns minutos.
                   </div>
                 ) : null}
               </div>
@@ -233,11 +233,10 @@ export default async function AppleBlogPage() {
               </div>
 
               <div className="rounded-[2rem] bg-gradient-to-br from-red-600 to-red-700 p-6 text-white shadow-xl">
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/80">Alta conversao</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/80">Atendimento rápido</p>
                 <h2 className="mt-3 text-2xl font-black">Precisa de assistencia Apple em Campinas?</h2>
                 <p className="mt-3 text-sm leading-6 text-white/90">
-                  Use o blog para acompanhar novidades, mas fale agora com a equipe se o seu MacBook, iPad,
-                  iMac, Apple Watch ou Mac Mini precisa de reparo.
+                  Se o seu MacBook, iPad, iMac, Apple Watch ou Mac Mini precisa de reparo, fale agora com a equipe.
                 </p>
                 <a
                   href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=Olá! Quero orçamento para um equipamento Apple.`}

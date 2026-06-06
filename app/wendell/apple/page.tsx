@@ -31,7 +31,7 @@ const WHATSAPP_LINK =
 const heroImage = "/images/apple/hub-hero-real.png";
 
 const trustPoints = [
-  "Atendimento Apple com foco em venda e conversão",
+  "Atendimento Apple especializado",
   "Diagnóstico rápido via WhatsApp",
   "Campinas, Cambuí e bairros próximos",
 ];
@@ -39,23 +39,23 @@ const trustPoints = [
 const conversionCards = [
   {
     icon: Clock3,
-    title: "Agilidade real no primeiro contato",
-    description: "O visitante entende rápido o próximo passo e consegue pedir orçamento sem fricção.",
+    title: "Atendimento rápido",
+    description: "Você envia o modelo e o defeito e recebe orientação inicial sem perder tempo.",
   },
   {
     icon: ShieldCheck,
-    title: "Mais confiança para fechar",
-    description: "Layout claro, prova visual e atalhos objetivos reduzem dúvida e aumentam conversão.",
+    title: "Mais segurança no atendimento",
+    description: "Você entende melhor o serviço, vê os atalhos certos e fala direto com quem resolve.",
   },
   {
     icon: MessageCircleMore,
-    title: "CTA forte para WhatsApp",
-    description: "Toda a página conduz o leitor para o contato direto com a equipe especializada.",
+    title: "Contato direto no WhatsApp",
+    description: "Em poucos cliques você chega ao atendimento para tirar dúvidas e pedir orçamento.",
   },
   {
     icon: MapPin,
-    title: "SEO local para Campinas",
-    description: "Conteúdo orientado para Cambuí, Nova Campinas, Guanabara, Taquaral, Centro e região.",
+    title: "Atendimento em Campinas",
+    description: "Cambuí, Nova Campinas, Guanabara, Taquaral, Centro e bairros próximos.",
   },
 ];
 
@@ -66,7 +66,7 @@ const processSteps = [
   },
   {
     title: "2. Receba a orientação",
-    description: "Indicamos a página ideal do serviço e explicamos o melhor caminho para o seu caso.",
+    description: "Você recebe a orientação certa para entender o reparo e seguir para o atendimento.",
   },
   {
     title: "3. Siga para o orçamento",
@@ -87,7 +87,7 @@ const services = [
   {
     title: "Assistência iMac",
     description:
-      "Página focada em tela, SSD, memória, placa lógica e atendimento técnico especializado para iMac.",
+      "Troca de tela, SSD, memória, placa lógica e atendimento técnico especializado para iMac.",
     href: "/wendell/apple/imac",
     image: "/images/apple/subcategories/imac-card.png",
     icon: Monitor,
@@ -96,7 +96,7 @@ const services = [
   {
     title: "Assistência iPad",
     description:
-      "Estrutura pensada para conversão de quem busca troca de tela, bateria, conector e reparo em iPad.",
+      "Troca de tela, bateria, conector de carga e reparos para quem precisa voltar a usar o iPad com segurança.",
     href: "/wendell/apple/ipad",
     image: "/images/apple/subcategories/ipad-card.png",
     icon: Tablet,
@@ -105,7 +105,7 @@ const services = [
   {
     title: "Assistência Apple Watch",
     description:
-      "Capta buscas por tela, bateria, coroa digital e outros reparos com CTA direto para WhatsApp.",
+      "Tela, bateria, coroa digital e outros reparos para Apple Watch com atendimento rápido.",
     href: "/wendell/apple/apple-watch",
     image: "/images/apple/subcategories/watch-card.png",
     icon: Watch,
@@ -114,7 +114,7 @@ const services = [
   {
     title: "Assistência MacBook",
     description:
-      "Página comercial para MacBook Air e Pro com foco em tela, bateria, teclado, SSD e placa lógica.",
+      "Tela, bateria, teclado, SSD e placa lógica para MacBook Air e Pro com suporte especializado.",
     href: "/wendell/apple/macbook",
     image: "/images/apple/subcategories/macbook-card.png",
     icon: Laptop,
@@ -125,7 +125,7 @@ const services = [
 export const metadata: Metadata = {
   title: "Assistência Apple em Campinas | Especialista Apple no Cambuí",
   description:
-    "Especialista Apple em Campinas para MacBook, iMac, iPad, Apple Watch e Mac Mini. Página otimizada para alta conversão com CTA para WhatsApp e foco em Cambuí e região.",
+    "Especialista Apple em Campinas para MacBook, iMac, iPad, Apple Watch e Mac Mini, com atendimento rápido no WhatsApp e foco em Cambuí e região.",
   keywords: [
     "assistência apple campinas",
     "especialista apple campinas",
@@ -145,7 +145,7 @@ export const metadata: Metadata = {
     url: "https://www.balao.info/wendell/apple",
     title: "Assistência Apple em Campinas | Especialista Apple no Cambuí",
     description:
-      "Atendimento Apple com foco em conversão: MacBook, iMac, iPad, Apple Watch e Mac Mini em Campinas.",
+      "Atendimento Apple para MacBook, iMac, iPad, Apple Watch e Mac Mini em Campinas.",
     siteName: SITE_CONFIG.name,
     images: [{ url: heroImage }],
   },
@@ -153,7 +153,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Assistência Apple em Campinas | Especialista Apple no Cambuí",
     description:
-      "Atendimento Apple com foco em conversão: MacBook, iMac, iPad, Apple Watch e Mac Mini em Campinas.",
+      "Atendimento Apple para MacBook, iMac, iPad, Apple Watch e Mac Mini em Campinas.",
     images: [heroImage],
   },
 };
@@ -285,15 +285,14 @@ export default async function AppleServicesPage() {
                   Especialista Apple em Campinas
                 </div>
                 <h1 className="mt-5 max-w-4xl text-4xl font-black leading-tight tracking-tight text-gray-900 md:text-6xl">
-                  Assistência técnica Apple com foco em
+                  Assistência técnica Apple para quem precisa de
                   <span className="bg-gradient-to-r from-red-500 to-red-700 bg-clip-text text-transparent">
-                    {" "}venda, confiança e conversão
+                    {" "}agilidade, confiança e atendimento rápido
                   </span>
                 </h1>
                 <p className="mt-6 max-w-2xl text-lg leading-8 text-gray-600 md:text-xl">
-                  Se o cliente procura reparo de MacBook, iMac, iPad, Apple Watch ou Mac Mini em Campinas,
-                  esta página encurta o caminho até o WhatsApp, melhora a experiência de navegação e aumenta a
-                  chance de fechamento comercial.
+                  Se você procura reparo de MacBook, iMac, iPad, Apple Watch ou Mac Mini em Campinas,
+                  aqui encontra atalhos rápidos para falar com a equipe, entender o serviço e pedir orçamento.
                 </p>
                 <div className="mt-8 flex flex-col gap-4 sm:flex-row">
                   <Link href={WHATSAPP_LINK} target="_blank">
@@ -304,7 +303,7 @@ export default async function AppleServicesPage() {
                   </Link>
                   <Link href="#servicos">
                     <span className="inline-flex w-full items-center justify-center rounded-full border border-gray-300 bg-white px-8 py-4 text-base font-semibold text-gray-800 transition-all hover:bg-gray-50 sm:w-auto">
-                      Ver páginas de serviço
+                      Ver serviços Apple
                     </span>
                   </Link>
                 </div>
@@ -346,7 +345,7 @@ export default async function AppleServicesPage() {
                       <BadgeCheck className="h-6 w-6" />
                     </div>
                     <div>
-                      <p className="text-sm font-extrabold uppercase tracking-wide text-gray-500">CTA estratégico</p>
+                  <p className="text-sm font-extrabold uppercase tracking-wide text-gray-500">Atendimento rápido</p>
                       <p className="mt-1 text-lg font-black text-gray-900">Quer resolver hoje?</p>
                       <p className="mt-2 text-sm text-gray-600">
                         Envie o modelo do seu Apple e o defeito para receber o melhor direcionamento.
@@ -370,11 +369,10 @@ export default async function AppleServicesPage() {
           <div className="container mx-auto px-4">
             <div className="mb-12 max-w-3xl">
               <h2 className="text-3xl font-black text-gray-900 md:text-4xl">
-                UX/UI pensado para conduzir o leitor ao contato
+                Atendimento claro para você resolver sem complicação
               </h2>
               <p className="mt-4 text-lg text-gray-600">
-                Organizamos a navegação para diminuir dúvida, destacar prova visual, acelerar a tomada de decisão
-                e facilitar a passagem da descoberta para o WhatsApp.
+                Você encontra o serviço certo, vê fotos reais e fala direto com a equipe para agilizar diagnóstico e orçamento.
               </p>
             </div>
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
@@ -398,8 +396,7 @@ export default async function AppleServicesPage() {
                 Escolha a página ideal para o seu equipamento Apple
               </h2>
               <p className="mt-4 text-lg text-gray-600">
-                Cada subpágina foi escrita para captar busca qualificada, responder objeções e aumentar a conversão
-                em orçamento.
+                Escolha o equipamento e siga para a área com informações mais próximas do que você precisa.
               </p>
             </div>
 
@@ -417,9 +414,9 @@ export default async function AppleServicesPage() {
               <div className="rounded-[2rem] border border-gray-200 bg-gray-50 p-8">
                 <div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-red-700 shadow-sm">
                   <Zap className="h-4 w-4" />
-                  Processo de conversão
+                  Como funciona
                 </div>
-                <h2 className="mt-5 text-3xl font-black text-gray-900">Como transformamos visita em contato</h2>
+                <h2 className="mt-5 text-3xl font-black text-gray-900">Como você avança para o atendimento</h2>
                 <div className="mt-8 space-y-4">
                   {processSteps.map((step) => (
                     <div key={step.title} className="rounded-[1.5rem] border border-gray-200 bg-white p-5">
@@ -433,14 +430,13 @@ export default async function AppleServicesPage() {
               <div className="rounded-[2rem] border border-gray-200 bg-white p-8 shadow-sm">
                 <div className="inline-flex items-center gap-2 rounded-full bg-red-50 px-4 py-2 text-sm font-semibold text-red-700">
                   <MapPin className="h-4 w-4" />
-                  SEO local forte
+                  Atendimento local
                 </div>
                 <h2 className="mt-5 text-3xl font-black text-gray-900">
                   Presença forte para Campinas, Cambuí e bairros próximos
                 </h2>
                 <p className="mt-4 text-lg text-gray-600">
-                  O conteúdo desta página foi reescrito para melhorar leitura, reforçar prova local e capturar
-                  buscas com intenção de compra e reparo em Campinas.
+                  Você conta com atendimento em Campinas para equipamentos Apple, com foco em Cambuí e bairros próximos.
                 </p>
                 <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-3">
                   {["Cambuí", "Nova Campinas", "Guanabara", "Taquaral", "Bosque", "Centro"].map((item) => (
@@ -473,14 +469,13 @@ export default async function AppleServicesPage() {
               <div className="max-w-3xl">
                 <div className="inline-flex items-center gap-2 rounded-full bg-red-50 px-4 py-2 text-sm font-semibold text-red-700">
                   <Newspaper className="h-4 w-4" />
-                  Radar de notícias Apple
+                  Notícias Apple em português
                 </div>
                 <h2 className="mt-5 text-3xl font-black text-gray-900 md:text-4xl">
-                  Novo blog Apple com atualização automática
+                  Acompanhe novidades do universo Apple
                 </h2>
                 <p className="mt-4 text-lg text-gray-600">
-                  Conteúdo editorial inspirado no blog principal, mas dedicado ao universo Apple, com novidades,
-                  atualizações e atalhos para transformar interesse em contato comercial.
+                  Veja notícias em português sobre iPhone, iPad, Mac e Apple Watch e, se precisar, siga direto para o atendimento especializado.
                 </p>
               </div>
               <Link
@@ -505,7 +500,7 @@ export default async function AppleServicesPage() {
             <div className="mx-auto max-w-4xl text-center">
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white">
                 <ShieldCheck className="h-4 w-4" />
-                Página otimizada para alta conversão
+                Atendimento Apple em Campinas
               </div>
               <h2 className="text-3xl font-black text-white md:text-5xl">
                 Precisa de assistência Apple em Campinas?

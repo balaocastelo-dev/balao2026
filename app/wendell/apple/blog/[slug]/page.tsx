@@ -104,7 +104,7 @@ export default async function AppleBlogPostPage(props: { params: Promise<{ slug:
     {
       question: "Vocês atendem MacBook, iMac, iPad e Apple Watch?",
       answer:
-        "Sim. A Balão da Informática possui páginas específicas para assistência MacBook, iMac, iPad, Apple Watch e Mac Mini.",
+        "Sim. A Balão da Informática atende MacBook, iMac, iPad, Apple Watch e Mac Mini em Campinas.",
     },
   ]);
 
@@ -168,7 +168,7 @@ export default async function AppleBlogPostPage(props: { params: Promise<{ slug:
               </div>
 
               <div className="mt-8 rounded-[1.5rem] border border-red-100 bg-red-50 p-6">
-                <div className="text-sm font-extrabold uppercase tracking-wide text-red-700">Conversão local</div>
+                <div className="text-sm font-extrabold uppercase tracking-wide text-red-700">Atendimento Apple</div>
                 <h2 className="mt-2 text-2xl font-black text-gray-900">
                   Quer ajuda prática com seu equipamento Apple?
                 </h2>
@@ -206,7 +206,7 @@ export default async function AppleBlogPostPage(props: { params: Promise<{ slug:
                   Atendemos clientes de Cambuí, Nova Campinas, Guanabara, Taquaral, Bosque, Centro e bairros próximos.
                 </p>
                 <Link href="/wendell/apple" className="mt-5 inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-extrabold text-gray-900">
-                  Ver página principal Apple
+                  Ver especialista Apple
                 </Link>
               </div>
 
