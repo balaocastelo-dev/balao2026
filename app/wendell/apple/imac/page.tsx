@@ -34,14 +34,14 @@ export const metadata: Metadata = {
     description:
       "Seu iMac precisa de reparo, troca de tela ou upgrade? Atendemos Campinas com foco em qualidade e agilidade.",
     siteName: SITE_CONFIG.name,
-    images: [{ url: "/images/apple/generated/imac-hero.svg" }],
+    images: [{ url: "/images/apple/imac-hero.webp" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Assistência iMac em Campinas | Tela, SSD e Reparo de Placa",
     description:
       "Seu iMac precisa de reparo, troca de tela ou upgrade? Atendemos Campinas com foco em qualidade e agilidade.",
-    images: ["/images/apple/generated/imac-hero.svg"],
+    images: ["/images/apple/imac-hero.webp"],
   },
 };
 
@@ -55,7 +55,7 @@ export default function IMacPage() {
       title="Assistência para"
       highlightedWord="iMac"
       description="Se o seu iMac perdeu desempenho, quebrou a tela ou apresenta falhas técnicas, conte com uma equipe preparada para reparos, upgrades e manutenção completa em Campinas e região."
-      heroImageSrc="/images/apple/generated/imac-hero.svg"
+      heroImageSrc="/images/apple/imac-hero.webp"
       heroImageAlt="Assistência técnica iMac em Campinas"
       heroCaption="Troca de tela, upgrade de SSD e reparo técnico com foco em performance"
       whatsappHref={WHATSAPP_LINK}
@@ -73,21 +73,21 @@ export default function IMacPage() {
           title: "Reparo de placa lógica para iMac",
           description:
             "Corrigimos falhas eletrônicas, problemas de inicialização e defeitos que exigem diagnóstico técnico detalhado.",
-          imageSrc: "/images/apple/generated/imac-placa.svg",
+          imageSrc: "/images/apple/imac-placa.png",
           imageAlt: "Reparo de placa lógica de iMac",
         },
         {
           title: "Troca de tela com instalação segura",
           description:
             "Substituímos telas com trincas, manchas, falhas de imagem ou danos físicos com acabamento profissional.",
-          imageSrc: "/images/apple/generated/imac-tela.svg",
+          imageSrc: "/images/apple/imac-tela.png",
           imageAlt: "Troca de tela de iMac",
         },
         {
           title: "Upgrade de SSD para mais velocidade",
           description:
             "Deixe o iMac mais rápido para abrir programas, arquivos e executar tarefas pesadas com mais fluidez.",
-          imageSrc: "/images/apple/generated/imac-ssd.svg",
+          imageSrc: "/images/apple/imac-ssd.png",
           imageAlt: "Upgrade de SSD em iMac",
         },
       ]}
