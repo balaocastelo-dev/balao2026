@@ -2,11 +2,19 @@ import { Metadata } from "next";
 import Header from "@/components/Header";
 import Image from "next/image";
 import Link from "next/link";
+import JsonLd, { generateBreadcrumbSchema, generateFAQSchema, generateOrganizationSchema } from "@/components/JsonLd";
+import SafeImage from "@/components/SafeImage";
 import {
+  ArrowRight,
+  BadgeCheck,
+  BookOpenText,
   Box,
+  Clock3,
   Laptop,
   MapPin,
+  MessageCircleMore,
   Monitor,
+  Newspaper,
   Phone,
   ShieldCheck,
   Tablet,
@@ -15,37 +23,62 @@ import {
   Zap,
 } from "lucide-react";
 import { SITE_CONFIG } from "@/lib/config";
+import { listAppleRadarPosts } from "@/lib/apple-news";
 
 const WHATSAPP_LINK =
-  "https://wa.me/5519987510267?text=Ol%C3%A1!%20Quero%20assist%C3%AAncia%20t%C3%A9cnica%20especializada%20em%20Apple%20em%20Campinas%20e%20regi%C3%A3o.%20Atendimento%20no%20Cambu%C3%AD!";
+  "https://wa.me/5519987510267?text=Ol%C3%A1!%20Quero%20or%C3%A7amento%20para%20assist%C3%AAncia%20Apple%20em%20Campinas.%20Meu%20equipamento%20%C3%A9%3A";
 
-const features = [
+const heroImage = "/images/apple/hub-hero-real.png";
+
+const trustPoints = [
+  "Atendimento Apple com foco em venda e conversão",
+  "Diagnóstico rápido via WhatsApp",
+  "Campinas, Cambuí e bairros próximos",
+];
+
+const conversionCards = [
   {
-    icon: Wrench,
-    title: "Especialização Apple",
-    description: "Atendimento focado em MacBook, iMac, iPad, Apple Watch e Mac Mini.",
-  },
-  {
-    icon: Zap,
-    title: "Agilidade no atendimento",
-    description: "Orientação rápida para entender defeito, modelo e melhor solução.",
+    icon: Clock3,
+    title: "Agilidade real no primeiro contato",
+    description: "O visitante entende rápido o próximo passo e consegue pedir orçamento sem fricção.",
   },
   {
     icon: ShieldCheck,
-    title: "Serviço com garantia",
-    description: "Processo técnico com mais segurança para o seu equipamento.",
+    title: "Mais confiança para fechar",
+    description: "Layout claro, prova visual e atalhos objetivos reduzem dúvida e aumentam conversão.",
+  },
+  {
+    icon: MessageCircleMore,
+    title: "CTA forte para WhatsApp",
+    description: "Toda a página conduz o leitor para o contato direto com a equipe especializada.",
   },
   {
     icon: MapPin,
-    title: "Foco em Campinas",
-    description: "Atendemos Cambuí, Nova Campinas, Guanabara, Taquaral e região.",
+    title: "SEO local para Campinas",
+    description: "Conteúdo orientado para Cambuí, Nova Campinas, Guanabara, Taquaral, Centro e região.",
+  },
+];
+
+const processSteps = [
+  {
+    title: "1. Conte o defeito",
+    description: "Envie modelo, sintoma e fotos pelo WhatsApp para acelerar o atendimento.",
+  },
+  {
+    title: "2. Receba a orientação",
+    description: "Indicamos a página ideal do serviço e explicamos o melhor caminho para o seu caso.",
+  },
+  {
+    title: "3. Siga para o orçamento",
+    description: "Você fala com a equipe e avança para diagnóstico, prazo e solução.",
   },
 ];
 
 const services = [
   {
     title: "Assistência Mac Mini",
-    description: "Upgrade, limpeza e reparo eletrônico para recuperar desempenho e estabilidade.",
+    description:
+      "Ideal para quem procura reparo, limpeza, upgrade e solução de falhas de desempenho em Mac Mini.",
     href: "/wendell/apple/mac-mini",
     image: "/images/apple/subcategories/macmini-card.png",
     icon: Box,
@@ -53,7 +86,8 @@ const services = [
   },
   {
     title: "Assistência iMac",
-    description: "Tela, SSD, memória e placa lógica com atendimento técnico especializado.",
+    description:
+      "Página focada em tela, SSD, memória, placa lógica e atendimento técnico especializado para iMac.",
     href: "/wendell/apple/imac",
     image: "/images/apple/subcategories/imac-card.png",
     icon: Monitor,
@@ -61,7 +95,8 @@ const services = [
   },
   {
     title: "Assistência iPad",
-    description: "Troca de tela, bateria e conector para deixar seu iPad pronto para uso.",
+    description:
+      "Estrutura pensada para conversão de quem busca troca de tela, bateria, conector e reparo em iPad.",
     href: "/wendell/apple/ipad",
     image: "/images/apple/subcategories/ipad-card.png",
     icon: Tablet,
@@ -69,7 +104,8 @@ const services = [
   },
   {
     title: "Assistência Apple Watch",
-    description: "Tela, bateria, coroa digital e outros reparos com precisão.",
+    description:
+      "Capta buscas por tela, bateria, coroa digital e outros reparos com CTA direto para WhatsApp.",
     href: "/wendell/apple/apple-watch",
     image: "/images/apple/subcategories/watch-card.png",
     icon: Watch,
@@ -77,7 +113,8 @@ const services = [
   },
   {
     title: "Assistência MacBook",
-    description: "Tela, bateria, teclado, SSD e placa lógica para Air e Pro.",
+    description:
+      "Página comercial para MacBook Air e Pro com foco em tela, bateria, teclado, SSD e placa lógica.",
     href: "/wendell/apple/macbook",
     image: "/images/apple/subcategories/macbook-card.png",
     icon: Laptop,
@@ -86,36 +123,38 @@ const services = [
 ];
 
 export const metadata: Metadata = {
-  title: "Assistência Técnica Apple em Campinas | Especialista Apple",
+  title: "Assistência Apple em Campinas | Especialista Apple no Cambuí",
   description:
-    "Assistência técnica especializada em Apple em Campinas. Reparo de Mac Mini, iMac, iPad, Apple Watch e MacBook com atendimento no Cambuí e bairros próximos.",
+    "Especialista Apple em Campinas para MacBook, iMac, iPad, Apple Watch e Mac Mini. Página otimizada para alta conversão com CTA para WhatsApp e foco em Cambuí e região.",
   keywords: [
     "assistência apple campinas",
-    "reparo mac mini campinas",
+    "especialista apple campinas",
+    "assistência apple cambuí",
+    "reparo macbook campinas",
     "reparo imac campinas",
     "reparo ipad campinas",
     "reparo apple watch campinas",
-    "reparo macbook campinas",
-    "assistência técnica apple cambuí",
-    "manutenção apple campinas",
+    "reparo mac mini campinas",
+    "manutenção apple cambuí",
+    "assistência técnica apple nova campinas",
   ],
   alternates: { canonical: "https://www.balao.info/wendell/apple" },
   openGraph: {
     type: "website",
     locale: "pt_BR",
     url: "https://www.balao.info/wendell/apple",
-    title: "Assistência Técnica Apple em Campinas | Especialista Apple",
+    title: "Assistência Apple em Campinas | Especialista Apple no Cambuí",
     description:
-      "Página principal de assistência Apple em Campinas com links rápidos para MacBook, iMac, iPad, Apple Watch e Mac Mini.",
+      "Atendimento Apple com foco em conversão: MacBook, iMac, iPad, Apple Watch e Mac Mini em Campinas.",
     siteName: SITE_CONFIG.name,
-    images: [{ url: "/images/apple/hub-hero-real.png" }],
+    images: [{ url: heroImage }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Assistência Técnica Apple em Campinas | Especialista Apple",
+    title: "Assistência Apple em Campinas | Especialista Apple no Cambuí",
     description:
-      "Página principal de assistência Apple em Campinas com links rápidos para MacBook, iMac, iPad, Apple Watch e Mac Mini.",
-    images: ["/images/apple/hub-hero-real.png"],
+      "Atendimento Apple com foco em conversão: MacBook, iMac, iPad, Apple Watch e Mac Mini em Campinas.",
+    images: [heroImage],
   },
 };
 
@@ -135,8 +174,8 @@ function ServiceCard({
   accent: string;
 }) {
   return (
-    <Link href={href} className="group">
-      <article className="overflow-hidden rounded-[2rem] border border-gray-200 bg-white shadow-lg transition-all hover:-translate-y-1 hover:shadow-2xl">
+    <article className="group overflow-hidden rounded-[2rem] border border-gray-200 bg-white shadow-lg transition-all hover:-translate-y-1 hover:shadow-2xl">
+      <Link href={href} className="block">
         <div className="relative aspect-[4/3]">
           <Image src={image} alt={title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
@@ -147,49 +186,120 @@ function ServiceCard({
             </div>
           </div>
         </div>
-        <div className="p-6">
-          <h3 className="text-2xl font-black text-gray-900">{title}</h3>
-          <p className="mt-3 text-gray-600">{description}</p>
-          <span className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-red-600">
+      </Link>
+      <div className="p-6">
+        <h3 className="text-2xl font-black text-gray-900">{title}</h3>
+        <p className="mt-3 text-gray-600">{description}</p>
+        <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+          <Link
+            href={href}
+            className="inline-flex items-center justify-center rounded-full border border-gray-200 bg-white px-5 py-3 text-sm font-bold text-gray-900 hover:bg-gray-50"
+          >
             Ver página completa
-            <span aria-hidden="true">→</span>
-          </span>
+          </Link>
+          <Link
+            href={WHATSAPP_LINK}
+            target="_blank"
+            className="inline-flex items-center justify-center rounded-full bg-red-600 px-5 py-3 text-sm font-bold text-white hover:bg-red-700"
+          >
+            Pedir orçamento
+          </Link>
         </div>
-      </article>
-    </Link>
+      </div>
+    </article>
   );
 }
 
-export default function AppleServicesPage() {
+function NewsPreviewCard({ post }: { post: Awaited<ReturnType<typeof listAppleRadarPosts>>[number] }) {
   return (
-    <div className="min-h-screen bg-white text-gray-900">
+    <article className="overflow-hidden rounded-[1.5rem] border border-gray-200 bg-white shadow-sm">
+      <Link href={`/wendell/apple/blog/${post.slug}`} className="block">
+        <div className="relative aspect-[16/10]">
+          <SafeImage
+            src={post.cover_image || heroImage}
+            fallbackSrc={heroImage}
+            alt={post.title}
+            fill
+            sizes="(max-width: 1024px) 100vw, 400px"
+            className="object-cover"
+          />
+        </div>
+        <div className="p-5">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-gray-500">
+            <span className="rounded-full bg-red-50 px-3 py-1 uppercase tracking-wide text-red-600">{post.category}</span>
+            {post.source_domain ? <span>{post.source_domain}</span> : null}
+          </div>
+          <h3 className="mt-3 text-lg font-extrabold leading-snug text-gray-900">{post.title}</h3>
+          <p className="mt-2 text-sm text-gray-600">{post.excerpt}</p>
+          <span className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-red-600">
+            Ler notícia
+            <ArrowRight className="h-4 w-4" />
+          </span>
+        </div>
+      </Link>
+    </article>
+  );
+}
+
+export default async function AppleServicesPage() {
+  const radarPosts = await listAppleRadarPosts(3);
+
+  const breadcrumbs = generateBreadcrumbSchema([
+    { name: "Início", item: "https://www.balao.info" },
+    { name: "Especialista Apple", item: "https://www.balao.info/wendell/apple" },
+  ]);
+
+  const faq = generateFAQSchema([
+    {
+      question: "Vocês atendem apenas Campinas?",
+      answer:
+        "O foco local desta página é Campinas, especialmente Cambuí, Nova Campinas, Guanabara, Taquaral, Bosque e Centro, mas o primeiro contato também pode ser feito online.",
+    },
+    {
+      question: "Quais equipamentos Apple vocês atendem?",
+      answer:
+        "Atendemos MacBook, iMac, iPad, Apple Watch e Mac Mini com páginas dedicadas para cada tipo de serviço.",
+    },
+    {
+      question: "Como pedir orçamento rápido?",
+      answer:
+        "Clique nos botões de WhatsApp da página, envie o modelo do equipamento e descreva o defeito para receber orientação inicial.",
+    },
+  ]);
+
+  const org = generateOrganizationSchema();
+
+  return (
+    <div className="min-h-screen bg-[#f8fafc] text-gray-900">
       <Header />
 
       <main>
-        <section className="relative overflow-hidden border-b border-gray-100 bg-[radial-gradient(circle_at_top_right,_rgba(239,68,68,0.08),_transparent_28%),linear-gradient(to_bottom,_#ffffff,_#f8fafc)]">
+        <JsonLd data={[org, breadcrumbs, faq]} />
+
+        <section className="relative overflow-hidden border-b border-gray-100 bg-[radial-gradient(circle_at_top_right,_rgba(239,68,68,0.10),_transparent_28%),linear-gradient(to_bottom,_#ffffff,_#f8fafc)]">
           <div className="container mx-auto px-4 py-14 md:py-20">
-            <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+            <div className="grid items-center gap-10 lg:grid-cols-[1.02fr_0.98fr]">
               <div>
                 <div className="inline-flex items-center gap-2 rounded-full border border-red-100 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700">
                   <Wrench className="h-4 w-4" />
                   Especialista Apple em Campinas
                 </div>
-                <h1 className="mt-5 max-w-3xl text-4xl font-black leading-tight tracking-tight text-gray-900 md:text-6xl">
-                  Assistência técnica{" "}
+                <h1 className="mt-5 max-w-4xl text-4xl font-black leading-tight tracking-tight text-gray-900 md:text-6xl">
+                  Assistência técnica Apple com foco em
                   <span className="bg-gradient-to-r from-red-500 to-red-700 bg-clip-text text-transparent">
-                    Apple
-                  </span>{" "}
-                  com páginas dedicadas para cada serviço
+                    {" "}venda, confiança e conversão
+                  </span>
                 </h1>
                 <p className="mt-6 max-w-2xl text-lg leading-8 text-gray-600 md:text-xl">
-                  Criamos uma experiência mais direta para quem procura conserto de MacBook, iMac,
-                  iPad, Apple Watch e Mac Mini em Campinas, com foco em Cambuí e bairros próximos.
+                  Se o cliente procura reparo de MacBook, iMac, iPad, Apple Watch ou Mac Mini em Campinas,
+                  esta página encurta o caminho até o WhatsApp, melhora a experiência de navegação e aumenta a
+                  chance de fechamento comercial.
                 </p>
                 <div className="mt-8 flex flex-col gap-4 sm:flex-row">
                   <Link href={WHATSAPP_LINK} target="_blank">
                     <span className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-red-600 px-8 py-4 text-base font-bold text-white shadow-lg transition-all hover:bg-red-700 sm:w-auto">
                       <Phone className="h-5 w-5" />
-                      Falar no WhatsApp
+                      Solicitar atendimento no WhatsApp
                     </span>
                   </Link>
                   <Link href="#servicos">
@@ -199,11 +309,8 @@ export default function AppleServicesPage() {
                   </Link>
                 </div>
                 <div className="mt-8 grid gap-3 sm:grid-cols-3">
-                  {["Cambuí e região", "Atendimento rápido", "CTA direto para WhatsApp"].map((item) => (
-                    <div
-                      key={item}
-                      className="rounded-2xl border border-gray-200 bg-white px-4 py-4 text-sm font-medium text-gray-700 shadow-sm"
-                    >
+                  {trustPoints.map((item) => (
+                    <div key={item} className="rounded-2xl border border-gray-200 bg-white px-4 py-4 text-sm font-semibold text-gray-700 shadow-sm">
                       {item}
                     </div>
                   ))}
@@ -215,7 +322,7 @@ export default function AppleServicesPage() {
                 <div className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-white shadow-2xl">
                   <div className="relative aspect-[4/3]">
                     <Image
-                      src="/images/apple/hub-hero-real.png"
+                      src={heroImage}
                       alt="Especialista Apple em Campinas"
                       fill
                       priority
@@ -228,25 +335,71 @@ export default function AppleServicesPage() {
                         Balão da Informática
                       </p>
                       <p className="mt-2 text-xl font-bold text-white">
-                        Atendimento Apple para Campinas, Cambuí e bairros próximos
+                        Atendimento Apple para Cambuí, Nova Campinas, Guanabara, Taquaral e região
                       </p>
                     </div>
                   </div>
+                </div>
+                <div className="absolute -bottom-4 left-4 right-4 rounded-[1.5rem] border border-gray-200 bg-white p-5 shadow-xl md:left-auto md:right-6 md:w-[340px]">
+                  <div className="flex items-start gap-3">
+                    <div className="rounded-2xl bg-red-50 p-3 text-red-600">
+                      <BadgeCheck className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-extrabold uppercase tracking-wide text-gray-500">CTA estratégico</p>
+                      <p className="mt-1 text-lg font-black text-gray-900">Quer resolver hoje?</p>
+                      <p className="mt-2 text-sm text-gray-600">
+                        Envie o modelo do seu Apple e o defeito para receber o melhor direcionamento.
+                      </p>
+                    </div>
+                  </div>
+                  <Link
+                    href={WHATSAPP_LINK}
+                    target="_blank"
+                    className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-gray-900 px-5 py-3 text-sm font-extrabold text-white hover:bg-black"
+                  >
+                    Iniciar atendimento
+                  </Link>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        <section id="servicos" className="bg-white py-16 md:py-20">
+        <section className="bg-white py-16 md:py-20">
+          <div className="container mx-auto px-4">
+            <div className="mb-12 max-w-3xl">
+              <h2 className="text-3xl font-black text-gray-900 md:text-4xl">
+                UX/UI pensado para conduzir o leitor ao contato
+              </h2>
+              <p className="mt-4 text-lg text-gray-600">
+                Organizamos a navegação para diminuir dúvida, destacar prova visual, acelerar a tomada de decisão
+                e facilitar a passagem da descoberta para o WhatsApp.
+              </p>
+            </div>
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+              {conversionCards.map((card) => (
+                <div key={card.title} className="rounded-[1.75rem] border border-gray-200 bg-white p-7 shadow-sm">
+                  <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-600">
+                    <card.icon className="h-7 w-7" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900">{card.title}</h3>
+                  <p className="mt-3 text-gray-600">{card.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="servicos" className="bg-[#f8fafc] py-16 md:py-20">
           <div className="container mx-auto px-4">
             <div className="mx-auto mb-12 max-w-3xl text-center">
               <h2 className="text-3xl font-black text-gray-900 md:text-4xl">
-                Escolha a página ideal para o seu dispositivo
+                Escolha a página ideal para o seu equipamento Apple
               </h2>
               <p className="mt-4 text-lg text-gray-600">
-                Cada subpágina foi organizada para destacar os serviços mais procurados, reforçar
-                confiança e facilitar o contato.
+                Cada subpágina foi escrita para captar busca qualificada, responder objeções e aumentar a conversão
+                em orçamento.
               </p>
             </div>
 
@@ -258,30 +411,90 @@ export default function AppleServicesPage() {
           </div>
         </section>
 
-        <section className="bg-gray-50 py-16 md:py-20">
+        <section className="bg-white py-16 md:py-20">
           <div className="container mx-auto px-4">
-            <div className="mb-12 max-w-3xl">
-              <h2 className="text-3xl font-black text-gray-900 md:text-4xl">
-                Estrutura pensada para conversão e SEO local
-              </h2>
-              <p className="mt-4 text-lg text-gray-600">
-                O conteúdo foi orientado para buscas em Campinas, com destaque para Cambuí, Nova
-                Campinas, Taquaral, Guanabara, Bosque, Centro e bairros próximos.
-              </p>
+            <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
+              <div className="rounded-[2rem] border border-gray-200 bg-gray-50 p-8">
+                <div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-red-700 shadow-sm">
+                  <Zap className="h-4 w-4" />
+                  Processo de conversão
+                </div>
+                <h2 className="mt-5 text-3xl font-black text-gray-900">Como transformamos visita em contato</h2>
+                <div className="mt-8 space-y-4">
+                  {processSteps.map((step) => (
+                    <div key={step.title} className="rounded-[1.5rem] border border-gray-200 bg-white p-5">
+                      <h3 className="text-lg font-black text-gray-900">{step.title}</h3>
+                      <p className="mt-2 text-gray-600">{step.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-[2rem] border border-gray-200 bg-white p-8 shadow-sm">
+                <div className="inline-flex items-center gap-2 rounded-full bg-red-50 px-4 py-2 text-sm font-semibold text-red-700">
+                  <MapPin className="h-4 w-4" />
+                  SEO local forte
+                </div>
+                <h2 className="mt-5 text-3xl font-black text-gray-900">
+                  Presença forte para Campinas, Cambuí e bairros próximos
+                </h2>
+                <p className="mt-4 text-lg text-gray-600">
+                  O conteúdo desta página foi reescrito para melhorar leitura, reforçar prova local e capturar
+                  buscas com intenção de compra e reparo em Campinas.
+                </p>
+                <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-3">
+                  {["Cambuí", "Nova Campinas", "Guanabara", "Taquaral", "Bosque", "Centro"].map((item) => (
+                    <div key={item} className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-semibold text-gray-700">
+                      {item}
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-8 rounded-[1.5rem] bg-gray-900 p-6 text-white">
+                  <h3 className="text-xl font-black">Quer um atendimento direto e sem enrolação?</h3>
+                  <p className="mt-3 text-sm leading-6 text-white/85">
+                    Chame no WhatsApp, informe o equipamento Apple e receba o melhor direcionamento para diagnóstico e orçamento.
+                  </p>
+                  <Link
+                    href={WHATSAPP_LINK}
+                    target="_blank"
+                    className="mt-5 inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-extrabold text-gray-900"
+                  >
+                    Falar com especialista
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-[#f8fafc] py-16 md:py-20">
+          <div className="container mx-auto px-4">
+            <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+              <div className="max-w-3xl">
+                <div className="inline-flex items-center gap-2 rounded-full bg-red-50 px-4 py-2 text-sm font-semibold text-red-700">
+                  <Newspaper className="h-4 w-4" />
+                  Radar de notícias Apple
+                </div>
+                <h2 className="mt-5 text-3xl font-black text-gray-900 md:text-4xl">
+                  Novo blog Apple com atualização automática
+                </h2>
+                <p className="mt-4 text-lg text-gray-600">
+                  Conteúdo editorial inspirado no blog principal, mas dedicado ao universo Apple, com novidades,
+                  atualizações e atalhos para transformar interesse em contato comercial.
+                </p>
+              </div>
+              <Link
+                href="/wendell/apple/blog"
+                className="inline-flex items-center justify-center rounded-full bg-red-600 px-7 py-4 text-sm font-extrabold text-white hover:bg-red-700"
+              >
+                <BookOpenText className="mr-2 h-5 w-5" />
+                Acessar Blog Apple
+              </Link>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-              {features.map((feature) => (
-                <div
-                  key={feature.title}
-                  className="rounded-3xl border border-gray-200 bg-white p-8 shadow-sm"
-                >
-                  <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-600">
-                    <feature.icon className="h-7 w-7" />
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900">{feature.title}</h3>
-                  <p className="mt-3 text-gray-600">{feature.description}</p>
-                </div>
+            <div className="grid gap-6 md:grid-cols-3">
+              {radarPosts.map((post) => (
+                <NewsPreviewCard key={post.id} post={post} />
               ))}
             </div>
           </div>
@@ -290,12 +503,15 @@ export default function AppleServicesPage() {
         <section className="bg-gradient-to-r from-red-600 to-red-700 py-16 md:py-20">
           <div className="container mx-auto px-4">
             <div className="mx-auto max-w-4xl text-center">
+              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white">
+                <ShieldCheck className="h-4 w-4" />
+                Página otimizada para alta conversão
+              </div>
               <h2 className="text-3xl font-black text-white md:text-5xl">
                 Precisa de assistência Apple em Campinas?
               </h2>
               <p className="mx-auto mt-5 max-w-2xl text-lg text-white/90 md:text-xl">
-                Fale agora no WhatsApp e siga direto para a página do serviço ideal para o seu
-                equipamento.
+                Fale agora no WhatsApp e siga direto para a página do serviço ideal para o seu equipamento Apple.
               </p>
               <Link href={WHATSAPP_LINK} target="_blank">
                 <span className="mt-8 inline-flex items-center gap-3 rounded-full bg-white px-10 py-5 text-lg font-black text-red-700 shadow-2xl">
