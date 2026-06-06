@@ -34,14 +34,14 @@ export const metadata: Metadata = {
     description:
       "Seu iMac precisa de reparo, troca de tela ou upgrade? Atendemos Campinas com foco em qualidade e agilidade.",
     siteName: SITE_CONFIG.name,
-    images: [{ url: "/images/apple/imac-hero.webp" }],
+    images: [{ url: "/images/apple/subcategories/imac-card.png" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Assistência iMac em Campinas | Tela, SSD e Reparo de Placa",
     description:
       "Seu iMac precisa de reparo, troca de tela ou upgrade? Atendemos Campinas com foco em qualidade e agilidade.",
-    images: ["/images/apple/imac-hero.webp"],
+    images: ["/images/apple/subcategories/imac-card.png"],
   },
 };
 
@@ -55,7 +55,7 @@ export default function IMacPage() {
       title="Assistência para"
       highlightedWord="iMac"
       description="Se o seu iMac perdeu desempenho, quebrou a tela ou apresenta falhas técnicas, conte com uma equipe preparada para reparos, upgrades e manutenção completa em Campinas e região."
-      heroImageSrc="/images/apple/imac-hero.webp"
+      heroImageSrc="/images/apple/subcategories/imac-card.png"
       heroImageAlt="Assistência técnica iMac em Campinas"
       heroCaption="Troca de tela, upgrade de SSD e reparo técnico com foco em performance"
       whatsappHref={WHATSAPP_LINK}

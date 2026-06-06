@@ -33,14 +33,14 @@ export const metadata: Metadata = {
     description:
       "iPad com tela quebrada, bateria ruim ou falha de carga? Fazemos reparo especializado em Campinas.",
     siteName: SITE_CONFIG.name,
-    images: [{ url: "/images/apple/ipad-hero.webp" }],
+    images: [{ url: "/images/apple/subcategories/ipad-card.png" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Assistência iPad em Campinas | Tela, Bateria e Conector",
     description:
       "iPad com tela quebrada, bateria ruim ou falha de carga? Fazemos reparo especializado em Campinas.",
-    images: ["/images/apple/ipad-hero.webp"],
+    images: ["/images/apple/subcategories/ipad-card.png"],
   },
 };
 
@@ -54,7 +54,7 @@ export default function IPadPage() {
       title="Assistência para"
       highlightedWord="iPad"
       description="Seu iPad merece um reparo ágil e bem executado. Trabalhamos com troca de tela, bateria, conector e reparos técnicos para clientes do Cambuí, Nova Campinas, Centro e bairros próximos."
-      heroImageSrc="/images/apple/ipad-hero.webp"
+      heroImageSrc="/images/apple/subcategories/ipad-card.png"
       heroImageAlt="Assistência técnica iPad em Campinas"
       heroCaption="Tela, bateria e conector com atendimento rápido para Campinas"
       whatsappHref={WHATSAPP_LINK}

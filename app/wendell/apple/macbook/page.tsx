@@ -35,14 +35,14 @@ export const metadata: Metadata = {
     description:
       "Serviço especializado para MacBook Air e Pro em Campinas, com foco em tela, bateria, teclado e placa lógica.",
     siteName: SITE_CONFIG.name,
-    images: [{ url: "/images/apple/macbook-hero.webp" }],
+    images: [{ url: "/images/apple/subcategories/macbook-card.png" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Assistência MacBook em Campinas | Tela, Bateria e Placa",
     description:
       "Serviço especializado para MacBook Air e Pro em Campinas, com foco em tela, bateria, teclado e placa lógica.",
-    images: ["/images/apple/macbook-hero.webp"],
+    images: ["/images/apple/subcategories/macbook-card.png"],
   },
 };
 
@@ -56,7 +56,7 @@ export default function MacBookPage() {
       title="Assistência para"
       highlightedWord="MacBook"
       description="Seu MacBook Air ou Pro merece um atendimento técnico preciso. Fazemos reparos avançados, upgrades e manutenção com foco em desempenho, segurança e agilidade para clientes de Campinas, Cambuí e região."
-      heroImageSrc="/images/apple/macbook-hero.webp"
+      heroImageSrc="/images/apple/subcategories/macbook-card.png"
       heroImageAlt="Assistência técnica MacBook em Campinas"
       heroCaption="Troca de tela, bateria, teclado e placa com diagnóstico especializado"
       whatsappHref={WHATSAPP_LINK}

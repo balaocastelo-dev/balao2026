@@ -35,14 +35,14 @@ export const metadata: Metadata = {
     description:
       "Mac Mini com defeito, lentidão ou falhas? Fazemos upgrade, manutenção e reparo técnico em Campinas.",
     siteName: SITE_CONFIG.name,
-    images: [{ url: "/images/apple/macmini-hero.webp" }],
+    images: [{ url: "/images/apple/subcategories/macmini-card.png" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Assistência Mac Mini em Campinas | Upgrade e Reparo",
     description:
       "Mac Mini com defeito, lentidão ou falhas? Fazemos upgrade, manutenção e reparo técnico em Campinas.",
-    images: ["/images/apple/macmini-hero.webp"],
+    images: ["/images/apple/subcategories/macmini-card.png"],
   },
 };
 
@@ -56,7 +56,7 @@ export default function MacMiniPage() {
       title="Assistência para"
       highlightedWord="Mac Mini"
       description="Seu Mac Mini pode ganhar mais velocidade e estabilidade com um atendimento técnico certo. Realizamos upgrades, reparos avançados e manutenção preventiva para clientes de Campinas, especialmente Cambuí e bairros vizinhos."
-      heroImageSrc="/images/apple/macmini-hero.webp"
+      heroImageSrc="/images/apple/subcategories/macmini-card.png"
       heroImageAlt="Assistência técnica Mac Mini em Campinas"
       heroCaption="Upgrade, limpeza e reparo eletrônico para recuperar desempenho"
       whatsappHref={WHATSAPP_LINK}

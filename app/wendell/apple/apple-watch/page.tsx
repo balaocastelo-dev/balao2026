@@ -33,14 +33,14 @@ export const metadata: Metadata = {
     description:
       "Apple Watch com tela quebrada, bateria ruim ou coroa digital travada? Atendemos Campinas com reparo especializado.",
     siteName: SITE_CONFIG.name,
-    images: [{ url: "/images/apple/watch-hero.webp" }],
+    images: [{ url: "/images/apple/subcategories/watch-card.png" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Assistência Apple Watch em Campinas | Tela, Bateria e Coroa",
     description:
       "Apple Watch com tela quebrada, bateria ruim ou coroa digital travada? Atendemos Campinas com reparo especializado.",
-    images: ["/images/apple/watch-hero.webp"],
+    images: ["/images/apple/subcategories/watch-card.png"],
   },
 };
 
@@ -54,7 +54,7 @@ export default function AppleWatchPage() {
       title="Assistência para"
       highlightedWord="Apple Watch"
       description="Seu Apple Watch precisa de cuidado técnico preciso. Fazemos reparos em tela, bateria, coroa digital e falhas eletrônicas para clientes do Cambuí, Centro e bairros próximos em Campinas."
-      heroImageSrc="/images/apple/watch-hero.webp"
+      heroImageSrc="/images/apple/subcategories/watch-card.png"
       heroImageAlt="Assistência técnica Apple Watch em Campinas"
       heroCaption="Tela, bateria e coroa digital com reparo especializado"
       whatsappHref={WHATSAPP_LINK}
