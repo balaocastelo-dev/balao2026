@@ -53,10 +53,21 @@ function getMinuteSeed(date = new Date()): string {
   return `${year}${month}${day}${hour}${minute}`;
 }
 
+function modHexString(hex: string, divisor: number): number {
+  let remainder = 0;
+
+  for (const char of hex) {
+    const digit = Number.parseInt(char, 16);
+    remainder = (remainder * 16 + digit) % divisor;
+  }
+
+  return remainder;
+}
+
 export function getRotatingApprovalPassword(date = new Date()): string {
   const seed = `${getDailyAdminPassword(date)}:${getMinuteSeed(date)}`;
   const digest = createHash("sha256").update(seed).digest("hex");
-  const numeric = BigInt(`0x${digest.slice(0, 16)}`) % 100000000n;
+  const numeric = modHexString(digest.slice(0, 16), 100000000);
 
   return numeric.toString().padStart(8, "0");
 }
