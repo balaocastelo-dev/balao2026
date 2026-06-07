@@ -51,6 +51,7 @@ type AppleServicePageProps = {
   showcaseImageAlt?: string;
   showcaseTitle?: string;
   showcaseDescription?: string;
+  mobileHighlightsFirst?: boolean;
   reviews?: AppleReview[];
 };
 
@@ -88,14 +89,19 @@ export default function AppleServicePage({
   showcaseImageAlt,
   showcaseTitle,
   showcaseDescription,
+  mobileHighlightsFirst = false,
   reviews = appleReviews,
 }: AppleServicePageProps) {
   return (
     <div className="min-h-screen bg-white text-gray-900">
       <Header />
 
-      <main>
-        <section className="relative overflow-hidden border-b border-gray-100 bg-[radial-gradient(circle_at_top_right,_rgba(239,68,68,0.08),_transparent_28%),linear-gradient(to_bottom,_#ffffff,_#f8fafc)]">
+      <main className="flex flex-col">
+        <section
+          className={`relative overflow-hidden border-b border-gray-100 bg-[radial-gradient(circle_at_top_right,_rgba(239,68,68,0.08),_transparent_28%),linear-gradient(to_bottom,_#ffffff,_#f8fafc)] ${
+            mobileHighlightsFirst ? "order-2 md:order-1" : ""
+          }`}
+        >
           <div className="container mx-auto px-4 py-14 md:py-20">
             <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
               <div>
@@ -192,7 +198,10 @@ export default function AppleServicePage({
           </div>
         </section>
 
-        <section id="servicos-detalhados" className="bg-white py-16 md:py-20">
+        <section
+          id="servicos-detalhados"
+          className={`bg-white py-16 md:py-20 ${mobileHighlightsFirst ? "order-1 md:order-2" : ""}`}
+        >
           <div className="container mx-auto px-4">
             <div className="mx-auto mb-12 max-w-3xl text-center">
               <h2 className="text-3xl font-black text-gray-900 md:text-4xl">

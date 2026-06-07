@@ -60,6 +60,7 @@ export default function IPhonePage() {
       heroImageAlt="Assistência técnica iPhone em Campinas"
       heroCaption="Tela, bateria, conector e reparos técnicos com atendimento rápido"
       whatsappHref={WHATSAPP_LINK}
+      mobileHighlightsFirst
       theme={{
         badge: "border-sky-100 bg-sky-50 text-sky-700",
         button: "bg-sky-600 text-white hover:bg-sky-700",
