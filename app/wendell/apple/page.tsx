@@ -25,6 +25,7 @@ import {
   Zap,
 } from "lucide-react";
 import { SITE_CONFIG } from "@/lib/config";
+import { appleReviews } from "@/lib/apple-reviews";
 import { listAppleRadarPosts } from "@/lib/apple-news";
 
 const WHATSAPP_LINK =
@@ -73,24 +74,6 @@ const processSteps = [
   {
     title: "3. Siga para o orçamento",
     description: "Você recebe orçamento sem compromisso, prazo estimado em 1 hora para muitos reparos e opção de parcelar em até 12x sem juros.",
-  },
-];
-
-const reviews: AppleReview[] = [
-  {
-    name: "Julio Cesar",
-    model: "iPhone 14 Pro Max",
-    text: "A tela quebrou e eu precisava do celular pro trabalho. Trocado em 2h no Cambuí, serviço impecável.",
-  },
-  {
-    name: "Beatriz Oliveira",
-    model: "iPhone 12 Mini",
-    text: "Minha bateria estava estufando. Resolveram rápido, preço justo e o atendimento foi excelente.",
-  },
-  {
-    name: "Marcos Paulo",
-    model: "iPhone 13",
-    text: "Melhor assistência de Campinas. Atendimento claro, reparo rápido e resultado muito bom.",
   },
 ];
 
@@ -555,8 +538,8 @@ export default async function AppleServicesPage() {
                 Veja avaliações de clientes que procuraram assistência Apple rápida em Campinas.
               </p>
             </div>
-            <div className="mx-auto max-w-4xl">
-              <AppleReviewsCarousel reviews={reviews} />
+            <div className="mx-auto max-w-6xl">
+              <AppleReviewsCarousel reviews={appleReviews} />
             </div>
           </div>
         </section>

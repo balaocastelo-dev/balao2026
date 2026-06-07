@@ -50,6 +50,21 @@ const APPLE_KEYWORDS = [
   "icloud",
 ];
 
+const NON_APPLE_KEYWORDS = [
+  "android",
+  "samsung",
+  "galaxy",
+  "xiaomi",
+  "redmi",
+  "motorola",
+  "moto g",
+  "google pixel",
+  "pixel 9",
+  "windows 11",
+  "playstation",
+  "xbox",
+];
+
 function sha256(input: string): string {
   return crypto.createHash("sha256").update(input).digest("hex");
 }
@@ -67,6 +82,10 @@ function decodeHtmlEntities(input: string): string {
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'");
+}
+
+function normalizeUrl(url: string): string {
+  return String(url || "").replace(/^http:\/\//i, "https://").trim();
 }
 
 function normalizeText(input: string): string {
@@ -158,9 +177,24 @@ function normalizeArticleHtml(inputHtml: string): string {
   return sanitizeHtmlBasic(s);
 }
 
-async function fetchOriginalArticleHtml(url: string): Promise<string | null> {
+function extractFirstImageUrl(input: string): string | null {
+  const html = String(input || "");
+  if (!html) return null;
+
+  const ogMatch = html.match(/<meta\b[^>]*(?:property|name)=["']og:image["'][^>]*content=["']([^"']+)["']/i);
+  const twitterMatch = html.match(/<meta\b[^>]*(?:property|name)=["']twitter:image["'][^>]*content=["']([^"']+)["']/i);
+  const imgMatch = html.match(/<img\b[^>]*src=["']([^"']+)["']/i);
+  const candidate = ogMatch?.[1] || twitterMatch?.[1] || imgMatch?.[1] || "";
+  const normalized = normalizeUrl(candidate);
+
+  if (!/^https:\/\//i.test(normalized)) return null;
+  if (/\.(svg)(\?|#|$)/i.test(normalized)) return null;
+  return normalized;
+}
+
+async function fetchOriginalArticle(url: string): Promise<{ html: string | null; imageUrl: string | null }> {
   const u = String(url || "").trim();
-  if (!u) return null;
+  if (!u) return { html: null, imageUrl: null };
 
   const res = await fetch(u, {
     headers: {
@@ -170,9 +204,10 @@ async function fetchOriginalArticleHtml(url: string): Promise<string | null> {
     cache: "no-store",
   });
 
-  if (!res.ok) return null;
+  if (!res.ok) return { html: null, imageUrl: null };
   const html = await res.text();
   const cleaned = removeDangerousBlocks(html);
+  const imageUrl = extractFirstImageUrl(cleaned);
 
   const body =
     findTagBlock(cleaned, "div", /\bentry-content\b/i) ||
@@ -185,8 +220,8 @@ async function fetchOriginalArticleHtml(url: string): Promise<string | null> {
 
   const inner = stripWrapperTag(body);
   const normalized = normalizeArticleHtml(inner);
-  if (stripHtmlToText(normalized).length < 500) return null;
-  return normalized;
+  if (stripHtmlToText(normalized).length < 500) return { html: null, imageUrl };
+  return { html: normalized, imageUrl };
 }
 
 function hasPortugueseLanguageSignals(item: RssItem): boolean {
@@ -224,8 +259,10 @@ function isAppleNewsItem(item: RssItem): boolean {
     domain.includes("canaltech.com.br") ||
     domain.includes("feedburner.com") ||
     domain.includes("tudocelular.com");
+  const hasAppleSignal = APPLE_KEYWORDS.some((keyword) => hay.includes(normalizeText(keyword)));
+  const hasNonAppleSignal = NON_APPLE_KEYWORDS.some((keyword) => hay.includes(normalizeText(keyword)));
 
-  return isPtSource && hasPortugueseLanguageSignals(item) && APPLE_KEYWORDS.some((keyword) => hay.includes(normalizeText(keyword)));
+  return isPtSource && hasPortugueseLanguageSignals(item) && hasAppleSignal && !hasNonAppleSignal;
 }
 
 function categorizeAppleNews(item: RssItem): string {
@@ -245,34 +282,30 @@ function categorizeAppleNews(item: RssItem): string {
   return "Universo Apple";
 }
 
-const BLOG_REAL_PHOTOS = [
-  "/images/apple/hub-hero-real.png",
-  "/images/apple/subcategories/macmini-card.png",
-  "/images/apple/subcategories/imac-card.png",
-  "/images/apple/subcategories/ipad-card.png",
-  "/images/apple/subcategories/watch-card.png",
-  "/images/apple/subcategories/macbook-card.png",
-];
+function pickCoverImage(item: RssItem, sourceImageUrl: string | null, contentHtml: string): string | null {
+  const feedImage = (item.imageUrls || []).map(normalizeUrl).find((url) => /^https:\/\//i.test(url) && !/\.(svg)(\?|#|$)/i.test(url));
+  if (feedImage) return feedImage;
+  if (sourceImageUrl) return sourceImageUrl;
 
-function getCategoryCoverImage(category: string, sourceUrl: string): string {
-  if (category === "iPad") return "/images/apple/subcategories/ipad-card.png";
-  if (category === "Apple Watch") return "/images/apple/subcategories/watch-card.png";
-  if (category === "Mac") return "/images/apple/subcategories/macbook-card.png";
+  const imageFromContent = extractFirstImageUrl(contentHtml);
+  if (imageFromContent) return imageFromContent;
 
-  const hash = sha256(sourceUrl || category);
-  const number = parseInt(hash.slice(0, 8), 16);
-  return BLOG_REAL_PHOTOS[number % BLOG_REAL_PHOTOS.length];
+  return null;
 }
 
-async function buildAppleRadarHtml(item: RssItem): Promise<string> {
-  const fromSource = await fetchOriginalArticleHtml(item.url).catch(() => null);
-  if (fromSource && stripHtmlToText(fromSource).length >= 500) return fromSource;
+async function buildAppleRadarContent(item: RssItem): Promise<{ contentHtml: string; sourceImageUrl: string | null }> {
+  const fromSource = await fetchOriginalArticle(item.url).catch(() => ({ html: null, imageUrl: null }));
+  if (fromSource.html && stripHtmlToText(fromSource.html).length >= 500) {
+    return { contentHtml: fromSource.html, sourceImageUrl: fromSource.imageUrl };
+  }
 
   const fromFeed = normalizeArticleHtml(String(item.summary || ""));
-  if (stripHtmlToText(fromFeed).length >= 250) return fromFeed;
+  if (stripHtmlToText(fromFeed).length >= 250) {
+    return { contentHtml: fromFeed, sourceImageUrl: fromSource.imageUrl };
+  }
 
   const fallback = sanitizeHtmlBasic(`<p>${clip(stripHtmlToText(String(item.summary || item.title || "")), 1200)}</p>`);
-  return fallback;
+  return { contentHtml: fallback, sourceImageUrl: fromSource.imageUrl };
 }
 
 async function toApplePost(item: RssItem): Promise<AppleNewsPost> {
@@ -280,7 +313,7 @@ async function toApplePost(item: RssItem): Promise<AppleNewsPost> {
   const title = decodeHtmlEntities(String(item.title || "Notícia Apple")).replace(/\s+/g, " ").trim();
   const slug = `${slugify(title).slice(0, 72)}-${sourceHash}`;
   const category = categorizeAppleNews(item);
-  const contentHtml = await buildAppleRadarHtml(item);
+  const { contentHtml, sourceImageUrl } = await buildAppleRadarContent(item);
   const excerpt =
     buildExcerptFromHtml(contentHtml, 180) ||
     `Leia a notícia completa sobre Apple e acompanhe as principais atualizações do setor.`;
@@ -295,7 +328,7 @@ async function toApplePost(item: RssItem): Promise<AppleNewsPost> {
     title,
     excerpt,
     content_html: contentHtml,
-    cover_image: getCategoryCoverImage(category, item.url),
+    cover_image: pickCoverImage(item, sourceImageUrl, contentHtml),
     category,
     source_url: item.url,
     source_domain: sourceDomain,

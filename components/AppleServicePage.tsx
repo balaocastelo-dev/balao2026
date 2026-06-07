@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { CheckCircle2, MapPin, Phone, type LucideIcon } from "lucide-react";
 import AppleReviewsCarousel, { type AppleReview } from "@/components/AppleReviewsCarousel";
+import { appleReviews } from "@/lib/apple-reviews";
 
 type ThemeClasses = {
   badge: string;
@@ -46,6 +47,10 @@ type AppleServicePageProps = {
   localDescription: string;
   ctaTitle: string;
   ctaDescription: string;
+  showcaseImageSrc?: string;
+  showcaseImageAlt?: string;
+  showcaseTitle?: string;
+  showcaseDescription?: string;
   reviews?: AppleReview[];
 };
 
@@ -58,24 +63,6 @@ const neighborhoods = [
   "Centro",
   "Proença",
   "Chácara da Barra",
-];
-
-const defaultReviews: AppleReview[] = [
-  {
-    name: "Julio Cesar",
-    model: "iPhone 14 Pro Max",
-    text: "A tela quebrou e eu precisava do celular pro trabalho. Trocado em 2h no Cambuí, serviço impecável.",
-  },
-  {
-    name: "Beatriz Oliveira",
-    model: "iPhone 12 Mini",
-    text: "Minha bateria estava estufando. Resolveram rápido, preço justo e o atendimento foi excelente.",
-  },
-  {
-    name: "Marcos Paulo",
-    model: "iPhone 13",
-    text: "Melhor assistência de Campinas. Atendimento claro, reparo rápido e resultado muito bom.",
-  },
 ];
 
 export default function AppleServicePage({
@@ -97,7 +84,11 @@ export default function AppleServicePage({
   localDescription,
   ctaTitle,
   ctaDescription,
-  reviews = defaultReviews,
+  showcaseImageSrc,
+  showcaseImageAlt,
+  showcaseTitle,
+  showcaseDescription,
+  reviews = appleReviews,
 }: AppleServicePageProps) {
   return (
     <div className="min-h-screen bg-white text-gray-900">
@@ -244,6 +235,41 @@ export default function AppleServicePage({
           </div>
         </section>
 
+        {showcaseImageSrc ? (
+          <section className="bg-[#f8fafc] py-16 md:py-20">
+            <div className="container mx-auto px-4">
+              <div className="grid items-center gap-8 overflow-hidden rounded-[2rem] border border-gray-200 bg-white p-6 shadow-sm md:p-8 lg:grid-cols-[0.95fr_1.05fr]">
+                <div className="relative aspect-[16/10] overflow-hidden rounded-[1.75rem] border border-gray-100 bg-gray-50">
+                  <Image
+                    src={showcaseImageSrc}
+                    alt={showcaseImageAlt || "Imagem de apoio do atendimento Apple"}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 46vw"
+                    className="object-cover"
+                  />
+                </div>
+                <div>
+                  <div className="inline-flex rounded-full border border-red-100 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700">
+                    Atendimento especializado Apple
+                  </div>
+                  <h2 className="mt-5 text-3xl font-black text-gray-900 md:text-4xl">
+                    {showcaseTitle || "Estrutura preparada para um atendimento rapido e seguro"}
+                  </h2>
+                  <p className="mt-4 text-lg leading-8 text-gray-600">
+                    {showcaseDescription ||
+                      "Seu equipamento recebe avaliacao tecnica cuidadosa, com explicacao clara do reparo, prazo e orientacao para seguir com mais seguranca."}
+                  </p>
+                  <div className="mt-6 flex flex-wrap gap-3 text-sm font-bold text-gray-700">
+                    <span className="rounded-full bg-gray-100 px-4 py-2">Assistencia Apple em 1 hora</span>
+                    <span className="rounded-full bg-gray-100 px-4 py-2">Motoboy gratis</span>
+                    <span className="rounded-full bg-gray-100 px-4 py-2">12x sem juros</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        ) : null}
+
         <section className="bg-gray-50 py-16 md:py-20">
           <div className="container mx-auto px-4">
             <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
@@ -313,7 +339,7 @@ export default function AppleServicePage({
                 Veja relatos de clientes que procuraram atendimento rápido para equipamentos Apple.
               </p>
             </div>
-            <div className="mx-auto max-w-4xl">
+            <div className="mx-auto max-w-6xl">
               <AppleReviewsCarousel reviews={reviews} />
             </div>
           </div>

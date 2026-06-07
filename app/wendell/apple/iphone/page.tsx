@@ -74,24 +74,28 @@ export default function IPhonePage() {
           title: "Troca de tela para iPhone",
           description:
             "Resolvemos telas trincadas, toque falhando, manchas, linhas e quebras que comprometem o uso do aparelho.",
-          imageSrc: "/images/apple/iphone-tela.png",
+          imageSrc: "/images/apple/iphone/iphone-reparo-bancada.png",
           imageAlt: "Troca de tela de iPhone",
         },
         {
           title: "Bateria nova para recuperar autonomia",
           description:
             "Se a bateria acaba rápido, esquenta ou o iPhone desliga sozinho, realizamos a substituição com segurança.",
-          imageSrc: "/images/apple/iphone-bateria.png",
+          imageSrc: "/images/apple/iphone/iphone-interno-reparo.png",
           imageAlt: "Troca de bateria de iPhone",
         },
         {
           title: "Conector e carga com reparo preciso",
           description:
             "Para iPhone que não carrega, carrega mal ou exige posição específica do cabo, fazemos o reparo correto.",
-          imageSrc: "/images/apple/iphone-carga.png",
+          imageSrc: "/images/apple/iphone/iphone-conector-reparo.png",
           imageAlt: "Reparo de conector de carga de iPhone",
         },
       ]}
+      showcaseImageSrc="/images/apple/iphone/apple-bench-showcase.png"
+      showcaseImageAlt="Estrutura de bancada para atendimento Apple na Balão da Informática"
+      showcaseTitle="Ambiente técnico preparado para atendimento especializado em iPhone"
+      showcaseDescription="Seu iPhone passa por uma bancada organizada, com estrutura para diagnóstico preciso, reparo cuidadoso e atendimento rápido para quem precisa voltar a usar o aparelho sem demora."
       services={[
         {
           icon: Smartphone,
