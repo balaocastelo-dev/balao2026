@@ -88,31 +88,94 @@ export async function getProductsByCategory(categorySlug: string): Promise<Produ
   }
 }
 
-export async function getProductById(id: string): Promise<Product | null> {
+export async function getProductsByExactCategories(categoryNames: string[]): Promise<Product[]> {
   try {
-    // Try admin client first (more reliable on server)
-    try {
-      const { data, error } = await supabaseAdmin
-        .from('products')
-        .select('*')
-        .eq('id', id)
-        .single();
-      if (!error && data) return data as Product;
-    } catch {}
+    const normalizedNames = [...new Set(categoryNames.map((name) => String(name || "").trim()).filter(Boolean))];
+    if (normalizedNames.length === 0) return [];
 
-    // Fallback to anon client
-    const { data: anonData, error: anonError } = await supabase
+    const { data, error } = await supabase
       .from('products')
       .select('*')
-      .eq('id', id)
-      .single();
-    if (!anonError && anonData) return anonData as Product;
+      .in('category', normalizedNames);
+
+    if (error) {
+      console.error("Error fetching products by exact categories:", error);
+      return [];
+    }
+
+    return ((data as Product[]) || []).sort((a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price));
+  } catch (error) {
+    console.error("Error fetching products by exact categories:", error);
+    return [];
+  }
+}
+
+export async function searchProductsByKeywords(keywords: string[], limit = 24): Promise<Product[]> {
+  try {
+    const normalizedKeywords = [...new Set(
+      keywords
+        .map((keyword) => String(keyword || "").trim().toLowerCase())
+        .filter(Boolean)
+    )];
+
+    if (normalizedKeywords.length === 0) return [];
+
+    const orFilters = normalizedKeywords.flatMap((keyword) => ([
+      `name.ilike.%${keyword}%`,
+      `category.ilike.%${keyword}%`,
+      `description.ilike.%${keyword}%`,
+    ]));
+
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .or(orFilters.join(","))
+      .limit(Math.max(limit, normalizedKeywords.length * 12));
+
+    if (error) {
+      console.error("Error searching products by keywords:", error);
+      return [];
+    }
+
+    const rows = ((data as Product[]) || [])
+      .sort((a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price));
+
+    return rows.slice(0, limit);
+  } catch (error) {
+    console.error("Error searching products by keywords:", error);
+    return [];
+  }
+}
+
+export async function getProductByIdentifier(identifier: string): Promise<Product | null> {
+  try {
+    for (const column of ['slug', 'id'] as const) {
+      try {
+        const { data, error } = await supabaseAdmin
+          .from('products')
+          .select('*')
+          .eq(column, identifier)
+          .single();
+        if (!error && data) return data as Product;
+      } catch {}
+
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq(column, identifier)
+        .single();
+      if (!error && data) return data as Product;
+    }
 
     return null;
   } catch (error) {
-    console.error("Error fetching product by id:", error);
+    console.error("Error fetching product by identifier:", error);
     return null;
   }
+}
+
+export async function getProductById(id: string): Promise<Product | null> {
+  return getProductByIdentifier(id);
 }
 
 export async function saveProducts(products: Product[]) {

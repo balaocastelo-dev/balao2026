@@ -1,10 +1,11 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import Header from '@/components/Header'
-import { getProducts } from '@/lib/db'
+import QuickLeadSection from '@/components/QuickLeadSection'
+import { searchProductsByKeywords } from '@/lib/db'
 import ProductCarousel from '@/components/ProductCarousel'
 import { ALL_SERVICES, SERVICE_CATEGORIES } from '../servicos-e-ofertas/data'
-import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from '@/components/JsonLd'
+import JsonLd, { generateBreadcrumbSchema, generateFAQSchema, generateOrganizationSchema, generateServiceSchema } from '@/components/JsonLd'
 import { 
   CheckCircle, 
   MessageCircle, 
@@ -17,14 +18,8 @@ import {
   Wrench,
   ShieldCheck,
   Zap,
-  Cpu,
-  Server,
-  Wifi,
   Activity,
-  MousePointer2,
   Settings,
-  Lock,
-  Printer,
   Clock
 } from 'lucide-react'
 
@@ -56,7 +51,17 @@ export const metadata: Metadata = {
   }
 }
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 600
+
+const MANUTENCAO_FAQS = [
+  { question: "Quanto tempo leva o diagnóstico?", answer: "Na maioria dos casos, o diagnóstico é concluído em até 24 horas úteis." },
+  { question: "Tem garantia?", answer: "Sim. O serviço e as peças substituídas contam com garantia legal de 90 dias." },
+  { question: "Vocês buscam o equipamento?", answer: "Sim. Há serviço de leva e traz para Campinas e região, conforme disponibilidade." },
+  { question: "Perco meus arquivos?", answer: "Sempre que possível preservamos seus dados. Se houver necessidade de formatação, o procedimento é alinhado antes com você." },
+]
+
+type ServiceItem = (typeof ALL_SERVICES)[number]
+type ServiceCategory = (typeof SERVICE_CATEGORIES)[number]
 
 function BlockStats() {
   return (
@@ -136,7 +141,7 @@ function BlockTestimonials() {
                         <div className="flex gap-1 text-yellow-500 mb-4">
                             {[...Array(t.stars)].map((_, j) => <Star key={j} className="w-5 h-5 fill-current" />)}
                         </div>
-                        <p className="text-zinc-300 mb-6 italic">"{t.text}"</p>
+                        <p className="text-zinc-300 mb-6 italic">&ldquo;{t.text}&rdquo;</p>
                         <div>
                             <div className="font-bold text-white">{t.name}</div>
                             <div className="text-sm text-blue-500">{t.role}</div>
@@ -251,7 +256,7 @@ function BlockHero() {
   );
 }
 
-function ServiceCard({ service }: { service: any }) {
+function ServiceCard({ service }: { service: ServiceItem }) {
   const Icon = service.icon
   return (
     <div className="group bg-zinc-900/50 backdrop-blur border border-zinc-800 p-4 md:p-6 rounded-3xl hover:border-blue-500 transition-all hover:bg-zinc-900/80">
@@ -311,7 +316,7 @@ function ServiceCard({ service }: { service: any }) {
 
                 <div className="bg-zinc-800/50 rounded-2xl p-6 border border-zinc-700/50">
                     <p className="text-zinc-400 text-sm italic leading-relaxed mb-6">
-                        "{service.longDescription}"
+                        &ldquo;{service.longDescription}&rdquo;
                     </p>
                     <div className="flex flex-wrap gap-4 text-sm pt-4 border-t border-zinc-700/50">
                         <div className="flex items-center gap-2 text-zinc-400">
@@ -339,7 +344,7 @@ function ServiceCard({ service }: { service: any }) {
   )
 }
 
-function BlockCategory({ category, isDark = true, reverse = false }: { category: any, isDark?: boolean, reverse?: boolean }) {
+function BlockCategory({ category, isDark = true, reverse = false }: { category: ServiceCategory, isDark?: boolean, reverse?: boolean }) {
   const categoryServices = ALL_SERVICES.filter(s => s.categoryId === category.id)
   
   return (
@@ -446,16 +451,21 @@ function BlockUrgency() {
 }
 
 export default async function ManutencaoPage() {
-  const allProducts = await getProducts()
-  
-  // Helper para filtrar peças de reparo
-  const repairParts = allProducts.filter(p => {
-    const text = (p.name + " " + (p.description || "")).toLowerCase()
-    return ['ssd', 'memoria', 'fonte', 'pasta', 'cooler'].some(k => text.includes(k))
-  }).slice(0, 8)
+  const repairParts = await searchProductsByKeywords(['ssd', 'memoria', 'fonte', 'pasta termica', 'cooler'], 8)
 
   return (
     <div className="min-h-screen flex flex-col bg-black font-sans">
+      <JsonLd
+        data={[
+          generateServiceSchema({
+            name: 'Assistência Técnica de Computadores e Notebooks em Campinas',
+            description: 'Conserto de notebooks, PCs, MacBooks e estações de trabalho com laboratório próprio, diagnóstico rápido e garantia.',
+            url: 'https://www.balao.info/manutencao',
+            serviceType: 'Assistência técnica de computadores, notebooks e MacBooks',
+          }),
+          generateFAQSchema(MANUTENCAO_FAQS),
+        ]}
+      />
       <Header />
       <main className="flex-1">
         
@@ -531,18 +541,13 @@ export default async function ManutencaoPage() {
                 <div className="container mx-auto px-4 max-w-4xl">
                     <h2 className="text-3xl md:text-5xl font-black text-center mb-12">DÚVIDAS FREQUENTES</h2>
                     <div className="space-y-4">
-                        {[
-                            { q: "Quanto tempo leva o diagnóstico?", a: "Para a maioria dos casos, o diagnóstico é feito em até 24 horas úteis." },
-                            { q: "Tem garantia?", a: "Sim, oferecemos 90 dias de garantia legal sobre o serviço realizado e peças substituídas." },
-                            { q: "Vocês buscam o equipamento?", a: "Sim, temos serviço de leva e traz para Campinas e região (consulte taxas)." },
-                            { q: "Perco meus arquivos?", a: "Sempre tentamos preservar seus dados. Caso seja necessária formatação, oferecemos backup como serviço adicional." }
-                        ].map((faq, i) => (
+                        {MANUTENCAO_FAQS.map((faq, i) => (
                             <details key={i} className="group bg-white p-6 rounded-2xl shadow-sm border border-slate-200 cursor-pointer">
                                 <summary className="flex justify-between items-center font-bold text-lg list-none">
-                                    {faq.q}
+                                    {faq.question}
                                     <ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180 text-blue-500" />
                                 </summary>
-                                <p className="mt-4 text-slate-600 leading-relaxed">{faq.a}</p>
+                                <p className="mt-4 text-slate-600 leading-relaxed">{faq.answer}</p>
                             </details>
                         ))}
                     </div>
@@ -579,6 +584,20 @@ export default async function ManutencaoPage() {
         </div>
 
         <BlockUrgency />
+
+        <section className="py-12 bg-slate-100 border-t border-slate-200">
+          <div className="container mx-auto px-4">
+            <QuickLeadSection
+              title="Seu computador parou? Peça atendimento agora"
+              description="Use o formulário ou clique no WhatsApp para acelerar o atendimento. Esse bloco existe para captar quem está com urgência e precisa resolver hoje."
+              messageTemplate="Olá! Preciso de assistência técnica para computador ou notebook em Campinas e região. Quero atendimento rápido."
+              source="manutencao"
+              cityLabel="Campinas e Região"
+              serviceLabel="Assistência Técnica"
+              formTitle="Solicitar orçamento de manutenção"
+            />
+          </div>
+        </section>
 
       </main>
     </div>

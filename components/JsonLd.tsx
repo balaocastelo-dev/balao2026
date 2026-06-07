@@ -1,8 +1,8 @@
-import { parsePriceToNumber, Product } from "@/lib/utils";
+import { getProductHref, parsePriceToNumber, Product } from "@/lib/utils";
 import { SITE_CONFIG } from "@/lib/config";
 
 type JsonLdProps = {
-  data: Record<string, any> | Record<string, any>[];
+  data: Record<string, unknown> | Record<string, unknown>[];
 };
 
 export default function JsonLd({ data }: JsonLdProps) {
@@ -65,6 +65,7 @@ export function generateProductSchema(product: Product) {
   const priceNumber = parsePriceToNumber(product.price);
   const price = Number.isFinite(priceNumber) ? priceNumber.toFixed(2) : undefined;
   const priceValidUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const productUrl = `https://www.balao.info${getProductHref(product)}`;
   return {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -77,7 +78,7 @@ export function generateProductSchema(product: Product) {
     },
     offers: {
       "@type": "Offer",
-      url: `https://www.balao.info/product/${product.slug || product.id}`,
+      url: productUrl,
       priceCurrency: "BRL",
       ...(price ? { price } : {}),
       priceValidUntil,
@@ -95,7 +96,7 @@ export function generateItemListSchema(products: Product[], url: string) {
     itemListElement: products.map((product, index) => ({
       "@type": "ListItem",
       position: index + 1,
-      url: `https://www.balao.info/product/${product.slug || product.id}`,
+      url: `https://www.balao.info${getProductHref(product)}`,
       name: product.name,
     })),
     url,
@@ -128,5 +129,37 @@ export function generateFAQSchema(faqs: { question: string; answer: string }[]) 
         text: faq.answer,
       },
     })),
+  };
+}
+
+export function generateServiceSchema({
+  name,
+  description,
+  url,
+  serviceType,
+  areaServed = ["Campinas", "Sumaré", "Hortolândia", "Paulínia", "Valinhos", "Vinhedo", "Brasil"],
+}: {
+  name: string;
+  description: string;
+  url: string;
+  serviceType: string;
+  areaServed?: string[];
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name,
+    description,
+    serviceType,
+    url,
+    areaServed,
+    provider: {
+      "@id": "https://www.balao.info/#organization",
+    },
+    availableChannel: {
+      "@type": "ServiceChannel",
+      serviceUrl: url,
+      servicePhone: `+${SITE_CONFIG.phone.number}`,
+    },
   };
 }

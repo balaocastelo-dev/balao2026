@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Header from "@/components/Header";
 import { getCategories, getProducts } from "@/lib/db";
-import { parsePriceToNumber, type Category, type Product } from "@/lib/utils";
+import { getProductHref, parsePriceToNumber, type Category, type Product } from "@/lib/utils";
 import { SITE_CONFIG } from "@/lib/config";
 import JsonLd from "@/components/JsonLd";
 import {
@@ -66,7 +66,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const dynamic = "force-dynamic";
+export const revalidate = 600;
 
 function normalize(text: string) {
   return (text || "")
@@ -100,7 +100,7 @@ function ProductTile({
   product: Product;
   eyebrow?: string;
 }) {
-  const href = `/product/${product.id}`;
+  const href = getProductHref(product);
   const imgSrc = product.image || "/logo.png";
   const priceNum = parsePriceToNumber(product.price);
   const priceLabel = priceNum > 0 ? formatCurrency(priceNum) : product.price || "Consultar";
@@ -149,7 +149,7 @@ function ProductTile({
 }
 
 function FeaturedShowcase({ product }: { product: Product }) {
-  const href = `/product/${product.id}`;
+  const href = getProductHref(product);
   const imgSrc = product.image || "/logo.png";
   const priceNum = parsePriceToNumber(product.price);
   const priceLabel = priceNum > 0 ? formatCurrency(priceNum) : product.price || "Consultar";

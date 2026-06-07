@@ -17,6 +17,12 @@ export interface Product {
   ai_status?: "thinking" | "done" | "error";
 }
 
+export function getProductHref(product: Pick<Product, "id" | "slug">): string {
+  const slug = typeof product.slug === "string" ? product.slug.trim() : "";
+  const id = typeof product.id === "string" ? product.id.trim() : "";
+  return `/product/${slug || id}`;
+}
+
 export interface UsedNotebook {
   id: string;
   name: string;

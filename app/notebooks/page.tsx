@@ -1,13 +1,10 @@
 import React from "react";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
-import { getProducts, getCategories } from "@/lib/db";
-import { Product, Category } from "@/lib/utils";
-import ProductCard from "@/components/ProductCard";
-import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from "@/components/JsonLd";
+import { getCategories, getProductsByExactCategories, searchProductsByKeywords } from "@/lib/db";
+import JsonLd, { generateBreadcrumbSchema, generateFAQSchema, generateItemListSchema, generateOrganizationSchema } from "@/components/JsonLd";
+import QuickLeadSection from "@/components/QuickLeadSection";
 import { SITE_CONFIG } from "@/lib/config";
-import Image from "next/image";
-import HeroCTA from "@/components/HeroCTA";
 import NotebooksSearchGrid from "@/components/NotebooksSearchGrid";
 import { 
   Laptop, 
@@ -57,7 +54,22 @@ export const metadata: Metadata = {
   },
 };
 
-export const dynamic = "force-dynamic";
+export const revalidate = 600;
+
+const NOTEBOOK_FAQS = [
+  {
+    question: "Os notebooks têm garantia?",
+    answer: "Sim. Equipamentos novos possuem garantia de fabricante e suporte da loja. Seminovos contam com garantia direta conforme a oferta.",
+  },
+  {
+    question: "Vocês fazem upgrade na hora?",
+    answer: "Sim. Podemos instalar SSD e ampliar a memória RAM durante a compra, conforme compatibilidade do equipamento.",
+  },
+  {
+    question: "Aceitam notebook usado na troca?",
+    answer: "Sim. Fazemos avaliação do seu usado e ele pode entrar como parte do pagamento.",
+  },
+];
 
 function BlockHero() {
   return (
@@ -346,7 +358,7 @@ function BlockTestimonials() {
                         <div className="flex items-center gap-2 mb-4 text-yellow-400">
                             {[1,2,3,4,5].map(s => <span key={s}>★</span>)}
                         </div>
-                        <p className="text-blue-100 mb-6 italic">"{t.quote}"</p>
+                        <p className="text-blue-100 mb-6 italic">&ldquo;{t.quote}&rdquo;</p>
                         <div>
                             <div className="font-bold text-white">{t.name}</div>
                             <div className="text-sm text-blue-300">{t.role}</div>
@@ -386,27 +398,31 @@ function BlockPayment() {
 }
 
 export default async function NotebooksPage() {
-  const [allProducts, categories] = await Promise.all([
-    getProducts(),
-    getCategories(),
+  const categories = await getCategories();
+
+  const notebookCategoryNames = categories
+    .filter((category) => {
+      const text = `${category.name} ${category.slug}`.toLowerCase();
+      return text.includes("notebook") || text.includes("laptop") || text.includes("macbook");
+    })
+    .map((category) => category.name);
+
+  const [categoryProducts, fallbackProducts] = await Promise.all([
+    notebookCategoryNames.length > 0
+      ? getProductsByExactCategories(notebookCategoryNames)
+      : Promise.resolve([]),
+    searchProductsByKeywords(["notebook", "macbook", "thinkpad", "latitude", "ideapad", "vivobook"], 120),
   ]);
 
-  // Filter logic for Notebooks (similar to PC Gamer but for Notebooks)
-  // We can look for "notebook" in category name or slug
-  const notebookProducts = allProducts.filter((p: Product) => {
-    const name = p.name.toLowerCase();
-    const category = p.category?.toLowerCase() || "";
-    // Basic filter for notebooks
-    return (
-      category.includes("notebook") || 
-      category.includes("laptop") || 
-      name.includes("notebook") ||
-      name.includes("macbook") ||
-      name.includes("dell") || // Often notebooks
-      name.includes("lenovo") // Often notebooks
-    ) && !category.includes("pc gamer") && !name.includes("pc gamer"); 
-    // Exclude PC Gamer explicitly if overlap exists, though unlikely with good categorization
-  });
+  const notebookProducts = [...categoryProducts, ...fallbackProducts]
+    .filter((product, index, list) =>
+      list.findIndex((candidate) => candidate.id === product.id) === index
+    )
+    .filter((product) => {
+      const name = product.name.toLowerCase();
+      const category = product.category?.toLowerCase() || "";
+      return !category.includes("pc gamer") && !name.includes("pc gamer");
+    });
 
   const breadcrumbItems = [
     { name: 'Home', item: 'https://www.balao.info' },
@@ -417,7 +433,9 @@ export default async function NotebooksPage() {
     <div className="min-h-screen flex flex-col bg-slate-50 font-sans">
       <JsonLd data={[
         generateOrganizationSchema(),
-        generateBreadcrumbSchema(breadcrumbItems)
+        generateBreadcrumbSchema(breadcrumbItems),
+        generateItemListSchema(notebookProducts.slice(0, 50), "https://www.balao.info/notebooks"),
+        generateFAQSchema(NOTEBOOK_FAQS),
       ]} />
       <Header />
       <main className="flex-1">
@@ -608,6 +626,20 @@ export default async function NotebooksPage() {
         <BlockPayment />
 
         {/* BLOCO 6: CTA FINAL */}
+        <section className="py-12 bg-slate-100 border-t border-slate-200">
+          <div className="container mx-auto px-4">
+            <QuickLeadSection
+              title="Quer ajuda para escolher seu notebook hoje?"
+              description="Esse bloco captura quem já está perto da decisão. Você pode pedir retorno, avaliação do usado, indicação do modelo ideal ou upgrade antes da compra."
+              messageTemplate="Olá! Quero ajuda para escolher um notebook ou fazer upgrade em Campinas e região."
+              source="notebooks"
+              cityLabel="Campinas e Região"
+              serviceLabel="Notebooks"
+              formTitle="Pedir ajuda para escolher notebook"
+            />
+          </div>
+        </section>
+
         <BlockUrgency />
 
       </main>

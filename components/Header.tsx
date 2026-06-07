@@ -8,7 +8,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 import { useSidebar } from "@/context/SidebarContext";
-import { Product } from "@/lib/utils";
+import { getProductHref, Product } from "@/lib/utils";
 import SearchPreview from "@/components/SearchPreview";
 import CartPreview from "@/components/CartPreview";
 import TopBar from "@/components/TopBar";
@@ -82,14 +82,13 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleLogoClick = () => {
+  const handleLogoClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
     const newClicks = logoClicks + 1;
     setLogoClicks(newClicks);
     if (newClicks >= 5) {
+      event.preventDefault();
       router.push("/admin");
       setLogoClicks(0);
-    } else {
-      router.push("/");
     }
   };
 
@@ -146,8 +145,9 @@ export default function Header() {
         </button>
 
         {/* Logo Section */}
-        <a 
-          href="http://www.balao.info"
+        <Link
+          href="/"
+          onClick={handleLogoClick}
           className="flex flex-col items-center cursor-pointer select-none flex-shrink-0 drop-shadow-sm transition-transform hover:scale-105 active:scale-95 no-underline"
           title="Ir para página inicial"
         >
@@ -160,7 +160,7 @@ export default function Header() {
                     priority
                 />
              </div>
-        </a>
+        </Link>
 
         
 
@@ -212,7 +212,7 @@ export default function Header() {
                   products={previewProducts}
                   searchQuery={searchQuery}
                   onSelect={(product) => {
-                      router.push(`/product/${product.id}`);
+                      router.push(getProductHref(product));
                       setShowPreview(false);
                       setSearchQuery("");
                   }}
@@ -318,7 +318,7 @@ export default function Header() {
                         products={previewProducts}
                         searchQuery={searchQuery}
                         onSelect={(product) => {
-                            router.push(`/product/${product.id}`);
+                            router.push(getProductHref(product));
                             setShowPreview(false);
                             setSearchQuery("");
                         }}

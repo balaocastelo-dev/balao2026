@@ -5,13 +5,14 @@ import Carousel from "@/components/Carousel";
 import ProductCarousel from "@/components/ProductCarousel";
 import SeoContent from "@/components/SeoContent";
 import JsonLd, { generateOrganizationSchema } from "@/components/JsonLd";
-import { getProducts, getCarouselImages, getCategories, getHomeBlocks } from "@/lib/db";
+import QuickLeadSection from "@/components/QuickLeadSection";
+import { getProductsByExactCategories, getCarouselImages, getCategories, getHomeBlocks } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
-import { parsePriceToNumber, Product } from "@/lib/utils";
+import { parsePriceToNumber, Product, type Category } from "@/lib/utils";
 import type { Metadata } from "next";
 import { SITE_CONFIG } from "@/lib/config";
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300;
 
 type SearchParams = Promise<{ category?: string; search?: string }>;
 
@@ -53,61 +54,8 @@ export default async function Home(props: {
   const category = searchParams?.category;
   const search = searchParams?.search;
 
-  // Optimized Data Fetching
-  const carouselImagesPromise = getCarouselImages(true);
-  const categoriesPromise = getCategories();
-  const homeBlocksPromise = getHomeBlocks(true);
-  
-  let productsPromise: Promise<Product[]>;
-  
-  if (search) {
-      // If searching, use the advanced FTS + Fuzzy search from Supabase
-      productsPromise = (async () => {
-          const supabase = await createClient();
-          // Prepare AND query: "Desktop 2025" -> "Desktop & 2025"
-          const searchTerms = search.trim().split(/\s+/).join(' & ');
-
-          const { data, error } = await supabase.rpc('search_products_fts', { 
-              query_text: searchTerms, 
-              limit_count: 50 
-          });
-          
-          if (error) {
-              console.error("Search RPC error:", error);
-              // Fallback to basic ILIKE search with strict AND logic for each term
-              let queryBuilder = supabase.from('products').select('*');
-              
-              const terms = search.trim().split(/\s+/);
-              terms.forEach(term => {
-                  if (term.length > 0) {
-                      queryBuilder = queryBuilder.ilike('name', `%${term}%`);
-                  }
-              });
-
-              const { data: fallbackData } = await queryBuilder.limit(50);
-              return ((fallbackData as Product[]) || []).sort(
-                (a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price)
-              );
-          }
-          
-          return ((data as Product[]) || []).sort(
-            (a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price)
-          );
-      })();
-  } else {
-      // Otherwise fetch all products (for category browsing and home blocks)
-      productsPromise = getProducts();
-  }
-
-  const [products, carouselImages, categories, homeBlocks] = await Promise.all([
-    productsPromise,
-    carouselImagesPromise,
-    categoriesPromise,
-    homeBlocksPromise
-  ]);
-
   // Helper to find all descendant category names
-  const getDescendantNames = (rootName: string, allCategories: any[]) => {
+  const getDescendantNames = (rootName: string, allCategories: Category[]) => {
       const root = allCategories.find(c => c.name === rootName);
       if (!root) return [];
       
@@ -125,23 +73,67 @@ export default async function Home(props: {
       return descendants;
   }
 
-  const validCategories = new Set<string>();
-  if (category) {
-      validCategories.add(category);
-      const descendants = getDescendantNames(category, categories);
-      descendants.forEach(d => validCategories.add(d));
-  }
+  let products: Product[] = [];
+  let categories: Category[] = [];
+  let carouselImages = [];
+  let homeBlocks = [];
 
-  let filteredProducts = products;
+  if (search) {
+    [categories, carouselImages, homeBlocks] = await Promise.all([
+      getCategories(),
+      getCarouselImages(true),
+      getHomeBlocks(true),
+    ]);
 
-  // If we are NOT searching, we might need to filter by category
-  // (If we ARE searching, 'products' is already the search result from RPC)
-  if (!search) {
-      filteredProducts = products.filter(p => {
-        if (category && category !== "Todos os Produtos" && !validCategories.has(p.category)) return false;
-        return true;
+    products = await (async () => {
+      const supabase = await createClient();
+      const searchTerms = search.trim().split(/\s+/).join(' & ');
+
+      const { data, error } = await supabase.rpc('search_products_fts', {
+        query_text: searchTerms,
+        limit_count: 50
       });
+
+      if (error) {
+        console.error("Search RPC error:", error);
+        let queryBuilder = supabase.from('products').select('*');
+
+        const terms = search.trim().split(/\s+/);
+        terms.forEach(term => {
+          if (term.length > 0) {
+            queryBuilder = queryBuilder.ilike('name', `%${term}%`);
+          }
+        });
+
+        const { data: fallbackData } = await queryBuilder.limit(50);
+        return ((fallbackData as Product[]) || []).sort(
+          (a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price)
+        );
+      }
+
+      return ((data as Product[]) || []).sort(
+        (a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price)
+      );
+    })();
+  } else {
+    [categories, carouselImages, homeBlocks] = await Promise.all([
+      getCategories(),
+      getCarouselImages(true),
+      getHomeBlocks(true),
+    ]);
+
+    if (category && category !== "Todos os Produtos") {
+      const validCategories = new Set<string>([category]);
+      const descendants = getDescendantNames(category, categories);
+      descendants.forEach((name) => validCategories.add(name));
+      products = await getProductsByExactCategories([...validCategories]);
+    } else {
+      const blockCategories = [...new Set(homeBlocks.map((block) => block.category_id).filter(Boolean))];
+      products = await getProductsByExactCategories(blockCategories);
+    }
   }
+
+  const filteredProducts = products;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
@@ -234,6 +226,20 @@ export default async function Home(props: {
                     </ul>
                 </SeoContent>
             )}      
+
+            {!search && !category && (
+              <div className="mt-8">
+                <QuickLeadSection
+                  title="Quer atendimento rápido para comprar ou consertar?"
+                  description="Se você precisa de notebook, PC Gamer, assistência técnica, upgrade ou reparo Apple, fale com a equipe agora. O foco é transformar visita no site em atendimento real."
+                  messageTemplate="Olá! Quero atendimento rápido da Balão da Informática para compra ou assistência técnica em Campinas e região."
+                  source="home"
+                  cityLabel="Campinas e Região"
+                  serviceLabel="Venda e Assistência Técnica"
+                  formTitle="Pedir retorno rápido"
+                />
+              </div>
+            )}
         </main>
       </div>
     </div>

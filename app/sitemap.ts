@@ -1,6 +1,8 @@
 import { MetadataRoute } from 'next'
 import { getCategories, getProductsForSitemap } from '@/lib/db'
 import { listBlogPostsForPage } from '@/lib/blog-store'
+import { LEAD_INTENTS } from '@/lib/lead-intents'
+import { REGIONAL_CITIES, REGIONAL_SERVICES, buildRegionalServicePath } from '@/lib/local-seo'
 import { listVitrinePagesPublic } from '@/lib/vitrine/db'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -24,6 +26,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/monteseupc',
     '/departamentos',
     '/fale-conosco',
+    '/especialidades',
+    '/regiao',
+    '/urgente',
     '/sobre-nos',
     '/sobre-a-empresa',
     '/assistenciagames',
@@ -46,16 +51,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/seguranca-e-privacidade',
   ].map((route) => ({
     url: `${baseUrl}${route}`,
-    lastModified: new Date(),
-    changeFrequency: 'daily' as const,
-    priority: route === '' ? 1 : 0.8,
+    changeFrequency: route === '' ? 'daily' as const : 'weekly' as const,
+    priority: route === '' ? 1 : 0.7,
   }))
 
   // Categorias
   const categories = await getCategories()
   const categoryRoutes = categories.map((category) => ({
     url: `${baseUrl}/categoria/${category.slug}`,
-    lastModified: new Date(),
     changeFrequency: 'weekly' as const,
     priority: 0.7,
   }))
@@ -87,5 +90,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }))
 
-  return [...staticRoutes, ...categoryRoutes, ...productRoutes, ...blogRoutes, ...vitrineRoutes]
+  const regionalRoutes = REGIONAL_CITIES.flatMap((city) =>
+    REGIONAL_SERVICES.map((service) => ({
+      url: `${baseUrl}${buildRegionalServicePath(city.slug, service.slug)}`,
+      changeFrequency: 'weekly' as const,
+      priority: city.slug === 'campinas' ? 0.82 : 0.76,
+    }))
+  )
+
+  const urgentRoutes = LEAD_INTENTS.map((intent) => ({
+    url: `${baseUrl}/urgente/${intent.slug}`,
+    changeFrequency: 'weekly' as const,
+    priority: 0.78,
+  }))
+
+  return [...staticRoutes, ...categoryRoutes, ...productRoutes, ...blogRoutes, ...vitrineRoutes, ...regionalRoutes, ...urgentRoutes]
 }

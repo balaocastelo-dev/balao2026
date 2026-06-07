@@ -9,22 +9,24 @@ import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 import { ShoppingCart } from "lucide-react";
 import { animateAddToCart } from "@/lib/animations";
+import { getProductHref } from "@/lib/utils";
 
 export default function ProductCard({ product, variant = "grid" }: { product: Product, variant?: "grid" | "list" }) {
   const { addToCart } = useCart();
   const { showToast } = useToast();
   const imageRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const productHref = getProductHref(product);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
-    router.push(`/product/${product.id}`);
+    router.push(productHref);
   };
 
   if (variant === "list") {
     return (
       <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-gray-100 flex flex-col md:flex-row h-full group">
-        <Link href={`/product/${product.id}`} className="flex-1 flex flex-col md:flex-row">
+        <Link href={productHref} className="flex-1 flex flex-col md:flex-row">
           <div ref={imageRef} className="relative w-full md:w-32 pt-[100%] md:pt-0 md:h-auto md:min-h-[8rem] bg-gray-50 overflow-hidden shrink-0">
              <Image
                 src={product.image}
@@ -74,7 +76,7 @@ export default function ProductCard({ product, variant = "grid" }: { product: Pr
 
   return (
     <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-gray-100 flex flex-col h-full group">
-      <Link href={`/product/${product.id}`} className="flex-1">
+      <Link href={productHref} className="flex-1">
         <div ref={imageRef} className="relative pt-[100%] bg-gray-50 overflow-hidden">
              <Image
                 src={product.image}

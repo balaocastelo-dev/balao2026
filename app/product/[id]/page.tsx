@@ -3,17 +3,25 @@ import { getCategories, getProductById } from '@/lib/db';
 import Header from '@/components/Header';
 import Sidebar from '@/components/Sidebar';
 import Image from 'next/image';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import ShareButton from '@/components/ShareButton';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import ProductActions from '@/components/ProductActions';
 import ShippingCalculator from '@/components/ShippingCalculator';
 import ProductMediaSwitcher from '@/components/ProductMediaSwitcher';
 import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema, generateProductSchema } from '@/components/JsonLd';
+import { getProductHref } from '@/lib/utils';
 
 type Props = {
   params: Promise<{ id: string }>;
 };
+
+function getProductCanonicalPath(slug?: string | null, id?: string) {
+  return `https://www.balao.info${getProductHref({
+    id: id || "",
+    slug: slug || "",
+  })}`;
+}
 
 function stripSpecsFromDescription(value: string | null | undefined) {
   let text = typeof value === 'string' ? value : '';
@@ -53,7 +61,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  const canonical = `https://www.balao.info/product/${product.slug || product.id}`;
+  const canonical = getProductCanonicalPath(product.slug, product.id);
 
   return {
     title: `${product.name} | Balão da Informática`,
@@ -93,6 +101,11 @@ export default async function ProductPage({ params }: Props) {
 
   if (!product) return notFound();
 
+  const canonicalHref = getProductHref(product);
+  if (product.slug && id !== product.slug) {
+    permanentRedirect(canonicalHref);
+  }
+
   const cashPriceNum = parseFloat(product.price.replace("R$", "").replace(/\./g, "").replace(",", ".").trim());
   const listPriceNum = cashPriceNum / 0.85;
   const installmentValue = listPriceNum / 10;
@@ -104,7 +117,7 @@ export default async function ProductPage({ params }: Props) {
   const breadcrumbItems = [
     { name: 'Home', item: 'https://www.balao.info' },
     { name: product.category || 'Produtos', item: `https://www.balao.info/categoria/${categorySlug}` },
-    { name: product.name, item: `https://www.balao.info/product/${product.id}` }
+    { name: product.name, item: getProductCanonicalPath(product.slug, product.id) }
   ];
 
   return (

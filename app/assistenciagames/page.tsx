@@ -1,12 +1,12 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import Header from '@/components/Header'
-import { getProducts } from '@/lib/db'
+import { searchProductsByKeywords } from '@/lib/db'
 import ProductCarousel from '@/components/ProductCarousel'
-import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from '@/components/JsonLd'
+import JsonLd, { generateBreadcrumbSchema, generateFAQSchema, generateOrganizationSchema, generateServiceSchema } from '@/components/JsonLd'
 import { 
   Gamepad2, 
-  Wrench, 
+  type LucideIcon,
   Cpu, 
   Zap, 
   ThermometerSun, 
@@ -19,14 +19,11 @@ import {
   MapPin,
   HelpCircle,
   ShieldCheck,
-  Search,
   Settings,
   Ghost,
   Timer,
   ThumbsUp,
   Star,
-  Shield,
-  AlertTriangle,
   Trophy
 } from 'lucide-react'
 
@@ -58,7 +55,22 @@ export const metadata: Metadata = {
   }
 }
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 600
+
+const GAMES_FAQS = [
+  {
+    question: "Quanto tempo demora o conserto?",
+    answer: "A maioria dos reparos, como limpeza, troca de HDMI e fonte, é concluída em 24 a 48 horas. Casos complexos de placa podem levar mais tempo para testes.",
+  },
+  {
+    question: "Qual a garantia do serviço?",
+    answer: "Os reparos e peças trocadas contam com garantia legal de 90 dias, com suporte da equipe após a entrega.",
+  },
+  {
+    question: "Meus jogos e saves são apagados?",
+    answer: "Na maior parte dos casos, não. Os dados são preservados sempre que possível e qualquer procedimento crítico é autorizado antes.",
+  },
+]
 
 function BlockHero() {
   const breadcrumbItems = [
@@ -127,7 +139,7 @@ function BlockHero() {
   );
 }
 
-function ServiceCard({ icon: Icon, title, description, items }: { icon: any, title: string, description: string, items: string[] }) {
+function ServiceCard({ icon: Icon, title, description, items }: { icon: LucideIcon, title: string, description: string, items: string[] }) {
   return (
     <div className="bg-zinc-900/50 backdrop-blur border border-zinc-800 p-8 rounded-3xl hover:border-purple-500 transition-all group h-full flex flex-col">
       <div className="w-14 h-14 bg-zinc-800 rounded-2xl flex items-center justify-center text-zinc-400 group-hover:text-purple-500 group-hover:bg-purple-500/10 transition-all mb-6 border border-zinc-700 group-hover:border-purple-500/30">
@@ -304,32 +316,15 @@ function BlockFAQ() {
         <h2 className="text-3xl md:text-5xl font-black text-center mb-12">DÚVIDAS FREQUENTES</h2>
         
         <div className="space-y-6">
-          <div className="bg-zinc-900 rounded-2xl p-6 md:p-8">
-            <h3 className="text-xl font-bold text-purple-400 mb-3 flex items-center gap-2">
-              <HelpCircle className="w-5 h-5" /> Quanto tempo demora o conserto?
-            </h3>
-            <p className="text-zinc-300 leading-relaxed">
-              A maioria dos reparos como limpeza, troca de HDMI e fonte são realizados em <strong>24 a 48 horas</strong>. Reparos complexos de placa-mãe podem levar de 3 a 5 dias úteis para testes rigorosos de estresse.
-            </p>
-          </div>
-
-          <div className="bg-zinc-900 rounded-2xl p-6 md:p-8">
-            <h3 className="text-xl font-bold text-purple-400 mb-3 flex items-center gap-2">
-              <Award className="w-5 h-5" /> Qual a garantia do serviço?
-            </h3>
-            <p className="text-zinc-300 leading-relaxed">
-              Oferecemos <strong>90 dias (3 meses) de garantia</strong> legal para qualquer serviço realizado e peças trocadas. Para alguns serviços específicos, podemos estender esse prazo.
-            </p>
-          </div>
-
-          <div className="bg-zinc-900 rounded-2xl p-6 md:p-8">
-            <h3 className="text-xl font-bold text-purple-400 mb-3 flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5" /> Meus jogos e saves são apagados?
-            </h3>
-            <p className="text-zinc-300 leading-relaxed">
-              Em 95% dos casos, <strong>NÃO</strong>. Preservamos seus dados sempre que possível. A formatação só é feita se houver dano irrecuperável no HD/SSD ou no sistema de arquivos, e sempre com sua autorização prévia.
-            </p>
-          </div>
+          {GAMES_FAQS.map((faq, index) => (
+            <div key={faq.question} className="bg-zinc-900 rounded-2xl p-6 md:p-8">
+              <h3 className="text-xl font-bold text-purple-400 mb-3 flex items-center gap-2">
+                {index === 0 ? <HelpCircle className="w-5 h-5" /> : index === 1 ? <Award className="w-5 h-5" /> : <ShieldCheck className="w-5 h-5" />}
+                {faq.question}
+              </h3>
+              <p className="text-zinc-300 leading-relaxed">{faq.answer}</p>
+            </div>
+          ))}
         </div>
       </div>
     </section>
@@ -337,16 +332,21 @@ function BlockFAQ() {
 }
 
 export default async function AssistenciaGamesPage() {
-  const allProducts = await getProducts()
-  
-  // Filtrar produtos relacionados a console e playstation
-  const gameProducts = allProducts.filter(p => {
-    const text = (p.name + " " + (p.description || "") + " " + p.category).toLowerCase()
-    return (text.includes('console') || text.includes('playstation') || text.includes('xbox') || text.includes('game'))
-  })
+  const gameProducts = await searchProductsByKeywords(['console', 'playstation', 'xbox', 'dualsense', 'controle'], 12)
 
   return (
     <div className="min-h-screen flex flex-col bg-black font-sans">
+      <JsonLd
+        data={[
+          generateServiceSchema({
+            name: 'Assistência Técnica para PS5, PS4, Xbox e Controles em Campinas',
+            description: 'Reparo de consoles, troca de HDMI, limpeza, fonte, drift e manutenção eletrônica avançada em laboratório próprio.',
+            url: 'https://www.balao.info/assistenciagames',
+            serviceType: 'Assistência técnica para videogames e controles',
+          }),
+          generateFAQSchema(GAMES_FAQS),
+        ]}
+      />
       <Header />
       <main className="flex-1">
         
@@ -489,8 +489,6 @@ export default async function AssistenciaGamesPage() {
 
         <BlockFAQ />
 
-        <BlockFAQ />
-
         {/* NEW BLOCK: Testimonials */}
         <section className="py-20 bg-zinc-950 text-white border-t border-zinc-900">
           <div className="container mx-auto px-4">
@@ -505,7 +503,7 @@ export default async function AssistenciaGamesPage() {
                      <div className="flex gap-1 text-yellow-500 mb-4">
                         {[1,2,3,4,5].map(s => <Star key={s} className="w-4 h-4 fill-current" />)}
                      </div>
-                     <p className="text-zinc-300 italic mb-6">"{t.text}"</p>
+                     <p className="text-zinc-300 italic mb-6">&ldquo;{t.text}&rdquo;</p>
                      <div>
                         <div className="font-bold">{t.name}</div>
                         <div className="text-xs text-purple-500 font-bold uppercase">{t.game}</div>

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Facebook, Instagram, Youtube, Mail, Phone, MapPin, ChevronDown, ChevronUp, CreditCard } from "lucide-react";
+import { Facebook, Instagram, Mail, Phone, MapPin, ChevronDown, ChevronUp, CreditCard } from "lucide-react";
 
 import { SITE_CONFIG } from "@/lib/config";
 
@@ -26,7 +26,7 @@ export default function Footer() {
           
           {/* About Section */}
           <div className="mb-6 md:mb-0">
-            <a href="http://www.balao.info" className="block mb-6 group no-underline w-fit">
+            <Link href="/" className="block mb-6 group no-underline w-fit">
                 <div className="relative w-[160px] h-[50px]">
                     <Image 
                         src="/logo.png" 
@@ -35,7 +35,7 @@ export default function Footer() {
                         className="object-contain"
                     />
                 </div>
-            </a>
+            </Link>
             <p className="text-sm leading-relaxed mb-6">
               Comércio e assistência técnica em informática. Tudo o que sua empresa e sua casa precisa em tecnologia.
             </p>
@@ -64,6 +64,9 @@ export default function Footer() {
               <li><Link href="/envio-e-entrega" className="hover:text-[#E60012] transition-colors">Envio e Entrega</Link></li>
               <li><Link href="/trocas-e-devolucoes" className="hover:text-[#E60012] transition-colors">Trocas e Devoluções</Link></li>
               <li><Link href="/fale-conosco" className="hover:text-[#E60012] transition-colors">Fale Conosco</Link></li>
+              <li><Link href="/especialidades" className="hover:text-[#E60012] transition-colors">Especialidades</Link></li>
+              <li><Link href="/regiao" className="hover:text-[#E60012] transition-colors">Atendimento Regional</Link></li>
+              <li><Link href="/urgente" className="hover:text-[#E60012] transition-colors">Atendimento Urgente</Link></li>
             </ul>
           </div>
 
@@ -79,12 +82,12 @@ export default function Footer() {
                 </span>
             </button>
             <ul className={`space-y-3 text-sm overflow-hidden transition-all duration-300 ${isExpanded('departamentos') ? 'max-h-96 opacity-100 mt-4' : 'max-h-0 opacity-0 md:max-h-full md:opacity-100 md:mt-0'}`}>
-              <li><Link href="/?category=Hardware" className="hover:text-[#E60012] transition-colors">Hardware</Link></li>
-              <li><Link href="/?category=PC Gamer" className="hover:text-[#E60012] transition-colors">Computadores Gamer</Link></li>
-              <li><Link href="/?category=Notebooks" className="hover:text-[#E60012] transition-colors">Notebooks</Link></li>
-              <li><Link href="/?category=Periféricos" className="hover:text-[#E60012] transition-colors">Periféricos</Link></li>
-              <li><Link href="/?category=Monitores" className="hover:text-[#E60012] transition-colors">Monitores</Link></li>
-              <li><Link href="/?category=Smartphones" className="hover:text-[#E60012] transition-colors">Smartphones</Link></li>
+              <li><Link href="/departamentos" className="hover:text-[#E60012] transition-colors">Departamentos</Link></li>
+              <li><Link href="/pcgamer" className="hover:text-[#E60012] transition-colors">Computadores Gamer</Link></li>
+              <li><Link href="/notebooks" className="hover:text-[#E60012] transition-colors">Notebooks</Link></li>
+              <li><Link href="/premium" className="hover:text-[#E60012] transition-colors">Premium</Link></li>
+              <li><Link href="/promocao" className="hover:text-[#E60012] transition-colors">Promoções</Link></li>
+              <li><Link href="/seminovos" className="hover:text-[#E60012] transition-colors">Seminovos</Link></li>
             </ul>
           </div>
 
@@ -140,7 +143,7 @@ export default function Footer() {
 
         {/* Copyright */}
         <div className="border-t border-gray-200 pt-8 text-center text-sm text-gray-500">
-          <p className="mb-2">&copy; 2026 Balão da Informática. Todos os direitos reservados. <a href="http://www.balao.info" target="_blank" className="hover:text-[#E60012]">www.balao.info</a></p>
+          <p className="mb-2">&copy; 2026 Balão da Informática. Todos os direitos reservados. <Link href="/" className="hover:text-[#E60012]">www.balao.info</Link></p>
           <p className="text-xs opacity-60">Razão Social: {SITE_CONFIG.companyName} | CNPJ: {SITE_CONFIG.cnpj} UNIDADE FRANQUEADA ANCHIETA</p>
         </div>
       </div>

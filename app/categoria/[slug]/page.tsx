@@ -1,24 +1,37 @@
+import Link from "next/link";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import ProductList from "@/components/ProductList";
 import FilterSyncer from "@/components/FilterSyncer";
-import { getProducts, getCategories } from "@/lib/db";
+import { getProductsByExactCategories, getCategories } from "@/lib/db";
 import { searchProducts } from "@/lib/searchUtils";
 import { extractTags, filterProductsByTags } from "@/lib/product-filters";
 import { parsePriceToNumber, type Category } from "@/lib/utils";
 import { Metadata } from "next";
 import JsonLd, { generateBreadcrumbSchema, generateOrganizationSchema, generateItemListSchema } from "@/components/JsonLd";
+import { notFound } from "next/navigation";
  
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
+const PRODUCTS_PER_PAGE = 24;
 
 type Props = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ search?: string; tags?: string }>;
+  searchParams: Promise<{ search?: string; tags?: string; page?: string }>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+function buildCategoryCanonical(slug: string, page: number, hasFacet: boolean) {
+  if (hasFacet || page <= 1) {
+    return `https://www.balao.info/categoria/${slug}`;
+  }
+  return `https://www.balao.info/categoria/${slug}?page=${page}`;
+}
+
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { slug } = await params;
+  const { search, tags: tagsParam, page } = await searchParams;
   const categories = await getCategories();
+  const pageNumber = Math.max(1, Number.parseInt(page || "1", 10) || 1);
+  const hasFacet = Boolean((search || "").trim() || (tagsParam || "").trim());
   
   let title = "Categoria";
   let description = "Encontre os melhores produtos de informática no Balão da Informática.";
@@ -34,17 +47,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
   }
 
+  if (pageNumber > 1 && !hasFacet) {
+    title = `${title} - Página ${pageNumber}`;
+  }
+
+  const canonical = buildCategoryCanonical(slug, pageNumber, hasFacet);
+
   return {
     title,
     description,
+    robots: hasFacet ? { index: false, follow: true } : { index: true, follow: true },
     openGraph: {
       title,
       description,
       type: 'website',
-      url: `https://www.balao.info/categoria/${slug}`,
+      url: canonical,
     },
     alternates: {
-      canonical: `https://www.balao.info/categoria/${slug}`,
+      canonical,
     }
   };
 }
@@ -54,13 +74,11 @@ export default async function CategoriaPage({
   searchParams,
 }: Props) {
   const { slug } = await params;
-  const { search, tags: tagsParam } = await searchParams;
+  const { search, tags: tagsParam, page } = await searchParams;
   const selectedTags = tagsParam ? tagsParam.split(',') : [];
+  const currentPage = Math.max(1, Number.parseInt(page || "1", 10) || 1);
  
-  const [products, categories] = await Promise.all([
-    getProducts(),
-    getCategories(),
-  ]);
+  const categories = await getCategories();
  
   const findBySlug = (s: string, all: Category[]) =>
     all.find((c) => c.slug === s);
@@ -93,10 +111,11 @@ export default async function CategoriaPage({
     descendants.forEach((d) => validCategories.add(d));
   }
  
-  let filteredProducts = products.filter((p) => {
-    if (categoryName && categoryName !== "Todos os Produtos" && !validCategories.has(p.category)) return false;
-    return true;
-  });
+  let filteredProducts = await getProductsByExactCategories(
+    categoryName && categoryName !== "Todos os Produtos"
+      ? [...validCategories]
+      : categories.map((category) => category.name)
+  );
  
   if (search) {
     filteredProducts = searchProducts(filteredProducts, search);
@@ -108,6 +127,22 @@ export default async function CategoriaPage({
   // Apply tag filter
   filteredProducts = filterProductsByTags(filteredProducts, selectedTags);
   filteredProducts = filteredProducts.sort((a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price));
+  const totalProducts = filteredProducts.length;
+  const totalPages = Math.max(1, Math.ceil(totalProducts / PRODUCTS_PER_PAGE));
+
+  if (currentPage > totalPages && totalProducts > 0) {
+    notFound();
+  }
+
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * PRODUCTS_PER_PAGE,
+    currentPage * PRODUCTS_PER_PAGE
+  );
+  const canonical = buildCategoryCanonical(
+    slug,
+    currentPage,
+    Boolean((search || "").trim() || selectedTags.length > 0)
+  );
 
   // Schema Markup
   const breadcrumbItems = [
@@ -121,7 +156,7 @@ export default async function CategoriaPage({
       <JsonLd data={[
         generateOrganizationSchema(),
         generateBreadcrumbSchema(breadcrumbItems),
-        generateItemListSchema(filteredProducts, `https://www.balao.info/categoria/${slug}`)
+        generateItemListSchema(paginatedProducts, canonical)
       ]} />
       <FilterSyncer tags={availableTags} />
       <Header />
@@ -132,7 +167,7 @@ export default async function CategoriaPage({
             {categoryName || "Categoria"}
          </h1>
          <span className="text-xs font-medium bg-gray-200 px-2 py-1 rounded-full text-gray-600">
-            {filteredProducts.length}
+            {totalProducts}
          </span>
       </div>
 
@@ -147,7 +182,9 @@ export default async function CategoriaPage({
             <h1 className="text-2xl font-bold text-gray-800">
               {categoryName || "Categoria"}
             </h1>
-            <span className="text-sm text-gray-500">{filteredProducts.length} produtos</span>
+            <span className="text-sm text-gray-500">
+              {totalProducts} produtos{totalPages > 1 ? ` • Página ${currentPage} de ${totalPages}` : ""}
+            </span>
           </div>
 
           {/* Tags List for Mobile (Horizontal Scroll) */}
@@ -159,13 +196,45 @@ export default async function CategoriaPage({
              ))}
           </div>
 
-          {filteredProducts.length === 0 ? (
+          {paginatedProducts.length === 0 ? (
             <div className="text-center py-20 text-gray-500 bg-white rounded-lg shadow-sm">
               <p className="text-xl font-medium">Nenhum produto encontrado.</p>
               <p className="mt-2 text-sm">Tente ajustar seus filtros ou busca.</p>
             </div>
           ) : (
-            <ProductList products={filteredProducts} />
+            <>
+              <ProductList products={paginatedProducts} />
+              {totalPages > 1 && (
+                <nav
+                  aria-label="Paginação da categoria"
+                  className="mt-8 flex flex-wrap items-center justify-center gap-2"
+                >
+                  {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => {
+                    const qs = new URLSearchParams();
+                    if (search) qs.set("search", search);
+                    if (tagsParam) qs.set("tags", tagsParam);
+                    if (pageNumber > 1) qs.set("page", String(pageNumber));
+                    const href = qs.toString()
+                      ? `/categoria/${slug}?${qs.toString()}`
+                      : `/categoria/${slug}`;
+
+                    return (
+                      <Link
+                        key={pageNumber}
+                        href={href}
+                        className={`min-w-11 rounded-xl border px-4 py-2 text-sm font-bold transition-colors ${
+                          pageNumber === currentPage
+                            ? "border-red-600 bg-red-600 text-white"
+                            : "border-gray-300 bg-white text-gray-700 hover:border-red-500 hover:text-red-600"
+                        }`}
+                      >
+                        {pageNumber}
+                      </Link>
+                    );
+                  })}
+                </nav>
+              )}
+            </>
           )}
 
           {/* SEO Section for Categories */}

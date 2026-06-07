@@ -4,7 +4,7 @@ import { sendEmail, sendSystemNotification } from "@/lib/mail";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name, email, phone, message } = body;
+    const { name, email, phone, message, subject, source, city, service } = body;
 
     if (!email || !message) {
       return NextResponse.json({ error: "Email and message required" }, { status: 400 });
@@ -15,7 +15,11 @@ export async function POST(req: Request) {
       name,
       email,
       phone,
-      message
+      message,
+      subject: subject || null,
+      source: source || null,
+      city: city || null,
+      service: service || null,
     });
 
     // 2. Confirmação para o usuário
@@ -31,13 +35,14 @@ export async function POST(req: Request) {
 
     await sendEmail({
         to: email,
-        subject: 'Recebemos sua mensagem - Balão Castelo',
+        subject: subject || 'Recebemos sua mensagem - Balão Castelo',
         html: userHtml,
         eventType: 'contact_form'
     });
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

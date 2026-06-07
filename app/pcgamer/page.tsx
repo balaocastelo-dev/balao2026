@@ -1,13 +1,12 @@
 import React from "react";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
-import { getProducts, getCategories } from "@/lib/db";
-import { Product, Category } from "@/lib/utils";
-import ProductCard from "@/components/ProductCard";
+import { getCategories, getProductsByExactCategories, searchProductsByKeywords } from "@/lib/db";
+import { Category } from "@/lib/utils";
 import { SITE_CONFIG } from "@/lib/config";
-import Image from "next/image";
 import HeroCTA from "@/components/HeroCTA";
 import PcGamerSearchGrid from "@/components/PcGamerSearchGrid";
+import QuickLeadSection from "@/components/QuickLeadSection";
 import { 
   Gamepad2,
   Cpu,
@@ -24,9 +23,9 @@ import {
   User,
   Quote,
   Building2,
-  ThumbsUp,
-  CreditCard
+  ThumbsUp
 } from "lucide-react";
+import JsonLd, { generateBreadcrumbSchema, generateFAQSchema, generateItemListSchema, generateOrganizationSchema } from "@/components/JsonLd";
 
 function BlockTestimonials() {
   return (
@@ -48,7 +47,7 @@ function BlockTestimonials() {
                         <div className="flex items-center gap-2 mb-4 text-yellow-400">
                             {[1,2,3,4,5].map(i => <Star key={i} className="w-4 h-4 fill-current" />)}
                         </div>
-                        <p className="text-zinc-300 mb-6 relative z-10">"{testimonial.text}"</p>
+                        <p className="text-zinc-300 mb-6 relative z-10">&ldquo;{testimonial.text}&rdquo;</p>
                         <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-zinc-800 rounded-full flex items-center justify-center border border-zinc-700">
                                 <User className="w-6 h-6 text-zinc-500" />
@@ -92,8 +91,6 @@ function BlockTrust() {
     </section>
   )
 }
-import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from "@/components/JsonLd";
-
 export const metadata: Metadata = {
   title: "PC Gamer em Campinas com Entrega Rápida | Balão da Informática",
   description:
@@ -123,7 +120,26 @@ export const metadata: Metadata = {
   },
 };
 
-export const dynamic = "force-dynamic";
+export const revalidate = 600;
+
+const PC_GAMER_FAQS = [
+  {
+    question: "O PC já vem montado?",
+    answer: "Sim. O computador sai montado, configurado, com sistema instalado e pronto para uso.",
+  },
+  {
+    question: "As peças são novas?",
+    answer: "Sim. Trabalhamos com componentes novos, originais e com garantia.",
+  },
+  {
+    question: "Posso alterar a configuração?",
+    answer: "Sim. A equipe ajusta armazenamento, memória, processador e placa de vídeo conforme seu objetivo.",
+  },
+  {
+    question: "Como funciona a garantia?",
+    answer: "Você conta com a garantia legal da loja e com a garantia contratual dos componentes, com suporte local em Campinas.",
+  },
+];
 
 function BlockHero() {
   return (
@@ -325,7 +341,7 @@ function BlockTesting() {
                   TESTADO<br/>NO LIMITE
                </h2>
                <p className="text-lg md:text-2xl text-red-100 opacity-80 leading-relaxed">
-                  Não entregamos o PC apenas "ligando". Todas as máquinas passam por baterias de testes de stress de CPU e GPU para garantir que não haverá superaquecimento ou telas azuis durante sua gameplay.
+                 Não entregamos o PC apenas &quot;ligando&quot;. Todas as máquinas passam por baterias de testes de stress de CPU e GPU para garantir que não haverá superaquecimento ou telas azuis durante sua gameplay.
                </p>
             </div>
             <div className="flex-1 grid grid-cols-2 gap-4 w-full">
@@ -479,10 +495,7 @@ function BlockPayment() {
 }
 
 export default async function PcGamerPage() {
-  const [allProducts, categories] = await Promise.all([
-    getProducts(),
-    getCategories(),
-  ]);
+  const categories = await getCategories();
 
   const rootCategory = categories.find(
     (c: Category) => c.slug === "pc-gamer"
@@ -503,11 +516,17 @@ export default async function PcGamerPage() {
     }
   }
 
-  const gamerProducts = allProducts.filter((p: Product) => {
-    if (!rootCategory) return false;
-    if (!p.category) return false;
-    return validCategories.has(p.category);
-  });
+  const [categoryProducts, fallbackProducts] = await Promise.all([
+    validCategories.size > 0
+      ? getProductsByExactCategories([...validCategories])
+      : Promise.resolve([]),
+    searchProductsByKeywords(["pc gamer", "rtx", "geforce", "ryzen"], 80),
+  ]);
+
+  const gamerProducts = [...categoryProducts, ...fallbackProducts].filter(
+    (product, index, list) =>
+      list.findIndex((candidate) => candidate.id === product.id) === index
+  );
 
   const breadcrumbItems = [
     { name: 'Home', item: 'https://www.balao.info' },
@@ -518,7 +537,9 @@ export default async function PcGamerPage() {
     <div className="min-h-screen flex flex-col bg-slate-50 font-sans">
       <JsonLd data={[
         generateOrganizationSchema(),
-        generateBreadcrumbSchema(breadcrumbItems)
+        generateBreadcrumbSchema(breadcrumbItems),
+        generateItemListSchema(gamerProducts.slice(0, 50), "https://www.balao.info/pcgamer"),
+        generateFAQSchema(PC_GAMER_FAQS),
       ]} />
       <Header />
       <main className="flex-1">
@@ -618,6 +639,20 @@ export default async function PcGamerPage() {
 
         {/* BLOCO 8: CTA FINAL */}
         <BlockUrgency />
+
+        <section className="py-12 bg-slate-100 border-t border-slate-200">
+          <div className="container mx-auto px-4">
+            <QuickLeadSection
+              title="Quer orçamento de PC Gamer com atendimento humano?"
+              description="Envie sua faixa de investimento, jogos e objetivo. A equipe monta uma sugestão mais certeira para você converter mais rápido sem perder tempo."
+              messageTemplate="Olá! Quero orçamento de PC Gamer em Campinas e região. Posso passar meu orçamento e os jogos que pretendo usar?"
+              source="pcgamer"
+              cityLabel="Campinas e Região"
+              serviceLabel="PC Gamer"
+              formTitle="Pedir orçamento de setup"
+            />
+          </div>
+        </section>
 
       </main>
     </div>

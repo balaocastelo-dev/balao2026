@@ -153,7 +153,7 @@ const maisDe50Servicos = [
   'Laudo Técnico para Seguradoras'
 ]
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 600
 
 function parsePrice(priceStr: string): number {
   if (!priceStr) return 0
@@ -289,7 +289,7 @@ const ProductCarousel = ({ title, products, icon: Icon, bgClass = "bg-zinc-50" }
                                 </div>
                                 
                                 <Link 
-                                    href={`/product/${product.id}`}
+                                    href={`/product/${product.slug || product.id}`}
                                     className="w-full bg-zinc-900 hover:bg-red-600 text-white text-sm font-bold py-4 px-6 rounded-xl transition-all text-center block shadow-lg shadow-zinc-900/10 hover:shadow-red-900/30"
                                 >
                                     COMPRAR AGORA
