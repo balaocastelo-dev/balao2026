@@ -236,7 +236,7 @@ export default async function AppleBlogPage() {
                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/80">Atendimento rápido</p>
                 <h2 className="mt-3 text-2xl font-black">Precisa de assistencia Apple em Campinas?</h2>
                 <p className="mt-3 text-sm leading-6 text-white/90">
-                  Atendimento Apple com reparo a partir de 60 minutos, motoboy grátis, orçamento sem compromisso e até 12x sem juros.
+                  Atendimento Apple com assistência em 1 hora para muitos reparos, motoboy grátis, orçamento sem compromisso e até 12x sem juros.
                 </p>
                 <a
                   href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=Olá! Quero orçamento para um equipamento Apple.`}
@@ -247,7 +247,7 @@ export default async function AppleBlogPage() {
                   Solicitar atendimento
                 </a>
                 <div className="mt-4 grid gap-2 text-xs font-bold text-white/95">
-                  <div className="rounded-xl bg-white/10 px-3 py-2">Reparo a partir de 60 minutos</div>
+                  <div className="rounded-xl bg-white/10 px-3 py-2">Assistência Apple em 1 hora</div>
                   <div className="rounded-xl bg-white/10 px-3 py-2">Motoboy grátis para retirada e entrega</div>
                   <div className="rounded-xl bg-white/10 px-3 py-2">Orçamento sem compromisso e 12x sem juros</div>
                 </div>

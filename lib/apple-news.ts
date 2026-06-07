@@ -245,19 +245,23 @@ function categorizeAppleNews(item: RssItem): string {
   return "Universo Apple";
 }
 
-function getCategoryCoverImage(category: string): string {
-  switch (category) {
-    case "iPhone":
-      return "/images/apple/subcategories/iphone-card.png";
-    case "iPad":
-      return "/images/apple/subcategories/ipad-card.png";
-    case "Apple Watch":
-      return "/images/apple/subcategories/watch-card.png";
-    case "Mac":
-      return "/images/apple/subcategories/macbook-card.png";
-    default:
-      return "/images/apple/hub-hero-real.png";
-  }
+const BLOG_REAL_PHOTOS = [
+  "/images/apple/hub-hero-real.png",
+  "/images/apple/subcategories/macmini-card.png",
+  "/images/apple/subcategories/imac-card.png",
+  "/images/apple/subcategories/ipad-card.png",
+  "/images/apple/subcategories/watch-card.png",
+  "/images/apple/subcategories/macbook-card.png",
+];
+
+function getCategoryCoverImage(category: string, sourceUrl: string): string {
+  if (category === "iPad") return "/images/apple/subcategories/ipad-card.png";
+  if (category === "Apple Watch") return "/images/apple/subcategories/watch-card.png";
+  if (category === "Mac") return "/images/apple/subcategories/macbook-card.png";
+
+  const hash = sha256(sourceUrl || category);
+  const number = parseInt(hash.slice(0, 8), 16);
+  return BLOG_REAL_PHOTOS[number % BLOG_REAL_PHOTOS.length];
 }
 
 async function buildAppleRadarHtml(item: RssItem): Promise<string> {
@@ -291,7 +295,7 @@ async function toApplePost(item: RssItem): Promise<AppleNewsPost> {
     title,
     excerpt,
     content_html: contentHtml,
-    cover_image: getCategoryCoverImage(category),
+    cover_image: getCategoryCoverImage(category, item.url),
     category,
     source_url: item.url,
     source_domain: sourceDomain,

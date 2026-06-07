@@ -181,7 +181,7 @@ export default async function AppleBlogPostPage(props: { params: Promise<{ slug:
                 <p className="mt-3 text-sm leading-6 text-gray-700">
                   Se a notícia despertou dúvida sobre atualização, troca, manutenção ou reparo, fale agora com a
                   equipe da Balão da Informática. Você pode pedir orçamento sem compromisso, retirada e entrega por
-                  motoboy grátis e parcelamento em até 12x sem juros.
+                  motoboy grátis, assistência em 1 hora para muitos reparos e parcelamento em até 12x sem juros.
                 </p>
                 <a
                   href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=Olá! Quero ajuda com um equipamento Apple.`}
@@ -213,7 +213,7 @@ export default async function AppleBlogPostPage(props: { params: Promise<{ slug:
                   Atendemos clientes de Cambuí, Nova Campinas, Guanabara, Taquaral, Bosque, Centro e bairros próximos.
                 </p>
                 <div className="mt-4 grid gap-2 text-xs font-bold text-white/95">
-                  <div className="rounded-xl bg-white/10 px-3 py-2">Reparo a partir de 60 minutos</div>
+                  <div className="rounded-xl bg-white/10 px-3 py-2">Assistência Apple em 1 hora</div>
                   <div className="rounded-xl bg-white/10 px-3 py-2">Motoboy grátis para retirada e entrega</div>
                   <div className="rounded-xl bg-white/10 px-3 py-2">Orçamento sem compromisso e 12x sem juros</div>
                 </div>

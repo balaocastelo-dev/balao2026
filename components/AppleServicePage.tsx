@@ -152,7 +152,7 @@ export default function AppleServicePage({
 
                 <div className="mt-8 grid gap-3 sm:grid-cols-3">
                   {[
-                    "Reparo a partir de 60 minutos",
+                    "Assistência Apple em 1 hora",
                     "Motoboy grátis para retirada e entrega",
                     "12x sem juros e orçamento sem compromisso",
                   ].map((item) => (
@@ -190,7 +190,7 @@ export default function AppleServicePage({
                 <div className="mt-4 rounded-[1.5rem] border border-gray-200 bg-white p-5 shadow-xl lg:absolute lg:-bottom-4 lg:left-4 lg:right-4 lg:mt-0">
                   <p className="text-sm font-extrabold uppercase tracking-wide text-gray-500">Diferenciais</p>
                   <div className="mt-3 grid gap-2 text-sm font-semibold text-gray-700 sm:grid-cols-2">
-                    <div className="rounded-xl bg-gray-50 px-4 py-3">Reparo a partir de 60 minutos</div>
+                    <div className="rounded-xl bg-gray-50 px-4 py-3">Assistência Apple em 1 hora</div>
                     <div className="rounded-xl bg-gray-50 px-4 py-3">Motoboy grátis para retirada e entrega</div>
                     <div className="rounded-xl bg-gray-50 px-4 py-3">Orçamento sem compromisso</div>
                     <div className="rounded-xl bg-gray-50 px-4 py-3">Conserto parcelado em 12x sem juros</div>
@@ -291,7 +291,7 @@ export default function AppleServicePage({
                 <div className="mt-8 rounded-2xl bg-gray-900 p-6 text-white">
                   <h3 className="text-xl font-bold">Precisa resolver hoje?</h3>
                   <p className="mt-3 text-sm leading-6 text-white/80">
-                    Fale direto no WhatsApp para confirmar modelo, defeito, prazo a partir de 60 minutos e retirada por motoboy grátis.
+                    Fale direto no WhatsApp para confirmar modelo, defeito, atendimento em 1 hora para muitos reparos e retirada por motoboy grátis.
                   </p>
                   <Link href={whatsappHref} target="_blank">
                     <span className="mt-5 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-gray-900">
@@ -331,7 +331,7 @@ export default function AppleServicePage({
                 {ctaDescription}
               </p>
               <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm font-bold text-white/95">
-                <span className="rounded-full bg-white/10 px-4 py-2">Reparo a partir de 60 minutos</span>
+                <span className="rounded-full bg-white/10 px-4 py-2">Assistência em 1 hora</span>
                 <span className="rounded-full bg-white/10 px-4 py-2">Retirada e entrega com motoboy grátis</span>
                 <span className="rounded-full bg-white/10 px-4 py-2">Orçamento sem compromisso</span>
                 <span className="rounded-full bg-white/10 px-4 py-2">12x sem juros</span>
