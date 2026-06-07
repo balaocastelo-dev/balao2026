@@ -2,7 +2,21 @@
 
 import { FormEvent, useState } from "react";
 
-export default function PainelLoginForm() {
+type PainelLoginFormProps = {
+  redirectTo?: string;
+  badgeLabel?: string;
+  title?: string;
+  description?: string;
+  submitLabel?: string;
+};
+
+export default function PainelLoginForm({
+  redirectTo = "/painel",
+  badgeLabel = "Painel Protegido",
+  title = "Acesso ao painel",
+  description = "Entre com a senha para abrir o painel interno em /painel.",
+  submitLabel = "Entrar no painel",
+}: PainelLoginFormProps) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -28,7 +42,7 @@ export default function PainelLoginForm() {
         return;
       }
 
-      window.location.href = "/painel";
+      window.location.href = redirectTo;
     } catch {
       setError("Nao foi possivel entrar no painel agora.");
     } finally {
@@ -40,12 +54,10 @@ export default function PainelLoginForm() {
     <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-8 shadow-xl">
       <div className="mb-6">
         <p className="mb-2 inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-blue-700">
-          Painel Protegido
+          {badgeLabel}
         </p>
-        <h1 className="text-3xl font-bold text-gray-900">Acesso ao painel</h1>
-        <p className="mt-2 text-sm text-gray-600">
-          Entre com a senha para abrir o painel interno em <strong>/painel</strong>.
-        </p>
+        <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
+        <p className="mt-2 text-sm text-gray-600">{description}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -77,7 +89,7 @@ export default function PainelLoginForm() {
           disabled={loading}
           className="w-full rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
         >
-          {loading ? "Entrando..." : "Entrar no painel"}
+          {loading ? "Entrando..." : submitLabel}
         </button>
       </form>
     </div>

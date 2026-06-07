@@ -3,7 +3,15 @@
 import { useState } from "react";
 import { LogOut } from "lucide-react";
 
-export default function PainelLogoutButton() {
+type PainelLogoutButtonProps = {
+  redirectTo?: string;
+  label?: string;
+};
+
+export default function PainelLogoutButton({
+  redirectTo = "/painel",
+  label = "Sair",
+}: PainelLogoutButtonProps) {
   const [loading, setLoading] = useState(false);
 
   const handleLogout = async () => {
@@ -14,7 +22,7 @@ export default function PainelLogoutButton() {
         method: "POST",
       });
     } finally {
-      window.location.href = "/painel";
+      window.location.href = redirectTo;
     }
   };
 
@@ -25,7 +33,7 @@ export default function PainelLogoutButton() {
       className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-70"
     >
       <LogOut size={16} />
-      {loading ? "Saindo..." : "Sair"}
+      {loading ? "Saindo..." : label}
     </button>
   );
 }
