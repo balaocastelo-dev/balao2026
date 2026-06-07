@@ -114,6 +114,10 @@ function truncateLabel(value: string, max = 42) {
   return value.length > max ? `${value.slice(0, max - 1)}...` : value;
 }
 
+function formatCurrencyTooltip(value: string | number | undefined) {
+  return `R$ ${Number(value || 0).toLocaleString("pt-BR")}`;
+}
+
 export default function PainelDashboard({
   endpoint,
   title,
@@ -479,9 +483,7 @@ export default function PainelDashboard({
                   tick={{ fontSize: 12 }}
                 />
                 <Tooltip
-                  formatter={(value: number | string) =>
-                    `R$ ${Number(value).toLocaleString("pt-BR")}`
-                  }
+                  formatter={formatCurrencyTooltip}
                 />
                 <Bar
                   dataKey="value"
@@ -520,9 +522,7 @@ export default function PainelDashboard({
                 <XAxis dataKey="hour" tick={{ fontSize: 12 }} />
                 <YAxis hide />
                 <Tooltip
-                  formatter={(value: number | string) =>
-                    `R$ ${Number(value).toLocaleString("pt-BR")}`
-                  }
+                  formatter={formatCurrencyTooltip}
                 />
                 <Area
                   type="monotone"
@@ -585,9 +585,7 @@ export default function PainelDashboard({
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(value: number | string) =>
-                    `R$ ${Number(value).toLocaleString("pt-BR")}`
-                  }
+                  formatter={formatCurrencyTooltip}
                 />
                 <Legend verticalAlign="bottom" height={36} />
               </PieChart>
