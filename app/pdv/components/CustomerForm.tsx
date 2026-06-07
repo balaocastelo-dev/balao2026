@@ -8,6 +8,7 @@ import SellerSelector from "./SellerSelector";
 export default function CustomerForm() {
   const { state, dispatch } = usePdv();
   const [loadingCep, setLoadingCep] = useState(false);
+  const normalizedPhone = state.customer.phone.replace(/\D/g, "");
 
   const handleChange = (field: string, value: string) => {
     dispatch({
@@ -52,7 +53,7 @@ export default function CustomerForm() {
         ...state.customer,
         name: "Cliente Final",
         cpf_cnpj: "000.000.000-00",
-        phone: "19999999999",
+        phone: "",
         email: "",
         cep: "",
         address: "",
@@ -62,8 +63,6 @@ export default function CustomerForm() {
         state: ""
       }
     });
-    // Avança para a próxima etapa (pagamento)
-    dispatch({ type: "SET_STEP", payload: "payment" });
   };
 
   return (
@@ -112,17 +111,21 @@ export default function CustomerForm() {
         {/* Contato */}
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp *</label>
             <div className="relative">
               <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
-                type="text"
+                type="tel"
                 value={state.customer.phone}
                 onChange={(e) => handleChange("phone", e.target.value)}
                 className="w-full pl-9 p-2 border border-gray-300 rounded focus:ring-2 focus:ring-red-500 outline-none"
                 placeholder="(00) 00000-0000"
+                required
               />
             </div>
+            <p className="mt-1 text-xs text-gray-500">
+              Usado para enviar o comprovante de venda do PDV.
+            </p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
@@ -227,7 +230,7 @@ export default function CustomerForm() {
       
       <div className="mt-4 pt-4 border-t border-gray-100 text-xs text-gray-500 flex items-start gap-2">
         <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
-        <p>Preencha os dados corretamente para emissão de Nota Fiscal. O CPF/CNPJ é obrigatório.</p>
+        <p>Preencha os dados corretamente para emissão de Nota Fiscal. CPF/CNPJ e WhatsApp são obrigatórios.</p>
       </div>
 
       {/* Botões de navegação */}
@@ -240,7 +243,7 @@ export default function CustomerForm() {
         </button>
         <button
           onClick={() => dispatch({ type: "SET_STEP", payload: "payment" })}
-          disabled={!state.customer.name || !state.customer.cpf_cnpj}
+          disabled={!state.customer.name || !state.customer.cpf_cnpj || normalizedPhone.length < 10}
           className="flex-1 rounded-xl bg-green-600 px-4 py-3 font-bold text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 md:rounded"
         >
           Ir para Pagamento

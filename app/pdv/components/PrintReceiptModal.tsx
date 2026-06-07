@@ -1,6 +1,6 @@
 'use client';
 
-import { X, Printer, Download } from 'lucide-react';
+import { Download, Printer, Send, X } from 'lucide-react';
 import html2canvas from 'html2canvas';
 
 import { SITE_CONFIG } from '@/lib/config';
@@ -31,6 +31,48 @@ interface PrintReceiptModalProps {
 
 export default function PrintReceiptModal({ order, onClose }: PrintReceiptModalProps) {
   if (!order) return null;
+
+  const normalizeWhatsApp = (value: string) => {
+    const digits = value.replace(/\D/g, '');
+    if (digits.startsWith('55') && digits.length > 11) {
+      return digits.slice(2);
+    }
+    return digits;
+  };
+
+  const normalizedWhatsApp = normalizeWhatsApp(order.customer_whatsapp || '');
+
+  const buildWhatsAppMessage = () => {
+    const itemsSummary = order.items
+      .map((item) => `- ${item.product_name} x${item.quantity} (${formatCurrency(item.price * item.quantity)})`)
+      .join('\n');
+
+    return [
+      `Ola, ${order.customer_name || 'cliente'}!`,
+      '',
+      `Segue seu comprovante da venda ${order.id.slice(0, 8)} da ${SITE_CONFIG.companyName}.`,
+      `Data: ${formatDate(order.created_at)}`,
+      `Pagamento: ${order.payment_method?.replace('_', ' ').toUpperCase()}`,
+      '',
+      'Itens:',
+      itemsSummary,
+      '',
+      `Total: ${formatCurrency(order.total)}`,
+      '',
+      `Loja: ${SITE_CONFIG.companyName}`,
+      `Site: www.balao.info`,
+    ].join('\n');
+  };
+
+  const handleSendWhatsApp = () => {
+    if (!normalizedWhatsApp) {
+      alert('Cadastre o WhatsApp do cliente para enviar o comprovante.');
+      return;
+    }
+
+    const url = `https://wa.me/55${normalizedWhatsApp}?text=${encodeURIComponent(buildWhatsAppMessage())}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
 
   const handlePrint = () => {
     window.print();
@@ -176,12 +218,20 @@ export default function PrintReceiptModal({ order, onClose }: PrintReceiptModalP
         </div>
 
         {/* Footer - Hidden on Print */}
-        <div className="p-4 border-t bg-gray-50 flex justify-end gap-2 print:hidden">
+        <div className="flex flex-col gap-2 border-t bg-gray-50 p-4 print:hidden sm:flex-row sm:justify-end">
           <button
             onClick={onClose}
             className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
           >
             Fechar
+          </button>
+          <button
+            onClick={handleSendWhatsApp}
+            disabled={!normalizedWhatsApp}
+            className="px-4 py-2 bg-[#25D366] text-white rounded-lg hover:bg-[#128C7E] transition-colors flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Send size={18} />
+            Enviar no WhatsApp
           </button>
           <button
             onClick={handleDownloadImage}
