@@ -184,14 +184,14 @@ export default function ProductSearch() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden relative">
-      <div className="p-4 border-b border-gray-200 bg-red-600 flex gap-4 items-center">
+    <div className="relative flex min-h-[60vh] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm md:h-full md:min-h-0 md:rounded-lg">
+      <div className="flex flex-col gap-3 border-b border-gray-200 bg-red-600 p-3 sm:flex-row sm:items-center sm:gap-4 sm:p-4">
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
             type="text"
             placeholder="Buscar produto (nome, código...)"
-            className="w-full pl-10 pr-4 py-3 rounded-md border-0 focus:ring-2 focus:ring-white/50 outline-none text-lg shadow-sm"
+            className="w-full rounded-xl border-0 py-3 pl-10 pr-4 text-base shadow-sm outline-none focus:ring-2 focus:ring-white/50 md:rounded-md md:text-lg"
             value={query}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
             autoFocus
@@ -199,27 +199,27 @@ export default function ProductSearch() {
         </div>
         <button 
           onClick={() => setShowCustomModal(true)}
-          className="bg-white/10 hover:bg-white/20 text-white p-3 rounded-md transition-colors flex items-center gap-2 font-medium whitespace-nowrap"
+          className="flex items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-white/10 p-3 font-medium text-white transition-colors hover:bg-white/20 md:rounded-md"
         >
           <PackagePlus size={20} />
-          <span className="hidden md:inline">Item Avulso</span>
+          <span>Item Avulso</span>
         </button>
       </div>
       
-      <div className="flex-1 overflow-y-auto p-4 bg-gray-50/50">
+      <div className="flex-1 overflow-y-auto bg-gray-50/50 p-3 md:p-4">
         {loading ? (
           <div className="flex justify-center items-center h-40">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
           </div>
         ) : products.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-2 md:gap-4 lg:grid-cols-3 xl:grid-cols-4">
             {products.map((product) => (
               <div 
                 key={product.id} 
-                className="flex flex-col bg-white border border-gray-200 rounded-lg p-3 hover:shadow-lg transition-shadow cursor-pointer group hover:border-red-200"
+                className="group flex cursor-pointer flex-col rounded-xl border border-gray-200 bg-white p-3 transition-shadow hover:border-red-200 hover:shadow-lg md:rounded-lg"
                 onClick={() => handleAdd(product)}
               >
-                <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-md mb-3 flex items-center justify-center overflow-hidden relative">
+                <div className="relative mb-3 aspect-square overflow-hidden rounded-md bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
                    {/* eslint-disable-next-line @next/next/no-img-element */}
                    <img 
                      src={product.image_url} 
@@ -237,13 +237,13 @@ export default function ProductSearch() {
                      <Package className="absolute w-8 h-8 text-gray-400" />
                    )}
                 </div>
-                <h3 className="font-medium text-sm text-gray-800 line-clamp-2 mb-2 flex-1 group-hover:text-red-600 transition-colors" title={product.name}>{product.name}</h3>
-                <div className="flex items-center justify-between mt-auto">
-                  <span className="font-bold text-lg text-red-600">
+                <h3 className="mb-2 flex-1 line-clamp-2 text-sm font-medium text-gray-800 transition-colors group-hover:text-red-600" title={product.name}>{product.name}</h3>
+                <div className="mt-auto flex items-center justify-between gap-2">
+                  <span className="text-sm font-bold text-red-600 md:text-lg">
                     {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
                   </span>
-                  <button className="p-2 bg-red-50 text-red-600 rounded-full hover:bg-red-100 transition-colors">
-                    <Plus size={18} />
+                  <button className="rounded-full bg-red-50 p-2 text-red-600 transition-colors hover:bg-red-100">
+                    <Plus size={16} />
                   </button>
                 </div>
               </div>
@@ -263,8 +263,8 @@ export default function ProductSearch() {
 
       {/* Modal Item Avulso */}
       {showCustomModal && (
-        <div className="absolute inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-sm p-6 animate-in fade-in zoom-in duration-200">
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-sm animate-in zoom-in rounded-2xl bg-white p-5 shadow-xl duration-200 md:rounded-lg md:p-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-bold text-gray-900">Adicionar Item Avulso</h3>
               <button onClick={() => setShowCustomModal(false)} className="text-gray-400 hover:text-gray-600">

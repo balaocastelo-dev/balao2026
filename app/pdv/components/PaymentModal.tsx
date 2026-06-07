@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { X, CreditCard, Banknote, QrCode, Printer, CheckCircle, AlertTriangle, Copy, Check, ShoppingCart } from "lucide-react";
+import { CreditCard, Banknote, QrCode, Printer, CheckCircle, AlertTriangle, Copy, Check, ShoppingCart } from "lucide-react";
 import { SITE_CONFIG } from "@/lib/config";
 import { usePdv } from "../store";
 import { createOrder } from "@/app/pdv/actions";
@@ -96,8 +96,8 @@ export default function PaymentModal() {
   if (success) {
     return (
       <>
-        <div className="absolute inset-0 z-50 bg-gray-900/50 flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl animate-in zoom-in duration-200 md:rounded-xl">
             <div className="p-8 text-center">
               <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <CheckCircle className="w-10 h-10 text-green-600" />
@@ -106,7 +106,7 @@ export default function PaymentModal() {
               <p className="text-gray-600 mb-2">O pedido #{orderId} foi registrado com sucesso.</p>
               <p className="text-sm text-gray-500 mb-8">Atualizando sistema em 5 segundos...</p>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <button 
                   onClick={handlePrint}
                   className="flex flex-col items-center justify-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border-2 border-gray-100 transition-all hover:border-gray-200 group"
@@ -153,7 +153,7 @@ export default function PaymentModal() {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 h-full flex flex-col">
+    <div className="flex min-h-[60vh] flex-col rounded-2xl border border-gray-200 bg-white p-4 shadow-sm md:h-full md:rounded-lg md:p-6">
       <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
         <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
           <CreditCard className="text-red-600" />
@@ -161,7 +161,7 @@ export default function PaymentModal() {
         </h2>
         <div className="text-right">
           <p className="text-sm text-gray-500">Total a Pagar</p>
-          <p className="text-2xl font-bold text-gray-900">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(total)}</p>
+          <p className="text-xl font-bold text-gray-900 md:text-2xl">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(total)}</p>
         </div>
       </div>
 
@@ -173,12 +173,12 @@ export default function PaymentModal() {
       )}
 
       {showPix ? (
-        <div className="flex flex-col items-center justify-center p-6 text-center animate-in fade-in zoom-in duration-300">
+        <div className="animate-in fade-in zoom-in flex flex-col items-center justify-center p-2 text-center duration-300 md:p-6">
           <h3 className="text-xl font-bold text-gray-900 mb-2">Pagamento via PIX</h3>
           <p className="text-gray-600 mb-6">Escaneie o QR Code abaixo para pagar</p>
           
           <div className="bg-white p-4 rounded-xl shadow-lg border-2 border-gray-100 mb-6">
-            <QRCodeSVG value={pixPayload} size={200} />
+            <QRCodeSVG value={pixPayload} size={180} />
           </div>
           
           <div className="w-full max-w-sm">
@@ -200,17 +200,17 @@ export default function PaymentModal() {
             {pixCopied && <p className="text-xs text-green-600 mt-1 font-medium">Copiado com sucesso!</p>}
           </div>
 
-          <div className="mt-8 flex gap-3 w-full max-w-sm">
+          <div className="mt-8 flex w-full max-w-sm flex-col gap-3 sm:flex-row">
             <button
               onClick={() => setShowPix(false)}
-              className="flex-1 py-3 px-4 bg-gray-100 text-gray-700 font-bold rounded-lg hover:bg-gray-200 transition-colors"
+              className="flex-1 rounded-xl bg-gray-100 px-4 py-3 font-bold text-gray-700 transition-colors hover:bg-gray-200 md:rounded-lg"
             >
               Voltar
             </button>
             <button
               onClick={() => handlePayment("pix")}
               disabled={loading}
-              className="flex-1 py-3 px-4 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-70"
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-3 font-bold text-white transition-colors hover:bg-green-700 disabled:opacity-70 md:rounded-lg"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -224,11 +224,11 @@ export default function PaymentModal() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <button
             onClick={handlePixSelection}
             disabled={loading}
-            className="flex flex-col items-center justify-center p-6 rounded-xl border-2 border-gray-100 hover:border-red-500 hover:bg-red-50 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+            className="group flex flex-col items-center justify-center rounded-xl border-2 border-gray-100 p-5 transition-all hover:border-red-500 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 md:p-6"
           >
             <QrCode className="w-10 h-10 text-gray-400 group-hover:text-red-600 mb-3 transition-colors" />
             <span className="font-bold text-gray-700 group-hover:text-red-700">PIX</span>
@@ -238,7 +238,7 @@ export default function PaymentModal() {
           <button
             onClick={() => handlePayment("credit_card")}
             disabled={loading}
-            className="flex flex-col items-center justify-center p-6 rounded-xl border-2 border-gray-100 hover:border-red-500 hover:bg-red-50 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+            className="group flex flex-col items-center justify-center rounded-xl border-2 border-gray-100 p-5 transition-all hover:border-red-500 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 md:p-6"
           >
             <CreditCard className="w-10 h-10 text-gray-400 group-hover:text-red-600 mb-3 transition-colors" />
             <span className="font-bold text-gray-700 group-hover:text-red-700">Cartão</span>
@@ -248,7 +248,7 @@ export default function PaymentModal() {
           <button
             onClick={() => handlePayment("cash")}
             disabled={loading}
-            className="flex flex-col items-center justify-center p-6 rounded-xl border-2 border-gray-100 hover:border-red-500 hover:bg-red-50 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+            className="group flex flex-col items-center justify-center rounded-xl border-2 border-gray-100 p-5 transition-all hover:border-red-500 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 md:p-6 sm:col-span-2"
           >
             <Banknote className="w-10 h-10 text-gray-400 group-hover:text-red-600 mb-3 transition-colors" />
             <span className="font-bold text-gray-700 group-hover:text-red-700">Dinheiro</span>

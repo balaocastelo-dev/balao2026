@@ -19,9 +19,9 @@ export default function CartSidebar() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white border-l border-gray-200 shadow-xl w-full max-w-md ml-auto">
-      <div className="p-4 border-b border-gray-200 bg-red-600 text-white flex justify-between items-center shadow-md z-20 relative">
-        <h2 className="text-xl font-bold flex items-center gap-2">
+    <div className="ml-auto flex min-h-[60vh] w-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl md:h-full md:max-w-md md:rounded-lg md:border-l">
+      <div className="relative z-20 flex items-center justify-between border-b border-gray-200 bg-red-600 p-4 text-white shadow-md">
+        <h2 className="flex items-center gap-2 text-lg font-bold md:text-xl">
           <ShoppingCart />
           Carrinho de Compras
         </h2>
@@ -37,7 +37,7 @@ export default function CartSidebar() {
         />
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
+      <div className="flex-1 space-y-3 overflow-y-auto bg-gray-50 p-3 md:p-4">
         {cart.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-gray-400 opacity-60">
             <ShoppingCart size={64} className="mb-4 text-gray-300" />
@@ -46,15 +46,15 @@ export default function CartSidebar() {
           </div>
         ) : (
           cart.map((item: PdvCartItem) => (
-            <div key={item.id} className="bg-white p-3 rounded-lg shadow-sm border border-gray-200 flex gap-3 group hover:border-red-200 transition-colors">
+            <div key={item.id} className="group flex gap-3 rounded-xl border border-gray-200 bg-white p-3 shadow-sm transition-colors hover:border-red-200 md:rounded-lg">
               <div className="w-16 h-16 bg-gray-100 rounded-md flex-shrink-0 flex items-center justify-center overflow-hidden">
                  {/* eslint-disable-next-line @next/next/no-img-element */}
                  <img src={item.image_url} alt={item.name} className="object-contain w-full h-full mix-blend-multiply" />
               </div>
               <div className="flex-1 flex flex-col justify-between">
                 <h4 className="font-medium text-gray-800 line-clamp-2 text-sm leading-tight group-hover:text-red-600 transition-colors" title={item.name}>{item.name}</h4>
-                <div className="flex justify-between items-end mt-2">
-                  <div className="flex items-center border border-gray-200 rounded-md bg-gray-50">
+                <div className="mt-2 flex items-end justify-between gap-3">
+                  <div className="flex items-center rounded-md border border-gray-200 bg-gray-50">
                     <button 
                       onClick={() => updateQty(item.id, item.quantity - 1)}
                       className="p-1 hover:bg-gray-200 text-gray-600 transition-colors"
@@ -71,7 +71,7 @@ export default function CartSidebar() {
                     </button>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs text-gray-500">Unit: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.price)}</p>
+                    <p className="text-[11px] text-gray-500 md:text-xs">Unit: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.price)}</p>
                     <p className="font-bold text-red-600">
                       {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.price * item.quantity)}
                     </p>
@@ -90,10 +90,10 @@ export default function CartSidebar() {
         )}
       </div>
 
-      <div className="p-4 bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20 relative">
+      <div className="relative z-20 border-t border-gray-200 bg-white p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
         <div className="flex justify-between items-center mb-4">
           <span className="text-gray-600 font-medium">Subtotal</span>
-          <span className="text-2xl font-bold text-gray-900">
+          <span className="text-xl font-bold text-gray-900 md:text-2xl">
             {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(total)}
           </span>
         </div>
@@ -107,10 +107,10 @@ export default function CartSidebar() {
             dispatch({ type: "SET_STEP", payload: "customer" });
           }}
           disabled={cart.length === 0}
-          className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg active:scale-[0.98]"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-5 py-4 font-bold text-white shadow-md transition-all hover:bg-green-700 hover:shadow-lg active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 md:rounded-lg"
         >
           <CreditCard size={24} />
-          <span className="text-lg">Finalizar Venda</span>
+          <span className="text-base md:text-lg">Finalizar Venda</span>
         </button>
       </div>
     </div>

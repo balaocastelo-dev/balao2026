@@ -8,34 +8,39 @@ export default function PdvLayout({ children }: { children: React.ReactNode }) {
   return (
     <PdvProvider>
       <div className="min-h-screen bg-gray-100 text-gray-900 font-sans antialiased">
-        <header className="bg-red-600 px-6 py-3 flex items-center justify-between shadow-lg sticky top-0 z-50">
-          <div className="flex items-center gap-4">
-            <div className="bg-white p-1 rounded shadow-sm">
+        <header className="sticky top-0 z-50 flex items-center justify-between gap-3 bg-red-600 px-3 py-3 shadow-lg md:px-6">
+          <div className="flex min-w-0 items-center gap-3 md:gap-4">
+            <div className="rounded bg-white p-1 shadow-sm">
                {/* eslint-disable-next-line @next/next/no-img-element */}
-               <img src="/logo.png" alt="Balão da Informática" className="h-8 w-auto object-contain" />
+               <img src="/logo.png" alt="Balão da Informática" className="h-7 w-auto object-contain md:h-8" />
             </div>
-            <div className="flex flex-col">
-              <h1 className="text-lg font-bold text-white leading-tight">
+            <div className="flex min-w-0 flex-col">
+              <h1 className="truncate text-base font-bold leading-tight text-white md:text-lg">
                 PDV <span className="opacity-80 font-normal">Balão</span>
               </h1>
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-                <span className="text-[10px] text-white/90 uppercase font-medium tracking-wide">Sistema Online</span>
+                <span className="h-2 w-2 animate-pulse rounded-full bg-green-400"></span>
+                <span className="text-[10px] font-medium uppercase tracking-wide text-white/90">
+                  Sistema Online
+                </span>
               </div>
             </div>
           </div>
           
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2 text-white/90 bg-white/10 px-3 py-1.5 rounded-full border border-white/10">
+          <div className="flex items-center gap-2 md:gap-6">
+            <div className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-white/90 md:flex">
               <User size={16} />
               <span className="text-sm font-medium">Operador: <strong>Admin</strong></span>
             </div>
-            <button className="text-white/80 hover:text-white hover:bg-white/10 p-2 rounded-full transition-colors flex items-center gap-2" title="Sair do PDV">
+            <button
+              className="flex items-center gap-2 rounded-full p-2 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+              title="Sair do PDV"
+            >
               <LogOut size={20} />
             </button>
           </div>
         </header>
-        <main className="p-4 md:p-6 max-w-[1920px] mx-auto h-[calc(100vh-64px)] overflow-hidden">
+        <main className="mx-auto min-h-[calc(100vh-64px)] max-w-[1920px] overflow-x-hidden p-3 md:h-[calc(100vh-64px)] md:overflow-hidden md:p-6">
           {children}
         </main>
       </div>

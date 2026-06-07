@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Package, Calendar, DollarSign, User, CreditCard, Printer, Search, Filter } from 'lucide-react';
+import { Package, Calendar, DollarSign, User, CreditCard, Printer, Filter } from 'lucide-react';
 import PrintReceiptModal from './PrintReceiptModal';
 
 interface RecentOrder {
@@ -117,7 +117,7 @@ export default function RecentOrders() {
   };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4 h-full flex flex-col">
+    <div className="flex min-h-[50vh] flex-col rounded-2xl border border-gray-200 bg-white p-4 md:h-full md:rounded-lg">
       <div className="flex flex-col gap-4 mb-4">
         <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
           <Package className="w-5 h-5 text-red-600" />
@@ -125,7 +125,7 @@ export default function RecentOrders() {
         </h3>
         
         {/* Filters */}
-        <div className="flex flex-wrap items-end gap-2 text-sm">
+        <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-[1fr_1fr_auto] sm:items-end">
           <div>
             <label className="block text-xs text-gray-500 mb-1">Data Início</label>
             <input
@@ -146,7 +146,7 @@ export default function RecentOrders() {
           </div>
           <button
             onClick={handleFilter}
-            className="bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700 transition-colors flex items-center gap-1"
+            className="flex items-center justify-center gap-1 rounded-xl bg-red-600 px-3 py-2 text-white transition-colors hover:bg-red-700 sm:rounded"
           >
             <Filter size={14} />
             Filtrar
@@ -169,13 +169,13 @@ export default function RecentOrders() {
           <p>Nenhum pedido encontrado</p>
         </div>
       ) : (
-        <div className="space-y-3 flex-1 overflow-y-auto pr-1 custom-scrollbar">
+        <div className="custom-scrollbar flex-1 space-y-3 overflow-y-auto pr-1">
           {orders.map((order) => (
-            <div key={order.id} className="border border-gray-100 rounded-lg p-3 hover:bg-gray-50 transition-colors group relative">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
+            <div key={order.id} className="group relative rounded-xl border border-gray-100 p-3 transition-colors hover:bg-gray-50 md:rounded-lg">
+              <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex min-w-0 items-center gap-2">
                   <User className="w-4 h-4 text-gray-500" />
-                  <span className="font-medium text-gray-900 text-sm truncate max-w-[150px]" title={order.customer_name}>
+                  <span className="max-w-full truncate text-sm font-medium text-gray-900 sm:max-w-[180px]" title={order.customer_name}>
                     {order.customer_name || 'Cliente não informado'}
                   </span>
                 </div>
@@ -184,8 +184,8 @@ export default function RecentOrders() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between text-xs text-gray-500">
-                <div className="flex items-center gap-2">
+              <div className="flex flex-col gap-3 text-xs text-gray-500 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-wrap items-center gap-2">
                   <div className="flex items-center gap-1">
                     {getPaymentMethodIcon(order.payment_method)}
                     <span>{getPaymentMethodLabel(order.payment_method)}</span>
@@ -196,7 +196,7 @@ export default function RecentOrders() {
                     <span>{formatDate(order.created_at)}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 self-end sm:self-auto">
                   <span className="text-xs px-2 py-0.5 bg-gray-100 rounded-full text-gray-600">
                     {order.origin === 'pdv' ? 'PDV' : 'Site'}
                   </span>

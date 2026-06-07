@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { User, MapPin, Phone, Mail, Search, Check, AlertCircle, ArrowLeft } from "lucide-react";
+import { User, MapPin, Phone, Mail, AlertCircle } from "lucide-react";
 import { usePdv } from "../store";
 import SellerSelector from "./SellerSelector";
 
@@ -67,7 +67,7 @@ export default function CustomerForm() {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 h-full flex flex-col">
+    <div className="flex min-h-[60vh] flex-col rounded-2xl border border-gray-200 bg-white p-4 shadow-sm md:h-full md:rounded-lg">
       <div className="flex justify-between items-center mb-4 border-b border-gray-100 pb-2">
         <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
           <User className="text-red-600" />
@@ -81,7 +81,7 @@ export default function CustomerForm() {
         </button>
       </div>
       
-      <div className="space-y-4 overflow-y-auto flex-1 pr-2">
+      <div className="flex-1 space-y-4 overflow-y-auto pr-1 md:pr-2">
         {/* Nome / Razão Social */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Nome Completo / Razão Social *</label>
@@ -110,7 +110,7 @@ export default function CustomerForm() {
         </div>
 
         {/* Contato */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp</label>
             <div className="relative">
@@ -157,7 +157,7 @@ export default function CustomerForm() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Logradouro</label>
             <div className="relative">
@@ -183,7 +183,7 @@ export default function CustomerForm() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Complemento</label>
             <input
@@ -196,7 +196,7 @@ export default function CustomerForm() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Cidade/UF</label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-[1fr_84px] gap-2">
               <input
                 type="text"
                 value={state.customer.city}
@@ -231,17 +231,17 @@ export default function CustomerForm() {
       </div>
 
       {/* Botões de navegação */}
-      <div className="mt-6 flex gap-3">
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
         <button
           onClick={() => dispatch({ type: "SET_STEP", payload: "cart" })}
-          className="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded transition-colors"
+          className="flex-1 rounded-xl bg-gray-500 px-4 py-3 font-bold text-white transition-colors hover:bg-gray-600 md:rounded"
         >
           Voltar ao Carrinho
         </button>
         <button
           onClick={() => dispatch({ type: "SET_STEP", payload: "payment" })}
           disabled={!state.customer.name || !state.customer.cpf_cnpj}
-          className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 rounded-xl bg-green-600 px-4 py-3 font-bold text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 md:rounded"
         >
           Ir para Pagamento
         </button>
