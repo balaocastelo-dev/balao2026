@@ -2,6 +2,7 @@
 
 import { MessageCircle } from "lucide-react";
 import { SITE_CONFIG } from "@/lib/config";
+import { trackWhatsAppClick } from "@/lib/tracking";
 
 export default function WhatsAppButton({ productName }: { productName: string }) {
   const handleWhatsAppClick = () => {
@@ -9,6 +10,12 @@ export default function WhatsAppButton({ productName }: { productName: string })
     if (typeof window !== "undefined") {
       const message = `Olá, gostaria de consultar a disponibilidade do produto: ${productName} - ${window.location.href}`;
       const url = `https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(message)}`;
+      trackWhatsAppClick({
+        page_path: window.location.pathname,
+        source: "product_whatsapp_button",
+        label: productName,
+        product_name: productName,
+      });
       window.open(url, '_blank');
     }
   };

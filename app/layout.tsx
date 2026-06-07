@@ -13,6 +13,7 @@ import { CartProvider } from "@/context/CartContext";
 import { ToastProvider } from "@/context/ToastContext";
 import LayoutWrapper from "@/components/LayoutWrapper";
 import VisitorTracker from "@/components/VisitorTracker";
+import GlobalConversionTracker from "@/components/GlobalConversionTracker";
 
 import { getCategories } from "@/lib/db";
 import type { Category } from "@/lib/utils";
@@ -243,6 +244,7 @@ export default async function RootLayout({
         )}
 
         <VisitorTracker />
+        <GlobalConversionTracker />
         <CartProvider>
           <ToastProvider>
             <Suspense>

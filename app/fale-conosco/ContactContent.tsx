@@ -4,11 +4,27 @@ import Header from "@/components/Header";
 import { SITE_CONFIG } from "@/lib/config";
 import { useToast } from "@/context/ToastContext";
 import { Mail, Phone, MapPin, Send } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import {
+  trackFormAttempt,
+  trackFormError,
+  trackFormSuccess,
+  trackPageLeadView,
+} from "@/lib/tracking";
 
 export default function FaleConoscoPage() {
   const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    trackPageLeadView({
+      page_path: pathname,
+      source: "fale-conosco",
+      service: "Contato geral",
+    });
+  }, [pathname]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -22,7 +38,16 @@ export default function FaleConoscoPage() {
         email: formData.get("email"),
         phone: formData.get("phone"),
         message: formData.get("message"),
+        subject: formData.get("subject"),
+        source: "fale-conosco",
+        service: "Contato geral",
       };
+
+      trackFormAttempt({
+        page_path: pathname,
+        source: "fale-conosco",
+        service: "Contato geral",
+      });
 
       const response = await fetch("/api/contact", {
         method: "POST",
@@ -32,10 +57,20 @@ export default function FaleConoscoPage() {
 
       if (!response.ok) throw new Error("Falha ao enviar mensagem");
 
+      trackFormSuccess({
+        page_path: pathname,
+        source: "fale-conosco",
+        service: "Contato geral",
+      });
       showToast("Mensagem enviada com sucesso! Entraremos em contato em breve.", "success");
       (e.target as HTMLFormElement).reset();
     } catch (error) {
       console.error(error);
+      trackFormError({
+        page_path: pathname,
+        source: "fale-conosco",
+        service: "Contato geral",
+      });
       showToast("Erro ao enviar mensagem. Tente novamente.", "error");
     } finally {
       setLoading(false);
@@ -64,7 +99,15 @@ export default function FaleConoscoPage() {
                 </div>
                 <div>
                   <h3 className="font-bold text-gray-800 text-lg">Televendas</h3>
-                  <p className="text-gray-600">{SITE_CONFIG.phone.display}</p>
+                  <a
+                    href={`tel:${SITE_CONFIG.phone.number}`}
+                    data-conversion-source="fale-conosco"
+                    data-conversion-label="Televendas"
+                    data-conversion-service="Contato geral"
+                    className="text-gray-600 hover:text-[#E60012] transition-colors"
+                  >
+                    {SITE_CONFIG.phone.display}
+                  </a>
                   <p className="text-sm text-gray-500">Seg. a Sex. das 9h às 18h</p>
                 </div>
               </div>
@@ -75,7 +118,13 @@ export default function FaleConoscoPage() {
                 </div>
                 <div>
                   <h3 className="font-bold text-gray-800 text-lg">E-mail</h3>
-                  <a href={`mailto:${SITE_CONFIG.email}`} className="text-gray-600 hover:text-[#E60012] transition-colors">
+                  <a
+                    href={`mailto:${SITE_CONFIG.email}`}
+                    data-conversion-source="fale-conosco"
+                    data-conversion-label="Email contato"
+                    data-conversion-service="Contato geral"
+                    className="text-gray-600 hover:text-[#E60012] transition-colors"
+                  >
                     {SITE_CONFIG.email}
                   </a>
                 </div>
@@ -139,6 +188,7 @@ export default function FaleConoscoPage() {
                 <label htmlFor="subject" className="text-sm font-medium text-gray-700">Assunto</label>
                 <select 
                   id="subject" 
+                  name="subject"
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#E60012] focus:border-transparent outline-none transition-all bg-white"
                 >
                   <option>Dúvida sobre produto</option>

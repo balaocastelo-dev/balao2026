@@ -3,12 +3,18 @@
 
 import { MessageCircle } from "lucide-react";
 import { SITE_CONFIG } from "@/lib/config";
+import { trackWhatsAppClick } from "@/lib/tracking";
 
 export default function FloatingWhatsApp() {
   const handleWhatsAppClick = () => {
     if (typeof window !== "undefined") {
       const message = SITE_CONFIG.whatsapp.messageDefault;
       const url = `https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(message)}`;
+      trackWhatsAppClick({
+        page_path: window.location.pathname,
+        source: "floating_whatsapp",
+        label: "Botao flutuante",
+      });
       window.open(url, '_blank');
     }
   };

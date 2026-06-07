@@ -9,6 +9,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [
           '/private/',
           '/admin/',
+          '/painel/',
           '/pdv/',
           '/dashboard/',
           '/arena/admin/',

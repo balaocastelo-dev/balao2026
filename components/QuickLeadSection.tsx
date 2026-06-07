@@ -1,9 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { MessageCircle, Phone, Send } from "lucide-react";
 import { SITE_CONFIG } from "@/lib/config";
 import { useToast } from "@/context/ToastContext";
+import {
+  trackFormAttempt,
+  trackFormError,
+  trackFormSuccess,
+  trackPageLeadView,
+} from "@/lib/tracking";
 
 type QuickLeadSectionProps = {
   title: string;
@@ -28,10 +35,20 @@ export default function QuickLeadSection({
 }: QuickLeadSectionProps) {
   const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
+  const pathname = usePathname();
 
   const whatsappUrl = `https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(
     messageTemplate
   )}`;
+
+  useEffect(() => {
+    trackPageLeadView({
+      page_path: pathname,
+      source,
+      city: cityLabel,
+      service: serviceLabel,
+    });
+  }, [pathname, source, cityLabel, serviceLabel]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -43,6 +60,13 @@ export default function QuickLeadSection({
       const email = String(formData.get("email") || "").trim();
       const phone = String(formData.get("phone") || "").trim();
       const message = String(formData.get("message") || "").trim();
+
+      trackFormAttempt({
+        page_path: pathname,
+        source,
+        city: cityLabel,
+        service: serviceLabel,
+      });
 
       const response = await fetch("/api/contact", {
         method: "POST",
@@ -63,10 +87,22 @@ export default function QuickLeadSection({
         throw new Error("Falha ao enviar lead");
       }
 
+      trackFormSuccess({
+        page_path: pathname,
+        source,
+        city: cityLabel,
+        service: serviceLabel,
+      });
       showToast("Pedido enviado. Vamos entrar em contato o mais rápido possível.", "success");
       event.currentTarget.reset();
     } catch (error) {
       console.error(error);
+      trackFormError({
+        page_path: pathname,
+        source,
+        city: cityLabel,
+        service: serviceLabel,
+      });
       showToast("Não foi possível enviar agora. Tente pelo WhatsApp.", "error");
     } finally {
       setLoading(false);
@@ -107,6 +143,10 @@ export default function QuickLeadSection({
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
+              data-conversion-source={source}
+              data-conversion-label={serviceLabel || title}
+              data-conversion-city={cityLabel}
+              data-conversion-service={serviceLabel}
               className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-6 py-3 font-black text-white hover:bg-[#128C7E]"
             >
               <MessageCircle className="h-5 w-5" />
@@ -114,6 +154,10 @@ export default function QuickLeadSection({
             </a>
             <a
               href={`tel:${SITE_CONFIG.phone.number}`}
+              data-conversion-source={source}
+              data-conversion-label={serviceLabel || title}
+              data-conversion-city={cityLabel}
+              data-conversion-service={serviceLabel}
               className="inline-flex items-center gap-2 rounded-full border border-slate-300 px-6 py-3 font-bold text-slate-700 hover:border-red-500 hover:text-red-600"
             >
               <Phone className="h-5 w-5" />
