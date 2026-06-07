@@ -80,18 +80,18 @@ export default function AppleReviewsCarousel({ reviews }: { reviews: AppleReview
                       <div className="text-lg font-black text-gray-900">{review.name}</div>
                       <div className="text-sm font-semibold uppercase tracking-wide text-red-600">{review.model}</div>
                     </div>
-                </div>
+                  </div>
                 ))}
+              </div>
             </div>
           ))}
         </div>
       </div>
 
-      {reviews.length > 1 ? (
       {pages.length > 1 ? (
+        <>
           <button
             type="button"
-            onClick={goPrev}
             onClick={goPrev}
             aria-label="Comentário anterior"
             className="absolute left-2 top-1/2 inline-flex -translate-y-1/2 items-center justify-center rounded-full border border-gray-200 bg-white p-3 text-gray-700 shadow-md transition hover:bg-gray-50 md:left-4"
