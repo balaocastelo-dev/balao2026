@@ -244,10 +244,12 @@ export default async function RootLayout({
         )}
 
         <VisitorTracker />
-        <GlobalConversionTracker />
+        <Suspense fallback={null}>
+          <GlobalConversionTracker />
+        </Suspense>
         <CartProvider>
           <ToastProvider>
-            <Suspense>
+            <Suspense fallback={null}>
               <LayoutWrapper categories={categories}>
                 {children}
               </LayoutWrapper>
