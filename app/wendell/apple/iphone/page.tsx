@@ -78,11 +78,11 @@ export default function IPhonePage() {
           imageAlt: "Troca de tela de iPhone",
         },
         {
-          title: "Bateria nova para recuperar autonomia",
+          title: "Reparo de tampa quebrada com retirada a laser",
           description:
-            "Se a bateria acaba rápido, esquenta ou o iPhone desliga sozinho, realizamos a substituição com segurança.",
+            "Removemos a tampa traseira quebrada com tecnica de retirada a laser para um acabamento mais preciso e seguro no reparo do iPhone.",
           imageSrc: "/images/apple/iphone/iphone-interno-reparo.png",
-          imageAlt: "Troca de bateria de iPhone",
+          imageAlt: "Reparo de tampa traseira quebrada de iPhone",
         },
         {
           title: "Conector e carga com reparo preciso",
