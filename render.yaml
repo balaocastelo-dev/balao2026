@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: balao-whatsapp-panel
+    runtime: docker
+    rootDir: whatsapp-server
+    plan: starter
+    autoDeploy: true
+    envVars:
+      - key: WHATSAPP_PANEL_PORT
+        value: 4100
+      - key: WHATSAPP_PANEL_ALLOWED_ORIGIN
+        sync: false
+    disk:
+      name: balao-whatsapp-session
+      mountPath: /app/.wwebjs_auth
+      sizeGB: 2

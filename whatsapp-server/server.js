@@ -42,6 +42,8 @@ const whatsappState = {
   session: false,
   phoneNumber: null,
 };
+let whatsappClient = null;
+let isInitializingClient = false;
 
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
@@ -185,100 +187,151 @@ function schedulePendingMessage(item) {
 
 loadStore();
 
-const whatsappClient = new Client({
-  authStrategy: new LocalAuth({
-    clientId: "balao-whatsapp-panel",
-    dataPath: path.join(__dirname, ".wwebjs_auth"),
-  }),
-  puppeteer: {
-    headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-  },
-  webVersionCache: {
-    type: "local",
-    path: path.join(__dirname, ".wwebjs_cache"),
-  },
-});
-
-whatsappClient.on("qr", async (qr) => {
-  whatsappState.status = "qr";
-  whatsappState.connected = false;
-  whatsappState.session = false;
-  whatsappState.qrCode = await qrcode.toDataURL(qr);
-  emitState();
-  emitToast("QR Code gerado. Escaneie com o WhatsApp.");
-});
-
-whatsappClient.on("authenticated", () => {
-  whatsappState.status = "authenticated";
-  whatsappState.session = true;
-  emitState();
-  emitToast("Sessao autenticada com sucesso.");
-});
-
-whatsappClient.on("ready", async () => {
-  whatsappState.status = "ready";
-  whatsappState.connected = true;
-  whatsappState.session = true;
-  whatsappState.qrCode = null;
-  whatsappState.phoneNumber = whatsappClient.info?.wid?.user || null;
-  emitState();
-  emitToast("WhatsApp conectado e pronto para uso.");
-});
-
-whatsappClient.on("auth_failure", (message) => {
-  whatsappState.status = "auth_failure";
-  whatsappState.connected = false;
-  whatsappState.session = false;
-  whatsappState.qrCode = null;
-  emitState();
-  emitToast(`Falha na autenticacao: ${message}`);
-});
-
-whatsappClient.on("disconnected", (reason) => {
-  whatsappState.status = "disconnected";
-  whatsappState.connected = false;
-  whatsappState.session = false;
-  whatsappState.qrCode = null;
-  emitState();
-  emitToast(`WhatsApp desconectado: ${reason}`);
-});
-
-whatsappClient.on("message", async (message) => {
-  const contactName =
-    message._data?.notifyName || message._data?.pushname || message.from || null;
-
-  storeMessage({
-    id: message.id?._serialized || createId(),
-    chatId: message.from,
-    from: message.from,
-    body: message.body || "",
-    direction: "in",
-    timestamp: (message.timestamp || Math.floor(Date.now() / 1000)) * 1000,
-    contactName,
+function buildWhatsAppClient() {
+  return new Client({
+    authStrategy: new LocalAuth({
+      clientId: "balao-whatsapp-panel",
+      dataPath: path.join(__dirname, ".wwebjs_auth"),
+    }),
+    puppeteer: {
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    },
+    webVersionCache: {
+      type: "local",
+      path: path.join(__dirname, ".wwebjs_cache"),
+    },
   });
-});
+}
 
-whatsappClient.on("message_create", async (message) => {
-  if (!message.fromMe) return;
-
-  storeMessage({
-    id: message.id?._serialized || createId(),
-    chatId: message.to || message.from,
-    from: whatsappState.phoneNumber || "balao",
-    to: message.to || null,
-    body: message.body || "",
-    direction: "out",
-    timestamp: (message.timestamp || Math.floor(Date.now() / 1000)) * 1000,
-    contactName: message.to || null,
+function attachWhatsAppClientEvents(client) {
+  client.on("qr", async (qr) => {
+    whatsappState.status = "qr";
+    whatsappState.connected = false;
+    whatsappState.session = false;
+    whatsappState.qrCode = await qrcode.toDataURL(qr);
+    emitState();
+    emitToast("QR Code gerado. Escaneie com o WhatsApp.");
   });
-});
 
-whatsappClient.initialize().catch((error) => {
-  console.error("Falha ao iniciar o cliente do WhatsApp:", error);
-  whatsappState.status = "disconnected";
-  emitState();
-});
+  client.on("authenticated", () => {
+    whatsappState.status = "authenticated";
+    whatsappState.session = true;
+    emitState();
+    emitToast("Sessao autenticada com sucesso.");
+  });
+
+  client.on("ready", async () => {
+    whatsappState.status = "ready";
+    whatsappState.connected = true;
+    whatsappState.session = true;
+    whatsappState.qrCode = null;
+    whatsappState.phoneNumber = client.info?.wid?.user || null;
+    emitState();
+    emitToast("WhatsApp conectado e pronto para uso.");
+  });
+
+  client.on("auth_failure", (message) => {
+    whatsappState.status = "auth_failure";
+    whatsappState.connected = false;
+    whatsappState.session = false;
+    whatsappState.qrCode = null;
+    emitState();
+    emitToast(`Falha na autenticacao: ${message}`);
+  });
+
+  client.on("disconnected", (reason) => {
+    whatsappState.status = "disconnected";
+    whatsappState.connected = false;
+    whatsappState.session = false;
+    whatsappState.qrCode = null;
+    whatsappState.phoneNumber = null;
+    emitState();
+    emitToast(`WhatsApp desconectado: ${reason}`);
+  });
+
+  client.on("message", async (message) => {
+    const contactName =
+      message._data?.notifyName || message._data?.pushname || message.from || null;
+
+    storeMessage({
+      id: message.id?._serialized || createId(),
+      chatId: message.from,
+      from: message.from,
+      body: message.body || "",
+      direction: "in",
+      timestamp: (message.timestamp || Math.floor(Date.now() / 1000)) * 1000,
+      contactName,
+    });
+  });
+
+  client.on("message_create", async (message) => {
+    if (!message.fromMe) return;
+
+    storeMessage({
+      id: message.id?._serialized || createId(),
+      chatId: message.to || message.from,
+      from: whatsappState.phoneNumber || "balao",
+      to: message.to || null,
+      body: message.body || "",
+      direction: "out",
+      timestamp: (message.timestamp || Math.floor(Date.now() / 1000)) * 1000,
+      contactName: message.to || null,
+    });
+  });
+}
+
+async function initializeWhatsAppClient(options = {}) {
+  const { resetSession = false } = options;
+  if (isInitializingClient) return;
+  isInitializingClient = true;
+
+  try {
+    whatsappState.status = "initializing";
+    whatsappState.qrCode = null;
+    whatsappState.connected = false;
+    if (resetSession) {
+      whatsappState.session = false;
+      whatsappState.phoneNumber = null;
+    }
+    emitState();
+
+    if (whatsappClient) {
+      try {
+        await whatsappClient.destroy();
+      } catch (error) {
+        console.error("Falha ao destruir cliente atual do WhatsApp:", error);
+      }
+      whatsappClient.removeAllListeners();
+      whatsappClient = null;
+    }
+
+    if (resetSession) {
+      try {
+        fs.rmSync(path.join(__dirname, ".wwebjs_auth"), { recursive: true, force: true });
+        fs.rmSync(path.join(__dirname, ".wwebjs_cache"), { recursive: true, force: true });
+      } catch (error) {
+        console.error("Falha ao limpar sessao/cache do WhatsApp:", error);
+      }
+    }
+
+    const client = buildWhatsAppClient();
+    attachWhatsAppClientEvents(client);
+    whatsappClient = client;
+    await client.initialize();
+  } catch (error) {
+    console.error("Falha ao iniciar o cliente do WhatsApp:", error);
+    whatsappState.status = "disconnected";
+    whatsappState.connected = false;
+    whatsappState.qrCode = null;
+    emitState();
+    emitToast("Falha ao iniciar o cliente do WhatsApp.");
+  } finally {
+    isInitializingClient = false;
+  }
+}
+
+initializeWhatsAppClient();
 
 store.schedules.forEach((item) => {
   if (item.status === "pending") {
@@ -329,6 +382,11 @@ io.on("connection", (socket) => {
       chatLabels: store.chatLabels,
     });
     socket.emit("whatsapp:messages", store.messages.slice(-300));
+  });
+
+  socket.on("panel:reset-session", async () => {
+    emitToast("Reiniciando a sessao do WhatsApp para gerar um novo QR Code.");
+    await initializeWhatsAppClient({ resetSession: true });
   });
 
   socket.on("panel:send-message", async (payload) => {

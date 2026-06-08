@@ -4,10 +4,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   CalendarClock,
   CheckCircle2,
+  LoaderCircle,
   MessageCircle,
   MessageSquareReply,
   Plus,
   QrCode,
+  RefreshCcw,
   Send,
   Tag,
   Trash2,
@@ -90,11 +92,15 @@ function formatTime(timestamp: number) {
 
 export default function WhatsAppPanelClient() {
   const socketRef = useRef<Socket | null>(null);
+  const serverUrl =
+    process.env.NEXT_PUBLIC_WHATSAPP_PANEL_SERVER_URL || "http://localhost:4100";
   const [status, setStatus] = useState<WhatsAppStatus>("initializing");
+  const [socketConnected, setSocketConnected] = useState(false);
   const [connected, setConnected] = useState(false);
   const [session, setSession] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState<string | null>(null);
   const [qrCode, setQrCode] = useState<string | null>(null);
+  const [serverHealthMessage, setServerHealthMessage] = useState("Verificando servidor...");
   const [messages, setMessages] = useState<PanelMessage[]>([]);
   const [labels, setLabels] = useState<string[]>([]);
   const [chatLabels, setChatLabels] = useState<Record<string, string[]>>({});
@@ -114,9 +120,6 @@ export default function WhatsAppPanelClient() {
   const [toast, setToast] = useState<string>("");
 
   useEffect(() => {
-    const serverUrl =
-      process.env.NEXT_PUBLIC_WHATSAPP_PANEL_SERVER_URL || "http://localhost:4100";
-
     const socket = io(serverUrl, {
       transports: ["websocket", "polling"],
     });
@@ -140,7 +143,23 @@ export default function WhatsAppPanelClient() {
     };
 
     socket.on("connect", () => {
+      setSocketConnected(true);
+      setServerHealthMessage("Servidor online.");
       socket.emit("panel:bootstrap");
+    });
+    socket.on("disconnect", () => {
+      setSocketConnected(false);
+      setConnected(false);
+      setServerHealthMessage(
+        "Servidor do WhatsApp offline ou inacessivel. Sem ele o QR Code nao pode ser gerado."
+      );
+    });
+    socket.on("connect_error", () => {
+      setSocketConnected(false);
+      setConnected(false);
+      setServerHealthMessage(
+        "Nao foi possivel conectar ao servidor do WhatsApp. Verifique se ele esta rodando."
+      );
     });
     socket.on("whatsapp:state", handleState);
     socket.on("whatsapp:settings", handleSettings);
@@ -163,6 +182,47 @@ export default function WhatsAppPanelClient() {
       socketRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    let active = true;
+
+    const checkHealth = async () => {
+      try {
+        const response = await fetch(`${serverUrl}/health`, {
+          method: "GET",
+          cache: "no-store",
+        });
+        if (!response.ok) {
+          throw new Error("health_failed");
+        }
+        const payload = await response.json();
+        if (!active) return;
+
+        if (payload.connected) {
+          setServerHealthMessage("Servidor online e WhatsApp conectado.");
+        } else if (payload.status === "qr") {
+          setServerHealthMessage("Servidor online e QR Code pronto para leitura.");
+        } else if (payload.status === "initializing") {
+          setServerHealthMessage("Servidor online e iniciando o WhatsApp.");
+        } else {
+          setServerHealthMessage("Servidor online aguardando autenticacao do WhatsApp.");
+        }
+      } catch {
+        if (!active) return;
+        setServerHealthMessage(
+          "Servidor do WhatsApp offline ou inacessivel. Sem ele o QR Code nao pode ser gerado."
+        );
+      }
+    };
+
+    checkHealth();
+    const interval = window.setInterval(checkHealth, 10000);
+
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+    };
+  }, [serverUrl]);
 
   const chatList = useMemo(() => {
     const map = new Map<string, PanelMessage>();
@@ -249,6 +309,10 @@ export default function WhatsAppPanelClient() {
     setScheduleDateTime("");
   };
 
+  const handleResetSession = () => {
+    sendSocketEvent("panel:reset-session", {});
+  };
+
   return (
     <div className="min-h-screen bg-[#fff7f7] text-slate-900">
       <div className="mx-auto max-w-7xl px-4 py-8 md:px-6">
@@ -269,11 +333,11 @@ export default function WhatsAppPanelClient() {
               <div className="grid gap-3 sm:grid-cols-3">
                 <div className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3">
                   <div className="flex items-center gap-2 text-sm font-bold">
-                    {connected ? <Wifi size={16} /> : <WifiOff size={16} />}
+                    {socketConnected ? <Wifi size={16} /> : <WifiOff size={16} />}
                     Conexao
                   </div>
                   <p className="mt-2 text-sm text-red-50">
-                    {connected ? "Servidor online" : "Aguardando servidor"}
+                    {socketConnected ? "Servidor online" : "Aguardando servidor"}
                   </p>
                 </div>
                 <div className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3">
@@ -311,7 +375,17 @@ export default function WhatsAppPanelClient() {
                 <h2 className="text-xl font-black">Conexao e QR Code</h2>
               </div>
               <div className="rounded-2xl border border-dashed border-red-200 bg-[#fffafa] p-4 text-center">
-                {status === "ready" && !qrCode ? (
+                {!socketConnected ? (
+                  <>
+                    <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+                      <WifiOff className="text-red-600" />
+                    </div>
+                    <p className="font-bold text-slate-900">Servidor do WhatsApp offline</p>
+                    <p className="mt-2 text-sm text-slate-500">
+                      O site abriu, mas o servidor Node do WhatsApp nao esta conectado.
+                    </p>
+                  </>
+                ) : status === "ready" && !qrCode ? (
                   <>
                     <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
                       <CheckCircle2 className="text-green-600" />
@@ -332,16 +406,46 @@ export default function WhatsAppPanelClient() {
                     <p className="mt-3 text-sm font-medium text-slate-700">
                       Escaneie o QR Code com o WhatsApp para conectar.
                     </p>
+                    <button
+                      onClick={handleResetSession}
+                      className="mt-4 inline-flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700 hover:bg-red-100"
+                    >
+                      <RefreshCcw size={16} />
+                      Gerar novo QR
+                    </button>
+                  </>
+                ) : status === "initializing" ? (
+                  <>
+                    <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
+                      <LoaderCircle className="animate-spin text-amber-600" />
+                    </div>
+                    <p className="font-bold text-slate-900">Inicializando WhatsApp</p>
+                    <p className="mt-2 text-sm text-slate-500">
+                      Aguarde alguns segundos enquanto o servidor prepara a conexao.
+                    </p>
                   </>
                 ) : (
-                  <p className="text-sm text-slate-500">
-                    Aguardando geracao do QR Code ou restaurando a sessao salva.
-                  </p>
+                  <>
+                    <p className="text-sm text-slate-500">
+                      Aguardando geracao do QR Code ou restaurando a sessao salva.
+                    </p>
+                    <button
+                      onClick={handleResetSession}
+                      className="mt-4 inline-flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700 hover:bg-red-100"
+                    >
+                      <RefreshCcw size={16} />
+                      Forcar novo QR
+                    </button>
+                  </>
                 )}
               </div>
 
               <div className="mt-4 rounded-2xl bg-red-50 p-4 text-sm text-red-700">
                 <strong>Status atual:</strong> {status}
+                <br />
+                <strong>Servidor:</strong> {serverHealthMessage}
+                <br />
+                <strong>URL:</strong> {serverUrl}
               </div>
             </section>
 
