@@ -81,6 +81,7 @@ type PanelSettings = {
   chatLabels: Record<string, string[]>;
   chatAssignments?: Record<string, string | null>;
   notifications?: PanelNotification[];
+  apiInfo?: PanelApiInfo;
 };
 
 type PanelStatePayload = {
@@ -111,6 +112,8 @@ type PanelChat = {
   isGroup: boolean;
   isArchived: boolean;
   isPinned: boolean;
+  isMuted?: boolean;
+  muteExpiration?: number;
   assignedSellerId?: string | null;
 };
 
@@ -147,6 +150,12 @@ type Vendor = {
   nome: string;
   avatar_url: string | null;
   veiculo_emoji: string;
+};
+
+type PanelApiInfo = {
+  declaredVersion?: string | null;
+  resolvedVersion?: string | null;
+  supportedActions: string[];
 };
 
 function formatPhoneNumber(value: string) {
@@ -257,6 +266,8 @@ function CascadeSection({
 export default function WhatsAppPanelClient() {
   const socketRef = useRef<Socket | null>(null);
   const workspaceRef = useRef<HTMLDivElement | null>(null);
+  const messagesViewportRef = useRef<HTMLDivElement | null>(null);
+  const selectedChatIdRef = useRef("");
   const serverUrl =
     process.env.NEXT_PUBLIC_WHATSAPP_PANEL_SERVER_URL || "http://localhost:4100";
   const [status, setStatus] = useState<WhatsAppStatus>("initializing");
@@ -273,6 +284,7 @@ export default function WhatsAppPanelClient() {
   const [chatLabels, setChatLabels] = useState<Record<string, string[]>>({});
   const [chatAssignments, setChatAssignments] = useState<Record<string, string | null>>({});
   const [notifications, setNotifications] = useState<PanelNotification[]>([]);
+  const [apiInfo, setApiInfo] = useState<PanelApiInfo | null>(null);
   const [signatures, setSignatures] = useState<SignatureItem[]>([]);
   const [quickReplies, setQuickReplies] = useState<QuickReplyItem[]>([]);
   const [schedules, setSchedules] = useState<ScheduleItem[]>([]);
@@ -307,6 +319,8 @@ export default function WhatsAppPanelClient() {
   const [segmentSelectedIds, setSegmentSelectedIds] = useState<string[]>([]);
   const [sidebarWidth, setSidebarWidth] = useState(420);
   const [isResizingSidebar, setIsResizingSidebar] = useState(false);
+  const [selectedChatNote, setSelectedChatNote] = useState("");
+  const [chatActionLoading, setChatActionLoading] = useState<string>("");
   const [openSections, setOpenSections] = useState({
     replies: true,
     labels: false,
@@ -315,6 +329,7 @@ export default function WhatsAppPanelClient() {
     vendors: false,
     statuses: true,
     segmentation: false,
+    actions: true,
   });
 
   useEffect(() => {
@@ -340,6 +355,7 @@ export default function WhatsAppPanelClient() {
       setChatLabels(payload.chatLabels || {});
       setChatAssignments(payload.chatAssignments || {});
       setNotifications(payload.notifications || []);
+      setApiInfo(payload.apiInfo || null);
     };
 
     socket.on("connect", () => {
@@ -363,6 +379,9 @@ export default function WhatsAppPanelClient() {
     });
     socket.on("whatsapp:state", handleState);
     socket.on("whatsapp:settings", handleSettings);
+    socket.on("whatsapp:api-info", (payload: PanelApiInfo) => {
+      setApiInfo(payload || null);
+    });
     socket.on("whatsapp:messages", (payload: PanelMessage[]) => {
       setMessages(payload || []);
     });
@@ -381,6 +400,14 @@ export default function WhatsAppPanelClient() {
     socket.on("whatsapp:toast", (payload: { message: string }) => {
       setToast(payload.message);
       window.setTimeout(() => setToast(""), 3500);
+    });
+    socket.on("whatsapp:chat-note", (payload: { chatId: string; note: string }) => {
+      if (payload.chatId === selectedChatIdRef.current) {
+        setSelectedChatNote(payload.note || "");
+      }
+    });
+    socket.on("whatsapp:chat-action-result", () => {
+      setChatActionLoading("");
     });
 
     return () => {
@@ -580,6 +607,10 @@ export default function WhatsAppPanelClient() {
   }, [filteredChatList, selectedChatId]);
 
   useEffect(() => {
+    selectedChatIdRef.current = selectedChatId;
+  }, [selectedChatId]);
+
+  useEffect(() => {
     if (!selectedChatId) return;
     const exists = chatSource.some((item) => item.chatId === selectedChatId);
     if (!exists && filteredChatList[0]) {
@@ -616,6 +647,26 @@ export default function WhatsAppPanelClient() {
     }
   }, [composerMode, selectedChatNumber]);
 
+  useEffect(() => {
+    if (!selectedChatId) {
+      setSelectedChatNote("");
+      return;
+    }
+    sendSocketEvent("panel:chat-action", {
+      chatId: selectedChatId,
+      action: "get-note",
+    });
+  }, [selectedChatId]);
+
+  useEffect(() => {
+    const viewport = messagesViewportRef.current;
+    if (!viewport) return;
+    viewport.scrollTo({
+      top: viewport.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [selectedChatId, selectedChatMessages.length]);
+
   const sendSocketEvent = (event: string, payload: Record<string, unknown>) => {
     socketRef.current?.emit(event, payload);
   };
@@ -646,7 +697,20 @@ export default function WhatsAppPanelClient() {
 
   const handleAddLabel = () => {
     if (!newLabel.trim()) return;
-    sendSocketEvent("panel:add-label", { label: newLabel.trim() });
+    const matchedLabel = labels.find(
+      (item) => item.toLowerCase() === newLabel.trim().toLowerCase()
+    );
+    if (!matchedLabel) {
+      setToast("Etiqueta nao encontrada na conta. Sincronize as etiquetas do WhatsApp.");
+      window.setTimeout(() => setToast(""), 3500);
+      return;
+    }
+    if (!selectedChatId) {
+      setToast("Selecione uma conversa para aplicar a etiqueta.");
+      window.setTimeout(() => setToast(""), 3500);
+      return;
+    }
+    handleToggleLabelOnChat(matchedLabel);
     setNewLabel("");
   };
 
@@ -866,9 +930,23 @@ export default function WhatsAppPanelClient() {
     setSegmentMessage("");
   };
 
+  const handleSyncLabels = () => {
+    sendSocketEvent("panel:refresh-labels", {});
+  };
+
+  const handleChatAction = (action: string, extraPayload?: Record<string, unknown>) => {
+    if (!selectedChatId) return;
+    setChatActionLoading(action);
+    sendSocketEvent("panel:chat-action", {
+      chatId: selectedChatId,
+      action,
+      ...(extraPayload || {}),
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,#fff5f5_0%,#fffdfd_100%)] text-slate-900">
-      <div className="mx-auto max-w-[1700px] px-4 py-6 md:px-6 md:py-8">
+    <div className="h-screen overflow-hidden bg-[linear-gradient(180deg,#fff5f5_0%,#fffdfd_100%)] text-slate-900">
+      <div className="mx-auto flex h-full max-w-[1700px] flex-col px-4 py-4 md:px-6 md:py-6">
         <div className="mb-6 overflow-hidden rounded-[32px] border border-red-100 bg-white shadow-[0_30px_80px_rgba(239,68,68,0.08)]">
           <div className="bg-[linear-gradient(135deg,#dc2626_0%,#ef4444_60%,#b91c1c_100%)] px-6 py-7 text-white md:px-8 md:py-8">
             <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
@@ -915,7 +993,7 @@ export default function WhatsAppPanelClient() {
             </div>
           </div>
 
-          <div className="grid gap-4 border-t border-red-100 bg-white px-6 py-4 md:grid-cols-3 md:px-8">
+          <div className="grid gap-4 border-t border-red-100 bg-white px-6 py-4 md:grid-cols-4 md:px-8">
             <div className="rounded-2xl bg-red-50 px-4 py-3">
               <div className="text-xs font-bold uppercase tracking-wide text-red-600">Status</div>
               <div className="mt-1 font-semibold text-slate-900">{status}</div>
@@ -928,6 +1006,12 @@ export default function WhatsAppPanelClient() {
               <div className="text-xs font-bold uppercase tracking-wide text-slate-500">URL</div>
               <div className="mt-1 truncate text-sm font-medium text-slate-800">{serverUrl}</div>
             </div>
+            <div className="rounded-2xl bg-slate-50 px-4 py-3">
+              <div className="text-xs font-bold uppercase tracking-wide text-slate-500">API</div>
+              <div className="mt-1 text-sm font-medium text-slate-800">
+                {apiInfo?.resolvedVersion || apiInfo?.declaredVersion || "whatsapp-web.js"}
+              </div>
+            </div>
           </div>
 
           {toast ? (
@@ -937,7 +1021,7 @@ export default function WhatsAppPanelClient() {
           ) : null}
         </div>
 
-        <div className="space-y-6">
+        <div className="flex min-h-0 flex-1 flex-col space-y-6">
           <div className="grid gap-6 xl:grid-cols-[340px_minmax(0,1fr)_360px]">
             <section className="overflow-hidden rounded-[28px] border border-red-100 bg-white shadow-sm">
               <div className="border-b border-red-100 px-5 py-4">
@@ -1055,7 +1139,7 @@ export default function WhatsAppPanelClient() {
                 >
                   <div className="text-xs font-bold uppercase tracking-wide text-red-600">Organizacao</div>
                   <div className="mt-1 font-black text-slate-900">Etiquetas</div>
-                  <div className="mt-1 text-xs text-slate-500">{labels.length} criadas</div>
+                  <div className="mt-1 text-xs text-slate-500">{labels.length} sincronizadas</div>
                 </button>
                 <button
                   onClick={() => toggleSection("statuses")}
@@ -1096,6 +1180,16 @@ export default function WhatsAppPanelClient() {
                   <div className="text-xs font-bold uppercase tracking-wide text-red-600">Selecao</div>
                   <div className="mt-1 font-black text-slate-900">Palavra-chave</div>
                   <div className="mt-1 text-xs text-slate-500">{segmentSelectedIds.length} marcados</div>
+                </button>
+                <button
+                  onClick={() => toggleSection("actions")}
+                  className="rounded-2xl border border-red-100 bg-white px-4 py-4 text-left transition hover:bg-red-50"
+                >
+                  <div className="text-xs font-bold uppercase tracking-wide text-red-600">API</div>
+                  <div className="mt-1 font-black text-slate-900">Acoes</div>
+                  <div className="mt-1 text-xs text-slate-500">
+                    {apiInfo?.supportedActions?.length || 0} recursos
+                  </div>
                 </button>
                 <button
                   onClick={handleStartNewMessage}
@@ -1159,11 +1253,11 @@ export default function WhatsAppPanelClient() {
 
           <section
             ref={workspaceRef}
-            className="overflow-hidden rounded-[32px] border border-red-100 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.06)]"
+            className="min-h-0 flex-1 overflow-hidden rounded-[32px] border border-red-100 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.06)]"
           >
-            <div className="flex min-h-[920px] flex-col xl:flex-row">
+            <div className="flex h-full min-h-0 flex-col xl:flex-row">
               <aside
-                className="w-full border-b border-red-100 bg-[#fffafa] xl:shrink-0 xl:border-b-0 xl:border-r"
+                className="w-full border-b border-red-100 bg-[#fffafa] xl:h-full xl:shrink-0 xl:border-b-0 xl:border-r"
                 style={{ width: `min(100%, ${sidebarWidth}px)` }}
               >
                 <div className="border-b border-red-100 px-5 py-5">
@@ -1212,7 +1306,7 @@ export default function WhatsAppPanelClient() {
                   </div>
                 </div>
 
-                <div className="max-h-[760px] space-y-2 overflow-y-auto px-4 py-4">
+                <div className="max-h-[calc(100vh-420px)] space-y-2 overflow-y-auto px-4 py-4 xl:max-h-[none] xl:h-[calc(100%-164px)]">
                   {filteredChatList.length ? (
                     filteredChatList.map((chat) => {
                       const assignedVendor =
@@ -1308,7 +1402,7 @@ export default function WhatsAppPanelClient() {
                 }`}
               />
 
-              <div className="flex min-w-0 flex-1 flex-col bg-[linear-gradient(180deg,#ffffff_0%,#fff9f9_100%)]">
+              <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-[linear-gradient(180deg,#ffffff_0%,#fff9f9_100%)]">
                 <div className="border-b border-red-100 px-5 py-5 md:px-7">
                   <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                     <div className="min-w-0">
@@ -1397,7 +1491,10 @@ export default function WhatsAppPanelClient() {
                   ) : null}
                 </div>
 
-                <div className="flex-1 overflow-y-auto px-5 py-6 md:px-7">
+                <div
+                  ref={messagesViewportRef}
+                  className="min-h-0 flex-1 overflow-y-auto px-5 py-6 md:px-7"
+                >
                   {selectedChatMessages.length ? (
                     <div className="space-y-4">
                       {selectedChatMessages.map((item) => (
@@ -1604,8 +1701,8 @@ export default function WhatsAppPanelClient() {
                 </div>
               </div>
 
-              <aside className="w-full border-t border-red-100 bg-[#fffdfd] xl:w-[380px] xl:shrink-0 xl:border-l xl:border-t-0">
-                <div className="max-h-[920px] space-y-5 overflow-y-auto p-5">
+              <aside className="w-full border-t border-red-100 bg-[#fffdfd] xl:h-full xl:w-[380px] xl:shrink-0 xl:border-l xl:border-t-0">
+                <div className="max-h-[calc(100vh-420px)] space-y-5 overflow-y-auto p-5 xl:h-full xl:max-h-none">
                   <section className="rounded-[28px] border border-red-100 bg-white p-4 shadow-sm">
                     <div className="mb-3 flex items-center gap-2">
                       <UserRound className="text-red-600" size={18} />
@@ -1838,14 +1935,14 @@ export default function WhatsAppPanelClient() {
                     title="Etiquetas"
                     icon={<Tag size={18} />}
                     open={openSections.labels}
-                    count={`${labels.length} criadas`}
+                    count={`${labels.length} sincronizadas`}
                     onToggle={() => toggleSection("labels")}
                   >
                     <div className="flex gap-2">
                       <input
                         value={newLabel}
                         onChange={(event) => setNewLabel(event.target.value)}
-                        placeholder="Nova etiqueta"
+                        placeholder="Digite uma etiqueta ja existente"
                         className="w-full rounded-2xl border border-red-100 px-4 py-3 outline-none transition focus:border-red-400"
                       />
                       <button
@@ -1855,6 +1952,14 @@ export default function WhatsAppPanelClient() {
                         <Plus size={16} />
                       </button>
                     </div>
+
+                    <button
+                      onClick={handleSyncLabels}
+                      className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 font-bold text-red-700 transition hover:bg-red-100"
+                    >
+                      <RefreshCcw size={16} />
+                      Sincronizar todas as etiquetas
+                    </button>
 
                     <div className="mt-4 flex flex-wrap gap-2">
                       {labels.length ? (
@@ -1971,6 +2076,148 @@ export default function WhatsAppPanelClient() {
                           Nenhum envio agendado.
                         </div>
                       )}
+                    </div>
+                  </CascadeSection>
+
+                  <CascadeSection
+                    title="API Profissional"
+                    icon={<Sparkles size={18} />}
+                    open={openSections.actions}
+                    count={`${apiInfo?.supportedActions?.length || 0} recursos da versao instalada`}
+                    onToggle={() => toggleSection("actions")}
+                  >
+                    <div className="space-y-4">
+                      <div className="rounded-2xl border border-red-100 bg-[#fffafa] p-4">
+                        <div className="text-xs font-bold uppercase tracking-wide text-slate-500">Versao</div>
+                        <div className="mt-1 font-black text-slate-900">
+                          {apiInfo?.resolvedVersion || apiInfo?.declaredVersion || "whatsapp-web.js"}
+                        </div>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {(apiInfo?.supportedActions || []).map((item) => (
+                            <span
+                              key={item}
+                              className="rounded-full bg-white px-3 py-1.5 text-[11px] font-bold text-slate-700"
+                            >
+                              {item}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <button
+                          onClick={() =>
+                            handleChatAction(selectedChat?.isArchived ? "unarchive" : "archive")
+                          }
+                          className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-bold text-red-700 transition hover:bg-red-100"
+                        >
+                          {chatActionLoading === "archive" || chatActionLoading === "unarchive"
+                            ? "Processando..."
+                            : selectedChat?.isArchived
+                              ? "Desarquivar"
+                              : "Arquivar"}
+                        </button>
+                        <button
+                          onClick={() =>
+                            handleChatAction(selectedChat?.isPinned ? "unpin" : "pin")
+                          }
+                          className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-bold text-red-700 transition hover:bg-red-100"
+                        >
+                          {chatActionLoading === "pin" || chatActionLoading === "unpin"
+                            ? "Processando..."
+                            : selectedChat?.isPinned
+                              ? "Desafixar"
+                              : "Fixar"}
+                        </button>
+                        <button
+                          onClick={() =>
+                            handleChatAction(selectedChat?.isMuted ? "unmute" : "mute", {
+                              unmuteDate: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString(),
+                            })
+                          }
+                          className="rounded-2xl border border-red-100 bg-white px-4 py-3 text-sm font-bold text-slate-700 transition hover:bg-red-50"
+                        >
+                          {chatActionLoading === "mute" || chatActionLoading === "unmute"
+                            ? "Processando..."
+                            : selectedChat?.isMuted
+                              ? "Remover silencio"
+                              : "Silenciar 8h"}
+                        </button>
+                        <button
+                          onClick={() => handleChatAction("mark-unread")}
+                          className="rounded-2xl border border-red-100 bg-white px-4 py-3 text-sm font-bold text-slate-700 transition hover:bg-red-50"
+                        >
+                          Marcar nao lida
+                        </button>
+                        <button
+                          onClick={() => handleChatAction("typing")}
+                          className="rounded-2xl border border-red-100 bg-white px-4 py-3 text-sm font-bold text-slate-700 transition hover:bg-red-50"
+                        >
+                          Mostrar digitando
+                        </button>
+                        <button
+                          onClick={() => handleChatAction("recording")}
+                          className="rounded-2xl border border-red-100 bg-white px-4 py-3 text-sm font-bold text-slate-700 transition hover:bg-red-50"
+                        >
+                          Mostrar gravando
+                        </button>
+                        <button
+                          onClick={() => handleChatAction("clear-state")}
+                          className="rounded-2xl border border-red-100 bg-white px-4 py-3 text-sm font-bold text-slate-700 transition hover:bg-red-50"
+                        >
+                          Limpar estado
+                        </button>
+                        <button
+                          onClick={() => handleChatAction("sync-history")}
+                          className="rounded-2xl border border-red-100 bg-white px-4 py-3 text-sm font-bold text-slate-700 transition hover:bg-red-50"
+                        >
+                          Sincronizar historico
+                        </button>
+                        <button
+                          onClick={() => handleChatAction("clear-messages")}
+                          className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-700 transition hover:bg-amber-100"
+                        >
+                          Limpar mensagens
+                        </button>
+                        <button
+                          onClick={() => handleChatAction("delete-chat")}
+                          className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-700 transition hover:bg-amber-100"
+                        >
+                          Excluir chat
+                        </button>
+                        <button
+                          onClick={() => handleChatAction("block")}
+                          className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+                        >
+                          Bloquear contato
+                        </button>
+                        <button
+                          onClick={() => handleChatAction("unblock")}
+                          className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+                        >
+                          Desbloquear contato
+                        </button>
+                      </div>
+
+                      <div className="rounded-2xl border border-red-100 bg-white p-4">
+                        <div className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">
+                          Nota do cliente
+                        </div>
+                        <textarea
+                          value={selectedChatNote}
+                          onChange={(event) => setSelectedChatNote(event.target.value)}
+                          rows={4}
+                          placeholder="Observacao sincronizada com a conversa"
+                          className="w-full rounded-2xl border border-red-100 px-4 py-3 outline-none transition focus:border-red-400"
+                        />
+                        <button
+                          onClick={() => handleChatAction("set-note", { note: selectedChatNote })}
+                          className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-red-600 px-4 py-3 font-bold text-white transition hover:bg-red-700"
+                        >
+                          <Send size={16} />
+                          Salvar nota do cliente
+                        </button>
+                      </div>
                     </div>
                   </CascadeSection>
 

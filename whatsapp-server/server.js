@@ -49,6 +49,49 @@ function debugReport(hypothesisId, location, msg, data = {}) {
   }).catch(() => {});
 }
 
+function readJsonSafe(filePath) {
+  try {
+    return JSON.parse(fs.readFileSync(filePath, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+const packageJson = readJsonSafe(path.join(__dirname, "package.json")) || {};
+const packageLockJson = readJsonSafe(path.join(__dirname, "package-lock.json")) || {};
+const resolvedWwebVersion =
+  packageLockJson?.packages?.["node_modules/whatsapp-web.js"]?.version || null;
+const apiInfo = {
+  declaredVersion: packageJson?.dependencies?.["whatsapp-web.js"] || null,
+  resolvedVersion: resolvedWwebVersion,
+  supportedActions: [
+    "enviar-mensagem",
+    "enviar-midia",
+    "publicar-status",
+    "sincronizar-conversas",
+    "sincronizar-etiquetas",
+    "marcar-lida",
+    "marcar-nao-lida",
+    "arquivar",
+    "desarquivar",
+    "fixar",
+    "desafixar",
+    "silenciar",
+    "remover-silencio",
+    "digitando",
+    "gravando",
+    "limpar-estado",
+    "sincronizar-historico",
+    "limpar-mensagens",
+    "excluir-chat",
+    "nota-do-cliente",
+    "bloquear-contato",
+    "desbloquear-contato",
+    "status-feed",
+    "segmentacao-manual",
+  ],
+};
+
 const dataDir = path.join(__dirname, "data");
 const dataFile = path.join(dataDir, "panel-data.json");
 const store = {
@@ -131,6 +174,10 @@ function emitState() {
   io.emit("whatsapp:state", whatsappState);
 }
 
+function emitApiInfo() {
+  io.emit("whatsapp:api-info", apiInfo);
+}
+
 function emitSettings() {
   io.emit("whatsapp:settings", {
     labels: store.labels,
@@ -140,6 +187,7 @@ function emitSettings() {
     chatLabels: store.chatLabels,
     chatAssignments: store.chatAssignments,
     notifications: store.notifications,
+    apiInfo,
   });
 }
 
@@ -176,6 +224,56 @@ function rebuildNotifications() {
     }))
     .sort((a, b) => b.timestamp - a.timestamp)
     .slice(0, 60);
+}
+
+async function getChatByIdSafe(chatId) {
+  if (!whatsappClient || !whatsappState.connected || !chatId) {
+    return null;
+  }
+
+  try {
+    return await whatsappClient.getChatById(chatId);
+  } catch {
+    return null;
+  }
+}
+
+async function syncLabelsForChats(chats = []) {
+  if (!whatsappClient || !whatsappState.connected) return;
+
+  try {
+    const nativeLabels = await whatsappClient.getLabels().catch(() => []);
+    const labelNames = Array.isArray(nativeLabels)
+      ? nativeLabels
+          .map((item) => String(item?.name || "").trim())
+          .filter(Boolean)
+          .sort((a, b) => a.localeCompare(b))
+      : [];
+
+    const nextChatLabels = {};
+    for (const chat of chats) {
+      try {
+        const assigned = await chat.getLabels().catch(() => []);
+        const names = (assigned || [])
+          .map((item) => String(item?.name || "").trim())
+          .filter(Boolean)
+          .sort((a, b) => a.localeCompare(b));
+
+        if (names.length) {
+          nextChatLabels[chat.id?._serialized || chat.id] = names;
+        }
+      } catch (error) {
+        console.error("Falha ao sincronizar etiquetas de um chat:", error);
+      }
+    }
+
+    store.labels = labelNames;
+    store.chatLabels = nextChatLabels;
+    persistStore();
+    emitSettings();
+  } catch (error) {
+    console.error("Falha ao sincronizar etiquetas:", error);
+  }
 }
 
 function normalizeNumber(value) {
@@ -318,6 +416,7 @@ async function syncRecentConversations() {
 
     const syncedMessages = [];
     const chatSummaries = [];
+    const labelAwareChats = [];
 
     for (const chat of relevantChats) {
       try {
@@ -333,6 +432,11 @@ async function syncRecentConversations() {
         );
         const profilePicUrl = await contact?.getProfilePicUrl?.().catch(() => null);
         const latestMessage = messages[messages.length - 1] || chat.lastMessage || null;
+        const assignedLabels = await chat.getLabels().catch(() => []);
+        const assignedLabelNames = (assignedLabels || [])
+          .map((item) => String(item?.name || "").trim())
+          .filter(Boolean)
+          .sort((a, b) => a.localeCompare(b));
         // #region debug-point C:sync-chat-contact
         debugReport("C", "whatsapp-server/server.js:syncRecentConversations", "[DEBUG] syncing chat contact", {
           chatId: chat.id?._serialized || null,
@@ -359,8 +463,16 @@ async function syncRecentConversations() {
           isGroup: Boolean(chat.isGroup),
           isArchived: Boolean(chat.archived),
           isPinned: Boolean(chat.pinned),
+          isMuted: Boolean(chat.isMuted),
+          muteExpiration: chat.muteExpiration || 0,
           assignedSellerId: getChatAssignment(chat.id?._serialized || ""),
         });
+        if (assignedLabelNames.length) {
+          store.chatLabels[chat.id?._serialized || ""] = assignedLabelNames;
+        } else {
+          delete store.chatLabels[chat.id?._serialized || ""];
+        }
+        labelAwareChats.push(chat);
 
         messages.forEach((message) => {
           const chatId = message.fromMe ? message.to || chat.id._serialized : message.from;
@@ -385,6 +497,7 @@ async function syncRecentConversations() {
     }
 
     mergeMessages(syncedMessages);
+    await syncLabelsForChats(labelAwareChats);
     store.chats = chatSummaries.sort((a, b) => {
       if ((b.unreadCount || 0) !== (a.unreadCount || 0)) {
         return (b.unreadCount || 0) - (a.unreadCount || 0);
@@ -400,6 +513,68 @@ async function syncRecentConversations() {
   } catch (error) {
     console.error("Falha ao sincronizar conversas do WhatsApp:", error);
     emitToast("Falha ao sincronizar conversas do WhatsApp.");
+  }
+}
+
+async function runChatAction(chatId, action, payload = {}) {
+  const chat = await getChatByIdSafe(chatId);
+  if (!chat) {
+    throw new Error("Conversa nao encontrada");
+  }
+
+  switch (action) {
+    case "archive":
+      await chat.archive();
+      return { success: true };
+    case "unarchive":
+      await chat.unarchive();
+      return { success: true };
+    case "pin":
+      return { success: await chat.pin() };
+    case "unpin":
+      return { success: await chat.unpin() };
+    case "mute":
+      return { success: true, payload: await chat.mute(payload.unmuteDate ? new Date(payload.unmuteDate) : undefined) };
+    case "unmute":
+      return { success: true, payload: await chat.unmute() };
+    case "mark-unread":
+      await chat.markUnread();
+      return { success: true };
+    case "typing":
+      await chat.sendStateTyping();
+      return { success: true };
+    case "recording":
+      await chat.sendStateRecording();
+      return { success: true };
+    case "clear-state":
+      await chat.clearState();
+      return { success: true };
+    case "sync-history":
+      await chat.syncHistory();
+      return { success: true };
+    case "clear-messages":
+      return { success: await chat.clearMessages() };
+    case "delete-chat":
+      return { success: await chat.delete() };
+    case "set-note":
+      await chat.addOrEditCustomerNote(String(payload.note || ""));
+      return { success: true };
+    case "get-note":
+      return { success: true, note: await chat.getCustomerNote() };
+    case "block": {
+      const contact = await chat.getContact();
+      if (!contact?.block) throw new Error("Contato sem suporte para bloqueio");
+      await contact.block();
+      return { success: true };
+    }
+    case "unblock": {
+      const contact = await chat.getContact();
+      if (!contact?.unblock) throw new Error("Contato sem suporte para desbloqueio");
+      await contact.unblock();
+      return { success: true };
+    }
+    default:
+      throw new Error("Acao nao suportada");
   }
 }
 
@@ -738,6 +913,7 @@ app.get("/health", (_req, res) => {
 
 io.on("connection", (socket) => {
   socket.emit("whatsapp:state", whatsappState);
+  socket.emit("whatsapp:api-info", apiInfo);
   socket.emit("whatsapp:settings", {
     labels: store.labels,
     signatures: store.signatures,
@@ -746,6 +922,7 @@ io.on("connection", (socket) => {
     chatLabels: store.chatLabels,
     chatAssignments: store.chatAssignments,
     notifications: store.notifications,
+    apiInfo,
   });
   socket.emit("whatsapp:messages", store.messages.slice(-300));
   socket.emit("whatsapp:chats", store.chats);
@@ -753,6 +930,7 @@ io.on("connection", (socket) => {
 
   socket.on("panel:bootstrap", () => {
     socket.emit("whatsapp:state", whatsappState);
+    socket.emit("whatsapp:api-info", apiInfo);
     socket.emit("whatsapp:settings", {
       labels: store.labels,
       signatures: store.signatures,
@@ -761,6 +939,7 @@ io.on("connection", (socket) => {
       chatLabels: store.chatLabels,
       chatAssignments: store.chatAssignments,
       notifications: store.notifications,
+      apiInfo,
     });
     socket.emit("whatsapp:messages", store.messages.slice(-300));
     socket.emit("whatsapp:chats", store.chats);
@@ -776,6 +955,17 @@ io.on("connection", (socket) => {
     emitToast("Sincronizando conversas da conta conectada.");
     await syncRecentConversations();
     await syncStatusFeed();
+  });
+
+  socket.on("panel:refresh-labels", async () => {
+    try {
+      const chats = await whatsappClient.getChats();
+      await syncLabelsForChats(chats || []);
+      emitToast("Etiquetas sincronizadas com o WhatsApp.");
+    } catch (error) {
+      console.error("Falha ao sincronizar etiquetas manualmente:", error);
+      emitToast("Falha ao sincronizar etiquetas.");
+    }
   });
 
   socket.on("panel:send-message", async (payload) => {
@@ -859,16 +1049,60 @@ io.on("connection", (socket) => {
     const label = String(payload.label || "").trim();
     if (!chatId || !label) return;
 
-    const current = new Set(store.chatLabels[chatId] || []);
-    if (current.has(label)) {
-      current.delete(label);
-    } else {
-      current.add(label);
+    (async () => {
+      try {
+        const chat = await getChatByIdSafe(chatId);
+        if (!chat) return;
+
+        const nativeLabels = await whatsappClient.getLabels().catch(() => []);
+        const selectedLabel = (nativeLabels || []).find(
+          (item) => String(item?.name || "").trim().toLowerCase() === label.toLowerCase()
+        );
+        if (!selectedLabel) {
+          emitToast("Etiqueta nao encontrada no WhatsApp. Sincronize a conta primeiro.");
+          return;
+        }
+
+        const currentLabels = await chat.getLabels().catch(() => []);
+        const currentIds = (currentLabels || []).map((item) => String(item?.id || item?._id || ""));
+        const labelId = String(selectedLabel.id || selectedLabel._id || "").trim();
+        const nextIds = currentIds.includes(labelId)
+          ? currentIds.filter((item) => item !== labelId)
+          : [...currentIds, labelId];
+
+        await chat.changeLabels(nextIds);
+        await syncLabelsForChats([chat]);
+        emitToast("Etiquetas da conversa atualizadas.");
+      } catch (error) {
+        console.error("Falha ao alterar etiqueta da conversa:", error);
+        emitToast("Falha ao alterar etiqueta da conversa.");
+      }
+    })();
+  });
+
+  socket.on("panel:chat-action", async (payload) => {
+    const chatId = String(payload.chatId || "").trim();
+    const action = String(payload.action || "").trim();
+    if (!chatId || !action) return;
+
+    try {
+      const result = await runChatAction(chatId, action, payload);
+      if (action === "get-note") {
+        socket.emit("whatsapp:chat-note", {
+          chatId,
+          note: String(result.note || ""),
+        });
+      } else {
+        socket.emit("whatsapp:chat-action-result", { chatId, action, result });
+      }
+      if (action !== "get-note") {
+        await syncRecentConversations();
+      }
+      emitToast("Acao da conversa executada com sucesso.");
+    } catch (error) {
+      console.error("Falha em acao de conversa:", error);
+      emitToast("Falha ao executar a acao da conversa.");
     }
-    store.chatLabels[chatId] = Array.from(current);
-    persistStore();
-    emitSettings();
-    emitMessages();
   });
 
   socket.on("panel:add-signature", (payload) => {
