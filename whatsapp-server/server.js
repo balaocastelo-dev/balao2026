@@ -6,7 +6,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const { Server } = require("socket.io");
 const qrcode = require("qrcode");
-const { Client, LocalAuth } = require("whatsapp-web.js");
+const { Client, LocalAuth, MessageMedia } = require("whatsapp-web.js");
 
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
@@ -58,9 +58,14 @@ const store = {
   schedules: [],
   chatLabels: {},
   messages: [],
+  chats: [],
+  statusFeed: [],
+  chatAssignments: {},
+  notifications: [],
 };
 
 const scheduleTimers = new Map();
+let chatRefreshTimer = null;
 const whatsappState = {
   status: "initializing",
   qrCode: null,
@@ -90,7 +95,16 @@ function loadStore() {
     store.schedules = Array.isArray(parsed.schedules) ? parsed.schedules : [];
     store.chatLabels =
       parsed.chatLabels && typeof parsed.chatLabels === "object" ? parsed.chatLabels : {};
-    store.messages = Array.isArray(parsed.messages) ? parsed.messages.slice(-400) : [];
+    store.messages = Array.isArray(parsed.messages)
+      ? parsed.messages.filter((item) => item.chatId !== "status@broadcast").slice(-400)
+      : [];
+    store.chats = Array.isArray(parsed.chats) ? parsed.chats : [];
+    store.statusFeed = Array.isArray(parsed.statusFeed) ? parsed.statusFeed : [];
+    store.chatAssignments =
+      parsed.chatAssignments && typeof parsed.chatAssignments === "object"
+        ? parsed.chatAssignments
+        : {};
+    store.notifications = Array.isArray(parsed.notifications) ? parsed.notifications : [];
   } catch (error) {
     console.error("Falha ao ler dados do painel do WhatsApp:", error);
   }
@@ -104,6 +118,10 @@ function persistStore() {
     schedules: store.schedules,
     chatLabels: store.chatLabels,
     messages: store.messages.slice(-400),
+    chats: store.chats,
+    statusFeed: store.statusFeed,
+    chatAssignments: store.chatAssignments,
+    notifications: store.notifications,
   };
 
   fs.writeFileSync(dataFile, JSON.stringify(payload, null, 2));
@@ -120,6 +138,8 @@ function emitSettings() {
     quickReplies: store.quickReplies,
     schedules: store.schedules,
     chatLabels: store.chatLabels,
+    chatAssignments: store.chatAssignments,
+    notifications: store.notifications,
   });
 }
 
@@ -127,8 +147,35 @@ function emitMessages() {
   io.emit("whatsapp:messages", store.messages.slice(-300));
 }
 
+function emitChats() {
+  io.emit("whatsapp:chats", store.chats);
+}
+
+function emitStatusFeed() {
+  io.emit("whatsapp:status-feed", store.statusFeed);
+}
+
 function emitToast(message) {
   io.emit("whatsapp:toast", { message });
+}
+
+function rebuildNotifications() {
+  store.notifications = store.chats
+    .filter((chat) => chat.unreadCount > 0)
+    .map((chat) => ({
+      id: chat.chatId,
+      chatId: chat.chatId,
+      sellerId: store.chatAssignments[chat.chatId] || null,
+      type: store.chatAssignments[chat.chatId] ? "seller" : "new_customer",
+      title: store.chatAssignments[chat.chatId]
+        ? `Cliente com mensagens para vendedor`
+        : "Cliente novo aguardando vendedor",
+      subtitle: chat.contactName || chat.realNumber || chat.chatId,
+      unreadCount: chat.unreadCount,
+      timestamp: chat.lastMessageTimestamp || Date.now(),
+    }))
+    .sort((a, b) => b.timestamp - a.timestamp)
+    .slice(0, 60);
 }
 
 function normalizeNumber(value) {
@@ -185,6 +232,26 @@ function resolveChatTarget(number, preferredChatId = null) {
   return toChatId(number);
 }
 
+function getChatAssignment(chatId) {
+  return store.chatAssignments[chatId] || null;
+}
+
+function scheduleChatRefresh() {
+  if (chatRefreshTimer) {
+    clearTimeout(chatRefreshTimer);
+  }
+  chatRefreshTimer = setTimeout(async () => {
+    try {
+      await syncRecentConversations();
+      await syncStatusFeed();
+    } catch (error) {
+      console.error("Falha ao atualizar resumo de chats/status:", error);
+    } finally {
+      chatRefreshTimer = null;
+    }
+  }, 1200);
+}
+
 function toChatId(number) {
   return `${normalizeNumber(number)}@c.us`;
 }
@@ -235,6 +302,8 @@ function storeMessage(message) {
   if (!exists) {
     io.emit("whatsapp:message", next);
   }
+
+  scheduleChatRefresh();
 }
 
 async function syncRecentConversations() {
@@ -248,6 +317,7 @@ async function syncRecentConversations() {
       .slice(0, 40);
 
     const syncedMessages = [];
+    const chatSummaries = [];
 
     for (const chat of relevantChats) {
       try {
@@ -261,6 +331,8 @@ async function syncRecentConversations() {
           contact?.pushname,
           contact?.shortName
         );
+        const profilePicUrl = await contact?.getProfilePicUrl?.().catch(() => null);
+        const latestMessage = messages[messages.length - 1] || chat.lastMessage || null;
         // #region debug-point C:sync-chat-contact
         debugReport("C", "whatsapp-server/server.js:syncRecentConversations", "[DEBUG] syncing chat contact", {
           chatId: chat.id?._serialized || null,
@@ -273,6 +345,22 @@ async function syncRecentConversations() {
           messageCount: messages.length,
         });
         // #endregion
+
+        chatSummaries.push({
+          chatId: chat.id?._serialized || null,
+          contactName,
+          realNumber,
+          displayNumber: realNumber,
+          profilePicUrl,
+          unreadCount: chat.unreadCount || 0,
+          lastMessageBody: latestMessage?.body || "",
+          lastMessageTimestamp:
+            ((latestMessage?.timestamp || chat.timestamp || Math.floor(Date.now() / 1000)) * 1000),
+          isGroup: Boolean(chat.isGroup),
+          isArchived: Boolean(chat.archived),
+          isPinned: Boolean(chat.pinned),
+          assignedSellerId: getChatAssignment(chat.id?._serialized || ""),
+        });
 
         messages.forEach((message) => {
           const chatId = message.fromMe ? message.to || chat.id._serialized : message.from;
@@ -287,6 +375,8 @@ async function syncRecentConversations() {
             contactName,
             realNumber,
             displayNumber: realNumber,
+            hasMedia: Boolean(message.hasMedia),
+            mediaType: message.type || null,
           });
         });
       } catch (error) {
@@ -295,12 +385,68 @@ async function syncRecentConversations() {
     }
 
     mergeMessages(syncedMessages);
+    store.chats = chatSummaries.sort((a, b) => {
+      if ((b.unreadCount || 0) !== (a.unreadCount || 0)) {
+        return (b.unreadCount || 0) - (a.unreadCount || 0);
+      }
+      return (b.lastMessageTimestamp || 0) - (a.lastMessageTimestamp || 0);
+    });
+    rebuildNotifications();
     persistStore();
+    emitChats();
     emitMessages();
+    emitSettings();
     emitToast("Conversas sincronizadas com o WhatsApp.");
   } catch (error) {
     console.error("Falha ao sincronizar conversas do WhatsApp:", error);
     emitToast("Falha ao sincronizar conversas do WhatsApp.");
+  }
+}
+
+async function syncStatusFeed() {
+  if (!whatsappClient || !whatsappState.connected) return;
+
+  try {
+    const broadcasts = await whatsappClient.getBroadcasts();
+    const feed = [];
+
+    for (const broadcast of broadcasts || []) {
+      try {
+        const contact = await broadcast.getContact().catch(() => null);
+        const profilePicUrl = await contact?.getProfilePicUrl?.().catch(() => null);
+        const contactName =
+          contact?.pushname ||
+          contact?.name ||
+          contact?.shortName ||
+          broadcast.id?.user ||
+          "Status";
+
+        feed.push({
+          id: broadcast.id?._serialized || broadcast.id?.user || createId(),
+          contactId: broadcast.id?._serialized || null,
+          contactName,
+          profilePicUrl,
+          unreadCount: broadcast.unreadCount || 0,
+          totalCount: broadcast.totalCount || broadcast.msgs?.length || 0,
+          timestamp: (broadcast.timestamp || Math.floor(Date.now() / 1000)) * 1000,
+          items: (broadcast.msgs || []).slice(-8).map((item) => ({
+            id: item.id?._serialized || createId(),
+            body: item.body || "",
+            timestamp: (item.timestamp || Math.floor(Date.now() / 1000)) * 1000,
+            hasMedia: Boolean(item.hasMedia),
+            mediaType: item.type || null,
+          })),
+        });
+      } catch (error) {
+        console.error("Falha ao sincronizar status individual:", error);
+      }
+    }
+
+    store.statusFeed = feed.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    persistStore();
+    emitStatusFeed();
+  } catch (error) {
+    console.error("Falha ao sincronizar status:", error);
   }
 }
 
@@ -321,6 +467,46 @@ async function sendDirectMessage({ number, text, signatureId, chatId: preferredC
   });
   // #endregion
   return whatsappClient.sendMessage(chatId, finalText);
+}
+
+async function sendDirectMedia({
+  number,
+  chatId: preferredChatId = null,
+  media,
+  caption = "",
+  sendAudioAsVoice = false,
+  sendMediaAsDocument = false,
+}) {
+  if (!whatsappState.connected) {
+    throw new Error("WhatsApp ainda nao conectado");
+  }
+
+  const chatId = resolveChatTarget(number, preferredChatId);
+  return whatsappClient.sendMessage(chatId, media, {
+    caption,
+    sendAudioAsVoice,
+    sendMediaAsDocument,
+    sendSeen: true,
+  });
+}
+
+async function postStatus({ text = "", media = null, backgroundColor = "#b91c1c" }) {
+  if (!whatsappState.connected) {
+    throw new Error("WhatsApp ainda nao conectado");
+  }
+
+  if (media) {
+    return whatsappClient.sendMessage("status@broadcast", media, {
+      caption: text || undefined,
+      sendSeen: false,
+    });
+  }
+
+  return whatsappClient.sendMessage("status@broadcast", text, {
+    fontStyle: 1,
+    backgroundColor,
+    sendSeen: false,
+  });
 }
 
 function clearScheduleTimer(id) {
@@ -409,6 +595,7 @@ function attachWhatsAppClientEvents(client) {
     emitState();
     emitToast("WhatsApp conectado e pronto para uso.");
     await syncRecentConversations();
+    await syncStatusFeed();
   });
 
   client.on("auth_failure", (message) => {
@@ -444,6 +631,8 @@ function attachWhatsAppClientEvents(client) {
       contactName,
       realNumber: extractRealNumber(message.from, contactName),
       displayNumber: extractRealNumber(message.from, contactName),
+      hasMedia: Boolean(message.hasMedia),
+      mediaType: message.type || null,
     });
   });
 
@@ -461,6 +650,8 @@ function attachWhatsAppClientEvents(client) {
       contactName: message.to || null,
       realNumber: extractRealNumber(message.to, message.from),
       displayNumber: extractRealNumber(message.to, message.from),
+      hasMedia: Boolean(message.hasMedia),
+      mediaType: message.type || null,
     });
   });
 }
@@ -553,8 +744,12 @@ io.on("connection", (socket) => {
     quickReplies: store.quickReplies,
     schedules: store.schedules,
     chatLabels: store.chatLabels,
+    chatAssignments: store.chatAssignments,
+    notifications: store.notifications,
   });
   socket.emit("whatsapp:messages", store.messages.slice(-300));
+  socket.emit("whatsapp:chats", store.chats);
+  socket.emit("whatsapp:status-feed", store.statusFeed);
 
   socket.on("panel:bootstrap", () => {
     socket.emit("whatsapp:state", whatsappState);
@@ -564,8 +759,12 @@ io.on("connection", (socket) => {
       quickReplies: store.quickReplies,
       schedules: store.schedules,
       chatLabels: store.chatLabels,
+      chatAssignments: store.chatAssignments,
+      notifications: store.notifications,
     });
     socket.emit("whatsapp:messages", store.messages.slice(-300));
+    socket.emit("whatsapp:chats", store.chats);
+    socket.emit("whatsapp:status-feed", store.statusFeed);
   });
 
   socket.on("panel:reset-session", async () => {
@@ -576,6 +775,7 @@ io.on("connection", (socket) => {
   socket.on("panel:sync-conversations", async () => {
     emitToast("Sincronizando conversas da conta conectada.");
     await syncRecentConversations();
+    await syncStatusFeed();
   });
 
   socket.on("panel:send-message", async (payload) => {
@@ -612,6 +812,46 @@ io.on("connection", (socket) => {
     store.labels.push(label);
     persistStore();
     emitSettings();
+  });
+
+  socket.on("panel:assign-seller", (payload) => {
+    const chatId = String(payload.chatId || "").trim();
+    const sellerId = payload.sellerId ? String(payload.sellerId) : null;
+    if (!chatId) return;
+
+    if (sellerId) {
+      store.chatAssignments[chatId] = sellerId;
+    } else {
+      delete store.chatAssignments[chatId];
+    }
+
+    store.chats = store.chats.map((chat) =>
+      chat.chatId === chatId ? { ...chat, assignedSellerId: sellerId } : chat
+    );
+    rebuildNotifications();
+    persistStore();
+    emitChats();
+    emitSettings();
+    emitToast("Vendedor atualizado para o cliente.");
+  });
+
+  socket.on("panel:mark-chat-read", async (payload) => {
+    const chatId = String(payload.chatId || "").trim();
+    if (!chatId) return;
+
+    try {
+      await whatsappClient.sendSeen(chatId);
+      store.chats = store.chats.map((chat) =>
+        chat.chatId === chatId ? { ...chat, unreadCount: 0 } : chat
+      );
+      rebuildNotifications();
+      persistStore();
+      emitChats();
+      emitSettings();
+    } catch (error) {
+      console.error("Falha ao marcar conversa como lida:", error);
+      emitToast("Falha ao marcar conversa como lida.");
+    }
   });
 
   socket.on("panel:toggle-chat-label", (payload) => {
@@ -657,6 +897,78 @@ io.on("connection", (socket) => {
     });
     persistStore();
     emitSettings();
+  });
+
+  socket.on("panel:send-media", async (payload) => {
+    try {
+      const number = normalizeNumber(payload.number);
+      const base64 = String(payload.base64 || "").trim();
+      const mimetype = String(payload.mimetype || "").trim();
+      const filename = String(payload.filename || "arquivo").trim();
+      const caption = String(payload.caption || "").trim();
+      if (!number || !base64 || !mimetype) return;
+
+      const media = new MessageMedia(mimetype, base64, filename);
+      await sendDirectMedia({
+        number,
+        chatId: payload.chatId || null,
+        media,
+        caption,
+        sendAudioAsVoice: Boolean(payload.sendAudioAsVoice),
+        sendMediaAsDocument: Boolean(payload.sendMediaAsDocument),
+      });
+      emitToast(`Midia enviada para ${number}.`);
+    } catch (error) {
+      console.error("Falha ao enviar midia:", error);
+      emitToast("Falha ao enviar midia.");
+    }
+  });
+
+  socket.on("panel:post-status", async (payload) => {
+    try {
+      const text = String(payload.text || "").trim();
+      const base64 = String(payload.base64 || "").trim();
+      const mimetype = String(payload.mimetype || "").trim();
+      const filename = String(payload.filename || "status").trim();
+      const media =
+        base64 && mimetype ? new MessageMedia(mimetype, base64, filename) : null;
+
+      if (!text && !media) return;
+      await postStatus({
+        text,
+        media,
+        backgroundColor: String(payload.backgroundColor || "#b91c1c"),
+      });
+      emitToast("Status publicado com sucesso.");
+      await syncStatusFeed();
+    } catch (error) {
+      console.error("Falha ao publicar status:", error);
+      emitToast("Falha ao publicar status.");
+    }
+  });
+
+  socket.on("panel:send-segmented", async (payload) => {
+    try {
+      const recipients = Array.isArray(payload.recipients) ? payload.recipients : [];
+      const text = String(payload.text || "").trim();
+      if (!recipients.length || !text) return;
+
+      for (const recipient of recipients.slice(0, 100)) {
+        const number = normalizeNumber(recipient.number || "");
+        if (!number) continue;
+        await sendDirectMessage({
+          number,
+          text,
+          signatureId: payload.signatureId || null,
+          chatId: recipient.chatId || null,
+        });
+      }
+
+      emitToast(`Envio segmentado concluido para ${Math.min(recipients.length, 100)} clientes.`);
+    } catch (error) {
+      console.error("Falha no envio segmentado:", error);
+      emitToast("Falha no envio segmentado.");
+    }
   });
 
   socket.on("panel:schedule-message", (payload) => {

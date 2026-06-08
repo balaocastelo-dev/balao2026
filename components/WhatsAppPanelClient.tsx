@@ -2,13 +2,17 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  Bell,
   CalendarClock,
   ChevronDown,
   ChevronRight,
   CheckCircle2,
+  Filter,
+  ImagePlus,
   LoaderCircle,
   MessageCircle,
   MessageSquareReply,
+  Mic,
   Package2,
   Plus,
   QrCode,
@@ -19,6 +23,7 @@ import {
   Tag,
   Trash2,
   UserRound,
+  Users,
   Wifi,
   WifiOff,
 } from "lucide-react";
@@ -44,6 +49,8 @@ type PanelMessage = {
   realNumber?: string | null;
   displayNumber?: string | null;
   labels?: string[];
+  hasMedia?: boolean;
+  mediaType?: string | null;
 };
 
 type SignatureItem = {
@@ -72,6 +79,8 @@ type PanelSettings = {
   quickReplies: QuickReplyItem[];
   schedules: ScheduleItem[];
   chatLabels: Record<string, string[]>;
+  chatAssignments?: Record<string, string | null>;
+  notifications?: PanelNotification[];
 };
 
 type PanelStatePayload = {
@@ -88,6 +97,56 @@ type SiteProduct = {
   price: string;
   image?: string;
   slug?: string;
+};
+
+type PanelChat = {
+  chatId: string;
+  contactName?: string | null;
+  realNumber?: string | null;
+  displayNumber?: string | null;
+  profilePicUrl?: string | null;
+  unreadCount: number;
+  lastMessageBody: string;
+  lastMessageTimestamp: number;
+  isGroup: boolean;
+  isArchived: boolean;
+  isPinned: boolean;
+  assignedSellerId?: string | null;
+};
+
+type PanelStatusFeedItem = {
+  id: string;
+  contactId?: string | null;
+  contactName: string;
+  profilePicUrl?: string | null;
+  unreadCount: number;
+  totalCount: number;
+  timestamp: number;
+  items: Array<{
+    id: string;
+    body: string;
+    timestamp: number;
+    hasMedia?: boolean;
+    mediaType?: string | null;
+  }>;
+};
+
+type PanelNotification = {
+  id: string;
+  chatId: string;
+  sellerId?: string | null;
+  type: "seller" | "new_customer";
+  title: string;
+  subtitle: string;
+  unreadCount: number;
+  timestamp: number;
+};
+
+type Vendor = {
+  id: string;
+  nome: string;
+  avatar_url: string | null;
+  veiculo_emoji: string;
 };
 
 function formatPhoneNumber(value: string) {
@@ -113,20 +172,49 @@ function isLikelyPhoneDigits(value: string) {
   return value.length >= 10 && value.length <= 13;
 }
 
-function getChatDisplayName(message: PanelMessage) {
-  return message.contactName || getChatDigits(message.chatId) || message.chatId;
+function getDisplayName(item: {
+  contactName?: string | null;
+  displayNumber?: string | null;
+  realNumber?: string | null;
+  chatId?: string;
+}) {
+  return item.contactName || item.displayNumber || item.realNumber || item.chatId || "Sem nome";
 }
 
-function getChatPreviewNumber(message: PanelMessage) {
-  const chatIdDigits = getChatDigits(message.chatId);
-  const fromDigits = getChatDigits(message.from);
+function getDisplayNumber(item: {
+  displayNumber?: string | null;
+  realNumber?: string | null;
+  chatId?: string;
+  from?: string;
+}) {
+  const chatIdDigits = getChatDigits(item.chatId || "");
+  const fromDigits = getChatDigits(item.from || "");
   return (
-    message.displayNumber ||
-    message.realNumber ||
+    item.displayNumber ||
+    item.realNumber ||
     (isLikelyPhoneDigits(chatIdDigits) ? `+${chatIdDigits}` : "") ||
     (isLikelyPhoneDigits(fromDigits) ? `+${fromDigits}` : "") ||
     ""
   );
+}
+
+function getSummaryDisplayName(chat: PanelChat) {
+  return getDisplayName(chat);
+}
+
+function getSummaryDisplayNumber(chat: PanelChat) {
+  return getDisplayNumber(chat);
+}
+
+function getInitials(value: string) {
+  const parts = value
+    .split(" ")
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, 2);
+
+  if (!parts.length) return "WA";
+  return parts.map((item) => item[0]?.toUpperCase() || "").join("");
 }
 
 type CascadeSectionProps = {
@@ -168,6 +256,7 @@ function CascadeSection({
 
 export default function WhatsAppPanelClient() {
   const socketRef = useRef<Socket | null>(null);
+  const workspaceRef = useRef<HTMLDivElement | null>(null);
   const serverUrl =
     process.env.NEXT_PUBLIC_WHATSAPP_PANEL_SERVER_URL || "http://localhost:4100";
   const [status, setStatus] = useState<WhatsAppStatus>("initializing");
@@ -178,8 +267,12 @@ export default function WhatsAppPanelClient() {
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [serverHealthMessage, setServerHealthMessage] = useState("Verificando servidor...");
   const [messages, setMessages] = useState<PanelMessage[]>([]);
+  const [chats, setChats] = useState<PanelChat[]>([]);
+  const [statusFeed, setStatusFeed] = useState<PanelStatusFeedItem[]>([]);
   const [labels, setLabels] = useState<string[]>([]);
   const [chatLabels, setChatLabels] = useState<Record<string, string[]>>({});
+  const [chatAssignments, setChatAssignments] = useState<Record<string, string | null>>({});
+  const [notifications, setNotifications] = useState<PanelNotification[]>([]);
   const [signatures, setSignatures] = useState<SignatureItem[]>([]);
   const [quickReplies, setQuickReplies] = useState<QuickReplyItem[]>([]);
   const [schedules, setSchedules] = useState<ScheduleItem[]>([]);
@@ -200,11 +293,28 @@ export default function WhatsAppPanelClient() {
   const [productLoading, setProductLoading] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<SiteProduct | null>(null);
   const [composerMode, setComposerMode] = useState<"chat" | "new">("chat");
+  const [chatFilter, setChatFilter] = useState<"all" | "unread" | "read">("all");
+  const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [vendorsLoading, setVendorsLoading] = useState(true);
+  const [newVendorName, setNewVendorName] = useState("");
+  const [newVendorAvatar, setNewVendorAvatar] = useState("");
+  const [newVendorEmoji, setNewVendorEmoji] = useState("🧑‍💼");
+  const [pendingMedia, setPendingMedia] = useState<File | null>(null);
+  const [statusText, setStatusText] = useState("");
+  const [statusMedia, setStatusMedia] = useState<File | null>(null);
+  const [segmentKeyword, setSegmentKeyword] = useState("");
+  const [segmentMessage, setSegmentMessage] = useState("");
+  const [segmentSelectedIds, setSegmentSelectedIds] = useState<string[]>([]);
+  const [sidebarWidth, setSidebarWidth] = useState(420);
+  const [isResizingSidebar, setIsResizingSidebar] = useState(false);
   const [openSections, setOpenSections] = useState({
     replies: true,
     labels: false,
     signatures: false,
     schedules: false,
+    vendors: false,
+    statuses: true,
+    segmentation: false,
   });
 
   useEffect(() => {
@@ -228,6 +338,8 @@ export default function WhatsAppPanelClient() {
       setQuickReplies(payload.quickReplies || []);
       setSchedules(payload.schedules || []);
       setChatLabels(payload.chatLabels || {});
+      setChatAssignments(payload.chatAssignments || {});
+      setNotifications(payload.notifications || []);
     };
 
     socket.on("connect", () => {
@@ -253,6 +365,12 @@ export default function WhatsAppPanelClient() {
     socket.on("whatsapp:settings", handleSettings);
     socket.on("whatsapp:messages", (payload: PanelMessage[]) => {
       setMessages(payload || []);
+    });
+    socket.on("whatsapp:chats", (payload: PanelChat[]) => {
+      setChats(payload || []);
+    });
+    socket.on("whatsapp:status-feed", (payload: PanelStatusFeedItem[]) => {
+      setStatusFeed(payload || []);
     });
     socket.on("whatsapp:message", (payload: PanelMessage) => {
       setMessages((current) => {
@@ -313,6 +431,46 @@ export default function WhatsAppPanelClient() {
   }, [serverUrl]);
 
   useEffect(() => {
+    const fetchVendors = async () => {
+      try {
+        setVendorsLoading(true);
+        const response = await fetch("/api/arena/vendedores", { cache: "no-store" });
+        if (!response.ok) {
+          throw new Error("vendors_failed");
+        }
+        const payload = (await response.json()) as Vendor[];
+        setVendors(Array.isArray(payload) ? payload : []);
+      } catch {
+        setVendors([]);
+      } finally {
+        setVendorsLoading(false);
+      }
+    };
+
+    fetchVendors();
+  }, []);
+
+  useEffect(() => {
+    if (!isResizingSidebar) return;
+
+    const handleMove = (event: MouseEvent) => {
+      const left = workspaceRef.current?.getBoundingClientRect().left ?? 0;
+      const next = Math.min(620, Math.max(320, event.clientX - left));
+      setSidebarWidth(next);
+    };
+
+    const handleUp = () => setIsResizingSidebar(false);
+
+    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mouseup", handleUp);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("mouseup", handleUp);
+    };
+  }, [isResizingSidebar]);
+
+  useEffect(() => {
     const query = productSearch.trim();
     if (query.length < 2) {
       setProductResults([]);
@@ -349,25 +507,45 @@ export default function WhatsAppPanelClient() {
     };
   }, [productSearch]);
 
-  const chatList = useMemo(() => {
-    const map = new Map<string, PanelMessage>();
+  const derivedChatList = useMemo(() => {
+    const map = new Map<string, PanelChat>();
     messages.forEach((item) => {
       const current = map.get(item.chatId);
-      if (!current || current.timestamp < item.timestamp) {
-        map.set(item.chatId, item);
+      if (!current || current.lastMessageTimestamp < item.timestamp) {
+        map.set(item.chatId, {
+          chatId: item.chatId,
+          contactName: item.contactName || null,
+          realNumber: item.realNumber || null,
+          displayNumber: item.displayNumber || item.realNumber || null,
+          unreadCount: 0,
+          lastMessageBody: item.body,
+          lastMessageTimestamp: item.timestamp,
+          isGroup: false,
+          isArchived: false,
+          isPinned: false,
+          assignedSellerId: chatAssignments[item.chatId] || null,
+        });
       }
     });
-    return Array.from(map.values()).sort((a, b) => b.timestamp - a.timestamp);
-  }, [messages]);
+    return Array.from(map.values()).sort((a, b) => b.lastMessageTimestamp - a.lastMessageTimestamp);
+  }, [messages, chatAssignments]);
+
+  const chatSource = chats.length ? chats : derivedChatList;
 
   const filteredChatList = useMemo(() => {
     const query = chatSearch.trim().toLowerCase();
-    if (!query) return chatList;
+    return chatSource.filter((item) => {
+      const unreadPass =
+        chatFilter === "all" ||
+        (chatFilter === "unread" && item.unreadCount > 0) ||
+        (chatFilter === "read" && item.unreadCount === 0);
+      if (!unreadPass) return false;
 
-    return chatList.filter((item) => {
-      const name = getChatDisplayName(item).toLowerCase();
-      const number = getChatPreviewNumber(item).toLowerCase();
-      const body = item.body.toLowerCase();
+      if (!query) return true;
+
+      const name = getSummaryDisplayName(item).toLowerCase();
+      const number = getSummaryDisplayNumber(item).toLowerCase();
+      const body = item.lastMessageBody.toLowerCase();
       const labelsForChat = (chatLabels[item.chatId] || []).join(" ").toLowerCase();
       return (
         name.includes(query) ||
@@ -376,7 +554,23 @@ export default function WhatsAppPanelClient() {
         labelsForChat.includes(query)
       );
     });
-  }, [chatLabels, chatList, chatSearch]);
+  }, [chatFilter, chatLabels, chatSearch, chatSource]);
+
+  const keywordMatches = useMemo(() => {
+    const query = segmentKeyword.trim().toLowerCase();
+    if (!query) return filteredChatList.slice(0, 20);
+    return filteredChatList.filter((chat) => {
+      const haystack = [
+        getSummaryDisplayName(chat),
+        getSummaryDisplayNumber(chat),
+        chat.lastMessageBody,
+        ...(chatLabels[chat.chatId] || []),
+      ]
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(query);
+    });
+  }, [filteredChatList, segmentKeyword, chatLabels]);
 
   useEffect(() => {
     if (!selectedChatId && filteredChatList[0]) {
@@ -385,25 +579,42 @@ export default function WhatsAppPanelClient() {
     }
   }, [filteredChatList, selectedChatId]);
 
+  useEffect(() => {
+    if (!selectedChatId) return;
+    const exists = chatSource.some((item) => item.chatId === selectedChatId);
+    if (!exists && filteredChatList[0]) {
+      setSelectedChatId(filteredChatList[0].chatId);
+    }
+  }, [chatSource, filteredChatList, selectedChatId]);
+
   const selectedChatMessages = useMemo(() => {
     return messages.filter((item) => item.chatId === selectedChatId);
   }, [messages, selectedChatId]);
 
   const selectedChatLabels = chatLabels[selectedChatId] || [];
   const selectedChat = useMemo(
-    () => chatList.find((item) => item.chatId === selectedChatId) || null,
-    [chatList, selectedChatId]
+    () => chatSource.find((item) => item.chatId === selectedChatId) || null,
+    [chatSource, selectedChatId]
   );
   const selectedChatName = selectedChat
-    ? getChatDisplayName(selectedChat)
+    ? getSummaryDisplayName(selectedChat)
     : composerMode === "new"
       ? "Nova mensagem"
       : "Selecione uma conversa";
   const selectedChatNumber = selectedChat
-    ? getChatPreviewNumber(selectedChat)
+    ? getSummaryDisplayNumber(selectedChat)
     : number
       ? `+${formatPhoneNumber(number)}`
       : "";
+  const selectedSellerId = selectedChat ? chatAssignments[selectedChat.chatId] || null : null;
+  const selectedSeller =
+    vendors.find((vendor) => vendor.id === selectedSellerId) || null;
+
+  useEffect(() => {
+    if (composerMode === "chat" && selectedChatNumber) {
+      setNumber(formatPhoneNumber(selectedChatNumber));
+    }
+  }, [composerMode, selectedChatNumber]);
 
   const sendSocketEvent = (event: string, payload: Record<string, unknown>) => {
     socketRef.current?.emit(event, payload);
@@ -420,7 +631,7 @@ export default function WhatsAppPanelClient() {
   };
 
   const handleSendMessage = () => {
-    const normalized = formatPhoneNumber(number);
+    const normalized = formatPhoneNumber(number || selectedChatNumber);
     if (!normalized || !message.trim()) return;
 
     sendSocketEvent("panel:send-message", {
@@ -468,7 +679,7 @@ export default function WhatsAppPanelClient() {
   };
 
   const handleScheduleMessage = () => {
-    const normalized = formatPhoneNumber(number);
+    const normalized = formatPhoneNumber(number || selectedChatNumber);
     if (!normalized || !message.trim() || !scheduleDateTime) return;
     sendSocketEvent("panel:schedule-message", {
       number: normalized,
@@ -477,6 +688,21 @@ export default function WhatsAppPanelClient() {
       signatureId: selectedSignatureId || null,
     });
     setScheduleDateTime("");
+  };
+
+  const fileToPayload = async (file: File) => {
+    const buffer = await file.arrayBuffer();
+    const base64 = btoa(
+      new Uint8Array(buffer).reduce(
+        (acc, byte) => acc + String.fromCharCode(byte),
+        ""
+      )
+    );
+    return {
+      base64,
+      mimetype: file.type || "application/octet-stream",
+      filename: file.name,
+    };
   };
 
   const handleResetSession = () => {
@@ -530,6 +756,114 @@ export default function WhatsAppPanelClient() {
       signatureId: selectedSignatureId || null,
     });
     setSelectedProduct(product);
+  };
+
+  const handleAssignSeller = (sellerId: string) => {
+    if (!selectedChat) return;
+    sendSocketEvent("panel:assign-seller", {
+      chatId: selectedChat.chatId,
+      sellerId: sellerId || null,
+    });
+  };
+
+  const handleMarkRead = () => {
+    if (!selectedChat) return;
+    sendSocketEvent("panel:mark-chat-read", { chatId: selectedChat.chatId });
+  };
+
+  const handleCreateVendor = async () => {
+    if (!newVendorName.trim()) return;
+
+    const response = await fetch("/api/arena/vendedores", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        nome: newVendorName.trim(),
+        avatar_url: newVendorAvatar.trim() || null,
+        veiculo_emoji: newVendorEmoji.trim() || "🧑‍💼",
+      }),
+    });
+
+    if (!response.ok) {
+      setToast("Falha ao cadastrar vendedor.");
+      window.setTimeout(() => setToast(""), 3500);
+      return;
+    }
+
+    const payload = (await response.json()) as Vendor;
+    setVendors((current) => [...current, payload].sort((a, b) => a.nome.localeCompare(b.nome)));
+    setNewVendorName("");
+    setNewVendorAvatar("");
+    setNewVendorEmoji("🧑‍💼");
+    setToast("Vendedor cadastrado e sincronizado com o sistema.");
+    window.setTimeout(() => setToast(""), 3500);
+  };
+
+  const handleSendMedia = async () => {
+    if (!pendingMedia) return;
+    const normalized = formatPhoneNumber(number || selectedChatNumber);
+    if (!normalized) return;
+
+    const payload = await fileToPayload(pendingMedia);
+    sendSocketEvent("panel:send-media", {
+      number: normalized,
+      chatId: composerMode === "chat" ? selectedChatId || null : null,
+      caption: message.trim(),
+      ...payload,
+      sendAudioAsVoice: pendingMedia.type.startsWith("audio/"),
+    });
+    setPendingMedia(null);
+    setMessage("");
+  };
+
+  const handlePostStatus = async () => {
+    if (!statusText.trim() && !statusMedia) return;
+    if (statusMedia) {
+      const payload = await fileToPayload(statusMedia);
+      sendSocketEvent("panel:post-status", {
+        text: statusText.trim(),
+        ...payload,
+      });
+    } else {
+      sendSocketEvent("panel:post-status", {
+        text: statusText.trim(),
+      });
+    }
+    setStatusText("");
+    setStatusMedia(null);
+  };
+
+  const toggleSegmentSelection = (chatId: string) => {
+    setSegmentSelectedIds((current) =>
+      current.includes(chatId)
+        ? current.filter((id) => id !== chatId)
+        : [...current, chatId]
+    );
+  };
+
+  const handleSelectAllSegmented = () => {
+    setSegmentSelectedIds(keywordMatches.map((chat) => chat.chatId));
+  };
+
+  const handleClearSegmented = () => {
+    setSegmentSelectedIds([]);
+  };
+
+  const handleSendSegmented = () => {
+    const recipients = keywordMatches
+      .filter((chat) => segmentSelectedIds.includes(chat.chatId))
+      .map((chat) => ({
+        chatId: chat.chatId,
+        number: getSummaryDisplayNumber(chat),
+      }));
+
+    if (!recipients.length || !segmentMessage.trim()) return;
+    sendSocketEvent("panel:send-segmented", {
+      recipients,
+      text: segmentMessage.trim(),
+      signatureId: selectedSignatureId || null,
+    });
+    setSegmentMessage("");
   };
 
   return (
@@ -603,8 +937,8 @@ export default function WhatsAppPanelClient() {
           ) : null}
         </div>
 
-        <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)] 2xl:grid-cols-[340px_minmax(0,1fr)]">
-          <aside className="space-y-5">
+        <div className="space-y-6">
+          <div className="grid gap-6 xl:grid-cols-[340px_minmax(0,1fr)_360px]">
             <section className="overflow-hidden rounded-[28px] border border-red-100 bg-white shadow-sm">
               <div className="border-b border-red-100 px-5 py-4">
                 <div className="flex items-center gap-3">
@@ -675,241 +1009,163 @@ export default function WhatsAppPanelClient() {
                   )}
                 </div>
 
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <button
+                    onClick={handleResetSession}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-600 px-4 py-3 font-bold text-white transition hover:bg-red-700"
+                  >
+                    <RefreshCcw size={16} />
+                    Gerar novo QR
+                  </button>
+                  <button
+                    onClick={handleSyncConversations}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-red-100 bg-white px-4 py-3 font-bold text-slate-700 transition hover:bg-red-50"
+                  >
+                    <RefreshCcw size={16} />
+                    Sincronizar conta
+                  </button>
+                </div>
+              </div>
+            </section>
+
+            <section className="overflow-hidden rounded-[28px] border border-red-100 bg-white shadow-sm">
+              <div className="border-b border-red-100 px-5 py-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-50 text-red-600">
+                    <Sparkles size={20} />
+                  </div>
+                  <div>
+                    <h2 className="font-black text-slate-900">Atalhos no topo</h2>
+                    <p className="text-sm text-slate-500">Ferramentas mais usadas sempre visiveis</p>
+                  </div>
+                </div>
+              </div>
+              <div className="grid gap-3 p-5 sm:grid-cols-3 xl:grid-cols-4">
                 <button
-                  onClick={handleResetSession}
-                  className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-red-600 px-4 py-3 font-bold text-white transition hover:bg-red-700"
+                  onClick={() => toggleSection("replies")}
+                  className="rounded-2xl border border-red-100 bg-red-50 px-4 py-4 text-left transition hover:bg-red-100"
                 >
-                  <RefreshCcw size={16} />
-                  Gerar novo QR
+                  <div className="text-xs font-bold uppercase tracking-wide text-red-600">Rapidez</div>
+                  <div className="mt-1 font-black text-slate-900">Respostas</div>
+                  <div className="mt-1 text-xs text-slate-500">{quickReplies.length} salvas</div>
+                </button>
+                <button
+                  onClick={() => toggleSection("labels")}
+                  className="rounded-2xl border border-red-100 bg-white px-4 py-4 text-left transition hover:bg-red-50"
+                >
+                  <div className="text-xs font-bold uppercase tracking-wide text-red-600">Organizacao</div>
+                  <div className="mt-1 font-black text-slate-900">Etiquetas</div>
+                  <div className="mt-1 text-xs text-slate-500">{labels.length} criadas</div>
+                </button>
+                <button
+                  onClick={() => toggleSection("statuses")}
+                  className="rounded-2xl border border-red-100 bg-white px-4 py-4 text-left transition hover:bg-red-50"
+                >
+                  <div className="text-xs font-bold uppercase tracking-wide text-red-600">WhatsApp</div>
+                  <div className="mt-1 font-black text-slate-900">Status</div>
+                  <div className="mt-1 text-xs text-slate-500">{statusFeed.length} contatos</div>
+                </button>
+                <button
+                  onClick={() => toggleSection("vendors")}
+                  className="rounded-2xl border border-red-100 bg-white px-4 py-4 text-left transition hover:bg-red-50"
+                >
+                  <div className="text-xs font-bold uppercase tracking-wide text-red-600">Equipe</div>
+                  <div className="mt-1 font-black text-slate-900">Vendedores</div>
+                  <div className="mt-1 text-xs text-slate-500">{vendors.length} sincronizados</div>
+                </button>
+                <button
+                  onClick={() => toggleSection("signatures")}
+                  className="rounded-2xl border border-red-100 bg-white px-4 py-4 text-left transition hover:bg-red-50"
+                >
+                  <div className="text-xs font-bold uppercase tracking-wide text-red-600">Assinatura</div>
+                  <div className="mt-1 font-black text-slate-900">Vendedor</div>
+                  <div className="mt-1 text-xs text-slate-500">{signatures.length} textos</div>
+                </button>
+                <button
+                  onClick={() => toggleSection("schedules")}
+                  className="rounded-2xl border border-red-100 bg-white px-4 py-4 text-left transition hover:bg-red-50"
+                >
+                  <div className="text-xs font-bold uppercase tracking-wide text-red-600">Agenda</div>
+                  <div className="mt-1 font-black text-slate-900">Programados</div>
+                  <div className="mt-1 text-xs text-slate-500">{schedules.length} envios</div>
+                </button>
+                <button
+                  onClick={() => toggleSection("segmentation")}
+                  className="rounded-2xl border border-red-100 bg-white px-4 py-4 text-left transition hover:bg-red-50"
+                >
+                  <div className="text-xs font-bold uppercase tracking-wide text-red-600">Selecao</div>
+                  <div className="mt-1 font-black text-slate-900">Palavra-chave</div>
+                  <div className="mt-1 text-xs text-slate-500">{segmentSelectedIds.length} marcados</div>
+                </button>
+                <button
+                  onClick={handleStartNewMessage}
+                  className="rounded-2xl border border-red-100 bg-white px-4 py-4 text-left transition hover:bg-red-50"
+                >
+                  <div className="text-xs font-bold uppercase tracking-wide text-red-600">Contato</div>
+                  <div className="mt-1 font-black text-slate-900">Nova mensagem</div>
+                  <div className="mt-1 text-xs text-slate-500">Iniciar conversa manual</div>
                 </button>
               </div>
             </section>
 
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => toggleSection("replies")}
-                className="rounded-2xl border border-red-100 bg-white px-4 py-3 text-left shadow-sm transition hover:border-red-200 hover:bg-red-50"
-              >
-                <div className="text-xs font-bold uppercase tracking-wide text-red-600">Atalho</div>
-                <div className="mt-1 font-black text-slate-900">Respostas</div>
-              </button>
-              <button
-                onClick={() => toggleSection("labels")}
-                className="rounded-2xl border border-red-100 bg-white px-4 py-3 text-left shadow-sm transition hover:border-red-200 hover:bg-red-50"
-              >
-                <div className="text-xs font-bold uppercase tracking-wide text-red-600">Atalho</div>
-                <div className="mt-1 font-black text-slate-900">Etiquetas</div>
-              </button>
-              <button
-                onClick={() => toggleSection("signatures")}
-                className="rounded-2xl border border-red-100 bg-white px-4 py-3 text-left shadow-sm transition hover:border-red-200 hover:bg-red-50"
-              >
-                <div className="text-xs font-bold uppercase tracking-wide text-red-600">Atalho</div>
-                <div className="mt-1 font-black text-slate-900">Assinaturas</div>
-              </button>
-              <button
-                onClick={() => toggleSection("schedules")}
-                className="rounded-2xl border border-red-100 bg-white px-4 py-3 text-left shadow-sm transition hover:border-red-200 hover:bg-red-50"
-              >
-                <div className="text-xs font-bold uppercase tracking-wide text-red-600">Atalho</div>
-                <div className="mt-1 font-black text-slate-900">Agenda</div>
-              </button>
-            </div>
-
-            <CascadeSection
-              title="Respostas Rapidas"
-              icon={<MessageSquareReply size={18} />}
-              open={openSections.replies}
-              count={`${quickReplies.length} salvas`}
-              onToggle={() => toggleSection("replies")}
-            >
-              <div className="space-y-3">
-                <input
-                  value={quickTitle}
-                  onChange={(event) => setQuickTitle(event.target.value)}
-                  placeholder="Titulo da resposta"
-                  className="w-full rounded-2xl border border-red-100 px-4 py-3 outline-none transition focus:border-red-400"
-                />
-                <textarea
-                  value={quickMessage}
-                  onChange={(event) => setQuickMessage(event.target.value)}
-                  placeholder="Texto rapido para reaproveitar no atendimento"
-                  rows={3}
-                  className="w-full rounded-2xl border border-red-100 px-4 py-3 outline-none transition focus:border-red-400"
-                />
-                <button
-                  onClick={handleAddQuickReply}
-                  className="inline-flex items-center gap-2 rounded-2xl bg-red-600 px-4 py-3 font-bold text-white hover:bg-red-700"
-                >
-                  <Plus size={16} />
-                  Salvar resposta
-                </button>
-              </div>
-
-              <div className="mt-4 space-y-2">
-                {quickReplies.length ? (
-                  quickReplies.map((reply) => (
-                    <button
-                      key={reply.id}
-                      onClick={() => setMessage(reply.message)}
-                      className="w-full rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-left transition hover:bg-red-100"
-                    >
-                      <div className="font-bold text-slate-900">{reply.title}</div>
-                      <div className="mt-1 line-clamp-3 text-sm text-slate-600">{reply.message}</div>
-                    </button>
-                  ))
-                ) : (
-                  <div className="rounded-2xl bg-slate-50 px-4 py-5 text-sm text-slate-500">
-                    Nenhuma resposta rapida cadastrada.
+            <section className="overflow-hidden rounded-[28px] border border-red-100 bg-white shadow-sm">
+              <div className="border-b border-red-100 px-5 py-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-50 text-red-600">
+                    <Bell size={20} />
                   </div>
-                )}
-              </div>
-            </CascadeSection>
-
-            <CascadeSection
-              title="Etiquetas"
-              icon={<Tag size={18} />}
-              open={openSections.labels}
-              count={`${labels.length} criadas`}
-              onToggle={() => toggleSection("labels")}
-            >
-              <div className="flex gap-2">
-                <input
-                  value={newLabel}
-                  onChange={(event) => setNewLabel(event.target.value)}
-                  placeholder="Nova etiqueta"
-                  className="w-full rounded-2xl border border-red-100 px-4 py-3 outline-none transition focus:border-red-400"
-                />
-                <button
-                  onClick={handleAddLabel}
-                  className="rounded-2xl bg-red-600 px-4 py-3 font-bold text-white hover:bg-red-700"
-                >
-                  <Plus size={16} />
-                </button>
-              </div>
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                {labels.length ? (
-                  labels.map((label) => (
-                    <button
-                      key={label}
-                      onClick={() => selectedChatId && handleToggleLabelOnChat(label)}
-                      className={`rounded-full px-3 py-2 text-sm font-bold transition ${
-                        selectedChatLabels.includes(label)
-                          ? "bg-red-600 text-white"
-                          : "bg-red-50 text-red-700 hover:bg-red-100"
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  ))
-                ) : (
-                  <div className="rounded-2xl bg-slate-50 px-4 py-5 text-sm text-slate-500">
-                    Nenhuma etiqueta criada.
+                  <div>
+                    <h2 className="font-black text-slate-900">Notificacoes de vendedores</h2>
+                    <p className="text-sm text-slate-500">Cliente novo e cliente aguardando retorno</p>
                   </div>
-                )}
+                </div>
               </div>
-            </CascadeSection>
-
-            <CascadeSection
-              title="Assinaturas por Vendedor"
-              icon={<UserRound size={18} />}
-              open={openSections.signatures}
-              count={`${signatures.length} vendedores`}
-              onToggle={() => toggleSection("signatures")}
-            >
-              <div className="space-y-3">
-                <input
-                  value={signatureName}
-                  onChange={(event) => setSignatureName(event.target.value)}
-                  placeholder="Nome do vendedor"
-                  className="w-full rounded-2xl border border-red-100 px-4 py-3 outline-none transition focus:border-red-400"
-                />
-                <textarea
-                  value={signatureText}
-                  onChange={(event) => setSignatureText(event.target.value)}
-                  placeholder="Assinatura padrao"
-                  rows={3}
-                  className="w-full rounded-2xl border border-red-100 px-4 py-3 outline-none transition focus:border-red-400"
-                />
-                <button
-                  onClick={handleAddSignature}
-                  className="inline-flex items-center gap-2 rounded-2xl bg-red-600 px-4 py-3 font-bold text-white hover:bg-red-700"
-                >
-                  <Plus size={16} />
-                  Salvar assinatura
-                </button>
-              </div>
-
-              <div className="mt-4 space-y-2">
-                {signatures.length ? (
-                  signatures.map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => setSelectedSignatureId(item.id)}
-                      className={`w-full rounded-2xl border px-4 py-3 text-left transition ${
-                        selectedSignatureId === item.id
-                          ? "border-red-300 bg-red-50"
-                          : "border-red-100 bg-white hover:bg-red-50"
-                      }`}
-                    >
-                      <div className="font-bold text-slate-900">{item.sellerName}</div>
-                      <div className="mt-1 line-clamp-3 whitespace-pre-wrap text-sm text-slate-600">
-                        {item.signature}
-                      </div>
-                    </button>
-                  ))
-                ) : (
-                  <div className="rounded-2xl bg-slate-50 px-4 py-5 text-sm text-slate-500">
-                    Nenhuma assinatura cadastrada.
-                  </div>
-                )}
-              </div>
-            </CascadeSection>
-
-            <CascadeSection
-              title="Agendamentos"
-              icon={<CalendarClock size={18} />}
-              open={openSections.schedules}
-              count={`${schedules.length} registros`}
-              onToggle={() => toggleSection("schedules")}
-            >
-              <div className="space-y-2">
-                {schedules.length ? (
-                  schedules.map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex items-start gap-3 rounded-2xl border border-red-100 bg-[#fffafa] px-4 py-3"
-                    >
-                      <div className="flex-1">
-                        <div className="text-sm font-bold text-slate-900">{item.number}</div>
-                        <div className="mt-1 line-clamp-3 text-sm text-slate-600">{item.text}</div>
-                        <div className="mt-2 text-xs text-slate-400">
-                          {item.sendAt} - {item.status}
+              <div className="space-y-3 p-5">
+                {notifications.length ? (
+                  notifications.slice(0, 4).map((item) => {
+                    const vendor = vendors.find((entry) => entry.id === item.sellerId) || null;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          setComposerMode("chat");
+                          setSelectedChatId(item.chatId);
+                        }}
+                        className="w-full rounded-2xl border border-red-100 bg-[#fffafa] px-4 py-3 text-left transition hover:bg-red-50"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="font-bold text-slate-900">{item.title}</div>
+                            <div className="mt-1 line-clamp-2 text-sm text-slate-600">{item.subtitle}</div>
+                            <div className="mt-2 text-xs font-medium text-slate-400">
+                              {vendor ? `Vendedor: ${vendor.nome}` : "Sem vendedor fixo"}
+                            </div>
+                          </div>
+                          <div className="rounded-full bg-red-600 px-2.5 py-1 text-xs font-black text-white">
+                            {item.unreadCount}
+                          </div>
                         </div>
-                      </div>
-                      {item.status === "pending" ? (
-                        <button
-                          onClick={() => sendSocketEvent("panel:cancel-schedule", { id: item.id })}
-                          className="rounded-full bg-red-100 p-2 text-red-600 hover:bg-red-200"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      ) : null}
-                    </div>
-                  ))
+                      </button>
+                    );
+                  })
                 ) : (
-                  <div className="rounded-2xl bg-slate-50 px-4 py-5 text-sm text-slate-500">
-                    Nenhum envio agendado.
+                  <div className="rounded-2xl bg-slate-50 px-4 py-6 text-sm text-slate-500">
+                    Nenhum cliente novo aguardando notificacao agora.
                   </div>
                 )}
               </div>
-            </CascadeSection>
-          </aside>
+            </section>
+          </div>
 
-          <section className="overflow-hidden rounded-[32px] border border-red-100 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.06)]">
-            <div className="grid min-h-[820px] xl:grid-cols-[330px_minmax(0,1fr)]">
-              <div className="border-b border-red-100 bg-[#fffafa] xl:border-b-0 xl:border-r">
+          <section
+            ref={workspaceRef}
+            className="overflow-hidden rounded-[32px] border border-red-100 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.06)]"
+          >
+            <div className="flex min-h-[920px] flex-col xl:flex-row">
+              <aside
+                className="w-full border-b border-red-100 bg-[#fffafa] xl:shrink-0 xl:border-b-0 xl:border-r"
+                style={{ width: `min(100%, ${sidebarWidth}px)` }}
+              >
                 <div className="border-b border-red-100 px-5 py-5">
                   <div className="flex items-center gap-3">
                     <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-100 text-red-600">
@@ -932,46 +1188,98 @@ export default function WhatsAppPanelClient() {
                       className="w-full rounded-2xl border border-red-100 bg-white py-3 pl-11 pr-4 outline-none transition focus:border-red-400"
                     />
                   </div>
-                </div>
 
-                <div className="max-h-[720px] space-y-2 overflow-y-auto px-4 py-4">
-                  {filteredChatList.length ? (
-                    filteredChatList.map((chat) => (
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {[
+                      { id: "all", label: "Todas" },
+                      { id: "unread", label: "Nao lidas" },
+                      { id: "read", label: "Lidas" },
+                    ].map((filterItem) => (
                       <button
-                        key={chat.chatId}
-                        onClick={() => {
-                          setComposerMode("chat");
-                          setSelectedChatId(chat.chatId);
-                          setNumber(getChatPreviewNumber(chat));
-                        }}
-                        className={`w-full rounded-3xl border px-4 py-4 text-left transition ${
-                          selectedChatId === chat.chatId
-                            ? "border-red-200 bg-white shadow-sm"
-                            : "border-transparent bg-transparent hover:border-red-100 hover:bg-white"
+                        key={filterItem.id}
+                        onClick={() =>
+                          setChatFilter(filterItem.id as "all" | "unread" | "read")
+                        }
+                        className={`rounded-full px-3 py-2 text-xs font-bold transition ${
+                          chatFilter === filterItem.id
+                            ? "bg-red-600 text-white"
+                            : "bg-white text-slate-600 hover:bg-red-50"
                         }`}
                       >
-                        <div className="flex items-start gap-3">
-                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-red-100 text-sm font-black text-red-700">
-                            {getChatDisplayName(chat).slice(0, 2).toUpperCase()}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center justify-between gap-3">
-                              <div className="truncate font-black text-slate-900">
-                                {getChatDisplayName(chat)}
+                        {filterItem.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="max-h-[760px] space-y-2 overflow-y-auto px-4 py-4">
+                  {filteredChatList.length ? (
+                    filteredChatList.map((chat) => {
+                      const assignedVendor =
+                        vendors.find((vendor) => vendor.id === (chatAssignments[chat.chatId] || chat.assignedSellerId)) ||
+                        null;
+                      return (
+                        <button
+                          key={chat.chatId}
+                          onClick={() => {
+                            setComposerMode("chat");
+                            setSelectedChatId(chat.chatId);
+                            setNumber(formatPhoneNumber(getSummaryDisplayNumber(chat)));
+                          }}
+                          className={`w-full rounded-3xl border px-4 py-4 text-left transition ${
+                            selectedChatId === chat.chatId
+                              ? "border-red-200 bg-white shadow-sm"
+                              : "border-transparent bg-transparent hover:border-red-100 hover:bg-white"
+                          }`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-red-100 text-sm font-black text-red-700">
+                              {chat.profilePicUrl ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  src={chat.profilePicUrl}
+                                  alt={getSummaryDisplayName(chat)}
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : (
+                                getInitials(getSummaryDisplayName(chat))
+                              )}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="truncate font-black text-slate-900">
+                                  {getSummaryDisplayName(chat)}
+                                </div>
+                                <div className="shrink-0 text-[11px] font-medium text-slate-400">
+                                  {formatTime(chat.lastMessageTimestamp)}
+                                </div>
                               </div>
-                              <div className="shrink-0 text-[11px] font-medium text-slate-400">
-                                {formatTime(chat.timestamp)}
+                              <div className="mt-1 text-xs font-medium text-slate-500">
+                                {getSummaryDisplayNumber(chat) || chat.chatId}
                               </div>
-                            </div>
-                            <div className="mt-1 text-xs font-medium text-slate-500">
-                              {getChatPreviewNumber(chat)}
-                            </div>
-                            <div className="mt-2 line-clamp-2 text-sm leading-relaxed text-slate-600">
-                              {chat.body}
-                            </div>
-                            {(chatLabels[chat.chatId] || []).length ? (
-                              <div className="mt-3 flex flex-wrap gap-2">
-                                {(chatLabels[chat.chatId] || []).map((label) => (
+                              <div className="mt-2 line-clamp-2 text-sm leading-relaxed text-slate-600">
+                                {chat.lastMessageBody || "Sem texto recente"}
+                              </div>
+                              <div className="mt-3 flex flex-wrap items-center gap-2">
+                                {chat.unreadCount > 0 ? (
+                                  <span className="rounded-full bg-red-600 px-2.5 py-1 text-[11px] font-black text-white">
+                                    {chat.unreadCount} nao lidas
+                                  </span>
+                                ) : (
+                                  <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-700">
+                                    Lida
+                                  </span>
+                                )}
+                                {assignedVendor ? (
+                                  <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-700">
+                                    {assignedVendor.veiculo_emoji || "🧑‍💼"} {assignedVendor.nome}
+                                  </span>
+                                ) : (
+                                  <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-bold text-amber-700">
+                                    Sem vendedor
+                                  </span>
+                                )}
+                                {(chatLabels[chat.chatId] || []).slice(0, 2).map((label) => (
                                   <span
                                     key={label}
                                     className="rounded-full bg-red-50 px-2.5 py-1 text-[11px] font-bold text-red-700"
@@ -980,25 +1288,51 @@ export default function WhatsAppPanelClient() {
                                   </span>
                                 ))}
                               </div>
-                            ) : null}
+                            </div>
                           </div>
-                        </div>
-                      </button>
-                    ))
+                        </button>
+                      );
+                    })
                   ) : (
                     <div className="rounded-3xl bg-white px-5 py-8 text-center text-sm text-slate-500 shadow-sm">
                       Nenhuma conversa encontrada com esse filtro.
                     </div>
                   )}
                 </div>
-              </div>
+              </aside>
 
-              <div className="flex min-h-[820px] flex-col bg-[linear-gradient(180deg,#ffffff_0%,#fff9f9_100%)]">
+              <div
+                onMouseDown={() => setIsResizingSidebar(true)}
+                className={`hidden w-3 cursor-col-resize bg-[linear-gradient(180deg,#fff7f7_0%,#ffe4e6_100%)] transition xl:block ${
+                  isResizingSidebar ? "shadow-[inset_0_0_0_1px_rgba(239,68,68,0.35)]" : ""
+                }`}
+              />
+
+              <div className="flex min-w-0 flex-1 flex-col bg-[linear-gradient(180deg,#ffffff_0%,#fff9f9_100%)]">
                 <div className="border-b border-red-100 px-5 py-5 md:px-7">
                   <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-3">
-                        <h3 className="text-2xl font-black text-slate-900">{selectedChatName}</h3>
+                        <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-red-100 text-base font-black text-red-700">
+                          {selectedChat?.profilePicUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={selectedChat.profilePicUrl}
+                              alt={selectedChatName}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            getInitials(selectedChatName)
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <h3 className="truncate text-2xl font-black text-slate-900">
+                            {selectedChatName}
+                          </h3>
+                          <p className="mt-1 text-sm text-slate-500">
+                            {selectedChatNumber || "Escolha uma conversa para abrir a leitura completa"}
+                          </p>
+                        </div>
                         {selectedChatLabels.map((label) => (
                           <button
                             key={label}
@@ -1009,15 +1343,24 @@ export default function WhatsAppPanelClient() {
                           </button>
                         ))}
                       </div>
-                      <p className="mt-2 text-sm text-slate-500">
-                        {selectedChatNumber || "Escolha uma conversa para abrir a leitura completa"}
-                      </p>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="rounded-full bg-red-50 px-3 py-2 text-xs font-bold text-red-700">
                         {selectedChatMessages.length} mensagens
                       </span>
+                      {selectedChat?.unreadCount ? (
+                        <span className="rounded-full bg-amber-50 px-3 py-2 text-xs font-bold text-amber-700">
+                          {selectedChat.unreadCount} nao lidas
+                        </span>
+                      ) : null}
+                      <button
+                        onClick={handleMarkRead}
+                        className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-red-50"
+                      >
+                        <CheckCircle2 size={14} />
+                        Marcar como lida
+                      </button>
                       <button
                         onClick={handleSyncConversations}
                         className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-red-50"
@@ -1032,12 +1375,6 @@ export default function WhatsAppPanelClient() {
                         <Plus size={14} />
                         Nova mensagem
                       </button>
-                      <span className="rounded-full bg-slate-100 px-3 py-2 text-xs font-bold text-slate-600">
-                        {selectedSignatureId ? "Assinatura ativa" : "Sem assinatura"}
-                      </span>
-                      <span className="rounded-full bg-slate-100 px-3 py-2 text-xs font-bold text-slate-600">
-                        {scheduleDateTime ? "Agendamento pronto" : "Envio imediato"}
-                      </span>
                     </div>
                   </div>
 
@@ -1056,11 +1393,6 @@ export default function WhatsAppPanelClient() {
                           {reply.title}
                         </button>
                       ))}
-                      {selectedProduct ? (
-                        <span className="shrink-0 rounded-full border border-red-100 bg-white px-4 py-2 text-sm font-semibold text-red-700">
-                          Produto: {selectedProduct.name}
-                        </span>
-                      ) : null}
                     </div>
                   ) : null}
                 </div>
@@ -1077,7 +1409,20 @@ export default function WhatsAppPanelClient() {
                               : "border border-red-100 bg-white text-slate-800"
                           }`}
                         >
-                          <div className="whitespace-pre-wrap text-[15px] leading-7">{item.body}</div>
+                          <div className="whitespace-pre-wrap text-[15px] leading-7">
+                            {item.body || (item.hasMedia ? "Midia enviada/recebida" : "")}
+                          </div>
+                          {item.hasMedia ? (
+                            <div
+                              className={`mt-3 inline-flex rounded-full px-3 py-1 text-xs font-bold ${
+                                item.direction === "out"
+                                  ? "bg-white/15 text-white"
+                                  : "bg-red-50 text-red-700"
+                              }`}
+                            >
+                              {item.mediaType || "midia"}
+                            </div>
+                          ) : null}
                           <div
                             className={`mt-3 text-xs font-medium ${
                               item.direction === "out" ? "text-red-100" : "text-slate-400"
@@ -1096,8 +1441,7 @@ export default function WhatsAppPanelClient() {
                         </div>
                         <h4 className="text-2xl font-black text-slate-900">Leitura ampla da conversa</h4>
                         <p className="mt-3 text-sm leading-relaxed text-slate-500">
-                          Selecione uma conversa na lateral para abrir o historico completo nesta
-                          area maior e mais confortavel de leitura.
+                          A caixa central mostra apenas as mensagens do contato selecionado para facilitar a leitura.
                         </p>
                       </div>
                     </div>
@@ -1105,7 +1449,45 @@ export default function WhatsAppPanelClient() {
                 </div>
 
                 <div className="border-t border-red-100 bg-white px-5 py-5 md:px-7">
-                  <div className="mb-4 grid gap-4 2xl:grid-cols-[minmax(0,1fr)_320px]">
+                  <div className="grid gap-4 xl:grid-cols-[1fr_240px_220px]">
+                    <input
+                      value={number}
+                      onChange={(event) => {
+                        setComposerMode("new");
+                        setNumber(formatPhoneNumber(event.target.value));
+                      }}
+                      placeholder="Numero com DDD"
+                      className="w-full rounded-2xl border border-red-100 px-4 py-3 outline-none transition focus:border-red-400"
+                    />
+                    <select
+                      value={selectedSignatureId}
+                      onChange={(event) => setSelectedSignatureId(event.target.value)}
+                      className="w-full rounded-2xl border border-red-100 px-4 py-3 outline-none transition focus:border-red-400"
+                    >
+                      <option value="">Sem assinatura</option>
+                      {signatures.map((item) => (
+                        <option key={item.id} value={item.id}>
+                          {item.sellerName}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="datetime-local"
+                      value={scheduleDateTime}
+                      onChange={(event) => setScheduleDateTime(event.target.value)}
+                      className="w-full rounded-2xl border border-red-100 px-4 py-3 outline-none transition focus:border-red-400"
+                    />
+                  </div>
+
+                  <textarea
+                    value={message}
+                    onChange={(event) => setMessage(event.target.value)}
+                    placeholder="Digite a mensagem. O envio pode ser imediato, com assinatura, com anexo ou agendado."
+                    rows={5}
+                    className="mt-3 w-full rounded-[28px] border border-red-100 px-5 py-4 text-[15px] leading-7 outline-none transition focus:border-red-400"
+                  />
+
+                  <div className="mt-4 grid gap-4 2xl:grid-cols-[minmax(0,1fr)_340px]">
                     <div className="rounded-[28px] border border-red-100 bg-[#fffafa] p-4">
                       <div className="mb-3 flex items-center gap-2">
                         <Package2 className="text-red-600" size={18} />
@@ -1148,13 +1530,13 @@ export default function WhatsAppPanelClient() {
                                     onClick={() => handleInsertProduct(product)}
                                     className="rounded-full bg-red-50 px-3 py-1.5 text-xs font-bold text-red-700 transition hover:bg-red-100"
                                   >
-                                    Inserir na mensagem
+                                    Inserir
                                   </button>
                                   <button
                                     onClick={() => handleSendProduct(product)}
                                     className="rounded-full bg-red-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-red-700"
                                   >
-                                    Enviar produto
+                                    Enviar
                                   </button>
                                 </div>
                               </div>
@@ -1170,132 +1552,510 @@ export default function WhatsAppPanelClient() {
 
                     <div className="rounded-[28px] border border-red-100 bg-white p-4">
                       <div className="mb-3 flex items-center gap-2">
-                        <UserRound className="text-red-600" size={18} />
-                        <h4 className="font-black text-slate-900">Detalhes da conversa</h4>
+                        <ImagePlus className="text-red-600" size={18} />
+                        <h4 className="font-black text-slate-900">Midia do atendimento</h4>
                       </div>
-                      <div className="space-y-3 text-sm">
-                        <div className="rounded-2xl bg-slate-50 px-4 py-3">
-                          <div className="text-xs font-bold uppercase tracking-wide text-slate-500">Cliente</div>
-                          <div className="mt-1 font-semibold text-slate-900">{selectedChatName}</div>
-                        </div>
-                        <div className="rounded-2xl bg-slate-50 px-4 py-3">
-                          <div className="text-xs font-bold uppercase tracking-wide text-slate-500">Numero</div>
-                          <div className="mt-1 font-semibold text-slate-900">{selectedChatNumber || "-"}</div>
-                        </div>
-                        <div className="rounded-2xl bg-slate-50 px-4 py-3">
-                          <div className="text-xs font-bold uppercase tracking-wide text-slate-500">Modo</div>
-                          <div className="mt-1 font-semibold text-slate-900">
-                            {composerMode === "new" ? "Nova mensagem" : "Conversa existente"}
+                      <div className="space-y-3">
+                        <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-red-200 bg-red-50 px-4 py-4 text-sm font-bold text-red-700 transition hover:bg-red-100">
+                          <ImagePlus size={16} />
+                          Selecionar imagem ou audio
+                          <input
+                            type="file"
+                            accept="image/*,audio/*"
+                            className="hidden"
+                            onChange={(event) => setPendingMedia(event.target.files?.[0] || null)}
+                          />
+                        </label>
+                        {pendingMedia ? (
+                          <div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                            Arquivo pronto: <span className="font-bold">{pendingMedia.name}</span>
                           </div>
-                        </div>
-                        <div className="rounded-2xl bg-slate-50 px-4 py-3">
-                          <div className="text-xs font-bold uppercase tracking-wide text-slate-500">Etiquetas</div>
-                          <div className="mt-2 flex flex-wrap gap-2">
-                            {selectedChatLabels.length ? (
-                              selectedChatLabels.map((label) => (
-                                <span
-                                  key={label}
-                                  className="rounded-full bg-red-100 px-2.5 py-1 text-[11px] font-bold text-red-700"
-                                >
-                                  {label}
-                                </span>
-                              ))
-                            ) : (
-                              <span className="text-slate-500">Sem etiquetas</span>
-                            )}
+                        ) : (
+                          <div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-500">
+                            Anexe imagens e audios para enviar na conversa selecionada.
                           </div>
-                        </div>
-                        <div className="rounded-2xl bg-slate-50 px-4 py-3">
-                          <div className="text-xs font-bold uppercase tracking-wide text-slate-500">Ultimo produto</div>
-                          <div className="mt-1 font-semibold text-slate-900">
-                            {selectedProduct?.name || "Nenhum produto selecionado"}
-                          </div>
+                        )}
+                        <div className="grid gap-3 sm:grid-cols-3">
+                          <button
+                            onClick={handleSendMedia}
+                            className="inline-flex items-center justify-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 font-bold text-red-700 transition hover:bg-red-100"
+                          >
+                            <Mic size={16} />
+                            Enviar midia
+                          </button>
+                          <button
+                            onClick={handleScheduleMessage}
+                            className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 font-bold text-slate-700 transition hover:bg-slate-50"
+                          >
+                            <CalendarClock size={16} />
+                            Agendar
+                          </button>
+                          <button
+                            onClick={handleSendMessage}
+                            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-600 px-4 py-3 font-bold text-white transition hover:bg-red-700"
+                          >
+                            <Send size={16} />
+                            {composerMode === "new" ? "Nova mensagem" : "Enviar agora"}
+                          </button>
                         </div>
                       </div>
-                    </div>
-                  </div>
-
-                  <div className="grid gap-3 xl:grid-cols-[1fr_260px_200px]">
-                    <input
-                      value={number}
-                      onChange={(event) => {
-                        setComposerMode("new");
-                        setNumber(formatPhoneNumber(event.target.value));
-                      }}
-                      placeholder="Numero com DDD"
-                      className="w-full rounded-2xl border border-red-100 px-4 py-3 outline-none transition focus:border-red-400"
-                    />
-                    <select
-                      value={selectedSignatureId}
-                      onChange={(event) => setSelectedSignatureId(event.target.value)}
-                      className="w-full rounded-2xl border border-red-100 px-4 py-3 outline-none transition focus:border-red-400"
-                    >
-                      <option value="">Sem assinatura</option>
-                      {signatures.map((item) => (
-                        <option key={item.id} value={item.id}>
-                          {item.sellerName}
-                        </option>
-                      ))}
-                    </select>
-                    <input
-                      type="datetime-local"
-                      value={scheduleDateTime}
-                      onChange={(event) => setScheduleDateTime(event.target.value)}
-                      className="w-full rounded-2xl border border-red-100 px-4 py-3 outline-none transition focus:border-red-400"
-                    />
-                  </div>
-
-                  <textarea
-                    value={message}
-                    onChange={(event) => setMessage(event.target.value)}
-                    placeholder="Digite sua mensagem aqui. Use as respostas rapidas ou a assinatura do vendedor para ganhar velocidade."
-                    rows={5}
-                    className="mt-3 w-full rounded-[28px] border border-red-100 px-5 py-4 text-[15px] leading-7 outline-none transition focus:border-red-400"
-                  />
-
-                  <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex flex-wrap gap-2">
-                      {labels.slice(0, 6).map((label) => (
-                        <button
-                          key={label}
-                          onClick={() => selectedChatId && handleToggleLabelOnChat(label)}
-                          className={`rounded-full px-3 py-2 text-xs font-bold transition ${
-                            selectedChatLabels.includes(label)
-                              ? "bg-red-600 text-white"
-                              : "bg-red-50 text-red-700 hover:bg-red-100"
-                          }`}
-                        >
-                          {label}
-                        </button>
-                      ))}
-                    </div>
-
-                    <div className="flex flex-col gap-3 sm:flex-row">
-                      <button
-                        onClick={handleSyncConversations}
-                        className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 font-bold text-slate-700 transition hover:bg-slate-50"
-                      >
-                        <RefreshCcw size={16} />
-                        Atualizar chats
-                      </button>
-                      <button
-                        onClick={handleScheduleMessage}
-                        className="inline-flex items-center justify-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 font-bold text-red-700 transition hover:bg-red-100"
-                      >
-                        <CalendarClock size={16} />
-                        Agendar
-                      </button>
-                      <button
-                        onClick={handleSendMessage}
-                        className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-600 px-6 py-3 font-bold text-white transition hover:bg-red-700"
-                      >
-                        <Send size={16} />
-                        {composerMode === "new" ? "Enviar nova mensagem" : "Enviar agora"}
-                      </button>
                     </div>
                   </div>
                 </div>
               </div>
+
+              <aside className="w-full border-t border-red-100 bg-[#fffdfd] xl:w-[380px] xl:shrink-0 xl:border-l xl:border-t-0">
+                <div className="max-h-[920px] space-y-5 overflow-y-auto p-5">
+                  <section className="rounded-[28px] border border-red-100 bg-white p-4 shadow-sm">
+                    <div className="mb-3 flex items-center gap-2">
+                      <UserRound className="text-red-600" size={18} />
+                      <h4 className="font-black text-slate-900">Cliente selecionado</h4>
+                    </div>
+                    <div className="space-y-3 text-sm">
+                      <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                        <div className="text-xs font-bold uppercase tracking-wide text-slate-500">Nome</div>
+                        <div className="mt-1 font-semibold text-slate-900">{selectedChatName}</div>
+                      </div>
+                      <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                        <div className="text-xs font-bold uppercase tracking-wide text-slate-500">Numero</div>
+                        <div className="mt-1 font-semibold text-slate-900">{selectedChatNumber || "-"}</div>
+                      </div>
+                      <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                        <div className="text-xs font-bold uppercase tracking-wide text-slate-500">Modo</div>
+                        <div className="mt-1 font-semibold text-slate-900">
+                          {composerMode === "new" ? "Nova mensagem" : "Conversa existente"}
+                        </div>
+                      </div>
+                      <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                        <div className="text-xs font-bold uppercase tracking-wide text-slate-500">Ultimo produto</div>
+                        <div className="mt-1 font-semibold text-slate-900">
+                          {selectedProduct?.name || "Nenhum produto selecionado"}
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+
+                  <CascadeSection
+                    title="Status do WhatsApp"
+                    icon={<Sparkles size={18} />}
+                    open={openSections.statuses}
+                    count={`${statusFeed.length} contatos com status`}
+                    onToggle={() => toggleSection("statuses")}
+                  >
+                    <div className="space-y-3">
+                      <textarea
+                        value={statusText}
+                        onChange={(event) => setStatusText(event.target.value)}
+                        placeholder="Texto para publicar no status"
+                        rows={3}
+                        className="w-full rounded-2xl border border-red-100 px-4 py-3 outline-none transition focus:border-red-400"
+                      />
+                      <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700 transition hover:bg-red-100">
+                        <ImagePlus size={16} />
+                        Selecionar foto ou audio para status
+                        <input
+                          type="file"
+                          accept="image/*,audio/*"
+                          className="hidden"
+                          onChange={(event) => setStatusMedia(event.target.files?.[0] || null)}
+                        />
+                      </label>
+                      {statusMedia ? (
+                        <div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                          Midia pronta: <span className="font-bold">{statusMedia.name}</span>
+                        </div>
+                      ) : null}
+                      <button
+                        onClick={handlePostStatus}
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-red-600 px-4 py-3 font-bold text-white transition hover:bg-red-700"
+                      >
+                        <Send size={16} />
+                        Publicar no status
+                      </button>
+                    </div>
+
+                    <div className="mt-4 space-y-2">
+                      {statusFeed.length ? (
+                        statusFeed.map((item) => (
+                          <div key={item.id} className="rounded-2xl border border-red-100 bg-[#fffafa] p-3">
+                            <div className="flex items-start gap-3">
+                              <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-red-100 text-sm font-black text-red-700">
+                                {item.profilePicUrl ? (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img
+                                    src={item.profilePicUrl}
+                                    alt={item.contactName}
+                                    className="h-full w-full object-cover"
+                                  />
+                                ) : (
+                                  getInitials(item.contactName)
+                                )}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="font-bold text-slate-900">{item.contactName}</div>
+                                <div className="mt-1 text-xs text-slate-500">
+                                  {item.totalCount} publicacoes • {item.unreadCount} nao vistas
+                                </div>
+                                <div className="mt-2 line-clamp-2 text-sm text-slate-600">
+                                  {item.items[0]?.body || item.items[0]?.mediaType || "Status com midia"}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="rounded-2xl bg-slate-50 px-4 py-5 text-sm text-slate-500">
+                          Nenhum status sincronizado ainda.
+                        </div>
+                      )}
+                    </div>
+                  </CascadeSection>
+
+                  <CascadeSection
+                    title="Vendedores Sincronizados"
+                    icon={<Users size={18} />}
+                    open={openSections.vendors}
+                    count={`${vendors.length} vendedores`}
+                    onToggle={() => toggleSection("vendors")}
+                  >
+                    <div className="space-y-3">
+                      <div>
+                        <div className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">
+                          Vendedor fixo do cliente
+                        </div>
+                        <select
+                          value={selectedSellerId || ""}
+                          onChange={(event) => handleAssignSeller(event.target.value)}
+                          className="w-full rounded-2xl border border-red-100 px-4 py-3 outline-none transition focus:border-red-400"
+                        >
+                          <option value="">Sem vendedor definido</option>
+                          {vendors.map((vendor) => (
+                            <option key={vendor.id} value={vendor.id}>
+                              {vendor.veiculo_emoji || "🧑‍💼"} {vendor.nome}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="mt-2 text-xs text-slate-500">
+                          Esse cadastro usa a mesma base `arena_vendedores`, refletindo no sistema todo.
+                        </div>
+                      </div>
+
+                      {selectedSeller ? (
+                        <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm">
+                          <div className="font-bold text-slate-900">
+                            Responsavel: {selectedSeller.veiculo_emoji || "🧑‍💼"} {selectedSeller.nome}
+                          </div>
+                          <div className="mt-1 text-slate-600">
+                            Novas mensagens deste cliente passam a aparecer nas notificacoes do vendedor.
+                          </div>
+                        </div>
+                      ) : null}
+
+                      <div className="rounded-2xl border border-red-100 bg-[#fffafa] p-4">
+                        <div className="font-bold text-slate-900">Cadastrar novo vendedor</div>
+                        <div className="mt-3 space-y-3">
+                          <input
+                            value={newVendorName}
+                            onChange={(event) => setNewVendorName(event.target.value)}
+                            placeholder="Nome do vendedor"
+                            className="w-full rounded-2xl border border-red-100 px-4 py-3 outline-none transition focus:border-red-400"
+                          />
+                          <input
+                            value={newVendorAvatar}
+                            onChange={(event) => setNewVendorAvatar(event.target.value)}
+                            placeholder="URL do avatar"
+                            className="w-full rounded-2xl border border-red-100 px-4 py-3 outline-none transition focus:border-red-400"
+                          />
+                          <input
+                            value={newVendorEmoji}
+                            onChange={(event) => setNewVendorEmoji(event.target.value)}
+                            placeholder="Emoji do vendedor"
+                            className="w-full rounded-2xl border border-red-100 px-4 py-3 outline-none transition focus:border-red-400"
+                          />
+                          <button
+                            onClick={handleCreateVendor}
+                            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-red-600 px-4 py-3 font-bold text-white hover:bg-red-700"
+                          >
+                            <Plus size={16} />
+                            {vendorsLoading ? "Carregando vendedores..." : "Cadastrar vendedor"}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </CascadeSection>
+
+                  <CascadeSection
+                    title="Respostas Rapidas"
+                    icon={<MessageSquareReply size={18} />}
+                    open={openSections.replies}
+                    count={`${quickReplies.length} salvas`}
+                    onToggle={() => toggleSection("replies")}
+                  >
+                    <div className="space-y-3">
+                      <input
+                        value={quickTitle}
+                        onChange={(event) => setQuickTitle(event.target.value)}
+                        placeholder="Titulo da resposta"
+                        className="w-full rounded-2xl border border-red-100 px-4 py-3 outline-none transition focus:border-red-400"
+                      />
+                      <textarea
+                        value={quickMessage}
+                        onChange={(event) => setQuickMessage(event.target.value)}
+                        placeholder="Texto rapido para reaproveitar no atendimento"
+                        rows={3}
+                        className="w-full rounded-2xl border border-red-100 px-4 py-3 outline-none transition focus:border-red-400"
+                      />
+                      <button
+                        onClick={handleAddQuickReply}
+                        className="inline-flex items-center gap-2 rounded-2xl bg-red-600 px-4 py-3 font-bold text-white hover:bg-red-700"
+                      >
+                        <Plus size={16} />
+                        Salvar resposta
+                      </button>
+                    </div>
+
+                    <div className="mt-4 space-y-2">
+                      {quickReplies.length ? (
+                        quickReplies.map((reply) => (
+                          <button
+                            key={reply.id}
+                            onClick={() => setMessage(reply.message)}
+                            className="w-full rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-left transition hover:bg-red-100"
+                          >
+                            <div className="font-bold text-slate-900">{reply.title}</div>
+                            <div className="mt-1 line-clamp-3 text-sm text-slate-600">{reply.message}</div>
+                          </button>
+                        ))
+                      ) : (
+                        <div className="rounded-2xl bg-slate-50 px-4 py-5 text-sm text-slate-500">
+                          Nenhuma resposta rapida cadastrada.
+                        </div>
+                      )}
+                    </div>
+                  </CascadeSection>
+
+                  <CascadeSection
+                    title="Etiquetas"
+                    icon={<Tag size={18} />}
+                    open={openSections.labels}
+                    count={`${labels.length} criadas`}
+                    onToggle={() => toggleSection("labels")}
+                  >
+                    <div className="flex gap-2">
+                      <input
+                        value={newLabel}
+                        onChange={(event) => setNewLabel(event.target.value)}
+                        placeholder="Nova etiqueta"
+                        className="w-full rounded-2xl border border-red-100 px-4 py-3 outline-none transition focus:border-red-400"
+                      />
+                      <button
+                        onClick={handleAddLabel}
+                        className="rounded-2xl bg-red-600 px-4 py-3 font-bold text-white hover:bg-red-700"
+                      >
+                        <Plus size={16} />
+                      </button>
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {labels.length ? (
+                        labels.map((label) => (
+                          <button
+                            key={label}
+                            onClick={() => selectedChatId && handleToggleLabelOnChat(label)}
+                            className={`rounded-full px-3 py-2 text-sm font-bold transition ${
+                              selectedChatLabels.includes(label)
+                                ? "bg-red-600 text-white"
+                                : "bg-red-50 text-red-700 hover:bg-red-100"
+                            }`}
+                          >
+                            {label}
+                          </button>
+                        ))
+                      ) : (
+                        <div className="rounded-2xl bg-slate-50 px-4 py-5 text-sm text-slate-500">
+                          Nenhuma etiqueta criada.
+                        </div>
+                      )}
+                    </div>
+                  </CascadeSection>
+
+                  <CascadeSection
+                    title="Assinaturas por Vendedor"
+                    icon={<UserRound size={18} />}
+                    open={openSections.signatures}
+                    count={`${signatures.length} vendedores`}
+                    onToggle={() => toggleSection("signatures")}
+                  >
+                    <div className="space-y-3">
+                      <input
+                        value={signatureName}
+                        onChange={(event) => setSignatureName(event.target.value)}
+                        placeholder="Nome do vendedor"
+                        className="w-full rounded-2xl border border-red-100 px-4 py-3 outline-none transition focus:border-red-400"
+                      />
+                      <textarea
+                        value={signatureText}
+                        onChange={(event) => setSignatureText(event.target.value)}
+                        placeholder="Assinatura padrao"
+                        rows={3}
+                        className="w-full rounded-2xl border border-red-100 px-4 py-3 outline-none transition focus:border-red-400"
+                      />
+                      <button
+                        onClick={handleAddSignature}
+                        className="inline-flex items-center gap-2 rounded-2xl bg-red-600 px-4 py-3 font-bold text-white hover:bg-red-700"
+                      >
+                        <Plus size={16} />
+                        Salvar assinatura
+                      </button>
+                    </div>
+
+                    <div className="mt-4 space-y-2">
+                      {signatures.length ? (
+                        signatures.map((item) => (
+                          <button
+                            key={item.id}
+                            onClick={() => setSelectedSignatureId(item.id)}
+                            className={`w-full rounded-2xl border px-4 py-3 text-left transition ${
+                              selectedSignatureId === item.id
+                                ? "border-red-300 bg-red-50"
+                                : "border-red-100 bg-white hover:bg-red-50"
+                            }`}
+                          >
+                            <div className="font-bold text-slate-900">{item.sellerName}</div>
+                            <div className="mt-1 line-clamp-3 whitespace-pre-wrap text-sm text-slate-600">
+                              {item.signature}
+                            </div>
+                          </button>
+                        ))
+                      ) : (
+                        <div className="rounded-2xl bg-slate-50 px-4 py-5 text-sm text-slate-500">
+                          Nenhuma assinatura cadastrada.
+                        </div>
+                      )}
+                    </div>
+                  </CascadeSection>
+
+                  <CascadeSection
+                    title="Agendamentos"
+                    icon={<CalendarClock size={18} />}
+                    open={openSections.schedules}
+                    count={`${schedules.length} registros`}
+                    onToggle={() => toggleSection("schedules")}
+                  >
+                    <div className="space-y-2">
+                      {schedules.length ? (
+                        schedules.map((item) => (
+                          <div
+                            key={item.id}
+                            className="flex items-start gap-3 rounded-2xl border border-red-100 bg-[#fffafa] px-4 py-3"
+                          >
+                            <div className="flex-1">
+                              <div className="text-sm font-bold text-slate-900">{item.number}</div>
+                              <div className="mt-1 line-clamp-3 text-sm text-slate-600">{item.text}</div>
+                              <div className="mt-2 text-xs text-slate-400">
+                                {item.sendAt} - {item.status}
+                              </div>
+                            </div>
+                            {item.status === "pending" ? (
+                              <button
+                                onClick={() => sendSocketEvent("panel:cancel-schedule", { id: item.id })}
+                                className="rounded-full bg-red-100 p-2 text-red-600 hover:bg-red-200"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            ) : null}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="rounded-2xl bg-slate-50 px-4 py-5 text-sm text-slate-500">
+                          Nenhum envio agendado.
+                        </div>
+                      )}
+                    </div>
+                  </CascadeSection>
+
+                  <CascadeSection
+                    title="Segmentacao por Palavra-chave"
+                    icon={<Filter size={18} />}
+                    open={openSections.segmentation}
+                    count={`${keywordMatches.length} encontrados`}
+                    onToggle={() => toggleSection("segmentation")}
+                  >
+                    <div className="space-y-3">
+                      <input
+                        value={segmentKeyword}
+                        onChange={(event) => setSegmentKeyword(event.target.value)}
+                        placeholder="Ex.: notebook"
+                        className="w-full rounded-2xl border border-red-100 px-4 py-3 outline-none transition focus:border-red-400"
+                      />
+                      <textarea
+                        value={segmentMessage}
+                        onChange={(event) => setSegmentMessage(event.target.value)}
+                        placeholder="Mensagem para os clientes selecionados"
+                        rows={3}
+                        className="w-full rounded-2xl border border-red-100 px-4 py-3 outline-none transition focus:border-red-400"
+                      />
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <button
+                          onClick={handleSelectAllSegmented}
+                          className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-bold text-red-700 transition hover:bg-red-100"
+                        >
+                          Selecionar todos
+                        </button>
+                        <button
+                          onClick={handleClearSegmented}
+                          className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+                        >
+                          Limpar selecao
+                        </button>
+                      </div>
+                      <div className="max-h-64 space-y-2 overflow-y-auto pr-1">
+                        {keywordMatches.length ? (
+                          keywordMatches.map((chat) => {
+                            const selected = segmentSelectedIds.includes(chat.chatId);
+                            return (
+                              <button
+                                key={chat.chatId}
+                                onClick={() => toggleSegmentSelection(chat.chatId)}
+                                className={`w-full rounded-2xl border px-4 py-3 text-left transition ${
+                                  selected
+                                    ? "border-red-300 bg-red-50"
+                                    : "border-red-100 bg-white hover:bg-red-50"
+                                }`}
+                              >
+                                <div className="flex items-center justify-between gap-3">
+                                  <div className="min-w-0">
+                                    <div className="truncate font-bold text-slate-900">
+                                      {getSummaryDisplayName(chat)}
+                                    </div>
+                                    <div className="mt-1 text-xs text-slate-500">
+                                      {getSummaryDisplayNumber(chat) || chat.chatId}
+                                    </div>
+                                  </div>
+                                  {selected ? (
+                                    <CheckCircle2 className="shrink-0 text-red-600" size={18} />
+                                  ) : null}
+                                </div>
+                              </button>
+                            );
+                          })
+                        ) : (
+                          <div className="rounded-2xl bg-slate-50 px-4 py-5 text-sm text-slate-500">
+                            Nenhum cliente encontrado para essa palavra-chave.
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        onClick={handleSendSegmented}
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-red-600 px-4 py-3 font-bold text-white transition hover:bg-red-700"
+                      >
+                        <Send size={16} />
+                        Enviar para selecionados
+                      </button>
+                    </div>
+                  </CascadeSection>
+                </div>
+              </aside>
             </div>
           </section>
         </div>
