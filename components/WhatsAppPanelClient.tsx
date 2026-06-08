@@ -640,6 +640,41 @@ export default function WhatsAppPanelClient() {
   const selectedSellerId = selectedChat ? chatAssignments[selectedChat.chatId] || null : null;
   const selectedSeller =
     vendors.find((vendor) => vendor.id === selectedSellerId) || null;
+  const selectedChatMetaBadges = useMemo(() => {
+    const badges: Array<{ label: string; tone: string }> = [];
+    if (!selectedChat) return badges;
+    if (selectedChat.isGroup) {
+      badges.push({
+        label: "Grupo",
+        tone: "bg-sky-50 text-sky-700 border-sky-100",
+      });
+    }
+    if (selectedChat.isPinned) {
+      badges.push({
+        label: "Fixada",
+        tone: "bg-violet-50 text-violet-700 border-violet-100",
+      });
+    }
+    if (selectedChat.isArchived) {
+      badges.push({
+        label: "Arquivada",
+        tone: "bg-slate-100 text-slate-700 border-slate-200",
+      });
+    }
+    if (selectedChat.isMuted) {
+      badges.push({
+        label: "Silenciada",
+        tone: "bg-amber-50 text-amber-700 border-amber-100",
+      });
+    }
+    if (selectedSeller) {
+      badges.push({
+        label: `${selectedSeller.veiculo_emoji || "🧑‍💼"} ${selectedSeller.nome}`,
+        tone: "bg-emerald-50 text-emerald-700 border-emerald-100",
+      });
+    }
+    return badges;
+  }, [selectedChat, selectedSeller]);
 
   useEffect(() => {
     if (composerMode === "chat" && selectedChatNumber) {
@@ -993,20 +1028,20 @@ export default function WhatsAppPanelClient() {
             </div>
           </div>
 
-          <div className="grid gap-4 border-t border-red-100 bg-white px-6 py-4 md:grid-cols-4 md:px-8">
-            <div className="rounded-2xl bg-red-50 px-4 py-3">
+          <div className="grid gap-4 border-t border-red-100 bg-white px-6 py-4 md:grid-cols-2 xl:grid-cols-4 md:px-8">
+            <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 shadow-sm">
               <div className="text-xs font-bold uppercase tracking-wide text-red-600">Status</div>
               <div className="mt-1 font-semibold text-slate-900">{status}</div>
             </div>
-            <div className="rounded-2xl bg-slate-50 px-4 py-3">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 shadow-sm">
               <div className="text-xs font-bold uppercase tracking-wide text-slate-500">Servidor</div>
               <div className="mt-1 text-sm font-medium text-slate-800">{serverHealthMessage}</div>
             </div>
-            <div className="rounded-2xl bg-slate-50 px-4 py-3">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 shadow-sm">
               <div className="text-xs font-bold uppercase tracking-wide text-slate-500">URL</div>
               <div className="mt-1 truncate text-sm font-medium text-slate-800">{serverUrl}</div>
             </div>
-            <div className="rounded-2xl bg-slate-50 px-4 py-3">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 shadow-sm">
               <div className="text-xs font-bold uppercase tracking-wide text-slate-500">API</div>
               <div className="mt-1 text-sm font-medium text-slate-800">
                 {apiInfo?.resolvedVersion || apiInfo?.declaredVersion || "whatsapp-web.js"}
@@ -1260,7 +1295,7 @@ export default function WhatsAppPanelClient() {
                 className="w-full border-b border-red-100 bg-[#fffafa] xl:h-full xl:shrink-0 xl:border-b-0 xl:border-r"
                 style={{ width: `min(100%, ${sidebarWidth}px)` }}
               >
-                <div className="border-b border-red-100 px-5 py-5">
+                <div className="border-b border-red-100 px-5 py-5 xl:sticky xl:top-0 xl:z-10 xl:bg-[#fffafa]/95 xl:backdrop-blur">
                   <div className="flex items-center gap-3">
                     <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-100 text-red-600">
                       <MessageCircle size={20} />
@@ -1322,8 +1357,8 @@ export default function WhatsAppPanelClient() {
                           }}
                           className={`w-full rounded-3xl border px-4 py-4 text-left transition ${
                             selectedChatId === chat.chatId
-                              ? "border-red-200 bg-white shadow-sm"
-                              : "border-transparent bg-transparent hover:border-red-100 hover:bg-white"
+                              ? "border-red-200 bg-white shadow-[0_14px_40px_rgba(239,68,68,0.10)]"
+                              : "border-transparent bg-transparent hover:border-red-100 hover:bg-white hover:shadow-sm"
                           }`}
                         >
                           <div className="flex items-start gap-3">
@@ -1403,7 +1438,7 @@ export default function WhatsAppPanelClient() {
               />
 
               <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-[linear-gradient(180deg,#ffffff_0%,#fff9f9_100%)]">
-                <div className="border-b border-red-100 px-5 py-5 md:px-7">
+                <div className="border-b border-red-100 bg-white/90 px-5 py-5 backdrop-blur md:px-7 xl:sticky xl:top-0 xl:z-10">
                   <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-3">
@@ -1437,6 +1472,18 @@ export default function WhatsAppPanelClient() {
                           </button>
                         ))}
                       </div>
+                      {selectedChatMetaBadges.length ? (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {selectedChatMetaBadges.map((badge) => (
+                            <span
+                              key={badge.label}
+                              className={`rounded-full border px-3 py-1 text-xs font-bold ${badge.tone}`}
+                            >
+                              {badge.label}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
@@ -1493,7 +1540,7 @@ export default function WhatsAppPanelClient() {
 
                 <div
                   ref={messagesViewportRef}
-                  className="max-h-[520px] overflow-y-auto px-5 py-6 md:px-7 xl:min-h-0 xl:flex-1 xl:max-h-none"
+                  className="max-h-[520px] overflow-y-auto bg-[radial-gradient(circle_at_top,#fff7f7_0%,#fffefe_45%,#ffffff_100%)] px-5 py-6 md:px-7 xl:min-h-0 xl:flex-1 xl:max-h-none"
                 >
                   {selectedChatMessages.length ? (
                     <div className="space-y-4">
@@ -1520,12 +1567,21 @@ export default function WhatsAppPanelClient() {
                               {item.mediaType || "midia"}
                             </div>
                           ) : null}
-                          <div
-                            className={`mt-3 text-xs font-medium ${
-                              item.direction === "out" ? "text-red-100" : "text-slate-400"
-                            }`}
-                          >
-                            {formatTime(item.timestamp)}
+                          <div className="mt-3 flex items-center justify-between gap-3">
+                            <div
+                              className={`text-xs font-medium ${
+                                item.direction === "out" ? "text-red-100" : "text-slate-400"
+                              }`}
+                            >
+                              {formatTime(item.timestamp)}
+                            </div>
+                            <div
+                              className={`text-[11px] font-bold ${
+                                item.direction === "out" ? "text-red-50/90" : "text-slate-300"
+                              }`}
+                            >
+                              {item.direction === "out" ? "Enviada" : "Recebida"}
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -1545,7 +1601,7 @@ export default function WhatsAppPanelClient() {
                   )}
                 </div>
 
-                <div className="border-t border-red-100 bg-white px-5 py-5 md:px-7">
+                <div className="border-t border-red-100 bg-white/95 px-5 py-5 backdrop-blur md:px-7 xl:sticky xl:bottom-0">
                   <div className="grid gap-4 xl:grid-cols-[1fr_240px_220px]">
                     <input
                       value={number}
@@ -1585,7 +1641,7 @@ export default function WhatsAppPanelClient() {
                   />
 
                   <div className="mt-4 grid gap-4 2xl:grid-cols-[minmax(0,1fr)_340px]">
-                    <div className="rounded-[28px] border border-red-100 bg-[#fffafa] p-4">
+                    <div className="rounded-[28px] border border-red-100 bg-[#fffafa] p-4 shadow-sm">
                       <div className="mb-3 flex items-center gap-2">
                         <Package2 className="text-red-600" size={18} />
                         <h4 className="font-black text-slate-900">Produtos do site</h4>
@@ -1647,7 +1703,7 @@ export default function WhatsAppPanelClient() {
                       </div>
                     </div>
 
-                    <div className="rounded-[28px] border border-red-100 bg-white p-4">
+                    <div className="rounded-[28px] border border-red-100 bg-white p-4 shadow-sm">
                       <div className="mb-3 flex items-center gap-2">
                         <ImagePlus className="text-red-600" size={18} />
                         <h4 className="font-black text-slate-900">Midia do atendimento</h4>
