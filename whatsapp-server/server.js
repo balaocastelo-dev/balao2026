@@ -22,6 +22,32 @@ const io = new Server(server, {
     methods: ["GET", "POST"],
   },
 });
+const debugEnvPath = path.join(process.cwd(), ".dbg", "whatsapp-send-sync.env");
+let DEBUG_SERVER_URL = "http://127.0.0.1:7777/event";
+let DEBUG_SESSION_ID = "whatsapp-send-sync";
+const DEBUG_RUN_ID = "post-fix";
+try {
+  const debugEnv = fs.readFileSync(debugEnvPath, "utf8");
+  DEBUG_SERVER_URL =
+    debugEnv.match(/DEBUG_SERVER_URL=(.+)/)?.[1]?.trim() || DEBUG_SERVER_URL;
+  DEBUG_SESSION_ID =
+    debugEnv.match(/DEBUG_SESSION_ID=(.+)/)?.[1]?.trim() || DEBUG_SESSION_ID;
+} catch {}
+function debugReport(hypothesisId, location, msg, data = {}) {
+  fetch(DEBUG_SERVER_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      sessionId: DEBUG_SESSION_ID,
+      runId: DEBUG_RUN_ID,
+      hypothesisId,
+      location,
+      msg,
+      data,
+      ts: Date.now(),
+    }),
+  }).catch(() => {});
+}
 
 const dataDir = path.join(__dirname, "data");
 const dataFile = path.join(dataDir, "panel-data.json");
@@ -112,6 +138,53 @@ function normalizeNumber(value) {
   return `55${digits}`;
 }
 
+function getDigits(value) {
+  return String(value || "").replace(/\D/g, "");
+}
+
+function isLikelyPhoneDigits(digits) {
+  return digits.length >= 10 && digits.length <= 13;
+}
+
+function formatDisplayNumber(value) {
+  const digits = getDigits(value);
+  if (!isLikelyPhoneDigits(digits)) return null;
+  return digits.startsWith("55") ? `+${digits}` : `+55${digits}`;
+}
+
+function extractRealNumber(...candidates) {
+  for (const candidate of candidates) {
+    const value = String(candidate || "").trim();
+    if (!value) continue;
+    const digits = getDigits(value);
+    const looksFormattedPhone =
+      value.startsWith("+") || value.includes("(") || value.includes(" ") || value.includes("-");
+    const looksBarePhone = /^55\d{10,11}$/.test(digits) || /^\d{10,11}$/.test(digits);
+
+    if ((looksFormattedPhone || looksBarePhone) && isLikelyPhoneDigits(digits)) {
+      return formatDisplayNumber(digits);
+    }
+  }
+  return null;
+}
+
+function resolveChatTarget(number, preferredChatId = null) {
+  if (preferredChatId) {
+    return preferredChatId;
+  }
+
+  const normalizedNumber = normalizeNumber(number);
+  const byHistory = [...store.messages]
+    .reverse()
+    .find((message) => normalizeNumber(message.realNumber || message.displayNumber || "") === normalizedNumber);
+
+  if (byHistory?.chatId) {
+    return byHistory.chatId;
+  }
+
+  return toChatId(number);
+}
+
 function toChatId(number) {
   return `${normalizeNumber(number)}@c.us`;
 }
@@ -182,6 +255,24 @@ async function syncRecentConversations() {
         const contact = await chat.getContact();
         const contactName =
           contact?.pushname || contact?.name || contact?.shortName || chat.name || chat.id.user || null;
+        const realNumber = extractRealNumber(
+          chat.name,
+          contact?.name,
+          contact?.pushname,
+          contact?.shortName
+        );
+        // #region debug-point C:sync-chat-contact
+        debugReport("C", "whatsapp-server/server.js:syncRecentConversations", "[DEBUG] syncing chat contact", {
+          chatId: chat.id?._serialized || null,
+          chatName: chat.name || null,
+          contactName,
+          realNumber,
+          contactNumber: contact?.number || null,
+          contactPushname: contact?.pushname || null,
+          isMyContact: typeof contact?.isMyContact === "boolean" ? contact.isMyContact : null,
+          messageCount: messages.length,
+        });
+        // #endregion
 
         messages.forEach((message) => {
           const chatId = message.fromMe ? message.to || chat.id._serialized : message.from;
@@ -194,6 +285,8 @@ async function syncRecentConversations() {
             direction: message.fromMe ? "out" : "in",
             timestamp: (message.timestamp || Math.floor(Date.now() / 1000)) * 1000,
             contactName,
+            realNumber,
+            displayNumber: realNumber,
           });
         });
       } catch (error) {
@@ -211,13 +304,22 @@ async function syncRecentConversations() {
   }
 }
 
-async function sendDirectMessage({ number, text, signatureId }) {
+async function sendDirectMessage({ number, text, signatureId, chatId: preferredChatId = null }) {
   if (!whatsappState.connected) {
     throw new Error("WhatsApp ainda nao conectado");
   }
 
   const finalText = appendSignature(text, signatureId);
-  const chatId = toChatId(number);
+  const chatId = resolveChatTarget(number, preferredChatId);
+  // #region debug-point B:send-direct-message
+  debugReport("B", "whatsapp-server/server.js:sendDirectMessage", "[DEBUG] preparing direct message", {
+    inputNumber: number,
+    preferredChatId,
+    normalizedChatId: chatId,
+    textPreview: finalText.slice(0, 140),
+    signatureId: signatureId || null,
+  });
+  // #endregion
   return whatsappClient.sendMessage(chatId, finalText);
 }
 
@@ -340,6 +442,8 @@ function attachWhatsAppClientEvents(client) {
       direction: "in",
       timestamp: (message.timestamp || Math.floor(Date.now() / 1000)) * 1000,
       contactName,
+      realNumber: extractRealNumber(message.from, contactName),
+      displayNumber: extractRealNumber(message.from, contactName),
     });
   });
 
@@ -355,6 +459,8 @@ function attachWhatsAppClientEvents(client) {
       direction: "out",
       timestamp: (message.timestamp || Math.floor(Date.now() / 1000)) * 1000,
       contactName: message.to || null,
+      realNumber: extractRealNumber(message.to, message.from),
+      displayNumber: extractRealNumber(message.to, message.from),
     });
   });
 }
@@ -477,11 +583,21 @@ io.on("connection", (socket) => {
       const number = normalizeNumber(payload.number);
       const text = String(payload.text || "").trim();
       if (!number || !text) return;
+      // #region debug-point D:panel-send-message
+      debugReport("D", "whatsapp-server/server.js:panel-send-message", "[DEBUG] panel send requested", {
+        requestedNumber: payload.number || null,
+        normalizedNumber: number,
+        requestedChatId: payload.chatId || null,
+        signatureId: payload.signatureId || null,
+        textPreview: text.slice(0, 140),
+      });
+      // #endregion
 
       await sendDirectMessage({
         number,
         text,
         signatureId: payload.signatureId || null,
+        chatId: payload.chatId || null,
       });
       emitToast(`Mensagem enviada para ${number}.`);
     } catch (error) {

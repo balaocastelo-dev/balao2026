@@ -41,6 +41,8 @@ type PanelMessage = {
   direction: "in" | "out";
   timestamp: number;
   contactName?: string | null;
+  realNumber?: string | null;
+  displayNumber?: string | null;
   labels?: string[];
 };
 
@@ -107,12 +109,24 @@ function getChatDigits(value: string) {
   return value.replace(/\D/g, "");
 }
 
+function isLikelyPhoneDigits(value: string) {
+  return value.length >= 10 && value.length <= 13;
+}
+
 function getChatDisplayName(message: PanelMessage) {
   return message.contactName || getChatDigits(message.chatId) || message.chatId;
 }
 
 function getChatPreviewNumber(message: PanelMessage) {
-  return getChatDigits(message.chatId) || getChatDigits(message.from) || message.chatId;
+  const chatIdDigits = getChatDigits(message.chatId);
+  const fromDigits = getChatDigits(message.from);
+  return (
+    message.displayNumber ||
+    message.realNumber ||
+    (isLikelyPhoneDigits(chatIdDigits) ? `+${chatIdDigits}` : "") ||
+    (isLikelyPhoneDigits(fromDigits) ? `+${fromDigits}` : "") ||
+    ""
+  );
 }
 
 type CascadeSectionProps = {
@@ -185,6 +199,7 @@ export default function WhatsAppPanelClient() {
   const [productResults, setProductResults] = useState<SiteProduct[]>([]);
   const [productLoading, setProductLoading] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<SiteProduct | null>(null);
+  const [composerMode, setComposerMode] = useState<"chat" | "new">("chat");
   const [openSections, setOpenSections] = useState({
     replies: true,
     labels: false,
@@ -366,6 +381,7 @@ export default function WhatsAppPanelClient() {
   useEffect(() => {
     if (!selectedChatId && filteredChatList[0]) {
       setSelectedChatId(filteredChatList[0].chatId);
+      setComposerMode("chat");
     }
   }, [filteredChatList, selectedChatId]);
 
@@ -378,8 +394,16 @@ export default function WhatsAppPanelClient() {
     () => chatList.find((item) => item.chatId === selectedChatId) || null,
     [chatList, selectedChatId]
   );
-  const selectedChatName = selectedChat ? getChatDisplayName(selectedChat) : "Selecione uma conversa";
-  const selectedChatNumber = selectedChat ? getChatPreviewNumber(selectedChat) : "";
+  const selectedChatName = selectedChat
+    ? getChatDisplayName(selectedChat)
+    : composerMode === "new"
+      ? "Nova mensagem"
+      : "Selecione uma conversa";
+  const selectedChatNumber = selectedChat
+    ? getChatPreviewNumber(selectedChat)
+    : number
+      ? `+${formatPhoneNumber(number)}`
+      : "";
 
   const sendSocketEvent = (event: string, payload: Record<string, unknown>) => {
     socketRef.current?.emit(event, payload);
@@ -401,6 +425,7 @@ export default function WhatsAppPanelClient() {
 
     sendSocketEvent("panel:send-message", {
       number: normalized,
+      chatId: composerMode === "chat" ? selectedChatId || null : null,
       text: message.trim(),
       signatureId: selectedSignatureId || null,
     });
@@ -458,6 +483,14 @@ export default function WhatsAppPanelClient() {
     sendSocketEvent("panel:reset-session", {});
   };
 
+  const handleStartNewMessage = () => {
+    setComposerMode("new");
+    setSelectedChatId("");
+    setNumber("");
+    setMessage("");
+    setSelectedProduct(null);
+  };
+
   const handleSyncConversations = () => {
     sendSocketEvent("panel:sync-conversations", {});
   };
@@ -492,6 +525,7 @@ export default function WhatsAppPanelClient() {
 
     sendSocketEvent("panel:send-message", {
       number: normalized,
+      chatId: composerMode === "chat" ? selectedChatId || null : null,
       text: buildProductMessage(product),
       signatureId: selectedSignatureId || null,
     });
@@ -906,6 +940,7 @@ export default function WhatsAppPanelClient() {
                       <button
                         key={chat.chatId}
                         onClick={() => {
+                          setComposerMode("chat");
                           setSelectedChatId(chat.chatId);
                           setNumber(getChatPreviewNumber(chat));
                         }}
@@ -989,6 +1024,13 @@ export default function WhatsAppPanelClient() {
                       >
                         <RefreshCcw size={14} />
                         Sincronizar
+                      </button>
+                      <button
+                        onClick={handleStartNewMessage}
+                        className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-red-50"
+                      >
+                        <Plus size={14} />
+                        Nova mensagem
                       </button>
                       <span className="rounded-full bg-slate-100 px-3 py-2 text-xs font-bold text-slate-600">
                         {selectedSignatureId ? "Assinatura ativa" : "Sem assinatura"}
@@ -1141,6 +1183,12 @@ export default function WhatsAppPanelClient() {
                           <div className="mt-1 font-semibold text-slate-900">{selectedChatNumber || "-"}</div>
                         </div>
                         <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                          <div className="text-xs font-bold uppercase tracking-wide text-slate-500">Modo</div>
+                          <div className="mt-1 font-semibold text-slate-900">
+                            {composerMode === "new" ? "Nova mensagem" : "Conversa existente"}
+                          </div>
+                        </div>
+                        <div className="rounded-2xl bg-slate-50 px-4 py-3">
                           <div className="text-xs font-bold uppercase tracking-wide text-slate-500">Etiquetas</div>
                           <div className="mt-2 flex flex-wrap gap-2">
                             {selectedChatLabels.length ? (
@@ -1170,7 +1218,10 @@ export default function WhatsAppPanelClient() {
                   <div className="grid gap-3 xl:grid-cols-[1fr_260px_200px]">
                     <input
                       value={number}
-                      onChange={(event) => setNumber(formatPhoneNumber(event.target.value))}
+                      onChange={(event) => {
+                        setComposerMode("new");
+                        setNumber(formatPhoneNumber(event.target.value));
+                      }}
                       placeholder="Numero com DDD"
                       className="w-full rounded-2xl border border-red-100 px-4 py-3 outline-none transition focus:border-red-400"
                     />
@@ -1239,7 +1290,7 @@ export default function WhatsAppPanelClient() {
                         className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-600 px-6 py-3 font-bold text-white transition hover:bg-red-700"
                       >
                         <Send size={16} />
-                        Enviar agora
+                        {composerMode === "new" ? "Enviar nova mensagem" : "Enviar agora"}
                       </button>
                     </div>
                   </div>
