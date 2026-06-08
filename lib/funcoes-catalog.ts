@@ -449,6 +449,12 @@ export const FUNCOES_CATALOG: FuncaoCategory[] = [
         description: "Pagina protegida que centraliza os atalhos para todas as funcoes do site.",
         image: IMAGES.gestao,
       },
+      {
+        href: "/whatsapp",
+        title: "WhatsApp",
+        description: "Painel protegido do WhatsApp com QR Code, chat, etiquetas, assinaturas, agendamentos e respostas rapidas.",
+        image: IMAGES.contato,
+      },
     ],
   },
   {
