@@ -419,7 +419,7 @@ export default function WhatsAppPanelClient() {
 
   const buildProductMessage = (product: SiteProduct) => {
     return [
-      "Produto recomendado da Bal„o da Inform·tica:",
+      "Produto recomendado da Bal√£o da Inform√°tica:",
       "",
       product.name,
       product.price || "Consulte o valor",
