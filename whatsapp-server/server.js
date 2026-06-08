@@ -123,15 +123,92 @@ function appendSignature(text, signatureId) {
   return `${text}\n\n${signature.signature}\n${signature.sellerName}`;
 }
 
-function storeMessage(message) {
-  const next = {
+function buildMessageFingerprint(message) {
+  return [
+    message.id || "",
+    message.chatId || "",
+    message.direction || "",
+    message.timestamp || 0,
+    message.body || "",
+  ].join("::");
+}
+
+function normalizeStoredMessage(message) {
+  return {
     ...message,
     labels: store.chatLabels[message.chatId] || [],
   };
+}
 
-  store.messages = [...store.messages, next].slice(-400);
+function mergeMessages(messages) {
+  const seen = new Map();
+  [...store.messages, ...messages.map(normalizeStoredMessage)].forEach((message) => {
+    seen.set(buildMessageFingerprint(message), message);
+  });
+  store.messages = Array.from(seen.values())
+    .sort((a, b) => a.timestamp - b.timestamp)
+    .slice(-600);
+}
+
+function storeMessage(message) {
+  const next = normalizeStoredMessage(message);
+  const exists = store.messages.some(
+    (item) => buildMessageFingerprint(item) === buildMessageFingerprint(next)
+  );
+
+  mergeMessages([next]);
   persistStore();
-  io.emit("whatsapp:message", next);
+
+  if (!exists) {
+    io.emit("whatsapp:message", next);
+  }
+}
+
+async function syncRecentConversations() {
+  if (!whatsappClient || !whatsappState.connected) return;
+
+  try {
+    const chats = await whatsappClient.getChats();
+    const relevantChats = chats
+      .filter((chat) => !chat.isGroup && !chat.isStatus && !chat.id?._serialized?.includes("broadcast"))
+      .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+      .slice(0, 40);
+
+    const syncedMessages = [];
+
+    for (const chat of relevantChats) {
+      try {
+        const messages = await chat.fetchMessages({ limit: 25 });
+        const contact = await chat.getContact();
+        const contactName =
+          contact?.pushname || contact?.name || contact?.shortName || chat.name || chat.id.user || null;
+
+        messages.forEach((message) => {
+          const chatId = message.fromMe ? message.to || chat.id._serialized : message.from;
+          syncedMessages.push({
+            id: message.id?._serialized || createId(),
+            chatId,
+            from: message.from,
+            to: message.to || null,
+            body: message.body || "",
+            direction: message.fromMe ? "out" : "in",
+            timestamp: (message.timestamp || Math.floor(Date.now() / 1000)) * 1000,
+            contactName,
+          });
+        });
+      } catch (error) {
+        console.error("Falha ao sincronizar conversa:", chat?.id?._serialized, error);
+      }
+    }
+
+    mergeMessages(syncedMessages);
+    persistStore();
+    emitMessages();
+    emitToast("Conversas sincronizadas com o WhatsApp.");
+  } catch (error) {
+    console.error("Falha ao sincronizar conversas do WhatsApp:", error);
+    emitToast("Falha ao sincronizar conversas do WhatsApp.");
+  }
 }
 
 async function sendDirectMessage({ number, text, signatureId }) {
@@ -229,6 +306,7 @@ function attachWhatsAppClientEvents(client) {
     whatsappState.phoneNumber = client.info?.wid?.user || null;
     emitState();
     emitToast("WhatsApp conectado e pronto para uso.");
+    await syncRecentConversations();
   });
 
   client.on("auth_failure", (message) => {
@@ -387,6 +465,11 @@ io.on("connection", (socket) => {
   socket.on("panel:reset-session", async () => {
     emitToast("Reiniciando a sessao do WhatsApp para gerar um novo QR Code.");
     await initializeWhatsAppClient({ resetSession: true });
+  });
+
+  socket.on("panel:sync-conversations", async () => {
+    emitToast("Sincronizando conversas da conta conectada.");
+    await syncRecentConversations();
   });
 
   socket.on("panel:send-message", async (payload) => {
