@@ -945,8 +945,8 @@ export default function WhatsAppPanelClient() {
   };
 
   return (
-    <div className="h-screen overflow-hidden bg-[linear-gradient(180deg,#fff5f5_0%,#fffdfd_100%)] text-slate-900">
-      <div className="mx-auto flex h-full max-w-[1700px] flex-col px-4 py-4 md:px-6 md:py-6">
+    <div className="min-h-screen bg-[linear-gradient(180deg,#fff5f5_0%,#fffdfd_100%)] text-slate-900">
+      <div className="mx-auto max-w-[1700px] px-4 py-4 md:px-6 md:py-6">
         <div className="mb-6 overflow-hidden rounded-[32px] border border-red-100 bg-white shadow-[0_30px_80px_rgba(239,68,68,0.08)]">
           <div className="bg-[linear-gradient(135deg,#dc2626_0%,#ef4444_60%,#b91c1c_100%)] px-6 py-7 text-white md:px-8 md:py-8">
             <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
@@ -1021,7 +1021,7 @@ export default function WhatsAppPanelClient() {
           ) : null}
         </div>
 
-        <div className="flex min-h-0 flex-1 flex-col space-y-6">
+        <div className="space-y-6">
           <div className="grid gap-6 xl:grid-cols-[340px_minmax(0,1fr)_360px]">
             <section className="overflow-hidden rounded-[28px] border border-red-100 bg-white shadow-sm">
               <div className="border-b border-red-100 px-5 py-4">
@@ -1253,9 +1253,9 @@ export default function WhatsAppPanelClient() {
 
           <section
             ref={workspaceRef}
-            className="min-h-0 flex-1 overflow-hidden rounded-[32px] border border-red-100 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.06)]"
+            className="overflow-hidden rounded-[32px] border border-red-100 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.06)] xl:h-[calc(100vh-22rem)] xl:min-h-[880px]"
           >
-            <div className="flex h-full min-h-0 flex-col xl:flex-row">
+            <div className="flex min-h-[880px] flex-col xl:h-full xl:min-h-0 xl:flex-row">
               <aside
                 className="w-full border-b border-red-100 bg-[#fffafa] xl:h-full xl:shrink-0 xl:border-b-0 xl:border-r"
                 style={{ width: `min(100%, ${sidebarWidth}px)` }}
@@ -1306,7 +1306,7 @@ export default function WhatsAppPanelClient() {
                   </div>
                 </div>
 
-                <div className="max-h-[calc(100vh-420px)] space-y-2 overflow-y-auto px-4 py-4 xl:max-h-[none] xl:h-[calc(100%-164px)]">
+                <div className="max-h-[420px] space-y-2 overflow-y-auto px-4 py-4 xl:h-[calc(100%-164px)] xl:max-h-none">
                   {filteredChatList.length ? (
                     filteredChatList.map((chat) => {
                       const assignedVendor =
@@ -1493,7 +1493,7 @@ export default function WhatsAppPanelClient() {
 
                 <div
                   ref={messagesViewportRef}
-                  className="min-h-0 flex-1 overflow-y-auto px-5 py-6 md:px-7"
+                  className="max-h-[520px] overflow-y-auto px-5 py-6 md:px-7 xl:min-h-0 xl:flex-1 xl:max-h-none"
                 >
                   {selectedChatMessages.length ? (
                     <div className="space-y-4">
@@ -1702,7 +1702,7 @@ export default function WhatsAppPanelClient() {
               </div>
 
               <aside className="w-full border-t border-red-100 bg-[#fffdfd] xl:h-full xl:w-[380px] xl:shrink-0 xl:border-l xl:border-t-0">
-                <div className="max-h-[calc(100vh-420px)] space-y-5 overflow-y-auto p-5 xl:h-full xl:max-h-none">
+                <div className="space-y-5 p-5 xl:h-full xl:overflow-y-auto">
                   <section className="rounded-[28px] border border-red-100 bg-white p-4 shadow-sm">
                     <div className="mb-3 flex items-center gap-2">
                       <UserRound className="text-red-600" size={18} />
