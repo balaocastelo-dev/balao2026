@@ -291,24 +291,24 @@ export default function PremiumConfigurator() {
   const setupImages = useMemo(
     () => [
       {
-        src: "/images/premium/setups/setup-gamer-premium-01.webp",
-        alt: "Setup gamer premium em tons escuros com iluminação vermelha",
+        src: "/images/prizes/pc.webp",
+        alt: "PC premium com gabinete e iluminação em destaque",
       },
       {
-        src: "/images/premium/setups/setup-gamer-premium-02.webp",
-        alt: "Setup gamer premium com PC iluminado em vermelho",
+        src: "/images/prizes/pc.png",
+        alt: "Computador premium para jogos e alta performance",
       },
       {
-        src: "/images/premium/setups/setup-workstation-premium.webp",
-        alt: "Setup workstation premium com dois monitores e iluminação vermelha",
+        src: "/images/prizes/pc.jpg",
+        alt: "Setup premium para uso gamer e profissional",
       },
       {
-        src: "/images/premium/setups/setup-creator-premium.webp",
-        alt: "Setup creator premium para edição e produção",
+        src: "/images/pcs/pc-gamer.svg",
+        alt: "Ilustração de PC premium gamer",
       },
       {
-        src: "/images/premium/setups/setup-extreme-premium.webp",
-        alt: "PC premium com visual extremo e iluminação vermelha",
+        src: "/logo.png",
+        alt: "Marca Balão da Informática",
       },
     ],
     []
@@ -536,7 +536,7 @@ export default function PremiumConfigurator() {
               <div className="relative aspect-[16/10] w-full">
                 <SafeImage
                   src={img.src}
-                  fallbackSrc="/images/pc.webp"
+                  fallbackSrc="/images/prizes/pc.webp"
                   alt={img.alt}
                   fill
                   sizes="(max-width: 1024px) 100vw, 220px"
