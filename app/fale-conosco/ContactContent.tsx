@@ -2,8 +2,9 @@
 
 import Header from "@/components/Header";
 import { SITE_CONFIG } from "@/lib/config";
+import { BUSINESS_INFO } from "@/lib/business-info";
 import { useToast } from "@/context/ToastContext";
-import { Mail, Phone, MapPin, Send } from "lucide-react";
+import { Mail, Phone, MapPin, Send, MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import {
@@ -108,7 +109,7 @@ export default function FaleConoscoPage() {
                   >
                     {SITE_CONFIG.phone.display}
                   </a>
-                  <p className="text-sm text-gray-500">Seg. a Sex. das 9h às 18h</p>
+                  <p className="text-sm text-gray-500">Seg–Sex: 08h–18h | Sáb: 08h–13h</p>
                 </div>
               </div>
 
@@ -135,10 +136,29 @@ export default function FaleConoscoPage() {
                   <MapPin size={24} />
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-800 text-lg">Endereço</h3>
-                  <p className="text-gray-600">
-                    {SITE_CONFIG.address}
-                  </p>
+                   <h3 className="font-bold text-gray-800 text-lg">Endereço</h3>
+                   <p className="text-gray-600">
+                     {SITE_CONFIG.address}
+                   </p>
+                   <p className="text-sm text-gray-500">CEP: {BUSINESS_INFO.postalCode}</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <div className="bg-white p-3 rounded-full shadow-sm" style={{color: '#25D366'}}>
+                  <MessageCircle size={24} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-800 text-lg">WhatsApp</h3>
+                  <a
+                    href={BUSINESS_INFO.whatsapp.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-600 hover:text-green-600 transition-colors font-bold"
+                  >
+                    {BUSINESS_INFO.whatsapp.display}
+                  </a>
+                  <p className="text-sm text-gray-500">Atendimento 24h: agente de IA + atendimento humano</p>
                 </div>
               </div>
             </div>

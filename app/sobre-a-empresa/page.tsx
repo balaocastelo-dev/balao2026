@@ -75,7 +75,7 @@ export default function SobreAEmpresaPage() {
             <p><strong>Razão Social:</strong> {SITE_CONFIG.companyName}</p>
             <p><strong>CNPJ:</strong> {SITE_CONFIG.cnpj}</p>
             <p><strong>Endereço Matriz:</strong> {SITE_CONFIG.address}</p>
-            <p><strong>CEP:</strong> 13025-000</p>
+            <p><strong>CEP:</strong> 13012-100</p>
             <p><strong>Inscrição Estadual:</strong> 000.000.000.000</p>
           </div>
 

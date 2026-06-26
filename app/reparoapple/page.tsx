@@ -1,4 +1,4 @@
-import { Metadata } from 'next'
+﻿import { Metadata } from 'next'
 import Header from '@/components/Header'
 import { 
   Smartphone, 
@@ -258,7 +258,7 @@ export default async function ReparoApplePage() {
                 Técnicos certificados e laboratório de ponta em Campinas.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="https://wa.me/5519993916723" target="_blank">
+                <Link href="https://wa.me/5519987510267" target="_blank">
                   <button className="inline-flex items-center justify-center bg-white text-black hover:bg-zinc-200 px-8 h-12 text-lg rounded-md font-medium transition-colors w-full sm:w-auto">
                     <Phone className="w-5 h-5 mr-2" />
                     Orçamento Grátis

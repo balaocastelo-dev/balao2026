@@ -2,17 +2,18 @@ import Header from "@/components/Header";
 import type { Metadata } from "next";
 import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from "@/components/JsonLd";
 import { SITE_CONFIG } from "@/lib/config";
+import { BUSINESS_INFO } from "@/lib/business-info";
 
 export const metadata: Metadata = {
-  title: "Sobre Nós | Balão da Informática",
+  title: "Sobre Nós | Balão da Informática Castelo – Campinas",
   description:
-    "Conheça a história, missão e valores do Balão da Informática, loja de informática com entrega rápida em Campinas e região e envio para todo o Brasil.",
+    "Conheça a unidade Balão da Informática Castelo, localizada na Av. Anchieta, 789 – Cambuí, Campinas. Loja de informática com assistência técnica, PCs Gamer, notebooks e atendimento via WhatsApp 24h.",
   keywords: [
-    "balão da informática",
-    "história balão da informática",
+    "balão da informática castelo",
     "loja de informática campinas",
-    "loja de informática brasil",
-    "entrega rápida campinas",
+    "assistência técnica informática campinas",
+    "av anchieta 789 campinas",
+    "cambuí campinas informática",
   ],
   alternates: { canonical: "https://www.balao.info/sobre-nos" },
   openGraph: {
@@ -84,6 +85,25 @@ export default function SobreNosPage() {
               Além de um vasto catálogo de produtos, contamos com uma equipe de especialistas pronta para 
               tirar suas dúvidas e ajudar na escolha do equipamento ideal. Nossa logística eficiente 
               garante que seu pedido chegue rápido e seguro até você.
+            </p>
+          </div>
+
+          <div className="bg-red-50 p-6 rounded-lg mt-8 border border-red-100">
+            <h3 className="text-xl font-bold text-[#E60012] mb-4">Unidade Castelo – Campinas</h3>
+            <ul className="space-y-2 text-gray-700">
+              <li><strong>Endereço:</strong> {BUSINESS_INFO.address}</li>
+              <li><strong>CEP:</strong> {BUSINESS_INFO.postalCode}</li>
+              <li><strong>Telefone:</strong> {BUSINESS_INFO.phone.display}</li>
+              <li><strong>WhatsApp:</strong> <a href={BUSINESS_INFO.whatsapp.href} target="_blank" rel="noopener noreferrer" className="text-green-600 font-bold hover:underline">{BUSINESS_INFO.whatsapp.display}</a></li>
+              <li><strong>E-mail:</strong> <a href={`mailto:${BUSINESS_INFO.email}`} className="text-[#E60012] hover:underline">{BUSINESS_INFO.email}</a></li>
+              <li><strong>Horário:</strong> Seg–Sex: 08h–18h | Sáb: 08h–13h</li>
+              <li><strong>WhatsApp 24h:</strong> atendimento com agente de IA e humano</li>
+              <li><strong>CNPJ:</strong> {BUSINESS_INFO.cnpj}</li>
+            </ul>
+            <p className="mt-4 text-gray-600">
+              Estamos na <strong>Av. Anchieta, 789 – Cambuí, Campinas/SP</strong>. 
+              Atendimento presencial de segunda a sexta das 08h às 18h e aos sábados das 08h às 13h.
+              Fale agora no WhatsApp: <a href={BUSINESS_INFO.whatsapp.href} target="_blank" rel="noopener noreferrer" className="text-green-600 font-bold">{BUSINESS_INFO.whatsapp.display}</a>.
             </p>
           </div>
         </div>

@@ -436,7 +436,7 @@ function BlockContact() {
     <section className="py-16 bg-slate-900 text-white">
       <div className="container mx-auto px-4 text-center">
         <h2 className="text-3xl md:text-5xl font-black mb-8">ONDE ESTAMOS</h2>
-        <p className="text-xl text-slate-300 mb-8">Av. Brasil, 1234 - Guanabara, Campinas - SP</p>
+        <p className="text-xl text-slate-300 mb-8">Av. Anchieta, 789 - Cambuí, Campinas - SP</p>
         
         <div className="flex flex-col md:flex-row gap-8 justify-center items-center">
           <a 

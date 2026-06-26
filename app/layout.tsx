@@ -32,28 +32,28 @@ function getMetadataBase() {
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | Balão da Informática",
+    template: "%s | Balão da Informática Castelo",
     default:
-      "Balão da Informática | Loja de Informática com Entrega Rápida em Campinas e Região",
+      "Balão da Informática Castelo | Loja de Informática em Campinas – Av. Anchieta, 789",
   },
   description:
     "Loja de informática completa com entrega rápida para Campinas, Sumaré, Hortolândia, Paulínia, Valinhos, Vinhedo e todo o Brasil. PCs Gamer, notebooks, hardware, periféricos e assistência técnica especializada.",
   metadataBase: getMetadataBase(),
   keywords: [
     "loja de informática",
-    "loja de informática online",
-    "informática campinas",
+    "balão da informática castelo",
+    "loja de informática campinas",
     "pc gamer campinas",
-    "pc gamer brasil",
-    "computador completo",
     "notebook campinas",
     "hardware campinas",
-    "loja de computadores",
-    "entrega rápida campinas",
-    "entrega rápida região metropolitana de campinas",
-    "entrega para todo brasil",
     "assistência técnica informática campinas",
-    "balão da informática",
+    "assistência técnica notebook campinas",
+    "manutenção notebook campinas",
+    "montagem pc gamer campinas",
+    "av anchieta 789 campinas",
+    "loja de computadores cambuí campinas",
+    "balao da informatica",
+    "entrega rápida campinas",
   ],
   authors: [{ name: "Balão da Informática" }],
   creator: "Balão da Informática",
@@ -84,6 +84,7 @@ export const metadata: Metadata = {
 };
 
 import { SITE_CONFIG } from "@/lib/config";
+import { BUSINESS_INFO } from "@/lib/business-info";
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -91,17 +92,19 @@ const jsonLd = {
     {
       "@type": ["ComputerStore", "Store", "LocalBusiness"],
       "@id": "https://www.balao.info/#store",
-      name: SITE_CONFIG.name,
+      name: BUSINESS_INFO.name,
+      legalName: BUSINESS_INFO.legalName,
+      taxID: BUSINESS_INFO.cnpj,
       image: "https://www.balao.info/logo.png",
       description:
         "Loja de informática em Campinas especializada em computadores, PC Gamer, notebooks, hardware e periféricos, com entrega rápida para Campinas e região.",
       address: {
         "@type": "PostalAddress",
-        streetAddress: SITE_CONFIG.address,
-        addressLocality: "Campinas",
-        addressRegion: "SP",
-        postalCode: "13025-000",
-        addressCountry: "BR",
+        streetAddress: BUSINESS_INFO.streetAddress,
+        addressLocality: BUSINESS_INFO.city,
+        addressRegion: BUSINESS_INFO.state,
+        postalCode: BUSINESS_INFO.postalCode,
+        addressCountry: BUSINESS_INFO.country,
       },
       geo: {
         "@type": "GeoCoordinates",
@@ -109,31 +112,56 @@ const jsonLd = {
         longitude: -47.0626,
       },
       url: "https://www.balao.info",
-      telephone: `+${SITE_CONFIG.phone.number}`,
-      email: SITE_CONFIG.email,
+      telephone: BUSINESS_INFO.phone.e164,
+      email: BUSINESS_INFO.email,
       priceRange: "$$",
+      openingHours: BUSINESS_INFO.openingHours.iso,
       openingHoursSpecification: [
         {
           "@type": "OpeningHoursSpecification",
           dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-          opens: "09:00",
+          opens: "08:00",
           closes: "18:00",
         },
         {
           "@type": "OpeningHoursSpecification",
           dayOfWeek: "Saturday",
-          opens: "09:00",
+          opens: "08:00",
           closes: "13:00",
         },
       ],
-      areaServed: ["Campinas", "Sumaré", "Hortolândia", "Paulínia", "Valinhos", "Vinhedo", "Brasil"],
-      sameAs: [SITE_CONFIG.social.instagram, SITE_CONFIG.social.facebook],
+      contactPoint: [
+        {
+          "@type": "ContactPoint",
+          telephone: BUSINESS_INFO.whatsapp.e164,
+          contactType: "customer service",
+          availableLanguage: "Portuguese",
+          areaServed: "Campinas e Região Metropolitana de Campinas",
+          contactOption: "TollFree",
+          hoursAvailable: {
+            "@type": "OpeningHoursSpecification",
+            dayOfWeek: ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+            opens: "00:00",
+            closes: "23:59",
+          },
+        },
+        {
+          "@type": "ContactPoint",
+          telephone: BUSINESS_INFO.phone.e164,
+          contactType: "customer service",
+          availableLanguage: "Portuguese",
+          areaServed: "Campinas e Região Metropolitana de Campinas",
+        },
+      ],
+      areaServed: BUSINESS_INFO.areaServed,
+      sameAs: [BUSINESS_INFO.social.instagram, BUSINESS_INFO.social.facebook],
       makesOffer: {
         "@type": "OfferCatalog",
         name: "Informática e Tecnologia",
         itemListElement: [
           { "@type": "Offer", name: "PC Gamer", category: "Computadores" },
           { "@type": "Offer", name: "Notebooks", category: "Informática" },
+          { "@type": "Offer", name: "Assistência Técnica", category: "Serviços" },
           { "@type": "Offer", name: "Periféricos e Acessórios", category: "Informática" },
         ],
       },
@@ -142,7 +170,7 @@ const jsonLd = {
       "@type": "WebSite",
       "@id": "https://www.balao.info/#website",
       url: "https://www.balao.info",
-      name: SITE_CONFIG.name,
+      name: BUSINESS_INFO.name,
       publisher: { "@id": "https://www.balao.info/#store" },
       inLanguage: "pt-BR",
       potentialAction: {

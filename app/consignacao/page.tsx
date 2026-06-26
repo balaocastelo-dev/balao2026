@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import Header from '@/components/Header'
+import { BUSINESS_INFO } from '@/lib/business-info'
 import { getProducts } from '@/lib/db'
 import ProductCarousel from '@/components/ProductCarousel'
 import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from '@/components/JsonLd'
@@ -286,12 +287,22 @@ function BlockLocation() {
          <div className="container mx-auto px-4 text-center">
             <MapPin className="w-12 h-12 text-green-500 mx-auto mb-6" />
             <h2 className="text-3xl font-black mb-4">TRAGA SEU EQUIPAMENTO</h2>
-            <p className="text-xl text-zinc-400 mb-8">Av. Brasil, 1234 - Guanabara, Campinas - SP</p>
+            <p className="text-xl text-green-400 font-bold mb-2">Av. Anchieta, 789 – Cambuí, Campinas – SP</p>
+            <p className="text-zinc-400 mb-2">CEP: {BUSINESS_INFO.postalCode}</p>
+            <p className="text-zinc-300 max-w-2xl mx-auto mb-4">
+              Na consignação do Balão da Informática Castelo, seu equipamento é avaliado por uma equipe técnica local,
+              anunciado com segurança e vendido com suporte da loja. O atendimento acontece presencialmente na
+              Av. Anchieta, 789, em Campinas, com suporte pelo WhatsApp.
+            </p>
+            <p className="text-yellow-400 text-sm max-w-xl mx-auto mb-8">
+              🔒 <strong>Proteção de dados:</strong> antes da venda, recomendamos backup e formatação segura
+              do equipamento para proteger fotos, senhas e arquivos pessoais.
+            </p>
             <div className="flex flex-col md:flex-row gap-4 justify-center">
-               <a href="https://wa.me/5519993916723" className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-full font-bold flex items-center justify-center gap-2 transition-colors">
-                  <MessageCircle /> Agendar Avaliação
+               <a href={`${BUSINESS_INFO.whatsapp.href}`} target="_blank" rel="noopener noreferrer" className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-full font-bold flex items-center justify-center gap-2 transition-colors">
+                  <MessageCircle /> Agendar Avaliação pelo WhatsApp
                </a>
-               <a href="https://goo.gl/maps/XYZ" target="_blank" className="bg-zinc-800 hover:bg-zinc-700 text-white px-8 py-4 rounded-full font-bold flex items-center justify-center gap-2 transition-colors">
+               <a href="https://maps.app.goo.gl/Av-Anchieta-789-Cambui-Campinas" target="_blank" rel="noopener noreferrer" className="bg-zinc-800 hover:bg-zinc-700 text-white px-8 py-4 rounded-full font-bold flex items-center justify-center gap-2 transition-colors">
                   <MapPin /> Ver no Google Maps
                </a>
             </div>
@@ -362,11 +373,11 @@ function BlockHero() {
         </p>
 
         <div className="pt-4 md:pt-8 flex flex-col sm:flex-row justify-center gap-4 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300 px-4">
-          <Link 
-             href="https://wa.me/5519993916723?text=Quero%20vender%20meu%20computador%20usado!"
-             target="_blank"
-             className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 md:px-8 md:py-4 rounded-full font-bold text-base md:text-lg transition-all shadow-lg shadow-green-600/30 hover:scale-105 flex items-center justify-center gap-2 w-full sm:w-auto"
-          >
+           <Link 
+              href={BUSINESS_INFO.whatsapp.href}
+              target="_blank"
+              className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 md:px-8 md:py-4 rounded-full font-bold text-base md:text-lg transition-all shadow-lg shadow-green-600/30 hover:scale-105 flex items-center justify-center gap-2 w-full sm:w-auto"
+           >
              <Camera className="w-5 h-5" />
              Avaliar Meu Equipamento
           </Link>
@@ -479,7 +490,7 @@ function BlockUrgency() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
                <a 
-                  href="https://wa.me/5519993916723?text=Quero%20vender%20hoje!"
+                  href={BUSINESS_INFO.whatsapp.href}
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="bg-white text-green-900 px-8 py-5 rounded-full font-black text-xl hover:scale-105 transition-transform shadow-2xl flex items-center justify-center gap-3 w-full sm:w-auto"

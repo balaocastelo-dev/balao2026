@@ -202,26 +202,30 @@ export default async function Home(props: {
 
             {/* SEO Content Section */}
             {!search && !category && (
-                <SeoContent title="BALÃO DA INFORMÁTICA: SUA LOJA DE INFORMÁTICA EM CAMPINAS E REGIÃO">
+                <SeoContent title="BALÃO DA INFORMÁTICA CASTELO: LOJA DE INFORMÁTICA EM CAMPINAS">
                     <p className="text-gray-600 mb-4">
-                        Bem-vindo ao <strong>Balão da Informática</strong>, sua referência em tecnologia e hardware em <strong>Campinas e RMC</strong>. Encontre as melhores marcas de peças, notebooks e PC Gamer com preço justo e garantia.
+                        Bem-vindo ao <strong>Balão da Informática Castelo</strong>, sua referência em tecnologia e hardware em <strong>Campinas – Cambuí</strong>. Encontre as melhores marcas de peças, notebooks e PC Gamer com preço justo e garantia. Estamos na <strong>Av. Anchieta, 789 – Cambuí, Campinas/SP</strong>.
                     </p>
                     <ul className="list-none pl-0 text-gray-600 space-y-3">
                         <li className="flex items-start gap-2">
                             <span className="text-xl">📍</span>
+                            <span><strong>Endereço:</strong> Av. Anchieta, 789 – Cambuí, Campinas – SP. CEP: 13012-100. Atendimento presencial de segunda a sexta das 08h às 18h e aos sábados das 08h às 13h.</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <span className="text-xl">💬</span>
+                            <span><strong>WhatsApp 24h:</strong> (19) 98751-0267 — atendimento com agente de IA e atendimento humano a qualquer hora.</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <span className="text-xl">🌎</span>
                             <span><strong>Região RMC:</strong> Atendemos Campinas, Sumaré, Hortolândia, Paulínia, Valinhos, Vinhedo, Indaiatuba e Jaguariúna.</span>
                         </li>
                         <li className="flex items-start gap-2">
                             <span className="text-xl">🚀</span>
-                            <span><strong>Especialistas:</strong> Montagem de PC Gamer High-End, Workstations para renderização e computadores para escritório.</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                            <span className="text-xl">⚡</span>
-                            <span><strong>Entrega Flash:</strong> Receba no mesmo dia em Campinas (consulte disponibilidade). Delivery rápido e seguro.</span>
+                            <span><strong>Especialistas:</strong> Montagem de PC Gamer, assistência técnica em notebooks e desktops, manutenção de Apple, consignação de usados.</span>
                         </li>
                         <li className="flex items-start gap-2">
                             <span className="text-xl">🏆</span>
-                            <span><strong>Por que escolher:</strong> Maior estoque da região, preços agressivos em SSD/RAM/Video e suporte técnico especializado.</span>
+                            <span><strong>Por que escolher:</strong> Maior estoque da região, preços agressivos em SSD/RAM/Vídeo e suporte técnico especializado com atendimento real.</span>
                         </li>
                     </ul>
                 </SeoContent>

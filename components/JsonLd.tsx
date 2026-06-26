@@ -1,5 +1,6 @@
 import { getProductHref, parsePriceToNumber, Product } from "@/lib/utils";
 import { SITE_CONFIG } from "@/lib/config";
+import { BUSINESS_INFO } from "@/lib/business-info";
 
 type JsonLdProps = {
   data: Record<string, unknown> | Record<string, unknown>[];
@@ -23,41 +24,67 @@ export function generateOrganizationSchema() {
     "@context": "https://schema.org",
     "@type": ["ComputerStore", "Store", "LocalBusiness"],
     "@id": "https://www.balao.info/#organization",
-    name: SITE_CONFIG.name,
+    name: BUSINESS_INFO.name,
+    legalName: BUSINESS_INFO.legalName,
+    taxID: BUSINESS_INFO.cnpj,
     url: "https://www.balao.info",
     image: "https://www.balao.info/logo.png",
-    telephone: `+${SITE_CONFIG.phone.number}`,
-    email: SITE_CONFIG.email,
+    telephone: BUSINESS_INFO.phone.e164,
+    email: BUSINESS_INFO.email,
     priceRange: "$$",
     address: {
       "@type": "PostalAddress",
-      streetAddress: SITE_CONFIG.address,
-      addressLocality: "Campinas",
-      addressRegion: "SP",
-      postalCode: "13025-000",
-      addressCountry: "BR",
+      streetAddress: BUSINESS_INFO.streetAddress,
+      addressLocality: BUSINESS_INFO.city,
+      addressRegion: BUSINESS_INFO.state,
+      postalCode: BUSINESS_INFO.postalCode,
+      addressCountry: BUSINESS_INFO.country,
     },
     geo: {
       "@type": "GeoCoordinates",
       latitude: -22.9099,
       longitude: -47.0626,
     },
+    openingHours: BUSINESS_INFO.openingHours.iso,
     openingHoursSpecification: [
       {
         "@type": "OpeningHoursSpecification",
         dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-        opens: "09:00",
+        opens: "08:00",
         closes: "18:00",
       },
       {
         "@type": "OpeningHoursSpecification",
         dayOfWeek: "Saturday",
-        opens: "09:00",
+        opens: "08:00",
         closes: "13:00",
       },
     ],
-    areaServed: ["Campinas", "Sumaré", "Hortolândia", "Paulínia", "Valinhos", "Vinhedo", "Brasil"],
-    sameAs: [SITE_CONFIG.social.instagram, SITE_CONFIG.social.facebook],
+    contactPoint: [
+      {
+        "@type": "ContactPoint",
+        telephone: BUSINESS_INFO.whatsapp.e164,
+        contactType: "customer service",
+        availableLanguage: "Portuguese",
+        areaServed: "Campinas e Região Metropolitana de Campinas",
+        contactOption: "TollFree",
+        hoursAvailable: {
+          "@type": "OpeningHoursSpecification",
+          dayOfWeek: ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+          opens: "00:00",
+          closes: "23:59",
+        },
+      },
+      {
+        "@type": "ContactPoint",
+        telephone: BUSINESS_INFO.phone.e164,
+        contactType: "customer service",
+        availableLanguage: "Portuguese",
+        areaServed: "Campinas e Região Metropolitana de Campinas",
+      },
+    ],
+    areaServed: BUSINESS_INFO.areaServed,
+    sameAs: [BUSINESS_INFO.social.instagram, BUSINESS_INFO.social.facebook],
   };
 }
 

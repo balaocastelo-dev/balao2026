@@ -763,7 +763,7 @@ function Footer() {
             <div className="mt-4 space-y-2 text-white/70 font-bold">
               <div>Av. Anchieta, 789 - Cambuí, Campinas/SP</div>
               <div>(19) 98751-0267</div>
-              <div>Balaocastelo@balaodainformatica.com.br</div>
+              <div>balaocastelo@gmail.com</div>
             </div>
             <div className="mt-6">
               <Link

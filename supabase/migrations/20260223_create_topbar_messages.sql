@@ -27,8 +27,8 @@ CREATE POLICY "Service role write topbar messages"
 -- Dados iniciais (opcionais)
 INSERT INTO public.topbar_messages (text, display_order) VALUES
 ('Telefone: (19) 3255-1661', 0),
-('WhatsApp: (19) 98751-0267', 1),
-('E-mail: balaocastelo@balaodainformatica.com.br', 2),
-('Horário de Atendimento: Seg a Sex das 07:00 às 18:00', 3),
-('Endereço: Av. Andrade Neves, 1682 - Jardim Chapadão, Campinas - SP', 4)
+('WhatsApp: (19) 98751-0267 — Atendimento 24h', 1),
+('E-mail: balaocastelo@gmail.com', 2),
+('Atendimento: Seg–Sex 08h–18h | Sáb 08h–13h | WhatsApp 24h com IA + humano', 3),
+('Endereço: Av. Anchieta, 789 – Cambuí, Campinas – SP | CEP: 13012-100', 4)
 ON CONFLICT DO NOTHING;

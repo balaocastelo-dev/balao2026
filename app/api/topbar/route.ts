@@ -19,10 +19,10 @@ export async function GET() {
   return NextResponse.json({
     messages: [
       `Telefone: ${SITE_CONFIG.phone.display}`,
-      `WhatsApp: ${SITE_CONFIG.whatsapp.display}`,
+      `WhatsApp: ${SITE_CONFIG.whatsapp.display} — Atendimento 24h`,
       `E-mail: ${SITE_CONFIG.email}`,
-      "Horário de Atendimento: Seg a Sex das 07:00 às 18:00",
-      `Endereço: ${SITE_CONFIG.address}`
+      "Atendimento: Seg–Sex 08h–18h | Sáb 08h–13h | WhatsApp 24h com IA + humano",
+      `Endereço: ${SITE_CONFIG.address} | CEP: 13012-100`
     ]
   });
 }

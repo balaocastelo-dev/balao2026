@@ -1,4 +1,4 @@
-import { Metadata } from 'next'
+﻿import { Metadata } from 'next'
 import Link from 'next/link'
 import Header from '@/components/Header'
 import { getProducts } from '@/lib/db'
@@ -101,7 +101,7 @@ function BlockHero() {
 
         <div className="pt-4 md:pt-8 flex flex-col sm:flex-row justify-center gap-4 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300 px-4">
           <Link 
-             href="https://wa.me/5519993916723?text=Ol%C3%A1%2C%20vi%20as%20promo%C3%A7%C3%B5es%20no%20site%20e%20quero%20saber%20mais!"
+             href="https://wa.me/5519987510267?text=Ol%C3%A1%2C%20vi%20as%20promo%C3%A7%C3%B5es%20no%20site%20e%20quero%20saber%20mais!"
              target="_blank"
              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 md:px-8 md:py-4 rounded-full font-bold text-base md:text-lg transition-all shadow-lg shadow-purple-600/30 hover:scale-105 flex items-center justify-center gap-2 w-full sm:w-auto"
           >
@@ -261,7 +261,7 @@ function BlockPriceGuarantee() {
              <p className="text-purple-700/80">Achou mais barato em Campinas? Nós cobrimos a oferta da concorrência na hora!</p>
           </div>
           <Link 
-             href="https://wa.me/5519993916723?text=Achei%20mais%20barato%20e%20quero%20negociar!"
+             href="https://wa.me/5519987510267?text=Achei%20mais%20barato%20e%20quero%20negociar!"
              target="_blank"
              className="px-6 py-2 bg-purple-600 text-white rounded-lg font-bold text-sm hover:bg-purple-700 transition-colors"
           >
@@ -455,7 +455,7 @@ export default async function PromocaoPage() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
                  <a 
-                    href="https://wa.me/5519993916723?text=Quero%20aproveitar%20as%20ofertas%20do%20site!"
+                    href="https://wa.me/5519987510267?text=Quero%20aproveitar%20as%20ofertas%20do%20site!"
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="bg-white text-purple-900 px-8 py-5 rounded-full font-black text-xl hover:scale-105 transition-transform shadow-2xl flex items-center justify-center gap-3 w-full sm:w-auto"

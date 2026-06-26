@@ -1,27 +1,32 @@
+/**
+ * Configurações globais do site.
+ * Para dados completos da empresa (endereço, horários, CNPJ etc.)
+ * importe BUSINESS_INFO de @/lib/business-info.
+ */
+import { BUSINESS_INFO } from "@/lib/business-info";
 
 export const SITE_CONFIG = {
-  name: "Balão da Informática",
-  companyName: "Balão da informática Castelo",
-  cnpj: "34.397.947/0001-08",
+  name: "Balão da Informática Castelo",
+  companyName: "Balão da Informática Castelo",
+  cnpj: BUSINESS_INFO.cnpj,
   phone: {
-    display: "(19) 3255-1661",
-    number: "551932551661"
+    display: BUSINESS_INFO.phone.display,
+    number: BUSINESS_INFO.phone.number,
   },
-  email: "Balaocastelo@balaodainformatica.com.br",
-  address: "Av Anchieta 789 - Cambui Campinas SP",
+  email: BUSINESS_INFO.email,
+  address: BUSINESS_INFO.address,
+  postalCode: BUSINESS_INFO.postalCode,
   whatsapp: {
-    number: "5519987510267",
-    display: "(19) 98751-0267",
-    messageDefault: "Olá! Gostaria de mais informações sobre os produtos.",
+    number: BUSINESS_INFO.whatsapp.number,
+    display: BUSINESS_INFO.whatsapp.display,
+    href: BUSINESS_INFO.whatsapp.href,
+    messageDefault: BUSINESS_INFO.whatsapp.defaultMessage,
   },
-  social: {
-    instagram: "https://instagram.com/balaodainformatica",
-    facebook: "https://facebook.com/balaodainformatica",
-  },
+  social: BUSINESS_INFO.social,
   pix: {
-    key: "34397947000108", // CNPJ
-    name: "Balao da informatica castelo",
+    key: "34397947000108", // CNPJ sem pontuação
+    name: "Balao da Informatica Castelo",
     city: "CAMPINAS",
-    cnpj: "34397947000108"
-  }
+    cnpj: "34397947000108",
+  },
 };

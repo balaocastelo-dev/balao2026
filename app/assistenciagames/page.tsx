@@ -1,4 +1,4 @@
-import { Metadata } from 'next'
+﻿import { Metadata } from 'next'
 import Link from 'next/link'
 import Header from '@/components/Header'
 import { searchProductsByKeywords } from '@/lib/db'
@@ -106,7 +106,7 @@ function BlockHero() {
 
         <div className="pt-8 flex flex-col sm:flex-row justify-center gap-4 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300">
           <Link 
-             href="https://wa.me/5519993916723?text=Preciso%20de%20assist%C3%AAncia%20para%20meu%20videogame!"
+             href="https://wa.me/5519987510267?text=Preciso%20de%20assist%C3%AAncia%20para%20meu%20videogame!"
              target="_blank"
              className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-full font-bold text-lg transition-all shadow-lg shadow-purple-600/30 hover:scale-105 flex items-center justify-center gap-2"
           >
@@ -287,7 +287,7 @@ function BlockNational() {
             </li>
           </ul>
           <Link 
-            href="https://wa.me/5519993916723?text=Quero%20enviar%20meu%20console%20pelos%20Correios!"
+            href="https://wa.me/5519987510267?text=Quero%20enviar%20meu%20console%20pelos%20Correios!"
             target="_blank"
             className="bg-white text-purple-900 px-8 py-4 rounded-full font-bold text-lg hover:scale-105 transition-transform inline-flex items-center gap-2 shadow-xl"
           >
@@ -519,7 +519,7 @@ export default async function AssistenciaGamesPage() {
            <div className="container mx-auto px-4 max-w-2xl">
               <h2 className="text-3xl font-bold mb-4">Dicas de Mestre?</h2>
               <p className="mb-8 text-purple-100">Entre no nosso grupo e receba dicas de como cuidar do seu console e promoções de jogos.</p>
-              <Link href="https://wa.me/5519993916723?text=Quero%20dicas%20para%20meu%20game" target="_blank" className="bg-white text-purple-600 px-8 py-4 rounded-full font-bold hover:bg-purple-50 transition-colors inline-flex items-center gap-2">
+              <Link href="https://wa.me/5519987510267?text=Quero%20dicas%20para%20meu%20game" target="_blank" className="bg-white text-purple-600 px-8 py-4 rounded-full font-bold hover:bg-purple-50 transition-colors inline-flex items-center gap-2">
                  Entrar na Comunidade <Gamepad2 className="w-5 h-5" />
               </Link>
            </div>
@@ -529,7 +529,7 @@ export default async function AssistenciaGamesPage() {
            <div className="container mx-auto px-4">
               <h2 className="text-3xl md:text-5xl font-black mb-8">PRONTO PARA VOLTAR AO JOGO?</h2>
               <Link 
-                 href="https://wa.me/5519993916723?text=Ol%C3%A1%2C%20gostaria%20de%20agendar%20um%20reparo%20para%20meu%20videogame."
+                 href="https://wa.me/5519987510267?text=Ol%C3%A1%2C%20gostaria%20de%20agendar%20um%20reparo%20para%20meu%20videogame."
                  target="_blank"
                  className="inline-flex items-center gap-3 bg-white text-purple-900 px-10 py-5 rounded-full font-black text-xl hover:scale-105 transition-transform shadow-2xl"
               >

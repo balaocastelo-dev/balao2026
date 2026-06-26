@@ -42,8 +42,9 @@ export default function TopBar() {
         `Telefone: ${SITE_CONFIG.phone.display}`,
         `WhatsApp: ${SITE_CONFIG.whatsapp.display}`,
         `E-mail: ${SITE_CONFIG.email}`,
-        "Horário de Atendimento: Seg a Sex das 09:00 às 18:00",
-        `Endereço: ${SITE_CONFIG.address}`
+        "Atendimento: Seg–Sex 08h–18h | Sáb 08h–13h | WhatsApp 24h",
+        `Endereço: ${SITE_CONFIG.address}`,
+        "CEP: 13012-100",
       ]);
     };
     fetchMessages();

@@ -108,8 +108,10 @@ export default function TrocasDevolucoesPage() {
           <div className="mt-8 border-t pt-8">
             <h3 className="text-xl font-bold text-gray-800 mb-4">Canais de Atendimento para Trocas</h3>
             <p>
-              Para iniciar um processo de troca ou devolução, entre em contato através do e-mail: <br />
-              <a href="mailto:sac@balaodainformatica.com.br" className="text-[#E60012] font-bold hover:underline">sac@balaodainformatica.com.br</a>
+              Para iniciar um processo de troca ou devolução, entre em contato pelo WhatsApp ou e-mail: <br />
+              <a href="https://wa.me/5519987510267" target="_blank" rel="noopener noreferrer" className="text-green-600 font-bold hover:underline">(19) 98751-0267 — WhatsApp 24h</a>
+              {" "}ou{" "}
+              <a href="mailto:balaocastelo@gmail.com" className="text-[#E60012] font-bold hover:underline">balaocastelo@gmail.com</a>
             </p>
           </div>
 
