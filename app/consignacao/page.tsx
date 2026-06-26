@@ -2,8 +2,8 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import Header from '@/components/Header'
 import { BUSINESS_INFO } from '@/lib/business-info'
-import { getProducts } from '@/lib/db'
-import ProductCarousel from '@/components/ProductCarousel'
+import { listVitrinePagesPublic } from '@/lib/vitrine/db'
+import { pickPcHeroImage } from '@/lib/vitrine/core'
 import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from '@/components/JsonLd'
 import { 
   CheckCircle, 
@@ -508,13 +508,8 @@ function BlockUrgency() {
 }
 
 export default async function ConsignacaoPage() {
-  const allProducts = await getProducts()
-  
-  // Helper para filtrar o que aceitamos (simulação com produtos novos)
-  const acceptedExamples = allProducts.filter(p => {
-    const text = (p.name + " " + (p.description || "")).toLowerCase()
-    return ['notebook', 'pc', 'gamer', 'placa', 'video'].some(k => text.includes(k))
-  }).slice(0, 12)
+  const vitrinePages = await listVitrinePagesPublic().catch(() => [])
+  const vitrineExamples = vitrinePages.slice(0, 12)
 
   return (
     <div className="min-h-screen flex flex-col bg-black font-sans">
@@ -533,13 +528,62 @@ export default async function ConsignacaoPage() {
         <section className="bg-zinc-900 py-20 relative">
            <div className="container mx-auto px-4">
               <p className="text-zinc-400 text-center max-w-2xl mx-auto mb-12 text-lg">
-                 Aceitamos equipamentos em bom estado, com menos de 5 anos de uso. 
+                 Aceitamos equipamentos em bom estado, com menos de 5 anos de uso.
                  Notebooks, PCs Gamer, Placas de Vídeo e Monitores são os mais procurados.
               </p>
-              <ProductCarousel 
-                 title="Exemplos do que Vendemos" 
-                 products={acceptedExamples} 
-              />
+
+              {vitrineExamples.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                  {vitrineExamples.map((p) => {
+                    const extras = (p as any)?.extras ?? {}
+                    const hero: string =
+                      (p as any)?.images?.hero ||
+                      pickPcHeroImage({ categoria: p.categoria } as any)
+                    const priceText: string =
+                      String(extras?.price_text || '').trim() ||
+                      String(extras?.main_product?.price || '').trim() ||
+                      'Sob consulta'
+                    return (
+                      <Link
+                        key={p.id}
+                        href={`/p/${p.slug}`}
+                        target="_blank"
+                        className="group rounded-2xl border border-zinc-700 bg-zinc-800 hover:border-green-500 transition-all overflow-hidden shadow-sm hover:shadow-green-900/30 hover:shadow-lg"
+                      >
+                        <div className="p-4">
+                          <div className="w-full h-40 rounded-xl bg-zinc-700 overflow-hidden flex items-center justify-center">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={hero}
+                              alt={p.nome_pc}
+                              className="w-full h-full object-contain"
+                              loading="lazy"
+                            />
+                          </div>
+                          <div className="mt-4">
+                            <p className="text-sm font-bold text-white whitespace-normal break-words group-hover:text-green-400 transition-colors">
+                              {p.nome_pc}
+                            </p>
+                            <p className="mt-1 text-base font-extrabold text-green-400">{priceText}</p>
+                            <p className="mt-1 text-xs text-zinc-500">{p.categoria}</p>
+                          </div>
+                        </div>
+                      </Link>
+                    )
+                  })}
+                </div>
+              ) : (
+                <p className="text-zinc-500 text-center">Nenhum exemplo disponível no momento.</p>
+              )}
+
+              <div className="mt-10 text-center">
+                <Link
+                  href="/vitrine"
+                  className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-full font-bold transition-colors"
+                >
+                  Ver toda a vitrine
+                </Link>
+              </div>
            </div>
         </section>
 
