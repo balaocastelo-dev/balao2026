@@ -277,6 +277,71 @@ export default function Header() {
         </div>
       </div>
 
+      {/* Desktop sub-navigation menu bar */}
+      <div className="hidden lg:block border-t border-gray-100 bg-gray-50/70">
+        <div className="container mx-auto px-4 flex items-center justify-center gap-8 py-3 text-sm font-semibold text-gray-700">
+           {/* Dropdown 1: Comprar */}
+           <div className="relative group py-1">
+             <span className="cursor-pointer hover:text-[#E60012] flex items-center gap-1">
+               Comprar
+               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+             </span>
+             <div className="absolute left-0 top-full hidden group-hover:block bg-white text-gray-800 border border-gray-100 rounded-xl shadow-lg py-2 w-56 z-[1000]">
+               <Link href="/pcgamer" className="block px-4 py-2 hover:bg-red-50 hover:text-[#E60012] transition-colors">PCs Gamer</Link>
+               <Link href="/notebooks" className="block px-4 py-2 hover:bg-red-50 hover:text-[#E60012] transition-colors">Notebooks</Link>
+               <Link href="/categoria/Hardware" className="block px-4 py-2 hover:bg-red-50 hover:text-[#E60012] transition-colors">Peças e Componentes</Link>
+               <Link href="/categoria/Acess%C3%B3rios" className="block px-4 py-2 hover:bg-red-50 hover:text-[#E60012] transition-colors">Periféricos</Link>
+               <Link href="/seminovos" className="block px-4 py-2 hover:bg-red-50 hover:text-[#E60012] transition-colors">Seminovos</Link>
+               <Link href="/promocao" className="block px-4 py-2 hover:bg-red-50 hover:text-[#E60012] transition-colors">Promoções</Link>
+             </div>
+           </div>
+
+           {/* Dropdown 2: Assistência Técnica */}
+           <div className="relative group py-1">
+             <span className="cursor-pointer hover:text-[#E60012] flex items-center gap-1">
+               Assistência Técnica
+               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+             </span>
+             <div className="absolute left-0 top-full hidden group-hover:block bg-white text-gray-800 border border-gray-100 rounded-xl shadow-lg py-2 w-64 z-[1000]">
+               <Link href="/conserto-notebook-campinas" className="block px-4 py-2 hover:bg-red-50 hover:text-[#E60012] transition-colors">Conserto de Notebook</Link>
+               <Link href="/manutencao-computadores-campinas" className="block px-4 py-2 hover:bg-red-50 hover:text-[#E60012] transition-colors">Manutenção de Computadores</Link>
+               <Link href="/assistencia-tecnica" className="block px-4 py-2 hover:bg-red-50 hover:text-[#E60012] transition-colors">Upgrade de PC e Notebook</Link>
+               <Link href="/montagem-pc-gamer-campinas" className="block px-4 py-2 hover:bg-red-50 hover:text-[#E60012] transition-colors">Montagem de PC Gamer</Link>
+               <Link href="/recuperacao-de-dados-campinas" className="block px-4 py-2 hover:bg-red-50 hover:text-[#E60012] transition-colors">Recuperação de Dados</Link>
+               <Link href="/manutencao" className="block px-4 py-2 hover:bg-red-50 hover:text-[#E60012] transition-colors">Limpeza e Manutenção Preventiva</Link>
+             </div>
+           </div>
+
+           {/* Dropdown 3: Consignação */}
+           <div className="relative group py-1">
+             <span className="cursor-pointer hover:text-[#E60012] flex items-center gap-1">
+               Consignação
+               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+             </span>
+             <div className="absolute left-0 top-full hidden group-hover:block bg-white text-gray-800 border border-gray-100 rounded-xl shadow-lg py-2 w-56 z-[1000]">
+               <Link href="/venda-seu-usado" className="block px-4 py-2 hover:bg-red-50 hover:text-[#E60012] transition-colors">Venda seu Usado</Link>
+               <Link href="/consignacao" className="block px-4 py-2 hover:bg-red-50 hover:text-[#E60012] transition-colors">Avaliação na Loja</Link>
+               <Link href="/consignacao" className="block px-4 py-2 hover:bg-red-50 hover:text-[#E60012] transition-colors">Segurança na Venda</Link>
+               <Link href="/consignacao" className="block px-4 py-2 hover:bg-red-50 hover:text-[#E60012] transition-colors">Formatação Segura</Link>
+             </div>
+           </div>
+
+           {/* Dropdown 4: Institucional */}
+           <div className="relative group py-1">
+             <span className="cursor-pointer hover:text-[#E60012] flex items-center gap-1">
+               Institucional
+               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+             </span>
+             <div className="absolute right-0 lg:left-0 top-full hidden group-hover:block bg-white text-gray-800 border border-gray-100 rounded-xl shadow-lg py-2 w-56 z-[1000]">
+               <Link href="/sobre-nos" className="block px-4 py-2 hover:bg-red-50 hover:text-[#E60012] transition-colors">Sobre o Balão Castelo</Link>
+               <Link href="/contato" className="block px-4 py-2 hover:bg-red-50 hover:text-[#E60012] transition-colors">Contato</Link>
+               <Link href="/fale-conosco" className="block px-4 py-2 hover:bg-red-50 hover:text-[#E60012] transition-colors">Localização</Link>
+               <Link href="/trocas-e-devolucoes" className="block px-4 py-2 hover:bg-red-50 hover:text-[#E60012] transition-colors">Políticas e Garantia</Link>
+             </div>
+           </div>
+        </div>
+      </div>
+
       {/* Mobile Search Bar (Full width below header on mobile) */}
       <div className="md:hidden px-4 pb-4" ref={mobileSearchContainerRef}>
           <form onSubmit={handleSearch} className="relative">

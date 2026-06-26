@@ -1,6 +1,7 @@
 import React from "react";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
+import WhatsAppCTA from "@/components/WhatsAppCTA";
 import { getCategories, getProductsByExactCategories, searchProductsByKeywords } from "@/lib/db";
 import JsonLd, { generateBreadcrumbSchema, generateFAQSchema, generateItemListSchema, generateOrganizationSchema } from "@/components/JsonLd";
 import QuickLeadSection from "@/components/QuickLeadSection";
@@ -471,15 +472,24 @@ export default async function NotebooksPage() {
         {/* PRODUTOS - GRID 1 */}
         <section id="ofertas" className="py-12 md:py-20 bg-zinc-50 min-h-[50vh]">
           <div className="container mx-auto px-4">
-             <div className="text-center mb-12 md:mb-16">
-                <h2 className="text-3xl md:text-6xl font-black text-slate-900 mb-4">DESTAQUES DA SEMANA</h2>
-                <div className="w-16 md:w-24 h-2 bg-blue-600 mx-auto rounded-full"></div>
-                <p className="mt-4 text-lg md:text-xl text-slate-600">As melhores oportunidades em custo-benefício e performance.</p>
+             <div className="text-center mb-12 md:mb-16 max-w-3xl mx-auto">
+                <h2 className="text-3xl md:text-5xl font-black text-slate-900 mb-4 uppercase">
+                  Notebooks novos e seminovos em Campinas
+                </h2>
+                <div className="w-16 md:w-24 h-2 bg-blue-600 mx-auto rounded-full mb-6"></div>
+                <p className="text-lg text-slate-600 leading-relaxed">
+                  Temos notebooks novos, seminovos e corporativos disponíveis na loja Balão da Informática Castelo. O estoque muda todos os dias, então fale com nossa equipe no WhatsApp para receber a lista atualizada com fotos, valores e condições.
+                </p>
+                <div className="mt-6">
+                  <WhatsAppCTA label="Ver notebooks disponíveis no WhatsApp" message="Olá! Gostaria de receber a lista atualizada de notebooks disponíveis e fotos dos aparelhos." variant="primary" />
+                </div>
              </div>
              
              {notebookProducts.length === 0 ? (
-               <div className="bg-white border-2 border-dashed border-gray-300 rounded-3xl p-8 md:p-12 text-center text-gray-500 text-lg md:text-xl">
-                 Carregando estoque de notebooks...
+               <div className="bg-white border border-gray-100 rounded-3xl p-8 md:p-12 text-center text-gray-500 shadow-sm max-w-xl mx-auto">
+                 <p className="font-semibold text-gray-800 mb-2">Estoque altamente rotativo</p>
+                 <p className="text-sm text-gray-500 mb-6">Nosso catálogo de notebooks novos e seminovos é atualizado diariamente. Fale com um técnico no WhatsApp para ver os aparelhos de hoje.</p>
+                 <WhatsAppCTA label="Consultar estoque no WhatsApp" message="Olá! Quais modelos de notebooks novos e seminovos estão disponíveis na loja hoje?" variant="success" className="text-sm" />
                </div>
              ) : (
                <NotebooksSearchGrid initialProducts={notebookProducts} />

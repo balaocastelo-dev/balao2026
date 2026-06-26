@@ -1,6 +1,7 @@
-﻿import { Metadata } from 'next'
+import { Metadata } from 'next'
 import Link from 'next/link'
 import Header from '@/components/Header'
+import WhatsAppCTA from "@/components/WhatsAppCTA";
 import { getProducts } from '@/lib/db'
 import ProductCarousel from '@/components/ProductCarousel'
 import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from '@/components/JsonLd'
@@ -96,23 +97,16 @@ function BlockHero() {
         </h1>
         
         <p className="text-base sm:text-lg md:text-3xl text-slate-300 max-w-4xl mx-auto font-light leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200 px-2">
-          Os melhores preços em <strong className="text-purple-400 font-bold">hardware e periféricos</strong> de Campinas. Cobrimos ofertas da concorrência local.
+          Confira ofertas de computadores, notebooks, peças, periféricos e produtos open box disponíveis na loja. Como o estoque muda rapidamente, chame nossa equipe no WhatsApp para receber as promoções atualizadas.
         </p>
 
         <div className="pt-4 md:pt-8 flex flex-col sm:flex-row justify-center gap-4 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300 px-4">
-          <Link 
-             href="https://wa.me/5519987510267?text=Ol%C3%A1%2C%20vi%20as%20promo%C3%A7%C3%B5es%20no%20site%20e%20quero%20saber%20mais!"
-             target="_blank"
-             className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 md:px-8 md:py-4 rounded-full font-bold text-base md:text-lg transition-all shadow-lg shadow-purple-600/30 hover:scale-105 flex items-center justify-center gap-2 w-full sm:w-auto"
-          >
-             <MessageCircle className="w-5 h-5" />
-             Ver no WhatsApp
-          </Link>
+          <WhatsAppCTA label="Receber promoções no WhatsApp" message="Olá! Vim pelo site e gostaria de receber a lista atualizada de promoções de informática." variant="primary" />
           <Link 
              href="#destaques"
              className="bg-white/10 hover:bg-white/20 border border-white/20 text-white px-6 py-3 md:px-8 md:py-4 rounded-full font-bold text-base md:text-lg transition-all hover:scale-105 flex items-center justify-center gap-2 backdrop-blur-sm w-full sm:w-auto"
           >
-             <ShoppingBag className="w-5 h-5" />
+             <ShoppingBag className="w-5 h-5 shrink-0" />
              Ver Destaques
           </Link>
         </div>

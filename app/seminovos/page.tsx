@@ -2,6 +2,7 @@ import { SITE_CONFIG } from "@/lib/config";
 import React from "react";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
+import WhatsAppCTA from "@/components/WhatsAppCTA";
 import { getProducts, getCategories } from "@/lib/db";
 import { Product, Category } from "@/lib/utils";
 import ProductCard from "@/components/ProductCard";
@@ -292,8 +293,10 @@ export default async function SeminovosPage() {
              </div>
              
              {seminovos.length === 0 ? (
-               <div className="bg-white border-2 border-dashed border-gray-300 rounded-3xl p-12 text-center text-gray-500 text-xl">
-                 Carregando estoque atualizado...
+               <div className="bg-white border border-gray-100 rounded-3xl p-8 md:p-12 text-center text-gray-500 shadow-sm max-w-xl mx-auto">
+                 <p className="font-semibold text-gray-800 mb-2">Notebooks novos e seminovos em Campinas</p>
+                 <p className="text-sm text-gray-500 mb-6 font-normal">Temos notebooks novos, seminovos e corporativos disponíveis na loja Balão da Informática Castelo. O estoque muda todos os dias, então fale com nossa equipe no WhatsApp para receber a lista atualizada com fotos, valores e condições.</p>
+                 <WhatsAppCTA label="Ver notebooks disponíveis no WhatsApp" message="Olá! Gostaria de receber a lista atualizada de notebooks seminovos e novos disponíveis na loja hoje." variant="success" className="text-sm" />
                </div>
              ) : (
                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">

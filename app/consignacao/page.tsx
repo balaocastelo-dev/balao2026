@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import Header from '@/components/Header'
+import WhatsAppCTA from "@/components/WhatsAppCTA";
 import { BUSINESS_INFO } from '@/lib/business-info'
 import { listVitrinePagesPublic } from '@/lib/vitrine/db'
 import { pickPcHeroImage } from '@/lib/vitrine/core'
@@ -369,23 +370,16 @@ function BlockHero() {
         </h1>
         
         <p className="text-base sm:text-lg md:text-3xl text-slate-300 max-w-4xl mx-auto font-light leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200 px-2">
-          Avaliação justa e venda rápida. Deixe a burocracia com a gente e receba o <strong className="text-green-500 font-bold">pagamento garantido</strong>.
+          No Balão da Informática Castelo, você deixa seu equipamento em consignação, nossa equipe avalia, anuncia e vende com segurança pela loja.
         </p>
 
         <div className="pt-4 md:pt-8 flex flex-col sm:flex-row justify-center gap-4 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300 px-4">
-           <Link 
-              href={BUSINESS_INFO.whatsapp.href}
-              target="_blank"
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 md:px-8 md:py-4 rounded-full font-bold text-base md:text-lg transition-all shadow-lg shadow-green-600/30 hover:scale-105 flex items-center justify-center gap-2 w-full sm:w-auto"
-           >
-             <Camera className="w-5 h-5" />
-             Avaliar Meu Equipamento
-          </Link>
+          <WhatsAppCTA label="Quero vender meu usado com segurança" message="Olá! Vim pelo site e gostaria de saber mais sobre a venda em consignação." variant="success" />
           <Link 
              href="#como-funciona"
              className="bg-white/10 hover:bg-white/20 border border-white/20 text-white px-6 py-3 md:px-8 md:py-4 rounded-full font-bold text-base md:text-lg transition-all hover:scale-105 flex items-center justify-center gap-2 backdrop-blur-sm w-full sm:w-auto"
           >
-             <Settings className="w-5 h-5" />
+             <Settings className="w-5 h-5 shrink-0" />
              Como Funciona
           </Link>
         </div>

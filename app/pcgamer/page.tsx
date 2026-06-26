@@ -1,6 +1,7 @@
 import React from "react";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
+import WhatsAppCTA from "@/components/WhatsAppCTA";
 import { getCategories, getProductsByExactCategories, searchProductsByKeywords } from "@/lib/db";
 import { Category } from "@/lib/utils";
 import { SITE_CONFIG } from "@/lib/config";
@@ -550,15 +551,24 @@ export default async function PcGamerPage() {
         {/* PRODUTOS - GRID 1 (MOVIDO PARA CIMA) */}
         <section id="ofertas" className="py-12 md:py-20 bg-zinc-50 min-h-[50vh]">
           <div className="container mx-auto px-4">
-             <div className="text-center mb-12 md:mb-16">
-                <h2 className="text-3xl md:text-6xl font-black text-slate-900 mb-4">SETUP GAMER PRONTO</h2>
-                <div className="w-16 md:w-24 h-2 bg-violet-600 mx-auto rounded-full"></div>
-                <p className="mt-4 text-lg md:text-xl text-slate-600">Máquinas montadas e configuradas. É só ligar e jogar.</p>
+             <div className="text-center mb-12 md:mb-16 max-w-3xl mx-auto">
+                <h2 className="text-3xl md:text-5xl font-black text-slate-900 mb-4 uppercase">
+                  PC Gamer pronto e montagem personalizada em Campinas
+                </h2>
+                <div className="w-16 md:w-24 h-2 bg-violet-600 mx-auto rounded-full mb-6"></div>
+                <p className="text-lg text-slate-600 leading-relaxed">
+                  Monte seu PC Gamer com peças selecionadas, assistência local e suporte direto da equipe Balão da Informática Castelo. Trabalhamos com computadores prontos, upgrades, placas de vídeo, fontes, gabinetes e periféricos.
+                </p>
+                <div className="mt-6">
+                  <WhatsAppCTA label="Montar meu PC Gamer no WhatsApp" message="Olá! Quero montar meu PC Gamer personalizado ou ver as configurações prontas." variant="primary" />
+                </div>
              </div>
              
              {gamerProducts.length === 0 ? (
-               <div className="bg-white border-2 border-dashed border-gray-300 rounded-3xl p-8 md:p-12 text-center text-gray-500 text-lg md:text-xl">
-                 Carregando estoque gamer atualizado...
+               <div className="bg-white border border-gray-100 rounded-3xl p-8 md:p-12 text-center text-gray-500 shadow-sm max-w-xl mx-auto">
+                 <p className="font-semibold text-gray-800 mb-2">Estoque altamente dinâmico</p>
+                 <p className="text-sm text-gray-500 mb-6">Nosso estoque de placas de vídeo e computadores montados muda todos os dias. Fale direto com nossa equipe no WhatsApp para receber o catálogo atualizado com fotos e preços.</p>
+                 <WhatsAppCTA label="Ver estoque atual no WhatsApp" message="Olá! Gostaria de receber a lista atualizada de PCs Gamer e peças disponíveis." variant="success" className="text-sm" />
                </div>
              ) : (
                <PcGamerSearchGrid initialProducts={gamerProducts} />

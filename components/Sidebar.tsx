@@ -9,7 +9,7 @@ import {
   Laptop, Cpu, Keyboard, Mouse, Watch, Tablet, Headphones, Camera,
   Tag, Wrench, Handshake,
   Lock, Ghost, Key, Armchair, Square, Disc, Mic, Cable, RefreshCcw, Usb, Backpack, Lightbulb, Zap, Video, Bell, Radio, Power, ToggleLeft, User, Star, Smile, Shirt, Coffee, Image, Gift, FileText, PenTool, Table, Move, CreditCard, Copy, Droplet, Cylinder, Scan, Gamepad2, Box, Server, Book, Feather, Aperture, CircuitBoard, MemoryStick, Fan, Network, Battery,
-  Filter as FilterIcon, Check, XCircle, X
+  Filter as FilterIcon, Check, XCircle, X, Phone, MapPin, DollarSign, Info, HelpCircle
 } from "lucide-react";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useSidebar } from "@/context/SidebarContext";
@@ -259,27 +259,39 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
           
           <div className="my-2 border-t border-gray-100 mx-4" />
           
-          <div className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Serviços</div>
-          <CustomLink href="/blog" icon={Book} label="Blog" />
-          <CustomLink href="/premium" icon={Star} label="Premium" />
-          <CustomLink href="/vitrine" icon={Image} label="Vitrine" />
-          <CustomLink href="/servicos-e-ofertas" icon={Gift} label="Serviços e Ofertas" />
-          <CustomLink href="/pcgamer" icon={Gamepad} label="PC Gamer" />
+          <div className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Comprar</div>
+          <CustomLink href="/pcgamer" icon={Gamepad} label="PCs Gamer" />
           <CustomLink href="/notebooks" icon={Laptop} label="Notebooks" />
-          <CustomLink href="/promocao" icon={Tag} label="Promoção" />
-          <CustomLink href="/manutencao" icon={Wrench} label="Manutenção" />
-          <CustomLink href="/consignacao" icon={Handshake} label="Consignação" />
-          <CustomLink href="/carregadores" icon={Battery} label="Carregadores" />
-          <CustomLink href="/microsoft" icon={Key} label="Licenças Microsoft" />
-          <CustomLink href="/assistenciagames" icon={Gamepad2} label="Assistência Games" />
-          <CustomLink href="/tonner" icon={Printer} label="Toners" />
-          <CustomLink href="/reparoapple" icon={Smartphone} label="Reparo Apple" />
-          <CustomLink href="/telaiphone" icon={Zap} label="Troca de Tela & Bateria" />
-          <CustomLink href="/recuperacaodados" icon={HardDrive} label="Recuperação de Dados" />
-          <CustomLink href="/montagempc" icon={Cpu} label="Montagem PC Gamer" />
-          <CustomLink href="/sistemas" icon={CircuitBoard} label="Sites & Sistemas" />
-          <CustomLink href="/pcgamer3d" icon={Box} label="PC Gamer 3D" />
-                  <CustomLink href="/wendell/apple" icon={Laptop} label="Especialista Apple" />
+          <CustomLink href="/categoria/Hardware" icon={Cpu} label="Peças e Componentes" />
+          <CustomLink href="/categoria/Acess%C3%B3rios" icon={Keyboard} label="Periféricos" />
+          <CustomLink href="/seminovos" icon={RefreshCcw} label="Seminovos" />
+          <CustomLink href="/promocao" icon={Tag} label="Promoções" />
+
+          <div className="my-2 border-t border-gray-100 mx-4" />
+          
+          <div className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Assistência Técnica</div>
+          <CustomLink href="/conserto-notebook-campinas" icon={Laptop} label="Conserto de Notebook" />
+          <CustomLink href="/manutencao-computadores-campinas" icon={Monitor} label="Manutenção de Computadores" />
+          <CustomLink href="/assistencia-tecnica" icon={Zap} label="Upgrade de PC e Notebook" />
+          <CustomLink href="/montagem-pc-gamer-campinas" icon={Cpu} label="Montagem de PC Gamer" />
+          <CustomLink href="/recuperacao-de-dados-campinas" icon={HardDrive} label="Recuperação de Dados" />
+          <CustomLink href="/manutencao" icon={Wrench} label="Limpeza e Manutenção" />
+
+          <div className="my-2 border-t border-gray-100 mx-4" />
+
+          <div className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Consignação</div>
+          <CustomLink href="/venda-seu-usado" icon={Handshake} label="Venda seu Usado" />
+          <CustomLink href="/consignacao" icon={FileText} label="Avaliação na Loja" />
+          <CustomLink href="/consignacao" icon={Shield} label="Segurança na Venda" />
+          <CustomLink href="/consignacao" icon={Lock} label="Formatação Segura" />
+
+          <div className="my-2 border-t border-gray-100 mx-4" />
+
+          <div className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Institucional</div>
+          <CustomLink href="/sobre-nos" icon={User} label="Sobre o Balão Castelo" />
+          <CustomLink href="/contato" icon={Phone} label="Contato" />
+          <CustomLink href="/fale-conosco" icon={MapPin} label="Localização" />
+          <CustomLink href="/trocas-e-devolucoes" icon={FileText} label="Políticas e Garantia" />
 
             {availableTags && availableTags.length > 0 && (
             <div className="mt-4 pt-4 border-t border-gray-100 mx-4">
@@ -349,25 +361,39 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
             
             <div className="my-4 border-t border-gray-100 mx-4" />
             
-            <div className="px-4 mb-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Serviços</div>
-            <CustomLink href="/blog" icon={Book} label="Blog" />
-            <CustomLink href="/premium" icon={Star} label="Premium" />
-            <CustomLink href="/vitrine" icon={Image} label="Vitrine" />
-            <CustomLink href="/servicos-e-ofertas" icon={Gift} label="Serviços e Ofertas" />
-            <CustomLink href="/pcgamer" icon={Gamepad} label="PC Gamer" />
+            <div className="px-4 mb-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Comprar</div>
+            <CustomLink href="/pcgamer" icon={Gamepad} label="PCs Gamer" />
             <CustomLink href="/notebooks" icon={Laptop} label="Notebooks" />
-            <CustomLink href="/promocao" icon={Tag} label="Promoção" />
-            <CustomLink href="/manutencao" icon={Wrench} label="Manutenção" />
-            <CustomLink href="/consignacao" icon={Handshake} label="Consignação" />
-            <CustomLink href="/assistenciagames" icon={Gamepad2} label="Assistência Games" />
-            <CustomLink href="/tonner" icon={Printer} label="Toners" />
-            <CustomLink href="/reparoapple" icon={Smartphone} label="Reparo Apple" />
-            <CustomLink href="/telaiphone" icon={Zap} label="Troca de Tela & Bateria" />
-            <CustomLink href="/recuperacaodados" icon={HardDrive} label="Recuperação de Dados" />
-            <CustomLink href="/montagempc" icon={Cpu} label="Montagem PC Gamer" />
-            <CustomLink href="/sistemas" icon={CircuitBoard} label="Sites & Sistemas" />
-            <CustomLink href="/pcgamer3d" icon={Box} label="PC Gamer 3D" />
-                  <CustomLink href="/wendell/apple" icon={Laptop} label="Especialista Apple" />
+            <CustomLink href="/categoria/Hardware" icon={Cpu} label="Peças e Componentes" />
+            <CustomLink href="/categoria/Acess%C3%B3rios" icon={Keyboard} label="Periféricos" />
+            <CustomLink href="/seminovos" icon={RefreshCcw} label="Seminovos" />
+            <CustomLink href="/promocao" icon={Tag} label="Promoções" />
+
+            <div className="my-4 border-t border-gray-100 mx-4" />
+
+            <div className="px-4 mb-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Assistência Técnica</div>
+            <CustomLink href="/conserto-notebook-campinas" icon={Laptop} label="Conserto de Notebook" />
+            <CustomLink href="/manutencao-computadores-campinas" icon={Monitor} label="Manutenção de Computadores" />
+            <CustomLink href="/assistencia-tecnica" icon={Zap} label="Upgrade de PC e Notebook" />
+            <CustomLink href="/montagem-pc-gamer-campinas" icon={Cpu} label="Montagem de PC Gamer" />
+            <CustomLink href="/recuperacao-de-dados-campinas" icon={HardDrive} label="Recuperação de Dados" />
+            <CustomLink href="/manutencao" icon={Wrench} label="Limpeza e Manutenção" />
+
+            <div className="my-4 border-t border-gray-100 mx-4" />
+
+            <div className="px-4 mb-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Consignação</div>
+            <CustomLink href="/venda-seu-usado" icon={Handshake} label="Venda seu Usado" />
+            <CustomLink href="/consignacao" icon={FileText} label="Avaliação na Loja" />
+            <CustomLink href="/consignacao" icon={Shield} label="Segurança na Venda" />
+            <CustomLink href="/consignacao" icon={Lock} label="Formatação Segura" />
+
+            <div className="my-4 border-t border-gray-100 mx-4" />
+
+            <div className="px-4 mb-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Institucional</div>
+            <CustomLink href="/sobre-nos" icon={User} label="Sobre o Balão Castelo" />
+            <CustomLink href="/contato" icon={Phone} label="Contato" />
+            <CustomLink href="/fale-conosco" icon={MapPin} label="Localização" />
+            <CustomLink href="/trocas-e-devolucoes" icon={FileText} label="Políticas e Garantia" />
 
             {/* Mobile Filters */}
             {availableTags && availableTags.length > 0 && (
