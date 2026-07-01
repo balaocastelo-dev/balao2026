@@ -34,7 +34,7 @@ export function generateOrganizationSchema() {
       streetAddress: SITE_CONFIG.address,
       addressLocality: "Campinas",
       addressRegion: "SP",
-      postalCode: "13025-000",
+      postalCode: SITE_CONFIG.postalCode,
       addressCountry: "BR",
     },
     geo: {

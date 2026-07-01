@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
@@ -18,10 +18,10 @@ export default function ProductActions({ product }: { product: Product }) {
     if (typeof window === "undefined") return;
 
     const message = [
-      `OlÃ¡! Quero comprar este produto: ${product.name}`,
+      `Olá! Quero comprar este produto: ${product.name}`,
       `Valor: ${product.price || "sob consulta"}`,
       `Link: ${window.location.href}`,
-      "Estou em Campinas/regiÃ£o. Tem pronta entrega hoje?",
+      "Estou em Campinas/região. Tem pronta entrega hoje?",
     ].join("\n");
 
     trackWhatsAppClick({
@@ -58,8 +58,8 @@ export default function ProductActions({ product }: { product: Product }) {
         onClick={handleAddToCart}
         className={`w-full py-3 rounded-md font-bold text-base transition-all active:scale-95 flex items-center justify-center gap-2 border shadow-sm ${
           added
-            ? "bg-green-50 border-green-200 text-green-700"
-            : "bg-white border-gray-200 text-gray-800 hover:border-[#E60012] hover:text-[#E60012]"
+            ? "bg-green-950/20 border-green-900/50 text-green-400"
+            : "bg-zinc-900 border-zinc-800 text-zinc-200 hover:border-[#E60012] hover:text-[#E60012] hover:bg-zinc-850"
         }`}
       >
         <ShoppingCart size={20} />

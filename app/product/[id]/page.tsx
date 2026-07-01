@@ -181,6 +181,16 @@ export default async function ProductPage({ params }: Props) {
                              </div>
                           </div>
 
+                          {/* Local Delivery & Retirada Badge */}
+                          <div className="mb-5 p-3.5 bg-red-950/20 border border-red-900/30 rounded-xl flex flex-col gap-1 text-xs text-left">
+                             <div className="text-zinc-100 font-extrabold flex items-center gap-1.5">
+                                <span className="text-[#E60012] text-sm">📍</span> RETIRE HOJE NA LOJA (CAMBUÍ)
+                             </div>
+                             <div className="text-zinc-400 font-semibold leading-relaxed">
+                                Ou compre pelo WhatsApp para ter <strong className="text-green-400">Entrega Rápida</strong> via motoboy hoje mesmo em Campinas e região.
+                             </div>
+                          </div>
+
                          <ProductActions product={product} />
                          
                          <ShippingCalculator />

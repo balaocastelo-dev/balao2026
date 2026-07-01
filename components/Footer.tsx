@@ -107,7 +107,7 @@ export default function Footer() {
                 <Phone size={18} className="text-[#E60012] mt-0.5" />
                 <div>
                     <span className="block font-bold text-zinc-200">{SITE_CONFIG.phone.display}</span>
-                    <span className="text-xs text-zinc-500">Seg. a Sex. das 9h às 18h</span>
+                    <span className="text-xs text-zinc-500">{SITE_CONFIG.openingHoursDisplay}</span>
                 </div>
               </li>
               <li className="flex items-center gap-3">

@@ -1,4 +1,4 @@
-﻿import Header from "@/components/Header";
+import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import ProductList from "@/components/ProductList";
 import Carousel from "@/components/Carousel";
@@ -7,6 +7,7 @@ import SeoContent from "@/components/SeoContent";
 import JsonLd, { generateOrganizationSchema } from "@/components/JsonLd";
 import QuickLeadSection from "@/components/QuickLeadSection";
 import HomeLocalHero from "@/components/HomeLocalHero";
+import HomeLocalStoreInfo from "@/components/HomeLocalStoreInfo";
 import { getProductsByExactCategories, getCarouselImages, getCategories, getHomeBlocks } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { parsePriceToNumber, Product, type Category } from "@/lib/utils";
@@ -20,9 +21,9 @@ type SearchParams = Promise<{ category?: string; search?: string }>;
 export async function generateMetadata(props: { searchParams: SearchParams }): Promise<Metadata> {
   const sp = await props.searchParams;
   const hasFacet = Boolean((sp?.category || "").trim() || (sp?.search || "").trim());
-  const title = "Loja de InformÃ¡tica em Campinas | PC Gamer, Notebook e AssistÃªncia TÃ©cnica";
+  const title = "Loja de Informática em Campinas | PC Gamer, Notebook e Assistência Técnica";
   const description =
-    "BalÃ£o da InformÃ¡tica Castelo: loja fÃ­sica em Campinas para PC Gamer, notebooks, peÃ§as, upgrades e assistÃªncia tÃ©cnica. Compre pelo WhatsApp, retire no CambuÃ­ ou consulte entrega rÃ¡pida.";
+    "Balão da Informática Castelo: loja física em Campinas para PC Gamer, notebooks, peças, upgrades e assistência técnica. Compre pelo WhatsApp, retire no Cambuí ou consulte entrega rápida.";
   const canonical = "https://www.balao.info/";
 
   return {
@@ -86,7 +87,7 @@ export default async function Home(props: {
       getHomeBlocks(true),
     ]);
 
-    products = await (async () => {
+    const rawSearchProducts = await (async () => {
       const supabase = await createClient();
       const searchTerms = search.trim().split(/\s+/).join(' & ');
 
@@ -116,6 +117,15 @@ export default async function Home(props: {
         (a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price)
       );
     })();
+
+    // Deduplicate by name
+    const seenNames = new Set();
+    products = rawSearchProducts.filter(p => {
+      const nameKey = p.name.trim().toLowerCase();
+      if (seenNames.has(nameKey)) return false;
+      seenNames.add(nameKey);
+      return true;
+    });
   } else {
     [categories, carouselImages, homeBlocks] = await Promise.all([
       getCategories(),
@@ -123,15 +133,25 @@ export default async function Home(props: {
       getHomeBlocks(true),
     ]);
 
+    let rawProducts: Product[] = [];
     if (category && category !== "Todos os Produtos") {
       const validCategories = new Set<string>([category]);
       const descendants = getDescendantNames(category, categories);
       descendants.forEach((name) => validCategories.add(name));
-      products = await getProductsByExactCategories([...validCategories]);
+      rawProducts = await getProductsByExactCategories([...validCategories]);
     } else {
       const blockCategories = [...new Set(homeBlocks.map((block) => block.category_id).filter(Boolean))];
-      products = await getProductsByExactCategories(blockCategories);
+      rawProducts = await getProductsByExactCategories(blockCategories);
     }
+
+    // Deduplicate by name
+    const seenNames = new Set();
+    products = rawProducts.filter(p => {
+      const nameKey = p.name.trim().toLowerCase();
+      if (seenNames.has(nameKey)) return false;
+      seenNames.add(nameKey);
+      return true;
+    });
   }
 
   const filteredProducts = products;
@@ -201,41 +221,45 @@ export default async function Home(props: {
 
             {/* SEO Content Section */}
             {!search && !category && (
-                <SeoContent title="LOJA DE INFORMÃTICA EM CAMPINAS COM ATENDIMENTO LOCAL">
-                    <p className="text-gray-600 mb-4">
-                        A <strong>BalÃ£o da InformÃ¡tica Castelo</strong> atende Campinas e regiÃ£o com venda de <strong>PC Gamer, notebooks, peÃ§as, perifÃ©ricos, upgrades e assistÃªncia tÃ©cnica</strong>. O foco Ã© resolver rÃ¡pido: consulte estoque pelo WhatsApp, retire na loja fÃ­sica no CambuÃ­ ou peÃ§a entrega conforme disponibilidade.
+                <SeoContent title="LOJA DE INFORMÁTICA EM CAMPINAS COM ATENDIMENTO LOCAL">
+                    <p className="text-zinc-400 mb-4">
+                        A <strong>Balão da Informática Castelo</strong> atende Campinas e região com venda de <strong>PC Gamer, notebooks, peças, periféricos, upgrades e assistência técnica</strong>. O foco é resolver rápido: consulte estoque pelo WhatsApp, retire na loja física no Cambuí ou peça entrega conforme disponibilidade.
                     </p>
-                    <ul className="list-none pl-0 text-gray-600 space-y-3">
+                    <ul className="list-none pl-0 text-zinc-400 space-y-3">
                         <li className="flex items-start gap-2">
-                            <span className="text-xl">ðŸ“</span>
-                            <span><strong>Loja fÃ­sica:</strong> {SITE_CONFIG.address}. Atendimento para Campinas, SumarÃ©, HortolÃ¢ndia, PaulÃ­nia, Valinhos, Vinhedo, Indaiatuba e JaguariÃºna.</span>
+                            <span className="text-xl">📍</span>
+                            <span><strong>Loja física:</strong> {SITE_CONFIG.address}. Atendimento para Campinas, Sumaré, Hortolândia, Paulínia, Valinhos, Vinhedo, Indaiatuba e Jaguariúna.</span>
                         </li>
                         <li className="flex items-start gap-2">
-                            <span className="text-xl">ðŸ’¬</span>
-                            <span><strong>Compra rÃ¡pida:</strong> fale no WhatsApp para confirmar estoque, preÃ§o final, retirada e entrega antes de sair de casa.</span>
+                            <span className="text-xl">💬</span>
+                            <span><strong>Compra rápida:</strong> fale no WhatsApp para confirmar estoque, preço final, retirada e entrega antes de sair de casa.</span>
                         </li>
                         <li className="flex items-start gap-2">
-                            <span className="text-xl">ðŸš€</span>
-                            <span><strong>Especialistas:</strong> montagem de PC Gamer, upgrades, manutenÃ§Ã£o de notebooks e suporte tÃ©cnico para empresas e clientes finais.</span>
+                            <span className="text-xl">🚀</span>
+                            <span><strong>Especialistas:</strong> montagem de PC Gamer, upgrades, manutenção de notebooks e suporte técnico para empresas e clientes finais.</span>
                         </li>
                         <li className="flex items-start gap-2">
-                            <span className="text-xl">ðŸ†</span>
-                            <span><strong>Diferencial local:</strong> loja real, atendimento humano, assistÃªncia tÃ©cnica e pÃ³s-venda perto do cliente.</span>
+                            <span className="text-xl">🏆</span>
+                            <span><strong>Diferencial local:</strong> loja real, atendimento humano, assistência técnica e pós-venda perto do cliente.</span>
                         </li>
                     </ul>
                 </SeoContent>
             )}      
 
             {!search && !category && (
+              <HomeLocalStoreInfo />
+            )}
+
+            {!search && !category && (
               <div className="mt-8">
                 <QuickLeadSection
                   title="Quer comprar ou consertar hoje?"
-                  description="Fale com a equipe da BalÃ£o da InformÃ¡tica pelo WhatsApp para confirmar estoque, retirada, entrega ou assistÃªncia tÃ©cnica em Campinas e regiÃ£o."
-                  messageTemplate="OlÃ¡! Quero atendimento rÃ¡pido da BalÃ£o da InformÃ¡tica para compra ou assistÃªncia tÃ©cnica em Campinas e regiÃ£o."
+                  description="Fale com a equipe da Balão da Informática pelo WhatsApp para confirmar estoque, retirada, entrega ou assistência técnica em Campinas e região."
+                  messageTemplate="Olá! Quero atendimento rápido da Balão da Informática para compra ou assistência técnica em Campinas e região."
                   source="home"
-                  cityLabel="Campinas e RegiÃ£o"
-                  serviceLabel="Venda, Upgrade e AssistÃªncia TÃ©cnica"
-                  formTitle="Pedir retorno rÃ¡pido"
+                  cityLabel="Campinas e Região"
+                  serviceLabel="Venda, Upgrade e Assistência Técnica"
+                  formTitle="Pedir retorno rápido"
                 />
               </div>
             )}
