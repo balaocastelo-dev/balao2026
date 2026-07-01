@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 
@@ -17,10 +17,11 @@ export default function TopBar() {
           setDolar(parseFloat(data.USDBRL.bid).toFixed(2));
         }
       } catch (error) {
-        console.error("Erro ao buscar dÃ³lar", error);
+        console.error("Erro ao buscar dólar", error);
       }
     }
     fetchDolar();
+    // Atualizar a cada 30 segundos
     const interval = setInterval(fetchDolar, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -38,11 +39,11 @@ export default function TopBar() {
         }
       } catch {}
       setMessages([
-        `Loja fÃ­sica em Campinas: ${SITE_CONFIG.addressShort || SITE_CONFIG.address}`,
-        `WhatsApp rÃ¡pido: ${SITE_CONFIG.whatsapp.display}`,
-        "Retire na loja ou consulte entrega para Campinas e regiÃ£o",
-        `HorÃ¡rio: ${SITE_CONFIG.openingHoursDisplay}`,
         `Telefone: ${SITE_CONFIG.phone.display}`,
+        `WhatsApp: ${SITE_CONFIG.whatsapp.display}`,
+        `E-mail: ${SITE_CONFIG.email}`,
+        "Horário de Atendimento: Seg a Sex das 09:00 às 18:00",
+        `Endereço: ${SITE_CONFIG.address}`
       ]);
     };
     fetchMessages();
@@ -51,6 +52,7 @@ export default function TopBar() {
   return (
     <div className="w-full bg-[#E60012] text-white text-xs md:text-sm py-1 overflow-hidden relative z-50 border-b border-red-700">
       <div className="container mx-auto flex items-center justify-between px-2">
+         {/* Marquee Container */}
          <div className="flex-1 overflow-hidden whitespace-nowrap relative">
             <div className="animate-marquee inline-block">
               {messages?.map((m, idx) => (
@@ -60,7 +62,7 @@ export default function TopBar() {
                {dolar && (
                 <>
                   <span className="mx-2 text-red-200">|</span>
-                  <span className="mx-4 font-bold text-yellow-300 bg-red-800 px-2 py-0.5 rounded">DÃ³lar Hoje: R$ {dolar}</span>
+                  <span className="mx-4 font-bold text-yellow-300 bg-red-800 px-2 py-0.5 rounded">Dólar Hoje: R$ {dolar}</span>
                 </>
               )}
             </div>

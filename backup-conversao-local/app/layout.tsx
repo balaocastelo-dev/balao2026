@@ -1,24 +1,23 @@
-﻿import type { Metadata, Viewport } from "next";
+import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import { Bangers } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
-import { CartProvider } from "@/context/CartContext";
-import { ToastProvider } from "@/context/ToastContext";
-import LayoutWrapper from "@/components/LayoutWrapper";
-import VisitorTracker from "@/components/VisitorTracker";
-import GlobalConversionTracker from "@/components/GlobalConversionTracker";
-import PromoJulioModal from "@/components/PromoJulioModal";
-import FloatingWhatsApp from "@/components/FloatingWhatsApp";
-import { getCategories } from "@/lib/db";
-import type { Category } from "@/lib/utils";
-import { SITE_CONFIG } from "@/lib/config";
 
 const bangers = Bangers({
   weight: "400",
   subsets: ["latin"],
   variable: "--font-bangers",
 });
+import { CartProvider } from "@/context/CartContext";
+import { ToastProvider } from "@/context/ToastContext";
+import LayoutWrapper from "@/components/LayoutWrapper";
+import VisitorTracker from "@/components/VisitorTracker";
+import GlobalConversionTracker from "@/components/GlobalConversionTracker";
+import PromoJulioModal from "@/components/PromoJulioModal";
+
+import { getCategories } from "@/lib/db";
+import type { Category } from "@/lib/utils";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -34,29 +33,32 @@ function getMetadataBase() {
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | BalÃ£o da InformÃ¡tica",
+    template: "%s | Balão da Informática",
     default:
-      "BalÃ£o da InformÃ¡tica | Loja de InformÃ¡tica em Campinas com WhatsApp RÃ¡pido",
+      "Balão da Informática | Loja de Informática com Entrega Rápida em Campinas e Região",
   },
   description:
-    "Loja de informÃ¡tica em Campinas com loja fÃ­sica no CambuÃ­. PCs Gamer, notebooks, peÃ§as, upgrades, perifÃ©ricos e assistÃªncia tÃ©cnica com atendimento pelo WhatsApp, retirada e entrega rÃ¡pida na regiÃ£o.",
+    "Loja de informática completa com entrega rápida para Campinas, Sumaré, Hortolândia, Paulínia, Valinhos, Vinhedo e todo o Brasil. PCs Gamer, notebooks, hardware, periféricos e assistência técnica especializada.",
   metadataBase: getMetadataBase(),
   keywords: [
-    "loja de informÃ¡tica campinas",
-    "informÃ¡tica campinas",
+    "loja de informática",
+    "loja de informática online",
+    "informática campinas",
     "pc gamer campinas",
+    "pc gamer brasil",
+    "computador completo",
     "notebook campinas",
-    "assistÃªncia tÃ©cnica informÃ¡tica campinas",
-    "manutenÃ§Ã£o de notebook campinas",
-    "montagem de pc gamer campinas",
     "hardware campinas",
-    "loja de computadores cambuÃ­",
-    "balÃ£o da informÃ¡tica castelo",
-    "balÃ£o da informÃ¡tica",
+    "loja de computadores",
+    "entrega rápida campinas",
+    "entrega rápida região metropolitana de campinas",
+    "entrega para todo brasil",
+    "assistência técnica informática campinas",
+    "balão da informática",
   ],
-  authors: [{ name: "BalÃ£o da InformÃ¡tica" }],
-  creator: "BalÃ£o da InformÃ¡tica",
-  publisher: "BalÃ£o da InformÃ¡tica",
+  authors: [{ name: "Balão da Informática" }],
+  creator: "Balão da Informática",
+  publisher: "Balão da Informática",
   robots: {
     index: true,
     follow: true,
@@ -66,21 +68,23 @@ export const metadata: Metadata = {
     locale: "pt_BR",
     url: "https://www.balao.info",
     title:
-      "BalÃ£o da InformÃ¡tica | Loja de InformÃ¡tica em Campinas com WhatsApp RÃ¡pido",
+      "Balão da Informática | Loja de Informática com Entrega Rápida em Campinas e Região",
     description:
-      "Loja fÃ­sica em Campinas para PC Gamer, notebooks, peÃ§as, upgrades e assistÃªncia tÃ©cnica. Consulte estoque pelo WhatsApp e retire no CambuÃ­.",
-    siteName: "BalÃ£o da InformÃ¡tica",
+      "Loja de informática em Campinas com foco em PCs Gamer, notebooks e hardware, entrega rápida na região de Campinas e envio para todo o Brasil.",
+    siteName: "Balão da Informática",
     images: [{ url: "/logo.png" }],
   },
   twitter: {
     card: "summary_large_image",
     title:
-      "BalÃ£o da InformÃ¡tica | Loja de InformÃ¡tica em Campinas com WhatsApp RÃ¡pido",
+      "Balão da Informática | Loja de Informática com Entrega Rápida em Campinas e Região",
     description:
-      "Loja fÃ­sica em Campinas para PC Gamer, notebooks, peÃ§as, upgrades e assistÃªncia tÃ©cnica. Consulte estoque pelo WhatsApp e retire no CambuÃ­.",
+      "Loja de informática em Campinas com foco em PCs Gamer, notebooks e hardware, entrega rápida na região de Campinas e envio para todo o Brasil.",
     images: ["/logo.png"],
   },
 };
+
+import { SITE_CONFIG } from "@/lib/config";
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -91,13 +95,13 @@ const jsonLd = {
       name: SITE_CONFIG.name,
       image: "https://www.balao.info/logo.png",
       description:
-        "Loja de informÃ¡tica em Campinas especializada em computadores, PC Gamer, notebooks, hardware, perifÃ©ricos e assistÃªncia tÃ©cnica, com atendimento pelo WhatsApp e retirada na loja fÃ­sica.",
+        "Loja de informática em Campinas especializada em computadores, PC Gamer, notebooks, hardware e periféricos, com entrega rápida para Campinas e região.",
       address: {
         "@type": "PostalAddress",
         streetAddress: SITE_CONFIG.address,
-        addressLocality: SITE_CONFIG.city,
-        addressRegion: SITE_CONFIG.region,
-        postalCode: SITE_CONFIG.postalCode || undefined,
+        addressLocality: "Campinas",
+        addressRegion: "SP",
+        postalCode: "13025-000",
         addressCountry: "BR",
       },
       geo: {
@@ -113,26 +117,25 @@ const jsonLd = {
         {
           "@type": "OpeningHoursSpecification",
           dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-          opens: "08:00",
+          opens: "09:00",
           closes: "18:00",
         },
         {
           "@type": "OpeningHoursSpecification",
           dayOfWeek: "Saturday",
-          opens: "08:00",
+          opens: "09:00",
           closes: "13:00",
         },
       ],
-      areaServed: ["Campinas", "SumarÃ©", "HortolÃ¢ndia", "PaulÃ­nia", "Valinhos", "Vinhedo", "Indaiatuba", "JaguariÃºna"],
+      areaServed: ["Campinas", "Sumaré", "Hortolândia", "Paulínia", "Valinhos", "Vinhedo", "Brasil"],
       sameAs: [SITE_CONFIG.social.instagram, SITE_CONFIG.social.facebook],
       makesOffer: {
         "@type": "OfferCatalog",
-        name: "InformÃ¡tica e Tecnologia",
+        name: "Informática e Tecnologia",
         itemListElement: [
           { "@type": "Offer", name: "PC Gamer", category: "Computadores" },
-          { "@type": "Offer", name: "Notebooks", category: "InformÃ¡tica" },
-          { "@type": "Offer", name: "AssistÃªncia TÃ©cnica", category: "ServiÃ§os" },
-          { "@type": "Offer", name: "PerifÃ©ricos e AcessÃ³rios", category: "InformÃ¡tica" },
+          { "@type": "Offer", name: "Notebooks", category: "Informática" },
+          { "@type": "Offer", name: "Periféricos e Acessórios", category: "Informática" },
         ],
       },
     },
@@ -252,7 +255,6 @@ export default async function RootLayout({
                 {children}
               </LayoutWrapper>
               <PromoJulioModal />
-              <FloatingWhatsApp />
             </Suspense>
           </ToastProvider>
         </CartProvider>

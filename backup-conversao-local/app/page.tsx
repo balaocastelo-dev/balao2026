@@ -1,4 +1,4 @@
-﻿import Header from "@/components/Header";
+import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import ProductList from "@/components/ProductList";
 import Carousel from "@/components/Carousel";
@@ -6,7 +6,6 @@ import ProductCarousel from "@/components/ProductCarousel";
 import SeoContent from "@/components/SeoContent";
 import JsonLd, { generateOrganizationSchema } from "@/components/JsonLd";
 import QuickLeadSection from "@/components/QuickLeadSection";
-import HomeLocalHero from "@/components/HomeLocalHero";
 import { getProductsByExactCategories, getCarouselImages, getCategories, getHomeBlocks } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { parsePriceToNumber, Product, type Category } from "@/lib/utils";
@@ -20,9 +19,9 @@ type SearchParams = Promise<{ category?: string; search?: string }>;
 export async function generateMetadata(props: { searchParams: SearchParams }): Promise<Metadata> {
   const sp = await props.searchParams;
   const hasFacet = Boolean((sp?.category || "").trim() || (sp?.search || "").trim());
-  const title = "Loja de InformÃ¡tica em Campinas | PC Gamer, Notebook e AssistÃªncia TÃ©cnica";
+  const title = "Balão da Informática | Loja de Informática com Entrega Rápida em Campinas e Região";
   const description =
-    "BalÃ£o da InformÃ¡tica Castelo: loja fÃ­sica em Campinas para PC Gamer, notebooks, peÃ§as, upgrades e assistÃªncia tÃ©cnica. Compre pelo WhatsApp, retire no CambuÃ­ ou consulte entrega rÃ¡pida.";
+    "Loja de informática completa com entrega rápida para Campinas e região. PCs Gamer, notebooks, hardware, periféricos e assistência técnica especializada.";
   const canonical = "https://www.balao.info/";
 
   return {
@@ -137,20 +136,18 @@ export default async function Home(props: {
   const filteredProducts = products;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+    <div className="min-h-screen flex flex-col font-sans">
       <JsonLd data={generateOrganizationSchema()} />
       <Header />
-
-      {!search && !category && <HomeLocalHero />}
       
       {/* Carousel Banner */}
       {!search && !category && (
-          <div className="container mx-auto px-4 mt-5 lg:px-0">
+          <div className="container mx-auto px-4 mt-6">
               {carouselImages.length > 0 ? (
                   <Carousel images={carouselImages} />
               ) : (
                   <div className="w-full h-40 md:h-64 lg:h-80 bg-gradient-to-r from-[#E60012] to-red-800 rounded-xl flex items-center justify-center text-white text-3xl font-bold shadow-md">
-                      Ofertas ImperdÃ­veis
+                      Ofertas Imperdíveis
                   </div>
               )}
           </div>
@@ -159,11 +156,15 @@ export default async function Home(props: {
       <div className="flex container mx-auto flex-1 py-6 gap-6 px-4 lg:px-0">
         <div className="hidden lg:block w-64 flex-shrink-0">
             <Sidebar categories={categories} />
+            {/* <div className="mt-4">
+                <InstagramFeed />
+            </div> */}
         </div>
         <main className="flex-1 w-full min-w-0">
             {/* Dynamic Home Blocks */}
             {!search && !category && (
                 <>
+                {/* Dynamic Home Blocks */}
                 {homeBlocks.map(block => {
                     const blockProducts = products.filter(p => p.category === block.category_id);
                     if (blockProducts.length === 0) return null;
@@ -182,45 +183,45 @@ export default async function Home(props: {
             {/* Product List - Only show when searching or browsing category */}
             {(category || search) && (
               <>
-                <div className="flex items-center justify-between mb-4">
-                    <h1 className="text-xl font-bold text-gray-800">
-                        {category || `Resultados para: "${search}"`}
-                    </h1>
-                    <span className="text-sm text-gray-500">{filteredProducts.length} produtos</span>
-                </div>
+                 <div className="flex items-center justify-between mb-4">
+                     <h1 className="text-xl font-bold text-zinc-100">
+                         {category || `Resultados para: "${search}"`}
+                     </h1>
+                     <span className="text-sm text-zinc-400">{filteredProducts.length} produtos</span>
+                 </div>
 
-                {filteredProducts.length === 0 ? (
-                   <div className="text-center py-20 text-gray-500 bg-white rounded-lg shadow-sm">
-                      <p className="text-xl font-medium">Nenhum produto encontrado.</p>
-                   </div>
-                ) : (
-                  <ProductList products={filteredProducts} />
-                )}
+                 {filteredProducts.length === 0 ? (
+                    <div className="text-center py-20 text-zinc-400 bg-zinc-900/40 border border-zinc-800 rounded-lg shadow-sm">
+                       <p className="text-xl font-medium">Nenhum produto encontrado.</p>
+                    </div>
+                 ) : (
+                   <ProductList products={filteredProducts} />
+                 )}
               </>
             )}
 
             {/* SEO Content Section */}
             {!search && !category && (
-                <SeoContent title="LOJA DE INFORMÃTICA EM CAMPINAS COM ATENDIMENTO LOCAL">
-                    <p className="text-gray-600 mb-4">
-                        A <strong>BalÃ£o da InformÃ¡tica Castelo</strong> atende Campinas e regiÃ£o com venda de <strong>PC Gamer, notebooks, peÃ§as, perifÃ©ricos, upgrades e assistÃªncia tÃ©cnica</strong>. O foco Ã© resolver rÃ¡pido: consulte estoque pelo WhatsApp, retire na loja fÃ­sica no CambuÃ­ ou peÃ§a entrega conforme disponibilidade.
-                    </p>
-                    <ul className="list-none pl-0 text-gray-600 space-y-3">
+                 <SeoContent title="BALÃO DA INFORMÁTICA: SUA LOJA DE INFORMÁTICA EM CAMPINAS E REGIÃO">
+                     <p className="text-zinc-400 mb-4">
+                         Bem-vindo ao <strong>Balão da Informática</strong>, sua referência em tecnologia e hardware em <strong>Campinas e RMC</strong>. Encontre as melhores marcas de peças, notebooks e PC Gamer com preço justo e garantia.
+                     </p>
+                     <ul className="list-none pl-0 text-zinc-400 space-y-3">
                         <li className="flex items-start gap-2">
-                            <span className="text-xl">ðŸ“</span>
-                            <span><strong>Loja fÃ­sica:</strong> {SITE_CONFIG.address}. Atendimento para Campinas, SumarÃ©, HortolÃ¢ndia, PaulÃ­nia, Valinhos, Vinhedo, Indaiatuba e JaguariÃºna.</span>
+                            <span className="text-xl">📍</span>
+                            <span><strong>Região RMC:</strong> Atendemos Campinas, Sumaré, Hortolândia, Paulínia, Valinhos, Vinhedo, Indaiatuba e Jaguariúna.</span>
                         </li>
                         <li className="flex items-start gap-2">
-                            <span className="text-xl">ðŸ’¬</span>
-                            <span><strong>Compra rÃ¡pida:</strong> fale no WhatsApp para confirmar estoque, preÃ§o final, retirada e entrega antes de sair de casa.</span>
+                            <span className="text-xl">🚀</span>
+                            <span><strong>Especialistas:</strong> Montagem de PC Gamer High-End, Workstations para renderização e computadores para escritório.</span>
                         </li>
                         <li className="flex items-start gap-2">
-                            <span className="text-xl">ðŸš€</span>
-                            <span><strong>Especialistas:</strong> montagem de PC Gamer, upgrades, manutenÃ§Ã£o de notebooks e suporte tÃ©cnico para empresas e clientes finais.</span>
+                            <span className="text-xl">⚡</span>
+                            <span><strong>Entrega Flash:</strong> Receba no mesmo dia em Campinas (consulte disponibilidade). Delivery rápido e seguro.</span>
                         </li>
                         <li className="flex items-start gap-2">
-                            <span className="text-xl">ðŸ†</span>
-                            <span><strong>Diferencial local:</strong> loja real, atendimento humano, assistÃªncia tÃ©cnica e pÃ³s-venda perto do cliente.</span>
+                            <span className="text-xl">🏆</span>
+                            <span><strong>Por que escolher:</strong> Maior estoque da região, preços agressivos em SSD/RAM/Video e suporte técnico especializado.</span>
                         </li>
                     </ul>
                 </SeoContent>
@@ -229,13 +230,13 @@ export default async function Home(props: {
             {!search && !category && (
               <div className="mt-8">
                 <QuickLeadSection
-                  title="Quer comprar ou consertar hoje?"
-                  description="Fale com a equipe da BalÃ£o da InformÃ¡tica pelo WhatsApp para confirmar estoque, retirada, entrega ou assistÃªncia tÃ©cnica em Campinas e regiÃ£o."
-                  messageTemplate="OlÃ¡! Quero atendimento rÃ¡pido da BalÃ£o da InformÃ¡tica para compra ou assistÃªncia tÃ©cnica em Campinas e regiÃ£o."
+                  title="Quer atendimento rápido para comprar ou consertar?"
+                  description="Se você precisa de notebook, PC Gamer, assistência técnica, upgrade ou reparo Apple, fale com a equipe agora. O foco é transformar visita no site em atendimento real."
+                  messageTemplate="Olá! Quero atendimento rápido da Balão da Informática para compra ou assistência técnica em Campinas e região."
                   source="home"
-                  cityLabel="Campinas e RegiÃ£o"
-                  serviceLabel="Venda, Upgrade e AssistÃªncia TÃ©cnica"
-                  formTitle="Pedir retorno rÃ¡pido"
+                  cityLabel="Campinas e Região"
+                  serviceLabel="Venda e Assistência Técnica"
+                  formTitle="Pedir retorno rápido"
                 />
               </div>
             )}

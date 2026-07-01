@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { MessageCircle } from "lucide-react";
 import { SITE_CONFIG } from "@/lib/config";
@@ -6,12 +6,9 @@ import { trackWhatsAppClick } from "@/lib/tracking";
 
 export default function WhatsAppButton({ productName }: { productName: string }) {
   const handleWhatsAppClick = () => {
+    // Check if window is defined (client-side)
     if (typeof window !== "undefined") {
-      const message = [
-        `OlÃ¡! Vi no site este produto: ${productName}`,
-        `Link: ${window.location.href}`,
-        "Pode confirmar estoque, valor final e opÃ§Ã£o de retirada/entrega em Campinas?",
-      ].join("\n");
+      const message = `Olá, gostaria de consultar a disponibilidade do produto: ${productName} - ${window.location.href}`;
       const url = `https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(message)}`;
       trackWhatsAppClick({
         page_path: window.location.pathname,
@@ -19,19 +16,19 @@ export default function WhatsAppButton({ productName }: { productName: string })
         label: productName,
         product_name: productName,
       });
-      window.open(url, "_blank");
+      window.open(url, '_blank');
     }
   };
 
   return (
-    <button
+    <button 
       onClick={handleWhatsAppClick}
-      className="flex items-center gap-2 px-3 py-2 text-xs md:px-4 md:py-2 md:text-base bg-[#25D366] text-white rounded-md font-bold hover:bg-[#128C7E] transition-colors shadow-sm"
-      title="Confirmar estoque no WhatsApp"
+      className="flex items-center gap-2 px-3 py-2 text-xs md:px-4 md:py-2 md:text-base bg-[#25D366] text-white rounded-md font-medium hover:bg-[#128C7E] transition-colors shadow-sm"
+      title="Verificar disponibilidade no WhatsApp"
     >
       <MessageCircle className="w-4 h-4 md:w-5 md:h-5" />
-      <span className="md:hidden">WhatsApp</span>
-      <span className="hidden md:inline">Confirmar estoque no WhatsApp</span>
+      <span className="md:hidden">Verificar no WhatsApp</span>
+      <span className="hidden md:inline">Verificar disponibilidade no WhatsApp</span>
     </button>
   );
 }
