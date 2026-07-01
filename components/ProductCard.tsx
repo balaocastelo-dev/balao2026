@@ -25,9 +25,9 @@ export default function ProductCard({ product, variant = "grid" }: { product: Pr
 
   if (variant === "list") {
     return (
-      <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-gray-100 flex flex-col md:flex-row h-full group">
+      <div className="bg-zinc-950/70 rounded-2xl shadow-lg hover:shadow-2xl hover:border-zinc-800/80 transition-all duration-300 overflow-hidden border border-zinc-900 flex flex-col md:flex-row h-full group">
         <Link href={productHref} className="flex-1 flex flex-col md:flex-row">
-          <div ref={imageRef} className="relative w-full md:w-32 pt-[100%] md:pt-0 md:h-auto md:min-h-[8rem] bg-gray-50 overflow-hidden shrink-0">
+          <div ref={imageRef} className="relative w-full md:w-32 pt-[100%] md:pt-0 md:h-auto md:min-h-[8rem] bg-zinc-900/40 overflow-hidden shrink-0">
              <Image
                 src={product.image}
                 alt={product.name}
@@ -39,13 +39,13 @@ export default function ProductCard({ product, variant = "grid" }: { product: Pr
              />
           </div>
           <div className="p-3 flex-1 flex flex-col justify-center">
-              <div className="text-[10px] text-gray-500 mb-1 uppercase tracking-wider">{product.category || "Hardware"}</div>
-              <h3 className="font-medium text-gray-800 line-clamp-2 mb-1 text-sm leading-tight" title={product.name}>
+              <div className="text-[10px] text-zinc-500 mb-1 uppercase tracking-wider">{product.category || "Hardware"}</div>
+              <h3 className="font-semibold text-zinc-200 line-clamp-2 mb-1 text-sm leading-tight group-hover:text-white transition-colors" title={product.name}>
                   {product.name}
               </h3>
               
               <div className="mt-1">
-                  <p className="text-[10px] text-gray-400 line-through">
+                  <p className="text-[10px] text-zinc-500 line-through">
                       {(parseFloat(product.price.replace("R$", "").replace(/\./g, "").replace(",", ".")) / 0.85).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                   </p>
                   <div className="flex items-baseline gap-1">
@@ -54,17 +54,17 @@ export default function ProductCard({ product, variant = "grid" }: { product: Pr
                           {product.price.replace("R$", "").trim()}
                       </span>
                   </div>
-                  <p className="text-[10px] text-gray-600">
+                  <p className="text-[10px] text-zinc-400">
                       à vista no PIX
                   </p>
               </div>
           </div>
         </Link>
         
-        <div className="p-3 md:w-40 flex items-center justify-center border-t md:border-t-0 md:border-l border-gray-100 bg-gray-50 md:bg-transparent">
+        <div className="p-3 md:w-40 flex items-center justify-center border-t md:border-t-0 md:border-l border-zinc-900 bg-zinc-900/10 md:bg-transparent">
           <button 
               onClick={handleAddToCart}
-              className="w-full bg-[#E60012] hover:bg-[#cc0010] active:scale-95 transform text-white font-bold py-2 px-3 rounded text-sm transition-all flex items-center justify-center gap-2"
+              className="w-full bg-[#E60012] hover:bg-[#cc0010] active:scale-95 transform text-white font-bold py-2 px-3 rounded text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-red-950/20"
           >
               <ShoppingCart size={16} />
               Comprar
@@ -75,28 +75,27 @@ export default function ProductCard({ product, variant = "grid" }: { product: Pr
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-gray-100 flex flex-col h-full group">
+    <div className="bg-zinc-950/70 rounded-2xl shadow-lg hover:shadow-2xl hover:border-zinc-800/80 transition-all duration-300 overflow-hidden border border-zinc-900 flex flex-col h-full group">
       <Link href={productHref} className="flex-1">
-        <div ref={imageRef} className="relative pt-[100%] bg-gray-50 overflow-hidden">
+        <div ref={imageRef} className="relative pt-[100%] bg-zinc-900/40 overflow-hidden">
              <Image
                 src={product.image}
                 alt={product.name}
                 fill
                 sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                className="object-contain p-2 sm:p-4 group-hover:scale-105 transition-transform duration-300"
+                className="object-contain p-4 group-hover:scale-105 transition-transform duration-300"
                 priority={false}
                 unoptimized
              />
         </div>
         <div className="p-3 md:p-4">
-            <div className="text-[10px] sm:text-xs text-gray-500 mb-1 uppercase tracking-wider">{product.category || "Hardware"}</div>
-            <h3 className="font-medium text-gray-800 line-clamp-2 mb-2 h-10 leading-5 text-sm sm:text-base" title={product.name}>
+            <div className="text-[10px] sm:text-xs text-zinc-500 mb-1 uppercase tracking-wider">{product.category || "Hardware"}</div>
+            <h3 className="font-semibold text-zinc-200 line-clamp-2 mb-2 h-10 leading-5 text-sm sm:text-base group-hover:text-white transition-colors" title={product.name}>
                 {product.name}
             </h3>
             
             <div className="mt-2 sm:mt-4">
-                <p className="text-[10px] sm:text-xs text-gray-400 line-through">
-                    {/* Reverse calculation: product.price is Cash Price (85% of List) */}
+                <p className="text-[10px] sm:text-xs text-zinc-500 line-through">
                     {(parseFloat(product.price.replace("R$", "").replace(/\./g, "").replace(",", ".")) / 0.85).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                 </p>
                 <div className="flex items-baseline gap-1">
@@ -105,7 +104,7 @@ export default function ProductCard({ product, variant = "grid" }: { product: Pr
                         {product.price.replace("R$", "").trim()}
                     </span>
                 </div>
-                <p className="text-[10px] sm:text-xs text-gray-600 mt-1">
+                <p className="text-[10px] sm:text-xs text-zinc-400 mt-1">
                     à vista no PIX
                 </p>
             </div>
@@ -115,7 +114,7 @@ export default function ProductCard({ product, variant = "grid" }: { product: Pr
       <div className="p-3 md:p-4 pt-0 mt-auto">
         <button 
             onClick={handleAddToCart}
-            className="w-full bg-[#E60012] hover:bg-[#cc0010] active:scale-95 transform text-white font-bold py-2 px-3 md:px-4 rounded transition-all flex items-center justify-center gap-2 text-sm sm:text-base"
+            className="w-full bg-[#E60012] hover:bg-[#cc0010] active:scale-95 transform text-white font-bold py-2 px-3 md:px-4 rounded transition-all flex items-center justify-center gap-2 text-sm sm:text-base shadow-lg shadow-red-950/20"
         >
             <ShoppingCart size={18} />
             Comprar

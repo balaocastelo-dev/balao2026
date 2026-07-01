@@ -3,7 +3,6 @@
 import Link from "next/link";
 import {
   ArrowRight,
-  CheckCircle2,
   Clock,
   Cpu,
   Laptop,
@@ -43,8 +42,10 @@ export default function HomeLocalHero() {
   return (
     <section className="container mx-auto px-4 pt-5 lg:px-0">
       <div className="relative overflow-hidden rounded-[2rem] border border-zinc-800 bg-zinc-950/75 backdrop-blur-md shadow-2xl">
-        <div className="absolute inset-y-0 right-0 hidden w-1/2 bg-[radial-gradient(circle_at_70%_30%,rgba(230,0,18,0.1),transparent_40%),linear-gradient(135deg,#090b11_0%,#18181b_100%)] lg:block" />
+        <div className="absolute inset-y-0 right-0 hidden w-1/2 bg-[radial-gradient(circle_at_70%_30%,rgba(230,0,18,0.06),transparent_40%),linear-gradient(135deg,#090b11_0%,#18181b_100%)] lg:block" />
         <div className="relative grid grid-cols-1 gap-8 p-5 sm:p-8 lg:grid-cols-12 lg:p-10">
+          
+          {/* Left Column: Local business information */}
           <div className="lg:col-span-7">
             <div className="inline-flex items-center gap-2 rounded-full border border-red-950 bg-red-950/20 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-red-400">
               <Clock size={15} />
@@ -110,41 +111,77 @@ export default function HomeLocalHero() {
             </div>
           </div>
 
+          {/* Right Column: High-converting Festa Julina promo PC hero banner */}
           <div className="lg:col-span-5">
-            <div className="h-full rounded-[1.7rem] border border-red-900/30 bg-gradient-to-br from-[#E60012] to-[#8f0010] p-5 text-white shadow-2xl">
-              <div className="rounded-2xl bg-white/10 p-4 ring-1 ring-white/15 backdrop-blur">
-                <div className="text-sm font-black uppercase tracking-[0.2em] text-red-100">Oferta local</div>
-                <div className="mt-2 text-3xl font-black leading-tight">Precisa hoje? Fale com a loja agora.</div>
-                <p className="mt-3 text-sm leading-relaxed text-red-50">
-                  Atendimento pensado para cliente de Campinas: estoque, retirada, entrega e suporte técnico de verdade.
-                </p>
-              </div>
+            <div className="relative h-full rounded-[1.7rem] border border-[#E60012]/30 bg-zinc-950/90 p-6 text-white shadow-2xl flex flex-col justify-between overflow-hidden">
+              
+              {/* Glowing highlight light */}
+              <div className="absolute -top-12 -right-12 w-32 h-32 bg-red-600/10 rounded-full blur-3xl pointer-events-none"></div>
+              
+              <div className="relative z-10 space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-[9px] font-black text-yellow-500 uppercase tracking-widest bg-yellow-950/45 px-2.5 py-1 rounded-md border border-yellow-900/30">
+                    🔥 ARRAIÁ DE OFERTAS
+                  </span>
+                  <span className="text-[9px] font-black text-red-400 uppercase tracking-wider bg-red-950/40 px-2.5 py-1 rounded-md border border-red-900/20">
+                    JULHO • VÁLIDO ATÉ 31/07
+                  </span>
+                </div>
+                
+                <div>
+                  <h3 className="text-xl sm:text-2xl font-black tracking-tight text-white uppercase">
+                    Super PC Gamer Completo
+                  </h3>
+                  <p className="text-[10px] text-zinc-400 font-semibold uppercase mt-0.5 tracking-wider">
+                    Gabinete Aquário + Led Azul (RTX 4090)
+                  </p>
+                </div>
 
-              <div className="mt-5 grid gap-3">
-                {[
-                  "Confirmar estoque antes de sair de casa",
-                  "Receber opção de retirada ou entrega",
-                  "Comprar com PIX, cartão ou atendimento humano",
-                  "Falar com quem entende de informática",
-                ].map((text) => (
-                  <div key={text} className="flex items-center gap-3 rounded-2xl bg-zinc-950 border border-zinc-900 px-4 py-3 text-sm font-black text-zinc-100 shadow-sm">
-                    <CheckCircle2 size={18} className="text-[#E60012]" />
-                    {text}
+                {/* Specs List */}
+                <ul className="text-zinc-400 text-xs space-y-2 border-y border-zinc-900 py-3">
+                  <li className="flex items-center gap-2">
+                    <span className="text-[#E60012] font-bold">⚡</span>
+                    <span>Processador Intel Core i9 13900</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-[#E60012] font-bold">⚡</span>
+                    <span>Placa de vídeo 24GB RTX 4090 PNY</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-[#E60012] font-bold">⚡</span>
+                    <span>32GB Memória RAM DDR5 (2x16GB)</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-[#E60012] font-bold">⚡</span>
+                    <span>SSD 2TB NVMe + Fonte 1000W</span>
+                  </li>
+                </ul>
+
+                {/* Price tag */}
+                <div className="text-left mt-2">
+                  <span className="text-xs text-zinc-500 line-through block">De: R$ 34.999,00</span>
+                  <div className="flex items-baseline gap-1 mt-0.5">
+                    <span className="text-zinc-400 text-xs">Por apenas:</span>
+                    <span className="text-2xl sm:text-3xl font-black text-green-500 tracking-tight">R$ 28.329,90</span>
                   </div>
-                ))}
+                  <span className="text-[10px] text-zinc-400 block font-semibold">ou em 12x sem juros no cartão!</span>
+                </div>
               </div>
 
               <a
-                href={whatsappHref}
+                href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(
+                  "Olá! Vi o Super PC Gamer Completo (i9 + RTX 4090) por R$ 28.329,90 no site e quero garantir a minha máquina agora!"
+                )}`}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-5 py-4 text-base font-black text-[#E60012] shadow-lg transition hover:bg-red-50 active:scale-[0.98]"
+                className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-green-500 hover:bg-green-600 px-5 py-4 text-base font-black text-white shadow-lg shadow-green-950/20 transition-all hover:scale-105 active:scale-[0.98] cursor-pointer"
               >
                 <MessageCircle size={21} />
-                Chamar vendedor agora
+                Comprar PC pelo WhatsApp
               </a>
             </div>
           </div>
+
         </div>
       </div>
 

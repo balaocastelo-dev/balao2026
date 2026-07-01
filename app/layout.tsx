@@ -8,7 +8,6 @@ import { ToastProvider } from "@/context/ToastContext";
 import LayoutWrapper from "@/components/LayoutWrapper";
 import VisitorTracker from "@/components/VisitorTracker";
 import GlobalConversionTracker from "@/components/GlobalConversionTracker";
-import PromoJulioModal from "@/components/PromoJulioModal";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import { getCategories } from "@/lib/db";
 import type { Category } from "@/lib/utils";
@@ -251,7 +250,6 @@ export default async function RootLayout({
               <LayoutWrapper categories={categories}>
                 {children}
               </LayoutWrapper>
-              <PromoJulioModal />
               <FloatingWhatsApp />
             </Suspense>
           </ToastProvider>

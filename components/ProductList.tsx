@@ -62,13 +62,13 @@ export default function ProductList({ products }: { products: Product[] }) {
         
         {/* Sort Controls */}
         <div className="flex items-center gap-2 w-full sm:w-auto">
-            <span className="text-sm text-gray-500 font-medium whitespace-nowrap flex items-center gap-1">
+            <span className="text-sm text-zinc-400 font-medium whitespace-nowrap flex items-center gap-1">
                 <ArrowUpDown size={16} /> Ordenar por:
             </span>
             <select 
                 value={sortMode}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSortMode(e.target.value as SortMode)}
-                className="bg-white border border-gray-200 text-gray-700 text-sm rounded-md focus:ring-red-500 focus:border-red-500 block w-full p-2 outline-none cursor-pointer hover:border-red-300 transition-colors"
+                className="bg-zinc-900 border border-zinc-800 text-zinc-200 text-sm rounded-md focus:ring-red-500 focus:border-red-500 block w-full p-2 outline-none cursor-pointer hover:border-zinc-700 transition-colors"
             >
                 <option value="default">Relevância</option>
                 <option value="price-asc">Menor Preço</option>
@@ -79,14 +79,14 @@ export default function ProductList({ products }: { products: Product[] }) {
         {/* View Controls */}
         <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
             
-            <span className="text-sm text-gray-500 font-medium mr-2 hidden sm:inline">Visualização:</span>
+            <span className="text-sm text-zinc-400 font-medium mr-2 hidden sm:inline">Visualização:</span>
             
             <button
             onClick={() => setViewMode("small")}
-            className={`p-2 rounded-md transition-all ${
+            className={`p-2 rounded-md transition-all cursor-pointer ${
                 viewMode === "small" 
                 ? "bg-[#E60012] text-white shadow-md" 
-                : "bg-white text-gray-500 hover:bg-gray-100 border border-gray-200"
+                : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800 border border-zinc-800"
             }`}
             title="Menores (Grade Compacta)"
             >
@@ -95,10 +95,10 @@ export default function ProductList({ products }: { products: Product[] }) {
 
             <button
             onClick={() => setViewMode("large")}
-            className={`p-2 rounded-md transition-all ${
+            className={`p-2 rounded-md transition-all cursor-pointer ${
                 viewMode === "large" 
                 ? "bg-[#E60012] text-white shadow-md" 
-                : "bg-white text-gray-500 hover:bg-gray-100 border border-gray-200"
+                : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800 border border-zinc-800"
             }`}
             title="Grandes (Grade Expandida)"
             >
@@ -123,10 +123,10 @@ export default function ProductList({ products }: { products: Product[] }) {
         <div className="flex justify-center mt-8">
           <button
             onClick={loadMore}
-            className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-200 text-gray-700 font-medium rounded-full shadow-sm hover:bg-gray-50 hover:border-gray-300 transition-all group"
+            className="flex items-center gap-2 px-6 py-3 bg-zinc-900 border border-zinc-800 text-zinc-200 font-medium rounded-full shadow-md hover:bg-zinc-850 hover:border-[#E60012] hover:text-white transition-all group cursor-pointer"
           >
-            <span className="group-hover:text-[#E60012] transition-colors">Carregar mais produtos</span>
-            <ChevronDown size={20} className="text-gray-400 group-hover:text-[#E60012] transition-colors" />
+            <span>Carregar mais produtos</span>
+            <ChevronDown size={20} className="text-zinc-500 group-hover:text-white transition-colors" />
           </button>
         </div>
       )}
