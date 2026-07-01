@@ -136,7 +136,7 @@ export default async function Home(props: {
   const filteredProducts = products;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+    <div className="min-h-screen flex flex-col font-sans">
       <JsonLd data={generateOrganizationSchema()} />
       <Header />
       
@@ -183,30 +183,30 @@ export default async function Home(props: {
             {/* Product List - Only show when searching or browsing category */}
             {(category || search) && (
               <>
-                <div className="flex items-center justify-between mb-4">
-                    <h1 className="text-xl font-bold text-gray-800">
-                        {category || `Resultados para: "${search}"`}
-                    </h1>
-                    <span className="text-sm text-gray-500">{filteredProducts.length} produtos</span>
-                </div>
+                 <div className="flex items-center justify-between mb-4">
+                     <h1 className="text-xl font-bold text-zinc-100">
+                         {category || `Resultados para: "${search}"`}
+                     </h1>
+                     <span className="text-sm text-zinc-400">{filteredProducts.length} produtos</span>
+                 </div>
 
-                {filteredProducts.length === 0 ? (
-                   <div className="text-center py-20 text-gray-500 bg-white rounded-lg shadow-sm">
-                      <p className="text-xl font-medium">Nenhum produto encontrado.</p>
-                   </div>
-                ) : (
-                  <ProductList products={filteredProducts} />
-                )}
+                 {filteredProducts.length === 0 ? (
+                    <div className="text-center py-20 text-zinc-400 bg-zinc-900/40 border border-zinc-800 rounded-lg shadow-sm">
+                       <p className="text-xl font-medium">Nenhum produto encontrado.</p>
+                    </div>
+                 ) : (
+                   <ProductList products={filteredProducts} />
+                 )}
               </>
             )}
 
             {/* SEO Content Section */}
             {!search && !category && (
-                <SeoContent title="BALÃO DA INFORMÁTICA: SUA LOJA DE INFORMÁTICA EM CAMPINAS E REGIÃO">
-                    <p className="text-gray-600 mb-4">
-                        Bem-vindo ao <strong>Balão da Informática</strong>, sua referência em tecnologia e hardware em <strong>Campinas e RMC</strong>. Encontre as melhores marcas de peças, notebooks e PC Gamer com preço justo e garantia.
-                    </p>
-                    <ul className="list-none pl-0 text-gray-600 space-y-3">
+                 <SeoContent title="BALÃO DA INFORMÁTICA: SUA LOJA DE INFORMÁTICA EM CAMPINAS E REGIÃO">
+                     <p className="text-zinc-400 mb-4">
+                         Bem-vindo ao <strong>Balão da Informática</strong>, sua referência em tecnologia e hardware em <strong>Campinas e RMC</strong>. Encontre as melhores marcas de peças, notebooks e PC Gamer com preço justo e garantia.
+                     </p>
+                     <ul className="list-none pl-0 text-zinc-400 space-y-3">
                         <li className="flex items-start gap-2">
                             <span className="text-xl">📍</span>
                             <span><strong>Região RMC:</strong> Atendemos Campinas, Sumaré, Hortolândia, Paulínia, Valinhos, Vinhedo, Indaiatuba e Jaguariúna.</span>

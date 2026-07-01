@@ -437,7 +437,7 @@ export default function PCBuilder({ products }: PCBuilderProps) {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg border border-red-100 overflow-hidden flex flex-col h-full max-h-[calc(100vh-250px)] sticky top-24">
+        <div className="bg-zinc-950/70 border border-zinc-800 overflow-hidden flex flex-col h-full max-h-[calc(100vh-250px)] sticky top-24 rounded-xl shadow-lg">
           <div className="p-4 bg-gradient-to-r from-red-600 to-red-700 text-white shadow-sm">
             <h2 className="font-bold text-lg flex items-center gap-2">
               <ShoppingCart size={20} />
@@ -446,7 +446,7 @@ export default function PCBuilder({ products }: PCBuilderProps) {
             <div className="text-red-100 text-sm">Resumo da configuração</div>
           </div>
           
-          <div className="flex-1 overflow-y-auto p-3 space-y-2 bg-zinc-50">
+          <div className="flex-1 overflow-y-auto p-3 space-y-2 bg-zinc-900/30">
             {STEPS.map((step) => {
               const selection = selections[step.id];
               const isSelected = Array.isArray(selection) ? selection.length > 0 : !!selection;
@@ -458,25 +458,25 @@ export default function PCBuilder({ products }: PCBuilderProps) {
                   onClick={() => setCurrentStep(step.id)}
                   className={`p-3 rounded-lg cursor-pointer transition-all border relative group ${
                     isCurrent 
-                      ? "bg-white border-red-500 shadow-md ring-1 ring-red-100" 
-                      : "bg-white border-zinc-200 hover:border-red-300"
+                      ? "bg-zinc-900 border-red-500 shadow-md ring-1 ring-red-950/30" 
+                      : "bg-zinc-900/50 border-zinc-850 hover:border-red-500/50"
                   }`}
                 >
                   <div className="flex items-start gap-3">
                     <div className={`p-2 rounded-lg shrink-0 mt-1 transition-colors ${
-                      isSelected ? "bg-red-100 text-red-600" : 
-                      isCurrent ? "bg-red-50 text-red-500" : "bg-zinc-100 text-zinc-400"
+                      isSelected ? "bg-red-950/30 text-red-400" : 
+                      isCurrent ? "bg-red-950/20 text-red-500" : "bg-zinc-850 text-zinc-500"
                     }`}>
                       {isSelected && !step.multiSelect ? <Check size={16} /> : <step.icon size={16} />}
                     </div>
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-center mb-1">
-                        <span className={`text-sm font-bold ${isCurrent ? "text-red-700" : "text-zinc-700"}`}>
+                        <span className={`text-sm font-bold ${isCurrent ? "text-red-400" : "text-zinc-300"}`}>
                           {step.label}
                         </span>
                         {step.required && !isSelected && (
-                          <span className="text-[10px] text-red-500 font-bold px-1.5 py-0.5 bg-red-50 rounded border border-red-100">
+                          <span className="text-[10px] text-red-500 font-bold px-1.5 py-0.5 bg-red-950/30 rounded border border-red-900/50">
                             REQ
                           </span>
                         )}
@@ -487,7 +487,7 @@ export default function PCBuilder({ products }: PCBuilderProps) {
                           <div className="space-y-1">
                             {selection.map((item, idx) => (
                               <div key={idx} className="flex justify-between items-center group/item">
-                                <span className="text-xs text-zinc-600 truncate max-w-[140px] block" title={item.name}>
+                                <span className="text-xs text-zinc-400 truncate max-w-[140px] block" title={item.name}>
                                   {item.name}
                                 </span>
                                 <button 
@@ -509,10 +509,10 @@ export default function PCBuilder({ products }: PCBuilderProps) {
                           </div>
                         ) : (
                           <div className="group/item relative">
-                            <div className="text-xs text-zinc-700 font-medium line-clamp-2" title={(selection as Product).name}>
+                            <div className="text-xs text-zinc-300 font-medium line-clamp-2" title={(selection as Product).name}>
                               {(selection as Product).name}
                             </div>
-                            <div className="text-xs text-red-600 font-bold mt-0.5">
+                            <div className="text-xs text-red-550 font-bold mt-0.5">
                               {(selection as Product).price}
                             </div>
                             <button 
@@ -520,14 +520,14 @@ export default function PCBuilder({ products }: PCBuilderProps) {
                                 e.stopPropagation();
                                 handleRemove(step.id);
                               }}
-                              className="absolute -right-1 -top-1 text-zinc-400 hover:text-red-500 opacity-0 group-hover/item:opacity-100 p-1 bg-white rounded-full shadow-sm"
+                              className="absolute -right-1 -top-1 text-zinc-400 hover:text-red-500 opacity-0 group-hover/item:opacity-100 p-1 bg-zinc-950 rounded-full shadow-sm"
                             >
                               <X size={12} />
                             </button>
                           </div>
                         )
                       ) : (
-                        <div className="text-xs text-zinc-400 italic">
+                        <div className="text-xs text-zinc-500 italic">
                           {isCurrent ? "Selecionando..." : "Não selecionado"}
                         </div>
                       )}
@@ -538,23 +538,23 @@ export default function PCBuilder({ products }: PCBuilderProps) {
             })}
           </div>
 
-          <div className="p-4 bg-white border-t border-zinc-200">
+          <div className="p-4 bg-zinc-900/40 border-t border-zinc-800">
             <div className="flex justify-between items-end mb-4">
-              <span className="text-zinc-500 text-sm font-medium">Total Estimado</span>
-              <span className="text-2xl font-black text-red-600">{formatPrice(totalPrice)}</span>
+              <span className="text-zinc-400 text-sm font-medium">Total Estimado</span>
+              <span className="text-2xl font-black text-red-500">{formatPrice(totalPrice)}</span>
             </div>
             
             <div className="grid grid-cols-2 gap-2">
               <button 
                 onClick={handleWhatsAppShare}
-                className="col-span-1 py-2.5 px-4 bg-green-500 hover:bg-green-600 text-white rounded-lg font-bold text-sm transition-colors flex items-center justify-center gap-2 shadow-sm"
+                className="col-span-1 py-2.5 px-4 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold text-sm transition-colors flex items-center justify-center gap-2 shadow-sm"
               >
                 <Share2 size={16} />
                 WhatsApp
               </button>
               <button 
                 onClick={handleFinish}
-                className="col-span-1 py-2.5 px-4 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold text-sm transition-colors flex items-center justify-center gap-2 shadow-lg shadow-red-200"
+                className="col-span-1 py-2.5 px-4 bg-red-650 hover:bg-red-700 text-white rounded-lg font-bold text-sm transition-colors flex items-center justify-center gap-2 shadow-lg shadow-red-950/20"
               >
                 <ShoppingCart size={16} />
                 Comprar
@@ -566,13 +566,13 @@ export default function PCBuilder({ products }: PCBuilderProps) {
 
       {/* Right Content - Product Selection */}
       <div className="flex-1 w-full">
-        <div className="bg-white rounded-xl shadow-sm border border-zinc-200 p-6 min-h-[600px]">
+        <div className="bg-zinc-950/70 border border-zinc-800 rounded-xl shadow-lg p-6 min-h-[600px]">
           <div className="mb-6">
-            <h1 className="text-2xl font-bold text-zinc-800 flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-zinc-100 flex items-center gap-2">
               {currentStepInfo?.icon && <currentStepInfo.icon className="text-red-600" />}
               {currentStepInfo?.label}
             </h1>
-            <p className="text-zinc-500 text-sm mt-1">
+            <p className="text-zinc-450 text-sm mt-1">
               {filteredProducts.length} produtos compatíveis encontrados
             </p>
             
@@ -580,12 +580,12 @@ export default function PCBuilder({ products }: PCBuilderProps) {
             {(selectedCpuSpecs?.socket || selectedMoboSpecs?.socket) && (
               <div className="mt-3 flex flex-wrap gap-2">
                 {selectedCpuSpecs?.socket && (
-                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-zinc-100 text-zinc-700 border border-zinc-200">
+                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-zinc-900 text-zinc-400 border border-zinc-800">
                      <Cpu size={12} /> Socket: {selectedCpuSpecs.socket}
                    </span>
                 )}
                 {selectedMoboSpecs?.memory && (
-                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-zinc-100 text-zinc-700 border border-zinc-200">
+                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-zinc-900 text-zinc-400 border border-zinc-800">
                      <MemoryStick size={12} /> RAM: {selectedMoboSpecs.memory}
                    </span>
                 )}
@@ -595,13 +595,13 @@ export default function PCBuilder({ products }: PCBuilderProps) {
 
           {/* Search Bar */}
           <div className="relative mb-6">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={20} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-450" size={20} />
             <input
               type="text"
               placeholder={`Buscar em ${currentStepInfo?.label}...`}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-zinc-50 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+              className="w-full pl-10 pr-4 py-3 bg-zinc-900 border border-zinc-850 text-zinc-100 placeholder-zinc-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
             />
           </div>
 
@@ -610,9 +610,9 @@ export default function PCBuilder({ products }: PCBuilderProps) {
             {filteredProducts.map((product) => (
               <div 
                 key={product.id} 
-                className="group border border-zinc-200 rounded-xl p-4 hover:border-red-500 hover:shadow-md transition-all bg-white flex flex-col"
+                className="group border border-zinc-850 rounded-xl p-4 hover:border-red-500/50 hover:shadow-lg transition-all bg-zinc-900/40 flex flex-col"
               >
-                <div className="relative aspect-square mb-4 bg-zinc-50 rounded-lg overflow-hidden">
+                <div className="relative aspect-square mb-4 bg-zinc-950 rounded-lg overflow-hidden">
                   <Image
                     src={product.image}
                     alt={product.name}
@@ -622,20 +622,20 @@ export default function PCBuilder({ products }: PCBuilderProps) {
                 </div>
                 
                 <div className="flex-1 flex flex-col">
-                  <div className="text-xs text-zinc-400 mb-1 uppercase tracking-wider font-semibold">
+                  <div className="text-xs text-zinc-500 mb-1 uppercase tracking-wider font-semibold">
                     {product.category || "Hardware"}
                   </div>
-                  <h3 className="font-medium text-zinc-800 line-clamp-2 mb-2 flex-1 text-sm" title={product.name}>
+                  <h3 className="font-medium text-zinc-200 line-clamp-2 mb-2 flex-1 text-sm" title={product.name}>
                     {product.name}
                   </h3>
                   
-                  <div className="mt-auto pt-3 border-t border-zinc-100 flex items-center justify-between">
-                    <span className="text-lg font-bold text-red-600">
+                  <div className="mt-auto pt-3 border-t border-zinc-850 flex items-center justify-between">
+                    <span className="text-lg font-bold text-red-500">
                       {product.price}
                     </span>
                     <button
                       onClick={() => handleSelect(product)}
-                      className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-colors"
+                      className="p-2 bg-red-950/20 text-red-400 rounded-lg hover:bg-red-650 hover:text-white transition-colors"
                     >
                       <Plus size={20} />
                     </button>

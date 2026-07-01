@@ -121,7 +121,7 @@ export default async function ProductPage({ params }: Props) {
   ];
 
   return (
-     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+     <div className="min-h-screen flex flex-col font-sans">
       <JsonLd data={[
         generateOrganizationSchema(),
         generateBreadcrumbSchema(breadcrumbItems),
@@ -133,7 +133,7 @@ export default async function ProductPage({ params }: Props) {
             <Sidebar categories={categories} />
         </div>
         <main className="flex-1 w-full px-4 lg:px-0">
-          <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+          <div className="bg-zinc-950/75 border border-zinc-800 rounded-lg shadow-lg overflow-hidden">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 p-4 sm:p-6 md:p-8">
                 <div className="flex flex-col gap-4 md:gap-6">
                     <ProductMediaSwitcher
@@ -147,39 +147,39 @@ export default async function ProductPage({ params }: Props) {
                 {/* Info Section */}
                 <div className="flex flex-col">
                     <div className="mb-4">
-                        <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full uppercase tracking-wider font-semibold">
+                        <span className="bg-zinc-900 text-zinc-400 border border-zinc-800 text-xs px-2 py-1 rounded-full uppercase tracking-wider font-semibold">
                             {product.category || "Hardware"}
                         </span>
                     </div>
-                    <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6 leading-tight">
+                    <h1 className="text-2xl md:text-3xl font-bold text-zinc-100 mb-6 leading-tight">
                         {product.name}
                     </h1>
                     
-                    <div className="mt-auto bg-gray-50 p-6 rounded-xl border border-gray-100">
-                         {/* Cash Price */}
-                         <div className="mb-4">
-                            <div className="flex items-baseline gap-2">
-                                 <span className="text-[#E60012] font-black text-4xl">
-                                    {product.price}
-                                 </span>
-                            </div>
-                            <div className="text-gray-600 text-sm font-medium">
-                                à vista no PIX com <strong>15% de desconto</strong>
-                            </div>
-                         </div>
+                    <div className="mt-auto bg-zinc-900/40 p-6 rounded-xl border border-zinc-800/80">
+                          {/* Cash Price */}
+                          <div className="mb-4">
+                             <div className="flex items-baseline gap-2">
+                                  <span className="text-[#E60012] font-black text-4xl">
+                                     {product.price}
+                                  </span>
+                             </div>
+                             <div className="text-zinc-400 text-sm font-medium">
+                                 à vista no PIX com <strong>15% de desconto</strong>
+                             </div>
+                          </div>
 
-                         {/* Installment Price */}
-                         <div className="mb-6 pt-4 border-t border-gray-200">
-                            <div className="text-gray-500 text-sm mb-1">
-                                De: <span className="line-through">{listPriceNum.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-                            </div>
-                            <div className="text-gray-800 font-bold text-xl">
-                                {listPriceNum.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                            </div>
-                            <div className="text-gray-600 text-sm">
-                                em até 10x de <strong>{installmentValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong> sem juros
-                            </div>
-                         </div>
+                          {/* Installment Price */}
+                          <div className="mb-6 pt-4 border-t border-zinc-800">
+                             <div className="text-zinc-500 text-sm mb-1">
+                                 De: <span className="line-through">{listPriceNum.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                             </div>
+                             <div className="text-zinc-200 font-bold text-xl">
+                                 {listPriceNum.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                             </div>
+                             <div className="text-zinc-400 text-sm">
+                                 em até 10x de <strong>{installmentValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong> sem juros
+                             </div>
+                          </div>
 
                          <ProductActions product={product} />
                          
@@ -194,13 +194,13 @@ export default async function ProductPage({ params }: Props) {
             </div>
             
             {/* Details Tab */}
-            <div className="border-t border-gray-200 p-8">
-                <h2 className="text-xl font-bold mb-6">Detalhes do Produto</h2>
+            <div className="border-t border-zinc-800 p-8">
+                <h2 className="text-xl font-bold mb-6 text-zinc-100">Detalhes do Produto</h2>
                 
                 <div className="grid grid-cols-1 gap-8">
                     <div>
-                        <h3 className="text-lg font-bold mb-4 text-gray-800 border-b pb-2">Descrição</h3>
-                        <div className="prose max-w-none text-gray-600">
+                        <h3 className="text-lg font-bold mb-4 text-zinc-200 border-b border-zinc-800 pb-2">Descrição</h3>
+                        <div className="prose max-w-none text-zinc-400">
                             {descriptionText ? (
                                 <div className="whitespace-pre-wrap">{descriptionText}</div>
                             ) : (

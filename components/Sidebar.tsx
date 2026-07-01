@@ -184,8 +184,8 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
            className={`
              group flex items-center justify-between px-4 py-2.5 text-base transition-all duration-200 cursor-pointer select-none rounded-r-full mr-2
              ${isActive 
-               ? 'bg-red-50 text-[#E60012] font-semibold border-l-4 border-[#E60012]' 
-               : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 border-l-4 border-transparent'}
+               ? 'bg-red-950/20 text-[#E60012] font-semibold border-l-4 border-[#E60012]' 
+               : 'text-zinc-400 hover:bg-zinc-900/60 hover:text-zinc-100 border-l-4 border-transparent'}
            `}
            style={{ paddingLeft: level === 0 ? '16px' : `${level * 16 + 16}px` }}
         >
@@ -194,14 +194,14 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
               className={`flex-1 flex items-center gap-3 ${isLongLabel ? '' : 'truncate'}`}
               onClick={closeSidebar}
           >
-              {Icon && <span className={`${isActive ? 'text-[#E60012]' : 'text-gray-400 group-hover:text-gray-600'}`}>{Icon}</span>}
+              {Icon && <span className={`${isActive ? 'text-[#E60012]' : 'text-zinc-500 group-hover:text-zinc-300'}`}>{Icon}</span>}
               <span className={isLongLabel ? 'text-[11px] leading-tight font-bold' : ''}>{node.name}</span>
            </Link>
            
            {hasChildren && (
                <button 
                    onClick={(e) => toggleExpand(node.id, e)}
-                   className={`p-1 rounded-full transition-colors ${isActive ? 'hover:bg-red-100 text-red-400' : 'hover:bg-gray-200 text-gray-400'}`}
+                   className={`p-1 rounded-full transition-colors ${isActive ? 'hover:bg-red-950/45 text-red-400' : 'hover:bg-zinc-800 text-zinc-500'}`}
                >
                    {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                </button>
@@ -230,12 +230,12 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
         className={`
           flex items-center gap-3 px-4 py-2.5 text-base transition-all duration-200 rounded-r-full mr-2
           ${isActive 
-            ? 'bg-red-50 text-[#E60012] font-semibold border-l-4 border-[#E60012]' 
-            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 border-l-4 border-transparent'}
+            ? 'bg-red-950/20 text-[#E60012] font-semibold border-l-4 border-[#E60012]' 
+            : 'text-zinc-400 hover:bg-zinc-900/60 hover:text-zinc-100 border-l-4 border-transparent'}
         `}
         onClick={closeSidebar}
       >
-        <span className={`${isActive ? 'text-[#E60012]' : 'text-gray-400'}`}><Icon size={18} /></span>
+        <span className={`${isActive ? 'text-[#E60012]' : 'text-zinc-500'}`}><Icon size={18} /></span>
         <span className={isLongLabel ? 'text-[11px] leading-tight font-bold' : ''}>{label}</span>
       </Link>
     );
@@ -246,9 +246,9 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
   // Desktop View (Static)
   if (!mobileOnly) {
     return (
-      <aside className="w-64 bg-white rounded-xl shadow-sm border border-gray-100 hidden lg:flex flex-col h-fit sticky top-24 overflow-hidden">
-        <div className="p-4 border-b border-gray-100 bg-gray-50/50">
-          <div className="flex items-center gap-2 font-bold text-gray-800">
+      <aside className="w-64 bg-zinc-950/70 backdrop-blur-md rounded-xl shadow-lg border border-zinc-800 hidden lg:flex flex-col h-fit sticky top-24 overflow-hidden">
+        <div className="p-4 border-b border-zinc-800 bg-zinc-900/40">
+          <div className="flex items-center gap-2 font-bold text-zinc-200">
             <List size={20} className="text-[#E60012]" />
             <span>Departamentos</span>
           </div>
@@ -257,9 +257,9 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
         <div className="py-2 flex-1 overflow-y-auto max-h-[calc(100vh-150px)] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
           {tree.map(node => <CategoryNode key={node.id} node={node} level={0} />)}
           
-          <div className="my-2 border-t border-gray-100 mx-4" />
+          <div className="my-2 border-t border-zinc-800 mx-4" />
           
-          <div className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Serviços</div>
+          <div className="px-4 py-2 text-xs font-bold text-zinc-500 uppercase tracking-wider">Serviços</div>
           <CustomLink href="/blog" icon={Book} label="Blog" />
           <CustomLink href="/premium" icon={Star} label="Premium" />
           <CustomLink href="/vitrine" icon={Image} label="Vitrine" />
@@ -282,9 +282,9 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
                   <CustomLink href="/wendell/apple" icon={Laptop} label="Especialista Apple" />
 
             {availableTags && availableTags.length > 0 && (
-            <div className="mt-4 pt-4 border-t border-gray-100 mx-4">
+            <div className="mt-4 pt-4 border-t border-zinc-800 mx-4">
               <div className="flex items-center justify-between mb-3">
-                 <div className="flex items-center gap-2 text-sm font-bold text-gray-700">
+                 <div className="flex items-center gap-2 text-sm font-bold text-zinc-300">
                     <FilterIcon size={16} className="text-[#E60012]" />
                     <span>Filtros</span>
                  </div>
@@ -299,11 +299,11 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
                    const isSelected = selectedTags.includes(tag.name);
                    return (
                      <div key={tag.name} onClick={() => handleTagToggle(tag.name)} className="flex items-center gap-2 py-1.5 cursor-pointer group">
-                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isSelected ? 'bg-[#E60012] border-[#E60012]' : 'bg-white border-gray-300 group-hover:border-red-300'}`}>
+                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isSelected ? 'bg-[#E60012] border-[#E60012]' : 'bg-zinc-900 border-zinc-800 group-hover:border-red-500'}`}>
                            {isSelected && <Check size={10} className="text-white" strokeWidth={3} />}
                         </div>
-                        <span className={`text-sm flex-1 truncate ${isSelected ? 'font-medium text-gray-900' : 'text-gray-500 group-hover:text-gray-700'}`}>{tag.name}</span>
-                        <span className="text-[10px] text-gray-400 bg-gray-100 px-1.5 rounded-full">{tag.count}</span>
+                        <span className={`text-sm flex-1 truncate ${isSelected ? 'font-medium text-zinc-100' : 'text-zinc-400 group-hover:text-zinc-200'}`}>{tag.name}</span>
+                        <span className="text-[10px] text-zinc-400 bg-zinc-900 px-1.5 rounded-full">{tag.count}</span>
                      </div>
                    );
                 })}
@@ -328,7 +328,7 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
 
       {/* Drawer */}
       <aside className={`
-          fixed inset-y-0 left-0 z-[10000] w-[85%] max-w-[320px] bg-white shadow-2xl flex flex-col transform transition-transform duration-300 ease-out lg:hidden
+          fixed inset-y-0 left-0 z-[10000] w-[85%] max-w-[320px] bg-zinc-950/95 shadow-2xl flex flex-col transform transition-transform duration-300 ease-out lg:hidden
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
          {/* Mobile Header */}
@@ -344,12 +344,12 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
 
          {/* Mobile Content */}
          <div className="flex-1 overflow-y-auto py-4">
-            <div className="px-4 mb-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Categorias</div>
+            <div className="px-4 mb-2 text-xs font-bold text-zinc-500 uppercase tracking-wider">Categorias</div>
             {tree.map(node => <CategoryNode key={node.id} node={node} level={0} />)}
             
-            <div className="my-4 border-t border-gray-100 mx-4" />
+            <div className="my-4 border-t border-zinc-800 mx-4" />
             
-            <div className="px-4 mb-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Serviços</div>
+            <div className="px-4 mb-2 text-xs font-bold text-zinc-500 uppercase tracking-wider">Serviços</div>
             <CustomLink href="/blog" icon={Book} label="Blog" />
             <CustomLink href="/premium" icon={Star} label="Premium" />
             <CustomLink href="/vitrine" icon={Image} label="Vitrine" />
@@ -369,11 +369,10 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
             <CustomLink href="/pcgamer3d" icon={Box} label="PC Gamer 3D" />
                   <CustomLink href="/wendell/apple" icon={Laptop} label="Especialista Apple" />
 
-            {/* Mobile Filters */}
-            {availableTags && availableTags.length > 0 && (
-            <div className="mt-6 pt-4 border-t border-gray-100 mx-4 bg-gray-50 p-4 rounded-lg">
+                       {availableTags && availableTags.length > 0 && (
+            <div className="mt-6 pt-4 border-t border-zinc-800 mx-4 bg-zinc-900/40 p-4 rounded-lg">
               <div className="flex items-center justify-between mb-3">
-                 <div className="flex items-center gap-2 text-sm font-bold text-gray-700">
+                 <div className="flex items-center gap-2 text-sm font-bold text-zinc-300">
                     <FilterIcon size={16} className="text-[#E60012]" />
                     <span>Filtros</span>
                  </div>
@@ -387,12 +386,12 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
                 {availableTags.map(tag => {
                    const isSelected = selectedTags.includes(tag.name);
                    return (
-                     <div key={tag.name} onClick={() => handleTagToggle(tag.name)} className="flex items-center gap-3 py-2 cursor-pointer border-b border-gray-100 last:border-0">
-                        <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${isSelected ? 'bg-[#E60012] border-[#E60012]' : 'bg-white border-gray-300'}`}>
+                     <div key={tag.name} onClick={() => handleTagToggle(tag.name)} className="flex items-center gap-3 py-2 cursor-pointer border-b border-zinc-900 last:border-0">
+                        <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${isSelected ? 'bg-[#E60012] border-[#E60012]' : 'bg-zinc-900 border-zinc-800'}`}>
                            {isSelected && <Check size={12} className="text-white" strokeWidth={3} />}
                         </div>
-                        <span className={`text-sm flex-1 truncate ${isSelected ? 'font-medium text-gray-900' : 'text-gray-600'}`}>{tag.name}</span>
-                        <span className="text-xs text-gray-500 bg-gray-200 px-2 py-0.5 rounded-full">{tag.count}</span>
+                        <span className={`text-sm flex-1 truncate ${isSelected ? 'font-medium text-zinc-100' : 'text-zinc-400'}`}>{tag.name}</span>
+                        <span className="text-xs text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded-full">{tag.count}</span>
                      </div>
                    );
                 })}
@@ -402,10 +401,10 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
          </div>
          
          {/* Mobile Footer (Account/Help) */}
-         <div className="p-4 border-t border-gray-100 bg-gray-50">
-             <Link href="/fale-conosco" className="flex items-center gap-3 text-gray-700 hover:text-[#E60012]" onClick={closeSidebar}>
-                 <User size={20} />
-                 <span className="font-medium">Fale Conosco</span>
+         <div className="p-4 border-t border-zinc-900 bg-zinc-900/40">
+             <Link href="/fale-conosco" className="flex items-center gap-3 text-zinc-350 hover:text-[#E60012]" onClick={closeSidebar}>
+                  <User size={20} />
+                  <span className="font-medium">Fale Conosco</span>
              </Link>
          </div>
       </aside>

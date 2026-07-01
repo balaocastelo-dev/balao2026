@@ -131,14 +131,14 @@ export default function Header() {
   const previewProducts = products;
 
   return (
-    <header className="bg-white border-b-4 border-[#E60012] sticky top-0 z-[900] shadow-md flex flex-col">
+    <header className="bg-zinc-950/90 backdrop-blur-md border-b border-zinc-800 sticky top-0 z-[900] shadow-lg flex flex-col">
       <TopBar />
       <div className="container mx-auto px-4 py-4 flex items-center justify-between gap-4">
         
         {/* Mobile Menu Button - Optimized for Touch */}
         <button 
           onClick={toggleSidebar}
-          className="lg:hidden p-3 -ml-3 text-gray-700 hover:text-[#E60012] transition-colors active:scale-95"
+          className="lg:hidden p-3 -ml-3 text-zinc-200 hover:text-[#E60012] transition-colors active:scale-95"
           aria-label="Abrir menu"
         >
             <Menu size={32} strokeWidth={2.5} />
@@ -173,7 +173,7 @@ export default function Header() {
           <input
               type="text"
               placeholder="Buscar produtos..."
-              className="w-full pl-12 pr-24 py-3 border border-gray-300 rounded-full focus:outline-none focus:border-[#E60012] focus:ring-1 focus:ring-[#E60012] shadow-sm text-base"
+              className="w-full pl-12 pr-24 py-3 bg-zinc-900 border border-zinc-800 rounded-full text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-[#E60012] focus:ring-1 focus:ring-[#E60012] shadow-inner text-base"
               value={searchQuery}
               onChange={(e) => {
                   setSearchQuery(e.target.value);
@@ -224,15 +224,15 @@ export default function Header() {
 
 
         {/* Actions */}
-        <div className="flex items-center gap-3 md:gap-8 text-gray-700">
+        <div className="flex items-center gap-3 md:gap-8 text-zinc-200">
 
           <Link href="/fale-conosco" className="flex items-center gap-3 group active:scale-95 transition-transform">
-            <div className="p-2 bg-gray-100 rounded-full text-gray-600 group-hover:bg-[#E60012] group-hover:text-white transition-colors shadow-sm">
+            <div className="p-2 bg-zinc-900 rounded-full text-zinc-300 group-hover:bg-[#E60012] group-hover:text-white transition-colors shadow-sm">
                 <User size={20} className="md:w-5 md:h-5" strokeWidth={2.5} />
             </div>
             <div className="hidden lg:flex flex-col text-sm leading-tight">
-                <span className="text-gray-500">Atendimento</span>
-                <span className="font-bold text-gray-800 group-hover:text-[#E60012] transition-colors">
+                <span className="text-zinc-400">Atendimento</span>
+                <span className="font-bold text-zinc-200 group-hover:text-[#E60012] transition-colors">
                   Fale Conosco
                 </span>
             </div>
@@ -244,26 +244,26 @@ export default function Header() {
             aria-label="PCS Premium"
             title="PCS Premium"
           >
-            <div className="p-2 bg-gray-100 rounded-full text-amber-500 group-hover:bg-amber-100 group-hover:text-amber-600 transition-colors shadow-sm">
+            <div className="p-2 bg-zinc-900 rounded-full text-amber-500 group-hover:bg-amber-100 group-hover:text-amber-600 transition-colors shadow-sm">
               <Crown size={20} className="md:w-5 md:h-5" strokeWidth={2.5} />
             </div>
             <div className="hidden lg:flex flex-col text-sm leading-tight">
-              <span className="text-gray-500">PCS</span>
-              <span className="font-bold text-gray-800 group-hover:text-amber-600 transition-colors">Premium</span>
+              <span className="text-zinc-400">PCS</span>
+              <span className="font-bold text-zinc-200 group-hover:text-amber-600 transition-colors">Premium</span>
             </div>
           </Link>
           
           <div className="relative" onMouseEnter={handleCartMouseEnter} onMouseLeave={handleCartMouseLeave}>
             <Link href="/cart" id="cart-icon-container" className="relative group flex items-center gap-3 active:scale-95 transition-transform">
-               <div className="p-2 bg-gray-100 rounded-full text-gray-600 group-hover:bg-[#E60012] group-hover:text-white transition-colors shadow-sm">
+               <div className="p-2 bg-zinc-900 rounded-full text-zinc-300 group-hover:bg-[#E60012] group-hover:text-white transition-colors shadow-sm">
                   <ShoppingCart size={20} className="md:w-5 md:h-5" strokeWidth={2.5} />
                </div>
                <div className="hidden lg:flex flex-col text-sm leading-tight">
-                  <span className="text-gray-500">Meu</span>
-                  <span className="font-bold text-gray-800 group-hover:text-[#E60012] transition-colors">Carrinho</span>
+                  <span className="text-zinc-400">Meu</span>
+                  <span className="font-bold text-zinc-200 group-hover:text-[#E60012] transition-colors">Carrinho</span>
               </div>
               {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 md:top-0 md:right-0 lg:left-7 lg:top-0 bg-[#E60012] text-white text-[10px] md:text-[11px] font-bold h-5 w-5 md:h-5 md:w-5 flex items-center justify-center rounded-full border-2 border-white shadow-sm">
+                  <span className="absolute -top-1 -right-1 md:top-0 md:right-0 lg:left-7 lg:top-0 bg-[#E60012] text-white text-[10px] md:text-[11px] font-bold h-5 w-5 md:h-5 md:w-5 flex items-center justify-center rounded-full border-2 border-zinc-950 shadow-sm">
                       {cartCount}
                   </span>
               )}
@@ -283,7 +283,7 @@ export default function Header() {
             <input
                 type="text"
                 placeholder="Buscar produtos..."
-                className="w-full pl-5 pr-12 py-3 border border-gray-300 rounded-full focus:outline-none focus:border-[#E60012] focus:ring-1 focus:ring-[#E60012] shadow-sm text-base"
+                className="w-full pl-5 pr-12 py-3 bg-zinc-900 border border-zinc-800 rounded-full text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-[#E60012] focus:ring-1 focus:ring-[#E60012] shadow-inner text-base"
                 value={searchQuery}
                 onChange={(e) => {
                     setSearchQuery(e.target.value);

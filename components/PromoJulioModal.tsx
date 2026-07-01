@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { X, MessageCircle, ChevronDown, ChevronUp, CheckCircle, Flame, ShieldCheck } from "lucide-react";
 import { SITE_CONFIG } from "@/lib/config";
+import Image from "next/image";
 
 interface PartItem {
   name: string;
@@ -13,6 +14,7 @@ interface PartItem {
 export default function PromoJulioModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [showSpecs, setShowSpecs] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -152,25 +154,37 @@ export default function PromoJulioModal() {
                 <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/10 to-red-600/10 opacity-50 group-hover:scale-110 transition-transform duration-500"></div>
                 
                 {/* Visual indicator of the PC Case */}
-                <svg viewBox="0 0 100 100" className="w-40 h-40 text-blue-500/80 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]">
-                  {/* Case Outer Chassis */}
-                  <rect x="20" y="10" width="60" height="80" rx="6" fill="none" stroke="currentColor" strokeWidth="2.5" />
-                  {/* Front Glass Panel divider */}
-                  <line x1="28" y1="10" x2="28" y2="90" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3" />
-                  {/* Internal Graphics Card */}
-                  <rect x="35" y="42" width="40" height="15" rx="3" fill="#18181b" stroke="#3b82f6" strokeWidth="2" />
-                  {/* Watercooler pump logo */}
-                  <circle cx="55" cy="30" r="7" fill="none" stroke="#ef4444" strokeWidth="2" strokeDasharray="2 2" />
-                  {/* Fan Rings Glowing (Circular LED) */}
-                  <circle cx="55" cy="72" r="10" fill="none" stroke="currentColor" strokeWidth="2" />
-                  <circle cx="55" cy="72" r="3" fill="currentColor" />
-                  
-                  <circle cx="70" cy="22" r="6" fill="none" stroke="currentColor" strokeWidth="1.5" />
-                  <circle cx="70" cy="22" r="1.5" fill="currentColor" />
-                  
-                  <circle cx="70" cy="36" r="6" fill="none" stroke="currentColor" strokeWidth="1.5" />
-                  <circle cx="70" cy="36" r="1.5" fill="currentColor" />
-                </svg>
+                {!imageError ? (
+                  <Image
+                    src="/images/pcs/galaxy_glass_pc.png"
+                    alt="Gabinete Gamer Rise Mode Galaxy Glass"
+                    width={200}
+                    height={200}
+                    className="object-contain max-h-[190px] drop-shadow-[0_0_15px_rgba(59,130,246,0.3)] transition-transform duration-300 group-hover:scale-105"
+                    onError={() => setImageError(true)}
+                    unoptimized
+                  />
+                ) : (
+                  <svg viewBox="0 0 100 100" className="w-40 h-40 text-blue-500/80 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]">
+                    {/* Case Outer Chassis */}
+                    <rect x="20" y="10" width="60" height="80" rx="6" fill="none" stroke="currentColor" strokeWidth="2.5" />
+                    {/* Front Glass Panel divider */}
+                    <line x1="28" y1="10" x2="28" y2="90" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3" />
+                    {/* Internal Graphics Card */}
+                    <rect x="35" y="42" width="40" height="15" rx="3" fill="#18181b" stroke="#3b82f6" strokeWidth="2" />
+                    {/* Watercooler pump logo */}
+                    <circle cx="55" cy="30" r="7" fill="none" stroke="#ef4444" strokeWidth="2" strokeDasharray="2 2" />
+                    {/* Fan Rings Glowing (Circular LED) */}
+                    <circle cx="55" cy="72" r="10" fill="none" stroke="currentColor" strokeWidth="2" />
+                    <circle cx="55" cy="72" r="3" fill="currentColor" />
+                    
+                    <circle cx="70" cy="22" r="6" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                    <circle cx="70" cy="22" r="1.5" fill="currentColor" />
+                    
+                    <circle cx="70" cy="36" r="6" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                    <circle cx="70" cy="36" r="1.5" fill="currentColor" />
+                  </svg>
+                )}
 
                 <div className="absolute top-2 right-2 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider shadow-md">
                   Gabinete Aquário
