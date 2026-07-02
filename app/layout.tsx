@@ -159,6 +159,17 @@ export default async function RootLayout({
   const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
   const gaId = process.env.NEXT_PUBLIC_GA_ID;
   const metaPixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
+  const googleAdsId = "AW-18292094494";
+  const googleTagIds = Array.from(
+    new Set([gaId, googleAdsId].filter((id): id is string => Boolean(id))),
+  );
+  const googleTagPrimaryId = googleTagIds[0];
+  const googleTagConfigScript = `
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    ${googleTagIds.map((id) => `gtag('config', '${id}');`).join("\n    ")}
+  `;
 
   let categories: Category[] = [];
   try {
@@ -198,43 +209,21 @@ export default async function RootLayout({
           </>
         )}
 
-        {gaId && (
+        {googleTagPrimaryId && (
           <>
             <Script
               strategy="afterInteractive"
-              src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+              src={`https://www.googletagmanager.com/gtag/js?id=${googleTagPrimaryId}`}
             />
             <Script
-              id="ga-init"
+              id="google-tag-init"
               strategy="afterInteractive"
               dangerouslySetInnerHTML={{
-                __html: `
-                  window.dataLayer = window.dataLayer || [];
-                  function gtag(){dataLayer.push(arguments);}
-                  gtag('js', new Date());
-                  gtag('config', '${gaId}', { send_page_view: true });
-                `,
+                __html: googleTagConfigScript,
               }}
             />
           </>
         )}
-
-        <Script
-          strategy="afterInteractive"
-          src="https://www.googletagmanager.com/gtag/js?id=AW-18292094494"
-        />
-        <Script
-          id="google-ads-tag"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'AW-18292094494');
-            `,
-          }}
-        />
         {metaPixelId && (
           <Script
             id="meta-pixel"
