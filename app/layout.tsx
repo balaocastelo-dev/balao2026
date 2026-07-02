@@ -130,7 +130,23 @@ const jsonLd = {
         itemListElement: [
           { "@type": "Offer", name: "PC Gamer", category: "Computadores" },
           { "@type": "Offer", name: "Notebooks", category: "InformÃ¡tica" },
-          { "@type": "Offer", name: "AssistÃªncia TÃ©cnica", category: "ServiÃ§os" },
+          { "@type": "Offer", name: "AssistÃªncia TÃ©cnica", category: "ServiÃ§os" }        <Script
+          strategy="afterInteractive"
+          src="https://www.googletagmanager.com/gtag/js?id=AW-18292094494"
+        />
+        <Script
+          id="google-ads-tag"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'AW-18292094494');
+            `,
+          }}
+        />
+,
           { "@type": "Offer", name: "PerifÃ©ricos e AcessÃ³rios", category: "InformÃ¡tica" },
         ],
       },
