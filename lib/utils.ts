@@ -17,7 +17,10 @@ export interface Product {
   ai_status?: "thinking" | "done" | "error";
 }
 
-export function getProductHref(product: Pick<Product, "id" | "slug">): string {
+export function getProductHref(product: Pick<Product, "id" | "slug" | "product_url">): string {
+  const productUrl = typeof product.product_url === "string" ? product.product_url.trim() : "";
+  if (productUrl.startsWith("/")) return productUrl;
+
   const slug = typeof product.slug === "string" ? product.slug.trim() : "";
   const id = typeof product.id === "string" ? product.id.trim() : "";
   return `/product/${slug || id}`;

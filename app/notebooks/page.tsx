@@ -56,6 +56,33 @@ export const metadata: Metadata = {
 
 export const revalidate = 600;
 
+const NOTEBOOK_ACCESSORY_KEYWORDS = [
+  "carregador",
+  "fonte",
+  "base",
+  "suporte",
+  "cooler",
+  "mochila",
+  "case",
+  "capa",
+  "bolsa",
+];
+
+function hasNotebookAccessorySignal(text: string) {
+  return NOTEBOOK_ACCESSORY_KEYWORDS.some((keyword) => text.includes(keyword));
+}
+
+function hasNotebookDeviceSignal(text: string) {
+  return text.includes("notebook") || text.includes("laptop") || text.includes("macbook");
+}
+
+const EXPLICIT_NOTEBOOK_SLUGS = new Set([
+  "notebooks",
+  "notebook-gamer",
+  "notebook-office",
+  "macbook",
+]);
+
 const NOTEBOOK_FAQS = [
   {
     question: "Os notebooks têm garantia?",
@@ -402,8 +429,9 @@ export default async function NotebooksPage() {
 
   const notebookCategoryNames = categories
     .filter((category) => {
-      const text = `${category.name} ${category.slug}`.toLowerCase();
-      return text.includes("notebook") || text.includes("laptop") || text.includes("macbook");
+      const slug = String(category.slug || "").toLowerCase().trim();
+      const text = `${category.name} ${slug}`.toLowerCase();
+      return (EXPLICIT_NOTEBOOK_SLUGS.has(slug) || hasNotebookDeviceSignal(text)) && !hasNotebookAccessorySignal(text);
     })
     .map((category) => category.name);
 
@@ -411,7 +439,7 @@ export default async function NotebooksPage() {
     notebookCategoryNames.length > 0
       ? getProductsByExactCategories(notebookCategoryNames)
       : Promise.resolve([]),
-    searchProductsByKeywords(["notebook", "macbook", "thinkpad", "latitude", "ideapad", "vivobook"], 120),
+    searchProductsByKeywords(["notebook", "notebook office", "notebook gamer", "macbook", "thinkpad", "latitude", "ideapad", "vivobook"], 120),
   ]);
 
   const notebookProducts = [...categoryProducts, ...fallbackProducts]
@@ -421,7 +449,11 @@ export default async function NotebooksPage() {
     .filter((product) => {
       const name = product.name.toLowerCase();
       const category = product.category?.toLowerCase() || "";
-      return !category.includes("pc gamer") && !name.includes("pc gamer");
+      const combined = `${name} ${category}`;
+      const isNotebookDevice = hasNotebookDeviceSignal(combined);
+      const isAccessory = hasNotebookAccessorySignal(combined);
+
+      return isNotebookDevice && !isAccessory && !category.includes("pc gamer") && !name.includes("pc gamer");
     });
 
   const breadcrumbItems = [

@@ -20,8 +20,8 @@ export default function LayoutWrapper({
   return (
     <SidebarProvider>
       {!isRoletaPage && !isBlogPage && <Sidebar categories={categories} mobileOnly />}
-      <div className="flex flex-col min-h-screen">
-        <main className="flex-grow">
+      <div className="flex min-h-screen w-full max-w-full flex-col overflow-x-hidden">
+        <main className="flex-grow w-full max-w-full overflow-x-hidden">
           {children}
         </main>
         {!isRoletaPage && <Footer />}

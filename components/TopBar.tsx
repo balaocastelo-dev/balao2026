@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 
@@ -49,8 +49,8 @@ export default function TopBar() {
   }, []);
 
   return (
-    <div className="w-full bg-[#E60012] text-white text-xs md:text-sm py-1 overflow-hidden relative z-50 border-b border-red-700">
-      <div className="container mx-auto flex items-center justify-between px-2">
+    <div className="relative z-50 w-full max-w-full overflow-hidden border-b border-red-700 bg-[#E60012] py-1 text-xs text-white md:text-sm">
+      <div className="container mx-auto flex max-w-full items-center justify-between px-2">
          <div className="flex-1 overflow-hidden whitespace-nowrap relative">
             <div className="animate-marquee inline-block">
               {messages?.map((m, idx) => (

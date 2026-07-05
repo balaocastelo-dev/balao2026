@@ -2,7 +2,6 @@ import { Metadata } from 'next';
 import { getCategories, getProductById } from '@/lib/db';
 import Header from '@/components/Header';
 import Sidebar from '@/components/Sidebar';
-import Image from 'next/image';
 import { notFound, permanentRedirect } from 'next/navigation';
 import ShareButton from '@/components/ShareButton';
 import WhatsAppButton from '@/components/WhatsAppButton';
@@ -133,7 +132,7 @@ export default async function ProductPage({ params }: Props) {
             <Sidebar categories={categories} />
         </div>
         <main className="flex-1 w-full px-4 lg:px-0">
-          <div className="bg-zinc-950/75 border border-zinc-800 rounded-lg shadow-lg overflow-hidden">
+          <div className="site-surface overflow-hidden rounded-[1.75rem] shadow-[0_30px_80px_rgba(2,6,23,0.18)]">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 p-4 sm:p-6 md:p-8">
                 <div className="flex flex-col gap-4 md:gap-6">
                     <ProductMediaSwitcher
@@ -147,15 +146,15 @@ export default async function ProductPage({ params }: Props) {
                 {/* Info Section */}
                 <div className="flex flex-col">
                     <div className="mb-4">
-                        <span className="bg-zinc-900 text-zinc-400 border border-zinc-800 text-xs px-2 py-1 rounded-full uppercase tracking-wider font-semibold">
+                        <span className="rounded-full border border-[var(--site-border)] bg-[var(--site-panel-muted)] px-2 py-1 text-xs font-semibold uppercase tracking-wider text-[var(--site-muted)]">
                             {product.category || "Hardware"}
                         </span>
                     </div>
-                    <h1 className="text-2xl md:text-3xl font-bold text-zinc-100 mb-6 leading-tight">
+                    <h1 className="mb-6 text-2xl font-bold leading-tight text-[var(--site-text)] md:text-3xl">
                         {product.name}
                     </h1>
                     
-                    <div className="mt-auto bg-zinc-900/40 p-6 rounded-xl border border-zinc-800/80">
+                    <div className="mt-auto rounded-xl border border-[var(--site-border)] bg-[var(--site-panel-soft)] p-6">
                           {/* Cash Price */}
                           <div className="mb-4">
                              <div className="flex items-baseline gap-2">
@@ -163,31 +162,31 @@ export default async function ProductPage({ params }: Props) {
                                      {product.price}
                                   </span>
                              </div>
-                             <div className="text-zinc-400 text-sm font-medium">
+                             <div className="text-sm font-medium text-[var(--site-soft)]">
                                  à vista no PIX com <strong>15% de desconto</strong>
                              </div>
                           </div>
 
                           {/* Installment Price */}
-                          <div className="mb-6 pt-4 border-t border-zinc-800">
-                             <div className="text-zinc-500 text-sm mb-1">
+                           <div className="mb-6 border-t border-[var(--site-border)] pt-4">
+                              <div className="mb-1 text-sm text-[var(--site-muted)]">
                                  De: <span className="line-through">{listPriceNum.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                              </div>
-                             <div className="text-zinc-200 font-bold text-xl">
+                              <div className="text-xl font-bold text-[var(--site-text)]">
                                  {listPriceNum.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                              </div>
-                             <div className="text-zinc-400 text-sm">
+                              <div className="text-sm text-[var(--site-soft)]">
                                  em até 10x de <strong>{installmentValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong> sem juros
                              </div>
                           </div>
 
                           {/* Local Delivery & Retirada Badge */}
-                          <div className="mb-5 p-3.5 bg-red-950/20 border border-red-900/30 rounded-xl flex flex-col gap-1 text-xs text-left">
-                             <div className="text-zinc-100 font-extrabold flex items-center gap-1.5">
+                          <div className="mb-5 flex flex-col gap-1 rounded-xl border border-[var(--home-border-strong)] bg-[var(--home-accent-soft)] p-3.5 text-left text-xs">
+                             <div className="flex items-center gap-1.5 font-extrabold text-[var(--site-text)]">
                                 <span className="text-[#E60012] text-sm">📍</span> RETIRE HOJE NA LOJA (CAMBUÍ)
                              </div>
-                             <div className="text-zinc-400 font-semibold leading-relaxed">
-                                Ou compre pelo WhatsApp para ter <strong className="text-green-400">Entrega Rápida</strong> via motoboy hoje mesmo em Campinas e região.
+                             <div className="font-semibold leading-relaxed text-[var(--site-soft)]">
+                                Ou compre pelo WhatsApp para ter <strong className="text-[var(--home-success)]">Entrega RÃ¡pida</strong> via motoboy hoje mesmo em Campinas e regiÃ£o.
                              </div>
                           </div>
 
@@ -204,13 +203,13 @@ export default async function ProductPage({ params }: Props) {
             </div>
             
             {/* Details Tab */}
-            <div className="border-t border-zinc-800 p-8">
-                <h2 className="text-xl font-bold mb-6 text-zinc-100">Detalhes do Produto</h2>
+            <div className="border-t border-[var(--site-border)] p-8">
+                <h2 className="mb-6 text-xl font-bold text-[var(--site-text)]">Detalhes do Produto</h2>
                 
                 <div className="grid grid-cols-1 gap-8">
                     <div>
-                        <h3 className="text-lg font-bold mb-4 text-zinc-200 border-b border-zinc-800 pb-2">Descrição</h3>
-                        <div className="prose max-w-none text-zinc-400">
+                        <h3 className="mb-4 border-b border-[var(--site-border)] pb-2 text-lg font-bold text-[var(--site-text)]">DescriÃ§Ã£o</h3>
+                        <div className="prose max-w-none text-[var(--site-soft)]">
                             {descriptionText ? (
                                 <div className="whitespace-pre-wrap">{descriptionText}</div>
                             ) : (

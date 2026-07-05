@@ -2,9 +2,11 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import { getProducts } from '@/lib/db'
+import { listVitrinePagesPublic } from '@/lib/vitrine/db'
+import { pickPcHeroImage } from '@/lib/vitrine/core'
 import ProductCarousel from '@/components/ProductCarousel'
 import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from '@/components/JsonLd'
+import type { Product } from '@/lib/utils'
 import { 
   CheckCircle, 
   MessageCircle, 
@@ -498,13 +500,28 @@ function BlockUrgency() {
 }
 
 export default async function ConsignacaoPage() {
-  const allProducts = await getProducts()
-  
-  // Helper para filtrar o que aceitamos (simulação com produtos novos)
-  const acceptedExamples = allProducts.filter(p => {
-    const text = (p.name + " " + (p.description || "")).toLowerCase()
-    return ['notebook', 'pc', 'gamer', 'placa', 'video'].some(k => text.includes(k))
-  }).slice(0, 12)
+  const vitrinePages = await listVitrinePagesPublic().catch(() => [])
+
+  const acceptedExamples: Product[] = vitrinePages.slice(0, 12).map((page) => {
+    const extras = page.extras && typeof page.extras === "object" ? page.extras : {}
+    const priceText = String(
+      extras.price_text ||
+      (extras.main_product && typeof extras.main_product === "object" && "price" in extras.main_product
+        ? String((extras.main_product as { price?: string }).price || "")
+        : "")
+    ).trim()
+
+    return {
+      id: page.id,
+      name: page.nome_pc,
+      price: priceText || "Sob consulta",
+      image: page.images?.hero || pickPcHeroImage({ categoria: page.categoria }),
+      category: page.categoria,
+      slug: page.slug,
+      product_url: `/p/${page.slug}`,
+      description: page.descricao_original,
+    }
+  })
 
   return (
     <div className="min-h-screen flex flex-col bg-black font-sans">

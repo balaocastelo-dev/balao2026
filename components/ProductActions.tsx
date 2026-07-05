@@ -58,8 +58,8 @@ export default function ProductActions({ product }: { product: Product }) {
         onClick={handleAddToCart}
         className={`w-full py-3 rounded-md font-bold text-base transition-all active:scale-95 flex items-center justify-center gap-2 border shadow-sm ${
           added
-            ? "bg-green-950/20 border-green-900/50 text-green-400"
-            : "bg-zinc-900 border-zinc-800 text-zinc-200 hover:border-[#E60012] hover:text-[#E60012] hover:bg-zinc-850"
+            ? "bg-[var(--home-success-soft)] border-[color:rgba(34,197,94,0.35)] text-[var(--home-success)]"
+            : "bg-[var(--site-panel-soft)] border-[var(--site-border)] text-[var(--site-text)] hover:border-[#E60012] hover:text-[#E60012]"
         }`}
       >
         <ShoppingCart size={20} />

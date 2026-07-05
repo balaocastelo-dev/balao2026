@@ -139,14 +139,14 @@ export default function Header() {
   const previewProducts = products;
 
   return (
-    <header className={`${headerClassName} sticky top-0 z-[900] flex flex-col border-b shadow-lg backdrop-blur-md transition-colors`}>
+    <header className={`${headerClassName} sticky top-0 z-[900] flex w-full max-w-full flex-col overflow-x-clip border-b shadow-lg backdrop-blur-md transition-colors`}>
       <TopBar />
-      <div className="container mx-auto px-4 py-4 flex items-center justify-between gap-4">
+      <div className="container mx-auto flex w-full max-w-full min-w-0 items-center justify-between gap-2 px-3 py-4 sm:gap-4 sm:px-4">
         
         {/* Mobile Menu Button - Optimized for Touch */}
         <button 
           onClick={toggleSidebar}
-          className="lg:hidden p-3 -ml-3 text-[var(--site-text)] hover:text-[#E60012] transition-colors active:scale-95"
+          className="lg:hidden -ml-2 shrink-0 p-2.5 text-[var(--site-text)] transition-colors hover:text-[#E60012] active:scale-95"
           aria-label="Abrir menu"
         >
             <Menu size={32} strokeWidth={2.5} />
@@ -156,10 +156,10 @@ export default function Header() {
         <Link
           href="/"
           onClick={handleLogoClick}
-          className="flex flex-col items-center cursor-pointer select-none flex-shrink-0 drop-shadow-sm transition-transform hover:scale-105 active:scale-95 no-underline"
+          className="flex flex-shrink-0 flex-col items-center cursor-pointer select-none drop-shadow-sm transition-transform hover:scale-105 active:scale-95 no-underline"
           title="Ir para página inicial"
         >
-             <div className="relative w-[140px] h-[45px] md:w-[200px] md:h-[65px]">
+             <div className="relative h-[36px] w-[112px] sm:h-[45px] sm:w-[140px] md:h-[65px] md:w-[200px]">
                 <Image 
                     src="/logo.png" 
                     alt="Balão da Informática" 
@@ -231,12 +231,12 @@ export default function Header() {
 
 
         {/* Actions */}
-        <div className="flex items-center gap-3 md:gap-6 text-zinc-200">
+        <div className="flex min-w-0 shrink-0 items-center gap-1.5 text-zinc-200 sm:gap-3 md:gap-6">
           <HomeThemeToggle />
 
           <Link href="/fale-conosco" className="flex items-center gap-3 group active:scale-95 transition-transform">
             <div className={`rounded-full p-2 shadow-sm transition-colors ${actionIconClassName}`}>
-                <User size={20} className="md:w-5 md:h-5" strokeWidth={2.5} />
+                <User size={18} className="md:h-5 md:w-5" strokeWidth={2.5} />
             </div>
             <div className="hidden lg:flex flex-col text-sm leading-tight">
                 <span className="text-[var(--site-muted)]">Atendimento</span>
@@ -252,8 +252,8 @@ export default function Header() {
             aria-label="PCS Premium"
             title="PCS Premium"
           >
-            <div className="rounded-full p-2 text-amber-500 transition-colors shadow-sm bg-[var(--site-panel-soft)] group-hover:bg-amber-100 group-hover:text-amber-600">
-              <Crown size={20} className="md:w-5 md:h-5" strokeWidth={2.5} />
+            <div className="rounded-full bg-[var(--site-panel-soft)] p-2 text-amber-500 shadow-sm transition-colors group-hover:bg-amber-100 group-hover:text-amber-600">
+              <Crown size={18} className="md:h-5 md:w-5" strokeWidth={2.5} />
             </div>
             <div className="hidden lg:flex flex-col text-sm leading-tight">
               <span className="text-[var(--site-muted)]">PCS</span>
@@ -264,7 +264,7 @@ export default function Header() {
           <div className="relative" onMouseEnter={handleCartMouseEnter} onMouseLeave={handleCartMouseLeave}>
             <Link href="/cart" id="cart-icon-container" className="relative group flex items-center gap-3 active:scale-95 transition-transform">
                <div className={`rounded-full p-2 shadow-sm transition-colors ${actionIconClassName}`}>
-                  <ShoppingCart size={20} className="md:w-5 md:h-5" strokeWidth={2.5} />
+                  <ShoppingCart size={18} className="md:h-5 md:w-5" strokeWidth={2.5} />
                </div>
                <div className="hidden lg:flex flex-col text-sm leading-tight">
                   <span className="text-[var(--site-muted)]">Meu</span>

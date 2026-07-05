@@ -54,15 +54,16 @@ export default function HomeProductShelf({
         ) : null}
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_250px]">
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
-          {products.slice(0, 5).map((product) => {
+      <div className="grid gap-4 2xl:grid-cols-[minmax(0,1fr)_250px]">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
+          {products.slice(0, 4).map((product) => {
             const oldPrice = formatOldPrice(product.price);
+
             return (
               <Link
                 key={product.id}
                 href={getProductHref(product)}
-                className="home-card group rounded-[1.25rem] p-3 transition hover:-translate-y-0.5 hover:border-[var(--home-border-strong)] hover:shadow-[0_18px_44px_rgba(15,23,42,0.08)]"
+                className="home-card group flex h-full min-h-full flex-col rounded-[1.25rem] p-3 transition hover:-translate-y-0.5 hover:border-[var(--home-border-strong)] hover:shadow-[0_18px_44px_rgba(15,23,42,0.08)]"
               >
                 <div className="mb-3 flex items-start justify-between gap-2">
                   <span className="inline-flex items-center gap-1 rounded-full bg-[var(--home-card-soft)] px-2 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-[var(--home-muted)]">
@@ -85,22 +86,26 @@ export default function HomeProductShelf({
                   />
                 </div>
 
-                <div className="mt-3 min-h-[52px] text-sm font-semibold leading-5 text-[var(--home-soft)] group-hover:text-[var(--home-text)]">
-                  {product.name}
-                </div>
-
-                <div className="mt-3">
-                  {oldPrice ? <div className="text-xs text-[var(--home-muted)] line-through">{oldPrice}</div> : null}
-                  <div className="mt-1 text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--home-muted)]">No Pix</div>
-                  <div className="mt-1 text-2xl font-black tracking-tight text-[var(--home-accent)]">
-                    {product.price.replace("R$", "R$ ").trim()}
+                <div className="mt-4 grid flex-1 grid-rows-[minmax(76px,auto)_minmax(96px,1fr)_auto] gap-3">
+                  <div className="text-[13px] font-medium leading-4 text-[var(--home-soft)] transition-colors group-hover:text-[var(--home-text)] sm:text-sm sm:leading-5">
+                    <span className="line-clamp-4">{product.name}</span>
                   </div>
-                  <div className="mt-1 text-xs text-[var(--home-muted)]">ou até 10x sem juros</div>
-                </div>
 
-                <div className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--home-accent)] px-4 py-3 text-sm font-black text-white transition hover:brightness-110">
-                  <ShoppingCart size={16} />
-                  Comprar
+                  <div className="flex flex-col justify-center">
+                    {oldPrice ? <div className="text-xs text-[var(--home-muted)] line-through whitespace-nowrap">{oldPrice}</div> : null}
+                    <div className="mt-1 text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--home-muted)]">No Pix</div>
+                    <div className="mt-1 whitespace-nowrap text-xl font-black leading-none tracking-tight text-[var(--home-accent)] sm:text-2xl">
+                      {product.price.replace("R$", "R$ ").trim()}
+                    </div>
+                    <div className="mt-1 text-xs text-[var(--home-muted)]">ou ate 10x sem juros</div>
+                  </div>
+
+                  <div className="pt-1">
+                    <div className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--home-accent)] px-4 py-3 text-sm font-black text-white transition hover:brightness-110">
+                      <ShoppingCart size={16} />
+                      Comprar
+                    </div>
+                  </div>
                 </div>
               </Link>
             );
@@ -110,7 +115,7 @@ export default function HomeProductShelf({
         <div className="home-panel-strong flex flex-col justify-between rounded-[1.5rem] p-5 text-white shadow-[0_18px_44px_rgba(15,23,42,0.22)]">
           <div>
             <div className="inline-flex rounded-full bg-[var(--home-accent-soft)] px-3 py-1 text-[10px] font-black uppercase tracking-[0.24em] text-[var(--home-accent)]">
-              Seleção especial
+              Selecao especial
             </div>
             <h3 className="mt-4 text-2xl font-black leading-tight">{bannerTitle}</h3>
             <p className="mt-3 text-sm leading-relaxed text-[var(--home-muted)]">{bannerText}</p>
@@ -119,11 +124,11 @@ export default function HomeProductShelf({
           <div className="mt-6 space-y-3">
             <div className="rounded-2xl bg-[var(--home-card-soft)] px-4 py-3 backdrop-blur">
               <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[var(--home-accent)]">Entrega</div>
-              <div className="mt-1 text-sm font-semibold">Campinas e região sob consulta</div>
+              <div className="mt-1 text-sm font-semibold">Campinas e regiao sob consulta</div>
             </div>
             <div className="rounded-2xl bg-[var(--home-card-soft)] px-4 py-3 backdrop-blur">
               <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[var(--home-accent)]">Atendimento</div>
-              <div className="mt-1 text-sm font-semibold">Suporte humano via WhatsApp e balcão</div>
+              <div className="mt-1 text-sm font-semibold">Suporte humano via WhatsApp e balcao</div>
             </div>
             <Link
               href="/fale-conosco"

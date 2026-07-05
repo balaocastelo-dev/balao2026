@@ -64,63 +64,65 @@ export default function Carousel({ images }: { images: CarouselImage[] }) {
   }
 
   return (
-    <div 
-      className="relative w-full h-40 md:h-64 lg:h-80 overflow-hidden rounded-xl shadow-lg group"
-      onMouseEnter={() => setIsAutoPlay(false)}
-      onMouseLeave={() => setIsAutoPlay(true)}
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
-    >
-      {/* Slides */}
+    <div className="w-full">
       <div 
-        className="flex transition-transform duration-500 ease-out h-full"
-        style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+        className="relative group h-40 w-full overflow-hidden rounded-xl shadow-lg md:h-64 lg:h-80"
+        onMouseEnter={() => setIsAutoPlay(false)}
+        onMouseLeave={() => setIsAutoPlay(true)}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
       >
-        {images.map((image) => (
-          <div key={image.id} className="min-w-full relative h-full bg-transparent">
-             <Image
-                src={image.image_url}
-                alt={image.title || "Banner"}
-                fill
-                className="w-full h-full"
-                style={{ objectFit: "fill" }}
-                priority={currentIndex === 0}
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 100vw"
-                unoptimized
-             />
-             {/* Title removed as requested */}
-          </div>
-        ))}
-      </div>
+        {/* Slides */}
+        <div 
+          className="flex h-full transition-transform duration-500 ease-out"
+          style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+        >
+          {images.map((image) => (
+            <div key={image.id} className="relative h-full min-w-full bg-transparent">
+               <Image
+                  src={image.image_url}
+                  alt={image.title || "Banner"}
+                  fill
+                  className="h-full w-full"
+                  style={{ objectFit: "fill" }}
+                  priority={currentIndex === 0}
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 100vw"
+                  unoptimized
+               />
+               {/* Title removed as requested */}
+            </div>
+          ))}
+        </div>
 
-      {/* Navigation Buttons (visible on hover) */}
-      {images.length > 1 && (
-        <>
-          <button 
-            onClick={(e) => { e.preventDefault(); prevSlide(); }}
-            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-          >
-            <ChevronLeft size={24} />
-          </button>
-          <button 
-            onClick={(e) => { e.preventDefault(); nextSlide(); }}
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-          >
-            <ChevronRight size={24} />
-          </button>
-        </>
-      )}
+        {/* Navigation Buttons (visible on hover) */}
+        {images.length > 1 && (
+          <>
+            <button 
+              onClick={(e) => { e.preventDefault(); prevSlide(); }}
+              className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/30 p-2 text-white opacity-0 transition-opacity hover:bg-black/50 group-hover:opacity-100"
+            >
+              <ChevronLeft size={24} />
+            </button>
+            <button 
+              onClick={(e) => { e.preventDefault(); nextSlide(); }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/30 p-2 text-white opacity-0 transition-opacity hover:bg-black/50 group-hover:opacity-100"
+            >
+              <ChevronRight size={24} />
+            </button>
+          </>
+        )}
+      </div>
 
       {/* Indicators */}
       {images.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+        <div className="mt-3 flex justify-center gap-2">
           {images.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentIndex(index)}
-              className={`w-2 h-2 rounded-full transition-all ${
-                currentIndex === index ? "bg-white w-6" : "bg-white/50"
+              className={`h-2 w-2 rounded-full transition-all ${
+                currentIndex === index ? "w-6 bg-[var(--home-accent)]" : "bg-[var(--home-border-strong)]"
               }`}
             />
           ))}

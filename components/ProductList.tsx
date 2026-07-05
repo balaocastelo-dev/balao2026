@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from "react";
 import { Product } from "@/lib/utils";
 import ProductCard from "./ProductCard";
-import { LayoutGrid, Grid2x2, List, ArrowUpDown, Filter, ChevronDown } from "lucide-react";
+import { LayoutGrid, Grid2x2, ArrowUpDown, ChevronDown } from "lucide-react";
 
 type ViewMode = "small" | "large" | "list";
 type SortMode = "default" | "price-asc" | "price-desc";
@@ -13,7 +13,7 @@ export default function ProductList({ products }: { products: Product[] }) {
   const [sortMode, setSortMode] = useState<SortMode>("default");
 
   const filteredAndSortedProducts = useMemo(() => {
-    let result = [...products];
+    const result = [...products];
 
     // Sort
     if (sortMode !== "default") {
@@ -29,7 +29,7 @@ export default function ProductList({ products }: { products: Product[] }) {
             const priceA = getPrice(a);
             const priceB = getPrice(b);
             return sortMode === "price-asc" ? priceA - priceB : priceB - priceA;
-        } catch (e) {
+        } catch {
             return 0;
         }
       });
@@ -62,13 +62,13 @@ export default function ProductList({ products }: { products: Product[] }) {
         
         {/* Sort Controls */}
         <div className="flex items-center gap-2 w-full sm:w-auto">
-            <span className="text-sm text-zinc-400 font-medium whitespace-nowrap flex items-center gap-1">
+            <span className="text-sm font-medium whitespace-nowrap flex items-center gap-1 text-[var(--site-muted)]">
                 <ArrowUpDown size={16} /> Ordenar por:
             </span>
             <select 
                 value={sortMode}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSortMode(e.target.value as SortMode)}
-                className="bg-zinc-900 border border-zinc-800 text-zinc-200 text-sm rounded-md focus:ring-red-500 focus:border-red-500 block w-full p-2 outline-none cursor-pointer hover:border-zinc-700 transition-colors"
+                className="block w-full cursor-pointer rounded-md border border-[var(--site-border)] bg-[var(--site-panel-soft)] p-2 text-sm text-[var(--site-text)] outline-none transition-colors hover:border-[var(--site-accent-soft)] focus:border-[#E60012] focus:ring-red-500"
             >
                 <option value="default">Relevância</option>
                 <option value="price-asc">Menor Preço</option>
@@ -79,14 +79,14 @@ export default function ProductList({ products }: { products: Product[] }) {
         {/* View Controls */}
         <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
             
-            <span className="text-sm text-zinc-400 font-medium mr-2 hidden sm:inline">Visualização:</span>
+            <span className="mr-2 hidden text-sm font-medium text-[var(--site-muted)] sm:inline">VisualizaÃ§Ã£o:</span>
             
             <button
             onClick={() => setViewMode("small")}
             className={`p-2 rounded-md transition-all cursor-pointer ${
                 viewMode === "small" 
                 ? "bg-[#E60012] text-white shadow-md" 
-                : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800 border border-zinc-800"
+                : "border border-[var(--site-border)] bg-[var(--site-panel-soft)] text-[var(--site-muted)] hover:border-[var(--site-accent-soft)] hover:text-[var(--site-text)]"
             }`}
             title="Menores (Grade Compacta)"
             >
@@ -98,7 +98,7 @@ export default function ProductList({ products }: { products: Product[] }) {
             className={`p-2 rounded-md transition-all cursor-pointer ${
                 viewMode === "large" 
                 ? "bg-[#E60012] text-white shadow-md" 
-                : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800 border border-zinc-800"
+                : "border border-[var(--site-border)] bg-[var(--site-panel-soft)] text-[var(--site-muted)] hover:border-[var(--site-accent-soft)] hover:text-[var(--site-text)]"
             }`}
             title="Grandes (Grade Expandida)"
             >
@@ -123,10 +123,10 @@ export default function ProductList({ products }: { products: Product[] }) {
         <div className="flex justify-center mt-8">
           <button
             onClick={loadMore}
-            className="flex items-center gap-2 px-6 py-3 bg-zinc-900 border border-zinc-800 text-zinc-200 font-medium rounded-full shadow-md hover:bg-zinc-850 hover:border-[#E60012] hover:text-white transition-all group cursor-pointer"
+            className="group flex cursor-pointer items-center gap-2 rounded-full border border-[var(--site-border)] bg-[var(--site-panel-soft)] px-6 py-3 font-medium text-[var(--site-text)] shadow-md transition-all hover:border-[#E60012] hover:text-[var(--site-accent)]"
           >
             <span>Carregar mais produtos</span>
-            <ChevronDown size={20} className="text-zinc-500 group-hover:text-white transition-colors" />
+            <ChevronDown size={20} className="text-[var(--site-muted)] transition-colors group-hover:text-[var(--site-accent)]" />
           </button>
         </div>
       )}

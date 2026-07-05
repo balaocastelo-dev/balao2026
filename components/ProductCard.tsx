@@ -5,15 +5,10 @@ import { Product } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCart } from "@/context/CartContext";
-import { useToast } from "@/context/ToastContext";
 import { ShoppingCart } from "lucide-react";
-import { animateAddToCart } from "@/lib/animations";
 import { getProductHref } from "@/lib/utils";
 
 export default function ProductCard({ product, variant = "grid" }: { product: Product, variant?: "grid" | "list" }) {
-  const { addToCart } = useCart();
-  const { showToast } = useToast();
   const imageRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const productHref = getProductHref(product);
@@ -25,9 +20,12 @@ export default function ProductCard({ product, variant = "grid" }: { product: Pr
 
   if (variant === "list") {
     return (
-      <div className="bg-zinc-950/70 rounded-2xl shadow-lg hover:shadow-2xl hover:border-zinc-800/80 transition-all duration-300 overflow-hidden border border-zinc-900 flex flex-col md:flex-row h-full group">
+      <div className="site-surface-soft rounded-2xl shadow-lg hover:-translate-y-0.5 hover:border-[var(--site-accent-soft)] hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col md:flex-row h-full group">
         <Link href={productHref} className="flex-1 flex flex-col md:flex-row">
-          <div ref={imageRef} className="relative w-full md:w-32 pt-[100%] md:pt-0 md:h-auto md:min-h-[8rem] bg-zinc-900/40 overflow-hidden shrink-0">
+          <div
+            ref={imageRef}
+            className="relative w-full md:w-32 pt-[100%] md:pt-0 md:h-auto md:min-h-[8rem] overflow-hidden shrink-0 bg-[var(--site-panel-muted)]"
+          >
              <Image
                 src={product.image}
                 alt={product.name}
@@ -39,13 +37,16 @@ export default function ProductCard({ product, variant = "grid" }: { product: Pr
              />
           </div>
           <div className="p-3 flex-1 flex flex-col justify-center">
-              <div className="text-[10px] text-zinc-500 mb-1 uppercase tracking-wider">{product.category || "Hardware"}</div>
-              <h3 className="font-semibold text-zinc-200 line-clamp-2 mb-1 text-sm leading-tight group-hover:text-white transition-colors" title={product.name}>
+              <div className="mb-1 text-[10px] uppercase tracking-wider text-[var(--site-muted)]">{product.category || "Hardware"}</div>
+              <h3
+                className="mb-1 line-clamp-2 text-sm font-semibold leading-tight text-[var(--site-text)] transition-colors group-hover:text-[var(--site-accent)]"
+                title={product.name}
+              >
                   {product.name}
               </h3>
               
               <div className="mt-1">
-                  <p className="text-[10px] text-zinc-500 line-through">
+                  <p className="text-[10px] text-[var(--site-muted)] line-through">
                       {(parseFloat(product.price.replace("R$", "").replace(/\./g, "").replace(",", ".")) / 0.85).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                   </p>
                   <div className="flex items-baseline gap-1">
@@ -54,14 +55,14 @@ export default function ProductCard({ product, variant = "grid" }: { product: Pr
                           {product.price.replace("R$", "").trim()}
                       </span>
                   </div>
-                  <p className="text-[10px] text-zinc-400">
+                  <p className="text-[10px] text-[var(--site-soft)]">
                       à vista no PIX
                   </p>
               </div>
           </div>
         </Link>
         
-        <div className="p-3 md:w-40 flex items-center justify-center border-t md:border-t-0 md:border-l border-zinc-900 bg-zinc-900/10 md:bg-transparent">
+        <div className="p-3 md:w-40 flex items-center justify-center border-t md:border-t-0 md:border-l border-[var(--site-border)] bg-[var(--site-panel-muted)]/80 md:bg-transparent">
           <button 
               onClick={handleAddToCart}
               className="w-full bg-[#E60012] hover:bg-[#cc0010] active:scale-95 transform text-white font-bold py-2 px-3 rounded text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-red-950/20"
@@ -75,9 +76,9 @@ export default function ProductCard({ product, variant = "grid" }: { product: Pr
   }
 
   return (
-    <div className="bg-zinc-950/70 rounded-2xl shadow-lg hover:shadow-2xl hover:border-zinc-800/80 transition-all duration-300 overflow-hidden border border-zinc-900 flex flex-col h-full group">
+    <div className="site-surface-soft rounded-2xl shadow-lg hover:-translate-y-0.5 hover:border-[var(--site-accent-soft)] hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col h-full group">
       <Link href={productHref} className="flex-1">
-        <div ref={imageRef} className="relative pt-[100%] bg-zinc-900/40 overflow-hidden">
+        <div ref={imageRef} className="relative pt-[100%] overflow-hidden bg-[var(--site-panel-muted)]">
              <Image
                 src={product.image}
                 alt={product.name}
@@ -89,13 +90,16 @@ export default function ProductCard({ product, variant = "grid" }: { product: Pr
              />
         </div>
         <div className="p-3 md:p-4">
-            <div className="text-[10px] sm:text-xs text-zinc-500 mb-1 uppercase tracking-wider">{product.category || "Hardware"}</div>
-            <h3 className="font-semibold text-zinc-200 line-clamp-2 mb-2 h-10 leading-5 text-sm sm:text-base group-hover:text-white transition-colors" title={product.name}>
+            <div className="mb-1 text-[10px] sm:text-xs uppercase tracking-wider text-[var(--site-muted)]">{product.category || "Hardware"}</div>
+            <h3
+              className="mb-2 h-10 line-clamp-2 text-sm sm:text-base font-semibold leading-5 text-[var(--site-text)] transition-colors group-hover:text-[var(--site-accent)]"
+              title={product.name}
+            >
                 {product.name}
             </h3>
             
             <div className="mt-2 sm:mt-4">
-                <p className="text-[10px] sm:text-xs text-zinc-500 line-through">
+                <p className="text-[10px] sm:text-xs text-[var(--site-muted)] line-through">
                     {(parseFloat(product.price.replace("R$", "").replace(/\./g, "").replace(",", ".")) / 0.85).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                 </p>
                 <div className="flex items-baseline gap-1">
@@ -104,7 +108,7 @@ export default function ProductCard({ product, variant = "grid" }: { product: Pr
                         {product.price.replace("R$", "").trim()}
                     </span>
                 </div>
-                <p className="text-[10px] sm:text-xs text-zinc-400 mt-1">
+                <p className="mt-1 text-[10px] sm:text-xs text-[var(--site-soft)]">
                     à vista no PIX
                 </p>
             </div>

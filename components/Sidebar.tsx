@@ -182,12 +182,12 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
       <div className="w-full">
         <div 
            className={`
-             group flex items-center justify-between px-4 py-2.5 text-base transition-all duration-200 cursor-pointer select-none rounded-r-full mr-2
+             group mx-2 flex items-center justify-between rounded-xl px-3 py-2.5 text-sm transition-all duration-200 cursor-pointer select-none
              ${isActive 
-               ? 'bg-red-950/20 text-[#E60012] font-semibold border-l-4 border-[#E60012]' 
-               : 'text-[var(--site-muted)] hover:bg-[var(--site-panel-muted)] hover:text-[var(--site-text)] border-l-4 border-transparent'}
+               ? 'bg-[var(--home-primary-soft)] text-[var(--home-accent)] font-semibold ring-1 ring-[var(--home-border-strong)]' 
+               : 'text-[var(--site-muted)] hover:bg-[var(--site-panel-muted)] hover:text-[var(--site-text)]'}
            `}
-           style={{ paddingLeft: level === 0 ? '16px' : `${level * 16 + 16}px` }}
+           style={{ paddingLeft: level === 0 ? '12px' : `${level * 14 + 12}px` }}
         >
           <Link 
               href={`/categoria/${encodeURIComponent(node.slug)}`} 
@@ -228,10 +228,10 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
       <Link 
         href={href} 
         className={`
-          flex items-center gap-3 px-4 py-2.5 text-base transition-all duration-200 rounded-r-full mr-2
+          mx-2 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all duration-200
           ${isActive 
-            ? 'bg-red-950/20 text-[#E60012] font-semibold border-l-4 border-[#E60012]' 
-            : 'text-[var(--site-muted)] hover:bg-[var(--site-panel-muted)] hover:text-[var(--site-text)] border-l-4 border-transparent'}
+            ? 'bg-[var(--home-primary-soft)] text-[var(--home-accent)] font-semibold ring-1 ring-[var(--home-border-strong)]' 
+            : 'text-[var(--site-muted)] hover:bg-[var(--site-panel-muted)] hover:text-[var(--site-text)]'}
         `}
         onClick={closeSidebar}
       >
@@ -246,7 +246,7 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
   // Desktop View (Static)
   if (!mobileOnly) {
     return (
-      <aside className="site-surface sticky top-24 hidden h-fit w-64 flex-col overflow-hidden rounded-xl shadow-lg lg:flex">
+      <aside className="site-surface sticky top-24 hidden h-fit w-64 flex-col rounded-[1.6rem] shadow-lg lg:flex">
         <div className="border-b border-[var(--site-border)] bg-[var(--site-panel-muted)] p-4">
           <div className="flex items-center gap-2 font-bold text-[var(--site-text)]">
             <List size={20} className="text-[#E60012]" />
@@ -254,7 +254,7 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
           </div>
         </div>
         
-        <div className="py-2 flex-1 overflow-y-auto max-h-[calc(100vh-150px)] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+        <div className="py-3">
           {tree.map(node => <CategoryNode key={node.id} node={node} level={0} />)}
           
           <div className="mx-4 my-2 border-t border-[var(--site-border)]" />
