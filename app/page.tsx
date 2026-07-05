@@ -12,6 +12,7 @@ import { getProductsByExactCategories, getCarouselImages, getCategories, getHome
 import { listBlogPostsForPage } from "@/lib/blog-store";
 import { pickPcHeroImage } from "@/lib/vitrine/core";
 import { listVitrinePagesPublic } from "@/lib/vitrine/db";
+import type { VitrineCategory } from "@/lib/vitrine/types";
 import { createClient } from "@/lib/supabase/server";
 import { getProductHref, parsePriceToNumber, Product, type Category } from "@/lib/utils";
 import type { Metadata } from "next";
@@ -52,7 +53,7 @@ type HomeSidebarVitrinePage = {
   id: string;
   slug: string;
   nome_pc: string;
-  categoria?: string;
+  categoria?: VitrineCategory;
   extras?: Record<string, unknown>;
   images?: Record<string, unknown>;
   data_publicacao?: string | null;
