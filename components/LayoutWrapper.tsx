@@ -4,7 +4,6 @@ import { usePathname } from "next/navigation";
 import { SidebarProvider } from "@/context/SidebarContext";
 import Sidebar from "@/components/Sidebar";
 import Footer from "@/components/Footer";
-import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import type { Category } from "@/lib/utils";
 
 export default function LayoutWrapper({ 
@@ -26,7 +25,6 @@ export default function LayoutWrapper({
           {children}
         </main>
         {!isRoletaPage && <Footer />}
-        {!isRoletaPage && <FloatingWhatsApp />}
       </div>
     </SidebarProvider>
   );

@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Search, ShoppingCart, User, Menu, X, Loader2, Crown } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -16,7 +16,6 @@ import HomeThemeToggle from "@/components/HomeThemeToggle";
 
 export default function Header() {
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const { cartCount } = useCart();
   const { toggleSidebar } = useSidebar();
@@ -41,19 +40,13 @@ export default function Header() {
   const [isLoading, setIsLoading] = useState(false);
   const searchContainerRef = useRef<HTMLFormElement>(null);
   const mobileSearchContainerRef = useRef<HTMLDivElement>(null);
-  const isHomePage = pathname === "/";
-  const headerClassName = isHomePage
-    ? "bg-[var(--home-panel-bg)] border-[var(--home-border)]"
-    : "bg-zinc-950/90 border-zinc-800";
-  const searchInputClassName = isHomePage
-    ? "bg-[var(--home-card-bg)] border-[var(--home-border)] text-[var(--home-text)] placeholder:text-[var(--home-muted)] focus:border-[var(--home-accent)] focus:ring-[var(--home-accent)]"
-    : "bg-zinc-900 border-zinc-800 text-zinc-100 placeholder-zinc-500 focus:border-[#E60012] focus:ring-[#E60012]";
-  const actionIconClassName = isHomePage
-    ? "bg-[var(--home-card-bg)] text-[var(--home-muted)] group-hover:bg-[var(--home-accent)] group-hover:text-white"
-    : "bg-zinc-900 text-zinc-300 group-hover:bg-[#E60012] group-hover:text-white";
-  const actionLabelClassName = isHomePage
-    ? "font-bold text-[var(--home-text)] group-hover:text-[var(--home-accent)] transition-colors"
-    : "font-bold text-zinc-200 group-hover:text-[#E60012] transition-colors";
+  const headerClassName = "bg-[var(--site-panel)] border-[var(--site-border)]";
+  const searchInputClassName =
+    "bg-[var(--site-panel-soft)] border-[var(--site-border)] text-[var(--site-text)] placeholder:text-[var(--site-muted)] focus:border-[var(--site-accent)] focus:ring-[var(--site-accent)]";
+  const actionIconClassName =
+    "bg-[var(--site-panel-soft)] text-[var(--site-muted)] group-hover:bg-[var(--site-accent)] group-hover:text-white";
+  const actionLabelClassName =
+    "font-bold text-[var(--site-text)] group-hover:text-[var(--site-accent)] transition-colors";
 
   // Debounced Backend Search
   useEffect(() => {
@@ -153,7 +146,7 @@ export default function Header() {
         {/* Mobile Menu Button - Optimized for Touch */}
         <button 
           onClick={toggleSidebar}
-          className="lg:hidden p-3 -ml-3 text-zinc-200 hover:text-[#E60012] transition-colors active:scale-95"
+          className="lg:hidden p-3 -ml-3 text-[var(--site-text)] hover:text-[#E60012] transition-colors active:scale-95"
           aria-label="Abrir menu"
         >
             <Menu size={32} strokeWidth={2.5} />
@@ -231,7 +224,6 @@ export default function Header() {
                       setShowPreview(false);
                       setSearchQuery("");
                   }}
-                  onClose={() => setShowPreview(false)}
               />
           )}
         </form>
@@ -240,14 +232,14 @@ export default function Header() {
 
         {/* Actions */}
         <div className="flex items-center gap-3 md:gap-6 text-zinc-200">
-          {isHomePage ? <HomeThemeToggle /> : null}
+          <HomeThemeToggle />
 
           <Link href="/fale-conosco" className="flex items-center gap-3 group active:scale-95 transition-transform">
             <div className={`rounded-full p-2 shadow-sm transition-colors ${actionIconClassName}`}>
                 <User size={20} className="md:w-5 md:h-5" strokeWidth={2.5} />
             </div>
             <div className="hidden lg:flex flex-col text-sm leading-tight">
-                <span className={isHomePage ? "text-[var(--home-muted)]" : "text-zinc-400"}>Atendimento</span>
+                <span className="text-[var(--site-muted)]">Atendimento</span>
                 <span className={actionLabelClassName}>
                   Fale Conosco
                 </span>
@@ -260,12 +252,12 @@ export default function Header() {
             aria-label="PCS Premium"
             title="PCS Premium"
           >
-            <div className={`rounded-full p-2 text-amber-500 transition-colors shadow-sm ${isHomePage ? "bg-[var(--home-card-bg)] group-hover:bg-amber-100 group-hover:text-amber-600" : "bg-zinc-900 group-hover:bg-amber-100 group-hover:text-amber-600"}`}>
+            <div className="rounded-full p-2 text-amber-500 transition-colors shadow-sm bg-[var(--site-panel-soft)] group-hover:bg-amber-100 group-hover:text-amber-600">
               <Crown size={20} className="md:w-5 md:h-5" strokeWidth={2.5} />
             </div>
             <div className="hidden lg:flex flex-col text-sm leading-tight">
-              <span className={isHomePage ? "text-[var(--home-muted)]" : "text-zinc-400"}>PCS</span>
-              <span className={isHomePage ? "font-bold text-[var(--home-text)] group-hover:text-amber-600 transition-colors" : "font-bold text-zinc-200 group-hover:text-amber-600 transition-colors"}>Premium</span>
+              <span className="text-[var(--site-muted)]">PCS</span>
+              <span className="font-bold text-[var(--site-text)] group-hover:text-amber-600 transition-colors">Premium</span>
             </div>
           </Link>
           
@@ -275,7 +267,7 @@ export default function Header() {
                   <ShoppingCart size={20} className="md:w-5 md:h-5" strokeWidth={2.5} />
                </div>
                <div className="hidden lg:flex flex-col text-sm leading-tight">
-                  <span className={isHomePage ? "text-[var(--home-muted)]" : "text-zinc-400"}>Meu</span>
+                  <span className="text-[var(--site-muted)]">Meu</span>
                   <span className={actionLabelClassName}>Carrinho</span>
               </div>
               {cartCount > 0 && (
@@ -338,7 +330,6 @@ export default function Header() {
                             setShowPreview(false);
                             setSearchQuery("");
                         }}
-                        onClose={() => setShowPreview(false)}
                     />
                 </div>
             )}

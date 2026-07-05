@@ -241,12 +241,13 @@ export default async function Home(props: {
                 Marcas em destaque
               </span>
               {homeBrands.map((brand) => (
-                <span
+                <Link
                   key={brand}
-                  className="rounded-full border border-[var(--home-border)] bg-[var(--home-card-soft)] px-4 py-2 text-sm font-bold text-[var(--home-text)]"
+                  href={`/?search=${encodeURIComponent(brand)}`}
+                  className="rounded-full border border-[var(--home-border)] bg-[var(--home-card-soft)] px-4 py-2 text-sm font-bold text-[var(--home-text)] transition hover:border-[var(--home-border-strong)] hover:text-[var(--home-accent)]"
                 >
                   {brand}
-                </span>
+                </Link>
               ))}
             </div>
           </div>
@@ -311,7 +312,7 @@ export default async function Home(props: {
                     {homeHighlights.map((item) => {
                       const Icon = item.icon;
                       return (
-                        <Link key={item.title} href={item.href} className="home-card group rounded-[1.5rem] p-5 transition hover:-translate-y-0.5 hover:border-[var(--home-border-strong)]">
+                        <Link key={item.title} href={item.href} className="home-card group flex min-h-[220px] flex-col rounded-[1.5rem] p-5 transition hover:-translate-y-0.5 hover:border-[var(--home-border-strong)]">
                           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--home-accent-soft)] text-[var(--home-accent)]">
                             <Icon size={20} />
                           </div>
@@ -371,7 +372,7 @@ export default async function Home(props: {
                     {homeServicePillars.map((item) => {
                       const Icon = item.icon;
                       const card = (
-                        <div className="home-card group rounded-[1.6rem] p-5 transition hover:-translate-y-0.5 hover:border-[var(--home-border-strong)]">
+                        <div className="home-card group min-h-[148px] rounded-[1.6rem] p-5 transition hover:-translate-y-0.5 hover:border-[var(--home-border-strong)]">
                           <div className="flex items-start gap-4">
                             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--home-accent-soft)] text-[var(--home-accent)]">
                               <Icon size={20} />

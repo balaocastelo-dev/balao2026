@@ -6,21 +6,13 @@ interface SearchPreviewProps {
   products: Product[];
   searchQuery?: string;
   onSelect: (product: Product) => void;
-  onClose: () => void;
 }
 
-export default function SearchPreview({ products, searchQuery = "", onSelect, onClose }: SearchPreviewProps) {
+export default function SearchPreview({ products, searchQuery = "", onSelect }: SearchPreviewProps) {
   if (products.length === 0) return null;
 
-  // Function to highlight search terms
   const highlightText = (text: string, query: string) => {
     if (!query || query.length < 2) return text;
-    
-    // Normalize for case-insensitive matching logic
-    const normalizedQuery = query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    
-    // Split text to find matches
-    // This is a simple implementation; for more complex needs consider a library
     const parts = text.split(new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'));
     
     return (
@@ -40,19 +32,19 @@ export default function SearchPreview({ products, searchQuery = "", onSelect, on
   };
 
   return (
-    <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2">
-      <div className="p-2 bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wider flex justify-between items-center">
+    <div className="site-surface absolute top-full left-0 right-0 mt-2 overflow-hidden rounded-2xl shadow-xl z-50 animate-in fade-in slide-in-from-top-2">
+      <div className="flex items-center justify-between border-b border-[var(--site-border)] bg-[var(--site-panel-muted)] p-2 text-xs font-semibold uppercase tracking-wider text-[var(--site-muted)]">
         <span>Sugestões de Produtos</span>
-        <span className="text-[10px] bg-gray-200 px-1.5 py-0.5 rounded text-gray-600">{products.length} encontrados</span>
+        <span className="rounded bg-[var(--site-panel-soft)] px-1.5 py-0.5 text-[10px] text-[var(--site-muted)]">{products.length} encontrados</span>
       </div>
       <div className="max-h-[400px] overflow-y-auto">
         {products.map((product) => (
           <div
             key={product.id}
             onClick={() => onSelect(product)}
-            className="flex items-center gap-4 p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-50 last:border-0 transition-colors group"
+            className="group flex cursor-pointer items-center gap-4 border-b border-[var(--site-border)] p-3 transition-colors last:border-0 hover:bg-[var(--site-panel-muted)]"
           >
-            <div className="relative w-12 h-12 flex-shrink-0 bg-white rounded-md border border-gray-100 p-1">
+            <div className="relative h-12 w-12 flex-shrink-0 rounded-md border border-[var(--site-border)] bg-[var(--site-panel-soft)] p-1">
               <Image
                 src={product.image}
                 alt={product.name}
@@ -62,20 +54,20 @@ export default function SearchPreview({ products, searchQuery = "", onSelect, on
               />
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="text-sm font-medium text-gray-800 truncate group-hover:text-[#E60012] transition-colors">
+              <h4 className="truncate text-sm font-medium text-[var(--site-text)] transition-colors group-hover:text-[#E60012]">
                 {highlightText(product.name, searchQuery)}
               </h4>
               <div className="flex items-center gap-2 mt-0.5">
-                <span className="text-xs text-gray-500">{product.category}</span>
+                <span className="text-xs text-[var(--site-muted)]">{product.category}</span>
                 <span className="text-xs font-bold text-[#E60012]">{product.price}</span>
               </div>
             </div>
-            <ChevronRight size={16} className="text-gray-300 group-hover:text-[#E60012]" />
+            <ChevronRight size={16} className="text-[var(--site-muted)] group-hover:text-[#E60012]" />
           </div>
         ))}
       </div>
-      <div className="bg-gray-50 p-2 text-xs text-center text-gray-500 border-t border-gray-100 flex items-center justify-center gap-1">
-        Pressione <kbd className="font-sans px-1 py-0.5 bg-white border rounded text-[10px]">Enter</kbd> para ver todos os resultados
+      <div className="flex items-center justify-center gap-1 border-t border-[var(--site-border)] bg-[var(--site-panel-muted)] p-2 text-center text-xs text-[var(--site-muted)]">
+        Pressione <kbd className="rounded border border-[var(--site-border)] bg-[var(--site-panel-soft)] px-1 py-0.5 font-sans text-[10px]">Enter</kbd> para ver todos os resultados
       </div>
     </div>
   );

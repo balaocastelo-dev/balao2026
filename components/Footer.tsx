@@ -20,7 +20,7 @@ export default function Footer() {
   const isExpanded = (section: string) => expandedSections[section];
 
   return (
-    <footer className="bg-zinc-950 text-zinc-400 pt-16 pb-8 border-t border-zinc-900 mt-auto">
+    <footer className="mt-auto border-t border-[var(--site-border)] bg-[var(--site-panel)] pt-16 pb-8 text-[var(--site-muted)]">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           
@@ -36,7 +36,7 @@ export default function Footer() {
                     />
                 </div>
             </Link>
-            <p className="text-sm leading-relaxed mb-6">
+            <p className="mb-6 text-sm leading-relaxed">
               Comércio e assistência técnica em informática. Tudo o que sua empresa e sua casa precisa em tecnologia.
             </p>
             <div className="flex gap-4">
@@ -46,12 +46,12 @@ export default function Footer() {
           </div>
 
           {/* Links Section */}
-          <div className="border-b border-zinc-900 md:border-none pb-4 md:pb-0">
+          <div className="border-b border-[var(--site-border)] pb-4 md:border-none md:pb-0">
             <button 
                 onClick={() => toggleSection('institucional')}
                 className="flex items-center justify-between w-full md:cursor-default"
             >
-                <h3 className="text-zinc-200 font-bold text-lg mb-2 md:mb-6">Institucional</h3>
+                <h3 className="mb-2 text-lg font-bold text-[var(--site-text)] md:mb-6">Institucional</h3>
                 <span className="md:hidden">
                     {isExpanded('institucional') ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                 </span>
@@ -71,12 +71,12 @@ export default function Footer() {
           </div>
 
           {/* Categories Section */}
-          <div className="border-b border-zinc-900 md:border-none pb-4 md:pb-0">
+          <div className="border-b border-[var(--site-border)] pb-4 md:border-none md:pb-0">
             <button 
                 onClick={() => toggleSection('departamentos')}
                 className="flex items-center justify-between w-full md:cursor-default"
             >
-                <h3 className="text-zinc-200 font-bold text-lg mb-2 md:mb-6">Departamentos</h3>
+                <h3 className="mb-2 text-lg font-bold text-[var(--site-text)] md:mb-6">Departamentos</h3>
                 <span className="md:hidden">
                     {isExpanded('departamentos') ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                 </span>
@@ -92,12 +92,12 @@ export default function Footer() {
           </div>
 
           {/* Contact Section */}
-          <div className="border-b border-zinc-900 md:border-none pb-4 md:pb-0">
+          <div className="border-b border-[var(--site-border)] pb-4 md:border-none md:pb-0">
             <button 
                 onClick={() => toggleSection('atendimento')}
                 className="flex items-center justify-between w-full md:cursor-default"
             >
-                <h3 className="text-zinc-200 font-bold text-lg mb-2 md:mb-6">Atendimento</h3>
+                <h3 className="mb-2 text-lg font-bold text-[var(--site-text)] md:mb-6">Atendimento</h3>
                 <span className="md:hidden">
                     {isExpanded('atendimento') ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                 </span>
@@ -106,17 +106,17 @@ export default function Footer() {
               <li className="flex items-start gap-3">
                 <Phone size={18} className="text-[#E60012] mt-0.5" />
                 <div>
-                    <span className="block font-bold text-zinc-200">{SITE_CONFIG.phone.display}</span>
-                    <span className="text-xs text-zinc-500">{SITE_CONFIG.openingHoursDisplay}</span>
+                    <span className="block font-bold text-[var(--site-text)]">{SITE_CONFIG.phone.display}</span>
+                    <span className="text-xs text-[var(--site-muted)]">{SITE_CONFIG.openingHoursDisplay}</span>
                 </div>
               </li>
               <li className="flex items-center gap-3">
                 <Mail size={18} className="text-[#E60012]" />
-                <a href={`mailto:${SITE_CONFIG.email}`} className="hover:text-zinc-200 transition-colors">{SITE_CONFIG.email}</a>
+                <a href={`mailto:${SITE_CONFIG.email}`} className="transition-colors hover:text-[var(--site-text)]">{SITE_CONFIG.email}</a>
               </li>
               <li className="flex items-start gap-3">
                 <MapPin size={18} className="text-[#E60012] mt-0.5" />
-                <span className="text-zinc-400">
+                <span className="text-[var(--site-muted)]">
                     {SITE_CONFIG.address}
                 </span>
               </li>
@@ -125,11 +125,11 @@ export default function Footer() {
         </div>
 
         {/* Payment Methods Banner */}
-        <div className="border-t border-zinc-900 pt-8 pb-8">
+        <div className="border-t border-[var(--site-border)] pt-8 pb-8">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                <div className="text-sm text-zinc-300">Formas de Pagamento</div>
+                <div className="text-sm text-[var(--site-soft)]">Formas de Pagamento</div>
                 <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2 text-zinc-500" title="Formas de Pagamento: Pix e Cartões">
+                    <div className="flex items-center gap-2 text-[var(--site-muted)]" title="Formas de Pagamento: Pix e Cartões">
                         <CreditCard size={32} />
                         <span className="text-sm">Pix, Visa, Master, Elo, Amex</span>
                     </div>
@@ -142,7 +142,7 @@ export default function Footer() {
         </div>
 
         {/* Copyright */}
-        <div className="border-t border-zinc-900 pt-8 text-center text-sm text-zinc-500">
+        <div className="border-t border-[var(--site-border)] pt-8 text-center text-sm text-[var(--site-muted)]">
           <p className="mb-2">&copy; 2026 Balão da Informática. Todos os direitos reservados. <Link href="/" className="hover:text-[#E60012]">www.balao.info</Link></p>
           <p className="text-xs opacity-60">Razão Social: {SITE_CONFIG.companyName} | CNPJ: {SITE_CONFIG.cnpj} UNIDADE FRANQUEADA ANCHIETA</p>
         </div>

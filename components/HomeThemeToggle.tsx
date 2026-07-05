@@ -22,10 +22,6 @@ export default function HomeThemeToggle() {
     setTheme(savedTheme);
     document.documentElement.setAttribute("data-home-theme", savedTheme);
     setMounted(true);
-
-    return () => {
-      document.documentElement.removeAttribute("data-home-theme");
-    };
   }, []);
 
   useEffect(() => {

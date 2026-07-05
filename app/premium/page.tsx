@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import Header from "@/components/Header";
+import PremiumPromoCountdown from "@/components/PremiumPromoCountdown";
 import { getCategories, getProducts } from "@/lib/db";
 import { getProductHref, parsePriceToNumber, type Category, type Product } from "@/lib/utils";
 import { SITE_CONFIG } from "@/lib/config";
@@ -80,6 +81,15 @@ function formatCurrency(value: number) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 }
 
+function getPromoPricing(priceText: string) {
+  const original = parsePriceToNumber(priceText);
+  if (original <= 0) return null;
+  return {
+    original,
+    promo: original * 0.5,
+  };
+}
+
 function buildWhatsAppLink(message: string) {
   return `https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(message)}`;
 }
@@ -102,8 +112,9 @@ function ProductTile({
 }) {
   const href = getProductHref(product);
   const imgSrc = product.image || "/logo.png";
-  const priceNum = parsePriceToNumber(product.price);
-  const priceLabel = priceNum > 0 ? formatCurrency(priceNum) : product.price || "Consultar";
+  const promoPricing = getPromoPricing(product.price);
+  const promoLabel = promoPricing ? formatCurrency(promoPricing.promo) : product.price || "Consultar";
+  const originalLabel = promoPricing ? formatCurrency(promoPricing.original) : null;
 
   return (
     <Link
@@ -133,9 +144,17 @@ function ProductTile({
           </div>
           <div className="flex items-center justify-between gap-3">
             <div className="text-zinc-400 text-sm line-clamp-1">{product.category}</div>
-            <div className="shrink-0 rounded-full bg-gradient-to-r from-amber-200 via-yellow-100 to-amber-200 text-black px-3 py-1 text-sm font-black tracking-tight">
-              {priceLabel}
+            <div className="shrink-0 rounded-full bg-gradient-to-r from-red-200 via-white to-red-100 px-3 py-1 text-sm font-black tracking-tight text-[#E60012]">
+              50% OFF
             </div>
+          </div>
+        </div>
+
+        <div className="mt-1">
+          {originalLabel ? <div className="text-sm font-semibold text-zinc-500 line-through">{originalLabel}</div> : null}
+          <div className="text-2xl font-black tracking-tight text-red-300">{promoLabel}</div>
+          <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-amber-100/85">
+            Promoção de 06 a 13 de julho
           </div>
         </div>
 
@@ -151,8 +170,9 @@ function ProductTile({
 function FeaturedShowcase({ product }: { product: Product }) {
   const href = getProductHref(product);
   const imgSrc = product.image || "/logo.png";
-  const priceNum = parsePriceToNumber(product.price);
-  const priceLabel = priceNum > 0 ? formatCurrency(priceNum) : product.price || "Consultar";
+  const promoPricing = getPromoPricing(product.price);
+  const promoLabel = promoPricing ? formatCurrency(promoPricing.promo) : product.price || "Consultar";
+  const originalLabel = promoPricing ? formatCurrency(promoPricing.original) : null;
 
   return (
     <Link
@@ -164,15 +184,20 @@ function FeaturedShowcase({ product }: { product: Product }) {
         <div className="flex items-center justify-between gap-4">
           <div>
             <div className="text-[11px] font-bold uppercase tracking-[0.24em] text-amber-200/85">
-              PC em destaque
+              Promoção Premium
             </div>
             <div className="mt-2 text-2xl sm:text-3xl font-black tracking-tight leading-tight line-clamp-2">
               {product.name}
             </div>
           </div>
-          <div className="shrink-0 rounded-full bg-gradient-to-r from-amber-200 via-yellow-100 to-amber-200 text-black px-4 py-2 text-sm font-black tracking-tight">
-            {priceLabel}
+          <div className="shrink-0 rounded-full bg-gradient-to-r from-red-200 via-white to-red-100 px-4 py-2 text-sm font-black tracking-tight text-[#E60012]">
+            50% OFF
           </div>
+        </div>
+
+        <div className="mt-5 flex flex-wrap items-end gap-3">
+          {originalLabel ? <div className="text-lg font-semibold text-zinc-500 line-through">{originalLabel}</div> : null}
+          <div className="text-3xl font-black tracking-tight text-red-300">{promoLabel}</div>
         </div>
 
         <div className="mt-6 relative aspect-[16/10] w-full overflow-hidden rounded-3xl bg-white border border-zinc-200 p-5 shadow-[0_22px_80px_rgba(0,0,0,0.18)]">
@@ -352,7 +377,7 @@ export default async function PremiumPage() {
 
   return (
     <div className="bg-black text-white">
-      <JsonLd data={jsonLdData as any} />
+      <JsonLd data={jsonLdData} />
       <Header />
 
       <section className="relative overflow-hidden min-h-[92vh] flex items-center">
@@ -376,6 +401,8 @@ export default async function PremiumPage() {
                 Uma seleção premium do nosso estoque. Itens escolhidos para quem quer qualidade, desempenho e segurança
                 na compra, com suporte de verdade em Campinas.
               </p>
+
+              <PremiumPromoCountdown />
 
               <div className="flex flex-col sm:flex-row gap-3">
                 <a

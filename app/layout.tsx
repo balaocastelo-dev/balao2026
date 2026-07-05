@@ -33,29 +33,29 @@ function getMetadataBase() {
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | BalÃ£o da InformÃ¡tica",
+    template: "%s | Balão da Informática",
     default:
-      "BalÃ£o da InformÃ¡tica | Loja de InformÃ¡tica em Campinas com WhatsApp RÃ¡pido",
+      "Balão da Informática | Loja de Informática em Campinas com WhatsApp Rápido",
   },
   description:
-    "Loja de informÃ¡tica em Campinas com loja fÃ­sica no CambuÃ­. PCs Gamer, notebooks, peÃ§as, upgrades, perifÃ©ricos e assistÃªncia tÃ©cnica com atendimento pelo WhatsApp, retirada e entrega rÃ¡pida na regiÃ£o.",
+    "Loja de informática em Campinas com loja física no Cambuí. PCs Gamer, notebooks, peças, upgrades, periféricos e assistência técnica com atendimento pelo WhatsApp, retirada e entrega rápida na região.",
   metadataBase: getMetadataBase(),
   keywords: [
-    "loja de informÃ¡tica campinas",
-    "informÃ¡tica campinas",
+    "loja de informática campinas",
+    "informática campinas",
     "pc gamer campinas",
     "notebook campinas",
-    "assistÃªncia tÃ©cnica informÃ¡tica campinas",
-    "manutenÃ§Ã£o de notebook campinas",
+    "assistência técnica informática campinas",
+    "manutenção de notebook campinas",
     "montagem de pc gamer campinas",
     "hardware campinas",
-    "loja de computadores cambuÃ­",
-    "balÃ£o da informÃ¡tica castelo",
-    "balÃ£o da informÃ¡tica",
+    "loja de computadores cambuí",
+    "balão da informática castelo",
+    "balão da informática",
   ],
-  authors: [{ name: "BalÃ£o da InformÃ¡tica" }],
-  creator: "BalÃ£o da InformÃ¡tica",
-  publisher: "BalÃ£o da InformÃ¡tica",
+  authors: [{ name: "Balão da Informática" }],
+  creator: "Balão da Informática",
+  publisher: "Balão da Informática",
   robots: {
     index: true,
     follow: true,
@@ -65,18 +65,18 @@ export const metadata: Metadata = {
     locale: "pt_BR",
     url: "https://www.balao.info",
     title:
-      "BalÃ£o da InformÃ¡tica | Loja de InformÃ¡tica em Campinas com WhatsApp RÃ¡pido",
+      "Balão da Informática | Loja de Informática em Campinas com WhatsApp Rápido",
     description:
-      "Loja fÃ­sica em Campinas para PC Gamer, notebooks, peÃ§as, upgrades e assistÃªncia tÃ©cnica. Consulte estoque pelo WhatsApp e retire no CambuÃ­.",
-    siteName: "BalÃ£o da InformÃ¡tica",
+      "Loja física em Campinas para PC Gamer, notebooks, peças, upgrades e assistência técnica. Consulte estoque pelo WhatsApp e retire no Cambuí.",
+    siteName: "Balão da Informática",
     images: [{ url: "/logo.png" }],
   },
   twitter: {
     card: "summary_large_image",
     title:
-      "BalÃ£o da InformÃ¡tica | Loja de InformÃ¡tica em Campinas com WhatsApp RÃ¡pido",
+      "Balão da Informática | Loja de Informática em Campinas com WhatsApp Rápido",
     description:
-      "Loja fÃ­sica em Campinas para PC Gamer, notebooks, peÃ§as, upgrades e assistÃªncia tÃ©cnica. Consulte estoque pelo WhatsApp e retire no CambuÃ­.",
+      "Loja física em Campinas para PC Gamer, notebooks, peças, upgrades e assistência técnica. Consulte estoque pelo WhatsApp e retire no Cambuí.",
     images: ["/logo.png"],
   },
 };
@@ -90,7 +90,7 @@ const jsonLd = {
       name: SITE_CONFIG.name,
       image: "https://www.balao.info/logo.png",
       description:
-        "Loja de informÃ¡tica em Campinas especializada em computadores, PC Gamer, notebooks, hardware, perifÃ©ricos e assistÃªncia tÃ©cnica, com atendimento pelo WhatsApp e retirada na loja fÃ­sica.",
+        "Loja de informática em Campinas especializada em computadores, PC Gamer, notebooks, hardware, periféricos e assistência técnica, com atendimento pelo WhatsApp e retirada na loja física.",
       address: {
         "@type": "PostalAddress",
         streetAddress: SITE_CONFIG.address,
@@ -122,16 +122,16 @@ const jsonLd = {
           closes: "13:00",
         },
       ],
-      areaServed: ["Campinas", "SumarÃ©", "HortolÃ¢ndia", "PaulÃ­nia", "Valinhos", "Vinhedo", "Indaiatuba", "JaguariÃºna"],
+      areaServed: ["Campinas", "Sumaré", "Hortolândia", "Paulínia", "Valinhos", "Vinhedo", "Indaiatuba", "Jaguariúna"],
       sameAs: [SITE_CONFIG.social.instagram, SITE_CONFIG.social.facebook],
       makesOffer: {
         "@type": "OfferCatalog",
-        name: "InformÃ¡tica e Tecnologia",
+        name: "Informática e Tecnologia",
         itemListElement: [
           { "@type": "Offer", name: "PC Gamer", category: "Computadores" },
-          { "@type": "Offer", name: "Notebooks", category: "InformÃ¡tica" },
-          { "@type": "Offer", name: "AssistÃªncia TÃ©cnica", category: "ServiÃ§os" },
-          { "@type": "Offer", name: "PerifÃ©ricos e AcessÃ³rios", category: "InformÃ¡tica" },
+          { "@type": "Offer", name: "Notebooks", category: "Informática" },
+          { "@type": "Offer", name: "Assistência Técnica", category: "Serviços" },
+          { "@type": "Offer", name: "Periféricos e Acessórios", category: "Informática" },
         ],
       },
     },
@@ -164,6 +164,17 @@ export default async function RootLayout({
     new Set([gaId, googleAdsId].filter((id): id is string => Boolean(id))),
   );
   const googleTagPrimaryId = googleTagIds[0];
+  const themeInitScript = `
+    (function() {
+      try {
+        var saved = localStorage.getItem('balao-home-theme');
+        var theme = saved === 'light' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-home-theme', theme);
+      } catch (e) {
+        document.documentElement.setAttribute('data-home-theme', 'dark');
+      }
+    })();
+  `;
   const googleTagConfigScript = `
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
@@ -179,10 +190,13 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" suppressHydrationWarning>
       <body
         className={`${bangers.variable} antialiased flex flex-col min-h-screen overflow-x-hidden`}
       >
+        <Script id="theme-init" strategy="beforeInteractive">
+          {themeInitScript}
+        </Script>
         {gtmId && (
           <>
             <Script
