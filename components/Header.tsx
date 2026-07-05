@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search, ShoppingCart, User, Menu, X, Loader2, Crown } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -12,9 +12,11 @@ import { getProductHref, Product } from "@/lib/utils";
 import SearchPreview from "@/components/SearchPreview";
 import CartPreview from "@/components/CartPreview";
 import TopBar from "@/components/TopBar";
+import HomeThemeToggle from "@/components/HomeThemeToggle";
 
 export default function Header() {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const { cartCount } = useCart();
   const { toggleSidebar } = useSidebar();
@@ -39,6 +41,19 @@ export default function Header() {
   const [isLoading, setIsLoading] = useState(false);
   const searchContainerRef = useRef<HTMLFormElement>(null);
   const mobileSearchContainerRef = useRef<HTMLDivElement>(null);
+  const isHomePage = pathname === "/";
+  const headerClassName = isHomePage
+    ? "bg-[var(--home-panel-bg)] border-[var(--home-border)]"
+    : "bg-zinc-950/90 border-zinc-800";
+  const searchInputClassName = isHomePage
+    ? "bg-[var(--home-card-bg)] border-[var(--home-border)] text-[var(--home-text)] placeholder:text-[var(--home-muted)] focus:border-[var(--home-accent)] focus:ring-[var(--home-accent)]"
+    : "bg-zinc-900 border-zinc-800 text-zinc-100 placeholder-zinc-500 focus:border-[#E60012] focus:ring-[#E60012]";
+  const actionIconClassName = isHomePage
+    ? "bg-[var(--home-card-bg)] text-[var(--home-muted)] group-hover:bg-[var(--home-accent)] group-hover:text-white"
+    : "bg-zinc-900 text-zinc-300 group-hover:bg-[#E60012] group-hover:text-white";
+  const actionLabelClassName = isHomePage
+    ? "font-bold text-[var(--home-text)] group-hover:text-[var(--home-accent)] transition-colors"
+    : "font-bold text-zinc-200 group-hover:text-[#E60012] transition-colors";
 
   // Debounced Backend Search
   useEffect(() => {
@@ -131,7 +146,7 @@ export default function Header() {
   const previewProducts = products;
 
   return (
-    <header className="bg-zinc-950/90 backdrop-blur-md border-b border-zinc-800 sticky top-0 z-[900] shadow-lg flex flex-col">
+    <header className={`${headerClassName} sticky top-0 z-[900] flex flex-col border-b shadow-lg backdrop-blur-md transition-colors`}>
       <TopBar />
       <div className="container mx-auto px-4 py-4 flex items-center justify-between gap-4">
         
@@ -173,7 +188,7 @@ export default function Header() {
           <input
               type="text"
               placeholder="Buscar produtos..."
-              className="w-full pl-12 pr-24 py-3 bg-zinc-900 border border-zinc-800 rounded-full text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-[#E60012] focus:ring-1 focus:ring-[#E60012] shadow-inner text-base"
+              className={`w-full rounded-full border py-3 pl-12 pr-24 text-base shadow-inner focus:outline-none focus:ring-1 ${searchInputClassName}`}
               value={searchQuery}
               onChange={(e) => {
                   setSearchQuery(e.target.value);
@@ -183,7 +198,7 @@ export default function Header() {
           />
 
           {/* Search Icon */}
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
 
           {/* Clear Button */}
           {searchQuery && (
@@ -200,7 +215,7 @@ export default function Header() {
           <button
               type="button"
               onClick={performSearch}
-              className="absolute right-3 top-1/2 -translate-y-1/2 bg-[#E60012] text-white px-4 py-2 rounded-full hover:bg-red-700 transition-colors flex items-center gap-2"
+              className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-2 rounded-full bg-[#E60012] px-4 py-2 text-white transition-colors hover:bg-red-700"
           >
               <Search size={18} />
               <span className="hidden lg:inline font-semibold">Buscar</span>
@@ -224,15 +239,16 @@ export default function Header() {
 
 
         {/* Actions */}
-        <div className="flex items-center gap-3 md:gap-8 text-zinc-200">
+        <div className="flex items-center gap-3 md:gap-6 text-zinc-200">
+          {isHomePage ? <HomeThemeToggle /> : null}
 
           <Link href="/fale-conosco" className="flex items-center gap-3 group active:scale-95 transition-transform">
-            <div className="p-2 bg-zinc-900 rounded-full text-zinc-300 group-hover:bg-[#E60012] group-hover:text-white transition-colors shadow-sm">
+            <div className={`rounded-full p-2 shadow-sm transition-colors ${actionIconClassName}`}>
                 <User size={20} className="md:w-5 md:h-5" strokeWidth={2.5} />
             </div>
             <div className="hidden lg:flex flex-col text-sm leading-tight">
-                <span className="text-zinc-400">Atendimento</span>
-                <span className="font-bold text-zinc-200 group-hover:text-[#E60012] transition-colors">
+                <span className={isHomePage ? "text-[var(--home-muted)]" : "text-zinc-400"}>Atendimento</span>
+                <span className={actionLabelClassName}>
                   Fale Conosco
                 </span>
             </div>
@@ -244,23 +260,23 @@ export default function Header() {
             aria-label="PCS Premium"
             title="PCS Premium"
           >
-            <div className="p-2 bg-zinc-900 rounded-full text-amber-500 group-hover:bg-amber-100 group-hover:text-amber-600 transition-colors shadow-sm">
+            <div className={`rounded-full p-2 text-amber-500 transition-colors shadow-sm ${isHomePage ? "bg-[var(--home-card-bg)] group-hover:bg-amber-100 group-hover:text-amber-600" : "bg-zinc-900 group-hover:bg-amber-100 group-hover:text-amber-600"}`}>
               <Crown size={20} className="md:w-5 md:h-5" strokeWidth={2.5} />
             </div>
             <div className="hidden lg:flex flex-col text-sm leading-tight">
-              <span className="text-zinc-400">PCS</span>
-              <span className="font-bold text-zinc-200 group-hover:text-amber-600 transition-colors">Premium</span>
+              <span className={isHomePage ? "text-[var(--home-muted)]" : "text-zinc-400"}>PCS</span>
+              <span className={isHomePage ? "font-bold text-[var(--home-text)] group-hover:text-amber-600 transition-colors" : "font-bold text-zinc-200 group-hover:text-amber-600 transition-colors"}>Premium</span>
             </div>
           </Link>
           
           <div className="relative" onMouseEnter={handleCartMouseEnter} onMouseLeave={handleCartMouseLeave}>
             <Link href="/cart" id="cart-icon-container" className="relative group flex items-center gap-3 active:scale-95 transition-transform">
-               <div className="p-2 bg-zinc-900 rounded-full text-zinc-300 group-hover:bg-[#E60012] group-hover:text-white transition-colors shadow-sm">
+               <div className={`rounded-full p-2 shadow-sm transition-colors ${actionIconClassName}`}>
                   <ShoppingCart size={20} className="md:w-5 md:h-5" strokeWidth={2.5} />
                </div>
                <div className="hidden lg:flex flex-col text-sm leading-tight">
-                  <span className="text-zinc-400">Meu</span>
-                  <span className="font-bold text-zinc-200 group-hover:text-[#E60012] transition-colors">Carrinho</span>
+                  <span className={isHomePage ? "text-[var(--home-muted)]" : "text-zinc-400"}>Meu</span>
+                  <span className={actionLabelClassName}>Carrinho</span>
               </div>
               {cartCount > 0 && (
                   <span className="absolute -top-1 -right-1 md:top-0 md:right-0 lg:left-7 lg:top-0 bg-[#E60012] text-white text-[10px] md:text-[11px] font-bold h-5 w-5 md:h-5 md:w-5 flex items-center justify-center rounded-full border-2 border-zinc-950 shadow-sm">
@@ -283,7 +299,7 @@ export default function Header() {
             <input
                 type="text"
                 placeholder="Buscar produtos..."
-                className="w-full pl-5 pr-12 py-3 bg-zinc-900 border border-zinc-800 rounded-full text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-[#E60012] focus:ring-1 focus:ring-[#E60012] shadow-inner text-base"
+                className={`w-full rounded-full border py-3 pl-5 pr-12 text-base shadow-inner focus:outline-none focus:ring-1 ${searchInputClassName}`}
                 value={searchQuery}
                 onChange={(e) => {
                     setSearchQuery(e.target.value);

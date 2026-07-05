@@ -6,6 +6,66 @@
   --foreground: #f3f4f6;
   --card-bg: rgba(21, 27, 45, 0.7);
   --border-color: rgba(255, 255, 255, 0.06);
+  --home-shell-bg: linear-gradient(180deg, #060913 0%, #0b1324 34%, #121a2b 100%);
+  --home-shell-glow: radial-gradient(circle at top left, rgba(230, 0, 18, 0.18), transparent 32%),
+    radial-gradient(circle at top right, rgba(239, 68, 68, 0.1), transparent 28%);
+  --home-panel-bg: rgba(10, 16, 29, 0.72);
+  --home-panel-strong: linear-gradient(180deg, rgba(10, 16, 29, 0.94), rgba(7, 11, 22, 0.94));
+  --home-card-bg: rgba(15, 23, 42, 0.82);
+  --home-card-soft: rgba(255, 255, 255, 0.04);
+  --home-border: rgba(148, 163, 184, 0.16);
+  --home-border-strong: rgba(248, 113, 113, 0.26);
+  --home-text: #f8fafc;
+  --home-muted: #94a3b8;
+  --home-soft: #cbd5e1;
+  --home-accent: #E60012;
+  --home-accent-soft: rgba(230, 0, 18, 0.12);
+  --home-success-soft: rgba(34, 197, 94, 0.14);
+  --home-success: #22c55e;
+  --home-primary: #E60012;
+  --home-primary-soft: rgba(230, 0, 18, 0.1);
+}
+
+[data-home-theme="light"] {
+  --home-shell-bg: linear-gradient(180deg, #f7f9fc 0%, #eef2ff 40%, #eef4ff 100%);
+  --home-shell-glow: radial-gradient(circle at top left, rgba(230, 0, 18, 0.08), transparent 34%),
+    radial-gradient(circle at top right, rgba(248, 113, 113, 0.08), transparent 30%);
+  --home-panel-bg: rgba(255, 255, 255, 0.82);
+  --home-panel-strong: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.96));
+  --home-card-bg: rgba(255, 255, 255, 0.92);
+  --home-card-soft: rgba(15, 23, 42, 0.03);
+  --home-border: rgba(15, 23, 42, 0.08);
+  --home-border-strong: rgba(225, 29, 72, 0.18);
+  --home-text: #0f172a;
+  --home-muted: #64748b;
+  --home-soft: #334155;
+  --home-accent: #E60012;
+  --home-accent-soft: rgba(225, 29, 72, 0.08);
+  --home-success-soft: rgba(34, 197, 94, 0.08);
+  --home-success: #16a34a;
+  --home-primary: #E60012;
+  --home-primary-soft: rgba(225, 29, 72, 0.08);
+}
+
+[data-home-theme="dark"] {
+  --home-shell-bg: linear-gradient(180deg, #060913 0%, #0b1324 34%, #121a2b 100%);
+  --home-shell-glow: radial-gradient(circle at top left, rgba(230, 0, 18, 0.18), transparent 32%),
+    radial-gradient(circle at top right, rgba(239, 68, 68, 0.1), transparent 28%);
+  --home-panel-bg: rgba(10, 16, 29, 0.72);
+  --home-panel-strong: linear-gradient(180deg, rgba(10, 16, 29, 0.94), rgba(7, 11, 22, 0.94));
+  --home-card-bg: rgba(15, 23, 42, 0.82);
+  --home-card-soft: rgba(255, 255, 255, 0.04);
+  --home-border: rgba(148, 163, 184, 0.16);
+  --home-border-strong: rgba(248, 113, 113, 0.26);
+  --home-text: #f8fafc;
+  --home-muted: #94a3b8;
+  --home-soft: #cbd5e1;
+  --home-accent: #E60012;
+  --home-accent-soft: rgba(230, 0, 18, 0.12);
+  --home-success-soft: rgba(34, 197, 94, 0.14);
+  --home-success: #22c55e;
+  --home-primary: #E60012;
+  --home-primary-soft: rgba(230, 0, 18, 0.1);
 }
 
 @theme inline {
@@ -22,6 +82,37 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   min-height: 100vh;
+}
+
+.home-shell {
+  background: var(--home-shell-glow), var(--home-shell-bg);
+  color: var(--home-text);
+}
+
+.home-panel {
+  background: var(--home-panel-bg);
+  border: 1px solid var(--home-border);
+  color: var(--home-text);
+  box-shadow: 0 30px 80px rgba(2, 6, 23, 0.16);
+  backdrop-filter: blur(18px);
+}
+
+.home-panel-strong {
+  background: var(--home-panel-strong);
+  border: 1px solid var(--home-border-strong);
+  color: var(--home-text);
+  box-shadow: 0 34px 80px rgba(2, 6, 23, 0.2);
+  backdrop-filter: blur(20px);
+}
+
+.home-card {
+  background: var(--home-card-bg);
+  border: 1px solid var(--home-border);
+  color: var(--home-text);
+}
+
+.home-muted {
+  color: var(--home-muted);
 }
 
 /* Force all text to be black unless explicitly overridden by white (e.g. buttons) */

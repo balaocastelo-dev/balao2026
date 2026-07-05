@@ -28,12 +28,12 @@ export default function ProductCarousel({ title, products, categoryId, isDark = 
   return (
     <div className="mb-8">
       <div className="flex items-center justify-between mb-4 px-4 lg:px-0">
-        <h2 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>{title}</h2>
+        <h2 className={`text-2xl font-bold ${isDark ? 'text-[var(--home-text)]' : 'text-gray-800'}`}>{title}</h2>
         <div className="flex gap-2">
             {categoryId && (
                 <Link 
                     href={`/?category=${encodeURIComponent(categoryId)}`}
-                    className="text-sm text-[#E60012] hover:underline font-medium mr-4 flex items-center"
+                    className="mr-4 flex items-center text-sm font-medium text-[#E60012] hover:underline"
                 >
                     Ver todos
                 </Link>
@@ -42,7 +42,7 @@ export default function ProductCarousel({ title, products, categoryId, isDark = 
             onClick={() => scroll("left")}
             className={`p-2 border rounded-full shadow-sm ${
               isDark 
-                ? 'bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700' 
+                ? 'bg-[var(--home-card-bg)] border-[var(--home-border)] text-[var(--home-text)] hover:border-[var(--home-border-strong)]' 
                 : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
             }`}
             aria-label="Previous"
@@ -53,7 +53,7 @@ export default function ProductCarousel({ title, products, categoryId, isDark = 
             onClick={() => scroll("right")}
             className={`p-2 border rounded-full shadow-sm ${
               isDark 
-                ? 'bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700' 
+                ? 'bg-[var(--home-card-bg)] border-[var(--home-border)] text-[var(--home-text)] hover:border-[var(--home-border-strong)]' 
                 : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
             }`}
             aria-label="Next"

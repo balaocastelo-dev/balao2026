@@ -111,28 +111,28 @@ export default function QuickLeadSection({
 
   return (
     <section
-      className={`rounded-[28px] border border-slate-200 bg-white shadow-sm ${
+      className={`rounded-[28px] border border-[var(--home-border)] bg-[var(--home-panel-bg)] shadow-[0_24px_70px_rgba(2,6,23,0.14)] backdrop-blur ${
         compact ? "p-6 md:p-8" : "p-8 md:p-10"
       }`}
     >
       <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
         <div>
-          <p className="text-sm uppercase tracking-[0.25em] text-red-600 font-bold">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-[var(--home-accent)]">
             Captação Direta
           </p>
-          <h2 className="mt-3 text-3xl md:text-4xl font-black tracking-tight text-slate-900">
+          <h2 className="mt-3 text-3xl font-black tracking-tight text-[var(--home-text)] md:text-4xl">
             {title}
           </h2>
-          <p className="mt-4 text-slate-600 text-lg leading-relaxed">{description}</p>
+          <p className="mt-4 text-lg leading-relaxed text-[var(--home-muted)]">{description}</p>
 
           <div className="mt-6 flex flex-wrap gap-3">
             {cityLabel ? (
-              <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">
+              <span className="rounded-full border border-[var(--home-border)] bg-[var(--home-card-soft)] px-4 py-2 text-sm font-semibold text-[var(--home-soft)]">
                 Cidade: {cityLabel}
               </span>
             ) : null}
             {serviceLabel ? (
-              <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">
+              <span className="rounded-full border border-[var(--home-border)] bg-[var(--home-card-soft)] px-4 py-2 text-sm font-semibold text-[var(--home-soft)]">
                 Serviço: {serviceLabel}
               </span>
             ) : null}
@@ -158,7 +158,7 @@ export default function QuickLeadSection({
               data-conversion-label={serviceLabel || title}
               data-conversion-city={cityLabel}
               data-conversion-service={serviceLabel}
-              className="inline-flex items-center gap-2 rounded-full border border-slate-300 px-6 py-3 font-bold text-slate-700 hover:border-red-500 hover:text-red-600"
+              className="inline-flex items-center gap-2 rounded-full border border-[var(--home-border)] bg-[var(--home-card-bg)] px-6 py-3 font-bold text-[var(--home-text)] hover:border-[var(--home-accent)] hover:text-[var(--home-accent)]"
             >
               <Phone className="h-5 w-5" />
               Ligar Agora
@@ -166,9 +166,9 @@ export default function QuickLeadSection({
           </div>
         </div>
 
-        <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-6">
-          <h3 className="text-2xl font-black text-slate-900">{formTitle}</h3>
-          <p className="mt-2 text-sm text-slate-600">
+        <div className="rounded-[24px] border border-[var(--home-border)] bg-[var(--home-card-bg)] p-6">
+          <h3 className="text-2xl font-black text-[var(--home-text)]">{formTitle}</h3>
+          <p className="mt-2 text-sm text-[var(--home-muted)]">
             Preencha os dados e receba retorno rápido da equipe.
           </p>
 
@@ -178,7 +178,7 @@ export default function QuickLeadSection({
               name="name"
               required
               placeholder="Seu nome"
-              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-red-500"
+              className="w-full rounded-xl border border-[var(--home-border)] bg-[var(--home-card-soft)] px-4 py-3 text-[var(--home-text)] outline-none placeholder:text-[var(--home-muted)] focus:border-[var(--home-accent)]"
             />
             <div className="grid gap-4 md:grid-cols-2">
               <input
@@ -186,14 +186,14 @@ export default function QuickLeadSection({
                 name="phone"
                 required
                 placeholder="WhatsApp"
-                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-red-500"
+                className="w-full rounded-xl border border-[var(--home-border)] bg-[var(--home-card-soft)] px-4 py-3 text-[var(--home-text)] outline-none placeholder:text-[var(--home-muted)] focus:border-[var(--home-accent)]"
               />
               <input
                 type="email"
                 name="email"
                 required
                 placeholder="Seu e-mail"
-                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-red-500"
+                className="w-full rounded-xl border border-[var(--home-border)] bg-[var(--home-card-soft)] px-4 py-3 text-[var(--home-text)] outline-none placeholder:text-[var(--home-muted)] focus:border-[var(--home-accent)]"
               />
             </div>
             <textarea
@@ -201,7 +201,7 @@ export default function QuickLeadSection({
               required
               rows={4}
               defaultValue={messageTemplate}
-              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none focus:border-red-500"
+              className="w-full rounded-xl border border-[var(--home-border)] bg-[var(--home-card-soft)] px-4 py-3 text-[var(--home-text)] outline-none placeholder:text-[var(--home-muted)] focus:border-[var(--home-accent)]"
             />
             <button
               type="submit"

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { MapPin, Clock, Phone, MessageCircle, Star, ShieldCheck, Wrench, Package, Users } from "lucide-react";
+import { MapPin, Clock, Phone, MessageCircle, Star, Wrench, Package, Users } from "lucide-react";
 import { SITE_CONFIG } from "@/lib/config";
 
 export default function HomeLocalStoreInfo() {
@@ -39,40 +39,40 @@ export default function HomeLocalStoreInfo() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         
         {/* Left: Address, Maps, Working Hours */}
-        <div className="lg:col-span-6 bg-zinc-950/70 border border-zinc-800 rounded-3xl p-6 sm:p-8 flex flex-col justify-between shadow-xl">
+        <div className="home-panel lg:col-span-6 flex flex-col justify-between rounded-3xl p-6 shadow-xl sm:p-8">
           <div>
-            <span className="text-[10px] font-black text-red-500 uppercase tracking-widest bg-red-950/30 px-3 py-1 rounded-full border border-red-900/30 w-fit">
+            <span className="w-fit rounded-full border border-[var(--home-border)] bg-[var(--home-accent-soft)] px-3 py-1 text-[10px] font-black uppercase tracking-widest text-[var(--home-accent)]">
               📍 Visite Nossa Loja Física
             </span>
-            <h2 className="text-2xl sm:text-3xl font-black text-white mt-4 tracking-tight">
+            <h2 className="mt-4 text-2xl font-black tracking-tight text-[var(--home-text)] sm:text-3xl">
               Balão da Informática Castelo
             </h2>
-            <p className="text-zinc-400 text-sm mt-2 leading-relaxed">
+            <p className="mt-2 text-sm leading-relaxed text-[var(--home-muted)]">
               Traga seu equipamento para diagnóstico, retire seus produtos comprados pelo site ou monte sua máquina dos sonhos direto no nosso balcão.
             </p>
             
             <div className="mt-6 space-y-4">
               <div className="flex items-start gap-3">
-                <MapPin className="text-[#E60012] shrink-0 mt-0.5" size={20} />
+                <MapPin className="mt-0.5 shrink-0 text-[var(--home-accent)]" size={20} />
                 <div>
-                  <span className="block text-zinc-100 font-bold text-sm">Endereço</span>
-                  <span className="text-zinc-400 text-xs">{SITE_CONFIG.address} • CEP {SITE_CONFIG.postalCode}</span>
+                  <span className="block text-sm font-bold text-[var(--home-text)]">Endereço</span>
+                  <span className="text-xs text-[var(--home-muted)]">{SITE_CONFIG.address} • CEP {SITE_CONFIG.postalCode}</span>
                 </div>
               </div>
               
               <div className="flex items-start gap-3">
-                <Clock className="text-[#E60012] shrink-0 mt-0.5" size={20} />
+                <Clock className="mt-0.5 shrink-0 text-[var(--home-accent)]" size={20} />
                 <div>
-                  <span className="block text-zinc-100 font-bold text-sm">Horário de Funcionamento</span>
-                  <span className="text-zinc-400 text-xs">{SITE_CONFIG.openingHoursDisplay}</span>
+                  <span className="block text-sm font-bold text-[var(--home-text)]">Horário de Funcionamento</span>
+                  <span className="text-xs text-[var(--home-muted)]">{SITE_CONFIG.openingHoursDisplay}</span>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
-                <Phone className="text-[#E60012] shrink-0 mt-0.5" size={20} />
+                <Phone className="mt-0.5 shrink-0 text-[var(--home-accent)]" size={20} />
                 <div>
-                  <span className="block text-zinc-100 font-bold text-sm">Contato Local</span>
-                  <span className="text-zinc-400 text-xs">Telefone: {SITE_CONFIG.phone.display} • WhatsApp: {SITE_CONFIG.whatsapp.display}</span>
+                  <span className="block text-sm font-bold text-[var(--home-text)]">Contato Local</span>
+                  <span className="text-xs text-[var(--home-muted)]">Telefone: {SITE_CONFIG.phone.display} • WhatsApp: {SITE_CONFIG.whatsapp.display}</span>
                 </div>
               </div>
             </div>
@@ -83,7 +83,7 @@ export default function HomeLocalStoreInfo() {
               href={SITE_CONFIG.mapsUrl}
               target="_blank"
               rel="noreferrer"
-              className="flex-1 py-3 px-6 bg-[#E60012] hover:bg-red-700 text-white rounded-xl font-bold text-sm text-center shadow-lg shadow-red-950/20 active:scale-95 transition-all flex items-center justify-center gap-2"
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#E60012] px-6 py-3 text-center text-sm font-bold text-white shadow-lg shadow-red-950/20 transition-all hover:bg-red-700 active:scale-95"
             >
               <MapPin size={16} />
               Como Chegar (Google Maps)
@@ -92,7 +92,7 @@ export default function HomeLocalStoreInfo() {
               href={`https://wa.me/${SITE_CONFIG.whatsapp.number}`}
               target="_blank"
               rel="noreferrer"
-              className="flex-1 py-3 px-6 bg-zinc-900 border border-zinc-800 text-zinc-200 hover:text-white rounded-xl font-bold text-sm text-center active:scale-95 transition-all flex items-center justify-center gap-2 hover:bg-zinc-850"
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[var(--home-border)] bg-[var(--home-card-bg)] px-6 py-3 text-center text-sm font-bold text-[var(--home-text)] transition-all hover:border-[var(--home-accent)] active:scale-95"
             >
               <MessageCircle size={16} className="text-[#25D366]" />
               Falar com Vendedor
@@ -107,18 +107,18 @@ export default function HomeLocalStoreInfo() {
             return (
               <div 
                 key={idx} 
-                className="relative overflow-hidden rounded-2xl border border-zinc-900 bg-zinc-950/40 p-5 flex items-center gap-4 group"
+                className="home-card group relative flex items-center gap-4 overflow-hidden rounded-2xl p-5"
               >
                 <div className={`w-12 h-12 rounded-xl bg-gradient-to-tr ${item.color} flex items-center justify-center text-white shrink-0`}>
                   <Icon size={24} />
                 </div>
                 <div>
-                  <h4 className="font-extrabold text-white text-base group-hover:text-[#E60012] transition-colors">
+                  <h4 className="text-base font-extrabold text-[var(--home-text)] transition-colors group-hover:text-[var(--home-accent)]">
                     {item.label}
                   </h4>
-                  <p className="text-zinc-400 text-xs mt-0.5">{item.desc}</p>
+                  <p className="mt-0.5 text-xs text-[var(--home-muted)]">{item.desc}</p>
                 </div>
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-800 font-black text-4xl select-none group-hover:text-[#E60012]/10 transition-colors pointer-events-none">
+                <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 select-none text-4xl font-black text-[var(--home-border)] transition-colors group-hover:text-[var(--home-accent-soft)]">
                   0{idx + 1}
                 </div>
               </div>
@@ -128,12 +128,12 @@ export default function HomeLocalStoreInfo() {
       </div>
 
       {/* Localized Testimonials Section */}
-      <div className="bg-zinc-950/70 border border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-xl mt-6">
+      <div className="home-panel mt-6 rounded-3xl p-6 shadow-xl sm:p-8">
         <div className="text-center max-w-xl mx-auto mb-8">
-          <span className="text-[10px] font-black text-green-500 uppercase tracking-widest bg-green-950/30 px-3 py-1 rounded-full border border-green-900/30">
+          <span className="rounded-full border border-[var(--home-border)] bg-[var(--home-success-soft)] px-3 py-1 text-[10px] font-black uppercase tracking-widest text-[var(--home-success)]">
             ⭐ Avaliações no Google
           </span>
-          <h3 className="text-xl sm:text-2xl font-black text-white mt-3">
+          <h3 className="mt-3 text-xl font-black text-[var(--home-text)] sm:text-2xl">
             Quem Compra em Campinas Recomenda
           </h3>
         </div>
@@ -142,7 +142,7 @@ export default function HomeLocalStoreInfo() {
           {testimonials.map((item, idx) => (
             <div 
               key={idx} 
-              className="bg-zinc-900/40 border border-zinc-900 rounded-2xl p-5 flex flex-col justify-between hover:border-zinc-800 transition-colors"
+              className="home-card flex flex-col justify-between rounded-2xl p-5 transition-colors hover:border-[var(--home-border-strong)]"
             >
               <div>
                 <div className="flex gap-1 text-amber-500 mb-3">
@@ -150,13 +150,13 @@ export default function HomeLocalStoreInfo() {
                     <Star key={i} size={14} className="fill-current" />
                   ))}
                 </div>
-                <p className="text-zinc-300 text-xs italic leading-relaxed">
-                  "{item.text}"
+                <p className="text-xs italic leading-relaxed text-[var(--home-soft)]">
+                  &ldquo;{item.text}&rdquo;
                 </p>
               </div>
-              <div className="mt-4 pt-3 border-t border-zinc-900 flex justify-between items-center text-[11px]">
-                <span className="font-extrabold text-zinc-200">{item.name}</span>
-                <span className="text-zinc-400 font-semibold">{item.location}</span>
+              <div className="mt-4 flex items-center justify-between border-t border-[var(--home-border)] pt-3 text-[11px]">
+                <span className="font-extrabold text-[var(--home-text)]">{item.name}</span>
+                <span className="font-semibold text-[var(--home-muted)]">{item.location}</span>
               </div>
             </div>
           ))}
