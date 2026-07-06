@@ -41,9 +41,9 @@ export default function ProductList({ products }: { products: Product[] }) {
   const getGridClasses = () => {
     switch (viewMode) {
       case "small":
-        return "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5";
+        return "grid-cols-1 min-[430px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5";
       case "large":
-        return "grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-3";
+        return "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3";
       case "list":
         return "grid-cols-1";
       default:
@@ -58,10 +58,10 @@ export default function ProductList({ products }: { products: Product[] }) {
   return (
     <div className="flex flex-col gap-6">
       {/* Controls */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 px-4 lg:px-0">
+      <div className="flex flex-col justify-between gap-4 px-1 sm:flex-row sm:items-center lg:px-0">
         
         {/* Sort Controls */}
-        <div className="flex items-center gap-2 w-full sm:w-auto">
+        <div className="flex w-full items-center gap-2 sm:w-auto">
             <span className="text-sm font-medium whitespace-nowrap flex items-center gap-1 text-[var(--site-muted)]">
                 <ArrowUpDown size={16} /> Ordenar por:
             </span>
@@ -77,7 +77,7 @@ export default function ProductList({ products }: { products: Product[] }) {
         </div>
 
         {/* View Controls */}
-        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+        <div className="flex w-full items-center justify-end gap-2 sm:w-auto">
             
             <span className="mr-2 hidden text-sm font-medium text-[var(--site-muted)] sm:inline">VisualizaÃ§Ã£o:</span>
             

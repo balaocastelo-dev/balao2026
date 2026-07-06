@@ -35,11 +35,11 @@ export default function HomeProductShelf({
   if (!products.length) return null;
 
   return (
-    <section className="home-panel rounded-[1.75rem] p-4 md:p-5">
+    <section className="home-panel rounded-[1.5rem] p-3 sm:p-4 md:rounded-[1.75rem] md:p-5">
       <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
           <div className="text-xs font-black uppercase tracking-[0.24em] text-[var(--home-accent)]">Ofertas em destaque</div>
-          <h2 className="mt-1 text-2xl font-black tracking-tight text-[var(--home-text)]">{title}</h2>
+          <h2 className="mt-1 text-xl font-black tracking-tight text-[var(--home-text)] sm:text-2xl">{title}</h2>
           <p className="mt-1 text-sm text-[var(--home-muted)]">{subtitle}</p>
         </div>
 
@@ -55,7 +55,7 @@ export default function HomeProductShelf({
       </div>
 
       <div className="grid gap-4 2xl:grid-cols-[minmax(0,1fr)_250px]">
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
           {products.slice(0, 4).map((product) => {
             const oldPrice = formatOldPrice(product.price);
 
@@ -86,7 +86,7 @@ export default function HomeProductShelf({
                   />
                 </div>
 
-                <div className="mt-4 grid flex-1 grid-rows-[minmax(76px,auto)_minmax(96px,1fr)_auto] gap-3">
+                <div className="mt-3 grid flex-1 grid-rows-[minmax(72px,auto)_minmax(96px,1fr)_auto] gap-3 sm:mt-4">
                   <div className="text-[13px] font-medium leading-4 text-[var(--home-soft)] transition-colors group-hover:text-[var(--home-text)] sm:text-sm sm:leading-5">
                     <span className="line-clamp-4">{product.name}</span>
                   </div>
@@ -112,7 +112,7 @@ export default function HomeProductShelf({
           })}
         </div>
 
-        <div className="home-panel-strong flex flex-col justify-between rounded-[1.5rem] p-5 text-white shadow-[0_18px_44px_rgba(15,23,42,0.22)]">
+        <div className="home-panel-strong flex flex-col justify-between rounded-[1.5rem] p-4 text-white shadow-[0_18px_44px_rgba(15,23,42,0.22)] sm:p-5">
           <div>
             <div className="inline-flex rounded-full bg-[var(--home-accent-soft)] px-3 py-1 text-[10px] font-black uppercase tracking-[0.24em] text-[var(--home-accent)]">
               Selecao especial

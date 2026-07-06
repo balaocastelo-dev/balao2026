@@ -152,7 +152,7 @@ export default async function CategoriaPage({
   ];
  
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+    <div className="min-h-screen flex flex-col font-sans">
       <JsonLd data={[
         generateOrganizationSchema(),
         generateBreadcrumbSchema(breadcrumbItems),
@@ -162,27 +162,27 @@ export default async function CategoriaPage({
       <Header />
       
       {/* Mobile Title & Filters Toggle (Placeholder for future filter drawer) */}
-      <div className="lg:hidden container mx-auto px-4 py-4 flex items-center justify-between">
-         <h1 className="text-xl font-bold text-gray-800">
+      <div className="container mx-auto flex items-center justify-between px-3 py-4 sm:px-4 lg:hidden">
+         <h1 className="text-xl font-bold text-[var(--site-text)]">
             {categoryName || "Categoria"}
          </h1>
-         <span className="text-xs font-medium bg-gray-200 px-2 py-1 rounded-full text-gray-600">
+         <span className="rounded-full border border-[var(--site-border)] bg-[var(--site-panel-soft)] px-2.5 py-1 text-xs font-medium text-[var(--site-muted)]">
             {totalProducts}
          </span>
       </div>
 
-      <div className="flex container mx-auto flex-1 py-6 gap-6 px-4 lg:px-0">
+      <div className="container mx-auto flex flex-1 flex-col gap-4 px-3 py-4 sm:px-4 lg:flex-row lg:gap-6 lg:px-0 lg:py-6">
         {/* Sidebar Hidden on Mobile */}
         <div className="hidden lg:block w-64 shrink-0">
           <Sidebar categories={categories} availableTags={availableTags} selectedTags={selectedTags} />
         </div>
 
         <main className="flex-1 w-full min-w-0">
-          <div className="hidden lg:flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-bold text-gray-800">
+          <div className="mb-4 hidden items-center justify-between lg:flex">
+            <h1 className="text-2xl font-bold text-[var(--site-text)]">
               {categoryName || "Categoria"}
             </h1>
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-[var(--site-muted)]">
               {totalProducts} produtos{totalPages > 1 ? ` • Página ${currentPage} de ${totalPages}` : ""}
             </span>
           </div>
@@ -190,14 +190,14 @@ export default async function CategoriaPage({
           {/* Tags List for Mobile (Horizontal Scroll) */}
           <div className="lg:hidden flex gap-2 overflow-x-auto pb-4 mb-4 scrollbar-hide">
              {availableTags.map(tag => (
-                <div key={tag.name} className="whitespace-nowrap bg-white border border-gray-200 px-3 py-1 rounded-full text-sm text-gray-600">
+                <div key={tag.name} className="whitespace-nowrap rounded-full border border-[var(--site-border)] bg-[var(--site-panel-soft)] px-3 py-1 text-sm text-[var(--site-muted)]">
                    {tag.name}
                 </div>
              ))}
           </div>
 
           {paginatedProducts.length === 0 ? (
-            <div className="text-center py-20 text-gray-500 bg-white rounded-lg shadow-sm">
+            <div className="site-surface-soft rounded-[1.5rem] px-6 py-16 text-center text-[var(--site-muted)] shadow-sm">
               <p className="text-xl font-medium">Nenhum produto encontrado.</p>
               <p className="mt-2 text-sm">Tente ajustar seus filtros ou busca.</p>
             </div>
@@ -225,7 +225,7 @@ export default async function CategoriaPage({
                         className={`min-w-11 rounded-xl border px-4 py-2 text-sm font-bold transition-colors ${
                           pageNumber === currentPage
                             ? "border-red-600 bg-red-600 text-white"
-                            : "border-gray-300 bg-white text-gray-700 hover:border-red-500 hover:text-red-600"
+                            : "border-[var(--site-border)] bg-[var(--site-panel-soft)] text-[var(--site-text)] hover:border-red-500 hover:text-red-600"
                         }`}
                       >
                         {pageNumber}
@@ -239,11 +239,11 @@ export default async function CategoriaPage({
 
           {/* SEO Section for Categories */}
           {categoryName && categoryName !== "Todos os Produtos" && (
-             <section className="bg-white p-6 rounded-lg shadow-sm mt-8 border-t border-gray-100">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">
+             <section className="site-surface-soft mt-8 rounded-[1.5rem] border-t border-[var(--site-border)] p-5 shadow-sm sm:p-6">
+                <h2 className="mb-4 text-xl font-bold text-[var(--site-text)]">
                     Comprar {categoryName} em Campinas e Região
                 </h2>
-                <div className="prose prose-sm text-gray-600 max-w-none">
+                <div className="prose prose-sm max-w-none text-[var(--site-soft)]">
                     <p>
                         Procurando por <strong>{categoryName}</strong> com o melhor preço de Campinas? No Balão da Informática você encontra uma seleção completa de {categoryName.toLowerCase()} das melhores marcas do mercado. Somos especialistas em hardware e periféricos, oferecendo garantia e suporte técnico especializado.
                     </p>

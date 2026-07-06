@@ -232,6 +232,20 @@ main {
   animation: marquee 30s linear infinite;
 }
 
+@keyframes brand-carousel-marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.brand-carousel-track {
+  animation: brand-carousel-marquee 34s linear infinite;
+  will-change: transform;
+}
+
+.brand-carousel:hover .brand-carousel-track {
+  animation-play-state: paused;
+}
+
 @keyframes balao-cta-pulse {
   0%,
   100% {
@@ -256,6 +270,11 @@ main {
 
 @media (prefers-reduced-motion: reduce) {
   .balao-cta-pulse {
+    animation: none;
+  }
+
+  .brand-carousel-track,
+  .animate-marquee {
     animation: none;
   }
 }

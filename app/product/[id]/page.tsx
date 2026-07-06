@@ -127,12 +127,12 @@ export default async function ProductPage({ params }: Props) {
         generateProductSchema(product)
       ]} />
       <Header />
-      <div className="flex container mx-auto flex-1 py-6 gap-6">
+      <div className="container mx-auto flex flex-1 flex-col gap-4 px-3 py-4 sm:px-4 lg:flex-row lg:gap-6 lg:px-0 lg:py-6">
         <div className="hidden lg:block">
             <Sidebar categories={categories} />
         </div>
-        <main className="flex-1 w-full px-4 lg:px-0">
-          <div className="site-surface overflow-hidden rounded-[1.75rem] shadow-[0_30px_80px_rgba(2,6,23,0.18)]">
+        <main className="flex-1 w-full min-w-0">
+          <div className="site-surface overflow-hidden rounded-[1.4rem] shadow-[0_30px_80px_rgba(2,6,23,0.18)] sm:rounded-[1.75rem]">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 p-4 sm:p-6 md:p-8">
                 <div className="flex flex-col gap-4 md:gap-6">
                     <ProductMediaSwitcher
@@ -154,7 +154,7 @@ export default async function ProductPage({ params }: Props) {
                         {product.name}
                     </h1>
                     
-                    <div className="mt-auto rounded-xl border border-[var(--site-border)] bg-[var(--site-panel-soft)] p-6">
+                    <div className="mt-auto rounded-xl border border-[var(--site-border)] bg-[var(--site-panel-soft)] p-4 sm:p-5 md:p-6">
                           {/* Cash Price */}
                           <div className="mb-4">
                              <div className="flex items-baseline gap-2">
@@ -195,7 +195,7 @@ export default async function ProductPage({ params }: Props) {
                          <ShippingCalculator />
                     </div>
 
-                    <div className="mt-6 flex flex-row items-center justify-end gap-2">
+                    <div className="mt-6 flex flex-wrap items-center justify-end gap-2">
                          <WhatsAppButton productName={product.name} />
                          <ShareButton title={product.name} text={`Confira ${product.name} no Balão da Informática!`} />
                     </div>
@@ -203,7 +203,7 @@ export default async function ProductPage({ params }: Props) {
             </div>
             
             {/* Details Tab */}
-            <div className="border-t border-[var(--site-border)] p-8">
+            <div className="border-t border-[var(--site-border)] p-4 sm:p-6 md:p-8">
                 <h2 className="mb-6 text-xl font-bold text-[var(--site-text)]">Detalhes do Produto</h2>
                 
                 <div className="grid grid-cols-1 gap-8">
