@@ -6,6 +6,7 @@ import { getBlogPostBySlug, getBlogPosts } from "@/lib/db";
 import { scrapeSiteProducts } from "@/lib/site-products";
 import { generateBlogPostFromProduct } from "@/lib/blog-ai";
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 
 export type BlogPostView = {
   id: string;
@@ -32,6 +33,14 @@ const getDbPostsCached = cache(async (limit: number, category: string | undefine
   void bucket;
   return getBlogPosts({ limit, category });
 });
+
+const getCachedBlogPostsForPage = unstable_cache(
+  async (take: number, category?: string) => {
+    return getBlogPosts({ limit: take, category });
+  },
+  ["blog-posts-for-page"],
+  { revalidate: 120, tags: ["blog"] }
+);
 
 const getDbPostBySlugCached = cache(async (slug: string, bucket: number) => {
   void bucket;
@@ -332,7 +341,7 @@ async function buildDynamicProductPosts(): Promise<BlogPostView[]> {
   return posts;
 }
 
-export async function listBlogPostsForPage(input?: { category?: string; take?: number }): Promise<BlogPostView[]> {
+export async function listBlogPostsForPage(input?: { category?: string; take?: number; skipDynamicFallback?: boolean }): Promise<BlogPostView[]> {
   const take = Math.max(1, Math.min(80, input?.take ?? 50));
   const category = input?.category ? normalizeCategory(input.category) : undefined;
 
@@ -370,8 +379,7 @@ export async function listBlogPostsForPage(input?: { category?: string; take?: n
   };
 
   if (isSupabaseReadable()) {
-    const bucket = Math.floor(Date.now() / 60_000);
-    const dbPosts = await getDbPostsCached(take, category, bucket);
+    const dbPosts = await getCachedBlogPostsForPage(take, category);
     if (dbPosts.length > 0) {
       const mapped = dbPosts.map((p) => ({
         id: p.id,
@@ -402,7 +410,7 @@ export async function listBlogPostsForPage(input?: { category?: string; take?: n
     }
   }
 
-  if (!isDynamicFallbackEnabled()) {
+  if (input?.skipDynamicFallback || !isDynamicFallbackEnabled()) {
     return [];
   }
 

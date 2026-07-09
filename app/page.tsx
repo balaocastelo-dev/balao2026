@@ -8,10 +8,10 @@ import QuickLeadSection from "@/components/QuickLeadSection";
 import HomeLocalStoreInfo from "@/components/HomeLocalStoreInfo";
 import HomeProductShelf from "@/components/HomeProductShelf";
 import Image from "next/image";
-import { getProductsByExactCategories, getCarouselImages, getCategories, getHomeBlocks } from "@/lib/db";
+import { getProductsByExactCategories } from "@/lib/db";
+import { getCachedCategories, getCachedCarouselImages, getCachedHomeBlocks, getCachedVitrinePages } from "@/lib/cache";
 import { listBlogPostsForPage } from "@/lib/blog-store";
 import { pickPcHeroImage } from "@/lib/vitrine/core";
-import { listVitrinePagesPublic } from "@/lib/vitrine/db";
 import type { VitrineCategory } from "@/lib/vitrine/types";
 import { createClient } from "@/lib/supabase/server";
 import { getProductHref, parsePriceToNumber, Product, type Category } from "@/lib/utils";
@@ -34,7 +34,7 @@ import {
   Zap,
 } from "lucide-react";
 
-export const revalidate = 300;
+export const revalidate = 60;
 
 type SearchParams = Promise<{ category?: string; search?: string }>;
 
@@ -248,11 +248,11 @@ export default async function Home(props: {
 
   if (search) {
     [categories, carouselImages, homeBlocks, blogPosts, vitrinePages] = await Promise.all([
-      getCategories(),
-      getCarouselImages(true),
-      getHomeBlocks(true),
-      listBlogPostsForPage({ take: 6 }) as Promise<HomeSidebarBlogPost[]>,
-      listVitrinePagesPublic().then((pages) => pages.slice(0, 6)) as Promise<HomeSidebarVitrinePage[]>,
+      getCachedCategories(),
+      getCachedCarouselImages(),
+      getCachedHomeBlocks(),
+      listBlogPostsForPage({ take: 6, skipDynamicFallback: true }) as Promise<HomeSidebarBlogPost[]>,
+      getCachedVitrinePages().then((pages) => pages.slice(0, 6)) as Promise<HomeSidebarVitrinePage[]>,
     ]);
 
     const rawSearchProducts = await (async () => {
@@ -296,11 +296,11 @@ export default async function Home(props: {
     });
   } else {
     [categories, carouselImages, homeBlocks, blogPosts, vitrinePages] = await Promise.all([
-      getCategories(),
-      getCarouselImages(true),
-      getHomeBlocks(true),
-      listBlogPostsForPage({ take: 6 }) as Promise<HomeSidebarBlogPost[]>,
-      listVitrinePagesPublic().then((pages) => pages.slice(0, 6)) as Promise<HomeSidebarVitrinePage[]>,
+      getCachedCategories(),
+      getCachedCarouselImages(),
+      getCachedHomeBlocks(),
+      listBlogPostsForPage({ take: 6, skipDynamicFallback: true }) as Promise<HomeSidebarBlogPost[]>,
+      getCachedVitrinePages().then((pages) => pages.slice(0, 6)) as Promise<HomeSidebarVitrinePage[]>,
     ]);
 
     let rawProducts: Product[] = [];
