@@ -3,6 +3,7 @@ import { getCategories, getProductsForSitemap } from '@/lib/db'
 import { listBlogPostsForPage } from '@/lib/blog-store'
 import { LEAD_INTENTS } from '@/lib/lead-intents'
 import { REGIONAL_CITIES, REGIONAL_SERVICES, buildRegionalServicePath } from '@/lib/local-seo'
+import { CAMPINAS_NEIGHBORHOODS } from '@/lib/neighborhood-seo'
 import { listVitrinePagesPublic } from '@/lib/vitrine/db'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -104,5 +105,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.78,
   }))
 
-  return [...staticRoutes, ...categoryRoutes, ...productRoutes, ...blogRoutes, ...vitrineRoutes, ...regionalRoutes, ...urgentRoutes]
+  const neighborhoodRoutes = CAMPINAS_NEIGHBORHOODS.map((neighborhood) => ({
+    url: `${baseUrl}/bairro/${neighborhood.slug}`,
+    changeFrequency: 'weekly' as const,
+    priority: 0.85,
+  }))
+
+  return [...staticRoutes, ...categoryRoutes, ...productRoutes, ...blogRoutes, ...vitrineRoutes, ...regionalRoutes, ...urgentRoutes, ...neighborhoodRoutes]
 }
