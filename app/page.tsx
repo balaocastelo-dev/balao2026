@@ -7,7 +7,6 @@ import JsonLd, { generateOrganizationSchema } from "@/components/JsonLd";
 import QuickLeadSection from "@/components/QuickLeadSection";
 import HomeLocalStoreInfo from "@/components/HomeLocalStoreInfo";
 import HomeProductShelf from "@/components/HomeProductShelf";
-import FestasJuninas from "@/components/FestasJuninas";
 import Image from "next/image";
 import { getProductsByExactCategories } from "@/lib/db";
 import { getCachedCategories, getCachedCarouselImages, getCachedHomeBlocks, getCachedVitrinePages } from "@/lib/cache";
@@ -357,7 +356,6 @@ export default async function Home(props: {
 
   return (
     <div className="home-shell min-h-screen flex flex-col font-sans transition-colors duration-300">
-      <FestasJuninas />
       <JsonLd data={generateOrganizationSchema()} />
       <Header />
 
