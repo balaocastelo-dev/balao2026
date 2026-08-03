@@ -322,11 +322,11 @@ function BlockWhatWeBuild() {
 
 function BlockBenefits() {
   const bullets = [
-    "Copy e estrutura pensadas para conversão (CTAs, prova social, objeções).",
-    "SEO técnico completo + orientação de conteúdo para alcance nacional.",
-    "Layout responsivo e rápido, com foco em experiência mobile.",
-    "Tracking de conversões (formulário e WhatsApp) com IDs fornecidos por você.",
-    "Código organizado e fácil de evoluir (novas páginas, integrações e funis).",
+    "Textos e layout pensados para transformar visitantes em clientes.",
+    "Seu site encontrado no Google por clientes de todo o Brasil.",
+    "Perfeito no celular e carregando rápido em qualquer aparelho.",
+    "Medição de resultados para saber de onde vêm seus clientes.",
+    "Evolução fácil: adicione páginas e recursos sem começar do zero.",
   ];
 
   return (
@@ -338,7 +338,7 @@ function BlockBenefits() {
               Resultado antes de “beleza”
             </h2>
             <p className="text-zinc-400 mt-4 text-lg leading-relaxed">
-              Design consistente, performance e mensagem certa. O objetivo é gerar lead e venda com previsibilidade.
+              Design consistente, performance e mensagem certa para transformar visitas em vendas previsíveis.
             </p>
             <ul className="mt-8 space-y-3">
               {bullets.map((b) => (
@@ -431,7 +431,7 @@ function BlockPortfolio() {
         <div className="max-w-4xl mx-auto text-center mb-14">
           <h2 className="text-3xl md:text-5xl font-black uppercase">Portfolio</h2>
           <p className="text-zinc-400 mt-4 text-lg md:text-xl">
-            Exemplos de entregáveis e estrutura (substituível pelos seus cases reais).
+            Exemplos de projetos que geram resultado para diferentes tipos de negócio.
           </p>
         </div>
 
@@ -481,22 +481,22 @@ function BlockProcess() {
   const steps = [
     {
       title: "1) Diagnóstico e escopo",
-      desc: "Objetivo, público, proposta de valor, páginas e integrações.",
+      desc: "Entendemos seu negócio, público e o que precisa ser entregue.",
       icon: FileText,
     },
     {
       title: "2) UX + layout",
-      desc: "Wireframe e design com foco em clareza e conversão.",
+      desc: "Layout pensado para converter visitante em cliente.",
       icon: Globe,
     },
     {
       title: "3) Desenvolvimento",
-      desc: "Implementação, testes, SEO técnico e performance.",
+      desc: "Site no ar com testes, SEO e carregamento rápido.",
       icon: Code2,
     },
     {
       title: "4) Tracking e publicação",
-      desc: "Eventos de conversão e orientação para operação.",
+      desc: "Medição de resultados e orientação para gerenciar seu site.",
       icon: BarChart3,
     },
   ];
@@ -537,12 +537,12 @@ function BlockGuarantees() {
     },
     {
       title: "Segurança",
-      desc: "Boas práticas para reduzir risco (headers, validações e dependências).",
+      desc: "Seu site protegido contra ameaças e falhas comuns de segurança.",
       icon: ShieldCheck,
     },
     {
       title: "Mensuração",
-      desc: "Evento de conversão no formulário e WhatsApp (com seus IDs).",
+      desc: "Saiba quantos visitantes viram contato e venda no seu site.",
       icon: BarChart3,
     },
   ];
@@ -593,7 +593,7 @@ function BlockPricing() {
     {
       name: "Custom",
       highlight: "Sistemas sob medida",
-      desc: "Projetos com lógica, integrações e áreas restritas.",
+      desc: "Sistemas, integrações e áreas restritas para o seu negócio.",
       items: ["Sistema/portal/e-commerce", "Integrações e automações", "Permissões e relatórios", "Roadmap evolutivo"],
       accent: "from-fuchsia-700 to-slate-900",
     },
@@ -665,7 +665,7 @@ function BlockTestimonials() {
     {
       name: "Cliente (B2B)",
       role: "Portal",
-      text: "O sistema organizou nosso fluxo e reduziu retrabalho. A entrega com tracking e ajustes foi bem objetiva.",
+      text: "O sistema organizou nosso fluxo de trabalho e reduziu retrabalho. As entregas por etapas e a medição de resultados foram bem objetivas.",
     },
     {
       name: "Cliente (varejo)",
@@ -680,7 +680,7 @@ function BlockTestimonials() {
         <div className="max-w-4xl mx-auto text-center mb-14">
           <h2 className="text-3xl md:text-5xl font-black uppercase">Depoimentos</h2>
           <p className="text-zinc-400 mt-4 text-lg md:text-xl">
-            Espaço pronto para inserir depoimentos reais (mantendo consistência visual).
+            O que nossos clientes dizem depois de lançar o projeto com a gente.
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">

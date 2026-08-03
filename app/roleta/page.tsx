@@ -513,8 +513,6 @@ export default function RoletaPage() {
               <div className="bg-gray-800/50 p-6 rounded-xl border border-cyan-500/30 mb-8">
                 <h2 className="text-2xl font-bold mb-4 text-cyan-400">Bem-vindo ao Clube de Vantagens!</h2>
                 <p className="text-slate-300 text-lg">Gire a roleta e ganhe prêmios exclusivos na hora.</p>
-                <h2 className="text-2xl font-bold mb-4 text-cyan-400">Bem-vindo ao Clube de Vantagens!</h2>
-                <p className="text-slate-300 text-lg">Gire a roleta e ganhe prêmios exclusivos na hora.</p>
               </div>
               <button 
                 onClick={handleStart}
@@ -528,7 +526,7 @@ export default function RoletaPage() {
           {(step === 'challenge1' || step === 'challenge2') && (
              <div className="text-center animate-fadeIn max-w-md mx-auto">
                <h2 className={`text-2xl font-bold mb-6 ${step === 'challenge1' ? 'text-cyan-400' : 'text-pink-500'}`}>
-                 {step === 'challenge1' ? 'Etapa 1: Avaliação Google' : 'Etapa 2: Siga no Instagram'}
+                 {step === 'challenge1' ? 'Etapa 1: Avalie a gente no Google' : 'Etapa 2: Siga a gente no Instagram'}
                </h2>
                <div className={`bg-white p-6 rounded-2xl mx-auto w-fit mb-8 shadow-[0_0_30px_${step === 'challenge1' ? 'rgba(0,255,255,0.3)' : 'rgba(255,0,128,0.3)'}]`}>
                  <QRCodeSVG 

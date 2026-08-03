@@ -79,7 +79,7 @@ export default function InstagramFeed() {
                 <div className="relative w-full h-full">
                    <img 
                         src={post.media_url} 
-                        alt={post.caption || "Instagram Post"}
+                        alt={post.caption || "Post do Instagram"}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                         onError={(e) => {
                             // Fallback if image fails to load
@@ -111,7 +111,7 @@ export default function InstagramFeed() {
                 )}
                 {!post.like_count && !post.comments_count && (
                     <span className="font-medium flex items-center gap-2">
-                        <Instagram size={20} /> Ver Post
+                        <Instagram size={20} /> Ver post
                     </span>
                 )}
             </div>

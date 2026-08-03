@@ -55,14 +55,14 @@ export default function RegiaoPage() {
         <section className="bg-slate-950 text-white py-16 md:py-24">
           <div className="container mx-auto px-4 max-w-5xl">
             <p className="text-sm uppercase tracking-[0.3em] text-blue-300 font-bold">
-              SEO Local
+              Atendimento Local
             </p>
             <h1 className="mt-4 text-4xl md:text-6xl font-black tracking-tight leading-tight">
-              Atendimento em Campinas e Região para trazer cliente para dentro da loja
+              Sua loja de informática em Campinas e Região
             </h1>
             <p className="mt-6 text-lg md:text-2xl text-slate-300 leading-relaxed">
-              Este hub concentra páginas locais com alta intenção de compra e atendimento.
-              A ideia aqui é simples: quem procurar serviço ou produto na sua região encontra a Balão primeiro.
+              Precisa de informática em Campinas, Sumaré, Hortolândia, Paulínia, Valinhos ou Vinhedo?
+              No Balão da Informática você encontra bom preço, entrega rápida e atendimento de quem entende — tudo perto de você.
             </p>
           </div>
         </section>
@@ -73,7 +73,7 @@ export default function RegiaoPage() {
               Principais cidades atendidas
             </h2>
             <p className="mt-3 text-slate-600 max-w-3xl">
-              Priorizamos cidades com maior proximidade, demanda e chance de conversão para loja física, retirada, orçamento e WhatsApp.
+              Atendemos todas essas cidades com entrega rápida, retirada na loja em Campinas, orçamento pelo WhatsApp e suporte de verdade.
             </p>
             <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
               {REGIONAL_CITIES.map((city) => (
@@ -83,7 +83,7 @@ export default function RegiaoPage() {
                 >
                   <h3 className="text-2xl font-black text-slate-900">{city.name}</h3>
                   <p className="mt-3 text-sm text-slate-600">
-                    Bairros e regiões mais fortes: {city.neighborhoods.join(", ")}.
+                    Bairros atendidos: {city.neighborhoods.join(", ")}.
                   </p>
                   <div className="mt-5 flex flex-wrap gap-2">
                     {REGIONAL_SERVICES.map((service) => (
@@ -105,7 +105,7 @@ export default function RegiaoPage() {
         <section className="py-14">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl md:text-4xl font-black text-slate-900">
-              Serviços com maior intenção comercial
+              Assistência técnica e serviços na sua região
             </h2>
             <div className="mt-8 grid gap-6 lg:grid-cols-2">
               {REGIONAL_SERVICES.map((service) => (

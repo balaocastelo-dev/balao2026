@@ -88,8 +88,8 @@ export default function FaleConoscoPage() {
           {/* Contact Info */}
           <div className="space-y-8">
             <p className="text-lg text-gray-700">
-              Tem alguma dúvida, sugestão ou reclamação? Estamos aqui para ouvir você. 
-              Utilize o formulário ou um de nossos canais de atendimento.
+              Tem dúvida, sugestão ou precisa de ajuda com o seu pedido? Estamos aqui para você. 
+              Envie sua mensagem pelo formulário ou fale com a gente pelos nossos canais de atendimento.
             </p>
 
             <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 space-y-6">

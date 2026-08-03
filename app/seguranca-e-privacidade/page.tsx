@@ -55,8 +55,8 @@ export default function SegurancaPrivacidadePage() {
           
           {/* Intro */}
           <p className="text-lg">
-            A sua segurança é prioridade para o <strong>Balão da Informática</strong>. Investimos em tecnologias avançadas 
-            de proteção de dados para que você possa fazer suas compras com tranquilidade.
+            A sua segurança vem em primeiro lugar para o <strong>Balão da Informática</strong>. Investimos nas tecnologias 
+            mais avançadas de proteção de dados para você comprar com total tranquilidade.
           </p>
 
           {/* Cards */}

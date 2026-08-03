@@ -77,8 +77,8 @@ export default function EnvioEntregaPage() {
               <div>
                 <h3 className="text-xl font-bold text-gray-800 mb-2">Prazos de Entrega</h3>
                 <p>
-                  O prazo é calculado automaticamente no carrinho de compras de acordo com o CEP e a modalidade escolhida. 
-                  O prazo começa a contar a partir da <strong>confirmação do pagamento</strong>.
+                  Para você se programar com tranquilidade, o prazo é calculado automaticamente no carrinho de acordo com o CEP e a modalidade escolhida. 
+                  Ele começa a contar a partir da <strong>confirmação do pagamento</strong>.
                 </p>
               </div>
             </div>
@@ -92,8 +92,8 @@ export default function EnvioEntregaPage() {
 
           <h2 className="text-2xl font-bold text-gray-800 mt-6">Tentativas de Entrega</h2>
           <p>
-            Serão realizadas até 3 tentativas de entrega. Caso não haja ninguém para receber, o produto retornará 
-            ao nosso Centro de Distribuição e será necessário pagar um novo frete para reenvio.
+            Faremos até 3 tentativas de entrega. Se não houver ninguém para receber, o produto retorna 
+            ao nosso Centro de Distribuição e um novo frete é cobrado para o reenvio.
           </p>
 
           <h2 className="text-2xl font-bold text-gray-800 mt-6">Retirada em Loja</h2>

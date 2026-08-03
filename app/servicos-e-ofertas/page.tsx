@@ -70,11 +70,11 @@ const FEATURED_SERVICES = [
     title: "Manutenção Especializada de Notebooks",
     description: "Reparo avançado de placa-mãe, troca de telas, teclados, baterias e carcaças. Soluções para equipamentos que não ligam, esquentam ou travam.",
     icon: Laptop, 
-    details: ["Reballing de BGA", "Reparo de circuito de carga", "Troca de DC-Jack", "Limpeza química"]
+    details: ["Reparo de placa-mãe", "Reparo de circuito de carga", "Troca de conector de carga", "Limpeza química"]
   },
   {
     title: "Montagem e Otimização de PC Gamer",
-    description: "Montagem profissional com cable management impecável. Otimização de BIOS, curvas de ventoinha e testes de estabilidade para máxima performance.",
+    description: "Montagem profissional com organização de cabos impecável. Otimização de BIOS, curvas de ventoinha e testes de estabilidade para máxima performance.",
     icon: Cpu,
     details: ["Consultoria de peças", "Overclock seguro", "Instalação de Water Cooler", "Personalização RGB"]
   },
@@ -511,7 +511,7 @@ export default async function Page() {
       {/* Banner 1 */}
       <FullWidthBanner 
         title="PC GAMER DOS SONHOS" 
-        subtitle="Montamos sua máquina com as melhores peças e cable management impecável. Performance extrema para seus jogos."
+        subtitle="Montamos sua máquina com as melhores peças e organização de cabos impecável. Performance extrema para seus jogos."
         theme="dark"
       />
 

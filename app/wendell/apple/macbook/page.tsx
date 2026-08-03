@@ -132,7 +132,7 @@ export default function MacBookPage() {
       localTitle="Atendemos Cambuí e bairros próximos"
       localDescription="Se você está no Cambuí, Nova Campinas, Guanabara, Taquaral ou Centro de Campinas, fale com a nossa equipe e receba orientação rápida para o seu MacBook."
       ctaTitle="Seu MacBook precisa voltar a render bem?"
-      ctaDescription="Envie o modelo e o defeito no WhatsApp e receba um atendimento direto, objetivo e com foco em solução."
+      ctaDescription="Envie o modelo e o defeito no WhatsApp e receba um atendimento direto e objetivo para resolver o problema."
     />
   );
 }

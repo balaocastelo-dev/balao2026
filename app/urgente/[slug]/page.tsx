@@ -96,7 +96,7 @@ export default async function UrgenteIntentPage({ params }: Props) {
         <section className="py-14 bg-white border-b border-slate-200">
           <div className="container mx-auto px-4 max-w-5xl">
             <h2 className="text-3xl md:text-4xl font-black text-slate-900">
-              O que normalmente está acontecendo
+              O que está acontecendo com seu equipamento
             </h2>
             <div className="mt-8 grid gap-5 md:grid-cols-2">
               {intent.problems.map((problem) => (
@@ -115,7 +115,7 @@ export default async function UrgenteIntentPage({ params }: Props) {
           <div className="container mx-auto px-4 max-w-6xl">
             <QuickLeadSection
               title={`Precisa resolver: ${intent.shortTitle.toLowerCase()}?`}
-              description="Quem chegou nessa página normalmente já está pronto para pedir ajuda. Use o formulário ou vá direto para o WhatsApp."
+              description="Preencha seus dados e receba ajuda rápida — ou fale direto com a gente no WhatsApp."
               messageTemplate={`Olá! Preciso de atendimento urgente para ${intent.shortTitle.toLowerCase()} em ${intent.city}.`}
               source={`urgente-${intent.slug}`}
               cityLabel={intent.city}

@@ -13,7 +13,7 @@ export const revalidate = 3600;
 const SPECIALTY_BLOCKS = [
   {
     title: "Assistência Técnica",
-    description: "Conserto de computadores, notebooks e diagnóstico com foco em rapidez, clareza e retorno do cliente para a loja.",
+    description: "Conserto de computadores e notebooks com diagnóstico rápido, orçamento claro e garantia no serviço.",
     href: "/manutencao",
   },
   {
@@ -23,27 +23,27 @@ const SPECIALTY_BLOCKS = [
   },
   {
     title: "PC Gamer",
-    description: "Montagem, upgrade e setups completos para quem quer desempenho e atendimento técnico real.",
+    description: "Montagem, upgrade e setups completos: PC gamer com desempenho de verdade, montagem profissional e suporte pós-venda.",
     href: "/pcgamer",
   },
   {
     title: "Reparo Apple",
-    description: "Atendimento para iPhone, iPad, MacBook e outros equipamentos Apple com foco local e comercial.",
+    description: "Reparo de iPhone, iPad e MacBook com peças de qualidade e atendimento rápido em Campinas.",
     href: "/reparoapple",
   },
   {
     title: "Recuperação de Dados",
-    description: "Atendimento para falhas em HD, SSD, sistema e estrutura de backup, muito procurado por empresas e usuários em urgência.",
+    description: "Recuperamos seus arquivos de HD, SSD e sistemas com agilidade — ideal quando o prazo é curto e o dado é importante.",
     href: "/recuperacaodados",
   },
   {
     title: "Atendimento Regional",
-    description: "Páginas locais para Campinas e região, com forte intenção de busca e CTA direto para WhatsApp.",
+    description: "Atendemos Campinas e toda a região com orçamento rápido e resposta direta no WhatsApp.",
     href: "/regiao",
   },
   {
     title: "Atendimento Urgente",
-    description: "Páginas para captar buscas com urgência real, quando o cliente quer resolver hoje e já está pronto para chamar.",
+    description: "Precisa resolver hoje? Priorizamos quem não pode esperar: atendimento ágil e resposta imediata no WhatsApp.",
     href: "/urgente",
   },
 ];
@@ -105,13 +105,13 @@ export default function EspecialidadesPage() {
         <section className="bg-slate-950 text-white py-16 md:py-24">
           <div className="container mx-auto px-4 max-w-5xl">
             <p className="text-sm uppercase tracking-[0.25em] text-blue-300 font-bold">
-              Hub Estratégico
+              Soluções em Informática
             </p>
             <h1 className="mt-4 text-4xl md:text-6xl font-black tracking-tight leading-tight">
-              Páginas que precisam existir para o Google entender exatamente o que você vende e resolve
+              Sua tecnologia resolvida hoje: conserto, notebooks, PC Gamer e mais
             </h1>
             <p className="mt-6 text-lg md:text-2xl text-slate-300 leading-relaxed">
-              Este hub centraliza as suas especialidades mais valiosas para tráfego orgânico, captação local e descoberta por mecanismos de busca e IAs.
+              Atendimento especializado em Campinas e região, com orçamento claro, serviço garantido e resposta rápida no WhatsApp.
             </p>
           </div>
         </section>
@@ -127,7 +127,7 @@ export default function EspecialidadesPage() {
                 >
                   <h2 className="text-2xl font-black text-slate-900">{block.title}</h2>
                   <p className="mt-4 text-slate-600 leading-relaxed">{block.description}</p>
-                  <p className="mt-5 text-sm font-bold text-blue-700">Abrir página</p>
+                  <p className="mt-5 text-sm font-bold text-blue-700">Ver soluções</p>
                 </Link>
               ))}
             </div>
@@ -137,20 +137,17 @@ export default function EspecialidadesPage() {
         <section className="py-14 bg-white border-y border-slate-200">
           <div className="container mx-auto px-4 max-w-4xl">
             <h2 className="text-3xl md:text-4xl font-black text-slate-900 text-center">
-              Como este hub ajuda seu negócio
+              Por que a Balão é a escolha certa
             </h2>
             <div className="mt-8 space-y-4 text-slate-600 leading-relaxed">
               <p>
-                O Google e as IAs entendem melhor um site quando ele deixa claras as entidades principais,
-                os serviços, as especialidades e os caminhos de navegação entre páginas.
+                Aqui cada especialidade tem gente de verdade por trás: diagnóstico honesto, preço combinado antes de começar e serviço com garantia.
               </p>
               <p>
-                Em vez de concentrar tudo só na home, este hub distribui autoridade para páginas com intenção real:
-                compra, reparo, urgência, atendimento local e orçamento.
+                Resolvemos de tudo que envolve tecnologia: conserto de PCs e notebooks, montagem de PC gamer, reparo Apple, recuperação de dados e orçamento para empresas.
               </p>
               <p>
-                Isso aumenta suas chances de aparecer para pessoas da região que precisam resolver um problema agora
-                e já estão prontas para mandar mensagem ou visitar a loja.
+                E quando a urgência bate, não perca tempo: fale direto no WhatsApp e resolva hoje mesmo, sem sair de casa.
               </p>
             </div>
           </div>

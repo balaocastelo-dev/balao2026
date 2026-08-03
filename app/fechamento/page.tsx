@@ -635,7 +635,7 @@ export default function WeeklyClosing() {
               
               <div className="col-span-2 grid grid-cols-2 gap-2">
                 <div className="space-y-1">
-                  <label className="text-[10px] uppercase font-bold text-green-600">Entrada MO</label>
+                  <label className="text-[10px] uppercase font-bold text-green-600">Entrada Mão de Obra</label>
                   <input 
                     type="number" 
                     placeholder="0.00"
@@ -658,7 +658,7 @@ export default function WeeklyClosing() {
 
               <div className="col-span-2 grid grid-cols-2 gap-2">
                 <div className="space-y-1">
-                  <label className="text-[10px] uppercase font-bold text-red-500">Saída MO</label>
+                  <label className="text-[10px] uppercase font-bold text-red-500">Saída Mão de Obra</label>
                   <input 
                     type="number" 
                     placeholder="0.00"
@@ -773,7 +773,7 @@ export default function WeeklyClosing() {
               <p className="text-2xl font-bold text-red-800">{fmt(summary.totalExpenses)}</p>
               <div className="flex justify-between text-xs text-red-600 mt-1">
                 <span>Diretas: {fmt(summary.directCostsTotal)}</span>
-                <span>Op.: {fmt(summary.operationalExpensesTotal)}</span>
+                <span>Operacionais: {fmt(summary.operationalExpensesTotal)}</span>
               </div>
             </div>
 

@@ -690,7 +690,7 @@ export default function GeradorPage() {
           <section className="lg:col-span-7 bg-white rounded-2xl border border-black/5 shadow-sm overflow-hidden">
             <div className="p-5 border-b border-black/5">
               <div className="text-lg font-extrabold">{activePageId ? "Editar página" : "Criar página"}</div>
-              <div className="text-sm text-gray-600">Selecione o produto principal e as peças. O preço sempre aparece.</div>
+              <div className="text-sm text-gray-600">Escolha o produto principal e as peças do catálogo. O preço fica preenchido sozinho.</div>
             </div>
 
             <div className="p-5 space-y-6">
@@ -773,7 +773,7 @@ export default function GeradorPage() {
                 ) : null}
                 {mainProduct ? (
                   <div className="mt-3 rounded-xl border border-black/10 bg-gray-50 p-3">
-                    <div className="text-xs font-extrabold text-gray-700 uppercase tracking-wide">Nome do produto (editável)</div>
+                    <div className="text-xs font-extrabold text-gray-700 uppercase tracking-wide">Nome de exibição do produto</div>
                     <textarea
                       rows={2}
                       value={mainCustomName}
@@ -825,7 +825,7 @@ export default function GeradorPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div>
                     <div className="text-sm font-extrabold">Botão</div>
-                    <div className="text-xs text-gray-600">WhatsApp fixo (+55 19 98751-0267) com nome do produto e preço.</div>
+                    <div className="text-xs text-gray-600">Botão de WhatsApp com o nome do produto e o preço já prontos para o cliente enviar.</div>
                   </div>
                   <a
                     href={whatsHref}
@@ -841,7 +841,7 @@ export default function GeradorPage() {
               <div>
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <div className="text-xs font-extrabold text-gray-700 uppercase tracking-wide">Peças (blocos)</div>
+                    <div className="text-xs font-extrabold text-gray-700 uppercase tracking-wide">Peças do computador</div>
                     <div className="text-sm text-gray-600">Escolha quantas quiser e selecione no catálogo.</div>
                   </div>
                   <button
@@ -853,7 +853,7 @@ export default function GeradorPage() {
                     }
                     className="px-3 py-2 rounded-xl border border-black/10 text-sm font-extrabold hover:bg-gray-50"
                   >
-                    Adicionar bloco
+                    Adicionar peça
                   </button>
                 </div>
 
@@ -985,7 +985,7 @@ export default function GeradorPage() {
                                   {String((selectedProd as any)?.price || "").trim() || "Sob consulta"}
                                 </div>
                                 <div className="mt-2">
-                                  <div className="text-xs font-extrabold text-gray-700 uppercase tracking-wide">Nome (editável)</div>
+                                  <div className="text-xs font-extrabold text-gray-700 uppercase tracking-wide">Nome de exibição</div>
                                   <textarea
                                     rows={2}
                                     value={String(b.customName || "")}
@@ -1099,7 +1099,7 @@ export default function GeradorPage() {
                   rel="noreferrer"
                   className="inline-flex items-center justify-center px-5 py-3 rounded-2xl border border-black/10 bg-white font-extrabold hover:bg-gray-50"
                 >
-                  Ver preview
+                  Ver página
                 </a>
               </div>
 

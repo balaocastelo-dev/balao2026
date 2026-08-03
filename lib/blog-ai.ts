@@ -316,7 +316,7 @@ URL do produto: ${JSON.stringify(input.productUrl)}
 <p><a href="${input.productUrl}">${productName}</a></p>
 <h2>Atendimento rápido</h2>
 <p>Quer indicação personalizada? <a href="${WHATSAPP_URL}" target="_blank" rel="noreferrer">WhatsApp 19 98751-0267</a>.</p>
-<p>Atalhos úteis: <a href="${SITE_URL}/notebooks">Notebooks</a> • <a href="${SITE_URL}/pcgamer">PC Gamer</a> • <a href="${SITE_URL}/departamentos">Departamentos</a> • <a href="${SITE_URL}/promocao">Promoções</a></p>
+<p>Links úteis: <a href="${SITE_URL}/notebooks">Notebooks</a> • <a href="${SITE_URL}/pcgamer">PC Gamer</a> • <a href="${SITE_URL}/departamentos">Departamentos</a> • <a href="${SITE_URL}/promocao">Promoções</a></p>
     `.trim();
 
   const contentHtmlBase = sanitizeHtmlBasic(rawHtml);

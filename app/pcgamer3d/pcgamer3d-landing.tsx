@@ -114,7 +114,7 @@ function Hero() {
             <Reveal>
               <div className="inline-flex items-center gap-2 rounded-full bg-white/5 px-4 py-2 text-xs md:text-sm font-black uppercase tracking-widest border border-white/10 mb-7">
                 <Sparkles className="h-4 w-4 text-violet-300" />
-                Montagem avançada + performance
+                Montagem profissional + mais FPS
               </div>
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter leading-[0.95] uppercase">
                 Montagem{" "}
@@ -125,9 +125,9 @@ function Hero() {
                 e FPS no máximo
               </h1>
               <p className="mt-6 text-lg md:text-2xl text-white/70 max-w-xl leading-relaxed">
-                Conteúdo técnico sobre sequência de instalação, aplicação correta de pasta térmica, airflow otimizado,
-                cable management eficiente e ajuste fino de BIOS para maximizar FPS com estabilidade e temperaturas
-                controladas.
+                Seu PC montado do jeito certo: peças instaladas na ordem certa, pasta térmica bem aplicada, ar circulando
+                como deve e BIOS ajustada para o máximo de FPS. Resultado: mais desempenho, menos barulho e zero
+                superaquecimento.
               </p>
 
               <div className="mt-9 flex flex-col sm:flex-row gap-4">
@@ -136,7 +136,7 @@ function Hero() {
                   onClick={() => pushEvent("pcgamer3d_cta_primary_click", { location: "hero" })}
                   className="bg-white text-black px-8 py-4 rounded-full font-black text-lg md:text-xl transition-all shadow-xl hover:scale-105 inline-flex items-center justify-center gap-3"
                 >
-                  Ver guia técnico
+                  Ver como montamos
                   <ChevronRight className="h-6 w-6" />
                 </Link>
                 <Link
@@ -146,18 +146,18 @@ function Hero() {
                   className="bg-[#25D366] hover:bg-[#128C7E] text-white px-8 py-4 rounded-full font-black text-lg md:text-xl transition-all hover:scale-105 inline-flex items-center justify-center gap-3"
                 >
                   <MessageCircle className="h-6 w-6" />
-                  Falar com técnico
+                  Falar com especialista
                 </Link>
               </div>
 
               <div className="mt-10 flex flex-wrap gap-3">
                 {[
-                  { icon: ListOrdered, text: "Sequência correta" },
-                  { icon: Thermometer, text: "Controle térmico" },
-                  { icon: Cable, text: "Cable management" },
-                  { icon: Settings2, text: "BIOS tuning" },
-                  { icon: BarChart3, text: "Benchmarks" },
-                  { icon: Lock, text: "Estabilidade" },
+                  { icon: ListOrdered, text: "Ordem certa de montagem" },
+                  { icon: Thermometer, text: "Sem superaquecimento" },
+                  { icon: Cable, text: "Cabos organizados" },
+                  { icon: Settings2, text: "Configuração fina" },
+                  { icon: BarChart3, text: "Testes de desempenho" },
+                  { icon: Lock, text: "Estável e durável" },
                 ].map((x) => (
                   <div
                     key={x.text}
@@ -207,7 +207,7 @@ function Specs() {
           <div className="max-w-4xl mx-auto text-center mb-14">
             <h2 className="text-3xl md:text-5xl font-black uppercase">Pilares da montagem de alto nível</h2>
             <p className="text-white/60 mt-4 text-lg md:text-xl">
-              Método acima de “só encaixar peças”: foco em procedimento, térmica, organização e validação de desempenho.
+              Não é só encaixar peças: cuidamos de procedimento, temperatura, organização e desempenho testado de verdade.
             </p>
           </div>
         </Reveal>
@@ -216,48 +216,48 @@ function Specs() {
           <Reveal>
             <SpecCard
               title="Sequência de montagem"
-              value="Instalação sem retrabalho"
-              hint="Ordem correta reduz risco de erros, melhora acesso e acelera o primeiro boot estável."
+              value="Montagem sem erro"
+              hint="Cada peça no lugar certo, na ordem certa, para o PC ligar de primeira e funcionar bem."
               icon={ListOrdered}
             />
           </Reveal>
           <Reveal delay={0.05}>
             <SpecCard
               title="Contato térmico"
-              value="Pasta + pressão + padrão"
-              hint="Aplicação consistente e torque uniforme evitam hotspots e melhoram boost sustentado."
+              value="Temperatura sob controle"
+              hint="Pasta térmica aplicada do jeito certo mantém o PC silencioso e sem superaquecimento."
               icon={Thermometer}
             />
           </Reveal>
           <Reveal delay={0.1}>
             <SpecCard
               title="Cable management"
-              value="Rotas limpas e funcionais"
-              hint="Cabos bem roteados melhoram airflow, reduzem ruído e deixam manutenção mais rápida."
+              value="Cabos organizados"
+              hint="Cabos no caminho certo melhoram a ventilação, reduzem o barulho e facilitam a manutenção."
               icon={Cable}
             />
           </Reveal>
           <Reveal>
             <SpecCard
-              title="Airflow e curvas de fan"
-              value="Fluxo estável e silencioso"
-              hint="Pressão interna controlada e fan curves bem definidas melhoram temperatura e acústica."
+              title="Ventilação inteligente"
+              value="Ar circulando bem"
+              hint="Ventilação equilibrada para o PC esquentar menos e fazer menos barulho."
               icon={Wind}
             />
           </Reveal>
           <Reveal delay={0.05}>
             <SpecCard
-              title="BIOS tuning"
-              value="Performance com estabilidade"
-              hint="Configurações corretas evitam throttling e entregam FPS consistente com frametime estável."
+              title="Ajuste de BIOS"
+              value="Performance estável"
+              hint="Configurações finas para o PC render mais FPS sem travar nem esquentar."
               icon={Settings2}
             />
           </Reveal>
           <Reveal delay={0.1}>
             <SpecCard
-              title="Validação por benchmark"
-              value="Ganho mensurável"
-              hint="Medição antes/depois com stress controlado garante desempenho real e seguro."
+              title="Testes de desempenho"
+              value="Resultado comprovado"
+              hint="Medimos o desempenho antes e depois para garantir que o ganho é real e seguro."
               icon={Activity}
             />
           </Reveal>
@@ -270,40 +270,40 @@ function Specs() {
 function BuildGuide() {
   const sequence = [
     {
-      title: "1) Preparação e antiestática",
-      text: "Planeje o roteamento de cabos antes de instalar. Separe abraçadeiras/velcros, organize parafusos e deixe o gabinete com painéis removidos. Trabalhe com descarregamento eletrostático e superfície estável.",
+      title: "1) Planejamento e organização",
+      text: "Organizamos cabos, parafusos e peças antes de começar, sobre superfície segura. Cada item no lugar certo evita danos e garante um trabalho caprichado.",
     },
     {
-      title: "2) Placa-mãe fora do gabinete",
-      text: "Instale CPU, memória e armazenamento com a placa-mãe apoiada. Isso reduz flexão, melhora visibilidade e facilita conferir encaixes e travas.",
+      title: "2) Peças principais com cuidado",
+      text: "Processador, memória e armazenamento entram com calma e precisão, sem risco de danos e com cada encaixe conferido.",
     },
     {
-      title: "3) Pasta térmica e montagem do cooler",
-      text: "Aplique pasta de forma consistente e priorize pressão uniforme: aperte em cruz, em passos curtos. Evite excesso e não reaproveite pasta contaminada. Se remover o cooler, limpe e reaplique.",
+      title: "3) Pasta térmica e cooler no ponto",
+      text: "Pasta na medida certa e cooler fixado com pressão uniforme. É isso que mantém seu processador frio e silencioso por muito mais tempo.",
     },
     {
-      title: "4) Fonte e cabos principais",
-      text: "Pré-roteie cabos de alimentação e front panel por trás do tray. Trave folgas com velcro e mantenha curvas suaves (sem dobrar agressivamente).",
+      title: "4) Fonte e cabos organizados",
+      text: "Cabos passados por trás da bandeja, com folga e curvas suaves. O ar circula livremente e o visual fica limpo.",
     },
     {
-      title: "5) Ventoinhas e radiadores (airflow)",
-      text: "Defina intake/exhaust com objetivo claro: alimentar GPU/CPU com ar frio e expulsar ar quente sem recirculação. Configure filtros e verifique direção das fans.",
+      title: "5) Ventilação equilibrada",
+      text: "Ar frio entra e ar quente sai no caminho certo. Placa de vídeo e processador rendem no máximo sem esquentar demais.",
     },
     {
-      title: "6) GPU e cabos de vídeo/energia",
-      text: "Instale a GPU por último para não atrapalhar acesso. Garanta fixação firme, ausência de tensão nos conectores e trajetória que não invada o fluxo de ar.",
+      title: "6) Placa de vídeo instalada",
+      text: "A placa de vídeo é fixada com firmeza e os cabos seguem o caminho certo, sem bloquear o fluxo de ar.",
     },
     {
-      title: "7) Primeiro boot e validação base",
-      text: "Faça POST, atualize firmware quando necessário e valide memória/temperaturas em carga leve antes de partir para ajustes de performance.",
+      title: "7) Primeiro teste completo",
+      text: "Ligamos o PC, atualizamos o sistema e conferimos memória e temperatura antes de entregar para você.",
     },
   ];
 
   const paste = [
     "Superfície limpa: álcool isopropílico e pano sem fiapos.",
-    "Quantidade consistente: foco em cobertura, não em volume.",
-    "Aperto em cruz: torque uniforme reduz hotspots.",
-    "Evite mexer após contato: reposicionar quebra o padrão de espalhamento.",
+    "Quantidade na medida certa: nem de menos, nem de mais.",
+    "Parafusos apertados em cruz, com pressão uniforme, para temperatura estável.",
+    "Depois de encaixado, não mexe: a pasta fica coberta de forma perfeita.",
   ];
 
   return (
@@ -312,10 +312,10 @@ function BuildGuide() {
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
           <div className="lg:col-span-7">
             <Reveal>
-              <h2 className="text-3xl md:text-5xl font-black uppercase">Guia técnico de montagem</h2>
+              <h2 className="text-3xl md:text-5xl font-black uppercase">Como montamos seu PC</h2>
               <p className="text-white/60 mt-4 text-lg md:text-xl leading-relaxed">
-                Um processo profissional é uma sequência de decisões pequenas que somam estabilidade, silêncio e FPS
-                consistente. O objetivo é reduzir retrabalho, evitar gargalos térmicos e validar performance com método.
+                Cada etapa é pensada para somar estabilidade, silêncio e mais FPS. Nada de improviso: ordem certa,
+                temperatura controlada e desempenho testado antes da entrega.
               </p>
             </Reveal>
 
@@ -343,7 +343,7 @@ function BuildGuide() {
               <GlassCard className="p-7 md:p-8">
                 <div className="flex items-center gap-3">
                   <Thermometer className="h-6 w-6 text-orange-300" />
-                  <div className="text-lg font-black uppercase tracking-widest">Pasta térmica: checklist</div>
+                  <div className="text-lg font-black uppercase tracking-widest">Pasta térmica: o cuidado que conta</div>
                 </div>
                 <div className="mt-5 space-y-3">
                   {paste.map((p) => (
@@ -354,8 +354,8 @@ function BuildGuide() {
                   ))}
                 </div>
                 <div className="mt-7 text-white/60 text-sm leading-relaxed">
-                  Dica prática: a estabilidade térmica é o que mantém boost sustentado. Melhor contato geralmente significa
-                  menos ruído (fans girando menos) e frametime mais estável em sessões longas.
+                  Dica prática: PC frio é PC silencioso e rápido. Com a pasta bem aplicada, as ventoinhas giram menos, o barulho
+                  cai e o desempenho se mantém em sessões longas.
                 </div>
               </GlassCard>
             </Reveal>
@@ -365,24 +365,24 @@ function BuildGuide() {
                 <GlassCard className="p-7 md:p-8">
                   <div className="flex items-center gap-3">
                     <Clock className="h-6 w-6 text-cyan-300" />
-                    <div className="text-lg font-black uppercase tracking-widest">Validação em etapas</div>
+                    <div className="text-lg font-black uppercase tracking-widest">Testes em cada etapa</div>
                   </div>
                   <div className="mt-5 space-y-3 text-white/70 font-bold">
                     <div className="flex items-start gap-3">
                       <span className="mt-2 h-2 w-2 rounded-full bg-cyan-300 shrink-0" />
-                      <div>Primeiro boot: POST e sensores básicos.</div>
+                      <div>Primeira ligação: tudo respondendo certo.</div>
                     </div>
                     <div className="flex items-start gap-3">
                       <span className="mt-2 h-2 w-2 rounded-full bg-cyan-300 shrink-0" />
-                      <div>Carga leve: temperatura, ruído e fan curves.</div>
+                      <div>Uso leve: temperatura, barulho e ventoinhas equilibrados.</div>
                     </div>
                     <div className="flex items-start gap-3">
                       <span className="mt-2 h-2 w-2 rounded-full bg-cyan-300 shrink-0" />
-                      <div>Carga real: jogo + monitoramento de frametime.</div>
+                      <div>Teste real: um jogo rodando para ver o desempenho na prática.</div>
                     </div>
                     <div className="flex items-start gap-3">
                       <span className="mt-2 h-2 w-2 rounded-full bg-cyan-300 shrink-0" />
-                      <div>Stress controlado: estabilidade térmica e elétrica.</div>
+                      <div>Teste pesado: estabilidade garantida mesmo no limite.</div>
                     </div>
                   </div>
                 </GlassCard>
@@ -398,28 +398,28 @@ function BuildGuide() {
 function CableManagement() {
   const principles = [
     {
-      title: "Roteamento com intenção",
-      text: "Use passagens do gabinete para manter cabos fora do fluxo de ar. Priorize caminhos curtos e que não pressionem conectores.",
+      title: "Cabos no caminho certo",
+      text: "Usamos as passagens do gabinete para manter os cabos longe do fluxo de ar, com trajeto curto e sem pressionar conectores.",
     },
     {
-      title: "Amarração em pontos-chave",
-      text: "Velcro para manutenção, abraçadeiras onde não precisa mexer. Agrupe por função (alimentação, dados, front panel) para facilitar diagnóstico.",
+      title: "Cada cabo no seu lugar",
+      text: "Velcro onde você pode precisar mexer e organização por função. Qualquer manutenção fica rápida e sem mistério.",
     },
     {
-      title: "Folga e raio de curvatura",
-      text: "Deixe folga controlada (service loop) e evite dobras agressivas. Cabos tensionados podem causar mau contato ou desgaste do conector.",
+      title: "Folga e proteção dos cabos",
+      text: "Deixamos folga controlada e evitamos dobras agressivas, prevenindo mau contato e desgaste dos conectores.",
     },
     {
-      title: "Eficiência térmica e estética",
-      text: "Cabos bem presos reduzem turbulência, melhoram a eficiência das fans e deixam a vitrine limpa sem “emaranhado” visível.",
+      title: "Menos calor, mais beleza",
+      text: "Cabos bem presos melhoram a ventilação, reduzem o barulho das ventoinhas e deixam o interior do gabinete impecável.",
     },
   ];
 
   const checklist = [
     "Nada encostando em fan ou hélice.",
-    "Cabos da GPU sem tensão e sem invadir intake.",
-    "Front panel organizado e identificado.",
-    "Trilho traseiro com fechamento sem forçar o painel.",
+    "Cabos da placa de vídeo soltos e fora do caminho do ar.",
+    "Botões e luzes do gabinete organizados e funcionando.",
+    "Painel traseiro fechando sem forçar, tudo limpo por dentro e por fora.",
   ];
 
   return (
@@ -428,9 +428,9 @@ function CableManagement() {
         <div className="max-w-6xl mx-auto">
           <Reveal>
             <div className="text-center mb-14">
-              <h2 className="text-3xl md:text-5xl font-black uppercase">Cable management avançado</h2>
+              <h2 className="text-3xl md:text-5xl font-black uppercase">Cabos organizados de verdade</h2>
               <p className="text-white/60 mt-4 text-lg md:text-xl">
-                Não é “arrumar por aparência”. É engenharia de fluxo, manutenção e confiabilidade.
+                Não é só estética: cabos organizados fazem o PC esquentar menos, durar mais e ficar lindo por dentro.
               </p>
             </div>
           </Reveal>
@@ -459,7 +459,7 @@ function CableManagement() {
                 <GlassCard className="p-7 md:p-8">
                   <div className="flex items-center gap-3">
                     <BadgeCheck className="h-6 w-6 text-green-400" />
-                    <div className="text-lg font-black uppercase tracking-widest">Checklist final</div>
+                    <div className="text-lg font-black uppercase tracking-widest">O que garantimos na entrega</div>
                   </div>
                   <div className="mt-5 space-y-3">
                     {checklist.map((c) => (
@@ -477,7 +477,7 @@ function CableManagement() {
                     className="mt-8 inline-flex items-center justify-center gap-3 bg-[#25D366] hover:bg-[#128C7E] text-white px-8 py-4 rounded-full font-black text-lg transition-colors w-full"
                   >
                     <MessageCircle className="h-6 w-6" />
-                    Quero otimizar meu PC
+                    Quero essa organização no meu PC
                   </Link>
                 </GlassCard>
               </Reveal>
@@ -492,23 +492,23 @@ function CableManagement() {
 function AirflowAndThermals() {
   const airflow = [
     {
-      title: "Pressão interna e poeira",
-      text: "Equilibre intake e exhaust para reduzir entrada de poeira por frestas e manter alimentação de ar frio. Filtros limpos e fluxo sem obstruções são parte do desempenho.",
+      title: "Menos poeira, mais ar frio",
+      text: "Equilibramos a entrada e a saída de ar para reduzir poeira e garantir ar frio na medida certa. Filtros limpos também fazem parte do desempenho.",
       icon: Wind,
     },
     {
-      title: "Direção de fluxo e recirculação",
-      text: "Evite criar bolsões de ar quente. Entrada frontal/baixo e saída superior/traseira costuma funcionar bem, mas a regra é: alimentar a GPU e expulsar calor sem voltar para dentro.",
+      title: "Ar quente para fora",
+      text: "Ar frio entra pela frente e ar quente sai por cima e atrás, sem voltar para dentro. Sua placa de vídeo sempre bem alimentada.",
       icon: Fan,
     },
     {
-      title: "Curvas de fan por sensor",
-      text: "Ajuste fan curves para responder a carga real. Priorize comportamento estável (sem “sobe e desce” irritante) e mantenha ruído controlado com rampas suaves.",
+      title: "Ventoinhas inteligentes",
+      text: "As ventoinhas respondem à temperatura real, sem aquele “acelera e desacelera” irritante. Ruído baixo e desempenho constante.",
       icon: Settings2,
     },
     {
-      title: "Contato térmico e montagem",
-      text: "Cooler bem fixado e pasta aplicada corretamente fazem diferença prática em boost sustentado. Menos temperatura = menos throttling = mais FPS consistente.",
+      title: "Cooler bem instalado",
+      text: "Cooler fixado com firmeza e pasta no ponto certo: menos temperatura, menos perda de desempenho e mais FPS consistente.",
       icon: Thermometer,
     },
   ];
@@ -519,10 +519,9 @@ function AirflowAndThermals() {
         <div className="max-w-6xl mx-auto">
           <Reveal>
             <div className="text-center mb-14">
-              <h2 className="text-3xl md:text-5xl font-black uppercase">Airflow otimizado e térmica</h2>
+              <h2 className="text-3xl md:text-5xl font-black uppercase">Ventilação no ponto certo</h2>
               <p className="text-white/60 mt-4 text-lg md:text-xl">
-                A otimização de FPS passa por temperatura e estabilidade. O objetivo é sustentar clocks altos sem ruído
-                excessivo e sem hotspots.
+                Mais FPS passa por temperatura: um PC bem ventilado rende no máximo, esquenta menos e faz menos barulho.
               </p>
             </div>
           </Reveal>
@@ -553,27 +552,27 @@ function AirflowAndThermals() {
 function BiosAndFps() {
   const topics = [
     {
-      title: "Configurações base de BIOS",
+      title: "Configurações de base",
       items: [
-        "Atualize firmware quando necessário e estabilize antes de otimizar.",
-        "Habilite o perfil de memória adequado e valide estabilidade.",
-        "Ajuste limites de potência/boost com foco em temperatura e ruído.",
+        "Sistema atualizado e estável antes de qualquer ajuste.",
+        "Memória rodando na velocidade correta, com estabilidade garantida.",
+        "Potência ajustada para render bem sem esquentar nem fazer barulho.",
       ],
     },
     {
-      title: "Overclock/undervolt com método",
+      title: "Mais desempenho com segurança",
       items: [
-        "Mude uma variável por vez e registre resultados.",
-        "Evite aumentar tensão sem necessidade; eficiência térmica sustenta clocks.",
-        "Valide em carga real e stress controlado para evitar instabilidade intermitente.",
+        "Ajustamos um item de cada vez e conferimos o resultado.",
+        "Sem forçar além do necessário: é a temperatura estável que mantém o desempenho.",
+        "Testamos em uso real e no limite para garantir estabilidade duradoura.",
       ],
     },
     {
-      title: "Maximização de FPS e frametime",
+      title: "FPS alto e sem engasgos",
       items: [
-        "Priorize estabilidade: frametime regular é tão importante quanto FPS médio.",
-        "Ajuste drivers e energia para evitar quedas de clock em carga.",
-        "Use resolução e presets de forma estratégica para manter consistência em cenas pesadas.",
+        "Preferimos um jogo liso o tempo todo a picos de FPS com engasgos.",
+        "Drivers e energia ajustados para o desempenho não cair no meio da partida.",
+        "Configurações escolhidas a dedo para manter a fluidez até nas cenas mais pesadas.",
       ],
     },
   ];
@@ -584,9 +583,9 @@ function BiosAndFps() {
         <div className="max-w-6xl mx-auto">
           <Reveal>
             <div className="text-center mb-14">
-              <h2 className="text-3xl md:text-5xl font-black uppercase">BIOS tuning e FPS consistente</h2>
+              <h2 className="text-3xl md:text-5xl font-black uppercase">Ajuste fino para mais FPS</h2>
               <p className="text-white/60 mt-4 text-lg md:text-xl">
-                Ajuste fino é onde você “ganha de graça”: menos throttling, mais consistência e melhor eficiência térmica.
+                Pequenos ajustes que fazem grande diferença: seu PC rende o máximo, de forma estável e sem esquentar.
               </p>
             </div>
           </Reveal>
@@ -620,9 +619,8 @@ function BiosAndFps() {
                   <div className="text-lg font-black uppercase tracking-widest">Segurança e estabilidade</div>
                 </div>
                 <div className="mt-4 text-white/60 leading-relaxed">
-                  Overclock e undervolt devem ser feitos com cuidado. Se surgirem travamentos, artefatos ou reinícios,
-                  retorne para o último ponto estável e valide novamente. O alvo é desempenho sustentável, não números
-                  instantâneos.
+                  Ajustes são feitos com segurança e testados de verdade. Se algo não se comportar bem, voltamos ao ponto
+                  estável. O objetivo é desempenho que dura, não números de laboratório.
                 </div>
               </GlassCard>
             </div>
@@ -636,20 +634,20 @@ function BiosAndFps() {
 function Benchmarks() {
   const steps = [
     {
-      title: "Baseline (antes)",
-      text: "Registre temperaturas, clocks, FPS médio e frametime em um cenário repetível.",
+      title: "Medição inicial",
+      text: "Registramos temperatura, desempenho e fluidez em um cenário real e repetível.",
     },
     {
-      title: "Ajuste (uma variável por vez)",
-      text: "Mude apenas uma configuração (fan curve, limite de potência, memória) e repita o teste.",
+      title: "Ajuste um a um",
+      text: "Mudamos uma configuração por vez (ventoinhas, energia, memória) e repetimos o teste.",
     },
     {
-      title: "Validação (stress controlado)",
-      text: "Rode sessões longas para confirmar que não há instabilidade intermitente.",
+      title: "Prova do fogo",
+      text: "Rodamos sessões longas para confirmar que não há instabilidade escondida.",
     },
     {
-      title: "Relatório (depois)",
-      text: "Compare ganho real: consistência de frametime, ruído e temperatura em uso prolongado.",
+      title: "Resultado na mão",
+      text: "Comparamos o ganho real: fluidez, barulho e temperatura no uso do dia a dia.",
     },
   ];
 
@@ -659,9 +657,9 @@ function Benchmarks() {
         <div className="max-w-6xl mx-auto">
           <Reveal>
             <div className="text-center mb-14">
-              <h2 className="text-3xl md:text-5xl font-black uppercase">Benchmarks e ganhos comprovados</h2>
+              <h2 className="text-3xl md:text-5xl font-black uppercase">Testes e resultados comprovados</h2>
               <p className="text-white/60 mt-4 text-lg md:text-xl">
-                O que melhora de verdade é o que você mede e valida. O processo abaixo evita “achismo”.
+                Não trabalhamos no achismo: medimos o desempenho antes e depois para garantir que seu PC entrega o que promete.
               </p>
             </div>
           </Reveal>
@@ -693,7 +691,7 @@ function Benchmarks() {
                 className="inline-flex items-center justify-center gap-3 bg-white text-black px-10 py-4 rounded-full font-black text-lg hover:bg-zinc-200 transition-colors"
               >
                 <MessageCircle className="h-6 w-6" />
-                Quero montar/otimizar com método
+                Quero meu PC no máximo
               </Link>
             </div>
           </Reveal>
@@ -713,15 +711,16 @@ function Footer() {
               Balão da Informática
             </div>
             <div className="mt-3 text-white/60 leading-relaxed">
-              Montagem profissional com foco em performance real: airflow, cable management, BIOS tuning e validação por benchmarks.
+              Montagem profissional focada em desempenho de verdade: ventilação certa, cabos organizados, configuração fina
+              e testes completos.
             </div>
             <div className="mt-6 flex flex-wrap gap-3">
               {[
-                { icon: Wrench, text: "Montagem avançada" },
-                { icon: Cable, text: "Cable management" },
-                { icon: Wind, text: "Airflow" },
-                { icon: Settings2, text: "BIOS tuning" },
-                { icon: BarChart3, text: "Benchmarks" },
+                { icon: Wrench, text: "Montagem profissional" },
+                { icon: Cable, text: "Cabos organizados" },
+                { icon: Wind, text: "Ventilação" },
+                { icon: Settings2, text: "Configuração fina" },
+                { icon: BarChart3, text: "Testes" },
               ].map((x) => (
                 <div
                   key={x.text}

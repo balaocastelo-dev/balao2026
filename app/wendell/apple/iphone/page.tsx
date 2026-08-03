@@ -81,7 +81,7 @@ export default function IPhonePage() {
         {
           title: "Reparo de tampa quebrada com retirada a laser",
           description:
-            "Removemos a tampa traseira quebrada com tecnica de retirada a laser para um acabamento mais preciso e seguro no reparo do iPhone.",
+            "Removemos a tampa traseira quebrada com técnica de retirada a laser, garantindo um acabamento mais preciso e seguro no reparo do iPhone.",
           imageSrc: "/images/apple/iphone/iphone-interno-reparo.png",
           imageAlt: "Reparo de tampa traseira quebrada de iPhone",
         },

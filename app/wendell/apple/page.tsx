@@ -417,7 +417,7 @@ export default async function AppleServicesPage() {
                 Escolha a página ideal para o seu equipamento Apple
               </h2>
               <p className="mt-4 text-lg text-gray-600">
-                Escolha o equipamento e siga para a área com informações mais próximas do que você precisa.
+                Escolha o equipamento e veja os serviços, prazos e orientações mais relevantes para você.
               </p>
             </div>
 

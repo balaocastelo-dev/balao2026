@@ -293,7 +293,7 @@ export default async function SeminovosPage() {
              
              {seminovos.length === 0 ? (
                <div className="bg-white border-2 border-dashed border-gray-300 rounded-3xl p-12 text-center text-gray-500 text-xl">
-                 Carregando estoque atualizado...
+                 Estoque sendo atualizado. Fale com a gente no WhatsApp para garantir o seu notebook seminovo.
                </div>
              ) : (
                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">

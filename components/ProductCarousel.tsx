@@ -45,7 +45,7 @@ export default function ProductCarousel({ title, products, categoryId, isDark = 
                 ? 'bg-[var(--home-card-bg)] border-[var(--home-border)] text-[var(--home-text)] hover:border-[var(--home-border-strong)]' 
                 : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
             }`}
-            aria-label="Previous"
+            aria-label="Anterior"
           >
             <ChevronLeft size={20} />
           </button>
@@ -56,7 +56,7 @@ export default function ProductCarousel({ title, products, categoryId, isDark = 
                 ? 'bg-[var(--home-card-bg)] border-[var(--home-border)] text-[var(--home-text)] hover:border-[var(--home-border-strong)]' 
                 : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
             }`}
-            aria-label="Next"
+            aria-label="Próximo"
           >
             <ChevronRight size={20} />
           </button>

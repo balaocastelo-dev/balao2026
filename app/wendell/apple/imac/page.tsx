@@ -57,7 +57,7 @@ export default function IMacPage() {
       description="Se o seu iMac perdeu desempenho, quebrou a tela ou apresenta falhas técnicas, conte com uma equipe preparada para reparos, upgrades e manutenção completa em Campinas e região."
       heroImageSrc="/images/apple/subcategories/imac-card.png"
       heroImageAlt="Assistência técnica iMac em Campinas"
-      heroCaption="Troca de tela, upgrade de SSD e reparo técnico com foco em performance"
+      heroCaption="Troca de tela, upgrade de SSD e reparo técnico para mais velocidade e desempenho"
       whatsappHref={WHATSAPP_LINK}
       theme={{
         badge: "border-purple-100 bg-purple-50 text-purple-700",

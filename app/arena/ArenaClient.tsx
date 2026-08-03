@@ -652,7 +652,7 @@ export default function ArenaClient({
               </AnimatePresence>
               {vendasRecentes.length === 0 && (
                 <div className="text-center py-8 text-slate-500 text-xs italic">
-                  Aguardando vendas...
+                  Aguardando novas vendas...
                 </div>
               )}
             </div>
@@ -939,7 +939,7 @@ function RacerRow({ data, rank, isLeader }: { data: Vendedor, rank: number, isLe
           <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 flex flex-col items-center gap-1 z-0">
             <div className="h-16 w-1 bg-white/10" />
             <div className="absolute top-0 transform -translate-y-full text-xs font-black text-white/20 uppercase tracking-widest rotate-90 origin-bottom-left ml-3">
-              Finish
+              CHEGADA
             </div>
           </div>
         </div>

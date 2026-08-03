@@ -118,7 +118,7 @@ export default function QuickLeadSection({
       <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
         <div>
           <p className="text-sm font-bold uppercase tracking-[0.25em] text-[var(--home-accent)]">
-            Captação Direta
+            Atendimento Rápido
           </p>
           <h2 className="mt-3 text-3xl font-black tracking-tight text-[var(--home-text)] md:text-4xl">
             {title}

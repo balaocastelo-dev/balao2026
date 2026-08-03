@@ -694,7 +694,7 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
                   <div className="w-7 h-7 rounded-full bg-[#E60012]/10 flex items-center justify-center">
                     <BadgeCheck size={16} className="text-[#E60012]" />
                   </div>
-                  CTA final
+                  Oferta por tempo limitado
                 </div>
 
                 <h3 className="mt-4 text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900 leading-[1.05]">

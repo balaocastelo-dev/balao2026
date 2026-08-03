@@ -262,11 +262,11 @@ export default function AppleServicePage({
                     Atendimento especializado Apple
                   </div>
                   <h2 className="mt-5 text-3xl font-black text-gray-900 md:text-4xl">
-                    {showcaseTitle || "Estrutura preparada para um atendimento rapido e seguro"}
+                    {showcaseTitle || "Seu Apple nas mãos certas, com atendimento rápido e seguro"}
                   </h2>
                   <p className="mt-4 text-lg leading-8 text-gray-600">
                     {showcaseDescription ||
-                      "Seu equipamento recebe avaliacao tecnica cuidadosa, com explicacao clara do reparo, prazo e orientacao para seguir com mais seguranca."}
+                      "Seu equipamento recebe avaliação técnica cuidadosa, com explicação clara do reparo, prazo e orientação para você ficar tranquilo."}
                   </p>
                   <div className="mt-6 flex flex-wrap gap-3 text-sm font-bold text-gray-700">
                     <span className="rounded-full bg-gray-100 px-4 py-2">Assistencia Apple em 1 hora</span>

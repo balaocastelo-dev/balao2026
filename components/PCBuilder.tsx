@@ -212,14 +212,14 @@ export default function PCBuilder({ products }: PCBuilderProps) {
     } 
     else if (currentStep === "motherboard") {
       if (selectedCpuSpecs?.socket) {
-        msg = `Ótima escolha de processador! Para ele, filtrei apenas as Placas-Mãe com socket ${selectedCpuSpecs.socket}.`;
+        msg = `Ótima escolha de processador! Para ele, mostro apenas as Placas-Mãe compatíveis com o socket ${selectedCpuSpecs.socket}.`;
       } else {
         msg = "A Placa-Mãe conecta tudo. Escolha uma compatível com seu processador.";
       }
     }
     else if (currentStep === "memory") {
       if (selectedMoboSpecs?.memory) {
-        msg = `Sua Placa-Mãe suporta memória ${selectedMoboSpecs.memory}. Mostrando apenas módulos compatíveis.`;
+        msg = `Sua Placa-Mãe é compatível com memória ${selectedMoboSpecs.memory}. Por isso, mostro apenas os módulos que funcionam nela.`;
       } else {
         msg = "Memória RAM é essencial para multitarefas e jogos. 16GB é o recomendado atualmente.";
       }
@@ -388,11 +388,11 @@ export default function PCBuilder({ products }: PCBuilderProps) {
       }
     });
     
-    showToast("Setup completo adicionado ao carrinho!", "success");
+    showToast("PC completo adicionado ao carrinho!", "success");
   };
 
   const handleWhatsAppShare = () => {
-    let message = "*Meu Setup Balao da Informatica:*\n\n";
+    let message = "*Meu PC Balao da Informatica:*\n\n";
     
     STEPS.forEach(step => {
       const selection = selections[step.id];
@@ -441,7 +441,7 @@ export default function PCBuilder({ products }: PCBuilderProps) {
           <div className="p-4 bg-gradient-to-r from-red-600 to-red-700 text-white shadow-sm">
             <h2 className="font-bold text-lg flex items-center gap-2">
               <ShoppingCart size={20} />
-              Seu Setup
+              Seu PC
             </h2>
             <div className="text-red-100 text-sm">Resumo da configuração</div>
           </div>

@@ -179,7 +179,7 @@ function BlockFeatures() {
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400">PORTÁTIL</span>
              </h2>
              <p className="text-xl md:text-3xl font-medium text-zinc-300 leading-snug">
-                Leve seu escritório ou setup gamer para onde você for. Liberdade total sem perder desempenho.
+                 Leve seu escritório ou PC gamer para onde você for. Liberdade total sem perder desempenho.
              </p>
              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center lg:justify-start">
                 <div className="flex items-center gap-4 bg-zinc-900 p-4 rounded-xl border border-zinc-800">
@@ -662,7 +662,7 @@ export default async function NotebooksPage() {
           <div className="container mx-auto px-4">
             <QuickLeadSection
               title="Quer ajuda para escolher seu notebook hoje?"
-              description="Esse bloco captura quem já está perto da decisão. Você pode pedir retorno, avaliação do usado, indicação do modelo ideal ou upgrade antes da compra."
+              description="Conte para que você vai usar o notebook: trabalho, estudos, jogos ou edição. Indicamos o modelo ideal e ainda avaliamos seu usado na troca."
               messageTemplate="Olá! Quero ajuda para escolher um notebook ou fazer upgrade em Campinas e região."
               source="notebooks"
               cityLabel="Campinas e Região"

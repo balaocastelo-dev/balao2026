@@ -246,9 +246,9 @@ function BlockGallery() {
     <section className="bg-black py-20 border-t border-zinc-900" id="galeria">
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto text-center mb-14">
-          <h2 className="text-3xl md:text-5xl font-black uppercase">Montagens reais (referência)</h2>
+          <h2 className="text-3xl md:text-5xl font-black uppercase">Montagens reais do nosso padrão</h2>
           <p className="text-zinc-400 mt-4 text-lg md:text-xl">
-            Visual limpo, cabos organizados e montagem feita para durar. Use como referência do padrão de acabamento.
+            Visual limpo, cabos organizados e montagem feita para durar. É exatamente esse o padrão que você recebe.
           </p>
         </div>
 
@@ -429,10 +429,10 @@ function BlockChecklist() {
       <div className="container mx-auto px-4">
         <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
           <div>
-            <h2 className="text-3xl md:text-5xl font-black uppercase">Checklist de montagem profissional</h2>
+            <h2 className="text-3xl md:text-5xl font-black uppercase">O que você recebe na montagem</h2>
             <p className="text-zinc-400 mt-4 text-lg leading-relaxed">
-              Para evitar gargalos, travamentos e temperaturas altas, seguimos um checklist padrão. É aqui que a montagem
-              “comum” vira montagem premium.
+              Para o seu PC não travar, esquentar ou decepcionar, conferimos cada detalhe. É aqui que a montagem simples vira
+              montagem premium.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4">
               <Link
@@ -634,7 +634,7 @@ function BlockProcess() {
         <div className="max-w-4xl mx-auto text-center mb-14">
           <h2 className="text-3xl md:text-5xl font-black uppercase">Como entregamos padrão premium</h2>
           <p className="text-zinc-400 mt-4 text-lg md:text-xl">
-            Processo claro e rastreável. Você aprova e acompanha.
+            Processo claro e transparente, do início ao fim. Você acompanha cada etapa.
           </p>
         </div>
 

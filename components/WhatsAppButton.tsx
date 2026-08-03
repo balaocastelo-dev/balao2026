@@ -8,9 +8,9 @@ export default function WhatsAppButton({ productName }: { productName: string })
   const handleWhatsAppClick = () => {
     if (typeof window !== "undefined") {
       const message = [
-        `OlÃ¡! Vi no site este produto: ${productName}`,
+        `Olá! Vi no site este produto: ${productName}`,
         `Link: ${window.location.href}`,
-        "Pode confirmar estoque, valor final e opÃ§Ã£o de retirada/entrega em Campinas?",
+        "Pode confirmar estoque, valor final e opção de retirada/entrega em Campinas?",
       ].join("\n");
       const url = `https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(message)}`;
       trackWhatsAppClick({

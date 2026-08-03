@@ -79,7 +79,7 @@ export default function ProductList({ products }: { products: Product[] }) {
         {/* View Controls */}
         <div className="flex w-full items-center justify-end gap-2 sm:w-auto">
             
-            <span className="mr-2 hidden text-sm font-medium text-[var(--site-muted)] sm:inline">VisualizaÃ§Ã£o:</span>
+            <span className="mr-2 hidden text-sm font-medium text-[var(--site-muted)] sm:inline">Visualização:</span>
             
             <button
             onClick={() => setViewMode("small")}
@@ -88,7 +88,7 @@ export default function ProductList({ products }: { products: Product[] }) {
                 ? "bg-[#E60012] text-white shadow-md" 
                 : "border border-[var(--site-border)] bg-[var(--site-panel-soft)] text-[var(--site-muted)] hover:border-[var(--site-accent-soft)] hover:text-[var(--site-text)]"
             }`}
-            title="Menores (Grade Compacta)"
+            title="Exibição compacta"
             >
             <LayoutGrid size={20} />
             </button>
@@ -100,7 +100,7 @@ export default function ProductList({ products }: { products: Product[] }) {
                 ? "bg-[#E60012] text-white shadow-md" 
                 : "border border-[var(--site-border)] bg-[var(--site-panel-soft)] text-[var(--site-muted)] hover:border-[var(--site-accent-soft)] hover:text-[var(--site-text)]"
             }`}
-            title="Grandes (Grade Expandida)"
+            title="Exibição ampla"
             >
             <Grid2x2 size={20} />
             </button>

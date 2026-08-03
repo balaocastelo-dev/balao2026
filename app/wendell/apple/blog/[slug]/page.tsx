@@ -196,7 +196,7 @@ export default async function AppleBlogPostPage(props: { params: Promise<{ slug:
 
             <aside className="space-y-6">
               <div className="rounded-[1.5rem] border border-neutral-200 bg-white p-5">
-                <h2 className="text-sm font-extrabold uppercase tracking-wide text-gray-900">Atalhos estratégicos</h2>
+                <h2 className="text-sm font-extrabold uppercase tracking-wide text-gray-900">Continue explorando</h2>
                 <div className="mt-4 grid gap-2">
                   {relatedLinks.map((item) => (
                     <Link key={item.href} href={item.href} className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-bold text-gray-800 hover:bg-gray-100">
@@ -229,7 +229,7 @@ export default async function AppleBlogPostPage(props: { params: Promise<{ slug:
                     {post.source_domain || post.source_url}
                   </div>
                   <div className="mt-2 text-xs text-gray-500">
-                    A leitura continua aqui no blog, sem redirecionamento externo.
+                    A leitura completa fica aqui mesmo, sem precisar sair do blog.
                   </div>
                 </div>
               ) : null}

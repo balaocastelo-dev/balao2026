@@ -28,19 +28,19 @@ export default async function FuncoesPage() {
               www.balao.info/funcoes
             </p>
             <h2 className="text-4xl font-bold leading-tight">
-              Central protegida com atalhos para todas as funcoes e paginas do site.
+              Central protegida com atalhos para todas as funções e páginas do site.
             </h2>
             <p className="mt-4 text-base text-slate-300">
-              Entre com a senha para abrir a lista completa de areas comerciais, operacionais,
+              Entre com a senha para abrir a lista completa de áreas comerciais, operacionais,
               administrativas e institucionais.
             </p>
           </div>
           <PainelLoginForm
             redirectTo="/funcoes"
-            badgeLabel="Funcoes Protegidas"
-            title="Acesso as funcoes"
-            description="Entre com a senha 56676009 para abrir a central interna em /funcoes."
-            submitLabel="Entrar nas funcoes"
+            badgeLabel="Funções Protegidas"
+            title="Acesso às funções"
+            description="Entre com a senha para abrir a central interna de funções."
+            submitLabel="Entrar nas funções"
           />
         </div>
       </main>
@@ -54,21 +54,21 @@ export default async function FuncoesPage() {
           <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
             <div className="max-w-3xl">
               <p className="text-sm font-semibold uppercase tracking-[0.3em] text-blue-300">
-                Central de Funcoes
+                Central de Funções
               </p>
               <h1 className="mt-4 text-4xl font-black tracking-tight md:text-5xl">
                 Todos os atalhos do site em um lugar
               </h1>
               <p className="mt-4 max-w-2xl text-lg leading-relaxed text-slate-300">
-                Esta pagina reune as funcoes listadas do site com card, imagem, nome,
-                explicacao e link direto para acesso rapido.
+                Esta página reúne todas as funções do site com card, imagem, nome,
+                explicação e link direto para acesso rápido.
               </p>
               <div className="mt-6 flex flex-wrap gap-3 text-sm">
                 <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2">
-                  {FUNCOES_TOTAL} atalhos mapeados
+                  {FUNCOES_TOTAL} atalhos disponíveis
                 </span>
                 <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2">
-                  {FUNCOES_CATALOG.length} grupos de funcoes
+                  {FUNCOES_CATALOG.length} grupos de funções
                 </span>
               </div>
             </div>
@@ -128,7 +128,7 @@ export default async function FuncoesPage() {
                         {item.description}
                       </p>
                       <div className="mt-5 inline-flex items-center rounded-full bg-blue-600 px-4 py-2 text-sm font-bold text-white transition group-hover:bg-blue-500">
-                        Abrir funcao
+                        Abrir função
                       </div>
                     </div>
                   </Link>

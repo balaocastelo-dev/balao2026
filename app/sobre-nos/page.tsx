@@ -52,7 +52,7 @@ export default function SobreNosPage() {
         
         <div className="prose max-w-none text-gray-700 leading-relaxed space-y-6">
           <p>
-            Bem-vindo ao <strong>Balão da Informática</strong>, sua referência em tecnologia e inovação. 
+            Bem-vindo ao <strong>Balão da Informática</strong>, sua melhor escolha em tecnologia e inovação. 
             Há mais de 20 anos no mercado, construímos uma história sólida baseada na confiança, 
             qualidade e compromisso com nossos clientes.
           </p>

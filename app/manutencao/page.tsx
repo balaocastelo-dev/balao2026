@@ -589,7 +589,7 @@ export default async function ManutencaoPage() {
           <div className="container mx-auto px-4">
             <QuickLeadSection
               title="Seu computador parou? Peça atendimento agora"
-              description="Use o formulário ou clique no WhatsApp para acelerar o atendimento. Esse bloco existe para captar quem está com urgência e precisa resolver hoje."
+              description="Precisa de ajuda agora? Envie seus dados pelo formulário ou fale direto no WhatsApp e receba orçamento em minutos. Atendimento prioritário para quem não pode esperar."
               messageTemplate="Olá! Preciso de assistência técnica para computador ou notebook em Campinas e região. Quero atendimento rápido."
               source="manutencao"
               cityLabel="Campinas e Região"

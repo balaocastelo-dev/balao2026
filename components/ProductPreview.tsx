@@ -85,7 +85,7 @@ export default function ProductPreview() {
             className="flex items-center justify-center gap-2 border border-gray-200 text-gray-700 py-2 rounded-lg text-xs font-medium hover:bg-gray-50 transition-colors"
             onClick={() => setIsVisible(false)}
           >
-            Ver Detalhes
+            Ver produto completo
             <ArrowRight size={14} />
           </Link>
         </div>

@@ -346,7 +346,7 @@ function BlockDevices() {
         <div className="text-center mb-14">
           <h2 className="text-3xl md:text-5xl font-black uppercase">O que recuperamos</h2>
           <p className="text-zinc-400 mt-4 text-lg md:text-xl">
-            Atendemos cenários lógicos e físicos com abordagem segura por tipo de dispositivo.
+            Seja falha lógica ou física, analisamos seu dispositivo com segurança e priorizamos a recuperação dos seus dados.
           </p>
         </div>
 
@@ -450,10 +450,10 @@ function BlockFileTypes() {
 
 function BlockHowItWorks() {
   const steps = [
-    { title: "1) Triagem e análise", desc: "Você descreve o problema e traz/enviamos instruções.", icon: FileSearch },
-    { title: "2) Diagnóstico e orçamento", desc: "Avaliamos o caso e apresentamos prazo e custo antes de executar.", icon: Clock },
-    { title: "3) Recuperação segura", desc: "Processo técnico com foco em preservar a integridade dos dados.", icon: ShieldCheck },
-    { title: "4) Entrega dos arquivos", desc: "Arquivos recuperados organizados e copiados para mídia adequada.", icon: CheckCircle2 },
+    { title: "1) Triagem e análise", desc: "Você descreve o problema e recebe as instruções de envio.", icon: FileSearch },
+    { title: "2) Diagnóstico e orçamento", desc: "Você recebe diagnóstico, prazo e preço antes de qualquer procedimento.", icon: Clock },
+    { title: "3) Recuperação segura", desc: "Recuperação técnica e segura, priorizando a integridade dos seus arquivos.", icon: ShieldCheck },
+    { title: "4) Entrega dos arquivos", desc: "Receba seus arquivos recuperados, organizados e prontos para usar.", icon: CheckCircle2 },
   ];
 
   return (
@@ -673,7 +673,7 @@ function BlockCitiesServed() {
         <div className="max-w-5xl mx-auto text-center">
           <h2 className="text-3xl md:text-5xl font-black uppercase">Cidades atendidas no Brasil</h2>
           <p className="text-zinc-400 mt-4 text-lg md:text-xl">
-            Atendimento nacional via envio. A lista abaixo é apenas uma referência de cidades com maior volume de atendimento.
+            Atendemos clientes de todo o Brasil via envio. Veja as cidades com maior volume de atendimento.
           </p>
         </div>
 

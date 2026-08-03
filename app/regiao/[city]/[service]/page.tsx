@@ -128,20 +128,20 @@ export default async function RegionalServicePage({ params }: Props) {
                   href={service.primaryHref}
                   className="rounded-full border border-white/20 bg-white/10 px-7 py-4 text-base font-bold text-white hover:bg-white/15"
                 >
-                  Ver Página Principal do Serviço
+                  Conhecer o serviço completo
                 </Link>
               </div>
             </div>
 
             <div className="rounded-3xl border border-white/10 bg-white/10 p-6 backdrop-blur">
-              <h2 className="text-2xl font-black">Atendimento que converte em cliente</h2>
+              <h2 className="text-2xl font-black">Atendimento rápido, perto de você</h2>
               <ul className="mt-5 space-y-3 text-slate-200">
                 {service.benefits.map((benefit) => (
                   <li key={benefit}>- {benefit}</li>
                 ))}
               </ul>
               <div className="mt-6 rounded-2xl bg-black/20 p-4 text-sm text-slate-300">
-                Bairros e regiões mais fortes em {city.name}: {city.neighborhoods.join(", ")}.
+                Bairros atendidos em {city.name}: {city.neighborhoods.join(", ")}.
               </div>
             </div>
           </div>
@@ -150,7 +150,7 @@ export default async function RegionalServicePage({ params }: Props) {
         <section className="py-14 bg-white border-b border-slate-200">
           <div className="container mx-auto px-4 max-w-6xl">
             <h2 className="text-3xl md:text-4xl font-black text-slate-900">
-              O que as pessoas de {city.name} mais procuram
+              Os problemas mais comuns em {city.name}
             </h2>
             <div className="mt-8 grid gap-5 md:grid-cols-2">
               {service.problems.map((problem) => (
@@ -169,18 +169,18 @@ export default async function RegionalServicePage({ params }: Props) {
           <div className="container mx-auto px-4 max-w-6xl grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
             <div className="rounded-3xl bg-white border border-slate-200 p-8 shadow-sm">
               <h2 className="text-3xl font-black text-slate-900">
-                Por que essa página existe
+                A Balão está perto de você
               </h2>
               <div className="mt-5 space-y-4 text-slate-600 leading-relaxed">
                 <p>
-                  Quem busca <strong>{service.shortName.toLowerCase()}</strong> em{" "}
-                  <strong>{city.name}</strong> geralmente está com urgência, dor real e quer resposta rápida.
-                  Por isso esta página foi construída para responder intenção local, facilitar o contato e reduzir
-                  o caminho até o orçamento.
+                  Se você procura <strong>{service.shortName.toLowerCase()}</strong> em{" "}
+                  <strong>{city.name}</strong>, quer resolver logo: orçamento rápido, atendimento claro e sem enrolação.
+                  É por isso que a Balão da Informática está a um WhatsApp de distância, com retorno na hora e
+                  equipe técnica que resolve de verdade.
                 </p>
                 <p>
-                  A Balão da Informática atende {city.name} e cidades vizinhas com foco em resolução, transparência
-                  e suporte de verdade, seja para loja física, atendimento por WhatsApp ou envio de equipamento.
+                  A Balão da Informática atende {city.name} e cidades vizinhas com atendimento local, preço justo
+                  e suporte de verdade — na loja física, pelo WhatsApp ou com envio do seu equipamento.
                 </p>
               </div>
             </div>
@@ -253,7 +253,7 @@ export default async function RegionalServicePage({ params }: Props) {
           <div className="container mx-auto px-4 max-w-6xl">
             <QuickLeadSection
               title={`Quer ${service.shortName.toLowerCase()} em ${city.name}?`}
-              description={`Este bloco foi feito para captar quem já está com intenção alta em ${city.name}. Você pode pedir retorno rápido, orçamento e atendimento pelo WhatsApp.`}
+              description={`Deixe seu contato e receba retorno rápido com orçamento em ${city.name}, sem compromisso. Também dá para chamar direto no WhatsApp.`}
               messageTemplate={`Olá! Quero atendimento para ${service.headline.toLowerCase()} em ${city.name}.`}
               source={`regiao-${city.slug}-${service.slug}`}
               cityLabel={city.name}

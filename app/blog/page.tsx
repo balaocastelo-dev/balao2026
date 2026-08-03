@@ -280,7 +280,7 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
 
             {posts.length === 0 && (
               <div className="mt-8 p-8 text-center text-sm text-neutral-600">
-                Ainda não há posts publicados. Aguarde a ingestão automática via RSS/Produtos.
+                Em breve teremos novas notícias e ofertas por aqui. Enquanto isso, chame no WhatsApp e peça uma indicação do melhor produto para o seu uso.
               </div>
             )}
 

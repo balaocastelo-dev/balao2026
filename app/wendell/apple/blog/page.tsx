@@ -159,7 +159,7 @@ export default async function AppleBlogPage() {
             <section className="mt-8">
               <div className="flex items-end justify-between">
                 <h2 className="text-lg font-extrabold tracking-tight">
-                  <span className="inline-block border-l-4 border-red-600 pl-3">Noticias em destaque</span>
+                  <span className="inline-block border-l-4 border-red-600 pl-3">Notícias em destaque</span>
                 </h2>
               </div>
               <div className="mt-4 divide-y divide-neutral-200 overflow-hidden rounded-2xl border border-neutral-200 bg-white">
@@ -234,7 +234,7 @@ export default async function AppleBlogPage() {
 
               <div className="rounded-[2rem] bg-gradient-to-br from-red-600 to-red-700 p-6 text-white shadow-xl">
                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/80">Atendimento rápido</p>
-                <h2 className="mt-3 text-2xl font-black">Precisa de assistencia Apple em Campinas?</h2>
+                <h2 className="mt-3 text-2xl font-black">Precisa de assistência Apple em Campinas?</h2>
                 <p className="mt-3 text-sm leading-6 text-white/90">
                   Atendimento Apple com assistência em 1 hora para muitos reparos, motoboy grátis, orçamento sem compromisso e até 12x sem juros.
                 </p>

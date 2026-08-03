@@ -139,7 +139,7 @@ export default function ProductMediaSwitcher({
             >
               <Image
                 src={img}
-                alt={`${productName} - view ${idx + 1}`}
+                alt={`${productName} - foto ${idx + 1}`}
                 fill
                 className="object-contain p-1"
                 unoptimized

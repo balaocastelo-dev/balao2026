@@ -60,8 +60,8 @@ export default function SobreAEmpresaPage() {
           <h2 className="text-2xl font-bold text-gray-800 mt-8">Estrutura e Logística</h2>
           <p>
             Contamos com Centros de Distribuição estrategicamente localizados para garantir agilidade na entrega 
-            em todo o território nacional. Nossa infraestrutura permite o processamento rápido de pedidos, 
-            desde a confirmação do pagamento até a expedição.
+            em todo o território nacional. Nossa estrutura foi pensada para processar seu pedido com rapidez, 
+            da confirmação do pagamento até a expedição.
           </p>
 
           <h2 className="text-2xl font-bold text-gray-800 mt-8">Nossas Lojas</h2>

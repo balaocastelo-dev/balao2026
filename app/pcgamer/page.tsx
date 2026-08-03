@@ -271,7 +271,7 @@ function BlockCustom() {
                     <Wrench className="w-20 h-20 text-blue-600 mb-4 mx-auto" />
                     <h3 className="text-3xl font-bold mb-3">Consultoria Grátis</h3>
                     <p className="text-slate-600 text-lg mb-6 max-w-md mx-auto">
-                       Não sabe qual peça escolher? Nossos especialistas te ajudam a montar o melhor setup para o seu orçamento.
+                       Não sabe qual peça escolher? Nossos especialistas montam o PC ideal para o seu orçamento.
                     </p>
                     <a 
                 href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=Ol%C3%A1%2C%20gostaria%20de%20uma%20consultoria%20gr%C3%A1tis%20para%20meu%20PC%20Gamer!`}
@@ -341,7 +341,7 @@ function BlockTesting() {
                   TESTADO<br/>NO LIMITE
                </h2>
                <p className="text-lg md:text-2xl text-red-100 opacity-80 leading-relaxed">
-                 Não entregamos o PC apenas &quot;ligando&quot;. Todas as máquinas passam por baterias de testes de stress de CPU e GPU para garantir que não haverá superaquecimento ou telas azuis durante sua gameplay.
+                 Não entregamos o PC apenas &quot;ligando&quot;. Todas as máquinas passam por testes rigorosos para garantir que não haverá travamentos, superaquecimento ou telas azuis durante a sua jogatina.
                </p>
             </div>
             <div className="flex-1 grid grid-cols-2 gap-4 w-full">
@@ -429,7 +429,7 @@ function BlockWhyUs() {
                 <div className="p-6 bg-zinc-800/50 rounded-3xl border border-zinc-700 hover:border-violet-500 transition-colors">
                     <Wrench className="w-16 h-16 mx-auto mb-6 text-violet-500" />
                     <h3 className="text-2xl font-bold mb-4">Suporte Técnico</h3>
-                    <p className="text-zinc-400">Equipe especializada pronta para tirar dúvidas e ajudar na configuração do seu setup.</p>
+                     <p className="text-zinc-400">Equipe especializada pronta para tirar dúvidas e deixar seu PC do seu jeito.</p>
                 </div>
                 <div className="p-6 bg-zinc-800/50 rounded-3xl border border-zinc-700 hover:border-violet-500 transition-colors">
                     <Truck className="w-16 h-16 mx-auto mb-6 text-violet-500" />
@@ -451,7 +451,7 @@ function BlockFAQ() {
                 {[
                     { q: "O PC já vem montado?", a: "Sim! Enviamos o computador 100% montado, configurado, com Windows instalado e drivers atualizados. É só ligar e jogar." },
                     { q: "As peças são novas?", a: "Absolutamente. Trabalhamos apenas com componentes novos, originais e com garantia de fábrica." },
-                    { q: "Posso alterar a configuração?", a: "Com certeza! Entre em contato via WhatsApp para personalizar qualquer detalhe do seu setup." },
+                    { q: "Posso alterar a configuração?", a: "Com certeza! Entre em contato via WhatsApp e personalize cada detalhe do seu PC." },
                     { q: "Como funciona a garantia?", a: "Oferecemos garantia legal de 90 dias + garantia contratual de cada componente, tudo tratado diretamente conosco." }
                 ].map((faq, i) => (
                     <details key={i} className="group bg-white p-6 rounded-2xl shadow-sm border border-slate-200 cursor-pointer">
@@ -551,7 +551,7 @@ export default async function PcGamerPage() {
         <section id="ofertas" className="py-12 md:py-20 bg-zinc-50 min-h-[50vh]">
           <div className="container mx-auto px-4">
              <div className="text-center mb-12 md:mb-16">
-                <h2 className="text-3xl md:text-6xl font-black text-slate-900 mb-4">SETUP GAMER PRONTO</h2>
+                <h2 className="text-3xl md:text-6xl font-black text-slate-900 mb-4">PC GAMER PRONTO</h2>
                 <div className="w-16 md:w-24 h-2 bg-violet-600 mx-auto rounded-full"></div>
                 <p className="mt-4 text-lg md:text-xl text-slate-600">Máquinas montadas e configuradas. É só ligar e jogar.</p>
              </div>
@@ -584,7 +584,7 @@ export default async function PcGamerPage() {
              <div className="text-center mb-12 md:mb-16">
                 <h2 className="text-3xl md:text-6xl font-black text-slate-900 mb-4">MAIS OFERTAS GAMER</h2>
                 <div className="w-16 md:w-24 h-2 bg-fuchsia-600 mx-auto rounded-full"></div>
-                <p className="mt-4 text-lg md:text-xl text-slate-600">Encontre o setup perfeito para você.</p>
+                <p className="mt-4 text-lg md:text-xl text-slate-600">Encontre o PC perfeito para você.</p>
              </div>
              
              {gamerProducts.length === 0 ? (
@@ -644,12 +644,12 @@ export default async function PcGamerPage() {
           <div className="container mx-auto px-4">
             <QuickLeadSection
               title="Quer orçamento de PC Gamer com atendimento humano?"
-              description="Envie sua faixa de investimento, jogos e objetivo. A equipe monta uma sugestão mais certeira para você converter mais rápido sem perder tempo."
+              description="Conte seus jogos, sua faixa de investimento e o que você espera do PC. Nossa equipe prepara uma sugestão sob medida, sem complicação."
               messageTemplate="Olá! Quero orçamento de PC Gamer em Campinas e região. Posso passar meu orçamento e os jogos que pretendo usar?"
               source="pcgamer"
               cityLabel="Campinas e Região"
               serviceLabel="PC Gamer"
-              formTitle="Pedir orçamento de setup"
+              formTitle="Pedir orçamento de PC Gamer"
             />
           </div>
         </section>

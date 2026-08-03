@@ -23,7 +23,7 @@ export default function ShippingCalculator() {
   const handleCalculate = async () => {
     const cleanCep = cep.replace(/\D/g, "");
     if (cleanCep.length !== 8) {
-      setError("CEP inválido");
+      setError("CEP inválido. Confira os números e tente novamente.");
       return;
     }
 
@@ -36,7 +36,7 @@ export default function ShippingCalculator() {
       const data = await response.json();
 
       if (data.erro) {
-        setError("CEP não encontrado");
+        setError("CEP não encontrado. Confira e tente novamente.");
         setLoading(false);
         return;
       }
@@ -80,7 +80,7 @@ export default function ShippingCalculator() {
         options,
       });
     } catch (err) {
-      setError("Erro ao consultar CEP");
+      setError("Não conseguimos consultar o CEP. Tente novamente.");
     } finally {
       setLoading(false);
     }
@@ -109,7 +109,7 @@ export default function ShippingCalculator() {
           disabled={loading || cep.length < 9}
           className="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {loading ? "..." : "OK"}
+          {loading ? "..." : "Calcular"}
         </button>
       </div>
 

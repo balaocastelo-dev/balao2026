@@ -47,7 +47,7 @@ export default function PremiumPromoCountdown() {
             Campanha válida de 06 a 13 de julho de 2026
           </div>
           <div className="mt-2 text-sm text-zinc-200">
-            Todos os preços desta página exibem o valor promocional com metade do preço original.
+            Todos os preços desta página já estão com 50% de desconto aplicado.
           </div>
         </div>
 

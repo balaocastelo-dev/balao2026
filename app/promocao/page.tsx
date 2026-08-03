@@ -244,7 +244,7 @@ function BlockUrgencyBanner() {
     <div className="bg-yellow-400 text-yellow-900 py-3 overflow-hidden">
       <div className="container mx-auto px-4 flex items-center justify-center gap-4 text-sm md:text-base font-black uppercase tracking-wide animate-pulse">
          <Timer className="w-5 h-5" />
-         <span>Corra! As ofertas mudam em: 04h 12m 33s</span>
+         <span>Corra! Ofertas válidas enquanto durar o estoque</span>
          <Timer className="w-5 h-5" />
       </div>
     </div>

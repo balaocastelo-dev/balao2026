@@ -186,7 +186,7 @@ export default async function ProductPage({ params }: Props) {
                                 <span className="text-[#E60012] text-sm">📍</span> RETIRE HOJE NA LOJA (CAMBUÍ)
                              </div>
                              <div className="font-semibold leading-relaxed text-[var(--site-soft)]">
-                                Ou compre pelo WhatsApp para ter <strong className="text-[var(--home-success)]">Entrega RÃ¡pida</strong> via motoboy hoje mesmo em Campinas e regiÃ£o.
+                                Ou compre pelo WhatsApp para ter <strong className="text-[var(--home-success)]">Entrega Rápida</strong> via motoboy hoje mesmo em Campinas e região.
                              </div>
                           </div>
 
@@ -208,7 +208,7 @@ export default async function ProductPage({ params }: Props) {
                 
                 <div className="grid grid-cols-1 gap-8">
                     <div>
-                        <h3 className="mb-4 border-b border-[var(--site-border)] pb-2 text-lg font-bold text-[var(--site-text)]">DescriÃ§Ã£o</h3>
+                        <h3 className="mb-4 border-b border-[var(--site-border)] pb-2 text-lg font-bold text-[var(--site-text)]">Descrição</h3>
                         <div className="prose max-w-none text-[var(--site-soft)]">
                             {descriptionText ? (
                                 <div className="whitespace-pre-wrap">{descriptionText}</div>

@@ -38,10 +38,10 @@ export default function TopBar() {
         }
       } catch {}
       setMessages([
-        `Loja fÃ­sica em Campinas: ${SITE_CONFIG.addressShort || SITE_CONFIG.address}`,
-        `WhatsApp rÃ¡pido: ${SITE_CONFIG.whatsapp.display}`,
-        "Retire na loja ou consulte entrega para Campinas e regiÃ£o",
-        `HorÃ¡rio: ${SITE_CONFIG.openingHoursDisplay}`,
+        `Loja física em Campinas: ${SITE_CONFIG.addressShort || SITE_CONFIG.address}`,
+        `WhatsApp rápido: ${SITE_CONFIG.whatsapp.display}`,
+        "Retire na loja ou consulte entrega para Campinas e região",
+        `Horário: ${SITE_CONFIG.openingHoursDisplay}`,
         `Telefone: ${SITE_CONFIG.phone.display}`,
       ]);
     };
@@ -60,7 +60,7 @@ export default function TopBar() {
                {dolar && (
                 <>
                   <span className="mx-2 text-red-200">|</span>
-                  <span className="mx-4 font-bold text-yellow-300 bg-red-800 px-2 py-0.5 rounded">DÃ³lar Hoje: R$ {dolar}</span>
+                  <span className="mx-4 font-bold text-yellow-300 bg-red-800 px-2 py-0.5 rounded">Dólar Hoje: R$ {dolar}</span>
                 </>
               )}
             </div>

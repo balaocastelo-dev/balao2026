@@ -89,7 +89,7 @@ function productMatchesTerms(product: Product, terms: string[]) {
 }
 
 const homeBrands = [
-  "BalÃ£o.info",
+  "Balão.info",
   "Apple",
   "Dell",
   "Lenovo",
@@ -152,7 +152,7 @@ const homeHighlights = [
   },
   {
     title: "Games e Consoles",
-    description: "Categoria rápida para quem já quer chegar direto na vitrine certa.",
+    description: "Consoles e jogos com retirada rápida e entrega para Campinas e região.",
     icon: Gamepad2,
     href: "/?category=Games",
   },
@@ -805,11 +805,11 @@ export default async function Home(props: {
                   <HomeProductShelf
                     key={block.id}
                     title={block.title || block.category_id}
-                    subtitle={index % 2 === 0 ? "Seleção curada para compra rápida, retirada e comparação direta." : "Produtos que puxam busca, clique e decisão rápida na home."}
+                    subtitle={index % 2 === 0 ? "Seleção feita a dedo para compra rápida, retirada no dia e entrega sob consulta." : "Produtos em destaque para você comparar, escolher e levar sem complicação."}
                     products={blockProducts}
                     categoryId={block.category_id}
-                    bannerTitle={index % 2 === 0 ? "Pronto para retirar ou pedir no WhatsApp" : "Vitrine com foco em giro e alta intenção"}
-                    bannerText={index % 2 === 0 ? "Combine catálogo online com atendimento local para confirmar estoque, fechar pedido e sair com a solução certa." : "Mantive a lógica de vitrine horizontal da referência, mas com a identidade Balão e seus fluxos locais."}
+                    bannerTitle={index % 2 === 0 ? "Pronto para retirar ou pedir no WhatsApp" : "Ofertas selecionadas para você"}
+                    bannerText={index % 2 === 0 ? "Combine catálogo online com atendimento local para confirmar estoque, fechar pedido e sair com a solução certa." : "As melhores marcas e preços de informática em Campinas, com entrega rápida e garantia de fábrica."}
                   />
                 );
               })}
@@ -821,7 +821,7 @@ export default async function Home(props: {
               <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div>
                   <div className="text-[11px] font-black uppercase tracking-[0.22em] text-[var(--home-accent)]">
-                    Navegação orientada
+                    Explore a loja
                   </div>
                   <h1 className="mt-2 text-2xl font-black tracking-tight text-[var(--home-text)] md:text-4xl">
                     {category || `Resultados para: "${search}"`}
@@ -861,12 +861,12 @@ export default async function Home(props: {
           {!search && !category && (
             <SeoContent title="LOJA DE INFORMATICA EM CAMPINAS COM WHATSAPP, RETIRADA E ASSISTENCIA TECNICA">
               <p className="mb-4 text-[var(--home-muted)]">
-                A <strong>Balão da Informática Castelo</strong> é uma <strong>loja de informática em Campinas</strong> com foco direto em
-                conversão local: <strong>PC Gamer em Campinas</strong>, <strong>notebook em Campinas</strong>, peças para upgrade,
+                A <strong>Balão da Informática Castelo</strong> é uma <strong>loja de informática em Campinas</strong> pensada para atender você
+                com agilidade e atendimento local: <strong>PC Gamer em Campinas</strong>, <strong>notebook em Campinas</strong>, peças para upgrade,
                 periféricos, SSD, memória RAM, placa de vídeo e <strong>assistência técnica em Campinas</strong> com atendimento rápido
                 pelo WhatsApp. Quem procura <strong>loja de computador no Cambuí</strong>, <strong>comprar notebook em Campinas</strong>,
                 <strong>upgrade de PC</strong>, <strong>conserto de notebook</strong> ou <strong>peças de informática com retirada rápida</strong>
-                encontra aqui uma rota curta para tirar dúvidas, consultar estoque e fechar pedido com mais segurança.
+                encontra aqui o caminho mais rápido para tirar dúvidas, consultar estoque e fechar pedido com mais segurança.
               </p>
               <p className="mb-4 text-[var(--home-muted)]">
                 Nosso atendimento comercial e técnico é orientado para <strong>Campinas</strong> e para buscas locais em bairros como
@@ -874,8 +874,8 @@ export default async function Home(props: {
                 <strong> Nova Campinas</strong>, <strong>Castelo</strong>, <strong>Chapadão</strong>, <strong>Barão Geraldo</strong>,
                 <strong> Sousas</strong> e <strong>Swiss Park</strong>. Se você precisa de <strong>assistência de computador em Campinas</strong>,
                 <strong> manutenção de notebook</strong>, <strong>montagem de PC Gamer</strong>, <strong>upgrade com SSD e memória</strong>,
-                <strong> comprar periféricos</strong> ou <strong>retirar produto hoje</strong>, este bloco foi reforçado para deixar claro
-                para Google, IA e para o cliente final que a página atende intenção comercial local real.
+                <strong> comprar periféricos</strong> ou <strong>retirar produto hoje</strong>, a nossa equipe confirma estoque, prazo e preço
+                para você sair com a solução certa no mesmo dia.
               </p>
               <ul className="list-none space-y-3 pl-0 text-[var(--home-muted)]">
                 <li className="flex items-start gap-2">
@@ -884,7 +884,7 @@ export default async function Home(props: {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-xl">💬</span>
-                  <span><strong>Compra com alta intenção:</strong> fale no WhatsApp para confirmar estoque, melhor configuração, preço final, retirada, prazo e disponibilidade antes de sair de casa.</span>
+                  <span><strong>Compra facilitada:</strong> fale no WhatsApp para confirmar estoque, melhor configuração, preço final, retirada, prazo e disponibilidade antes de sair de casa.</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-xl">🚀</span>
@@ -892,7 +892,7 @@ export default async function Home(props: {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-xl">🏆</span>
-                  <span><strong>Diferencial que converte:</strong> loja real, atendimento humano, assistência técnica, pós-venda e orientação comercial para quem quer comprar certo sem perder tempo.</span>
+                  <span><strong>Por que comprar na Balão:</strong> loja real, atendimento humano, assistência técnica, pós-venda e orientação comercial para quem quer comprar certo sem perder tempo.</span>
                 </li>
               </ul>
             </SeoContent>

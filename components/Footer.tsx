@@ -37,7 +37,7 @@ export default function Footer() {
                 </div>
             </Link>
             <p className="mb-6 text-sm leading-relaxed">
-              Comércio e assistência técnica em informática. Tudo o que sua empresa e sua casa precisa em tecnologia.
+              Informática e assistência técnica em Campinas. Tudo para a sua casa e a sua empresa, com atendimento especializado.
             </p>
             <div className="flex gap-4">
               {([

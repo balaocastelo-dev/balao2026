@@ -101,7 +101,7 @@ export default function ApplyCoupon({ cartTotal, items, onApply }: ApplyCouponPr
                         disabled={loading || !code}
                         className="bg-gray-800 text-white px-4 py-2 rounded-md font-medium hover:bg-gray-900 transition-colors disabled:opacity-50 flex items-center"
                     >
-                        {loading ? <Loader2 size={18} className="animate-spin" /> : "Aplicar"}
+                        {loading ? <Loader2 size={18} className="animate-spin" /> : "Aplicar cupom"}
                     </button>
                 </div>
             )}

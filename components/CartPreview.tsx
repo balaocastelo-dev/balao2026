@@ -79,7 +79,7 @@ export default function CartPreview({ onClose }: { onClose?: () => void }) {
       <div className="border-t border-[var(--site-border)] bg-[var(--site-panel-muted)] p-4">
         {hasMore && (
             <div className="mb-3 text-center text-xs text-[var(--site-muted)]">
-                E mais {items.length - 3} produto(s)...
+                E mais {items.length - 3} produto(s) no seu carrinho
             </div>
         )}
         
@@ -96,7 +96,7 @@ export default function CartPreview({ onClose }: { onClose?: () => void }) {
                 className="flex items-center justify-center px-4 py-2 bg-[#E60012] rounded text-white font-bold text-sm hover:bg-[#cc0010] shadow-md transition-all active:scale-95"
                 onClick={onClose}
              >
-                Finalizar
+                Finalizar Compra
              </Link>
         </div>
       </div>
