@@ -311,7 +311,7 @@ export default async function Home(props: {
       rawProducts = await getProductsByExactCategories([...validCategories]);
     } else {
       const blockCategories = [...new Set(homeBlocks.map((block) => block.category_id).filter(Boolean))];
-      rawProducts = await getProductsByExactCategories(blockCategories, 12);
+      rawProducts = await getProductsByExactCategories(blockCategories);
     }
 
     // Deduplicate by name
@@ -337,7 +337,7 @@ export default async function Home(props: {
       const semiNovoDescendants = getDescendantNames(rootCategory.name, categories);
       semiNovoDescendants.forEach((name) => validSemiNovoCategories.add(name));
     });
-    const semiNovoAllProducts = await getProductsByExactCategories([...validSemiNovoCategories], 12);
+    const semiNovoAllProducts = await getProductsByExactCategories([...validSemiNovoCategories]);
     iphoneSemiNovoProducts = semiNovoAllProducts
       .filter((product) => productMatchesTerms(product, ["iphone", "apple iphone", "ios"]))
       .slice(0, 6);
