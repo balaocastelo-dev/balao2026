@@ -32,6 +32,20 @@ export function estimateReadingTimeMinutesFromHtml(html: string): number {
   return Math.max(1, Math.round(words / 200));
 }
 
+// Detecta conteúdo gerado a partir de produto sem texto real (thin content):
+// template genérico de fallback ou corpo curto demais. Posts assim só saem com
+// conteúdo real (título + texto), nunca apenas com o template repetido.
+export function isThinProductContent(input: { contentHtml: string; seoDescription: string }): boolean {
+  const text = stripHtmlToText(input.contentHtml).toLowerCase();
+  const description = String(input.seoDescription || "").toLowerCase();
+
+  if (text.length < 300) return true;
+  if (description.includes("entenda para quem o")) return true;
+  if (text.includes("atalhos úteis")) return true;
+  if (text.includes("boa opção para quem busca desempenho e confiabilidade")) return true;
+  return false;
+}
+
 export function withUtm(url: string, params: Record<string, string>): string {
   try {
     const u = new URL(url);

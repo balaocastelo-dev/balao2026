@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Notebooks em Campinas: Performance e Mobilidade | Balão da Informática",
+  title: "Notebooks em Campinas: Performance e Mobilidade",
   description:
     "Encontre o notebook ideal para trabalho, estudo ou games. Dell, Lenovo, Acer e Apple com garantia e entrega rápida em Campinas e região.",
   keywords: [

@@ -38,14 +38,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/reparoapple',
     '/telaiphone',
     '/tonner',
-    '/wendell/apple',
-    '/wendell/apple/blog',
-    '/wendell/apple/macbook',
-    '/wendell/apple/imac',
-    '/wendell/apple/ipad',
-    '/wendell/apple/iphone',
-    '/wendell/apple/apple-watch',
-    '/wendell/apple/mac-mini',
     '/como-comprar',
     '/envio-e-entrega',
     '/trocas-e-devolucoes',
@@ -68,12 +60,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Nota: getProducts já tem paginação interna, mas aqui vamos pegar tudo o que ele retornar
   // Se getProducts retornar muitos, pode ser lento.
   const products = await getProductsForSitemap(1000)
-  const productRoutes = products.map((product) => ({
-    url: `${baseUrl}/product/${product.slug || product.id}`,
-    lastModified: new Date(product.created_at || new Date()),
-    changeFrequency: 'weekly' as const,
-    priority: 0.6,
-  }))
+  const seenProductSlugs = new Set<string>()
+  const productRoutes = products
+    .filter((product) => {
+      if (seenProductSlugs.has(product.slug)) return false
+      seenProductSlugs.add(product.slug)
+      return true
+    })
+    .map((product) => ({
+      url: `${baseUrl}/product/${product.slug || product.id}`,
+      lastModified: new Date(product.created_at || new Date()),
+      changeFrequency: 'weekly' as const,
+      priority: 0.6,
+    }))
 
   const blogPosts = await listBlogPostsForPage({ take: 500 })
   const blogRoutes = blogPosts.map((post) => ({

@@ -33,6 +33,8 @@ import { getVitrinePageBySlug } from "@/lib/vitrine/db";
 import { makeCommercialCopy, pickComponentImage, pickPcHeroImage } from "@/lib/vitrine/core";
 import ProductMediaSwitcher from "@/components/ProductMediaSwitcher";
 import { enhanceImageUrl } from "@/lib/utils";
+import JsonLd, { generateBreadcrumbSchema, generateOrganizationSchema } from "@/components/JsonLd";
+import { SITE_CONFIG } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
@@ -78,6 +80,10 @@ function parsePriceToNumber(text: string): number {
 
 function formatBRL(value: number) {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
+}
+
+function priceValidUntilDate() {
+  return new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 }
 
 function badgeText(categoria: string) {
@@ -229,7 +235,7 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
   const page = await getVitrinePageBySlug(slug).catch(() => null);
   if (!page) return {};
 
-  const title = `${page.nome_pc} | Balão da Informática`;
+  const title = `${page.nome_pc}`;
   const description = `${page.nome_pc}. Confira detalhes e compre direto no site da Balão da Informática.`;
   const canonical = `https://www.balao.info/p/${page.slug}`;
   const ogImage = (page as any)?.images?.hero || pickPcHeroImage({ categoria: page.categoria } as any);
@@ -256,6 +262,49 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
 
   const priceText = priceTextFromPage(page as any);
   const hero = (page as any)?.images?.hero || pickPcHeroImage({ categoria: page.categoria } as any);
+
+  const canonical = `https://www.balao.info/p/${page.slug}`;
+  const breadcrumbItems = [
+    { name: "Home", item: "https://www.balao.info" },
+    { name: "PCs Montados", item: "https://www.balao.info/vitrine" },
+    { name: page.nome_pc, item: canonical },
+  ];
+
+  const priceNumber = parsePriceToNumber(priceText);
+  const offerPrice = Number.isFinite(priceNumber) && priceNumber > 0 ? priceNumber.toFixed(2) : undefined;
+  const priceValidUntil = priceValidUntilDate();
+
+  const specSummary = [page.processador, page.placa_video, page.memoria_ram, page.armazenamento]
+    .map((value) => String(value || "").trim())
+    .filter(Boolean)
+    .join(", ");
+
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: page.nome_pc,
+    image: hero,
+    url: canonical,
+    description: `${page.nome_pc} — PC ${page.categoria}${specSummary ? `. ${specSummary}.` : ""} Monte seu setup na Balão da Informática em Campinas.`,
+    brand: {
+      "@type": "Brand",
+      name: SITE_CONFIG.name,
+    },
+    ...(offerPrice
+      ? {
+          offers: {
+            "@type": "Offer",
+            url: canonical,
+            price: offerPrice,
+            priceCurrency: "BRL",
+            priceValidUntil,
+            availability: "https://schema.org/InStock",
+            itemCondition: "https://schema.org/NewCondition",
+            seller: { "@id": "https://www.balao.info/#store" },
+          },
+        }
+      : {}),
+  };
 
   const parts = {
     processador: page.processador,
@@ -400,6 +449,13 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
 
   return (
     <div className="text-gray-900 pb-24 md:pb-0 bg-[linear-gradient(180deg,#ffffff_0%,#ffffff_24%,#0b0d10_52%,#0b0d10_62%,#ffffff_88%,#ffffff_100%)]">
+      <JsonLd
+        data={[
+          generateOrganizationSchema(),
+          generateBreadcrumbSchema(breadcrumbItems),
+          productSchema,
+        ]}
+      />
       <header className="sticky top-0 z-30 border-b border-white/10 bg-[#0b0d10]/90 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center gap-4">
           <Link href="/" className="flex items-center gap-3">

@@ -88,15 +88,21 @@ export async function getProductsByCategory(categorySlug: string): Promise<Produ
   }
 }
 
-export async function getProductsByExactCategories(categoryNames: string[]): Promise<Product[]> {
+export async function getProductsByExactCategories(categoryNames: string[], limit?: number): Promise<Product[]> {
   try {
     const normalizedNames = [...new Set(categoryNames.map((name) => String(name || "").trim()).filter(Boolean))];
     if (normalizedNames.length === 0) return [];
 
-    const { data, error } = await supabase
+    let query = supabase
       .from('products')
       .select('*')
       .in('category', normalizedNames);
+
+    if (typeof limit === 'number' && limit > 0) {
+      query = query.limit(limit);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error("Error fetching products by exact categories:", error);
@@ -625,9 +631,11 @@ export async function getBlogPosts(input?: {
   limit?: number;
   category?: string;
   query?: string;
+  offset?: number;
 }): Promise<BlogPost[]> {
   try {
     const limit = Math.max(1, Math.min(100, input?.limit ?? 24));
+    const offset = Math.max(0, input?.offset ?? 0);
 
     const selectList =
       "id,slug,title,excerpt,cover_image,category,published_at,created_at,updated_at,source_url,canonical_url,seo_title,seo_description,reading_time_minutes";
@@ -637,7 +645,7 @@ export async function getBlogPosts(input?: {
       .select(selectList)
       .eq("status", "published")
       .order("published_at", { ascending: false })
-      .limit(limit);
+      .range(offset, offset + limit - 1);
 
     if (input?.category) {
       query = query.eq("category", input.category);

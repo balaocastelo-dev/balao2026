@@ -4,7 +4,7 @@ import { hasAdmin } from "@/lib/supabase-admin";
 import { insertBlogPost, insertBlogSourceItem, hasBlogSourceItem } from "@/lib/db";
 import { scrapeSiteProducts } from "@/lib/site-products";
 import { generateBlogPostFromProduct } from "@/lib/blog-ai";
-import { slugify } from "@/lib/blog-utils";
+import { slugify, isThinProductContent } from "@/lib/blog-utils";
 
 function isAuthorized(req: Request): boolean {
   const vercelCron = req.headers.get("x-vercel-cron");
@@ -63,9 +63,13 @@ export async function GET(req: Request) {
         category: "Ofertas Balão",
         slug,
         description: picked.description || undefined,
-      } as any,
+      },
       { slug, publishedAtIso, url: postUrl, productUrl: picked.url },
     );
+
+    if (isThinProductContent({ contentHtml: generated.content_html, seoDescription: generated.seo_description })) {
+      return NextResponse.json({ ok: true, inserted: 0, message: "Conteúdo insuficiente, item ignorado" });
+    }
 
     if (!hasAdmin) {
       return NextResponse.json({
@@ -112,8 +116,8 @@ export async function GET(req: Request) {
     } catch {}
 
     return NextResponse.json({ ok: true, inserted: 1, slug: inserted.slug, id: inserted.id, sourceUrl: picked.url });
-  } catch (error: any) {
-    return NextResponse.json({ ok: false, error: error?.message || "Erro" }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json({ ok: false, error: error instanceof Error ? error.message : "Erro" }, { status: 500 });
   }
 }
 

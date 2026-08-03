@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { hasAdmin } from "@/lib/supabase-admin";
-import { slugify } from "@/lib/blog-utils";
+import { slugify, isThinProductContent } from "@/lib/blog-utils";
 import { generateBlogPostFromProduct } from "@/lib/blog-ai";
 import { hasBlogSourceItem, insertBlogPost, insertBlogSourceItem } from "@/lib/db";
 import type { Product } from "@/lib/utils";
@@ -84,6 +84,10 @@ export async function GET(req: Request) {
       productUrl,
     });
 
+    if (isThinProductContent({ contentHtml: generated.content_html, seoDescription: generated.seo_description })) {
+      return NextResponse.json({ ok: true, inserted: 0, message: "Conteúdo insuficiente, post ignorado" });
+    }
+
     const priceText = String(product.price || "").trim();
     const excerpt = priceText ? `${priceText} — ${generated.excerpt}` : generated.excerpt;
 
@@ -120,7 +124,7 @@ export async function GET(req: Request) {
     } catch {}
 
     return NextResponse.json({ ok: true, inserted: 1, slug: inserted.slug, id: inserted.id, productId: product.id });
-  } catch (error: any) {
-    return NextResponse.json({ ok: false, error: error?.message || "Erro" }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json({ ok: false, error: error instanceof Error ? error.message : "Erro" }, { status: 500 });
   }
 }

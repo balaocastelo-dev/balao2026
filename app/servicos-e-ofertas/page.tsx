@@ -3,6 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { getProductsByCategory } from '@/lib/db'
 import { SITE_CONFIG } from '@/lib/config'
+import JsonLd, { generateBreadcrumbSchema, generateServiceSchema } from '@/components/JsonLd'
 import { 
   CheckCircle, 
   MessageCircle, 
@@ -30,7 +31,7 @@ import {
 } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Serviços de Informática e Ofertas Especiais | Balão da Informática Campinas',
+  title: 'Serviços de Informática e Ofertas Especiais',
   description:
     'Assistência técnica especializada em notebooks e computadores em Campinas. Promoções exclusivas de iPhone, Apple Watch e Monitores com entrega rápida. Mão de obra qualificada e garantia.',
   keywords: [
@@ -365,7 +366,19 @@ export default async function Page() {
 
   return (
     <main className="min-h-screen bg-zinc-50 font-sans selection:bg-red-900 selection:text-white">
-      
+      <JsonLd data={[
+        generateBreadcrumbSchema([
+          { name: 'Home', item: 'https://www.balao.info' },
+          { name: 'Serviços e Ofertas', item: 'https://www.balao.info/servicos-e-ofertas' }
+        ]),
+        generateServiceSchema({
+          name: 'Serviços de Informática em Campinas',
+          description: 'Assistência técnica especializada em notebooks e computadores em Campinas. Promoções exclusivas de iPhone, Apple Watch e Monitores com entrega rápida. Mão de obra qualificada e garantia.',
+          url: 'https://www.balao.info/servicos-e-ofertas',
+          serviceType: 'ITServices',
+        }),
+      ]} />
+
       {/* Header */}
       <header className="bg-white/95 backdrop-blur-sm fixed top-0 w-full z-50 border-b border-red-600 shadow-lg">
         <div className="container mx-auto px-4 py-3 flex justify-between items-center">

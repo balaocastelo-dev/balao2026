@@ -37,12 +37,12 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   let description = "Encontre os melhores produtos de informática no Balão da Informática.";
 
   if (slug === 'todos-os-produtos') {
-    title = "Todos os Produtos | Balão da Informática";
+    title = "Todos os Produtos";
     description = "Confira nosso catálogo completo de produtos de informática, hardware e periféricos.";
   } else {
     const category = categories.find(c => c.slug === slug);
     if (category) {
-      title = `${category.name} em Campinas | Balão da Informática`;
+      title = `${category.name} em Campinas`;
       description = `Compre ${category.name} com o melhor preço de Campinas. Hardware, Periféricos e Computadores com entrega rápida.`;
     }
   }

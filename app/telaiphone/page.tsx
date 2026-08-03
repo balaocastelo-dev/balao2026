@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import Header from '@/components/Header'
-import JsonLd, { generateOrganizationSchema, generateFAQSchema } from '@/components/JsonLd'
+import JsonLd, { generateBreadcrumbSchema, generateFAQSchema, generateOrganizationSchema, generateServiceSchema } from '@/components/JsonLd'
 import { 
   Smartphone, 
   Battery, 
@@ -82,6 +82,16 @@ function BlockHero() {
     <section className="relative min-h-[90vh] flex items-center bg-black text-white overflow-hidden pt-20">
       <JsonLd data={[
         generateOrganizationSchema(),
+        generateBreadcrumbSchema([
+          { name: 'Home', item: 'https://www.balao.info' },
+          { name: 'Troca de Tela e Bateria de iPhone', item: 'https://www.balao.info/telaiphone' }
+        ]),
+        generateServiceSchema({
+          name: 'Conserto de iPhone em Campinas (troca de tela e bateria)',
+          description: 'Troca de tela e bateria de iPhone em até 3 horas, com peças premium, garantia de 1 ano e vedação original, em Campinas.',
+          url: 'https://www.balao.info/telaiphone',
+          serviceType: 'RepairService',
+        }),
         generateFAQSchema(FAQS)
       ]} />
       {/* Background Effects */}

@@ -1,9 +1,10 @@
-import { Metadata } from 'next'
+﻿import { Metadata } from 'next'
 import Link from 'next/link'
 import Header from '@/components/Header'
 import { getProducts } from '@/lib/db'
 import ProductCarousel from '@/components/ProductCarousel'
-import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from '@/components/JsonLd'
+import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema, generateItemListSchema } from '@/components/JsonLd'
+import { Product } from '@/lib/utils'
 import { 
   CheckCircle, 
   MessageCircle, 
@@ -61,14 +62,14 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic'
 
 // Helper para filtrar produtos
-const getPromotionalProducts = (products: any[], categoryKeywords: string[]) => {
+const getPromotionalProducts = (products: Product[], categoryKeywords: string[]) => {
   return products.filter(p => {
     const text = (p.name + " " + (p.description || "")).toLowerCase()
     return categoryKeywords.some(k => text.includes(k))
   }).slice(0, 12)
 }
 
-function BlockHero() {
+function BlockHero({ products }: { products: Product[] }) {
   const breadcrumbItems = [
     { name: 'Home', item: 'https://www.balao.info' },
     { name: 'Promoção', item: 'https://www.balao.info/promocao' }
@@ -78,7 +79,8 @@ function BlockHero() {
     <section className="relative min-h-[85vh] flex items-center justify-center bg-black text-white overflow-hidden">
       <JsonLd data={[
         generateOrganizationSchema(),
-        generateBreadcrumbSchema(breadcrumbItems)
+        generateBreadcrumbSchema(breadcrumbItems),
+        generateItemListSchema(products.slice(0, 50), 'https://www.balao.info/promocao')
       ]} />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-900/40 via-black to-black"></div>
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
@@ -101,7 +103,7 @@ function BlockHero() {
 
         <div className="pt-4 md:pt-8 flex flex-col sm:flex-row justify-center gap-4 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300 px-4">
           <Link 
-             href="https://wa.me/5519993916723?text=Ol%C3%A1%2C%20vi%20as%20promo%C3%A7%C3%B5es%20no%20site%20e%20quero%20saber%20mais!"
+             href="https://wa.me/5519987510267?text=Ol%C3%A1%2C%20vi%20as%20promo%C3%A7%C3%B5es%20no%20site%20e%20quero%20saber%20mais!"
              target="_blank"
              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 md:px-8 md:py-4 rounded-full font-bold text-base md:text-lg transition-all shadow-lg shadow-purple-600/30 hover:scale-105 flex items-center justify-center gap-2 w-full sm:w-auto"
           >
@@ -261,7 +263,7 @@ function BlockPriceGuarantee() {
              <p className="text-purple-700/80">Achou mais barato em Campinas? Nós cobrimos a oferta da concorrência na hora!</p>
           </div>
           <Link 
-             href="https://wa.me/5519993916723?text=Achei%20mais%20barato%20e%20quero%20negociar!"
+             href="https://wa.me/5519987510267?text=Achei%20mais%20barato%20e%20quero%20negociar!"
              target="_blank"
              className="px-6 py-2 bg-purple-600 text-white rounded-lg font-bold text-sm hover:bg-purple-700 transition-colors"
           >
@@ -307,12 +309,17 @@ export default async function PromocaoPage() {
   const peripheralProducts = getPromotionalProducts(allProducts, ['teclado', 'mouse', 'headset', 'monitor', 'gamer'])
   const pcProducts = getPromotionalProducts(allProducts, ['pc', 'computador', 'notebook', 'gamer'])
 
+  const promoProducts = [...hardwareProducts, ...peripheralProducts, ...pcProducts].filter(
+    (product, index, list) =>
+      list.findIndex((candidate) => candidate.id === product.id) === index
+  )
+
   return (
     <div className="min-h-screen flex flex-col bg-black font-sans">
       <Header />
       <main className="flex-1">
         
-        <BlockHero />
+        <BlockHero products={promoProducts} />
 
         <div id="destaques" className="bg-zinc-950 py-20 relative overflow-hidden">
            <div className="container mx-auto px-4 relative z-10">
@@ -455,7 +462,7 @@ export default async function PromocaoPage() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
                  <a 
-                    href="https://wa.me/5519993916723?text=Quero%20aproveitar%20as%20ofertas%20do%20site!"
+                    href="https://wa.me/5519987510267?text=Quero%20aproveitar%20as%20ofertas%20do%20site!"
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="bg-white text-purple-900 px-8 py-5 rounded-full font-black text-xl hover:scale-105 transition-transform shadow-2xl flex items-center justify-center gap-3 w-full sm:w-auto"

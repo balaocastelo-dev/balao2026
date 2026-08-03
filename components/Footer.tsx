@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Facebook, Instagram, Mail, Phone, MapPin, ChevronDown, ChevronUp, CreditCard } from "lucide-react";
+import { Facebook, Instagram, Mail, Phone, MapPin, ChevronDown, ChevronUp, CreditCard, Youtube, Twitter } from "lucide-react";
 
 import { SITE_CONFIG } from "@/lib/config";
 
@@ -40,8 +40,23 @@ export default function Footer() {
               Comércio e assistência técnica em informática. Tudo o que sua empresa e sua casa precisa em tecnologia.
             </p>
             <div className="flex gap-4">
-              <a href={SITE_CONFIG.social.facebook} target="_blank" rel="noopener noreferrer" className="hover:text-[#E60012] transition-colors"><Facebook size={20} /></a>
-              <a href={SITE_CONFIG.social.instagram} target="_blank" rel="noopener noreferrer" className="hover:text-[#E60012] transition-colors"><Instagram size={20} /></a>
+              {([
+                { key: "instagram", label: "Instagram", Icon: Instagram },
+                { key: "facebook", label: "Facebook", Icon: Facebook },
+                { key: "youtube", label: "YouTube", Icon: Youtube },
+                { key: "x", label: "X (Twitter)", Icon: Twitter },
+              ] as const).filter(({ key }) => SITE_CONFIG.social[key]).map(({ key, label, Icon }) => (
+                <a
+                  key={key}
+                  href={SITE_CONFIG.social[key]}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  className="hover:text-[#E60012] transition-colors"
+                >
+                  <Icon size={20} />
+                </a>
+              ))}
             </div>
           </div>
 

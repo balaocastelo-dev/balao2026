@@ -5,7 +5,7 @@ import WhatsAppPanelClient from "@/components/WhatsAppPanelClient";
 import { isPainelAuthenticated } from "@/lib/painel-auth";
 
 export const metadata: Metadata = {
-  title: "WhatsApp | Balao da Informatica",
+  title: "WhatsApp",
   description: "Painel interno protegido do WhatsApp com QR Code e chat em tempo real.",
   robots: {
     index: false,

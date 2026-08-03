@@ -3,6 +3,7 @@ import { SITE_CONFIG } from "@/lib/config";
 import React from "react";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
+import JsonLd, { generateBreadcrumbSchema, generateServiceSchema } from "@/components/JsonLd";
 import { getProducts } from "@/lib/db";
 import { searchProducts } from "@/lib/searchUtils";
 import ProductCard from "@/components/ProductCard";
@@ -30,7 +31,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Licenças Microsoft em Campinas | Windows e Office Originais | Balão da Informática",
+  title: "Licenças Microsoft em Campinas | Windows e Office Originais",
   description:
     "Compre licenças originais Microsoft Windows 10, Windows 11, Office 365 e Office 2021. Chave de ativação imediata e vitalícia. Suporte para instalação em Campinas.",
   keywords: [
@@ -452,6 +453,18 @@ export default async function MicrosoftPage() {
 
   return (
     <main className="min-h-screen bg-white">
+      <JsonLd data={[
+        generateBreadcrumbSchema([
+          { name: "Home", item: "https://www.balao.info" },
+          { name: "Licenças Microsoft", item: "https://www.balao.info/microsoft" }
+        ]),
+        generateServiceSchema({
+          name: "Licenças Microsoft Originais em Campinas",
+          description: "Compre licenças originais Microsoft Windows 10, Windows 11, Office 365 e Office 2021. Chave de ativação imediata e vitalícia. Suporte para instalação em Campinas.",
+          url: "https://www.balao.info/microsoft",
+          serviceType: "ITServices",
+        }),
+      ]} />
       <BlockUrgency />
       <Header />
       <BlockHero />

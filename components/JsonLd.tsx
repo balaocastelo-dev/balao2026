@@ -22,7 +22,7 @@ export function generateOrganizationSchema() {
   return {
     "@context": "https://schema.org",
     "@type": ["ComputerStore", "Store", "LocalBusiness"],
-    "@id": "https://www.balao.info/#organization",
+    "@id": "https://www.balao.info/#store",
     name: SITE_CONFIG.name,
     url: "https://www.balao.info",
     image: "https://www.balao.info/logo.png",
@@ -84,7 +84,7 @@ export function generateProductSchema(product: Product) {
       priceValidUntil,
       availability: "https://schema.org/InStock",
       itemCondition: "https://schema.org/NewCondition",
-      seller: { "@id": "https://www.balao.info/#organization" },
+      seller: { "@id": "https://www.balao.info/#store" },
     },
   };
 }
@@ -154,7 +154,7 @@ export function generateServiceSchema({
     url,
     areaServed,
     provider: {
-      "@id": "https://www.balao.info/#organization",
+      "@id": "https://www.balao.info/#store",
     },
     availableChannel: {
       "@type": "ServiceChannel",

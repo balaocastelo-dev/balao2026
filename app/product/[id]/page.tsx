@@ -63,7 +63,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const canonical = getProductCanonicalPath(product.slug, product.id);
 
   return {
-    title: `${product.name} | Balão da Informática`,
+    title: `${product.name}`,
     description: `Compre ${product.name} por ${product.price}`,
     alternates: { canonical },
     openGraph: {

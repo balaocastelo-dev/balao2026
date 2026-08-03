@@ -225,13 +225,23 @@ export async function GET(req: Request) {
       .trim()
       .toLowerCase();
 
+    // Regra: apenas fontes de hardware / PC gamer / notebook. Portais genéricos
+    // (Canaltech, TecMundo etc.) foram removidos para evitar conteúdo duplicado.
+    const hardwareFeeds = [
+      "https://www.adrenaline.com.br/feed/",
+      "https://pichauarena.com.br/feed/",
+      "https://blog.kabum.com.br/feed/",
+      "https://www.hardware.com.br/feed/",
+      "https://www.techpowerup.com/rss/news",
+    ];
+
     const feedsFromEnv = parseCsvEnv("BLOG_RSS_FEEDS");
     const feeds =
       feedsFromEnv.length > 0
         ? feedsFromEnv
         : mode === "campinas"
           ? ["https://pox.globo.com/rss/g1/sp/campinas-regiao"]
-          : ["https://www.adrenaline.com.br/feed/", "https://www.tecmundo.com.br/rss", "https://canaltech.com.br/rss/"];
+          : hardwareFeeds;
 
     const startIndex = Math.abs(new Date().getUTCMinutes()) % feeds.length;
 
@@ -246,8 +256,8 @@ export async function GET(req: Request) {
         feedUrl = tryUrl;
         items = fetched;
         if (items.length > 0) break;
-      } catch (e: any) {
-        lastError = e?.message ? String(e.message) : "RSS fetch failed";
+      } catch (e: unknown) {
+        lastError = e instanceof Error ? e.message : "RSS fetch failed";
         continue;
       }
     }
@@ -274,10 +284,10 @@ export async function GET(req: Request) {
         try {
           const original = await fetchOriginalArticleHtml(item.url);
           if (original) {
-            (item as any).summary = original;
+            item.summary = original;
             if (!Array.isArray(item.imageUrls) || item.imageUrls.length === 0) {
               const firstImg = extractFirstImageUrlFromHtml(original);
-              if (firstImg) (item as any).imageUrls = [firstImg];
+              if (firstImg) item.imageUrls = [firstImg];
             }
           }
         } catch {}
@@ -335,7 +345,7 @@ export async function GET(req: Request) {
     }
 
     return NextResponse.json({ ok: true, inserted: 0, feedUrl, message: "Nenhum item novo" });
-  } catch (error: any) {
-    return NextResponse.json({ ok: false, error: error?.message || "Erro" }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json({ ok: false, error: error instanceof Error ? error.message : "Erro" }, { status: 500 });
   }
 }

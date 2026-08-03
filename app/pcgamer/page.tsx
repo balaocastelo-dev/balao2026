@@ -92,7 +92,7 @@ function BlockTrust() {
   )
 }
 export const metadata: Metadata = {
-  title: "PC Gamer em Campinas com Entrega Rápida | Balão da Informática",
+  title: "PC Gamer em Campinas com Entrega Rápida",
   description:
     "PC Gamer de alta performance em Campinas com montagem profissional, setups personalizados, garantia local e entrega rápida para Campinas, região metropolitana e envio para todo o Brasil.",
   keywords: [

@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Categoria Premium em Campinas | Balão da Informática",
+  title: "Categoria Premium em Campinas",
   description:
     "Produtos Premium em Campinas (Cambuí): seleção especial do Balão da Informática com disponibilidade no site/estoque, garantia e suporte real. Confira a categoria Premium.",
   keywords: [

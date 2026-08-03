@@ -5,7 +5,7 @@ import PainelLogoutButton from "@/components/PainelLogoutButton";
 import { isPainelAuthenticated } from "@/lib/painel-auth";
 
 export const metadata: Metadata = {
-  title: "Painel | Balao da Informatica",
+  title: "Painel",
   description: "Painel interno protegido por senha.",
   robots: {
     index: false,

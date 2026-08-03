@@ -1,4 +1,4 @@
-import { Metadata } from 'next'
+﻿import { Metadata } from 'next'
 import Header from '@/components/Header'
 import { SITE_CONFIG } from "@/lib/config";
 import { 
@@ -23,9 +23,10 @@ import {
 import Link from 'next/link'
 import ProductCarousel from '@/components/ProductCarousel'
 import { getProducts } from '@/lib/db'
+import JsonLd, { generateBreadcrumbSchema, generateServiceSchema } from '@/components/JsonLd'
 
 export const metadata: Metadata = {
-  title: 'Venda e Entrega de Toner em Campinas | Original e Compatível | Balão da Informática',
+  title: 'Venda e Entrega de Toner em Campinas | Original e Compatível',
   description: 'Compre Toner HP, Brother, Samsung e Canon com entrega rápida em Campinas e envio para todo Brasil. Preços de atacado e varejo. Consulte nosso estoque!',
   keywords: [
     'toner campinas',
@@ -68,6 +69,18 @@ export default async function TonnerPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-black font-sans text-zinc-100">
+      <JsonLd data={[
+        generateBreadcrumbSchema([
+          { name: 'Home', item: 'https://www.balao.info' },
+          { name: 'Toner', item: 'https://www.balao.info/tonner' }
+        ]),
+        generateServiceSchema({
+          name: 'Venda e Entrega de Toner em Campinas',
+          description: 'Compre Toner HP, Brother, Samsung e Canon com entrega rápida em Campinas e envio para todo Brasil. Preços de atacado e varejo.',
+          url: 'https://www.balao.info/tonner',
+          serviceType: 'Service',
+        }),
+      ]} />
       <Header />
       
       <main className="flex-1">
@@ -89,7 +102,7 @@ export default async function TonnerPage() {
                 Entrega rápida e garantia total.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="https://wa.me/5519993916723" target="_blank">
+                <Link href="https://wa.me/5519987510267" target="_blank">
                   <button className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-8 h-12 text-lg rounded-md font-medium transition-colors w-full sm:w-auto">
                     <Phone className="w-5 h-5 mr-2" />
                     Pedir via WhatsApp
@@ -241,7 +254,7 @@ export default async function TonnerPage() {
                     <li className="flex items-center gap-2"><CheckCircle2 className="w-5 h-5 text-blue-400" /> 10% OFF acima de 10 un.</li>
                     <li className="flex items-center gap-2"><CheckCircle2 className="w-5 h-5 text-blue-400" /> Frete Grátis acima de R$ 500</li>
                  </ul>
-                 <Link href="https://wa.me/5519993916723?text=Quero%20cotar%20acima%20de%205%20unidades" target="_blank" className="bg-white text-blue-900 px-8 py-4 rounded-full font-bold hover:scale-105 transition-transform inline-flex items-center gap-2">
+                 <Link href="https://wa.me/5519987510267?text=Quero%20cotar%20acima%20de%205%20unidades" target="_blank" className="bg-white text-blue-900 px-8 py-4 rounded-full font-bold hover:scale-105 transition-transform inline-flex items-center gap-2">
                     Solicitar Cotação em Lote <ArrowRight className="w-5 h-5" />
                  </Link>
               </div>
@@ -401,7 +414,7 @@ export default async function TonnerPage() {
            <div className="container mx-auto px-4 max-w-2xl">
               <h2 className="text-3xl font-bold mb-4">Ofertas Relâmpago</h2>
               <p className="mb-8 text-blue-100">Receba promoções exclusivas de toner direto no seu WhatsApp.</p>
-              <Link href="https://wa.me/5519993916723?text=Quero%20entrar%20na%20lista%20VIP" target="_blank" className="bg-white text-blue-600 px-8 py-4 rounded-full font-bold hover:bg-blue-50 transition-colors inline-flex items-center gap-2">
+              <Link href="https://wa.me/5519987510267?text=Quero%20entrar%20na%20lista%20VIP" target="_blank" className="bg-white text-blue-600 px-8 py-4 rounded-full font-bold hover:bg-blue-50 transition-colors inline-flex items-center gap-2">
                  Entrar no Grupo VIP <BadgePercent className="w-5 h-5" />
               </Link>
            </div>

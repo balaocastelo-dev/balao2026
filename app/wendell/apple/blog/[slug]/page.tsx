@@ -82,7 +82,7 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
       description: post.seo_description,
       images: [post.cover_image || fallbackImage],
     },
-    robots: { index: true, follow: true },
+    robots: { index: false, follow: false },
   };
 }
 

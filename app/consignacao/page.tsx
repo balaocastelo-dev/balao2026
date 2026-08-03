@@ -1,11 +1,11 @@
-import { Metadata } from 'next'
+﻿import { Metadata } from 'next'
 import Link from 'next/link'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { listVitrinePagesPublic } from '@/lib/vitrine/db'
 import { pickPcHeroImage } from '@/lib/vitrine/core'
 import ProductCarousel from '@/components/ProductCarousel'
-import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from '@/components/JsonLd'
+import JsonLd, { generateBreadcrumbSchema, generateOrganizationSchema, generateServiceSchema } from '@/components/JsonLd'
 import type { Product } from '@/lib/utils'
 import { 
   CheckCircle, 
@@ -291,7 +291,7 @@ function BlockLocation() {
             <h2 className="text-3xl font-black mb-4">TRAGA SEU EQUIPAMENTO</h2>
             <p className="text-xl text-zinc-400 mb-8">Av. Brasil, 1234 - Guanabara, Campinas - SP</p>
             <div className="flex flex-col md:flex-row gap-4 justify-center">
-               <a href="https://wa.me/5519993916723" className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-full font-bold flex items-center justify-center gap-2 transition-colors">
+               <a href="https://wa.me/5519987510267" className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-full font-bold flex items-center justify-center gap-2 transition-colors">
                   <MessageCircle /> Agendar Avaliação
                </a>
                <a href="https://goo.gl/maps/XYZ" target="_blank" className="bg-zinc-800 hover:bg-zinc-700 text-white px-8 py-4 rounded-full font-bold flex items-center justify-center gap-2 transition-colors">
@@ -343,7 +343,13 @@ function BlockHero() {
     <section className="relative min-h-[85vh] flex items-center justify-center bg-black text-white overflow-hidden">
       <JsonLd data={[
         generateOrganizationSchema(),
-        generateBreadcrumbSchema(breadcrumbItems)
+        generateBreadcrumbSchema(breadcrumbItems),
+        generateServiceSchema({
+          name: 'Venda de Computadores e Notebooks Usados em Consignação em Campinas',
+          description: 'Transforme seu computador ou notebook usado em dinheiro. Avaliação justa, segurança total e pagamento garantido em Campinas.',
+          url: 'https://www.balao.info/consignacao',
+          serviceType: 'Service',
+        }),
       ]} />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-green-900/40 via-black to-black"></div>
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
@@ -366,7 +372,7 @@ function BlockHero() {
 
         <div className="pt-4 md:pt-8 flex flex-col sm:flex-row justify-center gap-4 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300 px-4">
           <Link 
-             href="https://wa.me/5519993916723?text=Quero%20vender%20meu%20computador%20usado!"
+             href="https://wa.me/5519987510267?text=Quero%20vender%20meu%20computador%20usado!"
              target="_blank"
              className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 md:px-8 md:py-4 rounded-full font-bold text-base md:text-lg transition-all shadow-lg shadow-green-600/30 hover:scale-105 flex items-center justify-center gap-2 w-full sm:w-auto"
           >
@@ -482,7 +488,7 @@ function BlockUrgency() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
                <a 
-                  href="https://wa.me/5519993916723?text=Quero%20vender%20hoje!"
+                  href="https://wa.me/5519987510267?text=Quero%20vender%20hoje!"
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="bg-white text-green-900 px-8 py-5 rounded-full font-black text-xl hover:scale-105 transition-transform shadow-2xl flex items-center justify-center gap-3 w-full sm:w-auto"

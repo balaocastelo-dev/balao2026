@@ -7,7 +7,7 @@ import { FUNCOES_CATALOG, FUNCOES_TOTAL } from "@/lib/funcoes-catalog";
 import { isPainelAuthenticated } from "@/lib/painel-auth";
 
 export const metadata: Metadata = {
-  title: "Funcoes | Balao da Informatica",
+  title: "Funcoes",
   description: "Central protegida com atalhos para as funcoes do site.",
   robots: {
     index: false,

@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  const title = `${service.shortName} em ${city.name} | Balão da Informática`;
+  const title = `${service.shortName} em ${city.name}`;
   const description = `${service.headline} em ${city.name}. ${service.description} Atendimento rápido, WhatsApp e suporte da Balão da Informática.`;
   const canonical = `https://www.balao.info${buildRegionalServicePath(city.slug, service.slug)}`;
 

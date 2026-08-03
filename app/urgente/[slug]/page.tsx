@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const canonical = `https://www.balao.info/urgente/${intent.slug}`;
 
   return {
-    title: `${intent.title} | Balão da Informática`,
+    title: `${intent.title}`,
     description: intent.description,
     alternates: { canonical },
     openGraph: {

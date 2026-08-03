@@ -23,7 +23,7 @@ const HUB_FAQS = [
 ];
 
 export const metadata: Metadata = {
-  title: "Atendimento Urgente em Campinas | Balão da Informática",
+  title: "Atendimento Urgente em Campinas",
   description:
     "Páginas de alta intenção para quem precisa resolver notebook, PC, console ou Apple com urgência em Campinas.",
   alternates: { canonical: "https://www.balao.info/urgente" },

@@ -4,7 +4,7 @@ import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from "@/
 import { SITE_CONFIG } from "@/lib/config";
 
 export const metadata: Metadata = {
-  title: "Segurança e Privacidade | Balão da Informática",
+  title: "Segurança e Privacidade",
   description:
     "Política de privacidade, LGPD e certificados de segurança do Balão da Informática para compras online em todo o Brasil com foco em clientes de Campinas e região.",
   keywords: [

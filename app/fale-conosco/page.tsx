@@ -4,7 +4,7 @@ import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from "@/
 import { SITE_CONFIG } from "@/lib/config";
 
 export const metadata: Metadata = {
-  title: "Fale Conosco | Balão da Informática",
+  title: "Fale Conosco",
   description:
     "Entre em contato com o Balão da Informática por telefone, e-mail ou formulário. Atendimento para Campinas, região metropolitana e clientes de todo o Brasil.",
   keywords: [

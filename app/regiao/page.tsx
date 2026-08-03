@@ -15,7 +15,7 @@ import {
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "Atendimento em Campinas e Região | Balão da Informática",
+  title: "Atendimento em Campinas e Região",
   description:
     "Encontre atendimento local para assistência técnica, conserto de notebook, PC Gamer e reparo Apple em Campinas, Sumaré, Hortolândia, Paulínia, Valinhos e Vinhedo.",
   alternates: { canonical: "https://www.balao.info/regiao" },

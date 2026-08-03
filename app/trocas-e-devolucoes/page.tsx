@@ -4,7 +4,7 @@ import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from "@/
 import { SITE_CONFIG } from "@/lib/config";
 
 export const metadata: Metadata = {
-  title: "Trocas e Devoluções | Balão da Informática",
+  title: "Trocas e Devoluções",
   description:
     "Política de trocas, devoluções e garantias do Balão da Informática para clientes de Campinas, região metropolitana e todo o Brasil.",
   keywords: [

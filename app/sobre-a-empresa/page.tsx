@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from "@/components/JsonLd";
 
 export const metadata: Metadata = {
-  title: "Sobre a Empresa | Balão da Informática",
+  title: "Sobre a Empresa",
   description:
     "Dados corporativos, estrutura logística e lojas do Balão da Informática, referência nacional em informática com entrega rápida para Campinas e região.",
   keywords: [

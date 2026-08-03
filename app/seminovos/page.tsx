@@ -10,7 +10,7 @@ import { Laptop2, ShieldCheck, BadgeCheck, Truck, Award, CheckCircle2 } from "lu
 import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema, generateItemListSchema } from "@/components/JsonLd";
 
 export const metadata: Metadata = {
-  title: "Notebooks Seminovos em Campinas com Entrega Rápida | Balão da Informática",
+  title: "Notebooks Seminovos em Campinas com Entrega Rápida",
   description:
     "Notebooks usados e seminovos com garantia de 6 meses em Campinas, estoque real e entrega rápida para Campinas, Sumaré, Hortolândia, Paulínia, Valinhos e Vinhedo, com envio para todo o Brasil.",
   keywords: [

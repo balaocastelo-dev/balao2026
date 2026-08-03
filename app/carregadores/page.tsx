@@ -3,6 +3,7 @@ import React from "react";
 import { SITE_CONFIG } from "@/lib/config";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
+import JsonLd, { generateBreadcrumbSchema, generateServiceSchema } from "@/components/JsonLd";
 import { getProducts } from "@/lib/db";
 import { searchProducts } from "@/lib/searchUtils";
 import ProductCard from "@/components/ProductCard";
@@ -230,7 +231,7 @@ function BlockWarrantyDetails() {
 }
 
 export const metadata: Metadata = {
-  title: "Carregadores de Notebook em Campinas | Entrega em 60 Minutos | Balão da Informática",
+  title: "Carregadores de Notebook em Campinas | Entrega em 60 Minutos",
   description:
     "Carregadores originais e compatíveis para todas as marcas de notebook em Campinas. Dell, HP, Lenovo, Acer, Samsung, Asus. Entrega expressa em até 60 minutos.",
   keywords: [
@@ -471,6 +472,18 @@ export default async function CarregadoresPage() {
 
   return (
     <main className="min-h-screen bg-white">
+      <JsonLd data={[
+        generateBreadcrumbSchema([
+          { name: "Home", item: "https://www.balao.info" },
+          { name: "Carregadores de Notebook", item: "https://www.balao.info/carregadores" }
+        ]),
+        generateServiceSchema({
+          name: "Carregadores de Notebook em Campinas",
+          description: "Carregadores originais e compatíveis para todas as marcas de notebook em Campinas. Dell, HP, Lenovo, Acer, Samsung, Asus. Entrega expressa em até 60 minutos.",
+          url: "https://www.balao.info/carregadores",
+          serviceType: "Service",
+        }),
+      ]} />
       <BlockUrgencyBanner />
       <Header />
       <BlockHero />

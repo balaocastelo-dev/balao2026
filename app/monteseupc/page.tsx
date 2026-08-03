@@ -2,12 +2,12 @@ import { getProducts } from "@/lib/db";
 import PCBuilder from "@/components/PCBuilder";
 import { Monitor, Cpu, Settings } from "lucide-react";
 import Header from "@/components/Header";
-import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from "@/components/JsonLd";
+import JsonLd, { generateBreadcrumbSchema, generateOrganizationSchema, generateServiceSchema } from "@/components/JsonLd";
 import type { Metadata } from "next";
 import { SITE_CONFIG } from "@/lib/config";
 
 export const metadata: Metadata = {
-  title: "Monte seu PC Gamer em Campinas | Balão da Informática",
+  title: "Monte seu PC Gamer em Campinas",
   description: "Monte seu PC Gamer peça por peça, com verificação de compatibilidade e montagem profissional em Campinas.",
   alternates: { canonical: "https://www.balao.info/monteseupc" },
   openGraph: {
@@ -42,7 +42,13 @@ export default async function MonteSeuPCPage() {
     <div className="min-h-screen bg-zinc-100 font-sans">
       <JsonLd data={[
         generateOrganizationSchema(),
-        generateBreadcrumbSchema(breadcrumbItems)
+        generateBreadcrumbSchema(breadcrumbItems),
+        generateServiceSchema({
+          name: "Montagem de PC Gamer em Campinas",
+          description: "Monte seu PC Gamer peça por peça, com verificação de compatibilidade e montagem profissional em Campinas.",
+          url: "https://www.balao.info/monteseupc",
+          serviceType: "RepairService",
+        }),
       ]} />
       <Header />
       {/* Header Banner */}

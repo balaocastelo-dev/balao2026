@@ -9,7 +9,7 @@ import { SITE_CONFIG } from "@/lib/config";
 export const runtime = "nodejs";
 export const revalidate = 120;
 
-type SearchParams = { cat?: string; category?: string };
+type SearchParams = { cat?: string; category?: string; page?: string };
 
 type BlogCardPost = {
   id: string;
@@ -56,9 +56,11 @@ function isBalaoProductPromo(post: { category: string; sourceUrl: string | null;
 }
 
 export async function generateMetadata(props: { searchParams?: SearchParams }): Promise<Metadata> {
-  const title = "Blog Balão da Informática — Notícias, Guias e Ofertas";
+  const sp = await props.searchParams;
+  const page = Math.max(1, Number.parseInt(sp?.page || "1", 10) || 1);
+  const title = page > 1 ? `Notícias, Guias e Ofertas - Página ${page}` : "Notícias, Guias e Ofertas";
   const description = `Notícias de tecnologia, guias de compra e ofertas de informática. Compare opções e chame no WhatsApp ${SITE_CONFIG.whatsapp.display} para escolher o melhor setup.`;
-  const canonical = "/blog";
+  const canonical = page > 1 ? `/blog?page=${page}` : "/blog";
 
   return {
     title,
@@ -68,17 +70,28 @@ export async function generateMetadata(props: { searchParams?: SearchParams }): 
       type: "website",
       locale: "pt_BR",
       url: canonical,
-      title,
+      title: page > 1 ? `Blog Balão da Informática — Notícias, Guias e Ofertas - Página ${page}` : "Blog Balão da Informática — Notícias, Guias e Ofertas",
       description,
       siteName: SITE_CONFIG.name,
-      images: [{ url: ogHomeFallbackUrl("home") }],
+      images: [{ url: ogHomeFallbackUrl(`home-${page}`) }],
     },
     robots: { index: true, follow: true },
   };
 }
 
 export default async function BlogPage(props: { searchParams?: SearchParams }) {
-  const rawPosts = await listBlogPostsForPage({ take: 50 });
+  const sp = await props.searchParams;
+  const page = Math.max(1, Number.parseInt(sp?.page || "1", 10) || 1);
+  const categoryFilter = (sp?.category || sp?.cat || "").trim() || undefined;
+  const POSTS_PER_PAGE = 12;
+  // Página 1 usa o layout de revista (precisa de mais posts); páginas 2+ usam lista paginada.
+  const take = page === 1 ? 50 : POSTS_PER_PAGE;
+  const offset = page === 1 ? 0 : (page - 1) * POSTS_PER_PAGE;
+  const rawPosts = await listBlogPostsForPage({
+    take,
+    offset,
+    category: categoryFilter,
+  });
 
   const posts: BlogCardPost[] = rawPosts.map((p) => {
     const createdAt = p.created_at ? new Date(p.created_at) : new Date();
@@ -134,13 +147,26 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
     },
   ]);
 
+  const itemList = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: posts.map((post, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url: `https://www.balao.info/blog/${post.slug}`,
+      name: post.title,
+    })),
+    url: "https://www.balao.info/blog",
+    numberOfItems: posts.length,
+  };
+
   const org = generateOrganizationSchema();
 
   return (
     <div className="min-h-screen flex flex-col font-sans">
       <Header />
       <main className="flex-1 mx-auto w-full max-w-7xl px-4 py-8">
-        <JsonLd data={[org, breadcrumbs, faq]} />
+        <JsonLd data={[org, breadcrumbs, faq, itemList]} />
 
         <section className="mb-6 rounded-md border border-neutral-200 bg-white p-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -256,6 +282,35 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
               <div className="mt-8 p-8 text-center text-sm text-neutral-600">
                 Ainda não há posts publicados. Aguarde a ingestão automática via RSS/Produtos.
               </div>
+            )}
+
+            {posts.length > 0 && (
+              <nav
+                aria-label="Paginação do blog"
+                className="mt-8 flex items-center justify-between gap-4 border-t border-neutral-200 pt-6"
+              >
+                {page > 1 ? (
+                  <Link
+                    href={`/blog?page=${page - 1}${categoryFilter ? `&category=${encodeURIComponent(categoryFilter)}` : ""}`}
+                    className="inline-flex items-center gap-1 rounded-md border border-neutral-200 bg-white px-4 py-2 text-sm font-bold text-neutral-900 hover:bg-neutral-50"
+                  >
+                    ← Anteriores
+                  </Link>
+                ) : (
+                  <span />
+                )}
+                <span className="text-xs font-semibold text-neutral-500">Página {page}</span>
+                {rawPosts.length >= POSTS_PER_PAGE ? (
+                  <Link
+                    href={`/blog?page=${page + 1}${categoryFilter ? `&category=${encodeURIComponent(categoryFilter)}` : ""}`}
+                    className="inline-flex items-center gap-1 rounded-md border border-neutral-200 bg-white px-4 py-2 text-sm font-bold text-neutral-900 hover:bg-neutral-50"
+                  >
+                    Próximos →
+                  </Link>
+                ) : (
+                  <span />
+                )}
+              </nav>
             )}
           </div>
 

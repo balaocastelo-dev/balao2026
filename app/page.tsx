@@ -183,7 +183,7 @@ const homeServicePillars = [
 export async function generateMetadata(props: { searchParams: SearchParams }): Promise<Metadata> {
   const sp = await props.searchParams;
   const hasFacet = Boolean((sp?.category || "").trim() || (sp?.search || "").trim());
-  const title = "Loja de Informática em Campinas | PC Gamer, Notebook e Assistência Técnica";
+  const title = "Loja de Informática em Campinas | PC Gamer e Notebook";
   const description =
     "Balão da Informática Castelo: loja física em Campinas para PC Gamer, notebooks, peças, upgrades e assistência técnica. Compre pelo WhatsApp, retire no Cambuí ou consulte entrega rápida.";
   const canonical = "https://www.balao.info/";
@@ -311,7 +311,7 @@ export default async function Home(props: {
       rawProducts = await getProductsByExactCategories([...validCategories]);
     } else {
       const blockCategories = [...new Set(homeBlocks.map((block) => block.category_id).filter(Boolean))];
-      rawProducts = await getProductsByExactCategories(blockCategories);
+      rawProducts = await getProductsByExactCategories(blockCategories, 12);
     }
 
     // Deduplicate by name
@@ -337,7 +337,7 @@ export default async function Home(props: {
       const semiNovoDescendants = getDescendantNames(rootCategory.name, categories);
       semiNovoDescendants.forEach((name) => validSemiNovoCategories.add(name));
     });
-    const semiNovoAllProducts = await getProductsByExactCategories([...validSemiNovoCategories]);
+    const semiNovoAllProducts = await getProductsByExactCategories([...validSemiNovoCategories], 12);
     iphoneSemiNovoProducts = semiNovoAllProducts
       .filter((product) => productMatchesTerms(product, ["iphone", "apple iphone", "ios"]))
       .slice(0, 6);

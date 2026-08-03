@@ -4,7 +4,7 @@ import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from "@/
 import { SITE_CONFIG } from "@/lib/config";
 
 export const metadata: Metadata = {
-  title: "Sobre Nós | Balão da Informática",
+  title: "Sobre Nós",
   description:
     "Conheça a história, missão e valores do Balão da Informática, loja de informática com entrega rápida em Campinas e região e envio para todo o Brasil.",
   keywords: [

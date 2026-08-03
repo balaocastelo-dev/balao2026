@@ -1,4 +1,4 @@
-import { Metadata } from 'next'
+﻿import { Metadata } from 'next'
 import Link from 'next/link'
 import Header from '@/components/Header'
 import QuickLeadSection from '@/components/QuickLeadSection'
@@ -180,7 +180,7 @@ function BlockNational() {
                 </div>
                 <div className="mt-12">
                     <Link 
-                        href="https://wa.me/5519993916723?text=Quero%20enviar%20meu%20equipamento%20pelos%20Correios"
+                        href="https://wa.me/5519987510267?text=Quero%20enviar%20meu%20equipamento%20pelos%20Correios"
                         target="_blank"
                         className="bg-white text-blue-900 px-8 py-4 rounded-full font-bold hover:scale-105 transition-transform inline-flex items-center gap-2"
                     >
@@ -225,7 +225,7 @@ function BlockHero() {
 
         <div className="pt-4 md:pt-8 flex flex-col sm:flex-row justify-center gap-4 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300 px-4">
           <Link 
-             href="https://wa.me/5519993916723?text=Preciso%20de%20assist%C3%AAncia%20t%C3%A9cnica%20para%20meu%20computador!"
+             href="https://wa.me/5519987510267?text=Preciso%20de%20assist%C3%AAncia%20t%C3%A9cnica%20para%20meu%20computador!"
              target="_blank"
              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 md:px-8 md:py-4 rounded-full font-bold text-base md:text-lg transition-all shadow-lg shadow-blue-600/30 hover:scale-105 flex items-center justify-center gap-2 w-full sm:w-auto"
           >
@@ -329,7 +329,7 @@ function ServiceCard({ service }: { service: ServiceItem }) {
                         </div>
                     </div>
                     <Link 
-                        href={`https://wa.me/5519993916723?text=Olá, gostaria de agendar manutenção para: ${service.title}`}
+                        href={`https://wa.me/5519987510267?text=Olá, gostaria de agendar manutenção para: ${service.title}`}
                         target="_blank"
                         className="mt-6 w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-xl font-bold text-center text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-600/20"
                     >
@@ -376,7 +376,7 @@ function BlockCategory({ category, isDark = true, reverse = false }: { category:
 
               <div className="block pt-2">
                  <Link 
-                    href="https://wa.me/5519993916723"
+                    href="https://wa.me/5519987510267"
                     target="_blank"
                     className={`inline-flex items-center gap-2 md:gap-3 font-bold text-base md:text-lg hover:underline ${isDark ? 'text-blue-400' : 'text-blue-600'}`}
                  >
@@ -433,7 +433,7 @@ function BlockUrgency() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
                <a 
-                  href="https://wa.me/5519993916723?text=SOS%20Manuten%C3%A7%C3%A3o%20Urgente!"
+                  href="https://wa.me/5519987510267?text=SOS%20Manuten%C3%A7%C3%A3o%20Urgente!"
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="bg-white text-blue-900 px-8 py-5 rounded-full font-black text-xl hover:scale-105 transition-transform shadow-2xl flex items-center justify-center gap-3 w-full sm:w-auto"

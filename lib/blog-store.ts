@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { fetchRssItems, shouldSkipRssItemForBlog, type RssItem } from "@/lib/rss";
-import { slugify } from "@/lib/blog-utils";
+import { slugify, isThinProductContent } from "@/lib/blog-utils";
 import { generateBlogPostFromRss } from "@/lib/blog-ai";
 import { getBlogPostBySlug, getBlogPosts } from "@/lib/db";
 import { scrapeSiteProducts } from "@/lib/site-products";
@@ -23,7 +23,7 @@ export type BlogPostView = {
   canonical_url: string | null;
   seo_title: string | null;
   seo_description: string | null;
-  json_ld: any;
+  json_ld: Record<string, unknown> | null;
   reading_time_minutes: number | null;
 };
 
@@ -35,8 +35,8 @@ const getDbPostsCached = cache(async (limit: number, category: string | undefine
 });
 
 const getCachedBlogPostsForPage = unstable_cache(
-  async (take: number, category?: string) => {
-    return getBlogPosts({ limit: take, category });
+  async (take: number, category: string | undefined, offset: number) => {
+    return getBlogPosts({ limit: take, category, offset });
   },
   ["blog-posts-for-page"],
   { revalidate: 120, tags: ["blog"] }
@@ -198,7 +198,15 @@ function getDefaultFeeds(): string[] {
 
   if (fromEnv.length > 0) return fromEnv;
 
-  return ["https://www.adrenaline.com.br/feed/", "https://www.tecmundo.com.br/rss", "https://canaltech.com.br/rss/"];
+  // Regra: apenas fontes de hardware / PC gamer / notebook. Portais genéricos
+  // (Canaltech, TecMundo etc.) foram removidos para evitar conteúdo duplicado.
+  return [
+    "https://www.adrenaline.com.br/feed/",
+    "https://pichauarena.com.br/feed/",
+    "https://blog.kabum.com.br/feed/",
+    "https://www.hardware.com.br/feed/",
+    "https://www.techpowerup.com/rss/news",
+  ];
 }
 
 function normalizeCategory(input: string | null | undefined): string {
@@ -311,9 +319,13 @@ async function buildDynamicProductPosts(): Promise<BlogPostView[]> {
         category: "Ofertas Balão",
         slug,
         description: p.description || undefined,
-      } as any,
+      },
       { slug, publishedAtIso: created, url, productUrl: p.url },
     );
+
+    if (isThinProductContent({ contentHtml: generated.content_html, seoDescription: generated.seo_description })) {
+      continue;
+    }
 
     const priceText = String(p.priceText || "").trim();
     const excerpt = priceText ? `${priceText} — ${generated.excerpt}` : generated.excerpt;
@@ -341,8 +353,9 @@ async function buildDynamicProductPosts(): Promise<BlogPostView[]> {
   return posts;
 }
 
-export async function listBlogPostsForPage(input?: { category?: string; take?: number; skipDynamicFallback?: boolean }): Promise<BlogPostView[]> {
+export async function listBlogPostsForPage(input?: { category?: string; take?: number; skipDynamicFallback?: boolean; offset?: number }): Promise<BlogPostView[]> {
   const take = Math.max(1, Math.min(80, input?.take ?? 50));
+  const offset = Math.max(0, input?.offset ?? 0);
   const category = input?.category ? normalizeCategory(input.category) : undefined;
 
   const normalizeTextForMatch = (s: string) =>
@@ -379,7 +392,7 @@ export async function listBlogPostsForPage(input?: { category?: string; take?: n
   };
 
   if (isSupabaseReadable()) {
-    const dbPosts = await getCachedBlogPostsForPage(take, category);
+    const dbPosts = await getCachedBlogPostsForPage(take, category, offset);
     if (dbPosts.length > 0) {
       const mapped = dbPosts.map((p) => ({
         id: p.id,
@@ -401,12 +414,12 @@ export async function listBlogPostsForPage(input?: { category?: string; take?: n
       }));
 
       if (category) {
-        return sortByPublishedDesc(mapped).filter((p) => !isThirdPartySalesPost(p)).slice(0, take);
+        return sortByPublishedDesc(mapped).filter((p) => !isThirdPartySalesPost(p)).slice(offset, offset + take);
       }
 
       const rss = mapped.filter((p) => kindOfPost(p) === "rss").filter((p) => !isThirdPartySalesPost(p));
       const products = mapped.filter((p) => kindOfPost(p) === "product");
-      return mixRssAndProductPosts({ rss, products, take, maxConsecutiveProducts: 1 });
+      return mixRssAndProductPosts({ rss, products, take: take + offset, maxConsecutiveProducts: 1 }).slice(offset, offset + take);
     }
   }
 
@@ -419,15 +432,15 @@ export async function listBlogPostsForPage(input?: { category?: string; take?: n
   if (category) {
     return sortByPublishedDesc(merged.filter((p) => p.category === category))
       .filter((p) => !isThirdPartySalesPost(p))
-      .slice(0, take);
+      .slice(offset, offset + take);
   }
 
   return mixRssAndProductPosts({
     rss: rssPosts.filter((p) => !isThirdPartySalesPost(p)),
     products: productPosts,
-    take,
+    take: take + offset,
     maxConsecutiveProducts: 1,
-  });
+  }).slice(offset, offset + take);
 }
 
 export async function getBlogPostForPage(slug: string): Promise<BlogPostView | null> {

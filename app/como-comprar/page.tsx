@@ -4,7 +4,7 @@ import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from "@/
 import { SITE_CONFIG } from "@/lib/config";
 
 export const metadata: Metadata = {
-  title: "Como Comprar | Balão da Informática",
+  title: "Como Comprar",
   description:
     "Guia passo a passo para comprar com segurança no Balão da Informática, loja de informática online com entrega rápida para Campinas e região e envio para todo o Brasil.",
   keywords: [

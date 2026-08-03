@@ -1,4 +1,4 @@
-import { Metadata } from 'next'
+﻿import { Metadata } from 'next'
 import Header from '@/components/Header'
 import { 
   Smartphone, 
@@ -22,9 +22,10 @@ import Link from 'next/link'
 import ProductCarousel from '@/components/ProductCarousel'
 import { getProducts } from '@/lib/db'
 import { SITE_CONFIG } from "@/lib/config";
+import JsonLd, { generateBreadcrumbSchema, generateServiceSchema } from '@/components/JsonLd'
 
 export const metadata: Metadata = {
-  title: 'Conserto de iPhone e iPad em Campinas | Assistência Apple Especializada | Balão da Informática',
+  title: 'Conserto de iPhone e iPad em Campinas | Assistência Apple Especializada',
   description: 'Assistência Técnica Especializada Apple em Campinas. Troca de tela iPhone, bateria, conector de carga, Face ID e reparo de placa. Peças premium e garantia.',
   keywords: [
     'conserto iphone campinas',
@@ -237,6 +238,18 @@ export default async function ReparoApplePage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-black font-sans text-zinc-100">
+      <JsonLd data={[
+        generateBreadcrumbSchema([
+          { name: 'Home', item: 'https://www.balao.info' },
+          { name: 'Conserto de iPhone e iPad', item: 'https://www.balao.info/reparoapple' }
+        ]),
+        generateServiceSchema({
+          name: 'Conserto de iPhone e iPad em Campinas',
+          description: 'Assistência Técnica Especializada Apple em Campinas. Troca de tela, bateria, conector de carga, Face ID e reparo de placa com peças premium e garantia.',
+          url: 'https://www.balao.info/reparoapple',
+          serviceType: 'ComputerRepair',
+        }),
+      ]} />
       <Header />
       
       <main className="flex-1">
@@ -258,7 +271,7 @@ export default async function ReparoApplePage() {
                 Técnicos certificados e laboratório de ponta em Campinas.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="https://wa.me/5519993916723" target="_blank">
+                <Link href="https://wa.me/5519987510267" target="_blank">
                   <button className="inline-flex items-center justify-center bg-white text-black hover:bg-zinc-200 px-8 h-12 text-lg rounded-md font-medium transition-colors w-full sm:w-auto">
                     <Phone className="w-5 h-5 mr-2" />
                     Orçamento Grátis

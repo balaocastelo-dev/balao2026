@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from "@/components/JsonLd";
 
 export const metadata: Metadata = {
-  title: "Envio e Entrega | Balão da Informática",
+  title: "Envio e Entrega",
   description:
     "Informações sobre frete, prazos e formas de entrega do Balão da Informática, com foco em entrega rápida para Campinas e região e envio para todo o Brasil.",
   keywords: [

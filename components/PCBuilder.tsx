@@ -410,7 +410,7 @@ export default function PCBuilder({ products }: PCBuilderProps) {
     
     message += `\n*Total:* ${formatPrice(totalPrice)}`;
     
-    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+    window.open(`https://wa.me/5519987510267?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   return (

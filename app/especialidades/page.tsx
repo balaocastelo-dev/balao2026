@@ -64,7 +64,7 @@ const AUTHORITY_FAQS = [
 ];
 
 export const metadata: Metadata = {
-  title: "Especialidades em Informática | Balão da Informática",
+  title: "Especialidades em Informática",
   description:
     "Conheça as principais especialidades da Balão da Informática: assistência técnica, notebooks, PC Gamer, Apple, recuperação de dados e atendimento regional.",
   alternates: { canonical: "https://www.balao.info/especialidades" },

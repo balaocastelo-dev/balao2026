@@ -21,7 +21,7 @@ import {
 import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from '@/components/JsonLd';
 
 export const metadata: Metadata = {
-  title: 'Departamentos e Categorias | Balão da Informática Campinas',
+  title: 'Departamentos e Categorias',
   description: 'Explore todos os departamentos de informática. Hardware, Periféricos, Computadores, Notebooks e muito mais. Encontre o que você precisa em Campinas.',
   keywords: ['departamentos informatica', 'categorias hardware', 'loja informatica campinas', 'comprar pc', 'peças computador'],
   alternates: {
@@ -64,11 +64,25 @@ export default async function DepartamentosPage() {
     { name: 'Departamentos', item: 'https://www.balao.info/departamentos' }
   ];
 
+  const itemList = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    itemListElement: rootCategories.map((category, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      url: `https://www.balao.info/categoria/${category.slug}`,
+      name: category.name
+    })),
+    url: 'https://www.balao.info/departamentos',
+    numberOfItems: rootCategories.length
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
       <JsonLd data={[
         generateOrganizationSchema(),
-        generateBreadcrumbSchema(breadcrumbItems)
+        generateBreadcrumbSchema(breadcrumbItems),
+        itemList
       ]} />
       
       {/* Header Simples */}
