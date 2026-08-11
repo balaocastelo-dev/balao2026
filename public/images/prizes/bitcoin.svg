@@ -1,0 +1,11 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fundo Moeda -->
+  <circle cx="100" cy="100" r="95" fill="#F7931A" stroke="#E08310" stroke-width="5"/>
+  <circle cx="100" cy="100" r="85" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-dasharray="5,5"/>
+  
+  <!-- Símbolo B -->
+  <text x="100" y="110" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="120" font-weight="bold" fill="white" transform="rotate(10 100 100)" filter="drop-shadow(3px 3px 0px rgba(0,0,0,0.2))">₿</text>
+  
+  <!-- Brilho -->
+  <ellipse cx="60" cy="60" rx="30" ry="15" fill="rgba(255,255,255,0.2)" transform="rotate(-45 60 60)"/>
+</svg>

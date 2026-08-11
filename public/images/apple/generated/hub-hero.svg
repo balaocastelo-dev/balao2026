@@ -1,0 +1,158 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1200" viewBox="0 0 1600 1200">
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f3f4f6"/>
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#e5e7eb"/>
+    </linearGradient>
+    <linearGradient id="brandRed" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff2a2a"/>
+      <stop offset="100%" stop-color="#b30d12"/>
+    </linearGradient>
+    <linearGradient id="counterLight" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f3f4f6"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#000000" flood-opacity="0.16"/>
+    </filter>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000000" flood-opacity="0.10"/>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="1200" fill="url(#wall)"/>
+  <rect x="0" y="830" width="1600" height="370" fill="url(#floor)"/>
+
+  <circle cx="190" cy="70" r="22" fill="#ffffff" opacity="0.96"/>
+  <circle cx="540" cy="70" r="22" fill="#ffffff" opacity="0.96"/>
+  <circle cx="885" cy="70" r="22" fill="#ffffff" opacity="0.96"/>
+  <circle cx="1230" cy="70" r="22" fill="#ffffff" opacity="0.96"/>
+  <circle cx="1480" cy="70" r="22" fill="#ffffff" opacity="0.96"/>
+
+  <rect x="70" y="40" width="760" height="500" rx="8" fill="url(#brandRed)" filter="url(#softShadow)"/>
+  <rect x="900" y="0" width="48" height="830" fill="url(#brandRed)"/>
+  <rect x="1280" y="0" width="320" height="830" fill="url(#brandRed)"/>
+
+  <rect x="930" y="120" width="315" height="620" rx="10" fill="#ffffff" filter="url(#softShadow)"/>
+  <rect x="1310" y="120" width="235" height="620" rx="10" fill="#ffffff" filter="url(#softShadow)"/>
+  <rect x="942" y="145" width="291" height="42" fill="#be1116"/>
+  <rect x="1322" y="145" width="211" height="42" fill="#be1116"/>
+  <text x="1087" y="174" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#ffffff">ACESSORIOS</text>
+  <text x="1428" y="174" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#ffffff">ORIGINAIS</text>
+
+  <g opacity="0.98">
+    <rect x="970" y="220" width="40" height="90" rx="6" fill="#161616"/>
+    <rect x="1018" y="220" width="40" height="90" rx="6" fill="#1f2937"/>
+    <rect x="1066" y="220" width="40" height="90" rx="6" fill="#ef4444"/>
+    <rect x="1114" y="220" width="40" height="90" rx="6" fill="#111827"/>
+    <rect x="1162" y="220" width="40" height="90" rx="6" fill="#dc2626"/>
+    <rect x="970" y="334" width="40" height="90" rx="6" fill="#111827"/>
+    <rect x="1018" y="334" width="40" height="90" rx="6" fill="#2563eb"/>
+    <rect x="1066" y="334" width="40" height="90" rx="6" fill="#111827"/>
+    <rect x="1114" y="334" width="40" height="90" rx="6" fill="#ef4444"/>
+    <rect x="1162" y="334" width="40" height="90" rx="6" fill="#111827"/>
+    <rect x="970" y="448" width="40" height="90" rx="6" fill="#ef4444"/>
+    <rect x="1018" y="448" width="40" height="90" rx="6" fill="#111827"/>
+    <rect x="1066" y="448" width="40" height="90" rx="6" fill="#2563eb"/>
+    <rect x="1114" y="448" width="40" height="90" rx="6" fill="#111827"/>
+    <rect x="1162" y="448" width="40" height="90" rx="6" fill="#ef4444"/>
+    <rect x="970" y="562" width="40" height="90" rx="6" fill="#111827"/>
+    <rect x="1018" y="562" width="40" height="90" rx="6" fill="#ef4444"/>
+    <rect x="1066" y="562" width="40" height="90" rx="6" fill="#111827"/>
+    <rect x="1114" y="562" width="40" height="90" rx="6" fill="#2563eb"/>
+    <rect x="1162" y="562" width="40" height="90" rx="6" fill="#111827"/>
+  </g>
+
+  <g opacity="0.98">
+    <rect x="1350" y="220" width="34" height="88" rx="6" fill="#111827"/>
+    <rect x="1394" y="220" width="34" height="88" rx="6" fill="#ef4444"/>
+    <rect x="1438" y="220" width="34" height="88" rx="6" fill="#111827"/>
+    <rect x="1482" y="220" width="34" height="88" rx="6" fill="#2563eb"/>
+    <rect x="1350" y="334" width="34" height="88" rx="6" fill="#ef4444"/>
+    <rect x="1394" y="334" width="34" height="88" rx="6" fill="#111827"/>
+    <rect x="1438" y="334" width="34" height="88" rx="6" fill="#ef4444"/>
+    <rect x="1482" y="334" width="34" height="88" rx="6" fill="#111827"/>
+    <rect x="1350" y="448" width="34" height="88" rx="6" fill="#111827"/>
+    <rect x="1394" y="448" width="34" height="88" rx="6" fill="#2563eb"/>
+    <rect x="1438" y="448" width="34" height="88" rx="6" fill="#111827"/>
+    <rect x="1482" y="448" width="34" height="88" rx="6" fill="#ef4444"/>
+  </g>
+
+  <g transform="translate(120 120)">
+    <g transform="translate(0 10) scale(2.2)">
+      <path d="M55 10 C82 10 101 34 101 59 C101 86 83 108 55 133 C27 108 9 86 9 59 C9 34 28 10 55 10 Z" fill="#ff3434"/>
+      <path d="M28 57 C28 38 40 24 55 18 C48 31 46 48 46 86 C38 78 28 66 28 57 Z" fill="#ffffff"/>
+      <path d="M45 18 C58 28 60 43 60 88 C55 94 55 94 50 88 C50 42 48 28 45 18 Z" fill="#ffffff"/>
+      <path d="M61 18 C73 28 77 42 77 79 C73 84 70 88 66 91 C66 42 64 27 61 18 Z" fill="#ffffff"/>
+      <path d="M77 24 C86 31 92 43 92 57 C92 67 84 79 71 92 C77 57 79 36 77 24 Z" fill="#ffffff"/>
+    </g>
+    <text x="270" y="160" font-family="Arial, Helvetica, sans-serif" font-size="92" font-weight="800" fill="#ff3434">Balao da</text>
+    <text x="270" y="255" font-family="Arial, Helvetica, sans-serif" font-size="92" font-weight="800" fill="#ff3434">Informatica</text>
+    <text x="270" y="330" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700" fill="#ffb4b4">
+      COMERCIO E ASSISTENCIA TECNICA EM INFORMATICA
+    </text>
+  </g>
+
+  <rect x="275" y="580" width="330" height="215" rx="6" fill="#cf181d" filter="url(#softShadow)"/>
+  <text x="440" y="655" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="36" font-weight="800" fill="#ffffff">
+    ASSISTENCIA TECNICA
+  </text>
+  <text x="440" y="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="36" font-weight="800" fill="#ffffff">
+    ESPECIALIZADA
+  </text>
+  <text x="440" y="748" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="#ffe5e5">
+    Computadores  •  Notebooks  •  Redes
+  </text>
+
+  <g filter="url(#shadow)">
+    <path d="M80 815 H760 L820 930 V1140 H0 V930 Z" fill="url(#counterLight)"/>
+    <path d="M80 815 H760 L790 860 H50 Z" fill="#ffffff"/>
+    <rect x="83" y="1118" width="737" height="16" fill="#ff6b6b" opacity="0.65"/>
+  </g>
+
+  <rect x="90" y="965" width="170" height="110" rx="8" fill="#ef4444"/>
+  <text x="175" y="1012" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="800" fill="#ffffff">ASSISTENCIA</text>
+  <text x="175" y="1040" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="800" fill="#ffffff">TECNICA</text>
+
+  <rect x="170" y="845" width="200" height="120" rx="6" fill="#1f2937" filter="url(#softShadow)"/>
+  <rect x="185" y="860" width="170" height="88" fill="#111827"/>
+
+  <g transform="translate(560 735)">
+    <circle cx="0" cy="78" r="44" fill="#8b5e3c"/>
+    <rect x="-56" y="126" width="112" height="178" rx="28" fill="#d7262b"/>
+    <rect x="-50" y="126" width="100" height="26" rx="13" fill="#ffffff" opacity="0.2"/>
+    <rect x="-48" y="302" width="96" height="108" rx="18" fill="#d7262b"/>
+    <rect x="-14" y="250" width="28" height="100" rx="14" fill="#8b5e3c"/>
+    <path d="M16 250 C60 270 104 308 108 356 C92 380 58 390 30 368 C22 330 18 292 16 250 Z" fill="#8b5e3c"/>
+    <path d="M-16 58 C-12 28 12 8 44 2 C68 18 80 46 74 72 C42 92 10 92 -16 58 Z" fill="#5b3a29"/>
+  </g>
+
+  <g transform="translate(1240 800)">
+    <circle cx="0" cy="60" r="42" fill="#8b5e3c"/>
+    <path d="M-84 112 C-38 92 34 92 88 118 L130 270 C56 308 -28 312 -110 274 Z" fill="#2b2f36"/>
+    <path d="M-26 50 C6 18 48 18 74 38 C56 66 18 84 -26 50 Z" fill="#2b2f36"/>
+    <rect x="-40" y="250" width="66" height="140" rx="28" fill="#2b2f36"/>
+  </g>
+
+  <g transform="translate(920 870)" filter="url(#softShadow)">
+    <rect x="0" y="0" width="510" height="250" rx="30" fill="#ffffff"/>
+    <rect x="34" y="34" width="196" height="42" rx="21" fill="url(#brandRed)"/>
+    <text x="132" y="61" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#ffffff">
+      Atendimento especializado
+    </text>
+    <text x="34" y="126" font-family="Arial, Helvetica, sans-serif" font-size="42" font-weight="800" fill="#111827">
+      Especialista Apple
+    </text>
+    <text x="34" y="172" font-family="Arial, Helvetica, sans-serif" font-size="25" fill="#4b5563">
+      Campinas, Cambui e bairros proximos
+    </text>
+    <text x="34" y="210" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="#6b7280">
+      Atendimento rapido com foco em conversao
+    </text>
+  </g>
+</svg>

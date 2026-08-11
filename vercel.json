@@ -1,0 +1,11 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "next build",
+  "devCommand": "next dev",
+  "installCommand": "npm install",
+  "crons": [
+    { "path": "/api/cron/blog-rss", "schedule": "* * * * *" },
+    { "path": "/api/cron/blog-product", "schedule": "* * * * *" },
+    { "path": "/api/cron/blog-balao-item", "schedule": "* * * * *" }
+  ]
+}
