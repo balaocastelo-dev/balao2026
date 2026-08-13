@@ -385,9 +385,19 @@ export default function ImportPage() {
         body: JSON.stringify({ products: finalProducts }),
       });
 
+      const text = await res.text();
+      let data: any = null;
+      try { data = text ? JSON.parse(text) : null; } catch { data = null; }
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "Falha ao salvar");
+        const details =
+          data?.error ||
+          (text
+            ? `Resposta não-JSON do servidor: ${text.replace(/\s+/g, " ").slice(0, 300)}`
+            : `HTTP ${res.status} — falha ao salvar produtos`);
+        throw new Error(details);
+      }
+      if (data == null && text) {
+        try { data = JSON.parse(text); } catch { data = { success: true, raw: text }; }
       }
 
       const appliedCatsSummary = uniqueCategoryNames.length > 0
@@ -405,9 +415,9 @@ export default function ImportPage() {
         })
       });
 
-      const data = await res.json();
       setStatus("success");
-      setMessage(`${data.count} produtos importados com sucesso!${categoriesToCreate.length > 0 ? ` (${categoriesToCreate.length} categoria(s) criada(s))` : ""}`);
+      const finalCount = (data && typeof data === "object") ? Number(data.count ?? finalProducts.length) : finalProducts.length;
+      setMessage(`${finalCount} produtos importados com sucesso!${categoriesToCreate.length > 0 ? ` (${categoriesToCreate.length} categoria(s) criada(s))` : ""}`);
       setText("");
       setParsedProducts([]);
       setImportStep("input");
