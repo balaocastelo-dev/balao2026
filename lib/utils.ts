@@ -291,6 +291,274 @@ export function parsePriceToNumber(value: unknown): number {
   return Number.isFinite(num) ? num : 0;
 }
 
+export type ColumnRole =
+  | "product_url"
+  | "image"
+  | "name"
+  | "price"
+  | "category"
+  | "ignore";
+
+export type ColumnMapping = Record<number, ColumnRole>;
+
+export interface ExtractedRaw {
+  columns: string[][];
+  headers: string[] | null;
+  detectedColumnCount: number;
+}
+
+export function extractRawColumns(text: string): ExtractedRaw {
+  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const allColumns: string[][] = [];
+  let maxCols = 0;
+
+  for (const line of lines) {
+    const cols = line.split("\t").map(c => c.trim());
+    if (cols.length > 0) {
+      allColumns.push(cols);
+      if (cols.length > maxCols) maxCols = cols.length;
+    }
+  }
+
+  if (maxCols === 0) return { columns: [], headers: null, detectedColumnCount: 0 };
+
+  const looksLikeHeaderLine = (columns: string[]): boolean => {
+    if (!columns || columns.length === 0) return true;
+    const hasAnyHttp = columns.some(c => /^https?:\/\//i.test(String(c || "").trim()));
+    if (hasAnyHttp) return false;
+    const hasAlphabetic = columns.some(c => /[a-zA-ZçÇáàâãéêíóôõúü]/.test(String(c || "").trim()));
+    const hasNoNumericPrice = !columns.some(c => /(?:R\$\s*)?\d{1,3}(?:[.,]\d+)+/.test(String(c || "").trim()));
+    return hasAlphabetic && hasNoNumericPrice;
+  };
+
+  let headers: string[] | null = null;
+  let startIdx = 0;
+  if (allColumns.length > 0 && looksLikeHeaderLine(allColumns[0])) {
+    headers = allColumns[0].slice();
+    while (headers.length < maxCols) headers.push("");
+    startIdx = 1;
+  }
+
+  const dataColumns = allColumns.slice(startIdx).map(row => {
+    const copy = row.slice();
+    while (copy.length < maxCols) copy.push("");
+    return copy;
+  }).filter(row => row.some(cell => cell !== ""));
+
+  return {
+    columns: dataColumns,
+    headers,
+    detectedColumnCount: maxCols,
+  };
+}
+
+const __isLikelyPrice = (value: unknown): boolean => {
+  const raw = String(value || "").trim();
+  if (!raw) return false;
+  if (/^R\$\s*\d/i.test(raw)) return true;
+  if (/^\d{1,3}(?:\.\d{3})*(?:,\d{1,2})?$|^\d+(?:,\d{1,2})?$/.test(raw) && /\d/.test(raw)) return true;
+  if (/^\d+\.\d{2}$/.test(raw)) return true;
+  return false;
+};
+
+const __isLikelyImageUrl = (value: unknown): boolean => {
+  const raw = String(value || "").trim();
+  if (!/^https?:\/\//i.test(raw)) return false;
+  if (/\.(?:jpg|jpeg|png|webp|gif|svg|avif|bmp)(?:[?#]|$)/i.test(raw)) return true;
+  return /image|img|foto|produto|photo|picture|medium|large|original|media|images\./i.test(raw);
+};
+
+const __isLikelyProductUrl = (value: unknown): boolean => {
+  const raw = String(value || "").trim();
+  if (!/^https?:\/\//i.test(raw)) return false;
+  if (__isLikelyImageUrl(raw)) return false;
+  return /\/produto\//i.test(raw)
+    || /\/product\//i.test(raw)
+    || /\/p\//i.test(raw)
+    || /\/dp\//i.test(raw)
+    || /\/categoria\//i.test(raw) === false;
+};
+
+export function autoGuessMapping(raw: ExtractedRaw): ColumnMapping {
+  const { columns, headers, detectedColumnCount } = raw;
+  const mapping: ColumnMapping = {};
+  for (let i = 0; i < detectedColumnCount; i++) mapping[i] = "ignore";
+  if (detectedColumnCount === 0 || columns.length === 0) return mapping;
+
+  const sampleSize = Math.min(25, columns.length);
+  const sample = columns.slice(0, sampleSize);
+
+  const score = (idx: number) => {
+    let s = { product_url: 0, image: 0, name: 0, price: 0, category: 0 };
+    if (headers && headers[idx]) {
+      const h = String(headers[idx]).toLowerCase();
+      if (/prod(uto)?.*(url|link)|href|link|product/i.test(h)) s.product_url += 25;
+      if (/img|image|foto|picture|src|photo|thumb|imagem/i.test(h)) s.image += 25;
+      if (/nome|t[ií]tulo|prod(uto)?\s*$|name|title|descri[cç][aã]o\s*curta/i.test(h)) s.name += 25;
+      if (/pre[cç]o|price|valor|custo|r\$/i.test(h)) s.price += 25;
+      if (/categ(oria)?|cat\b|grupo|departamento|classif/i.test(h)) s.category += 25;
+    }
+    for (const row of sample) {
+      const v = row[idx] || "";
+      if (!v) continue;
+      if (__isLikelyImageUrl(v)) s.image += 6;
+      if (__isLikelyProductUrl(v)) s.product_url += 6;
+      if (__isLikelyPrice(v)) s.price += 6;
+      if (v.length > 15 && !/^http/i.test(v) && !__isLikelyPrice(v)) s.name += 2;
+      if (/[->]|\b(?:hardware|software|acessorio|acessórios|periferico|notebook|monitor|fonte|memória|memoria|processador|gabinete|placa|ssd|hd|armazenamento)\b/i.test(v)) s.category += 3;
+      if (v.length <= 80 && v.length > 2 && /[a-zA-Záàâãéêíóôõúü]/.test(v) && !/^http/i.test(v) && !__isLikelyPrice(v) && !v.includes(",")) s.category += 1;
+    }
+    return s;
+  };
+
+  const scores = Array.from({ length: detectedColumnCount }, (_, i) => ({ i, s: score(i) }));
+
+  const pickBest = (role: ColumnRole, usedIdx: Set<number>): number => {
+    let bestIdx = -1;
+    let bestScore = -Infinity;
+    for (const { i, s } of scores) {
+      if (usedIdx.has(i)) continue;
+      const val = (s as any)[role] as number;
+      if (val > bestScore) { bestScore = val; bestIdx = i; }
+    }
+    if (bestScore > 0) return bestIdx;
+    return -1;
+  };
+
+  const used = new Set<number>();
+  const tryAssign = (role: ColumnRole) => {
+    const idx = pickBest(role, used);
+    if (idx !== -1) { mapping[idx] = role; used.add(idx); }
+  };
+
+  tryAssign("price");
+  tryAssign("image");
+  tryAssign("product_url");
+  tryAssign("name");
+  tryAssign("category");
+
+  const assignDefaultsByPosition = () => {
+    const available: number[] = [];
+    for (let i = 0; i < detectedColumnCount; i++) if (!used.has(i)) available.push(i);
+    if (available.length === 0) return;
+
+    const need: ColumnRole[] = [];
+    (["product_url","image","name","price","category"] as ColumnRole[]).forEach(r => {
+      if (!Object.values(mapping).includes(r)) need.push(r);
+    });
+    if (need.length === 0) return;
+
+    if (available.length >= 5) {
+      for (let k = 0; k < need.length && k < available.length; k++) mapping[available[k]] = need[k];
+    } else if (available.length >= 4) {
+      const simple: ColumnRole[] = ["image","name","price","category"];
+      for (let k = 0; k < Math.min(4, available.length); k++) mapping[available[k]] = simple[k];
+    } else if (available.length >= 3) {
+      const simple: ColumnRole[] = ["image","name","price"];
+      for (let k = 0; k < Math.min(3, available.length); k++) mapping[available[k]] = simple[k];
+    }
+  };
+
+  if (!Object.values(mapping).includes("name") || !Object.values(mapping).includes("price") || !Object.values(mapping).includes("image")) {
+    assignDefaultsByPosition();
+  }
+
+  return mapping;
+}
+
+const sanitizeProductName = (raw: unknown): string => {
+  let s = String(raw || '').trim();
+  s = s.replace(/[`´‘’"]/g, '');
+  s = s.replace(/\s+/g, ' ');
+  return s.trim();
+};
+
+const extractCategoryLeaf = (raw: unknown): string => {
+  const full = String(raw || '').trim();
+  if (!full) return '';
+  if (!full.includes('>')) return full;
+  const parts = full.split('>').map(p => p.trim()).filter(Boolean);
+  return parts[parts.length - 1] || full;
+};
+
+export function buildProductsByMapping(
+  raw: ExtractedRaw,
+  mapping: ColumnMapping,
+  defaultCategory: string = "Hardware"
+): Product[] {
+  const { columns } = raw;
+  if (columns.length === 0) return [];
+
+  let priceIdx = -1;
+  let nameIdx = -1;
+  let productUrlIdx = -1;
+  let categoryIdx = -1;
+  const imageIndices: number[] = [];
+  for (const [kStr, role] of Object.entries(mapping)) {
+    const k = Number(kStr);
+    if (!Number.isFinite(k)) continue;
+    if (role === "price") priceIdx = k;
+    else if (role === "name") nameIdx = k;
+    else if (role === "product_url") productUrlIdx = k;
+    else if (role === "category") categoryIdx = k;
+    else if (role === "image") imageIndices.push(k);
+  }
+
+  const products: Product[] = [];
+  for (let rowId = 0; rowId < columns.length; rowId++) {
+    const row = columns[rowId];
+    const priceRaw = priceIdx >= 0 ? String(row[priceIdx] || "").trim() : "";
+    const nameRaw = nameIdx >= 0 ? String(row[nameIdx] || "").trim() : "";
+    const imageCandidates: string[] = [];
+    for (const i of imageIndices) {
+      const v = String(row[i] || "").trim();
+      if (v) imageCandidates.push(v);
+    }
+    if (imageIndices.length === 0) {
+      for (let i = 0; i < row.length; i++) {
+        const v = String(row[i] || "").trim();
+        if (/^https?:\/\/.*\.(?:jpg|jpeg|png|webp|gif|svg|avif|bmp)(?:[?#]|$)/i.test(v)) imageCandidates.push(v);
+      }
+    }
+
+    const imageUrl = imageCandidates[0] || "";
+    if (!imageUrl.startsWith('http') || !nameRaw || !priceRaw) continue;
+
+    let productUrl = productUrlIdx >= 0 ? String(row[productUrlIdx] || "").trim() : "";
+    if (productUrl && !/^https?:\/\//i.test(productUrl)) productUrl = "";
+
+    const categoryRaw = categoryIdx >= 0 ? String(row[categoryIdx] || "").trim() : "";
+
+    const finalName = sanitizeProductName(nameRaw);
+    const slug = finalName.length > 0
+      ? finalName.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-")
+      : `prod-${Date.now()}-${rowId}`;
+
+    const priceFormatted = /^R\$\s*/i.test(priceRaw) ? priceRaw : `R$ ${priceRaw}`;
+
+    const imageUrlsDeduped: string[] = [];
+    const seen = new Set<string>();
+    for (const u of imageCandidates) {
+      const s = u.trim();
+      if (!s || !/^https?:\/\//i.test(s) || seen.has(s)) continue;
+      seen.add(s);
+      imageUrlsDeduped.push(s);
+    }
+
+    products.push({
+      id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `row-${Date.now()}-${rowId}-${Math.random().toString(36).slice(2, 10)}`,
+      name: finalName,
+      price: priceFormatted,
+      image: imageUrl,
+      image_urls: imageUrlsDeduped.length > 0 ? imageUrlsDeduped : [imageUrl],
+      product_url: productUrl,
+      category: extractCategoryLeaf(categoryRaw) || "",
+      slug,
+    } as any);
+  }
+  return products;
+}
+
 export function parseProducts(text: string): Product[] {
     const products: Product[] = [];
     const lines = text.split('\n');
@@ -423,6 +691,23 @@ export function parseProducts(text: string): Product[] {
         if (imageUrl.startsWith('http') && name && price) {
           const enhancedImage = enhanceImageUrl(imageUrl);
 
+          const allImageUrls: string[] = [];
+          const seenImgs = new Set<string>();
+          const pushImg = (u: string) => {
+            const s = String(u || "").trim();
+            if (!s || !/^https?:\/\//i.test(s) || seenImgs.has(s)) return;
+            seenImgs.add(s);
+            allImageUrls.push(enhanceImageUrl(s));
+          };
+          if (enhancedImage) pushImg(enhancedImage);
+          for (const p of parts) {
+            const v = String(p || "").trim();
+            if (!v) continue;
+            if (!/^https?:\/\//i.test(v)) continue;
+            if (!/^(?!.*\b(?:product|produto|page|pdp)\b).*$/i.test(v) && /\.(?:jpg|jpeg|png|webp|gif|svg|avif|bmp)(?:[?#]|$)/i.test(v)) pushImg(v);
+            else if (/image|img|foto|photo|picture|medium|large|original|cdn|\.(?:jpg|jpeg|png|webp|gif|svg|avif|bmp)/i.test(v)) pushImg(v);
+          }
+
           const brands = [
               /\bconnect\s*barra\s*inform[aá]tica\b/gi,
               /\bkalango[-\s]*games\b/gi,
@@ -471,6 +756,7 @@ export function parseProducts(text: string): Product[] {
             name: finalName,
             price: /^R\$\s*/i.test(price) ? price : `R$ ${price}`,
             image: enhancedImage,
+            image_urls: allImageUrls.length > 0 ? allImageUrls : [enhancedImage],
             product_url: productUrl,
             category: category || "",
             slug,
