@@ -295,19 +295,54 @@ export function parseProducts(text: string): Product[] {
     const products: Product[] = [];
     const lines = text.split('\n');
 
+    const looksLikeHeaderLine = (columns: string[]): boolean => {
+      if (!columns || columns.length === 0) return true;
+      const hasAnyHttp = columns.some(c => /^https?:\/\//i.test(String(c || '').trim()));
+      if (hasAnyHttp) return false;
+      const hasAlphabetic = columns.some(c => /[a-zA-ZçÇáàâãéêíóôõúü]/.test(String(c || '').trim()));
+      const hasNoNumericPrice = !columns.some(c => /(?:R\$\s*)?\d{1,3}(?:[.,]\d+)+/.test(String(c || '').trim()));
+      return hasAlphabetic && hasNoNumericPrice;
+    };
+
+    const isLikelyPrice = (value: unknown): boolean => {
+      const raw = String(value || '').trim();
+      if (!raw) return false;
+      if (/^R\$\s*\d/i.test(raw)) return true;
+      return /^\d{1,3}(?:\.\d{3})*(?:,\d{1,2})?$|^\d+(?:,\d{1,2})?$/.test(raw) && /\d/.test(raw);
+    };
+
+    const sanitizeProductName = (raw: unknown): string => {
+      let s = String(raw || '').trim();
+      s = s.replace(/[`´‘’"]/g, '');
+      s = s.replace(/\s+/g, ' ');
+      return s.trim();
+    };
+
+    const extractCategoryLeaf = (raw: unknown): string => {
+      const full = String(raw || '').trim();
+      if (!full) return '';
+      if (!full.includes('>')) return full;
+      const parts = full.split('>').map(p => p.trim()).filter(Boolean);
+      return parts[parts.length - 1] || full;
+    };
+
     for (let line of lines) {
       line = line.trim();
       if (!line) continue;
 
-      let parts = line.split('\t');
+      let parts = line.split('\t').map(p => p.trim()).filter(p => p.length > 0);
 
       if (parts.length < 3) {
-          const regex = /(https?:\/\/[^\s]+)\s+(.+?)\s+(R\$\s*[\d\.,]+|[\d\.,]+)(?:\s+(.+))?/;
+          const regex = /(https?:\/\/[^\s]+)\s+(.+?)\s+(R\$\s*[\d\.,]+|\d{1,3}(?:\.\d{3})*(?:,\d{1,2})?|\d+(?:,\d{1,2})?)(?:\s+(.+))?/;
           const match = line.match(regex);
           if (match) {
               parts = [match[1], match[2], match[3]];
               if (match[4]) parts.push(match[4]);
           }
+      }
+
+      if (looksLikeHeaderLine(parts)) {
+        continue;
       }
 
       if (parts.length >= 3) {
@@ -318,35 +353,71 @@ export function parseProducts(text: string): Product[] {
         let category = "";
 
         if (parts.length >= 5) {
-          productUrl = parts[0].trim();
-          imageUrl = parts[1].trim();
-          name = parts[2].trim();
-          price = parts[3].trim();
-          category = parts[4].trim();
-        } else if (parts.length === 4) {
-          const firstIsHttp = parts[0].trim().startsWith('http');
-          const lastIsPrice = /(?:R\$\s*)?[\d\.,]+/.test(parts[parts.length - 1].trim()) &&
-                            !parts[parts.length - 1].trim().match(/^[a-zA-ZçÇáàâãéêíóôõúüÁÀÂÃÉÊÍÓÔÕÚÜ]/);
-          if (firstIsHttp && lastIsPrice) {
-            productUrl = parts[0].trim();
-            imageUrl = parts[1].trim();
-            name = parts[2].trim();
-            price = parts[3].trim();
-          } else if (firstIsHttp) {
-            imageUrl = parts[0].trim();
-            name = parts[1].trim();
-            price = parts[2].trim();
-            category = parts[3].trim();
+          const first = parts[0];
+          const second = parts[1];
+          const fourth = parts[3];
+          const fifth = parts[4];
+
+          const firstIsHttp = /^https?:\/\//i.test(first);
+          const secondIsHttp = /^https?:\/\//i.test(second);
+          const fourthIsPrice = isLikelyPrice(fourth);
+          const fifthIsPrice = isLikelyPrice(fifth);
+
+          if (firstIsHttp && secondIsHttp && fourthIsPrice) {
+            productUrl = first;
+            imageUrl = second;
+            name = sanitizeProductName(parts[2]);
+            price = fourth;
+            category = extractCategoryLeaf(fifth);
           } else {
-            imageUrl = parts[0].trim();
-            name = parts[1].trim();
-            price = parts[2].trim();
-            category = parts[3].trim();
+            let imageIdx = parts.findIndex(p => /^https?:\/\/.*\.(?:jpg|jpeg|png|webp|gif|svg|avif|bmp)(?:[?#]|$)/i.test(p));
+            if (imageIdx === -1) imageIdx = parts.findIndex(p => /^https?:\/\//i.test(p) && /image|img|foto|produto|photo|picture|medium|large|original/i.test(p));
+            if (imageIdx === -1) imageIdx = parts.findIndex(p => /^https?:\/\//i.test(p));
+            const prodIdx = imageIdx > 0 ? parts.findIndex((p, i) => i < imageIdx && /^https?:\/\//i.test(p)) : -1;
+            const priceIdx = parts.findIndex((p, i) => i !== imageIdx && i !== prodIdx && isLikelyPrice(p));
+
+            if (prodIdx !== -1) productUrl = parts[prodIdx];
+            if (imageIdx !== -1) imageUrl = parts[imageIdx];
+            if (priceIdx !== -1) price = parts[priceIdx];
+
+            const takenIdx = new Set<number>();
+            [prodIdx, imageIdx, priceIdx].forEach(i => { if (i !== -1) takenIdx.add(i); });
+            const remaining = parts.map((p, i) => ({ p, i })).filter(x => !takenIdx.has(x.i)).map(x => x.p);
+            if (remaining.length >= 2) {
+              name = sanitizeProductName(remaining[0]);
+              category = extractCategoryLeaf(remaining[1]);
+            } else if (remaining.length === 1) {
+              if (!imageUrl || !productUrl) {
+                if (!imageUrl) imageUrl = remaining[0];
+                else name = sanitizeProductName(remaining[0]);
+              } else {
+                name = sanitizeProductName(remaining[0]);
+              }
+            }
+          }
+        } else if (parts.length === 4) {
+          const firstIsHttp = /^https?:\/\//i.test(parts[0]);
+          const lastIsPrice = isLikelyPrice(parts[parts.length - 1]);
+          if (firstIsHttp && lastIsPrice) {
+            productUrl = parts[0];
+            imageUrl = parts[1];
+            name = sanitizeProductName(parts[2]);
+            price = parts[3];
+          } else if (firstIsHttp) {
+            imageUrl = parts[0];
+            name = sanitizeProductName(parts[1]);
+            price = parts[2];
+            category = extractCategoryLeaf(parts[3]);
+          } else {
+            imageUrl = parts[0];
+            name = sanitizeProductName(parts[1]);
+            price = parts[2];
+            category = extractCategoryLeaf(parts[3]);
           }
         } else {
-          imageUrl = parts[0].trim();
-          name = parts[1].trim();
-          price = parts[2].trim();
+          imageUrl = parts[0];
+          name = sanitizeProductName(parts[1]);
+          price = parts[2];
         }
 
         if (imageUrl.startsWith('http') && name && price) {
@@ -398,7 +469,7 @@ export function parseProducts(text: string): Product[] {
           products.push({
             id,
             name: finalName,
-            price: price.startsWith('R$') ? price : `R$ ${price}`,
+            price: /^R\$\s*/i.test(price) ? price : `R$ ${price}`,
             image: enhancedImage,
             product_url: productUrl,
             category: category || "",
