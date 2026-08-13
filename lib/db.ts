@@ -160,67 +160,6 @@ export async function getProductsSummaryByCategory(): Promise<Record<string, num
     return {};
   }
 }
-    return (data || []) as Product[];
-  } catch (err) {
-    console.error("getProductsByExactCategories failed:", err);
-    return [];
-  }
-}
-
-export async function getProductsSummaryByCategory(): Promise<Record<string, number>> {
-  try {
-    const pageSize = 2000;
-    let from = 0;
-    const counts: Record<string, number> = {};
-    const slugOfCache: Record<string, string> = {};
-    let catsFetched: Category[] | null = null;
-    const getSlugOfName = async (name: string): Promise<string> => {
-      if (slugOfCache[name]) return slugOfCache[name];
-      if (!catsFetched) catsFetched = await getCategories().catch(() => []);
-      const hit = catsFetched.find((c) => c.name === name);
-      const slug = hit?.slug || "";
-      if (slug) slugOfCache[name] = slug;
-      return slug;
-    };
-    while (true) {
-      const { data, error } = await supabase
-        .from("products")
-        .select("id,category")
-        .range(from, from + pageSize - 1);
-      if (error) {
-        console.error("getProductsSummaryByCategory error:", error.message);
-        break;
-      }
-      if (!data || data.length === 0) break;
-      for (const row of data as any[]) {
-        const cat = String(row?.category || "").trim();
-        if (!cat) continue;
-        counts[cat] = (counts[cat] || 0) + 1;
-        // Also increment by slug if known to match the tree
-        void getSlugOfName(cat);
-      }
-      if (data.length < pageSize) break;
-      from += pageSize;
-    }
-    // Translate name-based counts into slug-based counts too (double index: slug -> count)
-    const out: Record<string, number> = { ...counts };
-    for (const [name, c] of Object.entries(counts)) {
-      const slug = slugOfCache[name];
-      if (slug) out[slug] = (out[slug] || 0) + c;
-    }
-    return out;
-  } catch (err) {
-    console.error("getProductsSummaryByCategory failed:", err);
-    return {};
-  }
-}
-
-    return ((data as Product[]) || []).sort((a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price));
-  } catch (error) {
-    console.error("Error fetching products by exact categories:", error);
-    return [];
-  }
-}
 
 export async function searchProductsByKeywords(keywords: string[], limit = 24): Promise<Product[]> {
   try {
