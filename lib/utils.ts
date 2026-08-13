@@ -299,17 +299,14 @@ export function parseProducts(text: string): Product[] {
       line = line.trim();
       if (!line) continue;
 
-      // Try Tab separated first (common in copy-paste from spreadsheets/sites)
       let parts = line.split('\t');
 
-      // If only one part, try whitespace but be careful with product names
       if (parts.length < 3) {
-          // Fallback to regex for space-separated format
-          // This handles: ImageURL Name Price
-          const regex = /(https?:\/\/[^\s]+)\s+(.+?)\s+(R\$\s*[\d\.,]+|[\d\.,]+)/;
+          const regex = /(https?:\/\/[^\s]+)\s+(.+?)\s+(R\$\s*[\d\.,]+|[\d\.,]+)(?:\s+(.+))?/;
           const match = line.match(regex);
           if (match) {
               parts = [match[1], match[2], match[3]];
+              if (match[4]) parts.push(match[4]);
           }
       }
 
@@ -318,15 +315,35 @@ export function parseProducts(text: string): Product[] {
         let imageUrl = "";
         let name = "";
         let price = "";
+        let category = "";
 
-        if (parts.length >= 4) {
-          // Format: ProductURL ImageURL Name Price
+        if (parts.length >= 5) {
           productUrl = parts[0].trim();
           imageUrl = parts[1].trim();
           name = parts[2].trim();
           price = parts[3].trim();
+          category = parts[4].trim();
+        } else if (parts.length === 4) {
+          const firstIsHttp = parts[0].trim().startsWith('http');
+          const lastIsPrice = /(?:R\$\s*)?[\d\.,]+/.test(parts[parts.length - 1].trim()) &&
+                            !parts[parts.length - 1].trim().match(/^[a-zA-ZçÇáàâãéêíóôõúüÁÀÂÃÉÊÍÓÔÕÚÜ]/);
+          if (firstIsHttp && lastIsPrice) {
+            productUrl = parts[0].trim();
+            imageUrl = parts[1].trim();
+            name = parts[2].trim();
+            price = parts[3].trim();
+          } else if (firstIsHttp) {
+            imageUrl = parts[0].trim();
+            name = parts[1].trim();
+            price = parts[2].trim();
+            category = parts[3].trim();
+          } else {
+            imageUrl = parts[0].trim();
+            name = parts[1].trim();
+            price = parts[2].trim();
+            category = parts[3].trim();
+          }
         } else {
-          // Format: ImageURL Name Price
           imageUrl = parts[0].trim();
           name = parts[1].trim();
           price = parts[2].trim();
@@ -384,7 +401,7 @@ export function parseProducts(text: string): Product[] {
             price: price.startsWith('R$') ? price : `R$ ${price}`,
             image: enhancedImage,
             product_url: productUrl,
-            category: "Hardware",
+            category: category || "",
             slug,
           });
         }

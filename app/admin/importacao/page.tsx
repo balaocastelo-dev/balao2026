@@ -57,14 +57,54 @@ export default function ImportPage() {
 
         const newPriceFormatted = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(newPriceNum);
 
+        const finalCategory = (p.category && p.category.trim()) || selectedCategory;
+
         return {
             ...p,
-            category: selectedCategory, // Apply selected category
+            category: finalCategory,
             originalPrice: p.price,
             newPrice: newPriceFormatted,
             priceChange: newPriceNum - priceNum
         };
     });
+  };
+
+  const getCategoryMeta = (categoryName: string) => {
+    const raw = String(categoryName || "").trim();
+    if (!raw) {
+      return {
+        label: `Fallback: ${selectedCategory}`,
+        badgeClass: "bg-gray-100 text-gray-600 border border-gray-200",
+        indicator: "⚪",
+        title: "Categoria não definida na 5ª coluna — usará o fallback do dropdown"
+      };
+    }
+
+    const normalize = (s: unknown) =>
+      String(s || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/\p{Diacritic}+/gu, "")
+        .trim();
+
+    const norm = normalize(raw);
+    const exists = categories.some(c => normalize(c.name) === norm);
+
+    if (exists) {
+      return {
+        label: raw,
+        badgeClass: "bg-green-50 text-green-700 border border-green-200",
+        indicator: "🟢",
+        title: "Categoria já existe no banco"
+      };
+    }
+
+    return {
+      label: raw,
+      badgeClass: "bg-yellow-50 text-yellow-800 border border-yellow-300",
+      indicator: "🟡",
+      title: "Categoria NÃO existe — será criada automaticamente na importação"
+    };
   };
 
   const validateImage = (url: string): Promise<boolean> => {
@@ -262,10 +302,26 @@ export default function ImportPage() {
   const handleConfirmImport = async () => {
     setStatus("loading");
     try {
-      const finalProducts = getPreviewProducts().map((p: any) => ({
+      const normalize = (s: unknown) =>
+        String(s || "")
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/\p{Diacritic}+/gu, "")
+          .trim();
+
+      const slugify = (s: string) =>
+        normalize(s)
+          .replace(/[^\w\s-]/g, "")
+          .replace(/\s+/g, "-")
+          .replace(/^-+|-+$/g, "")
+          .substring(0, 80);
+
+      const previewProducts = getPreviewProducts();
+
+      const finalProducts = previewProducts.map((p: any) => ({
           id: p.id,
           name: p.name,
-          price: p.newPrice, // Use calculated price
+          price: p.newPrice,
           image: p.image,
           image_urls: p.image_urls,
           product_url: p.product_url,
@@ -274,6 +330,54 @@ export default function ImportPage() {
           category: p.category,
           slug: p.slug
       }));
+
+      const uniqueCategoryNames = Array.from(
+        new Set(finalProducts.map(p => String(p.category || "").trim()).filter(Boolean))
+      );
+
+      const existingCategoryMap = new Map<string, Category>();
+      categories.forEach(c => {
+        existingCategoryMap.set(normalize(c.name), c);
+      });
+
+      const categoriesToCreate = uniqueCategoryNames.filter(
+        name => !existingCategoryMap.has(normalize(name))
+      );
+
+      if (categoriesToCreate.length > 0) {
+        setMessage(`Criando ${categoriesToCreate.length} categoria(s) nova(s)...`);
+
+        const createPromises = categoriesToCreate.map(async (catName) => {
+          const slug = slugify(catName) || `cat-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+          const res = await fetch("/api/categories", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: catName,
+              slug,
+              parent_id: null,
+              display_order: 0,
+              active: true,
+              icon: null
+            })
+          });
+          if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            console.warn(`Categoria "${catName}" não foi criada:`, errData);
+            return null;
+          }
+          return res.json();
+        });
+
+        const results = await Promise.all(createPromises);
+        const createdCount = results.filter(r => r !== null).length;
+
+        await fetchCategories();
+
+        setMessage(`${createdCount} categoria(s) criada(s). Salvando produtos...`);
+      } else {
+        setMessage("Salvando produtos...");
+      }
 
       const res = await fetch("/api/products", {
         method: "POST",
@@ -286,26 +390,28 @@ export default function ImportPage() {
         throw new Error(errorData.error || "Falha ao salvar");
       }
 
-      // Save History
+      const appliedCatsSummary = uniqueCategoryNames.length > 0
+        ? uniqueCategoryNames.join(", ")
+        : selectedCategory;
+
       await fetch("/api/history", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             product_count: finalProducts.length,
             price_percentage: priceAdjustment,
-            applied_category: selectedCategory,
+            applied_category: appliedCatsSummary,
             applied_scope: adjustmentScope
         })
       });
 
       const data = await res.json();
       setStatus("success");
-      setMessage(`${data.count} produtos importados com sucesso!`);
+      setMessage(`${data.count} produtos importados com sucesso!${categoriesToCreate.length > 0 ? ` (${categoriesToCreate.length} categoria(s) criada(s))` : ""}`);
       setText("");
       setParsedProducts([]);
       setImportStep("input");
-      
-      // Reset settings
+
       setPriceAdjustment(0);
     } catch (e: any) {
       console.error(e);
@@ -395,7 +501,7 @@ export default function ImportPage() {
                 {/* Preview & Settings */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 bg-gray-50 p-4 rounded-lg border">
                     <div>
-                        <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Categoria Destino</label>
+                        <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Categoria Padrão (fallback p/ produtos sem 5ª coluna)</label>
                         <select
                             value={selectedCategory}
                             onChange={(e) => setSelectedCategory(e.target.value)}
@@ -404,17 +510,16 @@ export default function ImportPage() {
                             {flatCategories.length > 0 ? (
                                 flatCategories.map(c => (
                                     <option key={c.name} value={c.name}>
-                                        {/* Indentation */}
                                         {'\u00A0'.repeat(c.level * 4)}{c.name}
                                     </option>
                                 ))
                             ) : (
-                                // Fallback to static list if empty (loading or error)
                                 CATEGORIES.map(c => (
                                     <option key={c} value={c}>{c}</option>
                                 ))
                             )}
                         </select>
+                        <p className="text-[10px] text-gray-500 mt-1">Produtos com categoria definida na 5ª coluna sobrescrevem esta opção.</p>
                     </div>
                     <div>
                         <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Ajuste de Preço (%)</label>
@@ -482,6 +587,7 @@ export default function ImportPage() {
                                 <th className="px-4 py-3">Produto</th>
                                 <th className="px-4 py-3">Preço Original</th>
                                 <th className="px-4 py-3">Novo Preço</th>
+                                <th className="px-4 py-3">Categoria</th>
                                 <th className="px-4 py-3">Status</th>
                             </tr>
                         </thead>
@@ -550,6 +656,17 @@ export default function ImportPage() {
                                                 ({p.priceChange > 0 ? '+' : ''}{p.priceChange.toFixed(2)})
                                             </span>
                                         )}
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        {(() => {
+                                            const meta = getCategoryMeta((p as any).category);
+                                            return (
+                                                <span title={meta.title} className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded border ${meta.badgeClass}`}>
+                                                    <span aria-hidden>{meta.indicator}</span>
+                                                    <span className="max-w-[140px] truncate">{meta.label}</span>
+                                                </span>
+                                            );
+                                        })()}
                                     </td>
                                     <td className="px-4 py-3">
                                         {p.ai_status === "thinking" ? (
