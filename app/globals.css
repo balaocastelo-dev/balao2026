@@ -136,6 +136,44 @@ main {
 }
 
 .home-shell {
+  /* Tema claro — a home é SEMPRE clara (vence :root e [data-home-theme]) */
+  --background: #f7f9fc;
+  --foreground: #0f172a;
+
+  /* Site surface */
+  --site-panel: rgba(255, 255, 255, 0.92);
+  --site-panel-soft: rgba(255, 255, 255, 0.96);
+  --site-panel-muted: rgba(15, 23, 42, 0.03);
+  --site-border: rgba(15, 23, 42, 0.08);
+  --site-text: #0f172a;
+  --site-muted: #64748b;
+  --site-soft: #334155;
+  --site-accent: #E60012;
+
+  /* Home shell background */
+  --home-shell-bg: linear-gradient(180deg, #f7f9fc 0%, #eef2ff 40%, #eef4ff 100%);
+  --home-shell-glow: radial-gradient(circle at top left, rgba(230, 0, 18, 0.08), transparent 34%),
+    radial-gradient(circle at top right, rgba(248, 113, 113, 0.08), transparent 30%);
+
+  /* Home panels & cards */
+  --home-panel-bg: rgba(255, 255, 255, 0.82);
+  --home-panel-strong: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.96));
+  --home-card-bg: rgba(255, 255, 255, 0.92);
+  --home-card-soft: rgba(15, 23, 42, 0.03);
+  --home-border: rgba(15, 23, 42, 0.08);
+  --home-border-strong: rgba(225, 29, 72, 0.18);
+
+  /* Home text & accents */
+  --home-text: #0f172a;
+  --home-muted: #64748b;
+  --home-soft: #334155;
+  --home-accent: #E60012;
+  --home-accent-soft: rgba(225, 29, 72, 0.08);
+  --home-success: #16a34a;
+  --home-success-soft: rgba(34, 197, 94, 0.08);
+  --home-primary: #E60012;
+  --home-primary-soft: rgba(225, 29, 72, 0.08);
+
   background: var(--home-shell-glow), var(--home-shell-bg);
   color: var(--home-text);
 }

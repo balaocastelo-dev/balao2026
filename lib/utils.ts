@@ -265,6 +265,26 @@ export function buildCategoryTree(categories: Category[]): Category[] {
   return roots;
 }
 
+export function slugify(s: string | null | undefined): string {
+  return String(s || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "") || "sem-nome";
+}
+
+export function extractLeafAndChainFromCategory(
+  rawCat: string
+): { chain: string[]; leaf: string; leafSlug: string } {
+  const chain = String(rawCat || "")
+    .split(/\s*[>➤»]\s*/g)
+    .map((p) => p.trim())
+    .filter(Boolean);
+  const leaf = chain.length ? chain[chain.length - 1] : "";
+  return { chain, leaf, leafSlug: slugify(chain.join(" ")) };
+}
+
 export function parsePriceToNumber(value: unknown): number {
   if (value == null) return 0;
   if (typeof value === "number") return Number.isFinite(value) ? value : 0;
@@ -277,551 +297,162 @@ export function parsePriceToNumber(value: unknown): number {
     .replace(/\s/g, "")
     .replace(/[^\d,.\-]/g, "");
 
-  const hasComma = cleaned.includes(",");
-  const hasDot = cleaned.includes(".");
+  const dots = (cleaned.match(/\./g) || []).length;
+  const commas = (cleaned.match(/,/g) || []).length;
 
   let normalized = cleaned;
-  if (hasComma && hasDot) {
-    normalized = cleaned.replace(/\./g, "").replace(",", ".");
-  } else if (hasComma && !hasDot) {
-    normalized = cleaned.replace(",", ".");
-  }
-
-  const num = Number.parseFloat(normalized);
-  return Number.isFinite(num) ? num : 0;
-}
-
-export type ColumnRole =
-  | "product_url"
-  | "image"
-  | "name"
-  | "price"
-  | "category"
-  | "ignore";
-
-export type ColumnMapping = Record<number, ColumnRole>;
-
-export interface ExtractedRaw {
-  columns: string[][];
-  headers: string[] | null;
-  detectedColumnCount: number;
-}
-
-export function enrichImageVariants(existing: string[], maxVariants: number = 14): string[] {
-  const out: string[] = (existing || []).slice();
-  const seen = new Set<string>(out.map(u => u.toLowerCase()));
-  const push = (u: string) => {
-    const s = String(u || "").trim().toLowerCase();
-    if (!s || seen.has(s) || !/^https?:\/\//i.test(u)) return;
-    seen.add(s);
-    out.push(u);
-  };
-
-  for (const seed of (existing || [])) {
-    if (out.length >= maxVariants) break;
-    try {
-      const u = new URL(seed);
-      const filename = u.pathname.split('/').pop() || '';
-      const m = filename.match(/(_)(\d{8,})(\.(?:jpg|jpeg|png|webp|gif))/i);
-      if (m) {
-        const sep = m[1];
-        const baseNum = Number(m[2]);
-        const ext = m[3];
-        if (Number.isFinite(baseNum)) {
-          const baseWithout = filename.slice(0, m.index) + sep;
-          const parentPath = u.pathname.slice(0, u.pathname.length - filename.length);
-          const variants: number[] = [];
-          for (let i = 1; i <= 14; i++) variants.push(baseNum + i);
-          for (let i = 1; i <= 6; i++) variants.push(baseNum - i);
-          for (const vNum of variants) {
-            if (out.length >= maxVariants) break;
-            const newFilename = baseWithout + String(vNum).padStart(m[2].length, '0') + ext;
-            const c = new URL(u.toString());
-            c.pathname = parentPath + newFilename;
-            c.search = '';
-            push(c.toString());
-          }
-        }
-      }
-      if (/\/sync_mirakl\//i.test(u.pathname)) {
-        const sizes = ['xlarge', 'large', 'medium', 'small', 'original'];
-        for (const sz of sizes) {
-          if (out.length >= maxVariants) break;
-          const c = new URL(u.toString());
-          const parts = c.pathname.split('/').filter(Boolean);
-          const sizeIdx = parts.findIndex(p => /^(small|medium|large|xlarge|mini|thumb|thumbnail|original)$/i.test(p));
-          if (sizeIdx >= 0) parts[sizeIdx] = sz;
-          else {
-            const pIdIdx = parts.findIndex((p, i) => /^\d+$/.test(p) && i > 0 && parts[i - 1].toLowerCase() === 'sync_mirakl');
-            if (pIdIdx >= 0 && parts[pIdIdx + 1]) parts.splice(pIdIdx + 1, 0, sz);
-          }
-          c.pathname = `/${parts.join('/')}`;
-          c.search = '';
-          push(c.toString());
-        }
-      }
-    } catch {}
-  }
-  return out;
-}
-
-export function extractRawColumns(text: string): ExtractedRaw {
-  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-  const allColumns: string[][] = [];
-  let maxCols = 0;
-
-  for (const line of lines) {
-    const cols = line.split("\t").map(c => c.trim());
-    if (cols.length > 0) {
-      allColumns.push(cols);
-      if (cols.length > maxCols) maxCols = cols.length;
-    }
-  }
-
-  if (maxCols === 0) return { columns: [], headers: null, detectedColumnCount: 0 };
-
-  const looksLikeHeaderLine = (columns: string[]): boolean => {
-    if (!columns || columns.length === 0) return true;
-    const hasAnyHttp = columns.some(c => /^https?:\/\//i.test(String(c || "").trim()));
-    if (hasAnyHttp) return false;
-    const hasAlphabetic = columns.some(c => /[a-zA-ZçÇáàâãéêíóôõúü]/.test(String(c || "").trim()));
-    const hasNoNumericPrice = !columns.some(c => /(?:R\$\s*)?\d{1,3}(?:[.,]\d+)+/.test(String(c || "").trim()));
-    return hasAlphabetic && hasNoNumericPrice;
-  };
-
-  let headers: string[] | null = null;
-  let startIdx = 0;
-  if (allColumns.length > 0 && looksLikeHeaderLine(allColumns[0])) {
-    headers = allColumns[0].slice();
-    while (headers.length < maxCols) headers.push("");
-    startIdx = 1;
-  }
-
-  const dataColumns = allColumns.slice(startIdx).map(row => {
-    const copy = row.slice();
-    while (copy.length < maxCols) copy.push("");
-    return copy;
-  }).filter(row => row.some(cell => cell !== ""));
-
-  return {
-    columns: dataColumns,
-    headers,
-    detectedColumnCount: maxCols,
-  };
-}
-
-const __isLikelyPrice = (value: unknown): boolean => {
-  const raw = String(value || "").trim();
-  if (!raw) return false;
-  if (/^R\$\s*\d/i.test(raw)) return true;
-  if (/^\d{1,3}(?:\.\d{3})*(?:,\d{1,2})?$|^\d+(?:,\d{1,2})?$/.test(raw) && /\d/.test(raw)) return true;
-  if (/^\d+\.\d{2}$/.test(raw)) return true;
-  return false;
-};
-
-const __isLikelyImageUrl = (value: unknown): boolean => {
-  const raw = String(value || "").trim();
-  if (!/^https?:\/\//i.test(raw)) return false;
-  if (/\.(?:jpg|jpeg|png|webp|gif|svg|avif|bmp)(?:[?#]|$)/i.test(raw)) return true;
-  return /image|img|foto|produto|photo|picture|medium|large|original|media|images\./i.test(raw);
-};
-
-const __isLikelyProductUrl = (value: unknown): boolean => {
-  const raw = String(value || "").trim();
-  if (!/^https?:\/\//i.test(raw)) return false;
-  if (__isLikelyImageUrl(raw)) return false;
-  return /\/produto\//i.test(raw)
-    || /\/product\//i.test(raw)
-    || /\/p\//i.test(raw)
-    || /\/dp\//i.test(raw)
-    || /\/categoria\//i.test(raw) === false;
-};
-
-export function autoGuessMapping(raw: ExtractedRaw): ColumnMapping {
-  const { columns, headers, detectedColumnCount } = raw;
-  const mapping: ColumnMapping = {};
-  for (let i = 0; i < detectedColumnCount; i++) mapping[i] = "ignore";
-  if (detectedColumnCount === 0 || columns.length === 0) return mapping;
-
-  const sampleSize = Math.min(25, columns.length);
-  const sample = columns.slice(0, sampleSize);
-
-  const score = (idx: number) => {
-    let s = { product_url: 0, image: 0, name: 0, price: 0, category: 0 };
-    if (headers && headers[idx]) {
-      const h = String(headers[idx]).toLowerCase();
-      if (/prod(uto)?.*(url|link)|href|link|product/i.test(h)) s.product_url += 25;
-      if (/img|image|foto|picture|src|photo|thumb|imagem/i.test(h)) s.image += 25;
-      if (/nome|t[ií]tulo|prod(uto)?\s*$|name|title|descri[cç][aã]o\s*curta/i.test(h)) s.name += 25;
-      if (/pre[cç]o|price|valor|custo|r\$/i.test(h)) s.price += 25;
-      if (/categ(oria)?|cat\b|grupo|departamento|classif/i.test(h)) s.category += 25;
-    }
-    for (const row of sample) {
-      const v = row[idx] || "";
-      if (!v) continue;
-      if (__isLikelyImageUrl(v)) s.image += 6;
-      if (__isLikelyProductUrl(v)) s.product_url += 6;
-      if (__isLikelyPrice(v)) s.price += 6;
-      if (v.length > 15 && !/^http/i.test(v) && !__isLikelyPrice(v)) s.name += 2;
-      if (/[->]|\b(?:hardware|software|acessorio|acessórios|periferico|notebook|monitor|fonte|memória|memoria|processador|gabinete|placa|ssd|hd|armazenamento)\b/i.test(v)) s.category += 3;
-      if (v.length <= 80 && v.length > 2 && /[a-zA-Záàâãéêíóôõúü]/.test(v) && !/^http/i.test(v) && !__isLikelyPrice(v) && !v.includes(",")) s.category += 1;
-    }
-    return s;
-  };
-
-  const scores = Array.from({ length: detectedColumnCount }, (_, i) => ({ i, s: score(i) }));
-
-  const pickBest = (role: ColumnRole, usedIdx: Set<number>): number => {
-    let bestIdx = -1;
-    let bestScore = -Infinity;
-    for (const { i, s } of scores) {
-      if (usedIdx.has(i)) continue;
-      const val = (s as any)[role] as number;
-      if (val > bestScore) { bestScore = val; bestIdx = i; }
-    }
-    if (bestScore > 0) return bestIdx;
-    return -1;
-  };
-
-  const used = new Set<number>();
-  const tryAssign = (role: ColumnRole) => {
-    const idx = pickBest(role, used);
-    if (idx !== -1) { mapping[idx] = role; used.add(idx); }
-  };
-
-  tryAssign("price");
-  tryAssign("image");
-  tryAssign("product_url");
-  tryAssign("name");
-  tryAssign("category");
-
-  const assignDefaultsByPosition = () => {
-    const available: number[] = [];
-    for (let i = 0; i < detectedColumnCount; i++) if (!used.has(i)) available.push(i);
-    if (available.length === 0) return;
-
-    const need: ColumnRole[] = [];
-    (["product_url","image","name","price","category"] as ColumnRole[]).forEach(r => {
-      if (!Object.values(mapping).includes(r)) need.push(r);
-    });
-    if (need.length === 0) return;
-
-    if (available.length >= 5) {
-      for (let k = 0; k < need.length && k < available.length; k++) mapping[available[k]] = need[k];
-    } else if (available.length >= 4) {
-      const simple: ColumnRole[] = ["image","name","price","category"];
-      for (let k = 0; k < Math.min(4, available.length); k++) mapping[available[k]] = simple[k];
-    } else if (available.length >= 3) {
-      const simple: ColumnRole[] = ["image","name","price"];
-      for (let k = 0; k < Math.min(3, available.length); k++) mapping[available[k]] = simple[k];
-    }
-  };
-
-  if (!Object.values(mapping).includes("name") || !Object.values(mapping).includes("price") || !Object.values(mapping).includes("image")) {
-    assignDefaultsByPosition();
-  }
-
-  return mapping;
-}
-
-const sanitizeProductName = (raw: unknown): string => {
-  let s = String(raw || '').trim();
-  s = s.replace(/[`´‘’"]/g, '');
-  s = s.replace(/\s+/g, ' ');
-  return s.trim();
-};
-
-const extractCategoryLeaf = (raw: unknown): string => {
-  const full = String(raw || '').trim();
-  if (!full) return '';
-  if (!full.includes('>')) return full;
-  const parts = full.split('>').map(p => p.trim()).filter(Boolean);
-  return parts[parts.length - 1] || full;
-};
-
-export function buildProductsByMapping(
-  raw: ExtractedRaw,
-  mapping: ColumnMapping,
-  defaultCategory: string = "Hardware"
-): Product[] {
-  const { columns } = raw;
-  if (columns.length === 0) return [];
-
-  let priceIdx = -1;
-  let nameIdx = -1;
-  let productUrlIdx = -1;
-  let categoryIdx = -1;
-  const imageIndices: number[] = [];
-  for (const [kStr, role] of Object.entries(mapping)) {
-    const k = Number(kStr);
-    if (!Number.isFinite(k)) continue;
-    if (role === "price") priceIdx = k;
-    else if (role === "name") nameIdx = k;
-    else if (role === "product_url") productUrlIdx = k;
-    else if (role === "category") categoryIdx = k;
-    else if (role === "image") imageIndices.push(k);
-  }
-
-  const products: Product[] = [];
-  for (let rowId = 0; rowId < columns.length; rowId++) {
-    const row = columns[rowId];
-    const priceRaw = priceIdx >= 0 ? String(row[priceIdx] || "").trim() : "";
-    const nameRaw = nameIdx >= 0 ? String(row[nameIdx] || "").trim() : "";
-    const imageCandidates: string[] = [];
-    for (const i of imageIndices) {
-      const v = String(row[i] || "").trim();
-      if (v) imageCandidates.push(v);
-    }
-    if (imageIndices.length === 0) {
-      for (let i = 0; i < row.length; i++) {
-        const v = String(row[i] || "").trim();
-        if (/^https?:\/\/.*\.(?:jpg|jpeg|png|webp|gif|svg|avif|bmp)(?:[?#]|$)/i.test(v)) imageCandidates.push(v);
-      }
-    }
-
-    const imageUrl = imageCandidates[0] || "";
-    if (!imageUrl.startsWith('http') || !nameRaw || !priceRaw) continue;
-
-    let productUrl = productUrlIdx >= 0 ? String(row[productUrlIdx] || "").trim() : "";
-    if (productUrl && !/^https?:\/\//i.test(productUrl)) productUrl = "";
-
-    const categoryRaw = categoryIdx >= 0 ? String(row[categoryIdx] || "").trim() : "";
-
-    const finalName = sanitizeProductName(nameRaw);
-    const slug = finalName.length > 0
-      ? finalName.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-")
-      : `prod-${Date.now()}-${rowId}`;
-
-    const priceFormatted = /^R\$\s*/i.test(priceRaw) ? priceRaw : `R$ ${priceRaw}`;
-
-    const imageUrlsDeduped: string[] = [];
-    const seen = new Set<string>();
-    for (const u of imageCandidates) {
-      const s = u.trim();
-      if (!s || !/^https?:\/\//i.test(s) || seen.has(s)) continue;
-      seen.add(s);
-      imageUrlsDeduped.push(s);
-    }
-
-    products.push({
-      id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `row-${Date.now()}-${rowId}-${Math.random().toString(36).slice(2, 10)}`,
-      name: finalName,
-      price: priceFormatted,
-      image: imageUrl,
-      image_urls: imageUrlsDeduped.length > 0 ? imageUrlsDeduped : [imageUrl],
-      product_url: productUrl,
-      category: extractCategoryLeaf(categoryRaw) || "",
-      slug,
-    } as any);
-  }
-  return products;
+  if (commas === 1 && dots === 0) normalized = cleaned.replace(",", ".");
+  else if (commas === 1 && dots >= 1) normalized = cleaned.replace(/\./g, "").replace(",", ".");
+  else if (commas === 0 && dots >= 2) normalized = cleaned.replace(/\./g, "");
+  const result = Number(normalized);
+  return Number.isFinite(result) ? Math.max(0, result) : 0;
 }
 
 export function parseProducts(text: string): Product[] {
-    const products: Product[] = [];
-    const lines = text.split('\n');
+  const products: Product[] = [];
+  const lines = text.split(/\r?\n/);
+  let startIdx = 0;
 
-    const looksLikeHeaderLine = (columns: string[]): boolean => {
-      if (!columns || columns.length === 0) return true;
-      const hasAnyHttp = columns.some(c => /^https?:\/\//i.test(String(c || '').trim()));
-      if (hasAnyHttp) return false;
-      const hasAlphabetic = columns.some(c => /[a-zA-ZçÇáàâãéêíóôõúü]/.test(String(c || '').trim()));
-      const hasNoNumericPrice = !columns.some(c => /(?:R\$\s*)?\d{1,3}(?:[.,]\d+)+/.test(String(c || '').trim()));
-      return hasAlphabetic && hasNoNumericPrice;
-    };
+  if (lines.length > 0) {
+    const first = lines[0] || "";
+    const temHeaderSuspeito =
+      /flex|href|relative|src|text-sm|text-base|categoria/i.test(first) ||
+      !/kabum\.com\.br\/produto\//i.test(first);
+    if (temHeaderSuspeito) startIdx = 1;
+  }
 
-    const isLikelyPrice = (value: unknown): boolean => {
-      const raw = String(value || '').trim();
-      if (!raw) return false;
-      if (/^R\$\s*\d/i.test(raw)) return true;
-      return /^\d{1,3}(?:\.\d{3})*(?:,\d{1,2})?$|^\d+(?:,\d{1,2})?$/.test(raw) && /\d/.test(raw);
-    };
+  for (let idx = startIdx; idx < lines.length; idx++) {
+    let line = (lines[idx] || "").trim();
+    if (!line) continue;
 
-    const sanitizeProductName = (raw: unknown): string => {
-      let s = String(raw || '').trim();
-      s = s.replace(/[`´‘’"]/g, '');
-      s = s.replace(/\s+/g, ' ');
-      return s.trim();
-    };
+    let parts = line.split("\t");
 
-    const extractCategoryLeaf = (raw: unknown): string => {
-      const full = String(raw || '').trim();
-      if (!full) return '';
-      if (!full.includes('>')) return full;
-      const parts = full.split('>').map(p => p.trim()).filter(Boolean);
-      return parts[parts.length - 1] || full;
-    };
-
-    for (let line of lines) {
-      line = line.trim();
-      if (!line) continue;
-
-      let parts = line.split('\t').map(p => p.trim()).filter(p => p.length > 0);
-
-      if (parts.length < 3) {
-          const regex = /(https?:\/\/[^\s]+)\s+(.+?)\s+(R\$\s*[\d\.,]+|\d{1,3}(?:\.\d{3})*(?:,\d{1,2})?|\d+(?:,\d{1,2})?)(?:\s+(.+))?/;
-          const match = line.match(regex);
-          if (match) {
-              parts = [match[1], match[2], match[3]];
-              if (match[4]) parts.push(match[4]);
-          }
-      }
-
-      if (looksLikeHeaderLine(parts)) {
-        continue;
-      }
-
-      if (parts.length >= 3) {
-        let productUrl = "";
-        let imageUrl = "";
-        let name = "";
-        let price = "";
-        let category = "";
-
-        if (parts.length >= 5) {
-          const first = parts[0];
-          const second = parts[1];
-          const fourth = parts[3];
-          const fifth = parts[4];
-
-          const firstIsHttp = /^https?:\/\//i.test(first);
-          const secondIsHttp = /^https?:\/\//i.test(second);
-          const fourthIsPrice = isLikelyPrice(fourth);
-          const fifthIsPrice = isLikelyPrice(fifth);
-
-          if (firstIsHttp && secondIsHttp && fourthIsPrice) {
-            productUrl = first;
-            imageUrl = second;
-            name = sanitizeProductName(parts[2]);
-            price = fourth;
-            category = extractCategoryLeaf(fifth);
-          } else {
-            let imageIdx = parts.findIndex(p => /^https?:\/\/.*\.(?:jpg|jpeg|png|webp|gif|svg|avif|bmp)(?:[?#]|$)/i.test(p));
-            if (imageIdx === -1) imageIdx = parts.findIndex(p => /^https?:\/\//i.test(p) && /image|img|foto|produto|photo|picture|medium|large|original/i.test(p));
-            if (imageIdx === -1) imageIdx = parts.findIndex(p => /^https?:\/\//i.test(p));
-            const prodIdx = imageIdx > 0 ? parts.findIndex((p, i) => i < imageIdx && /^https?:\/\//i.test(p)) : -1;
-            const priceIdx = parts.findIndex((p, i) => i !== imageIdx && i !== prodIdx && isLikelyPrice(p));
-
-            if (prodIdx !== -1) productUrl = parts[prodIdx];
-            if (imageIdx !== -1) imageUrl = parts[imageIdx];
-            if (priceIdx !== -1) price = parts[priceIdx];
-
-            const takenIdx = new Set<number>();
-            [prodIdx, imageIdx, priceIdx].forEach(i => { if (i !== -1) takenIdx.add(i); });
-            const remaining = parts.map((p, i) => ({ p, i })).filter(x => !takenIdx.has(x.i)).map(x => x.p);
-            if (remaining.length >= 2) {
-              name = sanitizeProductName(remaining[0]);
-              category = extractCategoryLeaf(remaining[1]);
-            } else if (remaining.length === 1) {
-              if (!imageUrl || !productUrl) {
-                if (!imageUrl) imageUrl = remaining[0];
-                else name = sanitizeProductName(remaining[0]);
-              } else {
-                name = sanitizeProductName(remaining[0]);
-              }
-            }
-          }
-        } else if (parts.length === 4) {
-          const firstIsHttp = /^https?:\/\//i.test(parts[0]);
-          const lastIsPrice = isLikelyPrice(parts[parts.length - 1]);
-          if (firstIsHttp && lastIsPrice) {
-            productUrl = parts[0];
-            imageUrl = parts[1];
-            name = sanitizeProductName(parts[2]);
-            price = parts[3];
-          } else if (firstIsHttp) {
-            imageUrl = parts[0];
-            name = sanitizeProductName(parts[1]);
-            price = parts[2];
-            category = extractCategoryLeaf(parts[3]);
-          } else {
-            imageUrl = parts[0];
-            name = sanitizeProductName(parts[1]);
-            price = parts[2];
-            category = extractCategoryLeaf(parts[3]);
-          }
-        } else {
-          imageUrl = parts[0];
-          name = sanitizeProductName(parts[1]);
-          price = parts[2];
-        }
-
-        if (imageUrl.startsWith('http') && name && price) {
-          const enhancedImage = enhanceImageUrl(imageUrl);
-
-          const allImageUrls: string[] = [];
-          const seenImgs = new Set<string>();
-          const pushImg = (u: string) => {
-            const s = String(u || "").trim();
-            if (!s || !/^https?:\/\//i.test(s) || seenImgs.has(s)) return;
-            seenImgs.add(s);
-            allImageUrls.push(enhanceImageUrl(s));
-          };
-          if (enhancedImage) pushImg(enhancedImage);
-          for (const p of parts) {
-            const v = String(p || "").trim();
-            if (!v) continue;
-            if (!/^https?:\/\//i.test(v)) continue;
-            if (!/^(?!.*\b(?:product|produto|page|pdp)\b).*$/i.test(v) && /\.(?:jpg|jpeg|png|webp|gif|svg|avif|bmp)(?:[?#]|$)/i.test(v)) pushImg(v);
-            else if (/image|img|foto|photo|picture|medium|large|original|cdn|\.(?:jpg|jpeg|png|webp|gif|svg|avif|bmp)/i.test(v)) pushImg(v);
-          }
-
-          const brands = [
-              /\bconnect\s*barra\s*inform[aá]tica\b/gi,
-              /\bkalango[-\s]*games\b/gi,
-              /\b3green[-\s]*force\b/gi,
-              /\b3green\b/gi,
-              /\bklv[-\s]*notebook\b/gi,
-              /\bskill\b/gi,
-              /\bnext[-\s]*pc\b/gi,
-              /\bnextpc\b/gi,
-              /\bmax[-\s]*elite\b/gi,
-              /\bdream[-\s]*computers?\b/gi,
-              /\bdreamcomputers\b/gi,
-              /\binfotech\b/gi,
-              /\bprime[-\s]*shock!?\b/gi,
-              /\bmulti[-\s]*pc\b/gi,
-              /\bmultipc\b/gi,
-              /\bneologic\b/gi,
-              /\bi[-\s]*buy[-\s]*power\b/gi,
-              /\bibuypower\b/gi,
-              /\balpha[-\s]*pcs?\b/gi,
-              /\balphapcs\b/gi,
-              /\bstudio[-\s]*pc\b/gi,
-              /\bstudiopc\b/gi,
-              /\btop[-\s]*pc\b/gi,
-              /\btoppc\b/gi,
-              /kabum/gi,
-              /\btob\s*pc[’'´`]?s\b/gi,
-              /tob/gi,
-              /alligator shop/gi,
-              /mrp inform[aá]tica/gi
-          ];
-
-          let finalName = name;
-          brands.forEach(regex => {
-              finalName = finalName.replace(regex, "Balão.info");
-          });
-
-          const id = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15);
-          const slug = finalName
-            .toLowerCase()
-            .replace(/[^\w\s-]/g, "")
-            .replace(/\s+/g, "-");
-
-          products.push({
-            id,
-            name: finalName,
-            price: /^R\$\s*/i.test(price) ? price : `R$ ${price}`,
-            image: enhancedImage,
-            image_urls: allImageUrls.length > 0 ? allImageUrls : [enhancedImage],
-            product_url: productUrl,
-            category: category || "",
-            slug,
-          });
-        }
+    if (parts.length < 3) {
+      const regex = /(https?:\/\/[^\s]+)\s+(.+?)\s+(R\$\s*[\d\.,]+|[\d\.,]+)(?:\s+(.+))?/;
+      const match = line.match(regex);
+      if (match) {
+        parts = [match[1], match[2], match[3]];
+        if (match[4]) parts.push(match[4]);
       }
     }
 
-    return products;
+    if (parts.length >= 3) {
+      let productUrl = "";
+      let imageUrl = "";
+      let name = "";
+      let price = "";
+      let categoryRaw = "";
+
+      if (parts.length >= 5) {
+        productUrl = parts[0].trim();
+        imageUrl = parts[1].trim();
+        name = parts[2].trim();
+        price = parts[3].trim();
+        categoryRaw = parts[4].trim();
+      } else if (parts.length === 4) {
+        const firstIsHttp = parts[0].trim().startsWith("http");
+        const lastCell = parts[parts.length - 1].trim();
+        const lastIsPrice =
+          /(?:R\$\s*)?\d[\d\.,]*/.test(lastCell) &&
+          !/^[A-Za-zçÇáàâãéêíóôõúüÁÀÂÃÉÊÍÓÔÕÚÜ]/.test(lastCell);
+        if (firstIsHttp && lastIsPrice) {
+          productUrl = parts[0].trim();
+          imageUrl = parts[1].trim();
+          name = parts[2].trim();
+          price = parts[3].trim();
+        } else if (firstIsHttp) {
+          productUrl = parts[0].trim();
+          imageUrl = parts[1].trim();
+          name = parts[2].trim();
+          categoryRaw = parts[3].trim();
+        } else {
+          imageUrl = parts[0].trim();
+          name = parts[1].trim();
+          price = parts[2].trim();
+          categoryRaw = parts[3].trim();
+        }
+      } else {
+        if (parts[0].trim().startsWith("http") && /(jpg|jpeg|png|webp|gif|avif)/i.test(parts[0].trim())) {
+          imageUrl = parts[0].trim();
+          name = parts[1].trim();
+          price = parts[2].trim();
+        } else if (parts[0].trim().startsWith("http") && /\/produto\//i.test(parts[0].trim())) {
+          productUrl = parts[0].trim();
+          name = parts[1].trim();
+          price = parts[2].trim();
+        } else {
+          imageUrl = parts[0].trim();
+          name = parts[1].trim();
+          price = parts[2].trim();
+        }
+      }
+
+      const image = imageUrl && imageUrl.startsWith("http") ? imageUrl : "";
+      if (name && price && (image || productUrl)) {
+        const enhancedImage = enhanceImageUrl(image || "");
+        const { chain, leafSlug } = extractLeafAndChainFromCategory(categoryRaw);
+
+        const brands = [
+          /\bconnect\s*barra\s*inform[aá]tica\b/gi,
+          /\bkalango[-\s]*games\b/gi,
+          /\b3green[-\s]*force\b/gi,
+          /\b3green\b/gi,
+          /\bklv[-\s]*notebook\b/gi,
+          /\bskill\b/gi,
+          /\bnext[-\s]*pc\b/gi,
+          /\bnextpc\b/gi,
+          /\bmax[-\s]*elite\b/gi,
+          /\bdream[-\s]*computers?\b/gi,
+          /\bdreamcomputers\b/gi,
+          /\binfotech\b/gi,
+          /\bprime[-\s]*shock!?\b/gi,
+          /\bmulti[-\s]*pc\b/gi,
+          /\bmultipc\b/gi,
+          /\bneologic\b/gi,
+          /\bi[-\s]*buy[-\s]*power\b/gi,
+          /\bibuypower\b/gi,
+          /\balpha[-\s]*pcs?\b/gi,
+          /\balphapcs\b/gi,
+          /\bstudio[-\s]*pc\b/gi,
+          /\bstudiopc\b/gi,
+          /\btop[-\s]*pc\b/gi,
+          /\btoppc\b/gi,
+          /kabum/gi,
+          /\btob\s*pc[’'´`]?s\b/gi,
+          /tob/gi,
+          /alligator shop/gi,
+          /mrp inform[aá]tica/gi,
+        ];
+
+        let finalName = name;
+        brands.forEach((re) => {
+          finalName = finalName.replace(re, "Balão.info");
+        });
+
+        const id =
+          typeof crypto !== "undefined" && (crypto as any)?.randomUUID
+            ? (crypto as any).randomUUID()
+            : Math.random().toString(36).slice(2, 15) + "-" + idx;
+        const slugBase = slugify(finalName);
+        const slug = slugBase + "-" + Math.random().toString(36).slice(2, 7);
+
+        const p: any = {
+          id,
+          name: finalName,
+          price: price.startsWith("R$") ? price : `R$ ${price}`,
+          image: enhancedImage,
+          image_urls: enhancedImage ? [enhancedImage] : [],
+          product_url: productUrl || undefined,
+          category: leafSlug || "outros",
+          slug,
+          _categoryChain: chain,
+          _categoryRaw: categoryRaw || undefined,
+        };
+        products.push(p as Product);
+      }
+    }
   }
+
+  return products;
+}
+

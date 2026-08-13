@@ -108,6 +108,112 @@ export async function getProductsByExactCategories(categoryNames: string[], limi
       console.error("Error fetching products by exact categories:", error);
       return [];
     }
+    return (data || []) as Product[];
+  } catch (err) {
+    console.error("getProductsByExactCategories failed:", err);
+    return [];
+  }
+}
+
+export async function getProductsSummaryByCategory(): Promise<Record<string, number>> {
+  try {
+    const pageSize = 2000;
+    let from = 0;
+    const countsByName: Record<string, number> = {};
+    const slugByCategoryName: Record<string, string> = {};
+    let catsCached: Category[] | null = null;
+    const resolveCategoryName = async (name: string): Promise<string> => {
+      if (slugByCategoryName[name] !== undefined) return slugByCategoryName[name];
+      if (!catsCached) catsCached = await getCategories().catch(() => []);
+      const hit = catsCached.find((c) => c.name === name);
+      slugByCategoryName[name] = hit?.slug || "";
+      return slugByCategoryName[name];
+    };
+    while (true) {
+      const { data, error } = await supabase
+        .from("products")
+        .select("id,category")
+        .range(from, from + pageSize - 1);
+      if (error) {
+        console.error("getProductsSummaryByCategory error:", error.message);
+        break;
+      }
+      if (!data || data.length === 0) break;
+      for (const row of data as any[]) {
+        const cat = String(row?.category || "").trim();
+        if (!cat) continue;
+        countsByName[cat] = (countsByName[cat] || 0) + 1;
+        void resolveCategoryName(cat);
+      }
+      if (data.length < pageSize) break;
+      from += pageSize;
+    }
+    // Map by slug as well (the UI uses slugs for links)
+    const out: Record<string, number> = { ...countsByName };
+    for (const [name, count] of Object.entries(countsByName)) {
+      const slug = slugByCategoryName[name];
+      if (slug) out[slug] = (out[slug] || 0) + count;
+    }
+    return out;
+  } catch (err) {
+    console.error("getProductsSummaryByCategory failed:", err);
+    return {};
+  }
+}
+    return (data || []) as Product[];
+  } catch (err) {
+    console.error("getProductsByExactCategories failed:", err);
+    return [];
+  }
+}
+
+export async function getProductsSummaryByCategory(): Promise<Record<string, number>> {
+  try {
+    const pageSize = 2000;
+    let from = 0;
+    const counts: Record<string, number> = {};
+    const slugOfCache: Record<string, string> = {};
+    let catsFetched: Category[] | null = null;
+    const getSlugOfName = async (name: string): Promise<string> => {
+      if (slugOfCache[name]) return slugOfCache[name];
+      if (!catsFetched) catsFetched = await getCategories().catch(() => []);
+      const hit = catsFetched.find((c) => c.name === name);
+      const slug = hit?.slug || "";
+      if (slug) slugOfCache[name] = slug;
+      return slug;
+    };
+    while (true) {
+      const { data, error } = await supabase
+        .from("products")
+        .select("id,category")
+        .range(from, from + pageSize - 1);
+      if (error) {
+        console.error("getProductsSummaryByCategory error:", error.message);
+        break;
+      }
+      if (!data || data.length === 0) break;
+      for (const row of data as any[]) {
+        const cat = String(row?.category || "").trim();
+        if (!cat) continue;
+        counts[cat] = (counts[cat] || 0) + 1;
+        // Also increment by slug if known to match the tree
+        void getSlugOfName(cat);
+      }
+      if (data.length < pageSize) break;
+      from += pageSize;
+    }
+    // Translate name-based counts into slug-based counts too (double index: slug -> count)
+    const out: Record<string, number> = { ...counts };
+    for (const [name, c] of Object.entries(counts)) {
+      const slug = slugOfCache[name];
+      if (slug) out[slug] = (out[slug] || 0) + c;
+    }
+    return out;
+  } catch (err) {
+    console.error("getProductsSummaryByCategory failed:", err);
+    return {};
+  }
+}
 
     return ((data as Product[]) || []).sort((a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price));
   } catch (error) {
