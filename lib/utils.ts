@@ -352,7 +352,7 @@ export function enrichImageVariants(existing: string[], maxVariants: number = 14
           const sizeIdx = parts.findIndex(p => /^(small|medium|large|xlarge|mini|thumb|thumbnail|original)$/i.test(p));
           if (sizeIdx >= 0) parts[sizeIdx] = sz;
           else {
-            const pIdIdx = parts.findIndex(p => /^\d+$/.test(p) && parts[p - 1] === 'sync_mirakl');
+            const pIdIdx = parts.findIndex((p, i) => /^\d+$/.test(p) && i > 0 && parts[i - 1].toLowerCase() === 'sync_mirakl');
             if (pIdIdx >= 0 && parts[pIdIdx + 1]) parts.splice(pIdIdx + 1, 0, sz);
           }
           c.pathname = `/${parts.join('/')}`;
