@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Category, buildCategoryTree } from "@/lib/utils";
-import { Plus, Edit, Trash2, ChevronRight, ChevronDown, Save, X } from "lucide-react";
+import { Plus, Edit, Trash2, ChevronRight, ChevronDown, Save, X, EyeOff } from "lucide-react";
 import SimpleEmojiPicker from "./SimpleEmojiPicker";
 import IconPicker, { ICON_LIST } from "./IconPicker";
 
@@ -13,6 +13,7 @@ export default function CategoryManager() {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showIconPicker, setShowIconPicker] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showInactive, setShowInactive] = useState(false);
   
   // Editing/Adding State
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -63,7 +64,12 @@ export default function CategoryManager() {
     }
   };
 
-  const tree = buildCategoryTree(categories);
+  const filteredCategories = useMemo(() => {
+    if (showInactive) return categories;
+    return categories.filter(c => c.active === true);
+  }, [categories, showInactive]);
+
+  const tree = useMemo(() => buildCategoryTree(filteredCategories), [filteredCategories]);
 
   const toggleExpand = (id: string) => {
     setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
@@ -155,10 +161,11 @@ export default function CategoryManager() {
   const CategoryNode = ({ node, level }: { node: Category, level: number }) => {
     const hasChildren = node.children && node.children.length > 0;
     const isExpanded = expanded[node.id];
+    const isInactive = node.active === false;
 
     return (
       <div className="border-l border-gray-200 ml-4 first:ml-0">
-        <div className={`flex items-center gap-2 p-2 hover:bg-gray-50 rounded group ${editingId === node.id ? 'bg-red-50' : ''}`}>
+        <div className={`flex items-center gap-2 p-2 hover:bg-gray-50 rounded group ${editingId === node.id ? 'bg-red-50' : ''} ${isInactive ? 'bg-gray-50 opacity-70' : ''}`}>
           <div style={{ width: level * 16 }} /> {/* Indentation */}
           
           <button 
@@ -168,9 +175,10 @@ export default function CategoryManager() {
             {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
           </button>
 
-          <div className="flex-1">
-            <span className="font-medium text-gray-800">{node.name}</span>
-            <span className="text-xs text-gray-400 ml-2">/{node.slug}</span>
+          <div className="flex-1 flex items-center gap-2">
+            {isInactive && <EyeOff size={14} className="text-gray-400" />}
+            <span className={`font-medium ${isInactive ? 'text-gray-500 line-through' : 'text-gray-800'}`}>{node.name}</span>
+            <span className="text-xs text-gray-400">/{node.slug}</span>
           </div>
 
           <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -201,9 +209,18 @@ export default function CategoryManager() {
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       {/* List */}
       <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
           <h2 className="text-lg font-bold">Estrutura de Categorias</h2>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <label className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded px-3 py-2 cursor-pointer hover:bg-gray-100">
+              <input
+                type="checkbox"
+                checked={showInactive}
+                onChange={(e) => setShowInactive(e.target.checked)}
+                className="rounded border-gray-300 text-[#E60012] focus:ring-[#E60012]"
+              />
+              <span>Mostrar inativas</span>
+            </label>
             <button 
                 onClick={handleSeed}
                 className="text-xs bg-gray-100 text-gray-600 px-2 py-2 rounded hover:bg-gray-200"
@@ -219,6 +236,19 @@ export default function CategoryManager() {
             </button>
           </div>
         </div>
+
+        {showInactive === false && (
+          <div className="mb-4 text-xs text-gray-500 bg-blue-50 border border-blue-100 rounded p-2.5">
+            Exibindo apenas categorias <strong>ativas</strong> (mesmo conjunto visível na Sidebar do site).
+            Ative "Mostrar inativas" acima para editar categorias ocultas.
+          </div>
+        )}
+        {showInactive === true && (
+          <div className="mb-4 text-xs text-gray-500 bg-amber-50 border border-amber-100 rounded p-2.5">
+            Exibindo <strong>todas</strong> as categorias (incluindo inativas).
+            Categorias inativas aparecem com ícone de olho e texto riscado.
+          </div>
+        )}
 
         {loading ? (
           <p>Carregando...</p>
@@ -347,7 +377,7 @@ export default function CategoryManager() {
                 checked={formData.active}
                 onChange={e => setFormData({ ...formData, active: e.target.checked })}
               />
-              <label htmlFor="active" className="text-sm text-gray-700">Ativo</label>
+              <label htmlFor="active" className="text-sm text-gray-700">Ativo (visível na Sidebar do site)</label>
             </div>
 
             {formData.parent_id && (

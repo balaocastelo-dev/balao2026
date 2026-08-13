@@ -196,9 +196,8 @@ export default async function RootLayout({
   const themeInitScript = `
     (function() {
       try {
-        var saved = localStorage.getItem('balao-home-theme');
-        var theme = saved === 'dark' ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-home-theme', theme);
+        document.documentElement.setAttribute('data-home-theme', 'light');
+        localStorage.setItem('balao-home-theme', 'light');
       } catch (e) {
         document.documentElement.setAttribute('data-home-theme', 'light');
       }

@@ -3,7 +3,7 @@ import { getCategories, getCarouselImages, getHomeBlocks } from "./db";
 import { listVitrinePagesPublic } from "./vitrine/db";
 
 export const getCachedCategories = unstable_cache(
-  async () => getCategories(),
+  async () => (await getCategories()).filter((c) => c.active !== false),
   ["categories"],
   { revalidate: 300, tags: ["categories"] }
 );

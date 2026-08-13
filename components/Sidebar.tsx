@@ -185,7 +185,8 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ categories, mobileOnly = false, availableTags: propTags, selectedTags: propSelectedTags }: SidebarProps) {
-  const dbTree = buildCategoryTree(categories || []);
+  const activeOnly = (categories || []).filter((c) => c.active !== false);
+  const dbTree = buildCategoryTree(activeOnly);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

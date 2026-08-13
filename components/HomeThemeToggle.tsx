@@ -9,18 +9,14 @@ const STORAGE_KEY = "balao-home-theme";
 
 export default function HomeThemeToggle() {
   const [mounted, setMounted] = useState(false);
-  const [theme, setTheme] = useState<HomeTheme>("dark");
+  const [theme, setTheme] = useState<HomeTheme>("light");
 
   useEffect(() => {
-    const savedTheme =
-      typeof window !== "undefined" && window.localStorage.getItem(STORAGE_KEY) === "light"
-        ? "light"
-        : "dark";
+    const savedTheme = "light";
 
-    // O estado inicial do tema depende do storage do navegador.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTheme(savedTheme);
     document.documentElement.setAttribute("data-home-theme", savedTheme);
+    window.localStorage.setItem(STORAGE_KEY, savedTheme);
     setMounted(true);
   }, []);
 
