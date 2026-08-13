@@ -97,7 +97,8 @@ export default async function CategoriaPage({
       const currentId = stack.pop()!;
       const children = all.filter((c) => c.parent_id === currentId);
       children.forEach((child) => {
-        descendants.push(child.name);
+        if (child?.name) descendants.push(child.name);
+        if (child?.slug) descendants.push(child.slug);
         stack.push(child.id);
       });
     }
@@ -107,6 +108,7 @@ export default async function CategoriaPage({
   const validCategories = new Set<string>();
   if (categoryName) {
     validCategories.add(categoryName);
+    if (selectedCat?.slug) validCategories.add(selectedCat.slug);
     const descendants = getDescendantNames(selectedCat, categories);
     descendants.forEach((d) => validCategories.add(d));
   }

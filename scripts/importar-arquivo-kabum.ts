@@ -1,4 +1,4 @@
-/*
+﻿/*
  * SCRIPT: importar-arquivo-kabum.ts
  * Uso:  npx tsx scripts/importar-arquivo-kabum.ts <arquivo.txt> [--base-url http://localhost:3000] [--dry]
  *       [--ajuste 0]  [-c N] [--scrape]
@@ -14,6 +14,33 @@ import path from "node:path";
 const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
 const CHUNK = Number(process.env.CHUNK || process.env.BATCH || 100);
 const DRY = !!process.env.DRY;
+
+// ---------------- MATCH CATEGORIA (SEM CRIAR NENHUMA NOVA!) ----------------
+function normalizeForMatchLocal(s: any): string {
+  return String(s || "")
+    .normalize("NFD")
+    .replace(/\p{Diacritic}+/gu, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+function matchExistingCategoryLocal(raw: any, existingCategories: any[]) {
+  const all = Array.isArray(existingCategories) ? existingCategories.filter(Boolean) : [];
+  if (all.length === 0) return { category: null, matchedBy: "fallback_any_leaf", confidence: 0, originalRaw: String(raw ?? "") };
+  const chain = (Array.isArray(raw) ? raw : String(raw || "").split(/\s*[>?�|\\/]\s*/g)).map((p) => String(p || "").trim()).filter(Boolean);
+  const originalRaw = Array.isArray(raw) ? raw.join(" > ") : String(raw ?? "");
+  const leaf = chain.length ? chain[chain.length - 1] : "";
+  const bySlug = new Map(); bySlug.clear(); const byNorm = new Map(); byNorm.clear();
+  for (const c of all) { if (c?.slug) bySlug.set(String(c.slug).toLowerCase().trim(), c); byNorm.set(normalizeForMatchLocal(c.name), c); }
+  const leafSlug = slugify(leaf); if (leafSlug && bySlug.has(leafSlug)) return { category: bySlug.get(leafSlug), matchedBy: "slug_chain_leaf", confidence: 1, originalRaw };
+  const joined = slugify(chain.join(" ")); if (joined && bySlug.has(joined)) return { category: bySlug.get(joined), matchedBy: "slug_chain_any", confidence: .98, originalRaw };
+  const leafNorm = normalizeForMatchLocal(leaf); if (leafNorm) { const el = byNorm.get(leafNorm); if (el) return { category: el, matchedBy: "name_chain_leaf", confidence: .97, originalRaw }; }
+  for (let i = chain.length - 1; i >= 0; i--) { const n = normalizeForMatchLocal(chain[i]); if (!n) continue; for (const [nk, cat] of byNorm.entries()) { if (nk && (nk === n || nk.includes(n) || n.includes(nk))) return { category: cat, matchedBy: "name_chain_contains", confidence: .75, originalRaw }; } }
+  const fns = ["Outros","Sem Categoria","Sem categoria","Diversos","Geral"];
+  for (const nm of fns) { const hit = byNorm.get(normalizeForMatchLocal(nm)); if (hit) return { category: hit, matchedBy: "fallback_outros", confidence: .3, originalRaw }; const sl = slugify(nm); if (bySlug.has(sl)) return { category: bySlug.get(sl), matchedBy: "fallback_outros", confidence: .3, originalRaw }; }
+  const firstActive = all.find((c) => c.active) || all[0];
+  return { category: firstActive, matchedBy: "fallback_any_leaf", confidence: .05, originalRaw };
+}
 const SCRAPE = !!process.env.SCRAPE;
 const AJUSTE_PCT = Number(process.env.AJUSTE || 0) / 100; // 0.10 = +10%
 
@@ -176,59 +203,7 @@ async function getCategoriesBySlug(): Promise<Record<string, { id: string; slug:
 }
 
 // Cria hierarquia: primeiro nivel 1, depois nivel 2,... tudo referenciando parent_slug
-async function ensureCategories(allChains: string[][]): Promise<void> {
-  console.log(`\n⏳ Garantindo categorias...`);
-  const existingBySlug: Record<string, any> = {};
-  if (!DRY) {
-    const list = await httpJson("GET", `${BASE_URL}/api/categories`);
-    if (Array.isArray(list)) for (const c of list) if (c?.slug) existingBySlug[c.slug] = c;
-  }
-  const uniqSlugs = new Set(Object.keys(existingBySlug));
-  // Agrupa por profundidade
-  const byDepth: Map<number, Set<string>> = new Map();
-  for (const chain of allChains) {
-    for (let i = 0; i < chain.length; i++) {
-      const prefixChain = chain.slice(0, i + 1);
-      const slug = slugify(prefixChain.join(" "));
-      if (!uniqSlugs.has(slug)) {
-        if (!byDepth.has(i)) byDepth.set(i, new Set());
-        byDepth.get(i)!.add(JSON.stringify({ name: prefixChain[prefixChain.length - 1], chain: prefixChain }));
-      }
-    }
-  }
-  if (byDepth.size === 0) {
-    console.log(`   ✓ Todas as categorias já existem (${uniqSlugs.size} no DB)`);
-    return;
-  }
-  const depths = [...byDepth.keys()].sort((a, b) => a - b);
-  let totalCriar = 0;
-  depths.forEach((d) => (totalCriar += byDepth.get(d)!.size));
-  console.log(`   🔹 ${totalCriar} categorias novas para criar em ${depths.length} níveis`);
-  for (const depth of depths) {
-    const items = [...(byDepth.get(depth) || [])].map((s) => JSON.parse(s));
-    console.log(`   └─ Nível ${depth + 1}: ${items.length} categorias`);
-    for (const it of items) {
-      const prefix = it.chain as string[];
-      const name = it.name;
-      const slug = slugify(prefix.join(" "));
-      const parentSlug = prefix.length > 1 ? slugify(prefix.slice(0, -1).join(" ")) : null;
-      const payload: any = { name, slug };
-      if (parentSlug) payload.parent_slug = parentSlug;
-      try {
-        if (DRY) {
-          // console.log(`      [DRY] POST /api/categories -> ${prefix.join(" > ")} (parent=${parentSlug ?? "RAIZ"})`);
-        } else {
-          await httpJson("POST", `${BASE_URL}/api/categories`, payload);
-        }
-        uniqSlugs.add(slug);
-      } catch (e: any) {
-        const warnMsg = e?.message ? String(e.message).slice(0, 200) : String(e);
-        console.warn(`      ⚠️  ${prefix.join(" > ")} : ${warnMsg}`);
-      }
-    }
-  }
-  console.log(`   ✓ Categorias prontas`);
-}
+
 
 async function scrapeExtraImages(product_url: string, baseImgs: string[]): Promise<string[]> {
   try {
@@ -280,10 +255,25 @@ async function main() {
     );
   });
 
-  const allChains = parsed.map((p) => p.categoryChain).filter((c) => c.length > 0);
-  await ensureCategories(allChains);
+  
 
   // Prepara payloads
+
+  // ANTES de preparar payloads: RESOLVER CATEGORIAS EXISTENTES (N�O CRIA NENHUMA!)
+  const existingCatsAll = await httpJson("GET", `${BASE_URL}/api/categories`).catch(() => []);
+  const catList = Array.isArray(existingCatsAll) ? existingCatsAll : [];
+  const matchLog: Record<string, number> = {};
+  for (let j = 0; j < parsed.length; j++) {
+    const pj = parsed[j];
+    const mj = matchExistingCategoryLocal(pj.categoryChain.length ? pj.categoryChain : pj.categoryLeafName || pj.categoryRaw, catList);
+    const mk = mj.matchedBy; matchLog[mk] = (matchLog[mk] || 0) + 1;
+    pj.categoryLeafName = mj.category?.name || pj.categoryLeafName || "Outros";
+    pj.categoryLeafSlug = mj.category?.slug || pj.categoryLeafSlug || slugify(pj.categoryLeafName);
+    pj.categoryChain = mj.category ? [mj.category.name] : pj.categoryChain;
+  }
+  const logl: string[] = []; Object.keys(matchLog).sort().forEach((k) => logl.push(`${k}:${matchLog[k]}`));
+  console.log(`?? Match de categorias (${catList.length} existentes no DB � NENHUMA NOVA CRIADA): ${logl.join(" | ")}`);
+
   const payloads: any[] = [];
   for (let i = 0; i < parsed.length; i++) {
     const p = parsed[i];
@@ -384,3 +374,4 @@ main().catch((err) => {
   console.error(`\n💥 Fatal:`, err);
   process.exit(99);
 });
+

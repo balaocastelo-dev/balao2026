@@ -274,6 +274,225 @@ export function slugify(s: string | null | undefined): string {
     .replace(/(^-|-$)/g, "") || "sem-nome";
 }
 
+export function normalizeForMatch(s: unknown): string {
+  return String(s || "")
+    .normalize("NFD")
+    .replace(/\p{Diacritic}+/gu, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+export interface MatchCategoryResult {
+  category: Category | null;
+  matchedBy:
+    | "slug_exact"
+    | "slug_chain_leaf"
+    | "slug_chain_any"
+    | "name_exact"
+    | "name_chain_leaf"
+    | "name_chain_contains"
+    | "norm_contains_name"
+    | "norm_contains_chain"
+    | "fallback_outros"
+    | "fallback_any_leaf";
+  confidence: number;
+  originalRaw: string;
+}
+
+export interface MatchCategoryOptions {
+  fallbackCategory?: "null" | "first" | Category;
+}
+
+export function matchExistingCategory(
+  raw: string | null | undefined | string[],
+  existingCategories: Category[],
+  opts: MatchCategoryOptions = {}
+): MatchCategoryResult {
+  const all = Array.isArray(existingCategories) ? existingCategories.filter(Boolean) : [];
+  const empty: MatchCategoryResult = {
+    category: null,
+    matchedBy: "fallback_outros",
+    confidence: 0,
+    originalRaw: String(raw ?? ""),
+  };
+  if (all.length === 0) {
+    empty.category = null;
+    return empty;
+  }
+
+  let chain: string[];
+  if (Array.isArray(raw)) {
+    chain = raw.map((p) => String(p || "").trim()).filter(Boolean);
+  } else {
+    const parts = String(raw || "")
+      .split(/\s*[>➤»|\\/]\s*/g)
+      .map((p) => p.trim())
+      .filter(Boolean);
+    chain = parts;
+  }
+  const originalRaw = Array.isArray(raw) ? raw.join(" > ") : String(raw ?? "");
+  const leaf = chain.length ? chain[chain.length - 1] : "";
+  const leafSlug = slugify(leaf);
+  const leafNorm = normalizeForMatch(leaf);
+  const chainSlugs = chain.map((p) => slugify(p));
+  const chainNorms = chain.map((p) => normalizeForMatch(p));
+  const joinedChainSlug = slugify(chain.join(" "));
+  const fullNorm = normalizeForMatch(originalRaw);
+
+  const bySlug = new Map<string, Category>();
+  const byNormName = new Map<string, Category>();
+  for (const c of all) {
+    if (c?.slug) bySlug.set(String(c.slug).toLowerCase().trim(), c);
+    byNormName.set(normalizeForMatch(c.name), c);
+  }
+
+  // 1. Slug exato (folha ou raw puro)
+  if (leafSlug && bySlug.has(leafSlug)) {
+    return {
+      category: bySlug.get(leafSlug)!,
+      matchedBy: "slug_chain_leaf",
+      confidence: 1,
+      originalRaw,
+    };
+  }
+  const rawSlug = slugify(originalRaw);
+  if (rawSlug && bySlug.has(rawSlug)) {
+    return {
+      category: bySlug.get(rawSlug)!,
+      matchedBy: "slug_exact",
+      confidence: 1,
+      originalRaw,
+    };
+  }
+  if (joinedChainSlug && bySlug.has(joinedChainSlug)) {
+    return {
+      category: bySlug.get(joinedChainSlug)!,
+      matchedBy: "slug_chain_any",
+      confidence: 0.98,
+      originalRaw,
+    };
+  }
+
+  // 2. Nome exato (normalizado sem acento)
+  if (leafNorm) {
+    const exactLeaf = byNormName.get(leafNorm);
+    if (exactLeaf) {
+      return {
+        category: exactLeaf,
+        matchedBy: "name_chain_leaf",
+        confidence: 0.97,
+        originalRaw,
+      };
+    }
+  }
+  const rawNorm = normalizeForMatch(originalRaw);
+  if (rawNorm) {
+    const exactRaw = byNormName.get(rawNorm);
+    if (exactRaw) {
+      return {
+        category: exactRaw,
+        matchedBy: "name_exact",
+        confidence: 0.96,
+        originalRaw,
+      };
+    }
+  }
+
+  // 3. Nome/chain substring (contains) em qualquer nivel
+  for (let i = chainNorms.length - 1; i >= 0; i--) {
+    const n = chainNorms[i];
+    if (!n) continue;
+    for (const [normKey, cat] of byNormName.entries()) {
+      if (normKey && (normKey === n || normKey.includes(n) || n.includes(normKey))) {
+        return {
+          category: cat,
+          matchedBy: "name_chain_contains",
+          confidence: 0.78 + Math.min(0.12, n.length / 100),
+          originalRaw,
+        };
+      }
+    }
+  }
+  if (fullNorm) {
+    for (const [normKey, cat] of byNormName.entries()) {
+      if (normKey && (fullNorm.includes(normKey) || normKey.includes(fullNorm))) {
+        return {
+          category: cat,
+          matchedBy: "norm_contains_name",
+          confidence: 0.65,
+          originalRaw,
+        };
+      }
+    }
+  }
+  // 3b. Match por slug contains (em qualquer item da chain)
+  for (let i = chainSlugs.length - 1; i >= 0; i--) {
+    const s = chainSlugs[i];
+    if (!s || s.length < 3) continue;
+    for (const [slugKey, cat] of bySlug.entries()) {
+      if (!slugKey) continue;
+      if (slugKey === s || slugKey.includes(s) || s.includes(slugKey)) {
+        return {
+          category: cat,
+          matchedBy: "norm_contains_chain",
+          confidence: 0.62,
+          originalRaw,
+        };
+      }
+    }
+  }
+
+  // 4. Fallback: tenta "Outros" / "Sem categoria" no DB, senão usa primeira categoria (nunca cria nova!)
+  const tryNames = ["Outros", "Sem Categoria", "Sem categoria", "Outros/Sem categoria", "Diversos", "Geral"];
+  for (const nm of tryNames) {
+    const hit = byNormName.get(normalizeForMatch(nm));
+    if (hit) {
+      return {
+        category: hit,
+        matchedBy: "fallback_outros",
+        confidence: 0.3,
+        originalRaw,
+      };
+    }
+    const slug = slugify(nm);
+    if (bySlug.has(slug)) {
+      return {
+        category: bySlug.get(slug)!,
+        matchedBy: "fallback_outros",
+        confidence: 0.3,
+        originalRaw,
+      };
+    }
+  }
+
+  const fallbackMode = opts.fallbackCategory ?? "first";
+  if (fallbackMode === "null") {
+    return {
+      category: null,
+      matchedBy: "fallback_outros",
+      confidence: 0,
+      originalRaw,
+    };
+  }
+  if (fallbackMode !== "first" && typeof fallbackMode === "object") {
+    return {
+      category: fallbackMode,
+      matchedBy: "fallback_outros",
+      confidence: 0.2,
+      originalRaw,
+    };
+  }
+  // Default: primeira categoria ativa da lista (nunca retorna null/nunca cria!)
+  const firstActive = all.find((c) => c.active) || all[0];
+  return {
+    category: firstActive,
+    matchedBy: "fallback_any_leaf",
+    confidence: 0.05,
+    originalRaw,
+  };
+}
+
 export function extractLeafAndChainFromCategory(
   rawCat: string
 ): { chain: string[]; leaf: string; leafSlug: string } {

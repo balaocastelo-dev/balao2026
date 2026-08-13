@@ -88,27 +88,58 @@ export async function getProductsByCategory(categorySlug: string): Promise<Produ
   }
 }
 
-export async function getProductsByExactCategories(categoryNames: string[], limit?: number): Promise<Product[]> {
+export async function getProductsByExactCategories(categoryNamesOrSlugs: string[], limit?: number): Promise<Product[]> {
   try {
-    const normalizedNames = [...new Set(categoryNames.map((name) => String(name || "").trim()).filter(Boolean))];
-    if (normalizedNames.length === 0) return [];
+    const rawList = categoryNamesOrSlugs.map((v) => String(v || "").trim()).filter(Boolean);
+    if (rawList.length === 0) return [];
 
-    let query = supabase
-      .from('products')
-      .select('*')
-      .in('category', normalizedNames);
+    const allCats = await getCategories().catch(() => []);
+    const norm2 = (s: unknown) => String(s || "").toLowerCase().trim();
 
-    if (typeof limit === 'number' && limit > 0) {
+    const finalMatchers = new Set<string>();
+    for (const v of rawList) finalMatchers.add(v);
+    for (const c of allCats) {
+      const n = norm2(c?.name);
+      const s = norm2(c?.slug);
+      for (const key of rawList) {
+        const k = norm2(key);
+        if (!k) continue;
+        if (
+          (n && (n === k || n.includes(k) || k.includes(n))) ||
+          (s && (s === k || s.includes(k) || k.includes(s)))
+        ) {
+          if (c?.slug) finalMatchers.add(String(c.slug));
+          if (c?.name) finalMatchers.add(String(c.name));
+        }
+      }
+    }
+
+    const arr = [...finalMatchers];
+    if (arr.length === 0) return [];
+
+    const escaped = arr.map((v) => `"${String(v).replace(/"/g, '\\"')}"`).join(",");
+    let query = supabase.from("products").select("*").or(`category.in.(${escaped})`);
+
+    if (typeof limit === "number" && limit > 0) {
       query = query.limit(limit);
     }
 
     const { data, error } = await query;
-
     if (error) {
       console.error("Error fetching products by exact categories:", error);
       return [];
     }
-    return (data || []) as Product[];
+
+    const rows = ((data || []) as Product[]).filter((row) => {
+      if (!row?.category) return false;
+      const rowcat = norm2(row.category);
+      return arr.some((m) => {
+        const mm = norm2(m);
+        return mm && (rowcat === mm || rowcat.includes(mm) || mm.includes(rowcat));
+      });
+    });
+
+    return rows;
   } catch (err) {
     console.error("getProductsByExactCategories failed:", err);
     return [];
@@ -572,6 +603,7 @@ export async function getCategories(): Promise<Category[]> {
         const { data, error } = await supabase
             .from('categories')
             .select('*')
+            .order('display_order', { ascending: true, nullsFirst: false })
             .order('name', { ascending: true });
 
         if (error) {

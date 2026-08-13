@@ -1,7 +1,7 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useRef } from "react";
-import { parseProducts, Product, Category, buildCategoryTree, CATEGORIES } from "@/lib/utils";
+import { parseProducts, Product, Category, buildCategoryTree, CATEGORIES, matchExistingCategory, normalizeForMatch, type MatchCategoryResult } from "@/lib/utils";
 import { Upload, CheckCircle, AlertCircle, Search, Save, X, Zap, Network, Clock, EyeOff } from "lucide-react";
 
 
@@ -388,9 +388,19 @@ export default function ImportPage() {
           .replace(/^-+|-+$/g, "")
           .substring(0, 80);
 
+
       const previewProducts = getPreviewProducts();
 
-      const finalProducts = previewProducts.map((p: any) => ({
+      const matchStats: Record<string, number> = {};
+      const finalProducts: any[] = [];
+      for (const p of previewProducts) {
+        const rawCat = String(p.category || "").trim() || selectedCategory;
+        const m = matchExistingCategory(rawCat, categories);
+        const key = m.matchedBy;
+        matchStats[key] = (matchStats[key] || 0) + 1;
+        const destName = m.category?.name || "";
+        const destSlug = m.category?.slug || "";
+        finalProducts.push({
           id: p.id,
           name: p.name,
           price: p.newPrice,
@@ -399,57 +409,15 @@ export default function ImportPage() {
           product_url: p.product_url,
           description: p.description,
           specs: p.specs,
-          category: p.category,
-          slug: p.slug
-      }));
-
-      const uniqueCategoryNames = Array.from(
-        new Set(finalProducts.map(p => String(p.category || "").trim()).filter(Boolean))
-      );
-
-      const existingCategoryMap = new Map<string, Category>();
-      categories.forEach(c => {
-        existingCategoryMap.set(normalize(c.name), c);
-      });
-
-      const categoriesToCreate = uniqueCategoryNames.filter(
-        name => !existingCategoryMap.has(normalize(name))
-      );
-
-      if (categoriesToCreate.length > 0) {
-        setMessage(`Criando ${categoriesToCreate.length} categoria(s) nova(s)...`);
-
-        const createPromises = categoriesToCreate.map(async (catName) => {
-          const slug = slugify(catName) || `cat-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-          const res = await fetch("/api/categories", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              name: catName,
-              slug,
-              parent_id: null,
-              display_order: 0,
-              active: true,
-              icon: null
-            })
-          });
-          if (!res.ok) {
-            const errData = await res.json().catch(() => ({}));
-            console.warn(`Categoria "${catName}" não foi criada:`, errData);
-            return null;
-          }
-          return res.json();
+          category: destName || destSlug,
+          slug: p.slug,
         });
-
-        const results = await Promise.all(createPromises);
-        const createdCount = results.filter(r => r !== null).length;
-
-        await fetchCategories();
-
-        setMessage(`${createdCount} categoria(s) criada(s). Salvando produtos...`);
-      } else {
-        setMessage("Salvando produtos...");
       }
+      const slines: string[] = [];
+      Object.keys(matchStats).sort().forEach(k => { slines.push(`${k}:${matchStats[k]}`); });
+      const summary = `Distribuindo ${finalProducts.length} produtos em ${categories.length} categorias existentes (${slines.join(" | ")}). Nenhuma categoria nova ser� criada.`;
+      console.info(`[match-category] ${summary}`);
+      setMessage(summary);
 
       // ----------------------------------------------------
       // ----------------------------------------------------
@@ -536,9 +504,15 @@ export default function ImportPage() {
       const totalCountOk = poolResults.reduce((s, r) => s + (r?.saved || 0), 0);
       const batchesOk = poolResults.filter((r) => r?.ok).length;
 
-      const appliedCatsSummary = uniqueCategoryNames.length > 0
-        ? uniqueCategoryNames.join(", ")
-        : selectedCategory;
+      const appliedCatsSummary = (() => {
+        const all = new Set<string>();
+        const pp = getPreviewProducts();
+        for (const p of pp) {
+          const v = String(p.category || selectedCategory || "").trim();
+          if (v) all.add(v);
+        }
+        return all.size > 0 ? [...all].slice(0, 10).join(", ") + (all.size > 10 ? ` (+${all.size - 10})` : "") : selectedCategory;
+      })();
 
       // Histórico
       try {
@@ -563,7 +537,7 @@ export default function ImportPage() {
       const parts: string[] = [
         `${finalCount} produtos importados com sucesso (${batchesOk}/${batches.length} lotes).`,
       ];
-      if (categoriesToCreate.length > 0) parts.push(`(${categoriesToCreate.length} categoria(s) criada(s))`);
+      parts.push("(0 categorias novas criadas — distribuição automática entre categorias existentes)");
       if (failedInBatch > 0) parts.push(`[${failedInBatch} itens COM ERRO — veja console]`);
       setMessage(parts.join(" "));
       setText("");
@@ -864,3 +838,4 @@ export default function ImportPage() {
     </div>
   );
 }
+

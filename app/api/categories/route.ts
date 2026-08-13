@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { getCategories, createCategory } from "@/lib/db";
 
 export const dynamic = 'force-dynamic';
@@ -12,6 +13,19 @@ export async function GET() {
   }
 }
 
+function invalidateAllCategoryCaches() {
+  try { revalidateTag("categories", "page"); } catch {}
+  try { revalidateTag("home-blocks", "page"); } catch {}
+  try { revalidatePath("/", "layout"); } catch {}
+  try { revalidatePath("/", "page"); } catch {}
+  try { revalidatePath("/categoria/[slug]", "page"); } catch {}
+  try { revalidatePath("/departamentos", "page"); } catch {}
+  try { revalidatePath("/pcgamer", "page"); } catch {}
+  try { revalidatePath("/manutencao", "page"); } catch {}
+  try { revalidatePath("/blog", "page"); } catch {}
+  try { revalidatePath("/vitrine", "page"); } catch {}
+}
+
 export async function POST(request: Request) {
   try {
     const data = await request.json();
@@ -19,7 +33,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Name and slug are required" }, { status: 400 });
     }
 
-    // Resolve parent_slug -> parent_id (opcional, usado por scripts de importação em massa)
     if (typeof data.parent_slug === "string" && data.parent_slug && !data.parent_id) {
       try {
         const all = await getCategories();
@@ -38,6 +51,7 @@ export async function POST(request: Request) {
     }
 
     const category = await createCategory(data);
+    invalidateAllCategoryCaches();
     return NextResponse.json(category);
   } catch (error) {
     return NextResponse.json(

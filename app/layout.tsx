@@ -9,7 +9,7 @@ import LayoutWrapper from "@/components/LayoutWrapper";
 import VisitorTracker from "@/components/VisitorTracker";
 import GlobalConversionTracker from "@/components/GlobalConversionTracker";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
-import { getCategories } from "@/lib/db";
+import { getCachedCategories } from "@/lib/cache";
 import type { Category } from "@/lib/utils";
 import { SITE_CONFIG } from "@/lib/config";
 
@@ -197,10 +197,10 @@ export default async function RootLayout({
     (function() {
       try {
         var saved = localStorage.getItem('balao-home-theme');
-        var theme = saved === 'light' ? 'light' : 'dark';
+        var theme = saved === 'dark' ? 'dark' : 'light';
         document.documentElement.setAttribute('data-home-theme', theme);
       } catch (e) {
-        document.documentElement.setAttribute('data-home-theme', 'dark');
+        document.documentElement.setAttribute('data-home-theme', 'light');
       }
     })();
   `;
@@ -213,7 +213,7 @@ export default async function RootLayout({
 
   let categories: Category[] = [];
   try {
-    categories = await getCategories();
+    categories = await getCachedCategories();
   } catch {
     categories = [];
   }
