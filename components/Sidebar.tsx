@@ -300,27 +300,6 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
     [baseTree, deptSearch]
   );
 
-  // --- Helpers: expand/collapse em lote ---
-  const getAllExpandableIds = (): string[] => {
-    const out: string[] = [];
-    const walk = (nodes: Category[]) => {
-      for (const n of nodes) {
-        if (n.children && n.children.length > 0) {
-          out.push(n.id);
-          walk(n.children);
-        }
-      }
-    };
-    walk(tree);
-    return out;
-  };
-  const expandAll = () => {
-    const ids = getAllExpandableIds();
-    const next: Record<string, boolean> = {};
-    ids.forEach((id) => (next[id] = true));
-    setExpanded(next);
-  };
-  const collapseAll = () => setExpanded({});
 
   // --- Components ---
 
@@ -402,26 +381,10 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
     return (
       <aside className="site-surface sticky top-24 hidden h-fit w-64 flex-col rounded-[1.6rem] shadow-lg lg:flex">
         <div className="border-b border-[var(--site-border)] bg-[var(--site-panel-muted)] p-4 flex flex-col gap-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center">
             <div className="flex items-center gap-2 font-bold text-[var(--site-text)]">
               <List size={20} className="text-[#E60012]" />
               <span>Departamentos</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={expandAll}
-                className="px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider text-[var(--site-muted)] hover:bg-[var(--site-panel)] hover:text-[var(--site-text)] transition-colors"
-                title="Expandir todas as categorias"
-              >
-                +Tudo
-              </button>
-              <button
-                onClick={collapseAll}
-                className="px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider text-[var(--site-muted)] hover:bg-[var(--site-panel)] hover:text-[var(--site-text)] transition-colors"
-                title="Recolher todas as categorias"
-              >
-                Limpar
-              </button>
             </div>
           </div>
           <div>
