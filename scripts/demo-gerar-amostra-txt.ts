@@ -128,7 +128,7 @@ async function main() {
     try {
       const r = await fetchJson("http://localhost:3000/api/scrape/product", { url: p.url });
       const imagens: string[] = Array.isArray(r?.images) ? r.images : [];
-      const nome = (r?.description || r?.success ? "" : "") || "";
+      const nome = (typeof r?.description === "string" ? r.description : "") || "";
       const price = (r as any)?.["price"] || "";
       addRow({
         url: p.url,
