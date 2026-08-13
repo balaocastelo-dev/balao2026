@@ -1,26 +1,45 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { parseProducts, Product, Category, buildCategoryTree, CATEGORIES } from "@/lib/utils";
-import { Upload, CheckCircle, AlertCircle, Search, Save, X } from "lucide-react";
+import { Upload, CheckCircle, AlertCircle, Search, Save, X, Zap, Network, Clock, EyeOff } from "lucide-react";
+
 
 export default function ImportPage() {
   const [categories, setCategories] = useState<Category[]>([]);
-  
+
   // Import State
   const [text, setText] = useState("");
   const [parsedProducts, setParsedProducts] = useState<Product[]>([]);
   const [importStep, setImportStep] = useState<"input" | "preview">("input");
-  
+
   // Import Settings
   const [selectedCategory, setSelectedCategory] = useState("Hardware");
   const [priceAdjustment, setPriceAdjustment] = useState<number>(0);
   const [adjustmentScope, setAdjustmentScope] = useState<"all" | "high_value" | "low_value">("all");
   const [scopeThreshold, setScopeThreshold] = useState<number>(1000);
   const [migrateImages, setMigrateImages] = useState(false);
-  
+
+  // Performance / Massivo (1000 workers p/ tarefas de rede)
+  const [workerConcurrency, setWorkerConcurrency] = useState<number>(260);
+  const [scrapeAttempts, setScrapeAttempts] = useState<number>(5);
+  const [aiAttempts, setAiAttempts] = useState<number>(4);
+  const [validateAttempts, setValidateAttempts] = useState<number>(3);
+  const [skipAI, setSkipAI] = useState<boolean>(false);
+  const [skipImageValidation, setSkipImageValidation] = useState<boolean>(false);
+  const [skipScrape, setSkipScrape] = useState<boolean>(false);
+
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [progressPct, setProgressPct] = useState(0);
+  const abortRef = useRef<AbortController | null>(null);
+  const [stats, setStats] = useState<{
+    total: number;
+    scrapeOK: number; scrapeERR: number;
+    aiOK: number; aiERR: number; aiSKIP: number;
+    imgOK: number; imgERR: number;
+    savedOK: number; savedERR: number;
+  } | null>(null);
 
   useEffect(() => {
     fetchCategories();
@@ -37,6 +56,59 @@ export default function ImportPage() {
         console.error("Failed to fetch categories", e);
     }
   };
+
+  const poolLimit = async <T,>(
+    maxConcurrency: number,
+    items: T[],
+    runner: (item: T, index: number) => Promise<any>
+  ): Promise<any[]> => {
+    if (!items || items.length === 0) return [];
+    const limit = Math.max(1, Math.min(2000, Math.floor(Number(maxConcurrency) || 1)));
+    const out: any[] = new Array(items.length);
+    let cursor = 0;
+    const worker = async () => {
+      while (cursor < items.length) {
+        const i = cursor++;
+        try {
+          out[i] = await runner(items[i], i);
+        } catch (e: any) {
+          out[i] = { __error: e?.message || String(e) };
+        }
+      }
+    };
+    const workers = Array.from({ length: Math.min(limit, items.length) }, () => worker());
+    await Promise.all(workers);
+    return out;
+  };
+
+  async function withRetry<T>(
+    fn: () => Promise<T>,
+    opts?: {
+      attempts?: number;
+      baseDelayMs?: number;
+      maxDelayMs?: number;
+      name?: string;
+      onError?: (e: any, attempt: number) => void;
+    }
+  ): Promise<T> {
+    const attempts = Math.max(1, opts?.attempts ?? 3);
+    const base = Math.max(0, opts?.baseDelayMs ?? 400);
+    const cap = Math.max(base, opts?.maxDelayMs ?? 5000);
+    let lastErr: any;
+    for (let a = 0; a < attempts; a++) {
+      try {
+        return await fn();
+      } catch (e) {
+        lastErr = e;
+        opts?.onError?.(e, a);
+        if (a + 1 < attempts) {
+          const delay = Math.min(cap, base * 2 ** a);
+          await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+      }
+    }
+    throw lastErr;
+  }
 
   // Preview Logic
   const getPreviewProducts = () => {
@@ -379,48 +451,126 @@ export default function ImportPage() {
         setMessage("Salvando produtos...");
       }
 
-      const res = await fetch("/api/products", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ products: finalProducts }),
+      // ----------------------------------------------------
+      // ----------------------------------------------------
+      // SAVE em LOTES (default 30 itens/request)
+      // Vercel Serverless tem ~6MB e Edge ~4.5MB por request.
+      // 30 itens ≈ 30*1500 bytes = ~45 KB. Ultra seguro.
+      // ----------------------------------------------------
+      const batchSize = Math.max(5, Math.min(120, 30));
+      const workersSave = Math.min(Math.max(1, workerConcurrency || 60), 200);
+      const batches: any[][] = [];
+      for (let i = 0; i < finalProducts.length; i += batchSize) {
+        batches.push(finalProducts.slice(i, i + batchSize));
+      }
+
+      setProgressPct(0);
+      let savedTotal = 0;
+      let failedInBatch = 0;
+      const failedItems: { name: string; erro: string }[] = [];
+
+      const poolResults = await poolLimit(workersSave, batches, async (lote, batchIdx) => {
+        let thisResult = { ok: false, saved: 0, erro: null as null | string };
+        // REQ com retry + fallback 1-a-1 (como o script Node)
+        try {
+          await withRetry(
+            async () => {
+              const controller = abortRef.current;
+              const signal = controller?.signal;
+              const res = await fetch("/api/products", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ products: lote }),
+                signal,
+              });
+              const raw = await res.text();
+              let j: any = null;
+              try { j = raw ? JSON.parse(raw) : null; } catch {}
+              if (!res.ok) {
+                const msg =
+                  j?.error ||
+                  (raw
+                    ? `HTTP ${res.status} — ${raw.replace(/\s+/g, " ").slice(0, 260)}`
+                    : `HTTP ${res.status}`);
+                throw new Error(msg);
+              }
+              thisResult = { ok: true, saved: lote.length, erro: null };
+            },
+            { attempts: 4, baseDelayMs: 500, name: `lote-${batchIdx}` }
+          );
+        } catch (e: any) {
+          const errorMsg = e?.message || String(e);
+          // Fallback: tenta 1-a-1 dentro do lote
+          console.warn(`Lote ${batchIdx} falhou (${errorMsg}), tentando 1-a-1 com ${lote.length} itens...`);
+          for (const single of lote) {
+            try {
+              await withRetry(async () => {
+                const res = await fetch("/api/products", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ products: [single] }),
+                });
+                const raw = await res.text();
+                let j: any = null;
+                try { j = raw ? JSON.parse(raw) : null; } catch {}
+                if (!res.ok) {
+                  throw new Error(j?.error || `HTTP ${res.status} ${raw.slice(0, 120)}`);
+                }
+              }, { attempts: 3, baseDelayMs: 350 });
+              thisResult.saved += 1;
+            } catch (eSingle: any) {
+              failedInBatch++;
+              failedItems.push({
+                name: String(single.name || "—").slice(0, 60),
+                erro: eSingle?.message || "erro desconhecido",
+              });
+            }
+          }
+          thisResult.ok = thisResult.saved > 0;
+          thisResult.erro = errorMsg;
+        }
+        savedTotal += thisResult.saved;
+        return thisResult;
       });
 
-      const text = await res.text();
-      let data: any = null;
-      try { data = text ? JSON.parse(text) : null; } catch { data = null; }
-      if (!res.ok) {
-        const details =
-          data?.error ||
-          (text
-            ? `Resposta não-JSON do servidor: ${text.replace(/\s+/g, " ").slice(0, 300)}`
-            : `HTTP ${res.status} — falha ao salvar produtos`);
-        throw new Error(details);
-      }
-      if (data == null && text) {
-        try { data = JSON.parse(text); } catch { data = { success: true, raw: text }; }
-      }
+      const totalCountOk = poolResults.reduce((s, r) => s + (r?.saved || 0), 0);
+      const batchesOk = poolResults.filter((r) => r?.ok).length;
 
       const appliedCatsSummary = uniqueCategoryNames.length > 0
         ? uniqueCategoryNames.join(", ")
         : selectedCategory;
 
-      await fetch("/api/history", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            product_count: finalProducts.length,
-            price_percentage: priceAdjustment,
-            applied_category: appliedCatsSummary,
-            applied_scope: adjustmentScope
-        })
-      });
+      // Histórico
+      try {
+        await fetch("/api/history", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+              product_count: savedTotal,
+              price_percentage: priceAdjustment,
+              applied_category: appliedCatsSummary,
+              applied_scope: adjustmentScope
+          }),
+        });
+      } catch (e) {
+        console.warn("Não foi possível gravar histórico (ignorado):", e);
+      }
 
-      setStatus("success");
-      const finalCount = (data && typeof data === "object") ? Number(data.count ?? finalProducts.length) : finalProducts.length;
-      setMessage(`${finalCount} produtos importados com sucesso!${categoriesToCreate.length > 0 ? ` (${categoriesToCreate.length} categoria(s) criada(s))` : ""}`);
+      setProgressPct(100);
+
+      setStatus(savedTotal > 0 ? "success" : "error");
+      const finalCount = savedTotal;
+      const parts: string[] = [
+        `${finalCount} produtos importados com sucesso (${batchesOk}/${batches.length} lotes).`,
+      ];
+      if (categoriesToCreate.length > 0) parts.push(`(${categoriesToCreate.length} categoria(s) criada(s))`);
+      if (failedInBatch > 0) parts.push(`[${failedInBatch} itens COM ERRO — veja console]`);
+      setMessage(parts.join(" "));
       setText("");
-      setParsedProducts([]);
-      setImportStep("input");
+      if (savedTotal > 0) {
+        setParsedProducts([]);
+        setImportStep("input");
+      }
 
       setPriceAdjustment(0);
     } catch (e: any) {

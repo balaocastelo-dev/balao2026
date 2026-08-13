@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { Category, buildCategoryTree } from "@/lib/utils";
 import { 
-  Menu, ChevronRight, ChevronDown, 
+  Menu, ChevronRight, ChevronDown, Search as SearchIcon,
   Monitor, Smartphone, Gamepad, Speaker, Tv, Wifi, Printer, Home, Plug, HardDrive, Briefcase, Shield, List,
   Laptop, Cpu, Keyboard, Mouse, Watch, Tablet, Headphones, Camera,
   Tag, Wrench, Handshake,
@@ -48,68 +48,151 @@ const iconMap: Record<string, LucideIcon> = {
   "Tablet": Tablet,
   "Camera": Camera,
   "Lock": Lock,
-  "Ghost": Ghost,
-  "Key": Key,
-  "Armchair": Armchair,
-  "Square": Square,
-  "Disc": Disc,
-  "Mic": Mic,
-  "Cable": Cable,
-  "RefreshCcw": RefreshCcw,
-  "Usb": Usb,
-  "Backpack": Backpack,
-  "Lightbulb": Lightbulb,
-  "Zap": Zap,
-  "Video": Video,
-  "Bell": Bell,
-  "Radio": Radio,
-  "Power": Power,
-  "ToggleLeft": ToggleLeft,
-  "User": User,
-  "Star": Star,
-  "Smile": Smile,
-  "Shirt": Shirt,
-  "Coffee": Coffee,
-  "Image": Image,
-  "Gift": Gift,
-  "FileText": FileText,
-  "PenTool": PenTool,
-  "Table": Table,
-  "Move": Move,
-  "CreditCard": CreditCard,
-  "Copy": Copy,
-  "Droplet": Droplet,
-  "Cylinder": Cylinder,
-  "Scan": Scan,
-  "Gamepad2": Gamepad2,
-  "Box": Box,
-  "Server": Server,
-  "Book": Book,
-  "Feather": Feather,
-  "Aperture": Aperture,
-  "CircuitBoard": CircuitBoard,
-  "MemoryStick": MemoryStick,
-  "Fan": Fan,
-  "Network": Network,
-  "Battery": Battery
+  "Adaptadores": RefreshCcw,
+  "Bases": Armchair,
+  "Cabos": Cable,
+  "Filtros": Zap,
+  "Estabilizadores": Zap,
+  "Hubs": Usb,
+  "Iluminação": Lightbulb,
+  "RGB": Lightbulb,
+  "Mochilas": Backpack,
+  "Cases": Box,
+  "Suportes": Armchair,
+  "Headset": Headphones,
+  "AirPods": Headphones,
+  "Automação": ToggleLeft,
+  "Assistentes": User,
+  "Casa": Home,
+  "Inteligente": ToggleLeft,
+  "Centrais": Server,
+  "Interruptores": ToggleLeft,
+  "Lâmpadas": Lightbulb,
+  "Fitas": Lightbulb,
+  "LED": Lightbulb,
+  "Sensores": Bell,
+  "Tomadas": Power,
+  "All-in-One": Monitor,
+  "Mini PC": Box,
+  "Corporativo": Briefcase,
+  "Escritório": Briefcase,
+  "PC Gamer": Cpu,
+  "Workstation": Server,
+  "Cadeiras": Armchair,
+  "Ergonômicas": Armchair,
+  "Gamer": Gamepad,
+  "Mesas": Table,
+  "Organizadores": FileText,
+  "Assinaturas": CreditCard,
+  "Consoles": Gamepad2,
+  "Controles": Gamepad2,
+  "Gift Cards": Gift,
+  "Jogos": Disc,
+  "Nintendo": Disc,
+  "PlayStation": Disc,
+  "Xbox": Disc,
+  "Action Figures": Smile,
+  "Brinquedos": Smile,
+  "Temáticos": Smile,
+  "Camisetas": Shirt,
+  "Vestuário": Shirt,
+  "Canecas": Coffee,
+  "Copos": Coffee,
+  "Colecionáveis": Star,
+  "Decoração": Image,
+  "Geek": Smile,
+  "Funko": Smile,
+  "Pop": Smile,
+  "Coolers": Fan,
+  "Water Cooler": Droplet,
+  "Fontes": Battery,
+  "Alimentação": Battery,
+  "Gabinetes": Box,
+  "Memória": MemoryStick,
+  "RAM": MemoryStick,
+  "Placas": CircuitBoard,
+  "Rede": Network,
+  "Som": Speaker,
+  "Vídeo": Monitor,
+  "GPU": Monitor,
+  "Placas-Mãe": CircuitBoard,
+  "Processadores": Cpu,
+  "CPU": Cpu,
+  "SSD": HardDrive,
+  "HD": HardDrive,
+  "NVMe": HardDrive,
+  "Cartuchos": Droplet,
+  "Tinta": Droplet,
+  "Etiquetas": FileText,
+  "Impressoras": Printer,
+  "Jato": Printer,
+  "Laser": Printer,
+  "Multifuncionais": Printer,
+  "Papel": FileText,
+  "Fotográfico": Image,
+  "Scanners": Scan,
+  "Toners": Printer,
+  "Antivírus": Shield,
+  "Microsoft": Key,
+  "Office": Key,
+  "Softwares": PenTool,
+  "Design": PenTool,
+  "Edição": PenTool,
+  "Windows": Key,
+  "4K": Monitor,
+  "Curvo": Monitor,
+  "Profissional": Monitor,
+  "Ultrawide": Monitor,
+  "MacBook": Laptop,
+  "Estudante": Laptop,
+  "Ultrabook": Laptop,
+  "Joysticks": Gamepad2,
+  "Microfones": Mic,
+  "Mousepads": Mouse,
+  "Mouses": Mouse,
+  "Teclados": Keyboard,
+  "Mecânicos": Keyboard,
+  "Volantes": Gamepad2,
+  "Simuladores": Gamepad2,
+  "Webcams": Camera,
+  "Alarmes": Bell,
+  "Residenciais": Bell,
+  "Câmeras de Segurança": Camera,
+  "IP": Camera,
+  "Wi-Fi": Camera,
+  "DVR": HardDrive,
+  "NVR": HardDrive,
+  "Fechaduras": Lock,
+  "Eletrônicas": Lock,
+  "Kits": Box,
+  "CFTV": Camera,
+  "Movimento": Bell,
+  "Vídeo Porteiros": Video,
+  "Capas": Shirt,
+  "Películas": Shield,
+  "Carregadores": Battery,
+  "Android": Smartphone,
+  "Power Banks": Battery,
 };
 
+// --- Component Types ---
+
 interface SidebarProps {
-  categories: Category[];
+  categories?: Category[];
   mobileOnly?: boolean;
   availableTags?: { name: string; count: number }[];
   selectedTags?: string[];
 }
 
 export default function Sidebar({ categories, mobileOnly = false, availableTags: propTags, selectedTags: propSelectedTags }: SidebarProps) {
-  const dbTree = buildCategoryTree(categories);
+  const dbTree = buildCategoryTree(categories || []);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { isOpen, closeSidebar, availableTags: contextTags } = useSidebar();
   
-  // State for expanded categories
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [deptSearch, setDeptSearch] = useState("");
 
   // Merge tags
   const availableTags = propTags || contextTags;
@@ -165,7 +248,57 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
     icon: "List"
   };
 
-  const tree = [allProductsItem, ...dbTree];
+  const baseTree = useMemo<Category[]>(
+    () => [allProductsItem, ...(dbTree || [])],
+    [dbTree]
+  );
+
+  // Filtro de busca por departamento (mantém ancestrais se filho der match)
+  function filterTreeBySearch(nodes: Category[], needle: string): Category[] {
+    if (!needle) return nodes;
+    const mapChildren = (list: Category[]): Category[] => {
+      const out: Category[] = [];
+      for (const n of list) {
+        const kids = n.children && n.children.length ? mapChildren(n.children) : [];
+        const selfMatch = String(n.name || "").toLowerCase().includes(needle) || String(n.slug || "").toLowerCase().includes(needle);
+        if (selfMatch || kids.length > 0) {
+          out.push({ ...n, children: kids });
+        }
+      }
+      return out;
+    };
+    return mapChildren(nodes);
+  }
+
+  // Expandir automaticamente os pais quando busca estiver ativa
+  useEffect(() => {
+    const q = deptSearch.trim().toLowerCase();
+    if (!q) return;
+    const ids = new Set<string>();
+    const walk = (nodes: Category[]): boolean => {
+      let ok = false;
+      for (const n of nodes) {
+        const kids = n.children && n.children.length > 0 ? walk(n.children) : false;
+        const self = String(n.name || "").toLowerCase().includes(q) || String(n.slug || "").toLowerCase().includes(q);
+        if ((self || kids) && n.children && n.children.length > 0) ids.add(n.id);
+        if (self || kids) ok = true;
+      }
+      return ok;
+    };
+    walk(baseTree);
+    if (ids.size > 0) {
+      setExpanded((prev) => {
+        const next = { ...prev };
+        ids.forEach((id) => (next[id] = true));
+        return next;
+      });
+    }
+  }, [deptSearch, baseTree]);
+
+  const tree = useMemo(
+    () => filterTreeBySearch(baseTree, deptSearch.trim().toLowerCase()),
+    [baseTree, deptSearch]
+  );
 
   // --- Helpers: expand/collapse em lote ---
   const getAllExpandableIds = (): string[] => {
@@ -188,12 +321,12 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
     setExpanded(next);
   };
   const collapseAll = () => setExpanded({});
+
   // --- Components ---
 
   const CategoryNode = ({ node, level }: { node: Category, level: number }) => {
     const hasChildren = node.children && node.children.length > 0;
     const isExpanded = expanded[node.id];
-    // Active state logic
     const isActive = currentCategory === node.name || (!!pathname && pathname.startsWith("/categoria/") && !!node.slug && pathname.endsWith(`/${node.slug}`));
     
     const Icon = level === 0 ? getIcon(node.icon || node.name) : null;
@@ -268,7 +401,7 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
   if (!mobileOnly) {
     return (
       <aside className="site-surface sticky top-24 hidden h-fit w-64 flex-col rounded-[1.6rem] shadow-lg lg:flex">
-        <div className="border-b border-[var(--site-border)] bg-[var(--site-panel-muted)] p-4">
+        <div className="border-b border-[var(--site-border)] bg-[var(--site-panel-muted)] p-4 flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 font-bold text-[var(--site-text)]">
               <List size={20} className="text-[#E60012]" />
@@ -291,10 +424,21 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
               </button>
             </div>
           </div>
+          <div>
+            <div className="flex items-center gap-2 rounded-xl border border-[var(--site-border)] bg-[var(--site-panel)] px-3 py-2 focus-within:ring-2 focus-within:ring-[var(--home-accent)]/40">
+              <SearchIcon size={16} className="text-[var(--site-muted)]" />
+              <input value={deptSearch} onChange={(e) => setDeptSearch(e.target.value)} placeholder="Buscar departamento..." className="w-full bg-transparent text-sm text-[var(--site-text)] placeholder:text-[var(--site-muted)] outline-none" />
+              {deptSearch && <button onClick={() => setDeptSearch("")} className="text-[var(--site-muted)] hover:text-[var(--site-text)]"><X size={14} /></button>}
+            </div>
+            {deptSearch && <div className="mt-1.5 px-1 text-[10px] text-[var(--site-muted)]">Filtrando por "{deptSearch.slice(0,30)}"</div>}
+          </div>
         </div>
-        
         <div className="py-3">
-          {tree.map(node => <CategoryNode key={node.id} node={node} level={0} />)}
+          {tree.length > 0 ? (
+            tree.map(node => <CategoryNode key={node.id} node={node} level={0} />)
+          ) : (
+            <div className="px-4 py-6 text-center text-xs text-[var(--site-muted)]">Nenhum departamento encontrado.</div>
+          )}
           
           <div className="mx-4 my-2 border-t border-[var(--site-border)]" />
           
@@ -318,7 +462,7 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
           <CustomLink href="/montagempc" icon={Cpu} label="Montagem PC Gamer" />
           <CustomLink href="/sistemas" icon={CircuitBoard} label="Sites & Sistemas" />
           <CustomLink href="/pcgamer3d" icon={Box} label="PC Gamer 3D" />
-                  <CustomLink href="/wendell/apple" icon={Laptop} label="Especialista Apple" />
+          <CustomLink href="/wendell/apple" icon={Laptop} label="Especialista Apple" />
 
             {availableTags && availableTags.length > 0 && (
             <div className="mx-4 mt-4 border-t border-[var(--site-border)] pt-4">
@@ -384,7 +528,14 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
          {/* Mobile Content */}
          <div className="flex-1 overflow-y-auto py-4">
             <div className="px-4 mb-2 text-xs font-bold text-zinc-500 uppercase tracking-wider">Categorias</div>
-            {tree.map(node => <CategoryNode key={node.id} node={node} level={0} />)}
+            <div className="px-4 mb-3">
+              <div className="flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2">
+                <SearchIcon size={16} className="text-zinc-400" />
+                <input value={deptSearch} onChange={(e) => setDeptSearch(e.target.value)} placeholder="Buscar departamento..." className="w-full bg-transparent text-sm text-zinc-100 placeholder:text-zinc-500 outline-none" />
+                {deptSearch && <button onClick={() => setDeptSearch("")} className="text-zinc-400 hover:text-zinc-100"><X size={14} /></button>}
+              </div>
+            </div>
+            {tree.length > 0 ? (tree.map(node => <CategoryNode key={node.id} node={node} level={0} />)) : (<div className="px-6 py-8 text-center text-xs text-zinc-500">Nenhum departamento encontrado.</div>)}
             
             <div className="my-4 border-t border-zinc-800 mx-4" />
             
@@ -406,7 +557,7 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
             <CustomLink href="/montagempc" icon={Cpu} label="Montagem PC Gamer" />
             <CustomLink href="/sistemas" icon={CircuitBoard} label="Sites & Sistemas" />
             <CustomLink href="/pcgamer3d" icon={Box} label="PC Gamer 3D" />
-                  <CustomLink href="/wendell/apple" icon={Laptop} label="Especialista Apple" />
+            <CustomLink href="/wendell/apple" icon={Laptop} label="Especialista Apple" />
 
                        {availableTags && availableTags.length > 0 && (
             <div className="mt-6 pt-4 border-t border-zinc-800 mx-4 bg-zinc-900/40 p-4 rounded-lg">
