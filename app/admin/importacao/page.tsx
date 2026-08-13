@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { parseProducts, Product, Category, buildCategoryTree, CATEGORIES, parsePriceToNumber, extractRawColumns, autoGuessMapping, buildProductsByMapping, ColumnMapping, ColumnRole, ExtractedRaw } from "@/lib/utils";
+import { parseProducts, Product, Category, buildCategoryTree, CATEGORIES, parsePriceToNumber, extractRawColumns, autoGuessMapping, buildProductsByMapping, ColumnMapping, ColumnRole, ExtractedRaw, enrichImageVariants } from "@/lib/utils";
 import { Upload, CheckCircle, AlertCircle, Search, Save, X, Zap, Settings, TrendingUp, Database, Clock, Layers, ChevronRight } from "lucide-react";
 
 const PRICE_FMT = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -481,6 +481,7 @@ export default function ImportPage() {
             } catch {}
           }
 
+          imageUrls = enrichImageVariants(imageUrls, 14);
           imageUrls = dedupeUrls(imageUrls);
           let aiNext: "done" | "error" = "error";
 

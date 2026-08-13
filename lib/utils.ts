@@ -307,6 +307,64 @@ export interface ExtractedRaw {
   detectedColumnCount: number;
 }
 
+export function enrichImageVariants(existing: string[], maxVariants: number = 14): string[] {
+  const out: string[] = (existing || []).slice();
+  const seen = new Set<string>(out.map(u => u.toLowerCase()));
+  const push = (u: string) => {
+    const s = String(u || "").trim().toLowerCase();
+    if (!s || seen.has(s) || !/^https?:\/\//i.test(u)) return;
+    seen.add(s);
+    out.push(u);
+  };
+
+  for (const seed of (existing || [])) {
+    if (out.length >= maxVariants) break;
+    try {
+      const u = new URL(seed);
+      const filename = u.pathname.split('/').pop() || '';
+      const m = filename.match(/(_)(\d{8,})(\.(?:jpg|jpeg|png|webp|gif))/i);
+      if (m) {
+        const sep = m[1];
+        const baseNum = Number(m[2]);
+        const ext = m[3];
+        if (Number.isFinite(baseNum)) {
+          const baseWithout = filename.slice(0, m.index) + sep;
+          const parentPath = u.pathname.slice(0, u.pathname.length - filename.length);
+          const variants: number[] = [];
+          for (let i = 1; i <= 14; i++) variants.push(baseNum + i);
+          for (let i = 1; i <= 6; i++) variants.push(baseNum - i);
+          for (const vNum of variants) {
+            if (out.length >= maxVariants) break;
+            const newFilename = baseWithout + String(vNum).padStart(m[2].length, '0') + ext;
+            const c = new URL(u.toString());
+            c.pathname = parentPath + newFilename;
+            c.search = '';
+            push(c.toString());
+          }
+        }
+      }
+      if (/\/sync_mirakl\//i.test(u.pathname)) {
+        const sizes = ['xlarge', 'large', 'medium', 'small', 'original'];
+        for (const sz of sizes) {
+          if (out.length >= maxVariants) break;
+          const c = new URL(u.toString());
+          const parts = c.pathname.split('/').filter(Boolean);
+          const sizeIdx = parts.findIndex(p => /^(small|medium|large|xlarge|mini|thumb|thumbnail|original)$/i.test(p));
+          if (sizeIdx >= 0) parts[sizeIdx] = sz;
+          else {
+            const pIdIdx = parts.findIndex(p => /^\d+$/.test(p) && parts[p - 1] === 'sync_mirakl');
+            if (pIdIdx >= 0 && parts[pIdIdx + 1]) parts.splice(pIdIdx + 1, 0, sz);
+          }
+          c.pathname = `/${parts.join('/')}`;
+          c.search = '';
+          push(c.toString());
+        }
+      }
+    } catch {}
+  }
+  return out;
+}
+
 export function extractRawColumns(text: string): ExtractedRaw {
   const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
   const allColumns: string[][] = [];

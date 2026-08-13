@@ -32,7 +32,7 @@ export async function POST(request: Request) {
           method: 'GET',
           headers: {
             'User-Agent': userAgent,
-            Range: 'bytes=0-262143'
+            Range: 'bytes=0-131071'
           }
         });
         if (!res.ok) return { ok: false as const };
@@ -41,11 +41,12 @@ export async function POST(request: Request) {
         if (contentType && !contentType.toLowerCase().startsWith('image/')) return { ok: false as const };
 
         const buf = Buffer.from(await res.arrayBuffer());
-        if (buf.length < 15000) return { ok: false as const };
+        if (buf.length < 1500) return { ok: false as const };
 
         const meta = await sharp(buf).metadata().catch(() => null);
-        if (!meta?.width || !meta?.height) return { ok: false as const };
-        if (Math.min(meta.width, meta.height) < 600) return { ok: false as const };
+        if (meta?.width && meta?.height) {
+          if (Math.min(meta.width, meta.height) < 80) return { ok: false as const };
+        }
 
         return { ok: true as const, url: imgUrl };
       } catch {
@@ -112,16 +113,18 @@ export async function POST(request: Request) {
 
       const hostMatch = base.hostname.match(/^images(\d)\.kabum\.com\.br$/i);
       const preferred = hostMatch?.[1] ? [hostMatch[1]] : [];
-      const digits = Array.from({ length: 10 }, (_, i) => String(i));
-      const orderedDigits = Array.from(new Set([...preferred, '7', ...digits]));
+      const orderedDigits = Array.from(new Set([...preferred, '7', '4', '8', '9', '5']));
 
-      for (const d of orderedDigits) {
-        const candidate = new URL(base.toString());
-        candidate.hostname = `images${d}.kabum.com.br`;
-        const probed = await probeImage(candidate.toString());
-        if (probed.ok) return probed.url;
-      }
-
+      const tasks = orderedDigits.map(async (d) => {
+        try {
+          const candidate = new URL(base.toString());
+          candidate.hostname = `images${d}.kabum.com.br`;
+          const probed = await probeImage(candidate.toString());
+          return probed.ok ? probed.url : null;
+        } catch { return null; }
+      });
+      const results = await Promise.all(tasks);
+      for (const ok of results) if (ok) return ok;
       return null;
     };
 
@@ -135,29 +138,101 @@ export async function POST(request: Request) {
     const miraklMatches = html.match(/https:\/\/images\d+\.kabum\.com\.br\/produtos\/fotos\/sync_mirakl\/\d+\/[^"'\s]+/gi) || [];
 
     const uniqueImages: string[] = [];
+    const seen = new Set<string>();
+    const pushUnique = (u: string) => {
+      if (!u) return;
+      const k = u.toLowerCase();
+      if (seen.has(k)) return;
+      seen.add(k);
+      uniqueImages.push(u);
+    };
+    const withTimeout = <T,>(p: Promise<T>, ms: number): Promise<T | null> =>
+      Promise.race([p, new Promise<null>(r => setTimeout(() => r(null), ms))]);
 
-    const originalCandidates = Array.from(new Set(classicMatches.map(toKabumOriginalUrl)));
-    for (const img of originalCandidates) {
-      if (uniqueImages.length >= 20) break;
-      const probed = await probeImage(img);
-      if (probed.ok) uniqueImages.push(probed.url);
+    const originalCandidates = Array.from(new Set(classicMatches.map(toKabumOriginalUrl))).filter(u => !seen.has(u.toLowerCase()));
+    {
+      const tasks = originalCandidates.slice(0, 40).map(img => withTimeout(probeImage(img), 3500));
+      const results = await Promise.all(tasks);
+      for (const r of results) {
+        if (r && (r as any).ok) pushUnique((r as any).url);
+        if (uniqueImages.length >= 20) break;
+      }
     }
 
     if (uniqueImages.length === 0 && miraklMatches.length > 0) {
-      const uniqueMirakl = Array.from(new Set(miraklMatches.map(normalizeMiraklToXlarge)));
-      for (const img of uniqueMirakl) {
+      const uniqueMirakl = Array.from(new Set(miraklMatches.map(normalizeMiraklToXlarge))).filter(u => !seen.has(u.toLowerCase()));
+      const tasks = uniqueMirakl.slice(0, 40).map(img => withTimeout(tryMiraklWithHostFallback(img), 7000));
+      const results = await Promise.all(tasks);
+      for (const r of results) {
+        if (r) pushUnique(r);
         if (uniqueImages.length >= 20) break;
-        const resolved = await tryMiraklWithHostFallback(img);
-        if (resolved) uniqueImages.push(resolved);
       }
     }
 
     if (uniqueImages.length === 0 && classicMatches.length > 0) {
-      const gCandidates = Array.from(new Set(classicMatches.map(toKabumGUrl)));
-      for (const img of gCandidates) {
+      const gCandidates = Array.from(new Set(classicMatches.map(toKabumGUrl))).filter(u => !seen.has(u.toLowerCase()));
+      const tasks = gCandidates.slice(0, 40).map(img => withTimeout(probeImage(img), 3500));
+      const results = await Promise.all(tasks);
+      for (const r of results) {
+        if (r && (r as any).ok) pushUnique((r as any).url);
         if (uniqueImages.length >= 20) break;
-        const probed = await probeImage(img);
-        if (probed.ok) uniqueImages.push(probed.url);
+      }
+    }
+
+    // 1b. Enriquecedor incremental: gera N fotos a partir de "foto_1234567890.jpg" -> 1234567891..99
+    if (uniqueImages.length < 10) {
+      const seedUrls: string[] = Array.from(new Set([...classicMatches, ...miraklMatches]));
+      if (seedUrls.length === 0 && uniqueImages.length > 0) seedUrls.push(uniqueImages[0]);
+      for (const seed of seedUrls) {
+        if (uniqueImages.length >= 10) break;
+        try {
+          const u = new URL(seed);
+          const filename = u.pathname.split('/').pop() || '';
+          const m = filename.match(/(_)(\d{8,})(\.(?:jpg|jpeg|png|webp|gif))/i);
+          if (!m) continue;
+          const sep = m[1];
+          const baseNum = Number(m[2]);
+          const ext = m[3];
+          if (!Number.isFinite(baseNum)) continue;
+
+          const baseWithout = filename.slice(0, m.index) + sep;
+          const parentPath = u.pathname.slice(0, u.pathname.length - filename.length);
+
+          const variants: number[] = [];
+          for (let i = 1; i <= 6; i++) variants.push(baseNum + i);
+          for (let i = 1; i <= 2; i++) variants.push(baseNum - i);
+
+          const candidateUrls: string[] = [];
+          for (const vNum of variants) {
+            if (uniqueImages.length + candidateUrls.length >= 10) break;
+            const newFilename = baseWithout + String(vNum).padStart(m[2].length, '0') + ext;
+            const candidate = new URL(u.toString());
+            candidate.pathname = parentPath + newFilename;
+            candidate.search = '';
+            const urlStr = candidate.toString();
+            if (seen.has(urlStr.toLowerCase())) continue;
+            candidateUrls.push(urlStr);
+          }
+
+          const probeTasks = candidateUrls.map(async (cand) => {
+            try {
+              if (normalizeMiraklToXlarge(seed) !== seed) {
+                const miraklNorm = normalizeMiraklToXlarge(cand);
+                return withTimeout(tryMiraklWithHostFallback(miraklNorm), 7000);
+              } else {
+                const p = await withTimeout(probeImage(toKabumOriginalUrl(cand)), 3500);
+                return p && (p as any).ok ? (p as any).url : null;
+              }
+            } catch { return null; }
+          });
+
+          const results = await Promise.all(probeTasks);
+          for (const ok of results) {
+            if (!ok) continue;
+            if (uniqueImages.length >= 10) break;
+            pushUnique(ok as string);
+          }
+        } catch {}
       }
     }
 
