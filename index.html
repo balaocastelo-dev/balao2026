@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Super PCs Gamer — Balão da Informática | Campinas</title>
+<meta name="description" content="Desktops Gamer revisados com garantia de 1 ano na Av. Anchieta 789, Cambuí, Campinas/SP. De R$ 1.999 a R$ 10.000, em até 12x sem juros. Loja física de confiança!">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='42' r='34' fill='%23d2232a'/%3E%3Cpath d='M38 76h24l-4 14H42z' fill='%23d2232a'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --red:#d2232a; --red-dark:#a81b21; --red-light:#fdecec;
+    --ink:#1c1c1e; --gray:#55555c; --bg:#ffffff; --bg-alt:#f7f6f5;
+    --radius:18px; --shadow:0 10px 30px rgba(28,28,30,.08);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55}
+  img{max-width:100%;display:block}
+  a{text-decoration:none;color:inherit}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+
+  /* ===== Topbar ===== */
+  .topbar{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid #eee;transition:box-shadow .3s}
+  .topbar.scrolled{box-shadow:0 4px 18px rgba(0,0,0,.08)}
+  .topbar-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand img{height:52px;width:auto}
+  .top-actions{display:flex;align-items:center;gap:18px}
+  .top-phone{font-weight:700;color:var(--ink);font-size:.95rem;display:flex;align-items:center;gap:8px}
+  .top-phone svg{flex:none}
+
+  /* ===== Botões ===== */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;font-weight:700;border-radius:999px;padding:14px 26px;font-size:1rem;cursor:pointer;border:none;transition:transform .15s,box-shadow .15s,background .15s}
+  .btn:hover{transform:translateY(-2px)}
+  .btn-wa{background:#25d366;color:#fff;box-shadow:0 8px 20px rgba(37,211,102,.35)}
+  .btn-wa:hover{background:#1fb857}
+  .btn-red{background:var(--red);color:#fff;box-shadow:0 8px 20px rgba(210,35,42,.3)}
+  .btn-red:hover{background:var(--red-dark)}
+  .btn-sm{padding:11px 20px;font-size:.92rem}
+
+  /* ===== Hero ===== */
+  .hero{padding:64px 0 40px;background:
+    radial-gradient(900px 420px at 85% -10%, var(--red-light) 0%, transparent 65%),
+    radial-gradient(700px 380px at -10% 110%, #fff2f2 0%, transparent 60%);}
+  .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center}
+  .kicker{display:inline-flex;align-items:center;gap:8px;background:var(--red-light);color:var(--red);font-weight:800;font-size:.85rem;letter-spacing:.06em;text-transform:uppercase;padding:8px 16px;border-radius:999px;margin-bottom:18px}
+  .hero h1{font-size:clamp(2rem,4.4vw,3.3rem);line-height:1.12;font-weight:900;letter-spacing:-.02em}
+  .hero h1 span{color:var(--red)}
+  .hero p.sub{margin:18px 0 26px;color:var(--gray);font-size:1.13rem;max-width:520px}
+  .hero-badges{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:30px}
+  .badge{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1.5px solid #f0dede;border-radius:999px;padding:8px 15px;font-size:.88rem;font-weight:600;color:var(--ink);box-shadow:0 3px 10px rgba(0,0,0,.04)}
+  .hero-ctas{display:flex;flex-wrap:wrap;gap:14px}
+  /* colagem */
+  .collage{position:relative;height:520px}
+  .polaroid{position:absolute;background:#fff;padding:10px 10px 14px;border-radius:14px;box-shadow:var(--shadow);border:1px solid #f1eaea;transition:transform .35s}
+  .polaroid img{border-radius:9px;height:100%;object-fit:cover;object-position:top}
+  .polaroid:hover{transform:scale(1.04) rotate(0deg) !important;z-index:5}
+  .pol-1{width:56%;height:78%;left:0;top:6%;transform:rotate(-4deg);z-index:2}
+  .pol-2{width:52%;height:70%;right:0;top:0;transform:rotate(3.5deg);z-index:1}
+  .pol-3{width:46%;height:58%;right:6%;bottom:0;transform:rotate(-2deg);z-index:3}
+  .float-tag{position:absolute;z-index:6;background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:10px 16px;font-weight:800;font-size:.9rem;display:flex;align-items:center;gap:10px;border:1px solid #f1eaea}
+  .ft-1{left:-8px;bottom:14%;color:var(--red)}
+  .ft-2{right:-4px;top:44%;color:#128c4b}
+
+  /* ===== Faixa confiança ===== */
+  .trust{background:var(--red);color:#fff;padding:18px 0}
+  .trust-inner{display:flex;flex-wrap:wrap;justify-content:center;gap:14px 44px;font-weight:700;font-size:.95rem}
+  .trust-item{display:flex;align-items:center;gap:10px}
+
+  /* ===== Seções ===== */
+  section{padding:72px 0}
+  .sec-head{text-align:center;max-width:640px;margin:0 auto 40px}
+  .sec-head h2{font-size:clamp(1.6rem,3vw,2.3rem);font-weight:900;letter-spacing:-.01em}
+  .sec-head h2 em{font-style:normal;color:var(--red)}
+  .sec-head p{color:var(--gray);margin-top:10px;font-size:1.05rem}
+
+  /* ===== Carrossel ===== */
+  .carousel{position:relative}
+  .car-viewport{overflow:hidden;padding:34px 0 12px}
+  .car-track{display:flex;gap:24px;transition:transform .55s cubic-bezier(.22,.8,.3,1);will-change:transform}
+  .car-slide{flex:0 0 clamp(280px,31vw,380px);transition:transform .45s,opacity .45s,filter .45s;transform:scale(.88);opacity:.45;filter:saturate(.55)}
+  .car-slide.active{transform:scale(1);opacity:1;filter:none;z-index:2}
+  .car-slide.active .card{border-color:#f3c9cb;box-shadow:0 24px 60px rgba(210,35,42,.20)}
+  .car-btn{position:absolute;top:44%;z-index:10;width:52px;height:52px;border-radius:50%;background:#fff;border:1px solid #eee;box-shadow:var(--shadow);font-size:1.7rem;line-height:1;color:var(--red);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s}
+  .car-btn:hover{background:var(--red);color:#fff}
+  .car-btn.prev{left:-6px}.car-btn.next{right:-6px}
+  .car-dots{display:flex;justify-content:center;gap:8px;margin-top:16px}
+  .car-dot{width:10px;height:10px;border-radius:999px;background:#e8d8d8;border:none;cursor:pointer;transition:.25s;padding:0}
+  .car-dot.active{background:var(--red);width:28px}
+
+  /* ===== Catálogo ===== */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:26px}
+  .card{background:#fff;border:1px solid #efeaea;border-radius:var(--radius);overflow:hidden;box-shadow:0 4px 16px rgba(28,28,30,.06);display:flex;flex-direction:column;transition:transform .25s,box-shadow .25s}
+  .card:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(28,28,30,.13)}
+  .card.hide{display:none}
+  .card-photo{position:relative;background:#faf8f8;border-bottom:1px solid #f3eeee}
+  .card-photo img{width:100%;aspect-ratio:9/13;object-fit:cover;object-position:top}
+  .tag{position:absolute;top:14px;left:14px;background:var(--red);color:#fff;font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:6px 12px;border-radius:999px;box-shadow:0 4px 12px rgba(210,35,42,.35)}
+  .tag.gold{background:#c98a10;box-shadow:0 4px 12px rgba(201,138,16,.35)}
+  .card-body{padding:22px 22px 24px;display:flex;flex-direction:column;flex:1}
+  .card-body h3{font-size:1.35rem;font-weight:900;letter-spacing:.01em}
+  .card-body .cpu-line{color:var(--gray);font-size:.9rem;margin-top:2px}
+  .specs{list-style:none;margin:16px 0 18px;display:flex;flex-direction:column;gap:8px}
+  .specs li{display:flex;gap:10px;font-size:.93rem;color:#333338}
+  .specs svg{flex:none;margin-top:2px}
+  .specs b{color:var(--ink)}
+  .price-box{margin-top:auto;background:var(--bg-alt);border-radius:14px;padding:16px 18px;text-align:center}
+  .price-vista{font-size:.82rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.05em}
+  .price{font-size:2.1rem;font-weight:900;color:var(--red);line-height:1.05}
+  .price small{font-size:1.1rem;font-weight:800}
+  .price-parcel{font-size:.88rem;color:var(--gray);margin-top:2px}
+  .price-parcel b{color:var(--ink)}
+  .card .btn{margin-top:16px;width:100%}
+  .guarantee-line{text-align:center;font-size:.78rem;color:#8a8a90;margin-top:10px}
+
+  /* ===== Setup banner ===== */
+  .setup-banner{background:linear-gradient(120deg,var(--red) 0%,#e8454c 100%);border-radius:24px;color:#fff;padding:46px 40px;display:grid;grid-template-columns:1fr auto;gap:30px;align-items:center;box-shadow:0 20px 50px rgba(210,35,42,.3)}
+  .setup-banner h2{font-size:clamp(1.4rem,2.6vw,2rem);font-weight:900}
+  .setup-banner p{opacity:.95;margin-top:8px;max-width:560px}
+  .setup-list{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:16px;font-weight:700;font-size:.95rem}
+  .setup-list span{display:inline-flex;align-items:center;gap:7px}
+  .setup-price{background:#fff;color:var(--red);border-radius:18px;padding:22px 34px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+  .setup-price .lbl{font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#9a9aa0}
+  .setup-price .val{font-size:2.2rem;font-weight:900;line-height:1.1}
+  .setup-price .plus{font-size:.85rem;font-weight:700;color:var(--gray)}
+
+  /* ===== Por que ===== */
+  .why{background:var(--bg-alt)}
+  .why-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:22px}
+  .why-card{background:#fff;border-radius:var(--radius);padding:28px 24px;border:1px solid #efe9e9;box-shadow:0 4px 14px rgba(28,28,30,.05)}
+  .why-icon{width:52px;height:52px;border-radius:14px;background:var(--red-light);display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+  .why-card h3{font-size:1.05rem;font-weight:800;margin-bottom:6px}
+  .why-card p{color:var(--gray);font-size:.92rem}
+
+  /* ===== Localização ===== */
+  .loc-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+  .loc-info h2{font-size:clamp(1.5rem,2.8vw,2.1rem);font-weight:900;margin-bottom:14px}
+  .loc-lines{display:flex;flex-direction:column;gap:14px;margin-top:20px}
+  .loc-line{display:flex;gap:14px;align-items:flex-start;font-size:1rem}
+  .loc-line svg{flex:none;margin-top:3px}
+  .loc-line b{display:block}
+  .loc-line span{color:var(--gray)}
+  .map-box{border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);border:1px solid #eee;height:340px}
+  .map-box iframe{width:100%;height:100%;border:0}
+
+  /* ===== Footer ===== */
+  footer{background:#17171a;color:#b9b9bf;padding:36px 0;font-size:.9rem}
+  .foot-inner{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:18px}
+  .foot-brand{display:flex;align-items:center;gap:12px;color:#fff;font-weight:800}
+  .foot-brand img{height:40px;background:#fff;border-radius:8px;padding:4px}
+
+  /* ===== Reveal ===== */
+  .reveal{opacity:0;transform:translateY(26px);transition:opacity .6s ease,transform .6s ease}
+  .reveal.on{opacity:1;transform:none}
+
+  /* ===== Responsivo ===== */
+  @media(max-width:920px){
+    .hero-grid{grid-template-columns:1fr}
+    .collage{height:430px;max-width:520px;margin:0 auto;width:100%}
+    .loc-grid{grid-template-columns:1fr}
+    .setup-banner{grid-template-columns:1fr;text-align:center}
+    .setup-price{margin:0 auto}
+    .top-phone span{display:none}
+  }
+  @media(max-width:560px){
+    .brand img{height:42px}
+    .collage{height:360px}
+    .pol-1{width:62%}
+    section{padding:54px 0}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= TOPBAR ================= -->
+<header class="topbar" id="topbar">
+  <div class="wrap topbar-inner">
+    <a class="brand" href="#inicio">
+      <img src="img/logo-balao.png" alt="Balão da Informática">
+    </a>
+    <div class="top-actions">
+      <div class="top-phone">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#d2232a"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg>
+        <span>(19) 3255-1661</span>
+      </div>
+      <a class="btn btn-wa btn-sm" href="https://wa.me/5519987510267?text=Ol%C3%A1!%20Vi%20o%20site%20dos%20Super%20PCs%20Gamer%20do%20Bal%C3%A3o%20e%20quero%20conversar!" target="_blank" rel="noopener">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm5.5 14.1c-.2.7-1.3 1.3-1.8 1.3-.5.1-1 .2-3.3-.7-2.8-1.1-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5s.8 1.9.8 2c.1.1.1.3 0 .5-.3.6-.7.9-.5 1.2.7 1.2 1.6 2 2.8 2.6.3.2.5.1.7-.1l.9-1c.2-.3.4-.2.7-.1l2 1c.3.1.5.2.5.4 0 .1 0 .7-.3 1.1z"/></svg>
+        WhatsApp
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- ================= HERO ================= -->
+<section class="hero" id="inicio">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="kicker">🔥 Ofertas da semana — loja física em Campinas</span>
+      <h1>Super PCs Gamer <span>revisados</span>, com garantia e preço de verdade.</h1>
+      <p class="sub">Máquinas prontas para jogar, estudar e trabalhar — do PC de entrada ao topo de linha com RTX 5060 Ti. Você retira na loja ou combina a entrega com a gente.</p>
+      <div class="hero-badges">
+        <span class="badge">✅ Produto revisado</span>
+        <span class="badge">🛡️ Garantia de 1 ano</span>
+        <span class="badge">💳 Até 12x sem juros</span>
+        <span class="badge">🏪 Loja física no Cambuí</span>
+      </div>
+      <div class="hero-ctas">
+        <a class="btn btn-red" href="#pcs">Ver os PCs disponíveis ↓</a>
+        <a class="btn btn-wa" href="https://wa.me/5519987510267?text=Ol%C3%A1!%20Quero%20ajuda%20para%20escolher%20meu%20PC%20Gamer%20no%20Bal%C3%A3o!" target="_blank" rel="noopener">Falar com um vendedor</a>
+      </div>
+    </div>
+    <div class="collage">
+      <div class="polaroid pol-1"><img src="fotos/ai_kross.jpg" alt="Desktop Gamer Kross"></div>
+      <div class="polaroid pol-2"><img src="fotos/ai_velocity.jpg" alt="Desktop Gamer Velocity"></div>
+      <div class="polaroid pol-3"><img src="fotos/ai_hyperx.jpg" alt="Desktop Gamer Hyper X"></div>
+      <div class="float-tag ft-1">🛡️ Garantia de 1 ano</div>
+      <div class="float-tag ft-2">💳 12x sem juros</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FAIXA CONFIANÇA ================= -->
+<div class="trust">
+  <div class="wrap trust-inner">
+    <div class="trust-item">✅ Revisado item por item</div>
+    <div class="trust-item">🛡️ 1 ano de garantia</div>
+    <div class="trust-item">🏪 Av. Anchieta 789 — Cambuí</div>
+    <div class="trust-item">💳 Parcele em até 12x</div>
+  </div>
+</div>
+
+<!-- ================= CATÁLOGO ================= -->
+<section id="pcs">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <h2>Os <em>PCs disponíveis</em> agora na loja</h2>
+      <p>Configuração e preço reais, conferidos item por item pela nossa equipe. Escolha o seu e fale direto com a gente no WhatsApp.</p>
+    </div>
+
+    <div class="carousel">
+      <button class="car-btn prev" aria-label="Anterior">&#8249;</button>
+      <div class="car-viewport"><div class="car-track">
+
+      <!-- NITRO -->
+      <article class="card car-slide">
+        <div class="card-photo">
+          <img src="fotos/ai_nitro.jpg" alt="Desktop Gamer Nitro" loading="lazy">
+          <span class="tag gold">Pra começar</span>
+        </div>
+        <div class="card-body">
+          <h3>NITRO</h3>
+          <div class="cpu-line">Intel Core i7 · dia a dia rápido</div>
+          <ul class="specs">
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="#d2232a"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3" stroke="#d2232a" stroke-width="2"/></svg><span><b>CPU:</b>&nbsp;Intel Core i7-3770</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="#d2232a"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M6 11h2M10 11h2M14 11h2M18 11h2" stroke="#fff" stroke-width="1.6"/></svg><span><b>RAM:</b>&nbsp;8GB DDR3</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="#d2232a"><rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="17" r="1.4" fill="#fff"/></svg><span><b>SSD:</b>&nbsp;480GB</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d2232a" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg><span><b>Refrigeração:</b>&nbsp;Air cooler</span></li>
+          </ul>
+          <div class="price-box">
+            <div class="price-vista">À vista</div>
+            <div class="price"><small>R$</small> 1.999</div>
+            <div class="price-parcel">ou <b>12x de R$ 199</b> sem juros</div>
+          </div>
+          <a class="btn btn-wa" target="_blank" rel="noopener" href="https://wa.me/5519987510267?text=Ol%C3%A1!%20Vi%20no%20site%20o%20Desktop%20Gamer%20NITRO%20(i7-3770%2C%208GB%2C%20SSD%20480GB)%20por%20R%24%201.999%20%C3%A0%20vista%20e%20quero%20mais%20informa%C3%A7%C3%B5es!">
+            📱 Quero este PC
+          </a>
+          <div class="guarantee-line">Windows 11 Trial · Office 2019 Trial · Garantia de 1 ano</div>
+        </div>
+      </article>
+
+      <!-- BLACK -->
+      <article class="card car-slide">
+        <div class="card-photo">
+          <img src="fotos/ai_black.jpg" alt="Desktop Gamer Black" loading="lazy">
+          <span class="tag gold">Custo-benefício</span>
+        </div>
+        <div class="card-body">
+          <h3>BLACK</h3>
+          <div class="cpu-line">Intel Core i5 · potência com estilo</div>
+          <ul class="specs">
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="#d2232a"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3" stroke="#d2232a" stroke-width="2"/></svg><span><b>CPU:</b>&nbsp;Intel Core i5-8400</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="#d2232a"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M6 11h2M10 11h2M14 11h2M18 11h2" stroke="#fff" stroke-width="1.6"/></svg><span><b>RAM:</b>&nbsp;8GB DDR4</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="#d2232a"><rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="17" r="1.4" fill="#fff"/></svg><span><b>SSD:</b>&nbsp;480GB</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d2232a" stroke-width="2"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg><span><b>Fonte:</b>&nbsp;ATX 500W</span></li>
+          </ul>
+          <div class="price-box">
+            <div class="price-vista">À vista</div>
+            <div class="price"><small>R$</small> 2.399</div>
+            <div class="price-parcel">ou <b>12x de R$ 199</b> sem juros</div>
+          </div>
+          <a class="btn btn-wa" target="_blank" rel="noopener" href="https://wa.me/5519987510267?text=Ol%C3%A1!%20Vi%20no%20site%20o%20Desktop%20Gamer%20BLACK%20(i5-8400%2C%208GB%2C%20SSD%20480GB)%20por%20R%24%202.399%20%C3%A0%20vista%20e%20quero%20mais%20informa%C3%A7%C3%B5es!">
+            📱 Quero este PC
+          </a>
+          <div class="guarantee-line">Windows 11 Trial · Office 2019 Trial · Garantia de 1 ano</div>
+        </div>
+      </article>
+
+      <!-- VELOCITY -->
+      <article class="card car-slide">
+        <div class="card-photo">
+          <img src="fotos/ai_velocity.jpg" alt="Desktop Gamer Velocity" loading="lazy">
+          <span class="tag">Pronto p/ jogar</span>
+        </div>
+        <div class="card-body">
+          <h3>VELOCITY</h3>
+          <div class="cpu-line">Alta velocidade para jogos e trabalho</div>
+          <ul class="specs">
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="#d2232a"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3" stroke="#d2232a" stroke-width="2"/></svg><span><b>CPU:</b>&nbsp;Intel Core i3-10105F</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="#d2232a"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M6 11h2M10 11h2M14 11h2M18 11h2" stroke="#fff" stroke-width="1.6"/></svg><span><b>RAM:</b>&nbsp;16GB DDR4</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="#d2232a"><rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="17" r="1.4" fill="#fff"/></svg><span><b>SSD:</b>&nbsp;NVMe 240GB</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="#d2232a"><path d="M3 6h18v9H3zM6 18h12v2H6z"/><circle cx="8" cy="10.5" r="1.6" fill="#fff"/><circle cx="16" cy="10.5" r="1.6" fill="#fff"/></svg><span><b>Vídeo:</b>&nbsp;GT 730 4GB</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d2232a" stroke-width="2"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg><span><b>Fonte:</b>&nbsp;500W</span></li>
+          </ul>
+          <div class="price-box">
+            <div class="price-vista">À vista</div>
+            <div class="price"><small>R$</small> 2.999</div>
+            <div class="price-parcel">ou <b>12x de R$ 249,92</b> sem juros</div>
+          </div>
+          <a class="btn btn-wa" target="_blank" rel="noopener" href="https://wa.me/5519987510267?text=Ol%C3%A1!%20Vi%20no%20site%20o%20Desktop%20Gamer%20VELOCITY%20(i3-10105F%2C%2016GB%2C%20SSD%20240GB%2C%20GT%20730)%20por%20R%24%202.999%20%C3%A0%20vista%20e%20quero%20mais%20informa%C3%A7%C3%B5es!">
+            📱 Quero este PC
+          </a>
+          <div class="guarantee-line">Windows 11 Trial · Office 2019 Trial · Garantia de 1 ano</div>
+        </div>
+      </article>
+
+      <!-- ULTRA -->
+      <article class="card car-slide">
+        <div class="card-photo">
+          <img src="fotos/ai_ultra.jpg" alt="Desktop Gamer Ultra" loading="lazy">
+          <span class="tag">Mais vendido 🔥</span>
+        </div>
+        <div class="card-body">
+          <h3>ULTRA</h3>
+          <div class="cpu-line">Desempenho, velocidade e imersão</div>
+          <ul class="specs">
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="#d2232a"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3" stroke="#d2232a" stroke-width="2"/></svg><span><b>CPU:</b>&nbsp;Intel Core i5 12ª geração</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="#d2232a"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M6 11h2M10 11h2M14 11h2M18 11h2" stroke="#fff" stroke-width="1.6"/></svg><span><b>RAM:</b>&nbsp;8GB DDR4</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="#d2232a"><rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="17" r="1.4" fill="#fff"/></svg><span><b>SSD:</b>&nbsp;SATA 1TB</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="#d2232a"><path d="M3 6h18v9H3zM6 18h12v2H6z"/><circle cx="8" cy="10.5" r="1.6" fill="#fff"/><circle cx="16" cy="10.5" r="1.6" fill="#fff"/></svg><span><b>Vídeo:</b>&nbsp;<b>RTX 3060 12GB</b></span></li>
+          </ul>
+          <div class="price-box">
+            <div class="price-vista">À vista</div>
+            <div class="price"><small>R$</small> 4.799</div>
+            <div class="price-parcel">ou <b>12x de R$ 479</b> sem juros</div>
+          </div>
+          <a class="btn btn-wa" target="_blank" rel="noopener" href="https://wa.me/5519987510267?text=Ol%C3%A1!%20Vi%20no%20site%20o%20Desktop%20Gamer%20ULTRA%20(i5%2012%C2%AA%20gera%C3%A7%C3%A3o%2C%20RTX%203060%2012GB%2C%20SSD%201TB)%20por%20R%24%204.799%20%C3%A0%20vista%20e%20quero%20mais%20informa%C3%A7%C3%B5es!">
+            📱 Quero este PC
+          </a>
+          <div class="guarantee-line">Windows 11 Trial · Office 2019 Trial · Garantia de 1 ano</div>
+        </div>
+      </article>
+
+      <!-- TITAN -->
+      <article class="card car-slide">
+        <div class="card-photo">
+          <img src="fotos/ai_titan.jpg" alt="Desktop Gamer Titan" loading="lazy">
+          <span class="tag">Water cooler 360mm</span>
+        </div>
+        <div class="card-body">
+          <h3>TITAN</h3>
+          <div class="cpu-line">Alto desempenho para jogar e trabalhar</div>
+          <ul class="specs">
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="#d2232a"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3" stroke="#d2232a" stroke-width="2"/></svg><span><b>CPU:</b>&nbsp;Intel Core i5-10600KF</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="#d2232a"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M6 11h2M10 11h2M14 11h2M18 11h2" stroke="#fff" stroke-width="1.6"/></svg><span><b>RAM:</b>&nbsp;16GB DDR4</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="#d2232a"><rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="17" r="1.4" fill="#fff"/></svg><span><b>SSD:</b>&nbsp;240GB SATA</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="#d2232a"><path d="M3 6h18v9H3zM6 18h12v2H6z"/><circle cx="8" cy="10.5" r="1.6" fill="#fff"/><circle cx="16" cy="10.5" r="1.6" fill="#fff"/></svg><span><b>Vídeo:</b>&nbsp;<b>RTX 5060 8GB</b></span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d2232a" stroke-width="2"><path d="M12 3c3 4 6 6.5 6 10a6 6 0 1 1-12 0c0-3.5 3-6 6-10z"/></svg><span><b>Refrigeração:</b>&nbsp;Water cooler 360mm branco</span></li>
+          </ul>
+          <div class="price-box">
+            <div class="price-vista">À vista</div>
+            <div class="price"><small>R$</small> 6.699</div>
+            <div class="price-parcel">ou <b>12x de R$ 669</b> sem juros</div>
+          </div>
+          <a class="btn btn-wa" target="_blank" rel="noopener" href="https://wa.me/5519987510267?text=Ol%C3%A1!%20Vi%20no%20site%20o%20Desktop%20Gamer%20TITAN%20(i5-10600KF%2C%2016GB%2C%20RTX%205060%208GB%2C%20water%20cooler%20360mm)%20por%20R%24%206.699%20%C3%A0%20vista%20e%20quero%20mais%20informa%C3%A7%C3%B5es!">
+            📱 Quero este PC
+          </a>
+          <div class="guarantee-line">Windows 11 Trial · Office 2019 Trial · Garantia de 1 ano</div>
+        </div>
+      </article>
+
+      <!-- HYPER X -->
+      <article class="card car-slide">
+        <div class="card-photo">
+          <img src="fotos/ai_hyperx.jpg" alt="Desktop Gamer Hyper X" loading="lazy">
+          <span class="tag">SSD 2TB</span>
+        </div>
+        <div class="card-body">
+          <h3>HYPER X</h3>
+          <div class="cpu-line">Ryzen de última geração, tudo branco</div>
+          <ul class="specs">
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="#d2232a"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3" stroke="#d2232a" stroke-width="2"/></svg><span><b>CPU:</b>&nbsp;AMD Ryzen 5 7600X</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="#d2232a"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M6 11h2M10 11h2M14 11h2M18 11h2" stroke="#fff" stroke-width="1.6"/></svg><span><b>RAM:</b>&nbsp;16GB DDR5</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="#d2232a"><rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="17" r="1.4" fill="#fff"/></svg><span><b>SSD:</b>&nbsp;NVMe 2TB</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="#d2232a"><path d="M3 6h18v9H3zM6 18h12v2H6z"/><circle cx="8" cy="10.5" r="1.6" fill="#fff"/><circle cx="16" cy="10.5" r="1.6" fill="#fff"/></svg><span><b>Vídeo:</b>&nbsp;<b>RTX 3070 Ti 8GB</b></span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d2232a" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg><span><b>Refrigeração:</b>&nbsp;Air cooler</span></li>
+          </ul>
+          <div class="price-box">
+            <div class="price-vista">À vista</div>
+            <div class="price"><small>R$</small> 8.999</div>
+            <div class="price-parcel">ou <b>12x de R$ 899</b> sem juros</div>
+          </div>
+          <a class="btn btn-wa" target="_blank" rel="noopener" href="https://wa.me/5519987510267?text=Ol%C3%A1!%20Vi%20no%20site%20o%20Desktop%20Gamer%20HYPER%20X%20(Ryzen%205%207600X%2C%2016GB%20DDR5%2C%20SSD%202TB%2C%20RTX%203070%20Ti)%20por%20R%24%208.999%20%C3%A0%20vista%20e%20quero%20mais%20informa%C3%A7%C3%B5es!">
+            📱 Quero este PC
+          </a>
+          <div class="guarantee-line">Windows 11 Trial · Office 2019 Trial · Garantia de 1 ano</div>
+        </div>
+      </article>
+
+      <!-- KROSS -->
+      <article class="card car-slide">
+        <div class="card-photo">
+          <img src="fotos/ai_kross.jpg" alt="Desktop Gamer Kross" loading="lazy">
+          <span class="tag gold">Top de linha 👑</span>
+        </div>
+        <div class="card-body">
+          <h3>KROSS</h3>
+          <div class="cpu-line">Performance, velocidade e imersão para vencer</div>
+          <ul class="specs">
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="#d2232a"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3" stroke="#d2232a" stroke-width="2"/></svg><span><b>CPU:</b>&nbsp;Intel Core i5 13ª geração</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="#d2232a"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12h8M12 8v8" stroke="#fff" stroke-width="1.8"/></svg><span><b>Placa-mãe:</b>&nbsp;MSI MPG B760 WIFI</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="#d2232a"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M6 11h2M10 11h2M14 11h2M18 11h2" stroke="#fff" stroke-width="1.6"/></svg><span><b>RAM:</b>&nbsp;16GB DDR5 5600MHz</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="#d2232a"><rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="17" r="1.4" fill="#fff"/></svg><span><b>SSD:</b>&nbsp;NVMe M.2 1TB</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="#d2232a"><path d="M3 6h18v9H3zM6 18h12v2H6z"/><circle cx="8" cy="10.5" r="1.6" fill="#fff"/><circle cx="16" cy="10.5" r="1.6" fill="#fff"/></svg><span><b>Vídeo:</b>&nbsp;<b>RTX 5060 Ti 16GB</b> (MSI Shadow)</span></li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d2232a" stroke-width="2"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg><span><b>Fonte:</b>&nbsp;650W 80 Plus</span></li>
+          </ul>
+          <div class="price-box">
+            <div class="price-vista">À vista</div>
+            <div class="price"><small>R$</small> 10.000</div>
+            <div class="price-parcel">ou <b>12x de R$ 999</b> sem juros</div>
+          </div>
+          <a class="btn btn-wa" target="_blank" rel="noopener" href="https://wa.me/5519987510267?text=Ol%C3%A1!%20Vi%20no%20site%20o%20Desktop%20Gamer%20KROSS%20(i5%2013%C2%AA%20gera%C3%A7%C3%A3o%2C%2016GB%20DDR5%2C%20RTX%205060%20Ti%2016GB%2C%20SSD%201TB)%20por%20R%24%2010.000%20%C3%A0%20vista%20e%20quero%20mais%20informa%C3%A7%C3%B5es!">
+            📱 Quero este PC
+          </a>
+          <div class="guarantee-line">Windows 11 Trial · Office 2019 Trial · Garantia de 1 ano</div>
+        </div>
+      </article>
+
+      </div></div>
+      <button class="car-btn next" aria-label="Próximo">&#8250;</button>
+      <div class="car-dots"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SETUP COMPLETO ================= -->
+<section style="padding-top:0">
+  <div class="wrap">
+    <div class="setup-banner reveal">
+      <div>
+        <h2>Deixe seu setup completo! 🎮</h2>
+        <p>Leve qualquer PC desta página e complete sua estação gamer com todos os periféricos por um preço especial, só na compra do desktop.</p>
+        <div class="setup-list">
+          <span>🖥️ Monitor LED 24"</span>
+          <span>⌨️ Teclado RGB</span>
+          <span>🖱️ Mouse</span>
+          <span>🎧 Headset</span>
+          <span>🖱️ Mousepad</span>
+        </div>
+      </div>
+      <div class="setup-price">
+        <div class="lbl">Tudo isso por apenas</div>
+        <div class="val">R$ 999</div>
+        <div class="plus">a mais, na compra do PC</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= POR QUE O BALÃO ================= -->
+<section class="why">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <h2>Por que comprar no <em>Balão</em>?</h2>
+      <p>Loja física de verdade, gente de verdade e máquina testada de verdade.</p>
+    </div>
+    <div class="why-grid">
+      <div class="why-card reveal">
+        <div class="why-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#d2232a" stroke-width="2"><path d="M3 9l9-6 9 6v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M9 21V12h6v9"/></svg></div>
+        <h3>Loja física no Cambuí</h3>
+        <p>Venha ver, ligar e testar o PC antes de levar. Estamos na Av. Anchieta 789, Campinas/SP.</p>
+      </div>
+      <div class="why-card reveal">
+        <div class="why-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#d2232a" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
+        <h3>Revisado + garantia</h3>
+        <p>Cada máquina passa por revisão item por item e sai com 1 ano de garantia.</p>
+      </div>
+      <div class="why-card reveal">
+        <div class="why-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#d2232a" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 12h.01M18 12h.01"/></svg></div>
+        <h3>Pague em até 12x</h3>
+        <p>Parcele sem juros no cartão ou pague à vista com desconto. Do jeito que ficar melhor pra você.</p>
+      </div>
+      <div class="why-card reveal">
+        <div class="why-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#d2232a" stroke-width="2"><path d="M14.7 6.3a5 5 0 0 0-7 7l-5 5a1.4 1.4 0 0 0 2 2l5-5a5 5 0 0 0 7-7l-3 3-2-2z"/></svg></div>
+        <h3>Suporte técnico próprio</h3>
+        <p>Assistência técnica dentro da própria loja. Depois da compra, a gente continua aqui pra te ajudar.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= LOCALIZAÇÃO ================= -->
+<section>
+  <div class="wrap loc-grid">
+    <div class="loc-info reveal">
+      <h2>Vem tomar um café com a gente ☕</h2>
+      <p style="color:var(--gray)">Estamos de portas abertas no coração do Cambuí. Chega mais, ver os PCs de perto e sai de lá com a máquina na mão.</p>
+      <div class="loc-lines">
+        <div class="loc-line">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#d2232a"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/></svg>
+          <div><b>Av. Anchieta 789 — Cambuí</b><span>Campinas/SP</span></div>
+        </div>
+        <div class="loc-line">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#d2232a"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg>
+          <div><b>(19) 3255-1661</b><span>WhatsApp (19) 98751-0267</span></div>
+        </div>
+        <div class="loc-line">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#d2232a"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-6h2zm0-8h-2V7h2z"/></svg>
+          <div><b>www.balao.info</b><span>Comércio e assistência técnica em informática</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="map-box reveal">
+      <iframe src="https://www.google.com/maps?q=Av.+Anchieta,+789+-+Cambu%C3%AD,+Campinas+-+SP&output=embed" loading="lazy" title="Mapa Balão da Informática"></iframe>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+  <div class="wrap foot-inner">
+    <div class="foot-brand">
+      <img src="img/logo-balao.png" alt="Balão da Informática">
+      <span>Balão da Informática<br><small style="color:#8a8a90;font-weight:400">Desde sempre cuidando do seu computador 💙</small></span>
+    </div>
+    <div style="text-align:right">
+      <div>Av. Anchieta 789 — Cambuí, Campinas/SP</div>
+      <div style="color:#8a8a90">(19) 3255-1661 · WhatsApp (19) 98751-0267 · www.balao.info</div>
+      <div style="color:#66666c;font-size:.8rem;margin-top:6px">© <span id="ano"></span> Balão da Informática. Imagens ilustrativas das embalagens exibidas na loja.</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ano automático
+  document.getElementById('ano').textContent = new Date().getFullYear();
+
+  // sombra no topo ao rolar
+  const topbar = document.getElementById('topbar');
+  window.addEventListener('scroll', () => {
+    topbar.classList.toggle('scrolled', window.scrollY > 10);
+  }, {passive:true});
+
+  // animação de entrada
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('on'); io.unobserve(e.target); } });
+  }, {threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // carrossel de produtos
+  const track = document.querySelector('.car-track');
+  const slides = [...document.querySelectorAll('.car-slide')];
+  const vp = document.querySelector('.car-viewport');
+  const dotsBox = document.querySelector('.car-dots');
+  let cur = 0, timer = null;
+
+  slides.forEach((_, i) => {
+    const b = document.createElement('button');
+    b.className = 'car-dot' + (i === 0 ? ' active' : '');
+    b.setAttribute('aria-label', 'Ir para PC ' + (i + 1));
+    b.addEventListener('click', () => go(i));
+    dotsBox.appendChild(b);
+  });
+
+  function render() {
+    const s = slides[cur];
+    const offset = s.offsetLeft + s.offsetWidth / 2 - vp.clientWidth / 2;
+    track.style.transform = `translateX(${-offset}px)`;
+    slides.forEach((el, i) => el.classList.toggle('active', i === cur));
+    dotsBox.querySelectorAll('.car-dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  }
+  function go(i) {
+    cur = (i + slides.length) % slides.length;
+    render();
+    restart();
+  }
+  function restart() { clearInterval(timer); timer = setInterval(() => go(cur + 1), 5000); }
+
+  document.querySelector('.car-btn.next').addEventListener('click', () => go(cur + 1));
+  document.querySelector('.car-btn.prev').addEventListener('click', () => go(cur - 1));
+
+  let x0 = null;
+  vp.addEventListener('touchstart', e => x0 = e.touches[0].clientX, {passive:true});
+  vp.addEventListener('touchend', e => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 40) go(cur + (dx < 0 ? 1 : -1));
+    x0 = null;
+  }, {passive:true});
+
+  vp.addEventListener('mouseenter', () => clearInterval(timer));
+  vp.addEventListener('mouseleave', restart);
+  window.addEventListener('resize', render);
+  render(); restart();
+</script>
+</body>
+</html>
