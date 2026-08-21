@@ -49,6 +49,29 @@ export default function PromocaoPagina() {
   const [gpu, setGpu] = useState<"rtx4060" | "rtx3080" | "rtx4070">("rtx3080");
   const [precoTotal, setPrecoTotal] = useState(7999);
   const [linkWhatsapp, setLinkWhatsapp] = useState("");
+  
+  const videoRef = React.useRef<HTMLVideoElement>(null);
+
+  // Efeito para ativar o som do autoplay no primeiro clique do usuário
+  useEffect(() => {
+    const desmutarVideo = () => {
+      if (videoRef.current) {
+        videoRef.current.muted = false;
+        // Tentar dar play se tiver pausado por politicas do browser
+        videoRef.current.play().catch(() => {});
+      }
+      document.removeEventListener("click", desmutarVideo);
+      document.removeEventListener("touchstart", desmutarVideo);
+    };
+
+    document.addEventListener("click", desmutarVideo);
+    document.addEventListener("touchstart", desmutarVideo);
+
+    return () => {
+      document.removeEventListener("click", desmutarVideo);
+      document.removeEventListener("touchstart", desmutarVideo);
+    };
+  }, []);
 
   // Efeito para recalcular o preço total e gerar o link do WhatsApp
   useEffect(() => {
@@ -181,13 +204,14 @@ export default function PromocaoPagina() {
                   </h4>
                   <div className="aspect-video rounded-xl overflow-hidden border border-gray-150 bg-black relative">
                     <video
+                      ref={videoRef}
                       src="/video_avatar_campanha.mp4"
                       autoPlay
                       muted
                       loop
                       controls
                       playsInline
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                     />
                   </div>
                   <p className="text-[10px] text-gray-500 mt-2 text-center">
