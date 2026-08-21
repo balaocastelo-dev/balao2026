@@ -182,13 +182,16 @@ export default function PromocaoPagina() {
                   <div className="aspect-video rounded-xl overflow-hidden border border-gray-150 bg-black relative">
                     <video
                       src="/video_avatar_campanha.mp4"
+                      autoPlay
+                      muted
+                      loop
                       controls
                       playsInline
                       className="w-full h-full object-cover"
                     />
                   </div>
                   <p className="text-[10px] text-gray-500 mt-2 text-center">
-                    Dê o play e saiba mais sobre as nossas condições exclusivas!
+                    🔊 Clique no ícone de som do player para ouvir a Julia!
                   </p>
                 </div>
               </div>
