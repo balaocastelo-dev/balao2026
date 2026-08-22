@@ -79,7 +79,7 @@
   .carousel{position:relative}
   .car-viewport{overflow:hidden;padding:34px 0 12px}
   .car-track{display:flex;gap:24px;transition:transform .55s cubic-bezier(.22,.8,.3,1);will-change:transform}
-  .car-slide{flex:0 0 clamp(280px,31vw,380px);transition:transform .45s,opacity .45s,filter .45s;transform:scale(.88);opacity:.45;filter:saturate(.55)}
+  .car-slide{flex:0 0 clamp(310px,44vw,470px);transition:transform .45s,opacity .45s,filter .45s;transform:scale(.88);opacity:.45;filter:saturate(.55)}
   .car-slide.active{transform:scale(1);opacity:1;filter:none;z-index:2}
   .car-slide.active .card{border-color:#f3c9cb;box-shadow:0 24px 60px rgba(210,35,42,.20)}
   .car-btn{position:absolute;top:44%;z-index:10;width:52px;height:52px;border-radius:50%;background:#fff;border:1px solid #eee;box-shadow:var(--shadow);font-size:1.7rem;line-height:1;color:var(--red);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s}
@@ -95,7 +95,7 @@
   .card:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(28,28,30,.13)}
   .card.hide{display:none}
   .card-photo{position:relative;background:#faf8f8;border-bottom:1px solid #f3eeee}
-  .card-photo img{width:100%;aspect-ratio:9/13;object-fit:cover;object-position:top}
+  .card-photo img{width:100%;aspect-ratio:1/1;object-fit:cover;object-position:center}
   .tag{position:absolute;top:14px;left:14px;background:var(--red);color:#fff;font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:6px 12px;border-radius:999px;box-shadow:0 4px 12px rgba(210,35,42,.35)}
   .tag.gold{background:#c98a10;box-shadow:0 4px 12px rgba(201,138,16,.35)}
   .card-body{padding:22px 22px 24px;display:flex;flex-direction:column;flex:1}
@@ -154,6 +154,28 @@
   .reveal{opacity:0;transform:translateY(26px);transition:opacity .6s ease,transform .6s ease}
   .reveal.on{opacity:1;transform:none}
 
+  /* ===== Promoção Sábado ===== */
+  .promo-top{background:repeating-linear-gradient(45deg,#ffb800,#ffb800 16px,#ff8a00 16px,#ff8a00 32px);color:#3d1500;text-align:center;font-weight:900;padding:10px 14px;font-size:.92rem;letter-spacing:.02em}
+  .promo-top b{display:inline-block;animation:pulseTxt .9s infinite alternate}
+  @keyframes pulseTxt{from{transform:scale(1)}to{transform:scale(1.07)}}
+  .ticker{overflow:hidden;background:#17171a;color:#fff;padding:8px 0;border-bottom:3px solid var(--red)}
+  .ticker-inner{display:inline-flex;gap:42px;white-space:nowrap;animation:ticker 24s linear infinite;font-weight:800;font-size:.85rem;padding-left:20px}
+  .ticker-inner span{color:#ffd166}
+  @keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  .countdown-box{margin:0 0 26px;background:#17171a;color:#fff;border-radius:18px;padding:16px 22px;display:flex;align-items:center;justify-content:space-between;gap:14px;box-shadow:0 12px 30px rgba(0,0,0,.25)}
+  .cd-lbl{font-weight:900;font-size:1.05rem;line-height:1.3}
+  .cd-lbl em{color:#ffd166;font-style:normal}
+  .cd-timer{display:flex;gap:8px}
+  .cd-cell{background:var(--red);border-radius:12px;min-width:60px;padding:9px 6px;text-align:center;box-shadow:0 4px 10px rgba(210,35,42,.35)}
+  .cd-cell b{display:block;font-size:1.55rem;font-weight:900;font-variant-numeric:tabular-nums;line-height:1.1}
+  .cd-cell span{font-size:.6rem;text-transform:uppercase;letter-spacing:.09em;opacity:.9}
+  .scarcity{margin-top:10px;text-align:center;font-size:.8rem;font-weight:800;color:var(--red)}
+  .btn-enviar-pulse{animation:pulseBtn 1.5s infinite}
+  @keyframes pulseBtn{0%{box-shadow:0 0 0 0 rgba(210,35,42,.45)}70%{box-shadow:0 0 0 16px rgba(210,35,42,0)}100%{box-shadow:0 0 0 0 rgba(210,35,42,0)}}
+  .sticky-cta{position:fixed;left:0;right:0;bottom:0;z-index:80;background:#fff;border-top:1px solid #eee;box-shadow:0 -8px 24px rgba(0,0,0,.14);padding:10px 14px;display:none;gap:12px;align-items:center;justify-content:space-between}
+  .sticky-cta .txt{font-size:.84rem;font-weight:900;line-height:1.25}
+  .sticky-cta .txt small{display:block;color:var(--muted);font-weight:600;font-size:.72rem}
+
   /* ===== Responsivo ===== */
   @media(max-width:920px){
     .hero-grid{grid-template-columns:1fr}
@@ -163,15 +185,34 @@
     .setup-price{margin:0 auto}
     .top-phone span{display:none}
   }
-  @media(max-width:560px){
-    .brand img{height:42px}
-    .collage{height:360px}
-    .pol-1{width:62%}
-    section{padding:54px 0}
+  @media(max-width:640px){
+    .hero{padding:34px 0 24px}
+    .collage{height:240px}
+    section{padding:42px 0}
+    .car-viewport{padding:16px 0 8px}
+    .car-slide{flex:0 0 92vw}
+    .car-slide:not(.active){opacity:0;pointer-events:none}
+    .card-photo img{height:34vh;aspect-ratio:auto}
+    .card-body{padding:14px 16px 16px}
+    .card-body h3{font-size:1.15rem}
+    .cpu-line{font-size:.8rem}
+    .specs{margin:9px 0 9px;gap:5px}
+    .specs li{font-size:.76rem}
+    .price-box{padding:10px 12px;border-radius:12px}
+    .price{font-size:1.75rem}
+    .price-parcel{font-size:.8rem}
+    .card .btn{padding:13px;font-size:1.02rem;margin-top:10px}
+    .guarantee-line{font-size:.7rem}
+    .scarcity{font-size:.72rem;margin-top:7px}
+    .countdown-box{flex-direction:column;text-align:center;padding:14px}
+    .sticky-cta{display:flex}
+    footer{padding-bottom:84px}
   }
 </style>
 </head>
 <body>
+
+<div class="promo-top">🔥 <b>PROMOÇÃO ESPECIAL DE SÁBADO!</b> 🔥 Condições imperdíveis só neste sábado — estoque limitado, quem chega primeiro leva! 🏃‍♂️💨</div>
 
 <!-- ================= TOPBAR ================= -->
 <header class="topbar" id="topbar">
@@ -192,11 +233,17 @@
   </div>
 </header>
 
-<!-- ================= HERO ================= -->
+<!-- ================= TICKER SÁBADO ================= -->
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-inner">
+    <span>🔥 SÁBADO DA PROMOÇÃO</span><span>💳 ATÉ 12x SEM JUROS</span><span>🛡️ GARANTIA DE 1 ANO</span><span>⚡ UNIDADE ÚNICA DE CADA PC</span><span>🏪 LOJA FÍSICA NO CAMBUÍ — CAMPINAS</span><span>🏃 CHEGA CEDO QUEM QUER LEVAR!</span>
+    <span>🔥 SÁBADO DA PROMOÇÃO</span><span>💳 ATÉ 12x SEM JUROS</span><span>🛡️ GARANTIA DE 1 ANO</span><span>⚡ UNIDADE ÚNICA DE CADA PC</span><span>🏪 LOJA FÍSICA NO CAMBUÍ — CAMPINAS</span><span>🏃 CHEGA CEDO QUEM QUER LEVAR!</span>
+  </div>
+</div>
 <section class="hero" id="inicio">
   <div class="wrap hero-grid">
     <div>
-      <span class="kicker">🔥 Ofertas da semana — loja física em Campinas</span>
+      <span class="kicker">🔥 SÁBADO DA PROMOÇÃO — loja física em Campinas</span>
       <h1>Super PCs Gamer <span>revisados</span>, com garantia e preço de verdade.</h1>
       <p class="sub">Máquinas prontas para jogar, estudar e trabalhar — do PC de entrada ao topo de linha com RTX 5060 Ti. Você retira na loja ou combina a entrega com a gente.</p>
       <div class="hero-badges">
@@ -204,6 +251,15 @@
         <span class="badge">🛡️ Garantia de 1 ano</span>
         <span class="badge">💳 Até 12x sem juros</span>
         <span class="badge">🏪 Loja física no Cambuí</span>
+      </div>
+      <div class="countdown-box" id="cdBox">
+        <div class="cd-lbl" id="cdLabel"><em>Promoção de SÁBADO</em> termina em:<small>Depois disso, os preços voltam ao normal! ⏰</small></div>
+        <div class="cd-timer" id="cdTimer">
+          <div class="cd-cell"><b id="cdD">0</b><span>dias</span></div>
+          <div class="cd-cell"><b id="cdH">00</b><span>horas</span></div>
+          <div class="cd-cell"><b id="cdM">00</b><span>min</span></div>
+          <div class="cd-cell"><b id="cdS">00</b><span>seg</span></div>
+        </div>
       </div>
       <div class="hero-ctas">
         <a class="btn btn-red" href="#pcs">Ver os PCs disponíveis ↓</a>
@@ -602,6 +658,46 @@
   vp.addEventListener('mouseleave', restart);
   window.addEventListener('resize', render);
   render(); restart();
+
+  /* ===== Promoção Sábado: escassez + contagem regressiva + botão fixo ===== */
+  document.querySelectorAll('.card-body .guarantee-line').forEach(el=>{
+    el.insertAdjacentHTML('beforebegin','<div class="scarcity">⚠️ Unidade única — quem chegar primeiro leva!</div>');
+  });
+  document.querySelectorAll('.card-body > .btn').forEach(b=>b.classList.add('btn-enviar-pulse'));
+
+  (function(){
+    const dEl=document.getElementById('cdD'),hEl=document.getElementById('cdH'),
+          mEl=document.getElementById('cdM'),sEl=document.getElementById('cdS');
+    if(!dEl) return;
+    function alvo(){
+      const n=new Date(), t=new Date(n);
+      const diff=(6-n.getDay()+7)%7;            // dias até sábado
+      t.setDate(t.getDate()+diff);
+      t.setHours(23,59,59,999);                 // sábado 23:59:59
+      return {t,diff};
+    }
+    const p2=v=>String(v).padStart(2,'0');
+    function tick(){
+      const {t,diff}=alvo();
+      let ms=t-Date.now();
+      if(ms<0){ ms=0; }
+      const s=Math.floor(ms/1000), d=Math.floor(s/86400),
+            h=Math.floor(s%86400/3600), m=Math.floor(s%3600/60), ss=s%60;
+      dEl.textContent=d; hEl.textContent=p2(h); mEl.textContent=p2(m); sEl.textContent=p2(ss);
+      const lbl=document.getElementById('cdLabel');
+      if(lbl && diff===0 && !lbl.dataset.hoje){
+        lbl.innerHTML='<em>É HOJE! A promoção de SÁBADO</em> termina em:<small>Corre pra loja — depois volta ao normal! ⏰</small>';
+        lbl.dataset.hoje='1';
+      }
+    }
+    tick(); setInterval(tick,1000);
+  })();
 </script>
+
+<!-- ================= CTA FIXO MOBILE ================= -->
+<div class="sticky-cta">
+  <div class="txt">🔥 Promoção de SÁBADO<small>Garantia de 1 ano · Até 12x sem juros</small></div>
+  <a class="btn btn-wa btn-sm btn-enviar-pulse" href="https://wa.me/5519987510267?text=Ol%C3%A1!%20Quero%20aproveitar%20a%20PROMO%C3%87%C3%83O%20DE%20S%C3%81BADO%20dos%20Super%20PCs%20Gamer!" target="_blank" rel="noopener">Chamar agora</a>
+</div>
 </body>
 </html>
