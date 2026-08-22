@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<base href="/softwares/ura/">
+<title>URA Balão — URA Inteligente, Roteamento e Atendimento Automatizado para Redes de Varejo | Balão da Informática</title>
+<meta name="description" content="URA inteligente para redes de varejo: atendimento por voz e WhatsApp, triagem automática, roteamento para a loja mais próxima e integração com estoque, pedidos e ERP. Reduza até 60% do custo do SAC e elimine filas de espera.">
+<link rel="canonical" href="https://www.balao.info/softwares/ura">
+<meta property="og:title" content="URA Balão | Automatize e escale o atendimento da sua rede de varejo">
+<meta property="og:description" content="Atendimento ágil por voz e WhatsApp, triagem automática, consulta de estoque e pedidos, zero fila de espera. Agende uma demonstração gratuita.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.balao.info/softwares/ura">
+<meta property="og:image" content="https://www.balao.info/softwares/ura/img/logo-balao.png">
+<meta property="og:locale" content="pt_BR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="URA Balão | URA Inteligente para Varejo">
+<meta name="twitter:description" content="Reduza até 60% do custo de atendimento e elimine filas: URA por voz e WhatsApp com roteamento por loja e relatórios em tempo real.">
+<meta name="twitter:image" content="https://www.balao.info/softwares/ura/img/logo-balao.png">
+<meta name="theme-color" content="#070d1a">
+<link rel="icon" type="image/png" href="img/logo-balao.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "URA Balão",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "description": "Sistema inteligente de URA, roteamento e atendimento automatizado por voz e WhatsApp para redes de varejo.",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Balão da Informática",
+    "url": "https://www.balao.info"
+  }
+}
+</script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        night: '#070d1a',
+        deep: '#0b1424',
+        cardx: '#101c33',
+        card2: '#14223d',
+        cyanx: '#22d3ee',
+        bluex: '#3b82f6',
+        violetx: '#a78bfa',
+        mint: '#34d399'
+      },
+      fontFamily: {
+        sans: ['"Segoe UI"', 'system-ui', '-apple-system', 'Roboto', 'Arial', 'sans-serif']
+      }
+    }
+  }
+}
+</script>
+<style>
+html{scroll-behavior:smooth}
+body{background:#070d1a;color:#e6edf7;line-height:1.6;overflow-x:hidden}
+.grad-text{background:linear-gradient(90deg,#22d3ee,#3b82f6);-webkit-background-clip:text;background-clip:text;color:transparent}
+.kicker{display:inline-block;font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#22d3ee;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.25);padding:6px 14px;border-radius:999px;margin-bottom:18px}
+.glass{background:rgba(16,28,51,.55);backdrop-filter:blur(14px);border:1px solid rgba(148,163,184,.14)}
+.card-lift{transition:.3s cubic-bezier(.2,.7,.3,1)}
+.card-lift:hover{transform:translateY(-6px)}
+nav.scrolled{border-bottom-color:rgba(148,163,184,.14)!important;background:rgba(7,13,26,.92)!important}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+.dot-live{width:8px;height:8px;border-radius:50%;background:#34d399;box-shadow:0 0 12px #34d399;animation:pulse 1.6s infinite;display:inline-block}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+.feed-row{animation:fadeSlide .5s ease both}
+.reveal{opacity:0;transform:translateY(26px);transition:.7s cubic-bezier(.2,.7,.3,1)}
+.reveal.on{opacity:1;transform:none}
+.flow-node{transition:.35s;opacity:.55}
+.flow-node.active{opacity:1;border-color:rgba(34,211,238,.65)!important;box-shadow:0 0 24px rgba(34,211,238,.25)}
+.tab-btn{transition:.25s;color:#94a3b8;border:1px solid transparent}
+.tab-btn[aria-selected="true"]{color:#e6edf7;background:rgba(34,211,238,.09);border-color:rgba(34,211,238,.4)}
+.tab-panel{display:none}
+.tab-panel.on{display:block;animation:fadeSlide .4s ease}
+.bar{border-radius:6px 6px 0 0;background:linear-gradient(180deg,#22d3ee,#3b82f6);opacity:.85;transition:.3s;width:100%}
+.bar:hover{opacity:1}
+input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid rgba(34,211,238,.6);outline-offset:2px}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+  .reveal{opacity:1;transform:none}
+}
+</style>
+</head>
+<body class="font-sans antialiased">
+
+<nav id="nav" class="fixed top-0 left-0 right-0 z-50 border-b border-transparent transition-all duration-300" style="background:rgba(7,13,26,.75);backdrop-filter:blur(14px)">
+  <div class="w-[min(1180px,92%)] mx-auto flex items-center justify-between h-[68px]">
+    <a href="#inicio" class="flex items-center gap-2.5 font-extrabold">
+      <img src="img/logo-balao.png" alt="Balão da Informática" class="h-[38px] w-auto rounded-lg">
+      <span class="leading-tight">Balão Software<small class="block text-slate-400 font-semibold text-[.66rem] tracking-widest uppercase">linha varejo</small></span>
+    </a>
+    <div class="hidden md:flex gap-7 text-[.95rem] text-slate-400">
+      <a href="#solucao" class="hover:text-cyanx transition-colors">A solução</a>
+      <a href="#telas" class="hover:text-cyanx transition-colors">Telas</a>
+      <a href="#recursos" class="hover:text-cyanx transition-colors">Recursos</a>
+      <a href="#segmentos" class="hover:text-cyanx transition-colors">Segmentos</a>
+      <a href="#resultados" class="hover:text-cyanx transition-colors">Resultados</a>
+    </div>
+    <a class="inline-flex items-center gap-2 font-bold rounded-xl px-4 py-2.5 text-sm text-white transition-all duration-300 hover:-translate-y-0.5"
+       style="background:#16a34a;box-shadow:0 8px 24px rgba(22,163,74,.35)"
+       target="_blank" rel="noopener"
+       href="https://wa.me/5519987510267?text=Ol%C3%A1!%20Quero%20agendar%20uma%20demonstra%C3%A7%C3%A3o%20da%20URA%20Bal%C3%A3o%20pra%20minha%20rede.">
+      Demonstração grátis
+    </a>
+  </div>
+</nav>
+
+<header id="inicio" class="relative min-h-screen flex flex-col justify-center pt-32 pb-20 overflow-hidden"
+        style="background:radial-gradient(1100px 520px at 78% -8%,rgba(59,130,246,.16),transparent 60%),radial-gradient(900px 480px at 8% 108%,rgba(34,211,238,.10),transparent 55%)">
+  <div id="particles-js" class="absolute inset-0 z-0" aria-hidden="true"></div>
+  <div class="relative z-10 w-[min(1180px,92%)] mx-auto">
+    <span class="inline-flex items-center gap-2 text-[.82rem] font-bold text-cyan-200 px-4 py-1.5 rounded-full mb-6"
+          style="background:rgba(34,211,238,.09);border:1px solid rgba(34,211,238,.3)">
+      <span class="dot-live"></span> URA inteligente · Telefonia IP · WhatsApp — feito para redes de varejo
+    </span>
+    <h1 class="text-[clamp(2.1rem,5vw,3.6rem)] leading-[1.12] tracking-tight font-extrabold max-w-[840px]">
+      Automatize, reduza custos e escale o atendimento da sua rede de varejo com a <span class="grad-text">URA inteligente</span>
+    </h1>
+    <p class="text-slate-400 text-[clamp(1rem,1.6vw,1.2rem)] max-w-[680px] mt-6 mb-9">
+      Atendimento ágil por <strong class="text-slate-200">voz e WhatsApp</strong> com triagem automática, consulta de estoque e pedidos em tempo real e
+      <strong class="text-slate-200">zero fila de espera</strong>. O cliente resolve em segundos — e o seu time só entra nas conversas que realmente valem.
+    </p>
+    <div class="flex gap-4 flex-wrap mb-12">
+      <a class="inline-flex items-center gap-2.5 font-bold rounded-xl px-8 py-4 text-lg text-[#06121f] transition-all duration-300 hover:-translate-y-0.5"
+         style="background:linear-gradient(90deg,#22d3ee,#3b82f6);box-shadow:0 10px 30px rgba(59,130,246,.4)"
+         target="_blank" rel="noopener"
+         href="https://wa.me/5519987510267?text=Ol%C3%A1!%20Quero%20agendar%20uma%20demonstra%C3%A7%C3%A3o%20gratuita%20da%20URA%20Bal%C3%A3o%20pra%20minha%20rede.">
+        Agendar Demonstração Gratuita
+        <i data-lucide="arrow-right" class="w-5 h-5"></i>
+      </a>
+      <a class="inline-flex items-center gap-2.5 font-bold rounded-xl px-8 py-4 text-lg transition-all duration-300 hover:border-cyanx hover:text-cyanx border border-slate-500/30 text-slate-100"
+         style="background:rgba(255,255,255,.03)" href="#contato">
+        Falar com Consultor
+      </a>
+    </div>
+    <div class="flex flex-wrap border-t border-slate-500/15 pt-6 max-w-[780px]">
+      <div class="pr-11 mr-11 border-r border-slate-500/15 max-sm:border-none max-sm:mr-6 max-sm:pr-6 max-sm:mb-2">
+        <b class="block text-2xl grad-text tracking-tight">-60%</b><span class="text-slate-400 text-sm">custo de atendimento</span>
+      </div>
+      <div class="pr-11 mr-11 border-r border-slate-500/15 max-sm:border-none max-sm:mr-6 max-sm:pr-6 max-sm:mb-2">
+        <b class="block text-2xl grad-text tracking-tight">98%</b><span class="text-slate-400 text-sm">retenção no 1º contato</span>
+      </div>
+      <div class="max-sm:mb-2">
+        <b class="block text-2xl grad-text tracking-tight">24/7</b><span class="text-slate-400 text-sm">atendimento automático</span>
+      </div>
+    </div>
+
+    <div class="relative mt-16 max-w-[980px]">
+      <div class="rounded-2xl p-2.5 bg-black border border-slate-700/70" style="box-shadow:0 30px 80px rgba(2,8,20,.8),0 0 60px rgba(59,130,246,.12)">
+        <div class="rounded-xl overflow-hidden bg-[#020617] border border-slate-800">
+          <div class="flex items-center gap-2 px-4 py-2.5 border-b border-slate-800 bg-[#0b1424]">
+            <span class="w-2.5 h-2.5 rounded-full bg-red-400/80"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-yellow-400/80"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400/80"></span>
+            <span class="ml-3 text-xs text-slate-500 font-mono bg-black/40 rounded-md px-3 py-1">painel.balao.info/ura</span>
+            <span class="ml-auto hidden sm:inline-flex items-center gap-1.5 text-[.7rem] font-bold text-emerald-300"><span class="dot-live"></span> ao vivo</span>
+          </div>
+          <div class="grid grid-cols-[52px_1fr] sm:grid-cols-[64px_1fr]">
+            <aside class="border-r border-slate-800 py-4 flex flex-col items-center gap-5 text-slate-500 bg-[#0b1424]" aria-hidden="true">
+              <i data-lucide="layout-dashboard" class="w-5 h-5 text-cyanx"></i>
+              <i data-lucide="phone-call" class="w-5 h-5"></i>
+              <i data-lucide="workflow" class="w-5 h-5"></i>
+              <i data-lucide="users" class="w-5 h-5"></i>
+              <i data-lucide="history" class="w-5 h-5"></i>
+              <i data-lucide="settings" class="w-5 h-5 mt-auto"></i>
+            </aside>
+            <div class="p-4 sm:p-5">
+              <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <div class="glass rounded-xl p-3.5">
+                  <p class="text-[.68rem] uppercase tracking-wider text-slate-500 font-bold">Chamadas hoje</p>
+                  <p class="text-xl font-extrabold mt-1"><span id="kpiCalls">187</span> <span class="text-[.65rem] font-bold text-mint align-middle">+12%</span></p>
+                </div>
+                <div class="glass rounded-xl p-3.5">
+                  <p class="text-[.68rem] uppercase tracking-wider text-slate-500 font-bold">Na fila agora</p>
+                  <p class="text-xl font-extrabold mt-1 text-cyanx" id="kpiQueue">3</p>
+                </div>
+                <div class="glass rounded-xl p-3.5">
+                  <p class="text-[.68rem] uppercase tracking-wider text-slate-500 font-bold">TMA médio</p>
+                  <p class="text-xl font-extrabold mt-1" id="kpiTma">0:42</p>
+                </div>
+                <div class="glass rounded-xl p-3.5">
+                  <p class="text-[.68rem] uppercase tracking-wider text-slate-500 font-bold">Retenção 1º contato</p>
+                  <p class="text-xl font-extrabold mt-1 text-mint">98%</p>
+                </div>
+              </div>
+              <div class="mt-4 glass rounded-xl p-3.5">
+                <div class="flex items-center justify-between mb-2">
+                  <p class="text-[.72rem] uppercase tracking-wider text-slate-500 font-bold">Chamadas ao vivo</p>
+                  <i data-lucide="radio" class="w-4 h-4 text-cyanx"></i>
+                </div>
+                <ul id="liveFeed" class="space-y-1.5 text-[.8rem]"></ul>
+              </div>
+              <div class="mt-4 hidden md:flex items-stretch gap-2" aria-hidden="true">
+                <div class="flow-node active flex-1 glass rounded-lg px-3 py-2 text-[.72rem] font-semibold text-center border-slate-600/50" id="fn1">Chamada recebida</div>
+                <i data-lucide="chevron-right" class="self-center w-4 h-4 text-slate-600 shrink-0"></i>
+                <div class="flow-node flex-1 glass rounded-lg px-3 py-2 text-[.72rem] font-semibold text-center border-slate-600/50" id="fn2">URA responde e identifica</div>
+                <i data-lucide="chevron-right" class="self-center w-4 h-4 text-slate-600 shrink-0"></i>
+                <div class="flow-node flex-1 glass rounded-lg px-3 py-2 text-[.72rem] font-semibold text-center border-slate-600/50" id="fn3">Consulta pedido / estoque</div>
+                <i data-lucide="chevron-right" class="self-center w-4 h-4 text-slate-600 shrink-0"></i>
+                <div class="flow-node flex-1 glass rounded-lg px-3 py-2 text-[.72rem] font-semibold text-center border-slate-600/50" id="fn4">Resolve ou transborda</div>
+                <i data-lucide="chevron-right" class="self-center w-4 h-4 text-slate-600 shrink-0"></i>
+                <div class="flow-node flex-1 glass rounded-lg px-3 py-2 text-[.72rem] font-semibold text-center border-slate-600/50" id="fn5">Loja certa atende</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="absolute -top-5 -left-3 glass rounded-2xl px-4 py-3 flex items-center gap-2.5 text-[.85rem] font-bold shadow-2xl floaty" style="animation:floaty 5s ease-in-out infinite">
+        <i data-lucide="message-circle" class="w-5 h-5 text-mint"></i> Transbordo pro WhatsApp
+      </div>
+      <div class="absolute -bottom-5 right-4 glass rounded-2xl px-4 py-3 flex items-center gap-2.5 text-[.85rem] font-bold shadow-2xl" style="animation:floaty 5s ease-in-out .8s infinite">
+        <i data-lucide="map-pin" class="w-5 h-5 text-cyanx"></i> Roteou p/ loja Cambuí
+      </div>
+    </div>
+  </div>
+</header>
+<style>@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}</style>
+
+<div class="border-y border-slate-500/15 bg-deep">
+  <div class="w-[min(1180px,92%)] mx-auto flex flex-wrap justify-center gap-x-12 gap-y-3 py-5 text-slate-400 text-[.92rem] font-semibold">
+    <span class="inline-flex items-center gap-2"><i data-lucide="message-circle" class="w-4 h-4 text-cyanx"></i> API oficial do WhatsApp Business</span>
+    <span class="inline-flex items-center gap-2"><i data-lucide="database" class="w-4 h-4 text-cyanx"></i> ERPs de varejo</span>
+    <span class="inline-flex items-center gap-2"><i data-lucide="phone-call" class="w-4 h-4 text-cyanx"></i> Telefonia IP / SIP · Asterisk</span>
+    <span class="inline-flex items-center gap-2"><i data-lucide="workflow" class="w-4 h-4 text-cyanx"></i> CRMs</span>
+  </div>
+</div>
+
+<section id="solucao" class="py-24 relative">
+  <div class="w-[min(1180px,92%)] mx-auto">
+    <div class="reveal">
+      <span class="kicker">A solução</span>
+      <h2 class="text-[clamp(1.7rem,3.4vw,2.5rem)] leading-tight tracking-tight font-extrabold mb-4">
+        Uma URA que atende, entende e <span class="grad-text">resolve sozinha</span>
+      </h2>
+      <p class="text-slate-400 max-w-[660px]">Chega de robô burro de "digite 1, digite 2" que não resolve nada. A URA Balão conversa por voz ou WhatsApp, identifica o motivo do contato, consulta seus sistemas na hora e só chama um humano quando vale a pena.</p>
+    </div>
+    <div class="grid md:grid-cols-3 gap-6 mt-12 reveal">
+      <div class="glass rounded-2xl p-7 card-lift">
+        <span class="text-3xl font-extrabold grad-text">01</span>
+        <h3 class="font-bold mt-2 mb-2 flex items-center gap-2"><i data-lucide="phone-incoming" class="w-5 h-5 text-cyanx"></i> O cliente liga ou chama no WhatsApp</h3>
+        <p class="text-slate-400 text-[.92rem]">A URA atende na hora, sem fila, com a saudação e os menus personalizados da sua rede.</p>
+      </div>
+      <div class="glass rounded-2xl p-7 card-lift">
+        <span class="text-3xl font-extrabold grad-text">02</span>
+        <h3 class="font-bold mt-2 mb-2 flex items-center gap-2"><i data-lucide="package-search" class="w-5 h-5 text-cyanx"></i> Identifica o motivo e consulta sistemas</h3>
+        <p class="text-slate-400 text-[.92rem]">Pedido, ordem de serviço, estoque, horário da loja: puxado direto das suas APIs e do ERP.</p>
+      </div>
+      <div class="glass rounded-2xl p-7 card-lift">
+        <span class="text-3xl font-extrabold grad-text">03</span>
+        <h3 class="font-bold mt-2 mb-2 flex items-center gap-2"><i data-lucide="phone-forwarded" class="w-5 h-5 text-cyanx"></i> Resolve sozinha ou passa pra pessoa certa</h3>
+        <p class="text-slate-400 text-[.92rem]">Transbordo inteligente pro vendedor da loja mais próxima — no ramal ou no WhatsApp, com contexto.</p>
+      </div>
+    </div>
+
+    <div id="telas" class="pt-24">
+      <div class="reveal">
+        <span class="kicker">Dentro do sistema</span>
+        <h2 class="text-[clamp(1.7rem,3.4vw,2.5rem)] leading-tight tracking-tight font-extrabold mb-4">Painel completo pra <span class="grad-text">gestão da sua rede</span></h2>
+        <p class="text-slate-400 max-w-[660px]">Tudo que o gestor precisa ver em um lugar só — métricas, fluxos, fila e histórico — em tempo real, loja por loja.</p>
+      </div>
+      <div class="flex flex-wrap gap-2.5 mt-10 reveal" role="tablist" aria-label="Telas do sistema">
+        <button role="tab" aria-selected="true" data-tab="t-dash" class="tab-btn glass rounded-xl px-5 py-3 text-sm font-bold inline-flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-4 h-4"></i> Dashboard de Métricas</button>
+        <button role="tab" aria-selected="false" data-tab="t-flow" class="tab-btn glass rounded-xl px-5 py-3 text-sm font-bold inline-flex items-center gap-2"><i data-lucide="git-branch" class="w-4 h-4"></i> Construtor de Fluxos</button>
+        <button role="tab" aria-selected="false" data-tab="t-fila" class="tab-btn glass rounded-xl px-5 py-3 text-sm font-bold inline-flex items-center gap-2"><i data-lucide="timer" class="w-4 h-4"></i> Fila em Tempo Real</button>
+        <button role="tab" aria-selected="false" data-tab="t-hist" class="tab-btn glass rounded-xl px-5 py-3 text-sm font-bold inline-flex items-center gap-2"><i data-lucide="history" class="w-4 h-4"></i> Histórico de Chamadas</button>
+      </div>
+
+      <div class="mt-8 reveal">
+        <div id="t-dash" class="tab-panel on glass rounded-2xl p-5 sm:p-7">
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+            <div class="rounded-xl p-4 bg-cardx border border-slate-500/15"><p class="text-[.66rem] uppercase tracking-wider text-slate-500 font-bold">Volume hoje</p><p class="text-2xl font-extrabold mt-1">214</p></div>
+            <div class="rounded-xl p-4 bg-cardx border border-slate-500/15"><p class="text-[.66rem] uppercase tracking-wider text-slate-500 font-bold">Resolvidas na URA</p><p class="text-2xl font-extrabold mt-1 text-mint">68%</p></div>
+            <div class="rounded-xl p-4 bg-cardx border border-slate-500/15"><p class="text-[.66rem] uppercase tracking-wider text-slate-500 font-bold">TMA médio</p><p class="text-2xl font-extrabold mt-1">0:42</p></div>
+            <div class="rounded-xl p-4 bg-cardx border border-slate-500/15"><p class="text-[.66rem] uppercase tracking-wider text-slate-500 font-bold">Retenção 1º contato</p><p class="text-2xl font-extrabold mt-1 text-cyanx">98%</p></div>
+          </div>
+          <div class="grid lg:grid-cols-[1fr_320px] gap-6">
+            <div class="rounded-xl p-5 bg-cardx border border-slate-500/15">
+              <p class="text-[.72rem] uppercase tracking-wider text-slate-500 font-bold mb-4">Chamadas por dia da semana</p>
+              <div class="flex items-end gap-3 h-40" aria-hidden="true">
+                <div class="flex flex-col items-center gap-2 flex-1 h-full justify-end"><span class="text-[.65rem] text-slate-500">182</span><div class="bar" style="height:62%"></div><span class="text-[.68rem] text-slate-500 font-bold">seg</span></div>
+                <div class="flex flex-col items-center gap-2 flex-1 h-full justify-end"><span class="text-[.65rem] text-slate-500">201</span><div class="bar" style="height:70%"></div><span class="text-[.68rem] text-slate-500 font-bold">ter</span></div>
+                <div class="flex flex-col items-center gap-2 flex-1 h-full justify-end"><span class="text-[.65rem] text-slate-500">188</span><div class="bar" style="height:64%"></div><span class="text-[.68rem] text-slate-500 font-bold">qua</span></div>
+                <div class="flex flex-col items-center gap-2 flex-1 h-full justify-end"><span class="text-[.65rem] text-slate-500">230</span><div class="bar" style="height:80%"></div><span class="text-[.68rem] text-slate-500 font-bold">qui</span></div>
+                <div class="flex flex-col items-center gap-2 flex-1 h-full justify-end"><span class="text-[.65rem] text-slate-500">267</span><div class="bar" style="height:93%"></div><span class="text-[.68rem] text-slate-500 font-bold">sex</span></div>
+                <div class="flex flex-col items-center gap-2 flex-1 h-full justify-end"><span class="text-[.65rem] text-slate-500">298</span><div class="bar" style="height:100%"></div><span class="text-[.68rem] text-slate-500 font-bold">sáb</span></div>
+                <div class="flex flex-col items-center gap-2 flex-1 h-full justify-end"><span class="text-[.65rem] text-slate-500">121</span><div class="bar opacity-40" style="height:42%"></div><span class="text-[.68rem] text-slate-500 font-bold">dom</span></div>
+              </div>
+            </div>
+            <div class="rounded-xl p-5 bg-cardx border border-slate-500/15">
+              <p class="text-[.72rem] uppercase tracking-wider text-slate-500 font-bold mb-4">Top motivos de contato</p>
+              <div class="flex items-center gap-5">
+                <div class="shrink-0 w-24 h-24 rounded-full grid place-items-center" style="background:conic-gradient(#34d399 0 68%,rgba(148,163,184,.15) 68% 100%)"><div class="w-16 h-16 rounded-full bg-cardx grid place-items-center text-sm font-extrabold text-mint">68%</div></div>
+                <ul class="text-[.82rem] space-y-1.5 text-slate-300">
+                  <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-mint shrink-0"></span> Status de pedido — 38%</li>
+                  <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-cyanx shrink-0"></span> Horário / endereço — 22%</li>
+                  <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-bluex shrink-0"></span> Suporte / garantia — 17%</li>
+                  <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-violetx shrink-0"></span> Orçamento — 14%</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="t-flow" class="tab-panel glass rounded-2xl p-5 sm:p-7">
+          <div class="flex flex-wrap gap-2 mb-6" aria-hidden="true">
+            <span class="text-[.72rem] font-bold text-slate-400 rounded-lg px-3 py-1.5 bg-cardx border border-slate-500/20">+ Áudio / TTS</span>
+            <span class="text-[.72rem] font-bold text-slate-400 rounded-lg px-3 py-1.5 bg-cardx border border-slate-500/20">+ Menu de teclas</span>
+            <span class="text-[.72rem] font-bold text-slate-400 rounded-lg px-3 py-1.5 bg-cardx border border-slate-500/20">+ Consulta API</span>
+            <span class="text-[.72rem] font-bold text-slate-400 rounded-lg px-3 py-1.5 bg-cardx border border-slate-500/20">+ Transbordo ramal</span>
+            <span class="text-[.72rem] font-bold text-slate-400 rounded-lg px-3 py-1.5 bg-cardx border border-slate-500/20">+ Enviar WhatsApp</span>
+            <span class="ml-auto hidden sm:inline text-[.72rem] font-bold text-violetx rounded-lg px-3 py-1.5 bg-violetx/10 border border-violetx/30">arraste e conecte os blocos</span>
+          </div>
+          <div class="grid md:grid-cols-[220px_1fr] gap-5">
+            <div class="rounded-xl p-4 bg-cardx border border-slate-500/15 text-[.85rem] space-y-3">
+              <p class="text-[.72rem] uppercase tracking-wider text-slate-500 font-bold">Fluxo: Assistência</p>
+              <div class="rounded-lg p-3 bg-deep border border-slate-500/20 font-semibold">Boas-vindas + identificação</div>
+              <div class="rounded-lg p-3 bg-deep border border-slate-500/20 font-semibold">Menu: <br><span class="text-slate-400 font-normal">1 Suporte · 2 WhatsApp · 0 Vendedor</span></div>
+              <div class="rounded-lg p-3 bg-cyanx/10 border border-cyanx/40 text-cyan-200 font-semibold">Consulta OS no ERP</div>
+            </div>
+            <div class="rounded-xl p-4 bg-cardx border border-slate-500/15">
+              <div class="grid sm:grid-cols-3 gap-3 text-[.8rem]">
+                <div class="rounded-lg p-3.5 bg-deep border border-mint/40"><p class="font-bold text-mint mb-1">Tecla 1 — Status</p><p class="text-slate-400">Cliente digita o nº da OS e ouve a situação na hora, sem falar com ninguém.</p></div>
+                <div class="rounded-lg p-3.5 bg-deep border border-violetx/40"><p class="font-bold text-violetx mb-1">Tecla 2 — WhatsApp</p><p class="text-slate-400">Recebe o retorno automático no celular com link de acompanhamento.</p></div>
+                <div class="rounded-lg p-3.5 bg-deep border border-bluex/40"><p class="font-bold text-bluex mb-1">Tecla 0 — Vendedor</p><p class="text-slate-400">Transborda pro ramal da loja mais próxima com o contexto da ligação.</p></div>
+              </div>
+              <div class="mt-4 rounded-lg p-3.5 bg-deep border border-slate-500/20 text-[.8rem] text-slate-400 flex items-center gap-2.5">
+                <i data-lucide="shield-check" class="w-4 h-4 text-mint shrink-0"></i>
+                Tecla 9 adiciona o número à lista de bloqueio (opt-out) automaticamente — conformidade LGPD nativa.
+              </div>
+              <div class="mt-3 rounded-lg p-3.5 bg-deep border border-slate-500/20 text-[.8rem] text-slate-400 flex items-center gap-2.5">
+                <i data-lucide="phone-call" class="w-4 h-4 text-cyanx shrink-0"></i>
+                O mesmo fluxo serve pra URA Ativa: campanhas de cobrança, entrega e pós-venda com resposta por tecla.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="t-fila" class="tab-panel glass rounded-2xl p-5 sm:p-7">
+          <div class="flex items-center justify-between mb-5">
+            <p class="text-[.72rem] uppercase tracking-wider text-slate-500 font-bold">Fila geral agora — <span class="text-cyanx">3 aguardando</span></p>
+            <span class="inline-flex items-center gap-1.5 text-[.72rem] font-bold text-emerald-300"><span class="dot-live"></span> tempo real</span>
+          </div>
+          <div class="grid lg:grid-cols-[1fr_280px] gap-5">
+            <ul class="space-y-2.5 text-[.85rem]">
+              <li class="flex items-center gap-3 rounded-xl p-3.5 bg-cardx border border-slate-500/15">
+                <span class="w-8 h-8 shrink-0 rounded-lg bg-cyanx/15 text-cyanx grid place-items-center font-extrabold text-sm">#1</span>
+                <div class="min-w-0"><p class="font-bold truncate">+55 19 9••••-2231</p><p class="text-slate-500 text-[.75rem]">Orçamento · aguardando 0:12</p></div>
+                <span class="ml-auto text-[.7rem] font-bold text-cyan-200 bg-cyanx/10 border border-cyanx/30 rounded-full px-2.5 py-1 whitespace-nowrap">Loja Cambuí</span>
+              </li>
+              <li class="flex items-center gap-3 rounded-xl p-3.5 bg-cardx border border-slate-500/15">
+                <span class="w-8 h-8 shrink-0 rounded-lg bg-cyanx/15 text-cyanx grid place-items-center font-extrabold text-sm">#2</span>
+                <div class="min-w-0"><p class="font-bold truncate">+55 11 9••••-8842</p><p class="text-slate-500 text-[.75rem]">Suporte técnico · aguardando 0:31</p></div>
+                <span class="ml-auto text-[.7rem] font-bold text-blue-200 bg-bluex/10 border border-bluex/30 rounded-full px-2.5 py-1 whitespace-nowrap">Loja Barão</span>
+              </li>
+              <li class="flex items-center gap-3 rounded-xl p-3.5 bg-cardx border border-slate-500/15">
+                <span class="w-8 h-8 shrink-0 rounded-lg bg-cyanx/15 text-cyanx grid place-items-center font-extrabold text-sm">#3</span>
+                <div class="min-w-0"><p class="font-bold truncate">+55 13 9••••-0477</p><p class="text-slate-500 text-[.75rem]">Status de pedido · aguardando 0:44</p></div>
+                <span class="ml-auto text-[.7rem] font-bold text-emerald-200 bg-mint/10 border border-mint/30 rounded-full px-2.5 py-1 whitespace-nowrap">Loja Sumaré</span>
+              </li>
+            </ul>
+            <div class="rounded-xl p-4 bg-cardx border border-slate-500/15 text-[.85rem]">
+              <p class="text-[.72rem] uppercase tracking-wider text-slate-500 font-bold mb-3">Equipe</p>
+              <ul class="space-y-2.5">
+                <li class="flex items-center gap-2.5"><span class="w-2 h-2 rounded-full bg-mint"></span> Ana · Cambuí <span class="ml-auto text-slate-500 text-[.72rem]">em chamada</span></li>
+                <li class="flex items-center gap-2.5"><span class="w-2 h-2 rounded-full bg-mint"></span> Carlos · Barão <span class="ml-auto text-slate-500 text-[.72rem]">disponível</span></li>
+                <li class="flex items-center gap-2.5"><span class="w-2 h-2 rounded-full bg-slate-500"></span> Júlia · Sumaré <span class="ml-auto text-slate-500 text-[.72rem]">pausa</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div id="t-hist" class="tab-panel glass rounded-2xl p-5 sm:p-7 overflow-x-auto">
+          <div class="flex flex-wrap gap-2 mb-5" aria-hidden="true">
+            <span class="text-[.72rem] font-bold text-cyan-200 rounded-lg px-3 py-1.5 bg-cyanx/10 border border-cyanx/30">Hoje</span>
+            <span class="text-[.72rem] font-bold text-slate-400 rounded-lg px-3 py-1.5 bg-cardx border border-slate-500/20">Últimos 7 dias</span>
+            <span class="text-[.72rem] font-bold text-slate-400 rounded-lg px-3 py-1.5 bg-cardx border border-slate-500/20">Por loja</span>
+          </div>
+          <table class="w-full text-[.83rem] min-w-[640px]">
+            <thead>
+              <tr class="text-left text-[.68rem] uppercase tracking-wider text-slate-500">
+                <th class="pb-3 pr-4 font-bold">Horário</th><th class="pb-3 pr-4 font-bold">Número</th><th class="pb-3 pr-4 font-bold">Motivo</th><th class="pb-3 pr-4 font-bold">Resultado</th><th class="pb-3 font-bold">Duração</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-500/10">
+              <tr><td class="py-3 pr-4 text-slate-400">14:32</td><td class="pr-4 font-bold">+55 19 9••••-2231</td><td class="pr-4 text-slate-300">Status de pedido</td><td class="pr-4"><span class="text-[.7rem] font-bold text-emerald-200 bg-mint/10 border border-mint/30 rounded-full px-2.5 py-1">Resolvido na URA</span></td><td class="text-slate-400">0:38</td></tr>
+              <tr><td class="py-3 pr-4 text-slate-400">14:29</td><td class="pr-4 font-bold">+55 11 9••••-8842</td><td class="pr-4 text-slate-300">Suporte técnico</td><td class="pr-4"><span class="text-[.7rem] font-bold text-blue-200 bg-bluex/10 border border-bluex/30 rounded-full px-2.5 py-1">Transbordo → vendedor</span></td><td class="text-slate-400">2:14</td></tr>
+              <tr><td class="py-3 pr-4 text-slate-400">14:21</td><td class="pr-4 font-bold">+55 13 9••••-5519</td><td class="pr-4 text-slate-300">Garantia / 2ª via</td><td class="pr-4"><span class="text-[.7rem] font-bold text-violet-200 bg-violetx/10 border border-violetx/30 rounded-full px-2.5 py-1">WhatsApp enviado</span></td><td class="text-slate-400">0:47</td></tr>
+              <tr><td class="py-3 pr-4 text-slate-400">14:17</td><td class="pr-4 font-bold">+55 19 9••••-9930</td><td class="pr-4 text-slate-300">Orçamento</td><td class="pr-4"><span class="text-[.7rem] font-bold text-cyan-200 bg-cyanx/10 border border-cyanx/30 rounded-full px-2.5 py-1">Fila → Loja Cambuí</span></td><td class="text-slate-400">1:05</td></tr>
+              <tr><td class="py-3 pr-4 text-slate-400">14:02</td><td class="pr-4 font-bold">+55 62 9••••-1148</td><td class="pr-4 text-slate-300">Oferecimento (campanha)</td><td class="pr-4"><span class="text-[.7rem] font-bold text-red-300 bg-red-500/10 border border-red-500/30 rounded-full px-2.5 py-1">Opt-out solicitado</span></td><td class="text-slate-400">0:19</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="pt-20">
+      <h3 class="font-extrabold text-xl mb-8 reveal">Integra com o que a sua rede <span class="grad-text">já usa hoje</span></h3>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 reveal">
+        <div class="mod glass rounded-2xl p-6 card-lift">
+          <div class="w-11 h-11 rounded-xl grid place-items-center mb-4 bg-mint/10 border border-mint/30"><i data-lucide="message-circle" class="w-5 h-5 text-mint"></i></div>
+          <b class="block mb-1.5">API WhatsApp Business</b><p class="text-slate-400 text-[.84rem]">Triagem, respostas automáticas e transbordo de voz pra conversa — tudo no número da empresa.</p>
+        </div>
+        <div class="mod glass rounded-2xl p-6 card-lift">
+          <div class="w-11 h-11 rounded-xl grid place-items-center mb-4 bg-cyanx/10 border border-cyanx/30"><i data-lucide="database" class="w-5 h-5 text-cyanx"></i></div>
+          <b class="block mb-1.5">ERPs de varejo</b><p class="text-slate-400 text-[.84rem]">Consulta de pedidos, ordens de serviço e estoque direto na base, via API segura.</p>
+        </div>
+        <div class="mod glass rounded-2xl p-6 card-lift">
+          <div class="w-11 h-11 rounded-xl grid place-items-center mb-4 bg-bluex/10 border border-bluex/30"><i data-lucide="phone-call" class="w-5 h-5 text-bluex"></i></div>
+          <b class="block mb-1.5">Telefonia IP / SIP</b><p class="text-slate-400 text-[.84rem]">Troncos SIP, PABX Asterisk e ramais: usa a infraestrutura de voz que você já tem.</p>
+        </div>
+        <div class="mod glass rounded-2xl p-6 card-lift">
+          <div class="w-11 h-11 rounded-xl grid place-items-center mb-4 bg-violetx/10 border border-violetx/30"><i data-lucide="workflow" class="w-5 h-5 text-violetx"></i></div>
+          <b class="block mb-1.5">CRMs</b><p class="text-slate-400 text-[.84rem]">Cada ligação registrada com motivo e resultado — histórico do cliente sempre atualizado.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="dores" class="py-24 bg-deep border-y border-slate-500/15">
+  <div class="w-[min(1180px,92%)] mx-auto">
+    <div class="text-center reveal">
+      <span class="kicker">O problema</span>
+      <h2 class="text-[clamp(1.7rem,3.4vw,2.5rem)] leading-tight tracking-tight font-extrabold mb-4">O telefone tá derrubando <span class="grad-text">dinheiro na mesa</span></h2>
+      <p class="text-slate-400 max-w-[620px] mx-auto">Se a sua rede tem telefone, provavelmente vive pelo menos um desses três cenários:</p>
+    </div>
+    <div class="grid md:grid-cols-3 gap-6 mt-14 reveal">
+      <article class="rounded-2xl p-8 border card-lift" style="background:linear-gradient(180deg,rgba(239,68,68,.07),rgba(239,68,68,.02));border-color:rgba(239,68,68,.22)">
+        <i data-lucide="phone-off" class="w-8 h-8 text-red-400 mb-4"></i>
+        <h3 class="font-bold text-lg mb-3 text-red-200">A fila que mata a venda</h3>
+        <p class="text-slate-300 text-[.93rem] mb-4">Cliente liga, ouve "aguarde", espera minutos e desiste — e compra no concorrente. Cada minuto de fila é uma venda indo pro concorrente pelo telefone.</p>
+        <p class="flex items-start gap-2 text-[.88rem] text-emerald-300 font-semibold pt-4 border-t border-emerald-500/15"><i data-lucide="check" class="w-4 h-4 mt-1 shrink-0"></i> A URA Balão atende 100% das ligações na hora, sem fila, 24 horas por dia.</p>
+      </article>
+      <article class="rounded-2xl p-8 border card-lift" style="background:linear-gradient(180deg,rgba(239,68,68,.07),rgba(239,68,68,.02));border-color:rgba(239,68,68,.22)">
+        <i data-lucide="coins" class="w-8 h-8 text-red-400 mb-4"></i>
+        <h3 class="font-bold text-lg mb-3 text-red-200">SAC caro pra responder sempre a mesma coisa</h3>
+        <p class="text-slate-300 text-[.93rem] mb-4">Operadores gastando horas com status de pedido, horário de funcionamento e dúvida de garantia — perguntas repetitivas que não precisam de gente pra ser respondidas.</p>
+        <p class="flex items-start gap-2 text-[.88rem] text-emerald-300 font-semibold pt-4 border-t border-emerald-500/15"><i data-lucide="check" class="w-4 h-4 mt-1 shrink-0"></i> A URA responde o repetitivo na hora; seu time só fala no que realmente dá margem.</p>
+      </article>
+      <article class="rounded-2xl p-8 border card-lift" style="background:linear-gradient(180deg,rgba(239,68,68,.07),rgba(239,68,68,.02));border-color:rgba(239,68,68,.22)">
+        <i data-lucide="eye-off" class="w-8 h-8 text-red-400 mb-4"></i>
+        <h3 class="font-bold text-lg mb-3 text-red-200">Zero visibilidade da rede</h3>
+        <p class="text-slate-300 text-[.93rem] mb-4">Você não sabe quantas ligações cada loja recebe, nem o motivo delas, nem quantas viraram venda. Gestão às cegas, decisão no achismo.</p>
+        <p class="flex items-start gap-2 text-[.88rem] text-emerald-300 font-semibold pt-4 border-t border-emerald-500/15"><i data-lucide="check" class="w-4 h-4 mt-1 shrink-0"></i> Painel em tempo real por loja/filial: volume, motivo, TMA e retenção.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="recursos" class="py-24">
+  <div class="w-[min(1180px,92%)] mx-auto">
+    <div class="text-center reveal">
+      <span class="kicker">Recursos chave</span>
+      <h2 class="text-[clamp(1.7rem,3.4vw,2.5rem)] leading-tight tracking-tight font-extrabold mb-4">Feito pro varejo, <span class="grad-text">não adaptado</span></h2>
+      <p class="text-slate-400 max-w-[620px] mx-auto">Nascido dentro de uma rede real de informática — cada recurso abaixo existe porque alguém precisou dele de verdade.</p>
+    </div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-14 reveal">
+      <div class="glass rounded-2xl p-7 card-lift">
+        <div class="w-11 h-11 rounded-xl grid place-items-center mb-4 bg-cyanx/10 border border-cyanx/30"><i data-lucide="map-pin" class="w-5 h-5 text-cyanx"></i></div>
+        <b class="block mb-1.5">Roteamento por loja mais próxima</b>
+        <p class="text-slate-400 text-[.88rem]">A ligação cai direto na unidade certa — pelo endereço/CEP informado ou região do número — sem transferência manual.</p>
+      </div>
+      <div class="glass rounded-2xl p-7 card-lift">
+        <div class="w-11 h-11 rounded-xl grid place-items-center mb-4 bg-cyanx/10 border border-cyanx/30"><i data-lucide="package-search" class="w-5 h-5 text-cyanx"></i></div>
+        <b class="block mb-1.5">Consulta automática de pedido e OS</b>
+        <p class="text-slate-400 text-[.88rem]">O cliente informa o número e ouve o status na hora, puxado do seu ERP ou sistema de ordens de serviço.</p>
+      </div>
+      <div class="glass rounded-2xl p-7 card-lift">
+        <div class="w-11 h-11 rounded-xl grid place-items-center mb-4 bg-cyanx/10 border border-cyanx/30"><i data-lucide="phone-forwarded" class="w-5 h-5 text-cyanx"></i></div>
+        <b class="block mb-1.5">Transbordo inteligente</b>
+        <p class="text-slate-400 text-[.88rem]">Do bot pra pessoa certa em 1 toque: vendedor no WhatsApp ou no ramal, levando todo o contexto da conversa.</p>
+      </div>
+      <div class="glass rounded-2xl p-7 card-lift">
+        <div class="w-11 h-11 rounded-xl grid place-items-center mb-4 bg-cyanx/10 border border-cyanx/30"><i data-lucide="activity" class="w-5 h-5 text-cyanx"></i></div>
+        <b class="block mb-1.5">Relatórios em tempo real</b>
+        <p class="text-slate-400 text-[.88rem]">TMA, retenção no primeiro contato, volume por motivo e por loja — tudo ao vivo e exportável.</p>
+      </div>
+      <div class="glass rounded-2xl p-7 card-lift">
+        <div class="w-11 h-11 rounded-xl grid place-items-center mb-4 bg-cyanx/10 border border-cyanx/30"><i data-lucide="phone-call" class="w-5 h-5 text-cyanx"></i></div>
+        <b class="block mb-1.5">URA Ativa pra campanhas</b>
+        <p class="text-slate-400 text-[.88rem]">Discador pra cobrança, entrega e pós-venda com áudio personalizado e resposta por tecla — com lista de bloqueio (opt-out).</p>
+      </div>
+      <div class="glass rounded-2xl p-7 card-lift">
+        <div class="w-11 h-11 rounded-xl grid place-items-center mb-4 bg-cyanx/10 border border-cyanx/30"><i data-lucide="shield-check" class="w-5 h-5 text-cyanx"></i></div>
+        <b class="block mb-1.5">Multi-loja, white label e LGPD</b>
+        <p class="text-slate-400 text-[.88rem]">Menus e áudios por unidade, painel com a sua marca e conformidade com a LGPD desde o desenho.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="segmentos" class="py-24 bg-deep border-y border-slate-500/15">
+  <div class="w-[min(1180px,92%)] mx-auto">
+    <div class="text-center reveal">
+      <span class="kicker">Casos de uso</span>
+      <h2 class="text-[clamp(1.7rem,3.4vw,2.5rem)] leading-tight tracking-tight font-extrabold mb-4">Veja funcionando no <span class="grad-text">seu segmento</span></h2>
+    </div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-5 mt-14 reveal">
+      <div class="glass rounded-2xl p-6 card-lift">
+        <i data-lucide="monitor" class="w-7 h-7 text-cyanx mb-3"></i>
+        <b class="block mb-1.5">Redes de Informática</b>
+        <p class="text-slate-400 text-[.82rem]">"Cadê meu PC da assistência?" — status de OS e garantia resolvido na hora; técnico só pega caso real.</p>
+      </div>
+      <div class="glass rounded-2xl p-6 card-lift">
+        <i data-lucide="smartphone" class="w-7 h-7 text-cyanx mb-3"></i>
+        <b class="block mb-1.5">Eletrônicos</b>
+        <p class="text-slate-400 text-[.82rem]">Rastreio de entrega, trocas e configuração de aparelho sem fila no telefone da loja.</p>
+      </div>
+      <div class="glass rounded-2xl p-6 card-lift">
+        <i data-lucide="car" class="w-7 h-7 text-cyanx mb-3"></i>
+        <b class="block mb-1.5">Autopeças</b>
+        <p class="text-slate-400 text-[.82rem]">"Tem a pastilha desse modelo?" — a URA consulta o estoque e transfere pra loja que tem a peça.</p>
+      </div>
+      <div class="glass rounded-2xl p-6 card-lift">
+        <i data-lucide="hard-hat" class="w-7 h-7 text-cyanx mb-3"></i>
+        <b class="block mb-1.5">Material de Construção</b>
+        <p class="text-slate-400 text-[.82rem]">Orçamento, prazo de entrega e retirada na filial — sem ocupar o balcão nem o caixa.</p>
+      </div>
+      <div class="glass rounded-2xl p-6 card-lift">
+        <i data-lucide="network" class="w-7 h-7 text-cyanx mb-3"></i>
+        <b class="block mb-1.5">Franquias</b>
+        <p class="text-slate-400 text-[.82rem]">Padrão de atendimento igual em todas as unidades e métricas centralizadas na matriz.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="resultados" class="py-24 relative overflow-hidden" style="background:radial-gradient(900px 420px at 50% 120%,rgba(34,211,238,.16),transparent 65%),#0b1424">
+  <div class="w-[min(1180px,92%)] mx-auto text-center">
+    <div class="reveal">
+      <span class="kicker">Impacto real</span>
+      <h2 class="text-[clamp(1.7rem,3.4vw,2.5rem)] leading-tight tracking-tight font-extrabold mb-4">Números que o seu contador <span class="grad-text">vai gostar</span></h2>
+    </div>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 mt-12 reveal">
+      <div class="tnum glass rounded-2xl p-8">
+        <b class="block text-4xl tracking-tight grad-text font-extrabold" data-target="60" data-prefix="-" data-suffix="%">-60%</b>
+        <span class="text-slate-400 text-sm block mt-2">de custo operacional com atendimento</span>
+      </div>
+      <div class="tnum glass rounded-2xl p-8">
+        <b class="block text-4xl tracking-tight grad-text font-extrabold" data-target="98" data-suffix="%">98%</b>
+        <span class="text-slate-400 text-sm block mt-2">de retenção no primeiro contato</span>
+      </div>
+      <div class="tnum glass rounded-2xl p-8">
+        <b class="block text-4xl tracking-tight grad-text font-extrabold" data-target="70" data-prefix="-" data-suffix="%">-70%</b>
+        <span class="text-slate-400 text-sm block mt-2">de ligações repetitivas chegando ao time humano</span>
+      </div>
+      <div class="tnum glass rounded-2xl p-8">
+        <b class="block text-4xl tracking-tight grad-text font-extrabold">24/7</b>
+        <span class="text-slate-400 text-sm block mt-2">de disponibilidade, inclusive feriados</span>
+      </div>
+    </div>
+    <div class="mt-12 glass rounded-2xl p-6 max-w-[720px] mx-auto flex items-center gap-4 text-left reveal">
+      <i data-lucide="badge-check" class="w-8 h-8 text-mint shrink-0"></i>
+      <p class="text-slate-300 text-[.95rem]">Em operação no atendimento do <strong>Balão da Informática Castelo</strong> — Campinas/SP. Não é promessa de folheto: é o mesmo sistema que atende nossos clientes todos os dias.</p>
+    </div>
+  </div>
+</section>
+
+<section id="contato" class="py-24">
+  <div class="w-[min(1180px,92%)] mx-auto grid lg:grid-cols-2 gap-12 items-start">
+    <div class="reveal">
+      <span class="kicker">Demonstração gratuita</span>
+      <h2 class="text-[clamp(1.7rem,3.4vw,2.5rem)] leading-tight tracking-tight font-extrabold mb-4">Quer ver a URA atendendo <span class="grad-text">de verdade?</span></h2>
+      <p class="text-slate-400 mb-8">Preencha os dados e receba o contato direto de quem desenvolveu o sistema — sem robô de vendas, sem enrolação. A gente liga pra você usando a própria URA Balão, pra você experimentar na pele.</p>
+      <ul class="space-y-4">
+        <li class="flex items-start gap-3"><i data-lucide="zap" class="w-5 h-5 text-cyanx mt-0.5 shrink-0"></i><span><strong>Resposta rápida</strong> — retorno em horário comercial, geralmente em minutos.</span></li>
+        <li class="flex items-start gap-3"><i data-lucide="clock" class="w-5 h-5 text-cyanx mt-0.5 shrink-0"></i><span><strong>Demonstração de 20 minutos</strong> — ao vivo, com os fluxos desenhados pros seus casos.</span></li>
+        <li class="flex items-start gap-3"><i data-lucide="file-check" class="w-5 h-5 text-cyanx mt-0.5 shrink-0"></i><span><strong>Proposta sob medida</strong> — preço pela sua realidade: nº de lojas, volume e integrações.</span></li>
+      </ul>
+      <div class="mt-8 glass rounded-xl p-4 flex items-center gap-3 text-sm text-slate-400">
+        <i data-lucide="lock" class="w-4 h-4 text-mint shrink-0"></i>
+        Seus dados são tratados conforme a LGPD e usados apenas pra esse contato comercial.
+      </div>
+    </div>
+    <form id="leadForm" class="glass rounded-3xl p-7 sm:p-9 reveal" novalidate>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div class="sm:col-span-2">
+          <label for="f-nome" class="block text-sm font-bold mb-1.5">Nome completo *</label>
+          <input id="f-nome" name="nome" type="text" required autocomplete="name" placeholder="Seu nome"
+                 class="w-full rounded-xl bg-night border border-slate-500/25 px-4 py-3 placeholder:text-slate-600 focus:border-cyanx transition-colors">
+        </div>
+        <div class="sm:col-span-2">
+          <label for="f-empresa" class="block text-sm font-bold mb-1.5">Empresa / Rede *</label>
+          <input id="f-empresa" name="empresa" type="text" required autocomplete="organization" placeholder="Ex.: Rede Castelo de Informática"
+                 class="w-full rounded-xl bg-night border border-slate-500/25 px-4 py-3 placeholder:text-slate-600 focus:border-cyanx transition-colors">
+        </div>
+        <div>
+          <label for="f-lojas" class="block text-sm font-bold mb-1.5">Número de lojas *</label>
+          <select id="f-lojas" name="lojas" required
+                  class="w-full rounded-xl bg-night border border-slate-500/25 px-4 py-3 text-slate-200 focus:border-cyanx transition-colors">
+            <option value="" selected disabled>Selecione</option>
+            <option value="1 a 2">1 a 2 lojas</option>
+            <option value="3 a 10">3 a 10 lojas</option>
+            <option value="11 a 30">11 a 30 lojas</option>
+            <option value="mais de 30">Mais de 30 lojas</option>
+          </select>
+        </div>
+        <div>
+          <label for="f-zap" class="block text-sm font-bold mb-1.5">WhatsApp com DDD *</label>
+          <input id="f-zap" name="whatsapp" type="tel" required inputmode="tel" autocomplete="tel" placeholder="(19) 90000-0000"
+                 class="w-full rounded-xl bg-night border border-slate-500/25 px-4 py-3 placeholder:text-slate-600 focus:border-cyanx transition-colors">
+        </div>
+        <div class="sm:col-span-2">
+          <label for="f-email" class="block text-sm font-bold mb-1.5">E-mail corporativo *</label>
+          <input id="f-email" name="email" type="email" required autocomplete="email" placeholder="voce@suaempresa.com.br"
+                 class="w-full rounded-xl bg-night border border-slate-500/25 px-4 py-3 placeholder:text-slate-600 focus:border-cyanx transition-colors">
+        </div>
+      </div>
+      <button type="submit" id="btnSubmit"
+              class="mt-6 w-full inline-flex items-center justify-center gap-2.5 font-bold rounded-xl px-8 py-4 text-lg text-[#06121f] transition-all duration-300 hover:-translate-y-0.5"
+              style="background:linear-gradient(90deg,#22d3ee,#3b82f6);box-shadow:0 10px 30px rgba(59,130,246,.4)">
+        Receber demonstração no WhatsApp
+        <i data-lucide="send" class="w-5 h-5"></i>
+      </button>
+      <p class="text-slate-500 text-[.78rem] text-center mt-4">Ao enviar, você concorda em receber o contato comercial da Balão da Informática. Sem spam — palavra de quem odeia spam.</p>
+      <div id="formOk" class="hidden mt-5 rounded-xl p-5 text-center" style="background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.3)">
+        <i data-lucide="check-circle-2" class="w-8 h-8 text-mint mx-auto mb-2"></i>
+        <p class="font-bold text-emerald-200">Recebido! 🎉</p>
+        <p class="text-slate-300 text-sm mt-1">Abrimos o WhatsApp com sua mensagem pronta — é só apertar enviar. Em horário comercial respondemos rapidinho.</p>
+      </div>
+    </form>
+  </div>
+</section>
+
+<footer class="border-t border-slate-500/15 py-14 bg-night">
+  <div class="w-[min(1180px,92%)] mx-auto flex flex-wrap justify-between gap-10 items-start text-[.88rem] text-slate-400">
+    <div class="max-w-[300px]">
+      <a href="#inicio" class="flex items-center gap-2.5 font-extrabold text-slate-100 mb-4">
+        <img src="img/logo-balao.png" alt="Balão da Informática" class="h-[38px] w-auto rounded-lg">
+        <span>Balão Software<small class="block text-slate-400 font-semibold text-[.66rem] tracking-widest uppercase">linha varejo</small></span>
+      </a>
+      Av. Anchieta 789 — Cambuí<br>Campinas/SP<br>
+      (19) 3255-1661 · <a href="https://wa.me/5519987510267" target="_blank" rel="noopener" class="text-cyanx hover:underline">WhatsApp (19) 98751-0267</a>
+    </div>
+    <nav aria-label="Links da página">
+      <b class="block text-slate-200 mb-3">URA Balão</b>
+      <ul class="space-y-2">
+        <li><a href="#solucao" class="hover:text-cyanx transition-colors">A solução</a></li>
+        <li><a href="#telas" class="hover:text-cyanx transition-colors">Telas do sistema</a></li>
+        <li><a href="#recursos" class="hover:text-cyanx transition-colors">Recursos</a></li>
+        <li><a href="#contato" class="hover:text-cyanx transition-colors">Demonstração gratuita</a></li>
+      </ul>
+    </nav>
+    <nav aria-label="Links institucionais">
+      <b class="block text-slate-200 mb-3">Institucional</b>
+      <ul class="space-y-2">
+        <li><a href="https://www.balao.info" target="_blank" rel="noopener" class="hover:text-cyanx transition-colors">www.balao.info</a></li>
+        <li><a href="https://www.balao.info" target="_blank" rel="noopener" class="hover:text-cyanx transition-colors">Balão da Informática</a></li>
+        <li><a href="https://wa.me/5519987510267?text=Ol%C3%A1!%20Preciso%20de%20suporte%20com%20a%20URA%20Bal%C3%A3o." target="_blank" rel="noopener" class="hover:text-cyanx transition-colors">Suporte</a></li>
+      </ul>
+    </nav>
+    <div class="max-w-[280px]">
+      <b class="block text-slate-200 mb-3">Segurança &amp; dados</b>
+      <p class="flex items-start gap-2"><i data-lucide="shield-check" class="w-4 h-4 text-mint mt-1 shrink-0"></i> Dados armazenados com segurança, opt-out nativo e tratamento conforme a Lei Geral de Proteção de Dados (LGPD).</p>
+    </div>
+  </div>
+  <div class="w-[min(1180px,92%)] mx-auto mt-10 pt-6 border-t border-slate-500/10 flex flex-wrap justify-between gap-3 text-[.8rem] text-slate-500">
+    <span>© 2026 Balão da Informática · Balão Softwares. Todos os direitos reservados.</span>
+    <span>www.balao.info</span>
+  </div>
+</footer>
+
+<script src="particles.min.js" defer></script>
+<script src="https://unpkg.com/lucide@latest" defer></script>
+<script>
+(function(){
+  const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const WA = '5519987510267';
+
+  const startParticles = () => {
+    if (!window.particlesJS || RM) return;
+    particlesJS('particles-js', {
+      particles: {
+        number: { value: 70, density: { enable: true, value_area: 900 } },
+        color: { value: ['#22d3ee', '#3b82f6', '#7dd3fc'] },
+        shape: { type: 'circle' },
+        opacity: { value: .45, random: true },
+        size: { value: 2.4, random: true },
+        line_linked: { enable: true, distance: 150, color: '#3b82f6', opacity: .14, width: 1 },
+        move: { enable: true, speed: 1.1, direction: 'none', random: true, out_mode: 'out' }
+      },
+      interactivity: {
+        detect_on: 'canvas',
+        events: { onhover: { enable: true, mode: 'grab' }, onclick: { enable: false }, resize: true },
+        modes: { grab: { distance: 160, line_linked: { opacity: .3 } } }
+      },
+      retina_detect: true
+    });
+  };
+  window.addEventListener('load', startParticles);
+
+  const nav = document.getElementById('nav');
+  addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 30), { passive: true });
+
+  const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && e.target.classList.add('on')), { threshold: .12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.setAttribute('aria-selected', 'false'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('on'));
+    btn.setAttribute('aria-selected', 'true');
+    document.getElementById(btn.dataset.tab).classList.add('on');
+  }));
+
+  const counters = document.querySelectorAll('[data-target]');
+  const cio = new IntersectionObserver(es => es.forEach(e => {
+    if (!e.isIntersecting || e.target.dataset.done) return;
+    e.target.dataset.done = '1';
+    const el = e.target, target = parseInt(el.dataset.target, 10);
+    const pre = el.dataset.prefix || '', suf = el.dataset.suffix || '';
+    if (RM) { el.textContent = pre + target + suf; return; }
+    const t0 = performance.now(), dur = 1300;
+    const tick = t => {
+      const p = Math.min((t - t0) / dur, 1);
+      el.textContent = pre + Math.round(target * (1 - Math.pow(1 - p, 3))) + suf;
+      if (p < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }), { threshold: .5 });
+  counters.forEach(c => cio.observe(c));
+
+  const intents = ['Status de pedido', 'Horário da loja', 'Garantia / assistência', 'Orçamento', 'Endereço / retirada', 'Segunda via'];
+  const results = [
+    ['Resolvido na URA', 'mint'], ['WhatsApp enviado', 'violetx'], ['Transbordo → vendedor', 'bluex'], ['Fila → loja próxima', 'cyanx']
+  ];
+  const rnd = a => a[Math.floor(Math.random() * a.length)];
+  const maskNum = () => '+55 ' + rnd(['11','13','19','21','62']) + ' 9••••-' + String(Math.floor(1000 + Math.random() * 9000));
+  const badgeCls = c => ({
+    mint: 'text-emerald-200 bg-mint/10 border-mint/30',
+    violetx: 'text-violet-200 bg-violetx/10 border-violetx/30',
+    bluex: 'text-blue-200 bg-bluex/10 border-bluex/30',
+    cyanx: 'text-cyan-200 bg-cyanx/10 border-cyanx/30'
+  })[c];
+  const addRow = () => {
+    const feed = document.getElementById('liveFeed');
+    if (!feed) return;
+    const [txt, cls] = rnd(results);
+    const li = document.createElement('li');
+    li.className = 'feed-row flex items-center gap-3';
+    li.innerHTML = '<span class="font-bold whitespace-nowrap">' + maskNum() + '</span>' +
+      '<span class="text-slate-500 truncate hidden sm:inline">' + rnd(intents) + '</span>' +
+      '<span class="ml-auto text-[.68rem] font-bold rounded-full px-2.5 py-0.5 border whitespace-nowrap ' + badgeCls(cls) + '">' + txt + '</span>';
+    feed.prepend(li);
+    while (feed.children.length > 5) feed.lastElementChild.remove();
+  };
+  for (let i = 0; i < 4; i++) addRow();
+  let calls = 187;
+  let simTimer = null, flowTimer = null;
+  const kpiCalls = document.getElementById('kpiCalls'), kpiQueue = document.getElementById('kpiQueue'), kpiTma = document.getElementById('kpiTma');
+  const startSim = () => {
+    if (RM || simTimer) return;
+    simTimer = setInterval(() => {
+      if (document.hidden) return;
+      addRow();
+      calls += Math.floor(Math.random() * 3);
+      if (kpiCalls) kpiCalls.textContent = calls;
+      if (kpiQueue) kpiQueue.textContent = 2 + Math.floor(Math.random() * 5);
+      if (kpiTma) kpiTma.textContent = '0:' + String(36 + Math.floor(Math.random() * 14)).padStart(2, '0');
+    }, 3200);
+  };
+  const nodes = ['fn1','fn2','fn3','fn4','fn5'].map(id => document.getElementById(id)).filter(Boolean);
+  let flowStep = 0;
+  const startFlow = () => {
+    if (RM || !nodes.length || flowTimer) return;
+    flowTimer = setInterval(() => {
+      if (document.hidden) return;
+      flowStep = (flowStep + 1) % nodes.length;
+      nodes.forEach((n, i) => n.classList.toggle('active', i === flowStep));
+    }, 1800);
+  };
+  startSim(); startFlow();
+
+  const zapMask = v => {
+    const d = v.replace(/\D/g, '').slice(0, 11);
+    if (d.length <= 2) return d;
+    if (d.length <= 6) return '(' + d.slice(0,2) + ') ' + d.slice(2);
+    return '(' + d.slice(0,2) + ') ' + d.slice(2, d.length === 11 ? 7 : 6) + '-' + d.slice(d.length === 11 ? 7 : 6);
+  };
+  const form = document.getElementById('leadForm');
+  const zapInput = document.getElementById('f-zap');
+  zapInput.addEventListener('input', () => { zapInput.value = zapMask(zapInput.value); });
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const nome = form.nome.value.trim(), empresa = form.empresa.value.trim(),
+          lojas = form.lojas.value, zap = zapInput.value.replace(/\D/g,''),
+          email = form.email.value.trim();
+    if (!nome || !empresa || !lojas || zap.length < 10 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      form.reportValidity(); return;
+    }
+    const msg = 'Olá! Sou ' + nome + ', da ' + empresa + ' (' + lojas + ' lojas). Quero uma demonstração da URA Balão. Meu e-mail: ' + email + '.';
+    const btn = document.getElementById('btnSubmit');
+    btn.disabled = true;
+    btn.innerHTML = 'Enviando...';
+    const finish = () => {
+      window.open('https://wa.me/' + WA + '?text=' + encodeURIComponent(msg), '_blank', 'noopener');
+      document.getElementById('formOk').classList.remove('hidden');
+      btn.innerHTML = 'Enviado ✓ Fale com a gente no WhatsApp';
+      setTimeout(() => { btn.disabled = false; }, 4000);
+    };
+    const hook = '';
+    if (hook) {
+      fetch(hook, {
+        method: 'POST', mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ origem: 'landing-ura', nome, empresa, lojas, whatsapp: zap, email, mensagem: msg })
+      }).catch(() => {}).finally(finish);
+    } else {
+      finish();
+    }
+  });
+
+  const initIcons = () => { if (window.lucide) lucide.createIcons(); };
+  document.addEventListener('DOMContentLoaded', initIcons);
+})();
+</script>
+</body>
+</html>
