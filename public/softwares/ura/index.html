@@ -27,6 +27,12 @@
   "applicationCategory": "BusinessApplication",
   "operatingSystem": "Web",
   "description": "Sistema inteligente de URA, roteamento e atendimento automatizado por voz e WhatsApp para redes de varejo.",
+  "offers": [
+    { "@type": "Offer", "name": "Essencial", "price": "197", "priceCurrency": "BRL" },
+    { "@type": "Offer", "name": "Profissional", "price": "347", "priceCurrency": "BRL" },
+    { "@type": "Offer", "name": "Redes e Franquias", "price": "697", "priceCurrency": "BRL" },
+    { "@type": "Offer", "name": "Licença Vitalícia", "price": "9999.99", "priceCurrency": "BRL" }
+  ],
   "publisher": {
     "@type": "Organization",
     "name": "Balão da Informática",
@@ -79,6 +85,24 @@ nav.scrolled{border-bottom-color:rgba(148,163,184,.14)!important;background:rgba
 .tab-panel.on{display:block;animation:fadeSlide .4s ease}
 .bar{border-radius:6px 6px 0 0;background:linear-gradient(180deg,#22d3ee,#3b82f6);opacity:.85;transition:.3s;width:100%}
 .bar:hover{opacity:1}
+#t-dash .bar{transform-origin:bottom;transition:transform .9s cubic-bezier(.2,.7,.3,1);transition-delay:var(--d,0s)}
+#t-dash.pre .bar{transform:scaleY(0)}
+#t-dash.pre.grown .bar{transform:scaleY(1)}
+.marquee{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent)}
+.marquee-track{display:flex;width:max-content;animation:marquee 32s linear infinite}
+.marquee:hover .marquee-track{animation-play-state:paused}
+@keyframes marquee{to{transform:translateX(-50%)}}
+@keyframes fabPulse{0%{box-shadow:0 0 0 0 rgba(22,163,74,.45)}70%{box-shadow:0 0 0 18px rgba(22,163,74,0)}100%{box-shadow:0 0 0 0 rgba(22,163,74,0)}}
+#fabWa{opacity:0;transform:translateY(16px);pointer-events:none;transition:all .35s ease}
+#fabWa.show{opacity:1;transform:none;pointer-events:auto;animation:fabPulse 2.4s infinite}
+#mockTilt{transition:transform .18s ease-out;will-change:transform}
+.vitalicia{position:relative;border-radius:26px;overflow:hidden;padding:2px}
+.vitalicia::before{content:'';position:absolute;inset:-150%;background:conic-gradient(#22d3ee,#3b82f6,#a78bfa,#22d3ee);animation:spinBorder 5s linear infinite;z-index:0}
+.vitalicia-inner{position:relative;z-index:1;border-radius:24px;background:#0b1424;height:100%}
+@keyframes spinBorder{to{transform:rotate(360deg)}}
+.shine{position:relative;overflow:hidden}
+.shine::after{content:'';position:absolute;top:0;left:-60%;width:45%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg);animation:shineMove 3.4s ease-in-out infinite}
+@keyframes shineMove{0%{left:-60%}55%{left:135%}100%{left:135%}}
 input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid rgba(34,211,238,.6);outline-offset:2px}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
@@ -99,6 +123,7 @@ input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{ou
       <a href="#telas" class="hover:text-cyanx transition-colors">Telas</a>
       <a href="#recursos" class="hover:text-cyanx transition-colors">Recursos</a>
       <a href="#segmentos" class="hover:text-cyanx transition-colors">Segmentos</a>
+      <a href="#planos" class="hover:text-cyanx transition-colors">Planos</a>
       <a href="#resultados" class="hover:text-cyanx transition-colors">Resultados</a>
     </div>
     <a class="inline-flex items-center gap-2 font-bold rounded-xl px-4 py-2.5 text-sm text-white transition-all duration-300 hover:-translate-y-0.5"
@@ -151,7 +176,7 @@ input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{ou
     </div>
 
     <div class="relative mt-16 max-w-[980px]">
-      <div class="rounded-2xl p-2.5 bg-black border border-slate-700/70" style="box-shadow:0 30px 80px rgba(2,8,20,.8),0 0 60px rgba(59,130,246,.12)">
+      <div id="mockTilt" class="rounded-2xl p-2.5 bg-black border border-slate-700/70" style="box-shadow:0 30px 80px rgba(2,8,20,.8),0 0 60px rgba(59,130,246,.12)">
         <div class="rounded-xl overflow-hidden bg-[#020617] border border-slate-800">
           <div class="flex items-center gap-2 px-4 py-2.5 border-b border-slate-800 bg-[#0b1424]">
             <span class="w-2.5 h-2.5 rounded-full bg-red-400/80"></span>
@@ -221,12 +246,20 @@ input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{ou
 </header>
 <style>@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}</style>
 
-<div class="border-y border-slate-500/15 bg-deep">
-  <div class="w-[min(1180px,92%)] mx-auto flex flex-wrap justify-center gap-x-12 gap-y-3 py-5 text-slate-400 text-[.92rem] font-semibold">
-    <span class="inline-flex items-center gap-2"><i data-lucide="message-circle" class="w-4 h-4 text-cyanx"></i> API oficial do WhatsApp Business</span>
-    <span class="inline-flex items-center gap-2"><i data-lucide="database" class="w-4 h-4 text-cyanx"></i> ERPs de varejo</span>
-    <span class="inline-flex items-center gap-2"><i data-lucide="phone-call" class="w-4 h-4 text-cyanx"></i> Telefonia IP / SIP · Asterisk</span>
-    <span class="inline-flex items-center gap-2"><i data-lucide="workflow" class="w-4 h-4 text-cyanx"></i> CRMs</span>
+<div class="border-y border-slate-500/15 bg-deep marquee" aria-label="Integrações disponíveis">
+  <div class="marquee-track py-5 text-slate-400 text-[.92rem] font-semibold">
+    <div class="flex items-center gap-x-12 pr-12 shrink-0">
+      <span class="inline-flex items-center gap-2 whitespace-nowrap"><i data-lucide="message-circle" class="w-4 h-4 text-cyanx"></i> API oficial do WhatsApp Business</span>
+      <span class="inline-flex items-center gap-2 whitespace-nowrap"><i data-lucide="database" class="w-4 h-4 text-cyanx"></i> ERPs de varejo</span>
+      <span class="inline-flex items-center gap-2 whitespace-nowrap"><i data-lucide="phone-call" class="w-4 h-4 text-cyanx"></i> Telefonia IP / SIP · Asterisk</span>
+      <span class="inline-flex items-center gap-2 whitespace-nowrap"><i data-lucide="workflow" class="w-4 h-4 text-cyanx"></i> CRMs</span>
+    </div>
+    <div class="flex items-center gap-x-12 pr-12 shrink-0" aria-hidden="true">
+      <span class="inline-flex items-center gap-2 whitespace-nowrap"><i data-lucide="message-circle" class="w-4 h-4 text-cyanx"></i> API oficial do WhatsApp Business</span>
+      <span class="inline-flex items-center gap-2 whitespace-nowrap"><i data-lucide="database" class="w-4 h-4 text-cyanx"></i> ERPs de varejo</span>
+      <span class="inline-flex items-center gap-2 whitespace-nowrap"><i data-lucide="phone-call" class="w-4 h-4 text-cyanx"></i> Telefonia IP / SIP · Asterisk</span>
+      <span class="inline-flex items-center gap-2 whitespace-nowrap"><i data-lucide="workflow" class="w-4 h-4 text-cyanx"></i> CRMs</span>
+    </div>
   </div>
 </div>
 
@@ -282,13 +315,13 @@ input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{ou
             <div class="rounded-xl p-5 bg-cardx border border-slate-500/15">
               <p class="text-[.72rem] uppercase tracking-wider text-slate-500 font-bold mb-4">Chamadas por dia da semana</p>
               <div class="flex items-end gap-3 h-40" aria-hidden="true">
-                <div class="flex flex-col items-center gap-2 flex-1 h-full justify-end"><span class="text-[.65rem] text-slate-500">182</span><div class="bar" style="height:62%"></div><span class="text-[.68rem] text-slate-500 font-bold">seg</span></div>
-                <div class="flex flex-col items-center gap-2 flex-1 h-full justify-end"><span class="text-[.65rem] text-slate-500">201</span><div class="bar" style="height:70%"></div><span class="text-[.68rem] text-slate-500 font-bold">ter</span></div>
-                <div class="flex flex-col items-center gap-2 flex-1 h-full justify-end"><span class="text-[.65rem] text-slate-500">188</span><div class="bar" style="height:64%"></div><span class="text-[.68rem] text-slate-500 font-bold">qua</span></div>
-                <div class="flex flex-col items-center gap-2 flex-1 h-full justify-end"><span class="text-[.65rem] text-slate-500">230</span><div class="bar" style="height:80%"></div><span class="text-[.68rem] text-slate-500 font-bold">qui</span></div>
-                <div class="flex flex-col items-center gap-2 flex-1 h-full justify-end"><span class="text-[.65rem] text-slate-500">267</span><div class="bar" style="height:93%"></div><span class="text-[.68rem] text-slate-500 font-bold">sex</span></div>
-                <div class="flex flex-col items-center gap-2 flex-1 h-full justify-end"><span class="text-[.65rem] text-slate-500">298</span><div class="bar" style="height:100%"></div><span class="text-[.68rem] text-slate-500 font-bold">sáb</span></div>
-                <div class="flex flex-col items-center gap-2 flex-1 h-full justify-end"><span class="text-[.65rem] text-slate-500">121</span><div class="bar opacity-40" style="height:42%"></div><span class="text-[.68rem] text-slate-500 font-bold">dom</span></div>
+                <div class="flex flex-col items-center gap-2 flex-1 h-full justify-end"><span class="text-[.65rem] text-slate-500">182</span><div class="bar" style="height:62%;--d:0s"></div><span class="text-[.68rem] text-slate-500 font-bold">seg</span></div>
+                <div class="flex flex-col items-center gap-2 flex-1 h-full justify-end"><span class="text-[.65rem] text-slate-500">201</span><div class="bar" style="height:70%;--d:.06s"></div><span class="text-[.68rem] text-slate-500 font-bold">ter</span></div>
+                <div class="flex flex-col items-center gap-2 flex-1 h-full justify-end"><span class="text-[.65rem] text-slate-500">188</span><div class="bar" style="height:64%;--d:.12s"></div><span class="text-[.68rem] text-slate-500 font-bold">qua</span></div>
+                <div class="flex flex-col items-center gap-2 flex-1 h-full justify-end"><span class="text-[.65rem] text-slate-500">230</span><div class="bar" style="height:80%;--d:.18s"></div><span class="text-[.68rem] text-slate-500 font-bold">qui</span></div>
+                <div class="flex flex-col items-center gap-2 flex-1 h-full justify-end"><span class="text-[.65rem] text-slate-500">267</span><div class="bar" style="height:93%;--d:.24s"></div><span class="text-[.68rem] text-slate-500 font-bold">sex</span></div>
+                <div class="flex flex-col items-center gap-2 flex-1 h-full justify-end"><span class="text-[.65rem] text-slate-500">298</span><div class="bar" style="height:100%;--d:.3s"></div><span class="text-[.68rem] text-slate-500 font-bold">sáb</span></div>
+                <div class="flex flex-col items-center gap-2 flex-1 h-full justify-end"><span class="text-[.65rem] text-slate-500">121</span><div class="bar opacity-40" style="height:42%;--d:.36s"></div><span class="text-[.68rem] text-slate-500 font-bold">dom</span></div>
               </div>
             </div>
             <div class="rounded-xl p-5 bg-cardx border border-slate-500/15">
@@ -561,6 +594,99 @@ input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{ou
   </div>
 </section>
 
+<section id="planos" class="py-24 bg-deep border-y border-slate-500/15">
+  <div class="w-[min(1180px,92%)] mx-auto">
+    <div class="text-center reveal">
+      <span class="kicker">Planos</span>
+      <h2 class="text-[clamp(1.7rem,3.4vw,2.5rem)] leading-tight tracking-tight font-extrabold mb-4">Assine por mês ou <span class="grad-text">leve pra sempre</span></h2>
+      <p class="text-slate-400 max-w-[640px] mx-auto">Sem letra miúda e sem multa de cancelamento nos planos mensais. Prefere não pagar nunca mais? A Licença Vitalícia é sua.</p>
+    </div>
+    <div class="grid md:grid-cols-3 gap-6 mt-14 items-stretch reveal">
+      <article class="glass rounded-3xl p-8 flex flex-col card-lift">
+        <h3 class="font-extrabold text-xl">Essencial</h3>
+        <p class="text-slate-400 text-sm mt-1 mb-5">Pra quem tá começando a automatizar o atendimento de uma loja.</p>
+        <div class="flex items-baseline gap-1.5"><span class="text-slate-400 font-bold">R$</span><b class="text-4xl tracking-tight font-extrabold">197</b><span class="text-slate-400 text-sm self-end mb-1">/mês</span></div>
+        <ul class="mt-6 mb-8 space-y-2.5 text-[.92rem] text-slate-300">
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-1 text-cyanx shrink-0"></i> URA de voz com menus personalizados</li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-1 text-cyanx shrink-0"></i> Transbordo pra ramal ou WhatsApp</li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-1 text-cyanx shrink-0"></i> Relatórios essenciais (TMA e retenção)</li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-1 text-cyanx shrink-0"></i> Suporte por WhatsApp</li>
+        </ul>
+        <a class="mt-auto inline-flex items-center justify-center gap-2 font-bold rounded-xl px-6 py-3.5 border border-slate-500/30 text-slate-100 hover:border-cyanx hover:text-cyanx transition-all"
+           target="_blank" rel="noopener"
+           href="https://wa.me/5519987510267?text=Ol%C3%A1!%20Tenho%20interesse%20no%20plano%20Essencial%20da%20URA%20Bal%C3%A3o%20(R%24197%2Fm%C3%AAs).">
+          Quero o Essencial
+        </a>
+      </article>
+      <article class="relative rounded-3xl p-8 flex flex-col card-lift border border-cyanx/60" style="background:linear-gradient(180deg,rgba(34,211,238,.08),rgba(16,28,51,.55));box-shadow:0 26px 60px rgba(2,8,20,.55)">
+        <span class="absolute -top-3.5 left-1/2 -translate-x-1/2 text-[.68rem] font-extrabold tracking-widest uppercase text-[#06121f] px-4 py-1.5 rounded-full whitespace-nowrap" style="background:linear-gradient(90deg,#22d3ee,#3b82f6)">Mais escolhido</span>
+        <h3 class="font-extrabold text-xl">Profissional</h3>
+        <p class="text-slate-400 text-sm mt-1 mb-5">A combinação favorita das redes que estão crescendo.</p>
+        <div class="flex items-baseline gap-1.5"><span class="text-slate-400 font-bold">R$</span><b class="text-4xl tracking-tight font-extrabold grad-text">347</b><span class="text-slate-400 text-sm self-end mb-1">/mês</span></div>
+        <ul class="mt-6 mb-8 space-y-2.5 text-[.92rem] text-slate-300">
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-1 text-cyanx shrink-0"></i> Tudo do Essencial</li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-1 text-cyanx shrink-0"></i> Até 5 lojas no mesmo painel</li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-1 text-cyanx shrink-0"></i> Roteamento pela loja mais próxima</li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-1 text-cyanx shrink-0"></i> Consulta automática de pedido/OS no ERP</li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-1 text-cyanx shrink-0"></i> Construtor visual de fluxos + URA Ativa</li>
+        </ul>
+        <a class="mt-auto inline-flex items-center justify-center gap-2 font-bold rounded-xl px-6 py-3.5 text-[#06121f] transition-all duration-300 hover:-translate-y-0.5"
+           style="background:linear-gradient(90deg,#22d3ee,#3b82f6);box-shadow:0 10px 30px rgba(59,130,246,.4)"
+           target="_blank" rel="noopener"
+           href="https://wa.me/5519987510267?text=Ol%C3%A1!%20Tenho%20interesse%20no%20plano%20Profissional%20da%20URA%20Bal%C3%A3o%20(R%24347%2Fm%C3%AAs).">
+          Quero o Profissional
+        </a>
+      </article>
+      <article class="glass rounded-3xl p-8 flex flex-col card-lift">
+        <h3 class="font-extrabold text-xl">Redes &amp; Franquias</h3>
+        <p class="text-slate-400 text-sm mt-1 mb-5">Padrão único de atendimento em todas as unidades da rede.</p>
+        <div class="flex items-baseline gap-1.5"><span class="text-slate-400 font-bold">R$</span><b class="text-4xl tracking-tight font-extrabold">697</b><span class="text-slate-400 text-sm self-end mb-1">/mês</span></div>
+        <ul class="mt-6 mb-8 space-y-2.5 text-[.92rem] text-slate-300">
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-1 text-cyanx shrink-0"></i> Tudo do Profissional</li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-1 text-cyanx shrink-0"></i> Lojas ilimitadas</li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-1 text-cyanx shrink-0"></i> White label com a sua marca</li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-1 text-cyanx shrink-0"></i> Áudios e menus por unidade</li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-1 text-cyanx shrink-0"></i> Painel consolidado da rede + suporte prioritário</li>
+        </ul>
+        <a class="mt-auto inline-flex items-center justify-center gap-2 font-bold rounded-xl px-6 py-3.5 border border-slate-500/30 text-slate-100 hover:border-cyanx hover:text-cyanx transition-all"
+           target="_blank" rel="noopener"
+           href="https://wa.me/5519987510267?text=Ol%C3%A1!%20Tenho%20interesse%20no%20plano%20Redes%20e%20Franquias%20da%20URA%20Bal%C3%A3o%20(R%24697%2Fm%C3%AAs).">
+          Quero o Redes &amp; Franquias
+        </a>
+      </article>
+    </div>
+
+    <div class="vitalicia mt-12 reveal">
+      <div class="vitalicia-inner p-8 sm:p-10 grid lg:grid-cols-[1fr_auto] gap-8 items-center">
+        <div>
+          <span class="inline-block text-[.68rem] font-extrabold tracking-widest uppercase text-violetx bg-violetx/10 border border-violetx/40 rounded-full px-3.5 py-1.5 mb-4">Oferta de lançamento</span>
+          <h3 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Licença Vitalícia <span class="grad-text">URA Balão</span></h3>
+          <p class="text-slate-400 mt-2 max-w-[520px]">Paga uma vez, usa pra sempre. Ideal pra rede que já sabe que automação é caminho sem volta — e não quer ver fatura todo mês.</p>
+          <ul class="flex flex-wrap gap-x-6 gap-y-2 mt-5 text-[.88rem] text-slate-300">
+            <li class="flex items-center gap-2"><i data-lucide="infinity" class="w-4 h-4 text-violetx"></i> Atualizações vitalícias</li>
+            <li class="flex items-center gap-2"><i data-lucide="rocket" class="w-4 h-4 text-violetx"></i> Implantação assistida inclusa</li>
+            <li class="flex items-center gap-2"><i data-lucide="shield-check" class="w-4 h-4 text-violetx"></i> 1 ano de suporte prioritário</li>
+            <li class="flex items-center gap-2"><i data-lucide="layers" class="w-4 h-4 text-violetx"></i> Todos os recursos do Profissional</li>
+          </ul>
+        </div>
+        <div class="lg:text-right lg:border-l lg:border-slate-500/15 lg:pl-10">
+          <p class="text-slate-500 text-sm line-through">R$ 697/mês pra sempre</p>
+          <div class="flex lg:justify-end items-baseline gap-1.5 mt-1"><span class="text-slate-400 font-bold">R$</span><b class="text-5xl tracking-tighter font-extrabold grad-text">9.999,99</b></div>
+          <p class="text-slate-400 text-sm mt-1">à vista · ou 12x de R$ 833,33 sem juros</p>
+          <a class="shine mt-6 inline-flex items-center justify-center gap-2 font-bold rounded-xl px-8 py-4 text-lg text-white transition-all duration-300 hover:-translate-y-0.5 w-full lg:w-auto"
+             style="background:#16a34a;box-shadow:0 10px 30px rgba(22,163,74,.35)"
+             target="_blank" rel="noopener"
+             href="https://wa.me/5519987510267?text=Ol%C3%A1!%20Quero%20garantir%20a%20Licen%C3%A7a%20Vital%C3%ADcia%20da%20URA%20Bal%C3%A3o%20(R%24%209.999%2C99).">
+            Garantir minha licença
+            <i data-lucide="zap" class="w-5 h-5"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    <p class="text-slate-500 text-[.82rem] text-center mt-6 reveal">Planos mensais sugeridos por porte da rede — montamos a proposta final sob medida na demonstração. A Licença Vitalícia cobre 1 loja; consulte valores pra multi-loja.</p>
+  </div>
+</section>
+
 <section id="contato" class="py-24">
   <div class="w-[min(1180px,92%)] mx-auto grid lg:grid-cols-2 gap-12 items-start">
     <div class="reveal">
@@ -643,6 +769,7 @@ input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{ou
         <li><a href="#solucao" class="hover:text-cyanx transition-colors">A solução</a></li>
         <li><a href="#telas" class="hover:text-cyanx transition-colors">Telas do sistema</a></li>
         <li><a href="#recursos" class="hover:text-cyanx transition-colors">Recursos</a></li>
+        <li><a href="#planos" class="hover:text-cyanx transition-colors">Planos</a></li>
         <li><a href="#contato" class="hover:text-cyanx transition-colors">Demonstração gratuita</a></li>
       </ul>
     </nav>
@@ -664,6 +791,12 @@ input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{ou
     <span>www.balao.info</span>
   </div>
 </footer>
+
+<a id="fabWa" aria-label="Falar no WhatsApp" class="fixed bottom-5 right-5 z-50 w-14 h-14 rounded-full grid place-items-center text-white shadow-2xl"
+   style="background:#16a34a" target="_blank" rel="noopener"
+   href="https://wa.me/5519987510267?text=Ol%C3%A1!%20Vi%20o%20site%20da%20URA%20Bal%C3%A3o%20e%20quero%20saber%20mais.">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.87 9.87 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.83 9.83 0 0 0 12.04 2Zm5.8 14.09c-.25.69-1.43 1.31-2 1.4-.51.08-1.16.11-1.87-.12-.43-.14-.99-.32-1.7-.63-3-1.29-4.95-4.3-5.1-4.5-.15-.2-1.22-1.62-1.22-3.09 0-1.47.77-2.19 1.04-2.49.27-.3.6-.37.8-.37h.57c.18 0 .43-.07.67.51.25.6.85 2.07.92 2.22.07.15.12.32.02.52-.1.2-.15.32-.3.5-.15.17-.31.39-.45.52-.15.15-.3.31-.13.61.17.3.77 1.26 1.65 2.05 1.13 1.01 2.08 1.32 2.38 1.47.3.15.47.12.65-.07.17-.2.75-.87.95-1.17.2-.3.4-.25.67-.15.27.1 1.72.81 2.02.96.3.15.5.22.57.35.07.12.07.72-.18 1.42Z"/></svg>
+</a>
 
 <script src="particles.min.js" defer></script>
 <script src="https://unpkg.com/lucide@latest" defer></script>
@@ -813,6 +946,34 @@ input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{ou
       finish();
     }
   });
+
+  const tiltWrap = document.getElementById('inicio'), tiltEl = document.getElementById('mockTilt');
+  if (tiltWrap && tiltEl && !RM && window.matchMedia('(pointer:fine)').matches) {
+    tiltWrap.addEventListener('mousemove', e => {
+      const r = tiltEl.getBoundingClientRect();
+      const x = (e.clientX - r.left - r.width / 2) / r.width;
+      const y = (e.clientY - r.top - r.height / 2) / r.height;
+      tiltEl.style.transform = 'perspective(1400px) rotateY(' + (x * 4).toFixed(2) + 'deg) rotateX(' + (-y * 3).toFixed(2) + 'deg)';
+    });
+    tiltWrap.addEventListener('mouseleave', () => { tiltEl.style.transform = ''; });
+  }
+
+  const fab = document.getElementById('fabWa');
+  if (fab) addEventListener('scroll', () => { fab.classList.toggle('show', scrollY > 650); }, { passive: true });
+
+  const dashPanel = document.getElementById('t-dash');
+  if (dashPanel && !RM) {
+    dashPanel.classList.add('pre');
+    const tabsBox = document.getElementById('telas');
+    if ('IntersectionObserver' in window && tabsBox) {
+      const gio = new IntersectionObserver(es => es.forEach(en => {
+        if (en.isIntersecting) { dashPanel.classList.add('grown'); gio.disconnect(); }
+      }), { threshold: .2 });
+      gio.observe(tabsBox);
+    } else {
+      dashPanel.classList.add('grown');
+    }
+  }
 
   const initIcons = () => { if (window.lucide) lucide.createIcons(); };
   document.addEventListener('DOMContentLoaded', initIcons);
