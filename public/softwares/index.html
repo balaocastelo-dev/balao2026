@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<base href="/softwares/">
+<title>Softwares Balão da Informática | Sistemas sob medida para o seu negócio</title>
+<meta name="description" content="Conheça a linha de softwares da Balão da Informática: sistema de fila para medicina ocupacional, URA inteligente, bot de WhatsApp, cardápio digital e automação com IA. Feitos em Campinas, com suporte humanizado.">
+<meta property="og:title" content="Softwares Balão da Informática">
+<meta property="og:description" content="Sistemas que resolvem: fila de clínica, atendimento automático, cardápio digital e mais. Desenvolvidos em Campinas/SP com suporte de verdade.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.balao.info/softwares">
+<link rel="icon" type="image/png" href="img/logo-balao.png">
+<style>
+:root{
+  --bg:#070d1a;--bg2:#0b1424;--card:#101c33;--line:rgba(148,163,184,.14);
+  --txt:#e6edf7;--muted:#94a3b8;--cyan:#22d3ee;--blue:#3b82f6;
+  --gold:#fbbf24;--green:#34d399;--grad:linear-gradient(90deg,#22d3ee,#3b82f6);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;background:var(--bg);color:var(--txt);line-height:1.6;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.container{width:min(1180px,92%);margin:0 auto}
+.kicker{display:inline-block;font-size:.8rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan);background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.25);padding:6px 14px;border-radius:999px;margin-bottom:18px}
+h2{font-size:clamp(1.7rem,3.4vw,2.4rem);line-height:1.2;letter-spacing:-.02em;margin-bottom:12px}
+.sub{color:var(--muted);max-width:640px;margin:0 auto;font-size:1.05rem}
+.center{text-align:center}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(7,13,26,.75);backdrop-filter:blur(14px);border-bottom:1px solid transparent;transition:.3s}
+nav.scrolled{border-bottom-color:var(--line);background:rgba(7,13,26,.92)}
+.nav-inner{width:min(1180px,92%);margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:66px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.02rem}
+.brand img{height:36px;width:auto;border-radius:8px}
+.brand small{display:block;font-weight:600;color:var(--muted);font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;line-height:1}
+.nav-links{display:flex;gap:26px;font-size:.93rem;color:var(--muted)}
+.nav-links a:hover{color:var(--cyan)}
+.btn{display:inline-flex;align-items:center;gap:9px;font-weight:700;border-radius:12px;padding:11px 20px;transition:.25s;border:1px solid transparent;cursor:pointer}
+.btn-wa{background:#16a34a;color:#fff;box-shadow:0 8px 24px rgba(22,163,74,.35)}
+.btn-wa:hover{background:#15803d;transform:translateY(-2px)}
+@media(max-width:900px){.nav-links{display:none}}
+
+#hero{min-height:88vh;display:flex;flex-direction:column;justify-content:center;padding-top:120px;padding-bottom:60px;position:relative;background:radial-gradient(1000px 500px at 80% -10%,rgba(59,130,246,.16),transparent 60%),radial-gradient(800px 420px at 5% 110%,rgba(251,191,36,.07),transparent 55%)}
+#particles-js{position:absolute;inset:0;z-index:0}
+#hero .container{position:relative;z-index:2}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;font-size:.82rem;font-weight:700;color:#a5f3fc;background:rgba(34,211,238,.09);border:1px solid rgba(34,211,238,.3);padding:7px 16px;border-radius:999px;margin-bottom:22px}
+.hero-badge .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green);animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+h1{font-size:clamp(2rem,4.6vw,3.3rem);line-height:1.12;letter-spacing:-.03em;font-weight:800;max-width:800px}
+h1 .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero-sub{color:var(--muted);font-size:clamp(1rem,1.6vw,1.15rem);max-width:620px;margin:20px 0 30px}
+.hero-ctas{display:flex;gap:14px;flex-wrap:wrap}
+.btn-hero{background:var(--grad);color:#06121f;box-shadow:0 10px 30px rgba(59,130,246,.4);padding:15px 28px;font-size:1rem}
+.btn-hero:hover{transform:translateY(-2px)}
+.btn-ghost{border-color:var(--line);color:var(--txt);background:rgba(255,255,255,.03)}
+.btn-ghost:hover{border-color:var(--cyan);color:var(--cyan)}
+
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:54px}
+@media(max-width:1020px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.grid{grid-template-columns:1fr}}
+.card{position:relative;background:linear-gradient(180deg,var(--card),#0d1729);border:1px solid var(--line);border-radius:22px;padding:34px 28px;display:flex;flex-direction:column;transform-style:preserve-3d;transition:border-color .3s,box-shadow .3s;overflow:hidden;min-height:340px}
+.card::before{content:"";position:absolute;inset:0;background:radial-gradient(420px 200px at var(--mx,50%) var(--my,0%),rgba(34,211,238,.12),transparent 70%);opacity:0;transition:opacity .35s;pointer-events:none}
+.card:hover{border-color:rgba(34,211,238,.45);box-shadow:0 24px 60px rgba(2,8,20,.65)}
+.card:hover::before{opacity:1}
+.card::after{content:"";position:absolute;top:0;left:-80%;width:55%;height:100%;background:linear-gradient(105deg,transparent,rgba(255,255,255,.07),transparent);transform:skewX(-18deg);transition:left .6s ease;pointer-events:none}
+.card:hover::after{left:130%}
+.card.gold{border-color:rgba(251,191,36,.35)}
+.card.gold:hover{border-color:rgba(251,191,36,.6);box-shadow:0 24px 60px rgba(2,8,20,.65),0 0 40px rgba(251,191,36,.08)}
+.card.gold::before{background:radial-gradient(420px 200px at var(--mx,50%) var(--my,0%),rgba(251,191,36,.12),transparent 70%)}
+.ic{width:56px;height:56px;border-radius:16px;background:rgba(34,211,238,.09);border:1px solid rgba(34,211,238,.3);display:flex;align-items:center;justify-content:center;margin-bottom:20px;transform:translateZ(30px)}
+.ic svg{width:27px;height:27px;color:var(--cyan)}
+.card.gold .ic{background:rgba(251,191,36,.09);border-color:rgba(251,191,36,.35)}
+.card.gold .ic svg{color:var(--gold)}
+.badge{position:absolute;top:20px;right:20px;font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border-radius:999px}
+.badge.on{color:#6ee7b7;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.4)}
+.badge.soon{color:var(--muted);background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.25)}
+.badge.hot{color:#231602;background:linear-gradient(90deg,#fbbf24,#f59e0b)}
+.card h3{font-size:1.22rem;letter-spacing:-.01em;margin-bottom:8px;transform:translateZ(24px)}
+.card p{color:var(--muted);font-size:.92rem;margin-bottom:18px;transform:translateZ(16px)}
+.tags{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:24px}
+.tag{font-size:.72rem;font-weight:600;color:#cbd5e1;background:rgba(255,255,255,.04);border:1px solid var(--line);padding:4px 11px;border-radius:999px}
+.price-line{margin-top:auto;transform:translateZ(16px)}
+.price-line small{display:block;color:var(--muted);font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.price-line b{font-size:1.05rem}
+.card .btn{margin-top:14px;justify-content:center;width:100%}
+.btn-blue{background:var(--grad);color:#06121f}
+.btn-blue:hover{transform:translateY(-2px)}
+.btn-outline{border-color:var(--line);color:var(--txt)}
+.btn-outline:hover{border-color:var(--green);color:var(--green)}
+.btn-gold{background:linear-gradient(90deg,#fbbf24,#f59e0b);color:#231602}
+.btn-gold:hover{transform:translateY(-2px)}
+
+.why{margin-top:96px}
+.why-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:44px}
+@media(max-width:900px){.why-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.why-grid{grid-template-columns:1fr}}
+.why-item{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:24px 20px;text-align:center;transition:.3s}
+.why-item:hover{transform:translateY(-5px);border-color:rgba(34,211,238,.4)}
+.why-item svg{width:30px;height:30px;color:var(--cyan);margin-bottom:12px}
+.why-item b{display:block;font-size:.95rem;margin-bottom:5px}
+.why-item span{color:var(--muted);font-size:.82rem}
+
+.cta-final{text-align:center;background:radial-gradient(700px 320px at 50% 115%,rgba(34,211,238,.14),transparent 65%),var(--bg2);border-top:1px solid var(--line);padding:90px 0}
+.cta-final h2{max-width:700px;margin:0 auto 14px}
+.cta-final p{color:var(--muted);max-width:540px;margin:0 auto 32px}
+
+footer{border-top:1px solid var(--line);padding:38px 0;background:var(--bg)}
+.foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:22px;align-items:center;color:var(--muted);font-size:.87rem}
+.foot a{color:var(--cyan)}
+
+.reveal{opacity:0;transform:translateY(28px);transition:.7s cubic-bezier(.2,.7,.3,1)}
+.reveal.on{opacity:1;transform:none}
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <div class="nav-inner">
+    <a class="brand" href="#hero">
+      <img src="img/logo-balao.png" alt="Balão da Informática">
+      <span>Balão Software<small>softwares que resolvem</small></span>
+    </a>
+    <div class="nav-links">
+      <a href="#catalogo">Catálogo</a>
+      <a href="#porque">Por que a Balão</a>
+      <a href="#contato">Contato</a>
+    </div>
+    <a class="btn btn-wa" target="_blank" rel="noopener"
+       href="https://wa.me/5519987510267?text=Ol%C3%A1!%20Vi%20a%20p%C3%A1gina%20de%20Softwares%20da%20Bal%C3%A3o%20e%20quero%20conversar%20sobre%20um%20projeto.">
+      Falar com especialista
+    </a>
+  </div>
+</nav>
+
+<header id="hero">
+  <div id="particles-js"></div>
+  <div class="container">
+    <span class="hero-badge"><span class="dot"></span> Desenvolvido em Campinas · suporte humanizado</span>
+    <h1>Softwares que resolvem<br><span class="grad">problemas reais do seu negócio</span></h1>
+    <p class="hero-sub">Da fila organizada na clínica ao atendimento automático no WhatsApp: cada sistema foi construído pra uma dor específica — e funciona de verdade.</p>
+    <div class="hero-ctas">
+      <a class="btn btn-hero" href="#catalogo">Ver o catálogo</a>
+      <a class="btn btn-ghost" target="_blank" rel="noopener"
+         href="https://wa.me/5519987510267?text=Ol%C3%A1!%20Quero%20or%C3%A7ar%20um%20software%20sob%20medida%20com%20a%20Bal%C3%A3o.">Projeto sob medida</a>
+    </div>
+  </div>
+</header>
+
+<section id="catalogo">
+  <div class="container">
+    <div class="center reveal">
+      <span class="kicker">Catálogo</span>
+      <h2>Nossos sistemas</h2>
+      <p class="sub">Prontos pra implantar ou personalizados com a sua marca. Toque em um card para conhecer.</p>
+    </div>
+    <div class="grid">
+
+      <a class="card gold reveal" href="/software/sistemadefila" style="animation-delay:.02s">
+        <span class="badge hot">Mais vendido</span>
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01"/><path d="M11 12l3 3 4-4"/></svg></div>
+        <h3>Sistema de Fila — Medicina Ocupacional</h3>
+        <p>Totem touch de senhas, painel de TV com chamada por voz, recepção, triagem e filas por sala em tempo real. White label com a marca da clínica.</p>
+        <div class="tags"><span class="tag">Totem touch</span><span class="tag">Voz pt-BR</span><span class="tag">Tempo real</span></div>
+        <div class="price-line"><small>a partir de</small><b>R$ 197/mês &nbsp;·&nbsp; vitalícia R$ 14.999</b></div>
+        <span class="btn btn-gold">Ver o sistema</span>
+      </a>
+
+      <a class="card reveal" href="/softwares/ura">
+        <span class="badge on">Disponível</span>
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg></div>
+        <h3>URA Balão — Atendimento Inteligente</h3>
+        <p>Atendimento automático por voz e WhatsApp: triagem inteligente, roteamento pra loja certa e integração com estoque e pedidos. Reduza até 60% do custo do SAC.</p>
+        <div class="tags"><span class="tag">Voz + WhatsApp</span><span class="tag">Roteamento</span><span class="tag">Integra ERP</span></div>
+        <div class="price-line"><small>investimento</small><b>consultar proposta</b></div>
+        <span class="btn btn-blue">Ver a URA</span>
+      </a>
+
+      <a class="card reveal" target="_blank" rel="noopener"
+         href="https://wa.me/5519987510267?text=Ol%C3%A1!%20Quero%20o%20Card%C3%A1pio%20Digital%20pra%20meu%20neg%C3%B3cio.">
+        <span class="badge on">Disponível</span>
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg></div>
+        <h3>Cardápio Digital com QR Code</h3>
+        <p>Cliente escaneia, vê fotos, pede pelo celular sem baixar app. Você muda preços e itens na hora, de qualquer lugar.</p>
+        <div class="tags"><span class="tag">QR Code</span><span class="tag">Sem app</span><span class="tag">Pedidos diretos</span></div>
+        <div class="price-line"><small>a partir de</small><b>R$ 49</b></div>
+        <span class="btn btn-outline">Quero o meu</span>
+      </a>
+
+      <a class="card reveal" target="_blank" rel="noopener"
+         href="https://wa.me/5519987510267?text=Ol%C3%A1!%20Quero%20um%20Bot%20de%20WhatsApp%20pra%20meu%20neg%C3%B3cio.">
+        <span class="badge on">Disponível</span>
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="7" width="16" height="13" rx="2"/><path d="M12 7V3M8 3h8"/><circle cx="9" cy="13" r=".6"/><circle cx="15" cy="13" r=".6"/><path d="M9 17h6"/></svg></div>
+        <h3>Bot de WhatsApp 24 horas</h3>
+        <p>Responde clientes na hora, tira dúvidas, agenda e não deixa ninguém no vácuo — mesmo de madrugada, feriado e fim de semana.</p>
+        <div class="tags"><span class="tag">IA</span><span class="tag">Agendamento</span><span class="tag">24/7</span></div>
+        <div class="price-line"><small>a partir de</small><b>R$ 97</b></div>
+        <span class="btn btn-outline">Quero um bot</span>
+      </a>
+
+      <a class="card reveal" target="_blank" rel="noopener"
+         href="https://wa.me/5519987510267?text=Ol%C3%A1!%20Quero%20uma%20Landing%20Page%20profissional%20com%20a%20Bal%C3%A3o.">
+        <span class="badge on">Disponível</span>
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5 3 21l4.5-1.5"/><path d="M15 4l5 5L8.5 20.5 3 21l.5-5.5L15 4Z"/></svg></div>
+        <h3>Landing Page que Vende</h3>
+        <p>Página rápida, bonita e feita pra converter visitantes em contatos no WhatsApp. Pronta em dias, com seu domínio e SEO local.</p>
+        <div class="tags"><span class="tag">Alta conversão</span><span class="tag">Responsiva</span><span class="tag">SEO</span></div>
+        <div class="price-line"><small>a partir de</small><b>R$ 147</b></div>
+        <span class="btn btn-outline">Quero minha página</span>
+      </a>
+
+      <a class="card reveal" target="_blank" rel="noopener"
+         href="https://wa.me/5519987510267?text=Ol%C3%A1!%20Tenho%20interesse%20em%20Automa%C3%A7%C3%A3o%20e%20IA%20sob%20medida%20com%20a%20Bal%C3%A3o.">
+        <span class="badge soon">Sob consulta</span>
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z"/></svg></div>
+        <h3>Automação &amp; IA Sob Medida</h3>
+        <p>Integrações entre sistemas, robôs de processo, relatórios automáticos e IA rodando nos seus fluxos. Conta pra gente a tarefa chata — a gente automatiza.</p>
+        <div class="tags"><span class="tag">Integrações</span><span class="tag">IA local</span><span class="tag">Sob medida</span></div>
+        <div class="price-line"><small>escopo fechado</small><b>orçamento grátis</b></div>
+        <span class="btn btn-outline">Conversar sobre o projeto</span>
+      </a>
+
+    </div>
+
+    <div class="why reveal" id="porque">
+      <div class="center">
+        <span class="kicker">Por que a Balão</span>
+        <h2>Não é agência gigante,<br>nem freelancer sumido</h2>
+      </div>
+      <div class="why-grid">
+        <div class="why-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg><b>Suporte humanizado</b><span>fala direto com quem desenvolveu</span></div>
+        <div class="why-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><b>Entrega rápida</b><span>sistema rodando em dias, não meses</span></div>
+        <div class="why-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg><b>Dados protegidos</b><span>LGPD, criptografia e acesso controlado</span></div>
+        <div class="why-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V8H6a2 2 0 0 1 0-4h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg><b>Preço justo</b><span>sem taxa abusiva de "consultoria"</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-final" id="contato">
+  <div class="container reveal">
+    <span class="kicker">Não achou o que precisa?</span>
+    <h2>A gente desenvolve o software<br>que o seu negócio precisa</h2>
+    <p>Conta sua dor pra gente no WhatsApp: respondemos rápido com uma proposta clara, sem juridiquês e sem compromisso.</p>
+    <a class="btn btn-hero" target="_blank" rel="noopener"
+       href="https://wa.me/5519987510267?text=Ol%C3%A1!%20Preciso%20de%20um%20software%20e%20quero%20conversar%20com%20a%20Bal%C3%A3o.">
+      Chamar no WhatsApp
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </a>
+  </div>
+</section>
+
+<footer>
+  <div class="foot container">
+    <a class="brand" href="#hero">
+      <img src="img/logo-balao.png" alt="Balão da Informática">
+      <span>Balão da Informática<small>desde sempre em Campinas</small></span>
+    </a>
+    <div>Av. Anchieta 789 — Cambuí, Campinas/SP<br>(19) 3255-1661 · WhatsApp (19) 98751-0267</div>
+    <div><a href="https://www.balao.info" target="_blank" rel="noopener">www.balao.info</a><br>© 2026 Balão da Informática</div>
+  </div>
+</footer>
+
+<script src="particles.min.js"></script>
+<script>
+particlesJS("particles-js", {
+  particles: {
+    number: { value: 60, density: { enable: true, value_area: 900 } },
+    color: { value: ["#22d3ee", "#3b82f6", "#fbbf24"] },
+    shape: { type: "circle" },
+    opacity: { value: .42, random: true },
+    size: { value: 2.4, random: true },
+    line_linked: { enable: true, distance: 150, color: "#3b82f6", opacity: .13, width: 1 },
+    move: { enable: true, speed: 1, direction: "none", random: true, out_mode: "out" }
+  },
+  interactivity: {
+    detect_on: "canvas",
+    events: { onhover: { enable: true, mode: "grab" }, onclick: { enable: false }, resize: true },
+    modes: { grab: { distance: 160, line_linked: { opacity: .28 } } }
+  },
+  retina_detect: true
+});
+
+const nav = document.getElementById("nav");
+addEventListener("scroll", () => nav.classList.toggle("scrolled", scrollY > 30));
+
+const io = new IntersectionObserver((es, obs) => es.forEach((e, i) => {
+  if (e.isIntersecting) { setTimeout(() => e.target.classList.add("on"), i * 90); obs.unobserve(e.target); }
+}), { threshold: .1 });
+document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+
+document.querySelectorAll(".card").forEach(card => {
+  card.addEventListener("mousemove", ev => {
+    const r = card.getBoundingClientRect();
+    const px = (ev.clientX - r.left) / r.width, py = (ev.clientY - r.top) / r.height;
+    card.style.setProperty("--mx", px * 100 + "%");
+    card.style.setProperty("--my", py * 100 + "%");
+    const rx = (.5 - py) * 7, ry = (px - .5) * 7;
+    card.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-4px)`;
+  });
+  card.addEventListener("mouseleave", () => { card.style.transform = ""; });
+});
+</script>
+</body>
+</html>
