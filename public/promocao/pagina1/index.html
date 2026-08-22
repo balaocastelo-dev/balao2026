@@ -79,7 +79,7 @@
   .carousel{position:relative}
   .car-viewport{overflow:hidden;padding:34px 0 12px}
   .car-track{display:flex;gap:24px;transition:transform .55s cubic-bezier(.22,.8,.3,1);will-change:transform}
-  .car-slide{flex:0 0 clamp(310px,44vw,470px);transition:transform .45s,opacity .45s,filter .45s;transform:scale(.88);opacity:.45;filter:saturate(.55)}
+  .car-slide{flex:0 0 clamp(270px,30vw,370px);transition:transform .45s,opacity .45s,filter .45s;transform:scale(.88);opacity:.45;filter:saturate(.55)}
   .car-slide.active{transform:scale(1);opacity:1;filter:none;z-index:2}
   .car-slide.active .card{border-color:#f3c9cb;box-shadow:0 24px 60px rgba(210,35,42,.20)}
   .car-btn{position:absolute;top:44%;z-index:10;width:52px;height:52px;border-radius:50%;background:#fff;border:1px solid #eee;box-shadow:var(--shadow);font-size:1.7rem;line-height:1;color:var(--red);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s}
@@ -94,8 +94,8 @@
   .card{background:#fff;border:1px solid #efeaea;border-radius:var(--radius);overflow:hidden;box-shadow:0 4px 16px rgba(28,28,30,.06);display:flex;flex-direction:column;transition:transform .25s,box-shadow .25s}
   .card:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(28,28,30,.13)}
   .card.hide{display:none}
-  .card-photo{position:relative;background:#faf8f8;border-bottom:1px solid #f3eeee}
-  .card-photo img{width:100%;height:auto;object-fit:contain;background:#fff;display:block}
+  .card-photo{position:relative;background:#faf8f8;border-bottom:1px solid #f3eeee;height:clamp(230px,24vw,300px);display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .card-photo img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;background:#fff;display:block}
   .tag{position:absolute;top:14px;left:14px;background:var(--red);color:#fff;font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:6px 12px;border-radius:999px;box-shadow:0 4px 12px rgba(210,35,42,.35)}
   .tag.gold{background:#c98a10;box-shadow:0 4px 12px rgba(201,138,16,.35)}
   .card-body{padding:22px 22px 24px;display:flex;flex-direction:column;flex:1}
@@ -190,9 +190,9 @@
     .collage{height:240px}
     section{padding:42px 0}
     .car-viewport{padding:16px 0 8px}
-    .car-slide{flex:0 0 92vw}
+    .car-slide{flex:0 0 88vw}
     .car-slide:not(.active){opacity:0;pointer-events:none}
-    .card-photo img{max-height:34vh;object-fit:contain}
+    .card-photo{height:30vh}
     .card-body{padding:14px 16px 16px}
     .card-body h3{font-size:1.15rem}
     .cpu-line{font-size:.8rem}
@@ -267,9 +267,9 @@
       </div>
     </div>
     <div class="collage">
-      <div class="polaroid pol-1"><img src="fotos/ai_kross.jpg" alt="Desktop Gamer Kross"></div>
+      <div class="polaroid pol-1"><img src="fotos/nova_7.jpg" alt="Desktop Gamer Kross"></div>
       <div class="polaroid pol-2"><img src="fotos/nova_3.jpg" alt="Desktop Gamer Velocity"></div>
-      <div class="polaroid pol-3"><img src="fotos/ai_hyperx.jpg" alt="Desktop Gamer Hyper X"></div>
+      <div class="polaroid pol-3"><img src="fotos/nova_6.jpg" alt="Desktop Gamer Hyper X"></div>
       <div class="float-tag ft-1">🛡️ Garantia de 1 ano</div>
       <div class="float-tag ft-2">💳 12x sem juros</div>
     </div>
@@ -438,7 +438,7 @@
       <!-- HYPER X -->
       <article class="card car-slide">
         <div class="card-photo">
-          <img src="fotos/ai_hyperx.jpg" alt="Desktop Gamer Hyper X" loading="lazy">
+          <img src="fotos/nova_6.jpg" alt="Desktop Gamer Hyper X" loading="lazy">
           <span class="tag">SSD 2TB</span>
         </div>
         <div class="card-body">
@@ -466,7 +466,7 @@
       <!-- KROSS -->
       <article class="card car-slide">
         <div class="card-photo">
-          <img src="fotos/ai_kross.jpg" alt="Desktop Gamer Kross" loading="lazy">
+          <img src="fotos/nova_7.jpg" alt="Desktop Gamer Kross" loading="lazy">
           <span class="tag gold">Top de linha 👑</span>
         </div>
         <div class="card-body">
