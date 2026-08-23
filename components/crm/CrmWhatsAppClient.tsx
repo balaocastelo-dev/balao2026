@@ -78,6 +78,16 @@ function formatarNumeroExibicao(num: string | null | undefined): string {
   return limpo;
 }
 
+// Proxy seguro para fotos de perfil do WhatsApp para evitar 403 Forbidden e CORS
+function formatAvatarUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  if (url.startsWith("data:")) return url;
+  if (url.startsWith("http")) {
+    return `/api/crm/avatar?url=${encodeURIComponent(url)}`;
+  }
+  return url;
+}
+
 export default function CrmWhatsAppClient() {
   const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -248,9 +258,7 @@ export default function CrmWhatsAppClient() {
   );
   const [disparoIntervalo, setDisparoIntervalo] = useState(25);
   const [disparoIntervaloMax, setDisparoIntervaloMax] = useState(60);
-  const [disparoLimiteDiario, setDisparoLimiteDiario] = useState(120);
   const [disparoAtivo, setDisparoAtivo] = useState(false);
-  const [disparoRecent, setDisparoRecent] = useState<Array<{ id: string; nome: string; ts: number; pulado?: boolean; texto?: string }>>([]);
   const [promocoes, setPromocoes] = useState<CrmPromocao[]>([
     {
       id: 1,
@@ -911,6 +919,7 @@ export default function CrmWhatsAppClient() {
       )
     );
 
+    // Disparar envio via Socket.IO
     if (socketRef.current?.connected) {
       socketRef.current.emit("panel:send-product", {
         chatId: chatSelecionado.id,
@@ -921,8 +930,21 @@ export default function CrmWhatsAppClient() {
       });
     }
 
+    // Fallback HTTP
+    fetch(`${serverUrl}/api/enviar-produto`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat: chatSelecionado.id,
+        number: chatSelecionado.numero,
+        product: prod,
+        price: precoFinal,
+        obs: obsCustom,
+      }),
+    }).catch(() => {});
+
     if (modalProdutoAberto) setModalProdutoAberto(false);
-    showToast(`📦 Oferta de "${prod.nome}" enviada direto ao cliente! ✅`);
+    showToast(`📦 Oferta de "${prod.nome}" enviada ao destinatário! ✅`);
   };
 
   // Send message
@@ -966,6 +988,7 @@ export default function CrmWhatsAppClient() {
       )
     );
 
+    // Disparar via Socket.IO
     if (socketRef.current?.connected) {
       socketRef.current.emit("panel:send-message", {
         number: chatSelecionado.numero,
@@ -975,10 +998,22 @@ export default function CrmWhatsAppClient() {
       });
     }
 
+    // Fallback HTTP para garantir entrega
+    fetch(`${serverUrl}/api/enviar`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat: chatSelecionado.id,
+        number: chatSelecionado.numero,
+        texto: textoFinal,
+        replyTo: msgRespondendo?.id || undefined,
+      }),
+    }).catch(() => {});
+
     setCampoTexto("");
     setMsgRespondendo(null);
     setLinkPreview(null);
-    showToast("Mensagem enviada ✓");
+    showToast("Mensagem disparada para o destinatário ✓");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -1122,6 +1157,16 @@ export default function CrmWhatsAppClient() {
         text: statusComentario.trim(),
       });
     }
+
+    fetch(`${serverUrl}/api/enviar`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat: chatId,
+        number: contactNumber,
+        texto: `💬 *Respondendo ao seu Status do WhatsApp:*\n> "${(statusItem?.body || "Mídia").slice(0, 80)}"\n\n${statusComentario.trim()}`,
+      }),
+    }).catch(() => {});
 
     // Also register message in chat store
     const novaMsg: CrmMensagem = {
@@ -1406,6 +1451,7 @@ export default function CrmWhatsAppClient() {
                     const isAtivo = chat.id === chatSelecionadoId;
                     const ini = (chat.nome || "?").trim().charAt(0).toUpperCase();
                     const numeroFormatado = formatarNumeroExibicao(chat.numero || chat.id);
+                    const avatarSrc = formatAvatarUrl(chat.pic);
 
                     return (
                       <div
@@ -1431,10 +1477,12 @@ export default function CrmWhatsAppClient() {
                       >
                         {/* Real Profile Avatar */}
                         <div className="w-10 h-10 rounded-full bg-[#0f9d58] text-white flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden relative shadow-xs border border-[#e3e3e3]">
-                          {chat.pic ? (
+                          {avatarSrc ? (
                             /* eslint-disable-next-line @next/next/no-img-element */
                             <img
-                              src={chat.pic}
+                              src={avatarSrc}
+                              referrerPolicy="no-referrer"
+                              crossOrigin="anonymous"
                               alt=""
                               className="w-full h-full object-cover"
                               onError={(e) => {
@@ -1542,10 +1590,12 @@ export default function CrmWhatsAppClient() {
                   <div className="bg-white border-b border-[#e3e3e3] p-2.5 px-4 flex items-center justify-between shrink-0 shadow-xs">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-[#0f9d58] text-white flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden border border-[#e3e3e3]">
-                        {chatSelecionado.pic ? (
+                        {formatAvatarUrl(chatSelecionado.pic) ? (
                           /* eslint-disable-next-line @next/next/no-img-element */
                           <img
-                            src={chatSelecionado.pic}
+                            src={formatAvatarUrl(chatSelecionado.pic)!}
+                            referrerPolicy="no-referrer"
+                            crossOrigin="anonymous"
                             alt=""
                             className="w-full h-full object-cover"
                             onError={(e) => {
@@ -1691,7 +1741,13 @@ export default function CrmWhatsAppClient() {
                             {m.hasMedia && m.mediaUrl && !m.produto && m.mediaType !== "document" && m.mediaType !== "audio" && (
                               <div className="w-full max-h-56 bg-black/5 rounded-lg overflow-hidden mb-2 flex items-center justify-center">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={m.mediaUrl} alt="" className="max-h-56 max-w-full object-contain" />
+                                <img
+                                  src={m.mediaUrl}
+                                  referrerPolicy="no-referrer"
+                                  crossOrigin="anonymous"
+                                  alt=""
+                                  className="max-h-56 max-w-full object-contain"
+                                />
                               </div>
                             )}
 
@@ -2304,9 +2360,15 @@ export default function CrmWhatsAppClient() {
                       <div className="space-y-3">
                         <div className="flex items-center gap-3 p-3 bg-[#f0f2f5] rounded-xl border border-[#e3e3e3]">
                           <div className="w-12 h-12 rounded-full bg-[#0f9d58] text-white flex items-center justify-center font-bold text-base shrink-0 overflow-hidden border border-[#e3e3e3]">
-                            {chatSelecionado.pic ? (
+                            {formatAvatarUrl(chatSelecionado.pic) ? (
                               /* eslint-disable-next-line @next/next/no-img-element */
-                              <img src={chatSelecionado.pic} alt="" className="w-full h-full object-cover" />
+                              <img
+                                src={formatAvatarUrl(chatSelecionado.pic)!}
+                                referrerPolicy="no-referrer"
+                                crossOrigin="anonymous"
+                                alt=""
+                                className="w-full h-full object-cover"
+                              />
                             ) : (
                               <span>{chatSelecionado.nome.charAt(0).toUpperCase()}</span>
                             )}
@@ -2577,9 +2639,15 @@ export default function CrmWhatsAppClient() {
                             >
                               <div className="flex items-center gap-2">
                                 <div className="w-6 h-6 rounded-full bg-[#0f9d58] text-white flex items-center justify-center font-bold text-[10px] shrink-0 overflow-hidden">
-                                  {card.pic ? (
+                                  {formatAvatarUrl(card.pic) ? (
                                     /* eslint-disable-next-line @next/next/no-img-element */
-                                    <img src={card.pic} alt="" className="w-full h-full object-cover" />
+                                    <img
+                                      src={formatAvatarUrl(card.pic)!}
+                                      referrerPolicy="no-referrer"
+                                      crossOrigin="anonymous"
+                                      alt=""
+                                      className="w-full h-full object-cover"
+                                    />
                                   ) : (
                                     <span>{card.nome.charAt(0).toUpperCase()}</span>
                                   )}
@@ -2652,6 +2720,7 @@ export default function CrmWhatsAppClient() {
                   statusFeed.map((feed) => {
                     const isSelected = statusSelecionadoFeed?.id === feed.id;
                     const contactNum = formatarNumeroExibicao(feed.contactNumber || feed.id);
+                    const avatarSrc = formatAvatarUrl(feed.profilePicUrl);
                     return (
                       <div
                         key={feed.id}
@@ -2664,9 +2733,15 @@ export default function CrmWhatsAppClient() {
                         }`}
                       >
                         <div className="w-12 h-12 rounded-full ring-2 ring-[#00a884] p-0.5 shrink-0 overflow-hidden bg-white/10 flex items-center justify-center font-bold text-sm">
-                          {feed.profilePicUrl ? (
+                          {avatarSrc ? (
                             /* eslint-disable-next-line @next/next/no-img-element */
-                            <img src={feed.profilePicUrl} alt="" className="w-full h-full object-cover rounded-full" />
+                            <img
+                              src={avatarSrc}
+                              referrerPolicy="no-referrer"
+                              crossOrigin="anonymous"
+                              alt=""
+                              className="w-full h-full object-cover rounded-full"
+                            />
                           ) : (
                             <span>{feed.contactName.charAt(0).toUpperCase()}</span>
                           )}
@@ -2713,8 +2788,19 @@ export default function CrmWhatsAppClient() {
 
                   {/* Story Header */}
                   <div className="px-4 py-2 flex items-center gap-3 z-10 bg-gradient-to-b from-black/60 to-transparent">
-                    <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm shrink-0">
-                      {statusSelecionadoFeed.contactName.charAt(0).toUpperCase()}
+                    <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden">
+                      {formatAvatarUrl(statusSelecionadoFeed.profilePicUrl) ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img
+                          src={formatAvatarUrl(statusSelecionadoFeed.profilePicUrl)!}
+                          referrerPolicy="no-referrer"
+                          crossOrigin="anonymous"
+                          alt=""
+                          className="w-full h-full object-cover rounded-full"
+                        />
+                      ) : (
+                        <span>{statusSelecionadoFeed.contactName.charAt(0).toUpperCase()}</span>
+                      )}
                     </div>
                     <div>
                       <h4 className="font-bold text-xs">{statusSelecionadoFeed.contactName}</h4>
@@ -2737,6 +2823,8 @@ export default function CrmWhatsAppClient() {
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img
                         src={statusSelecionadoFeed.items[statusItemIndex].mediaUrl!}
+                        referrerPolicy="no-referrer"
+                        crossOrigin="anonymous"
                         alt=""
                         className="max-h-[50vh] max-w-full object-contain rounded-xl shadow-2xl"
                       />
@@ -2979,7 +3067,7 @@ export default function CrmWhatsAppClient() {
               }}
               className="w-full bg-[#0f9d58] hover:bg-[#0a6e3d] text-white py-2 rounded-lg text-xs font-bold transition-colors cursor-pointer shadow-xs"
             >
-              ➤ Enviar Produto Direto ao Cliente
+              ➤ Enviar Produto Direto ao Destinatário
             </button>
           </div>
         </div>
