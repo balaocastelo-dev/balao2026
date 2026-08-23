@@ -9,6 +9,7 @@ import HomeTrustPillars from "@/components/HomeTrustPillars";
 import HomeLeftSidebar from "@/components/HomeLeftSidebar";
 import HomeRightSidebar from "@/components/HomeRightSidebar";
 import HomeCategoryShelf from "@/components/HomeCategoryShelf";
+import HomeMonitoresFullWidth from "@/components/HomeMonitoresFullWidth";
 import { getProductsByExactCategories, getProducts } from "@/lib/db";
 import { getCachedCategories, getCachedCarouselImages } from "@/lib/cache";
 import { listBlogPostsForPage } from "@/lib/blog-store";
@@ -137,7 +138,7 @@ export default async function Home(props: {
           args,
         });
         return ((res.rows as unknown as Product[]) || []).sort(
-          (a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price)
+          (a, b) => parsePriceToNumber(b.price) - parsePriceToNumber(a.price)
         );
       } catch (err) {
         console.error("Search error:", err);
@@ -158,23 +159,53 @@ export default async function Home(props: {
     products = await getProducts();
   }
 
-  // Segmentar produtos pelas categorias na ordem EXATA solicitada:
-  // 1. Computador Gamer
-  // 2. Notebooks
-  // 3. Monitores
-  // 4. Smartphones
-  // 5. Hardware
-  // 6. Periféricos
-  // 7. Games
-  const pcGamerProducts = products.filter(p => p.category === "Computadores" || p.name.toLowerCase().includes("pc gamer") || p.name.toLowerCase().includes("computador gamer"));
-  const notebookProducts = products.filter(p => p.category === "Notebooks" || p.category === "Notebooks Seminovos" || p.name.toLowerCase().includes("notebook") || p.name.toLowerCase().includes("macbook"));
-  const monitorProducts = products.filter(p => p.category === "Monitores" || p.name.toLowerCase().includes("monitor"));
-  const smartphoneProducts = products.filter(p => p.category === "Smartphones" || p.name.toLowerCase().includes("smartphone") || p.name.toLowerCase().includes("galaxy") || p.name.toLowerCase().includes("xiaomi") || p.name.toLowerCase().includes("iphone"));
-  const hardwareProducts = products.filter(p => p.category === "Hardware" || p.name.toLowerCase().includes("placa de vídeo") || p.name.toLowerCase().includes("processador") || p.name.toLowerCase().includes("ssd") || p.name.toLowerCase().includes("ram"));
-  const perifericoProducts = products.filter(p => p.category === "Periféricos" || p.name.toLowerCase().includes("teclado") || p.name.toLowerCase().includes("mouse") || p.name.toLowerCase().includes("headset"));
-  const gamesProducts = products.filter(p => p.category === "Games" || p.name.toLowerCase().includes("console") || p.name.toLowerCase().includes("playstation") || p.name.toLowerCase().includes("xbox") || p.name.toLowerCase().includes("cadeira gamer"));
+  // Ordenação global padrão: do MAIS CARO para o MAIS BARATO
+  const sortPriceDesc = (list: Product[]) =>
+    [...list].sort((a, b) => parsePriceToNumber(b.price) - parsePriceToNumber(a.price));
 
-  const flashDeals = products.slice(0, 4);
+  // Segmentar produtos pelas categorias na ordem EXATA solicitada:
+  // 1. Computador Gamer (ordenado do mais caro para o mais barato)
+  const pcGamerProducts = sortPriceDesc(
+    products.filter(p => p.category === "Computadores" || p.name.toLowerCase().includes("pc gamer") || p.name.toLowerCase().includes("computador gamer"))
+  );
+
+  // 2. Notebooks (ordenado do mais caro para o mais barato)
+  const notebookProducts = sortPriceDesc(
+    products.filter(p => p.category === "Notebooks" || p.category === "Notebooks Seminovos" || p.name.toLowerCase().includes("notebook") || p.name.toLowerCase().includes("macbook"))
+  );
+
+  // 3. Monitores (estritamente monitores, sem acessórios - ordenado do mais caro para o mais barato)
+  const monitorProducts = sortPriceDesc(
+    products.filter(p => 
+      (p.category === "Monitores" || p.name.toLowerCase().includes("monitor")) &&
+      !p.name.toLowerCase().includes("suporte") &&
+      !p.name.toLowerCase().includes("cabo") &&
+      !p.name.toLowerCase().includes("adaptador") &&
+      !p.name.toLowerCase().includes("braço articulado")
+    )
+  );
+
+  // 4. Smartphones (ordenado do mais caro para o mais barato)
+  const smartphoneProducts = sortPriceDesc(
+    products.filter(p => p.category === "Smartphones" || p.name.toLowerCase().includes("smartphone") || p.name.toLowerCase().includes("galaxy") || p.name.toLowerCase().includes("xiaomi") || p.name.toLowerCase().includes("iphone"))
+  );
+
+  // 5. Hardware (ordenado do mais caro para o mais barato)
+  const hardwareProducts = sortPriceDesc(
+    products.filter(p => p.category === "Hardware" || p.name.toLowerCase().includes("placa de vídeo") || p.name.toLowerCase().includes("processador") || p.name.toLowerCase().includes("ssd") || p.name.toLowerCase().includes("ram"))
+  );
+
+  // 6. Periféricos (ordenado do mais caro para o mais barato)
+  const perifericoProducts = sortPriceDesc(
+    products.filter(p => p.category === "Periféricos" || p.name.toLowerCase().includes("teclado") || p.name.toLowerCase().includes("mouse") || p.name.toLowerCase().includes("headset"))
+  );
+
+  // 7. Games (ordenado do mais caro para o mais barato)
+  const gamesProducts = sortPriceDesc(
+    products.filter(p => p.category === "Games" || p.name.toLowerCase().includes("console") || p.name.toLowerCase().includes("playstation") || p.name.toLowerCase().includes("xbox") || p.name.toLowerCase().includes("cadeira gamer"))
+  );
+
+  const flashDeals = sortPriceDesc(products).slice(0, 4);
 
   return (
     <div className="home-shell min-h-screen flex flex-col font-sans transition-colors duration-300">
@@ -184,9 +215,9 @@ export default async function Home(props: {
       {/* Marcas Parceiras Marquee */}
       {!search && !category && (
         <section className="container mx-auto px-3 pt-3 sm:px-4 lg:px-0 lg:pt-4">
-          <div className="home-panel brand-carousel rounded-2xl px-3 py-2.5 sm:px-4 border border-[var(--home-border)] bg-[var(--home-panel-bg)] shadow-sm">
+          <div className="home-panel brand-carousel rounded-2xl px-3 py-2 sm:px-4 border border-[var(--home-border)] bg-[var(--home-panel-bg)] shadow-sm">
             <div className="flex items-center gap-3">
-              <span className="shrink-0 rounded-full bg-[var(--home-accent)] px-3 py-1 text-[10px] font-black uppercase tracking-widest text-white shadow-sm sm:text-[11px]">
+              <span className="shrink-0 rounded-full bg-[#E60012] px-3 py-1 text-[10px] font-black uppercase tracking-widest text-white shadow-sm sm:text-[11px]">
                 Marcas em Destaque
               </span>
               <div className="relative min-w-0 flex-1 overflow-hidden">
@@ -197,7 +228,7 @@ export default async function Home(props: {
                     <Link
                       key={`${brand}-${index}`}
                       href={`/?search=${encodeURIComponent(brand)}`}
-                      className="flex-none whitespace-nowrap rounded-full border border-[var(--home-border)] bg-[var(--home-card-soft)] px-3 py-1.5 text-xs font-bold text-[var(--home-text)] transition hover:border-[var(--home-border-strong)] hover:text-[var(--home-accent)] sm:px-4 sm:text-sm"
+                      className="flex-none whitespace-nowrap rounded-full border border-[var(--home-border)] bg-[var(--home-card-soft)] px-3 py-1.5 text-xs font-bold text-[var(--home-text)] transition hover:border-[#E60012] hover:text-[#E60012] sm:px-4 sm:text-sm"
                     >
                       {brand}
                     </Link>
@@ -210,7 +241,7 @@ export default async function Home(props: {
       )}
 
       {/* Main Content Area */}
-      <div className="container mx-auto px-3 py-4 sm:px-4 lg:px-0 space-y-6">
+      <div className="container mx-auto px-3 py-4 sm:px-4 lg:px-0 space-y-6 sm:space-y-8">
         {/* 1. Full-Width Stretched Hero Banner */}
         {!search && !category && (
           <HomeHeroFullWidth carouselImages={carouselImages} />
@@ -221,57 +252,60 @@ export default async function Home(props: {
           <HomeTrustPillars />
         )}
 
-        {/* 3. Three-Column Power Layout (Left Sidebar, Central Priority Feed, Right Sidebar) */}
+        {/* 3. Section Upper: Left Sidebar, Main Category 1 (PC Gamer) & Category 2 (Notebooks), Right Sidebar */}
         {!search && !category ? (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            {/* Left Lateral Column (3 cols) */}
-            <div className="lg:col-span-3 space-y-6">
-              <HomeLeftSidebar categories={categories} flashDeals={flashDeals} />
+          <>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* Left Lateral Column (3 cols) */}
+              <div className="lg:col-span-3 space-y-6">
+                <HomeLeftSidebar categories={categories} flashDeals={flashDeals} />
+              </div>
+
+              {/* Center Feed (6 cols) - Categorias 1 e 2 */}
+              <div className="lg:col-span-6 space-y-6">
+                {/* 1. Computador Gamer */}
+                {pcGamerProducts.length > 0 && (
+                  <HomeCategoryShelf
+                    title="🚀 Computador Gamer & Setups"
+                    subtitle="Máquinas de alta performance montadas com componentes selecionados e garantia total."
+                    categorySlug="computadores"
+                    products={pcGamerProducts}
+                  />
+                )}
+
+                {/* 2. Notebooks */}
+                {notebookProducts.length > 0 && (
+                  <HomeCategoryShelf
+                    title="💻 Notebooks & Laptops"
+                    subtitle="Modelos para trabalho, estudos e gamers com máxima autonomia e potência."
+                    categorySlug="notebooks"
+                    products={notebookProducts}
+                  />
+                )}
+              </div>
+
+              {/* Right Lateral Column (3 cols) - Quadros do Blog e Assistência Técnica */}
+              <div className="lg:col-span-3 space-y-6">
+                <HomeRightSidebar blogPosts={blogPosts} />
+              </div>
             </div>
 
-            {/* Center Priority Feed (6 cols) - Categorias na ordem solicitada */}
-            <div className="lg:col-span-6 space-y-6">
-              {/* 1. Computador Gamer */}
-              {pcGamerProducts.length > 0 && (
-                <HomeCategoryShelf
-                  title="🚀 Computador Gamer & Setups"
-                  subtitle="Máquinas de alta performance montadas com componentes selecionados e garantia."
-                  categorySlug="computadores"
-                  products={pcGamerProducts}
-                  badgeColor="from-red-600 to-rose-600"
-                />
-              )}
+            {/* 4. BLOCO 3 FULL SIZE: Monitores Gamer & UltraWide (Esticado na tela toda) */}
+            {monitorProducts.length > 0 && (
+              <div className="w-full">
+                <HomeMonitoresFullWidth products={monitorProducts} />
+              </div>
+            )}
 
-              {/* 2. Notebooks */}
-              {notebookProducts.length > 0 && (
-                <HomeCategoryShelf
-                  title="💻 Notebooks & MacBooks"
-                  subtitle="Modelos para trabalho, estudos e gamers com autonomia e potência."
-                  categorySlug="notebooks"
-                  products={notebookProducts}
-                  badgeColor="from-blue-600 to-indigo-600"
-                />
-              )}
-
-              {/* 3. Monitores */}
-              {monitorProducts.length > 0 && (
-                <HomeCategoryShelf
-                  title="🖥️ Monitores Gamer & UltraWide"
-                  subtitle="Telas 144Hz, 240Hz, IPS e 4K para máxima fluidez nos jogos e produtividade."
-                  categorySlug="monitores"
-                  products={monitorProducts}
-                  badgeColor="from-purple-600 to-indigo-600"
-                />
-              )}
-
+            {/* 5. Demais Categorias em Destaque (Smartphones, Hardware, Periféricos, Games) */}
+            <div className="space-y-6">
               {/* 4. Smartphones */}
               {smartphoneProducts.length > 0 && (
                 <HomeCategoryShelf
                   title="📱 Smartphones & Celulares 5G"
-                  subtitle="Os lançamentos das melhores marcas com câmeras de alta resolução e bateria duradoura."
+                  subtitle="Os principais lançamentos com câmeras de alta resolução e bateria de longa duração."
                   categorySlug="smartphones"
                   products={smartphoneProducts}
-                  badgeColor="from-emerald-600 to-teal-600"
                 />
               )}
 
@@ -279,10 +313,9 @@ export default async function Home(props: {
               {hardwareProducts.length > 0 && (
                 <HomeCategoryShelf
                   title="⚡ Hardware & Peças para Upgrade"
-                  subtitle="Placas de vídeo RTX/Radeon, processadores, SSDs NVMe e memórias RAM."
+                  subtitle="Placas de vídeo RTX/Radeon, processadores Ryzen/Intel, SSDs NVMe e memórias RAM."
                   categorySlug="hardware"
                   products={hardwareProducts}
-                  badgeColor="from-amber-600 to-orange-600"
                 />
               )}
 
@@ -290,10 +323,9 @@ export default async function Home(props: {
               {perifericoProducts.length > 0 && (
                 <HomeCategoryShelf
                   title="🎧 Periféricos & Setup Gamer"
-                  subtitle="Teclados mecânicos, mouses de alta precisão, headsets e microfones."
+                  subtitle="Teclados mecânicos, mouses de precisão, headsets com áudio espacial e microfones."
                   categorySlug="perifericos"
                   products={perifericoProducts}
-                  badgeColor="from-cyan-600 to-blue-600"
                 />
               )}
 
@@ -304,21 +336,15 @@ export default async function Home(props: {
                   subtitle="PlayStation 5, Xbox, controles sem fio e cadeiras gamer ergonômicas."
                   categorySlug="games"
                   products={gamesProducts}
-                  badgeColor="from-rose-600 to-pink-600"
                 />
               )}
             </div>
-
-            {/* Right Lateral Column (3 cols) - Quadros do Blog e Promoções */}
-            <div className="lg:col-span-3 space-y-6">
-              <HomeRightSidebar blogPosts={blogPosts} />
-            </div>
-          </div>
+          </>
         ) : (
           <section className="home-panel rounded-[2rem] p-6 md:p-8 border border-[var(--home-border)] bg-[var(--home-panel-bg)] shadow-xl">
             <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
-                <div className="text-[11px] font-black uppercase tracking-[0.22em] text-[var(--home-accent)]">
+                <div className="text-[11px] font-black uppercase tracking-[0.22em] text-[#E60012]">
                   Navegação do Catálogo
                 </div>
                 <h1 className="mt-1 text-2xl font-black tracking-tight text-white md:text-4xl">
@@ -360,7 +386,7 @@ export default async function Home(props: {
           <SeoContent title="LOJA DE INFORMATICA EM CAMPINAS COM WHATSAPP, RETIRADA E ASSISTENCIA TECNICA">
             <p className="mb-4 text-[var(--home-muted)]">
               A <strong>Balão da Informática Castelo</strong> é a principal <strong>loja de informática em Campinas</strong> para quem busca
-              <strong>PC Gamer em Campinas</strong>, <strong>notebooks</strong>, <strong>monitores</strong>, <strong>smartphones</strong> e peças de hardware para upgrade (placas de vídeo RTX/Radeon,
+              <strong>PC Gamer em Campinas</strong>, <strong>notebooks</strong>, <strong>monitores gamer</strong>, <strong>smartphones</strong> e peças de hardware para upgrade (placas de vídeo RTX/Radeon,
               processadores Intel e AMD Ryzen, memórias RAM DDR4/DDR5, SSDs NVMe e fontes selo 80 Plus), periféricos gamer e <strong>assistência técnica especializada em Campinas</strong> com atendimento imediato no balcão e no WhatsApp.
               Compre online com desconto progressivo no PIX ou em até 10x sem juros no cartão de crédito e retire seu pedido em até 30 minutos na loja física no bairro Cambuí.
             </p>

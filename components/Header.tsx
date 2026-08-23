@@ -141,15 +141,15 @@ export default function Header() {
   return (
     <header className={`${headerClassName} sticky top-0 z-[900] flex w-full max-w-full flex-col overflow-x-clip border-b shadow-lg backdrop-blur-md transition-colors`}>
       <TopBar />
-      <div className="container mx-auto flex w-full max-w-full min-w-0 items-center justify-between gap-2 px-3 py-4 sm:gap-4 sm:px-4">
+      <div className="max-w-7xl mx-auto flex w-full min-w-0 items-center justify-between gap-4 px-6 sm:px-12 lg:px-24 xl:px-36 py-3.5 sm:gap-6">
         
         {/* Mobile Menu Button - Optimized for Touch */}
         <button 
           onClick={toggleSidebar}
-          className="lg:hidden -ml-2 shrink-0 p-2.5 text-[var(--site-text)] transition-colors hover:text-[#E60012] active:scale-95"
+          className="lg:hidden -ml-2 shrink-0 p-2 text-[var(--site-text)] transition-colors hover:text-[#E60012] active:scale-95"
           aria-label="Abrir menu"
         >
-            <Menu size={32} strokeWidth={2.5} />
+            <Menu size={28} strokeWidth={2.5} />
         </button>
 
         {/* Logo Section */}
@@ -159,7 +159,7 @@ export default function Header() {
           className="flex flex-shrink-0 flex-col items-center cursor-pointer select-none drop-shadow-sm transition-transform hover:scale-105 active:scale-95 no-underline"
           title="Ir para página inicial"
         >
-             <div className="relative h-[36px] w-[112px] sm:h-[45px] sm:w-[140px] md:h-[65px] md:w-[200px]">
+             <div className="relative h-[36px] w-[112px] sm:h-[45px] sm:w-[140px] md:h-[60px] md:w-[185px]">
                 <Image 
                     src="/logo.png" 
                     alt="Balão da Informática" 
@@ -170,18 +170,16 @@ export default function Header() {
              </div>
         </Link>
 
-        
-
         {/* Search Bar (Desktop) */}
         <form 
              ref={searchContainerRef}
              onSubmit={handleSearch} 
-             className="hidden md:flex flex-1 max-w-xl relative"
+             className="hidden md:flex flex-1 max-w-lg relative"
         >
           <input
               type="text"
               placeholder="Buscar produtos..."
-              className={`w-full rounded-full border py-3 pl-12 pr-24 text-base shadow-inner focus:outline-none focus:ring-1 ${searchInputClassName}`}
+              className={`w-full rounded-full border py-2.5 pl-11 pr-24 text-sm shadow-inner focus:outline-none focus:ring-1 ${searchInputClassName}`}
               value={searchQuery}
               onChange={(e) => {
                   setSearchQuery(e.target.value);
@@ -191,7 +189,7 @@ export default function Header() {
           />
 
           {/* Search Icon */}
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
 
           {/* Clear Button */}
           {searchQuery && (
@@ -200,7 +198,7 @@ export default function Header() {
                   onClick={clearSearch}
                   className="absolute right-[88px] top-1/2 -translate-y-1/2 text-gray-400 p-2"
               >
-                  {isLoading ? <Loader2 size={18} className="animate-spin" /> : <X size={18} />}
+                  {isLoading ? <Loader2 size={16} className="animate-spin" /> : <X size={16} />}
               </button>
           )}
 
@@ -208,10 +206,10 @@ export default function Header() {
           <button
               type="button"
               onClick={performSearch}
-              className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-2 rounded-full bg-[#E60012] px-4 py-2 text-white transition-colors hover:bg-red-700"
+              className="absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-1.5 rounded-full bg-[#E60012] px-4 py-1.5 text-xs text-white transition-colors hover:bg-red-700 font-bold"
           >
-              <Search size={18} />
-              <span className="hidden lg:inline font-semibold">Buscar</span>
+              <Search size={14} />
+              <span className="hidden lg:inline">Buscar</span>
           </button>
 
           {/* Search Preview */}
@@ -228,17 +226,15 @@ export default function Header() {
           )}
         </form>
 
-
-
         {/* Actions */}
-        <div className="flex min-w-0 shrink-0 items-center gap-1.5 text-zinc-200 sm:gap-3 md:gap-6">
+        <div className="flex min-w-0 shrink-0 items-center gap-2 text-zinc-200 sm:gap-4 md:gap-5">
           <HomeThemeToggle />
 
-          <Link href="/fale-conosco" className="flex items-center gap-3 group active:scale-95 transition-transform">
+          <Link href="/fale-conosco" className="flex items-center gap-2 group active:scale-95 transition-transform">
             <div className={`rounded-full p-2 shadow-sm transition-colors ${actionIconClassName}`}>
                 <User size={18} className="md:h-5 md:w-5" strokeWidth={2.5} />
             </div>
-            <div className="hidden lg:flex flex-col text-sm leading-tight">
+            <div className="hidden lg:flex flex-col text-xs leading-tight">
                 <span className="text-[var(--site-muted)]">Atendimento</span>
                 <span className={actionLabelClassName}>
                   Fale Conosco
@@ -248,30 +244,30 @@ export default function Header() {
 
           <Link
             href="/premium"
-            className="flex items-center gap-3 group active:scale-95 transition-transform"
+            className="flex items-center gap-2 group active:scale-95 transition-transform"
             aria-label="PCS Premium"
             title="PCS Premium"
           >
-            <div className="rounded-full bg-[var(--site-panel-soft)] p-2 text-amber-500 shadow-sm transition-colors group-hover:bg-amber-100 group-hover:text-amber-600">
+            <div className="rounded-full bg-[var(--site-panel-soft)] p-2 text-red-500 shadow-sm transition-colors group-hover:bg-[#E60012] group-hover:text-white">
               <Crown size={18} className="md:h-5 md:w-5" strokeWidth={2.5} />
             </div>
-            <div className="hidden lg:flex flex-col text-sm leading-tight">
+            <div className="hidden lg:flex flex-col text-xs leading-tight">
               <span className="text-[var(--site-muted)]">PCS</span>
-              <span className="font-bold text-[var(--site-text)] group-hover:text-amber-600 transition-colors">Premium</span>
+              <span className="font-bold text-[var(--site-text)] group-hover:text-red-500 transition-colors">Premium</span>
             </div>
           </Link>
           
           <div className="relative" onMouseEnter={handleCartMouseEnter} onMouseLeave={handleCartMouseLeave}>
-            <Link href="/cart" id="cart-icon-container" className="relative group flex items-center gap-3 active:scale-95 transition-transform">
+            <Link href="/cart" id="cart-icon-container" className="relative group flex items-center gap-2 active:scale-95 transition-transform">
                <div className={`rounded-full p-2 shadow-sm transition-colors ${actionIconClassName}`}>
                   <ShoppingCart size={18} className="md:h-5 md:w-5" strokeWidth={2.5} />
                </div>
-               <div className="hidden lg:flex flex-col text-sm leading-tight">
+               <div className="hidden lg:flex flex-col text-xs leading-tight">
                   <span className="text-[var(--site-muted)]">Meu</span>
                   <span className={actionLabelClassName}>Carrinho</span>
               </div>
               {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 md:top-0 md:right-0 lg:left-7 lg:top-0 bg-[#E60012] text-white text-[10px] md:text-[11px] font-bold h-5 w-5 md:h-5 md:w-5 flex items-center justify-center rounded-full border-2 border-zinc-950 shadow-sm">
+                  <span className="absolute -top-1 -right-1 md:top-0 md:right-0 lg:left-6 lg:top-0 bg-[#E60012] text-white text-[10px] md:text-[11px] font-bold h-4 w-4 md:h-5 md:w-5 flex items-center justify-center rounded-full border-2 border-zinc-950 shadow-sm">
                       {cartCount}
                   </span>
               )}
