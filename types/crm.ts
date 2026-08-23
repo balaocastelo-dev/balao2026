@@ -33,6 +33,13 @@ export interface CrmNotaCliente {
   timestamp: number;
 }
 
+export interface CrmProdutoEnviado {
+  id: string;
+  nome: string;
+  preco: number;
+  timestamp: number;
+}
+
 export interface CrmChat {
   id: string; // e.g. "5519981188090@c.us"
   nome: string;
@@ -47,6 +54,9 @@ export interface CrmChat {
   fixado?: boolean;
   bloqueado?: boolean;
   precisaAtencao?: boolean;
+  transferidoPor?: string | null;
+  transferidoEm?: number | null;
+  optOut?: boolean;
   email?: string;
   documento?: string;
   endereco?: string;
@@ -54,6 +64,7 @@ export interface CrmChat {
   valorNegocio?: number;
   produtoInteresse?: string;
   notas?: CrmNotaCliente[];
+  produtosEnviados?: CrmProdutoEnviado[];
 }
 
 export interface CrmMensagem {
@@ -69,7 +80,13 @@ export interface CrmMensagem {
   hasMedia?: boolean;
   mediaType?: string | null;
   mediaUrl?: string | null;
+  mediaName?: string | null;
   isVoice?: boolean;
+  replyTo?: {
+    id: string;
+    body: string;
+    author: string;
+  } | null;
   status?: "pending" | "sent" | "delivered" | "read" | "failed";
 }
 
@@ -93,4 +110,13 @@ export interface CrmProdutoCatalogo {
   imagem: string;
   slug?: string;
   specs?: string[];
+}
+
+export interface CrmPromocao {
+  id: string | number;
+  titulo: string;
+  texto: string;
+  ativo: boolean;
+  cartaz?: string | null;
+  cartazNome?: string | null;
 }

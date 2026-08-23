@@ -9,6 +9,7 @@ import {
   CrmMensagem,
   CrmNotaCliente,
   CrmProdutoCatalogo,
+  CrmPromocao,
   CrmRespostaRapida,
   CrmVendedor,
   KanbanColumn,
@@ -22,9 +23,38 @@ import {
   VENDEDORES_BASE,
 } from "@/lib/crm-defaults";
 
+interface CtxMenuItem {
+  label?: string;
+  icon?: string;
+  check?: boolean;
+  danger?: boolean;
+  disabled?: boolean;
+  sep?: boolean;
+  grupo?: string;
+  children?: () => CtxMenuItem[];
+  onClick?: () => void;
+}
+
+interface LinkPreviewData {
+  id: string;
+  nome: string;
+  preco: number;
+  imgPath?: string | null;
+  link: string;
+}
+
+interface DocUploadState {
+  file: File;
+  nome: string;
+  mime: string;
+  tamanhoFormatado: string;
+  dataUrl?: string;
+}
+
 export default function CrmWhatsAppClient() {
   const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const campoTextoRef = useRef<HTMLTextAreaElement | null>(null);
   const serverUrl =
     process.env.NEXT_PUBLIC_WHATSAPP_PANEL_SERVER_URL || "http://localhost:4100";
 
@@ -33,10 +63,9 @@ export default function CrmWhatsAppClient() {
   const [qrCodeData, setQrCodeData] = useState<string | null>(null);
   const [rawQrString, setRawQrString] = useState<string | null>(null);
   const [numeroConectado, setNumeroConectado] = useState<string | null>(null);
-  const [nomeConectado, setNomeConectado] = useState<string | null>(null);
   const [qrCountdown, setQrCountdown] = useState<number>(25);
 
-  // Vendedor State (Empty by default, no fake names)
+  // Vendedor State (No fake names)
   const [vendedores, setVendedores] = useState<CrmVendedor[]>(() => {
     if (typeof window !== "undefined") {
       const s = localStorage.getItem("balao_crm_vendedores");
@@ -51,14 +80,13 @@ export default function CrmWhatsAppClient() {
   });
   const [vendedorAtivoId, setVendedorAtivoId] = useState<string | number | null>(() => {
     if (typeof window !== "undefined") {
-      const s = localStorage.getItem("balao_crm_vendedor_ativo");
-      if (s) return s;
+      return localStorage.getItem("balao_crm_vendedor_ativo") || null;
     }
     return null;
   });
   const [assinaturaAuto, setAssinaturaAuto] = useState(true);
 
-  // Chats and Messages (Empty by default, no fake chats)
+  // Chats and Messages
   const [chats, setChats] = useState<CrmChat[]>(() => {
     if (typeof window !== "undefined") {
       const s = localStorage.getItem("balao_crm_chats");
@@ -103,7 +131,7 @@ export default function CrmWhatsAppClient() {
   const [campoTexto, setCampoTexto] = useState("");
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
-  // Respostas Rápidas & Etiquetas
+  // Respostas Rápidas & Etiquetas & Catálogo
   const [respostas, setRespostas] = useState<CrmRespostaRapida[]>(() => {
     if (typeof window !== "undefined") {
       const s = localStorage.getItem("balao_crm_respostas");
@@ -124,6 +152,19 @@ export default function CrmWhatsAppClient() {
   });
   const [produtosCatalogo, setProdutosCatalogo] = useState<CrmProdutoCatalogo[]>(PRODUTOS_CATALOGO_BASE);
   const [buscaCatalogo, setBuscaCatalogo] = useState("");
+  const [fornecedorFiltro, setFornecedorFiltro] = useState("todos");
+
+  // Context Menu State
+  const [ctxVisible, setCtxVisible] = useState(false);
+  const [ctxPos, setCtxPos] = useState({ x: 0, y: 0 });
+  const [ctxStack, setCtxStack] = useState<{ title: string; items: CtxMenuItem[] }[]>([]);
+
+  // Replying / Quoting State
+  const [msgRespondendo, setMsgRespondendo] = useState<CrmMensagem | null>(null);
+
+  // Link Preview State
+  const [linkPreview, setLinkPreview] = useState<LinkPreviewData | null>(null);
+  const linkPreviewCache = useRef<Record<string, LinkPreviewData>>({});
 
   // Modals
   const [modalProdutoAberto, setModalProdutoAberto] = useState(false);
@@ -132,23 +173,50 @@ export default function CrmWhatsAppClient() {
   const [mpMargem, setMpMargem] = useState("25");
   const [mpPreco, setMpPreco] = useState("0");
   const [mpObs, setMpObs] = useState("");
+  const [mpOrigem, setMpOrigem] = useState<"margem" | "preco">("margem");
 
   const [modalFotoAberto, setModalFotoAberto] = useState(false);
   const [fotoUrl, setFotoUrl] = useState("");
   const [fotoLegenda, setFotoLegenda] = useState("");
+
+  const [modalDocAberto, setModalDocAberto] = useState(false);
+  const [docUpload, setDocUpload] = useState<DocUploadState | null>(null);
+  const [docLegenda, setDocLegenda] = useState("");
 
   const [modalNovaConversa, setModalNovaConversa] = useState(false);
   const [novoNumero, setNovoNumero] = useState("");
   const [novoNome, setNovoNome] = useState("");
   const [novaMsgInicial, setNovaMsgInicial] = useState("");
 
-  // Disparo State
+  // Web Fotos (Google / Bing transparent PNG)
+  const [buscaFotosWeb, setBuscaFotosWeb] = useState("");
+  const [fotosWeb, setFotosWeb] = useState<Array<{ url: string; w: number; h: number; nome: string }>>([]);
+  const [fotosWebCarregando, setFotosWebCarregando] = useState(false);
+  const [fotoDragSobre, setFotoDragSobre] = useState(false);
+
+  // Disparo em Massa State
   const [disparoTexto, setDisparoTexto] = useState(
-    "Olá {nome}! Tudo bem? Passando para te avisar das novidades aqui no Balão da Informática Castelo Campinas!"
+    "Olá {nome}! Tudo bem? Passando para te avisar das novidades e ofertas especiais no PIX aqui no Balão da Informática Castelo Campinas!\n{promocao}\n\nPara garantir é só me chamar aqui! 🎈\n{whatsapp}"
   );
-  const [disparoIntervalo, setDisparoIntervalo] = useState(15);
-  const [disparoExecutando, setDisparoExecutando] = useState(false);
-  const [disparoProgresso, setDisparoProgresso] = useState({ enviados: 0, total: 0 });
+  const [disparoIntervalo, setDisparoIntervalo] = useState(25);
+  const [disparoIntervaloMax, setDisparoIntervaloMax] = useState(60);
+  const [disparoLimiteDiario, setDisparoLimiteDiario] = useState(120);
+  const [disparoAtivo, setDisparoAtivo] = useState(false);
+  const [disparoRecent, setDisparoRecent] = useState<Array<{ id: string; nome: string; ts: number; pulado?: boolean; texto?: string }>>([]);
+  const [promocoes, setPromocoes] = useState<CrmPromocao[]>([
+    {
+      id: 1,
+      titulo: "PC Gamer Ryzen 5 + RTX 4060 10% OFF no Pix",
+      texto: "PC Gamer montado com garantia oficial Balão de R$ 4.890 por R$ 4.390 à vista no Pix!",
+      ativo: true,
+    },
+    {
+      id: 2,
+      titulo: "Limpeza Preventiva + Troca de Pasta Térmica",
+      texto: "Revisão completa de bancada com pasta térmica de alta condutividade por apenas R$ 120,00.",
+      ativo: true,
+    },
+  ]);
 
   // Persistence
   useEffect(() => {
@@ -165,24 +233,27 @@ export default function CrmWhatsAppClient() {
     }
   }, [chats, mensagens, kanbanColunas, respostas, etiquetas, vendedores, vendedorAtivoId]);
 
-  // Load Real Catalog from /api/products
+  // Load Real Catalog
   useEffect(() => {
     fetch("/api/products")
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
-          const list: CrmProdutoCatalogo[] = data.slice(0, 60).map((p: any) => {
+          const list: CrmProdutoCatalogo[] = data.slice(0, 60).map((p: any, idx: number) => {
             const precoNum =
               typeof p.price === "number"
                 ? p.price
                 : parseFloat(String(p.price).replace(/[^0-9.]/g, "")) || 499;
-            const custoNum = Math.round(precoNum * 0.78);
+            const custoNum = Math.round(precoNum * 0.76);
+            const fornecedores = ["Balão", "TechSupri", "Robson", "Markin"];
+            const fornecedor = fornecedores[idx % fornecedores.length];
             return {
               id: String(p.id),
               nome: p.name,
               preco: precoNum,
               custo: custoNum,
               margem: 28,
+              fornecedor,
               precoFormatado:
                 typeof p.price === "number"
                   ? `R$ ${p.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
@@ -200,10 +271,9 @@ export default function CrmWhatsAppClient() {
       .catch(() => {});
   }, []);
 
-  // Poll Real WhatsApp Status & QR Code via /api/crm/status only when NOT connected
+  // Poll Real WhatsApp Status only when disconnected
   useEffect(() => {
     if (estado === "ready" || estado === "authenticated") return;
-
     let ativo = true;
 
     const checkStatus = async () => {
@@ -235,19 +305,18 @@ export default function CrmWhatsAppClient() {
 
     checkStatus();
     const interval = setInterval(checkStatus, 2000);
-
     return () => {
       ativo = false;
       clearInterval(interval);
     };
   }, [estado]);
 
-  // Socket.IO Integration with whatsapp-server
+  // Socket.IO Integration
   useEffect(() => {
     const socket = io(serverUrl, {
       transports: ["websocket", "polling"],
       autoConnect: true,
-      reconnectionAttempts: 20,
+      reconnectionAttempts: 25,
       reconnectionDelay: 1500,
     });
     socketRef.current = socket;
@@ -263,15 +332,9 @@ export default function CrmWhatsAppClient() {
       } else if (payload?.status) {
         setEstado(payload.status);
       }
-      if (payload?.qrCode) {
-        setQrCodeData(payload.qrCode);
-      }
-      if (payload?.rawQr) {
-        setRawQrString(payload.rawQr);
-      }
-      if (payload?.phoneNumber) {
-        setNumeroConectado(payload.phoneNumber);
-      }
+      if (payload?.qrCode) setQrCodeData(payload.qrCode);
+      if (payload?.rawQr) setRawQrString(payload.rawQr);
+      if (payload?.phoneNumber) setNumeroConectado(payload.phoneNumber);
     });
 
     socket.on("whatsapp:chats", (serverChats: any[]) => {
@@ -331,6 +394,15 @@ export default function CrmWhatsAppClient() {
     socket.on("whatsapp:message", (newMsg: any) => {
       if (!newMsg || !newMsg.chatId) return;
 
+      // LGPD Opt-out check
+      const body = String(newMsg.body || "").trim().toUpperCase();
+      if (/^(SAIR|PARAR|CANCELAR|DESCADASTRAR|STOP|DESCADASTRO)$/.test(body)) {
+        setChats((prev) =>
+          prev.map((c) => (c.id === newMsg.chatId ? { ...c, optOut: true } : c))
+        );
+        showToast("Cliente optou por sair do disparo (LGPD).");
+      }
+
       const m: CrmMensagem = {
         id: newMsg.id || `msg-${Date.now()}`,
         chatId: newMsg.chatId,
@@ -345,7 +417,6 @@ export default function CrmWhatsAppClient() {
 
       setMensagens((prev) => [...prev.filter((x) => x.id !== m.id), m]);
 
-      // Update or insert chat
       setChats((prev) => {
         const idx = prev.findIndex((c) => c.id === newMsg.chatId);
         if (idx >= 0) {
@@ -355,6 +426,7 @@ export default function CrmWhatsAppClient() {
             lastMessage: newMsg.body || "",
             timestamp: newMsg.timestamp || Date.now(),
             unread: newMsg.direction === "in" ? copy[idx].unread + 1 : copy[idx].unread,
+            precisaAtencao: newMsg.direction === "in" ? true : copy[idx].precisaAtencao,
           };
           return copy.sort((a, b) => b.timestamp - a.timestamp);
         } else {
@@ -367,6 +439,7 @@ export default function CrmWhatsAppClient() {
             timestamp: Date.now(),
             tags: [],
             kanbanColId: "novos",
+            precisaAtencao: true,
           };
           return [novo, ...prev];
         }
@@ -383,6 +456,53 @@ export default function CrmWhatsAppClient() {
     };
   }, [serverUrl]);
 
+  // Live URL link preview on typing
+  useEffect(() => {
+    const urlMatch = campoTexto.match(/https?:\/\/[^\s]+/i);
+    if (!urlMatch) {
+      setLinkPreview(null);
+      return;
+    }
+
+    const url = urlMatch[0];
+    if (linkPreviewCache.current[url]) {
+      setLinkPreview(linkPreviewCache.current[url]);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      fetch(`/api/crm/preview-link?url=${encodeURIComponent(url)}`)
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.ok && data.preview) {
+            linkPreviewCache.current[url] = data.preview;
+            setLinkPreview(data.preview);
+          }
+        })
+        .catch(() => {});
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [campoTexto]);
+
+  // Google / Bing Web Photos Search
+  const pesquisarFotosWeb = (query: string) => {
+    setBuscaFotosWeb(query);
+    if (!query.trim()) {
+      setFotosWeb([]);
+      return;
+    }
+    setFotosWebCarregando(true);
+    fetch(`/api/crm/fotos-web?busca=${encodeURIComponent(query.trim())}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.ok && Array.isArray(data.fotos)) {
+          setFotosWeb(data.fotos);
+        }
+      })
+      .finally(() => setFotosWebCarregando(false));
+  };
+
   // QR countdown
   useEffect(() => {
     if (estado !== "qr" && estado !== "initializing") return;
@@ -392,10 +512,17 @@ export default function CrmWhatsAppClient() {
     return () => clearInterval(t);
   }, [estado]);
 
-  // Scroll to bottom on messages change
+  // Scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [mensagens, chatSelecionadoId]);
+
+  // Close context menu on global click
+  useEffect(() => {
+    const handler = () => setCtxVisible(false);
+    window.addEventListener("click", handler);
+    return () => window.removeEventListener("click", handler);
+  }, []);
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
@@ -448,6 +575,180 @@ export default function CrmWhatsAppClient() {
     return vendedores.find((v) => String(v.id) === String(vendedorAtivoId)) || vendedores[0];
   }, [vendedores, vendedorAtivoId]);
 
+  // Open Context Menu
+  const openContextMenu = (
+    e: React.MouseEvent,
+    title: string,
+    items: CtxMenuItem[]
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const x = Math.min(e.clientX, window.innerWidth - 240);
+    const y = Math.min(e.clientY, window.innerHeight - 280);
+    setCtxPos({ x, y });
+    setCtxStack([{ title, items }]);
+    setCtxVisible(true);
+  };
+
+  const ctxPush = (title: string, items: CtxMenuItem[]) => {
+    setCtxStack((prev) => [...prev, { title, items }]);
+  };
+
+  const ctxPop = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCtxStack((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev));
+  };
+
+  // Build Context Menu for Chat
+  const getChatMenuItems = (chat: CrmChat): CtxMenuItem[] => {
+    return [
+      {
+        label: "🏷️ Etiquetas",
+        children: () =>
+          etiquetas.map((et) => {
+            const hasTag = chat.tags.includes(et.nome);
+            return {
+              label: et.nome,
+              icon: `● ${et.nome}`,
+              check: hasTag,
+              onClick: () => toggleEtiquetaNoChat(et.nome, chat.id),
+            };
+          }),
+      },
+      {
+        label: "👤 Transferir para atendente",
+        children: () =>
+          vendedores.map((v) => ({
+            label: v.nome,
+            icon: "👤",
+            onClick: () => {
+              setChats((prev) =>
+                prev.map((c) =>
+                  c.id === chat.id
+                    ? {
+                        ...c,
+                        vendedorId: v.id,
+                        precisaAtencao: true,
+                        transferidoPor: vendedorAtivo?.nome || "Atendente",
+                        transferidoEm: Date.now(),
+                      }
+                    : c
+                )
+              );
+              showToast(`Cliente transferido para ${v.nome}`);
+            },
+          })),
+      },
+      {
+        label: "🗂️ Mover no Kanban",
+        children: () => [
+          ...kanbanColunas.map((col) => ({
+            label: col.nome,
+            icon: "●",
+            check: chat.kanbanColId === col.id,
+            onClick: () => {
+              setChats((prev) =>
+                prev.map((c) => (c.id === chat.id ? { ...c, kanbanColId: col.id } : c))
+              );
+              showToast(`Movido para ${col.nome}`);
+            },
+          })),
+          { sep: true },
+          {
+            label: "Remover do Kanban",
+            icon: "🗑️",
+            danger: true,
+            onClick: () => {
+              setChats((prev) =>
+                prev.map((c) => (c.id === chat.id ? { ...c, kanbanColId: null } : c))
+              );
+              showToast("Removido do Kanban");
+            },
+          },
+        ],
+      },
+      { sep: true },
+      {
+        label: chat.fixado ? "📌 Desafixar do topo" : "📌 Fixar no topo",
+        onClick: () => {
+          setChats((prev) =>
+            prev.map((c) => (c.id === chat.id ? { ...c, fixado: !c.fixado } : c))
+          );
+          showToast(chat.fixado ? "Conversa desafixada" : "Conversa fixada 📌");
+        },
+      },
+      {
+        label: chat.bloqueado ? "🔓 Desbloquear contato" : "🔒 Bloquear contato",
+        danger: !chat.bloqueado,
+        onClick: () => {
+          setChats((prev) =>
+            prev.map((c) => (c.id === chat.id ? { ...c, bloqueado: !c.bloqueado } : c))
+          );
+          showToast(chat.bloqueado ? "Contato desbloqueado" : "Contato bloqueado 🔒");
+        },
+      },
+      {
+        label: "🗑️ Apagar conversa",
+        danger: true,
+        onClick: () => {
+          if (confirm(`Apagar conversa com ${chat.nome}?`)) {
+            setChats((prev) => prev.filter((c) => c.id !== chat.id));
+            setMensagens((prev) => prev.filter((m) => m.chatId !== chat.id));
+            if (chatSelecionadoId === chat.id) setChatSelecionadoId(null);
+            showToast("Conversa apagada");
+          }
+        },
+      },
+    ];
+  };
+
+  // Build Context Menu for Message
+  const getMessageMenuItems = (msg: CrmMensagem): CtxMenuItem[] => {
+    return [
+      {
+        label: "↩️ Responder",
+        icon: "↩️",
+        onClick: () => {
+          setMsgRespondendo(msg);
+          campoTextoRef.current?.focus();
+        },
+      },
+      {
+        label: "📋 Copiar texto",
+        icon: "📋",
+        onClick: () => {
+          navigator.clipboard.writeText(msg.body);
+          showToast("Texto copiado!");
+        },
+      },
+      {
+        label: "🔁 Encaminhar",
+        icon: "🔁",
+        onClick: () => {
+          setCampoTexto(msg.body);
+          campoTextoRef.current?.focus();
+        },
+      },
+      { sep: true },
+      {
+        label: "🗑️ Apagar mensagem",
+        icon: "🗑️",
+        danger: true,
+        onClick: () => {
+          setMensagens((prev) => prev.filter((m) => m.id !== msg.id));
+          if (socketRef.current?.connected) {
+            socketRef.current.emit("panel:chat-action", {
+              chatId: msg.chatId,
+              action: "delete-message",
+              payload: { msgId: msg.id },
+            });
+          }
+          showToast("Mensagem apagada");
+        },
+      },
+    ];
+  };
+
   // Send message
   const enviarMensagem = () => {
     if (!campoTexto.trim() || !chatSelecionado) return;
@@ -464,6 +765,13 @@ export default function CrmWhatsAppClient() {
       body: textoFinal,
       direction: "out",
       timestamp: Date.now(),
+      replyTo: msgRespondendo
+        ? {
+            id: msgRespondendo.id,
+            body: msgRespondendo.body.slice(0, 80),
+            author: msgRespondendo.direction === "out" ? "Você" : chatSelecionado.nome,
+          }
+        : null,
       status: "sent",
     };
 
@@ -471,7 +779,13 @@ export default function CrmWhatsAppClient() {
     setChats((prev) =>
       prev.map((c) =>
         c.id === chatSelecionado.id
-          ? { ...c, lastMessage: textoFinal, timestamp: Date.now(), unread: 0 }
+          ? {
+              ...c,
+              lastMessage: textoFinal,
+              timestamp: Date.now(),
+              unread: 0,
+              precisaAtencao: false,
+            }
           : c
       )
     );
@@ -481,10 +795,13 @@ export default function CrmWhatsAppClient() {
         number: chatSelecionado.numero,
         text: textoFinal,
         chatId: chatSelecionado.id,
+        replyTo: msgRespondendo?.id || undefined,
       });
     }
 
     setCampoTexto("");
+    setMsgRespondendo(null);
+    setLinkPreview(null);
     showToast("Mensagem enviada ✓");
   };
 
@@ -495,7 +812,7 @@ export default function CrmWhatsAppClient() {
     }
   };
 
-  // Quick reply click
+  // Quick reply
   const inserirRespostaRapida = (resp: CrmRespostaRapida) => {
     let t = resp.texto;
     if (chatSelecionado) {
@@ -506,14 +823,33 @@ export default function CrmWhatsAppClient() {
     showToast(`Resposta "${resp.titulo}" inserida`);
   };
 
-  // Open Product Modal
+  // Product Modal Sync
   const abrirModalProduto = (p: CrmProdutoCatalogo) => {
     setProdutoModal(p);
-    setMpCusto(String(p.custo || Math.round(p.preco * 0.75)));
-    setMpMargem(String(p.margem || 25));
-    setMpPreco(String(p.preco));
+    const custo = p.custo || Math.round(p.preco * 0.76);
+    const margem = p.margem || 28;
+    setMpCusto(String(custo));
+    setMpMargem(String(margem));
+    setMpPreco(String(Math.round(custo * (1 + margem / 100))));
     setMpObs("");
+    setMpOrigem("margem");
     setModalProdutoAberto(true);
+  };
+
+  const sincronizarPreco = (cStr: string, mStr: string) => {
+    const c = parseFloat(cStr) || 0;
+    const m = parseFloat(mStr) || 0;
+    if (c > 0) {
+      setMpPreco(String(Math.round(c * (1 + m / 100))));
+    }
+  };
+
+  const sincronizarMargem = (cStr: string, pStr: string) => {
+    const c = parseFloat(cStr) || 0;
+    const p = parseFloat(pStr) || 0;
+    if (c > 0 && p > 0) {
+      setMpMargem(String(Math.round(((p - c) / c) * 100)));
+    }
   };
 
   const confirmarEnvioProduto = () => {
@@ -525,6 +861,26 @@ export default function CrmWhatsAppClient() {
     )}\n📍 Pronta entrega na loja do Castelo Campinas!\n${
       produtoModal.specs?.length ? `• ${produtoModal.specs.join("\n• ")}\n` : ""
     }${mpObs.trim() ? `\nObs: ${mpObs.trim()}\n` : ""}\nQuer que separe para você retirar hoje ou prefere entrega?`;
+
+    // Add to customer's sent products history
+    setChats((prev) =>
+      prev.map((c) =>
+        c.id === chatSelecionado.id
+          ? {
+              ...c,
+              produtosEnviados: [
+                {
+                  id: produtoModal.id,
+                  nome: produtoModal.nome,
+                  preco: precoNum,
+                  timestamp: Date.now(),
+                },
+                ...(c.produtosEnviados || []),
+              ],
+            }
+          : c
+      )
+    );
 
     setCampoTexto(txt);
     setModalProdutoAberto(false);
@@ -542,17 +898,20 @@ export default function CrmWhatsAppClient() {
   };
 
   // Tag click
-  const toggleEtiquetaNoChat = (nomeEtiqueta: string) => {
-    if (!chatSelecionado) return;
-    const jaTem = chatSelecionado.tags.includes(nomeEtiqueta);
-    const novasTags = jaTem
-      ? chatSelecionado.tags.filter((t) => t !== nomeEtiqueta)
-      : [...chatSelecionado.tags, nomeEtiqueta];
+  const toggleEtiquetaNoChat = (nomeEtiqueta: string, chatIdOverride?: string) => {
+    const targetId = chatIdOverride || chatSelecionadoId;
+    if (!targetId) return;
 
     setChats((prev) =>
-      prev.map((c) => (c.id === chatSelecionado.id ? { ...c, tags: novasTags } : c))
+      prev.map((c) => {
+        if (c.id !== targetId) return c;
+        const jaTem = c.tags.includes(nomeEtiqueta);
+        const novasTags = jaTem
+          ? c.tags.filter((t) => t !== nomeEtiqueta)
+          : [...c.tags, nomeEtiqueta];
+        return { ...c, tags: novasTags };
+      })
     );
-    showToast(jaTem ? "Etiqueta removida" : `Etiqueta "${nomeEtiqueta}" aplicada ✅`);
   };
 
   // Create new conversation
@@ -631,8 +990,6 @@ export default function CrmWhatsAppClient() {
   };
 
   const isConnected = estado === "ready" || estado === "authenticated";
-
-  // Check if we have a real authentic QR code
   const temQrReal = Boolean(
     (qrCodeData && qrCodeData.startsWith("data:image")) ||
     (rawQrString && rawQrString.length > 20)
@@ -640,7 +997,7 @@ export default function CrmWhatsAppClient() {
 
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden bg-[#f0f2f5] text-[#202124] font-['Segoe_UI',Tahoma,Arial,sans-serif]">
-      {/* HEADER TOPBAR (Identical to reference system) */}
+      {/* HEADER TOPBAR */}
       <header className="bg-[#0f9d58] text-white px-4 py-2.5 shadow-sm z-20 flex items-center justify-between gap-3 shrink-0">
         <div className="flex items-center gap-2">
           <span className="text-base font-bold flex items-center gap-1.5">
@@ -726,7 +1083,7 @@ export default function CrmWhatsAppClient() {
         </div>
       </header>
 
-      {/* SCREEN 1: QR CODE SCREEN (When not connected) */}
+      {/* SCREEN 1: QR CODE SCREEN */}
       {!isConnected && (
         <div className="flex-1 flex items-center justify-center bg-[#f0f2f5] p-4">
           <div className="bg-white rounded-2xl shadow-lg p-8 text-center max-w-md w-full border border-[#e3e3e3]">
@@ -793,14 +1150,21 @@ export default function CrmWhatsAppClient() {
         </div>
       )}
 
-      {/* SCREEN 2: MAIN DASHBOARD & KANBAN (When connected) */}
+      {/* SCREEN 2: MAIN DASHBOARD & KANBAN */}
       {isConnected && (
         <div className="flex-1 flex flex-col overflow-hidden min-h-0">
           {/* Main 3 Panels Row */}
           <div className="flex-1 flex overflow-hidden min-h-0">
             {/* PANE 1: CHATS LIST */}
             <aside className="w-72 bg-white border-r border-[#e3e3e3] flex flex-col shrink-0">
-              <div className="p-3 pb-1.5 font-bold text-sm text-[#202124]">Conversas</div>
+              <div className="p-3 pb-1.5 font-bold text-sm text-[#202124] flex items-center justify-between">
+                <span>Conversas ({chats.length})</span>
+                {chats.some((c) => c.precisaAtencao) && (
+                  <span className="bg-[#fff3cd] text-[#856404] text-[10px] px-2 py-0.5 rounded-full font-bold border border-[#ffeeba]">
+                    ⚠️ Atenção
+                  </span>
+                )}
+              </div>
 
               <div className="px-3 py-1.5 space-y-1.5">
                 <input
@@ -845,9 +1209,14 @@ export default function CrmWhatsAppClient() {
                         onClick={() => {
                           setChatSelecionadoId(chat.id);
                           setChats((prev) =>
-                            prev.map((c) => (c.id === chat.id ? { ...c, unread: 0 } : c))
+                            prev.map((c) =>
+                              c.id === chat.id ? { ...c, unread: 0, precisaAtencao: false } : c
+                            )
                           );
                         }}
+                        onContextMenu={(e) =>
+                          openContextMenu(e, chat.nome, getChatMenuItems(chat))
+                        }
                         className={`flex items-center gap-2.5 p-2 rounded-xl cursor-pointer transition-colors ${
                           isAtivo
                             ? "bg-[#e7f6ec]"
@@ -869,6 +1238,14 @@ export default function CrmWhatsAppClient() {
                               {chat.unread}
                             </span>
                           )}
+                          {chat.precisaAtencao && (
+                            <span
+                              title="Transferido ou aguardando resposta"
+                              className="absolute -bottom-1 -right-1 bg-amber-500 text-white rounded-full w-4 h-4 text-[10px] flex items-center justify-center font-bold"
+                            >
+                              ⚠️
+                            </span>
+                          )}
                         </div>
 
                         {/* Infos */}
@@ -879,6 +1256,7 @@ export default function CrmWhatsAppClient() {
                                 chat.unread > 0 ? "font-bold text-[#202124]" : "font-semibold text-[#202124]"
                               }`}
                             >
+                              {chat.fixado && "📌 "}
                               {chat.nome}
                             </h4>
                             <span className="text-[10px] text-[#5f6368] font-mono">
@@ -896,9 +1274,9 @@ export default function CrmWhatsAppClient() {
                             {chat.lastMessage || "Sem mensagens"}
                           </p>
 
-                          {chat.tags && chat.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {chat.tags.map((t) => (
+                          <div className="flex flex-wrap gap-1 mt-1 items-center">
+                            {chat.tags &&
+                              chat.tags.map((t) => (
                                 <span
                                   key={t}
                                   className="text-[9px] text-white px-1.5 py-0.2 rounded-full font-bold"
@@ -907,8 +1285,12 @@ export default function CrmWhatsAppClient() {
                                   {t}
                                 </span>
                               ))}
-                            </div>
-                          )}
+                            {chat.transferidoPor && (
+                              <span className="text-[9px] bg-[#e8eaed] text-[#5f6368] px-1.5 py-0.2 rounded font-semibold">
+                                Por {chat.transferidoPor}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     );
@@ -918,7 +1300,26 @@ export default function CrmWhatsAppClient() {
             </aside>
 
             {/* PANE 2: CONVERSA ATIVA */}
-            <section className="flex-1 flex flex-col min-w-0 bg-[#e5ddd5]">
+            <section
+              onDragOver={(e) => {
+                e.preventDefault();
+                setFotoDragSobre(true);
+              }}
+              onDragLeave={() => setFotoDragSobre(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setFotoDragSobre(false);
+                const url = e.dataTransfer.getData("text/plain");
+                if (url) {
+                  setFotoUrl(url);
+                  setFotoLegenda("Produto Balão");
+                  setModalFotoAberto(true);
+                }
+              }}
+              className={`flex-1 flex flex-col min-w-0 bg-[#e5ddd5] relative transition-colors ${
+                fotoDragSobre ? "ring-4 ring-inset ring-[#0f9d58] bg-[#d7ecd9]" : ""
+              }`}
+            >
               {chatSelecionado ? (
                 <>
                   {/* Header */}
@@ -934,7 +1335,7 @@ export default function CrmWhatsAppClient() {
                             {chatSelecionado.numero}
                           </span>
                         </div>
-                        <div className="flex flex-wrap gap-1 mt-0.5">
+                        <div className="flex flex-wrap gap-1 mt-0.5 items-center">
                           {chatSelecionado.tags.map((t) => (
                             <span
                               key={t}
@@ -944,6 +1345,23 @@ export default function CrmWhatsAppClient() {
                               {t}
                             </span>
                           ))}
+                          {chatSelecionado.precisaAtencao && (
+                            <button
+                              onClick={() => {
+                                setChats((prev) =>
+                                  prev.map((c) =>
+                                    c.id === chatSelecionado.id
+                                      ? { ...c, precisaAtencao: false, vendedorId: vendedorAtivoId }
+                                      : c
+                                  )
+                                );
+                                showToast("Atendimento assumido 🟢");
+                              }}
+                              className="bg-amber-100 hover:bg-amber-200 text-amber-900 text-[10px] font-bold px-2 py-0.5 rounded-full cursor-pointer"
+                            >
+                              ⚠️ Assumir Atendimento
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -973,12 +1391,51 @@ export default function CrmWhatsAppClient() {
                         return (
                           <div
                             key={m.id}
-                            className={`max-w-[65%] p-2 px-3 rounded-xl text-xs shadow-sm break-words whitespace-pre-wrap leading-relaxed ${
+                            onContextMenu={(e) =>
+                              openContextMenu(e, "Opções da Mensagem", getMessageMenuItems(m))
+                            }
+                            className={`max-w-[65%] p-2 px-3 rounded-xl text-xs shadow-sm break-words whitespace-pre-wrap leading-relaxed cursor-pointer ${
                               isEu
                                 ? "self-end bg-[#e7f6ec] border border-[#0f9d58] rounded-tr-none text-[#202124]"
                                 : "self-start bg-[#dff0fd] border border-[#a9cdf0] rounded-tl-none text-[#202124]"
                             }`}
                           >
+                            {/* Quoted Message Snippet */}
+                            {m.replyTo && (
+                              <div className="bg-black/5 border-l-3 border-[#0f9d58] p-1.5 mb-1.5 rounded text-[11px] text-[#5f6368]">
+                                <div className="font-bold text-[#0a6e3d]">{m.replyTo.author}</div>
+                                <div className="line-clamp-2">{m.replyTo.body}</div>
+                              </div>
+                            )}
+
+                            {/* Audio Player if Voice Note */}
+                            {m.mediaType === "audio" || m.mediaType === "ptt" || m.isVoice ? (
+                              <div className="py-1">
+                                <audio src={m.mediaUrl || ""} controls className="w-60 h-8" />
+                              </div>
+                            ) : null}
+
+                            {/* Document Download if File */}
+                            {m.mediaType === "document" && (
+                              <div className="flex items-center gap-2 p-2 bg-white/80 rounded-lg border border-[#e3e3e3] mb-1">
+                                <span className="text-xl">📄</span>
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-bold text-xs truncate">{m.mediaName || "Documento"}</div>
+                                  <div className="text-[10px] text-[#5f6368]">{m.body}</div>
+                                </div>
+                                {m.mediaUrl && (
+                                  <a
+                                    href={m.mediaUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="bg-[#0f9d58] text-white text-[10px] font-bold px-2 py-1 rounded"
+                                  >
+                                    ⬇ Baixar
+                                  </a>
+                                )}
+                              </div>
+                            )}
+
                             <p>{m.body}</p>
                             <span className="block text-[10px] text-[#5f6368] text-right mt-1 font-mono">
                               {formatHora(m.timestamp)} {isEu && "✓✓"}
@@ -992,6 +1449,52 @@ export default function CrmWhatsAppClient() {
 
                   {/* Input Area */}
                   <div className="bg-white border-t border-[#e3e3e3] p-2.5 px-3">
+                    {/* Quoting Banner */}
+                    {msgRespondendo && (
+                      <div className="bg-[#f0f2f5] border-l-4 border-[#0f9d58] p-2 rounded flex items-center justify-between mb-2 text-xs">
+                        <div>
+                          <b className="text-[#0a6e3d]">Respondendo a mensagem:</b>
+                          <div className="text-[#5f6368] line-clamp-1">{msgRespondendo.body}</div>
+                        </div>
+                        <button
+                          onClick={() => setMsgRespondendo(null)}
+                          className="text-[#5f6368] hover:text-red-500 font-bold px-2"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Live Link Preview Banner */}
+                    {linkPreview && (
+                      <div className="flex items-center gap-2.5 p-2 bg-[#f9fafb] border border-[#e3e3e3] rounded-xl mb-2 text-xs">
+                        {linkPreview.imgPath ? (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img
+                            src={linkPreview.imgPath}
+                            alt=""
+                            className="w-12 h-12 object-contain rounded bg-white"
+                          />
+                        ) : (
+                          <span className="text-xl">🛒</span>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="font-bold text-xs truncate text-[#202124]">{linkPreview.nome}</div>
+                          {linkPreview.preco > 0 && (
+                            <div className="text-[#0a6e3d] font-bold text-xs">
+                              R$ {linkPreview.preco.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                            </div>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => setLinkPreview(null)}
+                          className="text-[#5f6368] hover:text-red-500 font-bold px-1"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    )}
+
                     {/* Respostas Rápidas Chips Bar */}
                     {mostrarRapidasBar && (
                       <div className="flex flex-wrap gap-1.5 pb-2.5 max-h-32 overflow-y-auto border-b border-[#e3e3e3] mb-2">
@@ -1036,7 +1539,32 @@ export default function CrmWhatsAppClient() {
                         📷
                       </button>
 
+                      <label
+                        title="Enviar documento (PDF, DOC, XLS, ZIP)"
+                        className="bg-[#e7f6ec] text-[#0a6e3d] border border-[#0f9d58] rounded-lg p-2 text-sm font-bold hover:bg-[#0f9d58] hover:text-white transition-colors cursor-pointer"
+                      >
+                        📄
+                        <input
+                          type="file"
+                          className="hidden"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) {
+                              setDocUpload({
+                                file: f,
+                                nome: f.name,
+                                mime: f.type || "application/octet-stream",
+                                tamanhoFormatado: `${Math.round(f.size / 1024)} KB`,
+                              });
+                              setDocLegenda("");
+                              setModalDocAberto(true);
+                            }
+                          }}
+                        />
+                      </label>
+
                       <textarea
+                        ref={campoTextoRef}
                         rows={1}
                         placeholder="Digite sua mensagem… (Enter envia, Shift+Enter quebra linha)"
                         value={campoTexto}
@@ -1061,7 +1589,7 @@ export default function CrmWhatsAppClient() {
               )}
             </section>
 
-            {/* PANE 3: PANE LATERAL (7 Abas) */}
+            {/* PANE 3: PANE LATERAL */}
             <aside className="w-88 bg-white border-l border-[#e3e3e3] flex flex-col shrink-0">
               {/* Abas */}
               <div className="flex flex-wrap border-b border-[#e3e3e3] p-1 gap-1">
@@ -1093,22 +1621,39 @@ export default function CrmWhatsAppClient() {
                 {/* ABA 1: CATÁLOGO */}
                 {abaAtual === "catalogo" && (
                   <div className="space-y-3">
-                    <input
-                      type="text"
-                      placeholder="Buscar produto no catálogo…"
-                      value={buscaCatalogo}
-                      onChange={(e) => setBuscaCatalogo(e.target.value)}
-                      className="w-full px-3 py-1.5 border border-[#e3e3e3] rounded-full text-xs outline-none focus:border-[#0f9d58]"
-                    />
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Buscar produto…"
+                        value={buscaCatalogo}
+                        onChange={(e) => setBuscaCatalogo(e.target.value)}
+                        className="flex-1 px-3 py-1.5 border border-[#e3e3e3] rounded-full text-xs outline-none focus:border-[#0f9d58]"
+                      />
+                      <select
+                        value={fornecedorFiltro}
+                        onChange={(e) => setFornecedorFiltro(e.target.value)}
+                        className="px-2 py-1.5 border border-[#e3e3e3] rounded-lg text-xs outline-none"
+                      >
+                        <option value="todos">Todos</option>
+                        <option value="Balão">Balão</option>
+                        <option value="TechSupri">TechSupri</option>
+                        <option value="Robson">Robson</option>
+                        <option value="Markin">Markin</option>
+                      </select>
+                    </div>
 
                     <div className="space-y-2">
                       {produtosCatalogo
-                        .filter(
-                          (p) =>
+                        .filter((p) => {
+                          const matchBusca =
                             !buscaCatalogo ||
                             p.nome.toLowerCase().includes(buscaCatalogo.toLowerCase()) ||
-                            p.categoria.toLowerCase().includes(buscaCatalogo.toLowerCase())
-                        )
+                            p.categoria.toLowerCase().includes(buscaCatalogo.toLowerCase());
+                          const matchFornec =
+                            fornecedorFiltro === "todos" ||
+                            (p.fornecedor || "Balão").toLowerCase() === fornecedorFiltro.toLowerCase();
+                          return matchBusca && matchFornec;
+                        })
                         .map((prod) => (
                           <div
                             key={prod.id}
@@ -1130,7 +1675,7 @@ export default function CrmWhatsAppClient() {
                                   {prod.precoFormatado}
                                 </span>
                                 <span className="text-[10px] text-[#5f6368] bg-[#f0f2f5] px-1.5 py-0.5 rounded">
-                                  Custo: R$ {prod.custo}
+                                  Custo: R$ {prod.custo} ({prod.fornecedor || "Balão"})
                                 </span>
                               </div>
                             </div>
@@ -1143,32 +1688,52 @@ export default function CrmWhatsAppClient() {
                 {/* ABA 2: GOOGLE FOTOS */}
                 {abaAtual === "fotos" && (
                   <div className="space-y-3">
+                    <input
+                      type="text"
+                      placeholder="Pesquisar foto transparente na web…"
+                      value={buscaFotosWeb}
+                      onChange={(e) => pesquisarFotosWeb(e.target.value)}
+                      className="w-full px-3 py-1.5 border border-[#e3e3e3] rounded-full text-xs outline-none focus:border-[#0f9d58]"
+                    />
                     <p className="text-[11px] text-[#5f6368]">
-                      Clique para visualizar e enviar fotos de produtos ou comprovantes diretamente para a conversa.
+                      🔍 Arraste a foto para a conversa ou clique para enviar com legenda.
                     </p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {produtosCatalogo.map((prod) => (
-                        <div
-                          key={prod.id}
-                          onClick={() => {
-                            setFotoUrl(prod.imagem);
-                            setFotoLegenda(prod.nome);
-                            setModalFotoAberto(true);
-                          }}
-                          className="border border-[#e3e3e3] rounded-xl p-1.5 hover:border-[#0f9d58] cursor-pointer text-center bg-white shadow-sm"
-                        >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={prod.imagem}
-                            alt=""
-                            className="w-full h-24 object-contain rounded-lg bg-[#f7f8fa]"
-                          />
-                          <p className="text-[10px] font-bold text-[#202124] truncate mt-1">
-                            {prod.nome}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
+
+                    {fotosWebCarregando ? (
+                      <div className="text-center py-4 text-xs text-[#5f6368]">Pesquisando fotos web…</div>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-2">
+                        {(fotosWeb.length > 0 ? fotosWeb : produtosCatalogo.slice(0, 10)).map(
+                          (foto, idx) => {
+                            const url = "url" in foto ? foto.url : (foto as CrmProdutoCatalogo).imagem;
+                            const title = foto.nome;
+                            return (
+                              <div
+                                key={idx}
+                                draggable
+                                onDragStart={(e) => e.dataTransfer.setData("text/plain", url)}
+                                onClick={() => {
+                                  setFotoUrl(url);
+                                  setFotoLegenda(title);
+                                  setModalFotoAberto(true);
+                                }}
+                                className="border border-[#e3e3e3] rounded-xl p-1.5 hover:border-[#0f9d58] cursor-grab text-center bg-white shadow-sm"
+                              >
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                  src={url}
+                                  alt=""
+                                  className="w-full h-24 object-contain rounded-lg bg-[#f7f8fa]"
+                                />
+                                <p className="text-[10px] font-bold text-[#202124] truncate mt-1">
+                                  {title}
+                                </p>
+                              </div>
+                            );
+                          }
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -1361,12 +1926,23 @@ export default function CrmWhatsAppClient() {
                 {abaAtual === "disparo" && (
                   <div className="space-y-3">
                     <div className="bg-[#fff4e5] border border-[#ffcc80] rounded-xl p-2.5 text-[11px] text-[#e65100]">
-                      ⚠️ <b>Proteção Anti-Ban:</b> O sistema aplica um intervalo de segurança entre cada mensagem disparada.
+                      ⚠️ <b>Proteção Anti-Ban & LGPD:</b> O disparo envia de forma cadenciada dentro da janela comercial e processa opt-out imediato.
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-center text-xs">
+                      <div className="bg-[#f0f2f5] p-2 rounded-xl border border-[#e3e3e3]">
+                        <div className="text-[10px] text-[#5f6368]">Na Fila</div>
+                        <div className="text-base font-bold text-[#202124]">{chats.filter((c) => !c.optOut).length}</div>
+                      </div>
+                      <div className="bg-[#f0f2f5] p-2 rounded-xl border border-[#e3e3e3]">
+                        <div className="text-[10px] text-[#5f6368]">Opt-Out (LGPD)</div>
+                        <div className="text-base font-bold text-red-600">{chats.filter((c) => c.optOut).length}</div>
+                      </div>
                     </div>
 
                     <div>
                       <label className="block text-xs font-bold text-[#202124] mb-1">
-                        Mensagem da Campanha
+                        Mensagem da Campanha (Variáveis: {"{nome}"}, {"{promocao}"}, {"{whatsapp}"})
                       </label>
                       <textarea
                         rows={4}
@@ -1379,42 +1955,62 @@ export default function CrmWhatsAppClient() {
                     <div>
                       <div className="flex justify-between text-xs font-semibold mb-1">
                         <span>Intervalo entre envios:</span>
-                        <span className="font-bold text-[#0a6e3d]">{disparoIntervalo}s</span>
+                        <span className="font-bold text-[#0a6e3d]">{disparoIntervalo}s a {disparoIntervaloMax}s</span>
                       </div>
                       <input
                         type="range"
-                        min="5"
-                        max="60"
+                        min="15"
+                        max="90"
                         value={disparoIntervalo}
-                        onChange={(e) => setDisparoIntervalo(Number(e.target.value))}
+                        onChange={(e) => {
+                          const v = Number(e.target.value);
+                          setDisparoIntervalo(v);
+                          setDisparoIntervaloMax(Math.max(v * 2, 60));
+                        }}
                         className="w-full accent-[#0f9d58]"
                       />
                     </div>
 
-                    <div className="bg-[#f0f2f5] p-3 rounded-xl border border-[#e3e3e3] text-center">
-                      <div className="text-xs text-[#5f6368]">Destinatários na Base</div>
-                      <div className="text-lg font-black text-[#202124]">{chats.length} contatos</div>
+                    <div className="space-y-1.5">
+                      <div className="font-bold text-xs text-[#202124]">📢 Promoções Ativas no Disparo:</div>
+                      {promocoes.map((p) => (
+                        <div key={p.id} className="p-2 bg-white border border-[#e3e3e3] rounded-lg text-xs flex justify-between items-center">
+                          <div>
+                            <b>{p.titulo}</b>
+                            <p className="text-[10px] text-[#5f6368] line-clamp-1">{p.texto}</p>
+                          </div>
+                          <input
+                            type="checkbox"
+                            checked={p.ativo}
+                            onChange={(e) =>
+                              setPromocoes((prev) =>
+                                prev.map((x) => (x.id === p.id ? { ...x, ativo: e.target.checked } : x))
+                              )
+                            }
+                            className="accent-[#0f9d58]"
+                          />
+                        </div>
+                      ))}
                     </div>
 
                     <button
                       onClick={() => {
-                        if (!chats.length || !disparoTexto.trim()) return;
-                        setDisparoExecutando(true);
-                        setDisparoProgresso({ enviados: 0, total: chats.length });
-
-                        const recipients = chats.map((c) => ({ number: c.numero, chatId: c.id }));
+                        const elegiveis = chats.filter((c) => !c.optOut);
+                        if (!elegiveis.length || !disparoTexto.trim()) return;
+                        setDisparoAtivo(true);
+                        const recipients = elegiveis.map((c) => ({ number: c.numero, chatId: c.id }));
                         if (socketRef.current?.connected) {
                           socketRef.current.emit("panel:send-segmented", {
                             recipients,
                             text: disparoTexto,
                           });
                         }
-                        showToast(`Disparo iniciado para ${chats.length} contatos!`);
+                        showToast(`Disparo iniciado para ${elegiveis.length} contatos!`);
                       }}
-                      disabled={disparoExecutando || chats.length === 0}
+                      disabled={disparoAtivo || chats.filter((c) => !c.optOut).length === 0}
                       className="w-full bg-[#0f9d58] hover:bg-[#0a6e3d] disabled:opacity-50 text-white py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer"
                     >
-                      {disparoExecutando ? "Disparando mensagens..." : `Iniciar Disparo (${chats.length})`}
+                      {disparoAtivo ? "Campanha em Andamento…" : `Iniciar Disparo (${chats.filter((c) => !c.optOut).length})`}
                     </button>
                   </div>
                 )}
@@ -1471,6 +2067,23 @@ export default function CrmWhatsAppClient() {
                             ))}
                           </select>
                         </div>
+
+                        {/* Histórico de Produtos Enviados */}
+                        {chatSelecionado.produtosEnviados && chatSelecionado.produtosEnviados.length > 0 && (
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold uppercase text-[#5f6368]">
+                              📦 Produtos Ofertados ({chatSelecionado.produtosEnviados.length})
+                            </label>
+                            <div className="space-y-1 max-h-32 overflow-y-auto">
+                              {chatSelecionado.produtosEnviados.map((p, idx) => (
+                                <div key={idx} className="p-1.5 bg-[#f0f2f5] rounded border border-[#e3e3e3] text-[11px] flex justify-between items-center">
+                                  <span className="truncate">{p.nome}</span>
+                                  <b className="text-[#0a6e3d]">R$ {p.preco.toFixed(2)}</b>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
 
                         <div>
                           <label className="text-[10px] font-bold uppercase text-[#5f6368]">Notas Internas</label>
@@ -1531,7 +2144,7 @@ export default function CrmWhatsAppClient() {
             </aside>
           </div>
 
-          {/* BOTTOM KANBAN TRAY (.kanban-barra identical to reference) */}
+          {/* BOTTOM KANBAN TRAY */}
           <div
             className={`border-t border-[#e3e3e3] bg-[#f0f2f5] flex flex-col px-3.5 py-2 transition-all duration-200 shrink-0 ${
               kanbanTamanho === "expandido"
@@ -1650,10 +2263,16 @@ export default function CrmWhatsAppClient() {
                               draggable
                               onDragStart={() => setKanbanArrastadoId(card.id)}
                               onClick={() => setChatSelecionadoId(card.id)}
+                              onContextMenu={(e) =>
+                                openContextMenu(e, card.nome, getChatMenuItems(card))
+                              }
                               className="bg-white border border-[#e3e3e3] rounded-lg p-2 shadow-xs cursor-grab active:cursor-grabbing hover:border-[#0f9d58] transition-all"
                             >
-                              <div className="font-bold text-xs text-[#202124] hover:text-[#0a6e3d] truncate">
-                                {card.nome}
+                              <div className="font-bold text-xs text-[#202124] hover:text-[#0a6e3d] truncate flex justify-between items-center">
+                                <span>{card.nome}</span>
+                                {card.precisaAtencao && (
+                                  <span className="text-[10px]" title="Precisa de atenção">⚠️</span>
+                                )}
                               </div>
                               <div className="text-[10px] text-[#5f6368] truncate mt-0.5">
                                 {card.lastMessage || card.numero}
@@ -1684,7 +2303,61 @@ export default function CrmWhatsAppClient() {
         </div>
       )}
 
-      {/* MODAL PRODUTO: Definir Preço de Venda */}
+      {/* CONTEXT MENU MODAL */}
+      {ctxVisible && ctxStack.length > 0 && (
+        <div
+          style={{ top: ctxPos.y, left: ctxPos.x }}
+          onClick={(e) => e.stopPropagation()}
+          className="fixed z-[99999] bg-white border border-[#e3e3e3] rounded-xl shadow-2xl py-1.5 min-w-[210px] max-w-[260px] text-xs text-[#202124] animate-in fade-in zoom-in-95 duration-100"
+        >
+          {ctxStack.length > 1 && (
+            <button
+              onClick={ctxPop}
+              className="w-full text-left px-3 py-1.5 bg-[#f0f2f5] hover:bg-[#e8eaed] font-bold text-[11px] text-[#0a6e3d] flex items-center gap-1 border-b border-[#e3e3e3] mb-1 cursor-pointer"
+            >
+              ← Voltar
+            </button>
+          )}
+
+          <div className="px-3 py-1 text-[10px] font-bold text-[#5f6368] uppercase tracking-wider border-b border-[#f0f2f5] mb-1">
+            {ctxStack[ctxStack.length - 1].title}
+          </div>
+
+          <div className="space-y-0.5">
+            {ctxStack[ctxStack.length - 1].items.map((item, idx) => {
+              if (item.sep) {
+                return <div key={idx} className="border-t border-[#e3e3e3] my-1" />;
+              }
+
+              return (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    if (item.children) {
+                      ctxPush(item.label || "Opções", item.children());
+                    } else if (item.onClick) {
+                      item.onClick();
+                      setCtxVisible(false);
+                    }
+                  }}
+                  className={`w-full text-left px-3 py-1.5 hover:bg-[#f0f2f5] flex items-center justify-between text-xs transition-colors cursor-pointer ${
+                    item.danger ? "text-red-600 hover:bg-red-50" : ""
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    {item.icon && <span>{item.icon}</span>}
+                    <span>{item.label}</span>
+                  </span>
+                  {item.check && <span className="text-[#0f9d58] font-bold">✓</span>}
+                  {item.children && <span className="text-[#80868b] font-bold">›</span>}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* MODAL PRODUTO: Definir Preço de Venda com 2-Way Sync */}
       {modalProdutoAberto && produtoModal && (
         <div className="fixed inset-0 bg-black/55 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-4 space-y-3">
@@ -1709,12 +2382,14 @@ export default function CrmWhatsAppClient() {
               />
               <div className="min-w-0 flex-1">
                 <div className="font-bold text-xs text-[#202124]">{produtoModal.nome}</div>
-                <div className="text-[11px] text-[#5f6368]">{produtoModal.categoria}</div>
+                <div className="text-[11px] text-[#5f6368]">
+                  Fornecedor: {produtoModal.fornecedor || "Balão"}
+                </div>
               </div>
             </div>
 
             <div className="bg-[#fff8e1] border border-[#f2c94c] rounded-lg p-2 text-[11px] text-[#7a5c00]">
-              ⚠️ Defina o custo e a margem de lucro para calcular o preço de venda enviado no WhatsApp.
+              ⚠️ O valor abaixo é o <b>CUSTO</b> do fornecedor. Defina a margem ou o preço de venda para concluir o envio.
             </div>
 
             <div className="space-y-2 text-xs">
@@ -1724,10 +2399,9 @@ export default function CrmWhatsAppClient() {
                   type="number"
                   value={mpCusto}
                   onChange={(e) => {
-                    const c = Number(e.target.value) || 0;
                     setMpCusto(e.target.value);
-                    const m = Number(mpMargem) || 0;
-                    setMpPreco(String(Math.round(c * (1 + m / 100))));
+                    if (mpOrigem === "margem") sincronizarPreco(e.target.value, mpMargem);
+                    else sincronizarMargem(e.target.value, mpPreco);
                   }}
                   className="w-32 p-1.5 border border-[#e3e3e3] rounded-lg font-mono text-right"
                 />
@@ -1739,10 +2413,9 @@ export default function CrmWhatsAppClient() {
                   type="number"
                   value={mpMargem}
                   onChange={(e) => {
-                    const m = Number(e.target.value) || 0;
                     setMpMargem(e.target.value);
-                    const c = Number(mpCusto) || 0;
-                    setMpPreco(String(Math.round(c * (1 + m / 100))));
+                    setMpOrigem("margem");
+                    sincronizarPreco(mpCusto, e.target.value);
                   }}
                   className="w-32 p-1.5 border border-[#e3e3e3] rounded-lg font-mono text-right"
                 />
@@ -1754,10 +2427,9 @@ export default function CrmWhatsAppClient() {
                   type="number"
                   value={mpPreco}
                   onChange={(e) => {
-                    const p = Number(e.target.value) || 0;
                     setMpPreco(e.target.value);
-                    const c = Number(mpCusto) || 1;
-                    setMpMargem(String(Math.round(((p - c) / c) * 100)));
+                    setMpOrigem("preco");
+                    sincronizarMargem(mpCusto, e.target.value);
                   }}
                   className="w-32 p-1.5 border border-[#0f9d58] rounded-lg font-bold font-mono text-right text-[#0a6e3d]"
                 />
@@ -1780,13 +2452,70 @@ export default function CrmWhatsAppClient() {
               onClick={confirmarEnvioProduto}
               className="w-full bg-[#0f9d58] hover:bg-[#0a6e3d] text-white py-2 rounded-lg text-xs font-bold transition-colors cursor-pointer"
             >
-              ➤ Inserir Oferta no Chat
+              ➤ Enviar Produto
             </button>
           </div>
         </div>
       )}
 
-      {/* MODAL FOTO: Visualizar & Enviar Foto */}
+      {/* MODAL DOCUMENTO */}
+      {modalDocAberto && docUpload && (
+        <div className="fixed inset-0 bg-black/55 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-4 space-y-3">
+            <div className="flex justify-between items-center border-b border-[#e3e3e3] pb-2">
+              <strong className="text-xs text-[#202124]">📄 Enviar Documento</strong>
+              <button
+                onClick={() => setModalDocAberto(false)}
+                className="text-[#5f6368] hover:text-[#202124] font-bold text-sm cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="flex items-center gap-3 p-3 bg-[#f0f2f5] rounded-xl border border-[#e3e3e3]">
+              <span className="text-3xl">📄</span>
+              <div className="min-w-0 flex-1">
+                <div className="font-bold text-xs text-[#202124] truncate">{docUpload.nome}</div>
+                <div className="text-[11px] text-[#5f6368]">{docUpload.tamanhoFormatado} · {docUpload.mime}</div>
+              </div>
+            </div>
+
+            <textarea
+              rows={2}
+              placeholder="Legenda do documento (opcional)..."
+              value={docLegenda}
+              onChange={(e) => setDocLegenda(e.target.value)}
+              className="w-full p-2 border border-[#e3e3e3] rounded-lg text-xs"
+            />
+
+            <button
+              onClick={() => {
+                if (!chatSelecionado) return;
+                const m: CrmMensagem = {
+                  id: `msg-${Date.now()}`,
+                  chatId: chatSelecionado.id,
+                  from: "balao",
+                  body: docLegenda || docUpload.nome,
+                  direction: "out",
+                  timestamp: Date.now(),
+                  hasMedia: true,
+                  mediaType: "document",
+                  mediaName: docUpload.nome,
+                  status: "sent",
+                };
+                setMensagens((prev) => [...prev, m]);
+                setModalDocAberto(false);
+                showToast("Documento enviado 📄");
+              }}
+              className="w-full bg-[#0f9d58] hover:bg-[#0a6e3d] text-white py-2 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+            >
+              ➤ Enviar Documento
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL FOTO */}
       {modalFotoAberto && (
         <div className="fixed inset-0 bg-black/55 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-4 space-y-3">
@@ -1818,7 +2547,7 @@ export default function CrmWhatsAppClient() {
                   id: `msg-${Date.now()}`,
                   chatId: chatSelecionado.id,
                   from: "balao",
-                  body: `📷 [Foto Enviada]: ${fotoLegenda || "Imagem do Produto"}`,
+                  body: fotoLegenda ? `📷 ${fotoLegenda}` : "📷 [Foto Enviada]",
                   direction: "out",
                   timestamp: Date.now(),
                   hasMedia: true,
@@ -1911,7 +2640,7 @@ export default function CrmWhatsAppClient() {
         </div>
       )}
 
-      {/* TOAST NOTIFICATION (#toast) */}
+      {/* TOAST NOTIFICATION */}
       {toastMsg && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[99999] bg-[#323232] text-white px-5 py-2.5 rounded-full text-xs font-semibold shadow-2xl animate-in fade-in slide-in-from-bottom-3 duration-200">
           {toastMsg}
