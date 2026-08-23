@@ -123,24 +123,20 @@ export default function CrmWhatsAppClient() {
   });
   const [assinaturaAuto, setAssinaturaAuto] = useState(true);
 
-  // Helper to strictly ignore WhatsApp status/broadcast/@lid internal handles
-  const isIgnoredCrmChat = (chatId?: string, numero?: string): boolean => {
-    const idStr = String(chatId || "").toLowerCase();
-    const numStr = String(numero || "").toLowerCase();
-    if (!idStr && !numStr) return true;
-    if (idStr.includes("@lid") || numStr.includes("@lid")) return true;
-    if (idStr.includes("broadcast") || numStr.includes("broadcast")) return true;
-    if (idStr.includes("status@") || numStr.includes("status@")) return true;
-    if (idStr.includes("@newsletter") || numStr.includes("@newsletter")) return true;
-    if (idStr === "status") return true;
-
-    const rawDigits = (numStr || idStr.replace(/@.*$/, "")).replace(/\D/g, "");
-    if (rawDigits.length > 13 && !idStr.includes("@g.us")) return true;
-    if (rawDigits.length < 8 && !idStr.includes("@g.us")) return true;
-    return false;
+  // Chats and Messages
+  const isRealDirectChat = (id: string | null | undefined): boolean => {
+    if (!id) return false;
+    const s = String(id).trim();
+    return (
+      s !== "status@broadcast" &&
+      !s.includes("broadcast") &&
+      !s.includes("@lid") &&
+      !s.endsWith("@lid") &&
+      !s.includes("@g.us") &&
+      s !== "status"
+    );
   };
 
-  // Chats and Messages
   const [chats, setChats] = useState<CrmChat[]>(() => {
     if (typeof window !== "undefined") {
       const s = localStorage.getItem("balao_crm_chats");
@@ -148,16 +144,7 @@ export default function CrmWhatsAppClient() {
         try {
           const parsed = JSON.parse(s);
           if (Array.isArray(parsed)) {
-            return parsed.filter(
-              (c: any) =>
-                c.id &&
-                !c.id.includes("@lid") &&
-                !c.id.includes("broadcast") &&
-                !c.id.includes("status@") &&
-                !c.id.includes("newsletter") &&
-                c.id !== "status" &&
-                !/^\d{14,}$/.test(String(c.numero || c.id).replace(/\D/g, ""))
-            );
+            return parsed.filter((c: any) => c.id && isRealDirectChat(c.id));
           }
         } catch {}
       }
@@ -169,7 +156,12 @@ export default function CrmWhatsAppClient() {
     if (typeof window !== "undefined") {
       const s = localStorage.getItem("balao_crm_mensagens_store");
       if (s) {
-        try { return JSON.parse(s); } catch {}
+        try {
+          const parsed = JSON.parse(s);
+          if (Array.isArray(parsed)) {
+            return parsed.filter((m: any) => m.chatId && isRealDirectChat(m.chatId));
+          }
+        } catch {}
       }
     }
     return [];
@@ -297,14 +289,13 @@ export default function CrmWhatsAppClient() {
     },
   ]);
 
-  // Persistence
+  // Persistence & Storage Cleanup
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const cleanChats = chats.filter(
-        (c) => c.id !== "status@broadcast" && !String(c.id).includes("broadcast")
-      );
+      const cleanChats = chats.filter((c) => isRealDirectChat(c.id));
+      const cleanMsgs = mensagens.filter((m) => isRealDirectChat(m.chatId));
       localStorage.setItem("balao_crm_chats", JSON.stringify(cleanChats));
-      localStorage.setItem("balao_crm_mensagens_store", JSON.stringify(mensagens));
+      localStorage.setItem("balao_crm_mensagens_store", JSON.stringify(cleanMsgs));
       localStorage.setItem("balao_crm_kanban_colunas", JSON.stringify(kanbanColunas));
       localStorage.setItem("balao_crm_respostas", JSON.stringify(respostas));
       localStorage.setItem("balao_crm_etiquetas", JSON.stringify(etiquetas));
@@ -446,9 +437,9 @@ export default function CrmWhatsAppClient() {
     socket.on("whatsapp:chats", (serverChats: any[]) => {
       if (Array.isArray(serverChats) && serverChats.length > 0) {
         setChats((prev) => {
-          const merged = [...prev.filter((c) => !isIgnoredCrmChat(c.id, c.numero))];
+          const merged = [...prev];
           serverChats
-            .filter((sc) => sc.chatId && !isIgnoredCrmChat(sc.chatId, sc.realNumber || sc.displayNumber))
+            .filter((sc) => sc.chatId && isRealDirectChat(sc.chatId))
             .forEach((sc) => {
               const idx = merged.findIndex((c) => c.id === sc.chatId);
               const realNum = sc.realNumber || sc.displayNumber || sc.chatId.replace(/@c\.us$/, "");
@@ -476,7 +467,7 @@ export default function CrmWhatsAppClient() {
               }
             });
           return merged
-            .filter((c) => !isIgnoredCrmChat(c.id, c.numero))
+            .filter((c) => isRealDirectChat(c.id))
             .sort((a, b) => b.timestamp - a.timestamp);
         });
       }
@@ -486,12 +477,9 @@ export default function CrmWhatsAppClient() {
       if (Array.isArray(serverMsgs) && serverMsgs.length > 0) {
         setMensagens((prev) => {
           const map = new Map<string, CrmMensagem>();
-          prev.forEach((m) => map.set(m.id, m));
+          prev.filter((m) => isRealDirectChat(m.chatId)).forEach((m) => map.set(m.id, m));
           serverMsgs
-            .filter(
-              (sm) =>
-                sm.chatId && !isIgnoredCrmChat(sm.chatId, sm.from)
-            )
+            .filter((sm) => sm.chatId && isRealDirectChat(sm.chatId))
             .forEach((sm) => {
               map.set(sm.id, {
                 id: sm.id,
@@ -514,10 +502,16 @@ export default function CrmWhatsAppClient() {
     socket.on("whatsapp:message", (newMsg: any) => {
       if (!newMsg || !newMsg.chatId) return;
 
-      // Status, broadcast, LID updates must NOT be created as chats
-      if (isIgnoredCrmChat(newMsg.chatId, newMsg.from)) {
-        if (socketRef.current?.connected) {
-          socketRef.current.emit("panel:sync-conversations");
+      // Filter out @lid or broadcast messages
+      if (!isRealDirectChat(newMsg.chatId) || !isRealDirectChat(newMsg.from)) {
+        if (
+          newMsg.chatId === "status@broadcast" ||
+          String(newMsg.chatId).includes("broadcast") ||
+          newMsg.from === "status@broadcast"
+        ) {
+          if (socketRef.current?.connected) {
+            socketRef.current.emit("panel:sync-conversations");
+          }
         }
         return;
       }
@@ -547,10 +541,9 @@ export default function CrmWhatsAppClient() {
       setMensagens((prev) => [...prev.filter((x) => x.id !== m.id), m]);
 
       setChats((prev) => {
-        const cleanPrev = prev.filter((c) => !isIgnoredCrmChat(c.id, c.numero));
-        const idx = cleanPrev.findIndex((c) => c.id === newMsg.chatId);
+        const idx = prev.findIndex((c) => c.id === newMsg.chatId);
         if (idx >= 0) {
-          const copy = [...cleanPrev];
+          const copy = [...prev];
           copy[idx] = {
             ...copy[idx],
             lastMessage: newMsg.body || "",
@@ -560,21 +553,18 @@ export default function CrmWhatsAppClient() {
           };
           return copy.sort((a, b) => b.timestamp - a.timestamp);
         } else {
-          const novoChat: CrmChat = {
+          const novo: CrmChat = {
             id: newMsg.chatId,
             nome: newMsg.contactName || realNum,
             numero: realNum,
-            pic: null,
-            unread: newMsg.direction === "in" ? 1 : 0,
+            unread: 1,
             lastMessage: newMsg.body || "",
-            timestamp: newMsg.timestamp || Date.now(),
+            timestamp: Date.now(),
             tags: [],
-            vendedorId: null,
             kanbanColId: "novos",
-            fixado: false,
-            precisaAtencao: newMsg.direction === "in",
+            precisaAtencao: true,
           };
-          return [novoChat, ...cleanPrev].sort((a, b) => b.timestamp - a.timestamp);
+          return [novo, ...prev];
         }
       });
     });
@@ -693,7 +683,7 @@ export default function CrmWhatsAppClient() {
 
   const chatsFiltrados = useMemo(() => {
     let list = chats
-      .filter((c) => c.id && !isIgnoredCrmChat(c.id, c.numero))
+      .filter((c) => isRealDirectChat(c.id))
       .filter((c) => {
         const b = buscaChat.trim().toLowerCase();
         if (!b) return true;
@@ -1402,12 +1392,9 @@ export default function CrmWhatsAppClient() {
                 : "Conectando ao serviço do WhatsApp…"}
             </p>
 
-            <div className="mt-5 flex gap-2 justify-center">
+            <div className="mt-5 flex flex-wrap gap-2 justify-center">
               <button
                 onClick={() => {
-                  if (socketRef.current?.connected) {
-                    socketRef.current.emit("panel:reset-session");
-                  }
                   fetch("/api/crm/status", { cache: "no-store" })
                     .then((r) => r.json())
                     .then((data) => {
@@ -1416,11 +1403,30 @@ export default function CrmWhatsAppClient() {
                       if (data.connected) setEstado("ready");
                     })
                     .catch(() => {});
-                  showToast("Atualizando QR Code...");
+                  showToast("Buscando status do QR Code...");
                 }}
-                className="bg-[#0f9d58] hover:bg-[#0a6e3d] text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors cursor-pointer"
+                className="bg-[#f0f2f5] hover:bg-[#e8eaed] text-[#202124] text-xs font-bold px-3 py-2 rounded-lg transition-colors cursor-pointer border border-[#e3e3e3]"
               >
-                🔄 Atualizar QR Code
+                🔄 Verificar Conexão
+              </button>
+
+              <button
+                onClick={() => {
+                  setQrCodeData(null);
+                  setRawQrString(null);
+                  setEstado("initializing");
+                  if (socketRef.current?.connected) {
+                    socketRef.current.emit("panel:reset-session");
+                  }
+                  fetch(`${serverUrl}/api/reset-session`, { method: "POST" })
+                    .catch(() => fetch("/api/crm/status", { cache: "no-store" }))
+                    .then(() => {
+                      showToast("Gerando novo QR Code oficial do WhatsApp...");
+                    });
+                }}
+                className="bg-[#0f9d58] hover:bg-[#0a6e3d] text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors cursor-pointer shadow-xs"
+              >
+                ⚡ Gerar Novo QR Code
               </button>
             </div>
           </div>
@@ -2727,16 +2733,17 @@ export default function CrmWhatsAppClient() {
             {kanbanTamanho !== "recolhido" && (
               <div className="flex-1 flex gap-3 overflow-x-auto pb-1 items-stretch min-h-0">
                 {kanbanColunas.map((col) => {
-                  const cardsNaColuna = chats.filter((c) => {
-                    if (isIgnoredCrmChat(c.id, c.numero)) return false;
-                    const matchCol = (c.kanbanColId || "novos") === col.id;
-                    const matchBusca =
-                      !kanbanBusca ||
-                      c.nome.toLowerCase().includes(kanbanBusca.toLowerCase()) ||
-                      c.numero.includes(kanbanBusca) ||
-                      formatarNumeroExibicao(c.numero).includes(kanbanBusca);
-                    return matchCol && matchBusca;
-                  });
+                  const cardsNaColuna = chats
+                    .filter((c) => isRealDirectChat(c.id))
+                    .filter((c) => {
+                      const matchCol = (c.kanbanColId || "novos") === col.id;
+                      const matchBusca =
+                        !kanbanBusca ||
+                        c.nome.toLowerCase().includes(kanbanBusca.toLowerCase()) ||
+                        c.numero.includes(kanbanBusca) ||
+                        formatarNumeroExibicao(c.numero).includes(kanbanBusca);
+                      return matchCol && matchBusca;
+                    });
 
                   return (
                     <div
