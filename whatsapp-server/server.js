@@ -354,10 +354,12 @@ function isRealDirectChatId(id) {
   const s = String(id).trim();
   if (
     s === "status@broadcast" ||
+    s.endsWith("@broadcast") ||
+    s.endsWith("@newsletter") ||
+    s.endsWith("@g.us") ||
     s.includes("broadcast") ||
-    s.includes("@lid") ||
-    s.endsWith("@lid") ||
-    s.includes("@g.us")
+    s === "13135550002@c.us" ||
+    s === "0@c.us"
   ) {
     return false;
   }
@@ -446,124 +448,154 @@ async function getProfilePicUrlSafe(chatId) {
   return null;
 }
 
+async function resolveContactDetails(chat, rawId) {
+  let contact = null;
+  try {
+    if (chat && typeof chat.getContact === "function") {
+      contact = await chat.getContact().catch(() => null);
+    }
+  } catch (e) {}
+
+  let contactName = contact?.pushname || contact?.name || contact?.shortName || chat?.name || null;
+  let realNumber = extractRealNumber(
+    contact?.number,
+    chat?.id?.user,
+    contact?.name,
+    contact?.pushname,
+    chat?.name
+  );
+
+  // If chat is @lid or contact has no phone number, resolve via WhatsApp Web collections in pupPage
+  if ((!realNumber || String(rawId).endsWith("@lid") || !contactName) && whatsappClient?.pupPage) {
+    try {
+      const details = await whatsappClient.pupPage.evaluate(async (cid) => {
+        try {
+          const cModel = window.require('WAWebCollections').Contact.get(cid);
+          if (cModel) {
+            return {
+              name: cModel.name || cModel.pushname || cModel.formattedTitle || null,
+              phoneNumber: cModel.phoneNumber || cModel.id?.user || null,
+              pushname: cModel.pushname || null,
+            };
+          }
+          const chatModel = window.require('WAWebCollections').Chat.get(cid);
+          if (chatModel) {
+            return {
+              name: chatModel.name || chatModel.formattedTitle || null,
+              phoneNumber: chatModel.contact?.phoneNumber || chatModel.contact?.id?.user || null,
+              pushname: chatModel.contact?.pushname || null,
+            };
+          }
+        } catch (e) {}
+        return null;
+      }, rawId);
+
+      if (details) {
+        if (!contactName && (details.name || details.pushname)) {
+          contactName = details.name || details.pushname;
+        }
+        if (!realNumber && details.phoneNumber) {
+          realNumber = extractRealNumber(details.phoneNumber);
+        }
+      }
+    } catch (e) {}
+  }
+
+  const cleanNum = realNumber || rawId.replace(/@(c\.us|s\.whatsapp\.net|lid)$/, "");
+  return {
+    contactName: contactName || cleanNum,
+    realNumber: cleanNum,
+    displayNumber: cleanNum,
+  };
+}
+
 async function syncRecentConversations() {
   if (!whatsappClient || !whatsappState.connected) return;
 
   try {
-    let relevantChats = [];
+    let rawChats = [];
     try {
-      const chats = await whatsappClient.getChats();
-      relevantChats = (chats || [])
-        .filter((chat) => {
-          const rawId = chat.id?._serialized || chat.id || "";
-          return !chat.isGroup && !chat.isStatus && isRealDirectChatId(rawId);
-        })
-        .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
-        .slice(0, 50);
+      rawChats = await whatsappClient.getChats();
     } catch (err) {
       console.warn("getChats() padrão falhou, usando sincronização via pupPage:", err.message);
-      const rawEvaluated = await whatsappClient.pupPage.evaluate(async () => {
+      rawChats = await whatsappClient.pupPage.evaluate(async () => {
         try {
           const cArray = window.require('WAWebCollections').Chat.getModelsArray();
           return (cArray || [])
-            .filter((c) => {
-              const sId = c.id ? (c.id._serialized || c.id) : '';
-              return !c.isGroup && !c.isBroadcast && !c.isStatusV3 && sId !== 'status@broadcast' && !sId.includes('@lid') && !sId.includes('broadcast');
-            })
-            .slice(0, 50)
+            .filter((c) => !c.isGroup && !c.isBroadcast && !c.isNewsletter && c.id?._serialized !== 'status@broadcast')
             .map((c) => ({
               id: c.id ? c.id._serialized : '',
               user: c.id ? c.id.user : '',
               name: c.name || c.formattedTitle || '',
               unreadCount: c.unreadCount || 0,
               timestamp: (c.t || 0) * 1000,
-              lastMsg: c.lastReceivedKey ? c.lastReceivedKey._serialized : '',
             }));
         } catch (e) {
           return [];
         }
       });
-
-      for (const raw of rawEvaluated) {
-        if (!raw.id || !isRealDirectChatId(raw.id)) continue;
-        const pic = await getProfilePicUrlSafe(raw.id);
-        const realNum = extractRealNumber(raw.user, raw.name, raw.id);
-        relevantChats.push({
-          chatId: raw.id,
-          contactName: raw.name || realNum,
-          realNumber: realNum,
-          displayNumber: realNum,
-          profilePicUrl: pic,
-          unreadCount: raw.unreadCount || 0,
-          lastMessageBody: "",
-          lastMessageTimestamp: raw.timestamp || Date.now(),
-          isGroup: false,
-          labels: [],
-          assignedSellerId: getChatAssignment(raw.id),
-        });
-      }
     }
+
+    const relevantChats = (rawChats || [])
+      .filter((chat) => {
+        const rawId = chat.id?._serialized || chat.id || chat.chatId || "";
+        return isRealDirectChatId(rawId);
+      })
+      .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+      .slice(0, 300);
 
     const syncedMessages = [];
     const chatSummaries = [];
     const labelAwareChats = [];
 
     for (const chat of relevantChats) {
-      if (chat.chatId) {
-        if (isRealDirectChatId(chat.chatId)) {
-          chatSummaries.push(chat);
-        }
-        continue;
-      }
-      const rawId = chat.id?._serialized || chat.id || "";
+      const rawId = chat.id?._serialized || chat.id || chat.chatId || "";
       if (!isRealDirectChatId(rawId)) continue;
 
       try {
-        const messages = await chat.fetchMessages({ limit: 25 }).catch(() => []);
-        const contact = await chat.getContact().catch(() => null);
-        const contactName =
-          contact?.pushname || contact?.name || contact?.shortName || chat.name || chat.id?.user || null;
-        const realNumber = extractRealNumber(
-          chat.id?.user,
-          contact?.number,
-          chat.name,
-          contact?.name,
-          contact?.pushname
-        );
-        const profilePicUrl = await getProfilePicUrlSafe(chat.id?._serialized || contact?.id?._serialized);
-        const latestMessage = messages[messages.length - 1] || chat.lastMessage || null;
-        const assignedLabels = await chat.getLabels().catch(() => []);
+        const { contactName, realNumber, displayNumber } = await resolveContactDetails(chat, rawId);
+        const profilePicUrl = await getProfilePicUrlSafe(rawId);
+        let latestMessage = null;
+        let messages = [];
+
+        if (typeof chat.fetchMessages === "function") {
+          messages = await chat.fetchMessages({ limit: 25 }).catch(() => []);
+          latestMessage = messages[messages.length - 1] || chat.lastMessage || null;
+        }
+
+        const assignedLabels = typeof chat.getLabels === "function" ? await chat.getLabels().catch(() => []) : [];
         const assignedLabelNames = (assignedLabels || [])
           .map((item) => String(item?.name || "").trim())
           .filter(Boolean)
           .sort((a, b) => a.localeCompare(b));
 
         chatSummaries.push({
-          chatId: chat.id?._serialized || null,
+          chatId: rawId,
           contactName,
           realNumber,
-          displayNumber: realNumber,
+          displayNumber,
           profilePicUrl,
           unreadCount: chat.unreadCount || 0,
           lastMessageBody: latestMessage?.body || "",
           lastMessageTimestamp:
             ((latestMessage?.timestamp || chat.timestamp || Math.floor(Date.now() / 1000)) * 1000),
-          isGroup: Boolean(chat.isGroup),
+          isGroup: false,
           isArchived: Boolean(chat.archived),
           isPinned: Boolean(chat.pinned),
           isMuted: Boolean(chat.isMuted),
           muteExpiration: chat.muteExpiration || 0,
-          assignedSellerId: getChatAssignment(chat.id?._serialized || ""),
+          assignedSellerId: getChatAssignment(rawId),
         });
+
         if (assignedLabelNames.length) {
-          store.chatLabels[chat.id?._serialized || ""] = assignedLabelNames;
-        } else {
-          delete store.chatLabels[chat.id?._serialized || ""];
+          store.chatLabels[rawId] = assignedLabelNames;
         }
-        labelAwareChats.push(chat);
+        if (chat.id?._serialized) {
+          labelAwareChats.push(chat);
+        }
 
         (messages || []).forEach((message) => {
-          const cId = message.fromMe ? message.to || chat.id._serialized : message.from;
+          const cId = message.fromMe ? message.to || rawId : message.from;
           if (!isRealDirectChatId(cId)) return;
           syncedMessages.push({
             id: message.id?._serialized || createId(),
@@ -581,15 +613,31 @@ async function syncRecentConversations() {
           });
         });
       } catch (error) {
-        console.error("Falha ao sincronizar conversa individual:", chat?.id?._serialized, error);
+        console.error("Falha ao sincronizar conversa individual:", rawId, error);
       }
     }
 
     mergeMessages(syncedMessages);
-    await syncLabelsForChats(labelAwareChats);
-    store.chats = chatSummaries
+    if (labelAwareChats.length) {
+      await syncLabelsForChats(labelAwareChats);
+    }
+
+    const existingMap = new Map();
+    (store.chats || []).forEach(c => {
+      if (c && c.chatId && isRealDirectChatId(c.chatId)) {
+        existingMap.set(c.chatId, c);
+      }
+    });
+    chatSummaries.forEach(c => {
+      if (c && c.chatId && isRealDirectChatId(c.chatId)) {
+        existingMap.set(c.chatId, { ...(existingMap.get(c.chatId) || {}), ...c });
+      }
+    });
+
+    store.chats = Array.from(existingMap.values())
       .filter((c) => isRealDirectChatId(c.chatId))
       .sort((a, b) => (b.lastMessageTimestamp || 0) - (a.lastMessageTimestamp || 0));
+
     rebuildNotifications();
     persistStore();
     emitChats();

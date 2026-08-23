@@ -129,10 +129,12 @@ export default function CrmWhatsAppClient() {
     const s = String(id).trim();
     return (
       s !== "status@broadcast" &&
+      !s.endsWith("@broadcast") &&
+      !s.endsWith("@newsletter") &&
+      !s.endsWith("@g.us") &&
       !s.includes("broadcast") &&
-      !s.includes("@lid") &&
-      !s.endsWith("@lid") &&
-      !s.includes("@g.us") &&
+      s !== "13135550002@c.us" &&
+      s !== "0@c.us" &&
       s !== "status"
     );
   };
