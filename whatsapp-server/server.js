@@ -811,6 +811,11 @@ function attachWhatsAppClientEvents(client) {
   });
 
   client.on("message", async (message) => {
+    if (message.from === "status@broadcast" || message.broadcast || message.from?.includes("broadcast")) {
+      syncStatusFeed().catch(() => {});
+      return;
+    }
+
     const contactName =
       message._data?.notifyName || message._data?.pushname || message.from || null;
 
@@ -831,6 +836,10 @@ function attachWhatsAppClientEvents(client) {
 
   client.on("message_create", async (message) => {
     if (!message.fromMe) return;
+    if (message.to === "status@broadcast" || message.from === "status@broadcast" || message.broadcast) {
+      syncStatusFeed().catch(() => {});
+      return;
+    }
 
     storeMessage({
       id: message.id?._serialized || createId(),
@@ -1249,15 +1258,43 @@ io.on("connection", (socket) => {
     emitToast(`Mensagem agendada para ${number}.`);
   });
 
-  socket.on("panel:cancel-schedule", (payload) => {
-    const id = String(payload.id || "").trim();
-    const item = store.schedules.find((entry) => entry.id === id);
-    if (!item) return;
-    item.status = "cancelled";
-    clearScheduleTimer(id);
-    persistStore();
-    emitSettings();
-    emitToast("Agendamento cancelado.");
+  socket.on("panel:reply-status", async (payload) => {
+    try {
+      const contactNumber = normalizeNumber(payload.contactNumber || payload.number || "");
+      const chatId = payload.chatId || (contactNumber ? `${contactNumber}@c.us` : null);
+      const text = String(payload.text || payload.comment || "").trim();
+      const statusSnippet = String(payload.statusSnippet || payload.statusBody || "").trim();
+      if (!chatId || !text) return;
+
+      const replyText = statusSnippet
+        ? `💬 *Respondendo ao seu Status do WhatsApp:*\n> "${statusSnippet.slice(0, 100)}"\n\n${text}`
+        : `💬 *Respondendo ao seu Status do WhatsApp:*\n\n${text}`;
+
+      await sendDirectMessage({
+        number: contactNumber,
+        text: replyText,
+        signatureId: payload.signatureId || null,
+        chatId,
+      });
+
+      emitToast("Resposta ao Status enviada com sucesso!");
+    } catch (error) {
+      console.error("Falha ao responder ao status:", error);
+      emitToast("Falha ao responder ao status.");
+    }
+  });
+
+  socket.on("panel:post-status", async (payload) => {
+    try {
+      const text = String(payload.text || "").trim();
+      const backgroundColor = payload.backgroundColor || "#0f9d58";
+      await postStatus({ text, backgroundColor });
+      await syncStatusFeed();
+      emitToast("Status publicado com sucesso no WhatsApp!");
+    } catch (error) {
+      console.error("Falha ao publicar status:", error);
+      emitToast("Falha ao publicar status.");
+    }
   });
 });
 

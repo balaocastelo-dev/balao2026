@@ -120,3 +120,24 @@ export interface CrmPromocao {
   cartaz?: string | null;
   cartazNome?: string | null;
 }
+
+export interface CrmStatusItem {
+  id: string;
+  body: string;
+  timestamp: number;
+  hasMedia?: boolean;
+  mediaType?: string | null;
+  mediaUrl?: string | null;
+}
+
+export interface CrmStatusFeed {
+  id: string;
+  contactId: string | null;
+  contactName: string;
+  contactNumber?: string | null;
+  profilePicUrl?: string | null;
+  unreadCount?: number;
+  totalCount?: number;
+  timestamp: number;
+  items: CrmStatusItem[];
+}
