@@ -6,7 +6,7 @@ import { parseProducts, Product, Category, buildCategoryTree, enhanceImageUrl } 
 import { 
   Upload, CheckCircle, AlertCircle, Search, Save, X, Sparkles, 
   Percent, Tag, Eye, Layers, Cpu, RefreshCw, FileText, Image as ImageIcon,
-  Zap, Database, ShieldCheck, ArrowRight
+  Zap, Database, ShieldCheck, ArrowRight, Check
 } from "lucide-react";
 
 export default function ImportPage() {
@@ -27,9 +27,13 @@ export default function ImportPage() {
   // AI Parallel Workers State
   const [isAiProcessing, setIsAiProcessing] = useState(false);
   const [aiProgress, setAiProgress] = useState(0);
-  const [aiAgentCount, setAiAgentCount] = useState(128); // 128 Agentes Paralelos
   const [aiProcessedCount, setAiProcessedCount] = useState(0);
   const [enrichedPhotosCount, setEnrichedPhotosCount] = useState(0);
+
+  // Saving / Upload Progress State
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveProgress, setSaveProgress] = useState(0);
+  const [saveDetail, setSaveDetail] = useState("");
 
   // Status & Notifications
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -83,7 +87,7 @@ export default function ImportPage() {
     setParsedProducts(products);
     setImportStep("preview");
     setStatus("idle");
-    setMessage(`${products.length} produtos carregados com sucesso de "${sourceName}"! Execute os Agentes de IA ou confirme a margem.`);
+    setMessage(`${products.length} produtos carregados com sucesso de "${sourceName}"! Execute os Agentes de IA ou confirme a margem de lucro.`);
   };
 
   // Cálculo da Margem Dinâmica Inteligente (40% a 120%)
@@ -97,7 +101,7 @@ export default function ImportPage() {
     return Math.max(40, Math.min(120, Math.round(120 - t * (120 - 40))));
   };
 
-  // Processador com Agentes de IA em Paralelo (Múltiplas Fotos Ultra HD + Descrições + Marcas)
+  // Processador com Centenas de Agentes de IA em Paralelo
   const runAiParallelProcessing = async () => {
     setIsAiProcessing(true);
     setAiProgress(0);
@@ -107,7 +111,7 @@ export default function ImportPage() {
     setMessage("Iniciando Centenas de Agentes de IA em paralelo...");
 
     const total = parsedProducts.length;
-    const batchSize = 30;
+    const batchSize = 40;
     let processed = 0;
     let photoCount = 0;
 
@@ -150,7 +154,7 @@ export default function ImportPage() {
           cleanBrand = "Balão.info";
         }
 
-        // 3. Descrição Rica
+        // 3. Descrição Rica e Ficha Técnica
         let cleanDesc = p.description || "";
         if (!cleanDesc || cleanDesc.length < 50) {
           cleanDesc = `${p.name}\n\nProduto oficial de alta performance com garantia e procedência.\n\nEspecificações:\n• Marca: ${cleanBrand}\n• Categoria: ${p.category}\n• Garantia: 12 meses de garantia oficial Balão.info.`;
@@ -220,64 +224,112 @@ export default function ImportPage() {
     });
   };
 
-  // Confirmar Importação e Gravar no Banco
+  // Confirmar Importação em Lotes Seguros (Evita 413 Payload Too Large)
   const handleConfirmImport = async () => {
+    setIsSaving(true);
+    setSaveProgress(0);
     setStatus("loading");
-    setMessage("Gravando produtos no banco de dados e sincronizando catálogo...");
+    
+    const previewList = getPreviewProducts();
+    const finalProducts = previewList.map((p: any) => ({
+      id: String(p.id),
+      name: p.name,
+      price: p.newPrice.replace("R$", "").trim(),
+      price_card: p.newPriceCard,
+      discount_pix: p.discount_pix || "15%",
+      installment: p.newInstallment,
+      brand: p.brand || "Balão.info",
+      rating: p.rating || "5.0 ⭐",
+      availability: p.availability || "Disponível",
+      source_url: p.source_url || null,
+      image: p.image || "/logo.png",
+      image_urls: Array.isArray(p.image_urls) && p.image_urls.length > 0 ? p.image_urls : [p.image || "/logo.png"],
+      product_url: p.product_url || `/product/${p.id}`,
+      description: p.description || "",
+      specs: {
+        ...(p.specs || {}),
+        custo_origem: p.custoOriginal,
+        markup: p.markupAplicado,
+        preco_a_vista: p.newPrice,
+        preco_parcelado: p.newPriceCard,
+        parcelamento: p.newInstallment,
+        marca: p.brand || "Balão.info",
+        garantia: "Garantia Balão.info (12 meses)",
+        vendedor: "Balão.info",
+        qualidade_fotos: "Ultra HD (1500px)"
+      },
+      category: p.category || "Hardware",
+      slug: p.slug || p.name.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-")
+    }));
+
+    const total = finalProducts.length;
+    const CHUNK_SIZE = 75; // Lotes de 75 produtos garantem payloads leves (~80KB)
+    const totalChunks = Math.ceil(total / CHUNK_SIZE);
+    let savedCount = 0;
+
     try {
-      const previewList = getPreviewProducts();
-      const finalProducts = previewList.map((p: any) => ({
-        id: String(p.id),
-        name: p.name,
-        price: p.newPrice.replace("R$", "").trim(),
-        price_card: p.newPriceCard,
-        discount_pix: p.discount_pix || "15%",
-        installment: p.newInstallment,
-        brand: p.brand || "Balão.info",
-        rating: p.rating || "5.0 ⭐",
-        availability: p.availability || "Disponível",
-        source_url: p.source_url || null,
-        image: p.image || "/logo.png",
-        image_urls: Array.isArray(p.image_urls) && p.image_urls.length > 0 ? p.image_urls : [p.image || "/logo.png"],
-        product_url: p.product_url || `/product/${p.id}`,
-        description: p.description || "",
-        specs: {
-          ...(p.specs || {}),
-          custo_origem: p.custoOriginal,
-          markup: p.markupAplicado,
-          preco_a_vista: p.newPrice,
-          preco_parcelado: p.newPriceCard,
-          parcelamento: p.newInstallment,
-          marca: p.brand || "Balão.info",
-          garantia: "Garantia Balão.info (12 meses)",
-          vendedor: "Balão.info",
-          qualidade_fotos: "Ultra HD (1500px)"
-        },
-        category: p.category || "Hardware",
-        slug: p.slug || p.name.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-")
-      }));
+      for (let chunkIdx = 0; chunkIdx < totalChunks; chunkIdx++) {
+        const start = chunkIdx * CHUNK_SIZE;
+        const end = Math.min(start + CHUNK_SIZE, total);
+        const chunk = finalProducts.slice(start, end);
 
-      const res = await fetch("/api/products", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ products: finalProducts }),
-      });
+        setSaveDetail(`Enviando Lote ${chunkIdx + 1} de ${totalChunks} (${end}/${total} produtos)... `);
+        setMessage(`Salvando produtos no banco: ${end} de ${total} gravados...`);
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "Falha ao salvar produtos no banco");
+        let attempts = 0;
+        let success = false;
+        let lastError = "";
+
+        while (attempts < 3 && !success) {
+          try {
+            attempts++;
+            const res = await fetch("/api/products", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ products: chunk }),
+            });
+
+            const resText = await res.text();
+            let resJson: any = {};
+            try {
+              resJson = JSON.parse(resText);
+            } catch {
+              throw new Error(`Resposta do servidor: ${resText.slice(0, 120)}`);
+            }
+
+            if (!res.ok) {
+              throw new Error(resJson.error || `Erro HTTP ${res.status}`);
+            }
+
+            success = true;
+          } catch (err: any) {
+            lastError = err.message || "Erro de rede";
+            if (attempts < 3) {
+              await new Promise(r => setTimeout(r, 1000));
+            }
+          }
+        }
+
+        if (!success) {
+          throw new Error(`Falha no Lote ${chunkIdx + 1}: ${lastError}`);
+        }
+
+        savedCount += chunk.length;
+        setSaveProgress(Math.round((savedCount / total) * 100));
       }
 
+      setIsSaving(false);
       setStatus("success");
-      setMessage(`🎉 ${finalProducts.length} produtos importados, enriquecidos e publicados com sucesso!`);
+      setMessage(`🎉 ${savedCount} produtos importados, enriquecidos e publicados no site com sucesso!`);
       setText("");
       setFileName(null);
       setParsedProducts([]);
       setImportStep("input");
     } catch (e: any) {
-      console.error("Erro ao importar:", e);
+      console.error("Erro ao importar em lote:", e);
+      setIsSaving(false);
       setStatus("error");
-      setMessage(`Erro ao importar: ${e.message || "Erro desconhecido"}`);
+      setMessage(`Erro na importação: ${e.message || "Erro desconhecido"}`);
     }
   };
 
@@ -309,16 +361,26 @@ export default function ImportPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setImportStep("input")}
-              className="px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition"
+              disabled={isSaving || isAiProcessing}
+              className="px-4 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition disabled:opacity-50"
             >
               Novo Upload
             </button>
             <button
               onClick={handleConfirmImport}
-              disabled={status === "loading" || isAiProcessing}
-              className="px-6 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 rounded-xl shadow-lg shadow-red-600/20 flex items-center gap-2 disabled:opacity-50 transition"
+              disabled={status === "loading" || isAiProcessing || isSaving}
+              className="px-6 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 rounded-xl shadow-lg shadow-red-600/20 flex items-center gap-2 disabled:opacity-50 transition cursor-pointer"
             >
-              <Save size={18} /> Publicar no Site
+              {isSaving ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Salvando ({saveProgress}%)
+                </>
+              ) : (
+                <>
+                  <Save size={18} /> Publicar no Site
+                </>
+              )}
             </button>
           </div>
         )}
@@ -335,6 +397,22 @@ export default function ImportPage() {
           {status === "success" && <CheckCircle className="w-5 h-5 text-green-600" />}
           {status === "error" && <AlertCircle className="w-5 h-5 text-red-600" />}
           <span className="text-sm font-medium">{message}</span>
+        </div>
+      )}
+
+      {/* Barra de Progresso de Gravação no Banco */}
+      {isSaving && (
+        <div className="bg-gray-900 text-white p-5 rounded-3xl mb-6 shadow-xl border border-gray-800 animate-in fade-in">
+          <div className="flex justify-between text-xs text-gray-400 mb-2 font-mono">
+            <span>{saveDetail}</span>
+            <span className="text-green-400 font-bold">{saveProgress}%</span>
+          </div>
+          <div className="w-full h-3 bg-gray-800 rounded-full overflow-hidden p-0.5 border border-white/5">
+            <div 
+              className="h-full bg-gradient-to-r from-green-500 to-emerald-400 rounded-full transition-all duration-300"
+              style={{ width: `${saveProgress}%` }}
+            />
+          </div>
         </div>
       )}
 
@@ -421,7 +499,7 @@ export default function ImportPage() {
               <div className="flex flex-wrap items-center gap-3">
                 <button
                   onClick={runAiParallelProcessing}
-                  disabled={isAiProcessing}
+                  disabled={isAiProcessing || isSaving}
                   className="px-6 py-3.5 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white font-extrabold text-sm rounded-2xl shadow-xl shadow-red-500/25 flex items-center gap-2.5 transition transform hover:scale-105 disabled:opacity-50 cursor-pointer"
                 >
                   {isAiProcessing ? (
@@ -439,7 +517,7 @@ export default function ImportPage() {
               </div>
             </div>
 
-            {/* Barra de Progresso Animada */}
+            {/* Barra de Progresso Animada de IA */}
             {isAiProcessing && (
               <div className="mt-6 pt-6 border-t border-gray-800">
                 <div className="flex justify-between text-xs text-gray-400 mb-2 font-mono">
