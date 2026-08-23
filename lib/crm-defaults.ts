@@ -137,36 +137,7 @@ export const KANBAN_COLUNAS_BASE: KanbanColumn[] = [
   { id: "perdido", nome: "Perdido / Sem Retorno", cor: "#64748b" },
 ];
 
-export const VENDEDORES_BASE: CrmVendedor[] = [
-  {
-    id: 1,
-    nome: "Wendell",
-    cargo: "Especialista em PC Gamer & Montagem",
-    telefone: "(19) 98118-8090",
-    assinatura: "Atenciosamente,\n*Wendell* — Balão da Informática\n📱 (19) 98118-8090",
-  },
-  {
-    id: 2,
-    nome: "Carlos",
-    cargo: "Consultor de Hardware & Upgrades",
-    telefone: "(19) 99122-3344",
-    assinatura: "Abraços,\n*Carlos* — Consultoria Técnica Balão\n📍 Balão Castelo Campinas",
-  },
-  {
-    id: 3,
-    nome: "Mariana",
-    cargo: "Especialista Apple & Mac",
-    telefone: "(19) 99233-4455",
-    assinatura: "Atenciosamente,\n*Mariana* — Assistência Especializada Apple Balão",
-  },
-  {
-    id: 4,
-    nome: "Suporte Balão",
-    cargo: "Atendimento Geral",
-    telefone: "(19) 98118-8090",
-    assinatura: "Equipe Balão da Informática\n🌐 www.balao.info | ☎️ (19) 3255-1661",
-  },
-];
+export const VENDEDORES_BASE: CrmVendedor[] = [];
 
 export const PRODUTOS_CATALOGO_BASE: CrmProdutoCatalogo[] = [
   {

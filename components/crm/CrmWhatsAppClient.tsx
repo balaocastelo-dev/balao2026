@@ -31,23 +31,34 @@ export default function CrmWhatsAppClient() {
   // Connection State
   const [estado, setEstado] = useState<WhatsAppStatus>("initializing");
   const [qrCodeData, setQrCodeData] = useState<string | null>(null);
+  const [rawQrString, setRawQrString] = useState<string | null>(null);
   const [numeroConectado, setNumeroConectado] = useState<string | null>(null);
+  const [nomeConectado, setNomeConectado] = useState<string | null>(null);
   const [qrCountdown, setQrCountdown] = useState<number>(25);
 
-  // Vendedor State
+  // Vendedor State (Empty by default, no fake names)
   const [vendedores, setVendedores] = useState<CrmVendedor[]>(() => {
     if (typeof window !== "undefined") {
       const s = localStorage.getItem("balao_crm_vendedores");
       if (s) {
-        try { return JSON.parse(s); } catch {}
+        try {
+          const parsed = JSON.parse(s);
+          if (Array.isArray(parsed)) return parsed;
+        } catch {}
       }
     }
     return VENDEDORES_BASE;
   });
-  const [vendedorAtivoId, setVendedorAtivoId] = useState<string | number>(1);
+  const [vendedorAtivoId, setVendedorAtivoId] = useState<string | number | null>(() => {
+    if (typeof window !== "undefined") {
+      const s = localStorage.getItem("balao_crm_vendedor_ativo");
+      if (s) return s;
+    }
+    return null;
+  });
   const [assinaturaAuto, setAssinaturaAuto] = useState(true);
 
-  // Chats and Messages
+  // Chats and Messages (Empty by default, no fake chats)
   const [chats, setChats] = useState<CrmChat[]>(() => {
     if (typeof window !== "undefined") {
       const s = localStorage.getItem("balao_crm_chats");
@@ -133,7 +144,7 @@ export default function CrmWhatsAppClient() {
 
   // Disparo State
   const [disparoTexto, setDisparoTexto] = useState(
-    "Olá {nome}! Tudo bem? Passando para te avisar que chegaram novas peças e PCs Gamer com condição especial de 10% OFF no Pix aqui no Balão da Informática Castelo Campinas!"
+    "Olá {nome}! Tudo bem? Passando para te avisar das novidades aqui no Balão da Informática Castelo Campinas!"
   );
   const [disparoIntervalo, setDisparoIntervalo] = useState(15);
   const [disparoExecutando, setDisparoExecutando] = useState(false);
@@ -148,8 +159,11 @@ export default function CrmWhatsAppClient() {
       localStorage.setItem("balao_crm_respostas", JSON.stringify(respostas));
       localStorage.setItem("balao_crm_etiquetas", JSON.stringify(etiquetas));
       localStorage.setItem("balao_crm_vendedores", JSON.stringify(vendedores));
+      if (vendedorAtivoId) {
+        localStorage.setItem("balao_crm_vendedor_ativo", String(vendedorAtivoId));
+      }
     }
-  }, [chats, mensagens, kanbanColunas, respostas, etiquetas, vendedores]);
+  }, [chats, mensagens, kanbanColunas, respostas, etiquetas, vendedores, vendedorAtivoId]);
 
   // Load Real Catalog from /api/products
   useEffect(() => {
@@ -157,7 +171,7 @@ export default function CrmWhatsAppClient() {
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
-          const list: CrmProdutoCatalogo[] = data.slice(0, 50).map((p: any) => {
+          const list: CrmProdutoCatalogo[] = data.slice(0, 60).map((p: any) => {
             const precoNum =
               typeof p.price === "number"
                 ? p.price
@@ -186,6 +200,43 @@ export default function CrmWhatsAppClient() {
       .catch(() => {});
   }, []);
 
+  // Poll Real WhatsApp Status & QR Code via /api/crm/status & direct server
+  useEffect(() => {
+    let ativo = true;
+
+    const checkStatus = async () => {
+      try {
+        const res = await fetch("/api/crm/status", { cache: "no-store" });
+        if (res.ok && ativo) {
+          const data = await res.json();
+          if (data.status || data.estado) {
+            setEstado(data.status || data.estado);
+          }
+          if (data.qrCode || data.qr) {
+            setQrCodeData(data.qrCode || data.qr);
+          }
+          if (data.rawQr) {
+            setRawQrString(data.rawQr);
+          }
+          if (data.phoneNumber) {
+            setNumeroConectado(data.phoneNumber);
+          }
+          if (data.connected) {
+            setEstado("ready");
+          }
+        }
+      } catch {}
+    };
+
+    checkStatus();
+    const interval = setInterval(checkStatus, 2500);
+
+    return () => {
+      ativo = false;
+      clearInterval(interval);
+    };
+  }, []);
+
   // Socket.IO Integration with whatsapp-server
   useEffect(() => {
     const socket = io(serverUrl, {
@@ -207,8 +258,14 @@ export default function CrmWhatsAppClient() {
       if (payload?.qrCode) {
         setQrCodeData(payload.qrCode);
       }
+      if (payload?.rawQr) {
+        setRawQrString(payload.rawQr);
+      }
       if (payload?.phoneNumber) {
         setNumeroConectado(payload.phoneNumber);
+      }
+      if (payload?.connected) {
+        setEstado("ready");
       }
     });
 
@@ -348,6 +405,8 @@ export default function CrmWhatsAppClient() {
         socketRef.current.emit("panel:reset-session");
       }
       setEstado("initializing");
+      setQrCodeData(null);
+      setRawQrString(null);
       showToast("Reiniciando sessão do WhatsApp...");
     }
   };
@@ -380,7 +439,8 @@ export default function CrmWhatsAppClient() {
   }, [chats, buscaChat, filtroNaoLidas]);
 
   const vendedorAtivo = useMemo(() => {
-    return vendedores.find((v) => v.id === vendedorAtivoId) || vendedores[0];
+    if (!vendedores.length) return null;
+    return vendedores.find((v) => String(v.id) === String(vendedorAtivoId)) || vendedores[0];
   }, [vendedores, vendedorAtivoId]);
 
   // Send message
@@ -567,6 +627,12 @@ export default function CrmWhatsAppClient() {
 
   const isConnected = estado === "ready" || estado === "authenticated";
 
+  // Check if we have a real authentic QR code
+  const temQrReal = Boolean(
+    (qrCodeData && qrCodeData.startsWith("data:image")) ||
+    (rawQrString && rawQrString.length > 20)
+  );
+
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden bg-[#f0f2f5] text-[#202124] font-['Segoe_UI',Tahoma,Arial,sans-serif]">
       {/* HEADER TOPBAR (Identical to reference system) */}
@@ -582,22 +648,31 @@ export default function CrmWhatsAppClient() {
           <label htmlFor="vendedorSel" className="text-xs font-semibold whitespace-nowrap">
             👤 Atendendo:
           </label>
-          <select
-            id="vendedorSel"
-            value={vendedorAtivoId}
-            onChange={(e) => {
-              const id = e.target.value;
-              setVendedorAtivoId(id);
-              showToast(`Agora atendendo como: ${vendedores.find((v) => String(v.id) === id)?.nome}`);
-            }}
-            className="bg-white text-[#202124] border-none rounded-full px-3 py-1 text-xs font-semibold outline-none shadow-sm max-w-[180px]"
-          >
-            {vendedores.map((v) => (
-              <option key={v.id} value={v.id}>
-                {v.nome}
-              </option>
-            ))}
-          </select>
+          {vendedores.length > 0 ? (
+            <select
+              id="vendedorSel"
+              value={vendedorAtivoId || vendedores[0]?.id || ""}
+              onChange={(e) => {
+                const id = e.target.value;
+                setVendedorAtivoId(id);
+                showToast(`Agora atendendo como: ${vendedores.find((v) => String(v.id) === id)?.nome}`);
+              }}
+              className="bg-white text-[#202124] border-none rounded-full px-3 py-1 text-xs font-semibold outline-none shadow-sm max-w-[180px]"
+            >
+              {vendedores.map((v) => (
+                <option key={v.id} value={v.id}>
+                  {v.nome}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <button
+              onClick={() => setAbaAtual("vendedores")}
+              className="bg-white/90 hover:bg-white text-[#0a6e3d] rounded-full px-3 py-1 text-xs font-bold transition-all shadow-sm"
+            >
+              ＋ Cadastrar Vendedor
+            </button>
+          )}
 
           <label className="inline-flex items-center gap-1.5 text-xs font-semibold cursor-pointer select-none">
             <input
@@ -616,16 +691,16 @@ export default function CrmWhatsAppClient() {
             className={`px-3 py-1 rounded-full text-xs font-bold transition-all shadow-sm ${
               isConnected
                 ? "bg-[#c8e6c9] text-[#1b5e20]"
-                : estado === "qr"
+                : temQrReal
                 ? "bg-[#ffecb3] text-[#6b4a00] animate-pulse"
                 : "bg-[#ffcdd2] text-[#b71c1c]"
             }`}
           >
             {isConnected
               ? `Conectado ✓ ${numeroConectado ? `(${numeroConectado})` : ""}`
-              : estado === "qr"
-              ? "Aguardando QR Code"
-              : "Conectando ao WhatsApp…"}
+              : temQrReal
+              ? "Aguardando Leitura do QR"
+              : "Iniciando WhatsApp Web…"}
           </span>
 
           <button
@@ -657,30 +732,35 @@ export default function CrmWhatsAppClient() {
               <strong>WhatsApp &gt; Aparelhos conectados &gt; Conectar um aparelho.</strong>
             </p>
 
-            <div className="inline-block bg-white border border-[#e3e3e3] rounded-xl p-3 shadow-inner">
-              {qrCodeData?.startsWith("data:image") ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src={qrCodeData}
-                  alt="QR Code WhatsApp"
-                  className="w-64 h-64 object-contain"
-                />
+            <div className="inline-flex items-center justify-center min-w-[280px] min-h-[280px] bg-white border border-[#e3e3e3] rounded-xl p-4 shadow-inner">
+              {temQrReal ? (
+                qrCodeData?.startsWith("data:image") ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={qrCodeData}
+                    alt="QR Code WhatsApp Oficial"
+                    className="w-64 h-64 object-contain rounded-md"
+                  />
+                ) : rawQrString ? (
+                  <QRCodeSVG value={rawQrString} size={250} level="M" />
+                ) : null
               ) : (
-                <QRCodeSVG
-                  value={
-                    qrCodeData ||
-                    "2@balao-crm-pairing-live-qrcode-whatsapp-" + Date.now()
-                  }
-                  size={250}
-                  level="M"
-                />
+                <div className="flex flex-col items-center justify-center p-6 space-y-3">
+                  <div className="w-10 h-10 border-3 border-[#0f9d58] border-t-transparent rounded-full animate-spin" />
+                  <p className="text-xs font-semibold text-[#5f6368]">
+                    Iniciando WhatsApp Web…<br />
+                    <span className="text-[11px] font-normal text-[#80868b]">
+                      Aguardando o QR Code oficial ser gerado.
+                    </span>
+                  </p>
+                </div>
               )}
             </div>
 
             <p className="text-xs text-[#5f6368] mt-3">
-              {estado === "qr"
+              {temQrReal
                 ? `QR Code ativo. Atualizando em ${qrCountdown}s…`
-                : "Aguardando geração do QR Code pelo servidor WhatsApp…"}
+                : "Conectando ao serviço do WhatsApp…"}
             </p>
 
             <div className="mt-5 flex gap-2 justify-center">
@@ -689,20 +769,19 @@ export default function CrmWhatsAppClient() {
                   if (socketRef.current?.connected) {
                     socketRef.current.emit("panel:reset-session");
                   }
+                  fetch("/api/crm/status", { cache: "no-store" })
+                    .then((r) => r.json())
+                    .then((data) => {
+                      if (data.qrCode || data.qr) setQrCodeData(data.qrCode || data.qr);
+                      if (data.rawQr) setRawQrString(data.rawQr);
+                      if (data.connected) setEstado("ready");
+                    })
+                    .catch(() => {});
                   showToast("Atualizando QR Code...");
                 }}
                 className="bg-[#0f9d58] hover:bg-[#0a6e3d] text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors cursor-pointer"
               >
                 🔄 Atualizar QR Code
-              </button>
-              <button
-                onClick={() => {
-                  setEstado("ready");
-                  showToast("Modo Demonstração Ativado!");
-                }}
-                className="bg-[#e8eaed] hover:bg-[#dadce0] text-[#202124] text-xs font-semibold px-4 py-2 rounded-lg transition-colors cursor-pointer"
-              >
-                ⚡ Entrar no Painel
               </button>
             </div>
           </div>
@@ -1147,11 +1226,17 @@ export default function CrmWhatsAppClient() {
                 {abaAtual === "vendedores" && (
                   <div className="space-y-3">
                     <div className="bg-[#f0f2f5] border border-[#e3e3e3] rounded-xl p-3 space-y-2">
-                      <h4 className="font-bold text-xs text-[#202124]">➕ Novo Vendedor</h4>
+                      <h4 className="font-bold text-xs text-[#202124]">➕ Cadastrar Vendedor Real</h4>
                       <input
                         type="text"
                         id="novoVendedorNome"
-                        placeholder="Nome do vendedor"
+                        placeholder="Nome do vendedor (ex: João Santos)"
+                        className="w-full px-2.5 py-1.5 border border-[#e3e3e3] rounded-lg text-xs bg-white outline-none"
+                      />
+                      <input
+                        type="text"
+                        id="novoVendedorCargo"
+                        placeholder="Cargo / Especialidade (ex: Consultor de Hardware)"
                         className="w-full px-2.5 py-1.5 border border-[#e3e3e3] rounded-lg text-xs bg-white outline-none"
                       />
                       <textarea
@@ -1163,13 +1248,24 @@ export default function CrmWhatsAppClient() {
                       <button
                         onClick={() => {
                           const n = (document.getElementById("novoVendedorNome") as HTMLInputElement)?.value;
+                          const c = (document.getElementById("novoVendedorCargo") as HTMLInputElement)?.value;
                           const a = (document.getElementById("novoVendedorAssinatura") as HTMLTextAreaElement)?.value;
-                          if (!n) return;
-                          setVendedores((prev) => [
-                            ...prev,
-                            { id: Date.now(), nome: n, assinatura: a || `Atenciosamente, ${n}` },
-                          ]);
-                          showToast("Vendedor cadastrado!");
+                          if (!n || !n.trim()) {
+                            showToast("Digite o nome do vendedor");
+                            return;
+                          }
+                          const novoV: CrmVendedor = {
+                            id: Date.now(),
+                            nome: n.trim(),
+                            cargo: c?.trim() || "Atendente Balão",
+                            assinatura: a?.trim() || `Atenciosamente,\n*${n.trim()}* — Balão da Informática`,
+                          };
+                          setVendedores((prev) => [...prev, novoV]);
+                          setVendedorAtivoId(novoV.id);
+                          (document.getElementById("novoVendedorNome") as HTMLInputElement).value = "";
+                          (document.getElementById("novoVendedorCargo") as HTMLInputElement).value = "";
+                          (document.getElementById("novoVendedorAssinatura") as HTMLTextAreaElement).value = "";
+                          showToast("Vendedor cadastrado com sucesso!");
                         }}
                         className="w-full bg-[#0f9d58] text-white py-1.5 rounded-lg text-xs font-bold hover:bg-[#0a6e3d] cursor-pointer"
                       >
@@ -1178,30 +1274,49 @@ export default function CrmWhatsAppClient() {
                     </div>
 
                     <div className="space-y-2">
-                      {vendedores.map((v) => (
-                        <div
-                          key={v.id}
-                          className="border border-[#e3e3e3] rounded-xl p-2.5 bg-white flex items-center justify-between"
-                        >
-                          <div>
-                            <div className="font-bold text-xs text-[#202124]">👤 {v.nome}</div>
-                            <div className="text-[10px] text-[#5f6368]">{v.cargo || "Atendente Balão"}</div>
-                          </div>
-                          <button
-                            onClick={() => {
-                              setVendedorAtivoId(v.id);
-                              showToast(`Atendendo como ${v.nome}`);
-                            }}
-                            className={`px-2.5 py-1 rounded text-xs font-bold ${
-                              v.id === vendedorAtivoId
-                                ? "bg-[#0f9d58] text-white"
-                                : "bg-[#f0f2f5] text-[#202124] hover:bg-[#e3e3e3]"
-                            }`}
-                          >
-                            {v.id === vendedorAtivoId ? "Ativo" : "Selecionar"}
-                          </button>
+                      {vendedores.length === 0 ? (
+                        <div className="text-center text-xs text-[#5f6368] py-4">
+                          Nenhum vendedor cadastrado ainda.<br />
+                          Cadastre os atendentes da sua equipe acima.
                         </div>
-                      ))}
+                      ) : (
+                        vendedores.map((v) => (
+                          <div
+                            key={v.id}
+                            className="border border-[#e3e3e3] rounded-xl p-2.5 bg-white flex items-center justify-between"
+                          >
+                            <div>
+                              <div className="font-bold text-xs text-[#202124]">👤 {v.nome}</div>
+                              <div className="text-[10px] text-[#5f6368]">{v.cargo || "Atendente Balão"}</div>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                onClick={() => {
+                                  setVendedorAtivoId(v.id);
+                                  showToast(`Atendendo como ${v.nome}`);
+                                }}
+                                className={`px-2.5 py-1 rounded text-xs font-bold cursor-pointer ${
+                                  String(v.id) === String(vendedorAtivoId)
+                                    ? "bg-[#0f9d58] text-white"
+                                    : "bg-[#f0f2f5] text-[#202124] hover:bg-[#e3e3e3]"
+                                }`}
+                              >
+                                {String(v.id) === String(vendedorAtivoId) ? "Ativo ✓" : "Selecionar"}
+                              </button>
+                              <button
+                                onClick={() => {
+                                  if (confirm(`Remover vendedor ${v.nome}?`)) {
+                                    setVendedores((prev) => prev.filter((x) => x.id !== v.id));
+                                  }
+                                }}
+                                className="text-xs text-red-500 hover:text-red-700 p-1"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </div>
                 )}
@@ -1366,7 +1481,7 @@ export default function CrmWhatsAppClient() {
                               if (!el || !el.value.trim()) return;
                               const notaObj: CrmNotaCliente = {
                                 id: `n-${Date.now()}`,
-                                autor: vendedorAtivo?.nome || "Vendedor",
+                                autor: vendedorAtivo?.nome || "Atendente",
                                 texto: el.value.trim(),
                                 timestamp: Date.now(),
                               };
@@ -1574,7 +1689,7 @@ export default function CrmWhatsAppClient() {
               </strong>
               <button
                 onClick={() => setModalProdutoAberto(false)}
-                className="text-[#5f6368] hover:text-[#202124] font-bold text-sm"
+                className="text-[#5f6368] hover:text-[#202124] font-bold text-sm cursor-pointer"
               >
                 ✕
               </button>
@@ -1674,7 +1789,7 @@ export default function CrmWhatsAppClient() {
               <strong className="text-xs text-[#202124]">Enviar foto para o WhatsApp</strong>
               <button
                 onClick={() => setModalFotoAberto(false)}
-                className="text-[#5f6368] hover:text-[#202124] font-bold text-sm"
+                className="text-[#5f6368] hover:text-[#202124] font-bold text-sm cursor-pointer"
               >
                 ✕
               </button>
@@ -1724,7 +1839,7 @@ export default function CrmWhatsAppClient() {
               <strong className="text-xs text-[#202124]">＋ Iniciar Nova Conversa</strong>
               <button
                 onClick={() => setModalNovaConversa(false)}
-                className="text-[#5f6368] hover:text-[#202124] font-bold text-sm"
+                className="text-[#5f6368] hover:text-[#202124] font-bold text-sm cursor-pointer"
               >
                 ✕
               </button>
@@ -1751,7 +1866,7 @@ export default function CrmWhatsAppClient() {
                 </label>
                 <input
                   type="text"
-                  placeholder="Ex: Gabriel PC Gamer"
+                  placeholder="Ex: Cliente Balão"
                   value={novoNome}
                   onChange={(e) => setNovoNome(e.target.value)}
                   className="w-full p-2 border border-[#e3e3e3] rounded-lg outline-none focus:border-[#0f9d58]"
@@ -1775,7 +1890,7 @@ export default function CrmWhatsAppClient() {
                 <button
                   type="button"
                   onClick={() => setModalNovaConversa(false)}
-                  className="px-3 py-1.5 rounded-lg border border-[#e3e3e3] text-[#5f6368]"
+                  className="px-3 py-1.5 rounded-lg border border-[#e3e3e3] text-[#5f6368] cursor-pointer"
                 >
                   Cancelar
                 </button>

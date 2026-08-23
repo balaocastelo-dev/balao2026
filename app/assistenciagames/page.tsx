@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import Header from "@/components/Header";
 import { getProducts, searchProductsByKeywords } from "@/lib/db";
 import ProductCard from "@/components/ProductCard";
@@ -25,6 +26,9 @@ import {
   Star,
   ArrowRight,
   Disc,
+  Flame,
+  Award,
+  Sparkles,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -53,13 +57,13 @@ export const metadata: Metadata = {
     url: "https://www.balao.info/assistenciagames",
     type: "website",
     locale: "pt_BR",
-    images: [{ url: "/logo.png" }],
+    images: [{ url: "/images/landing/hero_assistenciagames.jpg" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Conserto de Consoles e Games em Campinas | Balão da Informática",
     description: "Laboratório próprio especializado em PlayStation, Xbox e Nintendo em Campinas.",
-    images: ["/logo.png"],
+    images: ["/images/landing/hero_assistenciagames.jpg"],
   },
 };
 
@@ -122,62 +126,85 @@ export default async function AssistenciaGamesPage() {
       <Header />
 
       <main className="flex-1 space-y-16 sm:space-y-24 py-8 sm:py-12">
-        {/* HERO SECTION */}
+        {/* HERO SECTION COM FOTO REAL DE BANCADA IA */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-[#111827] border border-slate-800 rounded-3xl p-8 sm:p-12 lg:p-16 relative overflow-hidden shadow-2xl">
             <div className="absolute top-0 right-0 w-96 h-96 bg-[#E60012]/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="relative z-10 max-w-3xl space-y-6">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E60012]/15 border border-[#E60012]/40 text-[#E60012] text-xs font-black uppercase tracking-widest">
-                <Gamepad2 className="w-4 h-4" />
-                Laboratório Especializado em Games
+
+            <div className="grid lg:grid-cols-12 gap-10 items-center relative z-10">
+              <div className="lg:col-span-7 space-y-6">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E60012]/15 border border-[#E60012]/40 text-[#E60012] text-xs font-black uppercase tracking-widest">
+                  <Gamepad2 className="w-4 h-4" />
+                  Bancada Especializada em Games no Cambuí
+                </div>
+
+                <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight">
+                  Conserto de Consoles com <span className="text-[#E60012]">Micro-Soldagem & Precisão</span>
+                </h1>
+
+                <p className="text-base sm:text-xl text-slate-300 leading-relaxed font-normal">
+                  Seu PlayStation 5, PS4, Xbox Series ou Switch esquentando, desligando sozinho ou sem sinal de vídeo?
+                  Nosso laboratório conta com microscópios de precisão, reposição de metal líquido original e conserto de controles sem drift.
+                </p>
+
+                <div className="pt-4 flex flex-wrap items-center gap-4">
+                  <a
+                    href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(
+                      "Olá! Gostaria de um orçamento para conserto do meu videogame (PlayStation / Xbox / Nintendo Switch) na bancada da Balão."
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-[#E60012] hover:bg-red-700 text-white font-black py-4 px-8 rounded-2xl shadow-xl shadow-red-950/50 active:scale-95 transition-all flex items-center gap-3 text-base sm:text-lg"
+                  >
+                    <MessageCircle className="w-6 h-6" />
+                    Pedir Diagnóstico no WhatsApp
+                  </a>
+                  <a
+                    href="#servicos"
+                    className="bg-[#161f32] hover:bg-slate-800 text-slate-200 border border-slate-700 font-bold py-4 px-8 rounded-2xl transition-all text-base flex items-center gap-2"
+                  >
+                    Ver Principais Reparos
+                    <ArrowRight className="w-4 h-4" />
+                  </a>
+                </div>
+
+                <div className="pt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-slate-800/80 text-left">
+                  <div>
+                    <p className="text-2xl font-black text-white">24h a 48h</p>
+                    <p className="text-xs text-slate-400">Diagnóstico Ágil</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-[#E60012]">90 Dias</p>
+                    <p className="text-xs text-slate-400">Garantia Balão</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-white">Metal Líquido</p>
+                    <p className="text-xs text-slate-400">Padrão Original PS5</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-white">Hall Effect</p>
+                    <p className="text-xs text-slate-400">Analógicos Sem Drift</p>
+                  </div>
+                </div>
               </div>
 
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight">
-                Conserto de Consoles com <span className="text-[#E60012]">Bancada Especializada</span>
-              </h1>
-
-              <p className="text-base sm:text-xl text-slate-300 leading-relaxed font-normal">
-                Seu PS5, PS4, Xbox Series ou Switch esquentando, sem sinal de vídeo na TV ou com drift no controle?
-                Traga para quem entende de hardware gamer no Cambuí com peças originais e garantia real.
-              </p>
-
-              <div className="pt-4 flex flex-wrap items-center gap-4">
-                <a
-                  href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(
-                    "Olá! Gostaria de um orçamento para conserto do meu videogame (PlayStation / Xbox / Nintendo Switch)."
-                  )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-[#E60012] hover:bg-red-700 text-white font-black py-4 px-8 rounded-2xl shadow-xl shadow-red-950/50 active:scale-95 transition-all flex items-center gap-3 text-base sm:text-lg"
-                >
-                  <MessageCircle className="w-6 h-6" />
-                  Pedir Diagnóstico no WhatsApp
-                </a>
-                <a
-                  href="#servicos"
-                  className="bg-[#161f32] hover:bg-slate-800 text-slate-200 border border-slate-700 font-bold py-4 px-8 rounded-2xl transition-all text-base flex items-center gap-2"
-                >
-                  Ver Principais Reparos
-                  <ArrowRight className="w-4 h-4" />
-                </a>
-              </div>
-
-              <div className="pt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-slate-800/80 text-left">
-                <div>
-                  <p className="text-2xl font-black text-white">24h a 48h</p>
-                  <p className="text-xs text-slate-400">Diagnóstico Ágil</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-black text-[#E60012]">90 Dias</p>
-                  <p className="text-xs text-slate-400">Garantia Balão</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-black text-white">Metal Líquido</p>
-                  <p className="text-xs text-slate-400">Padrão Original PS5</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-black text-white">Hall Effect</p>
-                  <p className="text-xs text-slate-400">Analógicos sem Drift</p>
+              {/* FOTO DA BANCADA TÉCNICA */}
+              <div className="lg:col-span-5 relative aspect-[16/11] rounded-3xl overflow-hidden bg-[#161f32] border border-slate-800 shadow-2xl group">
+                <Image
+                  src="/images/landing/hero_assistenciagames.jpg"
+                  alt="Laboratório de manutenção de consoles em Campinas"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 45vw"
+                  className="object-cover group-hover:scale-105 transition-transform duration-700"
+                  priority
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#111827] via-transparent to-transparent" />
+                <div className="absolute bottom-4 left-4 right-4 bg-[#111827]/90 backdrop-blur p-4 rounded-2xl border border-slate-700">
+                  <div className="flex items-center gap-2 text-xs font-bold text-[#E60012] uppercase tracking-wider">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    Bancada de Precisão BGA
+                  </div>
+                  <p className="text-sm font-bold text-white mt-0.5">Microscópios térmicos e solda SMD certificada</p>
                 </div>
               </div>
             </div>

@@ -727,7 +727,10 @@ function schedulePendingMessage(item) {
 
 loadStore();
 
+const CHROME_PATH = process.env.CHROME_PATH || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+
 function buildWhatsAppClient() {
+  const executablePath = fs.existsSync(CHROME_PATH) ? CHROME_PATH : undefined;
   return new Client({
     authStrategy: new LocalAuth({
       clientId: "balao-whatsapp-panel",
@@ -735,7 +738,14 @@ function buildWhatsAppClient() {
     }),
     puppeteer: {
       headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      executablePath,
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
+        "--window-size=1280,800"
+      ],
     },
     webVersionCache: {
       type: "local",
@@ -749,7 +759,8 @@ function attachWhatsAppClientEvents(client) {
     whatsappState.status = "qr";
     whatsappState.connected = false;
     whatsappState.session = false;
-    whatsappState.qrCode = await qrcode.toDataURL(qr);
+    whatsappState.rawQr = qr;
+    whatsappState.qrCode = await qrcode.toDataURL(qr, { width: 300, margin: 1 });
     emitState();
     emitToast("QR Code gerado. Escaneie com o WhatsApp.");
   });
@@ -901,13 +912,18 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get("/health", (_req, res) => {
+app.get(["/health", "/status", "/api/status", "/api/crm/status"], (_req, res) => {
   res.json({
     ok: true,
+    estado: whatsappState.status,
     status: whatsappState.status,
+    qr: whatsappState.qrCode,
+    qrCode: whatsappState.qrCode,
+    rawQr: whatsappState.rawQr,
     connected: whatsappState.connected,
     session: whatsappState.session,
     phoneNumber: whatsappState.phoneNumber,
+    conta: whatsappState.phoneNumber ? { numero: whatsappState.phoneNumber } : null,
   });
 });
 
