@@ -12,7 +12,6 @@ import { getProductHref, Product } from "@/lib/utils";
 import SearchPreview from "@/components/SearchPreview";
 import CartPreview from "@/components/CartPreview";
 import TopBar from "@/components/TopBar";
-import HomeThemeToggle from "@/components/HomeThemeToggle";
 
 export default function Header() {
   const router = useRouter();
@@ -228,8 +227,6 @@ export default function Header() {
 
         {/* Actions */}
         <div className="flex min-w-0 shrink-0 items-center gap-2 text-zinc-200 sm:gap-4 md:gap-5">
-          <HomeThemeToggle />
-
           <Link href="/fale-conosco" className="flex items-center gap-2 group active:scale-95 transition-transform">
             <div className={`rounded-full p-2 shadow-sm transition-colors ${actionIconClassName}`}>
                 <User size={18} className="md:h-5 md:w-5" strokeWidth={2.5} />

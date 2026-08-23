@@ -196,9 +196,9 @@ export default async function RootLayout({
   const themeInitScript = `
     (function() {
       try {
-        var saved = localStorage.getItem('balao-home-theme');
-        var theme = saved === 'light' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-home-theme', theme);
+        localStorage.setItem('balao-home-theme', 'dark');
+        document.documentElement.setAttribute('data-home-theme', 'dark');
+        document.documentElement.classList.add('dark');
       } catch (e) {
         document.documentElement.setAttribute('data-home-theme', 'dark');
       }
@@ -219,9 +219,9 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
+    <html lang="pt-BR" className="dark" data-home-theme="dark" suppressHydrationWarning>
       <body
-        className={`${bangers.variable} antialiased flex flex-col min-h-screen overflow-x-hidden`}
+        className={`${bangers.variable} antialiased flex flex-col min-h-screen overflow-x-hidden bg-[#090d16] text-white`}
       >
         <Script id="theme-init" strategy="beforeInteractive">
           {themeInitScript}
