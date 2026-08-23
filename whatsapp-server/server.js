@@ -794,13 +794,20 @@ function attachWhatsAppClientEvents(client) {
   });
 
   client.on("disconnected", (reason) => {
+    console.log(`[whatsapp] disconnected: ${reason}`);
     whatsappState.status = "disconnected";
     whatsappState.connected = false;
-    whatsappState.session = false;
     whatsappState.qrCode = null;
-    whatsappState.phoneNumber = null;
     emitState();
     emitToast(`WhatsApp desconectado: ${reason}`);
+
+    if (reason === "LOGOUT") {
+      whatsappState.session = false;
+      whatsappState.phoneNumber = null;
+      setTimeout(() => initializeWhatsAppClient({ resetSession: true }), 2000);
+    } else {
+      setTimeout(() => initializeWhatsAppClient({ resetSession: false }), 4000);
+    }
   });
 
   client.on("message", async (message) => {

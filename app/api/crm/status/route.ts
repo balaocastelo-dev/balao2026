@@ -3,17 +3,16 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  const port = process.env.WHATSAPP_PANEL_PORT || "4100";
   const endpoints = [
-    "http://127.0.0.1:4100/status",
-    "http://localhost:4100/status",
-    "http://127.0.0.1:8787/api/status",
-    "http://localhost:8787/api/status",
+    `http://127.0.0.1:${port}/status`,
+    `http://localhost:${port}/status`,
   ];
 
   for (const url of endpoints) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 1200);
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
       const res = await fetch(url, {
         signal: controller.signal,
         cache: "no-store",
@@ -29,8 +28,8 @@ export async function GET() {
           status: data.status || data.estado || "qr",
           qr: data.qr || data.qrCode || null,
           qrCode: data.qrCode || data.qr || null,
-          rawQr: data.rawQr || data.qrTexto || null,
-          connected: Boolean(data.connected || data.estado === "ready"),
+          rawQr: data.rawQr || null,
+          connected: Boolean(data.connected || data.estado === "ready" || data.status === "ready"),
           phoneNumber: data.phoneNumber || data.conta?.numero || null,
         });
       }

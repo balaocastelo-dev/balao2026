@@ -200,15 +200,23 @@ export default function CrmWhatsAppClient() {
       .catch(() => {});
   }, []);
 
-  // Poll Real WhatsApp Status & QR Code via /api/crm/status & direct server
+  // Poll Real WhatsApp Status & QR Code via /api/crm/status only when NOT connected
   useEffect(() => {
+    if (estado === "ready" || estado === "authenticated") return;
+
     let ativo = true;
 
     const checkStatus = async () => {
+      if (!ativo) return;
       try {
         const res = await fetch("/api/crm/status", { cache: "no-store" });
         if (res.ok && ativo) {
           const data = await res.json();
+          if (data.connected || data.status === "ready" || data.estado === "ready") {
+            setEstado("ready");
+            if (data.phoneNumber) setNumeroConectado(data.phoneNumber);
+            return;
+          }
           if (data.status || data.estado) {
             setEstado(data.status || data.estado);
           }
@@ -221,29 +229,26 @@ export default function CrmWhatsAppClient() {
           if (data.phoneNumber) {
             setNumeroConectado(data.phoneNumber);
           }
-          if (data.connected) {
-            setEstado("ready");
-          }
         }
       } catch {}
     };
 
     checkStatus();
-    const interval = setInterval(checkStatus, 2500);
+    const interval = setInterval(checkStatus, 2000);
 
     return () => {
       ativo = false;
       clearInterval(interval);
     };
-  }, []);
+  }, [estado]);
 
   // Socket.IO Integration with whatsapp-server
   useEffect(() => {
     const socket = io(serverUrl, {
       transports: ["websocket", "polling"],
       autoConnect: true,
-      reconnectionAttempts: 10,
-      reconnectionDelay: 2000,
+      reconnectionAttempts: 20,
+      reconnectionDelay: 1500,
     });
     socketRef.current = socket;
 
@@ -252,7 +257,10 @@ export default function CrmWhatsAppClient() {
     });
 
     socket.on("whatsapp:state", (payload: any) => {
-      if (payload?.status) {
+      if (payload?.connected || payload?.status === "ready") {
+        setEstado("ready");
+        if (payload?.phoneNumber) setNumeroConectado(payload.phoneNumber);
+      } else if (payload?.status) {
         setEstado(payload.status);
       }
       if (payload?.qrCode) {
@@ -263,9 +271,6 @@ export default function CrmWhatsAppClient() {
       }
       if (payload?.phoneNumber) {
         setNumeroConectado(payload.phoneNumber);
-      }
-      if (payload?.connected) {
-        setEstado("ready");
       }
     });
 
