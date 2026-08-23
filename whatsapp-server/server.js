@@ -301,13 +301,10 @@ function extractRealNumber(...candidates) {
   for (const candidate of candidates) {
     const value = String(candidate || "").trim();
     if (!value) continue;
-    const digits = getDigits(value);
-    const looksFormattedPhone =
-      value.startsWith("+") || value.includes("(") || value.includes(" ") || value.includes("-");
-    const looksBarePhone = /^55\d{10,11}$/.test(digits) || /^\d{10,11}$/.test(digits);
-
-    if ((looksFormattedPhone || looksBarePhone) && isLikelyPhoneDigits(digits)) {
-      return formatDisplayNumber(digits);
+    const clean = value.replace(/@.*$/, "");
+    const digits = getDigits(clean);
+    if (digits.length >= 10 && digits.length <= 13) {
+      return digits.startsWith("55") ? digits : `55${digits}`;
     }
   }
   return null;
@@ -1281,6 +1278,44 @@ io.on("connection", (socket) => {
     } catch (error) {
       console.error("Falha ao responder ao status:", error);
       emitToast("Falha ao responder ao status.");
+    }
+  });
+
+  socket.on("panel:send-product", async (payload) => {
+    try {
+      const number = normalizeNumber(payload.number || payload.chatId || "");
+      const chatId = payload.chatId || (number ? `${number}@c.us` : null);
+      const prod = payload.product || {};
+      const obs = payload.obs ? `\n\n_Obs: ${payload.obs}_` : "";
+      const specs = prod.specs?.length ? `\n• ${prod.specs.join("\n• ")}` : "";
+      const precoFmt = Number(payload.price || prod.preco || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 });
+
+      const text = `⚡ *Oferta Balão da Informática*\n*${prod.nome}*\n\n💵 *Preço Especial:* *R$ ${precoFmt}*${specs}${obs}\n\n📍 Pronta entrega na loja do Castelo Campinas!\nPara reservar ou tirar dúvidas, é só responder aqui! 🎈`;
+
+      let mediaSent = false;
+      if (prod.imagem && prod.imagem.startsWith("http")) {
+        try {
+          const media = await MessageMedia.fromUrl(prod.imagem, { unsafeMime: true });
+          await whatsappClient.sendMessage(chatId, media, { caption: text });
+          mediaSent = true;
+        } catch (e) {
+          console.warn("Falha ao enviar imagem do produto via URL, enviando como texto:", e.message);
+        }
+      }
+
+      if (!mediaSent) {
+        await sendDirectMessage({
+          number,
+          text,
+          signatureId: payload.signatureId || null,
+          chatId,
+        });
+      }
+
+      emitToast(`Produto "${prod.nome}" enviado com sucesso!`);
+    } catch (error) {
+      console.error("Falha ao enviar produto:", error);
+      emitToast("Falha ao enviar produto.");
     }
   });
 

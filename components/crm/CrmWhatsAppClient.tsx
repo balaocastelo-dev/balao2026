@@ -9,6 +9,7 @@ import {
   CrmMensagem,
   CrmNotaCliente,
   CrmProdutoCatalogo,
+  CrmProdutoResumo,
   CrmPromocao,
   CrmRespostaRapida,
   CrmStatusFeed,
@@ -57,7 +58,7 @@ function formatarNumeroExibicao(num: string | null | undefined): string {
   if (!num) return "";
   const limpo = String(num).replace(/@.*$/, "").replace(/\D/g, "");
   if (!limpo) return "";
-  
+
   // 13 dígitos: 55 + DDD (2) + 9 dígitos -> 55 19 987510267
   if (limpo.length === 13 && limpo.startsWith("55")) {
     return `${limpo.slice(0, 2)} ${limpo.slice(2, 4)} ${limpo.slice(4)}`;
@@ -406,10 +407,11 @@ export default function CrmWhatsAppClient() {
             )
             .forEach((sc) => {
               const idx = merged.findIndex((c) => c.id === sc.chatId);
+              const realNum = sc.realNumber || sc.displayNumber || sc.chatId.replace(/@c\.us$/, "");
               const chatObj: CrmChat = {
                 id: sc.chatId,
-                nome: sc.contactName || sc.realNumber || sc.chatId.replace(/@c\.us$/, ""),
-                numero: sc.realNumber || sc.displayNumber || sc.chatId.replace(/@c\.us$/, ""),
+                nome: sc.contactName || realNum,
+                numero: realNum,
                 pic: sc.profilePicUrl || null,
                 unread: sc.unreadCount || 0,
                 lastMessage: sc.lastMessageBody || "",
@@ -420,7 +422,11 @@ export default function CrmWhatsAppClient() {
                 fixado: sc.isPinned || false,
               };
               if (idx >= 0) {
-                merged[idx] = { ...merged[idx], ...chatObj };
+                merged[idx] = {
+                  ...merged[idx],
+                  ...chatObj,
+                  pic: sc.profilePicUrl || merged[idx].pic,
+                };
               } else {
                 merged.push(chatObj);
               }
@@ -485,6 +491,7 @@ export default function CrmWhatsAppClient() {
         showToast("Cliente optou por sair do disparo (LGPD).");
       }
 
+      const realNum = newMsg.realNumber || newMsg.chatId.replace(/@c\.us$/, "");
       const m: CrmMensagem = {
         id: newMsg.id || `msg-${Date.now()}`,
         chatId: newMsg.chatId,
@@ -514,8 +521,8 @@ export default function CrmWhatsAppClient() {
         } else {
           const novo: CrmChat = {
             id: newMsg.chatId,
-            nome: newMsg.contactName || newMsg.realNumber || newMsg.chatId.replace(/@c\.us$/, ""),
-            numero: newMsg.realNumber || newMsg.chatId.replace(/@c\.us$/, ""),
+            nome: newMsg.contactName || realNum,
+            numero: realNum,
             unread: 1,
             lastMessage: newMsg.body || "",
             timestamp: Date.now(),
@@ -843,6 +850,81 @@ export default function CrmWhatsAppClient() {
     ];
   };
 
+  // Enviar Produto Direto para o Chat (Sem passar pelo digitador)
+  const enviarProdutoDiretoAoChat = (prod: CrmProdutoCatalogo, precoCustom?: number, obsCustom?: string) => {
+    if (!chatSelecionado) {
+      showToast("Selecione uma conversa primeiro!");
+      return;
+    }
+
+    const precoFinal = precoCustom || prod.preco;
+    const precoFmt = `R$ ${precoFinal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+    const specsTxt = prod.specs?.length ? `\n• ${prod.specs.join("\n• ")}` : "";
+    const obsTxt = obsCustom?.trim() ? `\n\n_Obs: ${obsCustom.trim()}_` : "";
+
+    const textoFormatado = `⚡ *Oferta Balão da Informática:*\n*${prod.nome}*\n\n💵 *Preço Especial:* *${precoFmt}*${specsTxt}${obsTxt}\n\n📍 Pronta entrega na loja do Castelo Campinas!\nPara garantir a reserva ou tirar dúvidas, é só responder aqui! 🎈`;
+
+    const produtoResumo: CrmProdutoResumo = {
+      id: prod.id,
+      nome: prod.nome,
+      preco: precoFinal,
+      precoFormatado: precoFmt,
+      imagem: prod.imagem,
+      fornecedor: prod.fornecedor || "Balão",
+      specs: prod.specs,
+    };
+
+    const novaMsg: CrmMensagem = {
+      id: `msg-prod-${Date.now()}`,
+      chatId: chatSelecionado.id,
+      from: "balao",
+      body: textoFormatado,
+      direction: "out",
+      timestamp: Date.now(),
+      produto: produtoResumo,
+      hasMedia: Boolean(prod.imagem),
+      mediaUrl: prod.imagem,
+      status: "sent",
+    };
+
+    setMensagens((prev) => [...prev, novaMsg]);
+
+    setChats((prev) =>
+      prev.map((c) =>
+        c.id === chatSelecionado.id
+          ? {
+              ...c,
+              lastMessage: `📦 Oferta: ${prod.nome} (${precoFmt})`,
+              timestamp: Date.now(),
+              produtosEnviados: [
+                {
+                  id: prod.id,
+                  nome: prod.nome,
+                  preco: precoFinal,
+                  imagem: prod.imagem,
+                  timestamp: Date.now(),
+                },
+                ...(c.produtosEnviados || []),
+              ],
+            }
+          : c
+      )
+    );
+
+    if (socketRef.current?.connected) {
+      socketRef.current.emit("panel:send-product", {
+        chatId: chatSelecionado.id,
+        number: chatSelecionado.numero,
+        product: prod,
+        price: precoFinal,
+        obs: obsCustom,
+      });
+    }
+
+    if (modalProdutoAberto) setModalProdutoAberto(false);
+    showToast(`📦 Oferta de "${prod.nome}" enviada direto ao cliente! ✅`);
+  };
+
   // Send message
   const enviarMensagem = () => {
     if (!campoTexto.trim() || !chatSelecionado) return;
@@ -944,41 +1026,6 @@ export default function CrmWhatsAppClient() {
     if (c > 0 && p > 0) {
       setMpMargem(String(Math.round(((p - c) / c) * 100)));
     }
-  };
-
-  const confirmarEnvioProduto = () => {
-    if (!produtoModal || !chatSelecionado) return;
-    const precoNum = Number(mpPreco) || produtoModal.preco;
-    const txt = `📦 *${produtoModal.nome}*\n\n💵 *Preço Especial Balão:* R$ ${precoNum.toLocaleString(
-      "pt-BR",
-      { minimumFractionDigits: 2 }
-    )}\n📍 Pronta entrega na loja do Castelo Campinas!\n${
-      produtoModal.specs?.length ? `• ${produtoModal.specs.join("\n• ")}\n` : ""
-    }${mpObs.trim() ? `\nObs: ${mpObs.trim()}\n` : ""}\nQuer que separe para você retirar hoje ou prefere entrega?`;
-
-    // Add to customer's sent products history
-    setChats((prev) =>
-      prev.map((c) =>
-        c.id === chatSelecionado.id
-          ? {
-              ...c,
-              produtosEnviados: [
-                {
-                  id: produtoModal.id,
-                  nome: produtoModal.nome,
-                  preco: precoNum,
-                  timestamp: Date.now(),
-                },
-                ...(c.produtosEnviados || []),
-              ],
-            }
-          : c
-      )
-    );
-
-    setCampoTexto(txt);
-    setModalProdutoAberto(false);
-    showToast("Oferta de produto pronta no campo de texto!");
   };
 
   // Toggle Fixar
@@ -1310,7 +1357,7 @@ export default function CrmWhatsAppClient() {
         <div className="flex-1 flex flex-col overflow-hidden min-h-0">
           {/* Main 3 Panels Row */}
           <div className="flex-1 flex overflow-hidden min-h-0">
-            {/* PANE 1: CHATS LIST (NO STATUS BROADCASTS - REAL FORMATTED NUMBERS) */}
+            {/* PANE 1: CHATS LIST (REAL NUMBERS & PROFILE PICTURES) */}
             <aside className="w-76 bg-white border-r border-[#e3e3e3] flex flex-col shrink-0">
               <div className="p-3 pb-1.5 font-bold text-sm text-[#202124] flex items-center justify-between">
                 <span>Conversas ({chatsFiltrados.length})</span>
@@ -1348,7 +1395,7 @@ export default function CrmWhatsAppClient() {
                 ＋ Nova conversa
               </button>
 
-              {/* Chat list items with clean formatted numbers */}
+              {/* Chat list items with real profile pics and formatted numbers */}
               <div className="flex-1 overflow-y-auto px-2 pb-2 space-y-1">
                 {chatsFiltrados.length === 0 ? (
                   <div className="text-center text-xs text-[#5f6368] py-8">
@@ -1382,11 +1429,18 @@ export default function CrmWhatsAppClient() {
                             : "hover:bg-[#f0f2f5]"
                         }`}
                       >
-                        {/* Avatar */}
-                        <div className="w-10 h-10 rounded-full bg-[#0f9d58] text-white flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden relative shadow-xs">
+                        {/* Real Profile Avatar */}
+                        <div className="w-10 h-10 rounded-full bg-[#0f9d58] text-white flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden relative shadow-xs border border-[#e3e3e3]">
                           {chat.pic ? (
                             /* eslint-disable-next-line @next/next/no-img-element */
-                            <img src={chat.pic} alt="" className="w-full h-full object-cover" />
+                            <img
+                              src={chat.pic}
+                              alt=""
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLElement).style.display = "none";
+                              }}
+                            />
                           ) : (
                             <span>{ini}</span>
                           )}
@@ -1484,16 +1538,28 @@ export default function CrmWhatsAppClient() {
             >
               {chatSelecionado ? (
                 <>
-                  {/* Header */}
+                  {/* Header with Profile Pic & Real Number */}
                   <div className="bg-white border-b border-[#e3e3e3] p-2.5 px-4 flex items-center justify-between shrink-0 shadow-xs">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-[#0f9d58] text-white flex items-center justify-center font-bold text-sm shrink-0">
-                        {chatSelecionado.nome.charAt(0).toUpperCase()}
+                      <div className="w-10 h-10 rounded-full bg-[#0f9d58] text-white flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden border border-[#e3e3e3]">
+                        {chatSelecionado.pic ? (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img
+                            src={chatSelecionado.pic}
+                            alt=""
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLElement).style.display = "none";
+                            }}
+                          />
+                        ) : (
+                          <span>{chatSelecionado.nome.charAt(0).toUpperCase()}</span>
+                        )}
                       </div>
                       <div>
                         <div className="font-bold text-sm text-[#202124] flex items-center gap-2">
                           {chatSelecionado.nome}
-                          <span className="text-xs font-mono text-[#0a6e3d] font-semibold bg-[#e7f6ec] px-2 py-0.5 rounded-full">
+                          <span className="text-xs font-mono text-[#0a6e3d] font-semibold bg-[#e7f6ec] px-2.5 py-0.5 rounded-full border border-[#0f9d58]/30">
                             {formatarNumeroExibicao(chatSelecionado.numero)}
                           </span>
                         </div>
@@ -1540,8 +1606,8 @@ export default function CrmWhatsAppClient() {
                     </button>
                   </div>
 
-                  {/* Messages Feed */}
-                  <div className="flex-1 overflow-y-auto p-4 space-y-2 flex flex-col">
+                  {/* Messages Feed with Sent Product Photos Preview */}
+                  <div className="flex-1 overflow-y-auto p-4 space-y-2.5 flex flex-col">
                     {mensagensChatAtual.length === 0 ? (
                       <div className="text-center text-xs text-[#5f6368] my-auto">
                         Inicie a conversa enviando uma mensagem abaixo.
@@ -1556,7 +1622,7 @@ export default function CrmWhatsAppClient() {
                             onContextMenu={(e) =>
                               openContextMenu(e, "Opções da Mensagem", getMessageMenuItems(m))
                             }
-                            className={`max-w-[65%] p-2 px-3 rounded-xl text-xs shadow-sm break-words whitespace-pre-wrap leading-relaxed cursor-pointer ${
+                            className={`max-w-[70%] p-2.5 px-3 rounded-2xl text-xs shadow-sm break-words whitespace-pre-wrap leading-relaxed cursor-pointer ${
                               isEu
                                 ? "self-end bg-[#e7f6ec] border border-[#0f9d58] rounded-tr-none text-[#202124]"
                                 : "self-start bg-[#dff0fd] border border-[#a9cdf0] rounded-tl-none text-[#202124]"
@@ -1564,9 +1630,32 @@ export default function CrmWhatsAppClient() {
                           >
                             {/* Quoted Message Snippet */}
                             {m.replyTo && (
-                              <div className="bg-black/5 border-l-3 border-[#0f9d58] p-1.5 mb-1.5 rounded text-[11px] text-[#5f6368]">
+                              <div className="bg-black/5 border-l-3 border-[#0f9d58] p-1.5 mb-2 rounded text-[11px] text-[#5f6368]">
                                 <div className="font-bold text-[#0a6e3d]">{m.replyTo.author}</div>
                                 <div className="line-clamp-2">{m.replyTo.body}</div>
+                              </div>
+                            )}
+
+                            {/* Sent Product Card with Photo */}
+                            {m.produto && (
+                              <div className="bg-white rounded-xl border border-[#e3e3e3] p-2.5 mb-2 shadow-xs flex flex-col gap-2">
+                                {m.produto.imagem && (
+                                  <div className="w-full h-36 bg-[#f7f8fa] rounded-lg overflow-hidden flex items-center justify-center">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                      src={m.produto.imagem}
+                                      alt={m.produto.nome}
+                                      className="max-h-full max-w-full object-contain p-1"
+                                      loading="lazy"
+                                    />
+                                  </div>
+                                )}
+                                <div>
+                                  <div className="font-bold text-xs text-[#202124]">{m.produto.nome}</div>
+                                  <div className="text-sm font-bold text-[#0a6e3d] mt-0.5">
+                                    {m.produto.precoFormatado || `R$ ${m.produto.preco.toFixed(2)}`}
+                                  </div>
+                                </div>
                               </div>
                             )}
 
@@ -1595,6 +1684,14 @@ export default function CrmWhatsAppClient() {
                                     ⬇ Baixar
                                   </a>
                                 )}
+                              </div>
+                            )}
+
+                            {/* Regular Photo Attachment */}
+                            {m.hasMedia && m.mediaUrl && !m.produto && m.mediaType !== "document" && m.mediaType !== "audio" && (
+                              <div className="w-full max-h-56 bg-black/5 rounded-lg overflow-hidden mb-2 flex items-center justify-center">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={m.mediaUrl} alt="" className="max-h-56 max-w-full object-contain" />
                               </div>
                             )}
 
@@ -1684,7 +1781,7 @@ export default function CrmWhatsAppClient() {
 
                       <button
                         onClick={() => setAbaAtual("catalogo")}
-                        title="Enviar produto do catálogo"
+                        title="Abrir catálogo de produtos"
                         className="bg-[#e7f6ec] text-[#0a6e3d] border border-[#0f9d58] rounded-lg p-2 text-sm font-bold hover:bg-[#0f9d58] hover:text-white transition-colors cursor-pointer"
                       >
                         📦
@@ -1780,9 +1877,13 @@ export default function CrmWhatsAppClient() {
 
               {/* Conteúdo da Aba */}
               <div className="flex-1 overflow-y-auto p-3 text-xs space-y-3">
-                {/* ABA 1: CATÁLOGO */}
+                {/* ABA 1: CATÁLOGO (ENVIO DIRETO AO CHAT) */}
                 {abaAtual === "catalogo" && (
                   <div className="space-y-3">
+                    <div className="bg-[#e7f6ec] border border-[#0f9d58]/40 rounded-xl p-2.5 text-[11px] text-[#0a6e3d] font-semibold">
+                      💡 Clique em <b>⚡ Enviar Direto</b> para enviar a foto e oferta do produto imediatamente no WhatsApp sem passar pelo digitador!
+                    </div>
+
                     <div className="flex gap-2">
                       <input
                         type="text"
@@ -1804,7 +1905,7 @@ export default function CrmWhatsAppClient() {
                       </select>
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-2.5">
                       {produtosCatalogo
                         .filter((p) => {
                           const matchBusca =
@@ -1819,27 +1920,46 @@ export default function CrmWhatsAppClient() {
                         .map((prod) => (
                           <div
                             key={prod.id}
-                            onClick={() => abrirModalProduto(prod)}
-                            className="flex items-center gap-2.5 p-2 border border-[#e3e3e3] hover:border-[#0f9d58] hover:bg-[#e7f6ec] rounded-xl cursor-pointer transition-all"
+                            className="p-2.5 border border-[#e3e3e3] hover:border-[#0f9d58] rounded-xl transition-all bg-white shadow-xs flex flex-col gap-2"
                           >
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={prod.imagem}
-                              alt=""
-                              className="w-12 h-12 object-cover rounded-lg bg-gray-100 shrink-0"
-                            />
-                            <div className="flex-1 min-w-0">
-                              <h5 className="font-semibold text-xs text-[#202124] truncate">
-                                {prod.nome}
-                              </h5>
-                              <div className="flex items-center justify-between mt-1">
-                                <span className="font-bold text-[#0a6e3d]">
-                                  {prod.precoFormatado}
-                                </span>
-                                <span className="text-[10px] text-[#5f6368] bg-[#f0f2f5] px-1.5 py-0.5 rounded">
-                                  Custo: R$ {prod.custo} ({prod.fornecedor || "Balão"})
-                                </span>
+                            <div className="flex items-center gap-2.5">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={prod.imagem}
+                                alt=""
+                                className="w-14 h-14 object-cover rounded-lg bg-gray-100 shrink-0 border border-[#e3e3e3]"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <h5 className="font-semibold text-xs text-[#202124] line-clamp-2">
+                                  {prod.nome}
+                                </h5>
+                                <div className="flex items-center justify-between mt-1">
+                                  <span className="font-bold text-sm text-[#0a6e3d]">
+                                    {prod.precoFormatado}
+                                  </span>
+                                  <span className="text-[10px] text-[#5f6368] bg-[#f0f2f5] px-1.5 py-0.5 rounded">
+                                    Custo: R$ {prod.custo} ({prod.fornecedor || "Balão"})
+                                  </span>
+                                </div>
                               </div>
+                            </div>
+
+                            {/* Action Buttons: Enviar Direto vs Ajustar Preço */}
+                            <div className="flex gap-1.5 pt-1 border-t border-[#f0f2f5]">
+                              <button
+                                onClick={() => enviarProdutoDiretoAoChat(prod)}
+                                className="flex-1 bg-[#0f9d58] hover:bg-[#0a6e3d] text-white py-1.5 px-2 rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1 shadow-xs"
+                                title="Enviar direto ao chat com foto"
+                              >
+                                ⚡ Enviar Direto
+                              </button>
+                              <button
+                                onClick={() => abrirModalProduto(prod)}
+                                className="bg-[#f0f2f5] hover:bg-[#e8eaed] text-[#202124] py-1.5 px-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                                title="Ajustar margem ou observação antes de enviar"
+                              >
+                                ⚙️ Ajustar
+                              </button>
                             </div>
                           </div>
                         ))}
@@ -2182,8 +2302,25 @@ export default function CrmWhatsAppClient() {
                   <div className="space-y-3">
                     {chatSelecionado ? (
                       <div className="space-y-3">
+                        <div className="flex items-center gap-3 p-3 bg-[#f0f2f5] rounded-xl border border-[#e3e3e3]">
+                          <div className="w-12 h-12 rounded-full bg-[#0f9d58] text-white flex items-center justify-center font-bold text-base shrink-0 overflow-hidden border border-[#e3e3e3]">
+                            {chatSelecionado.pic ? (
+                              /* eslint-disable-next-line @next/next/no-img-element */
+                              <img src={chatSelecionado.pic} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <span>{chatSelecionado.nome.charAt(0).toUpperCase()}</span>
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="font-bold text-xs text-[#202124]">{chatSelecionado.nome}</div>
+                            <div className="text-xs font-mono text-[#0a6e3d] font-semibold mt-0.5">
+                              {formatarNumeroExibicao(chatSelecionado.numero)}
+                            </div>
+                          </div>
+                        </div>
+
                         <div>
-                          <label className="text-[10px] font-bold uppercase text-[#5f6368]">Nome</label>
+                          <label className="text-[10px] font-bold uppercase text-[#5f6368]">Nome do Cliente</label>
                           <input
                             type="text"
                             value={chatSelecionado.nome}
@@ -2198,7 +2335,7 @@ export default function CrmWhatsAppClient() {
                         </div>
 
                         <div>
-                          <label className="text-[10px] font-bold uppercase text-[#5f6368]">Telefone / WhatsApp</label>
+                          <label className="text-[10px] font-bold uppercase text-[#5f6368]">Telefone Real</label>
                           <input
                             type="text"
                             readOnly
@@ -2230,17 +2367,24 @@ export default function CrmWhatsAppClient() {
                           </select>
                         </div>
 
-                        {/* Histórico de Produtos Enviados */}
+                        {/* Histórico de Produtos Enviados com Fotos */}
                         {chatSelecionado.produtosEnviados && chatSelecionado.produtosEnviados.length > 0 && (
                           <div className="space-y-1">
                             <label className="text-[10px] font-bold uppercase text-[#5f6368]">
                               📦 Produtos Ofertados ({chatSelecionado.produtosEnviados.length})
                             </label>
-                            <div className="space-y-1 max-h-32 overflow-y-auto">
+                            <div className="space-y-1.5 max-h-40 overflow-y-auto">
                               {chatSelecionado.produtosEnviados.map((p, idx) => (
-                                <div key={idx} className="p-1.5 bg-[#f0f2f5] rounded border border-[#e3e3e3] text-[11px] flex justify-between items-center">
-                                  <span className="truncate">{p.nome}</span>
-                                  <b className="text-[#0a6e3d]">R$ {p.preco.toFixed(2)}</b>
+                                <div key={idx} className="p-2 bg-[#f0f2f5] rounded-lg border border-[#e3e3e3] text-[11px] flex items-center gap-2">
+                                  {p.imagem && (
+                                    /* eslint-disable-next-line @next/next/no-img-element */
+                                    <img src={p.imagem} alt="" className="w-9 h-9 object-cover rounded bg-white shrink-0 border border-[#e3e3e3]" />
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <div className="truncate font-semibold text-[#202124]">{p.nome}</div>
+                                    <div className="text-[10px] text-[#5f6368]">{formatHora(p.timestamp)}</div>
+                                  </div>
+                                  <b className="text-[#0a6e3d] shrink-0">R$ {p.preco.toFixed(2)}</b>
                                 </div>
                               ))}
                             </div>
@@ -2413,7 +2557,7 @@ export default function CrmWhatsAppClient() {
                         </span>
                       </div>
 
-                      {/* Cards list */}
+                      {/* Cards list with profile pic */}
                       <div className="flex-1 overflow-y-auto p-2 space-y-2">
                         {cardsNaColuna.length === 0 ? (
                           <div className="text-center text-[11px] text-[#5f6368] py-4">
@@ -2431,13 +2575,24 @@ export default function CrmWhatsAppClient() {
                               }
                               className="bg-white border border-[#e3e3e3] rounded-lg p-2 shadow-xs cursor-grab active:cursor-grabbing hover:border-[#0f9d58] transition-all"
                             >
-                              <div className="font-bold text-xs text-[#202124] hover:text-[#0a6e3d] truncate flex justify-between items-center">
-                                <span>{card.nome}</span>
+                              <div className="flex items-center gap-2">
+                                <div className="w-6 h-6 rounded-full bg-[#0f9d58] text-white flex items-center justify-center font-bold text-[10px] shrink-0 overflow-hidden">
+                                  {card.pic ? (
+                                    /* eslint-disable-next-line @next/next/no-img-element */
+                                    <img src={card.pic} alt="" className="w-full h-full object-cover" />
+                                  ) : (
+                                    <span>{card.nome.charAt(0).toUpperCase()}</span>
+                                  )}
+                                </div>
+                                <div className="font-bold text-xs text-[#202124] hover:text-[#0a6e3d] truncate flex-1">
+                                  {card.nome}
+                                </div>
                                 {card.precisaAtencao && (
                                   <span className="text-[10px]" title="Precisa de atenção">⚠️</span>
                                 )}
                               </div>
-                              <div className="text-[10px] font-mono text-[#0a6e3d] font-semibold mt-0.5">
+
+                              <div className="text-[10px] font-mono text-[#0a6e3d] font-semibold mt-1">
                                 {formatarNumeroExibicao(card.numero || card.id)}
                               </div>
                               <div className="text-[10px] text-[#5f6368] truncate mt-0.5">
@@ -2725,13 +2880,13 @@ export default function CrmWhatsAppClient() {
         </div>
       )}
 
-      {/* MODAL PRODUTO: Definir Preço de Venda com 2-Way Sync */}
+      {/* MODAL PRODUTO: Definir Preço de Venda com Envio Direto ao Chat */}
       {modalProdutoAberto && produtoModal && (
         <div className="fixed inset-0 bg-black/55 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-4 space-y-3">
             <div className="flex justify-between items-center border-b border-[#e3e3e3] pb-2">
               <strong className="text-xs text-[#202124]">
-                Enviar produto — definir preço de venda
+                Enviar produto com margem/preço personalizado
               </strong>
               <button
                 onClick={() => setModalProdutoAberto(false)}
@@ -2746,7 +2901,7 @@ export default function CrmWhatsAppClient() {
               <img
                 src={produtoModal.imagem}
                 alt=""
-                className="w-20 h-20 object-cover rounded-lg bg-gray-100 shrink-0"
+                className="w-20 h-20 object-cover rounded-lg bg-gray-100 shrink-0 border border-[#e3e3e3]"
               />
               <div className="min-w-0 flex-1">
                 <div className="font-bold text-xs text-[#202124]">{produtoModal.nome}</div>
@@ -2817,10 +2972,14 @@ export default function CrmWhatsAppClient() {
             />
 
             <button
-              onClick={confirmarEnvioProduto}
-              className="w-full bg-[#0f9d58] hover:bg-[#0a6e3d] text-white py-2 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+              onClick={() => {
+                if (produtoModal) {
+                  enviarProdutoDiretoAoChat(produtoModal, Number(mpPreco) || produtoModal.preco, mpObs);
+                }
+              }}
+              className="w-full bg-[#0f9d58] hover:bg-[#0a6e3d] text-white py-2 rounded-lg text-xs font-bold transition-colors cursor-pointer shadow-xs"
             >
-              ➤ Enviar Produto
+              ➤ Enviar Produto Direto ao Cliente
             </button>
           </div>
         </div>
@@ -2919,6 +3078,7 @@ export default function CrmWhatsAppClient() {
                   direction: "out",
                   timestamp: Date.now(),
                   hasMedia: true,
+                  mediaUrl: fotoUrl,
                   status: "sent",
                 };
                 setMensagens((prev) => [...prev, m]);

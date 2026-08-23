@@ -37,6 +37,7 @@ export interface CrmProdutoEnviado {
   id: string;
   nome: string;
   preco: number;
+  imagem?: string | null;
   timestamp: number;
 }
 
@@ -67,6 +68,16 @@ export interface CrmChat {
   produtosEnviados?: CrmProdutoEnviado[];
 }
 
+export interface CrmProdutoResumo {
+  id: string;
+  nome: string;
+  preco: number;
+  precoFormatado?: string;
+  imagem?: string | null;
+  fornecedor?: string;
+  specs?: string[];
+}
+
 export interface CrmMensagem {
   id: string;
   chatId: string;
@@ -87,6 +98,7 @@ export interface CrmMensagem {
     body: string;
     author: string;
   } | null;
+  produto?: CrmProdutoResumo | null;
   status?: "pending" | "sent" | "delivered" | "read" | "failed";
 }
 
