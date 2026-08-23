@@ -240,8 +240,8 @@ export default async function Home(props: {
         </section>
       )}
 
-      {/* Main Content Container */}
-      <div className="container mx-auto px-3 py-4 sm:px-4 lg:px-0 space-y-6 sm:space-y-8">
+      {/* Main Content Container - Folgado e Espaçoso */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 sm:space-y-12 py-6">
         {/* 1. Full-Width Stretched Hero Banner */}
         {!search && !category && (
           <HomeHeroFullWidth carouselImages={carouselImages} />
@@ -255,14 +255,14 @@ export default async function Home(props: {
         {/* 3. Main Body: Left Column (Department Menu) + Right Roomy Center Feed (PC Gamer & Notebooks) */}
         {!search && !category ? (
           <>
-            <div className="flex flex-col lg:flex-row gap-6 items-start">
-              {/* Left Column: Dedicated Department Menu Sidebar (w-72 / 288px) */}
-              <div className="w-full lg:w-72 shrink-0">
+            <div className="flex flex-col lg:flex-row gap-8 items-start">
+              {/* Left Column: Dedicated Department Menu Sidebar (w-80 / 320px) */}
+              <div className="w-full lg:w-80 shrink-0">
                 <HomeDepartmentMenu categories={categories} dealOfTheDay={dealOfTheDay} />
               </div>
 
               {/* Right Column: Roomy Main Highlights Feed (Spacious, not squeezed!) */}
-              <div className="flex-1 min-w-0 space-y-6 sm:space-y-8">
+              <div className="flex-1 min-w-0 space-y-10 sm:space-y-12">
                 {/* 1. Computador Gamer */}
                 {pcGamerProducts.length > 0 && (
                   <HomeCategoryShelf
@@ -293,7 +293,7 @@ export default async function Home(props: {
             )}
 
             {/* 5. Demais Categorias em Destaque (Smartphones, Hardware, Periféricos, Games) */}
-            <div className="space-y-6 sm:space-y-8">
+            <div className="space-y-10 sm:space-y-12">
               {/* 4. Smartphones */}
               {smartphoneProducts.length > 0 && (
                 <HomeCategoryShelf
