@@ -1,12 +1,5 @@
 import { createClient, Client } from '@libsql/client';
 
-// Credenciais vêm SEMPRE de variáveis de ambiente (.env.local / Vercel).
-// Nunca colocar token direto no código!
-const envUrl = process.env.TURSO_DATABASE_URL;
-const envToken = process.env.TURSO_AUTH_TOKEN;
-
-const active = Boolean(envUrl && envUrl !== 'file:local.db' && envToken);
-
 function makeStub(): Client {
   return {
     execute: async () => ({ rows: [], columns: [], rowsAffected: 0, lastInsertRowid: undefined }),
@@ -19,24 +12,50 @@ function makeStub(): Client {
 }
 
 export function isTursoActive(): boolean {
-  return active;
+  const url = process.env.TURSO_DATABASE_URL;
+  const token = process.env.TURSO_AUTH_TOKEN;
+  return Boolean(url && url !== 'file:local.db' && token);
 }
 
-let tursoClient: Client;
+let _client: Client | null = null;
+let _cachedUrl: string | null = null;
+let _cachedToken: string | null = null;
 
-if (active) {
-  try {
-    tursoClient = createClient({ url: envUrl!, authToken: envToken });
-  } catch (error) {
-    console.error('Turso DB initialization error:', error);
-    tursoClient = makeStub();
+export function getTursoClient(): Client {
+  const url = process.env.TURSO_DATABASE_URL;
+  const token = process.env.TURSO_AUTH_TOKEN;
+
+  if (!url || url === 'file:local.db' || !token) {
+    if (process.env.NODE_ENV !== 'production' && typeof window === 'undefined') {
+      console.warn('[turso] TURSO_DATABASE_URL ou TURSO_AUTH_TOKEN ausentes — usando cliente inativo.');
+    }
+    return makeStub();
   }
-} else {
-  if (process.env.NODE_ENV !== 'production') {
-    console.warn('[turso] TURSO_DATABASE_URL/TURSO_AUTH_TOKEN ausentes — usando cliente inativo.');
+
+  if (!_client || _cachedUrl !== url || _cachedToken !== token) {
+    try {
+      _client = createClient({ url, authToken: token });
+      _cachedUrl = url;
+      _cachedToken = token;
+    } catch (error) {
+      console.error('[turso] Erro ao inicializar conexão LibSQL:', error);
+      return makeStub();
+    }
   }
-  tursoClient = makeStub();
+
+  return _client;
 }
 
-export const turso = tursoClient;
+export const turso: Client = new Proxy({} as Client, {
+  get(_target, prop) {
+    const client = getTursoClient();
+    const value = (client as any)[prop];
+    if (typeof value === 'function') {
+      return value.bind(client);
+    }
+    return value;
+  },
+});
+
 export default turso;
+

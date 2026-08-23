@@ -8,13 +8,13 @@ import QuickLeadSection from "@/components/QuickLeadSection";
 import HomeLocalStoreInfo from "@/components/HomeLocalStoreInfo";
 import HomeProductShelf from "@/components/HomeProductShelf";
 import Image from "next/image";
-import { getProductsByExactCategories } from "@/lib/db";
+import { getProductsByExactCategories, getProducts } from "@/lib/db";
 import { getCachedCategories, getCachedCarouselImages, getCachedHomeBlocks, getCachedVitrinePages } from "@/lib/cache";
 import { listBlogPostsForPage } from "@/lib/blog-store";
 import { pickPcHeroImage } from "@/lib/vitrine/core";
 import type { VitrineCategory } from "@/lib/vitrine/types";
 import { turso } from "@/lib/turso";
-import { getProductHref, parsePriceToNumber, Product, type Category } from "@/lib/utils";
+import { getProductHref, parsePriceToNumber, Product, type Category, type HomeBlock } from "@/lib/utils";
 import type { Metadata } from "next";
 import { SITE_CONFIG } from "@/lib/config";
 import Link from "next/link";
@@ -245,6 +245,7 @@ export default async function Home(props: {
   let vitrinePages: HomeSidebarVitrinePage[] = [];
   let semiNovoProducts: Product[] = [];
   let iphoneSemiNovoProducts: Product[] = [];
+  let activeBlocks: HomeBlock[] = [];
 
   if (search) {
     [categories, carouselImages, homeBlocks, blogPosts, vitrinePages] = await Promise.all([
@@ -298,6 +299,19 @@ export default async function Home(props: {
       getCachedVitrinePages().then((pages) => pages.slice(0, 6)) as Promise<HomeSidebarVitrinePage[]>,
     ]);
 
+    activeBlocks = homeBlocks;
+    if (!activeBlocks || activeBlocks.length === 0) {
+      const defaultCategories = ['Hardware', 'Computadores', 'Notebooks', 'Monitores', 'Smartphones', 'Periféricos', 'Acessórios', 'Segurança', 'Impressão'];
+      activeBlocks = defaultCategories.map((catName, i) => ({
+        id: `default-block-${i}`,
+        category_id: catName,
+        title: catName,
+        display_order: i,
+        active: true,
+        created_at: new Date().toISOString(),
+      }));
+    }
+
     let rawProducts: Product[] = [];
     if (category && category !== "Todos os Produtos") {
       const validCategories = new Set<string>([category]);
@@ -305,8 +319,11 @@ export default async function Home(props: {
       descendants.forEach((name) => validCategories.add(name));
       rawProducts = await getProductsByExactCategories([...validCategories]);
     } else {
-      const blockCategories = [...new Set(homeBlocks.map((block) => block.category_id).filter(Boolean))];
+      const blockCategories = [...new Set(activeBlocks.map((block) => block.category_id).filter(Boolean))];
       rawProducts = await getProductsByExactCategories(blockCategories);
+      if (rawProducts.length === 0) {
+        rawProducts = await getProducts();
+      }
     }
 
     // Deduplicate by name
@@ -792,7 +809,7 @@ export default async function Home(props: {
                 </aside>
               </section>
 
-              {homeBlocks.map((block, index) => {
+              {(activeBlocks && activeBlocks.length > 0 ? activeBlocks : homeBlocks).map((block, index) => {
                 const blockProducts = products.filter((p) => p.category === block.category_id);
                 if (blockProducts.length === 0) return null;
 
@@ -808,6 +825,20 @@ export default async function Home(props: {
                   />
                 );
               })}
+
+              {products.length > 0 && !(activeBlocks && activeBlocks.length > 0 ? activeBlocks : homeBlocks).some((block) => products.some((p) => p.category === block.category_id)) && (
+                <section className="home-panel rounded-[2rem] p-6 md:p-8">
+                  <div className="mb-6">
+                    <div className="text-[11px] font-black uppercase tracking-[0.22em] text-[var(--home-accent)]">
+                      Catálogo em Destaque
+                    </div>
+                    <h2 className="mt-2 text-2xl font-black tracking-tight text-[var(--home-text)] md:text-3xl">
+                      Produtos Disponíveis
+                    </h2>
+                  </div>
+                  <ProductList products={products.slice(0, 24)} />
+                </section>
+              )}
             </div>
           )}
 
