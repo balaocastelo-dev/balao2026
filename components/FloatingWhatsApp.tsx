@@ -1,11 +1,22 @@
 "use client";
 
 import React from "react";
+import { usePathname } from "next/navigation";
 import { MessageCircle } from "lucide-react";
 import { SITE_CONFIG } from "@/lib/config";
 import { trackWhatsAppClick } from "@/lib/tracking";
 
 export default function FloatingWhatsApp() {
+  const pathname = usePathname();
+  if (
+    pathname === "/crm" ||
+    pathname.startsWith("/crm/") ||
+    pathname === "/whatsapp" ||
+    pathname === "/painel"
+  ) {
+    return null;
+  }
+
   const handleWhatsAppClick = () => {
     if (typeof window === "undefined") return;
 

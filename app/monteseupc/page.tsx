@@ -1,103 +1,177 @@
 import { getProducts } from "@/lib/db";
 import PCBuilder from "@/components/PCBuilder";
-import { Monitor, Cpu, Settings } from "lucide-react";
+import { Monitor, Cpu, Settings, Wrench, ShieldCheck, Sparkles, MessageCircle, MapPin } from "lucide-react";
 import Header from "@/components/Header";
-import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from "@/components/JsonLd";
+import JsonLd, {
+  generateOrganizationSchema,
+  generateBreadcrumbSchema,
+  generateItemListSchema,
+  generateFAQSchema,
+  generateServiceSchema,
+} from "@/components/JsonLd";
 import type { Metadata } from "next";
 import { SITE_CONFIG } from "@/lib/config";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
-  title: "Monte seu PC Gamer em Campinas | Balão da Informática",
-  description: "Monte seu PC Gamer peça por peça, com verificação de compatibilidade e montagem profissional em Campinas.",
+  title: "Monte seu PC Gamer Customizado em Campinas | Balão da Informática",
+  description:
+    "Configurador inteligente de PC Gamer peça por peça com verificação automática de compatibilidade, cable management profissional e retirada no Cambuí em Campinas.",
+  keywords: [
+    "monte seu pc gamer campinas",
+    "configurador de pc gamer",
+    "montar pc peca por peca",
+    "compatibilidade pc gamer",
+    "loja montagem pc campinas",
+    "balao da informatica monte seu pc",
+  ],
   alternates: { canonical: "https://www.balao.info/monteseupc" },
   openGraph: {
     type: "website",
     locale: "pt_BR",
     url: "https://www.balao.info/monteseupc",
     title: "Monte seu PC Gamer em Campinas | Balão da Informática",
-    description: "Monte seu PC Gamer peça por peça, com verificação de compatibilidade e montagem profissional em Campinas.",
+    description: "Monte seu PC Gamer peça por peça com verificação de compatibilidade e montagem profissional.",
     siteName: SITE_CONFIG.name,
     images: [{ url: "/logo.png" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Monte seu PC Gamer em Campinas | Balão da Informática",
-    description: "Monte seu PC Gamer peça por peça, com verificação de compatibilidade e montagem profissional em Campinas.",
+    title: "Monte seu PC Gamer | Balão da Informática",
+    description: "Configurador interativo de PC Gamer com peças em estoque no Cambuí.",
     images: ["/logo.png"],
   },
 };
 
-// Force dynamic rendering to ensure we get fresh products
-export const dynamic = 'force-dynamic';
+const MONTE_SEU_PC_FAQS = [
+  {
+    question: "Como o configurador valida a compatibilidade das peças?",
+    answer:
+      "O sistema filtra automaticamente soquetes de processadores (LGA1700, AM4, AM5), compatibilidade de memória RAM (DDR4 vs DDR5), potência recomendada da fonte e suporte a slots M.2 NVMe.",
+  },
+  {
+    question: "Quanto tempo demora para montar o PC que escolhi no configurador?",
+    answer:
+      "A montagem completa com cable management e testes de estresse é concluída em média entre 3 e 24 horas após a confirmação.",
+  },
+  {
+    question: "Posso finalizar a compra pelo WhatsApp com um técnico?",
+    answer:
+      "Sim! Ao terminar de selecionar as peças, você pode enviar a lista gerada diretamente para o WhatsApp do nosso consultor para fechar com 10% de desconto no PIX.",
+  },
+];
 
 export default async function MonteSeuPCPage() {
   const products = await getProducts();
 
   const breadcrumbItems = [
-    { name: 'Home', item: 'https://www.balao.info' },
-    { name: 'Monte Seu PC', item: 'https://www.balao.info/monteseupc' }
+    { name: "Home", item: "https://www.balao.info" },
+    { name: "Monte Seu PC", item: "https://www.balao.info/monteseupc" },
   ];
 
   return (
-    <div className="min-h-screen bg-zinc-100 font-sans">
-      <JsonLd data={[
-        generateOrganizationSchema(),
-        generateBreadcrumbSchema(breadcrumbItems)
-      ]} />
+    <div className="min-h-screen bg-[#090d16] text-white font-sans selection:bg-[#E60012] selection:text-white flex flex-col">
+      <JsonLd
+        data={[
+          generateOrganizationSchema(),
+          generateBreadcrumbSchema(breadcrumbItems),
+          generateItemListSchema(products.slice(0, 16), "https://www.balao.info/monteseupc"),
+          generateFAQSchema(MONTE_SEU_PC_FAQS),
+          generateServiceSchema({
+            name: "Configurador e Montagem de PC Gamer Personalizado",
+            description: "Ferramenta interativa de montagem de computadores sob medida em Campinas.",
+            url: "https://www.balao.info/monteseupc",
+            serviceType: "Montagem e Customização de Computadores",
+          }),
+        ]}
+      />
       <Header />
-      {/* Header Banner */}
-      <div className="bg-gradient-to-r from-red-900 to-red-800 text-white py-12 md:py-16 relative overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-orange-600/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-red-600/5 rounded-full blur-3xl -ml-20 -mb-20 pointer-events-none"></div>
-        
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-            <div className="p-4 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 shadow-xl">
-              <Settings size={48} className="text-red-400" />
-            </div>
-            <div className="text-center md:text-left">
-              <h1 className="text-3xl md:text-5xl font-black mb-2 tracking-tight">
-                MONTE SEU <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-400">PC GAMER</span>
+
+      <main className="flex-1 space-y-12 sm:space-y-16 py-8 sm:py-12">
+        {/* HERO SECTION */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-[#111827] border border-slate-800 rounded-3xl p-8 sm:p-12 lg:p-16 relative overflow-hidden shadow-2xl">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-[#E60012]/10 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative z-10 max-w-3xl space-y-6">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E60012]/15 border border-[#E60012]/40 text-[#E60012] text-xs font-black uppercase tracking-widest">
+                <Sparkles className="w-4 h-4" />
+                Configurador Inteligente de Hardware
+              </div>
+
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight">
+                Monte seu <span className="text-[#E60012]">PC Gamer & Workstation</span>
               </h1>
-              <p className="text-zinc-200 text-lg max-w-2xl">
-                Escolha cada componente, verifique a compatibilidade e monte a máquina perfeita para o seu orçamento e estilo de jogo.
+
+              <p className="text-base sm:text-xl text-slate-300 leading-relaxed font-normal">
+                Escolha cada componente, verifique a compatibilidade em tempo real e monte a máquina perfeita
+                para seu orçamento. Montagem profissional com testes térmicos e retirada no Cambuí.
               </p>
             </div>
           </div>
-        </div>
-      </div>
+        </section>
 
-      <div className="container mx-auto px-4 py-8 -mt-8 relative z-20">
-        <PCBuilder products={products} />
-      </div>
-      
-      {/* Footer Info Section */}
-      <div className="container mx-auto px-4 py-12 mb-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-zinc-200">
-            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4 text-red-600">
-              <Cpu size={24} />
+        {/* COMPONENTE PC BUILDER INTERATIVO */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <PCBuilder products={products} />
+        </section>
+
+        {/* DIFERENCIAIS DE MONTAGEM */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-[#111827] border border-slate-800 rounded-3xl p-8 space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-[#161f32] border border-slate-700 flex items-center justify-center text-[#E60012]">
+                <Cpu className="w-6 h-6" />
+              </div>
+              <h3 className="font-bold text-lg text-white">Montagem Profissional</h3>
+              <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                Seu PC é montado por especialistas com organização de cabos impecável e fluxo de ar otimizado.
+              </p>
             </div>
-            <h3 className="font-bold text-lg mb-2">Montagem Profissional</h3>
-            <p className="text-zinc-500 text-sm">Seu PC é montado por especialistas com organização de cabos impecável.</p>
-          </div>
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-zinc-200">
-            <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mb-4 text-orange-600">
-              <Monitor size={24} />
+
+            <div className="bg-[#111827] border border-slate-800 rounded-3xl p-8 space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-[#161f32] border border-slate-700 flex items-center justify-center text-[#E60012]">
+                <Monitor className="w-6 h-6" />
+              </div>
+              <h3 className="font-bold text-lg text-white">Testado no Limite</h3>
+              <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                Realizamos baterias de testes de estresse no Cinebench e FurMark para certificar estabilidade térmica total.
+              </p>
             </div>
-            <h3 className="font-bold text-lg mb-2">Testado no Limite</h3>
-            <p className="text-zinc-500 text-sm">Realizamos testes de estresse para garantir estabilidade e performance.</p>
-          </div>
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-zinc-200">
-            <div className="w-12 h-12 bg-rose-100 rounded-full flex items-center justify-center mb-4 text-rose-600">
-              <Settings size={24} />
+
+            <div className="bg-[#111827] border border-slate-800 rounded-3xl p-8 space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-[#161f32] border border-slate-700 flex items-center justify-center text-[#E60012]">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <h3 className="font-bold text-lg text-white">Garantia Total & Balcão</h3>
+              <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                Garantia legal e do fabricante em todas as peças com suporte técnico direto na loja do Cambuí.
+              </p>
             </div>
-            <h3 className="font-bold text-lg mb-2">Garantia Total</h3>
-            <p className="text-zinc-500 text-sm">Garantia em todos os componentes e suporte técnico especializado.</p>
           </div>
-        </div>
-      </div>
+        </section>
+
+        {/* FAQ SCHEMA ENRICHED */}
+        <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+          <div className="text-center space-y-2 mb-8">
+            <div className="text-xs font-black uppercase tracking-wider text-[#E60012]">Dúvidas Frequentes</div>
+            <h2 className="text-2xl sm:text-3xl font-black text-white">Perguntas sobre a Montagem</h2>
+          </div>
+
+          <div className="space-y-4">
+            {MONTE_SEU_PC_FAQS.map((faq, idx) => (
+              <div key={idx} className="bg-[#111827] border border-slate-800 rounded-2xl p-6 space-y-2">
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-[#E60012]" />
+                  {faq.question}
+                </h3>
+                <p className="text-sm text-slate-300 leading-relaxed pl-4">{faq.answer}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </main>
     </div>
   );
 }

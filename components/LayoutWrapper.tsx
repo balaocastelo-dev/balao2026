@@ -16,15 +16,17 @@ export default function LayoutWrapper({
   const pathname = usePathname();
   const isRoletaPage = pathname === "/roleta";
   const isBlogPage = pathname === "/blog" || pathname.startsWith("/blog/");
+  const isCrmPage = pathname === "/crm" || pathname.startsWith("/crm");
+  const isFullscreenPanel = isCrmPage || pathname === "/whatsapp" || pathname === "/painel";
 
   return (
     <SidebarProvider>
-      {!isRoletaPage && !isBlogPage && <Sidebar categories={categories} mobileOnly />}
+      {!isRoletaPage && !isBlogPage && !isFullscreenPanel && <Sidebar categories={categories} mobileOnly />}
       <div className="flex min-h-screen w-full max-w-full flex-col overflow-x-hidden">
         <main className="flex-grow w-full max-w-full overflow-x-hidden">
           {children}
         </main>
-        {!isRoletaPage && <Footer />}
+        {!isRoletaPage && !isFullscreenPanel && <Footer />}
       </div>
     </SidebarProvider>
   );

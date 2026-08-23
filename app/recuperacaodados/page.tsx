@@ -1,11 +1,16 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import Header from "@/components/Header";
+import ProductCard from "@/components/ProductCard";
+import { getProducts, searchProductsByKeywords } from "@/lib/db";
 import JsonLd, {
   generateBreadcrumbSchema,
   generateFAQSchema,
   generateOrganizationSchema,
+  generateServiceSchema,
+  generateItemListSchema,
 } from "@/components/JsonLd";
+import { SITE_CONFIG } from "@/lib/config";
 import {
   AlertTriangle,
   ArrowRight,
@@ -13,820 +18,332 @@ import {
   Clock,
   Database,
   FileSearch,
-  FileText,
   HardDrive,
-  Image,
   Lock,
-  Mail,
   MemoryStick,
   MapPin,
   MessageCircle,
-  Package,
-  PenTool,
   Server,
   ShieldCheck,
-  Smartphone,
   Truck,
   Usb,
-  Video,
+  Zap,
 } from "lucide-react";
 import Model3DViewer from "@/components/Model3DViewer";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
-  title: "Recuperação de Dados no Brasil | HD, SSD/NVMe, Pendrive, SD e RAID",
+  title: "Recuperação de Dados Profissional em Campinas e Brasil | HD, SSD/NVMe e RAID | Balão da Informática",
   description:
-    "Recuperação de dados com atendimento nacional (envio). HD, SSD/NVMe, pendrive, cartão SD e RAID/NAS. Sigilo total, análise rápida e orçamento sem compromisso em Campinas/SP.",
+    "Laboratório especializado em recuperação de dados de HDs que não reconhecem, SSD/NVMe queimado, pendrives corrompidos e servidores RAID. Sigilo total, análise rápida e atendimento nacional em Campinas/SP.",
   keywords: [
-    "recuperação de dados brasil",
-    "recuperação de dados campinas",
+    "recuperacao de dados campinas",
     "recuperar dados hd campinas",
-    "recuperar dados ssd campinas",
-    "recuperar dados nvme campinas",
-    "recuperar dados pendrive campinas",
-    "recuperar fotos cartão de memória campinas",
-    "recuperar dados hd",
-    "recuperar dados ssd",
-    "recuperar dados nvme",
-    "recuperar fotos cartão sd",
-    "recuperação de dados pendrive",
-    "recuperação de dados raid",
-    "recuperação de dados nas",
-    "recuperação de dados servidor",
-    "recuperação de dados empresarial",
-    "recuperação de dados contabilidade",
-    "recuperação de dados engenharia",
-    "recuperação de dados arquitetura",
-    "recuperação de dados advocacia",
-    "recuperação de dados clínica",
-    "recuperação de banco de dados",
-    "hd externo não reconhece campinas",
-    "ssd não reconhecido campinas",
-    "arquivos apagados recuperacao",
-    "partição raw recuperação",
-    "hd fazendo barulho campinas",
-    "recuperação de dados empresarial campinas",
-    "recuperação de dados servidor raid nas",
-    "assistência técnica campinas cambuí",
-    "recuperação de dados urgente",
-    "recuperação de dados confidencial",
-    "recuperar fotos e videos",
-    "recuperar documentos word excel pdf",
-    "recuperar arquivos pst ost outlook",
-    "recuperar banco de dados sql",
-    "recuperar arquivos cad",
+    "recuperar dados ssd nvme campinas",
+    "recuperacao de dados pendrive campinas",
+    "recuperar dados raid servidor",
+    "hd externo nao reconhece campinas",
+    "recuperacao de arquivos deletados",
+    "balao da informatica recuperacao de dados",
   ],
   alternates: {
     canonical: "https://www.balao.info/recuperacaodados",
   },
-  robots: {
-    index: true,
-    follow: true,
-  },
   openGraph: {
-    title: "Recuperação de Dados no Brasil | Balão da Informática",
+    title: "Recuperação de Dados Profissional em Campinas e Brasil | Balão da Informática",
     description:
-      "Atendimento nacional (envio) + Campinas. Recuperação de HD, SSD/NVMe, pendrive, cartão SD e RAID/NAS com sigilo total e análise rápida.",
+      "Atendimento local em Campinas no Cambuí e envio nacional. Recuperação de HD, SSD/NVMe, pendrive e RAID com sigilo total e diagnóstico ágil.",
     url: "https://www.balao.info/recuperacaodados",
     type: "website",
-    images: ["/logo.png"],
+    images: [{ url: "/logo.png" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Recuperação de Dados no Brasil | HD, SSD/NVMe, RAID/NAS",
-    description:
-      "Atendimento nacional (envio) + Campinas/SP. Sigilo total e análise rápida para recuperação de dados.",
+    title: "Recuperação de Dados no Brasil | HD, SSD, RAID | Balão da Informática",
+    description: "Laboratório próprio de recuperação de arquivos perdidos com confidencialidade garantida.",
     images: ["/logo.png"],
   },
 };
 
-const WHATSAPP_LINK =
-  "https://wa.me/5519987510267?text=Olá!%20Preciso%20de%20recuperação%20de%20dados.%20Meu%20dispositivo%20(HD/SSD/pendrive/cartão)%20está%20com%20problema%20e%20quero%20um%20orçamento%20sem%20compromisso.";
-
-const SSD_MODEL_ID = "ad215e54c381456895e21db5062f8714";
-
-const FAQS = [
+const RECUPERACAO_FAQS = [
   {
-    question: "O que devo fazer imediatamente após perder meus dados?",
+    question: "O que devo fazer imediatamente ao perceber a perda de dados ou ruídos no HD?",
     answer:
-      "Pare de usar o dispositivo na hora. Não instale programas, não salve arquivos e evite tentativas repetidas. Quanto menos o dispositivo for usado, maior a chance de recuperar os dados com segurança.",
+      "Desligue o computador ou desconecte o HD externo imediatamente da porta USB. Não tente instalar programas de recuperação na mesma unidade, pois novas gravações sobrescrevem os setores e podem tornar a perda definitiva. Entre em contato com nossa equipe para orientações.",
   },
   {
-    question: "Vocês atendem clientes de todo o Brasil?",
+    question: "É possível recuperar dados de SSD e NVMe que pararam de ser reconhecidos na BIOS?",
     answer:
-      "Sim. Atendemos em Campinas/SP e também recebemos dispositivos de todo o Brasil via envio (Correios ou transportadora). Você recebe orientações de embalagem e o acompanhamento do processo.",
+      "Sim! Possuímos ferramentas de hardware para diagnóstico em modo seguro (safe mode de controladoras Phison, Silicon Motion, Samsung) para reconstrução de firmware corrompido e leitura direta dos chips de memória NAND Flash.",
   },
   {
-    question: "Vocês atendem empresas e casos críticos (contabilidade, engenharia, clínicas, advocacia)?",
+    question: "Como funciona a confidencialidade e sigilo dos meus arquivos e banco de dados?",
     answer:
-      "Sim. Atuamos com recuperação de dados empresarial e tratamos informações sensíveis com confidencialidade. Trabalhamos com prioridades definidas por você (por exemplo: banco de dados, documentos fiscais, projetos e arquivos jurídicos).",
+      "Trabalhamos sob rigoroso termo de confidencialidade (NDA). Os dados recuperados são transferidos em ambiente isolado e entregues diretamente a você, sendo apagados com segurança de nossas estações temporárias após a sua confirmação.",
   },
   {
-    question: "Vocês recuperam dados de SSD e NVMe?",
+    question: "Vocês atendem por envio de outras cidades e estados?",
     answer:
-      "Sim. Atendemos SSD SATA, M.2 e NVMe. Em muitos casos, a recuperação exige diagnóstico técnico e procedimentos específicos para evitar perdas definitivas.",
-  },
-  {
-    question: "Quanto tempo leva a recuperação de dados?",
-    answer:
-      "Depende do tipo de falha e do volume de dados. Fazemos análise rápida e apresentamos um plano com prazo e orçamento. Casos simples podem ser resolvidos rapidamente; casos físicos/firmware podem levar mais tempo.",
-  },
-  {
-    question: "A análise tem compromisso?",
-    answer:
-      "Não. Você recebe a avaliação e o orçamento antes de qualquer procedimento definitivo. A prioridade é transparência total.",
-  },
-  {
-    question: "Meus dados ficam em sigilo?",
-    answer:
-      "Sim. Tratamos arquivos pessoais e empresariais com confidencialidade, seguindo boas práticas de segurança para manuseio e transferência de dados.",
-  },
-  {
-    question: "Quais problemas vocês atendem?",
-    answer:
-      "Arquivos apagados, formatação, partição RAW, falhas de leitura, HD com barulho, dispositivo não reconhecido, queda, água/umidade e cenários complexos com servidor, NAS e RAID.",
+      "Sim. Recebemos unidades de todo o Brasil via Sedex ou transportadora com rastreamento. Fornecemos instruções detalhadas de embalagem antiestática e acolchoada para proteção contra impactos no transporte.",
   },
 ];
 
-function BlockHero() {
+const SSD_MODEL_ID = "ad215e54c381456895e21db5062f8714";
+
+export default async function RecuperacaoDadosPage() {
+  const [allProducts, keywordStorage] = await Promise.all([
+    getProducts(),
+    searchProductsByKeywords(["ssd", "nvme", "hd", "pendrive", "externo", "cartao"], 16),
+  ]);
+
+  let storageProducts = keywordStorage;
+  if (storageProducts.length === 0) {
+    storageProducts = allProducts.slice(0, 8);
+  }
+
+  const breadcrumbs = [
+    { name: "Home", item: "https://www.balao.info" },
+    { name: "Recuperação de Dados", item: "https://www.balao.info/recuperacaodados" },
+  ];
+
   return (
-    <section className="relative overflow-hidden bg-black text-white pt-20">
+    <div className="min-h-screen bg-[#090d16] text-white flex flex-col font-sans selection:bg-[#E60012] selection:text-white">
       <JsonLd
         data={[
           generateOrganizationSchema(),
-          generateBreadcrumbSchema([
-            { name: "Home", item: "https://www.balao.info" },
-            { name: "Recuperação de Dados", item: "https://www.balao.info/recuperacaodados" },
-          ]),
-          generateFAQSchema(FAQS),
-          {
-            "@context": "https://schema.org",
-            "@type": "Service",
-            name: "Recuperação de Dados",
-            serviceType: "Recuperação de dados (HD, SSD/NVMe, Pendrive, Cartão de memória, NAS/RAID)",
-            areaServed: [
-              { "@type": "Country", name: "Brasil" },
-              { "@type": "City", name: "Campinas" },
-            ],
-            provider: {
-              "@type": "LocalBusiness",
-              name: "Balão da Informática",
-              url: "https://www.balao.info",
-            },
-          },
+          generateBreadcrumbSchema(breadcrumbs),
+          generateItemListSchema(storageProducts, "https://www.balao.info/recuperacaodados"),
+          generateFAQSchema(RECUPERACAO_FAQS),
+          generateServiceSchema({
+            name: "Recuperação Profissional de Dados em Campinas e Brasil",
+            description:
+              "Serviço de recuperação de arquivos perdidos em HDs, SSDs NVMe, cartões de memória e sistemas RAID com sigilo total.",
+            url: "https://www.balao.info/recuperacaodados",
+            serviceType: "Recuperação Forense e Restauração de Dados Digitais",
+          }),
         ]}
       />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-900/20 via-black to-black" />
-      <div className="absolute top-1/2 left-1/2 h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-600/10 blur-[120px]" />
-
-      <div className="container mx-auto px-4 relative z-10 py-14 md:py-20">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-          <div className="lg:col-span-7">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/5 px-4 py-2 text-xs md:text-sm font-bold uppercase tracking-widest border border-white/10 mb-8">
-              <ShieldCheck className="h-4 w-4 text-green-400" />
-              Atendimento nacional + sigilo total
-            </div>
-
-            <h1 className="text-4xl md:text-7xl font-black tracking-tighter leading-[0.95] uppercase">
-              Recuperação de Dados no{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
-                Brasil
-              </span>
-            </h1>
-
-            <p className="mt-6 text-lg md:text-2xl text-zinc-300 max-w-3xl leading-relaxed">
-              Perdeu fotos, documentos ou arquivos da empresa? Recuperamos dados de{" "}
-              <strong className="text-white">HD, SSD/NVMe, pendrive e cartão</strong>{" "}
-              com processo seguro, transparente e sem compromisso — em Campinas/SP e por envio para todo o país.
-            </p>
-
-            <div className="mt-10 flex flex-col sm:flex-row gap-4">
-              <Link
-                href={WHATSAPP_LINK}
-                target="_blank"
-                className="bg-[#25D366] hover:bg-[#128C7E] text-white px-8 py-4 rounded-full font-black text-lg md:text-xl transition-all shadow-xl hover:scale-105 inline-flex items-center justify-center gap-3"
-              >
-                <MessageCircle className="h-6 w-6" />
-                Falar com Especialista
-                <ArrowRight className="h-6 w-6" />
-              </Link>
-              <Link
-                href="#como-funciona"
-                className="bg-white/10 hover:bg-white/20 border border-white/15 text-white px-8 py-4 rounded-full font-black text-lg md:text-xl transition-all hover:scale-105 inline-flex items-center justify-center gap-3"
-              >
-                <Clock className="h-6 w-6" />
-                Como funciona
-              </Link>
-            </div>
-
-            <div className="mt-10 flex flex-wrap gap-6 text-sm md:text-base text-white/70 font-bold uppercase tracking-wider">
-              <div className="inline-flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5 text-green-400" />
-                Orçamento sem compromisso
-              </div>
-              <div className="inline-flex items-center gap-2">
-                <Lock className="h-5 w-5 text-blue-300" />
-                Confidencialidade
-              </div>
-              <div className="inline-flex items-center gap-2">
-                <Clock className="h-5 w-5 text-orange-300" />
-                Análise rápida
-              </div>
-            </div>
-          </div>
-
-          <div className="lg:col-span-5">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-transparent pointer-events-auto">
-              <Model3DViewer
-                title="SSD Solid State Drive 3D"
-                src={`https://sketchfab.com/models/${SSD_MODEL_ID}/embed?ui_theme=dark&transparent=1&autostart=1&ui_infos=0&ui_watermark=0&ui_controls=0&ui_general_controls=0&ui_fullscreen=0&ui_help=0&ui_hint=0&ui_vr=0&ui_settings=0&ui_annotations=0&ui_stop=0&camera=0&dnt=1`}
-                className="absolute bg-transparent"
-                style={{
-                  top: -200,
-                  left: -70,
-                  width: "calc(100% + 140px)",
-                  height: "calc(100% + 400px)",
-                  transform: "scale(0.65)",
-                  transformOrigin: "center",
-                }}
-                allow="autoplay; fullscreen; xr-spatial-tracking"
-                allowFullScreen
-                loading="eager"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function BlockStopDoing() {
-  const donts = [
-    "Não instale softwares de recuperação no mesmo disco.",
-    "Não formate o dispositivo (mesmo que o Windows peça).",
-    "Não fique ligando e desligando repetidamente (principalmente HD com barulho).",
-    "Não tente abrir o disco ou desmontar SSD/pendrive.",
-  ];
-
-  const dos = [
-    "Desligue o equipamento e mantenha o dispositivo guardado.",
-    "Anote sintomas: barulho, lentidão, erro, queda, água/umidade.",
-    "Fale com um técnico antes de qualquer tentativa.",
-  ];
-
-  return (
-    <section className="bg-zinc-950 border-y border-zinc-900 py-16">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-          <div className="bg-black border border-red-500/20 rounded-3xl p-8">
-            <div className="flex items-center gap-3 mb-4">
-              <AlertTriangle className="h-7 w-7 text-red-500" />
-              <h2 className="text-2xl md:text-3xl font-black uppercase">Pare agora</h2>
-            </div>
-            <p className="text-zinc-300 mb-6 leading-relaxed">
-              A maior chance de sucesso vem do primeiro passo certo. Alguns “consertos” podem
-              sobrescrever dados e reduzir drasticamente a recuperação.
-            </p>
-            <ul className="space-y-3 text-zinc-200">
-              {donts.map((item) => (
-                <li key={item} className="flex gap-3">
-                  <span className="mt-1 h-2 w-2 rounded-full bg-red-500 shrink-0" />
-                  <span className="font-medium">{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="bg-black border border-green-500/20 rounded-3xl p-8">
-            <div className="flex items-center gap-3 mb-4">
-              <ShieldCheck className="h-7 w-7 text-green-500" />
-              <h2 className="text-2xl md:text-3xl font-black uppercase">Faça isso</h2>
-            </div>
-            <p className="text-zinc-300 mb-6 leading-relaxed">
-              Com informações básicas, já conseguimos orientar o próximo passo mais seguro e reduzir
-              o risco de perda definitiva.
-            </p>
-            <ul className="space-y-3 text-zinc-200">
-              {dos.map((item) => (
-                <li key={item} className="flex items-start gap-3">
-                  <CheckCircle2 className="h-6 w-6 text-green-500 shrink-0" />
-                  <span className="font-medium">{item}</span>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-8">
-              <Link
-                href={WHATSAPP_LINK}
-                target="_blank"
-                className="inline-flex items-center gap-2 text-white font-bold text-lg border-b-2 border-[#25D366] pb-1 hover:text-[#25D366] transition-colors"
-              >
-                Enviar foto/erro no WhatsApp <ArrowRight className="h-5 w-5" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function BlockDevices() {
-  const items = [
-    { title: "HD / HD Externo", desc: "Barulho, lentidão, RAW, não reconhece, queda.", icon: HardDrive },
-    { title: "SSD / NVMe", desc: "0GB, read-only, sumiu do sistema, firmware.", icon: MemoryStick },
-    { title: "Pendrive / USB", desc: "Queimou, corrompeu, pede formatação, não abre.", icon: Usb },
-    { title: "Cartão SD / microSD", desc: "Fotos apagadas, cartão vazio, corrompido.", icon: FileSearch },
-    { title: "Servidor / NAS / RAID", desc: "Volume degradado, múltiplos discos, falhas críticas.", icon: Server },
-    { title: "Celular / Notebook", desc: "Recuperação em dispositivos com falhas e travamentos.", icon: Smartphone },
-  ];
-
-  return (
-    <section className="bg-black py-20" id="o-que-recuperamos">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-14">
-          <h2 className="text-3xl md:text-5xl font-black uppercase">O que recuperamos</h2>
-          <p className="text-zinc-400 mt-4 text-lg md:text-xl">
-            Atendemos cenários lógicos e físicos com abordagem segura por tipo de dispositivo.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {items.map((it) => (
-            <div
-              key={it.title}
-              className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 hover:border-blue-500/40 transition-colors"
-            >
-              <div className="w-14 h-14 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center mb-6">
-                <it.icon className="h-7 w-7" />
-              </div>
-              <h3 className="text-2xl font-bold mb-3">{it.title}</h3>
-              <p className="text-zinc-400 leading-relaxed">{it.desc}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function BlockFileTypes() {
-  const items = [
-    {
-      title: "Fotos e vídeos",
-      desc: "Recuperação de mídias pessoais e profissionais (família, eventos, drones e câmeras).",
-      icon: Image,
-    },
-    {
-      title: "Documentos Office e PDF",
-      desc: "Word, Excel, PowerPoint e PDFs de trabalho, faculdade, contratos e notas.",
-      icon: FileText,
-    },
-    {
-      title: "Bancos de dados",
-      desc: "Bases e backups usados em empresas (SQL, ERPs, sistemas internos e relatórios).",
-      icon: Database,
-    },
-    {
-      title: "E-mails corporativos (PST/OST)",
-      desc: "Arquivos do Outlook e caixas de e-mail essenciais para rotinas e auditorias.",
-      icon: Mail,
-    },
-    {
-      title: "Projetos (CAD e afins)",
-      desc: "Projetos e arquivos técnicos de engenharia/arquitetura (CAD e similares).",
-      icon: PenTool,
-    },
-  ];
-
-  return (
-    <section className="bg-black py-20 border-t border-zinc-900" id="tipos-de-arquivo">
-      <div className="container mx-auto px-4">
-        <div className="max-w-5xl mx-auto text-center mb-14">
-          <h2 className="text-3xl md:text-5xl font-black uppercase">
-            Tipos de arquivo que mais recuperamos
-          </h2>
-          <p className="text-zinc-400 mt-4 text-lg md:text-xl">
-            Você define o que é prioridade. O objetivo é recuperar primeiro o que é mais importante para você ou sua empresa.
-          </p>
-        </div>
-
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {items.map((it) => (
-            <div
-              key={it.title}
-              className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 hover:border-blue-500/40 transition-colors"
-            >
-              <div className="w-14 h-14 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center mb-6">
-                <it.icon className="h-7 w-7" />
-              </div>
-              <h3 className="text-2xl font-bold mb-3">{it.title}</h3>
-              <p className="text-zinc-400 leading-relaxed">{it.desc}</p>
-            </div>
-          ))}
-          <div className="bg-gradient-to-br from-blue-700 to-slate-900 rounded-3xl p-8 border border-white/10 flex flex-col justify-between">
-            <div>
-              <div className="w-14 h-14 rounded-2xl bg-white/10 text-white flex items-center justify-center mb-6">
-                <Video className="h-7 w-7" />
-              </div>
-              <h3 className="text-2xl font-black mb-3 uppercase">Não viu seu caso?</h3>
-              <p className="text-white/80 leading-relaxed">
-                Envie uma foto do erro ou descreva o problema. Indicamos o próximo passo mais seguro.
-              </p>
-            </div>
-            <Link
-              href={WHATSAPP_LINK}
-              target="_blank"
-              className="mt-8 inline-flex items-center justify-center gap-3 bg-white text-black px-8 py-4 rounded-full font-black text-lg hover:bg-zinc-200 transition-colors"
-            >
-              <MessageCircle className="h-6 w-6" />
-              Enviar agora
-            </Link>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function BlockHowItWorks() {
-  const steps = [
-    { title: "1) Triagem e análise", desc: "Você descreve o problema e traz/enviamos instruções.", icon: FileSearch },
-    { title: "2) Diagnóstico e orçamento", desc: "Avaliamos o caso e apresentamos prazo e custo antes de executar.", icon: Clock },
-    { title: "3) Recuperação segura", desc: "Processo técnico com foco em preservar a integridade dos dados.", icon: ShieldCheck },
-    { title: "4) Entrega dos arquivos", desc: "Arquivos recuperados organizados e copiados para mídia adequada.", icon: CheckCircle2 },
-  ];
-
-  return (
-    <section className="bg-zinc-950 py-20 border-y border-zinc-900" id="como-funciona">
-      <div className="container mx-auto px-4">
-        <div className="max-w-4xl mx-auto text-center mb-14">
-          <h2 className="text-3xl md:text-5xl font-black uppercase">Como funciona</h2>
-          <p className="text-zinc-400 mt-4 text-lg md:text-xl">
-            Processo simples e transparente. Você aprova antes e acompanha cada etapa.
-          </p>
-        </div>
-
-        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-          {steps.map((s) => (
-            <div key={s.title} className="bg-black border border-zinc-800 rounded-3xl p-8">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white/80">
-                  <s.icon className="h-6 w-6" />
-                </div>
-                <h3 className="text-xl md:text-2xl font-bold">{s.title}</h3>
-              </div>
-              <p className="text-zinc-400 leading-relaxed">{s.desc}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-12 text-center">
-          <Link
-            href={WHATSAPP_LINK}
-            target="_blank"
-            className="inline-flex items-center gap-3 bg-white text-black px-10 py-4 rounded-full font-black text-lg hover:bg-zinc-200 transition-colors"
-          >
-            <MessageCircle className="h-6 w-6" />
-            Pedir orçamento agora
-          </Link>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function BlockLocal() {
-  return (
-    <section className="bg-black py-14">
-      <div className="container mx-auto px-4">
-        <div className="max-w-6xl mx-auto bg-zinc-900 border border-zinc-800 rounded-3xl p-8 md:p-10 flex flex-col lg:flex-row gap-8 items-start lg:items-center justify-between">
-          <div className="flex items-start gap-4">
-            <MapPin className="h-10 w-10 text-blue-400 shrink-0" />
-            <div>
-              <h3 className="text-2xl font-black uppercase">Campinas + atendimento nacional</h3>
-              <p className="text-zinc-400 mt-2 leading-relaxed">
-                Atendimento no Cambuí, Campinas/SP, e recebimento de dispositivos de todo o Brasil por
-                envio. Você recebe orientação para embalar e enviar com segurança.
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-            <Link
-              href={WHATSAPP_LINK}
-              target="_blank"
-              className="inline-flex items-center justify-center gap-2 bg-white text-black px-6 py-3 rounded-full font-black hover:bg-zinc-200 transition-colors"
-            >
-              <MessageCircle className="h-5 w-5" />
-              Orçar agora
-            </Link>
-            <Link
-              href="#atendimento-nacional"
-              className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 border border-white/15 text-white px-6 py-3 rounded-full font-black transition-colors"
-            >
-              <Truck className="h-5 w-5" />
-              Envio nacional
-            </Link>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function BlockNational() {
-  const steps = [
-    {
-      title: "1) Fale com um especialista",
-      desc: "Explique o sintoma e o que é prioridade recuperar (fotos, documentos, base de dados, projetos).",
-      icon: MessageCircle,
-    },
-    {
-      title: "2) Envie o dispositivo",
-      desc: "Você recebe orientações de embalagem e pode enviar por Correios/transportadora com rastreio.",
-      icon: Package,
-    },
-    {
-      title: "3) Diagnóstico e orçamento",
-      desc: "Avaliação técnica para definir viabilidade, prazo e custo antes de qualquer procedimento definitivo.",
-      icon: FileSearch,
-    },
-    {
-      title: "4) Entrega dos dados",
-      desc: "Após a recuperação, entregamos seus arquivos organizados em mídia adequada.",
-      icon: HardDrive,
-    },
-  ];
-
-  return (
-    <section className="bg-zinc-950 py-20 border-y border-zinc-900" id="atendimento-nacional">
-      <div className="container mx-auto px-4">
-        <div className="max-w-5xl mx-auto text-center mb-14">
-          <h2 className="text-3xl md:text-5xl font-black uppercase">Atendimento nacional (envio)</h2>
-          <p className="text-zinc-400 mt-4 text-lg md:text-xl">
-            Você não precisa estar em Campinas. Atendemos clientes de todo o Brasil com processo simples e seguro.
-          </p>
-        </div>
-
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-          {steps.map((s) => (
-            <div key={s.title} className="bg-black border border-zinc-800 rounded-3xl p-8">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white/80">
-                  <s.icon className="h-6 w-6" />
-                </div>
-                <h3 className="text-xl md:text-2xl font-bold">{s.title}</h3>
-              </div>
-              <p className="text-zinc-400 leading-relaxed">{s.desc}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-12 text-center">
-          <Link
-            href={WHATSAPP_LINK}
-            target="_blank"
-            className="inline-flex items-center gap-3 bg-[#25D366] hover:bg-[#128C7E] text-white px-10 py-4 rounded-full font-black text-lg transition-all shadow-xl hover:scale-105"
-          >
-            <MessageCircle className="h-6 w-6" />
-            Enviar caso por WhatsApp
-          </Link>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function BlockCitiesServed() {
-  const capitais = [
-    "São Paulo (SP)",
-    "Rio de Janeiro (RJ)",
-    "Belo Horizonte (MG)",
-    "Brasília (DF)",
-    "Curitiba (PR)",
-    "Porto Alegre (RS)",
-    "Florianópolis (SC)",
-    "Salvador (BA)",
-    "Recife (PE)",
-    "Fortaleza (CE)",
-    "Goiânia (GO)",
-    "Manaus (AM)",
-    "Belém (PA)",
-    "Vitória (ES)",
-    "Cuiabá (MT)",
-    "Campo Grande (MS)",
-    "São Luís (MA)",
-    "Natal (RN)",
-    "João Pessoa (PB)",
-    "Maceió (AL)",
-    "Aracaju (SE)",
-    "Teresina (PI)",
-    "Palmas (TO)",
-    "Porto Velho (RO)",
-    "Rio Branco (AC)",
-    "Macapá (AP)",
-    "Boa Vista (RR)",
-  ];
-
-  const interior = [
-    "Campinas (SP)",
-    "Santos (SP)",
-    "Ribeirão Preto (SP)",
-    "Sorocaba (SP)",
-    "São José dos Campos (SP)",
-    "Jundiaí (SP)",
-    "Bauru (SP)",
-    "Piracicaba (SP)",
-    "Uberlândia (MG)",
-    "Juiz de Fora (MG)",
-    "Contagem (MG)",
-    "Niterói (RJ)",
-    "Duque de Caxias (RJ)",
-    "Londrina (PR)",
-    "Maringá (PR)",
-    "Joinville (SC)",
-    "Blumenau (SC)",
-    "Caxias do Sul (RS)",
-    "Pelotas (RS)",
-    "Feira de Santana (BA)",
-    "Campina Grande (PB)",
-    "Jaboatão dos Guararapes (PE)",
-    "Anápolis (GO)",
-    "Santarém (PA)",
-  ];
-
-  const ChipList = ({ items }: { items: string[] }) => (
-    <div className="flex flex-wrap gap-2 justify-center">
-      {items.map((label) => (
-        <span
-          key={label}
-          className="px-3 py-1 text-xs font-bold uppercase tracking-wider bg-black/40 border border-white/10 rounded-full text-white/70"
-        >
-          {label}
-        </span>
-      ))}
-    </div>
-  );
-
-  return (
-    <section className="bg-black py-20 border-t border-zinc-900" id="cidades-atendidas">
-      <div className="container mx-auto px-4">
-        <div className="max-w-5xl mx-auto text-center">
-          <h2 className="text-3xl md:text-5xl font-black uppercase">Cidades atendidas no Brasil</h2>
-          <p className="text-zinc-400 mt-4 text-lg md:text-xl">
-            Atendimento nacional via envio. A lista abaixo é apenas uma referência de cidades com maior volume de atendimento.
-          </p>
-        </div>
-
-        <div className="max-w-6xl mx-auto mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
-            <h3 className="text-xl md:text-2xl font-bold mb-6 uppercase">Capitais</h3>
-            <ChipList items={capitais} />
-          </div>
-          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
-            <h3 className="text-xl md:text-2xl font-bold mb-6 uppercase">Interior e região</h3>
-            <ChipList items={interior} />
-          </div>
-        </div>
-
-        <div className="mt-12 text-center">
-          <Link
-            href={WHATSAPP_LINK}
-            target="_blank"
-            className="inline-flex items-center gap-3 bg-white text-black px-10 py-4 rounded-full font-black text-lg hover:bg-zinc-200 transition-colors"
-          >
-            <MessageCircle className="h-6 w-6" />
-            Quero enviar meu dispositivo
-          </Link>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function BlockSeoContent() {
-  const symptoms = [
-    "HD externo não reconhece ou pede formatação",
-    "Partição RAW, arquivos sumiram, pastas corrompidas",
-    "SSD/NVMe com 0GB, read-only ou sistema não inicia",
-    "Arquivos apagados, lixeira esvaziada, formatação acidental",
-    "HD fazendo barulho (cliques) ou travando",
-    "Ataques, corrupção de sistema, falhas após queda ou oscilação elétrica",
-  ];
-
-  return (
-    <section className="bg-black py-20 border-t border-zinc-900">
-      <div className="container mx-auto px-4 max-w-5xl">
-        <h2 className="text-3xl md:text-5xl font-black uppercase">Recuperação de dados: quando vale a pena</h2>
-        <p className="text-zinc-400 mt-6 text-lg leading-relaxed">
-          A recuperação de dados é indicada quando o dispositivo ainda contém arquivos valiosos — pessoais ou empresariais — e
-          qualquer tentativa errada pode reduzir a chance de sucesso. Por isso, o ideal é interromper o uso e fazer uma análise
-          técnica para definir o caminho mais seguro (lógico, firmware ou físico).
-        </p>
-        <h3 className="text-2xl font-bold mt-10">Recuperação de dados empresarial</h3>
-        <p className="text-zinc-400 mt-4 leading-relaxed">
-          Atendemos demandas de empresas e profissionais com prioridade por tipo de informação. Exemplos comuns:
-          <span className="text-zinc-300 font-semibold">
-            {" "}
-            contabilidade (documentos fiscais e bases), engenharia/arquitetura (projetos), advocacia (processos e contratos),
-            clínicas (documentos e laudos), estúdios/agências (mídia e projetos), e-commerce (cadastros e relatórios).
-          </span>
-        </p>
-        <h3 className="text-2xl font-bold mt-10">Sintomas comuns</h3>
-        <ul className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-3">
-          {symptoms.map((s) => (
-            <li key={s} className="flex items-start gap-3 bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
-              <CheckCircle2 className="h-5 w-5 text-blue-400 shrink-0 mt-0.5" />
-              <span className="text-zinc-200 font-medium">{s}</span>
-            </li>
-          ))}
-        </ul>
-        <p className="text-zinc-500 mt-10 leading-relaxed">
-          Se você está em Campinas, pode levar o dispositivo até nossa loja no Cambuí. Se estiver em outra cidade, atendemos via envio para todo o Brasil.
-        </p>
-      </div>
-    </section>
-  );
-}
-
-function BlockFAQ() {
-  return (
-    <section className="bg-zinc-950 py-20 border-t border-zinc-900" id="faq">
-      <div className="container mx-auto px-4 max-w-4xl">
-        <h2 className="text-3xl md:text-5xl font-black text-center uppercase italic">
-          Dúvidas frequentes
-        </h2>
-        <div className="mt-12 space-y-6">
-          {FAQS.map((faq) => (
-            <div key={faq.question} className="bg-black border border-zinc-800 rounded-2xl p-6">
-              <h3 className="text-lg md:text-xl font-bold flex items-center gap-3">
-                <span className="w-2 h-2 rounded-full bg-blue-400" />
-                {faq.question}
-              </h3>
-              <p className="text-zinc-400 mt-3 leading-relaxed">{faq.answer}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function BlockCTA() {
-  return (
-    <section className="bg-black py-20">
-      <div className="container mx-auto px-4">
-        <div className="max-w-5xl mx-auto bg-gradient-to-br from-blue-700 to-slate-900 rounded-[3rem] p-10 md:p-16 border border-white/10 shadow-2xl">
-          <h2 className="text-3xl md:text-6xl font-black text-white uppercase leading-tight">
-            Pare de tentar sozinho.
-            <br />
-            Salve seus dados agora.
-          </h2>
-          <p className="text-white/80 mt-6 text-lg md:text-2xl max-w-3xl leading-relaxed">
-            Fale com um especialista, descreva o sintoma e receba orientação segura antes de fazer
-            qualquer tentativa.
-          </p>
-          <div className="mt-10 flex flex-col sm:flex-row gap-4">
-            <Link
-              href={WHATSAPP_LINK}
-              target="_blank"
-              className="bg-white text-black px-10 py-4 rounded-full font-black text-lg hover:bg-zinc-200 transition-colors inline-flex items-center justify-center gap-3"
-            >
-              <MessageCircle className="h-6 w-6" />
-              Chamar no WhatsApp
-            </Link>
-            <Link
-              href="/fale-conosco"
-              className="bg-white/10 hover:bg-white/20 border border-white/15 text-white px-10 py-4 rounded-full font-black text-lg transition-colors inline-flex items-center justify-center gap-3"
-            >
-              <FileSearch className="h-6 w-6" />
-              Fale Conosco
-            </Link>
-          </div>
-          <div className="mt-10 text-white/70 font-bold uppercase tracking-widest text-sm">
-            Av. Anchieta, 789 - Cambuí, Campinas/SP
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-export default function RecuperacaoDadosPage() {
-  return (
-    <div className="min-h-screen bg-black text-white font-sans selection:bg-blue-500 selection:text-white">
       <Header />
-      <main>
-        <BlockHero />
-        <BlockStopDoing />
-        <BlockDevices />
-        <BlockFileTypes />
-        <BlockHowItWorks />
-        <BlockLocal />
-        <BlockNational />
-        <BlockCitiesServed />
-        <BlockFAQ />
-        <BlockSeoContent />
-        <BlockCTA />
+
+      {/* Banner de Atenção Impeccable */}
+      <div className="bg-[#E60012] text-white py-2.5 px-4 text-center text-xs sm:text-sm font-black tracking-wide flex items-center justify-center gap-2 shadow-md">
+        <AlertTriangle className="w-4 h-4 animate-pulse" />
+        <span>HD FAZENDO ESTALOS OU SSD NÃO RECONHECIDO? DESLIGUE O APARELHO E FALE COM NOSSO LABORATÓRIO!</span>
+      </div>
+
+      <main className="flex-1 space-y-16 sm:space-y-24 py-8 sm:py-12">
+        {/* HERO SECTION WITH 3D SSD VIEWER */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-[#111827] border border-slate-800 rounded-3xl p-8 sm:p-12 lg:p-16 relative overflow-hidden shadow-2xl">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-[#E60012]/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center relative z-10">
+              <div className="lg:col-span-7 space-y-6">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E60012]/15 border border-[#E60012]/40 text-[#E60012] text-xs font-black uppercase tracking-widest">
+                  <ShieldCheck className="w-4 h-4" />
+                  Atendimento Nacional • Sigilo Absoluto
+                </div>
+
+                <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight">
+                  Recuperação de Dados em <span className="text-[#E60012]">HD, SSD & RAID</span>
+                </h1>
+
+                <p className="text-base sm:text-xl text-slate-300 leading-relaxed font-normal">
+                  Perdeu fotos de família, projetos de engenharia ou o banco de dados da sua empresa?
+                  Recuperamos arquivos de discos formatados, queimados, molhados ou com falha mecânica no Cambuí.
+                </p>
+
+                <div className="pt-4 flex flex-wrap items-center gap-4">
+                  <a
+                    href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(
+                      "Olá! Preciso de ajuda com recuperação de dados urgente. Meu HD / SSD / dispositivo parou de funcionar."
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-[#E60012] hover:bg-red-700 text-white font-black py-4 px-8 rounded-2xl shadow-xl shadow-red-950/50 active:scale-95 transition-all flex items-center gap-3 text-base sm:text-lg"
+                  >
+                    <MessageCircle className="w-6 h-6" />
+                    Avaliar com Especialista no WhatsApp
+                  </a>
+                  <a
+                    href="#dispositivos"
+                    className="bg-[#161f32] hover:bg-slate-800 text-slate-200 border border-slate-700 font-bold py-4 px-8 rounded-2xl transition-all text-base flex items-center gap-2"
+                  >
+                    Dispositivos Suportados
+                    <ArrowRight className="w-4 h-4" />
+                  </a>
+                </div>
+
+                <div className="pt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-slate-800/80 text-left">
+                  <div>
+                    <p className="text-2xl font-black text-white">Sigilo</p>
+                    <p className="text-xs text-slate-400">Termo de Confidencialidade</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-[#E60012]">Análise Rápida</p>
+                    <p className="text-xs text-slate-400">Diagnóstico Sem Compromisso</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-white">Nacional</p>
+                    <p className="text-xs text-slate-400">Campinas e Envio Sedex</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-white">Laboratório</p>
+                    <p className="text-xs text-slate-400">Ferramentas de Precisão</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3D SSD Viewer */}
+              <div className="lg:col-span-5 relative aspect-square max-h-[380px] rounded-3xl overflow-hidden bg-[#161f32] border border-slate-800">
+                <Model3DViewer
+                  title="SSD Solid State Drive 3D"
+                  src={`https://sketchfab.com/models/${SSD_MODEL_ID}/embed?ui_theme=dark&transparent=1&autostart=1&ui_infos=0&ui_watermark=0&ui_controls=0&ui_general_controls=0&ui_fullscreen=0&ui_help=0&ui_hint=0&ui_vr=0&ui_settings=0&ui_annotations=0&ui_stop=0&camera=0&dnt=1`}
+                  className="w-full h-full"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* VITRINE DE DRIVES E ARMAZENAMENTO PARA BACKUP DA BASE */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+            <div>
+              <div className="text-xs font-black uppercase tracking-wider text-[#E60012] mb-1">Unidades de Armazenamento</div>
+              <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
+                SSDs, HDs e Armazenamento para Backup
+              </h2>
+            </div>
+            <a
+              href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(
+                "Olá! Gostaria de comprar um SSD / HD externo para fazer o backup seguro dos meus arquivos."
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm font-bold text-slate-300 hover:text-[#E60012] transition-colors"
+            >
+              Consulte opções de SSDs externos e pendrives <ArrowRight className="w-4 h-4" />
+            </a>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            {storageProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        </section>
+
+        {/* DISPOSITIVOS ATENDIDOS */}
+        <section id="dispositivos" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-[#111827] border border-slate-800 rounded-3xl p-8 sm:p-12 space-y-8">
+            <div className="text-center max-w-2xl mx-auto space-y-2">
+              <h2 className="text-2xl sm:text-3xl font-black text-white">Dispositivos que Recuperamos</h2>
+              <p className="text-sm sm:text-base text-slate-400">
+                Cobertura ampla para mídias magnéticas, memórias flash e servidores corporativos.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-[#161f32] border border-slate-800/80 rounded-2xl p-6 space-y-3">
+                <HardDrive className="w-8 h-8 text-[#E60012]" />
+                <h3 className="text-lg font-bold text-white">HDs Internos e Externos</h3>
+                <p className="text-sm text-slate-300 leading-relaxed">
+                  HDs Seagate, Western Digital, Toshiba que fazem barulho ('tec-tec'), com placa lógica queimada ou partição RAW.
+                </p>
+              </div>
+
+              <div className="bg-[#161f32] border border-slate-800/80 rounded-2xl p-6 space-y-3">
+                <Database className="w-8 h-8 text-[#E60012]" />
+                <h3 className="text-lg font-bold text-white">SSDs SATA, M.2 & NVMe</h3>
+                <p className="text-sm text-slate-300 leading-relaxed">
+                  Recuperação de firmware corrompido, controladora queimada e setores com falha de leitura em memórias NAND.
+                </p>
+              </div>
+
+              <div className="bg-[#161f32] border border-slate-800/80 rounded-2xl p-6 space-y-3">
+                <Server className="w-8 h-8 text-[#E60012]" />
+                <h3 className="text-lg font-bold text-white">Servidores, NAS & RAID</h3>
+                <p className="text-sm text-slate-300 leading-relaxed">
+                  Reconstrução virtual de arrays RAID 0, 1, 5, 6, 10, volumes Synology, QNAP e servidores Dell PowerEdge.
+                </p>
+              </div>
+
+              <div className="bg-[#161f32] border border-slate-800/80 rounded-2xl p-6 space-y-3">
+                <Usb className="w-8 h-8 text-[#E60012]" />
+                <h3 className="text-lg font-bold text-white">Pendrives e Cartões SD</h3>
+                <p className="text-sm text-slate-300 leading-relaxed">
+                  Cartões de câmeras fotográficas (SD, MicroSD, CFast) e pendrives que pedem para formatar ou com conector quebrado.
+                </p>
+              </div>
+
+              <div className="bg-[#161f32] border border-slate-800/80 rounded-2xl p-6 space-y-3">
+                <FileSearch className="w-8 h-8 text-[#E60012]" />
+                <h3 className="text-lg font-bold text-white">Bancos de Dados & Sistemas</h3>
+                <p className="text-sm text-slate-300 leading-relaxed">
+                  Recuperação de arquivos de e-mail (PST/OST), bancos de dados SQL Server, MySQL, Firebird e projetos AutoCAD/Revit.
+                </p>
+              </div>
+
+              <div className="bg-[#161f32] border border-slate-800/80 rounded-2xl p-6 space-y-3">
+                <Lock className="w-8 h-8 text-[#E60012]" />
+                <h3 className="text-lg font-bold text-white">Arquivos Deletados & Formatados</h3>
+                <p className="text-sm text-slate-300 leading-relaxed">
+                  Varredura profunda por assinatura de arquivos em casos de exclusão acidental da lixeira ou formatação equivocada.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ SCHEMA ENRICHED */}
+        <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+          <div className="text-center space-y-2 mb-8">
+            <div className="text-xs font-black uppercase tracking-wider text-[#E60012]">Dúvidas Comuns</div>
+            <h2 className="text-2xl sm:text-3xl font-black text-white">Perguntas sobre Recuperação de Dados</h2>
+          </div>
+
+          <div className="space-y-4">
+            {RECUPERACAO_FAQS.map((faq, idx) => (
+              <div key={idx} className="bg-[#111827] border border-slate-800 rounded-2xl p-6 space-y-2">
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-[#E60012]" />
+                  {faq.question}
+                </h3>
+                <p className="text-sm text-slate-300 leading-relaxed pl-4">{faq.answer}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* CTA FINAL */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-gradient-to-b from-[#111827] to-[#090d16] border border-slate-800 rounded-3xl p-8 sm:p-12 text-center space-y-6">
+            <div className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[#E60012]">
+              <MapPin className="w-4 h-4" />
+              Laboratório no Cambuí • Campinas/SP
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-black text-white">
+              Seus Arquivos Têm Salvação. Fale com Nossos Peritos.
+            </h2>
+            <p className="text-slate-300 max-w-2xl mx-auto text-sm sm:text-base">
+              Loja física: {SITE_CONFIG.address} • Traga sua unidade ou solicite as orientações de envio por Sedex.
+            </p>
+            <div className="pt-2 flex flex-wrap justify-center gap-4">
+              <a
+                href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(
+                  "Olá! Gostaria de uma avaliação para recuperação de dados do meu HD / SSD."
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-[#E60012] hover:bg-red-700 text-white font-black py-4 px-8 rounded-2xl transition-all flex items-center gap-3 text-base"
+              >
+                <MessageCircle className="w-5 h-5" />
+                Falar com Perito em Recuperação
+              </a>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   );
