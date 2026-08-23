@@ -1843,16 +1843,33 @@ export default function CrmWhatsAppClient() {
                         📦
                       </button>
 
-                      <button
-                        onClick={() => {
-                          setFotoUrl("https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=600");
-                          setModalFotoAberto(true);
-                        }}
-                        title="Enviar foto"
+                      <label
+                        title="Enviar foto do computador ou da web"
                         className="bg-[#e7f6ec] text-[#0a6e3d] border border-[#0f9d58] rounded-lg p-2 text-sm font-bold hover:bg-[#0f9d58] hover:text-white transition-colors cursor-pointer"
                       >
                         📷
-                      </button>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = (ev) => {
+                                const res = ev.target?.result as string;
+                                if (res) {
+                                  setFotoUrl(res);
+                                  setFotoLegenda(file.name.replace(/\.[^/.]+$/, ""));
+                                  setModalFotoAberto(true);
+                                }
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                            e.target.value = "";
+                          }}
+                        />
+                      </label>
 
                       <label
                         title="Enviar documento (PDF, DOC, XLS, ZIP)"
@@ -1865,15 +1882,22 @@ export default function CrmWhatsAppClient() {
                           onChange={(e) => {
                             const f = e.target.files?.[0];
                             if (f) {
-                              setDocUpload({
-                                file: f,
-                                nome: f.name,
-                                mime: f.type || "application/octet-stream",
-                                tamanhoFormatado: `${Math.round(f.size / 1024)} KB`,
-                              });
-                              setDocLegenda("");
-                              setModalDocAberto(true);
+                              const reader = new FileReader();
+                              reader.onload = (ev) => {
+                                const dataUrl = ev.target?.result as string;
+                                setDocUpload({
+                                  file: f,
+                                  nome: f.name,
+                                  mime: f.type || "application/octet-stream",
+                                  tamanhoFormatado: `${Math.round(f.size / 1024)} KB`,
+                                  dataUrl,
+                                });
+                                setDocLegenda("");
+                                setModalDocAberto(true);
+                              };
+                              reader.readAsDataURL(f);
                             }
+                            e.target.value = "";
                           }}
                         />
                       </label>
@@ -3105,22 +3129,65 @@ export default function CrmWhatsAppClient() {
 
             <button
               onClick={() => {
-                if (!chatSelecionado) return;
-                const m: CrmMensagem = {
-                  id: `msg-${Date.now()}`,
+                if (!chatSelecionado || !docUpload) return;
+                const legendaFinal = docLegenda.trim() || docUpload.nome;
+                const novaMsg: CrmMensagem = {
+                  id: `msg-doc-${Date.now()}`,
                   chatId: chatSelecionado.id,
                   from: "balao",
-                  body: docLegenda || docUpload.nome,
+                  body: legendaFinal,
                   direction: "out",
                   timestamp: Date.now(),
                   hasMedia: true,
                   mediaType: "document",
                   mediaName: docUpload.nome,
+                  mediaUrl: docUpload.dataUrl,
                   status: "sent",
                 };
-                setMensagens((prev) => [...prev, m]);
+                setMensagens((prev) => [...prev, novaMsg]);
+                setChats((prev) =>
+                  prev.map((c) =>
+                    c.id === chatSelecionado.id
+                      ? {
+                          ...c,
+                          lastMessage: `📄 ${docUpload.nome}`,
+                          timestamp: Date.now(),
+                        }
+                      : c
+                  )
+                );
+
+                if (socketRef.current?.connected) {
+                  socketRef.current.emit("panel:send-media", {
+                    chatId: chatSelecionado.id,
+                    number: chatSelecionado.numero,
+                    dataUrl: docUpload.dataUrl,
+                    base64: docUpload.dataUrl ? docUpload.dataUrl.split(",")[1] : undefined,
+                    mimetype: docUpload.mime,
+                    filename: docUpload.nome,
+                    caption: docLegenda.trim(),
+                    sendMediaAsDocument: true,
+                  });
+                }
+
+                fetch(`${serverUrl}/api/enviar-documento`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    chat: chatSelecionado.id,
+                    number: chatSelecionado.numero,
+                    dataUrl: docUpload.dataUrl,
+                    base64: docUpload.dataUrl ? docUpload.dataUrl.split(",")[1] : undefined,
+                    mimetype: docUpload.mime,
+                    nome: docUpload.nome,
+                    legenda: docLegenda.trim(),
+                  }),
+                }).catch(() => {});
+
                 setModalDocAberto(false);
-                showToast("Documento enviado 📄");
+                setDocUpload(null);
+                setDocLegenda("");
+                showToast("Documento enviado ao cliente! 📄 ✓");
               }}
               className="w-full bg-[#0f9d58] hover:bg-[#0a6e3d] text-white py-2 rounded-lg text-xs font-bold transition-colors cursor-pointer"
             >
@@ -3157,21 +3224,61 @@ export default function CrmWhatsAppClient() {
 
             <button
               onClick={() => {
-                if (!chatSelecionado) return;
-                const m: CrmMensagem = {
-                  id: `msg-${Date.now()}`,
+                if (!chatSelecionado || !fotoUrl) return;
+                const legendaFinal = fotoLegenda.trim();
+                const novaMsg: CrmMensagem = {
+                  id: `msg-media-${Date.now()}`,
                   chatId: chatSelecionado.id,
                   from: "balao",
-                  body: fotoLegenda ? `📷 ${fotoLegenda}` : "📷 [Foto Enviada]",
+                  body: legendaFinal ? `📷 ${legendaFinal}` : "📷 [Foto]",
                   direction: "out",
                   timestamp: Date.now(),
                   hasMedia: true,
                   mediaUrl: fotoUrl,
                   status: "sent",
                 };
-                setMensagens((prev) => [...prev, m]);
+                setMensagens((prev) => [...prev, novaMsg]);
+                setChats((prev) =>
+                  prev.map((c) =>
+                    c.id === chatSelecionado.id
+                      ? {
+                          ...c,
+                          lastMessage: legendaFinal ? `📷 ${legendaFinal}` : "📷 Foto",
+                          timestamp: Date.now(),
+                        }
+                      : c
+                  )
+                );
+
+                if (socketRef.current?.connected) {
+                  socketRef.current.emit("panel:send-media", {
+                    chatId: chatSelecionado.id,
+                    number: chatSelecionado.numero,
+                    url: fotoUrl.startsWith("http") ? fotoUrl : undefined,
+                    dataUrl: fotoUrl.startsWith("data:") ? fotoUrl : undefined,
+                    base64: fotoUrl.startsWith("data:") ? fotoUrl.split(",")[1] : undefined,
+                    mimetype: fotoUrl.startsWith("data:") ? fotoUrl.split(";")[0].replace("data:", "") : "image/jpeg",
+                    caption: legendaFinal,
+                  });
+                }
+
+                fetch(`${serverUrl}/api/enviar-foto`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    chat: chatSelecionado.id,
+                    number: chatSelecionado.numero,
+                    url: fotoUrl.startsWith("http") ? fotoUrl : undefined,
+                    dataUrl: fotoUrl.startsWith("data:") ? fotoUrl : undefined,
+                    base64: fotoUrl.startsWith("data:") ? fotoUrl.split(",")[1] : undefined,
+                    mimetype: fotoUrl.startsWith("data:") ? fotoUrl.split(";")[0].replace("data:", "") : "image/jpeg",
+                    legenda: legendaFinal,
+                  }),
+                }).catch(() => {});
+
                 setModalFotoAberto(false);
-                showToast("Foto enviada ✓");
+                setFotoLegenda("");
+                showToast("Foto enviada ao destinatário! 📷 ✓");
               }}
               className="w-full bg-[#0f9d58] hover:bg-[#0a6e3d] text-white py-2 rounded-lg text-xs font-bold transition-colors cursor-pointer"
             >

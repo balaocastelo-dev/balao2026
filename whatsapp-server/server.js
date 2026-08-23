@@ -704,9 +704,93 @@ async function syncStatusFeed() {
   }
 }
 
+async function resolveAndSendMessage(chatId, content, options = {}) {
+  try {
+    const res = await whatsappClient.sendMessage(chatId, content, options);
+    if (res) return res;
+  } catch (err1) {
+    console.warn(`[WHATSAPP-SEND] Tentativa direta para ${chatId} falhou: "${err1.message}". Tentando resolução de JID...`);
+
+    const clean = normalizeNumber(chatId);
+    if (clean) {
+      // 1. Try resolving via getNumberId
+      try {
+        const numberId = await whatsappClient.getNumberId(clean);
+        if (numberId?._serialized && numberId._serialized !== chatId) {
+          console.log(`[WHATSAPP-SEND] JID resolvido via getNumberId: ${numberId._serialized}`);
+          const res = await whatsappClient.sendMessage(numberId._serialized, content, options);
+          if (res) return res;
+        }
+      } catch (e) {}
+
+      // 2. If 13 digits (55 + DDD + 9 digits), try without the 9th digit (12 digits)
+      if (clean.length === 13 && clean.startsWith("55")) {
+        const alt12 = `${clean.slice(0, 4)}${clean.slice(5)}@c.us`;
+        try {
+          console.log(`[WHATSAPP-SEND] Tentando variação sem 9º dígito: ${alt12}`);
+          const res = await whatsappClient.sendMessage(alt12, content, options);
+          if (res) return res;
+        } catch (e) {}
+      }
+
+      // 3. If 12 digits (55 + DDD + 8 digits), try with the 9th digit (13 digits)
+      if (clean.length === 12 && clean.startsWith("55")) {
+        const alt13 = `${clean.slice(0, 4)}9${clean.slice(4)}@c.us`;
+        try {
+          console.log(`[WHATSAPP-SEND] Tentando variação com 9º dígito: ${alt13}`);
+          const res = await whatsappClient.sendMessage(alt13, content, options);
+          if (res) return res;
+        } catch (e) {}
+      }
+    }
+
+    throw err1;
+  }
+}
+
+async function resolveMediaObject(mediaSource, filename = "arquivo", mimetype = null) {
+  if (!mediaSource) return null;
+
+  if (mediaSource instanceof MessageMedia || (mediaSource.mimetype && mediaSource.data)) {
+    return mediaSource;
+  }
+
+  if (typeof mediaSource === "string" && mediaSource.startsWith("data:")) {
+    const match = mediaSource.match(/^data:([^;]+);base64,(.+)$/);
+    if (match) {
+      return new MessageMedia(match[1], match[2], filename);
+    }
+  }
+
+  if (typeof mediaSource === "string" && mimetype && !mediaSource.startsWith("http")) {
+    const cleanB64 = mediaSource.replace(/^data:[^;]+;base64,/, "");
+    return new MessageMedia(mimetype, cleanB64, filename);
+  }
+
+  if (typeof mediaSource === "string" && mediaSource.startsWith("http")) {
+    try {
+      const media = await MessageMedia.fromUrl(mediaSource, { unsafeMime: true });
+      if (media && media.data) return media;
+    } catch (e) {
+      console.warn("MessageMedia.fromUrl falhou, tentando download com fetch nativo:", e.message);
+      try {
+        const resp = await fetch(mediaSource);
+        const arrayBuf = await resp.arrayBuffer();
+        const base64 = Buffer.from(arrayBuf).toString("base64");
+        const detectedMime = resp.headers.get("content-type") || mimetype || "image/jpeg";
+        return new MessageMedia(detectedMime, base64, filename);
+      } catch (e2) {
+        console.error("Falha ao baixar imagem via fetch nativo:", e2.message);
+      }
+    }
+  }
+
+  return null;
+}
+
 async function sendDirectMessage({ number, text, signatureId, chatId: preferredChatId = null, replyTo = null }) {
   if (!whatsappState.connected || !whatsappClient) {
-    throw new Error("WhatsApp ainda nao conectado");
+    throw new Error("WhatsApp ainda não conectado");
   }
 
   const finalText = appendSignature(text, signatureId);
@@ -728,12 +812,12 @@ async function sendDirectMessage({ number, text, signatureId, chatId: preferredC
   }
 
   if (!targetChatId) {
-    throw new Error("Destinatario invalido para envio de mensagem");
+    throw new Error("Destinatário inválido para envio de mensagem");
   }
 
-  console.log(`[WHATSAPP-SEND] Disparando para ${targetChatId}: "${finalText.slice(0, 60)}"`);
+  console.log(`[WHATSAPP-SEND] Disparando texto para ${targetChatId}: "${finalText.slice(0, 60)}"`);
   const options = replyTo ? { quotedMessageId: replyTo } : {};
-  const sentMsg = await whatsappClient.sendMessage(targetChatId, finalText, options);
+  const sentMsg = await resolveAndSendMessage(targetChatId, finalText, options);
   console.log(`[WHATSAPP-SEND] Mensagem entregue com sucesso! ID: ${sentMsg?.id?._serialized || 'ok'}`);
 
   const outMsg = {
@@ -760,11 +844,13 @@ async function sendDirectMedia({
   chatId: preferredChatId = null,
   media,
   caption = "",
+  filename = "arquivo",
+  mimetype = null,
   sendAudioAsVoice = false,
   sendMediaAsDocument = false,
 }) {
   if (!whatsappState.connected || !whatsappClient) {
-    throw new Error("WhatsApp ainda nao conectado");
+    throw new Error("WhatsApp ainda não conectado");
   }
 
   let targetChatId = preferredChatId;
@@ -773,13 +859,38 @@ async function sendDirectMedia({
     targetChatId = `${cleanNumber}@c.us`;
   }
 
+  const mediaObj = await resolveMediaObject(media, filename, mimetype);
+  if (!mediaObj) {
+    throw new Error("Mídia inválida ou não foi possível carregar a imagem.");
+  }
+
   const options = {};
   if (caption) options.caption = caption;
   if (sendAudioAsVoice) options.sendAudioAsVoice = true;
   if (sendMediaAsDocument) options.sendMediaAsDocument = true;
 
-  console.log(`[WHATSAPP-SEND-MEDIA] Disparando midia para ${targetChatId}`);
-  const sent = await whatsappClient.sendMessage(targetChatId, media, options);
+  console.log(`[WHATSAPP-SEND-MEDIA] Disparando mídia para ${targetChatId} (${mediaObj.mimetype})`);
+  const sent = await resolveAndSendMessage(targetChatId, mediaObj, options);
+  console.log(`[WHATSAPP-SEND-MEDIA] Sucesso ao enviar mídia para ${targetChatId}!`);
+
+  const outMsg = {
+    id: sent?.id?._serialized || `msg-media-${Date.now()}`,
+    chatId: targetChatId,
+    from: "me",
+    to: targetChatId,
+    body: caption || (sendMediaAsDocument ? `📄 ${filename}` : "📷 Foto"),
+    direction: "out",
+    timestamp: Date.now(),
+    hasMedia: true,
+    mediaType: sendMediaAsDocument ? "document" : mediaObj.mimetype?.startsWith("image") ? "image" : "media",
+    realNumber: extractRealNumber(targetChatId),
+    displayNumber: extractRealNumber(targetChatId),
+    status: "sent",
+  };
+  store.messages.push(outMsg);
+  if (store.messages.length > 5000) store.messages.shift();
+  io.emit("whatsapp:message", outMsg);
+
   return sent;
 }
 
@@ -1136,6 +1247,70 @@ app.post(["/api/enviar-produto", "/api/crm/enviar-produto"], async (req, res) =>
   }
 });
 
+app.post(["/api/enviar-foto", "/api/crm/enviar-foto"], async (req, res) => {
+  try {
+    const { chat, number, url, base64, dataUrl, mimetype, legenda, caption } = req.body || {};
+    const targetChat = chat || number;
+    const finalCaption = legenda || caption || "";
+    if (!targetChat) {
+      return res.status(400).json({ ok: false, erro: "Chat de destino obrigatório." });
+    }
+
+    const mediaSource = dataUrl || url || base64;
+    if (!mediaSource) {
+      return res.status(400).json({ ok: false, erro: "Nenhuma imagem informada." });
+    }
+
+    const sent = await sendDirectMedia({
+      number: targetChat,
+      chatId: targetChat.includes("@") ? targetChat : null,
+      media: mediaSource,
+      caption: finalCaption,
+      filename: "foto.jpg",
+      mimetype: mimetype || "image/jpeg",
+    });
+
+    res.json({ ok: true, msgId: sent?.id?._serialized || null });
+  } catch (e) {
+    console.error("Erro /api/enviar-foto:", e.message);
+    res.status(500).json({ ok: false, erro: e.message });
+  }
+});
+
+app.post(["/api/enviar-documento", "/api/crm/enviar-documento"], async (req, res) => {
+  try {
+    const { chat, number, base64, dataUrl, mimetype, nome, filename, legenda, caption } = req.body || {};
+    const targetChat = chat || number;
+    const finalCaption = legenda || caption || "";
+    const finalName = nome || filename || "documento.pdf";
+    const finalMime = mimetype || "application/octet-stream";
+
+    if (!targetChat) {
+      return res.status(400).json({ ok: false, erro: "Chat de destino obrigatório." });
+    }
+
+    const mediaSource = dataUrl || base64;
+    if (!mediaSource) {
+      return res.status(400).json({ ok: false, erro: "Nenhum arquivo informado." });
+    }
+
+    const sent = await sendDirectMedia({
+      number: targetChat,
+      chatId: targetChat.includes("@") ? targetChat : null,
+      media: mediaSource,
+      caption: finalCaption,
+      filename: finalName,
+      mimetype: finalMime,
+      sendMediaAsDocument: true,
+    });
+
+    res.json({ ok: true, msgId: sent?.id?._serialized || null });
+  } catch (e) {
+    console.error("Erro /api/enviar-documento:", e.message);
+    res.status(500).json({ ok: false, erro: e.message });
+  }
+});
+
 io.on("connection", (socket) => {
   socket.emit("whatsapp:state", whatsappState);
   socket.emit("whatsapp:api-info", apiInfo);
@@ -1171,9 +1346,8 @@ io.on("connection", (socket) => {
     socket.emit("whatsapp:status-feed", store.statusFeed);
   });
 
-  socket.on("panel:reset-session", async () => {
-    emitToast("Reiniciando a sessao do WhatsApp para gerar um novo QR Code.");
-    await initializeWhatsAppClient({ resetSession: true });
+  socket.on("panel:reset-session", () => {
+    resetWhatsAppSession();
   });
 
   socket.on("panel:sync-conversations", async () => {
@@ -1195,29 +1369,22 @@ io.on("connection", (socket) => {
 
   socket.on("panel:send-message", async (payload) => {
     try {
-      const number = normalizeNumber(payload.number);
+      const number = normalizeNumber(payload.number || payload.chatId || "");
+      const chatId = payload.chatId || (number ? `${number}@c.us` : null);
       const text = String(payload.text || "").trim();
-      if (!number || !text) return;
-      // #region debug-point D:panel-send-message
-      debugReport("D", "whatsapp-server/server.js:panel-send-message", "[DEBUG] panel send requested", {
-        requestedNumber: payload.number || null,
-        normalizedNumber: number,
-        requestedChatId: payload.chatId || null,
-        signatureId: payload.signatureId || null,
-        textPreview: text.slice(0, 140),
-      });
-      // #endregion
+      if (!chatId || !text) return;
 
       await sendDirectMessage({
         number,
         text,
         signatureId: payload.signatureId || null,
-        chatId: payload.chatId || null,
+        chatId,
+        replyTo: payload.replyTo || null,
       });
-      emitToast(`Mensagem enviada para ${number}.`);
+      emitToast("Mensagem enviada.");
     } catch (error) {
       console.error("Falha ao enviar mensagem:", error);
-      emitToast("Falha ao enviar mensagem.");
+      emitToast("Falha ao enviar mensagem: " + error.message);
     }
   });
 
@@ -1360,26 +1527,32 @@ io.on("connection", (socket) => {
 
   socket.on("panel:send-media", async (payload) => {
     try {
-      const number = normalizeNumber(payload.number);
-      const base64 = String(payload.base64 || "").trim();
-      const mimetype = String(payload.mimetype || "").trim();
-      const filename = String(payload.filename || "arquivo").trim();
+      const number = normalizeNumber(payload.number || payload.chatId || "");
+      const chatId = payload.chatId || (number ? `${number}@c.us` : null);
       const caption = String(payload.caption || "").trim();
-      if (!number || !base64 || !mimetype) return;
+      const filename = String(payload.filename || "arquivo").trim();
+      const mimetype = String(payload.mimetype || "").trim();
+      const mediaSource = payload.dataUrl || payload.url || payload.base64;
 
-      const media = new MessageMedia(mimetype, base64, filename);
+      if (!chatId || !mediaSource) {
+        throw new Error("Chat de destino ou mídia não informados");
+      }
+
       await sendDirectMedia({
         number,
-        chatId: payload.chatId || null,
-        media,
+        chatId,
+        media: mediaSource,
         caption,
+        filename,
+        mimetype,
         sendAudioAsVoice: Boolean(payload.sendAudioAsVoice),
         sendMediaAsDocument: Boolean(payload.sendMediaAsDocument),
       });
-      emitToast(`Midia enviada para ${number}.`);
+
+      emitToast("Mídia enviada com sucesso!");
     } catch (error) {
-      console.error("Falha ao enviar midia:", error);
-      emitToast("Falha ao enviar midia.");
+      console.error("Falha ao enviar mídia:", error);
+      emitToast("Falha ao enviar mídia: " + error.message);
     }
   });
 
