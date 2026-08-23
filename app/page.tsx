@@ -338,30 +338,55 @@ export default async function Home(props: {
 
   const filteredProducts = products;
 
-  const semiNovoRootCandidates = categories.filter((item) => {
-    const slug = String(item.slug || "").toLowerCase();
-    return slug === "semi-novo" || slug === "semi-novos" || slug.includes("semi-novo");
-  });
-  if (semiNovoRootCandidates.length > 0) {
-    const validSemiNovoCategories = new Set<string>();
-    semiNovoRootCandidates.forEach((rootCategory) => {
-      validSemiNovoCategories.add(rootCategory.name);
-      const semiNovoDescendants = getDescendantNames(rootCategory.name, categories);
-      semiNovoDescendants.forEach((name) => validSemiNovoCategories.add(name));
+  const [iphoneProductsDirect, notebookProductsDirect] = await Promise.all([
+    getProductsByExactCategories(["iPhones Seminovos"]),
+    getProductsByExactCategories(["Notebooks Seminovos"]),
+  ]);
+
+  if (iphoneProductsDirect.length > 0) {
+    iphoneSemiNovoProducts = iphoneProductsDirect.slice(0, 6);
+  } else {
+    const semiNovoRootCandidates = categories.filter((item) => {
+      const slug = String(item.slug || "").toLowerCase();
+      return slug.includes("iphone") || slug.includes("semi-novo") || slug.includes("seminovos");
     });
-    const semiNovoAllProducts = await getProductsByExactCategories([...validSemiNovoCategories]);
-    iphoneSemiNovoProducts = semiNovoAllProducts
-      .filter((product) => productMatchesTerms(product, ["iphone", "apple iphone", "ios"]))
-      .slice(0, 6);
+    if (semiNovoRootCandidates.length > 0) {
+      const validSemiNovoCategories = new Set<string>();
+      semiNovoRootCandidates.forEach((rootCategory) => {
+        validSemiNovoCategories.add(rootCategory.name);
+        const semiNovoDescendants = getDescendantNames(rootCategory.name, categories);
+        semiNovoDescendants.forEach((name) => validSemiNovoCategories.add(name));
+      });
+      const semiNovoAllProducts = await getProductsByExactCategories([...validSemiNovoCategories]);
+      iphoneSemiNovoProducts = semiNovoAllProducts
+        .filter((product) => productMatchesTerms(product, ["iphone", "apple iphone", "ios"]))
+        .slice(0, 6);
+    }
+  }
 
-    const notebookCandidates = semiNovoAllProducts.filter((product) =>
-      productMatchesTerms(product, ["notebook", "notebooks", "laptop", "macbook", "ultrabook", "chromebook"]),
-    );
-
-    semiNovoProducts = (notebookCandidates.length > 0
-      ? notebookCandidates
-      : semiNovoAllProducts.filter((product) => !productMatchesTerms(product, ["iphone", "apple iphone", "ios"]))
-    ).slice(0, 6);
+  if (notebookProductsDirect.length > 0) {
+    semiNovoProducts = notebookProductsDirect.slice(0, 6);
+  } else {
+    const semiNovoRootCandidates = categories.filter((item) => {
+      const slug = String(item.slug || "").toLowerCase();
+      return slug.includes("notebook") || slug.includes("semi-novo") || slug.includes("seminovos");
+    });
+    if (semiNovoRootCandidates.length > 0) {
+      const validSemiNovoCategories = new Set<string>();
+      semiNovoRootCandidates.forEach((rootCategory) => {
+        validSemiNovoCategories.add(rootCategory.name);
+        const semiNovoDescendants = getDescendantNames(rootCategory.name, categories);
+        semiNovoDescendants.forEach((name) => validSemiNovoCategories.add(name));
+      });
+      const semiNovoAllProducts = await getProductsByExactCategories([...validSemiNovoCategories]);
+      const notebookCandidates = semiNovoAllProducts.filter((product) =>
+        productMatchesTerms(product, ["notebook", "notebooks", "laptop", "macbook", "ultrabook", "chromebook"]),
+      );
+      semiNovoProducts = (notebookCandidates.length > 0
+        ? notebookCandidates
+        : semiNovoAllProducts.filter((product) => !productMatchesTerms(product, ["iphone", "apple iphone", "ios"]))
+      ).slice(0, 6);
+    }
   }
   const semiNovoCards = Array.from({ length: 6 }, (_, index) => semiNovoProducts[index] || null);
   const iphoneSemiNovoCards = Array.from({ length: 6 }, (_, index) => iphoneSemiNovoProducts[index] || null);
@@ -520,7 +545,7 @@ export default async function Home(props: {
                 <h2 className="mt-1 text-sm font-black text-[var(--home-text)]">Notebooks seminovos</h2>
               </div>
               <Link
-                href="/categoria/semi-novos?search=notebook"
+                href="/categoria/notebooks-seminovos"
                 className="text-[11px] font-black uppercase tracking-[0.16em] text-[var(--home-accent)] hover:opacity-80"
               >
                 Ver mais
@@ -597,7 +622,7 @@ export default async function Home(props: {
                 <h2 className="mt-1 text-sm font-black text-[var(--home-text)]">iPhones seminovos</h2>
               </div>
               <Link
-                href="/categoria/semi-novos?search=iphone"
+                href="/categoria/iphones-seminovos"
                 className="text-[11px] font-black uppercase tracking-[0.16em] text-[var(--home-accent)] hover:opacity-80"
               >
                 Ver mais

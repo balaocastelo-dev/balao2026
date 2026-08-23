@@ -32,6 +32,8 @@ const iconMap: Record<string, LucideIcon> = {
   "List": List,
   "Apple": Laptop,
   "Notebooks": Laptop,
+  "Notebooks Seminovos": Laptop,
+  "iPhones Seminovos": Smartphone,
   "Computadores": Monitor,
   "Hardware": Cpu,
   "Acessórios": Keyboard,
