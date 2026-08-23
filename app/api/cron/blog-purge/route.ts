@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { hasAdmin, supabaseAdmin } from "@/lib/supabase-admin";
+import { turso, isTursoActive } from "@/lib/turso";
 import { requireAdminApiAuth } from "@/lib/admin/auth";
 
 function isAuthorized(req: Request): NextResponse | null {
@@ -36,8 +36,8 @@ export async function DELETE(req: Request) {
   const unauthorized = isAuthorized(req);
   if (unauthorized) return unauthorized;
 
-  if (!hasAdmin) {
-    return NextResponse.json({ error: "Supabase admin não configurado" }, { status: 500 });
+  if (!isTursoActive()) {
+    return NextResponse.json({ error: "Banco de dados não configurado" }, { status: 500 });
   }
 
   const url = new URL(req.url);
@@ -56,21 +56,16 @@ export async function DELETE(req: Request) {
         label: "blog_posts:rss",
         exec: async () => {
           if (dryRun) {
-            const { count, error } = await supabaseAdmin
-              .from("blog_posts")
-              .select("id", { count: "exact", head: true })
-              .eq("source_type", "rss");
-            if (error) throw error;
-            return { deleted: count || 0 };
+            const res = await turso.execute(
+              "SELECT COUNT(*) AS n FROM blog_posts WHERE source_type = 'rss'"
+            );
+            return { deleted: Number(res.rows[0]?.n || 0) };
           }
 
-          const { data, error } = await supabaseAdmin
-            .from("blog_posts")
-            .delete()
-            .eq("source_type", "rss")
-            .select("id");
-          if (error) throw error;
-          return { deleted: Array.isArray(data) ? data.length : 0 };
+          const res = await turso.execute(
+            "DELETE FROM blog_posts WHERE source_type = 'rss' RETURNING id"
+          );
+          return { deleted: res.rows.length };
         },
       });
     }
@@ -79,35 +74,23 @@ export async function DELETE(req: Request) {
       plan.push({
         label: "blog_posts:product_non_balao",
         exec: async () => {
-          if (dryRun) {
-            const { data, error } = await supabaseAdmin
-              .from("blog_posts")
-              .select("source_url", { count: "exact" })
-              .eq("source_type", "product")
-              .limit(10_000);
-            if (error) throw error;
-            const rows = Array.isArray(data) ? data : [];
-            const count = rows.filter((r: any) => getDomain(String(r?.source_url || "")) !== "balao.info").length;
-            return { deleted: count };
-          }
-
-          const { data, error } = await supabaseAdmin
-            .from("blog_posts")
-            .select("id,source_url")
-            .eq("source_type", "product")
-            .limit(10_000);
-          if (error) throw error;
-          const rows = Array.isArray(data) ? data : [];
-          const ids = rows.filter((r: any) => getDomain(String(r?.source_url || "")) !== "balao.info").map((r: any) => r.id);
+          const res = await turso.execute(
+            "SELECT id, source_url FROM blog_posts WHERE source_type = 'product' LIMIT 10000"
+          );
+          const rows = res.rows as any[];
+          const ids = rows
+            .filter((r) => getDomain(String(r?.source_url || "")) !== "balao.info")
+            .map((r) => r.id);
           if (ids.length === 0) return { deleted: 0 };
 
-          const { data: delData, error: delError } = await supabaseAdmin
-            .from("blog_posts")
-            .delete()
-            .in("id", ids)
-            .select("id");
-          if (delError) throw delError;
-          return { deleted: Array.isArray(delData) ? delData.length : 0 };
+          if (dryRun) return { deleted: ids.length };
+
+          const placeholders = ids.map(() => "?").join(",");
+          const delRes = await turso.execute({
+            sql: `DELETE FROM blog_posts WHERE id IN (${placeholders}) RETURNING id`,
+            args: ids,
+          });
+          return { deleted: delRes.rows.length };
         },
       });
     }
@@ -117,21 +100,16 @@ export async function DELETE(req: Request) {
         label: "blog_source_items:rss",
         exec: async () => {
           if (dryRun) {
-            const { count, error } = await supabaseAdmin
-              .from("blog_source_items")
-              .select("id", { count: "exact", head: true })
-              .eq("source_type", "rss");
-            if (error) throw error;
-            return { deleted: count || 0 };
+            const res = await turso.execute(
+              "SELECT COUNT(*) AS n FROM blog_source_items WHERE source_type = 'rss'"
+            );
+            return { deleted: Number(res.rows[0]?.n || 0) };
           }
 
-          const { data, error } = await supabaseAdmin
-            .from("blog_source_items")
-            .delete()
-            .eq("source_type", "rss")
-            .select("id");
-          if (error) throw error;
-          return { deleted: Array.isArray(data) ? data.length : 0 };
+          const res = await turso.execute(
+            "DELETE FROM blog_source_items WHERE source_type = 'rss' RETURNING id"
+          );
+          return { deleted: res.rows.length };
         },
       });
     }
@@ -157,4 +135,3 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ ok: false, error: error?.message || "Erro" }, { status: 500 });
   }
 }
-

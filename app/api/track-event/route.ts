@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { hasAdmin, supabaseAdmin } from "@/lib/supabase-admin";
+import { randomUUID } from "crypto";
+import { turso, isTursoActive } from "@/lib/turso";
 
 const ALLOWED_EVENTS = new Set([
   "whatsapp_click",
@@ -17,9 +18,9 @@ function pickText(value: unknown) {
 
 export async function POST(request: Request) {
   try {
-    if (!hasAdmin) {
+    if (!isTursoActive()) {
       return NextResponse.json(
-        { success: false, error: "Supabase admin nao configurado" },
+        { success: false, error: "Banco de dados nao configurado" },
         { status: 500 }
       );
     }
@@ -56,28 +57,30 @@ export async function POST(request: Request) {
       )
     );
 
-    const { error } = await supabaseAdmin.from("site_conversion_events").insert({
-      event_name: event,
-      event_category: pickText(payload.event_category),
-      channel: pickText(payload.channel),
-      page_path: pickText(payload.page_path),
-      page_query: pickText(payload.page_query),
-      source: pickText(payload.source),
-      label: pickText(payload.label),
-      city: pickText(payload.city),
-      service: pickText(payload.service),
-      product_name: pickText(payload.product_name),
-      destination: pickText(payload.destination),
-      visitor_id: pickText(payload.visitor_id),
-      metadata,
-    });
-
-    if (error) {
-      if (error.code === "42P01") {
-        console.warn("Tabela site_conversion_events nao encontrada. Rode o SQL do painel.");
-      } else {
-        console.error("Erro ao registrar evento de conversao:", error);
-      }
+    try {
+      await turso.execute({
+        sql: `INSERT INTO site_conversion_events
+          (id, event_name, event_category, channel, page_path, page_query, source, label, city, service, product_name, destination, visitor_id, metadata)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        args: [
+          randomUUID(),
+          event,
+          pickText(payload.event_category),
+          pickText(payload.channel),
+          pickText(payload.page_path),
+          pickText(payload.page_query),
+          pickText(payload.source),
+          pickText(payload.label),
+          pickText(payload.city),
+          pickText(payload.service),
+          pickText(payload.product_name),
+          pickText(payload.destination),
+          pickText(payload.visitor_id),
+          JSON.stringify(metadata),
+        ],
+      });
+    } catch (e) {
+      console.error("Erro ao registrar evento de conversao:", e);
     }
 
     return NextResponse.json({ success: true });

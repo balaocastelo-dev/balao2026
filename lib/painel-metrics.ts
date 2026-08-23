@@ -1,5 +1,5 @@
 import { DashboardMetrics, getDashboardMetrics } from "@/lib/dashboard-metrics";
-import { hasAdmin, supabaseAdmin } from "@/lib/supabase-admin";
+import { turso, isTursoActive } from "@/lib/turso";
 
 type ConversionEventRow = {
   created_at: string;
@@ -51,46 +51,53 @@ export async function getPainelMetrics(params: {
 }): Promise<DashboardMetrics> {
   const baseMetrics = await getDashboardMetrics(params);
 
-  if (!hasAdmin) {
+  if (!isTursoActive()) {
     return baseMetrics;
   }
 
   const { startDate, endDate } = params;
-  let query = supabaseAdmin
-    .from("site_conversion_events")
-    .select("created_at, event_name, page_path, source, city");
-
-  if (startDate) query = query.gte("created_at", startDate);
-  if (endDate) query = query.lte("created_at", endDate);
-
-  const { data, error } = await query;
-
-  if (error) {
-    if (error.code === "42P01") {
-      console.warn("Tabela site_conversion_events nao encontrada. Rode o SQL do painel.");
-      return {
-        ...baseMetrics,
-        leadKpis: {
-          total: 0,
-          last24h: 0,
-          conversionRate: 0,
-          formSuccesses: 0,
-          whatsappClicks: 0,
-          phoneClicks: 0,
-          emailClicks: 0,
-          sectionViews: 0,
-        },
-        leadBreakdown: [],
-        topLeadSources: [],
-        topLeadPages: [],
-        topLeadCities: [],
-      };
-    }
-
-    throw error;
+  const where: string[] = [];
+  const args: string[] = [];
+  if (startDate) {
+    where.push("created_at >= ?");
+    args.push(startDate);
+  }
+  if (endDate) {
+    where.push("created_at <= ?");
+    args.push(endDate);
   }
 
-  const events = (data || []) as ConversionEventRow[];
+  let rows: ConversionEventRow[] = [];
+  try {
+    const res = await turso.execute({
+      sql: `SELECT created_at, event_name, page_path, source, city
+            FROM site_conversion_events
+            ${where.length ? `WHERE ${where.join(" AND ")}` : ""}`,
+      args,
+    });
+    rows = res.rows as unknown as ConversionEventRow[];
+  } catch (err: any) {
+    console.warn("Erro ao consultar site_conversion_events:", err?.message);
+    return {
+      ...baseMetrics,
+      leadKpis: {
+        total: 0,
+        last24h: 0,
+        conversionRate: 0,
+        formSuccesses: 0,
+        whatsappClicks: 0,
+        phoneClicks: 0,
+        emailClicks: 0,
+        sectionViews: 0,
+      },
+      leadBreakdown: [],
+      topLeadSources: [],
+      topLeadPages: [],
+      topLeadCities: [],
+    };
+  }
+
+  const events = rows;
   const leadEvents = events.filter((event) => LEAD_EVENT_NAMES.has(event.event_name));
   const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
   const leadEvents24h = leadEvents.filter(

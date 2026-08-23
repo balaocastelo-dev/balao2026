@@ -1,15 +1,10 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { turso } from "@/lib/turso";
 
 export async function GET() {
   try {
-    const { data, error } = await supabaseAdmin
-      .from('weekly_expenses')
-      .select('*')
-      .order('date', { ascending: false });
-
-    if (error) throw error;
-    return NextResponse.json(data);
+    const res = await turso.execute("SELECT * FROM weekly_expenses ORDER BY date DESC");
+    return NextResponse.json(res.rows);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -18,14 +13,29 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { data, error } = await supabaseAdmin
-      .from('weekly_expenses')
-      .upsert(body)
-      .select()
-      .single();
 
-    if (error) throw error;
-    return NextResponse.json(data);
+    await turso.execute({
+      sql: `INSERT INTO weekly_expenses (id, description, value, category, date)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+              description = excluded.description,
+              value = excluded.value,
+              category = excluded.category,
+              date = excluded.date`,
+      args: [
+        body.id,
+        body.description ?? null,
+        body.value ?? null,
+        body.category ?? null,
+        body.date ?? null
+      ]
+    });
+
+    const res = await turso.execute({
+      sql: "SELECT * FROM weekly_expenses WHERE id = ?",
+      args: [body.id]
+    });
+    return NextResponse.json(res.rows[0] ?? null);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -38,12 +48,11 @@ export async function DELETE(req: Request) {
 
     if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });
 
-    const { error } = await supabaseAdmin
-      .from('weekly_expenses')
-      .delete()
-      .eq('id', id);
+    await turso.execute({
+      sql: "DELETE FROM weekly_expenses WHERE id = ?",
+      args: [id]
+    });
 
-    if (error) throw error;
     return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

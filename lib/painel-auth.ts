@@ -2,7 +2,10 @@ import { createHash, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
 
 export const PAINEL_COOKIE_NAME = "balao_painel_session";
-const PAINEL_PASSWORD = "56676009";
+
+// A senha do painel vem de variável de ambiente (PAINEL_PASSWORD).
+// Sem a variável definida, o painel fica INACESSÍVEL (falha fechada, por segurança).
+const PAINEL_PASSWORD = process.env.PAINEL_PASSWORD ?? "";
 
 function buildSessionToken(password: string) {
   return createHash("sha256")

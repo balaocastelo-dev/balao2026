@@ -1,5 +1,5 @@
-import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import { turso, isTursoActive } from '@/lib/turso';
 import { parsePriceToNumber } from '@/lib/utils';
 
 type ProductRow = { price?: unknown };
@@ -12,43 +12,34 @@ export async function GET(request: Request) {
     return NextResponse.json([]);
   }
 
-  const supabase = await createClient();
+  if (!isTursoActive()) {
+    return NextResponse.json([], { status: 500 });
+  }
 
   try {
-    // Call the Supabase RPC function for full-text search
-    const { data: products, error } = await supabase.rpc('search_products_fts', {
-      query_text: query,
-      limit_count: 10
+    // Busca com lógica AND: todos os termos precisam bater (nome ou descrição)
+    const terms = query.trim().split(/\s+/).filter((t) => t.length > 0);
+    if (terms.length === 0) return NextResponse.json([]);
+
+    const conditions = terms
+      .map(() => '(LOWER(name) LIKE ? OR LOWER(description) LIKE ?)')
+      .join(' AND ');
+    const args: string[] = [];
+    terms.forEach((term) => {
+      const like = `%${term.toLowerCase()}%`;
+      args.push(like, like);
     });
 
-    if (error) {
-      console.error('Search RPC Error:', error);
-      // Fallback to basic search if RPC fails (e.g. migration not applied yet)
-      // Uses strict AND logic for each term
-      let queryBuilder = supabase.from('products').select('*');
-      
-      const terms = query.trim().split(/\s+/);
-      terms.forEach(term => {
-          if (term.length > 0) {
-              queryBuilder = queryBuilder.ilike('name', `%${term}%`);
-          }
-      });
+    const res = await turso.execute({
+      sql: `SELECT * FROM products WHERE ${conditions} LIMIT 10`,
+      args,
+    });
 
-      const { data: fallbackData } = await queryBuilder.limit(10);
+    const sorted = (res.rows as ProductRow[])
+      .slice()
+      .sort((a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price));
 
-      const fallback = (fallbackData || []) as ProductRow[];
-      const sorted = fallback
-        .slice()
-        .sort((a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price));
-
-      return NextResponse.json(sorted);
-    }
-
-    return NextResponse.json(
-      ((products || []) as ProductRow[])
-        .slice()
-        .sort((a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price))
-    );
+    return NextResponse.json(sorted);
   } catch (err) {
     console.error('Search API Error:', err);
     return NextResponse.json([], { status: 500 });

@@ -1,23 +1,13 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { turso } from "@/lib/turso";
 
 export async function DELETE(req: Request) {
   try {
-    // Delete all orders
-    const { error: errorOrders } = await supabaseAdmin
-      .from('weekly_orders')
-      .delete()
-      .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all rows
-
-    if (errorOrders) throw errorOrders;
-
-    // Delete all expenses
-    const { error: errorExpenses } = await supabaseAdmin
-      .from('weekly_expenses')
-      .delete()
-      .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all rows
-
-    if (errorExpenses) throw errorExpenses;
+    // Apaga todos os registros
+    await turso.batch([
+      { sql: "DELETE FROM weekly_orders", args: [] },
+      { sql: "DELETE FROM weekly_expenses", args: [] },
+    ], 'write');
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

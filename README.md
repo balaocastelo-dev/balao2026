@@ -7,7 +7,7 @@ Este projeto é um e-commerce desenvolvido com Next.js, Tailwind CSS e TypeScrip
 - **Catálogo de Produtos**: Listagem com filtro por categorias e busca.
 - **Página de Detalhes**: Visualização do produto com opção de compartilhamento e pré-visualização (OG Tags).
 - **Painel Administrativo**:
-  - Acesso secreto: Clique 5 vezes no logo ou digite `56676009` na busca.
+  - Acesso secreto: Clique 5 vezes no logo (a senha é definida na variável de ambiente `PAINEL_PASSWORD` — nunca versionar no repositório).
   - Importação em Massa: Cole o texto com URLs de imagens, nomes e preços para popular o site.
 - **Responsividade**: Layout adaptado para Mobile e Desktop.
 

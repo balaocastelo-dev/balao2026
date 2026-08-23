@@ -1,29 +1,24 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { turso } from "@/lib/turso";
+
+function mapRow(item: any) {
+  return {
+    id: item.id,
+    osNumber: item.os_number,
+    status: item.status,
+    date: item.date,
+    laborIncome: Number(item.labor_income),
+    partsIncome: Number(item.parts_income),
+    laborExpense: Number(item.labor_expense),
+    partsExpense: Number(item.parts_expense),
+    paymentMethod: item.payment_method
+  };
+}
 
 export async function GET() {
   try {
-    const { data, error } = await supabaseAdmin
-      .from('weekly_orders')
-      .select('*')
-      .order('date', { ascending: false });
-
-    if (error) throw error;
-
-    // Map snake_case to camelCase
-    const mappedData = data.map((item: any) => ({
-      id: item.id,
-      osNumber: item.os_number,
-      status: item.status,
-      date: item.date,
-      laborIncome: Number(item.labor_income),
-      partsIncome: Number(item.parts_income),
-      laborExpense: Number(item.labor_expense),
-      partsExpense: Number(item.parts_expense),
-      paymentMethod: item.payment_method
-    }));
-
-    return NextResponse.json(mappedData);
+    const res = await turso.execute("SELECT * FROM weekly_orders ORDER BY date DESC");
+    return NextResponse.json(res.rows.map(mapRow));
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -33,41 +28,40 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    // Map camelCase to snake_case
-    const dbPayload = {
-      id: body.id,
-      os_number: body.osNumber,
-      status: body.status,
-      date: body.date,
-      labor_income: body.laborIncome,
-      parts_income: body.partsIncome,
-      labor_expense: body.laborExpense,
-      parts_expense: body.partsExpense,
-      payment_method: body.paymentMethod
-    };
+    // Map camelCase to snake_case (idempotente por id)
+    await turso.execute({
+      sql: `INSERT INTO weekly_orders (id, os_number, status, date, labor_income, parts_income, labor_expense, parts_expense, payment_method)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+              os_number = excluded.os_number,
+              status = excluded.status,
+              date = excluded.date,
+              labor_income = excluded.labor_income,
+              parts_income = excluded.parts_income,
+              labor_expense = excluded.labor_expense,
+              parts_expense = excluded.parts_expense,
+              payment_method = excluded.payment_method`,
+      args: [
+        body.id,
+        body.osNumber,
+        body.status,
+        body.date,
+        body.laborIncome ?? null,
+        body.partsIncome ?? null,
+        body.laborExpense ?? null,
+        body.partsExpense ?? null,
+        body.paymentMethod ?? null
+      ]
+    });
 
-    const { data, error } = await supabaseAdmin
-      .from('weekly_orders')
-      .upsert(dbPayload)
-      .select()
-      .single();
+    const res = await turso.execute({
+      sql: "SELECT * FROM weekly_orders WHERE id = ?",
+      args: [body.id]
+    });
+    const row = res.rows[0];
+    if (!row) throw new Error("Registro não encontrado após gravação");
 
-    if (error) throw error;
-
-    // Map back to camelCase for response
-    const mappedResponse = {
-      id: data.id,
-      osNumber: data.os_number,
-      status: data.status,
-      date: data.date,
-      laborIncome: Number(data.labor_income),
-      partsIncome: Number(data.parts_income),
-      laborExpense: Number(data.labor_expense),
-      partsExpense: Number(data.parts_expense),
-      paymentMethod: data.payment_method
-    };
-
-    return NextResponse.json(mappedResponse);
+    return NextResponse.json(mapRow(row));
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -80,12 +74,11 @@ export async function DELETE(req: Request) {
 
     if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });
 
-    const { error } = await supabaseAdmin
-      .from('weekly_orders')
-      .delete()
-      .eq('id', id);
+    await turso.execute({
+      sql: "DELETE FROM weekly_orders WHERE id = ?",
+      args: [id]
+    });
 
-    if (error) throw error;
     return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

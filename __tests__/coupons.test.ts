@@ -1,21 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { validateCoupon } from '../lib/coupons';
 
-// Mock supabaseAdmin
-const mockSelect = vi.fn();
-const mockIlike = vi.fn();
-const mockLimit = vi.fn();
+// Mock do cliente Turso
+const mockExecute = vi.fn();
 
-vi.mock('../lib/supabase-admin', () => ({
-  supabaseAdmin: {
-    from: vi.fn(() => ({
-      select: mockSelect.mockReturnValue({
-        ilike: mockIlike.mockReturnValue({
-          limit: mockLimit
-        })
-      })
-    }))
-  }
+vi.mock('../lib/turso', () => ({
+  turso: {
+    execute: (...args: unknown[]) => mockExecute(...args),
+  },
+  isTursoActive: () => true,
 }));
 
 describe('validateCoupon', () => {
@@ -30,7 +23,7 @@ describe('validateCoupon', () => {
   });
 
   it('should return invalid if coupon not found', async () => {
-    mockLimit.mockResolvedValue({ data: [], error: null });
+    mockExecute.mockResolvedValue({ rows: [] });
     
     const result = await validateCoupon('INVALID', 100, []);
     expect(result.valid).toBe(false);
@@ -38,15 +31,13 @@ describe('validateCoupon', () => {
   });
 
   it('should return invalid if coupon is inactive', async () => {
-    mockLimit.mockResolvedValue({ 
-      data: [{ 
+    mockExecute.mockResolvedValue({ rows: 
+      [{ 
         status: 'inactive', 
         code: 'TEST',
         discount_type: 'percentage',
         discount_value: 10
-      }], 
-      error: null 
-    });
+      }] });
     
     const result = await validateCoupon('TEST', 100, []);
     expect(result.valid).toBe(false);
@@ -57,16 +48,14 @@ describe('validateCoupon', () => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     
-    mockLimit.mockResolvedValue({ 
-      data: [{ 
+    mockExecute.mockResolvedValue({ rows: 
+      [{ 
         status: 'active', 
         code: 'EXPIRED',
         expiration_date: yesterday.toISOString(),
         discount_type: 'percentage',
         discount_value: 10
-      }], 
-      error: null 
-    });
+      }] });
     
     const result = await validateCoupon('EXPIRED', 100, []);
     expect(result.valid).toBe(false);
@@ -74,16 +63,14 @@ describe('validateCoupon', () => {
   });
 
   it('should validate percentage discount correctly', async () => {
-    mockLimit.mockResolvedValue({ 
-      data: [{ 
+    mockExecute.mockResolvedValue({ rows: 
+      [{ 
         status: 'active', 
         code: 'PERCENT',
         discount_type: 'percentage',
         discount_value: 10, // 10%
         id: '123'
-      }], 
-      error: null 
-    });
+      }] });
     
     const items = [{ id: '1', price: 100, quantity: 1 }];
     const result = await validateCoupon('PERCENT', 100, items);
@@ -93,16 +80,14 @@ describe('validateCoupon', () => {
   });
 
   it('should validate fixed discount correctly', async () => {
-    mockLimit.mockResolvedValue({ 
-      data: [{ 
+    mockExecute.mockResolvedValue({ rows: 
+      [{ 
         status: 'active', 
         code: 'FIXED',
         discount_type: 'fixed',
         discount_value: 20, // R$ 20
         id: '124'
-      }], 
-      error: null 
-    });
+      }] });
     
     const items = [{ id: '1', price: 100, quantity: 1 }];
     const result = await validateCoupon('FIXED', 100, items);
@@ -112,17 +97,15 @@ describe('validateCoupon', () => {
   });
 
   it('should apply product restrictions correctly', async () => {
-    mockLimit.mockResolvedValue({ 
-      data: [{ 
+    mockExecute.mockResolvedValue({ rows: 
+      [{ 
         status: 'active', 
         code: 'PRODUCT_ONLY',
         discount_type: 'fixed',
         discount_value: 50,
         applicable_products: ['prod-1'],
         id: '125'
-      }], 
-      error: null 
-    });
+      }] });
     
     const items = [
         { id: 'prod-1', price: 100, quantity: 1 },
@@ -138,17 +121,15 @@ describe('validateCoupon', () => {
   });
 
   it('should fail if no products match restriction', async () => {
-    mockLimit.mockResolvedValue({ 
-      data: [{ 
+    mockExecute.mockResolvedValue({ rows: 
+      [{ 
         status: 'active', 
         code: 'PRODUCT_ONLY',
         discount_type: 'fixed',
         discount_value: 50,
         applicable_products: ['prod-3'],
         id: '125'
-      }], 
-      error: null 
-    });
+      }] });
     
     const items = [
         { id: 'prod-1', price: 100, quantity: 1 },

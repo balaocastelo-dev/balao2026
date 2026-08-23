@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import { supabaseAdmin, hasAdmin } from '@/lib/supabase-admin';
+import { turso, isTursoActive } from '@/lib/turso';
 
 export async function GET(request: Request) {
   try {
-    if (!hasAdmin) {
+    if (!isTursoActive()) {
       return NextResponse.json(
-        { error: 'Supabase admin não configurado' },
+        { error: 'Banco de dados não configurado' },
         { status: 500 }
       );
     }
@@ -14,36 +14,28 @@ export async function GET(request: Request) {
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
 
-    let query = supabaseAdmin
-      .from('orders')
-      .select('id, customer_name, total, created_at, payment_method, origin')
-      .order('created_at', { ascending: false })
-      .limit(50); // Increased limit slightly
-
+    const where: string[] = [];
+    const args: string[] = [];
     if (startDate) {
-      query = query.gte('created_at', startDate);
+      where.push('created_at >= ?');
+      args.push(startDate);
     }
-
     if (endDate) {
-      // Add one day to include the end date fully if it's just a date string
-      // or assume it's a timestamp. If it's YYYY-MM-DD, we might want to set it to end of day.
-      // For simplicity, let's assume the client sends ISO strings or we handle it here.
-      // If client sends 2023-01-01, we probably want up to 2023-01-01 23:59:59.
-      // But usually >= start and <= end is enough if timestamps are passed correctly.
-      query = query.lte('created_at', endDate);
+      // Se for só a data (YYYY-MM-DD), incluir o dia inteiro
+      const end = /^\d{4}-\d{2}-\d{2}$/.test(endDate) ? `${endDate}T23:59:59.999Z` : endDate;
+      where.push('created_at <= ?');
+      args.push(end);
     }
 
-    const { data, error } = await query;
+    const sql = `SELECT id, customer_name, total, created_at, payment_method, origin
+                 FROM orders
+                 ${where.length ? `WHERE ${where.join(' AND ')}` : ''}
+                 ORDER BY created_at DESC
+                 LIMIT 50`;
 
-    if (error) {
-      console.error('Erro ao buscar pedidos recentes:', error);
-      return NextResponse.json(
-        { error: 'Erro ao buscar pedidos' },
-        { status: 500 }
-      );
-    }
+    const res = await turso.execute({ sql, args });
 
-    return NextResponse.json(data || []);
+    return NextResponse.json(res.rows);
   } catch (error) {
     console.error('Erro inesperado:', error);
     return NextResponse.json(

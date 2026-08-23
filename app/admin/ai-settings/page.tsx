@@ -85,10 +85,10 @@ export default function AISettingsPage() {
             detail={config.provider === 'serverless' ? "Vercel Python (Serverless)" : "Ollama Local (qwen2.5)"}
         />
         <StatusCard 
-            title="Supabase (Busca)" 
+            title="Banco de Dados (Turso)" 
             status={status.supabase} 
             icon={<Activity className="text-green-500" />} 
-            detail="Busca Semântica Habilitada"
+            detail="Busca de produtos habilitada"
         />
       </div>
 

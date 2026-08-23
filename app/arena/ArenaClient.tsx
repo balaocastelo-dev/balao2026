@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Vendedor, ArenaConfig, EventoMidia, Venda } from './types';
-import { supabase } from '@/utils/supabase';
+import { getVendedores, getConfig, getEventosMidia } from './actions';
 import { Trophy, Flag, Zap, Target, AlertCircle, RefreshCw, X, Clock, DollarSign, Flame } from 'lucide-react';
 
 // Cores e Temas para os Corredores
@@ -72,7 +72,6 @@ export default function ArenaClient({
     console.log('Config Inicial:', configInicial);
     console.log('Eventos Iniciais:', eventosIniciais);
     console.log('Vendas Recentes Iniciais:', vendasRecentesIniciais);
-    console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Definido' : 'Indefinido');
   }, [vendedoresIniciais, configInicial, eventosIniciais, vendasRecentesIniciais]);
 
   // Sincroniza estado com props (revalidatePath)
@@ -343,123 +342,51 @@ export default function ArenaClient({
     return { sortedVendedores: sorted, totalVendas, totalMeta, progressoGeral };
   }, [vendedores]);
 
-  // Polling de Fallback e Atualização de Segurança (a cada 5s)
+  // Polling via server actions (Turso) — atualiza a cada 5s
   useEffect(() => {
     const fetchDados = async () => {
-      // Se a conexão estiver saudável, evitamos polling excessivo (opcional, mas seguro manter)
-      // if (connectionStatus === 'SUBSCRIBED') return;
+      try {
+        const [novosVendedores, novaConfig, novosEventos] = await Promise.all([
+          getVendedores(),
+          getConfig(),
+          getEventosMidia(),
+        ]);
+        setConnectionStatus('SUBSCRIBED');
+        setLastUpdate(new Date().toLocaleTimeString());
 
-      const { data: novosVendedores } = await supabase.from('arena_vendedores').select('*');
-      
-      if (novosVendedores) {
-        setVendedores(prevVendedores => {
-          let mudou = false;
-          
-          // Verifica mudanças e dispara eventos se necessário (fallback do realtime)
-          novosVendedores.forEach((novo: any) => {
-            const antigo = prevVendedores.find(v => v.id === novo.id);
-            if (antigo && JSON.stringify(antigo) !== JSON.stringify(novo)) {
-              mudou = true;
-              // Só dispara eventos se a diferença de vendas for positiva
-              if (novo.vendas_atual > antigo.vendas_atual) {
-                 processarEventos(novo);
+        if (novosVendedores) {
+          setVendedores(prevVendedores => {
+            let mudou = false;
+
+            // Verifica mudanças e dispara eventos se necessário
+            novosVendedores.forEach((novo: any) => {
+              const antigo = prevVendedores.find(v => v.id === novo.id);
+              if (antigo && JSON.stringify(antigo) !== JSON.stringify(novo)) {
+                mudou = true;
+                // Só dispara eventos se a diferença de vendas for positiva
+                if (novo.vendas_atual > antigo.vendas_atual) {
+                  processarEventos(novo);
+                }
               }
-            }
+            });
+
+            if (mudou) return novosVendedores as Vendedor[];
+            return prevVendedores;
           });
+        }
 
-          if (mudou) return novosVendedores as Vendedor[];
-          return prevVendedores;
-        });
+        if (novaConfig) setConfig(novaConfig as ArenaConfig);
+        if (novosEventos) setEventosConfig(novosEventos as EventoMidia[]);
+      } catch (err) {
+        console.error('[arena] Erro no polling:', err);
       }
-
-      const { data: novaConfig } = await supabase.from('arena_config').select('*').single();
-      if (novaConfig) setConfig(novaConfig as ArenaConfig);
-
-      const { data: novosEventos } = await supabase.from('arena_eventos_midia').select('*');
-      if (novosEventos) setEventosConfig(novosEventos as EventoMidia[]);
     };
 
     const interval = setInterval(fetchDados, 5000); // 5 segundos
     fetchDados(); // Busca imediata
 
     return () => clearInterval(interval);
-  }, [connectionStatus]); // Recria se o status mudar
-
-  // Realtime Subscription
-  useEffect(() => {
-    console.log('Iniciando conexão Realtime...');
-    const channel = supabase
-      .channel('arena-changes')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'arena_vendedores' },
-        (payload) => {
-          console.log('⚡ Realtime Event (Vendedores):', payload);
-          setLastUpdate(new Date().toLocaleTimeString());
-          
-          if (payload.eventType === 'INSERT') {
-            setVendedores(prev => {
-                const exists = prev.some(v => v.id === payload.new.id);
-                if (exists) return prev;
-                return [...prev, payload.new as Vendedor];
-            });
-          } else if (payload.eventType === 'UPDATE') {
-            const novoVendedor = payload.new as Vendedor;
-            // Detecta eventos ANTES de atualizar o estado
-            processarEventos(novoVendedor);
-            
-            setVendedores(prev => prev.map(v => v.id === novoVendedor.id ? novoVendedor : v));
-          } else if (payload.eventType === 'DELETE') {
-            setVendedores(prev => prev.filter(v => v.id !== payload.old.id));
-          }
-        }
-      )
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'arena_config' },
-        (payload) => {
-          console.log('⚡ Realtime Event (Config):', payload);
-          if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
-            setConfig(payload.new as ArenaConfig);
-          }
-        }
-      )
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'arena_eventos_midia' },
-        (payload) => {
-            console.log('⚡ Realtime Event (Eventos Midia):', payload);
-            if (payload.eventType === 'INSERT') {
-                setEventosConfig(prev => [...prev, payload.new as EventoMidia]);
-            } else if (payload.eventType === 'UPDATE') {
-                setEventosConfig(prev => prev.map(e => e.id === payload.new.id ? payload.new as EventoMidia : e));
-            } else if (payload.eventType === 'DELETE') {
-                setEventosConfig(prev => prev.filter(e => e.id !== payload.old.id));
-            }
-        }
-      )
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'arena_vendas' },
-        (payload) => {
-            console.log('⚡ Realtime Event (Vendas):', payload);
-            const novaVenda = payload.new as Venda;
-            // Encontrar vendedor para preencher dados visuais
-            const vendedor = vendedoresRef.current.find(v => v.id === novaVenda.vendedor_id);
-            const vendaCompleta = { ...novaVenda, vendedor };
-            setVendasRecentes(prev => [vendaCompleta, ...prev].slice(0, 50));
-        }
-      )
-      .subscribe((status) => {
-        console.log('Status da Conexão:', status);
-        setConnectionStatus(status);
-      });
-
-    return () => {
-      console.log('Limpando canais...');
-      supabase.removeChannel(channel);
-    };
-  }, []); // Dependências vazias pois usamos refs para acessar estados atualizados
+  }, []);
 
   const handleCloseEvento = useCallback(() => {
     setEventoAtual(null);

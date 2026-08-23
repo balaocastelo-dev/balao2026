@@ -1,4 +1,3 @@
-import { supabaseAdmin } from './supabase-admin';
 import { turso, isTursoActive } from './turso';
 
 const hasTurso = isTursoActive();
@@ -35,7 +34,7 @@ export async function validateCoupon(code: string, cartTotal: number, items: any
 
   let coupon: any = null;
 
-  if (hasTurso) {
+  if (isTursoActive()) {
     try {
       const res = await turso.execute({
         sql: 'SELECT * FROM coupons WHERE LOWER(code) = LOWER(?) LIMIT 1',
@@ -58,24 +57,7 @@ export async function validateCoupon(code: string, cartTotal: number, items: any
         };
       }
     } catch (e) {
-      console.warn("[coupons] Turso validateCoupon failed, falling back Supabase:", (e as any).message);
-    }
-  }
-
-  if (!coupon) {
-    try {
-      const { data: coupons, error } = await supabaseAdmin
-        .from('coupons')
-        .select('*')
-        .ilike('code', code)
-        .limit(1);
-
-      if (error || !coupons || coupons.length === 0) {
-        return { valid: false, message: "Cupom não encontrado." };
-      }
-      coupon = coupons[0];
-    } catch (e) {
-      return { valid: false, message: "Cupom não encontrado." };
+      console.warn("[coupons] Turso validateCoupon failed:", (e as any).message);
     }
   }
 

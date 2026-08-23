@@ -4,13 +4,9 @@ import { POST } from '@/app/api/admin/enrich-product/route';
 import { NextResponse } from 'next/server';
 
 // Mocks
-vi.mock('@/lib/supabase-admin', () => ({
-  supabaseAdmin: {
-    from: vi.fn(() => ({
-      update: vi.fn(() => ({ eq: vi.fn(() => ({ error: null })) })),
-      insert: vi.fn(() => ({ error: null }))
-    }))
-  }
+vi.mock('@/lib/turso', () => ({
+  turso: { execute: vi.fn().mockResolvedValue({ rows: [] }) },
+  isTursoActive: () => true,
 }));
 
 vi.mock('@/lib/ai-service', () => ({

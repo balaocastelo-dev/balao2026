@@ -1,29 +1,21 @@
 import { NextResponse } from 'next/server';
-import { supabaseAdmin, hasAdmin } from '@/lib/supabase-admin';
+import { randomUUID } from 'crypto';
+import { turso, isTursoActive } from '@/lib/turso';
 
 export async function GET() {
   try {
-    if (!hasAdmin) {
+    if (!isTursoActive()) {
       return NextResponse.json(
-        { error: 'Supabase admin não configurado' },
+        { error: 'Banco de dados não configurado' },
         { status: 500 }
       );
     }
 
-    const { data, error } = await supabaseAdmin
-      .from('arena_vendedores')
-      .select('id, nome, avatar_url, veiculo_emoji')
-      .order('nome');
+    const res = await turso.execute(
+      'SELECT id, nome, avatar_url, veiculo_emoji FROM arena_vendedores ORDER BY nome ASC'
+    );
 
-    if (error) {
-      console.error('Erro ao buscar vendedores:', error);
-      return NextResponse.json(
-        { error: 'Erro ao buscar vendedores' },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json(data || []);
+    return NextResponse.json(res.rows);
   } catch (error) {
     console.error('Erro inesperado:', error);
     return NextResponse.json(
@@ -35,9 +27,9 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    if (!hasAdmin) {
+    if (!isTursoActive()) {
       return NextResponse.json(
-        { error: 'Supabase admin não configurado' },
+        { error: 'Banco de dados não configurado' },
         { status: 500 }
       );
     }
@@ -54,27 +46,19 @@ export async function POST(request: Request) {
       );
     }
 
-    const { data, error } = await supabaseAdmin
-      .from('arena_vendedores')
-      .insert({
-        nome,
-        avatar_url,
-        veiculo_emoji,
-        meta_valor: 0,
-        vendas_atual: 0,
-      })
-      .select('id, nome, avatar_url, veiculo_emoji')
-      .single();
+    const id = randomUUID();
+    await turso.execute({
+      sql: `INSERT INTO arena_vendedores (id, nome, avatar_url, veiculo_emoji, meta_valor, vendas_atual)
+            VALUES (?, ?, ?, ?, 0, 0)`,
+      args: [id, nome, avatar_url, veiculo_emoji],
+    });
 
-    if (error) {
-      console.error('Erro ao criar vendedor:', error);
-      return NextResponse.json(
-        { error: 'Erro ao criar vendedor' },
-        { status: 500 }
-      );
-    }
+    const res = await turso.execute({
+      sql: 'SELECT id, nome, avatar_url, veiculo_emoji FROM arena_vendedores WHERE id = ?',
+      args: [id],
+    });
 
-    return NextResponse.json(data, { status: 201 });
+    return NextResponse.json(res.rows[0], { status: 201 });
   } catch (error) {
     console.error('Erro inesperado ao criar vendedor:', error);
     return NextResponse.json(

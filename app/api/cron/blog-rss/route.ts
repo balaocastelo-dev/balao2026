@@ -4,7 +4,7 @@ import { fetchRssItems, shouldSkipRssItemForBlog, type RssItem } from "@/lib/rss
 import { slugify } from "@/lib/blog-utils";
 import { generateBlogPostFromRss } from "@/lib/blog-ai";
 import { hasBlogSourceItem, insertBlogPost, insertBlogSourceItem } from "@/lib/db";
-import { hasAdmin } from "@/lib/supabase-admin";
+import { isTursoActive } from "@/lib/turso";
 
 function isAuthorized(req: Request): boolean {
   const vercelCron = req.headers.get("x-vercel-cron");
@@ -208,7 +208,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (!hasAdmin) {
+    if (!isTursoActive()) {
       return NextResponse.json({
         ok: true,
         inserted: 0,

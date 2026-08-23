@@ -1,4 +1,3 @@
-import { hasAdmin, supabaseAdmin } from "@/lib/supabase-admin";
 import { turso, isTursoActive } from "@/lib/turso";
 
 import type {
@@ -9,10 +8,8 @@ import type {
   ControleWithdrawalRecord,
 } from "@/lib/controle/types";
 
-const hasTurso = isTursoActive();
-
 function isOperational(): boolean {
-  return Boolean(hasTurso || hasAdmin);
+  return isTursoActive();
 }
 
 function genId(): string {
@@ -36,23 +33,6 @@ const PART_COLUMNS = `
   withdrawn_sale_price,
   withdrawn_technician_name,
   withdrawn_authorization_code
-`;
-
-const WITHDRAWAL_COLUMNS = `
-  id,
-  created_at,
-  part_id,
-  customer_name,
-  os_number,
-  sale_price,
-  technician_name,
-  authorization_code,
-  approved_password_code,
-  part_snapshot_name,
-  part_snapshot_serial,
-  part_snapshot_type,
-  part_snapshot_photo_url,
-  purchase_order_reference
 `;
 
 function mapPartRow(r: any): ControlePart {
@@ -98,36 +78,15 @@ function mapWithdrawalRow(r: any): ControleWithdrawalRecord {
 export async function listPublicControleParts(): Promise<ControlePart[]> {
   if (!isOperational()) return [];
 
-  if (hasTurso) {
-    try {
-      const res = await turso.execute(`
-        SELECT ${PART_COLUMNS} FROM controle_parts
-        WHERE status = 'disponivel'
-        ORDER BY type ASC, full_name ASC
-      `);
-      return res.rows.map(mapPartRow);
-    } catch (e) {
-      console.warn('[controle:listPublicControleParts] Turso error:', (e as any).message);
-    }
-  }
-
   try {
-    if (!hasAdmin) return [];
-    const { data, error } = await supabaseAdmin
-      .from("controle_parts")
-      .select(PART_COLUMNS)
-      .eq("status", "disponivel")
-      .order("type", { ascending: true })
-      .order("full_name", { ascending: true });
-
-    if (error) {
-      console.error("Erro ao listar pecas publicas (Supabase):", error);
-      return [];
-    }
-
-    return ((data ?? []) as any[]).map(mapPartRow);
+    const res = await turso.execute(`
+      SELECT ${PART_COLUMNS} FROM controle_parts
+      WHERE status = 'disponivel'
+      ORDER BY type ASC, full_name ASC
+    `);
+    return res.rows.map(mapPartRow);
   } catch (e) {
-    console.error("Erro ao listar pecas publicas (fallback):", (e as any).message);
+    console.error('[controle:listPublicControleParts] Erro:', (e as any).message);
     return [];
   }
 }
@@ -135,33 +94,14 @@ export async function listPublicControleParts(): Promise<ControlePart[]> {
 export async function listAdminControleParts(): Promise<ControlePart[]> {
   if (!isOperational()) return [];
 
-  if (hasTurso) {
-    try {
-      const res = await turso.execute(`
-        SELECT ${PART_COLUMNS} FROM controle_parts
-        ORDER BY created_at DESC
-      `);
-      return res.rows.map(mapPartRow);
-    } catch (e) {
-      console.warn('[controle:listAdminControleParts] Turso error:', (e as any).message);
-    }
-  }
-
   try {
-    if (!hasAdmin) return [];
-    const { data, error } = await supabaseAdmin
-      .from("controle_parts")
-      .select(PART_COLUMNS)
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("Erro ao listar pecas admin (Supabase):", error.message);
-      return [];
-    }
-
-    return ((data ?? []) as any[]).map(mapPartRow);
+    const res = await turso.execute(`
+      SELECT ${PART_COLUMNS} FROM controle_parts
+      ORDER BY created_at DESC
+    `);
+    return res.rows.map(mapPartRow);
   } catch (e) {
-    console.error("Erro ao listar pecas admin (fallback):", (e as any).message);
+    console.error('[controle:listAdminControleParts] Erro:', (e as any).message);
     return [];
   }
 }
@@ -172,9 +112,8 @@ export async function createControlePart(payload: ControlePartInput): Promise<Co
   }
 
   const now = new Date().toISOString();
-  const id = genId();
   const row = {
-    id,
+    id: genId(),
     created_at: now,
     updated_at: now,
     type: payload.type,
@@ -186,43 +125,14 @@ export async function createControlePart(payload: ControlePartInput): Promise<Co
     notes: payload.notes?.trim() || null,
   };
 
-  if (hasTurso) {
-    try {
-      await turso.execute({
-        sql: `INSERT INTO controle_parts
-             (id, created_at, updated_at, type, status, full_name, serial_number, purchase_order_reference, photo_url, notes)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        args: [row.id, row.created_at, row.updated_at, row.type, row.status, row.full_name, row.serial_number, row.purchase_order_reference, row.photo_url, row.notes],
-      });
-      return mapPartRow(row);
-    } catch (e) {
-      console.warn('[controle:createControlePart] Turso failed, fallback Supabase:', (e as any).message);
-    }
-  }
-
   try {
-    if (!hasAdmin) throw new Error("Sem backend disponível.");
-    const { data, error } = await supabaseAdmin
-      .from("controle_parts")
-      .insert({
-        type: payload.type,
-        full_name: payload.fullName.trim(),
-        serial_number: payload.serialNumber.trim(),
-        purchase_order_reference: payload.purchaseOrderReference.trim(),
-        photo_url: payload.photoUrl.trim(),
-        notes: payload.notes?.trim() || null,
-        status: "disponivel",
-        created_at: now,
-        updated_at: now,
-      })
-      .select(PART_COLUMNS)
-      .single();
-
-    if (error || !data) {
-      throw new Error(`Erro ao cadastrar peca: ${error?.message ?? "desconhecido"}`);
-    }
-
-    return mapPartRow(data);
+    await turso.execute({
+      sql: `INSERT INTO controle_parts
+           (id, created_at, updated_at, type, status, full_name, serial_number, purchase_order_reference, photo_url, notes)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      args: [row.id, row.created_at, row.updated_at, row.type, row.status, row.full_name, row.serial_number, row.purchase_order_reference, row.photo_url, row.notes],
+    });
+    return mapPartRow(row);
   } catch (e) {
     throw new Error(`Nao foi possivel cadastrar a peca: ${(e as any).message ?? "erro desconhecido"}`);
   }
@@ -239,165 +149,86 @@ export async function createControleWithdrawal(
   const withdrawnAt = new Date().toISOString();
   const withdrawalId = genId();
 
-  if (hasTurso) {
-    try {
-      const partRes = await turso.execute({
-        sql: `SELECT ${PART_COLUMNS} FROM controle_parts WHERE id = ? LIMIT 1`,
-        args: [payload.partId],
-      });
-      if (partRes.rows.length === 0) throw new Error("Peca nao encontrada.");
-      const typedPart = mapPartRow(partRes.rows[0]);
-
-      if (typedPart.status !== "disponivel") {
-        throw new Error("Essa peca nao esta mais disponivel para retirada.");
-      }
-
-      const withdrawalRow = {
-        id: withdrawalId,
-        created_at: withdrawnAt,
-        part_id: typedPart.id,
-        customer_name: payload.customerName.trim(),
-        os_number: payload.osNumber.trim(),
-        sale_price: Number(payload.salePrice || 0),
-        technician_name: payload.technicianName.trim(),
-        authorization_code: payload.authorizationCode.trim(),
-        approved_password_code: approvedPasswordCode,
-        part_snapshot_name: typedPart.full_name,
-        part_snapshot_serial: typedPart.serial_number,
-        part_snapshot_type: typedPart.type,
-        part_snapshot_photo_url: typedPart.photo_url || null,
-        purchase_order_reference: typedPart.purchase_order_reference || null,
-      };
-
-      await turso.execute({
-        sql: `INSERT INTO controle_part_withdrawals
-             (id, created_at, part_id, customer_name, os_number, sale_price, technician_name, authorization_code, approved_password_code, part_snapshot_name, part_snapshot_serial, part_snapshot_type, part_snapshot_photo_url, purchase_order_reference)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        args: [
-          withdrawalRow.id, withdrawalRow.created_at, withdrawalRow.part_id,
-          withdrawalRow.customer_name, withdrawalRow.os_number, withdrawalRow.sale_price,
-          withdrawalRow.technician_name, withdrawalRow.authorization_code,
-          withdrawalRow.approved_password_code, withdrawalRow.part_snapshot_name,
-          withdrawalRow.part_snapshot_serial, withdrawalRow.part_snapshot_type,
-          withdrawalRow.part_snapshot_photo_url, withdrawalRow.purchase_order_reference,
-        ],
-      });
-
-      const updateRes = await turso.execute({
-        sql: `UPDATE controle_parts SET
-             status = 'retirada',
-             updated_at = ?,
-             withdrawn_at = ?,
-             withdrawn_customer_name = ?,
-             withdrawn_os_number = ?,
-             withdrawn_sale_price = ?,
-             withdrawn_technician_name = ?,
-             withdrawn_authorization_code = ?
-             WHERE id = ? AND status = 'disponivel'`,
-        args: [
-          withdrawnAt, withdrawnAt, payload.customerName.trim(), payload.osNumber.trim(),
-          Number(payload.salePrice || 0), payload.technicianName.trim(),
-          payload.authorizationCode.trim(), typedPart.id,
-        ],
-      });
-
-      if ((updateRes as any).rowsAffected === 0) {
-        await turso.execute({
-          sql: 'DELETE FROM controle_part_withdrawals WHERE id = ?',
-          args: [withdrawalId],
-        });
-        throw new Error("Nao foi possivel atualizar o estoque da peca.");
-      }
-
-      const updatedPartRes = await turso.execute({
-        sql: `SELECT ${PART_COLUMNS} FROM controle_parts WHERE id = ? LIMIT 1`,
-        args: [typedPart.id],
-      });
-      const updatedPart = updatedPartRes.rows.length > 0
-        ? mapPartRow(updatedPartRes.rows[0])
-        : typedPart;
-
-      return {
-        withdrawal: mapWithdrawalRow(withdrawalRow),
-        part: updatedPart,
-      };
-    } catch (e) {
-      if ((e as any).message && (e as any).message.includes("Turso")) {
-        // já logado, tenta fallback Supabase abaixo
-      } else {
-        throw e;
-      }
-      console.warn('[controle:createControleWithdrawal] Turso error, trying Supabase:', (e as any).message);
-    }
-  }
-
   try {
-    if (!hasAdmin) throw new Error("Sem backend disponível.");
-
-    const { data: part, error: partError } = await supabaseAdmin
-      .from("controle_parts")
-      .select(PART_COLUMNS)
-      .eq("id", payload.partId)
-      .single();
-
-    if (partError || !part) {
-      throw new Error("Peca nao encontrada.");
-    }
-
-    const typedPart = mapPartRow(part);
+    const partRes = await turso.execute({
+      sql: `SELECT ${PART_COLUMNS} FROM controle_parts WHERE id = ? LIMIT 1`,
+      args: [payload.partId],
+    });
+    if (partRes.rows.length === 0) throw new Error("Peca nao encontrada.");
+    const typedPart = mapPartRow(partRes.rows[0]);
 
     if (typedPart.status !== "disponivel") {
       throw new Error("Essa peca nao esta mais disponivel para retirada.");
     }
 
-    const { data: withdrawal, error: withdrawalError } = await supabaseAdmin
-      .from("controle_part_withdrawals")
-      .insert({
-        part_id: typedPart.id,
-        customer_name: payload.customerName.trim(),
-        os_number: payload.osNumber.trim(),
-        sale_price: payload.salePrice,
-        technician_name: payload.technicianName.trim(),
-        authorization_code: payload.authorizationCode.trim(),
-        approved_password_code: approvedPasswordCode,
-        part_snapshot_name: typedPart.full_name,
-        part_snapshot_serial: typedPart.serial_number,
-        part_snapshot_type: typedPart.type,
-        part_snapshot_photo_url: typedPart.photo_url || null,
-        purchase_order_reference: typedPart.purchase_order_reference || null,
-      })
-      .select(WITHDRAWAL_COLUMNS)
-      .single();
+    const withdrawalRow = {
+      id: withdrawalId,
+      created_at: withdrawnAt,
+      part_id: typedPart.id,
+      customer_name: payload.customerName.trim(),
+      os_number: payload.osNumber.trim(),
+      sale_price: Number(payload.salePrice || 0),
+      technician_name: payload.technicianName.trim(),
+      authorization_code: payload.authorizationCode.trim(),
+      approved_password_code: approvedPasswordCode,
+      part_snapshot_name: typedPart.full_name,
+      part_snapshot_serial: typedPart.serial_number,
+      part_snapshot_type: typedPart.type,
+      part_snapshot_photo_url: typedPart.photo_url || null,
+      purchase_order_reference: typedPart.purchase_order_reference || null,
+    };
 
-    if (withdrawalError || !withdrawal) {
-      throw new Error(`Nao foi possivel registrar a retirada: ${withdrawalError?.message ?? "erro desconhecido"}`);
-    }
+    await turso.execute({
+      sql: `INSERT INTO controle_part_withdrawals
+           (id, created_at, part_id, customer_name, os_number, sale_price, technician_name, authorization_code, approved_password_code, part_snapshot_name, part_snapshot_serial, part_snapshot_type, part_snapshot_photo_url, purchase_order_reference)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      args: [
+        withdrawalRow.id, withdrawalRow.created_at, withdrawalRow.part_id,
+        withdrawalRow.customer_name, withdrawalRow.os_number, withdrawalRow.sale_price,
+        withdrawalRow.technician_name, withdrawalRow.authorization_code,
+        withdrawalRow.approved_password_code, withdrawalRow.part_snapshot_name,
+        withdrawalRow.part_snapshot_serial, withdrawalRow.part_snapshot_type,
+        withdrawalRow.part_snapshot_photo_url, withdrawalRow.purchase_order_reference,
+      ],
+    });
 
-    const { data: updatedPart, error: updateError } = await supabaseAdmin
-      .from("controle_parts")
-      .update({
-        status: "retirada",
-        updated_at: withdrawnAt,
-        withdrawn_at: withdrawnAt,
-        withdrawn_customer_name: payload.customerName.trim(),
-        withdrawn_os_number: payload.osNumber.trim(),
-        withdrawn_sale_price: payload.salePrice,
-        withdrawn_technician_name: payload.technicianName.trim(),
-        withdrawn_authorization_code: payload.authorizationCode.trim(),
-      })
-      .eq("id", typedPart.id)
-      .eq("status", "disponivel")
-      .select(PART_COLUMNS)
-      .single();
+    const updateRes = await turso.execute({
+      sql: `UPDATE controle_parts SET
+           status = 'retirada',
+           updated_at = ?,
+           withdrawn_at = ?,
+           withdrawn_customer_name = ?,
+           withdrawn_os_number = ?,
+           withdrawn_sale_price = ?,
+           withdrawn_technician_name = ?,
+           withdrawn_authorization_code = ?
+           WHERE id = ? AND status = 'disponivel'`,
+      args: [
+        withdrawnAt, withdrawnAt, payload.customerName.trim(), payload.osNumber.trim(),
+        Number(payload.salePrice || 0), payload.technicianName.trim(),
+        payload.authorizationCode.trim(), typedPart.id,
+      ],
+    });
 
-    if (updateError || !updatedPart) {
-      await supabaseAdmin.from("controle_part_withdrawals").delete().eq("id", (withdrawal as any).id);
+    if ((updateRes as any).rowsAffected === 0) {
+      await turso.execute({
+        sql: 'DELETE FROM controle_part_withdrawals WHERE id = ?',
+        args: [withdrawalId],
+      });
       throw new Error("Nao foi possivel atualizar o estoque da peca.");
     }
 
+    const updatedPartRes = await turso.execute({
+      sql: `SELECT ${PART_COLUMNS} FROM controle_parts WHERE id = ? LIMIT 1`,
+      args: [typedPart.id],
+    });
+    const updatedPart = updatedPartRes.rows.length > 0
+      ? mapPartRow(updatedPartRes.rows[0])
+      : typedPart;
+
     return {
-      withdrawal: mapWithdrawalRow(withdrawal),
-      part: mapPartRow(updatedPart),
+      withdrawal: mapWithdrawalRow(withdrawalRow),
+      part: updatedPart,
     };
   } catch (e) {
     throw new Error(`Nao foi possivel registrar a retirada: ${(e as any).message ?? "erro desconhecido"}`);

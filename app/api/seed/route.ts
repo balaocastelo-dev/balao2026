@@ -1,22 +1,6 @@
-import { createClient } from "@supabase/supabase-js";
+﻿import { randomUUID } from "crypto";
+import { turso } from "@/lib/turso";
 import { NextResponse } from "next/server";
-
-// We need to use a service role key to bypass RLS for seeding if user is not authenticated,
-// but for safety we will rely on standard client and assume user is logged in or table is public writable (which it isn't).
-// Actually, for a seed route, we should protect it or check if table is empty.
-// Since we don't have the service key in env explicitly in the code (it's in .env.local usually as SUPABASE_SERVICE_ROLE_KEY),
-// we will try to use the standard client. If RLS blocks it, the user needs to be logged in as admin.
-
-// However, for "fixing" the issue where the user hasn't run the SQL, the best way is to run these inserts.
-// If RLS is enabled and policies are strict, this might fail without a logged in user.
-// But the SQL script creates policies allowing authenticated users to manage.
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co";
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder_key";
-// Use service role key if available for seeding to bypass RLS
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseKey;
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 type CategorySeed = {
   name: string;
@@ -32,9 +16,9 @@ const SEED_DATA: CategorySeed[] = [
     icon: "Monitor",
     children: [
       { name: "PC Gamer", slug: "pc-gamer", icon: "Gamepad2" },
-      { name: "PC Corporativo / Escritório", slug: "pc-corporativo", icon: "Briefcase" },
+      { name: "PC Corporativo / EscritÃ³rio", slug: "pc-corporativo", icon: "Briefcase" },
       { name: "Workstation", slug: "workstation", icon: "Server" },
-      { name: "All‑in‑One", slug: "all-in-one", icon: "Monitor" },
+      { name: "Allâ€‘inâ€‘One", slug: "all-in-one", icon: "Monitor" },
       { name: "Mini PC", slug: "mini-pc", icon: "Box" }
     ]
   },
@@ -56,11 +40,11 @@ const SEED_DATA: CategorySeed[] = [
     icon: "Cpu",
     children: [
       { name: "Processadores (CPU)", slug: "processadores", icon: "Cpu" },
-      { name: "Placas de Vídeo (GPU)", slug: "placas-de-video", icon: "Aperture" },
-      { name: "Placas‑Mãe", slug: "placas-mae", icon: "CircuitBoard" },
-      { name: "Memória RAM", slug: "memoria-ram", icon: "MemoryStick" },
+      { name: "Placas de VÃ­deo (GPU)", slug: "placas-de-video", icon: "Aperture" },
+      { name: "Placasâ€‘MÃ£e", slug: "placas-mae", icon: "CircuitBoard" },
+      { name: "MemÃ³ria RAM", slug: "memoria-ram", icon: "MemoryStick" },
       { name: "SSD / HD / NVMe", slug: "ssd-hd-nvme", icon: "HardDrive" },
-      { name: "Fontes de Alimentação", slug: "fontes-alimentacao", icon: "Zap" },
+      { name: "Fontes de AlimentaÃ§Ã£o", slug: "fontes-alimentacao", icon: "Zap" },
       { name: "Gabinetes", slug: "gabinetes", icon: "Box" },
       { name: "Coolers e Water Cooler", slug: "coolers", icon: "Fan" },
       { name: "Placas de Rede / Som", slug: "placas-rede-som", icon: "Network" }
@@ -74,7 +58,7 @@ const SEED_DATA: CategorySeed[] = [
       { name: "Smartphones Android", slug: "smartphones-android", icon: "Smartphone" },
       { name: "iPhone", slug: "iphone-smartphones", icon: "Smartphone" },
       { name: "Smartphones Gamer", slug: "smartphones-gamer", icon: "Gamepad2" },
-      { name: "Capas e Películas", slug: "capas-peliculas", icon: "Shield" },
+      { name: "Capas e PelÃ­culas", slug: "capas-peliculas", icon: "Shield" },
       { name: "Carregadores e Cabos", slug: "carregadores-cabos-smartphones", icon: "Zap" },
       { name: "Suportes e Power Banks", slug: "suportes-power-banks", icon: "Battery" }
     ]
@@ -93,11 +77,11 @@ const SEED_DATA: CategorySeed[] = [
     ]
   },
   {
-    name: "Periféricos",
+    name: "PerifÃ©ricos",
     slug: "perifericos",
     icon: "Keyboard",
     children: [
-      { name: "Teclados Gamer e Mecânicos", slug: "teclados-gamer-mecanicos", icon: "Keyboard" },
+      { name: "Teclados Gamer e MecÃ¢nicos", slug: "teclados-gamer-mecanicos", icon: "Keyboard" },
       { name: "Mouses Gamer", slug: "mouses-gamer", icon: "Mouse" },
       { name: "Headsets e Fones", slug: "headsets-fones", icon: "Headphones" },
       { name: "Mousepads", slug: "mousepads", icon: "Square" },
@@ -108,46 +92,46 @@ const SEED_DATA: CategorySeed[] = [
     ]
   },
   {
-    name: "Acessórios",
+    name: "AcessÃ³rios",
     slug: "acessorios",
     icon: "Plug",
     children: [
-      { name: "Cabos (HDMI, DisplayPort, USB, Áudio)", slug: "cabos-diversos", icon: "Cable" },
+      { name: "Cabos (HDMI, DisplayPort, USB, Ãudio)", slug: "cabos-diversos", icon: "Cable" },
       { name: "Adaptadores e Conversores", slug: "adaptadores-conversores", icon: "RefreshCcw" },
       { name: "Hubs USB", slug: "hubs-usb", icon: "Usb" },
       { name: "Bases para Notebook", slug: "bases-notebook", icon: "Laptop" },
       { name: "Suportes para Headset", slug: "suportes-headset", icon: "Headphones" },
       { name: "Mochilas e Cases", slug: "mochilas-cases", icon: "Backpack" },
-      { name: "Iluminação RGB", slug: "iluminacao-rgb", icon: "Lightbulb" },
+      { name: "IluminaÃ§Ã£o RGB", slug: "iluminacao-rgb", icon: "Lightbulb" },
       { name: "Filtros de Linha e Estabilizadores", slug: "filtros-estabilizadores", icon: "Zap" }
     ]
   },
   {
-    name: "Segurança",
+    name: "SeguranÃ§a",
     slug: "seguranca",
     icon: "Lock",
     children: [
-      { name: "Câmeras de Segurança (IP / Wi‑Fi)", slug: "cameras-seguranca", icon: "Video" },
+      { name: "CÃ¢meras de SeguranÃ§a (IP / Wiâ€‘Fi)", slug: "cameras-seguranca", icon: "Video" },
       { name: "Kits CFTV", slug: "kits-cftv", icon: "Video" },
       { name: "DVR e NVR", slug: "dvr-nvr", icon: "HardDrive" },
       { name: "Alarmes Residenciais", slug: "alarmes-residenciais", icon: "Bell" },
       { name: "Sensores de Movimento", slug: "sensores-movimento", icon: "Radio" },
-      { name: "Fechaduras Eletrônicas", slug: "fechaduras-eletronicas", icon: "Lock" },
-      { name: "Vídeo Porteiros", slug: "video-porteiros", icon: "Video" }
+      { name: "Fechaduras EletrÃ´nicas", slug: "fechaduras-eletronicas", icon: "Lock" },
+      { name: "VÃ­deo Porteiros", slug: "video-porteiros", icon: "Video" }
     ]
   },
   {
-    name: "Automação",
+    name: "AutomaÃ§Ã£o",
     slug: "automacao",
     icon: "Home",
     children: [
       { name: "Casa Inteligente", slug: "casa-inteligente", icon: "Home" },
       { name: "Tomadas Inteligentes", slug: "tomadas-inteligentes", icon: "Power" },
       { name: "Interruptores Inteligentes", slug: "interruptores-inteligentes", icon: "ToggleLeft" },
-      { name: "Lâmpadas e Fitas LED Smart", slug: "lampadas-fitas-led", icon: "Lightbulb" },
+      { name: "LÃ¢mpadas e Fitas LED Smart", slug: "lampadas-fitas-led", icon: "Lightbulb" },
       { name: "Sensores Inteligentes", slug: "sensores-inteligentes", icon: "Radio" },
       { name: "Assistentes Virtuais", slug: "assistentes-virtuais", icon: "Mic" },
-      { name: "Centrais de Automação", slug: "centrais-automacao", icon: "Server" }
+      { name: "Centrais de AutomaÃ§Ã£o", slug: "centrais-automacao", icon: "Server" }
     ]
   },
   {
@@ -156,36 +140,36 @@ const SEED_DATA: CategorySeed[] = [
     icon: "Ghost",
     children: [
       { name: "Action Figures", slug: "action-figures", icon: "User" },
-      { name: "Colecionáveis", slug: "colecionaveis", icon: "Star" },
+      { name: "ColecionÃ¡veis", slug: "colecionaveis", icon: "Star" },
       { name: "Funko Pop", slug: "funko-pop", icon: "Smile" },
-      { name: "Camisetas e Vestuário", slug: "camisetas-vestuario", icon: "Shirt" },
+      { name: "Camisetas e VestuÃ¡rio", slug: "camisetas-vestuario", icon: "Shirt" },
       { name: "Canecas e Copos", slug: "canecas-copos", icon: "Coffee" },
-      { name: "Decoração Geek", slug: "decoracao-geek", icon: "Image" },
-      { name: "Brinquedos Temáticos", slug: "brinquedos-tematicos", icon: "Gift" }
+      { name: "DecoraÃ§Ã£o Geek", slug: "decoracao-geek", icon: "Image" },
+      { name: "Brinquedos TemÃ¡ticos", slug: "brinquedos-tematicos", icon: "Gift" }
     ]
   },
   {
-    name: "Licenças",
+    name: "LicenÃ§as",
     slug: "licencas",
     icon: "Key",
     children: [
       { name: "Windows", slug: "windows", icon: "Monitor" },
       { name: "Microsoft Office", slug: "microsoft-office", icon: "FileText" },
-      { name: "Antivírus", slug: "antivirus", icon: "Shield" },
+      { name: "AntivÃ­rus", slug: "antivirus", icon: "Shield" },
       { name: "Softwares de Design", slug: "softwares-design", icon: "PenTool" },
-      { name: "Softwares de Edição", slug: "softwares-edicao", icon: "Video" }
+      { name: "Softwares de EdiÃ§Ã£o", slug: "softwares-edicao", icon: "Video" }
     ]
   },
   {
-    name: "Escritório",
+    name: "EscritÃ³rio",
     slug: "escritorio",
     icon: "Armchair",
     children: [
       { name: "Cadeiras Gamer", slug: "cadeiras-gamer", icon: "Armchair" },
-      { name: "Cadeiras Ergonômicas", slug: "cadeiras-ergonomicas", icon: "Armchair" },
+      { name: "Cadeiras ErgonÃ´micas", slug: "cadeiras-ergonomicas", icon: "Armchair" },
       { name: "Mesas Gamer", slug: "mesas-gamer", icon: "Table" },
-      { name: "Mesas para Escritório", slug: "mesas-escritorio", icon: "Table" },
-      { name: "Suportes Ergonômicos", slug: "suportes-ergonomicos", icon: "Move" },
+      { name: "Mesas para EscritÃ³rio", slug: "mesas-escritorio", icon: "Table" },
+      { name: "Suportes ErgonÃ´micos", slug: "suportes-ergonomicos", icon: "Move" },
       { name: "Organizadores", slug: "organizadores", icon: "Box" }
     ]
   },
@@ -216,11 +200,11 @@ const SEED_DATA: CategorySeed[] = [
       { name: "iPhone", slug: "iphone", icon: "Smartphone" },
       { name: "Apple Watch", slug: "apple-watch", icon: "Watch" },
       { name: "AirPods", slug: "airpods", icon: "Headphones" },
-      { name: "Acessórios Apple", slug: "acessorios-apple", icon: "Plug" }
+      { name: "AcessÃ³rios Apple", slug: "acessorios-apple", icon: "Plug" }
     ]
   },
   {
-    name: "Impressão",
+    name: "ImpressÃ£o",
     slug: "impressao",
     icon: "Printer",
     children: [
@@ -229,7 +213,7 @@ const SEED_DATA: CategorySeed[] = [
       { name: "Multifuncionais", slug: "multifuncionais", icon: "Copy" },
       { name: "Cartuchos de Tinta", slug: "cartuchos-tinta", icon: "Droplet" },
       { name: "Toners", slug: "toners", icon: "Cylinder" },
-      { name: "Papel Fotográfico", slug: "papel-fotografico", icon: "Image" },
+      { name: "Papel FotogrÃ¡fico", slug: "papel-fotografico", icon: "Image" },
       { name: "Etiquetas", slug: "etiquetas", icon: "Tag" },
       { name: "Scanners", slug: "scanners", icon: "Scan" }
     ]
@@ -237,48 +221,36 @@ const SEED_DATA: CategorySeed[] = [
 ];
 
 async function insertCategory(category: CategorySeed, parentId: string | null, order: number) {
-  // 1. Check if exists
-  const { data: existing } = await supabase
-    .from("categories")
-    .select("id")
-    .eq("slug", category.slug)
-    .single();
+  // 1. Verifica se já existe (por slug)
+  const existing = await turso.execute({
+    sql: 'SELECT id FROM categories WHERE slug = ? LIMIT 1',
+    args: [category.slug],
+  });
 
-  let categoryId = existing?.id;
+  let categoryId: string;
 
-  if (!categoryId) {
-    const { data, error } = await supabase
-      .from("categories")
-      .insert({
-        name: category.name,
-        slug: category.slug,
-        parent_id: parentId,
-        icon: category.icon,
-        display_order: order,
-        active: true,
-      })
-      .select("id")
-      .single();
-
-    if (error) {
+  if (existing.rows.length === 0) {
+    categoryId = randomUUID();
+    try {
+      await turso.execute({
+        sql: `INSERT INTO categories (id, name, slug, parent_id, icon, display_order, active)
+              VALUES (?, ?, ?, ?, ?, ?, 1)`,
+        args: [categoryId, category.name, category.slug, parentId, category.icon ?? null, order],
+      });
+    } catch (error) {
       console.error(`Error inserting ${category.name}:`, error);
       throw error;
     }
-    categoryId = data.id;
   } else {
-    // Update if exists to ensure hierarchy
-    await supabase
-        .from("categories")
-        .update({
-            name: category.name,
-            parent_id: parentId,
-            icon: category.icon,
-            display_order: order
-        })
-        .eq("id", categoryId);
+    // Atualiza se existir para garantir a hierarquia
+    categoryId = String((existing.rows[0] as any).id);
+    await turso.execute({
+      sql: `UPDATE categories SET name = ?, parent_id = ?, icon = ?, display_order = ? WHERE id = ?`,
+      args: [category.name, parentId, category.icon ?? null, order, categoryId],
+    });
   }
 
-  // 2. Insert Children
+  // 2. Insere as subcategorias
   if (category.children && category.children.length > 0) {
     for (let i = 0; i < category.children.length; i++) {
       await insertCategory(category.children[i], categoryId, i);

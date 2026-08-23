@@ -1,0 +1,1070 @@
+{
+  "arena_config": [
+    {
+      "name": "id",
+      "type": "INTEGER"
+    },
+    {
+      "name": "ativo",
+      "type": "INTEGER"
+    },
+    {
+      "name": "titulo",
+      "type": "TEXT"
+    },
+    {
+      "name": "atualizado_em",
+      "type": "TEXT"
+    }
+  ],
+  "arena_eventos_midia": [
+    {
+      "name": "id",
+      "type": "TEXT"
+    },
+    {
+      "name": "evento_tipo",
+      "type": "TEXT"
+    },
+    {
+      "name": "gif_url",
+      "type": "TEXT"
+    },
+    {
+      "name": "titulo",
+      "type": "TEXT"
+    },
+    {
+      "name": "mensagem_template",
+      "type": "TEXT"
+    },
+    {
+      "name": "ativo",
+      "type": "INTEGER"
+    },
+    {
+      "name": "created_at",
+      "type": "TEXT"
+    }
+  ],
+  "arena_vendas": [
+    {
+      "name": "id",
+      "type": "TEXT"
+    },
+    {
+      "name": "vendedor_id",
+      "type": "TEXT"
+    },
+    {
+      "name": "valor",
+      "type": "REAL"
+    },
+    {
+      "name": "created_at",
+      "type": "TEXT"
+    }
+  ],
+  "arena_vendedores": [
+    {
+      "name": "id",
+      "type": "TEXT"
+    },
+    {
+      "name": "nome",
+      "type": "TEXT"
+    },
+    {
+      "name": "avatar_url",
+      "type": "TEXT"
+    },
+    {
+      "name": "veiculo_emoji",
+      "type": "TEXT"
+    },
+    {
+      "name": "meta_valor",
+      "type": "REAL"
+    },
+    {
+      "name": "vendas_atual",
+      "type": "REAL"
+    },
+    {
+      "name": "criado_em",
+      "type": "TEXT"
+    }
+  ],
+  "audit_logs": [
+    {
+      "name": "id",
+      "type": "TEXT"
+    },
+    {
+      "name": "action",
+      "type": "TEXT"
+    },
+    {
+      "name": "entity",
+      "type": "TEXT"
+    },
+    {
+      "name": "entity_id",
+      "type": "TEXT"
+    },
+    {
+      "name": "details",
+      "type": "TEXT"
+    },
+    {
+      "name": "created_by",
+      "type": "TEXT"
+    },
+    {
+      "name": "created_at",
+      "type": "TEXT"
+    },
+    {
+      "name": "entity_type",
+      "type": "TEXT"
+    },
+    {
+      "name": "new_values",
+      "type": "TEXT"
+    }
+  ],
+  "blog_posts": [
+    {
+      "name": "id",
+      "type": "TEXT"
+    },
+    {
+      "name": "title",
+      "type": "TEXT"
+    },
+    {
+      "name": "slug",
+      "type": "TEXT"
+    },
+    {
+      "name": "excerpt",
+      "type": "TEXT"
+    },
+    {
+      "name": "content_html",
+      "type": "TEXT"
+    },
+    {
+      "name": "cover_image_url",
+      "type": "TEXT"
+    },
+    {
+      "name": "cover_image_alt",
+      "type": "TEXT"
+    },
+    {
+      "name": "source_url",
+      "type": "TEXT"
+    },
+    {
+      "name": "source_site",
+      "type": "TEXT"
+    },
+    {
+      "name": "source_title",
+      "type": "TEXT"
+    },
+    {
+      "name": "source_published_at",
+      "type": "TEXT"
+    },
+    {
+      "name": "language",
+      "type": "TEXT"
+    },
+    {
+      "name": "tags",
+      "type": "TEXT"
+    },
+    {
+      "name": "keywords",
+      "type": "TEXT"
+    },
+    {
+      "name": "status",
+      "type": "TEXT"
+    },
+    {
+      "name": "published_at",
+      "type": "TEXT"
+    },
+    {
+      "name": "created_at",
+      "type": "TEXT"
+    },
+    {
+      "name": "updated_at",
+      "type": "TEXT"
+    },
+    {
+      "name": "category",
+      "type": "TEXT"
+    },
+    {
+      "name": "cover_image",
+      "type": "TEXT"
+    },
+    {
+      "name": "source_type",
+      "type": "TEXT"
+    },
+    {
+      "name": "product_id",
+      "type": "TEXT"
+    },
+    {
+      "name": "seo_title",
+      "type": "TEXT"
+    },
+    {
+      "name": "seo_description",
+      "type": "TEXT"
+    },
+    {
+      "name": "canonical_url",
+      "type": "TEXT"
+    },
+    {
+      "name": "json_ld",
+      "type": "TEXT"
+    },
+    {
+      "name": "reading_time_minutes",
+      "type": "INTEGER"
+    },
+    {
+      "name": "internal_links",
+      "type": "TEXT"
+    }
+  ],
+  "blog_source_items": [
+    {
+      "name": "id",
+      "type": "TEXT"
+    },
+    {
+      "name": "source_type",
+      "type": "TEXT"
+    },
+    {
+      "name": "source_url",
+      "type": "TEXT"
+    },
+    {
+      "name": "source_hash",
+      "type": "TEXT"
+    },
+    {
+      "name": "source_title",
+      "type": "TEXT"
+    },
+    {
+      "name": "source_published_at",
+      "type": "TEXT"
+    },
+    {
+      "name": "created_at",
+      "type": "TEXT"
+    }
+  ],
+  "carousel_images": [
+    {
+      "name": "id",
+      "type": "TEXT"
+    },
+    {
+      "name": "created_at",
+      "type": "TEXT"
+    },
+    {
+      "name": "image_url",
+      "type": "TEXT"
+    },
+    {
+      "name": "title",
+      "type": "TEXT"
+    },
+    {
+      "name": "description",
+      "type": "TEXT"
+    },
+    {
+      "name": "link",
+      "type": "TEXT"
+    },
+    {
+      "name": "display_order",
+      "type": "INTEGER"
+    },
+    {
+      "name": "active",
+      "type": "INTEGER"
+    },
+    {
+      "name": "metadata",
+      "type": "TEXT"
+    }
+  ],
+  "categories": [
+    {
+      "name": "id",
+      "type": "TEXT"
+    },
+    {
+      "name": "created_at",
+      "type": "TEXT"
+    },
+    {
+      "name": "name",
+      "type": "TEXT"
+    },
+    {
+      "name": "slug",
+      "type": "TEXT"
+    },
+    {
+      "name": "parent_id",
+      "type": "TEXT"
+    },
+    {
+      "name": "display_order",
+      "type": "INTEGER"
+    },
+    {
+      "name": "icon",
+      "type": "TEXT"
+    },
+    {
+      "name": "active",
+      "type": "INTEGER"
+    }
+  ],
+  "controle_part_withdrawals": [
+    {
+      "name": "id",
+      "type": "TEXT"
+    },
+    {
+      "name": "created_at",
+      "type": "TEXT"
+    },
+    {
+      "name": "part_id",
+      "type": "TEXT"
+    },
+    {
+      "name": "customer_name",
+      "type": "TEXT"
+    },
+    {
+      "name": "os_number",
+      "type": "TEXT"
+    },
+    {
+      "name": "sale_price",
+      "type": "REAL"
+    },
+    {
+      "name": "technician_name",
+      "type": "TEXT"
+    },
+    {
+      "name": "authorization_code",
+      "type": "TEXT"
+    },
+    {
+      "name": "approved_password_code",
+      "type": "TEXT"
+    },
+    {
+      "name": "part_snapshot_name",
+      "type": "TEXT"
+    },
+    {
+      "name": "part_snapshot_serial",
+      "type": "TEXT"
+    },
+    {
+      "name": "part_snapshot_type",
+      "type": "TEXT"
+    },
+    {
+      "name": "part_snapshot_photo_url",
+      "type": "TEXT"
+    },
+    {
+      "name": "purchase_order_reference",
+      "type": "TEXT"
+    }
+  ],
+  "controle_parts": [
+    {
+      "name": "id",
+      "type": "TEXT"
+    },
+    {
+      "name": "created_at",
+      "type": "TEXT"
+    },
+    {
+      "name": "updated_at",
+      "type": "TEXT"
+    },
+    {
+      "name": "type",
+      "type": "TEXT"
+    },
+    {
+      "name": "status",
+      "type": "TEXT"
+    },
+    {
+      "name": "full_name",
+      "type": "TEXT"
+    },
+    {
+      "name": "serial_number",
+      "type": "TEXT"
+    },
+    {
+      "name": "purchase_order_reference",
+      "type": "TEXT"
+    },
+    {
+      "name": "photo_url",
+      "type": "TEXT"
+    },
+    {
+      "name": "notes",
+      "type": "TEXT"
+    },
+    {
+      "name": "withdrawn_at",
+      "type": "TEXT"
+    },
+    {
+      "name": "withdrawn_customer_name",
+      "type": "TEXT"
+    },
+    {
+      "name": "withdrawn_os_number",
+      "type": "TEXT"
+    },
+    {
+      "name": "withdrawn_sale_price",
+      "type": "REAL"
+    },
+    {
+      "name": "withdrawn_technician_name",
+      "type": "TEXT"
+    },
+    {
+      "name": "withdrawn_authorization_code",
+      "type": "TEXT"
+    }
+  ],
+  "coupons": [
+    {
+      "name": "id",
+      "type": "TEXT"
+    },
+    {
+      "name": "code",
+      "type": "TEXT"
+    },
+    {
+      "name": "discount_type",
+      "type": "TEXT"
+    },
+    {
+      "name": "discount_value",
+      "type": "REAL"
+    },
+    {
+      "name": "expiration_date",
+      "type": "TEXT"
+    },
+    {
+      "name": "max_uses",
+      "type": "INTEGER"
+    },
+    {
+      "name": "current_uses",
+      "type": "INTEGER"
+    },
+    {
+      "name": "status",
+      "type": "TEXT"
+    },
+    {
+      "name": "min_purchase_value",
+      "type": "REAL"
+    },
+    {
+      "name": "applicable_products",
+      "type": "TEXT"
+    },
+    {
+      "name": "applicable_categories",
+      "type": "TEXT"
+    },
+    {
+      "name": "created_at",
+      "type": "TEXT"
+    },
+    {
+      "name": "updated_at",
+      "type": "TEXT"
+    }
+  ],
+  "home_blocks": [
+    {
+      "name": "id",
+      "type": "TEXT"
+    },
+    {
+      "name": "category_id",
+      "type": "TEXT"
+    },
+    {
+      "name": "title",
+      "type": "TEXT"
+    },
+    {
+      "name": "display_order",
+      "type": "INTEGER"
+    },
+    {
+      "name": "active",
+      "type": "INTEGER"
+    },
+    {
+      "name": "created_at",
+      "type": "TEXT"
+    }
+  ],
+  "order_items": [
+    {
+      "name": "id",
+      "type": "TEXT"
+    },
+    {
+      "name": "order_id",
+      "type": "TEXT"
+    },
+    {
+      "name": "product_name",
+      "type": "TEXT"
+    },
+    {
+      "name": "product_image",
+      "type": "TEXT"
+    },
+    {
+      "name": "quantity",
+      "type": "INTEGER"
+    },
+    {
+      "name": "price",
+      "type": "REAL"
+    },
+    {
+      "name": "product_id",
+      "type": "TEXT"
+    }
+  ],
+  "orders": [
+    {
+      "name": "id",
+      "type": "TEXT"
+    },
+    {
+      "name": "created_at",
+      "type": "TEXT"
+    },
+    {
+      "name": "customer_name",
+      "type": "TEXT"
+    },
+    {
+      "name": "customer_email",
+      "type": "TEXT"
+    },
+    {
+      "name": "customer_whatsapp",
+      "type": "TEXT"
+    },
+    {
+      "name": "address",
+      "type": "TEXT"
+    },
+    {
+      "name": "total",
+      "type": "REAL"
+    },
+    {
+      "name": "status",
+      "type": "TEXT"
+    },
+    {
+      "name": "user_id",
+      "type": "TEXT"
+    },
+    {
+      "name": "coupon_code",
+      "type": "TEXT"
+    },
+    {
+      "name": "discount_value",
+      "type": "REAL"
+    },
+    {
+      "name": "payment_method",
+      "type": "TEXT"
+    },
+    {
+      "name": "transaction_id",
+      "type": "TEXT"
+    },
+    {
+      "name": "installments",
+      "type": "INTEGER"
+    },
+    {
+      "name": "nsu",
+      "type": "TEXT"
+    },
+    {
+      "name": "authorization_code",
+      "type": "TEXT"
+    },
+    {
+      "name": "card_brand",
+      "type": "TEXT"
+    },
+    {
+      "name": "risk_score",
+      "type": "REAL"
+    },
+    {
+      "name": "payment_details",
+      "type": "TEXT"
+    },
+    {
+      "name": "cpf_cnpj",
+      "type": "TEXT"
+    },
+    {
+      "name": "seller_id",
+      "type": "TEXT"
+    },
+    {
+      "name": "origin",
+      "type": "TEXT"
+    },
+    {
+      "name": "payment_status",
+      "type": "TEXT"
+    },
+    {
+      "name": "notes",
+      "type": "TEXT"
+    }
+  ],
+  "products": [
+    {
+      "name": "id",
+      "type": "TEXT"
+    },
+    {
+      "name": "name",
+      "type": "TEXT"
+    },
+    {
+      "name": "price",
+      "type": "TEXT"
+    },
+    {
+      "name": "image",
+      "type": "TEXT"
+    },
+    {
+      "name": "category",
+      "type": "TEXT"
+    },
+    {
+      "name": "slug",
+      "type": "TEXT"
+    },
+    {
+      "name": "created_at",
+      "type": "TEXT"
+    },
+    {
+      "name": "cost",
+      "type": "REAL"
+    },
+    {
+      "name": "supplier",
+      "type": "TEXT"
+    },
+    {
+      "name": "video_url",
+      "type": "TEXT"
+    },
+    {
+      "name": "description",
+      "type": "TEXT"
+    },
+    {
+      "name": "original_image",
+      "type": "TEXT"
+    },
+    {
+      "name": "migration_status",
+      "type": "TEXT"
+    },
+    {
+      "name": "migration_error",
+      "type": "TEXT"
+    },
+    {
+      "name": "migrated_at",
+      "type": "TEXT"
+    },
+    {
+      "name": "stock",
+      "type": "INTEGER"
+    },
+    {
+      "name": "name_description",
+      "type": "TEXT"
+    },
+    {
+      "name": "image_urls",
+      "type": "TEXT"
+    },
+    {
+      "name": "product_url",
+      "type": "TEXT"
+    },
+    {
+      "name": "specs",
+      "type": "TEXT"
+    },
+    {
+      "name": "kabum_url",
+      "type": "TEXT"
+    },
+    {
+      "name": "kabum_last_price",
+      "type": "REAL"
+    },
+    {
+      "name": "kabum_last_stock",
+      "type": "TEXT"
+    },
+    {
+      "name": "kabum_last_checked_at",
+      "type": "TEXT"
+    },
+    {
+      "name": "kabum_sync_enabled",
+      "type": "INTEGER"
+    },
+    {
+      "name": "kabum_sync_status",
+      "type": "TEXT"
+    },
+    {
+      "name": "kabum_sync_error",
+      "type": "TEXT"
+    },
+    {
+      "name": "cost_price",
+      "type": "REAL"
+    },
+    {
+      "name": "sale_price",
+      "type": "REAL"
+    },
+    {
+      "name": "stock_quantity",
+      "type": "INTEGER"
+    },
+    {
+      "name": "status",
+      "type": "TEXT"
+    },
+    {
+      "name": "photos",
+      "type": "TEXT"
+    },
+    {
+      "name": "notes",
+      "type": "TEXT"
+    },
+    {
+      "name": "updated_at",
+      "type": "TEXT"
+    }
+  ],
+  "site_conversion_events": [
+    {
+      "name": "id",
+      "type": "TEXT"
+    },
+    {
+      "name": "created_at",
+      "type": "TEXT"
+    },
+    {
+      "name": "event_name",
+      "type": "TEXT"
+    },
+    {
+      "name": "event_category",
+      "type": "TEXT"
+    },
+    {
+      "name": "channel",
+      "type": "TEXT"
+    },
+    {
+      "name": "page_path",
+      "type": "TEXT"
+    },
+    {
+      "name": "page_query",
+      "type": "TEXT"
+    },
+    {
+      "name": "source",
+      "type": "TEXT"
+    },
+    {
+      "name": "label",
+      "type": "TEXT"
+    },
+    {
+      "name": "city",
+      "type": "TEXT"
+    },
+    {
+      "name": "service",
+      "type": "TEXT"
+    },
+    {
+      "name": "product_name",
+      "type": "TEXT"
+    },
+    {
+      "name": "destination",
+      "type": "TEXT"
+    },
+    {
+      "name": "visitor_id",
+      "type": "TEXT"
+    },
+    {
+      "name": "metadata",
+      "type": "TEXT"
+    }
+  ],
+  "site_visits": [
+    {
+      "name": "id",
+      "type": "TEXT"
+    },
+    {
+      "name": "created_at",
+      "type": "TEXT"
+    },
+    {
+      "name": "page",
+      "type": "TEXT"
+    },
+    {
+      "name": "visitor_id",
+      "type": "TEXT"
+    }
+  ],
+  "topbar_messages": [
+    {
+      "name": "id",
+      "type": "TEXT"
+    },
+    {
+      "name": "text",
+      "type": "TEXT"
+    },
+    {
+      "name": "active",
+      "type": "INTEGER"
+    },
+    {
+      "name": "display_order",
+      "type": "INTEGER"
+    },
+    {
+      "name": "created_at",
+      "type": "TEXT"
+    }
+  ],
+  "vitrine_pages": [
+    {
+      "name": "id",
+      "type": "TEXT"
+    },
+    {
+      "name": "nome_pc",
+      "type": "TEXT"
+    },
+    {
+      "name": "slug",
+      "type": "TEXT"
+    },
+    {
+      "name": "categoria",
+      "type": "TEXT"
+    },
+    {
+      "name": "descricao_original",
+      "type": "TEXT"
+    },
+    {
+      "name": "processador",
+      "type": "TEXT"
+    },
+    {
+      "name": "placa_video",
+      "type": "TEXT"
+    },
+    {
+      "name": "memoria_ram",
+      "type": "TEXT"
+    },
+    {
+      "name": "armazenamento",
+      "type": "TEXT"
+    },
+    {
+      "name": "sistema_operacional",
+      "type": "TEXT"
+    },
+    {
+      "name": "resfriamento",
+      "type": "TEXT"
+    },
+    {
+      "name": "aplicacoes",
+      "type": "TEXT"
+    },
+    {
+      "name": "status",
+      "type": "TEXT"
+    },
+    {
+      "name": "data_criacao",
+      "type": "TEXT"
+    },
+    {
+      "name": "data_publicacao",
+      "type": "TEXT"
+    },
+    {
+      "name": "source_url",
+      "type": "TEXT"
+    },
+    {
+      "name": "extras",
+      "type": "TEXT"
+    },
+    {
+      "name": "images",
+      "type": "TEXT"
+    },
+    {
+      "name": "image_prompts",
+      "type": "TEXT"
+    }
+  ],
+  "weekly_expenses": [
+    {
+      "name": "id",
+      "type": "TEXT"
+    },
+    {
+      "name": "description",
+      "type": "TEXT"
+    },
+    {
+      "name": "value",
+      "type": "REAL"
+    },
+    {
+      "name": "category",
+      "type": "TEXT"
+    },
+    {
+      "name": "date",
+      "type": "TEXT"
+    },
+    {
+      "name": "created_at",
+      "type": "TEXT"
+    }
+  ],
+  "weekly_orders": [
+    {
+      "name": "id",
+      "type": "TEXT"
+    },
+    {
+      "name": "os_number",
+      "type": "TEXT"
+    },
+    {
+      "name": "status",
+      "type": "TEXT"
+    },
+    {
+      "name": "date",
+      "type": "TEXT"
+    },
+    {
+      "name": "labor_income",
+      "type": "REAL"
+    },
+    {
+      "name": "parts_income",
+      "type": "REAL"
+    },
+    {
+      "name": "labor_expense",
+      "type": "REAL"
+    },
+    {
+      "name": "parts_expense",
+      "type": "REAL"
+    },
+    {
+      "name": "payment_method",
+      "type": "TEXT"
+    },
+    {
+      "name": "created_at",
+      "type": "TEXT"
+    }
+  ]
+}

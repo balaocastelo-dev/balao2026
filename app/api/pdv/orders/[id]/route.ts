@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
-import { supabaseAdmin, hasAdmin } from '@/lib/supabase-admin';
+import { turso, isTursoActive } from '@/lib/turso';
 
 export async function GET(
   request: Request,
   props: { params: Promise<{ id: string }> }
 ) {
   try {
-    if (!hasAdmin) {
+    if (!isTursoActive()) {
       return NextResponse.json(
-        { error: 'Supabase admin não configurado' },
+        { error: 'Banco de dados não configurado' },
         { status: 500 }
       );
     }
@@ -23,39 +23,34 @@ export async function GET(
       );
     }
 
-    // 1. Fetch Order Details
-    const { data: order, error: orderError } = await supabaseAdmin
-      .from('orders')
-      .select('*')
-      .eq('id', id)
-      .single();
+    // 1. Busca o pedido
+    const orderRes = await turso.execute({
+      sql: 'SELECT * FROM orders WHERE id = ? LIMIT 1',
+      args: [id],
+    });
+    const order = orderRes.rows[0];
 
-    if (orderError) {
-      console.error('Erro ao buscar pedido:', orderError);
+    if (!order) {
       return NextResponse.json(
         { error: 'Pedido não encontrado' },
         { status: 404 }
       );
     }
 
-    // 2. Fetch Order Items
-    const { data: items, error: itemsError } = await supabaseAdmin
-      .from('order_items')
-      .select('*')
-      .eq('order_id', id);
-
-    if (itemsError) {
+    // 2. Busca os itens
+    let items: any[] = [];
+    try {
+      const itemsRes = await turso.execute({
+        sql: 'SELECT * FROM order_items WHERE order_id = ?',
+        args: [id],
+      });
+      items = itemsRes.rows as any[];
+    } catch (itemsError) {
       console.error('Erro ao buscar itens do pedido:', itemsError);
-      // Return order without items if items fetch fails, but log error
     }
 
-    // 3. Combine Data
-    const orderDetails = {
-      ...order,
-      items: items || []
-    };
-
-    return NextResponse.json(orderDetails);
+    // 3. Combina os dados
+    return NextResponse.json({ ...order, items });
   } catch (error: any) {
     console.error('Erro inesperado ao buscar detalhes do pedido:', error);
     return NextResponse.json(

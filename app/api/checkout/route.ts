@@ -3,7 +3,7 @@ import { createOrder, getProductById, getProductsByCategory } from "@/lib/db";
 import { sendEmail, sendNewOrderNotification } from "@/lib/mail";
 import { getOrderCustomerWhatsAppTemplate } from "@/lib/mail-templates";
 import { validateCoupon } from "@/lib/coupons";
-import { hasAdmin } from "@/lib/supabase-admin";
+import { isTursoActive } from "@/lib/turso";
 
 type CheckoutCustomerInput = {
   name?: unknown;
@@ -28,11 +28,11 @@ type CheckoutItemInput = {
 
 export async function POST(req: Request) {
   try {
-    if (!hasAdmin) {
+    if (!isTursoActive()) {
       return NextResponse.json(
         {
-          error: "Supabase admin não configurado",
-          details: "Defina NEXT_PUBLIC_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY (ou SERVICE_ROLE_KEY).",
+          error: "Banco de dados não configurado",
+          details: "Defina TURSO_DATABASE_URL e TURSO_AUTH_TOKEN.",
         },
         { status: 500 }
       );
@@ -144,6 +144,9 @@ export async function POST(req: Request) {
     }));
 
     const order = await createOrder(orderData, orderItems);
+    if (!order) {
+      throw new Error("Falha ao criar o pedido no banco de dados");
+    }
 
     const primaryProductId = typeof orderItems?.[0]?.product_id === "string" ? orderItems[0].product_id : "";
     const [primaryProduct] = await Promise.all([
@@ -228,20 +231,10 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error("Checkout error details:", error);
     
-    // Check for common Supabase errors
+    // Check for common database errors
     let errorMessage = "Failed to process order";
     let details = error instanceof Error ? error.message : JSON.stringify(error);
-    let hint = "Verifique se as tabelas 'orders' e 'order_items' existem no Supabase e se a chave de serviço (SERVICE_ROLE_KEY) está configurada.";
-
-    if (error?.code === '42P01') {
-        errorMessage = "Tabela não encontrada no banco de dados.";
-        hint = "Execute os scripts SQL no Supabase para criar as tabelas 'orders' e 'order_items'.";
-    } else if (error?.code === '23503') {
-        errorMessage = "Erro de integridade referencial.";
-        hint = "Verifique se os dados relacionados (como seller_id ou user_id) existem.";
-    } else if (error?.code === 'PGRST116') {
-        errorMessage = "Erro ao recuperar o pedido criado.";
-    }
+    let hint = "Verifique se as tabelas 'orders' e 'order_items' existem no banco Turso e se TURSO_AUTH_TOKEN está configurado.";
 
     return NextResponse.json(
         { 

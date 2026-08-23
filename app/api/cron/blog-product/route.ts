@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { supabaseAdmin } from "@/lib/supabase-admin";
-import { hasAdmin } from "@/lib/supabase-admin";
+import { turso, isTursoActive } from "@/lib/turso";
 import { slugify } from "@/lib/blog-utils";
 import { generateBlogPostFromProduct } from "@/lib/blog-ai";
 import { hasBlogSourceItem, insertBlogPost, insertBlogSourceItem } from "@/lib/db";
@@ -29,14 +28,15 @@ function sha256(input: string): string {
 }
 
 async function getRandomProduct(): Promise<Product | null> {
-  const { data, error } = await supabaseAdmin
-    .from("products")
-    .select("id,name,price,image,category,slug,description,specs,product_url,created_at")
-    .order("created_at", { ascending: false })
-    .limit(500);
+  const res = await turso.execute(
+    "SELECT id, name, price, image, category, slug, description, specs, product_url, created_at FROM products ORDER BY created_at DESC LIMIT 500"
+  );
 
-  if (error || !data || data.length === 0) return null;
-  const list = data as Product[];
+  if (!res.rows || res.rows.length === 0) return null;
+  const list = res.rows.map((r: any) => ({
+    ...r,
+    specs: typeof r.specs === "string" ? (() => { try { return JSON.parse(r.specs); } catch { return {}; } })() : r.specs,
+  })) as unknown as Product[];
   const picked = list[Math.floor(Math.random() * list.length)];
   return picked || null;
 }
@@ -47,12 +47,12 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (!hasAdmin) {
+    if (!isTursoActive()) {
       return NextResponse.json({
         ok: true,
         inserted: 0,
         skipped: true,
-        reason: "Supabase admin não configurado. Blog funciona em modo dinâmico sem persistência.",
+        reason: "Banco de dados nao configurado. Blog funciona em modo dinamico sem persistencia.",
       });
     }
 

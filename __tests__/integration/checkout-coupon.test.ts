@@ -5,14 +5,18 @@ import { POST } from '@/app/api/checkout/route';
 // Mocks
 vi.mock('@/lib/db', () => ({
   createOrder: vi.fn().mockResolvedValue({ id: '12345' }),
+  getProductById: vi.fn().mockResolvedValue(null),
+  getProductsByCategory: vi.fn().mockResolvedValue([]),
 }));
 
-vi.mock('@/lib/supabase-admin', () => ({
-  hasAdmin: true
+vi.mock('@/lib/turso', () => ({
+  turso: { execute: vi.fn().mockResolvedValue({ rows: [] }) },
+  isTursoActive: () => true,
 }));
 
 vi.mock('@/lib/mail', () => ({
   sendEmail: vi.fn().mockResolvedValue(true),
+  sendNewOrderNotification: vi.fn().mockResolvedValue(true),
   sendSystemNotification: vi.fn().mockResolvedValue(true),
 }));
 

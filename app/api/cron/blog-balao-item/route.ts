@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { hasAdmin } from "@/lib/supabase-admin";
+import { isTursoActive } from "@/lib/turso";
 import { insertBlogPost, insertBlogSourceItem, hasBlogSourceItem } from "@/lib/db";
 import { scrapeSiteProducts } from "@/lib/site-products";
 import { generateBlogPostFromProduct } from "@/lib/blog-ai";
@@ -41,7 +41,7 @@ export async function GET(req: Request) {
     const picked = items[Math.floor(Math.random() * items.length)]!;
     const sourceHash = sha256(`site-product:${picked.url}`);
 
-    if (hasAdmin) {
+    if (isTursoActive()) {
       const exists = await hasBlogSourceItem({ source_type: "product", source_hash: sourceHash });
       if (exists) {
         return NextResponse.json({ ok: true, inserted: 0, message: "Item já usado" });
@@ -67,7 +67,7 @@ export async function GET(req: Request) {
       { slug, publishedAtIso, url: postUrl, productUrl: picked.url },
     );
 
-    if (!hasAdmin) {
+    if (!isTursoActive()) {
       return NextResponse.json({
         ok: true,
         inserted: 0,

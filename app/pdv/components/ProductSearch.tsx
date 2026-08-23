@@ -1,9 +1,8 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect } from "react";
 import { Search, Plus, PackagePlus, X, Package } from "lucide-react";
 import { usePdv, PdvProduct } from "../store";
-import { supabase } from "@/lib/supabase";
 
 // Dados mock para desenvolvimento local
 const getMockProducts = (query: string) => {
@@ -17,7 +16,7 @@ const getMockProducts = (query: string) => {
     },
     {
       id: '2', 
-      name: 'Teclado Mecânico',
+      name: 'Teclado MecÃ¢nico',
       price: 199.90,
       images: ['teclado-mecanico.jpg'],
       stock_quantity: 8
@@ -68,77 +67,57 @@ export default function ProductSearch() {
       }
       setLoading(true);
       try {
-        // Verificar se temos configuração do Supabase
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-        
-        let list: any[] = [];
-        
-        if (supabaseUrl && supabaseKey && !supabaseUrl.includes('seu-projeto') && !supabaseKey.includes('sua-chave')) {
-          // Conexão real com Supabase
-          const { data: supabaseData, error } = await supabase
-            .from('products')
-            .select('*')
-            .ilike('name', `%${query}%`)
-            .limit(20);
-
-          if (error) throw error;
-          list = supabaseData || [];
-        } else {
-          // Fallback para API route (desenvolvimento local)
-          const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-          if (!res.ok) throw new Error("Falha na busca");
-          const data = await res.json();
-          list = Array.isArray(data) ? data : data.products || [];
-        }
+        // Busca sempre via API route (o acesso ao banco Ã© feito no servidor)
+        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+        if (!res.ok) throw new Error("Falha na busca");
+        const data = await res.json();
+        const list: any[] = Array.isArray(data) ? data : data.products || [];
 
         const mapped = list.map((p: any) => {
-          // Tratamento de imagem - correção para diferentes formatos de imagem
+          // Tratamento de imagem - correÃ§Ã£o para diferentes formatos de imagem
           let imageUrl = "/placeholder.png";
           
-          // Função para construir URL do Supabase
-          const buildSupabaseUrl = (filename: string) => {
+          // FunÃ§Ã£o para resolver URL de imagem (URLs completas e caminhos locais)
+          const buildImageUrl = (filename: string) => {
             if (!filename) return "/placeholder.png";
             if (filename.startsWith("http")) return filename;
+            if (filename.startsWith("/")) return filename;
             
-            // Remove qualquer prefixo de bucket se existir
+            // Nome de arquivo simples: procura em /uploads/products/
             const cleanFilename = filename.replace(/^products\//, '');
-            
-            // Para desenvolvimento local, usar URL padrão do Supabase
-            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://seu-projeto.supabase.co';
-            return `${supabaseUrl}/storage/v1/object/public/products/${cleanFilename}`;
+            return `/uploads/products/${cleanFilename}`;
           };
 
           // Prioridade 1: Campo images (pode ser array ou string)
           if (p.images) {
             if (Array.isArray(p.images) && p.images.length > 0) {
               const firstImg = p.images[0];
-              imageUrl = buildSupabaseUrl(firstImg);
+              imageUrl = buildImageUrl(firstImg);
             } else if (typeof p.images === 'string') {
               if (p.images.startsWith('[')) {
                 // Tentar parsear como JSON array
                 try {
                   const imagesArray = JSON.parse(p.images);
                   if (imagesArray.length > 0) {
-                    imageUrl = buildSupabaseUrl(imagesArray[0]);
+                    imageUrl = buildImageUrl(imagesArray[0]);
                   }
                 } catch {
                   // Se falhar o parse, tratar como string simples
-                  imageUrl = buildSupabaseUrl(p.images);
+                  imageUrl = buildImageUrl(p.images);
                 }
               } else {
                 // String simples
-                imageUrl = buildSupabaseUrl(p.images);
+                imageUrl = buildImageUrl(p.images);
               }
             }
           }
           // Prioridade 2: Campo image_url
           else if (p.image_url) {
-            imageUrl = buildSupabaseUrl(p.image_url);
+            imageUrl = buildImageUrl(p.image_url);
           }
           // Prioridade 3: Campo image (caso exista)
           else if (p.image) {
-            imageUrl = buildSupabaseUrl(p.image);
+            imageUrl = buildImageUrl(p.image);
           }
 
           return {
@@ -190,7 +169,7 @@ export default function ProductSearch() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
             type="text"
-            placeholder="Buscar produto (nome, código...)"
+            placeholder="Buscar produto (nome, cÃ³digo...)"
             className="w-full rounded-xl border-0 py-3 pl-10 pr-4 text-base shadow-sm outline-none focus:ring-2 focus:ring-white/50 md:rounded-md md:text-lg"
             value={query}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
@@ -273,13 +252,13 @@ export default function ProductSearch() {
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Descrição do Item</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">DescriÃ§Ã£o do Item</label>
                 <input
                   type="text"
                   value={customItem.name}
                   onChange={(e) => setCustomItem({...customItem, name: e.target.value})}
                   className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-red-500 outline-none"
-                  placeholder="Ex: Formatação de PC"
+                  placeholder="Ex: FormataÃ§Ã£o de PC"
                   autoFocus
                 />
               </div>

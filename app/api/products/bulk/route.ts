@@ -1,8 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabaseAdmin, hasAdmin } from '@/lib/supabase-admin';
 import { turso, isTursoActive } from '@/lib/turso';
-
-const hasTurso = isTursoActive();
 
 type ProductPriceRow = { id: number; price: string | number };
 
@@ -14,59 +11,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No products selected' }, { status: 400 });
     }
 
-    if (!hasAdmin) {
+    if (!isTursoActive()) {
       return NextResponse.json({ error: 'Configuração ausente: banco de dados não inicializado' }, { status: 500 });
     }
 
     if (action === 'update_category') {
-      if (hasTurso && turso) {
-        try {
-          const placeholders = ids.map(() => '?').join(', ');
-          const params = [value, ...ids];
-          await turso.execute(
-            { sql: `UPDATE products SET category = ? WHERE id IN (${placeholders})`, args: params }
-          );
-          return NextResponse.json({ success: true, count: ids.length });
-        } catch (tursoErr: any) {
-          console.warn('[bulk] Turso update_category falhou, tentando Supabase:', tursoErr.message);
-        }
-      }
-
-      const { error } = await supabaseAdmin
-        .from('products')
-        .update({ category: value })
-        .in('id', ids);
-
-      if (error) throw error;
-
+      const placeholders = ids.map(() => '?').join(', ');
+      await turso.execute(
+        { sql: `UPDATE products SET category = ? WHERE id IN (${placeholders})`, args: [value, ...ids] }
+      );
       return NextResponse.json({ success: true, count: ids.length });
     }
 
     if (action === 'update_price') {
-      let products: ProductPriceRow[] = [];
       const percentage = parseFloat(value);
 
-      if (hasTurso && turso) {
-        try {
-          const placeholders = ids.map(() => '?').join(', ');
-          const rs = await turso.execute(
-            { sql: `SELECT id, price FROM products WHERE id IN (${placeholders})`, args: [...ids] }
-          );
-          products = rs.rows.map(r => ({ id: Number(r.id), price: r.price as string | number }));
-        } catch (tursoErr: any) {
-          console.warn('[bulk] Turso fetch prices falhou, tentando Supabase:', tursoErr.message);
-        }
-      }
-
-      if (products.length === 0) {
-        const { data: sbProducts, error: fetchError } = await supabaseAdmin
-          .from('products')
-          .select('id, price')
-          .in('id', ids);
-
-        if (fetchError) throw fetchError;
-        products = (sbProducts || []) as ProductPriceRow[];
-      }
+      const placeholders = ids.map(() => '?').join(', ');
+      const rs = await turso.execute(
+        { sql: `SELECT id, price FROM products WHERE id IN (${placeholders})`, args: [...ids] }
+      );
+      const products: ProductPriceRow[] = rs.rows.map(r => ({ id: Number(r.id), price: r.price as string | number }));
 
       const updates = products.map((p: ProductPriceRow) => {
         let priceNum = 0;
@@ -82,27 +46,9 @@ export async function POST(request: Request) {
         return { id: p.id, price: newPriceFormatted };
       });
 
-      if (hasTurso && turso) {
-        try {
-          const tx = turso.transaction ? await turso.transaction('write') : null;
-          for (const u of updates) {
-            if (tx) {
-              await tx.execute({ sql: `UPDATE products SET price = ? WHERE id = ?`, args: [u.price, u.id] });
-            } else {
-              await turso.execute({ sql: `UPDATE products SET price = ? WHERE id = ?`, args: [u.price, u.id] });
-            }
-          }
-          if (tx) await tx.commit();
-          return NextResponse.json({ success: true, count: ids.length });
-        } catch (tursoErr: any) {
-          console.warn('[bulk] Turso update_price falhou, tentando Supabase:', tursoErr.message);
-        }
+      for (const u of updates) {
+        await turso.execute({ sql: `UPDATE products SET price = ? WHERE id = ?`, args: [u.price, u.id] });
       }
-
-      const updatePromises = updates.map(u =>
-        supabaseAdmin.from('products').update({ price: u.price }).eq('id', u.id)
-      );
-      await Promise.all(updatePromises);
 
       return NextResponse.json({ success: true, count: ids.length });
     }

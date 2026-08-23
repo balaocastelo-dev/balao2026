@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { randomUUID } from "crypto";
+import { turso } from "@/lib/turso";
 
 export async function POST(req: Request) {
   try {
@@ -9,12 +10,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Email required" }, { status: 400 });
     }
 
-    // Insert into blacklist
-    const { error } = await supabaseAdmin
-      .from('unsubscribed_emails')
-      .upsert({ email }, { onConflict: 'email' });
-
-    if (error) throw error;
+    // Insert into blacklist (idempotent por e-mail)
+    await turso.execute({
+      sql: `INSERT INTO unsubscribed_emails (id, email) VALUES (?, ?)
+            ON CONFLICT(email) DO NOTHING`,
+      args: [randomUUID(), String(email)],
+    });
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

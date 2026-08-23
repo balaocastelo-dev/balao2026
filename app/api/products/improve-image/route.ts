@@ -1,24 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
-import { createClient } from "@supabase/supabase-js";
-
-// Helper to create admin client for storage upload
-const createAdminClient = () => {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    if (!serviceRoleKey) {
-        throw new Error("SUPABASE_SERVICE_ROLE_KEY não está definida.");
-    }
-
-    return createClient(supabaseUrl, serviceRoleKey, {
-        auth: {
-            persistSession: false,
-            autoRefreshToken: false,
-            detectSessionInUrl: false
-        }
-    });
-};
+import { mkdir, writeFile } from "fs/promises";
+import path from "path";
 
 export async function POST(req: NextRequest) {
   try {
@@ -68,33 +51,15 @@ export async function POST(req: NextRequest) {
     const outputBuffer = await processed.toBuffer();
 
     if (migrate) {
-        // 3. Upload to Supabase Storage if requested
-        const adminClient = createAdminClient();
+        // 3. Salva localmente em public/uploads/products/
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.webp`;
-        const bucket = "products";
+        const dir = path.join(process.cwd(), 'public', 'uploads', 'products');
+        await mkdir(dir, { recursive: true });
+        await writeFile(path.join(dir, fileName), outputBuffer);
 
-        // Ensure bucket exists
-        const { data: buckets } = await adminClient.storage.listBuckets();
-        if (!buckets?.some(b => b.name === bucket)) {
-            await adminClient.storage.createBucket(bucket, { public: true });
-        }
-
-        const { error: uploadError } = await adminClient.storage
-            .from(bucket)
-            .upload(fileName, outputBuffer, {
-                contentType: 'image/webp',
-                upsert: false
-            });
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = adminClient.storage
-            .from(bucket)
-            .getPublicUrl(fileName);
-
-        return NextResponse.json({ 
-            success: true, 
-            url: publicUrl,
+        return NextResponse.json({
+            success: true,
+            url: `/uploads/products/${fileName}`,
             originalUrl: imageUrl,
             improved: true,
             migrated: true

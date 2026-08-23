@@ -47,6 +47,8 @@ export interface CarouselImage {
   id: string;
   image_url: string;
   title?: string;
+  description?: string;
+  link?: string;
   display_order: number;
   active: boolean;
   created_at: string;

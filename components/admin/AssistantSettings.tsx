@@ -176,7 +176,7 @@ export default function AssistantSettings() {
             onChange={(e) => setConfig((c) => ({ ...c, fallbackStrategy: e.target.value }))}
             className="w-full p-2 border rounded-md"
           >
-            <option value="supabase">Supabase (preferido)</option>
+            <option value="supabase">Banco de dados (Turso)</option>
             <option value="site">Site (recuperar produtos genéricos)</option>
           </select>
           <p className="text-xs text-gray-500 mt-1">

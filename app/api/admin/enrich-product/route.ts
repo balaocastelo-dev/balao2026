@@ -1,6 +1,7 @@
 
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { randomUUID } from "crypto";
+import { turso } from "@/lib/turso";
 import { enrichProductWithAI } from "@/lib/ai-service";
 
 export async function POST(req: Request) {
@@ -72,30 +73,36 @@ export async function PUT(req: Request) {
         const errors = [];
 
         for (const update of updates) {
-            const { error } = await supabaseAdmin
-                .from('products')
-                .update({ 
-                    specs: update.specs,
-                    description: update.description,
-                    // updated_at is handled by trigger usually, but we can set it
-                })
-                .eq('id', update.id);
-
-            if (error) {
-                errors.push({ id: update.id, error: error.message });
-            } else {
-                successIds.push(update.id);
-                
-                // Log Audit
-                await supabaseAdmin.from('audit_logs').insert({
-                    action: 'AI_ENRICHMENT',
-                    entity_type: 'product',
-                    entity_id: update.id,
-                    details: {
-                        specs_updated: true,
-                        description_updated: !!update.description
-                    }
+            try {
+                await turso.execute({
+                    sql: `UPDATE products SET specs = ?, description = ?, updated_at = ? WHERE id = ?`,
+                    args: [
+                        typeof update.specs === 'object' ? JSON.stringify(update.specs) : update.specs,
+                        update.description ?? null,
+                        new Date().toISOString(),
+                        update.id,
+                    ],
                 });
+                successIds.push(update.id);
+
+                // Log Audit
+                await turso.execute({
+                    sql: `INSERT INTO audit_logs (id, action, entity_type, entity_id, details, created_at)
+                          VALUES (?, ?, ?, ?, ?, ?)`,
+                    args: [
+                        randomUUID(),
+                        'AI_ENRICHMENT',
+                        'product',
+                        update.id,
+                        JSON.stringify({
+                            specs_updated: true,
+                            description_updated: !!update.description
+                        }),
+                        new Date().toISOString(),
+                    ],
+                });
+            } catch (err: any) {
+                errors.push({ id: update.id, error: err.message });
             }
         }
 

@@ -1,17 +1,16 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin, hasAdmin } from "@/lib/supabase-admin";
+import { randomUUID } from "crypto";
+import { turso, isTursoActive } from "@/lib/turso";
 import { SITE_CONFIG } from "@/lib/config";
 
 export async function GET() {
   try {
-    if (hasAdmin) {
-      const { data, error } = await supabaseAdmin
-        .from('topbar_messages')
-        .select('text, active, display_order')
-        .eq('active', true)
-        .order('display_order', { ascending: true });
-      if (!error && data) {
-        const messages = data.map((r: any) => r.text).filter(Boolean);
+    if (isTursoActive()) {
+      const res = await turso.execute(
+        "SELECT text FROM topbar_messages WHERE active = 1 ORDER BY display_order ASC"
+      );
+      const messages = res.rows.map((r: any) => r.text).filter(Boolean);
+      if (messages.length > 0) {
         return NextResponse.json({ messages });
       }
     }
@@ -29,26 +28,22 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    if (!hasAdmin) {
-      return NextResponse.json({ error: "Supabase admin não configurado" }, { status: 501 });
+    if (!isTursoActive()) {
+      return NextResponse.json({ error: "Banco de dados não configurado" }, { status: 501 });
     }
     const body = await req.json();
     const messages: string[] = Array.isArray(body?.messages) ? body.messages : [];
     const clean = messages.map(m => (typeof m === 'string' ? m.trim() : '')).filter(m => m.length > 0);
 
-    // Simple approach: clear and insert ordered
-    const { error: delError } = await supabaseAdmin.from('topbar_messages').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    if (delError) {
-      // If table doesn't exist yet, ignore and continue to insert which will fail as well; user should run SQL migration.
-      // We still return an error for transparency.
-    }
+    // Abordagem simples: limpar e inserir ordenado
+    await turso.execute("DELETE FROM topbar_messages");
 
     if (clean.length > 0) {
-      const rows = clean.map((text, idx) => ({ text, active: true, display_order: idx }));
-      const { error: insError } = await supabaseAdmin.from('topbar_messages').insert(rows);
-      if (insError) {
-        return NextResponse.json({ error: insError.message }, { status: 500 });
-      }
+      const stmts = clean.map((text, idx) => ({
+        sql: "INSERT INTO topbar_messages (id, text, active, display_order) VALUES (?, ?, 1, ?)",
+        args: [randomUUID(), text, idx],
+      }));
+      await turso.batch(stmts, 'write');
     }
     return NextResponse.json({ success: true });
   } catch (e: any) {

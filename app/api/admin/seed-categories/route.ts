@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { randomUUID } from "crypto";
+import { turso } from "@/lib/turso";
 
 export const dynamic = 'force-dynamic';
 
@@ -223,55 +224,38 @@ const SEED_DATA: CategorySeed[] = [
 
 export async function GET() {
   try {
-    // 1. Clear existing categories to match SQL "factory reset" behavior
-    await supabaseAdmin.from("categories").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+    // 1. Limpa as categorias existentes (comportamento de "factory reset")
+    await turso.execute("DELETE FROM categories");
 
     let displayOrder = 10;
 
     for (const category of SEED_DATA) {
-      // Insert parent
-      const { data: parent, error: parentError } = await supabaseAdmin
-        .from("categories")
-        .upsert(
-          {
-            name: category.name,
-            slug: category.slug,
-            icon: category.icon,
-            display_order: displayOrder,
-            parent_id: null,
-            active: true
-          },
-          { onConflict: "slug" }
-        )
-        .select()
-        .single();
-
-      if (parentError) {
+      // Insere a categoria pai
+      const parentId = randomUUID();
+      try {
+        await turso.execute({
+          sql: `INSERT INTO categories (id, name, slug, icon, display_order, parent_id, active)
+                VALUES (?, ?, ?, ?, ?, NULL, 1)`,
+          args: [parentId, category.name, category.slug, category.icon ?? null, displayOrder],
+        });
+      } catch (parentError) {
         console.error(`Error inserting ${category.name}:`, parentError);
         continue;
       }
 
       displayOrder += 10;
 
-      // Insert children
+      // Insere as subcategorias
       if (category.children) {
         let childOrder = 0;
         for (const child of category.children) {
-          const { error: childError } = await supabaseAdmin
-            .from("categories")
-            .upsert(
-              {
-                name: child.name,
-                slug: child.slug,
-                parent_id: parent.id,
-                display_order: childOrder,
-                icon: child.icon,
-                active: true
-              },
-              { onConflict: "slug" }
-            );
-
-          if (childError) {
+          try {
+            await turso.execute({
+              sql: `INSERT INTO categories (id, name, slug, icon, display_order, parent_id, active)
+                    VALUES (?, ?, ?, ?, ?, ?, 1)`,
+              args: [randomUUID(), child.name, child.slug, child.icon ?? null, childOrder, parentId],
+            });
+          } catch (childError) {
             console.error(`Error inserting ${child.name}:`, childError);
           }
           childOrder++;

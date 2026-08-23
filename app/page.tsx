@@ -13,7 +13,7 @@ import { getCachedCategories, getCachedCarouselImages, getCachedHomeBlocks, getC
 import { listBlogPostsForPage } from "@/lib/blog-store";
 import { pickPcHeroImage } from "@/lib/vitrine/core";
 import type { VitrineCategory } from "@/lib/vitrine/types";
-import { createClient } from "@/lib/supabase/server";
+import { turso } from "@/lib/turso";
 import { getProductHref, parsePriceToNumber, Product, type Category } from "@/lib/utils";
 import type { Metadata } from "next";
 import { SITE_CONFIG } from "@/lib/config";
@@ -256,34 +256,29 @@ export default async function Home(props: {
     ]);
 
     const rawSearchProducts = await (async () => {
-      const supabase = await createClient();
-      const searchTerms = search.trim().split(/\s+/).join(' & ');
+      const searchTerms = search.trim().split(/\s+/).filter((t) => t.length > 0);
 
-      const { data, error } = await supabase.rpc('search_products_fts', {
-        query_text: searchTerms,
-        limit_count: 50
+      const conditions = searchTerms
+        .map(() => '(LOWER(name) LIKE ? OR LOWER(description) LIKE ?)')
+        .join(' AND ');
+      const args: string[] = [];
+      searchTerms.forEach((term) => {
+        const like = `%${term.toLowerCase()}%`;
+        args.push(like, like);
       });
 
-      if (error) {
-        console.error("Search RPC error:", error);
-        let queryBuilder = supabase.from('products').select('*');
-
-        const terms = search.trim().split(/\s+/);
-        terms.forEach(term => {
-          if (term.length > 0) {
-            queryBuilder = queryBuilder.ilike('name', `%${term}%`);
-          }
+      try {
+        const res = await turso.execute({
+          sql: `SELECT * FROM products WHERE ${conditions} LIMIT 50`,
+          args,
         });
-
-        const { data: fallbackData } = await queryBuilder.limit(50);
-        return ((fallbackData as Product[]) || []).sort(
+        return ((res.rows as unknown as Product[]) || []).sort(
           (a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price)
         );
+      } catch (err) {
+        console.error("Search error:", err);
+        return [] as Product[];
       }
-
-      return ((data as Product[]) || []).sort(
-        (a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price)
-      );
     })();
 
     // Deduplicate by name

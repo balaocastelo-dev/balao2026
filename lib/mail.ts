@@ -1,7 +1,6 @@
 
 import nodemailer from 'nodemailer';
 import { Resend } from 'resend';
-import { supabaseAdmin } from './supabase-admin';
 import { getAdminNotificationTemplate, getNewOrderAdminTemplate } from "@/lib/mail-templates";
 import { SITE_CONFIG } from "@/lib/config";
 
@@ -209,14 +208,11 @@ export async function sendNewOrderNotification(data: {
 }
 
 /**
- * Loga o evento de e-mail no Supabase
+ * Loga o evento de e-mail
  */
 async function logEmail(event: string, recipient: string, status: string, errorMessage: string | null, metadata: any) {
     try {
-        // Tenta gravar no Supabase se possível, mas não falha o envio se der erro aqui
-        // (Assumindo que existe uma tabela 'email_logs', se não existir, vai falhar silenciosamente no console)
-        // await supabaseAdmin.from('email_logs').insert({ ... })
-        // Implementação simplificada para não travar:
+        // Log simplificado para não travar o envio:
         // console.log(`[Mail Log] ${event} -> ${recipient} (${status})`);
     } catch (e) {
         console.error('[Mail Log Error]', e);

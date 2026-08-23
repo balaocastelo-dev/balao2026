@@ -74,7 +74,7 @@ export default function PaymentModal() {
         throw new Error(res.error);
       }
 
-      setOrderId(res.orderId);
+      setOrderId(res.orderId ?? null);
       setSuccess(true);
       
     } catch (err: any) {

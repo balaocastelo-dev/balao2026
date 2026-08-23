@@ -1,22 +1,7 @@
-import { createClient } from "@supabase/supabase-js";
+﻿import { mkdir, writeFile, readdir } from "fs/promises";
+import path from "path";
 import { VitrinePageRecord } from "./types";
 import { pickComponentImage, pickPcHeroImage } from "./core";
-
-function getSupabaseAdminClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceKey =
-    process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.SERVICE_ROLE_KEY ||
-    process.env.SUPABASE_SERVICE_KEY;
-
-  if (!supabaseUrl || !serviceKey) {
-    throw new Error("Supabase admin não configurado para upload de imagens.");
-  }
-
-  return createClient(supabaseUrl, serviceKey, {
-    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
-  });
-}
 
 function getReplicateToken() {
   return process.env.REPLICATE_API_TOKEN || process.env.REPLICATE_TOKEN || "";
@@ -42,24 +27,16 @@ function stableIndex(seed: string, modulo: number) {
 }
 
 export function getVitrineImageGenerationDiagnostics() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-  const serviceKey =
-    process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.SERVICE_ROLE_KEY ||
-    process.env.SUPABASE_SERVICE_KEY ||
-    "";
   const replicateToken = getReplicateToken();
 
   return {
-    hasSupabaseUrl: Boolean(supabaseUrl),
-    hasSupabaseServiceRoleKey: Boolean(serviceKey),
+    hasUploadsDir: true,
     hasReplicateToken: Boolean(replicateToken),
     replicateModel: getReplicateModel(),
     replicatePromptKey: getReplicatePromptKey(),
     usesReplicateVersionOverride: Boolean(process.env.REPLICATE_IMAGE_VERSION),
   };
 }
-
 let replicateVersionCache: Record<string, string> | null = null;
 let libraryCache: Record<string, string[]> | null = null;
 
@@ -67,10 +44,10 @@ async function getReplicateLatestVersionId(model: string) {
   if (replicateVersionCache && replicateVersionCache[model]) return replicateVersionCache[model];
 
   const token = getReplicateToken();
-  if (!token) throw new Error("REPLICATE_API_TOKEN não configurado.");
+  if (!token) throw new Error("REPLICATE_API_TOKEN nÃ£o configurado.");
 
   const [owner, name] = model.split("/");
-  if (!owner || !name) throw new Error("REPLICATE_IMAGE_MODEL inválido.");
+  if (!owner || !name) throw new Error("REPLICATE_IMAGE_MODEL invÃ¡lido.");
 
   const res = await fetch(`https://api.replicate.com/v1/models/${owner}/${name}`, {
     headers: {
@@ -83,7 +60,7 @@ async function getReplicateLatestVersionId(model: string) {
   if (!res.ok) throw new Error("Falha ao acessar modelo de imagem.");
   const data: any = await res.json().catch(() => null);
   const versionId = String(data?.latest_version?.id || data?.latest_version?.version || "").trim();
-  if (!versionId) throw new Error("Modelo não retornou latest_version.id.");
+  if (!versionId) throw new Error("Modelo nÃ£o retornou latest_version.id.");
 
   replicateVersionCache = replicateVersionCache || {};
   replicateVersionCache[model] = versionId;
@@ -112,10 +89,10 @@ function pickOutputUrl(pred: any) {
 
 async function createPredictionViaModelsEndpoint(model: string, prompt: string) {
   const token = getReplicateToken();
-  if (!token) throw new Error("REPLICATE_API_TOKEN não configurado.");
+  if (!token) throw new Error("REPLICATE_API_TOKEN nÃ£o configurado.");
 
   const [owner, name] = model.split("/");
-  if (!owner || !name) throw new Error("REPLICATE_IMAGE_MODEL inválido.");
+  if (!owner || !name) throw new Error("REPLICATE_IMAGE_MODEL invÃ¡lido.");
 
   const res = await fetch(`https://api.replicate.com/v1/models/${owner}/${name}/predictions`, {
     method: "POST",
@@ -134,17 +111,17 @@ async function createPredictionViaModelsEndpoint(model: string, prompt: string) 
     throw new Error(txt || "Falha ao criar prediction (models endpoint).");
   }
   const pred: any = await res.json().catch(() => null);
-  if (!pred) throw new Error("Resposta inválida do Replicate.");
+  if (!pred) throw new Error("Resposta invÃ¡lida do Replicate.");
   if (pred?.status && pred.status !== "succeeded" && pred.status !== "successful") {
     const err = String(pred?.error || "").trim();
-    throw new Error(err || `Prediction não concluída: ${pred.status}`);
+    throw new Error(err || `Prediction nÃ£o concluÃ­da: ${pred.status}`);
   }
   return pred;
 }
 
 async function generateImageUrlFromReplicate(prompt: string) {
   const token = getReplicateToken();
-  if (!token) throw new Error("REPLICATE_API_TOKEN não configurado.");
+  if (!token) throw new Error("REPLICATE_API_TOKEN nÃ£o configurado.");
 
   const model = getReplicateModel();
 
@@ -173,13 +150,13 @@ async function generateImageUrlFromReplicate(prompt: string) {
     throw new Error(txt || "Falha ao gerar imagem (Replicate).");
   }
   const pred: any = await res.json().catch(() => null);
-  if (!pred) throw new Error("Resposta inválida do Replicate.");
+  if (!pred) throw new Error("Resposta invÃ¡lida do Replicate.");
   if (pred?.status && pred.status !== "succeeded" && pred.status !== "successful") {
     const err = String(pred?.error || "").trim();
-    throw new Error(err || `Prediction não concluída: ${pred.status}`);
+    throw new Error(err || `Prediction nÃ£o concluÃ­da: ${pred.status}`);
   }
   const url = pickOutputUrl(pred);
-  if (!url) throw new Error("Replicate não retornou URL de imagem.");
+  if (!url) throw new Error("Replicate nÃ£o retornou URL de imagem.");
   return url;
 }
 
@@ -191,67 +168,31 @@ async function downloadToBuffer(url: string) {
   return { buf, contentType };
 }
 
-async function uploadToSupabaseStorage(path: string, buf: Buffer, contentType: string) {
-  const admin = getSupabaseAdminClient();
-  const bucket = "vitrine";
-
-  try {
-    const { data: buckets } = await admin.storage.listBuckets();
-    const exists = Boolean(buckets?.some((b: any) => b.name === bucket));
-    if (!exists) {
-      await admin.storage.createBucket(bucket, { public: true });
-    }
-
-    await admin.storage.updateBucket(bucket, {
-      public: true,
-      fileSizeLimit: 10485760,
-      allowedMimeTypes: ["image/png", "image/jpeg", "image/webp", "image/gif"],
-    });
-  } catch {}
-
-  const { error: uploadError } = await admin.storage.from(bucket).upload(path, buf, {
-    contentType,
-    upsert: true,
-  });
-  if (uploadError) throw new Error(uploadError.message);
-
-  const { data } = admin.storage.from(bucket).getPublicUrl(path);
-  const publicUrl = data?.publicUrl || "";
-  if (!publicUrl) throw new Error("Falha ao obter URL pública.");
-
-  try {
-    const head = await fetch(publicUrl, { method: "HEAD", cache: "no-store" });
-    if (!head.ok) throw new Error("not-public");
-  } catch {
-    await admin.storage.updateBucket(bucket, { public: true }).catch(() => null);
-  }
-
-  return publicUrl;
+async function uploadToLocalUploads(relPath: string, buf: Buffer, contentType: string) {
+  const dir = path.join(process.cwd(), "public", "uploads", path.dirname(relPath));
+  await mkdir(dir, { recursive: true });
+  const dest = path.join(process.cwd(), "public", "uploads", relPath);
+  await writeFile(dest, buf);
+  return `/uploads/${relPath}`;
 }
-
 async function listLibraryUrls(folder: string) {
-  const admin = getSupabaseAdminClient();
-  const bucket = "vitrine";
-  const prefix = `library/${folder}`;
-
   libraryCache = libraryCache || {};
-  if (libraryCache[prefix]) return libraryCache[prefix];
+  if (libraryCache[folder]) return libraryCache[folder];
 
-  const { data, error } = await admin.storage.from(bucket).list(prefix, { limit: 100, sortBy: { column: "name", order: "asc" } } as any);
-  if (error) return [];
-  const names = (data || [])
-    .map((o: any) => String(o?.name || "").trim())
-    .filter(Boolean)
-    .filter((n: string) => !n.endsWith("/"));
-
-  const urls = names
-    .map((name: string) => admin.storage.from(bucket).getPublicUrl(`${prefix}/${name}`).data?.publicUrl || "")
-    .filter(Boolean);
-
-  libraryCache[prefix] = urls;
-  return urls;
+  try {
+    const dir = path.join(process.cwd(), "public", "uploads", "vitrine", "library", folder);
+    const entries = await readdir(dir);
+    const urls = entries
+      .filter((n: string) => !n.startsWith("."))
+      .sort()
+      .slice(0, 100)
+      .map((name: string) => `/uploads/vitrine/library/${folder}/${encodeURIComponent(name)}`);
+    libraryCache[folder] = urls;
+    return urls;
+  } catch {
+    return [];
+  }
 }
-
 async function pickLibraryImageUrl(key: string, page: VitrinePageRecord) {
   const folder =
     key === "hero" ? "pcs" : key === "cpu" ? "cpu" : key === "gpu" ? "gpu" : key === "ram" ? "ram" : key === "storage" ? "storage" : key === "cooling" ? "cooling" : "";
@@ -266,12 +207,12 @@ async function pickLibraryImageUrl(key: string, page: VitrinePageRecord) {
 function baseStylePrompt() {
   return [
     "foto de produto premium",
-    "estúdio, fundo clean claro",
-    "iluminação suave realista",
-    "alta definição",
+    "estÃºdio, fundo clean claro",
+    "iluminaÃ§Ã£o suave realista",
+    "alta definiÃ§Ã£o",
     "sem texto",
     "sem logo",
-    "sem marcas registradas visíveis",
+    "sem marcas registradas visÃ­veis",
     "sem watermark",
   ].join(", ");
 }
@@ -290,13 +231,13 @@ export function buildVitrineImagePrompts(page: VitrinePageRecord) {
 
   const gpu = page.placa_video || "";
   prompts.gpu = gpu
-    ? `Placa de vídeo de computador (${gpu}), fotorrealista, ${baseStylePrompt()}`
-    : `Placa de vídeo de computador premium, fotorrealista, ${baseStylePrompt()}`;
+    ? `Placa de vÃ­deo de computador (${gpu}), fotorrealista, ${baseStylePrompt()}`
+    : `Placa de vÃ­deo de computador premium, fotorrealista, ${baseStylePrompt()}`;
 
   const ram = page.memoria_ram || "";
   prompts.ram = ram
-    ? `Memória RAM de computador (${ram}), fotorrealista, ${baseStylePrompt()}`
-    : `Memória RAM de computador, fotorrealista, ${baseStylePrompt()}`;
+    ? `MemÃ³ria RAM de computador (${ram}), fotorrealista, ${baseStylePrompt()}`
+    : `MemÃ³ria RAM de computador, fotorrealista, ${baseStylePrompt()}`;
 
   const storage = page.armazenamento || "";
   prompts.storage = storage
@@ -312,7 +253,7 @@ export function buildVitrineImagePrompts(page: VitrinePageRecord) {
     prompts.case = `Gabinete de PC (${extras.gabinete}), fotorrealista, ${baseStylePrompt()}`;
   }
   if (extras.placa_mae) {
-    prompts.motherboard = `Placa-mãe de computador (${extras.placa_mae}), fotorrealista, ${baseStylePrompt()}`;
+    prompts.motherboard = `Placa-mÃ£e de computador (${extras.placa_mae}), fotorrealista, ${baseStylePrompt()}`;
   }
   if (extras.fonte) {
     prompts.psu = `Fonte ATX de computador (${extras.fonte}), fotorrealista, ${baseStylePrompt()}`;
@@ -391,7 +332,7 @@ export async function generateAndUploadVitrineImages(input: {
       if (!generatedUrl) throw new Error(lastErr || "Falha ao gerar imagem");
       const { buf, contentType } = await downloadToBuffer(generatedUrl);
       const filePath = `vitrine/${input.page.id}/${key}.png`;
-      const publicUrl = await uploadToSupabaseStorage(filePath, buf, contentType);
+      const publicUrl = await uploadToLocalUploads(filePath, buf, contentType);
       images[key] = publicUrl;
     } catch (e: any) {
       const libraryUrl = await pickLibraryImageUrl(key, input.page).catch(() => "");

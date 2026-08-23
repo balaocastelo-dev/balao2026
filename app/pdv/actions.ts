@@ -50,6 +50,9 @@ export async function createOrder({
     }));
 
     const order = await createDbOrder(orderData, itemsData);
+    if (!order) {
+      throw new Error("Falha ao criar o pedido no banco de dados");
+    }
 
     const primaryProductId = typeof itemsData?.[0]?.product_id === "string" ? itemsData[0].product_id : "";
     const primaryProduct = primaryProductId ? await getProductById(primaryProductId) : null;
