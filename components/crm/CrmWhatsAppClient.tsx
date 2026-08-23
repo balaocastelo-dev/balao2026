@@ -208,7 +208,10 @@ export default function CrmWhatsAppClient() {
     }
     return ETIQUETAS_BASE;
   });
-  const [produtosCatalogo, setProdutosCatalogo] = useState<CrmProdutoCatalogo[]>(PRODUTOS_CATALOGO_BASE);
+  // Real Database Catalog & Pricing Modes (Venda vs Custo)
+  const [produtosCatalogo, setProdutosCatalogo] = useState<CrmProdutoCatalogo[]>([]);
+  const [tipoPrecoCatalogo, setTipoPrecoCatalogo] = useState<"venda" | "custo">("venda");
+  const [catalogoCarregando, setCatalogoCarregando] = useState(false);
   const [buscaCatalogo, setBuscaCatalogo] = useState("");
   const [fornecedorFiltro, setFornecedorFiltro] = useState("todos");
 
@@ -292,42 +295,60 @@ export default function CrmWhatsAppClient() {
     }
   }, [chats, mensagens, kanbanColunas, respostas, etiquetas, vendedores, vendedorAtivoId]);
 
-  // Load Real Catalog
-  useEffect(() => {
-    fetch("/api/products")
+  // Load Real Catalog from Database (Shared with Website)
+  const carregarCatalogoBanco = () => {
+    setCatalogoCarregando(true);
+    fetch(`/api/products?t=${Date.now()}`)
       .then((r) => r.json())
       .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          const list: CrmProdutoCatalogo[] = data.slice(0, 60).map((p: any, idx: number) => {
+        if (Array.isArray(data)) {
+          const list: CrmProdutoCatalogo[] = data.map((p: any) => {
             const precoNum =
               typeof p.price === "number"
                 ? p.price
-                : parseFloat(String(p.price).replace(/[^0-9.]/g, "")) || 499;
-            const custoNum = Math.round(precoNum * 0.76);
-            const fornecedores = ["Balão", "TechSupri", "Robson", "Markin"];
-            const fornecedor = fornecedores[idx % fornecedores.length];
+                : parseFloat(String(p.price).replace(/[^0-9.]/g, "")) || 0;
+            const custoNum =
+              typeof p.cost === "number" && p.cost > 0
+                ? p.cost
+                : Math.round(precoNum * 0.75);
+            const margem =
+              custoNum > 0 ? Math.round(((precoNum - custoNum) / custoNum) * 100) : 25;
+            const fornecedor = p.supplier || p.brand || "Estoque Balão";
+            const precoFmt =
+              typeof p.price === "number"
+                ? `R$ ${p.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
+                : String(p.price || `R$ ${precoNum.toFixed(2)}`);
+
             return {
               id: String(p.id),
-              nome: p.name,
+              nome: p.name || "Produto Balão",
               preco: precoNum,
               custo: custoNum,
-              margem: 28,
+              margem,
               fornecedor,
-              precoFormatado:
-                typeof p.price === "number"
-                  ? `R$ ${p.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
-                  : String(p.price || "R$ 499,00"),
+              precoFormatado: precoFmt,
               categoria: p.category || "Informática",
-              imagem:
-                p.image ||
-                "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=500&auto=format&fit=crop&q=80",
-              specs: Array.isArray(p.specs) ? p.specs : Object.values(p.specs || {}).map(String),
+              imagem: p.image || p.image_urls?.[0] || "",
+              specs: Array.isArray(p.specs)
+                ? p.specs
+                : typeof p.specs === "object" && p.specs
+                ? Object.entries(p.specs).map(([k, v]) => `${k}: ${v}`)
+                : [],
             };
           });
           setProdutosCatalogo(list);
         }
       })
-      .catch(() => {});
+      .catch((err) => {
+        console.error("Falha ao carregar produtos do banco:", err);
+      })
+      .finally(() => {
+        setCatalogoCarregando(false);
+      });
+  };
+
+  useEffect(() => {
+    carregarCatalogoBanco();
   }, []);
 
   // Poll Real WhatsApp Status only when disconnected
@@ -1957,17 +1978,63 @@ export default function CrmWhatsAppClient() {
 
               {/* Conteúdo da Aba */}
               <div className="flex-1 overflow-y-auto p-3 text-xs space-y-3">
-                {/* ABA 1: CATÁLOGO (ENVIO DIRETO AO CHAT) */}
+                {/* ABA 1: CATÁLOGO (SINCRONIZADO COM O SITE / BANCO DE DADOS) */}
                 {abaAtual === "catalogo" && (
                   <div className="space-y-3">
-                    <div className="bg-[#e7f6ec] border border-[#0f9d58]/40 rounded-xl p-2.5 text-[11px] text-[#0a6e3d] font-semibold">
-                      💡 Clique em <b>⚡ Enviar Direto</b> para enviar a foto e oferta do produto imediatamente no WhatsApp sem passar pelo digitador!
+                    {/* Seletor de Modo: Preço de Venda (Site) vs Preço de Custo (+ Lucro) */}
+                    <div className="bg-[#f0f2f5] p-1 rounded-xl border border-[#e3e3e3] flex gap-1 text-xs">
+                      <button
+                        onClick={() => setTipoPrecoCatalogo("venda")}
+                        className={`flex-1 py-2 px-2 rounded-lg font-bold transition-all cursor-pointer text-center ${
+                          tipoPrecoCatalogo === "venda"
+                            ? "bg-[#0f9d58] text-white shadow-xs"
+                            : "text-[#5f6368] hover:bg-white"
+                        }`}
+                      >
+                        🏷️ Preço de Venda (Site)
+                      </button>
+                      <button
+                        onClick={() => setTipoPrecoCatalogo("custo")}
+                        className={`flex-1 py-2 px-2 rounded-lg font-bold transition-all cursor-pointer text-center ${
+                          tipoPrecoCatalogo === "custo"
+                            ? "bg-[#d97706] text-white shadow-xs"
+                            : "text-[#5f6368] hover:bg-white"
+                        }`}
+                      >
+                        📦 Preço de Custo (+ Margem)
+                      </button>
+                    </div>
+
+                    {/* Explicação do Modo Ativo */}
+                    <div
+                      className={`rounded-xl p-2.5 text-[11px] font-semibold flex items-center justify-between border ${
+                        tipoPrecoCatalogo === "venda"
+                          ? "bg-[#e7f6ec] border-[#0f9d58]/40 text-[#0a6e3d]"
+                          : "bg-[#fff8e1] border-[#f2c94c] text-[#7a5c00]"
+                      }`}
+                    >
+                      <span>
+                        {tipoPrecoCatalogo === "venda"
+                          ? "🏷️ Modo Venda: Envia o valor exato cadastrado no site/banco de dados."
+                          : "⚠️ Modo Custo: NUNCA envia no custo! Solicita o acréscimo de lucro antes de enviar."}
+                      </span>
+                      <button
+                        onClick={() => {
+                          carregarCatalogoBanco();
+                          showToast("Catálogo atualizado com o banco de dados do site!");
+                        }}
+                        disabled={catalogoCarregando}
+                        className="bg-white hover:bg-gray-100 text-[#202124] border border-gray-300 px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer shrink-0 ml-2"
+                        title="Atualizar produtos direto do banco de dados"
+                      >
+                        {catalogoCarregando ? "Carregando…" : "🔄 Atualizar"}
+                      </button>
                     </div>
 
                     <div className="flex gap-2">
                       <input
                         type="text"
-                        placeholder="Buscar produto…"
+                        placeholder="Buscar produto no banco de dados…"
                         value={buscaCatalogo}
                         onChange={(e) => setBuscaCatalogo(e.target.value)}
                         className="flex-1 px-3 py-1.5 border border-[#e3e3e3] rounded-full text-xs outline-none focus:border-[#0f9d58]"
@@ -1977,7 +2044,7 @@ export default function CrmWhatsAppClient() {
                         onChange={(e) => setFornecedorFiltro(e.target.value)}
                         className="px-2 py-1.5 border border-[#e3e3e3] rounded-lg text-xs outline-none"
                       >
-                        <option value="todos">Todos</option>
+                        <option value="todos">Todos Fornec.</option>
                         <option value="Balão">Balão</option>
                         <option value="TechSupri">TechSupri</option>
                         <option value="Robson">Robson</option>
@@ -1985,65 +2052,104 @@ export default function CrmWhatsAppClient() {
                       </select>
                     </div>
 
-                    <div className="space-y-2.5">
-                      {produtosCatalogo
-                        .filter((p) => {
-                          const matchBusca =
-                            !buscaCatalogo ||
-                            p.nome.toLowerCase().includes(buscaCatalogo.toLowerCase()) ||
-                            p.categoria.toLowerCase().includes(buscaCatalogo.toLowerCase());
-                          const matchFornec =
-                            fornecedorFiltro === "todos" ||
-                            (p.fornecedor || "Balão").toLowerCase() === fornecedorFiltro.toLowerCase();
-                          return matchBusca && matchFornec;
-                        })
-                        .map((prod) => (
-                          <div
-                            key={prod.id}
-                            className="p-2.5 border border-[#e3e3e3] hover:border-[#0f9d58] rounded-xl transition-all bg-white shadow-xs flex flex-col gap-2"
-                          >
-                            <div className="flex items-center gap-2.5">
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img
-                                src={prod.imagem}
-                                alt=""
-                                className="w-14 h-14 object-cover rounded-lg bg-gray-100 shrink-0 border border-[#e3e3e3]"
-                              />
-                              <div className="flex-1 min-w-0">
-                                <h5 className="font-semibold text-xs text-[#202124] line-clamp-2">
-                                  {prod.nome}
-                                </h5>
-                                <div className="flex items-center justify-between mt-1">
-                                  <span className="font-bold text-sm text-[#0a6e3d]">
-                                    {prod.precoFormatado}
-                                  </span>
-                                  <span className="text-[10px] text-[#5f6368] bg-[#f0f2f5] px-1.5 py-0.5 rounded">
-                                    Custo: R$ {prod.custo} ({prod.fornecedor || "Balão"})
-                                  </span>
+                    {produtosCatalogo.length === 0 ? (
+                      <div className="text-center py-8 bg-[#f9fafb] rounded-xl border border-dashed border-[#e3e3e3]">
+                        <p className="text-xs text-[#5f6368]">Nenhum produto cadastrado no banco de dados.</p>
+                        <button
+                          onClick={carregarCatalogoBanco}
+                          className="mt-2 bg-[#0f9d58] text-white px-3 py-1.5 rounded-lg text-xs font-bold"
+                        >
+                          🔄 Sincronizar com o Site
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="space-y-2.5">
+                        {produtosCatalogo
+                          .filter((p) => {
+                            const matchBusca =
+                              !buscaCatalogo ||
+                              p.nome.toLowerCase().includes(buscaCatalogo.toLowerCase()) ||
+                              p.categoria.toLowerCase().includes(buscaCatalogo.toLowerCase());
+                            const matchFornec =
+                              fornecedorFiltro === "todos" ||
+                              (p.fornecedor || "Balão").toLowerCase() === fornecedorFiltro.toLowerCase();
+                            return matchBusca && matchFornec;
+                          })
+                          .map((prod) => (
+                            <div
+                              key={prod.id}
+                              className="p-2.5 border border-[#e3e3e3] hover:border-[#0f9d58] rounded-xl transition-all bg-white shadow-xs flex flex-col gap-2"
+                            >
+                              <div className="flex items-center gap-2.5">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                  src={prod.imagem || "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=300"}
+                                  alt=""
+                                  className="w-14 h-14 object-cover rounded-lg bg-gray-100 shrink-0 border border-[#e3e3e3]"
+                                />
+                                <div className="flex-1 min-w-0">
+                                  <h5 className="font-semibold text-xs text-[#202124] line-clamp-2">
+                                    {prod.nome}
+                                  </h5>
+                                  <div className="flex items-center justify-between mt-1">
+                                    {tipoPrecoCatalogo === "venda" ? (
+                                      <>
+                                        <span className="font-bold text-sm text-[#0a6e3d]">
+                                          {prod.precoFormatado}
+                                        </span>
+                                        <span className="text-[10px] text-[#0f9d58] bg-[#e7f6ec] font-bold px-1.5 py-0.5 rounded">
+                                          Preço do Site
+                                        </span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <span className="font-bold text-sm text-[#b45309]">
+                                          Custo: R$ {prod.custo?.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                                        </span>
+                                        <span className="text-[10px] text-[#b45309] bg-[#fff8e1] font-bold px-1.5 py-0.5 rounded">
+                                          ⚠️ Custo Interno
+                                        </span>
+                                      </>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
-                            </div>
 
-                            {/* Action Buttons: Enviar Direto vs Ajustar Preço */}
-                            <div className="flex gap-1.5 pt-1 border-t border-[#f0f2f5]">
-                              <button
-                                onClick={() => enviarProdutoDiretoAoChat(prod)}
-                                className="flex-1 bg-[#0f9d58] hover:bg-[#0a6e3d] text-white py-1.5 px-2 rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1 shadow-xs"
-                                title="Enviar direto ao chat com foto"
-                              >
-                                ⚡ Enviar Direto
-                              </button>
-                              <button
-                                onClick={() => abrirModalProduto(prod)}
-                                className="bg-[#f0f2f5] hover:bg-[#e8eaed] text-[#202124] py-1.5 px-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
-                                title="Ajustar margem ou observação antes de enviar"
-                              >
-                                ⚙️ Ajustar
-                              </button>
+                              {/* Ação de Envio baseada no modo selecionado */}
+                              <div className="pt-1 border-t border-[#f0f2f5]">
+                                {tipoPrecoCatalogo === "venda" ? (
+                                  <button
+                                    onClick={() => enviarProdutoDiretoAoChat(prod, prod.preco)}
+                                    className="w-full bg-[#0f9d58] hover:bg-[#0a6e3d] text-white py-1.5 px-2 rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1 shadow-xs"
+                                    title="Enviar exatamente o preço de venda do site no WhatsApp"
+                                  >
+                                    ⚡ Enviar Preço do Site ({prod.precoFormatado})
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() => {
+                                      setProdutoModal(prod);
+                                      const custo = prod.custo || Math.round(prod.preco * 0.75);
+                                      const margemPadrao = 25;
+                                      const precoVendaCalc = Math.round(custo * (1 + margemPadrao / 100));
+                                      setMpCusto(String(custo));
+                                      setMpMargem(String(margemPadrao));
+                                      setMpPreco(String(precoVendaCalc));
+                                      setMpObs("");
+                                      setMpOrigem("margem");
+                                      setModalProdutoAberto(true);
+                                    }}
+                                    className="w-full bg-[#d97706] hover:bg-[#b45309] text-white py-1.5 px-2 rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1 shadow-xs"
+                                    title="Adicionar valor ao custo antes de enviar ao cliente"
+                                  >
+                                    ➕ Adicionar Lucro e Enviar ao WhatsApp
+                                  </button>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        ))}
-                    </div>
+                          ))}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -3023,13 +3129,19 @@ export default function CrmWhatsAppClient() {
               </div>
             </div>
 
-            <div className="bg-[#fff8e1] border border-[#f2c94c] rounded-lg p-2 text-[11px] text-[#7a5c00]">
-              ⚠️ O valor abaixo é o <b>CUSTO</b> do fornecedor. Defina a margem ou o preço de venda para concluir o envio.
+            <div className="bg-[#fee2e2] border-2 border-[#ef4444] rounded-xl p-3 text-xs text-[#991b1b] font-semibold space-y-1">
+              <div className="flex items-center gap-1.5 text-red-700 font-bold text-xs uppercase">
+                ⛔ ATENÇÃO: NUNCA ENVIE PELO PREÇO DE CUSTO!
+              </div>
+              <p className="text-[11px] leading-relaxed text-[#7f1d1d]">
+                O custo interno no estoque é <b>R$ {Number(mpCusto || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</b>.
+                Defina o acréscimo de lucro ou margem (%) abaixo. O cliente receberá no WhatsApp <b>apenas o preço final de venda</b>.
+              </p>
             </div>
 
             <div className="space-y-2 text-xs">
               <div className="flex items-center justify-between gap-2">
-                <label className="text-[#5f6368] font-semibold">Custo (R$)</label>
+                <label className="text-[#5f6368] font-semibold">Custo Interno (R$)</label>
                 <input
                   type="number"
                   value={mpCusto}
@@ -3038,12 +3150,12 @@ export default function CrmWhatsAppClient() {
                     if (mpOrigem === "margem") sincronizarPreco(e.target.value, mpMargem);
                     else sincronizarMargem(e.target.value, mpPreco);
                   }}
-                  className="w-32 p-1.5 border border-[#e3e3e3] rounded-lg font-mono text-right"
+                  className="w-32 p-1.5 border border-[#e3e3e3] rounded-lg font-mono text-right bg-gray-50 text-gray-700"
                 />
               </div>
 
               <div className="flex items-center justify-between gap-2">
-                <label className="text-[#5f6368] font-semibold">Margem (%)</label>
+                <label className="text-[#5f6368] font-semibold">Margem de Lucro (%)</label>
                 <input
                   type="number"
                   value={mpMargem}
@@ -3052,12 +3164,12 @@ export default function CrmWhatsAppClient() {
                     setMpOrigem("margem");
                     sincronizarPreco(mpCusto, e.target.value);
                   }}
-                  className="w-32 p-1.5 border border-[#e3e3e3] rounded-lg font-mono text-right"
+                  className="w-32 p-1.5 border border-[#e3e3e3] rounded-lg font-mono text-right font-bold text-[#b45309]"
                 />
               </div>
 
               <div className="flex items-center justify-between gap-2">
-                <label className="text-[#5f6368] font-semibold">Preço de Venda (R$)</label>
+                <label className="text-[#5f6368] font-semibold">Preço Final de Venda (R$)</label>
                 <input
                   type="number"
                   value={mpPreco}
@@ -3066,18 +3178,23 @@ export default function CrmWhatsAppClient() {
                     setMpOrigem("preco");
                     sincronizarMargem(mpCusto, e.target.value);
                   }}
-                  className="w-32 p-1.5 border border-[#0f9d58] rounded-lg font-bold font-mono text-right text-[#0a6e3d]"
+                  className="w-32 p-1.5 border-2 border-[#0f9d58] rounded-lg font-bold font-mono text-right text-[#0a6e3d] text-sm"
                 />
               </div>
             </div>
 
             <div className="bg-[#e8f5e9] border border-[#a5d6a7] rounded-lg p-2.5 text-center font-bold text-sm text-[#0f9d58]">
-              Enviar por: R$ {Number(mpPreco || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+              Preço enviado ao WhatsApp: R$ {Number(mpPreco || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+              {Number(mpPreco || 0) > Number(mpCusto || 0) && (
+                <span className="block text-[11px] font-normal text-[#0a6e3d] mt-0.5">
+                  (Lucro Bruto: +R$ {(Number(mpPreco) - Number(mpCusto)).toLocaleString("pt-BR", { minimumFractionDigits: 2 })})
+                </span>
+              )}
             </div>
 
             <textarea
               rows={2}
-              placeholder="Observação extra (opcional)..."
+              placeholder="Observação ou condição especial (ex: À vista no Pix com frete grátis)..."
               value={mpObs}
               onChange={(e) => setMpObs(e.target.value)}
               className="w-full p-2 border border-[#e3e3e3] rounded-lg text-xs"
@@ -3085,13 +3202,21 @@ export default function CrmWhatsAppClient() {
 
             <button
               onClick={() => {
-                if (produtoModal) {
-                  enviarProdutoDiretoAoChat(produtoModal, Number(mpPreco) || produtoModal.preco, mpObs);
+                if (!produtoModal) return;
+                const precoFinal = Number(mpPreco) || 0;
+                const custo = Number(mpCusto) || 0;
+                if (precoFinal <= custo) {
+                  showToast("⚠️ Preço de envio deve ser MAIOR que o custo!");
+                  alert("ERRO: O produto nunca deve ser enviado pelo preço de custo. Adicione uma margem de lucro para enviar!");
+                  return;
                 }
+                enviarProdutoDiretoAoChat(produtoModal, precoFinal, mpObs);
+                setModalProdutoAberto(false);
+                showToast(`Oferta enviada por R$ ${precoFinal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}! ⚡`);
               }}
               className="w-full bg-[#0f9d58] hover:bg-[#0a6e3d] text-white py-2 rounded-lg text-xs font-bold transition-colors cursor-pointer shadow-xs"
             >
-              ➤ Enviar Produto Direto ao Destinatário
+              ➤ Confirmar e Enviar ao WhatsApp
             </button>
           </div>
         </div>

@@ -789,8 +789,13 @@ async function resolveMediaObject(mediaSource, filename = "arquivo", mimetype = 
 }
 
 async function sendDirectMessage({ number, text, signatureId, chatId: preferredChatId = null, replyTo = null }) {
-  if (!whatsappState.connected || !whatsappClient) {
-    throw new Error("WhatsApp ainda não conectado");
+  if (!whatsappClient) {
+    throw new Error("WhatsApp ainda não iniciado");
+  }
+
+  const isConnected = whatsappState.connected || Boolean(whatsappClient.info?.wid) || Boolean(whatsappClient.pupPage);
+  if (!isConnected) {
+    throw new Error("WhatsApp ainda não conectado. Por favor aguarde ou escaneie o QR Code.");
   }
 
   const finalText = appendSignature(text, signatureId);
@@ -849,8 +854,13 @@ async function sendDirectMedia({
   sendAudioAsVoice = false,
   sendMediaAsDocument = false,
 }) {
-  if (!whatsappState.connected || !whatsappClient) {
-    throw new Error("WhatsApp ainda não conectado");
+  if (!whatsappClient) {
+    throw new Error("WhatsApp ainda não iniciado");
+  }
+
+  const isConnected = whatsappState.connected || Boolean(whatsappClient.info?.wid) || Boolean(whatsappClient.pupPage);
+  if (!isConnected) {
+    throw new Error("WhatsApp ainda não conectado. Por favor aguarde ou escaneie o QR Code.");
   }
 
   let targetChatId = preferredChatId;
@@ -895,8 +905,8 @@ async function sendDirectMedia({
 }
 
 async function postStatus({ text = "", media = null, backgroundColor = "#b91c1c" }) {
-  if (!whatsappState.connected) {
-    throw new Error("WhatsApp ainda nao conectado");
+  if (!whatsappState.connected && !whatsappClient?.info?.wid && !whatsappClient?.pupPage) {
+    throw new Error("WhatsApp ainda não conectado");
   }
 
   if (media) {
@@ -934,7 +944,7 @@ function schedulePendingMessage(item) {
       await sendDirectMessage({
         number: item.number,
         text: item.text,
-        signatureId: item.signatureId || null,
+        signatureId: item.signatureId,
       });
       item.status = "sent";
       persistStore();
@@ -973,6 +983,8 @@ function buildWhatsAppClient() {
         "--disable-setuid-sandbox",
         "--disable-dev-shm-usage",
         "--disable-gpu",
+        "--disable-extensions",
+        "--no-default-browser-check",
         "--window-size=1280,800"
       ],
     },
@@ -996,9 +1008,11 @@ function attachWhatsAppClientEvents(client) {
 
   client.on("authenticated", () => {
     whatsappState.status = "authenticated";
+    whatsappState.connected = true;
     whatsappState.session = true;
+    whatsappState.qrCode = null;
     emitState();
-    emitToast("Sessao autenticada com sucesso.");
+    emitToast("Sessão autenticada com sucesso.");
   });
 
   client.on("ready", async () => {
