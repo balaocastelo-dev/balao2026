@@ -127,6 +127,21 @@ function createId() {
   return crypto.randomUUID();
 }
 
+function isIgnoredChat(chatId, user) {
+  const idStr = String(chatId || "").toLowerCase();
+  const userStr = String(user || "").toLowerCase();
+  if (!idStr && !userStr) return true;
+  if (idStr.includes("@lid") || userStr.includes("@lid")) return true;
+  if (idStr.includes("broadcast") || userStr.includes("broadcast")) return true;
+  if (idStr.includes("status@") || userStr.includes("status@")) return true;
+  if (idStr.includes("@newsletter") || userStr.includes("@newsletter")) return true;
+
+  const rawDigits = (userStr || idStr.replace(/@.*$/, "")).replace(/\D/g, "");
+  if (rawDigits.length > 13 && !idStr.includes("@g.us")) return true;
+  if (rawDigits.length < 8 && !idStr.includes("@g.us")) return true;
+  return false;
+}
+
 function loadStore() {
   if (!fs.existsSync(dataFile)) return;
 
@@ -139,9 +154,13 @@ function loadStore() {
     store.chatLabels =
       parsed.chatLabels && typeof parsed.chatLabels === "object" ? parsed.chatLabels : {};
     store.messages = Array.isArray(parsed.messages)
-      ? parsed.messages.filter((item) => item.chatId !== "status@broadcast").slice(-400)
+      ? parsed.messages
+          .filter((item) => !isIgnoredChat(item.chatId, item.from) && !isIgnoredChat(item.to, item.from))
+          .slice(-400)
       : [];
-    store.chats = Array.isArray(parsed.chats) ? parsed.chats : [];
+    store.chats = Array.isArray(parsed.chats)
+      ? parsed.chats.filter((c) => !isIgnoredChat(c.chatId, c.realNumber))
+      : [];
     store.statusFeed = Array.isArray(parsed.statusFeed) ? parsed.statusFeed : [];
     store.chatAssignments =
       parsed.chatAssignments && typeof parsed.chatAssignments === "object"
@@ -160,8 +179,8 @@ function persistStore() {
     quickReplies: store.quickReplies,
     schedules: store.schedules,
     chatLabels: store.chatLabels,
-    messages: store.messages.slice(-400),
-    chats: store.chats,
+    messages: store.messages.filter((m) => !isIgnoredChat(m.chatId, m.from)).slice(-400),
+    chats: store.chats.filter((c) => !isIgnoredChat(c.chatId, c.realNumber)),
     statusFeed: store.statusFeed,
     chatAssignments: store.chatAssignments,
     notifications: store.notifications,
@@ -434,17 +453,27 @@ async function syncRecentConversations() {
     try {
       const chats = await whatsappClient.getChats();
       relevantChats = (chats || [])
-        .filter((chat) => !chat.isGroup && !chat.isStatus && !chat.id?._serialized?.includes("broadcast"))
+        .filter((chat) => !chat.isGroup && !chat.isStatus && !isIgnoredChat(chat.id?._serialized, chat.id?.user))
         .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
-        .slice(0, 50);
+        .slice(0, 60);
     } catch (err) {
       console.warn("getChats() padrão falhou, usando sincronização via pupPage:", err.message);
       const rawEvaluated = await whatsappClient.pupPage.evaluate(async () => {
         try {
           const cArray = window.require('WAWebCollections').Chat.getModelsArray();
           return (cArray || [])
-            .filter((c) => !c.isGroup && !c.isBroadcast && !c.isStatusV3 && c.id?._serialized !== 'status@broadcast')
-            .slice(0, 50)
+            .filter((c) => {
+              if (c.isGroup || c.isBroadcast || c.isStatusV3) return false;
+              const sId = String(c.id ? c.id._serialized : '').toLowerCase();
+              if (!sId || sId.includes('@lid') || sId.includes('broadcast') || sId.includes('status@') || sId.includes('@newsletter')) {
+                return false;
+              }
+              const userStr = String(c.id ? c.id.user : '');
+              const digits = userStr.replace(/\D/g, '');
+              if (digits.length > 13 || digits.length < 8) return false;
+              return true;
+            })
+            .slice(0, 60)
             .map((c) => ({
               id: c.id ? c.id._serialized : '',
               user: c.id ? c.id.user : '',
@@ -459,7 +488,7 @@ async function syncRecentConversations() {
       });
 
       for (const raw of rawEvaluated) {
-        if (!raw.id) continue;
+        if (!raw.id || isIgnoredChat(raw.id, raw.user)) continue;
         const pic = await getProfilePicUrlSafe(raw.id);
         const realNum = extractRealNumber(raw.user, raw.name, raw.id);
         relevantChats.push({
@@ -484,10 +513,14 @@ async function syncRecentConversations() {
 
     for (const chat of relevantChats) {
       if (chat.chatId) {
-        chatSummaries.push(chat);
+        if (!isIgnoredChat(chat.chatId, chat.realNumber)) {
+          chatSummaries.push(chat);
+        }
         continue;
       }
       try {
+        if (isIgnoredChat(chat.id?._serialized, chat.id?.user)) continue;
+
         const messages = await chat.fetchMessages({ limit: 25 }).catch(() => []);
         const contact = await chat.getContact().catch(() => null);
         const contactName =
@@ -533,6 +566,7 @@ async function syncRecentConversations() {
 
         (messages || []).forEach((message) => {
           const cId = message.fromMe ? message.to || chat.id._serialized : message.from;
+          if (isIgnoredChat(cId, message.from)) return;
           syncedMessages.push({
             id: message.id?._serialized || createId(),
             chatId: cId,
@@ -555,7 +589,9 @@ async function syncRecentConversations() {
 
     mergeMessages(syncedMessages);
     await syncLabelsForChats(labelAwareChats);
-    store.chats = chatSummaries.sort((a, b) => (b.lastMessageTimestamp || 0) - (a.lastMessageTimestamp || 0));
+    store.chats = chatSummaries
+      .filter((c) => !isIgnoredChat(c.chatId, c.realNumber))
+      .sort((a, b) => (b.lastMessageTimestamp || 0) - (a.lastMessageTimestamp || 0));
     rebuildNotifications();
     persistStore();
     emitChats();
@@ -1054,7 +1090,13 @@ function attachWhatsAppClientEvents(client) {
   });
 
   client.on("message", async (message) => {
-    if (message.from === "status@broadcast" || message.broadcast || message.from?.includes("broadcast")) {
+    if (
+      message.from === "status@broadcast" ||
+      message.to === "status@broadcast" ||
+      message.broadcast ||
+      message.from?.includes("broadcast") ||
+      isIgnoredChat(message.from, message.author)
+    ) {
       syncStatusFeed().catch(() => {});
       return;
     }
@@ -1079,7 +1121,13 @@ function attachWhatsAppClientEvents(client) {
 
   client.on("message_create", async (message) => {
     if (!message.fromMe) return;
-    if (message.to === "status@broadcast" || message.from === "status@broadcast" || message.broadcast) {
+    if (
+      message.to === "status@broadcast" ||
+      message.from === "status@broadcast" ||
+      message.broadcast ||
+      isIgnoredChat(message.to, message.author) ||
+      isIgnoredChat(message.from, message.author)
+    ) {
       syncStatusFeed().catch(() => {});
       return;
     }
@@ -1096,7 +1144,6 @@ function attachWhatsAppClientEvents(client) {
       realNumber: extractRealNumber(message.to, message.from),
       displayNumber: extractRealNumber(message.to, message.from),
       hasMedia: Boolean(message.hasMedia),
-      mediaType: message.type || null,
     });
   });
 }

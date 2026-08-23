@@ -123,6 +123,23 @@ export default function CrmWhatsAppClient() {
   });
   const [assinaturaAuto, setAssinaturaAuto] = useState(true);
 
+  // Helper to strictly ignore WhatsApp status/broadcast/@lid internal handles
+  const isIgnoredCrmChat = (chatId?: string, numero?: string): boolean => {
+    const idStr = String(chatId || "").toLowerCase();
+    const numStr = String(numero || "").toLowerCase();
+    if (!idStr && !numStr) return true;
+    if (idStr.includes("@lid") || numStr.includes("@lid")) return true;
+    if (idStr.includes("broadcast") || numStr.includes("broadcast")) return true;
+    if (idStr.includes("status@") || numStr.includes("status@")) return true;
+    if (idStr.includes("@newsletter") || numStr.includes("@newsletter")) return true;
+    if (idStr === "status") return true;
+
+    const rawDigits = (numStr || idStr.replace(/@.*$/, "")).replace(/\D/g, "");
+    if (rawDigits.length > 13 && !idStr.includes("@g.us")) return true;
+    if (rawDigits.length < 8 && !idStr.includes("@g.us")) return true;
+    return false;
+  };
+
   // Chats and Messages
   const [chats, setChats] = useState<CrmChat[]>(() => {
     if (typeof window !== "undefined") {
@@ -134,9 +151,12 @@ export default function CrmWhatsAppClient() {
             return parsed.filter(
               (c: any) =>
                 c.id &&
-                c.id !== "status@broadcast" &&
-                !String(c.id).includes("broadcast") &&
-                c.id !== "status"
+                !c.id.includes("@lid") &&
+                !c.id.includes("broadcast") &&
+                !c.id.includes("status@") &&
+                !c.id.includes("newsletter") &&
+                c.id !== "status" &&
+                !/^\d{14,}$/.test(String(c.numero || c.id).replace(/\D/g, ""))
             );
           }
         } catch {}
@@ -426,14 +446,9 @@ export default function CrmWhatsAppClient() {
     socket.on("whatsapp:chats", (serverChats: any[]) => {
       if (Array.isArray(serverChats) && serverChats.length > 0) {
         setChats((prev) => {
-          const merged = [...prev];
+          const merged = [...prev.filter((c) => !isIgnoredCrmChat(c.id, c.numero))];
           serverChats
-            .filter(
-              (sc) =>
-                sc.chatId &&
-                sc.chatId !== "status@broadcast" &&
-                !String(sc.chatId).includes("broadcast")
-            )
+            .filter((sc) => sc.chatId && !isIgnoredCrmChat(sc.chatId, sc.realNumber || sc.displayNumber))
             .forEach((sc) => {
               const idx = merged.findIndex((c) => c.id === sc.chatId);
               const realNum = sc.realNumber || sc.displayNumber || sc.chatId.replace(/@c\.us$/, "");
@@ -461,7 +476,7 @@ export default function CrmWhatsAppClient() {
               }
             });
           return merged
-            .filter((c) => c.id !== "status@broadcast" && !String(c.id).includes("broadcast"))
+            .filter((c) => !isIgnoredCrmChat(c.id, c.numero))
             .sort((a, b) => b.timestamp - a.timestamp);
         });
       }
@@ -475,7 +490,7 @@ export default function CrmWhatsAppClient() {
           serverMsgs
             .filter(
               (sm) =>
-                sm.chatId !== "status@broadcast" && !String(sm.chatId).includes("broadcast")
+                sm.chatId && !isIgnoredCrmChat(sm.chatId, sm.from)
             )
             .forEach((sm) => {
               map.set(sm.id, {
@@ -499,12 +514,8 @@ export default function CrmWhatsAppClient() {
     socket.on("whatsapp:message", (newMsg: any) => {
       if (!newMsg || !newMsg.chatId) return;
 
-      // Status broadcast updates must NOT be created as chats
-      if (
-        newMsg.chatId === "status@broadcast" ||
-        String(newMsg.chatId).includes("broadcast") ||
-        newMsg.from === "status@broadcast"
-      ) {
+      // Status, broadcast, LID updates must NOT be created as chats
+      if (isIgnoredCrmChat(newMsg.chatId, newMsg.from)) {
         if (socketRef.current?.connected) {
           socketRef.current.emit("panel:sync-conversations");
         }
@@ -536,9 +547,10 @@ export default function CrmWhatsAppClient() {
       setMensagens((prev) => [...prev.filter((x) => x.id !== m.id), m]);
 
       setChats((prev) => {
-        const idx = prev.findIndex((c) => c.id === newMsg.chatId);
+        const cleanPrev = prev.filter((c) => !isIgnoredCrmChat(c.id, c.numero));
+        const idx = cleanPrev.findIndex((c) => c.id === newMsg.chatId);
         if (idx >= 0) {
-          const copy = [...prev];
+          const copy = [...cleanPrev];
           copy[idx] = {
             ...copy[idx],
             lastMessage: newMsg.body || "",
@@ -548,18 +560,21 @@ export default function CrmWhatsAppClient() {
           };
           return copy.sort((a, b) => b.timestamp - a.timestamp);
         } else {
-          const novo: CrmChat = {
+          const novoChat: CrmChat = {
             id: newMsg.chatId,
             nome: newMsg.contactName || realNum,
             numero: realNum,
-            unread: 1,
+            pic: null,
+            unread: newMsg.direction === "in" ? 1 : 0,
             lastMessage: newMsg.body || "",
-            timestamp: Date.now(),
+            timestamp: newMsg.timestamp || Date.now(),
             tags: [],
+            vendedorId: null,
             kanbanColId: "novos",
-            precisaAtencao: true,
+            fixado: false,
+            precisaAtencao: newMsg.direction === "in",
           };
-          return [novo, ...prev];
+          return [novoChat, ...cleanPrev].sort((a, b) => b.timestamp - a.timestamp);
         }
       });
     });
@@ -678,13 +693,7 @@ export default function CrmWhatsAppClient() {
 
   const chatsFiltrados = useMemo(() => {
     let list = chats
-      .filter(
-        (c) =>
-          c.id &&
-          c.id !== "status@broadcast" &&
-          !String(c.id).includes("broadcast") &&
-          c.id !== "status"
-      )
+      .filter((c) => c.id && !isIgnoredCrmChat(c.id, c.numero))
       .filter((c) => {
         const b = buscaChat.trim().toLowerCase();
         if (!b) return true;
@@ -2719,6 +2728,7 @@ export default function CrmWhatsAppClient() {
               <div className="flex-1 flex gap-3 overflow-x-auto pb-1 items-stretch min-h-0">
                 {kanbanColunas.map((col) => {
                   const cardsNaColuna = chats.filter((c) => {
+                    if (isIgnoredCrmChat(c.id, c.numero)) return false;
                     const matchCol = (c.kanbanColId || "novos") === col.id;
                     const matchBusca =
                       !kanbanBusca ||
