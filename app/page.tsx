@@ -2,7 +2,7 @@ import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import ProductList from "@/components/ProductList";
 import SeoContent from "@/components/SeoContent";
-import JsonLd, { generateOrganizationSchema } from "@/components/JsonLd";
+import JsonLd, { generateHomeAiAndGoogleSchema } from "@/components/JsonLd";
 import QuickLeadSection from "@/components/QuickLeadSection";
 import HomeLocalStoreInfo from "@/components/HomeLocalStoreInfo";
 import HomeProductShelf from "@/components/HomeProductShelf";
@@ -112,15 +112,32 @@ const homeBrandCarousel = [...homeBrands, ...homeBrands];
 export async function generateMetadata(props: { searchParams: SearchParams }): Promise<Metadata> {
   const sp = await props.searchParams;
   const hasFacet = Boolean((sp?.category || "").trim() || (sp?.search || "").trim());
-  const title = "Loja de Informática em Campinas | PC Gamer, Notebooks e Assistência Técnica";
+  const title = "Loja de Informática em Campinas | PC Gamer, Peças, Notebooks e Assistência Técnica";
   const description =
-    "Balão da Informática Castelo: loja física em Campinas para PC Gamer, notebooks, peças, upgrades e assistência técnica. Compre pelo WhatsApp ou retire no Cambuí.";
+    "Balão da Informática Castelo: loja física de informática em Campinas. Mais de 5.000 produtos com até 10% de desconto no PIX ou 10x sem juros. PC Gamer, Hardware, Notebooks e Assistência no Cambuí.";
   const canonical = "https://www.balao.info/";
 
   return {
     title,
     description,
+    metadataBase: new URL("https://www.balao.info"),
     alternates: { canonical },
+    keywords: [
+      "loja de informática campinas",
+      "pc gamer campinas",
+      "comprar computador campinas",
+      "notebook campinas",
+      "assistência técnica campinas",
+      "placa de vídeo campinas",
+      "processador ryzen intel",
+      "hardware campinas cambuí",
+      "balão da informática castelo",
+      "conserto de notebook campinas",
+      "peças de informática campinas",
+      "ssd nvme ram ddr4 ddr5",
+      "periféricos gamer campinas",
+      "monitores 144hz 240hz campinas"
+    ],
     openGraph: {
       type: "website",
       locale: "pt_BR",
@@ -128,7 +145,7 @@ export async function generateMetadata(props: { searchParams: SearchParams }): P
       title,
       description,
       siteName: SITE_CONFIG.name,
-      images: [{ url: "/logo.png" }],
+      images: [{ url: "/logo.png", width: 1200, height: 630, alt: "Balão da Informática" }],
     },
     twitter: {
       card: "summary_large_image",
@@ -136,7 +153,19 @@ export async function generateMetadata(props: { searchParams: SearchParams }): P
       description,
       images: ["/logo.png"],
     },
-    robots: hasFacet ? { index: false, follow: true } : { index: true, follow: true },
+    robots: hasFacet
+      ? { index: false, follow: true }
+      : {
+          index: true,
+          follow: true,
+          googleBot: {
+            index: true,
+            follow: true,
+            "max-video-preview": -1,
+            "max-image-preview": "large",
+            "max-snippet": -1,
+          },
+        },
   };
 }
 
@@ -228,7 +257,7 @@ export default async function Home(props: {
 
     activeBlocks = homeBlocks;
     if (!activeBlocks || activeBlocks.length === 0) {
-      const defaultCategories = ["Computadores", "Notebooks Seminovos", "Hardware", "Notebooks", "Monitores", "Periféricos", "Acessórios", "Segurança", "Impressão"];
+      const defaultCategories = ["Hardware", "Notebooks Seminovos", "Periféricos", "Monitores", "Computadores", "Games", "Smartphones", "Acessórios", "Segurança"];
       activeBlocks = defaultCategories.map((catName, i) => ({
         id: `default-block-${i}`,
         category_id: catName,
@@ -277,7 +306,7 @@ export default async function Home(props: {
     pcGamerProducts = (gamerFiltered.length > 0 ? gamerFiltered : pcGamerDirect).slice(0, 6);
   } else {
     pcGamerProducts = products
-      .filter((p) => productMatchesTerms(p, ["computador gamer", "pc gamer", "desktop gamer", "ryzen", "core i5", "core i7", "rtx"]))
+      .filter((p) => productMatchesTerms(p, ["computador gamer", "pc gamer", "desktop gamer", "ryzen", "core i5", "core i7", "rtx", "gamer"]))
       .slice(0, 6);
   }
 
@@ -311,7 +340,7 @@ export default async function Home(props: {
 
   return (
     <div className="home-shell min-h-screen flex flex-col font-sans transition-colors duration-300">
-      <JsonLd data={generateOrganizationSchema()} />
+      <JsonLd data={generateHomeAiAndGoogleSchema()} />
       <Header />
 
       {!search && !category && (
@@ -345,7 +374,7 @@ export default async function Home(props: {
         <div className={`w-64 flex-shrink-0 space-y-4 ${search || category ? "hidden lg:block" : "hidden xl:block"}`}>
           <Sidebar categories={categories} />
 
-          {/* PC Gamer Sidebar (Substituindo iPhone Seminovo) */}
+          {/* PC Gamer Sidebar */}
           <section className="home-panel rounded-[1.5rem] p-3 border border-red-500/20 bg-gradient-to-b from-red-950/20 via-[var(--home-panel-bg)] to-[var(--home-panel-bg)] shadow-md">
             <div className="mb-3 flex items-center justify-between gap-2 px-1">
               <div>
@@ -633,7 +662,7 @@ export default async function Home(props: {
                   <HomeProductShelf
                     key={block.id}
                     title={block.title || block.category_id}
-                    subtitle={index % 2 === 0 ? "Seleção curada para compra rápida, retirada e comparação direta no Cambuí." : "Produtos com alto giro, garantia direta e entrega imediata."}
+                    subtitle={index % 2 === 0 ? "Seleção com estoque garantido, entrega rápida e retirada no Cambuí." : "Produtos com alto giro, garantia direta e suporte especializado."}
                     products={blockProducts}
                     categoryId={block.category_id}
                     bannerTitle={index % 2 === 0 ? "Pronto para retirar ou pedir no WhatsApp" : "Vitrine de Alta Performance"}
@@ -703,25 +732,23 @@ export default async function Home(props: {
           {!search && !category && (
             <SeoContent title="LOJA DE INFORMATICA EM CAMPINAS COM WHATSAPP, RETIRADA E ASSISTENCIA TECNICA">
               <p className="mb-4 text-[var(--home-muted)]">
-                A <strong>Balão da Informática Castelo</strong> é uma <strong>loja de informática em Campinas</strong> com foco direto em
-                conversão local: <strong>PC Gamer em Campinas</strong>, <strong>notebook em Campinas</strong>, peças para upgrade,
-                periféricos, SSD, memória RAM, placa de vídeo e <strong>assistência técnica em Campinas</strong> com atendimento rápido
-                pelo WhatsApp. Quem procura <strong>loja de computador no Cambuí</strong>, <strong>comprar notebook em Campinas</strong>,
-                <strong>upgrade de PC</strong>, <strong>conserto de notebook</strong> ou <strong>peças de informática com retirada rápida</strong>
-                encontra aqui uma rota curta para tirar dúvidas, consultar estoque e fechar pedido com mais segurança.
+                A <strong>Balão da Informática Castelo</strong> é a principal <strong>loja de informática em Campinas</strong> para quem busca
+                <strong>PC Gamer em Campinas</strong>, <strong>notebooks</strong>, peças de hardware para upgrade (placas de vídeo RTX/Radeon,
+                processadores Intel e AMD Ryzen, memórias RAM DDR4/DDR5, SSDs NVMe e fontes selo 80 Plus), periféricos gamer e <strong>assistência técnica especializada em Campinas</strong> com atendimento imediato no balcão e no WhatsApp.
+                Compre online com desconto progressivo no PIX ou em até 10x sem juros no cartão de crédito e retire seu pedido em até 30 minutos na loja física no bairro Cambuí.
               </p>
               <ul className="list-none space-y-3 pl-0 text-[var(--home-muted)]">
                 <li className="flex items-start gap-2">
                   <span className="text-xl">📍</span>
-                  <span><strong>Loja física em Campinas:</strong> {SITE_CONFIG.address}. Presença local para quem quer comprar computador, notebook, acessórios e peças com mais confiança e retirada ágil.</span>
+                  <span><strong>Loja física em Campinas:</strong> {SITE_CONFIG.address}. Presença local e balcão aberto para quem deseja comprar computador, notebook, peças e acessórios com total procedência, nota fiscal e garantia.</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-xl">💬</span>
-                  <span><strong>Compra com alta intenção:</strong> fale no WhatsApp para confirmar estoque, melhor configuração, preço final, retirada, prazo e disponibilidade antes de sair de casa.</span>
+                  <span><strong>Atendimento consultivo e ágil:</strong> converse diretamente com nossa equipe técnica pelo WhatsApp para esclarecer dúvidas de compatibilidade, solicitar orçamento de montagem e fechar seu pedido com rapidez.</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-xl">🚀</span>
-                  <span><strong>Especialistas em Campinas:</strong> montagem de PC Gamer, upgrade de computador, manutenção de notebooks e suporte técnico.</span>
+                  <span><strong>Bancada técnica própria:</strong> montagem profissional de PC Gamer com cable management, testes de estresse, manutenção preventiva, formatação e conserto de computadores e notebooks.</span>
                 </li>
               </ul>
             </SeoContent>
