@@ -302,7 +302,8 @@ export function parsePriceToNumber(value: unknown): number {
 
 export function parseProducts(text: string): Product[] {
     const products: Product[] = [];
-    const lines = text.split('\n');
+    const trimmed = text.trim();
+    if (!trimmed) return products;
 
     const competitorPatterns = [
         /\bconnect\s*barra\s*inform[aá]tica\b/gi,
@@ -329,7 +330,23 @@ export function parseProducts(text: string): Product[] {
         /\bstudiopc\b/gi,
         /\btop[-\s]*pc\b/gi,
         /\btoppc\b/gi,
-        /\bkabum\b/gi,
+        /\bKaBuM!\s*smart\b/gi,
+        /\bKabum\s*smart\b/gi,
+        /\bKaBuM!\s*essentials\b/gi,
+        /\bKabum\s*essentials\b/gi,
+        /\bKBM!\s*Gaming\b/gi,
+        /\bKBM\s*Gaming\b/gi,
+        /\bKabum\s*Gaming\b/gi,
+        /\bKaBuM!\s*Tech\b/gi,
+        /\bHusky\s*Gaming\b/gi,
+        /\bHusky\s*Technologies\b/gi,
+        /\bHusky\s*Sports\b/gi,
+        /\bHusky\b/gi,
+        /\bKaBuM!\b/gi,
+        /\bKaBuM\b/gi,
+        /\bKabum\b/gi,
+        /\bKBM!\b/gi,
+        /\bKBM\b/gi,
         /\btob\s*pc[’'´`]?s\b/gi,
         /\btob\b/gi,
         /\balligator shop\b/gi,
@@ -337,52 +354,128 @@ export function parseProducts(text: string): Product[] {
     ];
 
     const sanitizeText = (val: string) => {
-      let res = val;
+      let res = String(val || "");
       competitorPatterns.forEach(pattern => {
         res = res.replace(pattern, "Balão.info");
       });
-      return res;
+      return res.trim();
     };
 
+    // 1. Check if user provided JSON directly
+    if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+      try {
+        const jsonList = JSON.parse(trimmed);
+        if (Array.isArray(jsonList)) {
+          for (const item of jsonList) {
+            const rawName = item.titulo || item.name || item.title || "";
+            const rawPix = item.preco_custo_pix || item.preco_a_vista_pix || item.price || item.priceWithDiscount || "";
+            const rawPrazo = item.preco_custo_prazo || item.preco_parcelado || item.price_card || "";
+            const rawImg = item.link_foto_ultra_hd || item.image || item.imagem || "";
+            const rawGallery = Array.isArray(item.image_urls) ? item.image_urls : (item.photos || (rawImg ? [rawImg] : []));
+            const category = item.categoria || item.category || "Hardware";
+            const brand = item.marca || item.brand || "Balão.info";
+            const desc = item.descricao || item.description || "";
+            const id = String(item.id || item.code || (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 12)));
+
+            if (rawName && rawPix) {
+              const finalName = sanitizeText(rawName);
+              const enhancedImg = rawImg ? enhanceImageUrl(String(rawImg)) : "/logo.png";
+              const enhancedGallery = rawGallery.map((g: any) => enhanceImageUrl(String(g))).filter(Boolean);
+              if (!enhancedGallery.includes(enhancedImg)) enhancedGallery.unshift(enhancedImg);
+
+              let formattedPrice = String(rawPix).replace(/R\$/gi, "").trim();
+              if (!formattedPrice.startsWith("R$")) formattedPrice = `R$ ${formattedPrice}`;
+
+              let formattedPrazo = rawPrazo ? String(rawPrazo).replace(/R\$/gi, "").trim() : "";
+              if (formattedPrazo && !formattedPrazo.startsWith("R$")) formattedPrazo = `R$ ${formattedPrazo}`;
+
+              const slug = finalName.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
+
+              products.push({
+                id,
+                name: finalName,
+                price: formattedPrice,
+                price_card: formattedPrazo || undefined,
+                discount_pix: item.desconto_pix || "15%",
+                installment: item.parcelamento || `10x sem juros`,
+                category: category || "Hardware",
+                brand: sanitizeText(brand) || "Balão.info",
+                availability: item.disponibilidade || item.estoque || "Disponível",
+                rating: item.avaliacao || "5.0 ⭐",
+                product_url: `/product/${id}`,
+                source_url: item.link_produto || item.link || undefined,
+                image: enhancedImg,
+                image_urls: enhancedGallery.length > 0 ? enhancedGallery : [enhancedImg],
+                description: sanitizeText(desc),
+                slug: slug || String(id)
+              });
+            }
+          }
+          if (products.length > 0) return products;
+        }
+      } catch (e) {
+        // Fallback to TSV/CSV line parsing
+      }
+    }
+
+    // 2. Parse Line by Line (TSV or CSV)
+    const lines = trimmed.split(/\r?\n/);
     for (let line of lines) {
       line = line.trim();
       if (!line) continue;
 
-      // Check if header line
+      // Skip header lines
       const upperLine = line.toUpperCase();
       if (
-        (upperLine.startsWith("ID\t") || upperLine.startsWith("ID ")) && 
-        (upperLine.includes("TÍTULO") || upperLine.includes("TITULO") || upperLine.includes("PREÇO") || upperLine.includes("PRECO"))
+        (upperLine.startsWith("ID\t") || upperLine.startsWith("ID;") || upperLine.startsWith("\"ID\"")) &&
+        (upperLine.includes("TÍTULO") || upperLine.includes("TITULO") || upperLine.includes("PREÇO") || upperLine.includes("PRECO") || upperLine.includes("NOME"))
       ) {
-        continue; // Skip header row
+        continue;
       }
 
-      // Try Tab separated
-      let parts = line.split('\t');
+      let delimiter = "\t";
+      if (!line.includes("\t") && line.includes(";")) delimiter = ";";
 
-      // 1. Full 14-column format:
-      // ID | TÍTULO | PREÇO À VISTA NO PIX (R$) | PREÇO PARCELADO (R$) | DESCONTO PIX | PARCELAMENTO | CATEGORIA | MARCA | DISPONIBILIDADE | AVALIAÇÃO | LINK PRODUTO BALÃO.INFO | LINK PRODUTO ORIGEM | LINK FOTO ULTRA HD | DESCRIÇÃO
-      if (parts.length >= 10) {
-        const id = parts[0]?.trim() || (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15));
-        const rawName = parts[1]?.trim() || "";
-        const pricePixRaw = parts[2]?.trim() || "";
-        const priceCardRaw = parts[3]?.trim() || "";
-        const discountPix = parts[4]?.trim() || "";
-        const installment = parts[5]?.trim() || "";
-        const categoryRaw = parts[6]?.trim() || "Hardware";
-        const brand = parts[7]?.trim() || "";
-        const availability = parts[8]?.trim() || "Disponível";
-        const rating = parts[9]?.trim() || "5.0 ⭐";
-        const balaoUrl = parts[10]?.trim() || "";
-        const sourceUrl = parts[11]?.trim() || "";
-        const imageUrlRaw = parts[12]?.trim() || "";
-        const descriptionRaw = parts[13]?.trim() || "";
+      const parts = line.split(delimiter).map(p => p.replace(/^"|"$/g, "").trim());
+
+      // Format PRODUTOS_KABUM_1P_SOMENTE_PIX.txt (14+ columns)
+      if (parts.length >= 8) {
+        const id = parts[0] || (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 12));
+        const rawName = parts[1] || "";
+        const pricePixRaw = parts[2] || "";
+        const priceCardRaw = parts[3] || "";
+        const discountPix = parts[4] || "15%";
+        const installment = parts[5] || "";
+        const categoryRaw = parts[6] || "Hardware";
+        const brand = parts[7] || "";
+        const availability = parts[8] || "Disponível";
+        const rating = parts[9] || "5.0 ⭐";
+        
+        // Dynamic detection for Image and Description
+        let imageUrlRaw = "";
+        let descriptionRaw = "";
+        let sourceUrl = "";
+
+        for (let i = 10; i < parts.length; i++) {
+          const val = parts[i];
+          if (/https?:\/\/.*?\.(jpg|jpeg|png|webp)/i.test(val) || val.includes("images.kabum.com.br") || val.includes("static.kabum.com.br")) {
+            imageUrlRaw = val;
+          } else if (val.startsWith("http://") || val.startsWith("https://")) {
+            sourceUrl = val;
+          } else if (val.length > 30) {
+            descriptionRaw = val;
+          }
+        }
+
+        if (!imageUrlRaw && parts[11] && parts[11].startsWith("http")) imageUrlRaw = parts[11];
+        if (!imageUrlRaw && parts[12] && parts[12].startsWith("http")) imageUrlRaw = parts[12];
+        if (!descriptionRaw && parts[parts.length - 1] && parts[parts.length - 1].length > 15) descriptionRaw = parts[parts.length - 1];
 
         if (rawName && pricePixRaw) {
           const finalName = sanitizeText(rawName);
           const finalDescription = sanitizeText(descriptionRaw);
           const enhancedImage = imageUrlRaw ? enhanceImageUrl(imageUrlRaw) : "/logo.png";
-          
+
           let formattedPrice = pricePixRaw.replace(/R\$/gi, "").trim();
           if (!formattedPrice.startsWith("R$")) {
             formattedPrice = `R$ ${formattedPrice}`;
@@ -403,13 +496,13 @@ export function parseProducts(text: string): Product[] {
             name: finalName,
             price: formattedPrice,
             price_card: formattedPriceCard || undefined,
-            discount_pix: discountPix || undefined,
+            discount_pix: discountPix || "15%",
             installment: installment || undefined,
             category: categoryRaw || "Hardware",
-            brand: brand || undefined,
+            brand: sanitizeText(brand) || "Balão.info",
             availability: availability || "Disponível",
             rating: rating || "5.0 ⭐",
-            product_url: balaoUrl || `/product/${id}`,
+            product_url: `/product/${id}`,
             source_url: sourceUrl || undefined,
             image: enhancedImage,
             image_urls: enhancedImage ? [enhancedImage] : [],
@@ -420,49 +513,35 @@ export function parseProducts(text: string): Product[] {
         }
       }
 
-      // 2. Fallback to 3 or 4 column formats:
-      if (parts.length < 3) {
-          const regex = /(https?:\/\/[^\s]+)\s+(.+?)\s+(R\$\s*[\d\.,]+|[\d\.,]+)/;
-          const match = line.match(regex);
-          if (match) {
-              parts = [match[1], match[2], match[3]];
-          }
-      }
-
+      // Fallback 3/4 column format
       if (parts.length >= 3) {
-        let productUrl = "";
-        let imageUrl = "";
-        let name = "";
-        let price = "";
+        let imageUrl = parts[0];
+        let name = parts[1];
+        let price = parts[2];
 
-        if (parts.length >= 4) {
-          productUrl = parts[0].trim();
-          imageUrl = parts[1].trim();
-          name = parts[2].trim();
-          price = parts[3].trim();
-        } else {
-          imageUrl = parts[0].trim();
-          name = parts[1].trim();
-          price = parts[2].trim();
+        if (parts[0].startsWith("http") && !parts[1].startsWith("http")) {
+          imageUrl = parts[0];
+          name = parts[1];
+          price = parts[2];
+        } else if (parts[1].startsWith("http")) {
+          imageUrl = parts[1];
+          name = parts[2];
+          price = parts[3] || parts[2];
         }
 
-        if (imageUrl.startsWith('http') && name && price) {
+        if (imageUrl && name && price) {
           const enhancedImage = enhanceImageUrl(imageUrl);
           const finalName = sanitizeText(name);
-
-          const id = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15);
-          const slug = finalName
-            .toLowerCase()
-            .replace(/[^\w\s-]/g, "")
-            .replace(/\s+/g, "-");
+          const id = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 12);
+          const slug = finalName.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-");
 
           products.push({
             id,
             name: finalName,
-            price: price.startsWith('R$') ? price : `R$ ${price}`,
+            price: price.startsWith("R$") ? price : `R$ ${price}`,
             image: enhancedImage,
             image_urls: [enhancedImage],
-            product_url: productUrl,
+            product_url: `/product/${id}`,
             category: "Hardware",
             slug,
           });
