@@ -6,76 +6,57 @@ export type WhatsAppStatus =
   | "ready"
   | "auth_failure";
 
-export type FunnelStageId =
-  | "new_lead"
-  | "first_contact"
-  | "budget_sent"
-  | "in_negotiation"
-  | "awaiting_payment"
-  | "won"
-  | "post_sale"
-  | "lost";
-
-export interface FunnelStage {
-  id: FunnelStageId;
-  title: string;
-  shortTitle: string;
-  color: string;
-  badgeBg: string;
-  borderColor: string;
-  description: string;
+export interface KanbanColumn {
+  id: string;
+  nome: string;
+  cor: string;
 }
 
-export interface CrmTag {
-  id: string;
-  name: string;
-  color: string;
-  bgColor: string;
+export interface CrmEtiqueta {
+  id: number;
+  nome: string;
+  cor: string;
 }
 
-export interface CrmSeller {
-  id: string;
-  name: string;
-  role: string;
-  avatar: string;
-  phone?: string;
-  email?: string;
+export interface CrmVendedor {
+  id: string | number;
+  nome: string;
+  cargo?: string;
+  telefone?: string;
+  assinatura?: string;
 }
 
-export interface CrmCustomerNote {
+export interface CrmNotaCliente {
   id: string;
-  author: string;
-  text: string;
+  autor: string;
+  texto: string;
   timestamp: number;
 }
 
-export interface CrmLead {
-  id: string;
-  chatId: string;
-  name: string;
-  phone: string;
-  displayNumber?: string;
-  email?: string;
-  document?: string;
-  address?: string;
-  city?: string;
-  preferredBranch?: string;
-  stage: FunnelStageId;
-  dealValue: number;
+export interface CrmChat {
+  id: string; // e.g. "5519981188090@c.us"
+  nome: string;
+  numero: string;
+  pic?: string | null;
+  unread: number;
+  lastMessage: string;
+  timestamp: number;
   tags: string[];
-  assignedSellerId: string | null;
-  unreadCount: number;
-  lastMessageBody: string;
-  lastMessageTimestamp: number;
-  profilePicUrl?: string | null;
-  isGroup?: boolean;
-  notes: CrmCustomerNote[];
-  productOfInterest?: string;
-  createdAt: number;
-  updatedAt: number;
+  vendedorId?: string | number | null;
+  kanbanColId?: string | null;
+  fixado?: boolean;
+  bloqueado?: boolean;
+  precisaAtencao?: boolean;
+  email?: string;
+  documento?: string;
+  endereco?: string;
+  cidade?: string;
+  valorNegocio?: number;
+  produtoInteresse?: string;
+  notas?: CrmNotaCliente[];
 }
 
-export interface CrmMessage {
+export interface CrmMensagem {
   id: string;
   chatId: string;
   from: string;
@@ -85,57 +66,31 @@ export interface CrmMessage {
   timestamp: number;
   contactName?: string | null;
   realNumber?: string | null;
-  displayNumber?: string | null;
   hasMedia?: boolean;
   mediaType?: string | null;
+  mediaUrl?: string | null;
   isVoice?: boolean;
-  isPix?: boolean;
-  pixValue?: number;
   status?: "pending" | "sent" | "delivered" | "read" | "failed";
 }
 
-export interface QuickReplyTemplate {
-  id: string;
-  title: string;
-  category: "saudacoes" | "pix" | "orcamento" | "loja" | "assistencia" | "followup" | "geral";
-  message: string;
-  shortcut?: string;
+export interface CrmRespostaRapida {
+  id: string | number;
+  titulo: string;
+  texto: string;
+  categoria?: string;
+  atalho?: string;
 }
 
-export interface ScheduledMessage {
+export interface CrmProdutoCatalogo {
   id: string;
-  leadId?: string;
-  leadName?: string;
-  phone: string;
-  message: string;
-  sendAt: string;
-  status: "pending" | "sent" | "failed" | "cancelled";
-  sellerId?: string | null;
-  createdAt: number;
-}
-
-export interface BroadcastCampaign {
-  id: string;
-  title: string;
-  targetStage?: FunnelStageId | "all";
-  targetTag?: string | "all";
-  messageTemplate: string;
-  intervalSeconds: number;
-  totalRecipients: number;
-  sentCount: number;
-  failedCount: number;
-  status: "idle" | "running" | "completed" | "paused" | "cancelled";
-  createdAt: number;
-}
-
-export interface BalãoProductCatalogItem {
-  id: string;
-  name: string;
-  price: number;
-  formattedPrice: string;
-  category: string;
-  image: string;
+  nome: string;
+  preco: number;
+  custo?: number;
+  fornecedor?: string;
+  margem?: number;
+  precoFormatado: string;
+  categoria: string;
+  imagem: string;
   slug?: string;
   specs?: string[];
-  badge?: string;
 }
