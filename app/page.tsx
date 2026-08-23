@@ -22,20 +22,8 @@ import type { Metadata } from "next";
 import { SITE_CONFIG } from "@/lib/config";
 import Link from "next/link";
 import {
-  ArrowRight,
-  Clock3,
-  Cpu,
   Gamepad2,
-  Headphones,
   Laptop,
-  MapPin,
-  MessageCircle,
-  Monitor,
-  PhoneCall,
-  ShieldCheck,
-  Smartphone,
-  Store,
-  Zap,
 } from "lucide-react";
 
 export const revalidate = 60;
@@ -77,14 +65,6 @@ function priceTextFromVitrineRecord(page: HomeSidebarVitrinePage) {
   if (direct) return direct;
   const mainPrice = extras.main_product?.price ? String(extras.main_product.price).trim() : "";
   return mainPrice || "Sob consulta";
-}
-
-function vitrineDateText(page: HomeSidebarVitrinePage) {
-  const rawDate = page.data_publicacao || page.data_criacao;
-  if (!rawDate) return "Vitrine";
-  const parsed = new Date(rawDate);
-  if (Number.isNaN(parsed.getTime())) return "Vitrine";
-  return parsed.toLocaleDateString("pt-BR");
 }
 
 function productMatchesTerms(product: Product, terms: string[]) {
@@ -132,9 +112,9 @@ const homeBrandCarousel = [...homeBrands, ...homeBrands];
 export async function generateMetadata(props: { searchParams: SearchParams }): Promise<Metadata> {
   const sp = await props.searchParams;
   const hasFacet = Boolean((sp?.category || "").trim() || (sp?.search || "").trim());
-  const title = "Loja de Informática em Campinas | PC Gamer, Notebook, iPhone e Assistência Técnica";
+  const title = "Loja de Informática em Campinas | PC Gamer, Notebooks e Assistência Técnica";
   const description =
-    "Balão da Informática Castelo: loja física em Campinas para PC Gamer, notebooks, iPhones seminovos, peças, upgrades e assistência técnica. Compre pelo WhatsApp ou retire no Cambuí.";
+    "Balão da Informática Castelo: loja física em Campinas para PC Gamer, notebooks, peças, upgrades e assistência técnica. Compre pelo WhatsApp ou retire no Cambuí.";
   const canonical = "https://www.balao.info/";
 
   return {
@@ -192,7 +172,7 @@ export default async function Home(props: {
   let blogPosts: HomeSidebarBlogPost[] = [];
   let vitrinePages: HomeSidebarVitrinePage[] = [];
   let semiNovoProducts: Product[] = [];
-  let iphoneSemiNovoProducts: Product[] = [];
+  let pcGamerProducts: Product[] = [];
   let activeBlocks: HomeBlock[] = [];
 
   if (search) {
@@ -248,7 +228,7 @@ export default async function Home(props: {
 
     activeBlocks = homeBlocks;
     if (!activeBlocks || activeBlocks.length === 0) {
-      const defaultCategories = ["Hardware", "Computadores", "Notebooks", "Monitores", "Smartphones", "Periféricos", "Acessórios", "Segurança", "Impressão"];
+      const defaultCategories = ["Computadores", "Notebooks Seminovos", "Hardware", "Notebooks", "Monitores", "Periféricos", "Acessórios", "Segurança", "Impressão"];
       activeBlocks = defaultCategories.map((catName, i) => ({
         id: `default-block-${i}`,
         category_id: catName,
@@ -284,30 +264,21 @@ export default async function Home(props: {
 
   const filteredProducts = products;
 
-  const [iphoneProductsDirect, notebookProductsDirect] = await Promise.all([
-    getProductsByExactCategories(["iPhones Seminovos"]),
+  // Carregar produtos de PC Gamer e Notebooks
+  const [pcGamerDirect, notebookProductsDirect] = await Promise.all([
+    getProductsByExactCategories(["Computadores"]),
     getProductsByExactCategories(["Notebooks Seminovos"]),
   ]);
 
-  if (iphoneProductsDirect.length > 0) {
-    iphoneSemiNovoProducts = iphoneProductsDirect.slice(0, 6);
+  if (pcGamerDirect.length > 0) {
+    const gamerFiltered = pcGamerDirect.filter((p) =>
+      productMatchesTerms(p, ["gamer", "desktop gamer", "computador gamer", "ryzen", "core i", "rtx", "gtx", "pc gamer"])
+    );
+    pcGamerProducts = (gamerFiltered.length > 0 ? gamerFiltered : pcGamerDirect).slice(0, 6);
   } else {
-    const semiNovoRootCandidates = categories.filter((item) => {
-      const slug = String(item.slug || "").toLowerCase();
-      return slug.includes("iphone") || slug.includes("semi-novo") || slug.includes("seminovos");
-    });
-    if (semiNovoRootCandidates.length > 0) {
-      const validSemiNovoCategories = new Set<string>();
-      semiNovoRootCandidates.forEach((rootCategory) => {
-        validSemiNovoCategories.add(rootCategory.name);
-        const semiNovoDescendants = getDescendantNames(rootCategory.name, categories);
-        semiNovoDescendants.forEach((name) => validSemiNovoCategories.add(name));
-      });
-      const semiNovoAllProducts = await getProductsByExactCategories([...validSemiNovoCategories]);
-      iphoneSemiNovoProducts = semiNovoAllProducts
-        .filter((product) => productMatchesTerms(product, ["iphone", "apple iphone", "ios"]))
-        .slice(0, 6);
-    }
+    pcGamerProducts = products
+      .filter((p) => productMatchesTerms(p, ["computador gamer", "pc gamer", "desktop gamer", "ryzen", "core i5", "core i7", "rtx"]))
+      .slice(0, 6);
   }
 
   if (notebookProductsDirect.length > 0) {
@@ -336,7 +307,7 @@ export default async function Home(props: {
   }
 
   const semiNovoCards = Array.from({ length: 6 }, (_, index) => semiNovoProducts[index] || null);
-  const iphoneSemiNovoCards = Array.from({ length: 6 }, (_, index) => iphoneSemiNovoProducts[index] || null);
+  const pcGamerCards = Array.from({ length: 6 }, (_, index) => pcGamerProducts[index] || null);
 
   return (
     <div className="home-shell min-h-screen flex flex-col font-sans transition-colors duration-300">
@@ -374,35 +345,37 @@ export default async function Home(props: {
         <div className={`w-64 flex-shrink-0 space-y-4 ${search || category ? "hidden lg:block" : "hidden xl:block"}`}>
           <Sidebar categories={categories} />
 
-          {blogPosts.length > 0 ? (
-            <section className="home-panel rounded-[1.5rem] p-3 border border-[var(--home-border)] bg-[var(--home-panel-bg)] shadow-md">
-              <div className="mb-3 flex items-center justify-between gap-2 px-1">
-                <div>
-                  <div className="text-[10px] font-black uppercase tracking-[0.22em] text-[var(--home-accent)]">
-                    Blog
-                  </div>
-                  <h2 className="mt-0.5 text-sm font-black text-[var(--home-text)]">Leia também</h2>
+          {/* PC Gamer Sidebar (Substituindo iPhone Seminovo) */}
+          <section className="home-panel rounded-[1.5rem] p-3 border border-red-500/20 bg-gradient-to-b from-red-950/20 via-[var(--home-panel-bg)] to-[var(--home-panel-bg)] shadow-md">
+            <div className="mb-3 flex items-center justify-between gap-2 px-1">
+              <div>
+                <div className="text-[10px] font-black uppercase tracking-[0.22em] text-[var(--home-accent)] flex items-center gap-1">
+                  <Gamepad2 size={12} />
+                  Setup Gamer
                 </div>
-                <Link
-                  href="/blog"
-                  className="text-[11px] font-black uppercase tracking-[0.16em] text-[var(--home-accent)] hover:opacity-80"
-                >
-                  Ver mais
-                </Link>
+                <h2 className="mt-0.5 text-sm font-black text-[var(--home-text)]">PC Gamer & Desktops</h2>
               </div>
+              <Link
+                href="/pcgamer"
+                className="text-[11px] font-black uppercase tracking-[0.16em] text-[var(--home-accent)] hover:opacity-80"
+              >
+                Ver mais
+              </Link>
+            </div>
 
-              <div className="space-y-2.5">
-                {blogPosts.map((post) => (
+            <div className="space-y-2.5">
+              {pcGamerCards.map((product, index) =>
+                product ? (
                   <Link
-                    key={post.id}
-                    href={`/blog/${post.slug}`}
+                    key={product.id}
+                    href={getProductHref(product)}
                     prefetch={false}
                     className="home-card group flex items-center gap-2.5 rounded-[1.2rem] p-2.5 transition hover:-translate-y-0.5 hover:border-[var(--home-border-strong)]"
                   >
                     <div className="relative h-[64px] w-[64px] flex-none overflow-hidden rounded-xl border border-[var(--home-border)] bg-[var(--home-card-soft)]">
                       <Image
-                        src={post.cover_image || "/logo.png"}
-                        alt={post.title}
+                        src={product.image || "/logo.png"}
+                        alt={product.name}
                         fill
                         sizes="64px"
                         className="object-contain object-center p-1"
@@ -410,82 +383,49 @@ export default async function Home(props: {
                       />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-1 text-[9px] font-black uppercase tracking-[0.12em] text-[var(--home-muted)]">
-                        <span className="text-[var(--home-accent)]">{post.category}</span>
+                      <div className="text-[9px] font-black uppercase tracking-[0.12em] text-[var(--home-accent)]">
+                        {product.category || "PC Gamer"}
                       </div>
                       <h3 className="mt-0.5 line-clamp-2 text-xs font-bold leading-tight text-[var(--home-text)] group-hover:text-[var(--home-accent)]">
-                        {post.title}
+                        {product.name}
                       </h3>
+                      <p className="mt-1 text-xs font-black text-white">
+                        {product.price || "Sob consulta"}
+                      </p>
                     </div>
                   </Link>
-                ))}
-              </div>
-            </section>
-          ) : null}
-
-          {vitrinePages.length > 0 ? (
-            <section className="home-panel rounded-[1.5rem] p-3 border border-[var(--home-border)] bg-[var(--home-panel-bg)] shadow-md">
-              <div className="mb-3 flex items-center justify-between gap-2 px-1">
-                <div>
-                  <div className="text-[10px] font-black uppercase tracking-[0.22em] text-[var(--home-accent)]">
-                    Vitrine
+                ) : (
+                  <div key={`pc-gamer-placeholder-${index}`} className="home-card flex items-center gap-2.5 rounded-[1.2rem] p-2.5">
+                    <div className="relative h-[64px] w-[64px] flex-none overflow-hidden rounded-xl border border-[var(--home-border)] bg-[var(--home-card-soft)]">
+                      <Image
+                        src="/logo.png"
+                        alt="Mais PCs Gamer em breve"
+                        fill
+                        sizes="64px"
+                        className="object-contain object-center p-2"
+                        unoptimized
+                      />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[9px] font-black uppercase text-[var(--home-muted)]">
+                        Em breve
+                      </div>
+                      <h3 className="mt-0.5 line-clamp-2 text-xs font-bold leading-tight text-[var(--home-text)]">
+                        Novos PCs Gamer sendo montados
+                      </h3>
+                    </div>
                   </div>
-                  <h2 className="mt-0.5 text-sm font-black text-[var(--home-text)]">Destaques</h2>
-                </div>
-                <Link
-                  href="/vitrine"
-                  className="text-[11px] font-black uppercase tracking-[0.16em] text-[var(--home-accent)] hover:opacity-80"
-                >
-                  Ver mais
-                </Link>
-              </div>
-
-              <div className="space-y-2.5">
-                {vitrinePages.map((page) => {
-                  const imageMap = page.images && typeof page.images === "object" ? page.images : {};
-                  const hero = String(imageMap.hero || pickPcHeroImage({ categoria: page.categoria }));
-                  const priceText = priceTextFromVitrineRecord(page);
-
-                  return (
-                    <Link
-                      key={page.id}
-                      href={`/p/${page.slug}`}
-                      prefetch={false}
-                      className="home-card group flex items-center gap-2.5 rounded-[1.2rem] p-2.5 transition hover:-translate-y-0.5 hover:border-[var(--home-border-strong)]"
-                    >
-                      <div className="relative h-[64px] w-[64px] flex-none overflow-hidden rounded-xl border border-[var(--home-border)] bg-[var(--home-card-soft)]">
-                        <Image
-                          src={hero || "/logo.png"}
-                          alt={page.nome_pc}
-                          fill
-                          sizes="64px"
-                          className="object-contain object-center p-1"
-                          unoptimized
-                        />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="text-[9px] font-black uppercase tracking-[0.12em] text-[var(--home-accent)]">
-                          {page.categoria || "Vitrine"}
-                        </div>
-                        <h3 className="mt-0.5 line-clamp-2 text-xs font-bold leading-tight text-[var(--home-text)] group-hover:text-[var(--home-accent)]">
-                          {page.nome_pc}
-                        </h3>
-                        <p className="mt-1 text-xs font-black text-white">
-                          {priceText}
-                        </p>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            </section>
-          ) : null}
+                ),
+              )}
+            </div>
+          </section>
 
           {/* Notebooks Seminovos Sidebar */}
           <section className="home-panel rounded-[1.5rem] p-3 border border-[var(--home-border)] bg-[var(--home-panel-bg)] shadow-md">
             <div className="mb-3 flex items-center justify-between gap-2 px-1">
               <div>
-                <div className="text-[10px] font-black uppercase tracking-[0.22em] text-emerald-400">
+                <div className="text-[10px] font-black uppercase tracking-[0.22em] text-emerald-400 flex items-center gap-1">
+                  <Laptop size={12} />
                   Seminovo
                 </div>
                 <h2 className="mt-0.5 text-sm font-black text-[var(--home-text)]">Notebooks seminovos</h2>
@@ -555,36 +495,36 @@ export default async function Home(props: {
             </div>
           </section>
 
-          {/* iPhones Seminovos Sidebar */}
-          <section className="home-panel rounded-[1.5rem] p-3 border border-[var(--home-border)] bg-[var(--home-panel-bg)] shadow-md">
-            <div className="mb-3 flex items-center justify-between gap-2 px-1">
-              <div>
-                <div className="text-[10px] font-black uppercase tracking-[0.22em] text-blue-400">
-                  Seminovo
+          {/* Blog Sidebar */}
+          {blogPosts.length > 0 ? (
+            <section className="home-panel rounded-[1.5rem] p-3 border border-[var(--home-border)] bg-[var(--home-panel-bg)] shadow-md">
+              <div className="mb-3 flex items-center justify-between gap-2 px-1">
+                <div>
+                  <div className="text-[10px] font-black uppercase tracking-[0.22em] text-[var(--home-accent)]">
+                    Blog
+                  </div>
+                  <h2 className="mt-0.5 text-sm font-black text-[var(--home-text)]">Leia também</h2>
                 </div>
-                <h2 className="mt-0.5 text-sm font-black text-[var(--home-text)]">iPhones seminovos</h2>
+                <Link
+                  href="/blog"
+                  className="text-[11px] font-black uppercase tracking-[0.16em] text-[var(--home-accent)] hover:opacity-80"
+                >
+                  Ver mais
+                </Link>
               </div>
-              <Link
-                href="/categoria/iphones-seminovos"
-                className="text-[11px] font-black uppercase tracking-[0.16em] text-[var(--home-accent)] hover:opacity-80"
-              >
-                Ver mais
-              </Link>
-            </div>
 
-            <div className="space-y-2.5">
-              {iphoneSemiNovoCards.map((product, index) =>
-                product ? (
+              <div className="space-y-2.5">
+                {blogPosts.map((post) => (
                   <Link
-                    key={product.id}
-                    href={getProductHref(product)}
+                    key={post.id}
+                    href={`/blog/${post.slug}`}
                     prefetch={false}
                     className="home-card group flex items-center gap-2.5 rounded-[1.2rem] p-2.5 transition hover:-translate-y-0.5 hover:border-[var(--home-border-strong)]"
                   >
                     <div className="relative h-[64px] w-[64px] flex-none overflow-hidden rounded-xl border border-[var(--home-border)] bg-[var(--home-card-soft)]">
                       <Image
-                        src={product.image || "/logo.png"}
-                        alt={product.name}
+                        src={post.cover_image || "/logo.png"}
+                        alt={post.title}
                         fill
                         sizes="64px"
                         className="object-contain object-center p-1"
@@ -592,42 +532,77 @@ export default async function Home(props: {
                       />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="text-[9px] font-black uppercase tracking-[0.12em] text-blue-400">
-                        {product.category || "iPhone seminovo"}
+                      <div className="flex flex-wrap items-center gap-1 text-[9px] font-black uppercase tracking-[0.12em] text-[var(--home-muted)]">
+                        <span className="text-[var(--home-accent)]">{post.category}</span>
                       </div>
                       <h3 className="mt-0.5 line-clamp-2 text-xs font-bold leading-tight text-[var(--home-text)] group-hover:text-[var(--home-accent)]">
-                        {product.name}
+                        {post.title}
                       </h3>
-                      <p className="mt-1 text-xs font-black text-white">
-                        {product.price || "Sob consulta"}
-                      </p>
                     </div>
                   </Link>
-                ) : (
-                  <div key={`iphone-semi-novo-placeholder-${index}`} className="home-card flex items-center gap-2.5 rounded-[1.2rem] p-2.5">
-                    <div className="relative h-[64px] w-[64px] flex-none overflow-hidden rounded-xl border border-[var(--home-border)] bg-[var(--home-card-soft)]">
-                      <Image
-                        src="/logo.png"
-                        alt="Mais iPhones em breve"
-                        fill
-                        sizes="64px"
-                        className="object-contain object-center p-2"
-                        unoptimized
-                      />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="text-[9px] font-black uppercase text-[var(--home-muted)]">
-                        Em breve
-                      </div>
-                      <h3 className="mt-0.5 line-clamp-2 text-xs font-bold leading-tight text-[var(--home-text)]">
-                        Novos iPhones chegando
-                      </h3>
-                    </div>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
+          {/* Vitrine Sidebar */}
+          {vitrinePages.length > 0 ? (
+            <section className="home-panel rounded-[1.5rem] p-3 border border-[var(--home-border)] bg-[var(--home-panel-bg)] shadow-md">
+              <div className="mb-3 flex items-center justify-between gap-2 px-1">
+                <div>
+                  <div className="text-[10px] font-black uppercase tracking-[0.22em] text-[var(--home-accent)]">
+                    Vitrine
                   </div>
-                ),
-              )}
-            </div>
-          </section>
+                  <h2 className="mt-0.5 text-sm font-black text-[var(--home-text)]">Destaques</h2>
+                </div>
+                <Link
+                  href="/vitrine"
+                  className="text-[11px] font-black uppercase tracking-[0.16em] text-[var(--home-accent)] hover:opacity-80"
+                >
+                  Ver mais
+                </Link>
+              </div>
+
+              <div className="space-y-2.5">
+                {vitrinePages.map((page) => {
+                  const imageMap = page.images && typeof page.images === "object" ? page.images : {};
+                  const hero = String(imageMap.hero || pickPcHeroImage({ categoria: page.categoria }));
+                  const priceText = priceTextFromVitrineRecord(page);
+
+                  return (
+                    <Link
+                      key={page.id}
+                      href={`/p/${page.slug}`}
+                      prefetch={false}
+                      className="home-card group flex items-center gap-2.5 rounded-[1.2rem] p-2.5 transition hover:-translate-y-0.5 hover:border-[var(--home-border-strong)]"
+                    >
+                      <div className="relative h-[64px] w-[64px] flex-none overflow-hidden rounded-xl border border-[var(--home-border)] bg-[var(--home-card-soft)]">
+                        <Image
+                          src={hero || "/logo.png"}
+                          alt={page.nome_pc}
+                          fill
+                          sizes="64px"
+                          className="object-contain object-center p-1"
+                          unoptimized
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-[9px] font-black uppercase tracking-[0.12em] text-[var(--home-accent)]">
+                          {page.categoria || "Vitrine"}
+                        </div>
+                        <h3 className="mt-0.5 line-clamp-2 text-xs font-bold leading-tight text-[var(--home-text)] group-hover:text-[var(--home-accent)]">
+                          {page.nome_pc}
+                        </h3>
+                        <p className="mt-1 text-xs font-black text-white">
+                          {priceText}
+                        </p>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </section>
+          ) : null}
         </div>
 
         {/* Main Content Area */}
@@ -643,9 +618,9 @@ export default async function Home(props: {
               {/* 3. Flash Deals (Ofertas Relâmpago com Countdown) */}
               <HomeFlashDeals products={products} />
 
-              {/* 4. Dual Seminovos Showcase (iPhones & Notebooks) */}
+              {/* 4. Dual High Performance Showcase (PC Gamer & Notebooks) */}
               <HomeSeminovosShowcase
-                iphoneProducts={iphoneSemiNovoProducts}
+                pcGamerProducts={pcGamerProducts}
                 notebookProducts={semiNovoProducts}
               />
 
@@ -729,7 +704,7 @@ export default async function Home(props: {
             <SeoContent title="LOJA DE INFORMATICA EM CAMPINAS COM WHATSAPP, RETIRADA E ASSISTENCIA TECNICA">
               <p className="mb-4 text-[var(--home-muted)]">
                 A <strong>Balão da Informática Castelo</strong> é uma <strong>loja de informática em Campinas</strong> com foco direto em
-                conversão local: <strong>PC Gamer em Campinas</strong>, <strong>notebook em Campinas</strong>, <strong>iPhones seminovos</strong>, peças para upgrade,
+                conversão local: <strong>PC Gamer em Campinas</strong>, <strong>notebook em Campinas</strong>, peças para upgrade,
                 periféricos, SSD, memória RAM, placa de vídeo e <strong>assistência técnica em Campinas</strong> com atendimento rápido
                 pelo WhatsApp. Quem procura <strong>loja de computador no Cambuí</strong>, <strong>comprar notebook em Campinas</strong>,
                 <strong>upgrade de PC</strong>, <strong>conserto de notebook</strong> ou <strong>peças de informática com retirada rápida</strong>
@@ -738,7 +713,7 @@ export default async function Home(props: {
               <ul className="list-none space-y-3 pl-0 text-[var(--home-muted)]">
                 <li className="flex items-start gap-2">
                   <span className="text-xl">📍</span>
-                  <span><strong>Loja física em Campinas:</strong> {SITE_CONFIG.address}. Presença local para quem quer comprar computador, notebook, iPhone, acessórios e peças com mais confiança e retirada ágil.</span>
+                  <span><strong>Loja física em Campinas:</strong> {SITE_CONFIG.address}. Presença local para quem quer comprar computador, notebook, acessórios e peças com mais confiança e retirada ágil.</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-xl">💬</span>
@@ -746,7 +721,7 @@ export default async function Home(props: {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-xl">🚀</span>
-                  <span><strong>Especialistas em Campinas:</strong> montagem de PC Gamer, upgrade de computador, troca de tela e bateria de iPhone, manutenção de notebooks e suporte técnico.</span>
+                  <span><strong>Especialistas em Campinas:</strong> montagem de PC Gamer, upgrade de computador, manutenção de notebooks e suporte técnico.</span>
                 </li>
               </ul>
             </SeoContent>

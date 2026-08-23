@@ -1,12 +1,11 @@
 ﻿"use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { 
-  MessageCircle, MapPin, PhoneCall, Sparkles, Clock, ShieldCheck, 
-  Cpu, Laptop, Smartphone, Wrench, ArrowRight, Zap, Flame, CheckCircle2, ChevronRight
+  MessageCircle, MapPin, Sparkles, Clock, 
+  Cpu, Laptop, HardDrive, Wrench, ArrowRight, Zap, Flame, CheckCircle2, ChevronRight
 } from "lucide-react";
 import { SITE_CONFIG } from "@/lib/config";
 import Carousel from "@/components/Carousel";
@@ -24,7 +23,7 @@ export default function HomeHeroInteractive({ carouselImages }: HomeHeroInteract
   const goals = [
     { id: "pc-gamer", label: "PC Gamer", icon: Cpu, route: "/pcgamer", query: "PC Gamer" },
     { id: "notebooks", label: "Notebooks", icon: Laptop, route: "/categoria/notebooks-seminovos", query: "Notebook" },
-    { id: "iphones", label: "iPhones", icon: Smartphone, route: "/categoria/iphones-seminovos", query: "iPhone" },
+    { id: "hardware", label: "Peças & Upgrade", icon: HardDrive, route: "/categoria/hardware", query: "Hardware" },
     { id: "assistencia", label: "Assistência", icon: Wrench, route: "/manutencao", query: "Assistência" }
   ];
 
@@ -44,7 +43,7 @@ export default function HomeHeroInteractive({ carouselImages }: HomeHeroInteract
   };
 
   const openWhatsAppHelp = () => {
-    const goal = goals.find(g => g.id === selectedGoal)?.label || "um produto";
+    const goal = goals.find(g => g.id === selectedGoal)?.label || "um PC Gamer";
     const budget = budgets[selectedBudget]?.label || "sob medida";
     const text = `Olá! Estou procurando ${goal} na faixa de ${budget} no site da Balão da Informática. Podem me ajudar com as melhores opções?`;
     window.open(`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(text)}`, "_blank");
@@ -105,11 +104,11 @@ export default function HomeHeroInteractive({ carouselImages }: HomeHeroInteract
                 </div>
 
                 <Link
-                  href="/promocao"
+                  href="/pcgamer"
                   className="inline-flex items-center gap-1.5 text-xs font-black text-amber-400 hover:text-amber-300 transition-colors"
                 >
                   <Flame size={14} />
-                  Ver Liquidação da Semana
+                  Ver PCs Gamer Montados
                   <ChevronRight size={14} />
                 </Link>
               </div>
@@ -122,7 +121,7 @@ export default function HomeHeroInteractive({ carouselImages }: HomeHeroInteract
               ) : (
                 <div className="py-8 text-center">
                   <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
-                    Monte, compre e faça upgrade com quem entende.
+                    Monte seu PC Gamer com quem entende de hardware.
                   </h1>
                   <p className="mt-3 max-w-2xl mx-auto text-sm sm:text-base text-[var(--home-muted)]">
                     PCs Gamer montados, notebooks seminovos com garantia, peças e assistência no Cambuí.
@@ -217,38 +216,38 @@ export default function HomeHeroInteractive({ carouselImages }: HomeHeroInteract
               </div>
 
               <h2 className="mt-4 text-xl sm:text-2xl font-black text-white tracking-tight leading-snug">
-                Dúvida na peça ou configuração?
+                Monte seu Setup dos Sonhos
               </h2>
 
               <p className="mt-2 text-xs sm:text-sm text-[var(--home-muted)] leading-relaxed">
-                Nossa equipe técnica analisa sua necessidade na hora, confirma estoque e calcula frete ou retirada imediata.
+                Nossos especialistas montam o PC ideal para seu jogo ou trabalho, com teste de estresse e entrega no Cambuí.
               </p>
 
               <div className="mt-4 space-y-2 text-xs font-semibold text-[var(--home-soft)]">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />
-                  <span>Orçamento de montagem sem compromisso</span>
+                  <span>Montagem profissional e Cable Management</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />
-                  <span>Confirmação de compatibilidade técnica</span>
+                  <span>Testes de FPS e estabilidade de temperatura</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />
-                  <span>Negociação no PIX direto com vendedor</span>
+                  <span>Desconto no PIX ou até 10x sem juros</span>
                 </div>
               </div>
             </div>
 
             <div className="mt-6 space-y-2.5">
               <a
-                href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent("Olá! Estou no site da Balão da Informática e quero ajuda para escolher meu produto / tirar dúvidas de estoque.")}`}
+                href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent("Olá! Estou no site da Balão da Informática e quero um orçamento para montar meu PC Gamer / comprar produtos.")}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-black text-sm shadow-lg shadow-green-900/30 transition-all hover:scale-[1.02]"
               >
                 <MessageCircle size={18} />
-                <span>Iniciar Atendimento WhatsApp</span>
+                <span>Pedir Orçamento no WhatsApp</span>
               </a>
 
               <a
