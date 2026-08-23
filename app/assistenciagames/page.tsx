@@ -1,545 +1,328 @@
-import { Metadata } from 'next'
-import Link from 'next/link'
-import Header from '@/components/Header'
-import { searchProductsByKeywords } from '@/lib/db'
-import ProductCarousel from '@/components/ProductCarousel'
-import JsonLd, { generateBreadcrumbSchema, generateFAQSchema, generateOrganizationSchema, generateServiceSchema } from '@/components/JsonLd'
-import { 
-  Gamepad2, 
-  type LucideIcon,
-  Cpu, 
-  Zap, 
-  ThermometerSun, 
-  Disc, 
-  Cable, 
-  Truck, 
-  MessageCircle, 
+import { Metadata } from "next";
+import Link from "next/link";
+import Header from "@/components/Header";
+import { getProducts, searchProductsByKeywords } from "@/lib/db";
+import ProductCard from "@/components/ProductCard";
+import JsonLd, {
+  generateBreadcrumbSchema,
+  generateFAQSchema,
+  generateOrganizationSchema,
+  generateServiceSchema,
+  generateItemListSchema,
+} from "@/components/JsonLd";
+import { SITE_CONFIG } from "@/lib/config";
+import {
+  Gamepad2,
+  Cpu,
+  Zap,
+  ThermometerSun,
+  Cable,
+  Truck,
+  MessageCircle,
   CheckCircle,
-  Award,
   MapPin,
-  HelpCircle,
   ShieldCheck,
-  Settings,
-  Ghost,
-  Timer,
-  ThumbsUp,
   Star,
-  Trophy
-} from 'lucide-react'
+  ArrowRight,
+  Disc,
+} from "lucide-react";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: 'Assistência Técnica Games Campinas | Conserto PS5, PS4, Xbox Series | Balão da Informática',
-  description: 'Especialista em reparo de consoles: PlayStation 5, PS4, Xbox Series X/S e Xbox One. Limpeza, troca de pasta térmica, HDMI, fonte e controle. Orçamento grátis em Campinas.',
+  title: "Assistência Técnica de Games em Campinas | Conserto PS5, PS4, Xbox Series e Switch | Balão da Informática",
+  description:
+    "Especialistas em conserto de consoles e controles em Campinas: PlayStation 5, PS4, Xbox Series X/S, Xbox One e Nintendo Switch. Troca de HDMI, limpeza e metal líquido, reparo de fonte e correção de drift.",
   keywords: [
-    'conserto ps5 campinas',
-    'manutenção ps4',
-    'assistência técnica xbox series',
-    'reparo controle ps5 drift',
-    'limpeza ps5',
-    'troca hdmi ps5',
-    'conserto xbox one campinas',
-    'assistência games campinas',
-    'reparo placa mãe console',
-    'loja de games campinas'
+    "conserto ps5 campinas",
+    "manutencao ps4 campinas",
+    "assistencia tecnica xbox series campinas",
+    "troca hdmi ps5 campinas",
+    "limpeza ps5 metal liquido campinas",
+    "conserto controle ps5 drift campinas",
+    "assistencia nintendo switch campinas",
+    "balao da informatica games cambui",
   ],
   alternates: {
-    canonical: 'https://www.balao.info/assistenciagames',
+    canonical: "https://www.balao.info/assistenciagames",
   },
   openGraph: {
-    title: 'Assistência Técnica Games Especializada | PS5, PS4 e Xbox | Balão da Informática',
-    description: 'Seu console esquentando ou desligando? Resolvemos problemas de placa, HDMI, fonte e drift em controles. Atendemos todo o Brasil via correios.',
-    url: 'https://www.balao.info/assistenciagames',
-    type: 'website',
-    locale: 'pt_BR',
-    images: ['/images/og-games.jpg']
-  }
-}
-
-export const revalidate = 600
+    title: "Assistência Técnica Especializada em Games e Consoles | Balão da Informática",
+    description:
+      "Seu console está superaquecendo, sem imagem ou desligando? Bancada própria no Cambuí para reparo rápido de PS5, PS4, Xbox e Nintendo Switch.",
+    url: "https://www.balao.info/assistenciagames",
+    type: "website",
+    locale: "pt_BR",
+    images: [{ url: "/logo.png" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Conserto de Consoles e Games em Campinas | Balão da Informática",
+    description: "Laboratório próprio especializado em PlayStation, Xbox e Nintendo em Campinas.",
+    images: ["/logo.png"],
+  },
+};
 
 const GAMES_FAQS = [
   {
-    question: "Quanto tempo demora o conserto?",
-    answer: "A maioria dos reparos, como limpeza, troca de HDMI e fonte, é concluída em 24 a 48 horas. Casos complexos de placa podem levar mais tempo para testes.",
+    question: "Quanto tempo demora o conserto do meu console?",
+    answer:
+      "Serviços preventivos como limpeza profunda com troca de metal líquido (PS5) ou pasta térmica premium (PS4/Xbox), além de troca de conector HDMI, costumam ser finalizados em 24 a 48 horas úteis em nosso laboratório próprio no Cambuí.",
   },
   {
-    question: "Qual a garantia do serviço?",
-    answer: "Os reparos e peças trocadas contam com garantia legal de 90 dias, com suporte da equipe após a entrega.",
+    question: "Vocês consertam controle com drift nos analógicos?",
+    answer:
+      "Sim! Realizamos a substituição dos analógicos tradicionais e também a instalação de analógicos com tecnologia Hall Effect (magnéticos, que nunca mais sofrem com drift) para DualSense (PS5), Xbox Series e Nintendo Switch Joy-Con.",
   },
   {
-    question: "Meus jogos e saves são apagados?",
-    answer: "Na maior parte dos casos, não. Os dados são preservados sempre que possível e qualquer procedimento crítico é autorizado antes.",
+    question: "Meus jogos, contas e saves são apagados no reparo?",
+    answer:
+      "Não. Nossos procedimentos de bancada preservam todos os seus dados e contas salvas no SSD/HD interno do console. Caso haja necessidade de restauração de fábrica em casos raros de corrupção de sistema, avisamos antes.",
   },
-]
-
-function BlockHero() {
-  const breadcrumbItems = [
-    { name: 'Home', item: 'https://www.balao.info' },
-    { name: 'Assistência Games', item: 'https://www.balao.info/assistenciagames' }
-  ];
-
-  return (
-    <section className="relative min-h-[85vh] flex items-center justify-center bg-black text-white overflow-hidden">
-      <JsonLd data={[
-        generateOrganizationSchema(),
-        generateBreadcrumbSchema(breadcrumbItems)
-      ]} />
-      {/* Background Effects */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-900/40 via-black to-black"></div>
-      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-purple-600/20 rounded-full blur-[120px] animate-pulse"></div>
-
-      <div className="container relative z-10 px-4 text-center space-y-6 md:space-y-8">
-        <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs md:text-sm font-bold uppercase tracking-widest animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <Gamepad2 className="w-4 h-4 animate-bounce" />
-          Laboratório Especializado em Games
-        </div>
-        
-        <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-[9rem] font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-purple-200 to-purple-900 drop-shadow-[0_0_30px_rgba(147,51,234,0.5)] animate-in fade-in zoom-in-50 duration-1000 leading-none">
-          GAME OVER?<br />
-          <span className="text-stroke-white text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500">NUNCA!</span>
-        </h1>
-        
-        <p className="text-lg md:text-3xl text-slate-300 max-w-4xl mx-auto font-light leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
-          Ressuscitamos seu console. Especialistas em <strong className="text-purple-400 font-bold">PlayStation 5, PS4, Xbox Series e One</strong>.
-        </p>
-
-        <div className="pt-8 flex flex-col sm:flex-row justify-center gap-4 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300">
-          <Link 
-             href="https://wa.me/5519993916723?text=Preciso%20de%20assist%C3%AAncia%20para%20meu%20videogame!"
-             target="_blank"
-             className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-full font-bold text-lg transition-all shadow-lg shadow-purple-600/30 hover:scale-105 flex items-center justify-center gap-2"
-          >
-             <MessageCircle className="w-5 h-5" />
-             Orçamento Grátis
-          </Link>
-          <Link 
-             href="#servicos"
-             className="bg-white/10 hover:bg-white/20 border border-white/20 text-white px-8 py-4 rounded-full font-bold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2 backdrop-blur-sm"
-          >
-             <Settings className="w-5 h-5" />
-             Ver Serviços
-          </Link>
-        </div>
-      </div>
-      
-      {/* Marquee Consoles */}
-      <div className="absolute bottom-0 w-full bg-white/5 border-t border-white/10 py-4 md:py-6 backdrop-blur-sm overflow-hidden">
-        <div className="container mx-auto px-4 flex flex-wrap justify-center gap-6 md:gap-16 opacity-60 text-purple-200 font-bold tracking-widest text-xs md:text-xl">
-           <span>PLAYSTATION 5</span>
-           <span>XBOX SERIES X</span>
-           <span>PS4 PRO</span>
-           <span>XBOX ONE S</span>
-           <span>NINTENDO SWITCH</span>
-           <span>DUALSENSE</span>
-           <span>CONTROLE ELITE</span>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ServiceCard({ icon: Icon, title, description, items }: { icon: LucideIcon, title: string, description: string, items: string[] }) {
-  return (
-    <div className="bg-zinc-900/50 backdrop-blur border border-zinc-800 p-8 rounded-3xl hover:border-purple-500 transition-all group h-full flex flex-col">
-      <div className="w-14 h-14 bg-zinc-800 rounded-2xl flex items-center justify-center text-zinc-400 group-hover:text-purple-500 group-hover:bg-purple-500/10 transition-all mb-6 border border-zinc-700 group-hover:border-purple-500/30">
-        <Icon className="w-7 h-7" />
-      </div>
-      <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-purple-400 transition-colors">{title}</h3>
-      <p className="text-zinc-400 mb-6 leading-relaxed">{description}</p>
-      <ul className="space-y-3 mt-auto">
-        {items.map((item, idx) => (
-          <li key={idx} className="flex items-start gap-3 text-zinc-300 text-sm">
-            <CheckCircle className="w-4 h-4 text-purple-500 mt-0.5 shrink-0" />
-            {item}
-          </li>
-        ))}
-      </ul>
-    </div>
-  )
-}
-
-function BlockServices() {
-  const services = [
-    {
-      icon: ThermometerSun,
-      title: "Limpeza e Refrigeração",
-      description: "Seu console parece uma turbina de avião? Resolvemos o superaquecimento antes que queime o processador.",
-      items: [
-        "Limpeza química completa",
-        "Troca de Pasta Térmica (Prata/Liquid Metal)",
-        "Desobstrução de dissipadores",
-        "Lubrificação de cooler"
-      ]
-    },
-    {
-      icon: Cable,
-      title: "Reparo de HDMI e Conexões",
-      description: "Imagem falhando, tela preta ou conector quebrado. Trocamos a porta HDMI com solda BGA precisa.",
-      items: [
-        "Troca de conector HDMI",
-        "Reparo de CI de vídeo (Panasonic/Retimer)",
-        "Conserto de porta USB/Rede",
-        "Resolução de 'Luz Azul da Morte' (BLOD)"
-      ]
-    },
-    {
-      icon: Disc,
-      title: "Leitor e Drives",
-      description: "Console não puxa o disco, não lê jogos ou faz barulho estranho ao rodar mídia física.",
-      items: [
-        "Alinhamento de mecanismo",
-        "Limpeza de lente óptica",
-        "Troca de unidade óptica completa",
-        "Reparo de ejeção automática"
-      ]
-    },
-    {
-      icon: Gamepad2,
-      title: "Conserto de Controles",
-      description: "Recupere a precisão do seu DualSense, DualShock 4 ou Controle Xbox. Adeus Drift!",
-      items: [
-        "Troca de analógico (Drift)",
-        "Substituição de bateria viciada",
-        "Reparo de botões e gatilhos",
-        "Limpeza interna de contatos"
-      ]
-    },
-    {
-      icon: Zap,
-      title: "Fonte e Energia",
-      description: "Console não liga, desliga sozinho ou sofreu descarga elétrica (raio/pico de luz).",
-      items: [
-        "Reparo de fonte interna",
-        "Troca de componentes queimados",
-        "Recuperação de trilhas",
-        "Análise de curto na placa-mãe"
-      ]
-    },
-    {
-      icon: Cpu,
-      title: "Placa-Mãe e Chipset",
-      description: "Problemas complexos que outras assistências condenam. Temos laboratório avançado de eletrônica.",
-      items: [
-        "Reballing de APU/CPU",
-        "Troca de Memória GDDR",
-        "Reparo de circuito de Stand-by",
-        "Atualização de BIOS/Firmware corrompido"
-      ]
-    }
-  ];
-
-  return (
-    <section id="servicos" className="py-20 bg-zinc-950 text-white relative">
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-4xl md:text-5xl font-black mb-6 tracking-tight">
-            SOLUÇÕES PARA <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500">TODOS OS DEFEITOS</span>
-          </h2>
-          <p className="text-zinc-400 text-lg">
-            Utilizamos peças originais e equipamentos de ponta para garantir que seu videogame volte a funcionar como novo.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {services.map((service, idx) => (
-            <ServiceCard key={idx} {...service} />
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
-
-function BlockNational() {
-  return (
-    <section className="py-20 bg-purple-900 text-white relative overflow-hidden">
-      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
-      <div className="container mx-auto px-4 relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        <div>
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-white text-xs font-bold uppercase tracking-widest mb-6">
-            <Truck className="w-4 h-4" />
-            Atendemos Todo o Brasil
-          </div>
-          <h2 className="text-4xl md:text-6xl font-black mb-6 leading-tight">
-            MORA LONGE?<br />
-            <span className="text-purple-300">ENVIE PELOS CORREIOS</span>
-          </h2>
-          <p className="text-purple-100 text-lg mb-8 leading-relaxed">
-            Não confie seu console a curiosos. Envie para o laboratório mais especializado de Campinas. Recebemos equipamentos de todo o país com total segurança.
-          </p>
-          <ul className="space-y-4 mb-8">
-            <li className="flex items-center gap-3 font-medium">
-              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white font-bold">1</div>
-              Entre em contato e solicite a etiqueta de envio.
-            </li>
-            <li className="flex items-center gap-3 font-medium">
-              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white font-bold">2</div>
-              Embale seu console com segurança.
-            </li>
-            <li className="flex items-center gap-3 font-medium">
-              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white font-bold">3</div>
-              Receba o orçamento aprovado e acompanhe o reparo.
-            </li>
-            <li className="flex items-center gap-3 font-medium">
-              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white font-bold">4</div>
-              Receba de volta em casa, com garantia e nota fiscal.
-            </li>
-          </ul>
-          <Link 
-            href="https://wa.me/5519993916723?text=Quero%20enviar%20meu%20console%20pelos%20Correios!"
-            target="_blank"
-            className="bg-white text-purple-900 px-8 py-4 rounded-full font-bold text-lg hover:scale-105 transition-transform inline-flex items-center gap-2 shadow-xl"
-          >
-            <Truck className="w-5 h-5" />
-            Iniciar Envio Agora
-          </Link>
-        </div>
-        <div className="relative h-[400px] bg-purple-800/50 rounded-3xl border border-purple-500/30 flex items-center justify-center p-8">
-          <MapPin className="w-32 h-32 text-purple-400 opacity-50 animate-pulse" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center">
-              <p className="text-2xl font-bold text-white mb-2">Recebemos de:</p>
-              <p className="text-purple-200">São Paulo, Rio de Janeiro, Minas Gerais,<br/>Paraná, Bahia e muito mais.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
-
-function BlockFAQ() {
-  return (
-    <section className="py-20 bg-black text-white border-t border-zinc-900">
-      <div className="container mx-auto px-4 max-w-4xl">
-        <h2 className="text-3xl md:text-5xl font-black text-center mb-12">DÚVIDAS FREQUENTES</h2>
-        
-        <div className="space-y-6">
-          {GAMES_FAQS.map((faq, index) => (
-            <div key={faq.question} className="bg-zinc-900 rounded-2xl p-6 md:p-8">
-              <h3 className="text-xl font-bold text-purple-400 mb-3 flex items-center gap-2">
-                {index === 0 ? <HelpCircle className="w-5 h-5" /> : index === 1 ? <Award className="w-5 h-5" /> : <ShieldCheck className="w-5 h-5" />}
-                {faq.question}
-              </h3>
-              <p className="text-zinc-300 leading-relaxed">{faq.answer}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
+  {
+    question: "Qual a garantia do conserto?",
+    answer:
+      "Todos os reparos de placa, trocas de conectores HDMI, fontes e periféricos contam com garantia legal com suporte direto no balcão da nossa loja física.",
+  },
+];
 
 export default async function AssistenciaGamesPage() {
-  const gameProducts = await searchProductsByKeywords(['console', 'playstation', 'xbox', 'dualsense', 'controle'], 12)
+  const [allProducts, keywordGames] = await Promise.all([
+    getProducts(),
+    searchProductsByKeywords(["console", "gamer", "controle", "ps5", "xbox", "headset", "jogo"], 16),
+  ]);
+
+  let gameProducts = keywordGames;
+  if (gameProducts.length === 0) {
+    gameProducts = allProducts.slice(0, 8);
+  }
+
+  const breadcrumbItems = [
+    { name: "Home", item: "https://www.balao.info" },
+    { name: "Assistência Games", item: "https://www.balao.info/assistenciagames" },
+  ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-black font-sans">
+    <div className="min-h-screen bg-[#090d16] text-white flex flex-col font-sans selection:bg-[#E60012] selection:text-white">
       <JsonLd
         data={[
-          generateServiceSchema({
-            name: 'Assistência Técnica para PS5, PS4, Xbox e Controles em Campinas',
-            description: 'Reparo de consoles, troca de HDMI, limpeza, fonte, drift e manutenção eletrônica avançada em laboratório próprio.',
-            url: 'https://www.balao.info/assistenciagames',
-            serviceType: 'Assistência técnica para videogames e controles',
-          }),
+          generateOrganizationSchema(),
+          generateBreadcrumbSchema(breadcrumbItems),
+          generateItemListSchema(gameProducts, "https://www.balao.info/assistenciagames"),
           generateFAQSchema(GAMES_FAQS),
+          generateServiceSchema({
+            name: "Assistência Técnica de Consoles e Games em Campinas",
+            description:
+              "Conserto e manutenção especializada de consoles PlayStation, Xbox e Nintendo Switch na loja física do Cambuí.",
+            url: "https://www.balao.info/assistenciagames",
+            serviceType: "Reparo e Manutenção de Consoles de Videogame",
+          }),
         ]}
       />
       <Header />
-      <main className="flex-1">
-        
-        <BlockHero />
 
-        {/* NEW BLOCK: Stats */}
-        <section className="py-12 bg-zinc-900 border-b border-zinc-800">
-           <div className="container mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-              {[
-                 { num: "15k+", label: "Consoles Reparados", icon: Gamepad2 },
-                 { num: "98%", label: "Taxa de Sucesso", icon: Trophy },
-                 { num: "24h", label: "Orçamento Médio", icon: Timer },
-                 { num: "12x", label: "Parcelamento", icon: ThumbsUp }
-              ].map((s, i) => (
-                 <div key={i} className="group hover:bg-zinc-800/50 p-4 rounded-2xl transition-colors">
-                    <div className="flex justify-center mb-4 text-purple-500 group-hover:scale-110 transition-transform">
-                       <s.icon className="w-8 h-8" />
-                    </div>
-                    <div className="text-3xl md:text-4xl font-black text-white mb-2">{s.num}</div>
-                    <div className="text-sm text-zinc-500 uppercase tracking-wider font-bold">{s.label}</div>
-                 </div>
-              ))}
-           </div>
-        </section>
+      <main className="flex-1 space-y-16 sm:space-y-24 py-8 sm:py-12">
+        {/* HERO SECTION */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-[#111827] border border-slate-800 rounded-3xl p-8 sm:p-12 lg:p-16 relative overflow-hidden shadow-2xl">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-[#E60012]/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="relative z-10 max-w-3xl space-y-6">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E60012]/15 border border-[#E60012]/40 text-[#E60012] text-xs font-black uppercase tracking-widest">
+                <Gamepad2 className="w-4 h-4" />
+                Laboratório Especializado em Games
+              </div>
 
-        <BlockServices />
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight">
+                Conserto de Consoles com <span className="text-[#E60012]">Bancada Especializada</span>
+              </h1>
 
-        {/* NEW BLOCK: Process */}
-        <section className="py-20 bg-zinc-950 text-white relative overflow-hidden border-t border-zinc-900">
-            <div className="container mx-auto px-4">
-                <div className="text-center mb-16">
-                    <h2 className="text-3xl md:text-5xl font-black mb-4">COMO FUNCIONA</h2>
-                    <p className="text-zinc-400 max-w-2xl mx-auto">Seu game novo de novo em 4 passos simples.</p>
+              <p className="text-base sm:text-xl text-slate-300 leading-relaxed font-normal">
+                Seu PS5, PS4, Xbox Series ou Switch esquentando, sem sinal de vídeo na TV ou com drift no controle?
+                Traga para quem entende de hardware gamer no Cambuí com peças originais e garantia real.
+              </p>
+
+              <div className="pt-4 flex flex-wrap items-center gap-4">
+                <a
+                  href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(
+                    "Olá! Gostaria de um orçamento para conserto do meu videogame (PlayStation / Xbox / Nintendo Switch)."
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-[#E60012] hover:bg-red-700 text-white font-black py-4 px-8 rounded-2xl shadow-xl shadow-red-950/50 active:scale-95 transition-all flex items-center gap-3 text-base sm:text-lg"
+                >
+                  <MessageCircle className="w-6 h-6" />
+                  Pedir Diagnóstico no WhatsApp
+                </a>
+                <a
+                  href="#servicos"
+                  className="bg-[#161f32] hover:bg-slate-800 text-slate-200 border border-slate-700 font-bold py-4 px-8 rounded-2xl transition-all text-base flex items-center gap-2"
+                >
+                  Ver Principais Reparos
+                  <ArrowRight className="w-4 h-4" />
+                </a>
+              </div>
+
+              <div className="pt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-slate-800/80 text-left">
+                <div>
+                  <p className="text-2xl font-black text-white">24h a 48h</p>
+                  <p className="text-xs text-slate-400">Diagnóstico Ágil</p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                    {[
-                        { step: "01", title: "Entrada", desc: "Traga seu console ou envie pelos Correios." },
-                        { step: "02", title: "Análise", desc: "Diagnóstico preciso em laboratório próprio." },
-                        { step: "03", title: "Aprovação", desc: "Orçamento detalhado via WhatsApp." },
-                        { step: "04", title: "Diversão", desc: "Retire seu game pronto para jogar." }
-                    ].map((item, i) => (
-                        <div key={i} className="relative group">
-                            <div className="text-6xl font-black text-zinc-800 absolute -top-8 left-1/2 -translate-x-1/2 z-0 group-hover:text-purple-900/20 transition-colors">
-                                {item.step}
-                            </div>
-                            <div className="relative z-10 bg-zinc-900 p-8 rounded-3xl border border-zinc-800 hover:border-purple-500 transition-colors text-center">
-                                <h3 className="text-xl font-bold mb-2 text-purple-400">{item.title}</h3>
-                                <p className="text-zinc-400 text-sm">{item.desc}</p>
-                            </div>
-                        </div>
-                    ))}
+                <div>
+                  <p className="text-2xl font-black text-[#E60012]">90 Dias</p>
+                  <p className="text-xs text-slate-400">Garantia Balão</p>
                 </div>
-            </div>
-        </section>
-
-        {/* NEW BLOCK: Common Problems */}
-        <section className="py-20 bg-black text-white">
-           <div className="container mx-auto px-4">
-              <h2 className="text-3xl md:text-5xl font-black text-center mb-16">DEFEITOS COMUNS</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                 {[
-                    { title: "Luz Azul da Morte", desc: "O terror do PS4/PS5. Resolvemos com Reballing profissional.", icon: Ghost },
-                    { title: "Drift no Analógico", desc: "Seu personagem anda sozinho? Trocamos o mecanismo 3D.", icon: Gamepad2 },
-                    { title: "Superaquecimento", desc: "Barulho alto e desligamentos. Limpeza e pasta térmica resolvem.", icon: ThermometerSun },
-                    { title: "Não Lê Disco", desc: "Drive óptico travado ou lente suja. Recuperamos seu leitor.", icon: Disc },
-                    { title: "HDMI Quebrado", desc: "Mal contato ou porta danificada. Troca do conector na hora.", icon: Cable },
-                    { title: "Não Liga", desc: "Fonte queimada ou curto na placa. Diagnóstico eletrônico avançado.", icon: Zap }
-                 ].map((prob, i) => (
-                    <div key={i} className="flex items-start gap-4 p-6 rounded-2xl bg-zinc-900/50 border border-zinc-800 hover:bg-zinc-800 transition-colors">
-                       <div className="p-3 bg-red-500/10 rounded-xl text-red-500 shrink-0">
-                          <prob.icon className="w-6 h-6" />
-                       </div>
-                       <div>
-                          <h3 className="font-bold text-lg mb-1">{prob.title}</h3>
-                          <p className="text-sm text-zinc-400 leading-relaxed">{prob.desc}</p>
-                       </div>
-                    </div>
-                 ))}
+                <div>
+                  <p className="text-2xl font-black text-white">Metal Líquido</p>
+                  <p className="text-xs text-slate-400">Padrão Original PS5</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-black text-white">Hall Effect</p>
+                  <p className="text-xs text-slate-400">Analógicos sem Drift</p>
+                </div>
               </div>
-           </div>
-        </section>
-
-        {/* PRODUTOS EM DESTAQUE */}
-        <section className="bg-zinc-900 py-16 border-y border-zinc-800">
-           <div className="container mx-auto px-4">
-              <ProductCarousel 
-                 title="Consoles e Acessórios em Estoque" 
-                 products={gameProducts} 
-              />
-           </div>
-        </section>
-
-        {/* NEW BLOCK: Warranty */}
-        <section className="py-20 bg-zinc-900 text-white border-y border-zinc-800">
-           <div className="container mx-auto px-4 flex flex-col md:flex-row items-center gap-12">
-              <div className="flex-1">
-                 <ShieldCheck className="w-20 h-20 text-green-500 mb-6" />
-                 <h2 className="text-4xl font-black mb-6">GARANTIA DE VERDADE</h2>
-                 <p className="text-xl text-zinc-300 mb-8 leading-relaxed">
-                    Não brincamos em serviço. Todos os reparos possuem garantia legal de 90 dias, cobrindo peças e mão de obra.
-                    Se o problema voltar, nós resolvemos sem custo adicional.
-                 </p>
-                 <ul className="space-y-4">
-                    <li className="flex items-center gap-3 text-lg">
-                       <CheckCircle className="w-6 h-6 text-green-500" /> Peças 100% Originais
-                    </li>
-                    <li className="flex items-center gap-3 text-lg">
-                       <CheckCircle className="w-6 h-6 text-green-500" /> Nota Fiscal de Serviço
-                    </li>
-                    <li className="flex items-center gap-3 text-lg">
-                       <CheckCircle className="w-6 h-6 text-green-500" /> Suporte Pós-Venda
-                    </li>
-                 </ul>
-              </div>
-              <div className="flex-1 bg-black p-8 rounded-3xl border border-zinc-800 relative overflow-hidden">
-                 <div className="absolute top-0 right-0 p-4 bg-green-600 text-black font-black text-xs uppercase tracking-widest rounded-bl-2xl">
-                    Aprovado
-                 </div>
-                 <div className="space-y-6">
-                    <div className="flex items-center gap-4">
-                       <div className="w-12 h-12 bg-zinc-800 rounded-full flex items-center justify-center font-bold">VS</div>
-                       <div>
-                          <h3 className="font-bold text-green-500">Balão Games</h3>
-                          <p className="text-xs text-zinc-500">Laboratório Profissional</p>
-                       </div>
-                    </div>
-                    <div className="h-px bg-zinc-800"></div>
-                    <div className="space-y-2 text-sm text-zinc-300">
-                       <p className="flex justify-between"><span>Técnicos Certificados</span> <CheckCircle className="w-4 h-4 text-green-500" /></p>
-                       <p className="flex justify-between"><span>Ferramentas de Precisão</span> <CheckCircle className="w-4 h-4 text-green-500" /></p>
-                       <p className="flex justify-between"><span>Ambiente ESD (Anti-estático)</span> <CheckCircle className="w-4 h-4 text-green-500" /></p>
-                       <p className="flex justify-between"><span>Controle de Qualidade</span> <CheckCircle className="w-4 h-4 text-green-500" /></p>
-                    </div>
-                 </div>
-              </div>
-           </div>
-        </section>
-
-        <BlockNational />
-
-        <BlockFAQ />
-
-        {/* NEW BLOCK: Testimonials */}
-        <section className="py-20 bg-zinc-950 text-white border-t border-zinc-900">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-black mb-12 text-center">GAMERS APROVAM</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-               {[
-                  { name: "Lucas M.", game: "PS5", text: "Achei que meu PS5 tinha morrido com o raio. Recuperaram a fonte e ainda limparam. Top!" },
-                  { name: "Amanda K.", game: "Switch", text: "Trocaram o analógico do meu Joycon em 1 hora. O drift sumiu completamente." },
-                  { name: "Roberto J.", game: "Xbox Series S", text: "Enviei de Minas Gerais pelos correios. Chegou perfeito e muito bem embalado. Recomendo." }
-               ].map((t, i) => (
-                  <div key={i} className="bg-zinc-900 p-8 rounded-2xl border border-zinc-800">
-                     <div className="flex gap-1 text-yellow-500 mb-4">
-                        {[1,2,3,4,5].map(s => <Star key={s} className="w-4 h-4 fill-current" />)}
-                     </div>
-                     <p className="text-zinc-300 italic mb-6">&ldquo;{t.text}&rdquo;</p>
-                     <div>
-                        <div className="font-bold">{t.name}</div>
-                        <div className="text-xs text-purple-500 font-bold uppercase">{t.game}</div>
-                     </div>
-                  </div>
-               ))}
             </div>
           </div>
         </section>
 
-        {/* NEW BLOCK: Newsletter/Tips */}
-        <section className="py-20 bg-purple-600 text-white text-center">
-           <div className="container mx-auto px-4 max-w-2xl">
-              <h2 className="text-3xl font-bold mb-4">Dicas de Mestre?</h2>
-              <p className="mb-8 text-purple-100">Entre no nosso grupo e receba dicas de como cuidar do seu console e promoções de jogos.</p>
-              <Link href="https://wa.me/5519993916723?text=Quero%20dicas%20para%20meu%20game" target="_blank" className="bg-white text-purple-600 px-8 py-4 rounded-full font-bold hover:bg-purple-50 transition-colors inline-flex items-center gap-2">
-                 Entrar na Comunidade <Gamepad2 className="w-5 h-5" />
-              </Link>
-           </div>
+        {/* PRODUTOS E ACESSÓRIOS GAMER REAIS DO BANCO */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+            <div>
+              <div className="text-xs font-black uppercase tracking-wider text-[#E60012] mb-1">Loja & Acessórios</div>
+              <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
+                Equipamentos Gamer em Destaque
+              </h2>
+            </div>
+            <a
+              href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(
+                "Olá! Gostaria de consultar controles e acessórios gamer disponíveis na loja física."
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm font-bold text-slate-300 hover:text-[#E60012] transition-colors"
+            >
+              Consulte periféricos e consoles no WhatsApp <ArrowRight className="w-4 h-4" />
+            </a>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            {gameProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
         </section>
 
-        <section className="py-20 bg-gradient-to-br from-purple-900 to-indigo-900 text-white text-center">
-           <div className="container mx-auto px-4">
-              <h2 className="text-3xl md:text-5xl font-black mb-8">PRONTO PARA VOLTAR AO JOGO?</h2>
-              <Link 
-                 href="https://wa.me/5519993916723?text=Ol%C3%A1%2C%20gostaria%20de%20agendar%20um%20reparo%20para%20meu%20videogame."
-                 target="_blank"
-                 className="inline-flex items-center gap-3 bg-white text-purple-900 px-10 py-5 rounded-full font-black text-xl hover:scale-105 transition-transform shadow-2xl"
+        {/* PRINCIPAIS SERVIÇOS DE GAMES */}
+        <section id="servicos" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-[#111827] border border-slate-800 rounded-3xl p-8 sm:p-12 space-y-8">
+            <div className="text-center max-w-2xl mx-auto space-y-2">
+              <h2 className="text-2xl sm:text-3xl font-black text-white">Serviços Mais Procurados</h2>
+              <p className="text-sm sm:text-base text-slate-400">
+                Soluções técnicas com precisão cirúrgica para que você volte a jogar sem preocupações.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-[#161f32] border border-slate-800/80 rounded-2xl p-6 space-y-3">
+                <ThermometerSun className="w-8 h-8 text-[#E60012]" />
+                <h3 className="text-lg font-bold text-white">Limpeza Térmica & Metal Líquido</h3>
+                <p className="text-sm text-slate-300 leading-relaxed">
+                  Desobstrução do dissipador, higienização do cooler e aplicação de metal líquido ou pasta térmica premium para eliminar superaquecimento e desligamentos.
+                </p>
+              </div>
+
+              <div className="bg-[#161f32] border border-slate-800/80 rounded-2xl p-6 space-y-3">
+                <Cable className="w-8 h-8 text-[#E60012]" />
+                <h3 className="text-lg font-bold text-white">Troca de Conector HDMI</h3>
+                <p className="text-sm text-slate-300 leading-relaxed">
+                  Substituição profissional da porta HDMI danificada com estação de retrabalho BGA e micro-soldagem com conectores blindados de alta durabilidade.
+                </p>
+              </div>
+
+              <div className="bg-[#161f32] border border-slate-800/80 rounded-2xl p-6 space-y-3">
+                <Gamepad2 className="w-8 h-8 text-[#E60012]" />
+                <h3 className="text-lg font-bold text-white">Reparo de Controles & Drift</h3>
+                <p className="text-sm text-slate-300 leading-relaxed">
+                  Conserto de botões R2/L2, troca de analógicos com drift, substituição de baterias e instalação de sensores Hall Effect para PS5, Xbox e Switch.
+                </p>
+              </div>
+
+              <div className="bg-[#161f32] border border-slate-800/80 rounded-2xl p-6 space-y-3">
+                <Zap className="w-8 h-8 text-[#E60012]" />
+                <h3 className="text-lg font-bold text-white">Reparo de Fonte Interna</h3>
+                <p className="text-sm text-slate-300 leading-relaxed">
+                  Conserto e troca de fontes queimadas por raio ou picos de energia com componentes de padrão industrial.
+                </p>
+              </div>
+
+              <div className="bg-[#161f32] border border-slate-800/80 rounded-2xl p-6 space-y-3">
+                <Cpu className="w-8 h-8 text-[#E60012]" />
+                <h3 className="text-lg font-bold text-white">Reparo de Placa-Mãe (Curto)</h3>
+                <p className="text-sm text-slate-300 leading-relaxed">
+                  Diagnóstico avançado com osciloscópio e câmera térmica para localização de curtos em linhas de alimentação e substituição de CI HDMI encoder.
+                </p>
+              </div>
+
+              <div className="bg-[#161f32] border border-slate-800/80 rounded-2xl p-6 space-y-3">
+                <Disc className="w-8 h-8 text-[#E60012]" />
+                <h3 className="text-lg font-bold text-white">Leitor de Disco & Expansão SSD</h3>
+                <p className="text-sm text-slate-300 leading-relaxed">
+                  Conserto do mecanismo de ejeção/leitura de Blu-ray e instalação de SSDs NVMe M.2 Gen4 com dissipador térmico para aumentar espaço no PS5.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ SCHEMA ENRICHED */}
+        <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+          <div className="text-center space-y-2 mb-8">
+            <div className="text-xs font-black uppercase tracking-wider text-[#E60012]">Dúvidas Comuns</div>
+            <h2 className="text-2xl sm:text-3xl font-black text-white">Perguntas sobre Assistência Games</h2>
+          </div>
+
+          <div className="space-y-4">
+            {GAMES_FAQS.map((faq, idx) => (
+              <div key={idx} className="bg-[#111827] border border-slate-800 rounded-2xl p-6 space-y-2">
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-[#E60012]" />
+                  {faq.question}
+                </h3>
+                <p className="text-sm text-slate-300 leading-relaxed pl-4">{faq.answer}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* CTA FINAL */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-gradient-to-b from-[#111827] to-[#090d16] border border-slate-800 rounded-3xl p-8 sm:p-12 text-center space-y-6">
+            <div className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[#E60012]">
+              <MapPin className="w-4 h-4" />
+              Bancada Técnica no Cambuí • Campinas/SP
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-black text-white">
+              Traga seu Console para um Orçamento sem Compromisso
+            </h2>
+            <p className="text-slate-300 max-w-2xl mx-auto text-sm sm:text-base">
+              Loja física: {SITE_CONFIG.address} • Fale com nossos técnicos gamers agora mesmo no WhatsApp.
+            </p>
+            <div className="pt-2 flex flex-wrap justify-center gap-4">
+              <a
+                href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(
+                  "Olá! Gostaria de agendar a avaliação do meu videogame na assistência da Balão."
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-[#E60012] hover:bg-red-700 text-white font-black py-4 px-8 rounded-2xl transition-all flex items-center gap-3 text-base"
               >
-                 <MessageCircle className="w-6 h-6" />
-                 FALAR COM TÉCNICO AGORA
-              </Link>
-           </div>
+                <MessageCircle className="w-5 h-5" />
+                Falar com Técnico de Games
+              </a>
+            </div>
+          </div>
         </section>
-
       </main>
     </div>
-  )
+  );
 }

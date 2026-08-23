@@ -3,7 +3,7 @@
 
 ## 1. Target Audience & Core Value Proposition
 - **Audience**: Gamers, professionals, students, IT enthusiasts, and local businesses in Campinas and the Metropolitan Region (Sumaré, Hortolândia, Paulínia, Valinhos, Vinhedo, Indaiatuba).
-- **Core Value**: Local physical store trust in Cambuí + e-commerce agility. Pronta entrega, retirada no balcão em 30 min, assistência técnica com bancada própria, 10% de desconto no PIX e parcelamento em até 10x sem juros.
+- **Core Value**: Local physical store trust in Cambuí + e-commerce agility. Retirada no balcão no Cambuí (consulte disponibilidade imediata no WhatsApp), assistência técnica com bancada própria, 10% de desconto no PIX e parcelamento em até 10x sem juros.
 
 ## 2. Brand Identity & Visual Rules
 - **Color Palette**:

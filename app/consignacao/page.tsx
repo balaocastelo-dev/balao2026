@@ -1,565 +1,368 @@
-import { Metadata } from 'next'
-import Link from 'next/link'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
-import { listVitrinePagesPublic } from '@/lib/vitrine/db'
-import { pickPcHeroImage } from '@/lib/vitrine/core'
-import ProductCarousel from '@/components/ProductCarousel'
-import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from '@/components/JsonLd'
-import type { Product } from '@/lib/utils'
-import { 
-  CheckCircle, 
-  MessageCircle, 
-  Search,
-  Truck, 
-  Award,
-  MapPin,
-  ChevronDown,
-  Star,
-  Wrench,
+import { Metadata } from "next";
+import Link from "next/link";
+import Header from "@/components/Header";
+import ProductCard from "@/components/ProductCard";
+import { getProducts, searchProductsByKeywords } from "@/lib/db";
+import JsonLd, {
+  generateOrganizationSchema,
+  generateBreadcrumbSchema,
+  generateItemListSchema,
+  generateFAQSchema,
+  generateServiceSchema,
+} from "@/components/JsonLd";
+import { SITE_CONFIG } from "@/lib/config";
+import {
+  CheckCircle,
+  MessageCircle,
   ShieldCheck,
   Zap,
   Cpu,
-  Server,
-  Wifi,
-  Activity,
-  MousePointer2,
-  Settings,
+  MapPin,
   Lock,
-  Printer,
   DollarSign,
   Camera,
   Users,
-  Handshake,
   Smartphone,
   XCircle,
-  AlertTriangle,
   Monitor,
-  HardDrive,
-  Laptop
-} from 'lucide-react'
+  Laptop,
+  ArrowRight,
+  Handshake,
+  BadgeCheck,
+} from "lucide-react";
 
-function BlockStats() {
-  return (
-    <section className="py-12 bg-zinc-900 border-b border-zinc-800">
-      <div className="container mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
-        {[
-          { label: "Equipamentos Vendidos", value: "+2.500" },
-          { label: "Tempo Médio de Venda", value: "7 Dias" },
-          { label: "Avaliação de Clientes", value: "4.9/5" },
-          { label: "Anos de Mercado", value: "15" }
-        ].map((stat, i) => (
-          <div key={i}>
-            <div className="text-4xl font-black mb-2 text-green-500">{stat.value}</div>
-            <div className="text-zinc-400 text-sm uppercase tracking-wider">{stat.label}</div>
-          </div>
-        ))}
-      </div>
-    </section>
-  )
-}
-
-function BlockComparison() {
-  return (
-    <section className="py-20 bg-black text-white">
-      <div className="container mx-auto px-4">
-        <h2 className="text-3xl md:text-5xl font-black text-center mb-16">
-          POR QUE VENDER COM A <span className="text-green-500">BALÃO?</span>
-        </h2>
-        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-           {/* Vender Sozinho */}
-           <div className="bg-zinc-900/50 p-8 rounded-3xl border border-red-900/30 relative overflow-hidden">
-              <div className="absolute top-0 right-0 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">RISCO ALTO</div>
-              <h3 className="text-2xl font-bold mb-6 text-red-400">Vender Sozinho (OLX/Face)</h3>
-              <ul className="space-y-4">
-                 <li className="flex items-start gap-3 text-zinc-400">
-                    <XCircle className="w-6 h-6 text-red-500 shrink-0" />
-                    <span>Golpes de pagamento e comprovantes falsos.</span>
-                 </li>
-                 <li className="flex items-start gap-3 text-zinc-400">
-                    <XCircle className="w-6 h-6 text-red-500 shrink-0" />
-                    <span>Estranhos visitando sua casa para "testar".</span>
-                 </li>
-                 <li className="flex items-start gap-3 text-zinc-400">
-                    <XCircle className="w-6 h-6 text-red-500 shrink-0" />
-                    <span>Mensagens de curiosos o dia todo.</span>
-                 </li>
-                 <li className="flex items-start gap-3 text-zinc-400">
-                    <XCircle className="w-6 h-6 text-red-500 shrink-0" />
-                    <span>Sem garantia para quem compra (desvaloriza o produto).</span>
-                 </li>
-              </ul>
-           </div>
-
-           {/* Vender na Balão */}
-           <div className="bg-zinc-900 p-8 rounded-3xl border border-green-500/50 relative overflow-hidden shadow-[0_0_30px_rgba(34,197,94,0.1)]">
-              <div className="absolute top-0 right-0 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">RECOMENDADO</div>
-              <h3 className="text-2xl font-bold mb-6 text-green-400">Vender na Balão</h3>
-              <ul className="space-y-4">
-                 <li className="flex items-start gap-3 text-white">
-                    <CheckCircle className="w-6 h-6 text-green-500 shrink-0" />
-                    <span>Pagamento garantido e seguro.</span>
-                 </li>
-                 <li className="flex items-start gap-3 text-white">
-                    <CheckCircle className="w-6 h-6 text-green-500 shrink-0" />
-                    <span>Loja física no centro (segurança total).</span>
-                 </li>
-                 <li className="flex items-start gap-3 text-white">
-                    <CheckCircle className="w-6 h-6 text-green-500 shrink-0" />
-                    <span>Nós atendemos os interessados.</span>
-                 </li>
-                 <li className="flex items-start gap-3 text-white">
-                    <CheckCircle className="w-6 h-6 text-green-500 shrink-0" />
-                    <span>Oferecemos garantia e parcelamento (vende mais rápido).</span>
-                 </li>
-              </ul>
-           </div>
-        </div>
-      </div>
-    </section>
-  )
-}
-
-function BlockWhatWeAccept() {
-   return (
-      <section className="py-20 bg-zinc-950 text-white">
-         <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-black text-center mb-12">O QUE COMPRAMOS</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-               <div className="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 hover:border-green-500 transition-colors text-center group">
-                  <Smartphone className="w-12 h-12 mx-auto mb-4 text-zinc-500 group-hover:text-green-500 transition-colors" />
-                  <h3 className="font-bold text-lg">Celulares</h3>
-                  <p className="text-sm text-zinc-500 mt-2">iPhones e Androids topo de linha (Samsung S, Xiaomi).</p>
-               </div>
-               <div className="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 hover:border-green-500 transition-colors text-center group">
-                  <Laptop className="w-12 h-12 mx-auto mb-4 text-zinc-500 group-hover:text-green-500 transition-colors" />
-                  <h3 className="font-bold text-lg">Notebooks</h3>
-                  <p className="text-sm text-zinc-500 mt-2">Dell, Lenovo, Acer, Macbooks. Core i5 ou superior.</p>
-               </div>
-               <div className="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 hover:border-green-500 transition-colors text-center group">
-                  <Cpu className="w-12 h-12 mx-auto mb-4 text-zinc-500 group-hover:text-green-500 transition-colors" />
-                  <h3 className="font-bold text-lg">PC Gamer</h3>
-                  <p className="text-sm text-zinc-500 mt-2">Computadores montados com placa de vídeo dedicada.</p>
-               </div>
-               <div className="bg-zinc-900 p-6 rounded-2xl border border-zinc-800 hover:border-green-500 transition-colors text-center group">
-                  <Monitor className="w-12 h-12 mx-auto mb-4 text-zinc-500 group-hover:text-green-500 transition-colors" />
-                  <h3 className="font-bold text-lg">Periféricos</h3>
-                  <p className="text-sm text-zinc-500 mt-2">Monitores, Placas de Vídeo e peças high-end.</p>
-               </div>
-            </div>
-         </div>
-      </section>
-   )
-}
-
-function BlockWhatWeDontAccept() {
-   return (
-      <section className="py-12 bg-zinc-900 border-y border-zinc-800 text-white">
-         <div className="container mx-auto px-4 max-w-4xl text-center">
-            <h3 className="text-xl font-bold mb-8 text-zinc-400 flex items-center justify-center gap-2">
-               <XCircle className="text-red-500" />
-               O que NÃO aceitamos no momento
-            </h3>
-            <div className="flex flex-wrap justify-center gap-4">
-               {["Impressoras", "Monitores de Tubo (CRT)", "Peças Quebradas", "Notebooks muito antigos (DDR2)", "Celulares Bloqueados", "Tablets Genéricos"].map((item, i) => (
-                  <span key={i} className="bg-zinc-800 px-4 py-2 rounded-full text-zinc-400 text-sm border border-zinc-700">
-                     {item}
-                  </span>
-               ))}
-            </div>
-         </div>
-      </section>
-   )
-}
-
-function BlockSafety() {
-   return (
-      <section className="py-20 bg-black text-white">
-         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center gap-12">
-            <div className="flex-1 space-y-8">
-               <h2 className="text-3xl font-black mb-6">SEGURANÇA DE DADOS</h2>
-               <div className="flex gap-4">
-                  <div className="bg-green-900/20 p-4 rounded-xl h-fit">
-                     <Lock className="w-8 h-8 text-green-500" />
-                  </div>
-                  <div>
-                     <h3 className="text-xl font-bold mb-2">Formatação Segura (Wipe)</h3>
-                     <p className="text-zinc-400">Antes de colocar à venda, realizamos uma formatação de baixo nível que impede a recuperação dos seus arquivos pessoais, fotos e senhas.</p>
-                  </div>
-               </div>
-               <div className="flex gap-4">
-                  <div className="bg-green-900/20 p-4 rounded-xl h-fit">
-                     <ShieldCheck className="w-8 h-8 text-green-500" />
-                  </div>
-                  <div>
-                     <h3 className="text-xl font-bold mb-2">Contrato de Consignação</h3>
-                     <p className="text-zinc-400">Tudo documentado. Você recebe um contrato com a descrição do item, valor combinado e prazos. Transparência total.</p>
-                  </div>
-               </div>
-            </div>
-            <div className="flex-1 bg-zinc-900 p-8 rounded-2xl border border-zinc-800">
-               <h3 className="font-bold text-center mb-6 text-zinc-300">NOSSO COMPROMISSO</h3>
-               <ul className="space-y-4">
-                  <li className="flex items-center justify-between p-4 bg-black rounded-lg border border-zinc-800">
-                     <span>Privacidade</span>
-                     <CheckCircle className="text-green-500" />
-                  </li>
-                  <li className="flex items-center justify-between p-4 bg-black rounded-lg border border-zinc-800">
-                     <span>Honestidade na Avaliação</span>
-                     <CheckCircle className="text-green-500" />
-                  </li>
-                  <li className="flex items-center justify-between p-4 bg-black rounded-lg border border-zinc-800">
-                     <span>Pagamento Pontual</span>
-                     <CheckCircle className="text-green-500" />
-                  </li>
-               </ul>
-            </div>
-         </div>
-      </section>
-   )
-}
-
-function BlockTestimonials() {
-   return (
-      <section className="py-20 bg-zinc-950 text-white">
-         <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl font-black mb-12">QUEM VENDEU, RECOMENDA</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-               <div className="bg-zinc-900 p-8 rounded-2xl border border-zinc-800 relative">
-                  <div className="flex justify-center gap-1 text-green-500 mb-4">
-                     <Star className="fill-current" /><Star className="fill-current" /><Star className="fill-current" /><Star className="fill-current" /><Star className="fill-current" />
-                  </div>
-                  <p className="italic mb-6 text-zinc-300">"Tinha um PC Gamer parado há meses. Levei na Balão, avaliaram na hora e venderam em 1 semana. O PIX caiu na hora."</p>
-                  <p className="font-bold">- Felipe J., Programador</p>
-               </div>
-               <div className="bg-zinc-900 p-8 rounded-2xl border border-zinc-800 relative">
-                  <div className="flex justify-center gap-1 text-green-500 mb-4">
-                     <Star className="fill-current" /><Star className="fill-current" /><Star className="fill-current" /><Star className="fill-current" /><Star className="fill-current" />
-                  </div>
-                  <p className="italic mb-6 text-zinc-300">"Melhor que vender no Facebook. Não tive dor de cabeça com ninguém me chamando. Recomendo muito."</p>
-                  <p className="font-bold">- Amanda S., Arquiteta</p>
-               </div>
-               <div className="bg-zinc-900 p-8 rounded-2xl border border-zinc-800 relative">
-                  <div className="flex justify-center gap-1 text-green-500 mb-4">
-                     <Star className="fill-current" /><Star className="fill-current" /><Star className="fill-current" /><Star className="fill-current" /><Star className="fill-current" />
-                  </div>
-                  <p className="italic mb-6 text-zinc-300">"Vendi meu MacBook antigo para dar entrada em um novo com eles. Avaliação justa e processo transparente."</p>
-                  <p className="font-bold">- Roberto M., Fotógrafo</p>
-               </div>
-            </div>
-         </div>
-      </section>
-   )
-}
-
-function BlockFAQ() {
-   return (
-      <section className="py-20 bg-black text-white">
-         <div className="container mx-auto px-4 max-w-3xl">
-            <h2 className="text-3xl font-black text-center mb-12">DÚVIDAS FREQUENTES</h2>
-            <div className="space-y-6">
-               <div className="border border-zinc-800 rounded-xl p-6 bg-zinc-900/50">
-                  <h3 className="text-xl font-bold mb-2 flex items-center gap-2 text-green-400">
-                     <DollarSign className="w-5 h-5" />
-                     Quanto vocês cobram?
-                  </h3>
-                  <p className="text-zinc-400">Trabalhamos com uma porcentagem sobre a venda ou valor líquido combinado. Isso é definido na avaliação, sem surpresas.</p>
-               </div>
-               <div className="border border-zinc-800 rounded-xl p-6 bg-zinc-900/50">
-                  <h3 className="text-xl font-bold mb-2 text-green-400">Preciso deixar o equipamento na loja?</h3>
-                  <p className="text-zinc-400">Sim. Para vender rápido, o produto precisa estar disponível para os clientes verem e testarem em nossa vitrine física.</p>
-               </div>
-               <div className="border border-zinc-800 rounded-xl p-6 bg-zinc-900/50">
-                  <h3 className="text-xl font-bold mb-2 text-green-400">Quanto tempo demora?</h3>
-                  <p className="text-zinc-400">A média é de 7 a 15 dias para itens com preço de mercado. Itens muito específicos podem levar mais tempo.</p>
-               </div>
-               <div className="border border-zinc-800 rounded-xl p-6 bg-zinc-900/50">
-                  <h3 className="text-xl font-bold mb-2 text-green-400">Vocês compram à vista?</h3>
-                  <p className="text-zinc-400">Em alguns casos específicos de alta liquidez (como iPhones recentes ou MacBooks), podemos fazer uma oferta de compra imediata com valor diferenciado.</p>
-               </div>
-            </div>
-         </div>
-      </section>
-   )
-}
-
-function BlockLocation() {
-   return (
-      <section className="py-16 bg-zinc-900 text-white border-t border-zinc-800">
-         <div className="container mx-auto px-4 text-center">
-            <MapPin className="w-12 h-12 text-green-500 mx-auto mb-6" />
-            <h2 className="text-3xl font-black mb-4">TRAGA SEU EQUIPAMENTO</h2>
-            <p className="text-xl text-zinc-400 mb-8">Av. Brasil, 1234 - Guanabara, Campinas - SP</p>
-            <div className="flex flex-col md:flex-row gap-4 justify-center">
-               <a href="https://wa.me/5519993916723" className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-full font-bold flex items-center justify-center gap-2 transition-colors">
-                  <MessageCircle /> Agendar Avaliação
-               </a>
-               <a href="https://goo.gl/maps/XYZ" target="_blank" className="bg-zinc-800 hover:bg-zinc-700 text-white px-8 py-4 rounded-full font-bold flex items-center justify-center gap-2 transition-colors">
-                  <MapPin /> Ver no Google Maps
-               </a>
-            </div>
-         </div>
-      </section>
-   )
-}
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: 'Venda seu PC Usado em Consignação Campinas | Avaliação Justa',
-  description: 'Transforme seu computador ou notebook usado em dinheiro. Avaliação justa, segurança total e pagamento garantido em Campinas. Venda sem dor de cabeça.',
+  title: "Venda seu PC ou Notebook Usado em Consignação em Campinas | Balão da Informática",
+  description:
+    "Transforme seu computador, notebook gamer ou MacBook usado em dinheiro sem riscos. Avaliação justa, vitrine física no Cambuí, contrato transparente e pagamento garantido via PIX.",
   keywords: [
-    'venda pc usado campinas',
-    'consignacao informatica',
-    'vender notebook usado',
-    'avaliacao pc gamer',
-    'loja compra pc usado',
-    'vender macbook campinas',
-    'compro seu pc',
-    'troca pc gamer',
-    'balao da informatica usados',
-    'reciclagem eletronicos campinas'
+    "vender pc usado campinas",
+    "consignacao de computadores campinas",
+    "vender notebook usado campinas",
+    "compro seu pc gamer campinas",
+    "vender macbook campinas",
+    "troca de notebook usado campinas",
+    "balao da informatica consignacao cambui",
   ],
   alternates: {
-    canonical: 'https://www.balao.info/consignacao',
+    canonical: "https://www.balao.info/consignacao",
   },
   openGraph: {
-    title: 'Venda seu Equipamento Usado | Balão da Informática',
-    description: 'Nós vendemos para você. Segurança, vitrine na loja física e pagamento garantido.',
-    url: 'https://www.balao.info/consignacao',
-    type: 'website',
-    locale: 'pt_BR',
-    images: ['/images/og-consignacao.jpg']
+    title: "Venda seu Equipamento Usado em Consignação | Balão da Informática",
+    description: "Nós vendemos seu PC ou notebook para você. Segurança total, vitrine no Cambuí e PIX garantido.",
+    url: "https://www.balao.info/consignacao",
+    type: "website",
+    locale: "pt_BR",
+    images: [{ url: "/logo.png" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Venda seu Usado em Consignação em Campinas | Balão da Informática",
+    description: "Avaliação justa, segurança na transação e pagamento rápido para computadores e notebooks usados.",
+    images: ["/logo.png"],
+  },
+};
+
+const CONSIGNACAO_FAQS = [
+  {
+    question: "Como funciona a venda em consignação na Balão da Informática?",
+    answer:
+      "Você traz seu equipamento (PC Gamer, Notebook, MacBook, Monitor) para nossa loja no Cambuí. Nossos técnicos realizam a higienização, testes de bancada e cadastram o produto em nossa vitrine física e site. Assim que o item é vendido, o valor combinado é transferido diretamente para a sua chave PIX com total segurança.",
+  },
+  {
+    question: "Meus dados pessoais e arquivos ficam protegidos?",
+    answer:
+      "Sim! Antes de expor o computador ou notebook, executamos um procedimento de formatação segura (wipe de baixo nível) com instalação limpa do Windows/macOS, garantindo que nenhum documento, foto ou senha pessoal possa ser recuperado.",
+  },
+  {
+    question: "Qual o prazo médio para a venda do equipamento?",
+    answer:
+      "A média de venda na nossa loja física é de 7 a 15 dias para itens precificados dentro da média de mercado, pois oferecemos aos compradores a possibilidade de parcelamento em até 10x no cartão de crédito e garantia de balcão.",
+  },
+  {
+    question: "Vocês compram à vista ou pegam como entrada na troca por um novo?",
+    answer:
+      "Sim! Para diversos modelos de alta procura (como MacBooks, notebooks Dell/Lenovo recentes e placas de vídeo RTX), oferecemos a opção de compra imediata ou avaliação como abatimento na compra de um PC Gamer ou notebook novo da nossa loja.",
+  },
+];
+
+export default async function ConsignacaoPage() {
+  const [allProducts, keywordUsed] = await Promise.all([
+    getProducts(),
+    searchProductsByKeywords(["seminovo", "usado", "notebook", "gamer", "macbook"], 16),
+  ]);
+
+  let usedProducts = keywordUsed;
+  if (usedProducts.length === 0) {
+    usedProducts = allProducts.slice(0, 8);
   }
-}
 
-export const dynamic = 'force-dynamic'
-
-function BlockHero() {
-  const breadcrumbItems = [
-    { name: 'Home', item: 'https://www.balao.info' },
-    { name: 'Consignação', item: 'https://www.balao.info/consignacao' }
+  const breadcrumbs = [
+    { name: "Home", item: "https://www.balao.info" },
+    { name: "Consignação e Venda de Usados", item: "https://www.balao.info/consignacao" },
   ];
 
   return (
-    <section className="relative min-h-[85vh] flex items-center justify-center bg-black text-white overflow-hidden">
-      <JsonLd data={[
-        generateOrganizationSchema(),
-        generateBreadcrumbSchema(breadcrumbItems)
-      ]} />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-green-900/40 via-black to-black"></div>
-      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] md:w-[800px] md:h-[800px] bg-green-600/20 rounded-full blur-[60px] md:blur-[120px] animate-pulse"></div>
-
-      <div className="container relative z-10 px-4 text-center space-y-6 md:space-y-8">
-        <div className="inline-flex items-center gap-2 px-4 md:px-6 py-2 rounded-full bg-green-500/10 border border-green-500/30 text-green-300 text-[10px] sm:text-xs md:text-sm font-bold uppercase tracking-widest animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <DollarSign className="w-3 h-3 md:w-4 md:h-4 animate-bounce" />
-          Transforme Equipamento em Dinheiro
-        </div>
-        
-        <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-[9rem] font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-green-200 to-green-900 drop-shadow-[0_0_30px_rgba(34,197,94,0.5)] animate-in fade-in zoom-in-50 duration-1000 leading-[0.9] py-2">
-          VENDA SEU<br />
-          <span className="text-stroke-white text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-500">USADO</span>
-        </h1>
-        
-        <p className="text-base sm:text-lg md:text-3xl text-slate-300 max-w-4xl mx-auto font-light leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200 px-2">
-          Avaliação justa e venda rápida. Deixe a burocracia com a gente e receba o <strong className="text-green-500 font-bold">pagamento garantido</strong>.
-        </p>
-
-        <div className="pt-4 md:pt-8 flex flex-col sm:flex-row justify-center gap-4 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300 px-4">
-          <Link 
-             href="https://wa.me/5519993916723?text=Quero%20vender%20meu%20computador%20usado!"
-             target="_blank"
-             className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 md:px-8 md:py-4 rounded-full font-bold text-base md:text-lg transition-all shadow-lg shadow-green-600/30 hover:scale-105 flex items-center justify-center gap-2 w-full sm:w-auto"
-          >
-             <Camera className="w-5 h-5" />
-             Avaliar Meu Equipamento
-          </Link>
-          <Link 
-             href="#como-funciona"
-             className="bg-white/10 hover:bg-white/20 border border-white/20 text-white px-6 py-3 md:px-8 md:py-4 rounded-full font-bold text-base md:text-lg transition-all hover:scale-105 flex items-center justify-center gap-2 backdrop-blur-sm w-full sm:w-auto"
-          >
-             <Settings className="w-5 h-5" />
-             Como Funciona
-          </Link>
-        </div>
-      </div>
-      
-      {/* Marquee Benefits */}
-      <div className="absolute bottom-0 w-full bg-white/5 border-t border-white/10 py-4 md:py-6 backdrop-blur-sm overflow-hidden">
-        <div className="container mx-auto px-4 flex flex-wrap justify-center gap-6 md:gap-16 opacity-60 text-green-200 font-bold tracking-widest text-xs md:text-xl">
-           <span className="flex items-center gap-2"><ShieldCheck className="w-4 h-4" /> SEGURANÇA TOTAL</span>
-           <span className="flex items-center gap-2"><Users className="w-4 h-4" /> VITRINE NA LOJA</span>
-           <span className="flex items-center gap-2"><Handshake className="w-4 h-4" /> SEM CURIOSOS</span>
-           <span className="flex items-center gap-2"><DollarSign className="w-4 h-4" /> PAGAMENTO PIX</span>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function BlockDivider({ text, subtext }: { text: string, subtext?: string }) {
-  return (
-    <section className="relative py-16 md:py-32 flex flex-col items-center justify-center text-center overflow-hidden bg-black border-y border-zinc-800">
-       <div className="absolute inset-0 bg-green-900/10"></div>
-       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-30"></div>
-       
-       <div className="relative z-10 container px-4">
-          <h2 className="text-4xl sm:text-5xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-zinc-600 uppercase leading-none mb-4 drop-shadow-xl break-words">
-             {text}
-          </h2>
-          {subtext && (
-             <p className="text-sm sm:text-xl md:text-2xl text-green-500 font-bold tracking-widest uppercase animate-pulse">
-                {subtext}
-             </p>
-          )}
-       </div>
-    </section>
-  )
-}
-
-function StepCard({ number, title, description, icon: Icon }: { number: string, title: string, description: string, icon: any }) {
-   return (
-      <div className="relative group">
-         <div className="absolute -inset-1 bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
-         <div className="relative p-8 bg-zinc-900 ring-1 ring-zinc-800 rounded-xl leading-none flex flex-col h-full">
-            <div className="flex items-center gap-4 mb-8">
-               <div className="flex items-center justify-center w-12 h-12 bg-green-500/10 rounded-full text-green-400 font-bold text-xl border border-green-500/20">
-                  {number}
-               </div>
-               <Icon className="w-8 h-8 text-zinc-500 group-hover:text-green-500 transition-colors" />
-            </div>
-            <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-green-400 transition-colors">{title}</h3>
-            <p className="text-zinc-400 text-lg leading-relaxed">{description}</p>
-         </div>
-      </div>
-   )
-}
-
-function BlockSteps() {
-   return (
-      <section id="como-funciona" className="py-20 bg-zinc-950 relative overflow-hidden">
-         <div className="container mx-auto px-4 relative z-10">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-               <StepCard 
-                  number="1"
-                  title="Contato"
-                  description="Envie fotos e especificações do seu equipamento pelo nosso WhatsApp."
-                  icon={Smartphone}
-               />
-               <StepCard 
-                  number="2"
-                  title="Avaliação"
-                  description="Nossos técnicos avaliam o estado e definimos juntos um preço justo de venda."
-                  icon={Search}
-               />
-               <StepCard 
-                  number="3"
-                  title="Exposição"
-                  description="Seu produto fica exposto em nossa loja física e site para milhares de clientes."
-                  icon={Users}
-               />
-               <StepCard 
-                  number="4"
-                  title="Pagamento"
-                  description="Assim que vendido, transferimos o valor combinado via PIX para sua conta."
-                  icon={DollarSign}
-               />
-            </div>
-         </div>
-      </section>
-   )
-}
-
-function BlockUrgency() {
-   return (
-      <section className="py-20 bg-green-600 text-white text-center relative overflow-hidden">
-         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
-         <div className="container mx-auto px-4 max-w-4xl space-y-8 relative z-10">
-            <h2 className="text-4xl md:text-7xl font-black tracking-tight">
-               QUER VENDER RÁPIDO?
-            </h2>
-            <p className="text-xl md:text-3xl font-medium opacity-90">
-               Temos uma lista de espera de compradores procurando equipamentos usados.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
-               <a 
-                  href="https://wa.me/5519993916723?text=Quero%20vender%20hoje!"
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="bg-white text-green-900 px-8 py-5 rounded-full font-black text-xl hover:scale-105 transition-transform shadow-2xl flex items-center justify-center gap-3 w-full sm:w-auto"
-               >
-                  <DollarSign className="w-6 h-6 animate-pulse" />
-                  AVALIAR AGORA
-               </a>
-            </div>
-            <p className="text-sm opacity-75 mt-4 font-mono">
-               Campinas e Região • Pagamento Seguro • Sem Burocracia
-            </p>
-         </div>
-      </section>
-   );
-}
-
-export default async function ConsignacaoPage() {
-  const vitrinePages = await listVitrinePagesPublic().catch(() => [])
-
-  const acceptedExamples: Product[] = vitrinePages.slice(0, 12).map((page) => {
-    const extras = page.extras && typeof page.extras === "object" ? page.extras : {}
-    const priceText = String(
-      extras.price_text ||
-      (extras.main_product && typeof extras.main_product === "object" && "price" in extras.main_product
-        ? String((extras.main_product as { price?: string }).price || "")
-        : "")
-    ).trim()
-
-    return {
-      id: page.id,
-      name: page.nome_pc,
-      price: priceText || "Sob consulta",
-      image: page.images?.hero || pickPcHeroImage({ categoria: page.categoria }),
-      category: page.categoria,
-      slug: page.slug,
-      product_url: `/p/${page.slug}`,
-      description: page.descricao_original,
-    }
-  })
-
-  return (
-    <div className="min-h-screen flex flex-col bg-black font-sans">
+    <div className="min-h-screen bg-[#090d16] text-white flex flex-col font-sans selection:bg-[#E60012] selection:text-white">
+      <JsonLd
+        data={[
+          generateOrganizationSchema(),
+          generateBreadcrumbSchema(breadcrumbs),
+          generateItemListSchema(usedProducts, "https://www.balao.info/consignacao"),
+          generateFAQSchema(CONSIGNACAO_FAQS),
+          generateServiceSchema({
+            name: "Consignação e Avaliação de Computadores Usados em Campinas",
+            description:
+              "Serviço de intermediação e venda segura de computadores, notebooks e hardware usado na loja física do Cambuí.",
+            url: "https://www.balao.info/consignacao",
+            serviceType: "Consignação e Compra de Eletrônicos",
+          }),
+        ]}
+      />
       <Header />
-      <main className="flex-1">
-        
-        <BlockHero />
-        <BlockStats />
-        <BlockSteps />
-        <BlockComparison />
-        <BlockWhatWeAccept />
-        <BlockWhatWeDontAccept />
 
-        <BlockDivider text="O QUE ACEITAMOS" subtext="Equipamentos com Alta Procura" />
+      <main className="flex-1 space-y-16 sm:space-y-24 py-8 sm:py-12">
+        {/* HERO SECTION */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-[#111827] border border-slate-800 rounded-3xl p-8 sm:p-12 lg:p-16 relative overflow-hidden shadow-2xl">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-[#E60012]/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="relative z-10 max-w-3xl space-y-6">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E60012]/15 border border-[#E60012]/40 text-[#E60012] text-xs font-black uppercase tracking-widest">
+                <DollarSign className="w-4 h-4" />
+                Venda Segura sem Golpes
+              </div>
 
-        <section className="bg-zinc-900 py-20 relative">
-           <div className="container mx-auto px-4">
-              <p className="text-zinc-400 text-center max-w-2xl mx-auto mb-12 text-lg">
-                 Aceitamos equipamentos em bom estado, com menos de 5 anos de uso. 
-                 Notebooks, PCs Gamer, Placas de Vídeo e Monitores são os mais procurados.
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight">
+                Venda seu PC ou Notebook Usado com <span className="text-[#E60012]">Segurança Total</span>
+              </h1>
+
+              <p className="text-base sm:text-xl text-slate-300 leading-relaxed font-normal">
+                Evite encontros com estranhos e golpes de falsos comprovantes em marketplaces. Deixe seu equipamento na
+                nossa vitrine física no Cambuí e receba o valor direto na sua conta via PIX com contrato formal.
               </p>
-              <ProductCarousel 
-                 title="Exemplos do que Vendemos" 
-                 products={acceptedExamples} 
-              />
-           </div>
+
+              <div className="pt-4 flex flex-wrap items-center gap-4">
+                <a
+                  href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(
+                    "Olá! Gostaria de fazer uma avaliação para vender meu computador / notebook em consignação com a Balão."
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-[#E60012] hover:bg-red-700 text-white font-black py-4 px-8 rounded-2xl shadow-xl shadow-red-950/50 active:scale-95 transition-all flex items-center gap-3 text-base sm:text-lg"
+                >
+                  <Camera className="w-6 h-6" />
+                  Enviar Fotos para Avaliação Grátis
+                </a>
+                <a
+                  href="#como-funciona"
+                  className="bg-[#161f32] hover:bg-slate-800 text-slate-200 border border-slate-700 font-bold py-4 px-8 rounded-2xl transition-all text-base flex items-center gap-2"
+                >
+                  Entenda o Processo
+                  <ArrowRight className="w-4 h-4" />
+                </a>
+              </div>
+
+              <div className="pt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-slate-800/80 text-left">
+                <div>
+                  <p className="text-2xl font-black text-white">+2.500</p>
+                  <p className="text-xs text-slate-400">Itens Intermediados</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-black text-[#E60012]">7 a 15 Dias</p>
+                  <p className="text-xs text-slate-400">Tempo Médio de Venda</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-black text-white">PIX Seguro</p>
+                  <p className="text-xs text-slate-400">Pagamento Garantido</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-black text-white">Contrato</p>
+                  <p className="text-xs text-slate-400">Documentação Completa</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
 
-        <BlockSafety />
-        <BlockTestimonials />
-        <BlockFAQ />
-        <BlockLocation />
-        
-        {/* CTA FINAL */}
-        <BlockUrgency />
+        {/* VITRINE DE PRODUTOS REAIS VENDIDOS EM CONIGNAÇÃO */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+            <div>
+              <div className="text-xs font-black uppercase tracking-wider text-[#E60012] mb-1">Exemplos em Nossa Loja</div>
+              <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
+                Equipamentos em Destaque na Vitrine
+              </h2>
+            </div>
+            <p className="text-sm text-slate-400">
+              Produtos revisados com garantia e parcelamento que atraem compradores todos os dias.
+            </p>
+          </div>
 
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            {usedProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        </section>
+
+        {/* COMPARATIVO IMPECCABLE */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <h2 className="text-2xl sm:text-3xl font-black text-white">Por que Vender na Balão da Informática?</h2>
+            <p className="text-slate-400 text-sm sm:text-base mt-2">
+              Veja a diferença entre tentar vender por conta própria versus deixar com nossa equipe:
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="bg-[#111827] border border-red-950/60 rounded-3xl p-8 space-y-4">
+              <div className="flex items-center gap-2 text-red-400 font-black text-sm uppercase tracking-wider">
+                <XCircle className="w-5 h-5 text-red-500" />
+                Vender Sozinho em Redes / Classificados
+              </div>
+              <ul className="space-y-3 text-sm text-slate-400">
+                <li className="flex items-start gap-2">
+                  <span className="text-red-500 font-bold">•</span>
+                  Risco de golpes do PIX agendado e falsos intermediários.
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-500 font-bold">•</span>
+                  Estranhos marcando visitas na sua residência.
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-500 font-bold">•</span>
+                  Centenas de mensagens de curiosos oferecendo trocas absurdas.
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-500 font-bold">•</span>
+                  Impossibilidade de oferecer garantia ou parcelar para o comprador.
+                </li>
+              </ul>
+            </div>
+
+            <div className="bg-[#111827] border border-[#E60012]/50 rounded-3xl p-8 space-y-4 shadow-xl">
+              <div className="flex items-center gap-2 text-white font-black text-sm uppercase tracking-wider">
+                <CheckCircle className="w-5 h-5 text-[#E60012]" />
+                Vender na Balão da Informática
+              </div>
+              <ul className="space-y-3 text-sm text-slate-300">
+                <li className="flex items-start gap-2">
+                  <span className="text-[#E60012] font-bold">✓</span>
+                  Loja física segura no bairro Cambuí com equipe comercial treinada.
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#E60012] font-bold">✓</span>
+                  Formatação segura e limpeza técnica antes de expor o produto.
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#E60012] font-bold">✓</span>
+                  Oferecemos parcelamento em 10x e garantia ao comprador (vende 3x mais rápido).
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#E60012] font-bold">✓</span>
+                  Pagamento pontual e garantido direto na sua conta bancária.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* COMO FUNCIONA O PROCESSO */}
+        <section id="como-funciona" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-[#111827] border border-slate-800 rounded-3xl p-8 sm:p-12 space-y-8">
+            <div className="text-center max-w-2xl mx-auto space-y-2">
+              <h2 className="text-2xl sm:text-3xl font-black text-white">Passo a Passo da Consignação</h2>
+              <p className="text-sm sm:text-base text-slate-400">
+                Processo simples, transparente e sem burocracia desnecessária:
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              {[
+                {
+                  step: "1",
+                  title: "Envio de Fotos",
+                  desc: "Mande fotos e a ficha técnica do seu equipamento pelo nosso WhatsApp.",
+                },
+                {
+                  step: "2",
+                  title: "Pré-Avaliação",
+                  desc: "Nossos técnicos estimam o valor ideal de venda com base no mercado.",
+                },
+                {
+                  step: "3",
+                  title: "Entrega na Loja",
+                  desc: "Você deixa o equipamento no Cambuí, assina o contrato e formatamos com segurança.",
+                },
+                {
+                  step: "4",
+                  title: "PIX na Conta",
+                  desc: "Assim que o cliente compra, o pagamento é transferido na mesma hora para você.",
+                },
+              ].map((item, idx) => (
+                <div key={idx} className="bg-[#161f32] border border-slate-800/80 rounded-2xl p-6 space-y-3">
+                  <div className="w-9 h-9 rounded-xl bg-[#E60012] text-white flex items-center justify-center font-black text-base">
+                    {item.step}
+                  </div>
+                  <h3 className="text-base font-bold text-white">{item.title}</h3>
+                  <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ SCHEMA ENRICHED */}
+        <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+          <div className="text-center space-y-2 mb-8">
+            <div className="text-xs font-black uppercase tracking-wider text-[#E60012]">Dúvidas Comuns</div>
+            <h2 className="text-2xl sm:text-3xl font-black text-white">Perguntas sobre Consignação</h2>
+          </div>
+
+          <div className="space-y-4">
+            {CONSIGNACAO_FAQS.map((faq, idx) => (
+              <div key={idx} className="bg-[#111827] border border-slate-800 rounded-2xl p-6 space-y-2">
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-[#E60012]" />
+                  {faq.question}
+                </h3>
+                <p className="text-sm text-slate-300 leading-relaxed pl-4">{faq.answer}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* CTA FINAL */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-gradient-to-b from-[#111827] to-[#090d16] border border-slate-800 rounded-3xl p-8 sm:p-12 text-center space-y-6">
+            <div className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[#E60012]">
+              <MapPin className="w-4 h-4" />
+              Loja Física no Cambuí • Campinas/SP
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-black text-white">
+              Quer Saber Quanto Vale seu Equipamento Hoje?
+            </h2>
+            <p className="text-slate-300 max-w-2xl mx-auto text-sm sm:text-base">
+              Envie fotos agora pelo WhatsApp e receba uma estimativa de preço em poucos minutos sem compromisso.
+            </p>
+            <div className="pt-2 flex flex-wrap justify-center gap-4">
+              <a
+                href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(
+                  "Olá! Gostaria de uma avaliação para colocar meu computador / notebook em consignação com a Balão."
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-[#E60012] hover:bg-red-700 text-white font-black py-4 px-8 rounded-2xl transition-all flex items-center gap-3 text-base"
+              >
+                <MessageCircle className="w-5 h-5" />
+                Chamar Avaliador no WhatsApp
+              </a>
+            </div>
+          </div>
+        </section>
       </main>
-      <Footer />
     </div>
-  )
+  );
 }

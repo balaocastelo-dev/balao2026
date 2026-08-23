@@ -40,7 +40,7 @@ export default function HomeHeroFullWidth({ carouselImages }: HomeHeroFullWidthP
             </div>
             <span className="hidden sm:inline text-xs text-slate-500">•</span>
             <span className="text-xs sm:text-sm font-bold text-slate-200">
-              Retirada no balcão em até 30 min
+              Consulte disponibilidade imediata no WhatsApp
             </span>
           </div>
 

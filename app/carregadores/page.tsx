@@ -1,508 +1,377 @@
-
 import React from "react";
-import { SITE_CONFIG } from "@/lib/config";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
-import { getProducts } from "@/lib/db";
+import { getProducts, searchProductsByKeywords } from "@/lib/db";
 import { searchProducts } from "@/lib/searchUtils";
 import ProductCard from "@/components/ProductCard";
-import Image from "next/image";
-import HeroCTA from "@/components/HeroCTA";
-import OfferCountdown from "@/components/OfferCountdown";
-import ProductCarousel from "@/components/ProductCarousel";
-import { 
-  Zap, 
-  Battery, 
-  Truck, 
-  ShieldCheck, 
-  MessageCircle, 
-  CheckCircle2, 
-  MapPin, 
-  CreditCard, 
-  Clock, 
+import JsonLd, {
+  generateOrganizationSchema,
+  generateBreadcrumbSchema,
+  generateItemListSchema,
+  generateFAQSchema,
+  generateServiceSchema,
+} from "@/components/JsonLd";
+import { SITE_CONFIG } from "@/lib/config";
+import {
+  Zap,
+  Battery,
+  Truck,
+  ShieldCheck,
+  MessageCircle,
+  CheckCircle2,
+  MapPin,
+  Clock,
   Star,
   ArrowRight,
-  AlertTriangle,
   Flame,
   Plug,
   Laptop,
-  Smartphone
+  Check,
+  ShieldAlert,
 } from "lucide-react";
 
-function BlockUrgencyBanner() {
-  return (
-    <div className="bg-red-600 text-white py-2 text-center text-sm md:text-base font-bold animate-pulse">
-      🚨 Bateria acabando? Entregamos seu carregador em até 60 minutos! Peça agora. 🚨
-    </div>
-  )
-}
-
-function BlockStats() {
-  return (
-    <section className="py-12 bg-blue-600 text-white">
-      <div className="container mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-        {[
-          { label: "Carregadores em Estoque", value: "+1000" },
-          { label: "Modelos Compatíveis", value: "99%" },
-          { label: "Tempo Médio Entrega", value: "45min" },
-          { label: "Garantia (Meses)", value: "12" }
-        ].map((stat, i) => (
-          <div key={i}>
-            <div className="text-4xl font-black mb-2">{stat.value}</div>
-            <div className="text-blue-200 text-sm uppercase tracking-wider">{stat.label}</div>
-          </div>
-        ))}
-      </div>
-    </section>
-  )
-}
-
-function BlockSymptoms() {
-  return (
-    <section className="py-20 bg-zinc-50">
-       <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-black text-center mb-12 text-zinc-900">SINAIS QUE SEU CARREGADOR VAI PARAR</h2>
-          <div className="grid md:grid-cols-4 gap-6">
-             {[
-               { icon: Zap, title: "Mau Contato", desc: "Só carrega se ficar mexendo no cabo ou na ponta." },
-               { icon: Flame, title: "Superaquecimento", desc: "A fonte esquenta muito, chegando a queimar a mão." },
-               { icon: Battery, title: "Carga Lenta", desc: "Demora horas para subir 10% de bateria." },
-               { icon: AlertTriangle, title: "Ruídos Estranhos", desc: "Barulho de chiado ou zumbido vindo da fonte." }
-             ].map((item, i) => (
-               <div key={i} className="bg-white p-6 rounded-xl border border-zinc-200 shadow-sm hover:shadow-md transition-shadow">
-                  <item.icon className="w-10 h-10 text-red-500 mb-4" />
-                  <h3 className="font-bold text-lg mb-2">{item.title}</h3>
-                  <p className="text-zinc-600 text-sm">{item.desc}</p>
-               </div>
-             ))}
-          </div>
-       </div>
-    </section>
-  )
-}
-
-function BlockProcess() {
-   return (
-      <section className="py-20 bg-white text-center">
-         <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-black mb-12 text-slate-900">COMO COMPRAR O MODELO CERTO</h2>
-            <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-               <div className="relative p-8 rounded-3xl bg-blue-50 border-2 border-blue-100">
-                  <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-xl">1</div>
-                  <h3 className="text-xl font-bold mt-4 mb-4">Verifique a Etiqueta</h3>
-                  <p className="text-slate-600">Olhe embaixo do notebook ou na fonte antiga a voltagem (ex: 19V) e amperagem (ex: 3.42A).</p>
-               </div>
-               <div className="relative p-8 rounded-3xl bg-blue-50 border-2 border-blue-100">
-                  <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-xl">2</div>
-                  <h3 className="text-xl font-bold mt-4 mb-4">Confira o Pino</h3>
-                  <p className="text-slate-600">Veja se a ponta é fina, grossa, retangular (USB) ou tipo C. Se tiver dúvida, tire uma foto!</p>
-               </div>
-               <div className="relative p-8 rounded-3xl bg-blue-50 border-2 border-blue-100">
-                  <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-xl">3</div>
-                  <h3 className="text-xl font-bold mt-4 mb-4">Chame no WhatsApp</h3>
-                  <p className="text-slate-600">Mande a foto da etiqueta e do pino para nosso especialista confirmar o modelo exato.</p>
-               </div>
-            </div>
-            <div className="mt-12">
-               <a href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=Tenho%20dúvida%20no%20modelo%20do%20carregador`} className="inline-flex items-center gap-2 bg-green-500 text-white px-8 py-4 rounded-full font-bold hover:bg-green-600 transition-colors">
-                  <MessageCircle /> Enviar foto agora
-               </a>
-            </div>
-         </div>
-      </section>
-   )
-}
-
-function BlockConnectorTypes() {
-   return (
-      <section className="py-20 bg-slate-900 text-white">
-         <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-black text-center mb-12">TEMOS TODOS OS TIPOS DE CONECTORES</h2>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-               {[
-                  "Ponta Agulha (Dell/HP)",
-                  "Ponta Amarela (Lenovo/Asus)",
-                  "Ponta Azul (HP)",
-                  "USB-C (Modernos)",
-                  "Magsafe (MacBook)",
-                  "Retangular (Lenovo)",
-                  "Ponta Fina (Acer/Samsung)",
-                  "Ponta Grossa (Toshiba)",
-                  "Bullet (LG)",
-                  "Surface (Microsoft)"
-               ].map((type, i) => (
-                  <div key={i} className="bg-white/5 border border-white/10 p-4 rounded-lg flex items-center justify-center text-center h-24 hover:bg-white/10 transition-colors">
-                     <span className="font-bold text-blue-300">{type}</span>
-                  </div>
-               ))}
-            </div>
-         </div>
-      </section>
-   )
-}
-
-function BlockSafety() {
-   return (
-      <section className="py-20 bg-red-50 border-y border-red-100">
-         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center gap-12">
-            <div className="flex-1">
-               <AlertTriangle className="w-16 h-16 text-red-600 mb-6" />
-               <h2 className="text-3xl font-black text-red-900 mb-6">O PERIGO DOS CARREGADORES BARATOS</h2>
-               <p className="text-lg text-red-800 mb-6">
-                  Carregadores genéricos de baixa qualidade não possuem filtros de linha e proteção contra surtos. O resultado?
-               </p>
-               <ul className="space-y-3">
-                  {[
-                     "Queima da placa mãe do notebook",
-                     "Vício da bateria (perda de autonomia)",
-                     "Risco de incêndio e curto-circuito",
-                     "Interferência no trackpad e mouse"
-                  ].map((item, i) => (
-                     <li key={i} className="flex items-center gap-3 text-red-700 font-medium">
-                        <Flame className="w-5 h-5" /> {item}
-                     </li>
-                  ))}
-               </ul>
-            </div>
-            <div className="flex-1 bg-white p-8 rounded-2xl shadow-lg border-l-4 border-red-500">
-               <h3 className="text-xl font-bold mb-4 text-slate-900">Na Balão da Informática é diferente:</h3>
-               <ul className="space-y-4">
-                  <li className="flex items-start gap-3">
-                     <CheckCircle2 className="w-6 h-6 text-green-500 shrink-0" />
-                     <span className="text-slate-600">Componentes de alta qualidade que protegem seu notebook.</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                     <CheckCircle2 className="w-6 h-6 text-green-500 shrink-0" />
-                     <span className="text-slate-600">Voltagem estável que aumenta a vida útil da bateria.</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                     <CheckCircle2 className="w-6 h-6 text-green-500 shrink-0" />
-                     <span className="text-slate-600">Certificações de segurança INMETRO/CE.</span>
-                  </li>
-               </ul>
-            </div>
-         </div>
-      </section>
-   )
-}
-
-function BlockBrands() {
-   return (
-      <section className="py-16 bg-white">
-         <div className="container mx-auto px-4 text-center">
-            <p className="text-slate-500 font-bold mb-8 uppercase tracking-widest">Compatível com as principais marcas</p>
-            <div className="flex flex-wrap justify-center gap-8 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-               {["DELL", "HP", "LENOVO", "ACER", "SAMSUNG", "ASUS", "APPLE", "LG", "SONY", "POSITIVO"].map((brand, i) => (
-                  <span key={i} className="text-2xl md:text-4xl font-black text-slate-300 hover:text-blue-600 cursor-default select-none">{brand}</span>
-               ))}
-            </div>
-         </div>
-      </section>
-   )
-}
-
-function BlockWarrantyDetails() {
-   return (
-      <section className="py-20 bg-slate-50">
-         <div className="container mx-auto px-4 text-center">
-            <ShieldCheck className="w-16 h-16 text-blue-600 mx-auto mb-6" />
-            <h2 className="text-3xl font-black text-slate-900 mb-6">GARANTIA SEM BUROCRACIA</h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto mb-12">
-               Sabemos que você não pode ficar sem trabalhar. Por isso, nossa garantia é diferenciada.
-            </p>
-            <div className="grid md:grid-cols-3 gap-8">
-               <div className="bg-white p-6 rounded-xl border border-slate-200">
-                  <h3 className="font-bold text-lg mb-2">Troca Imediata</h3>
-                  <p className="text-sm text-slate-500">Se der defeito, trocamos na hora na loja. Sem esperar análise de fábrica.</p>
-               </div>
-               <div className="bg-white p-6 rounded-xl border border-slate-200">
-                  <h3 className="font-bold text-lg mb-2">12 Meses</h3>
-                  <p className="text-sm text-slate-500">Um ano inteiro de tranquilidade para você usar seu equipamento.</p>
-               </div>
-               <div className="bg-white p-6 rounded-xl border border-slate-200">
-                  <h3 className="font-bold text-lg mb-2">Suporte Técnico</h3>
-                  <p className="text-sm text-slate-500">Dúvidas sobre o funcionamento? Nossa equipe ajuda você.</p>
-               </div>
-            </div>
-         </div>
-      </section>
-   )
-}
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Carregadores de Notebook em Campinas | Entrega em 60 Minutos | Balão da Informática",
+  title: "Carregadores e Fontes de Notebook em Campinas | Entrega Expressa em 60 Minutos | Balão da Informática",
   description:
-    "Carregadores originais e compatíveis para todas as marcas de notebook em Campinas. Dell, HP, Lenovo, Acer, Samsung, Asus. Entrega expressa em até 60 minutos.",
+    "Fontes e carregadores originais e de primeira linha para notebooks Dell, Lenovo, Acer, HP, Samsung, Asus e Apple em Campinas. Retirada em 30 min no Cambuí ou entrega expressa via motoboy.",
   keywords: [
-    "carregadores campinas",
     "carregador notebook campinas",
     "fonte notebook campinas",
-    "entrega rápida carregadores",
     "carregador dell campinas",
     "carregador lenovo campinas",
     "carregador acer campinas",
     "carregador hp campinas",
-    "carregador samsung campinas",
-    "carregador asus campinas",
+    "carregador macbook campinas",
+    "fonte tipo c notebook campinas",
+    "entrega rapida carregador campinas",
+    "balao da informatica cambui",
   ],
   alternates: { canonical: "https://www.balao.info/carregadores" },
   openGraph: {
-    title: "Carregadores de Notebook em Campinas | Entrega Rápida",
-    description:
-      "Precisando de carregador urgente? Entregamos em até 60 minutos em Campinas e região. Todas as marcas e modelos com garantia.",
     type: "website",
+    locale: "pt_BR",
     url: "https://www.balao.info/carregadores",
+    title: "Carregadores e Fontes de Notebook em Campinas | Balão da Informática",
+    description:
+      "Precisando de carregador urgente? Entregamos em até 60 minutos em Campinas e região. Fontes com garantia de 12 meses e teste na hora.",
     siteName: SITE_CONFIG.name,
     images: [{ url: "/logo.png" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Carregadores de Notebook em Campinas | Entrega Rápida",
-    description: "Precisando de carregador urgente? Entregamos em até 60 minutos em Campinas e região. Todas as marcas e modelos com garantia.",
+    title: "Carregadores de Notebook em Campinas | Balão da Informática",
+    description:
+      "Fontes e carregadores para Dell, Lenovo, HP, Acer, Asus, Apple com pronta entrega em Campinas.",
     images: ["/logo.png"],
   },
 };
 
-export const dynamic = "force-dynamic";
-
-function BlockHero() {
-  return (
-    <section className="relative min-h-[85vh] flex items-center justify-center bg-zinc-950 text-white overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-900/40 via-black to-black"></div>
-      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
-      
-      <div className="container relative z-10 px-4 text-center space-y-6 md:space-y-8">
-        <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-300 text-xs md:text-sm font-bold uppercase tracking-widest animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <Truck className="w-4 h-4 animate-bounce" />
-          Entrega Expressa em 60 Minutos
-        </div>
-        
-        <h1 className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-blue-200 to-blue-900 drop-shadow-[0_0_30px_rgba(59,130,246,0.5)] animate-in fade-in zoom-in-50 duration-1000 leading-none">
-          CARREGADORES<br />
-          <span className="text-stroke-white text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-500">ORIGINAIS</span>
-        </h1>
-        
-        <p className="text-lg md:text-3xl text-slate-300 max-w-4xl mx-auto font-light leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
-          Seu notebook parou? Não espere dias. Receba seu carregador novo em <strong className="text-blue-400 font-bold">até 60 minutos</strong> em Campinas.
-        </p>
-
-        <div className="pt-8 flex flex-col items-center gap-6 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300">
-          <HeroCTA />
-          <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20">
-            <OfferCountdown />
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function BlockBenefits() {
-  return (
-    <section className="py-12 md:py-20 bg-white text-slate-900">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          <div className="p-6 rounded-2xl bg-slate-50 border border-slate-100 hover:shadow-lg transition-shadow">
-            <Clock className="w-12 h-12 text-blue-600 mb-4" />
-            <h3 className="text-xl font-bold mb-2">Entrega Relâmpago</h3>
-            <p className="text-slate-600">Receba em até 60 minutos em Campinas e região via motoboy.</p>
-          </div>
-          <div className="p-6 rounded-2xl bg-slate-50 border border-slate-100 hover:shadow-lg transition-shadow">
-            <ShieldCheck className="w-12 h-12 text-blue-600 mb-4" />
-            <h3 className="text-xl font-bold mb-2">Garantia Total</h3>
-            <p className="text-slate-600">Produtos com garantia de troca imediata em caso de defeito.</p>
-          </div>
-          <div className="p-6 rounded-2xl bg-slate-50 border border-slate-100 hover:shadow-lg transition-shadow">
-            <Zap className="w-12 h-12 text-blue-600 mb-4" />
-            <h3 className="text-xl font-bold mb-2">Voltagem Correta</h3>
-            <p className="text-slate-600">Auxiliamos na escolha da voltagem e amperagem correta.</p>
-          </div>
-          <div className="p-6 rounded-2xl bg-slate-50 border border-slate-100 hover:shadow-lg transition-shadow">
-            <CheckCircle2 className="w-12 h-12 text-blue-600 mb-4" />
-            <h3 className="text-xl font-bold mb-2">Todas as Marcas</h3>
-            <p className="text-slate-600">Dell, HP, Lenovo, Acer, Samsung, Asus, Apple e muito mais.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function BlockComparison() {
-  return (
-    <section className="py-16 bg-slate-100">
-      <div className="container mx-auto px-4">
-        <h2 className="text-3xl md:text-5xl font-black text-center mb-12 text-slate-900">
-          POR QUE ESCOLHER A <span className="text-blue-600">BALÃO?</span>
-        </h2>
-        <div className="max-w-4xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden">
-          <div className="grid grid-cols-3 bg-slate-900 text-white p-4 font-bold text-center">
-            <div>Critério</div>
-            <div className="text-blue-400">Balão da Informática</div>
-            <div className="text-slate-500">Concorrência / Marketplaces</div>
-          </div>
-          
-          <div className="divide-y divide-slate-100">
-            <div className="grid grid-cols-3 p-4 text-center items-center hover:bg-slate-50">
-              <div className="font-semibold text-slate-700">Tempo de Entrega</div>
-              <div className="text-blue-600 font-bold">60 Minutos (Campinas)</div>
-              <div className="text-slate-500">3 a 10 dias úteis</div>
-            </div>
-            <div className="grid grid-cols-3 p-4 text-center items-center hover:bg-slate-50">
-              <div className="font-semibold text-slate-700">Garantia</div>
-              <div className="text-blue-600 font-bold">Troca Imediata na Loja</div>
-              <div className="text-slate-500">Processo lento de correios</div>
-            </div>
-            <div className="grid grid-cols-3 p-4 text-center items-center hover:bg-slate-50">
-              <div className="font-semibold text-slate-700">Consultoria</div>
-              <div className="text-blue-600 font-bold">Especialista Humano</div>
-              <div className="text-slate-500">Chatbot ou Sem suporte</div>
-            </div>
-             <div className="grid grid-cols-3 p-4 text-center items-center hover:bg-slate-50">
-              <div className="font-semibold text-slate-700">Compatibilidade</div>
-              <div className="text-blue-600 font-bold">Teste na Hora</div>
-              <div className="text-slate-500">Risco de comprar errado</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function BlockTestimonials() {
-  return (
-    <section className="py-16 bg-blue-900 text-white">
-      <div className="container mx-auto px-4 text-center">
-        <h2 className="text-3xl md:text-5xl font-black mb-12">QUEM COMPROU, APROVOU</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="bg-blue-800/50 p-8 rounded-2xl border border-blue-700">
-            <div className="flex justify-center gap-1 text-yellow-400 mb-4">
-              <Star className="fill-current" /><Star className="fill-current" /><Star className="fill-current" /><Star className="fill-current" /><Star className="fill-current" />
-            </div>
-            <p className="italic mb-6">"Meu carregador queimou no meio de um projeto. A Balão entregou um novo em 40 minutos aqui no Cambuí. Salvaram minha vida!"</p>
-            <p className="font-bold">- Ricardo M., Designer</p>
-          </div>
-          <div className="bg-blue-800/50 p-8 rounded-2xl border border-blue-700">
-             <div className="flex justify-center gap-1 text-yellow-400 mb-4">
-              <Star className="fill-current" /><Star className="fill-current" /><Star className="fill-current" /><Star className="fill-current" /><Star className="fill-current" />
-            </div>
-            <p className="italic mb-6">"Não sabia qual modelo comprar pro meu Dell antigo. Mandei foto no Whats e eles mandaram o link certo. Chegou rapidinho."</p>
-            <p className="font-bold">- Ana Paula S., Advogada</p>
-          </div>
-          <div className="bg-blue-800/50 p-8 rounded-2xl border border-blue-700">
-             <div className="flex justify-center gap-1 text-yellow-400 mb-4">
-              <Star className="fill-current" /><Star className="fill-current" /><Star className="fill-current" /><Star className="fill-current" /><Star className="fill-current" />
-            </div>
-            <p className="italic mb-6">"Preço justo e atendimento excelente. Fui na loja retirar e testaram na hora no meu notebook."</p>
-            <p className="font-bold">- Carlos E., Estudante</p>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function BlockFAQ() {
-  return (
-    <section className="py-16 bg-white text-slate-900">
-      <div className="container mx-auto px-4 max-w-3xl">
-        <h2 className="text-3xl md:text-5xl font-black text-center mb-12">PERGUNTAS FREQUENTES</h2>
-        <div className="space-y-6">
-          <div className="border-b border-slate-200 pb-6">
-            <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
-              <AlertTriangle className="text-yellow-500" />
-              Como saber se o carregador serve no meu notebook?
-            </h3>
-            <p className="text-slate-600">Verifique a voltagem (V) e amperagem (A) na etiqueta do seu carregador antigo ou embaixo do notebook. Ou simplesmente chame nosso suporte no WhatsApp e mande uma foto!</p>
-          </div>
-          <div className="border-b border-slate-200 pb-6">
-            <h3 className="text-xl font-bold mb-2">É original?</h3>
-            <p className="text-slate-600">Trabalhamos com carregadores originais e também marcas compatíveis de primeira linha (OEM), todas com garantia e certificação.</p>
-          </div>
-          <div className="border-b border-slate-200 pb-6">
-            <h3 className="text-xl font-bold mb-2">Quanto custa a entrega?</h3>
-            <p className="text-slate-600">A taxa de entrega varia conforme o bairro em Campinas. Consulte no WhatsApp. Para retirada na loja, o frete é grátis.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function BlockContact() {
-  return (
-    <section className="py-16 bg-slate-900 text-white">
-      <div className="container mx-auto px-4 text-center">
-        <h2 className="text-3xl md:text-5xl font-black mb-8">ONDE ESTAMOS</h2>
-        <p className="text-xl text-slate-300 mb-8">Av. Brasil, 1234 - Guanabara, Campinas - SP</p>
-        
-        <div className="flex flex-col md:flex-row gap-8 justify-center items-center">
-          <a 
-            href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=Ol%C3%A1%2C%20preciso%20de%20um%20carregador%20para%20meu%20notebook!`}
-            className="bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-full font-bold text-xl flex items-center gap-3 transition-transform hover:scale-105"
-          >
-            <MessageCircle className="w-6 h-6" />
-            Chamar no WhatsApp
-          </a>
-          <a 
-            href="https://goo.gl/maps/XYZ" 
-            target="_blank"
-            className="bg-white hover:bg-slate-200 text-slate-900 px-8 py-4 rounded-full font-bold text-xl flex items-center gap-3 transition-transform hover:scale-105"
-          >
-            <MapPin className="w-6 h-6" />
-            Ver no Mapa
-          </a>
-        </div>
-        
-        <div className="mt-12 opacity-50 text-sm">
-          <p>Atendemos toda a região metropolitana de Campinas: Valinhos, Vinhedo, Sumaré, Hortolândia, Paulínia, Indaiatuba.</p>
-        </div>
-      </div>
-    </section>
-  );
-}
+const CARREGADORES_FAQS = [
+  {
+    question: "Como saber a voltagem e o pino correto para meu notebook?",
+    answer:
+      "Verifique na etiqueta embaixo do notebook ou na fonte antiga os valores de Volts (ex: 19V ou 20V) e Amperes (ex: 3.42A ou 4.74A). Caso tenha dúvida, basta enviar uma foto no nosso WhatsApp que nossos técnicos identificam o conector e a potência exata.",
+  },
+  {
+    question: "Os carregadores acompanham cabo de força tripolar?",
+    answer:
+      "Sim, todos os nossos carregadores e fontes acompanham o cabo de força no padrão brasileiro tripolar NBR 14136 certificado pelo INMETRO, prontos para uso imediato.",
+  },
+  {
+    question: "Qual o prazo de entrega em Campinas e região metropolitana?",
+    answer:
+      "Possuímos entrega expressa via motoboy em até 60 minutos para Campinas (Cambuí, Centro, Taquaral, Castelo, Barão Geraldo) e envio no mesmo dia para Sumaré, Hortolândia, Paulínia, Valinhos e Vinhedo.",
+  },
+  {
+    question: "Posso retirar e testar na loja física do Cambuí?",
+    answer:
+      "Com certeza! Você pode trazer seu notebook na nossa loja física no bairro Cambuí em Campinas. Nossos especialistas plugam a fonte e testam a voltagem e corrente na hora sem custo.",
+  },
+];
 
 export default async function CarregadoresPage() {
-  const allProducts = await getProducts();
-  const chargers = searchProducts(allProducts, "fonte notebook");
-  const filteredChargers = chargers.slice(0, 12); // Show top 12 initially
+  const [allProducts, keywordChargers] = await Promise.all([
+    getProducts(),
+    searchProductsByKeywords(["fonte", "carregador", "adaptador", "cabo"], 24),
+  ]);
+
+  const clientSearched = searchProducts(allProducts, "fonte");
+  const combined = [...keywordChargers, ...clientSearched];
+  const uniqueProductsMap = new Map();
+  for (const p of combined) {
+    if (!uniqueProductsMap.has(p.id)) {
+      uniqueProductsMap.set(p.id, p);
+    }
+  }
+  let chargers = Array.from(uniqueProductsMap.values());
+  if (chargers.length === 0) {
+    chargers = allProducts.slice(0, 8);
+  }
+
+  const breadcrumbs = [
+    { name: "Home", item: "https://www.balao.info" },
+    { name: "Carregadores", item: "https://www.balao.info/carregadores" },
+  ];
 
   return (
-    <main className="min-h-screen bg-white">
-      <BlockUrgencyBanner />
+    <div className="min-h-screen bg-[#090d16] text-white flex flex-col font-sans selection:bg-[#E60012] selection:text-white">
+      <JsonLd
+        data={[
+          generateOrganizationSchema(),
+          generateBreadcrumbSchema(breadcrumbs),
+          generateItemListSchema(chargers, "https://www.balao.info/carregadores"),
+          generateFAQSchema(CARREGADORES_FAQS),
+          generateServiceSchema({
+            name: "Venda e Teste de Fontes e Carregadores em Campinas",
+            description:
+              "Entrega expressa de carregadores e fontes para notebooks e celulares em até 60 minutos em Campinas e região.",
+            url: "https://www.balao.info/carregadores",
+            serviceType: "Venda e Suporte de Acessórios de Energia",
+          }),
+        ]}
+      />
       <Header />
-      <BlockHero />
-      <BlockStats />
-      <BlockSymptoms />
-      <BlockProcess />
-      
-      <div id="ofertas" className="py-16 container mx-auto px-4">
-        <ProductCarousel 
-          title="CARREGADORES EM DESTAQUE" 
-          products={filteredChargers} 
-        />
-        
-        <div className="text-center mt-12">
-          <a 
-            href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=N%C3%A3o%20achei%20meu%20modelo%20no%20site%2C%20pode%20me%20ajudar%3F`}
-            className="inline-flex items-center gap-2 text-blue-600 font-bold hover:underline text-lg"
-          >
-            Não achou seu modelo? Consulte no estoque da loja <ArrowRight className="w-5 h-5" />
-          </a>
-        </div>
+
+      {/* Top Banner de Urgência Impeccable */}
+      <div className="bg-[#E60012] text-white py-2.5 px-4 text-center text-xs sm:text-sm font-black tracking-wide flex items-center justify-center gap-2 shadow-md">
+        <Zap className="w-4 h-4 animate-pulse" />
+        <span>BATERIA NO FIM? ENTREGAMOS SEU CARREGADOR EM ATÉ 60 MINUTOS EM CAMPINAS OU RETIRE NO CAMBUÍ!</span>
       </div>
 
-      <BlockConnectorTypes />
-      <BlockBenefits />
-      <BlockSafety />
-      <BlockBrands />
-      <BlockComparison />
-      <BlockTestimonials />
-      <BlockWarrantyDetails />
-      <BlockFAQ />
-      <BlockContact />
-    </main>
+      <main className="flex-1 space-y-16 sm:space-y-24 py-8 sm:py-12">
+        {/* HERO SECTION */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-[#111827] border border-slate-800 rounded-3xl p-8 sm:p-12 lg:p-16 relative overflow-hidden shadow-2xl">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-[#E60012]/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="relative z-10 max-w-3xl space-y-6">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E60012]/15 border border-[#E60012]/40 text-[#E60012] text-xs font-black uppercase tracking-widest">
+                <Truck className="w-4 h-4" />
+                Pronta Entrega em Campinas
+              </div>
+
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight">
+                Carregadores & Fontes para Notebook com <span className="text-[#E60012]">Garantia Real</span>
+              </h1>
+
+              <p className="text-base sm:text-xl text-slate-300 leading-relaxed font-normal">
+                Seu notebook parou de carregar? Trabalhamos com fontes originais e de 1ª linha com proteção contra surtos,
+                cabo tripolar e voltagem precisa para Dell, HP, Lenovo, Acer, Samsung, Asus e Apple.
+              </p>
+
+              <div className="pt-4 flex flex-wrap items-center gap-4">
+                <a
+                  href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(
+                    "Olá! Preciso de um carregador para meu notebook. Podem me ajudar com o modelo compatível?"
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-[#E60012] hover:bg-red-700 text-white font-black py-4 px-8 rounded-2xl shadow-xl shadow-red-950/50 active:scale-95 transition-all flex items-center gap-3 text-base sm:text-lg"
+                >
+                  <MessageCircle className="w-6 h-6" />
+                  Pedir no WhatsApp em 1 Minuto
+                </a>
+                <a
+                  href="#catalogo"
+                  className="bg-[#161f32] hover:bg-slate-800 text-slate-200 border border-slate-700 font-bold py-4 px-8 rounded-2xl transition-all text-base flex items-center gap-2"
+                >
+                  Ver Modelos Disponíveis
+                  <ArrowRight className="w-4 h-4" />
+                </a>
+              </div>
+
+              <div className="pt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-slate-800/80 text-left">
+                <div>
+                  <p className="text-2xl font-black text-white">+1.000</p>
+                  <p className="text-xs text-slate-400">Fontes em Estoque</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-black text-[#E60012]">60 min</p>
+                  <p className="text-xs text-slate-400">Entrega Expressa</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-black text-white">12 Meses</p>
+                  <p className="text-xs text-slate-400">Garantia com Troca na Loja</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-black text-white">100%</p>
+                  <p className="text-xs text-slate-400">Testado na Bancada</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* VITRINE DE PRODUTOS REAIS DO BANCO */}
+        <section id="catalogo" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+            <div>
+              <div className="text-xs font-black uppercase tracking-wider text-[#E60012] mb-1">Estoque da Loja Física</div>
+              <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
+                Fontes e Carregadores Disponíveis
+              </h2>
+            </div>
+            <a
+              href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(
+                "Olá! Não encontrei o carregador do meu modelo no site. Vocês têm no estoque físico do Cambuí?"
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm font-bold text-slate-300 hover:text-[#E60012] transition-colors"
+            >
+              Não achou seu modelo? Consulte nossos técnicos <ArrowRight className="w-4 h-4" />
+            </a>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            {chargers.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        </section>
+
+        {/* CONECTORES E COMPATIBILIDADE */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-[#111827] border border-slate-800 rounded-3xl p-8 sm:p-12 space-y-8">
+            <div className="text-center max-w-2xl mx-auto space-y-2">
+              <h2 className="text-2xl sm:text-3xl font-black text-white">Conectores para Todas as Marcas</h2>
+              <p className="text-sm sm:text-base text-slate-400">
+                Seja conector de ponta fina, pino agulha, USB-C Power Delivery ou MagSafe, temos o modelo exato.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+              {[
+                { name: "USB-C Power Delivery", desc: "Dell, Mac, Lenovo, Asus" },
+                { name: "Pino Agulha (7.4mm)", desc: "Dell e HP tradicionais" },
+                { name: "Pino Azul (4.5mm)", desc: "HP Ultrabooks & Pavilions" },
+                { name: "Ponta Amarela / Retangular", desc: "Lenovo ThinkPad & IdeaPad" },
+                { name: "Ponta Fina (3.0mm / 4.0mm)", desc: "Acer Aspire & Samsung" },
+                { name: "MagSafe 1, 2 e 3", desc: "MacBook Air e MacBook Pro" },
+                { name: "Ponta Grossa (5.5mm)", desc: "Asus, Positivo, CCE, Intelbras" },
+                { name: "Microsoft Surface", desc: "Conector Magnético Surface Pro" },
+                { name: "Fontes Gamer 180W a 330W", desc: "Acer Nitro, Dell G15, Legion" },
+                { name: "Carregadores Rápidos GaN", desc: "Smartphones e Laptops 65W/100W" },
+              ].map((item, idx) => (
+                <div
+                  key={idx}
+                  className="bg-[#161f32] border border-slate-800/80 rounded-2xl p-4 text-center hover:border-[#E60012] transition-colors"
+                >
+                  <p className="font-extrabold text-sm text-white">{item.name}</p>
+                  <p className="text-xs text-slate-400 mt-1">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* COMO COMPRAR O MODELO CORRETO - 3 PASSOS SIMPLES */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <h2 className="text-2xl sm:text-3xl font-black text-white">Como Escolher o Carregador Certo</h2>
+            <p className="text-slate-400 text-sm sm:text-base mt-2">
+              Evite comprar a fonte errada e queimar seu notebook seguindo estas 3 orientações:
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-[#111827] border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-4">
+              <div className="w-10 h-10 rounded-xl bg-[#E60012] text-white flex items-center justify-center font-black text-lg">
+                1
+              </div>
+              <h3 className="text-lg font-bold text-white">Olhe a Etiqueta Traseira</h3>
+              <p className="text-sm text-slate-300 leading-relaxed">
+                Na parte de baixo do seu notebook consta a especificação de entrada (Input), por exemplo: <strong>19.5V - 3.34A</strong> ou <strong>20V - 3.25A</strong>.
+              </p>
+            </div>
+
+            <div className="bg-[#111827] border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-4">
+              <div className="w-10 h-10 rounded-xl bg-[#E60012] text-white flex items-center justify-center font-black text-lg">
+                2
+              </div>
+              <h3 className="text-lg font-bold text-white">Confira o Formato do Conector</h3>
+              <p className="text-sm text-slate-300 leading-relaxed">
+                Observe o tamanho da ponta ou se o seu modelo já utiliza o padrão moderno USB Tipo-C.
+              </p>
+            </div>
+
+            <div className="bg-[#111827] border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-4">
+              <div className="w-10 h-10 rounded-xl bg-[#E60012] text-white flex items-center justify-center font-black text-lg">
+                3
+              </div>
+              <h3 className="text-lg font-bold text-white">Fale com um Especialista</h3>
+              <p className="text-sm text-slate-300 leading-relaxed">
+                Tire uma foto da etiqueta e do pino e nos envie pelo WhatsApp. Confirmamos o modelo compatível em menos de 2 minutos.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* ALERTA DE SEGURANÇA IMPECCABLE */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-[#161f32] border-l-4 border-[#E60012] border-y border-r border-slate-800 rounded-3xl p-8 sm:p-10 flex flex-col md:flex-row items-center gap-8">
+            <div className="w-16 h-16 rounded-2xl bg-[#E60012]/20 flex items-center justify-center shrink-0 text-[#E60012]">
+              <ShieldAlert className="w-10 h-10" />
+            </div>
+            <div className="space-y-2 flex-1 text-left">
+              <h3 className="text-xl sm:text-2xl font-black text-white">Cuidado com Fontes Genéricas de Baixa Qualidade</h3>
+              <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
+                Carregadores universais baratos e sem blindagem oscilam a voltagem, danificam a controladora de carga (Super I/O) da placa-mãe e podem estufar a bateria. Na Balão da Informática você adquire fontes com proteção contra sobretensão e garantia total de troca no balcão.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ SCHEMA ENRICHED */}
+        <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+          <div className="text-center space-y-2 mb-8">
+            <div className="text-xs font-black uppercase tracking-wider text-[#E60012]">Dúvidas Frequentes</div>
+            <h2 className="text-2xl sm:text-3xl font-black text-white">Perguntas sobre Carregadores</h2>
+          </div>
+
+          <div className="space-y-4">
+            {CARREGADORES_FAQS.map((faq, idx) => (
+              <div key={idx} className="bg-[#111827] border border-slate-800 rounded-2xl p-6 space-y-2">
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-[#E60012]" />
+                  {faq.question}
+                </h3>
+                <p className="text-sm text-slate-300 leading-relaxed pl-4">{faq.answer}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* CONTATO & LOCALIZAÇÃO */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-gradient-to-b from-[#111827] to-[#090d16] border border-slate-800 rounded-3xl p-8 sm:p-12 text-center space-y-6">
+            <div className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[#E60012]">
+              <MapPin className="w-4 h-4" />
+              Loja Física no Cambuí - Campinas/SP
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-black text-white">
+              Retire Hoje Mesmo ou Receba em até 60 Minutos
+            </h2>
+            <p className="text-slate-300 max-w-2xl mx-auto text-sm sm:text-base">
+              Endereço: {SITE_CONFIG.address} • Atendimento de Segunda a Sexta das 09h às 18h e Sábados das 09h às 13h.
+            </p>
+            <div className="pt-2 flex flex-wrap justify-center gap-4">
+              <a
+                href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(
+                  "Olá! Gostaria de consultar o carregador compatível para o meu notebook e pedir a entrega/retirada."
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-[#E60012] hover:bg-red-700 text-white font-black py-4 px-8 rounded-2xl transition-all flex items-center gap-3 text-base"
+              >
+                <MessageCircle className="w-5 h-5" />
+                Chamar no WhatsApp
+              </a>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
   );
 }

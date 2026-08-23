@@ -115,10 +115,10 @@ export default function HomeDepartmentMenu({ categories, dealOfTheDay }: HomeDep
           <h3 className="text-sm font-black uppercase tracking-wider text-white">Loja Física Cambuí</h3>
         </div>
         <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-          {SITE_CONFIG.address}. Compre online e retire no balcão em 30 min com suporte técnico de prontidão.
+          {SITE_CONFIG.address}. Chame nossa equipe no WhatsApp para conferir se a disponibilidade deste item é imediata para retirada no balcão.
         </p>
         <a
-          href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent("Olá! Gostaria de consultar estoque e retirar no balcão da Balão da Informática no Cambuí.")}`}
+          href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent("Olá! Gostaria de consultar se a disponibilidade é imediata para retirada no balcão da Balão da Informática no Cambuí.")}`}
           target="_blank"
           rel="noopener noreferrer"
           className="mt-4 w-full inline-flex items-center justify-center gap-2.5 py-3.5 px-4 rounded-2xl bg-[#E60012] hover:bg-red-700 text-white font-black text-xs sm:text-sm uppercase tracking-wider transition-all shadow-md active:scale-95"

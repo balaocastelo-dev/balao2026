@@ -200,12 +200,12 @@ export default async function ProductPage({ params }: Props) {
                           </div>
 
                           {/* Local Delivery & Retirada Badge */}
-                          <div className="mb-5 flex flex-col gap-1 rounded-xl border border-[var(--home-border-strong)] bg-[var(--home-accent-soft)] p-3.5 text-left text-xs">
+                          <div className="mb-5 flex flex-col gap-1.5 rounded-xl border border-[var(--home-border-strong)] bg-[var(--home-accent-soft)] p-3.5 text-left text-xs">
                              <div className="flex items-center gap-1.5 font-extrabold text-[var(--site-text)]">
-                                <span className="text-[#E60012] text-sm">📍</span> RETIRE HOJE NA LOJA (CAMBUÍ)
+                                <span className="text-[#E60012] text-sm">📍</span> RETIRADA NO CAMBUÍ OU ENTREGA EXPRESS
                              </div>
                              <div className="font-semibold leading-relaxed text-[var(--site-soft)]">
-                                Compre online ou pelo WhatsApp para retirada express em até 30 minutos ou entrega via motoboy em Campinas e região.
+                                Chame nossa equipe no WhatsApp para conferir se a disponibilidade deste produto é imediata para retirada no balcão ou entrega via motoboy em Campinas e região.
                              </div>
                           </div>
 

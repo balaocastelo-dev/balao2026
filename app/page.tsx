@@ -388,7 +388,7 @@ export default async function Home(props: {
               A <strong>Balão da Informática Castelo</strong> é a principal <strong>loja de informática em Campinas</strong> para quem busca
               <strong>PC Gamer em Campinas</strong>, <strong>notebooks</strong>, <strong>monitores gamer</strong>, <strong>smartphones</strong> e peças de hardware para upgrade (placas de vídeo RTX/Radeon,
               processadores Intel e AMD Ryzen, memórias RAM DDR4/DDR5, SSDs NVMe e fontes selo 80 Plus), periféricos gamer e <strong>assistência técnica especializada em Campinas</strong> com atendimento imediato no balcão e no WhatsApp.
-              Compre online com desconto progressivo no PIX ou em até 10x sem juros no cartão de crédito e retire seu pedido em até 30 minutos na loja física no bairro Cambuí.
+              Compre online com desconto progressivo no PIX ou em até 10x sem juros no cartão de crédito e consulte nossa equipe no WhatsApp para conferir a disponibilidade imediata para retirada no balcão no Cambuí ou entrega express.
             </p>
             <ul className="list-none space-y-3 pl-0 text-slate-300">
               <li className="flex items-start gap-2">

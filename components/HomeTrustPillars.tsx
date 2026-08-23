@@ -9,9 +9,9 @@ export default function HomeTrustPillars() {
   const pillars = [
     {
       icon: Zap,
-      title: "Retirada Express no Cambuí",
-      desc: "Confirme no WhatsApp e retire seu produto no balcão em até 30 minutos.",
-      badge: "Mais Rápido",
+      title: "Retirada no Cambuí & Express",
+      desc: "Chame no WhatsApp para conferir se a disponibilidade é imediata para retirada no balcão ou entrega express.",
+      badge: "WhatsApp Rápido",
       actionText: "Ver Localização",
       href: SITE_CONFIG.mapsUrl,
       external: true,
