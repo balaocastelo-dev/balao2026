@@ -158,9 +158,9 @@ export function enhanceImageUrl(url: string): string {
     // Continue if URL parsing fails
   }
 
-  // 1. Kabum: _m, _p, _peq -> _g
+  // 1. Kabum: _m, _p, _peq, _g -> _gg (Ultra High Resolution 1500px)
   if (enhancedUrl.includes('kabum.com.br')) {
-    enhancedUrl = enhancedUrl.replace(/_(m|p|peq)\./g, '_g.');
+    enhancedUrl = enhancedUrl.replace(/_(m|p|peq|g)\./g, '_gg.');
   }
 
   // 2. Terabyte: _t or _small -> _g
