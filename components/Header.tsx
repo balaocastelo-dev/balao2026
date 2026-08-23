@@ -170,16 +170,16 @@ export default function Header() {
              </div>
         </Link>
 
-        {/* Search Bar (Desktop) */}
+        {/* Search Bar (Desktop) - 100% Maior */}
         <form 
              ref={searchContainerRef}
              onSubmit={handleSearch} 
-             className="hidden md:flex flex-1 max-w-lg relative"
+             className="hidden md:flex flex-1 max-w-3xl relative mx-4"
         >
           <input
               type="text"
-              placeholder="Buscar produtos..."
-              className={`w-full rounded-full border py-2.5 pl-11 pr-24 text-sm shadow-inner focus:outline-none focus:ring-1 ${searchInputClassName}`}
+              placeholder="O que você está procurando? (Ex: PC Gamer, Notebook, RTX 4060, Monitor 144Hz...)"
+              className={`w-full rounded-full border-2 py-3.5 pl-14 pr-32 text-sm md:text-base shadow-sm focus:outline-none focus:ring-2 focus:border-[#E60012] focus:ring-[#E60012]/30 ${searchInputClassName}`}
               value={searchQuery}
               onChange={(e) => {
                   setSearchQuery(e.target.value);
@@ -189,16 +189,16 @@ export default function Header() {
           />
 
           {/* Search Icon */}
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+          <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400" size={22} />
 
           {/* Clear Button */}
           {searchQuery && (
               <button
                   type="button"
                   onClick={clearSearch}
-                  className="absolute right-[88px] top-1/2 -translate-y-1/2 text-gray-400 p-2"
+                  className="absolute right-[100px] top-1/2 -translate-y-1/2 text-gray-400 p-2 hover:text-white"
               >
-                  {isLoading ? <Loader2 size={16} className="animate-spin" /> : <X size={16} />}
+                  {isLoading ? <Loader2 size={18} className="animate-spin" /> : <X size={18} />}
               </button>
           )}
 
@@ -206,9 +206,9 @@ export default function Header() {
           <button
               type="button"
               onClick={performSearch}
-              className="absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-1.5 rounded-full bg-[#E60012] px-4 py-1.5 text-xs text-white transition-colors hover:bg-red-700 font-bold"
+              className="absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-2 rounded-full bg-[#E60012] px-6 py-2.5 text-sm text-white transition-all hover:bg-red-700 font-extrabold shadow-md active:scale-95"
           >
-              <Search size={14} />
+              <Search size={16} />
               <span className="hidden lg:inline">Buscar</span>
           </button>
 

@@ -6,10 +6,10 @@ import QuickLeadSection from "@/components/QuickLeadSection";
 import HomeLocalStoreInfo from "@/components/HomeLocalStoreInfo";
 import HomeHeroFullWidth from "@/components/HomeHeroFullWidth";
 import HomeTrustPillars from "@/components/HomeTrustPillars";
-import HomeLeftSidebar from "@/components/HomeLeftSidebar";
-import HomeRightSidebar from "@/components/HomeRightSidebar";
+import HomeDepartmentMenu from "@/components/HomeDepartmentMenu";
 import HomeCategoryShelf from "@/components/HomeCategoryShelf";
 import HomeMonitoresFullWidth from "@/components/HomeMonitoresFullWidth";
+import HomeBlogSection from "@/components/HomeBlogSection";
 import { getProductsByExactCategories, getProducts } from "@/lib/db";
 import { getCachedCategories, getCachedCarouselImages } from "@/lib/cache";
 import { listBlogPostsForPage } from "@/lib/blog-store";
@@ -205,7 +205,7 @@ export default async function Home(props: {
     products.filter(p => p.category === "Games" || p.name.toLowerCase().includes("console") || p.name.toLowerCase().includes("playstation") || p.name.toLowerCase().includes("xbox") || p.name.toLowerCase().includes("cadeira gamer"))
   );
 
-  const flashDeals = sortPriceDesc(products).slice(0, 4);
+  const dealOfTheDay = pcGamerProducts[0] || products[0] || null;
 
   return (
     <div className="home-shell min-h-screen flex flex-col font-sans transition-colors duration-300">
@@ -215,20 +215,20 @@ export default async function Home(props: {
       {/* Marcas Parceiras Marquee */}
       {!search && !category && (
         <section className="container mx-auto px-3 pt-3 sm:px-4 lg:px-0 lg:pt-4">
-          <div className="home-panel brand-carousel rounded-2xl px-3 py-2 sm:px-4 border border-[var(--home-border)] bg-[var(--home-panel-bg)] shadow-sm">
+          <div className="home-panel brand-carousel rounded-2xl px-3 py-2 sm:px-4 border border-slate-700/80 bg-[#111827] shadow-md">
             <div className="flex items-center gap-3">
-              <span className="shrink-0 rounded-full bg-[#E60012] px-3 py-1 text-[10px] font-black uppercase tracking-widest text-white shadow-sm sm:text-[11px]">
-                Marcas em Destaque
+              <span className="shrink-0 rounded-full bg-[#E60012] px-3.5 py-1 text-[10px] font-black uppercase tracking-widest text-white shadow-sm sm:text-[11px]">
+                Marcas Oficiais
               </span>
               <div className="relative min-w-0 flex-1 overflow-hidden">
-                <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-8 bg-gradient-to-r from-[var(--home-panel-bg)] to-transparent" />
-                <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-gradient-to-l from-[var(--home-panel-bg)] to-transparent" />
+                <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-8 bg-gradient-to-r from-[#111827] to-transparent" />
+                <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-gradient-to-l from-[#111827] to-transparent" />
                 <div className="brand-carousel-track flex w-max min-w-full items-center gap-2 py-1 pr-2 sm:gap-3">
                   {homeBrandCarousel.map((brand, index) => (
                     <Link
                       key={`${brand}-${index}`}
                       href={`/?search=${encodeURIComponent(brand)}`}
-                      className="flex-none whitespace-nowrap rounded-full border border-[var(--home-border)] bg-[var(--home-card-soft)] px-3 py-1.5 text-xs font-bold text-[var(--home-text)] transition hover:border-[#E60012] hover:text-[#E60012] sm:px-4 sm:text-sm"
+                      className="flex-none whitespace-nowrap rounded-full border border-slate-700/80 bg-[#161f32] px-3.5 py-1.5 text-xs font-bold text-slate-200 transition hover:border-[#E60012] hover:text-[#E60012] sm:px-4 sm:text-sm"
                     >
                       {brand}
                     </Link>
@@ -240,7 +240,7 @@ export default async function Home(props: {
         </section>
       )}
 
-      {/* Main Content Area */}
+      {/* Main Content Container */}
       <div className="container mx-auto px-3 py-4 sm:px-4 lg:px-0 space-y-6 sm:space-y-8">
         {/* 1. Full-Width Stretched Hero Banner */}
         {!search && !category && (
@@ -252,17 +252,17 @@ export default async function Home(props: {
           <HomeTrustPillars />
         )}
 
-        {/* 3. Section Upper: Left Sidebar, Main Category 1 (PC Gamer) & Category 2 (Notebooks), Right Sidebar */}
+        {/* 3. Main Body: Left Column (Department Menu) + Right Roomy Center Feed (PC Gamer & Notebooks) */}
         {!search && !category ? (
           <>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              {/* Left Lateral Column (3 cols) */}
-              <div className="lg:col-span-3 space-y-6">
-                <HomeLeftSidebar categories={categories} flashDeals={flashDeals} />
+            <div className="flex flex-col lg:flex-row gap-6 items-start">
+              {/* Left Column: Dedicated Department Menu Sidebar (w-72 / 288px) */}
+              <div className="w-full lg:w-72 shrink-0">
+                <HomeDepartmentMenu categories={categories} dealOfTheDay={dealOfTheDay} />
               </div>
 
-              {/* Center Feed (6 cols) - Categorias 1 e 2 */}
-              <div className="lg:col-span-6 space-y-6">
+              {/* Right Column: Roomy Main Highlights Feed (Spacious, not squeezed!) */}
+              <div className="flex-1 min-w-0 space-y-6 sm:space-y-8">
                 {/* 1. Computador Gamer */}
                 {pcGamerProducts.length > 0 && (
                   <HomeCategoryShelf
@@ -283,11 +283,6 @@ export default async function Home(props: {
                   />
                 )}
               </div>
-
-              {/* Right Lateral Column (3 cols) - Quadros do Blog e Assistência Técnica */}
-              <div className="lg:col-span-3 space-y-6">
-                <HomeRightSidebar blogPosts={blogPosts} />
-              </div>
             </div>
 
             {/* 4. BLOCO 3 FULL SIZE: Monitores Gamer & UltraWide (Esticado na tela toda) */}
@@ -298,7 +293,7 @@ export default async function Home(props: {
             )}
 
             {/* 5. Demais Categorias em Destaque (Smartphones, Hardware, Periféricos, Games) */}
-            <div className="space-y-6">
+            <div className="space-y-6 sm:space-y-8">
               {/* 4. Smartphones */}
               {smartphoneProducts.length > 0 && (
                 <HomeCategoryShelf
@@ -339,9 +334,14 @@ export default async function Home(props: {
                 />
               )}
             </div>
+
+            {/* 6. Blog & Destaques de Conteúdo Full Width */}
+            <div className="w-full">
+              <HomeBlogSection blogPosts={blogPosts} />
+            </div>
           </>
         ) : (
-          <section className="home-panel rounded-[2rem] p-6 md:p-8 border border-[var(--home-border)] bg-[var(--home-panel-bg)] shadow-xl">
+          <section className="home-panel rounded-[2rem] p-6 md:p-8 border border-slate-700/80 bg-[#111827] shadow-xl">
             <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
                 <div className="text-[11px] font-black uppercase tracking-[0.22em] text-[#E60012]">
@@ -351,13 +351,13 @@ export default async function Home(props: {
                   {category || `Resultados para: "${search}"`}
                 </h1>
               </div>
-              <span className="rounded-full border border-[var(--home-border)] bg-[var(--home-card-soft)] px-4 py-2 text-sm font-bold text-[var(--home-muted)]">
+              <span className="rounded-full border border-slate-700 bg-[#161f32] px-4 py-2 text-sm font-bold text-slate-300">
                 {products.length} produtos
               </span>
             </div>
 
             {products.length === 0 ? (
-              <div className="rounded-[1.5rem] border border-[var(--home-border)] bg-[var(--home-card-bg)] px-6 py-20 text-center text-[var(--home-muted)]">
+              <div className="rounded-[1.5rem] border border-slate-700 bg-[#161f32] px-6 py-20 text-center text-slate-400">
                 <p className="text-xl font-medium">Nenhum produto encontrado para esta busca.</p>
               </div>
             ) : (
@@ -384,13 +384,13 @@ export default async function Home(props: {
 
         {!search && !category && (
           <SeoContent title="LOJA DE INFORMATICA EM CAMPINAS COM WHATSAPP, RETIRADA E ASSISTENCIA TECNICA">
-            <p className="mb-4 text-[var(--home-muted)]">
+            <p className="mb-4 text-slate-300">
               A <strong>Balão da Informática Castelo</strong> é a principal <strong>loja de informática em Campinas</strong> para quem busca
               <strong>PC Gamer em Campinas</strong>, <strong>notebooks</strong>, <strong>monitores gamer</strong>, <strong>smartphones</strong> e peças de hardware para upgrade (placas de vídeo RTX/Radeon,
               processadores Intel e AMD Ryzen, memórias RAM DDR4/DDR5, SSDs NVMe e fontes selo 80 Plus), periféricos gamer e <strong>assistência técnica especializada em Campinas</strong> com atendimento imediato no balcão e no WhatsApp.
               Compre online com desconto progressivo no PIX ou em até 10x sem juros no cartão de crédito e retire seu pedido em até 30 minutos na loja física no bairro Cambuí.
             </p>
-            <ul className="list-none space-y-3 pl-0 text-[var(--home-muted)]">
+            <ul className="list-none space-y-3 pl-0 text-slate-300">
               <li className="flex items-start gap-2">
                 <span className="text-xl">📍</span>
                 <span><strong>Loja física em Campinas:</strong> {SITE_CONFIG.address}. Presença local e balcão aberto para quem deseja comprar computador, notebook, peças e acessórios com total procedência, nota fiscal e garantia.</span>
