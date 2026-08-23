@@ -145,38 +145,57 @@ export default async function ProductPage({ params }: Props) {
 
                 {/* Info Section */}
                 <div className="flex flex-col">
-                    <div className="mb-4">
-                        <span className="rounded-full border border-[var(--site-border)] bg-[var(--site-panel-muted)] px-2 py-1 text-xs font-semibold uppercase tracking-wider text-[var(--site-muted)]">
+                    <div className="mb-3 flex flex-wrap items-center gap-2">
+                        {product.brand && (
+                            <span className="rounded-full border border-[var(--site-border)] bg-[#E60012]/15 px-3 py-1 text-xs font-black uppercase tracking-wider text-[#E60012]">
+                                {product.brand}
+                            </span>
+                        )}
+                        <span className="rounded-full border border-[var(--site-border)] bg-[var(--site-panel-muted)] px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[var(--site-muted)]">
                             {product.category || "Hardware"}
                         </span>
+                        {product.availability && (
+                            <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-400">
+                                ✓ {product.availability}
+                            </span>
+                        )}
+                        {product.rating && (
+                            <span className="rounded-full border border-slate-700 bg-slate-800/80 px-3 py-1 text-xs font-bold text-slate-200">
+                                {product.rating}
+                            </span>
+                        )}
                     </div>
-                    <h1 className="mb-6 text-2xl font-bold leading-tight text-[var(--site-text)] md:text-3xl">
+                    <h1 className="mb-4 text-2xl font-bold leading-tight text-[var(--site-text)] md:text-3xl">
                         {product.name}
                     </h1>
                     
-                    <div className="mt-auto rounded-xl border border-[var(--site-border)] bg-[var(--site-panel-soft)] p-4 sm:p-5 md:p-6">
+                    <div className="mt-auto rounded-2xl border border-[var(--site-border)] bg-[var(--site-panel-soft)] p-4 sm:p-5 md:p-6 shadow-xl">
                           {/* Cash Price */}
                           <div className="mb-4">
                              <div className="flex items-baseline gap-2">
-                                  <span className="text-[#E60012] font-black text-4xl">
+                                  <span className="text-[#E60012] font-black text-3xl sm:text-4xl">
                                      {product.price}
                                   </span>
+                                  <span className="text-xs font-black uppercase text-[#E60012] bg-[#E60012]/15 px-2 py-0.5 rounded-full">
+                                     no PIX
+                                  </span>
                              </div>
-                             <div className="text-sm font-medium text-[var(--site-soft)]">
-                                 à vista no PIX com <strong>15% de desconto</strong>
+                             <div className="text-sm font-medium text-[var(--site-soft)] mt-1">
+                                 à vista no PIX com <strong>{product.discount_pix || "10% de desconto"}</strong>
                              </div>
                           </div>
 
                           {/* Installment Price */}
                            <div className="mb-6 border-t border-[var(--site-border)] pt-4">
                               <div className="mb-1 text-sm text-[var(--site-muted)]">
-                                 De: <span className="line-through">{listPriceNum.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-                             </div>
-                              <div className="text-xl font-bold text-[var(--site-text)]">
-                                 {listPriceNum.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                 Cartão de Crédito: <span className="font-bold text-white">{product.price_card || listPriceNum.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                              </div>
                               <div className="text-sm text-[var(--site-soft)]">
-                                 em até 10x de <strong>{installmentValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong> sem juros
+                                 {product.installment ? (
+                                   <span>ou em até <strong>{product.installment}</strong> sem juros</span>
+                                 ) : (
+                                   <span>em até 10x de <strong>{installmentValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong> sem juros</span>
+                                 )}
                              </div>
                           </div>
 
@@ -186,7 +205,7 @@ export default async function ProductPage({ params }: Props) {
                                 <span className="text-[#E60012] text-sm">📍</span> RETIRE HOJE NA LOJA (CAMBUÍ)
                              </div>
                              <div className="font-semibold leading-relaxed text-[var(--site-soft)]">
-                                Ou compre pelo WhatsApp para ter <strong className="text-[var(--home-success)]">Entrega RÃ¡pida</strong> via motoboy hoje mesmo em Campinas e regiÃ£o.
+                                Compre online ou pelo WhatsApp para retirada express em até 30 minutos ou entrega via motoboy em Campinas e região.
                              </div>
                           </div>
 
@@ -208,19 +227,18 @@ export default async function ProductPage({ params }: Props) {
                 
                 <div className="grid grid-cols-1 gap-8">
                     <div>
-                        <h3 className="mb-4 border-b border-[var(--site-border)] pb-2 text-lg font-bold text-[var(--site-text)]">DescriÃ§Ã£o</h3>
-                        <div className="prose max-w-none text-[var(--site-soft)]">
+                        <h3 className="mb-4 border-b border-[var(--site-border)] pb-2 text-lg font-bold text-[var(--site-text)]">Descrição Técnica & Especificações</h3>
+                        <div className="prose max-w-none text-[var(--site-soft)] leading-relaxed">
                             {descriptionText ? (
                                 <div className="whitespace-pre-wrap">{descriptionText}</div>
                             ) : (
                                 <>
                                     <p>
                                         Aproveite a melhor tecnologia com o <strong>{product.name}</strong>. 
-                                        Ideal para quem busca desempenho e qualidade.
+                                        Ideal para quem busca desempenho, procedência e garantia.
                                     </p>
-                                    <p className="mt-4">
+                                    <p className="mt-4 text-xs text-slate-400">
                                         Imagens meramente ilustrativas. Todas as informações divulgadas são de responsabilidade do Fabricante/Fornecedor.
-                                        Verifique com os fabricantes do produto e de seus componentes eventuais limitações à utilização de todos os recursos e funcionalidades.
                                     </p>
                                 </>
                             )}

@@ -15,6 +15,13 @@ export interface Product {
   image_urls?: string[];
   imageValid?: boolean;
   ai_status?: "thinking" | "done" | "error";
+  brand?: string;
+  rating?: string;
+  installment?: string;
+  discount_pix?: string;
+  price_card?: string;
+  availability?: string;
+  source_url?: string;
 }
 
 export function getProductHref(product: Pick<Product, "id" | "slug" | "product_url">): string {
@@ -297,17 +304,124 @@ export function parseProducts(text: string): Product[] {
     const products: Product[] = [];
     const lines = text.split('\n');
 
+    const competitorPatterns = [
+        /\bconnect\s*barra\s*inform[aá]tica\b/gi,
+        /\bkalango[-\s]*games\b/gi,
+        /\b3green[-\s]*force\b/gi,
+        /\b3green\b/gi,
+        /\bklv[-\s]*notebook\b/gi,
+        /\bskill\b/gi,
+        /\bnext[-\s]*pc\b/gi,
+        /\bnextpc\b/gi,
+        /\bmax[-\s]*elite\b/gi,
+        /\bdream[-\s]*computers?\b/gi,
+        /\bdreamcomputers\b/gi,
+        /\binfotech\b/gi,
+        /\bprime[-\s]*shock!?\b/gi,
+        /\bmulti[-\s]*pc\b/gi,
+        /\bmultipc\b/gi,
+        /\bneologic\b/gi,
+        /\bi[-\s]*buy[-\s]*power\b/gi,
+        /\bibuypower\b/gi,
+        /\balpha[-\s]*pcs?\b/gi,
+        /\balphapcs\b/gi,
+        /\bstudio[-\s]*pc\b/gi,
+        /\bstudiopc\b/gi,
+        /\btop[-\s]*pc\b/gi,
+        /\btoppc\b/gi,
+        /\bkabum\b/gi,
+        /\btob\s*pc[’'´`]?s\b/gi,
+        /\btob\b/gi,
+        /\balligator shop\b/gi,
+        /\bmrp inform[aá]tica\b/gi
+    ];
+
+    const sanitizeText = (val: string) => {
+      let res = val;
+      competitorPatterns.forEach(pattern => {
+        res = res.replace(pattern, "Balão.info");
+      });
+      return res;
+    };
+
     for (let line of lines) {
       line = line.trim();
       if (!line) continue;
 
-      // Try Tab separated first (common in copy-paste from spreadsheets/sites)
+      // Check if header line
+      const upperLine = line.toUpperCase();
+      if (
+        (upperLine.startsWith("ID\t") || upperLine.startsWith("ID ")) && 
+        (upperLine.includes("TÍTULO") || upperLine.includes("TITULO") || upperLine.includes("PREÇO") || upperLine.includes("PRECO"))
+      ) {
+        continue; // Skip header row
+      }
+
+      // Try Tab separated
       let parts = line.split('\t');
 
-      // If only one part, try whitespace but be careful with product names
+      // 1. Full 14-column format:
+      // ID | TÍTULO | PREÇO À VISTA NO PIX (R$) | PREÇO PARCELADO (R$) | DESCONTO PIX | PARCELAMENTO | CATEGORIA | MARCA | DISPONIBILIDADE | AVALIAÇÃO | LINK PRODUTO BALÃO.INFO | LINK PRODUTO ORIGEM | LINK FOTO ULTRA HD | DESCRIÇÃO
+      if (parts.length >= 10) {
+        const id = parts[0]?.trim() || (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15));
+        const rawName = parts[1]?.trim() || "";
+        const pricePixRaw = parts[2]?.trim() || "";
+        const priceCardRaw = parts[3]?.trim() || "";
+        const discountPix = parts[4]?.trim() || "";
+        const installment = parts[5]?.trim() || "";
+        const categoryRaw = parts[6]?.trim() || "Hardware";
+        const brand = parts[7]?.trim() || "";
+        const availability = parts[8]?.trim() || "Disponível";
+        const rating = parts[9]?.trim() || "5.0 ⭐";
+        const balaoUrl = parts[10]?.trim() || "";
+        const sourceUrl = parts[11]?.trim() || "";
+        const imageUrlRaw = parts[12]?.trim() || "";
+        const descriptionRaw = parts[13]?.trim() || "";
+
+        if (rawName && pricePixRaw) {
+          const finalName = sanitizeText(rawName);
+          const finalDescription = sanitizeText(descriptionRaw);
+          const enhancedImage = imageUrlRaw ? enhanceImageUrl(imageUrlRaw) : "/logo.png";
+          
+          let formattedPrice = pricePixRaw.replace(/R\$/gi, "").trim();
+          if (!formattedPrice.startsWith("R$")) {
+            formattedPrice = `R$ ${formattedPrice}`;
+          }
+
+          let formattedPriceCard = priceCardRaw ? priceCardRaw.replace(/R\$/gi, "").trim() : "";
+          if (formattedPriceCard && !formattedPriceCard.startsWith("R$")) {
+            formattedPriceCard = `R$ ${formattedPriceCard}`;
+          }
+
+          const slug = finalName
+            .toLowerCase()
+            .replace(/[^\w\s-]/g, "")
+            .replace(/\s+/g, "-");
+
+          products.push({
+            id: String(id),
+            name: finalName,
+            price: formattedPrice,
+            price_card: formattedPriceCard || undefined,
+            discount_pix: discountPix || undefined,
+            installment: installment || undefined,
+            category: categoryRaw || "Hardware",
+            brand: brand || undefined,
+            availability: availability || "Disponível",
+            rating: rating || "5.0 ⭐",
+            product_url: balaoUrl || `/product/${id}`,
+            source_url: sourceUrl || undefined,
+            image: enhancedImage,
+            image_urls: enhancedImage ? [enhancedImage] : [],
+            description: finalDescription,
+            slug: slug || String(id),
+          });
+          continue;
+        }
+      }
+
+      // 2. Fallback to 3 or 4 column formats:
       if (parts.length < 3) {
-          // Fallback to regex for space-separated format
-          // This handles: ImageURL Name Price
           const regex = /(https?:\/\/[^\s]+)\s+(.+?)\s+(R\$\s*[\d\.,]+|[\d\.,]+)/;
           const match = line.match(regex);
           if (match) {
@@ -322,13 +436,11 @@ export function parseProducts(text: string): Product[] {
         let price = "";
 
         if (parts.length >= 4) {
-          // Format: ProductURL ImageURL Name Price
           productUrl = parts[0].trim();
           imageUrl = parts[1].trim();
           name = parts[2].trim();
           price = parts[3].trim();
         } else {
-          // Format: ImageURL Name Price
           imageUrl = parts[0].trim();
           name = parts[1].trim();
           price = parts[2].trim();
@@ -336,43 +448,7 @@ export function parseProducts(text: string): Product[] {
 
         if (imageUrl.startsWith('http') && name && price) {
           const enhancedImage = enhanceImageUrl(imageUrl);
-
-          const brands = [
-              /\bconnect\s*barra\s*inform[aá]tica\b/gi,
-              /\bkalango[-\s]*games\b/gi,
-              /\b3green[-\s]*force\b/gi,
-              /\b3green\b/gi,
-              /\bklv[-\s]*notebook\b/gi,
-              /\bskill\b/gi,
-              /\bnext[-\s]*pc\b/gi,
-              /\bnextpc\b/gi,
-              /\bmax[-\s]*elite\b/gi,
-              /\bdream[-\s]*computers?\b/gi,
-              /\bdreamcomputers\b/gi,
-              /\binfotech\b/gi,
-              /\bprime[-\s]*shock!?\b/gi,
-              /\bmulti[-\s]*pc\b/gi,
-              /\bmultipc\b/gi,
-              /\bneologic\b/gi,
-              /\bi[-\s]*buy[-\s]*power\b/gi,
-              /\bibuypower\b/gi,
-              /\balpha[-\s]*pcs?\b/gi,
-              /\balphapcs\b/gi,
-              /\bstudio[-\s]*pc\b/gi,
-              /\bstudiopc\b/gi,
-              /\btop[-\s]*pc\b/gi,
-              /\btoppc\b/gi,
-              /kabum/gi,
-              /\btob\s*pc[’'´`]?s\b/gi,
-              /tob/gi,
-              /alligator shop/gi,
-              /mrp inform[aá]tica/gi
-          ];
-
-          let finalName = name;
-          brands.forEach(regex => {
-              finalName = finalName.replace(regex, "Balão.info");
-          });
+          const finalName = sanitizeText(name);
 
           const id = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15);
           const slug = finalName
@@ -385,6 +461,7 @@ export function parseProducts(text: string): Product[] {
             name: finalName,
             price: price.startsWith('R$') ? price : `R$ ${price}`,
             image: enhancedImage,
+            image_urls: [enhancedImage],
             product_url: productUrl,
             category: "Hardware",
             slug,
@@ -394,4 +471,4 @@ export function parseProducts(text: string): Product[] {
     }
 
     return products;
-  }
+}

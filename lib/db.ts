@@ -30,6 +30,13 @@ function mapTursoProduct(r: Record<string, unknown>): Product {
     description: String(r.description ?? ''),
     specs: parseJson<Record<string, unknown>>(r.specs, {}),
     image_urls: parseJson<string[]>(r.image_urls, []),
+    brand: r.brand ? String(r.brand) : undefined,
+    rating: r.rating ? String(r.rating) : undefined,
+    installment: r.installment ? String(r.installment) : undefined,
+    discount_pix: r.discount_pix ? String(r.discount_pix) : undefined,
+    price_card: r.price_card ? String(r.price_card) : undefined,
+    availability: r.availability ? String(r.availability) : undefined,
+    source_url: r.source_url ? String(r.source_url) : undefined,
     created_at: r.created_at ? String(r.created_at) : undefined,
   } as Product;
 }
@@ -168,6 +175,13 @@ export async function saveProducts(products: Product[]) {
       id: p.id,
       name: p.name,
       price: String(p.price),
+      price_card: p.price_card || null,
+      discount_pix: p.discount_pix || null,
+      installment: p.installment || null,
+      brand: p.brand || null,
+      rating: p.rating || null,
+      availability: p.availability || null,
+      source_url: p.source_url || null,
       image: p.image,
       image_urls: p.image_urls || [p.image],
       product_url: p.product_url || null,
@@ -181,11 +195,18 @@ export async function saveProducts(products: Product[]) {
 
     for (const p of dbProducts) {
       await turso.execute({
-        sql: `INSERT INTO products (id, name, price, image, image_urls, product_url, description, specs, category, slug)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        sql: `INSERT INTO products (id, name, price, price_card, discount_pix, installment, brand, rating, availability, source_url, image, image_urls, product_url, description, specs, category, slug)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
               ON CONFLICT(id) DO UPDATE SET
                 name = excluded.name,
                 price = excluded.price,
+                price_card = excluded.price_card,
+                discount_pix = excluded.discount_pix,
+                installment = excluded.installment,
+                brand = excluded.brand,
+                rating = excluded.rating,
+                availability = excluded.availability,
+                source_url = excluded.source_url,
                 image = excluded.image,
                 image_urls = excluded.image_urls,
                 product_url = excluded.product_url,
@@ -194,7 +215,7 @@ export async function saveProducts(products: Product[]) {
                 category = excluded.category,
                 slug = excluded.slug`,
         args: [
-          p.id, p.name, p.price, p.image,
+          p.id, p.name, p.price, p.price_card, p.discount_pix, p.installment, p.brand, p.rating, p.availability, p.source_url, p.image,
           Array.isArray(p.image_urls) ? JSON.stringify(p.image_urls) : p.image_urls,
           p.product_url,
           p.description,
