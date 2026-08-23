@@ -58,3 +58,4 @@ node_modules
 *.exe
 *.msi
 *.zip
+backup_*.json
