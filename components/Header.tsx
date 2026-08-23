@@ -140,7 +140,7 @@ export default function Header() {
   return (
     <header className={`${headerClassName} sticky top-0 z-[900] flex w-full max-w-full flex-col overflow-x-clip border-b shadow-lg backdrop-blur-md transition-colors`}>
       <TopBar />
-      <div className="max-w-7xl mx-auto flex w-full min-w-0 items-center justify-between gap-4 px-6 sm:px-12 lg:px-24 xl:px-36 py-3.5 sm:gap-6">
+      <div className="w-full max-w-[1920px] mx-auto flex min-w-0 items-center justify-between gap-4 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 py-3.5 sm:gap-6">
         
         {/* Mobile Menu Button - Optimized for Touch */}
         <button 
@@ -169,11 +169,11 @@ export default function Header() {
              </div>
         </Link>
 
-        {/* Search Bar (Desktop) - 100% Maior */}
+        {/* Search Bar (Desktop) - Ampla em Telas Grandes */}
         <form 
              ref={searchContainerRef}
              onSubmit={handleSearch} 
-             className="hidden md:flex flex-1 max-w-3xl relative mx-4"
+             className="hidden md:flex flex-1 max-w-3xl xl:max-w-4xl 2xl:max-w-5xl relative mx-4"
         >
           <input
               type="text"

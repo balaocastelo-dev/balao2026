@@ -214,8 +214,8 @@ export default async function Home(props: {
 
       {/* Marcas Parceiras Marquee */}
       {!search && !category && (
-        <section className="container mx-auto px-3 pt-3 sm:px-4 lg:px-0 lg:pt-4">
-          <div className="home-panel brand-carousel rounded-2xl px-3 py-2 sm:px-4 border border-slate-700/80 bg-[#111827] shadow-md">
+        <section className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 pt-3 lg:pt-4">
+          <div className="home-panel brand-carousel rounded-2xl px-4 py-2.5 sm:px-6 border border-slate-700/80 bg-[#111827] shadow-md">
             <div className="flex items-center gap-3">
               <span className="shrink-0 rounded-full bg-[#E60012] px-3.5 py-1 text-[10px] font-black uppercase tracking-widest text-white shadow-sm sm:text-[11px]">
                 Marcas Oficiais
@@ -240,8 +240,8 @@ export default async function Home(props: {
         </section>
       )}
 
-      {/* Main Content Container - Folgado e Espaçoso */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 sm:space-y-12 py-6">
+      {/* Main Content Container - Multitela (Mobile, Tablet, Desktop, 40" e UltraWide) */}
+      <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 space-y-10 sm:space-y-14 py-6">
         {/* 1. Full-Width Stretched Hero Banner */}
         {!search && !category && (
           <HomeHeroFullWidth carouselImages={carouselImages} />
@@ -255,14 +255,14 @@ export default async function Home(props: {
         {/* 3. Main Body: Left Column (Department Menu) + Right Roomy Center Feed (PC Gamer & Notebooks) */}
         {!search && !category ? (
           <>
-            <div className="flex flex-col lg:flex-row gap-8 items-start">
-              {/* Left Column: Dedicated Department Menu Sidebar (w-80 / 320px) */}
-              <div className="w-full lg:w-80 shrink-0">
+            <div className="flex flex-col lg:flex-row gap-8 xl:gap-10 items-start">
+              {/* Left Column: Dedicated Department Menu Sidebar (w-full lg:w-72 xl:w-80 2xl:w-96) */}
+              <div className="w-full lg:w-72 xl:w-80 2xl:w-96 shrink-0">
                 <HomeDepartmentMenu categories={categories} dealOfTheDay={dealOfTheDay} />
               </div>
 
               {/* Right Column: Roomy Main Highlights Feed (Spacious, not squeezed!) */}
-              <div className="flex-1 min-w-0 space-y-10 sm:space-y-12">
+              <div className="flex-1 min-w-0 space-y-10 sm:space-y-14">
                 {/* 1. Computador Gamer */}
                 {pcGamerProducts.length > 0 && (
                   <HomeCategoryShelf
@@ -293,7 +293,7 @@ export default async function Home(props: {
             )}
 
             {/* 5. Demais Categorias em Destaque (Smartphones, Hardware, Periféricos, Games) */}
-            <div className="space-y-10 sm:space-y-12">
+            <div className="space-y-10 sm:space-y-14">
               {/* 4. Smartphones */}
               {smartphoneProducts.length > 0 && (
                 <HomeCategoryShelf

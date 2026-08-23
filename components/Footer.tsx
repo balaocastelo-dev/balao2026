@@ -21,7 +21,7 @@ export default function Footer() {
 
   return (
     <footer className="mt-auto border-t border-[var(--site-border)] bg-[var(--site-panel)] pt-16 pb-8 text-[var(--site-muted)]">
-      <div className="container mx-auto px-4">
+      <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           
           {/* About Section */}

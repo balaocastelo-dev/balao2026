@@ -49,7 +49,7 @@ export default function TopBar() {
 
   return (
     <div className="relative z-50 w-full max-w-full overflow-hidden border-b border-red-800 bg-[#E60012] py-2 text-xs text-white md:text-sm">
-      <div className="container mx-auto flex max-w-full items-center justify-between px-4">
+      <div className="w-full max-w-[1920px] mx-auto flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20">
         <div className="flex-1 overflow-hidden whitespace-nowrap relative">
           <div className="animate-marquee inline-block">
             {messages?.map((m, idx) => (

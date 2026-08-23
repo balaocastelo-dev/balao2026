@@ -41,13 +41,13 @@ export default function ProductList({ products }: { products: Product[] }) {
   const getGridClasses = () => {
     switch (viewMode) {
       case "small":
-        return "grid-cols-1 min-[430px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5";
+        return "grid-cols-1 min-[430px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6";
       case "large":
-        return "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3";
+        return "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4";
       case "list":
         return "grid-cols-1";
       default:
-        return "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4";
+        return "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5";
     }
   };
 
