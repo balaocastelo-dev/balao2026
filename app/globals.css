@@ -183,6 +183,17 @@ main {
   color: var(--site-muted);
 }
 
+/* O painel admin é sempre tema claro (bg-white/bg-gray-50 fixos), mas o
+   `body` global fica com texto quase-branco por padrão (pensado pro modo
+   escuro da loja). Inputs/selects do admin que não definem cor de texto
+   explícita herdam esse branco e ficam ilegíveis sobre fundo branco. */
+.admin-panel input,
+.admin-panel select,
+.admin-panel textarea,
+.admin-panel option {
+  color: #111827;
+}
+
 /* Force all text to be black unless explicitly overridden by white (e.g. buttons) */
 /* Modified to be less aggressive for dark mode sections */
 .light-mode .text-gray-50, .light-mode .text-gray-100 {
