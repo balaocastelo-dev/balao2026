@@ -40,10 +40,12 @@ const flattenCategoryTree = (categories: Category[], level = 0): { category: Cat
   return result;
 };
 
+const PAGE_SIZE = 50;
+
 export default function ProductManager() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  
+
   // Create sorted and flattened categories for display
   const sortedCategories = React.useMemo(() => {
     const tree = buildCategoryTree(categories);
@@ -52,8 +54,16 @@ export default function ProductManager() {
 
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
-  
+
+  // Paginação server-side: com um catálogo de milhares de itens, carregar e
+  // renderizar tudo de uma vez trava o navegador. A tabela sempre mostra só
+  // a página atual; busca e filtro de categoria também rodam no banco.
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+
   // Selection State
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   
@@ -85,16 +95,41 @@ export default function ProductManager() {
   const [isMigrating, setIsMigrating] = useState(false);
   const [migrationLogs, setMigrationLogs] = useState<string[]>([]);
 
+  // Debounce da busca: evita disparar uma requisição a cada tecla digitada.
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(searchTerm.trim()), 350);
+    return () => clearTimeout(t);
+  }, [searchTerm]);
+
+  // Volta pra página 1 sempre que busca ou filtro de categoria mudam —
+  // senão o usuário pode ficar numa página que não existe mais no resultado.
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, filterCategory]);
+
   useEffect(() => {
     fetchProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, debouncedSearch, filterCategory]);
+
+  useEffect(() => {
     fetchCategories();
   }, []);
 
   const fetchProducts = async () => {
     setLoading(true);
     try {
-        const res = await fetch("/api/products");
-        if (res.ok) setProducts(await res.json());
+        const params = new URLSearchParams({ page: String(page), limit: String(PAGE_SIZE) });
+        if (debouncedSearch) params.set("search", debouncedSearch);
+        if (filterCategory) params.set("category", filterCategory);
+
+        const res = await fetch(`/api/products?${params.toString()}`);
+        if (res.ok) {
+            const data = await res.json();
+            setProducts(data.products || []);
+            setTotalCount(data.total || 0);
+            setSelectedIds(new Set());
+        }
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   };
@@ -226,36 +261,42 @@ export default function ProductManager() {
   const handleDeleteNoImage = async () => {
     setIsProcessingBulk(true);
     try {
+        // `products` só tem a página atual agora — essa varredura precisa do
+        // catálogo inteiro, então busca a versão leve (id/name/image) em vez
+        // de depender do estado paginado da tabela.
+        const liteRes = await fetch("/api/products?lite=1");
+        const allProducts: Pick<Product, "id" | "name" | "image">[] = liteRes.ok ? await liteRes.json() : [];
+
         // 1. Identify candidates (empty or null)
-        let productsToDelete = products.filter((p: Product) => !p.image || p.image.trim() === "");
-        
+        let productsToDelete: Pick<Product, "id" | "name" | "image">[] = allProducts.filter((p) => !p.image || p.image.trim() === "");
+
         // 2. Identify candidates with potential broken links (scan the rest)
-        const productsWithImage = products.filter((p: Product) => p.image && p.image.trim() !== "");
+        const productsWithImage = allProducts.filter((p) => p.image && p.image.trim() !== "");
         
         if (productsWithImage.length > 0) {
              const userConfirmed = confirm(`Existem ${productsWithImage.length} produtos com URL de imagem. Deseja verificar quais estÃ£o quebradas? (Isso pode levar alguns instantes)`);
              
              if (userConfirmed) {
-                 const brokenImages: Product[] = [];
-                 
+                 const brokenImages: Pick<Product, "id" | "name" | "image">[] = [];
+
                  // Process in chunks to avoid browser freeze/network saturation
                  const chunkSize = 20;
                  for (let i = 0; i < productsWithImage.length; i += chunkSize) {
                     const chunk = productsWithImage.slice(i, i + chunkSize);
-                    const results = await Promise.all(chunk.map(async (p: Product) => {
+                    const results = await Promise.all(chunk.map(async (p) => {
                         const exists = await checkImageExists(p.image);
                         return exists ? null : p;
                     }));
-                    
-                    results.forEach((p: Product | null) => {
+
+                    results.forEach((p) => {
                         if (p) brokenImages.push(p);
                     });
                 }
-                 
+
                  productsToDelete = [...productsToDelete, ...brokenImages];
              }
         }
-    
+
         if (productsToDelete.length === 0) {
             alert("Nenhum produto sem imagem ou com imagem quebrada encontrado.");
             return;
@@ -264,12 +305,12 @@ export default function ProductManager() {
         if (!confirm(`Encontrados ${productsToDelete.length} produtos invÃ¡lidos (sem imagem ou link quebrado). Deseja excluÃ­-los?`)) return;
 
         let deletedCount = 0;
-        
+
         // Process in chunks
         const chunkSize = 5;
         for (let i = 0; i < productsToDelete.length; i += chunkSize) {
              const chunk = productsToDelete.slice(i, i + chunkSize);
-             await Promise.all(chunk.map((p: Product) => fetch(`/api/products/${p.id}`, { method: "DELETE" })));
+             await Promise.all(chunk.map((p) => fetch(`/api/products/${p.id}`, { method: "DELETE" })));
              deletedCount += chunk.length;
         }
 
@@ -284,10 +325,16 @@ export default function ProductManager() {
   };
 
   const handleDeleteDuplicates = async () => {
-    const nameMap = new Map<string, Product[]>();
-    
+    // `products` só tem a página atual agora — duplicados podem estar em
+    // páginas diferentes, então essa varredura precisa do catálogo inteiro
+    // (busca a versão leve: id/name/image).
+    const liteRes = await fetch("/api/products?lite=1");
+    const allProducts: Pick<Product, "id" | "name" | "image">[] = liteRes.ok ? await liteRes.json() : [];
+
+    const nameMap = new Map<string, Pick<Product, "id" | "name" | "image">[]>();
+
     // Group by normalized name
-    products.forEach((p: Product) => {
+    allProducts.forEach((p) => {
         const normalizedName = p.name.trim().toLowerCase();
         if (!nameMap.has(normalizedName)) {
             nameMap.set(normalizedName, []);
@@ -295,8 +342,8 @@ export default function ProductManager() {
         nameMap.get(normalizedName)?.push(p);
     });
 
-    const productsToDelete: Product[] = [];
-    
+    const productsToDelete: Pick<Product, "id" | "name" | "image">[] = [];
+
     nameMap.forEach((group) => {
         if (group.length > 1) {
             // Sort to keep the best one: prefer one with image, then created_at (if available), or just first
@@ -347,10 +394,10 @@ export default function ProductManager() {
 
   // Selection Handlers
   const toggleSelectAll = () => {
-    if (selectedIds.size === filteredProducts.length) {
+    if (selectedIds.size === products.length) {
         setSelectedIds(new Set());
     } else {
-        setSelectedIds(new Set(filteredProducts.map((p: Product) => p.id)));
+        setSelectedIds(new Set(products.map((p: Product) => p.id)));
     }
   };
 
@@ -676,34 +723,8 @@ export default function ProductManager() {
     }
   };
 
-  // Filter Products
-  const filteredProducts = React.useMemo(() => {
-    let result = products;
-
-    // Filter by Category
-    if (filterCategory) {
-        result = result.filter(p => p.category === filterCategory);
-    }
-
-    if (searchTerm) {
-        const lowerTerm = searchTerm.toLowerCase().trim();
-        
-        // Admin Search: Direct substring match for reliability
-        // Searches in Name, Category, Supplier, and ID
-        result = result.filter(p => {
-            const name = p.name?.toLowerCase() || "";
-            const category = p.category?.toLowerCase() || "";
-            const supplier = p.supplier?.toLowerCase() || "";
-            const id = p.id?.toLowerCase() || "";
-            
-            return name.includes(lowerTerm) || 
-                   category.includes(lowerTerm) || 
-                   supplier.includes(lowerTerm) ||
-                   id.includes(lowerTerm);
-        });
-    }
-    return result;
-  }, [products, searchTerm, filterCategory]);
+  // Busca e filtro de categoria agora rodam no banco (ver fetchProducts) —
+  // `products` já chega filtrado e paginado do servidor.
 
   return (
     <div>
@@ -726,7 +747,7 @@ export default function ProductManager() {
                     >
                         <option value="">Alterar Categoria...</option>
                         {sortedCategories.map((item) => (
-                            <option key={item.category.id} value={item.category.name}>
+                            <option key={item.category.id} value={item.category.full_path || item.category.name}>
                                 {Array(item.level).fill('\u00A0\u00A0').join('')}{item.category.name}
                             </option>
                         ))}
@@ -805,7 +826,7 @@ export default function ProductManager() {
                     >
                         <option value="">Todas Categorias</option>
                         {sortedCategories.map((item) => (
-                            <option key={item.category.id} value={item.category.name}>
+                            <option key={item.category.id} value={item.category.full_path || item.category.name}>
                                 {Array(item.level).fill('\u00A0\u00A0').join('')}{item.category.name}
                             </option>
                         ))}
@@ -907,7 +928,7 @@ export default function ProductManager() {
                     <tr>
                         <th className="p-4 w-10">
                             <button onClick={toggleSelectAll} className="text-gray-400 hover:text-gray-600">
-                                {selectedIds.size === filteredProducts.length && filteredProducts.length > 0 ? <CheckSquare size={20} /> : <Square size={20} />}
+                                {selectedIds.size === products.length && products.length > 0 ? <CheckSquare size={20} /> : <Square size={20} />}
                             </button>
                         </th>
                         <th className="p-4">Produto</th>
@@ -920,10 +941,10 @@ export default function ProductManager() {
                 <tbody className="divide-y">
                     {loading ? (
                         <tr><td colSpan={6} className="p-8 text-center text-gray-500">Carregando produtos...</td></tr>
-                    ) : filteredProducts.length === 0 ? (
+                    ) : products.length === 0 ? (
                         <tr><td colSpan={6} className="p-8 text-center text-gray-500">Nenhum produto encontrado.</td></tr>
                     ) : (
-                        filteredProducts.map((product: Product) => (
+                        products.map((product: Product) => (
                             <tr key={product.id} className={`hover:bg-gray-50 ${selectedIds.has(product.id) ? "bg-red-50" : ""}`}>
                                 <td className="p-4">
                                     <button
@@ -958,6 +979,46 @@ export default function ProductManager() {
                 </tbody>
             </table>
         </div>
+
+        {/* Pagination */}
+        {!loading && totalCount > 0 && (
+            <div className="flex flex-wrap items-center justify-between gap-3 mt-4 px-1">
+                <span className="text-sm text-gray-500">
+                    {totalCount.toLocaleString('pt-BR')} produtos • Página {page} de {totalPages}
+                </span>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => setPage(1)}
+                        disabled={page === 1}
+                        className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 bg-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50"
+                    >
+                        « Primeira
+                    </button>
+                    <button
+                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                        disabled={page === 1}
+                        className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 bg-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50"
+                    >
+                        ‹ Anterior
+                    </button>
+                    <span className="text-sm font-medium text-gray-700 px-2">{page} / {totalPages}</span>
+                    <button
+                        onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                        disabled={page >= totalPages}
+                        className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 bg-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50"
+                    >
+                        Próxima ›
+                    </button>
+                    <button
+                        onClick={() => setPage(totalPages)}
+                        disabled={page >= totalPages}
+                        className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 bg-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50"
+                    >
+                        Última »
+                    </button>
+                </div>
+            </div>
+        )}
 
         {/* AI Enrichment Modal */}
         {showEnrichmentModal && (
@@ -1283,7 +1344,7 @@ export default function ProductManager() {
                                 >
                                     <option value="">Selecione...</option>
                                     {sortedCategories.map(item => (
-                                        <option key={item.category.id} value={item.category.name}>
+                                        <option key={item.category.id} value={item.category.full_path || item.category.name}>
                                             {Array(item.level).fill('\u00A0\u00A0').join('')}{item.category.name}
                                         </option>
                                     ))}

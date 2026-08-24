@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
 import { turso, isTursoActive } from '@/lib/turso';
 
-type ProductPriceRow = { id: number; price: string | number };
+// `id` é TEXT no schema (pode ser UUID ou código numérico do fornecedor) —
+// nunca coagir pra Number: `Number("uuid...")` vira NaN e o UPDATE por id
+// simplesmente não bate com nenhuma linha (falha silenciosa).
+type ProductPriceRow = { id: string; price: string | number };
 
 export async function POST(request: Request) {
   try {
@@ -30,7 +33,7 @@ export async function POST(request: Request) {
       const rs = await turso.execute(
         { sql: `SELECT id, price FROM products WHERE id IN (${placeholders})`, args: [...ids] }
       );
-      const products: ProductPriceRow[] = rs.rows.map(r => ({ id: Number(r.id), price: r.price as string | number }));
+      const products: ProductPriceRow[] = rs.rows.map(r => ({ id: String(r.id), price: r.price as string | number }));
 
       const updates = products.map((p: ProductPriceRow) => {
         let priceNum = 0;

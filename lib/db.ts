@@ -64,6 +64,77 @@ export async function getProducts(): Promise<Product[]> {
   }
 }
 
+// Página de produtos com busca/filtro feitos no banco — usado pelo admin
+// (ProductManager) para não precisar carregar/renderizar o catálogo inteiro
+// (7000+ itens com specs/descrição completos) de uma vez, o que travava o
+// navegador.
+export async function getProductsPaginated(opts: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  category?: string;
+}): Promise<{ products: Product[]; total: number }> {
+  if (!isTursoActive()) return { products: [], total: 0 };
+
+  const page = Math.max(1, opts.page || 1);
+  const limit = Math.min(200, Math.max(1, opts.limit || 50));
+  const offset = (page - 1) * limit;
+
+  const where: string[] = [];
+  const args: (string | number)[] = [];
+
+  const search = opts.search?.trim();
+  if (search) {
+    where.push('(LOWER(name) LIKE ? OR LOWER(id) LIKE ? OR LOWER(supplier) LIKE ? OR LOWER(category) LIKE ?)');
+    const like = `%${search.toLowerCase()}%`;
+    args.push(like, like, like, like);
+  }
+
+  const category = opts.category?.trim();
+  if (category) {
+    // Mesma regra do site: categoria selecionada OU qualquer subcategoria
+    // abaixo dela (category guarda o caminho completo).
+    where.push('(category = ? OR category LIKE ?)');
+    args.push(category, `${category}/%`);
+  }
+
+  const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
+
+  try {
+    const countRes = await turso.execute({ sql: `SELECT COUNT(*) as c FROM products ${whereSql}`, args });
+    const total = Number((countRes.rows[0] as Row)?.c || 0);
+
+    const res = await turso.execute({
+      sql: `SELECT * FROM products ${whereSql} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
+      args: [...args, limit, offset],
+    });
+
+    return { products: res.rows.map(r => mapTursoProduct(r as Row)), total };
+  } catch (error) {
+    console.error("Error fetching paginated products:", error);
+    return { products: [], total: 0 };
+  }
+}
+
+// Versão enxuta (id/name/image) do catálogo inteiro — usada pelas rotinas
+// de manutenção do admin (achar sem foto, achar duplicado) que precisam
+// varrer TODOS os produtos, mas não podem puxar specs/descrição completos
+// de 7000+ itens de uma vez.
+export async function getProductsLite(): Promise<Pick<Product, "id" | "name" | "image">[]> {
+  if (!isTursoActive()) return [];
+  try {
+    const res = await turso.execute('SELECT id, name, image FROM products ORDER BY created_at DESC');
+    return res.rows.map((r) => ({
+      id: String((r as Row).id),
+      name: String((r as Row).name),
+      image: String((r as Row).image ?? ''),
+    }));
+  } catch (error) {
+    console.error("Error fetching lite products:", error);
+    return [];
+  }
+}
+
 export async function getProductsForSitemap(limit = 1000): Promise<Pick<Product, "id" | "slug" | "created_at">[]> {
   const take = Math.max(1, Math.min(5000, limit));
   if (!isTursoActive()) return [];

@@ -1,10 +1,44 @@
 import { NextResponse } from 'next/server';
-import { getProducts, saveProducts, createProduct } from '@/lib/db';
+import { getProducts, getProductsPaginated, getProductsLite, saveProducts, createProduct } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
+// Sem parâmetros: comportamento original (array completo) — mantido para não
+// quebrar quem já consome assim (CRM, importação, gerador). Com `page`/
+// `limit`/`search`/`category`, pagina no banco. Com `lite=1`, devolve só
+// id/name/image de TODOS os produtos (usado pelas rotinas de manutenção do
+// admin, que precisam varrer o catálogo inteiro sem puxar specs/descrição).
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const page = searchParams.get('page');
+  const limit = searchParams.get('limit');
+  const search = searchParams.get('search');
+  const category = searchParams.get('category');
+  const lite = searchParams.get('lite');
 
-export async function GET() {
+  if (lite) {
+    const products = await getProductsLite();
+    return NextResponse.json(products);
+  }
+
+  if (page || limit || search || category) {
+    const pageNum = page ? Number(page) : 1;
+    const limitNum = limit ? Number(limit) : 50;
+    const { products, total } = await getProductsPaginated({
+      page: pageNum,
+      limit: limitNum,
+      search: search || undefined,
+      category: category || undefined,
+    });
+    return NextResponse.json({
+      products,
+      total,
+      page: pageNum,
+      limit: limitNum,
+      totalPages: Math.max(1, Math.ceil(total / limitNum)),
+    });
+  }
+
   const products = await getProducts();
   return NextResponse.json(products);
 }
