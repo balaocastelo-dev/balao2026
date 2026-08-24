@@ -447,7 +447,16 @@ function mergeMessages(messages) {
   [...store.messages, ...messages.map(normalizeStoredMessage)]
     .filter((m) => isRealDirectChatId(m.chatId))
     .forEach((message) => {
-      seen.set(buildMessageFingerprint(message), message);
+      const key = buildMessageFingerprint(message);
+      const anterior = seen.get(key);
+      // A ressincronização periódica do histórico (via chat.fetchMessages)
+      // não baixa a mídia — sem isso, a foto sumia do chat assim que a
+      // mesma mensagem era resincronizada, sobrescrevendo a versão que
+      // guardava a mediaUrl no envio.
+      seen.set(
+        key,
+        anterior?.mediaUrl && !message.mediaUrl ? { ...message, mediaUrl: anterior.mediaUrl } : message
+      );
     });
   store.messages = Array.from(seen.values())
     .sort((a, b) => a.timestamp - b.timestamp)
@@ -1015,6 +1024,14 @@ async function sendDirectMedia({
   const sent = await resolveAndSendMessage(targetChatId, mediaObj, options);
   console.log(`[WHATSAPP-SEND-MEDIA] Sucesso ao enviar mídia para ${targetChatId}!`);
 
+  // Guarda a URL/data-URI original (não a mídia resolvida) pra imagem
+  // continuar aparecendo no histórico do chat depois de recarregar a
+  // página — sem isso a mensagem só tinha a legenda em texto.
+  const mediaUrlParaExibir =
+    typeof media === "string" && (media.startsWith("http") || media.startsWith("data:"))
+      ? media
+      : null;
+
   const outMsg = {
     id: sent?.id?._serialized || `msg-media-${Date.now()}`,
     chatId: targetChatId,
@@ -1025,6 +1042,7 @@ async function sendDirectMedia({
     timestamp: Date.now(),
     hasMedia: true,
     mediaType: sendMediaAsDocument ? "document" : mediaObj.mimetype?.startsWith("image") ? "image" : "media",
+    mediaUrl: mediaUrlParaExibir,
     realNumber: extractRealNumber(targetChatId),
     displayNumber: extractRealNumber(targetChatId),
     status: "sent",

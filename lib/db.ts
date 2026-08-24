@@ -73,6 +73,7 @@ export async function getProductsPaginated(opts: {
   limit?: number;
   search?: string;
   category?: string;
+  sort?: "price_asc" | "recent";
 }): Promise<{ products: Product[]; total: number }> {
   if (!isTursoActive()) return { products: [], total: 0 };
 
@@ -100,12 +101,20 @@ export async function getProductsPaginated(opts: {
 
   const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
 
+  // `price` é TEXT ("6.563,52" ou "R$ 6.563,52") — pra ordenar numericamente
+  // no banco (e continuar paginando sem puxar tudo pra JS) convertemos pro
+  // formato numérico dentro do próprio SQL antes do CAST.
+  const orderBySql =
+    opts.sort === "price_asc"
+      ? "ORDER BY CAST(REPLACE(REPLACE(REPLACE(price, 'R$', ''), '.', ''), ',', '.') AS REAL) ASC"
+      : "ORDER BY created_at DESC";
+
   try {
     const countRes = await turso.execute({ sql: `SELECT COUNT(*) as c FROM products ${whereSql}`, args });
     const total = Number((countRes.rows[0] as Row)?.c || 0);
 
     const res = await turso.execute({
-      sql: `SELECT * FROM products ${whereSql} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
+      sql: `SELECT * FROM products ${whereSql} ${orderBySql} LIMIT ? OFFSET ?`,
       args: [...args, limit, offset],
     });
 

@@ -14,6 +14,7 @@ export async function GET(request: Request) {
   const limit = searchParams.get('limit');
   const search = searchParams.get('search');
   const category = searchParams.get('category');
+  const sort = searchParams.get('sort');
   const lite = searchParams.get('lite');
 
   if (lite) {
@@ -21,7 +22,7 @@ export async function GET(request: Request) {
     return NextResponse.json(products);
   }
 
-  if (page || limit || search || category) {
+  if (page || limit || search || category || sort) {
     const pageNum = page ? Number(page) : 1;
     const limitNum = limit ? Number(limit) : 50;
     const { products, total } = await getProductsPaginated({
@@ -29,6 +30,7 @@ export async function GET(request: Request) {
       limit: limitNum,
       search: search || undefined,
       category: category || undefined,
+      sort: sort === 'price_asc' ? 'price_asc' : undefined,
     });
     return NextResponse.json({
       products,

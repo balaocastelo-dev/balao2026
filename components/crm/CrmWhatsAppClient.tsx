@@ -24,6 +24,7 @@ import {
   RESPOSTAS_BASE,
   VENDEDORES_BASE,
 } from "@/lib/crm-defaults";
+import { type Category, buildCategoryTree } from "@/lib/utils";
 
 interface CtxMenuItem {
   label?: string;
@@ -76,6 +77,19 @@ function formatarNumeroExibicao(num: string | null | undefined): string {
     return `55 ${limpo.slice(0, 2)} ${limpo.slice(2)}`;
   }
   return limpo;
+}
+
+// Achata a árvore de categorias (com nível de indentação) para exibir no
+// filtro do catálogo do CRM.
+function flattenCategoryTree(categories: Category[], level = 0): { category: Category; level: number }[] {
+  let result: { category: Category; level: number }[] = [];
+  categories.forEach((cat) => {
+    result.push({ category: cat, level });
+    if (cat.children && cat.children.length > 0) {
+      result = result.concat(flattenCategoryTree(cat.children, level + 1));
+    }
+  });
+  return result;
 }
 
 // Proxy seguro para fotos de perfil do WhatsApp para evitar 403 Forbidden e CORS
@@ -302,14 +316,20 @@ export default function CrmWhatsAppClient() {
   // Catálogo busca paginado no servidor (nunca o banco inteiro) — com
   // milhares de produtos, carregar tudo de uma vez e renderizar cada card
   // travava o CRM inteiro assim que a aba abria (que é a aba padrão).
-  const CATALOGO_PAGE_SIZE = 30;
+  const CATALOGO_PAGE_SIZE = 100;
   const [produtosCatalogo, setProdutosCatalogo] = useState<CrmProdutoCatalogo[]>([]);
   const [catalogoTotal, setCatalogoTotal] = useState(0);
+  const [catalogoPagina, setCatalogoPagina] = useState(1);
+  const [categoriasCatalogo, setCategoriasCatalogo] = useState<Category[]>([]);
+  const [catalogoCategoriaFiltro, setCatalogoCategoriaFiltro] = useState("");
+  const catalogoCategoriasFlat = useMemo(
+    () => flattenCategoryTree(buildCategoryTree(categoriasCatalogo)),
+    [categoriasCatalogo]
+  );
   const [tipoPrecoCatalogo, setTipoPrecoCatalogo] = useState<"venda" | "custo">("venda");
   const [catalogoCarregando, setCatalogoCarregando] = useState(false);
   const [buscaCatalogo, setBuscaCatalogo] = useState("");
   const [buscaCatalogoDebounced, setBuscaCatalogoDebounced] = useState("");
-  const [fornecedorFiltro, setFornecedorFiltro] = useState("todos");
 
   // Context Menu State
   const [ctxVisible, setCtxVisible] = useState(false);
@@ -394,11 +414,18 @@ export default function CrmWhatsAppClient() {
   // servidor. Com o catálogo tendo milhares de produtos, buscar/renderizar
   // tudo de uma vez travava o CRM inteiro assim que a aba (que é a padrão)
   // abria. Aqui só pedimos uma página pequena, filtrada pelo termo de busca.
-  const carregarCatalogoBanco = (termo?: string) => {
+  const carregarCatalogoBanco = () => {
     setCatalogoCarregando(true);
-    const params = new URLSearchParams({ page: "1", limit: String(CATALOGO_PAGE_SIZE) });
-    const busca = (termo ?? buscaCatalogoDebounced).trim();
+    // Sempre ordenado do mais barato pro mais caro, sempre paginado no
+    // servidor (nunca o catálogo inteiro de uma vez).
+    const params = new URLSearchParams({
+      page: String(catalogoPagina),
+      limit: String(CATALOGO_PAGE_SIZE),
+      sort: "price_asc",
+    });
+    const busca = buscaCatalogoDebounced.trim();
     if (busca) params.set("search", busca);
+    if (catalogoCategoriaFiltro) params.set("category", catalogoCategoriaFiltro);
 
     fetch(`/api/products?${params.toString()}`)
       .then((r) => r.json())
@@ -454,6 +481,15 @@ export default function CrmWhatsAppClient() {
       });
   };
 
+  const fetchCategoriasCatalogo = () => {
+    fetch("/api/categories")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) setCategoriasCatalogo(data);
+      })
+      .catch((err) => console.error("Falha ao carregar categorias do catálogo:", err));
+  };
+
   // Busca do catálogo com debounce — evita disparar uma requisição a cada
   // tecla digitada num campo que vai bater num banco de milhares de itens.
   useEffect(() => {
@@ -461,10 +497,20 @@ export default function CrmWhatsAppClient() {
     return () => clearTimeout(t);
   }, [buscaCatalogo]);
 
+  // Volta pra página 1 sempre que a busca ou a categoria mudam — senão o
+  // usuário pode ficar preso numa página que não existe mais no resultado.
+  useEffect(() => {
+    setCatalogoPagina(1);
+  }, [buscaCatalogoDebounced, catalogoCategoriaFiltro]);
+
   useEffect(() => {
     carregarCatalogoBanco();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [buscaCatalogoDebounced]);
+  }, [buscaCatalogoDebounced, catalogoCategoriaFiltro, catalogoPagina]);
+
+  useEffect(() => {
+    fetchCategoriasCatalogo();
+  }, []);
 
   // Poll Real WhatsApp Status only when disconnected
   useEffect(() => {
@@ -601,6 +647,7 @@ export default function CrmWhatsAppClient() {
                 timestamp: sm.timestamp || Date.now(),
                 hasMedia: sm.hasMedia,
                 mediaType: sm.mediaType,
+                mediaUrl: sm.mediaUrl || null,
                 status: "read",
               });
             });
@@ -649,6 +696,7 @@ export default function CrmWhatsAppClient() {
         timestamp: newMsg.timestamp || Date.now(),
         hasMedia: newMsg.hasMedia,
         mediaType: newMsg.mediaType,
+        mediaUrl: newMsg.mediaUrl || null,
         status: "read",
       };
 
@@ -1830,9 +1878,10 @@ export default function CrmWhatsAppClient() {
                 e.preventDefault();
                 setFotoDragSobre(false);
                 const url = e.dataTransfer.getData("text/plain");
+                const nomeFoto = e.dataTransfer.getData("text/x-foto-nome");
                 if (url) {
                   setFotoUrl(url);
-                  setFotoLegenda("Produto Balão");
+                  setFotoLegenda(nomeFoto || "Produto Balão");
                   setModalFotoAberto(true);
                 }
               }}
@@ -2270,32 +2319,33 @@ export default function CrmWhatsAppClient() {
                       </button>
                     </div>
 
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        placeholder="Buscar produto no banco de dados…"
-                        value={buscaCatalogo}
-                        onChange={(e) => setBuscaCatalogo(e.target.value)}
-                        className="flex-1 px-3 py-1.5 border border-[#e3e3e3] rounded-full text-xs outline-none focus:border-[#0f9d58]"
-                      />
-                      <select
-                        value={fornecedorFiltro}
-                        onChange={(e) => setFornecedorFiltro(e.target.value)}
-                        className="px-2 py-1.5 border border-[#e3e3e3] rounded-lg text-xs outline-none"
-                      >
-                        <option value="todos">Todos Fornec.</option>
-                        <option value="Balão">Balão</option>
-                        <option value="TechSupri">TechSupri</option>
-                        <option value="Robson">Robson</option>
-                        <option value="Markin">Markin</option>
-                      </select>
-                    </div>
+                    <input
+                      type="text"
+                      placeholder="Buscar produto no banco de dados…"
+                      value={buscaCatalogo}
+                      onChange={(e) => setBuscaCatalogo(e.target.value)}
+                      className="w-full px-3 py-1.5 border border-[#e3e3e3] rounded-full text-xs outline-none focus:border-[#0f9d58]"
+                    />
 
-                    {catalogoTotal > CATALOGO_PAGE_SIZE && (
-                      <p className="text-[10px] text-[#5f6368] px-0.5">
-                        Mostrando {produtosCatalogo.length} de {catalogoTotal.toLocaleString("pt-BR")} produtos — use a busca pra encontrar um específico.
-                      </p>
-                    )}
+                    {/* Filtro completo por categoria/subcategoria, logo abaixo da busca */}
+                    <select
+                      value={catalogoCategoriaFiltro}
+                      onChange={(e) => setCatalogoCategoriaFiltro(e.target.value)}
+                      className="w-full px-3 py-1.5 border border-[#e3e3e3] rounded-lg text-xs outline-none bg-white"
+                    >
+                      <option value="">Todas as categorias</option>
+                      {catalogoCategoriasFlat.map((item) => (
+                        <option key={item.category.id} value={item.category.full_path || item.category.name}>
+                          {"  ".repeat(item.level)}
+                          {item.category.name}
+                        </option>
+                      ))}
+                    </select>
+
+                    <p className="text-[10px] text-[#5f6368] px-0.5">
+                      {catalogoTotal.toLocaleString("pt-BR")} produtos no total • ordenado do mais barato pro mais caro
+                      {catalogoTotal > CATALOGO_PAGE_SIZE ? ` • página ${catalogoPagina} de ${Math.max(1, Math.ceil(catalogoTotal / CATALOGO_PAGE_SIZE))}` : ""}
+                    </p>
 
                     {catalogoCarregando ? (
                       <div className="text-center py-8 bg-[#f9fafb] rounded-xl border border-dashed border-[#e3e3e3]">
@@ -2315,16 +2365,8 @@ export default function CrmWhatsAppClient() {
                       </div>
                     ) : (
                       <div className="space-y-2.5">
+                        {/* Busca e categoria já filtram no servidor (carregarCatalogoBanco) */}
                         {produtosCatalogo
-                          .filter((p) => {
-                            // A busca por nome/categoria já roda no servidor
-                            // (carregarCatalogoBanco); aqui só filtra por
-                            // fornecedor dentro da página pequena já carregada.
-                            return (
-                              fornecedorFiltro === "todos" ||
-                              (p.fornecedor || "Balão").toLowerCase() === fornecedorFiltro.toLowerCase()
-                            );
-                          })
                           .map((prod) => (
                             <div
                               key={prod.id}
@@ -2400,6 +2442,33 @@ export default function CrmWhatsAppClient() {
                           ))}
                       </div>
                     )}
+
+                    {/* Paginação: 100 produtos por página */}
+                    {!catalogoCarregando && catalogoTotal > CATALOGO_PAGE_SIZE && (
+                      <div className="flex items-center justify-between gap-2 pt-1">
+                        <button
+                          onClick={() => setCatalogoPagina((p) => Math.max(1, p - 1))}
+                          disabled={catalogoPagina === 1}
+                          className="px-3 py-1.5 text-xs rounded-lg border border-[#e3e3e3] bg-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50"
+                        >
+                          ‹ Anterior
+                        </button>
+                        <span className="text-[11px] font-semibold text-[#5f6368]">
+                          Página {catalogoPagina} de {Math.max(1, Math.ceil(catalogoTotal / CATALOGO_PAGE_SIZE))}
+                        </span>
+                        <button
+                          onClick={() =>
+                            setCatalogoPagina((p) =>
+                              Math.min(Math.max(1, Math.ceil(catalogoTotal / CATALOGO_PAGE_SIZE)), p + 1)
+                            )
+                          }
+                          disabled={catalogoPagina >= Math.ceil(catalogoTotal / CATALOGO_PAGE_SIZE)}
+                          className="px-3 py-1.5 text-xs rounded-lg border border-[#e3e3e3] bg-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50"
+                        >
+                          Próxima ›
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -2429,7 +2498,10 @@ export default function CrmWhatsAppClient() {
                               <div
                                 key={idx}
                                 draggable
-                                onDragStart={(e) => e.dataTransfer.setData("text/plain", url)}
+                                onDragStart={(e) => {
+                                  e.dataTransfer.setData("text/plain", url);
+                                  e.dataTransfer.setData("text/x-foto-nome", title);
+                                }}
                                 onClick={() => {
                                   setFotoUrl(url);
                                   setFotoLegenda(title);

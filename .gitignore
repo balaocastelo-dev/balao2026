@@ -60,6 +60,7 @@ node_modules
 *.zip
 backup_*.json
 backups
+whatsapp-server/server.log
 
 # saida de scrapers (dados brutos grandes, nao sao codigo)
 scripts/output/

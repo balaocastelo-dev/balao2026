@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
           url: rawUrl,
           w: 400,
           h: 400,
-          nome: title.slice(0, 70),
+          nome: title,
         });
       }
     }
