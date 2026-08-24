@@ -104,7 +104,7 @@ export default function HomeFlashDeals({ products }: HomeFlashDealsProps) {
               <div className="mt-2 flex-1 flex flex-col justify-between">
                 <div>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--home-accent)]">
-                    {product.category || "Informática"}
+                    {product.category?.split("/").pop()?.trim() || "Informática"}
                   </span>
                   <Link href={href} className="block mt-1">
                     <h3 className="text-xs sm:text-sm font-bold text-white line-clamp-2 group-hover:text-red-400 transition-colors">

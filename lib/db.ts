@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
 import { turso, isTursoActive } from './turso';
-import { BlogPost, Product, CarouselImage, Category, HomeBlock, UsedNotebook, parsePriceToNumber } from './utils';
+import { BlogPost, Product, CarouselImage, Category, HomeBlock, UsedNotebook, parsePriceToNumber, buildCategoryNodesFromPaths } from './utils';
 
 // Linha crua retornada pelo driver LibSQL (valores vêm como unknown).
 type Row = Record<string, unknown>;
@@ -560,7 +560,8 @@ export async function getCategories(): Promise<Category[]> {
       parent_id: r.parent_id ? String(r.parent_id) : null,
       display_order: Number(r.display_order || 0),
       icon: r.icon ? String(r.icon) : null,
-      active: Boolean(r.active)
+      active: Boolean(r.active),
+      full_path: r.full_path ? String(r.full_path) : undefined,
     })) as Category[];
   } catch (error) {
     console.error("Error fetching categories:", error);
@@ -580,6 +581,7 @@ async function getCategoryById(id: string): Promise<Category | null> {
     display_order: Number(r.display_order || 0),
     icon: r.icon ? String(r.icon) : undefined,
     active: Boolean(r.active),
+    full_path: r.full_path ? String(r.full_path) : undefined,
   };
 }
 
@@ -594,8 +596,8 @@ export async function createCategory(category: Partial<Category>) {
 
     const id = category.id || randomUUID();
     await turso.execute({
-      sql: `INSERT INTO categories (id, name, slug, parent_id, display_order, icon, active)
-            VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      sql: `INSERT INTO categories (id, name, slug, parent_id, display_order, icon, active, full_path)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       args: [
         id,
         category.name ?? '',
@@ -604,6 +606,7 @@ export async function createCategory(category: Partial<Category>) {
         category.display_order ?? nextOrder,
         category.icon || null,
         category.active === false ? 0 : 1,
+        category.full_path || category.name || null,
       ],
     });
 
@@ -611,6 +614,45 @@ export async function createCategory(category: Partial<Category>) {
   } catch (error) {
     console.error("Error creating category:", error);
     throw error;
+  }
+}
+
+// Substitui TODA a árvore de categorias pela derivada dos caminhos reais dos
+// produtos importados (ex: "Hardware/Placas-mãe/AMD"). É destrutivo por
+// design: categorias antigas que não batem mais com o catálogo atual não
+// devem sobreviver a uma nova importação (senão o menu acumula lixo de
+// catálogos anteriores que não correspondem a nenhum produto real).
+export async function replaceCategoriesFromPaths(paths: string[]): Promise<void> {
+  if (!isTursoActive()) throw new Error('Banco de dados não configurado');
+
+  const nodes = buildCategoryNodesFromPaths(paths);
+  await turso.execute('DELETE FROM categories');
+
+  for (const node of nodes) {
+    await turso.execute({
+      sql: `INSERT INTO categories (id, name, slug, parent_id, display_order, icon, active, full_path)
+            VALUES (?, ?, ?, ?, ?, ?, 1, ?)`,
+      args: [node.id, node.name, node.slug, node.parent_id, node.display_order, null, node.full_path],
+    });
+  }
+}
+
+// Produtos da categoria selecionada E de todas as subcategorias abaixo dela
+// (o `category` do produto guarda o caminho completo, ex:
+// "Hardware/Placas-mãe/AMD" — então "é essa categoria ou está por baixo dela
+// na árvore" vira só comparar prefixo de string, sem precisar percorrer
+// parent_id em tempo de request).
+export async function getProductsByCategoryFullPath(fullPath: string): Promise<Product[]> {
+  try {
+    if (!isTursoActive() || !fullPath) return [];
+    const res = await turso.execute({
+      sql: `SELECT * FROM products WHERE category = ? OR category LIKE ? ORDER BY created_at DESC`,
+      args: [fullPath, `${fullPath}/%`],
+    });
+    return sortByPrice(res.rows.map(r => mapTursoProduct(r as Row)));
+  } catch (error) {
+    console.error("Error fetching products by category path:", error);
+    return [];
   }
 }
 

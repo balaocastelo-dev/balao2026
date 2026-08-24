@@ -58,7 +58,7 @@ export default function SearchPreview({ products, searchQuery = "", onSelect }: 
                 {highlightText(product.name, searchQuery)}
               </h4>
               <div className="flex items-center gap-2 mt-0.5">
-                <span className="text-xs text-[var(--site-muted)]">{product.category}</span>
+                <span className="text-xs text-[var(--site-muted)]">{product.category?.split("/").pop()?.trim()}</span>
                 <span className="text-xs font-bold text-[#E60012]">{product.price}</span>
               </div>
             </div>

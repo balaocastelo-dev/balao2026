@@ -68,7 +68,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     alternates: { canonical },
     openGraph: {
       title: product.name,
-      description: `Por apenas ${product.price} - ${product.category || "Hardware"}`,
+      description: `Por apenas ${product.price} - ${product.category?.split('/').pop() || "Hardware"}`,
       url: canonical,
       images: [
         {
@@ -110,12 +110,16 @@ export default async function ProductPage({ params }: Props) {
   const installmentValue = listPriceNum / 10;
   const descriptionText = stripSpecsFromDescription(product.description);
 
-  const category = categories.find(c => c.name === product.category);
+  // `product.category` guarda o caminho completo (ex: "Hardware/Placas-mãe/
+  // AMD") — a categoria correspondente agora é encontrada pelo full_path, não
+  // mais pelo nome isolado (que só bate com categorias de 1 nível).
+  const category = categories.find(c => c.full_path === product.category);
   const categorySlug = category ? category.slug : 'todos-os-produtos';
+  const categoryLabel = category?.name || product.category?.split('/').pop() || 'Produtos';
 
   const breadcrumbItems = [
     { name: 'Home', item: 'https://www.balao.info' },
-    { name: product.category || 'Produtos', item: `https://www.balao.info/categoria/${categorySlug}` },
+    { name: categoryLabel, item: `https://www.balao.info/categoria/${categorySlug}` },
     { name: product.name, item: getProductCanonicalPath(product.slug, product.id) }
   ];
 
@@ -152,7 +156,7 @@ export default async function ProductPage({ params }: Props) {
                             </span>
                         )}
                         <span className="rounded-full border border-[var(--site-border)] bg-[var(--site-panel-muted)] px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[var(--site-muted)]">
-                            {product.category || "Hardware"}
+                            {categoryLabel}
                         </span>
                         {product.availability && (
                             <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-400">

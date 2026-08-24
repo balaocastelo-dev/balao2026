@@ -77,6 +77,10 @@ export interface Category {
   icon?: string;
   active: boolean;
   children?: Category[]; // For frontend tree structure
+  // Caminho completo da categoria (ex: "Hardware/Placas-mãe/AMD"), usado para
+  // filtrar produtos por categoria + todas as subcategorias abaixo dela sem
+  // precisar percorrer a árvore de parent_id a cada request.
+  full_path?: string;
 }
 
 export interface HomeBlock {
@@ -274,6 +278,81 @@ export function buildCategoryTree(categories: Category[]): Category[] {
   return roots;
 }
 
+export function slugifyText(value: string): string {
+  return String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}+/gu, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80) || "categoria";
+}
+
+export interface CategoryPathNode {
+  id: string;
+  name: string;
+  slug: string;
+  parent_id: string | null;
+  full_path: string;
+  display_order: number;
+  level: number;
+}
+
+// Constrói a árvore de categorias a partir dos caminhos brutos vindos do
+// catálogo importado (ex: "Hardware/Placas-mãe/AMD"). Cada segmento vira um
+// nível na árvore, deduplicado por caminho completo (evita recriar
+// "Hardware" uma vez por produto). O slug do nível raiz é só o nome
+// (ex: "hardware"); níveis mais fundos herdam o slug do pai como prefixo
+// (ex: "hardware-placas-mae-amd") — isso garante slug único mesmo quando
+// departamentos diferentes têm uma subcategoria de mesmo nome (ex: "Cabos"
+// existe tanto em Hardware quanto em Periféricos).
+export function buildCategoryNodesFromPaths(paths: string[]): CategoryPathNode[] {
+  const nodesByPath = new Map<string, CategoryPathNode>();
+  let orderCounter = 0;
+
+  for (const rawPath of paths) {
+    const segments = String(rawPath || "")
+      .split("/")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (segments.length === 0) continue;
+
+    let parentPath = "";
+    let parentSlug = "";
+    for (let level = 0; level < segments.length; level++) {
+      const name = segments[level];
+      const fullPath = parentPath ? `${parentPath}/${name}` : name;
+
+      if (!nodesByPath.has(fullPath)) {
+        const slug = level === 0 ? slugifyText(name) : `${parentSlug}-${slugifyText(name)}`;
+        nodesByPath.set(fullPath, {
+          id: fullPath, // determinístico: reimportar o mesmo caminho reaproveita o mesmo id
+          name,
+          slug,
+          parent_id: parentPath || null,
+          full_path: fullPath,
+          display_order: orderCounter++,
+          level,
+        });
+      }
+
+      parentPath = fullPath;
+      parentSlug = nodesByPath.get(fullPath)!.slug;
+    }
+  }
+
+  // parent_id acima está guardando o full_path do pai (mais fácil de montar);
+  // troca para o id real do nó pai antes de devolver (id == full_path, então
+  // já bate — mantido explícito para não depender dessa coincidência).
+  const nodes = Array.from(nodesByPath.values());
+  for (const node of nodes) {
+    if (node.parent_id && !nodesByPath.has(node.parent_id)) {
+      node.parent_id = null;
+    }
+  }
+  return nodes;
+}
+
 export function parsePriceToNumber(value: unknown): number {
   if (value == null) return 0;
   if (typeof value === "number") return Number.isFinite(value) ? value : 0;
@@ -402,8 +481,16 @@ export function parseProducts(text: string): Product[] {
               ? item.images
               : item.photos || (rawImg ? [rawImg] : []);
             const category = item.categoria || item.category || "Hardware";
-            const brand = item.marca || item.brand || "Balão.info";
+            const brand = item.marca || item.brand || item.manufacturer || "Balão.info";
             const desc = item.descricao || item.description || "";
+            // Avaliação real do catálogo (quando existir) — usada não só para
+            // exibir, mas como sinal de relevância na home (em vez de ordenar
+            // sempre pelo preço, o que deixava a home parecendo cara).
+            const avgRating = typeof item.average_rating === "number" ? item.average_rating : null;
+            const ratingCount = typeof item.rating_count === "number" ? item.rating_count : 0;
+            const ratingStr =
+              item.avaliacao ||
+              (avgRating ? `${avgRating.toFixed(1)} ⭐ (${ratingCount})` : "Sem avaliações");
             const id = String(item.id || item.code || (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 12)));
 
             if (rawName && rawPix) {
@@ -430,7 +517,7 @@ export function parseProducts(text: string): Product[] {
                 category: category || "Hardware",
                 brand: sanitizeText(brand) || "Balão.info",
                 availability: item.disponibilidade || item.estoque || "Disponível",
-                rating: item.avaliacao || "5.0 ⭐",
+                rating: ratingStr,
                 product_url: `/product/${id}`,
                 source_url: item.link_produto || item.link || undefined,
                 image: enhancedImg,

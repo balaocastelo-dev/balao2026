@@ -304,6 +304,24 @@ export default function ImportPage() {
     let savedCount = 0;
 
     try {
+      // Reconstrói TODA a árvore de categorias a partir dos caminhos reais
+      // dos produtos deste catálogo (ex: "Hardware/Placas-mãe/AMD").
+      // Categorias antigas que não correspondem a nenhum produto deste
+      // catálogo são descartadas — o menu do site deve sempre refletir
+      // exatamente o que está à venda, não um catálogo anterior.
+      setSaveDetail("Reconstruindo árvore de categorias e subcategorias...");
+      setMessage("Recriando categorias a partir do catálogo novo...");
+      const categoryPaths = [...new Set(finalProducts.map((p) => p.category).filter(Boolean))];
+      const catRes = await fetch("/api/categories/rebuild", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paths: categoryPaths }),
+      });
+      if (!catRes.ok) {
+        const catErr = await catRes.text().catch(() => "");
+        throw new Error(`Falha ao reconstruir categorias: ${catErr.slice(0, 160)}`);
+      }
+
       for (let chunkIdx = 0; chunkIdx < totalChunks; chunkIdx++) {
         const start = chunkIdx * CHUNK_SIZE;
         const end = Math.min(start + CHUNK_SIZE, total);

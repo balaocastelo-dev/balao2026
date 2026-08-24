@@ -144,7 +144,7 @@ export function generateProductSchema(product: Product) {
     "@type": "Product",
     name: product.name,
     image: product.image,
-    description: product.description || `Comprar ${product.name} em Campinas. ${product.category}`,
+    description: product.description || `Comprar ${product.name} em Campinas. ${product.category?.split("/").pop()?.trim() || ""}`,
     brand: {
       "@type": "Brand",
       name: SITE_CONFIG.name,

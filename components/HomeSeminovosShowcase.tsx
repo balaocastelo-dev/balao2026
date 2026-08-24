@@ -129,7 +129,7 @@ export default function HomeSeminovosShowcase({ pcGamerProducts, notebookProduct
               <div className="flex-1 flex flex-col justify-between space-y-3">
                 <div>
                   <span className="text-[10px] font-black uppercase tracking-wider text-[var(--home-accent)]">
-                    {product.category || categoryTitle}
+                    {product.category?.split("/").pop()?.trim() || categoryTitle}
                   </span>
                   <Link href={href} className="block mt-1">
                     <h3 className="text-xs sm:text-sm font-bold text-white line-clamp-2 group-hover:text-red-400 transition-colors">

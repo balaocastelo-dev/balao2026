@@ -3,7 +3,7 @@ import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import ProductList from "@/components/ProductList";
 import FilterSyncer from "@/components/FilterSyncer";
-import { getProductsByExactCategories, getCategories } from "@/lib/db";
+import { getProductsByCategoryFullPath, getProducts, getCategories } from "@/lib/db";
 import { searchProducts } from "@/lib/searchUtils";
 import { extractTags, filterProductsByTags } from "@/lib/product-filters";
 import { parsePriceToNumber, type Category } from "@/lib/utils";
@@ -89,34 +89,15 @@ export default async function CategoriaPage({
       categoryName = 'Todos os Produtos';
   }
 
-  const getDescendantNames = (root: Category | undefined, all: Category[]) => {
-    if (!root) return [];
-    const descendants: string[] = [];
-    const stack = [root.id];
-    while (stack.length > 0) {
-      const currentId = stack.pop()!;
-      const children = all.filter((c) => c.parent_id === currentId);
-      children.forEach((child) => {
-        descendants.push(child.name);
-        stack.push(child.id);
-      });
-    }
-    return descendants;
-  };
- 
-  const validCategories = new Set<string>();
-  if (categoryName) {
-    validCategories.add(categoryName);
-    const descendants = getDescendantNames(selectedCat, categories);
-    descendants.forEach((d) => validCategories.add(d));
-  }
- 
-  let filteredProducts = await getProductsByExactCategories(
-    categoryName && categoryName !== "Todos os Produtos"
-      ? [...validCategories]
-      : categories.map((category) => category.name)
-  );
- 
+  // `products.category` guarda o caminho completo (ex: "Hardware/Placas-mãe/
+  // AMD"), então clicar em "Hardware" precisa trazer produtos dessa categoria
+  // E de todas as subcategorias abaixo dela — basta comparar prefixo do
+  // caminho, sem precisar percorrer a árvore de parent_id.
+  let filteredProducts =
+    categoryName && categoryName !== "Todos os Produtos" && selectedCat?.full_path
+      ? await getProductsByCategoryFullPath(selectedCat.full_path)
+      : await getProducts();
+
   if (search) {
     filteredProducts = searchProducts(filteredProducts, search);
   }

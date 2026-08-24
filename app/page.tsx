@@ -159,23 +159,42 @@ export default async function Home(props: {
     products = await getProducts();
   }
 
-  // Ordenação global padrão: do MAIS CARO para o MAIS BARATO
-  const sortPriceDesc = (list: Product[]) =>
-    [...list].sort((a, b) => parsePriceToNumber(b.price) - parsePriceToNumber(a.price));
+  // Extrai nota média e número de avaliações do texto salvo em `rating`
+  // (ex: "4.8 ⭐ (120)") para usar como sinal de relevância real.
+  const parseRelevanceSignal = (p: Product): { rating: number; count: number } => {
+    const m = String(p.rating || "").match(/(\d+(?:[.,]\d+)?)\s*⭐?\s*\(?(\d+)?/);
+    const rating = m ? parseFloat(m[1].replace(",", ".")) : 0;
+    const count = m && m[2] ? parseInt(m[2], 10) : 0;
+    return { rating, count };
+  };
+
+  // Ordenação das vitrines da home: NUNCA do mais caro pro mais barato (deixa
+  // a home parecendo cara logo de cara). Prioriza avaliação/popularidade real
+  // quando existir; sem isso (produto novo, sem avaliações), desempata pelo
+  // mais barato primeiro — assim o item de entrada aparece antes do topo de
+  // linha, sem esconder os caros (eles continuam na lista, só não lideram).
+  const sortRelevance = (list: Product[]) =>
+    [...list].sort((a, b) => {
+      const ra = parseRelevanceSignal(a);
+      const rb = parseRelevanceSignal(b);
+      if (rb.count !== ra.count) return rb.count - ra.count;
+      if (rb.rating !== ra.rating) return rb.rating - ra.rating;
+      return parsePriceToNumber(a.price) - parsePriceToNumber(b.price);
+    });
 
   // Segmentar produtos pelas categorias na ordem EXATA solicitada:
-  // 1. Computador Gamer (ordenado do mais caro para o mais barato)
-  const pcGamerProducts = sortPriceDesc(
+  // 1. Computador Gamer (ordenado por relevância/avaliação)
+  const pcGamerProducts = sortRelevance(
     products.filter(p => p.category === "Computadores" || p.name.toLowerCase().includes("pc gamer") || p.name.toLowerCase().includes("computador gamer"))
   );
 
-  // 2. Notebooks (ordenado do mais caro para o mais barato)
-  const notebookProducts = sortPriceDesc(
+  // 2. Notebooks (ordenado por relevância/avaliação)
+  const notebookProducts = sortRelevance(
     products.filter(p => p.category === "Notebooks" || p.category === "Notebooks Seminovos" || p.name.toLowerCase().includes("notebook") || p.name.toLowerCase().includes("macbook"))
   );
 
-  // 3. Monitores (estritamente monitores, sem acessórios - ordenado do mais caro para o mais barato)
-  const monitorProducts = sortPriceDesc(
+  // 3. Monitores (estritamente monitores, sem acessórios - ordenado por relevância/avaliação)
+  const monitorProducts = sortRelevance(
     products.filter(p => 
       (p.category === "Monitores" || p.name.toLowerCase().includes("monitor")) &&
       !p.name.toLowerCase().includes("suporte") &&
@@ -185,23 +204,23 @@ export default async function Home(props: {
     )
   );
 
-  // 4. Smartphones (ordenado do mais caro para o mais barato)
-  const smartphoneProducts = sortPriceDesc(
+  // 4. Smartphones (ordenado por relevância/avaliação)
+  const smartphoneProducts = sortRelevance(
     products.filter(p => p.category === "Smartphones" || p.name.toLowerCase().includes("smartphone") || p.name.toLowerCase().includes("galaxy") || p.name.toLowerCase().includes("xiaomi") || p.name.toLowerCase().includes("iphone"))
   );
 
-  // 5. Hardware (ordenado do mais caro para o mais barato)
-  const hardwareProducts = sortPriceDesc(
+  // 5. Hardware (ordenado por relevância/avaliação)
+  const hardwareProducts = sortRelevance(
     products.filter(p => p.category === "Hardware" || p.name.toLowerCase().includes("placa de vídeo") || p.name.toLowerCase().includes("processador") || p.name.toLowerCase().includes("ssd") || p.name.toLowerCase().includes("ram"))
   );
 
-  // 6. Periféricos (ordenado do mais caro para o mais barato)
-  const perifericoProducts = sortPriceDesc(
+  // 6. Periféricos (ordenado por relevância/avaliação)
+  const perifericoProducts = sortRelevance(
     products.filter(p => p.category === "Periféricos" || p.name.toLowerCase().includes("teclado") || p.name.toLowerCase().includes("mouse") || p.name.toLowerCase().includes("headset"))
   );
 
-  // 7. Games (ordenado do mais caro para o mais barato)
-  const gamesProducts = sortPriceDesc(
+  // 7. Games (ordenado por relevância/avaliação)
+  const gamesProducts = sortRelevance(
     products.filter(p => p.category === "Games" || p.name.toLowerCase().includes("console") || p.name.toLowerCase().includes("playstation") || p.name.toLowerCase().includes("xbox") || p.name.toLowerCase().includes("cadeira gamer"))
   );
 

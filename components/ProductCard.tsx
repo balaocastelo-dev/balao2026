@@ -12,6 +12,10 @@ export default function ProductCard({ product, variant = "grid" }: { product: Pr
   const imageRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const productHref = getProductHref(product);
+  // `product.category` guarda o caminho completo (ex: "Hardware/Placas-mãe/
+  // AMD") — no card mostramos só o último nível, senão o card fica poluído
+  // com a árvore inteira de categorias.
+  const categoryLabel = product.category?.split("/").pop()?.trim() || "Hardware";
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -37,7 +41,7 @@ export default function ProductCard({ product, variant = "grid" }: { product: Pr
              />
           </div>
           <div className="p-3 flex-1 flex flex-col justify-center">
-              <div className="mb-1 text-[10px] uppercase tracking-wider text-[var(--site-muted)]">{product.category || "Hardware"}</div>
+              <div className="mb-1 text-[10px] uppercase tracking-wider text-[var(--site-muted)]">{categoryLabel}</div>
               <h3
                 className="mb-1 line-clamp-2 text-sm font-semibold leading-tight text-[var(--site-text)] transition-colors group-hover:text-[var(--site-accent)]"
                 title={product.name}
@@ -90,7 +94,7 @@ export default function ProductCard({ product, variant = "grid" }: { product: Pr
              />
         </div>
         <div className="p-3 md:p-4">
-            <div className="mb-1 text-[10px] sm:text-xs uppercase tracking-wider text-[var(--site-muted)]">{product.category || "Hardware"}</div>
+            <div className="mb-1 text-[10px] sm:text-xs uppercase tracking-wider text-[var(--site-muted)]">{categoryLabel}</div>
             <h3
               className="mb-2 h-10 line-clamp-2 text-sm sm:text-base font-semibold leading-5 text-[var(--site-text)] transition-colors group-hover:text-[var(--site-accent)]"
               title={product.name}

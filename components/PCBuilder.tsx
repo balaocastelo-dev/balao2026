@@ -623,7 +623,7 @@ export default function PCBuilder({ products }: PCBuilderProps) {
                 
                 <div className="flex-1 flex flex-col">
                   <div className="text-xs text-zinc-500 mb-1 uppercase tracking-wider font-semibold">
-                    {product.category || "Hardware"}
+                    {product.category?.split("/").pop()?.trim() || "Hardware"}
                   </div>
                   <h3 className="font-medium text-zinc-200 line-clamp-2 mb-2 flex-1 text-sm" title={product.name}>
                     {product.name}
