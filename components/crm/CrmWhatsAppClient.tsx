@@ -150,6 +150,7 @@ export default function CrmWhatsAppClient() {
 
   const sairDoVendedor = () => {
     setVendedorAtivoId(null);
+    setKanbanPorChat({});
     if (typeof window !== "undefined") localStorage.removeItem("balao_crm_vendedor_ativo");
   };
 
@@ -251,6 +252,22 @@ export default function CrmWhatsAppClient() {
   const [kanbanTamanho, setKanbanTamanho] = useState<"normal" | "expandido" | "recolhido">("normal");
   const [kanbanBusca, setKanbanBusca] = useState("");
   const [kanbanArrastadoId, setKanbanArrastadoId] = useState<string | null>(null);
+  // Etapa do funil por cliente — é o kanban PESSOAL do vendedor logado
+  // (vem do servidor, um mapa separado por vendedor: o mesmo cliente pode
+  // estar em etapas diferentes pra vendedores diferentes, de propósito).
+  const [kanbanPorChat, setKanbanPorChat] = useState<Record<string, string>>({});
+  const getKanbanCol = (chatId: string) => kanbanPorChat[chatId] || "novos";
+  const setKanbanCol = (chatId: string, colId: string | null) => {
+    setKanbanPorChat((prev) => {
+      const next = { ...prev };
+      if (colId) next[chatId] = colId;
+      else delete next[chatId];
+      return next;
+    });
+    if (vendedorAtivoId) {
+      socketRef.current?.emit("panel:set-kanban-card", { vendedorId: vendedorAtivoId, chatId, colId: colId || null });
+    }
+  };
 
   // Sidebar Tabs & Settings
   const [abaAtual, setAbaAtual] = useState<
@@ -532,10 +549,13 @@ export default function CrmWhatsAppClient() {
             .filter((sc) => sc.chatId && isRealDirectChat(sc.chatId))
             .forEach((sc) => {
               const idx = merged.findIndex((c) => c.id === sc.chatId);
-              const realNum = sc.realNumber || sc.displayNumber || sc.chatId.replace(/@c\.us$/, "");
+              // Nunca deixar o sufixo do JID (@c.us, @lid, @s.whatsapp.net…)
+              // vazar como nome/número na lista de conversas.
+              const realNum = sc.realNumber || sc.displayNumber || String(sc.chatId || "").replace(/@.*$/, "");
+              const nomeSemJid = String(sc.contactName || realNum || "").replace(/@.*$/, "");
               const chatObj: CrmChat = {
                 id: sc.chatId,
-                nome: sc.contactName || realNum,
+                nome: nomeSemJid || "Contato",
                 numero: realNum,
                 pic: sc.profilePicUrl || null,
                 unread: sc.unreadCount || 0,
@@ -615,7 +635,11 @@ export default function CrmWhatsAppClient() {
         showToast("Cliente optou por sair do disparo (LGPD).");
       }
 
-      const realNum = newMsg.realNumber || newMsg.chatId.replace(/@c\.us$/, "");
+      // Nunca deixar o sufixo técnico do JID (@c.us, @lid, @s.whatsapp.net…)
+      // vazar como se fosse nome/número — sem isso, contatos @lid sem nome
+      // resolvido apareciam como "273082677764270@lid" na lista de chats.
+      const realNum = newMsg.realNumber || String(newMsg.chatId || "").replace(/@.*$/, "");
+      const nomeSemJid = (newMsg.contactName || realNum || "").replace(/@.*$/, "");
       const m: CrmMensagem = {
         id: newMsg.id || `msg-${Date.now()}`,
         chatId: newMsg.chatId,
@@ -645,7 +669,7 @@ export default function CrmWhatsAppClient() {
         } else {
           const novo: CrmChat = {
             id: newMsg.chatId,
-            nome: newMsg.contactName || realNum,
+            nome: nomeSemJid || "Contato",
             numero: realNum,
             unread: 1,
             lastMessage: newMsg.body || "",
@@ -672,12 +696,32 @@ export default function CrmWhatsAppClient() {
       if (Array.isArray(lista)) setVendedores(lista);
     });
 
+    socket.on("whatsapp:kanban", (mapa: Record<string, string>) => {
+      setKanbanPorChat(mapa && typeof mapa === "object" ? mapa : {});
+    });
+
     return () => {
       clearTimeout(vendedoresTimeout);
       socket.disconnect();
       socketRef.current = null;
     };
   }, [serverUrl]);
+
+  // Avisa o servidor qual vendedor está logado neste navegador, pra ele
+  // entrar na "sala" certa e receber só o kanban pessoal desse vendedor
+  // (não o de todo mundo). Repete a cada troca de vendedor e a cada
+  // reconexão do socket.
+  useEffect(() => {
+    if (!vendedorAtivoId) return;
+    const identificar = () => {
+      socketRef.current?.emit("panel:identify-vendedor", { vendedorId: vendedorAtivoId });
+    };
+    identificar();
+    socketRef.current?.on("connect", identificar);
+    return () => {
+      socketRef.current?.off("connect", identificar);
+    };
+  }, [vendedorAtivoId]);
 
   // Live URL link preview on typing
   useEffect(() => {
@@ -879,11 +923,9 @@ export default function CrmWhatsAppClient() {
           ...kanbanColunas.map((col) => ({
             label: col.nome,
             icon: "●",
-            check: chat.kanbanColId === col.id,
+            check: getKanbanCol(chat.id) === col.id,
             onClick: () => {
-              setChats((prev) =>
-                prev.map((c) => (c.id === chat.id ? { ...c, kanbanColId: col.id } : c))
-              );
+              setKanbanCol(chat.id, col.id);
               showToast(`Movido para ${col.nome}`);
             },
           })),
@@ -893,9 +935,7 @@ export default function CrmWhatsAppClient() {
             icon: "🗑️",
             danger: true,
             onClick: () => {
-              setChats((prev) =>
-                prev.map((c) => (c.id === chat.id ? { ...c, kanbanColId: null } : c))
-              );
+              setKanbanCol(chat.id, null);
               showToast("Removido do Kanban");
             },
           },
@@ -1321,9 +1361,7 @@ export default function CrmWhatsAppClient() {
   // Drag and Drop Kanban
   const kanbanDrop = (colunaId: string) => {
     if (!kanbanArrastadoId) return;
-    setChats((prev) =>
-      prev.map((c) => (c.id === kanbanArrastadoId ? { ...c, kanbanColId: colunaId } : c))
-    );
+    setKanbanCol(kanbanArrastadoId, colunaId);
     setKanbanArrastadoId(null);
     showToast("Card movido no Kanban ✅");
   };
@@ -2759,14 +2797,9 @@ export default function CrmWhatsAppClient() {
                         <div>
                           <label className="text-[10px] font-bold uppercase text-[#5f6368]">Etapa no Funil</label>
                           <select
-                            value={chatSelecionado.kanbanColId || "novos"}
+                            value={getKanbanCol(chatSelecionado.id)}
                             onChange={(e) => {
-                              const colId = e.target.value;
-                              setChats((prev) =>
-                                prev.map((c) =>
-                                  c.id === chatSelecionado.id ? { ...c, kanbanColId: colId } : c
-                                )
-                              );
+                              setKanbanCol(chatSelecionado.id, e.target.value);
                               showToast("Etapa atualizada");
                             }}
                             className="w-full p-2 border border-[#e3e3e3] rounded-lg text-xs bg-white"
@@ -2941,7 +2974,7 @@ export default function CrmWhatsAppClient() {
                   const cardsNaColuna = chats
                     .filter((c) => isRealDirectChat(c.id))
                     .filter((c) => {
-                      const matchCol = (c.kanbanColId || "novos") === col.id;
+                      const matchCol = getKanbanCol(c.id) === col.id;
                       const matchBusca =
                         !kanbanBusca ||
                         c.nome.toLowerCase().includes(kanbanBusca.toLowerCase()) ||
@@ -2953,12 +2986,21 @@ export default function CrmWhatsAppClient() {
                   return (
                     <div
                       key={col.id}
+                      data-kanban-col={col.id}
                       onDragOver={(e) => e.preventDefault()}
                       onDrop={() => kanbanDrop(col.id)}
                       className="w-56 bg-[#f0f2f5] border border-[#e3e3e3] rounded-xl flex flex-col h-full max-h-full shrink-0 shadow-sm"
                     >
-                      {/* Col Top */}
-                      <div className="p-2 px-3 border-b border-[#e3e3e3] bg-white rounded-t-xl flex items-center justify-between shrink-0">
+                      {/* Col Top — clicar traz a coluna pro centro da tela, sem precisar rolar manualmente */}
+                      <div
+                        onClick={(e) =>
+                          e.currentTarget
+                            .closest("[data-kanban-col]")
+                            ?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" })
+                        }
+                        className="p-2 px-3 border-b border-[#e3e3e3] bg-white rounded-t-xl flex items-center justify-between shrink-0 cursor-pointer hover:bg-[#f8f9fa]"
+                        title="Clique para centralizar esta coluna"
+                      >
                         <div className="flex items-center gap-1.5 font-bold text-xs text-[#202124] truncate">
                           <span
                             className="w-2.5 h-2.5 rounded-full shrink-0"

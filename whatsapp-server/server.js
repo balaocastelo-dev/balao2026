@@ -103,6 +103,10 @@ const store = {
   messages: [],
   chats: [],
   vendedores: [],
+  // Kanban pessoal de cada vendedor: { [vendedorId]: { [chatId]: colunaId } }.
+  // De propósito NÃO é um board único compartilhado — o mesmo cliente pode
+  // estar em etapas diferentes pra vendedores diferentes.
+  kanbanPorVendedor: {},
   statusFeed: [],
   chatAssignments: {},
   notifications: [],
@@ -154,6 +158,10 @@ function loadStore() {
         : {};
     store.notifications = Array.isArray(parsed.notifications) ? parsed.notifications : [];
     store.vendedores = Array.isArray(parsed.vendedores) ? parsed.vendedores : [];
+    store.kanbanPorVendedor =
+      parsed.kanbanPorVendedor && typeof parsed.kanbanPorVendedor === "object"
+        ? parsed.kanbanPorVendedor
+        : {};
   } catch (error) {
     console.error("Falha ao ler dados do painel do WhatsApp:", error);
   }
@@ -172,6 +180,7 @@ function persistStore() {
     chatAssignments: store.chatAssignments,
     notifications: store.notifications,
     vendedores: store.vendedores,
+    kanbanPorVendedor: store.kanbanPorVendedor,
   };
 
   fs.writeFileSync(dataFile, JSON.stringify(payload, null, 2));
@@ -540,7 +549,9 @@ async function resolveContactDetails(chat, rawId) {
     } catch (e) {}
   }
 
-  const cleanNum = realNumber || rawId.replace(/@(c\.us|s\.whatsapp\.net|lid)$/, "");
+  // Sufixo genérico (não só @c.us/@lid/@s.whatsapp.net) — se o WhatsApp usar
+  // algum formato de JID novo, não queremos ele vazando pro nome/número.
+  const cleanNum = realNumber || String(rawId || "").replace(/@.*$/, "");
   return {
     contactName: contactName || cleanNum,
     realNumber: cleanNum,
@@ -1133,8 +1144,14 @@ function attachWhatsAppClientEvents(client) {
   client.on("loading_screen", (percent, message) => {
     lastProgressAt = Date.now();
     console.log(`[whatsapp] Carregando tela: ${percent}% - ${message}`);
-    whatsappState.status = "loading";
-    emitState();
+    // O WhatsApp Web às vezes dispara "loading_screen" DEPOIS do "ready"
+    // (reflow interno da página). Sem essa guarda, o status voltava pra
+    // "loading" com o cliente já conectado e funcional — só cosmético, mas
+    // confundia quem checasse /health.
+    if (!whatsappState.connected) {
+      whatsappState.status = "loading";
+      emitState();
+    }
   });
 
   client.on("authenticated", () => {
@@ -1206,8 +1223,21 @@ function attachWhatsAppClientEvents(client) {
       return;
     }
 
-    const contactName =
-      message._data?.notifyName || message._data?.pushname || message.from || null;
+    // notifyName/pushname nem sempre existem (comum em contatos @lid) — nesse
+    // caso NÃO cair pro JID cru (message.from) como nome, senão o vendedor
+    // vê "273082677764270@lid" em vez de nome/telefone. Tenta a resolução
+    // completa (mesma usada na sincronização de conversas) antes de desistir.
+    let contactName = message._data?.notifyName || message._data?.pushname || null;
+    let realNumber = extractRealNumber(message.from, contactName);
+
+    if (!contactName || !realNumber) {
+      try {
+        const chat = await message.getChat();
+        const resolved = await resolveContactDetails(chat, message.from);
+        if (!contactName) contactName = resolved.contactName;
+        if (!realNumber) realNumber = extractRealNumber(resolved.realNumber) || resolved.realNumber || null;
+      } catch (e) {}
+    }
 
     storeMessage({
       id: message.id?._serialized || createId(),
@@ -1217,8 +1247,8 @@ function attachWhatsAppClientEvents(client) {
       direction: "in",
       timestamp: (message.timestamp || Math.floor(Date.now() / 1000)) * 1000,
       contactName,
-      realNumber: extractRealNumber(message.from, contactName),
-      displayNumber: extractRealNumber(message.from, contactName),
+      realNumber,
+      displayNumber: realNumber,
       hasMedia: Boolean(message.hasMedia),
       mediaType: message.type || null,
     });
@@ -1234,6 +1264,18 @@ function attachWhatsAppClientEvents(client) {
       return;
     }
 
+    // Nunca usar o JID cru (message.to) como nome — mesmo problema do @lid
+    // do handler de mensagem recebida: tenta resolver nome/número reais
+    // antes de desistir.
+    let contactName = null;
+    let realNumber = extractRealNumber(message.to, message.from);
+    try {
+      const chat = await message.getChat();
+      const resolved = await resolveContactDetails(chat, targetChat);
+      contactName = resolved.contactName;
+      if (!realNumber) realNumber = extractRealNumber(resolved.realNumber) || resolved.realNumber || null;
+    } catch (e) {}
+
     storeMessage({
       id: message.id?._serialized || createId(),
       chatId: targetChat,
@@ -1242,9 +1284,9 @@ function attachWhatsAppClientEvents(client) {
       body: message.body || "",
       direction: "out",
       timestamp: (message.timestamp || Math.floor(Date.now() / 1000)) * 1000,
-      contactName: message.to || null,
-      realNumber: extractRealNumber(message.to, message.from),
-      displayNumber: extractRealNumber(message.to, message.from),
+      contactName,
+      realNumber,
+      displayNumber: realNumber,
       hasMedia: Boolean(message.hasMedia),
       mediaType: message.type || null,
     });
@@ -1630,8 +1672,34 @@ io.on("connection", (socket) => {
     const id = String(payload?.id || "").trim();
     if (!id) return;
     store.vendedores = store.vendedores.filter((v) => String(v.id) !== id);
+    delete store.kanbanPorVendedor[id];
     persistStore();
     emitVendedores();
+  });
+
+  // Cada vendedor entra numa "sala" própria pra só receber o kanban dele —
+  // nunca o de outro vendedor logado em outro PC ao mesmo tempo.
+  socket.on("panel:identify-vendedor", (payload) => {
+    const vendedorId = String(payload?.vendedorId || "").trim();
+    if (!vendedorId) return;
+    socket.join(`vendedor:${vendedorId}`);
+    socket.emit("whatsapp:kanban", store.kanbanPorVendedor[vendedorId] || {});
+  });
+
+  socket.on("panel:set-kanban-card", (payload) => {
+    const vendedorId = String(payload?.vendedorId || "").trim();
+    const chatId = String(payload?.chatId || "").trim();
+    const colId = payload?.colId ? String(payload.colId) : null;
+    if (!vendedorId || !chatId) return;
+
+    if (!store.kanbanPorVendedor[vendedorId]) store.kanbanPorVendedor[vendedorId] = {};
+    if (colId) {
+      store.kanbanPorVendedor[vendedorId][chatId] = colId;
+    } else {
+      delete store.kanbanPorVendedor[vendedorId][chatId];
+    }
+    persistStore();
+    io.to(`vendedor:${vendedorId}`).emit("whatsapp:kanban", store.kanbanPorVendedor[vendedorId]);
   });
 
   socket.on("panel:reset-session", () => {
