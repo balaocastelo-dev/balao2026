@@ -6,7 +6,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const { Server } = require("socket.io");
 const qrcode = require("qrcode");
-const { Client, LocalAuth, MessageMedia } = require("whatsapp-web.js");
+const { Client, LocalAuth, MessageMedia, MessageAck } = require("whatsapp-web.js");
 
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
@@ -239,6 +239,16 @@ function emitToast(message) {
   io.emit("whatsapp:toast", { message });
 }
 
+// Confirmação real de envio, amarrada ao tempId que o painel gerou pro
+// balão otimista. Sem isso, o chat mostrava "enviado" assim que o vendedor
+// clicava, mesmo quando o whatsappClient.sendMessage() falhava de verdade
+// (JID inválido, mídia que não baixou, sessão instável) — o vendedor via
+// a mensagem "certinha" no CRM enquanto o cliente real não recebia nada.
+function emitSendAck({ tempId, chatId, success, id, error }) {
+  if (!tempId) return;
+  io.emit("whatsapp:send-ack", { tempId, chatId, success, id: id || null, error: error || null });
+}
+
 function emitDisparoStatus(ativo) {
   io.emit("whatsapp:disparo-status", { ativo });
 }
@@ -353,8 +363,19 @@ function extractRealNumber(...candidates) {
     if (!value) continue;
     const clean = value.replace(/@.*$/, "");
     const digits = getDigits(clean);
-    if (digits.length >= 10 && digits.length <= 13) {
-      return digits.startsWith("55") ? digits : `55${digits}`;
+
+    // 10-11 dígitos: número local sem DDI (DDD + 8/9 dígitos) — prefixar "55"
+    // é seguro aqui, é literalmente pra isso que serve.
+    if (digits.length === 10 || digits.length === 11) {
+      return `55${digits}`;
+    }
+    // 12-13 dígitos SÓ conta como número real se já vier com "55" na frente.
+    // Sem essa exigência, um LID que por coincidência também tem 12-13
+    // dígitos (ex: "2796493504750") virava um "número" fabricado prefixando
+    // 55 na frente de um ID técnico que não tem nada a ver com telefone —
+    // mostrava um número errado pro vendedor, sem relação com o contato real.
+    if ((digits.length === 12 || digits.length === 13) && digits.startsWith("55")) {
+      return digits;
     }
   }
   return null;
@@ -416,6 +437,37 @@ function isRealDirectChatId(id) {
 
 function toChatId(number) {
   return `${normalizeNumber(number)}@c.us`;
+}
+
+// Mensagens de mídia (foto, áudio, documento...) chegam com body="" — sem
+// isso, o lead aparecia como "Sem mensagens" na lista mesmo tendo mandado
+// uma foto de verdade, o que parecia (erradamente) um lead vazio.
+const LEGENDA_POR_TIPO = {
+  image: "📷 Foto",
+  video: "🎥 Vídeo",
+  ptt: "🎤 Áudio",
+  audio: "🎵 Áudio",
+  document: "📄 Documento",
+  sticker: "🌟 Figurinha",
+  location: "📍 Localização",
+  vcard: "👤 Contato",
+  multi_vcard: "👤 Contatos",
+  call_log: "📞 Chamada",
+  e2e_notification: "🔒 Notificação de segurança",
+  poll_creation: "📊 Enquete",
+};
+function descreverMensagem(message) {
+  if (!message) return "";
+  if (message.body) return message.body;
+  if (LEGENDA_POR_TIPO[message.type]) return LEGENDA_POR_TIPO[message.type];
+  if (message.hasMedia) return "📎 Mídia";
+  // `message` aqui às vezes é o `chat.lastMessage` (resumo leve do WhatsApp
+  // Web, não um Message completo) quando chat.fetchMessages() falha pra
+  // aquele chat — não tem type/hasMedia confiáveis, mas SABEMOS que existe
+  // uma mensagem de verdade (é por isso que chegamos até aqui). Nunca
+  // devolver "" nesse caso: isso fazia o lead aparecer como "Sem mensagens"
+  // na lista quando na real ele tinha, sim, uma conversa.
+  return "Mensagem";
 }
 
 function appendSignature(text, signatureId) {
@@ -514,8 +566,21 @@ async function resolveContactDetails(chat, rawId) {
   } catch (e) {}
 
   let contactName = contact?.pushname || contact?.name || contact?.shortName || chat?.name || null;
+
+  // getFormattedNumber() é o método oficial da lib pra número real (usa a
+  // própria resolução interna do WhatsApp Web, que às vezes acerta onde ler
+  // contact.number/chat.id.user na mão não acerta — especialmente em
+  // contatos @lid vinculados a conta business/API).
+  let formattedNumber = null;
+  try {
+    if (contact && typeof contact.getFormattedNumber === "function") {
+      formattedNumber = await contact.getFormattedNumber().catch(() => null);
+    }
+  } catch (e) {}
+
   let realNumber = extractRealNumber(
     contact?.number,
+    formattedNumber,
     chat?.id?.user,
     contact?.name,
     contact?.pushname,
@@ -640,7 +705,7 @@ async function syncRecentConversations() {
           displayNumber,
           profilePicUrl,
           unreadCount: chat.unreadCount || 0,
-          lastMessageBody: latestMessage?.body || "",
+          lastMessageBody: descreverMensagem(latestMessage),
           lastMessageTimestamp:
             ((latestMessage?.timestamp || chat.timestamp || Math.floor(Date.now() / 1000)) * 1000),
           isGroup: false,
@@ -1319,6 +1384,33 @@ function attachWhatsAppClientEvents(client) {
       mediaType: message.type || null,
     });
   });
+
+  // Confirmação real de entrega/leitura do WhatsApp — sem isso, o CRM não
+  // tinha como saber se uma mensagem "enviada" (sendMessage() resolveu)
+  // realmente chegou ao aparelho do cliente ou ficou presa no servidor do
+  // WhatsApp (ACK_ERROR/ACK_PENDING).
+  client.on("message_ack", (message, ack) => {
+    const id = message?.id?._serialized;
+    if (!id) return;
+
+    const status =
+      ack === MessageAck.ACK_ERROR
+        ? "failed"
+        : ack === MessageAck.ACK_READ || ack === MessageAck.ACK_PLAYED
+        ? "read"
+        : ack === MessageAck.ACK_DEVICE
+        ? "delivered"
+        : ack === MessageAck.ACK_SERVER
+        ? "sent"
+        : "pending";
+
+    const stored = store.messages.find((m) => m.id === id);
+    if (stored) {
+      stored.status = status;
+      persistStore();
+      io.emit("whatsapp:message-status", { id, chatId: stored.chatId, status });
+    }
+  });
 }
 
 async function initializeWhatsAppClient(options = {}) {
@@ -1769,23 +1861,25 @@ io.on("connection", (socket) => {
   });
 
   socket.on("panel:send-message", async (payload) => {
+    const chatIdRef = payload.chatId || null;
     try {
       const number = normalizeNumber(payload.number || payload.chatId || "");
       const chatId = payload.chatId || (number ? `${number}@c.us` : null);
       const text = String(payload.text || "").trim();
       if (!chatId || !text) return;
 
-      await sendDirectMessage({
+      const sent = await sendDirectMessage({
         number,
         text,
         signatureId: payload.signatureId || null,
         chatId,
         replyTo: payload.replyTo || null,
       });
-      emitToast("Mensagem enviada.");
+      emitSendAck({ tempId: payload.tempId, chatId, success: true, id: sent?.id?._serialized });
     } catch (error) {
       console.error("Falha ao enviar mensagem:", error);
-      emitToast("Falha ao enviar mensagem: " + error.message);
+      emitToast("⛔ Falha ao enviar mensagem: " + error.message);
+      emitSendAck({ tempId: payload.tempId, chatId: chatIdRef, success: false, error: error.message });
     }
   });
 
@@ -1927,6 +2021,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("panel:send-media", async (payload) => {
+    const chatIdRef = payload.chatId || null;
     try {
       const number = normalizeNumber(payload.number || payload.chatId || "");
       const chatId = payload.chatId || (number ? `${number}@c.us` : null);
@@ -1939,7 +2034,7 @@ io.on("connection", (socket) => {
         throw new Error("Chat de destino ou mídia não informados");
       }
 
-      await sendDirectMedia({
+      const sent = await sendDirectMedia({
         number,
         chatId,
         media: mediaSource,
@@ -1951,9 +2046,11 @@ io.on("connection", (socket) => {
       });
 
       emitToast("Mídia enviada com sucesso!");
+      emitSendAck({ tempId: payload.tempId, chatId, success: true, id: sent?.id?._serialized });
     } catch (error) {
       console.error("Falha ao enviar mídia:", error);
-      emitToast("Falha ao enviar mídia: " + error.message);
+      emitToast("⛔ Falha ao enviar mídia: " + error.message);
+      emitSendAck({ tempId: payload.tempId, chatId: chatIdRef, success: false, error: error.message });
     }
   });
 
@@ -2069,6 +2166,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("panel:send-product", async (payload) => {
+    const chatIdRef = payload.chatId || null;
     try {
       const number = normalizeNumber(payload.number || payload.chatId || "");
       const chatId = payload.chatId || (number ? `${number}@c.us` : null);
@@ -2076,7 +2174,9 @@ io.on("connection", (socket) => {
       const precoFinal = Number(payload.price || prod.preco || 0);
       const custo = Number(prod.custo || 0);
       if (custo > 0 && precoFinal <= custo) {
-        emitToast(`⛔ Envio bloqueado: preço (R$ ${precoFinal.toFixed(2)}) menor ou igual ao custo (R$ ${custo.toFixed(2)}).`);
+        const msg = `Preço (R$ ${precoFinal.toFixed(2)}) menor ou igual ao custo (R$ ${custo.toFixed(2)}).`;
+        emitToast(`⛔ Envio bloqueado: ${msg}`);
+        emitSendAck({ tempId: payload.tempId, chatId, success: false, error: msg });
         return;
       }
       const obs = payload.obs ? `\n\n_Obs: ${payload.obs}_` : "";
@@ -2087,15 +2187,17 @@ io.on("connection", (socket) => {
       const text = `⚡ *Oferta Balão da Informática*\n*${prod.nome}*\n\n💵 *Preço Especial:* *R$ ${precoFmt}*${specs}${obs}\n\n📍 Pronta entrega na loja do Castelo Campinas!\nPara reservar ou tirar dúvidas, é só responder aqui! 🎈`;
 
       let mediaSent = false;
+      let sentId = null;
       if (prod.imagem && prod.imagem.startsWith("http")) {
         try {
           const media = await MessageMedia.fromUrl(prod.imagem, { unsafeMime: true });
           const sentMsg = await resolveAndSendMessage(chatId, media, { caption: text });
           mediaSent = true;
+          sentId = sentMsg?.id?._serialized || null;
           // Mesmo motivo do endpoint REST: guarda a mediaUrl explicitamente
           // pra foto do produto não sumir do histórico na próxima sincronização.
           storeMessage({
-            id: sentMsg?.id?._serialized || `msg-produto-${Date.now()}`,
+            id: sentId || `msg-produto-${Date.now()}`,
             chatId,
             from: "me",
             to: chatId,
@@ -2114,18 +2216,21 @@ io.on("connection", (socket) => {
       }
 
       if (!mediaSent) {
-        await sendDirectMessage({
+        const sentMsg = await sendDirectMessage({
           number,
           text,
           signatureId: payload.signatureId || null,
           chatId,
         });
+        sentId = sentMsg?.id?._serialized || null;
       }
 
       emitToast(`Produto "${prod.nome}" enviado com sucesso!`);
+      emitSendAck({ tempId: payload.tempId, chatId, success: true, id: sentId });
     } catch (error) {
       console.error("Falha ao enviar produto:", error);
-      emitToast("Falha ao enviar produto.");
+      emitToast("⛔ Falha ao enviar produto: " + error.message);
+      emitSendAck({ tempId: payload.tempId, chatId: chatIdRef, success: false, error: error.message });
     }
   });
 

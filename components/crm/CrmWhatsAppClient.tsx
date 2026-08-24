@@ -54,6 +54,27 @@ interface DocUploadState {
   dataUrl?: string;
 }
 
+// Mensagens de mídia (foto, áudio, documento…) chegam com body vazio — sem
+// isso, o lead aparecia como "Sem mensagens" na lista mesmo tendo mandado
+// uma foto de verdade, parecendo (erradamente) um lead sem nenhum contato.
+const LEGENDA_POR_TIPO_MIDIA: Record<string, string> = {
+  image: "📷 Foto",
+  video: "🎥 Vídeo",
+  ptt: "🎤 Áudio",
+  audio: "🎵 Áudio",
+  document: "📄 Documento",
+  sticker: "🌟 Figurinha",
+  location: "📍 Localização",
+  vcard: "👤 Contato",
+  multi_vcard: "👤 Contatos",
+};
+function descreverPreviewMensagem(body: string | null | undefined, hasMedia?: boolean, mediaType?: string | null): string {
+  if (body) return body;
+  if (mediaType && LEGENDA_POR_TIPO_MIDIA[mediaType]) return LEGENDA_POR_TIPO_MIDIA[mediaType];
+  if (hasMedia) return "📎 Mídia";
+  return "";
+}
+
 // Formata número de WhatsApp no formato solicitado: xx xx xxxxxxxxx (ex: 55 19 987510267)
 function formatarNumeroExibicao(num: string | null | undefined): string {
   if (!num) return "";
@@ -648,7 +669,9 @@ export default function CrmWhatsAppClient() {
                 hasMedia: sm.hasMedia,
                 mediaType: sm.mediaType,
                 mediaUrl: sm.mediaUrl || null,
-                status: "read",
+                // Usa o status real persistido pelo message_ack quando existir
+                // (ver whatsapp-server), em vez de assumir "lida" sempre.
+                status: sm.status || "sent",
               });
             });
           return Array.from(map.values()).sort((a, b) => a.timestamp - b.timestamp);
@@ -708,7 +731,7 @@ export default function CrmWhatsAppClient() {
           const copy = [...prev];
           copy[idx] = {
             ...copy[idx],
-            lastMessage: newMsg.body || "",
+            lastMessage: descreverPreviewMensagem(newMsg.body, newMsg.hasMedia, newMsg.mediaType),
             timestamp: newMsg.timestamp || Date.now(),
             unread: newMsg.direction === "in" ? copy[idx].unread + 1 : copy[idx].unread,
             precisaAtencao: newMsg.direction === "in" ? true : copy[idx].precisaAtencao,
@@ -720,7 +743,7 @@ export default function CrmWhatsAppClient() {
             nome: nomeSemJid || "Contato",
             numero: realNum,
             unread: 1,
-            lastMessage: newMsg.body || "",
+            lastMessage: descreverPreviewMensagem(newMsg.body, newMsg.hasMedia, newMsg.mediaType),
             timestamp: Date.now(),
             tags: [],
             kanbanColId: "novos",
@@ -737,6 +760,25 @@ export default function CrmWhatsAppClient() {
 
     socket.on("whatsapp:disparo-status", (payload: any) => {
       setDisparoAtivo(Boolean(payload?.ativo));
+    });
+
+    // Confirmação real de envio (ligada ao tempId gerado ao criar o balão
+    // otimista) — sem isso, uma mensagem podia aparecer "enviada" no CRM
+    // mesmo quando o whatsappClient.sendMessage() falhou de verdade e o
+    // cliente nunca recebeu nada.
+    socket.on("whatsapp:send-ack", (payload: any) => {
+      if (!payload?.tempId) return;
+      atualizarStatusMensagem(payload.tempId, payload.success ? "sent" : "failed");
+      if (!payload.success) {
+        showToast(`⛔ Mensagem não chegou ao WhatsApp: ${payload.error || "falha desconhecida"}`);
+      }
+    });
+
+    // Confirmação de entrega/leitura vinda do próprio WhatsApp (message_ack:
+    // ACK_DEVICE/ACK_READ) — atualiza o mesmo balão pelo id real da mensagem.
+    socket.on("whatsapp:message-status", (payload: any) => {
+      if (!payload?.id) return;
+      atualizarStatusMensagem(payload.id, payload.status);
     });
 
     socket.on("whatsapp:vendedores", (lista: any[]) => {
@@ -1071,6 +1113,14 @@ export default function CrmWhatsAppClient() {
     ];
   };
 
+  // Atualiza o status de UMA mensagem específica (pelo id/tempId) — usado
+  // pela confirmação real de envio (whatsapp:send-ack) e pelo fallback HTTP,
+  // pra nunca deixar um balão preso em "pending" sem o vendedor saber se
+  // aquilo realmente chegou ao WhatsApp do cliente.
+  const atualizarStatusMensagem = (id: string, status: CrmMensagem["status"]) => {
+    setMensagens((prev) => prev.map((m) => (m.id === id ? { ...m, status } : m)));
+  };
+
   // Enviar Produto Direto para o Chat (Sem passar pelo digitador)
   const enviarProdutoDiretoAoChat = (prod: CrmProdutoCatalogo, precoCustom?: number, obsCustom?: string) => {
     if (!chatSelecionado) {
@@ -1095,8 +1145,9 @@ export default function CrmWhatsAppClient() {
       specs: prod.specs,
     };
 
+    const tempId = `msg-prod-${Date.now()}`;
     const novaMsg: CrmMensagem = {
-      id: `msg-prod-${Date.now()}`,
+      id: tempId,
       chatId: chatSelecionado.id,
       from: "balao",
       body: textoFormatado,
@@ -1105,7 +1156,11 @@ export default function CrmWhatsAppClient() {
       produto: produtoResumo,
       hasMedia: Boolean(prod.imagem),
       mediaUrl: prod.imagem,
-      status: "sent",
+      // "pending" até o servidor confirmar que o whatsappClient.sendMessage()
+      // realmente foi aceito pelo WhatsApp — sem isso o balão mostrava
+      // "enviado" mesmo quando o envio de verdade falhava (ver
+      // whatsapp:send-ack mais abaixo).
+      status: "pending",
     };
 
     setMensagens((prev) => [...prev, novaMsg]);
@@ -1136,26 +1191,35 @@ export default function CrmWhatsAppClient() {
     // senão o cliente recebe o produto em dobro.
     if (socketRef.current?.connected) {
       socketRef.current.emit("panel:send-product", {
+        tempId,
         chatId: chatSelecionado.id,
         number: chatSelecionado.numero,
         product: prod,
         price: precoFinal,
         obs: obsCustom,
       });
-    } else fetch(`${serverUrl}/api/enviar-produto`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat: chatSelecionado.id,
-        number: chatSelecionado.numero,
-        product: prod,
-        price: precoFinal,
-        obs: obsCustom,
-      }),
-    }).catch(() => {});
+    } else {
+      fetch(`${serverUrl}/api/enviar-produto`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat: chatSelecionado.id,
+          number: chatSelecionado.numero,
+          product: prod,
+          price: precoFinal,
+          obs: obsCustom,
+        }),
+      })
+        .then((r) => r.json().catch(() => ({})).then((data) => ({ ok: r.ok, data })))
+        .then(({ ok, data }) => {
+          atualizarStatusMensagem(tempId, ok ? "sent" : "failed");
+          if (!ok) showToast(`⛔ Falha ao enviar "${prod.nome}": ${data?.erro || "erro desconhecido"}`);
+        })
+        .catch(() => atualizarStatusMensagem(tempId, "failed"));
+    }
 
     if (modalProdutoAberto) setModalProdutoAberto(false);
-    showToast(`📦 Oferta de "${prod.nome}" enviada ao destinatário! ✅`);
+    showToast(`📦 Oferta de "${prod.nome}" enviada — aguardando confirmação…`);
   };
 
   // Send message
@@ -1167,8 +1231,9 @@ export default function CrmWhatsAppClient() {
       textoFinal += `\n\n${vendedorAtivo.assinatura}`;
     }
 
+    const tempId = `msg-out-${Date.now()}`;
     const novaMsg: CrmMensagem = {
-      id: `msg-out-${Date.now()}`,
+      id: tempId,
       chatId: chatSelecionado.id,
       from: "balao",
       body: textoFinal,
@@ -1181,7 +1246,9 @@ export default function CrmWhatsAppClient() {
             author: msgRespondendo.direction === "out" ? "Você" : chatSelecionado.nome,
           }
         : null,
-      status: "sent",
+      // "pending" até whatsapp:send-ack confirmar que chegou de verdade ao
+      // WhatsApp — ver atualizarStatusMensagem.
+      status: "pending",
     };
 
     setMensagens((prev) => [...prev, novaMsg]);
@@ -1203,26 +1270,34 @@ export default function CrmWhatsAppClient() {
     // senão a mensagem chega em dobro pro cliente.
     if (socketRef.current?.connected) {
       socketRef.current.emit("panel:send-message", {
+        tempId,
         number: chatSelecionado.numero,
         text: textoFinal,
         chatId: chatSelecionado.id,
         replyTo: msgRespondendo?.id || undefined,
       });
-    } else fetch(`${serverUrl}/api/enviar`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat: chatSelecionado.id,
-        number: chatSelecionado.numero,
-        texto: textoFinal,
-        replyTo: msgRespondendo?.id || undefined,
-      }),
-    }).catch(() => {});
+    } else {
+      fetch(`${serverUrl}/api/enviar`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat: chatSelecionado.id,
+          number: chatSelecionado.numero,
+          texto: textoFinal,
+          replyTo: msgRespondendo?.id || undefined,
+        }),
+      })
+        .then((r) => r.json().catch(() => ({})).then((data) => ({ ok: r.ok, data })))
+        .then(({ ok, data }) => {
+          atualizarStatusMensagem(tempId, ok ? "sent" : "failed");
+          if (!ok) showToast(`⛔ Falha ao enviar mensagem: ${data?.erro || "erro desconhecido"}`);
+        })
+        .catch(() => atualizarStatusMensagem(tempId, "failed"));
+    }
 
     setCampoTexto("");
     setMsgRespondendo(null);
     setLinkPreview(null);
-    showToast("Mensagem disparada para o destinatário ✓");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -2061,8 +2136,40 @@ export default function CrmWhatsAppClient() {
                             )}
 
                             <p>{m.body}</p>
-                            <span className="block text-[10px] text-[#5f6368] text-right mt-1 font-mono">
-                              {formatHora(m.timestamp)} {isEu && "✓✓"}
+                            <span className="flex items-center justify-end gap-1 text-[10px] text-[#5f6368] mt-1 font-mono">
+                              {formatHora(m.timestamp)}
+                              {isEu && (
+                                <span
+                                  title={
+                                    m.status === "failed"
+                                      ? "Falha no envio — não chegou ao WhatsApp do cliente"
+                                      : m.status === "pending"
+                                      ? "Enviando…"
+                                      : m.status === "read"
+                                      ? "Lida"
+                                      : m.status === "delivered"
+                                      ? "Entregue"
+                                      : "Enviada ao WhatsApp"
+                                  }
+                                  className={
+                                    m.status === "failed"
+                                      ? "text-red-600 font-bold cursor-help"
+                                      : m.status === "read"
+                                      ? "text-[#53bdeb] cursor-help"
+                                      : "text-[#5f6368] cursor-help"
+                                  }
+                                >
+                                  {m.status === "failed"
+                                    ? "⚠ Falhou"
+                                    : m.status === "pending"
+                                    ? "🕐"
+                                    : m.status === "read"
+                                    ? "✓✓"
+                                    : m.status === "delivered"
+                                    ? "✓✓"
+                                    : "✓"}
+                                </span>
+                              )}
                             </span>
                           </div>
                         );
@@ -3592,8 +3699,9 @@ export default function CrmWhatsAppClient() {
               onClick={() => {
                 if (!chatSelecionado || !docUpload) return;
                 const legendaFinal = docLegenda.trim() || docUpload.nome;
+                const tempId = `msg-doc-${Date.now()}`;
                 const novaMsg: CrmMensagem = {
-                  id: `msg-doc-${Date.now()}`,
+                  id: tempId,
                   chatId: chatSelecionado.id,
                   from: "balao",
                   body: legendaFinal,
@@ -3603,7 +3711,7 @@ export default function CrmWhatsAppClient() {
                   mediaType: "document",
                   mediaName: docUpload.nome,
                   mediaUrl: docUpload.dataUrl,
-                  status: "sent",
+                  status: "pending",
                 };
                 setMensagens((prev) => [...prev, novaMsg]);
                 setChats((prev) =>
@@ -3620,6 +3728,7 @@ export default function CrmWhatsAppClient() {
 
                 if (socketRef.current?.connected) {
                   socketRef.current.emit("panel:send-media", {
+                    tempId,
                     chatId: chatSelecionado.id,
                     number: chatSelecionado.numero,
                     dataUrl: docUpload.dataUrl,
@@ -3629,24 +3738,28 @@ export default function CrmWhatsAppClient() {
                     caption: docLegenda.trim(),
                     sendMediaAsDocument: true,
                   });
-                } else fetch(`${serverUrl}/api/enviar-documento`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    chat: chatSelecionado.id,
-                    number: chatSelecionado.numero,
-                    dataUrl: docUpload.dataUrl,
-                    base64: docUpload.dataUrl ? docUpload.dataUrl.split(",")[1] : undefined,
-                    mimetype: docUpload.mime,
-                    nome: docUpload.nome,
-                    legenda: docLegenda.trim(),
-                  }),
-                }).catch(() => {});
+                } else {
+                  fetch(`${serverUrl}/api/enviar-documento`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      chat: chatSelecionado.id,
+                      number: chatSelecionado.numero,
+                      dataUrl: docUpload.dataUrl,
+                      base64: docUpload.dataUrl ? docUpload.dataUrl.split(",")[1] : undefined,
+                      mimetype: docUpload.mime,
+                      nome: docUpload.nome,
+                      legenda: docLegenda.trim(),
+                    }),
+                  })
+                    .then((r) => atualizarStatusMensagem(tempId, r.ok ? "sent" : "failed"))
+                    .catch(() => atualizarStatusMensagem(tempId, "failed"));
+                }
 
                 setModalDocAberto(false);
                 setDocUpload(null);
                 setDocLegenda("");
-                showToast("Documento enviado ao cliente! 📄 ✓");
+                showToast("Documento enviado — aguardando confirmação…");
               }}
               className="w-full bg-[#0f9d58] hover:bg-[#0a6e3d] text-white py-2 rounded-lg text-xs font-bold transition-colors cursor-pointer"
             >
@@ -3685,8 +3798,9 @@ export default function CrmWhatsAppClient() {
               onClick={() => {
                 if (!chatSelecionado || !fotoUrl) return;
                 const legendaFinal = fotoLegenda.trim();
+                const tempId = `msg-media-${Date.now()}`;
                 const novaMsg: CrmMensagem = {
-                  id: `msg-media-${Date.now()}`,
+                  id: tempId,
                   chatId: chatSelecionado.id,
                   from: "balao",
                   body: legendaFinal ? `📷 ${legendaFinal}` : "📷 [Foto]",
@@ -3694,7 +3808,7 @@ export default function CrmWhatsAppClient() {
                   timestamp: Date.now(),
                   hasMedia: true,
                   mediaUrl: fotoUrl,
-                  status: "sent",
+                  status: "pending",
                 };
                 setMensagens((prev) => [...prev, novaMsg]);
                 setChats((prev) =>
@@ -3711,6 +3825,7 @@ export default function CrmWhatsAppClient() {
 
                 if (socketRef.current?.connected) {
                   socketRef.current.emit("panel:send-media", {
+                    tempId,
                     chatId: chatSelecionado.id,
                     number: chatSelecionado.numero,
                     url: fotoUrl.startsWith("http") ? fotoUrl : undefined,
@@ -3719,23 +3834,27 @@ export default function CrmWhatsAppClient() {
                     mimetype: fotoUrl.startsWith("data:") ? fotoUrl.split(";")[0].replace("data:", "") : "image/jpeg",
                     caption: legendaFinal,
                   });
-                } else fetch(`${serverUrl}/api/enviar-foto`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    chat: chatSelecionado.id,
-                    number: chatSelecionado.numero,
-                    url: fotoUrl.startsWith("http") ? fotoUrl : undefined,
-                    dataUrl: fotoUrl.startsWith("data:") ? fotoUrl : undefined,
-                    base64: fotoUrl.startsWith("data:") ? fotoUrl.split(",")[1] : undefined,
-                    mimetype: fotoUrl.startsWith("data:") ? fotoUrl.split(";")[0].replace("data:", "") : "image/jpeg",
-                    legenda: legendaFinal,
-                  }),
-                }).catch(() => {});
+                } else {
+                  fetch(`${serverUrl}/api/enviar-foto`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      chat: chatSelecionado.id,
+                      number: chatSelecionado.numero,
+                      url: fotoUrl.startsWith("http") ? fotoUrl : undefined,
+                      dataUrl: fotoUrl.startsWith("data:") ? fotoUrl : undefined,
+                      base64: fotoUrl.startsWith("data:") ? fotoUrl.split(",")[1] : undefined,
+                      mimetype: fotoUrl.startsWith("data:") ? fotoUrl.split(";")[0].replace("data:", "") : "image/jpeg",
+                      legenda: legendaFinal,
+                    }),
+                  })
+                    .then((r) => atualizarStatusMensagem(tempId, r.ok ? "sent" : "failed"))
+                    .catch(() => atualizarStatusMensagem(tempId, "failed"));
+                }
 
                 setModalFotoAberto(false);
                 setFotoLegenda("");
-                showToast("Foto enviada ao destinatário! 📷 ✓");
+                showToast("Foto enviada — aguardando confirmação…");
               }}
               className="w-full bg-[#0f9d58] hover:bg-[#0a6e3d] text-white py-2 rounded-lg text-xs font-bold transition-colors cursor-pointer"
             >
