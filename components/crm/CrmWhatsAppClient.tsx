@@ -132,6 +132,55 @@ export default function CrmWhatsAppClient() {
     return null;
   });
   const [assinaturaAuto, setAssinaturaAuto] = useState(true);
+  // Vendedores agora vivem no servidor (compartilhado entre todos os PCs da
+  // equipe) — este flag só existe pra não mostrar "cadastre o primeiro
+  // vendedor" antes da lista real chegar do socket.
+  const [vendedoresCarregados, setVendedoresCarregados] = useState(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      return JSON.parse(localStorage.getItem("balao_crm_vendedores") || "[]").length > 0;
+    } catch {
+      return false;
+    }
+  });
+  const [pinDigitado, setPinDigitado] = useState("");
+  const [erroLogin, setErroLogin] = useState("");
+  const vendedorAtivo0 = vendedores.find((v) => String(v.id) === String(vendedorAtivoId)) || null;
+  const vendedorAutenticado = Boolean(vendedorAtivoId) && Boolean(vendedorAtivo0);
+
+  const sairDoVendedor = () => {
+    setVendedorAtivoId(null);
+    if (typeof window !== "undefined") localStorage.removeItem("balao_crm_vendedor_ativo");
+  };
+
+  const fazerLoginVendedor = (pin: string) => {
+    const limpo = pin.trim();
+    if (!/^\d{4,6}$/.test(limpo)) {
+      setErroLogin("Digite um PIN de 4 a 6 números.");
+      return;
+    }
+    socketRef.current?.emit("panel:vendedor-login", { pin: limpo }, (res: any) => {
+      if (res?.ok && res.vendedor) {
+        setVendedorAtivoId(res.vendedor.id);
+        setPinDigitado("");
+        setErroLogin("");
+        showToast(`Bem-vindo, ${res.vendedor.nome}!`);
+      } else {
+        setErroLogin("PIN incorreto.");
+      }
+    });
+  };
+
+  const cadastrarVendedor = (dados: { nome: string; cargo: string; assinatura: string; pin: string }, autoLogin: boolean) => {
+    socketRef.current?.emit("panel:add-vendedor", dados, (res: any) => {
+      if (res?.ok && res.vendedor) {
+        showToast(`Vendedor ${res.vendedor.nome} cadastrado.`);
+        if (autoLogin) setVendedorAtivoId(res.vendedor.id);
+      } else {
+        showToast(res?.erro || "Não foi possível cadastrar o vendedor.");
+      }
+    });
+  };
 
   // Chats and Messages
   const isRealDirectChat = (id: string | null | undefined): boolean => {
@@ -454,6 +503,9 @@ export default function CrmWhatsAppClient() {
       socket.emit("panel:bootstrap");
     });
 
+    // Evita travar a tela de login pra sempre se o servidor demorar/estiver fora do ar.
+    const vendedoresTimeout = setTimeout(() => setVendedoresCarregados(true), 6000);
+
     socket.on("whatsapp:state", (payload: any) => {
       if (payload?.connected || payload?.status === "ready") {
         setEstado("ready");
@@ -615,7 +667,13 @@ export default function CrmWhatsAppClient() {
       setDisparoAtivo(Boolean(payload?.ativo));
     });
 
+    socket.on("whatsapp:vendedores", (lista: any[]) => {
+      setVendedoresCarregados(true);
+      if (Array.isArray(lista)) setVendedores(lista);
+    });
+
     return () => {
+      clearTimeout(vendedoresTimeout);
       socket.disconnect();
       socketRef.current = null;
     };
@@ -810,6 +868,7 @@ export default function CrmWhatsAppClient() {
                     : c
                 )
               );
+              socketRef.current?.emit("panel:assign-seller", { chatId: chat.id, sellerId: v.id });
               showToast(`Cliente transferido para ${v.nome}`);
             },
           })),
@@ -1288,6 +1347,101 @@ export default function CrmWhatsAppClient() {
     (rawQrString && rawQrString.length > 20)
   );
 
+  // Portão de acesso: cada vendedor precisa do próprio PIN pra "atender".
+  // A lista de vendedores vem do servidor (compartilhada por toda a equipe),
+  // então isso funciona igual em qualquer PC/navegador.
+  if (!vendedorAutenticado) {
+    if (!vendedoresCarregados) {
+      return (
+        <div className="flex items-center justify-center h-screen w-screen bg-[#f0f2f5] text-[#5f6368] text-sm">
+          Conectando ao painel...
+        </div>
+      );
+    }
+
+    if (vendedores.length === 0) {
+      return (
+        <div className="flex items-center justify-center h-screen w-screen bg-[#f0f2f5] p-4">
+          <div className="bg-white rounded-2xl shadow-md p-6 w-full max-w-sm space-y-3">
+            <h1 className="text-lg font-bold text-[#202124]">🎈 Balão da Informática</h1>
+            <p className="text-xs text-[#5f6368]">
+              Nenhum vendedor cadastrado ainda. Cadastre o primeiro (será o seu acesso).
+            </p>
+            <input
+              type="text"
+              id="gateNome"
+              placeholder="Seu nome"
+              className="w-full px-3 py-2 border border-[#e3e3e3] rounded-lg text-sm outline-none"
+            />
+            <input
+              type="text"
+              id="gateCargo"
+              placeholder="Cargo (opcional)"
+              className="w-full px-3 py-2 border border-[#e3e3e3] rounded-lg text-sm outline-none"
+            />
+            <input
+              type="password"
+              id="gatePin"
+              inputMode="numeric"
+              placeholder="Crie um PIN de 4 a 6 números"
+              className="w-full px-3 py-2 border border-[#e3e3e3] rounded-lg text-sm outline-none"
+            />
+            {erroLogin && <p className="text-xs text-red-600">{erroLogin}</p>}
+            <button
+              onClick={() => {
+                const nome = (document.getElementById("gateNome") as HTMLInputElement)?.value?.trim();
+                const cargo = (document.getElementById("gateCargo") as HTMLInputElement)?.value?.trim();
+                const pin = (document.getElementById("gatePin") as HTMLInputElement)?.value?.trim();
+                if (!nome) {
+                  setErroLogin("Digite seu nome.");
+                  return;
+                }
+                if (!/^\d{4,6}$/.test(pin || "")) {
+                  setErroLogin("O PIN precisa ter de 4 a 6 números.");
+                  return;
+                }
+                setErroLogin("");
+                cadastrarVendedor(
+                  { nome, cargo: cargo || "", assinatura: `Atenciosamente,\n*${nome}* — Balão da Informática`, pin: pin! },
+                  true
+                );
+              }}
+              className="w-full bg-[#0f9d58] text-white py-2 rounded-lg text-sm font-bold hover:bg-[#0a6e3d] cursor-pointer"
+            >
+              Cadastrar e entrar
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex items-center justify-center h-screen w-screen bg-[#f0f2f5] p-4">
+        <div className="bg-white rounded-2xl shadow-md p-6 w-full max-w-sm space-y-3">
+          <h1 className="text-lg font-bold text-[#202124]">🎈 Balão da Informática</h1>
+          <p className="text-xs text-[#5f6368]">Digite seu PIN de vendedor para entrar no atendimento.</p>
+          <input
+            type="password"
+            inputMode="numeric"
+            autoFocus
+            value={pinDigitado}
+            onChange={(e) => setPinDigitado(e.target.value.replace(/\D/g, "").slice(0, 6))}
+            onKeyDown={(e) => e.key === "Enter" && fazerLoginVendedor(pinDigitado)}
+            placeholder="PIN"
+            className="w-full px-3 py-2 border border-[#e3e3e3] rounded-lg text-center text-lg tracking-widest outline-none"
+          />
+          {erroLogin && <p className="text-xs text-red-600">{erroLogin}</p>}
+          <button
+            onClick={() => fazerLoginVendedor(pinDigitado)}
+            className="w-full bg-[#0f9d58] text-white py-2 rounded-lg text-sm font-bold hover:bg-[#0a6e3d] cursor-pointer"
+          >
+            Entrar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden bg-[#f0f2f5] text-[#202124] font-['Segoe_UI',Tahoma,Arial,sans-serif]">
       {/* HEADER TOPBAR */}
@@ -1300,34 +1454,19 @@ export default function CrmWhatsAppClient() {
 
         {/* Vendedor Selector & Status / Stories Feed Button */}
         <div className="flex items-center gap-2.5 flex-1 justify-center max-w-2xl">
-          <label htmlFor="vendedorSel" className="text-xs font-semibold whitespace-nowrap">
+          <label className="text-xs font-semibold whitespace-nowrap">
             👤 Atendendo:
           </label>
-          {vendedores.length > 0 ? (
-            <select
-              id="vendedorSel"
-              value={vendedorAtivoId || vendedores[0]?.id || ""}
-              onChange={(e) => {
-                const id = e.target.value;
-                setVendedorAtivoId(id);
-                showToast(`Agora atendendo como: ${vendedores.find((v) => String(v.id) === id)?.nome}`);
-              }}
-              className="bg-white text-[#202124] border-none rounded-full px-3 py-1 text-xs font-semibold outline-none shadow-sm max-w-[170px]"
-            >
-              {vendedores.map((v) => (
-                <option key={v.id} value={v.id}>
-                  {v.nome}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <button
-              onClick={() => setAbaAtual("vendedores")}
-              className="bg-white/90 hover:bg-white text-[#0a6e3d] rounded-full px-3 py-1 text-xs font-bold transition-all shadow-sm"
-            >
-              ＋ Cadastrar Vendedor
-            </button>
-          )}
+          <span className="bg-white text-[#0a6e3d] rounded-full px-3 py-1 text-xs font-bold shadow-sm max-w-[170px] truncate">
+            {vendedorAtivo0?.nome || "—"}
+          </span>
+          <button
+            onClick={sairDoVendedor}
+            title="Trocar de vendedor (pede o PIN de novo)"
+            className="bg-white/90 hover:bg-white text-[#0a6e3d] rounded-full px-2.5 py-1 text-xs font-bold transition-all shadow-sm"
+          >
+            🔁 Trocar
+          </button>
 
           <label className="inline-flex items-center gap-1.5 text-xs font-semibold cursor-pointer select-none">
             <input
@@ -1712,6 +1851,10 @@ export default function CrmWhatsAppClient() {
                                       : c
                                   )
                                 );
+                                socketRef.current?.emit("panel:assign-seller", {
+                                  chatId: chatSelecionado.id,
+                                  sellerId: vendedorAtivoId,
+                                });
                                 showToast("Atendimento assumido 🟢");
                               }}
                               className="bg-amber-100 hover:bg-amber-200 text-amber-900 text-[10px] font-bold px-2 py-0.5 rounded-full cursor-pointer"
@@ -2352,27 +2495,40 @@ export default function CrmWhatsAppClient() {
                         placeholder="Assinatura automática..."
                         className="w-full px-2.5 py-1.5 border border-[#e3e3e3] rounded-lg text-xs bg-white outline-none"
                       />
+                      <input
+                        type="text"
+                        id="novoVendedorPin"
+                        inputMode="numeric"
+                        placeholder="PIN de acesso (4 a 6 números)"
+                        className="w-full px-2.5 py-1.5 border border-[#e3e3e3] rounded-lg text-xs bg-white outline-none"
+                      />
                       <button
                         onClick={() => {
                           const n = (document.getElementById("novoVendedorNome") as HTMLInputElement)?.value;
                           const c = (document.getElementById("novoVendedorCargo") as HTMLInputElement)?.value;
                           const a = (document.getElementById("novoVendedorAssinatura") as HTMLTextAreaElement)?.value;
+                          const p = (document.getElementById("novoVendedorPin") as HTMLInputElement)?.value?.trim();
                           if (!n || !n.trim()) {
                             showToast("Digite o nome do vendedor");
                             return;
                           }
-                          const novoV: CrmVendedor = {
-                            id: Date.now(),
-                            nome: n.trim(),
-                            cargo: c?.trim() || "Atendente Balão",
-                            assinatura: a?.trim() || `Atenciosamente,\n*${n.trim()}* — Balão da Informática`,
-                          };
-                          setVendedores((prev) => [...prev, novoV]);
-                          setVendedorAtivoId(novoV.id);
+                          if (!/^\d{4,6}$/.test(p || "")) {
+                            showToast("O PIN precisa ter de 4 a 6 números");
+                            return;
+                          }
+                          cadastrarVendedor(
+                            {
+                              nome: n.trim(),
+                              cargo: c?.trim() || "Atendente Balão",
+                              assinatura: a?.trim() || `Atenciosamente,\n*${n.trim()}* — Balão da Informática`,
+                              pin: p!,
+                            },
+                            false
+                          );
                           (document.getElementById("novoVendedorNome") as HTMLInputElement).value = "";
                           (document.getElementById("novoVendedorCargo") as HTMLInputElement).value = "";
                           (document.getElementById("novoVendedorAssinatura") as HTMLTextAreaElement).value = "";
-                          showToast("Vendedor cadastrado com sucesso!");
+                          (document.getElementById("novoVendedorPin") as HTMLInputElement).value = "";
                         }}
                         className="w-full bg-[#0f9d58] text-white py-1.5 rounded-lg text-xs font-bold hover:bg-[#0a6e3d] cursor-pointer"
                       >
@@ -2397,23 +2553,16 @@ export default function CrmWhatsAppClient() {
                               <div className="text-[10px] text-[#5f6368]">{v.cargo || "Atendente Balão"}</div>
                             </div>
                             <div className="flex items-center gap-1.5">
+                              {String(v.id) === String(vendedorAtivoId) && (
+                                <span className="px-2.5 py-1 rounded text-xs font-bold bg-[#0f9d58] text-white">
+                                  Ativo ✓
+                                </span>
+                              )}
                               <button
                                 onClick={() => {
-                                  setVendedorAtivoId(v.id);
-                                  showToast(`Atendendo como ${v.nome}`);
-                                }}
-                                className={`px-2.5 py-1 rounded text-xs font-bold cursor-pointer ${
-                                  String(v.id) === String(vendedorAtivoId)
-                                    ? "bg-[#0f9d58] text-white"
-                                    : "bg-[#f0f2f5] text-[#202124] hover:bg-[#e3e3e3]"
-                                }`}
-                              >
-                                {String(v.id) === String(vendedorAtivoId) ? "Ativo ✓" : "Selecionar"}
-                              </button>
-                              <button
-                                onClick={() => {
-                                  if (confirm(`Remover vendedor ${v.nome}?`)) {
-                                    setVendedores((prev) => prev.filter((x) => x.id !== v.id));
+                                  if (confirm(`Remover vendedor ${v.nome}? Ele vai precisar ser recadastrado com um novo PIN.`)) {
+                                    socketRef.current?.emit("panel:remove-vendedor", { id: v.id });
+                                    if (String(v.id) === String(vendedorAtivoId)) sairDoVendedor();
                                   }
                                 }}
                                 className="text-xs text-red-500 hover:text-red-700 p-1"
