@@ -203,6 +203,14 @@ function emitChats() {
   io.emit("whatsapp:chats", store.chats);
 }
 
+function emitNotifications() {
+  io.emit("whatsapp:notifications", store.notifications);
+}
+
+function emitLabels() {
+  io.emit("whatsapp:labels", { labels: store.labels, chatLabels: store.chatLabels });
+}
+
 function emitStatusFeed() {
   io.emit("whatsapp:status-feed", store.statusFeed);
 }

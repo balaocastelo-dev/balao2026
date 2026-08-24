@@ -233,10 +233,16 @@ export default function CrmWhatsAppClient() {
     return ETIQUETAS_BASE;
   });
   // Real Database Catalog & Pricing Modes (Venda vs Custo)
+  // Catálogo busca paginado no servidor (nunca o banco inteiro) — com
+  // milhares de produtos, carregar tudo de uma vez e renderizar cada card
+  // travava o CRM inteiro assim que a aba abria (que é a aba padrão).
+  const CATALOGO_PAGE_SIZE = 30;
   const [produtosCatalogo, setProdutosCatalogo] = useState<CrmProdutoCatalogo[]>([]);
+  const [catalogoTotal, setCatalogoTotal] = useState(0);
   const [tipoPrecoCatalogo, setTipoPrecoCatalogo] = useState<"venda" | "custo">("venda");
   const [catalogoCarregando, setCatalogoCarregando] = useState(false);
   const [buscaCatalogo, setBuscaCatalogo] = useState("");
+  const [buscaCatalogoDebounced, setBuscaCatalogoDebounced] = useState("");
   const [fornecedorFiltro, setFornecedorFiltro] = useState("todos");
 
   // Context Menu State
@@ -318,14 +324,22 @@ export default function CrmWhatsAppClient() {
     }
   }, [chats, mensagens, kanbanColunas, respostas, etiquetas, vendedores, vendedorAtivoId]);
 
-  // Load Real Catalog from Database (Shared with Website)
-  const carregarCatalogoBanco = () => {
+  // Load Real Catalog from Database (Shared with Website) — paginado no
+  // servidor. Com o catálogo tendo milhares de produtos, buscar/renderizar
+  // tudo de uma vez travava o CRM inteiro assim que a aba (que é a padrão)
+  // abria. Aqui só pedimos uma página pequena, filtrada pelo termo de busca.
+  const carregarCatalogoBanco = (termo?: string) => {
     setCatalogoCarregando(true);
-    fetch(`/api/products?t=${Date.now()}`)
+    const params = new URLSearchParams({ page: "1", limit: String(CATALOGO_PAGE_SIZE) });
+    const busca = (termo ?? buscaCatalogoDebounced).trim();
+    if (busca) params.set("search", busca);
+
+    fetch(`/api/products?${params.toString()}`)
       .then((r) => r.json())
       .then((data) => {
-        if (Array.isArray(data)) {
-          const list: CrmProdutoCatalogo[] = data.map((p: any) => {
+        const rows = Array.isArray(data) ? data : Array.isArray(data?.products) ? data.products : [];
+        setCatalogoTotal(typeof data?.total === "number" ? data.total : rows.length);
+        const list: CrmProdutoCatalogo[] = rows.map((p: any) => {
             const precoNum =
               typeof p.price === "number"
                 ? p.price
@@ -358,9 +372,8 @@ export default function CrmWhatsAppClient() {
                 ? Object.entries(p.specs).map(([k, v]) => `${k}: ${v}`)
                 : [],
             };
-          });
-          setProdutosCatalogo(list);
-        }
+        });
+        setProdutosCatalogo(list);
       })
       .catch((err) => {
         console.error("Falha ao carregar produtos do banco:", err);
@@ -370,9 +383,17 @@ export default function CrmWhatsAppClient() {
       });
   };
 
+  // Busca do catálogo com debounce — evita disparar uma requisição a cada
+  // tecla digitada num campo que vai bater num banco de milhares de itens.
+  useEffect(() => {
+    const t = setTimeout(() => setBuscaCatalogoDebounced(buscaCatalogo), 350);
+    return () => clearTimeout(t);
+  }, [buscaCatalogo]);
+
   useEffect(() => {
     carregarCatalogoBanco();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [buscaCatalogoDebounced]);
 
   // Poll Real WhatsApp Status only when disconnected
   useEffect(() => {
@@ -2084,11 +2105,23 @@ export default function CrmWhatsAppClient() {
                       </select>
                     </div>
 
-                    {produtosCatalogo.length === 0 ? (
+                    {catalogoTotal > CATALOGO_PAGE_SIZE && (
+                      <p className="text-[10px] text-[#5f6368] px-0.5">
+                        Mostrando {produtosCatalogo.length} de {catalogoTotal.toLocaleString("pt-BR")} produtos — use a busca pra encontrar um específico.
+                      </p>
+                    )}
+
+                    {catalogoCarregando ? (
                       <div className="text-center py-8 bg-[#f9fafb] rounded-xl border border-dashed border-[#e3e3e3]">
-                        <p className="text-xs text-[#5f6368]">Nenhum produto cadastrado no banco de dados.</p>
+                        <p className="text-xs text-[#5f6368]">Carregando produtos…</p>
+                      </div>
+                    ) : produtosCatalogo.length === 0 ? (
+                      <div className="text-center py-8 bg-[#f9fafb] rounded-xl border border-dashed border-[#e3e3e3]">
+                        <p className="text-xs text-[#5f6368]">
+                          {buscaCatalogo ? "Nenhum produto encontrado para essa busca." : "Nenhum produto cadastrado no banco de dados."}
+                        </p>
                         <button
-                          onClick={carregarCatalogoBanco}
+                          onClick={() => carregarCatalogoBanco()}
                           className="mt-2 bg-[#0f9d58] text-white px-3 py-1.5 rounded-lg text-xs font-bold"
                         >
                           🔄 Sincronizar com o Site
@@ -2098,14 +2131,13 @@ export default function CrmWhatsAppClient() {
                       <div className="space-y-2.5">
                         {produtosCatalogo
                           .filter((p) => {
-                            const matchBusca =
-                              !buscaCatalogo ||
-                              p.nome.toLowerCase().includes(buscaCatalogo.toLowerCase()) ||
-                              p.categoria.toLowerCase().includes(buscaCatalogo.toLowerCase());
-                            const matchFornec =
+                            // A busca por nome/categoria já roda no servidor
+                            // (carregarCatalogoBanco); aqui só filtra por
+                            // fornecedor dentro da página pequena já carregada.
+                            return (
                               fornecedorFiltro === "todos" ||
-                              (p.fornecedor || "Balão").toLowerCase() === fornecedorFiltro.toLowerCase();
-                            return matchBusca && matchFornec;
+                              (p.fornecedor || "Balão").toLowerCase() === fornecedorFiltro.toLowerCase()
+                            );
                           })
                           .map((prod) => (
                             <div
