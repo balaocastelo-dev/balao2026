@@ -392,7 +392,15 @@ export function parseProducts(text: string): Product[] {
             const rawPix = toBrString(pixSource);
             const rawPrazo = toBrString(prazoSource);
             const rawImg = item.link_foto_ultra_hd || item.image || item.imagem || "";
-            const rawGallery = Array.isArray(item.image_urls) ? item.image_urls : (item.photos || (rawImg ? [rawImg] : []));
+            // "images" é o campo real usado pelo catálogo scrapeado da KaBuM
+            // (várias fotos reais por produto) — sem checar esse campo, só a
+            // foto principal (item.image) sobrevivia e o resto da galeria
+            // real do fornecedor era descartado.
+            const rawGallery = Array.isArray(item.image_urls)
+              ? item.image_urls
+              : Array.isArray(item.images)
+              ? item.images
+              : item.photos || (rawImg ? [rawImg] : []);
             const category = item.categoria || item.category || "Hardware";
             const brand = item.marca || item.brand || "Balão.info";
             const desc = item.descricao || item.description || "";

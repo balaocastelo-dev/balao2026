@@ -166,14 +166,11 @@ export default function ImportPage() {
           });
         }
 
-        // Se só tinha 1 foto, gera variações de ângulos se for da KaBuM
-        if (gallery.length === 1 && primaryImg.includes("produtos/fotos/")) {
-          const baseUrl = primaryImg.replace(/_\d+_(gg|g|original)\.jpg$/i, "");
-          for (let angle = 1; angle <= 4; angle++) {
-            const angleUrl = `${baseUrl}_${angle}_gg.jpg`;
-            if (!gallery.includes(angleUrl)) gallery.push(angleUrl);
-          }
-        }
+        // NUNCA inventar URLs de ângulo (_1_gg.jpg, _2_gg.jpg...) quando só
+        // existe 1 foto real: a KaBuM não segue esse padrão sequencial, então
+        // essas URLs fabricadas davam 404 no WhatsApp/site — exatamente as
+        // "fotos quebradas" depois da 1ª. Só usamos fotos que vieram de
+        // verdade no catálogo (rawGallery/image_urls em parseProducts).
 
         photoCount += gallery.length;
 

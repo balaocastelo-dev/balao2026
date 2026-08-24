@@ -118,6 +118,8 @@ const whatsappState = {
 };
 let whatsappClient = null;
 let isInitializingClient = false;
+let initializingSince = null;
+let lastProgressAt = Date.now();
 
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
@@ -1084,6 +1086,7 @@ function buildWhatsAppClient() {
 
 function attachWhatsAppClientEvents(client) {
   client.on("qr", async (qr) => {
+    lastProgressAt = Date.now();
     console.log("[whatsapp] QR Code recebido! Gerando imagem...");
     whatsappState.status = "qr";
     whatsappState.connected = false;
@@ -1099,12 +1102,14 @@ function attachWhatsAppClientEvents(client) {
   });
 
   client.on("loading_screen", (percent, message) => {
+    lastProgressAt = Date.now();
     console.log(`[whatsapp] Carregando tela: ${percent}% - ${message}`);
     whatsappState.status = "loading";
     emitState();
   });
 
   client.on("authenticated", () => {
+    lastProgressAt = Date.now();
     console.log("[whatsapp] Sessão autenticada!");
     whatsappState.status = "authenticated";
     whatsappState.connected = true;
@@ -1116,6 +1121,7 @@ function attachWhatsAppClientEvents(client) {
   });
 
   client.on("ready", async () => {
+    lastProgressAt = Date.now();
     console.log("[whatsapp] WhatsApp cliente conectado e pronto!");
     whatsappState.status = "ready";
     whatsappState.connected = true;
@@ -1130,6 +1136,7 @@ function attachWhatsAppClientEvents(client) {
   });
 
   client.on("auth_failure", (message) => {
+    lastProgressAt = Date.now();
     console.error("[whatsapp] Falha de autenticação:", message);
     whatsappState.status = "auth_failure";
     whatsappState.connected = false;
@@ -1138,9 +1145,13 @@ function attachWhatsAppClientEvents(client) {
     whatsappState.rawQr = null;
     emitState();
     emitToast(`Falha na autenticação: ${message}`);
+    // Sessão local corrompida/expirada: limpar e gerar QR novo automaticamente
+    // em vez de ficar travado exigindo reset manual.
+    setTimeout(() => initializeWhatsAppClient({ resetSession: true }), 3000);
   });
 
   client.on("disconnected", (reason) => {
+    lastProgressAt = Date.now();
     console.log(`[whatsapp] Desconectado: ${reason}`);
     whatsappState.status = "disconnected";
     whatsappState.connected = false;
@@ -1212,9 +1223,14 @@ function attachWhatsAppClientEvents(client) {
 }
 
 async function initializeWhatsAppClient(options = {}) {
-  const { resetSession = false } = options;
-  if (isInitializingClient) return;
+  const { resetSession = false, force = false } = options;
+  // "force" existe para ações explícitas do usuário (botão de reconectar/sair)
+  // e para o watchdog: sem isso, uma inicialização travada deixava o botão de
+  // reset completamente mudo (o guard nunca liberava sozinho).
+  if (isInitializingClient && !force) return;
   isInitializingClient = true;
+  initializingSince = Date.now();
+  lastProgressAt = Date.now();
 
   try {
     whatsappState.status = "initializing";
@@ -1255,14 +1271,55 @@ async function initializeWhatsAppClient(options = {}) {
     whatsappState.connected = false;
     whatsappState.qrCode = null;
     emitState();
-    emitToast("Falha ao iniciar o cliente do WhatsApp.");
+    emitToast("Falha ao iniciar o cliente do WhatsApp. Tentando novamente...");
+    // Antes disso, uma falha aqui (Puppeteer/Chrome instável, timeout de rede)
+    // deixava o painel travado pra sempre sem QR e sem retry automático.
+    setTimeout(() => initializeWhatsAppClient({ resetSession: false }), 8000);
   } finally {
     isInitializingClient = false;
+    initializingSince = null;
   }
 }
 
+// Watchdog: garante que o QR/sessão nunca fica travado sem se recuperar
+// sozinho — nem numa inicialização que trava no meio, nem num estado morto
+// (desconectado, sem client, sem nenhuma tentativa em andamento).
+const WATCHDOG_INTERVAL_MS = 20000;
+const WATCHDOG_STUCK_INIT_MS = 45000;
+const WATCHDOG_STUCK_PROGRESS_MS = 90000;
+
+setInterval(() => {
+  const now = Date.now();
+
+  if (isInitializingClient && initializingSince && now - initializingSince > WATCHDOG_STUCK_INIT_MS) {
+    console.warn("[whatsapp][watchdog] Inicialização travada há mais de 45s — forçando reinício.");
+    isInitializingClient = false;
+    initializeWhatsAppClient({ resetSession: false, force: true });
+    return;
+  }
+
+  if (!isInitializingClient && !whatsappState.connected && !whatsappClient) {
+    console.warn("[whatsapp][watchdog] Sem cliente ativo e desconectado — reiniciando.");
+    initializeWhatsAppClient({ resetSession: false });
+    return;
+  }
+
+  if (
+    !isInitializingClient &&
+    !whatsappState.connected &&
+    whatsappState.status !== "ready" &&
+    now - lastProgressAt > WATCHDOG_STUCK_PROGRESS_MS
+  ) {
+    console.warn(`[whatsapp][watchdog] Sem progresso há mais de ${WATCHDOG_STUCK_PROGRESS_MS / 1000}s (status=${whatsappState.status}) — forçando novo QR.`);
+    initializeWhatsAppClient({ resetSession: true, force: true });
+  }
+}, WATCHDOG_INTERVAL_MS);
+
 async function resetWhatsAppSession() {
-  return initializeWhatsAppClient({ resetSession: true });
+  // force:true porque é sempre uma ação explícita (botão "Gerar Novo QR
+  // Code"/"Sair"): tem que funcionar mesmo se uma inicialização anterior
+  // ficou presa, senão o botão de reset vira um no-op silencioso.
+  return initializeWhatsAppClient({ resetSession: true, force: true });
 }
 
 initializeWhatsAppClient();

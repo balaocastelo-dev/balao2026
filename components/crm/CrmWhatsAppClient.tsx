@@ -674,6 +674,10 @@ export default function CrmWhatsAppClient() {
     if (confirm("Desconectar o WhatsApp atual e gerar um novo QR Code para parear?")) {
       if (socketRef.current?.connected) {
         socketRef.current.emit("panel:reset-session");
+      } else {
+        // Sem socket, o clique não faria nada no servidor — garante que o
+        // reset é disparado mesmo com o painel momentaneamente desconectado.
+        fetch(`${serverUrl}/api/reset-session`, { method: "POST" }).catch(() => {});
       }
       setEstado("initializing");
       setQrCodeData(null);
@@ -1428,12 +1432,14 @@ export default function CrmWhatsAppClient() {
                   setEstado("initializing");
                   if (socketRef.current?.connected) {
                     socketRef.current.emit("panel:reset-session");
+                    showToast("Gerando novo QR Code oficial do WhatsApp...");
+                  } else {
+                    fetch(`${serverUrl}/api/reset-session`, { method: "POST" })
+                      .catch(() => fetch("/api/crm/status", { cache: "no-store" }))
+                      .then(() => {
+                        showToast("Gerando novo QR Code oficial do WhatsApp...");
+                      });
                   }
-                  fetch(`${serverUrl}/api/reset-session`, { method: "POST" })
-                    .catch(() => fetch("/api/crm/status", { cache: "no-store" }))
-                    .then(() => {
-                      showToast("Gerando novo QR Code oficial do WhatsApp...");
-                    });
                 }}
                 className="bg-[#0f9d58] hover:bg-[#0a6e3d] text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors cursor-pointer shadow-xs"
               >
