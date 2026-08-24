@@ -38,6 +38,8 @@ function mapTursoProduct(r: Record<string, unknown>): Product {
     availability: r.availability ? String(r.availability) : undefined,
     source_url: r.source_url ? String(r.source_url) : undefined,
     created_at: r.created_at ? String(r.created_at) : undefined,
+    cost: r.cost != null && Number(r.cost) > 0 ? Number(r.cost) : undefined,
+    supplier: r.supplier ? String(r.supplier) : undefined,
   } as Product;
 }
 
@@ -188,15 +190,17 @@ export async function saveProducts(products: Product[]) {
       description: p.description || null,
       specs: p.specs || null,
       category: p.category,
-      slug: p.slug || p.name.toLowerCase().replace(/\s+/g, '-') + '-' + Math.random().toString(36).substring(2, 7)
+      slug: p.slug || p.name.toLowerCase().replace(/\s+/g, '-') + '-' + Math.random().toString(36).substring(2, 7),
+      cost: p.cost != null && Number(p.cost) > 0 ? Number(p.cost) : null,
+      supplier: p.supplier || null,
     }));
 
     console.log(`[saveProducts] Saving ${dbProducts.length} products via Turso...`);
 
     for (const p of dbProducts) {
       await turso.execute({
-        sql: `INSERT INTO products (id, name, price, price_card, discount_pix, installment, brand, rating, availability, source_url, image, image_urls, product_url, description, specs, category, slug)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        sql: `INSERT INTO products (id, name, price, price_card, discount_pix, installment, brand, rating, availability, source_url, image, image_urls, product_url, description, specs, category, slug, cost, supplier)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
               ON CONFLICT(id) DO UPDATE SET
                 name = excluded.name,
                 price = excluded.price,
@@ -213,14 +217,16 @@ export async function saveProducts(products: Product[]) {
                 description = excluded.description,
                 specs = excluded.specs,
                 category = excluded.category,
-                slug = excluded.slug`,
+                slug = excluded.slug,
+                cost = excluded.cost,
+                supplier = excluded.supplier`,
         args: [
           p.id, p.name, p.price, p.price_card, p.discount_pix, p.installment, p.brand, p.rating, p.availability, p.source_url, p.image,
           Array.isArray(p.image_urls) ? JSON.stringify(p.image_urls) : p.image_urls,
           p.product_url,
           p.description,
           p.specs && typeof p.specs === 'object' ? JSON.stringify(p.specs) : p.specs,
-          p.category, p.slug,
+          p.category, p.slug, p.cost, p.supplier,
         ],
       });
     }
@@ -242,8 +248,8 @@ export async function createProduct(product: Partial<Product>) {
     const now = new Date().toISOString();
 
     await turso.execute({
-      sql: `INSERT INTO products (id, name, price, image, image_urls, product_url, description, specs, category, slug, video_url, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      sql: `INSERT INTO products (id, name, price, image, image_urls, product_url, description, specs, category, slug, video_url, created_at, cost, supplier)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       args: [
         id,
         product.name ?? '',
@@ -257,6 +263,8 @@ export async function createProduct(product: Partial<Product>) {
         product.slug ?? (product.name || 'produto').toLowerCase().replace(/\s+/g, '-'),
         product.video_url ?? null,
         now,
+        product.cost != null && Number(product.cost) > 0 ? Number(product.cost) : null,
+        product.supplier ?? null,
       ],
     });
 
@@ -282,6 +290,8 @@ export async function updateProduct(id: string, updates: Partial<Product>) {
     if (updates.category !== undefined) dbUpdates.category = updates.category;
     if (updates.slug !== undefined) dbUpdates.slug = updates.slug;
     if (updates.video_url !== undefined) dbUpdates.video_url = updates.video_url;
+    if (updates.cost !== undefined) dbUpdates.cost = updates.cost;
+    if (updates.supplier !== undefined) dbUpdates.supplier = updates.supplier;
 
     const keys = Object.keys(dbUpdates);
     if (keys.length === 0) return getProductById(id);

@@ -88,6 +88,16 @@ function formatAvatarUrl(url: string | null | undefined): string | null {
   return url;
 }
 
+// Resolve caminhos relativos de imagem (/uploads/...) em URL absoluta,
+// pois o whatsapp-server só consegue anexar mídia via MessageMedia.fromUrl
+// quando recebe uma URL http(s) completa.
+function resolveImagemAbsoluta(url: string | null | undefined): string {
+  if (!url) return "";
+  if (url.startsWith("http") || url.startsWith("data:")) return url;
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://www.balao.info";
+  return `${origin}${url.startsWith("/") ? "" : "/"}${url}`;
+}
+
 export default function CrmWhatsAppClient() {
   const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -341,7 +351,7 @@ export default function CrmWhatsAppClient() {
               fornecedor,
               precoFormatado: precoFmt,
               categoria: p.category || "Informática",
-              imagem: p.image || p.image_urls?.[0] || "",
+              imagem: resolveImagemAbsoluta(p.image || p.image_urls?.[0] || ""),
               specs: Array.isArray(p.specs)
                 ? p.specs
                 : typeof p.specs === "object" && p.specs
@@ -573,6 +583,10 @@ export default function CrmWhatsAppClient() {
 
     socket.on("whatsapp:toast", (payload: any) => {
       if (payload?.message) showToast(payload.message);
+    });
+
+    socket.on("whatsapp:disparo-status", (payload: any) => {
+      setDisparoAtivo(Boolean(payload?.ativo));
     });
 
     return () => {
@@ -941,7 +955,8 @@ export default function CrmWhatsAppClient() {
       )
     );
 
-    // Disparar envio via Socket.IO
+    // Disparar envio via Socket.IO — HTTP só roda se o socket estiver caído,
+    // senão o cliente recebe o produto em dobro.
     if (socketRef.current?.connected) {
       socketRef.current.emit("panel:send-product", {
         chatId: chatSelecionado.id,
@@ -950,10 +965,7 @@ export default function CrmWhatsAppClient() {
         price: precoFinal,
         obs: obsCustom,
       });
-    }
-
-    // Fallback HTTP
-    fetch(`${serverUrl}/api/enviar-produto`, {
+    } else fetch(`${serverUrl}/api/enviar-produto`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -1010,7 +1022,8 @@ export default function CrmWhatsAppClient() {
       )
     );
 
-    // Disparar via Socket.IO
+    // Disparar via Socket.IO — HTTP só roda se o socket estiver caído,
+    // senão a mensagem chega em dobro pro cliente.
     if (socketRef.current?.connected) {
       socketRef.current.emit("panel:send-message", {
         number: chatSelecionado.numero,
@@ -1018,10 +1031,7 @@ export default function CrmWhatsAppClient() {
         chatId: chatSelecionado.id,
         replyTo: msgRespondendo?.id || undefined,
       });
-    }
-
-    // Fallback HTTP para garantir entrega
-    fetch(`${serverUrl}/api/enviar`, {
+    } else fetch(`${serverUrl}/api/enviar`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -1171,6 +1181,7 @@ export default function CrmWhatsAppClient() {
     const contactNumber = statusSelecionadoFeed.contactNumber || statusSelecionadoFeed.id.replace(/@.*$/, "");
     const chatId = statusSelecionadoFeed.contactId || `${contactNumber}@c.us`;
 
+    // HTTP só roda se o socket estiver caído, senão o cliente recebe em dobro.
     if (socketRef.current?.connected) {
       socketRef.current.emit("panel:reply-status", {
         contactNumber,
@@ -1178,9 +1189,7 @@ export default function CrmWhatsAppClient() {
         statusSnippet: statusItem?.body || "Foto/Mídia do Status",
         text: statusComentario.trim(),
       });
-    }
-
-    fetch(`${serverUrl}/api/enviar`, {
+    } else fetch(`${serverUrl}/api/enviar`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -2488,8 +2497,10 @@ export default function CrmWhatsAppClient() {
                           socketRef.current.emit("panel:send-segmented", {
                             recipients,
                             text: disparoTexto,
+                            intervalMin: disparoIntervalo,
+                            intervalMax: disparoIntervaloMax,
                           });
-                        }
+                        } else setDisparoAtivo(false);
                         showToast(`Disparo iniciado para ${elegiveis.length} contatos!`);
                       }}
                       disabled={disparoAtivo || chats.filter((c) => !c.optOut).length === 0}
@@ -3312,9 +3323,7 @@ export default function CrmWhatsAppClient() {
                     caption: docLegenda.trim(),
                     sendMediaAsDocument: true,
                   });
-                }
-
-                fetch(`${serverUrl}/api/enviar-documento`, {
+                } else fetch(`${serverUrl}/api/enviar-documento`, {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
@@ -3404,9 +3413,7 @@ export default function CrmWhatsAppClient() {
                     mimetype: fotoUrl.startsWith("data:") ? fotoUrl.split(";")[0].replace("data:", "") : "image/jpeg",
                     caption: legendaFinal,
                   });
-                }
-
-                fetch(`${serverUrl}/api/enviar-foto`, {
+                } else fetch(`${serverUrl}/api/enviar-foto`, {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({

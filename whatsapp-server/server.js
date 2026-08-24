@@ -209,6 +209,14 @@ function emitToast(message) {
   io.emit("whatsapp:toast", { message });
 }
 
+function emitDisparoStatus(ativo) {
+  io.emit("whatsapp:disparo-status", { ativo });
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 function rebuildNotifications() {
   store.notifications = store.chats
     .filter((chat) => chat.unreadCount > 0)
@@ -1353,9 +1361,17 @@ app.post(["/api/enviar-produto", "/api/crm/enviar-produto"], async (req, res) =>
     if (!targetChat || !prod.nome) {
       return res.status(400).json({ ok: false, erro: "Chat e produto são obrigatórios." });
     }
+    const precoFinal = Number(price || prod.preco || 0);
+    const custo = Number(prod.custo || 0);
+    if (custo > 0 && precoFinal <= custo) {
+      return res.status(400).json({
+        ok: false,
+        erro: `Preço de envio (R$ ${precoFinal.toFixed(2)}) não pode ser menor ou igual ao custo (R$ ${custo.toFixed(2)}).`,
+      });
+    }
     const obsTxt = obs ? `\n\n_Obs: ${obs}_` : "";
     const specs = prod.specs?.length ? `\n• ${prod.specs.join("\n• ")}` : "";
-    const precoFmt = Number(price || prod.preco || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 });
+    const precoFmt = precoFinal.toLocaleString("pt-BR", { minimumFractionDigits: 2 });
     const text = `⚡ *Oferta Balão da Informática*\n*${prod.nome}*\n\n💵 *Preço Especial:* *R$ ${precoFmt}*${specs}${obsTxt}\n\n📍 Pronta entrega na loja do Castelo Campinas!\nPara reservar ou tirar dúvidas, é só responder aqui! 🎈`;
 
     let mediaSent = false;
@@ -1365,7 +1381,9 @@ app.post(["/api/enviar-produto", "/api/crm/enviar-produto"], async (req, res) =>
         const chatId = targetChat.includes("@") ? targetChat : `${normalizeNumber(targetChat)}@c.us`;
         await whatsappClient.sendMessage(chatId, media, { caption: text });
         mediaSent = true;
-      } catch (e) {}
+      } catch (e) {
+        console.warn("Falha ao anexar foto do produto (via /api/enviar-produto), enviando só texto:", e.message);
+      }
     }
 
     if (!mediaSent) {
@@ -1717,26 +1735,43 @@ io.on("connection", (socket) => {
   });
 
   socket.on("panel:send-segmented", async (payload) => {
-    try {
-      const recipients = Array.isArray(payload.recipients) ? payload.recipients : [];
-      const text = String(payload.text || "").trim();
-      if (!recipients.length || !text) return;
+    const recipients = Array.isArray(payload.recipients) ? payload.recipients : [];
+    const text = String(payload.text || "").trim();
+    if (!recipients.length || !text) return;
 
-      for (const recipient of recipients.slice(0, 100)) {
-        const number = normalizeNumber(recipient.number || "");
+    // Intervalo aleatório entre envios para não parecer disparo automatizado
+    // (evita banimento do número). Nunca deixar rodar sem pausa.
+    const intervalMin = Math.max(15, Number(payload.intervalMin) || 30) * 1000;
+    const intervalMax = Math.max(intervalMin, Number(payload.intervalMax) || 60000);
+
+    emitDisparoStatus(true);
+    try {
+      const lista = recipients.slice(0, 100);
+      for (let i = 0; i < lista.length; i++) {
+        const number = normalizeNumber(lista[i].number || "");
         if (!number) continue;
-        await sendDirectMessage({
-          number,
-          text,
-          signatureId: payload.signatureId || null,
-          chatId: recipient.chatId || null,
-        });
+        try {
+          await sendDirectMessage({
+            number,
+            text,
+            signatureId: payload.signatureId || null,
+            chatId: lista[i].chatId || null,
+          });
+        } catch (sendError) {
+          console.error(`Falha ao enviar para ${number} no disparo segmentado:`, sendError.message);
+        }
+        if (i < lista.length - 1) {
+          const espera = intervalMin + Math.random() * (intervalMax - intervalMin);
+          await sleep(espera);
+        }
       }
 
       emitToast(`Envio segmentado concluido para ${Math.min(recipients.length, 100)} clientes.`);
     } catch (error) {
       console.error("Falha no envio segmentado:", error);
       emitToast("Falha no envio segmentado.");
+    } finally {
+      emitDisparoStatus(false);
     }
   });
 
@@ -1792,9 +1827,15 @@ io.on("connection", (socket) => {
       const number = normalizeNumber(payload.number || payload.chatId || "");
       const chatId = payload.chatId || (number ? `${number}@c.us` : null);
       const prod = payload.product || {};
+      const precoFinal = Number(payload.price || prod.preco || 0);
+      const custo = Number(prod.custo || 0);
+      if (custo > 0 && precoFinal <= custo) {
+        emitToast(`⛔ Envio bloqueado: preço (R$ ${precoFinal.toFixed(2)}) menor ou igual ao custo (R$ ${custo.toFixed(2)}).`);
+        return;
+      }
       const obs = payload.obs ? `\n\n_Obs: ${payload.obs}_` : "";
       const specs = prod.specs?.length ? `\n• ${prod.specs.join("\n• ")}` : "";
-      const precoFmt = Number(payload.price || prod.preco || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 });
+      const precoFmt = precoFinal.toLocaleString("pt-BR", { minimumFractionDigits: 2 });
 
       const text = `⚡ *Oferta Balão da Informática*\n*${prod.nome}*\n\n💵 *Preço Especial:* *R$ ${precoFmt}*${specs}${obs}\n\n📍 Pronta entrega na loja do Castelo Campinas!\nPara reservar ou tirar dúvidas, é só responder aqui! 🎈`;
 

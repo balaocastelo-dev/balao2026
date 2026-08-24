@@ -368,8 +368,29 @@ export function parseProducts(text: string): Product[] {
         if (Array.isArray(jsonList)) {
           for (const item of jsonList) {
             const rawName = item.titulo || item.name || item.title || "";
-            const rawPix = item.preco_custo_pix || item.preco_a_vista_pix || item.price || item.priceWithDiscount || "";
-            const rawPrazo = item.preco_custo_prazo || item.preco_parcelado || item.price_card || "";
+            // Prioriza o preço COM desconto PIX (o que a loja de fato paga ao
+            // fornecedor) sobre o "price" cheio/de tabela — usar o price cheio
+            // como custo infla a margem real e compõe markup sobre markup.
+            const pixSource =
+              item.preco_custo_pix ??
+              item.preco_a_vista_pix ??
+              item.price_with_discount ??
+              item.priceWithDiscount ??
+              item.price ??
+              "";
+            const prazoSource = item.preco_custo_prazo ?? item.preco_parcelado ?? item.price_card ?? "";
+            // Números vindos direto do JSON usam ponto como separador decimal
+            // (ex: 6999.99). O parser abaixo assume formato BR (1.234,56) —
+            // sem essa conversão o ponto decimal é lido como milhar e infla o
+            // preço em 100x (6999.99 -> 699999).
+            const toBrString = (v: unknown): string => {
+              if (typeof v === "number" && isFinite(v)) {
+                return v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+              }
+              return String(v ?? "");
+            };
+            const rawPix = toBrString(pixSource);
+            const rawPrazo = toBrString(prazoSource);
             const rawImg = item.link_foto_ultra_hd || item.image || item.imagem || "";
             const rawGallery = Array.isArray(item.image_urls) ? item.image_urls : (item.photos || (rawImg ? [rawImg] : []));
             const category = item.categoria || item.category || "Hardware";

@@ -90,15 +90,44 @@ export default function ImportPage() {
     setMessage(`${products.length} produtos carregados com sucesso de "${sourceName}"! Execute os Agentes de IA ou confirme a margem de lucro.`);
   };
 
-  // Cálculo da Margem Dinâmica Inteligente (40% a 120%)
-  const calculateDynamicMarkup = (custo: number): number => {
-    if (custo <= 50) return 120;
-    if (custo >= 6000) return 40;
-    const logMin = Math.log10(50);
-    const logMax = Math.log10(6000);
-    const logPreco = Math.log10(custo);
-    const t = (logPreco - logMin) / (logMax - logMin);
-    return Math.max(40, Math.min(120, Math.round(120 - t * (120 - 40))));
+  // Faixa universal de markup: nunca abaixo de 33% (senão vende no custo/prejuízo)
+  // nem acima de 200% (senão fica fora da realidade de mercado).
+  const MARKUP_MIN = 33;
+  const MARKUP_MAX = 200;
+
+  // Teto de custo (R$) a partir do qual a categoria já atinge o markup mínimo.
+  // Categorias competitivas/caras (notebook, GPU, PC gamer) batem o piso de 33%
+  // logo cedo — item caro nessas categorias não aguenta margem alta.
+  // Categorias de acessório barato (cabo, mousepad, adaptador) só encostariam
+  // no piso em valores absurdamente altos, então praticamente sempre ficam
+  // perto do teto de 200%.
+  const CATEGORIA_TETO_CUSTO: { teste: RegExp; teto: number }[] = [
+    { teste: /notebook|laptop|pc\s*gamer|computador\s*gamer|placa\s*de\s*v[ií]deo|\bgpu\b|geforce|radeon|processador|\bcpu\b/i, teto: 600 },
+    { teste: /placa[-\s]*m[ãa]e|monitor|\bssd\b|mem[óo]ria|\bram\b|fonte|gabinete|water\s*cooler|nobreak/i, teto: 1200 },
+    { teste: /teclado|\bmouse\b|headset|fone\s*de\s*ouvido|webcam|console|joystick|controle|cadeira\s*gamer|impressora|hd\b|disco\s*r[íi]gido|cooler/i, teto: 2000 },
+    { teste: /cabo|adaptador|mousepad|suporte|pel[íi]cula|capa|carregador|pilha|bateria\s*port[áa]til|hub\s*usb|filtro|escova|gift\s*card/i, teto: 5000 },
+  ];
+  const CATEGORIA_TETO_PADRAO = 1500;
+
+  const getTetoPorCategoria = (categoria: string): number => {
+    const texto = String(categoria || "");
+    const match = CATEGORIA_TETO_CUSTO.find((c) => c.teste.test(texto));
+    return match ? match.teto : CATEGORIA_TETO_PADRAO;
+  };
+
+  // Cálculo da Margem Dinâmica Inteligente: quanto mais barato o item (e quanto
+  // menos competitiva/mais acessória a categoria), maior o markup — sempre
+  // dentro da faixa 33% a 200%.
+  const calculateDynamicMarkup = (custo: number, categoria: string = ""): number => {
+    const piso = 15; // abaixo disso, sempre markup máximo
+    const teto = getTetoPorCategoria(categoria);
+    if (custo <= piso) return MARKUP_MAX;
+    if (custo >= teto) return MARKUP_MIN;
+    const logMin = Math.log10(piso);
+    const logMax = Math.log10(teto);
+    const logCusto = Math.log10(custo);
+    const t = (logCusto - logMin) / (logMax - logMin);
+    return Math.max(MARKUP_MIN, Math.min(MARKUP_MAX, Math.round(MARKUP_MAX - t * (MARKUP_MAX - MARKUP_MIN))));
   };
 
   // Processador com Centenas de Agentes de IA em Paralelo
@@ -187,19 +216,28 @@ export default function ImportPage() {
   // Preview com aplicação da Margem de Preço Selecionada
   const getPreviewProducts = () => {
     return parsedProducts.map((p: Product) => {
+      // "R$" no regex sem escapar o "$" era interpretado como fim-de-string
+      // (nunca casava "R$ X"), então parseFloat sempre recebia "R$ ..." e
+      // retornava NaN -> todo produto caía no fallback de R$50 de custo,
+      // ignorando o preço real do fornecedor.
       let custoNum = parseFloat(
-        String(p.price).replace(/R$/gi, "").replace(/\./g, "").replace(",", ".").trim()
+        String(p.price).replace(/R\$/gi, "").replace(/\./g, "").replace(",", ".").trim()
       );
       if (isNaN(custoNum) || custoNum <= 0) custoNum = 50;
 
+      const finalCategory = selectedCategoryMode === "override" ? overrideCategory : (p.category || "Hardware");
+
       let pctAumento = 0;
       if (pricingMode === "dynamic_curve") {
-        pctAumento = calculateDynamicMarkup(custoNum);
+        pctAumento = calculateDynamicMarkup(custoNum, finalCategory);
       } else if (pricingMode === "fixed_margin") {
         pctAumento = fixedMargin;
       } else {
         pctAumento = 0;
       }
+      // Regra de negócio: nenhum produto pode sair com aumento fora de 33%-200%,
+      // nem mesmo no modo "manter preço exato" — isso evitaria vender no custo.
+      pctAumento = Math.max(MARKUP_MIN, Math.min(MARKUP_MAX, pctAumento));
 
       const precoVendaPixNum = custoNum * (1 + pctAumento / 100);
       const precoVendaPrazoNum = precoVendaPixNum * 1.12;
@@ -209,12 +247,11 @@ export default function ImportPage() {
       const cardFormatted = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(precoVendaPrazoNum);
       const installmentStr = `10x de ${new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(parcelaNum)} sem juros`;
 
-      const finalCategory = selectedCategoryMode === "override" ? overrideCategory : (p.category || "Hardware");
-
       return {
         ...p,
         category: finalCategory,
         custoOriginal: p.price,
+        custoNum,
         newPrice: pixFormatted,
         newPriceCard: cardFormatted,
         newInstallment: installmentStr,
@@ -246,6 +283,8 @@ export default function ImportPage() {
       image_urls: Array.isArray(p.image_urls) && p.image_urls.length > 0 ? p.image_urls : [p.image || "/logo.png"],
       product_url: p.product_url || `/product/${p.id}`,
       description: p.description || "",
+      cost: p.custoNum || null,
+      supplier: p.supplier || "KaBuM! (1P)",
       specs: {
         ...(p.specs || {}),
         custo_origem: p.custoOriginal,
@@ -550,7 +589,7 @@ export default function ImportPage() {
                     onChange={() => setPricingMode("dynamic_curve")}
                     className="text-red-600"
                   />
-                  <span>Curva Inteligente Balão (40% a 120%)</span>
+                  <span>Curva Inteligente Balão (33% a 200%, por categoria e preço)</span>
                 </label>
                 <label className="flex items-center gap-2 p-2.5 rounded-xl border border-gray-200 hover:bg-gray-50 cursor-pointer text-xs font-semibold text-gray-800">
                   <input
@@ -568,8 +607,8 @@ export default function ImportPage() {
                 <div className="mt-4 pt-3 border-t border-gray-100 flex items-center gap-3">
                   <input
                     type="range"
-                    min="10"
-                    max="150"
+                    min={MARKUP_MIN}
+                    max={MARKUP_MAX}
                     value={fixedMargin}
                     onChange={(e) => setFixedMargin(Number(e.target.value))}
                     className="w-full accent-red-600"
