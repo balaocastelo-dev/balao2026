@@ -622,6 +622,11 @@ async function syncRecentConversations() {
           latestMessage = messages[messages.length - 1] || chat.lastMessage || null;
         }
 
+        // "Lead" que o WhatsApp cria sozinho quando alguém clica num anúncio
+        // (Click-to-WhatsApp) mas nunca chegou a mandar mensagem nenhuma —
+        // não é cliente de verdade ainda, não deve poluir a lista.
+        if (!latestMessage) continue;
+
         const assignedLabels = typeof chat.getLabels === "function" ? await chat.getLabels().catch(() => []) : [];
         const assignedLabelNames = (assignedLabels || [])
           .map((item) => String(item?.name || "").trim())
@@ -693,8 +698,13 @@ async function syncRecentConversations() {
       }
     });
 
+    // Limpa também leads vazios que já tinham ficado salvos de sincronizações
+    // anteriores (antes dessa correção) — só mantém quem tem mensagem real
+    // registrada (no resumo do chat ou no histórico já baixado).
+    const chatIdsComMensagem = new Set(store.messages.map((m) => m.chatId));
     store.chats = Array.from(existingMap.values())
       .filter((c) => isRealDirectChatId(c.chatId))
+      .filter((c) => Boolean(c.lastMessageBody) || chatIdsComMensagem.has(c.chatId))
       .sort((a, b) => (b.lastMessageTimestamp || 0) - (a.lastMessageTimestamp || 0));
 
     rebuildNotifications();
@@ -1526,8 +1536,25 @@ app.post(["/api/enviar-produto", "/api/crm/enviar-produto"], async (req, res) =>
       try {
         const media = await MessageMedia.fromUrl(prod.imagem, { unsafeMime: true });
         const chatId = targetChat.includes("@") ? targetChat : `${normalizeNumber(targetChat)}@c.us`;
-        await whatsappClient.sendMessage(chatId, media, { caption: text });
+        const sentMsg = await resolveAndSendMessage(chatId, media, { caption: text });
         mediaSent = true;
+        // Guarda a URL da foto do produto no histórico — sem isso a imagem
+        // some do chat assim que a conversa ressincroniza (o listener
+        // genérico de "message_create" não sabe qual foi a imagem enviada).
+        storeMessage({
+          id: sentMsg?.id?._serialized || `msg-produto-${Date.now()}`,
+          chatId,
+          from: "me",
+          to: chatId,
+          body: text,
+          direction: "out",
+          timestamp: Date.now(),
+          hasMedia: true,
+          mediaType: "image",
+          mediaUrl: prod.imagem,
+          realNumber: extractRealNumber(chatId),
+          displayNumber: extractRealNumber(chatId),
+        });
       } catch (e) {
         console.warn("Falha ao anexar foto do produto (via /api/enviar-produto), enviando só texto:", e.message);
       }
@@ -2063,8 +2090,24 @@ io.on("connection", (socket) => {
       if (prod.imagem && prod.imagem.startsWith("http")) {
         try {
           const media = await MessageMedia.fromUrl(prod.imagem, { unsafeMime: true });
-          await whatsappClient.sendMessage(chatId, media, { caption: text });
+          const sentMsg = await resolveAndSendMessage(chatId, media, { caption: text });
           mediaSent = true;
+          // Mesmo motivo do endpoint REST: guarda a mediaUrl explicitamente
+          // pra foto do produto não sumir do histórico na próxima sincronização.
+          storeMessage({
+            id: sentMsg?.id?._serialized || `msg-produto-${Date.now()}`,
+            chatId,
+            from: "me",
+            to: chatId,
+            body: text,
+            direction: "out",
+            timestamp: Date.now(),
+            hasMedia: true,
+            mediaType: "image",
+            mediaUrl: prod.imagem,
+            realNumber: extractRealNumber(chatId),
+            displayNumber: extractRealNumber(chatId),
+          });
         } catch (e) {
           console.warn("Falha ao enviar imagem do produto via URL, enviando como texto:", e.message);
         }
