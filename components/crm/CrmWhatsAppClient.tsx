@@ -813,6 +813,13 @@ export default function CrmWhatsAppClient() {
     };
   }, [vendedorAtivoId]);
 
+  // Marcar chat como visto automaticamente ao selecionar
+  useEffect(() => {
+    if (chatSelecionadoId && socketRef.current?.connected) {
+      socketRef.current.emit("panel:mark-seen", { chatId: chatSelecionadoId });
+    }
+  }, [chatSelecionadoId]);
+
   // Live URL link preview on typing
   useEffect(() => {
     const urlMatch = campoTexto.match(/https?:\/\/[^\s]+/i);
@@ -1119,6 +1126,95 @@ export default function CrmWhatsAppClient() {
   // aquilo realmente chegou ao WhatsApp do cliente.
   const atualizarStatusMensagem = (id: string, status: CrmMensagem["status"]) => {
     setMensagens((prev) => prev.map((m) => (m.id === id ? { ...m, status } : m)));
+  };
+
+  // Enviar reação
+  const enviarReacao = (messageId: string, reaction: string) => {
+    if (socketRef.current?.connected) {
+      socketRef.current.emit("panel:send-reaction", { messageId, reaction });
+    }
+  };
+
+  // Enviar localização
+  const enviarLocalizacao = () => {
+    if (!chatSelecionado) {
+      showToast("Selecione uma conversa primeiro!");
+      return;
+    }
+    if (!navigator.geolocation) {
+      showToast("Geolocalização não suportada pelo navegador.");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        if (socketRef.current?.connected) {
+          socketRef.current.emit("panel:send-location", {
+            chatId: chatSelecionado.id,
+            lat: latitude,
+            lng: longitude,
+            description: "Localização atual",
+          });
+        }
+      },
+      () => showToast("Não foi possível obter sua localização.")
+    );
+  };
+
+  // Criar enquete
+  const [modalEnqueteAberto, setModalEnqueteAberto] = useState(false);
+  const [enquetePergunta, setEnquetePergunta] = useState("");
+  const [enqueteOpcoes, setEnqueteOpcoes] = useState(["", ""]);
+
+  const criarEnquete = () => {
+    if (!chatSelecionado || !enquetePergunta.trim()) return;
+    const opcoesLimpa = enqueteOpcoes.filter((o) => o.trim());
+    if (opcoesLimpa.length < 2) {
+      showToast("Adicione pelo menos 2 opções.");
+      return;
+    }
+    if (socketRef.current?.connected) {
+      socketRef.current.emit("panel:send-poll", {
+        chatId: chatSelecionado.id,
+        question: enquetePergunta.trim(),
+        options: opcoesLimpa,
+      });
+    }
+    setModalEnqueteAberto(false);
+    setEnquetePergunta("");
+    setEnqueteOpcoes(["", ""]);
+  };
+
+  // Buscar mensagens
+  const [buscaMensagem, setBuscaMensagem] = useState("");
+  const [resultadosBusca, setResultadosBusca] = useState<any[]>([]);
+  const [mostrarBuscaMensagem, setMostrarBuscaMensagem] = useState(false);
+
+  const buscarMensagens = (query: string) => {
+    setBuscaMensagem(query);
+    if (!query.trim() || !socketRef.current?.connected) {
+      setResultadosBusca([]);
+      return;
+    }
+    socketRef.current.emit(
+      "panel:search-messages",
+      { query, chatId: chatSelecionadoId, limit: 30 },
+      (res: any) => {
+        if (res?.ok) setResultadosBusca(res.results);
+      }
+    );
+  };
+
+  // Marcar chat como lido
+  const marcarComoLido = () => {
+    if (!chatSelecionadoId) return;
+    if (socketRef.current?.connected) {
+      socketRef.current.emit("panel:mark-seen", { chatId: chatSelecionadoId });
+      setChats((prev) =>
+        prev.map((c) => (c.id === chatSelecionadoId ? { ...c, unread: 0 } : c))
+      );
+      showToast("Conversa marcada como lida.");
+    }
   };
 
   // Enviar Produto Direto para o Chat (Sem passar pelo digitador)

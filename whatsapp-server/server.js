@@ -12,6 +12,36 @@ dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
 const app = express();
 const server = http.createServer(app);
+
+// Rota para servir mídia baixada
+app.get("/api/crm/media/:filename", (req, res) => {
+  const filename = req.params.filename;
+  const filePath = path.join(__dirname, "data", "media", filename);
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).send("Mídia não encontrada");
+  }
+  res.sendFile(filePath);
+});
+
+// Endpoint para marcar chat como visto
+app.post("/api/mark-seen", express.json(), async (req, res) => {
+  const { chatId } = req.body;
+  if (!chatId || !whatsappClient) {
+    return res.status(400).json({ ok: false, erro: "chatId ou cliente não disponível" });
+  }
+  try {
+    const chat = await whatsappClient.getChatById(chatId);
+    if (chat) {
+      await chat.sendSeen();
+      res.json({ ok: true });
+    } else {
+      res.status(404).json({ ok: false, erro: "Chat não encontrado" });
+    }
+  } catch (e) {
+    res.status(500).json({ ok: false, erro: e.message });
+  }
+});
+
 const port = Number(process.env.WHATSAPP_PANEL_PORT || 4100);
 const allowedOrigin =
   process.env.WHATSAPP_PANEL_ALLOWED_ORIGIN || "http://localhost:3000";
@@ -168,6 +198,21 @@ function loadStore() {
 }
 
 function persistStore() {
+  // Bug fix: Limitar mensagens a 2000, arquivando as mais antigas
+  if (store.messages.length > 2000) {
+    const toArchive = store.messages.slice(0, store.messages.length - 2000);
+    store.messages = store.messages.slice(-2000);
+    try {
+      const archiveDir = path.join(__dirname, "data");
+      if (!fs.existsSync(archiveDir)) fs.mkdirSync(archiveDir, { recursive: true });
+      const archiveFile = path.join(archiveDir, `messages-archive-${new Date().toISOString().slice(0, 10)}.json`);
+      const existing = fs.existsSync(archiveFile) ? JSON.parse(fs.readFileSync(archiveFile, "utf8")) : [];
+      fs.writeFileSync(archiveFile, JSON.stringify([...existing, ...toArchive], null, 2));
+    } catch (e) {
+      console.warn("[store] Falha ao arquivar mensagens:", e.message);
+    }
+  }
+
   const payload = {
     labels: store.labels,
     signatures: store.signatures,
@@ -1217,6 +1262,19 @@ function buildWhatsAppClient() {
   });
 }
 
+// Bug fix: Configurar auto-download de mídia após cliente estar pronto
+function configureAutoDownload(client) {
+  try {
+    client.setAutoDownloadPhotos(true);
+    client.setAutoDownloadVideos(true);
+    client.setAutoDownloadDocuments(true);
+    client.setAutoDownloadAudio(true);
+    console.log("[whatsapp] Auto-download de mídia ativado");
+  } catch (e) {
+    console.warn("[whatsapp] Falha ao configurar auto-download:", e.message);
+  }
+}
+
 function attachWhatsAppClientEvents(client) {
   client.on("qr", async (qr) => {
     lastProgressAt = Date.now();
@@ -1316,10 +1374,6 @@ function attachWhatsAppClientEvents(client) {
       return;
     }
 
-    // notifyName/pushname nem sempre existem (comum em contatos @lid) — nesse
-    // caso NÃO cair pro JID cru (message.from) como nome, senão o vendedor
-    // vê "273082677764270@lid" em vez de nome/telefone. Tenta a resolução
-    // completa (mesma usada na sincronização de conversas) antes de desistir.
     let contactName = message._data?.notifyName || message._data?.pushname || null;
     let realNumber = extractRealNumber(message.from, contactName);
 
@@ -1330,6 +1384,24 @@ function attachWhatsAppClientEvents(client) {
         if (!contactName) contactName = resolved.contactName;
         if (!realNumber) realNumber = extractRealNumber(resolved.realNumber) || resolved.realNumber || null;
       } catch (e) {}
+    }
+
+    // Bug fix: Download media to disk so it survives page reloads
+    let mediaUrl = null;
+    if (message.hasMedia) {
+      try {
+        const media = await message.downloadMedia();
+        if (media && media.data) {
+          const mediaDir = path.join(__dirname, "data", "media");
+          if (!fs.existsSync(mediaDir)) fs.mkdirSync(mediaDir, { recursive: true });
+          const ext = media.mimetype ? media.mimetype.split("/")[1]?.split(";")[0] || "bin" : "bin";
+          const filename = `${message.id?._serialized || createId()}.${ext}`;
+          fs.writeFileSync(path.join(mediaDir, filename), Buffer.from(media.data, "base64"));
+          mediaUrl = `/api/crm/media/${filename}`;
+        }
+      } catch (e) {
+        console.warn("[whatsapp] Falha ao baixar mídia:", e.message);
+      }
     }
 
     storeMessage({
@@ -1344,6 +1416,7 @@ function attachWhatsAppClientEvents(client) {
       displayNumber: realNumber,
       hasMedia: Boolean(message.hasMedia),
       mediaType: message.type || null,
+      mediaUrl,
     });
   });
 
@@ -1456,6 +1529,7 @@ async function initializeWhatsAppClient(options = {}) {
     attachWhatsAppClientEvents(client);
     whatsappClient = client;
     await client.initialize();
+    configureAutoDownload(client);
   } catch (error) {
     console.error("Falha ao iniciar o cliente do WhatsApp:", error);
     whatsappState.status = "disconnected";
@@ -2246,8 +2320,284 @@ io.on("connection", (socket) => {
       emitToast("Falha ao publicar status.");
     }
   });
+
+  // ============================
+  // NOVAS FUNCIONALIDADES SOCKET
+  // ============================
+
+  socket.on("panel:send-reaction", async (payload) => {
+    try {
+      const { messageId, reaction } = payload;
+      await sendReaction(messageId, reaction);
+      emitToast("Reação enviada!");
+    } catch (e) {
+      emitToast("Falha ao reagir: " + e.message);
+    }
+  });
+
+  socket.on("panel:send-location", async (payload) => {
+    try {
+      const { chatId, lat, lng, description } = payload;
+      const result = await sendLocation(chatId, lat, lng, description);
+      emitToast("Localização enviada!");
+      socket.emit("whatsapp:location-sent", result);
+    } catch (e) {
+      emitToast("Falha ao enviar localização: " + e.message);
+    }
+  });
+
+  socket.on("panel:send-poll", async (payload) => {
+    try {
+      const { chatId, question, options } = payload;
+      const result = await sendPoll(chatId, question, options);
+      emitToast("Enquete criada!");
+      socket.emit("whatsapp:poll-sent", result);
+    } catch (e) {
+      emitToast("Falha ao criar enquete: " + e.message);
+    }
+  });
+
+  socket.on("panel:edit-message", async (payload) => {
+    try {
+      const { messageId, newText } = payload;
+      await editMessage(messageId, newText);
+      emitToast("Mensagem editada!");
+    } catch (e) {
+      emitToast("Falha ao editar: " + e.message);
+    }
+  });
+
+  socket.on("panel:delete-message", async (payload) => {
+    try {
+      const { messageId, everyone } = payload;
+      await deleteMessage(messageId, everyone);
+      emitToast(everyone ? "Mensagem apagada para todos!" : "Mensagem apagada!");
+    } catch (e) {
+      emitToast("Falha ao apagar: " + e.message);
+    }
+  });
+
+  socket.on("panel:star-message", async (payload) => {
+    try {
+      const { messageId, star } = payload;
+      await starMessage(messageId, star);
+      emitToast(star ? "Favoritado!" : "Desfavoritado!");
+    } catch (e) {
+      emitToast("Falha ao favoritar: " + e.message);
+    }
+  });
+
+  socket.on("panel:forward-message", async (payload) => {
+    try {
+      const { messageId, targetChatId } = payload;
+      await forwardMessage(messageId, targetChatId);
+      emitToast("Mensagem encaminhada!");
+    } catch (e) {
+      emitToast("Falha ao encaminhar: " + e.message);
+    }
+  });
+
+  socket.on("panel:search-messages", async (payload, callback) => {
+    try {
+      const { query, chatId, limit } = payload;
+      const results = await searchMessages(query, chatId, limit);
+      callback?.({ ok: true, results });
+    } catch (e) {
+      callback?.({ ok: false, error: e.message });
+    }
+  });
+
+  socket.on("panel:get-contact", async (payload, callback) => {
+    try {
+      const contact = await getContactById(payload.contactId);
+      callback?.({ ok: true, contact });
+    } catch (e) {
+      callback?.({ ok: false, error: e.message });
+    }
+  });
+
+  socket.on("panel:set-presence", async (payload) => {
+    try {
+      await sendPresence(payload.available);
+      emitToast("Presença atualizada!");
+    } catch (e) {
+      emitToast("Falha ao atualizar presença: " + e.message);
+    }
+  });
+
+  socket.on("panel:mark-seen", async (payload) => {
+    try {
+      const chatId = String(payload?.chatId || "").trim();
+      if (chatId && whatsappClient) {
+        await whatsappClient.sendSeen(chatId);
+      }
+    } catch (e) {
+      console.warn("Falha ao marcar como visto:", e.message);
+    }
+  });
+
 });
 
 server.listen(port, () => {
   console.log(`WhatsApp panel server running on http://localhost:${port}`);
 });
+
+// ============================
+// NOVAS FUNCIONALIDADES
+// ============================
+
+// Buscar mensagens por texto
+async function searchMessages(query, chatId = null, limit = 50) {
+  if (!whatsappClient || !whatsappState.connected) return [];
+  try {
+    const results = await whatsappClient.searchMessages(query, { chatId, limit });
+    return results.map(m => ({
+      id: m.id?._serialized,
+      chatId: m.fromMe ? m.to : m.from,
+      body: m.body || "",
+      timestamp: (m.timestamp || 0) * 1000,
+      type: m.type,
+      hasMedia: m.hasMedia,
+    }));
+  } catch (e) {
+    console.error("[search] Falha:", e.message);
+    return [];
+  }
+}
+
+// Enviar reação
+async function sendReaction(messageId, reaction) {
+  if (!whatsappClient) throw new Error("Cliente não disponível");
+  const msg = await whatsappClient.getMessageById(messageId);
+  if (!msg) throw new Error("Mensagem não encontrada");
+  await msg.react(reaction);
+  return { success: true };
+}
+
+// Enviar localização
+async function sendLocation(chatId, lat, lng, description = "") {
+  if (!whatsappClient) throw new Error("Cliente não disponível");
+  const location = new (require('whatsapp-web.js').Location)(lat, lng, description);
+  const sent = await whatsappClient.sendMessage(chatId, location);
+  return { success: true, id: sent?.id?._serialized };
+}
+
+// Criar enquete
+async function sendPoll(chatId, question, options) {
+  if (!whatsappClient) throw new Error("Cliente não disponível");
+  const poll = await whatsappClient.sendMessage(chatId, {
+    poll: {
+      name: question,
+      options: options.map(opt => ({ text: opt })),
+      selectableOptionsCount: 1,
+    }
+  });
+  return { success: true, id: poll?.id?._serialized };
+}
+
+// Editar mensagem
+async function editMessage(messageId, newText) {
+  if (!whatsappClient) throw new Error("Cliente não disponível");
+  const msg = await whatsappClient.getMessageById(messageId);
+  if (!msg) throw new Error("Mensagem não encontrada");
+  await msg.edit(newText);
+  return { success: true };
+}
+
+// Apagar mensagem para todos
+async function deleteMessage(messageId, everyone = false) {
+  if (!whatsappClient) throw new Error("Cliente não disponível");
+  const msg = await whatsappClient.getMessageById(messageId);
+  if (!msg) throw new Error("Mensagem não encontrada");
+  await msg.delete(everyone);
+  return { success: true };
+}
+
+// Favoritar/desfavoritar
+async function starMessage(messageId, star = true) {
+  if (!whatsappClient) throw new Error("Cliente não disponível");
+  const msg = await whatsappClient.getMessageById(messageId);
+  if (!msg) throw new Error("Mensagem não encontrada");
+  if (star) await msg.star();
+  else await msg.unstar();
+  return { success: true };
+}
+
+// Encaminhar mensagem
+async function forwardMessage(messageId, targetChatId) {
+  if (!whatsappClient) throw new Error("Cliente não disponível");
+  const msg = await whatsappClient.getMessageById(messageId);
+  if (!msg) throw new Error("Mensagem não encontrada");
+  await msg.forward(targetChatId);
+  return { success: true };
+}
+
+// Mensagens fixadas
+async function getPinnedMessages(chatId) {
+  if (!whatsappClient) return [];
+  const chat = await whatsappClient.getChatById(chatId);
+  if (!chat) return [];
+  const pinned = await chat.getPinnedMessages();
+  return pinned.map(m => ({
+    id: m.id?._serialized,
+    body: m.body || "",
+    timestamp: (m.timestamp || 0) * 1000,
+    type: m.type,
+    hasMedia: m.hasMedia,
+  }));
+}
+
+// Estado de presença
+async function sendPresence(available) {
+  if (!whatsappClient) return;
+  if (available) await whatsappClient.sendPresenceAvailable();
+  else await whatsappClient.sendPresenceUnavailable();
+}
+
+// Buscar contato
+async function getContactById(contactId) {
+  if (!whatsappClient) return null;
+  try {
+    const contact = await whatsappClient.getContactById(contactId);
+    return {
+      id: contact.id?._serialized,
+      name: contact.name || contact.pushname,
+      number: contact.number,
+      isBlocked: contact.isBlocked,
+      isBusiness: contact.isBusiness,
+      isMyContact: contact.isMyContact,
+    };
+  } catch (e) {
+    return null;
+  }
+}
+
+// Buscar contatos bloqueados
+async function getBlockedContacts() {
+  if (!whatsappClient) return [];
+  try {
+    const blocked = await whatsappClient.getBlockedContacts();
+    return blocked.map(c => ({
+      id: c.id?._serialized,
+      name: c.name || c.pushname,
+      number: c.number,
+    }));
+  } catch (e) {
+    return [];
+  }
+}
+
+module.exports = {
+  searchMessages,
+  sendReaction,
+  sendLocation,
+  sendPoll,
+  editMessage,
+  deleteMessage,
+  starMessage,
+  forwardMessage,
+  getPinnedMessages,
+  sendPresence,
+  getContactById,
+  getBlockedContacts,
+};
