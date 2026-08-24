@@ -102,6 +102,7 @@ const store = {
   chatLabels: {},
   messages: [],
   chats: [],
+  vendedores: [],
   statusFeed: [],
   chatAssignments: {},
   notifications: [],
@@ -152,6 +153,7 @@ function loadStore() {
         ? parsed.chatAssignments
         : {};
     store.notifications = Array.isArray(parsed.notifications) ? parsed.notifications : [];
+    store.vendedores = Array.isArray(parsed.vendedores) ? parsed.vendedores : [];
   } catch (error) {
     console.error("Falha ao ler dados do painel do WhatsApp:", error);
   }
@@ -169,6 +171,7 @@ function persistStore() {
     statusFeed: store.statusFeed,
     chatAssignments: store.chatAssignments,
     notifications: store.notifications,
+    vendedores: store.vendedores,
   };
 
   fs.writeFileSync(dataFile, JSON.stringify(payload, null, 2));
@@ -205,6 +208,14 @@ function emitChats() {
 
 function emitNotifications() {
   io.emit("whatsapp:notifications", store.notifications);
+}
+
+function publicVendedor(v) {
+  return { id: v.id, nome: v.nome, cargo: v.cargo || "", assinatura: v.assinatura || "" };
+}
+
+function emitVendedores() {
+  io.emit("whatsapp:vendedores", store.vendedores.map(publicVendedor));
 }
 
 function emitLabels() {
@@ -294,6 +305,16 @@ async function syncLabelsForChats(chats = []) {
   } catch (error) {
     console.error("Falha ao sincronizar etiquetas:", error);
   }
+}
+
+// Segunda camada de proteção: mesmo que o cliente mande specs desatualizados
+// ou um payload manual, o servidor nunca deve deixar custo de aquisição,
+// markup aplicado ou nota sobre qualidade da foto vazar pra dentro de uma
+// mensagem real enviada ao cliente no WhatsApp.
+const SPEC_KEYS_INTERNOS = /^(custo_origem|markup|qualidade_fotos)\s*:/i;
+function filtrarSpecsInternos(specs) {
+  if (!Array.isArray(specs)) return [];
+  return specs.filter((linha) => !SPEC_KEYS_INTERNOS.test(String(linha || "")));
 }
 
 function normalizeNumber(value) {
@@ -1435,7 +1456,8 @@ app.post(["/api/enviar-produto", "/api/crm/enviar-produto"], async (req, res) =>
       });
     }
     const obsTxt = obs ? `\n\n_Obs: ${obs}_` : "";
-    const specs = prod.specs?.length ? `\n• ${prod.specs.join("\n• ")}` : "";
+    const specsVisiveis = filtrarSpecsInternos(prod.specs);
+    const specs = specsVisiveis.length ? `\n• ${specsVisiveis.join("\n• ")}` : "";
     const precoFmt = precoFinal.toLocaleString("pt-BR", { minimumFractionDigits: 2 });
     const text = `⚡ *Oferta Balão da Informática*\n*${prod.nome}*\n\n💵 *Preço Especial:* *R$ ${precoFmt}*${specs}${obsTxt}\n\n📍 Pronta entrega na loja do Castelo Campinas!\nPara reservar ou tirar dúvidas, é só responder aqui! 🎈`;
 
@@ -1547,6 +1569,7 @@ io.on("connection", (socket) => {
   socket.emit("whatsapp:messages", store.messages.slice(-300));
   socket.emit("whatsapp:chats", store.chats);
   socket.emit("whatsapp:status-feed", store.statusFeed);
+  socket.emit("whatsapp:vendedores", store.vendedores.map(publicVendedor));
 
   socket.on("panel:bootstrap", () => {
     socket.emit("whatsapp:state", whatsappState);
@@ -1564,6 +1587,51 @@ io.on("connection", (socket) => {
     socket.emit("whatsapp:messages", store.messages.slice(-300));
     socket.emit("whatsapp:chats", store.chats);
     socket.emit("whatsapp:status-feed", store.statusFeed);
+    socket.emit("whatsapp:vendedores", store.vendedores.map(publicVendedor));
+  });
+
+  socket.on("panel:vendedor-login", (payload, callback) => {
+    const pin = String(payload?.pin || "").trim();
+    const vendedor = store.vendedores.find((v) => v.pin === pin);
+    const result = vendedor ? { ok: true, vendedor: publicVendedor(vendedor) } : { ok: false };
+    if (typeof callback === "function") callback(result);
+  });
+
+  socket.on("panel:add-vendedor", (payload, callback) => {
+    const nome = String(payload?.nome || "").trim();
+    const pin = String(payload?.pin || "").trim();
+    const cargo = String(payload?.cargo || "").trim();
+    const assinatura = String(payload?.assinatura || "").trim();
+
+    if (!nome || !/^\d{4,6}$/.test(pin)) {
+      const result = { ok: false, erro: "Nome e PIN (4 a 6 numeros) sao obrigatorios." };
+      if (typeof callback === "function") callback(result);
+      emitToast(result.erro);
+      return;
+    }
+    if (store.vendedores.some((v) => v.pin === pin)) {
+      const result = { ok: false, erro: "Esse PIN ja esta em uso por outro vendedor." };
+      if (typeof callback === "function") callback(result);
+      emitToast(result.erro);
+      return;
+    }
+
+    const novo = { id: createId(), nome, cargo, assinatura, pin };
+    store.vendedores.push(novo);
+    persistStore();
+    emitVendedores();
+    emitToast(`Vendedor ${nome} cadastrado.`);
+
+    const result = { ok: true, vendedor: publicVendedor(novo) };
+    if (typeof callback === "function") callback(result);
+  });
+
+  socket.on("panel:remove-vendedor", (payload) => {
+    const id = String(payload?.id || "").trim();
+    if (!id) return;
+    store.vendedores = store.vendedores.filter((v) => String(v.id) !== id);
+    persistStore();
+    emitVendedores();
   });
 
   socket.on("panel:reset-session", () => {
@@ -1899,7 +1967,8 @@ io.on("connection", (socket) => {
         return;
       }
       const obs = payload.obs ? `\n\n_Obs: ${payload.obs}_` : "";
-      const specs = prod.specs?.length ? `\n• ${prod.specs.join("\n• ")}` : "";
+      const specsVisiveis = filtrarSpecsInternos(prod.specs);
+      const specs = specsVisiveis.length ? `\n• ${specsVisiveis.join("\n• ")}` : "";
       const precoFmt = precoFinal.toLocaleString("pt-BR", { minimumFractionDigits: 2 });
 
       const text = `⚡ *Oferta Balão da Informática*\n*${prod.nome}*\n\n💵 *Preço Especial:* *R$ ${precoFmt}*${specs}${obs}\n\n📍 Pronta entrega na loja do Castelo Campinas!\nPara reservar ou tirar dúvidas, é só responder aqui! 🎈`;

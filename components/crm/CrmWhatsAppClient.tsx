@@ -366,10 +366,15 @@ export default function CrmWhatsAppClient() {
               precoFormatado: precoFmt,
               categoria: p.category || "Informática",
               imagem: resolveImagemAbsoluta(p.image || p.image_urls?.[0] || ""),
+              // Campos internos (custo de aquisição, markup aplicado,
+              // qualidade da foto) nunca podem aparecer aqui: essa lista vai
+              // direto pro texto da mensagem enviada ao cliente no WhatsApp.
               specs: Array.isArray(p.specs)
                 ? p.specs
                 : typeof p.specs === "object" && p.specs
-                ? Object.entries(p.specs).map(([k, v]) => `${k}: ${v}`)
+                ? Object.entries(p.specs)
+                    .filter(([k]) => !["custo_origem", "markup", "qualidade_fotos"].includes(k))
+                    .map(([k, v]) => `${k}: ${v}`)
                 : [],
             };
         });
