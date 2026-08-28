@@ -39,18 +39,21 @@
   .cards-section{padding:40px 20px;max-width:1200px;margin:0 auto}
   .cards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:28px}
 
-  .pc-card{background:var(--card);border-radius:20px;overflow:hidden;border:2px solid rgba(255,255,255,.05);transition:transform .3s,box-shadow .3s;position:relative}
-  .pc-card:hover{transform:translateY(-8px);box-shadow:0 20px 50px rgba(230,0,18,.2);border-color:var(--red)}
-  .pc-card.featured{border-color:var(--gold)}
-  .pc-card.featured:hover{box-shadow:0 20px 50px rgba(245,158,11,.3)}
+  .pc-card{background:var(--card);border-radius:20px;overflow:hidden;border:3px solid rgba(255,255,255,.08);transition:transform .3s,box-shadow .3s;position:relative}
+  .pc-card:hover{transform:translateY(-10px) scale(1.02);box-shadow:0 25px 60px rgba(230,0,18,.25);border-color:var(--red)}
+  .pc-card.featured{border-color:var(--gold);box-shadow:0 0 30px rgba(245,158,11,.15)}
+  .pc-card.featured:hover{box-shadow:0 25px 60px rgba(245,158,11,.35)}
+  .pc-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--red),var(--gold),var(--red));z-index:5}
 
-  .card-badge{position:absolute;top:16px;left:16px;z-index:5;padding:6px 16px;border-radius:99px;font-weight:800;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em}
+  .card-badge{position:absolute;top:16px;left:16px;z-index:5;padding:8px 18px;border-radius:99px;font-weight:800;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em}
   .badge-hot{background:var(--red);color:#fff;animation:glow 1.5s infinite}
   .badge-gold{background:var(--gold);color:#000}
   .badge-new{background:var(--green);color:#fff}
+  .badge-discount{position:absolute;top:16px;right:16px;z-index:5;padding:8px 14px;border-radius:12px;font-weight:900;font-size:1.1rem;background:linear-gradient(135deg,#E60012,#ff4444);color:#fff;animation:discountPulse 1s infinite}
   @keyframes glow{0%,100%{box-shadow:0 0 10px rgba(230,0,18,.5)}50%{box-shadow:0 0 25px rgba(230,0,18,.8)}}
+  @keyframes discountPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
 
-  .card-img{width:100%;height:280px;object-fit:cover;background:#0d1117}
+  .card-img{width:100%;height:320px;object-fit:contain;background:#0d1117;padding:10px}
   .card-body{padding:24px}
   .card-name{font-size:1.6rem;font-weight:900;margin-bottom:4px}
   .card-tagline{color:var(--gray);font-size:.95rem;margin-bottom:16px}
@@ -62,12 +65,13 @@
   .specs .icon svg{width:16px;height:16px;fill:var(--red)}
   .specs b{color:var(--white)}
 
-  .price-area{background:var(--card2);border-radius:12px;padding:16px;margin-bottom:16px;text-align:center}
-  .price-old{color:var(--gray);text-decoration:line-through;font-size:.9rem}
-  .price-now{font-size:2rem;font-weight:900;color:var(--green)}
-  .price-now small{font-size:1rem}
-  .price-parcel{color:var(--gray);font-size:.85rem;margin-top:4px}
+  .price-area{background:linear-gradient(135deg,var(--card2) 0%,rgba(230,0,18,.1) 100%);border-radius:12px;padding:18px;margin-bottom:16px;text-align:center;border:1px solid rgba(230,0,18,.2)}
+  .price-old{color:var(--gray);text-decoration:line-through;font-size:1rem;margin-bottom:4px}
+  .price-now{font-size:2.4rem;font-weight:900;color:var(--green);text-shadow:0 0 20px rgba(16,185,129,.3)}
+  .price-now small{font-size:1.2rem}
+  .price-parcel{color:var(--gray);font-size:.9rem;margin-top:6px}
   .price-parcel b{color:var(--white)}
+  .savings{display:inline-block;background:rgba(16,185,129,.15);color:var(--green);padding:4px 12px;border-radius:99px;font-size:.8rem;font-weight:700;margin-top:8px}
 
   .btn-wa{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px;border-radius:12px;background:#25d366;color:#fff;font-weight:800;font-size:1.1rem;text-decoration:none;transition:transform .15s,box-shadow .15s;border:none;cursor:pointer}
   .btn-wa:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(37,211,102,.4)}
@@ -132,6 +136,7 @@
     <!-- TITAN -->
     <article class="pc-card">
       <span class="card-badge badge-hot">🔥 MAIS VENDIDO</span>
+      <span class="badge-discount">-33%</span>
       <img class="card-img" src="https://www.balao.info/promocao/pagina1/fotos/nova_5.jpg" alt="Desktop Gamer Titan" loading="lazy">
       <div class="card-body">
         <div class="card-name">TITAN</div>
@@ -144,11 +149,12 @@
           <li><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#E60012" stroke-width="2"><path d="M12 3c3 4 6 6.5 6 10a6 6 0 1 1-12 0c0-3.5 3-6 6-10z"/></svg></span><b>Refrigeração:</b> Water cooler 360mm branco</li>
         </ul>
         <div class="price-area">
-          <div class="price-old">De R$ 7.499</div>
-          <div class="price-now"><small>R$</small> 6.699</div>
-          <div class="price-parcel">ou <b>12x de R$ 669</b> sem juros</div>
+          <div class="price-old">De R$ 8.039</div>
+          <div class="price-now"><small>R$</small> 5.386</div>
+          <div class="price-parcel">ou <b>12x de R$ 449</b> sem juros</div>
+          <div class="savings">Você economiza R$ 2.653!</div>
         </div>
-        <a class="btn-wa" target="_blank" rel="noopener" href="https://wa.me/5519987510267?text=Ol%C3%A1!%20Vi%20no%20site%20o%20Desktop%20Gamer%20TITAN%20(i5-10600KF%2C%2016GB%2C%20RTX%205060%208GB%2C%20water%20cooler%20360mm)%20por%20R%24%206.699%20e%20quero%20comprar!">
+        <a class="btn-wa" target="_blank" rel="noopener" href="https://wa.me/5519987510267?text=Ol%C3%A1!%20Vi%20no%20site%20o%20Desktop%20Gamer%20TITAN%20(i5-10600KF%2C%2016GB%2C%20RTX%205060%208GB%2C%20water%20cooler%20360mm)%20por%20R%24%205.386%20e%20quero%20comprar!">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
           Quero este PC!
         </a>
@@ -159,6 +165,7 @@
     <!-- HYPER X -->
     <article class="pc-card featured">
       <span class="card-badge badge-gold">⭐ TOP ESCOLHA</span>
+      <span class="badge-discount">-33%</span>
       <img class="card-img" src="https://www.balao.info/promocao/pagina1/fotos/nova_6.jpg" alt="Desktop Gamer Hyper X" loading="lazy">
       <div class="card-body">
         <div class="card-name">HYPER X</div>
@@ -171,11 +178,12 @@
           <li><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#E60012" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg></span><b>Refrigeração:</b> Air cooler</li>
         </ul>
         <div class="price-area">
-          <div class="price-old">De R$ 9.999</div>
-          <div class="price-now"><small>R$</small> 8.999</div>
-          <div class="price-parcel">ou <b>12x de R$ 899</b> sem juros</div>
+          <div class="price-old">De R$ 10.799</div>
+          <div class="price-now"><small>R$</small> 7.235</div>
+          <div class="price-parcel">ou <b>12x de R$ 603</b> sem juros</div>
+          <div class="savings">Você economiza R$ 3.564!</div>
         </div>
-        <a class="btn-wa" target="_blank" rel="noopener" href="https://wa.me/5519987510267?text=Ol%C3%A1!%20Vi%20no%20site%20o%20Desktop%20Gamer%20HYPER%20X%20(Ryzen%205%207600X%2C%2016GB%20DDR5%2C%20SSD%202TB%2C%20RTX%203070%20Ti)%20por%20R%24%208.999%20e%20quero%20comprar!">
+        <a class="btn-wa" target="_blank" rel="noopener" href="https://wa.me/5519987510267?text=Ol%C3%A1!%20Vi%20no%20site%20o%20Desktop%20Gamer%20HYPER%20X%20(Ryzen%205%207600X%2C%2016GB%20DDR5%2C%20SSD%202TB%2C%20RTX%203070%20Ti)%20por%20R%24%207.235%20e%20quero%20comprar!">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
           Quero este PC!
         </a>
@@ -186,6 +194,7 @@
     <!-- KROSS -->
     <article class="pc-card">
       <span class="card-badge badge-new">💎 PREMIUM</span>
+      <span class="badge-discount">-33%</span>
       <img class="card-img" src="https://www.balao.info/promocao/pagina1/fotos/nova_7.jpg" alt="Desktop Gamer Kross" loading="lazy">
       <div class="card-body">
         <div class="card-name">KROSS</div>
@@ -199,11 +208,12 @@
           <li><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#E60012" stroke-width="2"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg></span><b>Fonte:</b> 650W 80 Plus</li>
         </ul>
         <div class="price-area">
-          <div class="price-old">De R$ 11.499</div>
-          <div class="price-now"><small>R$</small> 10.000</div>
-          <div class="price-parcel">ou <b>12x de R$ 999</b> sem juros</div>
+          <div class="price-old">De R$ 12.000</div>
+          <div class="price-now"><small>R$</small> 8.040</div>
+          <div class="price-parcel">ou <b>12x de R$ 670</b> sem juros</div>
+          <div class="savings">Você economiza R$ 3.960!</div>
         </div>
-        <a class="btn-wa" target="_blank" rel="noopener" href="https://wa.me/5519987510267?text=Ol%C3%A1!%20Vi%20no%20site%20o%20Desktop%20Gamer%20KROSS%20(i5%2013%C2%AA%20gera%C3%A7%C3%A3o%2C%2016GB%20DDR5%2C%20RTX%205060%20Ti%2016GB%2C%20SSD%201TB)%20por%20R%24%2010.000%20e%20quero%20comprar!">
+        <a class="btn-wa" target="_blank" rel="noopener" href="https://wa.me/5519987510267?text=Ol%C3%A1!%20Vi%20no%20site%20o%20Desktop%20Gamer%20KROSS%20(i5%2013%C2%AA%20gera%C3%A7%C3%A3o%2C%2016GB%20DDR5%2C%20RTX%205060%20Ti%2016GB%2C%20SSD%201TB)%20por%20R%24%208.040%20e%20quero%20comprar!">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
           Quero este PC!
         </a>
