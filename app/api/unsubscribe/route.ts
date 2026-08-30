@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     // Insert into blacklist (idempotent por e-mail)
     await turso.execute({
       sql: `INSERT INTO unsubscribed_emails (id, email) VALUES (?, ?)
-            ON CONFLICT(email) DO NOTHING`,
+            ON DUPLICATE KEY UPDATE email = VALUES(email)`,
       args: [randomUUID(), String(email)],
     });
 

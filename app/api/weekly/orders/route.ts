@@ -32,15 +32,15 @@ export async function POST(req: Request) {
     await turso.execute({
       sql: `INSERT INTO weekly_orders (id, os_number, status, date, labor_income, parts_income, labor_expense, parts_expense, payment_method)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(id) DO UPDATE SET
-              os_number = excluded.os_number,
-              status = excluded.status,
-              date = excluded.date,
-              labor_income = excluded.labor_income,
-              parts_income = excluded.parts_income,
-              labor_expense = excluded.labor_expense,
-              parts_expense = excluded.parts_expense,
-              payment_method = excluded.payment_method`,
+            ON DUPLICATE KEY UPDATE
+              os_number = VALUES(os_number),
+              status = VALUES(status),
+              date = VALUES(date),
+              labor_income = VALUES(labor_income),
+              parts_income = VALUES(parts_income),
+              labor_expense = VALUES(labor_expense),
+              parts_expense = VALUES(parts_expense),
+              payment_method = VALUES(payment_method)`,
       args: [
         body.id,
         body.osNumber,

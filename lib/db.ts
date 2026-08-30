@@ -106,7 +106,7 @@ export async function getProductsPaginated(opts: {
   // formato numérico dentro do próprio SQL antes do CAST.
   const orderBySql =
     opts.sort === "price_asc"
-      ? "ORDER BY CAST(REPLACE(REPLACE(REPLACE(price, 'R$', ''), '.', ''), ',', '.') AS REAL) ASC"
+      ? "ORDER BY CAST(REPLACE(REPLACE(REPLACE(price, 'R$', ''), '.', ''), ',', '.') AS DECIMAL(12,2)) ASC"
       : "ORDER BY created_at DESC";
 
   try {
@@ -281,25 +281,25 @@ export async function saveProducts(products: Product[]) {
       await turso.execute({
         sql: `INSERT INTO products (id, name, price, price_card, discount_pix, installment, brand, rating, availability, source_url, image, image_urls, product_url, description, specs, category, slug, cost, supplier)
               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-              ON CONFLICT(id) DO UPDATE SET
-                name = excluded.name,
-                price = excluded.price,
-                price_card = excluded.price_card,
-                discount_pix = excluded.discount_pix,
-                installment = excluded.installment,
-                brand = excluded.brand,
-                rating = excluded.rating,
-                availability = excluded.availability,
-                source_url = excluded.source_url,
-                image = excluded.image,
-                image_urls = excluded.image_urls,
-                product_url = excluded.product_url,
-                description = excluded.description,
-                specs = excluded.specs,
-                category = excluded.category,
-                slug = excluded.slug,
-                cost = excluded.cost,
-                supplier = excluded.supplier`,
+              ON DUPLICATE KEY UPDATE
+                name = VALUES(name),
+                price = VALUES(price),
+                price_card = VALUES(price_card),
+                discount_pix = VALUES(discount_pix),
+                installment = VALUES(installment),
+                brand = VALUES(brand),
+                rating = VALUES(rating),
+                availability = VALUES(availability),
+                source_url = VALUES(source_url),
+                image = VALUES(image),
+                image_urls = VALUES(image_urls),
+                product_url = VALUES(product_url),
+                description = VALUES(description),
+                specs = VALUES(specs),
+                category = VALUES(category),
+                slug = VALUES(slug),
+                cost = VALUES(cost),
+                supplier = VALUES(supplier)`,
         args: [
           p.id, p.name, p.price, p.price_card, p.discount_pix, p.installment, p.brand, p.rating, p.availability, p.source_url, p.image,
           Array.isArray(p.image_urls) ? JSON.stringify(p.image_urls) : p.image_urls,

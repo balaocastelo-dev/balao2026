@@ -17,11 +17,11 @@ export async function POST(req: Request) {
     await turso.execute({
       sql: `INSERT INTO weekly_expenses (id, description, value, category, date)
             VALUES (?, ?, ?, ?, ?)
-            ON CONFLICT(id) DO UPDATE SET
-              description = excluded.description,
-              value = excluded.value,
-              category = excluded.category,
-              date = excluded.date`,
+            ON DUPLICATE KEY UPDATE
+              description = VALUES(description),
+              value = VALUES(value),
+              category = VALUES(category),
+              date = VALUES(date)`,
       args: [
         body.id,
         body.description ?? null,
