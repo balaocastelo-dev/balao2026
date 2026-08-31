@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agente IA Corporativo | Balão da Informática</title>
+    <meta name="description" content="Automatize sua empresa com IA. Atendente Virtual 24/7, Automação de WhatsApp, Geração de Conteúdo e Agentes de Vendas.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: { 900: '#090d16', 800: '#111827', 700: '#161f32' },
+                        cyan: { 400: '#22d3ee', 500: '#06b6d4' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-text { background: linear-gradient(135deg, #22d3ee, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .glow { box-shadow: 0 0 40px rgba(34, 211, 238, 0.3); }
+        .card-hover:hover { transform: translateY(-8px); box-shadow: 0 20px 60px rgba(34, 211, 238, 0.2); }
+        .pulse-btn { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.4); } 50% { box-shadow: 0 0 0 15px rgba(34, 211, 238, 0); } }
+    </style>
+</head>
+<body class="bg-dark-900 text-white font-sans">
+    <!-- NAV -->
+    <nav class="fixed top-0 w-full bg-dark-900/90 backdrop-blur-md z-50 border-b border-dark-700">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 bg-cyan-500 rounded-lg flex items-center justify-center font-bold text-dark-900">B</div>
+                <span class="text-xl font-bold">Balão <span class="gradient-text">IA</span></span>
+            </div>
+            <a href="https://wa.me/5519987510267?text=Olá! Quero saber mais sobre os Agentes IA Corporativos." class="bg-cyan-500 hover:bg-cyan-400 text-dark-900 font-bold px-6 py-2 rounded-full transition pulse-btn">
+                Falar no WhatsApp
+            </a>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="min-h-screen flex items-center justify-center pt-20 px-6">
+        <div class="max-w-5xl text-center">
+            <div class="inline-block bg-cyan-500/10 border border-cyan-500/30 rounded-full px-4 py-2 mb-6">
+                <span class="text-cyan-400 text-sm">🚀 Soluções Corporativas de IA</span>
+            </div>
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+                Sua empresa com <span class="gradient-text">Inteligência Artificial</span> 24/7
+            </h1>
+            <p class="text-xl text-gray-400 mb-10 max-w-3xl mx-auto">
+                Automatize atendimento, vendas e conteúdo com Agentes IA que trabalham sem parar. 
+                Mais produtividade, menos custo.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="https://wa.me/5519987510267?text=Olá! Quero uma demonstração dos Agentes IA." class="bg-cyan-500 hover:bg-cyan-400 text-dark-900 font-bold px-8 py-4 rounded-full text-lg transition glow">
+                    Quero uma Demonstração
+                </a>
+                <a href="#servicos" class="border border-cyan-500/50 hover:border-cyan-400 text-cyan-400 px-8 py-4 rounded-full text-lg transition">
+                    Ver Soluções
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SERVIÇOS -->
+    <section id="servicos" class="py-20 px-6 bg-dark-800">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl font-bold text-center mb-4">Nossas <span class="gradient-text">Soluções</span></h2>
+            <p class="text-gray-400 text-center mb-16 max-w-2xl mx-auto">Tecnologia de ponta para automatizar processos e escalar seu negócio</p>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-dark-700 p-6 rounded-2xl border border-dark-700 card-hover transition duration-300">
+                    <div class="w-14 h-14 bg-cyan-500/20 rounded-xl flex items-center justify-center text-2xl mb-4">🤖</div>
+                    <h3 class="text-xl font-bold mb-2">Atendente Virtual 24/7</h3>
+                    <p class="text-gray-400 text-sm">IA que atende clientes no WhatsApp a qualquer hora, tira dúvidas e vende automaticamente.</p>
+                </div>
+                <div class="bg-dark-700 p-6 rounded-2xl border border-dark-700 card-hover transition duration-300">
+                    <div class="w-14 h-14 bg-cyan-500/20 rounded-xl flex items-center justify-center text-2xl mb-4">💬</div>
+                    <h3 class="text-xl font-bold mb-2">Automação WhatsApp</h3>
+                    <p class="text-gray-400 text-sm">Disparos em massa, respostas automáticas, catálogo de produtos e funil de vendas.</p>
+                </div>
+                <div class="bg-dark-700 p-6 rounded-2xl border border-dark-700 card-hover transition duration-300">
+                    <div class="w-14 h-14 bg-cyan-500/20 rounded-xl flex items-center justify-center text-2xl mb-4">📝</div>
+                    <h3 class="text-xl font-bold mb-2">Geração de Conteúdo IA</h3>
+                    <p class="text-gray-400 text-sm">Posts para redes sociais, roteiros de vídeo, e-mails marketing e copywriting automático.</p>
+                </div>
+                <div class="bg-dark-700 p-6 rounded-2xl border border-dark-700 card-hover transition duration-300">
+                    <div class="w-14 h-14 bg-cyan-500/20 rounded-xl flex items-center justify-center text-2xl mb-4">🎯</div>
+                    <h3 class="text-xl font-bold mb-2">Agente de Vendas</h3>
+                    <p class="text-gray-400 text-sm">IA prospecção, qualificação e follow-up. Fechamento automático de negócios.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PLANOS -->
+    <section id="planos" class="py-20 px-6">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-4xl font-bold text-center mb-4">Escolha seu <span class="gradient-text">Plano</span></h2>
+            <p class="text-gray-400 text-center mb-16">Comece hoje. Cancele quando quiser.</p>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- STARTER -->
+                <div class="bg-dark-800 p-8 rounded-2xl border border-dark-700 card-hover transition duration-300">
+                    <h3 class="text-xl font-bold mb-2">Starter</h3>
+                    <p class="text-gray-400 text-sm mb-6">Para começar com automação</p>
+                    <div class="mb-6">
+                        <span class="text-4xl font-bold">R$297</span><span class="text-gray-400">/mês</span>
+                    </div>
+                    <ul class="space-y-3 mb-8 text-sm">
+                        <li class="flex items-center gap-2"><span class="text-cyan-400">✓</span> 1 Agente IA</li>
+                        <li class="flex items-center gap-2"><span class="text-cyan-400">✓</span> Atendimento WhatsApp</li>
+                        <li class="flex items-center gap-2"><span class="text-cyan-400">✓</span> 500 conversas/mês</li>
+                        <li class="flex items-center gap-2"><span class="text-cyan-400">✓</span> Suporte por e-mail</li>
+                    </ul>
+                    <a href="https://wa.me/5519987510267?text=Olá! Quero assinar o plano Starter R$297/mês." class="block text-center border border-cyan-500 text-cyan-400 hover:bg-cyan-500 hover:text-dark-900 font-bold py-3 rounded-full transition">
+                        Assinar Starter
+                    </a>
+                </div>
+                <!-- PRO -->
+                <div class="bg-dark-800 p-8 rounded-2xl border-2 border-cyan-500 card-hover transition duration-300 relative glow">
+                    <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-cyan-500 text-dark-900 text-xs font-bold px-4 py-1 rounded-full">MAIS POPULAR</div>
+                    <h3 class="text-xl font-bold mb-2">Pro</h3>
+                    <p class="text-gray-400 text-sm mb-6">Para escalar seu negócio</p>
+                    <div class="mb-6">
+                        <span class="text-4xl font-bold">R$597</span><span class="text-gray-400">/mês</span>
+                    </div>
+                    <ul class="space-y-3 mb-8 text-sm">
+                        <li class="flex items-center gap-2"><span class="text-cyan-400">✓</span> 3 Agentes IA</li>
+                        <li class="flex items-center gap-2"><span class="text-cyan-400">✓</span> WhatsApp + Instagram</li>
+                        <li class="flex items-center gap-2"><span class="text-cyan-400">✓</span> 2.000 conversas/mês</li>
+                        <li class="flex items-center gap-2"><span class="text-cyan-400">✓</span> Geração de conteúdo</li>
+                        <li class="flex items-center gap-2"><span class="text-cyan-400">✓</span> Suporte prioritário</li>
+                    </ul>
+                    <a href="https://wa.me/5519987510267?text=Olá! Quero assinar o plano Pro R$597/mês." class="block text-center bg-cyan-500 hover:bg-cyan-400 text-dark-900 font-bold py-3 rounded-full transition">
+                        Assinar Pro
+                    </a>
+                </div>
+                <!-- ENTERPRISE -->
+                <div class="bg-dark-800 p-8 rounded-2xl border border-dark-700 card-hover transition duration-300">
+                    <h3 class="text-xl font-bold mb-2">Enterprise</h3>
+                    <p class="text-gray-400 text-sm mb-6">Para grandes operações</p>
+                    <div class="mb-6">
+                        <span class="text-4xl font-bold">R$1.497</span><span class="text-gray-400">/mês</span>
+                    </div>
+                    <ul class="space-y-3 mb-8 text-sm">
+                        <li class="flex items-center gap-2"><span class="text-cyan-400">✓</span> Agentes ilimitados</li>
+                        <li class="flex items-center gap-2"><span class="text-cyan-400">✓</span> Todos os canais</li>
+                        <li class="flex items-center gap-2"><span class="text-cyan-400">✓</span> Conversas ilimitadas</li>
+                        <li class="flex items-center gap-2"><span class="text-cyan-400">✓</span> API dedicada</li>
+                        <li class="flex items-center gap-2"><span class="text-cyan-400">✓</span> Gerente de sucesso</li>
+                    </ul>
+                    <a href="https://wa.me/5519987510267?text=Olá! Quero assinar o plano Enterprise R$1.497/mês." class="block text-center border border-cyan-500 text-cyan-400 hover:bg-cyan-500 hover:text-dark-900 font-bold py-3 rounded-full transition">
+                        Falar com Vendas
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DEPOIMENTOS -->
+    <section class="py-20 px-6 bg-dark-800">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-4xl font-bold text-center mb-16">O que nossos <span class="gradient-text">clientes</span> dizem</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-dark-700 p-6 rounded-2xl">
+                    <div class="text-cyan-400 text-2xl mb-4">⭐⭐⭐⭐⭐</div>
+                    <p class="text-gray-300 mb-4">"Em 2 semanas, o agente IA já estava vendendo mais que meu vendedor. Incrível!"</p>
+                    <p class="font-bold">Carlos M.</p>
+                    <p class="text-gray-500 text-sm">Loja de Eletrônicos</p>
+                </div>
+                <div class="bg-dark-700 p-6 rounded-2xl">
+                    <div class="text-cyan-400 text-2xl mb-4">⭐⭐⭐⭐⭐</div>
+                    <p class="text-gray-300 mb-4">"Atendimento 24/7 sem precisar de funcionário. ROI no primeiro mês."</p>
+                    <p class="font-bold">Ana P.</p>
+                    <p class="text-gray-500 text-sm">Clínica Estética</p>
+                </div>
+                <div class="bg-dark-700 p-6 rounded-2xl">
+                    <div class="text-cyan-400 text-2xl mb-4">⭐⭐⭐⭐⭐</div>
+                    <p class="text-gray-300 mb-4">"A automação de WhatsApp triplicou nossos leads. Melhor investimento do ano."</p>
+                    <p class="font-bold">Roberto S.</p>
+                    <p class="text-gray-500 text-sm">Imobiliária</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-20 px-6">
+        <div class="max-w-3xl mx-auto">
+            <h2 class="text-4xl font-bold text-center mb-16">Perguntas <span class="gradient-text">Frequentes</span></h2>
+            <div class="space-y-4">
+                <details class="bg-dark-800 p-6 rounded-xl cursor-pointer">
+                    <summary class="font-bold text-lg">Como funciona o Agente IA?</summary>
+                    <p class="text-gray-400 mt-3">Nosso agente é treinado com informações do seu negócio e atende clientes 24/7 via WhatsApp, tirando dúvidas, vendendo e agendamentos automaticamente.</p>
+                </details>
+                <details class="bg-dark-800 p-6 rounded-xl cursor-pointer">
+                    <summary class="font-bold text-lg">Preciso ter conhecimento técnico?</summary>
+                    <p class="text-gray-400 mt-3">Não! Nossa equipe configura tudo para você. Em até 48h seu agente está no ar e funcionando.</p>
+                </details>
+                <details class="bg-dark-800 p-6 rounded-xl cursor-pointer">
+                    <summary class="font-bold text-lg">Posso cancelar a qualquer momento?</summary>
+                    <p class="text-gray-400 mt-3">Sim, sem multa ou taxa de cancelamento. Cancele quando quiser.</p>
+                </details>
+                <details class="bg-dark-800 p-6 rounded-xl cursor-pointer">
+                    <summary class="font-bold text-lg">Funciona para meu segmento?</summary>
+                    <p class="text-gray-400 mt-3">Atendemos diversos segmentos: comércio, serviços, saúde, educação, imobiliárias e mais. Consulte-nos!</p>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA FINAL -->
+    <section class="py-20 px-6 bg-gradient-to-b from-dark-800 to-dark-900">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-4xl md:text-5xl font-bold mb-6">Pronto para <span class="gradient-text">automatizar</span> sua empresa?</h2>
+            <p class="text-xl text-gray-400 mb-10">Junte-se a dezenas de empresas que já usam IA para crescer.</p>
+            <a href="https://wa.me/5519987510267?text=Olá! Quero começar com os Agentes IA Corporativos." class="inline-block bg-cyan-500 hover:bg-cyan-400 text-dark-900 font-bold px-10 py-5 rounded-full text-xl transition glow pulse-btn">
+                Começar Agora no WhatsApp
+            </a>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="py-10 px-6 border-t border-dark-700">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center font-bold text-dark-900 text-sm">B</div>
+                <span class="font-bold">Balão <span class="gradient-text">IA</span></span>
+            </div>
+            <p class="text-gray-500 text-sm">© 2026 Balão da Informática — Av. Anchieta 789, Cambuí, Campinas/SP</p>
+        </div>
+    </footer>
+</body>
+</html>
