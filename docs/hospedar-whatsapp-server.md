@@ -158,25 +158,57 @@ O `render.yaml` do projeto já está pronto para isso (plano `starter` + disco d
 
 ---
 
-## Opção C — VPS · cerca de **R$ 25 a 40/mês**
+## Opção C — VPS ✅ escolhida
 
-Vale olhar porque **você já é cliente da Hostinger** (o banco MySQL do site está
-lá). Se o seu plano for hospedagem compartilhada, não serve — precisa ser VPS,
-que roda Node continuamente.
+Precisa ser **VPS**, não hospedagem compartilhada — compartilhada não roda Node
+continuamente. Na Hostinger, o plano **KVM 2** (2 vCPU, 8 GB, 100 GB) é o ponto
+certo: o Chrome do whatsapp-web.js fica ativo o tempo todo e 1 vCPU engasga.
 
-Numa VPS Ubuntu, o caminho mais simples é usar o Docker deste repositório:
+No sistema, escolha **Ubuntu 24.04 LTS limpo** — sem painel de controle
+(CyberPanel, Plesk, cPanel). Painel come 1-2 GB de RAM que você quer para o
+Chrome.
+
+### Passo 1 — Subir o servidor
+
+Conecte no servidor (`ssh root@SEU-IP`, ou pelo **Web console** do painel da
+Hostinger, que abre no navegador) e rode:
 
 ```bash
-cd whatsapp-server
-docker build -t balao-whats .
+curl -fsSL https://raw.githubusercontent.com/balaocastelo-dev/balao2026/main/whatsapp-server/deploy-vps.sh -o /tmp/deploy.sh && bash /tmp/deploy.sh
 ```
+
+Ele instala o Docker se faltar, baixa o código, constrói a imagem e sobe o
+container. A primeira vez demora alguns minutos (o Chromium é pesado).
+
+Rodar de novo, depois de mudanças no código, atualiza tudo **sem perder a
+sessão do WhatsApp nem o funil de vendas** — eles ficam no volume
+`/var/lib/balao-whats`.
+
+A porta fica publicada só em `127.0.0.1` de propósito: quem expõe para a
+internet, com HTTPS, é o passo seguinte.
+
+### Passo 2 — HTTPS
+
+Depois rode o segundo script, que põe HTTPS na frente com Caddy (certificado
+Let's Encrypt, pedido e renovado sozinho):
 
 ```bash
-docker run -d --name balao-whats --restart always -p 4100:4100 -v /opt/balao-whats-auth:/app/.wwebjs_auth -e WHATSAPP_PANEL_ALLOWED_ORIGIN=https://www.balao.info,https://balao.info balao-whats
+bash /opt/balao2026/whatsapp-server/configurar-https.sh
 ```
 
-Depois ponha um Nginx com certificado (Let's Encrypt, gratuito) na frente, ou
-use o Cloudflare Tunnel também aqui — funciona igual.
+Sem informar nada, ele usa o hostname da própria VPS (ex.:
+`srv1963897.hstgr.cloud`), que já aponta para o servidor — **não precisa mexer
+em DNS**. Para um endereço próprio, crie um registro A apontando para o IP da
+VPS no painel DNS do seu domínio e rode:
+
+```bash
+DOMINIO=whats.balao.info bash /opt/balao2026/whatsapp-server/configurar-https.sh
+```
+
+> O Cloudflare Tunnel também funciona, mas exige mover os nameservers do
+> domínio para a Cloudflare. Se o site principal estiver em outro provedor de
+> DNS (o `balao.info` está no Wix), o Caddy é o caminho mais seguro: ele não
+> encosta no DNS que já existe.
 
 - ✅ Mais barato que o Render e você controla tudo.
 - ⚠️ Manutenção é sua: atualização de sistema, certificado, monitoramento.
