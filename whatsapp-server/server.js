@@ -13,11 +13,43 @@ dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 const app = express();
 const server = http.createServer(app);
 
-// Rota para servir mídia baixada
+// ============================================================
+// Onde ficam os dados que precisam sobreviver a um restart.
+//
+// Sao dois: a sessao do WhatsApp (.wwebjs_auth) e a pasta data/
+// (panel-data.json com etiquetas, kanban, respostas e notas de cliente,
+// mais a midia baixada). Em container, os dois precisam estar em volume:
+// esquecer a pasta data/ faz o WhatsApp continuar conectado enquanto todo
+// o funil de vendas volta do zero.
+//
+// DATA_ROOT junta os dois embaixo de um caminho so, para um unico volume
+// dar conta. Sem a variavel, tudo continua ao lado do codigo, como antes.
+// ============================================================
+const DATA_ROOT = process.env.DATA_ROOT || __dirname;
+const DATA_DIR = path.join(DATA_ROOT, "data");
+const AUTH_DIR = path.join(DATA_ROOT, ".wwebjs_auth");
+const CACHE_DIR = path.join(DATA_ROOT, ".wwebjs_cache");
+
+// Rota para servir mídia baixada.
+//
+// O nome vem da URL, entao precisa ser tratado como entrada hostil: o Express
+// decodifica o parametro, e um "%2e%2e%2f" viraria "../" e serviria arquivo de
+// fora da pasta (a sessao do WhatsApp, por exemplo). basename() derruba
+// qualquer caminho, e a checagem depois garante que o alvo ficou mesmo dentro
+// da pasta de midia.
 app.get("/api/crm/media/:filename", (req, res) => {
-  const filename = req.params.filename;
-  const filePath = path.join(__dirname, "data", "media", filename);
-  if (!fs.existsSync(filePath)) {
+  const filename = path.basename(String(req.params.filename || ""));
+  if (!filename || filename === "." || filename === "..") {
+    return res.status(400).send("Nome de arquivo inválido");
+  }
+
+  const mediaDir = path.join(DATA_DIR, "media");
+  const filePath = path.resolve(mediaDir, filename);
+  if (filePath !== path.resolve(mediaDir, path.basename(filePath))) {
+    return res.status(400).send("Nome de arquivo inválido");
+  }
+
+  if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
     return res.status(404).send("Mídia não encontrada");
   }
   res.sendFile(filePath);
@@ -135,7 +167,7 @@ const apiInfo = {
   ],
 };
 
-const dataDir = path.join(__dirname, "data");
+const dataDir = DATA_DIR;
 const dataFile = path.join(dataDir, "panel-data.json");
 const store = {
   labels: [],
@@ -216,7 +248,7 @@ function persistStore() {
     const toArchive = store.messages.slice(0, store.messages.length - 2000);
     store.messages = store.messages.slice(-2000);
     try {
-      const archiveDir = path.join(__dirname, "data");
+      const archiveDir = DATA_DIR;
       if (!fs.existsSync(archiveDir)) fs.mkdirSync(archiveDir, { recursive: true });
       const archiveFile = path.join(archiveDir, `messages-archive-${new Date().toISOString().slice(0, 10)}.json`);
       const existing = fs.existsSync(archiveFile) ? JSON.parse(fs.readFileSync(archiveFile, "utf8")) : [];
@@ -346,7 +378,7 @@ function emitVendedores() {
 // mais antigos primeiro. O historico da conversa fica — some so o arquivo.
 // ============================================================
 
-const MEDIA_DIR = path.join(__dirname, "data", "media");
+const MEDIA_DIR = path.join(DATA_DIR, "media");
 
 const MEDIA_RETENCAO_DIAS = Math.max(
   1,
@@ -1446,7 +1478,7 @@ function buildWhatsAppClient() {
   return new Client({
     authStrategy: new LocalAuth({
       clientId: "balao-whatsapp-panel",
-      dataPath: path.join(__dirname, ".wwebjs_auth"),
+      dataPath: AUTH_DIR,
     }),
     puppeteer: {
       headless: true,
@@ -1595,7 +1627,7 @@ function attachWhatsAppClientEvents(client) {
       try {
         const media = await message.downloadMedia();
         if (media && media.data) {
-          const mediaDir = path.join(__dirname, "data", "media");
+          const mediaDir = MEDIA_DIR;
           if (!fs.existsSync(mediaDir)) fs.mkdirSync(mediaDir, { recursive: true });
           const ext = media.mimetype ? media.mimetype.split("/")[1]?.split(";")[0] || "bin" : "bin";
           const filename = `${message.id?._serialized || createId()}.${ext}`;
@@ -1721,8 +1753,8 @@ async function initializeWhatsAppClient(options = {}) {
 
     if (resetSession) {
       try {
-        fs.rmSync(path.join(__dirname, ".wwebjs_auth"), { recursive: true, force: true });
-        fs.rmSync(path.join(__dirname, ".wwebjs_cache"), { recursive: true, force: true });
+        fs.rmSync(AUTH_DIR, { recursive: true, force: true });
+        fs.rmSync(CACHE_DIR, { recursive: true, force: true });
       } catch (error) {
         console.error("Falha ao limpar sessao/cache do WhatsApp:", error);
       }
