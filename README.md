@@ -46,6 +46,22 @@ Este projeto é um e-commerce desenvolvido com Next.js, Tailwind CSS e TypeScrip
 
 No painel administrativo, use o formato de texto padrão (exemplo copiado de sites) contendo URL da imagem, Nome e Preço. O sistema extrairá automaticamente os dados.
 
+## Atendimento no WhatsApp (equipe de vendas)
+
+A equipe atende por **um número só** — (19) 98751-0267 — com **um QR Code só** e
+**um login por pessoa**.
+
+- `www.balao.info/brendon` — página pessoal do vendedor; ele entra com a senha
+  dele, no computador dele. Caixa compartilhada da loja, kanban pessoal,
+  assinatura própria, filtro "Meus" e botão de assumir atendimento.
+- `www.balao.info/crm` — administração: conecta o QR Code, cadastra vendedor,
+  vê a caixa inteira. Protegida pela senha do painel (`PAINEL_PASSWORD`).
+- `www.balao.info/whatsapp` — painel simples (QR + chat), mesma senha do painel.
+
+O cadastro de vendedores fica em `lib/vendedores.ts` (site) e
+`whatsapp-server/vendedores-fixos.json` (servidor). Como adicionar gente nova,
+trocar senha e tirar acesso: **[docs/acesso-vendedores.md](docs/acesso-vendedores.md)**.
+
 ## Blog (www.balao.info/blog)
 
 - Rotas públicas: `/blog`, `/blog/[slug]`, `/blog/rss.xml`

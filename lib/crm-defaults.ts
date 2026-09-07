@@ -40,7 +40,7 @@ export const RESPOSTAS_BASE: CrmRespostaRapida[] = [
   {
     id: 6,
     titulo: "Telefone / WhatsApp",
-    texto: "📲 WhatsApp: (19) 98118-8090\n☎️ Loja Física: (19) 3255-1661\nPode chamar a qualquer momento!",
+    texto: "📲 WhatsApp: (19) 98751-0267\n☎️ Loja Física: (19) 3255-1661\nPode chamar a qualquer momento!",
     categoria: "Loja",
   },
   {

@@ -133,7 +133,32 @@ function resolveImagemAbsoluta(url: string | null | undefined): string {
   return `${origin}${url.startsWith("/") ? "" : "/"}${url}`;
 }
 
-export default function CrmWhatsAppClient() {
+export interface CrmVendedorFixo {
+  id: string;
+  nome: string;
+  cargo?: string;
+  assinatura?: string;
+}
+
+export interface CrmWhatsAppClientProps {
+  /**
+   * Vendedor já autenticado por fora (páginas pessoais tipo /brendon, onde a
+   * senha é validada no servidor Next). Quando vem preenchido, o portão de
+   * PIN interno do CRM é dispensado e o painel abre direto no nome dele.
+   * Sem esta prop o componente segue com o comportamento antigo (login por
+   * PIN dentro da própria tela) — é o que a rota /crm usa.
+   */
+  vendedorFixo?: CrmVendedorFixo;
+  /** O que fazer no botão de sair. Sem isso, apenas volta ao portão de PIN. */
+  onSair?: () => void;
+  sairLabel?: string;
+}
+
+export default function CrmWhatsAppClient({
+  vendedorFixo,
+  onSair,
+  sairLabel,
+}: CrmWhatsAppClientProps = {}) {
   const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const campoTextoRef = useRef<HTMLTextAreaElement | null>(null);
@@ -161,6 +186,10 @@ export default function CrmWhatsAppClient() {
     return VENDEDORES_BASE;
   });
   const [vendedorAtivoId, setVendedorAtivoId] = useState<string | number | null>(() => {
+    // Numa página pessoal, quem manda é o vendedor autenticado no servidor —
+    // nunca o que sobrou no localStorage daquele PC (senão o Brendon abriria
+    // a página dele já "atendendo" como o vendedor anterior do mesmo micro).
+    if (vendedorFixo) return vendedorFixo.id;
     if (typeof window !== "undefined") {
       return localStorage.getItem("balao_crm_vendedor_ativo") || null;
     }
@@ -180,10 +209,31 @@ export default function CrmWhatsAppClient() {
   });
   const [pinDigitado, setPinDigitado] = useState("");
   const [erroLogin, setErroLogin] = useState("");
-  const vendedorAtivo0 = vendedores.find((v) => String(v.id) === String(vendedorAtivoId)) || null;
-  const vendedorAutenticado = Boolean(vendedorAtivoId) && Boolean(vendedorAtivo0);
+  // Numa página pessoal o registro do vendedor serve de reserva: se o servidor
+  // ainda não tiver semeado a lista (primeiro boot, store zerada), o painel
+  // abre igual em vez de travar o vendedor na tela de "Conectando…".
+  const vendedorFixoComoRegistro: CrmVendedor | null = vendedorFixo
+    ? {
+        id: vendedorFixo.id,
+        nome: vendedorFixo.nome,
+        cargo: vendedorFixo.cargo,
+        assinatura: vendedorFixo.assinatura,
+      }
+    : null;
+  const vendedorAtivo0 =
+    vendedores.find((v) => String(v.id) === String(vendedorAtivoId)) ||
+    vendedorFixoComoRegistro ||
+    null;
+  const vendedorAutenticado = vendedorFixo
+    ? true
+    : Boolean(vendedorAtivoId) && Boolean(vendedorAtivo0);
 
   const sairDoVendedor = () => {
+    // Na página pessoal, sair significa encerrar a sessão no servidor.
+    if (onSair) {
+      onSair();
+      return;
+    }
     setVendedorAtivoId(null);
     setKanbanPorChat({});
     if (typeof window !== "undefined") localStorage.removeItem("balao_crm_vendedor_ativo");
@@ -309,6 +359,9 @@ export default function CrmWhatsAppClient() {
     "catalogo" | "fotos" | "respostas" | "vendedores" | "etiquetas" | "disparo" | "cliente"
   >("catalogo");
   const [filtroNaoLidas, setFiltroNaoLidas] = useState(false);
+  // A caixa é compartilhada (é o número da loja), então cada vendedor precisa
+  // de um jeito rápido de ver só o que está com ele.
+  const [filtroMeus, setFiltroMeus] = useState(false);
   const [buscaChat, setBuscaChat] = useState("");
   const [mostrarRapidasBar, setMostrarRapidasBar] = useState(false);
   const [campoTexto, setCampoTexto] = useState("");
@@ -425,7 +478,10 @@ export default function CrmWhatsAppClient() {
       localStorage.setItem("balao_crm_respostas", JSON.stringify(respostas));
       localStorage.setItem("balao_crm_etiquetas", JSON.stringify(etiquetas));
       localStorage.setItem("balao_crm_vendedores", JSON.stringify(vendedores));
-      if (vendedorAtivoId) {
+      // Na página pessoal quem manda é o cookie de sessão, então não guardamos
+      // o vendedor no navegador — evita que o PC "lembre" de quem atendeu
+      // antes quando outra pessoa abrir a rota /crm no mesmo micro.
+      if (vendedorAtivoId && !vendedorFixo) {
         localStorage.setItem("balao_crm_vendedor_ativo", String(vendedorAtivoId));
       }
     }
@@ -941,13 +997,34 @@ export default function CrmWhatsAppClient() {
     if (filtroNaoLidas) {
       list = list.filter((c) => c.unread > 0);
     }
+
+    if (filtroMeus && vendedorAtivoId) {
+      list = list.filter((c) => String(c.vendedorId ?? "") === String(vendedorAtivoId));
+    }
     return list;
-  }, [chats, buscaChat, filtroNaoLidas]);
+  }, [chats, buscaChat, filtroNaoLidas, filtroMeus, vendedorAtivoId]);
+
+  // Quantas conversas estão atribuídas a quem está atendendo agora.
+  const totalMeusChats = useMemo(
+    () =>
+      vendedorAtivoId
+        ? chats.filter(
+            (c) => isRealDirectChat(c.id) && String(c.vendedorId ?? "") === String(vendedorAtivoId)
+          ).length
+        : 0,
+    [chats, vendedorAtivoId]
+  );
 
   const vendedorAtivo = useMemo(() => {
+    const encontrado = vendedores.find((v) => String(v.id) === String(vendedorAtivoId));
+    if (encontrado) return encontrado;
+    // Numa página pessoal, cair no `vendedores[0]` assinaria as mensagens com
+    // o nome de outra pessoa. O registro do próprio vendedor vem antes.
+    if (vendedorFixoComoRegistro) return vendedorFixoComoRegistro;
     if (!vendedores.length) return null;
-    return vendedores.find((v) => String(v.id) === String(vendedorAtivoId)) || vendedores[0];
-  }, [vendedores, vendedorAtivoId]);
+    return vendedores[0];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vendedores, vendedorAtivoId, vendedorFixo?.id, vendedorFixo?.nome, vendedorFixo?.assinatura]);
 
   // Open Context Menu
   const openContextMenu = (
@@ -1719,10 +1796,14 @@ export default function CrmWhatsAppClient() {
           </span>
           <button
             onClick={sairDoVendedor}
-            title="Trocar de vendedor (pede o PIN de novo)"
-            className="bg-white/90 hover:bg-white text-[#0a6e3d] rounded-full px-2.5 py-1 text-xs font-bold transition-all shadow-sm"
+            title={
+              vendedorFixo
+                ? "Encerrar a sessão neste computador"
+                : "Trocar de vendedor (pede o PIN de novo)"
+            }
+            className="bg-white/90 hover:bg-white text-[#0a6e3d] rounded-full px-2.5 py-1 text-xs font-bold transition-all shadow-sm cursor-pointer"
           >
-            🔁 Trocar
+            {vendedorFixo ? `🚪 ${sairLabel || "Sair"}` : "🔁 Trocar"}
           </button>
 
           <label className="inline-flex items-center gap-1.5 text-xs font-semibold cursor-pointer select-none">
@@ -1896,16 +1977,29 @@ export default function CrmWhatsAppClient() {
                   onChange={(e) => setBuscaChat(e.target.value)}
                   className="w-full px-3 py-1.5 border border-[#e3e3e3] rounded-full text-xs outline-none focus:border-[#0f9d58]"
                 />
-                <button
-                  onClick={() => setFiltroNaoLidas(!filtroNaoLidas)}
-                  className={`w-full py-1 px-3 rounded-full text-xs font-bold border transition-colors cursor-pointer ${
-                    filtroNaoLidas
-                      ? "bg-[#d93025] text-white border-[#d93025]"
-                      : "bg-white text-[#202124] border-[#e3e3e3] hover:bg-[#f0f2f5]"
-                  }`}
-                >
-                  🔴 Não lidas
-                </button>
+                <div className="flex gap-1.5">
+                  <button
+                    onClick={() => setFiltroNaoLidas(!filtroNaoLidas)}
+                    className={`flex-1 py-1 px-2 rounded-full text-xs font-bold border transition-colors cursor-pointer ${
+                      filtroNaoLidas
+                        ? "bg-[#d93025] text-white border-[#d93025]"
+                        : "bg-white text-[#202124] border-[#e3e3e3] hover:bg-[#f0f2f5]"
+                    }`}
+                  >
+                    🔴 Não lidas
+                  </button>
+                  <button
+                    onClick={() => setFiltroMeus(!filtroMeus)}
+                    title="Mostrar só as conversas atribuídas a você"
+                    className={`flex-1 py-1 px-2 rounded-full text-xs font-bold border transition-colors cursor-pointer ${
+                      filtroMeus
+                        ? "bg-[#0f9d58] text-white border-[#0f9d58]"
+                        : "bg-white text-[#202124] border-[#e3e3e3] hover:bg-[#f0f2f5]"
+                    }`}
+                  >
+                    👤 Meus ({totalMeusChats})
+                  </button>
+                </div>
               </div>
 
               <button
@@ -1919,7 +2013,11 @@ export default function CrmWhatsAppClient() {
               <div className="flex-1 overflow-y-auto px-2 pb-2 space-y-1">
                 {chatsFiltrados.length === 0 ? (
                   <div className="text-center text-xs text-[#5f6368] py-8">
-                    {filtroNaoLidas ? "Nenhuma conversa não lida." : "Nenhuma conversa encontrada."}
+                    {filtroMeus
+                      ? "Nenhuma conversa atribuída a você ainda. Desligue o filtro “Meus” para ver a caixa da loja."
+                      : filtroNaoLidas
+                      ? "Nenhuma conversa não lida."
+                      : "Nenhuma conversa encontrada."}
                   </div>
                 ) : (
                   chatsFiltrados.map((chat) => {
@@ -2120,6 +2218,59 @@ export default function CrmWhatsAppClient() {
                               ⚠️ Assumir Atendimento
                             </button>
                           )}
+
+                          {/* A caixa é do número da loja, então toda conversa
+                              começa sem dono. Isso mostra de quem ela é e
+                              deixa o vendedor puxar o lead pra si num clique. */}
+                          {(() => {
+                            const donoId = chatSelecionado.vendedorId;
+                            const meu = String(donoId ?? "") === String(vendedorAtivoId ?? "");
+                            if (meu && donoId) {
+                              return (
+                                <span className="bg-[#e7f6ec] text-[#0a6e3d] text-[9px] font-bold px-2 py-0.5 rounded-full border border-[#0f9d58]/30">
+                                  🟢 Seu atendimento
+                                </span>
+                              );
+                            }
+                            const dono = donoId
+                              ? vendedores.find((v) => String(v.id) === String(donoId))
+                              : null;
+                            if (chatSelecionado.precisaAtencao) return null;
+                            return (
+                              <button
+                                onClick={() => {
+                                  if (
+                                    dono &&
+                                    !confirm(
+                                      `Esta conversa está com ${dono.nome}. Passar o atendimento para você?`
+                                    )
+                                  ) {
+                                    return;
+                                  }
+                                  setChats((prev) =>
+                                    prev.map((c) =>
+                                      c.id === chatSelecionado.id
+                                        ? { ...c, precisaAtencao: false, vendedorId: vendedorAtivoId }
+                                        : c
+                                    )
+                                  );
+                                  socketRef.current?.emit("panel:assign-seller", {
+                                    chatId: chatSelecionado.id,
+                                    sellerId: vendedorAtivoId,
+                                  });
+                                  showToast("Atendimento assumido 🟢");
+                                }}
+                                title={
+                                  dono
+                                    ? `Hoje está com ${dono.nome}`
+                                    : "Ninguém assumiu esta conversa ainda"
+                                }
+                                className="bg-[#f0f2f5] hover:bg-[#e3e3e3] text-[#5f6368] text-[9px] font-bold px-2 py-0.5 rounded-full cursor-pointer border border-[#e3e3e3]"
+                              >
+                                {dono ? `👤 Com ${dono.nome} — pegar` : "✋ Pegar este atendimento"}
+                              </button>
+                            );
+                          })()}
                         </div>
                       </div>
                     </div>
@@ -2444,15 +2595,20 @@ export default function CrmWhatsAppClient() {
             <aside className="w-88 bg-white border-l border-[#e3e3e3] flex flex-col shrink-0">
               {/* Abas */}
               <div className="flex flex-wrap border-b border-[#e3e3e3] p-1 gap-1">
-                {[
+                {([
                   { id: "catalogo", label: "Catálogo" },
                   { id: "fotos", label: "Google Fotos" },
                   { id: "respostas", label: "Respostas" },
-                  { id: "vendedores", label: "Vendedores" },
+                  // Cadastrar/remover vendedor é tarefa de quem administra, em
+                  // /crm — não da página pessoal, senão um vendedor consegue
+                  // apagar o acesso dos colegas sem querer.
+                  ...(vendedorFixo
+                    ? []
+                    : [{ id: "vendedores", label: "Vendedores" }]),
                   { id: "etiquetas", label: "Etiquetas" },
                   { id: "disparo", label: "Disparo" },
                   { id: "cliente", label: "Cliente" },
-                ].map((aba) => (
+                ] as { id: string; label: string }[]).map((aba) => (
                   <button
                     key={aba.id}
                     onClick={() => setAbaAtual(aba.id as any)}

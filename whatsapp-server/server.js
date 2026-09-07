@@ -43,12 +43,25 @@ app.post("/api/mark-seen", express.json(), async (req, res) => {
 });
 
 const port = Number(process.env.WHATSAPP_PANEL_PORT || 4100);
-const allowedOrigin =
-  process.env.WHATSAPP_PANEL_ALLOWED_ORIGIN || "http://localhost:3000";
+
+// Aceita mais de uma origem separada por virgula. Na pratica o site responde
+// tanto em www.balao.info quanto em balao.info, e com uma origem so o painel
+// abria numa e dava erro de conexao na outra.
+const allowedOrigins = String(
+  process.env.WHATSAPP_PANEL_ALLOWED_ORIGIN || "http://localhost:3000"
+)
+  .split(",")
+  .map((origem) => origem.trim().replace(/\/$/, ""))
+  .filter(Boolean);
+
+function isOrigemPermitida(origem) {
+  if (!origem) return true; // requisicoes sem Origin (curl, healthcheck)
+  return allowedOrigins.includes(String(origem).replace(/\/$/, ""));
+}
 
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigin,
+    origin: (origem, callback) => callback(null, isOrigemPermitida(origem)),
     methods: ["GET", "POST"],
   },
 });
@@ -266,6 +279,57 @@ function emitNotifications() {
 
 function publicVendedor(v) {
   return { id: v.id, nome: v.nome, cargo: v.cargo || "", assinatura: v.assinatura || "" };
+}
+
+// Vendedores que entram pela pagina pessoal do site (ex.: /brendon). Quem
+// valida a senha e o Next; aqui eles so precisam EXISTIR com um id estavel,
+// porque esse id e a chave do kanban pessoal e da atribuicao de conversas.
+// Sem esse seed, o primeiro acesso do vendedor cairia numa lista vazia.
+function ensureVendedoresFixos() {
+  const arquivo = path.join(__dirname, "vendedores-fixos.json");
+  const conteudo = readJsonSafe(arquivo);
+  const fixos = Array.isArray(conteudo?.vendedores) ? conteudo.vendedores : [];
+  if (!fixos.length) return;
+
+  let mudou = false;
+
+  for (const fixo of fixos) {
+    const id = String(fixo?.id || "").trim();
+    const nome = String(fixo?.nome || "").trim();
+    if (!id || !nome) continue;
+
+    const existente = store.vendedores.find((v) => String(v.id) === id);
+
+    if (!existente) {
+      store.vendedores.push({
+        id,
+        nome,
+        cargo: String(fixo.cargo || ""),
+        assinatura: String(fixo.assinatura || ""),
+        // Sem PIN de proposito: o login desse vendedor e a senha do site.
+        pin: null,
+        protegido: fixo.protegido !== false,
+      });
+      mudou = true;
+      continue;
+    }
+
+    // Atualiza os dados de exibicao sem mexer no PIN de quem ja tinha um.
+    if (
+      existente.nome !== nome ||
+      existente.cargo !== String(fixo.cargo || "") ||
+      existente.assinatura !== String(fixo.assinatura || "") ||
+      existente.protegido !== (fixo.protegido !== false)
+    ) {
+      existente.nome = nome;
+      existente.cargo = String(fixo.cargo || "");
+      existente.assinatura = String(fixo.assinatura || "");
+      existente.protegido = fixo.protegido !== false;
+      mudou = true;
+    }
+  }
+
+  if (mudou) persistStore();
 }
 
 function emitVendedores() {
@@ -1235,6 +1299,7 @@ function schedulePendingMessage(item) {
 }
 
 loadStore();
+ensureVendedoresFixos();
 
 const CHROME_PATH = process.env.CHROME_PATH || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 
@@ -1597,7 +1662,15 @@ store.schedules.forEach((item) => {
 
 app.use(express.json());
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", allowedOrigin);
+  // Devolve a origem que pediu, quando ela esta na lista — um header com
+  // varias origens separadas por virgula nao e valido e o navegador recusa.
+  const origem = req.headers.origin;
+  if (origem && isOrigemPermitida(origem)) {
+    res.header("Access-Control-Allow-Origin", origem);
+    res.header("Vary", "Origin");
+  } else if (!origem) {
+    res.header("Access-Control-Allow-Origin", allowedOrigins[0] || "*");
+  }
   res.header("Access-Control-Allow-Headers", "Content-Type");
   res.header("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
   if (req.method === "OPTIONS") {
@@ -1845,7 +1918,11 @@ io.on("connection", (socket) => {
 
   socket.on("panel:vendedor-login", (payload, callback) => {
     const pin = String(payload?.pin || "").trim();
-    const vendedor = store.vendedores.find((v) => v.pin === pin);
+    // Vendedor de pagina pessoal nao tem PIN (pin: null). Sem esta guarda, um
+    // PIN vazio poderia casar com um registro sem PIN e abrir o painel.
+    const vendedor = /^\d{4,6}$/.test(pin)
+      ? store.vendedores.find((v) => v.pin && v.pin === pin)
+      : null;
     const result = vendedor ? { ok: true, vendedor: publicVendedor(vendedor) } : { ok: false };
     if (typeof callback === "function") callback(result);
   });
@@ -1882,6 +1959,18 @@ io.on("connection", (socket) => {
   socket.on("panel:remove-vendedor", (payload) => {
     const id = String(payload?.id || "").trim();
     if (!id) return;
+
+    // Vendedor de pagina pessoal e recriado no proximo boot pelo seed, entao
+    // remove-lo aqui so apagaria o kanban dele sem tirar o acesso. Bloqueia e
+    // avisa, em vez de fingir que funcionou.
+    const alvo = store.vendedores.find((v) => String(v.id) === id);
+    if (alvo?.protegido) {
+      emitToast(
+        `${alvo.nome} entra pela pagina pessoal do site. Para tirar o acesso, remova o registro em lib/vendedores.ts.`
+      );
+      return;
+    }
+
     store.vendedores = store.vendedores.filter((v) => String(v.id) !== id);
     delete store.kanbanPorVendedor[id];
     persistStore();

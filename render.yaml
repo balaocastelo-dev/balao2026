@@ -1,3 +1,15 @@
+# Deploy do servidor de WhatsApp no Render.
+#
+# ATENÇÃO — ISSO NÃO RODA NO PLANO GRATUITO DO RENDER:
+#   - o plano free hiberna depois de ~15 min sem acesso, e o WhatsApp cai junto;
+#   - o plano free não tem disco persistente, então a sessão se perde e o
+#     painel pede QR Code novo a cada reinício;
+#   - 512 MB de RAM não seguram o Chrome que o whatsapp-web.js precisa abrir.
+#
+# Por isso o plano aqui é "starter" (pago) e há um disco de 2 GB.
+# Quer sem custo? Rode no PC da loja com Cloudflare Tunnel —
+# veja docs/hospedar-whatsapp-server.md.
+
 services:
   - type: web
     name: balao-whatsapp-panel
@@ -5,12 +17,19 @@ services:
     rootDir: whatsapp-server
     plan: starter
     autoDeploy: true
+    healthCheckPath: /status
     envVars:
       - key: WHATSAPP_PANEL_PORT
         value: 4100
+      # Aceita mais de uma origem separada por vírgula.
+      # Ex.: https://www.balao.info,https://balao.info
       - key: WHATSAPP_PANEL_ALLOWED_ORIGIN
         sync: false
+      # O Dockerfile instala o Chromium do Debian aqui.
+      - key: CHROME_PATH
+        value: /usr/bin/chromium
     disk:
       name: balao-whatsapp-session
+      # Precisa bater com o dataPath do LocalAuth no server.js.
       mountPath: /app/.wwebjs_auth
       sizeGB: 2

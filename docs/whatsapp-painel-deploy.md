@@ -29,28 +29,26 @@ NEXT_PUBLIC_WHATSAPP_PANEL_SERVER_URL=https://SEU-SERVIDOR-WHATSAPP.onrender.com
 
 ```env
 WHATSAPP_PANEL_PORT=4100
-WHATSAPP_PANEL_ALLOWED_ORIGIN=https://www.balao.info
+WHATSAPP_PANEL_ALLOWED_ORIGIN=https://www.balao.info,https://balao.info
 ```
 
-## Opcao 1: Render
+`WHATSAPP_PANEL_ALLOWED_ORIGIN` aceita mais de uma origem separada por virgula
+(o site responde em `balao.info` e `www.balao.info`).
 
-O projeto ja tem um arquivo `render.yaml` pronto para subir o servico `whatsapp-server`.
+## Onde hospedar (custo e passo a passo)
 
-Depois de subir no Render:
+**Isso nao roda no plano gratuito do Render** — ele hiberna, nao tem disco
+persistente e nao tem RAM para o Chrome. A opcao sem custo e rodar no PC da
+loja com Cloudflare Tunnel.
 
-1. ajuste `WHATSAPP_PANEL_ALLOWED_ORIGIN`
-2. pegue a URL publica do servico
-3. configure `NEXT_PUBLIC_WHATSAPP_PANEL_SERVER_URL` na Vercel
-4. redeploy do site
+As tres opcoes, com preco e passo a passo, estao em
+**[hospedar-whatsapp-server.md](./hospedar-whatsapp-server.md)**:
 
-## Opcao 2: VPS / Node
+- **PC da loja + Cloudflare Tunnel** — R$ 0, recomendada
+- **Render** — plano `starter`, cerca de US$ 7/mes (o `render.yaml` ja esta pronto)
+- **VPS** — cerca de R$ 25 a 40/mes
 
-Na pasta `whatsapp-server`:
-
-```bash
-npm install
-npm run start
-```
+Para ligar no PC da loja, use o atalho `whatsapp-server/iniciar-servidor.bat`.
 
 ## Gerar novo QR Code
 

@@ -36,7 +36,7 @@ export default async function WhatsAppPage() {
             redirectTo="/whatsapp"
             badgeLabel="WhatsApp Protegido"
             title="Acesso ao WhatsApp"
-            description="Entre com a senha 56676009 para abrir a central interna do WhatsApp."
+            description="Entre com a senha do painel para abrir a central interna do WhatsApp."
             submitLabel="Entrar no WhatsApp"
           />
         </div>
