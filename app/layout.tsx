@@ -8,7 +8,7 @@ import { ToastProvider } from "@/context/ToastContext";
 import LayoutWrapper from "@/components/LayoutWrapper";
 import VisitorTracker from "@/components/VisitorTracker";
 import GlobalConversionTracker from "@/components/GlobalConversionTracker";
-import FloatingWhatsApp from "@/components/FloatingWhatsApp";
+import { VENDEDORES } from "@/lib/vendedores";
 import { getCategories } from "@/lib/db";
 import type { Category } from "@/lib/utils";
 import { SITE_CONFIG } from "@/lib/config";
@@ -295,10 +295,14 @@ export default async function RootLayout({
         <CartProvider>
           <ToastProvider>
             <Suspense fallback={null}>
-              <LayoutWrapper categories={categories}>
+              {/* O botão flutuante de WhatsApp mora dentro do LayoutWrapper
+                  agora, para sumir junto com o rodapé nas telas de trabalho. */}
+              <LayoutWrapper
+                categories={categories}
+                slugsVendedores={VENDEDORES.map((v) => v.slug)}
+              >
                 {children}
               </LayoutWrapper>
-              <FloatingWhatsApp />
             </Suspense>
           </ToastProvider>
         </CartProvider>

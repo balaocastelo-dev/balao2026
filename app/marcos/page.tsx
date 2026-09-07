@@ -13,6 +13,6 @@ export const metadata: Metadata = {
 // A sessão vive em cookie, então a página não pode ser cacheada estática.
 export const dynamic = "force-dynamic";
 
-export default function BrendonPage() {
-  return <PaginaVendedor slug="brendon" />;
+export default function MarcosPage() {
+  return <PaginaVendedor slug="marcos" />;
 }

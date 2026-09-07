@@ -3,16 +3,18 @@
 //
 // Todos atendem pelo MESMO número da loja (SITE_CONFIG.whatsapp.number
 // = 5519987510267). O WhatsApp é conectado UMA vez por QR Code no
-// servidor (whatsapp-server); cada vendedor entra no seu próprio PC
+// servidor (whatsapp-server); cada vendedor entra na sua própria página
 // com o login pessoal daqui e recebe:
 //   - a mesma caixa de conversas (é o número da loja, compartilhado);
 //   - o SEU kanban pessoal (o servidor separa por `id`);
-//   - a SUA assinatura automática nas mensagens.
+//   - a SUA assinatura automática nas mensagens;
+//   - o filtro "Meus" e as conversas atribuídas a ele.
 //
 // Para adicionar um vendedor novo:
 //   1. acrescente o registro nesta lista;
-//   2. crie a pasta `app/<slug>/page.tsx` copiando `app/brendon/page.tsx`;
-//   3. espelhe o `id` e o `nome` em `whatsapp-server/vendedores-fixos.json`.
+//   2. crie a pasta `app/<slug>/page.tsx` copiando outra existente;
+//   3. espelhe o `id` e o `nome` em `whatsapp-server/vendedores-fixos.json`;
+//   4. defina a variável de ambiente da senha na hospedagem e publique.
 // ============================================================
 
 export interface VendedorRegistro {
@@ -40,15 +42,26 @@ export interface VendedorRegistro {
   envSenha: string;
 }
 
+function registro(slug: string, nome: string): VendedorRegistro {
+  return {
+    slug,
+    id: slug,
+    nome,
+    // Cargo igual para todo mundo, sem flexão de gênero — muda aqui se
+    // alguém tiver função diferente.
+    cargo: "Vendas",
+    assinatura: `Atenciosamente,\n*${nome}* — Balão da Informática Castelo`,
+    envSenha: `VENDEDOR_${slug.toUpperCase()}_SENHA`,
+  };
+}
+
 export const VENDEDORES: VendedorRegistro[] = [
-  {
-    slug: "brendon",
-    id: "brendon",
-    nome: "Brendon",
-    cargo: "Consultor de Vendas",
-    assinatura: "Atenciosamente,\n*Brendon* — Balão da Informática Castelo",
-    envSenha: "VENDEDOR_BRENDON_SENHA",
-  },
+  registro("thiago", "Thiago"),
+  registro("marcos", "Marcos"),
+  registro("julia", "Julia"),
+  registro("gabriel", "Gabriel"),
+  registro("wendell", "Wendell"),
+  registro("brendon", "Brendon"),
 ];
 
 export function getVendedorPorSlug(slug: string): VendedorRegistro | null {

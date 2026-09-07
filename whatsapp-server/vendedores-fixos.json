@@ -2,9 +2,44 @@
   "_leia_me": "Vendedores da equipe que entram pela pagina pessoal do site (ex.: www.balao.info/brendon). O 'id' precisa ser IGUAL ao id em lib/vendedores.ts do site - e a chave do kanban pessoal e da atribuicao de conversas, entao nunca deve mudar depois que a pessoa comecou a atender. Nao ha senha aqui: quem valida a senha e o site. O campo 'protegido' impede que o vendedor seja removido pelo painel por engano.",
   "vendedores": [
     {
+      "id": "thiago",
+      "nome": "Thiago",
+      "cargo": "Vendas",
+      "assinatura": "Atenciosamente,\n*Thiago* — Balão da Informática Castelo",
+      "protegido": true
+    },
+    {
+      "id": "marcos",
+      "nome": "Marcos",
+      "cargo": "Vendas",
+      "assinatura": "Atenciosamente,\n*Marcos* — Balão da Informática Castelo",
+      "protegido": true
+    },
+    {
+      "id": "julia",
+      "nome": "Julia",
+      "cargo": "Vendas",
+      "assinatura": "Atenciosamente,\n*Julia* — Balão da Informática Castelo",
+      "protegido": true
+    },
+    {
+      "id": "gabriel",
+      "nome": "Gabriel",
+      "cargo": "Vendas",
+      "assinatura": "Atenciosamente,\n*Gabriel* — Balão da Informática Castelo",
+      "protegido": true
+    },
+    {
+      "id": "wendell",
+      "nome": "Wendell",
+      "cargo": "Vendas",
+      "assinatura": "Atenciosamente,\n*Wendell* — Balão da Informática Castelo",
+      "protegido": true
+    },
+    {
       "id": "brendon",
       "nome": "Brendon",
-      "cargo": "Consultor de Vendas",
+      "cargo": "Vendas",
       "assinatura": "Atenciosamente,\n*Brendon* — Balão da Informática Castelo",
       "protegido": true
     }

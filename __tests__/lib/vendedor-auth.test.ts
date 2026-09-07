@@ -58,6 +58,24 @@ describe("registro de vendedores", () => {
     const slugs = VENDEDORES.map((v) => v.slug);
     expect(new Set(slugs).size).toBe(slugs.length);
   });
+
+  it("toda a equipe está cadastrada e cada um tem a própria variável de senha", () => {
+    const slugs = VENDEDORES.map((v) => v.slug).sort();
+    expect(slugs).toEqual(
+      ["brendon", "gabriel", "julia", "marcos", "thiago", "wendell"].sort()
+    );
+
+    // Duas pessoas compartilharem a mesma variável faria uma senha abrir a
+    // página da outra.
+    const envs = VENDEDORES.map((v) => v.envSenha);
+    expect(new Set(envs).size).toBe(envs.length);
+  });
+
+  it("cada vendedor assina com o próprio nome", () => {
+    for (const vendedor of VENDEDORES) {
+      expect(vendedor.assinatura).toContain(vendedor.nome);
+    }
+  });
 });
 
 describe("senha do vendedor", () => {
