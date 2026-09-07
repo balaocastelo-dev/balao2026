@@ -1515,7 +1515,59 @@ if (CHROME_PATH) {
   );
 }
 
+// O Chromium tranca a pasta de perfil enquanto roda, para dois processos nao
+// corromperem a mesma sessao. Se ele morre de forma abrupta — container
+// derrubado num deploy, VPS reiniciada, OOM — a trava fica para tras. No boot
+// seguinte ele encontra a trava, acha que outro Chromium esta usando o perfil
+// e se recusa a abrir:
+//
+//   "The profile appears to be in use by another Chromium process (245) on
+//    another computer (caaf34be0153)"
+//
+// O painel entao fica em "disconnected" para sempre, sem QR Code. Como aqui o
+// perfil e usado por um processo so, uma trava sobrando e sempre resto de
+// execucao anterior — limpar e seguro e evita ter que apagar a sessao inteira
+// (o que custaria ler o QR Code de novo).
+const ARQUIVOS_DE_TRAVA = ["SingletonLock", "SingletonCookie", "SingletonSocket"];
+
+function limparTravasDoPerfil(dir = AUTH_DIR) {
+  if (!fs.existsSync(dir)) return 0;
+
+  let removidas = 0;
+  let entradas = [];
+  try {
+    entradas = fs.readdirSync(dir, { withFileTypes: true });
+  } catch {
+    return 0;
+  }
+
+  for (const entrada of entradas) {
+    const caminho = path.join(dir, entrada.name);
+    if (ARQUIVOS_DE_TRAVA.includes(entrada.name)) {
+      try {
+        // force:true da conta de symlink quebrado, que e como o Chromium
+        // costuma deixar o SingletonLock no Linux.
+        fs.rmSync(caminho, { force: true });
+        removidas += 1;
+      } catch (error) {
+        console.warn("[whatsapp] Nao consegui remover a trava", caminho, "-", error.message);
+      }
+    } else if (entrada.isDirectory()) {
+      removidas += limparTravasDoPerfil(caminho);
+    }
+  }
+
+  return removidas;
+}
+
 function buildWhatsAppClient() {
+  const travas = limparTravasDoPerfil();
+  if (travas > 0) {
+    console.log(
+      `[whatsapp] ${travas} trava(s) de perfil de execucao anterior removida(s).`
+    );
+  }
+
   // null => deixa o Puppeteer usar o navegador que ele mesmo baixou.
   const executablePath = CHROME_PATH || undefined;
   return new Client({

@@ -51,7 +51,14 @@ msg "Construindo a imagem"
 docker build -t "$CONTAINER" "$CODIGO/whatsapp-server"
 
 msg "Trocando o container"
-docker rm -f "$CONTAINER" >/dev/null 2>&1 || true
+# Para com calma antes de remover: 'docker rm -f' mata o Chromium na hora, e ele
+# deixa a trava do perfil para tras — no boot seguinte o navegador se recusa a
+# abrir e o painel fica sem QR Code. O servidor tambem limpa essas travas ao
+# subir, mas encerrar direito evita o problema na origem.
+if docker ps -a --format '{{.Names}}' | grep -qx "$CONTAINER"; then
+  docker stop -t 20 "$CONTAINER" >/dev/null 2>&1 || true
+  docker rm -f "$CONTAINER" >/dev/null 2>&1 || true
+fi
 docker run -d \
   --name "$CONTAINER" \
   --restart unless-stopped \
