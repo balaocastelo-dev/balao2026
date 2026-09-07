@@ -1686,6 +1686,15 @@ function attachWhatsAppClientEvents(client) {
     whatsappState.connected = false;
     whatsappState.qrCode = null;
     whatsappState.rawQr = null;
+    // Cair DEPOIS de conectado tem causa diferente de nao subir: costuma ser
+    // o navegador morto por falta de memoria no meio da sincronizacao, ou
+    // sessao encerrada no celular. Registrar o motivo evita ficar no escuro,
+    // porque daqui de fora "qr" de novo parece so "esperando leitura".
+    whatsappState.ultimoErro = {
+      mensagem: `Sessao caiu depois de conectada. Motivo: ${reason}`,
+      navegador: CHROME_PATH || "(nenhum encontrado)",
+      quando: new Date().toISOString(),
+    };
     emitState();
     emitToast(`WhatsApp desconectado: ${reason}`);
 

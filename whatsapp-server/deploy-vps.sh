@@ -20,6 +20,19 @@ CONTAINER="${CONTAINER:-balao-whats}"
 PORTA="${PORTA:-4100}"
 ORIGENS="${ORIGENS:-https://www.balao.info,https://balao.info}"
 
+# Teto de memoria do container.
+#
+# A primeira sincronizacao do WhatsApp Web e o momento mais pesado: o Chromium
+# carrega o historico de conversas de uma vez e passa facil de 3 GB numa conta
+# de loja. Se o teto for baixo, o kernel mata o navegador no meio — a sessao
+# recem-lida cai e o painel volta a pedir QR Code, parecendo que a leitura
+# "nao pegou".
+#
+# Numa VPS de 8 GB, 6 GB aqui deixam folga para o sistema. /dev/shm entra
+# nessa conta e o Chromium usa bastante: 2 GB evita travar so por causa disso.
+MEMORIA="${MEMORIA:-6g}"
+SHM="${SHM:-2g}"
+
 msg() { printf '\n\033[1;32m==> %s\033[0m\n' "$1"; }
 erro() { printf '\n\033[1;31m[ERRO] %s\033[0m\n' "$1" >&2; exit 1; }
 
@@ -56,6 +69,16 @@ msg "Trocando o container"
 # abrir e o painel fica sem QR Code. O servidor tambem limpa essas travas ao
 # subir, mas encerrar direito evita o problema na origem.
 if docker ps -a --format '{{.Names}}' | grep -qx "$CONTAINER"; then
+  # Antes de descartar, olha se o container anterior morreu por falta de
+  # memoria — e o motivo mais comum de a sessao cair no meio da primeira
+  # sincronizacao, e some sem deixar rastro quando o container e removido.
+  if [ "$(docker inspect -f '{{.State.OOMKilled}}' "$CONTAINER" 2>/dev/null)" = "true" ]; then
+    echo
+    echo "  ATENCAO: o container anterior foi morto por falta de memoria."
+    echo "  Subindo agora com MEMORIA=$MEMORIA. Se repetir, aumente:"
+    echo "    MEMORIA=7g bash deploy-vps.sh"
+    echo
+  fi
   docker stop -t 20 "$CONTAINER" >/dev/null 2>&1 || true
   docker rm -f "$CONTAINER" >/dev/null 2>&1 || true
 fi
@@ -67,8 +90,8 @@ docker run -d \
   -e DATA_ROOT=/dados \
   -e WHATSAPP_PANEL_ALLOWED_ORIGIN="$ORIGENS" \
   -e TZ=America/Sao_Paulo \
-  --memory=3g \
-  --shm-size=1g \
+  --memory="$MEMORIA" \
+  --shm-size="$SHM" \
   "$CONTAINER"
 
 msg "Esperando o servidor responder"
@@ -87,8 +110,11 @@ if [ "$ok" -eq 1 ]; then
   echo "internet com HTTPS e o Cloudflare Tunnel (ou o Nginx). Sem isso, o site"
   echo "nao alcanca este servidor."
   echo
+  echo "Memoria:   teto de $MEMORIA (/dev/shm: $SHM)"
+  echo
   echo "Logs:      docker logs -f $CONTAINER"
   echo "Reiniciar: docker restart $CONTAINER"
+  echo "Uso agora: docker stats --no-stream $CONTAINER"
 else
   erro "O servidor nao respondeu. Veja: docker logs $CONTAINER"
 fi
