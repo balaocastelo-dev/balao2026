@@ -217,3 +217,31 @@ montado no caminho certo (`/app/.wwebjs_auth`).
 **O WhatsApp desconecta sozinho depois de um tempo**
 Normalmente é o servidor tendo dormido (plano free) ou falta de memória. Veja os
 requisitos no começo deste documento.
+
+---
+
+## Espaço em disco (importante)
+
+O servidor grava em `whatsapp-server/data/media` **toda** foto, vídeo, áudio e
+documento que passa pelo WhatsApp — é o que faz a mídia continuar aparecendo
+quando alguém recarrega a página. Numa loja com movimento, isso são alguns GB
+por mês.
+
+Para o disco não encher e derrubar o atendimento, o servidor faz faxina
+sozinho: no boot e a cada 6 horas, apaga o que passou do prazo e, se ainda
+estiver acima do teto, remove os arquivos mais antigos até caber. **O histórico
+da conversa permanece** — some apenas o arquivo guardado no servidor.
+
+Quando o uso passa de 80% do teto, quem estiver com o painel aberto vê uma
+faixa amarela de aviso.
+
+### Variáveis
+
+| Variável | Padrão | O que faz |
+| --- | --- | --- |
+| `MEDIA_RETENCAO_DIAS` | `60` | Apaga mídia mais antiga que isso |
+| `MEDIA_LIMITE_MB` | `20000` (20 GB) | Teto da pasta; acima disso, os mais antigos saem. Mínimo aceito: 100 MB |
+| `MEDIA_LIMPEZA_HORAS` | `6` | De quanto em quanto tempo a faxina roda |
+
+Numa VPS de 100 GB, os padrões funcionam sem você mexer. Se o disco for menor,
+reduza `MEDIA_LIMITE_MB` para algo em torno de um terço do disco total.

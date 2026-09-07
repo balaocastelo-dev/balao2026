@@ -358,6 +358,17 @@ export default function CrmWhatsAppClient({
   const [abaAtual, setAbaAtual] = useState<
     "catalogo" | "fotos" | "respostas" | "vendedores" | "etiquetas" | "disparo" | "cliente"
   >("catalogo");
+  // Uso da pasta de mídia no servidor. Disco cheio derruba o atendimento, e
+  // quem percebe primeiro é quem está com o painel aberto.
+  const [armazenamento, setArmazenamento] = useState<{
+    mb: number;
+    limiteMb: number;
+    percentual: number;
+    retencaoDias: number;
+    alerta: boolean;
+  } | null>(null);
+  const [avisoDiscoFechado, setAvisoDiscoFechado] = useState(false);
+
   const [filtroNaoLidas, setFiltroNaoLidas] = useState(false);
   // A caixa é compartilhada (é o número da loja), então cada vendedor precisa
   // de um jeito rápido de ver só o que está com ele.
@@ -840,6 +851,10 @@ export default function CrmWhatsAppClient({
     socket.on("whatsapp:vendedores", (lista: any[]) => {
       setVendedoresCarregados(true);
       if (Array.isArray(lista)) setVendedores(lista);
+    });
+
+    socket.on("whatsapp:armazenamento", (dados: any) => {
+      if (dados && typeof dados === "object") setArmazenamento(dados);
     });
 
     socket.on("whatsapp:kanban", (mapa: Record<string, string>) => {
@@ -1950,6 +1965,29 @@ export default function CrmWhatsAppClient({
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* AVISO DE DISCO: a pasta de mídia do servidor está perto do teto.
+          Aparece para quem estiver com o painel aberto, porque disco cheio
+          derruba o atendimento de todo mundo. */}
+      {armazenamento?.alerta && !avisoDiscoFechado && (
+        <div className="bg-[#fff3cd] border-b border-[#ffeeba] px-4 py-2 flex items-center gap-3 shrink-0">
+          <span className="text-base">⚠️</span>
+          <p className="text-xs text-[#856404] flex-1 leading-relaxed">
+            <b>Espaço de mídia quase no limite:</b> {armazenamento.mb} MB de{" "}
+            {armazenamento.limiteMb} MB ({armazenamento.percentual}%). O servidor já
+            apaga sozinho o que tem mais de {armazenamento.retencaoDias} dias — se
+            continuar subindo, avise quem cuida do site para reduzir esse prazo ou
+            aumentar o disco.
+          </p>
+          <button
+            onClick={() => setAvisoDiscoFechado(true)}
+            title="Esconder até recarregar a página"
+            className="text-[#856404] hover:text-[#533f03] text-xs font-bold px-2 py-0.5 rounded cursor-pointer"
+          >
+            ✕
+          </button>
         </div>
       )}
 

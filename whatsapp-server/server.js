@@ -336,6 +336,143 @@ function emitVendedores() {
   io.emit("whatsapp:vendedores", store.vendedores.map(publicVendedor));
 }
 
+// ============================================================
+// Faxina da pasta de midia.
+//
+// Toda foto, video, audio e documento que passa pelo WhatsApp e gravado em
+// data/media para sobreviver ao refresh da pagina. Isso so cresce: numa loja
+// com movimento sao alguns GB por mes, e disco cheio derruba o servidor.
+// Aqui a pasta e podada por idade e, se ainda passar do teto, pelos arquivos
+// mais antigos primeiro. O historico da conversa fica — some so o arquivo.
+// ============================================================
+
+const MEDIA_DIR = path.join(__dirname, "data", "media");
+
+const MEDIA_RETENCAO_DIAS = Math.max(
+  1,
+  Number(process.env.MEDIA_RETENCAO_DIAS || 60) || 60
+);
+const MEDIA_LIMITE_MB = Math.max(
+  100,
+  Number(process.env.MEDIA_LIMITE_MB || 20000) || 20000
+);
+const MEDIA_LIMPEZA_HORAS = Math.max(
+  1,
+  Number(process.env.MEDIA_LIMPEZA_HORAS || 6) || 6
+);
+// A partir daqui o painel mostra aviso para quem administra.
+const MEDIA_ALERTA_PERCENTUAL = 80;
+
+function listarArquivosMidia() {
+  if (!fs.existsSync(MEDIA_DIR)) return [];
+  let nomes = [];
+  try {
+    nomes = fs.readdirSync(MEDIA_DIR);
+  } catch (error) {
+    console.warn("[midia] Nao consegui ler a pasta:", error.message);
+    return [];
+  }
+
+  const arquivos = [];
+  for (const nome of nomes) {
+    const caminho = path.join(MEDIA_DIR, nome);
+    try {
+      const info = fs.statSync(caminho);
+      if (info.isFile()) {
+        arquivos.push({ caminho, bytes: info.size, mtime: info.mtimeMs });
+      }
+    } catch {
+      // Arquivo sumiu no meio da varredura — segue o baile.
+    }
+  }
+  return arquivos;
+}
+
+function estadoArmazenamento() {
+  const arquivos = listarArquivosMidia();
+  const bytes = arquivos.reduce((total, item) => total + item.bytes, 0);
+  const mb = Math.round((bytes / (1024 * 1024)) * 10) / 10;
+  const percentual = Math.min(999, Math.round((mb / MEDIA_LIMITE_MB) * 100));
+
+  return {
+    arquivos: arquivos.length,
+    mb,
+    limiteMb: MEDIA_LIMITE_MB,
+    percentual,
+    retencaoDias: MEDIA_RETENCAO_DIAS,
+    alerta: percentual >= MEDIA_ALERTA_PERCENTUAL,
+  };
+}
+
+function emitArmazenamento() {
+  io.emit("whatsapp:armazenamento", estadoArmazenamento());
+}
+
+function limparMidiaAntiga() {
+  const arquivos = listarArquivosMidia();
+  if (!arquivos.length) return { removidos: 0, bytesLiberados: 0 };
+
+  const limiteIdade = Date.now() - MEDIA_RETENCAO_DIAS * 24 * 60 * 60 * 1000;
+  let removidos = 0;
+  let bytesLiberados = 0;
+
+  const apagar = (item) => {
+    try {
+      fs.unlinkSync(item.caminho);
+      removidos += 1;
+      bytesLiberados += item.bytes;
+      return true;
+    } catch (error) {
+      console.warn("[midia] Nao consegui apagar", item.caminho, "-", error.message);
+      return false;
+    }
+  };
+
+  // 1) Por idade.
+  const restantes = [];
+  for (const item of arquivos) {
+    if (item.mtime < limiteIdade) {
+      if (!apagar(item)) restantes.push(item);
+    } else {
+      restantes.push(item);
+    }
+  }
+
+  // 2) Se ainda passa do teto, os mais antigos saem ate caber.
+  const limiteBytes = MEDIA_LIMITE_MB * 1024 * 1024;
+  let bytesAtuais = restantes.reduce((total, item) => total + item.bytes, 0);
+  if (bytesAtuais > limiteBytes) {
+    restantes.sort((a, b) => a.mtime - b.mtime);
+    for (const item of restantes) {
+      if (bytesAtuais <= limiteBytes) break;
+      if (apagar(item)) bytesAtuais -= item.bytes;
+    }
+  }
+
+  if (removidos > 0) {
+    const mbLiberados = Math.round((bytesLiberados / (1024 * 1024)) * 10) / 10;
+    console.log(
+      `[midia] Faxina: ${removidos} arquivo(s) removido(s), ${mbLiberados} MB liberados.`
+    );
+    emitArmazenamento();
+  }
+
+  const estado = estadoArmazenamento();
+  if (estado.alerta) {
+    console.warn(
+      `[midia] ATENCAO: ${estado.mb} MB de ${estado.limiteMb} MB (${estado.percentual}%). ` +
+        `Reduza MEDIA_RETENCAO_DIAS (hoje ${MEDIA_RETENCAO_DIAS}) ou aumente o disco.`
+    );
+  }
+
+  return { removidos, bytesLiberados };
+}
+
+function agendarLimpezaMidia() {
+  limparMidiaAntiga();
+  setInterval(limparMidiaAntiga, MEDIA_LIMPEZA_HORAS * 60 * 60 * 1000);
+}
+
 function emitLabels() {
   io.emit("whatsapp:labels", { labels: store.labels, chatLabels: store.chatLabels });
 }
@@ -1300,6 +1437,7 @@ function schedulePendingMessage(item) {
 
 loadStore();
 ensureVendedoresFixos();
+agendarLimpezaMidia();
 
 const CHROME_PATH = process.env.CHROME_PATH || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 
@@ -1692,6 +1830,7 @@ app.get(["/health", "/status", "/api/status", "/api/crm/status"], (_req, res) =>
     session: whatsappState.session,
     phoneNumber: whatsappState.phoneNumber,
     conta: whatsappState.phoneNumber ? { numero: whatsappState.phoneNumber } : null,
+    armazenamento: estadoArmazenamento(),
   });
 });
 
@@ -1896,6 +2035,7 @@ io.on("connection", (socket) => {
   socket.emit("whatsapp:chats", store.chats);
   socket.emit("whatsapp:status-feed", store.statusFeed);
   socket.emit("whatsapp:vendedores", store.vendedores.map(publicVendedor));
+  socket.emit("whatsapp:armazenamento", estadoArmazenamento());
 
   socket.on("panel:bootstrap", () => {
     socket.emit("whatsapp:state", whatsappState);
