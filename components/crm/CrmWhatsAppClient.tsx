@@ -149,13 +149,31 @@ export interface CrmWhatsAppClientProps {
    * PIN dentro da própria tela) — é o que a rota /crm usa.
    */
   vendedorFixo?: CrmVendedorFixo;
+  /**
+   * Visão de administração (/crm), onde a senha do painel já foi validada no
+   * servidor. Dispensa o portão de PIN: exigir uma segunda senha ali só
+   * trancava quem precisa ler o QR Code e cadastrar a equipe — ainda mais
+   * porque vendedor de página pessoal não tem PIN nenhum.
+   * Diferente de `vendedorFixo`, mantém a aba de gestão de vendedores.
+   */
+  admin?: boolean;
   /** O que fazer no botão de sair. Sem isso, apenas volta ao portão de PIN. */
   onSair?: () => void;
   sairLabel?: string;
 }
 
+// Identidade usada no cabeçalho quando quem está na tela é a administração e
+// ainda não escolheu atender como alguém da equipe.
+const VENDEDOR_ADMIN: CrmVendedor = {
+  id: "admin",
+  nome: "Administração",
+  cargo: "Painel",
+  assinatura: "",
+};
+
 export default function CrmWhatsAppClient({
   vendedorFixo,
+  admin,
   onSair,
   sairLabel,
 }: CrmWhatsAppClientProps = {}) {
@@ -223,10 +241,11 @@ export default function CrmWhatsAppClient({
   const vendedorAtivo0 =
     vendedores.find((v) => String(v.id) === String(vendedorAtivoId)) ||
     vendedorFixoComoRegistro ||
-    null;
-  const vendedorAutenticado = vendedorFixo
-    ? true
-    : Boolean(vendedorAtivoId) && Boolean(vendedorAtivo0);
+    (admin ? VENDEDOR_ADMIN : null);
+  const vendedorAutenticado =
+    vendedorFixo || admin
+      ? true
+      : Boolean(vendedorAtivoId) && Boolean(vendedorAtivo0);
 
   const sairDoVendedor = () => {
     // Na página pessoal, sair significa encerrar a sessão no servidor.
@@ -1036,10 +1055,13 @@ export default function CrmWhatsAppClient({
     // Numa página pessoal, cair no `vendedores[0]` assinaria as mensagens com
     // o nome de outra pessoa. O registro do próprio vendedor vem antes.
     if (vendedorFixoComoRegistro) return vendedorFixoComoRegistro;
+    // Na administração, idem: melhor assinar como "Administração" do que sair
+    // mandando mensagem no nome do primeiro vendedor da lista.
+    if (admin) return VENDEDOR_ADMIN;
     if (!vendedores.length) return null;
     return vendedores[0];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [vendedores, vendedorAtivoId, vendedorFixo?.id, vendedorFixo?.nome, vendedorFixo?.assinatura]);
+  }, [vendedores, vendedorAtivoId, admin, vendedorFixo?.id, vendedorFixo?.nome, vendedorFixo?.assinatura]);
 
   // Open Context Menu
   const openContextMenu = (
@@ -1812,13 +1834,13 @@ export default function CrmWhatsAppClient({
           <button
             onClick={sairDoVendedor}
             title={
-              vendedorFixo
+              vendedorFixo || admin
                 ? "Encerrar a sessão neste computador"
                 : "Trocar de vendedor (pede o PIN de novo)"
             }
             className="bg-white/90 hover:bg-white text-[#0a6e3d] rounded-full px-2.5 py-1 text-xs font-bold transition-all shadow-sm cursor-pointer"
           >
-            {vendedorFixo ? `🚪 ${sairLabel || "Sair"}` : "🔁 Trocar"}
+            {vendedorFixo || admin ? `🚪 ${sairLabel || "Sair"}` : "🔁 Trocar"}
           </button>
 
           <label className="inline-flex items-center gap-1.5 text-xs font-semibold cursor-pointer select-none">

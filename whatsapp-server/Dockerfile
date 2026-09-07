@@ -10,7 +10,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       fonts-liberation \
       fonts-noto-color-emoji \
       tini \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    # Falha o build aqui se o navegador nao veio. Sem esta checagem, a imagem
+    # subia "com sucesso" e o painel ficava em "disconnected" pra sempre, sem
+    # QR Code e sem dizer o motivo — o erro so aparecia nos logs do container.
+    && (test -x /usr/bin/chromium \
+        || test -x /usr/bin/chromium-browser \
+        || (echo "ERRO: nenhum Chromium instalado nesta imagem" >&2 && exit 1))
 
 # Sem isso o npm install baixaria um segundo Chrome (~150 MB) que nao seria usado.
 ENV PUPPETEER_SKIP_DOWNLOAD=true

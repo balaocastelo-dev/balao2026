@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import CrmWhatsAppClient from "@/components/crm/CrmWhatsAppClient";
+import CrmAdminClient from "@/components/crm/CrmAdminClient";
 import PainelLoginForm from "@/components/PainelLoginForm";
 import { isPainelAuthenticated } from "@/lib/painel-auth";
 
@@ -63,7 +63,7 @@ export default async function CrmPage() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
-      <CrmWhatsAppClient />
+      <CrmAdminClient />
     </div>
   );
 }

@@ -195,6 +195,9 @@ const whatsappState = {
   connected: false,
   session: false,
   phoneNumber: null,
+  // Ultima falha ao subir o cliente, exposta no /status para dar para
+  // diagnosticar de fora sem abrir os logs do container.
+  ultimoErro: null,
 };
 let whatsappClient = null;
 let isInitializingClient = false;
@@ -1471,10 +1474,50 @@ loadStore();
 ensureVendedoresFixos();
 agendarLimpezaMidia();
 
-const CHROME_PATH = process.env.CHROME_PATH || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+// Onde procurar o navegador, em ordem. O whatsapp-web.js controla um Chrome
+// de verdade; sem achar um, o initialize() falha e o painel fica em
+// "disconnected" pra sempre, sem QR e sem dizer por que. Cada distro/imagem
+// poe o binario num lugar (chromium, chromium-browser, google-chrome...),
+// entao vale procurar em todos antes de desistir.
+const CHROME_CANDIDATOS = [
+  process.env.CHROME_PATH,
+  "/usr/bin/chromium",
+  "/usr/bin/chromium-browser",
+  "/usr/bin/google-chrome",
+  "/usr/bin/google-chrome-stable",
+  "/snap/bin/chromium",
+  "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+].filter(Boolean);
+
+function acharChrome() {
+  for (const caminho of CHROME_CANDIDATOS) {
+    try {
+      if (fs.existsSync(caminho)) return caminho;
+    } catch {
+      // Caminho invalido para esta plataforma — tenta o proximo.
+    }
+  }
+  return null;
+}
+
+const CHROME_PATH = acharChrome();
+
+if (CHROME_PATH) {
+  console.log(`[whatsapp] Navegador: ${CHROME_PATH}`);
+} else {
+  console.warn(
+    "[whatsapp] Nenhum navegador encontrado nos caminhos conhecidos:\n  " +
+      CHROME_CANDIDATOS.join("\n  ") +
+      "\n  Vou tentar o Chromium que vem com o Puppeteer. Se o painel ficar em" +
+      "\n  'disconnected' sem gerar QR Code, e isto: instale o Chromium ou" +
+      "\n  aponte CHROME_PATH para o executavel."
+  );
+}
 
 function buildWhatsAppClient() {
-  const executablePath = fs.existsSync(CHROME_PATH) ? CHROME_PATH : undefined;
+  // null => deixa o Puppeteer usar o navegador que ele mesmo baixou.
+  const executablePath = CHROME_PATH || undefined;
   return new Client({
     authStrategy: new LocalAuth({
       clientId: "balao-whatsapp-panel",
@@ -1560,6 +1603,8 @@ function attachWhatsAppClientEvents(client) {
     whatsappState.session = true;
     whatsappState.qrCode = null;
     whatsappState.rawQr = null;
+    // Conectou: a falha anterior nao interessa mais.
+    whatsappState.ultimoErro = null;
     whatsappState.phoneNumber = client.info?.wid?.user || null;
     emitState();
     emitToast("WhatsApp conectado e pronto para uso.");
@@ -1770,6 +1815,14 @@ async function initializeWhatsAppClient(options = {}) {
     whatsappState.status = "disconnected";
     whatsappState.connected = false;
     whatsappState.qrCode = null;
+    // Guarda o motivo para aparecer no /status. Sem isso, "disconnected" e
+    // tudo que se sabe de fora, e so os logs do container contam o porque —
+    // o que faz o diagnostico remoto virar adivinhacao.
+    whatsappState.ultimoErro = {
+      mensagem: String(error?.message || error).slice(0, 400),
+      navegador: CHROME_PATH || "(nenhum encontrado)",
+      quando: new Date().toISOString(),
+    };
     emitState();
     emitToast("Falha ao iniciar o cliente do WhatsApp. Tentando novamente...");
     // Antes disso, uma falha aqui (Puppeteer/Chrome instável, timeout de rede)
@@ -1863,6 +1916,8 @@ app.get(["/health", "/status", "/api/status", "/api/crm/status"], (_req, res) =>
     phoneNumber: whatsappState.phoneNumber,
     conta: whatsappState.phoneNumber ? { numero: whatsappState.phoneNumber } : null,
     armazenamento: estadoArmazenamento(),
+    navegador: CHROME_PATH || null,
+    ultimoErro: whatsappState.ultimoErro || null,
   });
 });
 
