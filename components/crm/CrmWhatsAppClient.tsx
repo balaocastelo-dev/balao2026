@@ -24,7 +24,7 @@ import {
   RESPOSTAS_BASE,
   VENDEDORES_BASE,
 } from "@/lib/crm-defaults";
-import { type Category, buildCategoryTree } from "@/lib/utils";
+import { type Category, buildCategoryTree, parsePriceToNumber } from "@/lib/utils";
 
 interface CtxMenuItem {
   label?: string;
@@ -639,10 +639,13 @@ export default function CrmWhatsAppClient({
           setDiagnosticoCatalogo(null);
         }
         const list: CrmProdutoCatalogo[] = rows.map((p: any) => {
-            const precoNum =
-              typeof p.price === "number"
-                ? p.price
-                : parseFloat(String(p.price).replace(/[^0-9.]/g, "")) || 0;
+            // O preço vem do banco como texto no formato brasileiro ("14,70").
+            // A conversão que estava aqui apagava tudo que não fosse dígito ou
+            // ponto — a vírgula sumia e "14,70" virava 1470. O CRM anunciava
+            // R$ 1.470,00 um produto de R$ 14,70, para o cliente, no WhatsApp.
+            // parsePriceToNumber é a mesma função que o site usa e entende os
+            // dois formatos.
+            const precoNum = parsePriceToNumber(p.price);
             const custoNum =
               typeof p.cost === "number" && p.cost > 0
                 ? p.cost
@@ -985,7 +988,8 @@ export default function CrmWhatsAppClient({
       atualizarStatusMensagem(
         payload.tempId,
         payload.success ? "sent" : "failed",
-        payload.id
+        payload.id,
+        payload.body
       );
       if (!payload.success) {
         showToast(`⛔ Mensagem não chegou ao WhatsApp: ${payload.error || "falha desconhecida"}`);
@@ -1485,8 +1489,16 @@ export default function CrmWhatsAppClient({
   const atualizarStatusMensagem = (
     id: string,
     status: CrmMensagem["status"],
-    idReal?: string | null
+    idReal?: string | null,
+    bodyReal?: string | null
   ) => {
+    const corrigir = (m: CrmMensagem): CrmMensagem => ({
+      ...m,
+      status,
+      // O texto que o cliente recebeu de fato manda no que aparece na tela.
+      body: bodyReal || m.body,
+    });
+
     setMensagens((prev) => {
       // Assim que o WhatsApp confirma o envio, o balão otimista assume o id
       // DEFINITIVO da mensagem.
@@ -1504,12 +1516,12 @@ export default function CrmWhatsAppClient({
         if (jaExiste) {
           return prev
             .filter((m) => m.id !== id)
-            .map((m) => (m.id === trocarPara ? { ...m, status } : m));
+            .map((m) => (m.id === trocarPara ? corrigir(m) : m));
         }
-        return prev.map((m) => (m.id === id ? { ...m, id: trocarPara, status } : m));
+        return prev.map((m) => (m.id === id ? { ...corrigir(m), id: trocarPara } : m));
       }
 
-      return prev.map((m) => (m.id === id ? { ...m, status } : m));
+      return prev.map((m) => (m.id === id ? corrigir(m) : m));
     });
   };
 

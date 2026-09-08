@@ -596,9 +596,19 @@ function emitToast(message) {
 // clicava, mesmo quando o whatsappClient.sendMessage() falhava de verdade
 // (JID inválido, mídia que não baixou, sessão instável) — o vendedor via
 // a mensagem "certinha" no CRM enquanto o cliente real não recebia nada.
-function emitSendAck({ tempId, chatId, success, id, error }) {
+function emitSendAck({ tempId, chatId, success, id, error, body }) {
   if (!tempId) return;
-  io.emit("whatsapp:send-ack", { tempId, chatId, success, id: id || null, error: error || null });
+  io.emit("whatsapp:send-ack", {
+    tempId,
+    chatId,
+    success,
+    id: id || null,
+    error: error || null,
+    // Texto REALMENTE enviado ao cliente. O painel usa isso para corrigir o
+    // balao otimista: quando ele monta um texto proprio e o servidor manda
+    // outro, a mesma oferta aparecia como duas mensagens diferentes na tela.
+    body: body || null,
+  });
 }
 
 function emitDisparoStatus(ativo) {
@@ -707,6 +717,32 @@ const SPEC_KEYS_INTERNOS = /^(custo_origem|markup|qualidade_fotos)\s*:/i;
 function filtrarSpecsInternos(specs) {
   if (!Array.isArray(specs)) return [];
   return specs.filter((linha) => !SPEC_KEYS_INTERNOS.test(String(linha || "")));
+}
+
+/**
+ * Monta a mensagem de oferta de um produto.
+ *
+ * Existe em um lugar so de proposito: o texto estava escrito em tres pontos
+ * diferentes (duas vezes aqui e uma no painel) e eles sairam de sincronia —
+ * o painel dizia "Oferta Balao da Informatica:" e "Para garantir a reserva",
+ * o servidor dizia "Oferta Balao da Informatica" e "Para reservar". Como o
+ * painel mostrava o proprio texto e o cliente recebia o do servidor, a mesma
+ * oferta aparecia como duas mensagens distintas na tela do vendedor.
+ */
+function montarTextoDoProduto({ nome, preco, specs, obs }) {
+  const precoFmt = Number(preco || 0).toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+  });
+  const specsVisiveis = filtrarSpecsInternos(specs);
+  const linhasSpecs = specsVisiveis.length ? `\n• ${specsVisiveis.join("\n• ")}` : "";
+  const linhaObs = obs && String(obs).trim() ? `\n\n_Obs: ${String(obs).trim()}_` : "";
+
+  return (
+    `⚡ *Oferta Balão da Informática*\n*${nome}*\n\n` +
+    `💵 *Preço Especial:* *R$ ${precoFmt}*${linhasSpecs}${linhaObs}\n\n` +
+    `📍 Pronta entrega na loja do Castelo Campinas!\n` +
+    `Para reservar ou tirar dúvidas, é só responder aqui! 🎈`
+  );
 }
 
 function normalizeNumber(value) {
@@ -2551,11 +2587,12 @@ app.post(["/api/enviar-produto", "/api/crm/enviar-produto"], async (req, res) =>
         erro: `Preço de envio (R$ ${precoFinal.toFixed(2)}) não pode ser menor ou igual ao custo (R$ ${custo.toFixed(2)}).`,
       });
     }
-    const obsTxt = obs ? `\n\n_Obs: ${obs}_` : "";
-    const specsVisiveis = filtrarSpecsInternos(prod.specs);
-    const specs = specsVisiveis.length ? `\n• ${specsVisiveis.join("\n• ")}` : "";
-    const precoFmt = precoFinal.toLocaleString("pt-BR", { minimumFractionDigits: 2 });
-    const text = `⚡ *Oferta Balão da Informática*\n*${prod.nome}*\n\n💵 *Preço Especial:* *R$ ${precoFmt}*${specs}${obsTxt}\n\n📍 Pronta entrega na loja do Castelo Campinas!\nPara reservar ou tirar dúvidas, é só responder aqui! 🎈`;
+    const text = montarTextoDoProduto({
+      nome: prod.nome,
+      preco: precoFinal,
+      specs: prod.specs,
+      obs,
+    });
 
     let mediaSent = false;
     if (prod.imagem && prod.imagem.startsWith("http")) {
@@ -3284,12 +3321,12 @@ io.on("connection", (socket) => {
         emitSendAck({ tempId: payload.tempId, chatId, success: false, error: msg });
         return;
       }
-      const obs = payload.obs ? `\n\n_Obs: ${payload.obs}_` : "";
-      const specsVisiveis = filtrarSpecsInternos(prod.specs);
-      const specs = specsVisiveis.length ? `\n• ${specsVisiveis.join("\n• ")}` : "";
-      const precoFmt = precoFinal.toLocaleString("pt-BR", { minimumFractionDigits: 2 });
-
-      const text = `⚡ *Oferta Balão da Informática*\n*${prod.nome}*\n\n💵 *Preço Especial:* *R$ ${precoFmt}*${specs}${obs}\n\n📍 Pronta entrega na loja do Castelo Campinas!\nPara reservar ou tirar dúvidas, é só responder aqui! 🎈`;
+      const text = montarTextoDoProduto({
+        nome: prod.nome,
+        preco: precoFinal,
+        specs: prod.specs,
+        obs: payload.obs,
+      });
 
       let mediaSent = false;
       let sentId = null;
@@ -3331,7 +3368,8 @@ io.on("connection", (socket) => {
       }
 
       emitToast(`Produto "${prod.nome}" enviado com sucesso!`);
-      emitSendAck({ tempId: payload.tempId, chatId, success: true, id: sentId });
+      // Devolve o texto enviado para o painel corrigir o balao otimista.
+      emitSendAck({ tempId: payload.tempId, chatId, success: true, id: sentId, body: text });
     } catch (error) {
       console.error("Falha ao enviar produto:", error);
       emitToast("⛔ Falha ao enviar produto: " + error.message);
