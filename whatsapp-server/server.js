@@ -307,7 +307,7 @@ function loadStore() {
     store.messages = Array.isArray(parsed.messages)
       ? parsed.messages
           .filter((item) => isRealDirectChatId(item.chatId) && !isStatusMessage(item))
-          .slice(-1000)
+          .slice(-2000)
       : [];
     store.chats = Array.isArray(parsed.chats)
       ? parsed.chats.filter(
@@ -334,29 +334,88 @@ function loadStore() {
   }
 }
 
-function persistStore() {
-  // Bug fix: Limitar mensagens a 2000, arquivando as mais antigas
-  if (store.messages.length > 2000) {
-    const toArchive = store.messages.slice(0, store.messages.length - 2000);
-    store.messages = store.messages.slice(-2000);
-    try {
-      const archiveDir = DATA_DIR;
-      if (!fs.existsSync(archiveDir)) fs.mkdirSync(archiveDir, { recursive: true });
-      const archiveFile = path.join(archiveDir, `messages-archive-${new Date().toISOString().slice(0, 10)}.json`);
-      const existing = fs.existsSync(archiveFile) ? JSON.parse(fs.readFileSync(archiveFile, "utf8")) : [];
-      fs.writeFileSync(archiveFile, JSON.stringify([...existing, ...toArchive], null, 2));
-    } catch (e) {
-      console.warn("[store] Falha ao arquivar mensagens:", e.message);
-    }
-  }
+// ============================================================
+// Historico por conversa.
+//
+// Antes tudo vivia numa lista unica, e o arquivo do painel guardava apenas as
+// 400 mensagens mais recentes DO TOTAL. Com 542 conversas, isso dava menos de
+// uma mensagem por conversa: o vendedor abria um cliente e via a tela vazia,
+// mesmo depois de o historico ter sido baixado do WhatsApp.
+//
+// Agora cada conversa tem o proprio arquivo. Assim da para guardar centenas de
+// mensagens por cliente sem reescrever tudo a cada mensagem nova, e o arquivo
+// do painel volta a ser pequeno.
+// ============================================================
 
+const CONVERSAS_DIR = path.join(DATA_DIR, "conversas");
+const MAX_MENSAGENS_POR_CONVERSA = 500;
+
+function arquivoDaConversa(chatId) {
+  const nome = crypto.createHash("sha1").update(String(chatId)).digest("hex");
+  return path.join(CONVERSAS_DIR, `${nome}.json`);
+}
+
+function lerMensagensDaConversa(chatId) {
+  try {
+    const caminho = arquivoDaConversa(chatId);
+    if (!fs.existsSync(caminho)) return [];
+    const lista = JSON.parse(fs.readFileSync(caminho, "utf8"));
+    return Array.isArray(lista) ? lista : [];
+  } catch (error) {
+    console.warn("[historico] Falha ao ler", chatId, "-", error.message);
+    return [];
+  }
+}
+
+function salvarMensagensDaConversa(chatId, mensagens) {
+  try {
+    if (!fs.existsSync(CONVERSAS_DIR)) fs.mkdirSync(CONVERSAS_DIR, { recursive: true });
+    const ordenadas = [...mensagens]
+      .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0))
+      .slice(-MAX_MENSAGENS_POR_CONVERSA);
+    fs.writeFileSync(arquivoDaConversa(chatId), JSON.stringify(ordenadas));
+    return ordenadas.length;
+  } catch (error) {
+    console.warn("[historico] Falha ao gravar", chatId, "-", error.message);
+    return 0;
+  }
+}
+
+// Gravar em disco a cada mensagem recebida seria custoso demais numa conversa
+// movimentada; o atraso agrupa a rajada numa gravacao so por conversa.
+const gravacoesPendentes = new Map();
+
+function agendarGravacaoDaConversa(chatId) {
+  if (!chatId || gravacoesPendentes.has(chatId)) return;
+
+  gravacoesPendentes.set(
+    chatId,
+    setTimeout(() => {
+      gravacoesPendentes.delete(chatId);
+      const daConversa = store.messages.filter((m) => m.chatId === chatId);
+      if (daConversa.length) {
+        // Junta com o que ja estava gravado: a memoria guarda so as recentes.
+        const guardadas = lerMensagensDaConversa(chatId);
+        const porChave = new Map();
+        [...guardadas, ...daConversa].forEach((m) => {
+          porChave.set(buildMessageFingerprint(m), m);
+        });
+        salvarMensagensDaConversa(chatId, Array.from(porChave.values()));
+      }
+    }, 3000)
+  );
+}
+
+function persistStore() {
   const payload = {
     labels: store.labels,
     signatures: store.signatures,
     quickReplies: store.quickReplies,
     schedules: store.schedules,
     chatLabels: store.chatLabels,
-    messages: store.messages.slice(-400),
+    // Só as recentes ficam aqui, para o arquivo do painel continuar leve. O
+    // histórico de verdade mora em data/conversas/, um arquivo por cliente.
+    messages: store.messages.slice(-2000),
     chats: store.chats,
     statusFeed: store.statusFeed,
     chatAssignments: store.chatAssignments,
@@ -1117,7 +1176,15 @@ function mergeMessages(messages) {
     });
   store.messages = Array.from(seen.values())
     .sort((a, b) => a.timestamp - b.timestamp)
-    .slice(-1000);
+    // Em memória ficam as recentes; o histórico completo de cada cliente vai
+    // para o arquivo da conversa, logo abaixo.
+    .slice(-5000);
+
+  // Grava o histórico das conversas que receberam mensagem agora.
+  const conversasTocadas = new Set(
+    messages.map((m) => m.chatId).filter((id) => id && isRealDirectChatId(id))
+  );
+  conversasTocadas.forEach(agendarGravacaoDaConversa);
 }
 
 function storeMessage(message) {
@@ -1443,6 +1510,86 @@ async function carregarMensagensAntigas(chatId, rodadas = 3) {
   } catch (error) {
     console.warn("[historico] Não consegui puxar mensagens antigas:", error.message);
     return 0;
+  }
+}
+
+/**
+ * Baixa o historico das conversas em segundo plano, das mais recentes para as
+ * mais antigas.
+ *
+ * Sem isto, so tinha historico a conversa que alguem ja tivesse aberto — as
+ * demais apareciam vazias na primeira vez. Roda devagar de proposito: cada
+ * conversa exige varias idas ao WhatsApp, e atropelar isso trava a sessao e
+ * derruba o atendimento de todo mundo.
+ */
+let carregandoHistoricos = false;
+
+async function carregarHistoricosEmSegundoPlano({ limite = 60, porConversa = 60 } = {}) {
+  if (carregandoHistoricos) return { pulado: true };
+  if (!whatsappClient || !whatsappState.connected) return { pulado: true };
+
+  carregandoHistoricos = true;
+  let baixadas = 0;
+  let visitadas = 0;
+
+  try {
+    const alvos = [...store.chats]
+      .sort((a, b) => (b.lastMessageTimestamp || 0) - (a.lastMessageTimestamp || 0))
+      .slice(0, limite);
+
+    for (const resumo of alvos) {
+      if (!whatsappState.connected) break;
+
+      const chatId = resumo.chatId;
+      if (!chatId || !isRealDirectChatId(chatId)) continue;
+
+      // Ja tem historico gravado? Passa para a proxima.
+      if (lerMensagensDaConversa(chatId).length >= 10) continue;
+
+      visitadas += 1;
+      try {
+        const chat = await getChatByIdSafe(chatId);
+        if (!chat || typeof chat.fetchMessages !== "function") continue;
+
+        await carregarMensagensAntigas(chatId, 2);
+        const brutas = await chat.fetchMessages({ limit: porConversa }).catch(() => []);
+        const uteis = (brutas || []).filter((m) => !isStatusMessage(m));
+        if (!uteis.length) continue;
+
+        const { contactName, realNumber } = await resolveContactDetails(chat, chatId);
+        const convertidas = uteis.map((message) => ({
+          id: message.id?._serialized || createId(),
+          chatId,
+          from: message.from,
+          to: message.to || null,
+          body: message.body || "",
+          direction: message.fromMe ? "out" : "in",
+          timestamp: (message.timestamp || Math.floor(Date.now() / 1000)) * 1000,
+          contactName,
+          realNumber,
+          displayNumber: realNumber,
+          hasMedia: Boolean(message.hasMedia),
+          mediaType: message.type || null,
+        }));
+
+        salvarMensagensDaConversa(chatId, convertidas);
+        baixadas += convertidas.length;
+
+        // Respira entre conversas para nao sufocar a sessao do WhatsApp.
+        await sleep(1500);
+      } catch (error) {
+        console.warn("[historico] Falha em", chatId, "-", error.message);
+      }
+    }
+
+    if (baixadas) {
+      console.log(
+        `[historico] Segundo plano: ${baixadas} mensagens de ${visitadas} conversa(s).`
+      );
+    }
+    return { visitadas, baixadas };
+  } finally {
+    carregandoHistoricos = false;
   }
 }
 
@@ -1995,9 +2142,9 @@ async function sendDirectMedia({
     displayNumber: extractRealNumber(targetChatId),
     status: "sent",
   };
-  store.messages.push(outMsg);
-  if (store.messages.length > 5000) store.messages.shift();
-  io.emit("whatsapp:message", outMsg);
+  // Mesmo motivo do envio de texto: pelo storeMessage, para passar pela
+  // deduplicacao e pela gravacao no arquivo da conversa.
+  storeMessage(outMsg);
 
   return sent;
 }
@@ -2254,6 +2401,13 @@ function attachWhatsAppClientEvents(client) {
     emitToast("WhatsApp conectado e pronto para uso.");
     // Só as conversas: o feed de status carrega quando alguém abrir a aba.
     await garantirChatsCarregados({ forcar: true });
+
+    // Em seguida, e sem travar nada, vai baixando o historico das conversas
+    // mais recentes — para o vendedor nao encontrar tela vazia ao abrir um
+    // cliente pela primeira vez. O atraso deixa a conexao assentar antes.
+    setTimeout(() => {
+      carregarHistoricosEmSegundoPlano({ limite: 80 }).catch(() => {});
+    }, 30_000);
   });
 
   client.on("auth_failure", (message) => {
@@ -2973,10 +3127,24 @@ io.on("connection", (socket) => {
       return;
     }
 
+    // Entrega na hora o que ja esta gravado desta conversa, antes de ir ao
+    // WhatsApp. A tela deixa de abrir vazia enquanto a busca acontece.
+    const jaGravadas = lerMensagensDaConversa(chatId);
+    if (jaGravadas.length) {
+      socket.emit("whatsapp:messages", jaGravadas);
+    }
+
     try {
       const chat = await getChatByIdSafe(chatId);
       if (!chat || typeof chat.fetchMessages !== "function") {
-        responder({ ok: false, erro: "Não foi possível abrir esta conversa no WhatsApp." });
+        // Nao deu para falar com o WhatsApp agora — mas se o historico
+        // gravado ja foi entregue acima, a conversa NAO esta vazia e nao ha
+        // erro a mostrar para o vendedor.
+        if (jaGravadas.length) {
+          responder({ ok: true, total: jaGravadas.length, doDisco: true });
+        } else {
+          responder({ ok: false, erro: "Não foi possível abrir esta conversa no WhatsApp." });
+        }
         return;
       }
 
@@ -3009,15 +3177,56 @@ io.on("connection", (socket) => {
       }));
 
       mergeMessages(convertidas);
+
+      // Grava JA, sem esperar o atraso: o vendedor acabou de abrir esta
+      // conversa e o historico precisa estar em disco para a proxima vez.
+      const guardadas = lerMensagensDaConversa(chatId);
+      const porChave = new Map();
+      [...guardadas, ...convertidas].forEach((m) => {
+        porChave.set(buildMessageFingerprint(m), m);
+      });
+      const total = salvarMensagensDaConversa(chatId, Array.from(porChave.values()));
+
       persistStore();
       // Vai para todo mundo: a conversa e do numero da loja, e o historico
       // recem-baixado serve para qualquer vendedor que abrir depois.
       emitMessages();
 
-      responder({ ok: true, total: convertidas.length });
+      responder({ ok: true, total, baixadas: convertidas.length });
     } catch (error) {
       console.error("Falha ao carregar histórico de", chatId, error);
       responder({ ok: false, erro: "Falha ao carregar o histórico." });
+    }
+  });
+
+  // Baixa o historico de MUITAS conversas de uma vez, sob demanda.
+  //
+  // A carga automatica ja roda ao conectar, mas cobre as mais recentes. Isto
+  // e para quando se quer puxar o historico de tudo — vale deixar rodando e
+  // ir atender enquanto isso.
+  socket.on("panel:carregar-todos-historicos", async (payload, callback) => {
+    const limite = Math.min(500, Math.max(10, Number(payload?.limite) || 200));
+
+    if (carregandoHistoricos) {
+      if (typeof callback === "function") {
+        callback({ ok: false, erro: "Já existe um carregamento em andamento." });
+      }
+      return;
+    }
+
+    emitToast(`Buscando o histórico de até ${limite} conversas. Pode continuar atendendo.`);
+    if (typeof callback === "function") callback({ ok: true, iniciado: true });
+
+    const resultado = await carregarHistoricosEmSegundoPlano({
+      limite,
+      porConversa: 80,
+    }).catch(() => null);
+
+    if (resultado && !resultado.pulado) {
+      emitToast(
+        `Histórico atualizado: ${resultado.baixadas} mensagens de ${resultado.visitadas} conversa(s).`
+      );
+      emitMessages();
     }
   });
 

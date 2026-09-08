@@ -1185,7 +1185,7 @@ export default function CrmWhatsAppClient({
       // `maisAntigas` faz o WhatsApp buscar o passado da conversa no servidor
       // dele antes de ler — sem isso vêm só os últimos recados que estavam na
       // tela, e o vendedor abre o cliente sem ver o que já foi combinado.
-      { chatId, limite: 150, maisAntigas: 3 },
+      { chatId, limite: 300, maisAntigas: 5 },
       (res: { ok?: boolean; erro?: string } | undefined) => {
         setCarregandoHistorico(false);
         if (!res?.ok && res?.erro) {
@@ -2505,6 +2505,36 @@ export default function CrmWhatsAppClient({
                 />
                 {/* Busca pelo TEXTO das conversas. A de cima acha pelo nome;
                     esta acha pelo que foi falado, em todas as conversas. */}
+                {/* Puxa o histórico de muitas conversas de uma vez, para não
+                    encontrar tela vazia ao abrir um cliente pela 1ª vez. */}
+                <button
+                  onClick={() => {
+                    if (!socketRef.current?.connected) {
+                      showToast("Sem conexão com o servidor do WhatsApp.");
+                      return;
+                    }
+                    if (
+                      !confirm(
+                        "Buscar o histórico de até 200 conversas no WhatsApp?\n\n" +
+                          "Leva alguns minutos e roda em segundo plano — dá para continuar atendendo normalmente."
+                      )
+                    ) {
+                      return;
+                    }
+                    socketRef.current.emit(
+                      "panel:carregar-todos-historicos",
+                      { limite: 200 },
+                      (res: { ok?: boolean; erro?: string } | undefined) => {
+                        if (!res?.ok && res?.erro) showToast(res.erro);
+                      }
+                    );
+                  }}
+                  title="Baixar as mensagens antigas de várias conversas de uma vez"
+                  className="w-full py-1 px-3 rounded-full text-xs font-bold border bg-white text-[#202124] border-[#e3e3e3] hover:bg-[#f0f2f5] transition-colors cursor-pointer"
+                >
+                  ⬇️ Puxar histórico das conversas
+                </button>
+
                 <button
                   onClick={() => {
                     const abrindo = !mostrarBuscaMensagem;
