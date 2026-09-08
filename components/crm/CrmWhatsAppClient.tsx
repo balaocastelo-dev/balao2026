@@ -3081,8 +3081,9 @@ export default function CrmWhatsAppClient({
                               <div className="flex items-center gap-2 px-2 py-1.5 mb-1 rounded-lg bg-black/5 text-[11px] text-[#5f6368]">
                                 <span>📎</span>
                                 <span>
-                                  {m.mediaType === "image" ? "Foto" : "Arquivo"} enviado — ainda
-                                  baixando. Abra a conversa de novo em instantes.
+                                  {m.mediaType === "image" ? "Foto" : "Arquivo"} recebido — o
+                                  servidor não conseguiu baixar o arquivo. Reabra a conversa para
+                                  tentar de novo.
                                 </span>
                               </div>
                             )}

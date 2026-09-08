@@ -1364,15 +1364,15 @@ async function baixarMidiaDaMensagem(message) {
         // Pede ao WhatsApp que resolva a mídia (é o que a seta de download
         // faz na tela). Sem isso, mídia antiga fica em PENDING para sempre.
         const estagio = () => msg.mediaData?.mediaStage || "sem mediaData";
+        let aoResolver = "";
         if (estagio() !== "RESOLVED") {
           try {
             await msg.downloadMedia({ downloadEvenIfExpensive: true, rmrReason: 1 });
           } catch (e) {
-            return falha(`resolver midia (estagio ${estagio()})`, e);
+            // NAO desiste aqui: se a foto ja apareceu na tela, o blob
+            // descriptografado esta na memoria mesmo com este passo falhando.
+            aoResolver = ` [resolver falhou: ${e.message || e}]`;
           }
-        }
-        if (estagio() === "REUPLOADING" || String(estagio()).includes("ERROR")) {
-          return falha(`midia indisponivel (estagio ${estagio()})`);
         }
 
         const paraBase64 = (buffer) =>
@@ -1396,7 +1396,13 @@ async function baixarMidiaDaMensagem(message) {
           // as três formas de chegar nos bytes.
           const bruto = msg.mediaData?.mediaBlob;
           let blob =
-            (bruto instanceof Blob && bruto) || bruto?._blob || bruto?.forceableBlob || null;
+            (bruto instanceof Blob && bruto) ||
+            bruto?._blob ||
+            bruto?.forceableBlob ||
+            bruto?.blob ||
+            bruto?._inner?.blob ||
+            (typeof bruto?.toBlob === "function" && (await bruto.toBlob())) ||
+            null;
 
           if (!blob) {
             const endereco =
@@ -1417,7 +1423,7 @@ async function baixarMidiaDaMensagem(message) {
         try {
           const gerenciador = window.require("WAWebDownloadManager")?.downloadManager;
           if (!gerenciador?.downloadAndMaybeDecrypt) {
-            return falha(`sem gerenciador de download (estagio ${estagio()})`);
+            return falha(`sem gerenciador de download (estagio ${estagio()})${aoResolver}`);
           }
           // O gerenciador anota métricas num objeto que ele espera receber;
           // sem esse boneco, ele estoura antes de baixar.
@@ -1437,7 +1443,7 @@ async function baixarMidiaDaMensagem(message) {
           });
           return { data: await paraBase64(buffer), mimetype: msg.mimetype || null };
         } catch (e) {
-          return falha(`descriptografar (estagio ${estagio()})`, e);
+          return falha(`descriptografar (estagio ${estagio()})${aoResolver}`, e);
         }
       }, id);
 
