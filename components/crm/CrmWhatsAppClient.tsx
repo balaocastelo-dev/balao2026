@@ -352,10 +352,15 @@ export default function CrmWhatsAppClient({
                 isRealDirectChat(c.id) &&
                 // Cache antigo deste navegador guarda contato que nunca trocou
                 // mensagem com a loja, e o LID duplicado de antes da correção.
-                // Sem esta linha, esse entulho reaparece a cada abertura, no
-                // intervalo até a lista do servidor chegar. Quem existe de
-                // verdade volta na primeira sincronização.
-                String(c.lastMessage || "").trim().length > 0
+                // Sem este filtro, o entulho reaparece a cada abertura, no
+                // intervalo até a lista do servidor chegar.
+                //
+                // Basta um dos dois sinais: o texto da última mensagem ou a
+                // hora da última atividade. O WhatsApp Web às vezes não
+                // entrega o texto (e aí o preview vem vazio), mas conversa de
+                // verdade sempre tem horário.
+                (String(c.lastMessage || "").trim().length > 0 ||
+                  Number(c.timestamp || 0) > 0)
             );
           }
         } catch {}

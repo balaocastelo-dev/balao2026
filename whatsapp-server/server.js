@@ -1160,6 +1160,13 @@ const ultimaVarredura = {
   comErro: 0,
   resumos: 0,
   aposDeduplicar: 0,
+  // Que sinal de "esta conversa existe" o WhatsApp entregou. Serve para saber
+  // em qual dado dá para confiar nesta versao do WhatsApp Web — ele mudou o
+  // suficiente para fetchMessages()/lastMessage voltarem vazios.
+  temFetch: 0,
+  comMensagensBaixadas: 0,
+  comLastMessage: 0,
+  comTimestamp: 0,
 };
 
 async function syncRecentConversations() {
@@ -1217,26 +1224,40 @@ async function syncRecentConversations() {
         let messages = [];
 
         if (typeof chat.fetchMessages === "function") {
+          ultimaVarredura.temFetch += 1;
           const rawMsgs = await chat.fetchMessages({ limit: 25 }).catch(() => []);
           messages = (rawMsgs || []).filter((m) => !isStatusMessage(m));
+          if (messages.length) ultimaVarredura.comMensagensBaixadas += 1;
           latestMessage = messages[messages.length - 1] || (chat.lastMessage && !isStatusMessage(chat.lastMessage) ? chat.lastMessage : null);
         }
+        if (chat.lastMessage) ultimaVarredura.comLastMessage += 1;
+        if (chat.timestamp) ultimaVarredura.comTimestamp += 1;
 
         // Só entra na lista quem realmente trocou mensagem com a loja.
         //
-        // A agenda do WhatsApp tem muita coisa que não é atendimento: contato
-        // salvo que nunca escreveu, e o "lead" que o WhatsApp cria sozinho
-        // quando alguém clica num anúncio (Click-to-WhatsApp) sem chegar a
-        // mandar nada. Sem esta linha o vendedor abre o painel e encontra uma
-        // lista enorme de gente com quem nunca falou.
+        // A agenda tem muita coisa que não é atendimento: contato salvo que
+        // nunca escreveu, e o "lead" que o WhatsApp cria sozinho quando alguém
+        // clica num anúncio (Click-to-WhatsApp) sem mandar nada.
+        //
+        // Só que exigir a MENSAGEM em mãos não funciona nesta versão do
+        // WhatsApp Web: medido no servidor da loja, 515 de 515 conversas reais
+        // voltaram sem `fetchMessages()` e sem `lastMessage`, e a lista ficou
+        // vazia. O `timestamp` do chat sobrevive a isso — ele é a hora da
+        // última atividade, e só existe quando houve conversa. Um contato que
+        // nunca trocou mensagem vem sem timestamp e sem não-lidas.
         //
         // A checagem vem ANTES de resolver contato e baixar foto de propósito:
-        // essas duas são as partes caras da varredura, e não faz sentido
-        // pagá-las por quem vai ser descartado logo em seguida.
+        // essas são as partes caras, e não faz sentido pagá-las por quem seria
+        // descartado logo depois.
         const referencia =
           latestMessage ||
           (chat.lastMessage && !isStatusMessage(chat.lastMessage) ? chat.lastMessage : null);
-        if (!referencia) {
+        const houveConversa =
+          Boolean(referencia) ||
+          Number(chat.timestamp || 0) > 0 ||
+          Number(chat.unreadCount || 0) > 0;
+
+        if (!houveConversa) {
           ultimaVarredura.semMensagem += 1;
           continue;
         }
@@ -1316,8 +1337,10 @@ async function syncRecentConversations() {
     ultimaVarredura.aposDeduplicar = resumosLimpos.length;
     console.log(
       `[chats] Varredura: ${ultimaVarredura.brutos} brutos -> ${ultimaVarredura.aposFiltroId} apos filtro -> ` +
-        `${ultimaVarredura.resumos} com mensagem -> ${ultimaVarredura.aposDeduplicar} finais ` +
-        `(sem mensagem: ${ultimaVarredura.semMensagem}, com erro: ${ultimaVarredura.comErro})`
+        `${ultimaVarredura.resumos} com conversa -> ${ultimaVarredura.aposDeduplicar} finais ` +
+        `(sem conversa: ${ultimaVarredura.semMensagem}, com erro: ${ultimaVarredura.comErro}) | ` +
+        `sinais: fetch=${ultimaVarredura.temFetch} msgs=${ultimaVarredura.comMensagensBaixadas} ` +
+        `lastMessage=${ultimaVarredura.comLastMessage} timestamp=${ultimaVarredura.comTimestamp}`
     );
 
     const existingMap = new Map();
