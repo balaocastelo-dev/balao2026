@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server';
-import { getProducts, getProductsPaginated, getProductsLite, saveProducts, createProduct } from '@/lib/db';
+import { getProductsLite, saveProducts, createProduct } from '@/lib/db';
+import {
+  getCachedProducts,
+  getCachedProductsPaginated,
+  invalidarCacheProdutos,
+} from '@/lib/cache';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,6 +13,11 @@ export const dynamic = 'force-dynamic';
 // `limit`/`search`/`category`, pagina no banco. Com `lite=1`, devolve só
 // id/name/image de TODOS os produtos (usado pelas rotinas de manutenção do
 // admin, que precisam varrer o catálogo inteiro sem puxar specs/descrição).
+//
+// As leituras passam pelo cache do Next. Não é otimização à toa: o banco da
+// Hostinger aceita 500 conexões por HORA, e a Vercel abre uma por requisição.
+// Sem cache, um dia movimentado queimava a cota e o catálogo sumia do site e
+// do CRM até a hora virar.
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const page = searchParams.get('page');
@@ -25,7 +35,7 @@ export async function GET(request: Request) {
   if (page || limit || search || category || sort) {
     const pageNum = page ? Number(page) : 1;
     const limitNum = limit ? Number(limit) : 50;
-    const { products, total } = await getProductsPaginated({
+    const { products, total } = await getCachedProductsPaginated({
       page: pageNum,
       limit: limitNum,
       search: search || undefined,
@@ -41,22 +51,26 @@ export async function GET(request: Request) {
     });
   }
 
-  const products = await getProducts();
+  const products = await getCachedProducts();
   return NextResponse.json(products);
 }
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    
+
     // Check if bulk import
     if (body.products && Array.isArray(body.products)) {
         await saveProducts(body.products);
+        // Derruba o cache para o site e o CRM verem a mudança na hora, em vez
+        // de continuarem mostrando o catálogo antigo.
+        invalidarCacheProdutos();
         return NextResponse.json({ success: true, count: body.products.length });
     }
 
     // Single product creation
     const newProduct = await createProduct(body);
+    invalidarCacheProdutos();
     return NextResponse.json(newProduct);
 
   } catch (e) {

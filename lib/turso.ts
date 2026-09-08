@@ -62,7 +62,18 @@ function getConfig() {
     password: process.env.MYSQL_PASSWORD || '',
     database: process.env.MYSQL_DATABASE || '',
     waitForConnections: true,
-    connectionLimit: 10,
+    // O plano da Hostinger limita o usuário a 500 conexões POR HORA. Na
+    // Vercel, cada instância serverless cria o próprio pool — com 10
+    // conexões cada, bastavam ~50 instâncias frias para estourar a cota, e aí
+    // o banco recusa tudo até a hora virar. Era o que fazia o catálogo sumir
+    // "só às vezes". Cada instância atende uma requisição por vez, então 2
+    // conexões dão conta.
+    connectionLimit: 2,
+    // Devolve a conexão rápido, em vez de segurá-la ociosa até a instância
+    // ser reciclada.
+    idleTimeout: 20_000,
+    maxIdle: 1,
+    enableKeepAlive: false,
     queueLimit: 0,
     charset: 'utf8mb4_unicode_ci',
     dateStrings: true,

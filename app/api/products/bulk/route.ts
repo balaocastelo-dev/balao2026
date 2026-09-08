@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { turso, isTursoActive } from '@/lib/turso';
+import { invalidarCacheProdutos } from '@/lib/cache';
 
 // `id` é TEXT no schema (pode ser UUID ou código numérico do fornecedor) —
 // nunca coagir pra Number: `Number("uuid...")` vira NaN e o UPDATE por id
@@ -23,6 +24,9 @@ export async function POST(request: Request) {
       await turso.execute(
         { sql: `UPDATE products SET category = ? WHERE id IN (${placeholders})`, args: [value, ...ids] }
       );
+      // Alteracao em lote muda muito preco de uma vez: derrubar o cache
+      // faz o site e o CRM mostrarem o novo valor na hora.
+      invalidarCacheProdutos();
       return NextResponse.json({ success: true, count: ids.length });
     }
 
@@ -53,6 +57,9 @@ export async function POST(request: Request) {
         await turso.execute({ sql: `UPDATE products SET price = ? WHERE id = ?`, args: [u.price, u.id] });
       }
 
+      // Alteracao em lote muda muito preco de uma vez: derrubar o cache
+      // faz o site e o CRM mostrarem o novo valor na hora.
+      invalidarCacheProdutos();
       return NextResponse.json({ success: true, count: ids.length });
     }
 
