@@ -1336,7 +1336,7 @@ function midiaJaBaixada(message) {
  * direta pelos modelos do WhatsApp Web — o mesmo tipo de contorno que ja foi
  * preciso para a lista de conversas nesta versao.
  */
-async function baixarMidiaDaMensagem(message) {
+async function baixarMidiaDaMensagem(message, chatId = null) {
   const jaTem = midiaJaBaixada(message);
   if (jaTem) {
     estatisticasMidia.reaproveitadas += 1;
@@ -1388,7 +1388,7 @@ async function baixarMidiaDaMensagem(message) {
   const id = message.id?._serialized;
   if (id && whatsappClient?.pupPage) {
     try {
-      const dados = await whatsappClient.pupPage.evaluate(async (msgId) => {
+      const dados = await whatsappClient.pupPage.evaluate(async (msgId, cid) => {
         const falha = (passo, e) =>
           ({ erro: `${passo}${e ? `: ${e.message || e}` : ""}` });
 
@@ -1402,11 +1402,42 @@ async function baixarMidiaDaMensagem(message) {
           // O id que guardamos veio do evento, com o chat no formato `@lid`;
           // na coleção a mesma mensagem pode estar indexada com o `@c.us`.
           // O trecho final do id (o hash da mensagem) é o mesmo nos dois.
+          const hash = String(msgId).split("_").pop();
+          const combina = (m) => {
+            const outro = String(m?.id?._serialized || "");
+            return outro === msgId || outro.split("_").pop() === hash;
+          };
+
           if (!msg) {
-            const hash = String(msgId).split("_").pop();
-            msg = (colecoes.Msg.getModelsArray() || []).find(
-              (m) => String(m.id?._serialized || "").split("_").pop() === hash
-            );
+            msg = (colecoes.Msg.getModelsArray() || []).find(combina);
+          }
+
+          // Última tentativa: por dentro da própria conversa, puxando o
+          // passado dela. É o único caminho para chat `@lid`, que a biblioteca
+          // não consegue abrir — e é justamente onde a foto some.
+          if (!msg && cid) {
+            const chat = colecoes.Chat.get(cid);
+            const listar = () =>
+              (typeof chat?.msgs?.getModelsArray === "function" && chat.msgs.getModelsArray()) ||
+              chat?.msgs?.models ||
+              [];
+
+            if (chat) {
+              msg = listar().find(combina);
+
+              for (let i = 0; i < 6 && !msg; i++) {
+                const antes = listar().length;
+                if (typeof chat.loadEarlierMsgs === "function") {
+                  await chat.loadEarlierMsgs();
+                } else if (typeof chat.msgs?.loadEarlierMsgs === "function") {
+                  await chat.msgs.loadEarlierMsgs();
+                } else {
+                  break;
+                }
+                if (listar().length <= antes) break;
+                msg = listar().find(combina);
+              }
+            }
           }
         } catch (e) {
           return falha("nao achei a mensagem no WhatsApp Web", e);
@@ -1497,7 +1528,7 @@ async function baixarMidiaDaMensagem(message) {
         } catch (e) {
           return falha(`descriptografar (estagio ${estagio()})${aoResolver}`, e);
         }
-      }, id);
+      }, id, chatId || message.chatId || null);
 
       if (dados?.data) {
         const url = gravar(dados.data, dados.mimetype);
@@ -1544,16 +1575,19 @@ async function recuperarMensagemOriginal(chatId, id) {
  * `getChatById()` de proposito: ele nao abre conversa com id `@lid`, que e
  * exatamente onde a foto sumia.
  */
-async function rebaixarMidiaPorId(id, tipo) {
+async function rebaixarMidiaPorId(id, tipo, chatId = null) {
   if (!id) return { url: null, motivo: "mensagem sem id" };
-  return baixarMidiaDaMensagem({
-    id: { _serialized: id },
-    type: tipo || null,
-    hasMedia: true,
-    // O metodo da biblioteca precisa do objeto original; aqui so existe o id,
-    // entao vai direto para a leitura na pagina.
-    downloadMedia: async () => null,
-  });
+  return baixarMidiaDaMensagem(
+    {
+      id: { _serialized: id },
+      type: tipo || null,
+      hasMedia: true,
+      // O metodo da biblioteca precisa do objeto original; aqui so existe o
+      // id, entao vai direto para a leitura na pagina.
+      downloadMedia: async () => null,
+    },
+    chatId
+  );
 }
 
 // Teto de downloads por carregamento de conversa. Sem ele, abrir um chat com
@@ -1578,7 +1612,7 @@ async function converterMensagensDoHistorico(uteis, chatId, contactName, realNum
       mediaUrl = midiaJaBaixada(message);
       if (!mediaUrl && baixadasAgora < MAX_MIDIAS_POR_CARREGAMENTO) {
         baixadasAgora += 1;
-        const midia = await baixarMidiaDaMensagem(message);
+        const midia = await baixarMidiaDaMensagem(message, chatId);
         mediaUrl = midia.url;
         mediaErro = midia.motivo;
       }
@@ -2827,7 +2861,7 @@ function attachWhatsAppClientEvents(client) {
 
     // Bug fix: Download media to disk so it survives page reloads
     const midia = message.hasMedia
-      ? await baixarMidiaDaMensagem(message)
+      ? await baixarMidiaDaMensagem(message, message.from)
       : { url: null, motivo: null };
 
     storeMessage({
@@ -3111,8 +3145,8 @@ app.get(["/api/crm/midia/diagnostico", "/api/midia/diagnostico"], async (req, re
 
   const original = await recuperarMensagemOriginal(escolhida.chatId, escolhida.id);
   const { url, motivo } = original
-    ? await baixarMidiaDaMensagem(original)
-    : await rebaixarMidiaPorId(escolhida.id, escolhida.mediaType);
+    ? await baixarMidiaDaMensagem(original, escolhida.chatId)
+    : await rebaixarMidiaPorId(escolhida.id, escolhida.mediaType, escolhida.chatId);
   mergeMessages([{ ...escolhida, mediaUrl: url || null, mediaErro: motivo }]);
   emitMessages();
 
@@ -3157,12 +3191,13 @@ app.all(["/api/crm/midia/repescar", "/api/midia/repescar"], async (req, res) => 
     // memória as mensagens das conversas carregadas. Buscar foto antiga só
     // pelo id sempre respondia "mensagem fora da memoria" — ela nunca esteve
     // lá. O fetchMessages traz os modelos de volta, e aí a mídia é alcançável.
+    // A biblioteca nao abre conversa `@lid`; quando falha, o caminho pela
+    // pagina assume — la o modelo da conversa existe e da para puxar o
+    // passado dela.
     const chat = await getChatByIdSafe(chatId);
     let brutas = [];
     if (chat && typeof chat.fetchMessages === "function") {
       brutas = (await chat.fetchMessages({ limit: 100 }).catch(() => [])) || [];
-    } else {
-      anotarMotivo(`nao consegui abrir a conversa ${chatId}`);
     }
 
     const hashDoId = (id) => String(id || "").split("_").pop();
@@ -3178,8 +3213,8 @@ app.all(["/api/crm/midia/repescar", "/api/midia/repescar"], async (req, res) => 
     for (const m of lista) {
       const bruta = porId.get(m.id) || porHash.get(hashDoId(m.id));
       const { url, motivo } = bruta
-        ? await baixarMidiaDaMensagem(bruta)
-        : await rebaixarMidiaPorId(m.id, m.mediaType);
+        ? await baixarMidiaDaMensagem(bruta, chatId)
+        : await rebaixarMidiaPorId(m.id, m.mediaType, chatId);
 
       mergeMessages([{ ...m, mediaUrl: url || null, mediaErro: motivo }]);
       if (url) recuperadas.push(m.id);
