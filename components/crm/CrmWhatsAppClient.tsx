@@ -114,9 +114,23 @@ function flattenCategoryTree(categories: Category[], level = 0): { category: Cat
 }
 
 // Proxy seguro para fotos de perfil do WhatsApp para evitar 403 Forbidden e CORS
-function formatAvatarUrl(url: string | null | undefined): string | null {
+function formatAvatarUrl(
+  url: string | null | undefined,
+  servidorWhatsApp?: string
+): string | null {
   if (!url) return null;
   if (url.startsWith("data:")) return url;
+
+  // Foto já baixada pelo servidor de WhatsApp: caminho estável, servido por
+  // ele mesmo. É o caso normal — as URLs originais do WhatsApp expiram e
+  // faziam o avatar sumir sozinho depois de algumas horas.
+  if (url.startsWith("/api/crm/foto/")) {
+    const base = (servidorWhatsApp || "").replace(/\/$/, "");
+    return base ? `${base}${url}` : url;
+  }
+
+  // Sobrou o link original do WhatsApp (o download falhou): passa pelo proxy
+  // do site para evitar bloqueio de CORS enquanto ele ainda vale.
   if (url.startsWith("http")) {
     return `/api/crm/avatar?url=${encodeURIComponent(url)}`;
   }
@@ -138,6 +152,28 @@ export interface CrmVendedorFixo {
   nome: string;
   cargo?: string;
   assinatura?: string;
+}
+
+/** Uso da pasta de mídia no servidor (vem em `whatsapp:armazenamento`). */
+interface EstadoArmazenamento {
+  mb: number;
+  limiteMb: number;
+  percentual: number;
+  retencaoDias: number;
+  alerta: boolean;
+}
+
+/**
+ * Preferências pessoais guardadas no servidor por vendedor. Todos os campos
+ * são opcionais: quem entra pela primeira vez recebe um objeto vazio, e
+ * versões futuras podem acrescentar chaves sem quebrar as antigas.
+ */
+interface PreferenciasVendedor {
+  kanbanColunas?: KanbanColumn[];
+  assinaturaAuto?: boolean;
+  kanbanTamanho?: "normal" | "expandido" | "recolhido";
+  filtroMeus?: boolean;
+  atualizadoEm?: number;
 }
 
 export interface CrmWhatsAppClientProps {
@@ -310,7 +346,16 @@ export default function CrmWhatsAppClient({
         try {
           const parsed = JSON.parse(s);
           if (Array.isArray(parsed)) {
-            return parsed.filter((c: any) => c.id && isRealDirectChat(c.id));
+            return parsed.filter(
+              (c: any) =>
+                c.id &&
+                isRealDirectChat(c.id) &&
+                // Cache antigo deste navegador guardava contato que nunca
+                // trocou mensagem com a loja — e como a lista só era somada,
+                // esse entulho reaparecia todo dia. Quem não tem mensagem
+                // não entra; se de fato existir, o servidor traz de volta.
+                String(c.lastMessage || "").trim().length > 0
+            );
           }
         } catch {}
       }
@@ -432,6 +477,9 @@ export default function CrmWhatsAppClient({
   // travava o CRM inteiro assim que a aba abria (que é a aba padrão).
   const CATALOGO_PAGE_SIZE = 100;
   const [produtosCatalogo, setProdutosCatalogo] = useState<CrmProdutoCatalogo[]>([]);
+  // Explica POR QUE o catálogo está vazio (banco sem credenciais, conexão
+  // falhando ou sem produtos). Vem de /api/health.
+  const [diagnosticoCatalogo, setDiagnosticoCatalogo] = useState<string | null>(null);
   const [catalogoTotal, setCatalogoTotal] = useState(0);
   const [catalogoPagina, setCatalogoPagina] = useState(1);
   const [categoriasCatalogo, setCategoriasCatalogo] = useState<Category[]>([]);
@@ -554,6 +602,19 @@ export default function CrmWhatsAppClient({
       .then((data) => {
         const rows = Array.isArray(data) ? data : Array.isArray(data?.products) ? data.products : [];
         setCatalogoTotal(typeof data?.total === "number" ? data.total : rows.length);
+
+        // Catálogo vazio tem mais de uma causa. Pergunta ao site qual é, para
+        // a tela poder dizer em vez de deixar o vendedor no escuro.
+        if (rows.length === 0) {
+          fetch("/api/health")
+            .then((r) => r.json())
+            .then((saude) => {
+              setDiagnosticoCatalogo(saude?.banco?.diagnostico || null);
+            })
+            .catch(() => setDiagnosticoCatalogo(null));
+        } else {
+          setDiagnosticoCatalogo(null);
+        }
         const list: CrmProdutoCatalogo[] = rows.map((p: any) => {
             const precoNum =
               typeof p.price === "number"
@@ -710,42 +771,45 @@ export default function CrmWhatsAppClient({
     });
 
     socket.on("whatsapp:chats", (serverChats: any[]) => {
-      if (Array.isArray(serverChats) && serverChats.length > 0) {
+      if (Array.isArray(serverChats)) {
         setChats((prev) => {
-          const merged = [...prev];
-          serverChats
+          // A lista do servidor é a verdade: ela já exclui status, grupos e
+          // quem nunca mandou mensagem. Antes isto era um merge que só somava,
+          // então contato descartado no servidor continuava na tela para
+          // sempre — inclusive vindo do cache antigo deste navegador.
+          // Aqui a lista é REFEITA, guardando só o que é do painel (etiquetas,
+          // notas, valor do negócio) dos contatos que continuam existindo.
+          const anteriores = new Map(prev.map((c) => [c.id, c]));
+
+          return serverChats
             .filter((sc) => sc.chatId && isRealDirectChat(sc.chatId))
-            .forEach((sc) => {
-              const idx = merged.findIndex((c) => c.id === sc.chatId);
+            .map((sc) => {
+              const anterior = anteriores.get(sc.chatId);
               // Nunca deixar o sufixo do JID (@c.us, @lid, @s.whatsapp.net…)
               // vazar como nome/número na lista de conversas.
-              const realNum = sc.realNumber || sc.displayNumber || String(sc.chatId || "").replace(/@.*$/, "");
+              const realNum =
+                sc.realNumber ||
+                sc.displayNumber ||
+                String(sc.chatId || "").replace(/@.*$/, "");
               const nomeSemJid = String(sc.contactName || realNum || "").replace(/@.*$/, "");
-              const chatObj: CrmChat = {
+
+              return {
+                ...anterior,
                 id: sc.chatId,
-                nome: nomeSemJid || "Contato",
+                nome: nomeSemJid || anterior?.nome || "Contato",
                 numero: realNum,
-                pic: sc.profilePicUrl || null,
+                // Mantém a foto que já tínhamos quando o servidor vier sem —
+                // evita o avatar sumir e voltar a cada sincronização.
+                pic: sc.profilePicUrl || anterior?.pic || null,
                 unread: sc.unreadCount || 0,
-                lastMessage: sc.lastMessageBody || "",
-                timestamp: sc.lastMessageTimestamp || Date.now(),
-                tags: [],
-                vendedorId: sc.assignedSellerId || null,
-                kanbanColId: "novos",
-                fixado: sc.isPinned || false,
-              };
-              if (idx >= 0) {
-                merged[idx] = {
-                  ...merged[idx],
-                  ...chatObj,
-                  pic: sc.profilePicUrl || merged[idx].pic,
-                };
-              } else {
-                merged.push(chatObj);
-              }
-            });
-          return merged
-            .filter((c) => isRealDirectChat(c.id))
+                lastMessage: sc.lastMessageBody || anterior?.lastMessage || "",
+                timestamp: sc.lastMessageTimestamp || anterior?.timestamp || Date.now(),
+                tags: anterior?.tags || [],
+                vendedorId: sc.assignedSellerId ?? anterior?.vendedorId ?? null,
+                kanbanColId: anterior?.kanbanColId || "novos",
+                fixado: sc.isPinned ?? anterior?.fixado ?? false,
+              } as CrmChat;
+            })
             .sort((a, b) => b.timestamp - a.timestamp);
         });
       }
@@ -880,7 +944,7 @@ export default function CrmWhatsAppClient({
       if (Array.isArray(lista)) setVendedores(lista);
     });
 
-    socket.on("whatsapp:armazenamento", (dados: any) => {
+    socket.on("whatsapp:armazenamento", (dados: EstadoArmazenamento | null) => {
       if (dados && typeof dados === "object") setArmazenamento(dados);
     });
 
@@ -890,7 +954,7 @@ export default function CrmWhatsAppClient({
 
     // Preferências pessoais chegando do servidor — é isto que faz o painel
     // abrir do mesmo jeito em qualquer computador da loja.
-    socket.on("whatsapp:preferencias", (prefs: any) => {
+    socket.on("whatsapp:preferencias", (prefs: PreferenciasVendedor | null) => {
       if (prefs && typeof prefs === "object") {
         if (Array.isArray(prefs.kanbanColunas) && prefs.kanbanColunas.length > 0) {
           setKanbanColunas(prefs.kanbanColunas);
@@ -898,8 +962,9 @@ export default function CrmWhatsAppClient({
         if (typeof prefs.assinaturaAuto === "boolean") {
           setAssinaturaAuto(prefs.assinaturaAuto);
         }
-        if (["normal", "expandido", "recolhido"].includes(prefs.kanbanTamanho)) {
-          setKanbanTamanho(prefs.kanbanTamanho);
+        const tamanho = prefs.kanbanTamanho;
+        if (tamanho === "normal" || tamanho === "expandido" || tamanho === "recolhido") {
+          setKanbanTamanho(tamanho);
         }
         if (typeof prefs.filtroMeus === "boolean") {
           setFiltroMeus(prefs.filtroMeus);
@@ -2143,7 +2208,7 @@ export default function CrmWhatsAppClient({
                     const isAtivo = chat.id === chatSelecionadoId;
                     const ini = (chat.nome || "?").trim().charAt(0).toUpperCase();
                     const numeroFormatado = formatarNumeroExibicao(chat.numero || chat.id);
-                    const avatarSrc = formatAvatarUrl(chat.pic);
+                    const avatarSrc = formatAvatarUrl(chat.pic, serverUrl);
 
                     return (
                       <div
@@ -2283,10 +2348,10 @@ export default function CrmWhatsAppClient({
                   <div className="bg-white border-b border-[#e3e3e3] p-2.5 px-4 flex items-center justify-between shrink-0 shadow-xs">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-[#0f9d58] text-white flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden border border-[#e3e3e3]">
-                        {formatAvatarUrl(chatSelecionado.pic) ? (
+                        {formatAvatarUrl(chatSelecionado.pic, serverUrl) ? (
                           /* eslint-disable-next-line @next/next/no-img-element */
                           <img
-                            src={formatAvatarUrl(chatSelecionado.pic)!}
+                            src={formatAvatarUrl(chatSelecionado.pic, serverUrl)!}
                             referrerPolicy="no-referrer"
                             crossOrigin="anonymous"
                             alt=""
@@ -2830,13 +2895,23 @@ export default function CrmWhatsAppClient({
                         <p className="text-xs text-[#5f6368]">Carregando produtos…</p>
                       </div>
                     ) : produtosCatalogo.length === 0 ? (
-                      <div className="text-center py-8 bg-[#f9fafb] rounded-xl border border-dashed border-[#e3e3e3]">
+                      <div className="text-center py-8 bg-[#f9fafb] rounded-xl border border-dashed border-[#e3e3e3] px-3">
                         <p className="text-xs text-[#5f6368]">
-                          {buscaCatalogo ? "Nenhum produto encontrado para essa busca." : "Nenhum produto cadastrado no banco de dados."}
+                          {buscaCatalogo
+                            ? "Nenhum produto encontrado para essa busca."
+                            : "O catálogo do site está vazio."}
                         </p>
+                        {!buscaCatalogo && diagnosticoCatalogo && (
+                          // Dizer o motivo evita o vendedor ficar clicando em
+                          // "Sincronizar" achando que é lentidão, quando na
+                          // verdade falta configuração no site.
+                          <p className="mt-2 text-[11px] leading-relaxed text-[#856404] bg-[#fff3cd] border border-[#ffeeba] rounded-lg px-2.5 py-2">
+                            {diagnosticoCatalogo}
+                          </p>
+                        )}
                         <button
                           onClick={() => carregarCatalogoBanco()}
-                          className="mt-2 bg-[#0f9d58] text-white px-3 py-1.5 rounded-lg text-xs font-bold"
+                          className="mt-2 bg-[#0f9d58] text-white px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer"
                         >
                           🔄 Sincronizar com o Site
                         </button>
@@ -3298,10 +3373,10 @@ export default function CrmWhatsAppClient({
                       <div className="space-y-3">
                         <div className="flex items-center gap-3 p-3 bg-[#f0f2f5] rounded-xl border border-[#e3e3e3]">
                           <div className="w-12 h-12 rounded-full bg-[#0f9d58] text-white flex items-center justify-center font-bold text-base shrink-0 overflow-hidden border border-[#e3e3e3]">
-                            {formatAvatarUrl(chatSelecionado.pic) ? (
+                            {formatAvatarUrl(chatSelecionado.pic, serverUrl) ? (
                               /* eslint-disable-next-line @next/next/no-img-element */
                               <img
-                                src={formatAvatarUrl(chatSelecionado.pic)!}
+                                src={formatAvatarUrl(chatSelecionado.pic, serverUrl)!}
                                 referrerPolicy="no-referrer"
                                 crossOrigin="anonymous"
                                 alt=""
@@ -3583,10 +3658,10 @@ export default function CrmWhatsAppClient({
                             >
                               <div className="flex items-center gap-2">
                                 <div className="w-6 h-6 rounded-full bg-[#0f9d58] text-white flex items-center justify-center font-bold text-[10px] shrink-0 overflow-hidden">
-                                  {formatAvatarUrl(card.pic) ? (
+                                  {formatAvatarUrl(card.pic, serverUrl) ? (
                                     /* eslint-disable-next-line @next/next/no-img-element */
                                     <img
-                                      src={formatAvatarUrl(card.pic)!}
+                                      src={formatAvatarUrl(card.pic, serverUrl)!}
                                       referrerPolicy="no-referrer"
                                       crossOrigin="anonymous"
                                       alt=""
@@ -3664,7 +3739,7 @@ export default function CrmWhatsAppClient({
                   statusFeed.map((feed) => {
                     const isSelected = statusSelecionadoFeed?.id === feed.id;
                     const contactNum = formatarNumeroExibicao(feed.contactNumber || feed.id);
-                    const avatarSrc = formatAvatarUrl(feed.profilePicUrl);
+                    const avatarSrc = formatAvatarUrl(feed.profilePicUrl, serverUrl);
                     return (
                       <div
                         key={feed.id}
@@ -3733,10 +3808,10 @@ export default function CrmWhatsAppClient({
                   {/* Story Header */}
                   <div className="px-4 py-2 flex items-center gap-3 z-10 bg-gradient-to-b from-black/60 to-transparent">
                     <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden">
-                      {formatAvatarUrl(statusSelecionadoFeed.profilePicUrl) ? (
+                      {formatAvatarUrl(statusSelecionadoFeed.profilePicUrl, serverUrl) ? (
                         /* eslint-disable-next-line @next/next/no-img-element */
                         <img
-                          src={formatAvatarUrl(statusSelecionadoFeed.profilePicUrl)!}
+                          src={formatAvatarUrl(statusSelecionadoFeed.profilePicUrl, serverUrl)!}
                           referrerPolicy="no-referrer"
                           crossOrigin="anonymous"
                           alt=""

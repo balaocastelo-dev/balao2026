@@ -30,6 +30,18 @@ const DATA_DIR = path.join(DATA_ROOT, "data");
 const AUTH_DIR = path.join(DATA_ROOT, ".wwebjs_auth");
 const CACHE_DIR = path.join(DATA_ROOT, ".wwebjs_cache");
 
+// Estas rotas de imagem ficam ANTES do middleware de CORS la embaixo, e no
+// Express um middleware so vale para o que e registrado depois dele. Sem o
+// header aqui, o painel (que carrega as imagens com crossOrigin="anonymous")
+// nao conseguia exibir foto de perfil nem midia de conversa.
+function liberarOrigemImagem(req, res) {
+  const origem = req.headers.origin;
+  if (origem && isOrigemPermitida(origem)) {
+    res.header("Access-Control-Allow-Origin", origem);
+    res.header("Vary", "Origin");
+  }
+}
+
 // Rota para servir mídia baixada.
 //
 // O nome vem da URL, entao precisa ser tratado como entrada hostil: o Express
@@ -38,6 +50,7 @@ const CACHE_DIR = path.join(DATA_ROOT, ".wwebjs_cache");
 // qualquer caminho, e a checagem depois garante que o alvo ficou mesmo dentro
 // da pasta de midia.
 app.get("/api/crm/media/:filename", (req, res) => {
+  liberarOrigemImagem(req, res);
   const filename = path.basename(String(req.params.filename || ""));
   if (!filename || filename === "." || filename === "..") {
     return res.status(400).send("Nome de arquivo inválido");
@@ -53,6 +66,24 @@ app.get("/api/crm/media/:filename", (req, res) => {
     return res.status(404).send("Mídia não encontrada");
   }
   res.sendFile(filePath);
+});
+
+// Fotos de perfil guardadas localmente (ver baixarAvatar). Mesmo cuidado da
+// rota de mídia: o nome vem da URL e e tratado como entrada hostil.
+app.get("/api/crm/foto/:arquivo", (req, res) => {
+  liberarOrigemImagem(req, res);
+  const arquivo = path.basename(String(req.params.arquivo || ""));
+  if (!/^[0-9a-f]{40}\.jpg$/.test(arquivo)) {
+    return res.status(400).send("Nome inválido");
+  }
+
+  const destino = path.resolve(path.join(DATA_DIR, "avatars"), arquivo);
+  if (!fs.existsSync(destino) || !fs.statSync(destino).isFile()) {
+    return res.status(404).send("Foto não encontrada");
+  }
+
+  res.setHeader("Cache-Control", "public, max-age=86400");
+  res.sendFile(destino);
 });
 
 // Endpoint para marcar chat como visto
@@ -855,11 +886,56 @@ function storeMessage(message) {
   scheduleChatRefresh();
 }
 
+// As URLs de foto de perfil do WhatsApp EXPIRAM. Por isso o avatar aparecia e
+// sumia sozinho: quando a lista era recarregada horas depois, o link ja nao
+// valia mais e a foto virava a inicial cinza. Aqui a imagem e baixada uma vez
+// e passa a ser servida por este servidor, com um caminho estavel.
+const AVATAR_DIR = path.join(DATA_DIR, "avatars");
+const AVATAR_VALIDADE_MS = 7 * 24 * 60 * 60 * 1000;
+
+function nomeArquivoAvatar(chatId) {
+  return crypto.createHash("sha1").update(String(chatId)).digest("hex") + ".jpg";
+}
+
+async function baixarAvatar(chatId, url) {
+  if (!url || !url.startsWith("http")) return null;
+
+  const arquivo = nomeArquivoAvatar(chatId);
+  const destino = path.join(AVATAR_DIR, arquivo);
+
+  try {
+    // Ja temos uma copia recente? Nao baixa de novo.
+    if (fs.existsSync(destino)) {
+      const info = fs.statSync(destino);
+      if (Date.now() - info.mtimeMs < AVATAR_VALIDADE_MS && info.size > 0) {
+        return `/api/crm/foto/${arquivo}`;
+      }
+    }
+
+    const resposta = await fetch(url);
+    if (!resposta.ok) return null;
+
+    const buffer = Buffer.from(await resposta.arrayBuffer());
+    if (!buffer.length) return null;
+
+    if (!fs.existsSync(AVATAR_DIR)) fs.mkdirSync(AVATAR_DIR, { recursive: true });
+    fs.writeFileSync(destino, buffer);
+    return `/api/crm/foto/${arquivo}`;
+  } catch (error) {
+    console.warn("[avatar] Falha ao baixar foto de", chatId, "-", error.message);
+    return null;
+  }
+}
+
 async function getProfilePicUrlSafe(chatId) {
   if (!whatsappClient || !whatsappState.connected || !chatId || !isRealDirectChatId(chatId)) return null;
   try {
     const url = await whatsappClient.getProfilePicUrl(chatId);
-    if (url && (url.startsWith("http") || url.startsWith("data:"))) return url;
+    if (url && url.startsWith("data:")) return url;
+    if (url && url.startsWith("http")) {
+      // Guarda local primeiro; se o download falhar, ainda vale a URL original.
+      return (await baixarAvatar(chatId, url)) || url;
+    }
   } catch (e) {}
 
   try {
