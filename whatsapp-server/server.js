@@ -1039,16 +1039,48 @@ function appendSignature(text, signatureId) {
  * Sem id (mensagem criada aqui antes da confirmacao), cai para a combinacao
  * de conversa, sentido, horario e texto.
  */
+// Id que NAO veio do WhatsApp: fabricado aqui quando message.id._serialized
+// vem vazio (acontece nesta versao do WhatsApp Web, mesmo problema do
+// getChats()). Dois desses nunca sao iguais, entao nao servem para dizer se
+// duas entradas sao a mesma mensagem.
+const ID_FABRICADO = /^(msg-|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$)/i;
+
+/**
+ * Identidade de uma mensagem, para nao guardar a mesma duas vezes.
+ *
+ * Com id do WhatsApp, e so ele que conta.
+ *
+ * Sem id do WhatsApp, vale conversa + sentido + texto dentro de uma JANELA de
+ * tempo. A janela e o ponto: a mesma mensagem chega por dois caminhos (o
+ * envio guarda uma, o evento message_create guarda outra) com segundos de
+ * diferenca — medido no servidor da loja, 00:47:14 e 00:47:15. Comparar o
+ * timestamp exato fazia as duas passarem como distintas, e a oferta aparecia
+ * repetida na tela do vendedor.
+ */
+const JANELA_MESMA_MENSAGEM_MS = 120_000;
+
 function buildMessageFingerprint(message) {
   const id = String(message.id || "").trim();
-  if (id) return `id::${id}`;
+  if (id && !ID_FABRICADO.test(id)) return `id::${id}`;
 
+  // Sem id do WhatsApp, a identidade e o conteudo. O horario NAO entra na
+  // chave — quem cuida da proximidade no tempo e `mesmaMensagem()`, porque
+  // arredondar o horario em faixas separaria 00:47:59 de 00:48:01, que sao a
+  // mesma mensagem.
   return [
+    "conteudo",
     message.chatId || "",
     message.direction || "",
-    message.timestamp || 0,
-    message.body || "",
+    (message.body || "").trim(),
   ].join("::");
+}
+
+/** Se duas entradas sem id do WhatsApp sao, na pratica, a mesma mensagem. */
+function mesmaMensagem(a, b) {
+  return (
+    Math.abs(Number(a.timestamp || 0) - Number(b.timestamp || 0)) <=
+    JANELA_MESMA_MENSAGEM_MS
+  );
 }
 
 function normalizeStoredMessage(message) {
@@ -1065,6 +1097,15 @@ function mergeMessages(messages) {
     .forEach((message) => {
       const key = buildMessageFingerprint(message);
       const anterior = seen.get(key);
+
+      // Chave de conteúdo só vale como "a mesma mensagem" se os horários
+      // estiverem próximos: o cliente pode repetir "oi" no dia seguinte, e
+      // isso é outra mensagem. Longe no tempo, guarda as duas.
+      if (anterior && key.startsWith("conteudo::") && !mesmaMensagem(anterior, message)) {
+        seen.set(`${key}::${message.timestamp}`, message);
+        return;
+      }
+
       // A ressincronização periódica do histórico (via chat.fetchMessages)
       // não baixa a mídia — sem isso, a foto sumia do chat assim que a
       // mesma mensagem era resincronizada, sobrescrevendo a versão que
@@ -3355,11 +3396,15 @@ io.on("connection", (socket) => {
           const media = await MessageMedia.fromUrl(prod.imagem, { unsafeMime: true });
           const sentMsg = await resolveAndSendMessage(chatId, media, { caption: text });
           mediaSent = true;
-          sentId = sentMsg?.id?._serialized || null;
+          // O WhatsApp Web nem sempre devolve o id (`_serialized` vem vazio
+          // nesta versao). Quando isso acontece, fabricamos um — mas o MESMO
+          // e usado no registro e na confirmacao, para o painel conseguir
+          // casar o balao que ele criou com a mensagem de verdade.
+          sentId = sentMsg?.id?._serialized || `msg-produto-${Date.now()}`;
           // Mesmo motivo do endpoint REST: guarda a mediaUrl explicitamente
           // pra foto do produto não sumir do histórico na próxima sincronização.
           storeMessage({
-            id: sentId || `msg-produto-${Date.now()}`,
+            id: sentId,
             chatId,
             from: "me",
             to: chatId,

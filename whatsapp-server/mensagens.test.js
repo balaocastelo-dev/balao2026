@@ -26,11 +26,17 @@ function extrair(nome) {
   throw new Error(`não consegui delimitar ${nome}`);
 }
 
-const { buildMessageFingerprint } = (function () {
+// A regex ID_FABRICADO é usada dentro de buildMessageFingerprint.
+const constFabricado = fonte.match(/const ID_FABRICADO = [^;]+;/)[0];
+const constJanela = fonte.match(/const JANELA_MESMA_MENSAGEM_MS = [^;]+;/)[0];
+
+const { buildMessageFingerprint, mesmaMensagem } = (function () {
   const mod = {};
   // eslint-disable-next-line no-new-func
   new Function(
-    `${extrair("buildMessageFingerprint")}; this.buildMessageFingerprint = buildMessageFingerprint;`
+    `${constFabricado}\n${constJanela}\n${extrair("buildMessageFingerprint")}\n${extrair("mesmaMensagem")};
+     this.buildMessageFingerprint = buildMessageFingerprint;
+     this.mesmaMensagem = mesmaMensagem;`
   ).call(mod);
   return mod;
 })();
@@ -110,6 +116,57 @@ teste("entrada e saída com o mesmo texto não se confundem", () => {
     buildMessageFingerprint({ ...base, direction: "in" }),
     buildMessageFingerprint({ ...base, direction: "out" })
   );
+});
+
+console.log("\nids fabricados (o caso real da oferta triplicada)");
+
+// Medido no servidor da loja: a MESMA oferta guardada duas vezes, cada uma
+// com um id inventado por um caminho diferente, com 1 segundo de diferença.
+const OFERTA =
+  "⚡ *Oferta Balão da Informática*\n*HD Externo LaCie 2TB Rugged, USB-C, Laranja - STFR2000800*";
+
+teste("id 'msg-...' e UUID da mesma oferta contam como UMA", () => {
+  const doEnvio = {
+    id: "msg-produto-1788839235530",
+    chatId: "92148808610042@lid",
+    direction: "out",
+    timestamp: 1788839235530,
+    body: OFERTA,
+  };
+  const doEvento = {
+    id: "a3ec26fa-61fd-4fad-a8d2-1a22f51e4237",
+    chatId: "92148808610042@lid",
+    direction: "out",
+    timestamp: 1788839234000, // 1,5s antes
+    body: OFERTA,
+  };
+
+  assert.strictEqual(
+    buildMessageFingerprint(doEnvio),
+    buildMessageFingerprint(doEvento),
+    "id inventado não pode separar a mesma mensagem"
+  );
+  assert.ok(mesmaMensagem(doEnvio, doEvento), "1,5s de diferença é a mesma mensagem");
+});
+
+teste("id de verdade do WhatsApp continua mandando", () => {
+  const a = { id: ID_REAL, chatId: "x@c.us", direction: "out", timestamp: 1, body: "oi" };
+  assert.strictEqual(buildMessageFingerprint(a), `id::${ID_REAL}`);
+});
+
+teste("o mesmo texto no dia seguinte é OUTRA mensagem", () => {
+  const hoje = {
+    id: "msg-1",
+    chatId: "5519991112222@c.us",
+    direction: "in",
+    timestamp: 1788839235530,
+    body: "oi",
+  };
+  const amanha = { ...hoje, id: "msg-2", timestamp: 1788839235530 + 86_400_000 };
+
+  // A chave é a mesma (o conteúdo), mas mesmaMensagem separa pelo tempo.
+  assert.strictEqual(buildMessageFingerprint(hoje), buildMessageFingerprint(amanha));
+  assert.strictEqual(mesmaMensagem(hoje, amanha), false, "um dia depois não é a mesma");
 });
 
 console.log(
