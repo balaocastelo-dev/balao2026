@@ -1918,11 +1918,19 @@ async function sendDirectMessage({ number, text, signatureId, chatId: preferredC
     displayNumber: extractRealNumber(targetChatId),
     status: "sent",
   };
-  store.messages.push(outMsg);
-  if (store.messages.length > 5000) store.messages.shift();
-  io.emit("whatsapp:message", outMsg);
 
-  return sentMsg;
+  // Entra pelo storeMessage, e nao com push direto no array.
+  //
+  // O push pulava a deduplicacao: em seguida o evento message_create do
+  // WhatsApp registra a MESMA mensagem por outro caminho, e as duas ficavam
+  // guardadas. Passando por aqui, a segunda e reconhecida como repetida e
+  // nenhum evento extra vai para o painel.
+  storeMessage(outMsg);
+
+  // Devolve tambem o id usado no registro: quando o WhatsApp nao informa o
+  // dele (`_serialized` vazio nesta versao), e por este id que o painel
+  // consegue casar o balao provisorio com a mensagem de verdade.
+  return { ...(sentMsg || {}), idRegistrado: outMsg.id };
 }
 
 async function sendDirectMedia({
@@ -3050,7 +3058,13 @@ io.on("connection", (socket) => {
         chatId,
         replyTo: payload.replyTo || null,
       });
-      emitSendAck({ tempId: payload.tempId, chatId, success: true, id: sent?.id?._serialized });
+      emitSendAck({
+        tempId: payload.tempId,
+        chatId,
+        success: true,
+        // idRegistrado cobre o caso do WhatsApp nao devolver id proprio.
+        id: sent?.id?._serialized || sent?.idRegistrado || null,
+      });
     } catch (error) {
       console.error("Falha ao enviar mensagem:", error);
       emitToast("⛔ Falha ao enviar mensagem: " + error.message);
@@ -3221,7 +3235,13 @@ io.on("connection", (socket) => {
       });
 
       emitToast("Mídia enviada com sucesso!");
-      emitSendAck({ tempId: payload.tempId, chatId, success: true, id: sent?.id?._serialized });
+      emitSendAck({
+        tempId: payload.tempId,
+        chatId,
+        success: true,
+        // idRegistrado cobre o caso do WhatsApp nao devolver id proprio.
+        id: sent?.id?._serialized || sent?.idRegistrado || null,
+      });
     } catch (error) {
       console.error("Falha ao enviar mídia:", error);
       emitToast("⛔ Falha ao enviar mídia: " + error.message);

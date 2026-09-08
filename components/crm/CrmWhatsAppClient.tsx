@@ -973,23 +973,36 @@ export default function CrmWhatsAppClient({
       setMensagens((prev) => {
         // Rede de segurança contra o balão repetido.
         //
-        // Ao enviar, o painel cria na hora um balão com id temporário próprio
-        // (`msg-...`). A mensagem real chega depois, com o id do WhatsApp. Se
-        // a confirmação não tiver trocado o id — servidor de versão antiga,
-        // conexão que caiu no meio — sobrariam os dois, e o vendedor veria a
-        // mesma mensagem duas vezes, como já aconteceu.
+        // Ao enviar, o painel cria na hora um balão provisório. A mensagem
+        // real chega em seguida, e o balão precisa sair — senão o vendedor vê
+        // a mesma coisa duas vezes.
         //
-        // Por isso, quando chega uma mensagem NOSSA, sai qualquer balão
-        // temporário da mesma conversa com o mesmo texto.
+        // O casamento é por TEXTO e não pela conversa: o painel identifica o
+        // cliente por um id (às vezes um `@lid`) e o servidor pode gravar a
+        // mensagem sob outro formato do mesmo contato. Exigir o mesmo chatId
+        // fazia a limpeza falhar exatamente nesses casos — foi o que sobrou
+        // depois de corrigir a duplicação do lado do servidor.
+        //
+        // A janela de tempo e o prefixo (só balões criados AQUI) evitam
+        // apagar mensagem legítima por coincidência de texto.
+        const JANELA_MS = 2 * 60 * 1000;
+        const agora = Date.now();
+        const textoNovo = (m.body || "").trim();
+
+        const ehBalaoProvisorioDoPainel = (x: CrmMensagem) =>
+          x.id.startsWith("msg-out-") ||
+          x.id.startsWith("msg-prod-") ||
+          x.id.startsWith("msg-doc-");
+
         const semDuplicataTemporaria =
-          m.direction === "out"
+          m.direction === "out" && textoNovo
             ? prev.filter(
                 (x) =>
                   !(
-                    x.id.startsWith("msg-") &&
-                    x.chatId === m.chatId &&
+                    ehBalaoProvisorioDoPainel(x) &&
                     x.direction === "out" &&
-                    (x.body || "").trim() === (m.body || "").trim()
+                    (x.body || "").trim() === textoNovo &&
+                    agora - (x.timestamp || 0) < JANELA_MS
                   )
               )
             : prev;
