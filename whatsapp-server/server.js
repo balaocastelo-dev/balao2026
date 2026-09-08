@@ -248,6 +248,32 @@ function createId() {
   return crypto.randomUUID();
 }
 
+function isStatusMessage(msg) {
+  if (!msg) return false;
+  const from = String(msg.from || msg.chatId || "");
+  const to = String(msg.to || "");
+  const remote = String(msg.id?.remote || msg.chatId || msg.id || "");
+  const type = String(msg.type || "");
+
+  if (
+    msg.isStatus === true ||
+    type === "status_v3" ||
+    from === "status@broadcast" ||
+    to === "status@broadcast" ||
+    remote === "status@broadcast" ||
+    from.endsWith("@broadcast") ||
+    to.endsWith("@broadcast") ||
+    remote.endsWith("@broadcast") ||
+    from.includes("status@broadcast") ||
+    to.includes("status@broadcast") ||
+    remote.includes("status@broadcast") ||
+    msg.broadcast === true
+  ) {
+    return true;
+  }
+  return false;
+}
+
 function loadStore() {
   if (!fs.existsSync(dataFile)) return;
 
@@ -260,10 +286,14 @@ function loadStore() {
     store.chatLabels =
       parsed.chatLabels && typeof parsed.chatLabels === "object" ? parsed.chatLabels : {};
     store.messages = Array.isArray(parsed.messages)
-      ? parsed.messages.filter((item) => isRealDirectChatId(item.chatId)).slice(-400)
+      ? parsed.messages
+          .filter((item) => isRealDirectChatId(item.chatId) && !isStatusMessage(item))
+          .slice(-1000)
       : [];
     store.chats = Array.isArray(parsed.chats)
-      ? parsed.chats.filter((item) => isRealDirectChatId(item.chatId || item.id))
+      ? parsed.chats.filter(
+          (item) => isRealDirectChatId(item.chatId || item.id) && !isStatusMessage(item)
+        )
       : [];
     store.statusFeed = Array.isArray(parsed.statusFeed) ? parsed.statusFeed : [];
     store.chatAssignments =
@@ -781,6 +811,7 @@ function isRealDirectChatId(id) {
     s.endsWith("@newsletter") ||
     s.endsWith("@g.us") ||
     s.includes("broadcast") ||
+    s.includes("status") ||
     s === "13135550002@c.us" ||
     s === "0@c.us"
   ) {
@@ -851,7 +882,7 @@ function normalizeStoredMessage(message) {
 function mergeMessages(messages) {
   const seen = new Map();
   [...store.messages, ...messages.map(normalizeStoredMessage)]
-    .filter((m) => isRealDirectChatId(m.chatId))
+    .filter((m) => isRealDirectChatId(m.chatId) && !isStatusMessage(m))
     .forEach((message) => {
       const key = buildMessageFingerprint(message);
       const anterior = seen.get(key);
@@ -866,11 +897,11 @@ function mergeMessages(messages) {
     });
   store.messages = Array.from(seen.values())
     .sort((a, b) => a.timestamp - b.timestamp)
-    .slice(-600);
+    .slice(-1000);
 }
 
 function storeMessage(message) {
-  if (!message || !isRealDirectChatId(message.chatId)) return;
+  if (!message || isStatusMessage(message) || !isRealDirectChatId(message.chatId)) return;
   const next = normalizeStoredMessage(message);
   const exists = store.messages.some(
     (item) => buildMessageFingerprint(item) === buildMessageFingerprint(next)
@@ -1062,10 +1093,10 @@ async function syncRecentConversations() {
     const relevantChats = (rawChats || [])
       .filter((chat) => {
         const rawId = chat.id?._serialized || chat.id || chat.chatId || "";
-        return isRealDirectChatId(rawId);
+        return isRealDirectChatId(rawId) && !isStatusMessage(chat);
       })
       .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
-      .slice(0, 300);
+      .slice(0, 1000);
 
     const syncedMessages = [];
     const chatSummaries = [];
@@ -1073,7 +1104,7 @@ async function syncRecentConversations() {
 
     for (const chat of relevantChats) {
       const rawId = chat.id?._serialized || chat.id || chat.chatId || "";
-      if (!isRealDirectChatId(rawId)) continue;
+      if (!isRealDirectChatId(rawId) || isStatusMessage(chat)) continue;
 
       try {
         const { contactName, realNumber, displayNumber } = await resolveContactDetails(chat, rawId);
@@ -1082,20 +1113,22 @@ async function syncRecentConversations() {
         let messages = [];
 
         if (typeof chat.fetchMessages === "function") {
-          messages = await chat.fetchMessages({ limit: 25 }).catch(() => []);
-          latestMessage = messages[messages.length - 1] || chat.lastMessage || null;
+          const rawMsgs = await chat.fetchMessages({ limit: 25 }).catch(() => []);
+          messages = (rawMsgs || []).filter((m) => !isStatusMessage(m));
+          latestMessage = messages[messages.length - 1] || (chat.lastMessage && !isStatusMessage(chat.lastMessage) ? chat.lastMessage : null);
         }
-
-        // "Lead" que o WhatsApp cria sozinho quando alguém clica num anúncio
-        // (Click-to-WhatsApp) mas nunca chegou a mandar mensagem nenhuma —
-        // não é cliente de verdade ainda, não deve poluir a lista.
-        if (!latestMessage) continue;
 
         const assignedLabels = typeof chat.getLabels === "function" ? await chat.getLabels().catch(() => []) : [];
         const assignedLabelNames = (assignedLabels || [])
           .map((item) => String(item?.name || "").trim())
           .filter(Boolean)
           .sort((a, b) => a.localeCompare(b));
+
+        const bodyResumo = latestMessage
+          ? descreverMensagem(latestMessage)
+          : chat.lastMessage
+          ? descreverMensagem(chat.lastMessage)
+          : "";
 
         chatSummaries.push({
           chatId: rawId,
@@ -1104,9 +1137,9 @@ async function syncRecentConversations() {
           displayNumber,
           profilePicUrl,
           unreadCount: chat.unreadCount || 0,
-          lastMessageBody: descreverMensagem(latestMessage),
+          lastMessageBody: bodyResumo,
           lastMessageTimestamp:
-            ((latestMessage?.timestamp || chat.timestamp || Math.floor(Date.now() / 1000)) * 1000),
+            ((latestMessage?.timestamp || chat.lastMessage?.timestamp || chat.timestamp || Math.floor(Date.now() / 1000)) * 1000),
           isGroup: false,
           isArchived: Boolean(chat.archived),
           isPinned: Boolean(chat.pinned),
@@ -1123,6 +1156,7 @@ async function syncRecentConversations() {
         }
 
         (messages || []).forEach((message) => {
+          if (isStatusMessage(message)) return;
           const cId = message.fromMe ? message.to || rawId : message.from;
           if (!isRealDirectChatId(cId)) return;
           syncedMessages.push({
@@ -1152,23 +1186,18 @@ async function syncRecentConversations() {
 
     const existingMap = new Map();
     (store.chats || []).forEach(c => {
-      if (c && c.chatId && isRealDirectChatId(c.chatId)) {
+      if (c && c.chatId && isRealDirectChatId(c.chatId) && !isStatusMessage(c)) {
         existingMap.set(c.chatId, c);
       }
     });
     chatSummaries.forEach(c => {
-      if (c && c.chatId && isRealDirectChatId(c.chatId)) {
+      if (c && c.chatId && isRealDirectChatId(c.chatId) && !isStatusMessage(c)) {
         existingMap.set(c.chatId, { ...(existingMap.get(c.chatId) || {}), ...c });
       }
     });
 
-    // Limpa também leads vazios que já tinham ficado salvos de sincronizações
-    // anteriores (antes dessa correção) — só mantém quem tem mensagem real
-    // registrada (no resumo do chat ou no histórico já baixado).
-    const chatIdsComMensagem = new Set(store.messages.map((m) => m.chatId));
     store.chats = Array.from(existingMap.values())
-      .filter((c) => isRealDirectChatId(c.chatId))
-      .filter((c) => Boolean(c.lastMessageBody) || chatIdsComMensagem.has(c.chatId))
+      .filter((c) => isRealDirectChatId(c.chatId) && !isStatusMessage(c))
       .sort((a, b) => (b.lastMessageTimestamp || 0) - (a.lastMessageTimestamp || 0));
 
     rebuildNotifications();
@@ -1826,7 +1855,7 @@ function attachWhatsAppClientEvents(client) {
   });
 
   client.on("message", async (message) => {
-    if (!isRealDirectChatId(message.from) || message.broadcast) {
+    if (isStatusMessage(message) || !isRealDirectChatId(message.from) || message.broadcast) {
       // Antes, todo status publicado por qualquer contato disparava uma
       // varredura do feed. Numa agenda grande isso e o dia inteiro carregando
       // gente que nao esta conversando com a loja. O feed agora e sob demanda.
@@ -1882,7 +1911,7 @@ function attachWhatsAppClientEvents(client) {
   client.on("message_create", async (message) => {
     if (!message.fromMe) return;
     const targetChat = message.to || message.from;
-    if (!isRealDirectChatId(targetChat) || message.broadcast) {
+    if (isStatusMessage(message) || !isRealDirectChatId(targetChat) || message.broadcast) {
       // Status publicado (por nos ou por um contato) nao recarrega o feed
       // sozinho — quem abre a aba de Status e que pede o carregamento.
       return;

@@ -346,16 +346,7 @@ export default function CrmWhatsAppClient({
         try {
           const parsed = JSON.parse(s);
           if (Array.isArray(parsed)) {
-            return parsed.filter(
-              (c: any) =>
-                c.id &&
-                isRealDirectChat(c.id) &&
-                // Cache antigo deste navegador guardava contato que nunca
-                // trocou mensagem com a loja — e como a lista só era somada,
-                // esse entulho reaparecia todo dia. Quem não tem mensagem
-                // não entra; se de fato existir, o servidor traz de volta.
-                String(c.lastMessage || "").trim().length > 0
-            );
+            return parsed.filter((c: any) => c.id && isRealDirectChat(c.id));
           }
         } catch {}
       }
@@ -874,7 +865,14 @@ export default function CrmWhatsAppClient({
       // Status, listas de transmissão e @lid não são atendimento: descarta.
       // Antes, um status de qualquer contato mandava o painel resincronizar a
       // lista inteira de conversas — trabalho pesado, à toa, o dia todo.
-      if (!isRealDirectChat(newMsg.chatId) || !isRealDirectChat(newMsg.from)) {
+      if (
+        newMsg.isStatus ||
+        newMsg.type === "status_v3" ||
+        newMsg.to === "status@broadcast" ||
+        newMsg.from === "status@broadcast" ||
+        !isRealDirectChat(newMsg.chatId) ||
+        !isRealDirectChat(newMsg.from)
+      ) {
         return;
       }
 
