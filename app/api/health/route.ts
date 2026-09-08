@@ -34,6 +34,14 @@ export async function GET() {
   return NextResponse.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
+    // Qual código está no ar. Sem isto, quando um comportamento não muda
+    // depois de publicar, não dá para separar "o deploy não pegou" de "a
+    // correção está errada" — e as duas hipóteses levam a caminhos opostos.
+    versao: {
+      commit: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12) || 'local',
+      mensagem: process.env.VERCEL_GIT_COMMIT_MESSAGE?.slice(0, 120) || null,
+      ambiente: process.env.VERCEL_ENV || 'desenvolvimento',
+    },
     banco: {
       configurado,
       conecta,

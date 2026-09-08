@@ -163,6 +163,25 @@ function readJsonSafe(filePath) {
   }
 }
 
+// Assinatura do codigo que esta rodando: hash do proprio server.js.
+//
+// Serve para responder "esta VPS ja tem a ultima versao?" sem abrir o
+// container. Sem isso, quando um comportamento nao mudava depois do deploy,
+// nao dava para saber se o deploy nao pegou ou se a correcao estava errada —
+// e as duas hipoteses levam a caminhos opostos.
+const VERSAO_CODIGO = (() => {
+  try {
+    const conteudo = fs.readFileSync(__filename);
+    return {
+      hash: crypto.createHash("sha1").update(conteudo).digest("hex").slice(0, 12),
+      bytes: conteudo.length,
+      modificadoEm: fs.statSync(__filename).mtime.toISOString(),
+    };
+  } catch {
+    return { hash: "desconhecido", bytes: 0, modificadoEm: null };
+  }
+})();
+
 const packageJson = readJsonSafe(path.join(__dirname, "package.json")) || {};
 const packageLockJson = readJsonSafe(path.join(__dirname, "package-lock.json")) || {};
 const resolvedWwebVersion =
@@ -2500,6 +2519,7 @@ app.get(["/health", "/status", "/api/status", "/api/crm/status"], (_req, res) =>
     phoneNumber: whatsappState.phoneNumber,
     conta: whatsappState.phoneNumber ? { numero: whatsappState.phoneNumber } : null,
     armazenamento: estadoArmazenamento(),
+    versao: VERSAO_CODIGO,
     navegador: CHROME_PATH || null,
     ultimoErro: whatsappState.ultimoErro || null,
     // Numeros para diagnosticar de fora quando a lista aparece vazia no

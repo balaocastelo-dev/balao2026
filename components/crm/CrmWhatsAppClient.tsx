@@ -154,6 +154,38 @@ export interface CrmVendedorFixo {
   assinatura?: string;
 }
 
+/**
+ * Texto da oferta de um produto.
+ *
+ * Precisa ser IDÊNTICO ao `montarTextoDoProduto` do whatsapp-server: é assim
+ * que o balão que aparece na hora e a mensagem que o cliente recebe são
+ * reconhecidas como a mesma coisa. Ao mudar aqui, mudar lá também.
+ */
+function montarTextoDoProduto({
+  nome,
+  preco,
+  specs,
+  obs,
+}: {
+  nome: string;
+  preco: number;
+  specs?: string[];
+  obs?: string;
+}): string {
+  const precoFmt = Number(preco || 0).toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+  });
+  const linhasSpecs = specs?.length ? `\n• ${specs.join("\n• ")}` : "";
+  const linhaObs = obs && obs.trim() ? `\n\n_Obs: ${obs.trim()}_` : "";
+
+  return (
+    `⚡ *Oferta Balão da Informática*\n*${nome}*\n\n` +
+    `💵 *Preço Especial:* *R$ ${precoFmt}*${linhasSpecs}${linhaObs}\n\n` +
+    `📍 Pronta entrega na loja do Castelo Campinas!\n` +
+    `Para reservar ou tirar dúvidas, é só responder aqui! 🎈`
+  );
+}
+
 /** Uma mensagem encontrada pela busca por texto (`panel:search-messages`). */
 interface ResultadoBusca {
   id: string;
@@ -938,7 +970,32 @@ export default function CrmWhatsAppClient({
         status: "read",
       };
 
-      setMensagens((prev) => [...prev.filter((x) => x.id !== m.id), m]);
+      setMensagens((prev) => {
+        // Rede de segurança contra o balão repetido.
+        //
+        // Ao enviar, o painel cria na hora um balão com id temporário próprio
+        // (`msg-...`). A mensagem real chega depois, com o id do WhatsApp. Se
+        // a confirmação não tiver trocado o id — servidor de versão antiga,
+        // conexão que caiu no meio — sobrariam os dois, e o vendedor veria a
+        // mesma mensagem duas vezes, como já aconteceu.
+        //
+        // Por isso, quando chega uma mensagem NOSSA, sai qualquer balão
+        // temporário da mesma conversa com o mesmo texto.
+        const semDuplicataTemporaria =
+          m.direction === "out"
+            ? prev.filter(
+                (x) =>
+                  !(
+                    x.id.startsWith("msg-") &&
+                    x.chatId === m.chatId &&
+                    x.direction === "out" &&
+                    (x.body || "").trim() === (m.body || "").trim()
+                  )
+              )
+            : prev;
+
+        return [...semDuplicataTemporaria.filter((x) => x.id !== m.id), m];
+      });
 
       setChats((prev) => {
         const idx = prev.findIndex((c) => c.id === newMsg.chatId);
@@ -1640,10 +1697,19 @@ export default function CrmWhatsAppClient({
 
     const precoFinal = precoCustom || prod.preco;
     const precoFmt = `R$ ${precoFinal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
-    const specsTxt = prod.specs?.length ? `\n• ${prod.specs.join("\n• ")}` : "";
-    const obsTxt = obsCustom?.trim() ? `\n\n_Obs: ${obsCustom.trim()}_` : "";
 
-    const textoFormatado = `⚡ *Oferta Balão da Informática:*\n*${prod.nome}*\n\n💵 *Preço Especial:* *${precoFmt}*${specsTxt}${obsTxt}\n\n📍 Pronta entrega na loja do Castelo Campinas!\nPara garantir a reserva ou tirar dúvidas, é só responder aqui! 🎈`;
+    // Palavra por palavra igual ao texto do servidor (montarTextoDoProduto).
+    //
+    // Antes o painel escrevia a sua versão ("Oferta Balão da Informática:",
+    // "Para garantir a reserva") e o servidor mandava outra ao cliente
+    // ("Oferta Balão da Informática", "Para reservar"). Textos diferentes =
+    // mensagens diferentes para a tela, e a mesma oferta aparecia duas vezes.
+    const textoFormatado = montarTextoDoProduto({
+      nome: prod.nome,
+      preco: precoFinal,
+      specs: prod.specs,
+      obs: obsCustom,
+    });
 
     const produtoResumo: CrmProdutoResumo = {
       id: prod.id,
