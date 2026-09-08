@@ -1149,6 +1149,19 @@ async function resolveContactDetails(chat, rawId) {
   };
 }
 
+// Contagem da ultima varredura, exposta no /status. Serve para descobrir ONDE
+// as conversas somem quando a lista aparece vazia: se o WhatsApp nao entregou
+// nada, se o filtro derrubou, ou se a juncao de duplicados zerou.
+const ultimaVarredura = {
+  quando: null,
+  brutos: 0,
+  aposFiltroId: 0,
+  semMensagem: 0,
+  comErro: 0,
+  resumos: 0,
+  aposDeduplicar: 0,
+};
+
 async function syncRecentConversations() {
   if (!whatsappClient || !whatsappState.connected) return;
 
@@ -1176,6 +1189,11 @@ async function syncRecentConversations() {
       });
     }
 
+    ultimaVarredura.quando = new Date().toISOString();
+    ultimaVarredura.brutos = (rawChats || []).length;
+    ultimaVarredura.semMensagem = 0;
+    ultimaVarredura.comErro = 0;
+
     const relevantChats = (rawChats || [])
       .filter((chat) => {
         const rawId = chat.id?._serialized || chat.id || chat.chatId || "";
@@ -1183,6 +1201,8 @@ async function syncRecentConversations() {
       })
       .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
       .slice(0, 1000);
+
+    ultimaVarredura.aposFiltroId = relevantChats.length;
 
     const syncedMessages = [];
     const chatSummaries = [];
@@ -1216,7 +1236,10 @@ async function syncRecentConversations() {
         const referencia =
           latestMessage ||
           (chat.lastMessage && !isStatusMessage(chat.lastMessage) ? chat.lastMessage : null);
-        if (!referencia) continue;
+        if (!referencia) {
+          ultimaVarredura.semMensagem += 1;
+          continue;
+        }
 
         const { contactName, realNumber, displayNumber } = await resolveContactDetails(chat, rawId);
         const profilePicUrl = await getProfilePicUrlSafe(rawId);
@@ -1274,6 +1297,7 @@ async function syncRecentConversations() {
           });
         });
       } catch (error) {
+        ultimaVarredura.comErro += 1;
         console.error("Falha ao sincronizar conversa individual:", rawId, error);
       }
     }
@@ -1287,6 +1311,14 @@ async function syncRecentConversations() {
     // proprio numero da loja, ANTES de misturar com o que ja estava salvo.
     const resumosLimpos = deduplicarConversas(chatSummaries, whatsappState.phoneNumber);
     const idsValidos = new Set(resumosLimpos.map((c) => c.chatId));
+
+    ultimaVarredura.resumos = chatSummaries.length;
+    ultimaVarredura.aposDeduplicar = resumosLimpos.length;
+    console.log(
+      `[chats] Varredura: ${ultimaVarredura.brutos} brutos -> ${ultimaVarredura.aposFiltroId} apos filtro -> ` +
+        `${ultimaVarredura.resumos} com mensagem -> ${ultimaVarredura.aposDeduplicar} finais ` +
+        `(sem mensagem: ${ultimaVarredura.semMensagem}, com erro: ${ultimaVarredura.comErro})`
+    );
 
     const existingMap = new Map();
     (store.chats || []).forEach(c => {
@@ -2247,6 +2279,8 @@ app.get(["/health", "/status", "/api/status", "/api/crm/status"], (_req, res) =>
         ? new Date(ultimaSincronizacaoChats).toISOString()
         : null,
       sincronizando: sincronizandoChats,
+      // Onde as conversas foram parar na ultima varredura.
+      varredura: ultimaVarredura,
     },
   });
 });
