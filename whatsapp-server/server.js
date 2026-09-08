@@ -1486,7 +1486,10 @@ async function baixarMidiaDaMensagem(message, chatId = null) {
   const id = message.id?._serialized;
   if (id && whatsappClient?.pupPage) {
     try {
-      const dados = await whatsappClient.pupPage.evaluate(async (msgId, cid) => {
+      const dados = await whatsappClient.pupPage.evaluate(async (msgId, cid, fonteDaChave) => {
+        // Mesma funcao do servidor, enviada como texto: e ela que diz se dois
+        // ids sao a mesma mensagem, e duas copias divergindo ja quebrou isso.
+        const chaveDaMensagem = new Function(`return (${fonteDaChave})`)();
         const falha = (passo, e) =>
           ({ erro: `${passo}${e ? `: ${e.message || e}` : ""}` });
 
@@ -1500,10 +1503,10 @@ async function baixarMidiaDaMensagem(message, chatId = null) {
           // O id que guardamos veio do evento, com o chat no formato `@lid`;
           // na coleção a mesma mensagem pode estar indexada com o `@c.us`.
           // O trecho final do id (o hash da mensagem) é o mesmo nos dois.
-          const hash = String(msgId).split("_").pop();
+          const chave = chaveDaMensagem(msgId);
           const combina = (m) => {
             const outro = String(m?.id?._serialized || "");
-            return outro === msgId || outro.split("_").pop() === hash;
+            return outro === msgId || (chave && chaveDaMensagem(outro) === chave);
           };
 
           if (!msg) {
@@ -1626,7 +1629,7 @@ async function baixarMidiaDaMensagem(message, chatId = null) {
         } catch (e) {
           return falha(`descriptografar (estagio ${estagio()})${aoResolver}`, e);
         }
-      }, id, chatId || message.chatId || null);
+      }, id, chatId || message.chatId || null, chaveDaMensagem.toString());
 
       if (dados?.data) {
         const url = gravar(dados.data, dados.mimetype);
@@ -1658,10 +1661,10 @@ async function recuperarMensagemOriginal(chatId, id) {
   if (!chat || typeof chat.fetchMessages !== "function") return null;
 
   const brutas = (await chat.fetchMessages({ limit: 100 }).catch(() => [])) || [];
-  const hash = (valor) => String(valor || "").split("_").pop();
+  const chave = chaveDaMensagem(id);
   return (
     brutas.find((b) => b.id?._serialized === id) ||
-    brutas.find((b) => hash(b.id?._serialized) === hash(id)) ||
+    brutas.find((b) => chave && chaveDaMensagem(b.id?._serialized) === chave) ||
     null
   );
 }
@@ -1686,6 +1689,114 @@ async function rebaixarMidiaPorId(id, tipo, chatId = null) {
     },
     chatId
   );
+}
+
+/**
+ * Identidade da mensagem dentro do id do WhatsApp.
+ *
+ * O id serializado tem formato variavel:
+ *   false_5519984515960@c.us_3EB0ABC              (conversa comum)
+ *   false_92148808610042@lid_3EB0ABC_5519...@c.us (conversa @lid, com autor)
+ *
+ * Pegar "o ultimo pedaco" devolve o telefone do autor no segundo caso, e nao
+ * a mensagem — foi assim que a busca por id nunca achou nada em chat `@lid`.
+ * O que identifica a mensagem e o maior pedaco que NAO e um JID.
+ *
+ * Esta funcao roda nos dois lados: aqui e dentro da pagina do WhatsApp (o
+ * codigo e enviado para la como texto, para nao existirem duas versoes que
+ * podem divergir).
+ */
+function chaveDaMensagem(id) {
+  const pedacos = String(id || "").split("_");
+  let melhor = "";
+  for (const pedaco of pedacos) {
+    if (pedaco.includes("@")) continue;
+    if (pedaco === "true" || pedaco === "false") continue;
+    if (pedaco.length > melhor.length) melhor = pedaco;
+  }
+  return melhor;
+}
+
+/**
+ * Olha por dentro da pagina do WhatsApp e conta o que EXISTE ali.
+ *
+ * Serve para o diagnostico de midia: quando a resposta e "mensagem fora da
+ * memoria", isto diz se o problema e a conversa que nao abre, a conversa
+ * vazia, ou os ids que nao casam — tres causas diferentes, com consertos
+ * diferentes, que ate agora davam a mesma mensagem.
+ */
+async function inspecionarConversaNaPagina(chatId, msgId) {
+  if (!whatsappClient?.pupPage) return { erro: "sem pagina do WhatsApp" };
+
+  try {
+    return await whatsappClient.pupPage.evaluate(
+      async (cid, alvo, fonteDaChave) => {
+        const chaveDaMensagem = new Function(`return (${fonteDaChave})`)();
+        const relato = { chatId: cid, idProcurado: alvo, chaveProcurada: chaveDaMensagem(alvo) };
+
+        try {
+          const colecoes = window.require("WAWebCollections");
+          relato.totalDeConversasNaPagina = colecoes.Chat.getModelsArray()?.length ?? null;
+          relato.totalDeMensagensNaColecao = colecoes.Msg.getModelsArray()?.length ?? null;
+
+          const chat = colecoes.Chat.get(cid);
+          relato.conversaEncontrada = Boolean(chat);
+          if (!chat) {
+            // Talvez o id guardado nao seja o id do modelo. Mostra alguns.
+            relato.amostraDeConversas = (colecoes.Chat.getModelsArray() || [])
+              .slice(0, 5)
+              .map((c) => c.id?._serialized);
+            return relato;
+          }
+
+          const listar = () =>
+            (typeof chat.msgs?.getModelsArray === "function" && chat.msgs.getModelsArray()) ||
+            chat.msgs?.models ||
+            [];
+
+          relato.metodoDeCarregarAntigas =
+            typeof chat.loadEarlierMsgs === "function"
+              ? "chat.loadEarlierMsgs"
+              : typeof chat.msgs?.loadEarlierMsgs === "function"
+              ? "chat.msgs.loadEarlierMsgs"
+              : "nenhum";
+
+          relato.mensagensAntesDeCarregar = listar().length;
+          if (relato.metodoDeCarregarAntigas !== "nenhum") {
+            for (let i = 0; i < 3; i++) {
+              const antes = listar().length;
+              if (typeof chat.loadEarlierMsgs === "function") await chat.loadEarlierMsgs();
+              else await chat.msgs.loadEarlierMsgs();
+              if (listar().length <= antes) break;
+            }
+          }
+
+          const mensagens = listar();
+          relato.mensagensDepoisDeCarregar = mensagens.length;
+          relato.amostraDeIds = mensagens.slice(-6).map((m) => m.id?._serialized);
+          relato.amostraDeChaves = relato.amostraDeIds.map(chaveDaMensagem);
+          relato.achouPorChave = mensagens.some(
+            (m) => chaveDaMensagem(m.id?._serialized) === relato.chaveProcurada
+          );
+          relato.comMidia = mensagens.filter((m) => m.mediaData || m.isMedia).length;
+          relato.estagiosDeMidia = mensagens
+            .filter((m) => m.mediaData)
+            .slice(-6)
+            .map((m) => m.mediaData.mediaStage);
+
+          return relato;
+        } catch (e) {
+          relato.erro = e.message || String(e);
+          return relato;
+        }
+      },
+      chatId,
+      msgId,
+      chaveDaMensagem.toString()
+    );
+  } catch (error) {
+    return { erro: `pupPage: ${error.message}` };
+  }
 }
 
 // Teto de downloads por carregamento de conversa. Sem ele, abrir um chat com
@@ -3248,6 +3359,9 @@ app.get(["/api/crm/midia/diagnostico", "/api/midia/diagnostico"], async (req, re
   mergeMessages([{ ...escolhida, mediaUrl: url || null, mediaErro: motivo }]);
   emitMessages();
 
+  // So inspeciona quando deu errado: e uma varredura cara na pagina.
+  const inspecao = url ? null : await inspecionarConversaNaPagina(escolhida.chatId, escolhida.id);
+
   res.json({
     ok: Boolean(url),
     id: escolhida.id,
@@ -3255,6 +3369,7 @@ app.get(["/api/crm/midia/diagnostico", "/api/midia/diagnostico"], async (req, re
     de: escolhida.realNumber || escolhida.from,
     tipo: escolhida.mediaType,
     conversaAberta: Boolean(original),
+    inspecao,
     url,
     // O passo exato em que parou — é isto que se lê quando dá errado.
     motivo,
@@ -3298,18 +3413,18 @@ app.all(["/api/crm/midia/repescar", "/api/midia/repescar"], async (req, res) => 
       brutas = (await chat.fetchMessages({ limit: 100 }).catch(() => [])) || [];
     }
 
-    const hashDoId = (id) => String(id || "").split("_").pop();
     const porId = new Map();
-    const porHash = new Map();
+    const porChave = new Map();
     brutas.forEach((b) => {
       const id = b.id?._serialized;
       if (!id) return;
       porId.set(id, b);
-      porHash.set(hashDoId(id), b);
+      const chave = chaveDaMensagem(id);
+      if (chave) porChave.set(chave, b);
     });
 
     for (const m of lista) {
-      const bruta = porId.get(m.id) || porHash.get(hashDoId(m.id));
+      const bruta = porId.get(m.id) || porChave.get(chaveDaMensagem(m.id));
       const { url, motivo } = bruta
         ? await baixarMidiaDaMensagem(bruta, chatId)
         : await rebaixarMidiaPorId(m.id, m.mediaType, chatId);
