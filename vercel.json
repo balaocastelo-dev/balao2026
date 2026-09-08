@@ -4,8 +4,18 @@
   "devCommand": "next dev",
   "installCommand": "npm install",
   "crons": [
-    { "path": "/api/cron/blog-rss", "schedule": "* * * * *" },
-    { "path": "/api/cron/blog-product", "schedule": "* * * * *" },
-    { "path": "/api/cron/blog-balao-item", "schedule": "* * * * *" }
+    {
+      "_comentario": "Os tres rodavam a cada MINUTO ('* * * * *'): 4.320 execucoes por dia, cada uma abrindo conexao com o banco. O plano da Hostinger permite 500 conexoes por HORA — isso sozinho queimava a cota e derrubava o catalogo do site e do CRM, sem nenhum visitante. Como blog, tambem geraria 1.440 posts por dia. Agora: RSS a cada 6 horas, produto e item do Balao uma vez por dia.",
+      "path": "/api/cron/blog-rss",
+      "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/cron/blog-product",
+      "schedule": "20 9 * * *"
+    },
+    {
+      "path": "/api/cron/blog-balao-item",
+      "schedule": "40 15 * * *"
+    }
   ]
 }

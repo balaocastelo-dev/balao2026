@@ -32,7 +32,7 @@ import {
 import Link from "next/link";
 import Model3DViewer from "@/components/Model3DViewer";
 import ProductCard from "@/components/ProductCard";
-import { getProducts, searchProductsByKeywords } from "@/lib/db";
+import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
 import { SITE_CONFIG } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
@@ -93,8 +93,8 @@ const IPHONE_SCREEN_FAQS = [
 
 export default async function TelaIPhonePage() {
   const [allProducts, keywordApple] = await Promise.all([
-    getProducts(),
-    searchProductsByKeywords(["iphone", "apple", "capa", "carregador", "tela"], 16),
+    getCachedProducts(),
+    getCachedProductsByKeywords(["iphone", "apple", "capa", "carregador", "tela"], 16),
   ]);
 
   let appleProducts = keywordApple;

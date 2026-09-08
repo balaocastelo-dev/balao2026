@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
-import { getProducts, searchProductsByKeywords } from "@/lib/db";
+import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
 import JsonLd, {
   generateOrganizationSchema,
   generateBreadcrumbSchema,
@@ -90,8 +90,8 @@ const CONSIGNACAO_FAQS = [
 
 export default async function ConsignacaoPage() {
   const [allProducts, keywordUsed] = await Promise.all([
-    getProducts(),
-    searchProductsByKeywords(["seminovo", "usado", "notebook", "gamer", "macbook"], 16),
+    getCachedProducts(),
+    getCachedProductsByKeywords(["seminovo", "usado", "notebook", "gamer", "macbook"], 16),
   ]);
 
   let usedProducts = keywordUsed;

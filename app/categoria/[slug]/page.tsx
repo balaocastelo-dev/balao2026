@@ -3,7 +3,8 @@ import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import ProductList from "@/components/ProductList";
 import FilterSyncer from "@/components/FilterSyncer";
-import { getProductsByCategoryFullPath, getProducts, getCategories } from "@/lib/db";
+import { getProductsByCategoryFullPath } from "@/lib/db";
+import { getCachedProducts, getCachedCategories } from "@/lib/cache";
 import { searchProducts } from "@/lib/searchUtils";
 import { extractTags, filterProductsByTags } from "@/lib/product-filters";
 import { parsePriceToNumber, type Category } from "@/lib/utils";
@@ -29,7 +30,7 @@ function buildCategoryCanonical(slug: string, page: number, hasFacet: boolean) {
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { slug } = await params;
   const { search, tags: tagsParam, page } = await searchParams;
-  const categories = await getCategories();
+  const categories = await getCachedCategories();
   const pageNumber = Math.max(1, Number.parseInt(page || "1", 10) || 1);
   const hasFacet = Boolean((search || "").trim() || (tagsParam || "").trim());
   
@@ -78,7 +79,7 @@ export default async function CategoriaPage({
   const selectedTags = tagsParam ? tagsParam.split(',') : [];
   const currentPage = Math.max(1, Number.parseInt(page || "1", 10) || 1);
  
-  const categories = await getCategories();
+  const categories = await getCachedCategories();
  
   const findBySlug = (s: string, all: Category[]) =>
     all.find((c) => c.slug === s);
@@ -96,7 +97,7 @@ export default async function CategoriaPage({
   let filteredProducts =
     categoryName && categoryName !== "Todos os Produtos" && selectedCat?.full_path
       ? await getProductsByCategoryFullPath(selectedCat.full_path)
-      : await getProducts();
+      : await getCachedProducts();
 
   if (search) {
     filteredProducts = searchProducts(filteredProducts, search);

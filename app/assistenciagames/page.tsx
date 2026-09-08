@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import Header from "@/components/Header";
-import { getProducts, searchProductsByKeywords } from "@/lib/db";
+import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
 import ProductCard from "@/components/ProductCard";
 import JsonLd, {
   generateBreadcrumbSchema,
@@ -92,8 +92,8 @@ const GAMES_FAQS = [
 
 export default async function AssistenciaGamesPage() {
   const [allProducts, keywordGames] = await Promise.all([
-    getProducts(),
-    searchProductsByKeywords(["console", "gamer", "controle", "ps5", "xbox", "headset", "jogo"], 16),
+    getCachedProducts(),
+    getCachedProductsByKeywords(["console", "gamer", "controle", "ps5", "xbox", "headset", "jogo"], 16),
   ]);
 
   let gameProducts = keywordGames;

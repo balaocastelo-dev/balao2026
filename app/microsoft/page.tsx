@@ -1,7 +1,7 @@
 import React from "react";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
-import { getProducts, searchProductsByKeywords } from "@/lib/db";
+import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
 import ProductCard from "@/components/ProductCard";
 import JsonLd, {
   generateOrganizationSchema,
@@ -86,8 +86,8 @@ const MICROSOFT_FAQS = [
 
 export default async function MicrosoftPage() {
   const [allProducts, keywordSoftware] = await Promise.all([
-    getProducts(),
-    searchProductsByKeywords(["microsoft", "windows", "office", "licença", "software", "teclado microsoft"], 24),
+    getCachedProducts(),
+    getCachedProductsByKeywords(["microsoft", "windows", "office", "licença", "software", "teclado microsoft"], 24),
   ]);
 
   const fallbackSoftware = allProducts.filter((p) => {

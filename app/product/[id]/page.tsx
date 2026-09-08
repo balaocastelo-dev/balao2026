@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
-import { getCategories, getProductById } from '@/lib/db';
+import { getProductById } from "@/lib/db";
+import { getCachedCategories } from "@/lib/cache";
 import Header from '@/components/Header';
 import Sidebar from '@/components/Sidebar';
 import { notFound, permanentRedirect } from 'next/navigation';
@@ -95,7 +96,7 @@ export default async function ProductPage({ params }: Props) {
   const { id } = await params;
   const [product, categories] = await Promise.all([
     getProductById(id),
-    getCategories()
+    getCachedCategories()
   ]);
 
   if (!product) return notFound();

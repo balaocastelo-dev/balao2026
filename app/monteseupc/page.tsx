@@ -1,4 +1,4 @@
-import { getProducts } from "@/lib/db";
+
 import PCBuilder from "@/components/PCBuilder";
 import { Monitor, Cpu, Settings, Wrench, ShieldCheck, Sparkles, MessageCircle, MapPin } from "lucide-react";
 import Header from "@/components/Header";
@@ -11,7 +11,7 @@ import JsonLd, {
 } from "@/components/JsonLd";
 import type { Metadata } from "next";
 import { SITE_CONFIG } from "@/lib/config";
-
+import { getCachedProducts } from "@/lib/cache";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
@@ -63,7 +63,7 @@ const MONTE_SEU_PC_FAQS = [
 ];
 
 export default async function MonteSeuPCPage() {
-  const products = await getProducts();
+  const products = await getCachedProducts();
 
   const breadcrumbItems = [
     { name: "Home", item: "https://www.balao.info" },

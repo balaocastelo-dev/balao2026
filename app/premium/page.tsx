@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Header from "@/components/Header";
 import PremiumPromoCountdown from "@/components/PremiumPromoCountdown";
-import { getCategories, getProducts } from "@/lib/db";
+import { getCachedCategories, getCachedProducts } from "@/lib/cache";
 import { getProductHref, parsePriceToNumber, type Category, type Product } from "@/lib/utils";
 import { SITE_CONFIG } from "@/lib/config";
 import JsonLd from "@/components/JsonLd";
@@ -278,7 +278,7 @@ function InfoTile({
 }
 
 export default async function PremiumPage() {
-  const [products, categories] = await Promise.all([getProducts(), getCategories()]);
+  const [products, categories] = await Promise.all([getCachedProducts(), getCachedCategories()]);
 
   const findBySlug = (s: string, all: Category[]) => all.find((c) => c.slug === s);
   const premiumCategory = findBySlug("premium", categories);

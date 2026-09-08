@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
-import { getProducts, searchProductsByKeywords } from "@/lib/db";
+import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
 import JsonLd, {
   generateBreadcrumbSchema,
   generateFAQSchema,
@@ -93,8 +93,8 @@ const MANUTENCAO_FAQS = [
 
 export default async function ManutencaoPage() {
   const [allProducts, keywordUpgrades] = await Promise.all([
-    getProducts(),
-    searchProductsByKeywords(["ssd", "memoria", "cooler", "fonte", "pasta termica", "teclado"], 16),
+    getCachedProducts(),
+    getCachedProductsByKeywords(["ssd", "memoria", "cooler", "fonte", "pasta termica", "teclado"], 16),
   ]);
 
   let displayProducts = keywordUpgrades.length > 0 ? keywordUpgrades : allProducts.slice(0, 8);

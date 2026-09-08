@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
-import { getProducts, searchProductsByKeywords } from "@/lib/db";
+import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
 import JsonLd, {
   generateBreadcrumbSchema,
   generateFAQSchema,
@@ -93,8 +93,8 @@ const RECUPERACAO_FAQS = [
 
 export default async function RecuperacaoDadosPage() {
   const [allProducts, keywordStorage] = await Promise.all([
-    getProducts(),
-    searchProductsByKeywords(["ssd", "nvme", "hd", "externo", "pendrive", "kingston", "sandisk"], 16),
+    getCachedProducts(),
+    getCachedProductsByKeywords(["ssd", "nvme", "hd", "externo", "pendrive", "kingston", "sandisk"], 16),
   ]);
 
   let displayProducts = keywordStorage.length > 0 ? keywordStorage : allProducts.slice(0, 8);

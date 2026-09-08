@@ -5,6 +5,7 @@ import {
   getHomeBlocks,
   getProducts,
   getProductsPaginated,
+  searchProductsByKeywords,
 } from "./db";
 import { listVitrinePagesPublic } from "./vitrine/db";
 
@@ -30,6 +31,22 @@ export const getCachedProducts = unstable_cache(
   ["products-all"],
   { revalidate: 120, tags: [TAG_PRODUTOS] }
 );
+
+/**
+ * Busca por palavras-chave, com cache.
+ *
+ * As landing pages (PC Gamer, Notebooks, Manutenção…) chamam isto a cada
+ * visita. Sem cache, cada visitante abre conexão com o banco — e a cota é de
+ * 500 por hora.
+ */
+export function getCachedProductsByKeywords(keywords: string[], limit = 24) {
+  const chave = ["products-keywords", keywords.slice().sort().join("|"), String(limit)];
+
+  return unstable_cache(async () => searchProductsByKeywords(keywords, limit), chave, {
+    revalidate: 300,
+    tags: [TAG_PRODUTOS],
+  })();
+}
 
 export function getCachedProductsPaginated(opts: {
   page?: number;

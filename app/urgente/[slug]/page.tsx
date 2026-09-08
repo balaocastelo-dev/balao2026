@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
-import { getProducts, searchProductsByKeywords } from "@/lib/db";
+import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
 import { SITE_CONFIG } from "@/lib/config";
 import JsonLd, {
   generateBreadcrumbSchema,
@@ -84,8 +84,8 @@ export default async function UrgenteIntentPage({ params }: Props) {
   }
 
   const [allProducts, keywordMatches] = await Promise.all([
-    getProducts(),
-    searchProductsByKeywords([intent.serviceLabel.toLowerCase(), "notebook", "ssd", "fonte", "tela"], 8),
+    getCachedProducts(),
+    getCachedProductsByKeywords([intent.serviceLabel.toLowerCase(), "notebook", "ssd", "fonte", "tela"], 8),
   ]);
 
   let displayProducts = keywordMatches.length > 0 ? keywordMatches : allProducts.slice(0, 8);

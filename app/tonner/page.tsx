@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
-import { getProducts, searchProductsByKeywords } from "@/lib/db";
+import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
 import JsonLd, {
   generateOrganizationSchema,
   generateBreadcrumbSchema,
@@ -94,8 +94,8 @@ const TONER_FAQS = [
 
 export default async function TonnerPage() {
   const [allProducts, keywordToners] = await Promise.all([
-    getProducts(),
-    searchProductsByKeywords(["toner", "tinta", "cartucho", "impressora", "brother", "hp", "canon"], 16),
+    getCachedProducts(),
+    getCachedProductsByKeywords(["toner", "tinta", "cartucho", "impressora", "brother", "hp", "canon"], 16),
   ]);
 
   let displayProducts = keywordToners.length > 0 ? keywordToners : allProducts.slice(0, 8);

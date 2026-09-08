@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
-import { getProducts, searchProductsByKeywords } from "@/lib/db";
+import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
 import JsonLd, {
   generateBreadcrumbSchema,
   generateFAQSchema,
@@ -88,8 +88,8 @@ const SISTEMAS_FAQS = [
 
 export default async function SistemasPage() {
   const [allProducts, keywordBiz] = await Promise.all([
-    getProducts(),
-    searchProductsByKeywords(["monitor", "mini pc", "computador", "teclado", "mouse", "nobreak"], 16),
+    getCachedProducts(),
+    getCachedProductsByKeywords(["monitor", "mini pc", "computador", "teclado", "mouse", "nobreak"], 16),
   ]);
 
   let displayProducts = keywordBiz.length > 0 ? keywordBiz : allProducts.slice(0, 8);

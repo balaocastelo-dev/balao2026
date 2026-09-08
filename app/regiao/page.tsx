@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
-import { getProducts } from "@/lib/db";
+import { getCachedProducts } from "@/lib/cache";
 import { SITE_CONFIG } from "@/lib/config";
 import JsonLd, {
   generateBreadcrumbSchema,
@@ -60,7 +60,7 @@ export const metadata: Metadata = {
 };
 
 export default async function RegiaoPage() {
-  const allProducts = await getProducts();
+  const allProducts = await getCachedProducts();
   const showcaseProducts = allProducts.slice(0, 8);
 
   const breadcrumbItems = [
