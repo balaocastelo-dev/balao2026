@@ -972,9 +972,23 @@ function appendSignature(text, signatureId) {
   return `${text}\n\n${signature.signature}\n${signature.sellerName}`;
 }
 
+/**
+ * Identidade de uma mensagem, para nao guardar a mesma duas vezes.
+ *
+ * Quando ha id do WhatsApp, e SO ele que conta. A versao anterior misturava
+ * timestamp e texto na conta, e a mesma mensagem chegando por caminhos
+ * diferentes — o evento de envio e a leitura do historico — vinha com
+ * timestamp levemente diferente e virava duas entradas. No painel isso
+ * aparecia como a mensagem repetida, uma copia por etapa de entrega.
+ *
+ * Sem id (mensagem criada aqui antes da confirmacao), cai para a combinacao
+ * de conversa, sentido, horario e texto.
+ */
 function buildMessageFingerprint(message) {
+  const id = String(message.id || "").trim();
+  if (id) return `id::${id}`;
+
   return [
-    message.id || "",
     message.chatId || "",
     message.direction || "",
     message.timestamp || 0,

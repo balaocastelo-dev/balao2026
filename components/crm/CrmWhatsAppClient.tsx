@@ -980,7 +980,13 @@ export default function CrmWhatsAppClient({
     // cliente nunca recebeu nada.
     socket.on("whatsapp:send-ack", (payload: any) => {
       if (!payload?.tempId) return;
-      atualizarStatusMensagem(payload.tempId, payload.success ? "sent" : "failed");
+      // O `id` aqui é o definitivo do WhatsApp. Passar adiante faz o balão
+      // otimista assumi-lo e deixar de virar uma cópia da mesma mensagem.
+      atualizarStatusMensagem(
+        payload.tempId,
+        payload.success ? "sent" : "failed",
+        payload.id
+      );
       if (!payload.success) {
         showToast(`⛔ Mensagem não chegou ao WhatsApp: ${payload.error || "falha desconhecida"}`);
       }
@@ -1476,8 +1482,35 @@ export default function CrmWhatsAppClient({
   // pela confirmação real de envio (whatsapp:send-ack) e pelo fallback HTTP,
   // pra nunca deixar um balão preso em "pending" sem o vendedor saber se
   // aquilo realmente chegou ao WhatsApp do cliente.
-  const atualizarStatusMensagem = (id: string, status: CrmMensagem["status"]) => {
-    setMensagens((prev) => prev.map((m) => (m.id === id ? { ...m, status } : m)));
+  const atualizarStatusMensagem = (
+    id: string,
+    status: CrmMensagem["status"],
+    idReal?: string | null
+  ) => {
+    setMensagens((prev) => {
+      // Assim que o WhatsApp confirma o envio, o balão otimista assume o id
+      // DEFINITIVO da mensagem.
+      //
+      // Sem essa troca ele ficava para sempre com o id temporário do painel, e
+      // a mesma mensagem voltava depois — pelo evento de envio e pelo
+      // histórico — com o id de verdade. Como a deduplicação é por id, cada
+      // uma virava um balão novo: a mensagem aparecia repetida, uma cópia por
+      // etapa de entrega (✓, ✓✓, ✓✓), enquanto no celular havia só uma.
+      const trocarPara = idReal && idReal !== id ? idReal : null;
+
+      if (trocarPara) {
+        // Se a definitiva já chegou, o balão otimista simplesmente sai.
+        const jaExiste = prev.some((m) => m.id === trocarPara);
+        if (jaExiste) {
+          return prev
+            .filter((m) => m.id !== id)
+            .map((m) => (m.id === trocarPara ? { ...m, status } : m));
+        }
+        return prev.map((m) => (m.id === id ? { ...m, id: trocarPara, status } : m));
+      }
+
+      return prev.map((m) => (m.id === id ? { ...m, status } : m));
+    });
   };
 
   // Enviar reação
