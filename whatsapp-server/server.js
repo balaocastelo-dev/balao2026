@@ -1167,6 +1167,8 @@ const ultimaVarredura = {
   comMensagensBaixadas: 0,
   comLastMessage: 0,
   comTimestamp: 0,
+  // Preenchido quando getChats() falha e caímos no caminho de emergência.
+  erroGetChats: null,
 };
 
 async function syncRecentConversations() {
@@ -1177,6 +1179,12 @@ async function syncRecentConversations() {
     try {
       rawChats = await whatsappClient.getChats();
     } catch (err) {
+      // Guarda o motivo: quando getChats() falha, os chats vêm do caminho de
+      // emergência abaixo como objetos simples, SEM os métodos da biblioteca
+      // (fetchMessages, getLabels, archive…). O painel segue funcionando, mas
+      // em modo reduzido — e sem registrar isso não dá para saber que se está
+      // nesse modo.
+      ultimaVarredura.erroGetChats = String(err?.message || err).slice(0, 300);
       console.warn("getChats() padrão falhou, usando sincronização via pupPage:", err.message);
       rawChats = await whatsappClient.pupPage.evaluate(async () => {
         try {
@@ -2671,6 +2679,66 @@ io.on("connection", (socket) => {
   socket.on("panel:sync-conversations", async () => {
     emitToast("Sincronizando conversas da conta conectada.");
     await garantirChatsCarregados({ forcar: true });
+  });
+
+  // Historico de UMA conversa, buscado quando o vendedor abre ela.
+  //
+  // A varredura da lista nao traz mensagem nenhuma nesta versao do WhatsApp
+  // Web (medido: 0 de 509 chats com fetchMessages), entao sem isto o vendedor
+  // abre o cliente e encontra a tela vazia — sem saber o que ja foi falado.
+  // getChatById() devolve um Chat de verdade, com os metodos da biblioteca,
+  // mesmo quando getChats() falha.
+  socket.on("panel:carregar-historico", async (payload, callback) => {
+    const chatId = String(payload?.chatId || "").trim();
+    const limite = Math.min(200, Math.max(10, Number(payload?.limite) || 50));
+
+    const responder = (resultado) => {
+      if (typeof callback === "function") callback(resultado);
+    };
+
+    if (!chatId || !isRealDirectChatId(chatId)) {
+      responder({ ok: false, erro: "Conversa inválida." });
+      return;
+    }
+
+    try {
+      const chat = await getChatByIdSafe(chatId);
+      if (!chat || typeof chat.fetchMessages !== "function") {
+        responder({ ok: false, erro: "Não foi possível abrir esta conversa no WhatsApp." });
+        return;
+      }
+
+      const brutas = await chat.fetchMessages({ limit: limite }).catch(() => []);
+      const uteis = (brutas || []).filter((m) => !isStatusMessage(m));
+
+      const { contactName, realNumber } = await resolveContactDetails(chat, chatId);
+
+      const convertidas = uteis.map((message) => ({
+        id: message.id?._serialized || createId(),
+        chatId,
+        from: message.from,
+        to: message.to || null,
+        body: message.body || "",
+        direction: message.fromMe ? "out" : "in",
+        timestamp: (message.timestamp || Math.floor(Date.now() / 1000)) * 1000,
+        contactName,
+        realNumber,
+        displayNumber: realNumber,
+        hasMedia: Boolean(message.hasMedia),
+        mediaType: message.type || null,
+      }));
+
+      mergeMessages(convertidas);
+      persistStore();
+      // Vai para todo mundo: a conversa e do numero da loja, e o historico
+      // recem-baixado serve para qualquer vendedor que abrir depois.
+      emitMessages();
+
+      responder({ ok: true, total: convertidas.length });
+    } catch (error) {
+      console.error("Falha ao carregar histórico de", chatId, error);
+      responder({ ok: false, erro: "Falha ao carregar o histórico." });
+    }
   });
 
   // Status (as "stories" dos contatos) sao caros e nao fazem parte do

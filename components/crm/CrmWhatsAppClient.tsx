@@ -369,6 +369,7 @@ export default function CrmWhatsAppClient({
     return [];
   });
   const [chatSelecionadoId, setChatSelecionadoId] = useState<string | null>(null);
+  const [carregandoHistorico, setCarregandoHistorico] = useState(false);
   const [mensagens, setMensagens] = useState<CrmMensagem[]>(() => {
     if (typeof window !== "undefined") {
       const s = localStorage.getItem("balao_crm_mensagens_store");
@@ -1066,6 +1067,34 @@ export default function CrmWhatsAppClient({
     if (chatSelecionadoId && socketRef.current?.connected) {
       socketRef.current.emit("panel:mark-seen", { chatId: chatSelecionadoId });
     }
+  }, [chatSelecionadoId]);
+
+  // Buscar o histórico da conversa ao abri-la.
+  //
+  // A varredura da lista não traz mensagem nesta versão do WhatsApp Web, então
+  // sem isto o vendedor abre o cliente e vê a tela vazia, sem saber o que já
+  // foi conversado. Só busca uma vez por conversa: depois as mensagens ficam
+  // no servidor e chegam por conta própria.
+  const historicosPedidos = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    const chatId = chatSelecionadoId;
+    if (!chatId || !socketRef.current?.connected) return;
+    if (historicosPedidos.current.has(chatId)) return;
+
+    historicosPedidos.current.add(chatId);
+    setCarregandoHistorico(true);
+
+    socketRef.current.emit(
+      "panel:carregar-historico",
+      { chatId, limite: 50 },
+      (res: { ok?: boolean; erro?: string } | undefined) => {
+        setCarregandoHistorico(false);
+        if (!res?.ok && res?.erro) {
+          // Deixa tentar de novo se falhou — pode ter sido queda momentânea.
+          historicosPedidos.current.delete(chatId);
+        }
+      }
+    );
   }, [chatSelecionadoId]);
 
   // Live URL link preview on typing
@@ -2516,7 +2545,14 @@ export default function CrmWhatsAppClient({
                   <div className="flex-1 overflow-y-auto p-4 space-y-2.5 flex flex-col">
                     {mensagensChatAtual.length === 0 ? (
                       <div className="text-center text-xs text-[#5f6368] my-auto">
-                        Inicie a conversa enviando uma mensagem abaixo.
+                        {carregandoHistorico ? (
+                          <span className="inline-flex items-center gap-2">
+                            <span className="w-3 h-3 border-2 border-[#0f9d58] border-t-transparent rounded-full animate-spin" />
+                            Buscando as mensagens anteriores…
+                          </span>
+                        ) : (
+                          "Inicie a conversa enviando uma mensagem abaixo."
+                        )}
                       </div>
                     ) : (
                       mensagensChatAtual.map((m) => {
