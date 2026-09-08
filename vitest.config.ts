@@ -8,5 +8,9 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],
     globals: true,
+    // O whatsapp-server é um projeto Node separado, com teste próprio em
+    // Node puro (`npm test --prefix whatsapp-server`). Sem excluir, o Vitest
+    // tenta rodá-lo no ambiente jsdom e falha.
+    exclude: ['**/node_modules/**', '**/dist/**', 'whatsapp-server/**'],
   },
 })

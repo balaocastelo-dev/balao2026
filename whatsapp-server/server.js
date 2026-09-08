@@ -733,6 +733,92 @@ function extractRealNumber(...candidates) {
   return null;
 }
 
+// Um telefone de verdade tem DDI 55 + DDD + 8/9 digitos. O WhatsApp tambem
+// entrega identificadores internos (@lid) com 15+ digitos, que NAO sao
+// telefone — sem essa checagem eles apareciam na lista como se fossem, tipo
+// "230188805845202".
+function pareceTelefone(valor) {
+  const digits = getDigits(String(valor || ""));
+  if (digits.length === 12 || digits.length === 13) return digits.startsWith("55");
+  return digits.length === 10 || digits.length === 11;
+}
+
+/**
+ * Tira da lista o que nao e conversa de cliente:
+ *
+ *  - o proprio numero da loja (aparecia como se fosse um contato, porque toda
+ *    mensagem enviada tem a loja como participante);
+ *  - o MESMO contato repetido. O WhatsApp esta migrando de "numero@c.us" para
+ *    "identificador@lid", e durante a transicao entrega os dois. Sem juntar,
+ *    a pessoa aparecia duas vezes: uma com o telefone e outra com um numero
+ *    comprido que nao e telefone nenhum.
+ *
+ * Quando ha duplicata, fica a versao com telefone de verdade, herdando o que
+ * a outra tiver de melhor (nome, foto, nao lidas, mensagem mais recente).
+ */
+function deduplicarConversas(resumos, numeroProprio) {
+  const proprio = getDigits(String(numeroProprio || ""));
+  const porTelefone = new Map();
+  const semTelefone = [];
+
+  const melhorEntre = (a, b) => {
+    // Mais recente manda no que e "estado atual" da conversa.
+    const maisNovo = (b.lastMessageTimestamp || 0) > (a.lastMessageTimestamp || 0) ? b : a;
+    const outro = maisNovo === a ? b : a;
+    const nomeBom = (c) => c.contactName && !pareceTelefone(c.contactName) ? c.contactName : null;
+
+    // Entre os dois ids do mesmo contato, fica o que NAO e @lid: e por ele
+    // que da pra responder de forma confiavel. Os dois podem ter telefone
+    // resolvido, entao olhar o telefone nao basta — o que decide e o formato
+    // do proprio id.
+    const idRespondivel = (c) => !String(c.chatId || "").endsWith("@lid");
+
+    return {
+      ...outro,
+      ...maisNovo,
+      chatId: idRespondivel(a)
+        ? a.chatId
+        : idRespondivel(b)
+        ? b.chatId
+        : maisNovo.chatId,
+      contactName: nomeBom(maisNovo) || nomeBom(outro) || maisNovo.contactName,
+      profilePicUrl: maisNovo.profilePicUrl || outro.profilePicUrl || null,
+      unreadCount: Math.max(a.unreadCount || 0, b.unreadCount || 0),
+    };
+  };
+
+  for (const resumo of resumos) {
+    const digits = getDigits(resumo.realNumber || "");
+
+    // Conversa consigo mesmo nao e atendimento.
+    if (proprio && digits && digits === proprio) continue;
+
+    if (pareceTelefone(digits)) {
+      const existente = porTelefone.get(digits);
+      porTelefone.set(digits, existente ? melhorEntre(existente, resumo) : resumo);
+    } else {
+      semTelefone.push(resumo);
+    }
+  }
+
+  // Sobrou algum @lid sem telefone: so entra se o contato nao estiver ja na
+  // lista pelo nome — senao seria a mesma pessoa aparecendo de novo.
+  const nomesJaListados = new Set(
+    Array.from(porTelefone.values())
+      .map((c) => String(c.contactName || "").trim().toLowerCase())
+      .filter(Boolean)
+  );
+
+  const orfaos = semTelefone.filter((c) => {
+    const nome = String(c.contactName || "").trim().toLowerCase();
+    if (nome && nomesJaListados.has(nome)) return false;
+    nomesJaListados.add(nome);
+    return true;
+  });
+
+  return [...porTelefone.values(), ...orfaos];
+}
+
 function resolveChatTarget(number, preferredChatId = null) {
   if (preferredChatId) {
     return preferredChatId;
@@ -1184,13 +1270,26 @@ async function syncRecentConversations() {
       await syncLabelsForChats(labelAwareChats);
     }
 
+    // Junta o mesmo contato que veio duas vezes (@c.us e @lid) e tira o
+    // proprio numero da loja, ANTES de misturar com o que ja estava salvo.
+    const resumosLimpos = deduplicarConversas(chatSummaries, whatsappState.phoneNumber);
+    const idsValidos = new Set(resumosLimpos.map((c) => c.chatId));
+
     const existingMap = new Map();
     (store.chats || []).forEach(c => {
-      if (c && c.chatId && isRealDirectChatId(c.chatId) && !isStatusMessage(c)) {
+      // So sobrevive o registro antigo cujo chat ainda aparece na varredura
+      // atual. Sem isso, a duplicata (e o proprio numero) ficava salva para
+      // sempre, mesmo depois de corrigida a origem.
+      if (
+        c && c.chatId &&
+        isRealDirectChatId(c.chatId) &&
+        !isStatusMessage(c) &&
+        idsValidos.has(c.chatId)
+      ) {
         existingMap.set(c.chatId, c);
       }
     });
-    chatSummaries.forEach(c => {
+    resumosLimpos.forEach(c => {
       if (c && c.chatId && isRealDirectChatId(c.chatId) && !isStatusMessage(c)) {
         existingMap.set(c.chatId, { ...(existingMap.get(c.chatId) || {}), ...c });
       }
