@@ -1245,6 +1245,189 @@ async function baixarAvatar(chatId, url) {
   }
 }
 
+// Quantas vezes o download de midia falhou desde que o servidor subiu.
+// Aparece no /status: sem isso, foto que o cliente manda simplesmente nao
+// chegava ao painel e a falha ficava so num console.warn dentro do container.
+const estatisticasMidia = { tentativas: 0, salvas: 0, falhas: 0, reaproveitadas: 0, ultimaFalha: null };
+
+// Nome do arquivo saneado: o id do WhatsApp traz caracteres que nao podem ir
+// para o disco (e que a rota de midia recusaria depois).
+function baseDoArquivoDeMidia(message) {
+  const id = message?.id?._serialized;
+  return id ? String(id).replace(/[^a-zA-Z0-9_-]/g, "_") : null;
+}
+
+/**
+ * Se a midia desta mensagem ja esta no disco, devolve a URL dela.
+ *
+ * Sem isso, abrir a mesma conversa duas vezes baixaria tudo de novo — e o
+ * download e a parte lenta.
+ */
+// Indice dos arquivos ja baixados. Ler a pasta a cada mensagem seria O(n) por
+// mensagem — com centenas de arquivos, abrir uma conversa ficaria lento. A
+// faxina de midia apaga arquivo por fora, entao o indice se refaz de tempos
+// em tempos em vez de confiar so no que gravamos.
+const indiceMidia = { nomes: new Set(), lidoEm: 0 };
+const VALIDADE_INDICE_MIDIA = 30_000;
+
+function atualizarIndiceDeMidia(forcar = false) {
+  if (!forcar && Date.now() - indiceMidia.lidoEm < VALIDADE_INDICE_MIDIA) return;
+  indiceMidia.lidoEm = Date.now();
+  try {
+    indiceMidia.nomes = new Set(fs.existsSync(MEDIA_DIR) ? fs.readdirSync(MEDIA_DIR) : []);
+  } catch {
+    indiceMidia.nomes = new Set();
+  }
+}
+
+function midiaJaBaixada(message) {
+  const base = baseDoArquivoDeMidia(message);
+  if (!base) return null;
+  atualizarIndiceDeMidia();
+  for (const nome of indiceMidia.nomes) {
+    if (nome.startsWith(`${base}.`)) return `/api/crm/media/${nome}`;
+  }
+  return null;
+}
+
+/**
+ * Baixa a midia de uma mensagem e devolve o caminho para servir.
+ *
+ * Duas tentativas: o metodo da biblioteca e, se ele vier vazio, a leitura
+ * direta pelos modelos do WhatsApp Web — o mesmo tipo de contorno que ja foi
+ * preciso para a lista de conversas nesta versao.
+ */
+async function baixarMidiaDaMensagem(message) {
+  const jaTem = midiaJaBaixada(message);
+  if (jaTem) {
+    estatisticasMidia.reaproveitadas += 1;
+    return jaTem;
+  }
+
+  estatisticasMidia.tentativas += 1;
+
+  const gravar = (base64, mimetype) => {
+    if (!base64) return null;
+    try {
+      if (!fs.existsSync(MEDIA_DIR)) fs.mkdirSync(MEDIA_DIR, { recursive: true });
+      const ext =
+        (mimetype && mimetype.split("/")[1]?.split(";")[0]) ||
+        (message.type === "image" ? "jpg" : "bin");
+      const filename = `${baseDoArquivoDeMidia(message) || createId()}.${ext}`;
+      fs.writeFileSync(path.join(MEDIA_DIR, filename), Buffer.from(base64, "base64"));
+      indiceMidia.nomes.add(filename);
+      estatisticasMidia.salvas += 1;
+      return `/api/crm/media/${filename}`;
+    } catch (error) {
+      estatisticasMidia.falhas += 1;
+      estatisticasMidia.ultimaFalha = `gravar: ${error.message}`;
+      console.warn("[midia] Falha ao gravar:", error.message);
+      return null;
+    }
+  };
+
+  // 1) Caminho normal da biblioteca.
+  try {
+    const media = await message.downloadMedia();
+    if (media?.data) return gravar(media.data, media.mimetype);
+    estatisticasMidia.ultimaFalha = "downloadMedia() voltou vazio";
+  } catch (error) {
+    estatisticasMidia.ultimaFalha = `downloadMedia: ${error.message}`;
+    console.warn("[midia] downloadMedia falhou:", error.message);
+  }
+
+  // 2) Direto pelo WhatsApp Web.
+  const id = message.id?._serialized;
+  if (id && whatsappClient?.pupPage) {
+    try {
+      const dados = await whatsappClient.pupPage.evaluate(async (msgId) => {
+        try {
+          const colecoes = window.require("WAWebCollections");
+          const msg = colecoes.Msg.get(msgId);
+          if (!msg) return null;
+
+          const mod = window.require("WAWebDownloadManager");
+          const baixar = mod?.downloadManager?.downloadAndMaybeDecrypt;
+          if (!baixar) return null;
+
+          const buffer = await baixar({
+            directPath: msg.directPath,
+            encFilehash: msg.encFilehash,
+            filehash: msg.filehash,
+            mediaKey: msg.mediaKey,
+            mediaKeyTimestamp: msg.mediaKeyTimestamp,
+            type: msg.type,
+            signal: new AbortController().signal,
+          });
+
+          let binario = "";
+          const bytes = new Uint8Array(buffer);
+          for (let i = 0; i < bytes.length; i++) binario += String.fromCharCode(bytes[i]);
+          return { data: btoa(binario), mimetype: msg.mimetype || null };
+        } catch {
+          return null;
+        }
+      }, id);
+
+      if (dados?.data) return gravar(dados.data, dados.mimetype);
+    } catch (error) {
+      estatisticasMidia.ultimaFalha = `pupPage: ${error.message}`;
+      console.warn("[midia] Leitura direta falhou:", error.message);
+    }
+  }
+
+  estatisticasMidia.falhas += 1;
+  console.warn(
+    `[midia] Nao consegui baixar a midia da mensagem ${id || "(sem id)"} — motivo: ${estatisticasMidia.ultimaFalha}`
+  );
+  return null;
+}
+
+// Teto de downloads por carregamento de conversa. Sem ele, abrir um chat com
+// 50 fotos travaria a resposta ate baixar todas.
+const MAX_MIDIAS_POR_CARREGAMENTO = 20;
+
+/**
+ * Converte mensagens do WhatsApp para o formato do painel, trazendo junto a
+ * foto que o cliente mandou.
+ *
+ * Antes isso so gravava `hasMedia: true` e a foto virava um "📎 Mídia" sem
+ * imagem nenhuma no painel.
+ */
+async function converterMensagensDoHistorico(uteis, chatId, contactName, realNumber) {
+  let baixadasAgora = 0;
+  const convertidas = [];
+
+  for (const message of uteis) {
+    let mediaUrl = null;
+    if (message.hasMedia) {
+      mediaUrl = midiaJaBaixada(message);
+      if (!mediaUrl && baixadasAgora < MAX_MIDIAS_POR_CARREGAMENTO) {
+        baixadasAgora += 1;
+        mediaUrl = await baixarMidiaDaMensagem(message);
+      }
+    }
+
+    convertidas.push({
+      id: message.id?._serialized || createId(),
+      chatId,
+      from: message.from,
+      to: message.to || null,
+      body: message.body || "",
+      direction: message.fromMe ? "out" : "in",
+      timestamp: (message.timestamp || Math.floor(Date.now() / 1000)) * 1000,
+      contactName,
+      realNumber,
+      displayNumber: realNumber,
+      hasMedia: Boolean(message.hasMedia),
+      mediaType: message.type || null,
+      mediaUrl,
+    });
+  }
+
+  return convertidas;
+}
+
 async function getProfilePicUrlSafe(chatId) {
   if (!whatsappClient || !whatsappState.connected || !chatId || !isRealDirectChatId(chatId)) return null;
   try {
@@ -1557,20 +1740,12 @@ async function carregarHistoricosEmSegundoPlano({ limite = 60, porConversa = 60 
         if (!uteis.length) continue;
 
         const { contactName, realNumber } = await resolveContactDetails(chat, chatId);
-        const convertidas = uteis.map((message) => ({
-          id: message.id?._serialized || createId(),
+        const convertidas = await converterMensagensDoHistorico(
+          uteis,
           chatId,
-          from: message.from,
-          to: message.to || null,
-          body: message.body || "",
-          direction: message.fromMe ? "out" : "in",
-          timestamp: (message.timestamp || Math.floor(Date.now() / 1000)) * 1000,
           contactName,
-          realNumber,
-          displayNumber: realNumber,
-          hasMedia: Boolean(message.hasMedia),
-          mediaType: message.type || null,
-        }));
+          realNumber
+        );
 
         salvarMensagensDaConversa(chatId, convertidas);
         baixadas += convertidas.length;
@@ -2474,22 +2649,7 @@ function attachWhatsAppClientEvents(client) {
     }
 
     // Bug fix: Download media to disk so it survives page reloads
-    let mediaUrl = null;
-    if (message.hasMedia) {
-      try {
-        const media = await message.downloadMedia();
-        if (media && media.data) {
-          const mediaDir = MEDIA_DIR;
-          if (!fs.existsSync(mediaDir)) fs.mkdirSync(mediaDir, { recursive: true });
-          const ext = media.mimetype ? media.mimetype.split("/")[1]?.split(";")[0] || "bin" : "bin";
-          const filename = `${message.id?._serialized || createId()}.${ext}`;
-          fs.writeFileSync(path.join(mediaDir, filename), Buffer.from(media.data, "base64"));
-          mediaUrl = `/api/crm/media/${filename}`;
-        }
-      } catch (e) {
-        console.warn("[whatsapp] Falha ao baixar mídia:", e.message);
-      }
-    }
+    const mediaUrl = message.hasMedia ? await baixarMidiaDaMensagem(message) : null;
 
     storeMessage({
       id: message.id?._serialized || createId(),
@@ -2738,6 +2898,9 @@ app.get(["/health", "/status", "/api/status", "/api/crm/status"], (_req, res) =>
       // Onde as conversas foram parar na ultima varredura.
       varredura: ultimaVarredura,
     },
+    // Foto que o cliente manda passa por aqui. Quando "salvas" fica em zero e
+    // "falhas" sobe, o problema e o download — nao o painel.
+    midia: estatisticasMidia,
   });
 });
 
@@ -3161,20 +3324,12 @@ io.on("connection", (socket) => {
 
       const { contactName, realNumber } = await resolveContactDetails(chat, chatId);
 
-      const convertidas = uteis.map((message) => ({
-        id: message.id?._serialized || createId(),
+      const convertidas = await converterMensagensDoHistorico(
+        uteis,
         chatId,
-        from: message.from,
-        to: message.to || null,
-        body: message.body || "",
-        direction: message.fromMe ? "out" : "in",
-        timestamp: (message.timestamp || Math.floor(Date.now() / 1000)) * 1000,
         contactName,
-        realNumber,
-        displayNumber: realNumber,
-        hasMedia: Boolean(message.hasMedia),
-        mediaType: message.type || null,
-      }));
+        realNumber
+      );
 
       mergeMessages(convertidas);
 

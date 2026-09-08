@@ -137,6 +137,23 @@ function formatAvatarUrl(
   return url;
 }
 
+// Mídia que o cliente mandou (foto, áudio, documento). O servidor de WhatsApp
+// devolve um caminho relativo — "/api/crm/media/xxx.jpg" — que é dele, não do
+// site. Sem prefixar, o navegador pedia para www.balao.info e a foto do
+// cliente nunca aparecia. Mesmo motivo do formatAvatarUrl acima.
+function resolverUrlMidia(
+  url: string | null | undefined,
+  servidorWhatsApp?: string
+): string | null {
+  if (!url) return null;
+  if (url.startsWith("data:") || url.startsWith("http")) return url;
+  if (url.startsWith("/api/crm/media/")) {
+    const base = (servidorWhatsApp || "").replace(/\/$/, "");
+    return base ? `${base}${url}` : url;
+  }
+  return url;
+}
+
 // Resolve caminhos relativos de imagem (/uploads/...) em URL absoluta,
 // pois o whatsapp-server só consegue anexar mídia via MessageMedia.fromUrl
 // quando recebe uma URL http(s) completa.
@@ -3014,7 +3031,11 @@ export default function CrmWhatsAppClient({
                             {/* Audio Player if Voice Note */}
                             {m.mediaType === "audio" || m.mediaType === "ptt" || m.isVoice ? (
                               <div className="py-1">
-                                <audio src={m.mediaUrl || ""} controls className="w-60 h-8" />
+                                <audio
+                                  src={resolverUrlMidia(m.mediaUrl, serverUrl) || ""}
+                                  controls
+                                  className="w-60 h-8"
+                                />
                               </div>
                             ) : null}
 
@@ -3028,7 +3049,7 @@ export default function CrmWhatsAppClient({
                                 </div>
                                 {m.mediaUrl && (
                                   <a
-                                    href={m.mediaUrl}
+                                    href={resolverUrlMidia(m.mediaUrl, serverUrl)!}
                                     target="_blank"
                                     rel="noreferrer"
                                     className="bg-[#0f9d58] text-white text-[10px] font-bold px-2 py-1 rounded"
@@ -3044,12 +3065,25 @@ export default function CrmWhatsAppClient({
                               <div className="w-full max-h-56 bg-black/5 rounded-lg overflow-hidden mb-2 flex items-center justify-center">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
-                                  src={m.mediaUrl}
+                                  src={resolverUrlMidia(m.mediaUrl, serverUrl)!}
                                   referrerPolicy="no-referrer"
                                   crossOrigin="anonymous"
                                   alt=""
                                   className="max-h-56 max-w-full object-contain"
                                 />
+                              </div>
+                            )}
+
+                            {/* Mídia que o servidor não conseguiu baixar: sem
+                                este aviso a mensagem aparecia como um balão
+                                vazio e parecia que o cliente não mandou nada. */}
+                            {m.hasMedia && !m.mediaUrl && !m.produto && (
+                              <div className="flex items-center gap-2 px-2 py-1.5 mb-1 rounded-lg bg-black/5 text-[11px] text-[#5f6368]">
+                                <span>📎</span>
+                                <span>
+                                  {m.mediaType === "image" ? "Foto" : "Arquivo"} enviado — ainda
+                                  baixando. Abra a conversa de novo em instantes.
+                                </span>
                               </div>
                             )}
 
