@@ -99,7 +99,7 @@ function mensagem(extra = {}) {
 
   await teste("foto do cliente é gravada e vira URL servível", async () => {
     const m = carregar(null);
-    const url = await m.baixar(
+    const { url, motivo } = await m.baixar(
       mensagem({
         async downloadMedia() {
           return { data: PNG, mimetype: "image/png" };
@@ -118,7 +118,7 @@ function mensagem(extra = {}) {
     // O id do WhatsApp tem "@", "_" e pontos. Se qualquer "/" ou ".." passasse
     // para o nome, a rota /api/crm/media recusaria o arquivo depois.
     const m = carregar(null);
-    const url = await m.baixar(
+    const { url, motivo } = await m.baixar(
       mensagem({
         id: { _serialized: "false_../../etc/passwd@c.us_X" },
         async downloadMedia() {
@@ -143,8 +143,8 @@ function mensagem(extra = {}) {
       },
     });
 
-    const primeira = await m.baixar(msg);
-    const segunda = await m.baixar(msg);
+    const primeira = (await m.baixar(msg)).url;
+    const segunda = (await m.baixar(msg)).url;
 
     assert.strictEqual(primeira, segunda, "a segunda vez devolveu outra URL");
     assert.strictEqual(downloads, 1, `baixou ${downloads} vezes`);
@@ -162,7 +162,7 @@ function mensagem(extra = {}) {
       },
     };
     const m = carregar(cliente);
-    const url = await m.baixar(
+    const { url, motivo } = await m.baixar(
       mensagem({
         id: { _serialized: "false_5519984515960@c.us_3EB0FALLBACK" },
         async downloadMedia() {
@@ -177,7 +177,7 @@ function mensagem(extra = {}) {
   await teste("falhando os dois caminhos, devolve null e conta a falha", async () => {
     const cliente = { pupPage: { async evaluate() { return null; } } };
     const m = carregar(cliente);
-    const url = await m.baixar(
+    const { url, motivo } = await m.baixar(
       mensagem({
         id: { _serialized: "false_5519984515960@c.us_3EB0PERDIDA" },
         async downloadMedia() {
@@ -204,7 +204,7 @@ function mensagem(extra = {}) {
       },
     };
     const m = carregar(cliente);
-    const url = await m.baixar(
+    const { url, motivo } = await m.baixar(
       mensagem({
         id: { _serialized: "false_5519984515960@c.us_3EB0MOTIVO" },
         async downloadMedia() {
@@ -214,11 +214,14 @@ function mensagem(extra = {}) {
     );
     assert.strictEqual(url, null);
     assert.strictEqual(m.stats.ultimaFalha, "pagina: descriptografar (estagio PENDING)");
+    // O motivo tem que voltar junto, e nao so ficar na estatistica: e ele que
+    // viaja ate o balao no painel.
+    assert.strictEqual(motivo, "pagina: descriptografar (estagio PENDING)");
   });
 
   await teste("mensagem sem id ainda grava a foto", async () => {
     const m = carregar(null);
-    const url = await m.baixar({
+    const { url, motivo } = await m.baixar({
       type: "image",
       hasMedia: true,
       async downloadMedia() {

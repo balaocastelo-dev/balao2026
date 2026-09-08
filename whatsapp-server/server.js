@@ -1340,7 +1340,7 @@ async function baixarMidiaDaMensagem(message) {
   const jaTem = midiaJaBaixada(message);
   if (jaTem) {
     estatisticasMidia.reaproveitadas += 1;
-    return jaTem;
+    return { url: jaTem, motivo: null };
   }
 
   estatisticasMidia.tentativas += 1;
@@ -1368,7 +1368,10 @@ async function baixarMidiaDaMensagem(message) {
   // 1) Caminho normal da biblioteca.
   try {
     const media = await message.downloadMedia();
-    if (media?.data) return gravar(media.data, media.mimetype);
+    if (media?.data) {
+      const url = gravar(media.data, media.mimetype);
+      if (url) return { url, motivo: null };
+    }
     estatisticasMidia.ultimaFalha = "downloadMedia() voltou vazio";
   } catch (error) {
     estatisticasMidia.ultimaFalha = `downloadMedia: ${error.message}`;
@@ -1395,6 +1398,16 @@ async function baixarMidiaDaMensagem(message) {
           msg =
             colecoes.Msg.get(msgId) ||
             (await colecoes.Msg.getMessagesById([msgId]))?.messages?.[0];
+
+          // O id que guardamos veio do evento, com o chat no formato `@lid`;
+          // na coleção a mesma mensagem pode estar indexada com o `@c.us`.
+          // O trecho final do id (o hash da mensagem) é o mesmo nos dois.
+          if (!msg) {
+            const hash = String(msgId).split("_").pop();
+            msg = (colecoes.Msg.getModelsArray() || []).find(
+              (m) => String(m.id?._serialized || "").split("_").pop() === hash
+            );
+          }
         } catch (e) {
           return falha("nao achei a mensagem no WhatsApp Web", e);
         }
@@ -1486,7 +1499,10 @@ async function baixarMidiaDaMensagem(message) {
         }
       }, id);
 
-      if (dados?.data) return gravar(dados.data, dados.mimetype);
+      if (dados?.data) {
+        const url = gravar(dados.data, dados.mimetype);
+        if (url) return { url, motivo: null };
+      }
       if (dados?.erro) estatisticasMidia.ultimaFalha = `pagina: ${dados.erro}`;
     } catch (error) {
       estatisticasMidia.ultimaFalha = `pupPage: ${error.message}`;
@@ -1498,7 +1514,7 @@ async function baixarMidiaDaMensagem(message) {
   console.warn(
     `[midia] Nao consegui baixar a midia da mensagem ${id || "(sem id)"} — motivo: ${estatisticasMidia.ultimaFalha}`
   );
-  return null;
+  return { url: null, motivo: estatisticasMidia.ultimaFalha };
 }
 
 /**
@@ -1509,7 +1525,7 @@ async function baixarMidiaDaMensagem(message) {
  * exatamente onde a foto sumia.
  */
 async function rebaixarMidiaPorId(id, tipo) {
-  if (!id) return null;
+  if (!id) return { url: null, motivo: "mensagem sem id" };
   return baixarMidiaDaMensagem({
     id: { _serialized: id },
     type: tipo || null,
@@ -1537,11 +1553,14 @@ async function converterMensagensDoHistorico(uteis, chatId, contactName, realNum
 
   for (const message of uteis) {
     let mediaUrl = null;
+    let mediaErro = null;
     if (message.hasMedia) {
       mediaUrl = midiaJaBaixada(message);
       if (!mediaUrl && baixadasAgora < MAX_MIDIAS_POR_CARREGAMENTO) {
         baixadasAgora += 1;
-        mediaUrl = await baixarMidiaDaMensagem(message);
+        const midia = await baixarMidiaDaMensagem(message);
+        mediaUrl = midia.url;
+        mediaErro = midia.motivo;
       }
     }
 
@@ -1559,6 +1578,7 @@ async function converterMensagensDoHistorico(uteis, chatId, contactName, realNum
       hasMedia: Boolean(message.hasMedia),
       mediaType: message.type || null,
       mediaUrl,
+      mediaErro,
     });
   }
 
@@ -2786,7 +2806,9 @@ function attachWhatsAppClientEvents(client) {
     }
 
     // Bug fix: Download media to disk so it survives page reloads
-    const mediaUrl = message.hasMedia ? await baixarMidiaDaMensagem(message) : null;
+    const midia = message.hasMedia
+      ? await baixarMidiaDaMensagem(message)
+      : { url: null, motivo: null };
 
     storeMessage({
       id: message.id?._serialized || createId(),
@@ -2800,7 +2822,10 @@ function attachWhatsAppClientEvents(client) {
       displayNumber: realNumber,
       hasMedia: Boolean(message.hasMedia),
       mediaType: message.type || null,
-      mediaUrl,
+      mediaUrl: midia.url,
+      // O motivo viaja junto ate o painel. Sem isso, foto que nao baixa vira
+      // um clipe mudo e so o log dentro do container sabe o porque.
+      mediaErro: midia.motivo,
     });
   });
 
@@ -3064,8 +3089,9 @@ app.get(["/api/crm/midia/diagnostico", "/api/midia/diagnostico"], async (req, re
     });
   }
 
-  const url = await rebaixarMidiaPorId(escolhida.id, escolhida.mediaType);
-  if (url) mergeMessages([{ ...escolhida, mediaUrl: url }]);
+  const { url, motivo } = await rebaixarMidiaPorId(escolhida.id, escolhida.mediaType);
+  mergeMessages([{ ...escolhida, mediaUrl: url || null, mediaErro: motivo }]);
+  emitMessages();
 
   res.json({
     ok: Boolean(url),
@@ -3075,7 +3101,7 @@ app.get(["/api/crm/midia/diagnostico", "/api/midia/diagnostico"], async (req, re
     tipo: escolhida.mediaType,
     url,
     // O passo exato em que parou — é isto que se lê quando dá errado.
-    motivo: url ? null : estatisticasMidia.ultimaFalha,
+    motivo,
     pendentes: pendentes.length,
     estatisticas: estatisticasMidia,
   });
@@ -3093,16 +3119,13 @@ app.all(["/api/crm/midia/repescar", "/api/midia/repescar"], async (req, res) => 
   const recuperadas = [];
   const motivos = [];
   for (const m of pendentes) {
-    const url = await rebaixarMidiaPorId(m.id, m.mediaType);
-    if (url) {
-      mergeMessages([{ ...m, mediaUrl: url }]);
-      recuperadas.push(m.id);
-    } else if (motivos.length < 5) {
-      motivos.push(estatisticasMidia.ultimaFalha);
-    }
+    const { url, motivo } = await rebaixarMidiaPorId(m.id, m.mediaType);
+    mergeMessages([{ ...m, mediaUrl: url || null, mediaErro: motivo }]);
+    if (url) recuperadas.push(m.id);
+    else if (!motivos.includes(motivo) && motivos.length < 5) motivos.push(motivo);
   }
 
-  if (recuperadas.length) emitMessages();
+  emitMessages();
 
   res.json({
     ok: true,

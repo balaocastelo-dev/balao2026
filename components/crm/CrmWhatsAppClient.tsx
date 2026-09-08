@@ -933,6 +933,7 @@ export default function CrmWhatsAppClient({
                 hasMedia: sm.hasMedia,
                 mediaType: sm.mediaType,
                 mediaUrl: sm.mediaUrl || null,
+                mediaErro: sm.mediaErro || null,
                 // Usa o status real persistido pelo message_ack quando existir
                 // (ver whatsapp-server), em vez de assumir "lida" sempre.
                 status: sm.status || "sent",
@@ -984,6 +985,7 @@ export default function CrmWhatsAppClient({
         hasMedia: newMsg.hasMedia,
         mediaType: newMsg.mediaType,
         mediaUrl: newMsg.mediaUrl || null,
+        mediaErro: newMsg.mediaErro || null,
         status: "read",
       };
 
@@ -3084,6 +3086,14 @@ export default function CrmWhatsAppClient({
                                   {m.mediaType === "image" ? "Foto" : "Arquivo"} recebido — o
                                   servidor não conseguiu baixar o arquivo. Reabra a conversa para
                                   tentar de novo.
+                                  {/* O motivo técnico fica à vista de propósito: é o
+                                      que permite consertar sem precisar abrir o log
+                                      de dentro do container. */}
+                                  {m.mediaErro && (
+                                    <span className="block mt-0.5 font-mono text-[10px] opacity-70 break-all">
+                                      {m.mediaErro}
+                                    </span>
+                                  )}
                                 </span>
                               </div>
                             )}

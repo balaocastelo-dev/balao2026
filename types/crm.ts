@@ -97,6 +97,10 @@ export interface CrmMensagem {
   hasMedia?: boolean;
   mediaType?: string | null;
   mediaUrl?: string | null;
+  // Por que a mídia não pôde ser baixada. Vem do servidor de WhatsApp e é
+  // mostrado no balão: sem isso, foto que falha vira um clipe mudo e o motivo
+  // só existe no log dentro do container.
+  mediaErro?: string | null;
   mediaName?: string | null;
   isVoice?: boolean;
   replyTo?: {
