@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raízes Digitais</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+        header h1 {
+            font-size: 2.5em;
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+        header p { color: #aaa; font-size: 1.1em; }
+        .chapter-card {
+            background: rgba(255,255,255,0.07);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .chapter-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,210,255,0.15);
+        }
+        .chapter-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .chapter-number {
+            width: 50px; height: 50px;
+            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 1.2em; color: #fff;
+            flex-shrink: 0;
+        }
+        .chapter-title { font-size: 1.3em; color: #fff; }
+        .chapter-canvas {
+            width: 100%; height: 180px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            display: block;
+        }
+        .audio-player {
+            width: 100%;
+            border-radius: 30px;
+            outline: none;
+        }
+        .audio-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            color: #00d2ff;
+            font-size: 0.95em;
+        }
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            font-size: 0.9em;
+        }
+        .illustration-area {
+            margin: 40px auto;
+            text-align: center;
+        }
+        .illustration-area canvas {
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📖 Raízes Digitais</h1>
+            <p>Como a tecnologia transforma cultura e identidade</p>
+            <p style="margin-top:10px;font-size:0.9em;">✨ 10 capítulos com áudio narrado por IA ✨</p>
+        </header>
+
+        <div class="illustration-area">
+            <canvas id="mainArt" width="800" height="300"></canvas>
+        <div class="chapter-card">
+            <div class="chapter-header">
+                <div class="chapter-number">1</div>
+                <div class="chapter-title">Capítulo 1</div>
+            </div>
+            <canvas class="chapter-canvas" id="art1" width="800" height="180"></canvas>
+            <div class="audio-label">🎧 Ouça este capítulo:</div>
+            <audio class="audio-player" controls preload="none">
+                <source src="audio-capitulo-01.mp3" type="audio/mpeg">
+                Seu navegador não suporta áudio.
+            </audio>
+        </div>
+        <div class="chapter-card">
+            <div class="chapter-header">
+                <div class="chapter-number">2</div>
+                <div class="chapter-title">Capítulo 2</div>
+            </div>
+            <canvas class="chapter-canvas" id="art2" width="800" height="180"></canvas>
+            <div class="audio-label">🎧 Ouça este capítulo:</div>
+            <audio class="audio-player" controls preload="none">
+                <source src="audio-capitulo-02.mp3" type="audio/mpeg">
+                Seu navegador não suporta áudio.
+            </audio>
+        </div>
+        <div class="chapter-card">
+            <div class="chapter-header">
+                <div class="chapter-number">3</div>
+                <div class="chapter-title">Capítulo 3</div>
+            </div>
+            <canvas class="chapter-canvas" id="art3" width="800" height="180"></canvas>
+            <div class="audio-label">🎧 Ouça este capítulo:</div>
+            <audio class="audio-player" controls preload="none">
+                <source src="audio-capitulo-03.mp3" type="audio/mpeg">
+                Seu navegador não suporta áudio.
+            </audio>
+        </div>
+        <div class="chapter-card">
+            <div class="chapter-header">
+                <div class="chapter-number">4</div>
+                <div class="chapter-title">Capítulo 4</div>
+            </div>
+            <canvas class="chapter-canvas" id="art4" width="800" height="180"></canvas>
+            <div class="audio-label">🎧 Ouça este capítulo:</div>
+            <audio class="audio-player" controls preload="none">
+                <source src="audio-capitulo-04.mp3" type="audio/mpeg">
+                Seu navegador não suporta áudio.
+            </audio>
+        </div>
+        <div class="chapter-card">
+            <div class="chapter-header">
+                <div class="chapter-number">5</div>
+                <div class="chapter-title">Capítulo 5</div>
+            </div>
+            <canvas class="chapter-canvas" id="art5" width="800" height="180"></canvas>
+            <div class="audio-label">🎧 Ouça este capítulo:</div>
+            <audio class="audio-player" controls preload="none">
+                <source src="audio-capitulo-05.mp3" type="audio/mpeg">
+                Seu navegador não suporta áudio.
+            </audio>
+        </div>
+        <div class="chapter-card">
+            <div class="chapter-header">
+                <div class="chapter-number">6</div>
+                <div class="chapter-title">Capítulo 6</div>
+            </div>
+            <canvas class="chapter-canvas" id="art6" width="800" height="180"></canvas>
+            <div class="audio-label">🎧 Ouça este capítulo:</div>
+            <audio class="audio-player" controls preload="none">
+                <source src="audio-capitulo-06.mp3" type="audio/mpeg">
+                Seu navegador não suporta áudio.
+            </audio>
+        </div>
+        <div class="chapter-card">
+            <div class="chapter-header">
+                <div class="chapter-number">7</div>
+                <div class="chapter-title">Capítulo 7</div>
+            </div>
+            <canvas class="chapter-canvas" id="art7" width="800" height="180"></canvas>
+            <div class="audio-label">🎧 Ouça este capítulo:</div>
+            <audio class="audio-player" controls preload="none">
+                <source src="audio-capitulo-07.mp3" type="audio/mpeg">
+                Seu navegador não suporta áudio.
+            </audio>
+        </div>
+        <div class="chapter-card">
+            <div class="chapter-header">
+                <div class="chapter-number">8</div>
+                <div class="chapter-title">Capítulo 8</div>
+            </div>
+            <canvas class="chapter-canvas" id="art8" width="800" height="180"></canvas>
+            <div class="audio-label">🎧 Ouça este capítulo:</div>
+            <audio class="audio-player" controls preload="none">
+                <source src="audio-capitulo-08.mp3" type="audio/mpeg">
+                Seu navegador não suporta áudio.
+            </audio>
+        </div>
+        <div class="chapter-card">
+            <div class="chapter-header">
+                <div class="chapter-number">9</div>
+                <div class="chapter-title">Capítulo 9</div>
+            </div>
+            <canvas class="chapter-canvas" id="art9" width="800" height="180"></canvas>
+            <div class="audio-label">🎧 Ouça este capítulo:</div>
+            <audio class="audio-player" controls preload="none">
+                <source src="audio-capitulo-09.mp3" type="audio/mpeg">
+                Seu navegador não suporta áudio.
+            </audio>
+        </div>
+        <div class="chapter-card">
+            <div class="chapter-header">
+                <div class="chapter-number">10</div>
+                <div class="chapter-title">Capítulo 10</div>
+            </div>
+            <canvas class="chapter-canvas" id="art10" width="800" height="180"></canvas>
+            <div class="audio-label">🎧 Ouça este capítulo:</div>
+            <audio class="audio-player" controls preload="none">
+                <source src="audio-capitulo-10.mp3" type="audio/mpeg">
+                Seu navegador não suporta áudio.
+            </audio>
+        </div>
+
+        <footer>
+            <p>📚 Raízes Digitais — Gerado com IA e edge-tts</p>
+            <p style="margin-top:5px;">Voz: pt-BR-FranciscaNeural | Ilustrações: Canvas API</p>
+        </footer>
+    </div>
+
+    <script>
+        function drawMainArt() {
+            const canvas = document.getElementById('mainArt');
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width, h = canvas.height;
+            
+            const grad = ctx.createLinearGradient(0, 0, w, h);
+            grad.addColorStop(0, '#0f0c29');
+            grad.addColorStop(0.5, '#302b63');
+            grad.addColorStop(1, '#24243e');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, w, h);
+            
+            const chars = '01{}[]()<>=;:./\\|&!@#$%';
+            ctx.font = '14px monospace';
+            for (let i = 0; i < 80; i++) {
+                const x = (i * 137 + Date.now() * 0.01) % w;
+                const y = (i * 73 + Math.sin(Date.now() * 0.001 + i) * 20) % h;
+                const alpha = 0.1 + Math.random() * 0.4;
+                ctx.fillStyle = `rgba(0, 210, 255, ${alpha})`;
+                ctx.fillText(chars[Math.floor(Math.random() * chars.length)], x, y);
+            }
+            
+            const cx = w/2, cy = h/2;
+            const orbGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 100);
+            orbGrad.addColorStop(0, 'rgba(0, 210, 255, 0.6)');
+            orbGrad.addColorStop(0.5, 'rgba(58, 123, 213, 0.3)');
+            orbGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = orbGrad;
+            ctx.beginPath();
+            ctx.arc(cx, cy, 100, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.strokeStyle = 'rgba(255, 107, 107, 0.5)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(cx, cy, 130, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            ctx.font = 'bold 28px Segoe UI';
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.fillText("RAÍZES DIGITAIS", cx, cy - 10);
+            ctx.font = '16px Segoe UI';
+            ctx.fillStyle = '#aaa';
+            ctx.fillText("Como a tecnologia transforma cultura e identidade", cx, cy + 20);
+        }
+
+        const chapterThemes = [
+            { colors: ["#8B4513", "#D2691E"], symbol: '🌱', name: 'Seed' },
+            { colors: ["#228B22", "#32CD32"], symbol: '🌳', name: 'Tree' },
+            { colors: ["#4169E1", "#00BFFF"], symbol: '📜', name: 'Scroll' },
+            { colors: ["#FF6347", "#FF4500"], symbol: '🌸', name: 'Flower' },
+            { colors: ["#FFD700", "#FFA500"], symbol: '🍎', name: 'Fruit' },
+            { colors: ["#8B4513", "#A0522D"], symbol: '🌿', name: 'Root' },
+            { colors: ["#4682B4", "#5F9EA0"], symbol: '💨', name: 'Wind' },
+            { colors: ["#DAA520", "#B8860B"], symbol: '🌾', name: 'Harvest' },
+            { colors: ["#2E8B57", "#3CB371"], symbol: '🌍', name: 'Globe' },
+            { colors: ["#9370DB", "#8A2BE2"], symbol: '🌱', name: 'NewSeed' }
+        ];
+
+        function drawChapterArt(index) {
+            const canvas = document.getElementById('art' + (index + 1));
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width, h = canvas.height;
+            const theme = chapterThemes[index];
+            
+            const grad = ctx.createLinearGradient(0, 0, w, h);
+            grad.addColorStop(0, theme.colors[0] + '22');
+            grad.addColorStop(1, theme.colors[1] + '22');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, w, h);
+            
+            ctx.strokeStyle = theme.colors[0] + '44';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 15; i++) {
+                const x = (i * 60) % w;
+                const y = (i * 30) % h;
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x + 100, h);
+                ctx.stroke();
+            }
+            
+            ctx.font = '60px serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(theme.symbol, w/2, h/2 + 20);
+            
+            for (let i = 0; i < 5; i++) {
+                ctx.beginPath();
+                ctx.arc(w/2 + (i-2)*40, h/2 - 40, 8, 0, Math.PI*2);
+                ctx.fillStyle = theme.colors[i % 2] + '66';
+                ctx.fill();
+            }
+        }
+
+        drawMainArt();
+        for (let i = 0; i < 10; i++) drawChapterArt(i);
+        setInterval(drawMainArt, 100);
+    </script>
+</body>
+</html>
