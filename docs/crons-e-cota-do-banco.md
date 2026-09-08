@@ -1,0 +1,80 @@
+# Crons e a cota de conexões do banco
+
+## O problema que isso resolve
+
+O banco MySQL da Hostinger permite **500 conexões por hora** para o usuário do
+site. Estourada a cota, o banco recusa **tudo** — e o catálogo aparece vazio no
+site e no CRM até a hora virar. O sintoma é o catálogo "sumir às vezes".
+
+Para saber se é esse o caso:
+
+```bash
+curl -s https://www.balao.info/api/health
+```
+
+Se o campo `banco.erro` mencionar `max_connections_per_hour`, é a cota.
+
+## O que estava queimando a cota
+
+Os três crons rodavam **a cada minuto** (`* * * * *`):
+
+```
+/api/cron/blog-rss         * * * * *
+/api/cron/blog-product     * * * * *
+/api/cron/blog-balao-item  * * * * *
+```
+
+São 180 execuções por hora — **4.320 por dia** — cada uma abrindo conexão com
+o banco, sem nenhum visitante no site. Isso sozinho consumia a cota. Como
+blog, também tentaria publicar 1.440 posts por dia.
+
+## Como está agora
+
+| Cron | Agenda | Quando roda |
+| --- | --- | --- |
+| `blog-rss` | `0 */6 * * *` | A cada 6 horas |
+| `blog-product` | `20 9 * * *` | Uma vez por dia, 9h20 |
+| `blog-balao-item` | `40 15 * * *` | Uma vez por dia, 15h40 |
+
+De 4.320 execuções diárias para 6.
+
+## ⚠️ O `vercel.json` não aceita comentários
+
+Já quebrou um build: a Vercel valida o arquivo contra um schema fechado e
+recusa qualquer propriedade fora dele.
+
+```
+Error: Invalid vercel.json - `crons[0]` should NOT have additional
+property `_comentario`. Please remove it.
+```
+
+Dentro de cada cron só podem existir `path` e `schedule`. Explicação vai
+para este documento, não para o JSON.
+
+## A outra fonte de consumo
+
+30 páginas com `force-dynamic` liam o banco a cada visita — incluindo
+`getProducts()`, que carrega os 4.155 produtos com specs e descrição.
+
+Elas usam as funções de `lib/cache.ts` (`getCachedProducts`,
+`getCachedProductsByKeywords`, `getCachedCategories`), com 2 a 5 minutos de
+cache. As páginas continuam dinâmicas; o que mudou é de onde vem o dado.
+
+**Ao criar página nova que lista produtos, use as funções de `lib/cache.ts`,
+não as de `lib/db.ts`.** As de `db` ficam para rotas de API e para o admin,
+que precisam do dado fresco.
+
+## Quando o preço muda
+
+Toda alteração de produto (individual, em lote ou importação) chama
+`invalidarCacheProdutos()`. É isso que faz o site e o CRM mostrarem o novo
+valor na hora, em vez de esperar o cache expirar.
+
+Ao criar uma rota nova que altere produto, chame essa função depois de salvar.
+
+## Se voltar a estourar
+
+1. Confirme pelo `/api/health` que é a cota mesmo.
+2. Veja se algum cron novo entrou com agenda curta.
+3. Procure página ou rota nova lendo de `lib/db` direto em vez do cache.
+4. Não adianta reiniciar nada: a cota é por hora e zera sozinha na virada.
