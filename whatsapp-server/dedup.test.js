@@ -86,6 +86,21 @@ teste("o proprio numero da loja nao vira conversa", () => {
   assert.strictEqual(saida[0].contactName, "Cliente");
 });
 
+teste("contato marcado pelo WhatsApp como 'eu' sai, mesmo vindo como @lid", () => {
+  // Caso real do painel: a própria loja aparecia como "Você 230188805845202".
+  // O LID não bate com o telefone da loja, então a comparação por número não
+  // pegava — quem resolve é a marcação do próprio WhatsApp.
+  const saida = deduplicarConversas(
+    [
+      { chatId: "230188805845202@lid", realNumber: "230188805845202", contactName: "Você", ehEu: true, lastMessageTimestamp: 5 },
+      { chatId: "5519991112222@c.us", realNumber: "5519991112222", contactName: "Cliente", lastMessageTimestamp: 4 },
+    ],
+    NUMERO_DA_LOJA
+  );
+  assert.strictEqual(saida.length, 1, "a própria loja não pode virar conversa");
+  assert.strictEqual(saida[0].contactName, "Cliente");
+});
+
 teste("mesmo contato em @lid e @c.us vira UMA conversa", () => {
   const saida = deduplicarConversas(
     [

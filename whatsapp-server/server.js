@@ -811,7 +811,10 @@ function deduplicarConversas(resumos, numeroProprio) {
   for (const resumo of resumos) {
     const digits = getDigits(resumo.realNumber || "");
 
-    // Conversa consigo mesmo nao e atendimento.
+    // Conversa consigo mesmo nao e atendimento. Duas formas de reconhecer: o
+    // numero bate com o da loja, ou o proprio WhatsApp marcou o contato como
+    // sendo voce — o que pega tambem o caso do @lid, que nao bate por numero.
+    if (resumo.ehEu) continue;
     if (proprio && digits && digits === proprio) continue;
 
     if (pareceTelefone(digits)) {
@@ -1263,6 +1266,13 @@ async function lerChatsDaPagina() {
             archived: Boolean(pegar(() => c.archive, false)),
             pinned: Boolean(pegar(() => c.pin, false)),
             isMuted: Boolean(pegar(() => c.mute?.isMuted, false)),
+            // O próprio número da loja aparecia na lista como se fosse
+            // cliente — às vezes com um @lid, que não bate com o telefone e
+            // por isso escapava da comparação por número. O WhatsApp marca o
+            // próprio contato, então é ele quem decide.
+            ehEu: Boolean(
+              pegar(() => c.contact?.isMe, false) || pegar(() => c.id?.isMe, false)
+            ),
             lastMessage: ultima,
           };
         });
@@ -1437,6 +1447,8 @@ async function syncRecentConversations() {
           isMuted: Boolean(chat.isMuted),
           muteExpiration: chat.muteExpiration || 0,
           assignedSellerId: getChatAssignment(rawId),
+          // Marcação do próprio WhatsApp de que este contato é a própria loja.
+          ehEu: Boolean(chat.ehEu),
         });
 
         if (assignedLabelNames.length) {
@@ -3452,22 +3464,65 @@ server.listen(port, () => {
 // ============================
 
 // Buscar mensagens por texto
+/**
+ * Procura pelo texto dentro das conversas.
+ *
+ * Duas fontes, nesta ordem:
+ *  1. o `searchMessages` da biblioteca, que varre o histórico inteiro no
+ *     WhatsApp — quando funciona, é o mais completo;
+ *  2. as mensagens que este servidor já guardou.
+ *
+ * O passo 2 não é só reserva: o `searchMessages` quebra nesta versão do
+ * WhatsApp Web (mesmo problema do getChats()) e devolve vazio calado. Sem a
+ * busca local, o vendedor digitava uma palavra que está na tela e recebia
+ * "nada encontrado".
+ */
 async function searchMessages(query, chatId = null, limit = 50) {
-  if (!whatsappClient || !whatsappState.connected) return [];
-  try {
-    const results = await whatsappClient.searchMessages(query, { chatId, limit });
-    return results.map(m => ({
-      id: m.id?._serialized,
-      chatId: m.fromMe ? m.to : m.from,
-      body: m.body || "",
-      timestamp: (m.timestamp || 0) * 1000,
-      type: m.type,
-      hasMedia: m.hasMedia,
-    }));
-  } catch (e) {
-    console.error("[search] Falha:", e.message);
-    return [];
+  const termo = String(query || "").trim().toLowerCase();
+  if (!termo) return [];
+
+  const encontradas = new Map();
+
+  if (whatsappClient && whatsappState.connected) {
+    try {
+      const results = await whatsappClient.searchMessages(query, { chatId, limit });
+      (results || []).forEach((m) => {
+        const id = m.id?._serialized;
+        if (!id) return;
+        encontradas.set(id, {
+          id,
+          chatId: m.fromMe ? m.to : m.from,
+          body: m.body || "",
+          timestamp: (m.timestamp || 0) * 1000,
+          type: m.type,
+          hasMedia: m.hasMedia,
+        });
+      });
+    } catch (e) {
+      console.warn("[search] searchMessages da lib falhou:", e.message);
+    }
   }
+
+  // Busca no que já está guardado aqui.
+  for (const m of store.messages) {
+    if (encontradas.size >= limit) break;
+    if (chatId && m.chatId !== chatId) continue;
+    if (encontradas.has(m.id)) continue;
+    if (!String(m.body || "").toLowerCase().includes(termo)) continue;
+
+    encontradas.set(m.id, {
+      id: m.id,
+      chatId: m.chatId,
+      body: m.body || "",
+      timestamp: m.timestamp || 0,
+      type: m.mediaType || null,
+      hasMedia: Boolean(m.hasMedia),
+    });
+  }
+
+  return Array.from(encontradas.values())
+    .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+    .slice(0, limit);
 }
 
 // Enviar reação

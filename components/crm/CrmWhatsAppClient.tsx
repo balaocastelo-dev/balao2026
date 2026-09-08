@@ -2661,16 +2661,29 @@ export default function CrmWhatsAppClient({
                       </div>
                     </div>
 
-                    <button
-                      onClick={alternarFixar}
-                      className={`px-3 py-1 rounded-lg text-xs font-bold border transition-colors cursor-pointer ${
-                        chatSelecionado.fixado
-                          ? "bg-[#e7f6ec] text-[#0a6e3d] border-[#0f9d58]"
-                          : "bg-white text-[#5f6368] border-[#e3e3e3] hover:bg-[#f0f2f5]"
-                      }`}
-                    >
-                      📌 {chatSelecionado.fixado ? "Fixado" : "Fixar"}
-                    </button>
+                    <div className="flex items-center gap-2">
+                      {/* Enquete: o cliente responde num toque, em vez de
+                          digitar. Serve para qualificar rápido — faixa de
+                          preço, modelo, urgência. */}
+                      <button
+                        onClick={() => setModalEnqueteAberto(true)}
+                        title="Perguntar com opções prontas (o cliente só toca)"
+                        className="px-3 py-1 rounded-lg text-xs font-bold border bg-white text-[#5f6368] border-[#e3e3e3] hover:bg-[#f0f2f5] transition-colors cursor-pointer"
+                      >
+                        📊 Enquete
+                      </button>
+
+                      <button
+                        onClick={alternarFixar}
+                        className={`px-3 py-1 rounded-lg text-xs font-bold border transition-colors cursor-pointer ${
+                          chatSelecionado.fixado
+                            ? "bg-[#e7f6ec] text-[#0a6e3d] border-[#0f9d58]"
+                            : "bg-white text-[#5f6368] border-[#e3e3e3] hover:bg-[#f0f2f5]"
+                        }`}
+                      >
+                        📌 {chatSelecionado.fixado ? "Fixado" : "Fixar"}
+                      </button>
+                    </div>
                   </div>
 
                   {/* Messages Feed with Sent Product Photos Preview */}
@@ -4527,6 +4540,87 @@ export default function CrmWhatsAppClient({
               className="w-full bg-[#0f9d58] hover:bg-[#0a6e3d] text-white py-2 rounded-lg text-xs font-bold transition-colors cursor-pointer"
             >
               ➤ Enviar Foto
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL ENQUETE — pergunta com opções prontas, respondida num toque */}
+      {modalEnqueteAberto && (
+        <div className="fixed inset-0 bg-black/55 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full p-4 space-y-3">
+            <div className="flex justify-between items-center border-b border-[#e3e3e3] pb-2">
+              <h3 className="font-bold text-sm text-[#202124]">📊 Nova enquete</h3>
+              <button
+                onClick={() => setModalEnqueteAberto(false)}
+                className="text-[#5f6368] hover:text-[#202124] text-lg leading-none cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-[11px] text-[#5f6368]">
+              O cliente responde tocando numa opção, sem digitar. Bom para
+              descobrir modelo, faixa de preço ou urgência.
+            </p>
+
+            <input
+              type="text"
+              autoFocus
+              value={enquetePergunta}
+              onChange={(e) => setEnquetePergunta(e.target.value)}
+              placeholder="Pergunta. Ex.: Qual faixa de preço você procura?"
+              className="w-full px-3 py-2 border border-[#e3e3e3] rounded-lg text-sm outline-none focus:border-[#0f9d58]"
+            />
+
+            <div className="space-y-2">
+              {enqueteOpcoes.map((opcao, i) => (
+                <div key={i} className="flex gap-1.5">
+                  <input
+                    type="text"
+                    value={opcao}
+                    onChange={(e) => {
+                      const proximas = [...enqueteOpcoes];
+                      proximas[i] = e.target.value;
+                      setEnqueteOpcoes(proximas);
+                    }}
+                    placeholder={`Opção ${i + 1}`}
+                    className="flex-1 px-3 py-1.5 border border-[#e3e3e3] rounded-lg text-sm outline-none focus:border-[#0f9d58]"
+                  />
+                  {enqueteOpcoes.length > 2 && (
+                    <button
+                      onClick={() =>
+                        setEnqueteOpcoes(enqueteOpcoes.filter((_, j) => j !== i))
+                      }
+                      title="Remover opção"
+                      className="px-2 text-[#d93025] hover:bg-[#fce8e6] rounded-lg cursor-pointer"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* O WhatsApp aceita até 12 opções por enquete. */}
+            {enqueteOpcoes.length < 12 && (
+              <button
+                onClick={() => setEnqueteOpcoes([...enqueteOpcoes, ""])}
+                className="text-xs font-bold text-[#0a6e3d] hover:underline cursor-pointer"
+              >
+                ＋ Adicionar opção
+              </button>
+            )}
+
+            <button
+              onClick={criarEnquete}
+              disabled={
+                !enquetePergunta.trim() ||
+                enqueteOpcoes.filter((o) => o.trim()).length < 2
+              }
+              className="w-full bg-[#0f9d58] hover:bg-[#0a6e3d] text-white py-2 rounded-lg text-sm font-bold transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Enviar enquete
             </button>
           </div>
         </div>
