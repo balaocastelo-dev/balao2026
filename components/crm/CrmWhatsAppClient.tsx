@@ -154,6 +154,16 @@ export interface CrmVendedorFixo {
   assinatura?: string;
 }
 
+/** Uma mensagem encontrada pela busca por texto (`panel:search-messages`). */
+interface ResultadoBusca {
+  id: string;
+  chatId: string;
+  body: string;
+  timestamp: number;
+  type?: string | null;
+  hasMedia?: boolean;
+}
+
 /** Uso da pasta de mídia no servidor (vem em `whatsapp:armazenamento`). */
 interface EstadoArmazenamento {
   mb: number;
@@ -1086,7 +1096,10 @@ export default function CrmWhatsAppClient({
 
     socketRef.current.emit(
       "panel:carregar-historico",
-      { chatId, limite: 50 },
+      // `maisAntigas` faz o WhatsApp buscar o passado da conversa no servidor
+      // dele antes de ler — sem isso vêm só os últimos recados que estavam na
+      // tela, e o vendedor abre o cliente sem ver o que já foi combinado.
+      { chatId, limite: 150, maisAntigas: 3 },
       (res: { ok?: boolean; erro?: string } | undefined) => {
         setCarregandoHistorico(false);
         if (!res?.ok && res?.erro) {
@@ -1096,6 +1109,26 @@ export default function CrmWhatsAppClient({
       }
     );
   }, [chatSelecionadoId]);
+
+  // Busca mais um pedaço do passado da conversa aberta, sob demanda.
+  const carregarMaisAntigas = () => {
+    const chatId = chatSelecionadoId;
+    if (!chatId || !socketRef.current?.connected || carregandoHistorico) return;
+
+    setCarregandoHistorico(true);
+    socketRef.current.emit(
+      "panel:carregar-historico",
+      { chatId, limite: 400, maisAntigas: 6 },
+      (res: { ok?: boolean; total?: number; erro?: string } | undefined) => {
+        setCarregandoHistorico(false);
+        if (res?.ok) {
+          showToast(`Histórico atualizado (${res.total ?? 0} mensagens).`);
+        } else {
+          showToast(res?.erro || "Não consegui buscar mensagens mais antigas.");
+        }
+      }
+    );
+  };
 
   // Live URL link preview on typing
   useEffect(() => {
@@ -1488,20 +1521,37 @@ export default function CrmWhatsAppClient({
 
   // Buscar mensagens
   const [buscaMensagem, setBuscaMensagem] = useState("");
-  const [resultadosBusca, setResultadosBusca] = useState<any[]>([]);
+  const [resultadosBusca, setResultadosBusca] = useState<ResultadoBusca[]>([]);
   const [mostrarBuscaMensagem, setMostrarBuscaMensagem] = useState(false);
+  const [buscandoMensagens, setBuscandoMensagens] = useState(false);
 
-  const buscarMensagens = (query: string) => {
+  /**
+   * Procura pelo TEXTO dentro de todas as conversas.
+   *
+   * Diferente da busca da lista, que só olha nome e número: com centenas de
+   * clientes, o vendedor lembra do que foi falado ("orçamento notebook",
+   * "placa de vídeo") muito antes de lembrar de quem falou.
+   */
+  const buscarMensagens = (query: string, apenasNestaConversa = false) => {
     setBuscaMensagem(query);
-    if (!query.trim() || !socketRef.current?.connected) {
+    const termo = query.trim();
+
+    if (termo.length < 2 || !socketRef.current?.connected) {
       setResultadosBusca([]);
       return;
     }
+
+    setBuscandoMensagens(true);
     socketRef.current.emit(
       "panel:search-messages",
-      { query, chatId: chatSelecionadoId, limit: 30 },
-      (res: any) => {
-        if (res?.ok) setResultadosBusca(res.results);
+      {
+        query: termo,
+        chatId: apenasNestaConversa ? chatSelecionadoId : null,
+        limit: 40,
+      },
+      (res: { ok?: boolean; results?: ResultadoBusca[] } | undefined) => {
+        setBuscandoMensagens(false);
+        setResultadosBusca(res?.ok && Array.isArray(res.results) ? res.results : []);
       }
     );
   };
@@ -2231,6 +2281,41 @@ export default function CrmWhatsAppClient({
                   onChange={(e) => setBuscaChat(e.target.value)}
                   className="w-full px-3 py-1.5 border border-[#e3e3e3] rounded-full text-xs outline-none focus:border-[#0f9d58]"
                 />
+                {/* Busca pelo TEXTO das conversas. A de cima acha pelo nome;
+                    esta acha pelo que foi falado, em todas as conversas. */}
+                <button
+                  onClick={() => {
+                    const abrindo = !mostrarBuscaMensagem;
+                    setMostrarBuscaMensagem(abrindo);
+                    if (!abrindo) {
+                      setBuscaMensagem("");
+                      setResultadosBusca([]);
+                    }
+                  }}
+                  className={`w-full py-1 px-3 rounded-full text-xs font-bold border transition-colors cursor-pointer ${
+                    mostrarBuscaMensagem
+                      ? "bg-[#0f9d58] text-white border-[#0f9d58]"
+                      : "bg-white text-[#202124] border-[#e3e3e3] hover:bg-[#f0f2f5]"
+                  }`}
+                >
+                  🔍 Buscar no conteúdo das conversas
+                </button>
+
+                {mostrarBuscaMensagem && (
+                  <input
+                    type="text"
+                    autoFocus
+                    placeholder="Ex.: orçamento notebook, placa de vídeo…"
+                    value={buscaMensagem}
+                    onChange={(e) => setBuscaMensagem(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") buscarMensagens(buscaMensagem);
+                    }}
+                    onBlur={() => buscarMensagens(buscaMensagem)}
+                    className="w-full px-3 py-1.5 border border-[#0f9d58] rounded-full text-xs outline-none"
+                  />
+                )}
+
                 <div className="flex gap-1.5">
                   <button
                     onClick={() => setFiltroNaoLidas(!filtroNaoLidas)}
@@ -2265,7 +2350,54 @@ export default function CrmWhatsAppClient({
 
               {/* Chat list items with real profile pics and formatted numbers */}
               <div className="flex-1 overflow-y-auto px-2 pb-2 space-y-1">
-                {chatsFiltrados.length === 0 ? (
+                {/* Resultados da busca por texto ocupam o lugar da lista
+                    enquanto ela está ativa — clicar abre a conversa. */}
+                {mostrarBuscaMensagem && buscaMensagem.trim().length >= 2 ? (
+                  buscandoMensagens ? (
+                    <div className="text-center text-xs text-[#5f6368] py-8">
+                      Procurando nas conversas…
+                    </div>
+                  ) : resultadosBusca.length === 0 ? (
+                    <div className="text-center text-xs text-[#5f6368] py-8">
+                      Nada encontrado para “{buscaMensagem.trim()}”.
+                    </div>
+                  ) : (
+                    <>
+                      <div className="px-1 py-1.5 text-[10px] font-bold uppercase tracking-wide text-[#5f6368]">
+                        {resultadosBusca.length} mensagem(ns)
+                      </div>
+                      {resultadosBusca.map((r) => {
+                        const dono = chats.find((c) => c.id === r.chatId);
+                        return (
+                          <div
+                            key={r.id}
+                            onClick={() => {
+                              if (r.chatId) setChatSelecionadoId(r.chatId);
+                            }}
+                            className="p-2 rounded-lg cursor-pointer hover:bg-[#f0f2f5] border border-[#e3e3e3]"
+                          >
+                            <div className="text-xs font-bold text-[#202124] truncate">
+                              {dono?.nome || formatarNumeroExibicao(r.chatId) || "Contato"}
+                            </div>
+                            <div className="text-[11px] text-[#5f6368] line-clamp-2">
+                              {r.body || (r.hasMedia ? "📎 Mídia" : "—")}
+                            </div>
+                            <div className="text-[10px] text-[#9aa0a6] mt-0.5">
+                              {r.timestamp
+                                ? new Date(r.timestamp).toLocaleString("pt-BR", {
+                                    day: "2-digit",
+                                    month: "2-digit",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })
+                                : ""}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </>
+                  )
+                ) : chatsFiltrados.length === 0 ? (
                   <div className="text-center text-xs text-[#5f6368] py-8">
                     {filtroMeus
                       ? "Nenhuma conversa atribuída a você ainda. Desligue o filtro “Meus” para ver a caixa da loja."
@@ -2543,6 +2675,19 @@ export default function CrmWhatsAppClient({
 
                   {/* Messages Feed with Sent Product Photos Preview */}
                   <div className="flex-1 overflow-y-auto p-4 space-y-2.5 flex flex-col">
+                    {/* O WhatsApp Web entrega só o pedaço recente da conversa.
+                        Este botão pede o resto ao servidor do WhatsApp. */}
+                    {mensagensChatAtual.length > 0 && (
+                      <div className="text-center pb-1">
+                        <button
+                          onClick={carregarMaisAntigas}
+                          disabled={carregandoHistorico}
+                          className="text-[11px] font-bold text-[#0a6e3d] bg-[#e7f6ec] hover:bg-[#d3eddd] border border-[#0f9d58]/30 rounded-full px-3 py-1 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                          {carregandoHistorico ? "Buscando…" : "↑ Carregar mensagens mais antigas"}
+                        </button>
+                      </div>
+                    )}
                     {mensagensChatAtual.length === 0 ? (
                       <div className="text-center text-xs text-[#5f6368] my-auto">
                         {carregandoHistorico ? (

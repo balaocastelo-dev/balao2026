@@ -628,6 +628,27 @@ function rebuildNotifications() {
     .slice(0, 60);
 }
 
+/**
+ * Se o numero existe no WhatsApp.
+ *
+ * Devolve `true`, `false` ou `null` quando nao foi possivel checar — e nesse
+ * caso o disparo segue mesmo assim, porque uma falha de consulta nao e prova
+ * de que o cliente nao tem WhatsApp.
+ */
+async function numeroTemWhatsApp(numero) {
+  if (!whatsappClient || !whatsappState.connected) return null;
+  const limpo = getDigits(String(numero || ""));
+  if (!limpo) return false;
+
+  try {
+    const id = await whatsappClient.getNumberId(limpo);
+    return Boolean(id);
+  } catch (error) {
+    console.warn("[numero] Nao consegui verificar", limpo, "-", error.message);
+    return null;
+  }
+}
+
 async function getChatByIdSafe(chatId) {
   if (!whatsappClient || !whatsappState.connected || !chatId) {
     return null;
@@ -1171,6 +1192,140 @@ const ultimaVarredura = {
   erroGetChats: null,
 };
 
+/**
+ * Le a lista de conversas direto dos modelos do WhatsApp Web.
+ *
+ * O `getChats()` da biblioteca quebra nesta versao do WhatsApp Web (o erro que
+ * chega e so "r", nome de variavel do bundle minificado — nao da nem para
+ * tratar). Sem isto o painel ficaria sem prévia da ultima mensagem, sem
+ * arquivadas/fixadas e sem etiquetas.
+ *
+ * O formato devolvido imita o do Chat da biblioteca — inclusive `timestamp` em
+ * SEGUNDOS, que e como o resto do codigo espera. A versao anterior devolvia em
+ * milissegundos e o codigo multiplicava por mil de novo, jogando a data de
+ * toda conversa para o ano 50000.
+ */
+async function lerChatsDaPagina() {
+  if (!whatsappClient?.pupPage) return [];
+
+  try {
+    return await whatsappClient.pupPage.evaluate(async () => {
+      const pegar = (fn, padrao = null) => {
+        try {
+          const v = fn();
+          return v === undefined ? padrao : v;
+        } catch {
+          return padrao;
+        }
+      };
+
+      const colecoes = window.require("WAWebCollections");
+      const chats = pegar(() => colecoes.Chat.getModelsArray(), []) || [];
+
+      return chats
+        .filter((c) =>
+          pegar(
+            () =>
+              !c.isGroup &&
+              !c.isBroadcast &&
+              !c.isNewsletter &&
+              c.id?._serialized !== "status@broadcast",
+            false
+          )
+        )
+        .map((c) => {
+          // A última mensagem mora na coleção de mensagens do próprio chat.
+          const ultima = pegar(() => {
+            const msgs = c.msgs;
+            if (!msgs) return null;
+            const m =
+              (typeof msgs.last === "function" && msgs.last()) ||
+              (Array.isArray(msgs.models) && msgs.models[msgs.models.length - 1]);
+            if (!m) return null;
+            return {
+              body: m.body || m.caption || "",
+              // `timestamp` (e não `t`) porque é o nome que o resto do código
+              // espera, igual ao Message da biblioteca.
+              timestamp: m.t || 0,
+              type: m.type || null,
+              fromMe: Boolean(m.id?.fromMe),
+              hasMedia: Boolean(m.mediaData || m.isMedia),
+            };
+          }, null);
+
+          return {
+            id: pegar(() => c.id?._serialized, "") || "",
+            user: pegar(() => c.id?.user, "") || "",
+            name: pegar(() => c.name || c.formattedTitle || c.contact?.name, "") || "",
+            unreadCount: pegar(() => c.unreadCount, 0) || 0,
+            // Em SEGUNDOS, como o Chat da biblioteca.
+            timestamp: pegar(() => c.t, 0) || 0,
+            archived: Boolean(pegar(() => c.archive, false)),
+            pinned: Boolean(pegar(() => c.pin, false)),
+            isMuted: Boolean(pegar(() => c.mute?.isMuted, false)),
+            lastMessage: ultima,
+          };
+        });
+    });
+  } catch (error) {
+    console.error("[chats] Falha ao ler conversas da página:", error.message);
+    return [];
+  }
+}
+
+/**
+ * Pede ao WhatsApp que traga do servidor dele as mensagens antigas de uma
+ * conversa — o equivalente a rolar a conversa para cima no celular.
+ *
+ * Sem isso, `fetchMessages()` devolve apenas o que já estava carregado na
+ * tela: alguns recados recentes. Cada rodada puxa mais um pedaço do passado.
+ */
+async function carregarMensagensAntigas(chatId, rodadas = 3) {
+  if (!whatsappClient?.pupPage) return 0;
+
+  try {
+    return await whatsappClient.pupPage.evaluate(
+      async (cid, vezes) => {
+        try {
+          const colecoes = window.require("WAWebCollections");
+          const chat = colecoes.Chat.get(cid);
+          if (!chat) return 0;
+
+          let carregadas = 0;
+          for (let i = 0; i < vezes; i++) {
+            const antes = chat.msgs?.length || 0;
+
+            // O nome do método mudou entre versões do WhatsApp Web; tenta os
+            // conhecidos e para no primeiro que existir.
+            if (typeof chat.loadEarlierMsgs === "function") {
+              await chat.loadEarlierMsgs();
+            } else if (chat.msgs && typeof chat.msgs.loadEarlierMsgs === "function") {
+              await chat.msgs.loadEarlierMsgs();
+            } else {
+              const mod = window.require("WAWebChatLoadMessages");
+              if (mod?.loadEarlierMsgs) await mod.loadEarlierMsgs(chat);
+              else break;
+            }
+
+            const depois = chat.msgs?.length || 0;
+            carregadas += depois - antes;
+            // Nada novo veio: chegou ao começo da conversa.
+            if (depois <= antes) break;
+          }
+          return carregadas;
+        } catch {
+          return 0;
+        }
+      },
+      chatId,
+      Math.min(10, Math.max(1, rodadas))
+    );
+  } catch (error) {
+    console.warn("[historico] Não consegui puxar mensagens antigas:", error.message);
+    return 0;
+  }
+}
+
 async function syncRecentConversations() {
   if (!whatsappClient || !whatsappState.connected) return;
 
@@ -1186,22 +1341,7 @@ async function syncRecentConversations() {
       // nesse modo.
       ultimaVarredura.erroGetChats = String(err?.message || err).slice(0, 300);
       console.warn("getChats() padrão falhou, usando sincronização via pupPage:", err.message);
-      rawChats = await whatsappClient.pupPage.evaluate(async () => {
-        try {
-          const cArray = window.require('WAWebCollections').Chat.getModelsArray();
-          return (cArray || [])
-            .filter((c) => !c.isGroup && !c.isBroadcast && !c.isNewsletter && c.id?._serialized !== 'status@broadcast')
-            .map((c) => ({
-              id: c.id ? c.id._serialized : '',
-              user: c.id ? c.id.user : '',
-              name: c.name || c.formattedTitle || '',
-              unreadCount: c.unreadCount || 0,
-              timestamp: (c.t || 0) * 1000,
-            }));
-        } catch (e) {
-          return [];
-        }
-      });
+      rawChats = await lerChatsDaPagina();
     }
 
     ultimaVarredura.quando = new Date().toISOString();
@@ -2708,6 +2848,14 @@ io.on("connection", (socket) => {
         return;
       }
 
+      // O WhatsApp Web só entrega o que já carregou na tela. Para o vendedor
+      // ver a conversa inteira, e não os últimos recados, é preciso pedir ao
+      // WhatsApp que traga as mensagens mais antigas do servidor dele antes de
+      // ler — é o mesmo que rolar a conversa para cima no celular.
+      if (payload?.maisAntigas) {
+        await carregarMensagensAntigas(chatId, Number(payload.maisAntigas) || 3);
+      }
+
       const brutas = await chat.fetchMessages({ limit: limite }).catch(() => []);
       const uteis = (brutas || []).filter((m) => !isStatusMessage(m));
 
@@ -2993,9 +3141,28 @@ io.on("connection", (socket) => {
     emitDisparoStatus(true);
     try {
       const lista = recipients.slice(0, 100);
+      let enviados = 0;
+      let semWhatsApp = 0;
+      let falharam = 0;
+
       for (let i = 0; i < lista.length; i++) {
         const number = normalizeNumber(lista[i].number || "");
         if (!number) continue;
+
+        // Confere se o numero existe no WhatsApp ANTES de enviar. Disparar
+        // para numero invalido e o que mais chama atencao do anti-spam — e a
+        // lista de clientes sempre tem numero errado ou desativado.
+        // Chat ja existente dispensa a checagem: se ha conversa, o numero e
+        // valido, e cada consulta dessas custa tempo.
+        if (!lista[i].chatId) {
+          const existe = await numeroTemWhatsApp(number);
+          if (existe === false) {
+            semWhatsApp += 1;
+            console.warn(`[disparo] ${number} nao tem WhatsApp — pulado.`);
+            continue;
+          }
+        }
+
         try {
           await sendDirectMessage({
             number,
@@ -3003,7 +3170,9 @@ io.on("connection", (socket) => {
             signatureId: payload.signatureId || null,
             chatId: lista[i].chatId || null,
           });
+          enviados += 1;
         } catch (sendError) {
+          falharam += 1;
           console.error(`Falha ao enviar para ${number} no disparo segmentado:`, sendError.message);
         }
         if (i < lista.length - 1) {
@@ -3012,7 +3181,14 @@ io.on("connection", (socket) => {
         }
       }
 
-      emitToast(`Envio segmentado concluido para ${Math.min(recipients.length, 100)} clientes.`);
+      const detalhes = [
+        `${enviados} enviada(s)`,
+        semWhatsApp ? `${semWhatsApp} sem WhatsApp` : null,
+        falharam ? `${falharam} com erro` : null,
+      ]
+        .filter(Boolean)
+        .join(" · ");
+      emitToast(`Envio segmentado concluido: ${detalhes}.`);
     } catch (error) {
       console.error("Falha no envio segmentado:", error);
       emitToast("Falha no envio segmentado.");
