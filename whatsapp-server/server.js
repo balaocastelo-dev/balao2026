@@ -182,6 +182,11 @@ const store = {
   // De propósito NÃO é um board único compartilhado — o mesmo cliente pode
   // estar em etapas diferentes pra vendedores diferentes.
   kanbanPorVendedor: {},
+  // Preferências pessoais: { [vendedorId]: { kanbanColunas, assinaturaAuto… }.
+  // Antes isso vivia só no localStorage do navegador, então o vendedor que
+  // trocava de computador (ou limpava o cache) perdia as colunas do funil que
+  // tinha criado. Aqui fica amarrado à pessoa, não à máquina.
+  preferenciasPorVendedor: {},
   statusFeed: [],
   chatAssignments: {},
   notifications: [],
@@ -240,6 +245,10 @@ function loadStore() {
       parsed.kanbanPorVendedor && typeof parsed.kanbanPorVendedor === "object"
         ? parsed.kanbanPorVendedor
         : {};
+    store.preferenciasPorVendedor =
+      parsed.preferenciasPorVendedor && typeof parsed.preferenciasPorVendedor === "object"
+        ? parsed.preferenciasPorVendedor
+        : {};
   } catch (error) {
     console.error("Falha ao ler dados do painel do WhatsApp:", error);
   }
@@ -274,6 +283,7 @@ function persistStore() {
     notifications: store.notifications,
     vendedores: store.vendedores,
     kanbanPorVendedor: store.kanbanPorVendedor,
+    preferenciasPorVendedor: store.preferenciasPorVendedor,
   };
 
   fs.writeFileSync(dataFile, JSON.stringify(payload, null, 2));
@@ -2272,6 +2282,42 @@ io.on("connection", (socket) => {
     if (!vendedorId) return;
     socket.join(`vendedor:${vendedorId}`);
     socket.emit("whatsapp:kanban", store.kanbanPorVendedor[vendedorId] || {});
+    // Devolve as preferencias assim que a pessoa se identifica: e o que faz o
+    // funil dela aparecer igual em qualquer computador da loja.
+    socket.emit(
+      "whatsapp:preferencias",
+      store.preferenciasPorVendedor[vendedorId] || {}
+    );
+  });
+
+  socket.on("panel:set-preferencias", (payload) => {
+    const vendedorId = String(payload?.vendedorId || "").trim();
+    const recebidas = payload?.preferencias;
+    if (!vendedorId || !recebidas || typeof recebidas !== "object") return;
+
+    // Teto de tamanho para o arquivo do painel nao virar deposito: sao
+    // preferencias de tela, nao armazenamento geral.
+    const serializado = JSON.stringify(recebidas);
+    if (serializado.length > 200_000) {
+      console.warn(
+        `[prefs] Preferencias de ${vendedorId} grandes demais (${serializado.length} bytes) — ignorado.`
+      );
+      return;
+    }
+
+    store.preferenciasPorVendedor[vendedorId] = {
+      ...(store.preferenciasPorVendedor[vendedorId] || {}),
+      ...recebidas,
+      atualizadoEm: Date.now(),
+    };
+    persistStore();
+
+    // Avisa as OUTRAS abas/PCs do mesmo vendedor, nunca quem acabou de salvar
+    // — devolver para a origem faria o painel reaplicar o que ele mesmo
+    // mandou, e isso vira laco de salvar/receber sem fim.
+    socket.broadcast
+      .to(`vendedor:${vendedorId}`)
+      .emit("whatsapp:preferencias", store.preferenciasPorVendedor[vendedorId]);
   });
 
   socket.on("panel:set-kanban-card", (payload) => {

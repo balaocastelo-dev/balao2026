@@ -13,7 +13,14 @@ Cada vendedor tem uma página própria e entra com a senha dele:
 
 | Vendedor | Página | Onde fica a senha |
 | --- | --- | --- |
-| Brendon | `www.balao.info/brendon` | Variável `VENDEDOR_BRENDON_SENHA` na hospedagem |
+| Thiago | `www.balao.info/thiago` | `VENDEDOR_THIAGO_SENHA` |
+| Marcos | `www.balao.info/marcos` | `VENDEDOR_MARCOS_SENHA` |
+| Julia | `www.balao.info/julia` | `VENDEDOR_JULIA_SENHA` |
+| Gabriel | `www.balao.info/gabriel` | `VENDEDOR_GABRIEL_SENHA` |
+| Wendell | `www.balao.info/wendell` | `VENDEDOR_WENDELL_SENHA` |
+| Brendon | `www.balao.info/brendon` | `VENDEDOR_BRENDON_SENHA` |
+
+As senhas são variáveis de ambiente na hospedagem (Vercel), uma por pessoa.
 
 > ⚠️ **A senha nunca vai no código.** Este repositório é público: senha
 > versionada vira senha pública, e o histórico do git não esquece. Enquanto a
@@ -32,6 +39,32 @@ Quem entra pela página pessoal recebe:
 
 O que a página pessoal **não** mostra: a aba de cadastrar/remover vendedores.
 Isso é tarefa de quem administra, em `/crm`.
+
+## O que fica guardado, e onde
+
+Tudo que é pessoal fica **no servidor, amarrado à pessoa** — não ao
+computador. O vendedor pode entrar de qualquer máquina da loja, ou de casa, e
+encontra o funil do jeito que deixou. Limpar o cache do navegador não perde
+nada.
+
+| Pessoal (por vendedor) | Compartilhado (toda a loja) |
+| --- | --- |
+| Colunas do funil, com nome e cor | A caixa de conversas e o histórico |
+| Em que etapa está cada cliente | Etiquetas |
+| Assinatura automática ligada/desligada | Respostas rápidas |
+| Tamanho do kanban e o filtro "Meus" | Catálogo de produtos |
+| As conversas atribuídas a ele | Notas de cliente |
+
+Na prática: se o Thiago renomeia uma coluna para "Aguardando peça", isso é só
+dele — a Julia continua vendo o funil dela. Já uma etiqueta ou resposta rápida
+nova aparece para todo mundo.
+
+Quem entra por `/crm` (administração) vê a caixa inteira e não carrega funil
+pessoal.
+
+> Nota sobre `/wendell`: a rota existia antes só como pasta de `/wendell/apple`
+> (o hub Apple, público). A página do vendedor ocupa `/wendell`; as páginas de
+> `/wendell/apple` continuam funcionando normalmente.
 
 ## As três portas do sistema
 

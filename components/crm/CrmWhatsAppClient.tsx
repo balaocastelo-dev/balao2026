@@ -345,6 +345,12 @@ export default function CrmWhatsAppClient({
 
   // Kanban State
   const [kanbanColunas, setKanbanColunas] = useState<KanbanColumn[]>(() => {
+    // Numa página pessoal as colunas vêm do servidor, amarradas à pessoa.
+    // O localStorage é do COMPUTADOR: aproveitá-lo aqui mostraria, por um
+    // instante, o funil do colega que usou este micro antes — e pior, esse
+    // funil poderia ser salvo por cima do da pessoa que acabou de entrar.
+    if (vendedorFixo) return KANBAN_COLUNAS_BASE;
+
     if (typeof window !== "undefined") {
       const s = localStorage.getItem("balao_crm_kanban_colunas");
       if (s) {
@@ -354,6 +360,10 @@ export default function CrmWhatsAppClient({
     return KANBAN_COLUNAS_BASE;
   });
   const [kanbanTamanho, setKanbanTamanho] = useState<"normal" | "expandido" | "recolhido">("normal");
+  // Só depois que as preferências do servidor chegarem é que passamos a
+  // salvar. Sem essa trava, o painel gravaria os valores padrão no primeiro
+  // render e apagaria o funil que a pessoa montou antes de ele chegar.
+  const [preferenciasCarregadas, setPreferenciasCarregadas] = useState(false);
   const [kanbanBusca, setKanbanBusca] = useState("");
   const [kanbanArrastadoId, setKanbanArrastadoId] = useState<string | null>(null);
   // Etapa do funil por cliente — é o kanban PESSOAL do vendedor logado
@@ -504,7 +514,12 @@ export default function CrmWhatsAppClient({
       const cleanMsgs = mensagens.filter((m) => isRealDirectChat(m.chatId));
       localStorage.setItem("balao_crm_chats", JSON.stringify(cleanChats));
       localStorage.setItem("balao_crm_mensagens_store", JSON.stringify(cleanMsgs));
-      localStorage.setItem("balao_crm_kanban_colunas", JSON.stringify(kanbanColunas));
+      // As colunas do funil de quem entrou pela página pessoal moram no
+      // servidor. Guardá-las aqui também deixaria o funil de uma pessoa no
+      // computador para a próxima que sentar nele.
+      if (!vendedorFixo) {
+        localStorage.setItem("balao_crm_kanban_colunas", JSON.stringify(kanbanColunas));
+      }
       localStorage.setItem("balao_crm_respostas", JSON.stringify(respostas));
       localStorage.setItem("balao_crm_etiquetas", JSON.stringify(etiquetas));
       localStorage.setItem("balao_crm_vendedores", JSON.stringify(vendedores));
@@ -880,6 +895,26 @@ export default function CrmWhatsAppClient({
       setKanbanPorChat(mapa && typeof mapa === "object" ? mapa : {});
     });
 
+    // Preferências pessoais chegando do servidor — é isto que faz o painel
+    // abrir do mesmo jeito em qualquer computador da loja.
+    socket.on("whatsapp:preferencias", (prefs: any) => {
+      if (prefs && typeof prefs === "object") {
+        if (Array.isArray(prefs.kanbanColunas) && prefs.kanbanColunas.length > 0) {
+          setKanbanColunas(prefs.kanbanColunas);
+        }
+        if (typeof prefs.assinaturaAuto === "boolean") {
+          setAssinaturaAuto(prefs.assinaturaAuto);
+        }
+        if (["normal", "expandido", "recolhido"].includes(prefs.kanbanTamanho)) {
+          setKanbanTamanho(prefs.kanbanTamanho);
+        }
+        if (typeof prefs.filtroMeus === "boolean") {
+          setFiltroMeus(prefs.filtroMeus);
+        }
+      }
+      setPreferenciasCarregadas(true);
+    });
+
     return () => {
       clearTimeout(vendedoresTimeout);
       socket.disconnect();
@@ -902,6 +937,34 @@ export default function CrmWhatsAppClient({
       socketRef.current?.off("connect", identificar);
     };
   }, [vendedorAtivoId]);
+
+  // Guarda as preferências no servidor, amarradas à pessoa e não ao
+  // computador. O atraso agrupa rajadas (arrastar coluna, renomear, marcar
+  // caixa) num gravação só, em vez de uma por tecla.
+  useEffect(() => {
+    if (!vendedorAtivoId || !preferenciasCarregadas) return;
+
+    const timer = setTimeout(() => {
+      socketRef.current?.emit("panel:set-preferencias", {
+        vendedorId: vendedorAtivoId,
+        preferencias: {
+          kanbanColunas,
+          assinaturaAuto,
+          kanbanTamanho,
+          filtroMeus,
+        },
+      });
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, [
+    vendedorAtivoId,
+    preferenciasCarregadas,
+    kanbanColunas,
+    assinaturaAuto,
+    kanbanTamanho,
+    filtroMeus,
+  ]);
 
   // Marcar chat como visto automaticamente ao selecionar
   useEffect(() => {
