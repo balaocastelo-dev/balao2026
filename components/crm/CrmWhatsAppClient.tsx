@@ -428,6 +428,12 @@ export default function CrmWhatsAppClient({
   const [preferenciasCarregadas, setPreferenciasCarregadas] = useState(false);
   const [kanbanBusca, setKanbanBusca] = useState("");
   const [kanbanArrastadoId, setKanbanArrastadoId] = useState<string | null>(null);
+  // Etapa reservada para o cliente que saiu do funil. Não é uma coluna de
+  // verdade: guardar essa marca (em vez de apagar o registro) é o que impede
+  // o card de reaparecer em "Novos Leads" na primeira sincronização — e é o
+  // que permite trazê-lo de volta depois.
+  const FORA_DO_FUNIL = "__fora_do_funil__";
+  const [mostrarForaDoFunil, setMostrarForaDoFunil] = useState(false);
   // Etapa do funil por cliente — é o kanban PESSOAL do vendedor logado
   // (vem do servidor, um mapa separado por vendedor: o mesmo cliente pode
   // estar em etapas diferentes pra vendedores diferentes, de propósito).
@@ -1258,6 +1264,18 @@ export default function CrmWhatsAppClient({
     return list;
   }, [chats, buscaChat, filtroNaoLidas, filtroMeus, vendedorAtivoId]);
 
+  // Clientes que o vendedor tirou do quadro. Ficam guardados para poderem
+  // voltar — tirar do funil não é apagar a conversa.
+  const foraDoFunil = useMemo(
+    () =>
+      chats.filter(
+        (c) => isRealDirectChat(c.id) && kanbanPorChat[c.id] === FORA_DO_FUNIL
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [chats, kanbanPorChat]
+  );
+  const totalForaDoFunil = foraDoFunil.length;
+
   // Quantas conversas estão atribuídas a quem está atendendo agora.
   const totalMeusChats = useMemo(
     () =>
@@ -1938,6 +1956,86 @@ export default function CrmWhatsAppClient({
     setKanbanCol(kanbanArrastadoId, colunaId);
     setKanbanArrastadoId(null);
     showToast("Card movido no Kanban ✅");
+  };
+
+  /** Tira o cliente do funil. Ele não some do CRM — sai só do quadro. */
+  const removerDoFunil = (chatId: string, nome: string) => {
+    setKanbanCol(chatId, FORA_DO_FUNIL);
+    showToast(`${nome} saiu do funil. Use "Fora do funil" para trazer de volta.`);
+  };
+
+  /** Menu de gestão de uma coluna: renomear, cor e apagar. */
+  const abrirMenuDaColuna = (e: React.MouseEvent, col: KanbanColumn) => {
+    e.stopPropagation();
+
+    const cores = [
+      { nome: "Azul", valor: "#3b82f6" },
+      { nome: "Roxo", valor: "#8b5cf6" },
+      { nome: "Laranja", valor: "#f59e0b" },
+      { nome: "Rosa", valor: "#ec4899" },
+      { nome: "Ciano", valor: "#06b6d4" },
+      { nome: "Verde", valor: "#10b981" },
+      { nome: "Cinza", valor: "#64748b" },
+      { nome: "Vermelho", valor: "#d93025" },
+    ];
+
+    openContextMenu(e, col.nome, [
+      {
+        label: "✏️ Renomear coluna",
+        onClick: () => {
+          const nome = prompt("Novo nome da coluna:", col.nome);
+          if (!nome || !nome.trim()) return;
+          setKanbanColunas((prev) =>
+            prev.map((c) => (c.id === col.id ? { ...c, nome: nome.trim() } : c))
+          );
+          showToast("Coluna renomeada ✅");
+        },
+      },
+      {
+        label: "🎨 Mudar a cor",
+        children: () =>
+          cores.map((cor) => ({
+            label: cor.nome,
+            check: col.cor === cor.valor,
+            onClick: () => {
+              setKanbanColunas((prev) =>
+                prev.map((c) => (c.id === col.id ? { ...c, cor: cor.valor } : c))
+              );
+            },
+          })),
+      },
+      { sep: true },
+      {
+        label: "🗑️ Apagar coluna",
+        danger: true,
+        // A última coluna não pode sair: sem nenhuma, os cards não teriam
+        // para onde ir e o quadro ficaria inutilizável.
+        disabled: kanbanColunas.length <= 1,
+        onClick: () => {
+          const nesta = chats.filter(
+            (c) => isRealDirectChat(c.id) && getKanbanCol(c.id) === col.id
+          );
+          const destino = kanbanColunas.find((c) => c.id !== col.id);
+          if (!destino) return;
+
+          const aviso = nesta.length
+            ? `Apagar a coluna "${col.nome}"?\n\n${nesta.length} cliente(s) vão para "${destino.nome}" — ninguém é perdido.`
+            : `Apagar a coluna "${col.nome}"?`;
+          if (!confirm(aviso)) return;
+
+          // Move os clientes ANTES de apagar. Se a coluna sumisse primeiro,
+          // eles ficariam apontando para uma etapa inexistente e some do
+          // quadro sem aviso.
+          nesta.forEach((c) => setKanbanCol(c.id, destino.id));
+          setKanbanColunas((prev) => prev.filter((c) => c.id !== col.id));
+          showToast(
+            nesta.length
+              ? `Coluna apagada. ${nesta.length} cliente(s) foram para "${destino.nome}".`
+              : "Coluna apagada."
+          );
+        },
+      },
+    ]);
   };
 
   const formatHora = (ts: number) => {
@@ -3790,6 +3888,20 @@ export default function CrmWhatsAppClient({
               )}
 
               <div className="flex items-center gap-2">
+                {kanbanTamanho !== "recolhido" && totalForaDoFunil > 0 && (
+                  <button
+                    onClick={() => setMostrarForaDoFunil(!mostrarForaDoFunil)}
+                    title="Clientes que você tirou do funil — dá para trazer de volta"
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors cursor-pointer ${
+                      mostrarForaDoFunil
+                        ? "bg-[#5f6368] text-white border-[#5f6368]"
+                        : "bg-white text-[#5f6368] border-[#e3e3e3] hover:bg-[#f0f2f5]"
+                    }`}
+                  >
+                    ♻️ Fora do funil ({totalForaDoFunil})
+                  </button>
+                )}
+
                 {kanbanTamanho !== "recolhido" && (
                   <button
                     onClick={() => {
@@ -3868,9 +3980,18 @@ export default function CrmWhatsAppClient({
                           />
                           <span className="truncate">{col.nome}</span>
                         </div>
-                        <span className="bg-[#f0f2f5] border border-[#e3e3e3] rounded-full px-2 py-0.2 text-[10px] font-bold text-[#5f6368]">
-                          {cardsNaColuna.length}
-                        </span>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <span className="bg-[#f0f2f5] border border-[#e3e3e3] rounded-full px-2 py-0.2 text-[10px] font-bold text-[#5f6368]">
+                            {cardsNaColuna.length}
+                          </span>
+                          <button
+                            onClick={(e) => abrirMenuDaColuna(e, col)}
+                            title="Renomear, mudar a cor ou apagar esta coluna"
+                            className="text-[#5f6368] hover:text-[#202124] hover:bg-[#f0f2f5] rounded px-1 text-sm leading-none cursor-pointer"
+                          >
+                            ⋮
+                          </button>
+                        </div>
                       </div>
 
                       {/* Cards list with profile pic */}
@@ -3912,6 +4033,16 @@ export default function CrmWhatsAppClient({
                                 {card.precisaAtencao && (
                                   <span className="text-[10px]" title="Precisa de atenção">⚠️</span>
                                 )}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    removerDoFunil(card.id, card.nome);
+                                  }}
+                                  title="Tirar do funil (a conversa continua no CRM)"
+                                  className="text-[#9aa0a6] hover:text-[#d93025] hover:bg-[#fce8e6] rounded px-1 text-[11px] leading-none cursor-pointer shrink-0"
+                                >
+                                  ✕
+                                </button>
                               </div>
 
                               <div className="text-[10px] font-mono text-[#0a6e3d] font-semibold mt-1">
@@ -3940,6 +4071,66 @@ export default function CrmWhatsAppClient({
                     </div>
                   );
                 })}
+
+                {/* Coluna de recuperação: quem saiu do funil fica aqui,
+                    e arrastar (ou clicar em ↩) devolve para o quadro. */}
+                {mostrarForaDoFunil && (
+                  <div
+                    data-kanban-col={FORA_DO_FUNIL}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={() => kanbanDrop(FORA_DO_FUNIL)}
+                    className="w-56 bg-[#f0f2f5] border-2 border-dashed border-[#9aa0a6] rounded-xl flex flex-col h-full max-h-full shrink-0"
+                  >
+                    <div className="p-2 px-3 border-b border-[#e3e3e3] bg-white rounded-t-xl flex items-center justify-between shrink-0">
+                      <div className="flex items-center gap-1.5 font-bold text-xs text-[#5f6368] truncate">
+                        ♻️ <span className="truncate">Fora do funil</span>
+                      </div>
+                      <span className="bg-[#f0f2f5] border border-[#e3e3e3] rounded-full px-2 py-0.2 text-[10px] font-bold text-[#5f6368]">
+                        {foraDoFunil.length}
+                      </span>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto p-2 space-y-2">
+                      {foraDoFunil.length === 0 ? (
+                        <div className="text-center text-[11px] text-[#5f6368] py-4">
+                          Ninguém aqui
+                        </div>
+                      ) : (
+                        foraDoFunil.map((card) => (
+                          <div
+                            key={card.id}
+                            draggable
+                            onDragStart={() => setKanbanArrastadoId(card.id)}
+                            onClick={() => setChatSelecionadoId(card.id)}
+                            className="bg-white border border-[#e3e3e3] rounded-lg p-2 shadow-xs cursor-grab active:cursor-grabbing hover:border-[#0f9d58] transition-all"
+                          >
+                            <div className="flex items-center gap-2">
+                              <div className="font-bold text-xs text-[#202124] truncate flex-1">
+                                {card.nome}
+                              </div>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const primeira = kanbanColunas[0];
+                                  if (!primeira) return;
+                                  setKanbanCol(card.id, primeira.id);
+                                  showToast(`${card.nome} voltou para "${primeira.nome}".`);
+                                }}
+                                title={`Devolver para "${kanbanColunas[0]?.nome || "o funil"}"`}
+                                className="text-[#0a6e3d] hover:bg-[#e7f6ec] rounded px-1 text-[11px] font-bold leading-none cursor-pointer shrink-0"
+                              >
+                                ↩
+                              </button>
+                            </div>
+                            <div className="text-[10px] font-mono text-[#5f6368] mt-1">
+                              {formatarNumeroExibicao(card.numero || card.id)}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
