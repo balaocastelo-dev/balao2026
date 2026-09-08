@@ -346,7 +346,17 @@ export default function CrmWhatsAppClient({
         try {
           const parsed = JSON.parse(s);
           if (Array.isArray(parsed)) {
-            return parsed.filter((c: any) => c.id && isRealDirectChat(c.id));
+            return parsed.filter(
+              (c: CrmChat) =>
+                c.id &&
+                isRealDirectChat(c.id) &&
+                // Cache antigo deste navegador guarda contato que nunca trocou
+                // mensagem com a loja, e o LID duplicado de antes da correção.
+                // Sem esta linha, esse entulho reaparece a cada abertura, no
+                // intervalo até a lista do servidor chegar. Quem existe de
+                // verdade volta na primeira sincronização.
+                String(c.lastMessage || "").trim().length > 0
+            );
           }
         } catch {}
       }
