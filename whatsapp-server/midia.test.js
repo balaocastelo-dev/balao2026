@@ -44,6 +44,9 @@ function carregar(clienteFalso) {
     fonte.match(/const indiceMidia = [^;]+;/)[0],
     fonte.match(/const VALIDADE_INDICE_MIDIA = [^;]+;/)[0],
     extrair("baseDoArquivoDeMidia"),
+    // `baixarMidiaDaMensagem` manda a fonte desta função para dentro da
+    // página, então ela precisa existir aqui também.
+    extrair("chaveDaMensagem"),
     extrair("atualizarIndiceDeMidia"),
     extrair("midiaJaBaixada"),
     extrair("baixarMidiaDaMensagem"),
