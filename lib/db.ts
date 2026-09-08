@@ -113,9 +113,16 @@ export async function getProductsPaginated(opts: {
     const countRes = await turso.execute({ sql: `SELECT COUNT(*) as c FROM products ${whereSql}`, args });
     const total = Number((countRes.rows[0] as Row)?.c || 0);
 
+    // LIMIT/OFFSET entram no SQL como número, não como parâmetro: o MySQL
+    // recusa placeholder nessa posição e a consulta inteira falhava calada —
+    // o catch abaixo devolvia lista vazia, e o catálogo aparecia zerado no
+    // site e no CRM mesmo com o banco cheio. Interpolar aqui é seguro porque
+    // os dois já foram limitados a inteiros nas linhas acima.
+    const limitSql = Math.trunc(limit);
+    const offsetSql = Math.trunc(offset);
     const res = await turso.execute({
-      sql: `SELECT * FROM products ${whereSql} ${orderBySql} LIMIT ? OFFSET ?`,
-      args: [...args, limit, offset],
+      sql: `SELECT * FROM products ${whereSql} ${orderBySql} LIMIT ${limitSql} OFFSET ${offsetSql}`,
+      args,
     });
 
     return { products: res.rows.map(r => mapTursoProduct(r as Row)), total };
@@ -149,10 +156,12 @@ export async function getProductsForSitemap(limit = 1000): Promise<Pick<Product,
   if (!isTursoActive()) return [];
 
   try {
-    const res = await turso.execute({
-      sql: 'SELECT id, slug, created_at FROM products ORDER BY created_at DESC LIMIT ?',
-      args: [take],
-    });
+    // LIMIT com número no SQL, não como parâmetro — o MySQL recusa
+    // placeholder nessa posição e a consulta falhava calada (sitemap sem
+    // nenhum produto). `take` já está limitado a inteiro acima.
+    const res = await turso.execute(
+      `SELECT id, slug, created_at FROM products ORDER BY created_at DESC LIMIT ${Math.trunc(take)}`
+    );
     return res.rows
       .map((r: Row) => ({
         id: String(r.id),
@@ -216,9 +225,11 @@ export async function searchProductsByKeywords(keywords: string[], limit = 24): 
       .join(' OR ');
     const args = normalizedKeywords.flatMap((k) => [`%${k}%`, `%${k}%`, `%${k}%`]);
     const take = Math.max(limit, normalizedKeywords.length * 12);
+    // Idem: LIMIT direto no SQL. Sem isso a busca por palavra-chave
+    // devolvia lista vazia sempre.
     const res = await turso.execute({
-      sql: `SELECT * FROM products WHERE ${clauses} LIMIT ?`,
-      args: [...args, take],
+      sql: `SELECT * FROM products WHERE ${clauses} LIMIT ${Math.trunc(take)}`,
+      args,
     });
     return sortByPrice(res.rows.map(r => mapTursoProduct(r as Row))).slice(0, limit);
   } catch (error) {
@@ -800,8 +811,8 @@ export async function getBlogPosts(input?: {
       args.push(`%${String(input.query).toLowerCase()}%`);
     }
     const res = await turso.execute({
-      sql: `SELECT ${selectList} FROM blog_posts WHERE ${where.join(" AND ")} ORDER BY published_at DESC LIMIT ?`,
-      args: [...args, limit],
+      sql: `SELECT ${selectList} FROM blog_posts WHERE ${where.join(" AND ")} ORDER BY published_at DESC LIMIT ${Math.trunc(limit)}`,
+      args,
     });
     return res.rows.map((r: Row) => ({ ...r })) as unknown as BlogPost[];
   } catch (error) {
@@ -830,10 +841,12 @@ export async function getBlogCategories(limit = 40): Promise<string[]> {
   try {
     if (!isTursoActive()) return [];
 
-    const res = await turso.execute({
-      sql: "SELECT category FROM blog_posts WHERE status = 'published' ORDER BY published_at DESC LIMIT ?",
-      args: [Math.max(1, Math.min(200, limit))],
-    });
+    const res = await turso.execute(
+      `SELECT category FROM blog_posts WHERE status = 'published' ORDER BY published_at DESC LIMIT ${Math.max(
+        1,
+        Math.min(200, Math.trunc(limit))
+      )}`
+    );
     const cats = res.rows
       .map((r: Row) => (typeof r.category === "string" ? r.category.trim() : ""))
       .filter((v): v is string => v.length > 0);

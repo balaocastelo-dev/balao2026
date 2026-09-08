@@ -771,7 +771,10 @@ export default function CrmWhatsAppClient({
     });
 
     socket.on("whatsapp:chats", (serverChats: any[]) => {
-      if (Array.isArray(serverChats)) {
+      // Lista vazia NÃO é ordem para limpar a tela. O servidor manda vazio
+      // enquanto ainda está sincronizando ou logo depois de reiniciar — tratar
+      // isso como verdade apagava todas as conversas do vendedor.
+      if (Array.isArray(serverChats) && serverChats.length > 0) {
         setChats((prev) => {
           // A lista do servidor é a verdade: ela já exclui status, grupos e
           // quem nunca mandou mensagem. Antes isto era um merge que só somava,
@@ -780,8 +783,23 @@ export default function CrmWhatsAppClient({
           // Aqui a lista é REFEITA, guardando só o que é do painel (etiquetas,
           // notas, valor do negócio) dos contatos que continuam existindo.
           const anteriores = new Map(prev.map((c) => [c.id, c]));
+          const idsDoServidor = new Set(
+            serverChats.map((sc) => sc.chatId).filter(Boolean)
+          );
 
-          return serverChats
+          // Conversa aberta agora pelo vendedor ainda não existe para o
+          // servidor (ele só lista quem tem mensagem). Segurar por um tempo
+          // evita ela sumir no instante seguinte ao clique.
+          const JANELA_CONVERSA_NOVA = 30 * 60 * 1000;
+          const agora = Date.now();
+          const novasAindaLocais = prev.filter(
+            (c) =>
+              !idsDoServidor.has(c.id) &&
+              c.localDesde &&
+              agora - c.localDesde < JANELA_CONVERSA_NOVA
+          );
+
+          const doServidor = serverChats
             .filter((sc) => sc.chatId && isRealDirectChat(sc.chatId))
             .map((sc) => {
               const anterior = anteriores.get(sc.chatId);
@@ -808,9 +826,15 @@ export default function CrmWhatsAppClient({
                 vendedorId: sc.assignedSellerId ?? anterior?.vendedorId ?? null,
                 kanbanColId: anterior?.kanbanColId || "novos",
                 fixado: sc.isPinned ?? anterior?.fixado ?? false,
+                // Já veio do servidor: não precisa mais da proteção de
+                // conversa recém-aberta.
+                localDesde: undefined,
               } as CrmChat;
-            })
-            .sort((a, b) => b.timestamp - a.timestamp);
+            });
+
+          return [...novasAindaLocais, ...doServidor].sort(
+            (a, b) => b.timestamp - a.timestamp
+          );
         });
       }
     });
@@ -1725,6 +1749,10 @@ export default function CrmWhatsAppClient({
         tags: [],
         kanbanColId: "novos",
         vendedorId: vendedorAtivoId,
+        // Marca que a conversa nasceu aqui: o servidor ainda não a conhece
+        // (ele só lista quem tem mensagem), então ela precisa sobreviver às
+        // próximas sincronizações em vez de sumir da tela.
+        localDesde: Date.now(),
       };
       setChats((prev) => [novo, ...prev]);
     }

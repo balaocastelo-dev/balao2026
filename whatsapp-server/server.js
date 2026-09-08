@@ -2096,6 +2096,17 @@ app.get(["/health", "/status", "/api/status", "/api/crm/status"], (_req, res) =>
     armazenamento: estadoArmazenamento(),
     navegador: CHROME_PATH || null,
     ultimoErro: whatsappState.ultimoErro || null,
+    // Numeros para diagnosticar de fora quando a lista aparece vazia no
+    // painel: da para saber se o servidor tem conversas e quando foi a
+    // ultima varredura, sem precisar abrir os logs do container.
+    conversas: {
+      total: store.chats.length,
+      mensagens: store.messages.length,
+      ultimaSincronizacao: ultimaSincronizacaoChats
+        ? new Date(ultimaSincronizacaoChats).toISOString()
+        : null,
+      sincronizando: sincronizandoChats,
+    },
   });
 });
 

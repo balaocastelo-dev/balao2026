@@ -66,6 +66,12 @@ export interface CrmChat {
   produtoInteresse?: string;
   notas?: CrmNotaCliente[];
   produtosEnviados?: CrmProdutoEnviado[];
+  /**
+   * Quando a conversa foi aberta aqui no painel, antes de o servidor conhecê-la.
+   * Serve para ela não desaparecer da lista na primeira sincronização que
+   * chegar — o servidor só passa a listá-la depois que houver mensagem.
+   */
+  localDesde?: number;
 }
 
 export interface CrmProdutoResumo {
