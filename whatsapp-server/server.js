@@ -219,6 +219,8 @@ const apiInfo = {
 
 const dataDir = DATA_DIR;
 const dataFile = path.join(dataDir, "panel-data.json");
+const { calcularMetricas } = require("./metricas");
+
 const store = {
   labels: [],
   signatures: [],
@@ -240,6 +242,12 @@ const store = {
   statusFeed: [],
   chatAssignments: {},
   notifications: [],
+  // Vendas lancadas no dashboard: { id, vendedorId, chatId, cliente, produto,
+  // valor, comissaoPercentual, data, observacao }.
+  //
+  // O percentual fica gravado NA VENDA de proposito: mudar a comissao do
+  // vendedor hoje nao pode reescrever o que ele ja ganhou no mes passado.
+  vendas: [],
 };
 
 const scheduleTimers = new Map();
@@ -329,6 +337,7 @@ function loadStore() {
       parsed.preferenciasPorVendedor && typeof parsed.preferenciasPorVendedor === "object"
         ? parsed.preferenciasPorVendedor
         : {};
+    store.vendas = Array.isArray(parsed.vendas) ? parsed.vendas : [];
   } catch (error) {
     console.error("Falha ao ler dados do painel do WhatsApp:", error);
   }
@@ -423,6 +432,7 @@ function persistStore() {
     vendedores: store.vendedores,
     kanbanPorVendedor: store.kanbanPorVendedor,
     preferenciasPorVendedor: store.preferenciasPorVendedor,
+    vendas: store.vendas,
   };
 
   fs.writeFileSync(dataFile, JSON.stringify(payload, null, 2));
@@ -461,8 +471,39 @@ function emitNotifications() {
   io.emit("whatsapp:notifications", store.notifications);
 }
 
+/**
+ * Endereco da pagina do vendedor a partir do nome.
+ *
+ * Precisa ser IGUAL ao `montarSlug()` do painel (components/crm/CrmDashboard):
+ * a senha do vendedor e derivada do slug, entao qualquer diferenca aqui cria
+ * um acesso que nunca abre. E idempotente de proposito — o painel ja manda o
+ * slug pronto e esta funcao roda por cima dele.
+ */
+function montarSlugDoVendedor(texto) {
+  return String(texto || "")
+    .normalize("NFD")
+    // Faixa das marcas de acento (U+0300-U+036F), que o NFD acabou de separar.
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 function publicVendedor(v) {
-  return { id: v.id, nome: v.nome, cargo: v.cargo || "", assinatura: v.assinatura || "" };
+  return {
+    id: v.id,
+    nome: v.nome,
+    cargo: v.cargo || "",
+    assinatura: v.assinatura || "",
+    slug: v.slug || v.id,
+    // Percentual da comissao e meta mensal, usados pelo dashboard.
+    comissaoPercentual: Number(v.comissaoPercentual) || 0,
+    meta: Number(v.meta) || 0,
+    ativo: v.ativo !== false,
+    protegido: Boolean(v.protegido),
+    // NUNCA o token de sessao: ele e o equivalente a senha desse vendedor.
+    temAcessoProprio: Boolean(v.tokenSessao),
+  };
 }
 
 // Vendedores que entram pela pagina pessoal do site (ex.: /brendon). Quem
@@ -514,6 +555,55 @@ function ensureVendedoresFixos() {
   }
 
   if (mudou) persistStore();
+}
+
+// Quem digitou a última mensagem de cada conversa.
+//
+// O WhatsApp não sabe qual vendedor escreveu: todos usam o mesmo número. O
+// painel avisa quem está enviando, e o evento `message_create` chega logo
+// depois — o cruzamento é por conversa e por tempo. Sem isso, "atendimento
+// por vendedor" no dashboard só saberia de quem é o cliente, não de quem
+// respondeu.
+const autoriaRecente = new Map();
+const JANELA_DE_AUTORIA_MS = 90_000;
+
+function marcarAutor(chatId, vendedorId) {
+  if (!chatId || !vendedorId) return;
+  autoriaRecente.set(chatId, { vendedorId, em: Date.now() });
+}
+
+function autorDaConversa(chatId) {
+  const registro = autoriaRecente.get(chatId);
+  if (!registro) return null;
+  if (Date.now() - registro.em > JANELA_DE_AUTORIA_MS) {
+    autoriaRecente.delete(chatId);
+    return null;
+  }
+  return registro.vendedorId;
+}
+
+// ---------- métricas do dashboard ----------
+
+let ultimasMetricas = null;
+
+function metricasAgora() {
+  ultimasMetricas = calcularMetricas(store, { agora: Date.now() });
+  return ultimasMetricas;
+}
+
+function emitMetricas() {
+  io.emit("whatsapp:metricas", metricasAgora());
+}
+
+// O dashboard fica aberto o dia inteiro numa tela da loja. Recalcular a cada
+// mensagem seria desperdício; a cada 20 segundos o número já acompanha o
+// movimento sem pesar.
+setInterval(() => {
+  if (io.engine.clientsCount > 0) emitMetricas();
+}, 20_000).unref?.();
+
+function emitVendas() {
+  io.emit("whatsapp:vendas", store.vendas);
 }
 
 function emitVendedores() {
@@ -1228,6 +1318,14 @@ function mergeMessages(messages) {
 
 function storeMessage(message) {
   if (!message || isStatusMessage(message) || !isRealDirectChatId(message.chatId)) return;
+
+  // Mensagem que sai sem autor declarado herda quem acabou de enviar por esta
+  // conversa — é o que credita o atendimento à pessoa certa no dashboard.
+  if (message.direction === "out" && !message.vendedorId) {
+    const autor = autorDaConversa(message.chatId);
+    if (autor) message = { ...message, vendedorId: autor };
+  }
+
   const next = normalizeStoredMessage(message);
   const exists = store.messages.some(
     (item) => buildMessageFingerprint(item) === buildMessageFingerprint(next)
@@ -3234,6 +3332,83 @@ app.all(["/api/crm/midia/repescar", "/api/midia/repescar"], async (req, res) => 
   });
 });
 
+// Números do dashboard por HTTP, para quem não está no socket (uma TV na
+// loja, um script, uma conferência rápida por curl).
+app.get(["/api/crm/metricas", "/api/metricas"], (_req, res) => {
+  res.json({ ok: true, metricas: metricasAgora() });
+});
+
+// Login dos vendedores criados pelo dashboard.
+//
+// O site manda o TOKEN (sha256 de slug+senha), nunca a senha; aqui só se
+// compara com o que está guardado. Assim nem o servidor de WhatsApp nem este
+// arquivo de dados chegam a conhecer a senha de ninguém.
+const tentativasDeLogin = new Map();
+const MAX_TENTATIVAS = 10;
+const JANELA_TENTATIVAS_MS = 5 * 60_000;
+
+app.post(["/api/crm/vendedor-login", "/api/vendedor-login"], express.json(), (req, res) => {
+  const slug = String(req.body?.slug || "").trim().toLowerCase();
+  const token = String(req.body?.token || "").trim();
+  if (!slug || !token) return res.status(400).json({ ok: false, erro: "Dados incompletos." });
+
+  // Freio contra tentativa em massa: o token é derivado da senha, então sem
+  // isto daria para varrer senhas fracas de fora.
+  const agora = Date.now();
+  const registro = tentativasDeLogin.get(slug) || { contagem: 0, desde: agora };
+  if (agora - registro.desde > JANELA_TENTATIVAS_MS) {
+    registro.contagem = 0;
+    registro.desde = agora;
+  }
+  if (registro.contagem >= MAX_TENTATIVAS) {
+    return res.status(429).json({ ok: false, erro: "Muitas tentativas. Aguarde alguns minutos." });
+  }
+
+  const vendedor = store.vendedores.find(
+    (v) => String(v.slug || v.id).toLowerCase() === slug && v.tokenSessao
+  );
+
+  const guardado = String(vendedor?.tokenSessao || "");
+  const iguais =
+    guardado.length === token.length &&
+    guardado.length > 0 &&
+    crypto.timingSafeEqual(Buffer.from(guardado), Buffer.from(token));
+
+  if (!vendedor || !iguais) {
+    registro.contagem += 1;
+    tentativasDeLogin.set(slug, registro);
+    return res.status(401).json({ ok: false, erro: "Senha incorreta." });
+  }
+  if (vendedor.ativo === false) {
+    return res.status(403).json({ ok: false, erro: "Este acesso está desativado." });
+  }
+
+  tentativasDeLogin.delete(slug);
+  res.json({ ok: true, vendedor: publicVendedor(vendedor) });
+});
+
+// Ficha pública de um vendedor criado pelo dashboard — o que a tela de login
+// precisa mostrar antes de alguém digitar a senha. Sem token, sem comissão.
+app.get(["/api/crm/vendedor/:slug", "/api/vendedor/:slug"], (req, res) => {
+  const slug = String(req.params.slug || "").trim().toLowerCase();
+  const vendedor = store.vendedores.find(
+    (v) => String(v.slug || v.id).toLowerCase() === slug && v.tokenSessao
+  );
+  if (!vendedor) return res.status(404).json({ ok: false, erro: "Vendedor não encontrado." });
+
+  res.json({
+    ok: true,
+    vendedor: {
+      id: vendedor.id,
+      slug: vendedor.slug || vendedor.id,
+      nome: vendedor.nome,
+      cargo: vendedor.cargo || "Vendas",
+      assinatura: vendedor.assinatura || "",
+      ativo: vendedor.ativo !== false,
+    },
+  });
+});
+
 app.all(["/api/reset-session", "/api/crm/reset-session", "/api/reconnect", "/api/crm/reconnect"], async (_req, res) => {
   console.log("[whatsapp] Reiniciando sessão a pedido do painel...");
   resetWhatsAppSession();
@@ -3460,6 +3635,8 @@ io.on("connection", (socket) => {
     socket.emit("whatsapp:chats", store.chats);
     socket.emit("whatsapp:status-feed", store.statusFeed);
     socket.emit("whatsapp:vendedores", store.vendedores.map(publicVendedor));
+    socket.emit("whatsapp:vendas", store.vendas);
+    socket.emit("whatsapp:metricas", metricasAgora());
   });
 
   socket.on("panel:vendedor-login", (payload, callback) => {
@@ -3502,6 +3679,148 @@ io.on("connection", (socket) => {
     if (typeof callback === "function") callback(result);
   });
 
+  // ---------- dashboard: números ao vivo ----------
+
+  socket.on("panel:metricas", (_payload, callback) => {
+    const metricas = metricasAgora();
+    if (typeof callback === "function") callback({ ok: true, metricas });
+    else socket.emit("whatsapp:metricas", metricas);
+  });
+
+  // ---------- dashboard: gestão de vendedores ----------
+
+  socket.on("panel:salvar-vendedor", (payload, callback) => {
+    const responder = (r) => {
+      if (typeof callback === "function") callback(r);
+      if (!r.ok) emitToast(r.erro);
+    };
+
+    const id = String(payload?.id || "").trim();
+    const nome = String(payload?.nome || "").trim();
+    if (!nome) return responder({ ok: false, erro: "O nome do vendedor é obrigatório." });
+
+    const comissao = Number(payload?.comissaoPercentual);
+    if (!Number.isFinite(comissao) || comissao < 0 || comissao > 100) {
+      return responder({ ok: false, erro: "A comissão precisa ser um número entre 0 e 100." });
+    }
+    const meta = Number(payload?.meta) || 0;
+    if (meta < 0) return responder({ ok: false, erro: "A meta não pode ser negativa." });
+
+    const existente = id ? store.vendedores.find((v) => String(v.id) === id) : null;
+    if (id && !existente) return responder({ ok: false, erro: "Vendedor não encontrado." });
+
+    const slugPedido = montarSlugDoVendedor(payload?.slug || nome);
+
+    if (!slugPedido) return responder({ ok: false, erro: "Não consegui montar um endereço a partir desse nome." });
+
+    const slugEmUso = store.vendedores.some(
+      (v) => (v.slug || v.id) === slugPedido && String(v.id) !== String(existente?.id || "")
+    );
+    if (slugEmUso) return responder({ ok: false, erro: `O endereço "${slugPedido}" já é de outro vendedor.` });
+
+    if (existente) {
+      existente.nome = nome;
+      existente.cargo = String(payload?.cargo || existente.cargo || "");
+      existente.assinatura = String(payload?.assinatura || existente.assinatura || "");
+      existente.comissaoPercentual = comissao;
+      existente.meta = meta;
+      existente.ativo = payload?.ativo !== false;
+      // Vendedor protegido (os da equipe fixa) nao muda de endereco: o slug
+      // dele e a pagina que ja esta publicada e o id do funil.
+      if (!existente.protegido) existente.slug = slugPedido;
+      // Token novo so quando o painel manda um; senao a senha atual continua.
+      if (payload?.tokenSessao) existente.tokenSessao = String(payload.tokenSessao);
+    } else {
+      if (!payload?.tokenSessao) {
+        return responder({ ok: false, erro: "Defina uma senha para o novo vendedor." });
+      }
+      store.vendedores.push({
+        id: createId(),
+        nome,
+        slug: slugPedido,
+        cargo: String(payload?.cargo || "Vendas"),
+        assinatura:
+          String(payload?.assinatura || "") ||
+          `Atenciosamente,
+*${nome}* — Balão da Informática Castelo`,
+        comissaoPercentual: comissao,
+        meta,
+        ativo: payload?.ativo !== false,
+        pin: null,
+        protegido: false,
+        tokenSessao: String(payload.tokenSessao),
+      });
+    }
+
+    persistStore();
+    emitVendedores();
+    emitMetricas();
+    emitToast(existente ? `${nome} atualizado.` : `${nome} cadastrado. Página: /equipe/${slugPedido}`);
+    responder({ ok: true, slug: slugPedido });
+  });
+
+  // ---------- dashboard: vendas e comissão ----------
+
+  socket.on("panel:registrar-venda", (payload, callback) => {
+    const responder = (r) => {
+      if (typeof callback === "function") callback(r);
+      if (!r.ok) emitToast(r.erro);
+    };
+
+    const vendedorId = String(payload?.vendedorId || "").trim();
+    const vendedor = store.vendedores.find((v) => String(v.id) === vendedorId);
+    if (!vendedor) return responder({ ok: false, erro: "Escolha o vendedor da venda." });
+
+    const valor = Number(payload?.valor);
+    if (!Number.isFinite(valor) || valor <= 0) {
+      return responder({ ok: false, erro: "O valor da venda precisa ser maior que zero." });
+    }
+
+    const data = Number(payload?.data) || Date.now();
+    const venda = {
+      id: createId(),
+      vendedorId,
+      chatId: payload?.chatId ? String(payload.chatId) : null,
+      cliente: String(payload?.cliente || "").trim(),
+      produto: String(payload?.produto || "").trim(),
+      valor: Math.round(valor * 100) / 100,
+      // Congela o percentual do dia da venda — ver o comentário em store.vendas.
+      comissaoPercentual: Number(vendedor.comissaoPercentual) || 0,
+      data,
+      observacao: String(payload?.observacao || "").trim(),
+      criadoEm: Date.now(),
+    };
+
+    store.vendas.push(venda);
+    persistStore();
+    emitVendas();
+    emitMetricas();
+    emitToast(`Venda de R$ ${venda.valor.toFixed(2)} lançada para ${vendedor.nome}.`);
+    responder({ ok: true, venda });
+  });
+
+  socket.on("panel:remover-venda", (payload, callback) => {
+    const id = String(payload?.id || "").trim();
+    const antes = store.vendas.length;
+    store.vendas = store.vendas.filter((v) => String(v.id) !== id);
+
+    if (store.vendas.length === antes) {
+      const r = { ok: false, erro: "Venda não encontrada." };
+      if (typeof callback === "function") callback(r);
+      return;
+    }
+
+    persistStore();
+    emitVendas();
+    emitMetricas();
+    emitToast("Venda removida.");
+    if (typeof callback === "function") callback({ ok: true });
+  });
+
+  socket.on("panel:listar-vendas", (_payload, callback) => {
+    if (typeof callback === "function") callback({ ok: true, vendas: store.vendas });
+  });
+
   socket.on("panel:remove-vendedor", (payload) => {
     const id = String(payload?.id || "").trim();
     if (!id) return;
@@ -3519,8 +3838,12 @@ io.on("connection", (socket) => {
 
     store.vendedores = store.vendedores.filter((v) => String(v.id) !== id);
     delete store.kanbanPorVendedor[id];
+    // As vendas dele FICAM: comissão já apurada é histórico, e apagar isso
+    // mudaria o fechamento de um mês que já passou. Elas aparecem no
+    // dashboard como "vendedor removido".
     persistStore();
     emitVendedores();
+    emitMetricas();
   });
 
   // Cada vendedor entra numa "sala" própria pra só receber o kanban dele —
@@ -3528,6 +3851,8 @@ io.on("connection", (socket) => {
   socket.on("panel:identify-vendedor", (payload) => {
     const vendedorId = String(payload?.vendedorId || "").trim();
     if (!vendedorId) return;
+    // Fica no socket para creditar no dashboard o que esta pessoa enviar.
+    socket.data.vendedorId = vendedorId;
     socket.join(`vendedor:${vendedorId}`);
     socket.emit("whatsapp:kanban", store.kanbanPorVendedor[vendedorId] || {});
     // Devolve as preferencias assim que a pessoa se identifica: e o que faz o
@@ -3744,6 +4069,10 @@ io.on("connection", (socket) => {
       const chatId = payload.chatId || (number ? `${number}@c.us` : null);
       const text = String(payload.text || "").trim();
       if (!chatId || !text) return;
+
+      // Antes de enviar: o `message_create` chega logo depois e precisa saber
+      // de quem foi a resposta.
+      marcarAutor(chatId, payload.vendedorId || socket.data?.vendedorId);
 
       const sent = await sendDirectMessage({
         number,
@@ -4088,6 +4417,7 @@ io.on("connection", (socket) => {
       const number = normalizeNumber(payload.number || payload.chatId || "");
       const chatId = payload.chatId || (number ? `${number}@c.us` : null);
       const prod = payload.product || {};
+      marcarAutor(chatId, payload.vendedorId || socket.data?.vendedorId);
       const precoFinal = Number(payload.price || prod.preco || 0);
       const custo = Number(prod.custo || 0);
       if (custo > 0 && precoFinal <= custo) {

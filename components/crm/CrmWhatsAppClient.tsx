@@ -255,6 +255,11 @@ export interface CrmWhatsAppClientProps {
   /** O que fazer no botão de sair. Sem isso, apenas volta ao portão de PIN. */
   onSair?: () => void;
   sairLabel?: string;
+  /**
+   * Volta para o painel de números do /crm. Só a administração passa isto —
+   * o vendedor na página pessoal não tem para onde voltar.
+   */
+  onVoltarPainel?: () => void;
 }
 
 // Identidade usada no cabeçalho quando quem está na tela é a administração e
@@ -271,6 +276,7 @@ export default function CrmWhatsAppClient({
   admin,
   onSair,
   sairLabel,
+  onVoltarPainel,
 }: CrmWhatsAppClientProps = {}) {
   const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -2338,6 +2344,16 @@ export default function CrmWhatsAppClient({
           <span className="bg-white text-[#0a6e3d] rounded-full px-3 py-1 text-xs font-bold shadow-sm max-w-[170px] truncate">
             {vendedorAtivo0?.nome || "—"}
           </span>
+          {onVoltarPainel && (
+            <button
+              onClick={onVoltarPainel}
+              title="Voltar para o painel de números"
+              className="bg-white/90 hover:bg-white text-[#0a6e3d] rounded-full px-2.5 py-1 text-xs font-bold transition-all shadow-sm cursor-pointer"
+            >
+              📊 Painel
+            </button>
+          )}
+
           <button
             onClick={sairDoVendedor}
             title={

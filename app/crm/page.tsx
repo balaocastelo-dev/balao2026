@@ -62,7 +62,12 @@ export default async function CrmPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
+    // `h-full`, não `min-h-screen`: o LayoutWrapper já entrega o viewport
+    // inteiro para esta rota, e um mínimo de tela cheia AQUI fazia o conteúdo
+    // empurrar a caixa para além do que o pai mostra — o painel crescia por
+    // baixo do corte e a metade de baixo ficava inalcançável, sem barra de
+    // rolagem em lugar nenhum.
+    <div className="flex h-full flex-col overflow-hidden bg-zinc-950 text-zinc-100">
       <CrmAdminClient />
     </div>
   );

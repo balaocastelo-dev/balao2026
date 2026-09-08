@@ -26,9 +26,12 @@ export default function LayoutWrapper({
   const isRoletaPage = pathname === "/roleta";
   const isBlogPage = pathname === "/blog" || pathname.startsWith("/blog/");
   const isCrmPage = pathname === "/crm" || pathname.startsWith("/crm");
-  const isPaginaVendedor = slugsVendedores.some(
-    (slug) => pathname === `/${slug}`
-  );
+  const isPaginaVendedor =
+    slugsVendedores.some((slug) => pathname === `/${slug}`) ||
+    // Vendedores criados pelo dashboard entram por /equipe/<slug>. Sem isto
+    // eles ganhariam o rodapé institucional no meio do atendimento, que é
+    // justamente o que essas telas não podem ter.
+    pathname.startsWith("/equipe/");
   const isFullscreenPanel =
     isCrmPage ||
     isPaginaVendedor ||
