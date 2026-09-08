@@ -745,8 +745,47 @@ async function getChatByIdSafe(chatId) {
   try {
     return await whatsappClient.getChatById(chatId);
   } catch {
+    // `getChatById()` nao abre conversa com id `@lid` — e o WhatsApp esta
+    // migrando justamente para esse formato. Sem esta segunda tentativa,
+    // essas conversas nunca carregam historico nem midia: foi assim que a
+    // foto do 19984515960 (chat `92148808610042@lid`) ficou sem arquivo.
+    const numero = numeroRealDoChat(chatId);
+    if (!numero) return null;
+
+    for (const alternativo of [`${numero}@c.us`, `${numero}@s.whatsapp.net`]) {
+      try {
+        const chat = await whatsappClient.getChatById(alternativo);
+        if (chat) return chat;
+      } catch {
+        // tenta o proximo formato
+      }
+    }
     return null;
   }
+}
+
+/**
+ * Telefone de verdade por tras de um id de conversa.
+ *
+ * Para `numero@c.us` sai do proprio id; para `id@lid` so o resumo guardado
+ * sabe, porque o id nao tem relacao nenhuma com o telefone.
+ */
+function numeroRealDoChat(chatId) {
+  const bruto = String(chatId || "");
+  if (!bruto.endsWith("@lid")) {
+    const doProprioId = bruto.replace(/@.*$/, "").replace(/\D/g, "");
+    return doProprioId || null;
+  }
+
+  const resumo = store.chats.find((c) => c.chatId === bruto);
+  const doResumo = String(resumo?.realNumber || resumo?.displayNumber || "").replace(/\D/g, "");
+  if (doResumo) return doResumo;
+
+  const mensagem = store.messages.find(
+    (m) => m.chatId === bruto && (m.realNumber || m.displayNumber)
+  );
+  const daMensagem = String(mensagem?.realNumber || mensagem?.displayNumber || "").replace(/\D/g, "");
+  return daMensagem || null;
 }
 
 async function syncLabelsForChats(chats = []) {
@@ -1460,6 +1499,25 @@ async function baixarMidiaDaMensagem(message) {
     `[midia] Nao consegui baixar a midia da mensagem ${id || "(sem id)"} — motivo: ${estatisticasMidia.ultimaFalha}`
   );
   return null;
+}
+
+/**
+ * Baixa a midia de uma mensagem sabendo so o id dela.
+ *
+ * Serve para repescar foto que ja chegou sem arquivo. Nao usa
+ * `getChatById()` de proposito: ele nao abre conversa com id `@lid`, que e
+ * exatamente onde a foto sumia.
+ */
+async function rebaixarMidiaPorId(id, tipo) {
+  if (!id) return null;
+  return baixarMidiaDaMensagem({
+    id: { _serialized: id },
+    type: tipo || null,
+    hasMedia: true,
+    // O metodo da biblioteca precisa do objeto original; aqui so existe o id,
+    // entao vai direto para a leitura na pagina.
+    downloadMedia: async () => null,
+  });
 }
 
 // Teto de downloads por carregamento de conversa. Sem ele, abrir um chat com
@@ -3006,40 +3064,51 @@ app.get(["/api/crm/midia/diagnostico", "/api/midia/diagnostico"], async (req, re
     });
   }
 
-  const chat = await getChatByIdSafe(escolhida.chatId);
-  if (!chat || typeof chat.fetchMessages !== "function") {
-    return res.json({
-      ok: false,
-      motivo: "Não consegui abrir a conversa dessa mensagem.",
-      chatId: escolhida.chatId,
-      estatisticas: estatisticasMidia,
-    });
-  }
-
-  const brutas = await chat.fetchMessages({ limit: 60 }).catch(() => []);
-  const original = (brutas || []).find((m) => m.id?._serialized === escolhida.id);
-  if (!original) {
-    return res.json({
-      ok: false,
-      motivo: "A mensagem não está mais na memória do WhatsApp Web.",
-      id: escolhida.id,
-      estatisticas: estatisticasMidia,
-    });
-  }
-
-  const antes = estatisticasMidia.ultimaFalha;
-  const url = await baixarMidiaDaMensagem(original);
+  const url = await rebaixarMidiaPorId(escolhida.id, escolhida.mediaType);
   if (url) mergeMessages([{ ...escolhida, mediaUrl: url }]);
 
   res.json({
     ok: Boolean(url),
     id: escolhida.id,
+    chatId: escolhida.chatId,
     de: escolhida.realNumber || escolhida.from,
     tipo: escolhida.mediaType,
     url,
     // O passo exato em que parou — é isto que se lê quando dá errado.
-    motivo: url ? null : estatisticasMidia.ultimaFalha || antes,
+    motivo: url ? null : estatisticasMidia.ultimaFalha,
     pendentes: pendentes.length,
+    estatisticas: estatisticasMidia,
+  });
+});
+
+// Repesca de mídia por id, sem passar pela conversa.
+//
+// `getChatById()` não abre chat com id `@lid` — e é justamente nesses que a
+// foto some. Aqui a mensagem é procurada direto na memória do WhatsApp Web,
+// que não se importa com o formato do id.
+app.all(["/api/crm/midia/repescar", "/api/midia/repescar"], async (req, res) => {
+  const limite = Math.min(Number(req.query.limite) || 20, 200);
+  const pendentes = store.messages.filter((m) => m.hasMedia && !m.mediaUrl).slice(-limite);
+
+  const recuperadas = [];
+  const motivos = [];
+  for (const m of pendentes) {
+    const url = await rebaixarMidiaPorId(m.id, m.mediaType);
+    if (url) {
+      mergeMessages([{ ...m, mediaUrl: url }]);
+      recuperadas.push(m.id);
+    } else if (motivos.length < 5) {
+      motivos.push(estatisticasMidia.ultimaFalha);
+    }
+  }
+
+  if (recuperadas.length) emitMessages();
+
+  res.json({
+    ok: true,
+    tentadas: pendentes.length,
+    recuperadas: recuperadas.length,
+    motivos,
     estatisticas: estatisticasMidia,
   });
 });
