@@ -193,6 +193,29 @@ function mensagem(extra = {}) {
     );
   });
 
+  await teste("erro da página vira motivo legível no /status", async () => {
+    // O erro cru do WhatsApp Web é a letra "r". Se o motivo não chegar ao
+    // /status, cada tentativa de conserto vira adivinhação.
+    const cliente = {
+      pupPage: {
+        async evaluate() {
+          return { erro: "descriptografar (estagio PENDING)" };
+        },
+      },
+    };
+    const m = carregar(cliente);
+    const url = await m.baixar(
+      mensagem({
+        id: { _serialized: "false_5519984515960@c.us_3EB0MOTIVO" },
+        async downloadMedia() {
+          throw new Error("r");
+        },
+      })
+    );
+    assert.strictEqual(url, null);
+    assert.strictEqual(m.stats.ultimaFalha, "pagina: descriptografar (estagio PENDING)");
+  });
+
   await teste("mensagem sem id ainda grava a foto", async () => {
     const m = carregar(null);
     const url = await m.baixar({

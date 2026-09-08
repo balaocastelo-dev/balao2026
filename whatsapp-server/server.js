@@ -1337,20 +1337,95 @@ async function baixarMidiaDaMensagem(message) {
   }
 
   // 2) Direto pelo WhatsApp Web.
+  //
+  // O `downloadMedia()` da biblioteca falha com a mensagem literal "r" — um
+  // nome minificado do bundle do WhatsApp, que não diz nada. Aqui a mesma
+  // coisa é feita passo a passo, devolvendo em qual passo parou em vez de
+  // engolir o erro: sem isso não dá para saber se o problema é o módulo, a
+  // mídia expirada ou a descriptografia.
   const id = message.id?._serialized;
   if (id && whatsappClient?.pupPage) {
     try {
       const dados = await whatsappClient.pupPage.evaluate(async (msgId) => {
+        const falha = (passo, e) =>
+          ({ erro: `${passo}${e ? `: ${e.message || e}` : ""}` });
+
+        let msg;
         try {
           const colecoes = window.require("WAWebCollections");
-          const msg = colecoes.Msg.get(msgId);
-          if (!msg) return null;
+          msg =
+            colecoes.Msg.get(msgId) ||
+            (await colecoes.Msg.getMessagesById([msgId]))?.messages?.[0];
+        } catch (e) {
+          return falha("nao achei a mensagem no WhatsApp Web", e);
+        }
+        if (!msg) return falha("mensagem fora da memoria do WhatsApp Web");
 
-          const mod = window.require("WAWebDownloadManager");
-          const baixar = mod?.downloadManager?.downloadAndMaybeDecrypt;
-          if (!baixar) return null;
+        // Pede ao WhatsApp que resolva a mídia (é o que a seta de download
+        // faz na tela). Sem isso, mídia antiga fica em PENDING para sempre.
+        const estagio = () => msg.mediaData?.mediaStage || "sem mediaData";
+        if (estagio() !== "RESOLVED") {
+          try {
+            await msg.downloadMedia({ downloadEvenIfExpensive: true, rmrReason: 1 });
+          } catch (e) {
+            return falha(`resolver midia (estagio ${estagio()})`, e);
+          }
+        }
+        if (estagio() === "REUPLOADING" || String(estagio()).includes("ERROR")) {
+          return falha(`midia indisponivel (estagio ${estagio()})`);
+        }
 
-          const buffer = await baixar({
+        const paraBase64 = (buffer) =>
+          new Promise((ok, nok) => {
+            try {
+              const leitor = new FileReader();
+              leitor.onloadend = () => ok(String(leitor.result).split(",")[1] || "");
+              leitor.onerror = () => nok(new Error("FileReader falhou"));
+              leitor.readAsDataURL(
+                buffer instanceof Blob ? buffer : new Blob([buffer])
+              );
+            } catch (e) {
+              nok(e);
+            }
+          });
+
+        // 2a) O blob já descriptografado, que o WhatsApp guarda depois de
+        //     resolver a mídia. Não depende do gerenciador de download.
+        try {
+          // O WhatsApp guarda isso como OpaqueData, não como Blob puro — daí
+          // as três formas de chegar nos bytes.
+          const bruto = msg.mediaData?.mediaBlob;
+          let blob =
+            (bruto instanceof Blob && bruto) || bruto?._blob || bruto?.forceableBlob || null;
+
+          if (!blob) {
+            const endereco =
+              (typeof bruto?.url === "function" && bruto.url()) ||
+              msg.mediaData?.renderableUrl ||
+              null;
+            if (endereco) blob = await fetch(endereco).then((r) => r.blob());
+          }
+
+          if (blob instanceof Blob && blob.size > 0) {
+            return { data: await paraBase64(blob), mimetype: blob.type || msg.mimetype || null };
+          }
+        } catch (e) {
+          // Segue para o gerenciador de download.
+        }
+
+        // 2b) Gerenciador de download, como a biblioteca faz.
+        try {
+          const gerenciador = window.require("WAWebDownloadManager")?.downloadManager;
+          if (!gerenciador?.downloadAndMaybeDecrypt) {
+            return falha(`sem gerenciador de download (estagio ${estagio()})`);
+          }
+          // O gerenciador anota métricas num objeto que ele espera receber;
+          // sem esse boneco, ele estoura antes de baixar.
+          const bonecoDeMetricas = {
+            addAnnotations() { return this; },
+            addPoint() { return this; },
+          };
+          const buffer = await gerenciador.downloadAndMaybeDecrypt({
             directPath: msg.directPath,
             encFilehash: msg.encFilehash,
             filehash: msg.filehash,
@@ -1358,18 +1433,16 @@ async function baixarMidiaDaMensagem(message) {
             mediaKeyTimestamp: msg.mediaKeyTimestamp,
             type: msg.type,
             signal: new AbortController().signal,
+            downloadQpl: bonecoDeMetricas,
           });
-
-          let binario = "";
-          const bytes = new Uint8Array(buffer);
-          for (let i = 0; i < bytes.length; i++) binario += String.fromCharCode(bytes[i]);
-          return { data: btoa(binario), mimetype: msg.mimetype || null };
-        } catch {
-          return null;
+          return { data: await paraBase64(buffer), mimetype: msg.mimetype || null };
+        } catch (e) {
+          return falha(`descriptografar (estagio ${estagio()})`, e);
         }
       }, id);
 
       if (dados?.data) return gravar(dados.data, dados.mimetype);
+      if (dados?.erro) estatisticasMidia.ultimaFalha = `pagina: ${dados.erro}`;
     } catch (error) {
       estatisticasMidia.ultimaFalha = `pupPage: ${error.message}`;
       console.warn("[midia] Leitura direta falhou:", error.message);
@@ -2901,6 +2974,67 @@ app.get(["/health", "/status", "/api/status", "/api/crm/status"], (_req, res) =>
     // Foto que o cliente manda passa por aqui. Quando "salvas" fica em zero e
     // "falhas" sobe, o problema e o download — nao o painel.
     midia: estatisticasMidia,
+  });
+});
+
+// Diagnóstico da mídia: pega a última mensagem que veio marcada como foto e
+// ficou sem arquivo, tenta baixar de novo e conta em que passo parou.
+//
+// Existe porque o erro do WhatsApp Web é a letra "r" — sem contexto nenhum.
+// Sem esta rota, cada tentativa de conserto exigia pedir uma foto nova ao
+// cliente e ler o log dentro do container.
+app.get(["/api/crm/midia/diagnostico", "/api/midia/diagnostico"], async (req, res) => {
+  const alvo = String(req.query.id || "").trim();
+
+  const pendentes = store.messages.filter((m) => m.hasMedia && !m.mediaUrl);
+  const escolhida = alvo
+    ? store.messages.find((m) => m.id === alvo)
+    : pendentes[pendentes.length - 1];
+
+  if (!escolhida) {
+    return res.json({
+      ok: true,
+      mensagem: alvo ? "Não achei essa mensagem." : "Nenhuma mídia pendente.",
+      pendentes: pendentes.length,
+      estatisticas: estatisticasMidia,
+    });
+  }
+
+  const chat = await getChatByIdSafe(escolhida.chatId);
+  if (!chat || typeof chat.fetchMessages !== "function") {
+    return res.json({
+      ok: false,
+      motivo: "Não consegui abrir a conversa dessa mensagem.",
+      chatId: escolhida.chatId,
+      estatisticas: estatisticasMidia,
+    });
+  }
+
+  const brutas = await chat.fetchMessages({ limit: 60 }).catch(() => []);
+  const original = (brutas || []).find((m) => m.id?._serialized === escolhida.id);
+  if (!original) {
+    return res.json({
+      ok: false,
+      motivo: "A mensagem não está mais na memória do WhatsApp Web.",
+      id: escolhida.id,
+      estatisticas: estatisticasMidia,
+    });
+  }
+
+  const antes = estatisticasMidia.ultimaFalha;
+  const url = await baixarMidiaDaMensagem(original);
+  if (url) mergeMessages([{ ...escolhida, mediaUrl: url }]);
+
+  res.json({
+    ok: Boolean(url),
+    id: escolhida.id,
+    de: escolhida.realNumber || escolhida.from,
+    tipo: escolhida.mediaType,
+    url,
+    // O passo exato em que parou — é isto que se lê quando dá errado.
+    motivo: url ? null : estatisticasMidia.ultimaFalha || antes,
+    pendentes: pendentes.length,
+    estatisticas: estatisticasMidia,
   });
 });
 
