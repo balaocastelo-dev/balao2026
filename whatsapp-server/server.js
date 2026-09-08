@@ -1518,6 +1518,26 @@ async function baixarMidiaDaMensagem(message) {
 }
 
 /**
+ * Reabre a conversa de uma mensagem e devolve o objeto original dela.
+ *
+ * O WhatsApp Web so mantem em memoria as mensagens das conversas carregadas.
+ * Sem este passo, procurar foto antiga pelo id sempre responde "mensagem fora
+ * da memoria" — ela nunca esteve la.
+ */
+async function recuperarMensagemOriginal(chatId, id) {
+  const chat = await getChatByIdSafe(chatId);
+  if (!chat || typeof chat.fetchMessages !== "function") return null;
+
+  const brutas = (await chat.fetchMessages({ limit: 100 }).catch(() => [])) || [];
+  const hash = (valor) => String(valor || "").split("_").pop();
+  return (
+    brutas.find((b) => b.id?._serialized === id) ||
+    brutas.find((b) => hash(b.id?._serialized) === hash(id)) ||
+    null
+  );
+}
+
+/**
  * Baixa a midia de uma mensagem sabendo so o id dela.
  *
  * Serve para repescar foto que ja chegou sem arquivo. Nao usa
@@ -3089,7 +3109,10 @@ app.get(["/api/crm/midia/diagnostico", "/api/midia/diagnostico"], async (req, re
     });
   }
 
-  const { url, motivo } = await rebaixarMidiaPorId(escolhida.id, escolhida.mediaType);
+  const original = await recuperarMensagemOriginal(escolhida.chatId, escolhida.id);
+  const { url, motivo } = original
+    ? await baixarMidiaDaMensagem(original)
+    : await rebaixarMidiaPorId(escolhida.id, escolhida.mediaType);
   mergeMessages([{ ...escolhida, mediaUrl: url || null, mediaErro: motivo }]);
   emitMessages();
 
@@ -3099,6 +3122,7 @@ app.get(["/api/crm/midia/diagnostico", "/api/midia/diagnostico"], async (req, re
     chatId: escolhida.chatId,
     de: escolhida.realNumber || escolhida.from,
     tipo: escolhida.mediaType,
+    conversaAberta: Boolean(original),
     url,
     // O passo exato em que parou — é isto que se lê quando dá errado.
     motivo,
@@ -3116,13 +3140,51 @@ app.all(["/api/crm/midia/repescar", "/api/midia/repescar"], async (req, res) => 
   const limite = Math.min(Number(req.query.limite) || 20, 200);
   const pendentes = store.messages.filter((m) => m.hasMedia && !m.mediaUrl).slice(-limite);
 
+  const porConversa = new Map();
+  pendentes.forEach((m) => {
+    if (!porConversa.has(m.chatId)) porConversa.set(m.chatId, []);
+    porConversa.get(m.chatId).push(m);
+  });
+
   const recuperadas = [];
   const motivos = [];
-  for (const m of pendentes) {
-    const { url, motivo } = await rebaixarMidiaPorId(m.id, m.mediaType);
-    mergeMessages([{ ...m, mediaUrl: url || null, mediaErro: motivo }]);
-    if (url) recuperadas.push(m.id);
-    else if (!motivos.includes(motivo) && motivos.length < 5) motivos.push(motivo);
+  const anotarMotivo = (motivo) => {
+    if (motivo && !motivos.includes(motivo) && motivos.length < 5) motivos.push(motivo);
+  };
+
+  for (const [chatId, lista] of porConversa) {
+    // Abrir a conversa é o passo que faltava: o WhatsApp Web só mantém em
+    // memória as mensagens das conversas carregadas. Buscar foto antiga só
+    // pelo id sempre respondia "mensagem fora da memoria" — ela nunca esteve
+    // lá. O fetchMessages traz os modelos de volta, e aí a mídia é alcançável.
+    const chat = await getChatByIdSafe(chatId);
+    let brutas = [];
+    if (chat && typeof chat.fetchMessages === "function") {
+      brutas = (await chat.fetchMessages({ limit: 100 }).catch(() => [])) || [];
+    } else {
+      anotarMotivo(`nao consegui abrir a conversa ${chatId}`);
+    }
+
+    const hashDoId = (id) => String(id || "").split("_").pop();
+    const porId = new Map();
+    const porHash = new Map();
+    brutas.forEach((b) => {
+      const id = b.id?._serialized;
+      if (!id) return;
+      porId.set(id, b);
+      porHash.set(hashDoId(id), b);
+    });
+
+    for (const m of lista) {
+      const bruta = porId.get(m.id) || porHash.get(hashDoId(m.id));
+      const { url, motivo } = bruta
+        ? await baixarMidiaDaMensagem(bruta)
+        : await rebaixarMidiaPorId(m.id, m.mediaType);
+
+      mergeMessages([{ ...m, mediaUrl: url || null, mediaErro: motivo }]);
+      if (url) recuperadas.push(m.id);
+      else anotarMotivo(motivo);
+    }
   }
 
   emitMessages();
@@ -3130,6 +3192,7 @@ app.all(["/api/crm/midia/repescar", "/api/midia/repescar"], async (req, res) => 
   res.json({
     ok: true,
     tentadas: pendentes.length,
+    conversas: porConversa.size,
     recuperadas: recuperadas.length,
     motivos,
     estatisticas: estatisticasMidia,

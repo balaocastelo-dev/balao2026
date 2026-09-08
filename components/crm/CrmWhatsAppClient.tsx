@@ -1191,12 +1191,34 @@ export default function CrmWhatsAppClient({
   // foi conversado. Só busca uma vez por conversa: depois as mensagens ficam
   // no servidor e chegam por conta própria.
   const historicosPedidos = useRef<Set<string>>(new Set());
+  // Quantas vezes já se tentou rebaixar a mídia desta conversa. Reabrir a
+  // conversa é a forma do vendedor pedir "tenta de novo", mas sem teto isso
+  // viraria um pedido a cada clique numa conversa que nunca vai resolver.
+  const tentativasDeMidia = useRef<Map<string, number>>(new Map());
+  // Sem isto o efeito dispararia de novo a cada lote de mensagens que o
+  // próprio pedido faz chegar.
+  const historicoEmVoo = useRef<Set<string>>(new Set());
+  const MAX_TENTATIVAS_DE_MIDIA = 3;
+
   useEffect(() => {
     const chatId = chatSelecionadoId;
     if (!chatId || !socketRef.current?.connected) return;
-    if (historicosPedidos.current.has(chatId)) return;
+
+    // Conversa com foto que não baixou merece nova tentativa: o servidor
+    // precisa reabrir a conversa no WhatsApp Web para alcançar o arquivo, e é
+    // isso que o carregamento de histórico faz.
+    const temMidiaFaltando = mensagens.some(
+      (m) => m.chatId === chatId && m.hasMedia && !m.mediaUrl
+    );
+    const jaTentou = tentativasDeMidia.current.get(chatId) || 0;
+    const vaiRetentar = temMidiaFaltando && jaTentou < MAX_TENTATIVAS_DE_MIDIA;
+
+    if (historicoEmVoo.current.has(chatId)) return;
+    if (historicosPedidos.current.has(chatId) && !vaiRetentar) return;
+    if (vaiRetentar) tentativasDeMidia.current.set(chatId, jaTentou + 1);
 
     historicosPedidos.current.add(chatId);
+    historicoEmVoo.current.add(chatId);
     setCarregandoHistorico(true);
 
     socketRef.current.emit(
@@ -1206,6 +1228,7 @@ export default function CrmWhatsAppClient({
       // tela, e o vendedor abre o cliente sem ver o que já foi combinado.
       { chatId, limite: 300, maisAntigas: 5 },
       (res: { ok?: boolean; erro?: string } | undefined) => {
+        historicoEmVoo.current.delete(chatId);
         setCarregandoHistorico(false);
         if (!res?.ok && res?.erro) {
           // Deixa tentar de novo se falhou — pode ter sido queda momentânea.
@@ -1213,7 +1236,9 @@ export default function CrmWhatsAppClient({
         }
       }
     );
-  }, [chatSelecionadoId]);
+    // `mensagens` entra de propósito: é o que permite notar que a conversa
+    // aberta tem foto sem arquivo e pedir o histórico de novo.
+  }, [chatSelecionadoId, mensagens]);
 
   // Busca mais um pedaço do passado da conversa aberta, sob demanda.
   const carregarMaisAntigas = () => {
