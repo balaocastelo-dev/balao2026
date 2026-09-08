@@ -699,14 +699,46 @@ function scheduleChatRefresh() {
   }
   chatRefreshTimer = setTimeout(async () => {
     try {
-      await syncRecentConversations();
-      await syncStatusFeed();
+      await garantirChatsCarregados({ forcar: true });
     } catch (error) {
-      console.error("Falha ao atualizar resumo de chats/status:", error);
+      console.error("Falha ao atualizar resumo de chats:", error);
     } finally {
       chatRefreshTimer = null;
     }
   }, 1200);
+}
+
+// Controle da carga de conversas.
+//
+// Buscar a lista e cara: sao ate 300 chats, com as ultimas mensagens, nome do
+// contato e foto de perfil de cada um. Com seis vendedores entrando de manha,
+// disparar uma busca dessas por login derrubaria o ritmo do servidor. Entao:
+// uma de cada vez, e so refaz se a ultima ja tiver idade.
+let sincronizandoChats = false;
+let ultimaSincronizacaoChats = 0;
+const IDADE_MAXIMA_CHATS_MS = 60_000;
+
+async function garantirChatsCarregados({ forcar = false } = {}) {
+  if (!whatsappClient || !whatsappState.connected) return false;
+  if (sincronizandoChats) return false;
+
+  const idade = Date.now() - ultimaSincronizacaoChats;
+  const temChats = store.chats.length > 0;
+  // Lista vazia sempre vale uma busca: e o caso de quem acabou de logar e
+  // encontraria a tela "Nenhuma conversa" sem motivo.
+  if (!forcar && temChats && idade < IDADE_MAXIMA_CHATS_MS) return false;
+
+  sincronizandoChats = true;
+  try {
+    await syncRecentConversations();
+    ultimaSincronizacaoChats = Date.now();
+    return true;
+  } catch (error) {
+    console.error("Falha ao carregar conversas:", error);
+    return false;
+  } finally {
+    sincronizandoChats = false;
+  }
 }
 
 function isRealDirectChatId(id) {
@@ -1670,8 +1702,8 @@ function attachWhatsAppClientEvents(client) {
     whatsappState.phoneNumber = client.info?.wid?.user || null;
     emitState();
     emitToast("WhatsApp conectado e pronto para uso.");
-    await syncRecentConversations();
-    await syncStatusFeed();
+    // Só as conversas: o feed de status carrega quando alguém abrir a aba.
+    await garantirChatsCarregados({ forcar: true });
   });
 
   client.on("auth_failure", (message) => {
@@ -1719,9 +1751,9 @@ function attachWhatsAppClientEvents(client) {
 
   client.on("message", async (message) => {
     if (!isRealDirectChatId(message.from) || message.broadcast) {
-      if (message.from === "status@broadcast" || message.broadcast || message.from?.includes("broadcast")) {
-        syncStatusFeed().catch(() => {});
-      }
+      // Antes, todo status publicado por qualquer contato disparava uma
+      // varredura do feed. Numa agenda grande isso e o dia inteiro carregando
+      // gente que nao esta conversando com a loja. O feed agora e sob demanda.
       return;
     }
 
@@ -1775,9 +1807,8 @@ function attachWhatsAppClientEvents(client) {
     if (!message.fromMe) return;
     const targetChat = message.to || message.from;
     if (!isRealDirectChatId(targetChat) || message.broadcast) {
-      if (targetChat === "status@broadcast" || message.broadcast) {
-        syncStatusFeed().catch(() => {});
-      }
+      // Status publicado (por nos ou por um contato) nao recarrega o feed
+      // sozinho — quem abre a aba de Status e que pede o carregamento.
       return;
     }
 
@@ -2195,6 +2226,11 @@ io.on("connection", (socket) => {
   socket.emit("whatsapp:vendedores", store.vendedores.map(publicVendedor));
   socket.emit("whatsapp:armazenamento", estadoArmazenamento());
 
+  // Quem abre o painel — vendedor ou administração — deve encontrar a lista
+  // de conversas pronta. O throttle interno evita que seis logins de manhã
+  // virem seis varreduras seguidas.
+  garantirChatsCarregados().catch(() => {});
+
   socket.on("panel:bootstrap", () => {
     socket.emit("whatsapp:state", whatsappState);
     socket.emit("whatsapp:api-info", apiInfo);
@@ -2288,6 +2324,13 @@ io.on("connection", (socket) => {
       "whatsapp:preferencias",
       store.preferenciasPorVendedor[vendedorId] || {}
     );
+
+    // Entrega na hora o que ja esta em memoria, para a tela nunca abrir vazia,
+    // e so entao busca o que faltar. De proposito NAO chama syncStatusFeed:
+    // status sao publicacoes de contatos, nao atendimento — carregar isso no
+    // login so gasta tempo e enche a tela de gente que nao esta conversando.
+    socket.emit("whatsapp:chats", store.chats);
+    garantirChatsCarregados().catch(() => {});
   });
 
   socket.on("panel:set-preferencias", (payload) => {
@@ -2342,8 +2385,18 @@ io.on("connection", (socket) => {
 
   socket.on("panel:sync-conversations", async () => {
     emitToast("Sincronizando conversas da conta conectada.");
-    await syncRecentConversations();
-    await syncStatusFeed();
+    await garantirChatsCarregados({ forcar: true });
+  });
+
+  // Status (as "stories" dos contatos) sao caros e nao fazem parte do
+  // atendimento, entao so carregam quando alguem abre essa aba de proposito.
+  socket.on("panel:sync-status", async () => {
+    try {
+      await syncStatusFeed();
+    } catch (error) {
+      console.error("Falha ao sincronizar status:", error);
+      emitToast("Falha ao carregar os status.");
+    }
   });
 
   socket.on("panel:refresh-labels", async () => {

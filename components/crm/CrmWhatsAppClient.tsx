@@ -783,17 +783,10 @@ export default function CrmWhatsAppClient({
     socket.on("whatsapp:message", (newMsg: any) => {
       if (!newMsg || !newMsg.chatId) return;
 
-      // Filter out @lid or broadcast messages
+      // Status, listas de transmissão e @lid não são atendimento: descarta.
+      // Antes, um status de qualquer contato mandava o painel resincronizar a
+      // lista inteira de conversas — trabalho pesado, à toa, o dia todo.
       if (!isRealDirectChat(newMsg.chatId) || !isRealDirectChat(newMsg.from)) {
-        if (
-          newMsg.chatId === "status@broadcast" ||
-          String(newMsg.chatId).includes("broadcast") ||
-          newMsg.from === "status@broadcast"
-        ) {
-          if (socketRef.current?.connected) {
-            socketRef.current.emit("panel:sync-conversations");
-          }
-        }
         return;
       }
 
@@ -1919,8 +1912,11 @@ export default function CrmWhatsAppClient({
           {/* WhatsApp Statuses (Stories) Button */}
           <button
             onClick={() => {
+              // Os status só são buscados aqui, quando alguém abre a aba —
+              // carregá-los junto com o atendimento enchia a tela de contatos
+              // que não estão conversando com a loja.
               if (socketRef.current?.connected) {
-                socketRef.current.emit("panel:sync-conversations");
+                socketRef.current.emit("panel:sync-status");
               }
               setModalStatusAberto(true);
             }}
