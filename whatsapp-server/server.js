@@ -1193,8 +1193,6 @@ async function syncRecentConversations() {
       if (!isRealDirectChatId(rawId) || isStatusMessage(chat)) continue;
 
       try {
-        const { contactName, realNumber, displayNumber } = await resolveContactDetails(chat, rawId);
-        const profilePicUrl = await getProfilePicUrlSafe(rawId);
         let latestMessage = null;
         let messages = [];
 
@@ -1204,17 +1202,32 @@ async function syncRecentConversations() {
           latestMessage = messages[messages.length - 1] || (chat.lastMessage && !isStatusMessage(chat.lastMessage) ? chat.lastMessage : null);
         }
 
+        // Só entra na lista quem realmente trocou mensagem com a loja.
+        //
+        // A agenda do WhatsApp tem muita coisa que não é atendimento: contato
+        // salvo que nunca escreveu, e o "lead" que o WhatsApp cria sozinho
+        // quando alguém clica num anúncio (Click-to-WhatsApp) sem chegar a
+        // mandar nada. Sem esta linha o vendedor abre o painel e encontra uma
+        // lista enorme de gente com quem nunca falou.
+        //
+        // A checagem vem ANTES de resolver contato e baixar foto de propósito:
+        // essas duas são as partes caras da varredura, e não faz sentido
+        // pagá-las por quem vai ser descartado logo em seguida.
+        const referencia =
+          latestMessage ||
+          (chat.lastMessage && !isStatusMessage(chat.lastMessage) ? chat.lastMessage : null);
+        if (!referencia) continue;
+
+        const { contactName, realNumber, displayNumber } = await resolveContactDetails(chat, rawId);
+        const profilePicUrl = await getProfilePicUrlSafe(rawId);
+
         const assignedLabels = typeof chat.getLabels === "function" ? await chat.getLabels().catch(() => []) : [];
         const assignedLabelNames = (assignedLabels || [])
           .map((item) => String(item?.name || "").trim())
           .filter(Boolean)
           .sort((a, b) => a.localeCompare(b));
 
-        const bodyResumo = latestMessage
-          ? descreverMensagem(latestMessage)
-          : chat.lastMessage
-          ? descreverMensagem(chat.lastMessage)
-          : "";
+        const bodyResumo = descreverMensagem(referencia);
 
         chatSummaries.push({
           chatId: rawId,
@@ -1225,7 +1238,7 @@ async function syncRecentConversations() {
           unreadCount: chat.unreadCount || 0,
           lastMessageBody: bodyResumo,
           lastMessageTimestamp:
-            ((latestMessage?.timestamp || chat.lastMessage?.timestamp || chat.timestamp || Math.floor(Date.now() / 1000)) * 1000),
+            (referencia?.timestamp || chat.timestamp || Math.floor(Date.now() / 1000)) * 1000,
           isGroup: false,
           isArchived: Boolean(chat.archived),
           isPinned: Boolean(chat.pinned),
