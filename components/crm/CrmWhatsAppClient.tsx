@@ -97,7 +97,12 @@ function formatarNumeroExibicao(num: string | null | undefined): string {
   if (limpo.length === 10) {
     return `55 ${limpo.slice(0, 2)} ${limpo.slice(2)}`;
   }
-  return limpo;
+
+  // Não é telefone. O caso comum é o `@lid` — o identificador interno do
+  // WhatsApp (ex.: 249610647953418), que aparece quando o contato está salvo
+  // na agenda. Devolver ele aqui mostrava um "número" que o vendedor tentava
+  // discar. Melhor não mostrar número nenhum do que mostrar um inventado.
+  return "";
 }
 
 // Achata a árvore de categorias (com nível de indentação) para exibir no
@@ -2808,9 +2813,21 @@ export default function CrmWhatsAppClient({
                             </span>
                           </div>
 
-                          {/* Clean Phone Number Format: xx xx xxxxxxxxx (ex: 55 19 987510267) */}
-                          <div className="text-[11px] font-mono text-[#0a6e3d] font-semibold tracking-tight">
-                            {numeroFormatado}
+                          {/* Número no formato 55 19 987510267. Quando o
+                              WhatsApp entrega a conversa só pelo id interno
+                              (@lid), não há número para mostrar — e dizer isso
+                              é melhor que exibir o id como se fosse telefone. */}
+                          <div
+                            className={`text-[11px] font-mono font-semibold tracking-tight ${
+                              numeroFormatado ? "text-[#0a6e3d]" : "text-[#9aa0a6] italic"
+                            }`}
+                            title={
+                              numeroFormatado
+                                ? undefined
+                                : "O WhatsApp não informou o telefone deste contato (ele está salvo na agenda e chega por id interno)."
+                            }
+                          >
+                            {numeroFormatado || "número não identificado"}
                           </div>
 
                           <p

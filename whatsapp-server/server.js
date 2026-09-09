@@ -1877,6 +1877,96 @@ async function getProfilePicUrlSafe(chatId) {
   return null;
 }
 
+/**
+ * Telefone de verdade por tras de um contato `@lid`.
+ *
+ * O `@lid` e um identificador interno do WhatsApp (ex.: 249610647953418) que
+ * NAO tem relacao com o telefone. Quando o contato esta salvo na agenda, o
+ * WhatsApp entrega a conversa por esse id e o numero nao vem pelo caminho
+ * normal — e o painel acabava mostrando o proprio id no lugar do telefone,
+ * como se fosse o numero do cliente.
+ *
+ * Procura em varias fontes porque nenhuma sozinha e confiavel nesta versao do
+ * WhatsApp Web. Devolve null quando nao da para saber: numero inventado e pior
+ * que numero ausente, porque o vendedor tenta ligar.
+ */
+async function telefoneRealDoLid(rawId, mensagensConhecidas = []) {
+  if (!String(rawId || "").endsWith("@lid")) return null;
+
+  const meuNumero = getDigits(whatsappState.phoneNumber || "");
+  const aceitar = (valor) => {
+    const numero = extractRealNumber(valor);
+    // O proprio numero da loja aparece como participante em tudo que sai —
+    // aceita-lo aqui carimbaria a loja como telefone do cliente.
+    if (!numero || (meuNumero && getDigits(numero) === meuNumero)) return null;
+    return numero;
+  };
+
+  // 1) Pelos ids das mensagens que ja temos guardadas. Em conversa `@lid` o id
+  //    serializado termina com o JID real do autor:
+  //    false_249610647953418@lid_3EB0ABC_5519984515960@c.us
+  for (const m of mensagensConhecidas) {
+    for (const pedaco of String(m?.id || "").split("_")) {
+      if (!pedaco.endsWith("@c.us")) continue;
+      const numero = aceitar(pedaco);
+      if (numero) return numero;
+    }
+    const doAutor = aceitar(m?.author) || aceitar(m?.participant);
+    if (doAutor) return doAutor;
+  }
+
+  // 2) Pela pagina do WhatsApp Web.
+  if (!whatsappClient?.pupPage) return null;
+
+  try {
+    const candidatos = await whatsappClient.pupPage.evaluate(async (cid) => {
+      const achados = [];
+      const anotar = (v) => {
+        if (!v) return;
+        // `phoneNumber` costuma ser um Wid (objeto), nao string — ler direto
+        // dava "[object Object]" e o codigo caia no id `@lid`.
+        if (typeof v === "string") achados.push(v);
+        else if (v.user) achados.push(v.user);
+        else if (v._serialized) achados.push(v._serialized);
+      };
+
+      try {
+        const colecoes = window.require("WAWebCollections");
+
+        const contato = colecoes.Contact.get(cid);
+        anotar(contato?.phoneNumber);
+        anotar(contato?.pnForLid);
+        anotar(contato?.displayPhoneNumber);
+
+        const chat = colecoes.Chat.get(cid);
+        anotar(chat?.contact?.phoneNumber);
+
+        // O autor das mensagens da conversa: em `@lid` ele vem com o JID real.
+        const listar = () =>
+          (typeof chat?.msgs?.getModelsArray === "function" && chat.msgs.getModelsArray()) ||
+          chat?.msgs?.models ||
+          [];
+        for (const m of listar().slice(-40)) {
+          anotar(m?.author);
+          anotar(m?.from);
+          anotar(m?.id?._serialized);
+        }
+      } catch (e) {}
+
+      return achados;
+    }, rawId);
+
+    for (const bruto of candidatos || []) {
+      for (const pedaco of String(bruto).split("_")) {
+        const numero = aceitar(pedaco);
+        if (numero) return numero;
+      }
+    }
+  } catch (e) {}
+
+  return null;
+}
+
 async function resolveContactDetails(chat, rawId) {
   let contact = null;
   try {
@@ -1943,11 +2033,26 @@ async function resolveContactDetails(chat, rawId) {
     } catch (e) {}
   }
 
+  // Conversa `@lid`: o id NAO e telefone. Busca o numero de verdade nas
+  // fontes que sobram (ids das mensagens, modelos da pagina).
+  if (!realNumber && String(rawId || "").endsWith("@lid")) {
+    realNumber = await telefoneRealDoLid(rawId, lerMensagensDaConversa(rawId).slice(-40));
+  }
+
   // Sufixo genérico (não só @c.us/@lid/@s.whatsapp.net) — se o WhatsApp usar
   // algum formato de JID novo, não queremos ele vazando pro nome/número.
-  const cleanNum = realNumber || String(rawId || "").replace(/@.*$/, "");
+  //
+  // O `@lid` fica de fora deste atalho de proposito: cair nele carimbava o
+  // identificador interno (ex.: 249610647953418) como telefone do cliente, e
+  // o vendedor tentava ligar para um numero que nao existe. Sem numero, o
+  // painel diz que nao identificou — o que e verdade.
+  const doProprioId = String(rawId || "").endsWith("@lid")
+    ? null
+    : String(rawId || "").replace(/@.*$/, "");
+  const cleanNum = realNumber || doProprioId || null;
+
   return {
-    contactName: contactName || cleanNum,
+    contactName: contactName || cleanNum || "Contato sem número",
     realNumber: cleanNum,
     displayNumber: cleanNum,
   };

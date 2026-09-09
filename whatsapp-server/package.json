@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node server.js",
     "start": "node server.js",
-    "test": "node dedup.test.js && node mensagens.test.js && node template-produto.test.js && node midia.test.js && node lid-chat.test.js && node metricas.test.js && node vendedor-slug.test.js && node chave-mensagem.test.js"
+    "test": "node dedup.test.js && node mensagens.test.js && node template-produto.test.js && node midia.test.js && node lid-chat.test.js && node telefone-lid.test.js && node metricas.test.js && node vendedor-slug.test.js && node chave-mensagem.test.js"
   },
   "dependencies": {
     "dotenv": "^17.2.4",
