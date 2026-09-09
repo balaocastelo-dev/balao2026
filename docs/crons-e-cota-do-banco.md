@@ -94,6 +94,40 @@ Seis vendedores com o painel aberto recarregam `/api/categories` e
 `/api/products` o tempo todo. As duas rotas passam pelo cache; ao criar rota
 nova que o painel consulte, usar `lib/cache.ts` também.
 
+## Espelho do catálogo na VPS
+
+Mesmo sem nenhuma página lendo o banco direto, a cota pode estourar por outro
+motivo (importação, admin, cron novo). Para o catálogo não sumir da tela nessa
+hora, a VPS guarda uma cópia.
+
+Como funciona:
+
+- A VPS busca `​https://www.balao.info/api/products?origem=banco` ao subir e
+  a cada 30 minutos, e grava em `catalogo.json` no volume.
+- `origem=banco` lê o banco **direto**, sem cache e sem a cópia. Sem isso o
+  espelho se alimentaria de si mesmo: num dia de cota estourada o site
+  responderia com a própria cópia, e a VPS gravaria dado velho carimbado com
+  data nova.
+- Toda alteração de produto chama `invalidarCacheProdutos()`, que avisa a VPS
+  na hora — a cópia não fica meia hora com preço velho.
+- **Catálogo vazio nunca sobrescreve a cópia boa.** Quando a cota estoura, o
+  site responde `[]` em vez de erro; gravar isso apagaria justamente a cópia
+  que existe para esse momento.
+
+No site, toda leitura de produto passa por `comEspelho()` em `lib/cache.ts`:
+consulta o banco e, se vier vazio, serve a cópia. **É rede de segurança, não a
+fonte** — o caminho normal continua sendo o banco.
+
+⚠️ Os filtros do espelho (`lib/catalogo-espelho.ts`) repetem em JavaScript o que
+o SQL de `lib/db.ts` faz. Ao mudar uma consulta lá, mudar aqui também — senão,
+no dia em que o banco cair, o site mostra uma seleção diferente da de sempre.
+
+Para conferir o estado da cópia:
+
+```bash
+curl -s https://srv1963897.hstgr.cloud/api/crm/catalogo/estado
+```
+
 ## Se voltar a estourar
 
 1. Confirme pelo `/api/health` que é a cota mesmo.

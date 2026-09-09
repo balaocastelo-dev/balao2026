@@ -11,6 +11,21 @@ import {
   searchProductsByKeywords,
 } from "./db";
 import { listVitrinePagesPublic } from "./vitrine/db";
+import {
+  comEspelho,
+  espelhoPaginado,
+  espelhoPorCaminhoDeCategoria,
+  espelhoPorCategoriasExatas,
+  espelhoPorIdentificador,
+  espelhoPorPalavrasChave,
+  espelhoTodos,
+} from "./catalogo-espelho";
+
+// Toda leitura de produto passa por `comEspelho`: consulta o banco e, se ele
+// devolver vazio (é o que acontece quando a cota de 500 conexões/hora da
+// Hostinger estoura), serve a cópia guardada na VPS. Catálogo de meia hora
+// atrás é melhor que catálogo nenhum no meio de um atendimento.
+const listaVazia = (itens: unknown[]) => itens.length === 0;
 
 /**
  * Etiqueta única do catálogo. Toda leitura de produto é marcada com ela, e
@@ -30,7 +45,7 @@ export const TAG_PRODUTOS = "products";
  * invalidação por etiqueta traz na hora), e o banco é consultado poucas vezes.
  */
 export const getCachedProducts = unstable_cache(
-  async () => getProducts(),
+  async () => comEspelho(() => getProducts(), espelhoTodos, listaVazia),
   ["products-all"],
   { revalidate: 120, tags: [TAG_PRODUTOS] }
 );
@@ -45,10 +60,16 @@ export const getCachedProducts = unstable_cache(
 export function getCachedProductsByKeywords(keywords: string[], limit = 24) {
   const chave = ["products-keywords", keywords.slice().sort().join("|"), String(limit)];
 
-  return unstable_cache(async () => searchProductsByKeywords(keywords, limit), chave, {
-    revalidate: 300,
-    tags: [TAG_PRODUTOS],
-  })();
+  return unstable_cache(
+    async () =>
+      comEspelho(
+        () => searchProductsByKeywords(keywords, limit),
+        (produtos) => espelhoPorPalavrasChave(produtos, keywords, limit),
+        listaVazia
+      ),
+    chave,
+    { revalidate: 300, tags: [TAG_PRODUTOS] }
+  )();
 }
 
 export function getCachedProductsPaginated(opts: {
@@ -69,10 +90,16 @@ export function getCachedProductsPaginated(opts: {
     opts.sort ?? "",
   ];
 
-  return unstable_cache(async () => getProductsPaginated(opts), chave, {
-    revalidate: 120,
-    tags: [TAG_PRODUTOS],
-  })();
+  return unstable_cache(
+    async () =>
+      comEspelho(
+        () => getProductsPaginated(opts),
+        (produtos) => espelhoPaginado(produtos, opts),
+        (resultado) => resultado.total === 0
+      ),
+    chave,
+    { revalidate: 120, tags: [TAG_PRODUTOS] }
+  )();
 }
 
 /**
@@ -88,10 +115,16 @@ export function getCachedProductsByExactCategories(categoryNames: string[]) {
   // estável quando a mesma lista vem em ordem diferente.
   const chave = ["products-exact-categories", categoryNames.slice().sort().join("|")];
 
-  return unstable_cache(async () => getProductsByExactCategories(categoryNames), chave, {
-    revalidate: 120,
-    tags: [TAG_PRODUTOS],
-  })();
+  return unstable_cache(
+    async () =>
+      comEspelho(
+        () => getProductsByExactCategories(categoryNames),
+        (produtos) => espelhoPorCategoriasExatas(produtos, categoryNames),
+        listaVazia
+      ),
+    chave,
+    { revalidate: 120, tags: [TAG_PRODUTOS] }
+  )();
 }
 
 /**
@@ -102,16 +135,27 @@ export function getCachedProductsByExactCategories(categoryNames: string[]) {
  * cota inteira sozinho.
  */
 export function getCachedProductById(id: string) {
-  return unstable_cache(async () => getProductById(id), ["product-by-id", String(id)], {
-    revalidate: 120,
-    tags: [TAG_PRODUTOS],
-  })();
+  return unstable_cache(
+    async () =>
+      comEspelho(
+        () => getProductById(id),
+        (produtos) => espelhoPorIdentificador(produtos, id),
+        (produto) => produto === null
+      ),
+    ["product-by-id", String(id)],
+    { revalidate: 120, tags: [TAG_PRODUTOS] }
+  )();
 }
 
 /** Produtos de uma categoria (caminho completo), com cache. */
 export function getCachedProductsByCategoryFullPath(fullPath: string) {
   return unstable_cache(
-    async () => getProductsByCategoryFullPath(fullPath),
+    async () =>
+      comEspelho(
+        () => getProductsByCategoryFullPath(fullPath),
+        (produtos) => espelhoPorCaminhoDeCategoria(produtos, fullPath),
+        listaVazia
+      ),
     ["products-category-path", String(fullPath)],
     { revalidate: 120, tags: [TAG_PRODUTOS] }
   )();
@@ -123,6 +167,28 @@ export function getCachedProductsByCategoryFullPath(fullPath: string) {
  * preço antigo por até dois minutos.
  */
 export function invalidarCacheProdutos() {
+  // Avisa a VPS para rebuscar o catálogo agora. Sem isto, a cópia dela
+  // levaria até meia hora para saber do preço novo — e num dia de cota
+  // estourada é ela quem o site mostra.
+  //
+  // Sem `await` de propósito: quem salvou o produto não deve esperar a VPS
+  // responder, e se ela estiver fora do ar a cópia velha continua servindo.
+  const servidor = (
+    process.env.WHATSAPP_PANEL_SERVER_URL ||
+    process.env.NEXT_PUBLIC_WHATSAPP_PANEL_SERVER_URL ||
+    ""
+  ).replace(/\/$/, "");
+
+  if (servidor) {
+    fetch(`${servidor}/api/crm/catalogo/atualizar`, {
+      method: "POST",
+      signal: AbortSignal.timeout(5000),
+    }).catch(() => {
+      // A VPS se atualiza sozinha na próxima rodada; não é motivo para
+      // derrubar o salvamento do produto.
+    });
+  }
+
   try {
     // No Next 16 o segundo argumento é obrigatório: diz por quanto tempo a
     // entrada ainda pode ser servida enquanto a nova é buscada. Zero =

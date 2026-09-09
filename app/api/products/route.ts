@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getProductsLite, saveProducts, createProduct } from '@/lib/db';
+import { getProducts, getProductsLite, saveProducts, createProduct } from '@/lib/db';
 import {
   getCachedProducts,
   getCachedProductsPaginated,
@@ -29,6 +29,18 @@ export async function GET(request: Request) {
 
   if (lite) {
     const products = await getProductsLite();
+    return NextResponse.json(products);
+  }
+
+  // `origem=banco`: lê o banco direto, sem cache e sem a cópia da VPS.
+  //
+  // É por aqui que a VPS busca o catálogo para espelhar. Se ela usasse a rota
+  // normal, um dia de cota estourada faria o site responder com a PRÓPRIA
+  // cópia — e a VPS gravaria isso de volta como se fosse dado novo, carimbando
+  // uma data recente num catálogo velho. O espelho só guarda o que realmente
+  // veio do banco.
+  if (searchParams.get('origem') === 'banco') {
+    const products = await getProducts();
     return NextResponse.json(products);
   }
 

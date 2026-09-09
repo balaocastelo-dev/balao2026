@@ -89,6 +89,7 @@ docker run -d \
   -v "$DADOS:/dados" \
   -e DATA_ROOT=/dados \
   -e WHATSAPP_PANEL_ALLOWED_ORIGIN="$ORIGENS" \
+  -e SITE_URL="${SITE_URL:-https://www.balao.info}" \
   -e TZ=America/Sao_Paulo \
   --memory="$MEMORIA" \
   --shm-size="$SHM" \

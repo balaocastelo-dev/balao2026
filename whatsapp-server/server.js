@@ -220,6 +220,7 @@ const apiInfo = {
 const dataDir = DATA_DIR;
 const dataFile = path.join(dataDir, "panel-data.json");
 const { calcularMetricas } = require("./metricas");
+const { criarEspelhoDoCatalogo } = require("./catalogo");
 
 const store = {
   labels: [],
@@ -621,6 +622,28 @@ function emitVendedores() {
 // ============================================================
 
 const MEDIA_DIR = path.join(DATA_DIR, "media");
+
+// Espelho do catálogo do site nesta VPS.
+//
+// O banco da Hostinger aceita 500 conexões por HORA; quando a cota estoura, o
+// site responde catálogo vazio e o vendedor fica sem preço no meio do
+// atendimento. Esta máquina já roda o dia inteiro e tem disco, então guarda
+// uma cópia e serve ela nessas horas. A Hostinger continua dona do dado.
+const SITE_URL = process.env.SITE_URL || "https://www.balao.info";
+const espelhoDoCatalogo = criarEspelhoDoCatalogo({
+  pasta: DATA_DIR,
+  urlDoSite: SITE_URL,
+});
+
+// Atualiza ao subir e de meia em meia hora. O site também avisa quando um
+// produto muda (POST /api/crm/catalogo/atualizar), então isto aqui é a rede
+// de segurança, não o caminho principal.
+const INTERVALO_DO_ESPELHO_MS = 30 * 60_000;
+setTimeout(() => espelhoDoCatalogo.atualizar({ motivo: "boot" }), 20_000).unref?.();
+setInterval(
+  () => espelhoDoCatalogo.atualizar({ motivo: "agendado" }),
+  INTERVALO_DO_ESPELHO_MS
+).unref?.();
 
 const MEDIA_RETENCAO_DIAS = Math.max(
   1,
@@ -3444,6 +3467,9 @@ app.get(["/health", "/status", "/api/status", "/api/crm/status"], (_req, res) =>
       // Onde as conversas foram parar na ultima varredura.
       varredura: ultimaVarredura,
     },
+    // Cópia do catálogo guardada aqui, para o site não ficar sem preço
+    // quando a cota do banco estoura.
+    catalogo: espelhoDoCatalogo.estado,
     // Foto que o cliente manda passa por aqui. Quando "salvas" fica em zero e
     // "falhas" sobe, o problema e o download — nao o painel.
     midia: estatisticasMidia,
@@ -3667,6 +3693,25 @@ app.get(["/api/crm/vendedor/:slug", "/api/vendedor/:slug"], (req, res) => {
       ativo: vendedor.ativo !== false,
     },
   });
+});
+
+// Catálogo espelhado. O site lê daqui quando o banco da Hostinger recusa.
+app.get(["/api/crm/catalogo", "/api/catalogo"], (_req, res) => {
+  const { produtos, total, atualizadoEm } = espelhoDoCatalogo.ler();
+  res.json({ ok: true, total, atualizadoEm, produtos });
+});
+
+// Só o resumo, para conferir o estado sem baixar milhares de produtos.
+app.get(["/api/crm/catalogo/estado", "/api/catalogo/estado"], (_req, res) => {
+  res.json({ ok: true, ...espelhoDoCatalogo.estado, origem: SITE_URL });
+});
+
+// O site chama isto quando alguém altera um produto, para o espelho não ficar
+// até meia hora com preço velho. Não recebe dados: apenas manda buscar de
+// novo no endereço já configurado, então não há o que injetar aqui.
+app.all(["/api/crm/catalogo/atualizar", "/api/catalogo/atualizar"], async (_req, res) => {
+  const resultado = await espelhoDoCatalogo.atualizar({ motivo: "site avisou" });
+  res.json(resultado);
 });
 
 app.all(["/api/reset-session", "/api/crm/reset-session", "/api/reconnect", "/api/crm/reconnect"], async (_req, res) => {
