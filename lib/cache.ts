@@ -3,7 +3,10 @@ import {
   getCategories,
   getCarouselImages,
   getHomeBlocks,
+  getProductById,
   getProducts,
+  getProductsByCategoryFullPath,
+  getProductsByExactCategories,
   getProductsPaginated,
   searchProductsByKeywords,
 } from "./db";
@@ -73,6 +76,48 @@ export function getCachedProductsPaginated(opts: {
 }
 
 /**
+ * Blocos de produtos da página inicial, com cache.
+ *
+ * A home é a página mais visitada do site e estava lendo o banco a CADA
+ * visita. Com a cota de 500 conexões por hora da Hostinger, bastava um pico
+ * de acesso (ou um robô de busca passando pelas páginas) para o catálogo
+ * inteiro sumir do site e do CRM até a hora virar.
+ */
+export function getCachedProductsByExactCategories(categoryNames: string[]) {
+  // Cada conjunto de categorias tem a própria entrada; ordenar deixa a chave
+  // estável quando a mesma lista vem em ordem diferente.
+  const chave = ["products-exact-categories", categoryNames.slice().sort().join("|")];
+
+  return unstable_cache(async () => getProductsByExactCategories(categoryNames), chave, {
+    revalidate: 120,
+    tags: [TAG_PRODUTOS],
+  })();
+}
+
+/**
+ * Um produto pelo id/slug, com cache.
+ *
+ * Mesma razão da home: a página de produto é a segunda mais visitada, e cada
+ * visita abria conexão. Robô de busca varrendo os 4.155 produtos queimava a
+ * cota inteira sozinho.
+ */
+export function getCachedProductById(id: string) {
+  return unstable_cache(async () => getProductById(id), ["product-by-id", String(id)], {
+    revalidate: 120,
+    tags: [TAG_PRODUTOS],
+  })();
+}
+
+/** Produtos de uma categoria (caminho completo), com cache. */
+export function getCachedProductsByCategoryFullPath(fullPath: string) {
+  return unstable_cache(
+    async () => getProductsByCategoryFullPath(fullPath),
+    ["products-category-path", String(fullPath)],
+    { revalidate: 120, tags: [TAG_PRODUTOS] }
+  )();
+}
+
+/**
  * Derruba o cache do catálogo. Chamar sempre que produto for criado,
  * alterado ou removido — sem isso o site e o CRM continuariam mostrando o
  * preço antigo por até dois minutos.
@@ -90,11 +135,27 @@ export function invalidarCacheProdutos() {
   }
 }
 
+/** Etiqueta das categorias, para invalidar quando o admin mexe na árvore. */
+export const TAG_CATEGORIAS = "categories";
+
 export const getCachedCategories = unstable_cache(
   async () => getCategories(),
   ["categories"],
-  { revalidate: 300, tags: ["categories"] }
+  { revalidate: 300, tags: [TAG_CATEGORIAS] }
 );
+
+/**
+ * Derruba o cache das categorias. Chamar depois de criar, alterar ou remover
+ * categoria — sem isso o menu e o CRM ficariam até cinco minutos com a árvore
+ * antiga.
+ */
+export function invalidarCacheCategorias() {
+  try {
+    revalidateTag(TAG_CATEGORIAS, { expire: 0 });
+  } catch (error) {
+    console.warn("[cache] Não consegui invalidar as categorias:", error);
+  }
+}
 
 export const getCachedCarouselImages = unstable_cache(
   async () => getCarouselImages(true),

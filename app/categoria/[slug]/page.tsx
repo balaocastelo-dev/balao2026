@@ -3,8 +3,11 @@ import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import ProductList from "@/components/ProductList";
 import FilterSyncer from "@/components/FilterSyncer";
-import { getProductsByCategoryFullPath } from "@/lib/db";
-import { getCachedProducts, getCachedCategories } from "@/lib/cache";
+import {
+  getCachedProducts,
+  getCachedCategories,
+  getCachedProductsByCategoryFullPath,
+} from "@/lib/cache";
 import { searchProducts } from "@/lib/searchUtils";
 import { extractTags, filterProductsByTags } from "@/lib/product-filters";
 import { parsePriceToNumber, type Category } from "@/lib/utils";
@@ -96,7 +99,7 @@ export default async function CategoriaPage({
   // caminho, sem precisar percorrer a árvore de parent_id.
   let filteredProducts =
     categoryName && categoryName !== "Todos os Produtos" && selectedCat?.full_path
-      ? await getProductsByCategoryFullPath(selectedCat.full_path)
+      ? await getCachedProductsByCategoryFullPath(selectedCat.full_path)
       : await getCachedProducts();
 
   if (search) {

@@ -1,5 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { updateCategory, deleteCategory } from "@/lib/db";
+import { invalidarCacheCategorias } from "@/lib/cache";
 
 export const dynamic = 'force-dynamic';
 
@@ -12,6 +13,7 @@ export async function PUT(
     const data = await request.json();
     console.log(`[API] Updating category ${params.id} with data:`, data);
     await updateCategory(params.id, data);
+    invalidarCacheCategorias();
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error("[API] Update category failed:", error);
@@ -26,6 +28,7 @@ export async function DELETE(
   const params = await props.params;
   try {
     await deleteCategory(params.id);
+    invalidarCacheCategorias();
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ error: "Failed to delete category" }, { status: 500 });

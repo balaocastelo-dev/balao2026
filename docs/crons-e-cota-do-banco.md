@@ -72,6 +72,28 @@ valor na hora, em vez de esperar o cache expirar.
 
 Ao criar uma rota nova que altere produto, chame essa função depois de salvar.
 
+## Nenhuma página lê o banco direto
+
+Depois da segunda vez que a cota estourou, ficou claro que a correção anterior
+tinha deixado de fora justamente as páginas mais visitadas: a **home**, a
+**página de produto** e a de **categoria** ainda chamavam `lib/db` a cada
+visita. Um robô de busca varrendo os 4.155 produtos queimava a cota sozinho.
+
+Hoje **nenhuma** `page.tsx` importa de `lib/db`. Para conferir:
+
+```bash
+grep -rln 'from "@/lib/db"' app --include=page.tsx
+```
+
+A saída precisa ser vazia. Se aparecer alguma página aí, ela é candidata a
+derrubar o catálogo no próximo pico de acesso.
+
+## O CRM também consome a cota
+
+Seis vendedores com o painel aberto recarregam `/api/categories` e
+`/api/products` o tempo todo. As duas rotas passam pelo cache; ao criar rota
+nova que o painel consulte, usar `lib/cache.ts` também.
+
 ## Se voltar a estourar
 
 1. Confirme pelo `/api/health` que é a cota mesmo.
