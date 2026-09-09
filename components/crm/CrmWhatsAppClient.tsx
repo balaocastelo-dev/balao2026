@@ -2746,34 +2746,48 @@ export default function CrmWhatsAppClient({
                             : "hover:bg-[#f0f2f5]"
                         }`}
                       >
-                        {/* Real Profile Avatar */}
-                        <div className="w-10 h-10 rounded-full bg-[#0f9d58] text-white flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden relative shadow-xs border border-[#e3e3e3]">
-                          {avatarSrc ? (
-                            /* eslint-disable-next-line @next/next/no-img-element */
-                            <img
-                              src={avatarSrc}
-                              referrerPolicy="no-referrer"
-                              crossOrigin="anonymous"
-                              alt=""
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                (e.target as HTMLElement).style.display = "none";
-                              }}
-                            />
-                          ) : (
-                            <span>{ini}</span>
-                          )}
+                        {/* Foto do contato, com os selos de aviso POR FORA.
+                            O recorte redondo da foto (`overflow-hidden`) vale
+                            só para a imagem: enquanto os selos moravam dentro
+                            dele, eram cortados pela borda e apareciam por
+                            dentro da foto, onde se confundem com ela. */}
+                        <div className="relative shrink-0">
+                          <div className="w-10 h-10 rounded-full bg-[#0f9d58] text-white flex items-center justify-center font-bold text-sm overflow-hidden shadow-xs border border-[#e3e3e3]">
+                            {avatarSrc ? (
+                              /* eslint-disable-next-line @next/next/no-img-element */
+                              <img
+                                src={avatarSrc}
+                                referrerPolicy="no-referrer"
+                                crossOrigin="anonymous"
+                                alt=""
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  (e.target as HTMLElement).style.display = "none";
+                                }}
+                              />
+                            ) : (
+                              <span>{ini}</span>
+                            )}
+                          </div>
+
                           {chat.unread > 0 && (
-                            <span className="absolute -top-1 -right-1 bg-[#d93025] text-white rounded-full w-4 h-4 text-[10px] flex items-center justify-center font-bold">
-                              {chat.unread}
+                            <span
+                              title={`${chat.unread} mensagem(ns) não lida(s)`}
+                              // O anel branco separa o selo da foto: sobre uma
+                              // imagem escura, vermelho sobre vermelho some.
+                              // `min-w` em vez de largura fixa porque duas
+                              // casas não cabem num círculo de 16px.
+                              className="absolute -top-1.5 -right-1.5 z-10 min-w-[18px] h-[18px] px-1 bg-[#d93025] text-white rounded-full text-[10px] leading-none flex items-center justify-center font-bold ring-2 ring-white shadow-sm tabular-nums"
+                            >
+                              {chat.unread > 99 ? "99+" : chat.unread}
                             </span>
                           )}
                           {chat.precisaAtencao && (
                             <span
                               title="Transferido ou aguardando resposta"
-                              className="absolute -bottom-1 -right-1 bg-amber-500 text-white rounded-full w-4 h-4 text-[10px] flex items-center justify-center font-bold shadow-xs"
+                              className="absolute -bottom-1.5 -right-1.5 z-10 w-[18px] h-[18px] bg-amber-500 text-white rounded-full text-[10px] leading-none flex items-center justify-center font-bold ring-2 ring-white shadow-sm"
                             >
-                              ⚠️
+                              !
                             </span>
                           )}
                         </div>

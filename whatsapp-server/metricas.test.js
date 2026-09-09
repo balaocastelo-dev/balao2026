@@ -221,6 +221,33 @@ teste("o funil usa o nome que o vendedor deu à coluna", () => {
   assert.strictEqual(m.funil.find((f) => f.id === "negociacao").nome, "Em Negociação");
 });
 
+teste("coluna guardada sob outro vendedor ainda mostra o nome", () => {
+  // Cartão e coluna podem estar sob pessoas diferentes. Sem procurar nas
+  // preferências de todo mundo, a tela mostrava `col-1787528992522` — um id
+  // interno, que para quem olha o painel parece defeito.
+  const m = calcularMetricas(
+    montar({
+      kanbanPorVendedor: { marcos: { "a@c.us": "col-1787528992522" } },
+      preferenciasPorVendedor: {
+        julia: {
+          kanbanColunas: [{ id: "col-1787528992522", nome: "Aguardando peça", cor: "#abcdef" }],
+        },
+      },
+    }),
+    opcoes
+  );
+  assert.strictEqual(m.funil[0].nome, "Aguardando peça");
+  assert.strictEqual(m.funil[0].cor, "#abcdef");
+});
+
+teste("coluna que ninguém nomeou não mostra o id cru", () => {
+  const m = calcularMetricas(
+    montar({ kanbanPorVendedor: { marcos: { "a@c.us": "col-999" } } }),
+    opcoes
+  );
+  assert.strictEqual(m.funil[0].nome, "Coluna sem nome");
+});
+
 teste("cartão fora do funil não entra na contagem", () => {
   const m = calcularMetricas(
     montar({ kanbanPorVendedor: { julia: { "a@c.us": "fora", "b@c.us": "novos" } } }),

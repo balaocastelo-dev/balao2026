@@ -67,18 +67,35 @@ function dinheiro(valor) {
 }
 
 /**
- * Nome da coluna do funil, olhando as colunas que o vendedor criou e caindo
- * nas padrão quando ele não mexeu.
+ * Nome da coluna do funil.
+ *
+ * Procura em três lugares, nesta ordem: as colunas que ESTE vendedor criou, as
+ * colunas de qualquer outro vendedor, e as padrão. O segundo passo existe
+ * porque cartão e coluna podem estar guardados sob pessoas diferentes — sem
+ * ele, o dashboard mostrava `col-1787528992522` no lugar de "Aguardando peça",
+ * que é um id de uso interno e não diz nada para quem está olhando a tela.
  */
-function nomeDaColuna(colunaId, preferencias) {
-  const personalizadas = Array.isArray(preferencias?.kanbanColunas)
-    ? preferencias.kanbanColunas
-    : [];
-  const achada =
-    personalizadas.find((c) => c?.id === colunaId) ||
-    COLUNAS_PADRAO.find((c) => c.id === colunaId);
+function nomeDaColuna(colunaId, preferenciasDoDono, todasAsPreferencias = {}) {
+  const procurarEm = (prefs) =>
+    (Array.isArray(prefs?.kanbanColunas) ? prefs.kanbanColunas : []).find(
+      (c) => c?.id === colunaId
+    );
+
+  let achada = procurarEm(preferenciasDoDono);
+
+  if (!achada) {
+    for (const prefs of Object.values(todasAsPreferencias)) {
+      achada = procurarEm(prefs);
+      if (achada) break;
+    }
+  }
+
+  if (!achada) achada = COLUNAS_PADRAO.find((c) => c.id === colunaId);
+
   return {
-    nome: achada?.nome || colunaId,
+    // Último recurso: um rótulo honesto em vez do id cru. O id é de uso
+    // interno e na tela parece defeito.
+    nome: achada?.nome || "Coluna sem nome",
     cor: achada?.cor || "#94a3b8",
   };
 }
@@ -335,7 +352,7 @@ function calcularMetricas(store, opcoes = {}) {
   for (const [vendedorId, cartoes] of Object.entries(kanban)) {
     for (const [, colunaId] of Object.entries(cartoes || {})) {
       if (!colunaId || colunaId === "fora") continue;
-      const { nome, cor } = nomeDaColuna(colunaId, preferencias[vendedorId]);
+      const { nome, cor } = nomeDaColuna(colunaId, preferencias[vendedorId], preferencias);
       const chave = colunaId;
       const atual = funilContagem.get(chave) || { id: colunaId, nome, cor, total: 0 };
       atual.total += 1;
