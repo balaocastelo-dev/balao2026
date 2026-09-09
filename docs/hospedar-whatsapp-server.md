@@ -170,6 +170,24 @@ Chrome.
 
 ### Passo 1 — Subir o servidor
 
+## Atualizar o servidor sem entrar na VPS
+
+O `deploy-vps.sh` mora **dentro** da VPS. Rodá-lo no PowerShell do PC
+responde `No such file or directory` — o caminho não existe lá. Já aconteceu
+duas vezes.
+
+Do PC, na pasta do projeto:
+
+```powershell
+.\whatsapp-server\deploy-daqui.ps1
+```
+
+Ele conecta, roda o deploy, espera o WhatsApp conectar e mostra a versão que
+ficou no ar. Pede a senha de root da VPS, que não fica gravada no repositório.
+
+Como saber onde você está: prompt começando com `PS C:\` é o Windows;
+começando com `root@srv...` é a VPS.
+
 Conecte no servidor (`ssh root@SEU-IP`, ou pelo **Web console** do painel da
 Hostinger, que abre no navegador) e rode:
 
