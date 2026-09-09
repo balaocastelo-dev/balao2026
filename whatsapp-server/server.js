@@ -221,6 +221,7 @@ const dataDir = DATA_DIR;
 const dataFile = path.join(dataDir, "panel-data.json");
 const { calcularMetricas } = require("./metricas");
 const { criarEspelhoDoCatalogo } = require("./catalogo");
+const { montarEtiquetas } = require("./etiquetas");
 
 const store = {
   labels: [],
@@ -645,6 +646,13 @@ setInterval(
   INTERVALO_DO_ESPELHO_MS
 ).unref?.();
 
+// Etiqueta criada no celular precisa aparecer no painel sem ninguem pedir.
+// Cinco minutos: rapido o bastante para nao incomodar, leve o bastante para
+// nao pesar (e uma leitura so na pagina, nao uma varredura de conversas).
+setInterval(() => {
+  if (whatsappState.connected) sincronizarEtiquetas().catch(() => {});
+}, 5 * 60_000).unref?.();
+
 const MEDIA_RETENCAO_DIAS = Math.max(
   1,
   Number(process.env.MEDIA_RETENCAO_DIAS || 60) || 60
@@ -901,43 +909,73 @@ function numeroRealDoChat(chatId) {
   return daMensagem || null;
 }
 
-async function syncLabelsForChats(chats = []) {
-  if (!whatsappClient || !whatsappState.connected) return;
+/**
+ * Traz as etiquetas do WhatsApp Business para o painel.
+ *
+ * As etiquetas que a loja usa no celular tem que ser AS MESMAS no sistema.
+ * Antes o painel mostrava uma lista inventada e guardada no navegador de cada
+ * vendedor — etiquetar ali nao aparecia no aparelho, e a etiqueta criada no
+ * aparelho nao aparecia no painel.
+ *
+ * A leitura pega TUDO numa chamada so: cada etiqueta ja traz a lista de
+ * conversas dela. O caminho antigo perguntava `chat.getLabels()` conversa por
+ * conversa — com 620 conversas isso era lento e, pior, so enxergava as
+ * conversas do lote, apagando as etiquetas de todas as outras.
+ */
+async function sincronizarEtiquetas() {
+  if (!whatsappClient?.pupPage || !whatsappState.connected) return { ok: false };
+
+  let brutas = null;
 
   try {
-    const nativeLabels = await whatsappClient.getLabels().catch(() => []);
-    const labelNames = Array.isArray(nativeLabels)
-      ? nativeLabels
-          .map((item) => String(item?.name || "").trim())
-          .filter(Boolean)
-          .sort((a, b) => a.localeCompare(b))
-      : [];
-
-    const nextChatLabels = {};
-    for (const chat of chats) {
+    brutas = await whatsappClient.pupPage.evaluate(() => {
       try {
-        const assigned = await chat.getLabels().catch(() => []);
-        const names = (assigned || [])
-          .map((item) => String(item?.name || "").trim())
-          .filter(Boolean)
-          .sort((a, b) => a.localeCompare(b));
-
-        if (names.length) {
-          nextChatLabels[chat.id?._serialized || chat.id] = names;
-        }
-      } catch (error) {
-        console.error("Falha ao sincronizar etiquetas de um chat:", error);
+        const colecoes = window.require("WAWebCollections");
+        const modelos = colecoes.Label?.getModelsArray?.() || [];
+        return modelos.map((etiqueta) => ({
+          id: String(etiqueta.id ?? ""),
+          nome: etiqueta.name ?? null,
+          cor: etiqueta.hexColor ?? etiqueta.colorIndex ?? null,
+          chatIds: (etiqueta.labelItemCollection?.getModelsArray?.() || [])
+            .filter((item) => item.parentType === "Chat")
+            .map((item) => item.parentId),
+        }));
+      } catch {
+        return null;
       }
-    }
-
-    store.labels = labelNames;
-    store.chatLabels = nextChatLabels;
-    persistStore();
-    emitSettings();
+    });
   } catch (error) {
-    console.error("Falha ao sincronizar etiquetas:", error);
+    console.warn("[etiquetas] Leitura pela pagina falhou:", error.message);
   }
+
+  // Caminho de reserva: o metodo da biblioteca traz nome e cor, mas nao diz
+  // quais conversas usam cada etiqueta.
+  if (!Array.isArray(brutas)) {
+    const daBiblioteca = await whatsappClient.getLabels().catch(() => []);
+    brutas = (daBiblioteca || []).map((e) => ({
+      id: e.id,
+      nome: e.name,
+      cor: e.hexColor,
+      chatIds: [],
+    }));
+  }
+
+  const { etiquetas, porConversa } = montarEtiquetas(brutas);
+
+  store.labels = etiquetas;
+  // So substitui o mapa quando a leitura trouxe as conversas. O caminho de
+  // reserva nao traz — e zerar aqui apagaria a etiqueta de todo mundo.
+  if (Object.keys(porConversa).length > 0 || etiquetas.length === 0) {
+    store.chatLabels = porConversa;
+  }
+
+  persistStore();
+  emitLabels();
+  emitSettings();
+
+  return { ok: true, total: etiquetas.length, conversas: Object.keys(porConversa).length };
 }
+
 
 // Segunda camada de proteção: mesmo que o cliente mande specs desatualizados
 // ou um payload manual, o servidor nunca deve deixar custo de aquisição,
@@ -2481,7 +2519,7 @@ async function syncRecentConversations() {
 
     mergeMessages(syncedMessages);
     if (labelAwareChats.length) {
-      await syncLabelsForChats(labelAwareChats);
+      await sincronizarEtiquetas();
     }
 
     // Junta o mesmo contato que veio duas vezes (@c.us e @lid) e tira o
@@ -4356,11 +4394,15 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("panel:refresh-labels", async () => {
+  socket.on("panel:refresh-labels", async (_payload, callback) => {
     try {
-      const chats = await whatsappClient.getChats();
-      await syncLabelsForChats(chats || []);
-      emitToast("Etiquetas sincronizadas com o WhatsApp.");
+      const resultado = await sincronizarEtiquetas();
+      if (typeof callback === "function") callback(resultado);
+      emitToast(
+        resultado?.total
+          ? `${resultado.total} etiqueta(s) sincronizada(s) com o WhatsApp.`
+          : "Nenhuma etiqueta encontrada. Etiquetas existem no WhatsApp Business."
+      );
     } catch (error) {
       console.error("Falha ao sincronizar etiquetas manualmente:", error);
       emitToast("Falha ao sincronizar etiquetas.");
@@ -4400,12 +4442,22 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("panel:add-label", (payload) => {
-    const label = String(payload.label || "").trim();
-    if (!label || store.labels.includes(label)) return;
-    store.labels.push(label);
-    persistStore();
-    emitSettings();
+  // Criar etiqueta e coisa do WhatsApp, nao do painel.
+  //
+  // Antes isto criava uma etiqueta que so existia aqui: o vendedor a via na
+  // lista, tentava aplicar num cliente e recebia "etiqueta nao encontrada no
+  // WhatsApp". Melhor dizer a verdade na hora do que fabricar uma que nunca
+  // vai funcionar.
+  socket.on("panel:add-label", (payload, callback) => {
+    const nome = String(payload?.label || "").trim();
+    const resposta = {
+      ok: false,
+      erro:
+        "Etiqueta nova se cria no WhatsApp Business (celular ou WhatsApp Web). " +
+        "Aqui elas aparecem sozinhas depois de sincronizar.",
+    };
+    if (typeof callback === "function") callback(resposta);
+    emitToast(nome ? `"${nome}": ${resposta.erro}` : resposta.erro);
   });
 
   socket.on("panel:assign-seller", (payload) => {
@@ -4475,7 +4527,7 @@ io.on("connection", (socket) => {
           : [...currentIds, labelId];
 
         await chat.changeLabels(nextIds);
-        await syncLabelsForChats([chat]);
+        await sincronizarEtiquetas();
         emitToast("Etiquetas da conversa atualizadas.");
       } catch (error) {
         console.error("Falha ao alterar etiqueta da conversa:", error);

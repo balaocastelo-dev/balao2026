@@ -18,7 +18,6 @@ import {
   WhatsAppStatus,
 } from "@/types/crm";
 import {
-  ETIQUETAS_BASE,
   KANBAN_COLUNAS_BASE,
   PRODUTOS_CATALOGO_BASE,
   RESPOSTAS_BASE,
@@ -545,15 +544,11 @@ export default function CrmWhatsAppClient({
     }
     return RESPOSTAS_BASE;
   });
-  const [etiquetas, setEtiquetas] = useState<CrmEtiqueta[]>(() => {
-    if (typeof window !== "undefined") {
-      const s = localStorage.getItem("balao_crm_etiquetas");
-      if (s) {
-        try { return JSON.parse(s); } catch {}
-      }
-    }
-    return ETIQUETAS_BASE;
-  });
+  // As etiquetas são as do WhatsApp Business — chegam do servidor pelo evento
+  // `whatsapp:labels`. Começa vazio de propósito: a lista inventada que ficava
+  // aqui ("Cliente Quente", "Interessado") não existia no celular de ninguém,
+  // e aplicar uma delas num cliente não fazia nada no aparelho.
+  const [etiquetas, setEtiquetas] = useState<CrmEtiqueta[]>([]);
   // Real Database Catalog & Pricing Modes (Venda vs Custo)
   // Catálogo busca paginado no servidor (nunca o banco inteiro) — com
   // milhares de produtos, carregar tudo de uma vez e renderizar cada card
@@ -652,7 +647,6 @@ export default function CrmWhatsAppClient({
         localStorage.setItem("balao_crm_kanban_colunas", JSON.stringify(kanbanColunas));
       }
       localStorage.setItem("balao_crm_respostas", JSON.stringify(respostas));
-      localStorage.setItem("balao_crm_etiquetas", JSON.stringify(etiquetas));
       localStorage.setItem("balao_crm_vendedores", JSON.stringify(vendedores));
       // Na página pessoal quem manda é o cookie de sessão, então não guardamos
       // o vendedor no navegador — evita que o PC "lembre" de quem atendeu
@@ -1115,6 +1109,31 @@ export default function CrmWhatsAppClient({
     socket.on("whatsapp:kanban", (mapa: Record<string, string>) => {
       setKanbanPorChat(mapa && typeof mapa === "object" ? mapa : {});
     });
+
+    // Etiquetas do WhatsApp Business: as mesmas do celular, com as mesmas
+    // cores. `chatLabels` diz quais conversas têm cada uma — é o que faz a
+    // etiqueta colocada no aparelho aparecer aqui.
+    socket.on(
+      "whatsapp:labels",
+      (payload: { labels?: any[]; chatLabels?: Record<string, string[]> }) => {
+        const lista = Array.isArray(payload?.labels) ? payload.labels : [];
+        setEtiquetas(
+          lista
+            .filter((e) => e && e.nome)
+            .map((e, i) => ({ id: Number(e.id) || i + 1, nome: String(e.nome), cor: String(e.cor || "#5f6368") }))
+        );
+
+        const porConversa = payload?.chatLabels || {};
+        setChats((prev) =>
+          prev.map((c) => {
+            const doWhatsApp = porConversa[c.id];
+            // Sem entrada no mapa a conversa não tem etiqueta — e limpar é
+            // correto: significa que alguém tirou a etiqueta no celular.
+            return { ...c, tags: Array.isArray(doWhatsApp) ? doWhatsApp : [] };
+          })
+        );
+      }
+    );
 
     // Preferências pessoais chegando do servidor — é isto que faz o painel
     // abrir do mesmo jeito em qualquer computador da loja.
@@ -2006,6 +2025,8 @@ export default function CrmWhatsAppClient({
     const targetId = chatIdOverride || chatSelecionadoId;
     if (!targetId) return;
 
+    // Mostra na hora e manda para o WhatsApp. Antes isto só mudava a tela: a
+    // etiqueta parecia aplicada aqui e não existia no celular.
     setChats((prev) =>
       prev.map((c) => {
         if (c.id !== targetId) return c;
@@ -2016,6 +2037,13 @@ export default function CrmWhatsAppClient({
         return { ...c, tags: novasTags };
       })
     );
+
+    // O servidor devolve `whatsapp:labels` depois de aplicar de verdade, e
+    // aquilo corrige a tela caso o WhatsApp recuse.
+    socketRef.current?.emit("panel:toggle-chat-label", {
+      chatId: targetId,
+      label: nomeEtiqueta,
+    });
   };
 
   // Create new conversation
@@ -3848,8 +3876,28 @@ export default function CrmWhatsAppClient({
                 {abaAtual === "etiquetas" && (
                   <div className="space-y-3">
                     <p className="text-[11px] text-[#5f6368]">
-                      Clique na etiqueta para aplicar ou remover da conversa selecionada.
+                      São as etiquetas do WhatsApp Business da loja — as mesmas do celular.
+                      Clique para aplicar ou remover da conversa selecionada.
                     </p>
+
+                    {etiquetas.length === 0 && (
+                      <div className="rounded-xl border border-dashed border-[#e3e3e3] bg-[#f9fafb] px-3 py-4 text-center">
+                        <p className="text-xs text-[#5f6368]">
+                          Nenhuma etiqueta encontrada no WhatsApp.
+                        </p>
+                        <p className="mt-1.5 text-[11px] leading-relaxed text-[#856404]">
+                          Etiquetas existem apenas em contas <b>WhatsApp Business</b>, e são criadas
+                          no celular ou no WhatsApp Web. Assim que existirem lá, aparecem aqui.
+                        </p>
+                        <button
+                          onClick={() => socketRef.current?.emit("panel:refresh-labels")}
+                          className="mt-2 cursor-pointer rounded-lg bg-[#0f9d58] px-3 py-1.5 text-xs font-bold text-white"
+                        >
+                          🔄 Buscar etiquetas agora
+                        </button>
+                      </div>
+                    )}
+
                     <div className="space-y-2">
                       {etiquetas.map((e) => {
                         const jaTem = chatSelecionado?.tags.includes(e.nome);

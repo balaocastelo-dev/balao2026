@@ -117,6 +117,12 @@ export const RESPOSTAS_BASE: CrmRespostaRapida[] = [
   },
 ];
 
+/**
+ * @deprecated As etiquetas agora vêm do WhatsApp Business, pelo servidor
+ * (`whatsapp:labels`). Esta lista era inventada: o vendedor aplicava
+ * "Cliente Quente" no painel e nada acontecia no celular, porque a etiqueta
+ * não existia lá. Mantida só para não quebrar quem ainda importe.
+ */
 export const ETIQUETAS_BASE: CrmEtiqueta[] = [
   { id: 1, nome: "Cliente Quente", cor: "#d93025" },
   { id: 2, nome: "Interessado", cor: "#ffb300" },
