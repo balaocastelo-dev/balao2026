@@ -1799,6 +1799,22 @@ async function inspecionarConversaNaPagina(chatId, msgId) {
   }
 }
 
+/**
+ * Se ainda da para buscar a midia desta mensagem depois que ela chegou.
+ *
+ * Quando o WhatsApp nao entrega identificador, o servidor grava um UUID
+ * proprio para a mensagem nao se perder. Esse UUID serve para nao duplicar o
+ * balao no painel, mas NAO serve para procurar nada: o WhatsApp nao conhece
+ * esse numero. Ficar tentando so gasta varredura e enche o diagnostico de
+ * "mensagem fora da memoria", escondendo as falhas que teriam conserto.
+ *
+ * Para essas, a unica chance de baixar a foto e no instante em que ela chega.
+ */
+function podeProcurarMidiaDepois(mensagem) {
+  const id = String(mensagem?.id || "");
+  return Boolean(id) && !ID_FABRICADO.test(id);
+}
+
 // Teto de downloads por carregamento de conversa. Sem ele, abrir um chat com
 // 50 fotos travaria a resposta ate baixar todas.
 const MAX_MIDIAS_POR_CARREGAMENTO = 20;
@@ -3444,9 +3460,12 @@ app.get(["/api/crm/midia/diagnostico", "/api/midia/diagnostico"], async (req, re
   const alvo = String(req.query.id || "").trim();
 
   const pendentes = store.messages.filter((m) => m.hasMedia && !m.mediaUrl);
+  // Prefere uma que ainda tenha chance: diagnosticar uma mensagem sem
+  // identificador so repete a resposta obvia.
+  const procuraveis = pendentes.filter(podeProcurarMidiaDepois);
   const escolhida = alvo
     ? store.messages.find((m) => m.id === alvo)
-    : pendentes[pendentes.length - 1];
+    : procuraveis[procuraveis.length - 1] || pendentes[pendentes.length - 1];
 
   if (!escolhida) {
     return res.json({
@@ -3479,6 +3498,8 @@ app.get(["/api/crm/midia/diagnostico", "/api/midia/diagnostico"], async (req, re
     // O passo exato em que parou — é isto que se lê quando dá errado.
     motivo,
     pendentes: pendentes.length,
+    pendentesProcuraveis: procuraveis.length,
+    temIdentificadorDoWhatsApp: podeProcurarMidiaDepois(escolhida),
     estatisticas: estatisticasMidia,
   });
 });
@@ -3490,7 +3511,22 @@ app.get(["/api/crm/midia/diagnostico", "/api/midia/diagnostico"], async (req, re
 // que não se importa com o formato do id.
 app.all(["/api/crm/midia/repescar", "/api/midia/repescar"], async (req, res) => {
   const limite = Math.min(Number(req.query.limite) || 20, 200);
-  const pendentes = store.messages.filter((m) => m.hasMedia && !m.mediaUrl).slice(-limite);
+  const todasPendentes = store.messages.filter((m) => m.hasMedia && !m.mediaUrl);
+
+  // Mensagem sem identificador do WhatsApp nao tem como ser procurada. Sai da
+  // fila e ganha um motivo honesto, em vez de falhar para sempre e mascarar as
+  // que ainda teriam conserto.
+  const semIdentificador = todasPendentes.filter((m) => !podeProcurarMidiaDepois(m));
+  if (semIdentificador.length) {
+    mergeMessages(
+      semIdentificador.map((m) => ({
+        ...m,
+        mediaErro: "o WhatsApp não deu identificador para esta mensagem — a foto só podia ser baixada na hora em que ela chegou",
+      }))
+    );
+  }
+
+  const pendentes = todasPendentes.filter(podeProcurarMidiaDepois).slice(-limite);
 
   const porConversa = new Map();
   pendentes.forEach((m) => {
@@ -3547,6 +3583,10 @@ app.all(["/api/crm/midia/repescar", "/api/midia/repescar"], async (req, res) => 
     tentadas: pendentes.length,
     conversas: porConversa.size,
     recuperadas: recuperadas.length,
+    // Quantas ficaram de fora por nunca terem tido identificador. Sem separar
+    // isso, elas apareciam como "falha" e escondiam o resto.
+    semIdentificador: semIdentificador.length,
+    pendentesNoTotal: todasPendentes.length,
     motivos,
     estatisticas: estatisticasMidia,
   });

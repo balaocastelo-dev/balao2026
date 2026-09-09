@@ -234,6 +234,34 @@ function mensagem(extra = {}) {
     assert.ok(url && url.startsWith("/api/crm/media/"), `URL inesperada: ${url}`);
   });
 
+  // ---- quem tem chance de ser repescado ----
+  const podeProcurar = new Function(
+    [
+      fonte.match(/const ID_FABRICADO = [^;]+;/)[0],
+      extrair("podeProcurarMidiaDepois"),
+      "return podeProcurarMidiaDepois;",
+    ].join(";\n")
+  )();
+
+  await teste("id de verdade do WhatsApp pode ser procurado depois", async () => {
+    assert.strictEqual(
+      podeProcurar({ id: "false_5519984515960@c.us_3EB0ABC" }),
+      true
+    );
+  });
+
+  await teste("UUID inventado por nós não pode ser procurado", async () => {
+    // Foi isto que o diagnóstico mostrou: a repescagem passava horas
+    // procurando por "235d3e6d-5fc0-4e48-9c6e-0f41d3428793", um número que o
+    // WhatsApp nunca viu. O erro resultante escondia as falhas com conserto.
+    assert.strictEqual(
+      podeProcurar({ id: "235d3e6d-5fc0-4e48-9c6e-0f41d3428793" }),
+      false
+    );
+    assert.strictEqual(podeProcurar({ id: "msg-produto-123" }), false);
+    assert.strictEqual(podeProcurar({}), false);
+  });
+
   fs.rmSync(MEDIA_DIR, { recursive: true, force: true });
 
   console.log(falhas ? `\n${falhas} falha(s)\n` : "\ntudo certo\n");
