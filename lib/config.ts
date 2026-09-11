@@ -21,7 +21,7 @@ export const SITE_CONFIG = {
   },
   social: {
     instagram: "https://instagram.com/balaodainformatica_castelo",
-    facebook: "https://facebook.com/balaodainformatica",
+    facebook: "https://www.facebook.com/Balaocastelo/",
   },
   pix: {
     key: "34397947000108", // CNPJ

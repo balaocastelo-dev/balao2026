@@ -1,7 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import CapturaWhatsApp from "@/components/CapturaWhatsApp";
 import { SITE_CONFIG } from "@/lib/config";
 
 export const revalidate = 3600;
+
+export const metadata: Metadata = {
+  title: "Livros Gratuitos sobre IA e Tecnologia | Balão da Informática",
+  description:
+    "Dez livros gratuitos sobre inteligência artificial, programação e o futuro do trabalho, escritos pelo Balão da Informática. Leia online ou baixe.",
+  alternates: { canonical: "https://www.balao.info/livros" },
+};
 
 const livros = [
   {
@@ -163,6 +172,42 @@ export default function LivrosPage() {
               </div>
             </Link>
           ))}
+        </div>
+
+        {/* Livro em PDF, com o portão de WhatsApp.
+            Os dez livros acima continuam abertos: são leitura no site e o
+            portão ali só atrapalharia. O PDF é material que a pessoa leva
+            embora — é onde a troca faz sentido. */}
+        <div className="mt-16">
+          <div className="mx-auto max-w-2xl overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 to-transparent p-6 sm:p-8">
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
+              <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-red-600 text-4xl shadow-lg">
+                📕
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="text-xs font-bold uppercase tracking-widest text-amber-400">
+                  Livro completo em PDF
+                </span>
+                <h2 className="mt-1 text-2xl font-bold text-white">
+                  O Filho da Puta
+                </h2>
+                <p className="mt-1 text-sm text-gray-400">por Thiago Herrera</p>
+                <p className="mt-3 text-sm leading-relaxed text-gray-300">
+                  Livro completo, gratuito, para baixar e ler onde quiser.
+                </p>
+
+                <div className="mt-5">
+                  <CapturaWhatsApp
+                    material="o-filho-da-puta"
+                    titulo="O Filho da Puta — Thiago Herrera"
+                    link="/livros/o-filho-da-puta/livro.pdf"
+                    rotuloBotao="📥 Baixar o PDF"
+                    aviso="Arquivo de 31 MB — no celular, prefira o Wi-Fi."
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Footer Info */}

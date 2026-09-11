@@ -37,8 +37,22 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   const pageNumber = Math.max(1, Number.parseInt(page || "1", 10) || 1);
   const hasFacet = Boolean((search || "").trim() || (tagsParam || "").trim());
   
-  let title = "Categoria";
-  let description = "Encontre os melhores produtos de informática no Balão da Informática.";
+  // Nome legível a partir do endereço, para quando o banco não responder.
+  //
+  // O nome da categoria vem do banco; com a cota estourada, `categories` volta
+  // vazia e TODA página de categoria virava "Categoria | Balão da Informática"
+  // — o mesmo título repetido dezenas de vezes no Google. Com isto, o pior
+  // caso ainda é um título específico daquela página.
+  const nomeDoEndereco = slug
+    .split("-")
+    .filter(Boolean)
+    .map((parte) => parte.charAt(0).toUpperCase() + parte.slice(1))
+    .join(" ");
+
+  let title = nomeDoEndereco
+    ? `${nomeDoEndereco} em Campinas | Balão da Informática`
+    : "Categoria | Balão da Informática";
+  let description = `Compre ${nomeDoEndereco || "produtos de informática"} com o melhor preço de Campinas, no Balão da Informática.`;
 
   if (slug === 'todos-os-produtos') {
     title = "Todos os Produtos | Balão da Informática";

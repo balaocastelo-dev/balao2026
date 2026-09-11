@@ -28,6 +28,33 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["lucide-react", "recharts", "framer-motion"],
   },
+
+  /**
+   * Endereços antigos que as pessoas ainda usam.
+   *
+   * `/politica-de-privacidade` respondia 404 — e é página que as pessoas
+   * linkam e que a LGPD exige estar acessível. O conteúdo sempre esteve em
+   * `/seguranca-e-privacidade`; faltava a ponte.
+   */
+  async redirects() {
+    return [
+      {
+        source: "/politica-de-privacidade",
+        destination: "/seguranca-e-privacidade",
+        permanent: true,
+      },
+      {
+        source: "/privacidade",
+        destination: "/seguranca-e-privacidade",
+        permanent: true,
+      },
+      {
+        source: "/politica-de-troca",
+        destination: "/trocas-e-devolucoes",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

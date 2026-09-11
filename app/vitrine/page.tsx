@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -14,6 +15,13 @@ import { SITE_CONFIG } from "@/lib/config";
 import { listVitrinePagesPublic } from "@/lib/vitrine/db";
 import { pickPcHeroImage } from "@/lib/vitrine/core";
 import type { VitrinePageRecord } from "@/lib/vitrine/types";
+
+export const metadata: Metadata = {
+  title: "Vitrine de Produtos | Balão da Informática",
+  description: "Vitrine de computadores, notebooks e periféricos do Balão da Informática em Campinas.",
+  alternates: { canonical: "https://www.balao.info/vitrine" },
+};
+
 
 export const dynamic = "force-dynamic";
 

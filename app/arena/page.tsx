@@ -1,5 +1,14 @@
+import type { Metadata } from "next";
 import { getVendedores, getConfig, getEventosMidia, getVendasRecentes } from './actions';
 import ArenaClient from './ArenaClient';
+
+export const metadata: Metadata = {
+  title: "Arena de Vendas | Balão da Informática",
+  description: "Painel de acompanhamento de vendas da equipe do Balão da Informática.",
+  alternates: { canonical: "https://www.balao.info/arena" },
+  robots: { index: false, follow: true },
+};
+
 
 // Força renderização dinâmica
 export const dynamic = 'force-dynamic';
