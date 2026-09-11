@@ -25,6 +25,40 @@ Write-Host "Atualizando o servidor de WhatsApp em $Servidor" -ForegroundColor Cy
 Write-Host "A senha pedida a seguir e a de root da VPS." -ForegroundColor DarkGray
 Write-Host ""
 
+# Segredo do backup do banco.
+#
+# Criado aqui, automaticamente, se ainda nao existir na VPS. Era um passo
+# manual com um comando de Linux que so funciona dentro do servidor — e rodar
+# no PowerShell do PC da erro de caminho. Um passo a menos para errar.
+Write-Host "Conferindo o segredo do backup..." -ForegroundColor DarkGray
+$criarToken = @'
+if [ -f /etc/balao.env ]; then
+  echo "JA_EXISTIA"
+  grep -o "BACKUP_TOKEN=.*" /etc/balao.env
+else
+  echo "BACKUP_TOKEN=$(openssl rand -hex 32)" > /etc/balao.env
+  chmod 600 /etc/balao.env
+  echo "CRIADO_AGORA"
+  grep -o "BACKUP_TOKEN=.*" /etc/balao.env
+fi
+'@
+$resultado = ssh $Servidor $criarToken
+
+if ($resultado -match "CRIADO_AGORA") {
+  $token = ($resultado | Select-String "BACKUP_TOKEN=(.+)").Matches.Groups[1].Value
+  Write-Host ""
+  Write-Host "  SEGREDO DO BACKUP CRIADO NA VPS" -ForegroundColor Yellow
+  Write-Host "  Coloque este MESMO valor na Vercel, em Settings > Environment" -ForegroundColor Yellow
+  Write-Host "  Variables, com o nome BACKUP_TOKEN:" -ForegroundColor Yellow
+  Write-Host ""
+  Write-Host "    $token" -ForegroundColor White
+  Write-Host ""
+  Write-Host "  Sem isso na Vercel, o backup automatico nao roda." -ForegroundColor DarkGray
+  Write-Host ""
+} elseif ($resultado -match "JA_EXISTIA") {
+  Write-Host "  segredo do backup ja configurado na VPS" -ForegroundColor DarkGray
+}
+
 ssh $Servidor "bash /opt/balao2026/whatsapp-server/deploy-vps.sh"
 
 if ($LASTEXITCODE -ne 0) {

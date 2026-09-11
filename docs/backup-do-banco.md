@@ -22,21 +22,22 @@ nem de ferramenta nenhuma para abrir.
 
 ## Configuração (uma vez só)
 
-Precisa de um segredo compartilhado entre o site e a VPS.
+Rode o deploy normal, do PowerShell, na pasta do projeto:
 
-**1. Na VPS**, crie o arquivo com um segredo longo:
-
-```bash
-echo 'BACKUP_TOKEN=troque-isto-por-algo-bem-longo-e-aleatorio' > /etc/balao.env
+```powershell
+.\whatsapp-server\deploy-daqui.ps1
 ```
 
-O arquivo fica **fora do repositório** de propósito: o repositório é público, e
-este token dá acesso a faturamento, despesas, salários e contatos de cliente.
+Ele **cria o segredo na VPS sozinho** se ainda não existir, e mostra o valor na
+tela. Copie e cole na **Vercel**, em Settings → Environment Variables, com o
+nome `BACKUP_TOKEN`.
 
-**2. Na Vercel**, defina a mesma variável `BACKUP_TOKEN` nas configurações do
-projeto.
+O segredo fica em `/etc/balao.env` na VPS, **fora do repositório** de propósito:
+o repositório é público, e este token dá acesso a faturamento, despesas,
+salários e contatos de cliente.
 
-**3. Rode o deploy** da VPS. O script lê `/etc/balao.env` sozinho.
+> Antes isso era um comando manual de Linux. Rodá-lo no PowerShell do PC dá erro
+> de caminho (`/etc/` não existe no Windows) — então virou parte do deploy.
 
 > Sem o token definido, a porta da máquina fica **fechada** e o backup
 > automático não roda. É de propósito: melhor não ter backup do que ter o
