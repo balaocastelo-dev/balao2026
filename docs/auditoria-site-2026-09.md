@@ -170,11 +170,40 @@ indisponibilidade do banco, e isso levaria a consertar o lugar errado.
 
 ---
 
-## Ordem de execução
+## O que foi feito
 
-1. Suspense no `Sidebar` — devolve o HTML de 24 páginas *(maior ganho isolado)*
-2. Cache na busca + sitemap resiliente — fecha o vazamento da cota
-3. Restaurar o histórico do `/fechamento`
-4. Redirecionamento da política de privacidade + Facebook correto
-5. Títulos e canonical das dez páginas + títulos das categorias
-6. Captura de contato nos livros
+| # | Item | Situação |
+| --- | --- | --- |
+| 1 | HTML no servidor para as 24 páginas | ✅ de 11 para 900–1.777 palavras |
+| 2 | Cache na busca + sitemap resiliente | ✅ |
+| 3 | Histórico do `/fechamento` | ✅ importação pronta — **falta o usuário rodar** |
+| 4 | Política de privacidade + Facebook | ✅ |
+| 5 | Títulos e canonical | ✅ 10 páginas + fallback das categorias |
+| 6 | Captura de contato | ✅ no PDF, só WhatsApp |
+
+### Achado fora da lista: o caixa estava aberto
+
+Durante o item 3 apareceu uma falha que não estava em nenhum relatório: as
+rotas `/api/weekly/*` respondiam **200 sem nenhuma credencial**. Qualquer pessoa
+com o endereço lia faturamento, despesas e salários — e podia apagar tudo com um
+`DELETE`.
+
+O portão da tela não protegia nada: a senha do dia (`56676009` + data) estava no
+JavaScript da página, visível no console do navegador.
+
+Foi trancado **antes** da restauração — repor 276 registros financeiros numa API
+pública seria publicar o caixa da loja. O acesso ao `/fechamento` passou a ser
+com a senha do painel.
+
+> **Vale revisar o resto:** se estas rotas nasceram sem proteção, outras podem
+> ter nascido também. Um levantamento das rotas de escrita sem guarda é o
+> próximo passo natural.
+
+## Ainda em aberto
+
+- **Blog vazio** — a página existe, sem artigos.
+- **Páginas pesadas** (194–232 KB de HTML) — não urgente.
+- **Avaliações do Google** — 744 avaliações que o site não mostra como nota.
+- **Checkout online** — hoje tudo passa pelo WhatsApp, manualmente.
+
+Estes são decisões de negócio, não defeitos. Ficam para quando o dono quiser.
