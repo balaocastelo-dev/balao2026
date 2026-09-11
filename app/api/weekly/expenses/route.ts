@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { turso } from "@/lib/turso";
+import { exigirPainel } from "@/lib/api-guard";
 
 export async function GET() {
+  const barrado = await exigirPainel();
+  if (barrado) return barrado;
+
   try {
     const res = await turso.execute("SELECT * FROM weekly_expenses ORDER BY date DESC");
     return NextResponse.json(res.rows);
@@ -11,6 +15,9 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const barrado = await exigirPainel();
+  if (barrado) return barrado;
+
   try {
     const body = await req.json();
 
@@ -42,6 +49,9 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+  const barrado = await exigirPainel();
+  if (barrado) return barrado;
+
   try {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
