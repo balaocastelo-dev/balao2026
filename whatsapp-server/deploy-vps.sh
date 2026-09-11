@@ -82,6 +82,19 @@ if docker ps -a --format '{{.Names}}' | grep -qx "$CONTAINER"; then
   docker stop -t 20 "$CONTAINER" >/dev/null 2>&1 || true
   docker rm -f "$CONTAINER" >/dev/null 2>&1 || true
 fi
+# Token do backup do banco.
+#
+# Fica num arquivo fora do repositório de propósito: o repositório é público, e
+# este token dá acesso ao faturamento, às despesas e aos contatos de cliente.
+# Para definir (uma vez só, na VPS):
+#
+#   echo 'BACKUP_TOKEN=algum-segredo-bem-longo' > /etc/balao.env
+#
+if [ -f /etc/balao.env ]; then
+  # shellcheck disable=SC1091
+  . /etc/balao.env
+fi
+
 docker run -d \
   --name "$CONTAINER" \
   --restart unless-stopped \
@@ -90,6 +103,7 @@ docker run -d \
   -e DATA_ROOT=/dados \
   -e WHATSAPP_PANEL_ALLOWED_ORIGIN="$ORIGENS" \
   -e SITE_URL="${SITE_URL:-https://www.balao.info}" \
+  -e BACKUP_TOKEN="${BACKUP_TOKEN:-}" \
   -e TZ=America/Sao_Paulo \
   --memory="$MEMORIA" \
   --shm-size="$SHM" \

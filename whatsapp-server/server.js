@@ -222,6 +222,7 @@ const dataFile = path.join(dataDir, "panel-data.json");
 const { calcularMetricas } = require("./metricas");
 const { criarEspelhoDoCatalogo } = require("./catalogo");
 const { montarEtiquetas } = require("./etiquetas");
+const { criarBackupDoBanco } = require("./backup");
 
 const store = {
   labels: [],
@@ -645,6 +646,42 @@ setInterval(
   () => espelhoDoCatalogo.atualizar({ motivo: "agendado" }),
   INTERVALO_DO_ESPELHO_MS
 ).unref?.();
+
+// Cópia de segurança do banco, uma por dia.
+//
+// O `/fechamento` perdeu 276 ordens de serviço numa migração e só voltou
+// porque existia um backup esquecido numa pasta do computador. Não havia
+// rotina nenhuma. Esta máquina fica ligada o dia inteiro e tem disco — é o
+// lugar natural para guardar.
+const backupDoBanco = criarBackupDoBanco({
+  pasta: DATA_DIR,
+  urlDoSite: SITE_URL,
+  token: process.env.BACKUP_TOKEN || "",
+});
+
+// 3h30 da manhã: loja fechada, site parado, banco tranquilo. O intervalo de
+// 15 minutos é só o relógio de checagem; a cópia sai uma vez por dia.
+setInterval(() => {
+  const agora = new Date();
+  const hora = Number(
+    new Intl.DateTimeFormat("en-GB", {
+      timeZone: "America/Sao_Paulo",
+      hour: "2-digit",
+      hour12: false,
+    }).format(agora)
+  );
+  const dia = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(agora);
+
+  if (hora !== 3) return;
+  if (backupDoBanco.listar().includes(`banco-${dia}.json`)) return;
+
+  backupDoBanco.executar({ motivo: "diário" }).catch(() => {});
+}, 15 * 60_000).unref?.();
 
 // Etiqueta criada no celular precisa aparecer no painel sem ninguem pedir.
 // Cinco minutos: rapido o bastante para nao incomodar, leve o bastante para
@@ -3505,6 +3542,8 @@ app.get(["/health", "/status", "/api/status", "/api/crm/status"], (_req, res) =>
       // Onde as conversas foram parar na ultima varredura.
       varredura: ultimaVarredura,
     },
+    // Cópias de segurança do banco guardadas nesta máquina.
+    backup: backupDoBanco.estado,
     // Cópia do catálogo guardada aqui, para o site não ficar sem preço
     // quando a cota do banco estoura.
     catalogo: espelhoDoCatalogo.estado,
@@ -3758,6 +3797,31 @@ app.get(["/api/crm/catalogo/estado", "/api/catalogo/estado"], (_req, res) => {
 app.all(["/api/crm/catalogo/atualizar", "/api/catalogo/atualizar"], async (_req, res) => {
   const resultado = await espelhoDoCatalogo.atualizar({ motivo: "site avisou" });
   res.json(resultado);
+});
+
+// ---------- cópias de segurança do banco ----------
+
+app.get(["/api/crm/backups", "/api/backups"], (_req, res) => {
+  res.json({
+    ok: true,
+    copias: backupDoBanco.listar(),
+    ...backupDoBanco.estado,
+  });
+});
+
+// Dispara a cópia agora, sem esperar as 3h da manhã.
+app.all(["/api/crm/backups/agora", "/api/backups/agora"], async (_req, res) => {
+  res.json(await backupDoBanco.executar({ motivo: "pedido à mão" }));
+});
+
+// Baixar uma cópia. O nome vem da URL, então é tratado como entrada hostil —
+// mesmo cuidado da rota de mídia.
+app.get(["/api/crm/backups/:nome", "/api/backups/:nome"], (req, res) => {
+  const caminho = backupDoBanco.caminhoDaCopia(req.params.nome);
+  if (!caminho || !fs.existsSync(caminho)) {
+    return res.status(404).json({ error: "Cópia não encontrada." });
+  }
+  res.download(caminho);
 });
 
 app.all(["/api/reset-session", "/api/crm/reset-session", "/api/reconnect", "/api/crm/reconnect"], async (_req, res) => {

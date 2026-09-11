@@ -48,6 +48,19 @@ export default function CrmAdminClient() {
             Balão · administração
           </span>
           <div className="flex items-center gap-2">
+            {/* Baixar uma cópia do banco para o próprio computador.
+                A VPS já guarda uma por dia; isto é para quando você quiser
+                levar uma cópia embora — antes de uma importação grande, por
+                exemplo. É link normal, não botão com JavaScript: arquivo de
+                alguns MB o navegador baixa melhor sozinho. */}
+            <a
+              href="/api/backup"
+              className="rounded-lg border border-white/10 px-3 py-1.5 text-sm font-semibold text-slate-300 transition hover:bg-white/5"
+              title="Baixa todas as tabelas do banco em um arquivo JSON"
+            >
+              Baixar backup
+            </a>
+
             <button
               onClick={() => setTela("atendimento")}
               className="rounded-lg bg-emerald-500 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-emerald-400"
