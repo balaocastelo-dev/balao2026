@@ -146,6 +146,25 @@ metade velha.
 **Parte vazia nunca sobrescreve a guardada.** Perder as categorias ou os
 banners num dia ruim deixaria a home quebrada mesmo com os produtos a salvo.
 
+## ⚠️ Conferir o estado do banco também gasta conexão
+
+`/api/health` abria **uma conexão a cada chamada**. Acompanhar um deploy
+consultando de minuto em minuto queima 60 conexões por hora só olhando; de
+vinte em vinte segundos, 180 — mais de um terço da cota, sem nenhum visitante
+no site.
+
+Aconteceu aqui, e por horas pareceu que havia outro consumidor escondido: era o
+próprio monitoramento impedindo a cota de se recuperar.
+
+Hoje a conferência tem 60 segundos de cache. Para uma leitura de verdade:
+
+```bash
+curl -s "https://www.balao.info/api/health?fresco=1"
+```
+
+**Use `?fresco=1` com parcimônia, e nunca dentro de um laço.** Para acompanhar
+um deploy, o `/status` da VPS não toca no banco e pode ser consultado à vontade.
+
 ## O disjuntor da cota
 
 Estourada a cota, o banco recusa tudo — e o site continuava tentando a cada
