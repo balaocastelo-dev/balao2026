@@ -33,11 +33,15 @@ const PRODUTOS = [
   { id: "2", slug: "monitor-24", name: 'Monitor 24"', price: "899,00", category: "Monitores" },
 ];
 
-function respostaDe(dados, status = 200) {
+// O espelho busca um endereço só (`/api/espelho`), que entrega tudo junto.
+function respostaDe(produtos, status = 200, extra = {}) {
+  const corpo = Array.isArray(produtos)
+    ? { produtos, categorias: [], banners: [], blog: [], ...extra }
+    : produtos;
   return async () => ({
     ok: status >= 200 && status < 300,
     status,
-    json: async () => dados,
+    json: async () => corpo,
   });
 }
 
@@ -195,52 +199,46 @@ function respostaDe(dados, status = 200) {
       urlDoSite: "https://www.balao.info/",
       buscar: async (url) => {
         pedidos.push(url);
-        return { ok: true, status: 200, json: async () => PRODUTOS };
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({ produtos: PRODUTOS, categorias: [], banners: [], blog: [] }),
+        };
       },
       registrar() {},
     });
 
     await espelho.atualizar();
-    assert.ok(
-      pedidos.includes("https://www.balao.info/api/products?origem=banco"),
-      `produtos: ${pedidos.join(" | ")}`
-    );
-    assert.ok(
-      pedidos.includes("https://www.balao.info/api/categories?origem=banco"),
-      `categorias: ${pedidos.join(" | ")}`
-    );
+    assert.deepStrictEqual(pedidos, ["https://www.balao.info/api/espelho"]);
   });
 
-  await teste("categorias vazias não apagam as que já estavam guardadas", async (pasta) => {
+  await teste("parte vazia não apaga a que já estava guardada", async (pasta) => {
     // O menu e as páginas /categoria/* vivem disso. Perder as categorias num
     // dia de cota estourada deixaria a home e a navegação vazias mesmo com os
     // produtos a salvo.
     const CATEGORIAS = [{ id: "1", name: "Notebooks", slug: "notebooks" }];
+    const BANNERS = [{ id: "b1", image_url: "/uploads/banner.jpg" }];
+
     const primeiro = criarEspelhoDoCatalogo({
       pasta,
       urlDoSite: "https://www.balao.info",
-      buscar: async (url) => ({
-        ok: true,
-        status: 200,
-        json: async () => (url.includes("categories") ? CATEGORIAS : PRODUTOS),
-      }),
+      buscar: respostaDe(PRODUTOS, 200, { categorias: CATEGORIAS, banners: BANNERS }),
       registrar() {},
     });
     await primeiro.atualizar();
     assert.strictEqual(primeiro.ler().categorias.length, 1);
+    assert.strictEqual(primeiro.ler().banners.length, 1);
 
-    const semCategorias = criarEspelhoDoCatalogo({
+    // Agora o site responde com produtos, mas categorias e banners vazios.
+    const parcial = criarEspelhoDoCatalogo({
       pasta,
       urlDoSite: "https://www.balao.info",
-      buscar: async (url) => ({
-        ok: true,
-        status: 200,
-        json: async () => (url.includes("categories") ? [] : PRODUTOS),
-      }),
+      buscar: respostaDe(PRODUTOS, 200, { categorias: [], banners: [] }),
       registrar() {},
     });
-    await semCategorias.atualizar();
-    assert.strictEqual(semCategorias.ler().categorias.length, 1, "as categorias sumiram");
+    await parcial.atualizar();
+    assert.strictEqual(parcial.ler().categorias.length, 1, "as categorias sumiram");
+    assert.strictEqual(parcial.ler().banners.length, 1, "os banners sumiram");
   });
 
   await teste("sem arquivo nenhum, ler() devolve vazio em vez de quebrar", async (pasta) => {

@@ -21,8 +21,11 @@ import {
   espelhoPorPalavrasChave,
   espelhoPorTodosOsTermos,
   espelhoTodos,
+  lerBannersDoEspelho,
+  lerBlogDoEspelho,
   lerCategoriasDoEspelho,
 } from "./catalogo-espelho";
+import { listBlogPostsForPage } from "./blog-store";
 
 // Toda leitura de produto passa por `comEspelho`: consulta o banco e, se ele
 // devolver vazio (é o que acontece quando a cota de 500 conexões/hora da
@@ -259,7 +262,16 @@ export function invalidarCacheCategorias() {
 }
 
 export const getCachedCarouselImages = unstable_cache(
-  async () => getCarouselImages(true),
+  async () => {
+    const doBanco = await getCarouselImages(true);
+    if (doBanco.length > 0) return doBanco;
+
+    // Sem banner a home perde o topo — foi o que aconteceu na última queda do
+    // banco. A cópia da VPS guarda todos; aqui ficam só os ativos, como no
+    // banco.
+    const daCopia = await lerBannersDoEspelho();
+    return daCopia.filter((b) => b.active !== false);
+  },
   ["carousel-images"],
   { revalidate: 300, tags: ["carousel"] }
 );
@@ -269,6 +281,29 @@ export const getCachedHomeBlocks = unstable_cache(
   ["home-blocks"],
   { revalidate: 300, tags: ["home-blocks"] }
 );
+
+/**
+ * Posts do blog para a home, com a cópia da VPS por trás.
+ *
+ * A seção de blog da home sumia junto com o banco. A cópia guarda os posts já
+ * filtrados pelo site quando ele estava saudável — então o que volta é o mesmo
+ * que apareceria normalmente.
+ */
+export function getCachedBlogDaHome<T>(quantidade = 6) {
+  return unstable_cache(
+    async () => {
+      const doBanco = (await listBlogPostsForPage({
+        take: quantidade,
+        skipDynamicFallback: true,
+      })) as T[];
+      if (doBanco.length > 0) return doBanco;
+
+      return (await lerBlogDoEspelho<T>()).slice(0, quantidade);
+    },
+    ["blog-home", String(quantidade)],
+    { revalidate: 300, tags: ["blog"] }
+  )();
+}
 
 export const getCachedVitrinePages = unstable_cache(
   async () => listVitrinePagesPublic(),

@@ -128,6 +128,38 @@ Para conferir o estado da cópia:
 curl -s https://srv1963897.hstgr.cloud/api/crm/catalogo/estado
 ```
 
+## O que a cópia cobre (e o que não cobre)
+
+A VPS busca **um endereço só** — `/api/espelho` — que lê o banco direto e
+entrega tudo de uma vez. É de propósito: buscando peça por peça, uma parte
+podia vir do banco e outra já da cota estourada, e a cópia ficaria metade nova,
+metade velha.
+
+| Dado | Sobrevive ao banco cair? |
+| --- | --- |
+| Produtos | ✅ |
+| Categorias | ✅ (é o que faz a home e `/categoria/*` funcionarem) |
+| Banners do carrossel | ✅ |
+| Posts do blog na home | ✅ |
+| Salvar/editar no admin | ❌ — escrita sempre precisa do banco |
+
+**Parte vazia nunca sobrescreve a guardada.** Perder as categorias ou os
+banners num dia ruim deixaria a home quebrada mesmo com os produtos a salvo.
+
+## O disjuntor da cota
+
+Estourada a cota, o banco recusa tudo — e o site continuava tentando a cada
+página. **Cada tentativa conta para a cota**, então o próprio site mantinha o
+banco fechado, e a hora seguinte já começava comprometida.
+
+Agora, ao ver `max_connections_per_hour`, `lib/turso.ts` dá o banco como fora
+por 3 minutos e as leituras vão direto para a cópia. Sem espera, sem conexão
+gasta.
+
+O reconhecimento do erro é específico (`max_connections_per_hour` e
+`max_user_connections`): confundir erro de SQL com cota deixaria o site na
+cópia antiga sem motivo.
+
 ## Se voltar a estourar
 
 1. Confirme pelo `/api/health` que é a cota mesmo.

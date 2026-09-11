@@ -1,4 +1,4 @@
-import { parsePriceToNumber, type Category, type Product } from "./utils";
+import { parsePriceToNumber, type CarouselImage, type Category, type Product } from "./utils";
 
 // ============================================================
 // Espelho do catálogo, guardado na VPS.
@@ -30,8 +30,15 @@ function enderecoDoEspelho() {
  * não responde: o espelho existe para melhorar um dia ruim, não para criar um
  * novo jeito de a página quebrar.
  */
-async function buscarEspelho(): Promise<{ produtos: Product[]; categorias: Category[] }> {
-  const vazio = { produtos: [], categorias: [] };
+interface CopiaDoEspelho {
+  produtos: Product[];
+  categorias: Category[];
+  banners: CarouselImage[];
+  blog: unknown[];
+}
+
+async function buscarEspelho(): Promise<CopiaDoEspelho> {
+  const vazio: CopiaDoEspelho = { produtos: [], categorias: [], banners: [], blog: [] };
   const base = enderecoDoEspelho();
   if (!base) return vazio;
 
@@ -45,9 +52,12 @@ async function buscarEspelho(): Promise<{ produtos: Product[]; categorias: Categ
     if (!resposta.ok) return vazio;
 
     const dados = await resposta.json();
+    const lista = <T,>(v: unknown): T[] => (Array.isArray(v) ? (v as T[]) : []);
     return {
-      produtos: Array.isArray(dados?.produtos) ? (dados.produtos as Product[]) : [],
-      categorias: Array.isArray(dados?.categorias) ? (dados.categorias as Category[]) : [],
+      produtos: lista<Product>(dados?.produtos),
+      categorias: lista<Category>(dados?.categorias),
+      banners: lista<CarouselImage>(dados?.banners),
+      blog: lista<unknown>(dados?.blog),
     };
   } catch {
     return vazio;
@@ -68,6 +78,16 @@ export async function lerCatalogoDoEspelho(): Promise<Product[]> {
  */
 export async function lerCategoriasDoEspelho(): Promise<Category[]> {
   return (await buscarEspelho()).categorias;
+}
+
+/** Banners do carrossel guardados na VPS. Sem eles a home perde o topo. */
+export async function lerBannersDoEspelho(): Promise<CarouselImage[]> {
+  return (await buscarEspelho()).banners;
+}
+
+/** Posts do blog guardados na VPS, para a seção de blog da home. */
+export async function lerBlogDoEspelho<T>(): Promise<T[]> {
+  return (await buscarEspelho()).blog as T[];
 }
 
 /**

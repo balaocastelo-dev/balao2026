@@ -11,8 +11,7 @@ import HomeCategoryShelf from "@/components/HomeCategoryShelf";
 import HomeMonitoresFullWidth from "@/components/HomeMonitoresFullWidth";
 import HomeBlogSection from "@/components/HomeBlogSection";
 import { getCachedProducts, getCachedProductsByExactCategories } from "@/lib/cache";
-import { getCachedCategories, getCachedCarouselImages } from "@/lib/cache";
-import { listBlogPostsForPage } from "@/lib/blog-store";
+import { getCachedBlogDaHome, getCachedCategories, getCachedCarouselImages } from "@/lib/cache";
 import { turso } from "@/lib/turso";
 import { parsePriceToNumber, Product, type Category } from "@/lib/utils";
 import type { Metadata } from "next";
@@ -116,7 +115,7 @@ export default async function Home(props: {
   [categories, carouselImages, blogPosts] = await Promise.all([
     getCachedCategories(),
     getCachedCarouselImages(),
-    listBlogPostsForPage({ take: 6, skipDynamicFallback: true }) as Promise<HomeBlogPost[]>,
+    getCachedBlogDaHome<HomeBlogPost>(6),
   ]);
 
   if (search) {
