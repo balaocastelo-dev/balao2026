@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 export interface FilterTag {
   name: string;
@@ -22,15 +22,20 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [availableTags, setAvailableTags] = useState<FilterTag[]>([]);
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   const toggleSidebar = () => setIsOpen(prev => !prev);
   const closeSidebar = () => setIsOpen(false);
 
-  // Close sidebar on route change
+  // Fecha o menu ao trocar de página.
+  //
+  // Antes isto dependia também de `useSearchParams()`. Este provedor envolve o
+  // site inteiro, e esse gancho fazia o Next desistir de renderizar no servidor
+  // em toda página estática — o conteúdo de 24 páginas ficava só no JavaScript.
+  // Só o caminho basta: trocar apenas o filtro (`?tags=`) não deveria mesmo
+  // fechar o menu no meio da escolha.
   useEffect(() => {
     closeSidebar();
-  }, [pathname, searchParams]);
+  }, [pathname]);
 
   // Reset tags on route change (optional, but good practice to avoid stale tags)
   // Mas se a nova página tiver tags, o FilterSyncer vai atualizar logo em seguida.

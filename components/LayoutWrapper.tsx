@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from "react";
 import { usePathname } from "next/navigation";
 import { SidebarProvider } from "@/context/SidebarContext";
 import Sidebar from "@/components/Sidebar";
@@ -40,8 +41,16 @@ export default function LayoutWrapper({
 
   return (
     <SidebarProvider>
+      {/* O Sidebar usa `useSearchParams()`, e em página estática isso faz o
+          Next desistir de renderizar no servidor. Sem este Suspense próprio, a
+          desistência levava junto TODO o `{children}` abaixo — 24 páginas
+          chegavam ao Google com 10 palavras e nenhum <h1>, com o conteúdo só
+          dentro do JavaScript. Isolado aqui, só o menu lateral cai para o
+          navegador; o conteúdo da página continua vindo pronto do servidor. */}
       {!isRoletaPage && !isBlogPage && !isFullscreenPanel && (
-        <Sidebar categories={categories} mobileOnly />
+        <Suspense fallback={null}>
+          <Sidebar categories={categories} mobileOnly />
+        </Suspense>
       )}
       <div
         className={
