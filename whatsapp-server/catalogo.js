@@ -31,6 +31,7 @@ function criarEspelhoDoCatalogo({ pasta, urlDoSite, buscar, registrar = console.
   const estado = {
     atualizadoEm: null,
     total: 0,
+    categorias: 0,
     ultimaTentativaEm: null,
     ultimoErro: null,
     atualizando: false,
@@ -42,16 +43,24 @@ function criarEspelhoDoCatalogo({ pasta, urlDoSite, buscar, registrar = console.
     if (memoria) return memoria;
 
     try {
-      if (!fs.existsSync(arquivo)) return { produtos: [], total: 0, atualizadoEm: null };
+      if (!fs.existsSync(arquivo)) {
+        return { produtos: [], categorias: [], total: 0, atualizadoEm: null };
+      }
       const conteudo = JSON.parse(fs.readFileSync(arquivo, "utf8"));
       const produtos = Array.isArray(conteudo?.produtos) ? conteudo.produtos : [];
-      memoria = { produtos, total: produtos.length, atualizadoEm: conteudo?.atualizadoEm || null };
+      const categorias = Array.isArray(conteudo?.categorias) ? conteudo.categorias : [];
+      memoria = {
+        produtos,
+        categorias,
+        total: produtos.length,
+        atualizadoEm: conteudo?.atualizadoEm || null,
+      };
       estado.atualizadoEm = memoria.atualizadoEm;
       estado.total = memoria.total;
       return memoria;
     } catch (erro) {
       registrar("[catalogo] Não consegui ler o espelho:", erro.message);
-      return { produtos: [], total: 0, atualizadoEm: null };
+      return { produtos: [], categorias: [], total: 0, atualizadoEm: null };
     }
   }
 
@@ -82,7 +91,8 @@ function criarEspelhoDoCatalogo({ pasta, urlDoSite, buscar, registrar = console.
       // `origem=banco` faz o site ler o banco direto, sem cache e sem a
       // cópia daqui — senão o espelho se alimentaria de si mesmo e gravaria
       // dado velho com data nova.
-      const endereco = `${String(urlDoSite).replace(/\/$/, "")}/api/products?origem=banco`;
+      const base = String(urlDoSite).replace(/\/$/, "");
+      const endereco = `${base}/api/products?origem=banco`;
       const resposta = await pegar(endereco, {
         headers: { accept: "application/json" },
         // O site pode estar lento; melhor desistir e manter a cópia antiga do
@@ -97,6 +107,25 @@ function criarEspelhoDoCatalogo({ pasta, urlDoSite, buscar, registrar = console.
 
       const dados = await resposta.json();
 
+      // As categorias vêm junto: são elas que montam o menu, a home e as
+      // páginas `/categoria/*`. Sem elas, a cópia dos produtos não salva
+      // essas telas — a página nem chega a perguntar por produto se não sabe
+      // qual categoria está aberta.
+      let categorias = ler().categorias || [];
+      try {
+        const r = await pegar(`${base}/api/categories?origem=banco`, {
+          headers: { accept: "application/json" },
+          signal: AbortSignal.timeout(20_000),
+        });
+        if (r.ok) {
+          const vindas = await r.json();
+          // Lista vazia não sobrescreve: mesma regra dos produtos.
+          if (Array.isArray(vindas) && vindas.length > 0) categorias = vindas;
+        }
+      } catch (e) {
+        registrar("[catalogo] Categorias não vieram; mantendo as anteriores.");
+      }
+
       if (!pareceCatalogo(dados)) {
         estado.ultimoErro = "o site devolveu catálogo vazio — cópia antiga mantida";
         registrar(`[catalogo] ${estado.ultimoErro} (${ler().total} produtos no espelho)`);
@@ -109,6 +138,7 @@ function criarEspelhoDoCatalogo({ pasta, urlDoSite, buscar, registrar = console.
         total: dados.length,
         origem: urlDoSite,
         produtos: dados,
+        categorias,
       };
 
       // Grava num arquivo temporário e renomeia: se a VPS cair no meio da
@@ -117,9 +147,15 @@ function criarEspelhoDoCatalogo({ pasta, urlDoSite, buscar, registrar = console.
       fs.writeFileSync(arquivoTemporario, JSON.stringify(conteudo));
       fs.renameSync(arquivoTemporario, arquivo);
 
-      memoria = { produtos: dados, total: dados.length, atualizadoEm: conteudo.atualizadoEm };
+      memoria = {
+        produtos: dados,
+        categorias,
+        total: dados.length,
+        atualizadoEm: conteudo.atualizadoEm,
+      };
       estado.atualizadoEm = conteudo.atualizadoEm;
       estado.total = dados.length;
+      estado.categorias = categorias.length;
       estado.ultimoErro = null;
 
       registrar(

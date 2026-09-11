@@ -21,6 +21,7 @@ import {
   espelhoPorPalavrasChave,
   espelhoPorTodosOsTermos,
   espelhoTodos,
+  lerCategoriasDoEspelho,
 } from "./catalogo-espelho";
 
 // Toda leitura de produto passa por `comEspelho`: consulta o banco e, se ele
@@ -230,7 +231,16 @@ export function invalidarCacheProdutos() {
 export const TAG_CATEGORIAS = "categories";
 
 export const getCachedCategories = unstable_cache(
-  async () => getCategories(),
+  async () => {
+    const doBanco = await getCategories();
+    if (doBanco.length > 0) return doBanco;
+
+    // Sem categorias, a home e as páginas `/categoria/*` nem chegam a
+    // perguntar por produto: elas descobrem qual categoria está aberta
+    // olhando esta árvore. Era por isso que o catálogo continuava sumindo
+    // dessas telas mesmo com a cópia dos produtos a salvo.
+    return lerCategoriasDoEspelho();
+  },
   ["categories"],
   { revalidate: 300, tags: [TAG_CATEGORIAS] }
 );

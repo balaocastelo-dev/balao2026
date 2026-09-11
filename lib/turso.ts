@@ -142,8 +142,55 @@ async function runQuery(poolOrConn: Pool | PoolConnection, input: StatementInput
   return toResult(result, fields as any[]);
 }
 
+// ============================================================
+// Disjuntor da cota.
+//
+// A Hostinger corta o usuário em 500 conexões por HORA e, estourada a cota,
+// recusa TUDO até a hora virar. O problema é que o site continuava tentando: a
+// cada página, cada busca, cada erro de cache, uma tentativa nova. Além de ser
+// desperdício, cada tentativa CONTA para a cota — então o próprio site mantinha
+// o banco fechado, e a hora seguinte já começava comprometida.
+//
+// Depois de ver o erro de cota, o banco é dado como fora por alguns minutos e
+// as leituras vão direto para a cópia da VPS. Sem espera, sem conexão gasta.
+// ============================================================
+
+const PAUSA_APOS_COTA_MS = 3 * 60_000;
+let cotaEstouradaEm = 0;
+
+function ehErroDeCota(erro: unknown) {
+  const texto = String((erro as Error)?.message || erro || "");
+  return texto.includes("max_connections_per_hour") || texto.includes("max_user_connections");
+}
+
+/** Se o banco está em pausa por ter recusado conexão há pouco. */
+export function bancoEmPausa() {
+  return cotaEstouradaEm > 0 && Date.now() - cotaEstouradaEm < PAUSA_APOS_COTA_MS;
+}
+
 async function execute(input: StatementInput | string): Promise<QueryResult> {
-  return runQuery(getPool(), input);
+  if (bancoEmPausa()) {
+    // Erro com a mesma cara do original: quem chama já sabe tratar, e o
+    // motivo continua legível em quem for investigar depois.
+    throw new Error(
+      "max_connections_per_hour: banco em pausa após recusar conexão; servindo a cópia."
+    );
+  }
+
+  try {
+    return await runQuery(getPool(), input);
+  } catch (erro) {
+    if (ehErroDeCota(erro)) {
+      if (!bancoEmPausa()) {
+        console.warn(
+          `[db] Cota de conexões estourada. Pausando o banco por ${PAUSA_APOS_COTA_MS / 60000} min ` +
+            "para não gastar mais tentativas — o site segue com a cópia da VPS."
+        );
+      }
+      cotaEstouradaEm = Date.now();
+    }
+    throw erro;
+  }
 }
 
 async function batch(stmts: StatementInput[], mode?: string): Promise<QueryResult[]> {

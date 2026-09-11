@@ -1,4 +1,4 @@
-import { parsePriceToNumber, type Product } from "./utils";
+import { parsePriceToNumber, type Category, type Product } from "./utils";
 
 // ============================================================
 // Espelho do catálogo, guardado na VPS.
@@ -30,9 +30,10 @@ function enderecoDoEspelho() {
  * não responde: o espelho existe para melhorar um dia ruim, não para criar um
  * novo jeito de a página quebrar.
  */
-export async function lerCatalogoDoEspelho(): Promise<Product[]> {
+async function buscarEspelho(): Promise<{ produtos: Product[]; categorias: Category[] }> {
+  const vazio = { produtos: [], categorias: [] };
   const base = enderecoDoEspelho();
-  if (!base) return [];
+  if (!base) return vazio;
 
   try {
     const resposta = await fetch(`${base}/api/crm/catalogo`, {
@@ -41,14 +42,32 @@ export async function lerCatalogoDoEspelho(): Promise<Product[]> {
       // sempre fresca para não empilhar dois caches com prazos diferentes.
       cache: "no-store",
     });
-    if (!resposta.ok) return [];
+    if (!resposta.ok) return vazio;
 
     const dados = await resposta.json();
-    const produtos = Array.isArray(dados?.produtos) ? dados.produtos : [];
-    return produtos as Product[];
+    return {
+      produtos: Array.isArray(dados?.produtos) ? (dados.produtos as Product[]) : [],
+      categorias: Array.isArray(dados?.categorias) ? (dados.categorias as Category[]) : [],
+    };
   } catch {
-    return [];
+    return vazio;
   }
+}
+
+export async function lerCatalogoDoEspelho(): Promise<Product[]> {
+  return (await buscarEspelho()).produtos;
+}
+
+/**
+ * Categorias guardadas na VPS.
+ *
+ * Precisa existir junto com os produtos: a home e as páginas `/categoria/*`
+ * descobrem QUAL categoria está aberta olhando esta árvore. Sem ela, a página
+ * nem chega a perguntar por produto — e o catálogo continuava sumindo dessas
+ * telas mesmo com a cópia dos produtos a salvo.
+ */
+export async function lerCategoriasDoEspelho(): Promise<Category[]> {
+  return (await buscarEspelho()).categorias;
 }
 
 /**

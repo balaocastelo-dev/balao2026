@@ -3735,8 +3735,8 @@ app.get(["/api/crm/vendedor/:slug", "/api/vendedor/:slug"], (req, res) => {
 
 // Catálogo espelhado. O site lê daqui quando o banco da Hostinger recusa.
 app.get(["/api/crm/catalogo", "/api/catalogo"], (_req, res) => {
-  const { produtos, total, atualizadoEm } = espelhoDoCatalogo.ler();
-  res.json({ ok: true, total, atualizadoEm, produtos });
+  const { produtos, categorias, total, atualizadoEm } = espelhoDoCatalogo.ler();
+  res.json({ ok: true, total, atualizadoEm, produtos, categorias: categorias || [] });
 });
 
 // Só o resumo, para conferir o estado sem baixar milhares de produtos.

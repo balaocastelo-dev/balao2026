@@ -189,19 +189,58 @@ function respostaDe(dados, status = 200) {
     // Sem `origem=banco`, o site responderia com a PRÓPRIA cópia num dia de
     // cota estourada — e o espelho gravaria dado velho carimbado com data
     // nova, escondendo que o catálogo parou de atualizar.
-    let pedido = "";
+    const pedidos = [];
     const espelho = criarEspelhoDoCatalogo({
       pasta,
       urlDoSite: "https://www.balao.info/",
       buscar: async (url) => {
-        pedido = url;
+        pedidos.push(url);
         return { ok: true, status: 200, json: async () => PRODUTOS };
       },
       registrar() {},
     });
 
     await espelho.atualizar();
-    assert.strictEqual(pedido, "https://www.balao.info/api/products?origem=banco");
+    assert.ok(
+      pedidos.includes("https://www.balao.info/api/products?origem=banco"),
+      `produtos: ${pedidos.join(" | ")}`
+    );
+    assert.ok(
+      pedidos.includes("https://www.balao.info/api/categories?origem=banco"),
+      `categorias: ${pedidos.join(" | ")}`
+    );
+  });
+
+  await teste("categorias vazias não apagam as que já estavam guardadas", async (pasta) => {
+    // O menu e as páginas /categoria/* vivem disso. Perder as categorias num
+    // dia de cota estourada deixaria a home e a navegação vazias mesmo com os
+    // produtos a salvo.
+    const CATEGORIAS = [{ id: "1", name: "Notebooks", slug: "notebooks" }];
+    const primeiro = criarEspelhoDoCatalogo({
+      pasta,
+      urlDoSite: "https://www.balao.info",
+      buscar: async (url) => ({
+        ok: true,
+        status: 200,
+        json: async () => (url.includes("categories") ? CATEGORIAS : PRODUTOS),
+      }),
+      registrar() {},
+    });
+    await primeiro.atualizar();
+    assert.strictEqual(primeiro.ler().categorias.length, 1);
+
+    const semCategorias = criarEspelhoDoCatalogo({
+      pasta,
+      urlDoSite: "https://www.balao.info",
+      buscar: async (url) => ({
+        ok: true,
+        status: 200,
+        json: async () => (url.includes("categories") ? [] : PRODUTOS),
+      }),
+      registrar() {},
+    });
+    await semCategorias.atualizar();
+    assert.strictEqual(semCategorias.ler().categorias.length, 1, "as categorias sumiram");
   });
 
   await teste("sem arquivo nenhum, ler() devolve vazio em vez de quebrar", async (pasta) => {
