@@ -1,6 +1,14 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { enrichProductWithAI, formatImportedProductDescription } from '@/lib/ai-service';
+import { MODELO_GEMINI } from "@/lib/ai-modelos";
+
+// O teste confere que o serviço usa o modelo CONFIGURADO, não um nome fixo.
+//
+// Antes ele travava "gemini-1.5-flash" — e quando o Google aposentou esse
+// modelo, o teste continuou passando enquanto a produção devolvia 404 para
+// 378 visitantes por 19 dias. Teste que trava um valor externo dá a impressão
+// de cobertura sem cobrir o que quebra.
 
 // Mock GoogleGenerativeAI
 const mockGenerateContent = vi.fn();
@@ -42,7 +50,7 @@ describe('AI Service', () => {
 
     const result = await enrichProductWithAI('MacBook Air');
 
-    expect(mockGetGenerativeModel).toHaveBeenCalledWith({ model: "gemini-1.5-flash" });
+    expect(mockGetGenerativeModel).toHaveBeenCalledWith({ model: MODELO_GEMINI });
     expect(mockGenerateContent).toHaveBeenCalled();
     expect(result.specs).toEqual({ "CPU": "M1" });
     expect(result.description).toBe("A great laptop");
@@ -114,7 +122,7 @@ describe('AI Service', () => {
       description: 'Texto bruto'
     });
 
-    expect(mockGetGenerativeModel).toHaveBeenCalledWith({ model: "gemini-1.5-flash" });
+    expect(mockGetGenerativeModel).toHaveBeenCalledWith({ model: MODELO_GEMINI });
     expect(result.source).toBe('Google Gemini 1.5 Flash');
     expect(result.description).toContain('✅');
   });

@@ -2,6 +2,7 @@
 import { Product } from "./utils";
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { MODELO_GEMINI } from "@/lib/ai-modelos";
 
 export interface AIEnrichmentResult {
     specs: Record<string, string>;
@@ -31,7 +32,7 @@ export async function formatImportedProductDescription(input: {
 
     try {
         const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: MODELO_GEMINI });
 
         const prompt = `
 Você é redator(a) de e-commerce.
@@ -203,7 +204,7 @@ export async function enrichProductWithAI(productName: string): Promise<AIEnrich
 
     try {
         const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: MODELO_GEMINI });
 
         const prompt = `
         You are an e-commerce product expert. 

@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { MODELO_GEMINI, MODELO_GROQ, comPrazo } from "@/lib/ai-modelos";
 import Groq from "groq-sdk";
 import { sanitizeHtmlBasic } from "@/lib/blog-sanitize";
 import { buildExcerptFromHtml, estimateReadingTimeMinutesFromHtml } from "@/lib/blog-utils";
@@ -179,13 +180,14 @@ async function generateFromGemini(prompt: string) {
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
-  const modelName = process.env.BLOG_AI_MODEL || "gemini-1.5-flash";
-  const model = genAI.getGenerativeModel({ model: modelName });
+  const model = genAI.getGenerativeModel({ model: MODELO_GEMINI });
 
-  const result = await model.generateContent(prompt);
-  const response = await result.response;
-  const text = response.text();
-  return safeParseJson(text);
+  const texto = await comPrazo("gemini (blog)", async () => {
+    const result = await model.generateContent(prompt);
+    return (await result.response).text();
+  });
+
+  return texto ? safeParseJson(texto) : null;
 }
 
 async function generateFromGroq(prompt: string) {
@@ -193,7 +195,10 @@ async function generateFromGroq(prompt: string) {
   if (!apiKey) return null;
 
   const client = new Groq({ apiKey });
-  const model = process.env.BLOG_AI_MODEL || "llama-3.1-70b-versatile";
+  // Antes esta variável era a MESMA do Gemini (`BLOG_AI_MODEL`): definir uma
+  // quebrava a outra, porque o nome de modelo de um provedor não existe no
+  // outro.
+  const model = MODELO_GROQ;
 
   const resp = await client.chat.completions.create({
     model,
