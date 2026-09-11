@@ -138,6 +138,24 @@ export function espelhoPorPalavrasChave(
   return porPreco(achados).slice(0, limite);
 }
 
+/** Busca da caixa de pesquisa: TODOS os termos precisam bater. */
+export function espelhoPorTodosOsTermos(
+  produtos: Product[],
+  termos: string[],
+  limite = 10
+): Product[] {
+  const limpos = termos.map((t) => texto(t).trim()).filter(Boolean);
+  if (limpos.length === 0) return [];
+
+  const achados = produtos.filter((p) => {
+    const nome = texto(p.name);
+    const descricao = texto(p.description);
+    return limpos.every((t) => nome.includes(t) || descricao.includes(t));
+  });
+
+  return porPreco(achados).slice(0, limite);
+}
+
 /** Paginação do admin: busca, categoria, ordenação e fatia. */
 export function espelhoPaginado(
   produtos: Product[],

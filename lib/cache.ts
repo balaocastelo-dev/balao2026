@@ -8,6 +8,7 @@ import {
   getProductsByCategoryFullPath,
   getProductsByExactCategories,
   getProductsPaginated,
+  searchProductsAllTerms,
   searchProductsByKeywords,
 } from "./db";
 import { listVitrinePagesPublic } from "./vitrine/db";
@@ -18,6 +19,7 @@ import {
   espelhoPorCategoriasExatas,
   espelhoPorIdentificador,
   espelhoPorPalavrasChave,
+  espelhoPorTodosOsTermos,
   espelhoTodos,
 } from "./catalogo-espelho";
 
@@ -99,6 +101,29 @@ export function getCachedProductsPaginated(opts: {
       ),
     chave,
     { revalidate: 120, tags: [TAG_PRODUTOS] }
+  )();
+}
+
+/**
+ * Busca da caixa de pesquisa do site, com cache.
+ *
+ * Era o último caminho público lendo o banco a cada requisição: cada visitante
+ * que digitava na busca gastava uma conexão das 500 por hora. Meia hora de
+ * cache é de sobra — catálogo não muda de minuto em minuto, e alteração de
+ * produto invalida a etiqueta na hora.
+ */
+export function getCachedBusca(termos: string[], limit = 10) {
+  const chave = ["busca-termos", termos.slice().sort().join("|"), String(limit)];
+
+  return unstable_cache(
+    async () =>
+      comEspelho(
+        () => searchProductsAllTerms(termos, limit),
+        (produtos) => espelhoPorTodosOsTermos(produtos, termos, limit),
+        listaVazia
+      ),
+    chave,
+    { revalidate: 1800, tags: [TAG_PRODUTOS] }
   )();
 }
 

@@ -733,6 +733,40 @@ export async function replaceCategoriesFromPaths(paths: string[]): Promise<void>
 // "Hardware/Placas-mãe/AMD" — então "é essa categoria ou está por baixo dela
 // na árvore" vira só comparar prefixo de string, sem precisar percorrer
 // parent_id em tempo de request).
+/**
+ * Busca da caixa de pesquisa do site: TODOS os termos precisam bater.
+ *
+ * Estava embutida em `app/api/search/route.ts`, lendo o banco direto a cada
+ * tecla parada do visitante. Com a cota de 500 conexões/hora da Hostinger, a
+ * própria busca do site derrubava o catálogo. Aqui ela ganha cache e cópia de
+ * segurança, como todo o resto.
+ */
+export async function searchProductsAllTerms(terms: string[], limit = 10): Promise<Product[]> {
+  const limpos = terms.map((t) => String(t || "").trim()).filter(Boolean);
+  if (!isTursoActive() || limpos.length === 0) return [];
+
+  try {
+    const conditions = limpos
+      .map(() => "(LOWER(name) LIKE ? OR LOWER(description) LIKE ?)")
+      .join(" AND ");
+    const args: string[] = [];
+    limpos.forEach((term) => {
+      const like = `%${term.toLowerCase()}%`;
+      args.push(like, like);
+    });
+
+    // LIMIT direto no SQL: o MySQL recusa `?` em LIMIT e a busca voltava vazia.
+    const res = await turso.execute({
+      sql: `SELECT * FROM products WHERE ${conditions} LIMIT ${Math.trunc(Math.max(1, limit))}`,
+      args,
+    });
+    return sortByPrice(res.rows.map((r) => mapTursoProduct(r as Row)));
+  } catch (error) {
+    console.error("Erro na busca por termos:", error);
+    return [];
+  }
+}
+
 export async function getProductsByCategoryFullPath(fullPath: string): Promise<Product[]> {
   try {
     if (!isTursoActive() || !fullPath) return [];

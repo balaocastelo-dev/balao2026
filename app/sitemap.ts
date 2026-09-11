@@ -1,10 +1,28 @@
 import { MetadataRoute } from 'next'
 import { getCategories, getProductsForSitemap } from '@/lib/db'
+import { lerCatalogoDoEspelho } from '@/lib/catalogo-espelho'
 import { listBlogPostsForPage } from '@/lib/blog-store'
 import { LEAD_INTENTS } from '@/lib/lead-intents'
 import { REGIONAL_CITIES, REGIONAL_SERVICES, buildRegionalServicePath } from '@/lib/local-seo'
 import { CAMPINAS_NEIGHBORHOODS } from '@/lib/neighborhood-seo'
 import { listVitrinePagesPublic } from '@/lib/vitrine/db'
+
+/**
+ * Nunca deixa o sitemap estourar por causa de uma parte.
+ *
+ * O sitemap devolvia erro 500 sempre que a cota do banco estourava — e sitemap
+ * que falha repetido faz o Google reduzir o ritmo de descoberta, atrasando a
+ * indexação de produto novo. Melhor um sitemap com as rotas fixas do que
+ * sitemap nenhum.
+ */
+async function semQuebrar<T>(rotulo: string, buscar: () => Promise<T>, reserva: T): Promise<T> {
+  try {
+    return await buscar()
+  } catch (erro) {
+    console.error(`[sitemap] ${rotulo} falhou; seguindo sem esta parte.`, erro)
+    return reserva
+  }
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.balao.info'
@@ -57,7 +75,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }))
 
   // Categorias
-  const categories = await getCategories()
+  const categories = await semQuebrar('categorias', () => getCategories(), [])
   const categoryRoutes = categories.map((category) => ({
     url: `${baseUrl}/categoria/${category.slug}`,
     changeFrequency: 'weekly' as const,
@@ -67,7 +85,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Produtos (Limitado aos 1000 mais recentes para performance)
   // Nota: getProducts já tem paginação interna, mas aqui vamos pegar tudo o que ele retornar
   // Se getProducts retornar muitos, pode ser lento.
-  const products = await getProductsForSitemap(1000)
+  // Com o banco fora, usa a cópia guardada na VPS — os produtos continuam
+  // sendo oferecidos ao Google em vez de sumirem do sitemap.
+  let products = await semQuebrar('produtos', () => getProductsForSitemap(1000), [])
+  if (products.length === 0) {
+    const daCopia = await semQuebrar('cópia do catálogo', () => lerCatalogoDoEspelho(), [])
+    products = daCopia.slice(0, 1000) as typeof products
+  }
   const productRoutes = products.map((product) => ({
     url: `${baseUrl}/product/${product.slug || product.id}`,
     lastModified: new Date(product.created_at || new Date()),
@@ -75,7 +99,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }))
 
-  const blogPosts = await listBlogPostsForPage({ take: 500 })
+  const blogPosts = await semQuebrar('blog', () => listBlogPostsForPage({ take: 500 }), [])
   const blogRoutes = blogPosts.map((post) => ({
     url: `${baseUrl}/blog/${post.slug}`,
     lastModified: new Date(post.published_at || new Date()),
