@@ -116,6 +116,13 @@ const WINNING_PRIZES = PRIZES.filter(p => p.probability > 0);
 // --- LOGO COMPONENT (Placeholder SVG se a imagem não carregar) ---
 const Logo = () => (
   <div className="flex justify-center mb-6">
+    {/* Título da página. O único <h1> daqui era injetado por `innerHTML` no
+        erro de carregamento do logo — ou seja, quase nunca existia. Como o
+        herói é a imagem, este fica `sr-only`: aparece para o Google e para
+        leitor de tela, sem mudar o visual. */}
+    <h1 className="sr-only">
+      Roleta de prêmios do Clube de Vantagens — Balão da Informática
+    </h1>
     <picture>
       <source srcSet="/logo.png" type="image/png" />
       <img 

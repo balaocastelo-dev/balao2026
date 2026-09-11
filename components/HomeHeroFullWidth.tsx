@@ -57,6 +57,18 @@ export default function HomeHeroFullWidth({ carouselImages }: HomeHeroFullWidthP
           </div>
         </div>
 
+        {/* Título da página.
+            Ele existia só no caso SEM carrossel — e como a loja sempre tem
+            banner, a home nunca teve <h1> nenhum. Fica fora do `if` agora.
+
+            `sr-only` porque o herói visual é o carrossel: o título aparece
+            para o Google e para quem usa leitor de tela, sem mexer no layout.
+            Toda página precisa de um <h1>, e esta não tinha. */}
+        <h1 className="sr-only">
+          Balão da Informática Castelo — PC Gamer, notebooks, monitores e assistência
+          técnica em Campinas
+        </h1>
+
         {/* 2. Full-Width Hero Carousel Banner */}
         <div className="w-full relative rounded-3xl overflow-hidden shadow-2xl border border-slate-700/80 bg-black/60">
           {carouselImages.length > 0 ? (
@@ -67,9 +79,9 @@ export default function HomeHeroFullWidth({ carouselImages }: HomeHeroFullWidthP
                 <Sparkles size={16} />
                 Balão da Informática Castelo
               </span>
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight max-w-5xl leading-tight">
+              <h2 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight max-w-5xl leading-tight">
                 A melhor experiência em <span className="text-[#E60012]">PC Gamer, Notebooks</span> e Hardware em Campinas.
-              </h1>
+              </h2>
               <p className="mt-5 text-base sm:text-xl text-slate-300 max-w-3xl leading-relaxed">
                 Mais de 5.000 produtos com pronta entrega, até 10x sem juros no cartão ou desconto no PIX e retirada no balcão.
               </p>

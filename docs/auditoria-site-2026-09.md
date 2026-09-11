@@ -199,7 +199,37 @@ com a senha do painel.
 > ter nascido também. Um levantamento das rotas de escrita sem guarda é o
 > próximo passo natural.
 
+### Resultado medido em produção
+
+| Medida | Antes | Depois |
+| --- | --- | --- |
+| Páginas sem `<h1>` no HTML | 25 | **7 → 4** |
+| Páginas sem canonical | 11 | **1** |
+| Páginas com título repetido | 10 | **0** |
+
+*(as 4 restantes são telas de uso pontual, fora do índice do Google)*
+
+O banco voltou a responder: `conecta: true`, **4.155 produtos**.
+
+### A home nunca teve `<h1>`
+
+Achado durante a conferência. O `<h1>` existia só no caso **sem carrossel** —
+e a loja sempre tem banner, então a página mais importante do site nunca teve
+título semântico. Agora ele existe sempre, como `sr-only`: aparece para o Google
+e para leitor de tela sem mexer no visual do herói.
+
+Mesmo caso no `/roleta`, onde o `<h1>` era injetado por `innerHTML` apenas
+quando a imagem do logo falhava ao carregar.
+
+> Se preferir um título **visível** na home em vez do invisível, é uma mudança
+> de design — dá para fazer, mas muda o herói e precisa da sua decisão.
+
 ## Ainda em aberto
+
+- **`/blog` mostra um carregador que nunca resolve.** O `<main>` da página fica
+  preso no `<Suspense>` e o conteúdo não chega. Não é a cota (o bailout está
+  zerado ali). Precisa de investigação própria — quem abre o blog hoje vê só uma
+  bolinha girando.
 
 - **Blog vazio** — a página existe, sem artigos.
 - **Páginas pesadas** (194–232 KB de HTML) — não urgente.
