@@ -209,7 +209,62 @@ function respostaDe(produtos, status = 200, extra = {}) {
     });
 
     await espelho.atualizar();
-    assert.deepStrictEqual(pedidos, ["https://www.balao.info/api/espelho"]);
+    // O catálogo vem de /api/espelho; logo depois o espelho guarda a
+    // assinatura, para a próxima volta agendada poder pular a baixada.
+    assert.deepStrictEqual(pedidos, [
+      "https://www.balao.info/api/espelho",
+      "https://www.balao.info/api/espelho/versao",
+    ]);
+  });
+
+  await teste("volta agendada não rebaixa o catálogo quando nada mudou", async (pasta) => {
+    // Baixar 11 MB a cada volta, sem nada ter mudado, custava ~15 GB por mês
+    // num projeto Supabase de 5 GB. A assinatura custa dezenas de bytes.
+    const pedidos = [];
+    const espelho = criarEspelhoDoCatalogo({
+      pasta,
+      urlDoSite: "https://www.balao.info",
+      buscar: async (url) => {
+        pedidos.push(url);
+        if (url.endsWith("/versao")) {
+          return { ok: true, status: 200, json: async () => ({ ok: true, total: 2, maisRecente: "2026-09-13T00:00:00Z" }) };
+        }
+        return { ok: true, status: 200, json: async () => ({ produtos: PRODUTOS, categorias: [], banners: [], blog: [] }) };
+      },
+      registrar() {},
+    });
+
+    await espelho.atualizar({ motivo: "boot" });
+    const aposPrimeira = pedidos.length;
+
+    const r = await espelho.atualizar({ motivo: "agendado" });
+    assert.strictEqual(r.semMudanca, true, "deveria ter pulado a baixada");
+    assert.strictEqual(pedidos.length, aposPrimeira + 1, "só a assinatura deveria ter sido pedida");
+    assert.ok(pedidos[pedidos.length - 1].endsWith("/api/espelho/versao"));
+    assert.strictEqual(espelho.ler().total, 2, "o catálogo guardado continua servível");
+  });
+
+  await teste("volta agendada baixa de novo quando o catálogo mudou", async (pasta) => {
+    const pedidos = [];
+    let total = 2;
+    const espelho = criarEspelhoDoCatalogo({
+      pasta,
+      urlDoSite: "https://www.balao.info",
+      buscar: async (url) => {
+        pedidos.push(url);
+        if (url.endsWith("/versao")) {
+          return { ok: true, status: 200, json: async () => ({ ok: true, total, maisRecente: `2026-09-${10 + total}T00:00:00Z` }) };
+        }
+        return { ok: true, status: 200, json: async () => ({ produtos: PRODUTOS, categorias: [], banners: [], blog: [] }) };
+      },
+      registrar() {},
+    });
+
+    await espelho.atualizar({ motivo: "boot" });
+    total = 3; // alguém cadastrou um produto no site
+    const r = await espelho.atualizar({ motivo: "agendado" });
+    assert.ok(!r.semMudanca, "assinatura diferente tem que forçar a baixada");
+    assert.ok(pedidos.includes("https://www.balao.info/api/espelho"));
   });
 
   await teste("parte vazia não apaga a que já estava guardada", async (pasta) => {

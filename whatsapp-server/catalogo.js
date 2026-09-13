@@ -37,6 +37,10 @@ function criarEspelhoDoCatalogo({ pasta, urlDoSite, buscar, registrar = console.
     ultimaTentativaEm: null,
     ultimoErro: null,
     atualizando: false,
+    // Assinatura do catalogo na ultima baixada com sucesso. Serve para pular
+    // downloads de 11 MB quando nada mudou no site.
+    assinatura: null,
+    pulados: 0,
   };
 
   let memoria = null;
@@ -96,6 +100,32 @@ function criarEspelhoDoCatalogo({ pasta, urlDoSite, buscar, registrar = console.
       // Buscando peça por peça, uma parte podia vir do banco e outra já da
       // cota estourada — e a cópia ficaria metade nova, metade velha.
       const base = String(urlDoSite).replace(/\/$/, "");
+
+      // Rede de seguranca agendada nao precisa baixar o catalogo inteiro a
+      // cada volta. A assinatura custa algumas dezenas de bytes; o catalogo
+      // custa 11 MB. Atualizacao pedida a mao ou avisada pelo site ignora
+      // este atalho, porque nesses casos algo mudou de proposito.
+      if (motivo === "agendado" && estado.assinatura) {
+        try {
+          const r = await pegar(`${base}/api/espelho/versao`, {
+            headers: { accept: "application/json" },
+            signal: AbortSignal.timeout(15_000),
+          });
+          if (r.ok) {
+            const v = await r.json();
+            const atual = v && v.ok ? `${v.total}|${v.maisRecente}` : null;
+            if (atual && atual === estado.assinatura) {
+              estado.pulados += 1;
+              estado.ultimoErro = null;
+              return { ok: true, semMudanca: true, total: ler().total };
+            }
+          }
+        } catch {
+          // Assinatura indisponivel: segue com a baixada normal. Melhor gastar
+          // banda do que deixar o espelho envelhecer em silencio.
+        }
+      }
+
       const resposta = await pegar(`${base}/api/espelho`, {
         headers: { accept: "application/json" },
         // O site pode estar lento; melhor desistir e manter a cópia antiga do
@@ -156,6 +186,24 @@ function criarEspelhoDoCatalogo({ pasta, urlDoSite, buscar, registrar = console.
       estado.banners = conteudo.banners.length;
       estado.blog = conteudo.blog.length;
       estado.ultimoErro = null;
+
+      // Guarda a assinatura desta versao para a proxima volta agendada poder
+      // pular a baixada. Uma requisicao de dezenas de bytes por atualizacao
+      // real — desprezivel perto dos 11 MB que ela evita depois.
+      try {
+        const rv = await pegar(`${base}/api/espelho/versao`, {
+          headers: { accept: "application/json" },
+          signal: AbortSignal.timeout(15_000),
+        });
+        if (rv.ok) {
+          const v = await rv.json();
+          estado.assinatura = v && v.ok ? `${v.total}|${v.maisRecente}` : null;
+        }
+      } catch {
+        // Sem assinatura a proxima volta baixa tudo. Perde a economia, nao a
+        // correcao.
+        estado.assinatura = null;
+      }
 
       // O site avisa quando uma parte dele falhou; sem isso, "espelho
       // atualizado" esconderia que o blog não vem há dias.
