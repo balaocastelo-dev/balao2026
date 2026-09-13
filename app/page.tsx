@@ -2,133 +2,84 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
-import ProductCard from "@/components/ProductCard";
+import CardProduto, { CONDICOES } from "@/components/CardProduto";
 import JsonLd, { generateHomeAiAndGoogleSchema } from "@/components/JsonLd";
 import { getCachedProducts } from "@/lib/cache";
 import { SITE_CONFIG } from "@/lib/config";
 import type { Product } from "@/lib/utils";
 import {
-  MessageCircle, MapPin, Clock, ShieldCheck, Wrench, HardDrive,
-  Apple, Smartphone, Cpu, RefreshCw, ArrowRight, Check, X, Store, Star,
+  MessageCircle, MapPin, Clock, ShieldCheck, Wrench, HardDrive, Apple,
+  Smartphone, Cpu, RefreshCw, ArrowRight, Star, Truck, CreditCard,
+  Monitor, Laptop, Printer, Keyboard, Gamepad2, Package,
 } from "lucide-react";
 
 export const revalidate = 60;
 
-/* ------------------------------------------------------------------ *
- * PENDENTE DE CONFIRMAÇÃO DO THIAGO
- * Preencher com o que aparece HOJE no perfil do Google. Enquanto for
- * null, a home simplesmente não exibe o número — melhor omitir do que
- * publicar uma contagem que o cliente confere e não bate.
- * ------------------------------------------------------------------ */
+/* Prova social confirmada no perfil do Google em 13/09/2026.
+ * Null = a página omite a afirmação em vez de publicar número não conferido. */
 const PROVA_SOCIAL = {
   googleNota: 4.8 as number | null,
   googleAvaliacoes: 839 as number | null,
   anosDeMercado: 25,
-  instagramSeguidores: "20 mil",
 };
 
-/* Avaliações públicas do perfil do Google, transcritas literalmente.
- * Só entram aqui depoimentos reais e verificáveis — nada reescrito. */
+/* Avaliações públicas do Google, transcritas literalmente. */
 const AVALIACOES = [
-  {
-    nome: "José Paulo Olímpio",
-    quando: "3 meses atrás",
-    texto:
-      "Levei minha impressora toda falhada, até achei que não tinha conserto. Porém voltou consertada e funcionando perfeitamente, paguei apenas a mão de obra. Recomendo.",
-  },
-  {
-    nome: "Caroline Bianca",
-    quando: "3 meses atrás",
-    texto:
-      "Resolveram em 1 hora meu problema! Precisei de uma nova fonte de computador, em 1 horinha recebi. Excelente atendimento.",
-  },
-  {
-    nome: "Winderson Oliveira",
-    quando: "3 meses atrás",
-    texto:
-      "Precisei de um adaptador de rede com certa urgência e fui muito bem atendido pela equipe. Foram atenciosos, prestativos e ainda fizeram a entrega diretamente no meu trabalho.",
-  },
-  {
-    nome: "Gilberto Filho",
-    quando: "3 meses atrás",
-    texto:
-      "Loja top, preços justos, atendimento ótimo, Thiago e sua equipe são muito prestativos, super recomendo.",
-  },
+  { nome: "José Paulo Olímpio", quando: "3 meses atrás", texto: "Levei minha impressora toda falhada, até achei que não tinha conserto. Porém voltou consertada e funcionando perfeitamente, paguei apenas a mão de obra. Recomendo." },
+  { nome: "Caroline Bianca", quando: "3 meses atrás", texto: "Resolveram em 1 hora meu problema! Precisei de uma nova fonte de computador, em 1 horinha recebi. Excelente atendimento." },
+  { nome: "Winderson Oliveira", quando: "3 meses atrás", texto: "Precisei de um adaptador de rede com certa urgência e fui muito bem atendido pela equipe. Foram atenciosos, prestativos e ainda fizeram a entrega diretamente no meu trabalho." },
+  { nome: "Gilberto Filho", quando: "3 meses atrás", texto: "Loja top, preços justos, atendimento ótimo, Thiago e sua equipe são muito prestativos, super recomendo." },
 ];
 
-/* Fotos reais da loja. Vazio = a seção usa um bloco neutro em vez de
- * imagem de IA. Render de IA contradiz o argumento "loja física real". */
-const FOTOS_LOJA: { src: string; alt: string }[] = [
+/* Fotos reais da loja, sem pessoas em cena. */
+const FOTOS_LOJA = [
   { src: "/images/loja/fachada.jpg", alt: "Fachada da Balão da Informática na Av. Anchieta, 789, no Cambuí" },
   { src: "/images/loja/salao.jpg", alt: "Salão da loja com prateleiras e corredor central" },
   { src: "/images/loja/estoque-notebooks.jpg", alt: "Prateleiras com notebooks e periféricos em exposição" },
   { src: "/images/loja/monitores-acessorios.jpg", alt: "Monitores em exposição e parede de acessórios" },
 ];
 
-const WPP = SITE_CONFIG.whatsapp.number;
-const wpp = (msg: string) => `https://wa.me/${WPP}?text=${encodeURIComponent(msg)}`;
-
-const SERVICOS = [
-  { icone: Apple, titulo: "Reparo Apple", desc: "MacBook, iMac, iPad e Apple Watch. Diagnóstico na bancada, não por telefone.", href: "/reparoapple", msg: "Olá! Preciso de reparo em um aparelho Apple." },
-  { icone: HardDrive, titulo: "Recuperação de dados", desc: "HD que não liga, SSD que sumiu, pendrive corrompido. Avaliação antes de cobrar.", href: "/recuperacaodados", msg: "Olá! Preciso recuperar dados de um disco." },
-  { icone: Smartphone, titulo: "Troca de tela e bateria", desc: "iPhone e notebook. Preço fechado antes do serviço, sem surpresa no balcão.", href: "/telaiphone", msg: "Olá! Quero orçamento de troca de tela." },
-  { icone: Cpu, titulo: "Montagem e upgrade de PC", desc: "Você escolhe o uso e o orçamento; a gente monta, testa e entrega funcionando.", href: "/montagempc", msg: "Olá! Quero montar um PC sob medida." },
-  { icone: Wrench, titulo: "Manutenção", desc: "PC lento, esquentando ou travando. Limpeza, pasta térmica e troca de peça.", href: "/manutencao", msg: "Olá! Meu computador está com problema." },
-  { icone: RefreshCw, titulo: "Seminovos e consignação", desc: "Compramos, vendemos e deixamos o seu à venda na loja, com garantia.", href: "/seminovos", msg: "Olá! Quero saber sobre seminovos/consignação." },
+const DEPARTAMENTOS = [
+  { nome: "PC Gamer", href: "/pcgamer", icone: Gamepad2 },
+  { nome: "Notebooks", href: "/notebooks", icone: Laptop },
+  { nome: "Monitores", href: "/categoria/monitores", icone: Monitor },
+  { nome: "Hardware", href: "/categoria/hardware", icone: Cpu },
+  { nome: "Periféricos", href: "/categoria/perifericos", icone: Keyboard },
+  { nome: "Impressão", href: "/categoria/impressao", icone: Printer },
+  { nome: "Seminovos", href: "/seminovos", icone: RefreshCw },
+  { nome: "Monte seu PC", href: "/monteseupc", icone: Package },
 ];
 
-/* Área de loja: cada prateleira agrupa uma ou mais categorias do banco.
- * Os slugs seguem a tabela `categories`. */
 const PRATELEIRAS = [
   { titulo: "Computadores e PC Gamer", cats: ["Computadores"], href: "/pcgamer" },
   { titulo: "Notebooks", cats: ["Notebooks"], href: "/notebooks" },
   { titulo: "Monitores", cats: ["Monitores"], href: "/categoria/monitores" },
   { titulo: "Placas de vídeo", cats: ["Hardware/Placas de Vídeo"], href: "/categoria/hardware-placas-de-video" },
-  {
-    titulo: "Memória, fonte, placa-mãe e gabinete",
-    cats: [
-      "Hardware/Memórias RAM", "Hardware/Fontes", "Hardware/Placas Mãe",
-      "Hardware/Processadores", "Hardware/Water Coolers", "Hardware/Gabinetes",
-      "Hardware/SSDs e NVMe", "Hardware",
-    ],
-    href: "/categoria/hardware",
-  },
-  {
-    titulo: "Periféricos, impressão e escritório",
-    cats: ["Periféricos", "Impressão", "Acessórios", "Escritório/Cadeiras Gamer"],
-    href: "/categoria/perifericos",
-  },
+  { titulo: "Memória, fonte, placa-mãe e gabinete", cats: ["Hardware/Memórias RAM","Hardware/Fontes","Hardware/Placas Mãe","Hardware/Processadores","Hardware/Water Coolers","Hardware/Gabinetes","Hardware/SSDs e NVMe","Hardware"], href: "/categoria/hardware" },
+  { titulo: "Periféricos, impressão e escritório", cats: ["Periféricos","Impressão","Acessórios","Escritório/Cadeiras Gamer"], href: "/categoria/perifericos" },
 ];
 
-const DEPARTAMENTOS = [
-  { nome: "PC Gamer", href: "/pcgamer" },
-  { nome: "Notebooks", href: "/notebooks" },
-  { nome: "Monitores", href: "/categoria/monitores" },
-  { nome: "Hardware", href: "/categoria/hardware" },
-  { nome: "Periféricos", href: "/categoria/perifericos" },
-  { nome: "Impressão", href: "/categoria/impressao" },
-  { nome: "Seminovos", href: "/seminovos" },
-  { nome: "Monte seu PC", href: "/monteseupc" },
+const SERVICOS = [
+  { icone: Apple, titulo: "Reparo Apple", href: "/reparoapple", msg: "Olá! Preciso de reparo em um aparelho Apple." },
+  { icone: HardDrive, titulo: "Recuperação de dados", href: "/recuperacaodados", msg: "Olá! Preciso recuperar dados de um disco." },
+  { icone: Smartphone, titulo: "Troca de tela e bateria", href: "/telaiphone", msg: "Olá! Quero orçamento de troca de tela." },
+  { icone: Cpu, titulo: "Montagem e upgrade", href: "/montagempc", msg: "Olá! Quero montar um PC sob medida." },
+  { icone: Wrench, titulo: "Manutenção", href: "/manutencao", msg: "Olá! Meu computador está com problema." },
+  { icone: RefreshCw, titulo: "Consignação", href: "/consignacao", msg: "Olá! Quero saber sobre consignação." },
 ];
 
-const COMPARATIVO = [
-  { ponto: "Ver o equipamento ligado antes de pagar", loja: true, online: false },
-  { ponto: "Retirar hoje, sem esperar frete", loja: true, online: false },
-  { ponto: "Falar com uma pessoa, não com um robô", loja: true, online: false },
-  { ponto: "Levar de volta se der problema", loja: true, online: false },
-  { ponto: "Serviço técnico no mesmo lugar da compra", loja: true, online: false },
-  { ponto: "Configuração feita para o seu uso", loja: true, online: false },
-];
+const WPP = SITE_CONFIG.whatsapp.number;
+const wpp = (msg: string) => `https://wa.me/${WPP}?text=${encodeURIComponent(msg)}`;
 
 export const metadata: Metadata = {
-  title: "Loja de Informática no Cambuí, Campinas | Balão da Informática",
+  title: "Balão da Informática | Loja de informática em Campinas — PC Gamer, notebooks e assistência técnica",
   description:
-    "Loja física no Cambuí: você vê o equipamento ligado antes de pagar e retira na hora. Assistência técnica, reparo Apple, recuperação de dados, montagem de PC e atendimento humano no WhatsApp.",
+    "Loja física no Cambuí, em Campinas. PC gamer, notebooks, monitores, hardware e periféricos com 5% de desconto no PIX e 12x sem juros. Assistência técnica no mesmo lugar e atendimento humano no WhatsApp.",
   alternates: { canonical: "https://www.balao.info" },
   openGraph: {
-    title: "Balão da Informática | Loja física no Cambuí, Campinas",
+    title: "Balão da Informática | Loja de informática em Campinas",
     description:
-      "Equipamento ligado na sua frente antes de pagar, assistência técnica no mesmo lugar e atendimento humano no WhatsApp.",
+      "Você vê o equipamento ligado antes de pagar. Loja física no Cambuí, assistência técnica e atendimento humano no WhatsApp.",
     url: "https://www.balao.info",
     type: "website",
   },
@@ -142,301 +93,231 @@ export default async function Home() {
     catalogo = [];
   }
 
-  // Agrupa uma vez só: o catálogo curado é pequeno, não compensa uma
-  // consulta por prateleira.
   const prateleiras = PRATELEIRAS.map((p) => ({
     ...p,
     itens: catalogo.filter((x) => p.cats.includes(String(x.category || ""))).slice(0, 8),
   })).filter((p) => p.itens.length > 0);
 
+  const destaques = catalogo.slice(0, 4);
   const temProvaGoogle =
     PROVA_SOCIAL.googleNota !== null && PROVA_SOCIAL.googleAvaliacoes !== null;
 
   return (
-    <div data-home-theme="light" className="bg-white">
+    <div data-home-theme="light" className="bg-neutral-50">
       <JsonLd data={generateHomeAiAndGoogleSchema()} />
       <Header />
 
-      {/* ============================ HERO ============================ */}
-      <section className="relative overflow-hidden bg-white">
-        <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-14 md:py-20 lg:grid-cols-[1.1fr_1fr]">
-          <div>
-          <p className="inline-flex items-center gap-2 rounded-full border border-[#E60012]/20 bg-[#E60012]/5 px-3 py-1 text-xs font-semibold text-[#E60012]">
-            <Store size={14} /> Loja física no Cambuí — Av. Anchieta, 789
-          </p>
-
-          <h1 className="mt-5 max-w-3xl text-4xl font-extrabold leading-[1.1] tracking-tight text-neutral-900 md:text-6xl">
-            Você vê o computador{" "}
-            <span className="text-[#E60012]">ligado na sua frente</span>{" "}
-            antes de pagar.
-          </h1>
-
-          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-neutral-600">
-            Loja de 300 m² no Cambuí, em Campinas há {PROVA_SOCIAL.anosDeMercado} anos.
-            Compra, assistência técnica e pós-venda no mesmo balcão — com uma pessoa
-            do outro lado do WhatsApp, não um formulário de chamado.
-          </p>
-
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <a
-              href={wpp(SITE_CONFIG.whatsapp.messageDefault)}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#25D366] px-6 py-4 text-base font-bold text-white shadow-lg shadow-[#25D366]/25 transition hover:brightness-95"
+      {/* ===================== BARRA DE DEPARTAMENTOS ==================== */}
+      <nav aria-label="Departamentos" className="border-b border-neutral-200 bg-white">
+        <div className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-4 py-2">
+          {DEPARTAMENTOS.map((d) => (
+            <Link
+              key={d.href}
+              href={d.href}
+              className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-semibold text-neutral-700 transition hover:bg-[#E60012]/5 hover:text-[#E60012]"
             >
-              <MessageCircle size={20} /> Falar com a loja agora
-            </a>
-            <a
-              href={SITE_CONFIG.mapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-neutral-200 px-6 py-4 text-base font-bold text-neutral-800 transition hover:border-neutral-900"
-            >
-              <MapPin size={20} /> Como chegar
-            </a>
-          </div>
+              <d.icone size={16} /> {d.nome}
+            </Link>
+          ))}
+        </div>
+      </nav>
 
-          <dl className="mt-10 grid max-w-3xl grid-cols-2 gap-x-6 gap-y-5 border-t border-neutral-100 pt-8 md:grid-cols-4">
-            <div>
-              <dt className="text-xs uppercase tracking-wide text-neutral-500">Na região desde</dt>
-              <dd className="mt-1 text-2xl font-bold text-neutral-900">1999</dd>
-            </div>
-            {temProvaGoogle && (
-              <div>
-                <dt className="text-xs uppercase tracking-wide text-neutral-500">Google</dt>
-                <dd className="mt-1 text-2xl font-bold text-neutral-900">
-                  {String(PROVA_SOCIAL.googleNota).replace(".", ",")}
-                  <span className="ml-1 text-sm font-normal text-neutral-500">
-                    · {PROVA_SOCIAL.googleAvaliacoes} avaliações
-                  </span>
-                </dd>
-              </div>
-            )}
-            <div>
-              <dt className="text-xs uppercase tracking-wide text-neutral-500">Retirada</dt>
-              <dd className="mt-1 text-2xl font-bold text-neutral-900">No mesmo dia</dd>
-            </div>
-            <div>
-              <dt className="text-xs uppercase tracking-wide text-neutral-500">Atendimento</dt>
-              <dd className="mt-1 text-2xl font-bold text-neutral-900">Humano</dd>
-            </div>
-          </dl>
-          </div>
-
-          {/* A manchete promete ver o PC ligado; a foto mostra exatamente
-              isso, na bancada da loja. Quadro real, não render. */}
-          <div className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl lg:aspect-square">
-            <Image
-              src="/images/loja/pc-ligado.jpg"
-              alt="Gabinete gamer montado e ligado na bancada da loja do Cambuí"
-              fill
-              priority
-              sizes="(max-width: 1024px) 100vw, 520px"
-              className="object-cover"
-            />
-            <span className="absolute bottom-4 left-4 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-neutral-800 shadow">
-              Salão da loja — Av. Anchieta, 789
+      {/* ============================= HERO ============================= */}
+      <section className="mx-auto grid max-w-7xl gap-4 px-4 py-5 lg:grid-cols-[2fr_1fr]">
+        <div className="relative min-h-[300px] overflow-hidden rounded-2xl lg:min-h-[380px]">
+          <Image
+            src="/images/loja/pc-ligado.jpg"
+            alt="Gabinete gamer montado e ligado na bancada da loja"
+            fill
+            priority
+            unoptimized
+            sizes="(max-width: 1024px) 100vw, 780px"
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-transparent" />
+          <div className="relative flex h-full flex-col justify-center p-7 md:p-10">
+            <span className="w-fit rounded-full bg-[#E60012] px-3 py-1 text-xs font-bold text-white">
+              Loja física no Cambuí
             </span>
+            <h1 className="mt-4 max-w-lg text-3xl font-extrabold leading-tight text-white md:text-5xl">
+              Você vê o computador ligado antes de pagar
+            </h1>
+            <p className="mt-3 max-w-md text-sm text-white/80 md:text-base">
+              {CONDICOES.descontoPixPercentual}% de desconto no PIX,{" "}
+              {CONDICOES.parcelas}x sem juros e retirada no mesmo dia em Campinas.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <a
+                href={wpp(SITE_CONFIG.whatsapp.messageDefault)}
+                className="inline-flex items-center gap-2 rounded-xl bg-[#25D366] px-5 py-3 text-sm font-bold text-white transition hover:brightness-95"
+              >
+                <MessageCircle size={18} /> Falar com a loja
+              </a>
+              <Link
+                href="/pcgamer"
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-neutral-900 transition hover:bg-neutral-100"
+              >
+                Ver PCs montados <ArrowRight size={16} />
+              </Link>
+            </div>
           </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+          <Link
+            href="/monteseupc"
+            className="group relative overflow-hidden rounded-2xl bg-neutral-900 p-6 text-white transition hover:brightness-110"
+          >
+            <Package size={26} className="text-[#E60012]" />
+            <h2 className="mt-3 text-lg font-bold">Monte seu PC</h2>
+            <p className="mt-1 text-sm text-white/70">
+              Escolha peça por peça. A gente monta, testa e entrega funcionando.
+            </p>
+            <span className="mt-4 inline-flex items-center gap-1 text-sm font-bold text-[#E60012]">
+              Começar <ArrowRight size={15} className="transition group-hover:translate-x-1" />
+            </span>
+          </Link>
+
+          <Link
+            href="/manutencao"
+            className="group relative overflow-hidden rounded-2xl border border-neutral-200 bg-white p-6 transition hover:border-[#E60012]/40 hover:shadow-lg"
+          >
+            <Wrench size={26} className="text-[#E60012]" />
+            <h2 className="mt-3 text-lg font-bold text-neutral-900">Assistência técnica</h2>
+            <p className="mt-1 text-sm text-neutral-600">
+              Conserto, upgrade e recuperação de dados na bancada da loja.
+            </p>
+            <span className="mt-4 inline-flex items-center gap-1 text-sm font-bold text-[#E60012]">
+              Ver serviços <ArrowRight size={15} className="transition group-hover:translate-x-1" />
+            </span>
+          </Link>
         </div>
       </section>
 
-      {/* ======================== ÁREA DE LOJA ======================== */}
-      <section className="border-t border-neutral-100 bg-white">
-        <div className="mx-auto max-w-6xl px-4 pt-12">
-          <nav aria-label="Departamentos" className="flex flex-wrap gap-2">
-            {DEPARTAMENTOS.map((d) => (
-              <Link
-                key={d.href}
-                href={d.href}
-                className="rounded-full border border-neutral-200 px-4 py-2 text-sm font-semibold text-neutral-700 transition hover:border-[#E60012] hover:text-[#E60012]"
-              >
-                {d.nome}
-              </Link>
-            ))}
-          </nav>
+      {/* ======================= BARRA DE BENEFÍCIOS ===================== */}
+      <section className="border-y border-neutral-200 bg-white">
+        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-4 px-4 py-5 md:grid-cols-4">
+          {[
+            { i: CreditCard, t: `${CONDICOES.descontoPixPercentual}% no PIX`, d: `ou ${CONDICOES.parcelas}x sem juros` },
+            { i: Truck, t: "Retirada hoje", d: "e entrega na região" },
+            { i: Wrench, t: "Assistência própria", d: "conserto no mesmo lugar" },
+            { i: ShieldCheck, t: "Nota fiscal", d: "em compra e serviço" },
+          ].map((b) => (
+            <div key={b.t} className="flex items-center gap-3">
+              <b.i size={22} className="shrink-0 text-[#E60012]" />
+              <div className="min-w-0">
+                <p className="truncate text-sm font-bold text-neutral-900">{b.t}</p>
+                <p className="truncate text-xs text-neutral-500">{b.d}</p>
+              </div>
+            </div>
+          ))}
         </div>
+      </section>
 
-        {prateleiras.map((p, i) => (
-          <div key={p.titulo} className={i % 2 === 1 ? "bg-neutral-50" : "bg-white"}>
-            <div className="mx-auto max-w-6xl px-4 py-12">
-              <div className="flex flex-wrap items-end justify-between gap-3">
-                <h2 className="text-2xl font-extrabold tracking-tight text-neutral-900 md:text-3xl">
-                  {p.titulo}
+      {/* ========================== DESTAQUES =========================== */}
+      {destaques.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4 py-8">
+          <div className="rounded-2xl bg-[#E60012] p-1">
+            <div className="rounded-[0.9rem] bg-white p-5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2 className="text-xl font-extrabold text-neutral-900">
+                  Destaques da semana
                 </h2>
-                <Link
-                  href={p.href}
-                  className="inline-flex items-center gap-1 text-sm font-bold text-[#E60012] hover:underline"
-                >
-                  Ver todos <ArrowRight size={16} />
+                <Link href="/vitrine" className="text-sm font-bold text-[#E60012] hover:underline">
+                  Ver a vitrine
                 </Link>
               </div>
-              <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
-                {p.itens.map((prod) => (
-                  <ProductCard key={prod.id} product={prod} />
-                ))}
+              <div className="mt-5 grid grid-cols-2 gap-4 md:grid-cols-4">
+                {destaques.map((p) => <CardProduto key={p.id} product={p} />)}
               </div>
             </div>
           </div>
-        ))}
+        </section>
+      )}
 
-        <div className="mx-auto max-w-6xl px-4 pb-14">
-          <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-6 text-center">
-            <p className="text-neutral-700">
-              O site mostra uma seleção. <strong>A loja tem muito mais</strong> —
-              e o que não está aqui a gente consegue.
-            </p>
-            <a
-              href={wpp("Olá! Procuro um produto que não achei no site.")}
-              className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#25D366] px-6 py-3 font-bold text-white transition hover:brightness-95"
-            >
-              <MessageCircle size={18} /> Consultar estoque no WhatsApp
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* ========================== SERVIÇOS ========================== */}
-      <section className="border-t border-neutral-100 bg-neutral-50">
-        <div className="mx-auto max-w-6xl px-4 py-16">
-          <h2 className="text-3xl font-extrabold tracking-tight text-neutral-900 md:text-4xl">
-            O que a loja da esquina faz e o site grande não faz
-          </h2>
-          <p className="mt-3 max-w-2xl text-neutral-600">
-            Serviço técnico é o motivo de existir uma loja física. Todos abaixo
-            são feitos aqui no Cambuí, por gente que você conhece pelo nome.
-          </p>
-
-          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {SERVICOS.map((s) => {
-              const Icone = s.icone;
-              return (
-                <div
-                  key={s.titulo}
-                  className="flex flex-col rounded-2xl border border-neutral-200 bg-white p-6 transition hover:border-[#E60012]/40 hover:shadow-lg"
-                >
-                  <Icone size={24} className="text-[#E60012]" />
-                  <h3 className="mt-4 text-lg font-bold text-neutral-900">{s.titulo}</h3>
-                  <p className="mt-2 flex-1 text-sm leading-relaxed text-neutral-600">{s.desc}</p>
-                  <div className="mt-5 flex items-center gap-4">
-                    <a
-                      href={wpp(s.msg)}
-                      className="inline-flex items-center gap-1.5 text-sm font-bold text-[#25D366] hover:underline"
-                    >
-                      <MessageCircle size={16} /> Chamar no WhatsApp
-                    </a>
-                    <Link
-                      href={s.href}
-                      className="inline-flex items-center gap-1 text-sm font-semibold text-neutral-500 hover:text-neutral-900"
-                    >
-                      Detalhes <ArrowRight size={14} />
-                    </Link>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ========================= COMPARATIVO ======================== */}
-      <section className="bg-white">
-        <div className="mx-auto max-w-4xl px-4 py-16">
-          <h2 className="text-3xl font-extrabold tracking-tight text-neutral-900 md:text-4xl">
-            Quando vale a pena comprar aqui
-          </h2>
-          <p className="mt-3 text-neutral-600">
-            Comprar em site grande faz sentido quando você já sabe exatamente o
-            que quer e não tem pressa. Fora isso, a conta muda:
-          </p>
-
-          <div className="mt-8 overflow-hidden rounded-2xl border border-neutral-200">
-            <div className="grid grid-cols-[1fr_auto_auto] gap-px bg-neutral-200 text-sm">
-              <div className="bg-neutral-50 px-5 py-3 font-semibold text-neutral-500" />
-              <div className="bg-neutral-50 px-4 py-3 text-center font-bold text-[#E60012]">Balão</div>
-              <div className="bg-neutral-50 px-4 py-3 text-center font-semibold text-neutral-500">Só online</div>
-              {COMPARATIVO.map((l) => (
-                <div key={l.ponto} className="contents">
-                  <div className="bg-white px-5 py-4 text-neutral-800">{l.ponto}</div>
-                  <div className="flex items-center justify-center bg-white px-4 py-4">
-                    {l.loja ? <Check size={18} className="text-[#25D366]" /> : <X size={18} className="text-neutral-300" />}
-                  </div>
-                  <div className="flex items-center justify-center bg-white px-4 py-4">
-                    {l.online ? <Check size={18} className="text-[#25D366]" /> : <X size={18} className="text-neutral-300" />}
-                  </div>
-                </div>
-              ))}
+      {/* ========================== PRATELEIRAS ========================= */}
+      {prateleiras.map((p) => (
+        <section key={p.titulo} className="mx-auto max-w-7xl px-4 py-6">
+          <div className="rounded-2xl border border-neutral-200 bg-white p-5">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-100 pb-4">
+              <h2 className="text-xl font-extrabold text-neutral-900">{p.titulo}</h2>
+              <Link href={p.href} className="inline-flex items-center gap-1 text-sm font-bold text-[#E60012] hover:underline">
+                Ver todos <ArrowRight size={15} />
+              </Link>
+            </div>
+            <div className="mt-5 grid grid-cols-2 gap-4 md:grid-cols-4">
+              {p.itens.map((prod) => <CardProduto key={prod.id} product={prod} />)}
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ))}
 
-      {/* ========================= COMO FUNCIONA ====================== */}
-      <section className="border-t border-neutral-100 bg-neutral-50">
-        <div className="mx-auto max-w-5xl px-4 py-16">
-          <h2 className="text-3xl font-extrabold tracking-tight text-neutral-900">Como funciona</h2>
-          <ol className="mt-8 grid gap-6 md:grid-cols-3">
-            {[
-              { n: "1", t: "Você chama no WhatsApp", d: "Conta o que precisa. Responde uma pessoa da loja, no horário comercial." },
-              { n: "2", t: "A gente confere e orça", d: "Estoque, prazo e preço fechado antes de qualquer serviço começar." },
-              { n: "3", t: "Retira no Cambuí ou recebe", d: "Entrega no mesmo dia em Campinas e região, ou retirada no balcão." },
-            ].map((p) => (
-              <li key={p.n} className="rounded-2xl border border-neutral-200 bg-white p-6">
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#E60012] text-sm font-bold text-white">{p.n}</span>
-                <h3 className="mt-4 font-bold text-neutral-900">{p.t}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-neutral-600">{p.d}</p>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-
-      {/* ========================= AVALIAÇÕES ========================= */}
-      <section className="bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-16">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <h2 className="text-3xl font-extrabold tracking-tight text-neutral-900">
-              O que os clientes escreveram
-            </h2>
-            {temProvaGoogle && (
-              <p className="text-sm text-neutral-500">
-                <span className="font-bold text-neutral-900">
-                  {String(PROVA_SOCIAL.googleNota).replace(".", ",")}
-                </span>{" "}
-                de 5 em {PROVA_SOCIAL.googleAvaliacoes} avaliações no Google
-              </p>
-            )}
-          </div>
-
-          <div className="mt-8 grid gap-4 md:grid-cols-2">
-            {AVALIACOES.map((a) => (
-              <figure key={a.nome} className="rounded-2xl border border-neutral-200 bg-white p-6">
-                <div className="flex gap-0.5 text-[#E60012]" aria-label="5 de 5 estrelas">
-                  {[0, 1, 2, 3, 4].map((i) => (
-                    <Star key={i} size={15} fill="currentColor" strokeWidth={0} />
-                  ))}
+      {/* ===================== FAIXA DE SERVIÇOS ======================== */}
+      <section className="mx-auto max-w-7xl px-4 py-8">
+        <div className="rounded-2xl bg-neutral-900 p-6 md:p-9">
+          <h2 className="text-2xl font-extrabold text-white md:text-3xl">
+            O que a loja da esquina faz e o site grande não faz
+          </h2>
+          <p className="mt-2 max-w-2xl text-sm text-white/70">
+            Serviço técnico é o motivo de existir uma loja física. Tudo abaixo é
+            feito aqui no Cambuí.
+          </p>
+          <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {SERVICOS.map((s) => (
+              <div key={s.titulo} className="flex items-center gap-3 rounded-xl bg-white/5 p-4 transition hover:bg-white/10">
+                <s.icone size={20} className="shrink-0 text-[#E60012]" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-bold text-white">{s.titulo}</p>
+                  <div className="mt-1 flex gap-3 text-xs">
+                    <a href={wpp(s.msg)} className="font-semibold text-[#25D366] hover:underline">WhatsApp</a>
+                    <Link href={s.href} className="text-white/50 hover:text-white">Detalhes</Link>
+                  </div>
                 </div>
-                <blockquote className="mt-4 text-[15px] leading-relaxed text-neutral-700">
-                  “{a.texto}”
-                </blockquote>
-                <figcaption className="mt-4 text-sm text-neutral-500">
-                  <span className="font-semibold text-neutral-900">{a.nome}</span> · {a.quando} · Google
-                </figcaption>
-              </figure>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ========================== LOJA FÍSICA ======================= */}
-      <section className="border-t border-neutral-100 bg-neutral-50">
-        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 md:grid-cols-2">
-          <div>
-            <h2 className="text-3xl font-extrabold tracking-tight text-neutral-900">Passa aqui</h2>
-            <p className="mt-3 text-neutral-600">
-              Tem café, tem bancada e tem gente pra explicar sem pressa.
+      {/* ========================= AVALIAÇÕES =========================== */}
+      <section className="mx-auto max-w-7xl px-4 py-8">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <h2 className="text-2xl font-extrabold text-neutral-900">O que os clientes escreveram</h2>
+          {temProvaGoogle && (
+            <p className="text-sm text-neutral-500">
+              <span className="font-bold text-neutral-900">
+                {String(PROVA_SOCIAL.googleNota).replace(".", ",")}
+              </span>{" "}
+              de 5 em {PROVA_SOCIAL.googleAvaliacoes} avaliações no Google
             </p>
-            <ul className="mt-8 space-y-5">
+          )}
+        </div>
+        <div className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {AVALIACOES.map((a) => (
+            <figure key={a.nome} className="rounded-xl border border-neutral-200 bg-white p-5">
+              <div className="flex gap-0.5 text-[#E60012]" aria-label="5 de 5 estrelas">
+                {[0,1,2,3,4].map((i) => <Star key={i} size={13} fill="currentColor" strokeWidth={0} />)}
+              </div>
+              <blockquote className="mt-3 text-[13px] leading-relaxed text-neutral-700">“{a.texto}”</blockquote>
+              <figcaption className="mt-3 text-xs text-neutral-500">
+                <span className="font-semibold text-neutral-900">{a.nome}</span> · {a.quando} · Google
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </section>
+
+      {/* ========================= LOJA FÍSICA ========================== */}
+      <section className="border-t border-neutral-200 bg-white">
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 md:grid-cols-2">
+          <div>
+            <h2 className="text-2xl font-extrabold text-neutral-900 md:text-3xl">Passa aqui</h2>
+            <p className="mt-2 text-neutral-600">
+              Loja de 300 m² no Cambuí. Tem bancada, tem estoque e tem gente pra explicar sem pressa.
+            </p>
+            <ul className="mt-7 space-y-4">
               <li className="flex gap-3">
-                <MapPin size={20} className="mt-0.5 shrink-0 text-[#E60012]" />
+                <MapPin size={19} className="mt-0.5 shrink-0 text-[#E60012]" />
                 <div>
                   <p className="font-semibold text-neutral-900">{SITE_CONFIG.address}</p>
                   <a href={SITE_CONFIG.mapsUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-[#E60012] hover:underline">
@@ -445,61 +326,42 @@ export default async function Home() {
                 </div>
               </li>
               <li className="flex gap-3">
-                <Clock size={20} className="mt-0.5 shrink-0 text-[#E60012]" />
+                <Clock size={19} className="mt-0.5 shrink-0 text-[#E60012]" />
                 <p className="text-neutral-800">{SITE_CONFIG.openingHoursDisplay}</p>
               </li>
               <li className="flex gap-3">
-                <ShieldCheck size={20} className="mt-0.5 shrink-0 text-[#E60012]" />
+                <ShieldCheck size={19} className="mt-0.5 shrink-0 text-[#E60012]" />
                 <p className="text-neutral-800">
-                  CNPJ {SITE_CONFIG.cnpj} — nota fiscal em toda compra e serviço.
+                  CNPJ {SITE_CONFIG.cnpj} — {PROVA_SOCIAL.anosDeMercado} anos em Campinas.
                 </p>
               </li>
             </ul>
-            <a
-              href={wpp("Olá! Queria confirmar se vocês estão abertos agora.")}
-              className="mt-8 inline-flex items-center gap-2 rounded-xl bg-[#25D366] px-6 py-4 font-bold text-white shadow-lg shadow-[#25D366]/25 transition hover:brightness-95"
-            >
-              <MessageCircle size={20} /> Falar com a loja
-            </a>
           </div>
-
-          <div>
-            {FOTOS_LOJA.length > 0 ? (
-              <div className="grid grid-cols-2 gap-3">
-                {FOTOS_LOJA.map((f) => (
-                  <div key={f.src} className="relative aspect-square overflow-hidden rounded-2xl">
-                    <Image src={f.src} alt={f.alt} fill className="object-cover" sizes="(max-width:768px) 50vw, 300px" />
-                  </div>
-                ))}
+          <div className="grid grid-cols-2 gap-3">
+            {FOTOS_LOJA.map((f) => (
+              <div key={f.src} className="relative aspect-square overflow-hidden rounded-xl">
+                <Image src={f.src} alt={f.alt} fill unoptimized sizes="(max-width:768px) 50vw, 280px" className="object-cover" />
               </div>
-            ) : (
-              /* Sem foto real ainda. Bloco neutro em vez de render de IA:
-                 imagem gerada contradiz o argumento de loja física. */
-              <div className="flex h-full min-h-[280px] items-center justify-center rounded-2xl border-2 border-dashed border-neutral-300 bg-white p-8 text-center">
-                <p className="max-w-xs text-sm text-neutral-400">
-                  Espaço reservado para as fotos e vídeos reais da loja.
-                </p>
-              </div>
-            )}
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ============================ CTA ============================= */}
+      {/* ============================= CTA ============================== */}
       <section className="bg-[#E60012]">
-        <div className="mx-auto max-w-4xl px-4 py-16 text-center">
-          <h2 className="text-3xl font-extrabold tracking-tight text-white md:text-4xl">
-            Descreve o problema. A gente responde.
+        <div className="mx-auto max-w-4xl px-4 py-12 text-center">
+          <h2 className="text-2xl font-extrabold text-white md:text-3xl">
+            Não achou? Pergunta no WhatsApp.
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-white/90">
-            Orçamento de serviço, consulta de estoque ou ajuda pra escolher —
-            tudo pelo mesmo número.
+          <p className="mx-auto mt-3 max-w-xl text-sm text-white/90">
+            O site mostra uma seleção — boa parte do estoque não está publicada.
+            Orçamento de serviço e consulta de estoque no mesmo número.
           </p>
           <a
             href={wpp(SITE_CONFIG.whatsapp.messageDefault)}
-            className="mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-8 py-4 text-base font-bold text-[#E60012] shadow-xl transition hover:bg-neutral-50"
+            className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-7 py-3.5 font-bold text-[#E60012] shadow-lg transition hover:bg-neutral-50"
           >
-            <MessageCircle size={20} /> {SITE_CONFIG.whatsapp.display}
+            <MessageCircle size={19} /> {SITE_CONFIG.whatsapp.display}
           </a>
         </div>
       </section>
