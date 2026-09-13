@@ -605,6 +605,10 @@ export default function CrmWhatsAppClient({
   const [novoNome, setNovoNome] = useState("");
   const [novaMsgInicial, setNovaMsgInicial] = useState("");
 
+  // Quick message via Kanban card
+  const [mensagemRapidaCardId, setMensagemRapidaCardId] = useState<string | null>(null);
+  const [mensagemRapidaTexto, setMensagemRapidaTexto] = useState("");
+
   // Web Fotos (Google / Bing transparent PNG)
   const [buscaFotosWeb, setBuscaFotosWeb] = useState("");
   const [fotosWeb, setFotosWeb] = useState<Array<{ url: string; w: number; h: number; nome: string }>>([]);
@@ -4153,26 +4157,31 @@ export default function CrmWhatsAppClient({
             </aside>
           </div>
 
-          {/* BOTTOM KANBAN TRAY */}
+          {/* BOTTOM KANBAN TRAY - deslizante 70% / 10% */}
           <div
-            className={`border-t border-[#e3e3e3] bg-[#f0f2f5] flex flex-col px-3.5 py-2 transition-all duration-200 shrink-0 ${
+            className={`border-t border-[#e3e3e3] bg-[#f0f2f5] flex flex-col px-3.5 py-2 transition-all duration-300 ease-in-out shrink-0 ${
               kanbanTamanho === "expandido"
-                ? "h-[65vh] min-h-[300px]"
+                ? "h-[70vh] min-h-[400px]"
                 : kanbanTamanho === "recolhido"
-                ? "h-11 min-h-[44px]"
+                ? "h-[10vh] min-h-[72px]"
                 : "h-56 min-h-[200px]"
             }`}
           >
-            {/* Topbar of Kanban */}
-            <div className="flex items-center justify-between gap-3 mb-2 shrink-0">
-              <h4
-                onClick={() =>
-                  setKanbanTamanho(kanbanTamanho === "recolhido" ? "normal" : "recolhido")
-                }
-                className="font-bold text-xs text-[#202124] cursor-pointer flex items-center gap-1.5"
-                title="Clique para recolher ou expandir o Kanban"
-              >
+            {/* Topbar of Kanban - clique em qualquer canto desliza */}
+            <div
+              onClick={() =>
+                setKanbanTamanho(
+                  kanbanTamanho === "expandido" ? "recolhido" : "expandido"
+                )
+              }
+              className="flex items-center justify-between gap-3 mb-2 shrink-0 cursor-pointer hover:bg-white/50 -mx-1 px-1 py-1 rounded-lg transition-colors"
+              title="Clique para expandir (70%) ou recolher (10%)"
+            >
+              <h4 className="font-bold text-xs text-[#202124] flex items-center gap-1.5 select-none">
                 🗂 <b>Kanban de atendimento</b>
+                <span className="text-[9px] font-normal text-[#5f6368] bg-white border border-[#e3e3e3] rounded-full px-1.5 py-0.5 hidden sm:inline">
+                  {kanbanTamanho === "expandido" ? "▼ recolher" : "▲ expandir 70%"}
+                </span>
               </h4>
 
               {kanbanTamanho !== "recolhido" && (
@@ -4364,6 +4373,17 @@ export default function CrmWhatsAppClient({
                                   ))}
                                 </div>
                               )}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setMensagemRapidaCardId(card.id);
+                                  setMensagemRapidaTexto("");
+                                }}
+                                className="w-full mt-2 bg-[#0f9d58] hover:bg-[#0a6e3d] text-white py-1.5 px-2 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 transition-colors shadow-sm"
+                                title="Enviar mensagem rápida sem sair do kanban"
+                              >
+                                💬 Enviar mensagem
+                              </button>
                             </div>
                           ))
                         )}
@@ -4433,9 +4453,106 @@ export default function CrmWhatsAppClient({
                 )}
               </div>
             )}
-          </div>
+            </div>
         </div>
       )}
+
+      {/* JANELA RÁPIDA DE MENSAGEM VIA KANBAN - sem sair do kanban */}
+      {mensagemRapidaCardId &&
+        (() => {
+          const chatRapido = chats.find((c) => c.id === mensagemRapidaCardId);
+          if (!chatRapido) return null;
+          return (
+            <div
+              className="fixed inset-0 bg-black/40 z-40 flex items-center justify-center p-4"
+              onClick={() => setMensagemRapidaCardId(null)}
+            >
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-[#e3e3e3] animate-in fade-in zoom-in duration-150"
+              >
+                <div className="bg-[#0f9d58] text-white px-4 py-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm overflow-hidden">
+                      {formatAvatarUrl(chatRapido.pic, serverUrl) ? (
+                        <img src={formatAvatarUrl(chatRapido.pic, serverUrl)!} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <span>{chatRapido.nome.charAt(0).toUpperCase()}</span>
+                      )}
+                    </div>
+                    <div>
+                      <div className="font-bold text-sm">{chatRapido.nome}</div>
+                      <div className="text-[11px] opacity-90 font-mono">{formatarNumeroExibicao(chatRapido.numero || chatRapido.id)}</div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setMensagemRapidaCardId(null)}
+                    className="text-white/80 hover:text-white hover:bg-white/10 rounded-full w-7 h-7 flex items-center justify-center"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="p-4 space-y-3">
+                  <textarea
+                    autoFocus
+                    value={mensagemRapidaTexto}
+                    onChange={(e) => setMensagemRapidaTexto(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                        e.preventDefault();
+                        if (mensagemRapidaTexto.trim() && socketRef.current?.connected) {
+                          const num = chatRapido.numero || chatRapido.id.replace(/@.*$/, "");
+                          socketRef.current.emit("panel:send-message", {
+                            number: num.replace(/\D/g, ""),
+                            text: mensagemRapidaTexto.trim(),
+                            chatId: chatRapido.id,
+                          });
+                          showToast(`Mensagem enviada para ${chatRapido.nome} ✓`);
+                          setMensagemRapidaTexto("");
+                          setMensagemRapidaCardId(null);
+                        }
+                      }
+                    }}
+                    placeholder={`Mensagem para ${chatRapido.nome}... (Ctrl+Enter para enviar)`}
+                    rows={4}
+                    className="w-full px-3 py-2 border border-[#e3e3e3] rounded-xl text-sm outline-none focus:border-[#0f9d58] focus:ring-1 focus:ring-[#0f9d58]/20 resize-none"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setMensagemRapidaCardId(null)}
+                      className="flex-1 bg-white border border-[#e3e3e3] hover:bg-[#f0f2f5] text-[#5f6368] py-2 rounded-xl text-sm font-bold"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (!mensagemRapidaTexto.trim()) return;
+                        if (!socketRef.current?.connected) {
+                          showToast("WhatsApp desconectado — aguarde reconectar");
+                          return;
+                        }
+                        const num = chatRapido.numero || chatRapido.id.replace(/@.*$/, "");
+                        socketRef.current.emit("panel:send-message", {
+                          number: num.replace(/\D/g, ""),
+                          text: mensagemRapidaTexto.trim(),
+                          chatId: chatRapido.id,
+                        });
+                        showToast(`Mensagem enviada para ${chatRapido.nome} ✓`);
+                        setMensagemRapidaTexto("");
+                        setMensagemRapidaCardId(null);
+                      }}
+                      disabled={!mensagemRapidaTexto.trim()}
+                      className="flex-1 bg-[#0f9d58] hover:bg-[#0a6e3d] disabled:opacity-40 disabled:cursor-not-allowed text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5"
+                    >
+                      ✈️ Enviar
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-[#5f6368] text-center">Dica: Ctrl+Enter envia rápido • Esc fecha</p>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
       {/* MODAL STATUS / STORIES DO WHATSAPP */}
       {modalStatusAberto && (
