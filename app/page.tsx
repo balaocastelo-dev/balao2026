@@ -59,10 +59,10 @@ const AVALIACOES = [
 /* Fotos reais da loja. Vazio = a seção usa um bloco neutro em vez de
  * imagem de IA. Render de IA contradiz o argumento "loja física real". */
 const FOTOS_LOJA: { src: string; alt: string }[] = [
-  { src: "/images/loja/atendimento-balcao.jpg", alt: "Atendente da Balão da Informática no salão da loja do Cambuí" },
-  { src: "/images/loja/estoque-notebooks.jpg", alt: "Prateleiras com notebooks em exposição na loja" },
-  { src: "/images/loja/vitrine-placas-video.jpg", alt: "Placas de vídeo GeForce RTX e processadores Ryzen na vitrine" },
-  { src: "/images/loja/parede-acessorios.jpg", alt: "Parede de acessórios e periféricos da loja" },
+  { src: "/images/loja/fachada.jpg", alt: "Fachada da Balão da Informática na Av. Anchieta, 789, no Cambuí" },
+  { src: "/images/loja/salao.jpg", alt: "Salão da loja com prateleiras e corredor central" },
+  { src: "/images/loja/estoque-notebooks.jpg", alt: "Prateleiras com notebooks e periféricos em exposição" },
+  { src: "/images/loja/monitores-acessorios.jpg", alt: "Monitores em exposição e parede de acessórios" },
 ];
 
 const WPP = SITE_CONFIG.whatsapp.number;
@@ -225,8 +225,8 @@ export default async function Home() {
               isso, na bancada da loja. Quadro real, não render. */}
           <div className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl lg:aspect-square">
             <Image
-              src="/images/loja/setup-gamer.jpg"
-              alt="PC gamer montado e ligado na bancada da loja do Cambuí"
+              src="/images/loja/pc-ligado.jpg"
+              alt="Gabinete gamer montado e ligado na bancada da loja do Cambuí"
               fill
               priority
               sizes="(max-width: 1024px) 100vw, 520px"
