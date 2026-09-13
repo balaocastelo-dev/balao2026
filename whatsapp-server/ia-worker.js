@@ -30,6 +30,28 @@ const IDADE_MAX_MS = 45 * 60_000; // não responde mensagem com mais de 45 min
 const MAX_CONCORRENTES = Number(process.env.JULIA_IA_MAX_CONCURRENT) || 3;
 const MAX_HISTORICO = 8; // últimas mensagens enviadas ao cérebro da Júlia
 const TIMEOUT_CHAMADA_MS = 120_000;
+// O WhatsApp precisa de alguns segundos para carregar a imagem do preview
+// antes de mandar o link — sem isso o cartão chega sem foto no celular.
+const DELAY_LINK_MS = Number(process.env.JULIA_IA_LINK_DELAY_MS) || 5_000;
+
+const dormir = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Separa os links do corpo do texto. Links em linha própria viram mensagem
+// separada (o WhatsApp transforma URL pura em cartão com foto). Link grudado
+// em frase continua no texto.
+function separarLinks(texto) {
+  const links = [];
+  const linhas = String(texto).split("\n");
+  const restantes = linhas.filter((linha) => {
+    const m = linha.trim().match(/^https?:\/\/\S+$/);
+    if (m) {
+      links.push(m[0]);
+      return false;
+    }
+    return true;
+  });
+  return { corpo: restantes.join("\n").trim(), links };
+}
 
 const estado = {
   modo: MODO_INICIAL,
