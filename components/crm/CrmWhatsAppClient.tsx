@@ -731,7 +731,7 @@ export default function CrmWhatsAppClient({
                   .replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'")
                   .replace(/&aacute;/g, "á").replace(/&eacute;/g, "é").replace(/&iacute;/g, "í").replace(/&oacute;/g, "ó").replace(/&uacute;/g, "ú")
                   .replace(/&atilde;/g, "ã").replace(/&otilde;/g, "õ").replace(/&ccedil;/g, "ç").replace(/&Aacute;/g, "Á").replace(/&Eacute;/g, "É").replace(/&Iacute;/g, "Í").replace(/&Oacute;/g, "Ó").replace(/&Uacute;/g, "Ú").replace(/&Ccedil;/g, "Ç");
-                if (Array.isArray(p.specs)) return p.specs.map(decode).filter(v => v.trim() && v.trim() !== ":" && v.trim() !== ";");
+                if (Array.isArray(p.specs)) return (p.specs as string[]).map(decode).filter((v: string) => v.trim() && v.trim() !== ":" && v.trim() !== ";");
                 if (typeof p.specs === "object" && p.specs) {
                   return Object.entries(p.specs)
                     .filter(([k]) => !["custo_origem", "markup", "qualidade_fotos"].includes(k))
