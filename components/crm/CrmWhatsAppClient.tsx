@@ -725,13 +725,28 @@ export default function CrmWhatsAppClient({
               // Campos internos (custo de aquisição, markup aplicado,
               // qualidade da foto) nunca podem aparecer aqui: essa lista vai
               // direto pro texto da mensagem enviada ao cliente no WhatsApp.
-              specs: Array.isArray(p.specs)
-                ? p.specs
-                : typeof p.specs === "object" && p.specs
-                ? Object.entries(p.specs)
+              // Decodifica entidades HTML e filtra specs vazias (":" , "&nbsp;" etc) que vêm do scraping da Kabum
+              specs: (() => {
+                const decode = (s: string) => String(s || "")
+                  .replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+                  .replace(/&aacute;/g, "á").replace(/&eacute;/g, "é").replace(/&iacute;/g, "í").replace(/&oacute;/g, "ó").replace(/&uacute;/g, "ú")
+                  .replace(/&atilde;/g, "ã").replace(/&otilde;/g, "õ").replace(/&ccedil;/g, "ç").replace(/&Aacute;/g, "Á").replace(/&Eacute;/g, "É").replace(/&Iacute;/g, "Í").replace(/&Oacute;/g, "Ó").replace(/&Uacute;/g, "Ú").replace(/&Ccedil;/g, "Ç");
+                if (Array.isArray(p.specs)) return p.specs.map(decode).filter(v => v.trim() && v.trim() !== ":" && v.trim() !== ";");
+                if (typeof p.specs === "object" && p.specs) {
+                  return Object.entries(p.specs)
                     .filter(([k]) => !["custo_origem", "markup", "qualidade_fotos"].includes(k))
-                    .map(([k, v]) => `${k}: ${v}`)
-                : [],
+                    .map(([k, v]) => {
+                      const dk = decode(k).trim();
+                      const dv = decode(String(v ?? "")).trim();
+                      // pula specs vazias, só ":" , só ";" ou HTML quebrado como "-->"
+                      if (!dk || dk === "-->" || !dv || dv === ":" || dv === ";" || dv === ":" || dv.length < 2) return "";
+                      // se dk já contém ":" no final, não duplica
+                      return dv ? `${dk}: ${dv}` : "";
+                    })
+                    .filter(Boolean);
+                }
+                return [];
+              })(),
             };
         });
         setProdutosCatalogo(list);

@@ -1018,10 +1018,30 @@ async function sincronizarEtiquetas() {
 // ou um payload manual, o servidor nunca deve deixar custo de aquisição,
 // markup aplicado ou nota sobre qualidade da foto vazar pra dentro de uma
 // mensagem real enviada ao cliente no WhatsApp.
+// Também decodifica entidades HTML (&nbsp; &aacute; etc) e remove specs vazias (":", ";", "-->") que vêm do scraping da Kabum
 const SPEC_KEYS_INTERNOS = /^(custo_origem|markup|qualidade_fotos)\s*:/i;
+function decodeHtml(str) {
+  return String(str || "")
+    .replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+    .replace(/&aacute;/g, "á").replace(/&eacute;/g, "é").replace(/&iacute;/g, "í").replace(/&oacute;/g, "ó").replace(/&uacute;/g, "ú")
+    .replace(/&atilde;/g, "ã").replace(/&otilde;/g, "õ").replace(/&ccedil;/g, "ç").replace(/&Aacute;/g, "Á").replace(/&Eacute;/g, "É").replace(/&Iacute;/g, "Í").replace(/&Oacute;/g, "Ó").replace(/&Uacute;/g, "Ú").replace(/&Ccedil;/g, "Ç");
+}
 function filtrarSpecsInternos(specs) {
   if (!Array.isArray(specs)) return [];
-  return specs.filter((linha) => !SPEC_KEYS_INTERNOS.test(String(linha || "")));
+  return specs
+    .map((linha) => decodeHtml(String(linha || "")).trim())
+    .filter((linha) => {
+      if (!linha) return false;
+      if (SPEC_KEYS_INTERNOS.test(linha)) return false;
+      // remove specs quebradas da Kabum: só ":", ";", "-->" ou "Chave: :" com valor vazio
+      if (linha === "-->" || linha === ":" || linha === ";" || linha === "-->: :") return false;
+      const partes = linha.split(":");
+      if (partes.length >= 2) {
+        const valor = partes.slice(1).join(":").trim();
+        if (!valor || valor === ":" || valor === ";" || valor.length < 2) return false;
+      }
+      return true;
+    });
 }
 
 /**
@@ -2816,7 +2836,14 @@ async function resolveMediaObject(mediaSource, filename = "arquivo", mimetype = 
     } catch (e) {
       console.warn("MessageMedia.fromUrl falhou, tentando download com fetch nativo:", e.message);
       try {
-        const resp = await fetch(mediaSource);
+        const resp = await fetch(mediaSource, {
+          headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
+            "Referer": "https://www.balao.info/",
+          },
+        });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status} ao baixar imagem`);
         const arrayBuf = await resp.arrayBuffer();
         const base64 = Buffer.from(arrayBuf).toString("base64");
         const detectedMime = resp.headers.get("content-type") || mimetype || "image/jpeg";
