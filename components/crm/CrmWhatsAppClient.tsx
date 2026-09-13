@@ -566,7 +566,7 @@ export default function CrmWhatsAppClient({
     () => flattenCategoryTree(buildCategoryTree(categoriasCatalogo)),
     [categoriasCatalogo]
   );
-  const [tipoPrecoCatalogo, setTipoPrecoCatalogo] = useState<"venda" | "custo">("venda");
+  const [tipoPrecoCatalogo, setTipoPrecoCatalogo] = useState<"venda" | "custo">("custo");
   const [catalogoCarregando, setCatalogoCarregando] = useState(false);
   const [buscaCatalogo, setBuscaCatalogo] = useState("");
   const [buscaCatalogoDebounced, setBuscaCatalogoDebounced] = useState("");
@@ -587,7 +587,7 @@ export default function CrmWhatsAppClient({
   const [modalProdutoAberto, setModalProdutoAberto] = useState(false);
   const [produtoModal, setProdutoModal] = useState<CrmProdutoCatalogo | null>(null);
   const [mpCusto, setMpCusto] = useState("0");
-  const [mpMargem, setMpMargem] = useState("25");
+  const [mpMargem, setMpMargem] = useState("50");
   const [mpPreco, setMpPreco] = useState("0");
   const [mpObs, setMpObs] = useState("");
   const [mpOrigem, setMpOrigem] = useState<"margem" | "preco">("margem");
@@ -705,7 +705,7 @@ export default function CrmWhatsAppClient({
                 ? p.cost
                 : Math.round(precoNum * 0.75);
             const margem =
-              custoNum > 0 ? Math.round(((precoNum - custoNum) / custoNum) * 100) : 25;
+              custoNum > 0 ? Math.round(((precoNum - custoNum) / custoNum) * 100) : 50;
             const fornecedor = p.supplier || p.brand || "Estoque Balão";
             const precoFmt =
               typeof p.price === "number"
@@ -1984,8 +1984,8 @@ export default function CrmWhatsAppClient({
   // Product Modal Sync
   const abrirModalProduto = (p: CrmProdutoCatalogo) => {
     setProdutoModal(p);
-    const custo = p.custo || Math.round(p.preco * 0.76);
-    const margem = p.margem || 28;
+    const custo = p.custo || Math.round(p.preco * 0.67);
+    const margem = p.margem || 50;
     setMpCusto(String(custo));
     setMpMargem(String(margem));
     setMpPreco(String(Math.round(custo * (1 + margem / 100))));
@@ -3444,43 +3444,9 @@ export default function CrmWhatsAppClient({
                 {/* ABA 1: CATÁLOGO (SINCRONIZADO COM O SITE / BANCO DE DADOS) */}
                 {abaAtual === "catalogo" && (
                   <div className="space-y-3">
-                    {/* Seletor de Modo: Preço de Venda (Site) vs Preço de Custo (+ Lucro) */}
-                    <div className="bg-[#f0f2f5] p-1 rounded-xl border border-[#e3e3e3] flex gap-1 text-xs">
-                      <button
-                        onClick={() => setTipoPrecoCatalogo("venda")}
-                        className={`flex-1 py-2 px-2 rounded-lg font-bold transition-all cursor-pointer text-center ${
-                          tipoPrecoCatalogo === "venda"
-                            ? "bg-[#0f9d58] text-white shadow-xs"
-                            : "text-[#5f6368] hover:bg-white"
-                        }`}
-                      >
-                        🏷️ Preço de Venda (Site)
-                      </button>
-                      <button
-                        onClick={() => setTipoPrecoCatalogo("custo")}
-                        className={`flex-1 py-2 px-2 rounded-lg font-bold transition-all cursor-pointer text-center ${
-                          tipoPrecoCatalogo === "custo"
-                            ? "bg-[#d97706] text-white shadow-xs"
-                            : "text-[#5f6368] hover:bg-white"
-                        }`}
-                      >
-                        📦 Preço de Custo (+ Margem)
-                      </button>
-                    </div>
-
-                    {/* Explicação do Modo Ativo */}
-                    <div
-                      className={`rounded-xl p-2.5 text-[11px] font-semibold flex items-center justify-between border ${
-                        tipoPrecoCatalogo === "venda"
-                          ? "bg-[#e7f6ec] border-[#0f9d58]/40 text-[#0a6e3d]"
-                          : "bg-[#fff8e1] border-[#f2c94c] text-[#7a5c00]"
-                      }`}
-                    >
-                      <span>
-                        {tipoPrecoCatalogo === "venda"
-                          ? "🏷️ Modo Venda: Envia o valor exato cadastrado no site/banco de dados."
-                          : "⚠️ Modo Custo: NUNCA envia no custo! Solicita o acréscimo de lucro antes de enviar."}
-                      </span>
+                    {/* Modo único: Preço de Custo (+50% Margem oficial) */}
+                    <div className="bg-[#fff8e1] border border-[#f2c94c] rounded-xl p-2.5 text-[11px] font-bold text-[#7a5c00] flex items-center justify-between">
+                      <span>📦 Modo Custo + Margem 50% — preço oficial da loja (custo + 50% de lucro)</span>
                       <button
                         onClick={() => {
                           carregarCatalogoBanco();
@@ -3606,8 +3572,8 @@ export default function CrmWhatsAppClient({
                                   <button
                                     onClick={() => {
                                       setProdutoModal(prod);
-                                      const custo = prod.custo || Math.round(prod.preco * 0.75);
-                                      const margemPadrao = 25;
+                                      const custo = prod.custo || Math.round(prod.preco * 0.67);
+                                      const margemPadrao = 50;
                                       const precoVendaCalc = Math.round(custo * (1 + margemPadrao / 100));
                                       setMpCusto(String(custo));
                                       setMpMargem(String(margemPadrao));
