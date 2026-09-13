@@ -82,21 +82,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }))
 
-  // Produtos (Limitado aos 1000 mais recentes para performance)
-  // Nota: getProducts já tem paginação interna, mas aqui vamos pegar tudo o que ele retornar
-  // Se getProducts retornar muitos, pode ser lento.
-  // Com o banco fora, usa a cópia guardada na VPS — os produtos continuam
-  // sendo oferecidos ao Google em vez de sumirem do sitemap.
-  let products = await semQuebrar('produtos', () => getProductsForSitemap(1000), [])
+  // Produtos - 1288 curados (1000 hardware + 288 originais) com prioridade alta para segunda-feira
+  let products = await semQuebrar('produtos', () => getProductsForSitemap(2000), [])
   if (products.length === 0) {
     const daCopia = await semQuebrar('cópia do catálogo', () => lerCatalogoDoEspelho(), [])
-    products = daCopia.slice(0, 1000) as typeof products
+    products = daCopia.slice(0, 2000) as typeof products
   }
   const productRoutes = products.map((product) => ({
     url: `${baseUrl}/product/${product.slug || product.id}`,
     lastModified: new Date(product.created_at || new Date()),
-    changeFrequency: 'weekly' as const,
-    priority: 0.6,
+    changeFrequency: 'daily' as const,
+    priority: 0.8,
   }))
 
   const blogPosts = await semQuebrar('blog', () => listBlogPostsForPage({ take: 500 }), [])

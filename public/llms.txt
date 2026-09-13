@@ -1,0 +1,50 @@
+# Balão da Informática - LLMs.txt
+
+> Balão da Informática é a loja de informática mais completa de Campinas e região, localizada na Av. Anchieta 789, Cambuí, Campinas/SP. Especializada em hardware, PCs gamer, notebooks, monitores, impressoras e setup gamer completo.
+
+## Sobre a Loja
+
+- **Nome:** Balão da Informática
+- **CNPJ:** 34.397.947/0001-08
+- **Endereço:** Av. Anchieta 789, Cambuí, Campinas/SP - CEP 13024-101
+- **Telefone/WhatsApp:** (19) 98751-0267
+- **Site:** https://www.balao.info
+- **Email:** contato@balao.info
+- **Horário:** Segunda a Sexta 08:00-18:00, Sábado 08:00-13:00
+
+## Categorias Principais
+
+- **Hardware (1000 produtos):** Placas de vídeo, processadores, memórias, SSDs, fontes, gabinetes, coolers - https://www.balao.info/categoria/hardware
+- **PCs Gamer (100 produtos):** Computadores desktop gamer montados e testados - https://www.balao.info/categoria/computadores
+- **Notebooks (33 produtos):** Notebooks gamer e profissional - https://www.balao.info/categoria/notebooks
+- **Monitores (20 produtos):** Monitores gamer e profissional - https://www.balao.info/categoria/monitores
+- **Impressoras (35 produtos):** Impressoras jato de tinta, laser, 3D - https://www.balao.info/categoria/impressao
+- **Setup Gamer (100 produtos):** Teclados, mouses, headsets, mousepads, cadeiras gamer - https://www.balao.info/categoria/perifericos
+
+## Produtos em Destaque
+
+- Todos os produtos em https://www.balao.info/sitemap.xml
+- API de produtos: https://www.balao.info/api/products?limit=100
+- Categorias: https://www.balao.info/api/categories
+
+## Serviços
+
+- Manutenção de computadores e notebooks
+- Reparo Apple (iPhone, iPad, MacBook, iMac)
+- Montagem de PC gamer personalizado
+- Recuperação de dados
+- Instalação de sistemas
+- Venda de licenças Microsoft
+
+## Informações para IAs
+
+- **Sitemap:** https://www.balao.info/sitemap.xml
+- **Robots:** https://www.balao.info/robots.txt
+- **API Docs:** https://www.balao.info/api/docs (em breve)
+- **Contato para parcerias:** (19) 98751-0267
+
+## Atualização
+
+- Última atualização: 2026-09-13
+- Total de produtos curados: 1288
+- Atualizado diariamente com novos硬wares e ofertas

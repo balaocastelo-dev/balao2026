@@ -661,10 +661,63 @@ export async function updateCarouselImage(id: string, updates: Partial<CarouselI
 
 export async function getCategories(): Promise<Category[]> {
   try {
+    // Se estiver usando Supabase com curadoria, só mostra categorias que têm produto curado
+    if (isSupabaseActive()) {
+      try {
+        const { supabase, CURATED_ONLY } = await import('./supabase');
+        const { data: cats, error } = await supabase.from("categories").select("*").order("display_order", { ascending: true }).order("name", { ascending: true });
+        if (error || !cats) throw error || new Error("sem categorias");
+        if (!CURATED_ONLY) {
+          return (cats as any[]).map(r => ({
+            id: String(r.id),
+            name: String(r.name),
+            slug: String(r.slug),
+            parent_id: r.parent_id ? String(r.parent_id) : null,
+            display_order: Number(r.display_order || 0),
+            icon: r.icon ? String(r.icon) : null,
+            active: Boolean(r.active),
+            full_path: r.full_path ? String(r.full_path) : undefined,
+          })) as Category[];
+        }
+        // Filtra só categorias com produto curado
+        const { data: prods } = await supabase.from("products").select("category").eq("is_curated", true);
+        const catsComProduto = new Set<string>();
+        (prods as any[] || []).forEach((p: any) => {
+          const cat = String(p.category || "").trim();
+          if (!cat) return;
+          // adiciona o caminho e todos os pais
+          const partes = cat.split("/").map((s: string) => s.trim()).filter(Boolean);
+          let cur = "";
+          for (const parte of partes) {
+            cur = cur ? `${cur}/${parte}` : parte;
+            catsComProduto.add(cur);
+          }
+        });
+        return (cats as any[])
+          .filter((c: any) => {
+            const fp = String(c.full_path || c.name || "").trim();
+            return catsComProduto.has(fp);
+          })
+          .map(r => ({
+            id: String(r.id),
+            name: String(r.name),
+            slug: String(r.slug),
+            parent_id: r.parent_id ? String(r.parent_id) : null,
+            display_order: Number(r.display_order || 0),
+            icon: r.icon ? String(r.icon) : null,
+            active: Boolean(r.active),
+            full_path: r.full_path ? String(r.full_path) : undefined,
+          })) as Category[];
+      } catch (e) {
+        console.error("Supabase getCategories filtrado falhou, fallback:", e);
+        // fallback para sem filtro se der erro
+      }
+    }
+
     if (!isTursoActive()) return [];
 
     const res = await turso.execute('SELECT * FROM categories ORDER BY display_order ASC, name ASC');
-    return res.rows.map(r => ({
+    const todas = res.rows.map(r => ({
       id: String(r.id),
       name: String(r.name),
       slug: String(r.slug),
@@ -674,6 +727,28 @@ export async function getCategories(): Promise<Category[]> {
       active: Boolean(r.active),
       full_path: r.full_path ? String(r.full_path) : undefined,
     })) as Category[];
+
+    // Se estiver em modo curadoria, filtra no MySQL também via contagem (evita categoria vazia)
+    if (isSupabaseActive()) {
+      try {
+        const { supabase } = await import('./supabase');
+        const { data: prods } = await supabase.from("products").select("category").eq("is_curated", true);
+        const catsComProduto = new Set<string>();
+        (prods as any[] || []).forEach((p: any) => {
+          const cat = String(p.category || "").trim();
+          if (!cat) return;
+          const partes = cat.split("/").map((s: string) => s.trim()).filter(Boolean);
+          let cur = "";
+          for (const parte of partes) {
+            cur = cur ? `${cur}/${parte}` : parte;
+            catsComProduto.add(cur);
+          }
+        });
+        return todas.filter(c => catsComProduto.has(String(c.full_path || c.name || "").trim()));
+      } catch {}
+    }
+
+    return todas;
   } catch (error) {
     console.error("Error fetching categories:", error);
     return [];
