@@ -1,10 +1,11 @@
 import Header from "@/components/Header";
 import ProductList from "@/components/ProductList";
+import LenisProvider from "@/components/LenisProvider";
 import SeoContent from "@/components/SeoContent";
 import JsonLd, { generateHomeAiAndGoogleSchema } from "@/components/JsonLd";
 import QuickLeadSection from "@/components/QuickLeadSection";
 import HomeLocalStoreInfo from "@/components/HomeLocalStoreInfo";
-import HomeHeroFullWidth from "@/components/HomeHeroFullWidth";
+import Home3DHero from "@/components/Home3DHero";
 import HomeTrustPillars from "@/components/HomeTrustPillars";
 import HomeDepartmentMenu from "@/components/HomeDepartmentMenu";
 import HomeCategoryShelf from "@/components/HomeCategoryShelf";
@@ -162,9 +163,10 @@ export default async function Home(props: {
   const dealOfTheDay = pcGamerProducts[0] || hardwareProducts[0] || products[0] || null;
 
   return (
-    <div className="home-shell min-h-screen flex flex-col font-sans transition-colors duration-300">
-      <JsonLd data={generateHomeAiAndGoogleSchema()} />
-      <Header />
+    <LenisProvider>
+      <div className="home-shell min-h-screen flex flex-col font-sans transition-colors duration-300">
+        <JsonLd data={generateHomeAiAndGoogleSchema()} />
+        <Header />
 
       {/* FAIXA PROMOÇÃO SEGUNDA - NOVA */}
       {!search && !category && (
@@ -209,40 +211,10 @@ export default async function Home(props: {
       )}
 
       <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 space-y-10 sm:space-y-14 py-6">
-        {/* HERO NOVO - PROMOÇÃO + PRODUTOS EM DESTAQUE */}
+        {/* HERO 3D IMERSIVO - Conversão Máxima com Glassmorphism e 3D */}
         {!search && !category && (
           <>
-            <section className="grid lg:grid-cols-[1.2fr_0.8fr] gap-6">
-              <HomeHeroFullWidth carouselImages={carouselImages} />
-              {/* Card Destaque Hardware */}
-              <div className="bg-gradient-to-br from-[#111827] to-[#1f2937] border border-slate-700/80 rounded-2xl p-6 flex flex-col justify-between shadow-xl">
-                <div>
-                  <div className="inline-flex items-center gap-2 bg-[#E60012] text-white px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest mb-3">
-                    🔥 Mais vendido
-                  </div>
-                  <h2 className="text-2xl md:text-3xl font-black text-white leading-tight">
-                    Hardware com<br />
-                    <span className="text-[#E60012]">40% OFF</span> essa semana
-                  </h2>
-                  <p className="text-slate-300 text-sm mt-2">1000 produtos em estoque • Pronta entrega Cambuí</p>
-                </div>
-                {hardwareProducts[0] && (
-                  <Link href={`/product/${hardwareProducts[0].slug || hardwareProducts[0].id}`} className="mt-6 group">
-                    <div className="bg-white rounded-xl p-4 flex gap-4 items-center hover:shadow-lg transition-shadow">
-                      <img src={hardwareProducts[0].image} alt={hardwareProducts[0].name} className="w-20 h-20 object-contain flex-shrink-0" />
-                      <div className="min-w-0">
-                        <p className="text-xs font-bold text-[#111827] line-clamp-2 leading-tight group-hover:text-[#E60012]">{hardwareProducts[0].name}</p>
-                        <p className="text-sm font-black text-[#E60012] mt-1">{hardwareProducts[0].price}</p>
-                        <p className="text-[11px] text-slate-500">12x sem juros • Retire hoje</p>
-                      </div>
-                    </div>
-                  </Link>
-                )}
-                <Link href="/categoria/hardware" className="mt-4 w-full bg-[#E60012] hover:bg-[#cc0010] text-white py-2.5 rounded-xl font-black text-sm text-center transition-colors">
-                  Ver 1000 hardwares →
-                </Link>
-              </div>
-            </section>
+            <Home3DHero produtoDestaque={hardwareProducts[0] || dealOfTheDay} />
             <HomeTrustPillars />
           </>
         )}
@@ -362,5 +334,6 @@ export default async function Home(props: {
         )}
       </div>
     </div>
+    </LenisProvider>
   );
 }
