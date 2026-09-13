@@ -4157,25 +4157,27 @@ export default function CrmWhatsAppClient({
             </aside>
           </div>
 
-          {/* BOTTOM KANBAN TRAY - deslizante 70% / 10% */}
+          {/* BOTTOM KANBAN TRAY - deslizante 70% / minimizado mostra busca + 1 fila */}
           <div
             className={`border-t border-[#e3e3e3] bg-[#f0f2f5] flex flex-col px-3.5 py-2 transition-all duration-300 ease-in-out shrink-0 ${
               kanbanTamanho === "expandido"
                 ? "h-[70vh] min-h-[400px]"
                 : kanbanTamanho === "recolhido"
-                ? "h-[10vh] min-h-[72px]"
+                ? "h-[190px] min-h-[190px]"
                 : "h-56 min-h-[200px]"
             }`}
           >
-            {/* Topbar of Kanban - clique em qualquer canto desliza */}
+            {/* Topbar of Kanban - clique no fundo desliza, mas não quando clica na busca/botões */}
             <div
-              onClick={() =>
+              onClick={(e) => {
+                const t = e.target as HTMLElement;
+                if (t.closest("input, button, a, select, textarea")) return;
                 setKanbanTamanho(
                   kanbanTamanho === "expandido" ? "recolhido" : "expandido"
-                )
-              }
+                );
+              }}
               className="flex items-center justify-between gap-3 mb-2 shrink-0 cursor-pointer hover:bg-white/50 -mx-1 px-1 py-1 rounded-lg transition-colors"
-              title="Clique para expandir (70%) ou recolher (10%)"
+              title="Clique no fundo para expandir (70%) ou recolher"
             >
               <h4 className="font-bold text-xs text-[#202124] flex items-center gap-1.5 select-none">
                 🗂 <b>Kanban de atendimento</b>
@@ -4185,21 +4187,26 @@ export default function CrmWhatsAppClient({
               </h4>
 
               {kanbanTamanho !== "recolhido" && (
-                <div className="relative flex-1 max-w-xs">
+                <div className="relative flex-1 max-w-xs" onClick={(e) => e.stopPropagation()}>
                   <input
                     type="text"
                     placeholder="🔍 Buscar cliente no kanban…"
                     value={kanbanBusca}
                     onChange={(e) => setKanbanBusca(e.target.value)}
+                    onClick={(e) => e.stopPropagation()}
+                    onFocus={(e) => e.stopPropagation()}
                     className="w-full px-3 py-1 bg-white border border-[#e3e3e3] rounded-full text-xs outline-none focus:border-[#0f9d58]"
                   />
                 </div>
               )}
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                 {kanbanTamanho !== "recolhido" && totalForaDoFunil > 0 && (
                   <button
-                    onClick={() => setMostrarForaDoFunil(!mostrarForaDoFunil)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setMostrarForaDoFunil(!mostrarForaDoFunil);
+                    }}
                     title="Clientes que você tirou do funil — dá para trazer de volta"
                     className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors cursor-pointer ${
                       mostrarForaDoFunil
@@ -4213,7 +4220,8 @@ export default function CrmWhatsAppClient({
 
                 {kanbanTamanho !== "recolhido" && (
                   <button
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       const nome = prompt("Nome da nova coluna (ex: Negociação, Orçamento, Fechado):");
                       if (!nome || !nome.trim()) return;
                       const novaCol: KanbanColumn = {
@@ -4231,15 +4239,16 @@ export default function CrmWhatsAppClient({
                 )}
 
                 <button
-                  onClick={() =>
+                  onClick={(e) => {
+                    e.stopPropagation();
                     setKanbanTamanho(
                       kanbanTamanho === "expandido"
                         ? "normal"
                         : kanbanTamanho === "normal"
                         ? "expandido"
                         : "normal"
-                    )
-                  }
+                    );
+                  }}
                   className="bg-[#e8eaed] hover:bg-[#dadce0] text-[#202124] px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer"
                   title="Expandir / Recolher Kanban"
                 >
