@@ -72,7 +72,7 @@ trocar senha e tirar acesso: **[docs/acesso-vendedores.md](docs/acesso-vendedore
 
 - Agente RSS: cria posts a partir de itens de feeds RSS (rota `/api/cron/blog-rss`)
 - Agente Produtos: cria posts a partir de um produto aleatório do catálogo (rota `/api/cron/blog-product`)
-- Agendamento: configurado em `vercel.json` para executar a cada 1 minuto
+- Agendamento em `vercel.json`: `blog-rss` a cada 6 horas, `blog-product` e `blog-balao-item` uma vez por dia. **Não volte para `* * * * *`** — eram 4.320 execuções diárias, que sozinhas estouravam a cota de conexões do banco e faziam o catálogo sumir do site. Ver **[docs/crons-e-cota-do-banco.md](docs/crons-e-cota-do-banco.md)**.
 
 ### Variáveis de ambiente (mínimo)
 
