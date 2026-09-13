@@ -3459,9 +3459,9 @@ export default function CrmWhatsAppClient({
                 {/* ABA 1: CATÁLOGO (SINCRONIZADO COM O SITE / BANCO DE DADOS) */}
                 {abaAtual === "catalogo" && (
                   <div className="space-y-3">
-                    {/* Modo único: Preço de Custo (+50% Margem oficial) */}
-                    <div className="bg-[#fff8e1] border border-[#f2c94c] rounded-xl p-2.5 text-[11px] font-bold text-[#7a5c00] flex items-center justify-between">
-                      <span>📦 Modo Custo + Margem 50% — preço oficial da loja (custo + 50% de lucro)</span>
+                    {/* Margem 50% — discreto */}
+                    <div className="flex items-center justify-between px-1">
+                      <span className="text-[10px] font-semibold text-[#7a5c00]/70 bg-[#fff8e1]/60 border border-[#f2c94c]/30 rounded-full px-2 py-0.5">50% margem</span>
                       <button
                         onClick={() => {
                           carregarCatalogoBanco();
