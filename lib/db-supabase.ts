@@ -46,12 +46,36 @@ function mapSupabaseProduct(r: Row): Product {
 
 const sortByPrice = (items: Product[]) => items.sort((a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price));
 
+// O PostgREST devolve no maximo 1000 linhas por consulta, em silencio: sem
+// erro e sem aviso. Um `select` direto entregava 1000 de 1288 curados, e o
+// espelho da VPS — que existe para segurar o site quando o banco cai — ficava
+// com 288 produtos a menos sem ninguem perceber. Por isso paginamos.
+const PAGINA_SUPABASE = 1000;
+
 export async function getProductsCurated(): Promise<Product[]> {
-  let query = supabase.from("products").select("*").order("created_at", { ascending: false });
-  if (CURATED_ONLY) query = query.eq("is_curated", true);
-  const { data, error } = await query;
-  if (error) { console.error("Supabase getProductsCurated error", error); return []; }
-  return sortByPrice((data as Row[]).map(mapSupabaseProduct));
+  const linhas: Row[] = [];
+
+  for (let inicio = 0; ; inicio += PAGINA_SUPABASE) {
+    let query = supabase
+      .from("products")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .range(inicio, inicio + PAGINA_SUPABASE - 1);
+    if (CURATED_ONLY) query = query.eq("is_curated", true);
+
+    const { data, error } = await query;
+    if (error) {
+      console.error("Supabase getProductsCurated error", error);
+      // Devolve o que ja veio: meio catalogo e melhor que catalogo nenhum.
+      break;
+    }
+
+    const pagina = (data as Row[]) || [];
+    linhas.push(...pagina);
+    if (pagina.length < PAGINA_SUPABASE) break;
+  }
+
+  return sortByPrice(linhas.map(mapSupabaseProduct));
 }
 
 export async function getProductsPaginatedCurated(opts: { page?: number; limit?: number; search?: string; category?: string; sort?: "price_asc" | "recent"; }): Promise<{ products: Product[]; total: number }> {

@@ -646,10 +646,13 @@ const espelhoDoCatalogo = criarEspelhoDoCatalogo({
   urlDoSite: SITE_URL,
 });
 
-// Atualiza ao subir e de meia em meia hora. O site também avisa quando um
-// produto muda (POST /api/crm/catalogo/atualizar), então isto aqui é a rede
-// de segurança, não o caminho principal.
-const INTERVALO_DO_ESPELHO_MS = 30 * 60_000;
+// Atualiza ao subir e de 6 em 6 horas. O site avisa quando um produto muda
+// (POST /api/crm/catalogo/atualizar), então isto aqui é a rede de segurança,
+// não o caminho principal — e rede de segurança não precisa de 48 voltas por
+// dia. Cada volta baixava 11 MB do catálogo mesmo sem nada ter mudado: ~15 GB
+// por mês num projeto Supabase de 5 GB. Agora a volta agendada confere antes
+// a assinatura em /api/espelho/versao e só baixa quando o catálogo mudou.
+const INTERVALO_DO_ESPELHO_MS = 6 * 60 * 60_000;
 setTimeout(() => espelhoDoCatalogo.atualizar({ motivo: "boot" }), 20_000).unref?.();
 setInterval(
   () => espelhoDoCatalogo.atualizar({ motivo: "agendado" }),
