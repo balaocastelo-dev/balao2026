@@ -4186,19 +4186,17 @@ export default function CrmWhatsAppClient({
                 </span>
               </h4>
 
-              {kanbanTamanho !== "recolhido" && (
-                <div className="relative flex-1 max-w-xs" onClick={(e) => e.stopPropagation()}>
-                  <input
-                    type="text"
-                    placeholder="🔍 Buscar cliente no kanban…"
-                    value={kanbanBusca}
-                    onChange={(e) => setKanbanBusca(e.target.value)}
-                    onClick={(e) => e.stopPropagation()}
-                    onFocus={(e) => e.stopPropagation()}
-                    className="w-full px-3 py-1 bg-white border border-[#e3e3e3] rounded-full text-xs outline-none focus:border-[#0f9d58]"
-                  />
-                </div>
-              )}
+              <div className="relative flex-1 max-w-xs" onClick={(e) => e.stopPropagation()}>
+                <input
+                  type="text"
+                  placeholder="🔍 Buscar cliente no kanban…"
+                  value={kanbanBusca}
+                  onChange={(e) => setKanbanBusca(e.target.value)}
+                  onClick={(e) => e.stopPropagation()}
+                  onFocus={(e) => e.stopPropagation()}
+                  className="w-full px-3 py-1 bg-white border border-[#e3e3e3] rounded-full text-xs outline-none focus:border-[#0f9d58]"
+                />
+              </div>
 
               <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                 {kanbanTamanho !== "recolhido" && totalForaDoFunil > 0 && (
@@ -4257,9 +4255,8 @@ export default function CrmWhatsAppClient({
               </div>
             </div>
 
-            {/* Kanban Columns Layout */}
-            {kanbanTamanho !== "recolhido" && (
-              <div className="flex-1 flex gap-3 overflow-x-auto pb-1 items-stretch min-h-0">
+            {/* Kanban Columns Layout - recolhido mostra só 1ª fila com scroll horizontal */}
+            <div className={`flex-1 flex gap-3 overflow-x-auto pb-1 items-stretch min-h-0 ${kanbanTamanho === "recolhido" ? "max-h-[110px] overflow-hidden" : ""}`}>
                 {kanbanColunas.map((col) => {
                   const cardsNaColuna = chats
                     .filter((c) => isRealDirectChat(c.id))
@@ -4461,8 +4458,7 @@ export default function CrmWhatsAppClient({
                   </div>
                 )}
               </div>
-            )}
-            </div>
+          </div>
         </div>
       )}
 
