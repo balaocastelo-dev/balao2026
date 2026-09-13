@@ -120,3 +120,112 @@ export async function mandarMaterialPeloWhatsApp(
     return false;
   }
 }
+
+export interface ContatoSalvo {
+  id: string;
+  whatsapp: string;
+  nome: string | null;
+  origem: string;
+  material: string | null;
+  criado_em: string | null;
+}
+
+export interface ResumoCaptura {
+  total: number;
+  pessoas: number;
+  porOrigem: { origem: string; quantidade: number }[];
+  porMaterial: { material: string; quantidade: number }[];
+  porMes: { mes: string; quantidade: number }[];
+  primeiro: string | null;
+  ultimo: string | null;
+}
+
+/**
+ * Lê os contatos capturados.
+ *
+ * Esta metade faltava. O formulário do site gravava desde sempre, mas só havia
+ * `salvarContato` — nenhum caminho de leitura, em lugar nenhum do código. Quem
+ * deixava o WhatsApp para baixar um material entrava na tabela e não era visto
+ * por ninguém: nem vendedor, nem painel, nem relatório. Lead capturado e
+ * esquecido é pior do que lead não capturado, porque a pessoa ficou esperando
+ * um retorno que nunca ia chegar.
+ *
+ * `total` conta as linhas (a mesma pessoa aparece uma vez por material);
+ * `pessoas` conta WhatsApps distintos, que é o número que interessa para saber
+ * com quanta gente dá para falar.
+ */
+export async function listarContatos(opcoes: {
+  limite?: number;
+  desde?: string | null;
+  origem?: string | null;
+} = {}): Promise<ContatoSalvo[]> {
+  if (!isTursoActive()) return [];
+
+  const limite = Math.min(Math.max(opcoes.limite ?? 200, 1), 2000);
+  const condicoes: string[] = [];
+  const args: unknown[] = [];
+
+  if (opcoes.desde) { condicoes.push("criado_em >= ?"); args.push(opcoes.desde); }
+  if (opcoes.origem) { condicoes.push("origem = ?"); args.push(opcoes.origem); }
+
+  const onde = condicoes.length ? `WHERE ${condicoes.join(" AND ")}` : "";
+
+  try {
+    const r = await turso.execute({
+      sql: `SELECT id, whatsapp, nome, origem, material, criado_em
+            FROM contatos_capturados ${onde}
+            ORDER BY criado_em DESC
+            LIMIT ${limite}`,
+      args,
+    });
+    return (r.rows as unknown as ContatoSalvo[]) || [];
+  } catch (erro) {
+    // Tabela ainda não existe (ninguém se cadastrou) é caso normal, não falha.
+    console.warn("[captura] listarContatos:", (erro as Error).message);
+    return [];
+  }
+}
+
+export async function resumirContatos(): Promise<ResumoCaptura> {
+  const vazio: ResumoCaptura = {
+    total: 0, pessoas: 0, porOrigem: [], porMaterial: [], porMes: [],
+    primeiro: null, ultimo: null,
+  };
+  if (!isTursoActive()) return vazio;
+
+  try {
+    const geral = await turso.execute(`
+      SELECT COUNT(*) AS total,
+             COUNT(DISTINCT whatsapp) AS pessoas,
+             MIN(criado_em) AS primeiro,
+             MAX(criado_em) AS ultimo
+      FROM contatos_capturados
+    `);
+    const origem = await turso.execute(`
+      SELECT origem, COUNT(*) AS quantidade FROM contatos_capturados
+      GROUP BY origem ORDER BY quantidade DESC LIMIT 30
+    `);
+    const material = await turso.execute(`
+      SELECT COALESCE(material, '(sem material)') AS material, COUNT(*) AS quantidade
+      FROM contatos_capturados GROUP BY material ORDER BY quantidade DESC LIMIT 30
+    `);
+    const mes = await turso.execute(`
+      SELECT DATE_FORMAT(criado_em, '%Y-%m') AS mes, COUNT(*) AS quantidade
+      FROM contatos_capturados GROUP BY mes ORDER BY mes DESC LIMIT 24
+    `);
+
+    const g = (geral.rows?.[0] || {}) as Record<string, unknown>;
+    return {
+      total: Number(g.total || 0),
+      pessoas: Number(g.pessoas || 0),
+      primeiro: g.primeiro ? String(g.primeiro) : null,
+      ultimo: g.ultimo ? String(g.ultimo) : null,
+      porOrigem: (origem.rows as unknown as { origem: string; quantidade: number }[]) || [],
+      porMaterial: (material.rows as unknown as { material: string; quantidade: number }[]) || [],
+      porMes: (mes.rows as unknown as { mes: string; quantidade: number }[]) || [],
+    };
+  } catch (erro) {
+    console.warn("[captura] resumirContatos:", (erro as Error).message);
+    return vazio;
+  }
+}
