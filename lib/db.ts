@@ -679,24 +679,39 @@ export async function getCategories(): Promise<Category[]> {
             full_path: r.full_path ? String(r.full_path) : undefined,
           })) as Category[];
         }
-        // Filtra só categorias com produto curado
+        // Filtra só categorias com produto curado - suporta hierarquia via parent_id
         const { data: prods } = await supabase.from("products").select("category").eq("is_curated", true);
         const catsComProduto = new Set<string>();
         (prods as any[] || []).forEach((p: any) => {
           const cat = String(p.category || "").trim();
           if (!cat) return;
-          // adiciona o caminho e todos os pais
           const partes = cat.split("/").map((s: string) => s.trim()).filter(Boolean);
           let cur = "";
           for (const parte of partes) {
             cur = cur ? `${cur}/${parte}` : parte;
-            catsComProduto.add(cur);
+            catsComProduto.add(cur.toLowerCase());
           }
+          // também adiciona só o último nome para match direto com subcategoria sem full_path
+          if (partes.length > 0) catsComProduto.add(partes[partes.length - 1].toLowerCase());
         });
+        // Mapa id->categoria para construir full_path quando não existe
+        const catMap = new Map<string, any>((cats as any[]).map((c: any) => [String(c.id), c]));
+        const buildFullPath = (cat: any): string => {
+          if (cat.full_path) return String(cat.full_path).trim();
+          const partes: string[] = [String(cat.name).trim()];
+          let cur: any = cat;
+          while (cur.parent_id && catMap.has(String(cur.parent_id))) {
+            cur = catMap.get(String(cur.parent_id));
+            partes.unshift(String(cur.name).trim());
+            if (partes.length > 5) break;
+          }
+          return partes.join("/");
+        };
         return (cats as any[])
           .filter((c: any) => {
-            const fp = String(c.full_path || c.name || "").trim();
-            return catsComProduto.has(fp);
+            const fp = buildFullPath(c).toLowerCase();
+            const nome = String(c.name || "").trim().toLowerCase();
+            return catsComProduto.has(fp) || catsComProduto.has(nome);
           })
           .map(r => ({
             id: String(r.id),
@@ -728,7 +743,7 @@ export async function getCategories(): Promise<Category[]> {
       full_path: r.full_path ? String(r.full_path) : undefined,
     })) as Category[];
 
-    // Se estiver em modo curadoria, filtra no MySQL também via contagem (evita categoria vazia)
+    // Se estiver em modo curadoria, filtra no MySQL também (evita categoria vazia)
     if (isSupabaseActive()) {
       try {
         const { supabase } = await import('./supabase');
@@ -741,10 +756,27 @@ export async function getCategories(): Promise<Category[]> {
           let cur = "";
           for (const parte of partes) {
             cur = cur ? `${cur}/${parte}` : parte;
-            catsComProduto.add(cur);
+            catsComProduto.add(cur.toLowerCase());
           }
+          if (partes.length > 0) catsComProduto.add(partes[partes.length - 1].toLowerCase());
         });
-        return todas.filter(c => catsComProduto.has(String(c.full_path || c.name || "").trim()));
+        const catMap2 = new Map<string, Category>(todas.map(c => [c.id, c]));
+        const buildFP2 = (cat: Category): string => {
+          if (cat.full_path) return String(cat.full_path).trim();
+          const partes: string[] = [String(cat.name).trim()];
+          let cur: any = cat;
+          while (cur.parent_id && catMap2.has(cur.parent_id)) {
+            cur = catMap2.get(cur.parent_id)!;
+            partes.unshift(String(cur.name).trim());
+            if (partes.length > 5) break;
+          }
+          return partes.join("/");
+        };
+        return todas.filter(c => {
+          const fp = buildFP2(c).toLowerCase();
+          const nome = String(c.name || "").trim().toLowerCase();
+          return catsComProduto.has(fp) || catsComProduto.has(nome);
+        });
       } catch {}
     }
 
