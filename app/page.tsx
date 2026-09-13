@@ -12,7 +12,6 @@ import HomeMonitoresFullWidth from "@/components/HomeMonitoresFullWidth";
 import HomeBlogSection from "@/components/HomeBlogSection";
 import { getCachedProducts, getCachedProductsByExactCategories } from "@/lib/cache";
 import { getCachedBlogDaHome, getCachedCategories, getCachedCarouselImages } from "@/lib/cache";
-import { turso } from "@/lib/turso";
 import { parsePriceToNumber, Product, type Category } from "@/lib/utils";
 import type { Metadata } from "next";
 import { SITE_CONFIG } from "@/lib/config";
@@ -33,22 +32,12 @@ type HomeBlogPost = {
   created_at: string;
 };
 
-const homeBrands = [
-  "Balão.info", "Apple", "Dell", "Lenovo", "HP", "ASUS", "Acer", "Samsung", 
-  "Microsoft", "Intel", "AMD", "NVIDIA", "Kingston", "Logitech", "Corsair", 
-  "Gigabyte", "MSI", "Western Digital", "Seagate", "Crucial", "SanDisk", 
-  "TP-Link", "D-Link", "Razer", "HyperX", "Cooler Master", "Thermaltake", 
-  "EVGA", "ASRock", "Epson", "Canon", "Husky"
-];
-
-const homeBrandCarousel = [...homeBrands, ...homeBrands];
-
 export async function generateMetadata(props: { searchParams: SearchParams }): Promise<Metadata> {
   const sp = await props.searchParams;
   const hasFacet = Boolean((sp?.category || "").trim() || (sp?.search || "").trim());
-  const title = "Loja de Informática em Campinas | PC Gamer, Notebooks, Monitores e Assistência Técnica";
+  const title = "Balão da Informática | Hardware, PC Gamer e Setup Completo em Campinas - 1288 Produtos";
   const description =
-    "Balão da Informática Castelo: a loja mais completa de informática em Campinas. PC Gamer, Notebooks, Monitores, Smartphones e Peças. Compre com desconto no PIX ou até 10x sem juros e retire no Cambuí.";
+    "A maior loja de informática de Campinas com 1288 produtos: 1000 hardwares, 100 PCs gamer, 33 notebooks, 20 monitores, 35 impressoras e 100 periféricos. Até 40% OFF + 12x sem juros. Retire no Cambuí ou receba em casa. Segunda é dia de oferta!";
   const canonical = "https://www.balao.info/";
 
   return {
@@ -58,16 +47,16 @@ export async function generateMetadata(props: { searchParams: SearchParams }): P
     alternates: { canonical },
     keywords: [
       "loja de informática campinas",
+      "hardware campinas",
       "pc gamer campinas",
       "notebook campinas",
-      "monitores gamer campinas",
-      "smartphones campinas",
-      "hardware e peças campinas",
-      "assistência técnica cambuí",
+      "monitor gamer",
       "placa de vídeo rtx",
-      "processador ryzen intel",
-      "balão da informática castelo",
-      "loja de computador campinas"
+      "processador ryzen",
+      "ssd nvme",
+      "balão da informática",
+      "promoção informática segunda",
+      "setup gamer campinas",
     ],
     openGraph: {
       type: "website",
@@ -76,7 +65,7 @@ export async function generateMetadata(props: { searchParams: SearchParams }): P
       title,
       description,
       siteName: SITE_CONFIG.name,
-      images: [{ url: "/logo.png", width: 1200, height: 630, alt: "Balão da Informática" }],
+      images: [{ url: "/logo.png", width: 1200, height: 630, alt: "Balão da Informática - 1288 produtos" }],
     },
     twitter: {
       card: "summary_large_image",
@@ -119,34 +108,23 @@ export default async function Home(props: {
   ]);
 
   if (search) {
-    const rawSearchProducts = await (async () => {
-      const searchTerms = search.trim().split(/\s+/).filter((t) => t.length > 0);
-
-      const conditions = searchTerms
-        .map(() => "(LOWER(name) LIKE ? OR LOWER(description) LIKE ?)")
-        .join(" AND ");
-      const args: string[] = [];
-      searchTerms.forEach((term) => {
-        const like = `%${term.toLowerCase()}%`;
-        args.push(like, like);
-      });
-
-      try {
-        const res = await turso.execute({
-          sql: `SELECT * FROM products WHERE ${conditions} LIMIT 50`,
-          args,
-        });
-        return ((res.rows as unknown as Product[]) || []).sort(
-          (a, b) => parsePriceToNumber(b.price) - parsePriceToNumber(a.price)
-        );
-      } catch (err) {
-        console.error("Search error:", err);
-        return [] as Product[];
-      }
-    })();
-
+    const searchTerms = search.trim().split(/\s+/).filter((t) => t.length > 0);
+    const conditions = searchTerms.map(() => "(LOWER(name) LIKE ? OR LOWER(description) LIKE ?)").join(" AND ");
+    const args: string[] = [];
+    searchTerms.forEach((term) => {
+      const like = `%${term.toLowerCase()}%`;
+      args.push(like, like);
+    });
+    try {
+      const { turso } = await import("@/lib/turso");
+      const res = await turso.execute({ sql: `SELECT * FROM products WHERE ${conditions} LIMIT 50`, args });
+      products = ((res.rows as unknown as Product[]) || []).sort((a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price));
+    } catch (err) {
+      console.error("Search error:", err);
+      products = [] as Product[];
+    }
     const seenNames = new Set();
-    products = rawSearchProducts.filter(p => {
+    products = products.filter(p => {
       const nameKey = p.name.trim().toLowerCase();
       if (seenNames.has(nameKey)) return false;
       seenNames.add(nameKey);
@@ -158,8 +136,6 @@ export default async function Home(props: {
     products = await getCachedProducts();
   }
 
-  // Extrai nota média e número de avaliações do texto salvo em `rating`
-  // (ex: "4.8 ⭐ (120)") para usar como sinal de relevância real.
   const parseRelevanceSignal = (p: Product): { rating: number; count: number } => {
     const m = String(p.rating || "").match(/(\d+(?:[.,]\d+)?)\s*⭐?\s*\(?(\d+)?/);
     const rating = m ? parseFloat(m[1].replace(",", ".")) : 0;
@@ -167,11 +143,6 @@ export default async function Home(props: {
     return { rating, count };
   };
 
-  // Ordenação das vitrines da home: NUNCA do mais caro pro mais barato (deixa
-  // a home parecendo cara logo de cara). Prioriza avaliação/popularidade real
-  // quando existir; sem isso (produto novo, sem avaliações), desempata pelo
-  // mais barato primeiro — assim o item de entrada aparece antes do topo de
-  // linha, sem esconder os caros (eles continuam na lista, só não lideram).
   const sortRelevance = (list: Product[]) =>
     [...list].sort((a, b) => {
       const ra = parseRelevanceSignal(a);
@@ -181,68 +152,47 @@ export default async function Home(props: {
       return parsePriceToNumber(a.price) - parsePriceToNumber(b.price);
     });
 
-  // Segmentar produtos pelas categorias na ordem EXATA solicitada:
-  // 1. Computador Gamer (ordenado por relevância/avaliação)
-  const pcGamerProducts = sortRelevance(
-    products.filter(p => p.category === "Computadores" || p.name.toLowerCase().includes("pc gamer") || p.name.toLowerCase().includes("computador gamer"))
-  );
+  const pcGamerProducts = sortRelevance(products.filter(p => p.category === "Computadores" || p.name.toLowerCase().includes("pc gamer") || p.name.toLowerCase().includes("computador gamer")));
+  const notebookProducts = sortRelevance(products.filter(p => p.category === "Notebooks" || p.name.toLowerCase().includes("notebook") || p.name.toLowerCase().includes("macbook")));
+  const monitorProducts = sortRelevance(products.filter(p => (p.category === "Monitores" || p.name.toLowerCase().includes("monitor")) && !p.name.toLowerCase().includes("suporte") && !p.name.toLowerCase().includes("cabo") && !p.name.toLowerCase().includes("adaptador")));
+  const hardwareProducts = sortRelevance(products.filter(p => p.category === "Hardware"));
+  const perifericoProducts = sortRelevance(products.filter(p => p.category === "Periféricos" || p.name.toLowerCase().includes("teclado") || p.name.toLowerCase().includes("mouse") || p.name.toLowerCase().includes("headset")));
+  const impressoraProducts = sortRelevance(products.filter(p => p.category === "Impressão"));
 
-  // 2. Notebooks (ordenado por relevância/avaliação)
-  const notebookProducts = sortRelevance(
-    products.filter(p => p.category === "Notebooks" || p.category === "Notebooks Seminovos" || p.name.toLowerCase().includes("notebook") || p.name.toLowerCase().includes("macbook"))
-  );
-
-  // 3. Monitores (estritamente monitores, sem acessórios - ordenado por relevância/avaliação)
-  const monitorProducts = sortRelevance(
-    products.filter(p => 
-      (p.category === "Monitores" || p.name.toLowerCase().includes("monitor")) &&
-      !p.name.toLowerCase().includes("suporte") &&
-      !p.name.toLowerCase().includes("cabo") &&
-      !p.name.toLowerCase().includes("adaptador") &&
-      !p.name.toLowerCase().includes("braço articulado")
-    )
-  );
-
-  // 4. Smartphones (ordenado por relevância/avaliação)
-  const smartphoneProducts = sortRelevance(
-    products.filter(p => p.category === "Smartphones" || p.name.toLowerCase().includes("smartphone") || p.name.toLowerCase().includes("galaxy") || p.name.toLowerCase().includes("xiaomi") || p.name.toLowerCase().includes("iphone"))
-  );
-
-  // 5. Hardware (ordenado por relevância/avaliação)
-  const hardwareProducts = sortRelevance(
-    products.filter(p => p.category === "Hardware" || p.name.toLowerCase().includes("placa de vídeo") || p.name.toLowerCase().includes("processador") || p.name.toLowerCase().includes("ssd") || p.name.toLowerCase().includes("ram"))
-  );
-
-  // 6. Periféricos (ordenado por relevância/avaliação)
-  const perifericoProducts = sortRelevance(
-    products.filter(p => p.category === "Periféricos" || p.name.toLowerCase().includes("teclado") || p.name.toLowerCase().includes("mouse") || p.name.toLowerCase().includes("headset"))
-  );
-
-  // 7. Games (ordenado por relevância/avaliação)
-  const gamesProducts = sortRelevance(
-    products.filter(p => p.category === "Games" || p.name.toLowerCase().includes("console") || p.name.toLowerCase().includes("playstation") || p.name.toLowerCase().includes("xbox") || p.name.toLowerCase().includes("cadeira gamer"))
-  );
-
-  const dealOfTheDay = pcGamerProducts[0] || products[0] || null;
+  const dealOfTheDay = pcGamerProducts[0] || hardwareProducts[0] || products[0] || null;
 
   return (
     <div className="home-shell min-h-screen flex flex-col font-sans transition-colors duration-300">
       <JsonLd data={generateHomeAiAndGoogleSchema()} />
       <Header />
 
-      {/* Marcas Parceiras Marquee */}
+      {/* FAIXA PROMOÇÃO SEGUNDA - NOVA */}
+      {!search && !category && (
+        <section className="w-full bg-gradient-to-r from-[#E60012] via-[#ff1a2e] to-[#E60012] text-white py-2.5 px-4 text-center relative overflow-hidden">
+          <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.1)_50%,transparent_75%)] bg-[length:250px_250px] animate-[shimmer_2s_infinite]"></div>
+          <p className="relative text-sm md:text-base font-black tracking-wide flex items-center justify-center gap-2 flex-wrap">
+            <span className="bg-white text-[#E60012] px-2.5 py-0.5 rounded-full text-xs animate-pulse">SEGUNDA</span>
+            <span>🔥 SEMANA DO HARDWARE - ATÉ 40% OFF</span>
+            <span className="hidden sm:inline">•</span>
+            <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs">12x sem juros</span>
+            <span className="hidden md:inline">• Retire no Cambuí em 2h</span>
+          </p>
+        </section>
+      )}
+
+      {/* Marcas Parceiras */}
       {!search && !category && (
         <section className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 pt-3 lg:pt-4">
           <div className="home-panel brand-carousel rounded-2xl px-4 py-2.5 sm:px-6 border border-slate-700/80 bg-[#111827] shadow-md">
             <div className="flex items-center gap-3">
               <span className="shrink-0 rounded-full bg-[#E60012] px-3.5 py-1 text-[10px] font-black uppercase tracking-widest text-white shadow-sm sm:text-[11px]">
-                Marcas Oficiais
+                Marcas Oficiais • 1288 produtos
               </span>
               <div className="relative min-w-0 flex-1 overflow-hidden">
                 <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-8 bg-gradient-to-r from-[#111827] to-transparent" />
                 <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-gradient-to-l from-[#111827] to-transparent" />
                 <div className="brand-carousel-track flex w-max min-w-full items-center gap-2 py-1 pr-2 sm:gap-3">
-                  {homeBrandCarousel.map((brand, index) => (
+                  {[...["Balão.info", "Intel", "AMD", "NVIDIA", "Kingston", "Logitech", "Corsair", "Gigabyte", "MSI", "ASUS", "Dell", "HP", "Epson", "Canon"], ...["Balão.info", "Intel", "AMD", "NVIDIA", "Kingston", "Logitech", "Corsair", "Gigabyte", "MSI", "ASUS", "Dell", "HP", "Epson", "Canon"]].map((brand, index) => (
                     <Link
                       key={`${brand}-${index}`}
                       href={`/?search=${encodeURIComponent(brand)}`}
@@ -258,44 +208,74 @@ export default async function Home(props: {
         </section>
       )}
 
-      {/* Main Content Container - Multitela (Mobile, Tablet, Desktop, 40" e UltraWide) */}
       <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 space-y-10 sm:space-y-14 py-6">
-        {/* 1. Full-Width Stretched Hero Banner */}
+        {/* HERO NOVO - PROMOÇÃO + PRODUTOS EM DESTAQUE */}
         {!search && !category && (
-          <HomeHeroFullWidth carouselImages={carouselImages} />
+          <>
+            <section className="grid lg:grid-cols-[1.2fr_0.8fr] gap-6">
+              <HomeHeroFullWidth carouselImages={carouselImages} />
+              {/* Card Destaque Hardware */}
+              <div className="bg-gradient-to-br from-[#111827] to-[#1f2937] border border-slate-700/80 rounded-2xl p-6 flex flex-col justify-between shadow-xl">
+                <div>
+                  <div className="inline-flex items-center gap-2 bg-[#E60012] text-white px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest mb-3">
+                    🔥 Mais vendido
+                  </div>
+                  <h2 className="text-2xl md:text-3xl font-black text-white leading-tight">
+                    Hardware com<br />
+                    <span className="text-[#E60012]">40% OFF</span> essa semana
+                  </h2>
+                  <p className="text-slate-300 text-sm mt-2">1000 produtos em estoque • Pronta entrega Cambuí</p>
+                </div>
+                {hardwareProducts[0] && (
+                  <Link href={`/product/${hardwareProducts[0].slug || hardwareProducts[0].id}`} className="mt-6 group">
+                    <div className="bg-white rounded-xl p-4 flex gap-4 items-center hover:shadow-lg transition-shadow">
+                      <img src={hardwareProducts[0].image} alt={hardwareProducts[0].name} className="w-20 h-20 object-contain flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-[#111827] line-clamp-2 leading-tight group-hover:text-[#E60012]">{hardwareProducts[0].name}</p>
+                        <p className="text-sm font-black text-[#E60012] mt-1">{hardwareProducts[0].price}</p>
+                        <p className="text-[11px] text-slate-500">12x sem juros • Retire hoje</p>
+                      </div>
+                    </div>
+                  </Link>
+                )}
+                <Link href="/categoria/hardware" className="mt-4 w-full bg-[#E60012] hover:bg-[#cc0010] text-white py-2.5 rounded-xl font-black text-sm text-center transition-colors">
+                  Ver 1000 hardwares →
+                </Link>
+              </div>
+            </section>
+            <HomeTrustPillars />
+          </>
         )}
 
-        {/* 2. Trust Pillars (4 interactive cards) */}
-        {!search && !category && (
-          <HomeTrustPillars />
-        )}
-
-        {/* 3. Main Body: Left Column (Department Menu) + Right Roomy Center Feed (PC Gamer & Notebooks) */}
+        {/* CORPO PRINCIPAL */}
         {!search && !category ? (
           <>
             <div className="flex flex-col lg:flex-row gap-8 xl:gap-10 items-start">
-              {/* Left Column: Dedicated Department Menu Sidebar (w-full lg:w-72 xl:w-80 2xl:w-96) */}
               <div className="w-full lg:w-72 xl:w-80 2xl:w-96 shrink-0">
                 <HomeDepartmentMenu categories={categories} dealOfTheDay={dealOfTheDay} />
               </div>
-
-              {/* Right Column: Roomy Main Highlights Feed (Spacious, not squeezed!) */}
               <div className="flex-1 min-w-0 space-y-10 sm:space-y-14">
-                {/* 1. Computador Gamer */}
+                {/* Hardware em primeiro - 1000 produtos */}
+                {hardwareProducts.length > 0 && (
+                  <HomeCategoryShelf
+                    title="⚡ Hardware em Oferta - 1000 produtos"
+                    subtitle="Placas RTX/Radeon, Ryzen/Intel, SSD NVMe, RAM DDR5 e tudo para upgrade com até 40% OFF."
+                    categorySlug="hardware"
+                    products={hardwareProducts}
+                  />
+                )}
                 {pcGamerProducts.length > 0 && (
                   <HomeCategoryShelf
-                    title="🚀 Computador Gamer & Setups"
-                    subtitle="Máquinas de alta performance montadas com componentes selecionados e garantia total."
+                    title="🚀 PCs Gamer Montados"
+                    subtitle="Máquinas testadas, com garantia e prontas para jogar. Monte seu setup completo."
                     categorySlug="computadores"
                     products={pcGamerProducts}
                   />
                 )}
-
-                {/* 2. Notebooks */}
                 {notebookProducts.length > 0 && (
                   <HomeCategoryShelf
-                    title="💻 Notebooks & Laptops"
-                    subtitle="Modelos para trabalho, estudos e gamers com máxima autonomia e potência."
+                    title="💻 Notebooks"
+                    subtitle="Gamer, ultrafinos e para trabalho - com SSD e garantia."
                     categorySlug="notebooks"
                     products={notebookProducts}
                   />
@@ -303,57 +283,31 @@ export default async function Home(props: {
               </div>
             </div>
 
-            {/* 4. BLOCO 3 FULL SIZE: Monitores Gamer & UltraWide (Esticado na tela toda) */}
             {monitorProducts.length > 0 && (
               <div className="w-full">
                 <HomeMonitoresFullWidth products={monitorProducts} />
               </div>
             )}
 
-            {/* 5. Demais Categorias em Destaque (Smartphones, Hardware, Periféricos, Games) */}
             <div className="space-y-10 sm:space-y-14">
-              {/* 4. Smartphones */}
-              {smartphoneProducts.length > 0 && (
-                <HomeCategoryShelf
-                  title="📱 Smartphones & Celulares 5G"
-                  subtitle="Os principais lançamentos com câmeras de alta resolução e bateria de longa duração."
-                  categorySlug="smartphones"
-                  products={smartphoneProducts}
-                />
-              )}
-
-              {/* 5. Hardware & Peças */}
-              {hardwareProducts.length > 0 && (
-                <HomeCategoryShelf
-                  title="⚡ Hardware & Peças para Upgrade"
-                  subtitle="Placas de vídeo RTX/Radeon, processadores Ryzen/Intel, SSDs NVMe e memórias RAM."
-                  categorySlug="hardware"
-                  products={hardwareProducts}
-                />
-              )}
-
-              {/* 6. Periféricos & Setup */}
               {perifericoProducts.length > 0 && (
                 <HomeCategoryShelf
-                  title="🎧 Periféricos & Setup Gamer"
-                  subtitle="Teclados mecânicos, mouses de precisão, headsets com áudio espacial e microfones."
+                  title="🎧 Setup Gamer Completo"
+                  subtitle="Teclados mecânicos, mouses 8K, headsets 7.1 e cadeiras - 100 produtos."
                   categorySlug="perifericos"
                   products={perifericoProducts}
                 />
               )}
-
-              {/* 7. Games & Consoles */}
-              {gamesProducts.length > 0 && (
+              {impressoraProducts.length > 0 && (
                 <HomeCategoryShelf
-                  title="🎮 Consoles, Games & Acessórios"
-                  subtitle="PlayStation 5, Xbox, controles sem fio e cadeiras gamer ergonômicas."
-                  categorySlug="games"
-                  products={gamesProducts}
+                  title="🖨️ Impressoras"
+                  subtitle="Jato de tinta, laser e 3D com tanque e Wi-Fi."
+                  categorySlug="impressao"
+                  products={impressoraProducts}
                 />
               )}
             </div>
 
-            {/* 6. Blog & Destaques de Conteúdo Full Width */}
             <div className="w-full">
               <HomeBlogSection blogPosts={blogPosts} />
             </div>
@@ -363,7 +317,7 @@ export default async function Home(props: {
             <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
                 <div className="text-[11px] font-black uppercase tracking-[0.22em] text-[#E60012]">
-                  Navegação do Catálogo
+                  Catálogo • 1288 produtos
                 </div>
                 <h1 className="mt-1 text-2xl font-black tracking-tight text-white md:text-4xl">
                   {category || `Resultados para: "${search}"`}
@@ -373,7 +327,6 @@ export default async function Home(props: {
                 {products.length} produtos
               </span>
             </div>
-
             {products.length === 0 ? (
               <div className="rounded-[1.5rem] border border-slate-700 bg-[#161f32] px-6 py-20 text-center text-slate-400">
                 <p className="text-xl font-medium">Nenhum produto encontrado para esta busca.</p>
@@ -389,39 +342,22 @@ export default async function Home(props: {
         {!search && !category && (
           <div className="mt-6 sm:mt-8">
             <QuickLeadSection
-              title="Quer comprar ou consertar hoje?"
-              description="Fale com a equipe da Balão da Informática pelo WhatsApp para confirmar estoque, retirada no Cambuí, entrega express ou assistência técnica."
-              messageTemplate="Olá! Quero atendimento rápido da Balão da Informática para compra ou assistência técnica em Campinas e região."
-              source="home"
+              title="Segunda é dia de garantir seu upgrade!"
+              description="Fale agora no WhatsApp e garanta 40% OFF no hardware + 12x sem juros. Retire no Cambuí em 2h ou receba em casa."
+              messageTemplate="Olá! Vi a nova home www.balao.info com 1288 produtos e quero aproveitar a promoção de segunda!"
+              source="home-nova"
               cityLabel="Campinas e Região"
-              serviceLabel="Venda, Upgrade e Assistência Técnica"
-              formTitle="Pedir retorno rápido"
+              serviceLabel="Hardware • PC Gamer • Setup Completo"
+              formTitle="Garantir oferta de segunda"
             />
           </div>
         )}
 
         {!search && !category && (
-          <SeoContent title="LOJA DE INFORMATICA EM CAMPINAS COM WHATSAPP, RETIRADA E ASSISTENCIA TECNICA">
+          <SeoContent title="HARDWARE, PC GAMER E SETUP COMPLETO EM CAMPINAS - 1288 PRODUTOS COM 40% OFF">
             <p className="mb-4 text-slate-300">
-              A <strong>Balão da Informática Castelo</strong> é a principal <strong>loja de informática em Campinas</strong> para quem busca
-              <strong>PC Gamer em Campinas</strong>, <strong>notebooks</strong>, <strong>monitores gamer</strong>, <strong>smartphones</strong> e peças de hardware para upgrade (placas de vídeo RTX/Radeon,
-              processadores Intel e AMD Ryzen, memórias RAM DDR4/DDR5, SSDs NVMe e fontes selo 80 Plus), periféricos gamer e <strong>assistência técnica especializada em Campinas</strong> com atendimento imediato no balcão e no WhatsApp.
-              Compre online com desconto progressivo no PIX ou em até 10x sem juros no cartão de crédito e consulte nossa equipe no WhatsApp para conferir a disponibilidade imediata para retirada no balcão no Cambuí ou entrega express.
+              A <strong>Balão da Informática Castelo</strong> reabriu sua loja virtual com <strong>1288 produtos curados</strong>: <strong>1000 hardwares</strong> (RTX, Ryzen, Intel, SSD NVMe, DDR5), <strong>100 PCs gamer</strong> montados, <strong>33 notebooks</strong>, <strong>20 monitores</strong>, <strong>35 impressoras</strong> e <strong>100 periféricos gamer</strong>. Tudo com <strong>até 40% OFF</strong> nessa segunda e <strong>12x sem juros</strong>. Retire no Cambuí em 2h ou receba com entrega expressa. ChatGPT, Perplexity e Google já indexam nosso catálogo via <code>llms.txt</code> e <code>sitemap.xml</code> com 1288 URLs.
             </p>
-            <ul className="list-none space-y-3 pl-0 text-slate-300">
-              <li className="flex items-start gap-2">
-                <span className="text-xl">📍</span>
-                <span><strong>Loja física em Campinas:</strong> {SITE_CONFIG.address}. Presença local e balcão aberto para quem deseja comprar computador, notebook, peças e acessórios com total procedência, nota fiscal e garantia.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-xl">💬</span>
-                <span><strong>Atendimento consultivo e ágil:</strong> converse diretamente com nossa equipe técnica pelo WhatsApp para esclarecer dúvidas de compatibilidade, solicitar orçamento de montagem e fechar seu pedido com rapidez.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-xl">🚀</span>
-                <span><strong>Bancada técnica própria:</strong> montagem profissional de PC Gamer com cable management, testes de estresse, manutenção preventiva, formatação e conserto de computadores e notebooks.</span>
-              </li>
-            </ul>
           </SeoContent>
         )}
       </div>
