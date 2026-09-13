@@ -1415,11 +1415,16 @@ function mergeMessages(messages) {
       // A ressincronização periódica do histórico (via chat.fetchMessages)
       // não baixa a mídia — sem isso, a foto sumia do chat assim que a
       // mesma mensagem era resincronizada, sobrescrevendo a versão que
-      // guardava a mediaUrl no envio.
-      seen.set(
-        key,
-        anterior?.mediaUrl && !message.mediaUrl ? { ...message, mediaUrl: anterior.mediaUrl } : message
-      );
+      // guardava a mediaUrl no envio. Preserva também produto/hasMedia.
+      const merged = { ...message };
+      if (anterior) {
+        if (anterior.mediaUrl && !merged.mediaUrl) merged.mediaUrl = anterior.mediaUrl;
+        if (anterior.produto && !merged.produto) merged.produto = anterior.produto;
+        if (anterior.hasMedia && !merged.hasMedia) merged.hasMedia = anterior.hasMedia;
+        if (anterior.mediaType && !merged.mediaType) merged.mediaType = anterior.mediaType;
+        if (!merged.body && anterior.body) merged.body = anterior.body;
+      }
+      seen.set(key, merged);
     });
   store.messages = Array.from(seen.values())
     .sort((a, b) => a.timestamp - b.timestamp)
@@ -4891,18 +4896,22 @@ io.on("connection", (socket) => {
 
       let mediaSent = false;
       let sentId = null;
+      const produtoResumo = {
+        id: prod.id,
+        nome: prod.nome,
+        preco: precoFinal,
+        precoFormatado: `R$ ${precoFinal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
+        imagem: prod.imagem,
+        fornecedor: prod.fornecedor || "Balão",
+        specs: Array.isArray(prod.specs) ? prod.specs.slice(0, 8) : [],
+      };
       if (prod.imagem && prod.imagem.startsWith("http")) {
         try {
-          const media = await MessageMedia.fromUrl(prod.imagem, { unsafeMime: true });
+          const media = await resolveMediaObject(prod.imagem, `produto-${prod.id}.jpg`, "image/jpeg");
+          if (!media) throw new Error("resolveMediaObject retornou null");
           const sentMsg = await resolveAndSendMessage(chatId, media, { caption: text });
           mediaSent = true;
-          // O WhatsApp Web nem sempre devolve o id (`_serialized` vem vazio
-          // nesta versao). Quando isso acontece, fabricamos um — mas o MESMO
-          // e usado no registro e na confirmacao, para o painel conseguir
-          // casar o balao que ele criou com a mensagem de verdade.
           sentId = sentMsg?.id?._serialized || `msg-produto-${Date.now()}`;
-          // Mesmo motivo do endpoint REST: guarda a mediaUrl explicitamente
-          // pra foto do produto não sumir do histórico na próxima sincronização.
           storeMessage({
             id: sentId,
             chatId,
@@ -4914,6 +4923,7 @@ io.on("connection", (socket) => {
             hasMedia: true,
             mediaType: "image",
             mediaUrl: prod.imagem,
+            produto: produtoResumo,
             realNumber: extractRealNumber(chatId),
             displayNumber: extractRealNumber(chatId),
           });

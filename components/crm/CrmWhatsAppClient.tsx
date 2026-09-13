@@ -946,22 +946,24 @@ export default function CrmWhatsAppClient({
           serverMsgs
             .filter((sm) => sm.chatId && isRealDirectChat(sm.chatId))
             .forEach((sm) => {
+              const existente = map.get(sm.id) as any;
               map.set(sm.id, {
                 id: sm.id,
                 chatId: sm.chatId,
                 from: sm.from,
                 to: sm.to,
-                body: sm.body || "",
+                body: sm.body || existente?.body || "",
                 direction: sm.direction || "in",
                 timestamp: sm.timestamp || Date.now(),
-                hasMedia: sm.hasMedia,
-                mediaType: sm.mediaType,
-                mediaUrl: sm.mediaUrl || null,
-                mediaErro: sm.mediaErro || null,
+                hasMedia: sm.hasMedia ?? existente?.hasMedia,
+                mediaType: sm.mediaType ?? existente?.mediaType,
+                mediaUrl: sm.mediaUrl || existente?.mediaUrl || null,
+                mediaErro: sm.mediaErro || existente?.mediaErro || null,
+                produto: (sm as any).produto || existente?.produto || null,
                 // Usa o status real persistido pelo message_ack quando existir
                 // (ver whatsapp-server), em vez de assumir "lida" sempre.
-                status: sm.status || "sent",
-              });
+                status: sm.status || existente?.status || "sent",
+              } as any);
             });
           return Array.from(map.values()).sort((a, b) => a.timestamp - b.timestamp);
         });
@@ -999,7 +1001,7 @@ export default function CrmWhatsAppClient({
       // resolvido apareciam como "273082677764270@lid" na lista de chats.
       const realNum = newMsg.realNumber || String(newMsg.chatId || "").replace(/@.*$/, "");
       const nomeSemJid = (newMsg.contactName || realNum || "").replace(/@.*$/, "");
-      const m: CrmMensagem = {
+      const m: any = {
         id: newMsg.id || `msg-${Date.now()}`,
         chatId: newMsg.chatId,
         from: newMsg.from || newMsg.chatId,
@@ -1010,47 +1012,46 @@ export default function CrmWhatsAppClient({
         mediaType: newMsg.mediaType,
         mediaUrl: newMsg.mediaUrl || null,
         mediaErro: newMsg.mediaErro || null,
+        produto: (newMsg as any).produto || null,
         status: "read",
       };
 
       setMensagens((prev) => {
-        // Rede de segurança contra o balão repetido.
-        //
-        // Ao enviar, o painel cria na hora um balão provisório. A mensagem
-        // real chega em seguida, e o balão precisa sair — senão o vendedor vê
-        // a mesma coisa duas vezes.
-        //
-        // O casamento é por TEXTO e não pela conversa: o painel identifica o
-        // cliente por um id (às vezes um `@lid`) e o servidor pode gravar a
-        // mensagem sob outro formato do mesmo contato. Exigir o mesmo chatId
-        // fazia a limpeza falhar exatamente nesses casos — foi o que sobrou
-        // depois de corrigir a duplicação do lado do servidor.
-        //
-        // A janela de tempo e o prefixo (só balões criados AQUI) evitam
-        // apagar mensagem legítima por coincidência de texto.
         const JANELA_MS = 2 * 60 * 1000;
         const agora = Date.now();
         const textoNovo = (m.body || "").trim();
 
         const ehBalaoProvisorioDoPainel = (x: CrmMensagem) =>
-          x.id.startsWith("msg-out-") ||
-          x.id.startsWith("msg-prod-") ||
-          x.id.startsWith("msg-doc-");
+          (x.id as string).startsWith("msg-out-") ||
+          (x.id as string).startsWith("msg-prod-") ||
+          (x.id as string).startsWith("msg-doc-");
 
-        const semDuplicataTemporaria =
+        const candidatosRemovidos =
           m.direction === "out" && textoNovo
             ? prev.filter(
                 (x) =>
-                  !(
-                    ehBalaoProvisorioDoPainel(x) &&
-                    x.direction === "out" &&
-                    (x.body || "").trim() === textoNovo &&
-                    agora - (x.timestamp || 0) < JANELA_MS
-                  )
+                  ehBalaoProvisorioDoPainel(x) &&
+                  x.direction === "out" &&
+                  (x.body || "").trim() === textoNovo &&
+                  agora - (x.timestamp || 0) < JANELA_MS
               )
-            : prev;
+            : [];
 
-        return [...semDuplicataTemporaria.filter((x) => x.id !== m.id), m];
+        const semDuplicataTemporaria = candidatosRemovidos.length
+          ? prev.filter((x) => !candidatosRemovidos.includes(x))
+          : prev;
+
+        // transfere produto/midia se o servidor veio magro (evita foto sumir)
+        let mEnriquecido: any = { ...m };
+        if (candidatosRemovidos.length && (!mEnriquecido.produto || !mEnriquecido.mediaUrl)) {
+          const fonte = [...candidatosRemovidos].reverse().find((x: any) => x.produto) || candidatosRemovidos[0];
+          if ((fonte as any).produto && !mEnriquecido.produto) mEnriquecido.produto = (fonte as any).produto;
+          if ((fonte as any).mediaUrl && !mEnriquecido.mediaUrl) mEnriquecido.mediaUrl = (fonte as any).mediaUrl;
+          if ((fonte as any).hasMedia && !mEnriquecido.hasMedia) mEnriquecido.hasMedia = (fonte as any).hasMedia;
+          if ((fonte as any).mediaType && !mEnriquecido.mediaType) mEnriquecido.mediaType = (fonte as any).mediaType;
+        }
+
+        return [...semDuplicataTemporaria.filter((x: any) => x.id !== mEnriquecido.id), mEnriquecido];
       });
 
       setChats((prev) => {
