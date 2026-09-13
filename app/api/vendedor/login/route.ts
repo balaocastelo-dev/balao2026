@@ -8,7 +8,7 @@ import {
   getVendedorSessionToken,
 } from "@/lib/vendedor-auth";
 import { getVendedorPorSlug, vendedorPublico } from "@/lib/vendedores";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase";
 import { createHash } from "crypto";
 
 function buildToken(slug: string, senha: string) {
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     }
 
     // 2) Tenta Supabase sellers (senha simples, ilimitado)
-    const { data: seller } = await supabase.from("sellers").select("id, name, slug, cargo, senha").eq("slug", slug).eq("ativo", true).limit(1).maybeSingle();
+    const { data: seller } = await supabaseAdmin.from("sellers").select("id, name, slug, cargo, senha").eq("slug", slug).eq("ativo", true).limit(1).maybeSingle();
     if (seller && (seller as any).senha) {
       const esperado = buildToken(slug, String((seller as any).senha));
       const recebido = buildToken(slug, senha);

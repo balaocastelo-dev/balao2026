@@ -1,24 +1,49 @@
 import { createClient } from "@supabase/supabase-js";
 
-// Cliente Supabase para o site Balão
-// Usa anon key para leitura pública (products tem policy SELECT true)
-// Para escrita no admin, o service_role é usado via API route com verificaçaão
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || "https://ptqqvezawobgnheesgvh.supabase.co";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0cXF2ZXphd29iZ25oZWVzZ3ZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxODE0ODMsImV4cCI6MjA4NDc1NzQ4M30.EPAYYj2Ky6wggkAr-Xz8029AO0CcN74Jo0s91tu39vY";
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+// Cliente Supabase do site Balão.
+// Sem fallback hardcoded: chave em código vira chave pública no primeiro push.
+const supabaseUrl =
+  process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || "";
+const supabaseAnonKey =
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+  process.env.SUPABASE_PUBLISHABLE_KEY ||
+  process.env.SUPABASE_ANON_KEY ||
+  "";
+const supabaseServiceKey =
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || "";
 
-// Client público (anon) - para leitura do catálogo curado
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: { persistSession: false },
-});
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.warn(
+    "[supabase] NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY ausentes — o site cai no Turso."
+  );
+}
 
-// Client admin (service_role) - para escrita quando disponível, senão usa anon com RLS anon_insert
-export const supabaseAdmin = supabaseServiceKey
-  ? createClient(supabaseUrl, supabaseServiceKey, { auth: { persistSession: false } })
-  : supabase;
+// Sem configuração o cliente não pode ser construído (o SDK lança na carga do
+// módulo). Usamos um destino inerte: isSupabaseActive() devolve false e o
+// lib/db.ts roteia tudo para o Turso, então este cliente nunca é chamado.
+const INERTE_URL = "https://indisponivel.supabase.co";
+const INERTE_KEY = "sem-configuracao";
+
+// Client público (anon/publishable) — leitura do catálogo, sujeito a RLS.
+export const supabase = createClient(
+  supabaseUrl || INERTE_URL,
+  supabaseAnonKey || INERTE_KEY,
+  { auth: { persistSession: false } }
+);
+
+// Client de servidor (service_role/secret) — ignora RLS.
+// NUNCA importar em componente marcado "use client".
+export const supabaseAdmin =
+  supabaseServiceKey && supabaseUrl
+    ? createClient(supabaseUrl, supabaseServiceKey, { auth: { persistSession: false } })
+    : supabase;
+
+export function hasSupabaseAdmin(): boolean {
+  return Boolean(supabaseServiceKey);
+}
 
 export function isSupabaseActive(): boolean {
   return Boolean(supabaseUrl && supabaseAnonKey);
 }
 
-export const CURATED_ONLY = true; // quando true, site mostra só os 260 curados
+export const CURATED_ONLY = true; // site mostra só os produtos com is_curated

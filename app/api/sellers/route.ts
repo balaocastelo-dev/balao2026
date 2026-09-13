@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
 // Lista vendedores ativos (para o CRM e para a página de login)
 export async function GET() {
-  const { data, error } = await supabase.from("sellers").select("id, name, slug, cargo, ativo, created_at").eq("ativo", true).order("name", { ascending: true });
+  const { data, error } = await supabaseAdmin.from("sellers").select("id, name, slug, cargo, ativo, created_at").eq("ativo", true).order("name", { ascending: true });
   if (error) return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   return NextResponse.json(data);
 }
@@ -30,10 +30,10 @@ export async function POST(request: Request) {
     if (!slug) return NextResponse.json({ success: false, error: "slug inválido" }, { status: 400 });
 
     // Verifica se slug já existe
-    const { data: existente } = await supabase.from("sellers").select("id").eq("slug", slug).limit(1).maybeSingle();
+    const { data: existente } = await supabaseAdmin.from("sellers").select("id").eq("slug", slug).limit(1).maybeSingle();
     if (existente) return NextResponse.json({ success: false, error: `slug "${slug}" já existe` }, { status: 409 });
 
-    const { data, error } = await supabase.from("sellers").insert({ name, slug, senha, cargo, ativo: true, hired_at: new Date().toISOString().slice(0,10) }).select("id, name, slug, cargo, ativo").single();
+    const { data, error } = await supabaseAdmin.from("sellers").insert({ name, slug, senha, cargo, ativo: true, hired_at: new Date().toISOString().slice(0,10) }).select("id, name, slug, cargo, ativo").single();
     if (error) return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     return NextResponse.json({ success: true, seller: data });
   } catch (e: any) {

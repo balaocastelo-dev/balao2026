@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +18,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
     if (Object.keys(updates).length === 0) return NextResponse.json({ success: false, error: "nada para atualizar" }, { status: 400 });
 
-    const { data, error } = await supabase.from("sellers").update(updates).eq("id", id).select("id, name, slug, cargo, ativo").single();
+    const { data, error } = await supabaseAdmin.from("sellers").update(updates).eq("id", id).select("id, name, slug, cargo, ativo").single();
     if (error) return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     return NextResponse.json({ success: true, seller: data });
   } catch (e: any) {
@@ -30,7 +30,7 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
   try {
     const { id } = await params;
     // Desativa ao invés de apagar para preservar histórico de vendas
-    const { error } = await supabase.from("sellers").update({ ativo: false }).eq("id", id);
+    const { error } = await supabaseAdmin.from("sellers").update({ ativo: false }).eq("id", id);
     if (error) return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     return NextResponse.json({ success: true });
   } catch (e: any) {
