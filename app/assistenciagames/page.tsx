@@ -101,6 +101,18 @@ export default async function AssistenciaGamesPage() {
     gameProducts = allProducts.slice(0, 8);
   }
 
+  const howToGames = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: "Como consertar PS5 superaquecendo e controle com drift",
+    step: [
+      { "@type": "HowToStep", name: "Sintoma", text: "Identifique superaquecimento, sem imagem HDMI ou drift analógico." },
+      { "@type": "HowToStep", name: "Diagnóstico 24-48h", text: "Bancada BGA com microscópio e teste de metal líquido." },
+      { "@type": "HowToStep", name: "Reparo", text: "Limpeza + metal líquido ou troca HDMI / Hall Effect." },
+      { "@type": "HowToStep", name: "Garantia", text: "Entrega com 90 dias e teste em jogo." },
+    ],
+  };
+
   const breadcrumbItems = [
     { name: "Home", item: "https://www.balao.info" },
     { name: "Assistência Games", item: "https://www.balao.info/assistenciagames" },
@@ -121,6 +133,7 @@ export default async function AssistenciaGamesPage() {
             url: "https://www.balao.info/assistenciagames",
             serviceType: "Reparo e Manutenção de Consoles de Videogame",
           }),
+          howToGames,
         ]}
       />
       <Header />
@@ -208,6 +221,40 @@ export default async function AssistenciaGamesPage() {
                 </div>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* SINTOMA → SOLUÇÃO P0 + HALL EFFECT */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-8 space-y-2">
+            <div className="text-xs font-black uppercase tracking-wider text-[#E60012]">Sintoma → Solução • Preço à vista</div>
+            <h2 className="text-2xl sm:text-3xl font-black text-white">Seu console está assim? Temos a solução</h2>
+            <p className="text-sm text-slate-400">Clique em “Orçar” e envie vídeo do sintoma no WhatsApp — diagnóstico em 24h</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              { sintoma: "PS5 Superaquecendo / Desligando", solucao: "Limpeza + Metal Líquido Original", preco: "R$ 149", wa: "Meu PS5 está SUPERaquecendo/desligando. Quero limpeza com metal líquido R$149." },
+              { sintoma: "PS5 / Xbox Sem Imagem HDMI", solucao: "Troca conector HDMI blindado BGA", preco: "R$ 199", wa: "Meu PS5/Xbox está SEM IMAGEM HDMI. Quero orçar troca HDMI R$199." },
+              { sintoma: "Controle Drift Analógico", solucao: "Hall Effect magnético — nunca mais drift", preco: "R$ 89", wa: "Meu controle está com DRIFT analógico. Quero Hall Effect R$89." },
+              { sintoma: "PS5 Barulho / Cooler Alto", solucao: "Desobstrução + pasta premium + cooler", preco: "R$ 129", wa: "Meu PS5 está BARULHENTO. Quero limpeza completa R$129." },
+              { sintoma: "Xbox / PS Fonte Queimada", solucao: "Reparo fonte interna industrial", preco: "R$ 179", wa: "Meu console NÃO LIGA fonte queimada. Quero reparo fonte R$179." },
+              { sintoma: "Switch Joy-Con Drift / Não Carrega", solucao: "Hall Effect Joy-Con + conector Type-C", preco: "R$ 99", wa: "Meu Switch Joy-Con com drift. Quero Hall Effect R$99." },
+            ].map((c) => (
+              <div key={c.sintoma} className="bg-[#111827] border border-slate-800 rounded-2xl p-5 space-y-3 flex flex-col">
+                <div className="text-xs font-black uppercase tracking-wider text-amber-400">{c.sintoma}</div>
+                <div className="text-sm font-bold text-white">→ {c.solucao}</div>
+                <div className="text-2xl font-black text-[#E60012]">{c.preco}</div>
+                <a href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(`Olá! ${c.wa}`)}`} target="_blank" rel="noopener noreferrer" className="mt-auto bg-[#E60012] hover:bg-red-700 text-white font-black py-2.5 px-4 rounded-xl text-center text-sm flex items-center justify-center gap-2"><MessageCircle className="w-4 h-4" /> Orçar no WhatsApp</a>
+              </div>
+            ))}
+          </div>
+          <div className="mt-6 bg-gradient-to-r from-[#E60012]/20 to-[#111827] border border-[#E60012]/40 rounded-3xl p-6 flex flex-col md:flex-row items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-[#E60012] flex items-center justify-center shrink-0"><Gamepad2 className="w-6 h-6 text-white" /></div>
+            <div className="flex-1">
+              <h3 className="font-black text-white">Novo: Hall Effect Magnético — fim do drift</h3>
+              <p className="text-sm text-slate-300">Sensores magnéticos sem contato físico: duram 5x mais que analógico original. Garantia 90 dias. Para DualSense, Xbox Series e Joy-Con.</p>
+            </div>
+            <a href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent("Olá! Quero HALL EFFECT magnético fim do drift para meu controle.")}`} target="_blank" rel="noopener noreferrer" className="bg-white text-[#E60012] font-black py-3 px-6 rounded-2xl text-sm whitespace-nowrap">Quero Hall Effect</a>
           </div>
         </section>
 

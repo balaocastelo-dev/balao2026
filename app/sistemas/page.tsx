@@ -12,6 +12,8 @@ import JsonLd, {
   generateItemListSchema,
 } from "@/components/JsonLd";
 import SistemasLeadForm from "@/components/SistemasLeadForm";
+import SistemasPortfolio from "@/components/SistemasPortfolio";
+import SistemasCalculator from "@/components/SistemasCalculator";
 import { SITE_CONFIG } from "@/lib/config";
 import {
   ArrowRight,
@@ -229,6 +231,16 @@ export default async function SistemasPage() {
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
+        </section>
+
+        {/* PORTFÓLIO 6 CASES */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <SistemasPortfolio />
+        </section>
+
+        {/* CALCULADORA DE PROPOSTA */}
+        <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <SistemasCalculator />
         </section>
 
         {/* FORMULÁRIO DE CAPTAÇÃO DE PROJETO */}

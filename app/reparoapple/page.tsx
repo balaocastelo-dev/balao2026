@@ -45,11 +45,11 @@ export const metadata: Metadata = {
     "face id iphone campinas",
     "balao da informatica apple",
   ],
-  alternates: { canonical: "https://www.balao.info/reparoapple" },
+  alternates: { canonical: "https://www.balao.info/wendell/apple" },
   openGraph: {
     type: "website",
     locale: "pt_BR",
-    url: "https://www.balao.info/reparoapple",
+    url: "https://www.balao.info/wendell/apple",
     title: "Assistência Técnica Especializada Apple em Campinas | Balão da Informática",
     description:
       "Troca de tela e bateria de iPhone em até 3 horas. Laboratório avançado para reparo de MacBooks e iPads no Cambuí.",
@@ -90,15 +90,27 @@ const APPLE_FAQS = [
 export default async function ReparoApplePage() {
   const [allProducts, keywordApple] = await Promise.all([
     getCachedProducts(),
-    getCachedProductsByKeywords(["apple", "iphone", "macbook", "ipad", "airpods", "magsafe", "carregador"], 16),
+    getCachedProductsByKeywords(["apple", "iphone", "macbook", "ipad", "airpods", "magsafe"], 12),
   ]);
 
-  let displayProducts = keywordApple.length > 0 ? keywordApple : allProducts.slice(0, 8);
+  let displayProducts = keywordApple.length > 0 ? keywordApple.slice(0, 12) : allProducts.slice(0, 12);
 
   const breadcrumbItems = [
     { name: "Home", item: "https://www.balao.info" },
+    { name: "Especialista Apple", item: "https://www.balao.info/wendell/apple" },
     { name: "Reparo Apple", item: "https://www.balao.info/reparoapple" },
   ];
+
+  const howToApple = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: "Como preservar True Tone e Face ID na troca de tela iPhone",
+    step: [
+      { "@type": "HowToStep", name: "Leitura EEPROM", text: "Programador lê serial do display original." },
+      { "@type": "HowToStep", name: "Gravação na nova tela", text: "Transfere código True Tone para OLED nova." },
+      { "@type": "HowToStep", name: "Calibração Face ID", text: "Mantém sensor de luminosidade e Face ID 100%." },
+    ],
+  };
 
   return (
     <div className="min-h-screen bg-[#090d16] text-white flex flex-col font-sans selection:bg-[#E60012] selection:text-white">
@@ -106,15 +118,16 @@ export default async function ReparoApplePage() {
         data={[
           generateOrganizationSchema(),
           generateBreadcrumbSchema(breadcrumbItems),
-          generateItemListSchema(displayProducts, "https://www.balao.info/reparoapple"),
+          generateItemListSchema(displayProducts, "https://www.balao.info/wendell/apple"),
           generateFAQSchema(APPLE_FAQS),
           generateServiceSchema({
             name: "Assistência Técnica Apple Especializada em Campinas",
             description:
               "Reparo avançado em iPhones, MacBooks, iPads e Apple Watch com bancada própria no Cambuí.",
-            url: "https://www.balao.info/reparoapple",
+            url: "https://www.balao.info/wendell/apple",
             serviceType: "Manutenção e Reparo de Dispositivos Apple",
           }),
+          howToApple,
         ]}
       />
       <Header />
@@ -205,14 +218,43 @@ export default async function ReparoApplePage() {
           </div>
         </section>
 
-        {/* VITRINE DE PRODUTOS APPLE REAIS DO BANCO */}
+        {/* TABELA TRUE TONE P0 + CANONICAL */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-[#111827] border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-xl sm:text-2xl font-black text-white">Preservação True Tone & Face ID <span className="text-[#E60012]">com Programador EEPROM</span></h2>
+              <a href="/wendell/apple" className="text-xs bg-[#E60012]/15 border border-[#E60012]/40 text-[#E60012] font-black px-3 py-1.5 rounded-full">Hub oficial: /wendell/apple → canonical</a>
+            </div>
+            <div className="overflow-x-auto rounded-2xl border border-slate-800">
+              <table className="w-full text-sm">
+                <thead className="bg-[#161f32] text-slate-400 text-xs uppercase tracking-wider">
+                  <tr><th className="px-4 py-3 text-left">Serviço</th><th className="px-4 py-3 text-left">Sem programador</th><th className="px-4 py-3 text-left text-emerald-400">Com programador Balão</th><th className="px-4 py-3 text-left">Modelos</th></tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800 text-slate-300">
+                  <tr><td className="px-4 py-3 font-bold text-white">Troca de Tela OLED</td><td className="px-4 py-3 text-red-400">True Tone perde, amarelado</td><td className="px-4 py-3 text-emerald-400">True Tone 100% + calibração</td><td className="px-4 py-3 text-xs">iPhone 11 ao 15 Pro Max</td></tr>
+                  <tr><td className="px-4 py-3 font-bold text-white">Troca de Bateria</td><td className="px-4 py-3 text-red-400">Aviso “peça desconhecida”</td><td className="px-4 py-3 text-emerald-400">Saúde 100% sem aviso, ciclos zerados</td><td className="px-4 py-3 text-xs">iPhone X ao 15 + Apple Watch</td></tr>
+                  <tr><td className="px-4 py-3 font-bold text-white">Face ID</td><td className="px-4 py-3 text-red-400">Perde Face ID</td><td className="px-4 py-3 text-emerald-400">Face ID preservado</td><td className="px-4 py-3 text-xs">Dot projector mantido original</td></tr>
+                  <tr><td className="px-4 py-3 font-bold text-white">Brilho automático</td><td className="px-4 py-3 text-red-400">Falha sensor luminosidade</td><td className="px-4 py-3 text-emerald-400">Sensor calibrado</td><td className="px-4 py-3 text-xs">Todos OLED</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p className="text-xs text-slate-500">SEO: esta página <code className="bg-[#161f32] px-1 rounded">/reparoapple</code> usa canonical para <code className="bg-emerald-500/20 text-emerald-400 px-1 rounded">/wendell/apple</code> para consolidar autoridade Apple. Conteúdo ainda indexável, mas hub é a versão canônica.</p>
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 flex items-center gap-3">
+              <ShieldCheck className="w-6 h-6 text-amber-400 shrink-0" />
+              <p className="text-sm text-amber-200"><b>Selo Microscópio & Estufa:</b> reparo de placa lógica M1/M2 com desoxidação ultrassônica — até 70% mais barato que placa nova. 90 dias a 1 ano de garantia.</p>
+            </div>
+          </div>
+        </section>
+
+        {/* VITRINE DE PRODUTOS APPLE REAIS DO BANCO — 12 FOCADOS */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
             <div>
-              <div className="text-xs font-black uppercase tracking-wider text-[#E60012] mb-1">Loja Balão Apple</div>
+              <div className="text-xs font-black uppercase tracking-wider text-[#E60012] mb-1">Loja Balão Apple • 12 produtos focados</div>
               <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
                 Equipamentos & Acessórios Apple
               </h2>
+              <p className="text-sm text-slate-400 mt-1">iPhone, iPad, MacBook, AirPods — filtro apple/iphone/macbook</p>
             </div>
             <a
               href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(

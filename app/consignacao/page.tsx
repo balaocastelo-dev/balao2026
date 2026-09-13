@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
+import ConsignacaoCalculator from "@/components/ConsignacaoCalculator";
 import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
 import JsonLd, {
   generateOrganizationSchema,
@@ -99,6 +100,19 @@ export default async function ConsignacaoPage() {
     usedProducts = allProducts.slice(0, 8);
   }
 
+  const howToConsign = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: "Como vender seu usado em consignação na Balão",
+    totalTime: "PT15M",
+    step: [
+      { "@type": "HowToStep", name: "Envie 3 fotos", text: "Fotos frente, etiqueta e funcionando via WhatsApp." },
+      { "@type": "HowToStep", name: "Receba estimativa", text: "Calculadora + avaliador estima valor de vitrine em 15 min." },
+      { "@type": "HowToStep", name: "Contrato na loja", text: "Entrega no Cambuí, formatação segura e vitrine física + site." },
+      { "@type": "HowToStep", name: "PIX na venda", text: "Pagamento garantido via PIX após venda com nota fiscal." },
+    ],
+  };
+
   const breadcrumbs = [
     { name: "Home", item: "https://www.balao.info" },
     { name: "Consignação e Venda de Usados", item: "https://www.balao.info/consignacao" },
@@ -119,6 +133,7 @@ export default async function ConsignacaoPage() {
             url: "https://www.balao.info/consignacao",
             serviceType: "Consignação e Compra de Eletrônicos",
           }),
+          howToConsign,
         ]}
       />
       <Header />
@@ -184,6 +199,11 @@ export default async function ConsignacaoPage() {
               </div>
             </div>
           </div>
+        </section>
+
+        {/* CALCULADORA + FORMULÁRIO P0 — 3 FOTOS */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ConsignacaoCalculator />
         </section>
 
         {/* VITRINE DE PRODUTOS REAIS VENDIDOS EM CONIGNAÇÃO */}

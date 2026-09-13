@@ -25,6 +25,7 @@ import {
   ArrowRight,
   Sparkles,
 } from "lucide-react";
+import MondayCountdown from "@/components/MondayCountdown";
 
 export const dynamic = "force-dynamic";
 
@@ -84,14 +85,21 @@ const PROMO_FAQS = [
 ];
 
 export default async function PromocaoPage() {
-  const [allProducts, promoHardware, promoNotebooks] = await Promise.all([
+  const [allProducts, promoHardwareRaw, promoNotebooksRaw] = await Promise.all([
     getCachedProducts(),
-    getCachedProductsByKeywords(["ssd", "rtx", "fonte", "gabinete", "cooler", "memoria"], 8),
-    getCachedProductsByKeywords(["notebook", "dell", "lenovo", "thinkpad", "macbook"], 8),
+    getCachedProductsByKeywords(["ssd", "rtx", "fonte", "gabinete", "cooler", "memoria", "placa de video"], 12),
+    getCachedProductsByKeywords(["notebook", "dell", "lenovo", "thinkpad", "macbook", "acer", "asus"], 12),
   ]);
 
-  let displayHardware = promoHardware.length > 0 ? promoHardware : allProducts.slice(0, 8);
-  let displayNotebooks = promoNotebooks.length > 0 ? promoNotebooks : allProducts.slice(8, 16);
+  let promoHardware = promoHardwareRaw.length >=12 ? promoHardwareRaw.slice(0,12) : [...promoHardwareRaw, ...allProducts.filter(p=> !promoHardwareRaw.find(x=>x.id===p.id))].slice(0,12);
+  let promoNotebooks = promoNotebooksRaw.length >=12 ? promoNotebooksRaw.slice(0,12) : [...promoNotebooksRaw, ...allProducts.filter(p=> !promoNotebooksRaw.find(x=>x.id===p.id) && !promoHardware.find(x=>x.id===p.id))].slice(0,12);
+  // garantir 24 únicos
+  if (promoHardware.length <12) promoHardware = [...promoHardware, ...allProducts.filter(p=> !promoHardware.find(x=>x.id===p.id))].slice(0,12);
+  if (promoNotebooks.length <12) promoNotebooks = [...promoNotebooks, ...allProducts.filter(p=> !promoNotebooks.find(x=>x.id===p.id) && !promoHardware.find(x=>x.id===p.id))].slice(0,12);
+
+  let displayHardware = promoHardware;
+  let displayNotebooks = promoNotebooks;
+  const all24 = [...displayHardware, ...displayNotebooks];
 
   const breadcrumbItems = [
     { name: "Home", item: "https://www.balao.info" },
@@ -104,7 +112,7 @@ export default async function PromocaoPage() {
         data={[
           generateOrganizationSchema(),
           generateBreadcrumbSchema(breadcrumbItems),
-          generateItemListSchema(allProducts.slice(0, 16), "https://www.balao.info/promocao"),
+          generateItemListSchema(all24, "https://www.balao.info/promocao"),
           generateFAQSchema(PROMO_FAQS),
           generateServiceSchema({
             name: "Central de Ofertas e Promoções Balão da Informática",
@@ -121,6 +129,9 @@ export default async function PromocaoPage() {
       <div className="bg-[#E60012] text-white py-2.5 px-4 text-center text-xs sm:text-sm font-black tracking-wide flex items-center justify-center gap-2 shadow-md">
         <Flame className="w-4 h-4 animate-bounce" />
         <span>OFERTAS DA SEMANA COM ATÉ 10% OFF NO PIX + RETIRADA IMEDIATA NO CAMBUÍ!</span>
+      </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+        <MondayCountdown hour={23} minute={59} label="Termina segunda às 23:59" sublabel="24 ofertas ativas • 10% OFF no PIX" />
       </div>
 
       <main className="flex-1 space-y-16 sm:space-y-24 py-8 sm:py-12">

@@ -99,10 +99,10 @@ const MONTAGEM_FAQS = [
 export default async function MontagemPCPage() {
   const [allProducts, keywordHardware] = await Promise.all([
     getCachedProducts(),
-    getCachedProductsByKeywords(["gabinete", "fonte", "watercooler", "cooler", "placa-mae", "rtx", "ryzen", "memoria"], 16),
+    getCachedProductsByKeywords(["gabinete", "fonte", "watercooler", "cooler", "placa-mae", "rtx", "ryzen", "memoria"], 24),
   ]);
 
-  let displayProducts = keywordHardware.length > 0 ? keywordHardware : allProducts.slice(0, 8);
+  let displayProducts = keywordHardware.length > 0 ? keywordHardware.slice(0, 24) : allProducts.slice(0, 24);
 
   const breadcrumbItems = [
     { name: "Home", item: "https://www.balao.info" },
@@ -162,6 +162,12 @@ export default async function MontagemPCPage() {
                     <MessageCircle className="w-6 h-6" />
                     Agendar Montagem no WhatsApp
                   </a>
+                  <Link
+                    href="/monteseupc"
+                    className="bg-gradient-to-r from-[#E60012] to-orange-500 hover:from-red-700 hover:to-orange-600 text-white border border-[#E60012] font-black py-4 px-8 rounded-2xl transition-all text-base flex items-center gap-2 shadow-lg"
+                  >
+                    Monte Agora — Simulador FPS <ArrowRight className="w-4 h-4" />
+                  </Link>
                   <a
                     href="#pilares"
                     className="bg-[#161f32] hover:bg-slate-800 text-slate-200 border border-slate-700 font-bold py-4 px-8 rounded-2xl transition-all text-base flex items-center gap-2"
@@ -218,21 +224,15 @@ export default async function MontagemPCPage() {
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
             <div>
-              <div className="text-xs font-black uppercase tracking-wider text-[#E60012] mb-1">Peças para Montagem</div>
+              <div className="text-xs font-black uppercase tracking-wider text-[#E60012] mb-1">Peças para Montagem • 24 em estoque</div>
               <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
                 Hardware Disponível na Loja
               </h2>
+              <p className="text-xs text-slate-400 mt-1">24 hardwares premium — clique em “Monte Agora” para simular FPS em tempo real.</p>
             </div>
-            <a
-              href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(
-                "Olá! Gostaria de consultar gabinetes, fontes e watercoolers para meu novo PC."
-              )}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm font-bold text-slate-300 hover:text-[#E60012] transition-colors"
-            >
-              Consulte no WhatsApp <ArrowRight className="w-4 h-4" />
-            </a>
+            <Link href="/monteseupc" className="inline-flex items-center gap-2 text-sm font-bold text-[#E60012] hover:text-white transition-colors border border-[#E60012]/30 px-4 py-2 rounded-full">
+              Simulador FPS no builder <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">

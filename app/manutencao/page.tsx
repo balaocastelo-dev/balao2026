@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
+import ManutencaoSimulador from "@/components/ManutencaoSimulador";
 import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
 import JsonLd, {
   generateBreadcrumbSchema,
@@ -94,15 +95,30 @@ const MANUTENCAO_FAQS = [
 export default async function ManutencaoPage() {
   const [allProducts, keywordUpgrades] = await Promise.all([
     getCachedProducts(),
-    getCachedProductsByKeywords(["ssd", "memoria", "cooler", "fonte", "pasta termica", "teclado"], 16),
+    getCachedProductsByKeywords(["ssd", "memoria", "cooler", "fonte", "pasta termica", "teclado", "nvme", "ram ddr4", "ram ddr5"], 20),
   ]);
 
-  let displayProducts = keywordUpgrades.length > 0 ? keywordUpgrades : allProducts.slice(0, 8);
+  let displayProducts = keywordUpgrades.length > 0 ? keywordUpgrades.slice(0, 20) : allProducts.slice(0, 20);
 
   const breadcrumbItems = [
     { name: "Home", item: "https://www.balao.info" },
     { name: "Manutenção Técnica", item: "https://www.balao.info/manutencao" },
   ];
+
+  const howToSchema = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: "Como recuperar PC lento ou com tela azul na Balão",
+    description: "Passo a passo da triagem até upgrade SSD/RAM com orçamento grátis",
+    totalTime: "PT24H",
+    estimatedCost: { "@type": "MonetaryAmount", currency: "BRL", value: "0" },
+    step: [
+      { "@type": "HowToStep", name: "Diagnóstico gratuito", text: "Traga no Cambuí ou chame motoboy. Triagem em 24h sem custo." },
+      { "@type": "HowToStep", name: "Orçamento no WhatsApp", text: "Enviamos laudo com fotos e valor fechado para aprovar." },
+      { "@type": "HowToStep", name: "Upgrade SSD/RAM ou limpeza térmica", text: "Clonagem de sistema, aplicação de pasta térmica prata, testes." },
+      { "@type": "HowToStep", name: "Teste e garantia", text: "Benchmark e entrega com garantia 90 dias no balcão." },
+    ],
+  };
 
   return (
     <div className="min-h-screen bg-[#090d16] text-white flex flex-col font-sans selection:bg-[#E60012] selection:text-white">
@@ -119,6 +135,7 @@ export default async function ManutencaoPage() {
             url: "https://www.balao.info/manutencao",
             serviceType: "Assistência Técnica em Informática",
           }),
+          howToSchema,
         ]}
       />
       <Header />
@@ -209,14 +226,21 @@ export default async function ManutencaoPage() {
           </div>
         </section>
 
-        {/* PRODUTOS PARA UPGRADE DO BANCO */}
+        {/* SIMULADOR DE ORÇAMENTO P0 */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ManutencaoSimulador />
+          <p className="text-center text-[11px] text-slate-500 mt-3">Selo Orçamento Grátis — diagnóstico sem compromisso • Se aprovar, valor abatido no serviço</p>
+        </section>
+
+        {/* PRODUTOS PARA UPGRADE DO BANCO — 20 ITENS */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
             <div>
-              <div className="text-xs font-black uppercase tracking-wider text-[#E60012] mb-1">Peças para Upgrade</div>
+              <div className="text-xs font-black uppercase tracking-wider text-[#E60012] mb-1">Peças para Upgrade • 20 em estoque</div>
               <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
                 Componentes de Upgrade na Hora
               </h2>
+              <p className="text-sm text-slate-400 mt-1">SSD NVMe, RAM DDR4/DDR5, pasta térmica e coolers — instalação na hora com clonagem</p>
             </div>
             <a
               href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(

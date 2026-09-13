@@ -4,6 +4,7 @@ import Image from "next/image";
 import Header from "@/components/Header";
 import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
 import ProductCard from "@/components/ProductCard";
+import CarregadoresWidget from "@/components/CarregadoresWidget";
 import JsonLd, {
   generateOrganizationSchema,
   generateBreadcrumbSchema,
@@ -95,15 +96,27 @@ const CARREGADORES_FAQS = [
 export default async function CarregadoresPage() {
   const [allProducts, keywordChargers] = await Promise.all([
     getCachedProducts(),
-    getCachedProductsByKeywords(["carregador", "fonte", "adaptador", "usb-c", "magsafe", "power"], 16),
+    getCachedProductsByKeywords(["carregador", "fonte", "adaptador", "usb-c", "magsafe", "power", "dell", "lenovo", "hp"], 20),
   ]);
 
-  let displayProducts = keywordChargers.length > 0 ? keywordChargers : allProducts.slice(0, 8);
+  let displayProducts = keywordChargers.length > 0 ? keywordChargers.slice(0, 20) : allProducts.slice(0, 20);
 
   const breadcrumbItems = [
     { name: "Home", item: "https://www.balao.info" },
     { name: "Carregadores", item: "https://www.balao.info/carregadores" },
   ];
+
+  const howToCarregador = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: "Como escolher o carregador correto pelo plug e etiqueta",
+    step: [
+      { "@type": "HowToStep", name: "Foto da etiqueta", text: "Fotografe a etiqueta debaixo do notebook (V e A)." },
+      { "@type": "HowToStep", name: "Foto do plug", text: "Fotografe o conector do carregador antigo ou do buraco do notebook." },
+      { "@type": "HowToStep", name: "Envio no WhatsApp", text: "Envie as fotos e receba confirmação de voltagem em 2 min." },
+      { "@type": "HowToStep", name: "Teste no balcão", text: "Retire no Cambuí com teste gratuito e garantia 12 meses." },
+    ],
+  };
 
   return (
     <div className="min-h-screen bg-[#090d16] text-white flex flex-col font-sans selection:bg-[#E60012] selection:text-white">
@@ -120,6 +133,7 @@ export default async function CarregadoresPage() {
             url: "https://www.balao.info/carregadores",
             serviceType: "Venda de Acessórios e Peças de Reposição de TI",
           }),
+          howToCarregador,
         ]}
       />
       <Header />
@@ -210,14 +224,20 @@ export default async function CarregadoresPage() {
           </div>
         </section>
 
-        {/* VITRINE DE PRODUTOS REAIS DO BANCO */}
+        {/* WIDGET FOTO PLUG + TABELA VOLTAGEM P0 */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <CarregadoresWidget />
+        </section>
+
+        {/* VITRINE DE PRODUTOS REAIS DO BANCO — 20 FONTES */}
         <section id="modelos" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
             <div>
-              <div className="text-xs font-black uppercase tracking-wider text-[#E60012] mb-1">Fontes em Estoque</div>
+              <div className="text-xs font-black uppercase tracking-wider text-[#E60012] mb-1">Fontes em Estoque • 20 modelos</div>
               <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
                 Carregadores Prontos para Retirada
               </h2>
+              <p className="text-sm text-slate-400 mt-1">Garanta voltagem exata — tabela acima evita queima de placa</p>
             </div>
             <a
               href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(

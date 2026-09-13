@@ -53,6 +53,16 @@ const nextConfig: NextConfig = {
         destination: "/trocas-e-devolucoes",
         permanent: true,
       },
+      {
+        source: "/tonner",
+        destination: "/toner",
+        permanent: true,
+      },
+      {
+        source: "/tonner/:path*",
+        destination: "/toner/:path*",
+        permanent: true,
+      },
     ];
   },
 };

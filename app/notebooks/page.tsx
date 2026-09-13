@@ -11,6 +11,7 @@ import JsonLd, {
 } from "@/components/JsonLd";
 import { SITE_CONFIG } from "@/lib/config";
 import ProductCard from "@/components/ProductCard";
+import NotebooksBrandFilter from "@/components/NotebooksBrandFilter";
 import {
   Laptop,
   Battery,
@@ -84,10 +85,14 @@ const NOTEBOOK_FAQS = [
 export default async function NotebooksPage() {
   const [allProducts, keywordNotebooks] = await Promise.all([
     getCachedProducts(),
-    getCachedProductsByKeywords(["notebook", "laptop", "macbook", "thinkpad", "dell", "lenovo", "acer"], 16),
+    getCachedProductsByKeywords(["notebook", "laptop", "macbook", "thinkpad", "dell", "lenovo", "acer", "asus", "samsung"], 33),
   ]);
 
-  let notebookProducts = keywordNotebooks.length > 0 ? keywordNotebooks : allProducts.slice(0, 8);
+  let notebookProducts = keywordNotebooks.length >= 33 ? keywordNotebooks.slice(0,33) : [...keywordNotebooks, ...allProducts.filter(p=> !keywordNotebooks.find(x=>x.id===p.id))].slice(0,33);
+  if (notebookProducts.length < 33) {
+    const more = allProducts.filter(p=> !notebookProducts.find(x=>x.id===p.id));
+    notebookProducts = [...notebookProducts, ...more].slice(0,33);
+  }
 
   const breadcrumbItems = [
     { name: "Home", item: "https://www.balao.info" },
@@ -176,14 +181,15 @@ export default async function NotebooksPage() {
           </div>
         </section>
 
-        {/* VITRINE DE NOTEBOOKS REAIS DO BANCO */}
+        {/* VITRINE DE NOTEBOOKS REAIS — 33 MODELOS + FILTROS */}
         <section id="catalogo" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
             <div>
-              <div className="text-xs font-black uppercase tracking-wider text-[#E60012] mb-1">Portáteis em Destaque</div>
+              <div className="text-xs font-black uppercase tracking-wider text-[#E60012] mb-1">33 Portáteis em Destaque • Filtro por marca</div>
               <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
-                Notebooks Pronta Entrega
+                Notebooks Pronta Entrega <span className="text-[#E60012]">• Upgrade na hora</span>
               </h2>
+              <p className="text-sm text-slate-400 mt-1">Dell • Lenovo • MacBook • Acer • Asus — com selo <span className="bg-emerald-500 text-white px-2 py-0.5 rounded-full text-xs font-black">Upgrade na hora</span> instalado no balcão do Cambuí.</p>
             </div>
             <a
               href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(
@@ -197,11 +203,7 @@ export default async function NotebooksPage() {
             </a>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {notebookProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          <NotebooksBrandFilter products={notebookProducts} />
         </section>
 
         {/* CATEGORIAS DE NOTEBOOK */}
