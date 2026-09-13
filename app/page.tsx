@@ -58,7 +58,12 @@ const AVALIACOES = [
 
 /* Fotos reais da loja. Vazio = a seção usa um bloco neutro em vez de
  * imagem de IA. Render de IA contradiz o argumento "loja física real". */
-const FOTOS_LOJA: { src: string; alt: string }[] = [];
+const FOTOS_LOJA: { src: string; alt: string }[] = [
+  { src: "/images/loja/atendimento-balcao.jpg", alt: "Atendente da Balão da Informática no salão da loja do Cambuí" },
+  { src: "/images/loja/estoque-notebooks.jpg", alt: "Prateleiras com notebooks em exposição na loja" },
+  { src: "/images/loja/vitrine-placas-video.jpg", alt: "Placas de vídeo GeForce RTX e processadores Ryzen na vitrine" },
+  { src: "/images/loja/parede-acessorios.jpg", alt: "Parede de acessórios e periféricos da loja" },
+];
 
 const WPP = SITE_CONFIG.whatsapp.number;
 const wpp = (msg: string) => `https://wa.me/${WPP}?text=${encodeURIComponent(msg)}`;
@@ -154,7 +159,8 @@ export default async function Home() {
 
       {/* ============================ HERO ============================ */}
       <section className="relative overflow-hidden bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-14 md:py-20">
+        <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-14 md:py-20 lg:grid-cols-[1.1fr_1fr]">
+          <div>
           <p className="inline-flex items-center gap-2 rounded-full border border-[#E60012]/20 bg-[#E60012]/5 px-3 py-1 text-xs font-semibold text-[#E60012]">
             <Store size={14} /> Loja física no Cambuí — Av. Anchieta, 789
           </p>
@@ -213,6 +219,23 @@ export default async function Home() {
               <dd className="mt-1 text-2xl font-bold text-neutral-900">Humano</dd>
             </div>
           </dl>
+          </div>
+
+          {/* A manchete promete ver o PC ligado; a foto mostra exatamente
+              isso, na bancada da loja. Quadro real, não render. */}
+          <div className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl lg:aspect-square">
+            <Image
+              src="/images/loja/setup-gamer.jpg"
+              alt="PC gamer montado e ligado na bancada da loja do Cambuí"
+              fill
+              priority
+              sizes="(max-width: 1024px) 100vw, 520px"
+              className="object-cover"
+            />
+            <span className="absolute bottom-4 left-4 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-neutral-800 shadow">
+              Salão da loja — Av. Anchieta, 789
+            </span>
+          </div>
         </div>
       </section>
 
