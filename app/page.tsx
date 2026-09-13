@@ -72,6 +72,40 @@ const SERVICOS = [
   { icone: RefreshCw, titulo: "Seminovos e consignação", desc: "Compramos, vendemos e deixamos o seu à venda na loja, com garantia.", href: "/seminovos", msg: "Olá! Quero saber sobre seminovos/consignação." },
 ];
 
+/* Área de loja: cada prateleira agrupa uma ou mais categorias do banco.
+ * Os slugs seguem a tabela `categories`. */
+const PRATELEIRAS = [
+  { titulo: "Computadores e PC Gamer", cats: ["Computadores"], href: "/pcgamer" },
+  { titulo: "Notebooks", cats: ["Notebooks"], href: "/notebooks" },
+  { titulo: "Monitores", cats: ["Monitores"], href: "/categoria/monitores" },
+  { titulo: "Placas de vídeo", cats: ["Hardware/Placas de Vídeo"], href: "/categoria/hardware-placas-de-video" },
+  {
+    titulo: "Memória, fonte, placa-mãe e gabinete",
+    cats: [
+      "Hardware/Memórias RAM", "Hardware/Fontes", "Hardware/Placas Mãe",
+      "Hardware/Processadores", "Hardware/Water Coolers", "Hardware/Gabinetes",
+      "Hardware/SSDs e NVMe", "Hardware",
+    ],
+    href: "/categoria/hardware",
+  },
+  {
+    titulo: "Periféricos, impressão e escritório",
+    cats: ["Periféricos", "Impressão", "Acessórios", "Escritório/Cadeiras Gamer"],
+    href: "/categoria/perifericos",
+  },
+];
+
+const DEPARTAMENTOS = [
+  { nome: "PC Gamer", href: "/pcgamer" },
+  { nome: "Notebooks", href: "/notebooks" },
+  { nome: "Monitores", href: "/categoria/monitores" },
+  { nome: "Hardware", href: "/categoria/hardware" },
+  { nome: "Periféricos", href: "/categoria/perifericos" },
+  { nome: "Impressão", href: "/categoria/impressao" },
+  { nome: "Seminovos", href: "/seminovos" },
+  { nome: "Monte seu PC", href: "/monteseupc" },
+];
+
 const COMPARATIVO = [
   { ponto: "Ver o equipamento ligado antes de pagar", loja: true, online: false },
   { ponto: "Retirar hoje, sem esperar frete", loja: true, online: false },
@@ -96,12 +130,19 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  let produtos: Product[] = [];
+  let catalogo: Product[] = [];
   try {
-    produtos = (await getCachedProducts()).slice(0, 8);
+    catalogo = await getCachedProducts();
   } catch {
-    produtos = [];
+    catalogo = [];
   }
+
+  // Agrupa uma vez só: o catálogo curado é pequeno, não compensa uma
+  // consulta por prateleira.
+  const prateleiras = PRATELEIRAS.map((p) => ({
+    ...p,
+    itens: catalogo.filter((x) => p.cats.includes(String(x.category || ""))).slice(0, 8),
+  })).filter((p) => p.itens.length > 0);
 
   const temProvaGoogle =
     PROVA_SOCIAL.googleNota !== null && PROVA_SOCIAL.googleAvaliacoes !== null;
@@ -172,6 +213,61 @@ export default async function Home() {
               <dd className="mt-1 text-2xl font-bold text-neutral-900">Humano</dd>
             </div>
           </dl>
+        </div>
+      </section>
+
+      {/* ======================== ÁREA DE LOJA ======================== */}
+      <section className="border-t border-neutral-100 bg-white">
+        <div className="mx-auto max-w-6xl px-4 pt-12">
+          <nav aria-label="Departamentos" className="flex flex-wrap gap-2">
+            {DEPARTAMENTOS.map((d) => (
+              <Link
+                key={d.href}
+                href={d.href}
+                className="rounded-full border border-neutral-200 px-4 py-2 text-sm font-semibold text-neutral-700 transition hover:border-[#E60012] hover:text-[#E60012]"
+              >
+                {d.nome}
+              </Link>
+            ))}
+          </nav>
+        </div>
+
+        {prateleiras.map((p, i) => (
+          <div key={p.titulo} className={i % 2 === 1 ? "bg-neutral-50" : "bg-white"}>
+            <div className="mx-auto max-w-6xl px-4 py-12">
+              <div className="flex flex-wrap items-end justify-between gap-3">
+                <h2 className="text-2xl font-extrabold tracking-tight text-neutral-900 md:text-3xl">
+                  {p.titulo}
+                </h2>
+                <Link
+                  href={p.href}
+                  className="inline-flex items-center gap-1 text-sm font-bold text-[#E60012] hover:underline"
+                >
+                  Ver todos <ArrowRight size={16} />
+                </Link>
+              </div>
+              <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+                {p.itens.map((prod) => (
+                  <ProductCard key={prod.id} product={prod} />
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+
+        <div className="mx-auto max-w-6xl px-4 pb-14">
+          <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-6 text-center">
+            <p className="text-neutral-700">
+              O site mostra uma seleção. <strong>A loja tem muito mais</strong> —
+              e o que não está aqui a gente consegue.
+            </p>
+            <a
+              href={wpp("Olá! Procuro um produto que não achei no site.")}
+              className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#25D366] px-6 py-3 font-bold text-white transition hover:brightness-95"
+            >
+              <MessageCircle size={18} /> Consultar estoque no WhatsApp
+            </a>
+          </div>
         </div>
       </section>
 
@@ -269,30 +365,6 @@ export default async function Home() {
           </ol>
         </div>
       </section>
-
-      {/* =========================== PRODUTOS ========================= */}
-      {produtos.length > 0 && (
-        <section className="bg-white">
-          <div className="mx-auto max-w-6xl px-4 py-16">
-            <div className="flex flex-wrap items-end justify-between gap-4">
-              <h2 className="text-3xl font-extrabold tracking-tight text-neutral-900">Em destaque</h2>
-              <Link href="/vitrine" className="inline-flex items-center gap-1 text-sm font-bold text-[#E60012] hover:underline">
-                Ver a vitrine <ArrowRight size={16} />
-              </Link>
-            </div>
-            <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
-              {produtos.map((p) => <ProductCard key={p.id} product={p} />)}
-            </div>
-            <p className="mt-6 text-sm text-neutral-500">
-              Não achou o que procura?{" "}
-              <a href={wpp("Olá! Procuro um produto que não achei no site.")} className="font-semibold text-[#25D366] hover:underline">
-                Pergunta no WhatsApp
-              </a>{" "}
-              — boa parte do estoque não está publicada.
-            </p>
-          </div>
-        </section>
-      )}
 
       {/* ========================= AVALIAÇÕES ========================= */}
       <section className="bg-white">
