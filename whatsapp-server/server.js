@@ -223,6 +223,7 @@ const { calcularMetricas } = require("./metricas");
 const { criarEspelhoDoCatalogo } = require("./catalogo");
 const { montarEtiquetas } = require("./etiquetas");
 const { criarBackupDoBanco } = require("./backup");
+const juliaIA = require("./ia-worker");
 
 const store = {
   labels: [],
@@ -251,6 +252,9 @@ const store = {
   // O percentual fica gravado NA VENDA de proposito: mudar a comissao do
   // vendedor hoje nao pode reescrever o que ele ja ganhou no mes passado.
   vendas: [],
+  // Configuração da Júlia IA (atendente digital): modo (off/copilot/autopilot)
+  // e se ela pega leads novos sem vendedor.
+  ia: { modo: "off", autolead: false },
 };
 
 const scheduleTimers = new Map();
@@ -341,6 +345,10 @@ function loadStore() {
         ? parsed.preferenciasPorVendedor
         : {};
     store.vendas = Array.isArray(parsed.vendas) ? parsed.vendas : [];
+    store.ia =
+      parsed.ia && typeof parsed.ia === "object"
+        ? { modo: parsed.ia.modo, autolead: Boolean(parsed.ia.autolead) }
+        : store.ia;
   } catch (error) {
     console.error("Falha ao ler dados do painel do WhatsApp:", error);
   }
@@ -436,6 +444,7 @@ function persistStore() {
     kanbanPorVendedor: store.kanbanPorVendedor,
     preferenciasPorVendedor: store.preferenciasPorVendedor,
     vendas: store.vendas,
+    ia: store.ia,
   };
 
   fs.writeFileSync(dataFile, JSON.stringify(payload, null, 2));
@@ -3733,6 +3742,47 @@ app.get(["/api/crm/metricas", "/api/metricas"], (_req, res) => {
   res.json({ ok: true, metricas: metricasAgora() });
 });
 
+// ---------- Júlia IA (atendente digital) ----------
+
+// Estado e estatísticas da atendente digital.
+app.get(["/api/crm/ia/estado", "/api/ia/estado"], (_req, res) => {
+  res.json({ ok: true, ia: juliaIA.resumo() });
+});
+
+// Liga/desliga e escolhe o modo: off | copilot | autopilot.
+// `autolead` faz a Júlia pegar leads novos (sem vendedor) sozinha.
+app.post(["/api/crm/ia/config", "/api/ia/config"], express.json(), (req, res) => {
+  const modo = String(req.body?.modo || "").trim().toLowerCase();
+  const autolead = req.body?.autolead;
+  res.json({ ok: true, ia: juliaIA.definirModo(modo || undefined, autolead) });
+});
+
+// Respostas sugeridas aguardando aprovação humana (modo copiloto).
+app.get(["/api/crm/ia/sugestoes", "/api/ia/sugestoes"], (_req, res) => {
+  res.json({ ok: true, sugestoes: juliaIA.resumo().sugestoes });
+});
+
+// Aprova e envia a sugestão pendente de uma conversa.
+app.post(["/api/crm/ia/enviar-sugestao", "/api/ia/enviar-sugestao"], express.json(), (req, res) => {
+  const chatId = String(req.body?.chatId || "").trim();
+  if (!chatId) return res.status(400).json({ ok: false, erro: "chatId é obrigatório." });
+  res.json(juliaIA.enviarSugestao(chatId));
+});
+
+// Descarta a sugestão pendente de uma conversa.
+app.post(["/api/crm/ia/descartar-sugestao", "/api/ia/descartar-sugestao"], express.json(), (req, res) => {
+  const chatId = String(req.body?.chatId || "").trim();
+  if (!chatId) return res.status(400).json({ ok: false, erro: "chatId é obrigatório." });
+  res.json(juliaIA.descartarSugestao(chatId));
+});
+
+// Passa um lead (novo ou não) para a Júlia IA atender.
+app.post(["/api/crm/ia/atribuir", "/api/ia/atribuir"], express.json(), (req, res) => {
+  const chatId = String(req.body?.chatId || "").trim();
+  if (!chatId) return res.status(400).json({ ok: false, erro: "chatId é obrigatório." });
+  res.json(juliaIA.atribuirLead(chatId));
+});
+
 // Login dos vendedores criados pelo dashboard.
 //
 // O site manda o TOKEN (sha256 de slug+senha), nunca a senha; aqui só se
@@ -5084,6 +5134,17 @@ io.on("connection", (socket) => {
 
 server.listen(port, () => {
   console.log(`WhatsApp panel server running on http://localhost:${port}`);
+
+  // Liga a atendente digital. Precisa das funções já definidas acima.
+  juliaIA.iniciar({
+    store,
+    persistStore,
+    io,
+    emitToast,
+    marcarAutor,
+    sendDirectMessage,
+    whatsappConectado: () => whatsappState.connected || Boolean(whatsappClient?.info?.wid),
+  });
 });
 
 // ============================

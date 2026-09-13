@@ -104,6 +104,8 @@ docker run -d \
   -e WHATSAPP_PANEL_ALLOWED_ORIGIN="$ORIGENS" \
   -e SITE_URL="${SITE_URL:-https://www.balao.info}" \
   -e BACKUP_TOKEN="${BACKUP_TOKEN:-}" \
+  -e JULIA_IA_URL="${JULIA_IA_URL:-}" \
+  -e JULIA_IA_MODO="${JULIA_IA_MODO:-off}" \
   -e TZ=America/Sao_Paulo \
   --memory="$MEMORIA" \
   --shm-size="$SHM" \

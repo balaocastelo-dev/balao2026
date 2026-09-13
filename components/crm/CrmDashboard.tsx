@@ -10,6 +10,7 @@ import {
   NumeroAnimado,
   PontoSerie,
 } from "./Graficos";
+import CrmJuliaPanel from "./CrmJuliaPanel";
 
 // ============================================================
 // Dashboard da administração (/crm).
@@ -217,6 +218,8 @@ export default function CrmDashboard() {
             <span className="text-slate-500">Atualizado às {atualizadoEm}</span>
           </div>
         </header>
+
+        <CrmJuliaPanel />
 
         {aviso && (
           <div

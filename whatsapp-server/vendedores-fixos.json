@@ -42,6 +42,13 @@
       "cargo": "Vendas",
       "assinatura": "Atenciosamente,\n*Brendon* — Balão da Informática Castelo",
       "protegido": true
+    },
+    {
+      "id": "julia-ia",
+      "nome": "Júlia IA",
+      "cargo": "Atendente Digital",
+      "assinatura": "Atenciosamente,\n*Júlia IA* • Atendente Digital da Balão da Informática 🤖",
+      "protegido": true
     }
   ]
 }
