@@ -298,23 +298,25 @@ export default async function Home(props: { searchParams: SearchParams }) {
   const monitorProducts = sortRelevance(
     products.filter(
       (p) =>
-        (p.category === "Monitores" || p.name.toLowerCase().includes("monitor")) &&
+        (p.category === "Monitores" || p.category.startsWith("Monitores/") || p.name.toLowerCase().includes("monitor")) &&
         !p.name.toLowerCase().includes("suporte") &&
         !p.name.toLowerCase().includes("cabo") &&
         !p.name.toLowerCase().includes("adaptador")
     )
   );
-  const hardwareProducts = sortRelevance(products.filter((p) => p.category === "Hardware"));
+  const isHardware = (c: string) => c === "Hardware" || c.startsWith("Hardware/");
+  const isPeriferico = (c: string) => c === "Periféricos" || c === "Perifericos" || c.startsWith("Periféricos/") || c.startsWith("Perifericos/");
+  const hardwareProducts = sortRelevance(products.filter((p) => isHardware(p.category)));
   const perifericoProducts = sortRelevance(
     products.filter(
       (p) =>
-        p.category === "Periféricos" ||
+        isPeriferico(p.category) ||
         p.name.toLowerCase().includes("teclado") ||
         p.name.toLowerCase().includes("mouse") ||
         p.name.toLowerCase().includes("headset")
     )
   );
-  const impressoraProducts = sortRelevance(products.filter((p) => p.category === "Impressão"));
+  const impressoraProducts = sortRelevance(products.filter((p) => p.category === "Impressão" || p.category === "Impressao" || p.category.startsWith("Impressão/") || p.category.startsWith("Impressao/")));
 
   const dealOfTheDay = pcGamerProducts[0] || hardwareProducts[0] || products[0] || null;
 
