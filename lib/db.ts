@@ -1,6 +1,8 @@
 import { randomUUID } from 'crypto';
 import { turso, isTursoActive } from './turso';
 import { BlogPost, Product, CarouselImage, Category, HomeBlock, UsedNotebook, parsePriceToNumber, buildCategoryNodesFromPaths } from './utils';
+import { isSupabaseActive } from './supabase';
+import { getProductsCurated, getProductsPaginatedCurated, getProductByIdentifierCurated, searchProductsByKeywordsCurated, searchProductsAllTermsCurated, getProductsByCategoryFullPathCurated, getProductsByExactCategoriesCurated, getProductsForSitemapCurated } from './db-supabase';
 
 // Linha crua retornada pelo driver LibSQL (valores vêm como unknown).
 type Row = Record<string, unknown>;
@@ -54,6 +56,9 @@ const sortByPrice = (items: Product[]) =>
   items.sort((a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price));
 
 export async function getProducts(): Promise<Product[]> {
+  if (isSupabaseActive()) {
+    try { return await getProductsCurated(); } catch (e) { console.error("Supabase getProducts error", e); }
+  }
   if (!isTursoActive()) return [];
   try {
     const res = await turso.execute('SELECT * FROM products ORDER BY created_at DESC');
@@ -75,6 +80,9 @@ export async function getProductsPaginated(opts: {
   category?: string;
   sort?: "price_asc" | "recent";
 }): Promise<{ products: Product[]; total: number }> {
+  if (isSupabaseActive()) {
+    try { return await getProductsPaginatedCurated(opts); } catch (e) { console.error("Supabase paginated error", e); }
+  }
   if (!isTursoActive()) return { products: [], total: 0 };
 
   const page = Math.max(1, opts.page || 1);
@@ -152,6 +160,9 @@ export async function getProductsLite(): Promise<Pick<Product, "id" | "name" | "
 }
 
 export async function getProductsForSitemap(limit = 1000): Promise<Pick<Product, "id" | "slug" | "created_at">[]> {
+  if (isSupabaseActive()) {
+    try { return await getProductsForSitemapCurated(limit); } catch (e) { console.error("Supabase sitemap error", e); }
+  }
   const take = Math.max(1, Math.min(5000, limit));
   if (!isTursoActive()) return [];
 
@@ -192,6 +203,9 @@ export async function getProductsByCategory(categorySlug: string): Promise<Produ
 }
 
 export async function getProductsByExactCategories(categoryNames: string[]): Promise<Product[]> {
+  if (isSupabaseActive()) {
+    try { return await getProductsByExactCategoriesCurated(categoryNames); } catch (e) { console.error("Supabase exactCategories error", e); }
+  }
   try {
     const normalizedNames = [...new Set(categoryNames.map((name) => String(name || "").trim()).filter(Boolean))];
     if (normalizedNames.length === 0) return [];
@@ -210,6 +224,9 @@ export async function getProductsByExactCategories(categoryNames: string[]): Pro
 }
 
 export async function searchProductsByKeywords(keywords: string[], limit = 24): Promise<Product[]> {
+  if (isSupabaseActive()) {
+    try { return await searchProductsByKeywordsCurated(keywords, limit); } catch (e) { console.error("Supabase keywords error", e); }
+  }
   try {
     const normalizedKeywords = [...new Set(
       keywords
@@ -239,6 +256,9 @@ export async function searchProductsByKeywords(keywords: string[], limit = 24): 
 }
 
 export async function getProductByIdentifier(identifier: string): Promise<Product | null> {
+  if (isSupabaseActive()) {
+    try { const r = await getProductByIdentifierCurated(identifier); if (r) return r; } catch (e) { console.error("Supabase getById error", e); }
+  }
   if (!isTursoActive()) return null;
 
   try {
@@ -742,6 +762,9 @@ export async function replaceCategoriesFromPaths(paths: string[]): Promise<void>
  * segurança, como todo o resto.
  */
 export async function searchProductsAllTerms(terms: string[], limit = 10): Promise<Product[]> {
+  if (isSupabaseActive()) {
+    try { return await searchProductsAllTermsCurated(terms, limit); } catch (e) { console.error("Supabase searchAllTerms error", e); }
+  }
   const limpos = terms.map((t) => String(t || "").trim()).filter(Boolean);
   if (!isTursoActive() || limpos.length === 0) return [];
 
@@ -768,6 +791,9 @@ export async function searchProductsAllTerms(terms: string[], limit = 10): Promi
 }
 
 export async function getProductsByCategoryFullPath(fullPath: string): Promise<Product[]> {
+  if (isSupabaseActive()) {
+    try { return await getProductsByCategoryFullPathCurated(fullPath); } catch (e) { console.error("Supabase categoryFullPath error", e); }
+  }
   try {
     if (!isTursoActive() || !fullPath) return [];
     const res = await turso.execute({

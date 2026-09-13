@@ -51,14 +51,30 @@ function comparaSeguro(a: string, b: string) {
 /**
  * Ficha pública do vendedor, para a tela de login saber o nome dele.
  *
- * Devolve null quando o servidor está fora do ar — a página então mostra o
- * aviso de indisponibilidade em vez de um 404 enganoso, que faria parecer que
- * o cadastro sumiu.
+ * Primeiro tenta Supabase (login ilimitado com senha simples), depois cai no
+ * whatsapp-server (legado). Devolve null quando ninguém conhece o slug.
  */
 export async function buscarVendedorDaEquipe(slug: string): Promise<VendedorDaEquipe | null> {
   const alvo = String(slug || "").trim().toLowerCase();
   if (!alvo) return null;
 
+  // 1) Tenta Supabase (sellers com senha simples)
+  try {
+    const { supabase } = await import("./supabase");
+    const { data } = await supabase.from("sellers").select("id, name, slug, cargo, ativo").eq("slug", alvo).eq("ativo", true).limit(1).maybeSingle();
+    if (data) {
+      return {
+        id: String((data as any).id),
+        slug: String((data as any).slug),
+        nome: String((data as any).name),
+        cargo: String((data as any).cargo || "Vendas"),
+        assinatura: `Atenciosamente,\n*${(data as any).name}* — Balão da Informática Castelo`,
+        ativo: Boolean((data as any).ativo),
+      };
+    }
+  } catch {}
+
+  // 2) Fallback whatsapp-server (legado)
   try {
     const resposta = await fetch(
       `${servidorDeAtendimento()}/api/crm/vendedor/${encodeURIComponent(alvo)}`,
@@ -72,11 +88,30 @@ export async function buscarVendedorDaEquipe(slug: string): Promise<VendedorDaEq
   }
 }
 
-/** Confere o token com o servidor de atendimento. */
+/** Confere o token com Supabase ou com o servidor de atendimento. */
 export async function tokenDaEquipeEhValido(slug: string, token: string): Promise<boolean> {
   const alvo = String(slug || "").trim().toLowerCase();
   if (!alvo || !token) return false;
 
+  // 1) Tenta validar via Supabase (senha simples)
+  try {
+    const { supabase } = await import("./supabase");
+    const { data } = await supabase.from("sellers").select("slug, senha").eq("slug", alvo).eq("ativo", true).limit(1).maybeSingle();
+    if (data && (data as any).senha) {
+      const esperado = montarTokenDaEquipe(alvo, String((data as any).senha));
+      // comparação em tempo constante
+      const bufA = Buffer.from(token);
+      const bufB = Buffer.from(esperado);
+      if (bufA.length === bufB.length) {
+        const { timingSafeEqual } = await import("crypto");
+        if (timingSafeEqual(bufA, bufB)) return true;
+      }
+      // se bateu no Supabase mas token não confere, não tenta o whatsapp-server (senha diferente)
+      return false;
+    }
+  } catch {}
+
+  // 2) Fallback whatsapp-server
   try {
     const resposta = await fetch(`${servidorDeAtendimento()}/api/crm/vendedor-login`, {
       method: "POST",
