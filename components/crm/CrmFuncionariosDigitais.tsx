@@ -30,6 +30,7 @@ export default function CrmFuncionariosDigitais({ onAbrirBeto }: Props) {
       <CrmJuliaPanel />
       <CrmCarlaPanel />
       <CartaoBeto onAbrir={onAbrirBeto} />
+      <CartaoRafa />
     </div>
   );
 }
@@ -175,6 +176,143 @@ function CartaoBling() {
       {estado?.ultimoErro && (
         <p className="mt-3 rounded-xl bg-red-500/10 p-3 text-xs text-red-200">
           Último erro: {estado.ultimoErro}
+        </p>
+      )}
+    </section>
+  );
+}
+
+
+/* ---------------------------------------------------------------- *
+ * Rafa — 7h o setor, 19h o fechamento
+ * ---------------------------------------------------------------- */
+
+interface EstadoRafa {
+  ativo?: boolean;
+  horaManha?: number;
+  horaNoite?: number;
+  agoraNaLoja?: string;
+  destinoConfigurado?: boolean;
+  tokenConfigurado?: boolean;
+  ultimoEnvio?: { manha?: string; noite?: string };
+  ultimoErro?: string | null;
+}
+
+function CartaoRafa() {
+  const [rafa, setRafa] = useState<EstadoRafa | null>(null);
+  const [ocupado, setOcupado] = useState(false);
+  const [aviso, setAviso] = useState<string | null>(null);
+
+  const servidor = (process.env.NEXT_PUBLIC_WHATSAPP_PANEL_SERVER_URL || "").replace(/\/$/, "");
+
+  const carregar = useCallback(async () => {
+    if (!servidor) return;
+    try {
+      const r = await fetch(`${servidor}/api/crm/rafa/estado`, { cache: "no-store" });
+      if (r.ok) setRafa(await r.json());
+    } catch {
+      // servidor fora do ar não derruba o painel
+    }
+  }, [servidor]);
+
+  useEffect(() => {
+    carregar();
+    const t = setInterval(carregar, 30_000);
+    return () => clearInterval(t);
+  }, [carregar]);
+
+  const acionar = async (caminho: string, corpo: Record<string, unknown>) => {
+    if (!servidor) return;
+    setOcupado(true);
+    setAviso(null);
+    try {
+      const r = await fetch(`${servidor}${caminho}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(corpo),
+      });
+      const dados = await r.json();
+      setRafa(dados);
+      if (dados?.erro) setAviso(String(dados.erro));
+      else if (caminho.endsWith("enviar")) setAviso("Relatório enviado.");
+    } catch (erro) {
+      setAviso((erro as Error).message);
+    } finally {
+      setOcupado(false);
+    }
+  };
+
+  const ligado = Boolean(rafa?.ativo);
+  const faltaConfig = rafa && (!rafa.destinoConfigurado || !rafa.tokenConfigurado);
+
+  return (
+    <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <span
+            className={`flex h-9 w-9 items-center justify-center rounded-xl text-lg ${
+              ligado ? "bg-sky-500/15" : "bg-white/5"
+            }`}
+          >
+            📊
+          </span>
+          <div>
+            <h3 className="font-semibold text-white">Rafa</h3>
+            <p className="text-xs text-slate-400">
+              Analista · {rafa?.horaManha ?? 7}h o setor, {rafa?.horaNoite ?? 19}h o fechamento
+              {rafa?.agoraNaLoja ? ` · na loja agora: ${rafa.agoraNaLoja}` : ""}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            disabled={ocupado || !servidor}
+            onClick={() => acionar("/api/crm/rafa/config", { ativo: !ligado })}
+            className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition disabled:opacity-50 ${
+              ligado
+                ? "border border-white/10 text-slate-300 hover:bg-white/5"
+                : "bg-sky-500 text-white hover:bg-sky-400"
+            }`}
+          >
+            {ligado ? "Desligar" : "Ligar"}
+          </button>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-2 text-xs">
+        <button
+          disabled={ocupado || !servidor}
+          onClick={() => acionar("/api/crm/rafa/enviar", { tipo: "manha" })}
+          className="rounded-lg border border-white/10 px-3 py-1.5 font-semibold text-slate-300 transition hover:bg-white/5 disabled:opacity-50"
+        >
+          Mandar o das 7h agora
+        </button>
+        <button
+          disabled={ocupado || !servidor}
+          onClick={() => acionar("/api/crm/rafa/enviar", { tipo: "fechamento" })}
+          className="rounded-lg border border-white/10 px-3 py-1.5 font-semibold text-slate-300 transition hover:bg-white/5 disabled:opacity-50"
+        >
+          Mandar o fechamento agora
+        </button>
+      </div>
+
+      {faltaConfig && (
+        <ul className="mt-3 space-y-1 rounded-xl bg-amber-500/10 p-3 text-xs text-amber-200">
+          {!rafa?.destinoConfigurado && <li>• RAFA_WHATSAPP não configurado (para qual número vai)</li>}
+          {!rafa?.tokenConfigurado && <li>• BETO_TOKEN não configurado (o Rafa usa o mesmo)</li>}
+        </ul>
+      )}
+
+      {rafa?.ultimoEnvio && (rafa.ultimoEnvio.manha || rafa.ultimoEnvio.noite) && (
+        <p className="mt-3 text-xs text-slate-500">
+          Último envio · manhã: {rafa.ultimoEnvio.manha || "—"} · noite: {rafa.ultimoEnvio.noite || "—"}
+        </p>
+      )}
+
+      {(aviso || rafa?.ultimoErro) && (
+        <p className="mt-3 rounded-xl bg-white/5 p-3 text-xs text-slate-300">
+          {aviso || rafa?.ultimoErro}
         </p>
       )}
     </section>

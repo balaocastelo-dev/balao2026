@@ -109,6 +109,10 @@ docker run -d \
   -e BETO_PANEL_TOKEN="${BETO_PANEL_TOKEN:-}" \
   -e BETO_TOKEN="${BETO_TOKEN:-}" \
   -e CARLA_ATIVO="${CARLA_ATIVO:-0}" \
+  -e RAFA_ATIVO="${RAFA_ATIVO:-0}" \
+  -e RAFA_WHATSAPP="${RAFA_WHATSAPP:-}" \
+  -e RAFA_HORA_MANHA="${RAFA_HORA_MANHA:-7}" \
+  -e RAFA_HORA_NOITE="${RAFA_HORA_NOITE:-19}" \
   -e CARLA_MAX_DIA="${CARLA_MAX_DIA:-10}" \
   -e TZ=America/Sao_Paulo \
   --memory="$MEMORIA" \

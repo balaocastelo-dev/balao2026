@@ -226,6 +226,7 @@ const { criarBackupDoBanco } = require("./backup");
 const juliaIA = require("./ia-worker");
 const betoWorker = require("./beto-worker");
 const carlaWorker = require("./carla-worker");
+const rafaWorker = require("./rafa-worker");
 
 // "loja" (padrão) roda a Júlia; "beto" roda o prospector no número próprio.
 const PERFIL = process.env.PERFIL || "loja";
@@ -3898,6 +3899,23 @@ app.post(["/api/crm/carla/config", "/api/carla/config"], express.json(), (req, r
   res.json({ ok: true, ...carlaWorker.definirConfig({ ativo, maxDia, mensagemCobranca, mensagemReativacao }) });
 });
 
+// ---- Rafa (analista: 7h setor, 19h fechamento) ----
+app.get(["/api/crm/rafa/estado", "/api/rafa/estado"], (req, res) => {
+  res.json({ ok: true, ...rafaWorker.resumo() });
+});
+
+app.post(["/api/crm/rafa/config", "/api/rafa/config"], express.json(), (req, res) => {
+  const ativo = typeof req.body?.ativo === "boolean" ? req.body.ativo : undefined;
+  res.json({ ok: true, ...rafaWorker.definirConfig({ ativo }) });
+});
+
+// Dispara um relatorio fora da hora. Serve para conferir o texto sem esperar
+// as 7h -- e para reenviar quando o WhatsApp caiu na hora marcada.
+app.post(["/api/crm/rafa/enviar", "/api/rafa/enviar"], express.json(), async (req, res) => {
+  const tipo = req.body?.tipo === "fechamento" ? "fechamento" : "manha";
+  res.json(await rafaWorker.enviarAgora(tipo));
+});
+
 // Login dos vendedores criados pelo dashboard.
 //
 // O site manda o TOKEN (sha256 de slug+senha), nunca a senha; aqui só se
@@ -5268,6 +5286,7 @@ server.listen(port, () => {
     // dispara daqui — o dele é número próprio.
     juliaIA.iniciar(depsDeTrabalho);
     carlaWorker.iniciar(depsDeTrabalho);
+    rafaWorker.iniciar(depsDeTrabalho);
   }
 });
 
