@@ -248,9 +248,15 @@ describe("Bling — escrita", () => {
   });
 
   it("pedido válido vai como POST para /pedidos/vendas", async () => {
-    const fetchFalso = vi.fn(async () => ({
-      ok: true, status: 201, text: async () => JSON.stringify({ data: { id: 99 } }),
-    }));
+    // Guarda o que foi enviado em vez de ler mock.calls: a assinatura inferida
+    // do mock é uma tupla vazia, e o tsc recusa indexar nela.
+    let urlChamada = "";
+    let opcoesChamadas: RequestInit = {};
+    const fetchFalso = vi.fn(async (url: unknown, opcoes: unknown) => {
+      urlChamada = String(url);
+      opcoesChamadas = (opcoes || {}) as RequestInit;
+      return { ok: true, status: 201, text: async () => JSON.stringify({ data: { id: 99 } }) };
+    });
     vi.stubGlobal("fetch", fetchFalso);
     const { criarPedido } = await import("../../lib/bling");
     const r = await criarPedido({
@@ -258,9 +264,8 @@ describe("Bling — escrita", () => {
       itens: [{ descricao: "SSD 1TB", quantidade: 2, valor: 350 }],
     });
     expect(r.ok).toBe(true);
-    const [url, opcoes] = fetchFalso.mock.calls[0];
-    expect(String(url)).toContain("/pedidos/vendas");
-    expect(opcoes.method).toBe("POST");
-    expect(JSON.parse(opcoes.body).contato.id).toBe(7);
+    expect(urlChamada).toContain("/pedidos/vendas");
+    expect(opcoesChamadas.method).toBe("POST");
+    expect(JSON.parse(String(opcoesChamadas.body)).contato.id).toBe(7);
   }, 15000);
 });

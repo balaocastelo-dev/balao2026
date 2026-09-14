@@ -145,6 +145,10 @@ docker run -d \
   -e BETO_CRM_URL="${BETO_CRM_URL:-https://srv1963897.hstgr.cloud}" \
   -e BETO_PANEL_TOKEN="${BETO_PANEL_TOKEN:-}" \
   -e BETO_ATIVO="${BETO_ATIVO:-0}" \
+  -e RAFA_ATIVO="${RAFA_ATIVO:-0}" \
+  -e RAFA_WHATSAPP="${RAFA_WHATSAPP:-}" \
+  -e RAFA_HORA_MANHA="${RAFA_HORA_MANHA:-7}" \
+  -e RAFA_HORA_NOITE="${RAFA_HORA_NOITE:-19}" \
   -e BETO_MAX_DIA="${BETO_MAX_DIA:-20}" \
   -e TZ=America/Sao_Paulo \
   --memory="3g" \

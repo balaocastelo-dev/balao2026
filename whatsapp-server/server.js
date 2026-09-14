@@ -5399,14 +5399,22 @@ server.listen(port, () => {
   };
 
   if (PERFIL === "beto") {
-    // Número próprio do prospector: aqui só o Beto trabalha.
+    // Número de fora: prospecção e relatórios. O Beto fala com quem ainda não
+    // é cliente; o Rafa só fala com o Thiago. Nenhum dos dois toca a linha que
+    // o cliente conhece.
+    //
+    // Os dois dividem a MESMA linha e cada um tem o próprio teto diário: o do
+    // Beto é o que protege o chip (mensagem fria é o que gera denúncia), e o
+    // do Rafa são dois relatórios por dia para um contato salvo, que não pesa
+    // no mesmo risco. Somar os dois num teto só faria o relatório do dono
+    // comer a cota de prospecção.
     betoWorker.iniciar(depsDeTrabalho);
+    rafaWorker.iniciar(depsDeTrabalho);
   } else {
     // Número da loja: a Júlia atende e a Carla cobra/reativa. O Beto nunca
     // dispara daqui — o dele é número próprio.
     juliaIA.iniciar(depsDeTrabalho);
     carlaWorker.iniciar(depsDeTrabalho);
-    rafaWorker.iniciar(depsDeTrabalho);
   }
 });
 
