@@ -47,13 +47,23 @@ export const TAG_PRODUTOS = "products";
  * Vercel abre conexão a cada requisição. Sem cache, uma visita movimentada
  * queima a cota e o catálogo aparece vazio no site e no CRM até a hora virar.
  *
- * Dois minutos é o equilíbrio: preço alterado no admin aparece rápido (e a
- * invalidação por etiqueta traz na hora), e o banco é consultado poucas vezes.
+ * Trinta minutos, não dois.
+ *
+ * Isto puxa o catálogo INTEIRO — 1.288 linhas com descrição e ficha técnica —
+ * e é chamado por umas vinte landing pages (PC Gamer, Notebooks, Promoção,
+ * Bairro...) que depois filtram em memória. Com dois minutos e
+ * `force-dynamic`, cada instância nova da Vercel reabria a leitura completa:
+ * 1.352 chamadas em quatro horas nos logs do Supabase, e junto com as do
+ * layout foi o que saturou o banco (consulta de 68 s, PostgREST em 503, três
+ * builds da Vercel falhando por timeout).
+ *
+ * Não se perde atualidade: alteração no admin invalida a etiqueta e derruba
+ * este cache na hora. O relógio só decide o caso em que nada mudou.
  */
 export const getCachedProducts = unstable_cache(
   async () => comEspelho(() => getProducts(), espelhoTodos, listaVazia),
   ["products-all"],
-  { revalidate: 120, tags: [TAG_PRODUTOS] }
+  { revalidate: 1800, tags: [TAG_PRODUTOS] }
 );
 
 /**
@@ -104,7 +114,7 @@ export function getCachedProductsPaginated(opts: {
         (resultado) => resultado.total === 0
       ),
     chave,
-    { revalidate: 120, tags: [TAG_PRODUTOS] }
+    { revalidate: 600, tags: [TAG_PRODUTOS] }
   )();
 }
 
@@ -152,7 +162,7 @@ export function getCachedProductsByExactCategories(categoryNames: string[]) {
         listaVazia
       ),
     chave,
-    { revalidate: 120, tags: [TAG_PRODUTOS] }
+    { revalidate: 600, tags: [TAG_PRODUTOS] }
   )();
 }
 
@@ -172,7 +182,7 @@ export function getCachedProductById(id: string) {
         (produto) => produto === null
       ),
     ["product-by-id", String(id)],
-    { revalidate: 120, tags: [TAG_PRODUTOS] }
+    { revalidate: 600, tags: [TAG_PRODUTOS] }
   )();
 }
 
@@ -186,7 +196,7 @@ export function getCachedProductsByCategoryFullPath(fullPath: string) {
         listaVazia
       ),
     ["products-category-path", String(fullPath)],
-    { revalidate: 120, tags: [TAG_PRODUTOS] }
+    { revalidate: 600, tags: [TAG_PRODUTOS] }
   )();
 }
 

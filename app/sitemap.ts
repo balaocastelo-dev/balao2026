@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next'
-import { getCategories, getProductsForSitemap } from '@/lib/db'
+import { getProductsForSitemap } from '@/lib/db'
+import { getCachedCategories } from '@/lib/cache'
 import { lerCatalogoDoEspelho } from '@/lib/catalogo-espelho'
 import { listBlogPostsForPage } from '@/lib/blog-store'
 import { LEAD_INTENTS } from '@/lib/lead-intents'
@@ -75,7 +76,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }))
 
   // Categorias
-  const categories = await semQuebrar('categorias', () => getCategories(), [])
+  const categories = await semQuebrar('categorias', () => getCachedCategories(), [])
   const categoryRoutes = categories.map((category) => ({
     url: `${baseUrl}/categoria/${category.slug}`,
     changeFrequency: 'weekly' as const,
