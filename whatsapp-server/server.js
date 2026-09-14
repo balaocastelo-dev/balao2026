@@ -3499,15 +3499,59 @@ async function initializeWhatsAppClient(options = {}) {
   }
 }
 
-// Watchdog: garante que o QR/sessão nunca fica travado sem se recuperar
-// sozinho — nem numa inicialização que trava no meio, nem num estado morto
-// (desconectado, sem client, sem nenhuma tentativa em andamento).
+// ============================================================
+// Watchdog: recuperar sozinho SEM destruir o que está funcionando.
+//
+// A versão anterior tinha um prazo só — 90 segundos sem evento — e, ao
+// estourar, apagava a sessão. Isso funcionava para sessão travada e era
+// destrutivo para o caso mais importante: o QR recém-lido.
+//
+// O que acontecia na prática, e custou uma manhã inteira à loja em 14/09:
+// o Thiago escaneava, o celular aceitava, a tela de carregamento chegava a
+// 100% e o WhatsApp entrava na sincronização das 806 conversas da conta —
+// que não emite evento nenhum por vários minutos. Aos 90 segundos o watchdog
+// concluía "travado", apagava a sessão recém-pareada e voltava para o QR.
+// Ele escaneava de novo, e o ciclo recomeçava.
+//
+// A regra agora é: SÓ se descarta sessão quando há prova de que ela morreu.
+//
+//   pareando/sincronizando  -> espera muito, e se travar reinicia SEM apagar
+//   parado no QR com sessão salva -> a sessão salva é a morta: apaga
+//   parado no QR sem sessão salva -> não faz nada: está esperando uma pessoa
+//
+// O último caso importa tanto quanto os outros: antes, o watchdog reiniciava
+// o cliente de 90 em 90 segundos enquanto o QR esperava alguém chegar com o
+// celular, trocando o código embaixo de quem estava tentando ler.
+// ============================================================
 const WATCHDOG_INTERVAL_MS = 20000;
 const WATCHDOG_STUCK_INIT_MS = 45000;
-const WATCHDOG_STUCK_PROGRESS_MS = 90000;
+
+// Pareado e sincronizando: dez minutos. Conta grande demora, e o preço de
+// esperar demais é esperar; o de esperar de menos é perder o pareamento.
+const WATCHDOG_SINCRONIZANDO_MS = 10 * 60 * 1000;
+
+// Parado no QR com sessão salva no disco: cinco minutos. Se a sessão
+// prestasse, ela teria autenticado em segundos — não chegaria a mostrar QR.
+const WATCHDOG_SESSAO_MORTA_MS = 5 * 60 * 1000;
+
+/** Se existe sessão gravada no disco. É o que separa "sessão morta" de
+ *  "esperando alguém escanear". */
+function temSessaoSalva() {
+  try {
+    return fs.existsSync(AUTH_DIR) && fs.readdirSync(AUTH_DIR).length > 0;
+  } catch {
+    return false;
+  }
+}
+
+/** Pareamento em andamento: o QR já foi lido, falta terminar de carregar. */
+function estaPareando() {
+  return whatsappState.status === "loading" || whatsappState.status === "authenticated";
+}
 
 setInterval(() => {
   const now = Date.now();
+  const parado = now - lastProgressAt;
 
   if (isInitializingClient && initializingSince && now - initializingSince > WATCHDOG_STUCK_INIT_MS) {
     console.warn("[whatsapp][watchdog] Inicialização travada há mais de 45s — forçando reinício.");
@@ -3522,15 +3566,35 @@ setInterval(() => {
     return;
   }
 
-  if (
-    !isInitializingClient &&
-    !whatsappState.connected &&
-    whatsappState.status !== "ready" &&
-    now - lastProgressAt > WATCHDOG_STUCK_PROGRESS_MS
-  ) {
-    console.warn(`[whatsapp][watchdog] Sem progresso há mais de ${WATCHDOG_STUCK_PROGRESS_MS / 1000}s (status=${whatsappState.status}) — forçando novo QR.`);
-    initializeWhatsAppClient({ resetSession: true, force: true });
+  if (isInitializingClient || whatsappState.status === "ready") return;
+
+  // 1. Pareando. Nunca apaga a sessão aqui: ela acabou de nascer.
+  if (estaPareando()) {
+    if (parado > WATCHDOG_SINCRONIZANDO_MS) {
+      console.warn(
+        `[whatsapp][watchdog] Sincronização parada há ${Math.round(parado / 1000)}s — ` +
+        "reiniciando SEM apagar a sessão (o pareamento foi aceito pelo celular)."
+      );
+      initializeWhatsAppClient({ resetSession: false, force: true });
+    }
+    return;
   }
+
+  // 2. No QR com sessão salva: a salva é a morta.
+  if (whatsappState.status === "qr" && temSessaoSalva() && parado > WATCHDOG_SESSAO_MORTA_MS) {
+    console.warn(
+      `[whatsapp][watchdog] No QR há ${Math.round(parado / 1000)}s com sessão gravada no disco — ` +
+      "sessão morta, descartando para o próximo QR valer."
+    );
+    whatsappState.ultimoErro = {
+      mensagem: "Sessão salva não autenticou e foi descartada. Escaneie o QR Code.",
+      quando: new Date().toISOString(),
+    };
+    initializeWhatsAppClient({ resetSession: true, force: true });
+    return;
+  }
+
+  // 3. No QR sem sessão salva: está esperando uma pessoa. Não mexe.
 }, WATCHDOG_INTERVAL_MS);
 
 async function resetWhatsAppSession() {
