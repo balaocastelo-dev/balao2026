@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import CrmDashboard from "@/components/crm/CrmDashboard";
 import CrmWhatsAppClient from "@/components/crm/CrmWhatsAppClient";
+import CrmBetoAdmin from "@/components/crm/CrmBetoAdmin";
 
 /**
  * Visão de administração do CRM (/crm).
@@ -16,7 +17,7 @@ import CrmWhatsAppClient from "@/components/crm/CrmWhatsAppClient";
  * pela própria página (ex.: /brendon), com a senha dele.
  */
 export default function CrmAdminClient() {
-  const [tela, setTela] = useState<"painel" | "atendimento">("painel");
+  const [tela, setTela] = useState<"painel" | "atendimento" | "beto">("painel");
 
   const sair = useCallback(async () => {
     try {
@@ -40,6 +41,11 @@ export default function CrmAdminClient() {
     );
   }
 
+  // Aba própria do Beto: QR Code do número dele + controles de disparo.
+  if (tela === "beto") {
+    return <CrmBetoAdmin onVoltar={() => setTela("painel")} sairLabel="Voltar ao painel" />;
+  }
+
   return (
     <div className="flex h-full flex-col">
       <div className="shrink-0 border-b border-white/10 bg-slate-950/90 backdrop-blur">
@@ -60,6 +66,13 @@ export default function CrmAdminClient() {
             >
               Baixar backup
             </a>
+
+            <button
+              onClick={() => setTela("beto")}
+              className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-sm font-semibold text-amber-300 transition hover:bg-amber-500/20"
+            >
+              🤖 Beto
+            </button>
 
             <button
               onClick={() => setTela("atendimento")}

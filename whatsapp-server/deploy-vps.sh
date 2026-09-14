@@ -106,9 +106,42 @@ docker run -d \
   -e BACKUP_TOKEN="${BACKUP_TOKEN:-}" \
   -e JULIA_IA_URL="${JULIA_IA_URL:-}" \
   -e JULIA_IA_MODO="${JULIA_IA_MODO:-off}" \
+  -e BETO_PANEL_TOKEN="${BETO_PANEL_TOKEN:-}" \
   -e TZ=America/Sao_Paulo \
   --memory="$MEMORIA" \
   --shm-size="$SHM" \
+  "$CONTAINER"
+
+# -------- Beto: número próprio do prospector --------
+#
+# Mesma imagem, outra sessão de WhatsApp, outro volume. O Beto nunca dispara
+# do número da loja: uma conta bloqueada por disparo não pode derrubar o
+# atendimento inteiro. A memória é menor de propósito (3g): sobra para o
+# container principal e o Chromium dele não precisa carregar 600 conversas.
+BETO_CONTAINER="${BETO_CONTAINER:-balao-beto}"
+BETO_DADOS="${BETO_DADOS:-/var/lib/balao-beto}"
+BETO_PORTA="${BETO_PORTA:-4101}"
+
+docker rm -f "$BETO_CONTAINER" >/dev/null 2>&1 || true
+mkdir -p "$BETO_DADOS"
+docker run -d \
+  --name "$BETO_CONTAINER" \
+  --restart unless-stopped \
+  -p "127.0.0.1:$BETO_PORTA:4100" \
+  -v "$BETO_DADOS:/dados" \
+  -e DATA_ROOT=/dados \
+  -e PERFIL=beto \
+  -e WHATSAPP_PANEL_ALLOWED_ORIGIN="$ORIGENS" \
+  -e SITE_URL="${SITE_URL:-https://www.balao.info}" \
+  -e BETO_URL="${BETO_URL:-https://www.balao.info}" \
+  -e BETO_TOKEN="${BETO_TOKEN:-}" \
+  -e BETO_CRM_URL="${BETO_CRM_URL:-https://srv1963897.hstgr.cloud}" \
+  -e BETO_PANEL_TOKEN="${BETO_PANEL_TOKEN:-}" \
+  -e BETO_ATIVO="${BETO_ATIVO:-0}" \
+  -e BETO_MAX_DIA="${BETO_MAX_DIA:-20}" \
+  -e TZ=America/Sao_Paulo \
+  --memory="3g" \
+  --shm-size="1g" \
   "$CONTAINER"
 
 msg "Esperando o servidor responder"

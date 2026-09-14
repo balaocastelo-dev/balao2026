@@ -74,10 +74,37 @@ function ehCelular(e164) {
  * Leitura
  * ---------------------------------------------------------------- */
 
+/** Nomes de agenda em quoted-printable ("=44=6F=75=67=6C=61=73..."). */
+function decodificarQuotedPrintable(s) {
+  if (!s || !s.includes("=")) return s;
+  try {
+    return s
+      .replace(/=([0-9A-Fa-f]{2})/g, (_m, h) => String.fromCharCode(parseInt(h, 16)))
+      .replace(/=/g, "")
+      .replace(/[\r\n]/g, " ");
+  } catch {
+    return s;
+  }
+}
+
+/** Nomes que claramente não são de gente: lixo de agenda. */
+const NOMES_LIXO = /^(ver contato|contato|sem nome|desconhecid[oa]|nome|telefone|celular|whatsapp|cliente|lead|amig[oa]|fulano|cicrano|teste|zzz|xxx|n\/a|na|vazio|-|_|\.+|,\d+)$/i;
+
+function limparNome(bruto) {
+  if (!bruto) return null;
+  let nome = String(bruto).trim();
+  nome = decodificarQuotedPrintable(nome);
+  nome = nome.replace(/\s+/g, " ").trim();
+  if (!nome) return null;
+  if (NOMES_LIXO.test(nome)) return null;
+  if (nome.length < 2 || nome.length > 80) return null;
+  return nome.slice(0, 120);
+}
+
 function lerVCard(texto) {
   const out = [];
   for (const bloco of texto.split(/BEGIN:VCARD/i).slice(1)) {
-    const nome = (bloco.match(/^FN[^:]*:(.+)$/im) || [])[1]?.trim() || null;
+    const nome = limparNome((bloco.match(/^FN[^:]*:(.+)$/im) || [])[1]);
     const org = (bloco.match(/^ORG[^:]*:(.+)$/im) || [])[1]?.trim() || null;
     const email = (bloco.match(/^EMAIL[^:]*:(.+)$/im) || [])[1]?.trim() || null;
     for (const m of bloco.matchAll(/^TEL[^:]*:(.+)$/gim)) {

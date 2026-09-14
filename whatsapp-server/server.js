@@ -224,6 +224,11 @@ const { criarEspelhoDoCatalogo } = require("./catalogo");
 const { montarEtiquetas } = require("./etiquetas");
 const { criarBackupDoBanco } = require("./backup");
 const juliaIA = require("./ia-worker");
+const betoWorker = require("./beto-worker");
+
+// "loja" (padrão) roda a Júlia; "beto" roda o prospector no número próprio.
+const PERFIL = process.env.PERFIL || "loja";
+const BETO_PANEL_TOKEN = process.env.BETO_PANEL_TOKEN || "";
 
 const store = {
   labels: [],
@@ -2874,7 +2879,7 @@ async function resolveMediaObject(mediaSource, filename = "arquivo", mimetype = 
   return null;
 }
 
-async function sendDirectMessage({ number, text, signatureId, chatId: preferredChatId = null, replyTo = null }) {
+async function sendDirectMessage({ number, text, signatureId, chatId: preferredChatId = null, replyTo = null, autorId = null }) {
   if (!whatsappClient) {
     throw new Error("WhatsApp ainda não iniciado");
   }
@@ -2905,6 +2910,10 @@ async function sendDirectMessage({ number, text, signatureId, chatId: preferredC
   if (!targetChatId) {
     throw new Error("Destinatário inválido para envio de mensagem");
   }
+
+  // Credita a autoria ANTES do envio: o message_create que chega logo em
+  // seguida herda quem mandou (robôs como a Júlia e o Beto usam isto).
+  if (autorId) marcarAutor(targetChatId, autorId);
 
   console.log(`[WHATSAPP-SEND] Disparando texto para ${targetChatId}: "${finalText.slice(0, 60)}"`);
   const options = replyTo ? { quotedMessageId: replyTo } : {};
@@ -3784,6 +3793,81 @@ app.post(["/api/crm/ia/atribuir", "/api/ia/atribuir"], express.json(), (req, res
   const chatId = String(req.body?.chatId || "").trim();
   if (!chatId) return res.status(400).json({ ok: false, erro: "chatId é obrigatório." });
   res.json(juliaIA.atribuirLead(chatId));
+});
+
+// ---------- portas entre instâncias (Beto) ----------
+
+// Confere um token em tempo constante — mesmo padrão do site.
+function confereTokenDeMaquina(req) {
+  const esperado = BETO_PANEL_TOKEN;
+  if (!esperado) return false;
+  const veio = (req.headers.authorization || "").replace(/^Bearer\s+/i, "").trim();
+  if (!veio || veio.length !== esperado.length) return false;
+  let diferenca = 0;
+  for (let i = 0; i < esperado.length; i++) {
+    diferenca |= esperado.charCodeAt(i) ^ veio.charCodeAt(i);
+  }
+  return diferenca === 0;
+}
+
+function normalizarParaBusca(v) {
+  let d = String(v || "").replace(/\D/g, "");
+  if (d.startsWith("55")) d = d.slice(2);
+  if (d.startsWith("0")) d = d.slice(1);
+  return d.slice(-11);
+}
+
+// O container do Beto pergunta aqui (número principal) se uma pessoa já tem
+// conversa recente com a loja — quem fala com a loja não é prospect frio.
+app.get("/api/crm/contato-recente", (req, res) => {
+  if (!confereTokenDeMaquina(req)) {
+    return res.status(401).json({ ok: false, erro: "não autorizado" });
+  }
+  const chave = normalizarParaBusca(req.query.numero);
+  if (chave.length < 10) return res.status(400).json({ ok: false, erro: "número inválido" });
+
+  const dias = Number(req.query.dias) || 45;
+  const corte = Date.now() - dias * 24 * 60 * 60 * 1000;
+  const recente = (store.messages || []).some(
+    (m) => normalizarParaBusca(m.chatId) === chave && (m.timestamp || 0) >= corte
+  );
+  res.json({ ok: true, recente });
+});
+
+// Lista as conversas da instância (para a aba do Beto no /crm).
+// Protegida: telefone de cliente não sai por rota aberta.
+app.get("/api/crm/conversas-recentes", (req, res) => {
+  if (!confereTokenDeMaquina(req)) {
+    return res.status(401).json({ ok: false, erro: "não autorizado" });
+  }
+
+  const limite = Math.min(Number(req.query.limite) || 15, 50);
+  const ultimasPorChat = new Map();
+  for (const m of store.messages || []) {
+    const atual = ultimasPorChat.get(m.chatId);
+    if (!atual || (m.timestamp || 0) > (atual.timestamp || 0)) {
+      ultimasPorChat.set(m.chatId, m);
+    }
+  }
+
+  const conversas = (store.chats || [])
+    .map((chat) => {
+      const ultima = ultimasPorChat.get(chat.chatId);
+      if (!ultima) return null;
+      return {
+        chatId: chat.chatId,
+        nome: chat.name || chat.realNumber || chat.chatId,
+        numero: chat.realNumber || null,
+        ultimaMensagem: String(ultima.body || "").slice(0, 300),
+        direcao: ultima.direction || null,
+        quando: ultima.timestamp || null,
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => (b.quando || 0) - (a.quando || 0))
+    .slice(0, limite);
+
+  res.json({ ok: true, conversas });
 });
 
 // Login dos vendedores criados pelo dashboard.
@@ -5136,10 +5220,9 @@ io.on("connection", (socket) => {
 });
 
 server.listen(port, () => {
-  console.log(`WhatsApp panel server running on http://localhost:${port}`);
+  console.log(`WhatsApp panel server running on http://localhost:${port} (perfil: ${PERFIL})`);
 
-  // Liga a atendente digital. Precisa das funções já definidas acima.
-  juliaIA.iniciar({
+  const depsDeTrabalho = {
     store,
     persistStore,
     io,
@@ -5147,7 +5230,15 @@ server.listen(port, () => {
     marcarAutor,
     sendDirectMessage,
     whatsappConectado: () => whatsappState.connected || Boolean(whatsappClient?.info?.wid),
-  });
+  };
+
+  if (PERFIL === "beto") {
+    // Número próprio do prospector: aqui só o Beto trabalha.
+    betoWorker.iniciar(depsDeTrabalho);
+  } else {
+    // Número da loja: a Júlia atende, o Beto nunca dispara daqui.
+    juliaIA.iniciar(depsDeTrabalho);
+  }
 });
 
 // ============================

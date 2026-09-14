@@ -49,6 +49,13 @@
       "cargo": "Atendente Digital",
       "assinatura": "Atenciosamente,\n*Júlia IA* • Atendente Digital da Balão da Informática 🤖",
       "protegido": true
+    },
+    {
+      "id": "beto",
+      "nome": "Beto",
+      "cargo": "Prospector Digital",
+      "assinatura": "",
+      "protegido": true
     }
   ]
 }
