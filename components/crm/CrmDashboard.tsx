@@ -10,8 +10,7 @@ import {
   NumeroAnimado,
   PontoSerie,
 } from "./Graficos";
-import CrmJuliaPanel from "./CrmJuliaPanel";
-import CrmCarlaPanel from "./CrmCarlaPanel";
+import CrmFuncionariosDigitais from "./CrmFuncionariosDigitais";
 
 // ============================================================
 // Dashboard da administração (/crm).
@@ -137,7 +136,9 @@ async function calcularToken(slug: string, senha: string) {
 const dinheiro = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-export default function CrmDashboard() {
+/** `onAbrirBeto` sobe até o CrmAdminClient porque a tela do Beto é cheia (o
+ *  QR Code precisa de espaço) e vive fora deste painel. */
+export default function CrmDashboard({ onAbrirBeto }: { onAbrirBeto: () => void }) {
   const serverUrl =
     process.env.NEXT_PUBLIC_WHATSAPP_PANEL_SERVER_URL || "http://localhost:4100";
 
@@ -146,7 +147,7 @@ export default function CrmDashboard() {
   const [metricas, setMetricas] = useState<Metricas | null>(null);
   const [vendas, setVendas] = useState<Venda[]>([]);
   const [vendedores, setVendedores] = useState<VendedorCadastro[]>([]);
-  const [aba, setAba] = useState<"visao" | "equipe" | "comissoes">("visao");
+  const [aba, setAba] = useState<"visao" | "agentes" | "equipe" | "comissoes">("visao");
   const [aviso, setAviso] = useState<{ tipo: "ok" | "erro"; texto: string } | null>(null);
 
   const mostrarAviso = useCallback((tipo: "ok" | "erro", texto: string) => {
@@ -220,10 +221,6 @@ export default function CrmDashboard() {
           </div>
         </header>
 
-        <CrmJuliaPanel />
-
-        <CrmCarlaPanel />
-
         {aviso && (
           <div
             className={`mb-4 rounded-xl border px-4 py-3 text-sm ${
@@ -240,6 +237,7 @@ export default function CrmDashboard() {
           {(
             [
               ["visao", "Visão geral"],
+              ["agentes", "Funcionários digitais"],
               ["equipe", "Vendedores"],
               ["comissoes", "Vendas e comissão"],
             ] as const
@@ -256,7 +254,9 @@ export default function CrmDashboard() {
           ))}
         </nav>
 
-        {!metricas ? (
+        {aba === "agentes" ? (
+          <CrmFuncionariosDigitais onAbrirBeto={onAbrirBeto} />
+        ) : !metricas ? (
           <CarregandoPainel conectado={conectado} servidor={serverUrl} />
         ) : aba === "visao" ? (
           <VisaoGeral metricas={metricas} />

@@ -68,13 +68,6 @@ export default function CrmAdminClient() {
             </a>
 
             <button
-              onClick={() => setTela("beto")}
-              className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-sm font-semibold text-amber-300 transition hover:bg-amber-500/20"
-            >
-              🤖 Beto
-            </button>
-
-            <button
               onClick={() => setTela("atendimento")}
               className="rounded-lg bg-emerald-500 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-emerald-400"
             >
@@ -91,7 +84,7 @@ export default function CrmAdminClient() {
       </div>
 
       <div className="min-h-0 flex-1">
-        <CrmDashboard />
+        <CrmDashboard onAbrirBeto={() => setTela("beto")} />
       </div>
     </div>
   );
