@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { io, type Socket } from "socket.io-client";
+import { type Socket } from "socket.io-client";
+import { conectarPainel } from "@/lib/socket-cliente";
 import {
   CrmChat,
   CrmEtiqueta,
@@ -836,20 +837,27 @@ export default function CrmWhatsAppClient({
 
   // Socket.IO Integration
   useEffect(() => {
-    const socket = io(serverUrl, {
-      transports: ["websocket", "polling"],
-      autoConnect: true,
-      reconnectionAttempts: 25,
-      reconnectionDelay: 1500,
-    });
-    socketRef.current = socket;
+    // `cancelado` porque a conexão agora espera o bilhete do site: sem a
+    // guarda, desmontar a tela durante essa espera deixaria um socket aberto
+    // sem ninguém para fechá-lo.
+    let cancelado = false;
+    let socket: Socket | null = null;
+    let vendedoresTimeout: ReturnType<typeof setTimeout> | undefined;
 
+    conectarPainel(serverUrl, { autoConnect: true, reconnectionAttempts: 25, reconnectionDelay: 1500 }).then(({ socket: s }) => {
+      if (cancelado) { s.disconnect(); return; }
+      socket = s;
+      socketRef.current = s;
+      ligarEventos(s);
+    });
+
+    function ligarEventos(socket: Socket) {
     socket.on("connect", () => {
       socket.emit("panel:bootstrap");
     });
 
     // Evita travar a tela de login pra sempre se o servidor demorar/estiver fora do ar.
-    const vendedoresTimeout = setTimeout(() => setVendedoresCarregados(true), 6000);
+    vendedoresTimeout = setTimeout(() => setVendedoresCarregados(true), 6000);
 
     socket.on("whatsapp:state", (payload: any) => {
       if (payload?.connected || payload?.status === "ready") {
@@ -1176,9 +1184,12 @@ export default function CrmWhatsAppClient({
       setPreferenciasCarregadas(true);
     });
 
+    }
+
     return () => {
+      cancelado = true;
       clearTimeout(vendedoresTimeout);
-      socket.disconnect();
+      socket?.disconnect();
       socketRef.current = null;
     };
   }, [serverUrl]);

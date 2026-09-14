@@ -4344,6 +4344,62 @@ app.post(["/api/enviar-documento", "/api/crm/enviar-documento"], async (req, res
   }
 });
 
+// ============================================================
+// Porta do socket.
+//
+// Este servidor transmite `whatsapp:chats` e `whatsapp:messages` para quem
+// estiver conectado. Até 14/09/2026 ele aceitava QUALQUER conexão: dava para
+// abrir um socket de fora, sem credencial nenhuma, e receber 515 conversas e
+// 300 mensagens — nome, telefone e conteúdo de cliente. Verificado ao vivo
+// antes de escrever isto. O endereço deste servidor está no JavaScript
+// público do site por definição, então "ninguém sabe o endereço" nunca foi
+// proteção nenhuma.
+//
+// O navegador não pode carregar um segredo e este servidor não enxerga o
+// cookie do site (origem diferente). Então o site, que já sabe quem passou
+// pela senha do painel ou entrou como vendedor, assina um bilhete curto
+// (lib/socket-token.ts) e aqui só se confere a assinatura.
+//
+// SEM O SEGREDO CONFIGURADO, NINGUÉM ENTRA. A tentação é liberar quando a
+// variável falta, para "não quebrar nada" — foi exatamente assim que a senha
+// do painel quase virou porta aberta. Esquecer a variável tem que derrubar o
+// painel de forma barulhenta, não reabrir a caixa da loja em silêncio.
+// ============================================================
+const PANEL_SOCKET_SECRET = process.env.PANEL_SOCKET_SECRET || "";
+
+function bilheteValido(token) {
+  if (!PANEL_SOCKET_SECRET) return false;
+
+  const partes = String(token || "").split(".");
+  if (partes.length !== 2) return false;
+
+  const expira = Number(partes[0]);
+  if (!Number.isFinite(expira) || expira < Date.now()) return false;
+
+  const esperado = crypto
+    .createHmac("sha256", PANEL_SOCKET_SECRET)
+    .update(String(expira))
+    .digest("hex");
+
+  const a = Buffer.from(esperado);
+  const b = Buffer.from(partes[1]);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
+io.use((socket, next) => {
+  if (!PANEL_SOCKET_SECRET) {
+    console.error(
+      "[socket] PANEL_SOCKET_SECRET nao configurado — recusando TODAS as conexoes. " +
+      "O painel fica fora do ar ate a variavel existir; e de proposito."
+    );
+    return next(new Error("servidor sem PANEL_SOCKET_SECRET"));
+  }
+  if (!bilheteValido(socket.handshake?.auth?.token)) {
+    return next(new Error("nao autorizado"));
+  }
+  next();
+});
+
 io.on("connection", (socket) => {
   socket.emit("whatsapp:state", whatsappState);
   socket.emit("whatsapp:api-info", apiInfo);

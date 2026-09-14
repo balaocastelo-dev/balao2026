@@ -104,6 +104,7 @@ docker run -d \
   -e WHATSAPP_PANEL_ALLOWED_ORIGIN="$ORIGENS" \
   -e SITE_URL="${SITE_URL:-https://www.balao.info}" \
   -e BACKUP_TOKEN="${BACKUP_TOKEN:-}" \
+  -e PANEL_SOCKET_SECRET="${PANEL_SOCKET_SECRET:-}" \
   -e JULIA_IA_URL="${JULIA_IA_URL:-}" \
   -e JULIA_IA_MODO="${JULIA_IA_MODO:-off}" \
   -e BETO_PANEL_TOKEN="${BETO_PANEL_TOKEN:-}" \
@@ -138,6 +139,7 @@ docker run -d \
   -v "$BETO_DADOS:/dados" \
   -e DATA_ROOT=/dados \
   -e PERFIL=beto \
+  -e PANEL_SOCKET_SECRET="${PANEL_SOCKET_SECRET:-}" \
   -e WHATSAPP_PANEL_ALLOWED_ORIGIN="$ORIGENS" \
   -e SITE_URL="${SITE_URL:-https://www.balao.info}" \
   -e BETO_URL="${BETO_URL:-https://www.balao.info}" \

@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { io, Socket } from "socket.io-client";
+import { Socket } from "socket.io-client";
+import { conectarPainel } from "@/lib/socket-cliente";
 import {
   GraficoDeAnel,
   GraficoDeBarras,
@@ -156,9 +157,20 @@ export default function CrmDashboard({ onAbrirBeto }: { onAbrirBeto: () => void 
   }, []);
 
   useEffect(() => {
-    const socket = io(serverUrl, { transports: ["websocket", "polling"] });
-    socketRef.current = socket;
+    // `cancelado` porque a conexão agora espera o bilhete do site: sem a
+    // guarda, desmontar a tela durante essa espera deixaria um socket aberto
+    // sem ninguém para fechá-lo.
+    let cancelado = false;
+    let socket: Socket | null = null;
 
+    conectarPainel(serverUrl).then(({ socket: s }) => {
+      if (cancelado) { s.disconnect(); return; }
+      socket = s;
+      socketRef.current = s;
+      ligarEventos(s);
+    });
+
+    function ligarEventos(socket: Socket) {
     socket.on("connect", () => {
       setConectado(true);
       socket.emit("panel:bootstrap");
@@ -169,9 +181,11 @@ export default function CrmDashboard({ onAbrirBeto }: { onAbrirBeto: () => void 
     socket.on("whatsapp:vendedores", (v: VendedorCadastro[]) =>
       setVendedores(Array.isArray(v) ? v : [])
     );
+    }
 
     return () => {
-      socket.disconnect();
+      cancelado = true;
+      socket?.disconnect();
       socketRef.current = null;
     };
   }, [serverUrl]);
