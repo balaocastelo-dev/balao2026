@@ -17,9 +17,20 @@ import { supabaseAdmin, hasSupabaseAdmin } from "./supabase";
 //  - cada refresh devolve um refresh_token NOVO; o anterior morre na hora
 // ============================================================
 
-const BASE = "https://www.bling.com.br/Api/v3";
-export const URL_AUTORIZACAO = `${BASE}/oauth/authorize`;
-export const URL_TOKEN = `${BASE}/oauth/token`;
+// São DOIS hosts, e confundi-los custa um 403 com a resposta certa dentro:
+//
+//   "A URL 'www.bling.com.br' está bloqueada para requisições de API.
+//    Por favor, utilize o endpoint oficial: 'api.bling.com.br'."
+//
+// O `www` serve o fluxo OAuth — a tela de autorização precisa ser uma página
+// de verdade, com o lojista logado — e o `api` serve os dados. Descoberto ao
+// conectar a conta real em 14/09: a troca de token passou no www e a primeira
+// consulta de pedidos voltou 403.
+const BASE_OAUTH = "https://www.bling.com.br/Api/v3";
+const BASE_API = "https://api.bling.com.br/Api/v3";
+
+export const URL_AUTORIZACAO = `${BASE_OAUTH}/oauth/authorize`;
+export const URL_TOKEN = `${BASE_OAUTH}/oauth/token`;
 
 const CLIENT_ID = process.env.BLING_CLIENT_ID || "";
 const CLIENT_SECRET = process.env.BLING_CLIENT_SECRET || "";
@@ -206,7 +217,7 @@ export async function chamarBling<T = unknown>(
     if (valor !== undefined && valor !== null && valor !== "") parametros.set(chave, String(valor));
   }
   const busca = parametros.toString();
-  const url = `${BASE}${caminho}${busca ? `?${busca}` : ""}`;
+  const url = `${BASE_API}${caminho}${busca ? `?${busca}` : ""}`;
 
   await respeitarRitmo();
 

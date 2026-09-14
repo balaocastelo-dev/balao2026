@@ -269,3 +269,37 @@ describe("Bling — escrita", () => {
     expect(JSON.parse(String(opcoesChamadas.body)).contato.id).toBe(7);
   }, 15000);
 });
+
+describe("Bling — hosts", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    process.env.BLING_CLIENT_ID = "id-de-teste";
+    process.env.BLING_CLIENT_SECRET = "segredo-de-teste";
+    linhaToken = {
+      access_token: "vigente", refresh_token: "r1",
+      expira_em: new Date(Date.now() + 3_600_000).toISOString(),
+      conectado_em: null, ultimo_erro: null,
+    };
+  });
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("dados vão para api.bling.com.br, não para o www", async () => {
+    // O www devolve 403 dizendo, com todas as letras, para usar o api. Foi o
+    // primeiro erro ao conectar a conta real em 14/09.
+    let urlChamada = "";
+    vi.stubGlobal("fetch", vi.fn(async (url: unknown) => {
+      urlChamada = String(url);
+      return { ok: true, status: 200, text: async () => JSON.stringify({ data: [] }) };
+    }));
+    const { chamarBling } = await import("../../lib/bling");
+    await chamarBling("/pedidos/vendas");
+    expect(urlChamada).toContain("https://api.bling.com.br/Api/v3/pedidos/vendas");
+    expect(urlChamada).not.toContain("www.bling.com.br");
+  }, 15000);
+
+  it("o OAuth continua no www, que é onde a tela de autorização vive", async () => {
+    const m = await import("../../lib/bling");
+    expect(m.URL_AUTORIZACAO).toContain("www.bling.com.br");
+    expect(m.URL_TOKEN).toContain("www.bling.com.br");
+  });
+});
