@@ -1,0 +1,11 @@
+{
+  "name": "balao-mcp-bling",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Servidor MCP para consultar o Bling da Balao pelo Claude",
+  "bin": { "balao-mcp-bling": "./servidor.mjs" },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  }
+}

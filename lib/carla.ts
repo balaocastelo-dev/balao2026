@@ -1,4 +1,5 @@
 import { supabaseAdmin } from "./supabase";
+import { chamarBling, estadoBling, listarContasAReceber } from "./bling";
 
 // ============================================================
 // Carla — cobradora & reativação da Balão.
@@ -91,15 +92,96 @@ export async function pegarReativacao(limite = 5): Promise<ProspectParaReativar[
     .slice(0, limite);
 }
 
+/* ---------------------------------------------------------------- *
+ * Cobrança pelo Bling
+ *
+ * A tabela `orders` do site tem 9 linhas, a mais recente de julho. A venda da
+ * loja acontece no balcão e é lançada no Bling — é lá que está o dinheiro a
+ * receber. Enquanto o Bling não estiver conectado, a Carla segue com os
+ * pedidos do site; quando estiver, o Bling passa a ser a fonte principal e o
+ * site vira o complemento.
+ * ---------------------------------------------------------------- */
+
+/** Telefone de um contato do Bling. Uma chamada por cobrança — a fila da
+ *  Carla é de 5 por vez, então cabe folgado no limite de 3 req/s. */
+async function telefoneDoContato(contatoId: string): Promise<string> {
+  const r = await chamarBling<Record<string, unknown>>(`/contatos/${contatoId}`);
+  if (!r.ok || !r.dados) return "";
+  const c = r.dados as Record<string, unknown>;
+  const celular = String(c.celular ?? "").replace(/\D/g, "");
+  const telefone = String(c.telefone ?? "").replace(/\D/g, "");
+  // Celular primeiro: fixo não recebe WhatsApp, e insistir em fixo é a Carla
+  // gastando o dia com número que nunca vai responder.
+  const escolhido = celular.length >= 10 ? celular : telefone;
+  return escolhido.length >= 10 ? escolhido : "";
+}
+
+/**
+ * Contas a receber vencidas, com telefone, que a Carla ainda não cobrou.
+ *
+ * Só o que JÁ venceu: cobrar antes do vencimento não é cobrança, é chateação
+ * — e é o tipo de mensagem que faz um cliente bom bloquear o número da loja.
+ */
+export async function pegarCobrancasDoBling(limite = 5): Promise<PedidoPendente[]> {
+  const estado = await estadoBling();
+  if (!estado.conectado) return [];
+
+  const hoje = new Date().toISOString().slice(0, 10);
+  const noventaDias = new Date(Date.now() - 90 * 86_400_000).toISOString().slice(0, 10);
+
+  const { contas, erro } = await listarContasAReceber({
+    dataInicial: noventaDias,
+    dataFinal: hoje,
+    maxPaginas: 2,
+  });
+  if (erro || !contas.length) return [];
+
+  const { data: cobrados } = await supabaseAdmin
+    .from("carla_contatos")
+    .select("whatsapp")
+    .eq("tipo", "cobranca");
+  const jaCobrados = new Set((cobrados || []).map((c) => c.whatsapp));
+
+  const emAberto = contas
+    .filter((c) => c.saldo > 0 && c.clienteId)
+    .sort((a, b) => (a.vencimento || "").localeCompare(b.vencimento || ""));
+
+  const fila: PedidoPendente[] = [];
+  for (const conta of emAberto) {
+    if (fila.length >= limite) break;
+    const whatsapp = await telefoneDoContato(conta.clienteId as string);
+    if (!whatsapp || jaCobrados.has(whatsapp)) continue;
+    fila.push({
+      id: `bling:${conta.id}`,
+      whatsapp,
+      nome: conta.clienteNome,
+      total: conta.saldo,
+      criado_em: conta.vencimento,
+    });
+  }
+  return fila;
+}
+
 /** Fila da Carla: cobrança primeiro (dinheiro parado), reativação depois. */
 export async function pegarFila(limiteCobranca = 5, limiteReativacao = 5) {
-  const [pendencias, reativacao] = await Promise.all([
-    pegarPendencias(limiteCobranca),
+  // Bling primeiro: é onde está a venda de verdade. O site entra só para
+  // completar a fila — e sozinho, enquanto o ERP não estiver conectado.
+  const [doBling, reativacao] = await Promise.all([
+    pegarCobrancasDoBling(limiteCobranca),
     pegarReativacao(limiteReativacao),
   ]);
+
+  let cobranca = doBling;
+  if (cobranca.length < limiteCobranca) {
+    const doSite = await pegarPendencias(limiteCobranca - cobranca.length);
+    const jaNaFila = new Set(cobranca.map((c) => c.whatsapp));
+    cobranca = [...cobranca, ...doSite.filter((c) => !jaNaFila.has(c.whatsapp))];
+  }
+
   return {
-    cobranca: pendencias,
+    cobranca,
     reativacao,
+    fonte: doBling.length ? "bling" : "site",
   };
 }
 
