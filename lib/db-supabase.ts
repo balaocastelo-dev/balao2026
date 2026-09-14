@@ -46,9 +46,19 @@ function mapSupabaseProduct(r: Row): Product {
 
 const sortByPrice = (items: Product[]) => items.sort((a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price));
 
+// Colunas leves para listas (home, categoria, busca, grupos).
+//
+// `select *` trazia description, specs e image_urls — campos pesados que
+// faziam a consulta estourar o statement_timeout do banco (erro 57014) em
+// 1000 linhas, e a página caía no espelho da VPS, devagar. O filtro por
+// description continua funcionando (o WHERE roda no banco mesmo sem a coluna
+// no select); só a página de produto precisa da linha completa.
+const COLUNAS_LISTA =
+  "id,name,price,image,category,slug,installment,discount_pix,price_card,availability,source_url,created_at,brand,rating,cost,supplier";
+
 // O PostgREST devolve no maximo 1000 linhas por consulta, em silencio: sem
 // erro e sem aviso. Um `select` direto entregava 1000 de 1288 curados, e o
-// espelho da VPS — que existe para segurar o site quando o banco cai — ficava
+// espelho da VPS é — que existe para segurar o site quando o banco cai — ficava
 // com 288 produtos a menos sem ninguem perceber. Por isso paginamos.
 const PAGINA_SUPABASE = 1000;
 
@@ -58,7 +68,7 @@ export async function getProductsCurated(): Promise<Product[]> {
   for (let inicio = 0; ; inicio += PAGINA_SUPABASE) {
     let query = supabase
       .from("products")
-      .select("*")
+      .select(COLUNAS_LISTA)
       .order("created_at", { ascending: false })
       .range(inicio, inicio + PAGINA_SUPABASE - 1);
     if (CURATED_ONLY) query = query.eq("is_curated", true);
@@ -84,7 +94,7 @@ export async function getProductsPaginatedCurated(opts: { page?: number; limit?:
   const from = (page - 1) * limit;
   const to = from + limit - 1;
 
-  let query = supabase.from("products").select("*", { count: "exact" });
+  let query = supabase.from("products").select(COLUNAS_LISTA, { count: "exact" });
   if (CURATED_ONLY) query = query.eq("is_curated", true);
 
   if (opts.search?.trim()) {
@@ -126,7 +136,7 @@ export async function getProductByIdentifierCurated(identifier: string): Promise
 export async function searchProductsByKeywordsCurated(keywords: string[], limit = 24): Promise<Product[]> {
   const normalized = [...new Set(keywords.map(k => String(k||"").trim().toLowerCase()).filter(Boolean))];
   if (normalized.length === 0) return [];
-  let query = supabase.from("products").select("*").limit(Math.max(limit, normalized.length * 12));
+  let query = supabase.from("products").select(COLUNAS_LISTA).limit(Math.max(limit, normalized.length * 12));
   if (CURATED_ONLY) query = query.eq("is_curated", true);
   // Para cada keyword, precisa bater em name OR category OR description - Supabase OR não faz AND entre keywords, então filtramos em memória se preciso
   // Primeiro pega candidatos com OR de todas keywords
@@ -141,7 +151,9 @@ export async function searchProductsByKeywordsCurated(keywords: string[], limit 
 export async function searchProductsAllTermsCurated(terms: string[], limit = 10): Promise<Product[]> {
   const limpos = terms.map(t => String(t||"").trim()).filter(Boolean);
   if (limpos.length === 0) return [];
-  let query = supabase.from("products").select("*").limit(limit);
+  // description entra no SELECT de propósito: este caminho filtra em memória
+  // (AND entre termos) e o limite é pequeno, então não estoura o timeout.
+  let query = supabase.from("products").select(`${COLUNAS_LISTA},description`).limit(limit);
   if (CURATED_ONLY) query = query.eq("is_curated", true);
   // AND entre termos: cada termo precisa aparecer em name OR description
   // Supabase não tem AND direto no or, fazemos filtro em memória após buscar com OR
@@ -160,7 +172,7 @@ export async function searchProductsAllTermsCurated(terms: string[], limit = 10)
 
 export async function getProductsByCategoryFullPathCurated(fullPath: string): Promise<Product[]> {
   if (!fullPath) return [];
-  let query = supabase.from("products").select("*").or(`category.eq.${fullPath},category.ilike.${fullPath}/%`).order("created_at", { ascending: false });
+  let query = supabase.from("products").select(COLUNAS_LISTA).or(`category.eq.${fullPath},category.ilike.${fullPath}/%`).order("created_at", { ascending: false });
   if (CURATED_ONLY) query = query.eq("is_curated", true);
   const { data, error } = await query;
   if (error) { console.error("Supabase getByCategoryFullPath error", error); return []; }
@@ -170,7 +182,7 @@ export async function getProductsByCategoryFullPathCurated(fullPath: string): Pr
 export async function getProductsByExactCategoriesCurated(categoryNames: string[]): Promise<Product[]> {
   const normalized = [...new Set(categoryNames.map(n => String(n||"").trim()).filter(Boolean))];
   if (normalized.length === 0) return [];
-  let query = supabase.from("products").select("*").in("category", normalized).order("created_at", { ascending: false });
+  let query = supabase.from("products").select(COLUNAS_LISTA).in("category", normalized).order("created_at", { ascending: false });
   if (CURATED_ONLY) query = query.eq("is_curated", true);
   const { data, error } = await query;
   if (error) { console.error("Supabase getByExactCategories error", error); return []; }
@@ -192,7 +204,7 @@ export async function getCuratedGroups(): Promise<Record<string, Product[]>> {
   const groups = ["pc_gamer","notebook","monitor","impressora","setup_gamer"];
   const result: Record<string, Product[]> = {};
   for (const g of groups) {
-    const { data, error } = await supabase.from("products").select("*").eq("is_curated", true).eq("curated_group", g).order("curated_rank", { ascending: true });
+    const { data, error } = await supabase.from("products").select(COLUNAS_LISTA).eq("is_curated", true).eq("curated_group", g).order("curated_rank", { ascending: true });
     if (!error && data) result[g] = (data as Row[]).map(mapSupabaseProduct);
     else result[g] = [];
   }
