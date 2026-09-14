@@ -225,6 +225,7 @@ const { montarEtiquetas } = require("./etiquetas");
 const { criarBackupDoBanco } = require("./backup");
 const juliaIA = require("./ia-worker");
 const betoWorker = require("./beto-worker");
+const carlaWorker = require("./carla-worker");
 
 // "loja" (padrão) roda a Júlia; "beto" roda o prospector no número próprio.
 const PERFIL = process.env.PERFIL || "loja";
@@ -3883,6 +3884,20 @@ app.post(["/api/crm/beto/config", "/api/beto/config"], express.json(), (req, res
   res.json({ ok: true, ...betoWorker.definirConfig({ ativo, maxDia, mensagem }) });
 });
 
+// ---------- Carla (cobradora & reativação, número da loja) ----------
+
+app.get(["/api/crm/carla/estado", "/api/carla/estado"], (_req, res) => {
+  res.json({ ok: true, ...carlaWorker.resumo() });
+});
+
+app.post(["/api/crm/carla/config", "/api/carla/config"], express.json(), (req, res) => {
+  const ativo = typeof req.body?.ativo === "boolean" ? req.body.ativo : undefined;
+  const maxDia = Number(req.body?.maxDia);
+  const mensagemCobranca = typeof req.body?.mensagemCobranca === "string" ? req.body.mensagemCobranca : undefined;
+  const mensagemReativacao = typeof req.body?.mensagemReativacao === "string" ? req.body.mensagemReativacao : undefined;
+  res.json({ ok: true, ...carlaWorker.definirConfig({ ativo, maxDia, mensagemCobranca, mensagemReativacao }) });
+});
+
 // Login dos vendedores criados pelo dashboard.
 //
 // O site manda o TOKEN (sha256 de slug+senha), nunca a senha; aqui só se
@@ -5249,8 +5264,10 @@ server.listen(port, () => {
     // Número próprio do prospector: aqui só o Beto trabalha.
     betoWorker.iniciar(depsDeTrabalho);
   } else {
-    // Número da loja: a Júlia atende, o Beto nunca dispara daqui.
+    // Número da loja: a Júlia atende e a Carla cobra/reativa. O Beto nunca
+    // dispara daqui — o dele é número próprio.
     juliaIA.iniciar(depsDeTrabalho);
+    carlaWorker.iniciar(depsDeTrabalho);
   }
 });
 

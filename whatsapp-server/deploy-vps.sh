@@ -107,6 +107,8 @@ docker run -d \
   -e JULIA_IA_URL="${JULIA_IA_URL:-}" \
   -e JULIA_IA_MODO="${JULIA_IA_MODO:-off}" \
   -e BETO_PANEL_TOKEN="${BETO_PANEL_TOKEN:-}" \
+  -e CARLA_ATIVO="${CARLA_ATIVO:-0}" \
+  -e CARLA_MAX_DIA="${CARLA_MAX_DIA:-10}" \
   -e TZ=America/Sao_Paulo \
   --memory="$MEMORIA" \
   --shm-size="$SHM" \

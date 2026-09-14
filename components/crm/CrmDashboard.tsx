@@ -11,6 +11,7 @@ import {
   PontoSerie,
 } from "./Graficos";
 import CrmJuliaPanel from "./CrmJuliaPanel";
+import CrmCarlaPanel from "./CrmCarlaPanel";
 
 // ============================================================
 // Dashboard da administração (/crm).
@@ -220,6 +221,8 @@ export default function CrmDashboard() {
         </header>
 
         <CrmJuliaPanel />
+
+        <CrmCarlaPanel />
 
         {aviso && (
           <div

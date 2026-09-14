@@ -56,6 +56,13 @@
       "cargo": "Prospector Digital",
       "assinatura": "",
       "protegido": true
+    },
+    {
+      "id": "carla",
+      "nome": "Carla",
+      "cargo": "Cobradora Digital",
+      "assinatura": "",
+      "protegido": true
     }
   ]
 }
