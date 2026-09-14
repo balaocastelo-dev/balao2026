@@ -16,9 +16,28 @@ import { listVitrinePagesPublic } from '@/lib/vitrine/db'
  * indexação de produto novo. Melhor um sitemap com as rotas fixas do que
  * sitemap nenhum.
  */
+const LIMITE_POR_PARTE_MS = 12_000
+
 async function semQuebrar<T>(rotulo: string, buscar: () => Promise<T>, reserva: T): Promise<T> {
+  // Prazo, não só try/catch.
+  //
+  // O catch cobria o banco dizendo "não" — mas o que derrubou as builds de
+  // 13/09 foi o banco dizendo "já vai": consulta que leva 90 segundos não
+  // lança nada, só consome o orçamento. A Vercel dá 60 segundos por rota e
+  // abortava a build inteira no /sitemap.xml.
+  //
+  // Doze segundos por parte: quatro partes cabem no prazo com folga, e quem
+  // não respondeu a tempo simplesmente fica de fora deste sitemap. Sitemap
+  // sem a lista de produtos ainda é sitemap; build quebrada não indexa nada.
+  const prazo = new Promise<T>((resolve) =>
+    setTimeout(() => {
+      console.error(`[sitemap] ${rotulo} passou de ${LIMITE_POR_PARTE_MS}ms; seguindo sem esta parte.`)
+      resolve(reserva)
+    }, LIMITE_POR_PARTE_MS)
+  )
+
   try {
-    return await buscar()
+    return await Promise.race([buscar(), prazo])
   } catch (erro) {
     console.error(`[sitemap] ${rotulo} falhou; seguindo sem esta parte.`, erro)
     return reserva
