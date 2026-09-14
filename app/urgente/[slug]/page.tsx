@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
-import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
+import { getCachedProdutosRecentes, getCachedProductsByKeywords } from "@/lib/cache";
 import { SITE_CONFIG } from "@/lib/config";
 import JsonLd, {
   generateBreadcrumbSchema,
@@ -84,7 +84,7 @@ export default async function UrgenteIntentPage({ params }: Props) {
   }
 
   const [allProducts, keywordMatches] = await Promise.all([
-    getCachedProducts(),
+    getCachedProdutosRecentes(),
     getCachedProductsByKeywords([intent.serviceLabel.toLowerCase(), "notebook", "ssd", "fonte", "tela"], 8),
   ]);
 

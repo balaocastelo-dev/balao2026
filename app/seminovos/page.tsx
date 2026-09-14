@@ -3,7 +3,7 @@ import React from "react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Header from "@/components/Header";
-import { getCachedProducts, getCachedCategories, getCachedProductsByKeywords } from "@/lib/cache";
+import { getCachedProdutosRecentes, getCachedCategories, getCachedProductsByKeywords } from "@/lib/cache";
 import { Product, Category } from "@/lib/utils";
 import ProductCard from "@/components/ProductCard";
 import {
@@ -87,7 +87,7 @@ const SEMINOVOS_FAQS = [
 
 export default async function SeminovosPage() {
   const [allProducts, keywordSeminovos] = await Promise.all([
-    getCachedProducts(),
+    getCachedProdutosRecentes(),
     getCachedProductsByKeywords(["seminovo", "recondicionado", "thinkpad", "latitude", "macbook", "notebook", "dell"], 16),
   ]);
 

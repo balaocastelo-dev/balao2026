@@ -2,7 +2,7 @@ import React from "react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Header from "@/components/Header";
-import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
+import { getCachedProdutosRecentes, getCachedProductsByKeywords } from "@/lib/cache";
 import ProductCard from "@/components/ProductCard";
 import CarregadoresWidget from "@/components/CarregadoresWidget";
 import JsonLd, {
@@ -95,7 +95,7 @@ const CARREGADORES_FAQS = [
 
 export default async function CarregadoresPage() {
   const [allProducts, keywordChargers] = await Promise.all([
-    getCachedProducts(),
+    getCachedProdutosRecentes(),
     getCachedProductsByKeywords(["carregador", "fonte", "adaptador", "usb-c", "magsafe", "power", "dell", "lenovo", "hp"], 20),
   ]);
 

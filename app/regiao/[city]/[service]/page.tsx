@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
-import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
+import { getCachedProdutosRecentes, getCachedProductsByKeywords } from "@/lib/cache";
 import { SITE_CONFIG } from "@/lib/config";
 import JsonLd, {
   generateBreadcrumbSchema,
@@ -90,7 +90,7 @@ export default async function RegionalServicePage({ params }: Props) {
   }
 
   const [allProducts, keywordMatches] = await Promise.all([
-    getCachedProducts(),
+    getCachedProdutosRecentes(),
     getCachedProductsByKeywords([service.slug.replace(/-/g, " "), "notebook", "ssd", "gamer", "apple"], 8),
   ]);
 

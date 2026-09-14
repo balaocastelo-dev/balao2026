@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import Header from "@/components/Header";
-import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
+import { getCachedProdutosRecentes, getCachedProductsByKeywords } from "@/lib/cache";
 import ProductCard from "@/components/ProductCard";
 import JsonLd, {
   generateOrganizationSchema,
@@ -86,7 +86,7 @@ const PROMO_FAQS = [
 
 export default async function PromocaoPage() {
   const [allProducts, promoHardwareRaw, promoNotebooksRaw] = await Promise.all([
-    getCachedProducts(),
+    getCachedProdutosRecentes(),
     getCachedProductsByKeywords(["ssd", "rtx", "fonte", "gabinete", "cooler", "memoria", "placa de video"], 12),
     getCachedProductsByKeywords(["notebook", "dell", "lenovo", "thinkpad", "macbook", "acer", "asus"], 12),
   ]);

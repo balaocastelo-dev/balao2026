@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
-import { getCachedProducts } from "@/lib/cache";
+import { getCachedProdutosRecentes } from "@/lib/cache";
 import { SITE_CONFIG } from "@/lib/config";
 import JsonLd, {
   generateBreadcrumbSchema,
@@ -129,7 +129,7 @@ const AUTHORITY_FAQS = [
 ];
 
 export default async function EspecialidadesPage() {
-  const allProducts = await getCachedProducts();
+  const allProducts = await getCachedProdutosRecentes();
   const showcaseProducts = allProducts.slice(0, 12);
 
   const breadcrumbItems = [

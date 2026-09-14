@@ -19,7 +19,7 @@ import {
   Award,
 } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
-import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
+import { getCachedProdutosRecentes, getCachedProductsByKeywords } from "@/lib/cache";
 import { SITE_CONFIG } from "@/lib/config";
 import JsonLd, {
   generateOrganizationSchema,
@@ -89,7 +89,7 @@ const APPLE_FAQS = [
 
 export default async function ReparoApplePage() {
   const [allProducts, keywordApple] = await Promise.all([
-    getCachedProducts(),
+    getCachedProdutosRecentes(),
     getCachedProductsByKeywords(["apple", "iphone", "macbook", "ipad", "airpods", "magsafe"], 12),
   ]);
 

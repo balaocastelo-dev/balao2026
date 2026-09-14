@@ -3,7 +3,7 @@ import Header from "@/components/Header";
 import Image from "next/image";
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
-import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
+import { getCachedProdutosRecentes, getCachedProductsByKeywords } from "@/lib/cache";
 import JsonLd, {
   generateBreadcrumbSchema,
   generateFAQSchema,
@@ -147,7 +147,7 @@ export const metadata: Metadata = {
 
 export default async function AppleHubPage() {
   const [allProducts, keywordApple, radarPosts] = await Promise.all([
-    getCachedProducts(),
+    getCachedProdutosRecentes(),
     getCachedProductsByKeywords(["apple", "iphone", "macbook", "ipad", "airpods", "watch", "capa", "carregador"], 20),
     listAppleRadarPosts(3),
   ]);

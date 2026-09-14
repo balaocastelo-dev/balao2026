@@ -25,7 +25,7 @@ import {
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
 import TonerCalculadora from "@/components/TonerCalculadora";
-import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
+import { getCachedProdutosRecentes, getCachedProductsByKeywords } from "@/lib/cache";
 import JsonLd, {
   generateOrganizationSchema,
   generateBreadcrumbSchema,
@@ -95,7 +95,7 @@ const TONER_FAQS = [
 
 export default async function TonnerPage() {
   const [allProducts, keywordToners] = await Promise.all([
-    getCachedProducts(),
+    getCachedProdutosRecentes(),
     getCachedProductsByKeywords(["toner", "tinta", "cartucho", "impressora", "brother", "hp", "canon", "samsung", "kyocera", "ricoh", "lexmark"], 35),
   ]);
 

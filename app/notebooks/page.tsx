@@ -1,7 +1,7 @@
 import React from "react";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
-import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
+import { getCachedProdutosRecentes, getCachedProductsByKeywords } from "@/lib/cache";
 import JsonLd, {
   generateBreadcrumbSchema,
   generateFAQSchema,
@@ -84,7 +84,7 @@ const NOTEBOOK_FAQS = [
 
 export default async function NotebooksPage() {
   const [allProducts, keywordNotebooks] = await Promise.all([
-    getCachedProducts(),
+    getCachedProdutosRecentes(),
     getCachedProductsByKeywords(["notebook", "laptop", "macbook", "thinkpad", "dell", "lenovo", "acer", "asus", "samsung"], 33),
   ]);
 

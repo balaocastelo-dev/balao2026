@@ -1,7 +1,7 @@
 import React from "react";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
-import { getCachedCategories, getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
+import { getCachedCategories, getCachedProdutosRecentes, getCachedProductsByKeywords } from "@/lib/cache";
 import { SITE_CONFIG } from "@/lib/config";
 import HeroCTA from "@/components/HeroCTA";
 import PcGamerSearchGrid from "@/components/PcGamerSearchGrid";
@@ -93,7 +93,7 @@ const PC_GAMER_FAQS = [
 
 export default async function PcGamerPage() {
   const [allProducts, pcsRaw, partsRaw, categories] = await Promise.all([
-    getCachedProducts(),
+    getCachedProdutosRecentes(),
     getCachedProductsByKeywords(["gamer", "pc gamer", "rtx 4060", "rtx 4070", "ryzen 7", "i7"], 16),
     getCachedProductsByKeywords(["placa de video", "ssd", "memoria ram", "fonte", "watercooler", "gabinete"], 16),
     getCachedCategories(),

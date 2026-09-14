@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
-import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
+import { getCachedProdutosRecentes, getCachedProductsByKeywords } from "@/lib/cache";
 import JsonLd, {
   generateBreadcrumbSchema,
   generateFAQSchema,
@@ -98,7 +98,7 @@ const MONTAGEM_FAQS = [
 
 export default async function MontagemPCPage() {
   const [allProducts, keywordHardware] = await Promise.all([
-    getCachedProducts(),
+    getCachedProdutosRecentes(),
     getCachedProductsByKeywords(["gabinete", "fonte", "watercooler", "cooler", "placa-mae", "rtx", "ryzen", "memoria"], 24),
   ]);
 

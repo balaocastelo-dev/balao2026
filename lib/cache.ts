@@ -67,6 +67,29 @@ export const getCachedProducts = unstable_cache(
 );
 
 /**
+ * Os produtos mais recentes, com cache — para preencher vitrine.
+ *
+ * Trinta e uma páginas do site chamavam `getCachedProducts()` (catálogo
+ * INTEIRO: 1.288 linhas com descrição e ficha técnica) e usavam no máximo os
+ * 35 primeiros itens, como recheio de prateleira quando a busca por palavra
+ * -chave devolvia pouca coisa. Era a leitura mais cara do sistema servindo ao
+ * detalhe mais barato da tela, e foi uma das três fontes que saturaram o
+ * banco em 13/09.
+ *
+ * Aqui todas essas páginas passam a dividir UMA entrada de cache de 60
+ * linhas leves. O limite fixo é de propósito: chave variável por página
+ * multiplicaria as entradas e devolveria o problema pela porta dos fundos.
+ *
+ * Quem realmente precisa do catálogo completo — `/categoria/[slug]`,
+ * `/premium`, `/vitrine`, `/monteseupc`, a home — continua em
+ * `getCachedProducts()`.
+ */
+export async function getCachedProdutosRecentes() {
+  const { products } = await getCachedProductsPaginated({ page: 1, limit: 60 });
+  return products;
+}
+
+/**
  * Busca por palavras-chave, com cache.
  *
  * As landing pages (PC Gamer, Notebooks, Manutenção…) chamam isto a cada

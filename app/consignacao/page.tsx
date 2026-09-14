@@ -3,7 +3,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
 import ConsignacaoCalculator from "@/components/ConsignacaoCalculator";
-import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
+import { getCachedProdutosRecentes, getCachedProductsByKeywords } from "@/lib/cache";
 import JsonLd, {
   generateOrganizationSchema,
   generateBreadcrumbSchema,
@@ -91,7 +91,7 @@ const CONSIGNACAO_FAQS = [
 
 export default async function ConsignacaoPage() {
   const [allProducts, keywordUsed] = await Promise.all([
-    getCachedProducts(),
+    getCachedProdutosRecentes(),
     getCachedProductsByKeywords(["seminovo", "usado", "notebook", "gamer", "macbook"], 16),
   ]);
 

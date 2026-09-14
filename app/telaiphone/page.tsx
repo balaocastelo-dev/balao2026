@@ -31,7 +31,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
-import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
+import { getCachedProdutosRecentes, getCachedProductsByKeywords } from "@/lib/cache";
 import { SITE_CONFIG } from "@/lib/config";
 import TelaIphonePriceTable from "@/components/TelaIphonePriceTable";
 import BeforeAfterSlider from "@/components/BeforeAfterSlider";
@@ -94,7 +94,7 @@ const IPHONE_SCREEN_FAQS = [
 
 export default async function TelaIPhonePage() {
   const [allProducts, keywordApple] = await Promise.all([
-    getCachedProducts(),
+    getCachedProdutosRecentes(),
     getCachedProductsByKeywords(["iphone", "apple", "capa", "carregador", "tela"], 16),
   ]);
 

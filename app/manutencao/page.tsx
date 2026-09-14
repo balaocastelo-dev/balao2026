@@ -4,7 +4,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
 import ManutencaoSimulador from "@/components/ManutencaoSimulador";
-import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
+import { getCachedProdutosRecentes, getCachedProductsByKeywords } from "@/lib/cache";
 import JsonLd, {
   generateBreadcrumbSchema,
   generateFAQSchema,
@@ -94,7 +94,7 @@ const MANUTENCAO_FAQS = [
 
 export default async function ManutencaoPage() {
   const [allProducts, keywordUpgrades] = await Promise.all([
-    getCachedProducts(),
+    getCachedProdutosRecentes(),
     getCachedProductsByKeywords(["ssd", "memoria", "cooler", "fonte", "pasta termica", "teclado", "nvme", "ram ddr4", "ram ddr5"], 20),
   ]);
 

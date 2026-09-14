@@ -5,7 +5,7 @@ import Header from "@/components/Header";
 import JsonLd, { generateBreadcrumbSchema, generateFAQSchema, generateOrganizationSchema, generateItemListSchema } from "@/components/JsonLd";
 import { listBlogPostsForPage } from "@/lib/blog-store";
 import { SITE_CONFIG } from "@/lib/config";
-import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
+import { getCachedProdutosRecentes, getCachedProductsByKeywords } from "@/lib/cache";
 import ProductCard from "@/components/ProductCard";
 import WhatsAppNewsletter from "@/components/WhatsAppNewsletter";
 
@@ -88,7 +88,7 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
   // fallback guarantee 8
   let leituraCompraProducts = vitrineProducts;
   if (leituraCompraProducts.length < 8) {
-    const all = await getCachedProducts();
+    const all = await getCachedProdutosRecentes();
     const fill = all.filter(a=> !leituraCompraProducts.find(b=>b.id===a.id));
     leituraCompraProducts = [...leituraCompraProducts, ...fill].slice(0,8);
   }
