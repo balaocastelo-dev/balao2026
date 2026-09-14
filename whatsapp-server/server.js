@@ -3870,6 +3870,19 @@ app.get("/api/crm/conversas-recentes", (req, res) => {
   res.json({ ok: true, conversas });
 });
 
+// Estado do prospector — a aba do Beto no /crm mostra isto.
+app.get(["/api/crm/beto/estado", "/api/beto/estado"], (_req, res) => {
+  res.json({ ok: true, ...betoWorker.resumo() });
+});
+
+// Liga/desliga, teto diário e mensagem de primeiro contato.
+app.post(["/api/crm/beto/config", "/api/beto/config"], express.json(), (req, res) => {
+  const ativo = typeof req.body?.ativo === "boolean" ? req.body.ativo : undefined;
+  const maxDia = Number(req.body?.maxDia);
+  const mensagem = typeof req.body?.mensagem === "string" ? req.body.mensagem : undefined;
+  res.json({ ok: true, ...betoWorker.definirConfig({ ativo, maxDia, mensagem }) });
+});
+
 // Login dos vendedores criados pelo dashboard.
 //
 // O site manda o TOKEN (sha256 de slug+senha), nunca a senha; aqui só se

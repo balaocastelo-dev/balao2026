@@ -88,10 +88,10 @@ export default function CrmBetoAdmin({
       setStatus(rStatus);
       setQr(rQr?.qrCode || rQr?.qr || null);
       if (rBeto?.ok) {
-        setBeto(rBeto.ia || rBeto.beto || rBeto);
+        setBeto(rBeto as BetoEstado);
         setForm((f) => ({
-          maxDia: String(rBeto.ia?.maxDia ?? f.maxDia),
-          mensagem: rBeto.ia?.mensagem ?? f.mensagem,
+          maxDia: String(rBeto.maxDia ?? f.maxDia),
+          mensagem: rBeto.mensagem ?? f.mensagem,
         }));
       }
     } catch {
@@ -130,7 +130,7 @@ export default function CrmBetoAdmin({
       });
       const d = await r.json();
       if (d?.ok) {
-        setBeto(d.ia || d.beto || d);
+        setBeto(d as BetoEstado);
         setAvisos({ tipo: "ok", texto: "Beto atualizado." });
       } else {
         setAvisos({ tipo: "erro", texto: d?.erro || "Não consegui atualizar." });
