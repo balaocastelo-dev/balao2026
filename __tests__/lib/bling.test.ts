@@ -187,3 +187,80 @@ describe("Bling — token e ritmo", () => {
     expect(r.maiores[0]).toEqual({ cliente: "Bruno", total: 300 });
   }, 15000);
 });
+
+describe("Bling — escrita", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    upserts.length = 0;
+    process.env.BLING_CLIENT_ID = "id-de-teste";
+    process.env.BLING_CLIENT_SECRET = "segredo-de-teste";
+    linhaToken = {
+      access_token: "vigente", refresh_token: "r1",
+      expira_em: new Date(Date.now() + 3_600_000).toISOString(),
+      conectado_em: null, ultimo_erro: null,
+    };
+  });
+
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("recusa pedido sem itens antes de chamar o Bling", async () => {
+    const fetchFalso = vi.fn();
+    vi.stubGlobal("fetch", fetchFalso);
+    const { criarPedido } = await import("../../lib/bling");
+    const r = await criarPedido({ contatoId: "1", itens: [] });
+    expect(r.ok).toBe(false);
+    expect(r.erro).toContain("sem itens");
+    expect(fetchFalso).not.toHaveBeenCalled();
+  });
+
+  it("recusa item com valor zero", async () => {
+    const fetchFalso = vi.fn();
+    vi.stubGlobal("fetch", fetchFalso);
+    const { criarPedido } = await import("../../lib/bling");
+    // Item a R$ 0,00 entra no ERP como pedido valido e so aparece no
+    // fechamento do mes. Mais barato recusar aqui.
+    const r = await criarPedido({
+      contatoId: "1",
+      itens: [{ descricao: "Mouse", quantidade: 1, valor: 0 }],
+    });
+    expect(r.ok).toBe(false);
+    expect(r.erro).toContain("valor zero");
+    expect(fetchFalso).not.toHaveBeenCalled();
+  });
+
+  it("recusa item sem quantidade", async () => {
+    vi.stubGlobal("fetch", vi.fn());
+    const { criarPedido } = await import("../../lib/bling");
+    const r = await criarPedido({
+      contatoId: "1",
+      itens: [{ descricao: "Teclado", quantidade: 0, valor: 100 }],
+    });
+    expect(r.ok).toBe(false);
+    expect(r.erro).toContain("sem quantidade");
+  });
+
+  it("recusa contato sem nome", async () => {
+    vi.stubGlobal("fetch", vi.fn());
+    const { criarContato } = await import("../../lib/bling");
+    const r = await criarContato({ nome: "   " });
+    expect(r.ok).toBe(false);
+    expect(r.erro).toContain("nome");
+  });
+
+  it("pedido válido vai como POST para /pedidos/vendas", async () => {
+    const fetchFalso = vi.fn(async () => ({
+      ok: true, status: 201, text: async () => JSON.stringify({ data: { id: 99 } }),
+    }));
+    vi.stubGlobal("fetch", fetchFalso);
+    const { criarPedido } = await import("../../lib/bling");
+    const r = await criarPedido({
+      contatoId: "7",
+      itens: [{ descricao: "SSD 1TB", quantidade: 2, valor: 350 }],
+    });
+    expect(r.ok).toBe(true);
+    const [url, opcoes] = fetchFalso.mock.calls[0];
+    expect(String(url)).toContain("/pedidos/vendas");
+    expect(opcoes.method).toBe("POST");
+    expect(JSON.parse(opcoes.body).contato.id).toBe(7);
+  }, 15000);
+});

@@ -40,7 +40,22 @@ E tem o lado prático: o que fica guardado no desktop é um token de máquina qu
 dá para revogar trocando uma variável de ambiente. A credencial do ERP não sai
 do servidor.
 
-## Só leitura
+## As 12 ferramentas
 
-Emitir pedido é escrita no faturamento da loja. Não entra por um servidor de
-consulta rodando num desktop.
+Leitura (10): estado da conexão, vendas do dia, pedidos por período, compras de
+um cliente, contas a receber, buscar cliente por nome, cliente por telefone,
+produtos com preço e estoque, situações de pedido, nota fiscal de um pedido.
+
+Escrita (2): criar contato e emitir pedido de venda.
+
+## A trava das duas de escrita
+
+As duas exigem `confirmacao=true`, e sem isso o servidor devolve uma recusa
+pedindo para confirmar com o Thiago primeiro. O site exige a mesma coisa
+(`confirmar: true`) na sua ponta, em rota separada da consulta.
+
+Parece redundante e não é. Quem chama estas ferramentas é um modelo lendo uma
+conversa, e o passo entre "acho que ele quer um pedido" e "emiti um pedido"
+precisa ser explícito. A validação de item (quantidade > 0, valor > 0) também
+roda antes de sair daqui: item a R$ 0,00 entra no Bling como pedido válido e
+alguém só descobre no fechamento do mês.

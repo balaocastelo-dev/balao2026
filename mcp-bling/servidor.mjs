@@ -13,8 +13,12 @@
  * disso: o que fica guardado aqui é um token de máquina revogável, não a
  * credencial do ERP inteiro.
  *
- * Só leitura. Emitir pedido é escrita no faturamento da loja; isso não entra
- * por um servidor de consulta que roda num desktop.
+ * Doze ferramentas: dez de leitura e duas de escrita (criar contato e emitir
+ * pedido de venda). As duas de escrita exigem `confirmar: true`, que o
+ * servidor só manda quando a ferramenta é chamada com confirmacao=true — o
+ * passo entre "acho que ele quer um pedido" e "emiti um pedido" tem que ser
+ * explícito, porque quem está do outro lado é um modelo de linguagem
+ * interpretando uma conversa.
  *
  * Configuração (claude_desktop_config.json):
  *
@@ -41,6 +45,22 @@ function hoje() {
 
 function diasAtras(n) {
   return new Date(Date.now() - n * 86_400_000).toISOString().slice(0, 10);
+}
+
+async function escrever(corpo) {
+  if (!TOKEN) return { erro: "BETO_TOKEN não configurado neste servidor MCP." };
+  try {
+    const resposta = await fetch(`${BASE}/api/bling/acao`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${TOKEN}` },
+      body: JSON.stringify(corpo),
+      signal: AbortSignal.timeout(60_000),
+    });
+    if (resposta.status === 401) return { erro: "Token recusado pelo site." };
+    return await resposta.json();
+  } catch (erro) {
+    return { erro: `Não consegui falar com o site: ${erro.message}` };
+  }
 }
 
 async function consultar(parametros) {
@@ -115,6 +135,97 @@ const FERRAMENTAS = [
     },
   },
   {
+    name: "bling_compras_do_cliente",
+    description:
+      "Histórico de pedidos de um cliente. Use o id que vem de bling_buscar_cliente ou bling_cliente_por_telefone. Sem datas, olha os últimos 365 dias.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        contatoId: { type: "string" },
+        de: { type: "string", description: "AAAA-MM-DD" },
+        ate: { type: "string", description: "AAAA-MM-DD" },
+      },
+      required: ["contatoId"],
+    },
+  },
+  {
+    name: "bling_produtos",
+    description:
+      "Procura produtos no Bling por nome ou código, com preço e saldo em estoque.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        busca: { type: "string", description: "Nome ou parte do nome" },
+        codigo: { type: "string", description: "Código do produto" },
+      },
+    },
+  },
+  {
+    name: "bling_situacoes_de_pedido",
+    description:
+      "Lista os códigos de situação de pedido de venda (em aberto, atendido, cancelado...). Use antes de interpretar o campo situacao de um pedido — lá vem um id, não um nome.",
+    inputSchema: { type: "object", properties: {} },
+  },
+  {
+    name: "bling_nota_do_pedido",
+    description: "Nota fiscal emitida para um pedido de venda, quando existe.",
+    inputSchema: {
+      type: "object",
+      properties: { pedidoId: { type: "string" } },
+      required: ["pedidoId"],
+    },
+  },
+  {
+    name: "bling_criar_contato",
+    description:
+      "Cria um cliente no Bling. ESCRITA: confirme com o Thiago antes e chame com confirmacao=true.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        nome: { type: "string" },
+        telefone: { type: "string" },
+        email: { type: "string" },
+        documento: { type: "string", description: "CPF ou CNPJ" },
+        confirmacao: {
+          type: "boolean",
+          description: "true só depois de o Thiago confirmar em palavras.",
+        },
+      },
+      required: ["nome", "confirmacao"],
+    },
+  },
+  {
+    name: "bling_emitir_pedido",
+    description:
+      "Emite um pedido de venda no Bling. ESCRITA no faturamento da loja: confirme item, quantidade e valor com o Thiago e só então chame com confirmacao=true.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        contatoId: { type: "string", description: "id do cliente no Bling" },
+        itens: {
+          type: "array",
+          description: "Cada item precisa de descricao, quantidade > 0 e valor > 0.",
+          items: {
+            type: "object",
+            properties: {
+              produtoId: { type: "string" },
+              descricao: { type: "string" },
+              quantidade: { type: "number" },
+              valor: { type: "number" },
+            },
+            required: ["descricao", "quantidade", "valor"],
+          },
+        },
+        observacoes: { type: "string" },
+        confirmacao: {
+          type: "boolean",
+          description: "true só depois de o Thiago confirmar em palavras.",
+        },
+      },
+      required: ["contatoId", "itens", "confirmacao"],
+    },
+  },
+  {
     name: "bling_cliente_por_telefone",
     description:
       "Acha o cliente dono de um telefone. Compara só os dígitos finais, porque o cadastro varia entre com e sem DDD.",
@@ -163,6 +274,50 @@ servidor.setRequestHandler(CallToolRequestSchema, async (pedido) => {
       break;
     case "bling_cliente_por_telefone":
       resultado = await consultar({ recurso: "contato-telefone", telefone: args.telefone });
+      break;
+    case "bling_compras_do_cliente":
+      resultado = await consultar({
+        recurso: "pedidos-do-cliente",
+        contatoId: args.contatoId,
+        de: args.de || diasAtras(365),
+        ate: args.ate || hoje(),
+      });
+      break;
+    case "bling_produtos":
+      resultado = await consultar({
+        recurso: "produtos",
+        busca: args.busca,
+        codigo: args.codigo,
+      });
+      break;
+    case "bling_situacoes_de_pedido":
+      resultado = await consultar({ recurso: "situacoes" });
+      break;
+    case "bling_nota_do_pedido":
+      resultado = await consultar({ recurso: "nota", pedidoId: args.pedidoId });
+      break;
+    case "bling_criar_contato":
+      resultado = args.confirmacao
+        ? await escrever({
+            acao: "criar-contato",
+            confirmar: true,
+            nome: args.nome,
+            telefone: args.telefone,
+            email: args.email,
+            documento: args.documento,
+          })
+        : { erro: "Não criei nada. Confirme com o Thiago e chame de novo com confirmacao=true." };
+      break;
+    case "bling_emitir_pedido":
+      resultado = args.confirmacao
+        ? await escrever({
+            acao: "criar-pedido",
+            confirmar: true,
+            contatoId: args.contatoId,
+            itens: args.itens,
+            observacoes: args.observacoes,
+          })
+        : { erro: "Não emiti nada. Leia os itens e os valores para o Thiago, espere ele confirmar, e chame de novo com confirmacao=true." };
       break;
     default:
       resultado = { erro: `ferramenta desconhecida: ${name}` };

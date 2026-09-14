@@ -500,3 +500,139 @@ export async function estadoBling() {
     ultimoErro: guardado?.ultimo_erro || null,
   };
 }
+
+/* ---------------------------------------------------------------- *
+ * Produtos, situações e nota
+ * ---------------------------------------------------------------- */
+
+export interface ProdutoBling {
+  id: string;
+  codigo: string | null;
+  nome: string | null;
+  preco: number;
+  estoque: number | null;
+  situacao: string | null;
+}
+
+function lerProduto(p: Record<string, unknown>): ProdutoBling {
+  const estoque = (p.estoque || {}) as Record<string, unknown>;
+  const saldo = estoque.saldoVirtualTotal ?? estoque.saldoFisicoTotal ?? p.saldo;
+  return {
+    id: String(p.id ?? ""),
+    codigo: texto(p.codigo),
+    nome: texto(p.nome),
+    preco: numero(p.preco),
+    estoque: saldo === undefined || saldo === null ? null : numero(saldo),
+    situacao: texto(p.situacao),
+  };
+}
+
+export async function listarProdutos(opcoes: {
+  pesquisa?: string;
+  codigo?: string;
+  maxPaginas?: number;
+} = {}): Promise<{ produtos: ProdutoBling[]; erro: string | null }> {
+  const { linhas, erro } = await paginar<Record<string, unknown>>(
+    "/produtos",
+    { pesquisa: opcoes.pesquisa, codigo: opcoes.codigo },
+    opcoes.maxPaginas ?? 3
+  );
+  return { produtos: linhas.map(lerProduto), erro };
+}
+
+/**
+ * Situações de pedido de venda — os códigos que o Bling usa para "em aberto",
+ * "atendido", "cancelado".
+ *
+ * Existe porque sem isto ninguém consegue ler o campo `situacao` dos pedidos:
+ * o que vem lá é um id, e adivinhar o que cada id significa é o caminho curto
+ * para um relatório contando pedido cancelado como venda.
+ */
+export async function listarSituacoes(): Promise<{ situacoes: unknown[]; erro: string | null }> {
+  // Módulo 98310 é o de Pedidos de Venda na API v3.
+  const r = await chamarBling<unknown[]>("/situacoes/modulos/98310");
+  return { situacoes: Array.isArray(r.dados) ? r.dados : [], erro: r.erro };
+}
+
+/** Nota fiscal de um pedido, quando existe. */
+export async function notaDoPedido(pedidoId: string): Promise<RespostaBling> {
+  return chamarBling(`/nfe`, { query: { idPedidoVenda: pedidoId } });
+}
+
+/* ---------------------------------------------------------------- *
+ * Escrita
+ *
+ * Duas operações e mais nada. Escrita em ERP é dinheiro e é obrigação
+ * fiscal: cada função aqui precisa de uma razão concreta para existir, e
+ * "para ficar completo" não é razão.
+ * ---------------------------------------------------------------- */
+
+export interface NovoContato {
+  nome: string;
+  telefone?: string;
+  email?: string;
+  documento?: string;
+}
+
+export async function criarContato(dados: NovoContato): Promise<RespostaBling> {
+  if (!dados.nome?.trim()) {
+    return { ok: false, dados: null, erro: "nome é obrigatório", status: 0 };
+  }
+  return chamarBling("/contatos", {
+    metodo: "POST",
+    corpo: {
+      nome: dados.nome.trim(),
+      tipo: "F",
+      numeroDocumento: dados.documento || undefined,
+      telefone: dados.telefone || undefined,
+      email: dados.email || undefined,
+    },
+  });
+}
+
+export interface NovoPedido {
+  contatoId: string;
+  itens: { produtoId?: string; descricao: string; quantidade: number; valor: number }[];
+  observacoes?: string;
+}
+
+/**
+ * Emite um pedido de venda.
+ *
+ * Confere o básico ANTES de chamar o Bling: item sem quantidade ou com valor
+ * zero entra no ERP como pedido válido de R$ 0,00, e alguém só descobre no
+ * fechamento do mês. É mais barato recusar aqui.
+ */
+export async function criarPedido(dados: NovoPedido): Promise<RespostaBling> {
+  if (!dados.contatoId) {
+    return { ok: false, dados: null, erro: "contatoId é obrigatório", status: 0 };
+  }
+  if (!dados.itens?.length) {
+    return { ok: false, dados: null, erro: "pedido sem itens", status: 0 };
+  }
+  for (const item of dados.itens) {
+    if (!item.descricao?.trim()) {
+      return { ok: false, dados: null, erro: "item sem descrição", status: 0 };
+    }
+    if (!(item.quantidade > 0)) {
+      return { ok: false, dados: null, erro: `item "${item.descricao}" sem quantidade`, status: 0 };
+    }
+    if (!(item.valor > 0)) {
+      return { ok: false, dados: null, erro: `item "${item.descricao}" com valor zero`, status: 0 };
+    }
+  }
+
+  return chamarBling("/pedidos/vendas", {
+    metodo: "POST",
+    corpo: {
+      contato: { id: Number(dados.contatoId) },
+      itens: dados.itens.map((i) => ({
+        codigo: i.produtoId || undefined,
+        descricao: i.descricao,
+        quantidade: i.quantidade,
+        valor: i.valor,
+      })),
+      observacoes: dados.observacoes || undefined,
+    },
+  });
+}

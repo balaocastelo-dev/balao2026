@@ -4,6 +4,9 @@ import {
   listarContasAReceber,
   listarContatos,
   contatoPorTelefone,
+  listarProdutos,
+  listarSituacoes,
+  notaDoPedido,
   resumoDoDia,
   estadoBling,
 } from "@/lib/bling";
@@ -75,6 +78,34 @@ export async function GET(req: Request) {
       case "contato-telefone": {
         const contato = await contatoPorTelefone(p.get("telefone") || "");
         return NextResponse.json({ ok: true, contato });
+      }
+
+      case "pedidos-do-cliente": {
+        const { pedidos, erro } = await listarPedidos({ dataInicial: de, dataFinal: ate });
+        const alvo = p.get("contatoId") || "";
+        return NextResponse.json({
+          ok: !erro,
+          pedidos: pedidos.filter((ped) => ped.clienteId === alvo),
+          erro,
+        });
+      }
+
+      case "produtos": {
+        const { produtos, erro } = await listarProdutos({
+          pesquisa: p.get("busca") || undefined,
+          codigo: p.get("codigo") || undefined,
+        });
+        return NextResponse.json({ ok: !erro, produtos, erro });
+      }
+
+      case "situacoes": {
+        const { situacoes, erro } = await listarSituacoes();
+        return NextResponse.json({ ok: !erro, situacoes, erro });
+      }
+
+      case "nota": {
+        const r = await notaDoPedido(p.get("pedidoId") || "");
+        return NextResponse.json({ ok: r.ok, nota: r.dados, erro: r.erro });
       }
 
       case "resumo-dia":
