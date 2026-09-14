@@ -3526,13 +3526,24 @@ async function initializeWhatsAppClient(options = {}) {
 const WATCHDOG_INTERVAL_MS = 20000;
 const WATCHDOG_STUCK_INIT_MS = 45000;
 
-// Pareado e sincronizando: dez minutos. Conta grande demora, e o preço de
-// esperar demais é esperar; o de esperar de menos é perder o pareamento.
-const WATCHDOG_SINCRONIZANDO_MS = 10 * 60 * 1000;
+// Pareado e sincronizando: o relógio é o último recurso, não o primeiro.
+//
+// Prazo fixo aqui é chute: a sincronização de uma conta com 806 conversas
+// para de emitir evento em 99% e some por muitos minutos, e qualquer número
+// que eu escolha ou mata uma carga viva ou deixa passar uma travada. Então
+// antes de desistir o watchdog PERGUNTA ao navegador se ele está vivo
+// (`pingNavegador`). Vinte minutos é só o teto para o caso de o próprio
+// ping estar mentindo.
+const WATCHDOG_SINCRONIZANDO_MS = 20 * 60 * 1000;
 
 // Parado no QR com sessão salva no disco: cinco minutos. Se a sessão
 // prestasse, ela teria autenticado em segundos — não chegaria a mostrar QR.
 const WATCHDOG_SESSAO_MORTA_MS = 5 * 60 * 1000;
+
+// A partir daqui o silêncio merece uma pergunta ao navegador — não uma
+// conclusão. Dois minutos: tempo de sobra para a carga normal terminar
+// sozinha sem ninguém perguntar nada.
+const WATCHDOG_SILENCIO_SUSPEITO_MS = 2 * 60 * 1000;
 
 /** Se existe sessão gravada no disco. É o que separa "sessão morta" de
  *  "esperando alguém escanear". */
@@ -3547,6 +3558,30 @@ function temSessaoSalva() {
 /** Pareamento em andamento: o QR já foi lido, falta terminar de carregar. */
 function estaPareando() {
   return whatsappState.status === "loading" || whatsappState.status === "authenticated";
+}
+
+/**
+ * Pergunta ao navegador se ele ainda responde.
+ *
+ * É a diferença entre "quieto" e "morto", que nenhum cronômetro sabe fazer.
+ * Durante a sincronização o WhatsApp Web não emite evento nenhum, mas a
+ * página continua viva e responde na hora. Uma página que não responde em
+ * 5 segundos travou de verdade.
+ *
+ * Qualquer erro conta como morto: se nem dá para perguntar, não está vivo.
+ */
+async function pingNavegador() {
+  const pagina = whatsappClient?.pupPage;
+  if (!pagina || pagina.isClosed?.()) return false;
+  try {
+    const resposta = await Promise.race([
+      pagina.evaluate(() => 1),
+      new Promise((_, rejeita) => setTimeout(() => rejeita(new Error("timeout")), 5000)),
+    ]);
+    return resposta === 1;
+  } catch {
+    return false;
+  }
 }
 
 setInterval(() => {
@@ -3576,6 +3611,27 @@ setInterval(() => {
         "reiniciando SEM apagar a sessão (o pareamento foi aceito pelo celular)."
       );
       initializeWhatsAppClient({ resetSession: false, force: true });
+      return;
+    }
+
+    // Passou do prazo curto e ainda está quieto: pergunta ao navegador em vez
+    // de supor. Vivo reabre o crédito; morto reinicia agora, sem esperar o
+    // teto de 20 minutos.
+    if (parado > WATCHDOG_SILENCIO_SUSPEITO_MS) {
+      pingNavegador().then((vivo) => {
+        if (vivo) {
+          lastProgressAt = Date.now();
+          console.log(
+            `[whatsapp][watchdog] Sem evento há ${Math.round(parado / 1000)}s, mas o navegador ` +
+            "responde — sincronização em andamento, seguindo em frente."
+          );
+        } else {
+          console.warn(
+            "[whatsapp][watchdog] Navegador não responde — reiniciando SEM apagar a sessão."
+          );
+          initializeWhatsAppClient({ resetSession: false, force: true });
+        }
+      });
     }
     return;
   }
