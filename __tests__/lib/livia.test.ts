@@ -99,6 +99,28 @@ describe("LIV.IA — classificação por regra", () => {
     })).toBe("rejeicao");
   });
 
+  it("frase de descadastro no RODAPÉ não conta; no começo, conta", () => {
+    // Com o remetente e o tamanho ja filtrados, um disparo curto de marketing
+    // ainda entrava como descadastro so por ter a palavra no fim. Quem quer
+    // sair diz isso na primeira linha.
+    const rodape = {
+      ...base,
+      remetente: "info@marketing.com",
+      assunto: "Oferta da semana",
+      corpo: "Aproveite nossa promoção! " + "texto ".repeat(60) +
+             "Para descadastrar, clique aqui.",
+    };
+    expect(classificarPorRegra(rodape)).not.toBe("descadastro");
+
+    const logoNoComeco = {
+      ...base,
+      remetente: "cliente@exemplo.com",
+      assunto: "",
+      corpo: "Não quero receber mais mensagens de vocês, obrigado.",
+    };
+    expect(classificarPorRegra(logoNoComeco)).toBe("descadastro");
+  });
+
   it("devolve null quando não dá para saber por regra", () => {
     expect(classificarPorRegra({ ...base, assunto: "Oi", corpo: "tudo bem?" })).toBeNull();
   });

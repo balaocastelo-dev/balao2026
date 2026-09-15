@@ -150,6 +150,23 @@ export function pareceEscritoPorGente(email: EmailRecebido): boolean {
 }
 
 /**
+ * Alguém está pedindo para sair, ou é só o rodapé de uma newsletter?
+ *
+ * A diferença está em ONDE a frase aparece. Quem quer sair diz isso no
+ * assunto ou nas primeiras linhas; newsletter põe "descadastrar" no pé da
+ * página, depois de todo o anúncio. Medido na caixa real: mesmo com o
+ * remetente e o tamanho já filtrados, um disparo curto de marketing ainda
+ * entrava como descadastro só por ter a palavra no fim.
+ */
+const COMECO_DA_MENSAGEM = 300;
+
+export function pedeParaSair(email: EmailRecebido): boolean {
+  if (contem(email.assunto || "", PEDIDOS_DE_SAIDA)) return true;
+  const comeco = String(email.corpo || "").slice(0, COMECO_DA_MENSAGEM);
+  return contem(comeco, PEDIDOS_DE_SAIDA);
+}
+
+/**
  * A classificação que sai só de regra. `null` quer dizer "não sei por
  * regra" — aí, e só aí, vale perguntar ao modelo.
  *
@@ -179,7 +196,7 @@ export function classificarPorRegra(email: EmailRecebido): Classificacao | null 
   // Mala direta e robô nunca pedem para sair nem pedem orçamento.
   if (!deGente) return "informativo";
 
-  if (contem(cabeca, PEDIDOS_DE_SAIDA)) return "descadastro";
+  if (pedeParaSair(email)) return "descadastro";
   if (contem(cabeca, SINAIS_DE_FORNECEDOR)) return "fornecedor";
   if (contem(cabeca, SINAIS_DE_ORCAMENTO)) return "orcamento";
   return null;
