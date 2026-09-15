@@ -31,7 +31,7 @@ const IDADE_CONTATO_MS = 10 * 24 * 60 * 60 * 1000;
 const MENSAGEM_COBRANCA_PADRAO = [
   "Oi {nome}! Tudo bem?",
   "",
-  "Aqui é a *CLAUD.IA, da Balão da Informática Castelo* 🙂",
+  "Aqui é a *CLAUD.IA*, assistente digital da *Balão da Informática Castelo* 🙂",
   "Passando só pra lembrar: seu pedido ({valor}) está com o pagamento pendente.",
   "Se tiver qualquer dúvida ou dificuldade, me conta aqui que a gente resolve com você. 🙏",
   "",
@@ -41,7 +41,7 @@ const MENSAGEM_COBRANCA_PADRAO = [
 const MENSAGEM_REATIVACAO_PADRAO = [
   "Oi {nome}! 👋",
   "",
-  "Aqui é a *CLAUD.IA, da Balão da Informática Castelo*.",
+  "Aqui é a *CLAUD.IA*, assistente digital da *Balão da Informática Castelo*.",
   "Faz um tempinho que a gente não se fala — passa aqui no Cambuí ou me chama se precisar de algo pra sua máquina!",
   "Esta semana temos ofertas novas em *PC gamer, notebooks e upgrades*. 💻",
   "",
