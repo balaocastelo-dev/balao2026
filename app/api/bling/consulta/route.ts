@@ -3,6 +3,8 @@ import {
   chamarBling,
   listarPedidos,
   listarContasAReceber,
+  listarVendedores,
+  contasVencidas,
   listarContatos,
   contatoPorTelefone,
   listarProdutos,
@@ -62,13 +64,35 @@ export async function GET(req: Request) {
         return NextResponse.json({ ok: true, ...(await estadoBling()) });
 
       case "pedidos": {
-        const { pedidos, erro } = await listarPedidos({ dataInicial: de, dataFinal: ate });
+        const { pedidos, erro } = await listarPedidos({
+          dataInicial: de,
+          dataFinal: ate,
+          situacoes: listaDeNumeros(p.get("situacoes")),
+          vendedorId: p.get("vendedor") || undefined,
+        });
         return NextResponse.json({ ok: !erro, pedidos, erro });
       }
 
       case "contas": {
-        const { contas, erro } = await listarContasAReceber({ dataInicial: de, dataFinal: ate });
+        const { contas, erro } = await listarContasAReceber({
+          dataInicial: de,
+          dataFinal: ate,
+          situacoes: listaDeNumeros(p.get("situacoes")),
+        });
         return NextResponse.json({ ok: !erro, contas, erro });
+      }
+
+      case "vencidas": {
+        const { contas, total, desde, ate: corte, erro } = await contasVencidas({
+          ate: p.get("ate") || undefined,
+          anos: Number(p.get("anos")) || undefined,
+        });
+        return NextResponse.json({ ok: !erro, contas, total, desde, ate: corte, erro });
+      }
+
+      case "vendedores": {
+        const { vendedores, erro } = await listarVendedores();
+        return NextResponse.json({ ok: !erro, vendedores, erro });
       }
 
       case "contatos": {
@@ -135,4 +159,15 @@ export async function GET(req: Request) {
   } catch (erro) {
     return NextResponse.json({ ok: false, erro: (erro as Error).message }, { status: 502 });
   }
+}
+
+/** "6,9" -> [6, 9]. Ignora o que não for número: filtro torto vira sem filtro,
+ *  nunca vira filtro errado. */
+function listaDeNumeros(valor: string | null): number[] | undefined {
+  if (!valor) return undefined;
+  const lista = valor
+    .split(",")
+    .map((n) => Number(n.trim()))
+    .filter((n) => Number.isFinite(n));
+  return lista.length ? lista : undefined;
 }

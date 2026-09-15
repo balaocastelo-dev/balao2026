@@ -1,5 +1,5 @@
 import { supabaseAdmin } from "./supabase";
-import { chamarBling, estadoBling, listarContasAReceber } from "./bling";
+import { chamarBling, estadoBling, listarContasAReceber, SITUACAO_CONTA } from "./bling";
 
 // ============================================================
 // Carla — cobradora & reativação da Balão.
@@ -129,10 +129,14 @@ export async function pegarCobrancasDoBling(limite = 5): Promise<PedidoPendente[
   const hoje = new Date().toISOString().slice(0, 10);
   const noventaDias = new Date(Date.now() - 90 * 86_400_000).toISOString().slice(0, 10);
 
+  // `situacoes: [emAberto]` é o que impede a CLAUD.IA de cobrar quem já pagou.
+  // Antes daqui o filtro não existia e o "saldo" era o próprio valor da conta,
+  // então conta recebida entrava na fila igual a conta vencida.
   const { contas, erro } = await listarContasAReceber({
     dataInicial: noventaDias,
     dataFinal: hoje,
-    maxPaginas: 2,
+    situacoes: [SITUACAO_CONTA.emAberto],
+    maxPaginas: 5,
   });
   if (erro || !contas.length) return [];
 
@@ -142,8 +146,11 @@ export async function pegarCobrancasDoBling(limite = 5): Promise<PedidoPendente[
     .eq("tipo", "cobranca");
   const jaCobrados = new Set((cobrados || []).map((c) => c.whatsapp));
 
+  // `saldo` só existe no detalhe da conta; na listagem vem nulo. O valor
+  // cobrado é o da conta em aberto — e conta em aberto no Bling é conta com
+  // saldo cheio (conferido: situação 1 => saldo = valor, situação 2 => 0).
   const emAberto = contas
-    .filter((c) => c.saldo > 0 && c.clienteId)
+    .filter((c) => c.emAberto && c.valor > 0 && c.clienteId)
     .sort((a, b) => (a.vencimento || "").localeCompare(b.vencimento || ""));
 
   const fila: PedidoPendente[] = [];
@@ -155,7 +162,7 @@ export async function pegarCobrancasDoBling(limite = 5): Promise<PedidoPendente[
       id: `bling:${conta.id}`,
       whatsapp,
       nome: conta.clienteNome,
-      total: conta.saldo,
+      total: conta.valor,
       criado_em: conta.vencimento,
     });
   }

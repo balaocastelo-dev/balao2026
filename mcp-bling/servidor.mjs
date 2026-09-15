@@ -104,24 +104,52 @@ const FERRAMENTAS = [
   {
     name: "bling_pedidos",
     description:
-      "Lista pedidos de venda num intervalo de datas, com cliente, valor e situação. Sem datas, usa os últimos 7 dias.",
+      "Lista pedidos de venda num intervalo de datas, com cliente, valor e situação. Sem datas, usa os últimos 7 dias. O intervalo não pode passar de 366 dias.",
     inputSchema: {
       type: "object",
       properties: {
         de: { type: "string", description: "AAAA-MM-DD" },
         ate: { type: "string", description: "AAAA-MM-DD" },
+        situacoes: {
+          type: "string",
+          description:
+            "Códigos separados por vírgula: 6 em aberto, 9 atendido, 12 cancelado, 15 em andamento, 21 em digitação, 24 verificado. Ex.: \"6,9\".",
+        },
+        vendedor: { type: "string", description: "id do vendedor (veja bling_vendedores)" },
       },
     },
   },
   {
+    name: "bling_vendedores",
+    description:
+      "Lista os vendedores cadastrados no Bling, com id e nome. Use para descobrir o id antes de filtrar pedidos por vendedor — o vendedor NÃO aparece na listagem de pedidos.",
+    inputSchema: { type: "object", properties: {} },
+  },
+  {
     name: "bling_contas_a_receber",
     description:
-      "Contas a receber num intervalo de vencimento — quem está devendo e quanto. Sem datas, usa os últimos 90 dias até hoje (ou seja, o que já venceu).",
+      "Contas a receber num intervalo de vencimento — quem está devendo e quanto. Sem datas, usa os últimos 90 dias até hoje. Por padrão só traz as EM ABERTO. O intervalo não pode passar de 366 dias.",
     inputSchema: {
       type: "object",
       properties: {
         de: { type: "string", description: "AAAA-MM-DD (vencimento inicial)" },
         ate: { type: "string", description: "AAAA-MM-DD (vencimento final)" },
+        situacoes: {
+          type: "string",
+          description: "Códigos separados por vírgula: 1 em aberto, 2 recebida. Padrão: 1.",
+        },
+      },
+    },
+  },
+  {
+    name: "bling_carteira_vencida",
+    description:
+      "A carteira de cobrança inteira: tudo que venceu e continua em aberto até a data de corte, com o total. Varre anos para trás em fatias, porque a API só aceita 366 dias por consulta.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        ate: { type: "string", description: "AAAA-MM-DD. Padrão: hoje." },
+        anos: { type: "number", description: "Quantos anos para trás varrer. Padrão: 3." },
       },
     },
   },
@@ -260,13 +288,28 @@ servidor.setRequestHandler(CallToolRequestSchema, async (pedido) => {
         recurso: "pedidos",
         de: args.de || diasAtras(7),
         ate: args.ate || hoje(),
+        situacoes: args.situacoes,
+        vendedor: args.vendedor,
       });
+      break;
+    case "bling_vendedores":
+      resultado = await consultar({ recurso: "vendedores" });
       break;
     case "bling_contas_a_receber":
       resultado = await consultar({
         recurso: "contas",
         de: args.de || diasAtras(90),
         ate: args.ate || hoje(),
+        // Sem isto a lista mistura conta já recebida com conta vencida, e a
+        // cobrança sai atrás de quem já pagou.
+        situacoes: args.situacoes || "1",
+      });
+      break;
+    case "bling_carteira_vencida":
+      resultado = await consultar({
+        recurso: "vencidas",
+        ate: args.ate || hoje(),
+        anos: args.anos,
       });
       break;
     case "bling_buscar_cliente":

@@ -328,10 +328,17 @@ export async function relatorioDoFechamento(data?: string): Promise<string> {
     "",
   ];
 
+  if (resumo.cancelados || resumo.emAberto) {
+    const partes: string[] = [];
+    if (resumo.emAberto) partes.push(`${resumo.emAberto} ainda em aberto`);
+    if (resumo.cancelados) partes.push(`${resumo.cancelados} cancelado(s), fora da conta`);
+    linhas.push(`📋 ${partes.join(" · ")}`, "");
+  }
+
   if (resumo.porVendedor.length) {
     linhas.push("*Por vendedor*");
     for (const v of resumo.porVendedor) {
-      linhas.push(`• ${v.vendedorId || "sem vendedor"}: ${v.pedidos} pedido(s) · ${reais(v.total)}`);
+      linhas.push(`• ${v.nome}: ${v.pedidos} pedido(s) · ${reais(v.total)}`);
     }
     linhas.push("");
   }
