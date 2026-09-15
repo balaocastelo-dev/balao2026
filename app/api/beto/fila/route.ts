@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
  *
  * O caminho continua /api/beto: o nome da rota é contrato com a VPS, que roda
  * em deploy separado. Renomear aqui derrubaria a prospecção até a VPS subir de
- * novo. A tabela chave -> nome mora em whatsapp-server/agentes.json.
+ * novo. A tabela chave -> nome mora em lib/agentes.json.
  *
  * Protegida por BETO_TOKEN no header Authorization: Bearer. Sem o token
  * configurado a porta fica FECHADA: a base tem telefone de cliente, e deixar

@@ -1,5 +1,5 @@
 {
-  "_leia_me": "Os funcionários digitais do Balão. Fonte única do nome: quem mostra nome na tela ou assina mensagem lê daqui, ninguém escreve o nome à mão. A CHAVE nunca muda — ela é o autorId no banco, o nome do arquivo do worker, a rota HTTP que o worker chama e a variável de ambiente. Renomear a chave quebraria o histórico de quem falou com quem e derrubaria a VPS até o próximo deploy. O que muda é o campo 'nome'. Mora aqui dentro de whatsapp-server porque é este o contexto do build do Docker na VPS; o site importa por lib/agentes.ts.",
+  "_leia_me": "Os funcionários digitais do Balão. Fonte única do nome: quem mostra nome na tela ou assina mensagem lê daqui, ninguém escreve o nome à mão. A CHAVE nunca muda — ela é o autorId no banco, o nome do arquivo do worker, a rota HTTP que o worker chama e a variável de ambiente. Renomear a chave quebraria o histórico de quem falou com quem e derrubaria a VPS até o próximo deploy. O que muda é o campo 'nome'. O site lê por lib/agentes.ts; o worker da VPS mostra nome a partir de whatsapp-server/vendedores-fixos.json.",
   "agentes": [
     {
       "chave": "julia-ia",

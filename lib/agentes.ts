@@ -1,9 +1,12 @@
 /**
- * Os funcionários digitais, do lado do site.
+ * Os funcionários digitais.
  *
- * A tabela mora em `whatsapp-server/agentes.json` porque o contexto do build
- * do Docker na VPS é aquela pasta — o worker precisa do arquivo lá dentro. O
- * site lê o MESMO arquivo, para não existirem duas listas divergindo.
+ * A tabela ficou primeiro em `whatsapp-server/`, pensando no build do Docker
+ * da VPS — e a Vercel recusou a build, porque o `.vercelignore` tira aquela
+ * pasta inteira do site. Mora aqui porque quem lê isto HOJE é só o site: o
+ * nome que o worker mostra vem de `whatsapp-server/vendedores-fixos.json`,
+ * que ele já carregava. Se um dia o worker precisar desta tabela, ela é
+ * copiada para o contexto do Docker no deploy — não duplicada no repositório.
  *
  * Regra que vale para sempre: a CHAVE não muda. Ela é o `autorId` gravado no
  * banco desde setembro, o nome do arquivo do worker, a rota HTTP que o worker
@@ -11,7 +14,7 @@
  * autoria do histórico e deixaria a VPS falando com rota que não existe até o
  * próximo deploy dela. O que se troca é o `nome`.
  */
-import bruto from "../whatsapp-server/agentes.json";
+import bruto from "./agentes.json";
 
 export type LinhaAgente = "loja" | "fora" | "email" | "voz";
 export type EstadoAgente = "ativo" | "em-construcao";
