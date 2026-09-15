@@ -40,6 +40,15 @@ export interface EmailRecebido {
   assunto: string;
   corpo: string;
   recebidoEm?: string | null;
+  /**
+   * A mensagem traz cabeçalho de mala direta (`List-Unsubscribe`,
+   * `Precedence: bulk`)?
+   *
+   * É o único sinal confiável de "isto foi disparado para uma lista, não
+   * escrito para nós". Sem ele, toda newsletter vira pedido de descadastro,
+   * porque toda newsletter tem "não quer mais receber" no rodapé.
+   */
+  mala?: boolean;
 }
 
 export interface Decisao {
@@ -125,17 +134,52 @@ export function acharTelefone(texto: string): string | null {
 }
 
 /**
+ * Uma mensagem escrita por uma pessoa, e não disparada para uma lista.
+ *
+ * Mala direta é reconhecida pelo cabeçalho (`List-Unsubscribe`), que é o
+ * sinal que o próprio protocolo dá. Quando o cabeçalho não vem, sobra o
+ * tamanho: newsletter é longa, cliente pedindo para sair escreve três linhas.
+ */
+const TAMANHO_DE_GENTE = 900;
+
+export function pareceEscritoPorGente(email: EmailRecebido): boolean {
+  if (email.mala) return false;
+  const de = normalizar(email.remetente);
+  if (REMETENTES_DE_SISTEMA.some((m) => de.includes(m))) return false;
+  return String(email.corpo || "").length <= TAMANHO_DE_GENTE;
+}
+
+/**
  * A classificação que sai só de regra. `null` quer dizer "não sei por
  * regra" — aí, e só aí, vale perguntar ao modelo.
+ *
+ * A ORDEM IMPORTA, e foi corrigida com a caixa real na mão: na primeira
+ * leitura de verdade, seis newsletters (Hostinger, Asaas, V4, TikTok,
+ * Netshoes) entraram como "descadastro" e foram parar na lista de supressão,
+ * só porque têm "não quer mais receber" no rodapé — como toda newsletter
+ * tem. Suprimir um fornecedor da loja por causa do rodapé dele é o oposto
+ * do que a lista serve.
+ *
+ * Então: mala direta é decidida ANTES de qualquer outra coisa, e pedido de
+ * saída e pedido de orçamento só valem quando alguém escreveu de próprio
+ * punho.
  */
 export function classificarPorRegra(email: EmailRecebido): Classificacao | null {
   const de = normalizar(email.remetente);
   const cabeca = `${email.assunto} ${email.corpo}`;
 
-  if (contem(cabeca, PEDIDOS_DE_SAIDA)) return "descadastro";
-  if (REMETENTES_DE_SISTEMA.some((m) => de.includes(m)) || contem(cabeca, MARCAS_DE_REJEICAO)) {
-    return contem(cabeca, MARCAS_DE_REJEICAO) ? "rejeicao" : "informativo";
+  // Devolução de e-mail vem de mailer-daemon e precisa ser vista mesmo sendo
+  // automática: é ela que mede a taxa de rejeição da prospecção.
+  if (contem(cabeca, MARCAS_DE_REJEICAO) || de.includes("mailer-daemon") || de.includes("postmaster")) {
+    return "rejeicao";
   }
+
+  const deGente = pareceEscritoPorGente(email);
+
+  // Mala direta e robô nunca pedem para sair nem pedem orçamento.
+  if (!deGente) return "informativo";
+
+  if (contem(cabeca, PEDIDOS_DE_SAIDA)) return "descadastro";
   if (contem(cabeca, SINAIS_DE_FORNECEDOR)) return "fornecedor";
   if (contem(cabeca, SINAIS_DE_ORCAMENTO)) return "orcamento";
   return null;

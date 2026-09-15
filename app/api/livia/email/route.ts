@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, erro: "não autorizado" }, { status: 401 });
   }
 
-  let corpo: Partial<EmailRecebido> & { modo?: string };
+  let corpo: Partial<EmailRecebido> & { modo?: string; mala?: boolean };
   try {
     corpo = await req.json();
   } catch {
@@ -50,6 +50,7 @@ export async function POST(req: Request) {
     assunto: String(corpo.assunto || ""),
     corpo: String(corpo.corpo || "").slice(0, 20_000),
     recebidoEm: corpo.recebidoEm ? String(corpo.recebidoEm) : null,
+    mala: Boolean(corpo.mala),
   };
 
   const decisao = await decidir(email, {

@@ -131,6 +131,15 @@ async function rodar() {
         }
 
         const de = (bruto.from && bruto.from.value && bruto.from.value[0]) || {};
+        // `List-Unsubscribe` é o sinal que o próprio protocolo dá para "isto
+        // saiu de uma lista". Sem ele, toda newsletter parece um cliente
+        // pedindo para sair, porque toda newsletter tem essa frase no rodapé.
+        const cabecalhos = bruto.headers || new Map();
+        const mala = Boolean(
+          cabecalhos.get("list-unsubscribe") ||
+          cabecalhos.get("list-id") ||
+          String(cabecalhos.get("precedence") || "").toLowerCase() === "bulk"
+        );
         const email = {
           messageId: bruto.messageId || `sem-id-${uid}@balao`,
           remetente: String(de.address || "").toLowerCase(),
@@ -138,6 +147,7 @@ async function rodar() {
           assunto: bruto.subject || "",
           corpo: (bruto.text || bruto.html || "").slice(0, 20_000),
           recebidoEm: bruto.date ? bruto.date.toISOString() : null,
+          mala,
         };
         if (!email.remetente) continue;
 

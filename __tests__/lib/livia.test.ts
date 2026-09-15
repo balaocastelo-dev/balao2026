@@ -51,6 +51,54 @@ describe("LIV.IA — classificação por regra", () => {
     })).toBe("fornecedor");
   });
 
+  it("newsletter com rodapé de descadastro NÃO é pedido de descadastro", () => {
+    // Aconteceu de verdade na primeira leitura da caixa: Hostinger, Asaas,
+    // V4, TikTok e Netshoes entraram como "descadastro" e foram para a lista
+    // de supressão só por causa do rodapé. Suprimir fornecedor da loja é o
+    // oposto do que a lista serve.
+    const nl = {
+      ...base,
+      remetente: "team@emails.hostinger.com",
+      assunto: "Registre seu domínio grátis",
+      corpo: "Promoção da semana. " + "conteúdo ".repeat(200) +
+             "Se não quer receber mais, clique aqui para descadastrar.",
+      mala: true,
+    };
+    expect(classificarPorRegra(nl)).toBe("informativo");
+  });
+
+  it("cliente escrevendo duas linhas pedindo para sair ainda é descadastro", () => {
+    const pessoa = {
+      ...base,
+      remetente: "cliente@exemplo.com",
+      assunto: "",
+      corpo: "Por favor me remova da lista, não quero receber mais.",
+    };
+    expect(classificarPorRegra(pessoa)).toBe("descadastro");
+  });
+
+  it("confirmação de pedido de marketplace não é pedido de orçamento", () => {
+    // Um "Pedido 8214918533896062: pedido confirmado" da AliExpress virou
+    // orçamento e gerou rascunho de resposta para um robô.
+    const robo = {
+      ...base,
+      remetente: "transaction@notice.aliexpress.com",
+      assunto: "Pedido 8214918533896062: pedido confirmado",
+      corpo: "Valor total do pedido: R$ 120,00. " + "detalhes ".repeat(200),
+      mala: true,
+    };
+    expect(classificarPorRegra(robo)).toBe("informativo");
+  });
+
+  it("devolução de e-mail continua sendo lida, mesmo sendo automática", () => {
+    // É ela que mede a taxa de rejeição da prospecção.
+    expect(classificarPorRegra({
+      ...base, remetente: "mailer-daemon@googlemail.com",
+      assunto: "Delivery Status Notification (Failure)",
+      corpo: "address not found", mala: true,
+    })).toBe("rejeicao");
+  });
+
   it("devolve null quando não dá para saber por regra", () => {
     expect(classificarPorRegra({ ...base, assunto: "Oi", corpo: "tudo bem?" })).toBeNull();
   });
