@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import CrmJuliaPanel from "./CrmJuliaPanel";
 import CrmCarlaPanel from "./CrmCarlaPanel";
+import CrmLiviaPanel from "./CrmLiviaPanel";
 
 // ============================================================
 // Aba "Funcionários digitais" do /crm.
@@ -31,6 +32,7 @@ export default function CrmFuncionariosDigitais({ onAbrirBeto }: Props) {
       <CrmCarlaPanel />
       <CartaoBeto onAbrir={onAbrirBeto} />
       <CartaoRafa />
+      <CrmLiviaPanel />
     </div>
   );
 }
