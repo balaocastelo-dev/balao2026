@@ -368,6 +368,34 @@ export async function nomesDeVendedores(): Promise<Map<string, string>> {
   return new Map(vendedores.map((v) => [v.id, v.nome || v.id]));
 }
 
+/**
+ * O nome do cadastro da JUL.IA no Bling.
+ *
+ * Tem o "(digital)" porque existe uma JULIA SOUZA de carne e osso vendendo na
+ * loja: dois "JULIA" na mesma lista viram briga no relatório de comissão.
+ */
+export const NOME_VENDEDORA_JULIA = "JUL.IA (digital)";
+
+/**
+ * Um vendedor pelo nome, ignorando caixa e acento.
+ *
+ * Procurar por nome em vez de guardar o id numa variável de ambiente é
+ * de propósito: o cadastro de vendedor do Bling só existe pela tela dele
+ * (a API v3 é somente leitura em /vendedores, conferido em 15/09/2026 —
+ * POST e PUT devolvem 404). Assim, no minuto em que o cadastro for criado,
+ * os pedidos passam a sair no nome dela sem precisar mexer em configuração.
+ */
+export async function vendedorPorNome(nome: string): Promise<VendedorBling | null> {
+  const alvo = normalizar(nome);
+  if (!alvo) return null;
+  const { vendedores } = await listarVendedores();
+  return vendedores.find((v) => normalizar(v.nome || "") === alvo) || null;
+}
+
+function normalizar(v: string): string {
+  return v.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
+}
+
 /** Dias entre duas datas AAAA-MM-DD. */
 function diasEntre(inicio: string, fim: string): number {
   const a = Date.parse(`${inicio}T00:00:00Z`);
@@ -913,6 +941,9 @@ export interface NovoPedido {
   contatoId: string;
   itens: { produtoId?: string; descricao: string; quantidade: number; valor: number }[];
   observacoes?: string;
+  /** Nome do vendedor a marcar no pedido. Padrão: a JUL.IA. Passe `null`
+   *  para emitir sem vendedor. */
+  vendedor?: string | null;
 }
 
 /**
@@ -941,10 +972,17 @@ export async function criarPedido(dados: NovoPedido): Promise<RespostaBling> {
     }
   }
 
+  // Marcar o vendedor é o que faz a venda da JUL.IA aparecer separada no
+  // Bling. Se o cadastro ainda não existe, o pedido sai mesmo assim, sem
+  // vendedor: perder a atribuição é chato, perder a venda é caro.
+  const nomeVendedor = dados.vendedor === undefined ? NOME_VENDEDORA_JULIA : dados.vendedor;
+  const vendedor = nomeVendedor ? await vendedorPorNome(nomeVendedor) : null;
+
   return chamarBling("/pedidos/vendas", {
     metodo: "POST",
     corpo: {
       contato: { id: Number(dados.contatoId) },
+      ...(vendedor ? { vendedor: { id: Number(vendedor.id) } } : {}),
       itens: dados.itens.map((i) => ({
         codigo: i.produtoId || undefined,
         descricao: i.descricao,

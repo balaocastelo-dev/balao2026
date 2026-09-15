@@ -227,6 +227,7 @@ const juliaIA = require("./ia-worker");
 const betoWorker = require("./beto-worker");
 const carlaWorker = require("./carla-worker");
 const rafaWorker = require("./rafa-worker");
+const liviaWorker = require("./livia-worker");
 
 // "loja" (padrão) roda a JUL.IA; "beto" roda o prospector no número próprio.
 const PERFIL = process.env.PERFIL || "loja";
@@ -4036,6 +4037,28 @@ app.post(["/api/crm/rafa/enviar", "/api/rafa/enviar"], express.json(), async (re
   res.json(await rafaWorker.enviarAgora(tipo));
 });
 
+// ---- LIV.IA (caixa de entrada da loja) ----
+//
+// Não é um worker de WhatsApp: ela não usa o cliente nem as deps de trabalho,
+// só IMAP e HTTP. Por isso liga fora do bloco de perfil, e SÓ na instância da
+// loja — duas instâncias lendo a mesma caixa responderiam o cliente duas vezes.
+app.get(["/api/crm/livia/estado", "/api/livia/estado"], (_req, res) => {
+  res.json({ ok: true, ...liviaWorker.resumo() });
+});
+
+app.post(["/api/crm/livia/config", "/api/livia/config"], express.json(), (req, res) => {
+  const ativo = typeof req.body?.ativo === "boolean" ? req.body.ativo : undefined;
+  if (ativo === true) return res.json({ ok: true, ...liviaWorker.ligar() });
+  if (ativo === false) return res.json({ ok: true, ...liviaWorker.desligar() });
+  res.json({ ok: true, ...liviaWorker.resumo() });
+});
+
+// Roda uma passada na caixa agora, sem esperar o intervalo. Serve para
+// conferir a configuração sem ficar olhando o relógio.
+app.post(["/api/crm/livia/rodar", "/api/livia/rodar"], express.json(), async (_req, res) => {
+  res.json(await liviaWorker.rodar());
+});
+
 // Login dos vendedores criados pelo dashboard.
 //
 // O site manda o TOKEN (sha256 de slug+senha), nunca a senha; aqui só se
@@ -5471,6 +5494,7 @@ server.listen(port, () => {
     // dispara daqui — o dele é número próprio.
     juliaIA.iniciar(depsDeTrabalho);
     carlaWorker.iniciar(depsDeTrabalho);
+    liviaWorker.iniciar();
   }
 });
 

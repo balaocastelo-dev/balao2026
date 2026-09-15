@@ -421,3 +421,60 @@ describe("Bling — hosts", () => {
     expect(m.URL_TOKEN).toContain("www.bling.com.br");
   });
 });
+
+describe("Bling — vendedora JUL.IA", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    upserts.length = 0;
+    process.env.BLING_CLIENT_ID = "id-de-teste";
+    process.env.BLING_CLIENT_SECRET = "segredo-de-teste";
+    linhaToken = {
+      access_token: "vigente", refresh_token: "r1",
+      expira_em: DAQUI_A_UMA_HORA, conectado_em: null, ultimo_erro: null,
+    };
+  });
+  afterEach(() => { vi.unstubAllGlobals(); });
+
+  function responderCom(vendedores: unknown[]) {
+    const chamadas: { url: string; corpo: unknown }[] = [];
+    vi.stubGlobal("fetch", vi.fn(async (url: string, opcoes: { body?: string } = {}) => {
+      chamadas.push({ url, corpo: opcoes.body ? JSON.parse(opcoes.body) : null });
+      const dados = url.includes("/vendedores") ? vendedores : { id: 1 };
+      return { ok: true, status: 200, text: async () => JSON.stringify({ data: dados }) };
+    }));
+    return chamadas;
+  }
+
+  const ITEM = [{ descricao: "Mouse", quantidade: 1, valor: 50 }];
+
+  it("marca a JUL.IA no pedido quando o cadastro existe", async () => {
+    const chamadas = responderCom([
+      { id: 99, contato: { id: 1, nome: "JUL.IA (digital)", situacao: "A" } },
+    ]);
+    const { criarPedido } = await import("../../lib/bling");
+    await criarPedido({ contatoId: "7", itens: ITEM });
+
+    const pedido = chamadas.find((c) => c.url.includes("/pedidos/vendas"));
+    expect((pedido?.corpo as Record<string, unknown>)?.vendedor).toEqual({ id: 99 });
+  }, 15000);
+
+  it("emite mesmo assim quando a JUL.IA ainda não está cadastrada", async () => {
+    // Perder a atribuição é chato; perder a venda é caro.
+    const chamadas = responderCom([
+      { id: 12, contato: { id: 2, nome: "JULIA SOUZA", situacao: "A" } },
+    ]);
+    const { criarPedido } = await import("../../lib/bling");
+    const r = await criarPedido({ contatoId: "7", itens: ITEM });
+
+    expect(r.ok).toBe(true);
+    const pedido = chamadas.find((c) => c.url.includes("/pedidos/vendas"));
+    expect((pedido?.corpo as Record<string, unknown>)?.vendedor).toBeUndefined();
+  }, 15000);
+
+  it("não confunde a JUL.IA com a JULIA SOUZA de carne e osso", async () => {
+    responderCom([{ id: 12, contato: { id: 2, nome: "JULIA SOUZA", situacao: "A" } }]);
+    const { vendedorPorNome } = await import("../../lib/bling");
+    expect(await vendedorPorNome("JUL.IA (digital)")).toBeNull();
+    expect((await vendedorPorNome("julia souza"))?.id).toBe("12");
+  }, 15000);
+});

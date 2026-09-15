@@ -114,6 +114,11 @@ docker run -d \
   -e RAFA_WHATSAPP="${RAFA_WHATSAPP:-}" \
   -e RAFA_HORA_MANHA="${RAFA_HORA_MANHA:-7}" \
   -e RAFA_HORA_NOITE="${RAFA_HORA_NOITE:-19}" \
+  -e LIVIA_ATIVO="${LIVIA_ATIVO:-0}" \
+  -e LIVIA_EMAIL="${LIVIA_EMAIL:-}" \
+  -e LIVIA_SENHA_APP="${LIVIA_SENHA_APP:-}" \
+  -e LIVIA_MODO="${LIVIA_MODO:-rascunho}" \
+  -e LIVIA_INTERVALO_MIN="${LIVIA_INTERVALO_MIN:-5}" \
   -e CARLA_MAX_DIA="${CARLA_MAX_DIA:-10}" \
   -e TZ=America/Sao_Paulo \
   --memory="$MEMORIA" \
