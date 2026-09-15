@@ -11,7 +11,7 @@
  * Credencial: SENHA DE APP do Google (a conta precisa de verificação em duas
  * etapas ligada). A senha normal do Gmail não abre IMAP.
  *
- *   LIVIA_ATIVO=true
+ *   LIVIA_ATIVO=1
  *   LIVIA_EMAIL=balaocastelo@gmail.com
  *   LIVIA_SENHA_APP=xxxxxxxxxxxxxxxx
  *   LIVIA_URL=https://www.balao.info
@@ -35,7 +35,14 @@ const INTERVALO_MS = Math.max(2, Number(process.env.LIVIA_INTERVALO_MIN) || 5) *
 const POR_RODADA = 25;
 
 const estado = {
-  ativo: String(process.env.LIVIA_ATIVO || "").toLowerCase() === "true",
+  // "1" como as outras (CARLA_ATIVO, RAFA_ATIVO, BETO_ATIVO) e como o
+  // deploy-vps.sh escreve. "true" continua valendo porque foi o que a
+  // documentação deste arquivo pediu primeiro — e ficar desligada em
+  // silêncio por causa da grafia da chave é o tipo de bug que custa uma
+  // manhã para ser notado.
+  ativo: ["1", "true", "sim", "on"].includes(
+    String(process.env.LIVIA_ATIVO || "").trim().toLowerCase()
+  ),
   rodando: false,
   ultimaRodada: null,
   ultimoErro: null,
@@ -287,7 +294,7 @@ function iniciar() {
     relogio = setInterval(() => { if (estado.ativo) rodar(); }, INTERVALO_MS);
     rodar();
   } else {
-    log("configurada, mas desligada (LIVIA_ATIVO != true)");
+    log("configurada, mas desligada (LIVIA_ATIVO diferente de 1)");
   }
 }
 

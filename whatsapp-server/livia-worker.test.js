@@ -39,6 +39,22 @@ teste("sem credencial, rodar recusa em vez de tentar conectar", async () => {
   assert.ok(r.motivo.includes("faltando"));
 });
 
+teste("LIVIA_ATIVO=1 liga, como nas outras agentes", () => {
+  // O deploy-vps.sh escreve "1", igual a CARLA_ATIVO e RAFA_ATIVO. Só "true"
+  // fazia a LIV.IA nascer desligada sem ninguém entender por quê.
+  delete require.cache[require.resolve("./livia-worker")];
+  process.env.LIVIA_ATIVO = "1";
+  const w1 = require("./livia-worker");
+  assert.strictEqual(w1.resumo().ativo, true);
+
+  delete require.cache[require.resolve("./livia-worker")];
+  process.env.LIVIA_ATIVO = "0";
+  const w0 = require("./livia-worker");
+  assert.strictEqual(w0.resumo().ativo, false);
+  delete require.cache[require.resolve("./livia-worker")];
+  process.env.LIVIA_ATIVO = "";
+});
+
 teste("ligar e desligar muda o estado", () => {
   assert.strictEqual(worker.ligar().ativo, true);
   assert.strictEqual(worker.desligar().ativo, false);
