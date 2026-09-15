@@ -81,7 +81,12 @@ export async function POST(req: Request) {
     acao: decisao.acao,
     pasta: decisao.pasta,
     classificacao: decisao.classificacao,
-    resposta: decisao.acao === "responder" ? decisao.resposta : undefined,
+    // O texto vai nos DOIS casos. No modo rascunho o worker precisa dele para
+    // guardar o rascunho no Gmail — sem isso a LIV.IA classifica, arquiva e o
+    // orçamento some: ninguém escreveu, e ninguém fica sabendo que devia.
+    resposta: decisao.acao === "responder" || decisao.acao === "rascunho"
+      ? decisao.resposta
+      : undefined,
     leadPara: decisao.leadPara || null,
     telefone: decisao.telefone || null,
     motivo: decisao.motivo,
