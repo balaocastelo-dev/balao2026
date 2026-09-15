@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+  chamarBling,
   listarPedidos,
   listarContasAReceber,
   listarContatos,
@@ -88,6 +89,23 @@ export async function GET(req: Request) {
           pedidos: pedidos.filter((ped) => ped.clienteId === alvo),
           erro,
         });
+      }
+
+      // Leitura crua, para mapear a API e conferir nomes de campo contra a
+      // conta real. SÓ GET: o caminho vem de fora, e um passthrough que
+      // aceitasse POST seria uma porta para escrever qualquer coisa no ERP
+      // com um parâmetro de query.
+      case "cru": {
+        const caminho = p.get("caminho") || "";
+        if (!caminho.startsWith("/")) {
+          return NextResponse.json({ ok: false, erro: "caminho deve começar com /" }, { status: 400 });
+        }
+        const extras: Record<string, string> = {};
+        for (const [k, v] of p.entries()) {
+          if (k !== "recurso" && k !== "caminho") extras[k] = v;
+        }
+        const r = await chamarBling(caminho, { metodo: "GET", query: extras });
+        return NextResponse.json({ ok: r.ok, dados: r.dados, erro: r.erro, status: r.status });
       }
 
       case "produtos": {
