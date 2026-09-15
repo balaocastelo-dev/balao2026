@@ -106,22 +106,26 @@ async function rodar() {
     try {
       // Só o que não foi lido: e-mail já lido é e-mail que alguém da loja já
       // tratou, e responder por cima disso é atropelar um humano.
-      const ids = await cliente.search({ seen: false });
+      //
+      // Por UID, não por número de sequência: mover uma mensagem RENUMERA
+      // todas as seguintes, e o laço passaria a baixar e arquivar a mensagem
+      // errada a partir do primeiro move. UID não muda.
+      const ids = await cliente.search({ seen: false }, { uid: true });
       const lote = (ids || []).slice(-POR_RODADA);
 
-      for (const id of lote) {
+      for (const uid of lote) {
         let bruto;
         try {
-          const { content } = await cliente.download(String(id));
+          const { content } = await cliente.download(String(uid), undefined, { uid: true });
           bruto = await simpleParser(content);
         } catch (erro) {
-          log("não consegui ler a mensagem", id, erro.message);
+          log("não consegui ler a mensagem uid", uid, erro.message);
           continue;
         }
 
         const de = (bruto.from && bruto.from.value && bruto.from.value[0]) || {};
         const email = {
-          messageId: bruto.messageId || `sem-id-${id}@balao`,
+          messageId: bruto.messageId || `sem-id-${uid}@balao`,
           remetente: String(de.address || "").toLowerCase(),
           nome: de.name || null,
           assunto: bruto.subject || "",
@@ -161,7 +165,7 @@ async function rodar() {
         if (decisao.pasta && decisao.acao !== "nada") {
           await garantirPasta(cliente, decisao.pasta);
           try {
-            await cliente.messageMove(String(id), decisao.pasta, { uid: false });
+            await cliente.messageMove(String(uid), decisao.pasta, { uid: true });
             estado.arquivados += 1;
           } catch (erro) {
             log("não consegui mover para", decisao.pasta, erro.message);
