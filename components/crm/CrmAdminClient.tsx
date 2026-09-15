@@ -41,7 +41,7 @@ export default function CrmAdminClient() {
     );
   }
 
-  // Aba própria do Beto: QR Code do número dele + controles de disparo.
+  // Aba própria da VITOR.IA: QR Code do número dele + controles de disparo.
   if (tela === "beto") {
     return <CrmBetoAdmin onVoltar={() => setTela("painel")} sairLabel="Voltar ao painel" />;
   }

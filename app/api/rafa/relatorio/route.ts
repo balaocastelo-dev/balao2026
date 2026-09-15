@@ -4,12 +4,12 @@ import { relatorioDaManha, relatorioDoFechamento } from "@/lib/rafa";
 export const dynamic = "force-dynamic";
 
 /**
- * Relatórios do Rafa. A VPS chama, monta nada e manda o texto no WhatsApp.
+ * Relatórios da MAR.IA. A VPS chama, monta nada e manda o texto no WhatsApp.
  *
  * A apuração mora aqui, não no worker, porque é aqui que estão as chaves do
  * Bling e o acesso ao banco. O worker só sabe a hora e o número.
  *
- * Mesma porta do Beto e da Carla (BETO_TOKEN): é a mesma máquina. Sem o token
+ * Mesma porta da VITOR.IA e da CLAUD.IA (BETO_TOKEN): é a mesma máquina. Sem o token
  * configurado a porta fica FECHADA — o fechamento do dia traz faturamento e
  * nome de cliente.
  *

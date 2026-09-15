@@ -2,13 +2,13 @@ import { supabaseAdmin } from "./supabase";
 import { resumoDoDia, listarPedidos, estadoBling } from "./bling";
 
 // ============================================================
-// Rafa — analista da loja. Dois relatórios por dia no WhatsApp do Thiago:
+// MAR.IA — analista da loja. Dois relatórios por dia no WhatsApp do Thiago:
 //
 //   07h  Como está o setor: preço contra concorrente, o que as pessoas
 //        procuraram e a loja não tem, movimento da semana.
 //   19h  Fechamento do dia: quanto entrou, quantos clientes, por vendedor.
 //
-// A regra que governa este arquivo: o Rafa só reporta número que ele MEDIU.
+// A regra que governa este arquivo: a MAR.IA só reporta número que ele MEDIU.
 //
 // Seria mais fácil perguntar a um modelo "quais as tendências do varejo de
 // informática hoje" e mandar a resposta. O resultado seria plausível, bonito

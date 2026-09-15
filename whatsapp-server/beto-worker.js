@@ -1,5 +1,5 @@
 /**
- * Beto — prospector digital da loja.
+ * VITOR.IA — prospector digital da loja.
  *
  * Roda DENTRO do servidor de WhatsApp (VPS). Pega prospects da base do site
  * (app/api/beto/fila, protegida por BETO_TOKEN), manda o primeiro contato
@@ -17,7 +17,7 @@
 
 const BETO_URL = (process.env.BETO_URL || "https://www.balao.info").replace(/\/$/, "");
 const BETO_TOKEN = process.env.BETO_TOKEN || "";
-// Instância principal (número da loja): o Beto pergunta aqui se a pessoa já
+// Instância principal (número da loja): a VITOR.IA pergunta aqui se a pessoa já
 // conversa com a loja antes de escrever do número dele.
 const BETO_CRM_URL = (process.env.BETO_CRM_URL || "https://srv1963897.hstgr.cloud").replace(/\/$/, "");
 const BETO_PANEL_TOKEN = process.env.BETO_PANEL_TOKEN || "";
@@ -80,7 +80,7 @@ function nomesDeChats() {
 
 async function conversaRecente(whatsapp) {
   // Pergunta à instância principal da loja: quem tem conversa recente lá
-  // não é prospect — é cliente. A instância do Beto só conhece os chats dele.
+  // não é prospect — é cliente. A instância da VITOR.IA só conhece os chats dele.
   try {
     const resposta = await fetch(
       `${BETO_CRM_URL}/api/crm/contato-recente?numero=${encodeURIComponent(whatsapp)}&dias=${DIAS_RECENTES}`,
@@ -99,7 +99,7 @@ async function conversaRecente(whatsapp) {
     return true;
   }
 
-  // Fallback local (chats do próprio número do Beto).
+  // Fallback local (chats do próprio número da VITOR.IA).
   const agora = Date.now();
   const chave = normalizarNumero(whatsapp);
   for (const m of deps.store.messages || []) {
@@ -184,7 +184,7 @@ async function detectarRespostas() {
         estado.contatados.delete(whatsapp);
         await registrar(whatsapp, "optout", "pediu para não ser contatado");
         estado.ultimaAcao = { tipo: "optout", whatsapp, em: agora };
-        deps.emitToast(`🤖 Beto: ${registro.nome || whatsapp} pediu para sair da lista`);
+        deps.emitToast(`🤖 VITOR.IA: ${registro.nome || whatsapp} pediu para sair da lista`);
         try {
           await deps.sendDirectMessage({ number: whatsapp, text: OPT_OUT_ACK, chatId: null, signatureId: null, autorId: "beto" });
         } catch {}
@@ -192,9 +192,9 @@ async function detectarRespostas() {
       }
 
       estado.contatados.delete(whatsapp);
-      await registrar(whatsapp, "respondeu", "respondeu ao primeiro contato do Beto");
+      await registrar(whatsapp, "respondeu", "respondeu ao primeiro contato da VITOR.IA");
       estado.ultimaAcao = { tipo: "resposta", whatsapp, em: agora };
-      deps.emitToast(`🤖 Beto: ${registro.nome || whatsapp} respondeu!`);
+      deps.emitToast(`🤖 VITOR.IA: ${registro.nome || whatsapp} respondeu!`);
       deps.io.emit("whatsapp:beto-acao", { tipo: "resposta", whatsapp, nome: registro.nome });
       break;
     }
@@ -253,13 +253,13 @@ async function enviarProximo() {
     return;
   }
 
-  await registrar(whatsapp, "contatado", "primeiro contato enviado pelo Beto");
+  await registrar(whatsapp, "contatado", "primeiro contato enviado pelo VITOR.IA");
   estado.contatados.set(whatsapp, { nome: nome || empresa || null, em: Date.now() });
   estado.enviadosHoje += 1;
   estado.ultimaAcao = { tipo: "enviado", whatsapp, em: Date.now() };
 
   deps.io.emit("whatsapp:beto-acao", { tipo: "enviado", whatsapp, nome });
-  deps.emitToast(`🤖 Beto: primeiro contato com ${nome || whatsapp}`);
+  deps.emitToast(`🤖 VITOR.IA: primeiro contato com ${nome || whatsapp}`);
 
   // Intervalo aleatório: humano, não robô de disparo.
   const pausa = DELAY_MIN_MS + Math.random() * (DELAY_MAX_MS - DELAY_MIN_MS);
@@ -332,7 +332,7 @@ function definirConfig({ ativo, maxDia, mensagem }) {
       diaAtual: estado.diaAtual,
     };
     deps.persistStore();
-    deps.emitToast(`Beto: ${estado.ativo ? "ligado" : "desligado"} · teto de ${estado.maxDia}/dia`);
+    deps.emitToast(`VITOR.IA: ${estado.ativo ? "ligado" : "desligado"} · teto de ${estado.maxDia}/dia`);
   }
   return resumo();
 }

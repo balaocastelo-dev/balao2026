@@ -1,7 +1,7 @@
 import { supabaseAdmin } from "./supabase";
 
 // ============================================================
-// Beto — o prospector digital da Balão.
+// VITOR.IA — o prospectora digital da Balão.
 //
 // Estas funções rodam SOMENTE no servidor (rotas de API), sempre com o
 // cliente service_role. A tabela public.prospects não tem policy para o

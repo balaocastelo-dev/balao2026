@@ -1,4 +1,4 @@
-// Testes do Rafa — o que quebra de madrugada e ninguém vê.
+// Testes da MAR.IA — o que quebra de madrugada e ninguém vê.
 //
 // Dois riscos reais aqui, e nenhum deles é o texto do relatório:
 //  1. fuso — o container roda em UTC; o relatório das 7h da loja não pode

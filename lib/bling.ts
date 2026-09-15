@@ -3,7 +3,7 @@ import { supabaseAdmin, hasSupabaseAdmin } from "./supabase";
 // ============================================================
 // Bling — ERP da loja.
 //
-// Aqui mora TODA a conversa com o Bling. Os agentes (Carla, Rafa, Beto) e o
+// Aqui mora TODA a conversa com o Bling. Os agentes (CLAUD.IA, MAR.IA, VITOR.IA) e o
 // servidor MCP consomem estas funções; nenhum deles fala com o Bling direto.
 // É de propósito: o token é um só, o limite de requisição é um só, e o dia em
 // que o Bling mudar um caminho, muda num lugar.
@@ -150,8 +150,8 @@ async function renovar(refreshToken: string): Promise<string | null> {
  * Devolve um access_token válido, renovando se preciso.
  *
  * null quer dizer "não dá para falar com o Bling agora" — nunca lança. Quem
- * chama decide o que fazer sem ERP: a Carla cai para os pedidos do site, o
- * Rafa manda o relatório dizendo que o Bling está fora.
+ * chama decide o que fazer sem ERP: a CLAUD.IA cai para os pedidos do site, o
+ * MAR.IA manda o relatório dizendo que o Bling está fora.
  */
 export async function tokenValido(): Promise<string | null> {
   if (!blingConfigurado()) return null;

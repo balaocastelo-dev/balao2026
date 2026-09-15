@@ -1,4 +1,4 @@
-// Testes da Carla — funções puras da cobradora.
+// Testes da CLAUD.IA — funções puras da cobradora.
 //
 // O que importa aqui: a mensagem de cobrança precisa do VALOR do pedido, o
 // nome precisa ser pessoal, e o pedido de sair precisa ser reconhecido sempre

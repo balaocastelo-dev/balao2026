@@ -3,9 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 
 // ============================================================
-// Painel da Carla (cobradora & reativação) dentro do /crm.
+// Painel da CLAUD.IA (cobradora & reativação) dentro do /crm.
 //
-// Ela trabalha no NÚMERO DA LOJA (clientes conhecidos), diferente do Beto.
+// Ela trabalha no NÚMERO DA LOJA (clientes conhecidos), diferente da VITOR.IA.
 // Este painel mostra o estado do worker, liga/desliga, teto diário e as
 // duas mensagens (cobrança e reativação), além dos números vindos do site
 // via /api/carla/stats (fechada pela senha do painel).
@@ -95,7 +95,7 @@ export default function CrmCarlaPanel() {
       const d = await r.json();
       if (d?.ok) {
         setCarla(d as CarlaEstado);
-        setAvisos({ tipo: "ok", texto: "Carla atualizada." });
+        setAvisos({ tipo: "ok", texto: "CLAUD.IA atualizada." });
       } else {
         setAvisos({ tipo: "erro", texto: d?.erro || "Não consegui atualizar." });
       }
@@ -118,7 +118,7 @@ export default function CrmCarlaPanel() {
             📞
           </span>
           <div>
-            <h2 className="text-sm font-bold text-white">Carla · Cobradora & Reativação</h2>
+            <h2 className="text-sm font-bold text-white">CLAUD.IA · Cobradora & Reativação</h2>
             <p className="text-xs text-slate-400">
               {carla?.ativo
                 ? `trabalhando no número da loja · ${carla.enviadosHoje}/${carla.maxDia} hoje`
@@ -135,7 +135,7 @@ export default function CrmCarlaPanel() {
               : "bg-violet-500 text-white hover:bg-violet-400"
           }`}
         >
-          {carla?.ativo ? "Desligar Carla" : "Ligar Carla"}
+          {carla?.ativo ? "Desligar CLAUD.IA" : "Ligar CLAUD.IA"}
         </button>
       </div>
 
@@ -234,7 +234,7 @@ export default function CrmCarlaPanel() {
       )}
 
       <p className="mt-3 text-[11px] leading-relaxed text-slate-500">
-        Cobrança primeiro (dinheiro parado é prioridade), depois reativação dos contatos do Beto que não
+        Cobrança primeiro (dinheiro parado é prioridade), depois reativação dos contatos da VITOR.IA que não
         responderam em 3+ dias. Ela nunca escreve para quem tem conversa recente com a loja e respeita
         "sair" na hora.
       </p>

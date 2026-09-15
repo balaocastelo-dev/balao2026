@@ -1,5 +1,5 @@
 /**
- * Júlia IA — atendente digital da loja.
+ * JUL.IA — atendente digital da loja.
  *
  * Roda DENTRO do servidor de WhatsApp (VPS) e chama o cérebro dela
  * (balao-assistente, FastAPI + Ollama) via JULIA_IA_URL.
@@ -28,7 +28,7 @@ const INTERVALO_MS = 8_000;
 const ATRASO_MIN_MS = Number(process.env.JULIA_IA_DELAY_MS) || 15_000;
 const IDADE_MAX_MS = 45 * 60_000; // não responde mensagem com mais de 45 min
 const MAX_CONCORRENTES = Number(process.env.JULIA_IA_MAX_CONCURRENT) || 3;
-const MAX_HISTORICO = 8; // últimas mensagens enviadas ao cérebro da Júlia
+const MAX_HISTORICO = 8; // últimas mensagens enviadas ao cérebro da JUL.IA
 const TIMEOUT_CHAMADA_MS = 120_000;
 // O WhatsApp precisa de alguns segundos para carregar a imagem do preview
 // antes de mandar o link — sem isso o cartão chega sem foto no celular.
@@ -110,7 +110,7 @@ function definirModo(modo, autolead) {
   if (mudou && deps) {
     deps.store.ia = { modo: estado.modo, autolead: estado.autolead };
     deps.persistStore();
-    deps.emitToast(`Júlia IA: modo ${estado.modo}${estado.autolead ? " · novos leads ativado" : ""}`);
+    deps.emitToast(`JUL.IA: modo ${estado.modo}${estado.autolead ? " · novos leads ativado" : ""}`);
   }
   return resumo();
 }
@@ -202,21 +202,21 @@ async function processar({ chatId, nome, ultima }) {
     const texto = await gerarResposta(chatId, nome);
 
     if (estado.modo === "autopilot") {
-      // Credita a mensagem à Júlia antes do envio: o listener de
-      // message_create herda a autoria e o dashboard mostra "Júlia IA".
+      // Credita a mensagem à JUL.IA antes do envio: o listener de
+      // message_create herda a autoria e o dashboard mostra "JUL.IA".
       deps.marcarAutor(chatId, IA_SELLER_ID);
       await deps.sendDirectMessage({ number: chatId, text: texto, chatId, signatureId: null });
       estado.respondidas.set(chatId, { mensagemId: buildFingerprint(ultima), hora: Date.now() });
       estado.stats.respostas += 1;
       estado.ultimaAcao = { tipo: "resposta", chatId, nome, hora: Date.now() };
       deps.io.emit("whatsapp:ia-acao", { tipo: "resposta", chatId, nome, texto });
-      deps.emitToast(`🤖 Júlia IA respondeu ${nome}`);
+      deps.emitToast(`🤖 JUL.IA respondeu ${nome}`);
     } else {
       estado.sugestoes.set(chatId, { texto, mensagemId: buildFingerprint(ultima), hora: Date.now() });
       estado.stats.sugestoes += 1;
       estado.ultimaAcao = { tipo: "sugestao", chatId, nome, hora: Date.now() };
       deps.io.emit("whatsapp:ia-sugestao", { chatId, nome, texto });
-      deps.emitToast(`🤖 Júlia IA sugeriu resposta para ${nome}`);
+      deps.emitToast(`🤖 JUL.IA sugeriu resposta para ${nome}`);
     }
   } catch (error) {
     estado.stats.falhas += 1;
@@ -269,8 +269,8 @@ function atribuirLead(chatId) {
     chat.chatId === chatId ? { ...chat, assignedSellerId: IA_SELLER_ID } : chat
   );
   deps.persistStore();
-  deps.emitToast(`Lead ${nomeDoChat(chatId)} passado para a Júlia IA`);
-  return { ok: true, mensagem: "Lead atribuído à Júlia IA." };
+  deps.emitToast(`Lead ${nomeDoChat(chatId)} passado para a JUL.IA`);
+  return { ok: true, mensagem: "Lead atribuído à JUL.IA." };
 }
 
 module.exports = {

@@ -7,19 +7,19 @@ import CrmCarlaPanel from "./CrmCarlaPanel";
 // ============================================================
 // Aba "Funcionários digitais" do /crm.
 //
-// Antes a Júlia e a Carla ficavam empilhadas ACIMA das abas, sempre abertas:
+// Antes a JUL.IA e a CLAUD.IA ficavam empilhadas ACIMA das abas, sempre abertas:
 // quem entrava no painel para ver o número do dia passava por dois blocos de
-// robô antes de chegar aos números, e o Beto só existia numa tela cheia
+// robô antes de chegar aos números, e a VITOR.IA só existia numa tela cheia
 // separada, atrás de um botão na barra de cima. Três funcionários digitais em
 // três lugares diferentes.
 //
 // Agora é um lugar só. Cada um aparece no mesmo formato de cartão, e a tela
-// cheia do Beto continua existindo — mas como destino do cartão dele, que é
+// cheia da VITOR.IA continua existindo — mas como destino do cartão dela, que é
 // onde o QR Code precisa de espaço.
 // ============================================================
 
 interface Props {
-  /** Abre a tela cheia do Beto (QR Code do número próprio dele). */
+  /** Abre a tela cheia da VITOR.IA (QR Code do número próprio dela). */
   onAbrirBeto: () => void;
 }
 
@@ -36,7 +36,7 @@ export default function CrmFuncionariosDigitais({ onAbrirBeto }: Props) {
 }
 
 /* ---------------------------------------------------------------- *
- * Beto — resumo + porta para a tela cheia
+ * VITOR.IA — resumo + porta para a tela cheia
  * ---------------------------------------------------------------- */
 
 function CartaoBeto({ onAbrir }: { onAbrir: () => void }) {
@@ -78,9 +78,9 @@ function CartaoBeto({ onAbrir }: { onAbrir: () => void }) {
             🎯
           </span>
           <div>
-            <h3 className="font-semibold text-white">Beto</h3>
+            <h3 className="font-semibold text-white">VITOR.IA</h3>
             <p className="text-xs text-slate-400">
-              Prospector · número próprio
+              Prospectora · número próprio
               {estado
                 ? ligado
                   ? ` · ${estado.enviadosHoje ?? 0}/${estado.maxDia ?? 0} hoje`
@@ -147,7 +147,7 @@ function CartaoBling() {
             <p className="text-xs text-slate-400">
               {conectado
                 ? "Conectado · pedidos, clientes e contas a receber"
-                : "Não conectado · a Carla e o Rafa dependem daqui"}
+                : "Não conectado · a CLAUD.IA e a MAR.IA dependem daqui"}
             </p>
           </div>
         </div>
@@ -184,7 +184,7 @@ function CartaoBling() {
 
 
 /* ---------------------------------------------------------------- *
- * Rafa — 7h o setor, 19h o fechamento
+ * MAR.IA — 7h o setor, 19h o fechamento
  * ---------------------------------------------------------------- */
 
 interface EstadoRafa {
@@ -257,7 +257,7 @@ function CartaoRafa() {
             📊
           </span>
           <div>
-            <h3 className="font-semibold text-white">Rafa</h3>
+            <h3 className="font-semibold text-white">MAR.IA</h3>
             <p className="text-xs text-slate-400">
               Analista · {rafa?.horaManha ?? 7}h o setor, {rafa?.horaNoite ?? 19}h o fechamento
               {rafa?.agoraNaLoja ? ` · na loja agora: ${rafa.agoraNaLoja}` : ""}
@@ -300,7 +300,7 @@ function CartaoRafa() {
       {faltaConfig && (
         <ul className="mt-3 space-y-1 rounded-xl bg-amber-500/10 p-3 text-xs text-amber-200">
           {!rafa?.destinoConfigurado && <li>• RAFA_WHATSAPP não configurado (para qual número vai)</li>}
-          {!rafa?.tokenConfigurado && <li>• BETO_TOKEN não configurado (o Rafa usa o mesmo)</li>}
+          {!rafa?.tokenConfigurado && <li>• BETO_TOKEN não configurado (a MAR.IA usa o mesmo)</li>}
         </ul>
       )}
 

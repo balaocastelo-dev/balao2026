@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 // ============================================================
-// Painel da Júlia IA (atendente digital) dentro do /crm.
+// Painel da JUL.IA (atendente digital) dentro do /crm.
 //
 // Fala com o servidor de WhatsApp pelos mesmos endereços REST do resto do
 // painel: /api/crm/ia/*. O cérebro dela (Ollama local) é chamado pelo
@@ -69,7 +69,7 @@ export default function CrmJuliaPanel() {
       const d = await r.json();
       if (d?.ok) {
         setIa(d.ia);
-        setAvisos({ tipo: "ok", texto: "Configuração da Júlia atualizada." });
+        setAvisos({ tipo: "ok", texto: "Configuração da JUL.IA atualizada." });
       } else {
         setAvisos({ tipo: "erro", texto: d?.erro || "Não consegui atualizar." });
       }
@@ -112,7 +112,7 @@ export default function CrmJuliaPanel() {
             🤖
           </span>
           <div>
-            <h2 className="text-sm font-bold text-white">Júlia IA · Atendente Digital</h2>
+            <h2 className="text-sm font-bold text-white">JUL.IA · Atendente Digital</h2>
             <p className="text-xs text-slate-400">
               {ia?.configurada === false
                 ? "cérebro offline — falta JULIA_IA_URL na VPS"
@@ -190,7 +190,7 @@ export default function CrmJuliaPanel() {
           </h3>
           {ia.sugestoes.length === 0 ? (
             <p className="text-xs text-slate-500">
-              Nenhuma sugestão pendente. Quando um cliente atribuído à Júlia falar, a resposta dela aparece aqui.
+              Nenhuma sugestão pendente. Quando um cliente atribuído à JUL.IA falar, a resposta dela aparece aqui.
             </p>
           ) : (
             <ul className="space-y-2">
