@@ -19,7 +19,7 @@ const STATUS = ["enviado", "respondeu", "optout", "descartado"] as const;
 const TIPOS = ["cobranca", "reativacao"] as const;
 
 /**
- * A VPS registra o resultado de cada contato da Carla.
+ * A VPS registra o resultado de cada contato da CLAUD.IA.
  */
 export async function POST(req: Request) {
   if (!tokenConfere(req)) {

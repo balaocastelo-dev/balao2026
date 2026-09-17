@@ -3,7 +3,7 @@ import { supabaseAdmin, hasSupabaseAdmin } from "./supabase";
 // ============================================================
 // Bling — ERP da loja.
 //
-// Aqui mora TODA a conversa com o Bling. Os agentes (Carla, Rafa, Beto) e o
+// Aqui mora TODA a conversa com o Bling. Os agentes (CLAUD.IA, MAR.IA, VITOR.IA) e o
 // servidor MCP consomem estas funções; nenhum deles fala com o Bling direto.
 // É de propósito: o token é um só, o limite de requisição é um só, e o dia em
 // que o Bling mudar um caminho, muda num lugar.
@@ -150,8 +150,8 @@ async function renovar(refreshToken: string): Promise<string | null> {
  * Devolve um access_token válido, renovando se preciso.
  *
  * null quer dizer "não dá para falar com o Bling agora" — nunca lança. Quem
- * chama decide o que fazer sem ERP: a Carla cai para os pedidos do site, o
- * Rafa manda o relatório dizendo que o Bling está fora.
+ * chama decide o que fazer sem ERP: a CLAUD.IA cai para os pedidos do site, o
+ * MAR.IA manda o relatório dizendo que o Bling está fora.
  */
 export async function tokenValido(): Promise<string | null> {
   if (!blingConfigurado()) return null;
@@ -202,7 +202,7 @@ export async function chamarBling<T = unknown>(
   caminho: string,
   opcoes: {
     metodo?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-    query?: Record<string, string | number | undefined>;
+    query?: Record<string, string | number | (string | number)[] | undefined>;
     corpo?: unknown;
     tentativa?: number;
   } = {}
@@ -214,7 +214,20 @@ export async function chamarBling<T = unknown>(
 
   const parametros = new URLSearchParams();
   for (const [chave, valor] of Object.entries(opcoes.query || {})) {
-    if (valor !== undefined && valor !== null && valor !== "") parametros.set(chave, String(valor));
+    if (valor === undefined || valor === null || valor === "") continue;
+    // Filtro de lista só funciona como `chave[]=a&chave[]=b`. Mandar
+    // `chave=a` devolve 200 com o filtro IGNORADO — o pior caso possível,
+    // porque o número sai errado e nada reclama. Conferido em 15/09/2026:
+    // `situacoes=2` trouxe as contas em aberto junto; `situacoes[]=2` não.
+    if (Array.isArray(valor)) {
+      for (const item of valor) {
+        if (item !== undefined && item !== null && item !== "") {
+          parametros.append(`${chave}[]`, String(item));
+        }
+      }
+      continue;
+    }
+    parametros.set(chave, String(valor));
   }
   const busca = parametros.toString();
   const url = `${BASE_API}${caminho}${busca ? `?${busca}` : ""}`;
@@ -260,16 +273,149 @@ export async function chamarBling<T = unknown>(
 /* ---------------------------------------------------------------- *
  * Leituras que os agentes usam
  *
- * Os caminhos e os nomes de campo abaixo seguem a referência da API v3
- * (developer.bling.com.br/referencia). Ainda NÃO foram exercitados contra uma
- * conta real — o aplicativo do Bling não estava criado quando isto foi
- * escrito. Por isso tudo aqui lê defensivamente: campo que não vier volta
- * nulo ou zero, nunca quebra. Ao conectar a conta, vale rodar
- * `chamarBling("/pedidos/vendas", { query: { limite: 1 } })` e conferir os
- * nomes antes de confiar nos números.
+ * Conferido campo a campo contra a conta real do Balão em 15/09/2026. O que
+ * a conta ensinou, e que a referência não deixa claro:
+ *
+ *  1. `pedido.situacao` é `{ id, valor }`. O `id` é o código de verdade
+ *     (6 em aberto, 9 atendido, 12 cancelado); `valor` é um 0/1 legado que
+ *     não diz nada. Ler `valor` fazia todo pedido virar "0" ou "1".
+ *  2. `vendedor` NÃO vem na listagem de pedidos, só no detalhe de cada um.
+ *     Para separar venda por vendedor usa-se o filtro `idVendedor`.
+ *  3. Em /contas/receber a data só filtra com `tipoFiltroData` junto
+ *     (V = vencimento, E = emissão) e a janela é de no máximo 366 dias.
+ *  4. `saldo` existe só no detalhe da conta, nunca na listagem.
+ *  5. Filtro de lista exige `chave[]=`; sem os colchetes é ignorado calado.
+ *
+ * Tudo aqui continua lendo defensivamente: campo que não vier volta nulo ou
+ * zero, nunca quebra.
  * ---------------------------------------------------------------- */
 
 const LIMITE_PAGINA = 100;
+
+/**
+ * Situações de pedido de venda, lidas da conta real em 15/09/2026.
+ *
+ * Os ids são fixos no Bling; a tabela viva vem de `mapaSituacoes()` e é ela
+ * que dá o nome. Estas constantes existem para as decisões que NÃO podem
+ * depender de rede: somar faturamento sem contar pedido cancelado.
+ */
+export const SITUACAO_PEDIDO = {
+  emAberto: 6,
+  atendido: 9,
+  cancelado: 12,
+  emAndamento: 15,
+  vendaAgenciada: 18,
+  emDigitacao: 21,
+  verificado: 24,
+} as const;
+
+/** Situações de conta a receber conferidas: 1 em aberto (saldo = valor),
+ *  2 recebida (saldo 0). Os outros códigos existem mas não apareceram nesta
+ *  conta, e chutar nome de código não visto é como o relatório erra. */
+export const SITUACAO_CONTA = { emAberto: 1, recebida: 2 } as const;
+
+const VALIDADE_TABELA_MS = 60 * 60 * 1000;
+let cacheSituacoes: { em: number; mapa: Map<number, string> } | null = null;
+
+/** id da situação -> nome ("Atendido"). Cacheada por uma hora. */
+export async function mapaSituacoes(): Promise<Map<number, string>> {
+  if (cacheSituacoes && Date.now() - cacheSituacoes.em < VALIDADE_TABELA_MS) {
+    return cacheSituacoes.mapa;
+  }
+  const r = await chamarBling<Array<Record<string, unknown>>>("/situacoes/modulos/98310");
+  const mapa = new Map<number, string>();
+  for (const linha of Array.isArray(r.dados) ? r.dados : []) {
+    const id = Number(linha?.id);
+    if (Number.isFinite(id)) mapa.set(id, String(linha?.nome ?? ""));
+  }
+  // Mapa vazio não entra no cache: guardar uma falha de rede por uma hora
+  // deixaria uma hora inteira de relatório sem nome de situação.
+  if (mapa.size) cacheSituacoes = { em: Date.now(), mapa };
+  return mapa;
+}
+
+export interface VendedorBling {
+  id: string;
+  nome: string | null;
+  ativo: boolean;
+  contatoId: string | null;
+}
+
+let cacheVendedores: { em: number; lista: VendedorBling[] } | null = null;
+
+/** Os vendedores cadastrados no Bling. O nome mora em `contato`, não na raiz. */
+export async function listarVendedores(): Promise<{ vendedores: VendedorBling[]; erro: string | null }> {
+  if (cacheVendedores && Date.now() - cacheVendedores.em < VALIDADE_TABELA_MS) {
+    return { vendedores: cacheVendedores.lista, erro: null };
+  }
+  const { linhas, erro } = await paginar<Record<string, unknown>>("/vendedores", {}, 2);
+  const vendedores = linhas.map((v) => {
+    const contato = (v.contato || {}) as Record<string, unknown>;
+    return {
+      id: String(v.id ?? ""),
+      nome: texto(contato.nome),
+      ativo: String(contato.situacao ?? "") === "A",
+      contatoId: texto(contato.id),
+    };
+  });
+  if (vendedores.length) cacheVendedores = { em: Date.now(), lista: vendedores };
+  return { vendedores, erro };
+}
+
+/** Nome do vendedor pelo id, sem estourar quando o Bling não responde. */
+export async function nomesDeVendedores(): Promise<Map<string, string>> {
+  const { vendedores } = await listarVendedores();
+  return new Map(vendedores.map((v) => [v.id, v.nome || v.id]));
+}
+
+/**
+ * O nome do cadastro da JUL.IA no Bling.
+ *
+ * Tem o "(digital)" porque existe uma JULIA SOUZA de carne e osso vendendo na
+ * loja: dois "JULIA" na mesma lista viram briga no relatório de comissão.
+ */
+export const NOME_VENDEDORA_JULIA = "JUL.IA (digital)";
+
+/**
+ * Um vendedor pelo nome, ignorando caixa e acento.
+ *
+ * Procurar por nome em vez de guardar o id numa variável de ambiente é
+ * de propósito: o cadastro de vendedor do Bling só existe pela tela dele
+ * (a API v3 é somente leitura em /vendedores, conferido em 15/09/2026 —
+ * POST e PUT devolvem 404). Assim, no minuto em que o cadastro for criado,
+ * os pedidos passam a sair no nome dela sem precisar mexer em configuração.
+ */
+export async function vendedorPorNome(nome: string): Promise<VendedorBling | null> {
+  const alvo = normalizar(nome);
+  if (!alvo) return null;
+  const { vendedores } = await listarVendedores();
+  return vendedores.find((v) => normalizar(v.nome || "") === alvo) || null;
+}
+
+function normalizar(v: string): string {
+  return v.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
+}
+
+/** Dias entre duas datas AAAA-MM-DD. */
+function diasEntre(inicio: string, fim: string): number {
+  const a = Date.parse(`${inicio}T00:00:00Z`);
+  const b = Date.parse(`${fim}T00:00:00Z`);
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return 0;
+  return Math.round((b - a) / 86_400_000);
+}
+
+/** A v3 recusa janela maior que 366 dias com 400. Melhor dizer antes. */
+const JANELA_MAXIMA_DIAS = 366;
+function janelaValida(inicio?: string, fim?: string): string | null {
+  if (!inicio || !fim) return null;
+  const dias = diasEntre(inicio, fim);
+  if (dias < 0) return "dataInicial depois da dataFinal";
+  if (dias > JANELA_MAXIMA_DIAS) {
+    return `janela de ${dias} dias; o Bling aceita no máximo ${JANELA_MAXIMA_DIAS}`;
+  }
+  return null;
+}
+
 
 function numero(v: unknown): number {
   const n = Number(v);
@@ -290,7 +436,7 @@ function soDigitos(v: unknown): string {
  *  de histórico varreria o limite diário da API numa consulta só. */
 async function paginar<T = Record<string, unknown>>(
   caminho: string,
-  query: Record<string, string | number | undefined>,
+  query: Record<string, string | number | (string | number)[] | undefined>,
   maxPaginas = 10
 ): Promise<{ linhas: T[]; erro: string | null }> {
   const linhas: T[] = [];
@@ -311,89 +457,224 @@ export interface PedidoBling {
   numero: string | null;
   data: string | null;
   total: number;
+  /** Código da situação no Bling (6 em aberto, 9 atendido, 12 cancelado). */
+  situacaoId: number | null;
+  /** Nome legível, quando a tabela de situações respondeu. */
   situacao: string | null;
   clienteNome: string | null;
   clienteId: string | null;
+  /** Só vem preenchido em `pedidoDetalhado` ou quando se filtra por vendedor:
+   *  a listagem da v3 não devolve este campo. */
   vendedorId: string | null;
 }
 
-function lerPedido(p: Record<string, unknown>): PedidoBling {
+function lerPedido(
+  p: Record<string, unknown>,
+  nomes?: Map<number, string>,
+  vendedorConhecido?: string
+): PedidoBling {
   const contato = (p.contato || {}) as Record<string, unknown>;
   const situacao = (p.situacao || {}) as Record<string, unknown>;
   const vendedor = (p.vendedor || {}) as Record<string, unknown>;
+  const situacaoId = Number(situacao.id);
+  const id = Number.isFinite(situacaoId) ? situacaoId : null;
   return {
     id: String(p.id ?? ""),
     numero: texto(p.numero),
     data: texto(p.data),
     total: numero(p.total),
-    situacao: texto(situacao.valor ?? situacao.id ?? p.situacao),
+    situacaoId: id,
+    situacao: id === null ? null : nomes?.get(id) ?? null,
     clienteNome: texto(contato.nome),
     clienteId: texto(contato.id),
-    vendedorId: texto(vendedor.id),
+    vendedorId: texto(vendedor.id) ?? vendedorConhecido ?? null,
   };
 }
 
-/** Pedidos de venda num intervalo. Datas em AAAA-MM-DD. */
+/**
+ * Pedidos de venda num intervalo. Datas em AAAA-MM-DD.
+ *
+ * `situacoes` e `vendedorId` filtram na API, não aqui: puxar tudo e peneirar
+ * em memória gasta o limite diário à toa.
+ */
 export async function listarPedidos(opcoes: {
   dataInicial?: string;
   dataFinal?: string;
+  situacoes?: number[];
+  vendedorId?: string | number;
   maxPaginas?: number;
 } = {}): Promise<{ pedidos: PedidoBling[]; erro: string | null }> {
+  const problema = janelaValida(opcoes.dataInicial, opcoes.dataFinal);
+  if (problema) return { pedidos: [], erro: problema };
+
   const { linhas, erro } = await paginar<Record<string, unknown>>(
     "/pedidos/vendas",
-    { dataInicial: opcoes.dataInicial, dataFinal: opcoes.dataFinal },
+    {
+      dataInicial: opcoes.dataInicial,
+      dataFinal: opcoes.dataFinal,
+      idsSituacoes: opcoes.situacoes,
+      idVendedor: opcoes.vendedorId,
+    },
     opcoes.maxPaginas ?? 10
   );
-  return { pedidos: linhas.map(lerPedido), erro };
+  const nomes = await mapaSituacoes();
+  const vendedor = opcoes.vendedorId ? String(opcoes.vendedorId) : undefined;
+  return { pedidos: linhas.map((l) => lerPedido(l, nomes, vendedor)), erro };
+}
+
+/** Um pedido com tudo: itens, parcelas e — o que a listagem esconde — o vendedor. */
+export async function pedidoDetalhado(pedidoId: string): Promise<{
+  pedido: PedidoBling | null;
+  bruto: Record<string, unknown> | null;
+  erro: string | null;
+}> {
+  const r = await chamarBling<Record<string, unknown>>(`/pedidos/vendas/${pedidoId}`);
+  if (!r.ok || !r.dados) return { pedido: null, bruto: null, erro: r.erro };
+  const nomes = await mapaSituacoes();
+  return { pedido: lerPedido(r.dados, nomes), bruto: r.dados, erro: null };
+}
+
+/** Um pedido conta como venda? Cancelado e em digitação não contam. */
+export function contaComoVenda(p: PedidoBling): boolean {
+  return p.situacaoId !== SITUACAO_PEDIDO.cancelado
+    && p.situacaoId !== SITUACAO_PEDIDO.emDigitacao;
 }
 
 export interface ContaReceber {
   id: string;
   vencimento: string | null;
   valor: number;
-  saldo: number;
-  situacao: string | null;
+  /** Só existe no detalhe da conta. Na listagem vem `null` — e `null` aqui
+   *  significa "não sei", nunca "zero". Somar saldo de listagem era o erro
+   *  que inflava a carteira da cobrança. */
+  saldo: number | null;
+  situacao: number | null;
+  emAberto: boolean;
   clienteNome: string | null;
   clienteId: string | null;
+  documento: string | null;
   historico: string | null;
+  pedidoNumero: string | null;
 }
 
 function lerConta(c: Record<string, unknown>): ContaReceber {
   const contato = (c.contato || {}) as Record<string, unknown>;
+  const origem = (c.origem || {}) as Record<string, unknown>;
+  const situacao = Number(c.situacao);
+  const codigo = Number.isFinite(situacao) ? situacao : null;
   return {
     id: String(c.id ?? ""),
-    vencimento: texto(c.vencimento ?? c.dataVencimento),
+    vencimento: texto(c.vencimento),
     valor: numero(c.valor),
-    saldo: numero(c.saldo ?? c.valor),
-    situacao: texto(c.situacao),
+    saldo: c.saldo === undefined || c.saldo === null ? null : numero(c.saldo),
+    situacao: codigo,
+    emAberto: codigo === SITUACAO_CONTA.emAberto,
     clienteNome: texto(contato.nome),
     clienteId: texto(contato.id),
+    documento: texto(contato.numeroDocumento),
     historico: texto(c.historico),
+    pedidoNumero: texto(origem.numero),
   };
 }
 
 /**
- * Contas a receber em aberto, vencidas até a data de corte.
+ * Contas a receber num intervalo de vencimento.
  *
- * É a fonte de cobrança da Carla: o dinheiro que a loja tem a receber está
+ * É a fonte de cobrança da CLAUD.IA: o dinheiro que a loja tem a receber está
  * aqui, não na tabela `orders` do site (que tem 9 linhas, a última de julho).
+ *
+ * Duas armadilhas da v3, as duas conferidas na conta real:
+ *  - sem `tipoFiltroData` as datas são ignoradas e volta a base inteira;
+ *  - `situacoes[]` filtra, `situacoes=` não. Por isso a peneira é repetida
+ *    aqui em memória: se a API voltar a ignorar o filtro, o número continua
+ *    certo em vez de ficar errado calado.
  */
 export async function listarContasAReceber(opcoes: {
   dataInicial?: string;
   dataFinal?: string;
-  situacao?: string | number;
+  situacoes?: number[];
   maxPaginas?: number;
 } = {}): Promise<{ contas: ContaReceber[]; erro: string | null }> {
+  const problema = janelaValida(opcoes.dataInicial, opcoes.dataFinal);
+  if (problema) return { contas: [], erro: problema };
+
   const { linhas, erro } = await paginar<Record<string, unknown>>(
     "/contas/receber",
     {
-      dataInicialVencimento: opcoes.dataInicial,
-      dataFinalVencimento: opcoes.dataFinal,
-      situacoes: opcoes.situacao,
+      tipoFiltroData: opcoes.dataInicial || opcoes.dataFinal ? "V" : undefined,
+      dataInicial: opcoes.dataInicial,
+      dataFinal: opcoes.dataFinal,
+      situacoes: opcoes.situacoes,
     },
-    opcoes.maxPaginas ?? 5
+    opcoes.maxPaginas ?? 10
   );
-  return { contas: linhas.map(lerConta), erro };
+
+  const querido = new Set(opcoes.situacoes || []);
+  const contas = linhas.map(lerConta).filter((c) => {
+    if (querido.size && (c.situacao === null || !querido.has(c.situacao))) return false;
+    if (opcoes.dataInicial && (!c.vencimento || c.vencimento < opcoes.dataInicial)) return false;
+    if (opcoes.dataFinal && (!c.vencimento || c.vencimento > opcoes.dataFinal)) return false;
+    return true;
+  });
+  return { contas, erro };
+}
+
+/** O detalhe de uma conta — é aqui, e só aqui, que o `saldo` aparece. */
+export async function contaReceberDetalhe(contaId: string): Promise<{
+  conta: ContaReceber | null;
+  erro: string | null;
+}> {
+  const r = await chamarBling<Record<string, unknown>>(`/contas/receber/${contaId}`);
+  if (!r.ok || !r.dados) return { conta: null, erro: r.erro };
+  return { conta: lerConta(r.dados), erro: null };
+}
+
+export interface CarteiraVencida {
+  contas: ContaReceber[];
+  total: number;
+  ate: string;
+  desde: string;
+  erro: string | null;
+}
+
+/**
+ * Tudo que venceu e não foi recebido, até a data de corte.
+ *
+ * Varre para trás em fatias de 366 dias porque a v3 recusa janela maior —
+ * uma única chamada "de 2020 até hoje" volta 400 e a cobrança fica sem lista.
+ */
+export async function contasVencidas(opcoes: { ate?: string; anos?: number } = {}): Promise<CarteiraVencida> {
+  const ate = opcoes.ate || new Date().toISOString().slice(0, 10);
+  const fatias = Math.max(1, Math.min(opcoes.anos ?? 3, 10));
+  const contas: ContaReceber[] = [];
+  let fim = ate;
+  let erro: string | null = null;
+  let desde = ate;
+
+  for (let i = 0; i < fatias; i++) {
+    const inicio = new Date(Date.parse(`${fim}T00:00:00Z`) - (JANELA_MAXIMA_DIAS - 1) * 86_400_000)
+      .toISOString()
+      .slice(0, 10);
+    const r = await listarContasAReceber({
+      dataInicial: inicio,
+      dataFinal: fim,
+      situacoes: [SITUACAO_CONTA.emAberto],
+      maxPaginas: 20,
+    });
+    if (r.erro) { erro = r.erro; break; }
+    contas.push(...r.contas);
+    desde = inicio;
+    fim = new Date(Date.parse(`${inicio}T00:00:00Z`) - 86_400_000).toISOString().slice(0, 10);
+  }
+
+  contas.sort((a, b) => (a.vencimento || "").localeCompare(b.vencimento || ""));
+  return {
+    contas,
+    total: contas.reduce((soma, c) => soma + c.valor, 0),
+    ate,
+    desde,
+    erro,
+  };
 }
 
 export interface ContatoBling {
@@ -444,13 +725,21 @@ export interface ResumoDoDia {
   faturamento: number;
   ticketMedio: number;
   clientes: number;
-  porVendedor: { vendedorId: string | null; pedidos: number; total: number }[];
-  maiores: { cliente: string | null; total: number }[];
+  cancelados: number;
+  emAberto: number;
+  porVendedor: { vendedorId: string | null; nome: string; pedidos: number; total: number }[];
+  maiores: { cliente: string | null; total: number; situacao: string | null }[];
   erro: string | null;
 }
 
 /**
- * Fechamento do dia — o que o Rafa manda às 19h.
+ * Fechamento do dia — o que a MAR.IA manda às 19h.
+ *
+ * Duas coisas que o número errado custava caro:
+ *  - pedido cancelado não entra no faturamento (na conta real o dia tem
+ *    pedido cancelado misturado com venda fechada);
+ *  - o vendedor não vem na listagem, então a quebra por vendedor é feita com
+ *    uma consulta filtrada por vendedor — são 7 chamadas, não 40 detalhes.
  *
  * Devolve `erro` preenchido em vez de lançar: relatório com o número errado é
  * pior do que relatório dizendo "não consegui falar com o Bling".
@@ -459,40 +748,87 @@ export async function resumoDoDia(data?: string): Promise<ResumoDoDia> {
   const dia = data || new Date().toISOString().slice(0, 10);
   const vazio: ResumoDoDia = {
     data: dia, pedidos: 0, faturamento: 0, ticketMedio: 0, clientes: 0,
-    porVendedor: [], maiores: [], erro: null,
+    cancelados: 0, emAberto: 0, porVendedor: [], maiores: [], erro: null,
   };
 
   const { pedidos, erro } = await listarPedidos({ dataInicial: dia, dataFinal: dia });
   if (erro) return { ...vazio, erro };
   if (!pedidos.length) return vazio;
 
-  const faturamento = pedidos.reduce((s, p) => s + p.total, 0);
-  const clientes = new Set(pedidos.map((p) => p.clienteId || p.clienteNome || p.id)).size;
+  const valem = pedidos.filter(contaComoVenda);
+  const cancelados = pedidos.filter((p) => p.situacaoId === SITUACAO_PEDIDO.cancelado).length;
+  const emAberto = pedidos.filter((p) => p.situacaoId === SITUACAO_PEDIDO.emAberto).length;
 
-  const porVendedor = new Map<string, { pedidos: number; total: number }>();
-  for (const p of pedidos) {
-    const chave = p.vendedorId || "sem vendedor";
-    const atual = porVendedor.get(chave) || { pedidos: 0, total: 0 };
-    atual.pedidos += 1;
-    atual.total += p.total;
-    porVendedor.set(chave, atual);
-  }
+  const faturamento = valem.reduce((soma, p) => soma + p.total, 0);
+  const clientes = new Set(valem.map((p) => p.clienteId || p.clienteNome || p.id)).size;
 
   return {
     data: dia,
-    pedidos: pedidos.length,
+    pedidos: valem.length,
     faturamento,
-    ticketMedio: faturamento / pedidos.length,
+    ticketMedio: valem.length ? faturamento / valem.length : 0,
     clientes,
-    porVendedor: [...porVendedor.entries()]
-      .map(([vendedorId, v]) => ({ vendedorId, ...v }))
-      .sort((a, b) => b.total - a.total),
-    maiores: [...pedidos]
+    cancelados,
+    emAberto,
+    porVendedor: await quebrarPorVendedor(dia, valem),
+    maiores: [...valem]
       .sort((a, b) => b.total - a.total)
       .slice(0, 3)
-      .map((p) => ({ cliente: p.clienteNome, total: p.total })),
+      .map((p) => ({ cliente: p.clienteNome, total: p.total, situacao: p.situacao })),
     erro: null,
   };
+}
+
+/**
+ * Quem vendeu o quê no dia.
+ *
+ * Uma consulta por vendedor ativo, porque `idVendedor` filtra na API e o campo
+ * não vem na listagem. O que sobrar da soma é venda sem vendedor marcado — e
+ * aparece como tal, em vez de sumir do relatório.
+ */
+async function quebrarPorVendedor(
+  dia: string,
+  doDia: PedidoBling[]
+): Promise<ResumoDoDia["porVendedor"]> {
+  const { vendedores } = await listarVendedores();
+  const ativos = vendedores.filter((v) => v.ativo);
+  if (!ativos.length) return [];
+
+  const idsQueValem = new Set(doDia.map((p) => p.id));
+  const linhas: ResumoDoDia["porVendedor"] = [];
+  const vistos = new Set<string>();
+
+  for (const v of ativos) {
+    const r = await listarPedidos({
+      dataInicial: dia,
+      dataFinal: dia,
+      vendedorId: v.id,
+      maxPaginas: 3,
+    });
+    if (r.erro) continue;
+    const seus = r.pedidos.filter((p) => idsQueValem.has(p.id));
+    for (const p of seus) vistos.add(p.id);
+    if (seus.length) {
+      linhas.push({
+        vendedorId: v.id,
+        nome: v.nome || v.id,
+        pedidos: seus.length,
+        total: seus.reduce((soma, p) => soma + p.total, 0),
+      });
+    }
+  }
+
+  const soltos = doDia.filter((p) => !vistos.has(p.id));
+  if (soltos.length) {
+    linhas.push({
+      vendedorId: null,
+      nome: "sem vendedor marcado",
+      pedidos: soltos.length,
+      total: soltos.reduce((soma, p) => soma + p.total, 0),
+    });
+  }
+
+  return linhas.sort((a, b) => b.total - a.total);
 }
 
 /** Estado da conexão, para o painel do CRM. Nunca devolve o token. */
@@ -605,6 +941,9 @@ export interface NovoPedido {
   contatoId: string;
   itens: { produtoId?: string; descricao: string; quantidade: number; valor: number }[];
   observacoes?: string;
+  /** Nome do vendedor a marcar no pedido. Padrão: a JUL.IA. Passe `null`
+   *  para emitir sem vendedor. */
+  vendedor?: string | null;
 }
 
 /**
@@ -633,10 +972,17 @@ export async function criarPedido(dados: NovoPedido): Promise<RespostaBling> {
     }
   }
 
+  // Marcar o vendedor é o que faz a venda da JUL.IA aparecer separada no
+  // Bling. Se o cadastro ainda não existe, o pedido sai mesmo assim, sem
+  // vendedor: perder a atribuição é chato, perder a venda é caro.
+  const nomeVendedor = dados.vendedor === undefined ? NOME_VENDEDORA_JULIA : dados.vendedor;
+  const vendedor = nomeVendedor ? await vendedorPorNome(nomeVendedor) : null;
+
   return chamarBling("/pedidos/vendas", {
     metodo: "POST",
     corpo: {
       contato: { id: Number(dados.contatoId) },
+      ...(vendedor ? { vendedor: { id: Number(vendedor.id) } } : {}),
       itens: dados.itens.map((i) => ({
         codigo: i.produtoId || undefined,
         descricao: i.descricao,

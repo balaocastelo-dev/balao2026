@@ -137,7 +137,7 @@ async function calcularToken(slug: string, senha: string) {
 const dinheiro = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-/** `onAbrirBeto` sobe até o CrmAdminClient porque a tela do Beto é cheia (o
+/** `onAbrirBeto` sobe até o CrmAdminClient porque a tela da VITOR.IA é cheia (o
  *  QR Code precisa de espaço) e vive fora deste painel. */
 export default function CrmDashboard({ onAbrirBeto }: { onAbrirBeto: () => void }) {
   const serverUrl =

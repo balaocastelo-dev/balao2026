@@ -3,10 +3,10 @@
 import { useCallback, useEffect, useState } from "react";
 
 // ============================================================
-// Aba do Beto no /crm — número PRÓPRIO do prospector.
+// Aba da VITOR.IA no /crm — número PRÓPRIO do prospectora.
 //
-// O Beto roda num container separado na VPS, exposto em
-// /beto/* do mesmo domínio. Esta aba mostra o QR Code dele (uma
+// O VITOR.IA roda num container separado na VPS, exposto em
+// /beto/* do mesmo domínio. Esta aba mostra o QR Code dela (uma
 // leitura só, como o número da loja), o estado do worker e os
 // controles: ligar/desligar, teto diário e mensagem de primeiro contato.
 // ============================================================
@@ -131,12 +131,12 @@ export default function CrmBetoAdmin({
       const d = await r.json();
       if (d?.ok) {
         setBeto(d as BetoEstado);
-        setAvisos({ tipo: "ok", texto: "Beto atualizado." });
+        setAvisos({ tipo: "ok", texto: "VITOR.IA atualizada." });
       } else {
         setAvisos({ tipo: "erro", texto: d?.erro || "Não consegui atualizar." });
       }
     } catch {
-      setAvisos({ tipo: "erro", texto: "Sem conexão com o servidor do Beto." });
+      setAvisos({ tipo: "erro", texto: "Sem conexão com o servidor da VITOR.IA." });
     } finally {
       setCarregando(false);
     }
@@ -150,7 +150,7 @@ export default function CrmBetoAdmin({
       <div className="shrink-0 border-b border-white/10 bg-slate-950/90 backdrop-blur">
         <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-3 px-4 py-2.5 lg:px-8">
           <span className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-400">
-            Balão · Beto — prospector digital
+            Balão · VITOR.IA — prospectora digital
           </span>
           <div className="flex items-center gap-2">
             <button
@@ -169,7 +169,7 @@ export default function CrmBetoAdmin({
           <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 lg:col-span-2">
             <h2 className="mb-1 text-sm font-bold text-white">Conexão do WhatsApp</h2>
             <p className="mb-4 text-xs text-slate-400">
-              Número PRÓPRIO do Beto — a loja usa outro. Leia este QR uma vez com o
+              Número PRÓPRIO da VITOR.IA — a loja usa outro. Leia este QR uma vez com o
               aparelho que vai receber as conversas de prospecção.
             </p>
 
@@ -193,7 +193,7 @@ export default function CrmBetoAdmin({
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={qr}
-                    alt="QR Code do número do Beto"
+                    alt="QR Code do número da VITOR.IA"
                     className="mx-auto w-56 rounded-lg border border-white/10 bg-white p-2"
                   />
                 ) : (
@@ -211,7 +211,7 @@ export default function CrmBetoAdmin({
           <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 lg:col-span-3">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h2 className="text-sm font-bold text-white">Disparos do Beto</h2>
+                <h2 className="text-sm font-bold text-white">Disparos da VITOR.IA</h2>
                 <p className="text-xs text-slate-400">
                   {beto?.tokenConfigurado === false
                     ? "faltando BETO_TOKEN — os disparos não saem"
@@ -231,7 +231,7 @@ export default function CrmBetoAdmin({
                     : "bg-emerald-500 text-white hover:bg-emerald-400"
                 }`}
               >
-                {beto?.ativo ? "Desligar Beto" : "Ligar Beto"}
+                {beto?.ativo ? "Desligar VITOR.IA" : "Ligar VITOR.IA"}
               </button>
             </div>
 
@@ -313,10 +313,10 @@ export default function CrmBetoAdmin({
             )}
           </section>
 
-          {/* ---------- conversas do número do Beto ---------- */}
+          {/* ---------- conversas do número da VITOR.IA ---------- */}
           <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 lg:col-span-5">
             <h2 className="mb-3 text-sm font-bold text-white">
-              Conversas do número do Beto ({conversas.length})
+              Conversas do número da VITOR.IA ({conversas.length})
             </h2>
             {conversas.length === 0 ? (
               <p className="text-xs text-slate-500">

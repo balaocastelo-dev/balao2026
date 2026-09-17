@@ -4,8 +4,8 @@ import { pegarFila } from "@/lib/carla";
 export const dynamic = "force-dynamic";
 
 /**
- * Fila da Carla — a VPS chama isto para saber quem cobrar e quem reativar.
- * Protegida pelo mesmo token de máquina do Beto (BETO_TOKEN): é a mesma VPS.
+ * Fila da CLAUD.IA — a VPS chama isto para saber quem cobrar e quem reativar.
+ * Protegida pelo mesmo token de máquina da VITOR.IA (BETO_TOKEN): é a mesma VPS.
  */
 function tokenConfere(req: Request) {
   const esperado = (process.env.BETO_TOKEN || "").trim();

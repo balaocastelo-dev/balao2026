@@ -45,22 +45,22 @@
     },
     {
       "id": "julia-ia",
-      "nome": "Júlia IA",
-      "cargo": "Atendente Digital",
-      "assinatura": "Atenciosamente,\n*Júlia IA* • Atendente Digital da Balão da Informática 🤖",
+      "nome": "JUL.IA",
+      "cargo": "Vendedora digital",
+      "assinatura": "Atenciosamente,\n*JUL.IA* • Vendedora digital da Balão da Informática 🤖",
       "protegido": true
     },
     {
       "id": "beto",
-      "nome": "Beto",
-      "cargo": "Prospector Digital",
+      "nome": "VITOR.IA",
+      "cargo": "Prospectora digital",
       "assinatura": "",
       "protegido": true
     },
     {
       "id": "carla",
-      "nome": "Carla",
-      "cargo": "Cobradora Digital",
+      "nome": "CLAUD.IA",
+      "cargo": "Cobrança e reativação",
       "assinatura": "",
       "protegido": true
     }

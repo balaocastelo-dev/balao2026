@@ -4,7 +4,11 @@ import { pegarFila, estatisticas } from "@/lib/beto";
 export const dynamic = "force-dynamic";
 
 /**
- * Fila do Beto — a VPS chama isto para pegar o próximo prospect a contatar.
+ * Fila da VITOR.IA — a VPS chama isto para pegar o próximo prospect a contatar.
+ *
+ * O caminho continua /api/beto: o nome da rota é contrato com a VPS, que roda
+ * em deploy separado. Renomear aqui derrubaria a prospecção até a VPS subir de
+ * novo. A tabela chave -> nome mora em lib/agentes.json.
  *
  * Protegida por BETO_TOKEN no header Authorization: Bearer. Sem o token
  * configurado a porta fica FECHADA: a base tem telefone de cliente, e deixar

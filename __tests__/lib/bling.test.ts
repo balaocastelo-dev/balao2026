@@ -162,30 +162,148 @@ describe("Bling — token e ritmo", () => {
     expect(r.erro).toBeTruthy();
   }, 15000);
 
-  it("soma faturamento, conta clientes e agrupa por vendedor", async () => {
+  it("soma faturamento, conta clientes e separa por vendedor pelo nome", async () => {
     linhaToken = {
       access_token: "vigente", refresh_token: "r1",
       expira_em: DAQUI_A_UMA_HORA, conectado_em: null, ultimo_erro: null,
     };
+    // O vendedor NÃO vem na listagem de pedidos — a quebra sai de uma consulta
+    // por vendedor, com `idVendedor`. Por isso a resposta depende da URL.
     const pedidos = [
-      { id: 1, total: 100, contato: { id: "c1", nome: "Ana" }, vendedor: { id: "v1" } },
-      { id: 2, total: 300, contato: { id: "c2", nome: "Bruno" }, vendedor: { id: "v1" } },
-      { id: 3, total: 200, contato: { id: "c1", nome: "Ana" }, vendedor: { id: "v2" } },
+      { id: 1, total: 100, situacao: { id: 9, valor: 1 }, contato: { id: "c1", nome: "Ana" } },
+      { id: 2, total: 300, situacao: { id: 6, valor: 0 }, contato: { id: "c2", nome: "Bruno" } },
+      { id: 3, total: 200, situacao: { id: 9, valor: 1 }, contato: { id: "c1", nome: "Ana" } },
+      { id: 4, total: 900, situacao: { id: 12, valor: 0 }, contato: { id: "c9", nome: "Zé" } },
     ];
-    vi.stubGlobal("fetch", vi.fn(async () => ({
-      ok: true, status: 200, text: async () => JSON.stringify({ data: pedidos }),
-    })));
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+      const responder = (dados: unknown) => ({
+        ok: true, status: 200, text: async () => JSON.stringify({ data: dados }),
+      });
+      if (url.includes("/situacoes/modulos/98310")) {
+        return responder([{ id: 6, nome: "Em aberto" }, { id: 9, nome: "Atendido" }, { id: 12, nome: "Cancelado" }]);
+      }
+      if (url.includes("/vendedores")) {
+        return responder([
+          { id: 10, contato: { id: 1, nome: "BRENDON OLIVEIRA", situacao: "A" } },
+          { id: 20, contato: { id: 2, nome: "JULIA SOUZA", situacao: "A" } },
+        ]);
+      }
+      if (url.includes("idVendedor=10")) return responder([pedidos[0], pedidos[1]]);
+      if (url.includes("idVendedor=20")) return responder([]);
+      return responder(pedidos);
+    }));
 
     const { resumoDoDia } = await import("../../lib/bling");
     const r = await resumoDoDia("2026-09-14");
 
+    // O cancelado de R$ 900 fica de fora: contar pedido cancelado como venda
+    // era o erro que inflava o fechamento.
     expect(r.pedidos).toBe(3);
     expect(r.faturamento).toBe(600);
-    expect(r.ticketMedio).toBe(200);
+    expect(r.cancelados).toBe(1);
+    expect(r.emAberto).toBe(1);
     expect(r.clientes).toBe(2); // Ana comprou duas vezes, é um cliente só
-    expect(r.porVendedor[0]).toEqual({ vendedorId: "v1", pedidos: 2, total: 400 });
-    expect(r.maiores[0]).toEqual({ cliente: "Bruno", total: 300 });
+    expect(r.porVendedor[0]).toEqual({
+      vendedorId: "10", nome: "BRENDON OLIVEIRA", pedidos: 2, total: 400,
+    });
+    // O pedido 3 não apareceu em nenhum vendedor — aparece como tal, em vez
+    // de sumir da soma.
+    expect(r.porVendedor.find((v) => v.vendedorId === null)).toEqual({
+      vendedorId: null, nome: "sem vendedor marcado", pedidos: 1, total: 200,
+    });
+    expect(r.maiores[0]).toEqual({ cliente: "Bruno", total: 300, situacao: "Em aberto" });
   }, 15000);
+
+  it("lê a situação do pedido pelo id, não pelo campo `valor`", async () => {
+    linhaToken = {
+      access_token: "vigente", refresh_token: "r1",
+      expira_em: DAQUI_A_UMA_HORA, conectado_em: null, ultimo_erro: null,
+    };
+    // Na conta real `situacao` é `{ id: 9, valor: 1 }`: o `valor` é um 0/1
+    // legado. Ler o `valor` fazia todo pedido virar "1" ou "0".
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => ({
+      ok: true, status: 200,
+      text: async () => JSON.stringify({
+        data: url.includes("/situacoes/")
+          ? [{ id: 9, nome: "Atendido" }]
+          : [{ id: 1, total: 10, situacao: { id: 9, valor: 1 }, contato: {} }],
+      }),
+    })));
+
+    const { listarPedidos } = await import("../../lib/bling");
+    const { pedidos } = await listarPedidos({ dataInicial: "2026-09-14", dataFinal: "2026-09-14" });
+    expect(pedidos[0].situacaoId).toBe(9);
+    expect(pedidos[0].situacao).toBe("Atendido");
+  }, 15000);
+
+  it("manda filtro de lista como `chave[]`, que é a forma que o Bling respeita", async () => {
+    linhaToken = {
+      access_token: "vigente", refresh_token: "r1",
+      expira_em: DAQUI_A_UMA_HORA, conectado_em: null, ultimo_erro: null,
+    };
+    const urls: string[] = [];
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+      urls.push(url);
+      return { ok: true, status: 200, text: async () => JSON.stringify({ data: [] }) };
+    }));
+
+    const { listarContasAReceber } = await import("../../lib/bling");
+    await listarContasAReceber({
+      dataInicial: "2026-09-01", dataFinal: "2026-09-14", situacoes: [1],
+    });
+
+    const consulta = urls.find((u) => u.includes("/contas/receber")) || "";
+    // `situacoes=1` devolve 200 com o filtro ignorado. Só a forma com
+    // colchetes filtra de verdade.
+    expect(consulta).toContain("situacoes%5B%5D=1");
+    // Sem `tipoFiltroData` as datas são ignoradas e volta a base inteira.
+    expect(consulta).toContain("tipoFiltroData=V");
+    expect(consulta).toContain("dataInicial=2026-09-01");
+  }, 15000);
+
+  it("peneira de novo em memória o que a API deveria ter filtrado", async () => {
+    linhaToken = {
+      access_token: "vigente", refresh_token: "r1",
+      expira_em: DAQUI_A_UMA_HORA, conectado_em: null, ultimo_erro: null,
+    };
+    // Se o filtro voltar a ser ignorado, o número continua certo em vez de
+    // ficar errado calado — que é o modo de falha caro aqui.
+    vi.stubGlobal("fetch", vi.fn(async () => ({
+      ok: true, status: 200,
+      text: async () => JSON.stringify({
+        data: [
+          { id: 1, vencimento: "2026-09-05", valor: 100, situacao: 1, contato: {} },
+          { id: 2, vencimento: "2026-09-06", valor: 500, situacao: 2, contato: {} },
+          { id: 3, vencimento: "2024-01-01", valor: 900, situacao: 1, contato: {} },
+        ],
+      }),
+    })));
+
+    const { listarContasAReceber } = await import("../../lib/bling");
+    const { contas } = await listarContasAReceber({
+      dataInicial: "2026-09-01", dataFinal: "2026-09-14", situacoes: [1], maxPaginas: 1,
+    });
+
+    expect(contas.map((c) => c.id)).toEqual(["1"]);
+    expect(contas[0].emAberto).toBe(true);
+    // `saldo` não existe na listagem: null é "não sei", não é zero.
+    expect(contas[0].saldo).toBeNull();
+  }, 15000);
+
+  it("recusa janela maior que 366 dias em vez de levar 400 do Bling", async () => {
+    linhaToken = {
+      access_token: "vigente", refresh_token: "r1",
+      expira_em: DAQUI_A_UMA_HORA, conectado_em: null, ultimo_erro: null,
+    };
+    const fetchFalso = vi.fn();
+    vi.stubGlobal("fetch", fetchFalso);
+
+    const { listarContasAReceber } = await import("../../lib/bling");
+    const r = await listarContasAReceber({ dataInicial: "2024-01-01", dataFinal: "2026-09-14" });
+
+    expect(r.erro).toContain("366");
+    expect(fetchFalso).not.toHaveBeenCalled();
+  });
 });
 
 describe("Bling — escrita", () => {
@@ -302,4 +420,61 @@ describe("Bling — hosts", () => {
     expect(m.URL_AUTORIZACAO).toContain("www.bling.com.br");
     expect(m.URL_TOKEN).toContain("www.bling.com.br");
   });
+});
+
+describe("Bling — vendedora JUL.IA", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    upserts.length = 0;
+    process.env.BLING_CLIENT_ID = "id-de-teste";
+    process.env.BLING_CLIENT_SECRET = "segredo-de-teste";
+    linhaToken = {
+      access_token: "vigente", refresh_token: "r1",
+      expira_em: DAQUI_A_UMA_HORA, conectado_em: null, ultimo_erro: null,
+    };
+  });
+  afterEach(() => { vi.unstubAllGlobals(); });
+
+  function responderCom(vendedores: unknown[]) {
+    const chamadas: { url: string; corpo: unknown }[] = [];
+    vi.stubGlobal("fetch", vi.fn(async (url: string, opcoes: { body?: string } = {}) => {
+      chamadas.push({ url, corpo: opcoes.body ? JSON.parse(opcoes.body) : null });
+      const dados = url.includes("/vendedores") ? vendedores : { id: 1 };
+      return { ok: true, status: 200, text: async () => JSON.stringify({ data: dados }) };
+    }));
+    return chamadas;
+  }
+
+  const ITEM = [{ descricao: "Mouse", quantidade: 1, valor: 50 }];
+
+  it("marca a JUL.IA no pedido quando o cadastro existe", async () => {
+    const chamadas = responderCom([
+      { id: 99, contato: { id: 1, nome: "JUL.IA (digital)", situacao: "A" } },
+    ]);
+    const { criarPedido } = await import("../../lib/bling");
+    await criarPedido({ contatoId: "7", itens: ITEM });
+
+    const pedido = chamadas.find((c) => c.url.includes("/pedidos/vendas"));
+    expect((pedido?.corpo as Record<string, unknown>)?.vendedor).toEqual({ id: 99 });
+  }, 15000);
+
+  it("emite mesmo assim quando a JUL.IA ainda não está cadastrada", async () => {
+    // Perder a atribuição é chato; perder a venda é caro.
+    const chamadas = responderCom([
+      { id: 12, contato: { id: 2, nome: "JULIA SOUZA", situacao: "A" } },
+    ]);
+    const { criarPedido } = await import("../../lib/bling");
+    const r = await criarPedido({ contatoId: "7", itens: ITEM });
+
+    expect(r.ok).toBe(true);
+    const pedido = chamadas.find((c) => c.url.includes("/pedidos/vendas"));
+    expect((pedido?.corpo as Record<string, unknown>)?.vendedor).toBeUndefined();
+  }, 15000);
+
+  it("não confunde a JUL.IA com a JULIA SOUZA de carne e osso", async () => {
+    responderCom([{ id: 12, contato: { id: 2, nome: "JULIA SOUZA", situacao: "A" } }]);
+    const { vendedorPorNome } = await import("../../lib/bling");
+    expect(await vendedorPorNome("JUL.IA (digital)")).toBeNull();
+    expect((await vendedorPorNome("julia souza"))?.id).toBe("12");
+  }, 15000);
 });

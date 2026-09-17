@@ -1,14 +1,14 @@
 /**
- * Carla — cobradora & reativação da loja.
+ * CLAUD.IA — cobradora & reativação da loja.
  *
  * Roda na instância PRINCIPAL (número da loja): ela conversa com quem já é
- * cliente, então o número certo é o que a pessoa conhece. O Beto fica no
- * número próprio dele; a Carla nunca disputa o mesmo canal com a Júlia —
+ * cliente, então o número certo é o que a pessoa conhece. A VITOR.IA fica no
+ * número próprio dele; a CLAUD.IA nunca disputa o mesmo canal com a JUL.IA —
  * clientes com conversa recente são pulados automaticamente.
  *
  * Fontes (via site, protegidas por BETO_TOKEN):
  *  - pedidos com payment_status pendente (cobrança)
- *  - prospects que o Beto contatou há 3+ dias sem resposta (reativação)
+ *  - prospects que a VITOR.IA contatou há 3+ dias sem resposta (reativação)
  *
  * Proteções (nunca desativar):
  *  - teto diário baixo, horário comercial, intervalo aleatório
@@ -31,7 +31,7 @@ const IDADE_CONTATO_MS = 10 * 24 * 60 * 60 * 1000;
 const MENSAGEM_COBRANCA_PADRAO = [
   "Oi {nome}! Tudo bem?",
   "",
-  "Aqui é a *Carla, da Balão da Informática Castelo* 🙂",
+  "Aqui é a *CLAUD.IA*, assistente digital da *Balão da Informática Castelo* 🙂",
   "Passando só pra lembrar: seu pedido ({valor}) está com o pagamento pendente.",
   "Se tiver qualquer dúvida ou dificuldade, me conta aqui que a gente resolve com você. 🙏",
   "",
@@ -41,7 +41,7 @@ const MENSAGEM_COBRANCA_PADRAO = [
 const MENSAGEM_REATIVACAO_PADRAO = [
   "Oi {nome}! 👋",
   "",
-  "Aqui é a *Carla, da Balão da Informática Castelo*.",
+  "Aqui é a *CLAUD.IA*, assistente digital da *Balão da Informática Castelo*.",
   "Faz um tempinho que a gente não se fala — passa aqui no Cambuí ou me chama se precisar de algo pra sua máquina!",
   "Esta semana temos ofertas novas em *PC gamer, notebooks e upgrades*. 💻",
   "",
@@ -159,7 +159,7 @@ async function detectarRespostas() {
         estado.contatados.delete(whatsapp);
         await registrar(whatsapp, registro.tipo, "optout", "pediu para não ser contatado");
         estado.ultimaAcao = { tipo: "optout", whatsapp, em: agora };
-        deps.emitToast(`📞 Carla: ${registro.nome || whatsapp} pediu para sair`);
+        deps.emitToast(`📞 CLAUD.IA: ${registro.nome || whatsapp} pediu para sair`);
         try {
           await deps.sendDirectMessage({ number: whatsapp, text: OPT_OUT_ACK, chatId: null, signatureId: null, autorId: "carla" });
         } catch {}
@@ -167,9 +167,9 @@ async function detectarRespostas() {
       }
 
       estado.contatados.delete(whatsapp);
-      await registrar(whatsapp, registro.tipo, "respondeu", "respondeu à Carla");
+      await registrar(whatsapp, registro.tipo, "respondeu", "respondeu à CLAUD.IA");
       estado.ultimaAcao = { tipo: "resposta", whatsapp, em: agora };
-      deps.emitToast(`📞 Carla: ${registro.nome || whatsapp} respondeu!`);
+      deps.emitToast(`📞 CLAUD.IA: ${registro.nome || whatsapp} respondeu!`);
       deps.io.emit("whatsapp:carla-acao", { tipo: "resposta", whatsapp, nome: registro.nome });
       break;
     }
@@ -232,7 +232,7 @@ async function trabalhar() {
   estado.ultimaAcao = { tipo, whatsapp: alvo.whatsapp, em: Date.now() };
 
   deps.io.emit("whatsapp:carla-acao", { tipo, whatsapp: alvo.whatsapp, nome: alvo.nome });
-  deps.emitToast(`📞 Carla: ${tipo} para ${alvo.nome || alvo.whatsapp}`);
+  deps.emitToast(`📞 CLAUD.IA: ${tipo} para ${alvo.nome || alvo.whatsapp}`);
 
   const pausa = DELAY_MIN_MS + Math.random() * (DELAY_MAX_MS - DELAY_MIN_MS);
   pausaAte = Date.now() + pausa;
@@ -308,7 +308,7 @@ function definirConfig({ ativo, maxDia, mensagemCobranca, mensagemReativacao }) 
       diaAtual: estado.diaAtual,
     };
     deps.persistStore();
-    deps.emitToast(`Carla: ${estado.ativo ? "ligada" : "desligada"} · teto de ${estado.maxDia}/dia`);
+    deps.emitToast(`CLAUD.IA: ${estado.ativo ? "ligada" : "desligada"} · teto de ${estado.maxDia}/dia`);
   }
   return resumo();
 }

@@ -18,7 +18,7 @@ function tokenConfere(req: Request) {
 const STATUS_VALIDOS = ["novo", "fila", "contatado", "respondeu", "convertido", "descartado", "optout"] as const;
 
 /**
- * A VPS avisa o resultado de cada envio do Beto:
+ * A VPS avisa o resultado de cada envio da VITOR.IA:
  *   status=contatado   mensagem enviada
  *   status=novo        envio falhou (volta pra fila e conta tentativa)
  *   status=respondeu   o prospect respondeu

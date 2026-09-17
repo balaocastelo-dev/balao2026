@@ -4,9 +4,9 @@ import { isPainelAuthenticated } from "@/lib/painel-auth";
 export const dynamic = "force-dynamic";
 
 /**
- * Conversas do número do Beto, para a aba dele no /crm.
+ * Conversas do número da VITOR.IA, para a aba dele no /crm.
  *
- * O navegador não fala direto com o container do Beto: telefone de cliente
+ * O navegador não fala direto com o container da VITOR.IA: telefone de cliente
  * não trafega por rota aberta. Aqui a porta é a senha do painel (cookie) e o
  * site é quem guarda o BETO_PANEL_TOKEN que o container exige.
  */
@@ -30,6 +30,6 @@ export async function GET() {
     const dados = await resposta.json();
     return NextResponse.json({ ok: true, conversas: dados?.conversas || [] });
   } catch {
-    return NextResponse.json({ ok: false, conversas: [], erro: "servidor do Beto fora do ar" });
+    return NextResponse.json({ ok: false, conversas: [], erro: "servidor da VITOR.IA fora do ar" });
   }
 }

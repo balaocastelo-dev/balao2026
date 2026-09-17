@@ -1,5 +1,5 @@
 /**
- * Rafa — analista da loja.
+ * MAR.IA — analista da loja.
  *
  * Dois relatórios por dia no WhatsApp do Thiago:
  *   07:00  como está o setor (venda, movimento, margem, procura sem resposta)
@@ -11,7 +11,7 @@
  * VPS — e a VPS é a máquina mais exposta do conjunto.
  *
  * Roda na instância PRINCIPAL (número da loja): o relatório vai para o Thiago
- * pelo número que ele já conhece. O Beto tem número próprio e não manda nada
+ * pelo número que ele já conhece. A VITOR.IA tem número próprio e não manda nada
  * disso.
  */
 
@@ -165,7 +165,7 @@ function definirConfig({ ativo }) {
   if (typeof ativo === "boolean" && ativo !== estado.ativo) {
     estado.ativo = ativo;
     persistir();
-    if (deps) deps.emitToast(`Rafa: ${ativo ? "ligado" : "desligado"}`);
+    if (deps) deps.emitToast(`MAR.IA: ${ativo ? "ligado" : "desligado"}`);
   }
   return resumo();
 }

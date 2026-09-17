@@ -146,8 +146,8 @@
   "use strict";
 
   var VPS = "https://srv1963897.hstgr.cloud";
-  var LOJA = VPS;          // número da loja: Júlia e Carla
-  var FORA = VPS + "/beto"; // número de fora: Beto e Rafa
+  var LOJA = VPS;          // número da loja: JUL.IA e CLAUD.IA
+  var FORA = VPS + "/beto"; // número de fora: VITOR.IA e MAR.IA
 
   // Buscar sem deixar uma falha derrubar a tela: quem não responde volta
   // null e a carta correspondente entra em "sem contato".
@@ -231,16 +231,16 @@
     /* ---------- personagens ---------- */
     var personagens = [];
 
-    // Júlia — atendimento
+    // JUL.IA — atendimento
     var ia = d.julia && d.julia.ia;
     if (!ia) {
-      personagens.push({ nome: "Júlia", classe: "Vendedora", retrato: "💬", semContato: true,
+      personagens.push({ nome: "JUL.IA", classe: "Vendedora", retrato: "💬", semContato: true,
         fala: "Sem contato com o servidor da loja." });
     } else {
       var modo = ia.modo === "autopilot" ? "autopiloto" : ia.modo === "copilot" ? "copiloto" : "desligada";
       var ligada = ia.modo && ia.modo !== "off";
       personagens.push({
-        nome: "Júlia", classe: "Vendedora · linha da loja", retrato: "💬",
+        nome: "JUL.IA", classe: "Vendedora · linha da loja", retrato: "💬",
         ligado: ligada, cor: "var(--azul)",
         fala: ligada
           ? "Atendendo em " + modo + "." + (ia.processando ? " Respondendo " + ia.processando + " conversa(s) agora." : "")
@@ -251,16 +251,16 @@
           { valor: (ia.stats && ia.stats.falhas) || 0, rotulo: "falhas" }
         ]
       });
-      anotar("Júlia", ia.ultimaAcao, null);
+      anotar("JUL.IA", ia.ultimaAcao, null);
     }
 
-    // Beto — prospecção
+    // VITOR.IA — prospecção
     if (!d.beto) {
-      personagens.push({ nome: "Beto", classe: "Prospector", retrato: "🎯", semContato: true,
+      personagens.push({ nome: "VITOR.IA", classe: "Prospectora", retrato: "🎯", semContato: true,
         fala: "Sem contato com o número de fora." });
     } else {
       personagens.push({
-        nome: "Beto", classe: "Prospector · linha de fora", retrato: "🎯",
+        nome: "VITOR.IA", classe: "Prospectora · linha de fora", retrato: "🎯",
         ligado: !!d.beto.ativo, cor: "var(--ambar)",
         feito: d.beto.enviadosHoje || 0, teto: d.beto.maxDia || 0,
         fala: d.beto.ativo
@@ -271,16 +271,16 @@
           { valor: d.beto.horarioComercial ? "sim" : "não", rotulo: "no horário" }
         ]
       });
-      anotar("Beto", d.beto.ultimaAcao, null);
+      anotar("VITOR.IA", d.beto.ultimaAcao, null);
     }
 
-    // Carla — cobrança
+    // CLAUD.IA — cobrança
     if (!d.carla) {
-      personagens.push({ nome: "Carla", classe: "Cobradora", retrato: "📞", semContato: true,
+      personagens.push({ nome: "CLAUD.IA", classe: "Cobradora", retrato: "📞", semContato: true,
         fala: "Sem contato com o servidor da loja." });
     } else {
       personagens.push({
-        nome: "Carla", classe: "Cobrança & reativação · linha da loja", retrato: "📞",
+        nome: "CLAUD.IA", classe: "Cobrança & reativação · linha da loja", retrato: "📞",
         ligado: !!d.carla.ativo, cor: "var(--roxo)",
         feito: d.carla.enviadosHoje || 0, teto: d.carla.maxDia || 0,
         fala: d.carla.ativo
@@ -291,19 +291,19 @@
           { valor: d.carla.tokenConfigurado ? "sim" : "não", rotulo: "fala com o site" }
         ]
       });
-      anotar("Carla", d.carla.ultimaAcao, null);
+      anotar("CLAUD.IA", d.carla.ultimaAcao, null);
     }
 
-    // Rafa — inteligência
+    // MAR.IA — inteligência
     if (!d.rafa) {
-      personagens.push({ nome: "Rafa", classe: "Analista", retrato: "📊", semContato: true,
+      personagens.push({ nome: "MAR.IA", classe: "Analista", retrato: "📊", semContato: true,
         fala: "Sem contato com o número de fora." });
     } else {
       var falta = [];
       if (!d.rafa.destinoConfigurado) falta.push("o número de destino");
       if (!d.rafa.tokenConfigurado) falta.push("o token do site");
       personagens.push({
-        nome: "Rafa", classe: "Analista · linha de fora", retrato: "📊",
+        nome: "MAR.IA", classe: "Analista · linha de fora", retrato: "📊",
         ligado: !!d.rafa.ativo, cor: "var(--verde)",
         fala: falta.length
           ? "Falta configurar " + falta.join(" e ") + "."
@@ -316,12 +316,12 @@
           { valor: d.rafa.agoraNaLoja ? d.rafa.agoraNaLoja.slice(-3) : "—", rotulo: "na loja" }
         ]
       });
-      anotar("Rafa", d.rafa.ultimaAcao, null);
+      anotar("MAR.IA", d.rafa.ultimaAcao, null);
       if (d.rafa.ultimoEnvio) {
-        if (d.rafa.ultimoEnvio.manha) anotar("Rafa", "briefing do setor enviado", d.rafa.ultimoEnvio.manha);
-        if (d.rafa.ultimoEnvio.noite) anotar("Rafa", "fechamento do dia enviado", d.rafa.ultimoEnvio.noite);
+        if (d.rafa.ultimoEnvio.manha) anotar("MAR.IA", "briefing do setor enviado", d.rafa.ultimoEnvio.manha);
+        if (d.rafa.ultimoEnvio.noite) anotar("MAR.IA", "fechamento do dia enviado", d.rafa.ultimoEnvio.noite);
       }
-      if (d.rafa.ultimoErro) anotar("Rafa", "erro: " + d.rafa.ultimoErro, null);
+      if (d.rafa.ultimoErro) anotar("MAR.IA", "erro: " + d.rafa.ultimoErro, null);
     }
 
     document.getElementById("grade").innerHTML = personagens.map(carta).join("");

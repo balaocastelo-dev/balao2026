@@ -2,13 +2,13 @@ import { supabaseAdmin } from "./supabase";
 import { resumoDoDia, listarPedidos, estadoBling } from "./bling";
 
 // ============================================================
-// Rafa — analista da loja. Dois relatórios por dia no WhatsApp do Thiago:
+// MAR.IA — analista da loja. Dois relatórios por dia no WhatsApp do Thiago:
 //
 //   07h  Como está o setor: preço contra concorrente, o que as pessoas
 //        procuraram e a loja não tem, movimento da semana.
 //   19h  Fechamento do dia: quanto entrou, quantos clientes, por vendedor.
 //
-// A regra que governa este arquivo: o Rafa só reporta número que ele MEDIU.
+// A regra que governa este arquivo: a MAR.IA só reporta número que ele MEDIU.
 //
 // Seria mais fácil perguntar a um modelo "quais as tendências do varejo de
 // informática hoje" e mandar a resposta. O resultado seria plausível, bonito
@@ -328,10 +328,17 @@ export async function relatorioDoFechamento(data?: string): Promise<string> {
     "",
   ];
 
+  if (resumo.cancelados || resumo.emAberto) {
+    const partes: string[] = [];
+    if (resumo.emAberto) partes.push(`${resumo.emAberto} ainda em aberto`);
+    if (resumo.cancelados) partes.push(`${resumo.cancelados} cancelado(s), fora da conta`);
+    linhas.push(`📋 ${partes.join(" · ")}`, "");
+  }
+
   if (resumo.porVendedor.length) {
     linhas.push("*Por vendedor*");
     for (const v of resumo.porVendedor) {
-      linhas.push(`• ${v.vendedorId || "sem vendedor"}: ${v.pedidos} pedido(s) · ${reais(v.total)}`);
+      linhas.push(`• ${v.nome}: ${v.pedidos} pedido(s) · ${reais(v.total)}`);
     }
     linhas.push("");
   }

@@ -1,4 +1,4 @@
-// Testes do Beto — funções puras do prospector.
+// Testes da VITOR.IA — funções puras do prospector.
 //
 // O que está coberto aqui é o que decide a reputação do número da loja (ou do
 // número próprio): a mensagem precisa ser pessoal, e o pedido de sair precisa

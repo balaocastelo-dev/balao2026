@@ -36,8 +36,11 @@ function mapSupabaseProduct(r: Row): Product {
     installment: r.installment ? String(r.installment) : undefined,
     discount_pix: r.discount_pix ? String(r.discount_pix) : undefined,
     price_card: r.price_card ? String(r.price_card) : undefined,
-    availability: r.availability ? String(r.availability) : undefined,
-    source_url: r.source_url ? String(r.source_url) : undefined,
+    // No Supabase estas duas se chamam `status` e `product_url`. Os nomes
+    // antigos continuam sendo lidos porque a cópia da VPS e o Turso ainda
+    // usam a grafia antiga.
+    availability: r.status ?? r.availability ? String(r.status ?? r.availability) : undefined,
+    source_url: r.product_url ?? r.source_url ? String(r.product_url ?? r.source_url) : undefined,
     created_at: r.created_at ? String(r.created_at) : undefined,
     cost: r.cost != null && Number(r.cost) > 0 ? Number(r.cost) : undefined,
     supplier: r.supplier ? String(r.supplier) : undefined,
@@ -53,8 +56,15 @@ const sortByPrice = (items: Product[]) => items.sort((a, b) => parsePriceToNumbe
 // 1000 linhas, e a página caía no espelho da VPS, devagar. O filtro por
 // description continua funcionando (o WHERE roda no banco mesmo sem a coluna
 // no select); só a página de produto precisa da linha completa.
+// CONFERIDO contra o schema real em 15/09/2026. Não acrescente coluna aqui
+// sem olhar a tabela: o PostgREST recusa a consulta INTEIRA com 400
+// (42703, "column does not exist") quando uma só não existe, e o código
+// devolve lista vazia. Foi exatamente isso que deixou a home e todas as
+// páginas de categoria sem um único produto — `installment`, `discount_pix`,
+// `price_card`, `availability`, `source_url`, `brand` e `rating` estavam
+// nesta lista e nenhuma delas existe na tabela.
 const COLUNAS_LISTA =
-  "id,name,price,image,category,slug,installment,discount_pix,price_card,availability,source_url,created_at,brand,rating,cost,supplier";
+  "id,name,price,image,category,slug,product_url,created_at,cost,supplier,status,stock";
 
 // O PostgREST devolve no maximo 1000 linhas por consulta, em silencio: sem
 // erro e sem aviso. Um `select` direto entregava 1000 de 1288 curados, e o

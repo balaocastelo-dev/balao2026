@@ -5,7 +5,7 @@ import { estatisticas } from "@/lib/carla";
 export const dynamic = "force-dynamic";
 
 /**
- * Números da Carla para o painel do /crm — porta fechada pela senha do painel.
+ * Números da CLAUD.IA para o painel do /crm — porta fechada pela senha do painel.
  */
 export async function GET() {
   const autenticado = await isPainelAuthenticated();

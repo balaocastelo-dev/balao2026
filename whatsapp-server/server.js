@@ -227,8 +227,9 @@ const juliaIA = require("./ia-worker");
 const betoWorker = require("./beto-worker");
 const carlaWorker = require("./carla-worker");
 const rafaWorker = require("./rafa-worker");
+const liviaWorker = require("./livia-worker");
 
-// "loja" (padrão) roda a Júlia; "beto" roda o prospector no número próprio.
+// "loja" (padrão) roda a JUL.IA; "beto" roda o prospector no número próprio.
 const PERFIL = process.env.PERFIL || "loja";
 const BETO_PANEL_TOKEN = process.env.BETO_PANEL_TOKEN || "";
 
@@ -259,7 +260,7 @@ const store = {
   // O percentual fica gravado NA VENDA de proposito: mudar a comissao do
   // vendedor hoje nao pode reescrever o que ele ja ganhou no mes passado.
   vendas: [],
-  // Configuração da Júlia IA (atendente digital): modo (off/copilot/autopilot)
+  // Configuração da JUL.IA (atendente digital): modo (off/copilot/autopilot)
   // e se ela pega leads novos sem vendedor.
   ia: { modo: "off", autolead: false },
 };
@@ -2914,7 +2915,7 @@ async function sendDirectMessage({ number, text, signatureId, chatId: preferredC
   }
 
   // Credita a autoria ANTES do envio: o message_create que chega logo em
-  // seguida herda quem mandou (robôs como a Júlia e o Beto usam isto).
+  // seguida herda quem mandou (robôs como a JUL.IA e a VITOR.IA usam isto).
   if (autorId) marcarAutor(targetChatId, autorId);
 
   console.log(`[WHATSAPP-SEND] Disparando texto para ${targetChatId}: "${finalText.slice(0, 60)}"`);
@@ -3876,7 +3877,7 @@ app.get(["/api/crm/metricas", "/api/metricas"], (_req, res) => {
   res.json({ ok: true, metricas: metricasAgora() });
 });
 
-// ---------- Júlia IA (atendente digital) ----------
+// ---------- JUL.IA (atendente digital) ----------
 
 // Estado e estatísticas da atendente digital.
 app.get(["/api/crm/ia/estado", "/api/ia/estado"], (_req, res) => {
@@ -3884,7 +3885,7 @@ app.get(["/api/crm/ia/estado", "/api/ia/estado"], (_req, res) => {
 });
 
 // Liga/desliga e escolhe o modo: off | copilot | autopilot.
-// `autolead` faz a Júlia pegar leads novos (sem vendedor) sozinha.
+// `autolead` faz a JUL.IA pegar leads novos (sem vendedor) sozinha.
 app.post(["/api/crm/ia/config", "/api/ia/config"], express.json(), (req, res) => {
   const modo = String(req.body?.modo || "").trim().toLowerCase();
   const autolead = req.body?.autolead;
@@ -3910,14 +3911,14 @@ app.post(["/api/crm/ia/descartar-sugestao", "/api/ia/descartar-sugestao"], expre
   res.json(juliaIA.descartarSugestao(chatId));
 });
 
-// Passa um lead (novo ou não) para a Júlia IA atender.
+// Passa um lead (novo ou não) para a JUL.IA atender.
 app.post(["/api/crm/ia/atribuir", "/api/ia/atribuir"], express.json(), (req, res) => {
   const chatId = String(req.body?.chatId || "").trim();
   if (!chatId) return res.status(400).json({ ok: false, erro: "chatId é obrigatório." });
   res.json(juliaIA.atribuirLead(chatId));
 });
 
-// ---------- portas entre instâncias (Beto) ----------
+// ---------- portas entre instâncias (VITOR.IA) ----------
 
 // Confere um token em tempo constante — mesmo padrão do site.
 function confereTokenDeMaquina(req) {
@@ -3939,7 +3940,7 @@ function normalizarParaBusca(v) {
   return d.slice(-11);
 }
 
-// O container do Beto pergunta aqui (número principal) se uma pessoa já tem
+// O container da VITOR.IA pergunta aqui (número principal) se uma pessoa já tem
 // conversa recente com a loja — quem fala com a loja não é prospect frio.
 app.get("/api/crm/contato-recente", (req, res) => {
   if (!confereTokenDeMaquina(req)) {
@@ -3956,7 +3957,7 @@ app.get("/api/crm/contato-recente", (req, res) => {
   res.json({ ok: true, recente });
 });
 
-// Lista as conversas da instância (para a aba do Beto no /crm).
+// Lista as conversas da instância (para a aba da VITOR.IA no /crm).
 // Protegida: telefone de cliente não sai por rota aberta.
 app.get("/api/crm/conversas-recentes", (req, res) => {
   if (!confereTokenDeMaquina(req)) {
@@ -3992,7 +3993,7 @@ app.get("/api/crm/conversas-recentes", (req, res) => {
   res.json({ ok: true, conversas });
 });
 
-// Estado do prospector — a aba do Beto no /crm mostra isto.
+// Estado do prospector — a aba da VITOR.IA no /crm mostra isto.
 app.get(["/api/crm/beto/estado", "/api/beto/estado"], (_req, res) => {
   res.json({ ok: true, ...betoWorker.resumo() });
 });
@@ -4005,7 +4006,7 @@ app.post(["/api/crm/beto/config", "/api/beto/config"], express.json(), (req, res
   res.json({ ok: true, ...betoWorker.definirConfig({ ativo, maxDia, mensagem }) });
 });
 
-// ---------- Carla (cobradora & reativação, número da loja) ----------
+// ---------- CLAUD.IA (cobradora & reativação, número da loja) ----------
 
 app.get(["/api/crm/carla/estado", "/api/carla/estado"], (_req, res) => {
   res.json({ ok: true, ...carlaWorker.resumo() });
@@ -4019,7 +4020,7 @@ app.post(["/api/crm/carla/config", "/api/carla/config"], express.json(), (req, r
   res.json({ ok: true, ...carlaWorker.definirConfig({ ativo, maxDia, mensagemCobranca, mensagemReativacao }) });
 });
 
-// ---- Rafa (analista: 7h setor, 19h fechamento) ----
+// ---- MAR.IA (analista: 7h setor, 19h fechamento) ----
 app.get(["/api/crm/rafa/estado", "/api/rafa/estado"], (req, res) => {
   res.json({ ok: true, ...rafaWorker.resumo() });
 });
@@ -4034,6 +4035,28 @@ app.post(["/api/crm/rafa/config", "/api/rafa/config"], express.json(), (req, res
 app.post(["/api/crm/rafa/enviar", "/api/rafa/enviar"], express.json(), async (req, res) => {
   const tipo = req.body?.tipo === "fechamento" ? "fechamento" : "manha";
   res.json(await rafaWorker.enviarAgora(tipo));
+});
+
+// ---- LIV.IA (caixa de entrada da loja) ----
+//
+// Não é um worker de WhatsApp: ela não usa o cliente nem as deps de trabalho,
+// só IMAP e HTTP. Por isso liga fora do bloco de perfil, e SÓ na instância da
+// loja — duas instâncias lendo a mesma caixa responderiam o cliente duas vezes.
+app.get(["/api/crm/livia/estado", "/api/livia/estado"], (_req, res) => {
+  res.json({ ok: true, ...liviaWorker.resumo() });
+});
+
+app.post(["/api/crm/livia/config", "/api/livia/config"], express.json(), (req, res) => {
+  const ativo = typeof req.body?.ativo === "boolean" ? req.body.ativo : undefined;
+  if (ativo === true) return res.json({ ok: true, ...liviaWorker.ligar() });
+  if (ativo === false) return res.json({ ok: true, ...liviaWorker.desligar() });
+  res.json({ ok: true, ...liviaWorker.resumo() });
+});
+
+// Roda uma passada na caixa agora, sem esperar o intervalo. Serve para
+// conferir a configuração sem ficar olhando o relógio.
+app.post(["/api/crm/livia/rodar", "/api/livia/rodar"], express.json(), async (_req, res) => {
+  res.json(await liviaWorker.rodar());
 });
 
 // Login dos vendedores criados pelo dashboard.
@@ -5455,22 +5478,23 @@ server.listen(port, () => {
   };
 
   if (PERFIL === "beto") {
-    // Número de fora: prospecção e relatórios. O Beto fala com quem ainda não
-    // é cliente; o Rafa só fala com o Thiago. Nenhum dos dois toca a linha que
+    // Número de fora: prospecção e relatórios. A VITOR.IA fala com quem ainda não
+    // é cliente; a MAR.IA só fala com o Thiago. Nenhum dos dois toca a linha que
     // o cliente conhece.
     //
     // Os dois dividem a MESMA linha e cada um tem o próprio teto diário: o do
-    // Beto é o que protege o chip (mensagem fria é o que gera denúncia), e o
-    // do Rafa são dois relatórios por dia para um contato salvo, que não pesa
+    // VITOR.IA é o que protege o chip (mensagem fria é o que gera denúncia), e o
+    // da MAR.IA são dois relatórios por dia para um contato salvo, que não pesa
     // no mesmo risco. Somar os dois num teto só faria o relatório do dono
     // comer a cota de prospecção.
     betoWorker.iniciar(depsDeTrabalho);
     rafaWorker.iniciar(depsDeTrabalho);
   } else {
-    // Número da loja: a Júlia atende e a Carla cobra/reativa. O Beto nunca
+    // Número da loja: a JUL.IA atende e a CLAUD.IA cobra/reativa. A VITOR.IA nunca
     // dispara daqui — o dele é número próprio.
     juliaIA.iniciar(depsDeTrabalho);
     carlaWorker.iniciar(depsDeTrabalho);
+    liviaWorker.iniciar();
   }
 });
 
