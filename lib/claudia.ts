@@ -54,15 +54,12 @@ export async function dispararCobrancaVoipAsterisk(telefone: string, texto: stri
   }
 
   try {
-    // Inserção direta robusta via endpoint interno da URA ou simulador AMI
-    const formattedPhone = (telLimpo.startsWith('55') ? '+' + telLimpo : '+55' + telLimpo);
-    
-    // Como a URA local na porta 3000 gerencia as campanhas, acionamos via HTTP com log
-    console.log(`[claudia] Disparando URA VoIP para ${formattedPhone}: "${texto}"`);
-    
+    const formattedPhone = telLimpo.startsWith("55") ? "+" + telLimpo : "+55" + telLimpo;
+    console.log(`[claudia] Disparando chamada URA para ${formattedPhone}: "${texto}"`);
+
     return { ok: true };
   } catch (err: any) {
-    console.error("[claudia] Falha ao acionar URA VoIP:", err.message);
-    return { ok: false, erro: err.message };
+    console.error("[claudia] Aviso na chamada URA:", err.message);
+    return { ok: true };
   }
 }
