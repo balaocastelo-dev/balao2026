@@ -15,6 +15,11 @@ export default function ClaudiaPage() {
   const [statusMsg, setStatusMsg] = useState("");
   const [carregando, setCarregando] = useState(false);
 
+  // Estados para cobrança avulsa VoIP / URA
+  const [telAvulso, setTelAvulso] = useState("");
+  const [textoAvulso, setTextoAvulso] = useState("Olá, aqui é da Balão da Informática. Entramos em contato para verificar pendência financeira em seu cadastro. Por favor retorne.");
+  const [statusAvulso, setStatusAvulso] = useState("");
+
   useEffect(() => {
     carregarDados();
   }, []);
@@ -69,6 +74,36 @@ export default function ClaudiaPage() {
     } finally {
       setCarregando(false);
       setTimeout(() => setStatusMsg(""), 4000);
+    }
+  }
+
+  async function dispararCobrancaAvulsa(e: React.FormEvent) {
+    e.preventDefault();
+    if (!telAvulso || !textoAvulso) return;
+    setCarregando(true);
+    setStatusAvulso("Disparando URA VoIP Asterisk...");
+
+    try {
+      const res = await fetch("/api/claudia", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          acao: "cobranca_avulsa",
+          telefone: telAvulso,
+          texto: textoAvulso
+        })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setStatusAvulso("✅ " + data.mensagem);
+        setTelAvulso("");
+      } else {
+        setStatusAvulso("❌ Erro: " + data.erro);
+      }
+    } catch (e) {
+      setStatusAvulso("❌ Erro de conexão com o VoIP.");
+    } finally {
+      setCarregando(false);
     }
   }
 
@@ -190,12 +225,60 @@ export default function ClaudiaPage() {
           </div>
         </div>
 
-        {/* Painel Direito: Fila de Cobrança com Ações */}
+        {/* Painel Direito: Fila de Cobrança + Cobrança Avulsa VoIP Asterisk */}
         <div className="lg:col-span-2 space-y-6">
+
+          {/* NOVA SEÇÃO: Cobrança Avulsa VoIP / URA */}
+          <div className="bg-[#101c33] border border-purple-500/30 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-cyan-400"></div>
+            <h2 className="text-lg font-bold mb-1 flex items-center gap-2">
+              <span>☎️ Cobrança Avulsa (VoIP Asterisk / URA)</span>
+            </h2>
+            <p className="text-xs text-slate-400 mb-4">Digite o número e o texto que a URA deve falar ao discar para o cliente.</p>
+            
+            <form onSubmit={dispararCobrancaAvulsa} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs text-slate-300 block mb-1">Telefone do Cliente (com DDD)</label>
+                  <input 
+                    type="text"
+                    value={telAvulso}
+                    onChange={e => setTelAvulso(e.target.value)}
+                    placeholder="Ex: 19987510267"
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500"
+                    required
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-slate-300 block mb-1">Texto da Cobrança (TTS URA)</label>
+                <textarea 
+                  value={textoAvulso}
+                  onChange={e => setTextoAvulso(e.target.value)}
+                  rows={3}
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500"
+                  required
+                ></textarea>
+              </div>
+              <div className="flex items-center justify-between pt-2">
+                <span className="text-xs text-purple-300 font-medium">{statusAvulso}</span>
+                <button 
+                  type="submit"
+                  disabled={carregando}
+                  className="bg-purple-600 hover:bg-purple-500 text-white font-bold px-6 py-2.5 rounded-xl transition text-sm shadow-lg flex items-center gap-2 disabled:opacity-50"
+                >
+                  <span>Disparar Chamada VoIP</span>
+                  <span>📞</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* Fila de Cobrança Automática */}
           <div className="bg-[#101c33] border border-white/10 rounded-2xl p-6 shadow-xl">
             <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
               <div>
-                <h2 className="text-lg font-bold">Fila de Cobrança Ativa</h2>
+                <h2 className="text-lg font-bold">Fila de Cobrança Automática</h2>
                 <p className="text-xs text-slate-400">Clientes com contas vencidas ou pedidos pendentes</p>
               </div>
               <button 
@@ -237,7 +320,7 @@ export default function ClaudiaPage() {
                       <button
                         disabled={carregando}
                         onClick={() => executarAcao(item.whatsapp, "cobrar", "todos", item.nome, item.total)}
-                        className="text-xs bg-emerald-500 hover:bg-emerald-400 text-black font-bold px-4 py-2 rounded-lg transition shadow-lg"
+                        className="text-xs bg-purple-600 hover:bg-purple-500 text-white font-bold px-4 py-2 rounded-lg transition shadow-lg"
                       >
                         ⚡ Cobrar Agora
                       </button>

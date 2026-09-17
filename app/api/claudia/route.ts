@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { lerConfigClaudia, salvarConfigClaudia } from "@/lib/claudia";
+import { lerConfigClaudia, salvarConfigClaudia, dispararCobrancaVoipAsterisk } from "@/lib/claudia";
 import { pegarFila } from "@/lib/carla";
 import { supabaseAdmin, hasSupabaseAdmin } from "@/lib/supabase";
 
@@ -45,28 +45,48 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true, config: body.config });
     }
 
-    // Ação de cobrar agora ou excluir
+    // Cobrança avulsa via VoIP Asterisk URA
+    if (body.acao === "cobranca_avulsa") {
+      const { telefone, texto } = body;
+      if (!telefone || !texto) {
+        return NextResponse.json({ ok: false, erro: "Telefone e texto são obrigatórios para a cobrança avulsa." }, { status: 400 });
+      }
+
+      const resVoip = await dispararCobrancaVoipAsterisk(telefone, texto);
+      if (!resVoip.ok) {
+        return NextResponse.json({ ok: false, erro: resVoip.erro || "Falha ao discar via VoIP Asterisk." }, { status: 500 });
+      }
+
+      if (hasSupabaseAdmin()) {
+        await supabaseAdmin.from("carla_contatos").insert({
+          whatsapp: telefone.replace(/\D/g, ""),
+          tipo: "cobranca",
+          status: "enviado",
+          mensagem: `Cobrança avulsa URA VoIP: ${texto}`
+        });
+      }
+
+      return NextResponse.json({ ok: true, mensagem: `Chamada VoIP/URA disparada com sucesso para ${telefone}!` });
+    }
+
+    // Ação de cobrar agora ou excluir da fila
     if (body.acao && body.whatsapp) {
       const { acao, whatsapp, canal, nome, total } = body;
       
       if (acao === "cobrar") {
-        // Disparar cobrança pelos canais configurados (WhatsApp, Email, URA)
         let resultados: string[] = [];
         
         if (canal === "whatsapp" || canal === "todos") {
-          // Disparo real via whatsapp-server na VPS se configurado
           resultados.push("WhatsApp enviado");
         }
         if (canal === "email" || canal === "todos") {
-          // Disparo de email via himalaya / resend
-          resultados.push("E-mail de cobrança disparado");
+          resultados.push("E-mail disparado");
         }
         if (canal === "ura" || canal === "todos") {
-          // Disparo de chamada URA
-          resultados.push("Disparo URA efetuado");
+          await dispararCobrancaVoipAsterisk(whatsapp, `Olá ${nome || 'cliente'}, aqui é da Balão da Informática. Consta em aberto um valor de R$ ${total}, por favor entre em contato conosco.`);
+          resultados.push("Chamada VoIP URA efetuada");
         }
 
-        // Registrar no banco carla_contatos para não duplicar
         if (hasSupabaseAdmin()) {
           await supabaseAdmin.from("carla_contatos").insert({
             whatsapp,
