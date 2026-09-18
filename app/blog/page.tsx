@@ -137,43 +137,57 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
   const org = generateOrganizationSchema();
 
   return (
-    <div className="min-h-screen flex flex-col font-sans">
+    <div className="min-h-screen flex flex-col font-sans bg-slate-950 text-slate-100 selection:bg-[#E60012] selection:text-white">
       <Header />
-      <main className="flex-1 mx-auto w-full max-w-7xl px-4 py-8">
+      <main className="flex-1 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
         <JsonLd data={[org, breadcrumbs, faq]} />
 
-        <section className="mb-6 rounded-md border border-neutral-200 bg-white p-5">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0">
-              <h1 className="text-2xl font-extrabold tracking-tight">Blog Balão da Informática</h1>
-              <p className="mt-2 text-sm text-neutral-700">
-                Notícias de tecnologia, guias de compra e ofertas para quem quer escolher <strong>notebook</strong>,{" "}
-                <strong>PC Gamer</strong>, <strong>hardware</strong> e periféricos com segurança.
+        {/* Impeccable Hero Header */}
+        <section className="mb-12 rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-900 via-slate-900/90 to-slate-950 p-8 sm:p-12 shadow-2xl relative overflow-hidden">
+          <div className="absolute -right-20 -top-20 w-96 h-96 bg-[#E60012]/10 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="absolute right-1/3 -bottom-20 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+          
+          <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#E60012]/10 border border-[#E60012]/30 text-[#E60012] text-xs font-black uppercase tracking-widest mb-4 shadow-sm">
+                <span>⚡ Conteúdo & Tecnologia</span>
+              </div>
+              <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
+                Blog Balão da Informática
+              </h1>
+              <p className="mt-4 text-base sm:text-lg text-slate-300 leading-relaxed font-normal">
+                Notícias de tecnologia, guias definitivos de hardware, análises de <strong>notebooks</strong>,{" "}
+                <strong>PCs Gamer</strong> e periféricos de alto desempenho. Tudo com a chancela de quem entende do assunto em Campinas.
               </p>
-              <p className="mt-2 text-sm text-neutral-700">
-                Precisa de indicação rápida? Chame no WhatsApp <strong>{SITE_CONFIG.whatsapp.display}</strong>.
-              </p>
+              <div className="mt-4 flex items-center gap-2 text-sm text-slate-400 font-medium">
+                <span>Precisa de indicação técnica imediata?</span>
+                <span className="text-white font-bold bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-700">{SITE_CONFIG.whatsapp.display}</span>
+              </div>
             </div>
-            <div className="flex w-full flex-col gap-2 sm:w-auto">
+            
+            <div className="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0">
               <a
                 href={`https://wa.me/${SITE_CONFIG.whatsapp.number}`}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center justify-center rounded-md bg-[#e41e26] px-4 py-3 text-sm font-extrabold text-white hover:bg-[#c81920]"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#E60012] px-6 py-4 text-sm font-black text-white hover:bg-red-700 transition-all shadow-lg shadow-red-950/50 hover:scale-[1.02] active:scale-95"
               >
-                Orçamento no WhatsApp
+                <span>Orçamento no WhatsApp</span>
               </a>
-              <Link href="/promocao" className="inline-flex items-center justify-center rounded-md border border-neutral-200 bg-white px-4 py-3 text-sm font-extrabold text-neutral-900 hover:bg-neutral-50">
-                Ver Promoções
+              <Link
+                href="/promocao"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-700 bg-slate-800/50 backdrop-blur px-6 py-4 text-sm font-black text-white hover:bg-slate-800 hover:border-slate-600 transition-all hover:scale-[1.02] active:scale-95"
+              >
+                <span>Ver Ofertas e Promoções</span>
               </Link>
             </div>
           </div>
         </section>
 
-        <div className="grid gap-8 lg:grid-cols-12">
-          <div className="lg:col-span-8">
+        <div className="grid gap-10 lg:grid-cols-12 items-start">
+          <div className="lg:col-span-8 space-y-10">
             {group1.length > 0 && (
-              <section className="grid gap-4 sm:grid-cols-12">
+              <section className="grid gap-6 sm:grid-cols-12">
                 <div className="sm:col-span-12">
                   <HeroCard post={group1[0]} size="lg" priority />
                 </div>
@@ -190,13 +204,15 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
               </section>
             )}
 
-            <section className="mt-8">
-              <div className="flex items-end justify-between">
-                <h2 className="text-lg font-extrabold tracking-tight">
-                  <span className="inline-block border-l-4 border-[#e41e26] pl-3">Destaques</span>
+            <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 sm:p-8 backdrop-blur shadow-xl">
+              <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-800">
+                <h2 className="text-xl font-black tracking-tight text-white flex items-center gap-3">
+                  <span className="w-2.5 h-6 rounded-full bg-[#E60012]"></span>
+                  <span>Destaques da Semana</span>
                 </h2>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Atualizado</span>
               </div>
-              <div className="mt-4 divide-y divide-neutral-200 rounded-md border border-neutral-200 bg-white">
+              <div className="divide-y divide-slate-800/80">
                 {group2.map((p) => (
                   <PostListItem key={p.id} post={p} />
                 ))}
@@ -204,13 +220,20 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
             </section>
 
             {/* Soro Embed Section in the center of the blog page */}
-            <section className="mt-8 rounded-md border border-neutral-200 bg-white p-6 shadow-sm">
-              <div id="soro-blog"></div>
+            <section className="rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-red-600/5 rounded-full blur-3xl pointer-events-none"></div>
+              <div className="mb-4">
+                <span className="text-xs font-black uppercase tracking-widest text-[#E60012] bg-[#E60012]/10 px-3 py-1 rounded-full border border-[#E60012]/20">
+                  Parceiro Oficial
+                </span>
+                <h3 className="text-xl font-black text-white mt-2">Feed Especializado Soro</h3>
+              </div>
+              <div id="soro-blog" className="min-h-[120px]"></div>
               <script src="https://app.trysoro.com/api/embed/71c5ae65-e641-4dca-928b-d80ac924512b" defer></script>
             </section>
 
             {group3.length > 0 && (
-              <section className="mt-8 grid gap-4 sm:grid-cols-12">
+              <section className="grid gap-6 sm:grid-cols-12">
                 <div className="sm:col-span-12">
                   <HeroCard post={group3[0]} size="lg" />
                 </div>
@@ -227,13 +250,14 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
               </section>
             )}
 
-            <section className="mt-8">
-              <div className="flex items-end justify-between">
-                <h2 className="text-lg font-extrabold tracking-tight">
-                  <span className="inline-block border-l-4 border-[#e41e26] pl-3">Mais Notícias</span>
+            <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 sm:p-8 backdrop-blur shadow-xl">
+              <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-800">
+                <h2 className="text-xl font-black tracking-tight text-white flex items-center gap-3">
+                  <span className="w-2.5 h-6 rounded-full bg-[#E60012]"></span>
+                  <span>Mais Notícias e Análises</span>
                 </h2>
               </div>
-              <div className="mt-4 divide-y divide-neutral-200 rounded-md border border-neutral-200 bg-white">
+              <div className="divide-y divide-slate-800/80">
                 {group4.map((p) => (
                   <PostListItem key={p.id} post={p} />
                 ))}
@@ -241,7 +265,7 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
             </section>
 
             {group5.length > 0 && (
-              <section className="mt-8 grid gap-4 sm:grid-cols-12">
+              <section className="grid gap-6 sm:grid-cols-12">
                 <div className="sm:col-span-12">
                   <HeroCard post={group5[0]} size="lg" />
                 </div>
@@ -259,33 +283,34 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
             )}
 
             {posts.length === 0 && (
-              <div className="mt-8 p-8 text-center text-sm text-neutral-600">
-                Ainda não há posts publicados. Aguarde a ingestão automática via RSS/Produtos.
+              <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-12 text-center text-slate-400">
+                <p className="text-lg font-medium">Ainda não há posts publicados. Aguarde a ingestão automática via RSS/Produtos.</p>
               </div>
             )}
           </div>
 
-          <aside className="lg:col-span-4">
+          <aside className="lg:col-span-4 space-y-8">
             <div className="sticky top-8 space-y-8">
-              <div className="rounded-md border border-neutral-200 bg-white">
-                <div className="border-b border-neutral-200 px-4 py-3">
-                  <h2 className="text-sm font-extrabold tracking-tight">
-                    <span className="inline-block border-l-4 border-[#e41e26] pl-3">Em alta</span>
+              <div className="rounded-3xl border border-slate-800 bg-slate-900/80 backdrop-blur p-6 shadow-xl">
+                <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-800">
+                  <h2 className="text-base font-black tracking-tight text-white flex items-center gap-2.5">
+                    <span className="w-2 h-5 rounded-full bg-[#E60012]"></span>
+                    <span>Mais Lidos / Em Alta</span>
                   </h2>
                 </div>
-                <ol className="divide-y divide-neutral-200">
+                <ol className="divide-y divide-slate-800/60">
                   {trending.slice(0, 5).map((p, idx) => (
-                    <li key={p.id} className="flex gap-3 px-4 py-3">
-                      <div className="w-6 flex-none text-right text-sm font-extrabold text-[#e41e26]">
-                        {idx + 1}
+                    <li key={p.id} className="flex gap-4 py-3.5 first:pt-0 last:pb-0 group">
+                      <div className="w-7 flex-none text-right text-base font-black text-[#E60012]">
+                        #{idx + 1}
                       </div>
-                      <div className="min-w-0">
-                        <Link href={`/blog/${p.slug}`} prefetch={false} className="text-sm font-semibold hover:underline">
+                      <div className="min-w-0 flex-1">
+                        <Link href={`/blog/${p.slug}`} prefetch={false} className="text-sm font-bold text-slate-200 group-hover:text-white group-hover:underline line-clamp-2 leading-snug">
                           {p.title}
                         </Link>
-                        <div className="mt-1 text-xs font-semibold text-neutral-600">
-                          {p.category}
-                          {p.sourceDomain ? ` • ${p.sourceDomain}` : ""}
+                        <div className="mt-1 flex items-center gap-2 text-xs font-medium text-slate-400">
+                          <span className="text-[#E60012] font-semibold">{p.category}</span>
+                          {p.sourceDomain ? <span>• {p.sourceDomain}</span> : ""}
                         </div>
                       </div>
                     </li>
@@ -293,61 +318,62 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
                 </ol>
               </div>
 
-              <div className="rounded-md border border-neutral-200 bg-white">
-                <div className="border-b border-neutral-200 px-4 py-3">
-                  <h2 className="text-sm font-extrabold tracking-tight">
-                    <span className="inline-block border-l-4 border-[#e41e26] pl-3">Ofertas Balão</span>
+              <div className="rounded-3xl border border-slate-800 bg-slate-900/80 backdrop-blur p-6 shadow-xl">
+                <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-800">
+                  <h2 className="text-base font-black tracking-tight text-white flex items-center gap-2.5">
+                    <span className="w-2 h-5 rounded-full bg-[#E60012]"></span>
+                    <span>Ofertas Balão da Informática</span>
                   </h2>
                 </div>
-                <div className="divide-y divide-neutral-200">
+                <div className="divide-y divide-slate-800/60">
                   {balaoPosts.map((p) => (
-                    <Link key={p.id} href={`/blog/${p.slug}`} prefetch={false} className="flex items-center gap-3 px-4 py-3 hover:bg-neutral-50">
-                      <div className="relative h-12 w-12 flex-none overflow-hidden rounded border border-neutral-100 bg-white">
+                    <Link key={p.id} href={`/blog/${p.slug}`} prefetch={false} className="flex items-center gap-4 py-3.5 first:pt-0 last:pb-0 group">
+                      <div className="relative h-14 w-14 flex-none overflow-hidden rounded-2xl border border-slate-700 bg-slate-800">
                         <Image
                           src={p.ogImageUrl || ogFallbackUrl(p)}
                           alt={p.title}
                           fill
-                          sizes="48px"
-                          className="object-contain"
+                          sizes="56px"
+                          className="object-contain p-1"
                         />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <h3 className="text-xs font-bold leading-tight hover:underline">{p.title}</h3>
+                        <h3 className="text-xs font-bold text-slate-200 group-hover:text-white group-hover:underline line-clamp-2 leading-snug">{p.title}</h3>
                         {isBalaoProductPromo(p) ? (
-                          <div className="mt-1 flex items-center gap-2 text-[10px] font-extrabold text-neutral-700">
-                            <span className="text-[#e41e26]">{extractPriceText(`${p.excerpt} ${p.title}`) || "Preço sob consulta"}</span>
-                            <span className="font-semibold text-neutral-500">{new Date(p.publishedAt ?? p.createdAt).toLocaleDateString("pt-BR")}</span>
+                          <div className="mt-1.5 flex items-center gap-2 text-xs font-black">
+                            <span className="text-[#E60012] bg-red-950/50 px-2 py-0.5 rounded border border-red-900/50">{extractPriceText(`${p.excerpt} ${p.title}`) || "Consulte"}</span>
+                            <span className="font-semibold text-slate-400 text-[10px]">{new Date(p.publishedAt ?? p.createdAt).toLocaleDateString("pt-BR")}</span>
                           </div>
                         ) : (
-                          <div className="mt-1 flex items-center gap-2 text-[10px] font-semibold text-neutral-500">
-                            <span className="text-[#e41e26]">Balão</span>
-                            <span>{new Date(p.publishedAt ?? p.createdAt).toLocaleDateString("pt-BR")}</span>
+                          <div className="mt-1.5 flex items-center gap-2 text-xs font-semibold text-slate-400">
+                            <span className="text-[#E60012]">Balão</span>
+                            <span>• {new Date(p.publishedAt ?? p.createdAt).toLocaleDateString("pt-BR")}</span>
                           </div>
                         )}
                       </div>
                     </Link>
                   ))}
 
-                  <div className="p-4">
+                  <div className="pt-6 mt-6 border-t border-slate-800">
                     <a
                       href="https://wa.me/5519987510267"
                       target="_blank"
                       rel="noreferrer"
-                      className="block rounded-md bg-[#e41e26] px-4 py-3 text-center text-sm font-extrabold text-white hover:bg-[#c81920]"
+                      className="block rounded-2xl bg-[#E60012] px-4 py-3.5 text-center text-sm font-black text-white hover:bg-red-700 transition-all shadow-lg shadow-red-950/50 hover:scale-[1.02] active:scale-95"
                     >
-                      Comprar com ajuda no WhatsApp
+                      Comprar com Ajuda no WhatsApp
                     </a>
                     <div className="mt-3 grid grid-cols-2 gap-2">
-                      <Link href="/notebooks" className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs font-bold text-neutral-900 hover:bg-neutral-50">
+                      <Link href="/notebooks" className="rounded-xl border border-slate-700 bg-slate-800/60 px-3 py-2.5 text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800 text-center transition-colors">
                         Notebooks
                       </Link>
-                      <Link href="/pcgamer" className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs font-bold text-neutral-900 hover:bg-neutral-50">
+                      <Link href="/pcgamer" className="rounded-xl border border-slate-700 bg-slate-800/60 px-3 py-2.5 text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800 text-center transition-colors">
                         PC Gamer
                       </Link>
-                      <Link href="/departamentos" className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs font-bold text-neutral-900 hover:bg-neutral-50">
+                      <Link href="/departamentos" className="rounded-xl border border-slate-700 bg-slate-800/60 px-3 py-2.5 text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800 text-center transition-colors">
                         Departamentos
                       </Link>
-                      <Link href="/promocao" className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs font-bold text-neutral-900 hover:bg-neutral-50">
+                      <Link href="/promocao" className="rounded-xl border border-slate-700 bg-slate-800/60 px-3 py-2.5 text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800 text-center transition-colors">
                         Promoções
                       </Link>
                     </div>
@@ -364,28 +390,28 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
 
 function PostListItem({ post }: { post: BlogCardPost }) {
   return (
-    <article className="flex gap-4 p-4 hover:bg-neutral-50/70">
-      <div className="relative h-[72px] w-[112px] flex-none sm:h-[86px] sm:w-[140px]">
+    <article className="flex gap-5 py-5 first:pt-0 last:pb-0 group">
+      <div className="relative h-20 w-28 flex-none sm:h-24 sm:w-36 overflow-hidden rounded-2xl border border-slate-800 bg-slate-800">
         <Image
           src={post.ogImageUrl || ogFallbackUrl(post)}
           alt={post.title}
           fill
-          sizes="(max-width: 640px) 112px, 140px"
-          className="object-contain"
+          sizes="(max-width: 640px) 112px, 144px"
+          className="object-cover group-hover:scale-105 transition-transform duration-300"
         />
       </div>
-      <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-neutral-600">
-          <span className="uppercase tracking-wide text-[#e41e26]">{post.category}</span>
-          {post.sourceDomain ? <span>{post.sourceDomain}</span> : null}
-          <span>{new Date(post.publishedAt ?? post.createdAt).toLocaleDateString("pt-BR")}</span>
+      <div className="min-w-0 flex-1 flex flex-col justify-center">
+        <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-400">
+          <span className="uppercase tracking-widest text-[#E60012]">{post.category}</span>
+          {post.sourceDomain ? <span>• {post.sourceDomain}</span> : null}
+          <span>• {new Date(post.publishedAt ?? post.createdAt).toLocaleDateString("pt-BR")}</span>
         </div>
-        <h3 className="mt-1 text-base font-extrabold leading-snug">
+        <h3 className="mt-1.5 text-base sm:text-lg font-black text-slate-100 group-hover:text-white leading-snug">
           <Link href={`/blog/${post.slug}`} prefetch={false} className="hover:underline">
             {post.title}
           </Link>
         </h3>
-        <p className="mt-1 text-sm text-neutral-700 overflow-hidden max-h-[2.8rem]">{post.excerpt}</p>
+        <p className="mt-1 text-sm text-slate-300 line-clamp-2 leading-relaxed">{post.excerpt}</p>
       </div>
     </article>
   );
@@ -402,28 +428,34 @@ function HeroCard({ post, size, priority }: { post: BlogCardPost; size: "lg" | "
   const date = new Date(post.publishedAt ?? post.createdAt).toLocaleDateString("pt-BR");
   const imageUrl = post.ogImageUrl || ogFallbackUrl(post);
   return (
-    <article className="overflow-hidden rounded-md border border-neutral-200 bg-white">
-      <Link href={`/blog/${post.slug}`} prefetch={false} className="block">
-        <div className="relative aspect-[16/9]">
+    <article className="overflow-hidden rounded-3xl border border-slate-800 bg-slate-900/80 backdrop-blur group hover:border-slate-700 transition-all shadow-xl">
+      <Link href={`/blog/${post.slug}`} prefetch={false} className="block flex flex-col h-full">
+        <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-950">
           <Image
             src={imageUrl}
             alt={post.title}
             fill
             sizes={size === "lg" ? "(max-width: 1024px) 100vw, 880px" : "(max-width: 1024px) 100vw, 420px"}
-            className="object-contain"
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
             priority={priority}
           />
         </div>
-        <div className="p-4">
-          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-neutral-600">
-            <span className="uppercase tracking-wide text-[#e41e26]">{post.category}</span>
-            {post.sourceDomain ? <span>{post.sourceDomain}</span> : null}
-            <span>{date}</span>
+        <div className="p-6 flex-1 flex flex-col justify-between">
+          <div>
+            <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-400">
+              <span className="uppercase tracking-widest text-[#E60012]">{post.category}</span>
+              {post.sourceDomain ? <span>• {post.sourceDomain}</span> : null}
+              <span>• {date}</span>
+            </div>
+            <h2 className={size === "lg" ? "mt-2.5 text-xl sm:text-2xl font-black leading-tight text-white group-hover:text-red-400 transition-colors" : "mt-2.5 text-base sm:text-lg font-black leading-tight text-white group-hover:text-red-400 transition-colors"}>
+              {post.title}
+            </h2>
+            <p className="mt-2 text-sm text-slate-300 line-clamp-2 leading-relaxed">{post.excerpt}</p>
           </div>
-          <h2 className={size === "lg" ? "mt-2 text-2xl font-extrabold leading-snug text-neutral-900" : "mt-2 text-lg font-extrabold leading-snug text-neutral-900"}>
-            {post.title}
-          </h2>
-          <p className="mt-2 text-sm text-neutral-700 overflow-hidden max-h-[2.8rem]">{post.excerpt}</p>
+          <div className="mt-4 pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs font-black text-[#E60012]">
+            <span>Ler artigo completo</span>
+            <span className="group-hover:translate-x-1 transition-transform">→</span>
+          </div>
         </div>
       </Link>
     </article>
