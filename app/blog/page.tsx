@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import Image from "next/image";
+import SoroBlog from "@/components/SoroBlog";
 import Header from "@/components/Header";
 import JsonLd, { generateBreadcrumbSchema, generateFAQSchema, generateOrganizationSchema, generateItemListSchema } from "@/components/JsonLd";
 import { listBlogPostsForPage } from "@/lib/blog-store";
@@ -284,9 +285,18 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
               </section>
             )}
 
+            {/* Blog do Soro. Fica aqui, e não numa página nova, porque o
+                valor de SEO de um blog está em morar no domínio da loja e no
+                endereço que as pessoas e o Google já conhecem. O blog interno
+                (RSS/Produtos) continua existindo: quando tiver post, os dois
+                aparecem, o interno primeiro. */}
+            <section className="mt-8">
+              <SoroBlog />
+            </section>
+
             {posts.length === 0 && (
               <div className="mt-8 p-8 text-center text-sm text-neutral-600">
-                Ainda não há posts publicados. Aguarde a ingestão automática via RSS/Produtos.
+                Ainda não há posts do blog interno. Aguarde a ingestão automática via RSS/Produtos.
               </div>
             )}
           </div>
