@@ -224,12 +224,13 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
               <div className="absolute top-0 right-0 w-64 h-64 bg-red-600/5 rounded-full blur-3xl pointer-events-none"></div>
               <div className="mb-4">
                 <span className="text-xs font-black uppercase tracking-widest text-[#E60012] bg-[#E60012]/10 px-3 py-1 rounded-full border border-[#E60012]/20">
-                  Parceiro Oficial
+                  Publicações do Soro
                 </span>
-                <h3 className="text-xl font-black text-white mt-2">Feed Especializado Soro</h3>
+                <h3 className="text-xl font-black text-white mt-2">Últimos Artigos Publicados</h3>
               </div>
-              <div id="soro-blog" className="min-h-[120px]"></div>
-              <script src="https://app.trysoro.com/api/embed/71c5ae65-e641-4dca-928b-d80ac924512b" defer></script>
+              <div id="soro-blog" className="min-h-[150px]">
+                <script src="https://app.trysoro.com/api/embed/71c5ae65-e641-4dca-928b-d80ac924512b" defer></script>
+              </div>
             </section>
 
             {group3.length > 0 && (
