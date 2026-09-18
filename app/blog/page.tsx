@@ -220,15 +220,15 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
             </section>
 
             {/* Soro Embed Section in the center of the blog page */}
-            <section className="rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+            <section className="rounded-3xl border border-neutral-200 bg-white p-6 sm:p-8 shadow-xl relative overflow-hidden text-neutral-900">
               <div className="absolute top-0 right-0 w-64 h-64 bg-red-600/5 rounded-full blur-3xl pointer-events-none"></div>
               <div className="mb-4">
                 <span className="text-xs font-black uppercase tracking-widest text-[#E60012] bg-[#E60012]/10 px-3 py-1 rounded-full border border-[#E60012]/20">
                   Publicações do Soro
                 </span>
-                <h3 className="text-xl font-black text-white mt-2">Últimos Artigos Publicados</h3>
+                <h3 className="text-xl font-black text-neutral-900 mt-2">Últimos Artigos Publicados</h3>
               </div>
-              <div id="soro-blog" className="min-h-[150px]">
+              <div id="soro-blog" className="min-h-[150px] text-neutral-900 bg-white">
                 <script src="https://app.trysoro.com/api/embed/71c5ae65-e641-4dca-928b-d80ac924512b" defer></script>
               </div>
             </section>
