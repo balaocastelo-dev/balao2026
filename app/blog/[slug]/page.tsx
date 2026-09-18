@@ -194,12 +194,12 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
   ]);
 
   return (
-    <div className="min-h-screen flex flex-col font-sans">
+    <div className="min-h-screen flex flex-col font-sans bg-white text-neutral-900">
       <Header />
       <main className="flex-1 mx-auto w-full max-w-5xl px-4 py-8">
         <JsonLd data={[org, breadcrumbs, jsonLd, faq]} />
 
-        <article className="overflow-hidden rounded-md border border-neutral-200 bg-white">
+        <article className="overflow-hidden rounded-md border border-neutral-200 bg-white text-neutral-900">
           <div className="p-6">
             <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-neutral-600">
               <span className="uppercase tracking-wide text-[#e41e26]">{category}</span>
@@ -207,11 +207,11 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
               {sourceDomain ? <span>{sourceDomain}</span> : null}
               <span>{new Date(post.published_at ?? post.created_at).toLocaleDateString("pt-BR")}</span>
             </div>
-            <h1 className="mt-3 text-3xl font-extrabold tracking-tight">{post.title}</h1>
+            <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-neutral-900">{post.title}</h1>
             {post.excerpt ? <p className="mt-3 text-neutral-700">{post.excerpt}</p> : null}
           </div>
 
-          <div className="relative aspect-[16/9] w-full">
+          <div className="relative aspect-[16/9] w-full bg-neutral-100">
             <SafeImage
               src={imageUrl}
               fallbackSrc={fallbackImageUrl}
@@ -222,24 +222,29 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
             />
           </div>
 
-          <div className="p-6">
-            <div className="prose prose-neutral max-w-none">
+          <div className="p-6 text-neutral-900">
+            <div className="prose prose-neutral max-w-none text-neutral-900 [&_*]:text-neutral-900">
               <div dangerouslySetInnerHTML={{ __html: safeHtml }} />
             </div>
 
-            <div className="mt-8 rounded-md border border-[#e41e26]/20 bg-neutral-50 p-4">
-              <div className="text-sm font-extrabold">Quer ajuda para escolher?</div>
+            <div className="mt-8 rounded-md border border-[#e41e26]/20 bg-neutral-50 p-4 text-neutral-900">
+              <div className="text-sm font-extrabold text-neutral-900">Quer ajuda para escolher?</div>
               <div className="mt-1 text-sm text-neutral-700">
                 Fale com um especialista e receba recomendação direta para o seu uso.
               </div>
-              <div className="mt-3 flex w-full items-center justify-center rounded-md bg-[#e41e26] px-4 py-3 text-sm font-extrabold text-white">
-                WhatsApp 19 98751-0267
-              </div>
+              <a
+                href={`https://wa.me/${SITE_CONFIG.whatsapp.number}`}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-3 flex w-full items-center justify-center rounded-md bg-[#e41e26] px-4 py-3 text-sm font-extrabold text-white hover:bg-[#c81920]"
+              >
+                WhatsApp {SITE_CONFIG.whatsapp.display}
+              </a>
               <div className="mt-3 grid grid-cols-2 gap-2">
-                <Link href="/notebooks" className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs font-bold text-neutral-900 hover:bg-neutral-50">
+                <Link href="/notebooks" className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs font-bold text-neutral-900 hover:bg-neutral-50 text-center">
                   Notebooks
                 </Link>
-                <Link href="/pcgamer" className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs font-bold text-neutral-900 hover:bg-neutral-50">
+                <Link href="/pcgamer" className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-xs font-bold text-neutral-900 hover:bg-neutral-50 text-center">
                   PC Gamer
                 </Link>
               </div>
@@ -247,7 +252,7 @@ export default async function BlogPostPage(props: { params: Promise<{ slug: stri
 
             {post.source_url ? (
               <footer className="mt-10 border-t border-neutral-200 pt-4 text-sm text-neutral-600">
-                Fonte: {post.source_url}
+                Fonte: <a href={post.source_url} target="_blank" rel="noopener noreferrer" className="hover:underline">{post.source_url}</a>
               </footer>
             ) : null}
           </div>

@@ -1,14 +1,10 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import Image from "next/image";
-import SoroBlog from "@/components/SoroBlog";
 import Header from "@/components/Header";
-import JsonLd, { generateBreadcrumbSchema, generateFAQSchema, generateOrganizationSchema, generateItemListSchema } from "@/components/JsonLd";
+import JsonLd, { generateBreadcrumbSchema, generateFAQSchema, generateOrganizationSchema } from "@/components/JsonLd";
 import { listBlogPostsForPage } from "@/lib/blog-store";
 import { SITE_CONFIG } from "@/lib/config";
-import { getCachedProdutosRecentes, getCachedProductsByKeywords } from "@/lib/cache";
-import ProductCard from "@/components/ProductCard";
-import WhatsAppNewsletter from "@/components/WhatsAppNewsletter";
 
 export const runtime = "nodejs";
 export const revalidate = 120;
@@ -82,17 +78,7 @@ export async function generateMetadata(props: { searchParams?: SearchParams }): 
 }
 
 export default async function BlogPage(props: { searchParams?: SearchParams }) {
-  const [rawPosts, vitrineProducts] = await Promise.all([
-    listBlogPostsForPage({ take: 50 }),
-    getCachedProductsByKeywords(["notebook","gamer","ssd","monitor"], 8).then(p=> p.length>=8 ? p : []).catch(()=>[]),
-  ]);
-  // fallback guarantee 8
-  let leituraCompraProducts = vitrineProducts;
-  if (leituraCompraProducts.length < 8) {
-    const all = await getCachedProdutosRecentes();
-    const fill = all.filter(a=> !leituraCompraProducts.find(b=>b.id===a.id));
-    leituraCompraProducts = [...leituraCompraProducts, ...fill].slice(0,8);
-  }
+  const rawPosts = await listBlogPostsForPage({ take: 50 });
 
   const posts: BlogCardPost[] = rawPosts.map((p) => {
     const createdAt = p.created_at ? new Date(p.created_at) : new Date();
@@ -149,13 +135,12 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
   ]);
 
   const org = generateOrganizationSchema();
-  const vitrineItemList = leituraCompraProducts.length>0 ? generateItemListSchema(leituraCompraProducts, "https://www.balao.info/blog#vitrine") : null;
 
   return (
     <div className="min-h-screen flex flex-col font-sans">
       <Header />
       <main className="flex-1 mx-auto w-full max-w-7xl px-4 py-8">
-        <JsonLd data={[org, breadcrumbs, faq, ...(vitrineItemList ? [vitrineItemList] : [])]} />
+        <JsonLd data={[org, breadcrumbs, faq]} />
 
         <section className="mb-6 rounded-md border border-neutral-200 bg-white p-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -218,22 +203,10 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
               </div>
             </section>
 
-            {/* VITRINE LEITURA + COMPRA — 8 produtos após 2º bloco */}
-            <section className="mt-8 rounded-xl border-2 border-[#e41e26]/20 bg-gradient-to-br from-white to-red-50 p-4 sm:p-5">
-              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-4">
-                <div>
-                  <div className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-[#e41e26]">🛒 Leitura + Compra</div>
-                  <h2 className="text-lg font-black text-slate-900">Continue lendo, já escolha seu upgrade</h2>
-                  <p className="text-xs text-slate-600">Seleção da curadoria Balão — clique e feche no WhatsApp com 10% OFF no PIX</p>
-                </div>
-                <a href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent("Olá! Vim pelo Blog e quero ajuda para escolher entre esses 8 produtos.")}`} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center rounded-full bg-[#25D366] px-4 py-2 text-xs font-black text-white hover:bg-[#128C7E] whitespace-nowrap">Falar no WhatsApp</a>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {leituraCompraProducts.slice(0,8).map((product)=>(
-                  <ProductCard key={product.id} product={product as any} />
-                ))}
-              </div>
-              <div className="mt-4"><WhatsAppNewsletter /></div>
+            {/* Soro Embed Section in the center of the blog page */}
+            <section className="mt-8 rounded-md border border-neutral-200 bg-white p-6 shadow-sm">
+              <div id="soro-blog"></div>
+              <script src="https://app.trysoro.com/api/embed/71c5ae65-e641-4dca-928b-d80ac924512b" defer></script>
             </section>
 
             {group3.length > 0 && (
@@ -285,18 +258,9 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
               </section>
             )}
 
-            {/* Blog do Soro. Fica aqui, e não numa página nova, porque o
-                valor de SEO de um blog está em morar no domínio da loja e no
-                endereço que as pessoas e o Google já conhecem. O blog interno
-                (RSS/Produtos) continua existindo: quando tiver post, os dois
-                aparecem, o interno primeiro. */}
-            <section className="mt-8">
-              <SoroBlog />
-            </section>
-
             {posts.length === 0 && (
               <div className="mt-8 p-8 text-center text-sm text-neutral-600">
-                Ainda não há posts do blog interno. Aguarde a ingestão automática via RSS/Produtos.
+                Ainda não há posts publicados. Aguarde a ingestão automática via RSS/Produtos.
               </div>
             )}
           </div>
