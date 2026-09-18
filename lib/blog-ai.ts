@@ -200,18 +200,31 @@ async function generateFromGroq(prompt: string) {
   // outro.
   const model = MODELO_GROQ;
 
-  const resp = await client.chat.completions.create({
-    model,
-    temperature: 0.6,
-    messages: [
-      { role: "system", content: "Você é um(a) redator(a) SEO especialista em tecnologia. Retorne apenas JSON válido." },
-      { role: "user", content: prompt },
-    ],
-  });
+  // NUNCA lança. Um provedor de IA fora do ar, sem cota ou com o nome do
+  // modelo trocado é rotina; virar exceção aqui significava derrubar a página
+  // que chamou. Foi o que aconteceu: a Groq aposentou o
+  // `llama-3.3-70b-versatile`, o 404 subiu, e o /blog ficou EM BRANCO de
+  // 11/09 a 18/09 sem ninguém perceber — a página não dava erro, só não
+  // mostrava nada.
+  try {
+    const resp = await client.chat.completions.create({
+      model,
+      temperature: 0.6,
+      messages: [
+        { role: "system", content: "Você é um(a) redator(a) SEO especialista em tecnologia. Retorne apenas JSON válido." },
+        { role: "user", content: prompt },
+      ],
+    });
 
-  const text = resp.choices?.[0]?.message?.content || "";
-  if (!text.trim()) return null;
-  return safeParseJson(text);
+    const text = resp.choices?.[0]?.message?.content || "";
+    if (!text.trim()) return null;
+    return safeParseJson(text);
+  } catch (erro) {
+    // Barulhento no log de propósito: sem post novo é um problema de
+    // conteúdo, e problema de conteúdo que ninguém vê dura semanas.
+    console.error(`[blog-ia] Groq recusou o modelo "${model}":`, (erro as Error).message);
+    return null;
+  }
 }
 
 async function generateFromAI(prompt: string) {

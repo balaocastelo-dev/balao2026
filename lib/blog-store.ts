@@ -414,7 +414,17 @@ export async function listBlogPostsForPage(input?: { category?: string; take?: n
     return [];
   }
 
-  const [rssPosts, productPosts] = await Promise.all([buildDynamicPosts(), buildDynamicProductPosts()]);
+  // Segunda trava, no nível da página: gerar post na hora de renderizar
+  // depende de rede e de provedor de IA. Se qualquer um falhar, a página do
+  // blog mostra o que tem (hoje, o Soro) em vez de morrer inteira.
+  let rssPosts: BlogPostView[] = [];
+  let productPosts: BlogPostView[] = [];
+  try {
+    [rssPosts, productPosts] = await Promise.all([buildDynamicPosts(), buildDynamicProductPosts()]);
+  } catch (erro) {
+    console.error("[blog] geração dinâmica falhou; seguindo sem posts internos:", (erro as Error).message);
+    return [];
+  }
   const merged = rssPosts.concat(productPosts);
   if (category) {
     return sortByPublishedDesc(merged.filter((p) => p.category === category))
