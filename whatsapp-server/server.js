@@ -2898,6 +2898,82 @@ app.post("/api/debug/test-send-media", async (req, res) => {
         logs.push(`Final chat object: ${Boolean(chat)}`);
         if (!chat) return { logs, error: "Could not find or create chat" };
 
+        let stepDebug = {};
+        try {
+          const MsgClass = window.require('WAWebCollections')?.Msg?.modelClass;
+          stepDebug.MsgClass = Boolean(MsgClass);
+
+          const mediaData = await window.WWebJS.processMediaData(med, {
+            forceSticker: false,
+            forceGif: false,
+            forceVoice: false,
+            forceDocument: false,
+            forceMediaHd: false,
+            sendToChannel: false,
+            sendToStatus: false
+          });
+          stepDebug.mediaDataHasId = 'id' in (mediaData || {});
+          stepDebug.mediaDataId = mediaData?.id;
+
+          const toJson = mediaData?.toJSON ? mediaData.toJSON() : {};
+          stepDebug.toJsonKeys = Object.keys(toJson);
+          stepDebug.toJsonHasId = 'id' in toJson;
+          stepDebug.toJsonId = toJson.id;
+          stepDebug.toJsonFrom = toJson.from;
+          stepDebug.toJsonAuthor = toJson.author;
+          stepDebug.toJsonType = toJson.type;
+
+          const { getMaybeMeLidUser, getMaybeMePnUser } = window.require('WAWebUserPrefsMeUser');
+          const lidUser = getMaybeMeLidUser();
+          const meUser = getMaybeMePnUser();
+          const newId = await window.require('WAWebMsgKey').newId();
+          let from = chat.id.isLid() ? lidUser : meUser;
+          stepDebug.fromVal = from ? (from._serialized || String(from)) : null;
+
+          const newMsgKey = new (window.require('WAWebMsgKey'))({
+            from: from,
+            to: chat.id,
+            id: newId,
+            participant: undefined,
+            selfDir: 'out'
+          });
+          stepDebug.newMsgKeyId = newMsgKey?.id;
+
+          const ephemeralFields = window.require('WAWebGetEphemeralFieldsMsgActionsUtils').getEphemeralFields(chat);
+
+          const messageObj = {
+            id: newMsgKey,
+            ack: 0,
+            body: med.caption || "",
+            caption: med.caption || "",
+            from: from,
+            to: chat.id,
+            local: true,
+            self: 'out',
+            t: parseInt(new Date().getTime() / 1000),
+            isNewMsg: true,
+            type: 'chat',
+            ...ephemeralFields,
+            ...mediaData,
+            ...toJson
+          };
+          stepDebug.messageObjId = messageObj.id ? (messageObj.id._serialized || String(messageObj.id)) : null;
+          stepDebug.messageObjIdType = typeof messageObj.id;
+          stepDebug.messageObjFrom = messageObj.from ? (messageObj.from._serialized || String(messageObj.from)) : null;
+          stepDebug.messageObjType = messageObj.type;
+
+          try {
+            const testMsg = new MsgClass(messageObj);
+            stepDebug.constructedMsgOk = Boolean(testMsg);
+          } catch (eMsg) {
+            stepDebug.constructedMsgError = eMsg.message;
+            stepDebug.constructedMsgStack = eMsg.stack;
+          }
+        } catch (eStep) {
+          stepDebug.error = eStep.message;
+          stepDebug.stack = eStep.stack;
+        }
+
         let sendResult = null;
         try {
           const sent = await window.WWebJS.sendMessage(chat, "", { media: med, caption: cap });
@@ -2908,7 +2984,7 @@ app.post("/api/debug/test-send-media", async (req, res) => {
           sendResult = { ok: false, error: eSend.message, stack: eSend.stack };
         }
 
-        return { logs, sendResult };
+        return { logs, stepDebug, sendResult };
       } catch (err) {
         return { logs, error: err.message, stack: err.stack };
       }
