@@ -1,370 +1,451 @@
-import Link from "next/link";
-import Image from "next/image";
-import type { Metadata } from "next";
 import Header from "@/components/Header";
-import CardProduto, { CONDICOES } from "@/components/CardProduto";
+import ProductList from "@/components/ProductList";
+import SeoContent from "@/components/SeoContent";
 import JsonLd, { generateHomeAiAndGoogleSchema } from "@/components/JsonLd";
-import { getCachedProducts } from "@/lib/cache";
+import QuickLeadSection from "@/components/QuickLeadSection";
+import HomeLocalStoreInfo from "@/components/HomeLocalStoreInfo";
+import HomeHeroFullWidth from "@/components/HomeHeroFullWidth";
+import HomeTrustPillars from "@/components/HomeTrustPillars";
+import HomeDepartmentMenu from "@/components/HomeDepartmentMenu";
+import HomeCategoryShelf from "@/components/HomeCategoryShelf";
+import HomeMonitoresFullWidth from "@/components/HomeMonitoresFullWidth";
+import HomeBlogSection from "@/components/HomeBlogSection";
+import { getProductsByExactCategories, getProducts } from "@/lib/db";
+import { getCachedCategories, getCachedCarouselImages } from "@/lib/cache";
+import { listBlogPostsForPage } from "@/lib/blog-store";
+import { turso } from "@/lib/turso";
+import { parsePriceToNumber, Product, type Category } from "@/lib/utils";
+import type { Metadata } from "next";
 import { SITE_CONFIG } from "@/lib/config";
-import type { Product } from "@/lib/utils";
-import {
-  MessageCircle, MapPin, Clock, ShieldCheck, Wrench, HardDrive, Apple,
-  Smartphone, Cpu, RefreshCw, ArrowRight, Star, Truck, CreditCard,
-  Monitor, Laptop, Printer, Keyboard, Gamepad2, Package,
-} from "lucide-react";
+import Link from "next/link";
 
 export const revalidate = 60;
 
-/* Prova social confirmada no perfil do Google em 13/09/2026.
- * Null = a página omite a afirmação em vez de publicar número não conferido. */
-const PROVA_SOCIAL = {
-  googleNota: 4.8 as number | null,
-  googleAvaliacoes: 839 as number | null,
-  anosDeMercado: 25,
+type SearchParams = Promise<{ category?: string; search?: string }>;
+
+type HomeBlogPost = {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  category: string;
+  cover_image: string | null;
+  published_at: string;
+  created_at: string;
 };
 
-/* Avaliações públicas do Google, transcritas literalmente. */
-const AVALIACOES = [
-  { nome: "José Paulo Olímpio", quando: "3 meses atrás", texto: "Levei minha impressora toda falhada, até achei que não tinha conserto. Porém voltou consertada e funcionando perfeitamente, paguei apenas a mão de obra. Recomendo." },
-  { nome: "Caroline Bianca", quando: "3 meses atrás", texto: "Resolveram em 1 hora meu problema! Precisei de uma nova fonte de computador, em 1 horinha recebi. Excelente atendimento." },
-  { nome: "Winderson Oliveira", quando: "3 meses atrás", texto: "Precisei de um adaptador de rede com certa urgência e fui muito bem atendido pela equipe. Foram atenciosos, prestativos e ainda fizeram a entrega diretamente no meu trabalho." },
-  { nome: "Gilberto Filho", quando: "3 meses atrás", texto: "Loja top, preços justos, atendimento ótimo, Thiago e sua equipe são muito prestativos, super recomendo." },
+const homeBrands = [
+  "Balão.info", "Apple", "Dell", "Lenovo", "HP", "ASUS", "Acer", "Samsung", 
+  "Microsoft", "Intel", "AMD", "NVIDIA", "Kingston", "Logitech", "Corsair", 
+  "Gigabyte", "MSI", "Western Digital", "Seagate", "Crucial", "SanDisk", 
+  "TP-Link", "D-Link", "Razer", "HyperX", "Cooler Master", "Thermaltake", 
+  "EVGA", "ASRock", "Epson", "Canon", "Husky"
 ];
 
-/* Fotos reais da loja, sem pessoas em cena. */
-const FOTOS_LOJA = [
-  { src: "/images/loja/fachada.jpg", alt: "Fachada da Balão da Informática na Av. Anchieta, 789, no Cambuí" },
-  { src: "/images/loja/salao.jpg", alt: "Salão da loja com prateleiras e corredor central" },
-  { src: "/images/loja/estoque-notebooks.jpg", alt: "Prateleiras com notebooks e periféricos em exposição" },
-  { src: "/images/loja/monitores-acessorios.jpg", alt: "Monitores em exposição e parede de acessórios" },
-];
+const homeBrandCarousel = [...homeBrands, ...homeBrands];
 
-const DEPARTAMENTOS = [
-  { nome: "PC Gamer", href: "/pcgamer", icone: Gamepad2 },
-  { nome: "Notebooks", href: "/notebooks", icone: Laptop },
-  { nome: "Monitores", href: "/categoria/monitores", icone: Monitor },
-  { nome: "Hardware", href: "/categoria/hardware", icone: Cpu },
-  { nome: "Periféricos", href: "/categoria/perifericos", icone: Keyboard },
-  { nome: "Impressão", href: "/categoria/impressao", icone: Printer },
-  { nome: "Seminovos", href: "/seminovos", icone: RefreshCw },
-  { nome: "Monte seu PC", href: "/monteseupc", icone: Package },
-];
+export async function generateMetadata(props: { searchParams: SearchParams }): Promise<Metadata> {
+  const sp = await props.searchParams;
+  const hasFacet = Boolean((sp?.category || "").trim() || (sp?.search || "").trim());
+  const title = "Loja de Informática em Campinas | PC Gamer, Notebooks, Monitores e Assistência Técnica";
+  const description =
+    "Balão da Informática Castelo: a loja mais completa de informática em Campinas. PC Gamer, Notebooks, Monitores, Smartphones e Peças. Compre com desconto no PIX ou até 10x sem juros e retire no Cambuí.";
+  const canonical = "https://www.balao.info/";
 
-const PRATELEIRAS = [
-  { titulo: "Computadores e PC Gamer", cats: ["Computadores"], href: "/pcgamer" },
-  { titulo: "Notebooks", cats: ["Notebooks"], href: "/notebooks" },
-  { titulo: "Monitores", cats: ["Monitores"], href: "/categoria/monitores" },
-  { titulo: "Placas de vídeo", cats: ["Hardware/Placas de Vídeo"], href: "/categoria/hardware-placas-de-video" },
-  { titulo: "Memória, fonte, placa-mãe e gabinete", cats: ["Hardware/Memórias RAM","Hardware/Fontes","Hardware/Placas Mãe","Hardware/Processadores","Hardware/Water Coolers","Hardware/Gabinetes","Hardware/SSDs e NVMe","Hardware"], href: "/categoria/hardware" },
-  { titulo: "Periféricos, impressão e escritório", cats: ["Periféricos","Impressão","Acessórios","Escritório/Cadeiras Gamer"], href: "/categoria/perifericos" },
-];
+  return {
+    title,
+    description,
+    metadataBase: new URL("https://www.balao.info"),
+    alternates: { canonical },
+    keywords: [
+      "loja de informática campinas",
+      "pc gamer campinas",
+      "notebook campinas",
+      "monitores gamer campinas",
+      "smartphones campinas",
+      "hardware e peças campinas",
+      "assistência técnica cambuí",
+      "placa de vídeo rtx",
+      "processador ryzen intel",
+      "balão da informática castelo",
+      "loja de computador campinas"
+    ],
+    openGraph: {
+      type: "website",
+      locale: "pt_BR",
+      url: canonical,
+      title,
+      description,
+      siteName: SITE_CONFIG.name,
+      images: [{ url: "/logo.png", width: 1200, height: 630, alt: "Balão da Informática" }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ["/logo.png"],
+    },
+    robots: hasFacet
+      ? { index: false, follow: true }
+      : {
+          index: true,
+          follow: true,
+          googleBot: {
+            index: true,
+            follow: true,
+            "max-video-preview": -1,
+            "max-image-preview": "large",
+            "max-snippet": -1,
+          },
+        },
+  };
+}
 
-const SERVICOS = [
-  { icone: Apple, titulo: "Reparo Apple", href: "/reparoapple", msg: "Olá! Preciso de reparo em um aparelho Apple." },
-  { icone: HardDrive, titulo: "Recuperação de dados", href: "/recuperacaodados", msg: "Olá! Preciso recuperar dados de um disco." },
-  { icone: Smartphone, titulo: "Troca de tela e bateria", href: "/telaiphone", msg: "Olá! Quero orçamento de troca de tela." },
-  { icone: Cpu, titulo: "Montagem e upgrade", href: "/montagempc", msg: "Olá! Quero montar um PC sob medida." },
-  { icone: Wrench, titulo: "Manutenção", href: "/manutencao", msg: "Olá! Meu computador está com problema." },
-  { icone: RefreshCw, titulo: "Consignação", href: "/consignacao", msg: "Olá! Quero saber sobre consignação." },
-];
+export default async function Home(props: {
+  searchParams: SearchParams;
+}) {
+  const searchParams = await props.searchParams;
+  const category = searchParams?.category;
+  const search = searchParams?.search;
 
-const WPP = SITE_CONFIG.whatsapp.number;
-const wpp = (msg: string) => `https://wa.me/${WPP}?text=${encodeURIComponent(msg)}`;
+  let products: Product[] = [];
+  let categories: Category[] = [];
+  let carouselImages = [];
+  let blogPosts: HomeBlogPost[] = [];
 
-export const metadata: Metadata = {
-  title: "Balão da Informática | Loja de informática em Campinas — PC Gamer, notebooks e assistência técnica",
-  description:
-    "Loja física no Cambuí, em Campinas. PC gamer, notebooks, monitores, hardware e periféricos com 5% de desconto no PIX e 12x sem juros. Assistência técnica no mesmo lugar e atendimento humano no WhatsApp.",
-  alternates: { canonical: "https://www.balao.info" },
-  openGraph: {
-    title: "Balão da Informática | Loja de informática em Campinas",
-    description:
-      "Você vê o equipamento ligado antes de pagar. Loja física no Cambuí, assistência técnica e atendimento humano no WhatsApp.",
-    url: "https://www.balao.info",
-    type: "website",
-  },
-};
+  [categories, carouselImages, blogPosts] = await Promise.all([
+    getCachedCategories(),
+    getCachedCarouselImages(),
+    listBlogPostsForPage({ take: 6, skipDynamicFallback: true }) as Promise<HomeBlogPost[]>,
+  ]);
 
-export default async function Home() {
-  let catalogo: Product[] = [];
-  try {
-    catalogo = await getCachedProducts();
-  } catch {
-    catalogo = [];
+  if (search) {
+    const rawSearchProducts = await (async () => {
+      const searchTerms = search.trim().split(/\s+/).filter((t) => t.length > 0);
+
+      const conditions = searchTerms
+        .map(() => "(LOWER(name) LIKE ? OR LOWER(description) LIKE ?)")
+        .join(" AND ");
+      const args: string[] = [];
+      searchTerms.forEach((term) => {
+        const like = `%${term.toLowerCase()}%`;
+        args.push(like, like);
+      });
+
+      try {
+        const res = await turso.execute({
+          sql: `SELECT * FROM products WHERE ${conditions} LIMIT 50`,
+          args,
+        });
+        return ((res.rows as unknown as Product[]) || []).sort(
+          (a, b) => parsePriceToNumber(b.price) - parsePriceToNumber(a.price)
+        );
+      } catch (err) {
+        console.error("Search error:", err);
+        return [] as Product[];
+      }
+    })();
+
+    const seenNames = new Set();
+    products = rawSearchProducts.filter(p => {
+      const nameKey = p.name.trim().toLowerCase();
+      if (seenNames.has(nameKey)) return false;
+      seenNames.add(nameKey);
+      return true;
+    });
+  } else if (category && category !== "Todos os Produtos") {
+    products = await getProductsByExactCategories([category]);
+  } else {
+    products = await getProducts();
   }
 
-  const prateleiras = PRATELEIRAS.map((p) => ({
-    ...p,
-    itens: catalogo.filter((x) => p.cats.includes(String(x.category || ""))).slice(0, 8),
-  })).filter((p) => p.itens.length > 0);
+  // Extrai nota média e número de avaliações do texto salvo em `rating`
+  const parseRelevanceSignal = (p: Product): { rating: number; count: number } => {
+    const m = String(p.rating || "").match(/(\d+(?:[.,]\d+)?)\s*⭐?\s*\(?(\d+)?/);
+    const rating = m ? parseFloat(m[1].replace(",", ".")) : 0;
+    const count = m && m[2] ? parseInt(m[2], 10) : 0;
+    return { rating, count };
+  };
 
-  const destaques = catalogo.slice(0, 4);
-  const temProvaGoogle =
-    PROVA_SOCIAL.googleNota !== null && PROVA_SOCIAL.googleAvaliacoes !== null;
+  // Relevância real por avaliações/popularidade (nunca do mais barato para o mais caro)
+  const sortRelevance = (list: Product[]) =>
+    [...list].sort((a, b) => {
+      const ra = parseRelevanceSignal(a);
+      const rb = parseRelevanceSignal(b);
+      if (rb.count !== ra.count) return rb.count - ra.count;
+      if (rb.rating !== ra.rating) return rb.rating - ra.rating;
+      return parsePriceToNumber(a.price) - parsePriceToNumber(b.price);
+    });
+
+  // Filtros estritos solicitados:
+  // - PC Gamer: apenas computadores/PCs gamer
+  // - Notebooks: apenas notebooks/laptops/macbooks (sem impressoras, sem periféricos)
+  // - Monitores: estritamente monitores (sem suportes, cabos, adaptadores)
+  // - Hardwares: apenas hardware (placas de vídeo, processadores, SSDs, RAM, placas-mãe)
+  // - Periféricos: apenas periféricos (teclados, mouses, headsets)
+  // - Impressão: apenas impressoras, multifuncionais e toners
+
+  const pcGamerProducts = sortRelevance(
+    products.filter(p => 
+      (p.category === "Computadores" || p.name.toLowerCase().includes("pc gamer") || p.name.toLowerCase().includes("computador gamer")) &&
+      !p.name.toLowerCase().includes("notebook") &&
+      !p.name.toLowerCase().includes("monitor")
+    )
+  );
+
+  const notebookProducts = sortRelevance(
+    products.filter(p => 
+      (p.category === "Notebooks" || p.category === "Notebooks Seminovos" || p.name.toLowerCase().includes("notebook") || p.name.toLowerCase().includes("laptop") || p.name.toLowerCase().includes("macbook") || p.name.toLowerCase().includes("thinkpad")) &&
+      !p.name.toLowerCase().includes("suporte") &&
+      !p.name.toLowerCase().includes("bolsa") &&
+      !p.name.toLowerCase().includes("mouse")
+    )
+  );
+
+  const monitorProducts = sortRelevance(
+    products.filter(p => 
+      (p.category === "Monitores" || p.name.toLowerCase().includes("monitor")) &&
+      !p.name.toLowerCase().includes("suporte") &&
+      !p.name.toLowerCase().includes("cabo") &&
+      !p.name.toLowerCase().includes("adaptador") &&
+      !p.name.toLowerCase().includes("braço articulado") &&
+      !p.name.toLowerCase().includes("notebook")
+    )
+  );
+
+  const hardwareProducts = sortRelevance(
+    products.filter(p => 
+      (p.category === "Hardware" || p.name.toLowerCase().includes("placa de vídeo") || p.name.toLowerCase().includes("processador") || p.name.toLowerCase().includes("ssd") || p.name.toLowerCase().includes("memória ram") || p.name.toLowerCase().includes("placa-mãe") || p.name.toLowerCase().includes("fonte")) &&
+      !p.name.toLowerCase().includes("notebook") &&
+      !p.name.toLowerCase().includes("monitor")
+    )
+  );
+
+  const perifericoProducts = sortRelevance(
+    products.filter(p => 
+      (p.category === "Periféricos" || p.name.toLowerCase().includes("teclado") || p.name.toLowerCase().includes("mouse") || p.name.toLowerCase().includes("headset") || p.name.toLowerCase().includes("mousepad")) &&
+      !p.name.toLowerCase().includes("notebook") &&
+      !p.name.toLowerCase().includes("monitor")
+    )
+  );
+
+  const impressaoProducts = sortRelevance(
+    products.filter(p => 
+      p.category === "Impressoras" || 
+      p.name.toLowerCase().includes("impressora") || 
+      p.name.toLowerCase().includes("multifuncional") || 
+      p.name.toLowerCase().includes("toner") || 
+      p.name.toLowerCase().includes("cartucho") ||
+      p.name.toLowerCase().includes("ecotank")
+    )
+  );
+
+  const gamesProducts = sortRelevance(
+    products.filter(p => p.category === "Games" || p.name.toLowerCase().includes("console") || p.name.toLowerCase().includes("playstation") || p.name.toLowerCase().includes("xbox") || p.name.toLowerCase().includes("cadeira gamer"))
+  );
+
+  const dealOfTheDay = pcGamerProducts[0] || products[0] || null;
 
   return (
-    <div data-home-theme="light" className="bg-neutral-50">
+    <div className="home-shell min-h-screen flex flex-col font-sans transition-colors duration-300 bg-slate-950 text-slate-100 selection:bg-[#E60012] selection:text-white">
       <JsonLd data={generateHomeAiAndGoogleSchema()} />
       <Header />
 
-      {/* ===================== BARRA DE DEPARTAMENTOS ==================== */}
-      <nav aria-label="Departamentos" className="border-b border-neutral-200 bg-white">
-        <div className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-4 py-2">
-          {DEPARTAMENTOS.map((d) => (
-            <Link
-              key={d.href}
-              href={d.href}
-              className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-semibold text-neutral-700 transition hover:bg-[#E60012]/5 hover:text-[#E60012]"
-            >
-              <d.icone size={16} /> {d.nome}
-            </Link>
-          ))}
-        </div>
-      </nav>
-
-      {/* ============================= HERO ============================= */}
-      <section className="mx-auto grid max-w-7xl gap-4 px-4 py-5 lg:grid-cols-[2fr_1fr]">
-        <div className="relative min-h-[300px] overflow-hidden rounded-2xl lg:min-h-[380px]">
-          <Image
-            src="/images/loja/pc-ligado.jpg"
-            alt="Gabinete gamer montado e ligado na bancada da loja"
-            fill
-            priority
-            unoptimized
-            sizes="(max-width: 1024px) 100vw, 780px"
-            className="object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-transparent" />
-          <div className="relative flex h-full flex-col justify-center p-7 md:p-10">
-            <span className="w-fit rounded-full bg-[#E60012] px-3 py-1 text-xs font-bold text-white">
-              Loja física no Cambuí
-            </span>
-            <h1 className="mt-4 max-w-lg text-3xl font-extrabold leading-tight text-white md:text-5xl">
-              Você vê o computador ligado antes de pagar
-            </h1>
-            <p className="mt-3 max-w-md text-sm text-white/80 md:text-base">
-              {CONDICOES.descontoPixPercentual}% de desconto no PIX,{" "}
-              {CONDICOES.parcelas}x sem juros e retirada no mesmo dia em Campinas.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <a
-                href={wpp(SITE_CONFIG.whatsapp.messageDefault)}
-                className="inline-flex items-center gap-2 rounded-xl bg-[#25D366] px-5 py-3 text-sm font-bold text-white transition hover:brightness-95"
-              >
-                <MessageCircle size={18} /> Falar com a loja
-              </a>
-              <Link
-                href="/pcgamer"
-                className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-neutral-900 transition hover:bg-neutral-100"
-              >
-                Ver PCs montados <ArrowRight size={16} />
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
-          <Link
-            href="/monteseupc"
-            className="group relative overflow-hidden rounded-2xl bg-neutral-900 p-6 text-white transition hover:brightness-110"
-          >
-            <Package size={26} className="text-[#E60012]" />
-            <h2 className="mt-3 text-lg font-bold">Monte seu PC</h2>
-            <p className="mt-1 text-sm text-white/70">
-              Escolha peça por peça. A gente monta, testa e entrega funcionando.
-            </p>
-            <span className="mt-4 inline-flex items-center gap-1 text-sm font-bold text-[#E60012]">
-              Começar <ArrowRight size={15} className="transition group-hover:translate-x-1" />
-            </span>
-          </Link>
-
-          <Link
-            href="/manutencao"
-            className="group relative overflow-hidden rounded-2xl border border-neutral-200 bg-white p-6 transition hover:border-[#E60012]/40 hover:shadow-lg"
-          >
-            <Wrench size={26} className="text-[#E60012]" />
-            <h2 className="mt-3 text-lg font-bold text-neutral-900">Assistência técnica</h2>
-            <p className="mt-1 text-sm text-neutral-600">
-              Conserto, upgrade e recuperação de dados na bancada da loja.
-            </p>
-            <span className="mt-4 inline-flex items-center gap-1 text-sm font-bold text-[#E60012]">
-              Ver serviços <ArrowRight size={15} className="transition group-hover:translate-x-1" />
-            </span>
-          </Link>
-        </div>
-      </section>
-
-      {/* ======================= BARRA DE BENEFÍCIOS ===================== */}
-      <section className="border-y border-neutral-200 bg-white">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-4 px-4 py-5 md:grid-cols-4">
-          {[
-            { i: CreditCard, t: `${CONDICOES.descontoPixPercentual}% no PIX`, d: `ou ${CONDICOES.parcelas}x sem juros` },
-            { i: Truck, t: "Retirada hoje", d: "e entrega na região" },
-            { i: Wrench, t: "Assistência própria", d: "conserto no mesmo lugar" },
-            { i: ShieldCheck, t: "Nota fiscal", d: "em compra e serviço" },
-          ].map((b) => (
-            <div key={b.t} className="flex items-center gap-3">
-              <b.i size={22} className="shrink-0 text-[#E60012]" />
-              <div className="min-w-0">
-                <p className="truncate text-sm font-bold text-neutral-900">{b.t}</p>
-                <p className="truncate text-xs text-neutral-500">{b.d}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ========================== DESTAQUES =========================== */}
-      {destaques.length > 0 && (
-        <section className="mx-auto max-w-7xl px-4 py-8">
-          <div className="rounded-2xl bg-[#E60012] p-1">
-            <div className="rounded-[0.9rem] bg-white p-5">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-xl font-extrabold text-neutral-900">
-                  Destaques da semana
-                </h2>
-                <Link href="/vitrine" className="text-sm font-bold text-[#E60012] hover:underline">
-                  Ver a vitrine
-                </Link>
-              </div>
-              <div className="mt-5 grid grid-cols-2 gap-4 md:grid-cols-4">
-                {destaques.map((p) => <CardProduto key={p.id} product={p} />)}
+      {/* Marcas Parceiras Marquee */}
+      {!search && !category && (
+        <section className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 pt-4 lg:pt-6">
+          <div className="home-panel brand-carousel rounded-2xl px-4 py-3 sm:px-6 border border-slate-800 bg-slate-900/90 shadow-xl backdrop-blur">
+            <div className="flex items-center gap-3">
+              <span className="shrink-0 rounded-full bg-[#E60012] px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-white shadow-sm sm:text-[11px]">
+                Marcas Oficiais
+              </span>
+              <div className="relative min-w-0 flex-1 overflow-hidden">
+                <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-8 bg-gradient-to-r from-slate-900 to-transparent" />
+                <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-gradient-to-l from-slate-900 to-transparent" />
+                <div className="brand-carousel-track flex w-max min-w-full items-center gap-3 py-1 pr-2">
+                  {homeBrandCarousel.map((brand, index) => (
+                    <Link
+                      key={`${brand}-${index}`}
+                      href={`/?search=${encodeURIComponent(brand)}`}
+                      className="flex-none whitespace-nowrap rounded-full border border-slate-700/80 bg-slate-800/80 px-4 py-1.5 text-xs font-bold text-slate-200 transition hover:border-[#E60012] hover:text-white sm:text-sm hover:bg-slate-800"
+                    >
+                      {brand}
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         </section>
       )}
 
-      {/* ========================== PRATELEIRAS ========================= */}
-      {prateleiras.map((p) => (
-        <section key={p.titulo} className="mx-auto max-w-7xl px-4 py-6">
-          <div className="rounded-2xl border border-neutral-200 bg-white p-5">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-100 pb-4">
-              <h2 className="text-xl font-extrabold text-neutral-900">{p.titulo}</h2>
-              <Link href={p.href} className="inline-flex items-center gap-1 text-sm font-bold text-[#E60012] hover:underline">
-                Ver todos <ArrowRight size={15} />
-              </Link>
-            </div>
-            <div className="mt-5 grid grid-cols-2 gap-4 md:grid-cols-4">
-              {p.itens.map((prod) => <CardProduto key={prod.id} product={prod} />)}
-            </div>
-          </div>
-        </section>
-      ))}
+      {/* Main Content Container - Impeccable Redesign */}
+      <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 space-y-12 sm:space-y-16 py-8">
+        {/* 1. Full-Width Stretched Hero Banner */}
+        {!search && !category && (
+          <HomeHeroFullWidth carouselImages={carouselImages} />
+        )}
 
-      {/* ===================== FAIXA DE SERVIÇOS ======================== */}
-      <section className="mx-auto max-w-7xl px-4 py-8">
-        <div className="rounded-2xl bg-neutral-900 p-6 md:p-9">
-          <h2 className="text-2xl font-extrabold text-white md:text-3xl">
-            O que a loja da esquina faz e o site grande não faz
-          </h2>
-          <p className="mt-2 max-w-2xl text-sm text-white/70">
-            Serviço técnico é o motivo de existir uma loja física. Tudo abaixo é
-            feito aqui no Cambuí.
-          </p>
-          <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {SERVICOS.map((s) => (
-              <div key={s.titulo} className="flex items-center gap-3 rounded-xl bg-white/5 p-4 transition hover:bg-white/10">
-                <s.icone size={20} className="shrink-0 text-[#E60012]" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-bold text-white">{s.titulo}</p>
-                  <div className="mt-1 flex gap-3 text-xs">
-                    <a href={wpp(s.msg)} className="font-semibold text-[#25D366] hover:underline">WhatsApp</a>
-                    <Link href={s.href} className="text-white/50 hover:text-white">Detalhes</Link>
-                  </div>
-                </div>
+        {/* 2. Trust Pillars (4 interactive cards) */}
+        {!search && !category && (
+          <HomeTrustPillars />
+        )}
+
+        {/* 3. Main Body: Left Column (Department Menu) + Right Roomy Center Feed */}
+        {!search && !category ? (
+          <>
+            <div className="flex flex-col lg:flex-row gap-8 xl:gap-10 items-start">
+              {/* Left Column: Dedicated Department Menu Sidebar */}
+              <div className="w-full lg:w-72 xl:w-80 2xl:w-96 shrink-0">
+                <HomeDepartmentMenu categories={categories} dealOfTheDay={dealOfTheDay} />
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* ========================= AVALIAÇÕES =========================== */}
-      <section className="mx-auto max-w-7xl px-4 py-8">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <h2 className="text-2xl font-extrabold text-neutral-900">O que os clientes escreveram</h2>
-          {temProvaGoogle && (
-            <p className="text-sm text-neutral-500">
-              <span className="font-bold text-neutral-900">
-                {String(PROVA_SOCIAL.googleNota).replace(".", ",")}
-              </span>{" "}
-              de 5 em {PROVA_SOCIAL.googleAvaliacoes} avaliações no Google
-            </p>
-          )}
-        </div>
-        <div className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {AVALIACOES.map((a) => (
-            <figure key={a.nome} className="rounded-xl border border-neutral-200 bg-white p-5">
-              <div className="flex gap-0.5 text-[#E60012]" aria-label="5 de 5 estrelas">
-                {[0,1,2,3,4].map((i) => <Star key={i} size={13} fill="currentColor" strokeWidth={0} />)}
+              {/* Right Column: Roomy Main Highlights Feed */}
+              <div className="flex-1 min-w-0 space-y-12 sm:space-y-16">
+                {/* 1. Computador Gamer */}
+                {pcGamerProducts.length > 0 && (
+                  <HomeCategoryShelf
+                    title="🚀 Computador Gamer & Setups"
+                    subtitle="Máquinas de alta performance montadas com componentes selecionados e garantia total."
+                    categorySlug="computadores"
+                    products={pcGamerProducts}
+                  />
+                )}
+
+                {/* 2. Notebooks (Estritamente Notebooks) */}
+                {notebookProducts.length > 0 && (
+                  <HomeCategoryShelf
+                    title="💻 Notebooks & Laptops"
+                    subtitle="Modelos para trabalho, estudos e gamers com máxima autonomia e potência."
+                    categorySlug="notebooks"
+                    products={notebookProducts}
+                  />
+                )}
               </div>
-              <blockquote className="mt-3 text-[13px] leading-relaxed text-neutral-700">“{a.texto}”</blockquote>
-              <figcaption className="mt-3 text-xs text-neutral-500">
-                <span className="font-semibold text-neutral-900">{a.nome}</span> · {a.quando} · Google
-              </figcaption>
-            </figure>
-          ))}
-        </div>
-      </section>
+            </div>
 
-      {/* ========================= LOJA FÍSICA ========================== */}
-      <section className="border-t border-neutral-200 bg-white">
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 md:grid-cols-2">
-          <div>
-            <h2 className="text-2xl font-extrabold text-neutral-900 md:text-3xl">Passa aqui</h2>
-            <p className="mt-2 text-neutral-600">
-              Loja de 300 m² no Cambuí. Tem bancada, tem estoque e tem gente pra explicar sem pressa.
-            </p>
-            <ul className="mt-7 space-y-4">
-              <li className="flex gap-3">
-                <MapPin size={19} className="mt-0.5 shrink-0 text-[#E60012]" />
-                <div>
-                  <p className="font-semibold text-neutral-900">{SITE_CONFIG.address}</p>
-                  <a href={SITE_CONFIG.mapsUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-[#E60012] hover:underline">
-                    Abrir no Google Maps
-                  </a>
+            {/* 4. BLOCO FULL SIZE: Monitores Gamer & UltraWide */}
+            {monitorProducts.length > 0 && (
+              <div className="w-full">
+                <HomeMonitoresFullWidth products={monitorProducts} />
+              </div>
+            )}
+
+            {/* 5. Demais Categorias em Destaque com Filtros Estritos */}
+            <div className="space-y-12 sm:space-y-16">
+              {/* Hardware */}
+              {hardwareProducts.length > 0 && (
+                <HomeCategoryShelf
+                  title="⚡ Hardware & Peças para Upgrade"
+                  subtitle="Placas de vídeo RTX/Radeon, processadores Ryzen/Intel, SSDs NVMe e memórias RAM."
+                  categorySlug="hardware"
+                  products={hardwareProducts}
+                />
+              )}
+
+              {/* Periféricos */}
+              {perifericoProducts.length > 0 && (
+                <HomeCategoryShelf
+                  title="🎧 Periféricos & Setup Gamer"
+                  subtitle="Teclados mecânicos, mouses de precisão, headsets com áudio espacial e microfones."
+                  categorySlug="perifericos"
+                  products={perifericoProducts}
+                />
+              )}
+
+              {/* Impressão & Suprimentos */}
+              {impressaoProducts.length > 0 && (
+                <HomeCategoryShelf
+                  title="🖨️ Impressão & Suprimentos"
+                  subtitle="Impressoras tanque de tinta, multifuncionais e toners originais com ótimo rendimento."
+                  categorySlug="impressao"
+                  products={impressaoProducts}
+                />
+              )}
+
+              {/* Games & Consoles */}
+              {gamesProducts.length > 0 && (
+                <HomeCategoryShelf
+                  title="🎮 Consoles, Games & Acessórios"
+                  subtitle="PlayStation 5, Xbox, controles sem fio e cadeiras gamer ergonômicas."
+                  categorySlug="games"
+                  products={gamesProducts}
+                />
+              )}
+            </div>
+
+            {/* 6. Blog & Destaques de Conteúdo Full Width */}
+            <div className="w-full">
+              <HomeBlogSection blogPosts={blogPosts} />
+            </div>
+          </>
+        ) : (
+          <section className="rounded-3xl border border-slate-800 bg-slate-900/90 p-6 md:p-10 shadow-2xl backdrop-blur">
+            <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div>
+                <div className="text-xs font-black uppercase tracking-widest text-[#E60012]">
+                  Navegação do Catálogo
                 </div>
+                <h1 className="mt-1 text-2xl font-black tracking-tight text-white md:text-4xl">
+                  {category || `Resultados para: "${search}"`}
+                </h1>
+              </div>
+              <span className="rounded-full border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-bold text-slate-300">
+                {products.length} produtos encontrados
+              </span>
+            </div>
+
+            {products.length === 0 ? (
+              <div className="rounded-2xl border border-slate-800 bg-slate-950 px-6 py-20 text-center text-slate-400">
+                <p className="text-xl font-medium">Nenhum produto encontrado para esta busca.</p>
+              </div>
+            ) : (
+              <ProductList products={products} />
+            )}
+          </section>
+        )}
+
+        {!search && !category && <HomeLocalStoreInfo />}
+
+        {!search && !category && (
+          <div className="mt-8">
+            <QuickLeadSection
+              title="Quer comprar ou consertar hoje?"
+              description="Fale com a equipe da Balão da Informática pelo WhatsApp para confirmar estoque, retirada no Cambuí, entrega express ou assistência técnica."
+              messageTemplate="Olá! Quero atendimento rápido da Balão da Informática para compra ou assistência técnica em Campinas e região."
+              source="home"
+              cityLabel="Campinas e Região"
+              serviceLabel="Venda, Upgrade e Assistência Técnica"
+              formTitle="Pedir retorno rápido"
+            />
+          </div>
+        )}
+
+        {!search && !category && (
+          <SeoContent title="LOJA DE INFORMATICA EM CAMPINAS COM WHATSAPP, RETIRADA E ASSISTENCIA TECNICA">
+            <p className="mb-4 text-slate-300">
+              A <strong>Balão da Informática Castelo</strong> é a principal <strong>loja de informática em Campinas</strong> para quem busca
+              <strong>PC Gamer em Campinas</strong>, <strong>notebooks</strong>, <strong>monitores gamer</strong>, <strong>smartphones</strong> e peças de hardware para upgrade (placas de vídeo RTX/Radeon,
+              processadores Intel e AMD Ryzen, memórias RAM DDR4/DDR5, SSDs NVMe e fontes selo 80 Plus), periféricos gamer e <strong>assistência técnica especializada em Campinas</strong> com atendimento imediato no balcão e no WhatsApp.
+              Compre online com desconto progressivo no PIX ou em até 10x sem juros no cartão de crédito e consulte nossa equipe no WhatsApp para conferir a disponibilidade imediata para retirada no balcão no Cambuí ou entrega express.
+            </p>
+            <ul className="list-none space-y-3 pl-0 text-slate-300">
+              <li className="flex items-start gap-2">
+                <span className="text-xl">📍</span>
+                <span><strong>Loja física em Campinas:</strong> {SITE_CONFIG.address}. Presença local e balcão aberto para quem deseja comprar computador, notebook, peças e acessórios com total procedência, nota fiscal e garantia.</span>
               </li>
-              <li className="flex gap-3">
-                <Clock size={19} className="mt-0.5 shrink-0 text-[#E60012]" />
-                <p className="text-neutral-800">{SITE_CONFIG.openingHoursDisplay}</p>
+              <li className="flex items-start gap-2">
+                <span className="text-xl">💬</span>
+                <span><strong>Atendimento consultivo e ágil:</strong> converse diretamente com nossa equipe técnica pelo WhatsApp para esclarecer dúvidas de compatibilidade, solicitar orçamento de montagem e fechar seu pedido com rapidez.</span>
               </li>
-              <li className="flex gap-3">
-                <ShieldCheck size={19} className="mt-0.5 shrink-0 text-[#E60012]" />
-                <p className="text-neutral-800">
-                  CNPJ {SITE_CONFIG.cnpj} — {PROVA_SOCIAL.anosDeMercado} anos em Campinas.
-                </p>
+              <li className="flex items-start gap-2">
+                <span className="text-xl">🚀</span>
+                <span><strong>Bancada técnica própria:</strong> montagem profissional de PC Gamer com cable management, testes de estresse, manutenção preventiva, formatação e conserto de computadores e notebooks.</span>
               </li>
             </ul>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            {FOTOS_LOJA.map((f) => (
-              <div key={f.src} className="relative aspect-square overflow-hidden rounded-xl">
-                <Image src={f.src} alt={f.alt} fill unoptimized sizes="(max-width:768px) 50vw, 280px" className="object-cover" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ============================= CTA ============================== */}
-      <section className="bg-[#E60012]">
-        <div className="mx-auto max-w-4xl px-4 py-12 text-center">
-          <h2 className="text-2xl font-extrabold text-white md:text-3xl">
-            Não achou? Pergunta no WhatsApp.
-          </h2>
-          <p className="mx-auto mt-3 max-w-xl text-sm text-white/90">
-            O site mostra uma seleção — boa parte do estoque não está publicada.
-            Orçamento de serviço e consulta de estoque no mesmo número.
-          </p>
-          <a
-            href={wpp(SITE_CONFIG.whatsapp.messageDefault)}
-            className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-7 py-3.5 font-bold text-[#E60012] shadow-lg transition hover:bg-neutral-50"
-          >
-            <MessageCircle size={19} /> {SITE_CONFIG.whatsapp.display}
-          </a>
-        </div>
-      </section>
+          </SeoContent>
+        )}
+      </div>
     </div>
   );
 }
