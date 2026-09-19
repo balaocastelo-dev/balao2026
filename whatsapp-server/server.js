@@ -730,6 +730,27 @@ function filtrarSpecsInternos(specs) {
   return specs.filter((linha) => !SPEC_KEYS_INTERNOS.test(String(linha || "")));
 }
 
+function parsePrice(value) {
+  if (value == null) return 0;
+  if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+  const raw = String(value).trim();
+  if (!raw) return 0;
+  const cleaned = raw
+    .replace(/R\$/gi, "")
+    .replace(/\s/g, "")
+    .replace(/[^\d,.\-]/g, "");
+  const hasComma = cleaned.includes(",");
+  const hasDot = cleaned.includes(".");
+  let normalized = cleaned;
+  if (hasComma && hasDot) {
+    normalized = cleaned.replace(/\./g, "").replace(",", ".");
+  } else if (hasComma && !hasDot) {
+    normalized = cleaned.replace(",", ".");
+  }
+  const num = parseFloat(normalized);
+  return Number.isFinite(num) ? num : 0;
+}
+
 function normalizeNumber(value) {
   const digits = String(value || "").replace(/\D/g, "");
   if (!digits) return "";
@@ -1748,11 +1769,12 @@ async function resolveAndSendMessage(chatId, content, options = {}) {
       }
     }
 
-    // Se for @lid, tenta achar o telefone @c.us correspondente no store
+    // Se for @lid, tenta achar o telefone @c.us correspondente no store ou nas opções
     if (String(chatId).endsWith("@lid")) {
       const found = store.chats.find((c) => c.id === chatId || c.chatId === chatId);
-      if (found?.realNumber) {
-        const altCus = `${found.realNumber}@c.us`;
+      let num = found?.realNumber || normalizeNumber(options?.number || options?.realNumber || "");
+      if (num) {
+        const altCus = `${num}@c.us`;
         try {
           console.log(`[WHATSAPP-SEND] Tentando enviar para telefone @c.us do contato @lid: ${altCus}`);
           const res = await whatsappClient.sendMessage(altCus, content, options);
@@ -2128,6 +2150,8 @@ function buildWhatsAppClient() {
       clientId: "balao-whatsapp-panel",
       dataPath: AUTH_DIR,
     }),
+    takeoverOnConflict: true,
+    takeoverTimeoutMs: 2000,
     webVersionCache: {
       type: "remote",
       remotePath: "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/{version}.html",
@@ -2147,6 +2171,12 @@ function buildWhatsAppClient() {
         "--disable-accelerated-2d-canvas",
         "--no-first-run",
         "--no-zygote",
+        "--disable-background-timer-throttling",
+        "--disable-backgrounding-occluded-windows",
+        "--disable-renderer-backgrounding",
+        "--disable-breakpad",
+        "--disable-component-extensions-with-background-pages",
+        "--disable-ipc-flooding-protection",
         "--window-size=1280,800",
       ],
       userAgent:
@@ -2326,14 +2356,12 @@ function attachWhatsAppClientEvents(client) {
     console.error("[whatsapp] Falha de autenticação:", message);
     whatsappState.status = "auth_failure";
     whatsappState.connected = false;
-    whatsappState.session = false;
     whatsappState.qrCode = null;
     whatsappState.rawQr = null;
     emitState();
     emitToast(`Falha na autenticação: ${message}`);
-    // Sessão local corrompida/expirada: limpar e gerar QR novo automaticamente
-    // em vez de ficar travado exigindo reset manual.
-    setTimeout(() => initializeWhatsAppClient({ resetSession: true }), 3000);
+    // Não limpa a sessão do disco automaticamente. Tenta reiniciar mantendo dados locais.
+    setTimeout(() => initializeWhatsAppClient({ resetSession: false }), 4000);
   });
 
   client.on("disconnected", (reason) => {
@@ -2355,13 +2383,10 @@ function attachWhatsAppClientEvents(client) {
     emitState();
     emitToast(`WhatsApp desconectado: ${reason}`);
 
-    if (reason === "LOGOUT") {
-      whatsappState.session = false;
-      whatsappState.phoneNumber = null;
-      setTimeout(() => initializeWhatsAppClient({ resetSession: true }), 2000);
-    } else {
-      setTimeout(() => initializeWhatsAppClient({ resetSession: false }), 4000);
-    }
+    // NUNCA apaga a sessão (.wwebjs_auth) em desconexões automáticas!
+    // Reconecta com resetSession: false para que o LocalAuth reutilize os dados de autenticação.
+    // Se o WhatsApp realmente desemparelhou o aparelho, ele emitirá o evento 'qr' naturalmente.
+    setTimeout(() => initializeWhatsAppClient({ resetSession: false }), 3000);
   });
 
   client.on("message", async (message) => {
@@ -2500,6 +2525,12 @@ async function initializeWhatsAppClient(options = {}) {
     if (resetSession) {
       whatsappState.session = false;
       whatsappState.phoneNumber = null;
+    } else {
+      try {
+        if (fs.existsSync(AUTH_DIR) && fs.readdirSync(AUTH_DIR).length > 0) {
+          whatsappState.session = true;
+        }
+      } catch {}
     }
     emitState();
 
@@ -2557,6 +2588,16 @@ async function initializeWhatsAppClient(options = {}) {
 const WATCHDOG_INTERVAL_MS = 20000;
 const WATCHDOG_STUCK_INIT_MS = 180000; // 3 minutos para falha real de boot do navegador
 const WATCHDOG_STUCK_PROGRESS_MS = 300000; // 5 minutos sem nenhum evento antes de reciclar
+
+// Keep-alive anti-freeze: a cada 25s, interage com a página do Puppeteer
+// para garantir que o Chrome não durma nem congele conexões TCP/WebSockets em background.
+setInterval(async () => {
+  if (whatsappClient?.pupPage && (whatsappState.connected || whatsappState.status === "ready")) {
+    try {
+      await whatsappClient.pupPage.evaluate(() => Boolean(window.WWebJS));
+    } catch {}
+  }
+}, 25000);
 
 setInterval(() => {
   const now = Date.now();
@@ -2758,8 +2799,8 @@ app.post(["/api/enviar-produto", "/api/crm/enviar-produto"], async (req, res) =>
     if (!targetChat || !prod.nome) {
       return res.status(400).json({ ok: false, erro: "Chat e produto são obrigatórios." });
     }
-    const precoFinal = Number(price || prod.preco || 0);
-    const custo = Number(prod.custo || 0);
+    const precoFinal = parsePrice(price != null ? price : (prod.preco != null ? prod.preco : prod.price));
+    const custo = parsePrice(prod.custo);
     if (custo > 0 && precoFinal <= custo) {
       return res.status(400).json({
         ok: false,
@@ -2777,7 +2818,7 @@ app.post(["/api/enviar-produto", "/api/crm/enviar-produto"], async (req, res) =>
       try {
         const media = await MessageMedia.fromUrl(prod.imagem, { unsafeMime: true });
         const chatId = targetChat.includes("@") ? targetChat : `${normalizeNumber(targetChat)}@c.us`;
-        const sentMsg = await resolveAndSendMessage(chatId, media, { caption: text });
+        const sentMsg = await resolveAndSendMessage(chatId, media, { caption: text, number: targetChat });
         mediaSent = true;
         // Guarda a URL da foto do produto no histórico — sem isso a imagem
         // some do chat assim que a conversa ressincroniza (o listener
@@ -3491,8 +3532,8 @@ io.on("connection", (socket) => {
       const number = normalizeNumber(payload.number || payload.chatId || "");
       const chatId = payload.chatId || (number ? `${number}@c.us` : null);
       const prod = payload.product || {};
-      const precoFinal = Number(payload.price || prod.preco || 0);
-      const custo = Number(prod.custo || 0);
+      const precoFinal = parsePrice(payload.price != null ? payload.price : (prod.preco != null ? prod.preco : prod.price));
+      const custo = parsePrice(prod.custo);
       if (custo > 0 && precoFinal <= custo) {
         const msg = `Preço (R$ ${precoFinal.toFixed(2)}) menor ou igual ao custo (R$ ${custo.toFixed(2)}).`;
         emitToast(`⛔ Envio bloqueado: ${msg}`);
@@ -3511,7 +3552,7 @@ io.on("connection", (socket) => {
       if (prod.imagem && prod.imagem.startsWith("http")) {
         try {
           const media = await MessageMedia.fromUrl(prod.imagem, { unsafeMime: true });
-          const sentMsg = await resolveAndSendMessage(chatId, media, { caption: text });
+          const sentMsg = await resolveAndSendMessage(chatId, media, { caption: text, number });
           mediaSent = true;
           sentId = sentMsg?.id?._serialized || null;
           // Mesmo motivo do endpoint REST: guarda a mediaUrl explicitamente

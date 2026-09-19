@@ -24,7 +24,7 @@ import {
   RESPOSTAS_BASE,
   VENDEDORES_BASE,
 } from "@/lib/crm-defaults";
-import { type Category, buildCategoryTree } from "@/lib/utils";
+import { type Category, buildCategoryTree, parsePriceToNumber } from "@/lib/utils";
 
 interface CtxMenuItem {
   label?: string;
@@ -639,21 +639,15 @@ export default function CrmWhatsAppClient({
           setDiagnosticoCatalogo(null);
         }
         const list: CrmProdutoCatalogo[] = rows.map((p: any) => {
-            const precoNum =
-              typeof p.price === "number"
-                ? p.price
-                : parseFloat(String(p.price).replace(/[^0-9.]/g, "")) || 0;
+            const precoNum = parsePriceToNumber(p.price);
             const custoNum =
               typeof p.cost === "number" && p.cost > 0
                 ? p.cost
-                : Math.round(precoNum * 0.75);
+                : Math.round(precoNum * 0.75 * 100) / 100;
             const margem =
               custoNum > 0 ? Math.round(((precoNum - custoNum) / custoNum) * 100) : 25;
             const fornecedor = p.supplier || p.brand || "Estoque Balão";
-            const precoFmt =
-              typeof p.price === "number"
-                ? `R$ ${p.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
-                : String(p.price || `R$ ${precoNum.toFixed(2)}`);
+            const precoFmt = `R$ ${precoNum.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
             return {
               id: String(p.id),
@@ -1702,8 +1696,8 @@ export default function CrmWhatsAppClient({
       return;
     }
 
-    const precoFinal = precoCustom || prod.preco;
-    const precoFmt = `R$ ${precoFinal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+    const precoFinal = typeof precoCustom === "number" ? precoCustom : prod.preco;
+    const precoFmt = `R$ ${precoFinal.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     const specsTxt = prod.specs?.length ? `\n• ${prod.specs.join("\n• ")}` : "";
     const obsTxt = obsCustom?.trim() ? `\n\n_Obs: ${obsCustom.trim()}_` : "";
 
@@ -1895,11 +1889,11 @@ export default function CrmWhatsAppClient({
   // Product Modal Sync
   const abrirModalProduto = (p: CrmProdutoCatalogo) => {
     setProdutoModal(p);
-    const custo = p.custo || Math.round(p.preco * 0.76);
+    const custo = p.custo || Math.round(p.preco * 0.76 * 100) / 100;
     const margem = p.margem || 28;
     setMpCusto(String(custo));
     setMpMargem(String(margem));
-    setMpPreco(String(Math.round(custo * (1 + margem / 100))));
+    setMpPreco((custo * (1 + margem / 100)).toFixed(2));
     setMpObs("");
     setMpOrigem("margem");
     setModalProdutoAberto(true);
@@ -1909,7 +1903,7 @@ export default function CrmWhatsAppClient({
     const c = parseFloat(cStr) || 0;
     const m = parseFloat(mStr) || 0;
     if (c > 0) {
-      setMpPreco(String(Math.round(c * (1 + m / 100))));
+      setMpPreco((c * (1 + m / 100)).toFixed(2));
     }
   };
 
@@ -2160,14 +2154,17 @@ export default function CrmWhatsAppClient({
     return etiquetas.find((e) => e.nome.toLowerCase() === nome.toLowerCase())?.cor || "#5f6368";
   };
 
-  const isConnected =
-    estado === "ready" ||
-    estado === "authenticated" ||
-    (estado === "loading" && (chats.length > 0 || statusFeed.length > 0));
   const temQrReal = Boolean(
     (qrCodeData && qrCodeData.startsWith("data:image")) ||
     (rawQrString && rawQrString.length > 20)
   );
+
+  const isConnected =
+    estado === "ready" ||
+    estado === "authenticated" ||
+    ((estado === "loading" || estado === "initializing" || estado === "disconnected") &&
+      chats.length > 0 &&
+      !temQrReal);
 
   // Portão de acesso: cada vendedor precisa do próprio PIN pra "atender".
   // A lista de vendedores vem do servidor (compartilhada por toda a equipe),
@@ -3479,12 +3476,12 @@ export default function CrmWhatsAppClient({
                                   <button
                                     onClick={() => {
                                       setProdutoModal(prod);
-                                      const custo = prod.custo || Math.round(prod.preco * 0.75);
+                                      const custo = prod.custo || Math.round(prod.preco * 0.75 * 100) / 100;
                                       const margemPadrao = 25;
-                                      const precoVendaCalc = Math.round(custo * (1 + margemPadrao / 100));
+                                      const precoVendaCalc = (custo * (1 + margemPadrao / 100)).toFixed(2);
                                       setMpCusto(String(custo));
                                       setMpMargem(String(margemPadrao));
-                                      setMpPreco(String(precoVendaCalc));
+                                      setMpPreco(precoVendaCalc);
                                       setMpObs("");
                                       setMpOrigem("margem");
                                       setModalProdutoAberto(true);
