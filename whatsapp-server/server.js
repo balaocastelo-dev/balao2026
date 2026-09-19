@@ -2963,7 +2963,8 @@ app.post(["/api/enviar-produto", "/api/crm/enviar-produto"], async (req, res) =>
     const { chat, number, product, price, obs, signatureId } = req.body || {};
     const targetChat = chat || number;
     const prod = product || {};
-    if (!targetChat || !prod.nome) {
+    const prodNome = prod.nome || prod.name || prod.title || "Produto do Catálogo";
+    if (!targetChat || !prodNome) {
       return res.status(400).json({ ok: false, erro: "Chat e produto são obrigatórios." });
     }
     const precoFinal = parsePrice(price != null ? price : (prod.preco != null ? prod.preco : prod.price));
@@ -2978,7 +2979,7 @@ app.post(["/api/enviar-produto", "/api/crm/enviar-produto"], async (req, res) =>
     const specsVisiveis = filtrarSpecsInternos(prod.specs);
     const specs = specsVisiveis.length ? `\n• ${specsVisiveis.join("\n• ")}` : "";
     const precoFmt = precoFinal.toLocaleString("pt-BR", { minimumFractionDigits: 2 });
-    const text = `⚡ *Oferta Balão da Informática*\n*${prod.nome}*\n\n💵 *Preço Especial:* *R$ ${precoFmt}*${specs}${obsTxt}\n\n📍 Pronta entrega na loja do Castelo Campinas!\nPara reservar ou tirar dúvidas, é só responder aqui! 🎈`;
+    const text = `⚡ *Oferta Balão da Informática*\n*${prodNome}*\n\n💵 *Preço Especial:* *R$ ${precoFmt}*${specs}${obsTxt}\n\n📍 Pronta entrega na loja do Castelo Campinas!\nPara reservar ou tirar dúvidas, é só responder aqui! 🎈`;
 
     let mediaSent = false;
     const bestChatId = getBestTargetChatId(targetChat, number || targetChat);
@@ -3719,6 +3720,7 @@ io.on("connection", (socket) => {
       const number = normalizeNumber(payload.number || payload.chatId || "");
       const targetChatId = getBestTargetChatId(payload.chatId, number);
       const prod = payload.product || {};
+      const prodNome = prod.nome || prod.name || prod.title || "Produto do Catálogo";
       const precoFinal = parsePrice(payload.price != null ? payload.price : (prod.preco != null ? prod.preco : prod.price));
       const custo = parsePrice(prod.custo);
       if (custo > 0 && precoFinal <= custo) {
@@ -3732,7 +3734,7 @@ io.on("connection", (socket) => {
       const specs = specsVisiveis.length ? `\n• ${specsVisiveis.join("\n• ")}` : "";
       const precoFmt = precoFinal.toLocaleString("pt-BR", { minimumFractionDigits: 2 });
 
-      const text = `⚡ *Oferta Balão da Informática*\n*${prod.nome}*\n\n💵 *Preço Especial:* *R$ ${precoFmt}*${specs}${obs}\n\n📍 Pronta entrega na loja do Castelo Campinas!\nPara reservar ou tirar dúvidas, é só responder aqui! 🎈`;
+      const text = `⚡ *Oferta Balão da Informática*\n*${prodNome}*\n\n💵 *Preço Especial:* *R$ ${precoFmt}*${specs}${obs}\n\n📍 Pronta entrega na loja do Castelo Campinas!\nPara reservar ou tirar dúvidas, é só responder aqui! 🎈`;
 
       let mediaSent = false;
       let sentId = null;
