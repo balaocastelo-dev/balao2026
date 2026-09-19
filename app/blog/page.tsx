@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import Image from "next/image";
+import Script from "next/script";
 import Header from "@/components/Header";
 import JsonLd, { generateBreadcrumbSchema, generateFAQSchema, generateOrganizationSchema } from "@/components/JsonLd";
 import { listBlogPostsForPage } from "@/lib/blog-store";
@@ -228,9 +229,8 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
                 </span>
                 <h3 className="text-xl font-black text-neutral-900 mt-2">Últimos Artigos Publicados</h3>
               </div>
-              <div id="soro-blog" className="min-h-[150px] text-neutral-900 bg-white">
-                <script src="https://app.trysoro.com/api/embed/71c5ae65-e641-4dca-928b-d80ac924512b" defer></script>
-              </div>
+              <div id="soro-blog" className="min-h-[150px] text-neutral-900 bg-white"></div>
+              <Script src="https://app.trysoro.com/api/embed/71c5ae65-e641-4dca-928b-d80ac924512b" strategy="afterInteractive" />
             </section>
 
             {group3.length > 0 && (
