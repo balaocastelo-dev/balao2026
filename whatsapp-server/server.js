@@ -1952,36 +1952,41 @@ async function ensureWWebJSInjected(client = whatsappClient) {
                 await sendMsgResultPromise;
               }
 
-              let msg = window.require('WAWebCollections').Msg.get(newMsgKey._serialized);
-              if (!msg) {
-                for (let i = 0; i < 5; i++) {
-                  await new Promise(r => setTimeout(r, 100));
-                  msg = window.require('WAWebCollections').Msg.get(newMsgKey._serialized);
-                  if (msg) break;
-                }
-              }
+              const serializedId = (newMsgKey && newMsgKey._serialized)
+                ? newMsgKey._serialized
+                : (newMsgKey ? String(newMsgKey) : `true_${chat.id?._serialized || String(chat.id)}_${newId}`);
 
-              if (!msg) {
+              let msg = null;
+              try {
+                msg = window.require('WAWebCollections')?.Msg?.get(serializedId);
+                if (!msg && newMsgKey?._serialized) {
+                  msg = window.require('WAWebCollections')?.Msg?.get(newMsgKey._serialized);
+                }
+                if (!msg) {
+                  for (let i = 0; i < 5; i++) {
+                    await new Promise(r => setTimeout(r, 100));
+                    msg = window.require('WAWebCollections')?.Msg?.get(serializedId);
+                    if (msg) break;
+                  }
+                }
+              } catch (eGet) {}
+
+              // Retorno garantido com _serialized concreto serializável pelo Puppeteer
+              if (!msg || !msg.id || !msg.id._serialized) {
                 msg = {
-                  id: newMsgKey,
+                  id: {
+                    _serialized: serializedId,
+                    id: newId,
+                    fromMe: true,
+                    remote: chat.id?._serialized || String(chat.id)
+                  },
                   ack: 1,
-                  body: message.body,
-                  caption: message.caption,
-                  type: message.type || "image",
-                  from: message.from,
-                  to: message.to,
-                  t: message.t,
-                  directPath: message.directPath,
-                  serialize: () => ({
-                    id: newMsgKey,
-                    ack: 1,
-                    body: message.body,
-                    caption: message.caption,
-                    type: message.type || "image",
-                    from: message.from?._serialized || String(message.from),
-                    to: message.to?._serialized || String(message.to),
-                    t: message.t
-                  })
+                  body: caption || message.body || "",
+                  caption: caption || message.caption || "",
+                  type: "image",
+                  from: from?._serialized || String(from),
+                  to: chat.id?._serialized || String(chat.id),
+                  t: message.t || parseInt(new Date().getTime() / 1000)
                 };
               }
 
@@ -2142,7 +2147,15 @@ async function resolveMediaObject(mediaSource, filename = "produto.jpg", mimetyp
 
 function extractProductImageUrl(prod) {
   if (!prod) return null;
-  let raw = prod.imagem || prod.image || prod.foto || prod.img || prod.urlImagem || (Array.isArray(prod.imagens) ? prod.imagens[0] : null);
+  let raw =
+    prod.imagem ||
+    prod.image ||
+    prod.foto ||
+    prod.img ||
+    prod.urlImagem ||
+    (Array.isArray(prod.imagens) ? prod.imagens[0] : null) ||
+    (Array.isArray(prod.image_urls) ? prod.image_urls[0] : null) ||
+    (Array.isArray(prod.images) ? prod.images[0] : null);
   if (typeof raw === "string" && raw.trim()) {
     raw = raw.trim();
     if (raw.startsWith("//")) return `https:${raw}`;
@@ -3027,156 +3040,11 @@ app.post("/api/debug/test-send-media", async (req, res) => {
           }
         }
 
+        if (!chat) {
+          chat = await window.WWebJS.getChat(cid, { getAsModel: false });
+        }
         logs.push(`Final chat object: ${Boolean(chat)}`);
         if (!chat) return { logs, error: "Could not find or create chat" };
-
-        let stepDebug = {};
-        try {
-          const MsgClass = window.require('WAWebCollections')?.Msg?.modelClass;
-          stepDebug.MsgClass = Boolean(MsgClass);
-
-          const mediaData = await window.WWebJS.processMediaData(med, {
-            forceSticker: false,
-            forceGif: false,
-            forceVoice: false,
-            forceDocument: false,
-            forceMediaHd: false,
-            sendToChannel: false,
-            sendToStatus: false
-          });
-          stepDebug.mediaDataHasId = 'id' in (mediaData || {});
-          stepDebug.mediaDataId = mediaData?.id;
-
-          const toJson = mediaData?.toJSON ? mediaData.toJSON() : {};
-          stepDebug.toJsonKeys = Object.keys(toJson);
-          stepDebug.toJsonHasId = 'id' in toJson;
-          stepDebug.toJsonId = toJson.id;
-          stepDebug.toJsonFrom = toJson.from;
-          stepDebug.toJsonAuthor = toJson.author;
-          stepDebug.toJsonType = toJson.type;
-
-          const { getMaybeMeLidUser, getMaybeMePnUser } = window.require('WAWebUserPrefsMeUser');
-          const lidUser = getMaybeMeLidUser();
-          const meUser = getMaybeMePnUser();
-          const newId = await window.require('WAWebMsgKey').newId();
-          let from = chat.id.isLid() ? lidUser : meUser;
-          stepDebug.fromVal = from ? (from._serialized || String(from)) : null;
-
-          const newMsgKey = new (window.require('WAWebMsgKey'))({
-            from: from,
-            to: chat.id,
-            id: newId,
-            participant: undefined,
-            selfDir: 'out'
-          });
-          stepDebug.newMsgKeyId = newMsgKey?.id;
-
-          const ephemeralFields = window.require('WAWebGetEphemeralFieldsMsgActionsUtils').getEphemeralFields(chat);
-
-          const messageObj = {
-            id: newMsgKey,
-            ack: 0,
-            body: med.caption || "",
-            caption: med.caption || "",
-            from: from,
-            to: chat.id,
-            local: true,
-            self: 'out',
-            t: parseInt(new Date().getTime() / 1000),
-            isNewMsg: true,
-            type: 'chat',
-            ...ephemeralFields,
-            ...mediaData,
-            ...toJson
-          };
-          stepDebug.messageObjId = messageObj.id ? (messageObj.id._serialized || String(messageObj.id)) : null;
-          stepDebug.messageObjIdType = typeof messageObj.id;
-          stepDebug.messageObjFrom = messageObj.from ? (messageObj.from._serialized || String(messageObj.from)) : null;
-          stepDebug.messageObjType = messageObj.type;
-
-          let testTextMsg = null;
-          let testMediaMsg = null;
-          const MsgGetters = window.require('WAWebMsgGetters');
-
-          // Test text message creation
-          try {
-            const textMsgObj = {
-              id: newMsgKey,
-              ack: 0,
-              body: "teste",
-              from: from,
-              to: chat.id,
-              local: true,
-              self: 'out',
-              t: parseInt(new Date().getTime() / 1000),
-              isNewMsg: true,
-              type: 'chat',
-              ...ephemeralFields
-            };
-            testTextMsg = new MsgClass(textMsgObj);
-            stepDebug.textMsgOk = Boolean(testTextMsg);
-            try {
-              const resTextSender = MsgGetters?.getSender?.(testTextMsg);
-              stepDebug.getSenderOnText = resTextSender ? (resTextSender._serialized || String(resTextSender)) : String(resTextSender);
-            } catch (eGst) {
-              stepDebug.getSenderOnTextErr = eGst.message;
-              stepDebug.getSenderOnTextStack = eGst.stack;
-            }
-          } catch (eText) {
-            stepDebug.textMsgError = eText.message;
-          }
-
-          // Test A: textMsg with type: 'image'
-          try {
-            const msgA = new MsgClass({ ...textMsgObj, type: 'image' });
-            MsgGetters?.getSender?.(msgA);
-            stepDebug.testA_typeImage = "OK";
-          } catch (eA) {
-            stepDebug.testA_typeImage = eA.message;
-          }
-
-          // Test B: textMsg with type: 'image' and author: from
-          try {
-            const msgB = new MsgClass({ ...textMsgObj, type: 'image', author: from });
-            MsgGetters?.getSender?.(msgB);
-            stepDebug.testB_authorFrom = "OK";
-          } catch (eB) {
-            stepDebug.testB_authorFrom = eB.message;
-          }
-
-          // Test sending with CLEAN message object (no ...mediaData, only ...toJson)
-          try {
-            const cleanMessage = {
-              id: newMsgKey,
-              ack: 0,
-              body: med.caption || "",
-              caption: med.caption || "",
-              from: from,
-              to: chat.id,
-              local: true,
-              self: 'out',
-              t: parseInt(new Date().getTime() / 1000),
-              isNewMsg: true,
-              type: 'chat',
-              ...ephemeralFields,
-              ...toJson
-            };
-            const [sendPromise, sendResultPromise] = window.require('WAWebSendMsgChatAction').addAndSendMsgToChat(chat, cleanMessage);
-            await sendPromise;
-            stepDebug.cleanSendPromiseOk = true;
-            if (sendResultPromise) {
-              const resResult = await sendResultPromise;
-              stepDebug.cleanSendResultVal = resResult ? JSON.stringify(resResult) : "void";
-            }
-            stepDebug.cleanSendFinalMsg = window.require('WAWebCollections').Msg.get(newMsgKey._serialized)?.id?._serialized;
-          } catch (eCleanSend) {
-            stepDebug.cleanSendError = eCleanSend.message;
-            stepDebug.cleanSendStack = eCleanSend.stack;
-          }
-        } catch (eStep) {
-          stepDebug.error = eStep.message;
-          stepDebug.stack = eStep.stack;
-        }
 
         let sendResult = null;
         try {
@@ -3188,7 +3056,7 @@ app.post("/api/debug/test-send-media", async (req, res) => {
           sendResult = { ok: false, error: eSend.message, stack: eSend.stack };
         }
 
-        return { logs, stepDebug, sendResult };
+        return { logs, sendResult };
       } catch (err) {
         return { logs, error: err.message, stack: err.stack };
       }
@@ -3359,9 +3227,10 @@ app.post(["/api/enviar-produto", "/api/crm/enviar-produto"], async (req, res) =>
           }
 
           if (mediaSent) {
+            const finalId = sentMsg?.id?._serialized || (typeof sentMsg?.id === "string" ? sentMsg.id : null) || `msg-produto-${Date.now()}`;
             storeMessage({
-              id: sentMsg?.id?._serialized || `msg-produto-${Date.now()}`,
-              chatId: bestChatId,
+              id: finalId,
+              chatId: targetChat || bestChatId,
               from: "me",
               to: bestChatId,
               body: text,
@@ -3370,8 +3239,17 @@ app.post(["/api/enviar-produto", "/api/crm/enviar-produto"], async (req, res) =>
               hasMedia: true,
               mediaType: "image",
               mediaUrl: prodImgUrl,
-              realNumber: extractRealNumber(bestChatId),
-              displayNumber: extractRealNumber(bestChatId),
+              produto: {
+                id: prod.id,
+                nome: prodNome,
+                preco: precoFinal,
+                precoFormatado: `R$ ${precoFmt}`,
+                imagem: prodImgUrl,
+                specs: prod.specs,
+              },
+              realNumber: extractRealNumber(bestChatId) || extractRealNumber(targetChat),
+              displayNumber: extractRealNumber(bestChatId) || extractRealNumber(targetChat),
+              status: "sent",
             });
           }
         }
@@ -4068,13 +3946,14 @@ io.on("connection", (socket) => {
     const chatIdRef = payload.chatId || null;
     try {
       const number = normalizeNumber(payload.number || payload.chatId || "");
-      const targetChatId = getBestTargetChatId(payload.chatId, number);
+      // Prioriza manter exatamente o chatId da conversa ativa no CRM
+      const targetChatId = payload.chatId || getBestTargetChatId(payload.chatId, number);
       const prod = payload.product || {};
       const prodNome = prod.nome || prod.name || prod.title || "Produto do Catálogo";
       const precoFinal = parsePrice(payload.price != null ? payload.price : (prod.preco != null ? prod.preco : prod.price));
       const custo = parsePrice(prod.custo);
-      if (custo > 0 && precoFinal <= custo) {
-        const msg = `Preço (R$ ${precoFinal.toFixed(2)}) menor ou igual ao custo (R$ ${custo.toFixed(2)}).`;
+      if (custo > 0 && precoFinal < custo) {
+        const msg = `Preço (R$ ${precoFinal.toFixed(2)}) menor que o custo (R$ ${custo.toFixed(2)}).`;
         emitToast(`⛔ Envio bloqueado: ${msg}`);
         emitSendAck({ tempId: payload.tempId, chatId: chatIdRef, success: false, error: msg });
         return;
@@ -4099,7 +3978,7 @@ io.on("connection", (socket) => {
               const sentMsg = await resolveAndSendMessage(targetChatId, media, { caption: text, number });
               if (sentMsg) {
                 mediaSent = true;
-                sentId = sentMsg?.id?._serialized || null;
+                sentId = sentMsg?.id?._serialized || (typeof sentMsg?.id === "string" ? sentMsg.id : null);
               }
             } catch (errCap) {
               console.warn(`[panel:send-product] Envio com legenda falhou ("${errCap.message}"). Tentando imagem pura + texto separado...`);
@@ -4107,7 +3986,7 @@ io.on("connection", (socket) => {
               const sentMediaOnly = await resolveAndSendMessage(targetChatId, media, { number });
               if (sentMediaOnly) {
                 mediaSent = true;
-                sentId = sentMediaOnly?.id?._serialized || null;
+                sentId = sentMediaOnly?.id?._serialized || (typeof sentMediaOnly?.id === "string" ? sentMediaOnly.id : null);
                 // E envia o texto da oferta logo em seguida
                 await sendDirectMessage({
                   number,
@@ -4119,9 +3998,11 @@ io.on("connection", (socket) => {
             }
 
             if (mediaSent) {
+              if (!sentId) sentId = `msg-produto-${Date.now()}`;
               storeMessage({
-                id: sentId || `msg-produto-${Date.now()}`,
-                chatId: targetChatId,
+                id: sentId,
+                tempId: payload.tempId || null,
+                chatId: chatIdRef || targetChatId,
                 from: "me",
                 to: targetChatId,
                 body: text,
@@ -4130,8 +4011,17 @@ io.on("connection", (socket) => {
                 hasMedia: true,
                 mediaType: "image",
                 mediaUrl: prodImgUrl,
-                realNumber: extractRealNumber(targetChatId),
-                displayNumber: extractRealNumber(targetChatId),
+                produto: {
+                  id: prod.id,
+                  nome: prodNome,
+                  preco: precoFinal,
+                  precoFormatado: `R$ ${precoFmt}`,
+                  imagem: prodImgUrl,
+                  specs: prod.specs,
+                },
+                realNumber: extractRealNumber(targetChatId) || extractRealNumber(chatIdRef),
+                displayNumber: extractRealNumber(targetChatId) || extractRealNumber(chatIdRef),
+                status: "sent",
               });
             }
           }
@@ -4148,10 +4038,11 @@ io.on("connection", (socket) => {
           signatureId: payload.signatureId || null,
           chatId: targetChatId,
         });
-        sentId = sentMsg?.id?._serialized || null;
+        sentId = sentMsg?.id?._serialized || (typeof sentMsg?.id === "string" ? sentMsg.id : null) || `msg-produto-${Date.now()}`;
       }
 
-      emitToast(`Produto "${prod.nome}" enviado com sucesso!`);
+      if (!sentId) sentId = `msg-produto-${Date.now()}`;
+      emitToast(`Produto "${prodNome}" enviado com sucesso!`);
       emitSendAck({ tempId: payload.tempId, chatId: chatIdRef, success: true, id: sentId });
     } catch (error) {
       console.error("Falha ao enviar produto:", error);

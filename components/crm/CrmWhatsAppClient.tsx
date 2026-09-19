@@ -940,6 +940,7 @@ export default function CrmWhatsAppClient({
           serverMsgs
             .filter((sm) => sm.chatId && isRealDirectChat(sm.chatId))
             .forEach((sm) => {
+              const existing = map.get(sm.id) || (sm.tempId ? map.get(sm.tempId) : undefined);
               map.set(sm.id, {
                 id: sm.id,
                 chatId: sm.chatId,
@@ -951,6 +952,7 @@ export default function CrmWhatsAppClient({
                 hasMedia: sm.hasMedia,
                 mediaType: sm.mediaType,
                 mediaUrl: sm.mediaUrl || null,
+                produto: sm.produto || existing?.produto || null,
                 // Usa o status real persistido pelo message_ack quando existir
                 // (ver whatsapp-server), em vez de assumir "lida" sempre.
                 status: sm.status || "sent",
@@ -1002,13 +1004,23 @@ export default function CrmWhatsAppClient({
         hasMedia: newMsg.hasMedia,
         mediaType: newMsg.mediaType,
         mediaUrl: newMsg.mediaUrl || null,
-        status: "read",
+        produto: newMsg.produto || null,
+        status: newMsg.status || (newMsg.direction === "out" ? "sent" : "read"),
       };
 
-      setMensagens((prev) => [...prev.filter((x) => x.id !== m.id), m]);
+      setMensagens((prev) => {
+        const existing = prev.find((x) => x.id === m.id || (newMsg.tempId && x.id === newMsg.tempId));
+        const finalMsg = existing?.produto && !m.produto ? { ...m, produto: existing.produto } : m;
+        return [...prev.filter((x) => x.id !== m.id && (!newMsg.tempId || x.id !== newMsg.tempId)), finalMsg];
+      });
 
       setChats((prev) => {
-        const idx = prev.findIndex((c) => c.id === newMsg.chatId);
+        const cleanMsgNum = realNum.replace(/\D/g, "");
+        const idx = prev.findIndex(
+          (c) =>
+            c.id === newMsg.chatId ||
+            (cleanMsgNum && c.numero && c.numero.replace(/\D/g, "") === cleanMsgNum)
+        );
         if (idx >= 0) {
           const copy = [...prev];
           copy[idx] = {
@@ -1315,8 +1327,22 @@ export default function CrmWhatsAppClient({
 
   const mensagensChatAtual = useMemo(() => {
     if (!chatSelecionadoId) return [];
-    return mensagens.filter((m) => m.chatId === chatSelecionadoId);
-  }, [mensagens, chatSelecionadoId]);
+    const selChat = chatSelecionado;
+    const cleanSelNum = selChat?.numero ? selChat.numero.replace(/\D/g, "") : "";
+    const cleanSelId = chatSelecionadoId.replace(/\D/g, "");
+
+    return mensagens.filter((m) => {
+      if (m.chatId === chatSelecionadoId) return true;
+      if (selChat?.numero) {
+        if (m.chatId === `${selChat.numero}@c.us`) return true;
+        if (m.realNumber && m.realNumber.replace(/\D/g, "") === cleanSelNum) return true;
+      }
+      const mNum = String(m.chatId || "").replace(/\D/g, "");
+      if (cleanSelNum && mNum && (cleanSelNum.endsWith(mNum) || mNum.endsWith(cleanSelNum))) return true;
+      if (cleanSelId && mNum && !chatSelecionadoId.endsWith("@lid") && (cleanSelId.endsWith(mNum) || mNum.endsWith(cleanSelId))) return true;
+      return false;
+    });
+  }, [mensagens, chatSelecionadoId, chatSelecionado]);
 
   const chatsFiltrados = useMemo(() => {
     let list = chats
@@ -1780,7 +1806,7 @@ export default function CrmWhatsAppClient({
       })
         .then((r) => r.json().catch(() => ({})).then((data) => ({ ok: r.ok, data })))
         .then(({ ok, data }) => {
-          atualizarStatusMensagem(tempId, ok ? "sent" : "failed");
+          atualizarStatusMensagem(tempId, ok ? "sent" : "failed", data?.id);
           if (!ok) showToast(`⛔ Falha ao enviar "${prod.nome}": ${data?.erro || "erro desconhecido"}`);
         })
         .catch(() => atualizarStatusMensagem(tempId, "failed"));
