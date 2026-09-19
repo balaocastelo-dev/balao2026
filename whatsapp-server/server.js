@@ -1731,18 +1731,97 @@ async function syncStatusFeed() {
   }
 }
 
+function getBestTargetChatId(preferredChatId, numberHint) {
+  const cleanNumber = normalizeNumber(numberHint || preferredChatId || "");
+  // Se preferredChatId for um telefone @c.us valido e direto, use-o
+  if (preferredChatId && preferredChatId.endsWith("@c.us") && !preferredChatId.startsWith("@")) {
+    return preferredChatId;
+  }
+  // Se temos um numero limpo (ex: 5519984515960), o alvo padrao para o WhatsApp Web e sempre numero@c.us
+  if (cleanNumber && cleanNumber.length >= 10 && cleanNumber.length <= 15) {
+    return `${cleanNumber}@c.us`;
+  }
+  // Se for @lid mas temos o numero real no store
+  if (preferredChatId && preferredChatId.endsWith("@lid")) {
+    const found = store.chats.find((c) => c.id === preferredChatId || c.chatId === preferredChatId);
+    const num = found?.realNumber || cleanNumber;
+    if (num && num.length >= 10) {
+      return `${num}@c.us`;
+    }
+  }
+  return preferredChatId || (cleanNumber ? `${cleanNumber}@c.us` : null);
+}
+
 async function ensureWWebJSInjected(client = whatsappClient) {
   if (!client?.pupPage) return false;
   try {
     const ok = await client.pupPage.evaluate(() => typeof window.WWebJS !== "undefined" && Boolean(window.WWebJS?.getChat)).catch(() => false);
-    if (ok) return true;
+    if (!ok) {
+      console.log("[whatsapp] Injetando LoadUtils no navegador...");
+      const { LoadUtils } = require("whatsapp-web.js/src/util/Injected/Utils");
+      await client.pupPage.evaluate(LoadUtils);
+    }
 
-    console.log("[whatsapp] Injetando LoadUtils no navegador...");
-    const { LoadUtils } = require("whatsapp-web.js/src/util/Injected/Utils");
-    await client.pupPage.evaluate(LoadUtils);
+    // Aplica protecoes para WhatsApp Web moderno contra erro "Data passed to getter must include an id property"
+    await client.pupPage.evaluate(() => {
+      if (typeof window.WWebJS === "undefined") return;
+
+      if (!window.WWebJS._patchedForMemoize) {
+        window.WWebJS._patchedForMemoize = true;
+
+        // 1. Proteger getMessageModel contra falha de serializacao interna
+        const origGetMessageModel = window.WWebJS.getMessageModel;
+        window.WWebJS.getMessageModel = function(message) {
+          if (!message) return null;
+          try {
+            return origGetMessageModel(message);
+          } catch (err) {
+            console.warn("[WWebJS-Patch] getMessageModel serializacao protegida:", err.message);
+            return {
+              id: message.id ? (message.id._serialized || message.id) : { _serialized: `msg_${Date.now()}` },
+              ack: message.ack || 1,
+              body: message.body || message.caption || "",
+              type: message.type || "chat",
+              from: message.from ? (message.from._serialized || message.from) : null,
+              to: message.to ? (message.to._serialized || message.to) : null,
+              timestamp: message.t || Math.floor(Date.now() / 1000),
+              hasMedia: Boolean(message.mediaData || message.directPath),
+            };
+          }
+        };
+
+        // 2. Proteger getContactModel contra contatos com id incompleto
+        const origGetContactModel = window.WWebJS.getContactModel;
+        if (typeof origGetContactModel === "function") {
+          window.WWebJS.getContactModel = function(contact) {
+            if (!contact || !contact.id) {
+              return {
+                id: contact?.id ? (contact.id._serialized || contact.id) : null,
+                name: contact?.name || contact?.pushname || null,
+                pushname: contact?.pushname || null,
+                isUser: true,
+                isGroup: false,
+                isWAContact: true,
+              };
+            }
+            try {
+              return origGetContactModel(contact);
+            } catch (err) {
+              return {
+                id: contact?.id ? (contact.id._serialized || contact.id) : null,
+                name: contact?.name || contact?.pushname || null,
+                pushname: contact?.pushname || null,
+                isUser: true,
+                isGroup: false,
+                isWAContact: true,
+              };
+            }
+          };
+        }
+      }
+    }).catch(() => {});
 
     const verified = await client.pupPage.evaluate(() => typeof window.WWebJS !== "undefined" && Boolean(window.WWebJS?.getChat)).catch(() => false);
-    console.log(`[whatsapp] LoadUtils verificado com sucesso: ${verified}`);
     return verified;
   } catch (err) {
     console.warn("[whatsapp] Falha ao injetar LoadUtils:", err.message);
@@ -1752,108 +1831,127 @@ async function ensureWWebJSInjected(client = whatsappClient) {
 
 async function resolveAndSendMessage(chatId, content, options = {}) {
   await ensureWWebJSInjected(whatsappClient);
-  try {
-    const res = await whatsappClient.sendMessage(chatId, content, options);
-    if (res) return res;
-  } catch (err1) {
-    console.warn(`[WHATSAPP-SEND] Tentativa direta para ${chatId} falhou: "${err1.message}". Tentando resolução...`);
 
-    if (err1.message?.includes("getChat") || err1.message?.includes("undefined")) {
-      console.log(`[WHATSAPP-SEND] Forçando reinjeção de LoadUtils após erro getChat...`);
-      await ensureWWebJSInjected(whatsappClient);
-      try {
-        const resRetry = await whatsappClient.sendMessage(chatId, content, options);
-        if (resRetry) return resRetry;
-      } catch (eRetry) {
-        console.warn(`[WHATSAPP-SEND] Retry direto falhou:`, eRetry.message);
-      }
+  // Normalizacao do chatId de destino
+  let targetId = chatId;
+  const numOpt = normalizeNumber(options?.number || options?.realNumber || "");
+
+  // Se for @lid mas temos o numero de telefone real, preferir o @c.us
+  if (String(targetId).endsWith("@lid")) {
+    const found = store.chats.find((c) => c.id === targetId || c.chatId === targetId);
+    const realNum = found?.realNumber || numOpt;
+    if (realNum && realNum.length >= 10) {
+      targetId = `${realNum}@c.us`;
+      console.log(`[WHATSAPP-SEND] Redirecionando envio de @lid (${chatId}) para @c.us: ${targetId}`);
     }
-
-    // Se for @lid, tenta achar o telefone @c.us correspondente no store ou nas opções
-    if (String(chatId).endsWith("@lid")) {
-      const found = store.chats.find((c) => c.id === chatId || c.chatId === chatId);
-      let num = found?.realNumber || normalizeNumber(options?.number || options?.realNumber || "");
-      if (num) {
-        const altCus = `${num}@c.us`;
-        try {
-          console.log(`[WHATSAPP-SEND] Tentando enviar para telefone @c.us do contato @lid: ${altCus}`);
-          const res = await whatsappClient.sendMessage(altCus, content, options);
-          if (res) return res;
-        } catch (eLid) {}
-      }
-    }
-
-    const clean = normalizeNumber(chatId);
-    if (clean) {
-      // 1. Try resolving via getNumberId
-      try {
-        const numberId = await whatsappClient.getNumberId(clean);
-        if (numberId?._serialized && numberId._serialized !== chatId) {
-          console.log(`[WHATSAPP-SEND] JID resolvido via getNumberId: ${numberId._serialized}`);
-          const res = await whatsappClient.sendMessage(numberId._serialized, content, options);
-          if (res) return res;
-        }
-      } catch (e) {}
-
-      // 2. If 13 digits (55 + DDD + 9 digits), try without the 9th digit (12 digits)
-      if (clean.length === 13 && clean.startsWith("55")) {
-        const alt12 = `${clean.slice(0, 4)}${clean.slice(5)}@c.us`;
-        try {
-          console.log(`[WHATSAPP-SEND] Tentando variação sem 9º dígito: ${alt12}`);
-          const res = await whatsappClient.sendMessage(alt12, content, options);
-          if (res) return res;
-        } catch (e) {}
-      }
-
-      // 3. If 12 digits (55 + DDD + 8 digits), try with the 9th digit (13 digits)
-      if (clean.length === 12 && clean.startsWith("55")) {
-        const alt13 = `${clean.slice(0, 4)}9${clean.slice(4)}@c.us`;
-        try {
-          console.log(`[WHATSAPP-SEND] Tentando variação com 9º dígito: ${alt13}`);
-          const res = await whatsappClient.sendMessage(alt13, content, options);
-          if (res) return res;
-        } catch (e) {}
-      }
-    }
-
-    throw err1;
   }
+
+  // Lista ordenada de alvos: primeiro o @c.us resolvido, depois o chatId original
+  const targetsToTry = [targetId];
+  if (chatId && chatId !== targetId && !targetsToTry.includes(chatId)) {
+    targetsToTry.push(chatId);
+  }
+
+  let lastError = null;
+  for (const target of targetsToTry) {
+    try {
+      console.log(`[WHATSAPP-SEND] Enviando para ${target}...`);
+      const res = await whatsappClient.sendMessage(target, content, options);
+      if (res) return res;
+    } catch (err) {
+      lastError = err;
+      console.warn(`[WHATSAPP-SEND] Tentativa direta para ${target} falhou: "${err.message}".`);
+
+      if (err.message?.includes("getChat") || err.message?.includes("undefined") || err.message?.includes("memoize")) {
+        await ensureWWebJSInjected(whatsappClient);
+        try {
+          const resRetry = await whatsappClient.sendMessage(target, content, options);
+          if (resRetry) return resRetry;
+        } catch (eRetry) {
+          console.warn(`[WHATSAPP-SEND] Retry direto falhou:`, eRetry.message);
+        }
+      }
+    }
+  }
+
+  // Se falhou e temos numero limpo, tenta variacoes de 9 digito
+  const clean = normalizeNumber(numOpt || targetId || chatId);
+  if (clean && clean.startsWith("55")) {
+    const variations = [];
+    if (clean.length === 13) {
+      variations.push(`${clean.slice(0, 4)}${clean.slice(5)}@c.us`);
+    } else if (clean.length === 12) {
+      variations.push(`${clean.slice(0, 4)}9${clean.slice(4)}@c.us`);
+    }
+
+    for (const alt of variations) {
+      try {
+        console.log(`[WHATSAPP-SEND] Tentando variacao de numero: ${alt}`);
+        const res = await whatsappClient.sendMessage(alt, content, options);
+        if (res) return res;
+      } catch (eAlt) {
+        console.warn(`[WHATSAPP-SEND] Variacao ${alt} falhou:`, eAlt.message);
+      }
+    }
+  }
+
+  throw lastError || new Error("Falha ao enviar mensagem");
 }
 
-async function resolveMediaObject(mediaSource, filename = "arquivo", mimetype = null) {
+async function resolveMediaObject(mediaSource, filename = "produto.jpg", mimetype = "image/jpeg") {
   if (!mediaSource) return null;
 
   if (mediaSource instanceof MessageMedia || (mediaSource.mimetype && mediaSource.data)) {
+    if (!mediaSource.filename) mediaSource.filename = filename || "produto.jpg";
+    if (!mediaSource.mimetype) mediaSource.mimetype = mimetype || "image/jpeg";
     return mediaSource;
   }
 
   if (typeof mediaSource === "string" && mediaSource.startsWith("data:")) {
     const match = mediaSource.match(/^data:([^;]+);base64,(.+)$/);
     if (match) {
-      return new MessageMedia(match[1], match[2], filename);
+      return new MessageMedia(match[1], match[2], filename || "produto.jpg");
     }
   }
 
   if (typeof mediaSource === "string" && mimetype && !mediaSource.startsWith("http")) {
     const cleanB64 = mediaSource.replace(/^data:[^;]+;base64,/, "");
-    return new MessageMedia(mimetype, cleanB64, filename);
+    return new MessageMedia(mimetype, cleanB64, filename || "produto.jpg");
   }
 
   if (typeof mediaSource === "string" && mediaSource.startsWith("http")) {
+    // 1. Tentar baixar diretamente via fetch do Node (mais rapido, headers corretos de navegador)
     try {
-      const media = await MessageMedia.fromUrl(mediaSource, { unsafeMime: true });
-      if (media && media.data) return media;
-    } catch (e) {
-      console.warn("MessageMedia.fromUrl falhou, tentando download com fetch nativo:", e.message);
-      try {
-        const resp = await fetch(mediaSource);
+      const resp = await fetch(mediaSource, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+        },
+      });
+      if (resp.ok) {
         const arrayBuf = await resp.arrayBuffer();
         const base64 = Buffer.from(arrayBuf).toString("base64");
-        const detectedMime = resp.headers.get("content-type") || mimetype || "image/jpeg";
-        return new MessageMedia(detectedMime, base64, filename);
-      } catch (e2) {
-        console.error("Falha ao baixar imagem via fetch nativo:", e2.message);
+        let detectedMime = resp.headers.get("content-type") || mimetype || "image/jpeg";
+        if (detectedMime.includes(";")) detectedMime = detectedMime.split(";")[0].trim();
+        if (!detectedMime.startsWith("image/")) detectedMime = "image/jpeg";
+        return new MessageMedia(detectedMime, base64, filename || "produto.jpg");
       }
+    } catch (eFetch) {
+      console.warn("[resolveMediaObject] fetch direto falhou, tentando MessageMedia.fromUrl:", eFetch.message);
+    }
+
+    // 2. Fallback para MessageMedia.fromUrl
+    try {
+      const media = await MessageMedia.fromUrl(mediaSource, { unsafeMime: true });
+      if (media && media.data) {
+        media.filename = filename || "produto.jpg";
+        if (!media.mimetype || !media.mimetype.startsWith("image/")) {
+          media.mimetype = mimetype || "image/jpeg";
+        }
+        return media;
+      }
+    } catch (e) {
+      console.error("[resolveMediaObject] MessageMedia.fromUrl falhou:", e.message);
     }
   }
 
@@ -1935,10 +2033,10 @@ async function sendDirectMedia({
     throw new Error("WhatsApp ainda não conectado. Por favor aguarde ou escaneie o QR Code.");
   }
 
-  let targetChatId = preferredChatId;
-  if (!targetChatId || !targetChatId.includes("@")) {
+  let targetChatId = getBestTargetChatId(preferredChatId, number);
+  if (!targetChatId) {
     const cleanNumber = normalizeNumber(number || preferredChatId);
-    targetChatId = `${cleanNumber}@c.us`;
+    targetChatId = cleanNumber ? `${cleanNumber}@c.us` : null;
   }
 
   const mediaObj = await resolveMediaObject(media, filename, mimetype);
@@ -2814,31 +2912,50 @@ app.post(["/api/enviar-produto", "/api/crm/enviar-produto"], async (req, res) =>
     const text = `⚡ *Oferta Balão da Informática*\n*${prod.nome}*\n\n💵 *Preço Especial:* *R$ ${precoFmt}*${specs}${obsTxt}\n\n📍 Pronta entrega na loja do Castelo Campinas!\nPara reservar ou tirar dúvidas, é só responder aqui! 🎈`;
 
     let mediaSent = false;
+    const bestChatId = getBestTargetChatId(targetChat, number || targetChat);
     if (prod.imagem && prod.imagem.startsWith("http")) {
       try {
-        const media = await MessageMedia.fromUrl(prod.imagem, { unsafeMime: true });
-        const chatId = targetChat.includes("@") ? targetChat : `${normalizeNumber(targetChat)}@c.us`;
-        const sentMsg = await resolveAndSendMessage(chatId, media, { caption: text, number: targetChat });
-        mediaSent = true;
-        // Guarda a URL da foto do produto no histórico — sem isso a imagem
-        // some do chat assim que a conversa ressincroniza (o listener
-        // genérico de "message_create" não sabe qual foi a imagem enviada).
-        storeMessage({
-          id: sentMsg?.id?._serialized || `msg-produto-${Date.now()}`,
-          chatId,
-          from: "me",
-          to: chatId,
-          body: text,
-          direction: "out",
-          timestamp: Date.now(),
-          hasMedia: true,
-          mediaType: "image",
-          mediaUrl: prod.imagem,
-          realNumber: extractRealNumber(chatId),
-          displayNumber: extractRealNumber(chatId),
-        });
+        const media = await resolveMediaObject(prod.imagem, "produto.jpg", "image/jpeg");
+        if (media) {
+          let sentMsg = null;
+          try {
+            console.log(`[/api/enviar-produto] Disparando imagem com legenda para ${bestChatId}`);
+            sentMsg = await resolveAndSendMessage(bestChatId, media, { caption: text, number: targetChat });
+            if (sentMsg) mediaSent = true;
+          } catch (errCap) {
+            console.warn(`[/api/enviar-produto] Envio com legenda falhou ("${errCap.message}"). Tentando imagem pura + texto separado...`);
+            const sentMediaOnly = await resolveAndSendMessage(bestChatId, media, { number: targetChat });
+            if (sentMediaOnly) {
+              mediaSent = true;
+              sentMsg = sentMediaOnly;
+              await sendDirectMessage({
+                number: targetChat,
+                text,
+                signatureId: signatureId || null,
+                chatId: bestChatId,
+              });
+            }
+          }
+
+          if (mediaSent) {
+            storeMessage({
+              id: sentMsg?.id?._serialized || `msg-produto-${Date.now()}`,
+              chatId: bestChatId,
+              from: "me",
+              to: bestChatId,
+              body: text,
+              direction: "out",
+              timestamp: Date.now(),
+              hasMedia: true,
+              mediaType: "image",
+              mediaUrl: prod.imagem,
+              realNumber: extractRealNumber(bestChatId),
+              displayNumber: extractRealNumber(bestChatId),
+            });
+          }
+        }
       } catch (e) {
-        console.warn("Falha ao anexar foto do produto (via /api/enviar-produto), enviando só texto:", e.message);
+        console.warn("Falha ao anexar foto do produto (via /api/enviar-produto), enviando so texto:", e.message);
       }
     }
 
@@ -2847,7 +2964,7 @@ app.post(["/api/enviar-produto", "/api/crm/enviar-produto"], async (req, res) =>
         number: targetChat,
         text,
         signatureId: signatureId || null,
-        chatId: targetChat.includes("@") ? targetChat : null,
+        chatId: bestChatId,
       });
     }
 
@@ -3530,14 +3647,14 @@ io.on("connection", (socket) => {
     const chatIdRef = payload.chatId || null;
     try {
       const number = normalizeNumber(payload.number || payload.chatId || "");
-      const chatId = payload.chatId || (number ? `${number}@c.us` : null);
+      const targetChatId = getBestTargetChatId(payload.chatId, number);
       const prod = payload.product || {};
       const precoFinal = parsePrice(payload.price != null ? payload.price : (prod.preco != null ? prod.preco : prod.price));
       const custo = parsePrice(prod.custo);
       if (custo > 0 && precoFinal <= custo) {
         const msg = `Preço (R$ ${precoFinal.toFixed(2)}) menor ou igual ao custo (R$ ${custo.toFixed(2)}).`;
         emitToast(`⛔ Envio bloqueado: ${msg}`);
-        emitSendAck({ tempId: payload.tempId, chatId, success: false, error: msg });
+        emitSendAck({ tempId: payload.tempId, chatId: chatIdRef, success: false, error: msg });
         return;
       }
       const obs = payload.obs ? `\n\n_Obs: ${payload.obs}_` : "";
@@ -3551,43 +3668,68 @@ io.on("connection", (socket) => {
       let sentId = null;
       if (prod.imagem && prod.imagem.startsWith("http")) {
         try {
-          const media = await MessageMedia.fromUrl(prod.imagem, { unsafeMime: true });
-          const sentMsg = await resolveAndSendMessage(chatId, media, { caption: text, number });
-          mediaSent = true;
-          sentId = sentMsg?.id?._serialized || null;
-          // Mesmo motivo do endpoint REST: guarda a mediaUrl explicitamente
-          // pra foto do produto não sumir do histórico na próxima sincronização.
-          storeMessage({
-            id: sentId || `msg-produto-${Date.now()}`,
-            chatId,
-            from: "me",
-            to: chatId,
-            body: text,
-            direction: "out",
-            timestamp: Date.now(),
-            hasMedia: true,
-            mediaType: "image",
-            mediaUrl: prod.imagem,
-            realNumber: extractRealNumber(chatId),
-            displayNumber: extractRealNumber(chatId),
-          });
+          const media = await resolveMediaObject(prod.imagem, "produto.jpg", "image/jpeg");
+          if (media) {
+            // Tentativa 1: Enviar com legenda (foto + texto juntos)
+            try {
+              console.log(`[panel:send-product] Disparando imagem com legenda para ${targetChatId}`);
+              const sentMsg = await resolveAndSendMessage(targetChatId, media, { caption: text, number });
+              if (sentMsg) {
+                mediaSent = true;
+                sentId = sentMsg?.id?._serialized || null;
+              }
+            } catch (errCap) {
+              console.warn(`[panel:send-product] Envio com legenda falhou ("${errCap.message}"). Tentando imagem pura + texto separado...`);
+              // Tentativa 2: Se falhar com legenda, envia a foto pura primeiro
+              const sentMediaOnly = await resolveAndSendMessage(targetChatId, media, { number });
+              if (sentMediaOnly) {
+                mediaSent = true;
+                sentId = sentMediaOnly?.id?._serialized || null;
+                // E envia o texto da oferta logo em seguida
+                await sendDirectMessage({
+                  number,
+                  text,
+                  signatureId: payload.signatureId || null,
+                  chatId: targetChatId,
+                });
+              }
+            }
+
+            if (mediaSent) {
+              storeMessage({
+                id: sentId || `msg-produto-${Date.now()}`,
+                chatId: targetChatId,
+                from: "me",
+                to: targetChatId,
+                body: text,
+                direction: "out",
+                timestamp: Date.now(),
+                hasMedia: true,
+                mediaType: "image",
+                mediaUrl: prod.imagem,
+                realNumber: extractRealNumber(targetChatId),
+                displayNumber: extractRealNumber(targetChatId),
+              });
+            }
+          }
         } catch (e) {
-          console.warn("Falha ao enviar imagem do produto via URL, enviando como texto:", e.message);
+          console.warn("Falha ao preparar/enviar imagem do produto, tentando texto:", e.message);
         }
       }
 
       if (!mediaSent) {
+        console.log(`[panel:send-product] Enviando oferta como texto para ${targetChatId}`);
         const sentMsg = await sendDirectMessage({
           number,
           text,
           signatureId: payload.signatureId || null,
-          chatId,
+          chatId: targetChatId,
         });
         sentId = sentMsg?.id?._serialized || null;
       }
 
       emitToast(`Produto "${prod.nome}" enviado com sucesso!`);
-      emitSendAck({ tempId: payload.tempId, chatId, success: true, id: sentId });
+      emitSendAck({ tempId: payload.tempId, chatId: chatIdRef, success: true, id: sentId });
     } catch (error) {
       console.error("Falha ao enviar produto:", error);
       emitToast("⛔ Falha ao enviar produto: " + error.message);
