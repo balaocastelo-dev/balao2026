@@ -27,13 +27,18 @@ export async function GET() {
 
       if (res.ok) {
         const data = await res.json();
+        const hasData = Boolean(
+          (data.conversas && (data.conversas.total > 0 || data.conversas.mensagens > 0)) ||
+          data.phoneNumber
+        );
         const isConn = Boolean(
           data.connected ||
           data.session ||
           data.estado === "ready" ||
           data.status === "ready" ||
           data.estado === "authenticated" ||
-          data.status === "authenticated"
+          data.status === "authenticated" ||
+          (hasData && (data.estado === "loading" || data.status === "loading"))
         );
         const isLoading = Boolean(
           !isConn && (data.estado === "loading" || data.status === "loading")

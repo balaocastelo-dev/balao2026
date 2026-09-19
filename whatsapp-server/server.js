@@ -10,6 +10,13 @@ const { Client, LocalAuth, MessageMedia, MessageAck } = require("whatsapp-web.js
 
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
+process.on("unhandledRejection", (reason) => {
+  console.warn("[process] unhandledRejection capturado:", reason?.message || reason);
+});
+process.on("uncaughtException", (error) => {
+  console.warn("[process] uncaughtException capturado:", error?.message || error);
+});
+
 const app = express();
 const server = http.createServer(app);
 
@@ -2065,7 +2072,7 @@ function buildWhatsAppClient() {
     }),
     webVersionCache: {
       type: "remote",
-      remotePath: "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.3000.1018949826-alpha.html",
+      remotePath: "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/{version}.html",
       strict: false,
     },
     puppeteer: {
@@ -2103,6 +2110,52 @@ function configureAutoDownload(client) {
   }
 }
 
+async function promoverClienteParaReady(client, origem = "auto") {
+  if (!client) return false;
+  if (whatsappState.status === "ready" && whatsappState.connected) return true;
+
+  try {
+    const wid = client.info?.wid?.user || null;
+    let pageHasChats = false;
+    if (client.pupPage) {
+      pageHasChats = await client.pupPage.evaluate(() => {
+        const side = document.querySelector("#pane-side") ||
+                     document.querySelector('[data-testid="chat-list"]') ||
+                     document.querySelector('[aria-label="Lista de conversas"]') ||
+                     document.querySelector('[aria-label="Chat list"]');
+        const main = document.querySelector("#main") || document.querySelector('[data-testid="intro-title"]');
+        const hasStore = typeof window.Store !== "undefined" && Boolean(window.Store?.Chat);
+        return Boolean(side || main || hasStore);
+      }).catch(() => false);
+    }
+
+    let state = null;
+    try {
+      state = await client.getState();
+    } catch {}
+
+    if (wid || pageHasChats || state === "CONNECTED") {
+      console.log(`[whatsapp] Conexão ativa detectada por ${origem}! (wid=${wid}, pageHasChats=${pageHasChats}, state=${state})`);
+      whatsappState.status = "ready";
+      whatsappState.connected = true;
+      whatsappState.session = true;
+      whatsappState.qrCode = null;
+      whatsappState.rawQr = null;
+      whatsappState.ultimoErro = null;
+      if (wid) whatsappState.phoneNumber = wid;
+      emitState();
+      emitToast("WhatsApp conectado com sucesso!");
+      garantirChatsCarregados({ forcar: true }).catch((err) => {
+        console.error("[whatsapp] Falha ao carregar conversas no ready:", err);
+      });
+      return true;
+    }
+  } catch (err) {
+    console.warn(`[whatsapp] Falha ao checar conexão ativa (${origem}):`, err.message);
+  }
+  return false;
+}
+
 function attachWhatsAppClientEvents(client) {
   client.on("qr", async (qr) => {
     lastProgressAt = Date.now();
@@ -2137,6 +2190,11 @@ function attachWhatsAppClientEvents(client) {
       whatsappState.rawQr = null;
       emitState();
     }
+    if (percent >= 100) {
+      setTimeout(() => {
+        promoverClienteParaReady(client, "loading_screen_100");
+      }, 1500);
+    }
   });
 
   client.on("authenticated", () => {
@@ -2152,6 +2210,9 @@ function attachWhatsAppClientEvents(client) {
     whatsappState.ultimoErro = null;
     emitState();
     emitToast("Sessão autenticada com sucesso.");
+    setTimeout(() => {
+      promoverClienteParaReady(client, "authenticated_event");
+    }, 1000);
   });
 
   client.on("ready", async () => {
@@ -2425,6 +2486,11 @@ setInterval(() => {
     return;
   }
 
+  // Se estiver em "loading" ou parecendo desconectado, verifica ativamente se a página já carregou o WhatsApp
+  if (whatsappClient && (whatsappState.status === "loading" || !whatsappState.connected)) {
+    promoverClienteParaReady(whatsappClient, "watchdog_interval").catch(() => {});
+  }
+
   if (isInitializingClient && initializingSince && now - initializingSince > WATCHDOG_STUCK_INIT_MS) {
     console.warn("[whatsapp][watchdog] Inicialização travada há mais de 3m — forçando reinício.");
     isInitializingClient = false;
@@ -2485,7 +2551,16 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get(["/health", "/status", "/api/status", "/api/crm/status"], (_req, res) => {
+app.all(["/api/force-ready", "/api/crm/force-ready"], async (_req, res) => {
+  console.log("[whatsapp] Forçando checagem e promoção de conexão...");
+  const promovido = await promoverClienteParaReady(whatsappClient, "api_force_ready");
+  res.json({ ok: true, promovido, estado: whatsappState.status, connected: whatsappState.connected });
+});
+
+app.get(["/health", "/status", "/api/status", "/api/crm/status"], async (req, res) => {
+  if (req.query?.check === "1" || (!whatsappState.connected && whatsappState.status === "loading")) {
+    await promoverClienteParaReady(whatsappClient, "status_request").catch(() => {});
+  }
   res.json({
     ok: true,
     estado: whatsappState.status,

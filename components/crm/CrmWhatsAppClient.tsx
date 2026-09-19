@@ -740,13 +740,15 @@ export default function CrmWhatsAppClient({
         }
 
         if (data && ativo) {
+          const temDadosLocais = chats.length > 0 || statusFeed.length > 0;
           const isConn = Boolean(
             data.connected ||
             data.session ||
             data.status === "ready" ||
             data.status === "authenticated" ||
             data.estado === "ready" ||
-            data.estado === "authenticated"
+            data.estado === "authenticated" ||
+            ((data.status === "loading" || data.estado === "loading") && temDadosLocais)
           );
 
           if (isConn) {
@@ -758,6 +760,10 @@ export default function CrmWhatsAppClient({
           }
 
           if (data.status === "loading" || data.estado === "loading") {
+            if (temDadosLocais) {
+              setEstado("ready");
+              return;
+            }
             setEstado("loading");
             setQrCodeData(null);
             setRawQrString(null);
@@ -793,7 +799,7 @@ export default function CrmWhatsAppClient({
       ativo = false;
       clearInterval(interval);
     };
-  }, [estado, serverUrl]);
+  }, [estado, serverUrl, chats.length, statusFeed.length]);
 
   // Socket.IO Integration
   useEffect(() => {
@@ -813,11 +819,13 @@ export default function CrmWhatsAppClient({
     const vendedoresTimeout = setTimeout(() => setVendedoresCarregados(true), 6000);
 
     socket.on("whatsapp:state", (payload: any) => {
+      const temDadosLocais = chats.length > 0 || statusFeed.length > 0;
       const isConn = Boolean(
         payload?.connected ||
         payload?.session ||
         payload?.status === "ready" ||
-        payload?.status === "authenticated"
+        payload?.status === "authenticated" ||
+        (payload?.status === "loading" && temDadosLocais)
       );
 
       if (isConn) {
@@ -826,7 +834,11 @@ export default function CrmWhatsAppClient({
         setRawQrString(null);
         if (payload?.phoneNumber) setNumeroConectado(payload.phoneNumber);
       } else if (payload?.status === "loading") {
-        setEstado("loading");
+        if (temDadosLocais) {
+          setEstado("ready");
+        } else {
+          setEstado("loading");
+        }
         setQrCodeData(null);
         setRawQrString(null);
       } else if (payload?.status) {
@@ -847,10 +859,16 @@ export default function CrmWhatsAppClient({
     socket.on("whatsapp:status-feed", (feed: any[]) => {
       if (Array.isArray(feed)) {
         setStatusFeed(feed);
+        if (feed.length > 0) {
+          setEstado((prev) => (prev === "loading" || prev === "initializing" ? "ready" : prev));
+        }
       }
     });
 
     socket.on("whatsapp:chats", (serverChats: any[]) => {
+      if (Array.isArray(serverChats) && serverChats.length > 0) {
+        setEstado((prev) => (prev === "loading" || prev === "initializing" ? "ready" : prev));
+      }
       // Lista vazia NÃO é ordem para limpar a tela. O servidor manda vazio
       // enquanto ainda está sincronizando ou logo depois de reiniciar — tratar
       // isso como verdade apagava todas as conversas do vendedor.
@@ -921,6 +939,7 @@ export default function CrmWhatsAppClient({
 
     socket.on("whatsapp:messages", (serverMsgs: any[]) => {
       if (Array.isArray(serverMsgs) && serverMsgs.length > 0) {
+        setEstado((prev) => (prev === "loading" || prev === "initializing" ? "ready" : prev));
         setMensagens((prev) => {
           const map = new Map<string, CrmMensagem>();
           prev.filter((m) => isRealDirectChat(m.chatId)).forEach((m) => map.set(m.id, m));
@@ -2141,7 +2160,10 @@ export default function CrmWhatsAppClient({
     return etiquetas.find((e) => e.nome.toLowerCase() === nome.toLowerCase())?.cor || "#5f6368";
   };
 
-  const isConnected = estado === "ready" || estado === "authenticated";
+  const isConnected =
+    estado === "ready" ||
+    estado === "authenticated" ||
+    (estado === "loading" && (chats.length > 0 || statusFeed.length > 0));
   const temQrReal = Boolean(
     (qrCodeData && qrCodeData.startsWith("data:image")) ||
     (rawQrString && rawQrString.length > 20)
@@ -2372,6 +2394,15 @@ export default function CrmWhatsAppClient({
                       Carregando conversas da loja...<br />
                       <span className="text-[11px] text-[#80868b]">Abrindo o atendimento automaticamente em instantes.</span>
                     </p>
+                    <button
+                      onClick={() => {
+                        setEstado("ready");
+                        showToast("Abrindo conversas do atendimento...");
+                      }}
+                      className="mt-3 bg-[#0f9d58] hover:bg-[#0a6e3d] text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-md cursor-pointer flex items-center gap-1.5 mx-auto"
+                    >
+                      <span>🚀 Abrir Atendimento Agora</span>
+                    </button>
                   </div>
                 </div>
               ) : temQrReal ? (
@@ -2423,19 +2454,15 @@ export default function CrmWhatsAppClient({
                       data?.status === "ready" ||
                       data?.status === "authenticated" ||
                       data?.estado === "ready" ||
-                      data?.estado === "authenticated"
+                      data?.estado === "authenticated" ||
+                      ((data?.status === "loading" || data?.estado === "loading") && (chats.length > 0 || statusFeed.length > 0))
                     );
-                    if (isConn) {
+                    if (isConn || data?.status === "loading" || data?.estado === "loading") {
                       setEstado("ready");
                       setQrCodeData(null);
                       setRawQrString(null);
                       if (data?.phoneNumber) setNumeroConectado(data.phoneNumber);
                       showToast("WhatsApp conectado com sucesso! ✓");
-                    } else if (data?.status === "loading" || data?.estado === "loading") {
-                      setEstado("loading");
-                      setQrCodeData(null);
-                      setRawQrString(null);
-                      showToast("Celular pareado. Sincronizando conversas...");
                     } else if (data?.qrCode || data?.qr) {
                       setQrCodeData(data.qrCode || data.qr);
                       if (data.rawQr) setRawQrString(data.rawQr);
