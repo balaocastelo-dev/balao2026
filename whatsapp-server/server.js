@@ -1818,6 +1818,49 @@ async function ensureWWebJSInjected(client = whatsappClient) {
             }
           };
         }
+
+        // 3. Proteger getChat contra Invariant Violation #56367 (banco de dados/storage nao inicializado)
+        const origGetChat = window.WWebJS.getChat;
+        if (typeof origGetChat === "function" && !window.WWebJS._patchedGetChat) {
+          window.WWebJS._patchedGetChat = true;
+          window.WWebJS.getChat = async function(chatId, options = {}) {
+            if (!chatId) return null;
+            const isChannel = /@\w*newsletter\b/.test(chatId);
+            const getAsModel = options.getAsModel !== false;
+
+            if (!isChannel) {
+              try {
+                const widFactory = window.require('WAWebWidFactory');
+                const chatWid = widFactory ? widFactory.createWid(chatId) : null;
+                if (chatWid) {
+                  const chatColl = window.require('WAWebCollections')?.Chat;
+                  const existing = chatColl?.get?.(chatWid);
+                  if (existing) {
+                    return getAsModel ? await window.WWebJS.getChatModel(existing, { isChannel: false }) : existing;
+                  }
+                }
+              } catch (eMem) {}
+            }
+
+            try {
+              return await origGetChat(chatId, options);
+            } catch (err) {
+              console.warn("[WWebJS-Patch] getChat interceptou erro de storage:", err?.message);
+              try {
+                const widFactory = window.require('WAWebWidFactory');
+                const chatWid = widFactory ? widFactory.createWid(chatId) : null;
+                if (chatWid) {
+                  const chatColl = window.require('WAWebCollections')?.Chat;
+                  const chat = chatColl?.get?.(chatWid);
+                  if (chat) {
+                    return getAsModel ? await window.WWebJS.getChatModel(chat, { isChannel: isChannel }) : chat;
+                  }
+                }
+              } catch {}
+              return null;
+            }
+          };
+        }
       }
     }).catch(() => {});
 
@@ -1958,14 +2001,15 @@ async function resolveMediaObject(mediaSource, filename = "produto.jpg", mimetyp
   return null;
 }
 
-async function sendDirectMessage({ number, text, signatureId, chatId: preferredChatId = null, replyTo = null }) {
-  if (!whatsappClient) {
-    throw new Error("WhatsApp ainda não iniciado");
-  }
+function isWhatsAppClientConnected() {
+  if (!whatsappClient) return false;
+  if (whatsappState.status === "disconnected" || whatsappState.status === "qr" || whatsappState.status === "initializing") return false;
+  return Boolean(whatsappState.connected || whatsappClient.info?.wid);
+}
 
-  const isConnected = whatsappState.connected || Boolean(whatsappClient.info?.wid) || Boolean(whatsappClient.pupPage);
-  if (!isConnected) {
-    throw new Error("WhatsApp ainda não conectado. Por favor aguarde ou escaneie o QR Code.");
+async function sendDirectMessage({ number, text, signatureId, chatId: preferredChatId = null, replyTo = null }) {
+  if (!isWhatsAppClientConnected()) {
+    throw new Error("WhatsApp ainda não conectado. Por favor aguarde a reconexão automática ou escaneie o QR Code.");
   }
 
   const finalText = appendSignature(text, signatureId);
@@ -2024,13 +2068,8 @@ async function sendDirectMedia({
   sendAudioAsVoice = false,
   sendMediaAsDocument = false,
 }) {
-  if (!whatsappClient) {
-    throw new Error("WhatsApp ainda não iniciado");
-  }
-
-  const isConnected = whatsappState.connected || Boolean(whatsappClient.info?.wid) || Boolean(whatsappClient.pupPage);
-  if (!isConnected) {
-    throw new Error("WhatsApp ainda não conectado. Por favor aguarde ou escaneie o QR Code.");
+  if (!isWhatsAppClientConnected()) {
+    throw new Error("WhatsApp ainda não conectado. Por favor aguarde a reconexão automática ou escaneie o QR Code.");
   }
 
   let targetChatId = getBestTargetChatId(preferredChatId, number);
@@ -2084,7 +2123,7 @@ async function sendDirectMedia({
 }
 
 async function postStatus({ text = "", media = null, backgroundColor = "#b91c1c" }) {
-  if (!whatsappState.connected && !whatsappClient?.info?.wid && !whatsappClient?.pupPage) {
+  if (!isWhatsAppClientConnected()) {
     throw new Error("WhatsApp ainda não conectado");
   }
 
@@ -2634,12 +2673,22 @@ async function initializeWhatsAppClient(options = {}) {
 
     if (whatsappClient) {
       try {
-        await whatsappClient.destroy();
+        if (whatsappClient.pupBrowser) {
+          await whatsappClient.pupBrowser.close().catch(() => {});
+        }
+        await whatsappClient.destroy().catch(() => {});
       } catch (error) {
         console.error("Falha ao destruir cliente atual do WhatsApp:", error);
       }
-      whatsappClient.removeAllListeners();
+      try { whatsappClient.removeAllListeners(); } catch {}
       whatsappClient = null;
+    }
+
+    if (process.platform === "linux") {
+      try {
+        const { execSync } = require("child_process");
+        execSync("pkill -9 -f chromium || true");
+      } catch {}
     }
 
     if (resetSession) {
