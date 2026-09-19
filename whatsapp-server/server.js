@@ -2987,15 +2987,21 @@ app.post("/api/debug/test-send-media", async (req, res) => {
             stepDebug.textMsgStack = eText.stack;
           }
 
-          // Inspect getSender
+          // Inspect addAndSendMsgToChat
+          try {
+            const sendAction = window.require('WAWebSendMsgChatAction');
+            stepDebug.addAndSendStr = sendAction?.addAndSendMsgToChat?.toString?.()?.slice(0, 1000);
+          } catch (eSendAct) {
+            stepDebug.sendActErr = eSendAct.message;
+          }
+
+          // Test getSender on textMsg
           try {
             const MsgGetters = window.require('WAWebMsgGetters');
-            stepDebug.hasGetSender = typeof MsgGetters?.getSender === 'function';
-            stepDebug.getSenderStr = MsgGetters?.getSender?.toString?.()?.slice(0, 500);
-            stepDebug.hasGetValidatedSender = typeof MsgGetters?.getValidatedSender === 'function';
-            stepDebug.getValidatedSenderStr = MsgGetters?.getValidatedSender?.toString?.()?.slice(0, 500);
-          } catch (eGetSender) {
-            stepDebug.getSenderErr = eGetSender.message;
+            stepDebug.getSenderOnText = MsgGetters?.getSender?.(testTextMsg);
+          } catch (eGst) {
+            stepDebug.getSenderOnTextErr = eGst.message;
+            stepDebug.getSenderOnTextStack = eGst.stack;
           }
         } catch (eStep) {
           stepDebug.error = eStep.message;
