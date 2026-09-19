@@ -2994,20 +2994,57 @@ app.post("/api/debug/test-send-media", async (req, res) => {
             stepDebug.textMsgError = eText.message;
           }
 
-          // Test media message creation
+          // Test A: textMsg with type: 'image'
           try {
-            testMediaMsg = new MsgClass(messageObj);
-            stepDebug.mediaMsgOk = Boolean(testMediaMsg);
-            try {
-              const resMediaSender = MsgGetters?.getSender?.(testMediaMsg);
-              stepDebug.getSenderOnMedia = resMediaSender ? (resMediaSender._serialized || String(resMediaSender)) : String(resMediaSender);
-            } catch (eGsm) {
-              stepDebug.getSenderOnMediaErr = eGsm.message;
-              stepDebug.getSenderOnMediaStack = eGsm.stack;
-            }
-          } catch (eMed) {
-            stepDebug.mediaMsgError = eMed.message;
-            stepDebug.mediaMsgStack = eMed.stack;
+            const msgA = new MsgClass({ ...textMsgObj, type: 'image' });
+            MsgGetters?.getSender?.(msgA);
+            stepDebug.testA_typeImage = "OK";
+          } catch (eA) {
+            stepDebug.testA_typeImage = eA.message;
+          }
+
+          // Test B: textMsg with type: 'image' and author: from
+          try {
+            const msgB = new MsgClass({ ...textMsgObj, type: 'image', author: from });
+            MsgGetters?.getSender?.(msgB);
+            stepDebug.testB_authorFrom = "OK";
+          } catch (eB) {
+            stepDebug.testB_authorFrom = eB.message;
+          }
+
+          // Test C: full messageObj WITHOUT ...mediaData (only ...toJson)
+          try {
+            const msgC = new MsgClass({
+              id: newMsgKey,
+              ack: 0,
+              body: med.caption || "",
+              caption: med.caption || "",
+              from: from,
+              to: chat.id,
+              local: true,
+              self: 'out',
+              t: parseInt(new Date().getTime() / 1000),
+              isNewMsg: true,
+              type: 'chat',
+              ...ephemeralFields,
+              ...toJson
+            });
+            MsgGetters?.getSender?.(msgC);
+            stepDebug.testC_onlyToJson = "OK";
+          } catch (eC) {
+            stepDebug.testC_onlyToJson = eC.message;
+          }
+
+          // Test D: full messageObj with author: from
+          try {
+            const msgD = new MsgClass({
+              ...messageObj,
+              author: from
+            });
+            MsgGetters?.getSender?.(msgD);
+            stepDebug.testD_fullWithAuthor = "OK";
+          } catch (eD) {
+            stepDebug.testD_fullWithAuthor = eD.message;
           }
         } catch (eStep) {
           stepDebug.error = eStep.message;
