@@ -1,8 +1,6 @@
-
+import { getProducts } from "@/lib/db";
 import PCBuilder from "@/components/PCBuilder";
-import PcFpsSimulator from "@/components/PcFpsSimulator";
-import { Monitor, Cpu, Settings, Wrench, ShieldCheck, Sparkles, MessageCircle, MapPin, ArrowRight } from "lucide-react";
-import Link from "next/link";
+import { Monitor, Cpu, Settings, Wrench, ShieldCheck, Sparkles, MessageCircle, MapPin } from "lucide-react";
 import Header from "@/components/Header";
 import JsonLd, {
   generateOrganizationSchema,
@@ -13,7 +11,7 @@ import JsonLd, {
 } from "@/components/JsonLd";
 import type { Metadata } from "next";
 import { SITE_CONFIG } from "@/lib/config";
-import { getCachedProducts } from "@/lib/cache";
+
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
@@ -65,7 +63,7 @@ const MONTE_SEU_PC_FAQS = [
 ];
 
 export default async function MonteSeuPCPage() {
-  const products = await getCachedProducts();
+  const products = await getProducts();
 
   const breadcrumbItems = [
     { name: "Home", item: "https://www.balao.info" },
@@ -110,19 +108,8 @@ export default async function MonteSeuPCPage() {
                 Escolha cada componente, verifique a compatibilidade em tempo real e monte a máquina perfeita
                 para seu orçamento. Montagem profissional com testes térmicos e retirada no Cambuí.
               </p>
-              <div className="pt-4 flex flex-wrap gap-3">
-                <Link href="/montagempc" className="inline-flex items-center gap-2 bg-[#161f32] hover:bg-slate-800 text-slate-200 border border-slate-700 font-bold px-6 py-3 rounded-xl text-sm">
-                  Ver Padrão de Montagem Profissional <ArrowRight className="w-4 h-4" />
-                </Link>
-                <span className="text-xs text-slate-500 py-3">24 hardwares • Compatibilidade AM4/AM5/LGA1700 • Fonte calculada</span>
-              </div>
             </div>
           </div>
-        </section>
-
-        {/* SIMULADOR FPS */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <PcFpsSimulator products={products.slice(0,24)} />
         </section>
 
         {/* COMPONENTE PC BUILDER INTERATIVO */}

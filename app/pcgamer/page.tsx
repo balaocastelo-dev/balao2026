@@ -1,11 +1,10 @@
 import React from "react";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
-import { getCachedCategories, getCachedProdutosRecentes, getCachedProductsByKeywords } from "@/lib/cache";
+import { getCategories, getProducts, searchProductsByKeywords } from "@/lib/db";
 import { SITE_CONFIG } from "@/lib/config";
 import HeroCTA from "@/components/HeroCTA";
 import PcGamerSearchGrid from "@/components/PcGamerSearchGrid";
-import PcGamerFpsCompare from "@/components/PcGamerFpsCompare";
 import ProductCard from "@/components/ProductCard";
 import {
   Gamepad2,
@@ -92,18 +91,13 @@ const PC_GAMER_FAQS = [
 ];
 
 export default async function PcGamerPage() {
-  const [allProducts, pcsRaw, partsRaw, categories] = await Promise.all([
-    getCachedProdutosRecentes(),
-    getCachedProductsByKeywords(["gamer", "pc gamer", "rtx 4060", "rtx 4070", "ryzen 7", "i7"], 16),
-    getCachedProductsByKeywords(["placa de video", "ssd", "memoria ram", "fonte", "watercooler", "gabinete"], 16),
-    getCachedCategories(),
+  const [allProducts, keywordGamer, categories] = await Promise.all([
+    getProducts(),
+    searchProductsByKeywords(["gamer", "rtx", "ryzen", "core i5", "core i7", "watercooler", "gabinete"], 16),
+    getCategories(),
   ]);
 
-  let pcs = pcsRaw.length >= 16 ? pcsRaw.slice(0,16) : [...pcsRaw, ...allProducts.filter(p=> !pcsRaw.find(x=>x.id===p.id))].slice(0,16);
-  let parts = partsRaw.length >= 16 ? partsRaw.slice(0,16) : [...partsRaw, ...allProducts.filter(p=> !partsRaw.find(x=>x.id===p.id) && !pcs.find(x=>x.id===p.id))].slice(0,16);
-  // ensure total 32 unique
-  const all32 = [...pcs, ...parts];
-  let gamerProducts = all32.length > 0 ? all32 : allProducts.slice(0, 8);
+  let gamerProducts = keywordGamer.length > 0 ? keywordGamer : allProducts.slice(0, 8);
 
   const breadcrumbItems = [
     { name: "Home", item: "https://www.balao.info" },
@@ -192,15 +186,14 @@ export default async function PcGamerPage() {
           </div>
         </section>
 
-        {/* VITRINE DINÂMICA DE PRODUTOS GAMER — 32 PRODUTOS + FILTRO FPS + COMPARADOR */}
+        {/* VITRINE DINÂMICA DE PRODUTOS GAMER */}
         <section id="vitrine" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
             <div>
-              <div className="text-xs font-black uppercase tracking-wider text-[#E60012] mb-1">Setups e Componentes • 32 em estoque</div>
+              <div className="text-xs font-black uppercase tracking-wider text-[#E60012] mb-1">Setups e Componentes</div>
               <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
                 Máquinas e Peças Gamer Disponíveis
               </h2>
-              <p className="text-sm text-slate-400 mt-1">Filtre por FPS esperado e compare 2 modelos lado a lado antes de chamar no WhatsApp.</p>
             </div>
             <a
               href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(
@@ -214,7 +207,11 @@ export default async function PcGamerPage() {
             </a>
           </div>
 
-          <PcGamerFpsCompare pcs={pcs} parts={parts} />
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            {gamerProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
         </section>
 
         {/* PILARES DE PERFORMANCE */}

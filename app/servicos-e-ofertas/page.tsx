@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
-import { getCachedProdutosRecentes, getCachedProductsByKeywords } from "@/lib/cache";
+import { getProducts, searchProductsByKeywords } from "@/lib/db";
 import { SITE_CONFIG } from "@/lib/config";
 import JsonLd, {
   generateBreadcrumbSchema,
@@ -11,8 +11,6 @@ import JsonLd, {
   generateServiceSchema,
   generateItemListSchema,
 } from "@/components/JsonLd";
-import ServicosHowTo from "@/components/ServicosHowTo";
-import StickyWhatsBar from "@/components/StickyWhatsBar";
 import {
   CheckCircle,
   MessageCircle,
@@ -85,8 +83,8 @@ const SERVICOS_FAQS = [
 
 export default async function ServicosEOfertasPage() {
   const [allProducts, keywordOffers] = await Promise.all([
-    getCachedProdutosRecentes(),
-    getCachedProductsByKeywords(["gamer", "notebook", "monitor", "ssd", "teclado"], 16),
+    getProducts(),
+    searchProductsByKeywords(["gamer", "notebook", "monitor", "ssd", "teclado"], 16),
   ]);
 
   let offerProducts = keywordOffers;
@@ -99,20 +97,6 @@ export default async function ServicosEOfertasPage() {
     { name: "Serviços e Ofertas", item: "https://www.balao.info/servicos-e-ofertas" },
   ];
 
-  const howToSchema = {
-    "@context": "https://schema.org",
-    "@type": "HowTo",
-    name: "Como contratar serviços da Balão da Informática",
-    description: "Contrate manutenção, montagem gamer ou reparo Apple em 4 passos via WhatsApp com desconto na instalação.",
-    totalTime: "PT30M",
-    step: [
-      { "@type": "HowToStep", name: "Diagnóstico no WhatsApp", text: "Envie foto/vídeo do defeito e receba orçamento em até 30 minutos." },
-      { "@type": "HowToStep", name: "Escolha peça com desconto", text: "SSD, RAM, placa ou fonte com 10% OFF no PIX ao contratar instalação." },
-      { "@type": "HowToStep", name: "Instalação profissional", text: "Bancada no Cambuí com testes e garantia." },
-      { "@type": "HowToStep", name: "Retirada em 30 minutos", text: "Pronto para uso com NF-e e suporte pós-venda." },
-    ],
-  };
-
   return (
     <div className="min-h-screen bg-[#090d16] text-white flex flex-col font-sans selection:bg-[#E60012] selection:text-white">
       <JsonLd
@@ -121,7 +105,6 @@ export default async function ServicosEOfertasPage() {
           generateBreadcrumbSchema(breadcrumbs),
           generateItemListSchema(offerProducts, "https://www.balao.info/servicos-e-ofertas"),
           generateFAQSchema(SERVICOS_FAQS),
-          howToSchema,
           generateServiceSchema({
             name: "Serviços de TI e Ofertas Comerciais em Campinas",
             description:
@@ -222,11 +205,6 @@ export default async function ServicosEOfertasPage() {
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
-        </section>
-
-        {/* HOWTO INTERATIVO */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ServicosHowTo />
         </section>
 
         {/* CATÁLOGO DE SERVIÇOS */}
@@ -346,7 +324,6 @@ export default async function ServicosEOfertasPage() {
           </div>
         </section>
       </main>
-      <StickyWhatsBar />
     </div>
   );
 }

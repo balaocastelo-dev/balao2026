@@ -82,19 +82,6 @@ if docker ps -a --format '{{.Names}}' | grep -qx "$CONTAINER"; then
   docker stop -t 20 "$CONTAINER" >/dev/null 2>&1 || true
   docker rm -f "$CONTAINER" >/dev/null 2>&1 || true
 fi
-# Token do backup do banco.
-#
-# Fica num arquivo fora do repositório de propósito: o repositório é público, e
-# este token dá acesso ao faturamento, às despesas e aos contatos de cliente.
-# Para definir (uma vez só, na VPS):
-#
-#   echo 'BACKUP_TOKEN=algum-segredo-bem-longo' > /etc/balao.env
-#
-if [ -f /etc/balao.env ]; then
-  # shellcheck disable=SC1091
-  . /etc/balao.env
-fi
-
 docker run -d \
   --name "$CONTAINER" \
   --restart unless-stopped \
@@ -102,64 +89,9 @@ docker run -d \
   -v "$DADOS:/dados" \
   -e DATA_ROOT=/dados \
   -e WHATSAPP_PANEL_ALLOWED_ORIGIN="$ORIGENS" \
-  -e SITE_URL="${SITE_URL:-https://www.balao.info}" \
-  -e BACKUP_TOKEN="${BACKUP_TOKEN:-}" \
-  -e PANEL_SOCKET_SECRET="${PANEL_SOCKET_SECRET:-}" \
-  -e JULIA_IA_URL="${JULIA_IA_URL:-}" \
-  -e JULIA_IA_MODO="${JULIA_IA_MODO:-off}" \
-  -e BETO_PANEL_TOKEN="${BETO_PANEL_TOKEN:-}" \
-  -e BETO_TOKEN="${BETO_TOKEN:-}" \
-  -e CARLA_ATIVO="${CARLA_ATIVO:-0}" \
-  -e RAFA_ATIVO="${RAFA_ATIVO:-0}" \
-  -e RAFA_WHATSAPP="${RAFA_WHATSAPP:-}" \
-  -e RAFA_HORA_MANHA="${RAFA_HORA_MANHA:-7}" \
-  -e RAFA_HORA_NOITE="${RAFA_HORA_NOITE:-19}" \
-  -e LIVIA_ATIVO="${LIVIA_ATIVO:-0}" \
-  -e LIVIA_EMAIL="${LIVIA_EMAIL:-}" \
-  -e LIVIA_SENHA_APP="${LIVIA_SENHA_APP:-}" \
-  -e LIVIA_MODO="${LIVIA_MODO:-rascunho}" \
-  -e LIVIA_INTERVALO_MIN="${LIVIA_INTERVALO_MIN:-5}" \
-  -e CARLA_MAX_DIA="${CARLA_MAX_DIA:-10}" \
   -e TZ=America/Sao_Paulo \
   --memory="$MEMORIA" \
   --shm-size="$SHM" \
-  "$CONTAINER"
-
-# -------- Beto: número próprio do prospector --------
-#
-# Mesma imagem, outra sessão de WhatsApp, outro volume. O Beto nunca dispara
-# do número da loja: uma conta bloqueada por disparo não pode derrubar o
-# atendimento inteiro. A memória é menor de propósito (3g): sobra para o
-# container principal e o Chromium dele não precisa carregar 600 conversas.
-BETO_CONTAINER="${BETO_CONTAINER:-balao-beto}"
-BETO_DADOS="${BETO_DADOS:-/var/lib/balao-beto}"
-BETO_PORTA="${BETO_PORTA:-4101}"
-
-docker rm -f "$BETO_CONTAINER" >/dev/null 2>&1 || true
-mkdir -p "$BETO_DADOS"
-docker run -d \
-  --name "$BETO_CONTAINER" \
-  --restart unless-stopped \
-  -p "127.0.0.1:$BETO_PORTA:4100" \
-  -v "$BETO_DADOS:/dados" \
-  -e DATA_ROOT=/dados \
-  -e PERFIL=beto \
-  -e PANEL_SOCKET_SECRET="${PANEL_SOCKET_SECRET:-}" \
-  -e WHATSAPP_PANEL_ALLOWED_ORIGIN="$ORIGENS" \
-  -e SITE_URL="${SITE_URL:-https://www.balao.info}" \
-  -e BETO_URL="${BETO_URL:-https://www.balao.info}" \
-  -e BETO_TOKEN="${BETO_TOKEN:-}" \
-  -e BETO_CRM_URL="${BETO_CRM_URL:-https://srv1963897.hstgr.cloud}" \
-  -e BETO_PANEL_TOKEN="${BETO_PANEL_TOKEN:-}" \
-  -e BETO_ATIVO="${BETO_ATIVO:-0}" \
-  -e RAFA_ATIVO="${RAFA_ATIVO:-0}" \
-  -e RAFA_WHATSAPP="${RAFA_WHATSAPP:-}" \
-  -e RAFA_HORA_MANHA="${RAFA_HORA_MANHA:-7}" \
-  -e RAFA_HORA_NOITE="${RAFA_HORA_NOITE:-19}" \
-  -e BETO_MAX_DIA="${BETO_MAX_DIA:-20}" \
-  -e TZ=America/Sao_Paulo \
-  --memory="3g" \
-  --shm-size="1g" \
   "$CONTAINER"
 
 msg "Esperando o servidor responder"

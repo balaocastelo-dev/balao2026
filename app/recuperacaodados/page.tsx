@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
-import { getCachedProdutosRecentes, getCachedProductsByKeywords } from "@/lib/cache";
+import { getProducts, searchProductsByKeywords } from "@/lib/db";
 import JsonLd, {
   generateBreadcrumbSchema,
   generateFAQSchema,
@@ -93,8 +93,8 @@ const RECUPERACAO_FAQS = [
 
 export default async function RecuperacaoDadosPage() {
   const [allProducts, keywordStorage] = await Promise.all([
-    getCachedProdutosRecentes(),
-    getCachedProductsByKeywords(["ssd", "nvme", "hd", "externo", "pendrive", "kingston", "sandisk"], 16),
+    getProducts(),
+    searchProductsByKeywords(["ssd", "nvme", "hd", "externo", "pendrive", "kingston", "sandisk"], 16),
   ]);
 
   let displayProducts = keywordStorage.length > 0 ? keywordStorage : allProducts.slice(0, 8);
@@ -124,28 +124,6 @@ export default async function RecuperacaoDadosPage() {
       <Header />
 
       <main className="flex-1 space-y-16 sm:space-y-24 py-8 sm:py-12">
-        {/* LEAD EMERGENCIAL - HD FAZ CLIQUE? DESLIGUE AGORA! */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-gradient-to-r from-[#E60012] via-red-600 to-[#E60012] rounded-3xl p-[1px] shadow-2xl shadow-red-950/50 animate-pulse">
-            <div className="bg-[#1a0a0a] rounded-3xl px-6 py-5 sm:px-8 sm:py-6 flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-[#E60012] flex items-center justify-center shrink-0 animate-bounce"><AlertTriangle className="w-6 h-6 text-white" /></div>
-                <div>
-                  <div className="text-sm font-black text-[#E60012] uppercase tracking-widest">🚨 Emergência — HD faz “clique-clique”?</div>
-                  <div className="text-lg sm:text-xl font-black text-white leading-tight">DESLIGUE AGORA! Cada segundo ligado risca o disco.</div>
-                  <div className="text-xs text-slate-300">Não tente software caseiro. Traga desligado ao Cambuí ou chame no WhatsApp em até 5 min.</div>
-                </div>
-              </div>
-              <a href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent("URGENTE: Meu HD está fazendo barulho de clique e não reconhece. Preciso de atendimento emergencial!")}`} target="_blank" rel="noopener noreferrer" className="bg-[#E60012] hover:bg-red-700 text-white font-black px-6 py-3 rounded-xl flex items-center gap-2 whitespace-nowrap shadow-lg"> <MessageCircle className="w-5 h-5" /> Socorro 24h no WhatsApp </a>
-            </div>
-          </div>
-          <div className="mt-3 flex flex-wrap gap-2 justify-center md:justify-start">
-            <span className="inline-flex items-center gap-1.5 bg-[#111827] border border-emerald-800 text-emerald-400 text-xs font-black px-3 py-1 rounded-full"><Clock className="w-3.5 h-3.5" /> Diagnóstico em 24h</span>
-            <span className="inline-flex items-center gap-1.5 bg-[#111827] border border-slate-700 text-slate-300 text-xs font-black px-3 py-1 rounded-full"><Lock className="w-3.5 h-3.5" /> NDA — Sigilo 100% garantido</span>
-            <span className="inline-flex items-center gap-1.5 bg-[#111827] border border-[#E60012]/40 text-[#E60012] text-xs font-black px-3 py-1 rounded-full"><ShieldCheck className="w-3.5 h-3.5" /> Laboratório próprio • Sem terceirização</span>
-          </div>
-        </section>
-
         {/* HERO SECTION COM FOTO DO LABORATÓRIO CLEANROOM IA */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-[#111827] border border-slate-800 rounded-3xl p-8 sm:p-12 lg:p-16 relative overflow-hidden shadow-2xl">

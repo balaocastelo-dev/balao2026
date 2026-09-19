@@ -163,25 +163,6 @@ function readJsonSafe(filePath) {
   }
 }
 
-// Assinatura do codigo que esta rodando: hash do proprio server.js.
-//
-// Serve para responder "esta VPS ja tem a ultima versao?" sem abrir o
-// container. Sem isso, quando um comportamento nao mudava depois do deploy,
-// nao dava para saber se o deploy nao pegou ou se a correcao estava errada —
-// e as duas hipoteses levam a caminhos opostos.
-const VERSAO_CODIGO = (() => {
-  try {
-    const conteudo = fs.readFileSync(__filename);
-    return {
-      hash: crypto.createHash("sha1").update(conteudo).digest("hex").slice(0, 12),
-      bytes: conteudo.length,
-      modificadoEm: fs.statSync(__filename).mtime.toISOString(),
-    };
-  } catch {
-    return { hash: "desconhecido", bytes: 0, modificadoEm: null };
-  }
-})();
-
 const packageJson = readJsonSafe(path.join(__dirname, "package.json")) || {};
 const packageLockJson = readJsonSafe(path.join(__dirname, "package-lock.json")) || {};
 const resolvedWwebVersion =
@@ -219,20 +200,6 @@ const apiInfo = {
 
 const dataDir = DATA_DIR;
 const dataFile = path.join(dataDir, "panel-data.json");
-const { calcularMetricas } = require("./metricas");
-const { criarEspelhoDoCatalogo } = require("./catalogo");
-const { montarEtiquetas } = require("./etiquetas");
-const { criarBackupDoBanco } = require("./backup");
-const juliaIA = require("./ia-worker");
-const betoWorker = require("./beto-worker");
-const carlaWorker = require("./carla-worker");
-const rafaWorker = require("./rafa-worker");
-const liviaWorker = require("./livia-worker");
-
-// "loja" (padrão) roda a JUL.IA; "beto" roda o prospector no número próprio.
-const PERFIL = process.env.PERFIL || "loja";
-const BETO_PANEL_TOKEN = process.env.BETO_PANEL_TOKEN || "";
-
 const store = {
   labels: [],
   signatures: [],
@@ -254,15 +221,6 @@ const store = {
   statusFeed: [],
   chatAssignments: {},
   notifications: [],
-  // Vendas lancadas no dashboard: { id, vendedorId, chatId, cliente, produto,
-  // valor, comissaoPercentual, data, observacao }.
-  //
-  // O percentual fica gravado NA VENDA de proposito: mudar a comissao do
-  // vendedor hoje nao pode reescrever o que ele ja ganhou no mes passado.
-  vendas: [],
-  // Configuração da JUL.IA (atendente digital): modo (off/copilot/autopilot)
-  // e se ela pega leads novos sem vendedor.
-  ia: { modo: "off", autolead: false },
 };
 
 const scheduleTimers = new Map();
@@ -330,7 +288,7 @@ function loadStore() {
     store.messages = Array.isArray(parsed.messages)
       ? parsed.messages
           .filter((item) => isRealDirectChatId(item.chatId) && !isStatusMessage(item))
-          .slice(-2000)
+          .slice(-1000)
       : [];
     store.chats = Array.isArray(parsed.chats)
       ? parsed.chats.filter(
@@ -352,98 +310,34 @@ function loadStore() {
       parsed.preferenciasPorVendedor && typeof parsed.preferenciasPorVendedor === "object"
         ? parsed.preferenciasPorVendedor
         : {};
-    store.vendas = Array.isArray(parsed.vendas) ? parsed.vendas : [];
-    store.ia =
-      parsed.ia && typeof parsed.ia === "object"
-        ? { modo: parsed.ia.modo, autolead: Boolean(parsed.ia.autolead) }
-        : store.ia;
   } catch (error) {
     console.error("Falha ao ler dados do painel do WhatsApp:", error);
   }
 }
 
-// ============================================================
-// Historico por conversa.
-//
-// Antes tudo vivia numa lista unica, e o arquivo do painel guardava apenas as
-// 400 mensagens mais recentes DO TOTAL. Com 542 conversas, isso dava menos de
-// uma mensagem por conversa: o vendedor abria um cliente e via a tela vazia,
-// mesmo depois de o historico ter sido baixado do WhatsApp.
-//
-// Agora cada conversa tem o proprio arquivo. Assim da para guardar centenas de
-// mensagens por cliente sem reescrever tudo a cada mensagem nova, e o arquivo
-// do painel volta a ser pequeno.
-// ============================================================
-
-const CONVERSAS_DIR = path.join(DATA_DIR, "conversas");
-const MAX_MENSAGENS_POR_CONVERSA = 500;
-
-function arquivoDaConversa(chatId) {
-  const nome = crypto.createHash("sha1").update(String(chatId)).digest("hex");
-  return path.join(CONVERSAS_DIR, `${nome}.json`);
-}
-
-function lerMensagensDaConversa(chatId) {
-  try {
-    const caminho = arquivoDaConversa(chatId);
-    if (!fs.existsSync(caminho)) return [];
-    const lista = JSON.parse(fs.readFileSync(caminho, "utf8"));
-    return Array.isArray(lista) ? lista : [];
-  } catch (error) {
-    console.warn("[historico] Falha ao ler", chatId, "-", error.message);
-    return [];
-  }
-}
-
-function salvarMensagensDaConversa(chatId, mensagens) {
-  try {
-    if (!fs.existsSync(CONVERSAS_DIR)) fs.mkdirSync(CONVERSAS_DIR, { recursive: true });
-    const ordenadas = [...mensagens]
-      .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0))
-      .slice(-MAX_MENSAGENS_POR_CONVERSA);
-    fs.writeFileSync(arquivoDaConversa(chatId), JSON.stringify(ordenadas));
-    return ordenadas.length;
-  } catch (error) {
-    console.warn("[historico] Falha ao gravar", chatId, "-", error.message);
-    return 0;
-  }
-}
-
-// Gravar em disco a cada mensagem recebida seria custoso demais numa conversa
-// movimentada; o atraso agrupa a rajada numa gravacao so por conversa.
-const gravacoesPendentes = new Map();
-
-function agendarGravacaoDaConversa(chatId) {
-  if (!chatId || gravacoesPendentes.has(chatId)) return;
-
-  gravacoesPendentes.set(
-    chatId,
-    setTimeout(() => {
-      gravacoesPendentes.delete(chatId);
-      const daConversa = store.messages.filter((m) => m.chatId === chatId);
-      if (daConversa.length) {
-        // Junta com o que ja estava gravado: a memoria guarda so as recentes.
-        const guardadas = lerMensagensDaConversa(chatId);
-        const porChave = new Map();
-        [...guardadas, ...daConversa].forEach((m) => {
-          porChave.set(buildMessageFingerprint(m), m);
-        });
-        salvarMensagensDaConversa(chatId, Array.from(porChave.values()));
-      }
-    }, 3000)
-  );
-}
-
 function persistStore() {
+  // Bug fix: Limitar mensagens a 2000, arquivando as mais antigas
+  if (store.messages.length > 2000) {
+    const toArchive = store.messages.slice(0, store.messages.length - 2000);
+    store.messages = store.messages.slice(-2000);
+    try {
+      const archiveDir = DATA_DIR;
+      if (!fs.existsSync(archiveDir)) fs.mkdirSync(archiveDir, { recursive: true });
+      const archiveFile = path.join(archiveDir, `messages-archive-${new Date().toISOString().slice(0, 10)}.json`);
+      const existing = fs.existsSync(archiveFile) ? JSON.parse(fs.readFileSync(archiveFile, "utf8")) : [];
+      fs.writeFileSync(archiveFile, JSON.stringify([...existing, ...toArchive], null, 2));
+    } catch (e) {
+      console.warn("[store] Falha ao arquivar mensagens:", e.message);
+    }
+  }
+
   const payload = {
     labels: store.labels,
     signatures: store.signatures,
     quickReplies: store.quickReplies,
     schedules: store.schedules,
     chatLabels: store.chatLabels,
-    // Só as recentes ficam aqui, para o arquivo do painel continuar leve. O
-    // histórico de verdade mora em data/conversas/, um arquivo por cliente.
-    messages: store.messages.slice(-2000),
+    messages: store.messages.slice(-400),
     chats: store.chats,
     statusFeed: store.statusFeed,
     chatAssignments: store.chatAssignments,
@@ -451,8 +345,6 @@ function persistStore() {
     vendedores: store.vendedores,
     kanbanPorVendedor: store.kanbanPorVendedor,
     preferenciasPorVendedor: store.preferenciasPorVendedor,
-    vendas: store.vendas,
-    ia: store.ia,
   };
 
   fs.writeFileSync(dataFile, JSON.stringify(payload, null, 2));
@@ -491,39 +383,8 @@ function emitNotifications() {
   io.emit("whatsapp:notifications", store.notifications);
 }
 
-/**
- * Endereco da pagina do vendedor a partir do nome.
- *
- * Precisa ser IGUAL ao `montarSlug()` do painel (components/crm/CrmDashboard):
- * a senha do vendedor e derivada do slug, entao qualquer diferenca aqui cria
- * um acesso que nunca abre. E idempotente de proposito — o painel ja manda o
- * slug pronto e esta funcao roda por cima dele.
- */
-function montarSlugDoVendedor(texto) {
-  return String(texto || "")
-    .normalize("NFD")
-    // Faixa das marcas de acento (U+0300-U+036F), que o NFD acabou de separar.
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
-
 function publicVendedor(v) {
-  return {
-    id: v.id,
-    nome: v.nome,
-    cargo: v.cargo || "",
-    assinatura: v.assinatura || "",
-    slug: v.slug || v.id,
-    // Percentual da comissao e meta mensal, usados pelo dashboard.
-    comissaoPercentual: Number(v.comissaoPercentual) || 0,
-    meta: Number(v.meta) || 0,
-    ativo: v.ativo !== false,
-    protegido: Boolean(v.protegido),
-    // NUNCA o token de sessao: ele e o equivalente a senha desse vendedor.
-    temAcessoProprio: Boolean(v.tokenSessao),
-  };
+  return { id: v.id, nome: v.nome, cargo: v.cargo || "", assinatura: v.assinatura || "" };
 }
 
 // Vendedores que entram pela pagina pessoal do site (ex.: /brendon). Quem
@@ -577,55 +438,6 @@ function ensureVendedoresFixos() {
   if (mudou) persistStore();
 }
 
-// Quem digitou a última mensagem de cada conversa.
-//
-// O WhatsApp não sabe qual vendedor escreveu: todos usam o mesmo número. O
-// painel avisa quem está enviando, e o evento `message_create` chega logo
-// depois — o cruzamento é por conversa e por tempo. Sem isso, "atendimento
-// por vendedor" no dashboard só saberia de quem é o cliente, não de quem
-// respondeu.
-const autoriaRecente = new Map();
-const JANELA_DE_AUTORIA_MS = 90_000;
-
-function marcarAutor(chatId, vendedorId) {
-  if (!chatId || !vendedorId) return;
-  autoriaRecente.set(chatId, { vendedorId, em: Date.now() });
-}
-
-function autorDaConversa(chatId) {
-  const registro = autoriaRecente.get(chatId);
-  if (!registro) return null;
-  if (Date.now() - registro.em > JANELA_DE_AUTORIA_MS) {
-    autoriaRecente.delete(chatId);
-    return null;
-  }
-  return registro.vendedorId;
-}
-
-// ---------- métricas do dashboard ----------
-
-let ultimasMetricas = null;
-
-function metricasAgora() {
-  ultimasMetricas = calcularMetricas(store, { agora: Date.now() });
-  return ultimasMetricas;
-}
-
-function emitMetricas() {
-  io.emit("whatsapp:metricas", metricasAgora());
-}
-
-// O dashboard fica aberto o dia inteiro numa tela da loja. Recalcular a cada
-// mensagem seria desperdício; a cada 20 segundos o número já acompanha o
-// movimento sem pesar.
-setInterval(() => {
-  if (io.engine.clientsCount > 0) emitMetricas();
-}, 20_000).unref?.();
-
-function emitVendas() {
-  io.emit("whatsapp:vendas", store.vendas);
-}
-
 function emitVendedores() {
   io.emit("whatsapp:vendedores", store.vendedores.map(publicVendedor));
 }
@@ -641,74 +453,6 @@ function emitVendedores() {
 // ============================================================
 
 const MEDIA_DIR = path.join(DATA_DIR, "media");
-
-// Espelho do catálogo do site nesta VPS.
-//
-// O banco da Hostinger aceita 500 conexões por HORA; quando a cota estoura, o
-// site responde catálogo vazio e o vendedor fica sem preço no meio do
-// atendimento. Esta máquina já roda o dia inteiro e tem disco, então guarda
-// uma cópia e serve ela nessas horas. A Hostinger continua dona do dado.
-const SITE_URL = process.env.SITE_URL || "https://www.balao.info";
-const espelhoDoCatalogo = criarEspelhoDoCatalogo({
-  pasta: DATA_DIR,
-  urlDoSite: SITE_URL,
-});
-
-// Atualiza ao subir e de 6 em 6 horas. O site avisa quando um produto muda
-// (POST /api/crm/catalogo/atualizar), então isto aqui é a rede de segurança,
-// não o caminho principal — e rede de segurança não precisa de 48 voltas por
-// dia. Cada volta baixava 11 MB do catálogo mesmo sem nada ter mudado: ~15 GB
-// por mês num projeto Supabase de 5 GB. Agora a volta agendada confere antes
-// a assinatura em /api/espelho/versao e só baixa quando o catálogo mudou.
-const INTERVALO_DO_ESPELHO_MS = 6 * 60 * 60_000;
-setTimeout(() => espelhoDoCatalogo.atualizar({ motivo: "boot" }), 20_000).unref?.();
-setInterval(
-  () => espelhoDoCatalogo.atualizar({ motivo: "agendado" }),
-  INTERVALO_DO_ESPELHO_MS
-).unref?.();
-
-// Cópia de segurança do banco, uma por dia.
-//
-// O `/fechamento` perdeu 276 ordens de serviço numa migração e só voltou
-// porque existia um backup esquecido numa pasta do computador. Não havia
-// rotina nenhuma. Esta máquina fica ligada o dia inteiro e tem disco — é o
-// lugar natural para guardar.
-const backupDoBanco = criarBackupDoBanco({
-  pasta: DATA_DIR,
-  urlDoSite: SITE_URL,
-  token: process.env.BACKUP_TOKEN || "",
-});
-
-// 3h30 da manhã: loja fechada, site parado, banco tranquilo. O intervalo de
-// 15 minutos é só o relógio de checagem; a cópia sai uma vez por dia.
-setInterval(() => {
-  const agora = new Date();
-  const hora = Number(
-    new Intl.DateTimeFormat("en-GB", {
-      timeZone: "America/Sao_Paulo",
-      hour: "2-digit",
-      hour12: false,
-    }).format(agora)
-  );
-  const dia = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Sao_Paulo",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(agora);
-
-  if (hora !== 3) return;
-  if (backupDoBanco.listar().includes(`banco-${dia}.json`)) return;
-
-  backupDoBanco.executar({ motivo: "diário" }).catch(() => {});
-}, 15 * 60_000).unref?.();
-
-// Etiqueta criada no celular precisa aparecer no painel sem ninguem pedir.
-// Cinco minutos: rapido o bastante para nao incomodar, leve o bastante para
-// nao pesar (e uma leitura so na pagina, nao uma varredura de conversas).
-setInterval(() => {
-  if (whatsappState.connected) sincronizarEtiquetas().catch(() => {});
-}, 5 * 60_000).unref?.();
 
 const MEDIA_RETENCAO_DIAS = Math.max(
   1,
@@ -852,19 +596,9 @@ function emitToast(message) {
 // clicava, mesmo quando o whatsappClient.sendMessage() falhava de verdade
 // (JID inválido, mídia que não baixou, sessão instável) — o vendedor via
 // a mensagem "certinha" no CRM enquanto o cliente real não recebia nada.
-function emitSendAck({ tempId, chatId, success, id, error, body }) {
+function emitSendAck({ tempId, chatId, success, id, error }) {
   if (!tempId) return;
-  io.emit("whatsapp:send-ack", {
-    tempId,
-    chatId,
-    success,
-    id: id || null,
-    error: error || null,
-    // Texto REALMENTE enviado ao cliente. O painel usa isso para corrigir o
-    // balao otimista: quando ele monta um texto proprio e o servidor manda
-    // outro, a mesma oferta aparecia como duas mensagens diferentes na tela.
-    body: body || null,
-  });
+  io.emit("whatsapp:send-ack", { tempId, chatId, success, id: id || null, error: error || null });
 }
 
 function emitDisparoStatus(ativo) {
@@ -923,171 +657,56 @@ async function getChatByIdSafe(chatId) {
   try {
     return await whatsappClient.getChatById(chatId);
   } catch {
-    // `getChatById()` nao abre conversa com id `@lid` — e o WhatsApp esta
-    // migrando justamente para esse formato. Sem esta segunda tentativa,
-    // essas conversas nunca carregam historico nem midia: foi assim que a
-    // foto do 19984515960 (chat `92148808610042@lid`) ficou sem arquivo.
-    const numero = numeroRealDoChat(chatId);
-    if (!numero) return null;
-
-    for (const alternativo of [`${numero}@c.us`, `${numero}@s.whatsapp.net`]) {
-      try {
-        const chat = await whatsappClient.getChatById(alternativo);
-        if (chat) return chat;
-      } catch {
-        // tenta o proximo formato
-      }
-    }
     return null;
   }
 }
 
-/**
- * Telefone de verdade por tras de um id de conversa.
- *
- * Para `numero@c.us` sai do proprio id; para `id@lid` so o resumo guardado
- * sabe, porque o id nao tem relacao nenhuma com o telefone.
- */
-function numeroRealDoChat(chatId) {
-  const bruto = String(chatId || "");
-  if (!bruto.endsWith("@lid")) {
-    const doProprioId = bruto.replace(/@.*$/, "").replace(/\D/g, "");
-    return doProprioId || null;
-  }
-
-  const resumo = store.chats.find((c) => c.chatId === bruto);
-  const doResumo = String(resumo?.realNumber || resumo?.displayNumber || "").replace(/\D/g, "");
-  if (doResumo) return doResumo;
-
-  const mensagem = store.messages.find(
-    (m) => m.chatId === bruto && (m.realNumber || m.displayNumber)
-  );
-  const daMensagem = String(mensagem?.realNumber || mensagem?.displayNumber || "").replace(/\D/g, "");
-  return daMensagem || null;
-}
-
-/**
- * Traz as etiquetas do WhatsApp Business para o painel.
- *
- * As etiquetas que a loja usa no celular tem que ser AS MESMAS no sistema.
- * Antes o painel mostrava uma lista inventada e guardada no navegador de cada
- * vendedor — etiquetar ali nao aparecia no aparelho, e a etiqueta criada no
- * aparelho nao aparecia no painel.
- *
- * A leitura pega TUDO numa chamada so: cada etiqueta ja traz a lista de
- * conversas dela. O caminho antigo perguntava `chat.getLabels()` conversa por
- * conversa — com 620 conversas isso era lento e, pior, so enxergava as
- * conversas do lote, apagando as etiquetas de todas as outras.
- */
-async function sincronizarEtiquetas() {
-  if (!whatsappClient?.pupPage || !whatsappState.connected) return { ok: false };
-
-  let brutas = null;
+async function syncLabelsForChats(chats = []) {
+  if (!whatsappClient || !whatsappState.connected) return;
 
   try {
-    brutas = await whatsappClient.pupPage.evaluate(() => {
+    const nativeLabels = await whatsappClient.getLabels().catch(() => []);
+    const labelNames = Array.isArray(nativeLabels)
+      ? nativeLabels
+          .map((item) => String(item?.name || "").trim())
+          .filter(Boolean)
+          .sort((a, b) => a.localeCompare(b))
+      : [];
+
+    const nextChatLabels = {};
+    for (const chat of chats) {
       try {
-        const colecoes = window.require("WAWebCollections");
-        const modelos = colecoes.Label?.getModelsArray?.() || [];
-        return modelos.map((etiqueta) => ({
-          id: String(etiqueta.id ?? ""),
-          nome: etiqueta.name ?? null,
-          cor: etiqueta.hexColor ?? etiqueta.colorIndex ?? null,
-          chatIds: (etiqueta.labelItemCollection?.getModelsArray?.() || [])
-            .filter((item) => item.parentType === "Chat")
-            .map((item) => item.parentId),
-        }));
-      } catch {
-        return null;
+        const assigned = await chat.getLabels().catch(() => []);
+        const names = (assigned || [])
+          .map((item) => String(item?.name || "").trim())
+          .filter(Boolean)
+          .sort((a, b) => a.localeCompare(b));
+
+        if (names.length) {
+          nextChatLabels[chat.id?._serialized || chat.id] = names;
+        }
+      } catch (error) {
+        console.error("Falha ao sincronizar etiquetas de um chat:", error);
       }
-    });
+    }
+
+    store.labels = labelNames;
+    store.chatLabels = nextChatLabels;
+    persistStore();
+    emitSettings();
   } catch (error) {
-    console.warn("[etiquetas] Leitura pela pagina falhou:", error.message);
+    console.error("Falha ao sincronizar etiquetas:", error);
   }
-
-  // Caminho de reserva: o metodo da biblioteca traz nome e cor, mas nao diz
-  // quais conversas usam cada etiqueta.
-  if (!Array.isArray(brutas)) {
-    const daBiblioteca = await whatsappClient.getLabels().catch(() => []);
-    brutas = (daBiblioteca || []).map((e) => ({
-      id: e.id,
-      nome: e.name,
-      cor: e.hexColor,
-      chatIds: [],
-    }));
-  }
-
-  const { etiquetas, porConversa } = montarEtiquetas(brutas);
-
-  store.labels = etiquetas;
-  // So substitui o mapa quando a leitura trouxe as conversas. O caminho de
-  // reserva nao traz — e zerar aqui apagaria a etiqueta de todo mundo.
-  if (Object.keys(porConversa).length > 0 || etiquetas.length === 0) {
-    store.chatLabels = porConversa;
-  }
-
-  persistStore();
-  emitLabels();
-  emitSettings();
-
-  return { ok: true, total: etiquetas.length, conversas: Object.keys(porConversa).length };
 }
-
 
 // Segunda camada de proteção: mesmo que o cliente mande specs desatualizados
 // ou um payload manual, o servidor nunca deve deixar custo de aquisição,
 // markup aplicado ou nota sobre qualidade da foto vazar pra dentro de uma
 // mensagem real enviada ao cliente no WhatsApp.
-// Também decodifica entidades HTML (&nbsp; &aacute; etc) e remove specs vazias (":", ";", "-->") que vêm do scraping da Kabum
 const SPEC_KEYS_INTERNOS = /^(custo_origem|markup|qualidade_fotos)\s*:/i;
-function decodeHtml(str) {
-  return String(str || "")
-    .replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'")
-    .replace(/&aacute;/g, "á").replace(/&eacute;/g, "é").replace(/&iacute;/g, "í").replace(/&oacute;/g, "ó").replace(/&uacute;/g, "ú")
-    .replace(/&atilde;/g, "ã").replace(/&otilde;/g, "õ").replace(/&ccedil;/g, "ç").replace(/&Aacute;/g, "Á").replace(/&Eacute;/g, "É").replace(/&Iacute;/g, "Í").replace(/&Oacute;/g, "Ó").replace(/&Uacute;/g, "Ú").replace(/&Ccedil;/g, "Ç");
-}
 function filtrarSpecsInternos(specs) {
   if (!Array.isArray(specs)) return [];
-  return specs
-    .map((linha) => decodeHtml(String(linha || "")).trim())
-    .filter((linha) => {
-      if (!linha) return false;
-      if (SPEC_KEYS_INTERNOS.test(linha)) return false;
-      // remove specs quebradas da Kabum: só ":", ";", "-->" ou "Chave: :" com valor vazio
-      if (linha === "-->" || linha === ":" || linha === ";" || linha === "-->: :") return false;
-      const partes = linha.split(":");
-      if (partes.length >= 2) {
-        const valor = partes.slice(1).join(":").trim();
-        if (!valor || valor === ":" || valor === ";" || valor.length < 2) return false;
-      }
-      return true;
-    });
-}
-
-/**
- * Monta a mensagem de oferta de um produto.
- *
- * Existe em um lugar so de proposito: o texto estava escrito em tres pontos
- * diferentes (duas vezes aqui e uma no painel) e eles sairam de sincronia —
- * o painel dizia "Oferta Balao da Informatica:" e "Para garantir a reserva",
- * o servidor dizia "Oferta Balao da Informatica" e "Para reservar". Como o
- * painel mostrava o proprio texto e o cliente recebia o do servidor, a mesma
- * oferta aparecia como duas mensagens distintas na tela do vendedor.
- */
-function montarTextoDoProduto({ nome, preco, specs, obs }) {
-  const precoFmt = Number(preco || 0).toLocaleString("pt-BR", {
-    minimumFractionDigits: 2,
-  });
-  const specsVisiveis = filtrarSpecsInternos(specs);
-  const linhasSpecs = specsVisiveis.length ? `\n• ${specsVisiveis.join("\n• ")}` : "";
-  const linhaObs = obs && String(obs).trim() ? `\n\n_Obs: ${String(obs).trim()}_` : "";
-
-  return (
-    `⚡ *Oferta Balão da Informática*\n*${nome}*\n\n` +
-    `💵 *Preço Especial:* *R$ ${precoFmt}*${linhasSpecs}${linhaObs}\n\n` +
-    `📍 Pronta entrega na loja do Castelo Campinas!\n` +
-    `Para reservar ou tirar dúvidas, é só responder aqui! 🎈`
-  );
+  return specs.filter((linha) => !SPEC_KEYS_INTERNOS.test(String(linha || "")));
 }
 
 function normalizeNumber(value) {
@@ -1365,48 +984,16 @@ function appendSignature(text, signatureId) {
  * Sem id (mensagem criada aqui antes da confirmacao), cai para a combinacao
  * de conversa, sentido, horario e texto.
  */
-// Id que NAO veio do WhatsApp: fabricado aqui quando message.id._serialized
-// vem vazio (acontece nesta versao do WhatsApp Web, mesmo problema do
-// getChats()). Dois desses nunca sao iguais, entao nao servem para dizer se
-// duas entradas sao a mesma mensagem.
-const ID_FABRICADO = /^(msg-|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$)/i;
-
-/**
- * Identidade de uma mensagem, para nao guardar a mesma duas vezes.
- *
- * Com id do WhatsApp, e so ele que conta.
- *
- * Sem id do WhatsApp, vale conversa + sentido + texto dentro de uma JANELA de
- * tempo. A janela e o ponto: a mesma mensagem chega por dois caminhos (o
- * envio guarda uma, o evento message_create guarda outra) com segundos de
- * diferenca — medido no servidor da loja, 00:47:14 e 00:47:15. Comparar o
- * timestamp exato fazia as duas passarem como distintas, e a oferta aparecia
- * repetida na tela do vendedor.
- */
-const JANELA_MESMA_MENSAGEM_MS = 120_000;
-
 function buildMessageFingerprint(message) {
   const id = String(message.id || "").trim();
-  if (id && !ID_FABRICADO.test(id)) return `id::${id}`;
+  if (id) return `id::${id}`;
 
-  // Sem id do WhatsApp, a identidade e o conteudo. O horario NAO entra na
-  // chave — quem cuida da proximidade no tempo e `mesmaMensagem()`, porque
-  // arredondar o horario em faixas separaria 00:47:59 de 00:48:01, que sao a
-  // mesma mensagem.
   return [
-    "conteudo",
     message.chatId || "",
     message.direction || "",
-    (message.body || "").trim(),
+    message.timestamp || 0,
+    message.body || "",
   ].join("::");
-}
-
-/** Se duas entradas sem id do WhatsApp sao, na pratica, a mesma mensagem. */
-function mesmaMensagem(a, b) {
-  return (
-    Math.abs(Number(a.timestamp || 0) - Number(b.timestamp || 0)) <=
-    JANELA_MESMA_MENSAGEM_MS
-  );
 }
 
 function normalizeStoredMessage(message) {
@@ -1423,52 +1010,22 @@ function mergeMessages(messages) {
     .forEach((message) => {
       const key = buildMessageFingerprint(message);
       const anterior = seen.get(key);
-
-      // Chave de conteúdo só vale como "a mesma mensagem" se os horários
-      // estiverem próximos: o cliente pode repetir "oi" no dia seguinte, e
-      // isso é outra mensagem. Longe no tempo, guarda as duas.
-      if (anterior && key.startsWith("conteudo::") && !mesmaMensagem(anterior, message)) {
-        seen.set(`${key}::${message.timestamp}`, message);
-        return;
-      }
-
       // A ressincronização periódica do histórico (via chat.fetchMessages)
       // não baixa a mídia — sem isso, a foto sumia do chat assim que a
       // mesma mensagem era resincronizada, sobrescrevendo a versão que
-      // guardava a mediaUrl no envio. Preserva também produto/hasMedia.
-      const merged = { ...message };
-      if (anterior) {
-        if (anterior.mediaUrl && !merged.mediaUrl) merged.mediaUrl = anterior.mediaUrl;
-        if (anterior.produto && !merged.produto) merged.produto = anterior.produto;
-        if (anterior.hasMedia && !merged.hasMedia) merged.hasMedia = anterior.hasMedia;
-        if (anterior.mediaType && !merged.mediaType) merged.mediaType = anterior.mediaType;
-        if (!merged.body && anterior.body) merged.body = anterior.body;
-      }
-      seen.set(key, merged);
+      // guardava a mediaUrl no envio.
+      seen.set(
+        key,
+        anterior?.mediaUrl && !message.mediaUrl ? { ...message, mediaUrl: anterior.mediaUrl } : message
+      );
     });
   store.messages = Array.from(seen.values())
     .sort((a, b) => a.timestamp - b.timestamp)
-    // Em memória ficam as recentes; o histórico completo de cada cliente vai
-    // para o arquivo da conversa, logo abaixo.
-    .slice(-5000);
-
-  // Grava o histórico das conversas que receberam mensagem agora.
-  const conversasTocadas = new Set(
-    messages.map((m) => m.chatId).filter((id) => id && isRealDirectChatId(id))
-  );
-  conversasTocadas.forEach(agendarGravacaoDaConversa);
+    .slice(-1000);
 }
 
 function storeMessage(message) {
   if (!message || isStatusMessage(message) || !isRealDirectChatId(message.chatId)) return;
-
-  // Mensagem que sai sem autor declarado herda quem acabou de enviar por esta
-  // conversa — é o que credita o atendimento à pessoa certa no dashboard.
-  if (message.direction === "out" && !message.vendedorId) {
-    const autor = autorDaConversa(message.chatId);
-    if (autor) message = { ...message, vendedorId: autor };
-  }
-
   const next = normalizeStoredMessage(message);
   const exists = store.messages.some(
     (item) => buildMessageFingerprint(item) === buildMessageFingerprint(next)
@@ -1525,488 +1082,6 @@ async function baixarAvatar(chatId, url) {
   }
 }
 
-// Quantas vezes o download de midia falhou desde que o servidor subiu.
-// Aparece no /status: sem isso, foto que o cliente manda simplesmente nao
-// chegava ao painel e a falha ficava so num console.warn dentro do container.
-const estatisticasMidia = { tentativas: 0, salvas: 0, falhas: 0, reaproveitadas: 0, ultimaFalha: null };
-
-// Nome do arquivo saneado: o id do WhatsApp traz caracteres que nao podem ir
-// para o disco (e que a rota de midia recusaria depois).
-function baseDoArquivoDeMidia(message) {
-  const id = message?.id?._serialized;
-  return id ? String(id).replace(/[^a-zA-Z0-9_-]/g, "_") : null;
-}
-
-/**
- * Se a midia desta mensagem ja esta no disco, devolve a URL dela.
- *
- * Sem isso, abrir a mesma conversa duas vezes baixaria tudo de novo — e o
- * download e a parte lenta.
- */
-// Indice dos arquivos ja baixados. Ler a pasta a cada mensagem seria O(n) por
-// mensagem — com centenas de arquivos, abrir uma conversa ficaria lento. A
-// faxina de midia apaga arquivo por fora, entao o indice se refaz de tempos
-// em tempos em vez de confiar so no que gravamos.
-const indiceMidia = { nomes: new Set(), lidoEm: 0 };
-const VALIDADE_INDICE_MIDIA = 30_000;
-
-function atualizarIndiceDeMidia(forcar = false) {
-  if (!forcar && Date.now() - indiceMidia.lidoEm < VALIDADE_INDICE_MIDIA) return;
-  indiceMidia.lidoEm = Date.now();
-  try {
-    indiceMidia.nomes = new Set(fs.existsSync(MEDIA_DIR) ? fs.readdirSync(MEDIA_DIR) : []);
-  } catch {
-    indiceMidia.nomes = new Set();
-  }
-}
-
-function midiaJaBaixada(message) {
-  const base = baseDoArquivoDeMidia(message);
-  if (!base) return null;
-  atualizarIndiceDeMidia();
-  for (const nome of indiceMidia.nomes) {
-    if (nome.startsWith(`${base}.`)) return `/api/crm/media/${nome}`;
-  }
-  return null;
-}
-
-/**
- * Baixa a midia de uma mensagem e devolve o caminho para servir.
- *
- * Duas tentativas: o metodo da biblioteca e, se ele vier vazio, a leitura
- * direta pelos modelos do WhatsApp Web — o mesmo tipo de contorno que ja foi
- * preciso para a lista de conversas nesta versao.
- */
-async function baixarMidiaDaMensagem(message, chatId = null) {
-  const jaTem = midiaJaBaixada(message);
-  if (jaTem) {
-    estatisticasMidia.reaproveitadas += 1;
-    return { url: jaTem, motivo: null };
-  }
-
-  estatisticasMidia.tentativas += 1;
-
-  const gravar = (base64, mimetype) => {
-    if (!base64) return null;
-    try {
-      if (!fs.existsSync(MEDIA_DIR)) fs.mkdirSync(MEDIA_DIR, { recursive: true });
-      const ext =
-        (mimetype && mimetype.split("/")[1]?.split(";")[0]) ||
-        (message.type === "image" ? "jpg" : "bin");
-      const filename = `${baseDoArquivoDeMidia(message) || createId()}.${ext}`;
-      fs.writeFileSync(path.join(MEDIA_DIR, filename), Buffer.from(base64, "base64"));
-      indiceMidia.nomes.add(filename);
-      estatisticasMidia.salvas += 1;
-      return `/api/crm/media/${filename}`;
-    } catch (error) {
-      estatisticasMidia.falhas += 1;
-      estatisticasMidia.ultimaFalha = `gravar: ${error.message}`;
-      console.warn("[midia] Falha ao gravar:", error.message);
-      return null;
-    }
-  };
-
-  // 1) Caminho normal da biblioteca.
-  try {
-    const media = await message.downloadMedia();
-    if (media?.data) {
-      const url = gravar(media.data, media.mimetype);
-      if (url) return { url, motivo: null };
-    }
-    estatisticasMidia.ultimaFalha = "downloadMedia() voltou vazio";
-  } catch (error) {
-    estatisticasMidia.ultimaFalha = `downloadMedia: ${error.message}`;
-    console.warn("[midia] downloadMedia falhou:", error.message);
-  }
-
-  // 2) Direto pelo WhatsApp Web.
-  //
-  // O `downloadMedia()` da biblioteca falha com a mensagem literal "r" — um
-  // nome minificado do bundle do WhatsApp, que não diz nada. Aqui a mesma
-  // coisa é feita passo a passo, devolvendo em qual passo parou em vez de
-  // engolir o erro: sem isso não dá para saber se o problema é o módulo, a
-  // mídia expirada ou a descriptografia.
-  const id = message.id?._serialized;
-  if (id && whatsappClient?.pupPage) {
-    try {
-      const dados = await whatsappClient.pupPage.evaluate(async (msgId, cid, fonteDaChave) => {
-        // Mesma funcao do servidor, enviada como texto: e ela que diz se dois
-        // ids sao a mesma mensagem, e duas copias divergindo ja quebrou isso.
-        const chaveDaMensagem = new Function(`return (${fonteDaChave})`)();
-        const falha = (passo, e) =>
-          ({ erro: `${passo}${e ? `: ${e.message || e}` : ""}` });
-
-        let msg;
-        try {
-          const colecoes = window.require("WAWebCollections");
-          msg =
-            colecoes.Msg.get(msgId) ||
-            (await colecoes.Msg.getMessagesById([msgId]))?.messages?.[0];
-
-          // O id que guardamos veio do evento, com o chat no formato `@lid`;
-          // na coleção a mesma mensagem pode estar indexada com o `@c.us`.
-          // O trecho final do id (o hash da mensagem) é o mesmo nos dois.
-          const chave = chaveDaMensagem(msgId);
-          const combina = (m) => {
-            const outro = String(m?.id?._serialized || "");
-            return outro === msgId || (chave && chaveDaMensagem(outro) === chave);
-          };
-
-          if (!msg) {
-            msg = (colecoes.Msg.getModelsArray() || []).find(combina);
-          }
-
-          // Última tentativa: por dentro da própria conversa, puxando o
-          // passado dela. É o único caminho para chat `@lid`, que a biblioteca
-          // não consegue abrir — e é justamente onde a foto some.
-          if (!msg && cid) {
-            const chat = colecoes.Chat.get(cid);
-            const listar = () =>
-              (typeof chat?.msgs?.getModelsArray === "function" && chat.msgs.getModelsArray()) ||
-              chat?.msgs?.models ||
-              [];
-
-            if (chat) {
-              msg = listar().find(combina);
-
-              for (let i = 0; i < 6 && !msg; i++) {
-                const antes = listar().length;
-                if (typeof chat.loadEarlierMsgs === "function") {
-                  await chat.loadEarlierMsgs();
-                } else if (typeof chat.msgs?.loadEarlierMsgs === "function") {
-                  await chat.msgs.loadEarlierMsgs();
-                } else {
-                  break;
-                }
-                if (listar().length <= antes) break;
-                msg = listar().find(combina);
-              }
-            }
-          }
-        } catch (e) {
-          return falha("nao achei a mensagem no WhatsApp Web", e);
-        }
-        if (!msg) return falha("mensagem fora da memoria do WhatsApp Web");
-
-        // Pede ao WhatsApp que resolva a mídia (é o que a seta de download
-        // faz na tela). Sem isso, mídia antiga fica em PENDING para sempre.
-        const estagio = () => msg.mediaData?.mediaStage || "sem mediaData";
-        let aoResolver = "";
-        if (estagio() !== "RESOLVED") {
-          try {
-            await msg.downloadMedia({ downloadEvenIfExpensive: true, rmrReason: 1 });
-          } catch (e) {
-            // NAO desiste aqui: se a foto ja apareceu na tela, o blob
-            // descriptografado esta na memoria mesmo com este passo falhando.
-            aoResolver = ` [resolver falhou: ${e.message || e}]`;
-          }
-        }
-
-        const paraBase64 = (buffer) =>
-          new Promise((ok, nok) => {
-            try {
-              const leitor = new FileReader();
-              leitor.onloadend = () => ok(String(leitor.result).split(",")[1] || "");
-              leitor.onerror = () => nok(new Error("FileReader falhou"));
-              leitor.readAsDataURL(
-                buffer instanceof Blob ? buffer : new Blob([buffer])
-              );
-            } catch (e) {
-              nok(e);
-            }
-          });
-
-        // 2a) O blob já descriptografado, que o WhatsApp guarda depois de
-        //     resolver a mídia. Não depende do gerenciador de download.
-        try {
-          // O WhatsApp guarda isso como OpaqueData, não como Blob puro — daí
-          // as três formas de chegar nos bytes.
-          const bruto = msg.mediaData?.mediaBlob;
-          let blob =
-            (bruto instanceof Blob && bruto) ||
-            bruto?._blob ||
-            bruto?.forceableBlob ||
-            bruto?.blob ||
-            bruto?._inner?.blob ||
-            (typeof bruto?.toBlob === "function" && (await bruto.toBlob())) ||
-            null;
-
-          if (!blob) {
-            const endereco =
-              (typeof bruto?.url === "function" && bruto.url()) ||
-              msg.mediaData?.renderableUrl ||
-              null;
-            if (endereco) blob = await fetch(endereco).then((r) => r.blob());
-          }
-
-          if (blob instanceof Blob && blob.size > 0) {
-            return { data: await paraBase64(blob), mimetype: blob.type || msg.mimetype || null };
-          }
-        } catch (e) {
-          // Segue para o gerenciador de download.
-        }
-
-        // 2b) Gerenciador de download, como a biblioteca faz.
-        try {
-          const gerenciador = window.require("WAWebDownloadManager")?.downloadManager;
-          if (!gerenciador?.downloadAndMaybeDecrypt) {
-            return falha(`sem gerenciador de download (estagio ${estagio()})${aoResolver}`);
-          }
-          // O gerenciador anota métricas num objeto que ele espera receber;
-          // sem esse boneco, ele estoura antes de baixar.
-          const bonecoDeMetricas = {
-            addAnnotations() { return this; },
-            addPoint() { return this; },
-          };
-          const buffer = await gerenciador.downloadAndMaybeDecrypt({
-            directPath: msg.directPath,
-            encFilehash: msg.encFilehash,
-            filehash: msg.filehash,
-            mediaKey: msg.mediaKey,
-            mediaKeyTimestamp: msg.mediaKeyTimestamp,
-            type: msg.type,
-            signal: new AbortController().signal,
-            downloadQpl: bonecoDeMetricas,
-          });
-          return { data: await paraBase64(buffer), mimetype: msg.mimetype || null };
-        } catch (e) {
-          return falha(`descriptografar (estagio ${estagio()})${aoResolver}`, e);
-        }
-      }, id, chatId || message.chatId || null, chaveDaMensagem.toString());
-
-      if (dados?.data) {
-        const url = gravar(dados.data, dados.mimetype);
-        if (url) return { url, motivo: null };
-      }
-      if (dados?.erro) estatisticasMidia.ultimaFalha = `pagina: ${dados.erro}`;
-    } catch (error) {
-      estatisticasMidia.ultimaFalha = `pupPage: ${error.message}`;
-      console.warn("[midia] Leitura direta falhou:", error.message);
-    }
-  }
-
-  estatisticasMidia.falhas += 1;
-  console.warn(
-    `[midia] Nao consegui baixar a midia da mensagem ${id || "(sem id)"} — motivo: ${estatisticasMidia.ultimaFalha}`
-  );
-  return { url: null, motivo: estatisticasMidia.ultimaFalha };
-}
-
-/**
- * Reabre a conversa de uma mensagem e devolve o objeto original dela.
- *
- * O WhatsApp Web so mantem em memoria as mensagens das conversas carregadas.
- * Sem este passo, procurar foto antiga pelo id sempre responde "mensagem fora
- * da memoria" — ela nunca esteve la.
- */
-async function recuperarMensagemOriginal(chatId, id) {
-  const chat = await getChatByIdSafe(chatId);
-  if (!chat || typeof chat.fetchMessages !== "function") return null;
-
-  const brutas = (await chat.fetchMessages({ limit: 100 }).catch(() => [])) || [];
-  const chave = chaveDaMensagem(id);
-  return (
-    brutas.find((b) => b.id?._serialized === id) ||
-    brutas.find((b) => chave && chaveDaMensagem(b.id?._serialized) === chave) ||
-    null
-  );
-}
-
-/**
- * Baixa a midia de uma mensagem sabendo so o id dela.
- *
- * Serve para repescar foto que ja chegou sem arquivo. Nao usa
- * `getChatById()` de proposito: ele nao abre conversa com id `@lid`, que e
- * exatamente onde a foto sumia.
- */
-async function rebaixarMidiaPorId(id, tipo, chatId = null) {
-  if (!id) return { url: null, motivo: "mensagem sem id" };
-  return baixarMidiaDaMensagem(
-    {
-      id: { _serialized: id },
-      type: tipo || null,
-      hasMedia: true,
-      // O metodo da biblioteca precisa do objeto original; aqui so existe o
-      // id, entao vai direto para a leitura na pagina.
-      downloadMedia: async () => null,
-    },
-    chatId
-  );
-}
-
-/**
- * Identidade da mensagem dentro do id do WhatsApp.
- *
- * O id serializado tem formato variavel:
- *   false_5519984515960@c.us_3EB0ABC              (conversa comum)
- *   false_92148808610042@lid_3EB0ABC_5519...@c.us (conversa @lid, com autor)
- *
- * Pegar "o ultimo pedaco" devolve o telefone do autor no segundo caso, e nao
- * a mensagem — foi assim que a busca por id nunca achou nada em chat `@lid`.
- * O que identifica a mensagem e o maior pedaco que NAO e um JID.
- *
- * Esta funcao roda nos dois lados: aqui e dentro da pagina do WhatsApp (o
- * codigo e enviado para la como texto, para nao existirem duas versoes que
- * podem divergir).
- */
-function chaveDaMensagem(id) {
-  const pedacos = String(id || "").split("_");
-  let melhor = "";
-  for (const pedaco of pedacos) {
-    if (pedaco.includes("@")) continue;
-    if (pedaco === "true" || pedaco === "false") continue;
-    if (pedaco.length > melhor.length) melhor = pedaco;
-  }
-  return melhor;
-}
-
-/**
- * Olha por dentro da pagina do WhatsApp e conta o que EXISTE ali.
- *
- * Serve para o diagnostico de midia: quando a resposta e "mensagem fora da
- * memoria", isto diz se o problema e a conversa que nao abre, a conversa
- * vazia, ou os ids que nao casam — tres causas diferentes, com consertos
- * diferentes, que ate agora davam a mesma mensagem.
- */
-async function inspecionarConversaNaPagina(chatId, msgId) {
-  if (!whatsappClient?.pupPage) return { erro: "sem pagina do WhatsApp" };
-
-  try {
-    return await whatsappClient.pupPage.evaluate(
-      async (cid, alvo, fonteDaChave) => {
-        const chaveDaMensagem = new Function(`return (${fonteDaChave})`)();
-        const relato = { chatId: cid, idProcurado: alvo, chaveProcurada: chaveDaMensagem(alvo) };
-
-        try {
-          const colecoes = window.require("WAWebCollections");
-          relato.totalDeConversasNaPagina = colecoes.Chat.getModelsArray()?.length ?? null;
-          relato.totalDeMensagensNaColecao = colecoes.Msg.getModelsArray()?.length ?? null;
-
-          const chat = colecoes.Chat.get(cid);
-          relato.conversaEncontrada = Boolean(chat);
-          if (!chat) {
-            // Talvez o id guardado nao seja o id do modelo. Mostra alguns.
-            relato.amostraDeConversas = (colecoes.Chat.getModelsArray() || [])
-              .slice(0, 5)
-              .map((c) => c.id?._serialized);
-            return relato;
-          }
-
-          const listar = () =>
-            (typeof chat.msgs?.getModelsArray === "function" && chat.msgs.getModelsArray()) ||
-            chat.msgs?.models ||
-            [];
-
-          relato.metodoDeCarregarAntigas =
-            typeof chat.loadEarlierMsgs === "function"
-              ? "chat.loadEarlierMsgs"
-              : typeof chat.msgs?.loadEarlierMsgs === "function"
-              ? "chat.msgs.loadEarlierMsgs"
-              : "nenhum";
-
-          relato.mensagensAntesDeCarregar = listar().length;
-          if (relato.metodoDeCarregarAntigas !== "nenhum") {
-            for (let i = 0; i < 3; i++) {
-              const antes = listar().length;
-              if (typeof chat.loadEarlierMsgs === "function") await chat.loadEarlierMsgs();
-              else await chat.msgs.loadEarlierMsgs();
-              if (listar().length <= antes) break;
-            }
-          }
-
-          const mensagens = listar();
-          relato.mensagensDepoisDeCarregar = mensagens.length;
-          relato.amostraDeIds = mensagens.slice(-6).map((m) => m.id?._serialized);
-          relato.amostraDeChaves = relato.amostraDeIds.map(chaveDaMensagem);
-          relato.achouPorChave = mensagens.some(
-            (m) => chaveDaMensagem(m.id?._serialized) === relato.chaveProcurada
-          );
-          relato.comMidia = mensagens.filter((m) => m.mediaData || m.isMedia).length;
-          relato.estagiosDeMidia = mensagens
-            .filter((m) => m.mediaData)
-            .slice(-6)
-            .map((m) => m.mediaData.mediaStage);
-
-          return relato;
-        } catch (e) {
-          relato.erro = e.message || String(e);
-          return relato;
-        }
-      },
-      chatId,
-      msgId,
-      chaveDaMensagem.toString()
-    );
-  } catch (error) {
-    return { erro: `pupPage: ${error.message}` };
-  }
-}
-
-/**
- * Se ainda da para buscar a midia desta mensagem depois que ela chegou.
- *
- * Quando o WhatsApp nao entrega identificador, o servidor grava um UUID
- * proprio para a mensagem nao se perder. Esse UUID serve para nao duplicar o
- * balao no painel, mas NAO serve para procurar nada: o WhatsApp nao conhece
- * esse numero. Ficar tentando so gasta varredura e enche o diagnostico de
- * "mensagem fora da memoria", escondendo as falhas que teriam conserto.
- *
- * Para essas, a unica chance de baixar a foto e no instante em que ela chega.
- */
-function podeProcurarMidiaDepois(mensagem) {
-  const id = String(mensagem?.id || "");
-  return Boolean(id) && !ID_FABRICADO.test(id);
-}
-
-// Teto de downloads por carregamento de conversa. Sem ele, abrir um chat com
-// 50 fotos travaria a resposta ate baixar todas.
-const MAX_MIDIAS_POR_CARREGAMENTO = 20;
-
-/**
- * Converte mensagens do WhatsApp para o formato do painel, trazendo junto a
- * foto que o cliente mandou.
- *
- * Antes isso so gravava `hasMedia: true` e a foto virava um "📎 Mídia" sem
- * imagem nenhuma no painel.
- */
-async function converterMensagensDoHistorico(uteis, chatId, contactName, realNumber) {
-  let baixadasAgora = 0;
-  const convertidas = [];
-
-  for (const message of uteis) {
-    let mediaUrl = null;
-    let mediaErro = null;
-    if (message.hasMedia) {
-      mediaUrl = midiaJaBaixada(message);
-      if (!mediaUrl && baixadasAgora < MAX_MIDIAS_POR_CARREGAMENTO) {
-        baixadasAgora += 1;
-        const midia = await baixarMidiaDaMensagem(message, chatId);
-        mediaUrl = midia.url;
-        mediaErro = midia.motivo;
-      }
-    }
-
-    convertidas.push({
-      id: message.id?._serialized || createId(),
-      chatId,
-      from: message.from,
-      to: message.to || null,
-      body: message.body || "",
-      direction: message.fromMe ? "out" : "in",
-      timestamp: (message.timestamp || Math.floor(Date.now() / 1000)) * 1000,
-      contactName,
-      realNumber,
-      displayNumber: realNumber,
-      hasMedia: Boolean(message.hasMedia),
-      mediaType: message.type || null,
-      mediaUrl,
-      mediaErro,
-    });
-  }
-
-  return convertidas;
-}
-
 async function getProfilePicUrlSafe(chatId) {
   if (!whatsappClient || !whatsappState.connected || !chatId || !isRealDirectChatId(chatId)) return null;
   try {
@@ -2031,96 +1106,6 @@ async function getProfilePicUrlSafe(chatId) {
       }
     }, chatId);
     if (pic) return pic;
-  } catch (e) {}
-
-  return null;
-}
-
-/**
- * Telefone de verdade por tras de um contato `@lid`.
- *
- * O `@lid` e um identificador interno do WhatsApp (ex.: 249610647953418) que
- * NAO tem relacao com o telefone. Quando o contato esta salvo na agenda, o
- * WhatsApp entrega a conversa por esse id e o numero nao vem pelo caminho
- * normal — e o painel acabava mostrando o proprio id no lugar do telefone,
- * como se fosse o numero do cliente.
- *
- * Procura em varias fontes porque nenhuma sozinha e confiavel nesta versao do
- * WhatsApp Web. Devolve null quando nao da para saber: numero inventado e pior
- * que numero ausente, porque o vendedor tenta ligar.
- */
-async function telefoneRealDoLid(rawId, mensagensConhecidas = []) {
-  if (!String(rawId || "").endsWith("@lid")) return null;
-
-  const meuNumero = getDigits(whatsappState.phoneNumber || "");
-  const aceitar = (valor) => {
-    const numero = extractRealNumber(valor);
-    // O proprio numero da loja aparece como participante em tudo que sai —
-    // aceita-lo aqui carimbaria a loja como telefone do cliente.
-    if (!numero || (meuNumero && getDigits(numero) === meuNumero)) return null;
-    return numero;
-  };
-
-  // 1) Pelos ids das mensagens que ja temos guardadas. Em conversa `@lid` o id
-  //    serializado termina com o JID real do autor:
-  //    false_249610647953418@lid_3EB0ABC_5519984515960@c.us
-  for (const m of mensagensConhecidas) {
-    for (const pedaco of String(m?.id || "").split("_")) {
-      if (!pedaco.endsWith("@c.us")) continue;
-      const numero = aceitar(pedaco);
-      if (numero) return numero;
-    }
-    const doAutor = aceitar(m?.author) || aceitar(m?.participant);
-    if (doAutor) return doAutor;
-  }
-
-  // 2) Pela pagina do WhatsApp Web.
-  if (!whatsappClient?.pupPage) return null;
-
-  try {
-    const candidatos = await whatsappClient.pupPage.evaluate(async (cid) => {
-      const achados = [];
-      const anotar = (v) => {
-        if (!v) return;
-        // `phoneNumber` costuma ser um Wid (objeto), nao string — ler direto
-        // dava "[object Object]" e o codigo caia no id `@lid`.
-        if (typeof v === "string") achados.push(v);
-        else if (v.user) achados.push(v.user);
-        else if (v._serialized) achados.push(v._serialized);
-      };
-
-      try {
-        const colecoes = window.require("WAWebCollections");
-
-        const contato = colecoes.Contact.get(cid);
-        anotar(contato?.phoneNumber);
-        anotar(contato?.pnForLid);
-        anotar(contato?.displayPhoneNumber);
-
-        const chat = colecoes.Chat.get(cid);
-        anotar(chat?.contact?.phoneNumber);
-
-        // O autor das mensagens da conversa: em `@lid` ele vem com o JID real.
-        const listar = () =>
-          (typeof chat?.msgs?.getModelsArray === "function" && chat.msgs.getModelsArray()) ||
-          chat?.msgs?.models ||
-          [];
-        for (const m of listar().slice(-40)) {
-          anotar(m?.author);
-          anotar(m?.from);
-          anotar(m?.id?._serialized);
-        }
-      } catch (e) {}
-
-      return achados;
-    }, rawId);
-
-    for (const bruto of candidatos || []) {
-      for (const pedaco of String(bruto).split("_")) {
-        const numero = aceitar(pedaco);
-        if (numero) return numero;
-      }
-    }
   } catch (e) {}
 
   return null;
@@ -2192,26 +1177,11 @@ async function resolveContactDetails(chat, rawId) {
     } catch (e) {}
   }
 
-  // Conversa `@lid`: o id NAO e telefone. Busca o numero de verdade nas
-  // fontes que sobram (ids das mensagens, modelos da pagina).
-  if (!realNumber && String(rawId || "").endsWith("@lid")) {
-    realNumber = await telefoneRealDoLid(rawId, lerMensagensDaConversa(rawId).slice(-40));
-  }
-
   // Sufixo genérico (não só @c.us/@lid/@s.whatsapp.net) — se o WhatsApp usar
   // algum formato de JID novo, não queremos ele vazando pro nome/número.
-  //
-  // O `@lid` fica de fora deste atalho de proposito: cair nele carimbava o
-  // identificador interno (ex.: 249610647953418) como telefone do cliente, e
-  // o vendedor tentava ligar para um numero que nao existe. Sem numero, o
-  // painel diz que nao identificou — o que e verdade.
-  const doProprioId = String(rawId || "").endsWith("@lid")
-    ? null
-    : String(rawId || "").replace(/@.*$/, "");
-  const cleanNum = realNumber || doProprioId || null;
-
+  const cleanNum = realNumber || String(rawId || "").replace(/@.*$/, "");
   return {
-    contactName: contactName || cleanNum || "Contato sem número",
+    contactName: contactName || cleanNum,
     realNumber: cleanNum,
     displayNumber: cleanNum,
   };
@@ -2380,78 +1350,6 @@ async function carregarMensagensAntigas(chatId, rodadas = 3) {
   }
 }
 
-/**
- * Baixa o historico das conversas em segundo plano, das mais recentes para as
- * mais antigas.
- *
- * Sem isto, so tinha historico a conversa que alguem ja tivesse aberto — as
- * demais apareciam vazias na primeira vez. Roda devagar de proposito: cada
- * conversa exige varias idas ao WhatsApp, e atropelar isso trava a sessao e
- * derruba o atendimento de todo mundo.
- */
-let carregandoHistoricos = false;
-
-async function carregarHistoricosEmSegundoPlano({ limite = 60, porConversa = 60 } = {}) {
-  if (carregandoHistoricos) return { pulado: true };
-  if (!whatsappClient || !whatsappState.connected) return { pulado: true };
-
-  carregandoHistoricos = true;
-  let baixadas = 0;
-  let visitadas = 0;
-
-  try {
-    const alvos = [...store.chats]
-      .sort((a, b) => (b.lastMessageTimestamp || 0) - (a.lastMessageTimestamp || 0))
-      .slice(0, limite);
-
-    for (const resumo of alvos) {
-      if (!whatsappState.connected) break;
-
-      const chatId = resumo.chatId;
-      if (!chatId || !isRealDirectChatId(chatId)) continue;
-
-      // Ja tem historico gravado? Passa para a proxima.
-      if (lerMensagensDaConversa(chatId).length >= 10) continue;
-
-      visitadas += 1;
-      try {
-        const chat = await getChatByIdSafe(chatId);
-        if (!chat || typeof chat.fetchMessages !== "function") continue;
-
-        await carregarMensagensAntigas(chatId, 2);
-        const brutas = await chat.fetchMessages({ limit: porConversa }).catch(() => []);
-        const uteis = (brutas || []).filter((m) => !isStatusMessage(m));
-        if (!uteis.length) continue;
-
-        const { contactName, realNumber } = await resolveContactDetails(chat, chatId);
-        const convertidas = await converterMensagensDoHistorico(
-          uteis,
-          chatId,
-          contactName,
-          realNumber
-        );
-
-        salvarMensagensDaConversa(chatId, convertidas);
-        baixadas += convertidas.length;
-
-        // Respira entre conversas para nao sufocar a sessao do WhatsApp.
-        await sleep(1500);
-      } catch (error) {
-        console.warn("[historico] Falha em", chatId, "-", error.message);
-      }
-    }
-
-    if (baixadas) {
-      console.log(
-        `[historico] Segundo plano: ${baixadas} mensagens de ${visitadas} conversa(s).`
-      );
-    }
-    return { visitadas, baixadas };
-  } finally {
-    carregandoHistoricos = false;
-  }
-}
-
 async function syncRecentConversations() {
   if (!whatsappClient || !whatsappState.connected) return;
 
@@ -2601,7 +1499,7 @@ async function syncRecentConversations() {
 
     mergeMessages(syncedMessages);
     if (labelAwareChats.length) {
-      await sincronizarEtiquetas();
+      await syncLabelsForChats(labelAwareChats);
     }
 
     // Junta o mesmo contato que veio duas vezes (@c.us e @lid) e tira o
@@ -2861,14 +1759,7 @@ async function resolveMediaObject(mediaSource, filename = "arquivo", mimetype = 
     } catch (e) {
       console.warn("MessageMedia.fromUrl falhou, tentando download com fetch nativo:", e.message);
       try {
-        const resp = await fetch(mediaSource, {
-          headers: {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            "Accept": "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
-            "Referer": "https://www.balao.info/",
-          },
-        });
-        if (!resp.ok) throw new Error(`HTTP ${resp.status} ao baixar imagem`);
+        const resp = await fetch(mediaSource);
         const arrayBuf = await resp.arrayBuffer();
         const base64 = Buffer.from(arrayBuf).toString("base64");
         const detectedMime = resp.headers.get("content-type") || mimetype || "image/jpeg";
@@ -2882,7 +1773,7 @@ async function resolveMediaObject(mediaSource, filename = "arquivo", mimetype = 
   return null;
 }
 
-async function sendDirectMessage({ number, text, signatureId, chatId: preferredChatId = null, replyTo = null, autorId = null }) {
+async function sendDirectMessage({ number, text, signatureId, chatId: preferredChatId = null, replyTo = null }) {
   if (!whatsappClient) {
     throw new Error("WhatsApp ainda não iniciado");
   }
@@ -2914,10 +1805,6 @@ async function sendDirectMessage({ number, text, signatureId, chatId: preferredC
     throw new Error("Destinatário inválido para envio de mensagem");
   }
 
-  // Credita a autoria ANTES do envio: o message_create que chega logo em
-  // seguida herda quem mandou (robôs como a JUL.IA e a VITOR.IA usam isto).
-  if (autorId) marcarAutor(targetChatId, autorId);
-
   console.log(`[WHATSAPP-SEND] Disparando texto para ${targetChatId}: "${finalText.slice(0, 60)}"`);
   const options = replyTo ? { quotedMessageId: replyTo } : {};
   const sentMsg = await resolveAndSendMessage(targetChatId, finalText, options);
@@ -2935,19 +1822,11 @@ async function sendDirectMessage({ number, text, signatureId, chatId: preferredC
     displayNumber: extractRealNumber(targetChatId),
     status: "sent",
   };
+  store.messages.push(outMsg);
+  if (store.messages.length > 5000) store.messages.shift();
+  io.emit("whatsapp:message", outMsg);
 
-  // Entra pelo storeMessage, e nao com push direto no array.
-  //
-  // O push pulava a deduplicacao: em seguida o evento message_create do
-  // WhatsApp registra a MESMA mensagem por outro caminho, e as duas ficavam
-  // guardadas. Passando por aqui, a segunda e reconhecida como repetida e
-  // nenhum evento extra vai para o painel.
-  storeMessage(outMsg);
-
-  // Devolve tambem o id usado no registro: quando o WhatsApp nao informa o
-  // dele (`_serialized` vazio nesta versao), e por este id que o painel
-  // consegue casar o balao provisorio com a mensagem de verdade.
-  return { ...(sentMsg || {}), idRegistrado: outMsg.id };
+  return sentMsg;
 }
 
 async function sendDirectMedia({
@@ -3012,9 +1891,9 @@ async function sendDirectMedia({
     displayNumber: extractRealNumber(targetChatId),
     status: "sent",
   };
-  // Mesmo motivo do envio de texto: pelo storeMessage, para passar pela
-  // deduplicacao e pela gravacao no arquivo da conversa.
-  storeMessage(outMsg);
+  store.messages.push(outMsg);
+  if (store.messages.length > 5000) store.messages.shift();
+  io.emit("whatsapp:message", outMsg);
 
   return sent;
 }
@@ -3271,13 +2150,6 @@ function attachWhatsAppClientEvents(client) {
     emitToast("WhatsApp conectado e pronto para uso.");
     // Só as conversas: o feed de status carrega quando alguém abrir a aba.
     await garantirChatsCarregados({ forcar: true });
-
-    // Em seguida, e sem travar nada, vai baixando o historico das conversas
-    // mais recentes — para o vendedor nao encontrar tela vazia ao abrir um
-    // cliente pela primeira vez. O atraso deixa a conexao assentar antes.
-    setTimeout(() => {
-      carregarHistoricosEmSegundoPlano({ limite: 80 }).catch(() => {});
-    }, 30_000);
   });
 
   client.on("auth_failure", (message) => {
@@ -3344,9 +2216,22 @@ function attachWhatsAppClientEvents(client) {
     }
 
     // Bug fix: Download media to disk so it survives page reloads
-    const midia = message.hasMedia
-      ? await baixarMidiaDaMensagem(message, message.from)
-      : { url: null, motivo: null };
+    let mediaUrl = null;
+    if (message.hasMedia) {
+      try {
+        const media = await message.downloadMedia();
+        if (media && media.data) {
+          const mediaDir = MEDIA_DIR;
+          if (!fs.existsSync(mediaDir)) fs.mkdirSync(mediaDir, { recursive: true });
+          const ext = media.mimetype ? media.mimetype.split("/")[1]?.split(";")[0] || "bin" : "bin";
+          const filename = `${message.id?._serialized || createId()}.${ext}`;
+          fs.writeFileSync(path.join(mediaDir, filename), Buffer.from(media.data, "base64"));
+          mediaUrl = `/api/crm/media/${filename}`;
+        }
+      } catch (e) {
+        console.warn("[whatsapp] Falha ao baixar mídia:", e.message);
+      }
+    }
 
     storeMessage({
       id: message.id?._serialized || createId(),
@@ -3360,10 +2245,7 @@ function attachWhatsAppClientEvents(client) {
       displayNumber: realNumber,
       hasMedia: Boolean(message.hasMedia),
       mediaType: message.type || null,
-      mediaUrl: midia.url,
-      // O motivo viaja junto ate o painel. Sem isso, foto que nao baixa vira
-      // um clipe mudo e so o log dentro do container sabe o porque.
-      mediaErro: midia.motivo,
+      mediaUrl,
     });
   });
 
@@ -3500,94 +2382,15 @@ async function initializeWhatsAppClient(options = {}) {
   }
 }
 
-// ============================================================
-// Watchdog: recuperar sozinho SEM destruir o que está funcionando.
-//
-// A versão anterior tinha um prazo só — 90 segundos sem evento — e, ao
-// estourar, apagava a sessão. Isso funcionava para sessão travada e era
-// destrutivo para o caso mais importante: o QR recém-lido.
-//
-// O que acontecia na prática, e custou uma manhã inteira à loja em 14/09:
-// o Thiago escaneava, o celular aceitava, a tela de carregamento chegava a
-// 100% e o WhatsApp entrava na sincronização das 806 conversas da conta —
-// que não emite evento nenhum por vários minutos. Aos 90 segundos o watchdog
-// concluía "travado", apagava a sessão recém-pareada e voltava para o QR.
-// Ele escaneava de novo, e o ciclo recomeçava.
-//
-// A regra agora é: SÓ se descarta sessão quando há prova de que ela morreu.
-//
-//   pareando/sincronizando  -> espera muito, e se travar reinicia SEM apagar
-//   parado no QR com sessão salva -> a sessão salva é a morta: apaga
-//   parado no QR sem sessão salva -> não faz nada: está esperando uma pessoa
-//
-// O último caso importa tanto quanto os outros: antes, o watchdog reiniciava
-// o cliente de 90 em 90 segundos enquanto o QR esperava alguém chegar com o
-// celular, trocando o código embaixo de quem estava tentando ler.
-// ============================================================
+// Watchdog: garante que o QR/sessão nunca fica travado sem se recuperar
+// sozinho — nem numa inicialização que trava no meio, nem num estado morto
+// (desconectado, sem client, sem nenhuma tentativa em andamento).
 const WATCHDOG_INTERVAL_MS = 20000;
 const WATCHDOG_STUCK_INIT_MS = 45000;
-
-// Pareado e sincronizando: o relógio é o último recurso, não o primeiro.
-//
-// Prazo fixo aqui é chute: a sincronização de uma conta com 806 conversas
-// para de emitir evento em 99% e some por muitos minutos, e qualquer número
-// que eu escolha ou mata uma carga viva ou deixa passar uma travada. Então
-// antes de desistir o watchdog PERGUNTA ao navegador se ele está vivo
-// (`pingNavegador`). Vinte minutos é só o teto para o caso de o próprio
-// ping estar mentindo.
-const WATCHDOG_SINCRONIZANDO_MS = 20 * 60 * 1000;
-
-// Parado no QR com sessão salva no disco: cinco minutos. Se a sessão
-// prestasse, ela teria autenticado em segundos — não chegaria a mostrar QR.
-const WATCHDOG_SESSAO_MORTA_MS = 5 * 60 * 1000;
-
-// A partir daqui o silêncio merece uma pergunta ao navegador — não uma
-// conclusão. Dois minutos: tempo de sobra para a carga normal terminar
-// sozinha sem ninguém perguntar nada.
-const WATCHDOG_SILENCIO_SUSPEITO_MS = 2 * 60 * 1000;
-
-/** Se existe sessão gravada no disco. É o que separa "sessão morta" de
- *  "esperando alguém escanear". */
-function temSessaoSalva() {
-  try {
-    return fs.existsSync(AUTH_DIR) && fs.readdirSync(AUTH_DIR).length > 0;
-  } catch {
-    return false;
-  }
-}
-
-/** Pareamento em andamento: o QR já foi lido, falta terminar de carregar. */
-function estaPareando() {
-  return whatsappState.status === "loading" || whatsappState.status === "authenticated";
-}
-
-/**
- * Pergunta ao navegador se ele ainda responde.
- *
- * É a diferença entre "quieto" e "morto", que nenhum cronômetro sabe fazer.
- * Durante a sincronização o WhatsApp Web não emite evento nenhum, mas a
- * página continua viva e responde na hora. Uma página que não responde em
- * 5 segundos travou de verdade.
- *
- * Qualquer erro conta como morto: se nem dá para perguntar, não está vivo.
- */
-async function pingNavegador() {
-  const pagina = whatsappClient?.pupPage;
-  if (!pagina || pagina.isClosed?.()) return false;
-  try {
-    const resposta = await Promise.race([
-      pagina.evaluate(() => 1),
-      new Promise((_, rejeita) => setTimeout(() => rejeita(new Error("timeout")), 5000)),
-    ]);
-    return resposta === 1;
-  } catch {
-    return false;
-  }
-}
+const WATCHDOG_STUCK_PROGRESS_MS = 90000;
 
 setInterval(() => {
   const now = Date.now();
-  const parado = now - lastProgressAt;
 
   if (isInitializingClient && initializingSince && now - initializingSince > WATCHDOG_STUCK_INIT_MS) {
     console.warn("[whatsapp][watchdog] Inicialização travada há mais de 45s — forçando reinício.");
@@ -3602,56 +2405,15 @@ setInterval(() => {
     return;
   }
 
-  if (isInitializingClient || whatsappState.status === "ready") return;
-
-  // 1. Pareando. Nunca apaga a sessão aqui: ela acabou de nascer.
-  if (estaPareando()) {
-    if (parado > WATCHDOG_SINCRONIZANDO_MS) {
-      console.warn(
-        `[whatsapp][watchdog] Sincronização parada há ${Math.round(parado / 1000)}s — ` +
-        "reiniciando SEM apagar a sessão (o pareamento foi aceito pelo celular)."
-      );
-      initializeWhatsAppClient({ resetSession: false, force: true });
-      return;
-    }
-
-    // Passou do prazo curto e ainda está quieto: pergunta ao navegador em vez
-    // de supor. Vivo reabre o crédito; morto reinicia agora, sem esperar o
-    // teto de 20 minutos.
-    if (parado > WATCHDOG_SILENCIO_SUSPEITO_MS) {
-      pingNavegador().then((vivo) => {
-        if (vivo) {
-          lastProgressAt = Date.now();
-          console.log(
-            `[whatsapp][watchdog] Sem evento há ${Math.round(parado / 1000)}s, mas o navegador ` +
-            "responde — sincronização em andamento, seguindo em frente."
-          );
-        } else {
-          console.warn(
-            "[whatsapp][watchdog] Navegador não responde — reiniciando SEM apagar a sessão."
-          );
-          initializeWhatsAppClient({ resetSession: false, force: true });
-        }
-      });
-    }
-    return;
-  }
-
-  // 2. No QR com sessão salva: a salva é a morta.
-  if (whatsappState.status === "qr" && temSessaoSalva() && parado > WATCHDOG_SESSAO_MORTA_MS) {
-    console.warn(
-      `[whatsapp][watchdog] No QR há ${Math.round(parado / 1000)}s com sessão gravada no disco — ` +
-      "sessão morta, descartando para o próximo QR valer."
-    );
-    whatsappState.ultimoErro = {
-      mensagem: "Sessão salva não autenticou e foi descartada. Escaneie o QR Code.",
-      quando: new Date().toISOString(),
-    };
+  if (
+    !isInitializingClient &&
+    !whatsappState.connected &&
+    whatsappState.status !== "ready" &&
+    now - lastProgressAt > WATCHDOG_STUCK_PROGRESS_MS
+  ) {
+    console.warn(`[whatsapp][watchdog] Sem progresso há mais de ${WATCHDOG_STUCK_PROGRESS_MS / 1000}s (status=${whatsappState.status}) — forçando novo QR.`);
     initializeWhatsAppClient({ resetSession: true, force: true });
-    return;
   }
-
-  // 3. No QR sem sessão salva: está esperando uma pessoa. Não mexe.
 }, WATCHDOG_INTERVAL_MS);
 
 async function resetWhatsAppSession() {
@@ -3702,7 +2464,6 @@ app.get(["/health", "/status", "/api/status", "/api/crm/status"], (_req, res) =>
     phoneNumber: whatsappState.phoneNumber,
     conta: whatsappState.phoneNumber ? { numero: whatsappState.phoneNumber } : null,
     armazenamento: estadoArmazenamento(),
-    versao: VERSAO_CODIGO,
     navegador: CHROME_PATH || null,
     ultimoErro: whatsappState.ultimoErro || null,
     // Numeros para diagnosticar de fora quando a lista aparece vazia no
@@ -3718,468 +2479,7 @@ app.get(["/health", "/status", "/api/status", "/api/crm/status"], (_req, res) =>
       // Onde as conversas foram parar na ultima varredura.
       varredura: ultimaVarredura,
     },
-    // Cópias de segurança do banco guardadas nesta máquina.
-    backup: backupDoBanco.estado,
-    // Cópia do catálogo guardada aqui, para o site não ficar sem preço
-    // quando a cota do banco estoura.
-    catalogo: espelhoDoCatalogo.estado,
-    // Foto que o cliente manda passa por aqui. Quando "salvas" fica em zero e
-    // "falhas" sobe, o problema e o download — nao o painel.
-    midia: estatisticasMidia,
   });
-});
-
-// Diagnóstico da mídia: pega a última mensagem que veio marcada como foto e
-// ficou sem arquivo, tenta baixar de novo e conta em que passo parou.
-//
-// Existe porque o erro do WhatsApp Web é a letra "r" — sem contexto nenhum.
-// Sem esta rota, cada tentativa de conserto exigia pedir uma foto nova ao
-// cliente e ler o log dentro do container.
-app.get(["/api/crm/midia/diagnostico", "/api/midia/diagnostico"], async (req, res) => {
-  const alvo = String(req.query.id || "").trim();
-
-  const pendentes = store.messages.filter((m) => m.hasMedia && !m.mediaUrl);
-  // Prefere uma que ainda tenha chance: diagnosticar uma mensagem sem
-  // identificador so repete a resposta obvia.
-  const procuraveis = pendentes.filter(podeProcurarMidiaDepois);
-  const escolhida = alvo
-    ? store.messages.find((m) => m.id === alvo)
-    : procuraveis[procuraveis.length - 1] || pendentes[pendentes.length - 1];
-
-  if (!escolhida) {
-    return res.json({
-      ok: true,
-      mensagem: alvo ? "Não achei essa mensagem." : "Nenhuma mídia pendente.",
-      pendentes: pendentes.length,
-      estatisticas: estatisticasMidia,
-    });
-  }
-
-  const original = await recuperarMensagemOriginal(escolhida.chatId, escolhida.id);
-  const { url, motivo } = original
-    ? await baixarMidiaDaMensagem(original, escolhida.chatId)
-    : await rebaixarMidiaPorId(escolhida.id, escolhida.mediaType, escolhida.chatId);
-  mergeMessages([{ ...escolhida, mediaUrl: url || null, mediaErro: motivo }]);
-  emitMessages();
-
-  // So inspeciona quando deu errado: e uma varredura cara na pagina.
-  const inspecao = url ? null : await inspecionarConversaNaPagina(escolhida.chatId, escolhida.id);
-
-  res.json({
-    ok: Boolean(url),
-    id: escolhida.id,
-    chatId: escolhida.chatId,
-    de: escolhida.realNumber || escolhida.from,
-    tipo: escolhida.mediaType,
-    conversaAberta: Boolean(original),
-    inspecao,
-    url,
-    // O passo exato em que parou — é isto que se lê quando dá errado.
-    motivo,
-    pendentes: pendentes.length,
-    pendentesProcuraveis: procuraveis.length,
-    temIdentificadorDoWhatsApp: podeProcurarMidiaDepois(escolhida),
-    estatisticas: estatisticasMidia,
-  });
-});
-
-// Repesca de mídia por id, sem passar pela conversa.
-//
-// `getChatById()` não abre chat com id `@lid` — e é justamente nesses que a
-// foto some. Aqui a mensagem é procurada direto na memória do WhatsApp Web,
-// que não se importa com o formato do id.
-app.all(["/api/crm/midia/repescar", "/api/midia/repescar"], async (req, res) => {
-  const limite = Math.min(Number(req.query.limite) || 20, 200);
-  const todasPendentes = store.messages.filter((m) => m.hasMedia && !m.mediaUrl);
-
-  // Mensagem sem identificador do WhatsApp nao tem como ser procurada. Sai da
-  // fila e ganha um motivo honesto, em vez de falhar para sempre e mascarar as
-  // que ainda teriam conserto.
-  const semIdentificador = todasPendentes.filter((m) => !podeProcurarMidiaDepois(m));
-  if (semIdentificador.length) {
-    mergeMessages(
-      semIdentificador.map((m) => ({
-        ...m,
-        mediaErro: "o WhatsApp não deu identificador para esta mensagem — a foto só podia ser baixada na hora em que ela chegou",
-      }))
-    );
-  }
-
-  const pendentes = todasPendentes.filter(podeProcurarMidiaDepois).slice(-limite);
-
-  const porConversa = new Map();
-  pendentes.forEach((m) => {
-    if (!porConversa.has(m.chatId)) porConversa.set(m.chatId, []);
-    porConversa.get(m.chatId).push(m);
-  });
-
-  const recuperadas = [];
-  const motivos = [];
-  const anotarMotivo = (motivo) => {
-    if (motivo && !motivos.includes(motivo) && motivos.length < 5) motivos.push(motivo);
-  };
-
-  for (const [chatId, lista] of porConversa) {
-    // Abrir a conversa é o passo que faltava: o WhatsApp Web só mantém em
-    // memória as mensagens das conversas carregadas. Buscar foto antiga só
-    // pelo id sempre respondia "mensagem fora da memoria" — ela nunca esteve
-    // lá. O fetchMessages traz os modelos de volta, e aí a mídia é alcançável.
-    // A biblioteca nao abre conversa `@lid`; quando falha, o caminho pela
-    // pagina assume — la o modelo da conversa existe e da para puxar o
-    // passado dela.
-    const chat = await getChatByIdSafe(chatId);
-    let brutas = [];
-    if (chat && typeof chat.fetchMessages === "function") {
-      brutas = (await chat.fetchMessages({ limit: 100 }).catch(() => [])) || [];
-    }
-
-    const porId = new Map();
-    const porChave = new Map();
-    brutas.forEach((b) => {
-      const id = b.id?._serialized;
-      if (!id) return;
-      porId.set(id, b);
-      const chave = chaveDaMensagem(id);
-      if (chave) porChave.set(chave, b);
-    });
-
-    for (const m of lista) {
-      const bruta = porId.get(m.id) || porChave.get(chaveDaMensagem(m.id));
-      const { url, motivo } = bruta
-        ? await baixarMidiaDaMensagem(bruta, chatId)
-        : await rebaixarMidiaPorId(m.id, m.mediaType, chatId);
-
-      mergeMessages([{ ...m, mediaUrl: url || null, mediaErro: motivo }]);
-      if (url) recuperadas.push(m.id);
-      else anotarMotivo(motivo);
-    }
-  }
-
-  emitMessages();
-
-  res.json({
-    ok: true,
-    tentadas: pendentes.length,
-    conversas: porConversa.size,
-    recuperadas: recuperadas.length,
-    // Quantas ficaram de fora por nunca terem tido identificador. Sem separar
-    // isso, elas apareciam como "falha" e escondiam o resto.
-    semIdentificador: semIdentificador.length,
-    pendentesNoTotal: todasPendentes.length,
-    motivos,
-    estatisticas: estatisticasMidia,
-  });
-});
-
-// Números do dashboard por HTTP, para quem não está no socket (uma TV na
-// loja, um script, uma conferência rápida por curl).
-app.get(["/api/crm/metricas", "/api/metricas"], (_req, res) => {
-  res.json({ ok: true, metricas: metricasAgora() });
-});
-
-// ---------- JUL.IA (atendente digital) ----------
-
-// Estado e estatísticas da atendente digital.
-app.get(["/api/crm/ia/estado", "/api/ia/estado"], (_req, res) => {
-  res.json({ ok: true, ia: juliaIA.resumo() });
-});
-
-// Liga/desliga e escolhe o modo: off | copilot | autopilot.
-// `autolead` faz a JUL.IA pegar leads novos (sem vendedor) sozinha.
-app.post(["/api/crm/ia/config", "/api/ia/config"], express.json(), (req, res) => {
-  const modo = String(req.body?.modo || "").trim().toLowerCase();
-  const autolead = req.body?.autolead;
-  res.json({ ok: true, ia: juliaIA.definirModo(modo || undefined, autolead) });
-});
-
-// Respostas sugeridas aguardando aprovação humana (modo copiloto).
-app.get(["/api/crm/ia/sugestoes", "/api/ia/sugestoes"], (_req, res) => {
-  res.json({ ok: true, sugestoes: juliaIA.resumo().sugestoes });
-});
-
-// Aprova e envia a sugestão pendente de uma conversa.
-app.post(["/api/crm/ia/enviar-sugestao", "/api/ia/enviar-sugestao"], express.json(), (req, res) => {
-  const chatId = String(req.body?.chatId || "").trim();
-  if (!chatId) return res.status(400).json({ ok: false, erro: "chatId é obrigatório." });
-  res.json(juliaIA.enviarSugestao(chatId));
-});
-
-// Descarta a sugestão pendente de uma conversa.
-app.post(["/api/crm/ia/descartar-sugestao", "/api/ia/descartar-sugestao"], express.json(), (req, res) => {
-  const chatId = String(req.body?.chatId || "").trim();
-  if (!chatId) return res.status(400).json({ ok: false, erro: "chatId é obrigatório." });
-  res.json(juliaIA.descartarSugestao(chatId));
-});
-
-// Passa um lead (novo ou não) para a JUL.IA atender.
-app.post(["/api/crm/ia/atribuir", "/api/ia/atribuir"], express.json(), (req, res) => {
-  const chatId = String(req.body?.chatId || "").trim();
-  if (!chatId) return res.status(400).json({ ok: false, erro: "chatId é obrigatório." });
-  res.json(juliaIA.atribuirLead(chatId));
-});
-
-// ---------- portas entre instâncias (VITOR.IA) ----------
-
-// Confere um token em tempo constante — mesmo padrão do site.
-function confereTokenDeMaquina(req) {
-  const esperado = BETO_PANEL_TOKEN;
-  if (!esperado) return false;
-  const veio = (req.headers.authorization || "").replace(/^Bearer\s+/i, "").trim();
-  if (!veio || veio.length !== esperado.length) return false;
-  let diferenca = 0;
-  for (let i = 0; i < esperado.length; i++) {
-    diferenca |= esperado.charCodeAt(i) ^ veio.charCodeAt(i);
-  }
-  return diferenca === 0;
-}
-
-function normalizarParaBusca(v) {
-  let d = String(v || "").replace(/\D/g, "");
-  if (d.startsWith("55")) d = d.slice(2);
-  if (d.startsWith("0")) d = d.slice(1);
-  return d.slice(-11);
-}
-
-// O container da VITOR.IA pergunta aqui (número principal) se uma pessoa já tem
-// conversa recente com a loja — quem fala com a loja não é prospect frio.
-app.get("/api/crm/contato-recente", (req, res) => {
-  if (!confereTokenDeMaquina(req)) {
-    return res.status(401).json({ ok: false, erro: "não autorizado" });
-  }
-  const chave = normalizarParaBusca(req.query.numero);
-  if (chave.length < 10) return res.status(400).json({ ok: false, erro: "número inválido" });
-
-  const dias = Number(req.query.dias) || 45;
-  const corte = Date.now() - dias * 24 * 60 * 60 * 1000;
-  const recente = (store.messages || []).some(
-    (m) => normalizarParaBusca(m.chatId) === chave && (m.timestamp || 0) >= corte
-  );
-  res.json({ ok: true, recente });
-});
-
-// Lista as conversas da instância (para a aba da VITOR.IA no /crm).
-// Protegida: telefone de cliente não sai por rota aberta.
-app.get("/api/crm/conversas-recentes", (req, res) => {
-  if (!confereTokenDeMaquina(req)) {
-    return res.status(401).json({ ok: false, erro: "não autorizado" });
-  }
-
-  const limite = Math.min(Number(req.query.limite) || 15, 50);
-  const ultimasPorChat = new Map();
-  for (const m of store.messages || []) {
-    const atual = ultimasPorChat.get(m.chatId);
-    if (!atual || (m.timestamp || 0) > (atual.timestamp || 0)) {
-      ultimasPorChat.set(m.chatId, m);
-    }
-  }
-
-  const conversas = (store.chats || [])
-    .map((chat) => {
-      const ultima = ultimasPorChat.get(chat.chatId);
-      if (!ultima) return null;
-      return {
-        chatId: chat.chatId,
-        nome: chat.name || chat.realNumber || chat.chatId,
-        numero: chat.realNumber || null,
-        ultimaMensagem: String(ultima.body || "").slice(0, 300),
-        direcao: ultima.direction || null,
-        quando: ultima.timestamp || null,
-      };
-    })
-    .filter(Boolean)
-    .sort((a, b) => (b.quando || 0) - (a.quando || 0))
-    .slice(0, limite);
-
-  res.json({ ok: true, conversas });
-});
-
-// Estado do prospector — a aba da VITOR.IA no /crm mostra isto.
-app.get(["/api/crm/beto/estado", "/api/beto/estado"], (_req, res) => {
-  res.json({ ok: true, ...betoWorker.resumo() });
-});
-
-// Liga/desliga, teto diário e mensagem de primeiro contato.
-app.post(["/api/crm/beto/config", "/api/beto/config"], express.json(), (req, res) => {
-  const ativo = typeof req.body?.ativo === "boolean" ? req.body.ativo : undefined;
-  const maxDia = Number(req.body?.maxDia);
-  const mensagem = typeof req.body?.mensagem === "string" ? req.body.mensagem : undefined;
-  res.json({ ok: true, ...betoWorker.definirConfig({ ativo, maxDia, mensagem }) });
-});
-
-// ---------- CLAUD.IA (cobradora & reativação, número da loja) ----------
-
-app.get(["/api/crm/carla/estado", "/api/carla/estado"], (_req, res) => {
-  res.json({ ok: true, ...carlaWorker.resumo() });
-});
-
-app.post(["/api/crm/carla/config", "/api/carla/config"], express.json(), (req, res) => {
-  const ativo = typeof req.body?.ativo === "boolean" ? req.body.ativo : undefined;
-  const maxDia = Number(req.body?.maxDia);
-  const mensagemCobranca = typeof req.body?.mensagemCobranca === "string" ? req.body.mensagemCobranca : undefined;
-  const mensagemReativacao = typeof req.body?.mensagemReativacao === "string" ? req.body.mensagemReativacao : undefined;
-  res.json({ ok: true, ...carlaWorker.definirConfig({ ativo, maxDia, mensagemCobranca, mensagemReativacao }) });
-});
-
-// ---- MAR.IA (analista: 7h setor, 19h fechamento) ----
-app.get(["/api/crm/rafa/estado", "/api/rafa/estado"], (req, res) => {
-  res.json({ ok: true, ...rafaWorker.resumo() });
-});
-
-app.post(["/api/crm/rafa/config", "/api/rafa/config"], express.json(), (req, res) => {
-  const ativo = typeof req.body?.ativo === "boolean" ? req.body.ativo : undefined;
-  res.json({ ok: true, ...rafaWorker.definirConfig({ ativo }) });
-});
-
-// Dispara um relatorio fora da hora. Serve para conferir o texto sem esperar
-// as 7h -- e para reenviar quando o WhatsApp caiu na hora marcada.
-app.post(["/api/crm/rafa/enviar", "/api/rafa/enviar"], express.json(), async (req, res) => {
-  const tipo = req.body?.tipo === "fechamento" ? "fechamento" : "manha";
-  res.json(await rafaWorker.enviarAgora(tipo));
-});
-
-// ---- LIV.IA (caixa de entrada da loja) ----
-//
-// Não é um worker de WhatsApp: ela não usa o cliente nem as deps de trabalho,
-// só IMAP e HTTP. Por isso liga fora do bloco de perfil, e SÓ na instância da
-// loja — duas instâncias lendo a mesma caixa responderiam o cliente duas vezes.
-app.get(["/api/crm/livia/estado", "/api/livia/estado"], (_req, res) => {
-  res.json({ ok: true, ...liviaWorker.resumo() });
-});
-
-app.post(["/api/crm/livia/config", "/api/livia/config"], express.json(), (req, res) => {
-  const ativo = typeof req.body?.ativo === "boolean" ? req.body.ativo : undefined;
-  if (ativo === true) return res.json({ ok: true, ...liviaWorker.ligar() });
-  if (ativo === false) return res.json({ ok: true, ...liviaWorker.desligar() });
-  res.json({ ok: true, ...liviaWorker.resumo() });
-});
-
-// Roda uma passada na caixa agora, sem esperar o intervalo. Serve para
-// conferir a configuração sem ficar olhando o relógio.
-app.post(["/api/crm/livia/rodar", "/api/livia/rodar"], express.json(), async (_req, res) => {
-  res.json(await liviaWorker.rodar());
-});
-
-// Login dos vendedores criados pelo dashboard.
-//
-// O site manda o TOKEN (sha256 de slug+senha), nunca a senha; aqui só se
-// compara com o que está guardado. Assim nem o servidor de WhatsApp nem este
-// arquivo de dados chegam a conhecer a senha de ninguém.
-const tentativasDeLogin = new Map();
-const MAX_TENTATIVAS = 10;
-const JANELA_TENTATIVAS_MS = 5 * 60_000;
-
-app.post(["/api/crm/vendedor-login", "/api/vendedor-login"], express.json(), (req, res) => {
-  const slug = String(req.body?.slug || "").trim().toLowerCase();
-  const token = String(req.body?.token || "").trim();
-  if (!slug || !token) return res.status(400).json({ ok: false, erro: "Dados incompletos." });
-
-  // Freio contra tentativa em massa: o token é derivado da senha, então sem
-  // isto daria para varrer senhas fracas de fora.
-  const agora = Date.now();
-  const registro = tentativasDeLogin.get(slug) || { contagem: 0, desde: agora };
-  if (agora - registro.desde > JANELA_TENTATIVAS_MS) {
-    registro.contagem = 0;
-    registro.desde = agora;
-  }
-  if (registro.contagem >= MAX_TENTATIVAS) {
-    return res.status(429).json({ ok: false, erro: "Muitas tentativas. Aguarde alguns minutos." });
-  }
-
-  const vendedor = store.vendedores.find(
-    (v) => String(v.slug || v.id).toLowerCase() === slug && v.tokenSessao
-  );
-
-  const guardado = String(vendedor?.tokenSessao || "");
-  const iguais =
-    guardado.length === token.length &&
-    guardado.length > 0 &&
-    crypto.timingSafeEqual(Buffer.from(guardado), Buffer.from(token));
-
-  if (!vendedor || !iguais) {
-    registro.contagem += 1;
-    tentativasDeLogin.set(slug, registro);
-    return res.status(401).json({ ok: false, erro: "Senha incorreta." });
-  }
-  if (vendedor.ativo === false) {
-    return res.status(403).json({ ok: false, erro: "Este acesso está desativado." });
-  }
-
-  tentativasDeLogin.delete(slug);
-  res.json({ ok: true, vendedor: publicVendedor(vendedor) });
-});
-
-// Ficha pública de um vendedor criado pelo dashboard — o que a tela de login
-// precisa mostrar antes de alguém digitar a senha. Sem token, sem comissão.
-app.get(["/api/crm/vendedor/:slug", "/api/vendedor/:slug"], (req, res) => {
-  const slug = String(req.params.slug || "").trim().toLowerCase();
-  const vendedor = store.vendedores.find(
-    (v) => String(v.slug || v.id).toLowerCase() === slug && v.tokenSessao
-  );
-  if (!vendedor) return res.status(404).json({ ok: false, erro: "Vendedor não encontrado." });
-
-  res.json({
-    ok: true,
-    vendedor: {
-      id: vendedor.id,
-      slug: vendedor.slug || vendedor.id,
-      nome: vendedor.nome,
-      cargo: vendedor.cargo || "Vendas",
-      assinatura: vendedor.assinatura || "",
-      ativo: vendedor.ativo !== false,
-    },
-  });
-});
-
-// Catálogo espelhado. O site lê daqui quando o banco da Hostinger recusa.
-app.get(["/api/crm/catalogo", "/api/catalogo"], (_req, res) => {
-  const copia = espelhoDoCatalogo.ler();
-  res.json({
-    ok: true,
-    total: copia.total,
-    atualizadoEm: copia.atualizadoEm,
-    produtos: copia.produtos,
-    categorias: copia.categorias || [],
-    banners: copia.banners || [],
-    blog: copia.blog || [],
-  });
-});
-
-// Só o resumo, para conferir o estado sem baixar milhares de produtos.
-app.get(["/api/crm/catalogo/estado", "/api/catalogo/estado"], (_req, res) => {
-  res.json({ ok: true, ...espelhoDoCatalogo.estado, origem: SITE_URL });
-});
-
-// O site chama isto quando alguém altera um produto, para o espelho não ficar
-// até meia hora com preço velho. Não recebe dados: apenas manda buscar de
-// novo no endereço já configurado, então não há o que injetar aqui.
-app.all(["/api/crm/catalogo/atualizar", "/api/catalogo/atualizar"], async (_req, res) => {
-  const resultado = await espelhoDoCatalogo.atualizar({ motivo: "site avisou" });
-  res.json(resultado);
-});
-
-// ---------- cópias de segurança do banco ----------
-
-app.get(["/api/crm/backups", "/api/backups"], (_req, res) => {
-  res.json({
-    ok: true,
-    copias: backupDoBanco.listar(),
-    ...backupDoBanco.estado,
-  });
-});
-
-// Dispara a cópia agora, sem esperar as 3h da manhã.
-app.all(["/api/crm/backups/agora", "/api/backups/agora"], async (_req, res) => {
-  res.json(await backupDoBanco.executar({ motivo: "pedido à mão" }));
-});
-
-// Baixar uma cópia. O nome vem da URL, então é tratado como entrada hostil —
-// mesmo cuidado da rota de mídia.
-app.get(["/api/crm/backups/:nome", "/api/backups/:nome"], (req, res) => {
-  const caminho = backupDoBanco.caminhoDaCopia(req.params.nome);
-  if (!caminho || !fs.existsSync(caminho)) {
-    return res.status(404).json({ error: "Cópia não encontrada." });
-  }
-  res.download(caminho);
 });
 
 app.all(["/api/reset-session", "/api/crm/reset-session", "/api/reconnect", "/api/crm/reconnect"], async (_req, res) => {
@@ -4251,12 +2551,11 @@ app.post(["/api/enviar-produto", "/api/crm/enviar-produto"], async (req, res) =>
         erro: `Preço de envio (R$ ${precoFinal.toFixed(2)}) não pode ser menor ou igual ao custo (R$ ${custo.toFixed(2)}).`,
       });
     }
-    const text = montarTextoDoProduto({
-      nome: prod.nome,
-      preco: precoFinal,
-      specs: prod.specs,
-      obs,
-    });
+    const obsTxt = obs ? `\n\n_Obs: ${obs}_` : "";
+    const specsVisiveis = filtrarSpecsInternos(prod.specs);
+    const specs = specsVisiveis.length ? `\n• ${specsVisiveis.join("\n• ")}` : "";
+    const precoFmt = precoFinal.toLocaleString("pt-BR", { minimumFractionDigits: 2 });
+    const text = `⚡ *Oferta Balão da Informática*\n*${prod.nome}*\n\n💵 *Preço Especial:* *R$ ${precoFmt}*${specs}${obsTxt}\n\n📍 Pronta entrega na loja do Castelo Campinas!\nPara reservar ou tirar dúvidas, é só responder aqui! 🎈`;
 
     let mediaSent = false;
     if (prod.imagem && prod.imagem.startsWith("http")) {
@@ -4367,62 +2666,6 @@ app.post(["/api/enviar-documento", "/api/crm/enviar-documento"], async (req, res
   }
 });
 
-// ============================================================
-// Porta do socket.
-//
-// Este servidor transmite `whatsapp:chats` e `whatsapp:messages` para quem
-// estiver conectado. Até 14/09/2026 ele aceitava QUALQUER conexão: dava para
-// abrir um socket de fora, sem credencial nenhuma, e receber 515 conversas e
-// 300 mensagens — nome, telefone e conteúdo de cliente. Verificado ao vivo
-// antes de escrever isto. O endereço deste servidor está no JavaScript
-// público do site por definição, então "ninguém sabe o endereço" nunca foi
-// proteção nenhuma.
-//
-// O navegador não pode carregar um segredo e este servidor não enxerga o
-// cookie do site (origem diferente). Então o site, que já sabe quem passou
-// pela senha do painel ou entrou como vendedor, assina um bilhete curto
-// (lib/socket-token.ts) e aqui só se confere a assinatura.
-//
-// SEM O SEGREDO CONFIGURADO, NINGUÉM ENTRA. A tentação é liberar quando a
-// variável falta, para "não quebrar nada" — foi exatamente assim que a senha
-// do painel quase virou porta aberta. Esquecer a variável tem que derrubar o
-// painel de forma barulhenta, não reabrir a caixa da loja em silêncio.
-// ============================================================
-const PANEL_SOCKET_SECRET = process.env.PANEL_SOCKET_SECRET || "";
-
-function bilheteValido(token) {
-  if (!PANEL_SOCKET_SECRET) return false;
-
-  const partes = String(token || "").split(".");
-  if (partes.length !== 2) return false;
-
-  const expira = Number(partes[0]);
-  if (!Number.isFinite(expira) || expira < Date.now()) return false;
-
-  const esperado = crypto
-    .createHmac("sha256", PANEL_SOCKET_SECRET)
-    .update(String(expira))
-    .digest("hex");
-
-  const a = Buffer.from(esperado);
-  const b = Buffer.from(partes[1]);
-  return a.length === b.length && crypto.timingSafeEqual(a, b);
-}
-
-io.use((socket, next) => {
-  if (!PANEL_SOCKET_SECRET) {
-    console.error(
-      "[socket] PANEL_SOCKET_SECRET nao configurado — recusando TODAS as conexoes. " +
-      "O painel fica fora do ar ate a variavel existir; e de proposito."
-    );
-    return next(new Error("servidor sem PANEL_SOCKET_SECRET"));
-  }
-  if (!bilheteValido(socket.handshake?.auth?.token)) {
-    return next(new Error("nao autorizado"));
-  }
-  next();
-});
-
 io.on("connection", (socket) => {
   socket.emit("whatsapp:state", whatsappState);
   socket.emit("whatsapp:api-info", apiInfo);
@@ -4464,8 +2707,6 @@ io.on("connection", (socket) => {
     socket.emit("whatsapp:chats", store.chats);
     socket.emit("whatsapp:status-feed", store.statusFeed);
     socket.emit("whatsapp:vendedores", store.vendedores.map(publicVendedor));
-    socket.emit("whatsapp:vendas", store.vendas);
-    socket.emit("whatsapp:metricas", metricasAgora());
   });
 
   socket.on("panel:vendedor-login", (payload, callback) => {
@@ -4508,148 +2749,6 @@ io.on("connection", (socket) => {
     if (typeof callback === "function") callback(result);
   });
 
-  // ---------- dashboard: números ao vivo ----------
-
-  socket.on("panel:metricas", (_payload, callback) => {
-    const metricas = metricasAgora();
-    if (typeof callback === "function") callback({ ok: true, metricas });
-    else socket.emit("whatsapp:metricas", metricas);
-  });
-
-  // ---------- dashboard: gestão de vendedores ----------
-
-  socket.on("panel:salvar-vendedor", (payload, callback) => {
-    const responder = (r) => {
-      if (typeof callback === "function") callback(r);
-      if (!r.ok) emitToast(r.erro);
-    };
-
-    const id = String(payload?.id || "").trim();
-    const nome = String(payload?.nome || "").trim();
-    if (!nome) return responder({ ok: false, erro: "O nome do vendedor é obrigatório." });
-
-    const comissao = Number(payload?.comissaoPercentual);
-    if (!Number.isFinite(comissao) || comissao < 0 || comissao > 100) {
-      return responder({ ok: false, erro: "A comissão precisa ser um número entre 0 e 100." });
-    }
-    const meta = Number(payload?.meta) || 0;
-    if (meta < 0) return responder({ ok: false, erro: "A meta não pode ser negativa." });
-
-    const existente = id ? store.vendedores.find((v) => String(v.id) === id) : null;
-    if (id && !existente) return responder({ ok: false, erro: "Vendedor não encontrado." });
-
-    const slugPedido = montarSlugDoVendedor(payload?.slug || nome);
-
-    if (!slugPedido) return responder({ ok: false, erro: "Não consegui montar um endereço a partir desse nome." });
-
-    const slugEmUso = store.vendedores.some(
-      (v) => (v.slug || v.id) === slugPedido && String(v.id) !== String(existente?.id || "")
-    );
-    if (slugEmUso) return responder({ ok: false, erro: `O endereço "${slugPedido}" já é de outro vendedor.` });
-
-    if (existente) {
-      existente.nome = nome;
-      existente.cargo = String(payload?.cargo || existente.cargo || "");
-      existente.assinatura = String(payload?.assinatura || existente.assinatura || "");
-      existente.comissaoPercentual = comissao;
-      existente.meta = meta;
-      existente.ativo = payload?.ativo !== false;
-      // Vendedor protegido (os da equipe fixa) nao muda de endereco: o slug
-      // dele e a pagina que ja esta publicada e o id do funil.
-      if (!existente.protegido) existente.slug = slugPedido;
-      // Token novo so quando o painel manda um; senao a senha atual continua.
-      if (payload?.tokenSessao) existente.tokenSessao = String(payload.tokenSessao);
-    } else {
-      if (!payload?.tokenSessao) {
-        return responder({ ok: false, erro: "Defina uma senha para o novo vendedor." });
-      }
-      store.vendedores.push({
-        id: createId(),
-        nome,
-        slug: slugPedido,
-        cargo: String(payload?.cargo || "Vendas"),
-        assinatura:
-          String(payload?.assinatura || "") ||
-          `Atenciosamente,
-*${nome}* — Balão da Informática Castelo`,
-        comissaoPercentual: comissao,
-        meta,
-        ativo: payload?.ativo !== false,
-        pin: null,
-        protegido: false,
-        tokenSessao: String(payload.tokenSessao),
-      });
-    }
-
-    persistStore();
-    emitVendedores();
-    emitMetricas();
-    emitToast(existente ? `${nome} atualizado.` : `${nome} cadastrado. Página: /equipe/${slugPedido}`);
-    responder({ ok: true, slug: slugPedido });
-  });
-
-  // ---------- dashboard: vendas e comissão ----------
-
-  socket.on("panel:registrar-venda", (payload, callback) => {
-    const responder = (r) => {
-      if (typeof callback === "function") callback(r);
-      if (!r.ok) emitToast(r.erro);
-    };
-
-    const vendedorId = String(payload?.vendedorId || "").trim();
-    const vendedor = store.vendedores.find((v) => String(v.id) === vendedorId);
-    if (!vendedor) return responder({ ok: false, erro: "Escolha o vendedor da venda." });
-
-    const valor = Number(payload?.valor);
-    if (!Number.isFinite(valor) || valor <= 0) {
-      return responder({ ok: false, erro: "O valor da venda precisa ser maior que zero." });
-    }
-
-    const data = Number(payload?.data) || Date.now();
-    const venda = {
-      id: createId(),
-      vendedorId,
-      chatId: payload?.chatId ? String(payload.chatId) : null,
-      cliente: String(payload?.cliente || "").trim(),
-      produto: String(payload?.produto || "").trim(),
-      valor: Math.round(valor * 100) / 100,
-      // Congela o percentual do dia da venda — ver o comentário em store.vendas.
-      comissaoPercentual: Number(vendedor.comissaoPercentual) || 0,
-      data,
-      observacao: String(payload?.observacao || "").trim(),
-      criadoEm: Date.now(),
-    };
-
-    store.vendas.push(venda);
-    persistStore();
-    emitVendas();
-    emitMetricas();
-    emitToast(`Venda de R$ ${venda.valor.toFixed(2)} lançada para ${vendedor.nome}.`);
-    responder({ ok: true, venda });
-  });
-
-  socket.on("panel:remover-venda", (payload, callback) => {
-    const id = String(payload?.id || "").trim();
-    const antes = store.vendas.length;
-    store.vendas = store.vendas.filter((v) => String(v.id) !== id);
-
-    if (store.vendas.length === antes) {
-      const r = { ok: false, erro: "Venda não encontrada." };
-      if (typeof callback === "function") callback(r);
-      return;
-    }
-
-    persistStore();
-    emitVendas();
-    emitMetricas();
-    emitToast("Venda removida.");
-    if (typeof callback === "function") callback({ ok: true });
-  });
-
-  socket.on("panel:listar-vendas", (_payload, callback) => {
-    if (typeof callback === "function") callback({ ok: true, vendas: store.vendas });
-  });
-
   socket.on("panel:remove-vendedor", (payload) => {
     const id = String(payload?.id || "").trim();
     if (!id) return;
@@ -4667,12 +2766,8 @@ io.on("connection", (socket) => {
 
     store.vendedores = store.vendedores.filter((v) => String(v.id) !== id);
     delete store.kanbanPorVendedor[id];
-    // As vendas dele FICAM: comissão já apurada é histórico, e apagar isso
-    // mudaria o fechamento de um mês que já passou. Elas aparecem no
-    // dashboard como "vendedor removido".
     persistStore();
     emitVendedores();
-    emitMetricas();
   });
 
   // Cada vendedor entra numa "sala" própria pra só receber o kanban dele —
@@ -4680,8 +2775,6 @@ io.on("connection", (socket) => {
   socket.on("panel:identify-vendedor", (payload) => {
     const vendedorId = String(payload?.vendedorId || "").trim();
     if (!vendedorId) return;
-    // Fica no socket para creditar no dashboard o que esta pessoa enviar.
-    socket.data.vendedorId = vendedorId;
     socket.join(`vendedor:${vendedorId}`);
     socket.emit("whatsapp:kanban", store.kanbanPorVendedor[vendedorId] || {});
     // Devolve as preferencias assim que a pessoa se identifica: e o que faz o
@@ -4774,24 +2867,10 @@ io.on("connection", (socket) => {
       return;
     }
 
-    // Entrega na hora o que ja esta gravado desta conversa, antes de ir ao
-    // WhatsApp. A tela deixa de abrir vazia enquanto a busca acontece.
-    const jaGravadas = lerMensagensDaConversa(chatId);
-    if (jaGravadas.length) {
-      socket.emit("whatsapp:messages", jaGravadas);
-    }
-
     try {
       const chat = await getChatByIdSafe(chatId);
       if (!chat || typeof chat.fetchMessages !== "function") {
-        // Nao deu para falar com o WhatsApp agora — mas se o historico
-        // gravado ja foi entregue acima, a conversa NAO esta vazia e nao ha
-        // erro a mostrar para o vendedor.
-        if (jaGravadas.length) {
-          responder({ ok: true, total: jaGravadas.length, doDisco: true });
-        } else {
-          responder({ ok: false, erro: "Não foi possível abrir esta conversa no WhatsApp." });
-        }
+        responder({ ok: false, erro: "Não foi possível abrir esta conversa no WhatsApp." });
         return;
       }
 
@@ -4808,64 +2887,31 @@ io.on("connection", (socket) => {
 
       const { contactName, realNumber } = await resolveContactDetails(chat, chatId);
 
-      const convertidas = await converterMensagensDoHistorico(
-        uteis,
+      const convertidas = uteis.map((message) => ({
+        id: message.id?._serialized || createId(),
         chatId,
+        from: message.from,
+        to: message.to || null,
+        body: message.body || "",
+        direction: message.fromMe ? "out" : "in",
+        timestamp: (message.timestamp || Math.floor(Date.now() / 1000)) * 1000,
         contactName,
-        realNumber
-      );
+        realNumber,
+        displayNumber: realNumber,
+        hasMedia: Boolean(message.hasMedia),
+        mediaType: message.type || null,
+      }));
 
       mergeMessages(convertidas);
-
-      // Grava JA, sem esperar o atraso: o vendedor acabou de abrir esta
-      // conversa e o historico precisa estar em disco para a proxima vez.
-      const guardadas = lerMensagensDaConversa(chatId);
-      const porChave = new Map();
-      [...guardadas, ...convertidas].forEach((m) => {
-        porChave.set(buildMessageFingerprint(m), m);
-      });
-      const total = salvarMensagensDaConversa(chatId, Array.from(porChave.values()));
-
       persistStore();
       // Vai para todo mundo: a conversa e do numero da loja, e o historico
       // recem-baixado serve para qualquer vendedor que abrir depois.
       emitMessages();
 
-      responder({ ok: true, total, baixadas: convertidas.length });
+      responder({ ok: true, total: convertidas.length });
     } catch (error) {
       console.error("Falha ao carregar histórico de", chatId, error);
       responder({ ok: false, erro: "Falha ao carregar o histórico." });
-    }
-  });
-
-  // Baixa o historico de MUITAS conversas de uma vez, sob demanda.
-  //
-  // A carga automatica ja roda ao conectar, mas cobre as mais recentes. Isto
-  // e para quando se quer puxar o historico de tudo — vale deixar rodando e
-  // ir atender enquanto isso.
-  socket.on("panel:carregar-todos-historicos", async (payload, callback) => {
-    const limite = Math.min(500, Math.max(10, Number(payload?.limite) || 200));
-
-    if (carregandoHistoricos) {
-      if (typeof callback === "function") {
-        callback({ ok: false, erro: "Já existe um carregamento em andamento." });
-      }
-      return;
-    }
-
-    emitToast(`Buscando o histórico de até ${limite} conversas. Pode continuar atendendo.`);
-    if (typeof callback === "function") callback({ ok: true, iniciado: true });
-
-    const resultado = await carregarHistoricosEmSegundoPlano({
-      limite,
-      porConversa: 80,
-    }).catch(() => null);
-
-    if (resultado && !resultado.pulado) {
-      emitToast(
-        `Histórico atualizado: ${resultado.baixadas} mensagens de ${resultado.visitadas} conversa(s).`
-      );
-      emitMessages();
     }
   });
 
@@ -4880,15 +2926,11 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("panel:refresh-labels", async (_payload, callback) => {
+  socket.on("panel:refresh-labels", async () => {
     try {
-      const resultado = await sincronizarEtiquetas();
-      if (typeof callback === "function") callback(resultado);
-      emitToast(
-        resultado?.total
-          ? `${resultado.total} etiqueta(s) sincronizada(s) com o WhatsApp.`
-          : "Nenhuma etiqueta encontrada. Etiquetas existem no WhatsApp Business."
-      );
+      const chats = await whatsappClient.getChats();
+      await syncLabelsForChats(chats || []);
+      emitToast("Etiquetas sincronizadas com o WhatsApp.");
     } catch (error) {
       console.error("Falha ao sincronizar etiquetas manualmente:", error);
       emitToast("Falha ao sincronizar etiquetas.");
@@ -4903,10 +2945,6 @@ io.on("connection", (socket) => {
       const text = String(payload.text || "").trim();
       if (!chatId || !text) return;
 
-      // Antes de enviar: o `message_create` chega logo depois e precisa saber
-      // de quem foi a resposta.
-      marcarAutor(chatId, payload.vendedorId || socket.data?.vendedorId);
-
       const sent = await sendDirectMessage({
         number,
         text,
@@ -4914,13 +2952,7 @@ io.on("connection", (socket) => {
         chatId,
         replyTo: payload.replyTo || null,
       });
-      emitSendAck({
-        tempId: payload.tempId,
-        chatId,
-        success: true,
-        // idRegistrado cobre o caso do WhatsApp nao devolver id proprio.
-        id: sent?.id?._serialized || sent?.idRegistrado || null,
-      });
+      emitSendAck({ tempId: payload.tempId, chatId, success: true, id: sent?.id?._serialized });
     } catch (error) {
       console.error("Falha ao enviar mensagem:", error);
       emitToast("⛔ Falha ao enviar mensagem: " + error.message);
@@ -4928,22 +2960,12 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Criar etiqueta e coisa do WhatsApp, nao do painel.
-  //
-  // Antes isto criava uma etiqueta que so existia aqui: o vendedor a via na
-  // lista, tentava aplicar num cliente e recebia "etiqueta nao encontrada no
-  // WhatsApp". Melhor dizer a verdade na hora do que fabricar uma que nunca
-  // vai funcionar.
-  socket.on("panel:add-label", (payload, callback) => {
-    const nome = String(payload?.label || "").trim();
-    const resposta = {
-      ok: false,
-      erro:
-        "Etiqueta nova se cria no WhatsApp Business (celular ou WhatsApp Web). " +
-        "Aqui elas aparecem sozinhas depois de sincronizar.",
-    };
-    if (typeof callback === "function") callback(resposta);
-    emitToast(nome ? `"${nome}": ${resposta.erro}` : resposta.erro);
+  socket.on("panel:add-label", (payload) => {
+    const label = String(payload.label || "").trim();
+    if (!label || store.labels.includes(label)) return;
+    store.labels.push(label);
+    persistStore();
+    emitSettings();
   });
 
   socket.on("panel:assign-seller", (payload) => {
@@ -5013,7 +3035,7 @@ io.on("connection", (socket) => {
           : [...currentIds, labelId];
 
         await chat.changeLabels(nextIds);
-        await sincronizarEtiquetas();
+        await syncLabelsForChats([chat]);
         emitToast("Etiquetas da conversa atualizadas.");
       } catch (error) {
         console.error("Falha ao alterar etiqueta da conversa:", error);
@@ -5101,13 +3123,7 @@ io.on("connection", (socket) => {
       });
 
       emitToast("Mídia enviada com sucesso!");
-      emitSendAck({
-        tempId: payload.tempId,
-        chatId,
-        success: true,
-        // idRegistrado cobre o caso do WhatsApp nao devolver id proprio.
-        id: sent?.id?._serialized || sent?.idRegistrado || null,
-      });
+      emitSendAck({ tempId: payload.tempId, chatId, success: true, id: sent?.id?._serialized });
     } catch (error) {
       console.error("Falha ao enviar mídia:", error);
       emitToast("⛔ Falha ao enviar mídia: " + error.message);
@@ -5260,7 +3276,6 @@ io.on("connection", (socket) => {
       const number = normalizeNumber(payload.number || payload.chatId || "");
       const chatId = payload.chatId || (number ? `${number}@c.us` : null);
       const prod = payload.product || {};
-      marcarAutor(chatId, payload.vendedorId || socket.data?.vendedorId);
       const precoFinal = Number(payload.price || prod.preco || 0);
       const custo = Number(prod.custo || 0);
       if (custo > 0 && precoFinal <= custo) {
@@ -5269,33 +3284,25 @@ io.on("connection", (socket) => {
         emitSendAck({ tempId: payload.tempId, chatId, success: false, error: msg });
         return;
       }
-      const text = montarTextoDoProduto({
-        nome: prod.nome,
-        preco: precoFinal,
-        specs: prod.specs,
-        obs: payload.obs,
-      });
+      const obs = payload.obs ? `\n\n_Obs: ${payload.obs}_` : "";
+      const specsVisiveis = filtrarSpecsInternos(prod.specs);
+      const specs = specsVisiveis.length ? `\n• ${specsVisiveis.join("\n• ")}` : "";
+      const precoFmt = precoFinal.toLocaleString("pt-BR", { minimumFractionDigits: 2 });
+
+      const text = `⚡ *Oferta Balão da Informática*\n*${prod.nome}*\n\n💵 *Preço Especial:* *R$ ${precoFmt}*${specs}${obs}\n\n📍 Pronta entrega na loja do Castelo Campinas!\nPara reservar ou tirar dúvidas, é só responder aqui! 🎈`;
 
       let mediaSent = false;
       let sentId = null;
-      const produtoResumo = {
-        id: prod.id,
-        nome: prod.nome,
-        preco: precoFinal,
-        precoFormatado: `R$ ${precoFinal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
-        imagem: prod.imagem,
-        fornecedor: prod.fornecedor || "Balão",
-        specs: Array.isArray(prod.specs) ? prod.specs.slice(0, 8) : [],
-      };
       if (prod.imagem && prod.imagem.startsWith("http")) {
         try {
-          const media = await resolveMediaObject(prod.imagem, `produto-${prod.id}.jpg`, "image/jpeg");
-          if (!media) throw new Error("resolveMediaObject retornou null");
+          const media = await MessageMedia.fromUrl(prod.imagem, { unsafeMime: true });
           const sentMsg = await resolveAndSendMessage(chatId, media, { caption: text });
           mediaSent = true;
-          sentId = sentMsg?.id?._serialized || `msg-produto-${Date.now()}`;
+          sentId = sentMsg?.id?._serialized || null;
+          // Mesmo motivo do endpoint REST: guarda a mediaUrl explicitamente
+          // pra foto do produto não sumir do histórico na próxima sincronização.
           storeMessage({
-            id: sentId,
+            id: sentId || `msg-produto-${Date.now()}`,
             chatId,
             from: "me",
             to: chatId,
@@ -5305,7 +3312,6 @@ io.on("connection", (socket) => {
             hasMedia: true,
             mediaType: "image",
             mediaUrl: prod.imagem,
-            produto: produtoResumo,
             realNumber: extractRealNumber(chatId),
             displayNumber: extractRealNumber(chatId),
           });
@@ -5325,8 +3331,7 @@ io.on("connection", (socket) => {
       }
 
       emitToast(`Produto "${prod.nome}" enviado com sucesso!`);
-      // Devolve o texto enviado para o painel corrigir o balao otimista.
-      emitSendAck({ tempId: payload.tempId, chatId, success: true, id: sentId, body: text });
+      emitSendAck({ tempId: payload.tempId, chatId, success: true, id: sentId });
     } catch (error) {
       console.error("Falha ao enviar produto:", error);
       emitToast("⛔ Falha ao enviar produto: " + error.message);
@@ -5465,37 +3470,7 @@ io.on("connection", (socket) => {
 });
 
 server.listen(port, () => {
-  console.log(`WhatsApp panel server running on http://localhost:${port} (perfil: ${PERFIL})`);
-
-  const depsDeTrabalho = {
-    store,
-    persistStore,
-    io,
-    emitToast,
-    marcarAutor,
-    sendDirectMessage,
-    whatsappConectado: () => whatsappState.connected || Boolean(whatsappClient?.info?.wid),
-  };
-
-  if (PERFIL === "beto") {
-    // Número de fora: prospecção e relatórios. A VITOR.IA fala com quem ainda não
-    // é cliente; a MAR.IA só fala com o Thiago. Nenhum dos dois toca a linha que
-    // o cliente conhece.
-    //
-    // Os dois dividem a MESMA linha e cada um tem o próprio teto diário: o do
-    // VITOR.IA é o que protege o chip (mensagem fria é o que gera denúncia), e o
-    // da MAR.IA são dois relatórios por dia para um contato salvo, que não pesa
-    // no mesmo risco. Somar os dois num teto só faria o relatório do dono
-    // comer a cota de prospecção.
-    betoWorker.iniciar(depsDeTrabalho);
-    rafaWorker.iniciar(depsDeTrabalho);
-  } else {
-    // Número da loja: a JUL.IA atende e a CLAUD.IA cobra/reativa. A VITOR.IA nunca
-    // dispara daqui — o dele é número próprio.
-    juliaIA.iniciar(depsDeTrabalho);
-    carlaWorker.iniciar(depsDeTrabalho);
-    liviaWorker.iniciar();
-  }
+  console.log(`WhatsApp panel server running on http://localhost:${port}`);
 });
 
 // ============================

@@ -1,8 +1,6 @@
 import { randomUUID } from 'crypto';
 import { turso, isTursoActive } from './turso';
 import { BlogPost, Product, CarouselImage, Category, HomeBlock, UsedNotebook, parsePriceToNumber, buildCategoryNodesFromPaths } from './utils';
-import { isSupabaseActive } from './supabase';
-import { getProductsCurated, getProductsPaginatedCurated, getProductByIdentifierCurated, searchProductsByKeywordsCurated, searchProductsAllTermsCurated, getProductsByCategoryFullPathCurated, getProductsByExactCategoriesCurated, getProductsForSitemapCurated } from './db-supabase';
 
 // Linha crua retornada pelo driver LibSQL (valores vêm como unknown).
 type Row = Record<string, unknown>;
@@ -56,9 +54,6 @@ const sortByPrice = (items: Product[]) =>
   items.sort((a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price));
 
 export async function getProducts(): Promise<Product[]> {
-  if (isSupabaseActive()) {
-    try { return await getProductsCurated(); } catch (e) { console.error("Supabase getProducts error", e); }
-  }
   if (!isTursoActive()) return [];
   try {
     const res = await turso.execute('SELECT * FROM products ORDER BY created_at DESC');
@@ -80,9 +75,6 @@ export async function getProductsPaginated(opts: {
   category?: string;
   sort?: "price_asc" | "recent";
 }): Promise<{ products: Product[]; total: number }> {
-  if (isSupabaseActive()) {
-    try { return await getProductsPaginatedCurated(opts); } catch (e) { console.error("Supabase paginated error", e); }
-  }
   if (!isTursoActive()) return { products: [], total: 0 };
 
   const page = Math.max(1, opts.page || 1);
@@ -160,9 +152,6 @@ export async function getProductsLite(): Promise<Pick<Product, "id" | "name" | "
 }
 
 export async function getProductsForSitemap(limit = 1000): Promise<Pick<Product, "id" | "slug" | "created_at">[]> {
-  if (isSupabaseActive()) {
-    try { return await getProductsForSitemapCurated(limit); } catch (e) { console.error("Supabase sitemap error", e); }
-  }
   const take = Math.max(1, Math.min(5000, limit));
   if (!isTursoActive()) return [];
 
@@ -203,9 +192,6 @@ export async function getProductsByCategory(categorySlug: string): Promise<Produ
 }
 
 export async function getProductsByExactCategories(categoryNames: string[]): Promise<Product[]> {
-  if (isSupabaseActive()) {
-    try { return await getProductsByExactCategoriesCurated(categoryNames); } catch (e) { console.error("Supabase exactCategories error", e); }
-  }
   try {
     const normalizedNames = [...new Set(categoryNames.map((name) => String(name || "").trim()).filter(Boolean))];
     if (normalizedNames.length === 0) return [];
@@ -224,9 +210,6 @@ export async function getProductsByExactCategories(categoryNames: string[]): Pro
 }
 
 export async function searchProductsByKeywords(keywords: string[], limit = 24): Promise<Product[]> {
-  if (isSupabaseActive()) {
-    try { return await searchProductsByKeywordsCurated(keywords, limit); } catch (e) { console.error("Supabase keywords error", e); }
-  }
   try {
     const normalizedKeywords = [...new Set(
       keywords
@@ -256,9 +239,6 @@ export async function searchProductsByKeywords(keywords: string[], limit = 24): 
 }
 
 export async function getProductByIdentifier(identifier: string): Promise<Product | null> {
-  if (isSupabaseActive()) {
-    try { const r = await getProductByIdentifierCurated(identifier); if (r) return r; } catch (e) { console.error("Supabase getById error", e); }
-  }
   if (!isTursoActive()) return null;
 
   try {
@@ -661,78 +641,10 @@ export async function updateCarouselImage(id: string, updates: Partial<CarouselI
 
 export async function getCategories(): Promise<Category[]> {
   try {
-    // Se estiver usando Supabase com curadoria, só mostra categorias que têm produto curado
-    if (isSupabaseActive()) {
-      try {
-        const { supabase, CURATED_ONLY } = await import('./supabase');
-        const { data: cats, error } = await supabase.from("categories").select("*").order("display_order", { ascending: true }).order("name", { ascending: true });
-        if (error || !cats) throw error || new Error("sem categorias");
-        if (!CURATED_ONLY) {
-          return (cats as any[]).map(r => ({
-            id: String(r.id),
-            name: String(r.name),
-            slug: String(r.slug),
-            parent_id: r.parent_id ? String(r.parent_id) : null,
-            display_order: Number(r.display_order || 0),
-            icon: r.icon ? String(r.icon) : null,
-            active: Boolean(r.active),
-            full_path: r.full_path ? String(r.full_path) : undefined,
-          })) as Category[];
-        }
-        // Filtra só categorias com produto curado - suporta hierarquia via parent_id
-        const { data: prods } = await supabase.from("products").select("category").eq("is_curated", true);
-        const catsComProduto = new Set<string>();
-        (prods as any[] || []).forEach((p: any) => {
-          const cat = String(p.category || "").trim();
-          if (!cat) return;
-          const partes = cat.split("/").map((s: string) => s.trim()).filter(Boolean);
-          let cur = "";
-          for (const parte of partes) {
-            cur = cur ? `${cur}/${parte}` : parte;
-            catsComProduto.add(cur.toLowerCase());
-          }
-          // também adiciona só o último nome para match direto com subcategoria sem full_path
-          if (partes.length > 0) catsComProduto.add(partes[partes.length - 1].toLowerCase());
-        });
-        // Mapa id->categoria para construir full_path quando não existe
-        const catMap = new Map<string, any>((cats as any[]).map((c: any) => [String(c.id), c]));
-        const buildFullPath = (cat: any): string => {
-          if (cat.full_path) return String(cat.full_path).trim();
-          const partes: string[] = [String(cat.name).trim()];
-          let cur: any = cat;
-          while (cur.parent_id && catMap.has(String(cur.parent_id))) {
-            cur = catMap.get(String(cur.parent_id));
-            partes.unshift(String(cur.name).trim());
-            if (partes.length > 5) break;
-          }
-          return partes.join("/");
-        };
-        return (cats as any[])
-          .filter((c: any) => {
-            const fp = buildFullPath(c).toLowerCase();
-            const nome = String(c.name || "").trim().toLowerCase();
-            return catsComProduto.has(fp) || catsComProduto.has(nome);
-          })
-          .map(r => ({
-            id: String(r.id),
-            name: String(r.name),
-            slug: String(r.slug),
-            parent_id: r.parent_id ? String(r.parent_id) : null,
-            display_order: Number(r.display_order || 0),
-            icon: r.icon ? String(r.icon) : null,
-            active: Boolean(r.active),
-            full_path: r.full_path ? String(r.full_path) : undefined,
-          })) as Category[];
-      } catch (e) {
-        console.error("Supabase getCategories filtrado falhou, fallback:", e);
-        // fallback para sem filtro se der erro
-      }
-    }
-
     if (!isTursoActive()) return [];
 
     const res = await turso.execute('SELECT * FROM categories ORDER BY display_order ASC, name ASC');
-    const todas = res.rows.map(r => ({
+    return res.rows.map(r => ({
       id: String(r.id),
       name: String(r.name),
       slug: String(r.slug),
@@ -742,45 +654,6 @@ export async function getCategories(): Promise<Category[]> {
       active: Boolean(r.active),
       full_path: r.full_path ? String(r.full_path) : undefined,
     })) as Category[];
-
-    // Se estiver em modo curadoria, filtra no MySQL também (evita categoria vazia)
-    if (isSupabaseActive()) {
-      try {
-        const { supabase } = await import('./supabase');
-        const { data: prods } = await supabase.from("products").select("category").eq("is_curated", true);
-        const catsComProduto = new Set<string>();
-        (prods as any[] || []).forEach((p: any) => {
-          const cat = String(p.category || "").trim();
-          if (!cat) return;
-          const partes = cat.split("/").map((s: string) => s.trim()).filter(Boolean);
-          let cur = "";
-          for (const parte of partes) {
-            cur = cur ? `${cur}/${parte}` : parte;
-            catsComProduto.add(cur.toLowerCase());
-          }
-          if (partes.length > 0) catsComProduto.add(partes[partes.length - 1].toLowerCase());
-        });
-        const catMap2 = new Map<string, Category>(todas.map(c => [c.id, c]));
-        const buildFP2 = (cat: Category): string => {
-          if (cat.full_path) return String(cat.full_path).trim();
-          const partes: string[] = [String(cat.name).trim()];
-          let cur: any = cat;
-          while (cur.parent_id && catMap2.has(cur.parent_id)) {
-            cur = catMap2.get(cur.parent_id)!;
-            partes.unshift(String(cur.name).trim());
-            if (partes.length > 5) break;
-          }
-          return partes.join("/");
-        };
-        return todas.filter(c => {
-          const fp = buildFP2(c).toLowerCase();
-          const nome = String(c.name || "").trim().toLowerCase();
-          return catsComProduto.has(fp) || catsComProduto.has(nome);
-        });
-      } catch {}
-    }
-
-    return todas;
   } catch (error) {
     console.error("Error fetching categories:", error);
     return [];
@@ -860,47 +733,7 @@ export async function replaceCategoriesFromPaths(paths: string[]): Promise<void>
 // "Hardware/Placas-mãe/AMD" — então "é essa categoria ou está por baixo dela
 // na árvore" vira só comparar prefixo de string, sem precisar percorrer
 // parent_id em tempo de request).
-/**
- * Busca da caixa de pesquisa do site: TODOS os termos precisam bater.
- *
- * Estava embutida em `app/api/search/route.ts`, lendo o banco direto a cada
- * tecla parada do visitante. Com a cota de 500 conexões/hora da Hostinger, a
- * própria busca do site derrubava o catálogo. Aqui ela ganha cache e cópia de
- * segurança, como todo o resto.
- */
-export async function searchProductsAllTerms(terms: string[], limit = 10): Promise<Product[]> {
-  if (isSupabaseActive()) {
-    try { return await searchProductsAllTermsCurated(terms, limit); } catch (e) { console.error("Supabase searchAllTerms error", e); }
-  }
-  const limpos = terms.map((t) => String(t || "").trim()).filter(Boolean);
-  if (!isTursoActive() || limpos.length === 0) return [];
-
-  try {
-    const conditions = limpos
-      .map(() => "(LOWER(name) LIKE ? OR LOWER(description) LIKE ?)")
-      .join(" AND ");
-    const args: string[] = [];
-    limpos.forEach((term) => {
-      const like = `%${term.toLowerCase()}%`;
-      args.push(like, like);
-    });
-
-    // LIMIT direto no SQL: o MySQL recusa `?` em LIMIT e a busca voltava vazia.
-    const res = await turso.execute({
-      sql: `SELECT * FROM products WHERE ${conditions} LIMIT ${Math.trunc(Math.max(1, limit))}`,
-      args,
-    });
-    return sortByPrice(res.rows.map((r) => mapTursoProduct(r as Row)));
-  } catch (error) {
-    console.error("Erro na busca por termos:", error);
-    return [];
-  }
-}
-
 export async function getProductsByCategoryFullPath(fullPath: string): Promise<Product[]> {
-  if (isSupabaseActive()) {
-    try { return await getProductsByCategoryFullPathCurated(fullPath); } catch (e) { console.error("Supabase categoryFullPath error", e); }
-  }
   try {
     if (!isTursoActive() || !fullPath) return [];
     const res = await turso.execute({

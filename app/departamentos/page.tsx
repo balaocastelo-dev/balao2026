@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { getCachedCategories } from "@/lib/cache";
+import { getCategories } from '@/lib/db';
 import { Category } from '@/lib/utils';
 import { 
   Monitor, 
@@ -53,7 +53,7 @@ function getIconForCategory(slug: string) {
 }
 
 export default async function DepartamentosPage() {
-  const categories = await getCachedCategories();
+  const categories = await getCategories();
   
   // Organizar categorias em árvore
   const rootCategories = categories.filter(c => !c.parent_id && c.active).sort((a, b) => (a.display_order || 0) - (b.display_order || 0));

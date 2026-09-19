@@ -7,7 +7,6 @@ import Model3DViewer from "@/components/Model3DViewer";
 import { Product } from "@/lib/utils";
 import ProductCard from "@/components/ProductCard";
 import { SITE_CONFIG } from "@/lib/config";
-import PcGamer3DTour from "@/components/PcGamer3DTour";
 import {
   BadgeCheck,
   BarChart3,
@@ -396,11 +395,6 @@ export default function Pcgamer3dLanding({ products = [] }: { products?: Product
   return (
     <div className="space-y-16 sm:space-y-24">
       <Hero />
-      {/* TOUR 360 + VER EM 3D - DIFERENCIAL vs /pcgamer */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <PcGamer3DTour />
-        <div className="mt-4 text-center text-xs text-slate-500">Diferencial PC Gamer 3D: modelo interativo + Tour 360º. Na página <a href="/pcgamer" className="underline text-[#E60012]">PC Gamer tradicional</a> você vê catálogo + comparador FPS. Aqui você vê montagem técnica em 3D.</div>
-      </section>
       <Specs />
 
       {/* VITRINE DE PRODUTOS REAIS DO BANCO */}

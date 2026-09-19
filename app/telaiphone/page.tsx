@@ -30,11 +30,10 @@ import {
   ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
+import Model3DViewer from "@/components/Model3DViewer";
 import ProductCard from "@/components/ProductCard";
-import { getCachedProdutosRecentes, getCachedProductsByKeywords } from "@/lib/cache";
+import { getProducts, searchProductsByKeywords } from "@/lib/db";
 import { SITE_CONFIG } from "@/lib/config";
-import TelaIphonePriceTable from "@/components/TelaIphonePriceTable";
-import BeforeAfterSlider from "@/components/BeforeAfterSlider";
 
 export const dynamic = "force-dynamic";
 
@@ -94,8 +93,8 @@ const IPHONE_SCREEN_FAQS = [
 
 export default async function TelaIPhonePage() {
   const [allProducts, keywordApple] = await Promise.all([
-    getCachedProdutosRecentes(),
-    getCachedProductsByKeywords(["iphone", "apple", "capa", "carregador", "tela"], 16),
+    getProducts(),
+    searchProductsByKeywords(["iphone", "apple", "capa", "carregador", "tela"], 16),
   ]);
 
   let appleProducts = keywordApple;
@@ -189,22 +188,13 @@ export default async function TelaIPhonePage() {
                 </div>
               </div>
 
-              {/* ANTES/DEPOIS - substitui Sketchfab removido */}
-              <div className="lg:col-span-5 space-y-4">
-                <div className="relative aspect-[4/3] rounded-3xl overflow-hidden bg-[#161f32] border border-slate-800 group">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/images/apple/iphone/iphone-reparo-bancada.png" alt="iPhone com tela nova - depois" className="absolute inset-0 w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  <div className="absolute top-3 left-3 bg-[#E60012] text-white text-xs font-black px-3 py-1 rounded-full">DEPOIS — Tela OLED zero + True Tone</div>
-                  <div className="absolute bottom-3 left-3 right-3 bg-[#111827]/90 backdrop-blur p-3 rounded-xl border border-slate-700">
-                    <p className="text-xs font-bold text-emerald-400">✓ Pronto em 45 min • Garantia 1 ano • Vedação nova</p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 gap-2 text-center">
-                  <div className="bg-[#161f32] border border-slate-800 rounded-xl p-2"><p className="text-[11px] text-slate-400">Avaliação</p><p className="text-sm font-black text-white">★★★★★ 4.9</p></div>
-                  <div className="bg-[#161f32] border border-slate-800 rounded-xl p-2"><p className="text-[11px] text-slate-400">Peças</p><p className="text-sm font-black text-[#E60012]">OLED Premium</p></div>
-                  <div className="bg-[#161f32] border border-slate-800 rounded-xl p-2"><p className="text-[11px] text-slate-400">Retirada</p><p className="text-sm font-black text-white">Hoje mesmo</p></div>
-                </div>
+              {/* 3D Model Interactive */}
+              <div className="lg:col-span-5 relative aspect-square max-h-[380px] rounded-3xl overflow-hidden bg-[#161f32] border border-slate-800">
+                <Model3DViewer
+                  title="iPhone 3D Visualizer"
+                  src="https://sketchfab.com/models/ba401e6a3cf14a13876e4c75fb7ca525/embed?ui_theme=dark&transparent=1&autostart=1&ui_infos=0&ui_watermark=0&ui_controls=0&ui_general_controls=0&ui_fullscreen=0&ui_help=0&ui_hint=0&ui_vr=0&ui_settings=0&ui_annotations=0&ui_stop=0&camera=0&dnt=1"
+                  className="w-full h-full"
+                />
               </div>
             </div>
           </div>
@@ -236,16 +226,6 @@ export default async function TelaIPhonePage() {
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
-        </section>
-
-        {/* TABELA DE PREÇOS CLICÁVEL */}
-        <section id="precos" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <TelaIphonePriceTable />
-        </section>
-
-        {/* CARROSSEL ANTES/DEPOIS */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <BeforeAfterSlider />
         </section>
 
         {/* MODELOS DE IPHONE ATENDIDOS */}

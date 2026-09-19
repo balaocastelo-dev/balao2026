@@ -1,48 +1,10 @@
 import { MetadataRoute } from 'next'
-import { getProductsForSitemap } from '@/lib/db'
-import { getCachedCategories } from '@/lib/cache'
-import { lerCatalogoDoEspelho } from '@/lib/catalogo-espelho'
+import { getCategories, getProductsForSitemap } from '@/lib/db'
 import { listBlogPostsForPage } from '@/lib/blog-store'
 import { LEAD_INTENTS } from '@/lib/lead-intents'
 import { REGIONAL_CITIES, REGIONAL_SERVICES, buildRegionalServicePath } from '@/lib/local-seo'
 import { CAMPINAS_NEIGHBORHOODS } from '@/lib/neighborhood-seo'
 import { listVitrinePagesPublic } from '@/lib/vitrine/db'
-
-/**
- * Nunca deixa o sitemap estourar por causa de uma parte.
- *
- * O sitemap devolvia erro 500 sempre que a cota do banco estourava — e sitemap
- * que falha repetido faz o Google reduzir o ritmo de descoberta, atrasando a
- * indexação de produto novo. Melhor um sitemap com as rotas fixas do que
- * sitemap nenhum.
- */
-const LIMITE_POR_PARTE_MS = 12_000
-
-async function semQuebrar<T>(rotulo: string, buscar: () => Promise<T>, reserva: T): Promise<T> {
-  // Prazo, não só try/catch.
-  //
-  // O catch cobria o banco dizendo "não" — mas o que derrubou as builds de
-  // 13/09 foi o banco dizendo "já vai": consulta que leva 90 segundos não
-  // lança nada, só consome o orçamento. A Vercel dá 60 segundos por rota e
-  // abortava a build inteira no /sitemap.xml.
-  //
-  // Doze segundos por parte: quatro partes cabem no prazo com folga, e quem
-  // não respondeu a tempo simplesmente fica de fora deste sitemap. Sitemap
-  // sem a lista de produtos ainda é sitemap; build quebrada não indexa nada.
-  const prazo = new Promise<T>((resolve) =>
-    setTimeout(() => {
-      console.error(`[sitemap] ${rotulo} passou de ${LIMITE_POR_PARTE_MS}ms; seguindo sem esta parte.`)
-      resolve(reserva)
-    }, LIMITE_POR_PARTE_MS)
-  )
-
-  try {
-    return await Promise.race([buscar(), prazo])
-  } catch (erro) {
-    console.error(`[sitemap] ${rotulo} falhou; seguindo sem esta parte.`, erro)
-    return reserva
-  }
-}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.balao.info'
@@ -95,27 +57,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }))
 
   // Categorias
-  const categories = await semQuebrar('categorias', () => getCachedCategories(), [])
+  const categories = await getCategories()
   const categoryRoutes = categories.map((category) => ({
     url: `${baseUrl}/categoria/${category.slug}`,
     changeFrequency: 'weekly' as const,
     priority: 0.7,
   }))
 
-  // Produtos - 1288 curados (1000 hardware + 288 originais) com prioridade alta para segunda-feira
-  let products = await semQuebrar('produtos', () => getProductsForSitemap(2000), [])
-  if (products.length === 0) {
-    const daCopia = await semQuebrar('cópia do catálogo', () => lerCatalogoDoEspelho(), [])
-    products = daCopia.slice(0, 2000) as typeof products
-  }
+  // Produtos (Limitado aos 1000 mais recentes para performance)
+  // Nota: getProducts já tem paginação interna, mas aqui vamos pegar tudo o que ele retornar
+  // Se getProducts retornar muitos, pode ser lento.
+  const products = await getProductsForSitemap(1000)
   const productRoutes = products.map((product) => ({
     url: `${baseUrl}/product/${product.slug || product.id}`,
     lastModified: new Date(product.created_at || new Date()),
-    changeFrequency: 'daily' as const,
-    priority: 0.8,
+    changeFrequency: 'weekly' as const,
+    priority: 0.6,
   }))
 
-  const blogPosts = await semQuebrar('blog', () => listBlogPostsForPage({ take: 500 }), [])
+  const blogPosts = await listBlogPostsForPage({ take: 500 })
   const blogRoutes = blogPosts.map((post) => ({
     url: `${baseUrl}/blog/${post.slug}`,
     lastModified: new Date(post.published_at || new Date()),

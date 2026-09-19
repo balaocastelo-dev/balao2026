@@ -15,8 +15,7 @@ import {
   Wifi,
   WifiOff,
 } from "lucide-react";
-import { type Socket } from "socket.io-client";
-import { conectarPainel } from "@/lib/socket-cliente";
+import { io, type Socket } from "socket.io-client";
 
 type WhatsAppStatus =
   | "disconnected"
@@ -161,20 +160,12 @@ export default function WhatsAppPanelClient() {
   const [composerMode, setComposerMode] = useState<"chat" | "new">("chat");
 
   useEffect(() => {
-    // `cancelado` porque a conexão agora espera o bilhete do site: sem a
-    // guarda, desmontar a tela durante essa espera deixaria um socket aberto
-    // sem ninguém para fechá-lo.
-    let cancelado = false;
-    let socket: Socket | null = null;
-
-    conectarPainel(serverUrl).then(({ socket: s }) => {
-      if (cancelado) { s.disconnect(); return; }
-      socket = s;
-      socketRef.current = s;
-      ligarEventos(s);
+    const socket = io(serverUrl, {
+      transports: ["websocket", "polling"],
     });
 
-    function ligarEventos(socket: Socket) {
+    socketRef.current = socket;
+
     socket.on("connect", () => {
       setSocketConnected(true);
       setServerHealthMessage("Servidor online.");
@@ -215,11 +206,8 @@ export default function WhatsAppPanelClient() {
       window.setTimeout(() => setToast(""), 3500);
     });
 
-    }
-
     return () => {
-      cancelado = true;
-      socket?.disconnect();
+      socket.disconnect();
       socketRef.current = null;
     };
   }, [serverUrl]);

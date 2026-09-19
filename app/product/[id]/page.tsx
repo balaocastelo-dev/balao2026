@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { getCachedCategories, getCachedProductById } from "@/lib/cache";
+import { getCategories, getProductById } from '@/lib/db';
 import Header from '@/components/Header';
 import Sidebar from '@/components/Sidebar';
 import { notFound, permanentRedirect } from 'next/navigation';
@@ -51,7 +51,7 @@ function stripSpecsFromDescription(value: string | null | undefined) {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const product = await getCachedProductById(id);
+  const product = await getProductById(id);
 
   if (!product) {
     return {
@@ -94,8 +94,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ProductPage({ params }: Props) {
   const { id } = await params;
   const [product, categories] = await Promise.all([
-    getCachedProductById(id),
-    getCachedCategories()
+    getProductById(id),
+    getCategories()
   ]);
 
   if (!product) return notFound();

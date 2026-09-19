@@ -1,7 +1,7 @@
 import React from "react";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
-import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
+import { getProducts, searchProductsByKeywords } from "@/lib/db";
 import ProductCard from "@/components/ProductCard";
 import JsonLd, {
   generateOrganizationSchema,
@@ -86,8 +86,8 @@ const MICROSOFT_FAQS = [
 
 export default async function MicrosoftPage() {
   const [allProducts, keywordSoftware] = await Promise.all([
-    getCachedProducts(),
-    getCachedProductsByKeywords(["microsoft", "windows", "office", "licença", "software", "teclado microsoft"], 24),
+    getProducts(),
+    searchProductsByKeywords(["microsoft", "windows", "office", "licença", "software", "teclado microsoft"], 24),
   ]);
 
   const fallbackSoftware = allProducts.filter((p) => {
@@ -103,28 +103,15 @@ export default async function MicrosoftPage() {
     }
   }
 
-  let softwareProducts = Array.from(uniqueProductsMap.values()).slice(0, 24);
+  let softwareProducts = Array.from(uniqueProductsMap.values());
   if (softwareProducts.length === 0) {
-    softwareProducts = allProducts.slice(0, 24);
+    softwareProducts = allProducts.slice(0, 8);
   }
-  if (softwareProducts.length > 24) softwareProducts = softwareProducts.slice(0, 24);
 
   const breadcrumbs = [
     { name: "Home", item: "https://www.balao.info" },
     { name: "Microsoft & Software", item: "https://www.balao.info/microsoft" },
   ];
-
-  const howToMicrosoft = {
-    "@context": "https://schema.org",
-    "@type": "HowTo",
-    name: "Como ativar Windows/Office original em 5 minutos",
-    totalTime: "PT5M",
-    step: [
-      { "@type": "HowToStep", name: "Compra via WhatsApp", text: "Escolha versão e pague PIX. Nota Fiscal emitida." },
-      { "@type": "HowToStep", name: "Receba chave em 5 min", text: "Chave + link oficial microsoft.com chega no e-mail/WhatsApp." },
-      { "@type": "HowToStep", name: "Ativação oficial", text: "Cole a chave em Configurações > Ativação. Suporte remoto incluso." },
-    ],
-  };
 
   return (
     <div className="min-h-screen bg-[#090d16] text-white flex flex-col font-sans selection:bg-[#E60012] selection:text-white">
@@ -141,7 +128,6 @@ export default async function MicrosoftPage() {
             url: "https://www.balao.info/microsoft",
             serviceType: "Licenciamento e Suporte de Software",
           }),
-          howToMicrosoft,
         ]}
       />
       <Header />
@@ -209,40 +195,14 @@ export default async function MicrosoftPage() {
           </div>
         </section>
 
-        {/* COMPARATIVO PIRATA VS ORIGINAL P0 */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-[#111827] border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-xl sm:text-2xl font-black text-white">Pirata (KMS/Crack) vs Original <span className="text-[#E60012]">com Nota</span></h2>
-              <span className="bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-black px-3 py-1 rounded-full">Envio em 5 min • Ativação Vitalícia</span>
-            </div>
-            <div className="overflow-x-auto rounded-2xl border border-slate-800">
-              <table className="w-full text-sm">
-                <thead className="bg-[#161f32] text-slate-400 text-xs uppercase tracking-wider">
-                  <tr><th className="px-4 py-3 text-left">Critério</th><th className="px-4 py-3 text-left text-red-400">Pirata / KMS</th><th className="px-4 py-3 text-left text-emerald-400">Original Balão</th></tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800 text-slate-300">
-                  <tr><td className="px-4 py-3 font-bold text-white">Segurança</td><td className="px-4 py-3 text-red-400">Backdoor, roubo de senhas bancárias</td><td className="px-4 py-3 text-emerald-400">100% limpo, updates direto Microsoft</td></tr>
-                  <tr><td className="px-4 py-3 font-bold text-white">Desempenho</td><td className="px-4 py-3">Minerador oculto consome CPU</td><td className="px-4 py-3">Sem processos parasitas, fluido</td></tr>
-                  <tr><td className="px-4 py-3 font-bold text-white">Atualizações</td><td className="px-4 py-3">Bloqueadas, risco de tela preta</td><td className="px-4 py-3">Windows Update liberado vitalício</td></tr>
-                  <tr><td className="px-4 py-3 font-bold text-white">Jurídico</td><td className="px-4 py-3">Multa ABES até R$ 3 mil/PC empresa</td><td className="px-4 py-3">NFe + conformidade auditoria</td></tr>
-                  <tr><td className="px-4 py-3 font-bold text-white">Suporte</td><td className="px-4 py-3">Nenhum, reinstalação a cada 180 dias</td><td className="px-4 py-3">Instalação remota grátis + garantia vitalícia ativação</td></tr>
-                </tbody>
-              </table>
-            </div>
-            <p className="text-xs text-slate-500 text-center">Selo: Licenças ESD genuínas • Download microsoft.com • Suporte instalação na loja Cambuí ou remoto</p>
-          </div>
-        </section>
-
-        {/* VITRINE DE PRODUTOS REAIS DO BANCO — 24 LICENÇAS FILTRADAS */}
+        {/* VITRINE DE PRODUTOS REAIS DO BANCO */}
         <section id="catalogo" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
             <div>
-              <div className="text-xs font-black uppercase tracking-wider text-[#E60012] mb-1">Catálogo Oficial • 24 licenças filtradas</div>
+              <div className="text-xs font-black uppercase tracking-wider text-[#E60012] mb-1">Catálogo Oficial</div>
               <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
                 Softwares e Licenças Microsoft
               </h2>
-              <p className="text-sm text-slate-400 mt-1">Windows 11 Pro, Office 2024, Microsoft 365 — filtro: windows/office/microsoft</p>
             </div>
             <a
               href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(

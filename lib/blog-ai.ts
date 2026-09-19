@@ -1,5 +1,4 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { MODELO_GEMINI, MODELO_GROQ, comPrazo } from "@/lib/ai-modelos";
 import Groq from "groq-sdk";
 import { sanitizeHtmlBasic } from "@/lib/blog-sanitize";
 import { buildExcerptFromHtml, estimateReadingTimeMinutesFromHtml } from "@/lib/blog-utils";
@@ -180,14 +179,13 @@ async function generateFromGemini(prompt: string) {
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: MODELO_GEMINI });
+  const modelName = process.env.BLOG_AI_MODEL || "gemini-1.5-flash";
+  const model = genAI.getGenerativeModel({ model: modelName });
 
-  const texto = await comPrazo("gemini (blog)", async () => {
-    const result = await model.generateContent(prompt);
-    return (await result.response).text();
-  });
-
-  return texto ? safeParseJson(texto) : null;
+  const result = await model.generateContent(prompt);
+  const response = await result.response;
+  const text = response.text();
+  return safeParseJson(text);
 }
 
 async function generateFromGroq(prompt: string) {
@@ -195,36 +193,20 @@ async function generateFromGroq(prompt: string) {
   if (!apiKey) return null;
 
   const client = new Groq({ apiKey });
-  // Antes esta variável era a MESMA do Gemini (`BLOG_AI_MODEL`): definir uma
-  // quebrava a outra, porque o nome de modelo de um provedor não existe no
-  // outro.
-  const model = MODELO_GROQ;
+  const model = process.env.BLOG_AI_MODEL || "llama-3.1-70b-versatile";
 
-  // NUNCA lança. Um provedor de IA fora do ar, sem cota ou com o nome do
-  // modelo trocado é rotina; virar exceção aqui significava derrubar a página
-  // que chamou. Foi o que aconteceu: a Groq aposentou o
-  // `llama-3.3-70b-versatile`, o 404 subiu, e o /blog ficou EM BRANCO de
-  // 11/09 a 18/09 sem ninguém perceber — a página não dava erro, só não
-  // mostrava nada.
-  try {
-    const resp = await client.chat.completions.create({
-      model,
-      temperature: 0.6,
-      messages: [
-        { role: "system", content: "Você é um(a) redator(a) SEO especialista em tecnologia. Retorne apenas JSON válido." },
-        { role: "user", content: prompt },
-      ],
-    });
+  const resp = await client.chat.completions.create({
+    model,
+    temperature: 0.6,
+    messages: [
+      { role: "system", content: "Você é um(a) redator(a) SEO especialista em tecnologia. Retorne apenas JSON válido." },
+      { role: "user", content: prompt },
+    ],
+  });
 
-    const text = resp.choices?.[0]?.message?.content || "";
-    if (!text.trim()) return null;
-    return safeParseJson(text);
-  } catch (erro) {
-    // Barulhento no log de propósito: sem post novo é um problema de
-    // conteúdo, e problema de conteúdo que ninguém vê dura semanas.
-    console.error(`[blog-ia] Groq recusou o modelo "${model}":`, (erro as Error).message);
-    return null;
-  }
+  const text = resp.choices?.[0]?.message?.content || "";
+  if (!text.trim()) return null;
+  return safeParseJson(text);
 }
 
 async function generateFromAI(prompt: string) {

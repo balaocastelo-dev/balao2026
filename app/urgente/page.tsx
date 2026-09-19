@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
-import { getCachedProdutosRecentes } from "@/lib/cache";
+import { getProducts } from "@/lib/db";
 import { SITE_CONFIG } from "@/lib/config";
 import JsonLd, {
   generateBreadcrumbSchema,
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
 };
 
 export default async function UrgenteHubPage() {
-  const allProducts = await getCachedProdutosRecentes();
+  const allProducts = await getProducts();
   const showcaseProducts = allProducts.slice(0, 8);
 
   const breadcrumbItems = [

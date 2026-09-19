@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -15,15 +14,6 @@ import { SITE_CONFIG } from "@/lib/config";
 import { listVitrinePagesPublic } from "@/lib/vitrine/db";
 import { pickPcHeroImage } from "@/lib/vitrine/core";
 import type { VitrinePageRecord } from "@/lib/vitrine/types";
-import VitrinePriceFilter from "@/components/VitrinePriceFilter";
-import { getCachedProductsByKeywords, getCachedProducts } from "@/lib/cache";
-
-export const metadata: Metadata = {
-  title: "Vitrine de Produtos | Balão da Informática",
-  description: "Vitrine de computadores, notebooks e periféricos do Balão da Informática em Campinas.",
-  alternates: { canonical: "https://www.balao.info/vitrine" },
-};
-
 
 export const dynamic = "force-dynamic";
 
@@ -62,22 +52,7 @@ function buildSpecs(page: VitrinePageView) {
 }
 
 export default async function VitrinePage() {
-  const [pagesRaw, fallbackA, fallbackAll] = await Promise.all([
-    listVitrinePagesPublic().catch(() => []),
-    getCachedProductsByKeywords(["gamer","pc gamer","rtx","ryzen"], 6).catch(()=>[]),
-    getCachedProducts().catch(()=>[] as any[]),
-  ]);
-  const pages = pagesRaw as VitrinePageView[];
-  let fallbackGamer = fallbackA;
-  if (fallbackGamer.length < 6) {
-    const ids = new Set(fallbackGamer.map((p:any)=>p.id));
-    const fill = (fallbackAll as any[]).filter((p:any)=> !ids.has(p.id) && (String(p.name||"").toLowerCase().includes("gamer") || String(p.category||"").toLowerCase().includes("gamer")));
-    fallbackGamer = [...fallbackGamer, ...fill].slice(0,6);
-    if (fallbackGamer.length < 6) {
-      const more = (fallbackAll as any[]).filter((p:any)=> !fallbackGamer.find((x:any)=>x.id===p.id));
-      fallbackGamer = [...fallbackGamer, ...more].slice(0,6);
-    }
-  }
+  const pages = (await listVitrinePagesPublic().catch(() => [])) as VitrinePageView[];
   const featured = pages[0];
   const featuredHero = featured
     ? featured.images?.hero || pickPcHeroImage({ categoria: featured.categoria })
@@ -295,7 +270,92 @@ export default async function VitrinePage() {
             </p>
           </div>
 
-          <VitrinePriceFilter pages={pages as any} fallbackProducts={fallbackGamer as any} />
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            {pages.map((page, index) => {
+              const hero = page.images?.hero || pickPcHeroImage({ categoria: page.categoria });
+              const priceText = priceTextFromRecord(page);
+              const specs = buildSpecs(page);
+
+              return (
+                <Link
+                  key={page.id}
+                  href={`/p/${page.slug}`}
+                  className="group flex h-full flex-col overflow-hidden rounded-[1.8rem] border border-[var(--site-border)] bg-[var(--site-panel-soft)] shadow-[0_20px_55px_rgba(15,23,42,0.08)] transition-all duration-300 hover:-translate-y-1 hover:border-[var(--site-accent-soft)] hover:shadow-[0_28px_70px_rgba(15,23,42,0.14)]"
+                >
+                  <div className="p-4 sm:p-5">
+                    <div className="mb-4 flex items-center justify-between gap-3">
+                      <span className="rounded-full bg-[var(--site-panel-muted)] px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[var(--site-accent)]">
+                        {String(page.categoria || "Setup")}
+                      </span>
+                      <span className="text-[10px] font-black uppercase tracking-[0.18em] text-[var(--site-muted)]">
+                        #{String(index + 1).padStart(2, "0")}
+                      </span>
+                    </div>
+
+                    <div className="relative flex h-72 items-center justify-center overflow-hidden rounded-[1.6rem] border border-[var(--site-border)] bg-white p-3 sm:h-80 sm:p-4">
+                      <Image
+                        src={hero}
+                        alt={page.nome_pc}
+                        width={900}
+                        height={700}
+                        className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.05]"
+                      />
+                    </div>
+
+                    <div className="mt-5 flex min-h-[220px] flex-col">
+                      <h3 className="line-clamp-4 text-xl font-black leading-tight tracking-tight text-[var(--site-text)] transition-colors group-hover:text-[#E60012]">
+                        {page.nome_pc}
+                      </h3>
+
+                      {specs.length > 0 ? (
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          {specs.map((spec) => (
+                            <span
+                              key={spec}
+                              className="rounded-full border border-[var(--site-border)] bg-[var(--site-panel-muted)] px-3 py-1 text-[11px] font-bold text-[var(--site-soft)]"
+                            >
+                              {spec}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
+
+                      <p className="mt-4 line-clamp-2 text-sm leading-relaxed text-[var(--site-soft)]">
+                        Setup publicado na vitrine para acelerar comparacao, clique e contato com a equipe da loja.
+                      </p>
+
+                      <div className="mt-auto pt-5">
+                        <div className="flex items-end justify-between gap-4">
+                          <div>
+                            <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[var(--site-muted)]">
+                              Faixa de investimento
+                            </div>
+                            <div className="mt-1 text-2xl font-black tracking-tight text-[#E60012]">
+                              {priceText}
+                            </div>
+                          </div>
+                          <div className="text-right text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--site-muted)]">
+                            Clique para abrir
+                          </div>
+                        </div>
+
+                        <div className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#E60012] px-4 py-3 text-sm font-black text-white transition group-hover:brightness-110">
+                          Ver detalhes
+                          <ArrowRight size={16} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+
+          {pages.length === 0 ? (
+            <div className="mt-10 rounded-[1.75rem] border border-dashed border-[var(--site-border)] bg-[var(--site-panel-soft)] px-6 py-10 text-center text-[var(--site-soft)]">
+              Nenhuma pagina publicada ainda.
+            </div>
+          ) : null}
         </section>
 
         <section className="mt-10 home-panel rounded-[1.9rem] p-6 sm:p-8">

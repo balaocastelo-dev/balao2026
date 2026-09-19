@@ -3,8 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Header from "@/components/Header";
 import PremiumPromoCountdown from "@/components/PremiumPromoCountdown";
-import MondayCountdown from "@/components/MondayCountdown";
-import { getCachedCategories, getCachedProducts } from "@/lib/cache";
+import { getCategories, getProducts } from "@/lib/db";
 import { getProductHref, parsePriceToNumber, type Category, type Product } from "@/lib/utils";
 import { SITE_CONFIG } from "@/lib/config";
 import JsonLd from "@/components/JsonLd";
@@ -122,7 +121,6 @@ function ProductTile({
       href={href}
       className="group relative overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(24,24,27,0.72),rgba(0,0,0,0.72))] backdrop-blur-xl transition-all hover:border-amber-200/20 hover:-translate-y-0.5 hover:shadow-[0_24px_80px_rgba(0,0,0,0.55)]"
     >
-      <div className="absolute left-3 top-3 z-10 rounded-full bg-emerald-500 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-white shadow">Retirada 30min • Cambuí</div>
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(251,191,36,0.14),_transparent_58%)] opacity-0 group-hover:opacity-100 transition-opacity" />
       <div className="relative p-5 sm:p-6 flex flex-col gap-4">
         <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl bg-white border border-zinc-200 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.18)]">
@@ -280,7 +278,7 @@ function InfoTile({
 }
 
 export default async function PremiumPage() {
-  const [products, categories] = await Promise.all([getCachedProducts(), getCachedCategories()]);
+  const [products, categories] = await Promise.all([getProducts(), getCategories()]);
 
   const findBySlug = (s: string, all: Category[]) => all.find((c) => c.slug === s);
   const premiumCategory = findBySlug("premium", categories);
@@ -320,26 +318,12 @@ export default async function PremiumPage() {
     return priceB - priceA;
   });
 
-  // Garantir 36 produtos com fallback do catálogo geral
-  let ensured = [...sorted];
-  if (ensured.length < 36) {
-    const ids = new Set(ensured.map(p=>p.id));
-    const filler = products.filter(p=> !ids.has(p.id));
-    // prioriza produtos com preço válido e imagem
-    const fillerSorted = filler.sort((a,b)=> parsePriceToNumber(b.price)-parsePriceToNumber(a.price));
-    ensured = [...ensured, ...fillerSorted].slice(0,36);
-  }
-  // se ainda <36, completa com shuffle (caso products <36 raro)
-  if (ensured.length < 36) {
-    ensured = [...ensured, ...shuffleCopy(products).filter(p=> !ensured.find(e=>e.id===p.id))].slice(0,36);
-  }
-
   const featuredTarget = 6;
   const listTarget = 30;
 
-  const featured = ensured.slice(0, Math.min(featuredTarget, ensured.length));
-  const remaining = ensured.slice(featured.length);
-  const stock = shuffleCopy(remaining).slice(0, Math.min(30, remaining.length));
+  const featured = sorted.slice(0, Math.min(featuredTarget, sorted.length));
+  const remaining = sorted.slice(featured.length);
+  const stock = shuffleCopy(remaining).slice(0, Math.min(listTarget - featured.length, remaining.length));
   const heroShowcaseProduct = stock[0] || featured[0];
 
   const whatsAppDefault = buildWhatsAppLink(
@@ -419,7 +403,6 @@ export default async function PremiumPage() {
               </p>
 
               <PremiumPromoCountdown />
-              <MondayCountdown hour={18} minute={0} label="Oferta Premium termina segunda às 18h" sublabel="Retirada 30min no Cambuí • 10% OFF no PIX" />
 
               <div className="flex flex-col sm:flex-row gap-3">
                 <a

@@ -3,11 +3,7 @@ import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import ProductList from "@/components/ProductList";
 import FilterSyncer from "@/components/FilterSyncer";
-import {
-  getCachedProducts,
-  getCachedCategories,
-  getCachedProductsByCategoryFullPath,
-} from "@/lib/cache";
+import { getProductsByCategoryFullPath, getProducts, getCategories } from "@/lib/db";
 import { searchProducts } from "@/lib/searchUtils";
 import { extractTags, filterProductsByTags } from "@/lib/product-filters";
 import { parsePriceToNumber, type Category } from "@/lib/utils";
@@ -33,26 +29,12 @@ function buildCategoryCanonical(slug: string, page: number, hasFacet: boolean) {
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { slug } = await params;
   const { search, tags: tagsParam, page } = await searchParams;
-  const categories = await getCachedCategories();
+  const categories = await getCategories();
   const pageNumber = Math.max(1, Number.parseInt(page || "1", 10) || 1);
   const hasFacet = Boolean((search || "").trim() || (tagsParam || "").trim());
   
-  // Nome legível a partir do endereço, para quando o banco não responder.
-  //
-  // O nome da categoria vem do banco; com a cota estourada, `categories` volta
-  // vazia e TODA página de categoria virava "Categoria | Balão da Informática"
-  // — o mesmo título repetido dezenas de vezes no Google. Com isto, o pior
-  // caso ainda é um título específico daquela página.
-  const nomeDoEndereco = slug
-    .split("-")
-    .filter(Boolean)
-    .map((parte) => parte.charAt(0).toUpperCase() + parte.slice(1))
-    .join(" ");
-
-  let title = nomeDoEndereco
-    ? `${nomeDoEndereco} em Campinas | Balão da Informática`
-    : "Categoria | Balão da Informática";
-  let description = `Compre ${nomeDoEndereco || "produtos de informática"} com o melhor preço de Campinas, no Balão da Informática.`;
+  let title = "Categoria";
+  let description = "Encontre os melhores produtos de informática no Balão da Informática.";
 
   if (slug === 'todos-os-produtos') {
     title = "Todos os Produtos | Balão da Informática";
@@ -96,7 +78,7 @@ export default async function CategoriaPage({
   const selectedTags = tagsParam ? tagsParam.split(',') : [];
   const currentPage = Math.max(1, Number.parseInt(page || "1", 10) || 1);
  
-  const categories = await getCachedCategories();
+  const categories = await getCategories();
  
   const findBySlug = (s: string, all: Category[]) =>
     all.find((c) => c.slug === s);
@@ -113,8 +95,8 @@ export default async function CategoriaPage({
   // caminho, sem precisar percorrer a árvore de parent_id.
   let filteredProducts =
     categoryName && categoryName !== "Todos os Produtos" && selectedCat?.full_path
-      ? await getCachedProductsByCategoryFullPath(selectedCat.full_path)
-      : await getCachedProducts();
+      ? await getProductsByCategoryFullPath(selectedCat.full_path)
+      : await getProducts();
 
   if (search) {
     filteredProducts = searchProducts(filteredProducts, search);

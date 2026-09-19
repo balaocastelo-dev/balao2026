@@ -1,6 +1,5 @@
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { MODELO_GEMINI } from "@/lib/ai-modelos";
 
 export interface WeeklyAnalysis {
   summary: string;
@@ -25,7 +24,7 @@ export async function analyzeWeeklyClosing(data: {
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: MODELO_GEMINI });
+  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
   const prompt = `
     Atue como um consultor financeiro sênior especializado em assistências técnicas de informática.

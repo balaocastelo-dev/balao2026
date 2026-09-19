@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
-import { getCachedProdutosRecentes, getCachedProductsByKeywords } from "@/lib/cache";
+import { getProducts, searchProductsByKeywords } from "@/lib/db";
 import { SITE_CONFIG } from "@/lib/config";
 import JsonLd, {
   generateBreadcrumbSchema,
@@ -90,8 +90,8 @@ export default async function RegionalServicePage({ params }: Props) {
   }
 
   const [allProducts, keywordMatches] = await Promise.all([
-    getCachedProdutosRecentes(),
-    getCachedProductsByKeywords([service.slug.replace(/-/g, " "), "notebook", "ssd", "gamer", "apple"], 8),
+    getProducts(),
+    searchProductsByKeywords([service.slug.replace(/-/g, " "), "notebook", "ssd", "gamer", "apple"], 8),
   ]);
 
   let displayProducts = keywordMatches.length > 0 ? keywordMatches : allProducts.slice(0, 8);

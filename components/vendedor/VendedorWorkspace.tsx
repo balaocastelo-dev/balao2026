@@ -8,11 +8,6 @@ type VendedorWorkspaceProps = {
   vendedor: VendedorPublico;
   /** Rota desta área, para onde voltar depois de sair. */
   caminho?: string;
-  /**
-   * Rota que encerra a sessão. Os seis da equipe fixa e os vendedores criados
-   * pelo dashboard usam cookies diferentes, então cada um limpa o seu.
-   */
-  rotaDeSaida?: string;
 };
 
 /**
@@ -27,17 +22,16 @@ type VendedorWorkspaceProps = {
 export default function VendedorWorkspace({
   vendedor,
   caminho,
-  rotaDeSaida = "/api/vendedor/logout",
 }: VendedorWorkspaceProps) {
   const sair = useCallback(async () => {
     try {
-      await fetch(rotaDeSaida, { method: "POST" });
+      await fetch("/api/vendedor/logout", { method: "POST" });
     } catch {
       // Mesmo sem resposta do servidor, tira o vendedor da tela.
     }
     // Volta para a própria área, que sem sessão cai na tela de login.
     window.location.href = caminho || `/${vendedor.slug}`;
-  }, [caminho, rotaDeSaida, vendedor.slug]);
+  }, [caminho, vendedor.slug]);
 
   return (
     <CrmWhatsAppClient

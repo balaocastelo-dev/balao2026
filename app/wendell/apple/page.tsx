@@ -3,7 +3,7 @@ import Header from "@/components/Header";
 import Image from "next/image";
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
-import { getCachedProdutosRecentes, getCachedProductsByKeywords } from "@/lib/cache";
+import { getProducts, searchProductsByKeywords } from "@/lib/db";
 import JsonLd, {
   generateBreadcrumbSchema,
   generateFAQSchema,
@@ -13,7 +13,6 @@ import JsonLd, {
 } from "@/components/JsonLd";
 import SafeImage from "@/components/SafeImage";
 import AppleReviewsCarousel, { type AppleReview } from "@/components/AppleReviewsCarousel";
-import AppleSymptomSearch from "@/components/AppleSymptomSearch";
 import {
   ArrowRight,
   BadgeCheck,
@@ -32,7 +31,6 @@ import {
   Watch,
   Wrench,
   Zap,
-  Truck,
 } from "lucide-react";
 import { SITE_CONFIG } from "@/lib/config";
 import { appleReviews } from "@/lib/apple-reviews";
@@ -147,12 +145,15 @@ export const metadata: Metadata = {
 
 export default async function AppleHubPage() {
   const [allProducts, keywordApple, radarPosts] = await Promise.all([
-    getCachedProdutosRecentes(),
-    getCachedProductsByKeywords(["apple", "iphone", "macbook", "ipad", "airpods", "watch", "capa", "carregador"], 20),
+    getProducts(),
+    searchProductsByKeywords(["apple", "iphone", "macbook", "ipad", "airpods"], 16),
     listAppleRadarPosts(3),
   ]);
 
-  let appleProducts = keywordApple.length >= 20 ? keywordApple.slice(0,20) : keywordApple.length >0 ? [...keywordApple, ...allProducts.filter(p=>!keywordApple.find(k=>k.id===p.id))].slice(0,20) : allProducts.slice(0, 20);
+  let appleProducts = keywordApple;
+  if (appleProducts.length === 0) {
+    appleProducts = allProducts.slice(0, 8);
+  }
 
   const breadcrumbs = [
     { name: "Home", item: "https://www.balao.info" },
@@ -244,25 +245,6 @@ export default async function AppleHubPage() {
           </div>
         </section>
 
-        {/* BUSCA POR SINTOMA */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <AppleSymptomSearch />
-        </section>
-
-        {/* AGENDAMENTO RETIRADA */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-gradient-to-r from-emerald-950/40 to-[#111827] border border-emerald-800/50 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-600 flex items-center justify-center"><Truck className="w-6 h-6 text-white" /></div>
-              <div>
-                <h3 className="font-black text-white">Agende Retirada — Levamos e Trazemos</h3>
-                <p className="text-xs text-slate-300">Motoboy segurado para Campinas e RMC • Diagnóstico no mesmo dia • 12x sem juros</p>
-              </div>
-            </div>
-            <a href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent("Olá! Quero agendar retirada do meu Apple no Cambuí - coleta em domicílio")}`} target="_blank" rel="noopener noreferrer" className="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-6 py-3 rounded-xl flex items-center gap-2 whitespace-nowrap"><MessageCircle className="w-5 h-5" /> Agendar no WhatsApp</a>
-          </div>
-        </section>
-
         {/* GRADE DE SERVIÇOS POR DISPOSITIVO */}
         <section id="servicos" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-10 space-y-2">
@@ -327,7 +309,7 @@ export default async function AppleHubPage() {
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
             <div>
-              <div className="text-xs font-black uppercase tracking-wider text-[#E60012] mb-1">Loja de Acessórios • 20 em destaque</div>
+              <div className="text-xs font-black uppercase tracking-wider text-[#E60012] mb-1">Loja de Acessórios</div>
               <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
                 Equipamentos Apple em Destaque
               </h2>

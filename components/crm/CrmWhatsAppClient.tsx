@@ -2,8 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { type Socket } from "socket.io-client";
-import { conectarPainel } from "@/lib/socket-cliente";
+import { io, type Socket } from "socket.io-client";
 import {
   CrmChat,
   CrmEtiqueta,
@@ -19,12 +18,13 @@ import {
   WhatsAppStatus,
 } from "@/types/crm";
 import {
+  ETIQUETAS_BASE,
   KANBAN_COLUNAS_BASE,
   PRODUTOS_CATALOGO_BASE,
   RESPOSTAS_BASE,
   VENDEDORES_BASE,
 } from "@/lib/crm-defaults";
-import { type Category, buildCategoryTree, parsePriceToNumber } from "@/lib/utils";
+import { type Category, buildCategoryTree } from "@/lib/utils";
 
 interface CtxMenuItem {
   label?: string;
@@ -97,12 +97,7 @@ function formatarNumeroExibicao(num: string | null | undefined): string {
   if (limpo.length === 10) {
     return `55 ${limpo.slice(0, 2)} ${limpo.slice(2)}`;
   }
-
-  // Não é telefone. O caso comum é o `@lid` — o identificador interno do
-  // WhatsApp (ex.: 249610647953418), que aparece quando o contato está salvo
-  // na agenda. Devolver ele aqui mostrava um "número" que o vendedor tentava
-  // discar. Melhor não mostrar número nenhum do que mostrar um inventado.
-  return "";
+  return limpo;
 }
 
 // Achata a árvore de categorias (com nível de indentação) para exibir no
@@ -142,23 +137,6 @@ function formatAvatarUrl(
   return url;
 }
 
-// Mídia que o cliente mandou (foto, áudio, documento). O servidor de WhatsApp
-// devolve um caminho relativo — "/api/crm/media/xxx.jpg" — que é dele, não do
-// site. Sem prefixar, o navegador pedia para www.balao.info e a foto do
-// cliente nunca aparecia. Mesmo motivo do formatAvatarUrl acima.
-function resolverUrlMidia(
-  url: string | null | undefined,
-  servidorWhatsApp?: string
-): string | null {
-  if (!url) return null;
-  if (url.startsWith("data:") || url.startsWith("http")) return url;
-  if (url.startsWith("/api/crm/media/")) {
-    const base = (servidorWhatsApp || "").replace(/\/$/, "");
-    return base ? `${base}${url}` : url;
-  }
-  return url;
-}
-
 // Resolve caminhos relativos de imagem (/uploads/...) em URL absoluta,
 // pois o whatsapp-server só consegue anexar mídia via MessageMedia.fromUrl
 // quando recebe uma URL http(s) completa.
@@ -174,38 +152,6 @@ export interface CrmVendedorFixo {
   nome: string;
   cargo?: string;
   assinatura?: string;
-}
-
-/**
- * Texto da oferta de um produto.
- *
- * Precisa ser IDÊNTICO ao `montarTextoDoProduto` do whatsapp-server: é assim
- * que o balão que aparece na hora e a mensagem que o cliente recebe são
- * reconhecidas como a mesma coisa. Ao mudar aqui, mudar lá também.
- */
-function montarTextoDoProduto({
-  nome,
-  preco,
-  specs,
-  obs,
-}: {
-  nome: string;
-  preco: number;
-  specs?: string[];
-  obs?: string;
-}): string {
-  const precoFmt = Number(preco || 0).toLocaleString("pt-BR", {
-    minimumFractionDigits: 2,
-  });
-  const linhasSpecs = specs?.length ? `\n• ${specs.join("\n• ")}` : "";
-  const linhaObs = obs && obs.trim() ? `\n\n_Obs: ${obs.trim()}_` : "";
-
-  return (
-    `⚡ *Oferta Balão da Informática*\n*${nome}*\n\n` +
-    `💵 *Preço Especial:* *R$ ${precoFmt}*${linhasSpecs}${linhaObs}\n\n` +
-    `📍 Pronta entrega na loja do Castelo Campinas!\n` +
-    `Para reservar ou tirar dúvidas, é só responder aqui! 🎈`
-  );
 }
 
 /** Uma mensagem encontrada pela busca por texto (`panel:search-messages`). */
@@ -260,11 +206,6 @@ export interface CrmWhatsAppClientProps {
   /** O que fazer no botão de sair. Sem isso, apenas volta ao portão de PIN. */
   onSair?: () => void;
   sairLabel?: string;
-  /**
-   * Volta para o painel de números do /crm. Só a administração passa isto —
-   * o vendedor na página pessoal não tem para onde voltar.
-   */
-  onVoltarPainel?: () => void;
 }
 
 // Identidade usada no cabeçalho quando quem está na tela é a administração e
@@ -281,7 +222,6 @@ export default function CrmWhatsAppClient({
   admin,
   onSair,
   sairLabel,
-  onVoltarPainel,
 }: CrmWhatsAppClientProps = {}) {
   const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -545,11 +485,15 @@ export default function CrmWhatsAppClient({
     }
     return RESPOSTAS_BASE;
   });
-  // As etiquetas são as do WhatsApp Business — chegam do servidor pelo evento
-  // `whatsapp:labels`. Começa vazio de propósito: a lista inventada que ficava
-  // aqui ("Cliente Quente", "Interessado") não existia no celular de ninguém,
-  // e aplicar uma delas num cliente não fazia nada no aparelho.
-  const [etiquetas, setEtiquetas] = useState<CrmEtiqueta[]>([]);
+  const [etiquetas, setEtiquetas] = useState<CrmEtiqueta[]>(() => {
+    if (typeof window !== "undefined") {
+      const s = localStorage.getItem("balao_crm_etiquetas");
+      if (s) {
+        try { return JSON.parse(s); } catch {}
+      }
+    }
+    return ETIQUETAS_BASE;
+  });
   // Real Database Catalog & Pricing Modes (Venda vs Custo)
   // Catálogo busca paginado no servidor (nunca o banco inteiro) — com
   // milhares de produtos, carregar tudo de uma vez e renderizar cada card
@@ -567,7 +511,7 @@ export default function CrmWhatsAppClient({
     () => flattenCategoryTree(buildCategoryTree(categoriasCatalogo)),
     [categoriasCatalogo]
   );
-  const [tipoPrecoCatalogo, setTipoPrecoCatalogo] = useState<"venda" | "custo">("custo");
+  const [tipoPrecoCatalogo, setTipoPrecoCatalogo] = useState<"venda" | "custo">("venda");
   const [catalogoCarregando, setCatalogoCarregando] = useState(false);
   const [buscaCatalogo, setBuscaCatalogo] = useState("");
   const [buscaCatalogoDebounced, setBuscaCatalogoDebounced] = useState("");
@@ -588,7 +532,7 @@ export default function CrmWhatsAppClient({
   const [modalProdutoAberto, setModalProdutoAberto] = useState(false);
   const [produtoModal, setProdutoModal] = useState<CrmProdutoCatalogo | null>(null);
   const [mpCusto, setMpCusto] = useState("0");
-  const [mpMargem, setMpMargem] = useState("50");
+  const [mpMargem, setMpMargem] = useState("25");
   const [mpPreco, setMpPreco] = useState("0");
   const [mpObs, setMpObs] = useState("");
   const [mpOrigem, setMpOrigem] = useState<"margem" | "preco">("margem");
@@ -605,10 +549,6 @@ export default function CrmWhatsAppClient({
   const [novoNumero, setNovoNumero] = useState("");
   const [novoNome, setNovoNome] = useState("");
   const [novaMsgInicial, setNovaMsgInicial] = useState("");
-
-  // Quick message via Kanban card
-  const [mensagemRapidaCardId, setMensagemRapidaCardId] = useState<string | null>(null);
-  const [mensagemRapidaTexto, setMensagemRapidaTexto] = useState("");
 
   // Web Fotos (Google / Bing transparent PNG)
   const [buscaFotosWeb, setBuscaFotosWeb] = useState("");
@@ -652,6 +592,7 @@ export default function CrmWhatsAppClient({
         localStorage.setItem("balao_crm_kanban_colunas", JSON.stringify(kanbanColunas));
       }
       localStorage.setItem("balao_crm_respostas", JSON.stringify(respostas));
+      localStorage.setItem("balao_crm_etiquetas", JSON.stringify(etiquetas));
       localStorage.setItem("balao_crm_vendedores", JSON.stringify(vendedores));
       // Na página pessoal quem manda é o cookie de sessão, então não guardamos
       // o vendedor no navegador — evita que o PC "lembre" de quem atendeu
@@ -698,19 +639,16 @@ export default function CrmWhatsAppClient({
           setDiagnosticoCatalogo(null);
         }
         const list: CrmProdutoCatalogo[] = rows.map((p: any) => {
-            // O preço vem do banco como texto no formato brasileiro ("14,70").
-            // A conversão que estava aqui apagava tudo que não fosse dígito ou
-            // ponto — a vírgula sumia e "14,70" virava 1470. O CRM anunciava
-            // R$ 1.470,00 um produto de R$ 14,70, para o cliente, no WhatsApp.
-            // parsePriceToNumber é a mesma função que o site usa e entende os
-            // dois formatos.
-            const precoNum = parsePriceToNumber(p.price);
+            const precoNum =
+              typeof p.price === "number"
+                ? p.price
+                : parseFloat(String(p.price).replace(/[^0-9.]/g, "")) || 0;
             const custoNum =
               typeof p.cost === "number" && p.cost > 0
                 ? p.cost
                 : Math.round(precoNum * 0.75);
             const margem =
-              custoNum > 0 ? Math.round(((precoNum - custoNum) / custoNum) * 100) : 50;
+              custoNum > 0 ? Math.round(((precoNum - custoNum) / custoNum) * 100) : 25;
             const fornecedor = p.supplier || p.brand || "Estoque Balão";
             const precoFmt =
               typeof p.price === "number"
@@ -730,28 +668,13 @@ export default function CrmWhatsAppClient({
               // Campos internos (custo de aquisição, markup aplicado,
               // qualidade da foto) nunca podem aparecer aqui: essa lista vai
               // direto pro texto da mensagem enviada ao cliente no WhatsApp.
-              // Decodifica entidades HTML e filtra specs vazias (":" , "&nbsp;" etc) que vêm do scraping da Kabum
-              specs: (() => {
-                const decode = (s: string) => String(s || "")
-                  .replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'")
-                  .replace(/&aacute;/g, "á").replace(/&eacute;/g, "é").replace(/&iacute;/g, "í").replace(/&oacute;/g, "ó").replace(/&uacute;/g, "ú")
-                  .replace(/&atilde;/g, "ã").replace(/&otilde;/g, "õ").replace(/&ccedil;/g, "ç").replace(/&Aacute;/g, "Á").replace(/&Eacute;/g, "É").replace(/&Iacute;/g, "Í").replace(/&Oacute;/g, "Ó").replace(/&Uacute;/g, "Ú").replace(/&Ccedil;/g, "Ç");
-                if (Array.isArray(p.specs)) return (p.specs as string[]).map(decode).filter((v: string) => v.trim() && v.trim() !== ":" && v.trim() !== ";");
-                if (typeof p.specs === "object" && p.specs) {
-                  return Object.entries(p.specs)
+              specs: Array.isArray(p.specs)
+                ? p.specs
+                : typeof p.specs === "object" && p.specs
+                ? Object.entries(p.specs)
                     .filter(([k]) => !["custo_origem", "markup", "qualidade_fotos"].includes(k))
-                    .map(([k, v]) => {
-                      const dk = decode(k).trim();
-                      const dv = decode(String(v ?? "")).trim();
-                      // pula specs vazias, só ":" , só ";" ou HTML quebrado como "-->"
-                      if (!dk || dk === "-->" || !dv || dv === ":" || dv === ";" || dv === ":" || dv.length < 2) return "";
-                      // se dk já contém ":" no final, não duplica
-                      return dv ? `${dk}: ${dv}` : "";
-                    })
-                    .filter(Boolean);
-                }
-                return [];
-              })(),
+                    .map(([k, v]) => `${k}: ${v}`)
+                : [],
             };
         });
         setProdutosCatalogo(list);
@@ -837,27 +760,20 @@ export default function CrmWhatsAppClient({
 
   // Socket.IO Integration
   useEffect(() => {
-    // `cancelado` porque a conexão agora espera o bilhete do site: sem a
-    // guarda, desmontar a tela durante essa espera deixaria um socket aberto
-    // sem ninguém para fechá-lo.
-    let cancelado = false;
-    let socket: Socket | null = null;
-    let vendedoresTimeout: ReturnType<typeof setTimeout> | undefined;
-
-    conectarPainel(serverUrl, { autoConnect: true, reconnectionAttempts: 25, reconnectionDelay: 1500 }).then(({ socket: s }) => {
-      if (cancelado) { s.disconnect(); return; }
-      socket = s;
-      socketRef.current = s;
-      ligarEventos(s);
+    const socket = io(serverUrl, {
+      transports: ["websocket", "polling"],
+      autoConnect: true,
+      reconnectionAttempts: 25,
+      reconnectionDelay: 1500,
     });
+    socketRef.current = socket;
 
-    function ligarEventos(socket: Socket) {
     socket.on("connect", () => {
       socket.emit("panel:bootstrap");
     });
 
     // Evita travar a tela de login pra sempre se o servidor demorar/estiver fora do ar.
-    vendedoresTimeout = setTimeout(() => setVendedoresCarregados(true), 6000);
+    const vendedoresTimeout = setTimeout(() => setVendedoresCarregados(true), 6000);
 
     socket.on("whatsapp:state", (payload: any) => {
       if (payload?.connected || payload?.status === "ready") {
@@ -954,24 +870,21 @@ export default function CrmWhatsAppClient({
           serverMsgs
             .filter((sm) => sm.chatId && isRealDirectChat(sm.chatId))
             .forEach((sm) => {
-              const existente = map.get(sm.id) as any;
               map.set(sm.id, {
                 id: sm.id,
                 chatId: sm.chatId,
                 from: sm.from,
                 to: sm.to,
-                body: sm.body || existente?.body || "",
+                body: sm.body || "",
                 direction: sm.direction || "in",
                 timestamp: sm.timestamp || Date.now(),
-                hasMedia: sm.hasMedia ?? existente?.hasMedia,
-                mediaType: sm.mediaType ?? existente?.mediaType,
-                mediaUrl: sm.mediaUrl || existente?.mediaUrl || null,
-                mediaErro: sm.mediaErro || existente?.mediaErro || null,
-                produto: (sm as any).produto || existente?.produto || null,
+                hasMedia: sm.hasMedia,
+                mediaType: sm.mediaType,
+                mediaUrl: sm.mediaUrl || null,
                 // Usa o status real persistido pelo message_ack quando existir
                 // (ver whatsapp-server), em vez de assumir "lida" sempre.
-                status: sm.status || existente?.status || "sent",
-              } as any);
+                status: sm.status || "sent",
+              });
             });
           return Array.from(map.values()).sort((a, b) => a.timestamp - b.timestamp);
         });
@@ -1009,7 +922,7 @@ export default function CrmWhatsAppClient({
       // resolvido apareciam como "273082677764270@lid" na lista de chats.
       const realNum = newMsg.realNumber || String(newMsg.chatId || "").replace(/@.*$/, "");
       const nomeSemJid = (newMsg.contactName || realNum || "").replace(/@.*$/, "");
-      const m: any = {
+      const m: CrmMensagem = {
         id: newMsg.id || `msg-${Date.now()}`,
         chatId: newMsg.chatId,
         from: newMsg.from || newMsg.chatId,
@@ -1019,48 +932,10 @@ export default function CrmWhatsAppClient({
         hasMedia: newMsg.hasMedia,
         mediaType: newMsg.mediaType,
         mediaUrl: newMsg.mediaUrl || null,
-        mediaErro: newMsg.mediaErro || null,
-        produto: (newMsg as any).produto || null,
         status: "read",
       };
 
-      setMensagens((prev) => {
-        const JANELA_MS = 2 * 60 * 1000;
-        const agora = Date.now();
-        const textoNovo = (m.body || "").trim();
-
-        const ehBalaoProvisorioDoPainel = (x: CrmMensagem) =>
-          (x.id as string).startsWith("msg-out-") ||
-          (x.id as string).startsWith("msg-prod-") ||
-          (x.id as string).startsWith("msg-doc-");
-
-        const candidatosRemovidos =
-          m.direction === "out" && textoNovo
-            ? prev.filter(
-                (x) =>
-                  ehBalaoProvisorioDoPainel(x) &&
-                  x.direction === "out" &&
-                  (x.body || "").trim() === textoNovo &&
-                  agora - (x.timestamp || 0) < JANELA_MS
-              )
-            : [];
-
-        const semDuplicataTemporaria = candidatosRemovidos.length
-          ? prev.filter((x) => !candidatosRemovidos.includes(x))
-          : prev;
-
-        // transfere produto/midia se o servidor veio magro (evita foto sumir)
-        let mEnriquecido: any = { ...m };
-        if (candidatosRemovidos.length && (!mEnriquecido.produto || !mEnriquecido.mediaUrl)) {
-          const fonte = [...candidatosRemovidos].reverse().find((x: any) => x.produto) || candidatosRemovidos[0];
-          if ((fonte as any).produto && !mEnriquecido.produto) mEnriquecido.produto = (fonte as any).produto;
-          if ((fonte as any).mediaUrl && !mEnriquecido.mediaUrl) mEnriquecido.mediaUrl = (fonte as any).mediaUrl;
-          if ((fonte as any).hasMedia && !mEnriquecido.hasMedia) mEnriquecido.hasMedia = (fonte as any).hasMedia;
-          if ((fonte as any).mediaType && !mEnriquecido.mediaType) mEnriquecido.mediaType = (fonte as any).mediaType;
-        }
-
-        return [...semDuplicataTemporaria.filter((x: any) => x.id !== mEnriquecido.id), mEnriquecido];
-      });
+      setMensagens((prev) => [...prev.filter((x) => x.id !== m.id), m]);
 
       setChats((prev) => {
         const idx = prev.findIndex((c) => c.id === newMsg.chatId);
@@ -1110,8 +985,7 @@ export default function CrmWhatsAppClient({
       atualizarStatusMensagem(
         payload.tempId,
         payload.success ? "sent" : "failed",
-        payload.id,
-        payload.body
+        payload.id
       );
       if (!payload.success) {
         showToast(`⛔ Mensagem não chegou ao WhatsApp: ${payload.error || "falha desconhecida"}`);
@@ -1138,31 +1012,6 @@ export default function CrmWhatsAppClient({
       setKanbanPorChat(mapa && typeof mapa === "object" ? mapa : {});
     });
 
-    // Etiquetas do WhatsApp Business: as mesmas do celular, com as mesmas
-    // cores. `chatLabels` diz quais conversas têm cada uma — é o que faz a
-    // etiqueta colocada no aparelho aparecer aqui.
-    socket.on(
-      "whatsapp:labels",
-      (payload: { labels?: any[]; chatLabels?: Record<string, string[]> }) => {
-        const lista = Array.isArray(payload?.labels) ? payload.labels : [];
-        setEtiquetas(
-          lista
-            .filter((e) => e && e.nome)
-            .map((e, i) => ({ id: Number(e.id) || i + 1, nome: String(e.nome), cor: String(e.cor || "#5f6368") }))
-        );
-
-        const porConversa = payload?.chatLabels || {};
-        setChats((prev) =>
-          prev.map((c) => {
-            const doWhatsApp = porConversa[c.id];
-            // Sem entrada no mapa a conversa não tem etiqueta — e limpar é
-            // correto: significa que alguém tirou a etiqueta no celular.
-            return { ...c, tags: Array.isArray(doWhatsApp) ? doWhatsApp : [] };
-          })
-        );
-      }
-    );
-
     // Preferências pessoais chegando do servidor — é isto que faz o painel
     // abrir do mesmo jeito em qualquer computador da loja.
     socket.on("whatsapp:preferencias", (prefs: PreferenciasVendedor | null) => {
@@ -1184,12 +1033,9 @@ export default function CrmWhatsAppClient({
       setPreferenciasCarregadas(true);
     });
 
-    }
-
     return () => {
-      cancelado = true;
       clearTimeout(vendedoresTimeout);
-      socket?.disconnect();
+      socket.disconnect();
       socketRef.current = null;
     };
   }, [serverUrl]);
@@ -1252,34 +1098,12 @@ export default function CrmWhatsAppClient({
   // foi conversado. Só busca uma vez por conversa: depois as mensagens ficam
   // no servidor e chegam por conta própria.
   const historicosPedidos = useRef<Set<string>>(new Set());
-  // Quantas vezes já se tentou rebaixar a mídia desta conversa. Reabrir a
-  // conversa é a forma do vendedor pedir "tenta de novo", mas sem teto isso
-  // viraria um pedido a cada clique numa conversa que nunca vai resolver.
-  const tentativasDeMidia = useRef<Map<string, number>>(new Map());
-  // Sem isto o efeito dispararia de novo a cada lote de mensagens que o
-  // próprio pedido faz chegar.
-  const historicoEmVoo = useRef<Set<string>>(new Set());
-  const MAX_TENTATIVAS_DE_MIDIA = 3;
-
   useEffect(() => {
     const chatId = chatSelecionadoId;
     if (!chatId || !socketRef.current?.connected) return;
-
-    // Conversa com foto que não baixou merece nova tentativa: o servidor
-    // precisa reabrir a conversa no WhatsApp Web para alcançar o arquivo, e é
-    // isso que o carregamento de histórico faz.
-    const temMidiaFaltando = mensagens.some(
-      (m) => m.chatId === chatId && m.hasMedia && !m.mediaUrl
-    );
-    const jaTentou = tentativasDeMidia.current.get(chatId) || 0;
-    const vaiRetentar = temMidiaFaltando && jaTentou < MAX_TENTATIVAS_DE_MIDIA;
-
-    if (historicoEmVoo.current.has(chatId)) return;
-    if (historicosPedidos.current.has(chatId) && !vaiRetentar) return;
-    if (vaiRetentar) tentativasDeMidia.current.set(chatId, jaTentou + 1);
+    if (historicosPedidos.current.has(chatId)) return;
 
     historicosPedidos.current.add(chatId);
-    historicoEmVoo.current.add(chatId);
     setCarregandoHistorico(true);
 
     socketRef.current.emit(
@@ -1287,9 +1111,8 @@ export default function CrmWhatsAppClient({
       // `maisAntigas` faz o WhatsApp buscar o passado da conversa no servidor
       // dele antes de ler — sem isso vêm só os últimos recados que estavam na
       // tela, e o vendedor abre o cliente sem ver o que já foi combinado.
-      { chatId, limite: 300, maisAntigas: 5 },
+      { chatId, limite: 150, maisAntigas: 3 },
       (res: { ok?: boolean; erro?: string } | undefined) => {
-        historicoEmVoo.current.delete(chatId);
         setCarregandoHistorico(false);
         if (!res?.ok && res?.erro) {
           // Deixa tentar de novo se falhou — pode ter sido queda momentânea.
@@ -1297,9 +1120,7 @@ export default function CrmWhatsAppClient({
         }
       }
     );
-    // `mensagens` entra de propósito: é o que permite notar que a conversa
-    // aberta tem foto sem arquivo e pedir o histórico de novo.
-  }, [chatSelecionadoId, mensagens]);
+  }, [chatSelecionadoId]);
 
   // Busca mais um pedaço do passado da conversa aberta, sob demanda.
   const carregarMaisAntigas = () => {
@@ -1664,16 +1485,8 @@ export default function CrmWhatsAppClient({
   const atualizarStatusMensagem = (
     id: string,
     status: CrmMensagem["status"],
-    idReal?: string | null,
-    bodyReal?: string | null
+    idReal?: string | null
   ) => {
-    const corrigir = (m: CrmMensagem): CrmMensagem => ({
-      ...m,
-      status,
-      // O texto que o cliente recebeu de fato manda no que aparece na tela.
-      body: bodyReal || m.body,
-    });
-
     setMensagens((prev) => {
       // Assim que o WhatsApp confirma o envio, o balão otimista assume o id
       // DEFINITIVO da mensagem.
@@ -1691,12 +1504,12 @@ export default function CrmWhatsAppClient({
         if (jaExiste) {
           return prev
             .filter((m) => m.id !== id)
-            .map((m) => (m.id === trocarPara ? corrigir(m) : m));
+            .map((m) => (m.id === trocarPara ? { ...m, status } : m));
         }
-        return prev.map((m) => (m.id === id ? { ...corrigir(m), id: trocarPara } : m));
+        return prev.map((m) => (m.id === id ? { ...m, id: trocarPara, status } : m));
       }
 
-      return prev.map((m) => (m.id === id ? corrigir(m) : m));
+      return prev.map((m) => (m.id === id ? { ...m, status } : m));
     });
   };
 
@@ -1815,19 +1628,10 @@ export default function CrmWhatsAppClient({
 
     const precoFinal = precoCustom || prod.preco;
     const precoFmt = `R$ ${precoFinal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+    const specsTxt = prod.specs?.length ? `\n• ${prod.specs.join("\n• ")}` : "";
+    const obsTxt = obsCustom?.trim() ? `\n\n_Obs: ${obsCustom.trim()}_` : "";
 
-    // Palavra por palavra igual ao texto do servidor (montarTextoDoProduto).
-    //
-    // Antes o painel escrevia a sua versão ("Oferta Balão da Informática:",
-    // "Para garantir a reserva") e o servidor mandava outra ao cliente
-    // ("Oferta Balão da Informática", "Para reservar"). Textos diferentes =
-    // mensagens diferentes para a tela, e a mesma oferta aparecia duas vezes.
-    const textoFormatado = montarTextoDoProduto({
-      nome: prod.nome,
-      preco: precoFinal,
-      specs: prod.specs,
-      obs: obsCustom,
-    });
+    const textoFormatado = `⚡ *Oferta Balão da Informática:*\n*${prod.nome}*\n\n💵 *Preço Especial:* *${precoFmt}*${specsTxt}${obsTxt}\n\n📍 Pronta entrega na loja do Castelo Campinas!\nPara garantir a reserva ou tirar dúvidas, é só responder aqui! 🎈`;
 
     const produtoResumo: CrmProdutoResumo = {
       id: prod.id,
@@ -2015,8 +1819,8 @@ export default function CrmWhatsAppClient({
   // Product Modal Sync
   const abrirModalProduto = (p: CrmProdutoCatalogo) => {
     setProdutoModal(p);
-    const custo = p.custo || Math.round(p.preco * 0.67);
-    const margem = p.margem || 50;
+    const custo = p.custo || Math.round(p.preco * 0.76);
+    const margem = p.margem || 28;
     setMpCusto(String(custo));
     setMpMargem(String(margem));
     setMpPreco(String(Math.round(custo * (1 + margem / 100))));
@@ -2056,8 +1860,6 @@ export default function CrmWhatsAppClient({
     const targetId = chatIdOverride || chatSelecionadoId;
     if (!targetId) return;
 
-    // Mostra na hora e manda para o WhatsApp. Antes isto só mudava a tela: a
-    // etiqueta parecia aplicada aqui e não existia no celular.
     setChats((prev) =>
       prev.map((c) => {
         if (c.id !== targetId) return c;
@@ -2068,13 +1870,6 @@ export default function CrmWhatsAppClient({
         return { ...c, tags: novasTags };
       })
     );
-
-    // O servidor devolve `whatsapp:labels` depois de aplicar de verdade, e
-    // aquilo corrige a tela caso o WhatsApp recuse.
-    socketRef.current?.emit("panel:toggle-chat-label", {
-      chatId: targetId,
-      label: nomeEtiqueta,
-    });
   };
 
   // Create new conversation
@@ -2408,16 +2203,6 @@ export default function CrmWhatsAppClient({
           <span className="bg-white text-[#0a6e3d] rounded-full px-3 py-1 text-xs font-bold shadow-sm max-w-[170px] truncate">
             {vendedorAtivo0?.nome || "—"}
           </span>
-          {onVoltarPainel && (
-            <button
-              onClick={onVoltarPainel}
-              title="Voltar para o painel de números"
-              className="bg-white/90 hover:bg-white text-[#0a6e3d] rounded-full px-2.5 py-1 text-xs font-bold transition-all shadow-sm cursor-pointer"
-            >
-              📊 Painel
-            </button>
-          )}
-
           <button
             onClick={sairDoVendedor}
             title={
@@ -2629,36 +2414,6 @@ export default function CrmWhatsAppClient({
                 />
                 {/* Busca pelo TEXTO das conversas. A de cima acha pelo nome;
                     esta acha pelo que foi falado, em todas as conversas. */}
-                {/* Puxa o histórico de muitas conversas de uma vez, para não
-                    encontrar tela vazia ao abrir um cliente pela 1ª vez. */}
-                <button
-                  onClick={() => {
-                    if (!socketRef.current?.connected) {
-                      showToast("Sem conexão com o servidor do WhatsApp.");
-                      return;
-                    }
-                    if (
-                      !confirm(
-                        "Buscar o histórico de até 200 conversas no WhatsApp?\n\n" +
-                          "Leva alguns minutos e roda em segundo plano — dá para continuar atendendo normalmente."
-                      )
-                    ) {
-                      return;
-                    }
-                    socketRef.current.emit(
-                      "panel:carregar-todos-historicos",
-                      { limite: 200 },
-                      (res: { ok?: boolean; erro?: string } | undefined) => {
-                        if (!res?.ok && res?.erro) showToast(res.erro);
-                      }
-                    );
-                  }}
-                  title="Baixar as mensagens antigas de várias conversas de uma vez"
-                  className="w-full py-1 px-3 rounded-full text-xs font-bold border bg-white text-[#202124] border-[#e3e3e3] hover:bg-[#f0f2f5] transition-colors cursor-pointer"
-                >
-                  ⬇️ Puxar histórico das conversas
-                </button>
-
                 <button
                   onClick={() => {
                     const abrindo = !mostrarBuscaMensagem;
@@ -2810,48 +2565,34 @@ export default function CrmWhatsAppClient({
                             : "hover:bg-[#f0f2f5]"
                         }`}
                       >
-                        {/* Foto do contato, com os selos de aviso POR FORA.
-                            O recorte redondo da foto (`overflow-hidden`) vale
-                            só para a imagem: enquanto os selos moravam dentro
-                            dele, eram cortados pela borda e apareciam por
-                            dentro da foto, onde se confundem com ela. */}
-                        <div className="relative shrink-0">
-                          <div className="w-10 h-10 rounded-full bg-[#0f9d58] text-white flex items-center justify-center font-bold text-sm overflow-hidden shadow-xs border border-[#e3e3e3]">
-                            {avatarSrc ? (
-                              /* eslint-disable-next-line @next/next/no-img-element */
-                              <img
-                                src={avatarSrc}
-                                referrerPolicy="no-referrer"
-                                crossOrigin="anonymous"
-                                alt=""
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  (e.target as HTMLElement).style.display = "none";
-                                }}
-                              />
-                            ) : (
-                              <span>{ini}</span>
-                            )}
-                          </div>
-
+                        {/* Real Profile Avatar */}
+                        <div className="w-10 h-10 rounded-full bg-[#0f9d58] text-white flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden relative shadow-xs border border-[#e3e3e3]">
+                          {avatarSrc ? (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img
+                              src={avatarSrc}
+                              referrerPolicy="no-referrer"
+                              crossOrigin="anonymous"
+                              alt=""
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLElement).style.display = "none";
+                              }}
+                            />
+                          ) : (
+                            <span>{ini}</span>
+                          )}
                           {chat.unread > 0 && (
-                            <span
-                              title={`${chat.unread} mensagem(ns) não lida(s)`}
-                              // O anel branco separa o selo da foto: sobre uma
-                              // imagem escura, vermelho sobre vermelho some.
-                              // `min-w` em vez de largura fixa porque duas
-                              // casas não cabem num círculo de 16px.
-                              className="absolute -top-1.5 -right-1.5 z-10 min-w-[18px] h-[18px] px-1 bg-[#d93025] text-white rounded-full text-[10px] leading-none flex items-center justify-center font-bold ring-2 ring-white shadow-sm tabular-nums"
-                            >
-                              {chat.unread > 99 ? "99+" : chat.unread}
+                            <span className="absolute -top-1 -right-1 bg-[#d93025] text-white rounded-full w-4 h-4 text-[10px] flex items-center justify-center font-bold">
+                              {chat.unread}
                             </span>
                           )}
                           {chat.precisaAtencao && (
                             <span
                               title="Transferido ou aguardando resposta"
-                              className="absolute -bottom-1.5 -right-1.5 z-10 w-[18px] h-[18px] bg-amber-500 text-white rounded-full text-[10px] leading-none flex items-center justify-center font-bold ring-2 ring-white shadow-sm"
+                              className="absolute -bottom-1 -right-1 bg-amber-500 text-white rounded-full w-4 h-4 text-[10px] flex items-center justify-center font-bold shadow-xs"
                             >
-                              !
+                              ⚠️
                             </span>
                           )}
                         </div>
@@ -2872,21 +2613,9 @@ export default function CrmWhatsAppClient({
                             </span>
                           </div>
 
-                          {/* Número no formato 55 19 987510267. Quando o
-                              WhatsApp entrega a conversa só pelo id interno
-                              (@lid), não há número para mostrar — e dizer isso
-                              é melhor que exibir o id como se fosse telefone. */}
-                          <div
-                            className={`text-[11px] font-mono font-semibold tracking-tight ${
-                              numeroFormatado ? "text-[#0a6e3d]" : "text-[#9aa0a6] italic"
-                            }`}
-                            title={
-                              numeroFormatado
-                                ? undefined
-                                : "O WhatsApp não informou o telefone deste contato (ele está salvo na agenda e chega por id interno)."
-                            }
-                          >
-                            {numeroFormatado || "número não identificado"}
+                          {/* Clean Phone Number Format: xx xx xxxxxxxxx (ex: 55 19 987510267) */}
+                          <div className="text-[11px] font-mono text-[#0a6e3d] font-semibold tracking-tight">
+                            {numeroFormatado}
                           </div>
 
                           <p
@@ -3164,11 +2893,7 @@ export default function CrmWhatsAppClient({
                             {/* Audio Player if Voice Note */}
                             {m.mediaType === "audio" || m.mediaType === "ptt" || m.isVoice ? (
                               <div className="py-1">
-                                <audio
-                                  src={resolverUrlMidia(m.mediaUrl, serverUrl) || ""}
-                                  controls
-                                  className="w-60 h-8"
-                                />
+                                <audio src={m.mediaUrl || ""} controls className="w-60 h-8" />
                               </div>
                             ) : null}
 
@@ -3182,7 +2907,7 @@ export default function CrmWhatsAppClient({
                                 </div>
                                 {m.mediaUrl && (
                                   <a
-                                    href={resolverUrlMidia(m.mediaUrl, serverUrl)!}
+                                    href={m.mediaUrl}
                                     target="_blank"
                                     rel="noreferrer"
                                     className="bg-[#0f9d58] text-white text-[10px] font-bold px-2 py-1 rounded"
@@ -3198,34 +2923,12 @@ export default function CrmWhatsAppClient({
                               <div className="w-full max-h-56 bg-black/5 rounded-lg overflow-hidden mb-2 flex items-center justify-center">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
-                                  src={resolverUrlMidia(m.mediaUrl, serverUrl)!}
+                                  src={m.mediaUrl}
                                   referrerPolicy="no-referrer"
                                   crossOrigin="anonymous"
                                   alt=""
                                   className="max-h-56 max-w-full object-contain"
                                 />
-                              </div>
-                            )}
-
-                            {/* Mídia que o servidor não conseguiu baixar: sem
-                                este aviso a mensagem aparecia como um balão
-                                vazio e parecia que o cliente não mandou nada. */}
-                            {m.hasMedia && !m.mediaUrl && !m.produto && (
-                              <div className="flex items-center gap-2 px-2 py-1.5 mb-1 rounded-lg bg-black/5 text-[11px] text-[#5f6368]">
-                                <span>📎</span>
-                                <span>
-                                  {m.mediaType === "image" ? "Foto" : "Arquivo"} recebido — o
-                                  servidor não conseguiu baixar o arquivo. Reabra a conversa para
-                                  tentar de novo.
-                                  {/* O motivo técnico fica à vista de propósito: é o
-                                      que permite consertar sem precisar abrir o log
-                                      de dentro do container. */}
-                                  {m.mediaErro && (
-                                    <span className="block mt-0.5 font-mono text-[10px] opacity-70 break-all">
-                                      {m.mediaErro}
-                                    </span>
-                                  )}
-                                </span>
                               </div>
                             )}
 
@@ -3475,9 +3178,43 @@ export default function CrmWhatsAppClient({
                 {/* ABA 1: CATÁLOGO (SINCRONIZADO COM O SITE / BANCO DE DADOS) */}
                 {abaAtual === "catalogo" && (
                   <div className="space-y-3">
-                    {/* Margem 50% — discreto */}
-                    <div className="flex items-center justify-between px-1">
-                      <span className="text-[10px] font-semibold text-[#7a5c00]/70 bg-[#fff8e1]/60 border border-[#f2c94c]/30 rounded-full px-2 py-0.5">50% margem</span>
+                    {/* Seletor de Modo: Preço de Venda (Site) vs Preço de Custo (+ Lucro) */}
+                    <div className="bg-[#f0f2f5] p-1 rounded-xl border border-[#e3e3e3] flex gap-1 text-xs">
+                      <button
+                        onClick={() => setTipoPrecoCatalogo("venda")}
+                        className={`flex-1 py-2 px-2 rounded-lg font-bold transition-all cursor-pointer text-center ${
+                          tipoPrecoCatalogo === "venda"
+                            ? "bg-[#0f9d58] text-white shadow-xs"
+                            : "text-[#5f6368] hover:bg-white"
+                        }`}
+                      >
+                        🏷️ Preço de Venda (Site)
+                      </button>
+                      <button
+                        onClick={() => setTipoPrecoCatalogo("custo")}
+                        className={`flex-1 py-2 px-2 rounded-lg font-bold transition-all cursor-pointer text-center ${
+                          tipoPrecoCatalogo === "custo"
+                            ? "bg-[#d97706] text-white shadow-xs"
+                            : "text-[#5f6368] hover:bg-white"
+                        }`}
+                      >
+                        📦 Preço de Custo (+ Margem)
+                      </button>
+                    </div>
+
+                    {/* Explicação do Modo Ativo */}
+                    <div
+                      className={`rounded-xl p-2.5 text-[11px] font-semibold flex items-center justify-between border ${
+                        tipoPrecoCatalogo === "venda"
+                          ? "bg-[#e7f6ec] border-[#0f9d58]/40 text-[#0a6e3d]"
+                          : "bg-[#fff8e1] border-[#f2c94c] text-[#7a5c00]"
+                      }`}
+                    >
+                      <span>
+                        {tipoPrecoCatalogo === "venda"
+                          ? "🏷️ Modo Venda: Envia o valor exato cadastrado no site/banco de dados."
+                          : "⚠️ Modo Custo: NUNCA envia no custo! Solicita o acréscimo de lucro antes de enviar."}
+                      </span>
                       <button
                         onClick={() => {
                           carregarCatalogoBanco();
@@ -3603,8 +3340,8 @@ export default function CrmWhatsAppClient({
                                   <button
                                     onClick={() => {
                                       setProdutoModal(prod);
-                                      const custo = prod.custo || Math.round(prod.preco * 0.67);
-                                      const margemPadrao = 50;
+                                      const custo = prod.custo || Math.round(prod.preco * 0.75);
+                                      const margemPadrao = 25;
                                       const precoVendaCalc = Math.round(custo * (1 + margemPadrao / 100));
                                       setMpCusto(String(custo));
                                       setMpMargem(String(margemPadrao));
@@ -3873,28 +3610,8 @@ export default function CrmWhatsAppClient({
                 {abaAtual === "etiquetas" && (
                   <div className="space-y-3">
                     <p className="text-[11px] text-[#5f6368]">
-                      São as etiquetas do WhatsApp Business da loja — as mesmas do celular.
-                      Clique para aplicar ou remover da conversa selecionada.
+                      Clique na etiqueta para aplicar ou remover da conversa selecionada.
                     </p>
-
-                    {etiquetas.length === 0 && (
-                      <div className="rounded-xl border border-dashed border-[#e3e3e3] bg-[#f9fafb] px-3 py-4 text-center">
-                        <p className="text-xs text-[#5f6368]">
-                          Nenhuma etiqueta encontrada no WhatsApp.
-                        </p>
-                        <p className="mt-1.5 text-[11px] leading-relaxed text-[#856404]">
-                          Etiquetas existem apenas em contas <b>WhatsApp Business</b>, e são criadas
-                          no celular ou no WhatsApp Web. Assim que existirem lá, aparecem aqui.
-                        </p>
-                        <button
-                          onClick={() => socketRef.current?.emit("panel:refresh-labels")}
-                          className="mt-2 cursor-pointer rounded-lg bg-[#0f9d58] px-3 py-1.5 text-xs font-bold text-white"
-                        >
-                          🔄 Buscar etiquetas agora
-                        </button>
-                      </div>
-                    )}
-
                     <div className="space-y-2">
                       {etiquetas.map((e) => {
                         const jaTem = chatSelecionado?.tags.includes(e.nome);
@@ -4169,54 +3886,44 @@ export default function CrmWhatsAppClient({
             </aside>
           </div>
 
-          {/* BOTTOM KANBAN TRAY - deslizante 70% / minimizado mostra busca + 1 fila */}
+          {/* BOTTOM KANBAN TRAY */}
           <div
-            className={`border-t border-[#e3e3e3] bg-[#f0f2f5] flex flex-col px-3.5 py-2 transition-all duration-300 ease-in-out shrink-0 ${
+            className={`border-t border-[#e3e3e3] bg-[#f0f2f5] flex flex-col px-3.5 py-2 transition-all duration-200 shrink-0 ${
               kanbanTamanho === "expandido"
-                ? "h-[70vh] min-h-[400px]"
+                ? "h-[65vh] min-h-[300px]"
                 : kanbanTamanho === "recolhido"
-                ? "h-[190px] min-h-[190px]"
+                ? "h-11 min-h-[44px]"
                 : "h-56 min-h-[200px]"
             }`}
           >
-            {/* Topbar of Kanban - clique no fundo desliza, mas não quando clica na busca/botões */}
-            <div
-              onClick={(e) => {
-                const t = e.target as HTMLElement;
-                if (t.closest("input, button, a, select, textarea")) return;
-                setKanbanTamanho(
-                  kanbanTamanho === "expandido" ? "recolhido" : "expandido"
-                );
-              }}
-              className="flex items-center justify-between gap-3 mb-2 shrink-0 cursor-pointer hover:bg-white/50 -mx-1 px-1 py-1 rounded-lg transition-colors"
-              title="Clique no fundo para expandir (70%) ou recolher"
-            >
-              <h4 className="font-bold text-xs text-[#202124] flex items-center gap-1.5 select-none">
+            {/* Topbar of Kanban */}
+            <div className="flex items-center justify-between gap-3 mb-2 shrink-0">
+              <h4
+                onClick={() =>
+                  setKanbanTamanho(kanbanTamanho === "recolhido" ? "normal" : "recolhido")
+                }
+                className="font-bold text-xs text-[#202124] cursor-pointer flex items-center gap-1.5"
+                title="Clique para recolher ou expandir o Kanban"
+              >
                 🗂 <b>Kanban de atendimento</b>
-                <span className="text-[9px] font-normal text-[#5f6368] bg-white border border-[#e3e3e3] rounded-full px-1.5 py-0.5 hidden sm:inline">
-                  {kanbanTamanho === "expandido" ? "▼ recolher" : "▲ expandir 70%"}
-                </span>
               </h4>
 
-              <div className="relative flex-1 max-w-xs" onClick={(e) => e.stopPropagation()}>
-                <input
-                  type="text"
-                  placeholder="🔍 Buscar cliente no kanban…"
-                  value={kanbanBusca}
-                  onChange={(e) => setKanbanBusca(e.target.value)}
-                  onClick={(e) => e.stopPropagation()}
-                  onFocus={(e) => e.stopPropagation()}
-                  className="w-full px-3 py-1 bg-white border border-[#e3e3e3] rounded-full text-xs outline-none focus:border-[#0f9d58]"
-                />
-              </div>
+              {kanbanTamanho !== "recolhido" && (
+                <div className="relative flex-1 max-w-xs">
+                  <input
+                    type="text"
+                    placeholder="🔍 Buscar cliente no kanban…"
+                    value={kanbanBusca}
+                    onChange={(e) => setKanbanBusca(e.target.value)}
+                    className="w-full px-3 py-1 bg-white border border-[#e3e3e3] rounded-full text-xs outline-none focus:border-[#0f9d58]"
+                  />
+                </div>
+              )}
 
-              <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center gap-2">
                 {kanbanTamanho !== "recolhido" && totalForaDoFunil > 0 && (
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setMostrarForaDoFunil(!mostrarForaDoFunil);
-                    }}
+                    onClick={() => setMostrarForaDoFunil(!mostrarForaDoFunil)}
                     title="Clientes que você tirou do funil — dá para trazer de volta"
                     className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors cursor-pointer ${
                       mostrarForaDoFunil
@@ -4230,8 +3937,7 @@ export default function CrmWhatsAppClient({
 
                 {kanbanTamanho !== "recolhido" && (
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
+                    onClick={() => {
                       const nome = prompt("Nome da nova coluna (ex: Negociação, Orçamento, Fechado):");
                       if (!nome || !nome.trim()) return;
                       const novaCol: KanbanColumn = {
@@ -4249,16 +3955,15 @@ export default function CrmWhatsAppClient({
                 )}
 
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
+                  onClick={() =>
                     setKanbanTamanho(
                       kanbanTamanho === "expandido"
                         ? "normal"
                         : kanbanTamanho === "normal"
                         ? "expandido"
                         : "normal"
-                    );
-                  }}
+                    )
+                  }
                   className="bg-[#e8eaed] hover:bg-[#dadce0] text-[#202124] px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer"
                   title="Expandir / Recolher Kanban"
                 >
@@ -4267,8 +3972,9 @@ export default function CrmWhatsAppClient({
               </div>
             </div>
 
-            {/* Kanban Columns Layout - recolhido mostra só 1ª fila com scroll horizontal */}
-            <div className={`flex-1 flex gap-3 overflow-x-auto pb-1 items-stretch min-h-0 ${kanbanTamanho === "recolhido" ? "max-h-[110px] overflow-hidden" : ""}`}>
+            {/* Kanban Columns Layout */}
+            {kanbanTamanho !== "recolhido" && (
+              <div className="flex-1 flex gap-3 overflow-x-auto pb-1 items-stretch min-h-0">
                 {kanbanColunas.map((col) => {
                   const cardsNaColuna = chats
                     .filter((c) => isRealDirectChat(c.id))
@@ -4391,17 +4097,6 @@ export default function CrmWhatsAppClient({
                                   ))}
                                 </div>
                               )}
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setMensagemRapidaCardId(card.id);
-                                  setMensagemRapidaTexto("");
-                                }}
-                                className="w-full mt-2 bg-[#0f9d58] hover:bg-[#0a6e3d] text-white py-1.5 px-2 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 transition-colors shadow-sm"
-                                title="Enviar mensagem rápida sem sair do kanban"
-                              >
-                                💬 Enviar mensagem
-                              </button>
                             </div>
                           ))
                         )}
@@ -4470,106 +4165,10 @@ export default function CrmWhatsAppClient({
                   </div>
                 )}
               </div>
+            )}
           </div>
         </div>
       )}
-
-      {/* JANELA RÁPIDA DE MENSAGEM VIA KANBAN - sem sair do kanban */}
-      {mensagemRapidaCardId &&
-        (() => {
-          const chatRapido = chats.find((c) => c.id === mensagemRapidaCardId);
-          if (!chatRapido) return null;
-          return (
-            <div
-              className="fixed inset-0 bg-black/40 z-40 flex items-center justify-center p-4"
-              onClick={() => setMensagemRapidaCardId(null)}
-            >
-              <div
-                onClick={(e) => e.stopPropagation()}
-                className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-[#e3e3e3] animate-in fade-in zoom-in duration-150"
-              >
-                <div className="bg-[#0f9d58] text-white px-4 py-3 flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm overflow-hidden">
-                      {formatAvatarUrl(chatRapido.pic, serverUrl) ? (
-                        <img src={formatAvatarUrl(chatRapido.pic, serverUrl)!} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        <span>{chatRapido.nome.charAt(0).toUpperCase()}</span>
-                      )}
-                    </div>
-                    <div>
-                      <div className="font-bold text-sm">{chatRapido.nome}</div>
-                      <div className="text-[11px] opacity-90 font-mono">{formatarNumeroExibicao(chatRapido.numero || chatRapido.id)}</div>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setMensagemRapidaCardId(null)}
-                    className="text-white/80 hover:text-white hover:bg-white/10 rounded-full w-7 h-7 flex items-center justify-center"
-                  >
-                    ✕
-                  </button>
-                </div>
-                <div className="p-4 space-y-3">
-                  <textarea
-                    autoFocus
-                    value={mensagemRapidaTexto}
-                    onChange={(e) => setMensagemRapidaTexto(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-                        e.preventDefault();
-                        if (mensagemRapidaTexto.trim() && socketRef.current?.connected) {
-                          const num = chatRapido.numero || chatRapido.id.replace(/@.*$/, "");
-                          socketRef.current.emit("panel:send-message", {
-                            number: num.replace(/\D/g, ""),
-                            text: mensagemRapidaTexto.trim(),
-                            chatId: chatRapido.id,
-                          });
-                          showToast(`Mensagem enviada para ${chatRapido.nome} ✓`);
-                          setMensagemRapidaTexto("");
-                          setMensagemRapidaCardId(null);
-                        }
-                      }
-                    }}
-                    placeholder={`Mensagem para ${chatRapido.nome}... (Ctrl+Enter para enviar)`}
-                    rows={4}
-                    className="w-full px-3 py-2 border border-[#e3e3e3] rounded-xl text-sm outline-none focus:border-[#0f9d58] focus:ring-1 focus:ring-[#0f9d58]/20 resize-none"
-                  />
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setMensagemRapidaCardId(null)}
-                      className="flex-1 bg-white border border-[#e3e3e3] hover:bg-[#f0f2f5] text-[#5f6368] py-2 rounded-xl text-sm font-bold"
-                    >
-                      Cancelar
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (!mensagemRapidaTexto.trim()) return;
-                        if (!socketRef.current?.connected) {
-                          showToast("WhatsApp desconectado — aguarde reconectar");
-                          return;
-                        }
-                        const num = chatRapido.numero || chatRapido.id.replace(/@.*$/, "");
-                        socketRef.current.emit("panel:send-message", {
-                          number: num.replace(/\D/g, ""),
-                          text: mensagemRapidaTexto.trim(),
-                          chatId: chatRapido.id,
-                        });
-                        showToast(`Mensagem enviada para ${chatRapido.nome} ✓`);
-                        setMensagemRapidaTexto("");
-                        setMensagemRapidaCardId(null);
-                      }}
-                      disabled={!mensagemRapidaTexto.trim()}
-                      className="flex-1 bg-[#0f9d58] hover:bg-[#0a6e3d] disabled:opacity-40 disabled:cursor-not-allowed text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5"
-                    >
-                      ✈️ Enviar
-                    </button>
-                  </div>
-                  <p className="text-[10px] text-[#5f6368] text-center">Dica: Ctrl+Enter envia rápido • Esc fecha</p>
-                </div>
-              </div>
-            </div>
-          );
-        })()}
 
       {/* MODAL STATUS / STORIES DO WHATSAPP */}
       {modalStatusAberto && (

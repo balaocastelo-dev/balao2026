@@ -1,3 +1,0 @@
-# Scripts de shell SEMPRE com LF — o bash da VPS não entende CRLF.
-*.sh text eol=lf
-*.ps1 text eol=crlf

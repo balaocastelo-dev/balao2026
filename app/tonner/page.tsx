@@ -24,8 +24,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
-import TonerCalculadora from "@/components/TonerCalculadora";
-import { getCachedProdutosRecentes, getCachedProductsByKeywords } from "@/lib/cache";
+import { getProducts, searchProductsByKeywords } from "@/lib/db";
 import JsonLd, {
   generateOrganizationSchema,
   generateBreadcrumbSchema,
@@ -51,11 +50,11 @@ export const metadata: Metadata = {
     "suprimentos de impressao campinas",
     "toner compatível campinas cambui",
   ],
-  alternates: { canonical: "https://www.balao.info/toner" },
+  alternates: { canonical: "https://www.balao.info/tonner" },
   openGraph: {
     type: "website",
     locale: "pt_BR",
-    url: "https://www.balao.info/toner",
+    url: "https://www.balao.info/tonner",
     title: "Venda e Entrega de Toner em Campinas | Balão da Informática",
     description:
       "Toners para impressoras laser com entrega rápida para empresas em Campinas e região. Preços de atacado e varejo com pronta entrega no Cambuí.",
@@ -95,28 +94,16 @@ const TONER_FAQS = [
 
 export default async function TonnerPage() {
   const [allProducts, keywordToners] = await Promise.all([
-    getCachedProdutosRecentes(),
-    getCachedProductsByKeywords(["toner", "tinta", "cartucho", "impressora", "brother", "hp", "canon", "samsung", "kyocera", "ricoh", "lexmark"], 35),
+    getProducts(),
+    searchProductsByKeywords(["toner", "tinta", "cartucho", "impressora", "brother", "hp", "canon"], 16),
   ]);
 
-  let displayProducts = keywordToners.length > 0 ? keywordToners.slice(0, 35) : allProducts.slice(0, 35);
+  let displayProducts = keywordToners.length > 0 ? keywordToners : allProducts.slice(0, 8);
 
   const breadcrumbItems = [
     { name: "Home", item: "https://www.balao.info" },
-    { name: "Toners e Suprimentos", item: "https://www.balao.info/toner" },
+    { name: "Toners e Suprimentos", item: "https://www.balao.info/tonner" },
   ];
-
-  const howToToner = {
-    "@context": "https://schema.org",
-    "@type": "HowTo",
-    name: "Como escolher o toner correto pela impressora",
-    step: [
-      { "@type": "HowToStep", name: "Modelo da impressora", text: "Veja etiqueta frontal: ex HP LaserJet M1132, Brother DCP-L2540." },
-      { "@type": "HowToStep", name: "Consulte tabela 35 modelos", text: "Encontre seu modelo na lista de 35 impressoras compatíveis." },
-      { "@type": "HowToStep", name: "Calcule custo por página", text: "Use calculadora ISO para comparar custo por página." },
-      { "@type": "HowToStep", name: "Entrega ou retirada", text: "Motoboy no mesmo dia ou retirada no Cambuí com 10% OFF PIX." },
-    ],
-  };
 
   return (
     <div className="min-h-screen bg-[#090d16] text-white flex flex-col font-sans selection:bg-[#E60012] selection:text-white">
@@ -124,16 +111,15 @@ export default async function TonnerPage() {
         data={[
           generateOrganizationSchema(),
           generateBreadcrumbSchema(breadcrumbItems),
-          generateItemListSchema(displayProducts, "https://www.balao.info/toner"),
+          generateItemListSchema(displayProducts, "https://www.balao.info/tonner"),
           generateFAQSchema(TONER_FAQS),
           generateServiceSchema({
             name: "Venda e Distribuição de Toners e Suprimentos de Impressão",
             description:
               "Fornecimento de cartuchos de toner originais e compatíveis para empresas em Campinas e região.",
-            url: "https://www.balao.info/toner",
+            url: "https://www.balao.info/tonner",
             serviceType: "Comércio de Suprimentos Corporativos de Impressão",
           }),
-          howToToner,
         ]}
       />
       <Header />
@@ -223,42 +209,14 @@ export default async function TonnerPage() {
           </div>
         </section>
 
-        {/* CALCULADORA CUSTO POR PÁGINA P0 */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <TonerCalculadora />
-        </section>
-
-        {/* TABELA 35 IMPRESSORAS COMPATÍVEIS */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-[#111827] border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-4">
-            <h3 className="text-lg sm:text-xl font-black text-white">35 Impressoras Compatíveis em Estoque</h3>
-            <p className="text-xs text-slate-400">HP, Brother, Samsung, Canon, Kyocera, Ricoh, Lexmark — modelos mais pedidos em Campinas. Envie foto da etiqueta para confirmar.</p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 text-xs">
-              {[
-                "HP 85A (CE285A) - M1132/M1212", "HP 83A (CF283A) - M127/M201", "HP 78A (CE278A) - P1566/P1606", "HP 05A (CE505A) - P2055", "HP 26A (CF226A) - M402/M426",
-                "HP 105A (W1105A) - 107/135", "HP 107A (W1107A) - 107a/135w", "HP 201A Color - M252", "HP 410A Color - M452", "HP 58A (CF258A) - M404",
-                "Brother TN-1060 - DCP-1512/HL-1212", "Brother TN-2370 - DCP-L2540", "Brother TN-3472 - DCP-L5652 (12k)", "Brother TN-3492 - HL-L6402", "Brother TN-660 - DCP-8080",
-                "Brother DR-1060 Cilindro", "Brother DR-2340 Cilindro", "Samsung D111S - M2020/M2070", "Samsung D101S - ML-2165", "Samsung D104S - ML-1665",
-                "Canon CRG-137 - MF211/212", "Canon 046 Color - MF733", "Kyocera TK-1122 - FS-1025", "Kyocera TK-1162 - P2040", "Ricoh SP 3710 - SP3710SF",
-                "Lexmark 502H - MX310/410", "Epson EcoTank T544/T664", "Canon MegaTank GI-190", "HP GT52/GT53 Garrafa", "Brother BT-D60 Tinta",
-                "HP Universal 12A/49A", "HP 36A (CB436A) - M1120", "Samsung D203U - M3320", "Brother TN-3442 - HL-L5102", "HP 151A (W1510A) - M406/M428",
-              ].map((m) => (
-                <div key={m} className="bg-[#161f32] border border-slate-800 rounded-xl px-3 py-2 text-slate-300 font-medium">{m}</div>
-              ))}
-            </div>
-            <p className="text-[11px] text-slate-500">Correção SEO: slug antigo <code className="bg-[#161f32] px-1 rounded">/tonner</code> agora 301 → <code className="bg-emerald-500/20 text-emerald-400 px-1 rounded">/toner</code> (canonico correto). Antigo ainda funciona via redirect.</p>
-          </div>
-        </section>
-
-        {/* VITRINE DE PRODUTOS E SUPRIMENTOS DO BANCO — 35 ITENS */}
+        {/* VITRINE DE PRODUTOS E SUPRIMENTOS DO BANCO */}
         <section id="produtos" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
             <div>
-              <div className="text-xs font-black uppercase tracking-wider text-[#E60012] mb-1">Suprimentos em Estoque • 35 modelos</div>
+              <div className="text-xs font-black uppercase tracking-wider text-[#E60012] mb-1">Suprimentos em Estoque</div>
               <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
                 Toners e Tintas Disponíveis
               </h2>
-              <p className="text-sm text-slate-400 mt-1">Filtrado por toner/tinta/cartucho/impressora • Use a calculadora acima</p>
             </div>
             <a
               href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(

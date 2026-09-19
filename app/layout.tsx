@@ -9,7 +9,7 @@ import LayoutWrapper from "@/components/LayoutWrapper";
 import VisitorTracker from "@/components/VisitorTracker";
 import GlobalConversionTracker from "@/components/GlobalConversionTracker";
 import { VENDEDORES } from "@/lib/vendedores";
-import { getCachedCategories } from "@/lib/cache";
+import { getCategories } from "@/lib/db";
 import type { Category } from "@/lib/utils";
 import { SITE_CONFIG } from "@/lib/config";
 
@@ -211,19 +211,9 @@ export default async function RootLayout({
     ${googleTagIds.map((id) => `gtag('config', '${id}');`).join("\n    ")}
   `;
 
-  // Pelo cache, nunca direto no banco.
-  //
-  // Isto roda no layout raiz: TODA página do site passa por aqui. Com a
-  // leitura direta, cada visita disparava duas consultas — a árvore de
-  // categorias e, para saber quais têm produto, as 1.288 linhas curadas.
-  // Nos logs do Supabase isso deu 5.883 + 5.040 chamadas em quatro horas e
-  // travou o banco: o mesmo `select` que custa milissegundos passou a levar
-  // 68 segundos, o PostgREST começou a devolver 503 e três builds da Vercel
-  // falharam por timeout. O menu é o mesmo para todo mundo; ler uma vez a
-  // cada cinco minutos (e na hora, quando o admin mexe na árvore) basta.
   let categories: Category[] = [];
   try {
-    categories = await getCachedCategories();
+    categories = await getCategories();
   } catch {
     categories = [];
   }

@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Search, ShoppingCart, User, Menu, X, Loader2, Crown } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -15,14 +15,7 @@ import TopBar from "@/components/TopBar";
 
 export default function Header() {
   const router = useRouter();
-  // `usePathname` no lugar de `useSearchParams` de propósito.
-  //
-  // `useSearchParams()` faz o Next desistir de renderizar no servidor em página
-  // estática — e como este cabeçalho está em 42 páginas, ele sozinho derrubava
-  // o conteúdo delas para o navegador. Aqui os parâmetros só eram lidos dentro
-  // de um efeito, que roda no navegador de qualquer forma, então dá para pegar
-  // direto da barra de endereço sem custo nenhum de renderização.
-  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { cartCount } = useCart();
   const { toggleSidebar } = useSidebar();
   const [logoClicks, setLogoClicks] = useState(0);
@@ -30,14 +23,15 @@ export default function Header() {
   const [showCartPreview, setShowCartPreview] = useState(false);
   const cartPreviewTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
-  // Mantém a caixa de busca em sincronia com o `?search=` do endereço.
+  // Sync search query with URL params
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const query = new URLSearchParams(window.location.search).get("search");
-    setSearchQuery(query || "");
-    // `pathname` é só o gatilho para reavaliar quando a navegação muda de
-    // página; o valor lido vem sempre da barra de endereço atual.
-  }, [pathname]);
+    const query = searchParams.get("search");
+    if (query) {
+      setSearchQuery(query);
+    } else {
+      setSearchQuery("");
+    }
+  }, [searchParams]);
   
   // Search Preview State
   const [showPreview, setShowPreview] = useState(false);

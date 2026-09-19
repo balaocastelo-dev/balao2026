@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
-import { getCachedProdutosRecentes } from "@/lib/cache";
+import { getProducts } from "@/lib/db";
 import { SITE_CONFIG } from "@/lib/config";
 import JsonLd, {
   generateBreadcrumbSchema,
@@ -11,7 +11,6 @@ import JsonLd, {
   generateServiceSchema,
   generateItemListSchema,
 } from "@/components/JsonLd";
-import StickyWhatsBar from "@/components/StickyWhatsBar";
 import {
   Wrench,
   Laptop,
@@ -129,8 +128,8 @@ const AUTHORITY_FAQS = [
 ];
 
 export default async function EspecialidadesPage() {
-  const allProducts = await getCachedProdutosRecentes();
-  const showcaseProducts = allProducts.slice(0, 12);
+  const allProducts = await getProducts();
+  const showcaseProducts = allProducts.slice(0, 8);
 
   const breadcrumbItems = [
     { name: "Home", item: "https://www.balao.info" },
@@ -223,7 +222,7 @@ export default async function EspecialidadesPage() {
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
             <div>
-              <div className="text-xs font-black uppercase tracking-wider text-[#E60012] mb-1">Loja Balão da Informática • 12 em destaque</div>
+              <div className="text-xs font-black uppercase tracking-wider text-[#E60012] mb-1">Loja Balão da Informática</div>
               <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
                 Produtos e Equipamentos em Estoque
               </h2>
@@ -296,7 +295,6 @@ export default async function EspecialidadesPage() {
           </div>
         </section>
       </main>
-      <StickyWhatsBar />
     </div>
   );
 }

@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
-import { getCachedProdutosRecentes, getCachedProductsByKeywords } from "@/lib/cache";
+import { getProducts, searchProductsByKeywords } from "@/lib/db";
 import JsonLd, {
   generateBreadcrumbSchema,
   generateFAQSchema,
@@ -12,8 +12,6 @@ import JsonLd, {
   generateItemListSchema,
 } from "@/components/JsonLd";
 import SistemasLeadForm from "@/components/SistemasLeadForm";
-import SistemasPortfolio from "@/components/SistemasPortfolio";
-import SistemasCalculator from "@/components/SistemasCalculator";
 import { SITE_CONFIG } from "@/lib/config";
 import {
   ArrowRight,
@@ -90,8 +88,8 @@ const SISTEMAS_FAQS = [
 
 export default async function SistemasPage() {
   const [allProducts, keywordBiz] = await Promise.all([
-    getCachedProdutosRecentes(),
-    getCachedProductsByKeywords(["monitor", "mini pc", "computador", "teclado", "mouse", "nobreak"], 16),
+    getProducts(),
+    searchProductsByKeywords(["monitor", "mini pc", "computador", "teclado", "mouse", "nobreak"], 16),
   ]);
 
   let displayProducts = keywordBiz.length > 0 ? keywordBiz : allProducts.slice(0, 8);
@@ -231,16 +229,6 @@ export default async function SistemasPage() {
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
-        </section>
-
-        {/* PORTFÓLIO 6 CASES */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <SistemasPortfolio />
-        </section>
-
-        {/* CALCULADORA DE PROPOSTA */}
-        <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <SistemasCalculator />
         </section>
 
         {/* FORMULÁRIO DE CAPTAÇÃO DE PROJETO */}

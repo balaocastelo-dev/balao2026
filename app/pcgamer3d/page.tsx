@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Pcgamer3dLanding from "./pcgamer3d-landing";
-import { getCachedProdutosRecentes, getCachedProductsByKeywords } from "@/lib/cache";
+import { getProducts, searchProductsByKeywords } from "@/lib/db";
 import JsonLd, {
   generateBreadcrumbSchema,
   generateFAQSchema,
@@ -73,8 +73,8 @@ const PCGAMER_FAQS = [
 
 export default async function PcGamer3DPage() {
   const [allProducts, keywordGamer] = await Promise.all([
-    getCachedProdutosRecentes(),
-    getCachedProductsByKeywords(["gamer", "rtx", "ryzen", "core i5", "core i7", "watercooler", "gabinete"], 16),
+    getProducts(),
+    searchProductsByKeywords(["gamer", "rtx", "ryzen", "core i5", "core i7", "watercooler", "gabinete"], 16),
   ]);
 
   let gamerProducts = keywordGamer;

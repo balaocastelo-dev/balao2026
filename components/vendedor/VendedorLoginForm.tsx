@@ -14,12 +14,6 @@ type VendedorLoginFormProps = {
   senhaConfigurada?: boolean;
   /** Nome dessa variável, para o aviso dizer exatamente o que falta. */
   nomeVariavelSenha?: string;
-  /**
-   * Rota que confere a senha. A equipe fixa valida contra variável de
-   * ambiente; quem foi cadastrado no dashboard valida contra o servidor de
-   * atendimento — telas iguais, portas diferentes.
-   */
-  endpoint?: string;
 };
 
 export default function VendedorLoginForm({
@@ -30,7 +24,6 @@ export default function VendedorLoginForm({
   redirectTo,
   senhaConfigurada = true,
   nomeVariavelSenha,
-  endpoint = "/api/vendedor/login",
 }: VendedorLoginFormProps) {
   const [senha, setSenha] = useState("");
   const [carregando, setCarregando] = useState(false);
@@ -42,7 +35,7 @@ export default function VendedorLoginForm({
     setErro("");
 
     try {
-      const resposta = await fetch(endpoint, {
+      const resposta = await fetch("/api/vendedor/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ slug, senha }),

@@ -1,9 +1,0 @@
-# Dois projetos Node separados que NÃO fazem parte do site.
-#
-# whatsapp-server roda na VPS (container balao-whats); mcp-bling roda no
-# computador do Thiago, ligado ao Claude Desktop. Nenhum dos dois é
-# importado pelo Next — mandá-los para a Vercel só engorda o build e faz o
-# bundler tentar resolver dependências que não existem lá (o SDK do MCP,
-# por exemplo).
-whatsapp-server
-mcp-bling
