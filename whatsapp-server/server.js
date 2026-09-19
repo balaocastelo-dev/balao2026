@@ -1858,11 +1858,143 @@ async function ensureWWebJSInjected(client = whatsappClient) {
                 }
               } catch {}
               return null;
+            };
+          }
+
+        // 4. Proteger window.WWebJS.sendMessage contra erro de memoize ao enviar media
+        const origSendMessage = window.WWebJS.sendMessage;
+        if (typeof origSendMessage === "function" && !window.WWebJS._patchedSendMessage) {
+          window.WWebJS._patchedSendMessage = true;
+          window.WWebJS.sendMessage = async function(chat, content, options = {}) {
+            if (!options || !options.media) {
+              return await origSendMessage(chat, content, options);
+            }
+
+            try {
+              const { getIsNewsletter, getIsBroadcast } = window.require('WAWebChatGetters');
+              const isChannel = getIsNewsletter(chat);
+              const isStatus = getIsBroadcast(chat);
+
+              let mediaOptions = {};
+              mediaOptions = options.sendMediaAsSticker && !isChannel && !isStatus
+                ? await window.WWebJS.processStickerData(options.media)
+                : await window.WWebJS.processMediaData(options.media, {
+                    forceSticker: options.sendMediaAsSticker,
+                    forceGif: options.sendVideoAsGif,
+                    forceVoice: options.sendAudioAsVoice,
+                    forceDocument: options.sendMediaAsDocument,
+                    forceMediaHd: options.sendMediaAsHd,
+                    sendToChannel: isChannel,
+                    sendToStatus: isStatus,
+                  });
+
+              const caption = options.caption || content || "";
+              mediaOptions.caption = caption;
+              mediaOptions.isViewOnce = options.isViewOnce;
+
+              const { getMaybeMeLidUser, getMaybeMePnUser } = window.require('WAWebUserPrefsMeUser');
+              const lidUser = getMaybeMeLidUser();
+              const meUser = getMaybeMePnUser();
+              const newId = await window.require('WAWebMsgKey').newId();
+              let from = chat.id?.isLid?.() ? lidUser : meUser;
+              let participant;
+
+              if (typeof chat.id?.isGroup === 'function' && chat.id.isGroup()) {
+                from = chat.groupMetadata && chat.groupMetadata.isLidAddressingMode ? lidUser : meUser;
+                participant = window.require('WAWebWidFactory').asUserWidOrThrow(from);
+              }
+
+              if (typeof chat.id?.isStatus === 'function' && chat.id.isStatus()) {
+                participant = window.require('WAWebWidFactory').asUserWidOrThrow(from);
+              }
+
+              const newMsgKey = new (window.require('WAWebMsgKey'))({
+                from: from,
+                to: chat.id,
+                id: newId,
+                participant: participant,
+                selfDir: 'out',
+              });
+
+              const ephemeralFields = window.require('WAWebGetEphemeralFieldsMsgActionsUtils').getEphemeralFields(chat);
+              const toJson = mediaOptions?.toJSON ? mediaOptions.toJSON() : {};
+
+              const cleanOptions = { ...options };
+              delete cleanOptions.media;
+              delete cleanOptions.sendMediaAsSticker;
+              delete cleanOptions.extraOptions;
+
+              // CRUCIAL: Nao dar spread de ...mediaOptions, pois e instancia de Backbone Model
+              // que polui a mensagem com propriedades internas e quebra o getter memoize do WhatsApp.
+              // Usar APENAS o plain object toJson e manter o id newMsgKey.
+              const message = {
+                ...cleanOptions,
+                id: newMsgKey,
+                ack: 0,
+                body: caption,
+                caption: caption,
+                from: from,
+                to: chat.id,
+                local: true,
+                self: 'out',
+                t: parseInt(new Date().getTime() / 1000),
+                isNewMsg: true,
+                type: 'chat',
+                ...ephemeralFields,
+                ...toJson,
+                ...(options.extraOptions || {})
+              };
+
+              const [msgPromise, sendMsgResultPromise] = window.require('WAWebSendMsgChatAction').addAndSendMsgToChat(chat, message);
+              await msgPromise;
+
+              if (options.waitUntilMsgSent && sendMsgResultPromise) {
+                await sendMsgResultPromise;
+              }
+
+              let msg = window.require('WAWebCollections').Msg.get(newMsgKey._serialized);
+              if (!msg) {
+                for (let i = 0; i < 5; i++) {
+                  await new Promise(r => setTimeout(r, 100));
+                  msg = window.require('WAWebCollections').Msg.get(newMsgKey._serialized);
+                  if (msg) break;
+                }
+              }
+
+              if (!msg) {
+                msg = {
+                  id: newMsgKey,
+                  ack: 1,
+                  body: message.body,
+                  caption: message.caption,
+                  type: message.type || "image",
+                  from: message.from,
+                  to: message.to,
+                  t: message.t,
+                  directPath: message.directPath,
+                  serialize: () => ({
+                    id: newMsgKey,
+                    ack: 1,
+                    body: message.body,
+                    caption: message.caption,
+                    type: message.type || "image",
+                    from: message.from?._serialized || String(message.from),
+                    to: message.to?._serialized || String(message.to),
+                    t: message.t
+                  })
+                };
+              }
+
+              return msg;
+            } catch (errMediaSend) {
+              console.warn("[WWebJS-Patch] Falha no envio protegido de media, tentando metodo nativo:", errMediaSend.message);
+              return await origSendMessage(chat, content, options);
             }
           };
         }
       }
-    }).catch(() => {});
+    }
+  }).catch(() => {});
 
     const verified = await client.pupPage.evaluate(() => typeof window.WWebJS !== "undefined" && Boolean(window.WWebJS?.getChat)).catch(() => false);
     return verified;
