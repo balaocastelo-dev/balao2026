@@ -2987,20 +2987,15 @@ app.post("/api/debug/test-send-media", async (req, res) => {
             stepDebug.textMsgStack = eText.stack;
           }
 
-          // Search for getSender / getValidatedSender modules
+          // Inspect getSender
           try {
-            const mods = ['WAWebMsgGetters', 'WAWebSenderGetters', 'WAWebMsgSender', 'WAWebMsgKey', 'WAWebChatGetters'];
-            stepDebug.moduleDumps = {};
-            for (const m of mods) {
-              try {
-                const mod = window.require(m);
-                stepDebug.moduleDumps[m] = mod ? Object.keys(mod) : null;
-              } catch (em) {
-                stepDebug.moduleDumps[m] = 'err: ' + em.message;
-              }
-            }
-          } catch (eMod) {
-            stepDebug.eMod = eMod.message;
+            const MsgGetters = window.require('WAWebMsgGetters');
+            stepDebug.hasGetSender = typeof MsgGetters?.getSender === 'function';
+            stepDebug.getSenderStr = MsgGetters?.getSender?.toString?.()?.slice(0, 500);
+            stepDebug.hasGetValidatedSender = typeof MsgGetters?.getValidatedSender === 'function';
+            stepDebug.getValidatedSenderStr = MsgGetters?.getValidatedSender?.toString?.()?.slice(0, 500);
+          } catch (eGetSender) {
+            stepDebug.getSenderErr = eGetSender.message;
           }
         } catch (eStep) {
           stepDebug.error = eStep.message;
