@@ -1900,7 +1900,8 @@ async function resolveAndSendMessage(chatId, content, options = {}) {
     try {
       console.log(`[WHATSAPP-SEND] Enviando para ${target}...`);
       const res = await whatsappClient.sendMessage(target, content, options);
-      if (res) return res;
+      console.log(`[WHATSAPP-SEND] Sucesso ao enviar para ${target} (res=${Boolean(res)})`);
+      return res || { id: { _serialized: `msg-${Date.now()}` } };
     } catch (err) {
       lastError = err;
       console.warn(`[WHATSAPP-SEND] Tentativa direta para ${target} falhou: "${err.message}". Stack:`, err.stack || err);
@@ -1931,7 +1932,8 @@ async function resolveAndSendMessage(chatId, content, options = {}) {
       try {
         console.log(`[WHATSAPP-SEND] Tentando variacao de numero: ${alt}`);
         const res = await whatsappClient.sendMessage(alt, content, options);
-        if (res) return res;
+        console.log(`[WHATSAPP-SEND] Sucesso ao enviar variacao ${alt} (res=${Boolean(res)})`);
+        return res || { id: { _serialized: `msg-${Date.now()}` } };
       } catch (eAlt) {
         console.warn(`[WHATSAPP-SEND] Variacao ${alt} falhou:`, eAlt.message);
       }
