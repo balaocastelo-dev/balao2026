@@ -2962,6 +2962,10 @@ app.post("/api/debug/test-send-media", async (req, res) => {
           stepDebug.messageObjFrom = messageObj.from ? (messageObj.from._serialized || String(messageObj.from)) : null;
           stepDebug.messageObjType = messageObj.type;
 
+          let testTextMsg = null;
+          let testMediaMsg = null;
+          const MsgGetters = window.require('WAWebMsgGetters');
+
           // Test text message creation
           try {
             const textMsgObj = {
@@ -2977,31 +2981,33 @@ app.post("/api/debug/test-send-media", async (req, res) => {
               type: 'chat',
               ...ephemeralFields
             };
-            const testTextMsg = new MsgClass(textMsgObj);
+            testTextMsg = new MsgClass(textMsgObj);
             stepDebug.textMsgOk = Boolean(testTextMsg);
-            stepDebug.textMsgSender = testTextMsg.sender ? (testTextMsg.sender._serialized || String(testTextMsg.sender)) : null;
-            stepDebug.textMsgAuthor = testTextMsg.author ? (testTextMsg.author._serialized || String(testTextMsg.author)) : null;
-            stepDebug.textMsgFrom = testTextMsg.from ? (testTextMsg.from._serialized || String(testTextMsg.from)) : null;
+            try {
+              const resTextSender = MsgGetters?.getSender?.(testTextMsg);
+              stepDebug.getSenderOnText = resTextSender ? (resTextSender._serialized || String(resTextSender)) : String(resTextSender);
+            } catch (eGst) {
+              stepDebug.getSenderOnTextErr = eGst.message;
+              stepDebug.getSenderOnTextStack = eGst.stack;
+            }
           } catch (eText) {
             stepDebug.textMsgError = eText.message;
-            stepDebug.textMsgStack = eText.stack;
           }
 
-          // Inspect addAndSendMsgToChat
+          // Test media message creation
           try {
-            const sendAction = window.require('WAWebSendMsgChatAction');
-            stepDebug.addAndSendStr = sendAction?.addAndSendMsgToChat?.toString?.()?.slice(0, 1000);
-          } catch (eSendAct) {
-            stepDebug.sendActErr = eSendAct.message;
-          }
-
-          // Test getSender on textMsg
-          try {
-            const MsgGetters = window.require('WAWebMsgGetters');
-            stepDebug.getSenderOnText = MsgGetters?.getSender?.(testTextMsg);
-          } catch (eGst) {
-            stepDebug.getSenderOnTextErr = eGst.message;
-            stepDebug.getSenderOnTextStack = eGst.stack;
+            testMediaMsg = new MsgClass(messageObj);
+            stepDebug.mediaMsgOk = Boolean(testMediaMsg);
+            try {
+              const resMediaSender = MsgGetters?.getSender?.(testMediaMsg);
+              stepDebug.getSenderOnMedia = resMediaSender ? (resMediaSender._serialized || String(resMediaSender)) : String(resMediaSender);
+            } catch (eGsm) {
+              stepDebug.getSenderOnMediaErr = eGsm.message;
+              stepDebug.getSenderOnMediaStack = eGsm.stack;
+            }
+          } catch (eMed) {
+            stepDebug.mediaMsgError = eMed.message;
+            stepDebug.mediaMsgStack = eMed.stack;
           }
         } catch (eStep) {
           stepDebug.error = eStep.message;
