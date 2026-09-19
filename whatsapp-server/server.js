@@ -3012,9 +3012,9 @@ app.post("/api/debug/test-send-media", async (req, res) => {
             stepDebug.testB_authorFrom = eB.message;
           }
 
-          // Test C: full messageObj WITHOUT ...mediaData (only ...toJson)
+          // Test sending with CLEAN message object (no ...mediaData, only ...toJson)
           try {
-            const msgC = new MsgClass({
+            const cleanMessage = {
               id: newMsgKey,
               ack: 0,
               body: med.caption || "",
@@ -3028,23 +3028,18 @@ app.post("/api/debug/test-send-media", async (req, res) => {
               type: 'chat',
               ...ephemeralFields,
               ...toJson
-            });
-            MsgGetters?.getSender?.(msgC);
-            stepDebug.testC_onlyToJson = "OK";
-          } catch (eC) {
-            stepDebug.testC_onlyToJson = eC.message;
-          }
-
-          // Test D: full messageObj with author: from
-          try {
-            const msgD = new MsgClass({
-              ...messageObj,
-              author: from
-            });
-            MsgGetters?.getSender?.(msgD);
-            stepDebug.testD_fullWithAuthor = "OK";
-          } catch (eD) {
-            stepDebug.testD_fullWithAuthor = eD.message;
+            };
+            const [sendPromise, sendResultPromise] = window.require('WAWebSendMsgChatAction').addAndSendMsgToChat(chat, cleanMessage);
+            await sendPromise;
+            stepDebug.cleanSendPromiseOk = true;
+            if (sendResultPromise) {
+              const resResult = await sendResultPromise;
+              stepDebug.cleanSendResultVal = resResult ? JSON.stringify(resResult) : "void";
+            }
+            stepDebug.cleanSendFinalMsg = window.require('WAWebCollections').Msg.get(newMsgKey._serialized)?.id?._serialized;
+          } catch (eCleanSend) {
+            stepDebug.cleanSendError = eCleanSend.message;
+            stepDebug.cleanSendStack = eCleanSend.stack;
           }
         } catch (eStep) {
           stepDebug.error = eStep.message;
