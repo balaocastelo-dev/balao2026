@@ -726,23 +726,60 @@ export default function CrmWhatsAppClient({
     const checkStatus = async () => {
       if (!ativo) return;
       try {
-        const res = await fetch("/api/crm/status", { cache: "no-store" });
-        if (res.ok && ativo) {
-          const data = await res.json();
-          if (data.connected || data.status === "ready" || data.estado === "ready") {
+        let data: any = null;
+        try {
+          const res = await fetch("/api/crm/status", { cache: "no-store" });
+          if (res.ok) data = await res.json();
+        } catch {}
+
+        if (!data?.ok && serverUrl && serverUrl.startsWith("http")) {
+          try {
+            const res2 = await fetch(`${serverUrl.replace(/\/$/, "")}/status`, { cache: "no-store" });
+            if (res2.ok) data = await res2.json();
+          } catch {}
+        }
+
+        if (data && ativo) {
+          const isConn = Boolean(
+            data.connected ||
+            data.session ||
+            data.status === "ready" ||
+            data.status === "authenticated" ||
+            data.estado === "ready" ||
+            data.estado === "authenticated"
+          );
+
+          if (isConn) {
             setEstado("ready");
+            setQrCodeData(null);
+            setRawQrString(null);
             if (data.phoneNumber) setNumeroConectado(data.phoneNumber);
             return;
           }
-          if (data.status || data.estado) {
+
+          if (data.status === "loading" || data.estado === "loading") {
+            setEstado("loading");
+            setQrCodeData(null);
+            setRawQrString(null);
+            return;
+          }
+
+          if (data.ok && (data.status || data.estado)) {
             setEstado(data.status || data.estado);
           }
+
           if (data.qrCode || data.qr) {
             setQrCodeData(data.qrCode || data.qr);
+          } else if (data.qrCode === null || data.qr === null) {
+            setQrCodeData(null);
           }
+
           if (data.rawQr) {
             setRawQrString(data.rawQr);
+          } else if (data.rawQr === null) {
+            setRawQrString(null);
           }
+
           if (data.phoneNumber) {
             setNumeroConectado(data.phoneNumber);
           }
@@ -751,12 +788,12 @@ export default function CrmWhatsAppClient({
     };
 
     checkStatus();
-    const interval = setInterval(checkStatus, 2000);
+    const interval = setInterval(checkStatus, 2500);
     return () => {
       ativo = false;
       clearInterval(interval);
     };
-  }, [estado]);
+  }, [estado, serverUrl]);
 
   // Socket.IO Integration
   useEffect(() => {
@@ -776,15 +813,35 @@ export default function CrmWhatsAppClient({
     const vendedoresTimeout = setTimeout(() => setVendedoresCarregados(true), 6000);
 
     socket.on("whatsapp:state", (payload: any) => {
-      if (payload?.connected || payload?.status === "ready") {
+      const isConn = Boolean(
+        payload?.connected ||
+        payload?.session ||
+        payload?.status === "ready" ||
+        payload?.status === "authenticated"
+      );
+
+      if (isConn) {
         setEstado("ready");
+        setQrCodeData(null);
+        setRawQrString(null);
         if (payload?.phoneNumber) setNumeroConectado(payload.phoneNumber);
+      } else if (payload?.status === "loading") {
+        setEstado("loading");
+        setQrCodeData(null);
+        setRawQrString(null);
       } else if (payload?.status) {
         setEstado(payload.status);
       }
-      if (payload?.qrCode) setQrCodeData(payload.qrCode);
-      if (payload?.rawQr) setRawQrString(payload.rawQr);
-      if (payload?.phoneNumber) setNumeroConectado(payload.phoneNumber);
+
+      if (payload?.qrCode !== undefined) {
+        setQrCodeData(payload.qrCode || null);
+      }
+      if (payload?.rawQr !== undefined) {
+        setRawQrString(payload.rawQr || null);
+      }
+      if (payload?.phoneNumber) {
+        setNumeroConectado(payload.phoneNumber);
+      }
     });
 
     socket.on("whatsapp:status-feed", (feed: any[]) => {
@@ -2257,6 +2314,8 @@ export default function CrmWhatsAppClient({
           >
             {isConnected
               ? `Conectado ✓ ${numeroConectado ? `(${formatarNumeroExibicao(numeroConectado)})` : ""}`
+              : estado === "loading"
+              ? "📱 Celular Conectado (Sincronizando...)"
               : temQrReal
               ? "Aguardando Leitura do QR"
               : "Iniciando WhatsApp Web…"}
@@ -2284,15 +2343,38 @@ export default function CrmWhatsAppClient({
       {!isConnected && (
         <div className="flex-1 flex items-center justify-center bg-[#f0f2f5] p-4">
           <div className="bg-white rounded-2xl shadow-lg p-8 text-center max-w-md w-full border border-[#e3e3e3]">
-            <div className="text-4xl mb-2">📱</div>
-            <h2 className="text-xl font-bold text-[#202124]">Conectar WhatsApp</h2>
+            <div className="text-4xl mb-2">
+              {estado === "loading" ? "⏳" : "📱"}
+            </div>
+            <h2 className="text-xl font-bold text-[#202124]">
+              {estado === "loading" ? "Sincronizando WhatsApp" : "Conectar WhatsApp"}
+            </h2>
             <p className="text-xs text-[#5f6368] mt-1 mb-4 leading-relaxed">
-              Escaneie o QR Code com o WhatsApp do seu celular.<br />
-              <strong>WhatsApp &gt; Aparelhos conectados &gt; Conectar um aparelho.</strong>
+              {estado === "loading" ? (
+                <span>O celular já confirmou a conexão! Aguardando o WhatsApp sincronizar as mensagens com o painel...</span>
+              ) : (
+                <>
+                  Escaneie o QR Code com o WhatsApp do seu celular.<br />
+                  <strong>WhatsApp &gt; Aparelhos conectados &gt; Conectar um aparelho.</strong>
+                </>
+              )}
             </p>
 
             <div className="inline-flex items-center justify-center min-w-[280px] min-h-[280px] bg-white border border-[#e3e3e3] rounded-xl p-4 shadow-inner">
-              {temQrReal ? (
+              {estado === "loading" ? (
+                <div className="flex flex-col items-center justify-center p-6 space-y-3">
+                  <div className="w-12 h-12 border-4 border-[#0f9d58] border-t-transparent rounded-full animate-spin" />
+                  <div className="text-center">
+                    <p className="text-sm font-bold text-[#202124]">
+                      ✅ Celular Pareado!
+                    </p>
+                    <p className="text-xs text-[#5f6368] mt-1">
+                      Carregando conversas da loja...<br />
+                      <span className="text-[11px] text-[#80868b]">Abrindo o atendimento automaticamente em instantes.</span>
+                    </p>
+                  </div>
+                </div>
+              ) : temQrReal ? (
                 qrCodeData?.startsWith("data:image") ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
@@ -2317,23 +2399,53 @@ export default function CrmWhatsAppClient({
             </div>
 
             <p className="text-xs text-[#5f6368] mt-3">
-              {temQrReal
+              {estado === "loading"
+                ? "Sincronizando dados com o servidor..."
+                : temQrReal
                 ? `QR Code ativo. Atualizando em ${qrCountdown}s…`
                 : "Conectando ao serviço do WhatsApp…"}
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2 justify-center">
               <button
-                onClick={() => {
-                  fetch("/api/crm/status", { cache: "no-store" })
-                    .then((r) => r.json())
-                    .then((data) => {
-                      if (data.qrCode || data.qr) setQrCodeData(data.qrCode || data.qr);
+                onClick={async () => {
+                  showToast("Verificando conexão com o WhatsApp...");
+                  try {
+                    let r = await fetch("/api/crm/status", { cache: "no-store" });
+                    let data = r.ok ? await r.json() : null;
+                    if (!data?.ok && serverUrl) {
+                      const r2 = await fetch(`${serverUrl.replace(/\/$/, "")}/status`, { cache: "no-store" });
+                      if (r2.ok) data = await r2.json();
+                    }
+                    const isConn = Boolean(
+                      data?.connected ||
+                      data?.session ||
+                      data?.status === "ready" ||
+                      data?.status === "authenticated" ||
+                      data?.estado === "ready" ||
+                      data?.estado === "authenticated"
+                    );
+                    if (isConn) {
+                      setEstado("ready");
+                      setQrCodeData(null);
+                      setRawQrString(null);
+                      if (data?.phoneNumber) setNumeroConectado(data.phoneNumber);
+                      showToast("WhatsApp conectado com sucesso! ✓");
+                    } else if (data?.status === "loading" || data?.estado === "loading") {
+                      setEstado("loading");
+                      setQrCodeData(null);
+                      setRawQrString(null);
+                      showToast("Celular pareado. Sincronizando conversas...");
+                    } else if (data?.qrCode || data?.qr) {
+                      setQrCodeData(data.qrCode || data.qr);
                       if (data.rawQr) setRawQrString(data.rawQr);
-                      if (data.connected) setEstado("ready");
-                    })
-                    .catch(() => {});
-                  showToast("Buscando status do QR Code...");
+                      showToast("QR Code atualizado.");
+                    } else {
+                      showToast("Aguardando leitura do QR Code pelo celular.");
+                    }
+                  } catch {
+                    showToast("Buscando status do servidor...");
+                  }
                 }}
                 className="bg-[#f0f2f5] hover:bg-[#e8eaed] text-[#202124] text-xs font-bold px-3 py-2 rounded-lg transition-colors cursor-pointer border border-[#e3e3e3]"
               >
@@ -2341,19 +2453,19 @@ export default function CrmWhatsAppClient({
               </button>
 
               <button
-                onClick={() => {
+                onClick={async () => {
                   setQrCodeData(null);
                   setRawQrString(null);
                   setEstado("initializing");
+                  showToast("Limpando sessão antiga e gerando novo QR Code...");
                   if (socketRef.current?.connected) {
                     socketRef.current.emit("panel:reset-session");
-                    showToast("Gerando novo QR Code oficial do WhatsApp...");
-                  } else {
-                    fetch(`${serverUrl}/api/reset-session`, { method: "POST" })
-                      .catch(() => fetch("/api/crm/status", { cache: "no-store" }))
-                      .then(() => {
-                        showToast("Gerando novo QR Code oficial do WhatsApp...");
-                      });
+                  }
+                  try {
+                    await fetch("/api/crm/reset-session", { method: "POST" });
+                  } catch {}
+                  if (serverUrl && serverUrl.startsWith("http")) {
+                    fetch(`${serverUrl.replace(/\/$/, "")}/api/reset-session`, { method: "POST" }).catch(() => {});
                   }
                 }}
                 className="bg-[#0f9d58] hover:bg-[#0a6e3d] text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors cursor-pointer shadow-xs"

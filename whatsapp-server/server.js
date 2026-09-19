@@ -2063,6 +2063,11 @@ function buildWhatsAppClient() {
       clientId: "balao-whatsapp-panel",
       dataPath: AUTH_DIR,
     }),
+    webVersionCache: {
+      type: "remote",
+      remotePath: "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.3000.1018949826-alpha.html",
+      strict: false,
+    },
     puppeteer: {
       headless: true,
       executablePath,
@@ -2074,8 +2079,13 @@ function buildWhatsAppClient() {
         "--disable-extensions",
         "--disable-software-rasterizer",
         "--no-default-browser-check",
-        "--window-size=1280,800"
+        "--disable-accelerated-2d-canvas",
+        "--no-first-run",
+        "--no-zygote",
+        "--window-size=1280,800",
       ],
+      userAgent:
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
     },
   });
 }
@@ -2096,6 +2106,8 @@ function configureAutoDownload(client) {
 function attachWhatsAppClientEvents(client) {
   client.on("qr", async (qr) => {
     lastProgressAt = Date.now();
+    isInitializingClient = false;
+    initializingSince = null;
     console.log("[whatsapp] QR Code recebido! Gerando imagem...");
     whatsappState.status = "qr";
     whatsappState.connected = false;
@@ -2112,6 +2124,8 @@ function attachWhatsAppClientEvents(client) {
 
   client.on("loading_screen", (percent, message) => {
     lastProgressAt = Date.now();
+    isInitializingClient = false;
+    initializingSince = null;
     console.log(`[whatsapp] Carregando tela: ${percent}% - ${message}`);
     // O WhatsApp Web às vezes dispara "loading_screen" DEPOIS do "ready"
     // (reflow interno da página). Sem essa guarda, o status voltava pra
@@ -2119,24 +2133,31 @@ function attachWhatsAppClientEvents(client) {
     // confundia quem checasse /health.
     if (!whatsappState.connected) {
       whatsappState.status = "loading";
+      whatsappState.qrCode = null;
+      whatsappState.rawQr = null;
       emitState();
     }
   });
 
   client.on("authenticated", () => {
     lastProgressAt = Date.now();
+    isInitializingClient = false;
+    initializingSince = null;
     console.log("[whatsapp] Sessão autenticada!");
     whatsappState.status = "authenticated";
     whatsappState.connected = true;
     whatsappState.session = true;
     whatsappState.qrCode = null;
     whatsappState.rawQr = null;
+    whatsappState.ultimoErro = null;
     emitState();
     emitToast("Sessão autenticada com sucesso.");
   });
 
   client.on("ready", async () => {
     lastProgressAt = Date.now();
+    isInitializingClient = false;
+    initializingSince = null;
     console.log("[whatsapp] WhatsApp cliente conectado e pronto!");
     whatsappState.status = "ready";
     whatsappState.connected = true;
@@ -2148,8 +2169,10 @@ function attachWhatsAppClientEvents(client) {
     whatsappState.phoneNumber = client.info?.wid?.user || null;
     emitState();
     emitToast("WhatsApp conectado e pronto para uso.");
-    // Só as conversas: o feed de status carrega quando alguém abrir a aba.
-    await garantirChatsCarregados({ forcar: true });
+    // Só as conversas: dispara carga sem travar a finalização do ready
+    garantirChatsCarregados({ forcar: true }).catch((err) => {
+      console.error("[whatsapp] Falha ao carregar conversas no ready:", err);
+    });
   });
 
   client.on("auth_failure", (message) => {
@@ -2386,14 +2409,24 @@ async function initializeWhatsAppClient(options = {}) {
 // sozinho — nem numa inicialização que trava no meio, nem num estado morto
 // (desconectado, sem client, sem nenhuma tentativa em andamento).
 const WATCHDOG_INTERVAL_MS = 20000;
-const WATCHDOG_STUCK_INIT_MS = 45000;
-const WATCHDOG_STUCK_PROGRESS_MS = 90000;
+const WATCHDOG_STUCK_INIT_MS = 180000; // 3 minutos para falha real de boot do navegador
+const WATCHDOG_STUCK_PROGRESS_MS = 300000; // 5 minutos sem nenhum evento antes de reciclar
 
 setInterval(() => {
   const now = Date.now();
 
+  // Se o cliente já está conectado, autenticado ou com sessão ativa, o watchdog não deve abortar
+  if (
+    whatsappState.connected ||
+    whatsappState.session ||
+    whatsappState.status === "ready" ||
+    whatsappState.status === "authenticated"
+  ) {
+    return;
+  }
+
   if (isInitializingClient && initializingSince && now - initializingSince > WATCHDOG_STUCK_INIT_MS) {
-    console.warn("[whatsapp][watchdog] Inicialização travada há mais de 45s — forçando reinício.");
+    console.warn("[whatsapp][watchdog] Inicialização travada há mais de 3m — forçando reinício.");
     isInitializingClient = false;
     initializeWhatsAppClient({ resetSession: false, force: true });
     return;
@@ -2409,10 +2442,11 @@ setInterval(() => {
     !isInitializingClient &&
     !whatsappState.connected &&
     whatsappState.status !== "ready" &&
+    whatsappState.status !== "authenticated" &&
     now - lastProgressAt > WATCHDOG_STUCK_PROGRESS_MS
   ) {
-    console.warn(`[whatsapp][watchdog] Sem progresso há mais de ${WATCHDOG_STUCK_PROGRESS_MS / 1000}s (status=${whatsappState.status}) — forçando novo QR.`);
-    initializeWhatsAppClient({ resetSession: true, force: true });
+    console.warn(`[whatsapp][watchdog] Sem progresso há mais de ${WATCHDOG_STUCK_PROGRESS_MS / 1000}s (status=${whatsappState.status}) — gerando novo QR.`);
+    initializeWhatsAppClient({ resetSession: false, force: true });
   }
 }, WATCHDOG_INTERVAL_MS);
 

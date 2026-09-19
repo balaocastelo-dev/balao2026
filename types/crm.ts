@@ -1,6 +1,7 @@
 export type WhatsAppStatus =
   | "disconnected"
   | "initializing"
+  | "loading"
   | "qr"
   | "authenticated"
   | "ready"
