@@ -1903,7 +1903,7 @@ async function resolveAndSendMessage(chatId, content, options = {}) {
       if (res) return res;
     } catch (err) {
       lastError = err;
-      console.warn(`[WHATSAPP-SEND] Tentativa direta para ${target} falhou: "${err.message}".`);
+      console.warn(`[WHATSAPP-SEND] Tentativa direta para ${target} falhou: "${err.message}". Stack:`, err.stack || err);
 
       if (err.message?.includes("getChat") || err.message?.includes("undefined") || err.message?.includes("memoize")) {
         await ensureWWebJSInjected(whatsappClient);
@@ -1947,18 +1947,22 @@ async function resolveMediaObject(mediaSource, filename = "produto.jpg", mimetyp
   if (mediaSource instanceof MessageMedia || (mediaSource.mimetype && mediaSource.data)) {
     if (!mediaSource.filename) mediaSource.filename = filename || "produto.jpg";
     if (!mediaSource.mimetype) mediaSource.mimetype = mimetype || "image/jpeg";
+    if (mediaSource.data) {
+      mediaSource.data = String(mediaSource.data).replace(/^data:[^;]+;base64,/, "").replace(/[\s\r\n]+/g, "");
+    }
     return mediaSource;
   }
 
   if (typeof mediaSource === "string" && mediaSource.startsWith("data:")) {
     const match = mediaSource.match(/^data:([^;]+);base64,(.+)$/);
     if (match) {
-      return new MessageMedia(match[1], match[2], filename || "produto.jpg");
+      const cleanB64 = match[2].replace(/[\s\r\n]+/g, "");
+      return new MessageMedia(match[1], cleanB64, filename || "produto.jpg");
     }
   }
 
   if (typeof mediaSource === "string" && mimetype && !mediaSource.startsWith("http")) {
-    const cleanB64 = mediaSource.replace(/^data:[^;]+;base64,/, "");
+    const cleanB64 = mediaSource.replace(/^data:[^;]+;base64,/, "").replace(/[\s\r\n]+/g, "");
     return new MessageMedia(mimetype, cleanB64, filename || "produto.jpg");
   }
 
@@ -1973,7 +1977,7 @@ async function resolveMediaObject(mediaSource, filename = "produto.jpg", mimetyp
       });
       if (resp.ok) {
         const arrayBuf = await resp.arrayBuffer();
-        const base64 = Buffer.from(arrayBuf).toString("base64");
+        const base64 = Buffer.from(arrayBuf).toString("base64").replace(/[\s\r\n]+/g, "");
         let detectedMime = resp.headers.get("content-type") || mimetype || "image/jpeg";
         if (detectedMime.includes(";")) detectedMime = detectedMime.split(";")[0].trim();
         if (!detectedMime.startsWith("image/")) detectedMime = "image/jpeg";
@@ -1991,6 +1995,7 @@ async function resolveMediaObject(mediaSource, filename = "produto.jpg", mimetyp
         if (!media.mimetype || !media.mimetype.startsWith("image/")) {
           media.mimetype = mimetype || "image/jpeg";
         }
+        media.data = String(media.data).replace(/^data:[^;]+;base64,/, "").replace(/[\s\r\n]+/g, "");
         return media;
       }
     } catch (e) {
