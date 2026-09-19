@@ -2850,6 +2850,76 @@ app.all(["/api/force-ready", "/api/crm/force-ready"], async (_req, res) => {
   res.json({ ok: true, promovido, estado: whatsappState.status, connected: whatsappState.connected });
 });
 
+app.post("/api/debug/test-send-media", async (req, res) => {
+  try {
+    const { chatId, imageUrl, caption } = req.body || {};
+    const media = await resolveMediaObject(imageUrl, "produto.jpg", "image/jpeg");
+    if (!whatsappClient?.pupPage) {
+      return res.status(500).json({ ok: false, error: "whatsappClient.pupPage is not ready" });
+    }
+    const evalResult = await whatsappClient.pupPage.evaluate(async (cid, med, cap) => {
+      const logs = [];
+      try {
+        logs.push(`Testing chatId: ${cid}`);
+        const widFactory = window.require('WAWebWidFactory');
+        const chatWid = widFactory ? widFactory.createWid(cid) : null;
+        logs.push(`chatWid: ${chatWid ? chatWid._serialized : 'null'}`);
+
+        const ChatColl = window.require('WAWebCollections')?.Chat;
+        logs.push(`ChatColl available: ${Boolean(ChatColl)}`);
+        let chat = ChatColl?.get?.(chatWid);
+        logs.push(`Chat.get(chatWid): ${Boolean(chat)}`);
+
+        if (!chat) {
+          try {
+            const findChatAction = window.require('WAWebFindChatAction');
+            logs.push(`findChatAction available: ${Boolean(findChatAction)}`);
+            if (findChatAction?.findOrCreateLatestChat) {
+              const resFind = await findChatAction.findOrCreateLatestChat(chatWid);
+              chat = resFind?.chat;
+              logs.push(`findOrCreateLatestChat result: ${Boolean(chat)}`);
+            }
+          } catch (eFind) {
+            logs.push(`findOrCreateLatestChat THREW: ${eFind.message}`);
+          }
+        }
+
+        if (!chat) {
+          try {
+            if (ChatColl?.find) {
+              chat = await ChatColl.find(chatWid);
+              logs.push(`ChatColl.find result: ${Boolean(chat)}`);
+            }
+          } catch (eCollFind) {
+            logs.push(`ChatColl.find THREW: ${eCollFind.message}`);
+          }
+        }
+
+        logs.push(`Final chat object: ${Boolean(chat)}`);
+        if (!chat) return { logs, error: "Could not find or create chat" };
+
+        let sendResult = null;
+        try {
+          const sent = await window.WWebJS.sendMessage(chat, "", { media: med, caption: cap });
+          sendResult = { ok: true, sentBool: Boolean(sent), msgId: sent?.id?._serialized };
+          logs.push(`sendMessage OK: ${sent?.id?._serialized}`);
+        } catch (eSend) {
+          logs.push(`sendMessage THREW: ${eSend.message}`);
+          sendResult = { ok: false, error: eSend.message, stack: eSend.stack };
+        }
+
+        return { logs, sendResult };
+      } catch (err) {
+        return { logs, error: err.message, stack: err.stack };
+      }
+    }, chatId, media, caption);
+
+    res.json({ ok: true, mediaOk: Boolean(media), dataLen: media?.data?.length, evalResult });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message, stack: e.stack });
+  }
+});
+
 app.get(["/health", "/status", "/api/status", "/api/crm/status"], async (req, res) => {
   if (req.query?.check === "1" || (!whatsappState.connected && whatsappState.status === "loading")) {
     await promoverClienteParaReady(whatsappClient, "status_request").catch(() => {});
