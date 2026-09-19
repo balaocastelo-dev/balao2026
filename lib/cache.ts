@@ -7,6 +7,15 @@ import {
   getProductsPaginated,
 } from "./db";
 import { listVitrinePagesPublic } from "./vitrine/db";
+import {
+  comEspelho,
+  espelhoPaginado,
+  espelhoTodos,
+  lerCategoriasDoEspelho,
+  lerBannersDoEspelho,
+} from "./catalogo-espelho";
+
+const listaVazia = (itens: unknown[]) => !Array.isArray(itens) || itens.length === 0;
 
 /**
  * Etiqueta única do catálogo. Toda leitura de produto é marcada com ela, e
@@ -16,17 +25,10 @@ import { listVitrinePagesPublic } from "./vitrine/db";
 export const TAG_PRODUTOS = "products";
 
 /**
- * Catálogo com cache.
- *
- * O motivo é a cota do banco: a Hostinger permite 500 conexões por HORA, e a
- * Vercel abre conexão a cada requisição. Sem cache, uma visita movimentada
- * queima a cota e o catálogo aparece vazio no site e no CRM até a hora virar.
- *
- * Dois minutos é o equilíbrio: preço alterado no admin aparece rápido (e a
- * invalidação por etiqueta traz na hora), e o banco é consultado poucas vezes.
+ * Catálogo com cache e espelho de contingência.
  */
 export const getCachedProducts = unstable_cache(
-  async () => getProducts(),
+  async () => comEspelho(() => getProducts(), espelhoTodos, listaVazia),
   ["products-all"],
   { revalidate: 120, tags: [TAG_PRODUTOS] }
 );
@@ -38,8 +40,6 @@ export function getCachedProductsPaginated(opts: {
   category?: string;
   sort?: "price_asc" | "recent";
 }) {
-  // Cada combinação de filtro tem a própria entrada — daí a chave carregar os
-  // parâmetros.
   const chave = [
     "products-paginated",
     String(opts.page ?? 1),
@@ -49,38 +49,73 @@ export function getCachedProductsPaginated(opts: {
     opts.sort ?? "",
   ];
 
-  return unstable_cache(async () => getProductsPaginated(opts), chave, {
-    revalidate: 120,
-    tags: [TAG_PRODUTOS],
-  })();
+  return unstable_cache(
+    async () =>
+      comEspelho(
+        () => getProductsPaginated(opts),
+        (produtos) => espelhoPaginado(produtos, opts),
+        (resultado) => !resultado || !Array.isArray(resultado.products) || resultado.total === 0
+      ),
+    chave,
+    { revalidate: 120, tags: [TAG_PRODUTOS] }
+  )();
 }
 
 /**
- * Derruba o cache do catálogo. Chamar sempre que produto for criado,
- * alterado ou removido — sem isso o site e o CRM continuariam mostrando o
- * preço antigo por até dois minutos.
+ * Derruba o cache do catálogo e avisa a VPS para sincronizar.
  */
 export function invalidarCacheProdutos() {
+  const servidor = (
+    process.env.WHATSAPP_PANEL_SERVER_URL ||
+    process.env.NEXT_PUBLIC_WHATSAPP_PANEL_SERVER_URL ||
+    "https://srv1963897.hstgr.cloud"
+  ).replace(/\/$/, "");
+
+  if (servidor) {
+    fetch(`${servidor}/api/crm/catalogo/atualizar`, {
+      method: "POST",
+      signal: AbortSignal.timeout(5000),
+    }).catch(() => {});
+  }
+
   try {
-    // No Next 16 o segundo argumento é obrigatório: diz por quanto tempo a
-    // entrada ainda pode ser servida enquanto a nova é buscada. Zero =
-    // expira imediatamente, que é o que se espera de "o preço mudou".
     revalidateTag(TAG_PRODUTOS, { expire: 0 });
   } catch (error) {
-    // Fora de um contexto de request o Next recusa a chamada; não é motivo
-    // para derrubar a operação que acabou de salvar o produto.
     console.warn("[cache] Não consegui invalidar o catálogo:", error);
   }
 }
 
+export const TAG_CATEGORIAS = "categories";
+
 export const getCachedCategories = unstable_cache(
-  async () => getCategories(),
+  async () => {
+    try {
+      const doBanco = await getCategories();
+      if (Array.isArray(doBanco) && doBanco.length > 0) return doBanco;
+    } catch {}
+    return lerCategoriasDoEspelho();
+  },
   ["categories"],
-  { revalidate: 300, tags: ["categories"] }
+  { revalidate: 300, tags: [TAG_CATEGORIAS] }
 );
 
+export function invalidarCacheCategorias() {
+  try {
+    revalidateTag(TAG_CATEGORIAS, { expire: 0 });
+  } catch (error) {
+    console.warn("[cache] Não consegui invalidar as categorias:", error);
+  }
+}
+
 export const getCachedCarouselImages = unstable_cache(
-  async () => getCarouselImages(true),
+  async () => {
+    try {
+      const doBanco = await getCarouselImages(true);
+      if (Array.isArray(doBanco) && doBanco.length > 0) return doBanco;
+    } catch {}
+    const daCopia = await lerBannersDoEspelho();
+    return daCopia.filter((b) => b.active !== false);
+  },
   ["carousel-images"],
   { revalidate: 300, tags: ["carousel"] }
 );

@@ -142,8 +142,40 @@ async function runQuery(poolOrConn: Pool | PoolConnection, input: StatementInput
   return toResult(result, fields as any[]);
 }
 
+const PAUSA_APOS_COTA_MS = 3 * 60_000;
+let cotaEstouradaEm = 0;
+
+export function ehErroDeCota(erro: unknown) {
+  const texto = String((erro as Error)?.message || erro || "");
+  return texto.includes("max_connections_per_hour") || texto.includes("max_user_connections");
+}
+
+/** Se o banco está em pausa por ter recusado conexão há pouco. */
+export function bancoEmPausa() {
+  return cotaEstouradaEm > 0 && Date.now() - cotaEstouradaEm < PAUSA_APOS_COTA_MS;
+}
+
 async function execute(input: StatementInput | string): Promise<QueryResult> {
-  return runQuery(getPool(), input);
+  if (bancoEmPausa()) {
+    throw new Error(
+      "max_connections_per_hour: banco em pausa após recusar conexão; servindo a cópia."
+    );
+  }
+
+  try {
+    return await runQuery(getPool(), input);
+  } catch (erro) {
+    if (ehErroDeCota(erro)) {
+      if (!bancoEmPausa()) {
+        console.warn(
+          `[db] Cota de conexões estourada. Pausando o banco por ${PAUSA_APOS_COTA_MS / 60000} min ` +
+            "para não gastar mais tentativas — o site segue com a cópia da VPS/backup."
+        );
+      }
+      cotaEstouradaEm = Date.now();
+    }
+    throw erro;
+  }
 }
 
 async function batch(stmts: StatementInput[], mode?: string): Promise<QueryResult[]> {

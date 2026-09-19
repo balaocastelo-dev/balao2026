@@ -37,6 +37,20 @@ const DATA_DIR = path.join(DATA_ROOT, "data");
 const AUTH_DIR = path.join(DATA_ROOT, ".wwebjs_auth");
 const CACHE_DIR = path.join(DATA_ROOT, ".wwebjs_cache");
 
+const { criarEspelhoDoCatalogo } = require("./catalogo");
+const SITE_URL = process.env.SITE_URL || "https://www.balao.info";
+const espelhoDoCatalogo = criarEspelhoDoCatalogo({
+  pasta: DATA_DIR,
+  urlDoSite: SITE_URL,
+});
+
+const INTERVALO_DO_ESPELHO_MS = 30 * 60_000;
+setTimeout(() => espelhoDoCatalogo.atualizar({ motivo: "boot" }), 20_000).unref?.();
+setInterval(
+  () => espelhoDoCatalogo.atualizar({ motivo: "agendado" }),
+  INTERVALO_DO_ESPELHO_MS
+).unref?.();
+
 // Estas rotas de imagem ficam ANTES do middleware de CORS la embaixo, e no
 // Express um middleware so vale para o que e registrado depois dele. Sem o
 // header aqui, o painel (que carrega as imagens com crossOrigin="anonymous")
@@ -1696,12 +1710,56 @@ async function syncStatusFeed() {
   }
 }
 
+async function ensureWWebJSInjected(client = whatsappClient) {
+  if (!client?.pupPage) return false;
+  try {
+    const ok = await client.pupPage.evaluate(() => typeof window.WWebJS !== "undefined" && Boolean(window.WWebJS?.getChat)).catch(() => false);
+    if (ok) return true;
+
+    console.log("[whatsapp] Injetando LoadUtils no navegador...");
+    const { LoadUtils } = require("whatsapp-web.js/src/util/Injected/Utils");
+    await client.pupPage.evaluate(LoadUtils);
+
+    const verified = await client.pupPage.evaluate(() => typeof window.WWebJS !== "undefined" && Boolean(window.WWebJS?.getChat)).catch(() => false);
+    console.log(`[whatsapp] LoadUtils verificado com sucesso: ${verified}`);
+    return verified;
+  } catch (err) {
+    console.warn("[whatsapp] Falha ao injetar LoadUtils:", err.message);
+    return false;
+  }
+}
+
 async function resolveAndSendMessage(chatId, content, options = {}) {
+  await ensureWWebJSInjected(whatsappClient);
   try {
     const res = await whatsappClient.sendMessage(chatId, content, options);
     if (res) return res;
   } catch (err1) {
-    console.warn(`[WHATSAPP-SEND] Tentativa direta para ${chatId} falhou: "${err1.message}". Tentando resolução de JID...`);
+    console.warn(`[WHATSAPP-SEND] Tentativa direta para ${chatId} falhou: "${err1.message}". Tentando resolução...`);
+
+    if (err1.message?.includes("getChat") || err1.message?.includes("undefined")) {
+      console.log(`[WHATSAPP-SEND] Forçando reinjeção de LoadUtils após erro getChat...`);
+      await ensureWWebJSInjected(whatsappClient);
+      try {
+        const resRetry = await whatsappClient.sendMessage(chatId, content, options);
+        if (resRetry) return resRetry;
+      } catch (eRetry) {
+        console.warn(`[WHATSAPP-SEND] Retry direto falhou:`, eRetry.message);
+      }
+    }
+
+    // Se for @lid, tenta achar o telefone @c.us correspondente no store
+    if (String(chatId).endsWith("@lid")) {
+      const found = store.chats.find((c) => c.id === chatId || c.chatId === chatId);
+      if (found?.realNumber) {
+        const altCus = `${found.realNumber}@c.us`;
+        try {
+          console.log(`[WHATSAPP-SEND] Tentando enviar para telefone @c.us do contato @lid: ${altCus}`);
+          const res = await whatsappClient.sendMessage(altCus, content, options);
+          if (res) return res;
+        } catch (eLid) {}
+      }
+    }
 
     const clean = normalizeNumber(chatId);
     if (clean) {
@@ -2143,6 +2201,33 @@ async function promoverClienteParaReady(client, origem = "auto") {
       whatsappState.rawQr = null;
       whatsappState.ultimoErro = null;
       if (wid) whatsappState.phoneNumber = wid;
+
+      // Injeta LoadUtils para garantir window.WWebJS.getChat e envio de mensagens
+      await ensureWWebJSInjected(client);
+
+      // Inicializa client.info se estiver ausente
+      if (!client.info && client.pupPage) {
+        try {
+          const ClientInfo = require("whatsapp-web.js/src/structures/ClientInfo");
+          const infoData = await client.pupPage.evaluate(() => {
+            const conn = window.require?.('WAWebConnModel')?.Conn?.serialize?.() || {};
+            const widUser = window.require?.('WAWebUserPrefsMeUser')?.getMaybeMePnUser?.() ||
+                            window.require?.('WAWebUserPrefsMeUser')?.getMaybeMeLidUser?.() ||
+                            window.require?.('WAWebConnModel')?.Conn?.wid;
+            return { ...conn, wid: widUser };
+          });
+          if (infoData?.wid) {
+            client.info = new ClientInfo(client, infoData);
+            if (!whatsappState.phoneNumber && infoData.wid?.user) {
+              whatsappState.phoneNumber = infoData.wid.user;
+            }
+            console.log(`[whatsapp] client.info inicializado no promote:`, infoData.wid);
+          }
+        } catch (eInfo) {
+          console.warn("[whatsapp] Falha ao extrair client.info:", eInfo.message);
+        }
+      }
+
       emitState();
       emitToast("WhatsApp conectado com sucesso!");
       garantirChatsCarregados({ forcar: true }).catch((err) => {
@@ -2588,7 +2673,28 @@ app.get(["/health", "/status", "/api/status", "/api/crm/status"], async (req, re
       // Onde as conversas foram parar na ultima varredura.
       varredura: ultimaVarredura,
     },
+    // Cópia do catálogo guardada aqui, para o site não ficar sem preço
+    // quando a cota do banco estoura.
+    catalogo: espelhoDoCatalogo.estado,
   });
+});
+
+// Catálogo espelhado. O site lê daqui quando o banco da Hostinger recusa.
+app.get(["/api/crm/catalogo", "/api/catalogo"], (_req, res) => {
+  const { produtos, categorias, banners, blog, total, atualizadoEm } = espelhoDoCatalogo.ler();
+  res.json({ ok: true, total, atualizadoEm, produtos, categorias, banners, blog });
+});
+
+// Só o resumo, para conferir o estado sem baixar milhares de produtos.
+app.get(["/api/crm/catalogo/estado", "/api/catalogo/estado"], (_req, res) => {
+  res.json({ ok: true, ...espelhoDoCatalogo.estado, origem: SITE_URL });
+});
+
+// O site chama isto quando alguém altera um produto, para o espelho não ficar
+// até meia hora com preço velho.
+app.all(["/api/crm/catalogo/atualizar", "/api/catalogo/atualizar"], async (_req, res) => {
+  const resultado = await espelhoDoCatalogo.atualizar({ motivo: "site avisou" });
+  res.json(resultado);
 });
 
 app.all(["/api/reset-session", "/api/crm/reset-session", "/api/reconnect", "/api/crm/reconnect"], async (_req, res) => {

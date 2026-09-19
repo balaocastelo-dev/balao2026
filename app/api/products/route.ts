@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getProductsLite, saveProducts, createProduct } from '@/lib/db';
+import { getProducts, getProductsLite, saveProducts, createProduct } from '@/lib/db';
 import {
   getCachedProducts,
   getCachedProductsPaginated,
@@ -13,11 +13,6 @@ export const dynamic = 'force-dynamic';
 // `limit`/`search`/`category`, pagina no banco. Com `lite=1`, devolve só
 // id/name/image de TODOS os produtos (usado pelas rotinas de manutenção do
 // admin, que precisam varrer o catálogo inteiro sem puxar specs/descrição).
-//
-// As leituras passam pelo cache do Next. Não é otimização à toa: o banco da
-// Hostinger aceita 500 conexões por HORA, e a Vercel abre uma por requisição.
-// Sem cache, um dia movimentado queimava a cota e o catálogo sumia do site e
-// do CRM até a hora virar.
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const page = searchParams.get('page');
@@ -29,6 +24,11 @@ export async function GET(request: Request) {
 
   if (lite) {
     const products = await getProductsLite();
+    return NextResponse.json(products);
+  }
+
+  if (searchParams.get('origem') === 'banco') {
+    const products = await getProducts();
     return NextResponse.json(products);
   }
 

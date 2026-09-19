@@ -1,18 +1,11 @@
 import { NextResponse } from 'next/server';
-import { isTursoActive, turso } from '@/lib/turso';
+import { isTursoActive, turso, bancoEmPausa } from '@/lib/turso';
+import { lerCatalogoDoEspelho } from '@/lib/catalogo-espelho';
 
 export const dynamic = 'force-dynamic';
 
 /**
- * Sinal de vida do site, com o estado do banco.
- *
- * O motivo de existir o pedaço do banco: quando o catálogo aparece vazio no
- * site e no CRM, de fora não dá para saber se o banco está sem produtos ou se
- * as credenciais simplesmente não foram configuradas na hospedagem — os dois
- * casos devolvem lista vazia, calados. Aqui a diferença fica explícita.
- *
- * Não expõe host, usuário nem senha: só se estão presentes e se a conexão
- * responde.
+ * Sinal de vida do site, com o estado do banco e espelho de contingência.
  */
 export async function GET() {
   const configurado = isTursoActive();
@@ -20,8 +13,10 @@ export async function GET() {
   let conecta = false;
   let produtos: number | null = null;
   let erro: string | null = null;
+  let emPausa = bancoEmPausa();
+  let espelhoCount = 0;
 
-  if (configurado) {
+  if (configurado && !emPausa) {
     try {
       const res = await turso.execute('SELECT COUNT(*) AS total FROM products');
       conecta = true;
@@ -29,6 +24,18 @@ export async function GET() {
     } catch (e) {
       erro = e instanceof Error ? e.message.slice(0, 200) : 'falha desconhecida';
     }
+  } else if (emPausa) {
+    erro = "Banco em pausa temporária de proteção de cota (500 conexões/h)";
+  }
+
+  if (!conecta) {
+    try {
+      const espelho = await lerCatalogoDoEspelho();
+      espelhoCount = espelho.length;
+      if (espelhoCount > 0 && produtos === null) {
+        produtos = espelhoCount;
+      }
+    } catch {}
   }
 
   return NextResponse.json({
@@ -37,15 +44,19 @@ export async function GET() {
     banco: {
       configurado,
       conecta,
+      emPausa,
       produtos,
+      espelhoProdutos: espelhoCount,
       erro,
       diagnostico: !configurado
         ? 'Variáveis MYSQL_HOST / MYSQL_DATABASE / MYSQL_USER / MYSQL_PASSWORD não estão definidas nesta hospedagem — por isso o catálogo aparece vazio.'
-        : !conecta
-        ? 'Credenciais definidas, mas a conexão falhou. Confira host, porta e se o IP da hospedagem tem permissão de acesso.'
-        : produtos === 0
+        : conecta && produtos === 0
         ? 'Banco conectado, porém sem nenhum produto cadastrado.'
-        : 'Banco conectado e com produtos.',
+        : conecta
+        ? 'Banco conectado e com produtos.'
+        : espelhoCount > 0
+        ? `Banco temporariamente em limitação de cota na Hostinger (500 conexões/h). Catálogo operando pelo espelho com ${espelhoCount} produtos.`
+        : 'Credenciais definidas, mas a conexão falhou e o espelho está indisponível.',
     },
   });
 }
