@@ -2001,6 +2001,19 @@ async function resolveMediaObject(mediaSource, filename = "produto.jpg", mimetyp
   return null;
 }
 
+function extractProductImageUrl(prod) {
+  if (!prod) return null;
+  let raw = prod.imagem || prod.image || prod.foto || prod.img || prod.urlImagem || (Array.isArray(prod.imagens) ? prod.imagens[0] : null);
+  if (typeof raw === "string" && raw.trim()) {
+    raw = raw.trim();
+    if (raw.startsWith("//")) return `https:${raw}`;
+    if (raw.startsWith("http://") || raw.startsWith("https://") || raw.startsWith("data:")) return raw;
+    if (raw.startsWith("/")) return `${SITE_URL}${raw}`;
+    return `https://${raw}`;
+  }
+  return null;
+}
+
 function isWhatsAppClientConnected() {
   if (!whatsappClient) return false;
   if (whatsappState.status === "disconnected" || whatsappState.status === "qr" || whatsappState.status === "initializing") return false;
@@ -2962,13 +2975,14 @@ app.post(["/api/enviar-produto", "/api/crm/enviar-produto"], async (req, res) =>
 
     let mediaSent = false;
     const bestChatId = getBestTargetChatId(targetChat, number || targetChat);
-    if (prod.imagem && prod.imagem.startsWith("http")) {
+    const prodImgUrl = extractProductImageUrl(prod);
+    if (prodImgUrl) {
       try {
-        const media = await resolveMediaObject(prod.imagem, "produto.jpg", "image/jpeg");
+        const media = await resolveMediaObject(prodImgUrl, "produto.jpg", "image/jpeg");
         if (media) {
           let sentMsg = null;
           try {
-            console.log(`[/api/enviar-produto] Disparando imagem com legenda para ${bestChatId}`);
+            console.log(`[/api/enviar-produto] Disparando imagem com legenda para ${bestChatId} (imagem: ${prodImgUrl})`);
             sentMsg = await resolveAndSendMessage(bestChatId, media, { caption: text, number: targetChat });
             if (sentMsg) mediaSent = true;
           } catch (errCap) {
@@ -2997,7 +3011,7 @@ app.post(["/api/enviar-produto", "/api/crm/enviar-produto"], async (req, res) =>
               timestamp: Date.now(),
               hasMedia: true,
               mediaType: "image",
-              mediaUrl: prod.imagem,
+              mediaUrl: prodImgUrl,
               realNumber: extractRealNumber(bestChatId),
               displayNumber: extractRealNumber(bestChatId),
             });
@@ -3715,13 +3729,14 @@ io.on("connection", (socket) => {
 
       let mediaSent = false;
       let sentId = null;
-      if (prod.imagem && prod.imagem.startsWith("http")) {
+      const prodImgUrl = extractProductImageUrl(prod);
+      if (prodImgUrl) {
         try {
-          const media = await resolveMediaObject(prod.imagem, "produto.jpg", "image/jpeg");
+          const media = await resolveMediaObject(prodImgUrl, "produto.jpg", "image/jpeg");
           if (media) {
             // Tentativa 1: Enviar com legenda (foto + texto juntos)
             try {
-              console.log(`[panel:send-product] Disparando imagem com legenda para ${targetChatId}`);
+              console.log(`[panel:send-product] Disparando imagem com legenda para ${targetChatId} (imagem: ${prodImgUrl})`);
               const sentMsg = await resolveAndSendMessage(targetChatId, media, { caption: text, number });
               if (sentMsg) {
                 mediaSent = true;
@@ -3755,7 +3770,7 @@ io.on("connection", (socket) => {
                 timestamp: Date.now(),
                 hasMedia: true,
                 mediaType: "image",
-                mediaUrl: prod.imagem,
+                mediaUrl: prodImgUrl,
                 realNumber: extractRealNumber(targetChatId),
                 displayNumber: extractRealNumber(targetChatId),
               });
