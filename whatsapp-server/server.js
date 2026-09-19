@@ -2962,12 +2962,45 @@ app.post("/api/debug/test-send-media", async (req, res) => {
           stepDebug.messageObjFrom = messageObj.from ? (messageObj.from._serialized || String(messageObj.from)) : null;
           stepDebug.messageObjType = messageObj.type;
 
+          // Test text message creation
           try {
-            const testMsg = new MsgClass(messageObj);
-            stepDebug.constructedMsgOk = Boolean(testMsg);
-          } catch (eMsg) {
-            stepDebug.constructedMsgError = eMsg.message;
-            stepDebug.constructedMsgStack = eMsg.stack;
+            const textMsgObj = {
+              id: newMsgKey,
+              ack: 0,
+              body: "teste",
+              from: from,
+              to: chat.id,
+              local: true,
+              self: 'out',
+              t: parseInt(new Date().getTime() / 1000),
+              isNewMsg: true,
+              type: 'chat',
+              ...ephemeralFields
+            };
+            const testTextMsg = new MsgClass(textMsgObj);
+            stepDebug.textMsgOk = Boolean(testTextMsg);
+            stepDebug.textMsgSender = testTextMsg.sender ? (testTextMsg.sender._serialized || String(testTextMsg.sender)) : null;
+            stepDebug.textMsgAuthor = testTextMsg.author ? (testTextMsg.author._serialized || String(testTextMsg.author)) : null;
+            stepDebug.textMsgFrom = testTextMsg.from ? (testTextMsg.from._serialized || String(testTextMsg.from)) : null;
+          } catch (eText) {
+            stepDebug.textMsgError = eText.message;
+            stepDebug.textMsgStack = eText.stack;
+          }
+
+          // Search for getSender / getValidatedSender modules
+          try {
+            const mods = ['WAWebMsgGetters', 'WAWebSenderGetters', 'WAWebMsgSender', 'WAWebMsgKey', 'WAWebChatGetters'];
+            stepDebug.moduleDumps = {};
+            for (const m of mods) {
+              try {
+                const mod = window.require(m);
+                stepDebug.moduleDumps[m] = mod ? Object.keys(mod) : null;
+              } catch (em) {
+                stepDebug.moduleDumps[m] = 'err: ' + em.message;
+              }
+            }
+          } catch (eMod) {
+            stepDebug.eMod = eMod.message;
           }
         } catch (eStep) {
           stepDebug.error = eStep.message;
