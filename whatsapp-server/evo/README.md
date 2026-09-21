@@ -36,3 +36,22 @@ sozinho o áudio recebido na conversa aberta; o texto fica guardado na VPS.
 segunda linha ("fora") e manda texto, foto, foto por link, vídeo, voz, PDF
 e um produto do catálogo; confere a chegada e se a mídia baixa, faz o
 caminho de volta e transcreve o áudio recebido.
+
+## Módulo de Status (`whatsapp-server/status/`)
+
+| Arquivo | Para quê |
+| --- | --- |
+| `status/db.js` | banco próprio `balao` no Postgres do compose, migrações idempotentes |
+| `status/recorrencia.js` | regras (única, diária, dias úteis, semanal; início/fim) no fuso de SP |
+| `status/servico.js` | conteúdos, agendamentos, publicação, agendador, auditoria, biblioteca, calendário, status recebidos |
+| `status/rotas.js` | `/api/status/*` (com ingresso) e `/interno/status/*` (a Evolution baixa a mídia daqui) |
+| `status/*.test.js` | `node status/recorrencia.test.js` e, com Postgres, `STATUS_DB_TESTE=… node status/servico.test.js` |
+
+- Sem publicação duplicada: cada ocorrência tem chave única
+  (`agenda:<agendamento>:<horário>`); o agendador só publica o que conseguiu
+  inserir. Reinício no meio da publicação vira "incerto" e nunca é repetido
+  sozinho — só com "Tentar novamente".
+- Ocorrência atrasada além da tolerância (padrão 30 min) vira "perdido".
+- Ver status dos contatos exige `readStatus` ligado na Evolution
+  (`STATUS_LER_CONTATOS=0` desliga): todo status recebido é marcado como visto.
+- Painel: `components/crm/status/` (Central, Editor, Calendário, Visualizador).

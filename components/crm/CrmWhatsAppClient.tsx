@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { io, type Socket } from "socket.io-client";
+import CentralStatus from "@/components/crm/status/CentralStatus";
+import type { PonteStatus, StatusRecebido } from "@/components/crm/status/tipos";
 import {
   CrmChat,
   CrmEtiqueta,
@@ -76,8 +78,23 @@ function descreverPreviewMensagem(body: string | null | undefined, hasMedia?: bo
 }
 
 // Formata número de WhatsApp no formato solicitado: xx xx xxxxxxxxx (ex: 55 19 987510267)
+/** Nome que é só o código interno do WhatsApp (@lid), não um nome de verdade. */
+function nomeEhCodigo(nome: string | null | undefined, chatId?: string | null) {
+  const n = String(nome || "").trim();
+  if (!n) return true;
+  if (/^\d{12,}$/.test(n)) return true; // telefone não tem mais de 13 dígitos; @lid tem 14-15
+  const lid = String(chatId || "").endsWith("@lid") ? String(chatId).replace(/@.*$/, "") : "";
+  return Boolean(lid) && n.replace(/\D/g, "").includes(lid);
+}
+
+const NUMERO_OCULTO = "Número oculto pelo WhatsApp";
+
 function formatarNumeroExibicao(num: string | null | undefined): string {
   if (!num) return "";
+  // Conversa que o WhatsApp só identifica pelo código interno (@lid): o
+  // número real ainda não foi informado. Mostrar o código como se fosse
+  // telefone confundia ("92148808610042").
+  if (String(num).endsWith("@lid")) return NUMERO_OCULTO;
   const limpo = String(num).replace(/@.*$/, "").replace(/\D/g, "");
   if (!limpo) return "";
 
@@ -338,7 +355,7 @@ export default function CrmWhatsAppClient({
   const urlMidia = useCallback(
     (url: string | null | undefined): string => {
       if (!url) return "";
-      if (url.startsWith("/midia/") || url.startsWith("/foto/")) {
+      if (url.startsWith("/midia/") || url.startsWith("/foto/") || url.startsWith("/api/status/midia/")) {
         return `${serverUrl.replace(/\/$/, "")}${url}?t=${encodeURIComponent(ticketAtual)}`;
       }
       return url;
@@ -531,13 +548,6 @@ export default function CrmWhatsAppClient({
 
   // WhatsApp Status / Stories State
   const [statusFeed, setStatusFeed] = useState<CrmStatusFeed[]>([]);
-  const [modalStatusAberto, setModalStatusAberto] = useState(false);
-  const [statusSelecionadoFeed, setStatusSelecionadoFeed] = useState<CrmStatusFeed | null>(null);
-  const [statusItemIndex, setStatusItemIndex] = useState(0);
-  const [statusComentario, setStatusComentario] = useState("");
-  const [modalNovoStatusAberto, setModalNovoStatusAberto] = useState(false);
-  const [novoStatusTexto, setNovoStatusTexto] = useState("");
-  const [novoStatusCor, setNovoStatusCor] = useState("#0f9d58");
 
   // Kanban State
   const [kanbanColunas, setKanbanColunas] = useState<KanbanColumn[]>(() => {
@@ -1051,16 +1061,22 @@ export default function CrmWhatsAppClient({
               const anterior = anteriores.get(sc.chatId);
               // Nunca deixar o sufixo do JID (@c.us, @lid, @s.whatsapp.net…)
               // vazar como nome/número na lista de conversas.
+              const ehLid = String(sc.chatId || "").endsWith("@lid");
               const realNum =
                 sc.realNumber ||
                 sc.displayNumber ||
-                String(sc.chatId || "").replace(/@.*$/, "");
-              const nomeSemJid = String(sc.contactName || realNum || "").replace(/@.*$/, "");
+                (ehLid ? "" : String(sc.chatId || "").replace(/@.*$/, ""));
+              const nomeServidor = String(sc.contactName || "").replace(/@.*$/, "");
+              const nomeSemJid = !nomeEhCodigo(nomeServidor, sc.chatId)
+                ? nomeServidor
+                : !nomeEhCodigo(anterior?.nome, sc.chatId)
+                ? anterior!.nome
+                : realNum || (ehLid ? "Contato (número oculto)" : "");
 
               return {
                 ...anterior,
                 id: sc.chatId,
-                nome: nomeSemJid || anterior?.nome || "Contato",
+                nome: nomeSemJid || "Contato",
                 numero: realNum,
                 // Mantém a foto que já tínhamos quando o servidor vier sem —
                 // evita o avatar sumir e voltar a cada sincronização.
@@ -1150,8 +1166,13 @@ export default function CrmWhatsAppClient({
       // Nunca deixar o sufixo técnico do JID (@c.us, @lid, @s.whatsapp.net…)
       // vazar como se fosse nome/número — sem isso, contatos @lid sem nome
       // resolvido apareciam como "273082677764270@lid" na lista de chats.
-      const realNum = newMsg.realNumber || String(newMsg.chatId || "").replace(/@.*$/, "");
-      const nomeSemJid = (newMsg.contactName || realNum || "").replace(/@.*$/, "");
+      const msgEhLid = String(newMsg.chatId || "").endsWith("@lid");
+      const realNum =
+        newMsg.realNumber || (msgEhLid ? "" : String(newMsg.chatId || "").replace(/@.*$/, ""));
+      const nomeMsg = String(newMsg.contactName || "").replace(/@.*$/, "");
+      const nomeSemJid = !nomeEhCodigo(nomeMsg, newMsg.chatId)
+        ? nomeMsg
+        : realNum || (msgEhLid ? "Contato (número oculto)" : "");
       const m: CrmMensagem = {
         id: newMsg.id || `msg-${Date.now()}`,
         chatId: newMsg.chatId,
@@ -1651,12 +1672,65 @@ export default function CrmWhatsAppClient({
     return () => window.removeEventListener("click", handler);
   }, []);
 
+  // Central de Status: o módulo recebe só o que precisa do painel.
+  const [centralStatusAberta, setCentralStatusAberta] = useState(false);
+  const chatsRef = useRef<CrmChat[]>([]);
+  chatsRef.current = chats;
+  const avisoRef = useRef<(m: string) => void>(() => {});
+  const ponteStatus = useMemo<PonteStatus>(
+    () => ({
+      chamar: async <T,>(caminho: string, init: RequestInit = {}) => {
+        const r = await fetchServidor(caminho, init);
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok || j?.ok === false) throw new Error(j?.erro || `O servidor respondeu ${r.status}`);
+        return j as T;
+      },
+      urlMidia,
+      fotoDoContato: (chatId: string) => {
+        const chat = chatsRef.current.find((c) => c.id === chatId);
+        const lista = chat ? fontesDaFoto(chat) : [];
+        const numero = chatId.endsWith("@c.us") ? chatId.replace(/\D/g, "") : "";
+        if (numero) lista.push(urlMidia(`/foto/${numero}`));
+        return [...new Set(lista)];
+      },
+      nomeDoContato: (chatId: string) => {
+        const chat = chatsRef.current.find((c) => c.id === chatId);
+        return chat && !nomeEhCodigo(chat.nome, chat.id) && chat.nome !== "Contato" ? chat.nome : null;
+      },
+      responderStatus: (st: StatusRecebido, texto: string) => {
+        if (!socketRef.current?.connected) {
+          avisoRef.current("Sem conexão com o servidor — resposta não enviada.");
+          return;
+        }
+        socketRef.current.emit("panel:reply-status", {
+          chatId: st.autor,
+          contactNumber: st.autor.replace(/@.*$/, ""),
+          statusSnippet: st.texto || (st.tipo === "video" ? "Vídeo do status" : "Foto do status"),
+          text: texto,
+        });
+        avisoRef.current("Resposta enviada para a conversa.");
+      },
+      avisar: (m: string) => avisoRef.current(m),
+      ouvir: (evento: string, fn: (dados: unknown) => void) => {
+        const s = socketRef.current;
+        s?.on(evento, fn);
+        return () => {
+          s?.off(evento, fn);
+        };
+      },
+      ehAdmin: !vendedorFixo,
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [fetchServidor, urlMidia, fontesDaFoto, vendedorFixo]
+  );
+
   const showToast = (msg: string) => {
     setToastMsg(msg);
     setTimeout(() => {
       setToastMsg((cur) => (cur === msg ? null : cur));
     }, 2800);
   };
+  avisoRef.current = showToast;
 
   const relogar = () => {
     if (confirm("Desconectar o WhatsApp atual e gerar um novo QR Code para parear?")) {
@@ -2485,61 +2559,6 @@ export default function CrmWhatsAppClient({
     showToast("Conversa aberta!");
   };
 
-  // Responder ao Status
-  const responderAoStatus = () => {
-    if (!statusSelecionadoFeed || !statusComentario.trim()) return;
-    const statusItem = statusSelecionadoFeed.items[statusItemIndex] || statusSelecionadoFeed.items[0];
-    const contactNumber = statusSelecionadoFeed.contactNumber || statusSelecionadoFeed.id.replace(/@.*$/, "");
-    const chatId = statusSelecionadoFeed.contactId || `${contactNumber}@c.us`;
-
-    // HTTP só roda se o socket estiver caído, senão o cliente recebe em dobro.
-    if (socketRef.current?.connected) {
-      socketRef.current.emit("panel:reply-status", {
-        contactNumber,
-        chatId,
-        statusSnippet: statusItem?.body || "Foto/Mídia do Status",
-        text: statusComentario.trim(),
-      });
-    } else fetchServidor(`/api/enviar`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat: chatId,
-        number: contactNumber,
-        texto: `💬 *Respondendo ao seu Status do WhatsApp:*\n> "${(statusItem?.body || "Mídia").slice(0, 80)}"\n\n${statusComentario.trim()}`,
-      }),
-    }).catch(() => {});
-
-    // Also register message in chat store
-    const novaMsg: CrmMensagem = {
-      id: `msg-status-${Date.now()}`,
-      chatId,
-      from: "balao",
-      body: `💬 *Respondendo ao seu Status do WhatsApp:*\n> "${(statusItem?.body || "Mídia").slice(0, 80)}"\n\n${statusComentario.trim()}`,
-      direction: "out",
-      timestamp: Date.now(),
-      status: "sent",
-    };
-    setMensagens((prev) => [...prev, novaMsg]);
-
-    setStatusComentario("");
-    showToast(`Comentário enviado para ${statusSelecionadoFeed.contactName}! 🚀`);
-  };
-
-  // Publicar Novo Status
-  const publicarNovoStatus = () => {
-    if (!novoStatusTexto.trim()) return;
-    if (socketRef.current?.connected) {
-      socketRef.current.emit("panel:post-status", {
-        text: novoStatusTexto.trim(),
-        backgroundColor: novoStatusCor,
-      });
-    }
-    setNovoStatusTexto("");
-    setModalNovoStatusAberto(false);
-    showToast("Status publicado com sucesso no WhatsApp! 🟢");
-  };
-
   // Drag and Drop Kanban
   const kanbanDrop = (colunaId: string) => {
     if (!kanbanArrastadoId) return;
@@ -2790,20 +2809,12 @@ export default function CrmWhatsAppClient({
 
           {/* WhatsApp Statuses (Stories) Button */}
           <button
-            onClick={() => {
-              // Os status só são buscados aqui, quando alguém abre a aba —
-              // carregá-los junto com o atendimento enchia a tela de contatos
-              // que não estão conversando com a loja.
-              if (socketRef.current?.connected) {
-                socketRef.current.emit("panel:sync-status");
-              }
-              setModalStatusAberto(true);
-            }}
+            onClick={() => setCentralStatusAberta(true)}
             className="bg-white/20 hover:bg-white text-white hover:text-[#0a6e3d] rounded-full px-3 py-1 text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
-            title="Ver e responder aos Status do WhatsApp"
+            title="Central de Status: ver status dos contatos, publicar, agendar e acompanhar"
           >
             <span className="w-2 h-2 rounded-full bg-emerald-300 animate-ping" />
-            <span>🟢 Status ({statusFeed.length})</span>
+            <span>🟢 Status</span>
           </button>
         </div>
 
@@ -3162,7 +3173,6 @@ export default function CrmWhatsAppClient({
                 ) : (
                   chatsFiltrados.map((chat) => {
                     const isAtivo = chat.id === chatSelecionadoId;
-                    const ini = (chat.nome || "?").trim().charAt(0).toUpperCase();
                     const numeroFormatado = formatarNumeroExibicao(chat.numero || chat.id);
 
                     return (
@@ -4906,226 +4916,9 @@ export default function CrmWhatsAppClient({
         </div>
       )}
 
-      {/* MODAL STATUS / STORIES DO WHATSAPP */}
-      {modalStatusAberto && (
-        <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4">
-          <div className="bg-[#121b22] text-white rounded-2xl shadow-2xl max-w-4xl w-full h-[85vh] flex overflow-hidden border border-white/10">
-            {/* Left Status List */}
-            <div className="w-80 bg-[#1f2c34] border-r border-white/10 flex flex-col">
-              <div className="p-3 border-b border-white/10 flex items-center justify-between">
-                <h3 className="font-bold text-sm flex items-center gap-2">
-                  🟢 <b>Status do WhatsApp</b>
-                </h3>
-                <button
-                  onClick={() => setModalNovoStatusAberto(true)}
-                  className="bg-[#00a884] hover:bg-[#008f6f] text-white px-2.5 py-1 rounded-full text-xs font-bold transition-colors cursor-pointer"
-                >
-                  ＋ Meu Status
-                </button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-2 space-y-1">
-                {statusFeed.length === 0 ? (
-                  <div className="text-center text-xs text-white/50 py-12 px-4">
-                    Nenhum status recente disponível.<br />
-                    Quando seus contatos postarem Stories, eles aparecerão aqui.
-                  </div>
-                ) : (
-                  statusFeed.map((feed) => {
-                    const isSelected = statusSelecionadoFeed?.id === feed.id;
-                    const contactNum = formatarNumeroExibicao(feed.contactNumber || feed.id);
-                    const avatarSrc = formatAvatarUrl(feed.profilePicUrl, serverUrl);
-                    return (
-                      <div
-                        key={feed.id}
-                        onClick={() => {
-                          setStatusSelecionadoFeed(feed);
-                          setStatusItemIndex(0);
-                        }}
-                        className={`flex items-center gap-3 p-2.5 rounded-xl cursor-pointer transition-colors ${
-                          isSelected ? "bg-white/15" : "hover:bg-white/5"
-                        }`}
-                      >
-                        <div className="w-12 h-12 rounded-full ring-2 ring-[#00a884] p-0.5 shrink-0 overflow-hidden bg-white/10 flex items-center justify-center font-bold text-sm">
-                          {avatarSrc ? (
-                            /* eslint-disable-next-line @next/next/no-img-element */
-                            <img
-                              src={avatarSrc}
-                              referrerPolicy="no-referrer"
-                              crossOrigin="anonymous"
-                              alt=""
-                              className="w-full h-full object-cover rounded-full"
-                            />
-                          ) : (
-                            <span>{feed.contactName.charAt(0).toUpperCase()}</span>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-bold text-xs truncate">{feed.contactName}</h4>
-                          <div className="text-[10px] text-[#00a884] font-mono">{contactNum}</div>
-                          <div className="text-[10px] text-white/60">
-                            {formatHora(feed.timestamp)} · {feed.items?.length || 1} postagens
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-
-            {/* Right Story Viewer & Comment Box */}
-            <div className="flex-1 flex flex-col bg-[#0b141a] relative">
-              <button
-                onClick={() => {
-                  setModalStatusAberto(false);
-                  setStatusSelecionadoFeed(null);
-                }}
-                className="absolute top-3 right-3 text-white/70 hover:text-white font-bold text-lg z-20 bg-black/40 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer"
-              >
-                ✕
-              </button>
-
-              {statusSelecionadoFeed ? (
-                <div className="flex-1 flex flex-col h-full">
-                  {/* Story Progress Bars */}
-                  <div className="p-3 pb-1 flex gap-1 z-10">
-                    {(statusSelecionadoFeed.items || [statusSelecionadoFeed]).map((_, idx) => (
-                      <div
-                        key={idx}
-                        className={`h-1 flex-1 rounded-full transition-all ${
-                          idx === statusItemIndex ? "bg-[#00a884]" : idx < statusItemIndex ? "bg-white/80" : "bg-white/20"
-                        }`}
-                      />
-                    ))}
-                  </div>
-
-                  {/* Story Header */}
-                  <div className="px-4 py-2 flex items-center gap-3 z-10 bg-gradient-to-b from-black/60 to-transparent">
-                    <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden">
-                      {formatAvatarUrl(statusSelecionadoFeed.profilePicUrl, serverUrl) ? (
-                        /* eslint-disable-next-line @next/next/no-img-element */
-                        <img
-                          src={formatAvatarUrl(statusSelecionadoFeed.profilePicUrl, serverUrl)!}
-                          referrerPolicy="no-referrer"
-                          crossOrigin="anonymous"
-                          alt=""
-                          className="w-full h-full object-cover rounded-full"
-                        />
-                      ) : (
-                        <span>{statusSelecionadoFeed.contactName.charAt(0).toUpperCase()}</span>
-                      )}
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-xs">{statusSelecionadoFeed.contactName}</h4>
-                      <span className="text-[10px] text-emerald-400 font-mono">
-                        {formatarNumeroExibicao(statusSelecionadoFeed.contactNumber || statusSelecionadoFeed.id)}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Main Story Content Area */}
-                  <div
-                    onClick={() => {
-                      const total = statusSelecionadoFeed.items?.length || 1;
-                      setStatusItemIndex((prev) => (prev + 1 < total ? prev + 1 : 0));
-                    }}
-                    className="flex-1 flex items-center justify-center p-6 text-center cursor-pointer relative"
-                  >
-                    {statusSelecionadoFeed.items?.[statusItemIndex]?.hasMedia &&
-                    statusSelecionadoFeed.items?.[statusItemIndex]?.mediaUrl ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img
-                        src={statusSelecionadoFeed.items[statusItemIndex].mediaUrl!}
-                        referrerPolicy="no-referrer"
-                        crossOrigin="anonymous"
-                        alt=""
-                        className="max-h-[50vh] max-w-full object-contain rounded-xl shadow-2xl"
-                      />
-                    ) : (
-                      <div className="bg-[#0f9d58] text-white p-8 rounded-2xl max-w-md w-full shadow-2xl text-lg font-bold flex items-center justify-center min-h-[240px] leading-relaxed">
-                        {statusSelecionadoFeed.items?.[statusItemIndex]?.body ||
-                          statusSelecionadoFeed.contactName + " atualizou seu status."}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Comment / Reply Box */}
-                  <div className="p-3 bg-[#1f2c34] border-t border-white/10 flex items-center gap-2">
-                    <input
-                      type="text"
-                      placeholder={`Responder ao status de ${statusSelecionadoFeed.contactName}…`}
-                      value={statusComentario}
-                      onChange={(e) => setStatusComentario(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") responderAoStatus();
-                      }}
-                      className="flex-1 bg-[#2a3942] text-white placeholder-white/50 border-none rounded-full px-4 py-2 text-xs outline-none focus:ring-1 focus:ring-[#00a884]"
-                    />
-                    <button
-                      onClick={responderAoStatus}
-                      className="bg-[#00a884] hover:bg-[#008f6f] text-white rounded-full w-9 h-9 flex items-center justify-center font-bold text-sm cursor-pointer shrink-0 transition-colors"
-                    >
-                      ➤
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex-1 flex items-center justify-center text-xs text-white/50">
-                  👈 Selecione um status ao lado para visualizar e responder
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL PUBLICAR MEU STATUS */}
-      {modalNovoStatusAberto && (
-        <div className="fixed inset-0 bg-black/75 z-55 flex items-center justify-center p-4">
-          <div className="bg-[#1f2c34] text-white rounded-2xl shadow-2xl max-w-md w-full p-4 space-y-3 border border-white/10">
-            <div className="flex justify-between items-center border-b border-white/10 pb-2">
-              <strong className="text-xs">＋ Publicar Status no WhatsApp</strong>
-              <button
-                onClick={() => setModalNovoStatusAberto(false)}
-                className="text-white/60 hover:text-white font-bold"
-              >
-                ✕
-              </button>
-            </div>
-
-            <textarea
-              rows={4}
-              placeholder="Digite o texto do seu Status/Story do WhatsApp..."
-              value={novoStatusTexto}
-              onChange={(e) => setNovoStatusTexto(e.target.value)}
-              className="w-full p-3 rounded-xl bg-[#2a3942] text-white text-xs outline-none border border-white/10"
-              style={{ backgroundColor: novoStatusCor }}
-            />
-
-            <div className="flex items-center gap-2">
-              <label className="text-xs text-white/70">Cor de fundo:</label>
-              {["#0f9d58", "#1a73e8", "#b91c1c", "#6b21a8", "#d97706", "#202124"].map((cor) => (
-                <button
-                  key={cor}
-                  type="button"
-                  onClick={() => setNovoStatusCor(cor)}
-                  className={`w-6 h-6 rounded-full border-2 transition-all ${
-                    novoStatusCor === cor ? "border-white scale-110" : "border-transparent"
-                  }`}
-                  style={{ backgroundColor: cor }}
-                />
-              ))}
-            </div>
-
-            <button
-              onClick={publicarNovoStatus}
-              className="w-full bg-[#00a884] hover:bg-[#008f6f] text-white py-2 rounded-xl text-xs font-bold cursor-pointer transition-colors"
-            >
-              Publicar no WhatsApp Stories 🟢
-            </button>
-          </div>
-        </div>
+      {/* CENTRAL DE STATUS (módulo components/crm/status) */}
+      {centralStatusAberta && (
+        <CentralStatus ponte={ponteStatus} aoFechar={() => setCentralStatusAberta(false)} />
       )}
 
       {/* CONTEXT MENU MODAL */}

@@ -25,6 +25,9 @@ const { criarEvolution, ErroEvolution } = require("./evo/evolution");
 const { criarAcesso } = require("./evo/acesso");
 const N = require("./evo/normalizar");
 const { criarEspelhoDoCatalogo } = require("./catalogo");
+const { abrirBanco } = require("./status/db");
+const { criarServicoDeStatus } = require("./status/servico");
+const { montarRotasDeStatus } = require("./status/rotas");
 
 process.on("unhandledRejection", (motivo) => console.warn("[processo] promessa rejeitada:", motivo?.message || motivo));
 process.on("uncaughtException", (erro) => console.warn("[processo] exceção:", erro?.message || erro));
@@ -79,6 +82,13 @@ const evolution = criarEvolution({
   chave: process.env.EVOLUTION_API_KEY,
 });
 const acesso = criarAcesso({ urlDoSite: SITE_URL });
+
+// Ver os status dos contatos exige que a Evolution receba status@broadcast,
+// e a Evolution só recebe com "readStatus" ligado — que marca como visto
+// todo status que chega (decisão do dono da loja em 21/09/2026).
+const LER_STATUS_DOS_CONTATOS = process.env.STATUS_LER_CONTATOS !== "0";
+const SEGREDO_STATUS = lerOuCriarSegredo("STATUS_SEGREDO", "status.segredo");
+let statusServico = null; // módulo de Status (liga quando o banco responde)
 const espelhoDoCatalogo = criarEspelhoDoCatalogo({ pasta: DATA_DIR, urlDoSite: SITE_URL });
 setTimeout(() => espelhoDoCatalogo.atualizar({ motivo: "boot" }), 20_000).unref?.();
 setInterval(() => espelhoDoCatalogo.atualizar({ motivo: "agendado" }), 30 * 60_000).unref?.();
@@ -218,7 +228,20 @@ function migrarChaveDeConversa(antigo, novo) {
   if (conversas.has(antigo)) {
     const c = conversas.get(antigo);
     conversas.delete(antigo);
-    conversas.set(novo, { ...c, chatId: novo, realNumber: N.digitos(novo), displayNumber: N.digitos(novo) });
+    const ja = conversas.get(novo);
+    // Se o número já tinha conversa própria, fica a mais recente — e o nome
+    // de verdade, quando só um dos dois tem.
+    const base = ja && (ja.lastMessageTimestamp || 0) >= (c.lastMessageTimestamp || 0) ? ja : c;
+    const nome = [base.contactName, ja?.contactName, c.contactName].find((n) => n && !/^\d+$/.test(n) && n !== "Contato");
+    conversas.set(novo, {
+      ...base,
+      chatId: novo,
+      lid: antigo,
+      contactName: nome || N.formatarNumero(novo),
+      realNumber: N.digitos(novo),
+      displayNumber: N.digitos(novo),
+      unreadCount: (ja?.unreadCount || 0) + (c.unreadCount || 0),
+    });
   }
   if (mensagensPorChat.has(antigo)) {
     const velhas = mensagensPorChat.get(antigo);
@@ -450,6 +473,16 @@ async function prepararInstancia() {
     events: EVENTOS_WEBHOOK,
   };
 
+  const configuracoesDaInstancia = {
+    rejectCall: false,
+    msgCall: "",
+    groupsIgnore: true,
+    alwaysOnline: false,
+    readMessages: false,
+    readStatus: LER_STATUS_DOS_CONTATOS,
+    syncFullHistory: true,
+  };
+
   if (!existe) {
     console.log(`[evolution] Criando a instância "${INSTANCIA}"`);
     await evolution.criarInstancia(INSTANCIA, {
@@ -457,12 +490,15 @@ async function prepararInstancia() {
       rejectCall: false,
       alwaysOnline: false,
       readMessages: false,
-      readStatus: false,
+      readStatus: LER_STATUS_DOS_CONTATOS,
       syncFullHistory: true,
       webhook,
     });
   } else {
     await evolution.definirWebhook(INSTANCIA, webhook);
+    await evolution
+      .definirConfiguracoes(INSTANCIA, configuracoesDaInstancia)
+      .catch((e) => console.warn("[evolution] Não consegui aplicar as configurações:", e.message));
   }
 
   await atualizarEstadoDaConexao();
@@ -551,12 +587,42 @@ async function sincronizarConversas() {
   ultimaSincronizacao = Date.now();
   paraPainel().emit("whatsapp:chats", listaDeConversas());
   for (const id of conversas.keys()) pedirFoto(id);
+  resolverLids().catch((e) => console.warn("[lid] Falha ao resolver:", e.message));
 
   paraPainel().emit("whatsapp:messages", mensagensRecentes());
 }
 setInterval(() => {
   if (estado.connected) sincronizarConversas().catch(() => {});
 }, 5 * 60_000).unref?.();
+
+// Conversas que o WhatsApp só identifica pelo código interno (@lid). Tenta
+// descobrir o número de verdade por dois caminhos oficiais da Evolution: o
+// histórico (mensagens trazem remoteJidAlt) e o cache de números
+// (whatsappNumbers). Se nenhum souber, o painel mostra "número oculto".
+const lidsSemNumero = new Map(); // lid -> última tentativa (ms)
+async function resolverLids() {
+  const pendentes = [...conversas.keys()]
+    .filter((id) => N.ehLid(id) && Date.now() - (lidsSemNumero.get(id) || 0) > 6 * 3600_000)
+    .slice(0, 40);
+  let resolvidos = 0;
+  for (const lid of pendentes) {
+    lidsSemNumero.set(lid, Date.now());
+    const r = await evolution
+      .buscarMensagens(INSTANCIA, { where: { key: { remoteJid: lid } }, offset: 40, page: 1 })
+      .catch(() => null);
+    for (const rec of r?.messages?.records || []) aprenderLid(rec.key);
+    if (!store.lids[lid]) {
+      const w = await evolution.temWhatsApp(INSTANCIA, [lid]).catch(() => null);
+      const jid = Array.isArray(w) ? w.find((x) => x?.jid && !N.ehLid(x.jid))?.jid : null;
+      if (jid) aprenderLid({ remoteJid: lid, remoteJidAlt: jid });
+    }
+    if (store.lids[lid]) resolvidos++;
+  }
+  if (resolvidos) {
+    console.log(`[lid] ${resolvidos} de ${pendentes.length} conversas @lid ganharam o número real`);
+    agendarEnvioDaLista();
+  }
+}
 
 let tentativasDePreparo = 0;
 async function iniciar() {
@@ -577,7 +643,32 @@ async function iniciar() {
 // ------------------------------------------------------------------
 // Webhook da Evolution (rede interna do Docker)
 // ------------------------------------------------------------------
+function tratarStatusRecebido(rec) {
+  if (!statusServico || rec.key.fromMe) return;
+  const autorJid = [rec.key.participantAlt, rec.key.participant].find((j) => j && !N.ehLid(j)) || rec.key.participant;
+  const autor = N.paraChatId(autorJid, lidParaNumero);
+  if (!autor) return;
+  const c = N.extrairConteudo(rec);
+  if (c.ignorar) return;
+  const tipo = c.mediaType === "image" ? "imagem" : c.mediaType === "video" ? "video" : c.mediaType ? null : "texto";
+  if (!tipo) return; // áudio/figurinha em status: fora do escopo por enquanto
+  statusServico
+    .registrarRecebido({
+      id: String(rec.key.id),
+      autor,
+      autorNome: rec.pushName || store.nomes[autor] || null,
+      tipo,
+      texto: c.body,
+      mime: c.mimetype,
+      recebidoEm: N.timestampMs(rec.messageTimestamp),
+    })
+    .catch((e) => console.warn("[status] Falha ao guardar status recebido:", e.message));
+  if (tipo !== "texto") baixarMidia(String(rec.key.id)).catch(() => {});
+  pedirFoto(autor);
+}
+
 function tratarMensagemRecebida(rec) {
+  if (rec.key.remoteJid === "status@broadcast") return tratarStatusRecebido(rec);
   aprenderLid(rec.key);
   const msg = N.normalizarMensagem(rec, { lidParaNumero, numeroDaLoja: estado.phoneNumber });
   if (!msg) return;
@@ -1599,30 +1690,32 @@ io.on("connection", (socket) => {
     paraPainel().emit("whatsapp:transcricao", { id, chatId, texto });
   });
 
-  // ---- status ----
+  // ---- status (o módulo completo vive em /api/status) ----
+  // "Meu Status" rápido do painel antigo: passa pelo módulo, então fica no
+  // histórico e recebe a assinatura como qualquer outro.
   socket.on("panel:post-status", async (p) => {
     try {
-      exigirConectado();
+      if (!statusServico) throw new Error("módulo de Status indisponível");
       const texto = String(p?.text || "").trim();
       const temMidia = p?.base64 && p?.mimetype;
       if (!texto && !temMidia) return;
-      await evolution.publicarStatus(INSTANCIA, temMidia
-        ? {
-            type: String(p.mimetype).startsWith("video/") ? "video" : "image",
-            content: N.separarDataUrl(p.base64).base64,
-            caption: texto,
-            allContacts: true,
-          }
-        : { type: "text", content: texto, backgroundColor: p.backgroundColor || "#b91c1c", font: 1, allContacts: true });
-      emitirToast("Status publicado.", socket);
+      const conteudo = await statusServico.salvarConteudo(
+        {
+          titulo: (texto.split("\n")[0] || "Status rápido").slice(0, 60),
+          texto,
+          midiaDataUrl: temMidia ? `data:${p.mimetype};base64,${N.separarDataUrl(p.base64).base64}` : null,
+        },
+        quem
+      );
+      const r = await statusServico.publicarAgora(conteudo.id, quem);
+      emitirToast(r.situacao === "publicado" ? "Status publicado." : `Status: ${r.erro}`, socket);
     } catch (erro) {
       emitirToast(`Falha ao publicar status: ${erro.message}`, socket);
     }
   });
 
-  socket.on("panel:sync-status", () => {
+  socket.on("panel:sync-status", async () => {
     socket.emit("whatsapp:status-feed", store.statusFeed);
-    emitirToast("Ver os status dos contatos ainda não está disponível nesta versão.", socket);
   });
 
   socket.on("panel:reply-status", async (p) => {
@@ -1714,9 +1807,60 @@ function agendar(item) {
 store.schedules.forEach(agendar);
 
 // ------------------------------------------------------------------
+async function ligarModuloDeStatus() {
+  const url = process.env.STATUS_DB_URL;
+  if (!url) {
+    console.warn("[status] STATUS_DB_URL não configurada — módulo de Status desligado.");
+    return;
+  }
+  for (let tentativa = 1; ; tentativa++) {
+    try {
+      const db = await abrirBanco({ url, urlAdmin: process.env.STATUS_DB_URL_ADMIN });
+      statusServico = criarServicoDeStatus({
+        db,
+        evolution,
+        instancia: INSTANCIA,
+        pasta: path.join(DATA_DIR, "status"),
+        urlInternaBase: process.env.URL_INTERNA_SERVIDOR || `http://balao-whats:${PORTA}`,
+        segredoInterno: SEGREDO_STATUS,
+        estaConectado: () => estado.connected,
+        avisarPainel: (evento, dados) => paraPainel().emit(evento, dados),
+      });
+      await statusServico.iniciar();
+      console.log("[status] Módulo de Status ligado.");
+      return;
+    } catch (e) {
+      const espera = Math.min(60, 5 * tentativa);
+      console.warn(`[status] Banco indisponível (${e.message}) — tento de novo em ${espera}s`);
+      await new Promise((r) => setTimeout(r, espera * 1000));
+    }
+  }
+}
+
+// As rotas existem desde o boot; enquanto o banco não liga, respondem 503.
+montarRotasDeStatus(app, {
+  acesso,
+  segredoInterno: SEGREDO_STATUS,
+  servico: new Proxy(
+    {},
+    {
+      get: (_alvo, nome) => {
+        if (!statusServico) {
+          return () => {
+            throw Object.assign(new Error("Módulo de Status iniciando. Tente em alguns segundos."), { status: 503 });
+          };
+        }
+        const v = statusServico[nome];
+        return typeof v === "function" ? v.bind(statusServico) : v;
+      },
+    }
+  ),
+});
+
 server.listen(PORTA, () => {
   console.log(`[servidor] WhatsApp (Evolution) no ar na porta ${PORTA} — versão ${VERSAO}`);
   iniciar();
+  ligarModuloDeStatus();
 });
 
 module.exports = { app, server, store, estado };

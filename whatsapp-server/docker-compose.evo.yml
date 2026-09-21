@@ -88,9 +88,16 @@ services:
     image: balao-whats-evo
     restart: unless-stopped
     depends_on:
-      - evolution
+      evolution:
+        condition: service_started
+      postgres:
+        condition: service_healthy
     environment:
       DATA_ROOT: /dados
+      # Banco próprio do módulo de Status, no mesmo Postgres (banco "balao").
+      STATUS_DB_URL: postgresql://evolution:${POSTGRES_SENHA}@postgres:5432/balao
+      STATUS_DB_URL_ADMIN: postgresql://evolution:${POSTGRES_SENHA}@postgres:5432/evolution
+      URL_INTERNA_SERVIDOR: http://balao-whats:4100
       PORT: "4100"
       EVOLUTION_URL: http://evolution:8080
       EVOLUTION_API_KEY: ${EVOLUTION_CHAVE}

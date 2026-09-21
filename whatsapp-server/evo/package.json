@@ -4,9 +4,14 @@
   "private": true,
   "description": "Servidor do painel de WhatsApp da loja sobre a Evolution API",
   "main": "servidor.js",
-  "scripts": { "start": "node servidor.js", "test": "node evo/normalizar.test.js" },
+  "scripts": {
+    "start": "node servidor.js",
+    "test": "node evo/normalizar.test.js"
+  },
   "dependencies": {
     "express": "4.22.2",
+    "pg": "8.23.0",
+    "sharp": "0.34.5",
     "socket.io": "4.8.3"
   }
 }

@@ -6,7 +6,7 @@ ENV NODE_ENV=production \
     TZ=America/Sao_Paulo
 
 RUN apt-get update \
- && apt-get install -y --no-install-recommends tini ca-certificates tzdata \
+ && apt-get install -y --no-install-recommends tini ca-certificates tzdata fonts-dejavu-core \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -15,11 +15,12 @@ COPY evo/package.json evo/package-lock.json ./
 # npm às vezes "termina" sem instalar nada quando a rede falha (bug do
 # próprio npm). A checagem abaixo faz o build parar em vez de subir quebrado.
 RUN npm ci --omit=dev \
- && node -e "require('express'); require('socket.io')" \
+ && node -e "require('express'); require('socket.io'); require('pg'); require('sharp')" \
  || (echo "ERRO: npm nao instalou as dependencias" >&2 && exit 1)
 
 COPY servidor.js catalogo.js vendedores-fixos.json ./
 COPY evo ./evo
+COPY status ./status
 
 ARG VERSAO=dev
 RUN echo "$VERSAO" > VERSAO
