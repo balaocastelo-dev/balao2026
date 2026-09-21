@@ -38,6 +38,12 @@ erro() { printf '\n\033[1;31m[ERRO] %s\033[0m\n' "$1" >&2; exit 1; }
 
 [ "$(id -u)" -eq 0 ] || erro "Rode como root (use: sudo bash deploy-vps.sh)"
 
+# Desde 21/09/2026 o WhatsApp roda na Evolution API (deploy-evo.sh). Este
+# script sobe o servidor ANTIGO e brigaria pela mesma porta.
+if docker ps --format '{{.Names}}' 2>/dev/null | grep -q '^balaoevo-'; then
+  erro "O WhatsApp agora roda na Evolution. Use: bash deploy-evo.sh  (ou 'bash deploy-evo.sh voltar' para o antigo)"
+fi
+
 msg "Conferindo o Docker"
 if ! command -v docker >/dev/null 2>&1; then
   echo "Docker nao encontrado. Instalando..."

@@ -162,6 +162,13 @@ export default function WhatsAppPanelClient() {
   useEffect(() => {
     const socket = io(serverUrl, {
       transports: ["websocket", "polling"],
+      // Ingresso emitido pelo site para quem está logado (lib/whatsapp-ticket.ts).
+      auth: (cb) => {
+        fetch("/api/painel/socket-ticket", { cache: "no-store" })
+          .then((r) => r.json())
+          .then((j) => cb({ ticket: j?.ticket || "" }))
+          .catch(() => cb({ ticket: "" }));
+      },
     });
 
     socketRef.current = socket;

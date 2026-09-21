@@ -99,6 +99,9 @@ export interface CrmMensagem {
   mediaType?: string | null;
   mediaUrl?: string | null;
   mediaName?: string | null;
+  mimetype?: string | null;
+  /** Texto do áudio (Whisper da Groq), quando já transcrito. */
+  transcricao?: string | null;
   isVoice?: boolean;
   replyTo?: {
     id: string;
@@ -106,7 +109,7 @@ export interface CrmMensagem {
     author: string;
   } | null;
   produto?: CrmProdutoResumo | null;
-  status?: "pending" | "sent" | "delivered" | "read" | "failed";
+  status?: "pending" | "sent" | "delivered" | "read" | "failed" | "deleted";
 }
 
 export interface CrmRespostaRapida {

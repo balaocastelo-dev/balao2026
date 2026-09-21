@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { io, type Socket } from "socket.io-client";
 import {
@@ -228,6 +228,48 @@ export default function CrmWhatsAppClient({
   const campoTextoRef = useRef<HTMLTextAreaElement | null>(null);
   const serverUrl =
     process.env.NEXT_PUBLIC_WHATSAPP_PANEL_SERVER_URL || "http://localhost:4100";
+
+  // Ingresso para falar com o servidor do WhatsApp (ver lib/whatsapp-ticket.ts).
+  const ticketRef = useRef<{ ticket: string; exp: number } | null>(null);
+  const [ticketAtual, setTicketAtual] = useState<string>("");
+  const obterTicket = useCallback(async (): Promise<string> => {
+    const atual = ticketRef.current;
+    if (atual && atual.exp * 1000 - Date.now() > 60 * 60 * 1000) return atual.ticket;
+    const res = await fetch("/api/painel/socket-ticket", { cache: "no-store" });
+    const json = await res.json().catch(() => null);
+    if (!res.ok || !json?.ticket) throw new Error(json?.erro || "sem acesso");
+    ticketRef.current = { ticket: json.ticket, exp: json.exp };
+    setTicketAtual(json.ticket);
+    return json.ticket;
+  }, []);
+  const cabecalhoServidor = useCallback(async (): Promise<Record<string, string>> => {
+    const ticket = await obterTicket().catch(() => "");
+    return ticket
+      ? { "Content-Type": "application/json", Authorization: `Bearer ${ticket}` }
+      : { "Content-Type": "application/json" };
+  }, [obterTicket]);
+  // Chamada HTTP ao servidor do WhatsApp, já com o ingresso.
+  const fetchServidor = useCallback(
+    (caminho: string, init: RequestInit = {}) =>
+      cabecalhoServidor().then((h) =>
+        fetch(`${serverUrl.replace(/\/$/, "")}${caminho}`, {
+          ...init,
+          headers: { ...h, ...((init.headers as Record<string, string>) || {}) },
+        })
+      ),
+    [cabecalhoServidor, serverUrl]
+  );
+  // Mídia das conversas é servida pela VPS e também pede o ingresso.
+  const urlMidia = useCallback(
+    (url: string | null | undefined): string => {
+      if (!url) return "";
+      if (url.startsWith("/midia/")) {
+        return `${serverUrl.replace(/\/$/, "")}${url}?t=${encodeURIComponent(ticketAtual)}`;
+      }
+      return url;
+    },
+    [serverUrl, ticketAtual]
+  );
 
   // Connection State
   const [estado, setEstado] = useState<WhatsAppStatus>("initializing");
@@ -797,13 +839,33 @@ export default function CrmWhatsAppClient({
 
   // Socket.IO Integration
   useEffect(() => {
+    // O servidor só aceita conexão com o ingresso emitido pelo site para quem
+    // está logado. A função abaixo é chamada a cada (re)conexão, então um
+    // ingresso vencido é trocado sozinho.
     const socket = io(serverUrl, {
       transports: ["websocket", "polling"],
       autoConnect: true,
       reconnectionAttempts: 25,
       reconnectionDelay: 1500,
+      auth: (cb) => {
+        obterTicket()
+          .then((ticket) => cb({ ticket }))
+          .catch(() => cb({ ticket: "" }));
+      },
     });
     socketRef.current = socket;
+
+    socket.on("connect_error", (erro: Error) => {
+      if (erro?.message === "nao-autorizado") {
+        ticketRef.current = null;
+        showToast("Sessão do painel expirada. Entre de novo para ver o WhatsApp.");
+      }
+    });
+
+    socket.on("whatsapp:transcricao", (p: { id?: string; texto?: string }) => {
+      if (!p?.id || !p.texto) return;
+      setMensagens((prev) => prev.map((m) => (m.id === p.id ? { ...m, transcricao: p.texto } : m)));
+    });
 
     socket.on("connect", () => {
       socket.emit("panel:bootstrap");
@@ -952,6 +1014,9 @@ export default function CrmWhatsAppClient({
                 hasMedia: sm.hasMedia,
                 mediaType: sm.mediaType,
                 mediaUrl: sm.mediaUrl || null,
+                mediaName: sm.mediaName || null,
+                mimetype: sm.mimetype || null,
+                transcricao: sm.transcricao || existing?.transcricao || null,
                 produto: sm.produto || existing?.produto || null,
                 // Usa o status real persistido pelo message_ack quando existir
                 // (ver whatsapp-server), em vez de assumir "lida" sempre.
@@ -1004,6 +1069,9 @@ export default function CrmWhatsAppClient({
         hasMedia: newMsg.hasMedia,
         mediaType: newMsg.mediaType,
         mediaUrl: newMsg.mediaUrl || null,
+        mediaName: newMsg.mediaName || null,
+        mimetype: newMsg.mimetype || null,
+        transcricao: newMsg.transcricao || null,
         produto: newMsg.produto || null,
         status: newMsg.status || (newMsg.direction === "out" ? "sent" : "read"),
       };
@@ -1078,6 +1146,16 @@ export default function CrmWhatsAppClient({
     // ACK_DEVICE/ACK_READ) — atualiza o mesmo balão pelo id real da mensagem.
     socket.on("whatsapp:message-status", (payload: any) => {
       if (!payload?.id) return;
+      if (payload.status === "deleted") {
+        setMensagens((prev) =>
+          prev.map((m) =>
+            m.id === payload.id
+              ? { ...m, body: "🚫 Mensagem apagada", hasMedia: false, mediaUrl: null, mediaType: null, produto: null }
+              : m
+          )
+        );
+        return;
+      }
       atualizarStatusMensagem(payload.id, payload.status);
     });
 
@@ -1165,6 +1243,190 @@ export default function CrmWhatsAppClient({
     kanbanTamanho,
     filtroMeus,
   ]);
+
+  // Transcrição de áudio (Whisper da Groq, via /api/crm/transcrever). O
+  // resultado vai para o servidor, que guarda e avisa os outros painéis.
+  const [transcrevendo, setTranscrevendo] = useState<Set<string>>(new Set());
+  const transcricoesPedidas = useRef<Set<string>>(new Set());
+  const transcreverAudio = useCallback(
+    async (id: string, silencioso = false) => {
+      if (transcricoesPedidas.current.has(id)) return;
+      transcricoesPedidas.current.add(id);
+      setTranscrevendo((prev) => new Set(prev).add(id));
+      try {
+        const res = await fetch("/api/crm/transcrever", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id }),
+        });
+        const json = await res.json().catch(() => null);
+        if (!res.ok || !json?.texto) throw new Error(json?.erro || "falha na transcrição");
+        setMensagens((prev) => prev.map((m) => (m.id === id ? { ...m, transcricao: json.texto } : m)));
+        socketRef.current?.emit("panel:salvar-transcricao", { id, texto: json.texto });
+      } catch (erro) {
+        transcricoesPedidas.current.delete(id);
+        if (!silencioso) showToast(`Não consegui transcrever: ${(erro as Error).message}`);
+      } finally {
+        setTranscrevendo((prev) => {
+          const n = new Set(prev);
+          n.delete(id);
+          return n;
+        });
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  // Áudio que o cliente mandou na conversa aberta é transcrito sozinho — o
+  // vendedor lê sem precisar ouvir (loja barulhenta, fone esquecido).
+  useEffect(() => {
+    if (!chatSelecionadoId) return;
+    const pendentes = mensagens
+      .filter(
+        (m) =>
+          m.chatId === chatSelecionadoId &&
+          m.direction === "in" &&
+          (m.mediaType === "ptt" || m.mediaType === "audio") &&
+          !m.transcricao &&
+          m.mediaUrl?.startsWith("/midia/") &&
+          Date.now() - m.timestamp < 7 * 24 * 3600 * 1000
+      )
+      .slice(-5);
+    pendentes.forEach((m) => transcreverAudio(m.id, true));
+  }, [mensagens, chatSelecionadoId, transcreverAudio]);
+
+  // Envio de arquivo (foto, vídeo, áudio ou documento). O tipo sai do próprio
+  // arquivo: vídeo vai como vídeo (toca no celular do cliente), áudio vai como
+  // mensagem de voz, e o resto como documento.
+  const LIMITE_ARQUIVO_MB = 60;
+  const enviarArquivo = (arq: {
+    dataUrl: string;
+    mime: string;
+    nome: string;
+    legenda?: string;
+    comoVoz?: boolean;
+    forcarDocumento?: boolean;
+  }) => {
+    const chat = chatSelecionadoRef.current;
+    if (!chat) return;
+    const bytes = Math.floor(((arq.dataUrl.split(",")[1] || "").length * 3) / 4);
+    if (bytes > LIMITE_ARQUIVO_MB * 1024 * 1024) {
+      showToast(`Arquivo grande demais (máx. ${LIMITE_ARQUIVO_MB} MB).`);
+      return;
+    }
+    const mime = arq.mime || "application/octet-stream";
+    const tipo = arq.forcarDocumento
+      ? "document"
+      : mime.startsWith("image/")
+      ? "image"
+      : mime.startsWith("video/")
+      ? "video"
+      : mime.startsWith("audio/")
+      ? "ptt"
+      : "document";
+    const tempId = `msg-arq-${Date.now()}`;
+    const rotulo = { image: "📷 Foto", video: "🎥 Vídeo", ptt: "🎤 Mensagem de voz", document: `📄 ${arq.nome}` }[tipo];
+    setMensagens((prev) => [
+      ...prev,
+      {
+        id: tempId,
+        chatId: chat.id,
+        from: "balao",
+        body: arq.legenda || "",
+        direction: "out",
+        timestamp: Date.now(),
+        hasMedia: true,
+        mediaType: tipo,
+        mediaName: arq.nome,
+        mediaUrl: arq.dataUrl,
+        status: "pending",
+      },
+    ]);
+    setChats((prev) => prev.map((c) => (c.id === chat.id ? { ...c, lastMessage: rotulo, timestamp: Date.now() } : c)));
+
+    const corpo = {
+      tempId,
+      chatId: chat.id,
+      number: chat.numero,
+      dataUrl: arq.dataUrl,
+      mimetype: mime,
+      filename: arq.nome,
+      caption: arq.legenda || "",
+      sendAudioAsVoice: tipo === "ptt" || arq.comoVoz === true,
+      sendMediaAsDocument: tipo === "document",
+    };
+    if (socketRef.current?.connected) {
+      socketRef.current.emit("panel:send-media", corpo);
+    } else {
+      fetchServidor(tipo === "document" ? "/api/enviar-documento" : "/api/enviar-midia", {
+        method: "POST",
+        body: JSON.stringify({ ...corpo, chat: chat.id, nome: arq.nome, legenda: arq.legenda || "" }),
+      })
+        .then((r) => r.json().catch(() => ({})).then((d) => ({ ok: r.ok, d })))
+        .then(({ ok, d }) => {
+          atualizarStatusMensagem(tempId, ok ? "sent" : "failed", d?.msgId);
+          if (!ok) showToast(`⛔ Arquivo não enviado: ${d?.erro || "erro desconhecido"}`);
+        })
+        .catch(() => atualizarStatusMensagem(tempId, "failed"));
+    }
+  };
+
+  // Gravador de mensagem de voz (botão 🎤). O navegador grava em opus e o
+  // servidor converte para o formato de voz do WhatsApp.
+  const [gravando, setGravando] = useState(false);
+  const [segundosGravando, setSegundosGravando] = useState(0);
+  const gravadorRef = useRef<MediaRecorder | null>(null);
+  const cancelarGravacaoRef = useRef(false);
+  useEffect(() => {
+    if (!gravando) return;
+    setSegundosGravando(0);
+    const t = setInterval(() => setSegundosGravando((s) => s + 1), 1000);
+    return () => clearInterval(t);
+  }, [gravando]);
+
+  const alternarGravacao = async () => {
+    if (gravando) {
+      gravadorRef.current?.stop();
+      return;
+    }
+    if (!chatSelecionadoRef.current) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const tipo = ["audio/ogg;codecs=opus", "audio/webm;codecs=opus", "audio/webm"].find(
+        (t) => typeof MediaRecorder !== "undefined" && MediaRecorder.isTypeSupported(t)
+      );
+      const gravador = new MediaRecorder(stream, tipo ? { mimeType: tipo } : undefined);
+      const pedacos: Blob[] = [];
+      cancelarGravacaoRef.current = false;
+      gravador.ondataavailable = (e) => e.data.size && pedacos.push(e.data);
+      gravador.onstop = () => {
+        stream.getTracks().forEach((t) => t.stop());
+        setGravando(false);
+        if (cancelarGravacaoRef.current || !pedacos.length) return;
+        const mime = (gravador.mimeType || "audio/webm").split(";")[0];
+        const blob = new Blob(pedacos, { type: mime });
+        const leitor = new FileReader();
+        leitor.onload = () =>
+          enviarArquivo({
+            dataUrl: String(leitor.result),
+            mime,
+            nome: `voz.${mime.includes("ogg") ? "ogg" : "webm"}`,
+            comoVoz: true,
+          });
+        leitor.readAsDataURL(blob);
+      };
+      gravadorRef.current = gravador;
+      gravador.start();
+      setGravando(true);
+    } catch {
+      showToast("Não consegui usar o microfone. Libere o acesso no navegador.");
+    }
+  };
+  const cancelarGravacao = () => {
+    cancelarGravacaoRef.current = true;
+    gravadorRef.current?.stop();
+  };
 
   // Marcar chat como visto automaticamente ao selecionar
   useEffect(() => {
@@ -1306,7 +1568,7 @@ export default function CrmWhatsAppClient({
       } else {
         // Sem socket, o clique não faria nada no servidor — garante que o
         // reset é disparado mesmo com o painel momentaneamente desconectado.
-        fetch(`${serverUrl}/api/reset-session`, { method: "POST" }).catch(() => {});
+        fetchServidor(`/api/reset-session`, { method: "POST" }).catch(() => {});
       }
       setEstado("initializing");
       setQrCodeData(null);
@@ -1324,6 +1586,9 @@ export default function CrmWhatsAppClient({
   const chatSelecionado = useMemo(() => {
     return chats.find((c) => c.id === chatSelecionadoId) || null;
   }, [chats, chatSelecionadoId]);
+  // Para os envios de arquivo/voz, que rodam fora do ciclo de render.
+  const chatSelecionadoRef = useRef(chatSelecionado);
+  chatSelecionadoRef.current = chatSelecionado;
 
   const mensagensChatAtual = useMemo(() => {
     if (!chatSelecionadoId) return [];
@@ -1793,7 +2058,7 @@ export default function CrmWhatsAppClient({
         obs: obsCustom,
       });
     } else {
-      fetch(`${serverUrl}/api/enviar-produto`, {
+      fetchServidor(`/api/enviar-produto`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1871,7 +2136,7 @@ export default function CrmWhatsAppClient({
         replyTo: msgRespondendo?.id || undefined,
       });
     } else {
-      fetch(`${serverUrl}/api/enviar`, {
+      fetchServidor(`/api/enviar`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -2039,7 +2304,7 @@ export default function CrmWhatsAppClient({
         statusSnippet: statusItem?.body || "Foto/Mídia do Status",
         text: statusComentario.trim(),
       });
-    } else fetch(`${serverUrl}/api/enviar`, {
+    } else fetchServidor(`/api/enviar`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -2515,7 +2780,7 @@ export default function CrmWhatsAppClient({
                     await fetch("/api/crm/reset-session", { method: "POST" });
                   } catch {}
                   if (serverUrl && serverUrl.startsWith("http")) {
-                    fetch(`${serverUrl.replace(/\/$/, "")}/api/reset-session`, { method: "POST" }).catch(() => {});
+                    fetchServidor(`/api/reset-session`, { method: "POST" }).catch(() => {});
                   }
                 }}
                 className="bg-[#0f9d58] hover:bg-[#0a6e3d] text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors cursor-pointer shadow-xs"
@@ -3052,46 +3317,71 @@ export default function CrmWhatsAppClient({
                               </div>
                             )}
 
-                            {/* Audio Player if Voice Note */}
+                            {/* Áudio / mensagem de voz, com transcrição */}
                             {m.mediaType === "audio" || m.mediaType === "ptt" || m.isVoice ? (
                               <div className="py-1">
-                                <audio src={m.mediaUrl || ""} controls className="w-60 h-8" />
+                                <audio src={urlMidia(m.mediaUrl)} controls preload="none" className="w-60 h-8" />
+                                {m.transcricao ? (
+                                  <p className="mt-1 text-[12px] italic text-[#3c4043] whitespace-pre-wrap">
+                                    📝 {m.transcricao}
+                                  </p>
+                                ) : m.mediaUrl && m.mediaUrl.startsWith("/midia/") ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => transcreverAudio(m.id)}
+                                    disabled={transcrevendo.has(m.id)}
+                                    className="mt-1 text-[11px] font-semibold text-[#0a6e3d] hover:underline disabled:opacity-60"
+                                  >
+                                    {transcrevendo.has(m.id) ? "Transcrevendo…" : "📝 Transcrever áudio"}
+                                  </button>
+                                ) : null}
                               </div>
                             ) : null}
 
-                            {/* Document Download if File */}
+                            {/* Documento */}
                             {m.mediaType === "document" && (
                               <div className="flex items-center gap-2 p-2 bg-white/80 rounded-lg border border-[#e3e3e3] mb-1">
                                 <span className="text-xl">📄</span>
                                 <div className="flex-1 min-w-0">
                                   <div className="font-bold text-xs truncate">{m.mediaName || "Documento"}</div>
-                                  <div className="text-[10px] text-[#5f6368]">{m.body}</div>
                                 </div>
                                 {m.mediaUrl && (
                                   <a
-                                    href={m.mediaUrl}
+                                    href={urlMidia(m.mediaUrl)}
                                     target="_blank"
                                     rel="noreferrer"
                                     className="bg-[#0f9d58] text-white text-[10px] font-bold px-2 py-1 rounded"
                                   >
-                                    ⬇ Baixar
+                                    ⬇ Abrir
                                   </a>
                                 )}
                               </div>
                             )}
 
-                            {/* Regular Photo Attachment */}
-                            {m.hasMedia && m.mediaUrl && !m.produto && m.mediaType !== "document" && m.mediaType !== "audio" && (
-                              <div className="w-full max-h-56 bg-black/5 rounded-lg overflow-hidden mb-2 flex items-center justify-center">
+                            {/* Vídeo */}
+                            {m.mediaType === "video" && m.mediaUrl && (
+                              <div className="w-full bg-black rounded-lg overflow-hidden mb-2">
+                                <video src={urlMidia(m.mediaUrl)} controls preload="metadata" className="max-h-64 w-full" />
+                              </div>
+                            )}
+
+                            {/* Foto / figurinha */}
+                            {m.hasMedia && m.mediaUrl && !m.produto && (m.mediaType === "image" || m.mediaType === "sticker") && (
+                              <a
+                                href={urlMidia(m.mediaUrl)}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="w-full max-h-56 bg-black/5 rounded-lg overflow-hidden mb-2 flex items-center justify-center"
+                              >
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
-                                  src={m.mediaUrl}
+                                  src={urlMidia(m.mediaUrl)}
                                   referrerPolicy="no-referrer"
-                                  crossOrigin="anonymous"
                                   alt=""
-                                  className="max-h-56 max-w-full object-contain"
+                                  loading="lazy"
+                                  className={m.mediaType === "sticker" ? "max-h-32" : "max-h-56 max-w-full object-contain"}
                                 />
-                              </div>
+                              </a>
                             )}
 
                             <p>{m.body}</p>
@@ -3246,13 +3536,33 @@ export default function CrmWhatsAppClient({
                         />
                       </label>
 
+                      <button
+                        type="button"
+                        onClick={alternarGravacao}
+                        onContextMenu={(e) => {
+                          if (gravando) {
+                            e.preventDefault();
+                            cancelarGravacao();
+                          }
+                        }}
+                        title={gravando ? "Parar e enviar (botão direito cancela)" : "Gravar mensagem de voz"}
+                        className={`rounded-lg p-2 text-sm font-bold border transition-colors cursor-pointer ${
+                          gravando
+                            ? "bg-[#b3261e] text-white border-[#b3261e] animate-pulse"
+                            : "bg-[#e7f6ec] text-[#0a6e3d] border-[#0f9d58] hover:bg-[#0f9d58] hover:text-white"
+                        }`}
+                      >
+                        {gravando ? `■ ${Math.floor(segundosGravando / 60)}:${String(segundosGravando % 60).padStart(2, "0")}` : "🎤"}
+                      </button>
+
                       <label
-                        title="Enviar documento (PDF, DOC, XLS, ZIP)"
+                        title="Enviar arquivo: vídeo, áudio, PDF, planilha…"
                         className="bg-[#e7f6ec] text-[#0a6e3d] border border-[#0f9d58] rounded-lg p-2 text-sm font-bold hover:bg-[#0f9d58] hover:text-white transition-colors cursor-pointer"
                       >
-                        📄
+                        📎
                         <input
                           type="file"
+                          accept="video/*,audio/*,image/*,application/pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.zip,.rar"
                           className="hidden"
                           onChange={(e) => {
                             const f = e.target.files?.[0];
@@ -4737,7 +5047,7 @@ export default function CrmWhatsAppClient({
         <div className="fixed inset-0 bg-black/55 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-4 space-y-3">
             <div className="flex justify-between items-center border-b border-[#e3e3e3] pb-2">
-              <strong className="text-xs text-[#202124]">📄 Enviar Documento</strong>
+              <strong className="text-xs text-[#202124]">📎 Enviar arquivo</strong>
               <button
                 onClick={() => setModalDocAberto(false)}
                 className="text-[#5f6368] hover:text-[#202124] font-bold text-sm cursor-pointer"
@@ -4764,73 +5074,21 @@ export default function CrmWhatsAppClient({
 
             <button
               onClick={() => {
-                if (!chatSelecionado || !docUpload) return;
-                const legendaFinal = docLegenda.trim() || docUpload.nome;
-                const tempId = `msg-doc-${Date.now()}`;
-                const novaMsg: CrmMensagem = {
-                  id: tempId,
-                  chatId: chatSelecionado.id,
-                  from: "balao",
-                  body: legendaFinal,
-                  direction: "out",
-                  timestamp: Date.now(),
-                  hasMedia: true,
-                  mediaType: "document",
-                  mediaName: docUpload.nome,
-                  mediaUrl: docUpload.dataUrl,
-                  status: "pending",
-                };
-                setMensagens((prev) => [...prev, novaMsg]);
-                setChats((prev) =>
-                  prev.map((c) =>
-                    c.id === chatSelecionado.id
-                      ? {
-                          ...c,
-                          lastMessage: `📄 ${docUpload.nome}`,
-                          timestamp: Date.now(),
-                        }
-                      : c
-                  )
-                );
-
-                if (socketRef.current?.connected) {
-                  socketRef.current.emit("panel:send-media", {
-                    tempId,
-                    chatId: chatSelecionado.id,
-                    number: chatSelecionado.numero,
-                    dataUrl: docUpload.dataUrl,
-                    base64: docUpload.dataUrl ? docUpload.dataUrl.split(",")[1] : undefined,
-                    mimetype: docUpload.mime,
-                    filename: docUpload.nome,
-                    caption: docLegenda.trim(),
-                    sendMediaAsDocument: true,
-                  });
-                } else {
-                  fetch(`${serverUrl}/api/enviar-documento`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      chat: chatSelecionado.id,
-                      number: chatSelecionado.numero,
-                      dataUrl: docUpload.dataUrl,
-                      base64: docUpload.dataUrl ? docUpload.dataUrl.split(",")[1] : undefined,
-                      mimetype: docUpload.mime,
-                      nome: docUpload.nome,
-                      legenda: docLegenda.trim(),
-                    }),
-                  })
-                    .then((r) => atualizarStatusMensagem(tempId, r.ok ? "sent" : "failed"))
-                    .catch(() => atualizarStatusMensagem(tempId, "failed"));
-                }
-
+                if (!chatSelecionado || !docUpload?.dataUrl) return;
+                enviarArquivo({
+                  dataUrl: docUpload.dataUrl,
+                  mime: docUpload.mime,
+                  nome: docUpload.nome,
+                  legenda: docLegenda.trim(),
+                });
                 setModalDocAberto(false);
                 setDocUpload(null);
                 setDocLegenda("");
-                showToast("Documento enviado — aguardando confirmação…");
+                showToast("Arquivo enviado — aguardando confirmação do WhatsApp…");
               }}
               className="w-full bg-[#0f9d58] hover:bg-[#0a6e3d] text-white py-2 rounded-lg text-xs font-bold transition-colors cursor-pointer"
             >
-              ➤ Enviar Documento
+              ➤ Enviar arquivo
             </button>
           </div>
         </div>
@@ -4902,7 +5160,7 @@ export default function CrmWhatsAppClient({
                     caption: legendaFinal,
                   });
                 } else {
-                  fetch(`${serverUrl}/api/enviar-foto`, {
+                  fetchServidor(`/api/enviar-foto`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({

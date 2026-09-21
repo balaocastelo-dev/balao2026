@@ -1,52 +1,33 @@
 import { NextResponse } from "next/server";
+import { isPainelAuthenticated } from "@/lib/painel-auth";
+import { ticketDeServico, urlDoServidorWhatsApp } from "@/lib/whatsapp-ticket";
 
 export const dynamic = "force-dynamic";
 
+// Desconecta o WhatsApp da loja e gera QR novo. Só a administração.
 export async function POST() {
-  const panelServerUrl =
-    process.env.WHATSAPP_PANEL_SERVER_URL ||
-    process.env.NEXT_PUBLIC_WHATSAPP_PANEL_SERVER_URL ||
-    "https://srv1963897.hstgr.cloud";
-  const port = process.env.WHATSAPP_PANEL_PORT || "4100";
-
-  const endpoints = [
-    `${panelServerUrl.replace(/\/$/, "")}/api/reset-session`,
-    `${panelServerUrl.replace(/\/$/, "")}/api/crm/reset-session`,
-    `http://127.0.0.1:${port}/api/reset-session`,
-    `http://localhost:${port}/api/reset-session`,
-  ];
-
-  for (const url of endpoints) {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
-      const res = await fetch(url, {
-        method: "POST",
-        signal: controller.signal,
-        cache: "no-store",
-      });
-      clearTimeout(timeoutId);
-
-      if (res.ok) {
-        const data = await res.json().catch(() => ({ ok: true }));
-        return NextResponse.json({
-          ok: true,
-          server: url,
-          mensagem: data.mensagem || "Sessão reiniciada com sucesso. Gerando novo QR Code...",
-        });
-      }
-    } catch {}
+  if (!(await isPainelAuthenticated())) {
+    return NextResponse.json({ ok: false, mensagem: "Só a administração pode reiniciar." }, { status: 401 });
   }
+  const ticket = ticketDeServico();
+  if (!ticket) return NextResponse.json({ ok: false, mensagem: "PAINEL_PASSWORD não configurada." }, { status: 500 });
 
-  return NextResponse.json(
-    {
-      ok: false,
-      mensagem: "Não foi possível contactar o servidor do WhatsApp para reiniciar a sessão.",
-    },
-    { status: 502 }
-  );
-}
-
-export async function GET() {
-  return POST();
+  try {
+    const res = await fetch(`${urlDoServidorWhatsApp()}/api/crm/reset-session`, {
+      method: "POST",
+      headers: { authorization: `Bearer ${ticket}` },
+      cache: "no-store",
+      signal: AbortSignal.timeout(15000),
+    });
+    const data = await res.json().catch(() => ({}));
+    return NextResponse.json(
+      { ok: res.ok && data.ok !== false, mensagem: data.mensagem || data.erro || "Pedido enviado." },
+      { status: res.ok ? 200 : 502 }
+    );
+  } catch (erro) {
+    return NextResponse.json(
+      { ok: false, mensagem: `Não consegui falar com o servidor do WhatsApp: ${(erro as Error).message}` },
+      { status: 502 }
+    );
+  }
 }

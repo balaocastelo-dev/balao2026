@@ -1,0 +1,107 @@
+# WhatsApp da loja: Evolution API + banco + cache + servidor do painel.
+#
+# Sobe com o deploy-evo.sh (que gera as senhas na primeira vez). Nada aqui
+# fica exposto para a internet além do servidor do painel, e mesmo ele só
+# escuta em 127.0.0.1 — o Caddy da VPS é quem publica com HTTPS.
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: evolution
+      POSTGRES_PASSWORD: ${POSTGRES_SENHA:?gere com o deploy-evo.sh}
+      POSTGRES_DB: evolution
+    volumes:
+      - ${DADOS}/postgres:/var/lib/postgresql/data
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U evolution -d evolution"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 200mb --maxmemory-policy allkeys-lru
+    volumes:
+      - ${DADOS}/redis:/data
+    mem_limit: 256m
+
+  evolution:
+    image: evoapicloud/evolution-api:v2.3.7
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      SERVER_TYPE: http
+      SERVER_PORT: "8080"
+      SERVER_URL: http://evolution:8080
+      SERVER_DISABLE_MANAGER: "true"
+      SERVER_DISABLE_DOCS: "true"
+      # A Evolution só é alcançável pela rede interna do Docker; com uma origem
+      # específica aqui ela recusa até as chamadas do próprio servidor.
+      CORS_ORIGIN: "*"
+      AUTHENTICATION_API_KEY: ${EVOLUTION_CHAVE:?gere com o deploy-evo.sh}
+      AUTHENTICATION_EXPOSE_IN_FETCH_INSTANCES: "false"
+      DATABASE_PROVIDER: postgresql
+      DATABASE_CONNECTION_URI: postgresql://evolution:${POSTGRES_SENHA}@postgres:5432/evolution?schema=public
+      DATABASE_CONNECTION_CLIENT_NAME: evolution_balao
+      DATABASE_SAVE_DATA_INSTANCE: "true"
+      DATABASE_SAVE_DATA_NEW_MESSAGE: "true"
+      DATABASE_SAVE_MESSAGE_UPDATE: "true"
+      DATABASE_SAVE_DATA_CONTACTS: "true"
+      DATABASE_SAVE_DATA_CHATS: "true"
+      DATABASE_SAVE_DATA_HISTORIC: "true"
+      DATABASE_SAVE_DATA_LABELS: "true"
+      DATABASE_DELETE_MESSAGE: "false"
+      CACHE_REDIS_ENABLED: "true"
+      CACHE_REDIS_URI: redis://redis:6379/6
+      CACHE_REDIS_PREFIX_KEY: evolution
+      CACHE_REDIS_SAVE_INSTANCES: "false"
+      CACHE_LOCAL_ENABLED: "false"
+      DEL_INSTANCE: "false"
+      LANGUAGE: pt-BR
+      LOG_LEVEL: ERROR,WARN,INFO
+      LOG_COLOR: "false"
+      LOG_BAILEYS: error
+      QRCODE_LIMIT: "30"
+      CONFIG_SESSION_PHONE_CLIENT: Balao CRM
+      CONFIG_SESSION_PHONE_NAME: Chrome
+      WEBSOCKET_ENABLED: "false"
+      TELEMETRY_ENABLED: "false"
+      TZ: America/Sao_Paulo
+    volumes:
+      - ${DADOS}/evolution:/evolution/instances
+    mem_limit: 1536m
+
+  balao-whats:
+    build:
+      context: .
+      dockerfile: Dockerfile.evo
+      args:
+        VERSAO: ${VERSAO:-dev}
+    image: balao-whats-evo
+    restart: unless-stopped
+    depends_on:
+      - evolution
+    environment:
+      DATA_ROOT: /dados
+      PORT: "4100"
+      EVOLUTION_URL: http://evolution:8080
+      EVOLUTION_API_KEY: ${EVOLUTION_CHAVE}
+      EVOLUTION_INSTANCIA: loja
+      EVOLUTION_INSTANCIA_TESTE: fora
+      WEBHOOK_URL_INTERNA: http://balao-whats:4100/evolution/webhook
+      SITE_URL: https://www.balao.info
+      WHATSAPP_PANEL_ALLOWED_ORIGIN: ${ORIGENS:-https://www.balao.info,https://balao.info}
+      TZ: America/Sao_Paulo
+    ports:
+      - "127.0.0.1:${PORTA:-4100}:4100"
+    volumes:
+      - ${DADOS}/painel:/dados
+    mem_limit: 768m

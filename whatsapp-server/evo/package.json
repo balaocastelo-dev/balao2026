@@ -1,0 +1,12 @@
+{
+  "name": "balao-whatsapp-evolution",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Servidor do painel de WhatsApp da loja sobre a Evolution API",
+  "main": "servidor.js",
+  "scripts": { "start": "node servidor.js", "test": "node evo/normalizar.test.js" },
+  "dependencies": {
+    "express": "4.22.2",
+    "socket.io": "4.8.3"
+  }
+}
