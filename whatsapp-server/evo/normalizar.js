@@ -238,6 +238,9 @@ function normalizarConversa(item, { lidParaNumero, numeroDaLoja, fotoLocal } = {
     realNumber: numero,
     displayNumber: numero,
     profilePicUrl: fotoLocal?.(chatId) || item.profilePicUrl || null,
+    // Link original do WhatsApp: o painel usa como reserva se a foto guardada
+    // não carregar. Expira em alguns dias, por isso não é a primeira opção.
+    profilePicOriginal: item.profilePicUrl || null,
     unreadCount: Number(item.unreadCount || 0),
     lastMessageBody: descreverResumo(ultima),
     lastMessageTimestamp: ultima?.timestamp || (item.updatedAt ? Date.parse(item.updatedAt) : Date.now()),

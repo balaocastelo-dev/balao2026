@@ -7,6 +7,17 @@ export async function GET(req: NextRequest) {
   if (!url || !url.startsWith("http")) {
     return new NextResponse(null, { status: 404 });
   }
+  // Só fotos de perfil do WhatsApp. Sem isto a rota buscava qualquer endereço
+  // da internet em nome do site (proxy aberto).
+  let host = "";
+  try {
+    host = new URL(url).hostname;
+  } catch {
+    return new NextResponse(null, { status: 400 });
+  }
+  if (!/(^|\.)whatsapp\.net$/.test(host) && !/(^|\.)fbcdn\.net$/.test(host)) {
+    return new NextResponse(null, { status: 403 });
+  }
 
   try {
     const res = await fetch(url, {

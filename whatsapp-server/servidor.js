@@ -35,6 +35,7 @@ process.on("uncaughtException", (erro) => console.warn("[processo] exceção:", 
 const DATA_ROOT = process.env.DATA_ROOT || __dirname;
 const DATA_DIR = path.join(DATA_ROOT, "data");
 const MIDIA_DIR = path.join(DATA_DIR, "midia");
+const FOTOS_DIR = path.join(DATA_DIR, "fotos");
 const ARQUIVO_PAINEL = path.join(DATA_DIR, "panel-data.json");
 const PORTA = Number(process.env.PORT || process.env.WHATSAPP_PANEL_PORT || 4100);
 const SITE_URL = (process.env.SITE_URL || "https://www.balao.info").replace(/\/$/, "");
@@ -55,7 +56,7 @@ const VERSAO = (() => {
   }
 })();
 
-for (const pasta of [DATA_DIR, MIDIA_DIR]) fs.mkdirSync(pasta, { recursive: true });
+for (const pasta of [DATA_DIR, MIDIA_DIR, FOTOS_DIR]) fs.mkdirSync(pasta, { recursive: true });
 
 function lerOuCriarSegredo(nomeVar, arquivo) {
   if (process.env[nomeVar]) return process.env[nomeVar];
@@ -103,6 +104,7 @@ const store = {
   transcricoes: {}, // idMensagem -> texto
   notas: {}, // chatId -> nota do cliente
   nomes: {}, // chatId -> nome que o próprio cliente usa no WhatsApp
+  fotos: {}, // número -> { em, tem } última consulta da foto de perfil
 };
 
 function carregarStore() {
@@ -270,7 +272,11 @@ function mensagensRecentes(limite = 300) {
 
 function listaDeConversas() {
   return [...conversas.values()]
-    .map((c) => ({ ...c, assignedSellerId: store.chatAssignments[c.chatId] || null }))
+    .map((c) => ({
+      ...c,
+      profilePicUrl: fotoLocal(c.chatId) || c.profilePicUrl || null,
+      assignedSellerId: store.chatAssignments[c.chatId] || null,
+    }))
     .sort((a, b) => (b.lastMessageTimestamp || 0) - (a.lastMessageTimestamp || 0));
 }
 
@@ -295,6 +301,77 @@ function tocarConversa(msg) {
   }
   conversas.set(msg.chatId, atual);
   agendarEnvioDaLista();
+  pedirFoto(msg.chatId);
+}
+
+// ------------------------------------------------------------------
+// Fotos de perfil
+//
+// O link de foto que o WhatsApp entrega expira em poucos dias — por isso as
+// fotos "sumiam" antes. Aqui cada foto é baixada e guardada em disco, e o
+// painel recebe um caminho estável (/foto/<número>). Se o contato esconder
+// a foto depois, a guardada continua valendo: nunca troca foto por avatar
+// genérico. Consulta de novo a cada 3 dias, uma por vez, sem pressa.
+// ------------------------------------------------------------------
+const VALIDADE_FOTO_MS = 3 * 24 * 3600_000;
+const filaFotos = new Set();
+let processandoFotos = false;
+
+function arquivoDaFoto(numero) {
+  return path.join(FOTOS_DIR, `${numero}.jpg`);
+}
+
+function fotoLocal(chatId) {
+  const numero = String(chatId || "").endsWith("@c.us") ? N.digitos(chatId) : "";
+  if (!numero) return null;
+  return fs.existsSync(arquivoDaFoto(numero)) ? `/foto/${numero}` : null;
+}
+
+function pedirFoto(chatId) {
+  const numero = String(chatId || "").endsWith("@c.us") ? N.digitos(chatId) : "";
+  if (!numero || numero === N.digitos(estado.phoneNumber)) return;
+  const ultima = store.fotos[numero];
+  if (ultima && Date.now() - ultima.em < VALIDADE_FOTO_MS) return;
+  filaFotos.add(numero);
+  if (!processandoFotos) processarFilaDeFotos();
+}
+
+async function processarFilaDeFotos() {
+  processandoFotos = true;
+  try {
+    while (filaFotos.size && estado.connected) {
+      const numero = filaFotos.values().next().value;
+      filaFotos.delete(numero);
+      try {
+        const r = await evolution.fotoDoPerfil(INSTANCIA, numero);
+        const url = r?.profilePictureUrl;
+        if (url) {
+          const resposta = await fetch(url, { signal: AbortSignal.timeout(15_000) });
+          const tipo = resposta.headers.get("content-type") || "";
+          if (resposta.ok && tipo.startsWith("image/")) {
+            const bytes = Buffer.from(await resposta.arrayBuffer());
+            if (bytes.length > 500) {
+              fs.writeFileSync(arquivoDaFoto(numero), bytes);
+              const c = conversas.get(`${numero}@c.us`);
+              if (c) {
+                c.profilePicUrl = `/foto/${numero}`;
+                c.profilePicOriginal = url;
+              }
+              agendarEnvioDaLista();
+            }
+          }
+        }
+        store.fotos[numero] = { em: Date.now(), tem: Boolean(url) };
+        salvarStore();
+      } catch (erro) {
+        // Falha de rede não marca como consultado: tenta de novo depois.
+        console.warn(`[fotos] ${numero}: ${erro.message}`);
+      }
+      await new Promise((r) => setTimeout(r, 800));
+    }
+  } finally {
+    processandoFotos = false;
+  }
 }
 
 // ------------------------------------------------------------------
@@ -457,7 +534,7 @@ async function sincronizarConversas() {
   const novas = new Map();
   for (const item of lista || []) {
     if (item?.lastMessage?.key) aprenderLid(item.lastMessage.key);
-    const c = N.normalizarConversa(item, { lidParaNumero, numeroDaLoja: estado.phoneNumber });
+    const c = N.normalizarConversa(item, { lidParaNumero, numeroDaLoja: estado.phoneNumber, fotoLocal });
     if (!c) continue;
     if (store.nomes[c.chatId] && (c.contactName === "Contato" || /^\(?\d/.test(c.contactName))) {
       c.contactName = store.nomes[c.chatId];
@@ -473,6 +550,7 @@ async function sincronizarConversas() {
   for (const [id, c] of novas) conversas.set(id, c);
   ultimaSincronizacao = Date.now();
   paraPainel().emit("whatsapp:chats", listaDeConversas());
+  for (const id of conversas.keys()) pedirFoto(id);
 
   paraPainel().emit("whatsapp:messages", mensagensRecentes());
 }
@@ -877,6 +955,15 @@ app.get(["/api/crm/catalogo/estado", "/api/catalogo/estado"], (_req, res) => {
 });
 app.post(["/api/crm/catalogo/atualizar", "/api/catalogo/atualizar"], acesso.exigir(), async (_req, res) => {
   res.json(await espelhoDoCatalogo.atualizar({ motivo: "site avisou" }));
+});
+
+app.get("/foto/:numero", acesso.exigir(), (req, res) => {
+  const numero = N.digitos(req.params.numero);
+  const arquivo = numero ? arquivoDaFoto(numero) : null;
+  if (!arquivo || !fs.existsSync(arquivo)) return res.status(404).end();
+  res.setHeader("Content-Type", "image/jpeg");
+  res.setHeader("Cache-Control", "private, max-age=86400");
+  res.sendFile(arquivo);
 });
 
 app.get("/midia/:id", acesso.exigir(), async (req, res) => {

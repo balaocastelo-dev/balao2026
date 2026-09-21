@@ -217,6 +217,81 @@ const VENDEDOR_ADMIN: CrmVendedor = {
   assinatura: "",
 };
 
+/**
+ * Foto do contato com os indicadores (não lidas / atenção) POR FORA do
+ * círculo. Antes as bolinhas ficavam dentro do mesmo elemento que corta a
+ * foto em círculo (overflow-hidden) e saíam pela metade. Aqui o círculo que
+ * corta é só o de dentro; as bolinhas ficam no invólucro, que não corta nada.
+ *
+ * `fontes` é a ordem de preferência: foto guardada no servidor, depois o link
+ * que veio do WhatsApp. Se uma falha ao carregar, tenta a próxima; a inicial
+ * do nome só aparece quando nenhuma foto carrega.
+ */
+function AvatarContato({
+  fontes,
+  nome,
+  tamanho = 40,
+  naoLidas = 0,
+  atencao = false,
+}: {
+  fontes: (string | null | undefined)[];
+  nome: string;
+  tamanho?: number;
+  naoLidas?: number;
+  atencao?: boolean;
+}) {
+  const lista = fontes.filter((f): f is string => Boolean(f));
+  // Guarda quais endereços falharam (e não uma posição), para que uma foto
+  // nova vinda do servidor seja tentada de novo sem precisar de efeito.
+  const [falharam, setFalharam] = useState<string[]>([]);
+  const atual = lista.find((u) => !falharam.includes(u));
+  const inicial = (nome || "?").trim().charAt(0).toUpperCase() || "?";
+  const bolinha = Math.max(14, Math.round(tamanho * 0.42));
+  const deslocamento = -Math.round(bolinha * 0.35);
+
+  return (
+    <div className="relative shrink-0" style={{ width: tamanho, height: tamanho }}>
+      <div
+        className="w-full h-full rounded-full bg-[#0f9d58] text-white flex items-center justify-center font-bold overflow-hidden border border-[#e3e3e3] shadow-xs"
+        style={{ fontSize: Math.max(10, Math.round(tamanho * 0.38)) }}
+      >
+        {atual ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            key={atual}
+            src={atual}
+            referrerPolicy="no-referrer"
+            alt=""
+            loading="lazy"
+            className="w-full h-full object-cover"
+            onError={() => setFalharam((f) => (f.includes(atual) ? f : [...f, atual]))}
+          />
+        ) : (
+          <span>{inicial}</span>
+        )}
+      </div>
+      {naoLidas > 0 && (
+        <span
+          className="absolute z-10 bg-[#d93025] text-white rounded-full flex items-center justify-center font-bold ring-2 ring-white leading-none px-1"
+          style={{ top: deslocamento, right: deslocamento, minWidth: bolinha, height: bolinha, fontSize: Math.max(9, bolinha - 6) }}
+          title={`${naoLidas} mensagem(ns) não lida(s)`}
+        >
+          {naoLidas > 99 ? "99+" : naoLidas}
+        </span>
+      )}
+      {atencao && (
+        <span
+          className="absolute z-10 bg-amber-500 text-white rounded-full flex items-center justify-center font-bold ring-2 ring-white leading-none"
+          style={{ bottom: deslocamento, right: deslocamento, width: bolinha, height: bolinha, fontSize: Math.max(8, bolinha - 7) }}
+          title="Transferido ou aguardando resposta"
+        >
+          !
+        </span>
+      )}
+    </div>
+  );
+}
+
 export default function CrmWhatsAppClient({
   vendedorFixo,
   admin,
@@ -263,13 +338,30 @@ export default function CrmWhatsAppClient({
   const urlMidia = useCallback(
     (url: string | null | undefined): string => {
       if (!url) return "";
-      if (url.startsWith("/midia/")) {
+      if (url.startsWith("/midia/") || url.startsWith("/foto/")) {
         return `${serverUrl.replace(/\/$/, "")}${url}?t=${encodeURIComponent(ticketAtual)}`;
       }
       return url;
     },
     [serverUrl, ticketAtual]
   );
+
+  // Fotos em ordem de preferência: a guardada no servidor da loja, depois a
+  // que veio do WhatsApp (via proxy do site). Nunca troca uma foto por avatar
+  // genérico: a inicial só aparece se nenhuma carregar.
+  const fontesDaFoto = useCallback(
+    (c: { pic?: string | null; picOriginal?: string | null }) => {
+      const lista: string[] = [];
+      for (const u of [c.pic, c.picOriginal]) {
+        if (!u) continue;
+        const pronta = u.startsWith("/foto/") ? urlMidia(u) : formatAvatarUrl(u, serverUrl);
+        if (pronta && !lista.includes(pronta)) lista.push(pronta);
+      }
+      return lista;
+    },
+    [urlMidia, serverUrl]
+  );
+
 
   // Connection State
   const [estado, setEstado] = useState<WhatsAppStatus>("initializing");
@@ -973,6 +1065,7 @@ export default function CrmWhatsAppClient({
                 // Mantém a foto que já tínhamos quando o servidor vier sem —
                 // evita o avatar sumir e voltar a cada sincronização.
                 pic: sc.profilePicUrl || anterior?.pic || null,
+                picOriginal: sc.profilePicOriginal || anterior?.picOriginal || null,
                 unread: sc.unreadCount || 0,
                 lastMessage: sc.lastMessageBody || anterior?.lastMessage || "",
                 timestamp: sc.lastMessageTimestamp || anterior?.timestamp || Date.now(),
@@ -1130,6 +1223,10 @@ export default function CrmWhatsAppClient({
     // cliente nunca recebeu nada.
     socket.on("whatsapp:send-ack", (payload: any) => {
       if (!payload?.tempId) return;
+      confirmacoesPendentes.current.get(payload.tempId)?.({
+        ok: Boolean(payload.success),
+        erro: payload.error || null,
+      });
       // O `id` aqui é o definitivo do WhatsApp. Passar adiante faz o balão
       // otimista assumi-lo e deixar de virar uma cópia da mesma mensagem.
       atualizarStatusMensagem(
@@ -2159,6 +2256,105 @@ export default function CrmWhatsAppClient({
     setLinkPreview(null);
   };
 
+  // Envio de texto que devolve uma Promise resolvida pela confirmação REAL
+  // do servidor (whatsapp:send-ack). Usado pelo envio rápido do Kanban, que
+  // precisa mostrar "enviando / enviada / erro" no próprio card.
+  const confirmacoesPendentes = useRef<
+    Map<string, (r: { ok: boolean; erro?: string | null }) => void>
+  >(new Map());
+  const enviarTextoParaChat = (chat: CrmChat, texto: string): Promise<{ ok: boolean; erro?: string | null }> => {
+    let textoFinal = texto.trim();
+    if (!textoFinal) return Promise.resolve({ ok: false, erro: "Mensagem vazia." });
+    if (assinaturaAuto && vendedorAtivo?.assinatura) textoFinal += `\n\n${vendedorAtivo.assinatura}`;
+
+    const tempId = `msg-kanban-${Date.now()}`;
+    setMensagens((prev) => [
+      ...prev,
+      {
+        id: tempId,
+        chatId: chat.id,
+        from: "balao",
+        body: textoFinal,
+        direction: "out",
+        timestamp: Date.now(),
+        status: "pending",
+      },
+    ]);
+    setChats((prev) =>
+      prev.map((c) =>
+        c.id === chat.id
+          ? { ...c, lastMessage: textoFinal, timestamp: Date.now(), unread: 0, precisaAtencao: false }
+          : c
+      )
+    );
+
+    return new Promise((resolve) => {
+      const limite = setTimeout(() => {
+        confirmacoesPendentes.current.delete(tempId);
+        resolve({ ok: false, erro: "O servidor não confirmou o envio em 45 s. Confira a conversa antes de reenviar." });
+      }, 45_000);
+      const concluir = (r: { ok: boolean; erro?: string | null }) => {
+        clearTimeout(limite);
+        confirmacoesPendentes.current.delete(tempId);
+        resolve(r);
+      };
+
+      if (socketRef.current?.connected) {
+        confirmacoesPendentes.current.set(tempId, concluir);
+        socketRef.current.emit("panel:send-message", {
+          tempId,
+          number: chat.numero,
+          text: textoFinal,
+          chatId: chat.id,
+        });
+      } else {
+        fetchServidor(`/api/enviar`, {
+          method: "POST",
+          body: JSON.stringify({ chat: chat.id, number: chat.numero, texto: textoFinal }),
+        })
+          .then((r) => r.json().catch(() => ({})).then((data) => ({ ok: r.ok, data })))
+          .then(({ ok, data }) => {
+            atualizarStatusMensagem(tempId, ok ? "sent" : "failed", data?.msgId);
+            concluir({ ok, erro: ok ? null : data?.erro || "erro desconhecido" });
+          })
+          .catch(() => {
+            atualizarStatusMensagem(tempId, "failed");
+            concluir({ ok: false, erro: "Servidor do WhatsApp fora do ar." });
+          });
+      }
+    });
+  };
+
+  // Resposta rápida direto no card do Kanban.
+  const [kanbanComposerId, setKanbanComposerId] = useState<string | null>(null);
+  const [kanbanTextos, setKanbanTextos] = useState<Record<string, string>>({});
+  const [kanbanEnvio, setKanbanEnvio] = useState<
+    Record<string, { estado: "enviando" | "ok" | "erro"; erro?: string | null }>
+  >({});
+  const enviarPeloKanban = async (card: CrmChat) => {
+    const texto = (kanbanTextos[card.id] || "").trim();
+    if (!texto || kanbanEnvio[card.id]?.estado === "enviando") return;
+    setKanbanEnvio((p) => ({ ...p, [card.id]: { estado: "enviando" } }));
+    const r = await enviarTextoParaChat(card, texto);
+    if (r.ok) {
+      setKanbanTextos((p) => ({ ...p, [card.id]: "" }));
+      setKanbanEnvio((p) => ({ ...p, [card.id]: { estado: "ok" } }));
+      setTimeout(
+        () =>
+          setKanbanEnvio((p) => {
+            if (p[card.id]?.estado !== "ok") return p;
+            const n = { ...p };
+            delete n[card.id];
+            return n;
+          }),
+        4000
+      );
+    } else {
+      // O texto fica na caixa para o atendente tentar de novo.
+      setKanbanEnvio((p) => ({ ...p, [card.id]: { estado: "erro", erro: r.erro } }));
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -2968,7 +3164,6 @@ export default function CrmWhatsAppClient({
                     const isAtivo = chat.id === chatSelecionadoId;
                     const ini = (chat.nome || "?").trim().charAt(0).toUpperCase();
                     const numeroFormatado = formatarNumeroExibicao(chat.numero || chat.id);
-                    const avatarSrc = formatAvatarUrl(chat.pic, serverUrl);
 
                     return (
                       <div
@@ -2992,37 +3187,14 @@ export default function CrmWhatsAppClient({
                             : "hover:bg-[#f0f2f5]"
                         }`}
                       >
-                        {/* Real Profile Avatar */}
-                        <div className="w-10 h-10 rounded-full bg-[#0f9d58] text-white flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden relative shadow-xs border border-[#e3e3e3]">
-                          {avatarSrc ? (
-                            /* eslint-disable-next-line @next/next/no-img-element */
-                            <img
-                              src={avatarSrc}
-                              referrerPolicy="no-referrer"
-                              crossOrigin="anonymous"
-                              alt=""
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                (e.target as HTMLElement).style.display = "none";
-                              }}
-                            />
-                          ) : (
-                            <span>{ini}</span>
-                          )}
-                          {chat.unread > 0 && (
-                            <span className="absolute -top-1 -right-1 bg-[#d93025] text-white rounded-full w-4 h-4 text-[10px] flex items-center justify-center font-bold">
-                              {chat.unread}
-                            </span>
-                          )}
-                          {chat.precisaAtencao && (
-                            <span
-                              title="Transferido ou aguardando resposta"
-                              className="absolute -bottom-1 -right-1 bg-amber-500 text-white rounded-full w-4 h-4 text-[10px] flex items-center justify-center font-bold shadow-xs"
-                            >
-                              ⚠️
-                            </span>
-                          )}
-                        </div>
+                        {/* Foto com indicadores por fora do círculo */}
+                        <AvatarContato
+                          fontes={fontesDaFoto(chat)}
+                          nome={chat.nome}
+                          tamanho={40}
+                          naoLidas={chat.unread}
+                          atencao={Boolean(chat.precisaAtencao)}
+                        />
 
                         {/* Infos with Real Name & Clean Formatted Phone Number */}
                         <div className="flex-1 min-w-0">
@@ -4509,35 +4681,29 @@ export default function CrmWhatsAppClient({
                           cardsNaColuna.map((card) => (
                             <div
                               key={card.id}
-                              draggable
+                              draggable={kanbanComposerId !== card.id}
                               onDragStart={() => setKanbanArrastadoId(card.id)}
                               onClick={() => setChatSelecionadoId(card.id)}
                               onContextMenu={(e) =>
                                 openContextMenu(e, card.nome, getChatMenuItems(card))
                               }
-                              className="bg-white border border-[#e3e3e3] rounded-lg p-2 shadow-xs cursor-grab active:cursor-grabbing hover:border-[#0f9d58] transition-all"
+                              className={`bg-white border rounded-lg p-2 shadow-xs transition-all ${
+                                kanbanComposerId === card.id
+                                  ? "border-[#0f9d58] cursor-default"
+                                  : "border-[#e3e3e3] cursor-grab active:cursor-grabbing hover:border-[#0f9d58]"
+                              }`}
                             >
                               <div className="flex items-center gap-2">
-                                <div className="w-6 h-6 rounded-full bg-[#0f9d58] text-white flex items-center justify-center font-bold text-[10px] shrink-0 overflow-hidden">
-                                  {formatAvatarUrl(card.pic, serverUrl) ? (
-                                    /* eslint-disable-next-line @next/next/no-img-element */
-                                    <img
-                                      src={formatAvatarUrl(card.pic, serverUrl)!}
-                                      referrerPolicy="no-referrer"
-                                      crossOrigin="anonymous"
-                                      alt=""
-                                      className="w-full h-full object-cover"
-                                    />
-                                  ) : (
-                                    <span>{card.nome.charAt(0).toUpperCase()}</span>
-                                  )}
-                                </div>
+                                <AvatarContato
+                                  fontes={fontesDaFoto(card)}
+                                  nome={card.nome}
+                                  tamanho={28}
+                                  naoLidas={card.unread}
+                                  atencao={Boolean(card.precisaAtencao)}
+                                />
                                 <div className="font-bold text-xs text-[#202124] hover:text-[#0a6e3d] truncate flex-1">
                                   {card.nome}
                                 </div>
-                                {card.precisaAtencao && (
-                                  <span className="text-[10px]" title="Precisa de atenção">⚠️</span>
-                                )}
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -4567,6 +4733,104 @@ export default function CrmWhatsAppClient({
                                       {t}
                                     </span>
                                   ))}
+                                </div>
+                              )}
+
+                              {/* Resposta rápida direto no card */}
+                              {kanbanComposerId === card.id ? (
+                                <div
+                                  className="mt-2 border-t border-[#e3e3e3] pt-2"
+                                  onClick={(e) => e.stopPropagation()}
+                                  onMouseDown={(e) => e.stopPropagation()}
+                                >
+                                  <textarea
+                                    id={`kanban-msg-${card.id}`}
+                                    autoFocus
+                                    rows={2}
+                                    value={kanbanTextos[card.id] || ""}
+                                    disabled={kanbanEnvio[card.id]?.estado === "enviando"}
+                                    onChange={(e) => {
+                                      const v = e.target.value;
+                                      setKanbanTextos((p) => ({ ...p, [card.id]: v }));
+                                      if (kanbanEnvio[card.id]?.estado === "erro") {
+                                        setKanbanEnvio((p) => {
+                                          const n = { ...p };
+                                          delete n[card.id];
+                                          return n;
+                                        });
+                                      }
+                                    }}
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter" && !e.shiftKey) {
+                                        e.preventDefault();
+                                        enviarPeloKanban(card);
+                                      } else if (e.key === "Escape") {
+                                        setKanbanComposerId(null);
+                                      }
+                                    }}
+                                    placeholder={`Mensagem para ${card.nome.split(" ")[0]}… (Enter envia, Shift+Enter quebra linha)`}
+                                    className="w-full resize-y min-h-[44px] max-h-40 border border-[#e3e3e3] rounded-md px-2 py-1 text-[11px] outline-none focus:border-[#0f9d58] disabled:bg-[#f6f7f6]"
+                                  />
+                                  <div className="flex flex-wrap items-center justify-end gap-x-2 gap-y-1 mt-1">
+                                    <span
+                                      role="status"
+                                      aria-live="polite"
+                                      className={`text-[10px] font-semibold break-words mr-auto ${
+                                        kanbanEnvio[card.id]?.estado === "erro" ? "basis-full" : ""
+                                      } ${
+                                        kanbanEnvio[card.id]?.estado === "erro"
+                                          ? "text-[#d93025]"
+                                          : kanbanEnvio[card.id]?.estado === "ok"
+                                          ? "text-[#0a6e3d]"
+                                          : "text-[#5f6368]"
+                                      }`}
+                                      title={kanbanEnvio[card.id]?.erro || undefined}
+                                    >
+                                      {kanbanEnvio[card.id]?.estado === "enviando"
+                                        ? "Enviando…"
+                                        : kanbanEnvio[card.id]?.estado === "ok"
+                                        ? "✓ Enviada"
+                                        : kanbanEnvio[card.id]?.estado === "erro"
+                                        ? `✕ Não enviada: ${kanbanEnvio[card.id]?.erro || "erro"}`
+                                        : ""}
+                                    </span>
+                                    <div className="flex gap-1 shrink-0">
+                                      <button
+                                        type="button"
+                                        onClick={() => setKanbanComposerId(null)}
+                                        className="text-[10px] text-[#5f6368] hover:bg-[#f0f2f5] rounded px-2 py-1 cursor-pointer"
+                                      >
+                                        Fechar
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => enviarPeloKanban(card)}
+                                        disabled={
+                                          !(kanbanTextos[card.id] || "").trim() ||
+                                          kanbanEnvio[card.id]?.estado === "enviando"
+                                        }
+                                        className="text-[10px] font-bold bg-[#0f9d58] hover:bg-[#0a6e3d] text-white rounded px-2.5 py-1 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                      >
+                                        {kanbanEnvio[card.id]?.estado === "enviando" ? "Enviando…" : "Enviar"}
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="mt-1.5 flex items-center justify-between gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setKanbanComposerId(card.id);
+                                    }}
+                                    className="text-[10px] font-semibold text-[#0a6e3d] border border-[#0f9d58]/40 hover:bg-[#e7f6ec] rounded px-2 py-0.5 cursor-pointer"
+                                  >
+                                    💬 Enviar mensagem
+                                  </button>
+                                  {kanbanEnvio[card.id]?.estado === "ok" && (
+                                    <span className="text-[10px] font-semibold text-[#0a6e3d]">✓ Enviada</span>
+                                  )}
                                 </div>
                               )}
                             </div>

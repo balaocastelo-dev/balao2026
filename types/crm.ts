@@ -47,6 +47,8 @@ export interface CrmChat {
   nome: string;
   numero: string;
   pic?: string | null;
+  /** Link original do WhatsApp, usado se a foto guardada falhar. */
+  picOriginal?: string | null;
   unread: number;
   lastMessage: string;
   timestamp: number;
