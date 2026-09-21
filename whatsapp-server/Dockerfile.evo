@@ -6,7 +6,7 @@ ENV NODE_ENV=production \
     TZ=America/Sao_Paulo
 
 RUN apt-get update \
- && apt-get install -y --no-install-recommends tini ca-certificates tzdata fonts-dejavu-core \
+ && apt-get install -y --no-install-recommends tini ca-certificates tzdata fonts-dejavu-core fontconfig \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
