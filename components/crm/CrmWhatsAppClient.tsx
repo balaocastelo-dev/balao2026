@@ -89,6 +89,49 @@ function nomeEhCodigo(nome: string | null | undefined, chatId?: string | null) {
 
 const NUMERO_OCULTO = "Número oculto pelo WhatsApp";
 
+const CORES_COLUNA = [
+  { nome: "Azul", valor: "#3b82f6" },
+  { nome: "Roxo", valor: "#8b5cf6" },
+  { nome: "Laranja", valor: "#f59e0b" },
+  { nome: "Rosa", valor: "#ec4899" },
+  { nome: "Ciano", valor: "#06b6d4" },
+  { nome: "Verde", valor: "#10b981" },
+  { nome: "Teal", valor: "#0d9488" },
+  { nome: "Índigo", valor: "#6366f1" },
+  { nome: "Cinza", valor: "#64748b" },
+  { nome: "Vermelho", valor: "#d93025" },
+];
+
+/**
+ * Junta as colunas salvas (do navegador ou do servidor) com as colunas
+ * padrão do sistema. Sem isso, quem já tinha um funil montado nunca via uma
+ * coluna nova criada aqui — o padrão só valia para quem começava do zero.
+ * As colunas da pessoa mandam: só entram as padrão que faltam, na posição
+ * que elas têm no padrão.
+ */
+function comColunasPadrao(salvas: KanbanColumn[] | null | undefined): KanbanColumn[] {
+  const lista = Array.isArray(salvas) ? salvas.filter((c) => c && c.id && c.nome) : [];
+  if (!lista.length) return [...KANBAN_COLUNAS_BASE];
+  const ids = new Set(lista.map((c) => String(c.id)));
+  const faltando = KANBAN_COLUNAS_BASE.filter((p) => !ids.has(String(p.id)));
+  if (!faltando.length) return lista;
+
+  const saida = [...lista];
+  const presentes = new Set(ids);
+  for (const nova of faltando) {
+    const posicaoNoPadrao = KANBAN_COLUNAS_BASE.findIndex((p) => p.id === nova.id);
+    // Entra logo depois da coluna padrão que vem antes dela, quando essa já
+    // está no funil da pessoa; senão, vai para o fim.
+    const anterior = KANBAN_COLUNAS_BASE.slice(0, posicaoNoPadrao)
+      .reverse()
+      .find((p) => presentes.has(String(p.id)));
+    const indice = anterior ? saida.findIndex((c) => String(c.id) === String(anterior.id)) + 1 : saida.length;
+    saida.splice(indice, 0, { ...nova });
+    presentes.add(String(nova.id));
+  }
+  return saida;
+}
+
 function formatarNumeroExibicao(num: string | null | undefined): string {
   if (!num) return "";
   // Conversa que o WhatsApp só identifica pelo código interno (@lid): o
@@ -555,15 +598,17 @@ export default function CrmWhatsAppClient({
     // O localStorage é do COMPUTADOR: aproveitá-lo aqui mostraria, por um
     // instante, o funil do colega que usou este micro antes — e pior, esse
     // funil poderia ser salvo por cima do da pessoa que acabou de entrar.
-    if (vendedorFixo) return KANBAN_COLUNAS_BASE;
+    if (vendedorFixo) return [...KANBAN_COLUNAS_BASE];
 
     if (typeof window !== "undefined") {
       const s = localStorage.getItem("balao_crm_kanban_colunas");
       if (s) {
-        try { return JSON.parse(s); } catch {}
+        try {
+          return comColunasPadrao(JSON.parse(s));
+        } catch {}
       }
     }
-    return KANBAN_COLUNAS_BASE;
+    return [...KANBAN_COLUNAS_BASE];
   });
   const [kanbanTamanho, setKanbanTamanho] = useState<"normal" | "expandido" | "recolhido">("normal");
   // Só depois que as preferências do servidor chegarem é que passamos a
@@ -571,6 +616,13 @@ export default function CrmWhatsAppClient({
   // render e apagaria o funil que a pessoa montou antes de ele chegar.
   const [preferenciasCarregadas, setPreferenciasCarregadas] = useState(false);
   const [kanbanBusca, setKanbanBusca] = useState("");
+  // Criar/renomear coluna em janela do próprio painel. Antes era o prompt()
+  // do navegador, que em vários casos (Chrome com pop-ups bloqueados, aba
+  // em segundo plano, celular) simplesmente não aparece — e o clique em
+  // "Nova coluna" parecia não fazer nada.
+  const [modalColuna, setModalColuna] = useState<
+    { modo: "nova" | "renomear"; id?: string; nome: string; cor: string } | null
+  >(null);
   const [kanbanArrastadoId, setKanbanArrastadoId] = useState<string | null>(null);
   // Etapa reservada para o cliente que saiu do funil. Não é uma coluna de
   // verdade: guardar essa marca (em vez de apagar o registro) é o que impede
@@ -583,6 +635,43 @@ export default function CrmWhatsAppClient({
   // estar em etapas diferentes pra vendedores diferentes, de propósito).
   const [kanbanPorChat, setKanbanPorChat] = useState<Record<string, string>>({});
   const getKanbanCol = (chatId: string) => kanbanPorChat[chatId] || "novos";
+
+  /**
+   * Grava as colunas na hora: no navegador e, quando há vendedor
+   * identificado, também no servidor. O salvamento normal espera 800 ms
+   * juntando alterações — fechar a aba antes disso perdia a coluna nova.
+   */
+  const salvarColunas = (novas: KanbanColumn[]) => {
+    setKanbanColunas(novas);
+    if (typeof window !== "undefined" && !vendedorFixo) {
+      try {
+        localStorage.setItem("balao_crm_kanban_colunas", JSON.stringify(novas));
+      } catch {}
+    }
+    if (vendedorAtivoId && socketRef.current?.connected) {
+      socketRef.current.emit("panel:set-preferencias", {
+        vendedorId: vendedorAtivoId,
+        preferencias: { kanbanColunas: novas, assinaturaAuto, kanbanTamanho, filtroMeus },
+      });
+    }
+  };
+
+  const confirmarModalColuna = () => {
+    if (!modalColuna) return;
+    const nome = modalColuna.nome.trim().slice(0, 40);
+    if (!nome) return;
+    if (modalColuna.modo === "nova") {
+      const nova: KanbanColumn = { id: `col-${Date.now()}`, nome, cor: modalColuna.cor };
+      salvarColunas([...kanbanColunas, nova]);
+      showToast(`Coluna "${nome}" criada ✅`);
+    } else {
+      salvarColunas(
+        kanbanColunas.map((c) => (String(c.id) === String(modalColuna.id) ? { ...c, nome, cor: modalColuna.cor } : c))
+      );
+      showToast("Coluna atualizada ✅");
+    }
+    setModalColuna(null);
+  };
   const setKanbanCol = (chatId: string, colId: string | null) => {
     setKanbanPorChat((prev) => {
       const next = { ...prev };
@@ -1295,7 +1384,7 @@ export default function CrmWhatsAppClient({
     socket.on("whatsapp:preferencias", (prefs: PreferenciasVendedor | null) => {
       if (prefs && typeof prefs === "object") {
         if (Array.isArray(prefs.kanbanColunas) && prefs.kanbanColunas.length > 0) {
-          setKanbanColunas(prefs.kanbanColunas);
+          setKanbanColunas(comColunasPadrao(prefs.kanbanColunas));
         }
         if (typeof prefs.assinaturaAuto === "boolean") {
           setAssinaturaAuto(prefs.assinaturaAuto);
@@ -2577,40 +2666,19 @@ export default function CrmWhatsAppClient({
   const abrirMenuDaColuna = (e: React.MouseEvent, col: KanbanColumn) => {
     e.stopPropagation();
 
-    const cores = [
-      { nome: "Azul", valor: "#3b82f6" },
-      { nome: "Roxo", valor: "#8b5cf6" },
-      { nome: "Laranja", valor: "#f59e0b" },
-      { nome: "Rosa", valor: "#ec4899" },
-      { nome: "Ciano", valor: "#06b6d4" },
-      { nome: "Verde", valor: "#10b981" },
-      { nome: "Cinza", valor: "#64748b" },
-      { nome: "Vermelho", valor: "#d93025" },
-    ];
-
     openContextMenu(e, col.nome, [
       {
-        label: "✏️ Renomear coluna",
-        onClick: () => {
-          const nome = prompt("Novo nome da coluna:", col.nome);
-          if (!nome || !nome.trim()) return;
-          setKanbanColunas((prev) =>
-            prev.map((c) => (c.id === col.id ? { ...c, nome: nome.trim() } : c))
-          );
-          showToast("Coluna renomeada ✅");
-        },
+        label: "✏️ Renomear / mudar a cor",
+        onClick: () => setModalColuna({ modo: "renomear", id: String(col.id), nome: col.nome, cor: col.cor }),
       },
       {
         label: "🎨 Mudar a cor",
         children: () =>
-          cores.map((cor) => ({
+          CORES_COLUNA.map((cor) => ({
             label: cor.nome,
             check: col.cor === cor.valor,
-            onClick: () => {
-              setKanbanColunas((prev) =>
-                prev.map((c) => (c.id === col.id ? { ...c, cor: cor.valor } : c))
-              );
-            },
+            onClick: () =>
+              salvarColunas(kanbanColunas.map((c) => (String(c.id) === String(col.id) ? { ...c, cor: cor.valor } : c))),
           })),
       },
       { sep: true },
@@ -4592,15 +4660,7 @@ export default function CrmWhatsAppClient({
                 {kanbanTamanho !== "recolhido" && (
                   <button
                     onClick={() => {
-                      const nome = prompt("Nome da nova coluna (ex: Negociação, Orçamento, Fechado):");
-                      if (!nome || !nome.trim()) return;
-                      const novaCol: KanbanColumn = {
-                        id: `col-${Date.now()}`,
-                        nome: nome.trim(),
-                        cor: "#0f9d58",
-                      };
-                      setKanbanColunas((prev) => [...prev, novaCol]);
-                      showToast("Coluna criada ✅");
+                      setModalColuna({ modo: "nova", nome: "", cor: CORES_COLUNA[0].valor });
                     }}
                     className="bg-[#e7f6ec] hover:bg-[#0f9d58] text-[#0a6e3d] hover:text-white border border-[#0f9d58] px-2.5 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer"
                   >
@@ -4912,6 +4972,71 @@ export default function CrmWhatsAppClient({
                 )}
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* NOVA COLUNA / RENOMEAR COLUNA DO KANBAN */}
+      {modalColuna && (
+        <div
+          className="fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label={modalColuna.modo === "nova" ? "Nova coluna" : "Editar coluna"}
+          onClick={() => setModalColuna(null)}
+        >
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-5" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-bold text-base text-[#202124] mb-3">
+              {modalColuna.modo === "nova" ? "Nova coluna do funil" : "Editar coluna"}
+            </h3>
+            <label className="block text-xs text-[#3c4043]">
+              Nome
+              <input
+                id="kanban-coluna-nome"
+                autoFocus
+                value={modalColuna.nome}
+                onChange={(e) => setModalColuna({ ...modalColuna, nome: e.target.value.slice(0, 40) })}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") confirmarModalColuna();
+                  if (e.key === "Escape") setModalColuna(null);
+                }}
+                placeholder="Ex.: Consignados, Orçamento, Entrega"
+                className="w-full mt-1 border border-[#e3e3e3] rounded-md px-3 py-2 text-sm outline-none focus:border-[#0f9d58]"
+              />
+            </label>
+            <div className="mt-3">
+              <span className="block text-xs text-[#3c4043] mb-1">Cor</span>
+              <div className="flex flex-wrap gap-2">
+                {CORES_COLUNA.map((cor) => (
+                  <button
+                    key={cor.valor}
+                    type="button"
+                    aria-label={cor.nome}
+                    aria-pressed={modalColuna.cor === cor.valor}
+                    onClick={() => setModalColuna({ ...modalColuna, cor: cor.valor })}
+                    className={`w-7 h-7 rounded-full cursor-pointer ${
+                      modalColuna.cor === cor.valor ? "ring-2 ring-offset-2 ring-[#202124]" : ""
+                    }`}
+                    style={{ backgroundColor: cor.valor }}
+                  />
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-5">
+              <button
+                onClick={() => setModalColuna(null)}
+                className="px-4 py-2 text-sm rounded-lg text-[#3c4043] hover:bg-[#f0f2f5] cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmarModalColuna}
+                disabled={!modalColuna.nome.trim()}
+                className="px-4 py-2 text-sm font-bold rounded-lg bg-[#0f9d58] hover:bg-[#0a6e3d] text-white disabled:opacity-50 cursor-pointer"
+              >
+                {modalColuna.modo === "nova" ? "Criar coluna" : "Salvar"}
+              </button>
+            </div>
           </div>
         </div>
       )}

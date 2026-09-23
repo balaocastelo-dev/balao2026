@@ -133,6 +133,7 @@ export const KANBAN_COLUNAS_BASE: KanbanColumn[] = [
   { id: "negociacao", nome: "Em Negociação", cor: "#ec4899" },
   { id: "aguardando_pgto", nome: "Aguardando Pix / Pgto", cor: "#06b6d4" },
   { id: "ganho", nome: "Venda Fechada / Ganho", cor: "#10b981" },
+  { id: "consignados", nome: "Consignados", cor: "#0d9488" },
   { id: "pos_venda", nome: "Pós-Venda & Garantia", cor: "#6366f1" },
   { id: "perdido", nome: "Perdido / Sem Retorno", cor: "#64748b" },
 ];
