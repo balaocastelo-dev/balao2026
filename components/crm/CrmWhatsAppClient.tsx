@@ -1232,13 +1232,15 @@ export default function CrmWhatsAppClient({
       // Status, listas de transmissão e @lid não são atendimento: descarta.
       // Antes, um status de qualquer contato mandava o painel resincronizar a
       // lista inteira de conversas — trabalho pesado, à toa, o dia todo.
+      // O que vale é a conversa (chatId). O campo `from` de uma mensagem que
+      // saiu da loja é o número da própria loja — filtrar por ele já fez
+      // mensagem enviada pelo celular sumir do painel.
       if (
         newMsg.isStatus ||
         newMsg.type === "status_v3" ||
         newMsg.to === "status@broadcast" ||
         newMsg.from === "status@broadcast" ||
-        !isRealDirectChat(newMsg.chatId) ||
-        !isRealDirectChat(newMsg.from)
+        !isRealDirectChat(newMsg.chatId)
       ) {
         return;
       }
@@ -1400,8 +1402,24 @@ export default function CrmWhatsAppClient({
       setPreferenciasCarregadas(true);
     });
 
+    // Aba voltando ao primeiro plano (celular bloqueado, notebook que dormiu,
+    // outra aba aberta o dia todo): pede ao servidor para reler as mensagens
+    // recentes. Sem isso, o que a loja escreveu pelo celular enquanto a tela
+    // estava parada só apareceria na varredura seguinte.
+    const acordar = () => {
+      if (document.visibilityState !== "visible") return;
+      if (!socket.connected) socket.connect();
+      socket.emit("panel:conciliar");
+    };
+    document.addEventListener("visibilitychange", acordar);
+    window.addEventListener("focus", acordar);
+    window.addEventListener("online", acordar);
+
     return () => {
       clearTimeout(vendedoresTimeout);
+      document.removeEventListener("visibilitychange", acordar);
+      window.removeEventListener("focus", acordar);
+      window.removeEventListener("online", acordar);
       socket.disconnect();
       socketRef.current = null;
     };

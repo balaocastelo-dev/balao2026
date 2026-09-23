@@ -446,6 +446,17 @@ function emitirMensagem(msg, extras = {}) {
   paraPainel().emit("whatsapp:message", { ...comExtras(msg), ...extras });
 }
 
+// Quando chega um lote (sincronização de histórico), vale mais mandar a lista
+// pronta uma vez do que um evento por mensagem.
+let envioDasMensagensAgendado = null;
+function agendarEnvioDasMensagens() {
+  if (envioDasMensagensAgendado) return;
+  envioDasMensagensAgendado = setTimeout(() => {
+    envioDasMensagensAgendado = null;
+    paraPainel().emit("whatsapp:messages", mensagensRecentes());
+  }, 1500);
+}
+
 // ------------------------------------------------------------------
 // Conexão com a Evolution
 // ------------------------------------------------------------------
@@ -456,6 +467,11 @@ const EVENTOS_WEBHOOK = [
   "MESSAGES_UPDATE",
   "MESSAGES_DELETE",
   "SEND_MESSAGE",
+  // Mensagem que a Evolution recebeu pela sincronização do histórico (o que
+  // acontece com o que a loja escreve pelo celular enquanto o servidor está
+  // reiniciando, ou logo depois de reconectar). Sem este evento essa mensagem
+  // só apareceria no painel na varredura seguinte.
+  "MESSAGES_SET",
 ];
 
 async function prepararInstancia() {
@@ -683,6 +699,71 @@ function tratarMensagemRecebida(rec) {
   }
 }
 
+// ------------------------------------------------------------------
+// Conciliação — a mensagem tem de aparecer no CRM venha de onde vier
+// ------------------------------------------------------------------
+// O webhook é o caminho normal, mas ele falha de vez em quando: mensagem
+// escrita no celular da loja pode chegar à Evolution pela sincronização do
+// histórico (que dispara MESSAGES_SET, não MESSAGES_UPSERT), o container pode
+// estar reiniciando na hora, a rede pode piscar. Nesses casos a mensagem fica
+// só no banco da Evolution e o painel não mostra nada. Estas rotinas releem as
+// mensagens mais recentes e entregam ao painel o que faltou — sem duplicar,
+// porque guardarMensagem avisa quando a mensagem já era conhecida.
+
+// Mensagem mais velha que isto não toca a conversa: ela veio de uma
+// sincronização de histórico e não pode inflar o contador de não lidas nem
+// reordenar a lista de conversas.
+const JANELA_PARA_TOCAR = 10 * 60_000;
+
+function absorverRegistro(rec, { emitir = true } = {}) {
+  if (!rec?.key?.id || rec.key.remoteJid === "status@broadcast") return null;
+  aprenderLid(rec.key);
+  const msg = N.normalizarMensagem(rec, { lidParaNumero, numeroDaLoja: estado.phoneNumber });
+  if (!msg) return null;
+  const { final, nova } = guardarMensagem(msg);
+  if (!nova) return null;
+  aprenderNome(final);
+  if (emitir) emitirMensagem(final);
+  if (Date.now() - final.timestamp < JANELA_PARA_TOCAR) tocarConversa(final);
+  if (final.hasMedia && final.direction === "in") baixarMidia(final.id).catch(() => {});
+  return final;
+}
+
+let conciliando = false;
+let ultimaConciliacao = 0;
+async function conciliarRecentes(quantas = 40) {
+  if (conciliando || !estado.connected) return 0;
+  conciliando = true;
+  try {
+    const r = await evolution.buscarMensagens(INSTANCIA, { where: {}, offset: quantas, page: 1 });
+    let novas = 0;
+    for (const rec of r?.messages?.records || []) if (absorverRegistro(rec)) novas++;
+    ultimaConciliacao = Date.now();
+    if (novas) console.log(`[conciliacao] ${novas} mensagem(ns) que o webhook não trouxe.`);
+    return novas;
+  } catch (erro) {
+    console.warn("[conciliacao] Falha ao reler as mensagens recentes:", erro.message);
+    return 0;
+  } finally {
+    conciliando = false;
+  }
+}
+
+// Varredura curta e barata: 40 mensagens, a cada 20 segundos. É o que garante
+// que uma mensagem escrita no celular aparece no CRM em segundos mesmo quando
+// o webhook não chegou.
+setInterval(() => {
+  conciliarRecentes().catch(() => {});
+}, 20_000).unref?.();
+
+// Painel voltando do sono / abrindo a tela pede a conciliação na hora, sem
+// esperar o próximo ciclo — no máximo uma vez a cada 3 segundos, para muitos
+// painéis abertos ao mesmo tempo não virarem uma enxurrada de consultas.
+function conciliarAgora() {
+  if (Date.now() - ultimaConciliacao < 3000) return Promise.resolve(0);
+  return conciliarRecentes();
+}
+
 app.post("/evolution/webhook", express.json({ limit: "60mb" }), (req, res) => {
   const recebido = String(req.headers["x-balao-webhook"] || "");
   const ok =
@@ -724,6 +805,16 @@ app.post("/evolution/webhook", express.json({ limit: "60mb" }), (req, res) => {
       case "send.message": {
         const lista = Array.isArray(data) ? data : data?.messages || [data];
         for (const rec of lista) if (rec?.key) tratarMensagemRecebida(rec);
+        break;
+      }
+      // Histórico sincronizado pelo celular. Pode vir aos milhares na primeira
+      // conexão, por isso guarda tudo em silêncio e manda uma lista só para o
+      // painel, em vez de um evento por mensagem.
+      case "messages.set": {
+        const lista = Array.isArray(data) ? data : data?.messages || [data];
+        let novas = 0;
+        for (const rec of lista) if (rec?.key && absorverRegistro(rec, { emitir: false })) novas++;
+        if (novas) agendarEnvioDasMensagens();
         break;
       }
       case "messages.update": {
@@ -1369,7 +1460,19 @@ io.on("connection", (socket) => {
     socket.emit("whatsapp:vendedores", store.vendedores.map(publicoVendedor));
   };
   entregar();
-  socket.on("panel:bootstrap", entregar);
+  // Painel abrindo (ou voltando do sono) relê as mensagens recentes na hora:
+  // se alguma escrita no celular não chegou pelo webhook, ela aparece aqui.
+  conciliarAgora().catch(() => {});
+  socket.on("panel:bootstrap", () => {
+    entregar();
+    conciliarAgora().catch(() => {});
+  });
+  // Chamado quando a aba volta a ficar visível.
+  socket.on("panel:conciliar", (_p, cb) => {
+    conciliarAgora()
+      .then((novas) => cb?.({ ok: true, novas }))
+      .catch((erro) => cb?.({ ok: false, erro: erro.message }));
+  });
 
   // ---- vendedores e funil ----
   socket.on("panel:vendedor-login", (p, cb) => {
@@ -1489,6 +1592,7 @@ io.on("connection", (socket) => {
 
   socket.on("panel:sync-conversations", async () => {
     try {
+      await conciliarRecentes(80);
       await sincronizarConversas();
     } catch (erro) {
       emitirToast(`Falha ao sincronizar: ${erro.message}`, socket);
