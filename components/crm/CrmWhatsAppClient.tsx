@@ -636,6 +636,29 @@ export default function CrmWhatsAppClient({
   const [kanbanPorChat, setKanbanPorChat] = useState<Record<string, string>>({});
   const getKanbanCol = (chatId: string) => kanbanPorChat[chatId] || "novos";
 
+  // Cópia local do quadro. O servidor só guarda o kanban de quem entrou com
+  // PIN de vendedor; sem vendedor identificado nada era salvo, e ao recarregar
+  // (ou a cada reconexão) o card tirado do funil voltava para o quadro.
+  const chaveKanbanCards = (id: string | number | null) => `balao_crm_kanban_cards_${id || "sem-vendedor"}`;
+  const chaveKanbanRef = useRef<string>(chaveKanbanCards(null));
+  const guardarKanbanLocal = (mapa: Record<string, string>) => {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.setItem(chaveKanbanRef.current, JSON.stringify(mapa));
+    } catch {}
+  };
+  useEffect(() => {
+    chaveKanbanRef.current = chaveKanbanCards(vendedorAtivoId);
+    if (typeof window === "undefined") return;
+    try {
+      const salvo = localStorage.getItem(chaveKanbanRef.current);
+      const mapa = salvo ? JSON.parse(salvo) : null;
+      setKanbanPorChat(mapa && typeof mapa === "object" ? mapa : {});
+    } catch {
+      setKanbanPorChat({});
+    }
+  }, [vendedorAtivoId]);
+
   /**
    * Grava as colunas na hora: no navegador e, quando há vendedor
    * identificado, também no servidor. O salvamento normal espera 800 ms
@@ -677,6 +700,7 @@ export default function CrmWhatsAppClient({
       const next = { ...prev };
       if (colId) next[chatId] = colId;
       else delete next[chatId];
+      guardarKanbanLocal(next);
       return next;
     });
     if (vendedorAtivoId) {
@@ -1378,7 +1402,24 @@ export default function CrmWhatsAppClient({
     });
 
     socket.on("whatsapp:kanban", (mapa: Record<string, string>) => {
-      setKanbanPorChat(mapa && typeof mapa === "object" ? mapa : {});
+      const doServidor = mapa && typeof mapa === "object" ? mapa : {};
+      // O servidor manda o quadro do vendedor e manda por inteiro. Vale o que
+      // vem de lá, mas o que só existe neste navegador (organizado antes de
+      // entrar com o PIN) é mantido, em vez de ser apagado da tela.
+      setKanbanPorChat((prev) => {
+        const junto = { ...prev, ...doServidor };
+        guardarKanbanLocal(junto);
+        return junto;
+      });
+    });
+
+    // Conversa apagada em qualquer painel some de todos.
+    socket.on("whatsapp:conversa-apagada", (p: { chatId?: string }) => {
+      const id = String(p?.chatId || "");
+      if (!id) return;
+      setChats((prev) => prev.filter((c) => c.id !== id));
+      setMensagens((prev) => prev.filter((m) => m.chatId !== id));
+      setChatSelecionadoId((atual) => (atual === id ? null : atual));
     });
 
     // Preferências pessoais chegando do servidor — é isto que faz o painel
@@ -2029,8 +2070,9 @@ export default function CrmWhatsAppClient({
             icon: "🗑️",
             danger: true,
             onClick: () => {
-              setKanbanCol(chat.id, null);
-              showToast("Removido do Kanban");
+              // Apagar a marca fazia o card cair no padrão ("Novos") e
+              // reaparecer no quadro. Tem de ir para "Fora do funil".
+              removerDoFunil(chat.id, chat.nome);
             },
           },
         ],
@@ -2059,7 +2101,18 @@ export default function CrmWhatsAppClient({
         label: "🗑️ Apagar conversa",
         danger: true,
         onClick: () => {
-          if (confirm(`Apagar conversa com ${chat.nome}?`)) {
+          if (
+            confirm(
+              `Apagar conversa com ${chat.nome}?\n\nEla sai do painel de todos. Se ${chat.nome} escrever de novo, a conversa volta.`
+            )
+          ) {
+            // Antes isto só limpava a tela deste navegador: a lista que o
+            // servidor manda a cada sincronização trazia a conversa de volta.
+            // Agora o servidor marca a conversa como apagada.
+            socketRef.current?.emit("panel:apagar-conversa", {
+              chatId: chat.id,
+              ateTimestamp: chat.timestamp || Date.now(),
+            });
             setChats((prev) => prev.filter((c) => c.id !== chat.id));
             setMensagens((prev) => prev.filter((m) => m.chatId !== chat.id));
             if (chatSelecionadoId === chat.id) setChatSelecionadoId(null);

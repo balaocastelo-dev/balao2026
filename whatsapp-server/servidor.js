@@ -115,6 +115,10 @@ const store = {
   notas: {}, // chatId -> nota do cliente
   nomes: {}, // chatId -> nome que o próprio cliente usa no WhatsApp
   fotos: {}, // número -> { em, tem } última consulta da foto de perfil
+  // Conversa que o atendente apagou: fica escondida do painel até o cliente
+  // escrever de novo. Sem isto, o "Apagar conversa" era só visual — a lista
+  // vinda do servidor trazia a conversa de volta minutos depois.
+  ocultas: {}, // chatId -> { em, ateTimestamp }
 };
 
 function carregarStore() {
@@ -225,6 +229,7 @@ function migrarChaveDeConversa(antigo, novo) {
   mover(store.notas);
   mover(store.nomes);
   for (const k of Object.values(store.kanbanPorVendedor || {})) mover(k);
+  mover(store.ocultas);
   if (conversas.has(antigo)) {
     const c = conversas.get(antigo);
     conversas.delete(antigo);
@@ -286,15 +291,24 @@ function guardarMensagem(msg) {
 
 function mensagensRecentes(limite = 300) {
   const todas = [];
-  for (const mapa of mensagensPorChat.values()) for (const m of mapa.values()) todas.push(m);
+  for (const mapa of mensagensPorChat.values())
+    for (const m of mapa.values()) if (!estaOculta(m.chatId, m.timestamp)) todas.push(m);
   return todas
     .sort((a, b) => a.timestamp - b.timestamp)
     .slice(-limite)
     .map(comExtras);
 }
 
+/** Conversa apagada pelo atendente e sem mensagem nova depois disso. */
+function estaOculta(chatId, ultimoTimestamp = 0) {
+  const o = store.ocultas?.[chatId];
+  if (!o) return false;
+  return Number(ultimoTimestamp || 0) <= Number(o.ateTimestamp || 0);
+}
+
 function listaDeConversas() {
   return [...conversas.values()]
+    .filter((c) => !estaOculta(c.chatId, c.lastMessageTimestamp))
     .map((c) => ({
       ...c,
       profilePicUrl: fotoLocal(c.chatId) || c.profilePicUrl || null,
@@ -305,6 +319,13 @@ function listaDeConversas() {
 
 function tocarConversa(msg) {
   if (estado.phoneNumber && N.digitos(msg.chatId) === N.digitos(estado.phoneNumber)) return;
+  // Conversa apagada volta sozinha quando o cliente escreve de novo — apagar
+  // não é bloquear, e ninguém pode ficar sem resposta por causa disso.
+  const oculta = store.ocultas?.[msg.chatId];
+  if (oculta && Number(msg.timestamp || 0) > Number(oculta.ateTimestamp || 0)) {
+    delete store.ocultas[msg.chatId];
+    salvarStore();
+  }
   const atual = conversas.get(msg.chatId) || {
     chatId: msg.chatId,
     contactName: msg.contactName || (msg.realNumber ? N.formatarNumero(msg.realNumber) : "Contato"),
@@ -1522,6 +1543,32 @@ io.on("connection", (socket) => {
     store.preferenciasPorVendedor[id] = { ...(store.preferenciasPorVendedor[id] || {}), ...p.preferencias, atualizadoEm: Date.now() };
     salvarStore();
     socket.broadcast.to(`vendedor:${id}`).emit("whatsapp:preferencias", store.preferenciasPorVendedor[id]);
+  });
+
+  // ---- apagar / restaurar conversa ----
+  // Some do painel de todo mundo e fica marcada como apagada no servidor, com
+  // a data da última mensagem. Se o cliente escrever depois disso, a conversa
+  // volta sozinha (ver tocarConversa).
+  socket.on("panel:apagar-conversa", (p, cb) => {
+    const chatId = String(p?.chatId || "").trim();
+    if (!chatId) return cb?.({ ok: false, erro: "Conversa inválida." });
+    const conversa = conversas.get(chatId);
+    const ultima = Number(p?.ateTimestamp || conversa?.lastMessageTimestamp || Date.now());
+    store.ocultas[chatId] = { em: new Date().toISOString(), ateTimestamp: ultima, por: quem.vendedor?.nome || quem.papel };
+    salvarStore();
+    paraPainel().emit("whatsapp:conversa-apagada", { chatId });
+    agendarEnvioDaLista();
+    cb?.({ ok: true });
+  });
+
+  socket.on("panel:restaurar-conversa", (p, cb) => {
+    const chatId = String(p?.chatId || "").trim();
+    if (!chatId || !store.ocultas[chatId]) return cb?.({ ok: false });
+    delete store.ocultas[chatId];
+    salvarStore();
+    agendarEnvioDaLista();
+    paraPainel().emit("whatsapp:messages", mensagensRecentes());
+    cb?.({ ok: true });
   });
 
   socket.on("panel:set-kanban-card", (p) => {
