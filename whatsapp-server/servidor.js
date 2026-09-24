@@ -176,8 +176,16 @@ function garantirVendedoresFixos() {
       assinatura: String(fixo.assinatura || ""),
       protegido: fixo.protegido !== false,
     };
-    if (existente) Object.assign(existente, dados);
-    else store.vendedores.push({ id, pin: null, ...dados });
+    if (existente) {
+      // O arquivo semeia; a edição feita no painel manda. Antes, todo reinício
+      // desfazia o que a loja tinha ajustado em nome, cargo e assinatura.
+      existente.protegido = dados.protegido;
+      for (const campo of ["nome", "cargo", "assinatura"]) {
+        if (!String(existente[campo] || "").trim()) existente[campo] = dados[campo];
+      }
+    } else {
+      store.vendedores.push({ id, pin: null, ...dados });
+    }
   }
   salvarStore();
 }
@@ -2230,8 +2238,63 @@ async function importarHistoricoParaOCrm() {
   }
 }
 
+// Gestão da equipe pelo Centro de Comando. O dado continua no mesmo lugar de
+// sempre (store.vendedores), então o atendimento e a página pessoal do
+// vendedor não mudam em nada — só ganhamos edição, que não existia.
+const equipe = {
+  listar: () =>
+    store.vendedores.map((v) => ({
+      ...publicoVendedor(v),
+      temPin: Boolean(v.pin),
+      protegido: Boolean(v.protegido),
+      conversas: Object.values(store.chatAssignments).filter((id) => String(id) === String(v.id)).length,
+    })),
+  salvar: (dados) => {
+    const id = String(dados?.id || "").trim();
+    const nome = String(dados?.nome || "").trim();
+    if (!nome) throw Object.assign(new Error("O nome é obrigatório."), { status: 400 });
+    const pin = dados?.pin === undefined || dados?.pin === null ? null : String(dados.pin).trim();
+    if (pin && !/^\d{4,6}$/.test(pin)) {
+      throw Object.assign(new Error("O PIN precisa ter de 4 a 6 números."), { status: 400 });
+    }
+    const emUso = store.vendedores.find((v) => pin && v.pin === pin && String(v.id) !== id);
+    if (emUso) throw Object.assign(new Error(`Esse PIN já é do ${emUso.nome}.`), { status: 400 });
+
+    let alvo = id ? store.vendedores.find((v) => String(v.id) === id) : null;
+    if (id && !alvo) throw Object.assign(new Error("Vendedor não encontrado."), { status: 404 });
+    if (!alvo) {
+      if (!pin) throw Object.assign(new Error("Vendedor novo precisa de um PIN."), { status: 400 });
+      alvo = { id: crypto.randomUUID(), pin };
+      store.vendedores.push(alvo);
+    }
+    alvo.nome = nome;
+    alvo.cargo = String(dados?.cargo ?? alvo.cargo ?? "");
+    alvo.assinatura = String(dados?.assinatura ?? alvo.assinatura ?? "");
+    // PIN em branco no formulário quer dizer "não mexer", não "apagar".
+    if (pin) alvo.pin = pin;
+    salvarStore();
+    emitirVendedores();
+    return publicoVendedor(alvo);
+  },
+  remover: (id) => {
+    const alvo = store.vendedores.find((v) => String(v.id) === String(id));
+    if (!alvo) throw Object.assign(new Error("Vendedor não encontrado."), { status: 404 });
+    if (alvo.protegido) {
+      throw Object.assign(
+        new Error(`${alvo.nome} entra pela página pessoal do site e não pode ser removido por aqui.`),
+        { status: 400 }
+      );
+    }
+    store.vendedores = store.vendedores.filter((v) => String(v.id) !== String(id));
+    delete store.kanbanPorVendedor[id];
+    salvarStore();
+    emitirVendedores();
+  },
+};
+
 // As rotas existem desde o boot; enquanto o banco não liga, respondem 503.
 montarRotasDoCrm(app, {
+  equipe,
   acesso,
   servico: new Proxy(
     {},

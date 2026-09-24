@@ -78,4 +78,4 @@ export type AchadoBusca = {
   nome: string;
 };
 
-export type ModuloComando = "painel" | "clientes" | "ajustes";
+export type ModuloComando = "painel" | "clientes" | "catalogo" | "equipe" | "ajustes";

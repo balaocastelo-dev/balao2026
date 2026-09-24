@@ -5,6 +5,8 @@ import type { PonteComando, ModuloComando } from "./tipos";
 import PainelOperacao from "./PainelOperacao";
 import Clientes from "./Clientes";
 import Ajustes from "./Ajustes";
+import Equipe from "./Equipe";
+import Catalogo from "./Catalogo";
 
 // Centro de Comando: a tela de gestão da operação, ao lado do atendimento.
 //
@@ -16,6 +18,8 @@ import Ajustes from "./Ajustes";
 const MODULOS: { chave: ModuloComando; rotulo: string; icone: string; ajuda: string }[] = [
   { chave: "painel", rotulo: "Painel", icone: "📊", ajuda: "Números da operação" },
   { chave: "clientes", rotulo: "Clientes", icone: "👥", ajuda: "Base, segmentos e fichas" },
+  { chave: "catalogo", rotulo: "Catálogo", icone: "🏷️", ajuda: "Preço, custo e descrição dos produtos" },
+  { chave: "equipe", rotulo: "Equipe", icone: "🧑‍💼", ajuda: "Vendedores, PIN e assinatura" },
   { chave: "ajustes", rotulo: "Ajustes", icone: "⚙️", ajuda: "Respostas rápidas e etiquetas" },
 ];
 
@@ -91,6 +95,8 @@ export default function CentroDeComando({
             />
           )}
           {modulo === "clientes" && <Clientes ponte={ponte} segmentoInicial={segmento} />}
+          {modulo === "catalogo" && <Catalogo />}
+          {modulo === "equipe" && <Equipe ponte={ponte} />}
           {modulo === "ajustes" && <Ajustes ponte={ponte} />}
         </div>
       </main>

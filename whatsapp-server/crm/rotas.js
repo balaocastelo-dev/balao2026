@@ -5,7 +5,7 @@
 
 const express = require("express");
 
-function montarRotasDoCrm(app, { acesso, servico }) {
+function montarRotasDoCrm(app, { acesso, servico, equipe }) {
   const r = express.Router();
   const json = express.json({ limit: "2mb" });
 
@@ -106,6 +106,16 @@ function montarRotasDoCrm(app, { acesso, servico }) {
       return {};
     })
   );
+
+  // ---- equipe ----
+  r.get("/equipe", rota(async () => ({ itens: equipe.listar() })));
+  r.post(
+    "/equipe",
+    json,
+    acesso.exigir(["admin"]),
+    rota(async (req) => ({ vendedor: equipe.salvar(req.body || {}) }))
+  );
+  r.delete("/equipe/:id", acesso.exigir(["admin"]), rota(async (req) => (equipe.remover(req.params.id), {})));
 
   app.use("/api/comando", r);
 }
