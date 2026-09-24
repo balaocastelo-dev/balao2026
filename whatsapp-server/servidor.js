@@ -463,7 +463,35 @@ function agendarEnvioDaLista() {
   }, 1500);
 }
 
+// Números do funcionamento, para descobrir de fora onde uma mensagem parou.
+// Só contadores e horários — nenhum número de cliente, nenhum texto.
+const diag = {
+  ultimoWebhookEm: null,
+  ultimoWebhookEvento: null,
+  ultimaMensagemEm: null,
+  ultimaMensagemDirecao: null,
+  ultimaMensagemPor: null, // "webhook" | "conciliacao" | "historico"
+  ultimaSaindoDoCelularEm: null, // mensagem da loja que NÃO saiu do CRM
+  webhooksDeMensagem: 0,
+  conciliacoes: 0,
+  conciliadasNovas: 0,
+  conciliacaoErros: 0,
+  ultimoErroConciliacao: null,
+  emitidasParaOPainel: 0,
+};
+
+// Ids que já foram entregues ao painel. Sem isto, uma mensagem que entrou em
+// silêncio (lote de histórico) ficava guardada no servidor sem nunca chegar à
+// tela: para o vendedor, é o mesmo que não existir.
+const jaEmitidas = new Set();
 function emitirMensagem(msg, extras = {}) {
+  if (msg?.id) {
+    if (jaEmitidas.size > 8000) jaEmitidas.clear();
+    jaEmitidas.add(msg.id);
+  }
+  diag.emitidasParaOPainel++;
+  diag.ultimaMensagemEm = new Date().toISOString();
+  diag.ultimaMensagemDirecao = msg?.direction || null;
   paraPainel().emit("whatsapp:message", { ...comExtras(msg), ...extras });
 }
 
@@ -712,6 +740,8 @@ function tratarMensagemRecebida(rec) {
   aprenderNome(msg);
   const { final, nova } = guardarMensagem(msg);
   emitirMensagem(final);
+  diag.ultimaMensagemPor = "webhook";
+  if (final.direction === "out") diag.ultimaSaindoDoCelularEm = new Date().toISOString();
   if (nova) tocarConversa(final);
   // Mídia recebida é baixada logo: o link do WhatsApp expira em alguns dias.
   if (final.hasMedia && final.direction === "in") baixarMidia(final.id).catch(() => {});
@@ -736,17 +766,33 @@ function tratarMensagemRecebida(rec) {
 // reordenar a lista de conversas.
 const JANELA_PARA_TOCAR = 10 * 60_000;
 
-function absorverRegistro(rec, { emitir = true } = {}) {
+// Mensagem com menos de um dia ainda vale um aviso individual para a tela.
+const JANELA_PARA_EMITIR = 24 * 3600_000;
+
+function absorverRegistro(rec, { emitir = true, origem = "conciliacao" } = {}) {
   if (!rec?.key?.id || rec.key.remoteJid === "status@broadcast") return null;
   aprenderLid(rec.key);
   const msg = N.normalizarMensagem(rec, { lidParaNumero, numeroDaLoja: estado.phoneNumber });
   if (!msg) return null;
   const { final, nova } = guardarMensagem(msg);
-  if (!nova) return null;
+  const idade = Date.now() - final.timestamp;
+  // Não basta ser desconhecida: mensagem que já estava guardada mas nunca foi
+  // entregue ao painel (veio num lote de histórico, por exemplo) também tem de
+  // ir para a tela. Era exatamente aqui que a mensagem escrita no celular
+  // sumia: ficava no servidor, mas o vendedor nunca via.
+  const faltaEntregar = !jaEmitidas.has(final.id) && idade < JANELA_PARA_EMITIR;
+  if (!nova && !faltaEntregar) return null;
   aprenderNome(final);
-  if (emitir) emitirMensagem(final);
-  if (Date.now() - final.timestamp < JANELA_PARA_TOCAR) tocarConversa(final);
-  if (final.hasMedia && final.direction === "in") baixarMidia(final.id).catch(() => {});
+  if (emitir && (nova || faltaEntregar)) {
+    emitirMensagem(final);
+    diag.ultimaMensagemPor = origem;
+    if (final.direction === "out") diag.ultimaSaindoDoCelularEm = new Date().toISOString();
+  } else if (!emitir) {
+    // Guardada em silêncio: fica marcada como pendente, e a varredura leva.
+    jaEmitidas.delete(final.id);
+  }
+  if (nova && idade < JANELA_PARA_TOCAR) tocarConversa(final);
+  if (nova && final.hasMedia && final.direction === "in") baixarMidia(final.id).catch(() => {});
   return final;
 }
 
@@ -760,9 +806,15 @@ async function conciliarRecentes(quantas = 40) {
     let novas = 0;
     for (const rec of r?.messages?.records || []) if (absorverRegistro(rec)) novas++;
     ultimaConciliacao = Date.now();
+    diag.conciliacoes++;
+    diag.conciliadasNovas += novas;
+    diag.ultimaConciliacaoEm = new Date().toISOString();
+    diag.ultimoErroConciliacao = null;
     if (novas) console.log(`[conciliacao] ${novas} mensagem(ns) que o webhook não trouxe.`);
     return novas;
   } catch (erro) {
+    diag.conciliacaoErros++;
+    diag.ultimoErroConciliacao = String(erro.message || erro).slice(0, 200);
     console.warn("[conciliacao] Falha ao reler as mensagens recentes:", erro.message);
     return 0;
   } finally {
@@ -775,7 +827,7 @@ async function conciliarRecentes(quantas = 40) {
 // o webhook não chegou.
 setInterval(() => {
   conciliarRecentes().catch(() => {});
-}, 20_000).unref?.();
+}, 15_000).unref?.();
 
 // Painel voltando do sono / abrindo a tela pede a conciliação na hora, sem
 // esperar o próximo ciclo — no máximo uma vez a cada 3 segundos, para muitos
@@ -795,6 +847,11 @@ app.post("/evolution/webhook", express.json({ limit: "60mb" }), (req, res) => {
 
   const { event, data, instance } = req.body || {};
   const evento = String(event || "").toLowerCase().replace(/_/g, ".");
+  diag.ultimoWebhookEm = new Date().toISOString();
+  diag.ultimoWebhookEvento = evento;
+  if (evento === "messages.upsert" || evento === "send.message" || evento === "messages.set") {
+    diag.webhooksDeMensagem++;
+  }
   if (instance && instance === INSTANCIA_TESTE && instance !== INSTANCIA) return tratarWebhookDeTeste(evento, data);
   if (instance && instance !== INSTANCIA) return;
 
@@ -834,7 +891,7 @@ app.post("/evolution/webhook", express.json({ limit: "60mb" }), (req, res) => {
       case "messages.set": {
         const lista = Array.isArray(data) ? data : data?.messages || [data];
         let novas = 0;
-        for (const rec of lista) if (rec?.key && absorverRegistro(rec, { emitir: false })) novas++;
+        for (const rec of lista) if (rec?.key && absorverRegistro(rec, { emitir: false, origem: "historico" })) novas++;
         if (novas) agendarEnvioDasMensagens();
         break;
       }
@@ -1116,6 +1173,8 @@ app.use((req, res, next) => {
 
 // Público de propósito: só diz se está no ar. Nada de QR, número ou conversa.
 app.get(["/health", "/status", "/api/status"], (_req, res) => {
+  let mensagensNaMemoria = 0;
+  for (const mapa of mensagensPorChat.values()) mensagensNaMemoria += mapa.size;
   res.json({
     ok: true,
     motor: "evolution",
@@ -1123,6 +1182,14 @@ app.get(["/health", "/status", "/api/status"], (_req, res) => {
     estado: estado.status,
     status: estado.status,
     connected: estado.connected,
+    // Diagnóstico: só horários e contagens, nenhum dado de cliente.
+    diagnostico: {
+      ...diag,
+      conversas: conversas.size,
+      mensagensNaMemoria,
+      paineisAbertos: io.sockets.adapter.rooms.get(SALA)?.size || 0,
+      agoraNoServidor: new Date().toISOString(),
+    },
   });
 });
 
@@ -1200,6 +1267,38 @@ app.post("/api/diagnostico/cruzado", acesso.exigir(["admin"]), express.json(), (
     .finally(() => Object.assign(execucao, { rodando: false, fim: Date.now() }));
   res.json({ ok: true, iniciado: true, inicio: execucao.inicio });
 });
+// Compara o que a Evolution tem com o que o painel recebeu. Números saem
+// mascarados (só os 4 últimos dígitos) e o texto não sai.
+app.get("/api/diagnostico/mensagens", acesso.exigir(["admin"]), async (req, res) => {
+  const quantas = Math.min(100, Math.max(5, Number(req.query.n) || 30));
+  try {
+    const r = await evolution.buscarMensagens(INSTANCIA, { where: {}, offset: quantas, page: 1 });
+    const linhas = (r?.messages?.records || []).map((rec) => {
+      const m = N.normalizarMensagem(rec, { lidParaNumero, numeroDaLoja: estado.phoneNumber });
+      const id = String(rec?.key?.id || "");
+      const chat = m?.chatId || String(rec?.key?.remoteJid || "");
+      return {
+        id: id.slice(0, 10),
+        conversa: `…${chat.replace(/\D/g, "").slice(-4)}${chat.endsWith("@lid") ? " (@lid)" : ""}`,
+        deQuem: rec?.key?.fromMe ? "loja" : "cliente",
+        tipo: rec?.messageType || null,
+        quando: m ? new Date(m.timestamp).toISOString() : null,
+        traduzida: Boolean(m),
+        naMemoriaDoServidor: Boolean(m && mensagensPorChat.get(m.chatId)?.has(m.id)),
+        entregueAoPainel: jaEmitidas.has(id),
+      };
+    });
+    res.json({
+      ok: true,
+      totalNaEvolution: r?.messages?.total ?? null,
+      paineisAbertos: io.sockets.adapter.rooms.get(SALA)?.size || 0,
+      linhas,
+    });
+  } catch (erro) {
+    res.status(502).json({ ok: false, erro: String(erro.message || erro).slice(0, 300) });
+  }
+});
+
 app.get("/api/diagnostico/cruzado", acesso.exigir(["admin"]), (_req, res) => {
   res.json({ ok: true, ...execucao, linhaTeste: { estado: teste.estado, numero: teste.numero } });
 });
