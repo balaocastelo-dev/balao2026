@@ -1884,6 +1884,11 @@ export default function CrmWhatsAppClient({
       chamar: async <T,>(caminho: string, init: RequestInit = {}) => {
         const r = await fetchServidor(caminho, init);
         const j = await r.json().catch(() => ({}));
+        if (r.status === 404) {
+          throw new Error(
+            "O servidor da loja ainda não recebeu esta atualização. Rode o deploy na VPS e recarregue a página."
+          );
+        }
         if (!r.ok || j?.ok === false) throw new Error(j?.erro || `O servidor respondeu ${r.status}`);
         return j as T;
       },

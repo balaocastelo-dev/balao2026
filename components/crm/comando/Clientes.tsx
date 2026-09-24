@@ -259,7 +259,14 @@ export default function Clientes({
 
       {erro && (
         <div className="rounded-xl border border-[#c2571a]/40 bg-[#fdf1e8] p-3 text-xs text-[#a8471a]">
-          {erro}
+          <p className="font-semibold">{erro}</p>
+          <button
+            type="button"
+            onClick={carregar}
+            className="mt-2 cursor-pointer rounded-lg bg-[#0f9d58] px-3 py-1 text-[11px] font-bold text-white hover:bg-[#0a6e3d]"
+          >
+            Tentar de novo
+          </button>
         </div>
       )}
 
