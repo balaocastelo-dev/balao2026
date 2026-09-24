@@ -535,6 +535,60 @@ function criarServicoDoCrm({ db, registrar = console.log }) {
     return gravadas;
   }
 
+  /**
+   * Recalcula os interesses de todo mundo a partir das mensagens já gravadas.
+   * Serve para quando as regras de assunto melhoram: o passado passa a ser lido
+   * com as regras novas, em vez de ficar congelado no que valia antes.
+   */
+  async function reprocessarInteresses({ desdeDias = 720 } = {}) {
+    const dias = `${Math.max(1, Math.min(3650, Number(desdeDias) || 720))} days`;
+    await db.query(`DELETE FROM crm_interesse`);
+    let contatos = 0;
+    let pagina = 0;
+    const porPagina = 500;
+    // Percorre por conversa para somar tudo de uma vez e escrever pouco.
+    for (;;) {
+      const chats = await db.query(
+        `SELECT DISTINCT chat_id FROM crm_mensagem WHERE em >= now() - $1::interval
+         ORDER BY chat_id LIMIT $2 OFFSET $3`,
+        [dias, porPagina, pagina * porPagina]
+      );
+      if (!chats.rowCount) break;
+      for (const { chat_id: chatId } of chats.rows) {
+        const msgs = await db.query(
+          `SELECT corpo, produto_nome, em FROM crm_mensagem
+           WHERE chat_id = $1 AND em >= now() - $2::interval`,
+          [chatId, dias]
+        );
+        let pontos = {};
+        let ultima = null;
+        for (const m of msgs.rows) {
+          pontos = I.somar(
+            pontos,
+            I.analisarTexto(m.corpo),
+            m.produto_nome ? I.analisarProduto(m.produto_nome, null) : {}
+          );
+          if (!ultima || m.em > ultima) ultima = m.em;
+        }
+        const linhas = Object.entries(pontos);
+        if (!linhas.length) continue;
+        for (const [interesse, n] of linhas) {
+          await db.query(
+            `INSERT INTO crm_interesse (chat_id, interesse, pontos, ultima_em)
+             VALUES ($1,$2,$3,$4)
+             ON CONFLICT (chat_id, interesse) DO UPDATE
+               SET pontos = EXCLUDED.pontos, ultima_em = EXCLUDED.ultima_em`,
+            [chatId, interesse, n, ultima]
+          );
+        }
+        contatos++;
+      }
+      pagina++;
+    }
+    log(`interesses recalculados para ${contatos} conversa(s)`);
+    return { contatos };
+  }
+
   async function estado() {
     const r = await db.query(
       `SELECT
@@ -573,6 +627,7 @@ function criarServicoDoCrm({ db, registrar = console.log }) {
     excluirResposta,
     contarUsoDaResposta,
     importar,
+    reprocessarInteresses,
     estado,
   };
 }

@@ -37,6 +37,20 @@ test("pedido de preço entra como orçamento", () => {
   assert.strictEqual(r[0].chave, "orcamento");
 });
 
+test("uma menção clara basta: termo forte vale 2 pontos", () => {
+  // Era o caso do "meu notebook não liga": com 1 ponto o cliente ficava de
+  // fora do segmento Notebook, que é exatamente onde ele deveria estar.
+  const r = I.ranking(I.analisarTexto("meu notebook nao liga, voces consertam?"), 2);
+  const chaves = r.map((x) => x.chave);
+  assert.ok(chaves.includes("notebook"), `veio ${JSON.stringify(chaves)}`);
+  assert.ok(chaves.includes("assistencia"));
+});
+
+test("conversa sem assunto não entra em segmento nenhum", () => {
+  assert.deepStrictEqual(I.ranking(I.analisarTexto("bom dia, tudo bem?"), 2), []);
+  assert.deepStrictEqual(I.ranking(I.analisarTexto("obrigado!"), 2), []);
+});
+
 test("soma junta as pontuações de várias mensagens", () => {
   const total = I.somar(I.analisarTexto("quero um pc gamer"), I.analisarTexto("com rtx e ryzen"));
   assert.ok(total.pc_gamer >= 3);

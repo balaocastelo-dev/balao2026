@@ -21,6 +21,7 @@ const INTERESSES = {
       "core i9", "fps", "jogar", "jogos", "game", "cs2", "valorant", "fortnite", "gabinete",
       "water cooler", "fonte 650", "fonte 750", "memoria ram ddr", "memória ram ddr",
     ],
+    fortes: ["pc gamer","computador gamer","setup gamer","placa de video","placa de vídeo","rtx","gtx","geforce","radeon"],
     categorias: ["gamer", "placa de vídeo", "placa de video", "processador", "placa mãe", "placa mae", "memória", "memoria", "fonte", "gabinete", "cooler"],
   },
   notebook: {
@@ -30,6 +31,7 @@ const INTERESSES = {
       "lenovo ideapad", "acer aspire", "samsung book", "positivo motion", "tela do notebook",
       "bateria do notebook", "carregador de notebook", "dobradiça", "dobradica", "teclado do notebook",
     ],
+    fortes: ["notebook","note book","laptop","ultrabook","macbook"],
     categorias: ["notebook", "notebooks", "laptop"],
   },
   assistencia: {
@@ -42,6 +44,7 @@ const INTERESSES = {
       "pasta térmica", "manutencao", "manutenção", "defeito", "quebrou", "queimou", "assistencia",
       "assistência", "ordem de servico", "ordem de serviço", "os aberta", "meu pc", "meu note",
     ],
+    fortes: ["conserto","consertar","formatar","manutencao","manutenção","assistencia","assistência","nao liga","não liga","defeito","ordem de servico","ordem de serviço","tela azul"],
     categorias: ["serviço", "servico", "assistência", "assistencia"],
   },
   impressora: {
@@ -51,6 +54,7 @@ const INTERESSES = {
       "epson l3", "hp deskjet", "hp smart tank", "brother dcp", "não imprime", "nao imprime",
       "imprimindo falhado", "cabeça de impressão", "cabeca de impressao", "papel atolado",
     ],
+    fortes: ["impressora","multifuncional","cartucho","toner","bulk ink"],
     categorias: ["impressora", "impressoras", "suprimentos", "cartucho", "toner"],
   },
   pecas_upgrade: {
@@ -60,6 +64,7 @@ const INTERESSES = {
       "memória ram", "ddr3", "ddr4", "ddr5", "fonte", "placa mae", "placa mãe", "processador",
       "cooler", "gabinete", "pente de memoria", "pente de memória",
     ],
+    fortes: ["upgrade","ssd","nvme","placa mae","placa mãe","memoria ram","memória ram"],
     categorias: ["ssd", "hd", "armazenamento", "memória", "memoria", "hardware", "peças", "pecas"],
   },
   perifericos: {
@@ -68,6 +73,7 @@ const INTERESSES = {
       "monitor", "teclado", "mouse", "headset", "fone", "webcam", "caixa de som", "mousepad",
       "cadeira gamer", "suporte de monitor", "hz", "polegadas",
     ],
+    fortes: ["monitor","teclado","mouse","headset","cadeira gamer"],
     categorias: ["monitor", "monitores", "periférico", "periferico", "teclado", "mouse", "headset", "áudio", "audio"],
   },
   rede: {
@@ -76,6 +82,7 @@ const INTERESSES = {
       "roteador", "wifi", "wi-fi", "internet caindo", "repetidor", "cabo de rede", "switch",
       "mesh", "sinal fraco", "rede cabeada", "patch cord", "rj45",
     ],
+    fortes: ["roteador","wifi","wi-fi","repetidor","mesh"],
     categorias: ["rede", "roteador", "cabo", "conectividade"],
   },
   celular: {
@@ -84,6 +91,7 @@ const INTERESSES = {
       "celular", "smartphone", "iphone", "android", "capinha", "pelicula", "película",
       "tela do celular", "bateria do celular", "carregador turbo", "fone bluetooth",
     ],
+    fortes: ["celular","smartphone","iphone"],
     categorias: ["celular", "smartphone", "acessórios para celular", "acessorios para celular"],
   },
   consignado: {
@@ -92,6 +100,7 @@ const INTERESSES = {
       "consignado", "consignacao", "consignação", "usado", "seminovo", "semi novo", "de segunda",
       "vender meu", "trocar o meu", "quanto vale o meu",
     ],
+    fortes: ["consignado","consignacao","consignação","seminovo","semi novo"],
     categorias: ["seminovo", "seminovos", "usado", "consignado"],
   },
   orcamento: {
@@ -101,6 +110,7 @@ const INTERESSES = {
       "tem em estoque", "tem disponivel", "tem disponível", "faz por quanto", "melhor preço",
       "melhor preco", "parcela", "parcelado", "no pix", "desconto",
     ],
+    fortes: ["orçamento","orcamento","quanto custa","qual o valor","qual o preço","qual o preco"],
     categorias: [],
   },
 };
@@ -118,12 +128,17 @@ const TABELA = Object.entries(INTERESSES).map(([chave, def]) => ({
   chave,
   nome: def.nome,
   termos: def.termos.map(normalizar),
+  // Termo "forte" é o que sozinho já diz o assunto ("notebook", "impressora",
+  // "consignado"). Ele vale 2 pontos, e por isso uma única menção clara já
+  // coloca o cliente no segmento — sem precisar que ele repita.
+  fortes: new Set((def.fortes || []).map(normalizar)),
   categorias: def.categorias.map(normalizar),
 }));
 
 /**
  * Pontos por interesse a partir de um texto solto (uma mensagem, ou várias
- * juntas). Cada termo encontrado vale 1 ponto, contado uma vez por termo.
+ * juntas). Termo comum vale 1 ponto; termo forte, 2 — é o que faz "meu
+ * notebook não liga" entrar em Notebook já na primeira mensagem.
  */
 function analisarTexto(texto) {
   const t = normalizar(texto);
@@ -131,7 +146,7 @@ function analisarTexto(texto) {
   const pontos = {};
   for (const item of TABELA) {
     let n = 0;
-    for (const termo of item.termos) if (t.includes(termo)) n++;
+    for (const termo of item.termos) if (t.includes(termo)) n += item.fortes.has(termo) ? 2 : 1;
     if (n) pontos[item.chave] = n;
   }
   return pontos;

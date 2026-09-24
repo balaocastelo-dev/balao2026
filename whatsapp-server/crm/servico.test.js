@@ -159,6 +159,18 @@ test("serviço do CRM", { skip: pular ? "sem CRM_TESTE_DB" : false }, async (t) 
     assert.ok(r.funil.some((f) => f.etapa === "orcamento" && f.total === 1));
   });
 
+  await t.test("reprocessar interesses relê o passado com as regras atuais", async () => {
+    await db.query(`DELETE FROM crm_interesse`);
+    let c = await crm.contato("5519999990000@c.us");
+    assert.strictEqual(c.interesses.length, 0, "limpou");
+    const r = await crm.reprocessarInteresses({ desdeDias: 30 });
+    assert.ok(r.contatos >= 1);
+    c = await crm.contato("5519999990000@c.us");
+    const chaves = c.interesses.map((i) => i.chave);
+    assert.ok(chaves.includes("notebook"), `veio ${JSON.stringify(chaves)}`);
+    assert.ok(chaves.includes("assistencia"));
+  });
+
   await t.test("estado do banco responde", async () => {
     const e = await crm.estado();
     assert.ok(e.contatos >= 1 && e.mensagens >= 3);

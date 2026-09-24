@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { io, type Socket } from "socket.io-client";
 import CentralStatus from "@/components/crm/status/CentralStatus";
+import CentroDeComando from "@/components/crm/comando/CentroDeComando";
+import type { PonteComando } from "@/components/crm/comando/tipos";
 import type { PonteStatus, StatusRecebido } from "@/components/crm/status/tipos";
 import {
   CrmChat,
@@ -1865,9 +1867,31 @@ export default function CrmWhatsAppClient({
 
   // Central de Status: o módulo recebe só o que precisa do painel.
   const [centralStatusAberta, setCentralStatusAberta] = useState(false);
+  // Centro de Comando: gestão da operação (painel, clientes, ajustes). Fica
+  // num módulo separado — ver components/crm/comando/.
+  const [comandoAberto, setComandoAberto] = useState(false);
   const chatsRef = useRef<CrmChat[]>([]);
   chatsRef.current = chats;
   const avisoRef = useRef<(m: string) => void>(() => {});
+  const ponteComando = useMemo<PonteComando>(
+    () => ({
+      chamar: async <T,>(caminho: string, init: RequestInit = {}) => {
+        const r = await fetchServidor(caminho, init);
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok || j?.ok === false) throw new Error(j?.erro || `O servidor respondeu ${r.status}`);
+        return j as T;
+      },
+      // Clicar num cliente volta para o atendimento com a conversa aberta.
+      abrirConversa: (chatId: string) => {
+        setChatSelecionadoId(chatId);
+        setComandoAberto(false);
+      },
+      nomeDoVendedor: (id: string | null) =>
+        id ? vendedores.find((v) => String(v.id) === String(id))?.nome || id : null,
+    }),
+    [fetchServidor, vendedores]
+  );
+
   const ponteStatus = useMemo<PonteStatus>(
     () => ({
       chamar: async <T,>(caminho: string, init: RequestInit = {}) => {
@@ -2997,6 +3021,15 @@ export default function CrmWhatsAppClient({
           >
             <span className="w-2 h-2 rounded-full bg-emerald-300 animate-ping" />
             <span>🟢 Status</span>
+          </button>
+
+          {/* Centro de Comando: painel da operação, clientes e ajustes */}
+          <button
+            onClick={() => setComandoAberto(true)}
+            className="bg-white/20 hover:bg-white text-white hover:text-[#0a6e3d] rounded-full px-3 py-1 text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+            title="Centro de Comando: números da operação, base de clientes, segmentos e ajustes da equipe"
+          >
+            <span>📊 Comando</span>
           </button>
         </div>
 
@@ -5158,6 +5191,10 @@ export default function CrmWhatsAppClient({
       {/* CENTRAL DE STATUS (módulo components/crm/status) */}
       {centralStatusAberta && (
         <CentralStatus ponte={ponteStatus} aoFechar={() => setCentralStatusAberta(false)} />
+      )}
+
+      {comandoAberto && (
+        <CentroDeComando ponte={ponteComando} aoFechar={() => setComandoAberto(false)} />
       )}
 
       {/* CONTEXT MENU MODAL */}

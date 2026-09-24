@@ -1226,7 +1226,10 @@ app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", origem);
     res.setHeader("Vary", "Origin");
     res.setHeader("Access-Control-Allow-Headers", "authorization, content-type, x-balao-ticket");
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    // PUT/PATCH/DELETE faltavam aqui. Sem eles o navegador barra no preflight
+    // qualquer edição ou exclusão feita pelo painel — o que já afetava apagar
+    // e reagendar status, e afetaria o Centro de Comando inteiro.
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
   }
   if (req.method === "OPTIONS") return res.status(204).end();
   next();

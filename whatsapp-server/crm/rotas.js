@@ -26,6 +26,13 @@ function montarRotasDoCrm(app, { acesso, servico }) {
   r.get("/resumo", rota((req) => servico.resumo({ dias: req.query.dias })));
   r.get("/fila", rota(async (req) => ({ itens: await servico.fila({ limite: req.query.limite }) })));
   r.get("/estado", rota(async () => ({ estado: await servico.estado() })));
+  // Relê o passado com as regras de assunto atuais (quando elas melhoram).
+  r.post(
+    "/reprocessar-interesses",
+    json,
+    acesso.exigir(["admin"]),
+    rota(async (req) => servico.reprocessarInteresses({ desdeDias: req.body?.dias }))
+  );
 
   // ---- clientes ----
   r.get(
