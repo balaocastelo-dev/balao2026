@@ -21,6 +21,7 @@ RUN npm ci --omit=dev \
 COPY servidor.js catalogo.js vendedores-fixos.json ./
 COPY evo ./evo
 COPY status ./status
+COPY crm ./crm
 
 ARG VERSAO=dev
 RUN echo "$VERSAO" > VERSAO

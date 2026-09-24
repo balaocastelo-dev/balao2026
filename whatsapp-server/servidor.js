@@ -28,6 +28,9 @@ const { criarEspelhoDoCatalogo } = require("./catalogo");
 const { abrirBanco } = require("./status/db");
 const { criarServicoDeStatus } = require("./status/servico");
 const { montarRotasDeStatus } = require("./status/rotas");
+const { abrirBanco: abrirBancoDoCrm } = require("./crm/db");
+const { criarServicoDoCrm } = require("./crm/servico");
+const { montarRotasDoCrm } = require("./crm/rotas");
 
 process.on("unhandledRejection", (motivo) => console.warn("[processo] promessa rejeitada:", motivo?.message || motivo));
 process.on("uncaughtException", (erro) => console.warn("[processo] exceção:", erro?.message || erro));
@@ -89,6 +92,7 @@ const acesso = criarAcesso({ urlDoSite: SITE_URL });
 const LER_STATUS_DOS_CONTATOS = process.env.STATUS_LER_CONTATOS !== "0";
 const SEGREDO_STATUS = lerOuCriarSegredo("STATUS_SEGREDO", "status.segredo");
 let statusServico = null; // módulo de Status (liga quando o banco responde)
+let crmServico = null; // Centro de Comando (contatos, mensagens, métricas)
 const espelhoDoCatalogo = criarEspelhoDoCatalogo({ pasta: DATA_DIR, urlDoSite: SITE_URL });
 setTimeout(() => espelhoDoCatalogo.atualizar({ motivo: "boot" }), 20_000).unref?.();
 setInterval(() => espelhoDoCatalogo.atualizar({ motivo: "agendado" }), 30 * 60_000).unref?.();
@@ -648,7 +652,10 @@ async function sincronizarConversas() {
   // Conversa nova que chegou pelo webhook e ainda não está no banco fica.
   for (const [id, c] of conversas) if (!novas.has(id)) novas.set(id, c);
   conversas.clear();
-  for (const [id, c] of novas) conversas.set(id, c);
+  for (const [id, c] of novas) {
+    conversas.set(id, c);
+    guardarConversaNoCrm(c);
+  }
   ultimaSincronizacao = Date.now();
   paraPainel().emit("whatsapp:chats", listaDeConversas());
   for (const id of conversas.keys()) pedirFoto(id);
@@ -732,6 +739,48 @@ function tratarStatusRecebido(rec) {
   pedirFoto(autor);
 }
 
+// ------------------------------------------------------------------
+// Ponte para o banco do Centro de Comando
+// ------------------------------------------------------------------
+// O atendimento não pode depender do banco: se ele estiver fora, a loja
+// continua conversando e só a estatística fica para trás. Por isso tudo aqui
+// é "sem quebrar" — erro vira log, nunca exceção no caminho da mensagem.
+function guardarNoCrm(msg, origem, vendedorId = null) {
+  if (!crmServico || !msg?.id) return;
+  crmServico.registrarMensagemSemQuebrar(
+    {
+      id: msg.id,
+      chatId: msg.chatId,
+      direcao: msg.direction === "out" ? "out" : "in",
+      corpo: msg.body || "",
+      tipoMidia: msg.mediaType || null,
+      mime: msg.mimetype || null,
+      nomeMidia: msg.mediaName || null,
+      transcricao: msg.transcricao || null,
+      produtoId: msg.produto?.id || null,
+      produtoNome: msg.produto?.nome || msg.produto?.name || null,
+      produtoCategoria: msg.produto?.categoria || msg.produto?.category || null,
+      situacao: msg.status || null,
+      numero: msg.realNumber || null,
+      contato: msg.contactName || null,
+      timestamp: msg.timestamp || Date.now(),
+    },
+    { origem, vendedorId }
+  );
+}
+
+function guardarConversaNoCrm(c) {
+  if (!crmServico || !c?.chatId) return;
+  crmServico.registrarContatoSemQuebrar({
+    chatId: c.chatId,
+    numero: c.realNumber || null,
+    nome: c.contactName || null,
+    foto: c.profilePicUrl || c.profilePicOriginal || null,
+    ultimaEm: c.lastMessageTimestamp || null,
+    previa: c.lastMessageBody || null,
+  });
+}
+
 function tratarMensagemRecebida(rec) {
   if (rec.key.remoteJid === "status@broadcast") return tratarStatusRecebido(rec);
   aprenderLid(rec.key);
@@ -740,6 +789,7 @@ function tratarMensagemRecebida(rec) {
   aprenderNome(msg);
   const { final, nova } = guardarMensagem(msg);
   emitirMensagem(final);
+  guardarNoCrm(final, "webhook");
   diag.ultimaMensagemPor = "webhook";
   if (final.direction === "out") diag.ultimaSaindoDoCelularEm = new Date().toISOString();
   if (nova) tocarConversa(final);
@@ -747,6 +797,16 @@ function tratarMensagemRecebida(rec) {
   if (final.hasMedia && final.direction === "in") baixarMidia(final.id).catch(() => {});
   if (final.direction === "in" && /^(SAIR|PARAR|CANCELAR|DESCADASTRAR|STOP)$/i.test(final.body.trim())) {
     emitirToast(`Cliente ${final.contactName || final.realNumber} pediu para sair dos disparos.`);
+    // Registro auditável do "PARAR" — é o que a LGPD pede que se prove.
+    crmServico
+      ?.registrarConsentimento({
+        chatId: final.chatId,
+        acao: "opt_out",
+        canal: "whatsapp",
+        texto: final.body.trim().slice(0, 200),
+        por: "cliente",
+      })
+      .catch(() => {});
   }
 }
 
@@ -783,6 +843,7 @@ function absorverRegistro(rec, { emitir = true, origem = "conciliacao" } = {}) {
   const faltaEntregar = !jaEmitidas.has(final.id) && idade < JANELA_PARA_EMITIR;
   if (!nova && !faltaEntregar) return null;
   aprenderNome(final);
+  if (nova) guardarNoCrm(final, origem);
   if (emitir && (nova || faltaEntregar)) {
     emitirMensagem(final);
     diag.ultimaMensagemPor = origem;
@@ -1345,6 +1406,7 @@ function registrarEnviada(rec, extras = {}) {
     };
   const { final } = guardarMensagem({ ...msg, ...extras });
   emitirMensagem(final, extras.tempId ? { tempId: extras.tempId } : {});
+  guardarNoCrm(final, "crm", extras.vendedorId || null);
   tocarConversa(final);
   return final;
 }
@@ -1678,6 +1740,7 @@ io.on("connection", (socket) => {
     if (p.colId) store.kanbanPorVendedor[id][chatId] = String(p.colId);
     else delete store.kanbanPorVendedor[id][chatId];
     salvarStore();
+    crmServico?.definirEtapa(chatId, p.colId || null, id).catch(() => {});
     io.to(`vendedor:${id}`).emit("whatsapp:kanban", store.kanbanPorVendedor[id]);
   });
 
@@ -1687,6 +1750,7 @@ io.on("connection", (socket) => {
     if (p.sellerId) store.chatAssignments[chatId] = String(p.sellerId);
     else delete store.chatAssignments[chatId];
     salvarStore();
+    crmServico?.definirVendedor(chatId, p.sellerId || null).catch(() => {});
     paraPainel().emit("whatsapp:chats", listaDeConversas());
     emitirConfiguracoes();
   });
@@ -1792,7 +1856,7 @@ io.on("connection", (socket) => {
         signatureId: p.signatureId,
         responderA: p.replyTo,
       });
-      const msg = registrarEnviada(rec, { tempId: p.tempId });
+      const msg = registrarEnviada(rec, { tempId: p.tempId, vendedorId: quem.vendedor?.id || p.vendedorId || null });
       ack(p, true, msg.id);
     } catch (erro) {
       ack(p, false, null, erro.message);
@@ -2087,7 +2151,101 @@ async function ligarModuloDeStatus() {
   }
 }
 
+// ------------------------------------------------------------------
+async function ligarModuloDoCrm() {
+  // Usa o mesmo Postgres do módulo de Status (banco "balao"), com tabelas
+  // próprias. Sem banco configurado, o Centro de Comando simplesmente não
+  // liga — e o atendimento segue igual, como sempre foi.
+  const url = process.env.CRM_DB_URL || process.env.STATUS_DB_URL;
+  if (!url) {
+    console.warn("[comando] Sem banco configurado — Centro de Comando desligado.");
+    return;
+  }
+  for (let tentativa = 1; ; tentativa++) {
+    try {
+      const db = await abrirBancoDoCrm({
+        url,
+        urlAdmin: process.env.CRM_DB_URL_ADMIN || process.env.STATUS_DB_URL_ADMIN,
+      });
+      crmServico = criarServicoDoCrm({ db });
+      console.log("[comando] Centro de Comando ligado.");
+      importarHistoricoParaOCrm().catch((e) => console.warn("[comando] importação:", e.message));
+      return;
+    } catch (e) {
+      const espera = Math.min(60, 5 * tentativa);
+      console.warn(`[comando] Banco indisponível (${e.message}) — tento de novo em ${espera}s`);
+      await new Promise((r) => setTimeout(r, espera * 1000));
+    }
+  }
+}
+
+/**
+ * Primeira carga: leva para o banco o que já está na memória e um pedaço do
+ * histórico que a Evolution guarda. Roda uma vez por boot, devagar, e pode
+ * repetir sem duplicar — a mensagem tem chave própria.
+ */
+let importandoHistorico = false;
+async function importarHistoricoParaOCrm() {
+  if (!crmServico || importandoHistorico) return;
+  importandoHistorico = true;
+  try {
+    const jaTem = await crmServico.estado();
+    // O que já está na memória vai primeiro: é o mais recente.
+    let daMemoria = 0;
+    for (const mapa of mensagensPorChat.values()) {
+      for (const m of mapa.values()) {
+        guardarNoCrm(m, "memoria");
+        daMemoria++;
+      }
+    }
+    for (const c of conversas.values()) guardarConversaNoCrm(c);
+
+    // Depois o passado, em páginas, sem pressa (a Evolution e o Postgres
+    // ficam no mesmo container pequeno — não vale travá-los por isto).
+    const paginas = Number(process.env.CRM_IMPORTAR_PAGINAS || 20);
+    let doHistorico = 0;
+    for (let pagina = 1; pagina <= paginas; pagina++) {
+      const r = await evolution
+        .buscarMensagens(INSTANCIA, { where: {}, offset: 500, page: pagina })
+        .catch(() => null);
+      const registros = r?.messages?.records || [];
+      if (!registros.length) break;
+      for (const rec of registros) {
+        const m = N.normalizarMensagem(rec, { lidParaNumero, numeroDaLoja: estado.phoneNumber });
+        if (m) {
+          guardarNoCrm(m, "historico");
+          doHistorico++;
+        }
+      }
+      await new Promise((r2) => setTimeout(r2, 1500));
+    }
+    console.log(
+      `[comando] Importação: ${daMemoria} da memória + ${doHistorico} do histórico (o banco tinha ${jaTem.mensagens}).`
+    );
+  } finally {
+    importandoHistorico = false;
+  }
+}
+
 // As rotas existem desde o boot; enquanto o banco não liga, respondem 503.
+montarRotasDoCrm(app, {
+  acesso,
+  servico: new Proxy(
+    {},
+    {
+      get: (_alvo, nome) => {
+        if (!crmServico) {
+          return () => {
+            throw Object.assign(new Error("Centro de Comando iniciando. Tente em alguns segundos."), { status: 503 });
+          };
+        }
+        const v = crmServico[nome];
+        return typeof v === "function" ? v.bind(crmServico) : v;
+      },
+    }
+  ),
+});
+
 montarRotasDeStatus(app, {
   acesso,
   segredoInterno: SEGREDO_STATUS,
@@ -2111,6 +2269,7 @@ server.listen(PORTA, () => {
   console.log(`[servidor] WhatsApp (Evolution) no ar na porta ${PORTA} — versão ${VERSAO}`);
   iniciar();
   ligarModuloDeStatus();
+  ligarModuloDoCrm();
 });
 
 module.exports = { app, server, store, estado };
