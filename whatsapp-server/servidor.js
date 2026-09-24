@@ -896,7 +896,7 @@ async function conciliarRecentes(quantas = 40) {
 // o webhook não chegou.
 setInterval(() => {
   conciliarRecentes().catch(() => {});
-}, 15_000).unref?.();
+}, 20_000).unref?.();
 
 // Painel voltando do sono / abrindo a tela pede a conciliação na hora, sem
 // esperar o próximo ciclo — no máximo uma vez a cada 3 segundos, para muitos
@@ -1317,6 +1317,36 @@ app.get("/midia/:id", acesso.exigir(), async (req, res) => {
     res.sendFile(m.caminho);
   } catch (erro) {
     res.status(404).json({ ok: false, erro: `Mídia indisponível: ${erro.message}` });
+  }
+});
+
+/**
+ * Reconecta o WhatsApp da loja SEM deslogar — não pede QR novo.
+ *
+ * Existe porque acontece de o aparelho ficar "meio conectado": continua
+ * recebendo mensagem normalmente, mas o envio trava e nunca responde. Nesse
+ * estado o painel mostra tudo verde e mesmo assim nada sai. Reiniciar só a
+ * conexão resolve, e é bem diferente de "Relogar", que desloga e obriga a ler
+ * o QR de novo no celular.
+ */
+app.post(["/api/crm/reconectar", "/api/reconectar"], acesso.exigir(["admin"]), async (_req, res) => {
+  try {
+    await evolution.reiniciar(INSTANCIA);
+    Object.assign(estado, { status: "loading", ultimoErro: null });
+    emitirEstado();
+    // A Evolution avisa pelo webhook quando voltar; isto é só uma rede de
+    // segurança para o painel não ficar preso em "conectando".
+    setTimeout(() => {
+      evolution
+        .estadoConexao(INSTANCIA)
+        .then((r) => {
+          if (r?.instance?.state === "open") aoConectar({});
+        })
+        .catch(() => {});
+    }, 8000);
+    res.json({ ok: true, mensagem: "Reconectando o WhatsApp da loja. Em alguns segundos volta ao ar." });
+  } catch (erro) {
+    res.status(502).json({ ok: false, erro: erro.message });
   }
 });
 
@@ -1805,6 +1835,20 @@ io.on("connection", (socket) => {
   });
 
   // ---- sessão ----
+  socket.on("panel:reconectar", async (_p, cb) => {
+    if (!ehAdmin) return cb?.({ ok: false, erro: "Só a administração reconecta." });
+    try {
+      await evolution.reiniciar(INSTANCIA);
+      Object.assign(estado, { status: "loading", ultimoErro: null });
+      emitirEstado();
+      emitirToast("Reconectando o WhatsApp da loja — sem precisar ler o QR.");
+      cb?.({ ok: true });
+    } catch (erro) {
+      cb?.({ ok: false, erro: erro.message });
+      emitirToast(`Não consegui reconectar: ${erro.message}`, socket);
+    }
+  });
+
   socket.on("panel:reset-session", async () => {
     if (!ehAdmin) return emitirToast("Só a administração pode reiniciar a sessão.", socket);
     const r = await reiniciarSessao();
@@ -2213,7 +2257,10 @@ async function importarHistoricoParaOCrm() {
 
     // Depois o passado, em páginas, sem pressa (a Evolution e o Postgres
     // ficam no mesmo container pequeno — não vale travá-los por isto).
-    const paginas = Number(process.env.CRM_IMPORTAR_PAGINAS || 20);
+    // Por padrão NÃO importa o passado a cada reinício: são 500 mensagens por
+    // página vindas da Evolution, com o JSON inteiro de cada uma. Para trazer o
+    // histórico, ligue CRM_IMPORTAR_PAGINAS uma vez e desligue depois.
+    const paginas = Number(process.env.CRM_IMPORTAR_PAGINAS || 0);
     let doHistorico = 0;
     for (let pagina = 1; pagina <= paginas; pagina++) {
       const r = await evolution

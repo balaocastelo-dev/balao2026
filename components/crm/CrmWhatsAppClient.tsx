@@ -1973,6 +1973,30 @@ export default function CrmWhatsAppClient({
   };
   avisoRef.current = showToast;
 
+  /**
+   * Reconecta sem deslogar — NÃO pede QR novo.
+   *
+   * Serve para o caso em que o WhatsApp fica "meio conectado": continua
+   * recebendo mensagem, mas o envio trava e nunca responde. O painel mostra
+   * tudo verde e mesmo assim nada sai. É a primeira coisa a tentar; "Relogar"
+   * (que desloga e exige o QR no celular) fica como último recurso.
+   */
+  const reconectar = () => {
+    showToast("Reconectando o WhatsApp da loja…");
+    const aoResponder = (r: { ok?: boolean; erro?: string } | undefined) => {
+      if (r?.ok) showToast("Reconectando. Em alguns segundos tente enviar de novo.");
+      else showToast(r?.erro || "Não consegui reconectar agora.");
+    };
+    if (socketRef.current?.connected) {
+      socketRef.current.emit("panel:reconectar", {}, aoResponder);
+    } else {
+      fetchServidor("/api/crm/reconectar", { method: "POST" })
+        .then((r) => r.json())
+        .then(aoResponder)
+        .catch(() => showToast("Não consegui falar com o servidor da loja."));
+    }
+  };
+
   const relogar = () => {
     if (confirm("Desconectar o WhatsApp atual e gerar um novo QR Code para parear?")) {
       if (socketRef.current?.connected) {
@@ -3078,6 +3102,14 @@ export default function CrmWhatsAppClient({
               ? "Aguardando Leitura do QR"
               : "Iniciando WhatsApp Web…"}
           </span>
+
+          <button
+            onClick={reconectar}
+            title="Reconecta o WhatsApp da loja sem deslogar — use quando as mensagens param de sair mas continuam chegando"
+            className="bg-[#e8eaed] hover:bg-[#dadce0] text-[#202124] px-3 py-1 rounded-lg text-xs font-semibold transition-colors cursor-pointer shadow-sm"
+          >
+            ♻️ Reconectar
+          </button>
 
           <button
             onClick={relogar}
