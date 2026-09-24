@@ -28,7 +28,11 @@ export default function HomeThemeToggle() {
     if (!mounted) return;
 
     document.documentElement.setAttribute("data-home-theme", theme);
-    window.localStorage.setItem(STORAGE_KEY, theme);
+    // Navegador anônimo, cookies bloqueados ou espaço cheio fazem o setItem
+    // lançar — e aqui dentro de um efeito isso derrubaria a página.
+    try {
+      window.localStorage.setItem(STORAGE_KEY, theme);
+    } catch {}
   }, [mounted, theme]);
 
   const nextTheme = theme === "dark" ? "light" : "dark";

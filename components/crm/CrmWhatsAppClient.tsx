@@ -836,28 +836,67 @@ export default function CrmWhatsAppClient({
   ]);
 
   // Persistence & Storage Cleanup
+  //
+  // O navegador dá cerca de 5 MB por site. Quando esse espaço enche, o
+  // localStorage.setItem NÃO devolve erro: ele LANÇA (QuotaExceededError). Como
+  // isto roda dentro de um efeito do React, a exceção derrubava o painel
+  // inteiro e a tela ficava preta com "Algo deu errado". Daqui em diante nada
+  // neste bloco pode quebrar a tela: este cache é só um atalho para a tela
+  // abrir preenchida enquanto o servidor responde — a fonte de verdade é o
+  // servidor, e perder o cache não custa nada.
+  const guardarLocal = (chave: string, valor: unknown) => {
+    try {
+      localStorage.setItem(chave, JSON.stringify(valor));
+      return true;
+    } catch {
+      // Espaço acabou (ou o navegador está em modo anônimo/bloqueado). Tira o
+      // valor antigo para não ficar ocupando lugar com dado velho.
+      try {
+        localStorage.removeItem(chave);
+      } catch {}
+      return false;
+    }
+  };
+
+  // Guarda só a ponta da lista, e vai encolhendo enquanto não couber.
+  const guardarListaLocal = <T,>(chave: string, lista: T[], limite: number) => {
+    for (const n of [limite, Math.floor(limite / 3), 60]) {
+      if (guardarLocal(chave, lista.slice(-n))) return;
+    }
+  };
+
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const cleanChats = chats.filter((c) => isRealDirectChat(c.id));
-      const cleanMsgs = mensagens.filter((m) => isRealDirectChat(m.chatId));
-      localStorage.setItem("balao_crm_chats", JSON.stringify(cleanChats));
-      localStorage.setItem("balao_crm_mensagens_store", JSON.stringify(cleanMsgs));
+    if (typeof window === "undefined") return;
+    // Espera o movimento parar: sem isto, cada mensagem que chega reserializa
+    // a conversa inteira — caro à toa numa loja movimentada.
+    const t = setTimeout(() => {
+      const cleanChats = chats
+        .filter((c) => isRealDirectChat(c.id))
+        .slice()
+        .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+      const cleanMsgs = mensagens
+        .filter((m) => isRealDirectChat(m.chatId))
+        .slice()
+        .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+      guardarListaLocal("balao_crm_chats", cleanChats, 400);
+      guardarListaLocal("balao_crm_mensagens_store", cleanMsgs, 800);
       // As colunas do funil de quem entrou pela página pessoal moram no
       // servidor. Guardá-las aqui também deixaria o funil de uma pessoa no
       // computador para a próxima que sentar nele.
-      if (!vendedorFixo) {
-        localStorage.setItem("balao_crm_kanban_colunas", JSON.stringify(kanbanColunas));
-      }
-      localStorage.setItem("balao_crm_respostas", JSON.stringify(respostas));
-      localStorage.setItem("balao_crm_etiquetas", JSON.stringify(etiquetas));
-      localStorage.setItem("balao_crm_vendedores", JSON.stringify(vendedores));
+      if (!vendedorFixo) guardarLocal("balao_crm_kanban_colunas", kanbanColunas);
+      guardarLocal("balao_crm_respostas", respostas);
+      guardarLocal("balao_crm_etiquetas", etiquetas);
+      guardarLocal("balao_crm_vendedores", vendedores);
       // Na página pessoal quem manda é o cookie de sessão, então não guardamos
       // o vendedor no navegador — evita que o PC "lembre" de quem atendeu
       // antes quando outra pessoa abrir a rota /crm no mesmo micro.
       if (vendedorAtivoId && !vendedorFixo) {
-        localStorage.setItem("balao_crm_vendedor_ativo", String(vendedorAtivoId));
+        try {
+          localStorage.setItem("balao_crm_vendedor_ativo", String(vendedorAtivoId));
+        } catch {}
       }
-    }
+    }, 1200);
+    return () => clearTimeout(t);
   }, [chats, mensagens, kanbanColunas, respostas, etiquetas, vendedores, vendedorAtivoId]);
 
   // Load Real Catalog from Database (Shared with Website) — paginado no
@@ -1245,7 +1284,11 @@ export default function CrmWhatsAppClient({
                 status: sm.status || "sent",
               });
             });
-          return Array.from(map.values()).sort((a, b) => a.timestamp - b.timestamp);
+          // Teto de segurança: um painel aberto a semana inteira acumulava
+          // mensagem sem limite, até estourar o espaço do navegador. As mais
+          // antigas voltam do servidor quando a conversa é aberta.
+          const ordenadas = Array.from(map.values()).sort((a, b) => a.timestamp - b.timestamp);
+          return ordenadas.length > 4000 ? ordenadas.slice(-4000) : ordenadas;
         });
       }
     });
