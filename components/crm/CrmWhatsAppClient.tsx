@@ -1870,6 +1870,12 @@ export default function CrmWhatsAppClient({
   // Centro de Comando: gestão da operação (painel, clientes, ajustes). Fica
   // num módulo separado — ver components/crm/comando/.
   const [comandoAberto, setComandoAberto] = useState(false);
+  // Respostas rápidas da LOJA (ficam no servidor, iguais para todo mundo).
+  // As antigas, salvas só neste navegador, continuam aparecendo embaixo até a
+  // loja terminar de passar tudo para cá — ninguém perde nada.
+  const [respostasDaEquipe, setRespostasDaEquipe] = useState<
+    { id: string; titulo: string; texto: string; atalho: string | null; categoria: string | null }[]
+  >([]);
   const chatsRef = useRef<CrmChat[]>([]);
   chatsRef.current = chats;
   const avisoRef = useRef<(m: string) => void>(() => {});
@@ -1891,6 +1897,21 @@ export default function CrmWhatsAppClient({
     }),
     [fetchServidor, vendedores]
   );
+
+  const carregarRespostasDaEquipe = useCallback(() => {
+    fetchServidor("/api/comando/respostas")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        if (j?.ok && Array.isArray(j.itens)) setRespostasDaEquipe(j.itens);
+      })
+      .catch(() => {
+        /* servidor sem o módulo ainda: a aba segue com as locais */
+      });
+  }, [fetchServidor]);
+
+  useEffect(() => {
+    carregarRespostasDaEquipe();
+  }, [carregarRespostasDaEquipe]);
 
   const ponteStatus = useMemo<PonteStatus>(
     () => ({
@@ -4346,7 +4367,50 @@ export default function CrmWhatsAppClient({
                       </button>
                     </div>
 
+                    {respostasDaEquipe.length > 0 && (
+                      <div className="space-y-2">
+                        <h4 className="text-[11px] font-bold uppercase tracking-wide text-[#5f6368]">
+                          Da equipe ({respostasDaEquipe.length})
+                        </h4>
+                        {respostasDaEquipe.map((r) => (
+                          <div
+                            key={r.id}
+                            className="border border-[#0f9d58]/30 rounded-xl p-2.5 bg-[#e7f6ec] space-y-1"
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <strong className="text-xs text-[#202124] truncate">
+                                {r.titulo}
+                                {r.atalho && (
+                                  <span className="ml-1 font-mono text-[10px] font-normal text-[#5f6368]">
+                                    {r.atalho}
+                                  </span>
+                                )}
+                              </strong>
+                              <button
+                                onClick={() => inserirRespostaRapida({ id: r.id, titulo: r.titulo, texto: r.texto })}
+                                className="shrink-0 text-[11px] font-bold text-[#0a6e3d] hover:underline cursor-pointer"
+                              >
+                                Inserir ➔
+                              </button>
+                            </div>
+                            <p className="text-[11px] text-[#5f6368] whitespace-pre-wrap line-clamp-3">
+                              {r.texto}
+                            </p>
+                          </div>
+                        ))}
+                        <p className="text-[10px] text-[#5f6368]">
+                          Estas ficam no servidor e valem para toda a loja. Edite em 📊 Comando →
+                          Ajustes.
+                        </p>
+                      </div>
+                    )}
+
                     <div className="space-y-2">
+                      {respostas.length > 0 && respostasDaEquipe.length > 0 && (
+                        <h4 className="text-[11px] font-bold uppercase tracking-wide text-[#5f6368]">
+                          Só deste computador ({respostas.length})
+                        </h4>
+                      )}
                       {respostas.map((r) => (
                         <div
                           key={r.id}
@@ -5194,7 +5258,13 @@ export default function CrmWhatsAppClient({
       )}
 
       {comandoAberto && (
-        <CentroDeComando ponte={ponteComando} aoFechar={() => setComandoAberto(false)} />
+        <CentroDeComando
+          ponte={ponteComando}
+          aoFechar={() => {
+            setComandoAberto(false);
+            carregarRespostasDaEquipe();
+          }}
+        />
       )}
 
       {/* CONTEXT MENU MODAL */}
