@@ -134,6 +134,13 @@ function criarEvolution({ url, chave, buscar = fetch, registrar = console.log })
       chamar("POST", `/chat/fetchProfilePictureUrl/${inst(nome)}`, { number: numero }),
     temWhatsApp: (nome, numeros) =>
       chamar("POST", `/chat/whatsappNumbers/${inst(nome)}`, { numbers: numeros }),
+    // Bloquear/desbloquear de verdade no WhatsApp. Sem isto, "Bloquear
+    // contato" no painel era só um cadeado desenhado na tela.
+    bloquearContato: (nome, numero, bloquear = true) =>
+      chamar("POST", `/message/updateBlockStatus/${inst(nome)}`, {
+        number: numero,
+        status: bloquear ? "block" : "unblock",
+      }),
     presenca: (nome, numero, presenca, delay = 1200) =>
       chamar("POST", `/chat/sendPresence/${inst(nome)}`, { number: numero, presence: presenca, delay }),
     // Baixa a midia de uma mensagem ja guardada (por id). Volta base64.

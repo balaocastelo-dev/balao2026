@@ -430,6 +430,11 @@ export default function CrmWhatsAppClient({
   const [qrCodeData, setQrCodeData] = useState<string | null>(null);
   const [rawQrString, setRawQrString] = useState<string | null>(null);
   const [numeroConectado, setNumeroConectado] = useState<string | null>(null);
+  // Ligação viva com o servidor. Diferente de "WhatsApp conectado": o WhatsApp
+  // pode estar de pé e esta tela estar sem ligação — e é aí que ela mostra
+  // mensagem velha achando que está atualizada.
+  const [aoVivo, setAoVivo] = useState(false);
+  const [motivoQueda, setMotivoQueda] = useState<string | null>(null);
   const [qrCountdown, setQrCountdown] = useState<number>(25);
 
   // Vendedor State (No fake names)
@@ -1101,8 +1106,18 @@ export default function CrmWhatsAppClient({
     const socket = io(serverUrl, {
       transports: ["websocket", "polling"],
       autoConnect: true,
-      reconnectionAttempts: 25,
+      // Nunca desistir.
+      //
+      // Com 25 tentativas, uma queda de internet de alguns minutos (ou o
+      // notebook dormindo) gastava as tentativas e o socket morria calado: a
+      // tela continuava mostrando o que estava em cache, e quem olhava jurava
+      // que o sistema estava ao vivo vendo mensagem de horas atrás. Agora ele
+      // tenta para sempre, e a tela avisa quando não está ao vivo.
+      reconnection: true,
+      reconnectionAttempts: Infinity,
       reconnectionDelay: 1500,
+      reconnectionDelayMax: 10_000,
+      timeout: 15_000,
       auth: (cb) => {
         obterTicket()
           .then((ticket) => cb({ ticket }))
@@ -1112,10 +1127,18 @@ export default function CrmWhatsAppClient({
     socketRef.current = socket;
 
     socket.on("connect_error", (erro: Error) => {
+      setAoVivo(false);
       if (erro?.message === "nao-autorizado") {
+        // Ingresso vencido: joga fora e deixa o próprio socket tentar de novo
+        // — na próxima tentativa a função auth busca um ingresso novo.
         ticketRef.current = null;
-        showToast("Sessão do painel expirada. Entre de novo para ver o WhatsApp.");
       }
+    });
+
+    socket.on("disconnect", (motivo: string) => {
+      setAoVivo(false);
+      // "io client disconnect" é a própria tela saindo: não é queda.
+      if (motivo !== "io client disconnect") setMotivoQueda(motivo);
     });
 
     socket.on("whatsapp:transcricao", (p: { id?: string; texto?: string }) => {
@@ -1124,6 +1147,8 @@ export default function CrmWhatsAppClient({
     });
 
     socket.on("connect", () => {
+      setAoVivo(true);
+      setMotivoQueda(null);
       socket.emit("panel:bootstrap");
     });
 
@@ -1239,10 +1264,16 @@ export default function CrmWhatsAppClient({
                 unread: sc.unreadCount || 0,
                 lastMessage: sc.lastMessageBody || anterior?.lastMessage || "",
                 timestamp: sc.lastMessageTimestamp || anterior?.timestamp || Date.now(),
-                tags: anterior?.tags || [],
+                // Etiquetas do servidor são a verdade (valem para a loja
+                // inteira); o cache local só entra enquanto elas não chegam.
+                tags: Array.isArray(sc.labels) ? sc.labels : anterior?.tags || [],
                 vendedorId: sc.assignedSellerId ?? anterior?.vendedorId ?? null,
                 kanbanColId: anterior?.kanbanColId || "novos",
                 fixado: sc.isPinned ?? anterior?.fixado ?? false,
+                // Quem pediu PARAR e quem está bloqueado: decisão do servidor,
+                // igual para todos os vendedores.
+                optOut: sc.optOut ?? anterior?.optOut ?? false,
+                bloqueado: sc.isBlocked ?? anterior?.bloqueado ?? false,
                 // Já veio do servidor: não precisa mais da proteção de
                 // conversa recém-aberta.
                 localDesde: undefined,
@@ -1252,6 +1283,43 @@ export default function CrmWhatsAppClient({
           return [...novasAindaLocais, ...doServidor].sort(
             (a, b) => b.timestamp - a.timestamp
           );
+        });
+      }
+    });
+
+    // Configurações da loja (vem do servidor, vale para todo mundo).
+    //
+    // O servidor já mandava isto desde sempre; o painel simplesmente não
+    // escutava, então agenda de disparo e etiquetas cadastradas no servidor
+    // nunca apareciam na tela de quem não as criou.
+    socket.on("whatsapp:settings", (cfg: any) => {
+      if (!cfg || typeof cfg !== "object") return;
+      if (Array.isArray(cfg.labels) && cfg.labels.length > 0) {
+        setEtiquetas((atuais) => {
+          const porNome = new Map(atuais.map((e) => [e.nome.toLowerCase(), e]));
+          let proximoId = Math.max(0, ...atuais.map((e) => Number(e.id) || 0));
+          for (const bruta of cfg.labels) {
+            const nome = String(bruta || "").trim();
+            if (!nome || porNome.has(nome.toLowerCase())) continue;
+            porNome.set(nome.toLowerCase(), { id: ++proximoId, nome, cor: "#5f6368" });
+          }
+          return porNome.size === atuais.length ? atuais : [...porNome.values()];
+        });
+      }
+      if (cfg.chatLabels && typeof cfg.chatLabels === "object") {
+        setChats((prev) => {
+          let mudou = false;
+          const proximo = prev.map((c) => {
+            const doServidor = cfg.chatLabels[c.id];
+            if (!Array.isArray(doServidor)) return c;
+            const iguais =
+              doServidor.length === c.tags.length &&
+              doServidor.every((t: string) => c.tags.includes(t));
+            if (iguais) return c;
+            mudou = true;
+            return { ...c, tags: doServidor as string[] };
+          });
+          return mudou ? proximo : prev;
         });
       }
     });
@@ -1294,10 +1362,12 @@ export default function CrmWhatsAppClient({
             unread: sc.unreadCount ?? anterior?.unread ?? 0,
             lastMessage: sc.lastMessageBody || anterior?.lastMessage || "",
             timestamp: sc.lastMessageTimestamp || anterior?.timestamp || Date.now(),
-            tags: anterior?.tags || [],
+            tags: Array.isArray(sc.labels) ? sc.labels : anterior?.tags || [],
             vendedorId: sc.assignedSellerId ?? anterior?.vendedorId ?? null,
             kanbanColId: anterior?.kanbanColId || "novos",
             fixado: sc.isPinned ?? anterior?.fixado ?? false,
+            optOut: sc.optOut ?? anterior?.optOut ?? false,
+            bloqueado: sc.isBlocked ?? anterior?.bloqueado ?? false,
             localDesde: undefined,
           } as CrmChat;
 
@@ -1977,9 +2047,43 @@ export default function CrmWhatsAppClient({
       });
   }, [fetchServidor]);
 
+  // Etiquetas da LOJA. Quem cria uma etiqueta em Comando > Ajustes precisa
+  // vê-la aqui no atendimento — antes a lista do chat era fixa no código e
+  // ignorava tudo o que a loja cadastrava.
+  const carregarEtiquetasDaEquipe = useCallback(() => {
+    fetchServidor("/api/comando/etiquetas")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        if (!j?.ok || !Array.isArray(j.itens) || j.itens.length === 0) return;
+        setEtiquetas((atuais) => {
+          const porNome = new Map(atuais.map((e) => [e.nome.toLowerCase(), e]));
+          let proximoId = Math.max(0, ...atuais.map((e) => Number(e.id) || 0));
+          for (const it of j.itens as { nome?: string; cor?: string }[]) {
+            const nome = String(it?.nome || "").trim();
+            if (!nome) continue;
+            const chave = nome.toLowerCase();
+            const existente = porNome.get(chave);
+            if (existente) {
+              // Cor cadastrada na loja manda na cor que este navegador tinha.
+              if (it.cor && it.cor !== existente.cor) {
+                porNome.set(chave, { ...existente, cor: it.cor });
+              }
+              continue;
+            }
+            porNome.set(chave, { id: ++proximoId, nome, cor: it.cor || "#5f6368" });
+          }
+          return [...porNome.values()];
+        });
+      })
+      .catch(() => {
+        /* servidor sem o módulo ainda: segue com as etiquetas locais */
+      });
+  }, [fetchServidor]);
+
   useEffect(() => {
     carregarRespostasDaEquipe();
-  }, [carregarRespostasDaEquipe]);
+    carregarEtiquetasDaEquipe();
+  }, [carregarRespostasDaEquipe, carregarEtiquetasDaEquipe]);
 
   const ponteStatus = useMemo<PonteStatus>(
     () => ({
@@ -2264,6 +2368,10 @@ export default function CrmWhatsAppClient({
           setChats((prev) =>
             prev.map((c) => (c.id === chat.id ? { ...c, fixado: !c.fixado } : c))
           );
+          socketRef.current?.emit("panel:fixar-conversa", {
+            chatId: chat.id,
+            fixar: !chat.fixado,
+          });
           showToast(chat.fixado ? "Conversa desafixada" : "Conversa fixada 📌");
         },
       },
@@ -2271,10 +2379,40 @@ export default function CrmWhatsAppClient({
         label: chat.bloqueado ? "🔓 Desbloquear contato" : "🔒 Bloquear contato",
         danger: !chat.bloqueado,
         onClick: () => {
+          const bloquear = !chat.bloqueado;
+          if (
+            bloquear &&
+            !confirm(
+              `Bloquear ${chat.nome} no WhatsApp?\n\nEle para de conseguir mandar mensagem para a loja e sai de qualquer disparo.`
+            )
+          ) {
+            return;
+          }
           setChats((prev) =>
-            prev.map((c) => (c.id === chat.id ? { ...c, bloqueado: !c.bloqueado } : c))
+            prev.map((c) => (c.id === chat.id ? { ...c, bloqueado: bloquear } : c))
           );
-          showToast(chat.bloqueado ? "Contato desbloqueado" : "Contato bloqueado 🔒");
+          // Antes isto era só o cadeado desenhado na tela: o contato continuava
+          // escrevendo e continuava entrando nos disparos.
+          socketRef.current?.emit(
+            "panel:bloquear-contato",
+            { chatId: chat.id, bloquear },
+            (res: { ok?: boolean; noWhatsapp?: boolean } | undefined) => {
+              if (!res?.ok) {
+                setChats((prev) =>
+                  prev.map((c) => (c.id === chat.id ? { ...c, bloqueado: !bloquear } : c))
+                );
+                showToast("Não consegui mudar o bloqueio.");
+                return;
+              }
+              showToast(
+                bloquear
+                  ? res.noWhatsapp
+                    ? "Contato bloqueado no WhatsApp 🔒"
+                    : "Bloqueado no painel (o WhatsApp recusou)"
+                  : "Contato desbloqueado"
+              );
+            }
+          );
         },
       },
       {
@@ -2817,19 +2955,35 @@ export default function CrmWhatsAppClient({
   };
 
   // Toggle Fixar
+  //
+  // Precisa ir ao servidor: a lista de conversas vem dele, e a cada
+  // sincronização o campo era sobrescrito — o alfinete sumia sozinho.
   const alternarFixar = () => {
     if (!chatSelecionado) return;
     const novoStatus = !chatSelecionado.fixado;
     setChats((prev) =>
       prev.map((c) => (c.id === chatSelecionado.id ? { ...c, fixado: novoStatus } : c))
     );
+    socketRef.current?.emit("panel:fixar-conversa", {
+      chatId: chatSelecionado.id,
+      fixar: novoStatus,
+    });
     showToast(novoStatus ? "Conversa fixada 📌" : "Conversa desafixada");
   };
 
   // Tag click
+  //
+  // A etiqueta é informação da loja, não deste navegador: quem marca "cliente
+  // VIP" precisa que o colega veja a mesma marca. O servidor guarda e devolve
+  // junto com a conversa.
   const toggleEtiquetaNoChat = (nomeEtiqueta: string, chatIdOverride?: string) => {
     const targetId = chatIdOverride || chatSelecionadoId;
     if (!targetId) return;
+
+    socketRef.current?.emit("panel:toggle-chat-label", {
+      chatId: targetId,
+      label: nomeEtiqueta,
+    });
 
     setChats((prev) =>
       prev.map((c) => {
@@ -3164,6 +3318,25 @@ export default function CrmWhatsAppClient({
               : temQrReal
               ? "Aguardando Leitura do QR"
               : "Iniciando WhatsApp Web…"}
+          </span>
+
+          {/* Ligação com o servidor. Fica discreto quando está tudo bem e
+              grita quando não está: é a diferença entre ver a conversa de
+              agora e ver a de uma hora atrás sem saber. */}
+          <span
+            title={
+              aoVivo
+                ? "Mensagens chegando na hora"
+                : `Sem ligação com o servidor${motivoQueda ? ` (${motivoQueda})` : ""} — a tela está mostrando o que já tinha. Tentando reconectar…`
+            }
+            className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold shadow-sm ${
+              aoVivo ? "bg-[#c8e6c9] text-[#1b5e20]" : "animate-pulse bg-[#ffcdd2] text-[#b71c1c]"
+            }`}
+          >
+            <span
+              className={`inline-block h-2 w-2 rounded-full ${aoVivo ? "bg-[#0f9d58]" : "bg-[#b71c1c]"}`}
+            />
+            {aoVivo ? "Ao vivo" : "Reconectando…"}
           </span>
 
           <button
@@ -5363,6 +5536,7 @@ export default function CrmWhatsAppClient({
           aoFechar={() => {
             setComandoAberto(false);
             carregarRespostasDaEquipe();
+            carregarEtiquetasDaEquipe();
           }}
         />
       )}

@@ -123,6 +123,15 @@ const store = {
   // escrever de novo. Sem isto, o "Apagar conversa" era só visual — a lista
   // vinda do servidor trazia a conversa de volta minutos depois.
   ocultas: {}, // chatId -> { em, ateTimestamp }
+  // "Fixar no topo" era só visual: a próxima sincronização desfixava, porque o
+  // campo vinha do WhatsApp. Agora o painel tem o seu próprio, que vale para
+  // todos os vendedores.
+  fixadas: {}, // chatId -> em (ISO)
+  // Quem pediu PARAR/SAIR. Fica aqui, e não só no banco do CRM, porque o
+  // disparo precisa consultar isto a cada destinatário sem depender de o
+  // Postgres estar de pé. O registro auditável continua no CRM.
+  optout: {}, // chatId -> { em, texto }
+  bloqueados: {}, // chatId -> em (ISO)
 };
 
 function carregarStore() {
@@ -322,14 +331,25 @@ function estaOculta(chatId, ultimoTimestamp = 0) {
   return Number(ultimoTimestamp || 0) <= Number(o.ateTimestamp || 0);
 }
 
+// Campos do painel que moram aqui, não no WhatsApp: etiquetas, vendedor
+// responsável e "fixar no topo". Antes só viviam no navegador de quem clicou —
+// o colega ao lado não via a etiqueta, e ela desaparecia ao limpar o cache.
+function comCamposDoPainel(c) {
+  return {
+    ...c,
+    profilePicUrl: fotoLocal(c.chatId) || c.profilePicUrl || null,
+    assignedSellerId: store.chatAssignments[c.chatId] || null,
+    labels: store.chatLabels[c.chatId] || [],
+    isPinned: Boolean(store.fixadas[c.chatId]) || Boolean(c.isPinned),
+    optOut: Boolean(store.optout[c.chatId]),
+    isBlocked: Boolean(store.bloqueados[c.chatId]),
+  };
+}
+
 function listaDeConversas() {
   return [...conversas.values()]
     .filter((c) => !estaOculta(c.chatId, c.lastMessageTimestamp))
-    .map((c) => ({
-      ...c,
-      profilePicUrl: fotoLocal(c.chatId) || c.profilePicUrl || null,
-      assignedSellerId: store.chatAssignments[c.chatId] || null,
-    }))
+    .map(comCamposDoPainel)
     .sort((a, b) => (b.lastMessageTimestamp || 0) - (a.lastMessageTimestamp || 0));
 }
 
@@ -506,11 +526,7 @@ function conversaParaOPainel(chatId) {
   const c = conversas.get(chatId);
   if (!c) return null;
   if (estaOculta(c.chatId, c.lastMessageTimestamp)) return null;
-  return {
-    ...c,
-    profilePicUrl: fotoLocal(c.chatId) || c.profilePicUrl || null,
-    assignedSellerId: store.chatAssignments[c.chatId] || null,
-  };
+  return comCamposDoPainel(c);
 }
 
 // Entrega incremental da lista de conversas.
@@ -882,6 +898,12 @@ function tratarMensagemRecebida(rec) {
   if (final.hasMedia && final.direction === "in") baixarMidia(final.id).catch(() => {});
   if (final.direction === "in" && /^(SAIR|PARAR|CANCELAR|DESCADASTRAR|STOP)$/i.test(final.body.trim())) {
     emitirToast(`Cliente ${final.contactName || final.realNumber} pediu para sair dos disparos.`);
+    // Antes, o "não mandar mais" vivia só na tela de quem estava com o painel
+    // aberto naquele segundo. Quem abrisse o CRM depois não sabia do pedido e
+    // o disparo mandava de novo. Agora quem decide é o servidor.
+    store.optout[final.chatId] = { em: new Date().toISOString(), texto: final.body.trim().slice(0, 200) };
+    salvarStore();
+    agendarConversas([final.chatId]);
     // Registro auditável do "PARAR" — é o que a LGPD pede que se prove.
     crmServico
       ?.registrarConsentimento({
@@ -1891,6 +1913,50 @@ io.on("connection", (socket) => {
     store.chatLabels[chatId] = [...atuais];
     salvarStore();
     emitirConfiguracoes();
+    // A etiqueta aparece na lista de conversas, então a lista precisa saber.
+    agendarConversas([chatId]);
+  });
+
+  // ---- bloquear contato ----
+  //
+  // Bloqueio é no WhatsApp mesmo, e não só na tela: o contato bloqueado para
+  // de chegar. Mesmo que a Evolution recuse (versão antiga do endpoint), a
+  // marca fica guardada aqui e tira o contato de qualquer disparo.
+  socket.on("panel:bloquear-contato", async (p, cb) => {
+    const responder = typeof cb === "function" ? cb : () => {};
+    const chatId = String(p?.chatId || "").trim();
+    if (!chatId) return responder({ ok: false, erro: "conversa não informada" });
+    const bloquear = p?.bloquear === undefined ? !store.bloqueados[chatId] : Boolean(p.bloquear);
+
+    if (bloquear) store.bloqueados[chatId] = new Date().toISOString();
+    else delete store.bloqueados[chatId];
+    salvarStore();
+    agendarConversas([chatId]);
+
+    try {
+      await evolution.bloquearContato(INSTANCIA, N.paraDestino(chatId), bloquear);
+      responder({ ok: true, bloqueado: bloquear, noWhatsapp: true });
+    } catch (erro) {
+      // Vale avisar: o painel esconde a conversa, mas a mensagem do contato
+      // ainda chega até alguém bloquear no celular.
+      emitirToast(
+        `Marquei como ${bloquear ? "bloqueado" : "desbloqueado"} no painel, mas o WhatsApp recusou: ${erro.message}`,
+        socket
+      );
+      responder({ ok: true, bloqueado: bloquear, noWhatsapp: false, erro: erro.message });
+    }
+  });
+
+  // ---- fixar conversa no topo ----
+  socket.on("panel:fixar-conversa", (p, cb) => {
+    const chatId = String(p?.chatId || "").trim();
+    if (!chatId) return typeof cb === "function" && cb({ ok: false });
+    const fixar = p?.fixar === undefined ? !store.fixadas[chatId] : Boolean(p.fixar);
+    if (fixar) store.fixadas[chatId] = new Date().toISOString();
+    else delete store.fixadas[chatId];
+    salvarStore();
+    agendarConversas([chatId]);
+    if (typeof cb === "function") cb({ ok: true, fixada: fixar });
   });
 
   socket.on("panel:add-signature", (p) => {
@@ -2126,6 +2192,78 @@ io.on("connection", (socket) => {
   socket.on("panel:mark-seen", (p) => marcarLida(String(p?.chatId || "")).catch(() => {}));
   socket.on("panel:mark-chat-read", (p) => marcarLida(String(p?.chatId || "")).catch(() => {}));
 
+  // ---- busca por texto dentro das conversas ----
+  //
+  // O painel já tinha a tela ("Procurando nas conversas…") e já emitia este
+  // evento esperando resposta, mas o servidor nunca escutou: o retorno nunca
+  // chegava e a busca ficava girando para sempre.
+  //
+  // Procura em dois lugares, nesta ordem:
+  //  1. memória — o que o servidor tem carregado, resposta imediata;
+  //  2. banco do CRM — o histórico antigo que já saiu da memória.
+  // O resultado sai sem repetição, do mais novo para o mais velho.
+  socket.on("panel:search-messages", async (p, cb) => {
+    const responder = typeof cb === "function" ? cb : () => {};
+    const termo = String(p?.query || "").trim();
+    const soNesta = p?.chatId ? String(p.chatId) : null;
+    const limite = Math.min(100, Math.max(1, Number(p?.limit) || 40));
+    if (termo.length < 2) return responder({ ok: true, results: [] });
+
+    const alvo = termo.toLowerCase();
+    const achados = new Map();
+
+    try {
+      const mapas = soNesta
+        ? [mensagensPorChat.get(soNesta)].filter(Boolean)
+        : [...mensagensPorChat.values()];
+      for (const mapa of mapas) {
+        for (const m of mapa.values()) {
+          const corpo = String(m?.body || "");
+          if (!corpo || !corpo.toLowerCase().includes(alvo)) continue;
+          if (estaOculta(m.chatId)) continue;
+          achados.set(m.id, {
+            id: m.id,
+            chatId: m.chatId,
+            body: corpo,
+            timestamp: Number(m.timestamp) || 0,
+            type: m.type || null,
+            hasMedia: Boolean(m.hasMedia),
+          });
+        }
+      }
+    } catch (erro) {
+      console.error("[busca] memória:", erro.message);
+    }
+
+    // O banco só entra quando a memória não encheu o limite — ele guarda o
+    // histórico antigo, que é justamente o que o vendedor não acha na tela.
+    if (crmServico && achados.size < limite) {
+      try {
+        const doBanco = await crmServico.buscarMensagens({ texto: termo, limite: limite * 2 });
+        for (const x of doBanco) {
+          if (achados.has(x.id)) continue;
+          if (soNesta && x.chatId !== soNesta) continue;
+          if (estaOculta(x.chatId)) continue;
+          achados.set(x.id, {
+            id: x.id,
+            chatId: x.chatId,
+            body: String(x.corpo || ""),
+            timestamp: x.em ? Math.floor(new Date(x.em).getTime() / 1000) : 0,
+            type: null,
+            hasMedia: false,
+          });
+        }
+      } catch (erro) {
+        console.error("[busca] banco do CRM:", erro.message);
+      }
+    }
+
+    const results = [...achados.values()]
+      .sort((a, b) => b.timestamp - a.timestamp)
+      .slice(0, limite);
+    responder({ ok: true, results, total: achados.size });
+  });
+
   // ---- transcrição de áudio (feita pelo site, guardada aqui) ----
   socket.on("panel:salvar-transcricao", (p) => {
     const id = String(p?.id || "").trim();
@@ -2188,13 +2326,38 @@ io.on("connection", (socket) => {
     if (!lista.length || !texto) return;
     const min = Math.max(15, Number(p.intervalMin) || 30) * 1000;
     const max = Math.max(min, Number(p.intervalMax) || 60_000);
+
+    // A decisão de não mandar é do servidor, não da tela.
+    //
+    // O painel já filtrava, mas a lista chega aqui pronta: um navegador com
+    // cache velho, ou o painel de outro vendedor que não viu o "PARAR",
+    // mandava para quem pediu para sair. Isso é exposição de LGPD, então a
+    // checagem passa a ser feita de novo aqui, onde está a verdade.
+    const barrados = [];
+    const permitidos = lista.filter((item) => {
+      const chatId = item?.chatId || (item?.number ? N.paraChatId(item.number, lidParaNumero) : null);
+      if (!chatId) return true;
+      if (store.optout[chatId]) return (barrados.push("pediu para sair"), false);
+      if (store.bloqueados[chatId]) return (barrados.push("bloqueado"), false);
+      return true;
+    });
+    if (barrados.length) {
+      emitirToast(
+        `${barrados.length} contato(s) fora do disparo: ${barrados.filter((b) => b === "pediu para sair").length} pediram para sair, ${barrados.filter((b) => b === "bloqueado").length} bloqueado(s).`,
+        socket
+      );
+    }
+    if (!permitidos.length) {
+      return emitirToast("Nenhum destinatário elegível: todos pediram para sair ou estão bloqueados.", socket);
+    }
+
     paraPainel().emit("whatsapp:disparo-status", { ativo: true });
     let enviados = 0, semWhats = 0, falhas = 0;
     try {
-      for (let i = 0; i < lista.length; i++) {
-        const destino = lista[i].chatId || lista[i].number;
+      for (let i = 0; i < permitidos.length; i++) {
+        const destino = permitidos[i].chatId || permitidos[i].number;
         try {
-          if (!lista[i].chatId) {
+          if (!permitidos[i].chatId) {
             const r = await evolution.temWhatsApp(INSTANCIA, [N.digitos(destino)]).catch(() => null);
             if (Array.isArray(r) && r[0] && r[0].exists === false) {
               semWhats++;
@@ -2206,7 +2369,7 @@ io.on("connection", (socket) => {
         } catch {
           falhas++;
         }
-        if (i < lista.length - 1) await new Promise((r) => setTimeout(r, min + Math.random() * (max - min)));
+        if (i < permitidos.length - 1) await new Promise((r) => setTimeout(r, min + Math.random() * (max - min)));
       }
       emitirToast(`Disparo concluído: ${enviados} enviada(s)${semWhats ? ` · ${semWhats} sem WhatsApp` : ""}${falhas ? ` · ${falhas} com erro` : ""}.`, socket);
     } finally {
