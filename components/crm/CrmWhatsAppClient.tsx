@@ -535,6 +535,41 @@ export default function CrmWhatsAppClient({
   };
 
   // Chats and Messages
+  /**
+   * Telefone numa forma única, para comparar grafias diferentes do MESMO número.
+   *
+   * O WhatsApp entrega o mesmo contato de várias formas: com e sem o 55, com e
+   * sem o nono dígito do celular. Aqui tudo vira "DDD + 8 últimos dígitos", que
+   * é o que não muda.
+   *
+   * Devolve null para o que NÃO é telefone — e isso é a parte importante. O
+   * código interno do WhatsApp (@lid) tem 15 dígitos ou mais; telefone
+   * brasileiro com país tem 12 ou 13. A comparação antiga usava "um é sufixo do
+   * outro" sem olhar tamanho, e com isso um código interno casava com telefone
+   * de cliente por coincidência de dígitos — mensagem aparecendo na conversa
+   * errada.
+   */
+  const telefoneCanonico = (bruto: string | null | undefined): string | null => {
+    const d = String(bruto || "").replace(/\D/g, "");
+    if (d.length < 10 || d.length > 13) return null;
+    const semPais = d.startsWith("55") && d.length >= 12 ? d.slice(2) : d;
+    if (semPais.length < 10 || semPais.length > 11) return null;
+    const ddd = semPais.slice(0, 2);
+    const resto = semPais.slice(2);
+    // O nono dígito do celular entra e sai conforme a origem: comparar os 8
+    // finais resolve, sem confundir clientes diferentes (o DDD vai junto).
+    return `${ddd}${resto.slice(-8)}`;
+  };
+
+  /** Código interno do WhatsApp (@lid): 15 dígitos ou mais, nunca um telefone. */
+  const codigoInterno = (bruto: string | null | undefined): string | null => {
+    const txt = String(bruto || "");
+    const d = txt.replace(/\D/g, "");
+    if (!d) return null;
+    if (txt.includes("@lid")) return d;
+    return d.length >= 14 ? d : null;
+  };
+
   const isRealDirectChat = (id: string | null | undefined): boolean => {
     if (!id) return false;
     const s = String(id).trim();
@@ -1274,6 +1309,10 @@ export default function CrmWhatsAppClient({
                 // igual para todos os vendedores.
                 optOut: sc.optOut ?? anterior?.optOut ?? false,
                 bloqueado: sc.isBlocked ?? anterior?.bloqueado ?? false,
+                // Guardar o código interno do WhatsApp é o que permite
+                // reconhecer a conversa quando a mensagem chega no outro
+                // formato. Sem ele, metade do cruzamento fica cega.
+                lid: sc.lid ?? anterior?.lid ?? null,
                 // Já veio do servidor: não precisa mais da proteção de
                 // conversa recém-aberta.
                 localDesde: undefined,
@@ -1378,6 +1417,7 @@ export default function CrmWhatsAppClient({
             fixado: sc.isPinned ?? anterior?.fixado ?? false,
             optOut: sc.optOut ?? anterior?.optOut ?? false,
             bloqueado: sc.isBlocked ?? anterior?.bloqueado ?? false,
+            lid: sc.lid ?? anterior?.lid ?? null,
             localDesde: undefined,
           } as CrmChat;
 
@@ -1420,7 +1460,17 @@ export default function CrmWhatsAppClient({
               const existing = map.get(sm.id) || (sm.tempId ? map.get(sm.tempId) : undefined);
               map.set(sm.id, {
                 id: sm.id,
-                chatId: sm.chatId,
+                // O chatId que já estava na tela MANDA.
+                //
+                // Esta lista chega a cada 5 minutos e sobrescrevia o chatId de
+                // mensagens que o painel já tinha. Resultado: uma mensagem que
+                // tinha acabado de aparecer na conversa certa voltava ao código
+                // interno do WhatsApp e desaparecia de novo minutos depois. Era
+                // o que desfazia qualquer conserto.
+                chatId: existing?.chatId || sm.chatId,
+                lid: existing?.lid ?? sm.lid ?? null,
+                realNumber: existing?.realNumber ?? sm.realNumber ?? sm.displayNumber ?? null,
+                contactName: existing?.contactName ?? sm.contactName ?? null,
                 from: sm.from,
                 to: sm.to,
                 body: sm.body || "",
@@ -1488,6 +1538,16 @@ export default function CrmWhatsAppClient({
       const m: CrmMensagem = {
         id: newMsg.id || `msg-${Date.now()}`,
         chatId: newMsg.chatId,
+        // Estes três campos vinham do servidor e eram JOGADOS FORA aqui.
+        //
+        // Sem eles não sobra nada no navegador capaz de ligar uma mensagem que
+        // chega identificada pelo código interno do WhatsApp (@lid) à conversa
+        // que o vendedor tem aberta pelo número — e era por isso que mensagem
+        // digitada no celular da loja não aparecia na tela.
+        lid: newMsg.lid || null,
+        realNumber: newMsg.realNumber || newMsg.displayNumber || null,
+        to: newMsg.to || null,
+        contactName: newMsg.contactName || null,
         from: newMsg.from || newMsg.chatId,
         body: newMsg.body || "",
         direction: newMsg.direction || "in",
@@ -2218,18 +2278,31 @@ export default function CrmWhatsAppClient({
   const mensagensChatAtual = useMemo(() => {
     if (!chatSelecionadoId) return [];
     const selChat = chatSelecionado;
-    const cleanSelNum = selChat?.numero ? selChat.numero.replace(/\D/g, "") : "";
-    const cleanSelId = chatSelecionadoId.replace(/\D/g, "");
+
+    // Identidades da conversa aberta: tudo que pode identificá-la.
+    const telefoneDoChat = telefoneCanonico(selChat?.numero) || telefoneCanonico(chatSelecionadoId);
+    const lidsDoChat = new Set(
+      [codigoInterno(chatSelecionadoId), codigoInterno(selChat?.lid)].filter(Boolean) as string[]
+    );
 
     return mensagens.filter((m) => {
+      // 1. O caminho normal: mesma string.
       if (m.chatId === chatSelecionadoId) return true;
-      if (selChat?.numero) {
-        if (m.chatId === `${selChat.numero}@c.us`) return true;
-        if (m.realNumber && m.realNumber.replace(/\D/g, "") === cleanSelNum) return true;
-      }
-      const mNum = String(m.chatId || "").replace(/\D/g, "");
-      if (cleanSelNum && mNum && (cleanSelNum.endsWith(mNum) || mNum.endsWith(cleanSelNum))) return true;
-      if (cleanSelId && mNum && !chatSelecionadoId.endsWith("@lid") && (cleanSelId.endsWith(mNum) || mNum.endsWith(cleanSelId))) return true;
+
+      // 2. Mesmo telefone, em qualquer grafia (com/sem 55, com/sem o 9).
+      const telefoneDaMsg = telefoneCanonico(m.realNumber) || telefoneCanonico(m.chatId);
+      if (telefoneDoChat && telefoneDaMsg && telefoneDoChat === telefoneDaMsg) return true;
+
+      // 3. Mesmo código interno do WhatsApp, nos dois sentidos.
+      const lidDaMsg = codigoInterno(m.chatId) || codigoInterno(m.lid);
+      if (lidDaMsg && lidsDoChat.has(lidDaMsg)) return true;
+
+      // 4. A ponte entre os dois mundos: o servidor manda os dois campos na
+      //    mesma mensagem, então uma mensagem com @lid E telefone resolvido
+      //    casa com a conversa aberta pelo telefone, e vice-versa.
+      if (telefoneDoChat && telefoneCanonico(m.lid ? m.realNumber : null) === telefoneDoChat) return true;
+      if (lidsDoChat.size && codigoInterno(m.lid) && lidsDoChat.has(codigoInterno(m.lid) as string)) return true;
+
       return false;
     });
   }, [mensagens, chatSelecionadoId, chatSelecionado]);
@@ -3142,13 +3215,46 @@ export default function CrmWhatsAppClient({
     ]);
   };
 
-  const formatHora = (ts: number) => {
+  /**
+   * Data e hora de uma mensagem.
+   *
+   * Antes, mensagem de outro dia mostrava só "30/09" — a HORA desaparecia. Para
+   * quem atende isso é informação que falta: "foi ontem" é diferente de "foi
+   * ontem às 23h". Agora:
+   *   hoje        -> 23:21
+   *   ontem       -> ontem 23:21            (completo: 30/09/2026 (ontem) 23:21)
+   *   esta semana -> seg 23:21              (completo: 29/09/2026 (segunda) 23:21)
+   *   antes disso -> 30/09 23:21            (completo: 30/09/2026 23:21)
+   *
+   * `completo` manda a forma inteira, com ano. A lista de conversas é estreita,
+   * então lá vai a curta, e a inteira fica no title (aparece ao passar o mouse).
+   */
+  const DIAS_DA_SEMANA = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"];
+  const DIAS_CURTOS = ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"];
+
+  const formatHora = (ts: number, completo = false) => {
     const d = new Date(ts);
-    const hoje = new Date();
-    if (d.toDateString() === hoje.toDateString()) {
-      return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+    if (!ts || Number.isNaN(d.getTime())) return "";
+
+    const hh = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+    const dd = String(d.getDate()).padStart(2, "0");
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const aaaa = d.getFullYear();
+    const dataCheia = `${dd}/${mm}/${aaaa}`;
+
+    // Diferença em DIAS DE CALENDÁRIO, não em horas: às 00:30, uma mensagem
+    // das 23:50 é "ontem" ainda que tenham passado 40 minutos.
+    const soData = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+    const diasAtras = Math.round((soData(new Date()) - soData(d)) / 86_400_000);
+
+    if (diasAtras === 0) return completo ? `hoje ${hh}` : hh;
+    if (diasAtras === 1) return completo ? `${dataCheia} (ontem) ${hh}` : `ontem ${hh}`;
+    if (diasAtras > 1 && diasAtras < 7) {
+      return completo
+        ? `${dataCheia} (${DIAS_DA_SEMANA[d.getDay()]}) ${hh}`
+        : `${DIAS_CURTOS[d.getDay()]} ${hh}`;
     }
-    return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
+    return completo ? `${dataCheia} ${hh}` : `${dd}/${mm} ${hh}`;
   };
 
   const getCorEtiqueta = (nome: string) => {
@@ -3748,7 +3854,10 @@ export default function CrmWhatsAppClient({
                               {chat.fixado && "📌 "}
                               {chat.nome}
                             </h4>
-                            <span className="text-[10px] text-[#5f6368] font-mono shrink-0 ml-1">
+                            <span
+                              className="text-[10px] text-[#5f6368] font-mono shrink-0 ml-1 whitespace-nowrap"
+                              title={formatHora(chat.timestamp, true)}
+                            >
                               {formatHora(chat.timestamp)}
                             </span>
                           </div>
@@ -4098,7 +4207,10 @@ export default function CrmWhatsAppClient({
                             )}
 
                             <p>{m.body}</p>
-                            <span className="flex items-center justify-end gap-1 text-[10px] text-[#5f6368] mt-1 font-mono">
+                            <span
+                              className="flex items-center justify-end gap-1 text-[10px] text-[#5f6368] mt-1 font-mono"
+                              title={formatHora(m.timestamp, true)}
+                            >
                               {formatHora(m.timestamp)}
                               {isEu && (
                                 <span

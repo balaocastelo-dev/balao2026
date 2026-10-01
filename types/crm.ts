@@ -43,6 +43,8 @@ export interface CrmProdutoEnviado {
 }
 
 export interface CrmChat {
+  /** Código interno do WhatsApp para esta conversa (@lid), quando existe. */
+  lid?: string | null;
   id: string; // e.g. "5519981188090@c.us"
   nome: string;
   numero: string;
@@ -97,6 +99,8 @@ export interface CrmMensagem {
   timestamp: number;
   contactName?: string | null;
   realNumber?: string | null;
+  /** Código interno que o WhatsApp usa para a conversa (@lid), quando existe. */
+  lid?: string | null;
   hasMedia?: boolean;
   mediaType?: string | null;
   mediaUrl?: string | null;
