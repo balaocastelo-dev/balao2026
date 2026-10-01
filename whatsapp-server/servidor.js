@@ -1453,6 +1453,19 @@ app.get(["/health", "/status", "/api/status"], (_req, res) => {
       mensagensNaMemoria,
       paineisAbertos: io.sockets.adapter.rooms.get(SALA)?.size || 0,
       agoraNoServidor: new Date().toISOString(),
+      // As 12 conversas mais recentes, SÓ os horários.
+      //
+      // Sem nome, sem número, sem texto: nada de cliente. Serve para uma
+      // pergunta que eu não conseguia responder de fora — quando o vendedor
+      // diz "a lista está com um buraco de oito horas", é a lista do SERVIDOR
+      // que está assim, ou só a tela dele? Sem isso, a resposta era chute.
+      ultimasConversas: listaDeConversas()
+        .slice(0, 12)
+        .map((c) => ({
+          em: c.lastMessageTimestamp ? new Date(c.lastMessageTimestamp).toISOString() : null,
+          naoLidas: c.unreadCount || 0,
+          porCodigoInterno: String(c.chatId || "").endsWith("@lid"),
+        })),
     },
   });
 });
