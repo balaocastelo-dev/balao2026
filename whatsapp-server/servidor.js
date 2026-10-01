@@ -593,6 +593,14 @@ const diag = {
   ultimoErroConciliacao: null,
   ultimoErroListaConversas: null,
   webhook: null,
+  // Contadores SEPARADOS por instância. A "fora" (instância de teste) entra
+  // no mesmo webhook e, quando ela fica num laço de QR, infla o contador geral
+  // e faz parecer que a loja está recebendo quando não está.
+  porInstancia: {},
+  // Mensagem que chegou e foi DESCARTADA na normalização. Só a forma — tipo do
+  // endereço e nome do campo — nunca número, nome ou texto de cliente.
+  descartadas: 0,
+  motivosDescarte: {},
   emitidasParaOPainel: 0,
 };
 
@@ -923,7 +931,30 @@ function tratarMensagemRecebida(rec) {
   if (rec.key.remoteJid === "status@broadcast") return tratarStatusRecebido(rec);
   aprenderLid(rec.key);
   const msg = N.normalizarMensagem(rec, { lidParaNumero, numeroDaLoja: estado.phoneNumber });
-  if (!msg) return;
+  if (!msg) {
+    // Por que a mensagem foi descartada? Sem isso, "chegou e sumiu" é chute.
+    // Guardamos só a FORMA: tipo do endereço e nome do campo da mensagem.
+    // Nenhum número, nenhum nome, nenhum texto.
+    const jid = String(rec?.key?.remoteJid || "");
+    const tipoEndereco = jid.endsWith("@lid")
+      ? "@lid"
+      : jid.endsWith("@g.us")
+      ? "@g.us (grupo)"
+      : jid.endsWith("@newsletter")
+      ? "@newsletter"
+      : jid.includes("broadcast")
+      ? "broadcast"
+      : jid.endsWith("@s.whatsapp.net") || jid.endsWith("@c.us")
+      ? "numero"
+      : jid
+      ? "outro"
+      : "sem endereço";
+    const campos = Object.keys(rec?.message || {});
+    const motivo = `${tipoEndereco} / ${campos.length ? campos.join("+") : "sem conteúdo"}`;
+    diag.descartadas++;
+    diag.motivosDescarte[motivo] = (diag.motivosDescarte[motivo] || 0) + 1;
+    return;
+  }
   aprenderNome(msg);
   const { final, nova } = guardarMensagem(msg);
   emitirMensagem(final);
@@ -1112,6 +1143,8 @@ app.post("/evolution/webhook", express.json({ limit: "60mb" }), (req, res) => {
   diag.ultimoWebhookEvento = evento;
   if (evento === "messages.upsert" || evento === "send.message" || evento === "messages.set") {
     diag.webhooksDeMensagem++;
+    const nome = String(instance || "sem-nome");
+    diag.porInstancia[nome] = (diag.porInstancia[nome] || 0) + 1;
   }
   if (instance && instance === INSTANCIA_TESTE && instance !== INSTANCIA) return tratarWebhookDeTeste(evento, data);
   if (instance && instance !== INSTANCIA) return;
