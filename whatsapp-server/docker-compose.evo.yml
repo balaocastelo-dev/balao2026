@@ -107,6 +107,20 @@ services:
       SITE_URL: https://www.balao.info
       WHATSAPP_PANEL_ALLOWED_ORIGIN: ${ORIGENS:-https://www.balao.info,https://balao.info}
       TZ: America/Sao_Paulo
+      # Vigia de recebimento. Em 29/09 o WhatsApp ficou dois dias sem receber
+      # nada, com tudo dizendo "conectado", porque enviar continuava
+      # funcionando. Basta uma linha em segredos.env para o alarme sair do
+      # painel e chegar ao celular:
+      #
+      #   VIGIA_AVISAR_WHATSAPP=55319XXXXXXXX
+      #
+      # O resto tem padrão razoável (claude/vigia-de-recebimento.md explica).
+      VIGIA_AVISAR_WHATSAPP: ${VIGIA_AVISAR_WHATSAPP:-}
+      VIGIA_TELEGRAM_TOKEN: ${VIGIA_TELEGRAM_TOKEN:-}
+      VIGIA_TELEGRAM_CHAT: ${VIGIA_TELEGRAM_CHAT:-}
+      VIGIA_SILENCIO_MIN: ${VIGIA_SILENCIO_MIN:-45}
+      VIGIA_ESCALA_MIN: ${VIGIA_ESCALA_MIN:-45}
+      VIGIA_AUTOCURA: ${VIGIA_AUTOCURA:-0}
     ports:
       - "127.0.0.1:${PORTA:-4100}:4100"
     volumes:
