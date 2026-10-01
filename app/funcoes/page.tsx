@@ -39,7 +39,7 @@ export default async function FuncoesPage() {
             redirectTo="/funcoes"
             badgeLabel="Funcoes Protegidas"
             title="Acesso as funcoes"
-            description="Entre com a senha 56676009 para abrir a central interna em /funcoes."
+            description="Entre com a senha do painel para abrir a central interna."
             submitLabel="Entrar nas funcoes"
           />
         </div>

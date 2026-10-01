@@ -99,16 +99,19 @@ export default function Header() {
     }
   };
 
+  // O atalho "digite a senha na lupa e caia no /admin" saiu daqui.
+  //
+  // Ele guardava a senha em texto puro NESTE arquivo, que o navegador de todo
+  // visitante da loja baixa. E hoje nao serve para nada: /admin pede a senha
+  // do painel de qualquer jeito, entao basta digitar o endereco. Guardar so a
+  // impressao digital tambem nao resolveria — sao 8 digitos, um computador
+  // testa os cem milhoes em segundos.
   const performSearch = () => {
     setShowPreview(false);
-    if (searchQuery === "56676009") {
-      router.push("/admin");
+    if (searchQuery.trim()) {
+      router.push(`/?search=${encodeURIComponent(searchQuery)}`);
     } else {
-      if (searchQuery.trim()) {
-        router.push(`/?search=${encodeURIComponent(searchQuery)}`);
-      } else {
-        router.push('/');
-      }
+      router.push('/');
     }
   };
 

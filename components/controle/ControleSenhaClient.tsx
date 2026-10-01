@@ -103,7 +103,7 @@ export default function ControleSenhaClient() {
                   Validacao diaria
                 </h2>
                 <p className="text-sm text-gray-500">
-                  Digite `56676009 + dia + mes + ano`.
+                  Digite a senha do dia.
                 </p>
               </div>
             </div>

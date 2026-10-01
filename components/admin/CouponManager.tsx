@@ -28,7 +28,7 @@ const HOLIDAY_MODELS = [
 ];
 
 export default function CouponManager() {
-    const [authorized, setAuthorized] = useState(false);
+    const [authorized, setAuthorized] = useState(true);
     const [password, setPassword] = useState("");
     
     const [coupons, setCoupons] = useState<Coupon[]>([]);
@@ -46,13 +46,15 @@ export default function CouponManager() {
         if (authorized) fetchCoupons();
     }, [authorized]);
 
+    // Esta tela nao confere mais senha nenhuma.
+    //
+    // Ela comparava a senha AQUI, no navegador — ou seja, a senha ia dentro do
+    // arquivo JavaScript que qualquer visitante baixa. E nem era necessaria:
+    // /admin/cupons ja esta atras da senha do painel, e /api/coupons so aceita
+    // alteracao de quem entrou. Quem chega aqui ja passou pela tranca real.
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
-        if (password === "56676009") {
-            setAuthorized(true);
-        } else {
-            alert("Senha incorreta");
-        }
+        setAuthorized(true);
     };
 
     const fetchCoupons = async () => {

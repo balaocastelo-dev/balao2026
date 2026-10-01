@@ -218,7 +218,7 @@ export default function ControleAdminClient() {
                 Controle Admin
               </h1>
               <p className="text-sm text-gray-500">
-                Acesse com a senha diaria `56676009 + dia + mes + ano`.
+                Acesse com a senha do dia.
               </p>
             </div>
           </div>
