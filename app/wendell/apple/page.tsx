@@ -3,7 +3,7 @@ import Header from "@/components/Header";
 import Image from "next/image";
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
-import { getProducts, searchProductsByKeywords } from "@/lib/db";
+
 import JsonLd, {
   generateBreadcrumbSchema,
   generateFAQSchema,
@@ -35,6 +35,7 @@ import {
 import { SITE_CONFIG } from "@/lib/config";
 import { appleReviews } from "@/lib/apple-reviews";
 import { listAppleRadarPosts } from "@/lib/apple-news";
+import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
 
 export const dynamic = "force-dynamic";
 
@@ -145,8 +146,8 @@ export const metadata: Metadata = {
 
 export default async function AppleHubPage() {
   const [allProducts, keywordApple, radarPosts] = await Promise.all([
-    getProducts(),
-    searchProductsByKeywords(["apple", "iphone", "macbook", "ipad", "airpods"], 16),
+    getCachedProducts(),
+    getCachedProductsByKeywords(["apple", "iphone", "macbook", "ipad", "airpods"], 16),
     listAppleRadarPosts(3),
   ]);
 

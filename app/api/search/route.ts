@@ -1,47 +1,30 @@
 import { NextResponse } from 'next/server';
-import { turso, isTursoActive } from '@/lib/turso';
-import { parsePriceToNumber } from '@/lib/utils';
+import { getCachedSearchByTerms } from '@/lib/cache';
 
-type ProductRow = { price?: unknown };
-
+/**
+ * Caixa de busca do site.
+ *
+ * Antes consultava o banco direto e, quando a Hostinger recusava conexão por
+ * cota, devolvia `[]` com status 500 — ou seja, a busca do cliente morria
+ * calada e o navegador não tinha como distinguir "não achei" de "banco fora".
+ * Agora passa pela cópia do catálogo (espelho da VPS), que continua
+ * respondendo mesmo com o banco indisponível.
+ */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const query = searchParams.get('q');
+  if (!query) return NextResponse.json([]);
 
-  if (!query) {
-    return NextResponse.json([]);
-  }
-
-  if (!isTursoActive()) {
-    return NextResponse.json([], { status: 500 });
-  }
+  const termos = query.trim().split(/\s+/).filter((t) => t.length > 0);
+  if (termos.length === 0) return NextResponse.json([]);
 
   try {
-    // Busca com lógica AND: todos os termos precisam bater (nome ou descrição)
-    const terms = query.trim().split(/\s+/).filter((t) => t.length > 0);
-    if (terms.length === 0) return NextResponse.json([]);
-
-    const conditions = terms
-      .map(() => '(LOWER(name) LIKE ? OR LOWER(description) LIKE ?)')
-      .join(' AND ');
-    const args: string[] = [];
-    terms.forEach((term) => {
-      const like = `%${term.toLowerCase()}%`;
-      args.push(like, like);
-    });
-
-    const res = await turso.execute({
-      sql: `SELECT * FROM products WHERE ${conditions} LIMIT 10`,
-      args,
-    });
-
-    const sorted = (res.rows as ProductRow[])
-      .slice()
-      .sort((a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price));
-
-    return NextResponse.json(sorted);
+    const achados = await getCachedSearchByTerms(termos, 10);
+    return NextResponse.json(achados);
   } catch (err) {
     console.error('Search API Error:', err);
-    return NextResponse.json([], { status: 500 });
+    // Status honesto: o cliente da busca precisa saber que foi falha, não
+    // ausência de resultado.
+    return NextResponse.json({ error: 'Busca indisponível no momento.' }, { status: 503 });
   }
 }

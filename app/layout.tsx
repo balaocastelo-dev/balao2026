@@ -9,9 +9,10 @@ import LayoutWrapper from "@/components/LayoutWrapper";
 import VisitorTracker from "@/components/VisitorTracker";
 import GlobalConversionTracker from "@/components/GlobalConversionTracker";
 import { VENDEDORES } from "@/lib/vendedores";
-import { getCategories } from "@/lib/db";
+
 import type { Category } from "@/lib/utils";
 import { SITE_CONFIG } from "@/lib/config";
+import { getCachedCategories } from "@/lib/cache";
 
 const bangers = Bangers({
   weight: "400",
@@ -213,7 +214,7 @@ export default async function RootLayout({
 
   let categories: Category[] = [];
   try {
-    categories = await getCategories();
+    categories = await getCachedCategories();
   } catch {
     categories = [];
   }

@@ -2,8 +2,9 @@ import { Metadata } from "next";
 import Link from "next/link";
 import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
-import { getProducts, searchProductsByKeywords } from "@/lib/db";
+
 import { SITE_CONFIG } from "@/lib/config";
+import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
 import JsonLd, {
   generateBreadcrumbSchema,
   generateFAQSchema,
@@ -83,8 +84,8 @@ const SERVICOS_FAQS = [
 
 export default async function ServicosEOfertasPage() {
   const [allProducts, keywordOffers] = await Promise.all([
-    getProducts(),
-    searchProductsByKeywords(["gamer", "notebook", "monitor", "ssd", "teclado"], 16),
+    getCachedProducts(),
+    getCachedProductsByKeywords(["gamer", "notebook", "monitor", "ssd", "teclado"], 16),
   ]);
 
   let offerProducts = keywordOffers;

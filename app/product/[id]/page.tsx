@@ -1,5 +1,4 @@
 import { Metadata } from 'next';
-import { getCategories, getProductById } from '@/lib/db';
 import Header from '@/components/Header';
 import Sidebar from '@/components/Sidebar';
 import { notFound, permanentRedirect } from 'next/navigation';
@@ -10,6 +9,7 @@ import ShippingCalculator from '@/components/ShippingCalculator';
 import ProductMediaSwitcher from '@/components/ProductMediaSwitcher';
 import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema, generateProductSchema } from '@/components/JsonLd';
 import { getProductHref } from '@/lib/utils';
+import { getCachedCategories, getCachedProductByIdentifier } from "@/lib/cache";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -51,7 +51,7 @@ function stripSpecsFromDescription(value: string | null | undefined) {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const product = await getProductById(id);
+  const product = await getCachedProductByIdentifier(id);
 
   if (!product) {
     return {
@@ -94,8 +94,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ProductPage({ params }: Props) {
   const { id } = await params;
   const [product, categories] = await Promise.all([
-    getProductById(id),
-    getCategories()
+    getCachedProductByIdentifier(id),
+    getCachedCategories()
   ]);
 
   if (!product) return notFound();

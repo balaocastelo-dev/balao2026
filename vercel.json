@@ -4,8 +4,8 @@
   "devCommand": "next dev",
   "installCommand": "npm install",
   "crons": [
-    { "path": "/api/cron/blog-rss", "schedule": "* * * * *" },
-    { "path": "/api/cron/blog-product", "schedule": "* * * * *" },
-    { "path": "/api/cron/blog-balao-item", "schedule": "* * * * *" }
+    { "path": "/api/cron/blog-rss", "schedule": "*/30 * * * *" },
+    { "path": "/api/cron/blog-product", "schedule": "*/30 * * * *" },
+    { "path": "/api/cron/blog-balao-item", "schedule": "*/30 * * * *" }
   ]
 }

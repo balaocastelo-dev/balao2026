@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import Header from "@/components/Header";
-import { getProducts, searchProductsByKeywords } from "@/lib/db";
+
 import ProductCard from "@/components/ProductCard";
 import JsonLd, {
   generateOrganizationSchema,
@@ -11,6 +11,7 @@ import JsonLd, {
   generateServiceSchema,
 } from "@/components/JsonLd";
 import { SITE_CONFIG } from "@/lib/config";
+import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
 import {
   Tag,
   Percent,
@@ -85,9 +86,9 @@ const PROMO_FAQS = [
 
 export default async function PromocaoPage() {
   const [allProducts, promoHardware, promoNotebooks] = await Promise.all([
-    getProducts(),
-    searchProductsByKeywords(["ssd", "rtx", "fonte", "gabinete", "cooler", "memoria"], 8),
-    searchProductsByKeywords(["notebook", "dell", "lenovo", "thinkpad", "macbook"], 8),
+    getCachedProducts(),
+    getCachedProductsByKeywords(["ssd", "rtx", "fonte", "gabinete", "cooler", "memoria"], 8),
+    getCachedProductsByKeywords(["notebook", "dell", "lenovo", "thinkpad", "macbook"], 8),
   ]);
 
   let displayHardware = promoHardware.length > 0 ? promoHardware : allProducts.slice(0, 8);

@@ -10,8 +10,8 @@ import HomeDepartmentMenu from "@/components/HomeDepartmentMenu";
 import HomeCategoryShelf from "@/components/HomeCategoryShelf";
 import HomeMonitoresFullWidth from "@/components/HomeMonitoresFullWidth";
 import HomeBlogSection from "@/components/HomeBlogSection";
-import { getProductsByExactCategories, getProducts } from "@/lib/db";
-import { getCachedCategories, getCachedCarouselImages } from "@/lib/cache";
+
+import { getCachedCategories, getCachedProducts, getCachedProductsByExactCategories, getCachedCarouselImages } from "@/lib/cache";
 import { listBlogPostsForPage } from "@/lib/blog-store";
 import { turso } from "@/lib/turso";
 import { parsePriceToNumber, Product, type Category } from "@/lib/utils";
@@ -154,9 +154,9 @@ export default async function Home(props: {
       return true;
     });
   } else if (category && category !== "Todos os Produtos") {
-    products = await getProductsByExactCategories([category]);
+    products = await getCachedProductsByExactCategories([category]);
   } else {
-    products = await getProducts();
+    products = await getCachedProducts();
   }
 
   // Extrai nota média e número de avaliações do texto salvo em `rating`

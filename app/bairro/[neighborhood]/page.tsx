@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
-import { getProducts, searchProductsByKeywords } from "@/lib/db";
+
 import { SITE_CONFIG } from "@/lib/config";
 import JsonLd, {
   generateBreadcrumbSchema,
@@ -18,6 +18,7 @@ import {
   getNeighborhoodWhatsAppUrl,
 } from "@/lib/neighborhood-seo";
 import { MapPin, ArrowRight, MessageCircle, Truck, ShieldCheck, Clock, Zap, CheckCircle2 } from "lucide-react";
+import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
 
 export const dynamic = "force-dynamic";
 
@@ -96,8 +97,8 @@ export default async function NeighborhoodPage({ params }: Props) {
   }
 
   const [allProducts, keywordMatches] = await Promise.all([
-    getProducts(),
-    searchProductsByKeywords(["notebook", "ssd", "gamer", "fonte", "memoria"], 8),
+    getCachedProducts(),
+    getCachedProductsByKeywords(["notebook", "ssd", "gamer", "fonte", "memoria"], 8),
   ]);
 
   let displayProducts = keywordMatches.length > 0 ? keywordMatches : allProducts.slice(0, 8);

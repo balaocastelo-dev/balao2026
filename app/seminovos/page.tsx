@@ -3,9 +3,10 @@ import React from "react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Header from "@/components/Header";
-import { getProducts, getCategories, searchProductsByKeywords } from "@/lib/db";
+
 import { Product, Category } from "@/lib/utils";
 import ProductCard from "@/components/ProductCard";
+import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
 import {
   Laptop,
   ShieldCheck,
@@ -87,8 +88,8 @@ const SEMINOVOS_FAQS = [
 
 export default async function SeminovosPage() {
   const [allProducts, keywordSeminovos] = await Promise.all([
-    getProducts(),
-    searchProductsByKeywords(["seminovo", "recondicionado", "thinkpad", "latitude", "macbook", "notebook", "dell"], 16),
+    getCachedProducts(),
+    getCachedProductsByKeywords(["seminovo", "recondicionado", "thinkpad", "latitude", "macbook", "notebook", "dell"], 16),
   ]);
 
   let displayProducts = keywordSeminovos.length > 0 ? keywordSeminovos : allProducts.slice(0, 8);

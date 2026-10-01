@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Header from "@/components/Header";
 import ProductCard from "@/components/ProductCard";
-import { getProducts, searchProductsByKeywords } from "@/lib/db";
+
 import { SITE_CONFIG } from "@/lib/config";
 import JsonLd, {
   generateBreadcrumbSchema,
@@ -13,6 +13,7 @@ import JsonLd, {
   generateItemListSchema,
 } from "@/components/JsonLd";
 import { LEAD_INTENTS, getLeadIntent } from "@/lib/lead-intents";
+import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
 import {
   Flame,
   ArrowRight,
@@ -84,8 +85,8 @@ export default async function UrgenteIntentPage({ params }: Props) {
   }
 
   const [allProducts, keywordMatches] = await Promise.all([
-    getProducts(),
-    searchProductsByKeywords([intent.serviceLabel.toLowerCase(), "notebook", "ssd", "fonte", "tela"], 8),
+    getCachedProducts(),
+    getCachedProductsByKeywords([intent.serviceLabel.toLowerCase(), "notebook", "ssd", "fonte", "tela"], 8),
   ]);
 
   let displayProducts = keywordMatches.length > 0 ? keywordMatches : allProducts.slice(0, 8);

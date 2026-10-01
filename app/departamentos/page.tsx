@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { getCategories } from '@/lib/db';
+
 import { Category } from '@/lib/utils';
 import { 
   Monitor, 
@@ -19,6 +19,7 @@ import {
   Package
 } from 'lucide-react';
 import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from '@/components/JsonLd';
+import { getCachedCategories } from "@/lib/cache";
 
 export const metadata: Metadata = {
   title: 'Departamentos e Categorias | Balão da Informática Campinas',
@@ -53,7 +54,7 @@ function getIconForCategory(slug: string) {
 }
 
 export default async function DepartamentosPage() {
-  const categories = await getCategories();
+  const categories = await getCachedCategories();
   
   // Organizar categorias em árvore
   const rootCategories = categories.filter(c => !c.parent_id && c.active).sort((a, b) => (a.display_order || 0) - (b.display_order || 0));

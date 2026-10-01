@@ -19,8 +19,9 @@ import {
   Award,
 } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
-import { getProducts, searchProductsByKeywords } from "@/lib/db";
+
 import { SITE_CONFIG } from "@/lib/config";
+import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
 import JsonLd, {
   generateOrganizationSchema,
   generateBreadcrumbSchema,
@@ -89,8 +90,8 @@ const APPLE_FAQS = [
 
 export default async function ReparoApplePage() {
   const [allProducts, keywordApple] = await Promise.all([
-    getProducts(),
-    searchProductsByKeywords(["apple", "iphone", "macbook", "ipad", "airpods", "magsafe", "carregador"], 16),
+    getCachedProducts(),
+    getCachedProductsByKeywords(["apple", "iphone", "macbook", "ipad", "airpods", "magsafe", "carregador"], 16),
   ]);
 
   let displayProducts = keywordApple.length > 0 ? keywordApple : allProducts.slice(0, 8);

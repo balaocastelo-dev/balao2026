@@ -2,7 +2,7 @@ import React from "react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Header from "@/components/Header";
-import { getProducts, searchProductsByKeywords } from "@/lib/db";
+
 import ProductCard from "@/components/ProductCard";
 import JsonLd, {
   generateOrganizationSchema,
@@ -12,6 +12,7 @@ import JsonLd, {
   generateServiceSchema,
 } from "@/components/JsonLd";
 import { SITE_CONFIG } from "@/lib/config";
+import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
 import {
   Zap,
   Battery,
@@ -94,8 +95,8 @@ const CARREGADORES_FAQS = [
 
 export default async function CarregadoresPage() {
   const [allProducts, keywordChargers] = await Promise.all([
-    getProducts(),
-    searchProductsByKeywords(["carregador", "fonte", "adaptador", "usb-c", "magsafe", "power"], 16),
+    getCachedProducts(),
+    getCachedProductsByKeywords(["carregador", "fonte", "adaptador", "usb-c", "magsafe", "power"], 16),
   ]);
 
   let displayProducts = keywordChargers.length > 0 ? keywordChargers : allProducts.slice(0, 8);
