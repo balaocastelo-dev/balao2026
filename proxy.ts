@@ -22,6 +22,36 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 const COOKIE = 'balao_painel_session'
 
+// A loja tem DUAS portas de entrada, e as duas são legítimas:
+//  - a senha do painel (cookie acima), que abre /crm, /painel e o /admin;
+//  - a senha do dia do balcão (cookie abaixo), que abre /controle/admin e
+//    /fechamento — é a que o pessoal da loja usa no dia a dia.
+//
+// A tranca do administrativo só conhecia a primeira. Resultado: quem entrava
+// com a senha do dia para fechar a semana recebia 401 ao salvar, e o
+// fechamento simplesmente não gravava. Aqui a segunda porta volta a valer,
+// mas só nas rotas que são dela.
+const COOKIE_BALCAO = 'controle_admin_auth'
+const API_DO_BALCAO = ['/api/weekly', '/api/upload', '/api/controle']
+
+/** A senha do dia: 56676009 + dia + mês + ano, no fuso de São Paulo. */
+function senhaDoDia() {
+  const partes = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Sao_Paulo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  })
+    .formatToParts(new Date())
+    .filter((p) => p.type !== 'literal')
+  const m = Object.fromEntries(partes.map((p) => [p.type, p.value])) as Record<string, string>
+  return `56676009${m.day}${m.month}${m.year}`
+}
+
+function ehApiDoBalcao(pathname: string) {
+  return API_DO_BALCAO.some((p) => pathname === p || pathname.startsWith(`${p}/`))
+}
+
 // Rotas de API em que só o administrador pode ESCREVER (GET segue liberado).
 const API_SO_ESCRITA = [
   '/api/products',
@@ -133,9 +163,17 @@ export async function proxy(request: NextRequest) {
 
   // API: leitura continua pública; escrita pede a senha.
   if (metodo !== 'GET' && metodo !== 'HEAD' && metodo !== 'OPTIONS' && ehApiProtegida(pathname)) {
-    if (!(await estaAutenticado(request))) {
+    // Nas rotas do balcão, a senha do dia também abre.
+    const comSenhaDoDia =
+      ehApiDoBalcao(pathname) && request.cookies.get(COOKIE_BALCAO)?.value === senhaDoDia()
+    if (!comSenhaDoDia && !(await estaAutenticado(request))) {
       return NextResponse.json(
-        { ok: false, error: 'Acesso negado. Entre no painel do Balão antes de alterar o catálogo.' },
+        {
+          ok: false,
+          error: ehApiDoBalcao(pathname)
+            ? 'Acesso negado. Entre de novo com a senha do dia e tente outra vez.'
+            : 'Acesso negado. Entre no painel do Balão antes de alterar o catálogo.',
+        },
         { status: 401 }
       )
     }

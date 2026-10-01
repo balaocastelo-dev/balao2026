@@ -94,8 +94,23 @@ export default function WeeklyClosing() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       // Check Auth
+      //
+      // Quem manda é o cookie do servidor, não a marca deste navegador: a
+      // senha do dia vence à meia-noite, e sem esta conferência a tela abria
+      // normal no dia seguinte e só dava erro na hora de salvar.
       if (sessionStorage.getItem("fechamento_auth") === "true") {
         setIsAuthenticated(true);
+        fetch('/api/controle/admin-session')
+          .then((r) => (r.ok ? r.json() : null))
+          .then((j) => {
+            if (j && j.authenticated === false) {
+              setIsAuthenticated(false);
+              sessionStorage.removeItem("fechamento_auth");
+            }
+          })
+          .catch(() => {
+            /* sem rede: segue na tela, o salvar avisa se não der */
+          });
       }
 
       // Fetch Data
@@ -406,14 +421,16 @@ export default function WeeklyClosing() {
   };
 
   const handleClearAll = async () => {
-    const today = new Date();
-    const day = String(today.getDate()).padStart(2, '0');
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const year = today.getFullYear();
-    const expected = `56676009${day}${month}${year}`;
-
     const pwd = prompt("Digite a senha de segurança para apagar TUDO (Senha do dia):");
-    if (pwd !== expected) {
+    if (!pwd) return;
+
+    // Conferida no servidor, igual à entrada: a senha não mora mais aqui.
+    const confere = await fetch('/api/controle/admin-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pwd.trim() }),
+    }).catch(() => null);
+    if (!confere?.ok) {
       showToast("Senha incorreta! Ação cancelada.");
       return;
     }
@@ -435,20 +452,41 @@ export default function WeeklyClosing() {
   const fmt = (val: number) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
   // Auth Handler
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    const today = new Date();
-    const day = String(today.getDate()).padStart(2, '0');
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const year = today.getFullYear();
-    const expected = `56676009${day}${month}${year}`;
+  //
+  // A senha agora é conferida NO SERVIDOR, pela mesma porta que o /controle
+  // usa, e o servidor devolve um cookie. Dois motivos:
+  //
+  //  1. antes a senha do dia era montada aqui, no navegador — ou seja, ia
+  //     dentro do arquivo JavaScript que qualquer visitante baixa. Quem
+  //     abrisse o código da página lia a regra e entrava;
+  //  2. salvar aqui grava no banco da loja, e o servidor passou a exigir
+  //     senha para gravar. Sem o cookie, o fechamento entrava na tela mas
+  //     não gravava nada — dava erro na hora de salvar.
+  const [entrando, setEntrando] = useState(false);
 
-    if (passwordInput === expected) {
-      setIsAuthenticated(true);
-      sessionStorage.setItem("fechamento_auth", "true");
-      showToast("Acesso permitido!");
-    } else {
-      showToast("Senha incorreta.");
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (entrando) return;
+    setEntrando(true);
+    try {
+      const res = await fetch('/api/controle/admin-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: passwordInput }),
+      });
+      if (res.ok) {
+        setIsAuthenticated(true);
+        sessionStorage.setItem("fechamento_auth", "true");
+        showToast("Acesso permitido!");
+      } else if (res.status === 401) {
+        showToast("Senha incorreta.");
+      } else {
+        showToast("Não consegui falar com o servidor. Tente de novo.");
+      }
+    } catch {
+      showToast("Sem conexão com o servidor. Tente de novo.");
+    } finally {
+      setEntrando(false);
     }
   };
 
