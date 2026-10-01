@@ -1256,6 +1256,66 @@ export default function CrmWhatsAppClient({
       }
     });
 
+    // Atualização incremental da lista de conversas.
+    //
+    // O servidor agora manda só o que mudou. Antes vinham as 12.398 conversas
+    // a cada mensagem e o painel recriava todos os objetos — o React então
+    // redesenhava a lista inteira e a tela ficava para trás do servidor.
+    socket.on("whatsapp:chats-parcial", (parciais: any[]) => {
+      if (!Array.isArray(parciais) || parciais.length === 0) return;
+      setChats((prev) => {
+        const porId = new Map(prev.map((c, i) => [c.id, i]));
+        const copia = prev.slice();
+        let precisaOrdenar = false;
+
+        for (const sc of parciais) {
+          if (!sc?.chatId || !isRealDirectChat(sc.chatId)) continue;
+          const i = porId.get(sc.chatId);
+          const anterior = i === undefined ? undefined : copia[i];
+          const ehLid = String(sc.chatId).endsWith("@lid");
+          const realNum =
+            sc.realNumber ||
+            sc.displayNumber ||
+            (ehLid ? "" : String(sc.chatId).replace(/@.*$/, ""));
+          const nomeServidor = String(sc.contactName || "").replace(/@.*$/, "");
+          const nomeSemJid = !nomeEhCodigo(nomeServidor, sc.chatId)
+            ? nomeServidor
+            : !nomeEhCodigo(anterior?.nome, sc.chatId)
+            ? anterior!.nome
+            : realNum || (ehLid ? "Contato (número oculto)" : "");
+
+          const atualizado = {
+            ...(anterior || {}),
+            id: sc.chatId,
+            nome: nomeSemJid || anterior?.nome || "Contato",
+            numero: realNum || anterior?.numero || "",
+            pic: sc.profilePicUrl || anterior?.pic || null,
+            picOriginal: sc.profilePicOriginal || anterior?.picOriginal || null,
+            unread: sc.unreadCount ?? anterior?.unread ?? 0,
+            lastMessage: sc.lastMessageBody || anterior?.lastMessage || "",
+            timestamp: sc.lastMessageTimestamp || anterior?.timestamp || Date.now(),
+            tags: anterior?.tags || [],
+            vendedorId: sc.assignedSellerId ?? anterior?.vendedorId ?? null,
+            kanbanColId: anterior?.kanbanColId || "novos",
+            fixado: sc.isPinned ?? anterior?.fixado ?? false,
+            localDesde: undefined,
+          } as CrmChat;
+
+          if (i === undefined) {
+            copia.unshift(atualizado);
+            precisaOrdenar = true;
+          } else {
+            if ((anterior?.timestamp || 0) !== atualizado.timestamp) precisaOrdenar = true;
+            copia[i] = atualizado;
+          }
+        }
+
+        // Só reordena quando alguma data mudou. As conversas não tocadas
+        // mantêm o MESMO objeto, então o React não precisa redesenhá-las.
+        return precisaOrdenar ? copia.sort((a, b) => b.timestamp - a.timestamp) : copia;
+      });
+    });
+
     socket.on("whatsapp:messages", (serverMsgs: any[]) => {
       if (Array.isArray(serverMsgs) && serverMsgs.length > 0) {
         setEstado((prev) => (prev === "loading" || prev === "initializing" ? "ready" : prev));
@@ -1357,22 +1417,25 @@ export default function CrmWhatsAppClient({
       });
 
       setChats((prev) => {
-        const cleanMsgNum = realNum.replace(/\D/g, "");
-        const idx = prev.findIndex(
-          (c) =>
-            c.id === newMsg.chatId ||
-            (cleanMsgNum && c.numero && c.numero.replace(/\D/g, "") === cleanMsgNum)
-        );
+        // Procura só pelo id da conversa. A varredura antiga comparava número
+        // por número rodando uma expressão regular em CADA conversa — com 12
+        // mil conversas, isso acontecia a cada mensagem recebida.
+        const idx = prev.findIndex((c) => c.id === newMsg.chatId);
         if (idx >= 0) {
-          const copy = [...prev];
-          copy[idx] = {
-            ...copy[idx],
+          const atualizado: CrmChat = {
+            ...prev[idx],
             lastMessage: descreverPreviewMensagem(newMsg.body, newMsg.hasMedia, newMsg.mediaType),
             timestamp: newMsg.timestamp || Date.now(),
-            unread: newMsg.direction === "in" ? copy[idx].unread + 1 : copy[idx].unread,
-            precisaAtencao: newMsg.direction === "in" ? true : copy[idx].precisaAtencao,
+            unread: newMsg.direction === "in" ? prev[idx].unread + 1 : prev[idx].unread,
+            precisaAtencao: newMsg.direction === "in" ? true : prev[idx].precisaAtencao,
           };
-          return copy.sort((a, b) => b.timestamp - a.timestamp);
+          // A conversa que acabou de receber mensagem é, por definição, a mais
+          // recente: vai para o topo. Antes a lista inteira era reordenada a
+          // cada mensagem só para mover um item.
+          const copy = prev.slice();
+          copy.splice(idx, 1);
+          copy.unshift(atualizado);
+          return copy;
         } else {
           const novo: CrmChat = {
             id: newMsg.chatId,

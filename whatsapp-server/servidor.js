@@ -148,12 +148,16 @@ function salvarStore() {
     if (ids.length > 5000) for (const id of ids.slice(0, ids.length - 5000)) delete store.transcricoes[id];
     const temp = `${ARQUIVO_PAINEL}.tmp`;
     try {
-      fs.writeFileSync(temp, JSON.stringify(store, null, 1));
+      // Sem indentação: o arquivo tem 12 mil fotos e 12 mil nomes, e o
+      // `null, 1` inflava ~25% de texto a cada gravação.
+      fs.writeFileSync(temp, JSON.stringify(store));
       fs.renameSync(temp, ARQUIVO_PAINEL);
     } catch (erro) {
       console.error("[painel] Falha ao gravar:", erro.message);
     }
-  }, 400);
+    // Folga maior: a gravação é síncrona e trava o servidor. Juntar 2 s de
+    // alterações custa pouco e devolve event loop para as mensagens.
+  }, 2000);
 }
 
 carregarStore();
@@ -356,7 +360,7 @@ function tocarConversa(msg) {
     if (msg.contactName && (!atual.contactName || /^\(?\d/.test(atual.contactName))) atual.contactName = msg.contactName;
   }
   conversas.set(msg.chatId, atual);
-  agendarEnvioDaLista();
+  agendarConversas([msg.chatId]);
   pedirFoto(msg.chatId);
 }
 
@@ -370,6 +374,7 @@ function tocarConversa(msg) {
 // genérico. Consulta de novo a cada 3 dias, uma por vez, sem pressa.
 // ------------------------------------------------------------------
 const VALIDADE_FOTO_MS = 3 * 24 * 3600_000;
+const LIMITE_FILA_FOTOS = Number(process.env.LIMITE_FILA_FOTOS || 150);
 const filaFotos = new Set();
 let processandoFotos = false;
 
@@ -377,10 +382,29 @@ function arquivoDaFoto(numero) {
   return path.join(FOTOS_DIR, `${numero}.jpg`);
 }
 
+// Quais números já têm foto guardada, em memória.
+//
+// Antes, montar a lista de conversas fazia um fs.existsSync POR CONVERSA. Com
+// 12 mil conversas eram 12 mil chamadas ao disco, travando o servidor inteiro
+// a cada atualização da lista — e é justamente durante esse travamento que a
+// mensagem nova fica esperando para ser processada. Agora o disco é lido uma
+// vez só, no boot, e o índice é atualizado quando uma foto é gravada.
+const numerosComFoto = new Set();
+function indexarFotos() {
+  try {
+    for (const nome of fs.readdirSync(FOTOS_DIR)) {
+      if (nome.endsWith(".jpg")) numerosComFoto.add(nome.slice(0, -4));
+    }
+    console.log(`[fotos] ${numerosComFoto.size} foto(s) no disco.`);
+  } catch {
+    /* pasta ainda não existe: será criada na primeira foto */
+  }
+}
+
 function fotoLocal(chatId) {
   const numero = String(chatId || "").endsWith("@c.us") ? N.digitos(chatId) : "";
   if (!numero) return null;
-  return fs.existsSync(arquivoDaFoto(numero)) ? `/foto/${numero}` : null;
+  return numerosComFoto.has(numero) ? `/foto/${numero}` : null;
 }
 
 function pedirFoto(chatId) {
@@ -388,6 +412,10 @@ function pedirFoto(chatId) {
   if (!numero || numero === N.digitos(estado.phoneNumber)) return;
   const ultima = store.fotos[numero];
   if (ultima && Date.now() - ultima.em < VALIDADE_FOTO_MS) return;
+  // Teto na fila: cada foto é uma consulta ao WhatsApp pela MESMA conexão que
+  // envia mensagem. Enfileirar 12 mil de uma vez deixava o WhatsApp ocupado
+  // com retrato por horas, disputando espaço com o atendimento.
+  if (filaFotos.size >= LIMITE_FILA_FOTOS) return;
   filaFotos.add(numero);
   if (!processandoFotos) processarFilaDeFotos();
 }
@@ -408,12 +436,15 @@ async function processarFilaDeFotos() {
             const bytes = Buffer.from(await resposta.arrayBuffer());
             if (bytes.length > 500) {
               fs.writeFileSync(arquivoDaFoto(numero), bytes);
+              numerosComFoto.add(numero);
               const c = conversas.get(`${numero}@c.us`);
               if (c) {
                 c.profilePicUrl = `/foto/${numero}`;
                 c.profilePicOriginal = url;
+                // Só a conversa que mudou vai para a tela — antes cada foto
+                // baixada reenviava as 12 mil conversas.
+                agendarConversas([c.chatId]);
               }
-              agendarEnvioDaLista();
             }
           }
         }
@@ -438,6 +469,10 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: { origin: ORIGENS, methods: ["GET", "POST"] },
   maxHttpBufferSize: 80 * 1024 * 1024, // vídeo de até ~60 MB em base64
+  // A lista de conversas é um JSON muito repetitivo; comprimida cai para
+  // cerca de um décimo. Sem isto, a lista inteira ocupava o canal por
+  // segundos e a mensagem nova ficava na fila atrás dela.
+  perMessageDeflate: { threshold: 16 * 1024 },
 });
 const SALA = "painel";
 const paraPainel = () => io.to(SALA);
@@ -466,12 +501,52 @@ function configuracoes() {
 const emitirConfiguracoes = () => paraPainel().emit("whatsapp:settings", configuracoes());
 const emitirVendedores = () => paraPainel().emit("whatsapp:vendedores", store.vendedores.map(publicoVendedor));
 
+/** Uma conversa, do jeito que o painel espera recebê-la. */
+function conversaParaOPainel(chatId) {
+  const c = conversas.get(chatId);
+  if (!c) return null;
+  if (estaOculta(c.chatId, c.lastMessageTimestamp)) return null;
+  return {
+    ...c,
+    profilePicUrl: fotoLocal(c.chatId) || c.profilePicUrl || null,
+    assignedSellerId: store.chatAssignments[c.chatId] || null,
+  };
+}
+
+// Entrega incremental da lista de conversas.
+//
+// Este era o maior motivo de a mensagem demorar a aparecer: a cada mensagem o
+// servidor remontava e mandava a lista INTEIRA — com 12 mil conversas, vários
+// megabytes — e o aviso da mensagem nova (1 KB) ficava preso na fila atrás
+// dela. Agora só a conversa que mudou é enviada, e a lista completa vai apenas
+// quando o painel abre ou na sincronização.
+let conversasPendentes = new Set();
+let envioDeConversasAgendado = null;
+function agendarConversas(chatIds) {
+  for (const id of chatIds || []) if (id) conversasPendentes.add(id);
+  if (envioDeConversasAgendado || conversasPendentes.size === 0) return;
+  envioDeConversasAgendado = setTimeout(() => {
+    envioDeConversasAgendado = null;
+    const ids = [...conversasPendentes];
+    conversasPendentes = new Set();
+    const itens = ids.map(conversaParaOPainel).filter(Boolean);
+    if (itens.length) paraPainel().emit("whatsapp:chats-parcial", itens);
+  }, 400);
+}
+
+/** Lista completa: só no bootstrap e na sincronização. */
+function enviarListaCompleta(alvo = null) {
+  (alvo || paraPainel()).emit("whatsapp:chats", listaDeConversas());
+}
+
+// Mantido para quem ainda chama pelo nome antigo (mudança de etapa, apagar e
+// restaurar conversa): agora manda a lista completa, que nesses casos é raro.
 let envioDaListaAgendado = null;
 function agendarEnvioDaLista() {
   if (envioDaListaAgendado) return;
   envioDaListaAgendado = setTimeout(() => {
     envioDaListaAgendado = null;
-    paraPainel().emit("whatsapp:chats", listaDeConversas());
+    enviarListaCompleta();
   }, 1500);
 }
 
@@ -666,7 +741,9 @@ async function sincronizarConversas() {
   }
   ultimaSincronizacao = Date.now();
   paraPainel().emit("whatsapp:chats", listaDeConversas());
-  for (const id of conversas.keys()) pedirFoto(id);
+  // Só as conversas com movimento recente pedem foto. Antes eram as 12 mil a
+  // cada 5 minutos, o que mantinha a fila cheia o tempo todo.
+  for (const c of listaDeConversas().slice(0, LIMITE_FILA_FOTOS)) pedirFoto(c.chatId);
   resolverLids().catch((e) => console.warn("[lid] Falha ao resolver:", e.message));
 
   paraPainel().emit("whatsapp:messages", mensagensRecentes());
@@ -1792,7 +1869,7 @@ io.on("connection", (socket) => {
     else delete store.chatAssignments[chatId];
     salvarStore();
     crmServico?.definirVendedor(chatId, p.sellerId || null).catch(() => {});
-    paraPainel().emit("whatsapp:chats", listaDeConversas());
+    enviarListaCompleta();
     emitirConfiguracoes();
   });
 
@@ -2042,7 +2119,9 @@ io.on("connection", (socket) => {
     if (naoLidas.length) await evolution.marcarComoLida(INSTANCIA, naoLidas.map((m) => m.chave)).catch(() => {});
     const c = conversas.get(chatId);
     if (c) c.unreadCount = 0;
-    agendarEnvioDaLista();
+    // Abrir uma conversa mudava só ela — mandar as 12 mil por causa disso era
+    // o que travava o painel justamente no clique do vendedor.
+    agendarConversas([chatId]);
   }
   socket.on("panel:mark-seen", (p) => marcarLida(String(p?.chatId || "")).catch(() => {}));
   socket.on("panel:mark-chat-read", (p) => marcarLida(String(p?.chatId || "")).catch(() => {}));
@@ -2377,6 +2456,8 @@ montarRotasDeStatus(app, {
     }
   ),
 });
+
+indexarFotos();
 
 server.listen(PORTA, () => {
   console.log(`[servidor] WhatsApp (Evolution) no ar na porta ${PORTA} — versão ${VERSAO}`);
