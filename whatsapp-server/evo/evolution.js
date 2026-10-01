@@ -120,7 +120,10 @@ function criarEvolution({ url, chave, buscar = fetch, registrar = console.log })
       chamar("POST", `/message/sendStatus/${inst(nome)}`, status, { timeoutMs: 180_000 }),
 
     // ---------- conversas ----------
-    buscarConversas: (nome, filtro = {}) => chamar("POST", `/chat/findChats/${inst(nome)}`, filtro),
+    // 12 mil conversas não cabem no timeout padrão de 60 s. Quem chama passa
+    // o seu, porque quando esta busca falha o painel fica sem a lista completa.
+    buscarConversas: (nome, filtro = {}, opcoes = {}) =>
+      chamar("POST", `/chat/findChats/${inst(nome)}`, filtro, opcoes),
     buscarMensagens: (nome, filtro) =>
       chamar("POST", `/chat/findMessages/${inst(nome)}`, filtro, { timeoutMs: 90_000 }),
     buscarContatos: (nome, filtro = {}) => chamar("POST", `/chat/findContacts/${inst(nome)}`, filtro),

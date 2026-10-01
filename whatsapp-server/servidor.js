@@ -580,6 +580,7 @@ const diag = {
   conciliadasNovas: 0,
   conciliacaoErros: 0,
   ultimoErroConciliacao: null,
+  ultimoErroListaConversas: null,
   emitidasParaOPainel: 0,
 };
 
@@ -734,7 +735,31 @@ async function sincronizarConversas() {
     guardarMensagem(m);
   }
 
-  const lista = await evolution.buscarConversas(INSTANCIA, {});
+  // A lista do WhatsApp é opcional; a entrega ao painel NÃO é.
+  //
+  // Antes, se esta busca falhasse (são 12 mil conversas no timeout padrão de
+  // 60 s), a função toda rejeitava ANTES de emitir a lista para o painel — e o
+  // erro era engolido pelo .catch(() => {}) do intervalo. O painel ficava horas
+  // sem receber a lista completa, ou seja, sem a rede de segurança que corrige
+  // qualquer desencontro. Era isso que transformava um engano momentâneo em
+  // "conversas sumidas desde as 15:47".
+  const lista = await evolution
+    .buscarConversas(INSTANCIA, {}, { timeoutMs: 120_000 })
+    .catch((erro) => {
+      console.warn("[conversas] O WhatsApp não devolveu a lista:", erro.message);
+      diag.ultimoErroListaConversas = String(erro.message || erro).slice(0, 200);
+      return null;
+    });
+  if (!lista) {
+    // Sem lista nova, mas o painel ainda recebe o que já temos em memória.
+    // É exatamente aqui que o painel se cura de qualquer conversa fora de
+    // lugar — não pode depender do WhatsApp responder.
+    ultimaSincronizacao = Date.now();
+    enviarListaCompleta();
+    paraPainel().emit("whatsapp:messages", mensagensRecentes());
+    return;
+  }
+  diag.ultimoErroListaConversas = null;
   const novas = new Map();
   for (const item of lista || []) {
     if (item?.lastMessage?.key) aprenderLid(item.lastMessage.key);
@@ -756,7 +781,7 @@ async function sincronizarConversas() {
     guardarConversaNoCrm(c);
   }
   ultimaSincronizacao = Date.now();
-  paraPainel().emit("whatsapp:chats", listaDeConversas());
+  enviarListaCompleta();
   // Só as conversas com movimento recente pedem foto. Antes eram as 12 mil a
   // cada 5 minutos, o que mantinha a fila cheia o tempo todo.
   for (const c of listaDeConversas().slice(0, LIMITE_FILA_FOTOS)) pedirFoto(c.chatId);

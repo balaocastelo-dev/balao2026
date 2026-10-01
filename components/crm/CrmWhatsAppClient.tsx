@@ -1332,14 +1332,24 @@ export default function CrmWhatsAppClient({
     socket.on("whatsapp:chats-parcial", (parciais: any[]) => {
       if (!Array.isArray(parciais) || parciais.length === 0) return;
       setChats((prev) => {
-        const porId = new Map(prev.map((c, i) => [c.id, i]));
-        const copia = prev.slice();
+        // Índice por OBJETO, não por posição.
+        //
+        // Aqui morava um bug que apagava conversas. O índice era montado com a
+        // POSIÇÃO de cada conversa no array, e uma conversa nova entrava com
+        // unshift no meio do laço — o que empurra tudo uma casa para o lado e
+        // deixa todas as posições do índice erradas. A conversa seguinte do
+        // mesmo lote era então gravada no lugar da VIZINHA: a vizinha era
+        // destruída, a outra aparecia duplicada e herdava os dados de funil de
+        // quem foi sobrescrito. Com lotes de 400 ms numa loja movimentada,
+        // isso acontecia muitas vezes por hora.
+        //
+        // Com um Map de id -> conversa não existe posição para desencontrar.
+        const porId = new Map(prev.map((c) => [c.id, c]));
         let precisaOrdenar = false;
 
         for (const sc of parciais) {
           if (!sc?.chatId || !isRealDirectChat(sc.chatId)) continue;
-          const i = porId.get(sc.chatId);
-          const anterior = i === undefined ? undefined : copia[i];
+          const anterior = porId.get(sc.chatId);
           const ehLid = String(sc.chatId).endsWith("@lid");
           const realNum =
             sc.realNumber ||
@@ -1371,18 +1381,30 @@ export default function CrmWhatsAppClient({
             localDesde: undefined,
           } as CrmChat;
 
-          if (i === undefined) {
-            copia.unshift(atualizado);
+          if (!anterior || (anterior.timestamp || 0) !== atualizado.timestamp) {
             precisaOrdenar = true;
-          } else {
-            if ((anterior?.timestamp || 0) !== atualizado.timestamp) precisaOrdenar = true;
-            copia[i] = atualizado;
           }
+          porId.set(sc.chatId, atualizado);
         }
 
-        // Só reordena quando alguma data mudou. As conversas não tocadas
-        // mantêm o MESMO objeto, então o React não precisa redesenhá-las.
-        return precisaOrdenar ? copia.sort((a, b) => b.timestamp - a.timestamp) : copia;
+        // Sem mudança nenhuma: devolve o MESMO array, para o React não
+        // redesenhar a lista inteira à toa.
+        if (!precisaOrdenar) {
+          let mudouAlgo = false;
+          for (const c of prev) {
+            if (porId.get(c.id) !== c) {
+              mudouAlgo = true;
+              break;
+            }
+          }
+          if (!mudouAlgo && porId.size === prev.length) return prev;
+        }
+
+        // A ordem de prev é preservada; só o que é novo entra no fim e a
+        // ordenação por data acerta o lugar. Nenhuma conversa é perdida: o Map
+        // começa com TODAS as anteriores.
+        const saida = [...porId.values()];
+        return precisaOrdenar ? saida.sort((a, b) => b.timestamp - a.timestamp) : saida;
       });
     });
 
