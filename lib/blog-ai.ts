@@ -178,40 +178,74 @@ async function generateFromGemini(prompt: string) {
     return null;
   }
 
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const modelName = process.env.BLOG_AI_MODEL || "gemini-1.5-flash";
-  const model = genAI.getGenerativeModel({ model: modelName });
+  // Sem modelo escolhido, o Gemini NÃO é chamado.
+  //
+  // Aqui havia "gemini-1.5-flash" como padrão. Esse modelo foi desativado pelo
+  // Google, e a chamada passou a responder 404 — mas o erro subia e deixava a
+  // página /blog EM BRANCO. Já aconteceu uma vez e voltou a acontecer. Um nome
+  // de modelo chumbado no código vence sem avisar; agora, para usar o Gemini,
+  // é preciso dizer qual modelo na variável BLOG_AI_MODEL.
+  const modelName = String(process.env.BLOG_AI_MODEL || "").trim();
+  if (!modelName) return null;
 
-  const result = await model.generateContent(prompt);
-  const response = await result.response;
-  const text = response.text();
-  return safeParseJson(text);
+  try {
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: modelName });
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return safeParseJson(response.text());
+  } catch (erro) {
+    console.warn("[blog] Gemini não respondeu:", (erro as Error).message);
+    return null;
+  }
 }
 
 async function generateFromGroq(prompt: string) {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) return null;
 
-  const client = new Groq({ apiKey });
-  const model = process.env.BLOG_AI_MODEL || "llama-3.1-70b-versatile";
+  const model = String(process.env.BLOG_AI_MODEL || "llama-3.3-70b-versatile").trim();
 
-  const resp = await client.chat.completions.create({
-    model,
-    temperature: 0.6,
-    messages: [
-      { role: "system", content: "Você é um(a) redator(a) SEO especialista em tecnologia. Retorne apenas JSON válido." },
-      { role: "user", content: prompt },
-    ],
-  });
+  try {
+    const client = new Groq({ apiKey });
+    const resp = await client.chat.completions.create({
+      model,
+      temperature: 0.6,
+      messages: [
+        { role: "system", content: "Você é um(a) redator(a) SEO especialista em tecnologia. Retorne apenas JSON válido." },
+        { role: "user", content: prompt },
+      ],
+    });
 
-  const text = resp.choices?.[0]?.message?.content || "";
-  if (!text.trim()) return null;
-  return safeParseJson(text);
+    const text = resp.choices?.[0]?.message?.content || "";
+    if (!text.trim()) return null;
+    return safeParseJson(text);
+  } catch (erro) {
+    // Modelo desativado, chave vencida, limite estourado: nada disso pode
+    // apagar a página. O texto de reserva abaixo assume a vez.
+    console.warn("[blog] Groq não respondeu:", (erro as Error).message);
+    return null;
+  }
 }
 
+/**
+ * Texto gerado por IA é ENFEITE, não requisito.
+ *
+ * Todo o resto deste arquivo já sabe trabalhar com `null` — tem título,
+ * descrição e HTML de reserva para cada caso. O que faltava era garantir que
+ * uma falha chegasse como `null` em vez de estourar: era por isso que um
+ * modelo desativado apagava a página /blog inteira em vez de só deixá-la com
+ * o texto mais simples.
+ */
 async function generateFromAI(prompt: string) {
-  const fromGroq = await generateFromGroq(prompt);
-  if (fromGroq) return fromGroq;
+  try {
+    const fromGroq = await generateFromGroq(prompt);
+    if (fromGroq) return fromGroq;
+    const fromGemini = await generateFromGemini(prompt);
+    if (fromGemini) return fromGemini;
+  } catch (erro) {
+    console.warn("[blog] Nenhuma IA respondeu:", (erro as Error).message);
+  }
   return null;
 }
 

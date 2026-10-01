@@ -79,7 +79,17 @@ export async function generateMetadata(props: { searchParams?: SearchParams }): 
 }
 
 export default async function BlogPage(props: { searchParams?: SearchParams }) {
-  const rawPosts = await listBlogPostsForPage({ take: 50 });
+  // Última rede: nem a busca dos posts pode apagar a página.
+  //
+  // Esta página já ficou EM BRANCO duas vezes — uma semana na primeira — porque
+  // uma falha aqui dentro derrubava TODO o conteúdo, inclusive o que não
+  // dependia dos posts: o layout, os destaques e o bloco de publicações do
+  // Soro, que é script externo e não tem nada a ver com o banco. Sem posts a
+  // página fica mais pobre; sem esta guarda ela deixa de existir.
+  const rawPosts = await listBlogPostsForPage({ take: 50 }).catch((erro) => {
+    console.error("[blog] Não consegui carregar os posts:", erro?.message || erro);
+    return [];
+  });
 
   const posts: BlogCardPost[] = rawPosts.map((p) => {
     const createdAt = p.created_at ? new Date(p.created_at) : new Date();
@@ -285,7 +295,10 @@ export default async function BlogPage(props: { searchParams?: SearchParams }) {
 
             {posts.length === 0 && (
               <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-12 text-center text-slate-400">
-                <p className="text-lg font-medium">Ainda não há posts publicados. Aguarde a ingestão automática via RSS/Produtos.</p>
+                <p className="text-lg font-medium">Os artigos estão sendo atualizados. Volte em alguns minutos.</p>
+                <p className="mt-2 text-sm text-slate-500">
+                  As publicações do Soro, acima, continuam disponíveis.
+                </p>
               </div>
             )}
           </div>

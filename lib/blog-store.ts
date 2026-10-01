@@ -258,7 +258,14 @@ async function buildDynamicPosts(): Promise<BlogPostView[]> {
     const publishedAt = item.publishedAt ? new Date(item.publishedAt) : new Date();
     const publishedAtIso = Number.isFinite(publishedAt.getTime()) ? publishedAt.toISOString() : nowIso;
     const postUrl = `https://www.balao.info/blog/${slug}`;
-    const generated = await generateBlogPostFromRss(item, { slug, publishedAtIso, url: postUrl });
+    // Um item problemático não pode levar os outros embora.
+    const generated = await generateBlogPostFromRss(item, { slug, publishedAtIso, url: postUrl }).catch(
+      (erro) => {
+        console.warn(`[blog] Pulei "${item.url}":`, erro?.message || erro);
+        return null;
+      },
+    );
+    if (!generated) continue;
     const cover = (item.imageUrls?.[0] ? String(item.imageUrls[0]) : null) || extractFirstImageUrlFromHtml(generated.content_html);
 
     posts.push({
@@ -414,7 +421,22 @@ export async function listBlogPostsForPage(input?: { category?: string; take?: n
     return [];
   }
 
-  const [rssPosts, productPosts] = await Promise.all([buildDynamicPosts(), buildDynamicProductPosts()]);
+  // Lista vazia é uma página de blog pobre; uma exceção aqui é uma página de
+  // blog EM BRANCO. Entre as duas, a lista vazia.
+  //
+  // Esta montagem ao vivo lê RSS, raspa o site e chama IA. Qualquer um dos três
+  // pode falhar num dia ruim, e sem esta guarda a falha subia até a página e
+  // apagava o conteúdo inteiro — inclusive o que não dependia disso.
+  const [rssPosts, productPosts] = await Promise.all([
+    buildDynamicPosts().catch((erro) => {
+      console.warn("[blog] Não consegui montar os posts de RSS:", erro?.message || erro);
+      return [] as BlogPostView[];
+    }),
+    buildDynamicProductPosts().catch((erro) => {
+      console.warn("[blog] Não consegui montar os posts de produto:", erro?.message || erro);
+      return [] as BlogPostView[];
+    }),
+  ]);
   const merged = rssPosts.concat(productPosts);
   if (category) {
     return sortByPublishedDesc(merged.filter((p) => p.category === category))
@@ -461,6 +483,9 @@ export async function getBlogPostForPage(slug: string): Promise<BlogPostView | n
     return null;
   }
 
-  const [rssPosts, productPosts] = await Promise.all([buildDynamicPosts(), buildDynamicProductPosts()]);
+  const [rssPosts, productPosts] = await Promise.all([
+    buildDynamicPosts().catch(() => [] as BlogPostView[]),
+    buildDynamicProductPosts().catch(() => [] as BlogPostView[]),
+  ]);
   return rssPosts.concat(productPosts).find((p) => p.slug === slug) || null;
 }
