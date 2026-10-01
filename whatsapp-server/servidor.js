@@ -586,6 +586,12 @@ const diag = {
   ultimaMensagemDirecao: null,
   ultimaMensagemPor: null, // "webhook" | "conciliacao" | "historico"
   ultimaSaindoDoCelularEm: null, // mensagem da loja que NÃO saiu do CRM
+  // A marca que faltava. "ultimaMensagemEm" conta as duas direções, e enviar
+  // continuou funcionando durante todo o apagão de 29/09 — então ela ficava
+  // sempre fresca e dizia que estava tudo bem. Só esta responde à pergunta que
+  // importa: quando foi a última vez que um CLIENTE conseguiu falar com a loja?
+  ultimaEntradaEm: null,
+  vigia: null,
   webhooksDeMensagem: 0,
   conciliacoes: 0,
   conciliadasNovas: 0,
@@ -961,6 +967,7 @@ function tratarMensagemRecebida(rec) {
   guardarNoCrm(final, "webhook");
   diag.ultimaMensagemPor = "webhook";
   if (final.direction === "out") diag.ultimaSaindoDoCelularEm = new Date().toISOString();
+  if (final.direction === "in") marcarEntrada(final.timestamp);
   if (nova) tocarConversa(final);
   // Mídia recebida é baixada logo: o link do WhatsApp expira em alguns dias.
   if (final.hasMedia && final.direction === "in") baixarMidia(final.id).catch(() => {});
@@ -1023,6 +1030,7 @@ function absorverRegistro(rec, { emitir = true, origem = "conciliacao" } = {}) {
     emitirMensagem(final);
     diag.ultimaMensagemPor = origem;
     if (final.direction === "out") diag.ultimaSaindoDoCelularEm = new Date().toISOString();
+    if (final.direction === "in") marcarEntrada(final.timestamp);
   } else if (!emitir) {
     // Guardada em silêncio: fica marcada como pendente, e a varredura leva.
     jaEmitidas.delete(final.id);
@@ -1113,6 +1121,153 @@ async function conferirWebhook({ consertar = true } = {}) {
 
 setTimeout(() => conferirWebhook().catch(() => {}), 30_000).unref?.();
 setInterval(() => conferirWebhook().catch(() => {}), 10 * 60_000).unref?.();
+
+// ------------------------------------------------------------------
+// Vigia de recebimento
+// ------------------------------------------------------------------
+// De 29/09 às 18:08 até 01/10 às 07:28, nenhuma mensagem de cliente entrou.
+// A Evolution dizia "conectado". O painel dizia "conectado". O /health dizia
+// "conectado". Enviar funcionava. Foram dois dias de loja aberta com o
+// telefone surdo, e o jeito de descobrir foi o dono estranhar o silêncio.
+//
+// O que o vigia acrescenta não é mais um "está conectado?" — essa pergunta já
+// tinha resposta, e era mentira. É esta: faz tempo demais que ninguém escreve,
+// NESTE horário, PARA ESTA loja? O ritmo vem do próprio histórico do CRM
+// (vigia.js explica), então madrugada e domingo não acordam ninguém.
+//
+// A escada é de propósito. Suspeita: conserta o que dá para consertar sozinho,
+// calado. Surdez confirmada: avisa — no painel, no WhatsApp do dono (enviar
+// continua funcionando justamente quando receber para) e no Telegram, se
+// estiver configurado. Reiniciar a sessão, não: isso pode cair num pedido de
+// QR novo, e um QR esperando às 3h da manhã é pior que o silêncio. Fica atrás
+// de VIGIA_AUTOCURA=1, para quando ele confiar.
+const { criarVigia } = require("./vigia.js");
+
+const VIGIA_LIGADO = process.env.VIGIA !== "0";
+const VIGIA_WHATSAPP = String(process.env.VIGIA_AVISAR_WHATSAPP || "").replace(/\D/g, "");
+const VIGIA_TELEGRAM_TOKEN = process.env.VIGIA_TELEGRAM_TOKEN || "";
+const VIGIA_TELEGRAM_CHAT = process.env.VIGIA_TELEGRAM_CHAT || "";
+const VIGIA_AUTOCURA = process.env.VIGIA_AUTOCURA === "1";
+// De quanto em quanto tempo o vigia olha. Cinco minutos na loja; a bancada
+// baixa isso para rodar um apagão de duas horas em dois segundos.
+const VIGIA_INTERVALO_MS = Number(process.env.VIGIA_INTERVALO_MS || 5 * 60_000);
+// Ritmo cravado à mão, em vez de aprendido do CRM. Serve para dois casos:
+// a bancada de teste (que não tem Postgres) e o dia em que o histórico ainda
+// não existe mas já se quer o alarme de pé. Formato: {"2:15": 14, ...}
+const VIGIA_BASE_FIXA = (() => {
+  try {
+    return process.env.VIGIA_BASE ? JSON.parse(process.env.VIGIA_BASE) : null;
+  } catch {
+    console.warn("[vigia] VIGIA_BASE não é JSON válido — ignorando.");
+    return null;
+  }
+})();
+
+/** "há 1 minuto" / "há 90 minutos" / "há 2 horas" — sem "1 minutos". */
+function minutos(n) {
+  const m = Math.max(1, Math.round(Number(n) || 0));
+  if (m < 60) return `há ${m} minuto${m === 1 ? "" : "s"}`;
+  const h = Math.round(m / 60);
+  return `há ${h} hora${h === 1 ? "" : "s"}`;
+}
+
+function marcarEntrada(timestamp) {
+  const ts = Number(timestamp) || Date.now();
+  // Mensagem de histórico (chega atrasada, em lote) não pode fingir que o
+  // recebimento está vivo: só conta o que é do presente.
+  if (Date.now() - ts > 30 * 60_000) return;
+  const atual = diag.ultimaEntradaEm ? Date.parse(diag.ultimaEntradaEm) : 0;
+  if (ts > atual) diag.ultimaEntradaEm = new Date(ts).toISOString();
+}
+
+async function avisarTelegram(texto) {
+  if (!VIGIA_TELEGRAM_TOKEN || !VIGIA_TELEGRAM_CHAT) return;
+  await fetch(`https://api.telegram.org/bot${VIGIA_TELEGRAM_TOKEN}/sendMessage`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ chat_id: VIGIA_TELEGRAM_CHAT, text: texto, disable_notification: false }),
+    signal: AbortSignal.timeout(15_000),
+  });
+}
+
+const vigia = criarVigia({
+  // Suspeita calada, e aviso quando a surdez se confirma.
+  tentarCurar: async (parecer) => {
+    console.warn(`[vigia] Suspeita: ${parecer.motivo}. Tentando consertar em silêncio.`);
+    // Na ordem do mais provável para o menos: webhook desinscrito (acontece
+    // quando a Evolution reinicia), varredura atrasada, lista velha.
+    await conferirWebhook({ consertar: true }).catch(() => {});
+    await atualizarEstadoDaConexao().catch(() => {});
+    await conciliarRecentes(120).catch(() => {});
+    if (VIGIA_AUTOCURA) {
+      console.warn("[vigia] VIGIA_AUTOCURA=1 — reiniciando a sessão da Evolution.");
+      await evolution.reiniciar(INSTANCIA).catch((e) => console.warn("[vigia] reinício falhou:", e.message));
+    }
+  },
+
+  avisar: async ({ tipo, parecer }) => {
+    const voltou = tipo === "voltou";
+    const titulo = voltou ? "WhatsApp voltou a receber" : "WhatsApp NÃO está recebendo";
+    const corpo = voltou
+      ? "Entrou mensagem de cliente agora. O recebimento voltou ao normal."
+      : `Nenhuma mensagem de cliente entrou ${minutos(parecer.silencioMin)}. ` +
+        `O WhatsApp aparece como conectado e o envio funciona — é o recebimento que parou. ` +
+        `Confira o aparelho da loja e, se precisar, reconecte pelo painel.`;
+
+    // 1) No painel, em letras grandes. Quem está com o CRM aberto vê na hora.
+    paraPainel().emit("whatsapp:vigia", { estado: voltou ? "ok" : "surdo", titulo, corpo, parecer });
+    diag.vigia = vigia.estado;
+
+    // 2) No WhatsApp do dono. A ironia é o que faz funcionar: quando receber
+    //    para, ENVIAR continua de pé, então este é o canal mais confiável que
+    //    existe nesta hora. Só para o número configurado — nunca um cliente.
+    if (VIGIA_WHATSAPP && estado.connected) {
+      await evolution
+        .enviarTexto(INSTANCIA, VIGIA_WHATSAPP, `${voltou ? "✅" : "🚨"} ${titulo}\n\n${corpo}`)
+        .catch((e) => console.warn("[vigia] aviso por WhatsApp falhou:", e.message));
+    }
+
+    // 3) No Telegram, se configurado — para o caso de o WhatsApp estar pior do
+    //    que o vigia imagina.
+    await avisarTelegram(`${voltou ? "✅" : "🚨"} ${titulo}\n${corpo}`).catch(() => {});
+  },
+});
+
+async function aprenderRitmoDaLoja() {
+  if (VIGIA_BASE_FIXA) {
+    vigia.aprender(VIGIA_BASE_FIXA);
+    console.log("[vigia] Ritmo cravado por VIGIA_BASE.");
+    return;
+  }
+  if (!crmServico?.ritmoDeEntrada) return;
+  try {
+    const base = await crmServico.ritmoDeEntrada({ semanas: 8 });
+    vigia.aprender(base);
+    const movimentadas = Object.values(base).filter((n) => n >= 2).length;
+    console.log(`[vigia] Ritmo aprendido: ${movimentadas} de 168 faixas de hora com movimento.`);
+  } catch (e) {
+    console.warn("[vigia] Não consegui aprender o ritmo:", e.message);
+  }
+}
+
+if (VIGIA_LIGADO) {
+  // Aprende depois do boot (o CRM leva alguns segundos para subir) e reaprende
+  // de 6 em 6 horas: o horário da loja muda, e a referência tem de mudar com ele.
+  setTimeout(() => aprenderRitmoDaLoja(), VIGIA_BASE_FIXA ? 500 : 90_000).unref?.();
+  setInterval(() => aprenderRitmoDaLoja(), 6 * 3600_000).unref?.();
+
+  setInterval(() => {
+    const ultima = diag.ultimaEntradaEm ? Date.parse(diag.ultimaEntradaEm) : 0;
+    vigia
+      .olhar(ultima)
+      .then(() => {
+        diag.vigia = vigia.estado;
+      })
+      .catch((e) => console.warn("[vigia] olhada falhou:", e.message));
+  }, VIGIA_INTERVALO_MS).unref?.();
+} else {
+  console.warn("[vigia] Desligado por VIGIA=0.");
+}
 
 // Varredura curta e barata: 40 mensagens, a cada 20 segundos. É o que garante
 // que uma mensagem escrita no celular aparece no CRM em segundos mesmo quando
@@ -1919,6 +2074,17 @@ io.on("connection", (socket) => {
     socket.emit("whatsapp:chats", listaDeConversas());
     socket.emit("whatsapp:status-feed", store.statusFeed);
     socket.emit("whatsapp:vendedores", store.vendedores.map(publicoVendedor));
+    // Painel que abre no meio de uma pane tem de já abrir avisando. Sem isto,
+    // o alerta só existia para quem estava com a tela aberta na hora do grito.
+    const v = diag.vigia || vigia.estado;
+    if (v?.estado === "surdo") {
+      socket.emit("whatsapp:vigia", {
+        estado: "surdo",
+        titulo: "WhatsApp NÃO está recebendo",
+        corpo: `Nenhuma mensagem de cliente entra ${minutos(v.silencioMin)}. O envio continua funcionando — é o recebimento que parou.`,
+        parecer: v,
+      });
+    }
   };
   entregar();
   // Painel abrindo (ou voltando do sono) relê as mensagens recentes na hora:

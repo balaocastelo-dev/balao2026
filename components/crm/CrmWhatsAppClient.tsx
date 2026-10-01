@@ -435,6 +435,11 @@ export default function CrmWhatsAppClient({
   // mensagem velha achando que está atualizada.
   const [aoVivo, setAoVivo] = useState(false);
   const [motivoQueda, setMotivoQueda] = useState<string | null>(null);
+  // O aviso do vigia de recebimento. Em 29/09 o WhatsApp ficou dois dias sem
+  // receber mensagem nenhuma, com tudo na tela dizendo "Conectado ✓" — porque
+  // enviar continuava funcionando. Esta faixa existe para que esse estado
+  // nunca mais passe despercebido.
+  const [alertaVigia, setAlertaVigia] = useState<{ titulo: string; corpo: string } | null>(null);
   const [qrCountdown, setQrCountdown] = useState<number>(25);
 
   // Vendedor State (No fake names)
@@ -1331,6 +1336,17 @@ export default function CrmWhatsAppClient({
     // O servidor já mandava isto desde sempre; o painel simplesmente não
     // escutava, então agenda de disparo e etiquetas cadastradas no servidor
     // nunca apareciam na tela de quem não as criou.
+    socket.on("whatsapp:vigia", (aviso: any) => {
+      if (!aviso || aviso.estado === "ok") {
+        setAlertaVigia(null);
+        return;
+      }
+      setAlertaVigia({
+        titulo: String(aviso.titulo || "WhatsApp não está recebendo"),
+        corpo: String(aviso.corpo || ""),
+      });
+    });
+
     socket.on("whatsapp:settings", (cfg: any) => {
       if (!cfg || typeof cfg !== "object") return;
       if (Array.isArray(cfg.labels) && cfg.labels.length > 0) {
@@ -3370,6 +3386,28 @@ export default function CrmWhatsAppClient({
 
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden bg-[#f0f2f5] text-[#202124] font-['Segoe_UI',Tahoma,Arial,sans-serif]">
+      {/* Vigia de recebimento: a faixa que faltava em 29/09. Fica em cima de
+          tudo, vermelha, e não se fecha sozinha — some quando entrar mensagem
+          de cliente de verdade. */}
+      {alertaVigia && (
+        <div
+          role="alert"
+          className="shrink-0 bg-[#b71c1c] text-white px-4 py-3 shadow-lg z-30 flex items-start gap-3"
+        >
+          <span className="text-2xl leading-none" aria-hidden>🚨</span>
+          <div className="flex-1 min-w-0">
+            <p className="font-extrabold text-sm sm:text-base">{alertaVigia.titulo}</p>
+            <p className="text-xs sm:text-sm opacity-95 mt-0.5">{alertaVigia.corpo}</p>
+          </div>
+          <button
+            onClick={reconectar}
+            className="shrink-0 bg-white text-[#b71c1c] font-bold text-xs rounded-lg px-3 py-1.5 hover:bg-[#ffebee] transition-colors cursor-pointer"
+          >
+            ♻️ Reconectar agora
+          </button>
+        </div>
+      )}
+
       {/* HEADER TOPBAR */}
       <header className="bg-[#0f9d58] text-white px-4 py-2.5 shadow-sm z-20 flex items-center justify-between gap-3 shrink-0">
         <div className="flex items-center gap-2">

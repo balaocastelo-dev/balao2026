@@ -601,7 +601,73 @@ function criarServicoDoCrm({ db, registrar = console.log }) {
     return r.rows[0];
   }
 
+  /**
+   * O ritmo de ENTRADA da loja, por dia da semana e hora, no fuso de São Paulo.
+   *
+   * É a base do vigia de recebimento. Em vez de cravar "avise com 2 horas de
+   * silêncio" — número que erra nos dois sentidos, porque domingo de madrugada
+   * 2 horas é normal e terça às 15h já é tarde demais — o servidor pergunta ao
+   * próprio histórico quantas mensagens costumam entrar em cada pedaço do dia.
+   *
+   * Usa a MEDIANA, não a média: uma Black Friday ou um dia de pane não
+   * deslocam a referência. E só conta mensagem de cliente ('in'): mensagem que
+   * a loja manda continua saindo mesmo com o recebimento surdo, então contá-la
+   * esconderia exatamente a pane que se quer enxergar.
+   */
+  async function ritmoDeEntrada({ semanas = 8 } = {}) {
+    const r = await db.query(
+      `WITH por_hora AS (
+         SELECT
+           EXTRACT(DOW  FROM em AT TIME ZONE 'America/Sao_Paulo')::int AS dow,
+           EXTRACT(HOUR FROM em AT TIME ZONE 'America/Sao_Paulo')::int AS hora,
+           date_trunc('hour', em AT TIME ZONE 'America/Sao_Paulo')     AS fatia,
+           count(*)::int                                               AS quantas
+         FROM crm_mensagem
+         WHERE direcao = 'in'
+           AND em >= now() - ($1::int * interval '7 days')
+         GROUP BY 1, 2, 3
+       ),
+       -- Hora sem NENHUMA mensagem não aparece no GROUP BY. Se olhássemos só
+       -- as horas que tiveram movimento, toda fatia pareceria movimentada e o
+       -- vigia alarmaria de madrugada. Então as ocorrências de cada fatia são
+       -- contadas de fora, e o que falta entra como zero.
+       ocorrencias AS (
+         SELECT dow, hora, count(*)::int AS vezes
+         FROM por_hora GROUP BY 1, 2
+       )
+       SELECT o.dow, o.hora,
+              percentile_disc(0.5) WITHIN GROUP (
+                ORDER BY coalesce(p.quantas, 0)
+              )::int AS mediana,
+              sum(coalesce(p.quantas, 0))::int AS total,
+              o.vezes
+       FROM ocorrencias o
+       JOIN por_hora p ON p.dow = o.dow AND p.hora = o.hora
+       GROUP BY o.dow, o.hora, o.vezes`,
+      [Math.max(1, Math.min(52, Number(semanas) || 8))]
+    );
+
+    const base = {};
+    for (const l of r.rows) {
+      // Uma fatia vista 2 vezes em 8 semanas não é referência de nada: a
+      // mediana dessas 2 ocorrências diria "movimentado" para um horário que
+      // quase sempre está vazio. Abaixo de metade das semanas, vale zero.
+      const confiavel = l.vezes >= Math.max(2, Math.floor(semanas / 2));
+      base[`${l.dow}:${l.hora}`] = confiavel ? Number(l.mediana) || 0 : 0;
+    }
+    // Fatias que nunca tiveram uma única mensagem não voltam da consulta.
+    // Preenchê-las com zero é o que diz ao vigia "aqui silêncio é normal".
+    for (let dow = 0; dow <= 6; dow++) {
+      for (let hora = 0; hora <= 23; hora++) {
+        const k = `${dow}:${hora}`;
+        if (!(k in base)) base[k] = 0;
+      }
+    }
+    return base;
+  }
+
   return {
+    ritmoDeEntrada,
     registrarMensagem,
     registrarMensagemSemQuebrar,
     registrarContato,

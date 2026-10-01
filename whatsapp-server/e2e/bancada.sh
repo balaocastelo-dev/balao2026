@@ -5,8 +5,8 @@ set -e
 R=/tmp/claude-0/bancada
 SENHA=teste123
 rm -rf $R && mkdir -p $R/dados
-cp /tmp/claude-0/-home-claude/7190d527-2f1c-59f4-b4eb-89b05f406470/scratchpad/rig2309/fakes.js $R/
-cp /tmp/claude-0/-home-claude/7190d527-2f1c-59f4-b4eb-89b05f406470/scratchpad/rig2309/dados2/webhook.segredo $R/dados/
+cp "$(dirname "$0")/fakes.js" $R/
+echo "segredo-de-bancada" > $R/dados/webhook.segredo
 ln -sfn /home/claude/balao2026/whatsapp-server/node_modules $R/node_modules
 
 # 1. Evolution falsa (portas 4598/4599)
