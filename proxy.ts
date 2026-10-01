@@ -44,6 +44,21 @@ const API_SO_ESCRITA = [
 // Dentro dos prefixos acima, estas continuam públicas (a loja depende delas).
 const EXCECOES_PUBLICAS = ['/api/coupons/validate']
 
+/**
+ * Rotas em que NEM LER é público, porque o GET delas ESCREVE no banco.
+ *
+ * `/api/admin/seed-categories` começa com `DELETE FROM categories`: abrir esse
+ * endereço no navegador apagava a árvore de categorias da loja inteira e
+ * recriava a de fábrica. `/api/seed` insere a árvore de fábrica de novo, o que
+ * duplica tudo. Nenhuma das duas pedia senha, e por serem GET a trava de
+ * escrita acima não as pegava — bastava alguém ter o endereço.
+ */
+const API_PROTEGIDA_SEMPRE = ['/api/seed', '/api/admin/seed-categories']
+
+function ehApiProtegidaSempre(pathname: string) {
+  return API_PROTEGIDA_SEMPRE.some((p) => pathname === p || pathname.startsWith(`${p}/`))
+}
+
 function ehApiProtegida(pathname: string) {
   if (EXCECOES_PUBLICAS.some((p) => pathname === p || pathname.startsWith(`${p}/`))) return false
   return API_SO_ESCRITA.some((p) => pathname === p || pathname.startsWith(`${p}/`))
@@ -104,6 +119,16 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(destino)
     }
     return NextResponse.next({ request })
+  }
+
+  // Rotas cujo GET escreve no banco: senha em qualquer método.
+  if (ehApiProtegidaSempre(pathname)) {
+    if (!(await estaAutenticado(request))) {
+      return NextResponse.json(
+        { ok: false, error: 'Acesso negado. Esta rota altera o banco e exige a senha do painel.' },
+        { status: 401 }
+      )
+    }
   }
 
   // API: leitura continua pública; escrita pede a senha.

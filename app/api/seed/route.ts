@@ -1,6 +1,7 @@
 ﻿import { randomUUID } from "crypto";
 import { turso } from "@/lib/turso";
 import { NextResponse } from "next/server";
+import { isPainelAuthenticated } from "@/lib/painel-auth";
 
 type CategorySeed = {
   name: string;
@@ -258,7 +259,25 @@ async function insertCategory(category: CategorySeed, parentId: string | null, o
   }
 }
 
+
+/**
+ * Segunda tranca, dentro da própria rota.
+ *
+ * A trava do `proxy.ts` já barra quem não tem a senha, mas esta rota APAGA
+ * dados: se um dia o matcher do proxy mudar, ela não pode voltar a ficar
+ * aberta na internet calada. Então ela confere de novo aqui.
+ */
+async function exigirPainel() {
+  if (await isPainelAuthenticated()) return null;
+  return NextResponse.json(
+    { success: false, error: "Acesso negado. Entre no painel do Balão antes de recriar as categorias." },
+    { status: 401 }
+  );
+}
+
 export async function GET() {
+  const barrado = await exigirPainel();
+  if (barrado) return barrado;
   try {
     for (let i = 0; i < SEED_DATA.length; i++) {
       await insertCategory(SEED_DATA[i], null, i);
