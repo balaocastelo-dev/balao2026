@@ -83,6 +83,9 @@ function criarEvolution({ url, chave, buscar = fetch, registrar = console.log })
     desconectar: (nome) => chamar("DELETE", `/instance/logout/${inst(nome)}`),
     definirWebhook: (nome, webhook) =>
       chamar("POST", `/webhook/set/${inst(nome)}`, { webhook }),
+    // O que a Evolution diz que TEM registrado — não o que mandamos registrar.
+    // Sem isso, um webhook que não chega é adivinhação.
+    consultarWebhook: (nome) => chamar("GET", `/webhook/find/${inst(nome)}`),
     definirConfiguracoes: (nome, config) =>
       chamar("POST", `/settings/set/${inst(nome)}`, config),
 

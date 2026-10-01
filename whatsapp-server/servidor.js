@@ -353,7 +353,18 @@ function listaDeConversas() {
     .sort((a, b) => (b.lastMessageTimestamp || 0) - (a.lastMessageTimestamp || 0));
 }
 
-function tocarConversa(msg) {
+/**
+ * Mensagem chegou: a conversa sobe na lista e ganha a prévia nova.
+ *
+ * `contarNaoLida` existe porque as duas coisas tinham sido amarradas na mesma
+ * trava de 10 minutos, e isso escondia conversa do vendedor. A sincronização do
+ * histórico traz mensagem antiga em lote; contar cada uma como não lida enche o
+ * contador de falso. Mas ATUALIZAR a lista é seguro em qualquer caso: a data só
+ * anda para frente (ver o `>=` abaixo), então mensagem velha não desarruma
+ * nada. Separando os dois, mensagem que chega pela varredura — e não pelo
+ * webhook — passa a aparecer na lista como deveria.
+ */
+function tocarConversa(msg, { contarNaoLida = true } = {}) {
   if (estado.phoneNumber && N.digitos(msg.chatId) === N.digitos(estado.phoneNumber)) return;
   // Conversa apagada volta sozinha quando o cliente escreve de novo — apagar
   // não é bloquear, e ninguém pode ficar sem resposta por causa disso.
@@ -376,7 +387,7 @@ function tocarConversa(msg) {
     atual.lastMessageTimestamp = msg.timestamp;
   }
   if (msg.direction === "in") {
-    atual.unreadCount = (atual.unreadCount || 0) + 1;
+    if (contarNaoLida) atual.unreadCount = (atual.unreadCount || 0) + 1;
     if (msg.contactName && (!atual.contactName || /^\(?\d/.test(atual.contactName))) atual.contactName = msg.contactName;
   }
   conversas.set(msg.chatId, atual);
@@ -581,6 +592,7 @@ const diag = {
   conciliacaoErros: 0,
   ultimoErroConciliacao: null,
   ultimoErroListaConversas: null,
+  webhook: null,
   emitidasParaOPainel: 0,
 };
 
@@ -984,7 +996,12 @@ function absorverRegistro(rec, { emitir = true, origem = "conciliacao" } = {}) {
     // Guardada em silêncio: fica marcada como pendente, e a varredura leva.
     jaEmitidas.delete(final.id);
   }
-  if (nova && idade < JANELA_PARA_TOCAR) tocarConversa(final);
+  // Antes: `if (nova && idade < JANELA_PARA_TOCAR)`. A mensagem era guardada e
+  // entregue, mas a CONVERSA não era atualizada — então ela não subia na lista
+  // e continuava mostrando a prévia e o horário velhos. Com o webhook de
+  // entrada falhando (hoje: 1 webhook contra 25 mensagens trazidas pela
+  // varredura), era isso que deixava a lista com buracos de horas.
+  if (nova || faltaEntregar) tocarConversa(final, { contarNaoLida: idade < JANELA_PARA_TOCAR });
   if (nova && final.hasMedia && final.direction === "in") baixarMidia(final.id).catch(() => {});
   return final;
 }
@@ -1014,6 +1031,57 @@ async function conciliarRecentes(quantas = 40) {
     conciliando = false;
   }
 }
+
+// ------------------------------------------------------------------
+// Guarda do webhook
+// ------------------------------------------------------------------
+// O servidor REGISTRA os eventos que quer receber no boot. Mas registrar não é
+// receber: se a Evolution reiniciar, perder a configuração ou aceitar só parte
+// dos eventos, mensagem que ENTRA deixa de chegar e ninguém é avisado. O
+// sintoma é cruel, porque enviar continua funcionando: só o que o cliente
+// escreve é que não aparece.
+//
+// Então o servidor pergunta à Evolution o que ela TEM registrado, compara com o
+// que precisa, publica a diferença no /health e reinscreve sozinho quando falta
+// evento. Sem adivinhação.
+async function conferirWebhook({ consertar = true } = {}) {
+  try {
+    const r = await evolution.consultarWebhook(INSTANCIA);
+    const cfg = r?.webhook || r || {};
+    const temEventos = (cfg.events || cfg.Events || []).map((e) => String(e).toUpperCase());
+    const faltando = EVENTOS_WEBHOOK.filter((e) => !temEventos.includes(e));
+    const urlOk = String(cfg.url || "") === String(WEBHOOK_URL);
+
+    diag.webhook = {
+      ligado: cfg.enabled !== false,
+      urlConfere: urlOk,
+      eventosRegistrados: temEventos.length,
+      faltando,
+      conferidoEm: new Date().toISOString(),
+    };
+
+    if (consertar && (faltando.length || !urlOk || cfg.enabled === false)) {
+      console.warn(
+        `[webhook] Reinscrevendo: faltando=${faltando.join(",") || "nenhum"} urlConfere=${urlOk} ligado=${cfg.enabled !== false}`
+      );
+      await evolution.definirWebhook(INSTANCIA, {
+        enabled: true,
+        url: WEBHOOK_URL,
+        byEvents: false,
+        base64: false,
+        headers: { "x-balao-webhook": SEGREDO_WEBHOOK },
+        events: EVENTOS_WEBHOOK,
+      });
+      diag.webhook.reinscritoEm = new Date().toISOString();
+    }
+  } catch (erro) {
+    diag.webhook = { erro: String(erro.message || erro).slice(0, 200), conferidoEm: new Date().toISOString() };
+    console.warn("[webhook] Não consegui conferir:", erro.message);
+  }
+}
+
+setTimeout(() => conferirWebhook().catch(() => {}), 30_000).unref?.();
+setInterval(() => conferirWebhook().catch(() => {}), 10 * 60_000).unref?.();
 
 // Varredura curta e barata: 40 mensagens, a cada 20 segundos. É o que garante
 // que uma mensagem escrita no celular aparece no CRM em segundos mesmo quando
