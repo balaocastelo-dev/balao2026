@@ -18,10 +18,20 @@ RUN npm ci --omit=dev \
  && node -e "require('express'); require('socket.io'); require('pg'); require('sharp')" \
  || (echo "ERRO: npm nao instalou as dependencias" >&2 && exit 1)
 
-COPY servidor.js catalogo.js vendedores-fixos.json ./
+# ATENÇÃO: esta lista é arquivo por arquivo. Módulo novo na raiz do servidor
+# TEM de ser acrescentado aqui — senão o container sobe, o require falha e o
+# servidor morre no boot, com o painel em 502. Foi o que aconteceu em 02/10:
+# o vigia.js foi criado, testado, deployado... e não estava dentro da imagem.
+COPY servidor.js catalogo.js vigia.js vendedores-fixos.json confere-imagem.js ./
 COPY evo ./evo
 COPY status ./status
 COPY crm ./crm
+
+# A rede de segurança para o erro acima: confere que todo require("./...") de
+# todo arquivo copiado resolve de verdade. Se faltar um, o BUILD falha aqui — e
+# o deploy nem chega a trocar o container, então o servidor antigo continua
+# atendendo. Build vermelho em vez de painel em 502.
+RUN node confere-imagem.js
 
 ARG VERSAO=dev
 RUN echo "$VERSAO" > VERSAO
