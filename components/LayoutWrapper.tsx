@@ -29,6 +29,10 @@ export default function LayoutWrapper({
   const isPaginaVendedor = slugsVendedores.some(
     (slug) => pathname === `/${slug}`
   );
+  // Página de vendas dos sistemas: tem cabeçalho, rodapé e barra de compra
+  // próprios. O menu, o rodapé da loja e o botão flutuante de WhatsApp
+  // competiriam com o único botão que importa ali.
+  const isPaginaDeVendas = pathname === "/sistemasdeia";
   const isFullscreenPanel =
     isCrmPage ||
     isPaginaVendedor ||
@@ -37,7 +41,7 @@ export default function LayoutWrapper({
 
   return (
     <SidebarProvider>
-      {!isRoletaPage && !isBlogPage && !isFullscreenPanel && (
+      {!isRoletaPage && !isBlogPage && !isFullscreenPanel && !isPaginaDeVendas && (
         <Sidebar categories={categories} mobileOnly />
       )}
       <div
@@ -58,9 +62,9 @@ export default function LayoutWrapper({
         >
           {children}
         </main>
-        {!isRoletaPage && !isFullscreenPanel && <Footer />}
+        {!isRoletaPage && !isFullscreenPanel && !isPaginaDeVendas && <Footer />}
       </div>
-      {!isFullscreenPanel && <FloatingWhatsApp />}
+      {!isFullscreenPanel && !isPaginaDeVendas && <FloatingWhatsApp />}
     </SidebarProvider>
   );
 }
