@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import {
   motion,
   useScroll,
@@ -9,7 +9,6 @@ import {
   useTransform,
 } from "framer-motion";
 import {
-  ArrowDown,
   ArrowUpRight,
   BadgeCheck,
   BatteryCharging,
@@ -85,156 +84,162 @@ const faqs = [
   },
 ];
 
-function ScrubVideo() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const targetTime = useRef(0);
-  const [ready, setReady] = useState(false);
-
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start start", "end end"],
-  });
-
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 80,
-    damping: 24,
-    mass: 0.35,
-  });
-
-  const videoRadius = useTransform(smoothProgress, [0, 0.18, 0.82, 1], [36, 24, 24, 36]);
-  const introOpacity = useTransform(smoothProgress, [0, 0.16, 0.28], [1, 1, 0]);
-  const introY = useTransform(smoothProgress, [0, 0.28], [0, -36]);
-  const specOpacity = useTransform(smoothProgress, [0.22, 0.38, 0.88], [0, 1, 1]);
-  const specY = useTransform(smoothProgress, [0.22, 0.46], [28, 0]);
-  const footerOpacity = useTransform(smoothProgress, [0.82, 0.96], [0, 1]);
-
-  useEffect(() => {
-    const unsubscribe = smoothProgress.on("change", (p) => {
-      const video = videoRef.current;
-      if (!video || !Number.isFinite(video.duration) || video.duration <= 0) return;
-      const easedProgress = Math.pow(Math.min(1, Math.max(0, p)), 0.92);
-      targetTime.current = Math.min(
-        video.duration * 0.72,
-        Math.max(0, easedProgress * video.duration * 0.72)
-      );
-    });
-
-    let raf = 0;
-    const animate = () => {
-      const video = videoRef.current;
-      if (video && Number.isFinite(video.duration) && video.duration > 0) {
-        const delta = targetTime.current - video.currentTime;
-        if (Math.abs(delta) > 0.018) {
-          video.currentTime += delta * 0.075;
-        }
-      }
-      raf = requestAnimationFrame(animate);
-    };
-    raf = requestAnimationFrame(animate);
-
-    return () => {
-      unsubscribe();
-      cancelAnimationFrame(raf);
-    };
-  }, [smoothProgress]);
-
+function ProductStory() {
   return (
-    <section ref={sectionRef} className="relative h-[430vh]">
-      <div className="sticky top-0 h-[100svh] overflow-hidden bg-[#050505]">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_15%,rgba(220,38,38,.16),transparent_38%)]" />
-        <div className="pointer-events-none absolute inset-0 opacity-[.13] [background-image:linear-gradient(rgba(255,255,255,.045)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.045)_1px,transparent_1px)] [background-size:52px_52px]" />
+    <section className="relative border-b border-white/10 bg-[#050505]">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_72%_20%,rgba(220,38,38,.16),transparent_32%)]" />
+      <div className="pointer-events-none absolute inset-0 opacity-[.12] [background-image:linear-gradient(rgba(255,255,255,.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.04)_1px,transparent_1px)] [background-size:52px_52px]" />
 
-        <motion.div
-          style={{ borderRadius: videoRadius }}
-          className="absolute left-1/2 top-1/2 h-[82svh] w-[96vw] max-w-[1600px] -translate-x-1/2 -translate-y-1/2 overflow-hidden border border-white/10 bg-black shadow-[0_60px_180px_rgba(0,0,0,.9)] sm:h-[84svh] sm:w-[94vw]"
-        >
-          {!ready && (
-            <Image
-              src="/images/apple/subcategories/macbook-card.png"
-              alt="MacBook Pro 2025 M5"
-              fill
-              sizes="100vw"
-              className="z-10 object-contain object-center"
-              priority
-            />
-          )}
-          <video
-            ref={videoRef}
-            src={VIDEO_URL}
-            poster="/images/apple/subcategories/macbook-card.png"
-            muted
-            playsInline
-            preload="auto"
-            onLoadedMetadata={() => setReady(true)}
-            className="h-full w-full object-contain object-center"
-            aria-label="MacBook Pro M5 em apresentação cinematográfica controlada pelo scroll"
-          />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/65" />
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_35%,rgba(0,0,0,.5)_100%)]" />
-        </motion.div>
-
-        <motion.div
-          style={{ opacity: introOpacity, y: introY }}
-          className="absolute inset-x-0 top-[10svh] z-20 mx-auto max-w-7xl px-5"
-        >
-          <div className="mx-auto max-w-5xl text-center">
-            <div className="mx-auto mb-5 flex w-fit items-center gap-2 rounded-full border border-white/15 bg-black/40 px-4 py-2 text-[11px] font-black uppercase tracking-[.22em] text-zinc-300 backdrop-blur-xl">
+      <div className="relative mx-auto grid max-w-[1500px] gap-10 px-5 pb-24 pt-28 lg:grid-cols-[.95fr_1.05fr] lg:gap-14 lg:pb-36">
+        <div className="space-y-28 lg:space-y-40">
+          <motion.div
+            initial={{ opacity: 0, y: 36 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: .7 }}
+            className="min-h-[78svh] pt-8 lg:pt-20"
+          >
+            <div className="mb-5 flex w-fit items-center gap-2 rounded-full border border-white/15 bg-white/[.04] px-4 py-2 text-[11px] font-black uppercase tracking-[.22em] text-zinc-300">
               <Sparkles className="h-3.5 w-3.5 text-red-400" />
               MacBook Pro 2025 · M5
             </div>
-
-            <h1 className="text-[15vw] font-black leading-[.72] tracking-[-.085em] text-white sm:text-[11vw] lg:text-[8.3rem]">
+            <h1 className="max-w-3xl text-6xl font-black leading-[.88] tracking-[-.075em] sm:text-7xl xl:text-[7rem]">
               PRO.
+              <br />
+              <span className="text-zinc-500">Agora com M5.</span>
             </h1>
-            <p className="mx-auto mt-8 max-w-2xl text-lg font-medium leading-relaxed text-zinc-300 sm:text-xl">
-              A máquina que transforma um dia inteiro de trabalho em uma experiência mais rápida,
-              silenciosa e elegante.
+            <p className="mt-8 max-w-2xl text-lg font-medium leading-relaxed text-zinc-300 sm:text-xl">
+              Um MacBook Pro feito para quem quer potência, mobilidade e uma experiência premium do começo ao fim.
             </p>
-          </div>
-        </motion.div>
+            <div className="mt-10 flex flex-wrap gap-3">
+              {["M5", "16GB", "SSD 512GB", "2025"].map((item) => (
+                <span key={item} className="rounded-full border border-white/12 bg-white/[.035] px-4 py-2 text-xs font-black uppercase tracking-[.16em] text-zinc-300">
+                  {item}
+                </span>
+              ))}
+            </div>
+          </motion.div>
 
-        <motion.div
-          style={{ opacity: specOpacity, y: specY }}
-          className="absolute inset-x-0 bottom-[6svh] z-20 mx-auto max-w-7xl px-5"
-        >
-          <div className="grid gap-2 md:grid-cols-4">
-            {[
-              ["M5", "Apple Silicon"],
-              ["16GB", "Memória"],
-              ["512GB", "SSD"],
-              ["10x", "Sem juros"],
-            ].map(([value, label]) => (
-              <div
-                key={value}
-                className="border-t border-white/25 bg-black/20 px-4 py-4 backdrop-blur-md"
-              >
-                <div className="text-3xl font-black tracking-[-.04em]">{value}</div>
-                <div className="mt-1 text-[10px] font-black uppercase tracking-[.2em] text-zinc-500">
-                  {label}
-                </div>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-
-        <motion.div
-          style={{ opacity: footerOpacity }}
-          className="absolute bottom-5 left-1/2 z-30 -translate-x-1/2"
-        >
-          <a
-            href="#oferta"
-            className="flex items-center gap-2 rounded-full border border-white/15 bg-black/55 px-4 py-2 text-xs font-black uppercase tracking-[.18em] text-white backdrop-blur-xl"
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: .35 }}
+            className="min-h-[72svh] flex flex-col justify-center"
           >
-            Ver oferta
-            <ArrowDown className="h-4 w-4" />
-          </a>
-        </motion.div>
+            <div className="text-xs font-black uppercase tracking-[.28em] text-red-400">01 / PERFORMANCE</div>
+            <h2 className="mt-4 max-w-3xl text-5xl font-black leading-[.94] tracking-[-.06em] sm:text-6xl">
+              O MacBook acompanha você.
+              <br />
+              Não o contrário.
+            </h2>
+            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-zinc-400">
+              O chip Apple M5, os 16GB de memória e o SSD de 512GB formam uma configuração pensada para trabalho profissional, criação, código, estudo e multitarefa.
+            </p>
+            <div className="mt-10 grid gap-3 sm:grid-cols-2">
+              {specs.slice(0, 2).map((item) => {
+                const Icon = item.icon;
+                return (
+                  <div key={item.value} className="rounded-[1.6rem] border border-white/10 bg-white/[.035] p-6">
+                    <Icon className="h-6 w-6 text-red-400" />
+                    <div className="mt-8 text-3xl font-black tracking-[-.04em]">{item.value}</div>
+                    <div className="mt-1 text-[10px] font-black uppercase tracking-[.2em] text-zinc-500">{item.label}</div>
+                    <p className="mt-4 text-sm leading-relaxed text-zinc-500">{item.copy}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: .35 }}
+            className="min-h-[72svh] flex flex-col justify-center"
+          >
+            <div className="text-xs font-black uppercase tracking-[.28em] text-red-400">02 / EXPERIÊNCIA</div>
+            <h2 className="mt-4 max-w-3xl text-5xl font-black leading-[.94] tracking-[-.06em] sm:text-6xl">
+              Ele continua na tela.
+              <br />
+              Enquanto você descobre.
+            </h2>
+            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-zinc-400">
+              O produto permanece ao seu lado durante a navegação. Nada de desaparecer no topo: você continua vendo o MacBook enquanto conhece os detalhes.
+            </p>
+            <div className="mt-10 grid gap-3 sm:grid-cols-2">
+              {specs.slice(2).map((item) => {
+                const Icon = item.icon;
+                return (
+                  <div key={item.value} className="rounded-[1.6rem] border border-white/10 bg-white/[.035] p-6">
+                    <Icon className="h-6 w-6 text-red-400" />
+                    <div className="mt-8 text-3xl font-black tracking-[-.04em]">{item.value}</div>
+                    <div className="mt-1 text-[10px] font-black uppercase tracking-[.2em] text-zinc-500">{item.label}</div>
+                    <p className="mt-4 text-sm leading-relaxed text-zinc-500">{item.copy}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+
+          <motion.div
+            id="oferta"
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: .35 }}
+            className="min-h-[78svh] flex flex-col justify-center"
+          >
+            <div className="text-xs font-black uppercase tracking-[.28em] text-red-400">03 / OFERTA</div>
+            <h2 className="mt-4 max-w-3xl text-5xl font-black leading-[.94] tracking-[-.06em] sm:text-6xl">
+              MacBook Pro M5.
+              <br />
+              R$ 10.999.
+            </h2>
+            <div className="mt-8 border-t border-white/10 pt-8">
+              <div className="text-5xl font-black tracking-[-.06em] sm:text-7xl">10x de R$ 1.099,90</div>
+              <div className="mt-2 text-lg font-bold text-zinc-400">sem juros no cartão</div>
+            </div>
+            <a
+              href={WHATSAPP}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group mt-9 inline-flex w-fit items-center gap-3 rounded-full bg-[#25D366] px-7 py-4 text-base font-black text-white shadow-2xl shadow-green-950/30 transition hover:scale-[1.03]"
+            >
+              <MessageCircle className="h-5 w-5" />
+              Comprar pelo WhatsApp
+              <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </a>
+          </motion.div>
+        </div>
+
+        <div className="relative">
+          <div className="sticky top-[10svh] flex h-[80svh] items-center justify-center lg:h-[84svh]">
+            <motion.div
+              initial={{ opacity: 0, scale: .96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: .8 }}
+              className="relative h-full w-full overflow-hidden rounded-[2.2rem] border border-white/10 bg-black shadow-[0_50px_160px_rgba(0,0,0,.85)]"
+            >
+              <video
+                src={VIDEO_URL}
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="metadata"
+                poster="/images/apple/subcategories/macbook-card.png"
+                className="h-full w-full object-contain object-center"
+                aria-label="MacBook Pro M5 em animação contínua"
+              />
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_40%,rgba(0,0,0,.48)_100%)]" />
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-black/70 to-transparent" />
+              <div className="absolute bottom-6 left-6 rounded-full border border-white/10 bg-black/55 px-4 py-2 text-[10px] font-black uppercase tracking-[.18em] text-zinc-300 backdrop-blur-xl">
+                MacBook Pro M5 · sempre visível
+              </div>
+            </motion.div>
+          </div>
+        </div>
       </div>
     </section>
   );
 }
-
 export default function MacBookM5Landing() {
   const { scrollYProgress } = useScroll();
   const progress = useSpring(scrollYProgress, {
@@ -298,7 +303,7 @@ export default function MacBookM5Landing() {
         </div>
       </header>
 
-      <ScrubVideo />
+      <ProductStory />
 
       <section className="relative overflow-hidden border-y border-white/10 bg-[#090909] py-5">
         <motion.div
@@ -418,66 +423,6 @@ export default function MacBookM5Landing() {
               Mobilidade, desempenho e a experiência integrada do ecossistema Apple.
             </p>
           </motion.article>
-        </div>
-      </section>
-
-      <section id="oferta" className="relative overflow-hidden border-y border-white/10 bg-white text-black">
-        <div className="mx-auto grid max-w-7xl gap-0 lg:grid-cols-2">
-          <div className="relative min-h-[560px] overflow-hidden bg-[#efefef] p-6 sm:p-10">
-            <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-white/70 to-transparent" />
-            <Image
-              src="/images/apple/subcategories/macbook-card.png"
-              alt="MacBook Pro 2025 M5 16GB 512GB"
-              fill
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover object-center mix-blend-multiply"
-            />
-            <div className="absolute left-6 top-6 rounded-full bg-black px-4 py-2 text-[10px] font-black uppercase tracking-[.2em] text-white sm:left-10 sm:top-10">
-              Pronta entrega · consulte estoque
-            </div>
-          </div>
-
-          <div className="flex min-h-[560px] flex-col justify-between p-7 sm:p-12 lg:p-14">
-            <div>
-              <div className="text-xs font-black uppercase tracking-[.25em] text-black/45">
-                OFERTA BALÃO
-              </div>
-              <h2 className="mt-5 text-4xl font-black leading-[.95] tracking-[-.055em] sm:text-6xl">
-                MacBook Pro
-                <br />
-                M5 · 16GB · 512GB
-              </h2>
-              <div className="mt-10 border-t border-black/15 pt-8">
-                <div className="text-xs font-black uppercase tracking-[.2em] text-black/45">Por</div>
-                <div className="mt-2 text-6xl font-black tracking-[-.07em] sm:text-7xl">
-                  R$ 10.999
-                </div>
-                <div className="mt-2 text-lg font-bold text-black/60">
-                  10x de R$ 1.099,90 sem juros
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-10">
-              <a
-                href={WHATSAPP}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex w-full items-center justify-between rounded-2xl bg-black px-6 py-5 text-white transition hover:bg-red-600"
-              >
-                <span className="flex items-center gap-3 text-lg font-black">
-                  <MessageCircle className="h-6 w-6" />
-                  Comprar pelo WhatsApp
-                </span>
-                <ArrowUpRight className="h-5 w-5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
-              </a>
-              <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs font-bold text-black/50">
-                <span>✓ Atendimento humano</span>
-                <span>✓ Compra local em Campinas</span>
-                <span>✓ Garantia total de 1 ano</span>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
