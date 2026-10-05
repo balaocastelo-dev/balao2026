@@ -2,8 +2,10 @@
 
 Website oficial: https://www.balao.info
 
-## Oferta destacada
-- Produto: MacBook com chip Apple M5
+## Oferta destacada — MacBook Pro 2025 M5
+- Produto: MacBook Pro 2025 com chip Apple M5
+- Memória: 16GB
+- Armazenamento: SSD 512GB
 - Página oficial da oferta: https://www.balao.info/macbookm5
 - Preço anunciado: R$ 10.999,00
 - Pagamento: até 10x sem juros
