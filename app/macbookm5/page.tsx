@@ -4,20 +4,21 @@ import MacBookM5Landing from "./MacBookM5Landing";
 const canonical = "https://www.balao.info/macbookm5";
 
 export const metadata: Metadata = {
-  title: "MacBook M5 em Campinas por R$ 10.999 | 10x sem juros",
+  title: "MacBook Pro 2025 M5 16GB 512GB em Campinas | R$ 10.999",
   description:
-    "Compre MacBook com chip M5 em Campinas por R$ 10.999 em até 10x sem juros. 6 meses de garantia Apple + 6 meses adicionais da Balão da Informática, completando 1 ano. Atendimento direto no WhatsApp.",
+    "MacBook Pro 2025 com chip M5, 16GB e SSD 512GB por R$ 10.999 em até 10x sem juros na Balão da Informática em Campinas. 6 meses Apple + 6 meses adicionais da loja.",
   keywords: [
-    "macbook m5 campinas",
-    "macbook campinas",
-    "comprar macbook m5 campinas",
-    "macbook m5 preço campinas",
-    "macbook m5 10x sem juros",
-    "macbook apple campinas",
-    "loja apple campinas",
-    "notebook apple campinas",
+    "macbook pro 2025 m5 campinas",
+    "macbook pro m5 16gb 512gb",
+    "macbook pro m5 campinas",
+    "comprar macbook pro m5 campinas",
+    "macbook m5 512gb campinas",
+    "macbook m5 16gb campinas",
+    "macbook pro 2025 preço",
+    "macbook pro 10x sem juros",
+    "apple campinas",
+    "macbook cambuí",
     "balão da informática macbook",
-    "macbook cambuí campinas",
   ],
   alternates: { canonical },
   robots: { index: true, follow: true },
@@ -26,15 +27,16 @@ export const metadata: Metadata = {
     locale: "pt_BR",
     url: canonical,
     siteName: "Balão da Informática",
-    title: "MacBook M5 em Campinas por R$ 10.999",
+    title: "MacBook Pro 2025 M5 16GB 512GB | R$ 10.999",
     description:
-      "Oferta especial: R$ 10.999 em até 10x sem juros, com 1 ano de cobertura total de garantia.",
+      "Oferta em Campinas: MacBook Pro M5 com 16GB e SSD 512GB por R$ 10.999 em até 10x sem juros.",
     images: [{ url: "/images/apple/subcategories/macbook-card.png" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "MacBook M5 em Campinas | Balão da Informática",
-    description: "R$ 10.999 em até 10x sem juros. Fale direto com a loja pelo WhatsApp.",
+    title: "MacBook Pro 2025 M5 16GB 512GB | Balão da Informática",
+    description:
+      "R$ 10.999 em até 10x sem juros. 6 meses Apple + 6 meses Balão.",
     images: ["/images/apple/subcategories/macbook-card.png"],
   },
 };
@@ -45,12 +47,12 @@ const jsonLd = {
     {
       "@type": "Product",
       "@id": canonical + "#product",
-      name: "MacBook com chip M5",
+      name: "MacBook Pro 2025 M5 16GB 512GB",
       description:
-        "MacBook com chip Apple M5 vendido pela Balão da Informática em Campinas, com atendimento direto pelo WhatsApp.",
+        "MacBook Pro 2025 com chip Apple M5, 16GB de memória e SSD de 512GB vendido pela Balão da Informática em Campinas.",
       brand: { "@type": "Brand", name: "Apple" },
       image: "https://www.balao.info/images/apple/subcategories/macbook-card.png",
-      sku: "MACBOOK-M5-BALAO",
+      sku: "MACBOOK-PRO-2025-M5-16-512",
       offers: {
         "@type": "Offer",
         url: canonical,
@@ -76,18 +78,27 @@ const jsonLd = {
       mainEntity: [
         {
           "@type": "Question",
-          name: "Qual o preço do MacBook M5 na Balão da Informática?",
-          acceptedAnswer: { "@type": "Answer", text: "R$ 10.999,00, com opção de pagamento em até 10x sem juros." }
+          name: "Qual é o preço do MacBook Pro 2025 M5 16GB 512GB?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "R$ 10.999,00, com opção de pagamento em até 10x sem juros."
+          }
         },
         {
           "@type": "Question",
-          name: "Qual a garantia do MacBook M5?",
-          acceptedAnswer: { "@type": "Answer", text: "São 6 meses de garantia Apple e mais 6 meses adicionais oferecidos pela Balão da Informática, completando 1 ano de cobertura." }
+          name: "Qual é a configuração do MacBook Pro anunciado?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "MacBook Pro 2025 com chip M5, 16GB de memória e SSD de 512GB."
+          }
         },
         {
           "@type": "Question",
-          name: "A Balão da Informática atende Campinas?",
-          acceptedAnswer: { "@type": "Answer", text: "Sim. A loja atende Campinas e região, com contato comercial direto pelo WhatsApp (19) 98751-0267." }
+          name: "Qual é a garantia do MacBook Pro M5?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "São 6 meses de garantia Apple e mais 6 meses adicionais da Balão da Informática, completando 1 ano de cobertura."
+          }
         }
       ]
     },
@@ -95,7 +106,7 @@ const jsonLd = {
       "@type": "BreadcrumbList",
       itemListElement: [
         { "@type": "ListItem", position: 1, name: "Balão da Informática", item: "https://www.balao.info" },
-        { "@type": "ListItem", position: 2, name: "MacBook M5", item: canonical }
+        { "@type": "ListItem", position: 2, name: "MacBook Pro 2025 M5", item: canonical }
       ]
     }
   ]
