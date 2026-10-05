@@ -102,19 +102,22 @@ function ScrubVideo() {
     mass: 0.35,
   });
 
-  const videoScale = useTransform(smoothProgress, [0, 0.5, 1], [0.82, 1, 0.92]);
-  const videoRadius = useTransform(smoothProgress, [0, 0.25, 0.75, 1], [40, 8, 8, 40]);
-  const introOpacity = useTransform(smoothProgress, [0, 0.18, 0.34], [1, 1, 0]);
-  const introY = useTransform(smoothProgress, [0, 0.34], [0, -70]);
-  const specOpacity = useTransform(smoothProgress, [0.28, 0.48, 0.78], [0, 1, 1]);
-  const specY = useTransform(smoothProgress, [0.28, 0.55], [70, 0]);
-  const footerOpacity = useTransform(smoothProgress, [0.72, 0.9], [0, 1]);
+  const videoRadius = useTransform(smoothProgress, [0, 0.18, 0.82, 1], [36, 24, 24, 36]);
+  const introOpacity = useTransform(smoothProgress, [0, 0.16, 0.28], [1, 1, 0]);
+  const introY = useTransform(smoothProgress, [0, 0.28], [0, -36]);
+  const specOpacity = useTransform(smoothProgress, [0.22, 0.38, 0.88], [0, 1, 1]);
+  const specY = useTransform(smoothProgress, [0.22, 0.46], [28, 0]);
+  const footerOpacity = useTransform(smoothProgress, [0.82, 0.96], [0, 1]);
 
   useEffect(() => {
     const unsubscribe = smoothProgress.on("change", (p) => {
       const video = videoRef.current;
       if (!video || !Number.isFinite(video.duration) || video.duration <= 0) return;
-      targetTime.current = Math.min(video.duration * 0.995, Math.max(0, p * video.duration));
+      const easedProgress = Math.pow(Math.min(1, Math.max(0, p)), 0.92);
+      targetTime.current = Math.min(
+        video.duration * 0.72,
+        Math.max(0, easedProgress * video.duration * 0.72)
+      );
     });
 
     let raf = 0;
@@ -123,7 +126,7 @@ function ScrubVideo() {
       if (video && Number.isFinite(video.duration) && video.duration > 0) {
         const delta = targetTime.current - video.currentTime;
         if (Math.abs(delta) > 0.018) {
-          video.currentTime += delta * 0.16;
+          video.currentTime += delta * 0.075;
         }
       }
       raf = requestAnimationFrame(animate);
@@ -137,14 +140,14 @@ function ScrubVideo() {
   }, [smoothProgress]);
 
   return (
-    <section ref={sectionRef} className="relative h-[340vh]">
+    <section ref={sectionRef} className="relative h-[430vh]">
       <div className="sticky top-0 h-[100svh] overflow-hidden bg-[#050505]">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_15%,rgba(220,38,38,.16),transparent_38%)]" />
         <div className="pointer-events-none absolute inset-0 opacity-[.13] [background-image:linear-gradient(rgba(255,255,255,.045)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.045)_1px,transparent_1px)] [background-size:52px_52px]" />
 
         <motion.div
-          style={{ scale: videoScale, borderRadius: videoRadius }}
-          className="absolute inset-0 m-auto h-[68vh] w-[92vw] max-w-[1500px] overflow-hidden border border-white/10 bg-black shadow-[0_60px_180px_rgba(0,0,0,.9)]"
+          style={{ borderRadius: videoRadius }}
+          className="absolute left-1/2 top-1/2 h-[82svh] w-[96vw] max-w-[1600px] -translate-x-1/2 -translate-y-1/2 overflow-hidden border border-white/10 bg-black shadow-[0_60px_180px_rgba(0,0,0,.9)] sm:h-[84svh] sm:w-[94vw]"
         >
           {!ready && (
             <Image
@@ -152,7 +155,7 @@ function ScrubVideo() {
               alt="MacBook Pro 2025 M5"
               fill
               sizes="100vw"
-              className="z-10 object-cover"
+              className="z-10 object-contain object-center"
               priority
             />
           )}
@@ -164,7 +167,7 @@ function ScrubVideo() {
             playsInline
             preload="auto"
             onLoadedMetadata={() => setReady(true)}
-            className="h-full w-full object-cover"
+            className="h-full w-full object-contain object-center"
             aria-label="MacBook Pro M5 em apresentação cinematográfica controlada pelo scroll"
           />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/65" />
@@ -173,7 +176,7 @@ function ScrubVideo() {
 
         <motion.div
           style={{ opacity: introOpacity, y: introY }}
-          className="absolute inset-x-0 top-[13vh] z-20 mx-auto max-w-7xl px-5"
+          className="absolute inset-x-0 top-[10svh] z-20 mx-auto max-w-7xl px-5"
         >
           <div className="mx-auto max-w-5xl text-center">
             <div className="mx-auto mb-5 flex w-fit items-center gap-2 rounded-full border border-white/15 bg-black/40 px-4 py-2 text-[11px] font-black uppercase tracking-[.22em] text-zinc-300 backdrop-blur-xl">
@@ -193,7 +196,7 @@ function ScrubVideo() {
 
         <motion.div
           style={{ opacity: specOpacity, y: specY }}
-          className="absolute inset-x-0 bottom-[8vh] z-20 mx-auto max-w-7xl px-5"
+          className="absolute inset-x-0 bottom-[6svh] z-20 mx-auto max-w-7xl px-5"
         >
           <div className="grid gap-2 md:grid-cols-4">
             {[
