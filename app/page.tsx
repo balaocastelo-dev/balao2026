@@ -283,7 +283,7 @@ export default async function Home(props: {
       <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 space-y-12 sm:space-y-16 py-8">
         {/* 1. Full-Width Stretched Hero Banner */}
         {!search && !category && (
-          <HomeHeroFullWidth carouselImages={carouselImages} />
+          <HomeHeroFullWidth />
         )}
 
         {/* 2. Trust Pillars (4 interactive cards) */}
