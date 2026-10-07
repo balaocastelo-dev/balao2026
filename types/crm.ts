@@ -134,6 +134,9 @@ export interface CrmProdutoCatalogo {
   fornecedor?: string;
   margem?: number;
   precoFormatado: string;
+  /** Preço no cartão e parcelamento, como estão no site. */
+  precoCartao?: number;
+  parcelamento?: string;
   categoria: string;
   imagem: string;
   slug?: string;

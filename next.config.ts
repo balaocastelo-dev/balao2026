@@ -4,6 +4,11 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: process.cwd(),
   },
+  // A troca do catálogo lê este arquivo do disco; sem declarar, ele não vai
+  // junto com a função na Vercel.
+  outputFileTracingIncludes: {
+    "/api/precos/troca": ["./data/catalogo-inicial.json"],
+  },
   images: {
     remotePatterns: [
       {
