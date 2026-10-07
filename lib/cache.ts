@@ -24,6 +24,7 @@ import {
   lerCategoriasDoEspelho,
   lerBannersDoEspelho,
 } from "./catalogo-espelho";
+import { casaComTermos } from "./catalogo/filtros";
 import type { Product } from "./utils";
 
 const listaVazia = (itens: unknown[]) => !Array.isArray(itens) || itens.length === 0;
@@ -174,7 +175,7 @@ export function getCachedSearchByTerms(termos: string[], limite = 10) {
     async () =>
       comEspelho<Product[]>(
         async () => searchProductsByKeywords(termos, limite),
-        (produtos) => espelhoPorTodosOsTermos(produtos, termos, limite),
+        (produtos) => produtos.filter((p) => casaComTermos(p, termos)).slice(0, limite),
         listaVazia
       ),
     chave,
@@ -192,7 +193,7 @@ export function getCachedBuscaCompleta(termos: string[], limite = 1500) {
     async () =>
       comEspelho<Product[]>(
         () => buscarProdutosPorTermos(termos, limite),
-        (produtos) => espelhoPorTodosOsTermos(produtos, termos, limite),
+        (produtos) => produtos.filter((p) => casaComTermos(p, termos)).slice(0, limite),
         listaVazia
       ),
     chave,

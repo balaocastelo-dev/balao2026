@@ -203,6 +203,19 @@ export function termosDaBusca(busca: string): string[] {
 }
 
 /**
+ * Todos os termos aparecem no nome, na categoria ou na marca? Sem depender de
+ * acento nem de caixa: "memoria" acha "Memória RAM".
+ *
+ * É a mesma regra da consulta no banco, usada quando a busca precisa responder
+ * pela cópia do catálogo (banco fora do ar ou no limite de conexões).
+ */
+export function casaComTermos(produto: Product, termos: string[]): boolean {
+  if (termos.length === 0) return false;
+  const texto = `${semAcento(produto.name)} ${semAcento(produto.category)} ${semAcento(produto.brand)}`;
+  return termos.every((t) => texto.includes(semAcento(t)));
+}
+
+/**
  * Relevância na busca. Quanto maior a fatia do nome que a busca cobre, mais o
  * produto É aquilo: "Memória RAM Kingston 16GB DDR5" é uma memória; um PC com
  * quinze itens na ficha só TEM uma. O termo aparecer no começo também conta.

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { aplicarFiltros, contarFiltros, lerFiltros, montarFacetas, ordenar, paraQuery, pontuar, termosDaBusca } from "@/lib/catalogo/filtros";
+import { aplicarFiltros, casaComTermos, contarFiltros, lerFiltros, montarFacetas, ordenar, paraQuery, pontuar, termosDaBusca } from "@/lib/catalogo/filtros";
 import type { Product } from "@/lib/utils";
 
 const p = (id: string, name: string, category: string, price: string, brand?: string): Product => ({
@@ -118,6 +118,19 @@ describe("catalogo/filtros — o caso '16gb ddr5'", () => {
   it("ordena por preço quando pedido", () => {
     expect(ordenar(resultado, "menor")[0].id).toBe("m3");
     expect(ordenar(resultado, "maior")[0].id).toBe("pc2");
+  });
+});
+
+describe("catalogo/filtros — busca pela cópia do catálogo", () => {
+  it("acha 'memoria' sem acento, 'ddr5' e a marca", () => {
+    const achados = (busca: string) => resultado.filter((x) => casaComTermos(x, termosDaBusca(busca))).map((x) => x.id);
+    expect(achados("memoria")).toEqual(["m1", "m2", "m3"]);
+    expect(achados("MEMÓRIA")).toEqual(["m1", "m2", "m3"]);
+    expect(achados("ddr5")).toHaveLength(7);
+    expect(achados("kingston ddr5")).toEqual(["m1", "m3"]);
+    expect(achados("placas-mae")).toEqual(["mb1"]); // pela categoria
+    expect(achados("geladeira")).toEqual([]);
+    expect(casaComTermos(resultado[0], [])).toBe(false);
   });
 });
 
