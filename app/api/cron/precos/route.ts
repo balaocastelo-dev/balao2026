@@ -15,6 +15,12 @@ export const maxDuration = 60;
  */
 async function autorizado(req: Request) {
   if (req.headers.get("x-vercel-cron")) return true;
+  // O agendador da Vercel se apresenta pelo user-agent "vercel-cron/1.0" e só
+  // manda o Authorization quando existe CRON_SECRET no projeto. Sem aceitar o
+  // user-agent, a rota respondia 401 ao próprio agendador e nenhuma fonte era
+  // relida sozinha. Não é segredo, e não precisa ser: quem chamar esta rota
+  // por fora só adianta uma leitura que já estava vencida.
+  if ((req.headers.get("user-agent") || "").toLowerCase().startsWith("vercel-cron/")) return true;
   const segredo = process.env.CRON_SECRET;
   if (segredo && req.headers.get("authorization") === `Bearer ${segredo}`) return true;
   return isPainelAuthenticated();
@@ -35,6 +41,13 @@ export async function GET(req: Request) {
       return NextResponse.json({ ok: true, passos: [], aviso: "Catálogo ainda não vem das fontes." });
     }
     const passos = await rodarAgendado(45_000);
+    // Uma linha por rodada, para dar para conferir nos logs que o agendador está vivo.
+    console.log(
+      "[cron/precos]",
+      passos.length === 0
+        ? "nenhuma fonte vencida"
+        : passos.map((p) => `${p.fonte}: ${p.estado}${p.totalDePaginas ? ` (pág. ${p.pagina}/${p.totalDePaginas})` : ""}`).join("; ")
+    );
     return NextResponse.json({ ok: true, passos });
   } catch (erro) {
     const mensagem = String((erro as Error)?.message || erro);
