@@ -11,9 +11,12 @@ import HomeCategoryShelf from "@/components/HomeCategoryShelf";
 import HomeMonitoresFullWidth from "@/components/HomeMonitoresFullWidth";
 import HomeBlogSection from "@/components/HomeBlogSection";
 
-import { getCachedCategories, getCachedProducts, getCachedProductsByExactCategories, getCachedCarouselImages } from "@/lib/cache";
+import Paginacao from "@/components/catalogo/Paginacao";
+import { BotaoDeFiltros, FiltrosLaterais } from "@/components/catalogo/FiltrosDoCatalogo";
+import { aplicarFiltros, contarFiltros, lerFiltros, montarFacetas, ordenar, paraQuery, termosDaBusca } from "@/lib/catalogo/filtros";
+
+import { getCachedCategories, getCachedProducts, getCachedProductsByExactCategories, getCachedCarouselImages, getCachedBuscaCompleta } from "@/lib/cache";
 import { listBlogPostsForPage } from "@/lib/blog-store";
-import { turso } from "@/lib/turso";
 import { parsePriceToNumber, Product, type Category } from "@/lib/utils";
 import type { Metadata } from "next";
 import { SITE_CONFIG } from "@/lib/config";
@@ -21,7 +24,19 @@ import Link from "next/link";
 
 export const revalidate = 60;
 
-type SearchParams = Promise<{ category?: string; search?: string }>;
+type SearchParams = Promise<{
+  category?: string;
+  search?: string;
+  cat?: string;
+  marca?: string;
+  min?: string;
+  max?: string;
+  tags?: string;
+  ordem?: string;
+  page?: string;
+}>;
+
+const PRODUTOS_POR_PAGINA = 24;
 
 type HomeBlogPost = {
   id: string;
@@ -120,31 +135,10 @@ export default async function Home(props: {
   ]);
 
   if (search) {
-    const rawSearchProducts = await (async () => {
-      const searchTerms = search.trim().split(/\s+/).filter((t) => t.length > 0);
-
-      const conditions = searchTerms
-        .map(() => "(LOWER(name) LIKE ? OR LOWER(description) LIKE ?)")
-        .join(" AND ");
-      const args: string[] = [];
-      searchTerms.forEach((term) => {
-        const like = `%${term.toLowerCase()}%`;
-        args.push(like, like);
-      });
-
-      try {
-        const res = await turso.execute({
-          sql: `SELECT * FROM products WHERE ${conditions} LIMIT 50`,
-          args,
-        });
-        return ((res.rows as unknown as Product[]) || []).sort(
-          (a, b) => parsePriceToNumber(b.price) - parsePriceToNumber(a.price)
-        );
-      } catch (err) {
-        console.error("Search error:", err);
-        return [] as Product[];
-      }
-    })();
+    // Todos os termos precisam bater (nome, categoria ou marca). Vem o
+    // resultado inteiro, não só os 50 primeiros: é ele que o painel de filtros
+    // usa para contar categorias, marcas e faixa de preço.
+    const rawSearchProducts = await getCachedBuscaCompleta(termosDaBusca(search));
 
     const seenNames = new Set();
     products = rawSearchProducts.filter(p => {
@@ -245,6 +239,20 @@ export default async function Home(props: {
   );
 
   const dealOfTheDay = pcGamerProducts[0] || products[0] || null;
+
+  // --- Navegação do catálogo (busca ou ?category=): filtros laterais ---
+  const filtros = lerFiltros(searchParams || {});
+  const navegando = Boolean(search || category);
+  const facetas = navegando ? montarFacetas(products, filtros) : null;
+  const filtrosLigados = contarFiltros(filtros);
+  const ordemPadrao = search ? "relevancia" : "menor";
+  const filtrados = navegando
+    ? ordenar(aplicarFiltros(products, filtros), filtros.ordem || ordemPadrao, search ? termosDaBusca(search) : [])
+    : [];
+  const totalDePaginas = Math.max(1, Math.ceil(filtrados.length / PRODUTOS_POR_PAGINA));
+  const paginaAtual = Math.min(filtros.pagina, totalDePaginas);
+  const daPagina = filtrados.slice((paginaAtual - 1) * PRODUTOS_POR_PAGINA, paginaAtual * PRODUTOS_POR_PAGINA);
+  const hrefDaPagina = (pagina: number) => `/?${paraQuery({ ...filtros, pagina }, { search, category })}`;
 
   return (
     <div className="home-shell min-h-screen flex flex-col font-sans transition-colors duration-300 bg-slate-950 text-slate-100 selection:bg-[#E60012] selection:text-white">
@@ -390,9 +398,15 @@ export default async function Home(props: {
                   {category || `Resultados para: "${search}"`}
                 </h1>
               </div>
-              <span className="rounded-full border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-bold text-slate-300">
-                {products.length} produtos encontrados
-              </span>
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="rounded-full border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-bold text-slate-300">
+                  {filtrados.length.toLocaleString("pt-BR")} {filtrados.length === 1 ? "produto" : "produtos"}
+                  {filtrosLigados > 0 ? ` de ${products.length.toLocaleString("pt-BR")}` : ""}
+                </span>
+                {facetas && products.length > 0 && (
+                  <BotaoDeFiltros facetas={facetas} filtros={filtros} ligados={filtrosLigados} total={filtrados.length} ordemPadrao={ordemPadrao} />
+                )}
+              </div>
             </div>
 
             {products.length === 0 ? (
@@ -400,7 +414,24 @@ export default async function Home(props: {
                 <p className="text-xl font-medium">Nenhum produto encontrado para esta busca.</p>
               </div>
             ) : (
-              <ProductList products={products} />
+              <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+                {facetas && (
+                  <FiltrosLaterais facetas={facetas} filtros={filtros} ligados={filtrosLigados} total={filtrados.length} ordemPadrao={ordemPadrao} />
+                )}
+                <div className="min-w-0 flex-1">
+                  {daPagina.length === 0 ? (
+                    <div className="rounded-2xl border border-slate-800 bg-slate-950 px-6 py-20 text-center text-slate-400">
+                      <p className="text-xl font-medium">Nenhum produto bate com esses filtros.</p>
+                      <p className="mt-2 text-sm">Tire algum filtro para ver mais resultados.</p>
+                    </div>
+                  ) : (
+                    <>
+                      <ProductList products={daPagina} semOrdenacao />
+                      <Paginacao atual={paginaAtual} total={totalDePaginas} href={hrefDaPagina} rotulo="Paginação dos resultados" />
+                    </>
+                  )}
+                </div>
+              </div>
             )}
           </section>
         )}

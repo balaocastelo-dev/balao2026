@@ -9,6 +9,7 @@ import {
   getProductsByExactCategories,
   getProductsByCategoryFullPath,
   searchProductsByKeywords,
+  buscarProdutosPorTermos,
 } from "./db";
 import { listVitrinePagesPublic } from "./vitrine/db";
 import {
@@ -173,6 +174,24 @@ export function getCachedSearchByTerms(termos: string[], limite = 10) {
     async () =>
       comEspelho<Product[]>(
         async () => searchProductsByKeywords(termos, limite),
+        (produtos) => espelhoPorTodosOsTermos(produtos, termos, limite),
+        listaVazia
+      ),
+    chave,
+    { revalidate: 120, tags: [TAG_PRODUTOS] }
+  )();
+}
+
+/**
+ * Página de resultados da busca: todos os termos, sem o teto de 10 da caixa de
+ * pesquisa. O resultado inteiro alimenta o painel de filtros.
+ */
+export function getCachedBuscaCompleta(termos: string[], limite = 1500) {
+  const chave = ["products-busca-completa", termos.join("|"), String(limite)];
+  return unstable_cache(
+    async () =>
+      comEspelho<Product[]>(
+        () => buscarProdutosPorTermos(termos, limite),
         (produtos) => espelhoPorTodosOsTermos(produtos, termos, limite),
         listaVazia
       ),
