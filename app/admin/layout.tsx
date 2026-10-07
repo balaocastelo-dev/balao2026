@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowLeft, CheckCircle, Upload, Layout, Layers, ShoppingBag, Settings } from "lucide-react";
+import { ArrowLeft, CheckCircle, Upload, Layout, Layers, ShoppingBag, Settings, Percent } from "lucide-react";
 import VitrineAdminShell from "@/components/admin/VitrineAdminShell";
 
 export default function AdminLayout({
@@ -17,6 +17,7 @@ export default function AdminLayout({
   }
 
   const tabs = [
+    { name: "Preços por Fonte", href: "/admin/precos", icon: Percent },
     { name: "Importação em Massa", href: "/admin/importacao", icon: Upload },
     { name: "Minhas Páginas", href: "/admin/paginas", icon: Layout },
     { name: "Gerenciar Carrossel", href: "/admin/carrossel", icon: Layout },

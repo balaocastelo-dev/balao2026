@@ -1000,6 +1000,8 @@ export default function CrmWhatsAppClient({
               margem,
               fornecedor,
               precoFormatado: precoFmt,
+              precoCartao: parsePriceToNumber(p.price_card) || undefined,
+              parcelamento: typeof p.installment === "string" && p.installment ? p.installment : undefined,
               categoria: p.category || "Informática",
               imagem: resolveImagemAbsoluta(p.image || p.image_urls?.[0] || ""),
               // Campos internos (custo de aquisição, markup aplicado,
@@ -2752,7 +2754,14 @@ export default function CrmWhatsAppClient({
     const specsTxt = prod.specs?.length ? `\n• ${prod.specs.join("\n• ")}` : "";
     const obsTxt = obsCustom?.trim() ? `\n\n_Obs: ${obsCustom.trim()}_` : "";
 
-    const textoFormatado = `⚡ *Oferta Balão da Informática:*\n*${prod.nome}*\n\n💵 *Preço Especial:* *${precoFmt}*${specsTxt}${obsTxt}\n\n📍 Pronta entrega na loja do Castelo Campinas!\nPara garantir a reserva ou tirar dúvidas, é só responder aqui! 🎈`;
+    // Preço do site sem ajuste: vai com os dois preços, à vista e no cartão,
+    // iguais aos da página do produto. Preço montado à mão segue sozinho.
+    const cartaoTxt =
+      precoFinal === prod.preco && prod.precoCartao && prod.precoCartao > 0
+        ? ` à vista no Pix\n💳 *No cartão:* R$ ${prod.precoCartao.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}${prod.parcelamento ? ` em até ${prod.parcelamento}` : ""}`
+        : "";
+
+    const textoFormatado = `⚡ *Oferta Balão da Informática:*\n*${prod.nome}*\n\n💵 *Preço Especial:* *${precoFmt}*${cartaoTxt}${specsTxt}${obsTxt}\n\n📍 Pronta entrega na loja do Castelo Campinas!\nPara garantir a reserva ou tirar dúvidas, é só responder aqui! 🎈`;
 
     const produtoResumo: CrmProdutoResumo = {
       id: prod.id,
@@ -4642,6 +4651,7 @@ export default function CrmWhatsAppClient({
                                       <>
                                         <span className="font-bold text-sm text-[#0a6e3d]">
                                           {prod.precoFormatado}
+                                          <span className="ml-1 text-[10px] font-semibold text-[#5f6368]">à vista</span>
                                         </span>
                                         <span className="text-[10px] text-[#0f9d58] bg-[#e7f6ec] font-bold px-1.5 py-0.5 rounded">
                                           Preço do Site
@@ -4658,6 +4668,12 @@ export default function CrmWhatsAppClient({
                                       </>
                                     )}
                                   </div>
+                                  {tipoPrecoCatalogo === "venda" && prod.precoCartao ? (
+                                    <p className="mt-0.5 text-[11px] text-[#5f6368]">
+                                      No cartão: R$ {prod.precoCartao.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                      {prod.parcelamento ? ` · ${prod.parcelamento}` : ""}
+                                    </p>
+                                  ) : null}
                                 </div>
                               </div>
 

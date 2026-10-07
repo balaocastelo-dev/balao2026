@@ -6,6 +6,7 @@
   "crons": [
     { "path": "/api/cron/blog-rss", "schedule": "*/30 * * * *" },
     { "path": "/api/cron/blog-product", "schedule": "*/30 * * * *" },
-    { "path": "/api/cron/blog-balao-item", "schedule": "*/30 * * * *" }
+    { "path": "/api/cron/blog-balao-item", "schedule": "*/30 * * * *" },
+    { "path": "/api/cron/precos", "schedule": "*/10 * * * *" }
   ]
 }

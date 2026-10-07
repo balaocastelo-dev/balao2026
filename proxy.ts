@@ -83,7 +83,9 @@ const EXCECOES_PUBLICAS = ['/api/coupons/validate']
  * duplica tudo. Nenhuma das duas pedia senha, e por serem GET a trava de
  * escrita acima não as pegava — bastava alguém ter o endereço.
  */
-const API_PROTEGIDA_SEMPRE = ['/api/seed', '/api/admin/seed-categories']
+// `/api/precos` entra aqui inteiro: até a leitura mostra as margens da loja e
+// de onde cada preço vem, e isso não é assunto de quem não tem a senha.
+const API_PROTEGIDA_SEMPRE = ['/api/seed', '/api/admin/seed-categories', '/api/precos']
 
 function ehApiProtegidaSempre(pathname: string) {
   return API_PROTEGIDA_SEMPRE.some((p) => pathname === p || pathname.startsWith(`${p}/`))

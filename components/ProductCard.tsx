@@ -50,9 +50,6 @@ export default function ProductCard({ product, variant = "grid" }: { product: Pr
               </h3>
               
               <div className="mt-1">
-                  <p className="text-[10px] text-[var(--site-muted)] line-through">
-                      {(parseFloat(product.price.replace("R$", "").replace(/\./g, "").replace(",", ".")) / 0.85).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                  </p>
                   <div className="flex items-baseline gap-1">
                       <span className="text-xs font-bold text-[#E60012]">R$</span>
                       <span className="text-lg font-extrabold text-[#E60012]">
@@ -62,6 +59,11 @@ export default function ProductCard({ product, variant = "grid" }: { product: Pr
                   <p className="text-[10px] text-[var(--site-soft)]">
                       à vista no PIX
                   </p>
+                  {product.price_card && (
+                    <p className="text-[10px] text-[var(--site-muted)]">
+                        ou {product.price_card} no cartão
+                    </p>
+                  )}
               </div>
           </div>
         </Link>
@@ -103,9 +105,6 @@ export default function ProductCard({ product, variant = "grid" }: { product: Pr
             </h3>
             
             <div className="mt-2 sm:mt-4">
-                <p className="text-[10px] sm:text-xs text-[var(--site-muted)] line-through">
-                    {(parseFloat(product.price.replace("R$", "").replace(/\./g, "").replace(",", ".")) / 0.85).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                </p>
                 <div className="flex items-baseline gap-1">
                     <span className="text-xs sm:text-sm font-bold text-[#E60012]">R$</span>
                     <span className="text-lg sm:text-2xl font-extrabold text-[#E60012]">
@@ -115,6 +114,11 @@ export default function ProductCard({ product, variant = "grid" }: { product: Pr
                 <p className="mt-1 text-[10px] sm:text-xs text-[var(--site-soft)]">
                     à vista no PIX
                 </p>
+                {product.price_card && (
+                  <p className="text-[10px] sm:text-xs text-[var(--site-muted)]">
+                      ou {product.price_card} no cartão
+                  </p>
+                )}
             </div>
         </div>
       </Link>
