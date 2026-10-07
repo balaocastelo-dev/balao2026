@@ -238,6 +238,28 @@ export async function searchProductsByKeywords(keywords: string[], limit = 24): 
   }
 }
 
+// Busca do site: TODOS os termos precisam aparecer no nome, na categoria ou na
+// marca. Devolve só as colunas que a vitrine usa — sem descrição nem ficha —
+// porque o resultado inteiro vai para o painel de filtros contar categorias,
+// marcas e faixa de preço, e uma busca ampla ("ssd") traz centenas de linhas.
+export async function buscarProdutosPorTermos(termos: string[], limite = 1500): Promise<Product[]> {
+  const limpos = [...new Set(termos.map((t) => String(t || "").trim().toLowerCase()).filter(Boolean))].slice(0, 8);
+  if (limpos.length === 0) return [];
+  if (!isTursoActive()) return [];
+
+  const clausulas = limpos
+    .map(() => "(LOWER(name) LIKE ? OR LOWER(category) LIKE ? OR LOWER(brand) LIKE ?)")
+    .join(" AND ");
+  const args = limpos.flatMap((t) => [`%${t}%`, `%${t}%`, `%${t}%`]);
+
+  const res = await turso.execute({
+    sql: `SELECT id, name, price, image, category, slug, brand, rating, installment, discount_pix, price_card, availability
+          FROM products WHERE ${clausulas} LIMIT ${Math.trunc(Math.max(1, Math.min(3000, limite)))}`,
+    args,
+  });
+  return res.rows.map((r) => mapTursoProduct(r as Row));
+}
+
 export async function getProductByIdentifier(identifier: string): Promise<Product | null> {
   if (!isTursoActive()) return null;
 

@@ -1,12 +1,12 @@
-import Link from "next/link";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import ProductList from "@/components/ProductList";
-import FilterSyncer from "@/components/FilterSyncer";
+import Paginacao from "@/components/catalogo/Paginacao";
+import { BotaoDeFiltros, FiltrosLaterais } from "@/components/catalogo/FiltrosDoCatalogo";
 
 import { searchProducts } from "@/lib/searchUtils";
-import { extractTags, filterProductsByTags } from "@/lib/product-filters";
-import { parsePriceToNumber, type Category } from "@/lib/utils";
+import { aplicarFiltros, contarFiltros, lerFiltros, montarFacetas, ordenar, paraQuery, termosDaBusca } from "@/lib/catalogo/filtros";
+import { type Category } from "@/lib/utils";
 import { Metadata } from "next";
 import JsonLd, { generateBreadcrumbSchema, generateOrganizationSchema, generateItemListSchema } from "@/components/JsonLd";
 import { notFound } from "next/navigation";
@@ -17,7 +17,16 @@ const PRODUCTS_PER_PAGE = 24;
 
 type Props = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ search?: string; tags?: string; page?: string }>;
+  searchParams: Promise<{
+    search?: string;
+    tags?: string;
+    page?: string;
+    cat?: string;
+    marca?: string;
+    min?: string;
+    max?: string;
+    ordem?: string;
+  }>;
 };
 
 function buildCategoryCanonical(slug: string, page: number, hasFacet: boolean) {
@@ -29,10 +38,13 @@ function buildCategoryCanonical(slug: string, page: number, hasFacet: boolean) {
 
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const { search, tags: tagsParam, page } = await searchParams;
+  const sp = await searchParams;
+  const { search, page } = sp;
   const categories = await getCachedCategories();
   const pageNumber = Math.max(1, Number.parseInt(page || "1", 10) || 1);
-  const hasFacet = Boolean((search || "").trim() || (tagsParam || "").trim());
+  const filtrosDaUrl = lerFiltros(sp);
+  // Página filtrada ou reordenada é variação da mesma lista: não vai para o índice.
+  const hasFacet = Boolean((search || "").trim() || contarFiltros(filtrosDaUrl) > 0 || filtrosDaUrl.ordem);
   
   let title = "Categoria";
   let description = "Encontre os melhores produtos de informática no Balão da Informática.";
@@ -75,9 +87,10 @@ export default async function CategoriaPage({
   searchParams,
 }: Props) {
   const { slug } = await params;
-  const { search, tags: tagsParam, page } = await searchParams;
-  const selectedTags = tagsParam ? tagsParam.split(',') : [];
-  const currentPage = Math.max(1, Number.parseInt(page || "1", 10) || 1);
+  const sp = await searchParams;
+  const { search } = sp;
+  const filtros = lerFiltros(sp);
+  const currentPage = filtros.pagina;
  
   const categories = await getCachedCategories();
  
@@ -103,12 +116,18 @@ export default async function CategoriaPage({
     filteredProducts = searchProducts(filteredProducts, search);
   }
 
-  // Extract tags from current filtered products (before tag filtering)
-  const availableTags = extractTags(filteredProducts);
-
-  // Apply tag filter
-  filteredProducts = filterProductsByTags(filteredProducts, selectedTags);
-  filteredProducts = filteredProducts.sort((a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price));
+  // Filtros laterais. As opções de cada bloco (subcategorias, marcas, faixa
+  // de preço, características) saem do conjunto ANTES do corte de página, para
+  // valerem para a categoria inteira.
+  const raiz = categoryName !== "Todos os Produtos" ? selectedCat?.full_path || "" : "";
+  const facetas = montarFacetas(filteredProducts, filtros, raiz, categoryName || "Todas as categorias");
+  const filtrosLigados = contarFiltros(filtros);
+  const ordemPadrao = search ? "relevancia" : "menor";
+  filteredProducts = ordenar(
+    aplicarFiltros(filteredProducts, filtros),
+    filtros.ordem || ordemPadrao,
+    search ? termosDaBusca(search) : []
+  );
   const totalProducts = filteredProducts.length;
   const totalPages = Math.max(1, Math.ceil(totalProducts / PRODUCTS_PER_PAGE));
 
@@ -123,8 +142,13 @@ export default async function CategoriaPage({
   const canonical = buildCategoryCanonical(
     slug,
     currentPage,
-    Boolean((search || "").trim() || selectedTags.length > 0)
+    Boolean((search || "").trim() || filtrosLigados > 0 || filtros.ordem)
   );
+  const hrefDaPagina = (pagina: number) => {
+    const qs = paraQuery({ ...filtros, pagina }, { search });
+    return qs ? `/categoria/${slug}?${qs}` : `/categoria/${slug}`;
+  };
+  const propsDosFiltros = { facetas, filtros, ligados: filtrosLigados, total: totalProducts, ordemPadrao } as const;
 
   // Schema Markup
   const breadcrumbItems = [
@@ -140,7 +164,6 @@ export default async function CategoriaPage({
         generateBreadcrumbSchema(breadcrumbItems),
         generateItemListSchema(paginatedProducts, canonical)
       ]} />
-      <FilterSyncer tags={availableTags} />
       <Header />
       
       {/* Mobile Title & Filters Toggle (Placeholder for future filter drawer) */}
@@ -148,15 +171,19 @@ export default async function CategoriaPage({
          <h1 className="text-xl font-bold text-[var(--site-text)]">
             {categoryName || "Categoria"}
          </h1>
-         <span className="rounded-full border border-[var(--site-border)] bg-[var(--site-panel-soft)] px-2.5 py-1 text-xs font-medium text-[var(--site-muted)]">
-            {totalProducts}
-         </span>
+         <div className="flex items-center gap-2">
+           <span className="rounded-full border border-[var(--site-border)] bg-[var(--site-panel-soft)] px-2.5 py-1 text-xs font-medium text-[var(--site-muted)]">
+              {totalProducts}
+           </span>
+           <BotaoDeFiltros {...propsDosFiltros} />
+         </div>
       </div>
 
       <div className="container mx-auto flex flex-1 flex-col gap-4 px-3 py-4 sm:px-4 lg:flex-row lg:gap-6 lg:px-0 lg:py-6">
         {/* Sidebar Hidden on Mobile */}
-        <div className="hidden lg:block w-64 shrink-0">
-          <Sidebar categories={categories} availableTags={availableTags} selectedTags={selectedTags} />
+        <div className="hidden lg:flex w-64 shrink-0 flex-col gap-4">
+          <FiltrosLaterais {...propsDosFiltros} />
+          <Sidebar categories={categories} />
         </div>
 
         <main className="flex-1 w-full min-w-0">
@@ -169,53 +196,17 @@ export default async function CategoriaPage({
             </span>
           </div>
 
-          {/* Tags List for Mobile (Horizontal Scroll) */}
-          <div className="lg:hidden flex gap-2 overflow-x-auto pb-4 mb-4 scrollbar-hide">
-             {availableTags.map(tag => (
-                <div key={tag.name} className="whitespace-nowrap rounded-full border border-[var(--site-border)] bg-[var(--site-panel-soft)] px-3 py-1 text-sm text-[var(--site-muted)]">
-                   {tag.name}
-                </div>
-             ))}
-          </div>
-
           {paginatedProducts.length === 0 ? (
             <div className="site-surface-soft rounded-[1.5rem] px-6 py-16 text-center text-[var(--site-muted)] shadow-sm">
               <p className="text-xl font-medium">Nenhum produto encontrado.</p>
-              <p className="mt-2 text-sm">Tente ajustar seus filtros ou busca.</p>
+              <p className="mt-2 text-sm">
+                {filtrosLigados > 0 ? "Nenhum produto bate com esses filtros. Tire algum para ver mais." : "Tente outra busca."}
+              </p>
             </div>
           ) : (
             <>
-              <ProductList products={paginatedProducts} />
-              {totalPages > 1 && (
-                <nav
-                  aria-label="Paginação da categoria"
-                  className="mt-8 flex flex-wrap items-center justify-center gap-2"
-                >
-                  {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => {
-                    const qs = new URLSearchParams();
-                    if (search) qs.set("search", search);
-                    if (tagsParam) qs.set("tags", tagsParam);
-                    if (pageNumber > 1) qs.set("page", String(pageNumber));
-                    const href = qs.toString()
-                      ? `/categoria/${slug}?${qs.toString()}`
-                      : `/categoria/${slug}`;
-
-                    return (
-                      <Link
-                        key={pageNumber}
-                        href={href}
-                        className={`min-w-11 rounded-xl border px-4 py-2 text-sm font-bold transition-colors ${
-                          pageNumber === currentPage
-                            ? "border-red-600 bg-red-600 text-white"
-                            : "border-[var(--site-border)] bg-[var(--site-panel-soft)] text-[var(--site-text)] hover:border-red-500 hover:text-red-600"
-                        }`}
-                      >
-                        {pageNumber}
-                      </Link>
-                    );
-                  })}
-                </nav>
-              )}
+              <ProductList products={paginatedProducts} semOrdenacao />
+              <Paginacao atual={currentPage} total={totalPages} href={hrefDaPagina} rotulo="Paginação da categoria" />
             </>
           )}
 

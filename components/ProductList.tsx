@@ -8,7 +8,14 @@ import { LayoutGrid, Grid2x2, ArrowUpDown, ChevronDown } from "lucide-react";
 type ViewMode = "small" | "large" | "list";
 type SortMode = "default" | "price-asc" | "price-desc";
 
-export default function ProductList({ products }: { products: Product[] }) {
+export default function ProductList({
+  products,
+  semOrdenacao = false,
+}: {
+  products: Product[];
+  /** A página já ordena no servidor (filtros do catálogo): esconde o seletor daqui. */
+  semOrdenacao?: boolean;
+}) {
   const [viewMode, setViewMode] = useState<ViewMode>("small");
   const [sortMode, setSortMode] = useState<SortMode>("default");
 
@@ -61,7 +68,7 @@ export default function ProductList({ products }: { products: Product[] }) {
       <div className="flex flex-col justify-between gap-4 px-1 sm:flex-row sm:items-center lg:px-0">
         
         {/* Sort Controls */}
-        <div className="flex w-full items-center gap-2 sm:w-auto">
+        <div className={semOrdenacao ? "hidden" : "flex w-full items-center gap-2 sm:w-auto"}>
             <span className="text-sm font-medium whitespace-nowrap flex items-center gap-1 text-[var(--site-muted)]">
                 <ArrowUpDown size={16} /> Ordenar por:
             </span>
@@ -79,7 +86,7 @@ export default function ProductList({ products }: { products: Product[] }) {
         {/* View Controls */}
         <div className="flex w-full items-center justify-end gap-2 sm:w-auto">
             
-            <span className="mr-2 hidden text-sm font-medium text-[var(--site-muted)] sm:inline">VisualizaÃ§Ã£o:</span>
+            <span className="mr-2 hidden text-sm font-medium text-[var(--site-muted)] sm:inline">Visualização:</span>
             
             <button
             onClick={() => setViewMode("small")}
