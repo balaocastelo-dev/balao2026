@@ -30,14 +30,14 @@ export const metadata: Metadata = {
     title: "MacBook Pro 2025 M5 16GB 512GB | R$ 10.999",
     description:
       "Oferta em Campinas: MacBook Pro M5 com 16GB e SSD 512GB por R$ 10.999 em até 10x sem juros.",
-    images: [{ url: "/images/apple/subcategories/macbook-card.png" }],
+    images: [{ url: "/images/macbook-m5/macbook-pro-m5-og.jpg" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "MacBook Pro 2025 M5 16GB 512GB | Balão da Informática",
     description:
       "R$ 10.999 em até 10x sem juros. 6 meses Apple + 6 meses Balão.",
-    images: ["/images/apple/subcategories/macbook-card.png"],
+    images: ["/images/macbook-m5/macbook-pro-m5-og.jpg"],
   },
 };
 
@@ -51,7 +51,7 @@ const jsonLd = {
       description:
         "MacBook Pro 2025 com chip Apple M5, 16GB de memória e SSD de 512GB vendido pela Balão da Informática em Campinas.",
       brand: { "@type": "Brand", name: "Apple" },
-      image: "https://www.balao.info/images/apple/subcategories/macbook-card.png",
+      image: "https://www.balao.info/images/macbook-m5/macbook-pro-m5-og.jpg",
       sku: "MACBOOK-PRO-2025-M5-16-512",
       offers: {
         "@type": "Offer",

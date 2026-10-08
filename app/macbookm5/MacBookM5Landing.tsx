@@ -224,7 +224,7 @@ function ProductStory() {
                 muted
                 playsInline
                 preload="metadata"
-                poster="/images/apple/subcategories/macbook-card.png"
+                poster="/images/macbook-m5/macbook-pro-m5-poster.webp"
                 className="h-full w-full object-contain object-center"
                 aria-label="MacBook Pro M5 em animação contínua"
               />
