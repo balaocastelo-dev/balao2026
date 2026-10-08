@@ -7,10 +7,15 @@ import { ArrowRight, BadgeCheck, Clock3, PackageCheck, ShieldCheck } from "lucid
  *
  * É um produto único da loja — não vem do espelhamento de preços (Kabum e
  * afins), então os valores ficam aqui, à mão. Mudou o preço? É só trocar as
- * duas constantes abaixo; o "economize" se ajusta sozinho.
+ * constantes abaixo; a parcela e o "abaixo do mercado" se ajustam sozinhos.
+ *
+ * Os mesmos dois preços (à vista e no cartão) aparecem em /macbookm5 — se
+ * mudar aqui, mude lá também.
  */
 const PRECO_DE_MERCADO = 15000;
-const PRECO_PROMOCIONAL = 9999;
+const PRECO_A_VISTA = 9999;
+const PRECO_NO_CARTAO = 10999;
+const PARCELAS = 10;
 
 const PAGINA_DO_PRODUTO = "/macbookm5";
 
@@ -21,8 +26,13 @@ const emReais = (valor: number) =>
     maximumFractionDigits: 0,
   });
 
+const valorDaParcela = (PRECO_NO_CARTAO / PARCELAS).toLocaleString("pt-BR", {
+  style: "currency",
+  currency: "BRL",
+});
+
 // O preço de mercado é aproximado, então a economia também é dita por alto.
-const economiaEmMil = Math.round((PRECO_DE_MERCADO - PRECO_PROMOCIONAL) / 1000);
+const economiaEmMil = Math.round((PRECO_DE_MERCADO - PRECO_A_VISTA) / 1000);
 
 const condicoes = [
   { icon: Clock3, texto: "6 meses de uso" },
@@ -63,19 +73,13 @@ export default function HomeMacbookM5Destaque() {
             className="pointer-events-none absolute inset-y-0 left-0 hidden w-24 bg-gradient-to-r from-[#06070b] to-transparent lg:block"
           />
 
-          {/* Selo de seminovo */}
+          {/* Selo de seminovo: discreto, no canto da foto */}
           <div
             aria-hidden="true"
-            className="absolute right-4 top-4 flex h-24 w-24 -rotate-12 flex-col items-center justify-center rounded-full bg-[#E60012] text-center text-white shadow-xl shadow-black/70 ring-4 ring-white/20 sm:right-6 sm:top-6 sm:h-28 sm:w-28 lg:h-32 lg:w-32"
+            className="absolute right-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/60 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-100 backdrop-blur-sm sm:right-6 sm:top-6 sm:text-[11px]"
           >
-            <span className="text-lg font-black uppercase leading-none tracking-tight sm:text-xl lg:text-2xl">
-              Semi
-              <br />
-              novo
-            </span>
-            <span className="mt-1.5 text-[9px] font-black uppercase tracking-wider sm:text-[10px] lg:text-[11px]">
-              6 meses de uso
-            </span>
+            <span className="h-1.5 w-1.5 rounded-full bg-[#E60012]" />
+            Seminovo
           </div>
         </div>
 
@@ -113,7 +117,7 @@ export default function HomeMacbookM5Destaque() {
             ))}
           </ul>
 
-          {/* Preço cheio riscado + preço promocional */}
+          {/* Preço cheio riscado + preço promocional (à vista) + preço no cartão */}
           <div className="mt-6 border-t border-slate-700/80 pt-5">
             <p className="text-sm font-bold text-slate-300 sm:text-base">
               Preço de mercado:{" "}
@@ -124,19 +128,23 @@ export default function HomeMacbookM5Destaque() {
 
             <div className="mt-1.5 flex flex-wrap items-end gap-x-4 gap-y-2.5">
               <p className="whitespace-nowrap text-6xl font-black leading-none tracking-tight text-white sm:text-7xl">
-                <span className="sr-only">Preço promocional: </span>
-                {emReais(PRECO_PROMOCIONAL)}
+                <span className="sr-only">Preço promocional à vista: </span>
+                {emReais(PRECO_A_VISTA)}
               </p>
               <span
                 aria-hidden="true"
                 className="mb-1 rounded-full bg-[#E60012] px-3.5 py-1.5 text-[11px] font-black uppercase tracking-widest text-white sm:mb-2"
               >
-                Preço promocional
+                À vista
               </span>
             </div>
 
-            <p className="mt-3 text-sm font-bold text-slate-200 sm:text-base">
-              Cerca de R$ {economiaEmMil} mil abaixo do preço de mercado.
+            <p className="mt-3 text-base font-bold text-slate-100 sm:text-lg">
+              ou <span className="font-black text-white">{emReais(PRECO_NO_CARTAO)}</span> em até{" "}
+              {PARCELAS}x de {valorDaParcela} sem juros
+            </p>
+            <p className="mt-1.5 text-sm text-slate-300">
+              À vista, cerca de R$ {economiaEmMil} mil abaixo do preço de mercado.
             </p>
           </div>
 
