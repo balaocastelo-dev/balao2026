@@ -5,10 +5,12 @@ import { escolherTema, resolverChamada } from "@/lib/blog/chamadas";
 import { artigosGuardadosDoSoro, extrairListaDoScript, inserirChamadas } from "@/lib/blog/fontes/soro";
 import { ajustarLink, htmlParaBlocos } from "@/lib/blog/html-para-blocos";
 import { avaliarArtigo } from "@/lib/blog/regua";
-import { contarPorCategoria, escolherDestaques, escolherRelacionados, prontoParaPublicar } from "@/lib/blog/repositorio";
-import { jsonLdDoArtigo, metadataDoArtigo } from "@/lib/blog/seo";
+import { contarPorCategoria, escolherDestaques, escolherRelacionados, prontoParaPublicar, resumir } from "@/lib/blog/repositorio";
+import { desenharFundo } from "@/lib/blog/fundo";
+import { fundoGerado, jsonLdDoArtigo, metadataDoArtigo } from "@/lib/blog/seo";
 import { hrefSeguro, lerTextoRico, linksDoTexto, minutosDeLeitura, montarSumario, textoPuro } from "@/lib/blog/texto";
 import type { Artigo, Bloco } from "@/lib/blog/tipos";
+import { lerArtigo, lerResumo } from "@/lib/blog/validar";
 
 const importados = artigosGuardadosDoSoro();
 
@@ -269,9 +271,9 @@ describe("dados estruturados", () => {
 });
 
 describe("vitrine e relacionados", () => {
-  const todos = [...ARTIGOS_AUTORAIS, ...importados].sort(
-    (a, b) => Date.parse(b.publicadoEm) - Date.parse(a.publicadoEm),
-  );
+  const todos = [...ARTIGOS_AUTORAIS, ...importados]
+    .sort((a, b) => Date.parse(b.publicadoEm) - Date.parse(a.publicadoEm))
+    .map(resumir);
 
   it("o artigo marcado como destaque abre a vitrine, e ninguém se repete", () => {
     const destaques = escolherDestaques(todos, 4);
@@ -287,5 +289,147 @@ describe("vitrine e relacionados", () => {
 
   it("as categorias do filtro são as cinco da taxonomia", () => {
     expect(CATEGORIAS.map((c) => c.slug)).toEqual(["guias", "hardware", "analises", "noticias", "assistencia"]);
+  });
+});
+
+describe("rotina diária", () => {
+  // Um artigo como a rotina escreve: JSON solto, sem autor nem origem.
+  const paragrafo = (assunto: string) =>
+    `Quem escolhe ${assunto} olhando só um número da caixa costuma errar. O que decide é o uso: quantas horas por dia, que programas ficam abertos e o que vai ser ligado junto. Por isso vale separar o que muda o dia a dia do que só aparece no anúncio.`;
+  const secao = (titulo: string, assunto: string) => [
+    { tipo: "titulo", nivel: 2, texto: titulo },
+    ...Array.from({ length: 5 }, (_v, i) => ({ tipo: "paragrafo", texto: `${paragrafo(assunto)} Ponto ${i + 1}.` })),
+  ];
+  const artigoBruto = () => ({
+    slug: "como-escolher-monitor-para-trabalho",
+    titulo: "Como escolher monitor para trabalho sem pagar a mais",
+    resumo:
+      "Tamanho, resolução e tipo de painel: o que pesa na escolha de um monitor para trabalhar oito horas por dia, e o que é só número de anúncio.",
+    categoria: "guias",
+    etiquetas: ["monitor", "home office"],
+    publicadoEm: "2026-10-09T09:00:00-03:00",
+    blocos: [
+      { tipo: "paragrafo", texto: paragrafo("monitor para trabalho") },
+      { tipo: "resumo", itens: ["Tamanho pela distância dos olhos.", "Resolução pelo tamanho.", "Painel pelo uso."] },
+      ...secao("Tamanho: a distância manda", "o tamanho"),
+      {
+        tipo: "tabela",
+        colunas: ["Tamanho", "Resolução indicada"],
+        linhas: [
+          ["24 polegadas", "Full HD"],
+          ["27 polegadas", "Quad HD"],
+        ],
+      },
+      ...secao("Resolução: nitidez depende do tamanho", "a resolução"),
+      { tipo: "chamada", tema: "geral" },
+      ...secao("Painel: IPS, VA ou OLED", "o painel"),
+      { tipo: "pros-contras", pros: ["Mais área de trabalho"], contras: ["Ocupa mais mesa"] },
+      ...secao("Conexões e ajuste de altura", "as conexões"),
+      { tipo: "paragrafo", texto: "Veja os [monitores](/categoria/computadores-monitores-monitor-gamer) e a [assistência técnica](/manutencao) da loja." },
+      ...secao("Quando o segundo monitor compensa", "o segundo monitor"),
+    ],
+    perguntas: [
+      { pergunta: "Monitor curvo cansa menos?", resposta: "Em telas largas, a curva mantém as bordas à mesma distância dos olhos." },
+      { pergunta: "Preciso de 144 Hz para trabalhar?", resposta: "Não. A rolagem fica mais suave, mas não muda a produtividade." },
+      { pergunta: "TV serve como monitor?", resposta: "Serve para vídeo; para texto, a nitidez costuma ser pior." },
+    ],
+    fontes: [
+      { nome: "RTINGS: monitor size to distance", url: "https://www.rtings.com/monitor/learn/size-to-distance-relationship" },
+      { nome: "VESA DisplayPort", url: "https://www.displayport.org/" },
+    ],
+  });
+
+  it("aceita um artigo completo e assina pela equipe", () => {
+    const lido = lerArtigo(artigoBruto());
+    expect(lido.ok, lido.ok ? "" : lido.erros.join("\n")).toBe(true);
+    if (!lido.ok) return;
+    expect(lido.valor.origem).toBe("diario");
+    expect(lido.valor.autor.pessoa).toBeUndefined();
+    const avaliacao = avaliarArtigo(lido.valor);
+    expect(avaliacao.erros, avaliacao.erros.join("\n")).toEqual([]);
+  });
+
+  it("recusa arquivo malformado em vez de publicar pela metade", () => {
+    expect(lerArtigo(null).ok).toBe(false);
+    expect(lerArtigo({ ...artigoBruto(), slug: "Com Espaço" }).ok).toBe(false);
+    expect(lerArtigo({ ...artigoBruto(), categoria: "promocoes" }).ok).toBe(false);
+    expect(lerArtigo({ ...artigoBruto(), blocos: [{ tipo: "html", texto: "<script>" }] }).ok).toBe(false);
+    expect(lerArtigo({ ...artigoBruto(), blocos: [{ tipo: "imagem", imagem: { src: "javascript:alert(1)", alt: "x" } }] }).ok).toBe(false);
+    // Nota e veredito falam em nome da loja: não entram por arquivo.
+    expect(lerArtigo({ ...artigoBruto(), analise: { item: { nome: "X" }, nota: 9, veredito: "Ótimo" } }).ok).toBe(false);
+  });
+
+  const reprova = (mudar: (a: ReturnType<typeof artigoBruto>) => void): string[] => {
+    const bruto = artigoBruto();
+    mudar(bruto);
+    const lido = lerArtigo(bruto);
+    if (!lido.ok) return lido.erros;
+    return avaliarArtigo(lido.valor).erros;
+  };
+
+  it("não deixa a rotina falar de preço, parcela ou desconto", () => {
+    expect(reprova((a) => a.blocos.push({ tipo: "paragrafo", texto: "Sai por R$ 1.299 na loja." })).join(" ")).toMatch(/preço em reais/);
+    expect(reprova((a) => a.blocos.push({ tipo: "paragrafo", texto: "Em até 10x sem juros." })).join(" ")).toMatch(/parcelamento/);
+    expect(reprova((a) => a.blocos.push({ tipo: "paragrafo", texto: "Com 10% no PIX." })).join(" ")).toMatch(/desconto/);
+    // "2x de 8 GB" é memória, não parcela.
+    expect(reprova((a) => a.blocos.push({ tipo: "paragrafo", texto: "Prefira 2x de 8 GB a um pente só." }))).toEqual([]);
+  });
+
+  it("não deixa a rotina transcrever número de teste nem frase de terceiros", () => {
+    const fonte = { nome: "Site", url: "https://exemplo.com/teste" };
+    expect(
+      reprova((a) =>
+        a.blocos.push({
+          tipo: "benchmark",
+          titulo: "Quadros por segundo",
+          unidade: "fps",
+          grupos: [{ rotulo: "Jogo", barras: [{ nome: "A", valor: 60 }, { nome: "B", valor: 70 }] }],
+          fonte,
+        } as never),
+      ).join(" "),
+    ).toMatch(/benchmark/);
+    expect(reprova((a) => a.blocos.push({ tipo: "citacao", texto: "É ótimo.", autor: "Fulano", fonte } as never)).join(" ")).toMatch(/citação/);
+    expect(reprova((a) => a.blocos.push({ tipo: "paragrafo", texto: "Testamos na bancada e deu certo." })).join(" ")).toMatch(/teste próprio/);
+  });
+
+  it("a rotina só aponta para páginas conferidas e só usa chamada pronta", () => {
+    expect(reprova((a) => a.blocos.push({ tipo: "paragrafo", texto: "Veja a [promoção](/promocao-relampago)." })).join(" ")).toMatch(/fora da lista/);
+    expect(reprova((a) => a.blocos.push({ tipo: "paragrafo", texto: "Leia [outro artigo](/blog/fonte-ideal-para-pc-gamer)." }))).toEqual([]);
+    expect(
+      reprova((a) => a.blocos.push({ tipo: "chamada", titulo: "Garantia vitalícia", texto: "Só hoje." } as never)).join(" "),
+    ).toMatch(/tema pronto/);
+    expect(reprova((a) => (a.fontes = a.fontes.slice(0, 1))).join(" ")).toMatch(/duas fontes/);
+    expect(reprova((a) => (a.categoria = "analises")).join(" ")).toMatch(/não publica análise/);
+  });
+
+  it("lê a lista do ramo de conteúdo e ignora linha estragada", () => {
+    const linha = { slug: "a-b", titulo: "Título", resumo: "Resumo", categoria: "guias", publicadoEm: "2026-10-09T09:00:00Z", minutos: 7 };
+    expect(lerResumo(linha)).toMatchObject({ slug: "a-b", minutos: 7, temAnalise: false, capa: null });
+    expect(lerResumo({ ...linha, categoria: "outra" })).toBeNull();
+    expect(lerResumo({ ...linha, publicadoEm: "ontem" })).toBeNull();
+    expect(lerResumo("texto")).toBeNull();
+  });
+
+  it("artigo sem foto ganha capa desenhada, sempre a mesma, e sem texto", () => {
+    const capa = desenharFundo("como-escolher-monitor-para-trabalho", "guias");
+    expect(capa).toBe(desenharFundo("como-escolher-monitor-para-trabalho", "guias"));
+    expect(capa).not.toBe(desenharFundo("pc-nao-liga-o-que-verificar", "guias"));
+    expect(capa).toMatch(/^<svg /);
+    expect(capa).not.toMatch(/<text/);
+    expect(capa).toContain("#E60012");
+    expect(fundoGerado({ slug: "a-b", categoria: "guias" })).toBe("/blog/api/og?fundo=1&category=guias&seed=a-b");
+  });
+
+  it("o artigo do dia entra na vitrine depois do destaque marcado", () => {
+    const daCasa = [...ARTIGOS_AUTORAIS, ...importados].map(resumir);
+    const doDia = lerResumo({
+      slug: "artigo-do-dia",
+      titulo: "Artigo do dia",
+      resumo: "Resumo",
+      categoria: "guias",
+      publicadoEm: "2099-01-01T09:00:00Z",
+    })!;
+    const todos = [doDia, ...daCasa];
+    expect(escolherDestaques(todos, 4).map((d) => d.slug).slice(0, 2)).toEqual(["rtx-5060-ti-8gb-ou-16gb", "artigo-do-dia"]);
   });
 });

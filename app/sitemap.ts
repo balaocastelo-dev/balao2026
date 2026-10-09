@@ -80,7 +80,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Blog: cada artigo e cada categoria que já tem artigo. Se a leitura
   // falhar, o sitemap sai sem o blog — melhor do que não sair.
-  const artigos = await listarResumos().catch(() => [])
+  const artigos = await listarResumos({ tolerante: true }).catch(() => [])
   const blogRoutes = [
     ...artigos.map((artigo) => ({
       url: `${baseUrl}/blog/${artigo.slug}`,

@@ -1,5 +1,7 @@
 import { ImageResponse } from "next/og";
 import React from "react";
+import { categoriaPorSlug } from "@/lib/blog/categorias";
+import { ALTURA_DO_FUNDO, LARGURA_DO_FUNDO, desenharFundo } from "@/lib/blog/fundo";
 
 // Roda no runtime padrão (Node), não no "edge". No edge esta rota respondia
 // 500 na Vercel desde agosto ("NEXT_DEPLOYMENT_ID is missing"): nenhuma capa
@@ -7,12 +9,12 @@ import React from "react";
 export const runtime = "nodejs";
 
 /**
- * A capa gerada com o título do artigo (1200 × 630).
+ * A capa gerada com o título do artigo (1200 × 630): é a imagem que aparece
+ * quando o link é compartilhado no WhatsApp e nas redes. Só as cores da
+ * marca: fundo carbono, branco e o Vermelho Balão.
  *
- * Serve para três coisas: a imagem que aparece quando o link é compartilhado
- * no WhatsApp e nas redes, a capa de artigo que ainda não tem foto e a reserva
- * quando uma capa hospedada fora falha. Só as cores da marca: fundo carbono,
- * branco e o Vermelho Balão.
+ * Com `?fundo=1` a rota devolve a outra capa, a desenhada e sem texto — ver
+ * `capaSemTexto`, logo abaixo.
  */
 
 function cortar(texto: string, max: number) {
@@ -30,8 +32,32 @@ function semente(texto: string) {
   return h >>> 0;
 }
 
+const GUARDAR = "public, max-age=86400, s-maxage=604800, immutable";
+
+/**
+ * A capa desenhada, sem texto (1200 × 800): é a que aparece nos cartões e no
+ * topo de um artigo que não tem foto. `?fundo=1&seed=<endereço>&category=<categoria>`.
+ */
+function capaSemTexto(url: URL) {
+  const chave = (url.searchParams.get("seed") ?? "blog").slice(0, 120);
+  const categoria = categoriaPorSlug(url.searchParams.get("category") ?? "")?.slug ?? "guias";
+  const svg = desenharFundo(chave, categoria);
+  const elemento = React.createElement("img", {
+    src: `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`,
+    width: LARGURA_DO_FUNDO,
+    height: ALTURA_DO_FUNDO,
+  });
+  return new ImageResponse(elemento, {
+    width: LARGURA_DO_FUNDO,
+    height: ALTURA_DO_FUNDO,
+    headers: { "cache-control": GUARDAR },
+  });
+}
+
 export async function GET(req: Request) {
   const url = new URL(req.url);
+  if (url.searchParams.get("fundo") === "1") return capaSemTexto(url);
+
   const titulo = cortar(url.searchParams.get("title") ?? "Blog da Balão da Informática", 110);
   const categoria = cortar(url.searchParams.get("category") ?? "Guias", 40);
   const s = semente(url.searchParams.get("seed") ?? titulo);
@@ -126,6 +152,6 @@ export async function GET(req: Request) {
   return new ImageResponse(elemento, {
     width: 1200,
     height: 630,
-    headers: { "cache-control": "public, max-age=86400, s-maxage=604800, immutable" },
+    headers: { "cache-control": GUARDAR },
   });
 }

@@ -186,8 +186,11 @@ export type Artigo = {
   publicadoEm: string;
   atualizadoEm?: string;
   autor: Autor;
-  /** `autoral` nasce neste repositório; `soro` vem da ferramenta Soro. */
-  origem: "autoral" | "soro";
+  /**
+   * `autoral` nasce neste repositório; `soro` vem da ferramenta Soro; `diario`
+   * é publicado pela rotina diária, no ramo de conteúdo.
+   */
+  origem: "autoral" | "soro" | "diario";
   /** Sobe para a vitrine do topo. Número maior aparece primeiro. */
   destaque?: number;
   /** Ainda em escrita: fica fora do site até esta linha sair. */
@@ -213,6 +216,8 @@ export type ArtigoResumido = {
   minutos: number;
   temAnalise: boolean;
   nota?: number;
+  /** Peso na vitrine do topo (só os artigos marcados têm). */
+  destaque?: number;
 };
 
 export type ItemDoSumario = { id: string; texto: string; nivel: 2 | 3 };

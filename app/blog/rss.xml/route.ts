@@ -15,7 +15,7 @@ function xml(texto: string): string {
 }
 
 export async function GET() {
-  const artigos = (await listarResumos()).slice(0, 50);
+  const artigos = (await listarResumos({ tolerante: true })).slice(0, 50);
   const ultimo = artigos[0] ? new Date(artigos[0].publicadoEm) : new Date();
 
   const itens = artigos
@@ -29,7 +29,7 @@ export async function GET() {
     <pubDate>${new Date(a.publicadoEm).toUTCString()}</pubDate>
     <category>${xml(nomeDaCategoria(a.categoria))}</category>
     <description>${xml(a.resumo)}</description>
-    <enclosure url="${xml(imagemDoArtigo(a))}" type="image/webp" length="0" />
+    <enclosure url="${xml(imagemDoArtigo(a))}" type="${a.capa?.src.endsWith(".webp") ? "image/webp" : a.capa ? "image/jpeg" : "image/png"}" length="0" />
   </item>`;
     })
     .join("");

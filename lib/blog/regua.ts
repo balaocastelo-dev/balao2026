@@ -1,4 +1,4 @@
-import { contarPalavras, linksDoTexto, palavrasDoArtigo, textoPuro } from "./texto";
+import { contarPalavras, linksDoTexto, palavrasDoArtigo, textoPuro, textosDoBloco } from "./texto";
 import type { Artigo, Bloco } from "./tipos";
 
 /**
@@ -53,6 +53,50 @@ const MINIMO_DE_SECOES: Record<Artigo["categoria"], number> = {
   assistencia: 4,
   noticias: 2,
 };
+
+/**
+ * Condição comercial não entra em artigo: preço, parcela, desconto e frete
+ * mudam, e o texto fica no ar por anos. Um artigo antigo com número velho vira
+ * promessa que a loja não fez.
+ */
+const CONDICOES_COMERCIAIS: { padrao: RegExp; nome: string }[] = [
+  { padrao: /R\$\s?\d/, nome: "preço em reais" },
+  { padrao: /sem juros|\b\d{1,2}\s?x\s+no\s+cart|parcel\w*\s+em\s+(?:até\s+)?\d/i, nome: "parcelamento" },
+  { padrao: /\d\s?%\s+(?:de\s+desconto|off|no\s+pix|à\s+vista)|desconto\s+de\s+\d/i, nome: "percentual de desconto" },
+  { padrao: /frete\s+gr[aá]tis/i, nome: "frete grátis" },
+];
+
+/**
+ * Para onde um artigo da rotina diária pode mandar o leitor dentro da loja.
+ * São páginas e categorias conferidas, que existem. Link para página que não
+ * existe é o erro mais comum de texto escrito sem ninguém olhando.
+ */
+export const PAGINAS_DA_LOJA = [
+  "/blog",
+  "/manutencao",
+  "/montagempc",
+  "/recuperacaodados",
+  "/notebooks",
+  "/seminovos",
+  "/carregadores",
+  "/consignacao",
+  "/pcgamer3d",
+  "/fale-conosco",
+  "/sobre-nos",
+  "/categoria/computadores",
+  "/categoria/computadores-pc",
+  "/categoria/computadores-pc-pc-gamer",
+  "/categoria/computadores-monitores-monitor-gamer",
+  "/categoria/hardware-fontes",
+  "/categoria/hardware-memoria-ram",
+  "/categoria/hardware-placa-de-video-vga",
+];
+
+function linkPermitidoNaRotina(link: string): boolean {
+  const caminho = link.split(/[?#]/)[0].replace(/\/+$/, "") || "/";
+  if (/^\/blog\/[a-z0-9]+(?:-[a-z0-9]+)*$/.test(caminho)) return true;
+  return PAGINAS_DA_LOJA.includes(caminho);
+}
 
 function textosComLink(bloco: Bloco): string[] {
   switch (bloco.tipo) {
@@ -131,8 +175,10 @@ export function avaliarArtigo(artigo: Artigo): Avaliacao {
     erros.push(`Descrição com ${descricao.length} caracteres; o intervalo é de 110 a 165 (o Google corta depois disso).`);
   }
   if (!Number.isFinite(Date.parse(artigo.publicadoEm))) erros.push("Data de publicação inválida.");
-  if (!artigo.capa) avisos.push("Sem imagem de capa: o cartão usará a capa gerada com o título.");
-  else if (artigo.capa.alt.trim().length < 12) erros.push("A capa precisa de um texto alternativo que descreva a imagem.");
+  if (!artigo.capa) {
+    // No artigo da rotina isso é o esperado: a capa dele é sempre a desenhada.
+    if (artigo.origem !== "diario") avisos.push("Sem imagem de capa: o cartão usará a capa desenhada pelo site.");
+  } else if (artigo.capa.alt.trim().length < 12) erros.push("A capa precisa de um texto alternativo que descreva a imagem.");
 
   // ---- Estrutura ----
   if (palavras < MINIMO_DE_PALAVRAS[artigo.categoria]) {
@@ -253,6 +299,46 @@ export function avaliarArtigo(artigo: Artigo): Avaliacao {
   }
   for (let i = 1; i < blocos.length; i += 1) {
     if (blocos[i].tipo === "chamada" && blocos[i - 1].tipo === "chamada") erros.push("Duas chamadas seguidas.");
+  }
+
+  // ---- Condição comercial ----
+  // Os artigos do Soro ficam de fora: já foram publicados assim, pela ferramenta.
+  if (artigo.origem !== "soro") {
+    const tudo = [
+      artigo.titulo,
+      artigo.resumo,
+      ...blocos.flatMap(textosDoBloco),
+      ...(artigo.perguntas ?? []).flatMap((p) => [p.pergunta, p.resposta]),
+    ].join("\n");
+    for (const { padrao, nome } of CONDICOES_COMERCIAIS) {
+      const achado = padrao.exec(tudo);
+      if (achado) erros.push(`O texto traz ${nome} ("${achado[0]}"): condição comercial não entra em artigo.`);
+    }
+  }
+
+  // ---- Artigo da rotina diária: ninguém revisa antes de ir ao ar ----
+  // Por isso ele só pode usar o que não depende de transcrever número ou
+  // frase de terceiros, e só fala da loja com as chamadas já escritas.
+  if (artigo.origem === "diario") {
+    if (artigo.categoria === "analises") erros.push("A rotina diária não publica análise: nota e veredito são da loja.");
+    if (artigo.analise) erros.push("Artigo da rotina não pode ter veredito com nota.");
+    if (benchmarks.length > 0) erros.push("Artigo da rotina não leva gráfico de benchmark: número de teste só entra em artigo revisado.");
+    if (citacoes.length > 0) erros.push("Artigo da rotina não leva citação: frase de terceiros só entra em artigo revisado.");
+    if ((artigo.fontes?.length ?? 0) < 2) erros.push("Artigo da rotina precisa de ao menos duas fontes consultadas (campo fontes).");
+    // Imagem trazida de fora tem dono; a capa do artigo da rotina é desenhada pelo site.
+    if (artigo.capa || blocos.some((b) => b.tipo === "imagem")) erros.push("Artigo da rotina não leva imagem: a capa é desenhada pelo site.");
+    for (const c of chamadas) {
+      if (c.tipo !== "chamada") continue;
+      if (!c.tema || c.titulo || c.texto || c.rotulo || c.href) {
+        erros.push("Chamada de artigo da rotina usa só o tema pronto (campo tema), sem texto próprio.");
+        break;
+      }
+    }
+    const proibidos = [...new Set(internos.filter((l) => !linkPermitidoNaRotina(l)))];
+    if (proibidos.length > 0) erros.push(`Link para página fora da lista conferida: ${proibidos.join(", ")}.`);
+    if (/\b(testamos|medimos|nossa bancada mediu|em nossos testes|nos nossos testes)\b/i.test(blocos.flatMap(textosDoBloco).join("\n"))) {
+      erros.push("O texto afirma um teste próprio da loja; a rotina não testa nada — atribua o dado à fonte.");
+    }
   }
 
   return { aprovado: erros.length === 0, erros, avisos, medidas };

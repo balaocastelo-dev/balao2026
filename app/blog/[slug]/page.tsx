@@ -10,19 +10,22 @@ import { CabecalhoDaLoja, FaixaDaLoja } from "@/components/blog/Moldura";
 import { ProgressoDeLeitura, SumarioLateral, SumarioRecolhivel } from "@/components/blog/Sumario";
 import { nomeDaCategoria } from "@/lib/blog/categorias";
 import { linkDoWhatsApp } from "@/lib/blog/chamadas";
-import { escolherRelacionados, listarArtigos, obterArtigo, resumir } from "@/lib/blog/repositorio";
+import { escolherRelacionados, listarArtigosDaCasa, listarResumos, obterArtigo } from "@/lib/blog/repositorio";
 import { jsonLdDoArtigo, metadataDoArtigo } from "@/lib/blog/seo";
 import { dataPorExtenso, minutosDeLeitura, montarSumario, semQuebraRuim } from "@/lib/blog/texto";
 import type { ItemDoSumario } from "@/lib/blog/tipos";
 
 export const revalidate = 3600;
-// Artigo novo do Soro ganha página sozinho, sem precisar publicar o site de novo.
+// Artigo novo — do Soro ou da rotina diária — ganha página sozinho, na
+// primeira visita, sem precisar publicar o site de novo.
 export const dynamicParams = true;
 
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateStaticParams() {
-  return (await listarArtigos()).map((a) => ({ slug: a.slug }));
+  // Só os artigos da casa são montados junto com o site; os da rotina diária
+  // são montados quando alguém os abre pela primeira vez.
+  return (await listarArtigosDaCasa()).map((a) => ({ slug: a.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -37,7 +40,7 @@ export default async function PaginaDoArtigo({ params }: Props) {
   const artigo = await obterArtigo(slug);
   if (!artigo) notFound();
 
-  const relacionados = escolherRelacionados(artigo, await listarArtigos(), 3).map(resumir);
+  const relacionados = escolherRelacionados(artigo, await listarResumos(), 3);
   const minutos = minutosDeLeitura(artigo);
   const categoria = nomeDaCategoria(artigo.categoria);
   const perguntas = artigo.perguntas ?? [];
@@ -100,16 +103,13 @@ export default async function PaginaDoArtigo({ params }: Props) {
             </p>
           </header>
 
-          {artigo.capa ? (
-            <CapaArtigo
-              artigo={artigo}
-              sizes="(min-width: 1280px) 1152px, 100vw"
-              prioridade
-              className="relative mt-8 aspect-[16/10] rounded-[18px] ring-1 ring-inset ring-white/10 sm:mt-10 sm:aspect-[21/9]"
-            />
-          ) : (
-            <hr className="mt-8 border-[var(--b-linha)] sm:mt-10" />
-          )}
+          {/* Sem foto, entra a capa desenhada para o artigo. */}
+          <CapaArtigo
+            artigo={artigo}
+            sizes="(min-width: 1280px) 1152px, 100vw"
+            prioridade
+            className="relative mt-8 aspect-[16/10] rounded-[18px] ring-1 ring-inset ring-white/10 sm:mt-10 sm:aspect-[21/9]"
+          />
 
           <div className="mt-8 lg:hidden">
             <SumarioRecolhivel itens={sumario} />

@@ -8,7 +8,7 @@ import { CATEGORIAS, categoriaPorSlug } from "@/lib/blog/categorias";
 import { contarPorCategoria, listarResumos } from "@/lib/blog/repositorio";
 import { jsonLdDaCategoria } from "@/lib/blog/seo";
 
-export const revalidate = 3600;
+export const revalidate = 1800;
 export const dynamicParams = false;
 
 type Props = { params: Promise<{ categoria: string }> };

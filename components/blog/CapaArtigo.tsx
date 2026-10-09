@@ -1,5 +1,5 @@
 import SafeImage from "@/components/SafeImage";
-import { capaGerada } from "@/lib/blog/seo";
+import { fundoGerado } from "@/lib/blog/seo";
 import type { ArtigoResumido } from "@/lib/blog/tipos";
 
 type Props = {
@@ -14,15 +14,16 @@ type Props = {
 
 /**
  * A capa de um artigo, sempre com o mesmo tratamento de imagem.
- * Se o arquivo falhar (capa hospedada fora, por exemplo), entra a capa gerada
- * com o título — o cartão nunca fica com um buraco.
+ * Artigo sem foto recebe a capa desenhada para ele; e se o arquivo de uma
+ * foto falhar (capa hospedada fora, por exemplo), a desenhada entra no lugar —
+ * o cartão nunca fica com um buraco.
  */
 export default function CapaArtigo({ artigo, sizes, prioridade, comTexto, className = "" }: Props) {
-  const reserva = capaGerada(artigo);
+  const reserva = fundoGerado(artigo);
+  // A capa desenhada já está nas cores do blog, como as feitas à mão.
+  const pronta = artigo.capa ? artigo.capa.pronta : true;
   return (
-    <div
-      className={`b-capa ${comTexto ? "b-capa-com-texto" : ""} ${artigo.capa?.pronta ? "b-capa-pronta" : ""} ${className}`}
-    >
+    <div className={`b-capa ${comTexto ? "b-capa-com-texto" : ""} ${pronta ? "b-capa-pronta" : ""} ${className}`}>
       <SafeImage
         src={artigo.capa?.src ?? reserva}
         fallbackSrc={reserva}

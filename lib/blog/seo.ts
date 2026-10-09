@@ -24,7 +24,16 @@ export function urlDoArtigo(slug: string): string {
   return `${SITE}/blog/${slug}`;
 }
 
-/** Capa gerada com o título, para artigo sem imagem e como reserva se a capa falhar. */
+/**
+ * Capa desenhada e sem texto: é a que os cartões e o topo do artigo mostram
+ * quando não há foto, e a reserva quando uma capa hospedada fora falha.
+ */
+export function fundoGerado(artigo: { categoria: Artigo["categoria"]; slug: string }): string {
+  const parametros = new URLSearchParams({ fundo: "1", category: artigo.categoria, seed: artigo.slug });
+  return `/blog/api/og?${parametros.toString()}`;
+}
+
+/** Capa com o título escrito: a imagem de quando o link é compartilhado. */
 export function capaGerada(artigo: { titulo: string; categoria: Artigo["categoria"]; slug: string }): string {
   const parametros = new URLSearchParams({
     title: cortar(artigo.titulo, 110),

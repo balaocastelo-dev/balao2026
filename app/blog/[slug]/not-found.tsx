@@ -8,7 +8,7 @@ import { listarResumos } from "@/lib/blog/repositorio";
  * Em vez de um beco sem saída, mostra o que há para ler.
  */
 export default async function ArtigoNaoEncontrado() {
-  const recentes = (await listarResumos()).slice(0, 3);
+  const recentes = (await listarResumos({ tolerante: true })).slice(0, 3);
 
   return (
     <>

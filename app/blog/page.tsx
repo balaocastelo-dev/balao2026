@@ -4,12 +4,13 @@ import IndiceDeArtigos from "@/components/blog/IndiceDeArtigos";
 import ListaDeArtigos from "@/components/blog/ListaDeArtigos";
 import { CabecalhoDaLoja, FaixaDaLoja } from "@/components/blog/Moldura";
 import Vitrine from "@/components/blog/Vitrine";
-import { escolherDestaques, listarArtigos, resumir } from "@/lib/blog/repositorio";
+import { escolherDestaques, listarResumos } from "@/lib/blog/repositorio";
 import { jsonLdDaHome } from "@/lib/blog/seo";
 
-// A página é montada no servidor e guardada por uma hora. Busca e filtro
-// acontecem no navegador, então ela não precisa ser refeita a cada visita.
-export const revalidate = 3600;
+// A página é montada no servidor e guardada por meia hora — é o tempo máximo
+// para o artigo do dia aparecer. Busca e filtro acontecem no navegador, então
+// ela não precisa ser refeita a cada visita.
+export const revalidate = 1800;
 
 const TITULO = "Blog da Balão da Informática: guias, análises e assistência";
 const DESCRICAO =
@@ -31,9 +32,8 @@ export const metadata: Metadata = {
 };
 
 export default async function PaginaDoBlog() {
-  const artigos = await listarArtigos();
-  const destaques = escolherDestaques(artigos, 4).map(resumir);
-  const resumos = artigos.map(resumir);
+  const resumos = await listarResumos();
+  const destaques = escolherDestaques(resumos, 4);
 
   return (
     <>

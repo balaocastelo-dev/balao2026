@@ -10,6 +10,7 @@ essa pessoa até a loja.
 |---|---|---|
 | **Soro** (a ferramenta que escreve os guias) | No Soro; cópia de reserva em `content/blog/soro/snapshot.json` e capas em `public/blog/capas` | Sozinho. O site consulta o Soro de hora em hora; artigo novo ganha página em `/blog/<endereço>` sem ninguém publicar nada |
 | **Artigos escritos aqui** (análises, notícias, guias com tabela e gráfico) | `content/blog/artigos/`, um arquivo por artigo | Quando o arquivo é enviado ao repositório |
+| **Rotina diária** (um artigo por dia, escrito e publicado sozinho) | No ramo `claude/blog-conteudo` deste repositório, um arquivo JSON por artigo | Sozinho. O site lê esse ramo a cada 15 minutos; ver [publicacao-diaria.md](publicacao-diaria.md) |
 
 Se o Soro sair do ar, o blog continua abrindo com a cópia de reserva. Para
 atualizar essa cópia: `npm run blog:soro` (uma vez por mês é suficiente).
@@ -41,8 +42,11 @@ content/blog/
 
 lib/blog/
   tipos.ts                 o formato de um artigo: uma lista de blocos tipados
-  repositorio.ts           a única porta de entrada: junta as origens, ordena, escolhe destaques
+  repositorio.ts           a única porta de entrada: junta as três origens, ordena, escolhe destaques
   fontes/soro.ts           busca e converte os artigos do Soro
+  fontes/diario.ts         lê os artigos da rotina diária, no ramo de conteúdo
+  validar.ts               confere o formato de um artigo que chega em JSON
+  fundo.ts                 a capa desenhada para o artigo que não tem foto
   html-para-blocos.ts      transforma o HTML do Soro nos mesmos blocos dos artigos daqui
   regua.ts                 a régua editorial em código (o que reprova e o que só avisa)
   seo.ts                   metadados, Open Graph e JSON-LD, calculados do artigo
@@ -63,7 +67,12 @@ app/blog/
   [slug]/page.tsx          a página do artigo
   categoria/[categoria]/   uma página por categoria
   rss.xml, feed.xml        o feed
-  api/og                   a capa gerada com o título (para compartilhar e como reserva)
+  api/og                   a capa com o título (para compartilhar) e a capa desenhada (?fundo=1)
+
+scripts/
+  blog-novo.mjs            cria o rascunho de um artigo escrito aqui
+  blog-soro.mjs            atualiza a cópia de reserva do Soro
+  blog-publicar.mjs        confere e publica um artigo no ramo de conteúdo (a rotina diária)
 ```
 
 Um artigo **não é um HTML solto**: é uma lista de blocos (`paragrafo`, `titulo`,
