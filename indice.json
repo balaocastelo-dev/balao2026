@@ -1,4 +1,21 @@
 {
   "versao": 1,
-  "artigos": []
+  "artigos": [
+    {
+      "slug": "windows-10-ate-quando-tem-atualizacao",
+      "titulo": "Windows 10: até quando tem atualização e o que fazer",
+      "resumo": "O Windows 10 saiu de suporte, mas ainda recebe correções de segurança até outubro de 2027. Veja como garantir isso e quando vale atualizar ou trocar de PC.",
+      "categoria": "guias",
+      "etiquetas": [
+        "windows",
+        "upgrade",
+        "segurança",
+        "notebook"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-09T09:09:24.725Z",
+      "minutos": 10
+    }
+  ],
+  "atualizadoEm": "2026-10-09T09:09:25.509Z"
 }

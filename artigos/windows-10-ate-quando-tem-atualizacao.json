@@ -1,0 +1,314 @@
+{
+  "slug": "windows-10-ate-quando-tem-atualizacao",
+  "titulo": "Windows 10: até quando tem atualização e o que fazer",
+  "resumo": "O Windows 10 saiu de suporte, mas ainda recebe correções de segurança até outubro de 2027. Veja como garantir isso e quando vale atualizar ou trocar de PC.",
+  "categoria": "guias",
+  "etiquetas": [
+    "windows",
+    "upgrade",
+    "segurança",
+    "notebook"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-09T09:09:24.725Z",
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Se o seu computador ainda usa o Windows 10, ele não parou de funcionar e não vai parar de uma hora para outra. O que mudou é que a Microsoft encerrou o suporte do sistema em 14 de outubro de 2025: desde então, só recebe correção de segurança o computador inscrito no programa de atualizações estendidas."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "É comum achar que a única saída é comprar um computador novo. Não é. Muita máquina com Windows 10 roda o Windows 11 sem trocar nada, outras passam a rodar com um ajuste ou uma peça, e quem não tem como atualizar agora ganhou prazo até outubro de 2027. O que não vale é deixar como está sem saber em qual dos três casos você se encaixa."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "O suporte do Windows 10 terminou em **14 de outubro de 2025**; o computador continua funcionando, mas sem correções.",
+        "O programa de atualizações estendidas mantém as correções de segurança até **12 de outubro de 2027**, para quem se inscrever.",
+        "Se o computador atende aos requisitos, a atualização para o Windows 11 é gratuita e aparece no Windows Update.",
+        "Trocar de máquina só é a resposta quando o processador não é aceito pelo Windows 11 — e mesmo assim há prazo para planejar."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que acabou e o que continua funcionando"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Fim de suporte não é desligamento. Segundo a própria Microsoft, os computadores com Windows 10 continuam funcionando normalmente: ligam, abrem os programas, acessam a internet. O que a empresa deixou de fornecer são as atualizações de software, as correções de segurança e a assistência técnica para o sistema."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Na prática, o problema é a correção de segurança. Falhas no sistema são descobertas o tempo todo, e é a atualização mensal que fecha cada uma delas. Sem ela, uma falha conhecida fica aberta para sempre naquele computador. Você não percebe nada no dia a dia — e é justamente por isso que o risco costuma ser ignorado."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Esse risco pesa mais em quem usa o computador para banco, loja virtual, e-mail de trabalho e arquivos de clientes. Para uma máquina que só toca música numa sala, o efeito é pequeno. Mas a maioria dos computadores de casa e de escritório está no primeiro grupo, e antivírus sozinho não substitui a correção do sistema."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Atualizações estendidas: o prazo vai até outubro de 2027"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Para quem não pode mudar de sistema agora, a Microsoft mantém o programa de Atualizações de Segurança Estendidas, conhecido pela sigla ESU. O computador inscrito continua recebendo as correções de segurança pelo Windows Update, como antes. A página oficial informa que a inscrição pode ser feita até o programa terminar, em 12 de outubro de 2027."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A inscrição é feita no próprio computador, em **Configurações > Atualização e Segurança > Windows Update**, no link \"Inscrever-se agora\". A Microsoft oferece três caminhos: sincronizar as configurações do PC com a conta Microsoft, sem custo adicional; resgatar pontos do programa Microsoft Rewards; ou fazer uma compra única. Uma mesma licença vale para até dez dispositivos."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": false,
+      "itens": [
+        "O computador precisa estar no **Windows 10 versão 22H2**, com a atualização mais recente instalada.",
+        "É preciso entrar com uma **conta Microsoft de administrador** (não pode ser conta de criança).",
+        "O link de inscrição só aparece quando o computador atende a esses requisitos.",
+        "O programa para consumidores **não vale para uso comercial**: máquina ligada ao domínio da empresa ou gerenciada pela equipe de TI fica de fora."
+      ]
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "As atualizações estendidas trazem só as correções de segurança classificadas como críticas e importantes. Não há recurso novo, melhoria nem suporte técnico, e o prazo tem data para acabar. Use esse tempo para decidir com calma o que fazer com o computador, e não para esquecer o assunto.",
+      "titulo": "É uma ponte, não uma solução"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Seu computador roda o Windows 11? Como conferir"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O jeito mais rápido é o aplicativo **Verificação de Integridade do PC**, da própria Microsoft: ele analisa a máquina e diz se ela pode receber o Windows 11 e, quando não pode, qual requisito falhou. Só não confere a placa gráfica e a tela, que raramente são o obstáculo em computadores dos últimos anos."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Item",
+        "Mínimo exigido",
+        "Onde costuma travar"
+      ],
+      "linhas": [
+        [
+          "Processador",
+          "64 bits, 1 GHz, 2 núcleos, e constar na lista de modelos aceitos",
+          "Processadores mais antigos ficam fora da lista"
+        ],
+        [
+          "Memória RAM",
+          "4 GB",
+          "Passa no requisito, mas é pouco para o uso real"
+        ],
+        [
+          "Armazenamento",
+          "64 GB",
+          "Notebooks de entrada com pouco espaço livre"
+        ],
+        [
+          "Firmware",
+          "UEFI com Inicialização Segura",
+          "Recurso existe, mas está desligado"
+        ],
+        [
+          "TPM",
+          "Versão 2.0",
+          "Chip existe, mas está desligado na configuração da placa"
+        ],
+        [
+          "Vídeo e tela",
+          "DirectX 12 com driver WDDM 2.0; tela HD acima de 9 polegadas",
+          "Raro em máquinas recentes"
+        ]
+      ],
+      "titulo": "Requisitos mínimos do Windows 11",
+      "fonte": {
+        "nome": "Microsoft — Especificações e requisitos de sistema do Windows 11",
+        "url": "https://www.microsoft.com/pt-br/windows/windows-11-specifications"
+      }
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Dois itens dessa tabela enganam muita gente. O TPM 2.0, um componente de segurança, e a Inicialização Segura costumam existir no computador e estar apenas desativados na configuração da placa-mãe. Nesse caso o aplicativo acusa incompatibilidade, mas o problema se resolve com um ajuste, sem trocar peça."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Já o processador não tem ajuste. A Microsoft publica listas dos modelos aceitos, e em geral elas começam nos Intel Core de oitava geração e nos AMD Ryzen da série 2000. Se o seu é anterior, o Windows 11 não é oferecido para a máquina, por mais memória que ela tenha."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "upgrade"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Atualizar, fazer upgrade ou trocar: como decidir"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Com o resultado da verificação em mãos, a decisão fica simples. O que muda de um caso para outro é quanto trabalho e quanto investimento cada caminho pede, e por quanto tempo ele resolve. A tabela abaixo resume os três cenários mais comuns."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Situação do computador",
+        "Caminho indicado",
+        "Resolve por quanto tempo"
+      ],
+      "linhas": [
+        [
+          "Passa em todos os requisitos",
+          "Atualizar para o Windows 11 pelo Windows Update",
+          "Enquanto o hardware der conta"
+        ],
+        [
+          "Só o TPM ou a Inicialização Segura falham",
+          "Ativar os dois na configuração da placa e atualizar",
+          "Enquanto o hardware der conta"
+        ],
+        [
+          "Passa, mas tem 4 GB de memória ou disco rígido comum",
+          "Atualizar e fazer upgrade de memória e SSD",
+          "Alguns anos a mais, com uso confortável"
+        ],
+        [
+          "Processador fora da lista",
+          "Inscrever nas atualizações estendidas e planejar a troca",
+          "Até outubro de 2027"
+        ]
+      ],
+      "titulo": "O que fazer em cada situação",
+      "colunaDestaque": 1
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 3,
+      "texto": "Quando o upgrade de peças resolve"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Os 4 GB de memória que a Microsoft pede são o mínimo para instalar, não para trabalhar bem. Com navegador, reunião por vídeo e planilha abertos ao mesmo tempo, o sistema fica lento. Se o processador é aceito, colocar mais [memória RAM](/categoria/hardware-memoria-ram) costuma ser o upgrade de melhor resultado — veja [como aumentar a memória do PC](/blog/como-aumentar-memoria-ram-pc)."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O outro ponto é o armazenamento. Computador que ainda usa disco rígido mecânico demora para ligar e para abrir programas em qualquer versão do Windows. Trocar por um SSD muda a experiência mais do que trocar de sistema; em notebooks, vale ler [quando o upgrade para SSD NVMe compensa](/blog/ssd-nvme-em-notebook-quando-vale-upgrade)."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 3,
+      "texto": "Quando é hora de trocar"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se o processador não está na lista, investir em memória e SSD nessa máquina só adia a decisão. O prazo das atualizações estendidas serve justamente para isso: dá para continuar usando com segurança e escolher o substituto sem pressa, em vez de comprar o primeiro que aparecer quando o computador der problema."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Na troca, um [seminovo](/seminovos) pode atender bem quem usa o computador para escritório e estudo, desde que ele próprio rode o Windows 11 — confira isso antes de fechar. O guia sobre [computador seminovo para escritório](/blog/computador-seminovo-para-escritorio) mostra o que avaliar."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "Mantém as correções de segurança sem trocar de computador",
+        "Nenhum programa ou arquivo muda de lugar",
+        "Dá tempo para planejar a compra ou o upgrade"
+      ],
+      "contras": [
+        "Tem data para acabar: outubro de 2027",
+        "Não traz recurso novo nem suporte técnico",
+        "Exige conta Microsoft e a versão 22H2 do sistema",
+        "Não se aplica a computador de uso comercial"
+      ],
+      "titulo": "Ficar no Windows 10 com as atualizações estendidas"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Antes de qualquer mudança, faça backup"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A atualização para o Windows 11 mantém arquivos e programas, mas nenhuma troca de sistema deve começar sem uma cópia do que é importante. Fotos, documentos, a pasta do programa da empresa: copie para um disco externo ou para a nuvem e confira se a cópia abre. Falta de energia no meio do processo é rara, mas acontece."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O cuidado vale em dobro para quem vai trocar o disco rígido por SSD, porque aí os dados precisam ser levados de um para o outro. Se o disco antigo já dá sinais de falha — travamentos, barulho, arquivos que somem —, pare de usar e leia antes [como recuperar dados de HD](/blog/como-recuperar-dados-de-hd)."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "E se eu não fizer nada?"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O computador segue ligando e funcionando. O que cresce, mês a mês, é o número de falhas conhecidas sem correção. Com o tempo, programas e navegadores também tendem a deixar de lançar versões para um sistema sem suporte, e o que hoje é só um risco passa a ser incompatibilidade."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Como a inscrição nas atualizações estendidas pode ser feita a qualquer momento até o fim do programa, não há motivo para ficar descoberto. Se você ainda não se inscreveu e não vai atualizar esta semana, esse é o primeiro passo — leva poucos minutos e não muda nada no uso do computador."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Onde resolver isso em Campinas"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Conferir requisito, ativar o TPM na configuração da placa e instalar memória ou SSD são tarefas simples para quem faz todo dia, e arriscadas para quem nunca abriu um computador. Na [assistência técnica](/manutencao) da Balão da Informática, no Cambuí, a equipe verifica a compatibilidade e faz o upgrade e a atualização no mesmo lugar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "E se a conclusão for trocar, dá para ver o computador ligado e testar antes de pagar, entre [PCs de mesa](/categoria/computadores-pc) e [notebooks](/notebooks), novos e seminovos. A decisão, em uma linha: descubra primeiro se a sua máquina roda o Windows 11; só depois disso faz sentido falar em comprar outra."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "O Windows 10 vai parar de funcionar?",
+      "resposta": "Não. Segundo a Microsoft, os computadores com Windows 10 continuam funcionando. O que terminou, em 14 de outubro de 2025, foi o fornecimento de atualizações de software, correções de segurança e assistência técnica para o sistema."
+    },
+    {
+      "pergunta": "Até quando o Windows 10 recebe correção de segurança?",
+      "resposta": "Para quem se inscrever no programa de Atualizações de Segurança Estendidas, até 12 de outubro de 2027. Sem a inscrição, o computador não recebe mais correções."
+    },
+    {
+      "pergunta": "A atualização do Windows 10 para o Windows 11 é paga?",
+      "resposta": "Não. Se o computador atende aos requisitos mínimos, a Microsoft informa que a opção de atualizar gratuitamente aparece no Windows Update, do Windows 10 Home ou Pro para a edição equivalente do Windows 11."
+    },
+    {
+      "pergunta": "Meu computador tem 4 GB de memória. Posso instalar o Windows 11?",
+      "resposta": "Pode, se os outros requisitos forem atendidos: 4 GB é o mínimo exigido. Para o uso do dia a dia, porém, é pouco. Se o processador é aceito, vale aproveitar a atualização para colocar mais memória."
+    },
+    {
+      "pergunta": "O aplicativo disse que meu PC não é compatível. Tem conserto?",
+      "resposta": "Depende do motivo. Quando o que falha é o TPM 2.0 ou a Inicialização Segura, muitas vezes basta ativar o recurso na configuração da placa-mãe. Quando é o processador que não está na lista da Microsoft, não há ajuste que resolva."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Microsoft — Atualizações de Segurança Estendidas (ESU) do Windows 10",
+      "url": "https://www.microsoft.com/pt-br/windows/extended-security-updates",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Microsoft — Fim do suporte do Windows 10",
+      "url": "https://www.microsoft.com/pt-br/windows/end-of-support",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Microsoft — Especificações e requisitos de sistema do Windows 11",
+      "url": "https://www.microsoft.com/pt-br/windows/windows-11-specifications",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Microsoft Learn — Requisitos de processador do Windows",
+      "url": "https://learn.microsoft.com/pt-br/windows-hardware/design/minimum/windows-processor-requirements",
+      "data": "consultado em outubro de 2026"
+    }
+  ]
+}
