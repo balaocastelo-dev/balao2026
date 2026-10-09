@@ -1,7 +1,10 @@
 import { ImageResponse } from "next/og";
 import React from "react";
 
-export const runtime = "edge";
+// Roda no runtime padrão (Node), não no "edge". No edge esta rota respondia
+// 500 na Vercel desde agosto ("NEXT_DEPLOYMENT_ID is missing"): nenhuma capa
+// gerada aparecia, nem no site nem ao compartilhar o link.
+export const runtime = "nodejs";
 
 /**
  * A capa gerada com o título do artigo (1200 × 630).
