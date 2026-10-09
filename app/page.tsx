@@ -16,7 +16,7 @@ import { BotaoDeFiltros, FiltrosLaterais } from "@/components/catalogo/FiltrosDo
 import { aplicarFiltros, contarFiltros, lerFiltros, montarFacetas, ordenar, paraQuery, termosDaBusca } from "@/lib/catalogo/filtros";
 
 import { getCachedCategories, getCachedProducts, getCachedProductsByExactCategories, getCachedCarouselImages, getCachedBuscaCompleta } from "@/lib/cache";
-import { listBlogPostsForPage } from "@/lib/blog-store";
+import { listarNoFormatoAntigo } from "@/lib/blog/repositorio";
 import { parsePriceToNumber, Product, type Category } from "@/lib/utils";
 import type { Metadata } from "next";
 import { SITE_CONFIG } from "@/lib/config";
@@ -131,7 +131,7 @@ export default async function Home(props: {
   [categories, carouselImages, blogPosts] = await Promise.all([
     getCachedCategories(),
     getCachedCarouselImages(),
-    listBlogPostsForPage({ take: 6, skipDynamicFallback: true }) as Promise<HomeBlogPost[]>,
+    listarNoFormatoAntigo(6) as Promise<HomeBlogPost[]>,
   ]);
 
   if (search) {

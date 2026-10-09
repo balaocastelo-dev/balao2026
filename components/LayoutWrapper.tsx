@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from "react";
 import { usePathname } from "next/navigation";
 import { SidebarProvider } from "@/context/SidebarContext";
 import Sidebar from "@/components/Sidebar";
@@ -41,8 +42,15 @@ export default function LayoutWrapper({
 
   return (
     <SidebarProvider>
-      {!isRoletaPage && !isBlogPage && !isFullscreenPanel && !isPaginaDeVendas && (
-        <Sidebar categories={categories} mobileOnly />
+      {/* O blog também recebe o menu da loja: sem ele, o botão de menu do
+          cabeçalho não abria nada no celular e o leitor não tinha como ir do
+          artigo para as categorias. */}
+      {!isRoletaPage && !isFullscreenPanel && !isPaginaDeVendas && (
+        // O menu lê os filtros da URL; dentro do Suspense, só ele espera o
+        // navegador — o resto da página continua saindo pronto do servidor.
+        <Suspense fallback={null}>
+          <Sidebar categories={categories} mobileOnly />
+        </Suspense>
       )}
       <div
         className={
@@ -50,14 +58,17 @@ export default function LayoutWrapper({
             ? // Altura fixa e sem overflow: a tela de atendimento manda no
               // viewport inteiro e não gera aquela segunda barra de rolagem.
               "flex h-screen w-full max-w-full flex-col overflow-hidden"
-            : "flex min-h-screen w-full max-w-full flex-col overflow-x-hidden"
+            : `flex min-h-screen w-full max-w-full flex-col ${isBlogPage ? "overflow-x-clip" : "overflow-x-hidden"}`
         }
       >
         <main
           className={
             isFullscreenPanel
               ? "flex-1 w-full max-w-full overflow-hidden"
-              : "flex-grow w-full max-w-full overflow-x-hidden"
+              : // No blog o corte lateral é "clip": com "hidden" o navegador
+                // trata o bloco como área de rolagem, e aí nada fica preso ao
+                // topo — nem o filtro da lista, nem o sumário do artigo.
+                `flex-grow w-full max-w-full ${isBlogPage ? "overflow-x-clip" : "overflow-x-hidden"}`
           }
         >
           {children}

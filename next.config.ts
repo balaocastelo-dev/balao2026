@@ -9,6 +9,18 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/api/precos/troca": ["./data/catalogo-inicial.json"],
   },
+  async redirects() {
+    return [
+      // Os artigos do Soro abriam por script em /blog?post=<slug>. Agora cada
+      // um tem página própria; o endereço antigo leva para ela.
+      {
+        source: "/blog",
+        has: [{ type: "query", key: "post", value: "(?<slug>[a-z0-9-]+)" }],
+        destination: "/blog/:slug",
+        permanent: true,
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {

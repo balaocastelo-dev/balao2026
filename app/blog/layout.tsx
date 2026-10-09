@@ -1,53 +1,51 @@
 import type { Metadata } from "next";
+import { Archivo, Source_Serif_4 } from "next/font/google";
 import { SITE_CONFIG } from "@/lib/config";
+import "./blog.css";
 
-function getMetadataBase() {
+// Títulos e interface. O eixo de largura (wdth) é o que deixa os títulos um
+// pouco expandidos sem carregar uma segunda família.
+const archivo = Archivo({
+  subsets: ["latin"],
+  axes: ["wdth"],
+  variable: "--font-blog-titulo",
+  display: "swap",
+});
+
+// Texto corrido dos artigos.
+const sourceSerif = Source_Serif_4({
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  variable: "--font-blog-texto",
+  display: "swap",
+});
+
+function baseDoSite() {
   const url = process.env.NEXT_PUBLIC_SITE_URL || "https://www.balao.info";
-  if (url.startsWith("http")) return new URL(url);
-  return new URL(`https://${url}`);
+  return new URL(url.startsWith("http") ? url : `https://${url}`);
 }
 
 export const metadata: Metadata = {
+  metadataBase: baseDoSite(),
   title: {
-    default: "Blog Balão da Informática — Notícias, Guias e Ofertas",
-    template: "%s | Blog Balão da Informática",
+    default: "Blog da Balão da Informática: guias, análises e assistência",
+    template: "%s | Balão da Informática",
   },
   description:
-    "Notícias de tecnologia, guias de compra e ofertas de informática. Conteúdo atualizado com foco em SEO para quem quer comprar notebook, PC Gamer, hardware e periféricos. Atendimento rápido no WhatsApp.",
-  keywords: [
-    "loja de informática",
-    "informática em Campinas",
-    "hardware",
-    "notebook",
-    "pc gamer",
-    "placa de vídeo",
-    "ssd",
-    "memória ram",
-    "periféricos",
-    "promoções",
-  ],
-  metadataBase: getMetadataBase(),
+    "Guias de compra, análises com números de teste e orientação de assistência técnica da Balão da Informática, loja de informática em Campinas.",
   alternates: {
     canonical: "/blog",
+    types: { "application/rss+xml": "/blog/rss.xml" },
   },
   openGraph: {
     type: "website",
     locale: "pt_BR",
     url: "/blog",
     siteName: SITE_CONFIG.name,
-    title: "Blog Balão da Informática — Notícias, Guias e Ofertas",
-    description:
-      "Notícias de tecnologia, guias de compra e ofertas de informática. Atendimento rápido no WhatsApp.",
-    images: [{ url: "/logo.png" }],
   },
-  robots: {
-    index: true,
-    follow: true,
-  },
+  robots: { index: true, follow: true },
 };
 
-export const runtime = "nodejs";
-
-export default function BlogLayout({ children }: { children: React.ReactNode }) {
-  return children;
+export default function LayoutDoBlog({ children }: { children: React.ReactNode }) {
+  return <div className={`blog-raiz ${archivo.variable} ${sourceSerif.variable} min-h-screen`}>{children}</div>;
 }

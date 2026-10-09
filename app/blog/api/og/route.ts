@@ -3,134 +3,126 @@ import React from "react";
 
 export const runtime = "edge";
 
-function clamp(input: string, max: number) {
-  const t = (input ?? "").toString().replace(/\s+/g, " ").trim();
-  return t.length > max ? `${t.slice(0, max - 1)}…` : t;
+/**
+ * A capa gerada com o título do artigo (1200 × 630).
+ *
+ * Serve para três coisas: a imagem que aparece quando o link é compartilhado
+ * no WhatsApp e nas redes, a capa de artigo que ainda não tem foto e a reserva
+ * quando uma capa hospedada fora falha. Só as cores da marca: fundo carbono,
+ * branco e o Vermelho Balão.
+ */
+
+function cortar(texto: string, max: number) {
+  const t = (texto ?? "").toString().replace(/\s+/g, " ").trim();
+  return t.length > max ? `${t.slice(0, max - 1).trim()}…` : t;
 }
 
-function hashString(input: string) {
+/** Um desenho de fundo diferente por artigo, sempre o mesmo para o mesmo endereço. */
+function semente(texto: string) {
   let h = 2166136261;
-  for (let i = 0; i < input.length; i += 1) {
-    h ^= input.charCodeAt(i);
+  for (let i = 0; i < texto.length; i += 1) {
+    h ^= texto.charCodeAt(i);
     h = Math.imul(h, 16777619);
   }
   return h >>> 0;
 }
 
-function pickPalette(seed: string) {
-  const h = hashString(seed);
-  const palettes = [
-    ["#0b1020", "#111827", "#e41e26"],
-    ["#0a0a0a", "#171717", "#f97316"],
-    ["#0b1020", "#1f2937", "#22c55e"],
-    ["#0b1020", "#111827", "#3b82f6"],
-    ["#0a0a0a", "#1f2937", "#a855f7"],
-  ];
-  return palettes[h % palettes.length]!;
-}
-
 export async function GET(req: Request) {
   const url = new URL(req.url);
-  const title = clamp(url.searchParams.get("title") ?? "Post", 110);
-  const category = clamp(url.searchParams.get("category") ?? "Tecnologia", 24);
-  const source = clamp(url.searchParams.get("source") ?? "", 36);
-  const seed = url.searchParams.get("seed") ?? `${category}-${title}`;
-  const [bg1, bg2, accent] = pickPalette(seed);
+  const titulo = cortar(url.searchParams.get("title") ?? "Blog da Balão da Informática", 110);
+  const categoria = cortar(url.searchParams.get("category") ?? "Guias", 40);
+  const s = semente(url.searchParams.get("seed") ?? titulo);
 
-  const rootStyle: React.CSSProperties = {
-    width: "1200px",
-    height: "630px",
-    display: "flex",
-    flexDirection: "column",
-    padding: "56px",
-    background: `linear-gradient(135deg, ${bg1} 0%, ${bg2} 60%, ${bg1} 100%)`,
-    color: "white",
-    justifyContent: "space-between",
-  };
+  // Uma régua de barras verticais no canto, como um gráfico de teste.
+  const barras = Array.from({ length: 9 }, (_v, i) => 90 + ((s >> (i * 3)) & 7) * 46);
+  const acesa = s % barras.length;
 
-  const headerRowStyle: React.CSSProperties = {
-    display: "flex",
-    alignItems: "center",
-    gap: "14px",
-  };
+  const e = React.createElement;
+  const tamanhoDoTitulo = titulo.length > 80 ? 54 : titulo.length > 52 ? 64 : 76;
 
-  const dotStyle: React.CSSProperties = {
-    width: "18px",
-    height: "18px",
-    borderRadius: "999px",
-    background: accent,
-    boxShadow: "0 0 0 8px rgba(255,255,255,0.06)",
-  };
-
-  const brandStyle: React.CSSProperties = {
-    fontSize: "24px",
-    fontWeight: 900,
-    letterSpacing: "-0.02em",
-  };
-
-  const chipStyle: React.CSSProperties = {
-    marginLeft: "12px",
-    padding: "6px 12px",
-    borderRadius: "999px",
-    background: "rgba(255,255,255,0.10)",
-    fontSize: "14px",
-    fontWeight: 800,
-    textTransform: "uppercase",
-    letterSpacing: "0.08em",
-  };
-
-  const midStyle: React.CSSProperties = {
-    display: "flex",
-    flexDirection: "column",
-    gap: "16px",
-  };
-
-  const titleStyle: React.CSSProperties = {
-    fontSize: "58px",
-    fontWeight: 900,
-    lineHeight: 1.06,
-    letterSpacing: "-0.04em",
-  };
-
-  const sourceStyle: React.CSSProperties = {
-    fontSize: "18px",
-    color: "rgba(255,255,255,0.8)",
-    fontWeight: 700,
-  };
-
-  const footerStyle: React.CSSProperties = {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    fontSize: "14px",
-    color: "rgba(255,255,255,0.65)",
-    fontWeight: 700,
-  };
-
-  const element = React.createElement(
+  const elemento = e(
     "div",
-    { style: rootStyle },
-    React.createElement(
+    {
+      style: {
+        width: "1200px",
+        height: "630px",
+        display: "flex",
+        position: "relative",
+        background: "#090d16",
+        color: "#f8fafc",
+        fontFamily: "sans-serif",
+      },
+    },
+    e(
       "div",
-      { style: headerRowStyle },
-      React.createElement("div", { style: dotStyle }),
-      React.createElement("div", { style: brandStyle }, "BalãoNews"),
-      React.createElement("div", { style: chipStyle }, category),
+      {
+        style: {
+          position: "absolute",
+          right: "64px",
+          bottom: "0px",
+          display: "flex",
+          alignItems: "flex-end",
+          gap: "14px",
+          height: "630px",
+        },
+      },
+      ...barras.map((altura, i) =>
+        e("div", {
+          key: i,
+          style: {
+            width: "26px",
+            height: `${altura}px`,
+            background: i === acesa ? "#E60012" : "#161f32",
+            borderTopLeftRadius: "6px",
+            borderTopRightRadius: "6px",
+          },
+        }),
+      ),
     ),
-    React.createElement(
+    e(
       "div",
-      { style: midStyle },
-      React.createElement("div", { style: titleStyle }, title),
-      source ? React.createElement("div", { style: sourceStyle }, `Fonte: ${source}`) : null,
-    ),
-    React.createElement(
-      "div",
-      { style: footerStyle },
-      React.createElement("div", null, "Notícias • Hardware • Games • IA"),
-      React.createElement("div", { style: { color: accent } }, "balao.info/blog"),
+      {
+        style: {
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          padding: "64px",
+          width: "860px",
+          height: "630px",
+        },
+      },
+      e(
+        "div",
+        { style: { display: "flex", alignItems: "center", gap: "16px", fontSize: "26px", fontWeight: 700 } },
+        e("div", { style: { width: "18px", height: "18px", background: "#E60012" } }),
+        e("div", null, categoria),
+      ),
+      e(
+        "div",
+        {
+          style: {
+            display: "flex",
+            fontSize: `${tamanhoDoTitulo}px`,
+            fontWeight: 900,
+            lineHeight: 1.06,
+            letterSpacing: "-0.035em",
+          },
+        },
+        titulo,
+      ),
+      e(
+        "div",
+        { style: { display: "flex", alignItems: "center", gap: "18px", fontSize: "24px", color: "#94a3b8", fontWeight: 600 } },
+        e("div", { style: { color: "#f8fafc", fontWeight: 800 } }, "Balão da Informática"),
+        e("div", { style: { width: "2px", height: "22px", background: "#334155" } }),
+        e("div", null, "balao.info/blog"),
+      ),
     ),
   );
 
-  return new ImageResponse(element, { width: 1200, height: 630 });
+  return new ImageResponse(elemento, {
+    width: 1200,
+    height: 630,
+    headers: { "cache-control": "public, max-age=86400, s-maxage=604800, immutable" },
+  });
 }
-
