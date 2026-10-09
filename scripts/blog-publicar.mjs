@@ -270,7 +270,9 @@ if (comando === "listar") {
     conferirContraOPublicado(artigo, indice, { atualizar, forcar });
 
     // O autor e a origem não vão no arquivo: quem lê o ramo é que os define.
-    const { autor: _autor, origem: _origem, ...paraGravar } = artigo;
+    const paraGravar = { ...artigo };
+    delete paraGravar.autor;
+    delete paraGravar.origem;
     const anterior = indice.artigos.find((a) => a.slug === artigo.slug);
     if (anterior) {
       paraGravar.publicadoEm = anterior.publicadoEm;

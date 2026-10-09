@@ -251,7 +251,7 @@ export function desenharFundo(chave: string, categoria: CategoriaSlug): string {
     "<defs>",
     `<radialGradient id="brilho" cx="50%" cy="0%" r="75%"><stop offset="0" stop-color="${VERMELHO}" stop-opacity="0.2"/><stop offset="0.55" stop-color="${VERMELHO}" stop-opacity="0"/></radialGradient>`,
     // Some de cima para baixo: o terço de cima fica vivo, o resto vira textura.
-    `<linearGradient id="some" x1="0" y1="0" x2="0" y2="1"><stop offset="0.36" stop-color="${CARBONO}" stop-opacity="0"/><stop offset="0.7" stop-color="${CARBONO}" stop-opacity="0.6"/><stop offset="1" stop-color="${CARBONO}" stop-opacity="0.9"/></linearGradient>`,
+    `<linearGradient id="some" x1="0" y1="0" x2="0" y2="1"><stop offset="0.3" stop-color="${CARBONO}" stop-opacity="0"/><stop offset="0.6" stop-color="${CARBONO}" stop-opacity="0.75"/><stop offset="1" stop-color="${CARBONO}" stop-opacity="0.92"/></linearGradient>`,
     "</defs>",
     `<rect width="${LARGURA_DO_FUNDO}" height="${ALTURA_DO_FUNDO}" fill="${CARBONO}"/>`,
     `<rect width="${LARGURA_DO_FUNDO}" height="${ALTURA_DO_FUNDO}" fill="url(#brilho)"/>`,
