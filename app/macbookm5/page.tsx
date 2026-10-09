@@ -4,9 +4,9 @@ import MacBookM5Landing from "./MacBookM5Landing";
 const canonical = "https://www.balao.info/macbookm5";
 
 export const metadata: Metadata = {
-  title: "MacBook Pro 2025 M5 16GB 512GB em Campinas | R$ 10.999",
+  title: "MacBook Pro 2025 M5 16GB 512GB em Campinas | R$ 10.999 ou R$ 9.999 à vista",
   description:
-    "MacBook Pro 2025 com chip M5, 16GB e SSD 512GB por R$ 10.999 em até 10x sem juros na Balão da Informática em Campinas. 6 meses Apple + 6 meses adicionais da loja.",
+    "MacBook Pro 2025 com chip M5, 16GB e SSD 512GB por R$ 10.999 em até 10x sem juros ou R$ 9.999 à vista na Balão da Informática em Campinas. 6 meses Apple + 6 meses adicionais da loja.",
   keywords: [
     "macbook pro 2025 m5 campinas",
     "macbook pro m5 16gb 512gb",
@@ -27,17 +27,17 @@ export const metadata: Metadata = {
     locale: "pt_BR",
     url: canonical,
     siteName: "Balão da Informática",
-    title: "MacBook Pro 2025 M5 16GB 512GB | R$ 10.999",
+    title: "MacBook Pro 2025 M5 16GB 512GB | R$ 10.999 ou R$ 9.999 à vista",
     description:
-      "Oferta em Campinas: MacBook Pro M5 com 16GB e SSD 512GB por R$ 10.999 em até 10x sem juros.",
-    images: [{ url: "/images/apple/subcategories/macbook-card.png" }],
+      "Oferta em Campinas: MacBook Pro M5 com 16GB e SSD 512GB por R$ 10.999 em até 10x sem juros ou R$ 9.999 à vista.",
+    images: [{ url: "/images/macbook-m5/macbook-pro-m5-og.jpg" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "MacBook Pro 2025 M5 16GB 512GB | Balão da Informática",
     description:
-      "R$ 10.999 em até 10x sem juros. 6 meses Apple + 6 meses Balão.",
-    images: ["/images/apple/subcategories/macbook-card.png"],
+      "R$ 10.999 em até 10x sem juros ou R$ 9.999 à vista. 6 meses Apple + 6 meses Balão.",
+    images: ["/images/macbook-m5/macbook-pro-m5-og.jpg"],
   },
 };
 
@@ -51,7 +51,7 @@ const jsonLd = {
       description:
         "MacBook Pro 2025 com chip Apple M5, 16GB de memória e SSD de 512GB vendido pela Balão da Informática em Campinas.",
       brand: { "@type": "Brand", name: "Apple" },
-      image: "https://www.balao.info/images/apple/subcategories/macbook-card.png",
+      image: "https://www.balao.info/images/macbook-m5/macbook-pro-m5-og.jpg",
       sku: "MACBOOK-PRO-2025-M5-16-512",
       offers: {
         "@type": "Offer",
@@ -81,7 +81,7 @@ const jsonLd = {
           name: "Qual é o preço do MacBook Pro 2025 M5 16GB 512GB?",
           acceptedAnswer: {
             "@type": "Answer",
-            text: "R$ 10.999,00, com opção de pagamento em até 10x sem juros."
+            text: "R$ 9.999,00 à vista ou R$ 10.999,00 em até 10x sem juros."
           }
         },
         {

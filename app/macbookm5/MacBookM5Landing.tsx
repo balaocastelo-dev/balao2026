@@ -31,7 +31,7 @@ const VIDEO_URL =
 const WHATSAPP =
   "https://wa.me/5519987510267?text=" +
   encodeURIComponent(
-    "Olá! Vi a página do MacBook Pro 2025 M5 16GB / SSD 512GB por R$ 10.999 e quero confirmar disponibilidade."
+    "Olá! Vi a página do MacBook Pro 2025 M5 16GB / SSD 512GB por R$ 9.999 à vista ou R$ 10.999 em 10x e quero confirmar disponibilidade."
   );
 
 const specs = [
@@ -72,11 +72,11 @@ const faqs = [
   },
   {
     q: "Qual é o valor?",
-    a: "R$ 10.999,00, sujeito à disponibilidade do estoque no momento do atendimento.",
+    a: "R$ 9.999,00 à vista ou R$ 10.999,00 em até 10x sem juros no cartão, sujeito à disponibilidade do estoque no momento do atendimento.",
   },
   {
     q: "Dá para parcelar sem juros?",
-    a: "Sim. A condição anunciada é em até 10x de R$ 1.099,90 sem juros no cartão.",
+    a: "Sim. A condição anunciada é em até 10x de R$ 1.099,90 sem juros no cartão (R$ 10.999,00). À vista sai por R$ 9.999,00.",
   },
   {
     q: "Como funciona a garantia?",
@@ -195,6 +195,9 @@ function ProductStory() {
             <div className="mt-8 border-t border-white/10 pt-8">
               <div className="text-5xl font-black tracking-[-.06em] sm:text-7xl">10x de R$ 1.099,90</div>
               <div className="mt-2 text-lg font-bold text-zinc-400">sem juros no cartão</div>
+              <div className="mt-5 text-3xl font-black tracking-[-.04em] text-white sm:text-4xl">
+                ou R$ 9.999 à vista
+              </div>
             </div>
             <a
               href={WHATSAPP}
@@ -224,7 +227,7 @@ function ProductStory() {
                 muted
                 playsInline
                 preload="metadata"
-                poster="/images/apple/subcategories/macbook-card.png"
+                poster="/images/macbook-m5/macbook-pro-m5-poster.webp"
                 className="h-full w-full object-contain object-center"
                 aria-label="MacBook Pro M5 em animação contínua"
               />
@@ -563,7 +566,7 @@ export default function MacBookM5Landing() {
             QUERO M5.
           </div>
           <p className="mx-auto mt-9 max-w-xl text-lg font-medium text-red-100">
-            MacBook Pro 2025 M5, 16GB, SSD 512GB. R$ 10.999 em até 10x sem juros.
+            MacBook Pro 2025 M5, 16GB, SSD 512GB. R$ 10.999 em até 10x sem juros ou R$ 9.999 à vista.
           </p>
           <a
             href={WHATSAPP}

@@ -5,6 +5,7 @@ import JsonLd, { generateHomeAiAndGoogleSchema } from "@/components/JsonLd";
 import QuickLeadSection from "@/components/QuickLeadSection";
 import HomeLocalStoreInfo from "@/components/HomeLocalStoreInfo";
 import HomeHeroFullWidth from "@/components/HomeHeroFullWidth";
+import HomeMacbookM5Destaque from "@/components/HomeMacbookM5Destaque";
 import HomeTrustPillars from "@/components/HomeTrustPillars";
 import HomeDepartmentMenu from "@/components/HomeDepartmentMenu";
 import HomeCategoryShelf from "@/components/HomeCategoryShelf";
@@ -292,6 +293,11 @@ export default async function Home(props: {
         {/* 1. Full-Width Stretched Hero Banner */}
         {!search && !category && (
           <HomeHeroFullWidth />
+        )}
+
+        {/* 1.1 Destaque: MacBook Pro M5 seminovo (produto único da loja, fora do espelhamento) */}
+        {!search && !category && (
+          <HomeMacbookM5Destaque />
         )}
 
         {/* 2. Trust Pillars (4 interactive cards) */}
