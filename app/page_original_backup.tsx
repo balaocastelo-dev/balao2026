@@ -13,7 +13,7 @@ import HomeSeminovosShowcase from "@/components/HomeSeminovosShowcase";
 import Image from "next/image";
 import { getProductsByExactCategories, getProducts } from "@/lib/db";
 import { getCachedCategories, getCachedCarouselImages, getCachedHomeBlocks, getCachedVitrinePages } from "@/lib/cache";
-import { listBlogPostsForPage } from "@/lib/blog-store";
+import { listarNoFormatoAntigo } from "@/lib/blog/repositorio";
 import { pickPcHeroImage } from "@/lib/vitrine/core";
 import type { VitrineCategory } from "@/lib/vitrine/types";
 import { turso } from "@/lib/turso";
@@ -209,7 +209,7 @@ export default async function Home(props: {
       getCachedCategories(),
       getCachedCarouselImages(),
       getCachedHomeBlocks(),
-      listBlogPostsForPage({ take: 6, skipDynamicFallback: true }) as Promise<HomeSidebarBlogPost[]>,
+      listarNoFormatoAntigo(6) as Promise<HomeSidebarBlogPost[]>,
       getCachedVitrinePages().then((pages) => pages.slice(0, 6)) as Promise<HomeSidebarVitrinePage[]>,
     ]);
 
@@ -251,7 +251,7 @@ export default async function Home(props: {
       getCachedCategories(),
       getCachedCarouselImages(),
       getCachedHomeBlocks(),
-      listBlogPostsForPage({ take: 6, skipDynamicFallback: true }) as Promise<HomeSidebarBlogPost[]>,
+      listarNoFormatoAntigo(6) as Promise<HomeSidebarBlogPost[]>,
       getCachedVitrinePages().then((pages) => pages.slice(0, 6)) as Promise<HomeSidebarVitrinePage[]>,
     ]);
 

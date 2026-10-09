@@ -12,7 +12,11 @@
     "lint": "eslint",
     "test": "vitest run",
     "whatsapp:server": "npm --prefix whatsapp-server run dev",
-    "whatsapp:server:start": "npm --prefix whatsapp-server run start"
+    "whatsapp:server:start": "npm --prefix whatsapp-server run start",
+    "blog:novo": "node scripts/blog-novo.mjs",
+    "blog:conferir": "vitest run __tests__/lib/blog.test.ts",
+    "blog:soro": "node scripts/blog-soro.mjs",
+    "blog:publicar": "node scripts/blog-publicar.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

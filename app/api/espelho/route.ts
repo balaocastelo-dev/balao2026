@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCarouselImages, getCategories, getProducts } from "@/lib/db";
-import { listBlogPostsForPage } from "@/lib/blog-store";
+import { listarNoFormatoAntigo } from "@/lib/blog/repositorio";
 import { bancoEmPausa } from "@/lib/turso";
 
 export const dynamic = "force-dynamic";
@@ -28,7 +28,7 @@ export async function GET() {
     parte("produtos", () => getProducts(), []),
     parte("categorias", () => getCategories(), []),
     parte("banners", () => getCarouselImages(false), []),
-    parte("blog", () => listBlogPostsForPage({ take: 40, skipDynamicFallback: true }), []),
+    parte("blog", () => listarNoFormatoAntigo(40), []),
   ]);
 
   const falhas = [produtos, categorias, banners, blog]

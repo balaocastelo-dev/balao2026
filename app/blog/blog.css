@@ -1,0 +1,499 @@
+/*
+ * Estilos do blog.
+ *
+ * Tudo aqui vive dentro de `.blog-raiz` (aplicada no layout do blog), então
+ * nada vaza para a loja. As cores são as do DESIGN.md — fundo carbono, painel
+ * ardósia, Vermelho Balão — sem verde, amarelo ou degradê roxo.
+ *
+ * Duas famílias, com papéis separados: Archivo um pouco expandida nos títulos
+ * e na interface (lembra capa de revista de informática); Source Serif no
+ * texto corrido, que é o que se lê por dez minutos.
+ */
+
+/*
+ * A ordem das camadas é a mesma do Tailwind. Declarada aqui também para valer
+ * mesmo se este arquivo for carregado antes do globals.css. Com as regras em
+ * `components`, uma classe utilitária no elemento sempre vence a regra daqui.
+ */
+@layer theme, base, components, utilities;
+
+@layer components {
+  .blog-raiz {
+    --b-fundo: #090d16;
+    --b-painel: #111827;
+    --b-cartao: #161f32;
+    --b-linha: rgba(148, 163, 184, 0.18);
+    --b-linha-forte: rgba(148, 163, 184, 0.34);
+    --b-tinta: #f8fafc;
+    --b-tinta-2: #d5dde8;
+    --b-tinta-3: #94a3b8;
+    --b-vermelho: #e60012;
+    --b-barra-neutra: #94a3b8;
+
+    background: var(--b-fundo);
+    color: var(--b-tinta);
+    font-family: var(--font-blog-titulo), "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .blog-raiz ::selection {
+    background: var(--b-vermelho);
+    color: #fff;
+  }
+
+  .blog-raiz :focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* ---------- Tipografia ---------- */
+
+  .b-titulo {
+    font-family: var(--font-blog-titulo), "Helvetica Neue", Arial, sans-serif;
+    font-stretch: 112%;
+    font-weight: 800;
+    letter-spacing: -0.022em;
+    line-height: 1.05;
+    text-wrap: balance;
+  }
+
+  .b-serifa {
+    font-family: var(--font-blog-texto), Georgia, "Times New Roman", serif;
+  }
+
+  /* Rótulo de categoria: quadrado vermelho + texto claro. O vermelho da marca
+     não tem contraste para texto pequeno em fundo escuro; como marcador, tem. */
+  .b-categoria {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    color: var(--b-tinta);
+  }
+  .b-categoria::before {
+    content: "";
+    width: 0.5rem;
+    height: 0.5rem;
+    background: var(--b-vermelho);
+    flex: none;
+  }
+
+  /* ---------- Imagens: um tratamento só para todas as capas ---------- */
+
+  .b-capa {
+    overflow: hidden;
+    background: var(--b-cartao);
+    isolation: isolate;
+  }
+  .b-capa img {
+    object-fit: cover;
+    filter: saturate(0.84) contrast(1.06);
+    transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1), filter 0.3s ease;
+  }
+  /* Um véu azul-noite que tira as capas do tom de madeira clara e as aproxima do fundo. */
+  .b-capa::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: #0b1324;
+    mix-blend-mode: color;
+    opacity: 0.28;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  a:hover .b-capa img,
+  a:focus-visible .b-capa img {
+    transform: scale(1.03);
+    filter: saturate(1) contrast(1.04);
+  }
+  a:hover .b-capa::after,
+  a:focus-visible .b-capa::after {
+    opacity: 0.08;
+  }
+
+  /* Com título por cima, a imagem sobe um pouco: o que importa fica fora do texto. */
+  .b-capa-com-texto img {
+    object-position: 50% 25%;
+  }
+  /* Capa desenhada para o blog: já está nas cores certas e tem o assunto no topo. */
+  .b-capa-pronta img {
+    filter: none;
+    object-position: 50% 0%;
+  }
+  .b-capa-pronta::after {
+    display: none;
+  }
+  a:hover .b-capa-pronta img,
+  a:focus-visible .b-capa-pronta img {
+    filter: none;
+  }
+
+  /* Capa com texto por cima: escurece de baixo para cima. */
+  .b-capa-com-texto::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(
+      to top,
+      rgba(9, 13, 22, 0.97) 0%,
+      rgba(9, 13, 22, 0.86) 26%,
+      rgba(9, 13, 22, 0.42) 54%,
+      rgba(9, 13, 22, 0.08) 78%
+    );
+    pointer-events: none;
+  }
+
+  /* ---------- Vitrine do topo ---------- */
+
+  .b-vitrine {
+    display: grid;
+    gap: 0.875rem;
+    grid-template-columns: 1fr;
+  }
+  .b-vitrine > * {
+    min-height: 15rem;
+  }
+  .b-vitrine > :first-child {
+    min-height: 24rem;
+  }
+
+  @media (min-width: 640px) {
+    .b-vitrine {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .b-vitrine > :nth-child(1),
+    .b-vitrine > :nth-child(2) {
+      grid-column: span 2;
+    }
+    .b-vitrine > :nth-child(2) {
+      min-height: 17rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .b-vitrine {
+      grid-template-columns: repeat(14, minmax(0, 1fr));
+      grid-template-rows: repeat(2, minmax(16rem, 1fr));
+    }
+    .b-vitrine > * {
+      min-height: 0;
+    }
+    .b-vitrine > :nth-child(1) {
+      grid-column: 1 / span 8;
+      grid-row: 1 / span 2;
+      min-height: 34rem;
+    }
+    .b-vitrine > :nth-child(2) {
+      grid-column: 9 / span 6;
+      grid-row: 1;
+      min-height: 0;
+    }
+    .b-vitrine > :nth-child(3) {
+      grid-column: 9 / span 3;
+      grid-row: 2;
+    }
+    .b-vitrine > :nth-child(4) {
+      grid-column: 12 / span 3;
+      grid-row: 2;
+    }
+  }
+
+  /* ---------- Lista de artigos ---------- */
+
+  .b-grade {
+    display: grid;
+    gap: 2.5rem 1.5rem;
+    grid-template-columns: 1fr;
+    grid-auto-flow: dense;
+  }
+  @media (min-width: 640px) {
+    .b-grade {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .b-grade > .b-largo {
+      grid-column: span 2;
+    }
+  }
+  @media (min-width: 1024px) {
+    .b-grade {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 3rem 1.75rem;
+    }
+  }
+
+  @keyframes b-entrar {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .b-entra {
+    animation: b-entrar 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  /* ---------- Corpo do artigo ---------- */
+
+  .b-prosa {
+    font-family: var(--font-blog-texto), Georgia, "Times New Roman", serif;
+    font-size: 1.0625rem;
+    line-height: 1.75;
+    color: var(--b-tinta-2);
+    max-width: 44rem;
+  }
+  @media (min-width: 640px) {
+    .b-prosa {
+      font-size: 1.1875rem;
+    }
+  }
+
+  .b-prosa > p {
+    margin: 1.3em 0;
+    hanging-punctuation: first;
+  }
+  .b-prosa > p:first-child {
+    margin-top: 0;
+    font-size: 1.18em;
+    line-height: 1.6;
+    color: var(--b-tinta);
+  }
+
+  .b-prosa strong {
+    color: var(--b-tinta);
+    font-weight: 700;
+  }
+
+  .b-prosa a.b-link,
+  .b-link {
+    color: var(--b-tinta);
+    text-decoration: underline;
+    text-decoration-color: var(--b-vermelho);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+    transition: background-color 0.15s ease;
+  }
+  .b-prosa a.b-link:hover,
+  .b-link:hover {
+    background: rgba(230, 0, 18, 0.22);
+  }
+
+  .b-prosa h2,
+  .b-prosa h3 {
+    font-family: var(--font-blog-titulo), "Helvetica Neue", Arial, sans-serif;
+    color: var(--b-tinta);
+    text-wrap: balance;
+    scroll-margin-top: 5.5rem;
+  }
+  .b-prosa h2 {
+    font-stretch: 108%;
+    font-weight: 800;
+    font-size: 1.6rem;
+    line-height: 1.14;
+    letter-spacing: -0.018em;
+    margin: 2.6em 0 0.7em;
+  }
+  .b-prosa h3 {
+    font-weight: 700;
+    font-size: 1.22rem;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    margin: 2em 0 0.5em;
+  }
+  @media (min-width: 640px) {
+    .b-prosa h2 {
+      font-size: 1.95rem;
+    }
+    .b-prosa h3 {
+      font-size: 1.35rem;
+    }
+  }
+
+  .b-prosa ul.b-lista,
+  .b-prosa ol.b-lista {
+    margin: 1.3em 0;
+    padding-left: 1.4em;
+  }
+  .b-prosa ul.b-lista {
+    list-style: square;
+  }
+  .b-prosa ol.b-lista {
+    list-style: decimal;
+  }
+  .b-prosa .b-lista li {
+    margin: 0.45em 0;
+    padding-left: 0.25em;
+  }
+  .b-prosa .b-lista li::marker {
+    color: var(--b-vermelho);
+    font-family: var(--font-blog-titulo), sans-serif;
+    font-weight: 700;
+  }
+
+  /* Blocos ricos saem da medida do texto e voltam para a família de interface. */
+  .b-bloco {
+    font-family: var(--font-blog-titulo), "Helvetica Neue", Arial, sans-serif;
+    margin: 2.25rem 0;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  /* ---------- Tabela ---------- */
+
+  .b-tabela-rolagem {
+    overflow-x: auto;
+    border: 1px solid var(--b-linha);
+    border-radius: 14px;
+    background: var(--b-painel);
+  }
+  .b-tabela {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+  }
+  /* Tabela de quatro colunas ou mais não se espreme no celular: rola de lado. */
+  .b-tabela[data-larga="true"] {
+    min-width: 36rem;
+  }
+  .b-tabela th,
+  .b-tabela td {
+    padding: 0.7rem 0.75rem;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--b-linha);
+  }
+  .b-tabela thead th {
+    font-weight: 700;
+    color: var(--b-tinta);
+    background: rgba(255, 255, 255, 0.03);
+  }
+  @media (min-width: 640px) {
+    .b-tabela {
+      font-size: 0.9375rem;
+    }
+    .b-tabela th,
+    .b-tabela td {
+      padding: 0.8rem 1rem;
+    }
+  }
+  .b-tabela tbody th {
+    font-weight: 600;
+    color: var(--b-tinta-3);
+  }
+  .b-tabela tbody td {
+    color: var(--b-tinta-2);
+  }
+  .b-tabela tbody tr:last-child th,
+  .b-tabela tbody tr:last-child td {
+    border-bottom: 0;
+  }
+  .b-tabela .b-coluna-destaque {
+    background: rgba(230, 0, 18, 0.09);
+    color: var(--b-tinta);
+  }
+  .b-tabela thead .b-coluna-destaque {
+    box-shadow: inset 0 3px 0 var(--b-vermelho);
+  }
+  .b-tabela strong {
+    color: var(--b-tinta);
+  }
+
+  /* ---------- Gráfico de benchmark ---------- */
+
+  .b-barra-trilho {
+    height: 1.125rem;
+    background: rgba(148, 163, 184, 0.1);
+    border-radius: 0 4px 4px 0;
+  }
+  .b-barra {
+    height: 100%;
+    min-width: 2px;
+    border-radius: 0 4px 4px 0;
+    background: var(--b-barra-neutra);
+    transform-origin: left center;
+  }
+  .b-barra[data-destaque="true"] {
+    background: var(--b-vermelho);
+  }
+  @media (forced-colors: active) {
+    .b-barra {
+      background: CanvasText;
+    }
+    .b-barra[data-destaque="true"] {
+      background: Highlight;
+    }
+  }
+
+  /* ---------- Sumário ---------- */
+
+  .b-sumario a {
+    display: block;
+    padding: 0.4rem 0 0.4rem 0.9rem;
+    border-left: 2px solid var(--b-linha);
+    color: var(--b-tinta-3);
+    font-size: 0.875rem;
+    line-height: 1.35;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+  .b-sumario a:hover {
+    color: var(--b-tinta);
+  }
+  .b-sumario a[data-nivel="3"] {
+    padding-left: 1.75rem;
+    font-size: 0.8125rem;
+  }
+  .b-sumario a[aria-current="true"] {
+    color: var(--b-tinta);
+    border-left-color: var(--b-vermelho);
+    font-weight: 700;
+  }
+
+  .b-progresso {
+    position: fixed;
+    inset: 0 0 auto 0;
+    height: 3px;
+    z-index: 60;
+    background: var(--b-vermelho);
+    transform-origin: left center;
+    transform: scaleX(0);
+    will-change: transform;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .b-entra {
+      animation: none;
+    }
+    .b-capa img,
+    .b-capa::after {
+      transition: none;
+    }
+    a:hover .b-capa img,
+    a:focus-visible .b-capa img {
+      transform: none;
+    }
+    html {
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/*
+ * Fora da camada de propósito: precisa vencer a regra global do <body>.
+ *
+ * O site corta o transbordo lateral com `overflow-x: hidden` no <html> e no
+ * <body>. Com isso o <body> vira uma área de rolagem que nunca rola, e nada
+ * dentro dele consegue ficar preso ao topo da tela. Nas páginas do blog o
+ * corte passa a ser `clip`, que esconde o transbordo do mesmo jeito sem criar
+ * essa área — é o que faz o filtro da lista e o sumário do artigo acompanharem
+ * a leitura.
+ */
+html:has(.blog-raiz) body {
+  overflow-x: clip;
+}

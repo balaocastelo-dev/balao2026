@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next'
 import { getCategories, getProductsForSitemap } from '@/lib/db'
-import { listBlogPostsForPage } from '@/lib/blog-store'
+import { CATEGORIAS } from '@/lib/blog/categorias'
+import { listarResumos } from '@/lib/blog/repositorio'
 import { LEAD_INTENTS } from '@/lib/lead-intents'
 import { REGIONAL_CITIES, REGIONAL_SERVICES, buildRegionalServicePath } from '@/lib/local-seo'
 import { CAMPINAS_NEIGHBORHOODS } from '@/lib/neighborhood-seo'
@@ -77,13 +78,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }))
 
-  const blogPosts = await listBlogPostsForPage({ take: 500 })
-  const blogRoutes = blogPosts.map((post) => ({
-    url: `${baseUrl}/blog/${post.slug}`,
-    lastModified: new Date(post.published_at || new Date()),
-    changeFrequency: 'weekly' as const,
-    priority: 0.65,
-  }))
+  // Blog: cada artigo e cada categoria que já tem artigo. Se a leitura
+  // falhar, o sitemap sai sem o blog — melhor do que não sair.
+  const artigos = await listarResumos({ tolerante: true }).catch(() => [])
+  const blogRoutes = [
+    ...artigos.map((artigo) => ({
+      url: `${baseUrl}/blog/${artigo.slug}`,
+      lastModified: new Date(artigo.publicadoEm),
+      changeFrequency: 'monthly' as const,
+      priority: 0.75,
+    })),
+    ...CATEGORIAS.filter((c) => artigos.some((a) => a.categoria === c.slug)).map((c) => ({
+      url: `${baseUrl}/blog/categoria/${c.slug}`,
+      changeFrequency: 'weekly' as const,
+      priority: 0.6,
+    })),
+  ]
 
   const vitrinePages = await listVitrinePagesPublic().catch(() => [])
   const vitrineRoutes = vitrinePages.map((p) => ({
