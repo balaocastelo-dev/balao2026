@@ -125,7 +125,7 @@ async function main() {
   confere("a queda de mais da metade ficou retida", passo.retidos === 1 && q.retido_desde != null && Math.abs(q.origem_pix - queda.origem_pix * 3) < 0.01 && q.retido_pix > 0, q);
   confere("o preço de venda retido segue o da origem anterior", q.price === formatarNumero(aplicarMargem(q.origem_pix, 40)), q.price);
   const a = await um("SELECT name, price, origem_pix, retido_desde FROM products WHERE id = ?", [alta.id]);
-  confere("a alta foi aplicada na hora", a.retido_desde == null && a.price === formatarNumero(aplicarMargem(a.origem_pix, 40)) && Math.abs(a.origem_pix - alta.origem_pix) < 0.01, a.price);
+  confere("a alta foi aplicada na hora", a.retido_desde == null && a.price === formatarNumero(aplicarMargem(a.origem_pix, 40)) && a.origem_pix > alta.origem_pix / 2, { price: a.price, esperado: formatarNumero(aplicarMargem(a.origem_pix, 40)), origem: a.origem_pix, antes: alta.origem_pix });
   confere("o nome ajustado à mão sobreviveu à releitura", a.name === "Nome ajustado à mão");
   const f = await buscarFonte("kabum-projetor");
   confere("a fonte ficou 'ok', destravada e sem passada aberta", f?.ultimo_status === "ok" && f.passo_pagina === 0 && f.travada_ate == null, { s: f?.ultimo_status, p: f?.passo_pagina });

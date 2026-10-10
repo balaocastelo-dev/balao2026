@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Header from '@/components/Header';
+import SeloProntaEntrega from "@/components/SeloProntaEntrega";
 import Sidebar from '@/components/Sidebar';
 import { notFound, permanentRedirect } from 'next/navigation';
 import ShareButton from '@/components/ShareButton';
@@ -138,7 +139,8 @@ export default async function ProductPage({ params }: Props) {
         <main className="flex-1 w-full min-w-0">
           <div className="site-surface overflow-hidden rounded-[1.4rem] shadow-[0_30px_80px_rgba(2,6,23,0.18)] sm:rounded-[1.75rem]">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 p-4 sm:p-6 md:p-8">
-                <div className="flex flex-col gap-4 md:gap-6">
+                <div className="relative flex flex-col gap-4 md:gap-6">
+                    <SeloProntaEntrega availability={product.availability} tamanho="grande" />
                     <ProductMediaSwitcher
                       imageUrl={product.image}
                       imageUrls={product.image_urls}

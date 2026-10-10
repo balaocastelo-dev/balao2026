@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
   // junto com a função na Vercel.
   outputFileTracingIncludes: {
     "/api/precos/troca": ["./data/catalogo-inicial.json"],
+    "/api/precos/importar": ["./data/techsupri-catalogo.json"],
   },
   // O Office 3D (escritório virtual) é uma página pronta, em public/3d: não
   // passa pelo layout da loja. O endereço /3d abre o index.html dela.
