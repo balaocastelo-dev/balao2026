@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { destinoDentroDoPainel } from "@/lib/painel/voltar";
 
 type PainelLoginFormProps = {
   /**
@@ -14,14 +15,6 @@ type PainelLoginFormProps = {
   description?: string;
   submitLabel?: string;
 };
-
-/** Só aceita voltar para dentro do painel — nunca para um endereço de fora. */
-function destinoDentroDoPainel(valor: string | null) {
-  if (!valor) return null;
-  if (valor !== "/painel" && !valor.startsWith("/painel/")) return null;
-  if (valor.includes("//") || valor.includes("\\") || valor.includes("..")) return null;
-  return valor;
-}
 
 export default function PainelLoginForm({
   redirectTo = "/painel",
@@ -57,7 +50,8 @@ export default function PainelLoginForm({
 
       if (redirectTo === "atual") {
         const voltar = new URLSearchParams(window.location.search).get("voltar");
-        window.location.href = destinoDentroDoPainel(voltar) || window.location.pathname;
+        window.location.href =
+          destinoDentroDoPainel(voltar, window.location.origin) || window.location.pathname;
         return;
       }
 

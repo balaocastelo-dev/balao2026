@@ -66,7 +66,7 @@ export default function LayoutWrapper({
               // no celular, 100vh inclui o trecho escondido atrás da barra do
               // navegador, e o fim do menu ficava fora de alcance.
               `flex h-screen w-full max-w-full flex-col overflow-hidden print:h-auto print:overflow-visible ${
-                isPainel ? "supports-[height:100dvh]:h-dvh" : ""
+                isPainel && pathname !== "/painel/crm" ? "supports-[height:100dvh]:h-dvh" : ""
               }`
             : `flex min-h-screen w-full max-w-full flex-col ${isBlogPage ? "overflow-x-clip" : "overflow-x-hidden"}`
         }

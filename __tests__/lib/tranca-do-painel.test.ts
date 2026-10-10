@@ -64,6 +64,12 @@ describe("tranca do painel", () => {
     }
   });
 
+  it("guarda também a consulta do endereço pedido", async () => {
+    const r = await passar("/painel/clientes?segmento=notebook");
+    const destino = new URL(r.headers.get("location") || "");
+    expect(destino.searchParams.get("voltar")).toBe("/painel/clientes?segmento=notebook");
+  });
+
   it("área de dentro, com a senha, abre", async () => {
     expect(seguiu(await passar("/painel/produtos", { cookie: tokenDe(SENHA) }))).toBe(true);
     expect(seguiu(await passar("/painel/crm", { cookie: tokenDe(SENHA) }))).toBe(true);
@@ -114,6 +120,16 @@ describe("tranca do painel", () => {
     }
     expect(seguiu(await passar("/api/checkout", { metodo: "POST" }))).toBe(true);
     expect(seguiu(await passar("/api/coupons/validate", { metodo: "POST" }))).toBe(true);
+  });
+
+  // A regra principal do matcher pula o que termina em .png/.jpg — e pulava
+  // junto qualquer chamada de API com esse final. API e painel passam sempre.
+  it("API e painel passam pela tranca mesmo com final de arquivo de imagem", async () => {
+    const { config } = await import("@/proxy");
+    expect(config.matcher).toContain("/api/:path*");
+    expect(config.matcher).toContain("/painel/:path*");
+    expect((await passar("/api/products/qualquer.png", { metodo: "DELETE" })).status).toBe(401);
+    expect((await passar("/painel/produtos.png")).status).toBe(307);
   });
 
   it("alterar o catálogo continua pedindo a senha", async () => {

@@ -30,6 +30,8 @@ function enderecosDe(pasta: string): string[] {
   const achados: string[] = [];
   if (existsSync(join(pasta, "page.tsx"))) achados.push("/painel");
   for (const nome of readdirSync(pasta)) {
+    // [...resto] é a página de "área não encontrada", não uma área.
+    if (nome.startsWith("[")) continue;
     const caminho = join(pasta, nome);
     if (statSync(caminho).isDirectory() && existsSync(join(caminho, "page.tsx"))) {
       achados.push(`/painel/${nome}`);

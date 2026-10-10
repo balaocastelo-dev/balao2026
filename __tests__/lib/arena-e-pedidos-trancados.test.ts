@@ -74,6 +74,36 @@ describe("ações da Arena", () => {
     expect(execute).toHaveBeenCalledTimes(3);
   });
 
+  it("o histórico público não despeja mais que 100 vendas, peça o que pedir", async () => {
+    const arena = await import("@/app/arena/actions");
+    const limiteUsado = async (pedido: number) => {
+      execute.mockClear();
+      await arena.getVendasRecentes(pedido);
+      return (execute.mock.calls[0] as unknown as [{ args: number[] }])[0].args[0];
+    };
+    expect(await limiteUsado(10)).toBe(10);
+    expect(await limiteUsado(100)).toBe(100);
+    expect(await limiteUsado(1_000_000)).toBe(100);
+    expect(await limiteUsado(-5)).toBe(1);
+    expect(await limiteUsado(Number.NaN)).toBe(50);
+  });
+
+  it("criar competidor pela API também pede a sessão", async () => {
+    const { POST } = await import("@/app/api/arena/vendedores/route");
+    const pedido = () =>
+      new Request("https://www.balao.info/api/arena/vendedores", {
+        method: "POST",
+        body: JSON.stringify({ nome: "Intruso" }),
+      });
+
+    expect((await POST(pedido())).status).toBe(401);
+    expect(execute).not.toHaveBeenCalled();
+
+    estado.logado = true;
+    await POST(pedido());
+    expect(execute).toHaveBeenCalled();
+  });
+
   it("o telão continua lendo sem login", async () => {
     const arena = await import("@/app/arena/actions");
     await arena.getVendedores();

@@ -12,6 +12,7 @@ import {
   LayoutGrid,
   ListChecks,
   Map as MapIcon,
+  MessageCircle,
   MessageSquareText,
   MessagesSquare,
   Megaphone,
@@ -62,8 +63,10 @@ export type ItemDoPainel = {
    */
   moldura: "folha" | "livre" | "cheia";
   /**
-   * Tela de balcão, fora do /painel: tem endereço e senha próprios porque é
-   * usada por quem não tem a senha do painel. Abre em outra aba.
+   * Tela que fica fora do /painel e abre em outra aba. São as telas de balcão,
+   * usadas por quem não tem a senha do painel — cada uma com o endereço e a
+   * entrada que já tinha (a senha do dia na assistência; o caixa, hoje, abre
+   * sem senha) — e a tela antiga do WhatsApp.
    */
   fora?: boolean;
 };
@@ -179,6 +182,15 @@ export const MENU_DO_PAINEL: GrupoDoPainel[] = [
         descricao: "Conversas, funil, status, disparos e a conexão do QR Code.",
         icone: MessagesSquare,
         moldura: "cheia",
+      },
+      {
+        href: "/whatsapp",
+        palavras: "whatsapp zap painel antigo simples qr code",
+        rotulo: "WhatsApp simples",
+        descricao: "A tela antiga, só com o QR Code e a conversa. Mesma senha do painel.",
+        icone: MessageCircle,
+        moldura: "livre",
+        fora: true,
       },
       {
         href: "/painel/atendimento",

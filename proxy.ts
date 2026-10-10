@@ -183,7 +183,10 @@ export async function proxy(request: NextRequest) {
       const destino = request.nextUrl.clone()
       destino.pathname = '/painel'
       destino.search = ''
-      destino.searchParams.set('voltar', pathname)
+      // Com a consulta junto (?segmento=…), para a pessoa cair exatamente
+      // onde pediu. Quem confere se esse valor pode ser seguido é a tela de
+      // entrada (lib/painel/voltar.ts), não a tranca.
+      destino.searchParams.set('voltar', `${pathname}${request.nextUrl.search}`)
       return NextResponse.redirect(destino)
     }
     return NextResponse.next({ request })
@@ -232,5 +235,11 @@ export const config = {
      * Feel free to modify this pattern to include more paths.
      */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    // A regra de cima pula tudo o que termina em .png, .jpg… — pensada para
+    // os arquivos de imagem do site. Só que ela pulava também uma chamada de
+    // API cujo endereço terminasse assim (DELETE /api/products/qualquer.png),
+    // e a tranca nem chegava a olhar. API e painel passam pela tranca sempre.
+    '/api/:path*',
+    '/painel/:path*',
   ],
 }

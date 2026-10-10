@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PonteComando } from "@/components/crm/comando/tipos";
+import { CHAVE_CONVERSA_PEDIDA } from "@/lib/painel/recados";
 
 // ============================================================
 // A ponte entre o painel e o servidor do WhatsApp.
@@ -107,8 +108,16 @@ export function usePonteDoPainel(opcoes: { comNomesDaEquipe?: boolean } = {}): {
     () => ({
       chamar,
       // Clicar num cliente leva para o atendimento com a conversa aberta.
+      //
+      // O recado vai pelo sessionStorage, e não pelo endereço: o identificador
+      // da conversa carrega o telefone do cliente (ver lib/painel/recados.ts).
       abrirConversa: (chatId: string) => {
-        window.location.href = `/painel/crm?conversa=${encodeURIComponent(chatId)}`;
+        try {
+          sessionStorage.setItem(CHAVE_CONVERSA_PEDIDA, chatId);
+        } catch {
+          // Sem sessionStorage o atendimento abre do mesmo jeito, só não na conversa.
+        }
+        window.location.href = "/painel/crm";
       },
       nomeDoVendedor: (id: string | null) => (id ? nomes[String(id)] || id : null),
     }),

@@ -393,7 +393,7 @@ export const FUNCOES_CATALOG: FuncaoCategory[] = [
   {
     slug: "operacao",
     title: "Telas de trabalho",
-    description: "O painel e as telas de balcao, que tem endereco e senha proprios.",
+    description: "O painel e as telas de balcao, que ficam em endereco proprio.",
     items: [
       {
         href: "/painel",

@@ -10,14 +10,15 @@ navegador.
 |---|---|
 | Vendas | Indicadores, Pedidos do site, Fechamento da assistência, Caixa (PDV)* |
 | Produtos e preços | Produtos, Categorias, Preços por fonte, Importação em massa, Cupons |
-| CRM e atendimento | Atendimento no WhatsApp, Números do atendimento, Clientes, Respostas e etiquetas |
+| CRM e atendimento | Atendimento no WhatsApp, WhatsApp simples*, Números do atendimento, Clientes, Respostas e etiquetas |
 | Equipe | Vendedores, Usuários e acessos, Arena de vendas |
 | Site e conteúdo | Carrossel, Blocos da home, Barra de avisos, Páginas de vitrine, Gerador de páginas, Mapa do site |
 | Assistência técnica | Estoque de peças, Retirada de peças*, Senha de retirada* |
 | Sistema | Assistente de IA, Teste de imagens |
 
-\* Telas de balcão: têm endereço e senha próprios e abrem em outra aba (ver
-"As três portas").
+\* Telas de balcão: ficam em endereço próprio, fora do `/painel`, e abrem em
+outra aba (ver "As três portas"). O caixa (`/pdv`) hoje abre sem senha
+nenhuma — ver "Ainda aberto".
 
 ## Como é montado
 
@@ -88,3 +89,21 @@ Estavam abertos na internet, para quem tivesse o endereço:
 - **`/dashboard`** e `/api/dashboard/metrics` — faturamento, pedidos e vendas
   por vendedor. Hoje é `/painel/indicadores`.
 - **`/gerador`** — hoje `/painel/gerador`.
+- **`POST /api/arena/vendedores`** — criava competidor na Arena sem senha.
+
+## Ainda aberto (não mexido nesta mudança)
+
+Achados na conferência, fora do que foi pedido e com risco de parar o balcão
+se forem trancados sem combinar antes:
+
+- **O caixa (`/pdv`) não tem senha.** Qualquer pessoa com o endereço abre a
+  tela e registra uma venda como paga (`app/pdv/actions.ts`), o que entra nos
+  indicadores e dispara e-mail de confirmação.
+- **`/api/pdv/orders/recent` e `/api/pdv/orders/<id>`** devolvem os últimos
+  pedidos e, por pedido, e-mail, WhatsApp, endereço e CPF do cliente — sem
+  senha. É o mesmo dado que `/api/orders` passou a proteger; o caixa depende
+  dessas duas rotas para listar e reimprimir.
+- **`GET /api/weekly/orders` e `/api/weekly/expenses`** (receita e despesa da
+  assistência) respondem sem senha.
+- **`GET /api/products`** devolve custo e fornecedor de cada produto junto com
+  o resto do catálogo.

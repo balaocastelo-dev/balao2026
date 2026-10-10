@@ -6,6 +6,7 @@ import { io, type Socket } from "socket.io-client";
 import CentralStatus from "@/components/crm/status/CentralStatus";
 import CentroDeComando from "@/components/crm/comando/CentroDeComando";
 import type { PonteComando } from "@/components/crm/comando/tipos";
+import { CHAVE_CONVERSA_PEDIDA } from "@/lib/painel/recados";
 import type { PonteStatus, StatusRecebido } from "@/components/crm/status/tipos";
 import {
   CrmChat,
@@ -1975,13 +1976,19 @@ export default function CrmWhatsAppClient({
     gravadorRef.current?.stop();
   };
 
-  // Vindo de outra área do painel (Clientes, Números do atendimento), o
-  // endereço traz ?conversa=<id>. Abre nessa conversa assim que a tela estiver
-  // ao vivo — antes disso a seleção não buscaria o histórico, que depende do
-  // socket conectado.
+  // Vindo de outra área do painel (Clientes, Números do atendimento), fica um
+  // recado no sessionStorage dizendo qual conversa abrir (lib/painel/ponte.ts).
+  // Abre nessa conversa assim que a tela estiver ao vivo — antes disso a
+  // seleção não buscaria o histórico, que depende do socket conectado. O
+  // recado é apagado ao ser lido, para não reabrir a conversa a cada visita.
   const conversaPedidaRef = useRef<string | null>(null);
   useEffect(() => {
-    conversaPedidaRef.current = new URLSearchParams(window.location.search).get("conversa");
+    try {
+      conversaPedidaRef.current = sessionStorage.getItem(CHAVE_CONVERSA_PEDIDA);
+      sessionStorage.removeItem(CHAVE_CONVERSA_PEDIDA);
+    } catch {
+      // Navegador sem sessionStorage: abre sem conversa escolhida.
+    }
   }, []);
   useEffect(() => {
     const pedida = conversaPedidaRef.current;

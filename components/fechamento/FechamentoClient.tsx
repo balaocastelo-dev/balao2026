@@ -58,6 +58,10 @@ export default function WeeklyClosing() {
   
   // Auth State
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Enquanto o servidor não responde se já existe sessão (do balcão ou do
+  // painel), a tela espera — senão quem chega pelo painel via, por um
+  // instante, o pedido de uma senha que não precisa digitar.
+  const [conferindoSessao, setConferindoSessao] = useState(true);
   const [passwordInput, setPasswordInput] = useState("");
 
   // State
@@ -119,7 +123,8 @@ export default function WeeklyClosing() {
         })
         .catch(() => {
           /* sem rede: segue na tela, o salvar avisa se não der */
-        });
+        })
+        .finally(() => setConferindoSessao(false));
 
       // Fetch Data
       const fetchData = async () => {
@@ -497,6 +502,14 @@ export default function WeeklyClosing() {
       setEntrando(false);
     }
   };
+
+  if (!isAuthenticated && conferindoSessao) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 text-slate-500">
+        Conferindo o acesso…
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return (

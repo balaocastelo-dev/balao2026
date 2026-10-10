@@ -35,6 +35,10 @@ function genId(): string {
 
 export async function getVendasRecentes(limit = 50): Promise<Venda[]> {
   if (!isOperational()) return [];
+  // Esta leitura é pública (o telão usa) e pode ser chamada de fora com o
+  // número que a pessoa quiser. O telão pede 10 e o painel pede 100; mais que
+  // isso seria despejar o histórico inteiro de vendas para qualquer um.
+  limit = Math.min(Math.max(1, Math.floor(Number(limit)) || 50), 100);
 
   try {
     const res = await turso.execute({
