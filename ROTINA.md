@@ -9,8 +9,8 @@ ajuda a loja; um artigo vistoso com um dado errado prejudica.
 
 ## O que a rotina pode e o que não pode
 
-**Pode:** pesquisar na internet, escrever um arquivo JSON e publicá-lo com
-`node scripts/blog-publicar.mjs publicar`.
+**Pode:** pesquisar na internet, escrever um arquivo JSON, gerar a foto de
+capa do artigo e publicar os dois com `node scripts/blog-publicar.mjs publicar`.
 
 **Não pode, em nenhuma hipótese:**
 
@@ -40,9 +40,11 @@ artigo), **pare e relate**. Não improvise outro caminho.
    reprovar e leve os avisos a sério. Repita até passar.
 6. Releia o texto inteiro uma vez, como leitor. Confira cada número e cada
    nome contra a página de onde saiu.
-7. `node scripts/blog-publicar.mjs publicar artigo.json`.
-8. Relate em poucas linhas: título, endereço, de onde vieram os dados e
-   qualquer dúvida que tenha ficado.
+7. Gere a foto de capa (seção "A foto de capa"), **olhe a imagem** e salve em
+   `capa.jpg`.
+8. `node scripts/blog-publicar.mjs publicar artigo.json --capa capa.jpg`.
+9. Relate em poucas linhas: título, endereço, de onde vieram os dados, como a
+   capa foi feita e qualquer dúvida que tenha ficado.
 
 ## Como escolher o assunto
 
@@ -88,6 +90,45 @@ isso, publique um assunto da fila.
    Leia, entenda, feche a página e escreva.
 8. **Nada de preço, parcela, desconto, prazo ou frete** — nem da loja, nem de
    mercado. Mudam, e o artigo fica no ar por anos. A régua reprova.
+
+## A foto de capa
+
+Todo artigo novo sai com uma foto de capa: uma fotografia ou imagem simulada
+do assunto, e não um desenho ou gráfico. Ela é criada junto com a matéria.
+
+**Como gerar.** Use a ferramenta de geração de imagem da sessão (hoje, a
+`generate_image` do Figma, no plano da equipe da loja; modelo
+`gemini-3.1-flash-image`, 1600 × 900). Uma tentativa, e no máximo mais duas se
+a primeira não servir: cada imagem consome créditos da conta da loja. Baixe o
+arquivo em resolução cheia e salve em JPEG.
+
+**O que pedir.** Uma fotografia realista, deitada (16:9), da cena que o artigo
+trata: o equipamento, a bancada, a mesa de trabalho. Peça sempre: sem texto,
+sem logotipo, sem marca, sem marca-d'água, sem rosto de pessoa. Mãos podem
+aparecer. Nada de fachada, interior ou funcionário "da Balão": a imagem não
+pode passar por foto da loja.
+
+**Confira antes de publicar.** Abra a imagem e olhe. Reprove e gere de novo se
+houver: marca ou logotipo legível (monitor, gabinete, teclado, caixa), texto
+ou letras, rosto, mão ou objeto deformado, cena que não é a do artigo, ou
+algo que oriente errado (por exemplo, alguém abrindo uma fonte de
+alimentação). Um logotipo pequeno em área lisa pode ser apagado com um
+retoque simples; se o retoque aparecer, gere outra.
+
+**O que o comando exige.** JPEG ou PNG, 1200 px de largura ou mais, deitada
+perto de 16:9, até 900 KB. No artigo vai só a descrição do que a foto mostra:
+
+```json
+"capa": { "alt": "Gabinete aberto sobre uma bancada, com o monitor apagado ao lado" }
+```
+
+O endereço da imagem quem preenche é o comando. Não aponte para imagem de
+outro site: a régua reprova.
+
+**Se não der para gerar** (ferramenta fora do ar, sem crédito, três tentativas
+ruins): publique com `--sem-capa` no lugar de `--capa` — o site desenha a capa
+— e diga isso no relato. Artigo sem foto é melhor do que dia sem artigo, e
+muito melhor do que foto com marca ou erro.
 
 ## O que se pode dizer da loja
 
@@ -143,6 +184,7 @@ estrutura dele. Os campos:
   "resumo": "Uma ou duas frases que respondem à busca. De 110 a 165 caracteres.",
   "categoria": "assistencia",
   "etiquetas": ["manutenção", "fonte", "diagnóstico"],
+  "capa": { "alt": "O que a foto de capa mostra, em uma frase" },
   "seo": { "titulo": "Só se o título passar de 60 caracteres" },
   "blocos": [],
   "perguntas": [{ "pergunta": "…?", "resposta": "Duas ou três frases." }],
@@ -153,8 +195,11 @@ estrutura dele. Os campos:
 - `slug`: minúsculas, números e hífens; as palavras da busca; até 70 caracteres.
 - `categoria`: `guias`, `hardware`, `assistencia` ou `noticias`. (`analises`
   não: nota e veredito são da loja.)
-- `publicadoEm`, `autor` e `capa`: **não preencha**. A data é a da publicação,
-  a assinatura é da equipe e a capa é desenhada pelo site.
+- `publicadoEm` e `autor`: **não preencha**. A data é a da publicação e a
+  assinatura é da equipe.
+- `capa`: só o campo `alt`, com 12 caracteres ou mais, descrevendo o que a
+  foto mostra (seção "A foto de capa"). Se copiar a estrutura do modelo, apague
+  o `src`, a `largura` e a `altura` que vierem nele.
 - `etiquetas`: de duas a cinco, em minúsculas; repita as de artigos parecidos
   (é assim que o "Leia também" os aproxima).
 
@@ -177,7 +222,7 @@ Temas de chamada: `manutencao`, `dados`, `montagem`, `pc-gamer`,
 `placas-de-video`, `notebooks`, `seminovos`, `upgrade`, `empresas`, `geral`.
 Escolha o que continua o assunto do artigo.
 
-Não use `benchmark`, `citacao` nem `imagem`.
+Não use `benchmark`, `citacao` nem `imagem`: a única imagem do artigo é a capa.
 
 ## O que a régua cobra
 
@@ -195,6 +240,7 @@ O comando `conferir` aplica tudo isto; saber antes poupa idas e vindas.
 - Ao menos 2 fontes.
 - De 3 a 6 perguntas frequentes — as dúvidas que o cliente faria no balcão.
 - Sem preço, parcela, desconto ou frete; sem "testamos".
+- Foto de capa enviada com `--capa` (o `publicar` recusa artigo novo sem ela).
 
 ## Como o texto soa
 

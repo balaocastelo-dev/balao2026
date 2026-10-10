@@ -7,6 +7,7 @@ em https://www.balao.info/blog — um arquivo por artigo.
 |---|---|
 | `indice.json` | A lista dos artigos publicados, com o que os cartões do blog mostram |
 | `artigos/<endereço>.json` | O artigo inteiro |
+| `capas/<endereço>-<marca>.jpg` | A foto de capa do artigo, enviada junto com ele |
 | `ROTINA.md` | O passo a passo e as regras que a rotina segue todo dia |
 | `pauta.md` | A fila de assuntos |
 | `vercel.json` | Diz à Vercel para não montar o site a partir deste ramo |
