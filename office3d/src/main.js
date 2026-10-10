@@ -305,6 +305,13 @@ async function start() {
   setQuality(qs.get('q') || store.get('office3d.q') || (TOUCH || Math.min(window.innerWidth, window.innerHeight) < 600 ? 'low' : 'high'));
   setTime(day.preset); applyDay(true);
   setMode('overview', { force: true, home: true });
+  // Warm-up while the loading screen is still up: draw the whole office once from above so every texture is sent to the
+  // video card and every shader is compiled now, instead of stuttering during the opening flight as each room comes into view.
+  { setLoad(0.98, 'Preparando a cena…'); const p = camera.position.clone(), q = camera.quaternion.clone(), f = camera.fov;
+    try { camera.clearViewOffset(); camera.fov = 70; camera.position.set(0, 46, 0.01); camera.lookAt(0, 0, 0); camera.updateProjectionMatrix(); camera.updateMatrixWorld(); updateCut(0, true); world.ceiling.visible = true; if (world.backdrop) world.backdrop.visible = true;
+      for (const a of sim.agents) a.rig.updateMatrixWorld(true);
+      if (st.post) post.render(scene, camera, { exposure: day.exposure }); else { renderer.setRenderTarget(null); renderer.render(scene, camera); } } catch (e) { console.warn('aquecimento', e); }
+    camera.position.copy(p); camera.quaternion.copy(q); camera.fov = f; applyOffset(); camera.updateProjectionMatrix(); camera.updateMatrixWorld(); }
   if (!qs.has('nointro')) { st.intro = { p0: new THREE.Vector3(-11.9, 5.2, 4.2), t0: new THREE.Vector3(-12.5, 1.5, -6.6), t: -0.9, dur: 5.2 }; orbit.enabled = false; camera.position.copy(st.intro.p0); orbit.target.copy(st.intro.t0); camera.lookAt(orbit.target); }
   setLoad(1, 'Pronto'); document.body.classList.add('ready'); setTimeout(() => { const l = $('#loading'); if (l) l.remove(); }, 1600);
   window.__office = { sim, world, nav, camera, orbit, st, setMode, renderer, scene, ui, HOME, frame, day, setTime, setQuality, audio, officeEvent, get post() { return post; },
