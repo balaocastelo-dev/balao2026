@@ -23,6 +23,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/sistemasdeia',
     '/pcgamer3d',
     '/consignacao',
+    '/premium',
+    '/ia-local',
     '/pcgamer',
     '/notebooks',
     '/seminovos',

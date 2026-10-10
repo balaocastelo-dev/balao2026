@@ -1,0 +1,1048 @@
+/* ============================================================
+   Páginas /premium e /ia-local.
+
+   A loja inteira é escura. Estas duas páginas alternam carbono e papel de
+   propósito: as fotos do catálogo têm fundo branco, e sobre papel branco a
+   máquina fica solta na página, como numa ficha de fabricante — sem a
+   caixinha branca em volta de cada foto.
+
+   Uma família só (Archivo, que tem eixo de largura): larga nos títulos,
+   normal no texto, e algarismos tabulares em preço e ficha. O vermelho da
+   marca aparece em um botão por tela e em mais nada.
+
+   Tudo aqui começa com .prm para não vazar para o resto do site.
+   ============================================================ */
+
+.prm {
+  --prm-carbono: #090d16;
+  --prm-carbono-2: #111827;
+  --prm-fio-escuro: rgba(255, 255, 255, 0.14);
+  --prm-aco: #a9b4c4;
+  --prm-papel: #ffffff;
+  --prm-nevoa: #f3f5f8;
+  --prm-fio: #dde2e9;
+  --prm-tinta: #0b1220;
+  --prm-tinta-2: #4d5868;
+  --prm-vermelho: #e60012;
+  --prm-vermelho-escuro: #b8000e;
+  --prm-margem: clamp(1.25rem, 4vw, 2.5rem);
+
+  font-family: var(--font-archivo), "Helvetica Neue", Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--prm-tinta);
+  background: var(--prm-papel);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+.prm-miolo {
+  width: 100%;
+  max-width: 75rem;
+  margin-inline: auto;
+  padding-inline: var(--prm-margem);
+}
+
+/* ---------- faixas ---------- */
+
+.prm-faixa {
+  padding-block: clamp(3.5rem, 8vw, 6.5rem);
+}
+
+.prm-faixa--carbono {
+  background: var(--prm-carbono);
+  color: #fff;
+}
+
+.prm-faixa--nevoa {
+  background: var(--prm-nevoa);
+}
+
+.prm-faixa--colada {
+  padding-top: 0;
+}
+
+/* ---------- tipografia ---------- */
+
+.prm-titulo-1,
+.prm-titulo-2,
+.prm-titulo-3 {
+  font-stretch: 125%;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  text-wrap: balance;
+  margin: 0;
+}
+
+.prm-titulo-1 {
+  font-size: clamp(2.375rem, 6.4vw, 4.75rem);
+  line-height: 1.02;
+  max-width: 22ch;
+}
+
+.prm-titulo-2 {
+  font-size: clamp(1.75rem, 3.6vw, 2.75rem);
+  line-height: 1.08;
+  max-width: 20ch;
+}
+
+.prm-titulo-3 {
+  font-size: 1.1875rem;
+  line-height: 1.25;
+  letter-spacing: -0.012em;
+  font-stretch: 112%;
+}
+
+.prm-abre {
+  font-size: clamp(1.0625rem, 1.5vw, 1.25rem);
+  line-height: 1.5;
+  max-width: 38rem;
+  margin: 1.25rem 0 0;
+  color: var(--prm-tinta-2);
+}
+
+.prm-faixa--carbono .prm-abre {
+  color: var(--prm-aco);
+}
+
+.prm-nota {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--prm-tinta-2);
+  margin: 0;
+}
+
+.prm-faixa--carbono .prm-nota {
+  color: var(--prm-aco);
+}
+
+/* ---------- botões e links ---------- */
+
+.prm-botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  min-height: 3rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  font: inherit;
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.prm-botao--vermelho {
+  background: var(--prm-vermelho);
+  color: #fff;
+}
+
+.prm-botao--vermelho:hover {
+  background: var(--prm-vermelho-escuro);
+}
+
+.prm-botao--claro {
+  background: #fff;
+  color: var(--prm-tinta);
+}
+
+.prm-botao--claro:hover {
+  background: #e7ebf1;
+}
+
+.prm-botao--contorno {
+  background: transparent;
+  color: inherit;
+  border-color: currentColor;
+}
+
+.prm-botao--contorno:hover {
+  background: var(--prm-tinta);
+  border-color: var(--prm-tinta);
+  color: #fff;
+}
+
+.prm-faixa--carbono .prm-botao--contorno:hover {
+  background: #fff;
+  border-color: #fff;
+  color: var(--prm-tinta);
+}
+
+.prm-link {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.3em;
+}
+
+.prm-link:hover {
+  text-decoration-thickness: 2px;
+}
+
+.prm a:focus-visible,
+.prm button:focus-visible,
+.prm summary:focus-visible {
+  outline: 2px solid var(--prm-vermelho);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.prm-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.75rem;
+  margin-top: 2rem;
+}
+
+/* ---------- abertura ---------- */
+
+.prm-abertura {
+  background: var(--prm-carbono);
+  color: #fff;
+  padding-top: clamp(2.5rem, 6vw, 5rem);
+}
+
+.prm-abertura .prm-abre {
+  color: var(--prm-aco);
+}
+
+.prm-trilha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 clamp(1.5rem, 4vw, 2.75rem);
+  padding: 0;
+  list-style: none;
+  font-size: 0.875rem;
+  color: var(--prm-aco);
+}
+
+.prm-trilha a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.prm-trilha a:hover {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 0.3em;
+}
+
+.prm-trilha li + li::before {
+  content: "/";
+  margin-right: 0.5rem;
+  opacity: 0.5;
+}
+
+/* A máquina do topo fica num palco branco que atravessa a fronteira entre o
+   carbono da abertura e o papel da lista. */
+.prm-palco {
+  margin-top: clamp(2.5rem, 6vw, 4.5rem);
+  background: linear-gradient(to bottom, var(--prm-carbono) 0 42%, var(--prm-papel) 42% 100%);
+}
+
+.prm-peca {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  background: var(--prm-papel);
+  color: var(--prm-tinta);
+  border: 1px solid var(--prm-fio);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2.5rem 5rem -2.5rem rgba(11, 18, 32, 0.35);
+  animation: prm-subir 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes prm-subir {
+  from {
+    opacity: 0;
+    transform: translateY(1.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prm-peca {
+    animation: none;
+  }
+}
+
+.prm-peca__foto {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: var(--prm-papel);
+}
+
+.prm-peca__foto img {
+  object-fit: contain;
+  padding: clamp(1rem, 4vw, 2.5rem);
+}
+
+.prm-peca__ficha {
+  display: flex;
+  flex-direction: column;
+  padding: clamp(1.5rem, 4vw, 2.75rem);
+  border-top: 1px solid var(--prm-fio);
+}
+
+.prm-peca__titulo {
+  font-stretch: 125%;
+  font-weight: 600;
+  font-size: clamp(1.5rem, 2.6vw, 2.125rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin: 0.5rem 0 0;
+  text-wrap: balance;
+}
+
+@media (min-width: 60rem) {
+  .prm-peca {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  }
+
+  .prm-peca__foto {
+    aspect-ratio: auto;
+    min-height: 30rem;
+  }
+
+  .prm-peca__ficha {
+    border-top: 0;
+    border-left: 1px solid var(--prm-fio);
+  }
+}
+
+/* ---------- ficha técnica ---------- */
+
+.prm-ficha {
+  margin: 1.5rem 0 0;
+  padding: 0;
+  border-top: 1px solid var(--prm-fio);
+}
+
+.prm-ficha > div {
+  display: grid;
+  grid-template-columns: 8.5rem minmax(0, 1fr);
+  gap: 1rem;
+  padding-block: 0.6875rem;
+  border-bottom: 1px solid var(--prm-fio);
+}
+
+.prm-ficha dt {
+  font-size: 0.875rem;
+  color: var(--prm-tinta-2);
+}
+
+.prm-ficha dd {
+  margin: 0;
+  font-weight: 500;
+}
+
+/* ---------- preço ---------- */
+
+.prm-preco {
+  display: grid;
+  gap: 0.125rem;
+}
+
+.prm-preco__valor {
+  font-size: 1.5rem;
+  line-height: 1.15;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  white-space: nowrap;
+}
+
+.prm-preco--grande .prm-preco__valor {
+  font-size: clamp(1.875rem, 3vw, 2.375rem);
+  font-stretch: 112%;
+}
+
+.prm-preco__como {
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--prm-tinta-2);
+}
+
+.prm-peca .prm-preco {
+  margin-top: auto;
+  padding-top: 1.75rem;
+}
+
+.prm-peca .prm-botao {
+  margin-top: 1.5rem;
+  align-self: flex-start;
+}
+
+/* ---------- para quem ---------- */
+
+.prm-oficios {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  margin: clamp(2rem, 5vw, 3.5rem) 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--prm-fio);
+}
+
+.prm-oficios > li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-block: 1.75rem;
+  border-bottom: 1px solid var(--prm-fio);
+}
+
+.prm-oficios p {
+  margin: 0;
+  color: var(--prm-tinta-2);
+}
+
+.prm-oficios .prm-link {
+  margin-top: auto;
+  padding-top: 0.5rem;
+  align-self: flex-start;
+}
+
+@media (min-width: 40rem) {
+  .prm-oficios {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 2.5rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  .prm-oficios {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    column-gap: 0;
+    border-bottom: 1px solid var(--prm-fio);
+  }
+
+  .prm-oficios > li {
+    padding: 2rem 1.75rem;
+    border-bottom: 0;
+    border-left: 1px solid var(--prm-fio);
+  }
+
+  .prm-oficios > li:first-child {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .prm-oficios > li:last-child {
+    padding-right: 0;
+  }
+}
+
+/* ---------- cabeçalho de seção ---------- */
+
+.prm-cabeca {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.25rem 2.5rem;
+}
+
+.prm-cabeca .prm-abre {
+  margin-top: 1rem;
+}
+
+/* ---------- filtro da lista ---------- */
+
+.prm-filtro {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: clamp(1.75rem, 4vw, 2.75rem) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.prm-filtro__opcao {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  padding: 0.4375rem 0.9375rem;
+  border: 1px solid var(--prm-fio);
+  border-radius: 999px;
+  background: var(--prm-papel);
+  color: var(--prm-tinta);
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.prm-filtro__opcao:hover {
+  border-color: var(--prm-tinta);
+}
+
+.prm-filtro__opcao[aria-pressed="true"],
+.prm-filtro__opcao[aria-current="true"] {
+  background: var(--prm-tinta);
+  border-color: var(--prm-tinta);
+  color: #fff;
+}
+
+.prm-filtro__total {
+  font-size: 0.8125rem;
+  opacity: 0.7;
+}
+
+/* ---------- lista de máquinas ---------- */
+
+.prm-lista {
+  margin: 1.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--prm-fio);
+}
+
+.prm-lista > li {
+  border-bottom: 1px solid var(--prm-fio);
+}
+
+.prm-linha {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  grid-template-areas:
+    "foto nome"
+    "dados dados"
+    "preco preco";
+  gap: 1rem 1.125rem;
+  padding-block: 1.5rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.prm-linha__foto {
+  grid-area: foto;
+  position: relative;
+  aspect-ratio: 1;
+  align-self: start;
+}
+
+.prm-linha__foto img {
+  object-fit: contain;
+}
+
+.prm-linha__nome {
+  grid-area: nome;
+  align-self: center;
+  min-width: 0;
+}
+
+.prm-linha__tipo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem 0.625rem;
+  font-size: 0.875rem;
+  color: var(--prm-tinta-2);
+}
+
+.prm-linha__titulo {
+  display: block;
+  margin-top: 0.1875rem;
+  font-stretch: 112%;
+  font-weight: 600;
+  font-size: 1.1875rem;
+  line-height: 1.25;
+  letter-spacing: -0.012em;
+}
+
+.prm-linha:hover .prm-linha__titulo {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+}
+
+.prm-linha__dados {
+  grid-area: dados;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.875rem 1.25rem;
+  margin: 0;
+}
+
+.prm-linha__dados dt {
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  color: var(--prm-tinta-2);
+}
+
+.prm-linha__dados dd {
+  margin: 0.125rem 0 0;
+  font-size: 0.9375rem;
+  line-height: 1.35;
+  font-weight: 500;
+}
+
+.prm-linha__preco {
+  grid-area: preco;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.prm-linha__ver {
+  flex: none;
+  min-height: 2.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.9375rem;
+}
+
+.prm-linha:hover .prm-linha__ver {
+  background: var(--prm-tinta);
+  border-color: var(--prm-tinta);
+  color: #fff;
+}
+
+@media (min-width: 64rem) {
+  .prm-linha {
+    grid-template-columns: 8.5rem minmax(0, 1fr) 15rem;
+    grid-template-areas:
+      "foto nome preco"
+      "foto dados preco";
+    gap: 1rem 2rem;
+    padding-block: 1.875rem;
+  }
+
+  .prm-linha__nome {
+    align-self: end;
+  }
+
+  .prm-linha__dados {
+    grid-template-columns: 1.45fr 1.65fr 0.92fr 1fr;
+    column-gap: 1rem;
+    align-self: start;
+  }
+
+  .prm-linha__dados dd {
+    font-size: 0.875rem;
+  }
+
+  .prm-linha__preco {
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    text-align: right;
+  }
+}
+
+.prm-mais {
+  display: flex;
+  justify-content: center;
+  padding-top: 2rem;
+}
+
+.prm-lista > li[hidden] {
+  display: none;
+}
+
+.prm-vazio {
+  margin: 1.5rem 0 0;
+  padding: 2.5rem 0;
+  border-block: 1px solid var(--prm-fio);
+  color: var(--prm-tinta-2);
+}
+
+.prm-rodape-de-lista {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  margin-top: 2rem;
+}
+
+/* ---------- régua de memória (IA local) ---------- */
+
+.prm-ia {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(2.5rem, 6vw, 5rem);
+  align-items: start;
+}
+
+@media (min-width: 64rem) {
+  .prm-ia {
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+  }
+}
+
+.prm-regua {
+  margin: 0;
+}
+
+.prm-regua__titulo {
+  font-size: 0.9375rem;
+  color: var(--prm-aco);
+  margin: 0 0 1rem;
+}
+
+.prm-regua__barra {
+  display: grid;
+  /* 0–12 GB, 12–16, 16–24, 24–32: a largura de cada trecho é a quantidade de GB. */
+  grid-template-columns: 12fr 4fr 8fr 8fr;
+  height: 2.75rem;
+  border: 1px solid var(--prm-fio-escuro);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.prm-regua__trecho {
+  border-left: 1px solid var(--prm-carbono);
+  background: #fff;
+}
+
+.prm-regua__trecho:first-child {
+  border-left: 0;
+}
+
+.prm-regua__trecho--fora {
+  background: repeating-linear-gradient(135deg, transparent 0 6px, rgba(255, 255, 255, 0.1) 6px 7px);
+}
+
+.prm-regua__trecho--12 {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.prm-regua__trecho--16 {
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.prm-regua__trecho--vazio {
+  background: transparent;
+  border-left: 1px dashed var(--prm-fio-escuro);
+}
+
+.prm-regua__marcas {
+  display: grid;
+  grid-template-columns: 12fr 4fr 8fr 8fr;
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--prm-aco);
+}
+
+.prm-regua__marcas span:last-child {
+  display: flex;
+  justify-content: space-between;
+}
+
+.prm-niveis {
+  margin: 2rem 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--prm-fio-escuro);
+}
+
+.prm-niveis > li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.375rem 1.5rem;
+  padding-block: 1.125rem;
+  border-bottom: 1px solid var(--prm-fio-escuro);
+}
+
+.prm-niveis__nome {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
+  font-weight: 600;
+  font-size: 1.0625rem;
+}
+
+.prm-niveis__nome a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.3em;
+}
+
+.prm-niveis__nome a:hover {
+  text-decoration-thickness: 2px;
+}
+
+.prm-niveis__total {
+  font-weight: 400;
+  font-size: 0.875rem;
+  color: var(--prm-aco);
+}
+
+.prm-niveis p {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--prm-aco);
+}
+
+.prm-niveis > li[data-vazio="true"] .prm-niveis__nome {
+  color: var(--prm-aco);
+}
+
+@media (min-width: 40rem) {
+  .prm-niveis > li {
+    grid-template-columns: 13rem minmax(0, 1fr);
+  }
+}
+
+/* A lista de máquinas dentro de uma faixa de carbono. */
+.prm-faixa--carbono .prm-lista,
+.prm-faixa--carbono .prm-lista > li {
+  border-color: var(--prm-fio-escuro);
+}
+
+.prm-faixa--carbono .prm-linha__tipo,
+.prm-faixa--carbono .prm-linha__dados dt,
+.prm-faixa--carbono .prm-preco__como {
+  color: var(--prm-aco);
+}
+
+.prm-faixa--carbono .prm-linha__foto {
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.prm-faixa--carbono .prm-linha__foto img {
+  padding: 0.5rem;
+}
+
+.prm-faixa--carbono .prm-linha:hover .prm-linha__ver {
+  background: #fff;
+  border-color: #fff;
+  color: var(--prm-tinta);
+}
+
+/* ---------- notebooks ---------- */
+
+.prm-grade {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2rem 1.25rem;
+  margin: clamp(2rem, 5vw, 3rem) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 60rem) {
+  .prm-grade {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 2.5rem;
+  }
+}
+
+.prm-cartao {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
+.prm-cartao__foto {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  margin-bottom: 1rem;
+}
+
+.prm-cartao__foto img {
+  object-fit: contain;
+}
+
+.prm-cartao__titulo {
+  font-stretch: 112%;
+  font-weight: 600;
+  font-size: 1.0625rem;
+  line-height: 1.25;
+  letter-spacing: -0.012em;
+}
+
+.prm-cartao:hover .prm-cartao__titulo {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+}
+
+.prm-cartao__dados {
+  display: grid;
+  gap: 0.125rem;
+  margin: 0.5rem 0 1.125rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--prm-tinta-2);
+}
+
+.prm-cartao .prm-preco {
+  margin-top: auto;
+}
+
+.prm-cartao .prm-preco__valor {
+  font-size: 1.25rem;
+}
+
+/* ---------- como funciona ---------- */
+
+.prm-passos {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem 2.5rem;
+  margin: clamp(2rem, 5vw, 3.5rem) 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: passo;
+}
+
+.prm-passos > li {
+  counter-increment: passo;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--prm-tinta);
+}
+
+.prm-passos > li::before {
+  content: counter(passo);
+  display: block;
+  font-stretch: 125%;
+  font-weight: 600;
+  font-size: 1.75rem;
+  line-height: 1;
+  margin-bottom: 1rem;
+}
+
+.prm-passos p {
+  margin: 0.5rem 0 0;
+  color: var(--prm-tinta-2);
+}
+
+@media (min-width: 40rem) {
+  .prm-passos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 64rem) {
+  .prm-passos {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* ---------- perguntas ---------- */
+
+.prm-perguntas {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem 4rem;
+}
+
+@media (min-width: 64rem) {
+  .prm-perguntas {
+    grid-template-columns: minmax(0, 0.7fr) minmax(0, 1fr);
+  }
+}
+
+.prm-perguntas__lista {
+  border-top: 1px solid var(--prm-fio);
+}
+
+.prm-faixa--carbono .prm-perguntas__lista,
+.prm-faixa--carbono .prm-perguntas details {
+  border-color: var(--prm-fio-escuro);
+}
+
+.prm-perguntas details {
+  border-bottom: 1px solid var(--prm-fio);
+}
+
+.prm-perguntas summary {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding-block: 1.25rem;
+  font-weight: 600;
+  font-size: 1.0625rem;
+  line-height: 1.35;
+  cursor: pointer;
+  list-style: none;
+}
+
+.prm-perguntas summary::-webkit-details-marker {
+  display: none;
+}
+
+.prm-perguntas summary::after {
+  content: "+";
+  flex: none;
+  font-weight: 400;
+  font-size: 1.5rem;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.prm-perguntas details[open] summary::after {
+  transform: rotate(45deg);
+}
+
+.prm-perguntas details p {
+  margin: 0 0 1.5rem;
+  max-width: 40rem;
+  color: var(--prm-tinta-2);
+}
+
+.prm-faixa--carbono .prm-perguntas details p {
+  color: var(--prm-aco);
+}
+
+/* ---------- fecho ---------- */
+
+.prm-fecho {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2.5rem 4rem;
+  align-items: end;
+}
+
+@media (min-width: 60rem) {
+  .prm-fecho {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+
+.prm-loja {
+  margin: 0;
+  font-style: normal;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--prm-aco);
+}
+
+.prm-loja strong {
+  display: block;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ---------- paginação (reaproveita o componente do catálogo) ---------- */
+
+.prm-paginas {
+  margin-top: 2.5rem;
+  --site-panel-soft: var(--prm-papel);
+  --site-border: var(--prm-fio);
+  --site-text: var(--prm-tinta);
+  --site-muted: var(--prm-tinta-2);
+}

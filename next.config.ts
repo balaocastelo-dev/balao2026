@@ -11,6 +11,9 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // "IA local" é uma categoria por regra, com página própria. Quem chegar
+      // pelo endereço no formato das outras categorias cai nela.
+      { source: "/categoria/ia-local", destination: "/ia-local", permanent: true },
       // Os artigos do Soro abriam por script em /blog?post=<slug>. Agora cada
       // um tem página própria; o endereço antigo leva para ela.
       {
