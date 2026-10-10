@@ -24,6 +24,12 @@ export interface RegraDeMargem {
   precoDaMinima: number;
   /** Palavras que, no nome ou na categoria, fixam a margem mínima. */
   fixasNaMinima: string[];
+  /**
+   * Tipos com margem própria, que vale antes de tudo (ex.: toner 300%).
+   * O tipo é reconhecido do mesmo jeito que as fixas: palavra no começo do
+   * nome ou última parte da categoria.
+   */
+  especiais?: { palavras: string[]; margem: number }[];
 }
 
 export const REGRA_TECHSUPRI: RegraDeMargem = {
@@ -34,9 +40,11 @@ export const REGRA_TECHSUPRI: RegraDeMargem = {
   precoDaMinima: 400,
   fixasNaMinima: [
     "notebook", "laptop", "macbook", "chromebook",
-    "cartucho", "toner", "tinta", "refil", "fotocondutor", "cilindro",
+    "cartucho", "tinta", "refil", "fotocondutor", "cilindro",
     "celular", "smartphone", "iphone",
   ],
+  // Pedido do Thiago em 10/10: toner com 300%.
+  especiais: [{ palavras: ["toner"], margem: 300 }],
 };
 
 const semAcento = (s: unknown) =>
@@ -64,7 +72,16 @@ export function lerRegra(valor: unknown): RegraDeMargem | null {
   const fixasNaMinima = Array.isArray(r.fixasNaMinima)
     ? r.fixasNaMinima.map((p) => semAcento(p).trim()).filter(Boolean).slice(0, 60)
     : [];
-  return { tipo: "escalonada", minima, maxima, precoDaMaxima, precoDaMinima, fixasNaMinima };
+  const especiais = Array.isArray(r.especiais)
+    ? r.especiais
+        .map((e) => ({
+          palavras: (Array.isArray(e?.palavras) ? e.palavras : []).map((p) => semAcento(p).trim()).filter(Boolean).slice(0, 30),
+          margem: normalizarMargem(e?.margem),
+        }))
+        .filter((e) => e.palavras.length > 0)
+        .slice(0, 20)
+    : [];
+  return { tipo: "escalonada", minima, maxima, precoDaMaxima, precoDaMinima, fixasNaMinima, ...(especiais.length ? { especiais } : {}) };
 }
 
 const palavras = (s: string) => semAcento(s).replace(/[^a-z0-9]+/g, " ").trim().split(" ").filter(Boolean);
@@ -80,7 +97,11 @@ const singular = (p: string) => (p.length > 3 && p.endsWith("s") ? p.slice(0, -1
  * com margem de acessório.
  */
 function ehFixa(regra: RegraDeMargem, nome: string, categoria: string): boolean {
-  const fixas = new Set(regra.fixasNaMinima);
+  return ehDoTipo(regra.fixasNaMinima, nome, categoria);
+}
+
+function ehDoTipo(lista: string[], nome: string, categoria: string): boolean {
+  const fixas = new Set(lista);
   // "Cartucho HP 664", "Kit Cartucho...", "Refil de Tinta..." contam;
   // "Fonte Notebook Dell" e "Capa Celular" não (o tipo vem depois).
   const [primeira, segunda] = palavras(nome).map(singular);
@@ -98,6 +119,9 @@ function ehFixa(regra: RegraDeMargem, nome: string, categoria: string): boolean 
  * de R$ 60 não fica com quase a mesma margem de um de R$ 25.
  */
 export function margemPelaRegra(regra: RegraDeMargem, produto: { nome: string; categoria: string; preco: number }): number {
+  for (const especial of regra.especiais || []) {
+    if (ehDoTipo(especial.palavras, produto.nome, produto.categoria)) return especial.margem;
+  }
   if (ehFixa(regra, produto.nome, produto.categoria)) return regra.minima;
   const preco = produto.preco;
   if (!(preco > 0) || preco <= regra.precoDaMaxima) return regra.maxima;
@@ -120,5 +144,6 @@ export function margemDoProduto(
 /** Texto curto da regra, para o painel. */
 export function descreverRegra(regra: RegraDeMargem): string {
   const reais = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
-  return `${regra.maxima}% até ${reais(regra.precoDaMaxima)}, caindo até ${regra.minima}% a partir de ${reais(regra.precoDaMinima)}. Sempre ${regra.minima}%: ${regra.fixasNaMinima.slice(0, 8).join(", ")}${regra.fixasNaMinima.length > 8 ? "…" : ""}.`;
+  const especiais = (regra.especiais || []).map((e) => `${e.palavras.join(", ")}: ${e.margem}%`).join("; ");
+  return `${regra.maxima}% até ${reais(regra.precoDaMaxima)}, caindo até ${regra.minima}% a partir de ${reais(regra.precoDaMinima)}. Sempre ${regra.minima}%: ${regra.fixasNaMinima.slice(0, 8).join(", ")}${regra.fixasNaMinima.length > 8 ? "…" : ""}.${especiais ? ` Margem própria — ${especiais}.` : ""}`;
 }
