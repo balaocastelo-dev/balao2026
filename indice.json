@@ -12,7 +12,12 @@
         "diagnóstico",
         "notebook"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/pc-nao-liga-o-que-verificar-64c7642b.jpg",
+        "alt": "Gabinete de computador aberto sobre uma bancada, com a mão apertando o botão de ligar e o monitor apagado ao lado",
+        "largura": 1376,
+        "altura": 768
+      },
       "publicadoEm": "2026-10-10T08:56:41.916Z",
       "minutos": 12
     },
@@ -32,5 +37,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-10T08:56:42.574Z"
+  "atualizadoEm": "2026-10-10T12:17:20.437Z"
 }
