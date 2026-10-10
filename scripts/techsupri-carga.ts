@@ -4,7 +4,10 @@
 // produto na KaBuM! — as fotos da TechSupri têm marca d'água e não são usadas.
 //
 // Uso:
-//   npx tsx scripts/techsupri-carga.ts <captura.txt> [--sem-fotos] [--reconferir]
+//   npx tsx scripts/techsupri-carga.ts <captura.txt> [--sem-fotos] [--reconferir] [--ilustrativas]
+//
+// --ilustrativas: para quem ficou sem foto, usa uma foto do mesmo tipo de
+// produto (marcada com #ilustrativa; o site mostra "Imagem ilustrativa").
 //
 // --reconferir passa as fotos já achadas pela regra de semelhança atual e
 // descarta (para buscar de novo) as que não passam mais.
@@ -18,7 +21,10 @@
 
 import { readFileSync, writeFileSync, existsSync } from "fs";
 import path from "path";
-import { buscarFotoNaAmericanas, buscarFotoNaKabum, buscarFotoNaKalunga, NOTA_MINIMA, semelhanca, termoCurto } from "../lib/precos/fotos";
+import {
+  buscarFotoNaAmericanas, buscarFotoNaKabum, buscarFotoNaKalunga, MARCA_ILUSTRATIVA, NOTA_MINIMA, semelhanca,
+  semelhancaIlustrativa, termoCurto, termoGenerico,
+} from "../lib/precos/fotos";
 import { marcaDoTechsupri, produtosDaCaptura } from "../lib/precos/techsupri";
 import type { ProdutoCapturado } from "../lib/precos/techsupri";
 
@@ -28,7 +34,15 @@ const ARQ_SAIDA = path.join(RAIZ, "data", "techsupri-catalogo.json");
 
 type Foto =
   | { foto: string; fotos: string[]; achadoEm: string; nome: string; nota: number; origem?: string }
-  | { semFoto: true; tentadoEm: string; kalunga?: boolean; curto?: boolean; americanas?: boolean };
+  | { semFoto: true; tentadoEm: string; kalunga?: boolean; curto?: boolean; americanas?: boolean; ilustrativa?: boolean };
+
+/** Marcas pequenas que aparecem nos nomes da TechSupri e não ajudam a achar foto de tipo. */
+const MARCAS_PEQUENAS = [
+  "exbom", "knup", "kaidi", "lehmox", "tomate", "it", "blue", "itblue", "onikuma", "dobe", "oivo", "tyx", "7&z", "7z", "feir",
+  "mox", "implastec", "grasep", "joog", "revenger", "aula", "havit", "redragon", "ipega", "infokit", "inova", "weed",
+  "gass", "naticon", "luatek", "bmax", "altomex", "shinka", "peining", "aitek", "delta", "chinamate", "evolut", "flex",
+  "toply", "mn", "box", "lh", "jsx", "t&z", "tz", "kp", "kd", "le", "ley", "mtv", "mhd", "tns", "tp5", "tp4", "hl",
+];
 
 function lerCaptura(arquivo: string): ProdutoCapturado[] {
   return produtosDaCaptura(readFileSync(arquivo, "utf8"));
@@ -47,7 +61,7 @@ async function main() {
     const nomes = new Map(produtos.map((p) => [p.id, p.name]));
     let descartadas = 0;
     for (const [id, f] of Object.entries(fotos)) {
-      if (!("foto" in f) || !nomes.has(id)) continue;
+      if (!("foto" in f) || !nomes.has(id) || String(f.origem || "").startsWith("ilustrativa")) continue;
       if (semelhanca(nomes.get(id)!, f.nome) < NOTA_MINIMA) {
         delete fotos[id];
         descartadas++;
@@ -150,6 +164,45 @@ async function main() {
     }
     writeFileSync(ARQ_FOTOS, JSON.stringify(fotos, null, 1));
     console.log(`Americanas: ${naAmericanas} fotos a mais`);
+  }
+
+  if (opcoes.includes("--ilustrativas")) {
+    let achadas = 0;
+    let feitas = 0;
+    for (const p of produtos) {
+      const f = fotos[p.id];
+      if (!f || !("semFoto" in f) || f.ilustrativa) continue;
+      const marcas = [marcaDoTechsupri(p.name) || "", p.category?.name || "", ...MARCAS_PEQUENAS].filter(Boolean);
+      const avaliar = (a: string, b: string) => semelhancaIlustrativa(a, b, marcas);
+      const termos = [...new Set([termoCurto(p.name, marcaDoTechsupri(p.name)), termoGenerico(p.name, marcas)].filter((t): t is string => !!t))];
+      let achada = null;
+      let origem = "";
+      for (const termo of [undefined, ...termos]) {
+        const busca = await buscarFotoNaKabum(p.name, fetch, termo, avaliar, 0.5);
+        await dormir(1000);
+        if (busca.ok && busca.achada) { achada = busca.achada; origem = "ilustrativa-kabum"; break; }
+        if (!busca.ok && busca.motivo === "bloqueado") break;
+      }
+      if (!achada) {
+        const busca = await buscarFotoNaAmericanas(p.name, fetch, termos.map((t) => t.replace(/-/g, " ")), avaliar, 0.5);
+        await dormir(1000);
+        if (busca.ok && busca.achada) { achada = busca.achada; origem = "ilustrativa-americanas"; }
+      }
+      fotos[p.id] = achada
+        ? {
+            foto: achada.foto + MARCA_ILUSTRATIVA,
+            fotos: [achada.foto + MARCA_ILUSTRATIVA, ...achada.fotos.slice(1, 4).map((u) => u + MARCA_ILUSTRATIVA)],
+            achadoEm: new Date().toISOString(), nome: achada.nome, nota: Math.round(achada.nota * 100) / 100, origem,
+          }
+        : { ...f, ilustrativa: true };
+      if (achada) achadas++;
+      if (++feitas % 20 === 0) {
+        writeFileSync(ARQ_FOTOS, JSON.stringify(fotos, null, 1));
+        process.stdout.write(`${feitas} `);
+      }
+    }
+    writeFileSync(ARQ_FOTOS, JSON.stringify(fotos, null, 1));
+    console.log(`\nilustrativas: ${achadas} de ${feitas}`);
   }
 
   const saida = produtos.map((p) => {

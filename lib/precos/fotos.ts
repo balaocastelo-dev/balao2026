@@ -180,7 +180,15 @@ export function termoCurto(nome: string, marca: string | null): string | null {
   return partes.join("-");
 }
 
-export async function buscarFotoNaKabum(nome: string, buscar: typeof fetch = fetch, termoPronto?: string): Promise<ResultadoDaBusca> {
+export type Avaliador = (doFornecedor: string, achado: string) => number;
+
+export async function buscarFotoNaKabum(
+  nome: string,
+  buscar: typeof fetch = fetch,
+  termoPronto?: string,
+  avaliar: Avaliador = semelhanca,
+  minima = NOTA_MINIMA
+): Promise<ResultadoDaBusca> {
   const termo = termoPronto || termoDeBusca(nome);
   if (!termo) return { ok: true, achada: null };
   try {
@@ -200,8 +208,8 @@ export async function buscarFotoNaKabum(nome: string, buscar: typeof fetch = fet
     let melhor: FotoAchada | null = null;
     for (const item of pagina.itens.slice(0, 30)) {
       if (!item.foto) continue;
-      const nota = semelhanca(nome, item.nome);
-      if (nota >= NOTA_MINIMA && (!melhor || nota > melhor.nota)) {
+      const nota = avaliar(nome, item.nome);
+      if (nota >= minima && (!melhor || nota > melhor.nota)) {
         melhor = { foto: item.foto, fotos: item.fotos.length ? item.fotos : [item.foto], nome: item.nome, codigo: item.codigo, nota };
       }
     }
@@ -295,7 +303,9 @@ export function produtosDaBuscaAmericanas(json: unknown): { nome: string; foto: 
 export async function buscarFotoNaAmericanas(
   nome: string,
   buscar: typeof fetch = fetch,
-  termos?: string[]
+  termos?: string[],
+  avaliar: Avaliador = semelhanca,
+  minima = NOTA_MINIMA
 ): Promise<ResultadoDaBusca> {
   // A busca deles exige todas as palavras: termo comprido não acha nada.
   // Tenta do mais específico ao mais solto.
@@ -317,8 +327,8 @@ export async function buscarFotoNaAmericanas(
       }
       if (!resposta.ok) continue;
       for (const item of produtosDaBuscaAmericanas(await resposta.json())) {
-        const nota = semelhanca(nome, item.nome);
-        if (nota >= NOTA_MINIMA && (!melhor || nota > melhor.nota)) {
+        const nota = avaliar(nome, item.nome);
+        if (nota >= minima && (!melhor || nota > melhor.nota)) {
           melhor = { foto: item.foto, fotos: item.fotos, nome: item.nome, codigo: item.codigo, nota };
         }
       }
@@ -328,4 +338,78 @@ export async function buscarFotoNaAmericanas(
   } catch (erro) {
     return { ok: false, motivo: "rede", detalhe: String((erro as Error)?.message || erro) };
   }
+}
+
+
+// ---------- foto ilustrativa ----------
+//
+// Para o que não tem foto do produto exato em lugar nenhum (cabo genérico,
+// acessório de marca pequena), vale uma foto do MESMO TIPO de produto,
+// marcada no site como "Imagem ilustrativa". O endereço da foto ganha o
+// final #ilustrativa, que o navegador ignora e o site usa para mostrar o aviso.
+
+export const MARCA_ILUSTRATIVA = "#ilustrativa";
+
+export function ehIlustrativa(url: string | null | undefined): boolean {
+  return String(url || "").endsWith(MARCA_ILUSTRATIVA);
+}
+
+/** Palavras do tipo de produto: sem marca, sem código de modelo, sem cor. */
+export function palavrasGenericas(nome: string, marcas: string[] = []): string[] {
+  const fora = new Set(marcas.map((m) => semAcento(m).replace(/[^a-z0-9]+/g, "")));
+  const modelos = new Set(modelosDoNome(nome));
+  return palavrasDoNome(nome).filter((p) => {
+    if (fora.has(p.replace(/[^a-z0-9]/g, ""))) return false;
+    if (CORES[p]) return false;
+    if (modelos.has(p) && !/^(cat[5-7]e?|ps[2-5]|v8|p2|p10|4k|8k|usb3|hdmi2)$/.test(p)) return false;
+    if (/^\d+$/.test(p) && p.length < 3) return false;
+    return true;
+  });
+}
+
+const CONECTORES = new Set(["hdmi", "vga", "dvi", "displayport", "rca", "p2", "p10", "lightning", "v8", "rj45", "sata"]);
+const GENERICOS = new Set(["cat5", "cat6", "cat5e", "ps2", "ps3", "ps4", "ps5", "usb3", "hdmi2"]);
+
+const singularIl = (p: string) => (p.length > 3 && p.endsWith("s") ? p.slice(0, -1) : p);
+
+/**
+ * 0 a 1 para foto ilustrativa:
+ *  - com modelo no nome e o modelo batendo, vale (cor diferente não importa);
+ *  - sem isso, o tipo (primeira palavra) precisa aparecer no achado e pelo
+ *    menos metade das palavras do tipo de produto também.
+ * Acessório no lugar do produto continua recusado (foto de carregador não
+ * ilustra pilha).
+ */
+export function semelhancaIlustrativa(doFornecedor: string, achado: string, marcas: string[] = []): number {
+  const primeiraAchada = semAcento(achado).split(/[^a-z0-9]+/).filter(Boolean)[0] || "";
+  const palavrasForn = semAcento(doFornecedor).split(/[^a-z0-9]+/).filter(Boolean);
+  if (OUTRO_TIPO.has(primeiraAchada) && !palavrasForn.includes(primeiraAchada)) return 0;
+
+  // Conector que só o achado tem (HDMI, VGA, USB-C...) é outro produto.
+  const conectores = (t: string) => new Set(semAcento(t).split(/[^a-z0-9]+/).filter((p) => CONECTORES.has(p)));
+  const conForn = conectores(doFornecedor);
+  for (const c of conectores(achado)) if (!conForn.has(c)) return 0;
+
+  // O tipo (primeira palavra que diz o que é) precisa estar no começo do nome achado.
+  const tipo = singularIl(palavrasForn.find((p) => p.length >= 3 && !VAZIAS.has(p)) || "");
+  const inicioAchado = palavrasDoNome(achado).slice(0, 3).map(singularIl);
+  if (!tipo || !inicioAchado.includes(tipo)) return 0;
+
+  // Modelo distintivo batendo: mesma peça, talvez outra cor.
+  const modelos = modelosDoNome(doFornecedor).filter((m) => m.length >= 4 && !GENERICOS.has(m));
+  if (modelos.length > 0) {
+    const bateu = modelos.filter((m) => temModelo(achado, m));
+    if (bateu.length === modelos.length) return 0.9;
+  }
+
+  const achadas = new Set(palavrasDoNome(achado).map(singularIl));
+  const genericas = palavrasGenericas(doFornecedor, marcas).map(singularIl);
+  if (genericas.length === 0) return 0;
+  const comuns = genericas.filter((p) => achadas.has(p)).length;
+  const cobertura = comuns / genericas.length;
+  return cobertura >= 0.5 ? 0.5 + cobertura * 0.4 : 0;
+}
+
+export function termoGenerico(nome: string, marcas: string[] = []): string {
+  return palavrasGenericas(nome, marcas).slice(0, 4).join("-").replace(/\./g, "");
 }

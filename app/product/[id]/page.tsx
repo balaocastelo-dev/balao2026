@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Header from '@/components/Header';
-import SeloProntaEntrega from "@/components/SeloProntaEntrega";
+import SeloProntaEntrega, { ehImagemIlustrativa } from "@/components/SeloProntaEntrega";
 import Sidebar from '@/components/Sidebar';
 import { notFound, permanentRedirect } from 'next/navigation';
 import ShareButton from '@/components/ShareButton';
@@ -147,6 +147,9 @@ export default async function ProductPage({ params }: Props) {
                       videoUrl={product.video_url}
                       productName={product.name}
                     />
+                    {ehImagemIlustrativa(product.image) && (
+                      <p className="text-xs text-[var(--site-muted)]">Imagem ilustrativa: o produto pode ter outra cor ou embalagem.</p>
+                    )}
                 </div>
 
                 {/* Info Section */}
