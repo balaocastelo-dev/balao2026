@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "pc-nao-liga-o-que-verificar",
+      "titulo": "PC não liga: o que verificar antes de levar à assistência",
+      "resumo": "PC não liga? Veja o que dá para conferir em casa com segurança, como separar falta de energia de falta de imagem e em que ponto parar e chamar um técnico.",
+      "categoria": "assistencia",
+      "etiquetas": [
+        "manutenção",
+        "fonte",
+        "diagnóstico",
+        "notebook"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-10T08:56:41.916Z",
+      "minutos": 12
+    },
+    {
       "slug": "windows-10-ate-quando-tem-atualizacao",
       "titulo": "Windows 10: até quando tem atualização e o que fazer",
       "resumo": "O Windows 10 saiu de suporte, mas ainda recebe correções de segurança até outubro de 2027. Veja como garantir isso e quando vale atualizar ou trocar de PC.",
@@ -17,5 +32,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-09T09:09:25.509Z"
+  "atualizadoEm": "2026-10-10T08:56:42.574Z"
 }

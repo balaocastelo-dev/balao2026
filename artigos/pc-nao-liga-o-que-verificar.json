@@ -1,0 +1,324 @@
+{
+  "slug": "pc-nao-liga-o-que-verificar",
+  "titulo": "PC não liga: o que verificar antes de levar à assistência",
+  "resumo": "PC não liga? Veja o que dá para conferir em casa com segurança, como separar falta de energia de falta de imagem e em que ponto parar e chamar um técnico.",
+  "categoria": "assistencia",
+  "etiquetas": [
+    "manutenção",
+    "fonte",
+    "diagnóstico",
+    "notebook"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-10T08:56:41.916Z",
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Você aperta o botão e o PC não liga: nenhuma luz, nenhum barulho, ou então as ventoinhas giram e a tela continua preta. Antes de levar à assistência, vale gastar alguns minutos com verificações simples, feitas por fora do gabinete. Parte dos casos se resolve ali mesmo, na tomada, no cabo ou no monitor."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano mais comum é concluir de cara que a placa-mãe queimou. Quase sempre é cedo para dizer isso. O primeiro passo é descobrir se o computador está sem energia ou se ele liga e apenas não mostra imagem, porque são dois problemas diferentes, com causas e caminhos diferentes. Com essa resposta, você já sabe o que testar e o que contar ao técnico."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "Separe os dois casos: **nada acende** (falta de energia) ou **liga, mas não dá imagem** (inicialização ou vídeo).",
+        "Em casa, confira por fora: tomada, filtro de linha, cabo de energia, chave da fonte, monitor e periféricos.",
+        "Anote luzes, bipes e o que mudou antes do defeito: essa informação encurta o diagnóstico.",
+        "Cheiro de queimado, estalo, líquido ou bateria estufada: desligue da tomada e não tente de novo."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Não liga nada ou liga sem imagem? Descubra primeiro qual é o seu caso"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Olhe e escute o computador no momento em que você aperta o botão. Se nenhuma luz acende, nenhuma ventoinha gira e não há som algum, a energia não está chegando ou não está sendo distribuída. A página de suporte da Dell descreve esse quadro como falta de energia e o trata separado dos demais."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se há luz acesa, ventoinha girando ou o logotipo do fabricante parado na tela, o computador está recebendo energia. Aí o defeito costuma estar na inicialização, que é a sequência de testes que a placa-mãe faz antes de carregar o sistema, ou no caminho do vídeo: placa de vídeo, cabo ou monitor."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "O que você observa",
+        "O que costuma indicar",
+        "Por onde começar"
+      ],
+      "linhas": [
+        [
+          "Nenhuma luz, nenhum som",
+          "Energia não chega: tomada, cabo, filtro de linha ou fonte",
+          "Tomada e cabo de energia"
+        ],
+        [
+          "Luzes e ventoinhas, tela preta",
+          "Falha na inicialização ou no vídeo",
+          "Monitor, cabo de vídeo e entrada selecionada"
+        ],
+        [
+          "Liga e desliga em seguida",
+          "Fonte, superaquecimento ou curto em alguma peça",
+          "Parar e levar a um técnico"
+        ],
+        [
+          "Bipes ou luz piscando em sequência",
+          "Código de erro da placa, muitas vezes ligado à memória",
+          "Anotar o padrão e consultar o manual"
+        ],
+        [
+          "Logotipo aparece e trava",
+          "Disco de sistema ou o próprio Windows",
+          "Desconectar periféricos e tentar de novo"
+        ]
+      ],
+      "titulo": "O que cada sintoma costuma indicar",
+      "colunaDestaque": 2,
+      "nota": "São indicações iniciais, não diagnóstico. O mesmo sintoma pode ter mais de uma causa."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A tabela serve para orientar a ordem dos testes, mas não fecha a questão. Uma fonte de alimentação fraca, por exemplo, pode deixar as luzes acenderem e ainda assim não sustentar a partida. Por isso o caminho seguro é sempre o mesmo: do mais simples e externo para o mais complexo e interno."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que verificar em casa quando nada acende"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Comece pelo que está fora do computador. Tanto a Dell quanto a ASUS abrem seus roteiros de solução de problemas pelo mesmo ponto: confirmar que a energia chega até a máquina. Parece óbvio, mas tomada sem corrente, filtro de linha desligado e cabo mal encaixado respondem por boa parte dos sustos."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "**Teste a tomada** com outro aparelho, como um abajur ou o próprio monitor.",
+        "**Tire o filtro de linha do caminho**: confira se a chave dele está ligada e, depois, ligue o computador direto na parede.",
+        "**Reencaixe o cabo de energia** nas duas pontas. Se tiver outro igual, como o do monitor, troque um pelo outro para testar.",
+        "**Confira a chave da fonte**, na traseira do gabinete: ela precisa estar na posição ligada.",
+        "**Desconecte os periféricos**: impressora, disco externo, pen drive, tudo que não seja necessário para ligar.",
+        "**Aperte o botão com firmeza** e veja se ele não está travado ou afundado."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Há ainda um procedimento que os fabricantes chamam de drenar a energia residual. Com o cabo de energia fora da tomada, você mantém o botão de ligar pressionado por alguns segundos, reconecta o cabo e tenta de novo. Nos desktops da Dell, a orientação da marca é segurar de 15 a 20 segundos. Não desmonta nada e não oferece risco."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se depois disso tudo o computador continua sem dar sinal, a suspeita recai sobre a fonte de alimentação ou sobre algo dentro do gabinete. A fonte é a peça que converte a energia da tomada para o restante da máquina, e é também o ponto em que a verificação caseira termina."
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "A fonte guarda carga elétrica mesmo fora da tomada e não tem peça que se conserte em casa. Se você sentir cheiro de queimado, ouvir estalo, vir faísca ou notar o gabinete dando choque, tire o cabo da tomada e não tente ligar de novo. O mesmo vale se caiu líquido no equipamento.",
+      "titulo": "Nunca abra a fonte de alimentação"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que verificar quando o PC liga mas a tela fica preta"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Aqui o suspeito número um é o mais simples de testar: o monitor. Veja se a luz dele está acesa e desligue e ligue o aparelho. Segundo o guia da ASUS, quando a tela mostra a mensagem de sem sinal, o monitor está funcionando; o que falta é a imagem chegar até ele."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "**Reencaixe o cabo de vídeo** no monitor e no computador e olhe se algum pino está torto.",
+        "**Confira a entrada selecionada** no menu do monitor: ela precisa ser a mesma do cabo em uso, HDMI ou DisplayPort, por exemplo.",
+        "**Veja em qual saída o cabo está ligado.** Se o computador tem placa de vídeo dedicada, o cabo vai nela, e não na saída da placa-mãe.",
+        "**Teste outro cabo** do mesmo tipo, se tiver.",
+        "**Ligue o monitor em outro computador** ou em um notebook, para descartar defeito no próprio monitor."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O terceiro item merece atenção em máquinas montadas. A Intel lembra, em sua página de suporte, que os processadores com a letra F no nome não têm vídeo integrado e dependem de uma placa de vídeo. Nesses computadores, ligar o cabo na placa-mãe resulta em tela preta, mesmo com tudo em ordem."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Pense também no que mudou. A recomendação da Intel para um computador que funcionava e parou é desfazer a última alteração de hardware. Se o problema surgiu logo depois de instalar uma memória, uma placa ou um disco novo, essa peça, ou o encaixe dela, vira o primeiro ponto a ser conferido. O artigo sobre [como aumentar a memória RAM do PC](/blog/como-aumentar-memoria-ram-pc) explica os cuidados dessa instalação."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Luzes e bipes: o que anotar antes de levar"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Muitos computadores avisam onde está o problema. Alguns emitem bipes em sequência; outros piscam a luz do botão em um padrão que se repete. A Dell orienta contar as piscadas e procurar o código no manual do modelo, e observa que os bipes costumam apontar para memória ou placa-mãe."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Em placas-mãe de computadores montados, é comum haver pequenas luzes de diagnóstico na própria placa. Nas da ASUS, o recurso se chama Q-LED e tem quatro indicadores: CPU (o processador), DRAM (a memória), VGA (o vídeo) e BOOT (o disco de inicialização). A luz que permanece acesa depois de ligar mostra em qual etapa a partida parou."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas essas luzes ficam dentro do gabinete, e nem todo modelo tem. Se o seu gabinete tem lateral de vidro, dá para ver sem abrir nada. Caso contrário, não há problema: anote o que você consegue observar por fora. Uma descrição precisa vale mais do que um palpite sobre a peça."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": false,
+      "itens": [
+        "O que acontece ao apertar o botão: luzes, ventoinhas, sons, mensagem na tela.",
+        "Quantos bipes ou piscadas, e se o padrão se repete.",
+        "O que mudou antes do defeito: queda de energia, temporal, peça nova, mudança de lugar, atualização.",
+        "Se o problema é constante ou vai e volta."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Se for notebook: carregador e bateria vêm antes de tudo"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "No notebook, a lógica é a mesma, com outras peças no caminho da energia. Teste a tomada e olhe o carregador: fio descascado, conector frouxo ou marcas de aquecimento são motivo para parar de usar. Se o carregador tem luz indicadora e ela está apagada, reencaixe o cabo; continuando apagada, o problema provavelmente é o próprio carregador."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Dell recomenda usar o carregador original ou um homologado para o modelo e, se possível, testar com outro que se saiba estar funcionando. Vale também tirar o notebook da base de expansão, se você usa uma, e ligar o carregador direto nele: bateria totalmente descarregada pode não partir pela base."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Alguns modelos têm um procedimento de reinício do relógio interno, feito segurando o botão de ligar por um tempo determinado. Como o tempo e a disponibilidade variam de modelo para modelo, consulte o manual do seu antes de tentar. E se a tampa ou o teclado estiverem estufados, não ligue na tomada: é sinal de bateria inchada, e isso é caso para técnico."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Onde parar: o que fica para o técnico"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Os roteiros dos fabricantes continuam para dentro do gabinete: reencaixar memória e placa de vídeo, testar um módulo de memória por vez, ligar só com o mínimo de peças, restaurar as configurações da placa-mãe, trocar a fonte por outra em bom estado. São passos corretos, mas pedem ferramenta, peça de teste e cuidado com eletricidade estática."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Verificação",
+        "Em casa",
+        "Na assistência"
+      ],
+      "linhas": [
+        [
+          "Tomada, filtro de linha e cabo de energia",
+          "Sim",
+          "—"
+        ],
+        [
+          "Monitor, cabo de vídeo e entrada selecionada",
+          "Sim",
+          "—"
+        ],
+        [
+          "Desconectar periféricos e drenar a energia residual",
+          "Sim",
+          "—"
+        ],
+        [
+          "Anotar bipes, luzes e o que mudou",
+          "Sim",
+          "—"
+        ],
+        [
+          "Reencaixar memória e placa de vídeo",
+          "Só com experiência e o cabo fora da tomada",
+          "Sim"
+        ],
+        [
+          "Testar com outra fonte, memória ou processador",
+          "Não",
+          "Sim"
+        ],
+        [
+          "Abrir a fonte ou mexer em bateria estufada",
+          "Nunca",
+          "Avaliação e troca da peça"
+        ]
+      ],
+      "titulo": "O que fazer em casa e o que deixar para a assistência",
+      "colunaDestaque": 1
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A razão de parar não é só o risco de choque. Diagnóstico por substituição exige peças que se sabe estarem boas, e pouca gente tem em casa uma fonte ou uma memória sobrando. Sem isso, você troca a peça errada. Quando a fonte for mesmo a culpada, o guia sobre [como escolher a fonte ideal](/blog/fonte-ideal-para-pc-gamer) ajuda a acertar a substituta."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Um último cuidado antes de sair de casa: seus arquivos. Na maioria dos casos de computador que não liga, o disco está intacto e os dados continuam lá. Mas, se houve queda, líquido ou barulho estranho vindo do disco, avise o técnico e não fique insistindo em ligar. O artigo sobre [como recuperar dados de HD](/blog/como-recuperar-dados-de-hd) explica por quê."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando levar à assistência em Campinas"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se você passou pelas verificações externas e o computador continua sem ligar, é hora de um diagnóstico com peças de teste. A Balão da Informática tem [assistência técnica](/manutencao) no Cambuí, em Campinas, no mesmo endereço da loja: a equipe faz diagnóstico, troca de peça, conserto e, quando preciso, [recuperação de dados](/recuperacaodados)."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Leve junto o cabo de energia ou o carregador e as anotações sobre luzes, bipes e o que mudou antes do defeito. Se o resultado apontar para a fonte, a loja tem [fontes](/categoria/hardware-fontes) para a troca. A decisão, em uma linha: confira por fora o que é seguro conferir e, se não ligar, pare antes de abrir o que você não conhece."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "geral"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Meu PC não liga depois de uma queda de energia. O que pode ser?",
+      "resposta": "Comece pelo filtro de linha, que pode ter desarmado ou queimado, e ligue o computador direto na parede. Vale também tirar o cabo da tomada, segurar o botão de ligar por alguns segundos e tentar de novo. Se continuar sem sinal, a fonte de alimentação é a principal suspeita e deve ser testada por um técnico."
+    },
+    {
+      "pergunta": "As ventoinhas giram, mas a tela fica preta. É a placa de vídeo?",
+      "resposta": "Pode ser, mas não é o primeiro teste. Confira antes o monitor, o cabo, a entrada selecionada e se o cabo está na saída da placa de vídeo, e não na da placa-mãe. Memória mal encaixada também causa esse sintoma, por isso o diagnóstico completo fica para a assistência."
+    },
+    {
+      "pergunta": "O que significam os bipes quando ligo o computador?",
+      "resposta": "São um código de erro da placa-mãe. O significado muda de fabricante para fabricante e está no manual do modelo. Anote quantos bipes são e se a sequência se repete: isso ajuda bastante quem for fazer o diagnóstico."
+    },
+    {
+      "pergunta": "Posso abrir o gabinete para olhar?",
+      "resposta": "Abrir a lateral do gabinete, com o cabo fora da tomada, não é perigoso em si, mas mexer nas peças exige cuidado com eletricidade estática e com os encaixes. Se você nunca fez isso, pare nas verificações externas. A fonte de alimentação não deve ser aberta em hipótese alguma."
+    },
+    {
+      "pergunta": "Se o PC não liga, perdi meus arquivos?",
+      "resposta": "Normalmente não. Quando o defeito está na fonte, na memória ou na placa-mãe, o disco continua com os dados e pode ser lido depois do conserto ou em outra máquina. O risco aumenta quando houve queda, líquido ou falha do próprio disco; nesses casos, não insista em ligar."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Dell — O computador não liga: solução de problemas de energia",
+      "url": "https://www.dell.com/support/contents/article/product-support/self-support-knowledgebase/fix-common-issues/no-power",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "ASUS — [Motherboard] Solução de problemas: sem energia / sem inicialização / sem imagem",
+      "url": "https://www.asus.com/br/support/FAQ/1042632",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "ASUS — [Motherboard] Solução de problemas de Q-LED",
+      "url": "https://www.asus.com/br/support/FAQ/1042678",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Intel — Troubleshooting for No Boot and No Display Issues with Intel Boxed Processors",
+      "url": "https://www.intel.com/content/www/us/en/support/articles/000021605/processors.html",
+      "data": "consultado em outubro de 2026"
+    }
+  ]
+}
