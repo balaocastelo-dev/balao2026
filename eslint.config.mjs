@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Office 3D: página pronta (minificada) e o código dela, que não é React.
+    "public/3d/**",
+    "office3d/**",
   ]),
 ]);
 

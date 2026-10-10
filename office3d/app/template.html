@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Office 3D — Balão da Informática</title>
+<meta name="description" content="Escritório virtual 3D da Balão da Informática: conheça a equipe e os agentes de IA trabalhando, em uma simulação interativa.">
+<!--HEAD-->
+<link rel="stylesheet" href="{{CSS}}">
+</head>
+<body data-mode="overview" data-day="day">
+<canvas id="scene" tabindex="0"></canvas>
+<div id="labels"></div>
+<div id="cross"></div>
+<div id="stick"><i></i></div>
+
+<div id="cctv">
+  <span class="corner c1"></span><span class="corner c2"></span><span class="corner c3"></span><span class="corner c4"></span>
+  <div class="tl"><span id="cctv-name">CAM_01</span><small>BALÃO DA INFORMÁTICA · CFTV</small></div>
+  <div class="bl" id="cctv-time"></div>
+  <div class="rec"><i></i>REC</div>
+  <div class="nav"><button id="cctv-prev">◀ ANTERIOR</button><button id="cctv-auto">AUTO</button><button id="cctv-next">PRÓXIMA ▶</button></div>
+</div>
+
+<div class="panel" id="brand">
+  <img alt="Balão da Informática" src="{{LOGO}}">
+  <span class="sep"></span>
+  <div><h1>Office 3D</h1><p>Escritório virtual da equipe · simulação</p></div>
+</div>
+
+<div class="panel" id="bar">
+  <div class="seg">
+    <button data-mode-btn="overview" class="on">Visão geral<kbd>1</kbd></button>
+    <button data-mode-btn="fpv">Andar<kbd>2</kbd></button>
+    <button data-mode-btn="tour">Tour<kbd>3</kbd></button>
+    <button data-mode-btn="cctv">Câmeras<kbd>4</kbd></button>
+    <button data-mode-btn="maquete">Maquete<kbd>5</kbd></button>
+  </div>
+  <span class="vsep"></span>
+  <button class="btn ico" id="btn-time" title="Hora do dia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg><span id="time-label">Hora real</span></button>
+  <button class="btn ico" id="btn-sound" title="Som ambiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z"/><path class="on" d="M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a7.8 7.8 0 0 1 0 11" style="display:none"/><path class="off" d="M16 9.5l5 5M21 9.5l-5 5"/></svg></button>
+  <button class="btn ico" id="btn-more" title="Mais opções"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button>
+  <span class="vsep"></span>
+  <button class="btn" id="btn-pres">Presidência</button>
+  <button class="btn red" id="btn-meeting">Reunião geral</button>
+</div>
+
+<div class="panel pop" id="pop-time">
+  <h4>Hora do dia</h4>
+  <button data-time="auto" class="on">Hora real <small id="time-now"></small></button>
+  <button data-time="manha">Manhã</button>
+  <button data-time="tarde">Tarde</button>
+  <button data-time="por">Pôr do sol</button>
+  <button data-time="noite">Noite</button>
+</div>
+<div class="panel pop" id="pop-more">
+  <h4>Escritório</h4>
+  <button id="btn-home">Todos aos postos</button>
+  <button id="btn-reset">Recentrar a câmera</button>
+  <hr>
+  <h4>Exibição</h4>
+  <button id="opt-quality">Qualidade gráfica <small id="quality-label">Alta</small></button>
+  <button id="opt-labels" class="on">Etiquetas e balões</button>
+  <button id="opt-mini" class="on">Minimapa</button>
+  <hr>
+  <h4>Simular evento</h4>
+  <button id="sim-order">Novo pedido <small>teste</small></button>
+  <button id="sim-server">Alerta no servidor <small>teste</small></button>
+</div>
+
+<aside class="panel" id="team">
+  <header><b>Equipe</b><span id="stat"></span></header>
+  <div id="team-list"></div>
+</aside>
+
+<aside class="panel" id="card">
+  <div class="top"><div id="card-avatar"></div><div><h2 id="card-name"></h2><div id="card-role"></div></div><button id="card-close" title="Fechar">×</button></div>
+  <span id="card-dept"></span>
+  <p id="card-desc"></p>
+  <div id="card-status"></div>
+  <h3>Movimentações</h3>
+  <div id="card-log"></div>
+  <div id="card-actions"></div>
+</aside>
+
+<div class="panel" id="foot"><span id="clock">--:--</span><span class="chip" id="day-chip">dia</span><span class="chip">simulação</span><button class="btn" id="btn-team" style="padding:4px 8px">Equipe</button></div>
+<div class="panel" id="mini"><canvas id="mini-canvas" width="460" height="232" style="width:230px;height:116px"></canvas></div>
+<div id="hint"></div>
+<div id="toast"><i></i><span></span></div>
+
+<div id="pip"><div class="win"><header><b id="pip-title"></b><span id="pip-sub"></span><button id="pip-close" title="Fechar">×</button></header><canvas id="pip-canvas" width="1280" height="720"></canvas><footer>Tela ilustrativa da simulação — ainda não está ligada aos dados reais da loja.</footer></div></div>
+
+<div id="loading"><div class="box"><img alt="" src="{{LOGO}}"><div class="track"><div id="load-bar"></div></div><div id="load-msg">Abrindo o escritório…</div></div></div>
+
+<!--CONFIG-->
+<!--SCRIPTS-->
+</body>
+</html>

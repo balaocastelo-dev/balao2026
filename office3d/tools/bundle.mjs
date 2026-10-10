@@ -1,0 +1,12 @@
+import fs from 'fs'; import path from 'path'; import zlib from 'zlib';
+const root = 'build/pack'; const files = {}; const chunks = []; let off = 0;
+const only = process.env.ONLY ? new RegExp(process.env.ONLY) : null;
+(function walk(d) { for (const n of fs.readdirSync(d).sort()) { const p = path.join(d, n); if (fs.statSync(p).isDirectory()) walk(p); else { const rel = path.relative(root, p).split(path.sep).join('/'); if (only && !only.test(rel)) continue; let b = fs.readFileSync(p); const pad = (4 - (b.length % 4)) % 4; files[rel] = [off, b.length]; chunks.push(b); if (pad) chunks.push(Buffer.alloc(pad)); off += b.length + pad; } } })(root);
+let header = Buffer.from(JSON.stringify({ files })); const hp = (4 - (header.length % 4)) % 4; if (hp) header = Buffer.concat([header, Buffer.alloc(hp, 0x20)]);
+const hl = Buffer.alloc(4); hl.writeUInt32LE(header.length);
+const bin = Buffer.concat([hl, header, ...chunks]);
+const out = process.argv[2] || 'build/assets.bin';
+fs.writeFileSync(out, bin);
+const gz = zlib.gzipSync(bin, { level: 9 });
+fs.writeFileSync(out + '.gz', gz);
+console.log('pack', Object.keys(files).length, 'files', (bin.length / 1e6).toFixed(2), 'MB raw', (gz.length / 1e6).toFixed(2), 'MB gz');

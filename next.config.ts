@@ -10,6 +10,27 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/api/precos/troca": ["./data/catalogo-inicial.json"],
   },
+  // O Office 3D (escritório virtual) é uma página pronta, em public/3d: não
+  // passa pelo layout da loja. O endereço /3d abre o index.html dela.
+  // O código-fonte e o comando para republicar estão em office3d/README.md.
+  async rewrites() {
+    return {
+      beforeFiles: [{ source: "/3d", destination: "/3d/index.html" }],
+      afterFiles: [],
+      fallback: [],
+    };
+  },
+  // Motor, modelos e visual do Office 3D levam um código no nome que muda a
+  // cada versão; por isso o navegador pode guardá-los sem voltar a perguntar
+  // (são ~12 MB — sem isto seriam conferidos a cada visita).
+  async headers() {
+    return [
+      {
+        source: "/3d/:arquivo((?:assets|engine|ui)\\.[0-9a-f]{10}\\.(?:pack|js|css))",
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      },
+    ];
+  },
   async redirects() {
     return [
       // "IA local" é uma categoria por regra, com página própria. Quem chegar

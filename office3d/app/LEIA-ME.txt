@@ -1,0 +1,67 @@
+OFFICE 3D — Balão da Informática  (versão 2)
+============================================
+
+Como abrir
+  Dê dois cliques em HERMES_OFFICE_3D.html (ou no ABRIR_OFFICE_3D.bat).
+  Funciona sem internet. Esta pasta "office3d" precisa ficar ao lado do arquivo .html.
+  A mesma versão está publicada em https://www.balao.info/3d
+
+O que tem nesta pasta
+  engine.js          o motor 3D (cenário, luz, câmeras, comportamento das pessoas)
+  assets.js          os modelos 3D das pessoas, as animações e as texturas
+  ui.css             o visual dos painéis (inclui a fonte Inter)
+  logo.png           o logo usado na barra do topo
+  codigo-fonte.zip   o código original, para futuras alterações
+  versao-anterior/   as versões antigas, guardadas como estavam
+
+Como trocar nomes e textos
+  Abra o HERMES_OFFICE_3D.html num editor de texto e procure "CONFIGURAÇÃO DO ESCRITÓRIO".
+  Ali ficam o nome, o cargo, a descrição e as tarefas de cada pessoa.
+
+Visões (barra do topo ou teclas)
+  1  Visão geral   arrastar gira, roda do mouse aproxima, botão direito move.
+  2  Andar         clique na cena, depois W A S D; Shift corre; Esc solta o mouse.
+                   No celular aparece um controle redondo para andar.
+  3  Tour          passeio automático pelas salas.
+  4  Câmeras       câmeras de segurança de cada sala (setas ← → trocam).
+  5  Maquete       o prédio visto como miniatura.
+  0  volta a câmera para o começo.
+
+Outros controles
+  Relógio (sol)    hora do dia: hora real, manhã, tarde, pôr do sol ou noite.
+                   Em "hora real" a luz acompanha o relógio do computador.
+  Alto-falante     liga o som ambiente (tecla M). Começa desligado.
+  ⋯                todos aos postos, recentrar a câmera, qualidade gráfica (alta ou leve),
+                   etiquetas e balões (tecla L), minimapa e os dois testes de evento.
+  Reunião geral    tecla R; a câmera acompanha a equipe até a sala. Clique para voltar.
+  Clique numa pessoa para ver o cartão dela e dar ordens.
+  Clique numa tela (monitor ou TV) para vê-la grande.
+  Clique no minimapa para levar a câmera até aquele ponto.
+
+Qualidade gráfica
+  Alta: sombras suaves, brilho das telas, mais pontos de luz, mãos no teclado e no mouse.
+  Leve: para computadores modestos e celulares. Se o computador não der conta da alta,
+  o office passa sozinho para a leve e avisa.
+
+É uma simulação
+  O que as pessoas fazem, os textos de status e o conteúdo das telas são encenados;
+  não vêm dos sistemas reais da loja. Os botões "Novo pedido" e "Alerta no servidor"
+  são testes. O office já sabe receber esses avisos de fora (veja abaixo), mas a
+  ligação com o Bling e com o servidor ainda não foi feita.
+
+Para ligar a dados reais no futuro (parte técnica)
+  O office aceita avisos de três jeitos:
+    window.Office3D.event({ type: "pedido", titulo: "#1234 · Notebook" })
+    window.Office3D.event({ type: "servidor", carga: 0.95 })   // ou { status: "ok" }
+    window.Office3D.event({ type: "mensagem", agente: "julia", texto: "..." })
+  ou por window.postMessage({ office3d: { ... } }), ou lendo de tempos em tempos um
+  endereço que devolva uma lista desses avisos (em CONFIGURAÇÃO: events: { url, intervalo }).
+  Falta existir esse endereço: um serviço que consulte o Bling e o servidor com as
+  credenciais guardadas do lado dele, nunca dentro desta página.
+
+Créditos
+  Pessoas e animações: Microsoft Rocketbox Avatar Library (licença MIT),
+    https://github.com/microsoft/Microsoft-Rocketbox
+  Motor gráfico: three.js (licença MIT). Textura de madeira: exemplos do three.js.
+  Fonte Inter (SIL Open Font License). Nota de 100 dólares: imagem em domínio público
+  (Wikimedia Commons).
