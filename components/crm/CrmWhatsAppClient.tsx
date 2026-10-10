@@ -6,6 +6,7 @@ import { io, type Socket } from "socket.io-client";
 import CentralStatus from "@/components/crm/status/CentralStatus";
 import CentroDeComando from "@/components/crm/comando/CentroDeComando";
 import type { PonteComando } from "@/components/crm/comando/tipos";
+import { CHAVE_CONVERSA_PEDIDA } from "@/lib/painel/recados";
 import type { PonteStatus, StatusRecebido } from "@/components/crm/status/tipos";
 import {
   CrmChat,
@@ -268,6 +269,8 @@ export interface CrmWhatsAppClientProps {
   /** O que fazer no botão de sair. Sem isso, apenas volta ao portão de PIN. */
   onSair?: () => void;
   sairLabel?: string;
+  /** Texto de ajuda do botão de sair, quando ele não encerra a sessão. */
+  sairTitulo?: string;
 }
 
 // Identidade usada no cabeçalho quando quem está na tela é a administração e
@@ -359,6 +362,7 @@ export default function CrmWhatsAppClient({
   admin,
   onSair,
   sairLabel,
+  sairTitulo,
 }: CrmWhatsAppClientProps = {}) {
   const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -1972,6 +1976,27 @@ export default function CrmWhatsAppClient({
     gravadorRef.current?.stop();
   };
 
+  // Vindo de outra área do painel (Clientes, Números do atendimento), fica um
+  // recado no sessionStorage dizendo qual conversa abrir (lib/painel/ponte.ts).
+  // Abre nessa conversa assim que a tela estiver ao vivo — antes disso a
+  // seleção não buscaria o histórico, que depende do socket conectado. O
+  // recado é apagado ao ser lido, para não reabrir a conversa a cada visita.
+  const conversaPedidaRef = useRef<string | null>(null);
+  useEffect(() => {
+    try {
+      conversaPedidaRef.current = sessionStorage.getItem(CHAVE_CONVERSA_PEDIDA);
+      sessionStorage.removeItem(CHAVE_CONVERSA_PEDIDA);
+    } catch {
+      // Navegador sem sessionStorage: abre sem conversa escolhida.
+    }
+  }, []);
+  useEffect(() => {
+    const pedida = conversaPedidaRef.current;
+    if (!aoVivo || !pedida) return;
+    conversaPedidaRef.current = null;
+    setChatSelecionadoId(pedida);
+  }, [aoVivo]);
+
   // Marcar chat como visto automaticamente ao selecionar
   useEffect(() => {
     if (chatSelecionadoId && socketRef.current?.connected) {
@@ -3436,9 +3461,10 @@ export default function CrmWhatsAppClient({
           <button
             onClick={sairDoVendedor}
             title={
-              vendedorFixo || admin
+              sairTitulo ||
+              (vendedorFixo || admin
                 ? "Encerrar a sessão neste computador"
-                : "Trocar de vendedor (pede o PIN de novo)"
+                : "Trocar de vendedor (pede o PIN de novo)")
             }
             className="bg-white/90 hover:bg-white text-[#0a6e3d] rounded-full px-2.5 py-1 text-xs font-bold transition-all shadow-sm cursor-pointer"
           >

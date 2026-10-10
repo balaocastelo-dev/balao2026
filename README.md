@@ -42,6 +42,14 @@ Este projeto é um e-commerce desenvolvido com Next.js, Tailwind CSS e TypeScrip
 - `/lib`: Utilitários e lógica de banco de dados (JSON local).
 - `/data`: Armazenamento local dos produtos (`products.json`).
 
+## Painel (www.balao.info/painel)
+
+Toda a administração mora em `/painel`, atrás de uma senha só: vendas, produtos
+e preços, CRM, equipe, Arena, conteúdo do site e assistência. Os endereços de
+antes (`/admin`, `/crm`, `/arena/admin`, `/dashboard`, `/gerador`, `/funcoes`)
+continuam valendo e levam para dentro dele. Como funciona e como acrescentar
+uma área: **[docs/painel.md](docs/painel.md)**.
+
 ## Importação de Produtos
 
 No painel administrativo, use o formato de texto padrão (exemplo copiado de sites) contendo URL da imagem, Nome e Preço. O sistema extrairá automaticamente os dados.
@@ -54,8 +62,9 @@ A equipe atende por **um número só** — (19) 98751-0267 — com **um QR Code 
 - `www.balao.info/brendon` — página pessoal do vendedor; ele entra com a senha
   dele, no computador dele. Caixa compartilhada da loja, kanban pessoal,
   assinatura própria, filtro "Meus" e botão de assumir atendimento.
-- `www.balao.info/crm` — administração: conecta o QR Code, cadastra vendedor,
-  vê a caixa inteira. Protegida pela senha do painel (`PAINEL_PASSWORD`).
+- `www.balao.info/painel/crm` — administração: conecta o QR Code, cadastra
+  vendedor, vê a caixa inteira. É uma área do painel, protegida pela senha
+  dele (`PAINEL_PASSWORD`). O endereço antigo, `/crm`, leva para lá.
 - `www.balao.info/whatsapp` — painel simples (QR + chat), mesma senha do painel.
 
 O cadastro de vendedores fica em `lib/vendedores.ts` (site) e

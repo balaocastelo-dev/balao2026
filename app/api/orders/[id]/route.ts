@@ -2,8 +2,17 @@ import { NextResponse, NextRequest } from 'next/server';
 import { updateOrderStatus, deleteOrder, getOrder } from '@/lib/db';
 import { sendEmail } from '@/lib/mail';
 import { getOrderStatusUpdateTemplate } from '@/lib/mail-templates';
+import { isPainelAuthenticated } from '@/lib/painel-auth';
+
+// Mudar a situação de um pedido manda e-mail para o cliente, e apagar não tem
+// volta. As duas coisas só valem para quem entrou no painel (o proxy.ts barra
+// antes; aqui é a segunda conferência).
+function negado() {
+  return NextResponse.json({ error: 'Acesso negado. Entre no painel do Balão.' }, { status: 401 });
+}
 
 export async function PATCH(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  if (!(await isPainelAuthenticated())) return negado();
   const params = await props.params;
   try {
     const { status } = await request.json();
@@ -29,6 +38,7 @@ export async function PATCH(request: NextRequest, props: { params: Promise<{ id:
 }
 
 export async function DELETE(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  if (!(await isPainelAuthenticated())) return negado();
   const params = await props.params;
   try {
     await deleteOrder(params.id);

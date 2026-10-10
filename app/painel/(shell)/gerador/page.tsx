@@ -621,8 +621,8 @@ export default function GeradorPage() {
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
           <div className="font-extrabold tracking-tight">Gerador</div>
           <div className="flex items-center gap-2">
-            <Link href="/" className="text-sm font-bold text-gray-700 hover:text-[#d71920]">
-              Voltar para loja
+            <Link href="/painel/paginas" className="text-sm font-bold text-gray-700 hover:text-[#d71920]">
+              Ver as páginas publicadas
             </Link>
           </div>
         </div>

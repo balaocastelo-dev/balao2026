@@ -3,9 +3,28 @@
 import { revalidatePath } from 'next/cache';
 import { Vendedor, ArenaConfig, EventoMidia, Venda } from './types';
 import { turso, isTursoActive } from '@/lib/turso';
+import { isPainelAuthenticated } from '@/lib/painel-auth';
 
 function isOperational(): boolean {
   return isTursoActive();
+}
+
+/**
+ * Só quem entrou no painel mexe na Arena.
+ *
+ * A tela de administração ficava em /arena/admin, aberta na internet e sem
+ * senha: qualquer pessoa com o endereço lançava venda, apagava vendedor ou
+ * zerava a temporada. Hoje ela mora em /painel/arena, atrás da senha — mas
+ * trancar a tela não basta, porque estas ações podem ser chamadas direto, sem
+ * passar por tela nenhuma. Por isso cada uma confere a sessão aqui.
+ *
+ * As leituras (getVendedores, getConfig…) continuam livres: o telão da loja,
+ * em /arena, depende delas e não tem login.
+ */
+async function semSessaoDoPainel(acao: string): Promise<boolean> {
+  if (await isPainelAuthenticated()) return false;
+  console.warn(`[arena:${acao}] recusado: sem sessão do painel`);
+  return true;
 }
 
 function genId(): string {
@@ -16,6 +35,10 @@ function genId(): string {
 
 export async function getVendasRecentes(limit = 50): Promise<Venda[]> {
   if (!isOperational()) return [];
+  // Esta leitura é pública (o telão usa) e pode ser chamada de fora com o
+  // número que a pessoa quiser. O telão pede 10 e o painel pede 100; mais que
+  // isso seria despejar o histórico inteiro de vendas para qualquer um.
+  limit = Math.min(Math.max(1, Math.floor(Number(limit)) || 50), 100);
 
   try {
     const res = await turso.execute({
@@ -53,6 +76,7 @@ export async function getVendasRecentes(limit = 50): Promise<Venda[]> {
 }
 
 export async function removerVenda(vendaId: string) {
+  if (await semSessaoDoPainel('removerVenda')) return;
   if (!isOperational()) {
     console.warn('[arena:removerVenda] Banco não configurado');
     return;
@@ -100,7 +124,7 @@ export async function removerVenda(vendaId: string) {
       }
     }
 
-    revalidatePath('/arena/admin');
+    revalidatePath('/painel/arena');
     revalidatePath('/arena');
   } catch (e) {
     console.error('[arena:removerVenda] Erro:', (e as any).message);
@@ -132,6 +156,7 @@ export async function getVendedores(): Promise<Vendedor[]> {
 }
 
 export async function criarVendedor(formData: FormData) {
+  if (await semSessaoDoPainel('criarVendedor')) return;
   if (!isOperational()) return;
 
   const nome = formData.get('nome') as string;
@@ -149,7 +174,7 @@ export async function criarVendedor(formData: FormData) {
             VALUES (?, ?, ?, ?, ?, ?, ?)`,
       args: [id, nome, avatar_url || null, veiculo_emoji || '🚗', meta_valor, vendas_atual, criado_em],
     });
-    revalidatePath('/arena/admin');
+    revalidatePath('/painel/arena');
     revalidatePath('/arena');
   } catch (e) {
     console.error('[arena:criarVendedor] Erro:', (e as any).message);
@@ -157,6 +182,7 @@ export async function criarVendedor(formData: FormData) {
 }
 
 export async function atualizarVendedor(id: string, formData: FormData) {
+  if (await semSessaoDoPainel('atualizarVendedor')) return;
   if (!isOperational()) return;
 
   const nome = formData.get('nome') as string;
@@ -170,7 +196,7 @@ export async function atualizarVendedor(id: string, formData: FormData) {
       sql: `UPDATE arena_vendedores SET nome = ?, avatar_url = ?, veiculo_emoji = ?, meta_valor = ?, vendas_atual = ? WHERE id = ?`,
       args: [nome, avatar_url || null, veiculo_emoji || '🚗', meta_valor, vendas_atual, id],
     });
-    revalidatePath('/arena/admin');
+    revalidatePath('/painel/arena');
     revalidatePath('/arena');
   } catch (e) {
     console.error('[arena:atualizarVendedor] Erro:', (e as any).message);
@@ -178,6 +204,7 @@ export async function atualizarVendedor(id: string, formData: FormData) {
 }
 
 export async function removerVendedor(id: string) {
+  if (await semSessaoDoPainel('removerVendedor')) return;
   if (!isOperational()) return;
 
   try {
@@ -185,7 +212,7 @@ export async function removerVendedor(id: string) {
       sql: 'DELETE FROM arena_vendedores WHERE id = ?',
       args: [id],
     });
-    revalidatePath('/arena/admin');
+    revalidatePath('/painel/arena');
     revalidatePath('/arena');
   } catch (e) {
     console.error('[arena:removerVendedor] Erro:', (e as any).message);
@@ -193,6 +220,7 @@ export async function removerVendedor(id: string) {
 }
 
 export async function adicionarVenda(id: string, valor: number) {
+  if (await semSessaoDoPainel('adicionarVenda')) return;
   if (!isOperational()) return;
 
   try {
@@ -215,7 +243,7 @@ export async function adicionarVenda(id: string, valor: number) {
       args: [vendaId, id, Number(valor || 0), new Date().toISOString()],
     });
 
-    revalidatePath('/arena/admin');
+    revalidatePath('/painel/arena');
     revalidatePath('/arena');
   } catch (e) {
     console.error('[arena:adicionarVenda] Erro:', (e as any).message);
@@ -223,6 +251,7 @@ export async function adicionarVenda(id: string, valor: number) {
 }
 
 export async function resetarVendas() {
+  if (await semSessaoDoPainel('resetarVendas')) return;
   if (!isOperational()) return;
 
   try {
@@ -232,7 +261,7 @@ export async function resetarVendas() {
     await turso.execute(
       "UPDATE arena_vendedores SET vendas_atual = 0 WHERE id != '00000000-0000-0000-0000-000000000000'"
     );
-    revalidatePath('/arena/admin');
+    revalidatePath('/painel/arena');
     revalidatePath('/arena');
   } catch (e) {
     console.error('[arena:resetarVendas] Erro:', (e as any).message);
@@ -265,6 +294,7 @@ export async function getConfig(): Promise<ArenaConfig | null> {
 }
 
 export async function atualizarConfig(formData: FormData) {
+  if (await semSessaoDoPainel('atualizarConfig')) return;
   if (!isOperational()) return;
 
   const titulo = formData.get('titulo') as string;
@@ -284,7 +314,7 @@ export async function atualizarConfig(formData: FormData) {
         args: [titulo, ativo ? 1 : 0, agora],
       });
     }
-    revalidatePath('/arena/admin');
+    revalidatePath('/painel/arena');
     revalidatePath('/arena');
   } catch (e) {
     console.error('[arena:atualizarConfig] Erro:', (e as any).message);
@@ -316,6 +346,7 @@ export async function getEventosMidia(): Promise<EventoMidia[]> {
 }
 
 export async function criarEventoMidia(formData: FormData) {
+  if (await semSessaoDoPainel('criarEventoMidia')) return;
   if (!isOperational()) return;
 
   const evento_tipo = formData.get('evento_tipo') as string;
@@ -331,7 +362,7 @@ export async function criarEventoMidia(formData: FormData) {
             VALUES (?, ?, ?, ?, ?, 1, ?)`,
       args: [id, evento_tipo, gif_url || null, titulo || null, mensagem_template || null, created_at],
     });
-    revalidatePath('/arena/admin');
+    revalidatePath('/painel/arena');
     revalidatePath('/arena');
   } catch (e) {
     console.error('[arena:criarEventoMidia] Erro:', (e as any).message);
@@ -339,6 +370,7 @@ export async function criarEventoMidia(formData: FormData) {
 }
 
 export async function atualizarEventoMidia(id: string, formData: FormData) {
+  if (await semSessaoDoPainel('atualizarEventoMidia')) return;
   if (!isOperational()) return;
 
   const evento_tipo = formData.get('evento_tipo') as string;
@@ -352,7 +384,7 @@ export async function atualizarEventoMidia(id: string, formData: FormData) {
       sql: `UPDATE arena_eventos_midia SET evento_tipo = ?, gif_url = ?, titulo = ?, mensagem_template = ?, ativo = ? WHERE id = ?`,
       args: [evento_tipo, gif_url || null, titulo || null, mensagem_template || null, ativo ? 1 : 0, id],
     });
-    revalidatePath('/arena/admin');
+    revalidatePath('/painel/arena');
     revalidatePath('/arena');
   } catch (e) {
     console.error('[arena:atualizarEventoMidia] Erro:', (e as any).message);
@@ -360,6 +392,7 @@ export async function atualizarEventoMidia(id: string, formData: FormData) {
 }
 
 export async function removerEventoMidia(id: string) {
+  if (await semSessaoDoPainel('removerEventoMidia')) return;
   if (!isOperational()) return;
 
   try {
@@ -367,7 +400,7 @@ export async function removerEventoMidia(id: string) {
       sql: 'DELETE FROM arena_eventos_midia WHERE id = ?',
       args: [id],
     });
-    revalidatePath('/arena/admin');
+    revalidatePath('/painel/arena');
     revalidatePath('/arena');
   } catch (e) {
     console.error('[arena:removerEventoMidia] Erro:', (e as any).message);

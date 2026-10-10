@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { turso, isTursoActive } from '@/lib/turso';
+import { isPainelAuthenticated } from '@/lib/painel-auth';
 
 export async function GET() {
   try {
@@ -25,7 +26,14 @@ export async function GET() {
   }
 }
 
+// Criar competidor é administração da Arena: só com a sessão do painel, igual
+// às ações de app/arena/actions.ts. Ninguém no site chama este POST (o caixa
+// só usa a leitura acima); ele ficava aberto para quem tivesse o endereço.
 export async function POST(request: Request) {
+  if (!(await isPainelAuthenticated())) {
+    return NextResponse.json({ error: 'Acesso negado. Entre no painel do Balão.' }, { status: 401 });
+  }
+
   try {
     if (!isTursoActive()) {
       return NextResponse.json(

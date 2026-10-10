@@ -99,7 +99,7 @@ export default function AdminPaginasPage() {
   };
 
   return (
-    <div className="max-w-[1400px] mx-auto">
+    <div className="max-w-[1400px] mx-auto p-3 sm:p-5 lg:p-6">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#111111]">Minhas Páginas</h1>
@@ -108,7 +108,7 @@ export default function AdminPaginasPage() {
           </p>
         </div>
         <Link
-          href="/gerador"
+          href="/painel/gerador"
           className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-[#d71920] text-white font-extrabold text-sm hover:bg-[#b9151b]"
         >
           Criar nova página
@@ -172,7 +172,7 @@ export default function AdminPaginasPage() {
               <div className="p-5">
                 <div className="grid grid-cols-2 gap-2">
                   <Link
-                    href={`/gerador`}
+                    href="/painel/gerador"
                     className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl border border-black/10 bg-white font-extrabold text-sm hover:bg-black/5"
                   >
                     <Pencil size={16} />

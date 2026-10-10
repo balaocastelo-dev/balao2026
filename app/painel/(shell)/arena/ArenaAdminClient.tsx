@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Vendedor, ArenaConfig, VEICULOS_DISPONIVEIS, EventoMidia, TIPOS_EVENTOS, Venda } from '../types';
-import { criarVendedor, atualizarVendedor, removerVendedor, resetarVendas, adicionarVenda, criarEventoMidia, atualizarEventoMidia, removerEventoMidia, removerVenda } from '../actions';
-import { Trash2, Edit, Plus, Save, Trophy, Car, RotateCcw, Power, X, DollarSign, Users, Settings, Search, Image as ImageIcon, Video, History, AlertTriangle } from 'lucide-react';
+import { Vendedor, ArenaConfig, VEICULOS_DISPONIVEIS, EventoMidia, TIPOS_EVENTOS, Venda } from '@/app/arena/types';
+import { criarVendedor, atualizarVendedor, removerVendedor, resetarVendas, adicionarVenda, criarEventoMidia, atualizarEventoMidia, removerEventoMidia, removerVenda } from '@/app/arena/actions';
+import { Trash2, Edit, Plus, Save, Trophy, Car, RotateCcw, Power, X, DollarSign, Users, Settings, Search, Image as ImageIcon, Video, History, AlertTriangle, MonitorPlay } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AdminClient({ 
@@ -233,14 +233,24 @@ export default function AdminClient({
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
       {/* Navbar */}
-      <nav className="bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center sticky top-0 z-20 shadow-sm">
+      <nav className="bg-white border-b border-slate-200 px-4 sm:px-6 py-4 flex flex-wrap gap-3 justify-between items-center sticky top-0 z-20 shadow-sm">
         <div className="flex items-center gap-3">
           <div className="bg-blue-600 p-2 rounded-lg text-white">
             <Settings className="w-5 h-5" />
           </div>
-          <h1 className="text-xl font-bold text-slate-800">Arena Admin</h1>
+          <h1 className="text-xl font-bold text-slate-800">Arena de vendas</h1>
+          <a
+            href="/arena"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-2 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100"
+            title="Abre o telão da corrida em outra aba"
+          >
+            <MonitorPlay className="w-4 h-4" />
+            Ver o telão
+          </a>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
             <button 
                 onClick={() => setActiveTab('vendedores')}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === 'vendedores' ? 'bg-blue-100 text-blue-700' : 'text-slate-600 hover:bg-slate-100'}`}
@@ -260,7 +270,7 @@ export default function AdminClient({
                 Histórico
             </button>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
             <button 
                 onClick={handleReset}
                 className="flex items-center gap-2 px-4 py-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors text-sm font-medium"

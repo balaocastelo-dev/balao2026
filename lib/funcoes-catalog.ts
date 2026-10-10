@@ -181,6 +181,12 @@ export const FUNCOES_CATALOG: FuncaoCategory[] = [
         image: IMAGES.premium,
       },
       {
+        href: "/ia-local",
+        title: "IA Local",
+        description: "Maquinas para rodar inteligencia artificial no proprio computador, escolhidas pela memoria de video.",
+        image: IMAGES.premium,
+      },
+      {
         href: "/monteseupc",
         title: "Monte Seu PC",
         description: "Ajuda o cliente a escolher ou montar um computador personalizado.",
@@ -190,12 +196,6 @@ export const FUNCOES_CATALOG: FuncaoCategory[] = [
         href: "/montagempc",
         title: "Montagem de PC",
         description: "Pagina comercial para vender servico de montagem e configuracao.",
-        image: IMAGES.premium,
-      },
-      {
-        href: "/gerador",
-        title: "Gerador",
-        description: "Ferramenta especial do site para gerar configuracoes ou conteudos internos.",
         image: IMAGES.premium,
       },
       {
@@ -398,19 +398,13 @@ export const FUNCOES_CATALOG: FuncaoCategory[] = [
   },
   {
     slug: "operacao",
-    title: "Sistemas Internos",
-    description: "Paginas protegidas e operacionais usadas no dia a dia do negocio.",
+    title: "Telas de trabalho",
+    description: "O painel e as telas de balcao, que ficam em endereco proprio.",
     items: [
       {
         href: "/painel",
         title: "Painel",
-        description: "Painel protegido com metricas de vendas, visitas e conversoes.",
-        image: IMAGES.gestao,
-      },
-      {
-        href: "/dashboard",
-        title: "Dashboard",
-        description: "Dashboard executivo antigo que ainda serve como base visual e operacional.",
+        description: "Administracao da loja: vendas, produtos, CRM, equipe, Arena e conteudo do site.",
         image: IMAGES.gestao,
       },
       {
@@ -444,101 +438,10 @@ export const FUNCOES_CATALOG: FuncaoCategory[] = [
         image: IMAGES.gestao,
       },
       {
-        href: "/funcoes",
-        title: "Funcoes",
-        description: "Pagina protegida que centraliza os atalhos para todas as funcoes do site.",
-        image: IMAGES.gestao,
-      },
-      {
         href: "/whatsapp",
         title: "WhatsApp",
         description: "Painel protegido do WhatsApp com QR Code, chat, etiquetas, assinaturas, agendamentos e respostas rapidas.",
         image: IMAGES.contato,
-      },
-    ],
-  },
-  {
-    slug: "admin",
-    title: "Administracao",
-    description: "Paginas de gestao do catalogo, conteudo e operacao interna.",
-    items: [
-      {
-        href: "/admin",
-        title: "Admin Principal",
-        description: "Entrada principal do painel administrativo.",
-        image: IMAGES.gestao,
-      },
-      {
-        href: "/admin/produtos",
-        title: "Admin Produtos",
-        description: "Gestao dos produtos da loja.",
-        image: IMAGES.gestao,
-      },
-      {
-        href: "/admin/pedidos",
-        title: "Admin Pedidos",
-        description: "Gestao dos pedidos realizados no site.",
-        image: IMAGES.gestao,
-      },
-      {
-        href: "/admin/categorias",
-        title: "Admin Categorias",
-        description: "Gerencia categorias e organizacao do catalogo.",
-        image: IMAGES.gestao,
-      },
-      {
-        href: "/admin/carrossel",
-        title: "Admin Carrossel",
-        description: "Gerencia banners e imagens do carrossel da home.",
-        image: IMAGES.gestao,
-      },
-      {
-        href: "/admin/barra",
-        title: "Admin Barra",
-        description: "Gerencia a barra superior e avisos do site.",
-        image: IMAGES.gestao,
-      },
-      {
-        href: "/admin/cupons",
-        title: "Admin Cupons",
-        description: "Gerencia cupons promocionais e regras de desconto.",
-        image: IMAGES.gestao,
-      },
-      {
-        href: "/admin/home-blocks",
-        title: "Admin Home Blocks",
-        description: "Edita os blocos de conteudo da pagina inicial.",
-        image: IMAGES.gestao,
-      },
-      {
-        href: "/admin/paginas",
-        title: "Admin Paginas",
-        description: "Gerencia paginas especiais e vitrines dinamicas.",
-        image: IMAGES.gestao,
-      },
-      {
-        href: "/admin/importacao",
-        title: "Admin Importacao",
-        description: "Ferramenta para importar dados, produtos ou estrutura.",
-        image: IMAGES.gestao,
-      },
-      {
-        href: "/admin/ai-settings",
-        title: "Admin AI Settings",
-        description: "Configura automacoes e recursos de inteligencia artificial.",
-        image: IMAGES.gestao,
-      },
-      {
-        href: "/admin/test-migration",
-        title: "Admin Test Migration",
-        description: "Pagina tecnica para testar migracoes e ajustes internos.",
-        image: IMAGES.gestao,
-      },
-      {
-        href: "/arena/admin",
-        title: "Arena Admin",
-        description: "Administracao da area Arena e seus recursos internos.",
-        image: IMAGES.gestao,
       },
     ],
   },

@@ -94,7 +94,7 @@ export default function Header() {
     setLogoClicks(newClicks);
     if (newClicks >= 5) {
       event.preventDefault();
-      router.push("/admin");
+      router.push("/painel");
       setLogoClicks(0);
     }
   };

@@ -83,7 +83,7 @@ export default function Catalogo() {
         }),
       });
       if (r.status === 401) {
-        throw new Error("Sua sessão do painel expirou. Entre de novo em /crm e tente outra vez.");
+        throw new Error("Sua sessão do painel expirou. Entre de novo em /painel e tente outra vez.");
       }
       if (!r.ok) throw new Error(`O site respondeu ${r.status}`);
       setAviso(`"${editando.name}" atualizado.`);
