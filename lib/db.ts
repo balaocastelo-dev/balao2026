@@ -260,6 +260,22 @@ export async function buscarProdutosPorTermos(termos: string[], limite = 1500): 
   return res.rows.map((r) => mapTursoProduct(r as Row));
 }
 
+// Desktops e notebooks para as páginas /premium e /ia-local. Só as colunas
+// que a vitrine desenha: são quase três mil linhas, e descrição, ficha e lista
+// de fotos de cada uma não servem para nada ali. Erro de banco NÃO é engolido
+// de propósito — quem chama cai na cópia do catálogo em vez de mostrar a
+// página vazia.
+export async function getComputadoresDaVitrine(): Promise<Product[]> {
+  if (!isTursoActive()) return [];
+  const res = await turso.execute({
+    sql: `SELECT id, name, price, image, category, slug, brand, installment, price_card, availability
+          FROM products
+          WHERE category = ? OR category LIKE ? OR category = ? OR category LIKE ?`,
+    args: ['Computadores/PC', 'Computadores/PC/%', 'Computadores/Notebooks', 'Computadores/Notebooks/%'],
+  });
+  return res.rows.map((r) => mapTursoProduct(r as Row));
+}
+
 export async function getProductByIdentifier(identifier: string): Promise<Product | null> {
   if (!isTursoActive()) return null;
 

@@ -86,6 +86,7 @@ export default function Footer() {
               <li><Link href="/pcgamer" className="hover:text-[#E60012] transition-colors">Computadores Gamer</Link></li>
               <li><Link href="/notebooks" className="hover:text-[#E60012] transition-colors">Notebooks</Link></li>
               <li><Link href="/premium" className="hover:text-[#E60012] transition-colors">Premium</Link></li>
+              <li><Link href="/ia-local" className="hover:text-[#E60012] transition-colors">IA Local</Link></li>
               <li><Link href="/promocao" className="hover:text-[#E60012] transition-colors">Promoções</Link></li>
               <li><Link href="/seminovos" className="hover:text-[#E60012] transition-colors">Seminovos</Link></li>
             </ul>

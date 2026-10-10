@@ -181,6 +181,12 @@ export const FUNCOES_CATALOG: FuncaoCategory[] = [
         image: IMAGES.premium,
       },
       {
+        href: "/ia-local",
+        title: "IA Local",
+        description: "Maquinas para rodar inteligencia artificial no proprio computador, escolhidas pela memoria de video.",
+        image: IMAGES.premium,
+      },
+      {
         href: "/monteseupc",
         title: "Monte Seu PC",
         description: "Ajuda o cliente a escolher ou montar um computador personalizado.",

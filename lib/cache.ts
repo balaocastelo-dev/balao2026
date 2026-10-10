@@ -10,6 +10,7 @@ import {
   getProductsByCategoryFullPath,
   searchProductsByKeywords,
   buscarProdutosPorTermos,
+  getComputadoresDaVitrine,
 } from "./db";
 import { listVitrinePagesPublic } from "./vitrine/db";
 import {
@@ -25,6 +26,7 @@ import {
   lerBannersDoEspelho,
 } from "./catalogo-espelho";
 import { casaComTermos } from "./catalogo/filtros";
+import { montarVitrine, RAIZ_DESKTOPS, RAIZ_NOTEBOOKS, type VitrinePremium } from "./catalogo/vitrine-premium";
 import type { Product } from "./utils";
 
 const listaVazia = (itens: unknown[]) => !Array.isArray(itens) || itens.length === 0;
@@ -200,6 +202,32 @@ export function getCachedBuscaCompleta(termos: string[], limite = 1500) {
     { revalidate: 120, tags: [TAG_PRODUTOS] }
   )();
 }
+
+/**
+ * Seleção das páginas /premium e /ia-local: os computadores mais caros da loja
+ * e as máquinas que atendem ao critério de IA local.
+ *
+ * As duas páginas dividem esta mesma leitura — uma consulta ao banco a cada
+ * cinco minutos, no máximo, por causa do teto de 500 conexões por hora. O que
+ * fica guardado é a seleção pronta (uns duzentos itens enxutos), não os quase
+ * três mil computadores do catálogo: o cache do Next recusa entrada com mais
+ * de 2 MB.
+ */
+export const getCachedVitrinePremium = unstable_cache(
+  async (): Promise<VitrinePremium> => {
+    const computadores = await comEspelho<Product[]>(
+      () => getComputadoresDaVitrine(),
+      (produtos) => [
+        ...espelhoPorCaminhoDeCategoria(produtos, RAIZ_DESKTOPS),
+        ...espelhoPorCaminhoDeCategoria(produtos, RAIZ_NOTEBOOKS),
+      ],
+      listaVazia
+    );
+    return montarVitrine(computadores);
+  },
+  ["vitrine-premium-v1"],
+  { revalidate: 300, tags: [TAG_PRODUTOS] }
+);
 
 export const TAG_CATEGORIAS = "categories";
 
