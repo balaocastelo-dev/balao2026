@@ -10,6 +10,8 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const password = String(body?.password || "");
+    // "Manter conectado": 30 dias em vez de 12 horas, por escolha de quem entra.
+    const lembrar = body?.lembrar === true;
 
     if (!isPainelPasswordValid(password)) {
       return NextResponse.json({ success: false, error: "Senha invalida" }, { status: 401 });
@@ -21,7 +23,7 @@ export async function POST(request: Request) {
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      maxAge: 60 * 60 * 12,
+      maxAge: lembrar ? 60 * 60 * 24 * 30 : 60 * 60 * 12,
     });
 
     return NextResponse.json({ success: true });

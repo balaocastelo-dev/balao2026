@@ -19,10 +19,9 @@
 import { readFileSync, writeFileSync, existsSync } from "fs";
 import path from "path";
 import { buscarFotoNaAmericanas, buscarFotoNaKabum, buscarFotoNaKalunga, NOTA_MINIMA, semelhanca, termoCurto } from "../lib/precos/fotos";
-import { marcaDoTechsupri } from "../lib/precos/techsupri";
+import { marcaDoTechsupri, produtosDaCaptura } from "../lib/precos/techsupri";
 import type { ProdutoCapturado } from "../lib/precos/techsupri";
 
-const SUFIXO_KYTE = "-X5mQX";
 const RAIZ = path.join(__dirname, "..");
 const ARQ_FOTOS = path.join(RAIZ, "data", "techsupri-fotos.json");
 const ARQ_SAIDA = path.join(RAIZ, "data", "techsupri-catalogo.json");
@@ -32,24 +31,7 @@ type Foto =
   | { semFoto: true; tentadoEm: string; kalunga?: boolean; curto?: boolean; americanas?: boolean };
 
 function lerCaptura(arquivo: string): ProdutoCapturado[] {
-  return readFileSync(arquivo, "utf8")
-    .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean)
-    .map((linha) => {
-      const [id, nome, preco, promo, categoria, indisponivel] = linha.split("|");
-      const kyteId = `${id}${SUFIXO_KYTE}`;
-      return {
-        id: kyteId,
-        name: nome,
-        salePrice: Number(preco) || 0,
-        salePromotionalPrice: Number(promo) || null,
-        category: { name: (categoria || "").trim() || null } as { name?: string },
-        active: indisponivel !== "X",
-        showOnCatalog: true,
-        url: `https://techsupri.kyte.site/pt-BR/p/produto/${kyteId}`,
-      };
-    });
+  return produtosDaCaptura(readFileSync(arquivo, "utf8"));
 }
 
 const dormir = (ms: number) => new Promise((r) => setTimeout(r, ms));

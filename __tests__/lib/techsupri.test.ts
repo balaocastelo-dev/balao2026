@@ -8,6 +8,7 @@ import {
   paraItemTechsupri,
   precoDoKyte,
   produtoDaPaginaKyte,
+  produtosDaCaptura,
 } from "@/lib/precos/techsupri";
 import { montarProduto, type RegrasDaFonte } from "@/lib/precos/produto";
 import { semelhanca, modelosDoNome, termoDeBusca } from "@/lib/precos/fotos";
@@ -171,5 +172,15 @@ describe("foto: com fio x sem fio", () => {
   it("não troca um pelo outro", () => {
     expect(semelhanca("Controle Ps2 7&Z Com Fio", "Controle Ps2 Joystick Sem Fio Analógico")).toBe(0);
     expect(semelhanca("Headset com fio Logitech H390", "Headset Logitech H390, USB")).toBeGreaterThan(0);
+  });
+});
+
+
+describe("captura em texto", () => {
+  it("lê as linhas do navegador e ignora lixo", () => {
+    const p = produtosDaCaptura("1640857761165|Duplicador HDMI|5||Informática/Acessórios|\nlixo\n1640808671408|Fone JBL|55|49|JBL|X\n");
+    expect(p).toHaveLength(2);
+    expect(p[0]).toMatchObject({ id: "1640857761165-X5mQX", name: "Duplicador HDMI", salePrice: 5, active: true });
+    expect(p[1]).toMatchObject({ salePromotionalPrice: 49, active: false, category: { name: "JBL" } });
   });
 });
