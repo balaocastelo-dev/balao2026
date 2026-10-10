@@ -24,6 +24,7 @@ export default function PainelLoginForm({
   submitLabel = "Entrar no painel",
 }: PainelLoginFormProps) {
   const [password, setPassword] = useState("");
+  const [lembrar, setLembrar] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -38,7 +39,7 @@ export default function PainelLoginForm({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ password, lembrar }),
       });
 
       const data = (await response.json()) as { success?: boolean; error?: string };
@@ -92,6 +93,23 @@ export default function PainelLoginForm({
             required
           />
         </div>
+
+        <label className="flex items-start gap-2 text-sm text-gray-700">
+          <input
+            id="painel-lembrar"
+            type="checkbox"
+            checked={lembrar}
+            onChange={(event) => setLembrar(event.target.checked)}
+            className="mt-0.5"
+          />
+          <span>
+            Manter conectado neste computador por 30 dias
+            <span className="block text-xs text-gray-500">
+              Necessário para a atualização automática da TechSupri, que roda às 6h pelo seu navegador. Não marque em
+              computador de uso público.
+            </span>
+          </span>
+        </label>
 
         {error ? (
           <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">

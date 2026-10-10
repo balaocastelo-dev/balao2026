@@ -353,3 +353,35 @@ export function produtoDaPaginaKyte(html: string): ProdutoKyte | null {
   }
   return null;
 }
+
+// ---------- captura em texto ----------
+
+const SUFIXO_KYTE = "-X5mQX";
+
+/**
+ * Lê a captura feita pelo navegador (scripts/techsupri-captura-navegador.js),
+ * uma linha por produto:
+ *   <id sem -X5mQX>|<nome>|<preço>|<preço promocional>|<categoria kyte>|<X se indisponível>
+ */
+export function produtosDaCaptura(texto: string): ProdutoCapturado[] {
+  return String(texto || "")
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .map((linha): ProdutoCapturado | null => {
+      const [id, nome, preco, promo, categoria, indisponivel] = linha.split("|");
+      if (!/^\d{10,16}$/.test(String(id || "").trim()) || !String(nome || "").trim()) return null;
+      const kyteId = `${id.trim()}${SUFIXO_KYTE}`;
+      return {
+        id: kyteId,
+        name: nome.trim(),
+        salePrice: Number(preco) || 0,
+        salePromotionalPrice: Number(promo) || null,
+        category: { name: (categoria || "").trim() || undefined },
+        active: (indisponivel || "").trim() !== "X",
+        showOnCatalog: true,
+        url: `https://techsupri.kyte.site/pt-BR/p/produto/${kyteId}`,
+      };
+    })
+    .filter((p): p is ProdutoCapturado => !!p);
+}

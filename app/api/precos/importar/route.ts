@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { readFile } from "fs/promises";
 import path from "path";
 import { fonteDaTechsupri, importarTechsupri } from "@/lib/precos/importacao";
-import type { ProdutoCapturado } from "@/lib/precos/techsupri";
+import { produtosDaCaptura, type ProdutoCapturado } from "@/lib/precos/techsupri";
 import { falha } from "@/lib/precos/resposta";
 
 export const dynamic = "force-dynamic";
@@ -26,7 +26,8 @@ export async function GET() {
  * { "fornecedor": "techsupri", "arquivo": true }
  *    usa a captura que foi junto com o deploy (data/techsupri-catalogo.json),
  *    numa passada só.
- * { "fornecedor": "techsupri", "produtos": [...], "inicio"?: "...", "final"?: true }
+ * { "fornecedor": "techsupri", "produtos": [...] | "linhas": "id|nome|preço|promo|categoria|X\n...",
+ *   "inicio"?: "...", "final"?: true }
  *    lote vindo do navegador. O primeiro lote devolve `inicio`; os seguintes
  *    repetem esse valor e o último manda `final: true`.
  */
@@ -45,11 +46,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true, capturadoEm: carga.capturadoEm || null, resultado });
     }
 
-    const produtos = Array.isArray(corpo.produtos) ? (corpo.produtos as ProdutoCapturado[]) : [];
+    // `linhas` é o texto da captura do navegador (o mesmo formato do script).
+    const produtos =
+      typeof corpo.linhas === "string"
+        ? produtosDaCaptura(corpo.linhas)
+        : Array.isArray(corpo.produtos)
+          ? (corpo.produtos as ProdutoCapturado[])
+          : [];
     if (produtos.length > 1000) {
       return NextResponse.json({ ok: false, erro: "Mande no máximo 1000 produtos por lote." }, { status: 400 });
     }
-    const resultado = await importarTechsupri(produtos, { inicio: corpo.inicio || null, final: corpo.final === true });
+    const resultado = await importarTechsupri(produtos, {
+      inicio: corpo.inicio || null,
+      final: corpo.final === true,
+      limiteMs: Date.now() + 80_000,
+    });
     return NextResponse.json({ ok: true, resultado });
   } catch (erro) {
     return falha(erro);
