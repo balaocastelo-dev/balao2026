@@ -33,7 +33,7 @@ export function palavrasDoNome(nome: string): string[] {
     .filter((p) => p.length >= 2 && !VAZIAS.has(p));
 }
 
-const UNIDADE = /^\d+(gb|tb|mb|w|v|mah|m|cm|mm|hz|ml|g|kg|pol|x|un|pcs)$/;
+const UNIDADE = /^(\d+(\.\d+)?(gb|tb|mb|w|v|mah|m|cm|mm|hz|ml|g|kg|pol|x|un|pcs|k|mbps|gbps|dpi)|\d{1,2}(\.\d+)?a)$/;
 
 /**
  * Pedaços de modelo: têm letra e número ("ax12", "cf258a") ou são números de
@@ -46,7 +46,7 @@ export function modelosDoNome(nome: string): string[] {
   for (const p of palavras) {
     const temNumero = /\d/.test(p);
     const temLetra = /[a-z]/.test(p);
-    if (temNumero && temLetra && p.length >= 3 && !UNIDADE.test(p)) pedacos.add(p);
+    if (temNumero && temLetra && (p.length >= 3 || /^[a-z]\d$/.test(p)) && !UNIDADE.test(p)) pedacos.add(p);
     else if (temNumero && !temLetra && /^\d{3,}$/.test(p)) pedacos.add(p);
   }
   const soltas = semAcento(nome).split(/[^a-z0-9]+/).filter(Boolean);
@@ -79,11 +79,13 @@ const CORES: Record<string, string> = {
   rosa: "rosa", pink: "rosa", roxo: "roxo", roxa: "roxo", purple: "roxo", lilas: "roxo",
   verde: "verde", green: "verde", cinza: "cinza", grafite: "cinza", gray: "cinza", grey: "cinza",
   dourado: "dourado", gold: "dourado", prata: "prata", silver: "prata", laranja: "laranja", orange: "laranja",
-  camuflado: "camuflado", camuflada: "camuflado",
+  camuflado: "camuflado", camuflada: "camuflado", bege: "bege", nude: "bege", marrom: "marrom",
 };
 
 /** Palavras que, no começo do nome achado, dizem que é OUTRA coisa (acessório do produto). */
-const OUTRO_TIPO = new Set(["carregador", "kit", "capa", "case", "suporte", "pelicula", "base", "dock", "refil", "bateria"]);
+const OUTRO_TIPO = new Set([
+  "carregador", "kit", "capa", "case", "suporte", "pelicula", "base", "dock", "refil", "bateria", "console", "adaptador", "volante",
+]);
 
 function coresDoNome(nome: string): Set<string> {
   const saida = new Set<string>();
@@ -107,6 +109,16 @@ export function semelhanca(doFornecedor: string, achado: string): number {
   }
   const primeiraAchada = semAcento(achado).split(/[^a-z0-9]+/).filter(Boolean)[0] || "";
   if (OUTRO_TIPO.has(primeiraAchada) && !semAcento(doFornecedor).split(/[^a-z0-9]+/).includes(primeiraAchada)) return 0;
+  // Com fio x sem fio: a foto de um não serve para o outro.
+  const conexao = (t: string) => {
+    const n = " " + semAcento(t).replace(/[^a-z0-9]+/g, " ") + " ";
+    if (/ sem fio | wireless | bluetooth | s fio /.test(n)) return "sem";
+    if (/ com fio | c fio /.test(n)) return "com";
+    return null;
+  };
+  const conexaoA = conexao(doFornecedor);
+  const conexaoB = conexao(achado);
+  if (conexaoA && conexaoB && conexaoA !== conexaoB) return 0;
   const coresA = coresDoNome(doFornecedor);
   const coresB = coresDoNome(achado);
   if (coresA.size && coresB.size && ![...coresA].some((c) => coresB.has(c))) return 0;
@@ -160,8 +172,16 @@ const CABECALHOS = {
   "accept-language": "pt-BR,pt;q=0.9",
 };
 
-export async function buscarFotoNaKabum(nome: string, buscar: typeof fetch = fetch): Promise<ResultadoDaBusca> {
-  const termo = termoDeBusca(nome);
+/** Termo curto: marca + modelos ("onikuma-k8"). Segunda tentativa quando o nome inteiro não acha nada. */
+export function termoCurto(nome: string, marca: string | null): string | null {
+  const modelos = modelosDoNome(nome).filter((m) => !/^\d+$/.test(m) || m.length >= 3);
+  if (modelos.length === 0) return null;
+  const partes = [marca ? semAcento(marca).replace(/[^a-z0-9]+/g, "-") : "", ...modelos.slice(0, 2)].filter(Boolean);
+  return partes.join("-");
+}
+
+export async function buscarFotoNaKabum(nome: string, buscar: typeof fetch = fetch, termoPronto?: string): Promise<ResultadoDaBusca> {
+  const termo = termoPronto || termoDeBusca(nome);
   if (!termo) return { ok: true, achada: null };
   try {
     const resposta = await buscar(`https://www.kabum.com.br/busca/${encodeURIComponent(termo)}`, {
@@ -184,6 +204,125 @@ export async function buscarFotoNaKabum(nome: string, buscar: typeof fetch = fet
       if (nota >= NOTA_MINIMA && (!melhor || nota > melhor.nota)) {
         melhor = { foto: item.foto, fotos: item.fotos.length ? item.fotos : [item.foto], nome: item.nome, codigo: item.codigo, nota };
       }
+    }
+    return { ok: true, achada: melhor };
+  } catch (erro) {
+    return { ok: false, motivo: "rede", detalhe: String((erro as Error)?.message || erro) };
+  }
+}
+
+// ---------- Kalunga (segunda tentativa) ----------
+//
+// Quando a KaBuM! não tem o produto, a Kalunga costuma ter (cartucho, toner,
+// cabo, pilha, papelaria). A busca `/busca/1?q=` é permitida pelo robots.txt
+// deles. Mesmas regras: uma por vez, com pausa; 403/429 encerra.
+
+/** Lê os produtos (nome e foto) do HTML da busca da Kalunga. Separado para teste. */
+export function produtosDaBuscaKalunga(html: string): { nome: string; foto: string; codigo: string }[] {
+  const saida: { nome: string; foto: string; codigo: string }[] = [];
+  const re = /<a class="blocoproduto__link[^"]*" href="\/prod\/[^"]*\/(\d+)" title="([^"]+)"/g;
+  for (const m of String(html || "").matchAll(re)) {
+    const codigo = m[1];
+    const nome = m[2].replace(/&quot;/g, '"').replace(/&amp;/g, "&").replace(/&#39;/g, "'");
+    if (saida.some((p) => p.codigo === codigo)) continue;
+    saida.push({ codigo, nome, foto: `https://img.kalunga.com.br/fotosdeprodutos/${codigo}.webp` });
+  }
+  return saida;
+}
+
+export async function buscarFotoNaKalunga(nome: string, buscar: typeof fetch = fetch): Promise<ResultadoDaBusca> {
+  const termo = termoDeBusca(nome).replace(/-/g, " ");
+  if (!termo) return { ok: true, achada: null };
+  try {
+    const resposta = await buscar(`https://www.kalunga.com.br/busca/1?q=${encodeURIComponent(termo)}`, {
+      headers: CABECALHOS,
+      redirect: "follow",
+      cache: "no-store",
+      signal: AbortSignal.timeout(12_000),
+    });
+    if (resposta.status === 403 || resposta.status === 429) {
+      return { ok: false, motivo: "bloqueado", detalhe: `a Kalunga respondeu ${resposta.status}` };
+    }
+    if (!resposta.ok) return { ok: true, achada: null };
+    let melhor: FotoAchada | null = null;
+    for (const item of produtosDaBuscaKalunga(await resposta.text()).slice(0, 30)) {
+      const nota = semelhanca(nome, item.nome);
+      if (nota >= NOTA_MINIMA && (!melhor || nota > melhor.nota)) {
+        melhor = { foto: item.foto, fotos: [item.foto], nome: item.nome, codigo: item.codigo, nota };
+      }
+    }
+    return { ok: true, achada: melhor };
+  } catch (erro) {
+    return { ok: false, motivo: "rede", detalhe: String((erro as Error)?.message || erro) };
+  }
+}
+
+/** KaBuM! primeiro; se não achar, Americanas. */
+export async function buscarFoto(nome: string, buscar: typeof fetch = fetch): Promise<ResultadoDaBusca> {
+  const kabum = await buscarFotoNaKabum(nome, buscar);
+  if (!kabum.ok || kabum.achada) return kabum;
+  return buscarFotoNaAmericanas(nome, buscar);
+}
+
+// ---------- Americanas (terceira tentativa) ----------
+//
+// A Americanas tem muito acessório de marketplace que a KaBuM! não vende
+// (controle genérico, cabo, suporte). A busca pública deles (VTEX) devolve
+// JSON, e o robots.txt libera o site inteiro, inclusive para agentes.
+
+interface ProdutoAmericanas {
+  productId?: string;
+  productName?: string;
+  items?: { images?: { imageUrl?: string }[] }[];
+}
+
+export function produtosDaBuscaAmericanas(json: unknown): { nome: string; foto: string; fotos: string[]; codigo: string }[] {
+  const lista = (json as { products?: ProdutoAmericanas[] })?.products;
+  if (!Array.isArray(lista)) return [];
+  const saida: { nome: string; foto: string; fotos: string[]; codigo: string }[] = [];
+  for (const p of lista) {
+    const fotos = (p.items || [])
+      .flatMap((i) => i.images || [])
+      .map((i) => String(i.imageUrl || ""))
+      .filter((u) => /^https:\/\/[a-z0-9.-]+\.vtexassets\.com\//.test(u))
+      .slice(0, 6);
+    if (!p.productName || fotos.length === 0) continue;
+    saida.push({ nome: String(p.productName), foto: fotos[0], fotos, codigo: String(p.productId || "") });
+  }
+  return saida;
+}
+
+export async function buscarFotoNaAmericanas(
+  nome: string,
+  buscar: typeof fetch = fetch,
+  termos?: string[]
+): Promise<ResultadoDaBusca> {
+  // A busca deles exige todas as palavras: termo comprido não acha nada.
+  // Tenta do mais específico ao mais solto.
+  const palavras = termoDeBusca(nome).split("-").filter(Boolean);
+  const tentativas = [...new Set([...(termos || []), palavras.slice(0, 5).join(" "), palavras.slice(0, 3).join(" ")])]
+    .map((t) => t.replace(/-/g, " ").trim())
+    .filter(Boolean);
+  let melhor: FotoAchada | null = null;
+  try {
+    for (const termo of tentativas) {
+      const url = `https://www.americanas.com.br/api/io/_v/api/intelligent-search/product_search/?query=${encodeURIComponent(termo)}&count=20&page=1&locale=pt-BR`;
+      const resposta = await buscar(url, {
+        headers: { ...CABECALHOS, accept: "application/json" },
+        cache: "no-store",
+        signal: AbortSignal.timeout(12_000),
+      });
+      if (resposta.status === 403 || resposta.status === 429) {
+        return { ok: false, motivo: "bloqueado", detalhe: `a Americanas respondeu ${resposta.status}` };
+      }
+      if (!resposta.ok) continue;
+      for (const item of produtosDaBuscaAmericanas(await resposta.json())) {
+        const nota = semelhanca(nome, item.nome);
+        if (nota >= NOTA_MINIMA && (!melhor || nota > melhor.nota)) {
+          melhor = { foto: item.foto, fotos: item.fotos, nome: item.nome, codigo: item.codigo, nota };
+        }
+      }
+      if (melhor) break;
     }
     return { ok: true, achada: melhor };
   } catch (erro) {

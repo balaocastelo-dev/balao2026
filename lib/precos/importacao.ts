@@ -23,7 +23,7 @@ import {
 import { REGRA_TECHSUPRI } from "./margem";
 import { paraItemTechsupri, SITE_TECHSUPRI, URL_TECHSUPRI, type ProdutoCapturado } from "./techsupri";
 import type { ItemDeOrigem } from "./kabum";
-import { buscarFotoNaKabum } from "./fotos";
+import { buscarFoto } from "./fotos";
 
 const LOTE = 150;
 
@@ -51,7 +51,7 @@ async function completarFotos(itens: ItemDeOrigem[], limiteMs: number): Promise<
   for (const item of semFoto) {
     if (comFotoNoSite.has(item.codigo) || !item.disponivel) continue;
     if (Date.now() + 15_000 > limiteMs) break;
-    const busca = await buscarFotoNaKabum(item.nome);
+    const busca = await buscarFoto(item.nome);
     if (!busca.ok) {
       if (busca.motivo === "bloqueado") break;
       continue;
@@ -111,7 +111,7 @@ export interface ResultadoDaImportacao {
  */
 export async function importarTechsupri(
   produtos: ProdutoCapturado[],
-  opcoes: { inicio?: string | null; final?: boolean; limiteMs?: number } = {}
+  opcoes: { inicio?: string | null; final?: boolean; limiteMs?: number; buscarFotos?: boolean } = {}
 ): Promise<ResultadoDaImportacao> {
   const fonte = await fonteDaTechsupri();
   const inicio = opcoes.inicio && !Number.isNaN(Date.parse(opcoes.inicio)) ? opcoes.inicio : new Date().toISOString();
@@ -123,7 +123,9 @@ export async function importarTechsupri(
     removidos: 0, suspeita: false, concluida: false, fotosAchadas: 0,
   };
 
-  saida.fotosAchadas = await completarFotos(itens, opcoes.limiteMs ?? Date.now() + 60_000);
+  if (opcoes.buscarFotos !== false) {
+    saida.fotosAchadas = await completarFotos(itens, opcoes.limiteMs ?? Date.now() + 60_000);
+  }
 
   const agora = new Date().toISOString();
   for (let i = 0; i < itens.length; i += LOTE) {

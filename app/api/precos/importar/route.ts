@@ -40,7 +40,8 @@ export async function POST(request: Request) {
     if (corpo.arquivo === true) {
       const arquivo = path.join(process.cwd(), "data", "techsupri-catalogo.json");
       const carga = JSON.parse(await readFile(arquivo, "utf8")) as { capturadoEm?: string; produtos: ProdutoCapturado[] };
-      const resultado = await importarTechsupri(carga.produtos || [], { final: true });
+      // As fotos da carga já foram procuradas ao montar o arquivo.
+      const resultado = await importarTechsupri(carga.produtos || [], { final: true, buscarFotos: false });
       return NextResponse.json({ ok: true, capturadoEm: carga.capturadoEm || null, resultado });
     }
 

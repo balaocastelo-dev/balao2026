@@ -166,3 +166,10 @@ describe("foto pela KaBuM!", () => {
     expect(termoDeBusca("Caixa de Som JBL Flip 6")).toBe("caixa-som-jbl-flip-6");
   });
 });
+
+describe("foto: com fio x sem fio", () => {
+  it("não troca um pelo outro", () => {
+    expect(semelhanca("Controle Ps2 7&Z Com Fio", "Controle Ps2 Joystick Sem Fio Analógico")).toBe(0);
+    expect(semelhanca("Headset com fio Logitech H390", "Headset Logitech H390, USB")).toBeGreaterThan(0);
+  });
+});
