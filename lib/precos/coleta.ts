@@ -76,6 +76,12 @@ export async function lerFonteAte(fonteId: string, limiteMs: number): Promise<Re
     mensagem: null,
   };
 
+  // Só a KaBuM! é lida pelo servidor. Fornecedor com proteção contra robôs
+  // (TechSupri, na Kyte) é atualizado por importação, pelo navegador da loja.
+  if (fonte.site !== "kabum") {
+    return { ...resumo, estado: "erro", mensagem: "Esta fonte é atualizada por importação, não pela leitura automática." };
+  }
+
   if (!(await travarFonte(fonte.id, 90))) {
     return { ...resumo, estado: "ocupada", mensagem: "Esta fonte já está sendo lida agora." };
   }
@@ -185,7 +191,7 @@ export async function lerFonteAte(fonteId: string, limiteMs: number): Promise<Re
 export async function rodarAgendado(orcamentoMs: number): Promise<ResumoDoPasso[]> {
   const limite = Date.now() + orcamentoMs;
   const fontes = (await listarFontes())
-    .filter((f) => estaVencida(f))
+    .filter((f) => f.site === "kabum" && estaVencida(f))
     .sort((a, b) => {
       // Passada pela metade vem antes; depois, a que está há mais tempo sem ler.
       if ((a.passo_pagina > 0) !== (b.passo_pagina > 0)) return a.passo_pagina > 0 ? -1 : 1;

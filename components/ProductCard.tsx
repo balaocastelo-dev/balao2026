@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ShoppingCart } from "lucide-react";
 import { getProductHref } from "@/lib/utils";
+import SeloProntaEntrega from "@/components/SeloProntaEntrega";
 
 export default function ProductCard({ product, variant = "grid" }: { product: Product, variant?: "grid" | "list" }) {
   const imageRef = useRef<HTMLDivElement>(null);
@@ -30,6 +31,7 @@ export default function ProductCard({ product, variant = "grid" }: { product: Pr
             ref={imageRef}
             className="relative w-full md:w-32 pt-[100%] md:pt-0 md:h-auto md:min-h-[8rem] overflow-hidden shrink-0 bg-[var(--site-panel-muted)]"
           >
+             <SeloProntaEntrega availability={product.availability} tamanho="pequeno" />
              <Image
                 src={product.image}
                 alt={product.name}
@@ -85,6 +87,7 @@ export default function ProductCard({ product, variant = "grid" }: { product: Pr
     <div className="site-surface-soft rounded-2xl shadow-lg hover:-translate-y-0.5 hover:border-[var(--site-accent-soft)] hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col h-full group">
       <Link href={productHref} className="flex-1">
         <div ref={imageRef} className="relative pt-[100%] overflow-hidden bg-[var(--site-panel-muted)]">
+             <SeloProntaEntrega availability={product.availability} />
              <Image
                 src={product.image}
                 alt={product.name}

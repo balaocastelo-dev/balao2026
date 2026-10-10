@@ -16,6 +16,7 @@ import { randomUUID } from "crypto";
 import { turso, isTursoActive } from "@/lib/turso";
 import { buildCategoryNodesFromPaths } from "@/lib/utils";
 import { calcularVenda, decidirPreco, normalizarMargem } from "./calculo";
+import { lerRegra, margemDoProduto, type RegraDeMargem } from "./margem";
 import type { ItemDeOrigem } from "./kabum";
 import { montarProduto, motivoDeRecusa, type ProdutoDeOrigem, type RegrasDaFonte } from "./produto";
 
@@ -107,6 +108,20 @@ async function criarEstrutura() {
     ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `);
 
+  // Colunas que chegaram depois da primeira versão da tabela.
+  const colunasDaFonte = await turso.execute(
+    "SELECT COLUMN_NAME AS nome FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'fontes_preco'"
+  );
+  const naFonte = new Set(colunasDaFonte.rows.map((r) => String((r as Linha).nome).toLowerCase()));
+  const novasDaFonte: Record<string, string> = {
+    regra_margem: "TEXT NULL",
+    pronta_entrega: "TINYINT NOT NULL DEFAULT 0",
+    fornecedor: "VARCHAR(120) NULL",
+  };
+  for (const [coluna, tipo] of Object.entries(novasDaFonte)) {
+    if (!naFonte.has(coluna)) await turso.execute(`ALTER TABLE fontes_preco ADD COLUMN ${coluna} ${tipo}`);
+  }
+
   const colunas = await turso.execute(
     "SELECT COLUMN_NAME AS nome FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'products'"
   );
@@ -155,6 +170,9 @@ function paraFonte(r: Linha): Fonte {
     preco_max: numOuNulo(r.preco_max),
     trilha: txtOuNulo(r.trilha),
     categoria_destino: txtOuNulo(r.categoria_destino),
+    regra_margem: lerRegra(r.regra_margem),
+    pronta_entrega: num(r.pronta_entrega) === 1,
+    fornecedor: txtOuNulo(r.fornecedor),
     ordem: num(r.ordem),
     passo_pagina: num(r.passo_pagina),
     passo_inicio: txtOuNulo(r.passo_inicio),
@@ -209,6 +227,9 @@ export interface DadosDaFonte {
   trilha?: string | null;
   categoria_destino?: string | null;
   ordem?: number;
+  regra_margem?: RegraDeMargem | null;
+  pronta_entrega?: boolean;
+  fornecedor?: string | null;
 }
 
 const limitarIntervalo = (v: unknown) => Math.min(24 * 60, Math.max(30, Math.round(num(v, 120))));
@@ -228,8 +249,9 @@ export async function criarFonte(dados: DadosDaFonte, id: string = randomUUID())
 
   await turso.execute({
     sql: `INSERT INTO fontes_preco
-            (id, nome, site, url, caminho, so_loja, margem, ativa, intervalo_min, preco_min, preco_max, trilha, categoria_destino, ordem, criada_em)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            (id, nome, site, url, caminho, so_loja, margem, ativa, intervalo_min, preco_min, preco_max, trilha, categoria_destino, ordem, criada_em,
+             regra_margem, pronta_entrega, fornecedor)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     args: [
       id,
       dados.nome.trim().slice(0, 190),
@@ -246,13 +268,19 @@ export async function criarFonte(dados: DadosDaFonte, id: string = randomUUID())
       txtOuNulo(dados.categoria_destino),
       ordem,
       agoraIso(),
+      dados.regra_margem ? JSON.stringify(dados.regra_margem) : null,
+      dados.pronta_entrega ? 1 : 0,
+      txtOuNulo(dados.fornecedor),
     ],
   });
   return (await buscarFonte(id))!;
 }
 
 export type AlteracaoDaFonte = Partial<
-  Pick<DadosDaFonte, "nome" | "so_loja" | "margem" | "ativa" | "intervalo_min" | "preco_min" | "preco_max" | "categoria_destino">
+  Pick<
+    DadosDaFonte,
+    "nome" | "so_loja" | "margem" | "ativa" | "intervalo_min" | "preco_min" | "preco_max" | "categoria_destino" | "regra_margem"
+  >
 >;
 
 export async function atualizarFonte(id: string, mudanca: AlteracaoDaFonte): Promise<Fonte | null> {
@@ -267,6 +295,10 @@ export async function atualizarFonte(id: string, mudanca: AlteracaoDaFonte): Pro
   if (mudanca.preco_min !== undefined) campos.preco_min = numOuNulo(mudanca.preco_min);
   if (mudanca.preco_max !== undefined) campos.preco_max = numOuNulo(mudanca.preco_max);
   if (mudanca.categoria_destino !== undefined) campos.categoria_destino = txtOuNulo(mudanca.categoria_destino);
+  if (mudanca.regra_margem !== undefined) {
+    const regra = lerRegra(mudanca.regra_margem);
+    campos.regra_margem = regra ? JSON.stringify(regra) : null;
+  }
 
   const chaves = Object.keys(campos);
   if (chaves.length > 0) {
@@ -333,7 +365,9 @@ const COLUNAS_DO_PRODUTO = [
 // e endereço (slug) ficam como estão: o que for ajustado à mão no painel de
 // produtos sobrevive, e o link do produto não muda. A foto só é trocada
 // enquanto ainda apontar para a fonte — depois de copiada para o servidor da
-// loja, não é mais sobrescrita.
+// loja, não é mais sobrescrita — e nunca por uma foto vazia.
+// (image_urls vem antes de image: o MySQL avalia o SET em ordem, e a condição
+// precisa ver a foto antiga.)
 const AO_REPETIR = `
   price = VALUES(price),
   price_card = VALUES(price_card),
@@ -341,8 +375,8 @@ const AO_REPETIR = `
   installment = VALUES(installment),
   availability = VALUES(availability),
   source_url = VALUES(source_url),
-  image = IF(image IS NULL OR image = '' OR image LIKE '%kabum.com.br%', VALUES(image), image),
-  image_urls = IF(image IS NULL OR image = '' OR image LIKE '%kabum.com.br%', VALUES(image_urls), image_urls),
+  image_urls = IF(VALUES(image) <> '' AND VALUES(image) NOT LIKE '%produto-sem-foto%' AND (image IS NULL OR image = '' OR image LIKE '%kabum.com.br%' OR image LIKE '%produto-sem-foto%'), VALUES(image_urls), image_urls),
+  image = IF(VALUES(image) <> '' AND VALUES(image) NOT LIKE '%produto-sem-foto%' AND (image IS NULL OR image = '' OR image LIKE '%kabum.com.br%' OR image LIKE '%produto-sem-foto%'), VALUES(image), image),
   cost = VALUES(cost),
   supplier = VALUES(supplier),
   fonte_id = VALUES(fonte_id),
@@ -441,7 +475,10 @@ export async function gravarPagina(fonte: Fonte, itens: ItemDeOrigem[], agora: s
           origem_pix: anterior,
           origem_cartao: cartaoAnterior,
           origem_parcelas: parcelas,
-          venda: calcularVenda({ pix: anterior, cartao: cartaoAnterior, parcelas }, fonte.margem),
+          venda: calcularVenda(
+            { pix: anterior, cartao: cartaoAnterior, parcelas },
+            margemDoProduto(fonte, { nome: item.nome, categoria: produto.category, preco: anterior })
+          ),
         };
         saida.retidos++;
       }
@@ -518,15 +555,16 @@ function sqlDeReprecificacao(linhas: { id: string; price: string; price_card: st
 export async function recalcularMargem(fonte: Fonte): Promise<number> {
   await garantirEstrutura();
   const res = await turso.execute({
-    sql: "SELECT id, origem_pix, origem_cartao, origem_parcelas FROM products WHERE fonte_id = ? AND origem_pix > 0",
+    sql: "SELECT id, name, category, origem_pix, origem_cartao, origem_parcelas FROM products WHERE fonte_id = ? AND origem_pix > 0",
     args: [fonte.id],
   });
 
   const linhas = res.rows.map((r) => {
     const l = r as Linha;
+    const margem = margemDoProduto(fonte, { nome: String(l.name ?? ""), categoria: String(l.category ?? ""), preco: num(l.origem_pix) });
     const venda = calcularVenda(
       { pix: num(l.origem_pix), cartao: num(l.origem_cartao) || num(l.origem_pix), parcelas: num(l.origem_parcelas) },
-      fonte.margem
+      margem
     );
     return { id: String(l.id), price: venda.price, price_card: venda.price_card, installment: venda.installment, discount_pix: venda.discount_pix };
   });
@@ -577,7 +615,7 @@ export async function aceitarRetidos(fonte: Fonte, ids?: string[]): Promise<numb
   await garantirEstrutura();
   const filtroIds = ids && ids.length ? ` AND id IN (${ids.map(() => "?").join(", ")})` : "";
   const res = await turso.execute({
-    sql: `SELECT id, retido_pix, retido_cartao, origem_parcelas FROM products WHERE fonte_id = ? AND retido_desde IS NOT NULL${filtroIds}`,
+    sql: `SELECT id, name, category, retido_pix, retido_cartao, origem_parcelas FROM products WHERE fonte_id = ? AND retido_desde IS NOT NULL${filtroIds}`,
     args: [fonte.id, ...(ids && ids.length ? ids : [])],
   });
   if (res.rows.length === 0) return 0;
@@ -586,7 +624,8 @@ export async function aceitarRetidos(fonte: Fonte, ids?: string[]): Promise<numb
     const l = r as Linha;
     const pix = num(l.retido_pix);
     const cartao = num(l.retido_cartao) || pix;
-    const venda = calcularVenda({ pix, cartao, parcelas: num(l.origem_parcelas) }, fonte.margem);
+    const margem = margemDoProduto(fonte, { nome: String(l.name ?? ""), categoria: String(l.category ?? ""), preco: pix });
+    const venda = calcularVenda({ pix, cartao, parcelas: num(l.origem_parcelas) }, margem);
     return {
       sql: `UPDATE products SET price = ?, price_card = ?, installment = ?, discount_pix = ?, cost = ?, origem_pix = ?, origem_cartao = ?,
               retido_pix = NULL, retido_cartao = NULL, retido_desde = NULL WHERE id = ?`,

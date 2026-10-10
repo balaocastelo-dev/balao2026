@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { AlertTriangle, CheckCircle, ExternalLink, Loader2, Percent, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { descreverRegra, type RegraDeMargem } from "@/lib/precos/margem";
 
 interface Fonte {
   id: string;
@@ -22,6 +23,9 @@ interface Fonte {
   ultimo_removidos: number | null;
   produtos?: number;
   retidos?: number;
+  site?: string;
+  regra_margem?: RegraDeMargem | null;
+  pronta_entrega?: boolean;
 }
 
 interface Situacao {
@@ -400,6 +404,7 @@ export default function PrecosPage() {
                 ? { texto: `Lendo (página ${f.passo_pagina}${f.passo_total_pag ? ` de ${f.passo_total_pag}` : ""})`, classe: "bg-blue-50 text-blue-800 border-blue-200" }
                 : ROTULO_DO_STATUS[f.ultimo_status || ""] || { texto: "Aguardando a primeira leitura", classe: "bg-gray-50 text-gray-700 border-gray-200" };
               const mexeu = String(f.margem) !== String(margens[f.id] ?? "").replace(",", ".");
+              const porImportacao = !!f.site && f.site !== "kabum";
               return (
                 <article key={f.id} className={`rounded-lg border p-4 ${f.ativa ? "border-gray-200" : "border-dashed border-gray-300 bg-gray-50"}`}>
                   <div className="flex flex-wrap items-start justify-between gap-3">
@@ -417,9 +422,24 @@ export default function PrecosPage() {
                         {f.preco_max != null ? ` · só até ${reais(f.preco_max)} na fonte` : ""}
                         {f.retidos ? ` · ${f.retidos} com queda retida` : ""}
                       </p>
+                      {f.pronta_entrega && (
+                        <p className="mt-1 text-xs font-semibold text-emerald-700">Produtos com a faixa PRONTA ENTREGA na foto.</p>
+                      )}
+                      {porImportacao && (
+                        <p className="mt-1 max-w-2xl text-xs text-gray-600">
+                          Este fornecedor bloqueia leitura automática por servidor. Os preços são atualizados por importação, feita pelo
+                          navegador da loja.
+                        </p>
+                      )}
                       {f.ultimo_erro && <p className="mt-1 text-xs text-red-700">{f.ultimo_erro}</p>}
                     </div>
 
+                    {f.regra_margem ? (
+                      <div className="max-w-xs rounded-md border border-gray-200 bg-gray-50 p-3 text-xs text-gray-700">
+                        <span className="mb-1 block font-semibold text-gray-600">Margem escalonada</span>
+                        {descreverRegra(f.regra_margem)}
+                      </div>
+                    ) : (
                     <div className="flex flex-wrap items-end gap-3">
                       <label className="text-xs font-semibold text-gray-600">
                         <span className="block mb-1">Margem (%)</span>
@@ -443,9 +463,11 @@ export default function PrecosPage() {
                         </span>
                       </label>
                     </div>
+                    )}
                   </div>
 
                   <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-gray-100 pt-3 text-sm">
+                    {!porImportacao && (<>
                     <label className="inline-flex items-center gap-2 text-gray-700">
                       <input
                         id={`so-loja-${f.id}`}
@@ -468,6 +490,7 @@ export default function PrecosPage() {
                       />
                       Atualizar sozinha
                     </label>
+                    </>)}
 
                     <span className="ml-auto flex flex-wrap items-center gap-2">
                       {ocupada[f.id] && (
@@ -475,6 +498,7 @@ export default function PrecosPage() {
                           <Loader2 size={14} className="animate-spin" /> {ocupada[f.id]}
                         </span>
                       )}
+                      {!porImportacao && (
                       <button
                         type="button"
                         onClick={() => lerAgora(f)}
@@ -483,6 +507,7 @@ export default function PrecosPage() {
                       >
                         <RefreshCw size={14} /> Ler agora
                       </button>
+                      )}
                       {removendo === f.id ? (
                         <>
                           <button type="button" onClick={() => remover(f)} className="rounded-md bg-red-700 px-3 py-1.5 text-sm font-bold text-white">

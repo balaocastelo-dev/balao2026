@@ -5,8 +5,9 @@
 // quanto custa. O banco só grava o que sair daqui.
 // ============================================================
 
-import { calcularVenda, normalizarMargem, type PrecoDeVenda } from "./calculo";
+import { calcularVenda, type PrecoDeVenda } from "./calculo";
 import type { ItemDeOrigem } from "./kabum";
+import { margemDoProduto, type RegraDeMargem } from "./margem";
 
 export interface RegrasDaFonte {
   id: string;
@@ -20,6 +21,12 @@ export interface RegrasDaFonte {
   trilha: string | null;
   /** Se preenchido, troca a trilha da fonte por este caminho no menu do site. */
   categoria_destino: string | null;
+  /** Margem escalonada por preço/tipo. Sem ela, vale `margem` para todos. */
+  regra_margem?: RegraDeMargem | null;
+  /** Nome do fornecedor gravado em `supplier` (padrão: "KaBuM!"). */
+  fornecedor?: string | null;
+  /** Fornecedor local: o produto sai com o selo "Pronta entrega". */
+  pronta_entrega?: boolean;
 }
 
 export type MotivoDeRecusa =
@@ -116,6 +123,9 @@ export function slugDoProduto(nome: string, codigo: string): string {
 
 // ---------- produto ----------
 
+/** Enquanto o produto não tem foto boa. A releitura troca quando achar uma. */
+export const FOTO_PROVISORIA = "/produto-sem-foto.svg";
+
 export interface ProdutoDeOrigem {
   id: string;
   name: string;
@@ -142,10 +152,8 @@ export function montarProduto(item: ItemDeOrigem, fonte: RegrasDaFonte): Produto
   const referencia = !fonte.so_loja;
   const name = referencia ? nomeSemMontadora(item.nome, item.marca, item.vendedor) || item.nome : item.nome;
   const marca = referencia ? null : item.marca;
-  const venda = calcularVenda(
-    { pix: item.pix, cartao: item.cartao, parcelas: item.parcelas },
-    normalizarMargem(fonte.margem)
-  );
+  const margem = margemDoProduto(fonte, { nome: item.nome, categoria: item.categoria, preco: item.pix });
+  const venda = calcularVenda({ pix: item.pix, cartao: item.cartao, parcelas: item.parcelas }, margem);
 
   const specs: Record<string, string> = {};
   if (marca) specs["Marca"] = marca;
@@ -156,7 +164,9 @@ export function montarProduto(item: ItemDeOrigem, fonte: RegrasDaFonte): Produto
   partes.push(
     referencia
       ? "Montado e testado na Balão da Informática, no Cambuí, em Campinas."
-      : "Vendido pela Balão da Informática, no Cambuí, em Campinas."
+      : fonte.pronta_entrega
+        ? "Pronta entrega na Balão da Informática, no Cambuí, em Campinas."
+        : "Vendido pela Balão da Informática, no Cambuí, em Campinas."
   );
 
   return {
@@ -165,13 +175,13 @@ export function montarProduto(item: ItemDeOrigem, fonte: RegrasDaFonte): Produto
     brand: marca,
     category: categoriaNoSite(item, fonte),
     slug: slugDoProduto(name, item.codigo),
-    image: item.foto || item.fotos[0] || "",
+    image: item.foto || item.fotos[0] || FOTO_PROVISORIA,
     image_urls: item.fotos.length ? item.fotos : item.foto ? [item.foto] : [],
     description: partes.join(" "),
     specs,
-    availability: "Disponível",
+    availability: fonte.pronta_entrega ? "Pronta entrega" : "Disponível",
     source_url: item.url,
-    supplier: referencia ? item.vendedor || fonte.nome : "KaBuM!",
+    supplier: referencia ? item.vendedor || fonte.nome : fonte.fornecedor || "KaBuM!",
     cost: item.pix,
     fonte_id: fonte.id,
     origem_codigo: item.codigo,
