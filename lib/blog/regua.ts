@@ -1,3 +1,4 @@
+import { capaDaRotina } from "./capas";
 import { contarPalavras, linksDoTexto, palavrasDoArtigo, textoPuro, textosDoBloco } from "./texto";
 import type { Artigo, Bloco } from "./tipos";
 
@@ -176,8 +177,7 @@ export function avaliarArtigo(artigo: Artigo): Avaliacao {
   }
   if (!Number.isFinite(Date.parse(artigo.publicadoEm))) erros.push("Data de publicação inválida.");
   if (!artigo.capa) {
-    // No artigo da rotina isso é o esperado: a capa dele é sempre a desenhada.
-    if (artigo.origem !== "diario") avisos.push("Sem imagem de capa: o cartão usará a capa desenhada pelo site.");
+    avisos.push("Sem imagem de capa: o cartão usará a capa desenhada pelo site.");
   } else if (artigo.capa.alt.trim().length < 12) erros.push("A capa precisa de um texto alternativo que descreva a imagem.");
 
   // ---- Estrutura ----
@@ -325,8 +325,12 @@ export function avaliarArtigo(artigo: Artigo): Avaliacao {
     if (benchmarks.length > 0) erros.push("Artigo da rotina não leva gráfico de benchmark: número de teste só entra em artigo revisado.");
     if (citacoes.length > 0) erros.push("Artigo da rotina não leva citação: frase de terceiros só entra em artigo revisado.");
     if ((artigo.fontes?.length ?? 0) < 2) erros.push("Artigo da rotina precisa de ao menos duas fontes consultadas (campo fontes).");
-    // Imagem trazida de fora tem dono; a capa do artigo da rotina é desenhada pelo site.
-    if (artigo.capa || blocos.some((b) => b.tipo === "imagem")) erros.push("Artigo da rotina não leva imagem: a capa é desenhada pelo site.");
+    // Imagem trazida de fora tem dono. A única que entra é a foto de capa que o
+    // comando de publicar gravou no ramo de conteúdo, junto com o artigo.
+    if (blocos.some((b) => b.tipo === "imagem")) erros.push("Artigo da rotina não leva imagem no meio do texto: só a foto de capa.");
+    if (artigo.capa && !capaDaRotina(artigo.capa.src, artigo.slug)) {
+      erros.push("A capa de artigo da rotina é o arquivo enviado pelo comando publicar (--capa): imagem de outro endereço não entra.");
+    }
     for (const c of chamadas) {
       if (c.tipo !== "chamada") continue;
       if (!c.tema || c.titulo || c.texto || c.rotulo || c.href) {

@@ -1,3 +1,4 @@
+import { ENDERECO_DO_RAMO } from "../capas";
 import { avaliarArtigo } from "../regua";
 import type { Artigo, ArtigoResumido } from "../tipos";
 import { lerArtigo, lerResumo } from "../validar";
@@ -13,6 +14,7 @@ import { lerArtigo, lerResumo } from "../validar";
  *
  *   indice.json            a lista, com o que os cartões precisam
  *   artigos/<endereço>.json  o artigo inteiro
+ *   capas/<endereço>-<marca>.jpg  a foto de capa (veja `../capas`)
  *
  * Nada do que chega daqui é aceito de olhos fechados: o formato passa por
  * `lerArtigo` e o conteúdo passa pela régua editorial, as mesmas conferências
@@ -20,8 +22,7 @@ import { lerArtigo, lerResumo } from "../validar";
  * do site.
  */
 
-const RAMO = "claude/blog-conteudo";
-const ENDERECO_PADRAO = `https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/${RAMO}`;
+const ENDERECO_PADRAO = ENDERECO_DO_RAMO;
 
 /** De quanto em quanto tempo o site olha o ramo de novo, em segundos. */
 const INTERVALO = 900;

@@ -5,7 +5,7 @@
  *   node scripts/blog-publicar.mjs preparar
  *   node scripts/blog-publicar.mjs listar
  *   node scripts/blog-publicar.mjs conferir artigo.json
- *   node scripts/blog-publicar.mjs publicar artigo.json
+ *   node scripts/blog-publicar.mjs publicar artigo.json --capa foto.jpg
  *   node scripts/blog-publicar.mjs retirar <endereço-do-artigo>
  *
  * O artigo é um arquivo JSON no formato de `lib/blog/tipos.ts`. Antes de
@@ -14,13 +14,19 @@
  * (`lib/blog/regua.ts`). Se não passa aqui, não passaria lá — então nada é
  * enviado.
  *
- * Publicar é gravar dois arquivos no ramo `claude/blog-conteudo` e enviar:
- * o artigo e a lista. O site não é refeito, e o ramo principal não é tocado.
+ * Publicar é gravar três arquivos no ramo `claude/blog-conteudo` e enviar:
+ * o artigo, a foto de capa e a lista. O site não é refeito, e o ramo principal
+ * não é tocado.
+ *
+ * Todo artigo novo leva uma foto de capa (`--capa`): fotografia ou imagem
+ * simulada do assunto, sem texto e sem marca. O artigo diz só o texto
+ * alternativo (`"capa": { "alt": "…" }`); o endereço quem preenche é o comando.
  *
  * Não precisa de `npm install`: usa só o Node (22.18 ou mais novo) e o git.
  */
 
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import { registerHooks } from "node:module";
 import os from "node:os";
@@ -28,7 +34,6 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const RAMO = "claude/blog-conteudo";
 const SITE = "https://www.balao.info";
 const FUSO = "America/Sao_Paulo";
 
@@ -54,6 +59,7 @@ const importar = (arquivo) => import(pathToFileURL(path.join(RAIZ, arquivo)).hre
 const { lerArtigo } = await importar("lib/blog/validar.ts");
 const { avaliarArtigo } = await importar("lib/blog/regua.ts");
 const { minutosDeLeitura, semAcento } = await importar("lib/blog/texto.ts");
+const { RAMO_DE_CONTEUDO: RAMO, arquivoDaCapa, enderecoDaCapa } = await importar("lib/blog/capas.ts");
 
 // ---------------------------------------------------------------- utilidades
 
@@ -140,8 +146,74 @@ function enviar(pasta, mensagem) {
   }
 }
 
-/** Lê o arquivo e aplica as duas conferências. Devolve o artigo pronto, ou encerra. */
-function conferir(arquivo, { dataPadrao }) {
+// --------------------------------------------------------------- foto de capa
+
+const CAPA_PESO_MAXIMO = 900 * 1024;
+const CAPA_LARGURA_MINIMA = 1200;
+
+/** Largura e altura lidas do próprio arquivo, sem depender de biblioteca. */
+function medirImagem(bytes) {
+  // PNG: assinatura de 8 bytes e, logo depois, o bloco IHDR com as medidas.
+  if (bytes.length > 24 && bytes.readUInt32BE(0) === 0x89504e47 && bytes.readUInt32BE(4) === 0x0d0a1a0a) {
+    return { extensao: "png", largura: bytes.readUInt32BE(16), altura: bytes.readUInt32BE(20) };
+  }
+  // JPEG: percorre os segmentos até o que descreve o quadro (SOF).
+  if (bytes.length > 4 && bytes[0] === 0xff && bytes[1] === 0xd8) {
+    let i = 2;
+    while (i + 9 < bytes.length) {
+      if (bytes[i] !== 0xff) return null;
+      const marcador = bytes[i + 1];
+      if (marcador === 0xff) {
+        i += 1;
+        continue;
+      }
+      const tamanho = bytes.readUInt16BE(i + 2);
+      const quadro = marcador >= 0xc0 && marcador <= 0xcf && ![0xc4, 0xc8, 0xcc].includes(marcador);
+      if (quadro) return { extensao: "jpg", largura: bytes.readUInt16BE(i + 7), altura: bytes.readUInt16BE(i + 5) };
+      i += 2 + tamanho;
+    }
+  }
+  return null;
+}
+
+/** Confere a foto de capa e diz com que nome ela entra no ramo de conteúdo. */
+function lerCapa(arquivo, slug) {
+  if (!fs.existsSync(arquivo)) sair(`Foto de capa não encontrada: ${arquivo}`);
+  const bytes = fs.readFileSync(arquivo);
+  const medida = medirImagem(bytes);
+  const erros = [];
+  if (!medida) sair("A foto de capa precisa ser um arquivo JPEG ou PNG.");
+  if (bytes.length > CAPA_PESO_MAXIMO) erros.push(`A foto de capa tem ${Math.round(bytes.length / 1024)} KB; o máximo é ${CAPA_PESO_MAXIMO / 1024} KB (salve em JPEG).`);
+  if (medida.largura < CAPA_LARGURA_MINIMA) erros.push(`A foto de capa tem ${medida.largura} px de largura; o mínimo é ${CAPA_LARGURA_MINIMA} px.`);
+  const proporcao = medida.largura / medida.altura;
+  if (proporcao < 1.5 || proporcao > 2) erros.push(`A foto de capa é ${medida.largura} × ${medida.altura}; ela precisa ser deitada, perto de 16:9.`);
+  if (erros.length > 0) sair(`Capa reprovada:\n- ${erros.join("\n- ")}`);
+
+  const marca = createHash("sha256").update(bytes).digest("hex").slice(0, 8);
+  return {
+    bytes,
+    noRamo: arquivoDaCapa(slug, marca, medida.extensao),
+    src: enderecoDaCapa(slug, marca, medida.extensao),
+    largura: medida.largura,
+    altura: medida.altura,
+  };
+}
+
+/** As capas que um artigo já tem no ramo (uma, salvo sobra de troca). */
+function capasNoRamo(pasta, slug) {
+  const dir = path.join(pasta, "capas");
+  if (!fs.existsSync(dir)) return [];
+  return fs
+    .readdirSync(dir)
+    .filter((nome) => nome.startsWith(`${slug}-`) && /^[0-9a-f]{8}\.(?:jpg|png)$/.test(nome.slice(slug.length + 1)))
+    .map((nome) => path.join(dir, nome));
+}
+
+/**
+ * Lê o arquivo e aplica as duas conferências. Devolve o artigo pronto (e a
+ * foto de capa, quando veio uma), ou encerra.
+ */
+function conferir(arquivo, { dataPadrao, arquivoDaFoto }) {
   if (!arquivo || !fs.existsSync(arquivo)) sair(`Arquivo não encontrado: ${arquivo ?? "(nenhum)"}`);
 
   let bruto;
@@ -153,6 +225,18 @@ function conferir(arquivo, { dataPadrao }) {
   // A data é a da publicação: quem escreve não precisa preencher.
   if (bruto && typeof bruto === "object" && !bruto.publicadoEm) bruto.publicadoEm = dataPadrao;
 
+  // A foto vem em arquivo; o artigo só descreve o que ela mostra.
+  let foto = null;
+  if (arquivoDaFoto) {
+    if (!bruto || typeof bruto !== "object" || typeof bruto.slug !== "string") sair("O artigo precisa do campo slug.");
+    const alt = typeof bruto.capa?.alt === "string" ? bruto.capa.alt.trim() : "";
+    if (alt.length < 12) sair('Com --capa, o artigo precisa dizer o que a foto mostra: "capa": { "alt": "…" }.');
+    foto = lerCapa(arquivoDaFoto, bruto.slug);
+    bruto.capa = { src: foto.src, alt, largura: foto.largura, altura: foto.altura };
+  } else if (bruto?.capa && typeof bruto.capa === "object" && !bruto.capa.src) {
+    sair("O artigo descreve uma capa, mas a foto não veio: passe --capa foto.jpg.");
+  }
+
   const lido = lerArtigo(bruto);
   if (!lido.ok) sair(`Formato reprovado:\n- ${lido.erros.join("\n- ")}`);
 
@@ -162,10 +246,11 @@ function conferir(arquivo, { dataPadrao }) {
   console.log(`\n${artigo.titulo}`);
   console.log(`/blog/${artigo.slug} · ${artigo.categoria} · ${m.palavras} palavras · ${m.secoes} seções · ${minutosDeLeitura(artigo)} min de leitura`);
   console.log(`${m.tabelas} tabela(s) · ${m.perguntas} pergunta(s) · ${m.linksInternos} link(s) para a loja · ${m.chamadas} chamada(s) · ${artigo.fontes?.length ?? 0} fonte(s)`);
+  if (foto) console.log(`Capa: ${foto.largura} × ${foto.altura}, ${Math.round(foto.bytes.length / 1024)} KB`);
   if (avaliacao.avisos.length > 0) console.log(`\nAvisos (não impedem a publicação):\n- ${avaliacao.avisos.join("\n- ")}`);
   if (!avaliacao.aprovado) sair(`Reprovado na régua editorial:\n- ${avaliacao.erros.join("\n- ")}`);
 
-  return artigo;
+  return { artigo, foto };
 }
 
 /** Conferências que dependem do que já está publicado. */
@@ -208,9 +293,22 @@ function conferirContraOPublicado(artigo, indice, { atualizar, forcar }) {
 // ------------------------------------------------------------------ comandos
 
 const [comando, alvo, ...resto] = process.argv.slice(2);
-const opcoes = new Set([alvo, ...resto].filter((a) => a?.startsWith("--")));
+const argumentos = [alvo, ...resto].filter((a) => typeof a === "string");
+const opcoes = new Set(argumentos.filter((a) => a.startsWith("--")).map((a) => a.split("=")[0]));
 const atualizar = opcoes.has("--atualizar");
 const forcar = opcoes.has("--forcar");
+const semCapa = opcoes.has("--sem-capa");
+
+/** `--capa foto.jpg` ou `--capa=foto.jpg`. */
+function valorDaOpcao(nome) {
+  const i = argumentos.findIndex((a) => a === nome || a.startsWith(`${nome}=`));
+  if (i < 0) return null;
+  const valor = argumentos[i].includes("=") ? argumentos[i].slice(nome.length + 1) : argumentos[i + 1];
+  if (!valor || valor.startsWith("--")) sair(`Diga o arquivo: ${nome} foto.jpg`);
+  return valor;
+}
+const arquivoDaFoto = valorDaOpcao("--capa");
+if (arquivoDaFoto && semCapa) sair("Use --capa ou --sem-capa, não os dois.");
 
 /** O que já está no ar — para a rotina não repetir assunto. */
 function mostrarPublicados(indice) {
@@ -258,11 +356,16 @@ if (comando === "listar") {
     fecharRamo(pasta);
   }
 } else if (comando === "conferir") {
-  conferir(alvo, { dataPadrao: new Date().toISOString() });
+  const { artigo } = conferir(alvo, { dataPadrao: new Date().toISOString(), arquivoDaFoto });
+  if (!artigo.capa) console.log("\nAtenção: sem foto de capa. O comando publicar exige --capa foto.jpg.");
   console.log("\n✓ Aprovado. (Nada foi publicado: use o comando publicar.)");
 } else if (comando === "publicar") {
-  const artigo = conferir(alvo, { dataPadrao: new Date().toISOString() });
+  const { artigo, foto } = conferir(alvo, { dataPadrao: new Date().toISOString(), arquivoDaFoto });
   if (Date.parse(artigo.publicadoEm) > Date.now() + 60_000) sair("A data de publicação está no futuro.");
+  // Capa desenhada só por exceção declarada: quando não foi possível gerar a foto.
+  if (!artigo.capa && !semCapa) {
+    sair("Falta a foto de capa: gere a imagem e passe --capa foto.jpg. (Se não foi possível gerar, publique com --sem-capa e relate.)");
+  }
 
   const pasta = abrirRamo();
   try {
@@ -277,6 +380,18 @@ if (comando === "listar") {
     if (anterior) {
       paraGravar.publicadoEm = anterior.publicadoEm;
       paraGravar.atualizadoEm = new Date().toISOString();
+    }
+
+    // A foto entra com o artigo; a anterior, se o endereço mudou, sai.
+    const capaEmUso = artigo.capa ? path.join(pasta, "capas", path.basename(artigo.capa.src)) : null;
+    if (foto) {
+      fs.mkdirSync(path.join(pasta, "capas"), { recursive: true });
+      fs.writeFileSync(path.join(pasta, foto.noRamo), foto.bytes);
+    } else if (capaEmUso && !fs.existsSync(capaEmUso)) {
+      sair("O artigo aponta para uma foto de capa que não está no ramo de conteúdo: passe --capa foto.jpg.");
+    }
+    for (const antiga of capasNoRamo(pasta, artigo.slug)) {
+      if (antiga !== capaEmUso) fs.rmSync(antiga, { force: true });
     }
 
     fs.mkdirSync(path.join(pasta, "artigos"), { recursive: true });
@@ -309,6 +424,7 @@ if (comando === "listar") {
     if (!artigo) sair(`/blog/${alvo} não está entre os artigos da rotina diária.`);
     indice.artigos = indice.artigos.filter((a) => a.slug !== alvo);
     fs.rmSync(path.join(pasta, "artigos", `${alvo}.json`), { force: true });
+    for (const capa of capasNoRamo(pasta, alvo)) fs.rmSync(capa, { force: true });
     gravarIndice(pasta, indice);
     enviar(pasta, `Retira: ${artigo.titulo}`);
     console.log(`\n✓ Retirado. Em até uma hora ${SITE}/blog/${alvo} sai do ar.`);
@@ -319,8 +435,9 @@ if (comando === "listar") {
   console.log(`Uso:
   node scripts/blog-publicar.mjs preparar                  as regras, a pauta e o que já foi publicado
   node scripts/blog-publicar.mjs listar                    só o que já foi publicado
-  node scripts/blog-publicar.mjs conferir artigo.json      confere formato e régua, sem publicar
-  node scripts/blog-publicar.mjs publicar artigo.json      confere e publica   [--atualizar] [--forcar]
+  node scripts/blog-publicar.mjs conferir artigo.json      confere formato e régua, sem publicar   [--capa foto.jpg]
+  node scripts/blog-publicar.mjs publicar artigo.json --capa foto.jpg
+                                                           confere e publica   [--atualizar] [--forcar] [--sem-capa]
   node scripts/blog-publicar.mjs retirar <endereço>        tira um artigo do ar`);
   process.exit(comando ? 2 : 0);
 }
