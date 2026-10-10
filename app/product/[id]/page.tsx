@@ -148,7 +148,7 @@ export default async function ProductPage({ params }: Props) {
                       productName={product.name}
                     />
                     {ehImagemIlustrativa(product.image) && (
-                      <p className="text-xs text-[var(--site-muted)]">Imagem ilustrativa: o produto pode ter outra cor ou embalagem.</p>
+                      <p className="text-xs text-[var(--site-muted)]">Imagem ilustrativa: a foto pode não mostrar exatamente este modelo, cor ou embalagem.</p>
                     )}
                 </div>
 
