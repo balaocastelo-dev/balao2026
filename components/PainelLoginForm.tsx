@@ -3,12 +3,25 @@
 import { FormEvent, useState } from "react";
 
 type PainelLoginFormProps = {
+  /**
+   * Para onde ir depois de entrar. "atual" devolve a pessoa ao endereço que
+   * ela tentou abrir: o do parâmetro `voltar` (posto pela tranca quando o
+   * endereço era uma área de dentro do painel) ou, sem ele, a própria página.
+   */
   redirectTo?: string;
   badgeLabel?: string;
   title?: string;
   description?: string;
   submitLabel?: string;
 };
+
+/** Só aceita voltar para dentro do painel — nunca para um endereço de fora. */
+function destinoDentroDoPainel(valor: string | null) {
+  if (!valor) return null;
+  if (valor !== "/painel" && !valor.startsWith("/painel/")) return null;
+  if (valor.includes("//") || valor.includes("\\") || valor.includes("..")) return null;
+  return valor;
+}
 
 export default function PainelLoginForm({
   redirectTo = "/painel",
@@ -42,9 +55,15 @@ export default function PainelLoginForm({
         return;
       }
 
+      if (redirectTo === "atual") {
+        const voltar = new URLSearchParams(window.location.search).get("voltar");
+        window.location.href = destinoDentroDoPainel(voltar) || window.location.pathname;
+        return;
+      }
+
       window.location.href = redirectTo;
     } catch {
-      setError("Nao foi possivel entrar no painel agora.");
+      setError("Não foi possível entrar no painel agora.");
     } finally {
       setLoading(false);
     }
@@ -53,9 +72,11 @@ export default function PainelLoginForm({
   return (
     <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-8 shadow-xl">
       <div className="mb-6">
-        <p className="mb-2 inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-blue-700">
-          {badgeLabel}
-        </p>
+        {badgeLabel ? (
+          <p className="mb-2 inline-flex rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-[#b8000e]">
+            {badgeLabel}
+          </p>
+        ) : null}
         <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
         <p className="mt-2 text-sm text-gray-600">{description}</p>
       </div>
@@ -72,7 +93,7 @@ export default function PainelLoginForm({
             autoComplete="current-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 outline-none transition focus:border-[#E60012] focus:ring-2 focus:ring-red-100"
             placeholder="Digite a senha"
             required
           />
@@ -87,7 +108,7 @@ export default function PainelLoginForm({
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
+          className="w-full rounded-xl bg-[#E60012] px-4 py-3 font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-70"
         >
           {loading ? "Entrando..." : submitLabel}
         </button>

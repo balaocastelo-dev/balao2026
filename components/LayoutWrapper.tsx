@@ -34,11 +34,14 @@ export default function LayoutWrapper({
   // próprios. O menu, o rodapé da loja e o botão flutuante de WhatsApp
   // competiriam com o único botão que importa ali.
   const isPaginaDeVendas = pathname === "/sistemasdeia" || pathname === "/macbookm5";
+  // O painel inteiro (/painel e tudo embaixo dele) é tela de trabalho: tem o
+  // próprio menu e rola por dentro, sem o rodapé nem o botão da loja.
+  const isPainel = pathname === "/painel" || pathname.startsWith("/painel/");
   const isFullscreenPanel =
     isCrmPage ||
     isPaginaVendedor ||
     pathname === "/whatsapp" ||
-    pathname === "/painel";
+    isPainel;
 
   return (
     <SidebarProvider>
@@ -57,14 +60,21 @@ export default function LayoutWrapper({
           isFullscreenPanel
             ? // Altura fixa e sem overflow: a tela de atendimento manda no
               // viewport inteiro e não gera aquela segunda barra de rolagem.
-              "flex h-screen w-full max-w-full flex-col overflow-hidden"
+              // Na impressão (relatório do painel) a altura fixa cortaria tudo
+              // depois da primeira folha.
+              // No painel a altura acompanha a parte visível da tela (dvh):
+              // no celular, 100vh inclui o trecho escondido atrás da barra do
+              // navegador, e o fim do menu ficava fora de alcance.
+              `flex h-screen w-full max-w-full flex-col overflow-hidden print:h-auto print:overflow-visible ${
+                isPainel ? "supports-[height:100dvh]:h-dvh" : ""
+              }`
             : `flex min-h-screen w-full max-w-full flex-col ${isBlogPage ? "overflow-x-clip" : "overflow-x-hidden"}`
         }
       >
         <main
           className={
             isFullscreenPanel
-              ? "flex-1 w-full max-w-full overflow-hidden"
+              ? "flex-1 w-full max-w-full overflow-hidden print:overflow-visible"
               : // No blog o corte lateral é "clip": com "hidden" o navegador
                 // trata o bloco como área de rolagem, e aí nada fica preso ao
                 // topo — nem o filtro da lista, nem o sumário do artigo.

@@ -12,7 +12,8 @@ export default function FloatingWhatsApp() {
     pathname === "/crm" ||
     pathname.startsWith("/crm/") ||
     pathname === "/whatsapp" ||
-    pathname === "/painel"
+    pathname === "/painel" ||
+    pathname.startsWith("/painel/")
   ) {
     return null;
   }

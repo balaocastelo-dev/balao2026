@@ -10,22 +10,26 @@ import {
   listPublicControleParts,
 } from "@/lib/controle/db";
 import { PART_TYPES, type PartType } from "@/lib/controle/types";
+import { isPainelAuthenticated } from "@/lib/painel-auth";
 
 function isValidPartType(value: string): value is PartType {
   return PART_TYPES.includes(value as PartType);
 }
 
-function isAdminAuthenticated(request: NextRequest): boolean {
-  return isControleAdminSessionValid(
-    request.cookies.get(CONTROLE_ADMIN_COOKIE)?.value,
-  );
+// Administra o estoque quem entrou com a senha do dia (balcão) ou quem já
+// está no painel — a tela abre em /painel/controle sem pedir outra senha.
+async function isAdminAuthenticated(request: NextRequest): Promise<boolean> {
+  if (isControleAdminSessionValid(request.cookies.get(CONTROLE_ADMIN_COOKIE)?.value)) {
+    return true;
+  }
+  return isPainelAuthenticated();
 }
 
 export async function GET(request: NextRequest) {
   try {
     const scope = request.nextUrl.searchParams.get("scope");
     const parts =
-      scope === "admin" && isAdminAuthenticated(request)
+      scope === "admin" && (await isAdminAuthenticated(request))
         ? await listAdminControleParts()
         : await listPublicControleParts();
 
@@ -40,7 +44,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  if (!isAdminAuthenticated(request)) {
+  if (!(await isAdminAuthenticated(request))) {
     return NextResponse.json({ error: "Nao autorizado." }, { status: 401 });
   }
 

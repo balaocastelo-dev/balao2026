@@ -252,7 +252,7 @@ export default function ProductManager() {
               throw new Error("Failed to save updates");
           }
       } catch (error) {
-          alert("Erro ao salvar alteraÃ§Ãµes");
+          alert("Erro ao salvar alterações");
           setEnrichmentStep('preview');
       }
   };
@@ -274,7 +274,7 @@ export default function ProductManager() {
         const productsWithImage = allProducts.filter((p) => p.image && p.image.trim() !== "");
         
         if (productsWithImage.length > 0) {
-             const userConfirmed = confirm(`Existem ${productsWithImage.length} produtos com URL de imagem. Deseja verificar quais estÃ£o quebradas? (Isso pode levar alguns instantes)`);
+             const userConfirmed = confirm(`Existem ${productsWithImage.length} produtos com URL de imagem. Deseja verificar quais estão quebradas? (Isso pode levar alguns instantes)`);
              
              if (userConfirmed) {
                  const brokenImages: Pick<Product, "id" | "name" | "image">[] = [];
@@ -302,7 +302,7 @@ export default function ProductManager() {
             return;
         }
 
-        if (!confirm(`Encontrados ${productsToDelete.length} produtos invÃ¡lidos (sem imagem ou link quebrado). Deseja excluÃ­-los?`)) return;
+        if (!confirm(`Encontrados ${productsToDelete.length} produtos inválidos (sem imagem ou link quebrado). Deseja excluí-los?`)) return;
 
         let deletedCount = 0;
 
@@ -314,7 +314,7 @@ export default function ProductManager() {
              deletedCount += chunk.length;
         }
 
-        alert(`${deletedCount} produtos excluÃ­dos com sucesso.`);
+        alert(`${deletedCount} produtos excluídos com sucesso.`);
         fetchProducts();
     } catch (e) {
         console.error(e);
@@ -369,7 +369,7 @@ export default function ProductManager() {
         return;
     }
 
-    if (!confirm(`Encontrados ${productsToDelete.length} produtos duplicados (pelo nome). Deseja excluir as cÃ³pias e manter o original?`)) return;
+    if (!confirm(`Encontrados ${productsToDelete.length} produtos duplicados (pelo nome). Deseja excluir as cópias e manter o original?`)) return;
 
     setIsProcessingBulk(true);
     let deletedCount = 0;
@@ -382,7 +382,7 @@ export default function ProductManager() {
             await Promise.all(chunk.map(p => fetch(`/api/products/${p.id}`, { method: "DELETE" })));
             deletedCount += chunk.length;
         }
-        alert(`${deletedCount} produtos duplicados excluÃ­dos com sucesso.`);
+        alert(`${deletedCount} produtos duplicados excluídos com sucesso.`);
         fetchProducts();
     } catch (e) {
         console.error(e);
@@ -442,7 +442,7 @@ export default function ProductManager() {
 
   const handleBulkUpdatePrice = async () => {
     if (bulkPricePercent === 0) return alert("Digite uma porcentagem");
-    if (!confirm(`Alterar preÃ§o de ${selectedIds.size} produtos em ${bulkPricePercent}%?`)) return;
+    if (!confirm(`Alterar preço de ${selectedIds.size} produtos em ${bulkPricePercent}%?`)) return;
 
     setIsProcessingBulk(true);
     try {
@@ -457,7 +457,7 @@ export default function ProductManager() {
         });
 
         if (res.ok) {
-            alert("PreÃ§os atualizados com sucesso!");
+            alert("Preços atualizados com sucesso!");
             setSelectedIds(new Set());
             setBulkPricePercent(0);
             fetchProducts();
@@ -473,7 +473,7 @@ export default function ProductManager() {
   };
 
   const handleBulkDelete = async () => {
-    if (!confirm(`Tem certeza que deseja excluir ${selectedIds.size} produtos selecionados? Esta aÃ§Ã£o nÃ£o pode ser desfeita.`)) return;
+    if (!confirm(`Tem certeza que deseja excluir ${selectedIds.size} produtos selecionados? Esta ação não pode ser desfeita.`)) return;
     
     setIsProcessingBulk(true);
     let deletedCount = 0;
@@ -489,7 +489,7 @@ export default function ProductManager() {
             deletedCount += chunk.length;
         }
         
-        alert(`${deletedCount} produtos excluÃ­dos com sucesso.`);
+        alert(`${deletedCount} produtos excluídos com sucesso.`);
         setSelectedIds(new Set());
         fetchProducts();
     } catch (e) {
@@ -516,7 +516,7 @@ export default function ProductManager() {
     const newProduct = {
         ...product,
         id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15),
-        name: `${product.name} (CÃ³pia)`,
+        name: `${product.name} (Cópia)`,
         slug: `${product.slug}-copia-${Math.floor(Math.random() * 1000)}`
     };
     
@@ -540,9 +540,9 @@ export default function ProductManager() {
   };
 
   const handleSave = async () => {
-    if (!currentProduct.name) return alert("Nome Ã© obrigatÃ³rio");
-    if (!currentProduct.price) return alert("PreÃ§o Ã© obrigatÃ³rio");
-    if (!currentProduct.category) return alert("Categoria Ã© obrigatÃ³ria");
+    if (!currentProduct.name) return alert("Nome é obrigatório");
+    if (!currentProduct.price) return alert("Preço é obrigatório");
+    if (!currentProduct.category) return alert("Categoria é obrigatória");
 
     setSaving(true);
     try {
@@ -566,7 +566,7 @@ export default function ProductManager() {
 
         if (!imageUrl) {
             setSaving(false);
-            return alert("Imagem Ã© obrigatÃ³ria. Por favor, faÃ§a upload de uma imagem.");
+            return alert("Imagem é obrigatória. Por favor, faça upload de uma imagem.");
         }
 
         if (videoFile) {
@@ -581,7 +581,7 @@ export default function ProductManager() {
                 videoUrl = dataVideo.url;
             } else {
                 setVideoUploading(false);
-                throw new Error("Erro no upload do vÃ­deo");
+                throw new Error("Erro no upload do vídeo");
             }
             setVideoUploading(false);
         }
@@ -643,7 +643,7 @@ export default function ProductManager() {
     const candidates = products.filter(p => p.image && !p.image.includes('supabase.co'));
 
     if (candidates.length === 0) {
-        return alert("Todas as imagens jÃ¡ estÃ£o no Supabase (ou nÃ£o possuem imagem).");
+        return alert("Todas as imagens já estão no Supabase (ou não possuem imagem).");
     }
 
     if (!confirm(`Deseja migrar ${candidates.length} imagens para o Supabase? Isso pode demorar.`)) return;
@@ -697,7 +697,7 @@ export default function ProductManager() {
                 });
 
             } else {
-                setMigrationLogs(prev => [...prev, `Erro na requisiÃ§Ã£o do lote.`]);
+                setMigrationLogs(prev => [...prev, `Erro na requisição do lote.`]);
                 errorCount += chunkIds.length;
             }
 
@@ -710,14 +710,14 @@ export default function ProductManager() {
             });
         }
         
-        setMigrationLogs(prev => [...prev, `ConcluÃ­do! Sucesso: ${successCount}, Erros: ${errorCount}`]);
-        alert(`MigraÃ§Ã£o concluÃ­da!\nSucesso: ${successCount}\nErros: ${errorCount}`);
+        setMigrationLogs(prev => [...prev, `Concluído! Sucesso: ${successCount}, Erros: ${errorCount}`]);
+        alert(`Migração concluída!\nSucesso: ${successCount}\nErros: ${errorCount}`);
         fetchProducts(); // Refresh to see new URLs
 
     } catch (error: any) {
         console.error("Migration error:", error);
         setMigrationLogs(prev => [...prev, `Erro fatal: ${error.message}`]);
-        alert("Erro durante a migraÃ§Ã£o.");
+        alert("Erro durante a migração.");
     } finally {
         setIsMigrating(false);
     }
@@ -799,7 +799,7 @@ export default function ProductManager() {
                     onClick={() => setSelectedIds(new Set())}
                     className="text-sm text-red-600 hover:text-red-800 underline"
                 >
-                    Cancelar SeleÃ§Ã£o
+                    Cancelar Seleção
                 </button>
             </div>
         )}
@@ -894,7 +894,7 @@ export default function ProductManager() {
         {showMigration && (
             <div className="bg-white border rounded-lg p-6 mb-6 shadow-sm animate-in fade-in slide-in-from-top-4">
                 <div className="flex justify-between items-center mb-4">
-                    <h3 className="font-bold text-lg">MigraÃ§Ã£o de Imagens</h3>
+                    <h3 className="font-bold text-lg">Migração de Imagens</h3>
                     <button onClick={() => setShowMigration(false)} className="text-gray-400 hover:text-gray-600">
                         <X size={20} />
                     </button>
@@ -913,7 +913,7 @@ export default function ProductManager() {
                 </div>
 
                 <div className="bg-gray-50 p-4 rounded-md h-40 overflow-y-auto text-xs font-mono border">
-                    {migrationLogs.length === 0 && <span className="text-gray-400">Aguardando inÃ­cio...</span>}
+                    {migrationLogs.length === 0 && <span className="text-gray-400">Aguardando início...</span>}
                     {migrationLogs.map((log, i) => (
                         <div key={i} className="mb-1">{log}</div>
                     ))}
@@ -933,9 +933,9 @@ export default function ProductManager() {
                         </th>
                         <th className="p-4">Produto</th>
                         <th className="p-4">Categoria</th>
-                        <th className="p-4">PreÃ§o</th>
+                        <th className="p-4">Preço</th>
                         <th className="p-4">Custo</th>
-                        <th className="p-4 text-right">AÃ§Ãµes</th>
+                        <th className="p-4 text-right">Ações</th>
                     </tr>
                 </thead>
                 <tbody className="divide-y">
@@ -1039,7 +1039,7 @@ export default function ProductManager() {
                             <div className="text-center py-10">
                                 <BrainCircuit size={64} className="mx-auto text-purple-300 animate-pulse mb-6" />
                                 <h3 className="text-xl font-medium mb-2">Analisando produtos...</h3>
-                                <p className="text-gray-500 mb-8">Consultando base de conhecimento e gerando descriÃ§Ãµes.</p>
+                                <p className="text-gray-500 mb-8">Consultando base de conhecimento e gerando descrições.</p>
                                 
                                 <div className="max-w-md mx-auto">
                                     <div className="flex justify-between text-sm text-gray-600 mb-2">
@@ -1062,7 +1062,7 @@ export default function ProductManager() {
                         {enrichmentStep === 'preview' && (
                             <div className="space-y-4">
                                 <div className="bg-blue-50 text-blue-800 p-4 rounded-lg text-sm mb-4">
-                                    Revise as alteraÃ§Ãµes sugeridas abaixo antes de aplicar.
+                                    Revise as alterações sugeridas abaixo antes de aplicar.
                                 </div>
                                 
                                 {enrichmentPreviews.map((item, idx) => (
@@ -1079,7 +1079,7 @@ export default function ProductManager() {
                                         {item.status === 'success' && (
                                             <div className="p-3 text-sm grid grid-cols-2 gap-4">
                                                 <div>
-                                                    <h4 className="font-semibold text-gray-500 mb-1">EspecificaÃ§Ãµes Novas</h4>
+                                                    <h4 className="font-semibold text-gray-500 mb-1">Especificações Novas</h4>
                                                     <pre className="text-xs bg-gray-50 p-2 rounded border overflow-x-auto max-h-40">
                                                         {JSON.stringify(item.new_specs, null, 2)}
                                                     </pre>
@@ -1108,7 +1108,7 @@ export default function ProductManager() {
                                                     )}
                                                 </div>
                                                 <div>
-                                                    <h4 className="font-semibold text-gray-500 mb-1">DescriÃ§Ã£o Nova (HTML)</h4>
+                                                    <h4 className="font-semibold text-gray-500 mb-1">Descrição Nova (HTML)</h4>
                                                     <div className="text-xs bg-gray-50 p-2 rounded border h-64 overflow-y-auto">
                                                         <div dangerouslySetInnerHTML={{ __html: item.new_description }} />
                                                     </div>
@@ -1139,7 +1139,7 @@ export default function ProductManager() {
                                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                                     <CheckSquare size={32} className="text-green-600" />
                                 </div>
-                                <h3 className="text-2xl font-bold text-gray-800 mb-2">ConcluÃ­do!</h3>
+                                <h3 className="text-2xl font-bold text-gray-800 mb-2">Concluído!</h3>
                                 <p className="text-gray-600">Os produtos foram atualizados com sucesso.</p>
                             </div>
                         )}
@@ -1230,14 +1230,14 @@ export default function ProductManager() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">VÃ­deo do Produto</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Vídeo do Produto</label>
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2 border rounded-lg px-3 py-2 focus-within:ring-2 ring-red-500">
                                         <Video size={20} className="text-gray-400" />
                                         <input 
                                             type="text" 
                                             className="flex-1 outline-none text-sm" 
-                                            placeholder="Link do vÃ­deo (YouTube, Vimeo ou URL direta)"
+                                            placeholder="Link do vídeo (YouTube, Vimeo ou URL direta)"
                                             value={currentProduct.video_url || ""}
                                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                                 const value = e.target.value.trim();
@@ -1254,14 +1254,14 @@ export default function ProductManager() {
                                                     lower.includes("youtube.com") ||
                                                     lower.includes("youtu.be") ||
                                                     lower.includes("vimeo.com");
-                                                setVideoError(isValid ? null : "Formato de link invÃ¡lido. Use YouTube, Vimeo ou URL direta.");
+                                                setVideoError(isValid ? null : "Formato de link inválido. Use YouTube, Vimeo ou URL direta.");
                                             }}
                                         />
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <label className="inline-flex items-center gap-2 text-xs font-medium text-gray-600 cursor-pointer">
                                             <Upload size={14} className="text-gray-500" />
-                                            <span>Ou enviar arquivo de vÃ­deo (MP4, WebM, MOV)</span>
+                                            <span>Ou enviar arquivo de vídeo (MP4, WebM, MOV)</span>
                                             <input
                                                 type="file"
                                                 accept="video/mp4,video/webm,video/quicktime"
@@ -1270,7 +1270,7 @@ export default function ProductManager() {
                                                     const file = e.target.files?.[0];
                                                     if (!file) return;
                                                     if (!file.type.startsWith("video/")) {
-                                                        setVideoError("Arquivo invÃ¡lido. Selecione um vÃ­deo MP4, WebM ou MOV.");
+                                                        setVideoError("Arquivo inválido. Selecione um vídeo MP4, WebM ou MOV.");
                                                         setVideoFile(null);
                                                         setVideoPreview("");
                                                         return;
@@ -1282,7 +1282,7 @@ export default function ProductManager() {
                                             />
                                         </label>
                                         {videoUploading && (
-                                            <span className="text-[11px] text-gray-500">Enviando vÃ­deo...</span>
+                                            <span className="text-[11px] text-gray-500">Enviando vídeo...</span>
                                         )}
                                     </div>
                                     {videoError && (
@@ -1292,7 +1292,7 @@ export default function ProductManager() {
                                         <div className="mt-2">
                                             <ProductVideo
                                                 videoUrl={videoPreview}
-                                                productName={currentProduct.name || "PrÃ©via do produto"}
+                                                productName={currentProduct.name || "Prévia do produto"}
                                             />
                                         </div>
                                     )}
@@ -1314,7 +1314,7 @@ export default function ProductManager() {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">PreÃ§o (Venda)</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Preço (Venda)</label>
                                     <input 
                                         type="text" 
                                         className="w-full border rounded-lg px-3 py-2 focus:ring-2 ring-red-500 outline-none"
@@ -1352,7 +1352,7 @@ export default function ProductManager() {
                                     {!sortedCategories.length && (
                                         <>
                                             <option value="Hardware">Hardware</option>
-                                            <option value="PerifÃ©ricos">PerifÃ©ricos</option>
+                                            <option value="Periféricos">Periféricos</option>
                                         </>
                                     )}
                                 </select>
@@ -1369,7 +1369,7 @@ export default function ProductManager() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">DescriÃ§Ã£o</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
                                 <textarea 
                                     className="w-full border rounded-lg px-3 py-2 h-32 focus:ring-2 ring-red-500 outline-none resize-none"
                                     value={currentProduct.description || ""}

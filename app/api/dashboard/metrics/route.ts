@@ -1,7 +1,14 @@
 import { NextResponse } from "next/server";
 import { getDashboardMetrics } from "@/lib/dashboard-metrics";
+import { isPainelAuthenticated } from "@/lib/painel-auth";
 
+// Faturamento, pedidos e vendas por vendedor: só para quem entrou no painel.
+// (A tela que usava isto, /dashboard, hoje é /painel/indicadores.)
 export async function GET(request: Request) {
+  if (!(await isPainelAuthenticated())) {
+    return NextResponse.json({ error: "Nao autorizado" }, { status: 401 });
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const startDate = searchParams.get("startDate");

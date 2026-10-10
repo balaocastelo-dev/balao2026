@@ -124,7 +124,7 @@ WHATSAPP_PANEL_PORT=4100
 WHATSAPP_PANEL_ALLOWED_ORIGIN=https://www.balao.info,https://balao.info
 ```
 
-Publique o site de novo e abra `/crm` para ler o QR Code.
+Publique o site de novo e abra `/painel/crm` para ler o QR Code.
 
 ### O que pesar antes de escolher
 
@@ -150,7 +150,7 @@ O `render.yaml` do projeto já está pronto para isso (plano `starter` + disco d
    `https://www.balao.info,https://balao.info`.
 4. Copie a URL pública do serviço e coloque em
    `NEXT_PUBLIC_WHATSAPP_PANEL_SERVER_URL` no site.
-5. Publique o site e leia o QR Code em `/crm`.
+5. Publique o site e leia o QR Code em `/painel/crm`.
 
 - ✅ Liga sozinho, HTTPS pronto, não depende do PC da loja.
 - ✅ O disco persistente mantém a sessão entre reinícios.

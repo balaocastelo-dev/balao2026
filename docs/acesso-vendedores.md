@@ -38,7 +38,7 @@ Quem entra pela página pessoal recebe:
 - o botão **“✋ Pegar este atendimento”**, para puxar um lead da caixa da loja.
 
 O que a página pessoal **não** mostra: a aba de cadastrar/remover vendedores.
-Isso é tarefa de quem administra, em `/crm`.
+Isso é tarefa de quem administra, em `/painel/crm`.
 
 ## O que fica guardado, e onde
 
@@ -59,7 +59,7 @@ Na prática: se o Thiago renomeia uma coluna para "Aguardando peça", isso é s�
 dele — a Julia continua vendo o funil dela. Já uma etiqueta ou resposta rápida
 nova aparece para todo mundo.
 
-Quem entra por `/crm` (administração) vê a caixa inteira e não carrega funil
+Quem entra por `/painel/crm` (administração) vê a caixa inteira e não carrega funil
 pessoal.
 
 > Nota sobre `/wendell`: a rota existia antes só como pasta de `/wendell/apple`
@@ -71,7 +71,7 @@ pessoal.
 | Rota | Para quem | Senha |
 | --- | --- | --- |
 | `/brendon` | O vendedor, no dia a dia | A senha pessoal dele |
-| `/crm` | Administração: conectar QR Code, cadastrar vendedor, ver a caixa toda | `PAINEL_PASSWORD` |
+| `/painel/crm` | Administração: conectar QR Code, cadastrar vendedor, ver a caixa toda | `PAINEL_PASSWORD` |
 | `/whatsapp` | Painel simples do WhatsApp (QR + chat) | `PAINEL_PASSWORD` |
 
 ## Primeira vez (checklist)
@@ -81,7 +81,7 @@ pessoal.
    disco persistente em `.wwebjs_auth`, senão a sessão cai a cada reinício.
 2. **Configure no site** a variável `NEXT_PUBLIC_WHATSAPP_PANEL_SERVER_URL`
    apontando para esse servidor.
-3. **Abra `/crm`** com a senha do painel e **leia o QR Code** com o celular da
+3. **Abra `/painel/crm`** com a senha do painel e **leia o QR Code** com o celular da
    loja, o do número (19) 98751-0267. Isso é feito uma vez só.
 4. **Mande o link para o vendedor**: `www.balao.info/brendon`. Ele entra com a
    senha dele, no computador dele.

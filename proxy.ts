@@ -9,8 +9,10 @@ import { NextResponse, type NextRequest } from 'next/server'
  * migração de imagens — sem senha nenhuma. As rotas de API por trás dessas
  * telas também aceitavam POST/PUT/DELETE de qualquer origem.
  *
- * A trava é a MESMA senha que já protege /crm e /painel (cookie de sessão do
- * painel): quem entrou em um, entra nos outros. Nada muda para quem usa a
+ * A trava é a senha do painel (cookie de sessão). Desde que a administração
+ * inteira passou a morar em /painel — catálogo, pedidos, CRM, equipe, Arena —
+ * é uma porta só: /admin, /crm e os outros endereços antigos levam para lá
+ * (lib/painel/enderecos-antigos.ts). Nada muda para quem usa a
  * loja — leitura (GET) continua pública, e as rotas do site (checkout,
  * contato, leads, validação de cupom, rastreio, descadastro, webhook do Pix)
  * ficam de fora desta lista de propósito.
@@ -23,7 +25,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 const COOKIE = 'balao_painel_session'
 
 // A loja tem DUAS portas de entrada, e as duas são legítimas:
-//  - a senha do painel (cookie acima), que abre /crm, /painel e o /admin;
+//  - a senha do painel (cookie acima), que abre o /painel inteiro;
 //  - a senha do dia do balcão (cookie abaixo), que abre /controle/admin e
 //    /fechamento — é a que o pessoal da loja usa no dia a dia.
 //
@@ -69,6 +71,10 @@ const API_SO_ESCRITA = [
   '/api/admin',
   '/api/ai',
   '/api/history',
+  // Mudar a situação de um pedido (que dispara e-mail para o cliente) e apagar
+  // pedido eram chamadas abertas. A consulta que a página de "obrigado" faz,
+  // /api/orders/status, é GET e continua pública.
+  '/api/orders',
 ]
 
 // Dentro dos prefixos acima, estas continuam públicas (a loja depende delas).
@@ -85,9 +91,25 @@ const EXCECOES_PUBLICAS = ['/api/coupons/validate']
  */
 // `/api/precos` entra aqui inteiro: até a leitura mostra as margens da loja e
 // de onde cada preço vem, e isso não é assunto de quem não tem a senha.
-const API_PROTEGIDA_SEMPRE = ['/api/seed', '/api/admin/seed-categories', '/api/precos']
+//
+// `/api/dashboard` também: são o faturamento, os pedidos e as vendas por
+// vendedor da loja. Estavam abertos em /dashboard para quem tivesse o endereço;
+// hoje esses números só existem dentro do painel.
+const API_PROTEGIDA_SEMPRE = ['/api/seed', '/api/admin/seed-categories', '/api/precos', '/api/dashboard']
+
+/**
+ * Endereços protegidos só no caminho exato, não no que vem embaixo.
+ *
+ * `/api/orders` devolve a lista de TODOS os pedidos com nome, e-mail, WhatsApp,
+ * endereço e CPF de cada cliente — e respondia para qualquer pessoa, sem senha.
+ * Quem usa é só a tela de pedidos do painel. Fica fora da regra de prefixo
+ * porque `/api/orders/status` (a página de "obrigado" consulta se o Pix caiu)
+ * precisa continuar pública.
+ */
+const API_PROTEGIDA_SEMPRE_EXATA = ['/api/orders']
 
 function ehApiProtegidaSempre(pathname: string) {
+  if (API_PROTEGIDA_SEMPRE_EXATA.includes(pathname.replace(/\/+$/, ''))) return true
   return API_PROTEGIDA_SEMPRE.some((p) => pathname === p || pathname.startsWith(`${p}/`))
 }
 
@@ -153,11 +175,26 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next({ request })
   }
 
-  // Rotas cujo GET escreve no banco: senha em qualquer método.
+  // As áreas de dentro do painel (/painel/produtos, /painel/crm…): sem a senha
+  // nem chegam a ser montadas. A pessoa vai para a entrada, em /painel, e de lá
+  // volta para a área que tinha pedido.
+  if (pathname.startsWith('/painel/')) {
+    if (!(await estaAutenticado(request))) {
+      const destino = request.nextUrl.clone()
+      destino.pathname = '/painel'
+      destino.search = ''
+      destino.searchParams.set('voltar', pathname)
+      return NextResponse.redirect(destino)
+    }
+    return NextResponse.next({ request })
+  }
+
+  // Rotas cujo GET escreve no banco ou devolve dado que não é público: senha
+  // em qualquer método.
   if (ehApiProtegidaSempre(pathname)) {
     if (!(await estaAutenticado(request))) {
       return NextResponse.json(
-        { ok: false, error: 'Acesso negado. Esta rota altera o banco e exige a senha do painel.' },
+        { ok: false, error: 'Acesso negado. Entre no painel do Balão para usar esta rota.' },
         { status: 401 }
       )
     }

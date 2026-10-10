@@ -1,10 +1,8 @@
 # Manual do Administrador - Sistema de Cupons
 
 ## Acesso
-1. Acesse a área administrativa do site (`/admin`).
-2. Localize a aba **"Cupons"** no menu de navegação.
-3. Ao clicar, será solicitada uma senha de segurança.
-4. Digite a senha: **56676009**.
+1. Acesse o painel do site (`www.balao.info/painel`) e entre com a senha do painel.
+2. No menu, em **Produtos e preços**, abra **Cupons**.
 
 ## Funcionalidades
 

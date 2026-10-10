@@ -50,7 +50,7 @@ export default function CouponManager() {
     //
     // Ela comparava a senha AQUI, no navegador — ou seja, a senha ia dentro do
     // arquivo JavaScript que qualquer visitante baixa. E nem era necessaria:
-    // /admin/cupons ja esta atras da senha do painel, e /api/coupons so aceita
+    // /painel/cupons ja esta atras da senha do painel, e /api/coupons so aceita
     // alteracao de quem entrou. Quem chega aqui ja passou pela tranca real.
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();

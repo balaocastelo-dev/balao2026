@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { ENDERECOS_ANTIGOS } from "./lib/painel/enderecos-antigos";
 
 const nextConfig: NextConfig = {
   turbopack: {
@@ -19,6 +20,15 @@ const nextConfig: NextConfig = {
         destination: "/blog/:slug",
         permanent: true,
       },
+      // A administração inteira mora em /painel. Os endereços de antes
+      // (/admin, /crm, /arena/admin…) continuam valendo e levam para lá.
+      // Temporário (307) de propósito: são endereços internos, e um 308 fica
+      // gravado no navegador mesmo se um dia a área mudar de lugar de novo.
+      ...ENDERECOS_ANTIGOS.map(({ de, para }) => ({
+        source: de,
+        destination: para,
+        permanent: false,
+      })),
     ];
   },
   images: {
