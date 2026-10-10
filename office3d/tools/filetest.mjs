@@ -1,0 +1,12 @@
+import { createRequire } from 'module';
+const require = createRequire('/opt/npm-tools/node_modules/');
+const { chromium } = require('playwright');
+const [file, out, wait] = process.argv.slice(2);
+const browser = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
+const page = await browser.newPage({ viewport: { width: 1600, height: 900 } });
+const logs = []; page.on('console', m => { const t = m.text(); if (!/GPU stall/.test(t)) logs.push('[' + m.type() + '] ' + t.slice(0, 300)); }); page.on('pageerror', e => logs.push('[pageerror] ' + e.message)); page.on('requestfailed', r => logs.push('[reqfail] ' + r.url().slice(0, 120)));
+const t0 = Date.now(); await page.goto('file://' + file);
+await page.waitForFunction('document.body.classList.contains("ready")', null, { timeout: 240000 }).catch(e => logs.push('TIMEOUT ready'));
+console.log('ready in', Date.now() - t0, 'ms'); await page.waitForTimeout(+(wait || 9000));
+await page.screenshot({ path: out, type: 'jpeg', quality: 86 });
+console.log(logs.join('\n') || 'no console output'); await browser.close();

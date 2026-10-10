@@ -1,0 +1,85 @@
+<!doctype html><meta charset="utf-8"><script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+import * as BGU from 'three/addons/utils/BufferGeometryUtils.js';
+window.THREE = THREE;
+const load = (url) => new Promise((res, rej) => new FBXLoader().load(url, res, undefined, rej));
+const b64 = (buf) => { const u = new Uint8Array(buf.buffer || buf, buf.byteOffset || 0, buf.byteLength); let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); };
+
+export const BODY = ['Bip01','Bip01_Pelvis','Bip01_Spine','Bip01_Spine1','Bip01_Spine2','Bip01_Neck','Bip01_Head',
+ 'Bip01_L_Clavicle','Bip01_L_UpperArm','Bip01_L_Forearm','Bip01_L_Hand','Bip01_R_Clavicle','Bip01_R_UpperArm','Bip01_R_Forearm','Bip01_R_Hand',
+ 'Bip01_L_Thigh','Bip01_L_Calf','Bip01_L_Foot','Bip01_L_Toe0','Bip01_R_Thigh','Bip01_R_Calf','Bip01_R_Foot','Bip01_R_Toe0'];
+const FINGERS = []; for (const s of ['L','R']) for (const f of ['0','1','2','3','4']) for (const k of ['', '1', '2']) FINGERS.push(`Bip01_${s}_Finger${f}${k}`);
+
+window.avatarPack = async (url) => {
+  const o = await load(url);
+  let mesh; o.traverse(n => { if (n.isSkinnedMesh && (!mesh || n.geometry.attributes.position.count > mesh.geometry.attributes.position.count)) mesh = n; });
+  o.updateMatrixWorld(true);
+  const nodes = []; o.traverse(n => { if (n.isBone) nodes.push(n); });
+  const idx = new Map(nodes.map((n, i) => [n, i]));
+  const warn = [];
+  const bones = nodes.map(n => { if (!idx.has(n.parent) && n.parent !== o) warn.push('odd parent ' + n.name + ' <- ' + n.parent.name); return { name: n.name, parent: idx.has(n.parent) ? idx.get(n.parent) : -1, p: n.position.toArray(), q: n.quaternion.toArray(), s: n.scale.toArray() }; });
+  const skel = mesh.skeleton.bones.map(b => idx.get(b));
+  const inv = new Float32Array(16 * skel.length); mesh.skeleton.boneInverses.forEach((m, i) => inv.set(m.elements, i * 16));
+  // geometry
+  let g = mesh.geometry.clone();
+  for (const k of Object.keys(g.attributes)) if (!['position', 'normal', 'uv', 'skinIndex', 'skinWeight'].includes(k)) g.deleteAttribute(k);
+  const mats = [].concat(mesh.material).map(m => m.name);
+  const n = g.attributes.position.count;
+  const order = []; const groups = [];
+  const src = g.groups.length ? g.groups : [{ start: 0, count: n, materialIndex: 0 }];
+  for (let mi = 0; mi < mats.length; mi++) { const start = order.length; for (const gr of src) if (gr.materialIndex === mi) for (let i = gr.start; i < gr.start + gr.count; i++) order.push(i); if (order.length > start) groups.push({ start, count: order.length - start, mat: mi }); }
+  g.clearGroups(); g.setIndex(order);
+  g = BGU.mergeVertices(g, 1e-4);
+  const P = g.attributes.position, N = g.attributes.normal, U = g.attributes.uv, SI = g.attributes.skinIndex, SW = g.attributes.skinWeight, c = P.count;
+  const pos = new Float32Array(P.array), nor = new Int8Array(c * 3), uv = new Float32Array(c * 2), si = new Uint8Array(c * 4), sw = new Uint8Array(c * 4);
+  let uvmin = 1e9, uvmax = -1e9;
+  for (let i = 0; i < c; i++) {
+    const nx = N.getX(i), ny = N.getY(i), nz = N.getZ(i), l = Math.hypot(nx, ny, nz) || 1;
+    nor[i * 3] = Math.round(nx / l * 127); nor[i * 3 + 1] = Math.round(ny / l * 127); nor[i * 3 + 2] = Math.round(nz / l * 127);
+    uv[i * 2] = U.getX(i); uv[i * 2 + 1] = U.getY(i); uvmin = Math.min(uvmin, uv[i * 2], uv[i * 2 + 1]); uvmax = Math.max(uvmax, uv[i * 2], uv[i * 2 + 1]);
+    let w = [SW.getX(i), SW.getY(i), SW.getZ(i), SW.getW(i)], j = [SI.getX(i), SI.getY(i), SI.getZ(i), SI.getW(i)];
+    const sum = w[0] + w[1] + w[2] + w[3] || 1; let q = w.map(v => Math.round(v / sum * 255)); const d = 255 - (q[0] + q[1] + q[2] + q[3]); let mx = 0; for (let k = 1; k < 4; k++) if (q[k] > q[mx]) mx = k; q[mx] += d;
+    for (let k = 0; k < 4; k++) { si[i * 4 + k] = q[k] ? j[k] : 0; sw[i * 4 + k] = q[k]; }
+  }
+  const index = c < 65536 ? new Uint16Array(g.index.array) : new Uint32Array(g.index.array);
+  const box = new THREE.Box3().setFromObject(o);
+  const meta = { bones, skel, mats, groups, verts: c, tris: index.length / 3, index32: c >= 65536, bindMatrix: mesh.bindMatrix.toArray(), meshMatrix: mesh.matrix.toArray(), height: box.max.y, uvRange: [uvmin, uvmax], warn,
+    matInfo: [].concat(mesh.material).map(m => ({ name: m.name, map: m.map && m.map.name, transparent: m.transparent })) };
+  return { meta, bufs: { 'pos.f32': b64(pos), 'nor.i8': b64(nor), 'uv.f32': b64(uv), 'si.u8': b64(si), 'sw.u8': b64(sw), 'idx.bin': b64(index), 'inv.f32': b64(inv) } };
+};
+
+// opts: fps, maxDur, start, inplace(bool: remove horizontal drift), 
+window.animPack = async (url, opts = {}) => {
+  const o = await load(url);
+  const clip = o.animations[0];
+  const fps = opts.fps || 30;
+  const t0 = opts.start || 0;
+  const dur = Math.min(clip.duration - t0, opts.maxDur || 1e9);
+  const frames = Math.max(2, Math.ceil(dur * fps - 1e-4) + 1);
+  const tr = new Map(clip.tracks.map(t => [t.name, t]));
+  const q16 = new Int16Array(frames * BODY.length * 4);
+  const missing = [];
+  const tmp = new THREE.Quaternion(), prev = BODY.map(() => new THREE.Quaternion());
+  BODY.forEach((b, bi) => {
+    const t = tr.get(b + '.quaternion');
+    let rest = null; if (!t) { missing.push(b); o.traverse(n => { if (n.name === b) rest = n.quaternion; }); }
+    const it = t && t.createInterpolant();
+    for (let f = 0; f < frames; f++) {
+      if (t) tmp.fromArray(it.evaluate(t0 + Math.min(f / fps, dur))); else tmp.copy(rest || new THREE.Quaternion());
+      tmp.normalize(); if (f > 0 && tmp.dot(prev[bi]) < 0) { tmp.set(-tmp.x, -tmp.y, -tmp.z, -tmp.w); } prev[bi].copy(tmp);
+      const k = (f * BODY.length + bi) * 4; q16[k] = Math.round(tmp.x * 32767); q16[k + 1] = Math.round(tmp.y * 32767); q16[k + 2] = Math.round(tmp.z * 32767); q16[k + 3] = Math.round(tmp.w * 32767);
+    }
+  });
+  const root = new Float32Array(frames * 3); const pt = tr.get('Bip01.position'); const pit = pt.createInterpolant();
+  for (let f = 0; f < frames; f++) { const v = pit.evaluate(t0 + Math.min(f / fps, dur)); root[f * 3] = v[0]; root[f * 3 + 1] = v[1]; root[f * 3 + 2] = v[2]; }
+  // fingers: constant pose sampled mid clip
+  const fingers = {}; for (const b of FINGERS) { const t = tr.get(b + '.quaternion'); if (t) { const v = t.createInterpolant().evaluate(t0 + dur * (opts.fingerAt ?? 0.5)); fingers[b] = Array.from(v).map(x => +x.toFixed(4)); } }
+  // face: blink info
+  const face = {}; for (const b of ['Bip01_LEyeBlinkTop', 'Bip01_REyeBlinkTop', 'Bip01_LEyeBlinkBottom', 'Bip01_REyeBlinkBottom', 'Bip01_MJaw']) { const t = tr.get(b + '.position'); const tq = tr.get(b + '.quaternion'); if (t) { let far = 0, fv = null; const v0 = t.values.slice(0, 3); for (let i = 0; i < t.values.length; i += 3) { const d = Math.hypot(t.values[i] - v0[0], t.values[i + 1] - v0[1], t.values[i + 2] - v0[2]); if (d > far) { far = d; fv = Array.from(t.values.slice(i, i + 3)); } } let qfar = 0; if (tq) { const q0 = new THREE.Quaternion().fromArray(tq.values, 0); for (let i = 0; i < tq.values.length; i += 4) qfar = Math.max(qfar, q0.angleTo(new THREE.Quaternion().fromArray(tq.values, i))); } face[b] = { rest: Array.from(v0), far: fv, d: far, qfar }; } }
+  const meta = { fps, frames, duration: dur, srcDuration: clip.duration, bones: BODY, missing, fingers, face, root0: Array.from(root.slice(0, 3)), rootEnd: Array.from(root.slice(-3)) };
+  return { meta, bufs: { 'q.i16': b64(q16), 'root.f32': b64(root) } };
+};
+window.ready = true;
+</script>
