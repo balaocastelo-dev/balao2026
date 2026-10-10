@@ -137,6 +137,82 @@ describe("ficha — memória e armazenamento", () => {
   });
 });
 
+// Casos apontados na revisão do código: tudo o que a página afirmaria sem o
+// título sustentar, ou leria errado.
+describe("ficha — não afirmar o que o título não diz", () => {
+  it("M.2 não é NVMe, e disco sem palavra nenhuma não é SSD", () => {
+    expect(ficha("PC Gamer I7 12700kf, Rtx 3080, 32gb Ddr5, M.2 1tb").armazenamento).toBe("SSD M.2 1 TB");
+    expect(ficha("Cpu Gamer Intel I9 11ª 32gb Ram 1Tb Placa de video Rtx 3060 12gb Gabinete Preto").armazenamento).toBe("1 TB");
+    expect(ficha("PC Gamer Completo Ryzen 7 8700f, RTX 5060, 16gb Ddr5, SSD Nvme 1TB").armazenamento).toBe("SSD NVMe 1 TB");
+  });
+
+  it("placa com duas versões e título mudo: a regra usa a menor, a vitrine não mostra número", () => {
+    const f = ficha("PC Gamer I7 12700kf, Rtx 3080, 32gb Ddr5, M.2 1tb");
+    expect([f.vramGb, f.vramConfirmada]).toEqual([10, false]);
+    expect(rotuloDePlaca(f)).toBe("GeForce RTX 3080");
+
+    // O título diz 16, a tabela só conhece 12: vale 12 para a regra, sem número na tela.
+    const ti = ficha("PC Gamer Bluepc, Amd Ryzen 7 7800x3d, Geforce RTX 4070 Ti 16gb, 32gb Ddr5, SSD 1TB Nvme");
+    expect([ti.vramGb, ti.vramConfirmada, ti.memoriaGb]).toEqual([12, false, 32]);
+    expect(rotuloDePlaca(ti)).toBe("GeForce RTX 4070 Ti");
+    expect(nivelDeIA(ti)).toBe("vram-12");
+  });
+
+  it("placa fora da tabela não ganha memória pelo número ao lado", () => {
+    const f = ficha("Computador Gamer I7, GTX 1050 16GB, HD 1TB, SSD 120GB, Fonte 500W");
+    expect(f.vramGb).toBeNull();
+    expect(rotuloDePlaca(f)).toBe("GeForce GTX 1050");
+  });
+
+  it('só diz "Integrada" quando o título diz', () => {
+    expect(rotuloDePlaca(ficha("PC Gamer Completo Player, Intel Core i5, 16gb Ram, Placa De Vídeo Geforce 4gb, SSD 1TB"))).toBeNull();
+    expect(rotuloDePlaca(ficha("PC Gamer Amd Ryzen 5 5600gt, 16gb Ram, Placa De Video Radeon Vega 7, SSD 960gb"))).toBe("Integrada");
+    expect(rotuloDePlaca(ficha("PC Workstation NVIDIA RTX A4000 16GB, Intel Xeon, 64gb"))).toBeNull();
+  });
+
+  it("memória da placa escrita como se fosse RAM", () => {
+    expect(ficha("PC Gamer Ryzen 5-5600, GPU RX580 8GB DDR5, SSD 512GB Nvme, 16GB RAM DDR4 3200MHz")).toMatchObject({
+      memoriaGb: 16,
+      tipoDeMemoria: "DDR4",
+    });
+    expect(ficha("PC Gamer Completo Intel i7 3770 Gtx 750 4gb Ram 16gb Ddr3 SSD 480gb").memoriaGb).toBe(16);
+    expect(ficha("PC Gamer I5 6400 Gtx 1650, 4GB, SSD 480GB, 8GB, DDR4")).toMatchObject({ vramGb: 4, memoriaGb: 8 });
+    // Quando só há um número, ele é a RAM.
+    expect(ficha("PC Gamer i9 11ª RTX 5060 32gb Ddr4 1TB SSD Monitor 24 Curvo")).toMatchObject({ vramGb: 8, memoriaGb: 32 });
+  });
+
+  it("mini PC e chip de notebook usam a placa de notebook", () => {
+    const mini = lerFicha({
+      name: "Mini PC Asus ROG NUC, Intel Core Ultra 9 185H, RTX 4070, 32GB RAM, SSD 1TB",
+      category: "Computadores/PC/Computador Mini PC",
+    });
+    expect(mini.vramGb).toBe(8);
+    expect(nivelDeIA(mini)).toBeNull();
+  });
+
+  it("128 GB solto é memória quando o título já tem disco", () => {
+    const mac = lerFicha({
+      name: 'MacBook Pro Apple 16" Chip M5 Max, CPU 18 Núcleos, GPU 40 Núcleos, 128GB, SSD 4TB, Preto-Espacial',
+      category: "Computadores/Notebooks/Macbook/Macbook Pro",
+    });
+    expect([mac.memoriaGb, mac.armazenamento]).toEqual([128, "SSD 4 TB"]);
+    expect(nivelDeIA(mac)).toBe("apple");
+    // Sozinho, é o disco.
+    expect(ficha("PC Gamer Completo Intel Core i5 SSD 128GB 8GB Monitor 19")).toMatchObject({ memoriaGb: 8, armazenamento: "SSD 128 GB" });
+  });
+
+  it("não tira processador nem placa de palavra parecida", () => {
+    const note = lerFicha({
+      name: "Notebook Gamer Acer Nitro Intel Core i7 13650HX, 16GB, RTX 4060, Tela 15.6 FHD Ultra 165hz",
+      category: "Computadores/Notebooks",
+    });
+    expect(note.processador).toBe("Intel Core i7 13650HX");
+    expect(ficha("PC Gamer Ryzen 5 480GB SSD 16gb").processador).toBe("AMD Ryzen 5");
+    expect(ficha("PC Gamer i7 1000w, 16gb").processador).toBe("Intel Core i7");
+    expect(ficha("PC Gamer Gabinete Asus GT502, Ryzen 7 9800x3d, RTX 5080 16gb, 64gb Ddr5").placaDeVideo).toBe("GeForce RTX 5080");
+  });
+});
+
 describe("ficha — nome de vitrine", () => {
   it("troca o título do vendedor pelo que a máquina é", () => {
     const produto = {

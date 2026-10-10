@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { MaquinaDeVitrine } from "@/lib/catalogo/vitrine-premium";
 import LinhaDeMaquina from "./LinhaDeMaquina";
 
@@ -34,6 +34,16 @@ export default function ListaComFiltro({ maquinas }: { maquinas: MaquinaDeVitrin
   const visiveis = useMemo(() => maquinas.filter(RECORTES.find((r) => r.id === recorte)!.passa), [maquinas, recorte]);
   const recolhidas = aberta ? 0 : Math.max(0, visiveis.length - DE_INICIO);
 
+  // O botão some ao abrir a lista. Sem isto, quem navega pelo teclado perdia
+  // o lugar: o foco vai para a primeira máquina que acabou de aparecer.
+  const lista = useRef<HTMLOListElement>(null);
+  const acabouDeAbrir = useRef(false);
+  useEffect(() => {
+    if (!aberta || !acabouDeAbrir.current) return;
+    acabouDeAbrir.current = false;
+    lista.current?.querySelector<HTMLAnchorElement>(`li:nth-child(${DE_INICIO + 1}) a`)?.focus();
+  }, [aberta]);
+
   return (
     <>
       <ul className="prm-filtro" aria-label="Recortar a lista por configuração">
@@ -52,7 +62,7 @@ export default function ListaComFiltro({ maquinas }: { maquinas: MaquinaDeVitrin
         ))}
       </ul>
 
-      <ol id="lista-do-topo" className="prm-lista">
+      <ol id="lista-do-topo" ref={lista} className="prm-lista">
         {visiveis.map((maquina, i) => (
           <li key={maquina.id} hidden={!aberta && i >= DE_INICIO}>
             <LinhaDeMaquina maquina={maquina} />
@@ -66,8 +76,10 @@ export default function ListaComFiltro({ maquinas }: { maquinas: MaquinaDeVitrin
             type="button"
             className="prm-botao prm-botao--contorno"
             aria-controls="lista-do-topo"
-            aria-expanded={false}
-            onClick={() => setAberta(true)}
+            onClick={() => {
+              acabouDeAbrir.current = true;
+              setAberta(true);
+            }}
           >
             {recolhidas === 1 ? "Mostrar mais 1 máquina" : `Mostrar mais ${recolhidas} máquinas`}
           </button>

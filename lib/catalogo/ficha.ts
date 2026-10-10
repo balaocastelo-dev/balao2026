@@ -27,12 +27,23 @@ export interface FichaDaMaquina {
   /** "GeForce RTX 5070 Ti", "Radeon RX 6600". Vazio em placa integrada. */
   placaDeVideo: string | null;
   fabricanteDaPlaca: "nvidia" | "amd" | "intel" | null;
-  /** Memória da placa de vídeo dedicada, em GB. */
+  /**
+   * Memória da placa de vídeo dedicada, em GB. Só existe para placa que está
+   * na tabela; em modelo com mais de uma versão e título mudo, é a MENOR.
+   */
   vramGb: number | null;
+  /**
+   * `true` quando dá para afirmar o número: o modelo só existe com essa
+   * memória, ou o título disse uma versão que existe. Quando é `false`, o
+   * número serve para a regra (por baixo), mas não é mostrado ao cliente.
+   */
+  vramConfirmada: boolean;
+  /** O título diz que os gráficos são integrados (Vega, UHD, "integrado"). */
+  placaIntegrada: boolean;
   /** Memória RAM, em GB. Nos Apple é a memória unificada. */
   memoriaGb: number | null;
   tipoDeMemoria: "DDR3" | "DDR4" | "DDR5" | null;
-  /** "SSD NVMe 2 TB", "SSD 512 GB", "HD 1 TB". */
+  /** "SSD NVMe 2 TB", "SSD M.2 1 TB", "SSD 512 GB", "HD 1 TB" — ou só "1 TB" quando o título não diz o tipo. */
   armazenamento: string | null;
   /** Chip Apple (M1 a M5, com Pro/Max/Ultra): memória unificada. */
   appleSilicon: boolean;
@@ -129,8 +140,25 @@ function lerTipo(nome: string, categoria: string): TipoDeMaquina {
 }
 
 // ---------- processador ----------
+//
+// Os sufixos são listados um a um de propósito. Um padrão frouxo ("qualquer
+// letra depois do número") transformava "Tela Ultra 165hz" em "Core Ultra
+// 165HZ" e "Ryzen 5 480GB" em processador.
 
 const sufixo = (s: string) => s.toUpperCase();
+
+const SUFIXO_RYZEN = "(?:x3d|xt|x|gt|ge|g|f|hs|hx|h|u|s|c|e)?";
+const SUFIXO_INTEL = "(?:kf|ks|k|f|t|s|hx|hk|hs|h|u|p|v)?";
+
+const RE_RYZEN_AI = /\bryzen\s*ai\s*([3579])[\s-]+(?:hx\s*)?(\d{3})\b/;
+// "ryzne" é erro de digitação que aparece de verdade nos títulos de origem.
+const RE_RYZEN = new RegExp(`\\bry(?:zen|zne)\\s*([3579])[\\s-]+(?:pro\\s+)?(\\d{3,4}${SUFIXO_RYZEN})\\b`);
+const RE_RYZEN_SEM_NIVEL = new RegExp(`\\bryzen\\s*(\\d{4}${SUFIXO_RYZEN})\\b`);
+const RE_RYZEN_SO_NIVEL = /\bry(?:zen|zne)\s*([3579])\b/;
+const RE_ULTRA = new RegExp(`\\bultra\\s*([3579])?[\\s-]*(\\d{3}${SUFIXO_INTEL})\\b`);
+const RE_ULTRA_SO_NIVEL = /\bcore\s*ultra\s*([3579])\b/;
+const RE_CORE = new RegExp(`\\bi([3579])\\b(?:[\\s-]*(\\d{4,5}${SUFIXO_INTEL})\\b)?`);
+const RE_CORE_NOVO = /\bcore\s*([3579])[\s-]+(\d{3}(?:hx|h|u))\b/;
 
 function nivelDoCoreUltra(modelo: string): string | null {
   // 225/235/245 = Ultra 5, 255/265 = Ultra 7, 275/285 = Ultra 9.
@@ -151,25 +179,24 @@ function lerProcessador(nome: string, tipo: TipoDeMaquina): { rotulo: string | n
     }
   }
 
-  const ryzenAi = nome.match(/\bryzen\s*ai\s*([3579])[\s-]+(?:hx\s*)?(\d{3})\b/);
+  const ryzenAi = nome.match(RE_RYZEN_AI);
   if (ryzenAi) return { rotulo: `AMD Ryzen AI ${ryzenAi[1]} ${ryzenAi[2]}`, apple: false };
-  // "ryzne" é erro de digitação que aparece de verdade nos títulos de origem.
-  const ryzen = nome.match(/\bry(?:zen|zne)\s*([3579])[\s-]+(?:pro\s+)?(\d{3,4}[a-z0-9]{0,3})\b/);
+  const ryzen = nome.match(RE_RYZEN);
   if (ryzen) return { rotulo: `AMD Ryzen ${ryzen[1]} ${sufixo(ryzen[2])}`, apple: false };
-  const ryzenSemNivel = nome.match(/\bryzen\s*(\d{4}[a-z0-9]{0,3})\b/);
+  const ryzenSemNivel = nome.match(RE_RYZEN_SEM_NIVEL);
   if (ryzenSemNivel) return { rotulo: `AMD Ryzen ${sufixo(ryzenSemNivel[1])}`, apple: false };
-  const ryzenSoNivel = nome.match(/\bry(?:zen|zne)\s*([3579])\b/);
+  const ryzenSoNivel = nome.match(RE_RYZEN_SO_NIVEL);
   if (ryzenSoNivel) return { rotulo: `AMD Ryzen ${ryzenSoNivel[1]}`, apple: false };
 
-  const ultra = nome.match(/\bultra\s*([3579])?[\s-]*(\d{3}[a-z]{0,2})\b/);
+  const ultra = nome.match(RE_ULTRA);
   if (ultra) {
     const nivel = ultra[1] || nivelDoCoreUltra(ultra[2]);
     return { rotulo: `Intel Core Ultra ${nivel ? `${nivel} ` : ""}${sufixo(ultra[2])}`, apple: false };
   }
-  const ultraSoNivel = nome.match(/\bcore\s*ultra\s*([3579])\b/);
+  const ultraSoNivel = nome.match(RE_ULTRA_SO_NIVEL);
   if (ultraSoNivel) return { rotulo: `Intel Core Ultra ${ultraSoNivel[1]}`, apple: false };
 
-  const core = nome.match(/\bi([3579])\b(?:[\s-]*(\d{4,5}[a-z]{0,2})\b)?/);
+  const core = nome.match(RE_CORE);
   if (core) {
     if (core[2]) return { rotulo: `Intel Core i${core[1]} ${sufixo(core[2])}`, apple: false };
     const resto = nome.slice(core.index! + core[0].length);
@@ -179,7 +206,7 @@ function lerProcessador(nome: string, tipo: TipoDeMaquina): { rotulo: string | n
   }
 
   // A linha nova da Intel perdeu o "i": "Core 5 210H".
-  const coreNovo = nome.match(/\bcore\s*([3579])[\s-]+(\d{3}[a-z]{1,2})\b/);
+  const coreNovo = nome.match(RE_CORE_NOVO);
   if (coreNovo) return { rotulo: `Intel Core ${coreNovo[1]} ${sufixo(coreNovo[2])}`, apple: false };
 
   return { rotulo: null, apple: false };
@@ -196,7 +223,11 @@ interface PlacaLida {
 }
 
 function lerPlaca(nome: string): PlacaLida | null {
-  const nvidia = /\b(rtx|gtx|gt)\W{0,3}(\d{3,4})\s*(ti\s*super|ti|super)?\b/.exec(nome);
+  // RTX e GTX primeiro. "GT" sozinho só vale para os modelos que existem:
+  // sem isso, o gabinete "GT502" virava placa de vídeo.
+  const nvidia =
+    /\b(rtx|gtx)\W{0,3}(\d{3,4})\s*(ti\s*super|ti|super)?\b/.exec(nome) ||
+    /\b(gt)\W{0,3}(610|630|640|710|720|730|740|1030)()\b/.exec(nome);
   if (nvidia) {
     const variante = (nvidia[3] || "").replace(/\s+/g, " ").trim();
     const chave = `${nvidia[1]} ${nvidia[2]}${variante ? ` ${variante}` : ""}`;
@@ -237,6 +268,17 @@ function lerPlaca(nome: string): PlacaLida | null {
   return null;
 }
 
+/**
+ * A placa é a versão de notebook? Além dos notebooks, os mini PCs e os "tudo
+ * em um" usam chip de notebook: uma "RTX 4070" neles tem 8 GB, não 12. O
+ * processador de sufixo H/HX/HS/U denuncia isso mesmo quando a categoria não.
+ */
+function usaPlacaDeNotebook(nome: string, tipo: TipoDeMaquina, processador: string | null): boolean {
+  if (tipo === "notebook") return true;
+  if (/\bmini\s*-?\s*pc\b|\bnuc\b|all\s*-?\s*in\s*-?\s*one|\btudo em um\b/.test(nome)) return true;
+  return /\d(HX|HS|HK|H|U)$/.test(processador || "");
+}
+
 // ---------- memória e armazenamento ----------
 
 interface Capacidade {
@@ -247,6 +289,8 @@ interface Capacidade {
   antes: string;
   /** A palavra logo depois do número. */
   depois: string;
+  /** O número abre o próprio trecho ("…, 16gb, …"): não tem vizinho à esquerda. */
+  abreOTrecho: boolean;
   /** A palavra seguinte é "ssd"/"nvme" e logo vem OUTRA capacidade ("32GB SSD 1TB"). */
   discoEhDoProximo: boolean;
 }
@@ -279,6 +323,7 @@ function capacidades(nome: string): Capacidade[] {
       inicio: m.index,
       antes,
       depois: direita[0] || "",
+      abreOTrecho: esquerda.length === 0,
       discoEhDoProximo: DISCO.test(direita[0] || "") && /^\d{1,4}(gb|tb)?$/.test(direita[1] || ""),
     });
   }
@@ -293,6 +338,9 @@ function rotuloDeCapacidade(gb: number): string {
   return `${gb} GB`;
 }
 
+const MEMORIAS_COMUNS = [4, 6, 8, 12, 16, 18, 24, 32, 36, 48, 64, 96];
+const MEMORIAS_GRANDES = [128, 192, 256];
+
 // ---------- leitura completa ----------
 
 export function lerFicha(produto: Pick<Product, "name" | "category">): FichaDaMaquina {
@@ -301,24 +349,44 @@ export function lerFicha(produto: Pick<Product, "name" | "category">): FichaDaMa
   const tipo = lerTipo(nome, categoria);
   const processador = lerProcessador(nome, tipo);
   const placa = processador.apple ? null : lerPlaca(nome);
+  const versoes = placa
+    ? (usaPlacaDeNotebook(nome, tipo, processador.rotulo) ? VRAM_NOTEBOOK : VRAM_DESKTOP)[placa.chave]
+    : undefined;
 
   let vramDita: number | null = null;
+  /** "RX580 8GB DDR5", "Gtx 750 4gb Ram 16gb": colado na placa E com cara de RAM. */
+  let coladaComCaraDeRam: number | null = null;
   let memoriaDita: number | null = null;
-  let memoriaSolta: number | null = null;
-  const discos: (Capacidade & { ssd: boolean })[] = [];
+  const soltas: Capacidade[] = [];
+  /** "128GB" sem palavra nenhuma: disco pequeno ou memória grande. */
+  const grandesSoltas: Capacidade[] = [];
+  const discos: (Capacidade & { tipo: "ssd" | "hd" | "indefinido" })[] = [];
 
   for (const c of capacidades(nome)) {
     const ramExplicita = RAM_DEPOIS.test(c.depois) || RAM_ANTES.test(c.antes);
+    const comPalavraDeDisco = DISCO.test(c.antes) || (DISCO.test(c.depois) && !c.discoEhDoProximo);
 
     // Disco: tudo em TB e todo "GB" grande demais para ser memória.
-    if (c.unidade === "tb" || (c.gb >= 100 && !(ramExplicita && [128, 192, 256].includes(c.gb)))) {
+    if (c.unidade === "tb" || c.gb >= 100) {
+      if (c.unidade === "gb" && MEMORIAS_GRANDES.includes(c.gb) && !comPalavraDeDisco) {
+        if (ramExplicita) {
+          if (memoriaDita == null) memoriaDita = c.gb;
+        } else {
+          grandesSoltas.push(c);
+        }
+        continue;
+      }
       const hd = /^(hd|hdd)$/.test(c.antes) || (/^(hd|hdd)$/.test(c.depois) && !c.discoEhDoProximo);
-      discos.push({ ...c, ssd: !hd });
+      discos.push({ ...c, tipo: hd ? "hd" : comPalavraDeDisco ? "ssd" : "indefinido" });
       continue;
     }
 
     // Daqui para baixo o número é pequeno: memória da placa ou RAM.
     const coladaNaPlaca = placa != null && c.inicio >= placa.fim && /^\s*$/.test(nome.slice(placa.fim, c.inicio));
+    if (coladaNaPlaca && ramExplicita) {
+      if (coladaComCaraDeRam == null) coladaComCaraDeRam = c.gb;
+      continue;
+    }
     if (!ramExplicita && (coladaNaPlaca || PLACA_ANTES.test(c.antes))) {
       if (vramDita == null) vramDita = c.gb;
       continue;
@@ -327,36 +395,74 @@ export function lerFicha(produto: Pick<Product, "name" | "category">): FichaDaMa
       if (memoriaDita == null) memoriaDita = c.gb;
       continue;
     }
-    if (memoriaSolta == null && [4, 6, 8, 12, 16, 18, 24, 32, 36, 48, 64, 96].includes(c.gb)) {
-      memoriaSolta = c.gb;
+    if (MEMORIAS_COMUNS.includes(c.gb)) soltas.push(c);
+  }
+
+  // O número colado na placa com "DDR5"/"Ram" ao lado: se o título traz OUTRA
+  // memória explícita, aquele era da placa (GDDR5 escrito como DDR5). Se não
+  // traz, era mesmo a RAM ("RTX 5060 32gb Ddr4").
+  let textoDaMemoria = nome;
+  if (coladaComCaraDeRam != null) {
+    if (memoriaDita != null) {
+      vramDita ??= coladaComCaraDeRam;
+      // O "DDR5" colado na placa é a memória DELA; não serve para dizer o tipo da RAM.
+      textoDaMemoria = nome.slice(0, placa!.fim) + nome.slice(placa!.fim).replace(/^\s*\d+\s*gb\s*ddr\d/, " ");
+    } else {
+      memoriaDita = coladaComCaraDeRam;
     }
   }
 
-  // VRAM: a tabela manda; o título só escolhe entre versões que existem.
+  // "GTX 1650, 4GB, SSD 480GB, 8GB": o primeiro número solto, logo depois da
+  // placa e igual à memória dela, é da placa; a RAM é o seguinte.
+  let memoriaSolta = soltas[0]?.gb ?? null;
+  if (soltas.length > 1 && placa && versoes?.includes(soltas[0].gb) && soltas[0].abreOTrecho) {
+    const entre = nome.slice(placa.fim, soltas[0].inicio);
+    if (/^\s*[,|/;]\s*$/.test(entre)) memoriaSolta = soltas[1].gb;
+  }
+
+  // VRAM: só de placa que está na tabela; o título apenas escolhe entre as
+  // versões que existem. Placa fora da tabela fica sem número — era por ali
+  // que "GTX 1050 16GB" virava placa de 16 GB.
   let vramGb: number | null = null;
+  let vramConfirmada = false;
   let vramEraRam = false;
-  if (placa) {
-    const tabela = tipo === "notebook" ? VRAM_NOTEBOOK : VRAM_DESKTOP;
-    const versoes = tabela[placa.chave];
-    if (versoes) {
-      vramGb = vramDita != null && versoes.includes(vramDita) ? vramDita : versoes[0];
-      // "RTX 3050 16gb SSD 960gb": não existe 3050 de 16 GB — o número colado
-      // na placa era a RAM do computador.
-      vramEraRam = vramDita != null && !versoes.includes(vramDita);
-    } else if (tipo !== "notebook" || vramDita != null) {
-      vramGb = vramDita;
-    }
+  if (versoes) {
+    const ditaExiste = vramDita != null && versoes.includes(vramDita);
+    vramGb = ditaExiste ? vramDita : versoes[0];
+    vramConfirmada = ditaExiste || (versoes.length === 1 && vramDita == null);
+    // "RTX 3050 16gb SSD 960gb": não existe 3050 de 16 GB — o número colado
+    // na placa era a RAM do computador.
+    vramEraRam = vramDita != null && !ditaExiste;
+  }
+
+  // "128GB" solto: é a memória quando o título já tem um disco de verdade
+  // (MacBook "…, 128GB, SSD 4TB"); sozinho, é o disco.
+  let memoriaGrande: number | null = null;
+  for (const c of grandesSoltas) {
+    if (memoriaGrande == null && discos.length > 0) memoriaGrande = c.gb;
+    else discos.push({ ...c, tipo: "indefinido" });
   }
 
   const memoriaGb =
-    memoriaDita ?? memoriaSolta ?? (vramEraRam && vramDita != null && [8, 16, 32, 64].includes(vramDita) ? vramDita : null);
+    memoriaDita ??
+    memoriaSolta ??
+    memoriaGrande ??
+    (vramEraRam && vramDita != null && [8, 16, 32, 64].includes(vramDita) ? vramDita : null);
 
-  const tipoDeMemoria = nome.match(/\bddr([345])\b/);
-  const temNvme = /\bnvme\b|\bm\.?2\b|\bpcie\b/.test(nome);
+  const tipoDeMemoria = textoDaMemoria.match(/\bddr([345])\b/);
+  // NVMe só quando o título diz NVMe ou PCIe. "M.2" é o formato do encaixe:
+  // existe M.2 SATA, então vira "SSD M.2", sem prometer a velocidade.
+  const temNvme = /\bnvme\b|\bpcie\b/.test(nome);
+  const temM2 = /\bm\.?2\b/.test(nome);
   let armazenamento: string | null = null;
-  const disco = discos.find((d) => d.ssd) || discos[0];
+  const disco = discos.find((d) => d.tipo === "ssd") || discos.find((d) => d.tipo === "indefinido") || discos[0];
   if (disco) {
-    armazenamento = `${!disco.ssd ? "HD" : temNvme ? "SSD NVMe" : "SSD"} ${rotuloDeCapacidade(disco.gb)}`;
+    const tamanho = rotuloDeCapacidade(disco.gb);
+    if (disco.tipo === "hd") armazenamento = `HD ${tamanho}`;
+    else if (temNvme) armazenamento = `SSD NVMe ${tamanho}`;
+    else if (temM2) armazenamento = `SSD M.2 ${tamanho}`;
+    else if (disco.tipo === "ssd" || /\bssd\b/.test(nome)) armazenamento = `SSD ${tamanho}`;
+    else armazenamento = tamanho;
   }
 
   return {
@@ -365,6 +471,8 @@ export function lerFicha(produto: Pick<Product, "name" | "category">): FichaDaMa
     placaDeVideo: placa?.rotulo ?? null,
     fabricanteDaPlaca: placa?.fabricante ?? null,
     vramGb,
+    vramConfirmada,
+    placaIntegrada: !placa && !processador.apple && /\bvega\b|\bintegrad|\buhd\b|\biris\b|radeon graphics/.test(nome),
     memoriaGb,
     tipoDeMemoria: tipoDeMemoria ? (`DDR${tipoDeMemoria[1]}` as FichaDaMaquina["tipoDeMemoria"]) : null,
     armazenamento,
@@ -433,9 +541,13 @@ export function rotuloDeMemoria(ficha: FichaDaMaquina): string | null {
   return `${ficha.memoriaGb} GB${ficha.tipoDeMemoria ? ` ${ficha.tipoDeMemoria}` : ""}`;
 }
 
-/** "GeForce RTX 5070 Ti, 16 GB", "Gráficos do chip M5 Max". */
+/**
+ * "GeForce RTX 5070 Ti, 16 GB". O número só aparece quando dá para afirmar;
+ * "GeForce RTX 5060 Ti" sozinho quando o título não diz qual das versões é.
+ * Devolve "Integrada" só quando o título diz; `null` quando não se sabe.
+ */
 export function rotuloDePlaca(ficha: FichaDaMaquina): string | null {
   if (ficha.appleSilicon) return ficha.processador ? `Integrada ao ${curto(ficha.processador)}` : null;
-  if (!ficha.placaDeVideo) return null;
-  return ficha.vramGb ? `${ficha.placaDeVideo}, ${ficha.vramGb} GB` : ficha.placaDeVideo;
+  if (!ficha.placaDeVideo) return ficha.placaIntegrada ? "Integrada" : null;
+  return ficha.vramGb && ficha.vramConfirmada ? `${ficha.placaDeVideo}, ${ficha.vramGb} GB` : ficha.placaDeVideo;
 }

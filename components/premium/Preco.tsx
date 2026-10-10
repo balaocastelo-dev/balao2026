@@ -20,9 +20,9 @@ export default function Preco({
       : "à vista";
 
   return (
-    <div className={`prm-preco${grande ? " prm-preco--grande" : ""}`}>
+    <span className={`prm-preco${grande ? " prm-preco--grande" : ""}`}>
       <span className="prm-preco__valor">{emReais(valor)}</span>
       <span className="prm-preco__como">{como}</span>
-    </div>
+    </span>
   );
 }

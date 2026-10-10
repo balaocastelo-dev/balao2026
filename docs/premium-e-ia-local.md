@@ -19,8 +19,10 @@ Fica de fora o produto sem preço e o marcado como indisponível.
 
 Os computadores chegam pelo espelhamento sem ficha técnica; tudo o que se sabe está no título do vendedor de origem. `lib/catalogo/ficha.ts` lê o título e devolve processador, placa de vídeo, memória da placa (VRAM), RAM e armazenamento. É conservador: na dúvida, o campo fica vazio.
 
-- Memória da placa: vale a tabela do fabricante (`VRAM_DESKTOP` e `VRAM_NOTEBOOK`). Modelo com mais de uma versão (RTX 5060 Ti de 8 ou 16 GB) fica com a menor, a não ser que o título diga a maior.
-- Placa nova no mercado: acrescentar uma linha na tabela. Sem a linha, só entra a memória que o título disser.
+- Memória da placa: vale a tabela do fabricante (`VRAM_DESKTOP` e `VRAM_NOTEBOOK`). Modelo com mais de uma versão (RTX 5060 Ti de 8 ou 16 GB) fica com a menor para a regra, a não ser que o título diga a maior — e, enquanto o título não disser, a página mostra a placa sem o número.
+- Placa nova no mercado: acrescentar uma linha na tabela. Placa fora da tabela aparece com o nome, sem memória, e não entra em IA local.
+- Mini PC, "tudo em um" e máquina com processador de notebook (final H, HX, HS, U) usam a tabela de notebook: a placa de mesmo nome tem menos memória.
+- Armazenamento: "NVMe" só quando o título diz NVMe ou PCIe; "M.2" sozinho vira "SSD M.2"; capacidade sem palavra nenhuma aparece só com o tamanho.
 - O nome de vitrine ("Ryzen 7 9800X3D com RTX 5070 Ti") também sai daí. O nome completo continua na página do produto.
 
 ## Quem entra em IA local
@@ -36,7 +38,7 @@ O produto não muda de categoria no cadastro: continua em Computadores e aparece
 
 ## Testes
 
-`npx vitest run __tests__/lib/catalogo-vitrine-premium.test.ts` — 41 casos com títulos reais do catálogo de 10/10/2026.
+`npx vitest run __tests__/lib/catalogo-vitrine-premium.test.ts` — 49 casos, quase todos com títulos reais do catálogo de 10/10/2026.
 
 ## Visual
 

@@ -277,7 +277,7 @@ export default async function PremiumPage() {
                     </div>
                     <div>
                       <dt>Placa de vídeo</dt>
-                      <dd>{topo.placa || "Integrada"}</dd>
+                      <dd>{topo.placa || "Consulte a ficha"}</dd>
                     </div>
                     <div>
                       <dt>Memória</dt>

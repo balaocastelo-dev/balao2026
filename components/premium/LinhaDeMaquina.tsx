@@ -33,7 +33,7 @@ export default function LinhaDeMaquina({ maquina }: { maquina: MaquinaDeVitrine 
         </div>
         <div>
           <dt>Placa de vídeo</dt>
-          <dd>{maquina.placa ? semQuebra(maquina.placa) : "Integrada"}</dd>
+          <dd>{maquina.placa ? semQuebra(maquina.placa) : SEM_DADO}</dd>
         </div>
         <div>
           <dt>Memória</dt>
