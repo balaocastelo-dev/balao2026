@@ -36,14 +36,21 @@ describe("margem escalonada", () => {
     expect(m("Mouse", Math.sqrt(20 * 400))).toBeCloseTo(108, 0);
   });
 
-  it("notebook, cartucho, toner, tinta e celular ficam sempre na mínima", () => {
+  it("notebook, cartucho, tinta e celular ficam sempre na mínima", () => {
     expect(m("Cartucho HP 664 Preto", 30)).toBe(66);
     expect(m("Kit Cartucho HP 667", 25)).toBe(66);
-    expect(m("Toner Compatível CF258A", 15)).toBe(66);
     expect(m("Tinta Epson T544 Ciano", 40)).toBe(66);
     expect(m("Smartphone Xiaomi Redmi 14C", 900)).toBe(66);
-    expect(m("Qualquer coisa", 10, "Impressão/Toners")).toBe(66);
     expect(m("Qualquer coisa", 10, "Celular & Smartphone/Smartphones")).toBe(66);
+  });
+
+  it("toner tem margem própria de 300%, em qualquer preço", () => {
+    expect(m("Toner Compatível CF258A", 15)).toBe(300);
+    expect(m("Toner Evolut Compatível Lexmark X264 9K", 65)).toBe(300);
+    expect(m("Qualquer coisa", 10, "Impressão/Toners")).toBe(300);
+    expect(m("Fotocondutor Brother DR3440", 120)).toBe(66);
+    expect(lerRegra(JSON.parse(JSON.stringify(REGRA_TECHSUPRI)))?.especiais).toEqual([{ palavras: ["toner"], margem: 300 }]);
+    expect(descreverRegra(REGRA_TECHSUPRI)).toContain("toner: 300%");
   });
 
   it("acessório de notebook ou celular segue como acessório", () => {

@@ -26,6 +26,7 @@ export async function PATCH(request: NextRequest, props: { params: Promise<{ id:
       preco_min: corpo?.preco_min,
       preco_max: corpo?.preco_max,
       categoria_destino: corpo?.categoria_destino,
+      regra_margem: corpo?.regra_margem,
     });
     if (!fonte) return falha("Fonte não encontrada.", 404);
 
@@ -33,7 +34,7 @@ export async function PATCH(request: NextRequest, props: { params: Promise<{ id:
     // agora, sem esperar a próxima leitura — e o cache cai para o site e o CRM
     // mostrarem o preço novo na hora.
     let reprecificados = 0;
-    if (fonte.margem !== antes.margem) {
+    if (fonte.margem !== antes.margem || JSON.stringify(fonte.regra_margem ?? null) !== JSON.stringify(antes.regra_margem ?? null)) {
       reprecificados = await recalcularMargem(fonte);
       invalidarCacheProdutos();
     }
