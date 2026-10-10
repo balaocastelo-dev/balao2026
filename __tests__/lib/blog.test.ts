@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ARTIGOS_AUTORAIS } from "@/content/blog/artigos";
+import { capaDaRotina, enderecoDaCapa } from "@/lib/blog/capas";
 import { CATEGORIAS, classificarPorTitulo } from "@/lib/blog/categorias";
 import { escolherTema, resolverChamada } from "@/lib/blog/chamadas";
 import { artigosGuardadosDoSoro, extrairListaDoScript, inserirChamadas } from "@/lib/blog/fontes/soro";
@@ -390,6 +391,23 @@ describe("rotina diária", () => {
     ).toMatch(/benchmark/);
     expect(reprova((a) => a.blocos.push({ tipo: "citacao", texto: "É ótimo.", autor: "Fulano", fonte } as never)).join(" ")).toMatch(/citação/);
     expect(reprova((a) => a.blocos.push({ tipo: "paragrafo", texto: "Testamos na bancada e deu certo." })).join(" ")).toMatch(/teste próprio/);
+  });
+
+  it("a rotina leva foto de capa, mas só a que o comando gravou para aquele artigo", () => {
+    const daRotina = enderecoDaCapa("como-escolher-monitor-para-trabalho", "0a1b2c3d", "jpg");
+    const alt = "Monitor ligado sobre uma mesa de escritório";
+    expect(capaDaRotina(daRotina, "como-escolher-monitor-para-trabalho")).toBe(true);
+    expect(reprova((a) => Object.assign(a, { capa: { src: daRotina, alt, largura: 1376, altura: 768 } }))).toEqual([]);
+    // De outro artigo, de outro site ou do próprio site: não entra.
+    expect(capaDaRotina(daRotina, "como-escolher-monitor")).toBe(false);
+    expect(capaDaRotina(`${daRotina}?x=1`, "como-escolher-monitor-para-trabalho")).toBe(false);
+    expect(reprova((a) => Object.assign(a, { capa: { src: "https://exemplo.com/foto.jpg", alt } })).join(" ")).toMatch(/outro endereço/);
+    expect(reprova((a) => Object.assign(a, { capa: { src: "/blog/capas/outra.webp", alt } })).join(" ")).toMatch(/outro endereço/);
+    expect(reprova((a) => Object.assign(a, { capa: { src: daRotina, alt: "foto" } })).join(" ")).toMatch(/texto alternativo/);
+    // No meio do texto continua sem imagem.
+    expect(
+      reprova((a) => a.blocos.push({ tipo: "imagem", imagem: { src: daRotina, alt } } as never)).join(" "),
+    ).toMatch(/no meio do texto/);
   });
 
   it("a rotina só aponta para páginas conferidas e só usa chamada pronta", () => {
