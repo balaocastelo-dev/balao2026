@@ -116,6 +116,20 @@ export interface CrmMensagem {
   } | null;
   produto?: CrmProdutoResumo | null;
   status?: "pending" | "sent" | "delivered" | "read" | "failed" | "deleted";
+  // ---- Fase 1 do WhatsApp (whatsapp-server; desenho em components/crm/mensagem-extras.tsx) ----
+  /** Número de sequência do banco da loja: o painel guarda o maior e pede o que veio depois (panel:desde). */
+  seq?: number;
+  /** Uma reação por pessoa ("cliente" ou "loja"). */
+  reacoes?: { emoji: string; de: string; em?: number }[];
+  /** Quando foi editada (o body já é o texto novo). */
+  editadaEm?: number;
+  /** Apagada para todos. O texto continua guardado; a tela mostra o aviso. */
+  apagada?: boolean;
+  /** A mensagem respondida: id e um trecho. */
+  citada?: { id: string; trecho: string; deMim?: boolean | null } | null;
+  /** Ligação recebida, como linha da conversa. */
+  ligacao?: { estado: string; video?: boolean } | null;
+  videoRecado?: boolean;
 }
 
 export interface CrmRespostaRapida {

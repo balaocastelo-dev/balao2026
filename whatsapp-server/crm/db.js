@@ -166,6 +166,39 @@ const MIGRACOES = [
         ON crm_mensagem USING gin (to_tsvector('portuguese', corpo));
     `,
   },
+  {
+    id: "crm_003_mensagem_completa",
+    sql: `
+      -- O histórico da conversa passa a ser lido DAQUI, e não da Evolution.
+      -- Antes, abrir uma conversa fazia de 2 a 4 findMessages no banco da
+      -- Evolution (tabela inteira, a cada clique). Para o painel desenhar a
+      -- mensagem sem perguntar nada à Evolution, faltava guardar:
+      --   chave       a chave do WhatsApp (para responder, reagir, apagar)
+      --   de_mim      se saiu da loja (a chave diz, mas fica explícito)
+      --   midia       o que desenhar no lugar da mídia: tipo, duração,
+      --               vídeo-recado, cartão de produto, ligação
+      --   citada      a mensagem respondida: { id, trecho, deMim }
+      --   reacoes     [{ emoji, de, em }] — uma por pessoa, como no WhatsApp
+      --   editada_em  quando foi editada (o corpo já é o texto novo)
+      --   apagada     apagada para todos — o corpo NÃO é apagado aqui; só a
+      --               tela mostra "mensagem apagada"
+      --   lid         o código interno (@lid) da conversa, quando houver
+      --   seq         número de sequência: cresce a cada mensagem gravada OU
+      --               alterada. O painel guarda o último que viu e, ao voltar
+      --               do sono, pede só o que veio depois (panel:desde).
+      ALTER TABLE crm_mensagem
+        ADD COLUMN IF NOT EXISTS chave      jsonb,
+        ADD COLUMN IF NOT EXISTS de_mim     boolean,
+        ADD COLUMN IF NOT EXISTS midia      jsonb,
+        ADD COLUMN IF NOT EXISTS citada     jsonb,
+        ADD COLUMN IF NOT EXISTS reacoes    jsonb NOT NULL DEFAULT '[]'::jsonb,
+        ADD COLUMN IF NOT EXISTS editada_em timestamptz,
+        ADD COLUMN IF NOT EXISTS apagada    boolean NOT NULL DEFAULT false,
+        ADD COLUMN IF NOT EXISTS lid        text,
+        ADD COLUMN IF NOT EXISTS seq        bigserial;
+      CREATE UNIQUE INDEX IF NOT EXISTS crm_mensagem_seq ON crm_mensagem (seq);
+    `,
+  },
 ];
 
 async function garantirBanco(urlAdmin, nome) {

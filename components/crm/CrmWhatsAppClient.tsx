@@ -7,6 +7,20 @@ import CentralStatus from "@/components/crm/status/CentralStatus";
 import CentroDeComando from "@/components/crm/comando/CentroDeComando";
 import type { PonteComando } from "@/components/crm/comando/tipos";
 import { CHAVE_CONVERSA_PEDIDA } from "@/lib/painel/recados";
+import {
+  AvisoApagada,
+  BarraDeEnvio,
+  CorpoDaMensagem,
+  LinhaDeLigacao,
+  Reacoes,
+  TrechoCitado,
+  aplicarMudanca,
+  extrasDaMensagem,
+  maiorSeq,
+  maisAntiga,
+  type MudancaDeMensagem,
+} from "@/components/crm/mensagem-extras";
+import { blobDoDataUrl, enviarPorUpload } from "@/components/crm/upload-midia";
 import type { PonteStatus, StatusRecebido } from "@/components/crm/status/tipos";
 import {
   CrmChat,
@@ -373,6 +387,15 @@ export default function CrmWhatsAppClient({
   // Ingresso para falar com o servidor do WhatsApp (ver lib/whatsapp-ticket.ts).
   const ticketRef = useRef<{ ticket: string; exp: number } | null>(null);
   const [ticketAtual, setTicketAtual] = useState<string>("");
+  // Maior número de sequência (seq) que o painel já recebeu do banco da loja.
+  // Ao reconectar ou voltar do sono, o painel pede só o que veio depois dele
+  // (panel:desde), em vez de depender das 300 mensagens do bootstrap.
+  const ultimoSeqRef = useRef(0);
+  // Com transcrição ligada no servidor, o painel não transcreve sozinho a
+  // conversa aberta (seriam duas transcrições do mesmo áudio).
+  const [transcricaoNoServidor, setTranscricaoNoServidor] = useState(false);
+  // Progresso do arquivo subindo pelo upload direto, por tempId.
+  const [progressoEnvio, setProgressoEnvio] = useState<Record<string, number>>({});
   const obterTicket = useCallback(async (): Promise<string> => {
     const atual = ticketRef.current;
     if (atual && atual.exp * 1000 - Date.now() > 60 * 60 * 1000) return atual.ticket;
@@ -1187,8 +1210,9 @@ export default function CrmWhatsAppClient({
       if (motivo !== "io client disconnect") setMotivoQueda(motivo);
     });
 
-    socket.on("whatsapp:transcricao", (p: { id?: string; texto?: string }) => {
+    socket.on("whatsapp:transcricao", (p: { id?: string; texto?: string; seq?: number }) => {
       if (!p?.id || !p.texto) return;
+      ultimoSeqRef.current = maiorSeq(ultimoSeqRef.current, p.seq);
       setMensagens((prev) => prev.map((m) => (m.id === p.id ? { ...m, transcricao: p.texto } : m)));
     });
 
@@ -1196,6 +1220,9 @@ export default function CrmWhatsAppClient({
       setAoVivo(true);
       setMotivoQueda(null);
       socket.emit("panel:bootstrap");
+      // Reconexão: o bootstrap traz o recente; o panel:desde fecha o buraco
+      // de tudo o que passou enquanto a tela estava desligada.
+      pedirDesde();
     });
 
     // Evita travar a tela de login pra sempre se o servidor demorar/estiver fora do ar.
@@ -1355,6 +1382,9 @@ export default function CrmWhatsAppClient({
 
     socket.on("whatsapp:settings", (cfg: any) => {
       if (!cfg || typeof cfg !== "object") return;
+      if (cfg.apiInfo && typeof cfg.apiInfo === "object") {
+        setTranscricaoNoServidor(cfg.apiInfo.transcricaoNoServidor === true);
+      }
       if (Array.isArray(cfg.labels) && cfg.labels.length > 0) {
         setEtiquetas((atuais) => {
           const porNome = new Map(atuais.map((e) => [e.nome.toLowerCase(), e]));
@@ -1470,8 +1500,12 @@ export default function CrmWhatsAppClient({
       });
     });
 
-    socket.on("whatsapp:messages", (serverMsgs: any[]) => {
+    // Junta um lote de mensagens do servidor ao que a tela já tem. Serve à
+    // lista do bootstrap/sincronização (whatsapp:messages) e à resposta do
+    // panel:desde, que traz só o que veio depois do último seq visto.
+    const juntarMensagensDoServidor = (serverMsgs: any[]) => {
       if (Array.isArray(serverMsgs) && serverMsgs.length > 0) {
+        ultimoSeqRef.current = maiorSeq(ultimoSeqRef.current, ...serverMsgs.map((sm) => sm?.seq));
         setEstado((prev) => (prev === "loading" || prev === "initializing" ? "ready" : prev));
         setMensagens((prev) => {
           const map = new Map<string, CrmMensagem>();
@@ -1508,6 +1542,10 @@ export default function CrmWhatsAppClient({
                 // Usa o status real persistido pelo message_ack quando existir
                 // (ver whatsapp-server), em vez de assumir "lida" sempre.
                 status: sm.status || "sent",
+                // Reação, edição, apagada, citação, ligação: o que a tela já
+                // tinha fica, e o que veio agora do servidor manda.
+                ...extrasDaMensagem(existing as unknown as Record<string, unknown>),
+                ...extrasDaMensagem(sm),
               });
             });
           // Teto de segurança: um painel aberto a semana inteira acumulava
@@ -1517,6 +1555,35 @@ export default function CrmWhatsAppClient({
           return ordenadas.length > 4000 ? ordenadas.slice(-4000) : ordenadas;
         });
       }
+    };
+    socket.on("whatsapp:messages", juntarMensagensDoServidor);
+
+    // O que veio depois do último seq que este painel viu. Pede de novo
+    // enquanto o servidor disser que há mais (no máximo 5 voltas, 10 mil
+    // mensagens) — uma tarde inteira com o notebook dormindo cabe nisso.
+    // Servidor antigo (sem panel:desde) simplesmente não responde: nada muda.
+    const pedirDesde = (voltas = 0) => {
+      const seq = ultimoSeqRef.current;
+      if (!seq || voltas >= 5 || !socket.connected) return;
+      socket.emit(
+        "panel:desde",
+        { seq },
+        (r: { ok?: boolean; seq?: number; ate?: number; completo?: boolean; mensagens?: any[] } | undefined) => {
+          if (!r?.ok) return;
+          juntarMensagensDoServidor(r.mensagens || []);
+          ultimoSeqRef.current = maiorSeq(ultimoSeqRef.current, r.ate);
+          if (r.completo === false) pedirDesde(voltas + 1);
+          else ultimoSeqRef.current = maiorSeq(ultimoSeqRef.current, r.seq);
+        }
+      );
+    };
+
+    // Reação, edição, "apagada para todos", ligação, transcrição: mudança numa
+    // mensagem que já está na tela.
+    socket.on("whatsapp:message-update", (mudanca: MudancaDeMensagem) => {
+      if (!mudanca?.id) return;
+      ultimoSeqRef.current = maiorSeq(ultimoSeqRef.current, mudanca.patch?.seq);
+      setMensagens((prev) => aplicarMudanca(prev, mudanca));
     });
 
     socket.on("whatsapp:message", (newMsg: any) => {
@@ -1582,7 +1649,9 @@ export default function CrmWhatsAppClient({
         transcricao: newMsg.transcricao || null,
         produto: newMsg.produto || null,
         status: newMsg.status || (newMsg.direction === "out" ? "sent" : "read"),
+        ...extrasDaMensagem(newMsg),
       };
+      ultimoSeqRef.current = maiorSeq(ultimoSeqRef.current, newMsg.seq);
 
       setMensagens((prev) => {
         const existing = prev.find((x) => x.id === m.id || (newMsg.tempId && x.id === newMsg.tempId));
@@ -1733,6 +1802,7 @@ export default function CrmWhatsAppClient({
       if (document.visibilityState !== "visible") return;
       if (!socket.connected) socket.connect();
       socket.emit("panel:conciliar");
+      pedirDesde();
     };
     document.addEventListener("visibilitychange", acordar);
     window.addEventListener("focus", acordar);
@@ -1830,6 +1900,9 @@ export default function CrmWhatsAppClient({
   // vendedor lê sem precisar ouvir (loja barulhenta, fone esquecido).
   useEffect(() => {
     if (!chatSelecionadoId) return;
+    // O servidor já transcreve todo áudio que chega: pedir de novo daqui
+    // gastaria a transcrição duas vezes. O botão "Transcrever" continua.
+    if (transcricaoNoServidor) return;
     const pendentes = mensagens
       .filter(
         (m) =>
@@ -1842,7 +1915,7 @@ export default function CrmWhatsAppClient({
       )
       .slice(-5);
     pendentes.forEach((m) => transcreverAudio(m.id, true));
-  }, [mensagens, chatSelecionadoId, transcreverAudio]);
+  }, [mensagens, chatSelecionadoId, transcreverAudio, transcricaoNoServidor]);
 
   // Envio de arquivo (foto, vídeo, áudio ou documento). O tipo sai do próprio
   // arquivo: vídeo vai como vídeo (toca no celular do cliente), áudio vai como
@@ -1904,20 +1977,68 @@ export default function CrmWhatsAppClient({
       sendAudioAsVoice: tipo === "ptt" || arq.comoVoz === true,
       sendMediaAsDocument: tipo === "document",
     };
-    if (socketRef.current?.connected) {
-      socketRef.current.emit("panel:send-media", corpo);
-    } else {
-      fetchServidor(tipo === "document" ? "/api/enviar-documento" : "/api/enviar-midia", {
-        method: "POST",
-        body: JSON.stringify({ ...corpo, chat: chat.id, nome: arq.nome, legenda: arq.legenda || "" }),
-      })
-        .then((r) => r.json().catch(() => ({})).then((d) => ({ ok: r.ok, d })))
-        .then(({ ok, d }) => {
-          atualizarStatusMensagem(tempId, ok ? "sent" : "failed", d?.msgId);
-          if (!ok) showToast(`⛔ Arquivo não enviado: ${d?.erro || "erro desconhecido"}`);
+    // Caminho antigo (base64 pelo socket, ou pela rota HTTP de envio): fica de
+    // reserva para servidor sem a rota de upload ou queda ANTES de o arquivo
+    // terminar de subir — nunca depois, para não mandar duas vezes.
+    const enviarPeloCaminhoAntigo = () => {
+      if (socketRef.current?.connected) {
+        socketRef.current.emit("panel:send-media", corpo);
+      } else {
+        fetchServidor(tipo === "document" ? "/api/enviar-documento" : "/api/enviar-midia", {
+          method: "POST",
+          body: JSON.stringify({ ...corpo, chat: chat.id, nome: arq.nome, legenda: arq.legenda || "" }),
         })
-        .catch(() => atualizarStatusMensagem(tempId, "failed"));
-    }
+          .then((r) => r.json().catch(() => ({})).then((d) => ({ ok: r.ok, d })))
+          .then(({ ok, d }) => {
+            atualizarStatusMensagem(tempId, ok ? "sent" : "failed", d?.msgId);
+            if (!ok) showToast(`⛔ Arquivo não enviado: ${d?.erro || "erro desconhecido"}`);
+          })
+          .catch(() => atualizarStatusMensagem(tempId, "failed"));
+      }
+    };
+
+    // Upload direto, fora do canal das mensagens e com barra de progresso.
+    setProgressoEnvio((p) => ({ ...p, [tempId]: 0 }));
+    (async () => {
+      try {
+        const ticket = await obterTicket();
+        const arquivo = await blobDoDataUrl(arq.dataUrl);
+        const r = await enviarPorUpload({
+          url: `${serverUrl.replace(/\/$/, "")}/api/crm/upload`,
+          ticket,
+          campos: {
+            tempId,
+            chatId: chat.id,
+            number: chat.numero,
+            mimetype: mime,
+            nome: arq.nome,
+            legenda: arq.legenda || "",
+            comoVoz: tipo === "ptt" || arq.comoVoz === true ? "1" : "0",
+            comoDocumento: tipo === "document" ? "1" : "0",
+          },
+          arquivo,
+          nome: arq.nome,
+          aoProgresso: (valor) => setProgressoEnvio((p) => ({ ...p, [tempId]: valor })),
+        });
+        if (r.ok) {
+          atualizarStatusMensagem(tempId, "sent", r.msgId);
+        } else if (r.usarReserva) {
+          enviarPeloCaminhoAntigo();
+        } else {
+          atualizarStatusMensagem(tempId, "failed");
+          showToast(`⛔ Arquivo não enviado: ${r.erro || "erro desconhecido"}`);
+        }
+      } catch {
+        // Nem começou a subir (sem ingresso, arquivo ilegível): seguro tentar o antigo.
+        enviarPeloCaminhoAntigo();
+      } finally {
+        setProgressoEnvio((p) => {
+          const resto = { ...p };
+          delete resto[tempId];
+          return resto;
+        });
+      }
+    })();
   };
 
   // Gravador de mensagem de voz (botão 🎤). O navegador grava em opus e o
@@ -2041,9 +2162,13 @@ export default function CrmWhatsAppClient({
     if (!chatId || !socketRef.current?.connected || carregandoHistorico) return;
 
     setCarregandoHistorico(true);
+    // `antesDe`: a página anterior à mensagem mais antiga que a tela já tem
+    // desta conversa (o servidor lê do banco da loja, por data). O
+    // `maisAntigas` fica para o servidor antigo, que só entende ele.
+    const antesDe = maisAntiga(mensagens.filter((m) => m.chatId === chatId)) || undefined;
     socketRef.current.emit(
       "panel:carregar-historico",
-      { chatId, limite: 400, maisAntigas: 6 },
+      { chatId, limite: 200, antesDe, maisAntigas: 6 },
       (res: { ok?: boolean; total?: number; erro?: string } | undefined) => {
         setCarregandoHistorico(false);
         if (res?.ok) {
@@ -4181,14 +4306,16 @@ export default function CrmWhatsAppClient({
                                 : "self-start bg-[#dff0fd] border border-[#a9cdf0] rounded-tl-none text-[#202124]"
                             }`}
                           >
-                            {/* Quoted Message Snippet */}
-                            {m.replyTo && (
-                              <div className="bg-black/5 border-l-3 border-[#0f9d58] p-1.5 mb-2 rounded text-[11px] text-[#5f6368]">
-                                <div className="font-bold text-[#0a6e3d]">{m.replyTo.author}</div>
-                                <div className="line-clamp-2">{m.replyTo.body}</div>
-                              </div>
-                            )}
+                            {/* Mensagem respondida: a citação do WhatsApp (cliente ou
+                                celular) ou a resposta montada aqui no painel */}
+                            <TrechoCitado m={m} />
 
+                            {/* Ligação do cliente, como linha da conversa */}
+                            <LinhaDeLigacao m={m} />
+
+                            {/* Apagada para todos: só o aviso, como no WhatsApp. O
+                                conteúdo continua guardado no banco da loja. */}
+                            {!m.apagada && (<>
                             {/* Sent Product Card with Photo */}
                             {m.produto && (
                               <div className="bg-white rounded-xl border border-[#e3e3e3] p-2.5 mb-2 shadow-xs flex flex-col gap-2">
@@ -4278,8 +4405,11 @@ export default function CrmWhatsAppClient({
                                 />
                               </a>
                             )}
+                            </>)}
 
-                            <p>{m.body}</p>
+                            {m.apagada ? <AvisoApagada m={m} /> : m.ligacao ? null : <CorpoDaMensagem m={m} />}
+                            <BarraDeEnvio valor={progressoEnvio[m.id]} />
+                            <Reacoes m={m} />
                             <span
                               className="flex items-center justify-end gap-1 text-[10px] text-[#5f6368] mt-1 font-mono"
                               title={formatHora(m.timestamp, true)}

@@ -49,7 +49,10 @@ fs.mkdirSync(`${R}/dados`, { recursive: true });
 const SEG = "segredo-de-bancada-do-vigia";
 fs.writeFileSync(`${R}/dados/webhook.segredo`, SEG);
 
-const servidor = spawn("node", ["/home/claude/balao2026/whatsapp-server/servidor.js"], {
+// O servidor DESTA cópia do repositório (antes era um caminho fixo, que
+// testava outra pasta quando a bancada rodava num worktree). SERVIDOR=...
+// permite apontar para o código antigo e confirmar que o teste falha nele.
+const servidor = spawn("node", [process.env.SERVIDOR || new URL("../servidor.js", import.meta.url).pathname], {
   env: {
     ...process.env,
     DATA_ROOT: `${R}/dados`,

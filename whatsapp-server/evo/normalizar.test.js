@@ -101,4 +101,81 @@ t("dataUrl e extensões", () => {
   assert.equal(N.tipoPeloMime("application/pdf"), "document");
 });
 
+// ---- Fase 1: o que mudava uma mensagem e era jogado fora ----
+// Antes, reação, edição e "apagar para todos" caíam em TIPOS_IGNORADOS e
+// sumiam; a citação nem era lida. Estes testes falham no normalizar antigo
+// (extrairEvento não existia; citada vinha undefined).
+
+t("reação do cliente aponta para a mensagem-alvo", () => {
+  const e = N.extrairEvento({
+    key: { id: "R1", remoteJid: "5519984515960@s.whatsapp.net", fromMe: false },
+    messageType: "reactionMessage",
+    message: { reactionMessage: { key: { remoteJid: "5519987510267@s.whatsapp.net", fromMe: true, id: "ALVO1" }, text: "👍", senderTimestampMs: "1760200000123" } },
+    messageTimestamp: 1760200000,
+  });
+  assert.deepEqual(e, { tipo: "reacao", alvoId: "ALVO1", emoji: "👍", deMim: false, em: 1760200000123 });
+  // A reação em si não vira balão de conversa.
+  assert.equal(N.normalizarMensagem({ key: { id: "R1", remoteJid: "5519984515960@s.whatsapp.net" }, messageType: "reactionMessage", message: { reactionMessage: { key: { id: "ALVO1" }, text: "👍" } } }), null);
+});
+
+t("reação retirada (texto vazio) e milissegundos em Long {low, high}", () => {
+  const ms = 1760200000123;
+  const e = N.extrairEvento({
+    key: { id: "R2", remoteJid: "5519984515960@s.whatsapp.net", fromMe: true },
+    message: { reactionMessage: { key: { id: "ALVO1" }, text: "", senderTimestampMs: { low: ms % 4294967296 | 0, high: Math.floor(ms / 4294967296), unsigned: false } } },
+  });
+  assert.equal(e.emoji, "");
+  assert.equal(e.deMim, true);
+  assert.equal(e.em, ms);
+});
+
+t("edição: o protocolMessage do webhook MESSAGES_EDITED", () => {
+  const e = N.eventoDoProtocolo({ key: { remoteJid: "x@s.whatsapp.net", fromMe: true, id: "ALVO2" }, type: 14, editedMessage: { conversation: "texto novo" }, timestampMs: "1760200001000" });
+  assert.deepEqual(e, { tipo: "edicao", alvoId: "ALVO2", texto: "texto novo", em: 1760200001000 });
+  const legenda = N.eventoDoProtocolo({ key: { id: "ALVO3" }, type: "MESSAGE_EDIT", editedMessage: { imageMessage: { caption: "nova legenda" } } }, 5);
+  assert.equal(legenda.texto, "nova legenda");
+});
+
+t("apagar para todos (REVOKE) e edição embrulhada em editedMessage", () => {
+  assert.deepEqual(N.eventoDoProtocolo({ key: { id: "ALVO4" }, type: 0 }, 7), { tipo: "apagada", alvoId: "ALVO4", em: 7 });
+  const e = N.extrairEvento({
+    key: { id: "P1", remoteJid: "5519984515960@s.whatsapp.net", fromMe: false },
+    message: { editedMessage: { message: { protocolMessage: { key: { id: "ALVO5" }, type: 14, editedMessage: { extendedTextMessage: { text: "corrigido" } } } } } },
+    messageTimestamp: 1760200002,
+  });
+  assert.equal(e.tipo, "edicao");
+  assert.equal(e.alvoId, "ALVO5");
+  assert.equal(e.texto, "corrigido");
+});
+
+t("mensagem comum não é evento", () => {
+  assert.equal(N.extrairEvento({ key: { id: "C", remoteJid: "5519984515960@s.whatsapp.net" }, message: { conversation: "oi" } }), null);
+});
+
+t("citação: a Evolution põe o contextInfo no registro (prepareMessage)", () => {
+  const m = N.normalizarMensagem(
+    {
+      key: { id: "Q2", remoteJid: "5519984515960@s.whatsapp.net", fromMe: false },
+      messageType: "conversation",
+      message: { conversation: "esse mesmo" },
+      contextInfo: { stanzaId: "Q1", participant: "5519987510267@s.whatsapp.net", quotedMessage: { conversation: "Tem placa de vídeo RTX 4060?" } },
+      messageTimestamp: 1760200003,
+    },
+    { numeroDaLoja: "5519987510267" }
+  );
+  assert.deepEqual(m.citada, { id: "Q1", trecho: "Tem placa de vídeo RTX 4060?", deMim: true });
+  // Citação de foto: o trecho é o rótulo (ou a legenda).
+  const f = N.normalizarMensagem({
+    key: { id: "Q3", remoteJid: "5519984515960@s.whatsapp.net" },
+    message: { imageMessage: { mimetype: "image/jpeg", contextInfo: { stanzaId: "F1", participant: "5519984515960@s.whatsapp.net", quotedMessage: { imageMessage: {} } } } },
+  }, { numeroDaLoja: "5519987510267" });
+  assert.deepEqual(f.citada, { id: "F1", trecho: "📷 Foto", deMim: false });
+});
+
+t("vídeo-recado é vídeo, marcado para transcrição", () => {
+  const m = N.normalizarMensagem({ key: { id: "PTV", remoteJid: "5519984515960@s.whatsapp.net" }, messageType: "ptvMessage", message: { ptvMessage: { mimetype: "video/mp4", seconds: 12 } } });
+  assert.equal(m.mediaType, "video");
+  assert.equal(m.videoRecado, true);
+});
+
 console.log(`\n${ok} testes ok`);

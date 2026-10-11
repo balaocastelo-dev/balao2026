@@ -13,7 +13,18 @@ num container ao lado, sem porta pública.
 | `evo/normalizar.test.js` | testes (`node evo/normalizar.test.js`) |
 | `evo/amostras/` | foto, vídeo, áudio falado e PDF do teste cruzado |
 | `docker-compose.evo.yml` | Evolution + Postgres + Redis + servidor |
-| `deploy-evo.sh` / `deploy-evo.ps1` | instala, atualiza e volta atrás |
+| `deploy-evo.sh` / `deploy-evo.ps1` | instala, atualiza, sobe um commit (`REF=`/`-Commit`), `importar`, `diagnostico` |
+| `evolution/` | a imagem da Evolution 2.3.7 com o remendo da fila offline do Baileys |
+| `evo/indices.sql` | índices em `"Message"` (o deploy aplica) |
+| `evo/consultas-quentes.sql` · `diagnostico-banco.sh` | raio-X do banco (EXPLAIN, sem dado de cliente) |
+| `medicao.js` | latência por mensagem e caminho, no `/health` |
+| `recarga.js` | lista inteira só no boot e às 03h30; janela de 1 h a cada 5 min |
+| `transcricao.js` | fila de transcrição (servidor local, Groq, trabalhador puxado) |
+| `upload.js` | `POST /api/crm/upload` (multipart em streaming) |
+| `crm/formato.js` · `crm/importar-da-evolution.js` | histórico pelo banco da loja (`crm_mensagem`) |
+| `e2e/fase1.e2e.mjs` | bancada da fase 1 (Evolution falsa com o comportamento da 2.3.7) |
+
+O que mudou na fase 1 e como subir: `docs/whatsapp-fase1.md`.
 
 ## Segurança
 
@@ -29,6 +40,11 @@ num container ao lado, sem porta pública.
 `/api/crm/transcrever` (site) baixa o áudio da VPS e manda para o Whisper
 da Groq (`whisper-large-v3-turbo`, `GROQ_API_KEY`). O painel transcreve
 sozinho o áudio recebido na conversa aberta; o texto fica guardado na VPS.
+
+Com `TRANSCRICAO_URL`, `GROQ_API_KEY` ou `TRANSCRICAO_PUXADA=1` no
+`segredos.env` da VPS, quem transcreve é o próprio servidor (`transcricao.js`),
+todo áudio e vídeo-recado que entra, na chegada — e o painel deixa de
+transcrever por conta própria (`apiInfo.transcricaoNoServidor`).
 
 ## Teste cruzado
 

@@ -23,20 +23,30 @@ function criarServicoDoCrm({ db, registrar = console.log }) {
    * mensagem pode chegar pelo webhook e pela varredura sem duplicar.
    */
   async function registrarMensagem(msg, { origem = "webhook", vendedorId = null } = {}) {
-    if (!msg?.id || !msg?.chatId || !msg?.direcao) return;
+    if (!msg?.id || !msg?.chatId || !msg?.direcao) return null;
     const em = new Date(msg.timestamp || Date.now());
     const corpo = String(msg.corpo || "").slice(0, 8000);
+    const jsonOuNulo = (v) => (v == null ? null : JSON.stringify(v));
 
-    await db.transacao(async (c) => {
+    return db.transacao(async (c) => {
+      // Na repetição (a mesma mensagem pelo webhook e pela varredura), o que
+      // faltava é completado e nada que já estava é perdido. O seq é o da
+      // primeira gravação: repetir não é mudança.
       const inserida = await c.query(
         `INSERT INTO crm_mensagem
            (id, chat_id, direcao, corpo, tipo_midia, mime, nome_midia, transcricao,
-            produto_id, produto_nome, vendedor_id, origem, situacao, em)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+            produto_id, produto_nome, vendedor_id, origem, situacao, em,
+            chave, de_mim, midia, citada, lid)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)
          ON CONFLICT (id) DO UPDATE
            SET situacao = COALESCE(EXCLUDED.situacao, crm_mensagem.situacao),
-               transcricao = COALESCE(EXCLUDED.transcricao, crm_mensagem.transcricao)
-         RETURNING (xmax = 0) AS nova`,
+               transcricao = COALESCE(EXCLUDED.transcricao, crm_mensagem.transcricao),
+               chave = COALESCE(crm_mensagem.chave, EXCLUDED.chave),
+               de_mim = COALESCE(crm_mensagem.de_mim, EXCLUDED.de_mim),
+               midia = COALESCE(crm_mensagem.midia, EXCLUDED.midia),
+               citada = COALESCE(crm_mensagem.citada, EXCLUDED.citada),
+               lid = COALESCE(crm_mensagem.lid, EXCLUDED.lid)
+         RETURNING (xmax = 0) AS nova, seq`,
         [
           String(msg.id),
           String(msg.chatId),
@@ -52,10 +62,16 @@ function criarServicoDoCrm({ db, registrar = console.log }) {
           origem,
           msg.situacao || null,
           em,
+          jsonOuNulo(msg.chave),
+          msg.deMim == null ? msg.direcao === "out" : Boolean(msg.deMim),
+          jsonOuNulo(msg.midia),
+          jsonOuNulo(msg.citada),
+          msg.lid || null,
         ]
       );
       const nova = inserida.rows[0]?.nova === true;
-      if (!nova) return;
+      const seq = inserida.rows[0]?.seq != null ? Number(inserida.rows[0].seq) : null;
+      if (!nova) return { nova, seq };
 
       const entrada = msg.direcao === "in" ? 1 : 0;
       await c.query(
@@ -114,12 +130,131 @@ function criarServicoDoCrm({ db, registrar = console.log }) {
           [String(msg.chatId), interesse, n, em]
         );
       }
+      return { nova, seq };
     });
   }
 
   /** Versão que nunca estoura: usada no caminho quente do atendimento. */
   function registrarMensagemSemQuebrar(msg, opcoes) {
-    return registrarMensagem(msg, opcoes).catch(falhou("registrarMensagem"));
+    return registrarMensagem(msg, opcoes).catch((e) => {
+      falhou("registrarMensagem")(e);
+      return null;
+    });
+  }
+
+  /**
+   * Muda uma mensagem já gravada — situação, edição, apagada, transcrição,
+   * reação — e lhe dá um seq NOVO, para o painel que estava dormindo receber
+   * a mudança no panel:desde. Só grava (e só gasta seq) se algo mudou.
+   * Devolve { seq, chatId, reacoes } ou null (mensagem fora do banco, ou nada mudou).
+   */
+  async function atualizarMensagem(id, patch = {}) {
+    if (!id) return null;
+    const args = [String(id)];
+    const sets = [];
+    const mudou = [];
+    const p = (v) => {
+      args.push(v);
+      return `$${args.length}`;
+    };
+    const simples = {
+      situacao: "situacao",
+      corpo: "corpo",
+      transcricao: "transcricao",
+      apagada: "apagada",
+      editadaEm: "editada_em",
+    };
+    for (const [campo, coluna] of Object.entries(simples)) {
+      if (patch[campo] === undefined) continue;
+      let valor = patch[campo];
+      if (campo === "corpo") valor = String(valor || "").slice(0, 8000);
+      if (campo === "editadaEm") valor = valor ? new Date(valor) : null;
+      if (campo === "apagada") valor = Boolean(valor);
+      const ph = p(valor);
+      sets.push(`${coluna} = ${ph}`);
+      mudou.push(`${coluna} IS DISTINCT FROM ${ph}`);
+    }
+    if (patch.midia && typeof patch.midia === "object") {
+      const ph = p(JSON.stringify(patch.midia));
+      sets.push(`midia = COALESCE(midia, '{}'::jsonb) || ${ph}::jsonb`);
+      mudou.push(`(COALESCE(midia, '{}'::jsonb) || ${ph}::jsonb) IS DISTINCT FROM midia`);
+    }
+    if (patch.reacao) {
+      // Uma reação por pessoa, como no WhatsApp: a nova substitui a anterior
+      // de quem reagiu, e emoji vazio retira.
+      const de = p(String(patch.reacao.de || ""));
+      const emoji = p(String(patch.reacao.emoji || ""));
+      const em = p(Number(patch.reacao.em) || Date.now());
+      sets.push(
+        `reacoes = (SELECT COALESCE(jsonb_agg(r), '[]'::jsonb) FROM jsonb_array_elements(crm_mensagem.reacoes) r
+                     WHERE r->>'de' IS DISTINCT FROM ${de}::text)
+                   || CASE WHEN ${emoji}::text <> '' THEN
+                        jsonb_build_array(jsonb_build_object('emoji', ${emoji}::text, 'de', ${de}::text, 'em', ${em}::bigint))
+                      ELSE '[]'::jsonb END`
+      );
+      // Mudou se a pessoa ainda não tinha ESTA reação (ou, ao retirar, se tinha alguma).
+      mudou.push(
+        `CASE WHEN ${emoji}::text <> ''
+           THEN NOT EXISTS (SELECT 1 FROM jsonb_array_elements(crm_mensagem.reacoes) r
+                            WHERE r->>'de' = ${de}::text AND r->>'emoji' = ${emoji}::text)
+           ELSE EXISTS (SELECT 1 FROM jsonb_array_elements(crm_mensagem.reacoes) r WHERE r->>'de' = ${de}::text)
+         END`
+      );
+    }
+    if (!sets.length) return null;
+    sets.push(`seq = nextval(pg_get_serial_sequence('crm_mensagem', 'seq'))`);
+    const r = await db.query(
+      `UPDATE crm_mensagem SET ${sets.join(", ")}
+       WHERE id = $1 AND (${mudou.join(" OR ")})
+       RETURNING seq, chat_id, reacoes`,
+      args
+    );
+    if (!r.rowCount) return null;
+    return { seq: Number(r.rows[0].seq), chatId: r.rows[0].chat_id, reacoes: r.rows[0].reacoes };
+  }
+
+  function atualizarMensagemSemQuebrar(id, patch) {
+    return atualizarMensagem(id, patch).catch((e) => {
+      falhou("atualizarMensagem")(e);
+      return null;
+    });
+  }
+
+  /**
+   * Histórico de uma conversa, do mais novo para o mais velho, antes de
+   * `antesDe` (ms). `chatIds` traz a conversa e os códigos @lid dela: mensagem
+   * gravada antes de o WhatsApp revelar o número fica com o @lid.
+   */
+  async function historico({ chatIds, antesDe = null, limite = 80 }) {
+    const ids = [...new Set((chatIds || []).map(String).filter(Boolean))];
+    if (!ids.length) return [];
+    const r = await db.query(
+      `SELECT * FROM crm_mensagem
+       WHERE chat_id = ANY($1::text[]) AND ($2::timestamptz IS NULL OR em < $2)
+       ORDER BY em DESC, id DESC
+       LIMIT $3`,
+      [ids, antesDe ? new Date(Number(antesDe)) : null, Math.min(1000, Math.max(1, Number(limite) || 80))]
+    );
+    return r.rows;
+  }
+
+  /** O que foi gravado ou mudou depois do seq `seq`, em ordem. */
+  async function desde({ seq = 0, limite = 2000 } = {}) {
+    const r = await db.query(`SELECT * FROM crm_mensagem WHERE seq > $1 ORDER BY seq LIMIT $2`, [
+      Math.max(0, Number(seq) || 0),
+      Math.min(5000, Math.max(1, Number(limite) || 2000)),
+    ]);
+    return r.rows;
+  }
+
+  async function seqAtual() {
+    const r = await db.query(`SELECT COALESCE(max(seq), 0) AS seq FROM crm_mensagem`);
+    return Number(r.rows[0].seq);
+  }
+
+  async function mensagem(id) {
+    const r = await db.query(`SELECT * FROM crm_mensagem WHERE id = $1`, [String(id)]);
+    return r.rows[0] || null;
   }
 
   /** Dados que vêm da lista de conversas (nome, foto, número). */
@@ -670,6 +805,12 @@ function criarServicoDoCrm({ db, registrar = console.log }) {
     ritmoDeEntrada,
     registrarMensagem,
     registrarMensagemSemQuebrar,
+    atualizarMensagem,
+    atualizarMensagemSemQuebrar,
+    historico,
+    desde,
+    seqAtual,
+    mensagem,
     registrarContato,
     registrarContatoSemQuebrar,
     registrarEvento,
@@ -701,6 +842,7 @@ function criarServicoDoCrm({ db, registrar = console.log }) {
 function previa(msg) {
   if (msg.corpo) return String(msg.corpo).slice(0, 120);
   const rotulos = {
+    ligacao: "📞 Ligação",
     image: "📷 Foto",
     video: "🎥 Vídeo",
     audio: "🎵 Áudio",
