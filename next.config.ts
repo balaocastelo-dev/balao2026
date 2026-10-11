@@ -14,9 +14,15 @@ const nextConfig: NextConfig = {
   // O Office 3D (escritório virtual) é uma página pronta, em public/3d: não
   // passa pelo layout da loja. O endereço /3d abre o index.html dela.
   // O código-fonte e o comando para republicar estão em office3d/README.md.
+  // A Chácara 3D (passeio pelo terreno do Thiago) segue o mesmo esquema:
+  // página pronta em public/chacara3d, aberta pelo endereço /chacara3d.
+  // Fonte e como refazer em chacara3d/README.md.
   async rewrites() {
     return {
-      beforeFiles: [{ source: "/3d", destination: "/3d/index.html" }],
+      beforeFiles: [
+        { source: "/3d", destination: "/3d/index.html" },
+        { source: "/chacara3d", destination: "/chacara3d/index.html" },
+      ],
       afterFiles: [],
       fallback: [],
     };

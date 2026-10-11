@@ -64,3 +64,9 @@ whatsapp-server/server.log
 
 # saida de scrapers (dados brutos grandes, nao sao codigo)
 scripts/output/
+
+# Chácara 3D: ambiente do Blender e saídas dos scripts do modelo
+/chacara3d/.venv
+/chacara3d/saida
+/chacara3d/modelo/chacara.blend*
+/chacara3d/modelo/__pycache__
