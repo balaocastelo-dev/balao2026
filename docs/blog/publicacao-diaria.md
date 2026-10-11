@@ -18,9 +18,15 @@ o resto é o artigo principal).
 A dica leva um campo `roteiro` (fala, título, destaques, legenda, hashtags).
 A fábrica de conteúdo, no computador da loja, transforma esse roteiro em
 Reels com o avatar do Thiago (`balao-content-factory\publisher\video_dica.py`,
-segunda, quarta e sexta às 04:30), manda a prévia no Telegram dele e só
-publica no Facebook e no Instagram depois do OK. A legenda leva o link do
-artigo. O blog em si não passa pelo Telegram.
+segunda, quarta e sexta às 04:15, depois do vídeo do dia), manda a prévia no
+Telegram dele às 07:30 e só publica no Facebook e no Instagram, às 15:00,
+depois do OK. A legenda do Facebook leva o link do artigo. O blog em si não
+passa pelo Telegram.
+
+O script lê este ramo de conteúdo direto do GitHub e pega a dica mais nova
+(até quatro dias) que ainda não virou vídeo; confere o roteiro de novo antes
+de gravar. Os detalhes da fábrica estão no doc `claude/fabrica-de-conteudo-11-10.md`
+do Projeto "Balao.info" e na nota `11-Claude\Fabrica-de-Conteudo.md` do cérebro.
 
 A régua confere o roteiro como confere o texto: de 45 a 85 palavras de fala,
 sem preço, sem promessa, sem número que a voz sintética lê mal.
