@@ -13,8 +13,9 @@ A rotina do blog, na nuvem, publica o artigo e deixa na fila o pedido da foto
   2. espera a placa de vídeo ficar livre (URA sem ligação, nenhum outro render,
      memória da placa sobrando);
   3. gera a foto com o Flux, no ComfyUI local;
-  4. mostra a foto a um modelo de visão do Ollama local, que reprova marca,
-     texto, rosto, deformação ou cena errada; reprovada, gera outra (até 3);
+  4. mostra a foto a um modelo de visão do Ollama local, que lista texto, marca,
+     rosto e defeito que encontrar; achou qualquer coisa ou a cena não é a
+     pedida, reprova e gera outra (até 3 por rodada);
   5. prende a foto ao artigo com `node scripts/blog-publicar.mjs capa`, num
      clone do repositório só para isso (`balao-content-factory\\_blog_repo`).
 
@@ -80,17 +81,20 @@ SEMPRE = (" Realistic photograph, landscape 16:9, natural light, shallow depth o
 SEM_CARA_DE_APPLE = (" Any laptop or computer is a generic dark gray or black Windows-style model, clearly not"
                      " Apple-style, with a blank lid and a blank bezel without any marking.")
 
-PERGUNTA = """You are checking a blog cover photo before it is published. The photo should show: "{cena}".
-Answer ONLY with JSON: {{"texto": bool, "marca": bool, "rosto": bool, "deformado": bool, "cena_certa": bool, "motivo": "short reason"}}
-- texto: any readable letters, words or numbers anywhere (screens, keys, labels, boxes).
-- marca: any logo, brand name or recognizable brand symbol, or a blurred or illegible label where a brand name would be.{apple}
-- rosto: any human face.
-- deformado: warped hands, melted or impossible objects, broken geometry.
-- cena_certa: the photo plausibly shows the described scene.
-Be strict: when in doubt about texto, marca, rosto or deformado, answer true."""
+# Modelo de visão pequeno erra "tem texto? sim/não", mas acerta quando tem de LISTAR o que vê. Por isso a pergunta
+# pede listas, e a foto só passa com todas vazias.
+PERGUNTA = """You are inspecting a photo before it is used as a blog cover. Look at every part of it, including small details on devices, screens, keys, mugs, boxes and the background.
+Answer ONLY with JSON in exactly this shape:
+{{"textos": [], "marcas": [], "rostos": 0, "defeitos": [], "descricao": "", "mostra_a_cena": true}}
+- textos: every readable or half-readable word, letter group or number you can see, each with where it is. Empty only if there is none at all.
+- marcas: every logo, brand name, brand symbol, or small label or sticker that looks like a brand mark, each with where it is.{apple}
+- rostos: how many human faces are visible.
+- defeitos: warped hands, melted or impossible objects, broken geometry, duplicated parts.
+- descricao: one sentence saying what the photo shows.
+- mostra_a_cena: true only if the photo plausibly shows this scene: "{cena}"."""
 
 
-NAO_APPLE = " Also true if a laptop or computer clearly looks like an Apple product (MacBook, iMac)."
+NAO_APPLE = " Also list here any laptop or computer that clearly looks like an Apple product (MacBook, iMac)."
 
 
 class Interrompida(Exception):
@@ -343,12 +347,19 @@ def conferir(arquivo, cena, modelo, categoria=""):
                       "images": [base64.b64encode(arquivo.read_bytes()).decode()]}]}, espera=420))
     try:
         v = json.loads(resposta["message"]["content"])
+        assert isinstance(v, dict)
     except Exception:
         return False, "o modelo de visão não respondeu em JSON"
-    ruins = [k for k in ("texto", "marca", "rosto", "deformado") if v.get(k) is not False]
-    if v.get("cena_certa") is not True:
-        ruins.append("cena errada")
-    return (not ruins), (", ".join(ruins) + f" — {v.get('motivo', '')}" if ruins else "ok")
+    ruins = []
+    for campo, nome in (("textos", "texto"), ("marcas", "marca"), ("defeitos", "deformado")):
+        achado = v.get(campo)
+        if achado != []:                  # lista vazia é a única resposta que passa
+            ruins.append(f"{nome} ({'; '.join(str(x) for x in achado)[:120] if isinstance(achado, list) else 'sem resposta'})")
+    if v.get("rostos") != 0:
+        ruins.append("rosto")
+    if v.get("mostra_a_cena") is not True:
+        ruins.append(f"cena errada ({str(v.get('descricao', ''))[:120]})")
+    return (not ruins), (", ".join(ruins) if ruins else "ok")
 
 
 def foto_aprovada(pedido, destino, modelo, categoria=""):
