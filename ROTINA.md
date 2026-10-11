@@ -18,8 +18,8 @@ ajuda a loja; um artigo vistoso com um dado errado prejudica.
 
 ## O que a rotina pode e o que não pode
 
-**Pode:** pesquisar na internet, escrever um arquivo JSON, gerar a foto de
-capa do artigo e publicar os dois com `node scripts/blog-publicar.mjs publicar`.
+**Pode:** pesquisar na internet, escrever um arquivo JSON (que descreve a
+foto de capa) e publicar com `node scripts/blog-publicar.mjs publicar`.
 
 **Não pode, em nenhuma hipótese:**
 
@@ -50,11 +50,11 @@ artigo), **pare e relate**. Não improvise outro caminho.
    reprovar e leve os avisos a sério. Repita até passar.
 6. Releia o texto inteiro uma vez, como leitor. Confira cada número e cada
    nome contra a página de onde saiu.
-7. Gere a foto de capa (seção "A foto de capa"), **olhe a imagem** e salve em
-   `capa.jpg`.
-8. `node scripts/blog-publicar.mjs publicar artigo.json --capa capa.jpg`.
-9. Relate em poucas linhas: título, endereço, de onde vieram os dados, como a
-   capa foi feita e qualquer dúvida que tenha ficado.
+7. Descreva a foto de capa no artigo (seção "A foto de capa"). **Você não
+   gera imagem nenhuma**: a foto é feita depois, no computador da loja.
+8. `node scripts/blog-publicar.mjs publicar artigo.json`.
+9. Relate em poucas linhas: título, endereço, de onde vieram os dados, a foto
+   que você pediu e qualquer dúvida que tenha ficado.
 
 ## Os três tipos
 
@@ -148,44 +148,56 @@ nome de modelo, versão, recurso ou data sem a página aberta nesta sessão.
 ## A foto de capa
 
 Todo artigo novo sai com uma foto de capa: uma fotografia ou imagem simulada
-do assunto, e não um desenho ou gráfico. Ela é criada junto com a matéria.
+do assunto, e não um desenho ou gráfico.
 
-**Como gerar.** Use a ferramenta de geração de imagem da sessão (hoje, a
-`generate_image` do Figma, no plano da equipe da loja; modelo
-`gemini-3.1-flash-image`, 1600 × 900). Uma tentativa, e no máximo mais uma se
-a primeira não servir: são três publicações por dia, e cada imagem consome
-créditos da conta da loja. Baixe o
-arquivo em resolução cheia e salve em JPEG.
+**Quem faz a foto é o computador da loja**, na placa de vídeo de lá, e não
+você. Você escreve o pedido; o comando `publicar` põe o artigo no ar com a
+capa desenhada pelo site e deixa o pedido numa fila; o computador gera a foto,
+um modelo de visão confere (marca, texto, rosto, deformação, cena errada) e a
+foto entra no artigo sozinha, em geral em menos de uma hora. Não use
+ferramenta de imagem nenhuma (nem Figma, nem outra) e não baixe foto de lugar
+nenhum.
 
-**O que pedir.** Uma fotografia realista, deitada (16:9), da cena que o artigo
-trata: o equipamento, a bancada, a mesa de trabalho. Peça sempre: sem texto,
-sem logotipo, sem marca, sem marca-d'água, sem rosto de pessoa. Mãos podem
-aparecer. Em assunto de Apple, peça o aparelho de costas para a câmera ou em
-ângulo que não mostre a maçã; em assunto de IA, um computador comum em uso,
-nada de robô nem de cérebro luminoso. Nada de fachada, interior ou funcionário "da Balão": a imagem não
-pode passar por foto da loja.
-
-**Confira antes de publicar.** Abra a imagem e olhe. Reprove e gere de novo se
-houver: marca ou logotipo legível (monitor, gabinete, teclado, caixa), texto
-ou letras, rosto, mão ou objeto deformado, cena que não é a do artigo, ou
-algo que oriente errado (por exemplo, alguém abrindo uma fonte de
-alimentação). Um logotipo pequeno em área lisa pode ser apagado com um
-retoque simples; se o retoque aparecer, gere outra.
-
-**O que o comando exige.** JPEG ou PNG, 1200 px de largura ou mais, deitada
-perto de 16:9, até 900 KB. No artigo vai só a descrição do que a foto mostra:
+**O que vai no artigo:**
 
 ```json
-"capa": { "alt": "Gabinete aberto sobre uma bancada, com o monitor apagado ao lado" }
+"capa": {
+  "alt": "Gabinete aberto sobre uma bancada, com o monitor apagado ao lado",
+  "pedido": "A mid-tower desktop computer case with the side panel removed, lying on a clean wooden workbench, showing the motherboard and cables. A switched-off monitor stands beside it, slightly out of focus. A small screwdriver on the bench. Soft daylight from a window on the left."
+}
 ```
 
-O endereço da imagem quem preenche é o comando. Não aponte para imagem de
-outro site: a régua reprova.
+- `alt`: em português, 12 caracteres ou mais — o que a foto mostra. É o texto
+  que o leitor cego ouve e o que o conferente usa para dizer se a cena é a certa.
+- `pedido`: **em inglês**, de 60 a 900 caracteres — o que o gerador de imagem
+  recebe. Descreva uma cena só, concreta: os objetos, onde estão, o ângulo, a
+  luz. De três a cinco frases.
 
-**Se não der para gerar** (ferramenta fora do ar, sem crédito, duas tentativas
-ruins): publique com `--sem-capa` no lugar de `--capa` — o site desenha a capa
-— e diga isso no relato. Artigo sem foto é melhor do que dia sem artigo, e
-muito melhor do que foto com marca ou erro.
+**Como escrever um bom pedido.** O gerador erra quando o pedido é vago ou
+pede o impossível:
+
+- A cena que o artigo trata: o equipamento, a bancada, a mesa de trabalho.
+  Poucos objetos, bem descritos. Nada de conceito abstrato.
+- **Telas apagadas ou de lado.** Tela ligada vira texto embaralhado, e texto
+  reprova a foto. Se a tela precisa aparecer ligada, peça "abstract blurred
+  shapes on screen".
+- **Teclado longe, de lado ou desfocado**: tecla de perto vira letra torta.
+- **Sem pessoas.** Rosto reprova, e mão costuma sair deformada.
+- Equipamento genérico ("a generic laptop"): não escreva marca nem nome de
+  produto no pedido — escrever a marca faz o logotipo aparecer. Em assunto de
+  Apple, peça o aparelho de costas ou em ângulo que não mostre o símbolo.
+- Em assunto de IA: um computador comum em uso, nada de robô nem de cérebro
+  luminoso.
+- Nada de fachada, interior ou funcionário "da Balão": a imagem não pode
+  passar por foto da loja.
+- Nada que oriente errado (por exemplo, alguém abrindo uma fonte de
+  alimentação).
+
+O "sem texto, sem logotipo, sem marca-d'água, sem rosto" o computador
+acrescenta sozinho a todo pedido; não precisa repetir.
+
+**Se você não conseguir descrever uma foto honesta para o assunto**, publique
+com `--sem-capa` (sem o campo `capa`): o site desenha a capa. É raro.
 
 ## O que se pode dizer da loja
 
@@ -248,7 +260,7 @@ estrutura dele. Os campos:
   "categoria": "assistencia",
   "etiquetas": ["manutenção", "fonte", "diagnóstico"],
   "formato": "dica",
-  "capa": { "alt": "O que a foto de capa mostra, em uma frase" },
+  "capa": { "alt": "O que a foto de capa mostra, em uma frase", "pedido": "The scene, in English, for the image generator…" },
   "seo": { "titulo": "Só se o título passar de 60 caracteres" },
   "roteiro": { "fala": "…", "titulo": "…", "destaques": ["…", "…"], "legenda": "…", "hashtags": ["…"] },
   "blocos": [],
@@ -263,9 +275,9 @@ estrutura dele. Os campos:
 - `formato` e `roteiro`: **só na dica**. Nos outros dois tipos, não existem.
 - `publicadoEm` e `autor`: **não preencha**. A data é a da publicação e a
   assinatura é da equipe.
-- `capa`: só o campo `alt`, com 12 caracteres ou mais, descrevendo o que a
-  foto mostra (seção "A foto de capa"). Se copiar a estrutura do modelo, apague
-  o `src`, a `largura` e a `altura` que vierem nele.
+- `capa`: os campos `alt` e `pedido` (seção "A foto de capa"). Se copiar a
+  estrutura do modelo, apague o `src`, a `largura` e a `altura` que vierem
+  nele: o endereço da foto quem preenche é o comando, depois.
 - `etiquetas`: de duas a cinco, em minúsculas; repita as de artigos parecidos
   (é assim que o "Leia também" os aproxima).
 
@@ -343,7 +355,8 @@ O comando `conferir` aplica tudo isto; saber antes poupa idas e vindas.
 - De 3 a 6 perguntas frequentes no artigo principal (2 ou 3 na dica) — as
   dúvidas que o cliente faria no balcão.
 - Sem preço, parcela, desconto ou frete; sem "testamos".
-- Foto de capa enviada com `--capa` (o `publicar` recusa artigo novo sem ela).
+- Foto de capa descrita no artigo (`alt` e `pedido`): o `publicar` recusa
+  artigo novo sem a descrição, a não ser com `--sem-capa`.
 
 ## Como o texto soa
 
