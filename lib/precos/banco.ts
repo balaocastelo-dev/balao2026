@@ -15,8 +15,9 @@
 import { randomUUID } from "crypto";
 import { turso, isTursoActive } from "@/lib/turso";
 import { buildCategoryNodesFromPaths } from "@/lib/utils";
-import { calcularVenda, decidirPreco, normalizarMargem } from "./calculo";
+import { decidirPreco, normalizarMargem } from "./calculo";
 import { lerRegra, margemDoProduto, type RegraDeMargem } from "./margem";
+import { vendaDoProduto } from "./faixas";
 import type { ItemDeOrigem } from "./kabum";
 import { montarProduto, motivoDeRecusa, type ProdutoDeOrigem, type RegrasDaFonte } from "./produto";
 
@@ -475,9 +476,10 @@ export async function gravarPagina(fonte: Fonte, itens: ItemDeOrigem[], agora: s
           origem_pix: anterior,
           origem_cartao: cartaoAnterior,
           origem_parcelas: parcelas,
-          venda: calcularVenda(
+          venda: vendaDoProduto(
             { pix: anterior, cartao: cartaoAnterior, parcelas },
-            margemDoProduto(fonte, { nome: item.nome, categoria: produto.category, preco: anterior })
+            margemDoProduto(fonte, { nome: item.nome, categoria: produto.category, preco: anterior }),
+            { nome: produto.name, categoria: produto.category }
           ),
         };
         saida.retidos++;
@@ -562,9 +564,10 @@ export async function recalcularMargem(fonte: Fonte): Promise<number> {
   const linhas = res.rows.map((r) => {
     const l = r as Linha;
     const margem = margemDoProduto(fonte, { nome: String(l.name ?? ""), categoria: String(l.category ?? ""), preco: num(l.origem_pix) });
-    const venda = calcularVenda(
+    const venda = vendaDoProduto(
       { pix: num(l.origem_pix), cartao: num(l.origem_cartao) || num(l.origem_pix), parcelas: num(l.origem_parcelas) },
-      margem
+      margem,
+      { nome: String(l.name ?? ""), categoria: String(l.category ?? "") }
     );
     return { id: String(l.id), price: venda.price, price_card: venda.price_card, installment: venda.installment, discount_pix: venda.discount_pix };
   });
@@ -625,7 +628,10 @@ export async function aceitarRetidos(fonte: Fonte, ids?: string[]): Promise<numb
     const pix = num(l.retido_pix);
     const cartao = num(l.retido_cartao) || pix;
     const margem = margemDoProduto(fonte, { nome: String(l.name ?? ""), categoria: String(l.category ?? ""), preco: pix });
-    const venda = calcularVenda({ pix, cartao, parcelas: num(l.origem_parcelas) }, margem);
+    const venda = vendaDoProduto({ pix, cartao, parcelas: num(l.origem_parcelas) }, margem, {
+      nome: String(l.name ?? ""),
+      categoria: String(l.category ?? ""),
+    });
     return {
       sql: `UPDATE products SET price = ?, price_card = ?, installment = ?, discount_pix = ?, cost = ?, origem_pix = ?, origem_cartao = ?,
               retido_pix = NULL, retido_cartao = NULL, retido_desde = NULL WHERE id = ?`,

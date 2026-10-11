@@ -143,3 +143,26 @@ describe("catalogo/Paginacao", () => {
     expect(paginasVisiveis(109, 109)).toEqual([1, "…", 107, 108, 109]);
   });
 });
+
+describe("filtro de pronta entrega", () => {
+  const produtos = [
+    { id: "a", name: "Cabo HDMI", price: "10,00", category: "Informática/Cabos", availability: "Pronta entrega" },
+    { id: "b", name: "Cabo VGA", price: "20,00", category: "Informática/Cabos", availability: "Disponível" },
+    { id: "c", name: "Mouse", price: "30,00", category: "Periféricos/Mouses", availability: "Pronta entrega" },
+  ] as unknown as Parameters<typeof aplicarFiltros>[0];
+
+  it("lê, conta e monta o endereço", () => {
+    const f = lerFiltros({ pronta: "1" });
+    expect(f.pronta).toBe(true);
+    expect(lerFiltros({}).pronta).toBe(false);
+    expect(contarFiltros(f)).toBe(1);
+    expect(paraQuery(f)).toBe("pronta=1");
+  });
+
+  it("filtra e conta na faceta sem depender de si mesmo", () => {
+    const f = lerFiltros({ pronta: "1", cat: "Informática" });
+    expect(aplicarFiltros(produtos, f).map((p) => p.id)).toEqual(["a"]);
+    expect(montarFacetas(produtos, lerFiltros({})).prontaEntrega).toBe(2);
+    expect(montarFacetas(produtos, lerFiltros({ cat: "Periféricos" })).prontaEntrega).toBe(1);
+  });
+});

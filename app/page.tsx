@@ -243,7 +243,8 @@ export default async function Home(props: {
 
   // --- Navegação do catálogo (busca ou ?category=): filtros laterais ---
   const filtros = lerFiltros(searchParams || {});
-  const navegando = Boolean(search || category);
+  // ?pronta=1 sozinho também abre a lista: todos os produtos de pronta entrega.
+  const navegando = Boolean(search || category || filtros.pronta);
   const facetas = navegando ? montarFacetas(products, filtros) : null;
   const filtrosLigados = contarFiltros(filtros);
   const ordemPadrao = search ? "relevancia" : "menor";
@@ -261,7 +262,7 @@ export default async function Home(props: {
       <Header />
 
       {/* Marcas Parceiras Marquee */}
-      {!search && !category && (
+      {!navegando && (
         <section className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 pt-4 lg:pt-6">
           <div className="home-panel brand-carousel rounded-2xl px-4 py-3 sm:px-6 border border-slate-800 bg-slate-900/90 shadow-xl backdrop-blur">
             <div className="flex items-center gap-3">
@@ -291,22 +292,22 @@ export default async function Home(props: {
       {/* Main Content Container - Impeccable Redesign */}
       <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 space-y-12 sm:space-y-16 py-8">
         {/* 1. Full-Width Stretched Hero Banner */}
-        {!search && !category && (
+        {!navegando && (
           <HomeHeroFullWidth />
         )}
 
         {/* 1.1 Destaque: MacBook Pro M5 seminovo (produto único da loja, fora do espelhamento) */}
-        {!search && !category && (
+        {!navegando && (
           <HomeMacbookM5Destaque />
         )}
 
         {/* 2. Trust Pillars (4 interactive cards) */}
-        {!search && !category && (
+        {!navegando && (
           <HomeTrustPillars />
         )}
 
         {/* 3. Main Body: Left Column (Department Menu) + Right Roomy Center Feed */}
-        {!search && !category ? (
+        {!navegando ? (
           <>
             <div className="flex flex-col lg:flex-row gap-8 xl:gap-10 items-start">
               {/* Left Column: Dedicated Department Menu Sidebar */}
@@ -401,7 +402,7 @@ export default async function Home(props: {
                   Navegação do Catálogo
                 </div>
                 <h1 className="mt-1 text-2xl font-black tracking-tight text-white md:text-4xl">
-                  {category || `Resultados para: "${search}"`}
+                  {category || (search ? `Resultados para: "${search}"` : "Pronta entrega")}
                 </h1>
               </div>
               <div className="flex flex-wrap items-center gap-3">
@@ -442,9 +443,9 @@ export default async function Home(props: {
           </section>
         )}
 
-        {!search && !category && <HomeLocalStoreInfo />}
+        {!navegando && <HomeLocalStoreInfo />}
 
-        {!search && !category && (
+        {!navegando && (
           <div className="mt-8">
             <QuickLeadSection
               title="Quer comprar ou consertar hoje?"
@@ -458,7 +459,7 @@ export default async function Home(props: {
           </div>
         )}
 
-        {!search && !category && (
+        {!navegando && (
           <SeoContent title="LOJA DE INFORMATICA EM CAMPINAS COM WHATSAPP, RETIRADA E ASSISTENCIA TECNICA">
             <p className="mb-4 text-slate-300">
               A <strong>Balão da Informática Castelo</strong> é a principal <strong>loja de informática em Campinas</strong> para quem busca

@@ -27,3 +27,21 @@ export default function SeloProntaEntrega({
     </span>
   );
 }
+
+/** Foto de produto do mesmo tipo, não do item exato (endereço termina em #ilustrativa). */
+export function ehImagemIlustrativa(url?: string | null): boolean {
+  return String(url || "").endsWith("#ilustrativa");
+}
+
+export function AvisoImagemIlustrativa({ url, tamanho = "normal" }: { url?: string | null; tamanho?: "pequeno" | "normal" }) {
+  if (!ehImagemIlustrativa(url)) return null;
+  return (
+    <span
+      className={`pointer-events-none absolute bottom-1.5 right-1.5 z-10 rounded bg-black/60 font-semibold text-white ${
+        tamanho === "pequeno" ? "px-1 py-0.5 text-[8px]" : "px-1.5 py-0.5 text-[10px]"
+      }`}
+    >
+      Imagem ilustrativa
+    </span>
+  );
+}

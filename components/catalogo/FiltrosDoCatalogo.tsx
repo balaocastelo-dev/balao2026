@@ -9,7 +9,7 @@ import type { Facetas, Filtros } from "@/lib/catalogo/filtros";
 // ============================================================
 // Painel de filtros das páginas de navegação do catálogo.
 //
-// O estado mora na URL (?cat=&marca=&min=&max=&tags=&ordem=): cada clique
+// O estado mora na URL (?cat=&marca=&min=&max=&tags=&pronta=&ordem=): cada clique
 // troca o endereço e o servidor devolve a lista já filtrada. Assim o filtro
 // vale para o resultado inteiro, não só para a página que está na tela, e o
 // link pode ser copiado e mandado para um cliente.
@@ -140,13 +140,32 @@ function Painel({ facetas, filtros, ligados, ordemPadrao, idBase }: Props & { id
         {ligados > 0 && (
           <button
             type="button"
-            onClick={() => mudar({ cat: null, marca: null, min: null, max: null, tags: null })}
+            onClick={() => mudar({ cat: null, marca: null, min: null, max: null, tags: null, pronta: null })}
             className="cursor-pointer text-xs font-semibold text-[#E60012] hover:underline"
           >
             Limpar ({ligados})
           </button>
         )}
       </div>
+
+      {(facetas.prontaEntrega > 0 || filtros.pronta) && (
+        <Bloco titulo="Entrega">
+          <button
+            type="button"
+            role="checkbox"
+            aria-checked={filtros.pronta}
+            onClick={() => mudar({ pronta: filtros.pronta ? null : "1" })}
+            className="flex w-full cursor-pointer items-center gap-2 rounded-md py-1 text-left text-sm text-[var(--site-text)] hover:text-[#E60012]"
+          >
+            <Caixa marcada={filtros.pronta} />
+            <span className="flex-1">
+              <span className="rounded bg-emerald-500 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white">Pronta entrega</span>
+              <span className="mt-0.5 block text-xs text-[var(--site-muted)]">Disponível para entrega imediata</span>
+            </span>
+            <span className="text-xs text-[var(--site-muted)]">{facetas.prontaEntrega}</span>
+          </button>
+        </Bloco>
+      )}
 
       <Bloco titulo="Ordenar por">
         <select

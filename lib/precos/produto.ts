@@ -5,7 +5,8 @@
 // quanto custa. O banco só grava o que sair daqui.
 // ============================================================
 
-import { calcularVenda, type PrecoDeVenda } from "./calculo";
+import { type PrecoDeVenda } from "./calculo";
+import { vendaDoProduto } from "./faixas";
 import type { ItemDeOrigem } from "./kabum";
 import { margemDoProduto, type RegraDeMargem } from "./margem";
 
@@ -153,7 +154,8 @@ export function montarProduto(item: ItemDeOrigem, fonte: RegrasDaFonte): Produto
   const name = referencia ? nomeSemMontadora(item.nome, item.marca, item.vendedor) || item.nome : item.nome;
   const marca = referencia ? null : item.marca;
   const margem = margemDoProduto(fonte, { nome: item.nome, categoria: item.categoria, preco: item.pix });
-  const venda = calcularVenda({ pix: item.pix, cartao: item.cartao, parcelas: item.parcelas }, margem);
+  const category = categoriaNoSite(item, fonte);
+  const venda = vendaDoProduto({ pix: item.pix, cartao: item.cartao, parcelas: item.parcelas }, margem, { nome: name, categoria: category });
 
   const specs: Record<string, string> = {};
   if (marca) specs["Marca"] = marca;
@@ -173,7 +175,7 @@ export function montarProduto(item: ItemDeOrigem, fonte: RegrasDaFonte): Produto
     id: item.codigo,
     name,
     brand: marca,
-    category: categoriaNoSite(item, fonte),
+    category,
     slug: slugDoProduto(name, item.codigo),
     image: item.foto || item.fotos[0] || FOTO_PROVISORIA,
     image_urls: item.fotos.length ? item.fotos : item.foto ? [item.foto] : [],
