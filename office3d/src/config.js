@@ -3,7 +3,7 @@ export const DEFAULT_CONFIG = {
   company: 'Balão da Informática',
   president: { name: 'Thiago Herrera', title: 'Presidente' },
   people: [
-    { id: 'thiago', name: 'Thiago Herrera', role: 'Presidente', dept: 'Presidência', avatar: 'Business_Male_01', seat: 'thiago', kind: 'president', color: '#ed3237',
+    { id: 'thiago', name: 'Thiago Herrera', role: 'Presidente', dept: 'Presidência', avatar: 'Thiago_Herrera', seat: 'thiago', kind: 'president', color: '#ed3237',
       desc: 'Comanda a Balão da Informática. Define prioridades, acompanha os setores e recebe os reportes dos agentes.', workLabel: 'Despachando na Presidência',
       errands: [{ spot: 'pres.lounge', role: 'text', label: 'Lendo mensagens no celular', icon: '📱', dur: [10, 16], prop: 'phone' }] },
     { id: 'hermes', name: 'Hermes', role: 'Orquestrador-chefe dos agentes', dept: 'Operações', avatar: 'Business_Male_02', seat: 'hermes', kind: 'chief', color: '#06b6d4',
