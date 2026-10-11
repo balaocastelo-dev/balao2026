@@ -21,6 +21,7 @@ import {
   type MudancaDeMensagem,
 } from "@/components/crm/mensagem-extras";
 import { blobDoDataUrl, enviarPorUpload } from "@/components/crm/upload-midia";
+import EnviarPorEmail, { type ProdutoParaEmail } from "@/components/crm/email/EnviarPorEmail";
 import type { PonteStatus, StatusRecebido } from "@/components/crm/status/tipos";
 import {
   CrmChat,
@@ -2821,6 +2822,9 @@ export default function CrmWhatsAppClient({
 
   // Criar enquete
   const [modalEnqueteAberto, setModalEnqueteAberto] = useState(false);
+  // Produto, preço e link do site por e-mail (components/crm/email/EnviarPorEmail.tsx).
+  const [emailAberto, setEmailAberto] = useState(false);
+  const [produtosParaEmail, setProdutosParaEmail] = useState<ProdutoParaEmail[]>([]);
   const [enquetePergunta, setEnquetePergunta] = useState("");
   const [enqueteOpcoes, setEnqueteOpcoes] = useState(["", ""]);
 
@@ -4244,6 +4248,14 @@ export default function CrmWhatsAppClient({
                           digitar. Serve para qualificar rápido — faixa de
                           preço, modelo, urgência. */}
                       <button
+                        onClick={() => setEmailAberto(true)}
+                        title="Mandar produto, preço e link do site por e-mail"
+                        className="px-3 py-1 rounded-lg text-xs font-bold border bg-white text-[#5f6368] border-[#e3e3e3] hover:bg-[#f0f2f5] transition-colors cursor-pointer"
+                      >
+                        📧 E-mail{produtosParaEmail.length ? ` (${produtosParaEmail.length})` : ""}
+                      </button>
+
+                      <button
                         onClick={() => setModalEnqueteAberto(true)}
                         title="Perguntar com opções prontas (o cliente só toca)"
                         className="px-3 py-1 rounded-lg text-xs font-bold border bg-white text-[#5f6368] border-[#e3e3e3] hover:bg-[#f0f2f5] transition-colors cursor-pointer"
@@ -4842,6 +4854,28 @@ export default function CrmWhatsAppClient({
                                     title="Enviar exatamente o preço de venda do site no WhatsApp"
                                   >
                                     ⚡ Enviar Preço do Site ({prod.precoFormatado})
+                                  </button>
+                                ) : null}
+                                {tipoPrecoCatalogo === "venda" ? (
+                                  <button
+                                    onClick={() => {
+                                      const ja = produtosParaEmail.some((p) => p.id === prod.id);
+                                      if (!ja) {
+                                        setProdutosParaEmail((lista) => [
+                                          ...lista,
+                                          { id: prod.id, nome: prod.nome, preco: prod.preco, imagem: prod.imagem || null },
+                                        ]);
+                                      }
+                                      showToast(
+                                        ja
+                                          ? "Este produto já está no e-mail."
+                                          : `📧 No e-mail (${produtosParaEmail.length + 1}). Abra pelo botão 📧 E-mail da conversa.`
+                                      );
+                                    }}
+                                    className="w-full mt-1 bg-white hover:bg-[#f0f2f5] text-[#0a6e3d] border border-[#0f9d58] py-1 px-2 rounded-lg text-[11px] font-bold transition-colors cursor-pointer"
+                                    title="Juntar este produto ao e-mail para o cliente"
+                                  >
+                                    📧 Pôr no e-mail
                                   </button>
                                 ) : (
                                   <button
@@ -6211,6 +6245,19 @@ export default function CrmWhatsAppClient({
       )}
 
       {/* MODAL ENQUETE — pergunta com opções prontas, respondida num toque */}
+      <EnviarPorEmail
+        aberto={emailAberto}
+        aoFechar={() => setEmailAberto(false)}
+        chat={chatSelecionado ? { id: chatSelecionado.id, nome: chatSelecionado.nome, numero: chatSelecionado.numero } : null}
+        produtosIniciais={produtosParaEmail}
+        textosDaConversa={mensagensChatAtual.filter((m) => m.direction === "in").map((m) => m.body)}
+        // No painel do dono o "vendedor" é a Administração: o e-mail sai só como "Balão da Informática".
+        vendedorNome={vendedorAtivo && vendedorAtivo.id !== VENDEDOR_ADMIN.id ? vendedorAtivo.nome : null}
+        fetchServidor={fetchServidor}
+        aoEnviar={() => setProdutosParaEmail([])}
+        avisar={showToast}
+      />
+
       {modalEnqueteAberto && (
         <div className="fixed inset-0 bg-black/55 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full p-4 space-y-3">

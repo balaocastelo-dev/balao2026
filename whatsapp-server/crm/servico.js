@@ -801,7 +801,102 @@ function criarServicoDoCrm({ db, registrar = console.log }) {
     return base;
   }
 
+  // ---- e-mail de produtos (o site manda; aqui fica o registro) ----
+
+  /** Guarda o e-mail do cliente na ficha. Conversa sem ficha ainda ganha uma. */
+  async function definirEmail(chatId, email) {
+    const id = String(chatId || "").trim();
+    const e = String(email || "").trim().toLowerCase();
+    if (!id) return false;
+    await db.query(
+      `INSERT INTO crm_contato (chat_id, email) VALUES ($1, $2)
+       ON CONFLICT (chat_id) DO UPDATE SET email = EXCLUDED.email, atualizado_em = now()`,
+      [id, e || null]
+    );
+    return true;
+  }
+
+  /**
+   * O site mandou um e-mail de produtos: fica como evento (para o clique achar
+   * o envio), como nota na ficha (para o vendedor ver o que foi) e o e-mail
+   * do cliente fica guardado para a próxima vez.
+   */
+  async function registrarEmailEnviado({ chatId, para, assunto, envioId, provedor, messageId, vendedor, itens, links, por }) {
+    const id = String(chatId || "").trim();
+    if (!id || !envioId) return null;
+    const lista = (Array.isArray(itens) ? itens : []).slice(0, 12).map((i) => ({
+      id: String(i?.id ?? ""),
+      nome: String(i?.nome ?? "").slice(0, 160),
+      preco: Number(i?.preco) || null,
+      quantidade: Number(i?.quantidade) || 1,
+    }));
+    await registrarEvento("email_enviado", {
+      chatId: id,
+      detalhes: {
+        envioId: String(envioId),
+        para: String(para || ""),
+        assunto: String(assunto || "").slice(0, 200),
+        provedor: provedor || null,
+        messageId: messageId || null,
+        vendedor: vendedor || null,
+        itens: lista,
+        links: (Array.isArray(links) ? links : []).slice(0, 5).map(String),
+      },
+    });
+    if (para) await definirEmail(id, para).catch(falhou("definirEmail"));
+    const brl = (v) => `R$ ${Number(v).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const texto = [
+      `📧 E-mail enviado para ${para}: ${String(assunto || "").slice(0, 200)}`,
+      ...lista.map((i) => `• ${i.quantidade > 1 ? `${i.quantidade} × ` : ""}${i.nome}${i.preco ? ` — ${brl(i.preco)}` : ""}`),
+    ].join("\n");
+    return adicionarNota({ chatId: id, texto, autor: vendedor || por || null });
+  }
+
+  /**
+   * O cliente clicou num link do e-mail. Devolve o que o painel precisa para
+   * avisar o vendedor, ou null quando o envio não é conhecido.
+   *
+   * `segundosDepois` existe por causa dos leitores de e-mail que abrem os
+   * links sozinhos para conferir se são seguros (Outlook, antivírus): isso
+   * acontece segundos depois da entrega. Quem chama decide não avisar nesses.
+   */
+  async function registrarCliqueNoEmail({ envioId, chatId, produtoId, destino }) {
+    const r = await db.query(
+      `SELECT chat_id, em, detalhes FROM crm_evento
+        WHERE tipo = 'email_enviado' AND detalhes->>'envioId' = $1
+        ORDER BY em DESC LIMIT 1`,
+      [String(envioId || "")]
+    );
+    if (!r.rowCount) return null;
+    const envio = r.rows[0];
+    const id = envio.chat_id || (chatId ? String(chatId) : null);
+    const anteriores = await db.query(
+      `SELECT count(*)::int AS n FROM crm_evento
+        WHERE tipo = 'email_clique' AND detalhes->>'envioId' = $1 AND detalhes->>'destino' = $2`,
+      [String(envioId), String(destino || "")]
+    );
+    const segundosDepois = Math.max(0, Math.round((Date.now() - new Date(envio.em).getTime()) / 1000));
+    await registrarEvento("email_clique", {
+      chatId: id,
+      detalhes: { envioId: String(envioId), produtoId: produtoId || null, destino: String(destino || ""), segundosDepois },
+    });
+    const produto = produtoId ? (envio.detalhes?.itens || []).find((i) => String(i.id) === String(produtoId)) : null;
+    const contatoR = id ? await db.query(`SELECT nome, nome_whatsapp, numero FROM crm_contato WHERE chat_id = $1`, [id]) : { rows: [] };
+    const c = contatoR.rows[0] || {};
+    return {
+      chatId: id,
+      cliente: c.nome || c.nome_whatsapp || c.numero || envio.detalhes?.para || "Cliente",
+      produto: produto?.nome || null,
+      whatsapp: destino === "wa",
+      segundosDepois,
+      primeiroClique: anteriores.rows[0].n === 0,
+    };
+  }
+
   return {
+    definirEmail,
+    registrarEmailEnviado,
+    registrarCliqueNoEmail,
     ritmoDeEntrada,
     registrarMensagem,
     registrarMensagemSemQuebrar,
@@ -859,6 +954,7 @@ function linhaContato(x) {
     numero: x.numero,
     nome: x.nome || x.nome_whatsapp || null,
     nomeWhatsapp: x.nome_whatsapp,
+    email: x.email || null,
     foto: x.foto_url,
     vendedorId: x.vendedor_id,
     etapa: x.etapa || "novos",

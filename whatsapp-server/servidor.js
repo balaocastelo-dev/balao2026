@@ -3672,6 +3672,8 @@ const equipe = {
 montarRotasDoCrm(app, {
   equipe,
   acesso,
+  // Clique do cliente num e-mail de produtos: o vendedor é avisado na hora.
+  avisarPainel: (texto) => emitirToast(texto),
   servico: new Proxy(
     {},
     {
