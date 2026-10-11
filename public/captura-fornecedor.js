@@ -70,10 +70,23 @@
   }
 
   // ---------- catálogo antigo: tudo já está na página ----------
-  function doCatalogo() {
+  function produtosDaPagina() {
     var loja = window.__NEXT_REDUX_STORE__ && window.__NEXT_REDUX_STORE__.getState && window.__NEXT_REDUX_STORE__.getState();
     var todos = loja && loja.products && loja.products.allProducts;
-    if (!Array.isArray(todos) || todos.length === 0) return null;
+    return Array.isArray(todos) ? todos : [];
+  }
+  // Os produtos chegam alguns segundos depois de a página abrir: espera até
+  // a lista parar de crescer (até 30 s) antes de desistir.
+  async function doCatalogo() {
+    if (!window.__NEXT_REDUX_STORE__ && !/\.catalog\.kyte\.site$/.test(location.host)) return null;
+    var antes = -1, iguais = 0;
+    for (var t = 0; t < 60 && iguais < 4; t++) {
+      var n = produtosDaPagina().length;
+      if (n > 0 && n === antes) iguais++; else { iguais = 0; antes = n; }
+      if (iguais < 4) await dormir(500);
+    }
+    var todos = produtosDaPagina();
+    if (todos.length === 0) return null;
     return todos.map(function (p) { return normal(p, location.origin + "/"); });
   }
 
@@ -163,7 +176,7 @@
 
   (async function () {
     try {
-      var produtos = doCatalogo();
+      var produtos = await doCatalogo();
       if (!produtos) produtos = await doCatalogoNovo();
       produtos = produtos.filter(function (p) { return p.id && p.name; });
       if (produtos.length === 0) throw new Error("não achei nenhum produto nesta página.");
