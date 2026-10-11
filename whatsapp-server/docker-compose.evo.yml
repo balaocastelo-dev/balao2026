@@ -30,7 +30,13 @@ services:
     mem_limit: 256m
 
   evolution:
-    image: evoapicloud/evolution-api:v2.3.7
+    # A imagem oficial evoapicloud/evolution-api:v2.3.7 com UMA linha trocada
+    # no Baileys: a fila offline que travava o recebimento (apagão de 29/09).
+    # Ver evolution/Dockerfile e evolution/remendar-baileys.cjs. O build falha
+    # se o remendo não encaixar — e aí a Evolution antiga continua no ar.
+    build:
+      context: ./evolution
+    image: balao-evolution:2.3.7-remendo
     restart: unless-stopped
     depends_on:
       postgres:

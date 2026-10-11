@@ -94,8 +94,11 @@ msg "Memória livre"
 free -h | sed -n 1,2p
 
 msg "Construindo e subindo a Evolution (o servidor antigo continua no ar por enquanto)"
-compose pull postgres redis evolution
-compose build balao-whats
+compose pull postgres redis
+# A Evolution não é mais baixada pronta: é a imagem oficial 2.3.7 com o
+# remendo do Baileys (evolution/Dockerfile). Se o remendo não encaixar, o
+# build falha AQUI, antes de qualquer container ser trocado.
+compose build evolution balao-whats
 compose up -d postgres redis evolution
 
 echo -n "Esperando a Evolution responder"
