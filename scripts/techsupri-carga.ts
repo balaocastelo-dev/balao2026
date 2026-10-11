@@ -22,7 +22,7 @@
 import { readFileSync, writeFileSync, existsSync } from "fs";
 import path from "path";
 import {
-  buscarFotoNaAmericanas, buscarFotoNaKabum, buscarFotoNaKalunga, MARCA_ILUSTRATIVA, NOTA_MINIMA, semelhanca,
+  buscarFotoNaAmericanas, buscarFotoNaKabum, buscarFotoNaKalunga, MARCA_ILUSTRATIVA, misturaOriginalECompativel, NOTA_MINIMA, semelhanca,
   semelhancaIlustrativa, termoCurto, termoGenerico,
 } from "../lib/precos/fotos";
 import { marcaDoTechsupri, produtosDaCaptura } from "../lib/precos/techsupri";
@@ -61,8 +61,12 @@ async function main() {
     const nomes = new Map(produtos.map((p) => [p.id, p.name]));
     let descartadas = 0;
     for (const [id, f] of Object.entries(fotos)) {
-      if (!("foto" in f) || !nomes.has(id) || String(f.origem || "").startsWith("ilustrativa")) continue;
-      if (semelhanca(nomes.get(id)!, f.nome) < NOTA_MINIMA) {
+      if (!("foto" in f) || !nomes.has(id)) continue;
+      // Foto de original em compatível (ou o contrário) sai sempre, até a ilustrativa.
+      const mistura = misturaOriginalECompativel(nomes.get(id)!, f.nome);
+      if (!mistura && String(f.origem || "").startsWith("ilustrativa")) continue;
+      if (mistura || semelhanca(nomes.get(id)!, f.nome) < NOTA_MINIMA) {
+        if (mistura) console.log(`  original/compatível: ${nomes.get(id)} <- ${f.nome}`);
         delete fotos[id];
         descartadas++;
       }

@@ -8,7 +8,7 @@
 import { type PrecoDeVenda } from "./calculo";
 import { vendaDoProduto } from "./faixas";
 import type { ItemDeOrigem } from "./kabum";
-import { margemDoProduto, type RegraDeMargem } from "./margem";
+import { margemDoProduto, type MargensPorCategoria, type RegraDeMargem } from "./margem";
 
 export interface RegrasDaFonte {
   id: string;
@@ -28,6 +28,8 @@ export interface RegrasDaFonte {
   fornecedor?: string | null;
   /** Fornecedor local: o produto sai com o selo "Pronta entrega". */
   pronta_entrega?: boolean;
+  /** Margem fixada por categoria do site; vale antes da regra e da margem única. */
+  margens_categoria?: MargensPorCategoria | null;
 }
 
 export type MotivoDeRecusa =
@@ -153,8 +155,9 @@ export function montarProduto(item: ItemDeOrigem, fonte: RegrasDaFonte): Produto
   const referencia = !fonte.so_loja;
   const name = referencia ? nomeSemMontadora(item.nome, item.marca, item.vendedor) || item.nome : item.nome;
   const marca = referencia ? null : item.marca;
-  const margem = margemDoProduto(fonte, { nome: item.nome, categoria: item.categoria, preco: item.pix });
   const category = categoriaNoSite(item, fonte);
+  // A margem por categoria é pela categoria do SITE (a que aparece no painel).
+  const margem = margemDoProduto(fonte, { nome: item.nome, categoria: category, preco: item.pix });
   const venda = vendaDoProduto({ pix: item.pix, cartao: item.cartao, parcelas: item.parcelas }, margem, { nome: name, categoria: category });
 
   const specs: Record<string, string> = {};

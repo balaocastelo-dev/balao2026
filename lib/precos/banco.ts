@@ -16,7 +16,7 @@ import { randomUUID } from "crypto";
 import { turso, isTursoActive } from "@/lib/turso";
 import { buildCategoryNodesFromPaths } from "@/lib/utils";
 import { decidirPreco, normalizarMargem } from "./calculo";
-import { lerRegra, margemDoProduto, type RegraDeMargem } from "./margem";
+import { lerMargensPorCategoria, lerRegra, margemAutomatica, margemDoProduto, type MargensPorCategoria, type RegraDeMargem } from "./margem";
 import { vendaDoProduto } from "./faixas";
 import type { ItemDeOrigem } from "./kabum";
 import { montarProduto, motivoDeRecusa, type ProdutoDeOrigem, type RegrasDaFonte } from "./produto";
@@ -25,6 +25,11 @@ type Linha = Record<string, unknown>;
 
 export interface Fonte extends RegrasDaFonte {
   site: string;
+  /**
+   * As fotos do fornecedor têm marca d'água/logo dele? null = ainda não
+   * conferido (a primeira importação confere sozinha).
+   */
+  marca_dagua: boolean | null;
   url: string;
   caminho: string;
   ativa: boolean;
@@ -118,9 +123,15 @@ async function criarEstrutura() {
     regra_margem: "TEXT NULL",
     pronta_entrega: "TINYINT NOT NULL DEFAULT 0",
     fornecedor: "VARCHAR(120) NULL",
+    margens_categoria: "TEXT NULL",
+    marca_dagua: "TINYINT NULL",
   };
   for (const [coluna, tipo] of Object.entries(novasDaFonte)) {
     if (!naFonte.has(coluna)) await turso.execute(`ALTER TABLE fontes_preco ADD COLUMN ${coluna} ${tipo}`);
+  }
+  // As fotos da TechSupri têm a marca d'água dela (conferido em 10/10).
+  if (!naFonte.has("marca_dagua")) {
+    await turso.execute("UPDATE fontes_preco SET marca_dagua = 1 WHERE site = 'techsupri' AND marca_dagua IS NULL");
   }
 
   const colunas = await turso.execute(
@@ -174,6 +185,8 @@ function paraFonte(r: Linha): Fonte {
     regra_margem: lerRegra(r.regra_margem),
     pronta_entrega: num(r.pronta_entrega) === 1,
     fornecedor: txtOuNulo(r.fornecedor),
+    margens_categoria: lerMargensPorCategoria(r.margens_categoria),
+    marca_dagua: r.marca_dagua === null || r.marca_dagua === undefined ? null : num(r.marca_dagua) === 1,
     ordem: num(r.ordem),
     passo_pagina: num(r.passo_pagina),
     passo_inicio: txtOuNulo(r.passo_inicio),
@@ -231,6 +244,8 @@ export interface DadosDaFonte {
   regra_margem?: RegraDeMargem | null;
   pronta_entrega?: boolean;
   fornecedor?: string | null;
+  margens_categoria?: MargensPorCategoria | null;
+  marca_dagua?: boolean | null;
 }
 
 const limitarIntervalo = (v: unknown) => Math.min(24 * 60, Math.max(30, Math.round(num(v, 120))));
@@ -242,7 +257,9 @@ export async function criarFonte(dados: DadosDaFonte, id: string = randomUUID())
     sql: "SELECT id FROM fontes_preco WHERE site = ? AND caminho = ? LIMIT 1",
     args: [dados.site || "kabum", dados.caminho],
   });
-  if (repetida.rows.length > 0) throw new Error("Esta categoria já está cadastrada como fonte.");
+  if (repetida.rows.length > 0) {
+    throw new Error(dados.site && dados.site !== "kabum" ? "Este fornecedor já está cadastrado." : "Esta categoria já está cadastrada como fonte.");
+  }
 
   const ordem =
     dados.ordem ??
@@ -251,8 +268,8 @@ export async function criarFonte(dados: DadosDaFonte, id: string = randomUUID())
   await turso.execute({
     sql: `INSERT INTO fontes_preco
             (id, nome, site, url, caminho, so_loja, margem, ativa, intervalo_min, preco_min, preco_max, trilha, categoria_destino, ordem, criada_em,
-             regra_margem, pronta_entrega, fornecedor)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+             regra_margem, pronta_entrega, fornecedor, margens_categoria, marca_dagua)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     args: [
       id,
       dados.nome.trim().slice(0, 190),
@@ -272,6 +289,8 @@ export async function criarFonte(dados: DadosDaFonte, id: string = randomUUID())
       dados.regra_margem ? JSON.stringify(dados.regra_margem) : null,
       dados.pronta_entrega ? 1 : 0,
       txtOuNulo(dados.fornecedor),
+      dados.margens_categoria && Object.keys(dados.margens_categoria).length ? JSON.stringify(lerMargensPorCategoria(dados.margens_categoria)) : null,
+      dados.marca_dagua == null ? null : dados.marca_dagua ? 1 : 0,
     ],
   });
   return (await buscarFonte(id))!;
@@ -280,7 +299,8 @@ export async function criarFonte(dados: DadosDaFonte, id: string = randomUUID())
 export type AlteracaoDaFonte = Partial<
   Pick<
     DadosDaFonte,
-    "nome" | "so_loja" | "margem" | "ativa" | "intervalo_min" | "preco_min" | "preco_max" | "categoria_destino" | "regra_margem"
+    | "nome" | "so_loja" | "margem" | "ativa" | "intervalo_min" | "preco_min" | "preco_max" | "categoria_destino" | "regra_margem"
+    | "margens_categoria" | "marca_dagua" | "pronta_entrega" | "fornecedor"
   >
 >;
 
@@ -300,6 +320,13 @@ export async function atualizarFonte(id: string, mudanca: AlteracaoDaFonte): Pro
     const regra = lerRegra(mudanca.regra_margem);
     campos.regra_margem = regra ? JSON.stringify(regra) : null;
   }
+  if (mudanca.margens_categoria !== undefined) {
+    const margens = lerMargensPorCategoria(mudanca.margens_categoria);
+    campos.margens_categoria = Object.keys(margens).length ? JSON.stringify(margens) : null;
+  }
+  if (mudanca.marca_dagua !== undefined) campos.marca_dagua = mudanca.marca_dagua == null ? null : mudanca.marca_dagua ? 1 : 0;
+  if (mudanca.pronta_entrega !== undefined) campos.pronta_entrega = mudanca.pronta_entrega ? 1 : 0;
+  if (mudanca.fornecedor !== undefined) campos.fornecedor = txtOuNulo(String(mudanca.fornecedor ?? "").trim().slice(0, 120));
 
   const chaves = Object.keys(campos);
   if (chaves.length > 0) {
@@ -364,7 +391,8 @@ const COLUNAS_DO_PRODUTO = [
 
 // Numa releitura só muda o que vem da fonte. Nome, categoria, descrição, ficha
 // e endereço (slug) ficam como estão: o que for ajustado à mão no painel de
-// produtos sobrevive, e o link do produto não muda. A foto só é trocada
+// produtos sobrevive, e o link do produto não muda. Exceção: a marca de um
+// compatível é apagada ("Cartucho Compatível HP" não é da HP — caso de 11/10). A foto só é trocada
 // enquanto ainda apontar para a fonte — depois de copiada para o servidor da
 // loja, não é mais sobrescrita — e nunca por uma foto vazia.
 // (image_urls vem antes de image: o MySQL avalia o SET em ordem, e a condição
@@ -380,6 +408,7 @@ const AO_REPETIR = `
   image = IF(VALUES(image) <> '' AND VALUES(image) NOT LIKE '%produto-sem-foto%' AND (image IS NULL OR image = '' OR image LIKE '%kabum.com.br%' OR image LIKE '%produto-sem-foto%'), VALUES(image), image),
   cost = VALUES(cost),
   supplier = VALUES(supplier),
+  brand = IF(VALUES(brand) IS NULL AND LOWER(name) LIKE '%compat%', NULL, brand),
   fonte_id = VALUES(fonte_id),
   origem_codigo = VALUES(origem_codigo),
   origem_pix = VALUES(origem_pix),
@@ -580,6 +609,53 @@ export async function recalcularMargem(fonte: Fonte): Promise<number> {
   // Uma transação só: ou a fonte inteira muda de preço, ou nada muda.
   await turso.batch(comandos, "write");
   return linhas.length;
+}
+
+// ---------- margem por categoria ----------
+
+export interface CategoriaDaFonte {
+  categoria: string;
+  produtos: number;
+  /** Margem fixada pelo Thiago para esta categoria (null = automática). */
+  margem: number | null;
+  /** Faixa da margem automática (regra ou margem única) nos produtos da categoria. */
+  automaticaMin: number;
+  automaticaMax: number;
+  /** Faixa do preço do fornecedor. */
+  precoMin: number;
+  precoMax: number;
+}
+
+/** As categorias do site em que caem os produtos da fonte, com a margem de cada uma. */
+export async function categoriasDaFonte(fonte: Fonte): Promise<CategoriaDaFonte[]> {
+  await garantirEstrutura();
+  const res = await turso.execute({
+    sql: "SELECT name, category, origem_pix FROM products WHERE fonte_id = ? AND origem_pix > 0",
+    args: [fonte.id],
+  });
+  const grupos = new Map<string, CategoriaDaFonte>();
+  for (const r of res.rows) {
+    const l = r as Linha;
+    const categoria = String(l.category ?? "").trim() || "(sem categoria)";
+    const preco = num(l.origem_pix);
+    const auto = margemAutomatica(fonte, { nome: String(l.name ?? ""), categoria, preco });
+    const g = grupos.get(categoria) || {
+      categoria,
+      produtos: 0,
+      margem: fonte.margens_categoria?.[categoria] ?? null,
+      automaticaMin: Infinity,
+      automaticaMax: -Infinity,
+      precoMin: Infinity,
+      precoMax: -Infinity,
+    };
+    g.produtos++;
+    g.automaticaMin = Math.min(g.automaticaMin, auto);
+    g.automaticaMax = Math.max(g.automaticaMax, auto);
+    g.precoMin = Math.min(g.precoMin, preco);
+    g.precoMax = Math.max(g.precoMax, preco);
+    grupos.set(categoria, g);
+  }
+  return [...grupos.values()].sort((a, b) => a.categoria.localeCompare(b.categoria, "pt-BR"));
 }
 
 // ---------- quedas retidas ----------

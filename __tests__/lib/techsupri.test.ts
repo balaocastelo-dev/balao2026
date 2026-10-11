@@ -160,9 +160,21 @@ describe("foto pela KaBuM!", () => {
 
   it("cor, kit e acessório no lugar do produto são recusados", () => {
     expect(semelhanca("Mouse Sem Fio Logitech M170 Vermelho", "Mouse Wireless Logitech M170 Preto")).toBe(0);
-    expect(semelhanca("Cartucho Compatível HP 933XL Azul", "Cartucho HP 933XL Ciano")).toBeGreaterThan(0);
+    expect(semelhanca("Cartucho Compatível HP 933XL Azul", "Cartucho Compatível HP 933XL Ciano")).toBeGreaterThan(0);
     expect(semelhanca("Pilha Recarregável AA C/4 Mox", "Carregador Com 4 Pilha Recarregável 2600mah Aa Mox")).toBe(0);
     expect(semelhanca("Kit Cartucho HP 667", "Kit Cartucho HP 667 Preto e Colorido")).toBeGreaterThan(0);
+  });
+
+  it("compatível nunca leva foto do original (caso do HP 932XL, 11/10)", () => {
+    expect(semelhanca("Cartucho Compatível HP 932XL Preto 50ML", "Cartucho de Tinta Hp 932xl Cn053al Preto")).toBe(0);
+    expect(semelhanca("Toner Compatível Hp 105A/107A 1K Evolut", "Toner Original Hp W1105a 105a 107a")).toBe(0);
+    expect(semelhanca("Controle Ps4 Compativel Preto", "Controle Sony Dualshock 4, Playstation 4, Sem Fio, Preto - PS4")).toBe(0);
+    expect(semelhanca("Toner Evolut Compativel Hp CB541A/CE321A/CF211A Azul 1.8K", "Cart. Toner Comp. C/ Cb541a/ce321a/cf211a Cyan")).toBeGreaterThan(0);
+    // e o original não leva foto de compatível
+    expect(semelhanca("Cartucho HP 664 Preto Original", "Cartucho Compatível HP 664 Preto")).toBe(0);
+    // compatível não diz que é da marca da impressora
+    expect(marcaDoTechsupri("Cartucho Compatível HP 932XL Preto 50ML")).toBeNull();
+    expect(marcaDoTechsupri("Cartucho HP 664 Preto Original")).toBe("HP");
   });
 
   it("sem modelo, quase todo o nome precisa aparecer", () => {

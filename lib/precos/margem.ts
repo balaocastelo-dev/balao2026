@@ -133,12 +133,70 @@ export function margemPelaRegra(regra: RegraDeMargem, produto: { nome: string; c
   return Math.round(margem * 10) / 10;
 }
 
-/** A margem que vale para um produto da fonte: a regra, se houver, ou a margem única. */
-export function margemDoProduto(
-  fonte: { margem: number; regra_margem?: RegraDeMargem | null },
-  produto: { nome: string; categoria: string; preco: number }
-): number {
+// ---------- margem por categoria ----------
+
+/**
+ * Margem fixada pelo Thiago para uma categoria do site, dentro de uma fonte:
+ * { "Áudio/Fone de Ouvido": 120, "Impressão/Toners": 300 }.
+ * Vale antes de qualquer regra. A categoria mais específica ganha: uma
+ * margem em "Áudio" vale para "Áudio/Fone de Ouvido" se esta não tiver a sua.
+ */
+export type MargensPorCategoria = Record<string, number>;
+
+const limparCategoria = (c: unknown) =>
+  String(c ?? "")
+    .split("/")
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .join("/");
+
+export function lerMargensPorCategoria(valor: unknown): MargensPorCategoria {
+  let bruto: unknown = valor;
+  if (typeof valor === "string") {
+    try {
+      bruto = JSON.parse(valor);
+    } catch {
+      return {};
+    }
+  }
+  if (!bruto || typeof bruto !== "object" || Array.isArray(bruto)) return {};
+  const saida: MargensPorCategoria = {};
+  for (const [categoria, margem] of Object.entries(bruto as Record<string, unknown>).slice(0, 500)) {
+    const c = limparCategoria(categoria).slice(0, 190);
+    if (!c || margem === null || margem === "" || !Number.isFinite(Number(margem))) continue;
+    saida[c] = normalizarMargem(margem);
+  }
+  return saida;
+}
+
+/** A margem fixada para a categoria (ou a do pai mais próximo), ou null. */
+export function margemDaCategoria(margens: MargensPorCategoria | null | undefined, categoria: string): number | null {
+  if (!margens) return null;
+  const partes = limparCategoria(categoria).split("/").filter(Boolean);
+  for (let n = partes.length; n > 0; n--) {
+    const m = margens[partes.slice(0, n).join("/")];
+    if (m != null) return m;
+  }
+  return null;
+}
+
+interface FonteComMargem {
+  margem: number;
+  regra_margem?: RegraDeMargem | null;
+  margens_categoria?: MargensPorCategoria | null;
+}
+
+/** A margem da fonte sem olhar a margem por categoria (a "automática"). */
+export function margemAutomatica(fonte: FonteComMargem, produto: { nome: string; categoria: string; preco: number }): number {
   return fonte.regra_margem ? margemPelaRegra(fonte.regra_margem, produto) : normalizarMargem(fonte.margem);
+}
+
+/**
+ * A margem que vale para um produto da fonte: a fixada para a categoria, se
+ * houver; senão a regra escalonada, se houver; senão a margem única.
+ */
+export function margemDoProduto(fonte: FonteComMargem, produto: { nome: string; categoria: string; preco: number }): number {
+  return margemDaCategoria(fonte.margens_categoria, produto.categoria) ?? margemAutomatica(fonte, produto);
 }
 
 /** Texto curto da regra, para o painel. */
