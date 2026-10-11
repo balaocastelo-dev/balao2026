@@ -29,6 +29,7 @@ import {
 import { casaComTermos } from "./catalogo/filtros";
 import { montarVitrine, RAIZ_DESKTOPS, RAIZ_NOTEBOOKS, type VitrinePremium } from "./catalogo/vitrine-premium";
 import { selecionarNotebooks, type VitrineDeNotebooks } from "./catalogo/notebooks";
+import { montarFileiras, type VitrineDePcGamer } from "./catalogo/pc-gamer";
 import type { Product } from "./utils";
 
 const listaVazia = (itens: unknown[]) => !Array.isArray(itens) || itens.length === 0;
@@ -247,6 +248,26 @@ export const getCachedNotebooks = unstable_cache(
       (vitrine) => !vitrine || vitrine.total === 0
     ),
   ["notebooks-vitrine-v1"],
+  { revalidate: 300, tags: [TAG_PRODUTOS] }
+);
+
+/**
+ * Fileiras da página /pcgamer: só PC gamer, separado por memória da placa de
+ * vídeo, setups com monitor, linha do Ryzen e PCs de elite.
+ *
+ * Lê os computadores do catálogo uma vez a cada cinco minutos (a mesma
+ * consulta enxuta das páginas /premium e /ia-local) e guarda só as fileiras
+ * prontas, uns cem produtos: os dois mil e tantos PCs não cabem no cache do
+ * Next. Se o banco falhar ou vier vazio, as fileiras saem da cópia do catálogo.
+ */
+export const getCachedVitrinePcGamer = unstable_cache(
+  async (): Promise<VitrineDePcGamer<Product>> =>
+    comEspelho<VitrineDePcGamer<Product>>(
+      async () => montarFileiras(await getComputadoresDaVitrine()),
+      (produtos) => montarFileiras(espelhoPorCaminhoDeCategoria(produtos, RAIZ_DESKTOPS)),
+      (vitrine) => !vitrine || vitrine.total === 0
+    ),
+  ["pcgamer-fileiras-v1"],
   { revalidate: 300, tags: [TAG_PRODUTOS] }
 );
 

@@ -3,10 +3,9 @@ import type { Metadata } from "next";
 import Header from "@/components/Header";
 
 import { SITE_CONFIG } from "@/lib/config";
-import HeroCTA from "@/components/HeroCTA";
-import PcGamerSearchGrid from "@/components/PcGamerSearchGrid";
-import ProductCard from "@/components/ProductCard";
-import { getCachedCategories, getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
+import FileiraDeProdutos from "@/components/catalogo/FileiraDeProdutos";
+import { getCachedCategories, getCachedVitrinePcGamer } from "@/lib/cache";
+import { RAIZ_PC_GAMER } from "@/lib/catalogo/pc-gamer";
 import {
   Gamepad2,
   Cpu,
@@ -92,13 +91,19 @@ const PC_GAMER_FAQS = [
 ];
 
 export default async function PcGamerPage() {
-  const [allProducts, keywordGamer, categories] = await Promise.all([
-    getCachedProducts(),
-    getCachedProductsByKeywords(["gamer", "rtx", "ryzen", "core i5", "core i7", "watercooler", "gabinete"], 16),
-    getCachedCategories(),
+  // Só PC gamer: a categoria Computadores/PC/PC Gamer, separada em fileiras
+  // (placa de vídeo, setups com monitor, linha do Ryzen e PCs de elite). Peça,
+  // gabinete e periférico não entram. Se o catálogo não responder, a página
+  // chama para o WhatsApp em vez de mostrar produto de outro departamento.
+  const [vitrine, categorias] = await Promise.all([
+    getCachedVitrinePcGamer().catch(() => ({ fileiras: [], total: 0 })),
+    getCachedCategories().catch(() => []),
   ]);
 
-  let gamerProducts = keywordGamer.length > 0 ? keywordGamer : allProducts.slice(0, 8);
+  const fileiras = vitrine.fileiras;
+  const gamerProducts = fileiras.flatMap((f) => f.produtos);
+  const slugDaCategoria = categorias.find((c) => c.full_path === RAIZ_PC_GAMER)?.slug || "computadores-pc-pc-gamer";
+  const todosOsPcs = `/categoria/${slugDaCategoria}`;
 
   const breadcrumbItems = [
     { name: "Home", item: "https://www.balao.info" },
@@ -191,9 +196,9 @@ export default async function PcGamerPage() {
         <section id="vitrine" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
             <div>
-              <div className="text-xs font-black uppercase tracking-wider text-[#E60012] mb-1">Setups e Componentes</div>
+              <div className="text-xs font-black uppercase tracking-wider text-[#E60012] mb-1">Só PC Gamer</div>
               <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
-                Máquinas e Peças Gamer Disponíveis
+                Escolha pela placa de vídeo, pelo processador ou pelo setup
               </h2>
             </div>
             <a
@@ -208,11 +213,65 @@ export default async function PcGamerPage() {
             </a>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {gamerProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          {fileiras.length > 0 ? (
+            <>
+              <nav
+                aria-label="Fileiras de PC gamer"
+                className="mb-10 flex gap-2 overflow-x-auto pb-2 sm:flex-wrap sm:overflow-visible sm:pb-0"
+                style={{ scrollbarWidth: "none" }}
+              >
+                {fileiras.map((f, i) => (
+                  <a
+                    key={f.id}
+                    href={`#fileira-${f.id}`}
+                    className="shrink-0 whitespace-nowrap rounded-full border border-slate-700 bg-[#111827] px-4 py-2 text-xs sm:text-sm font-bold text-slate-200 transition hover:border-[#E60012] hover:text-white"
+                  >
+                    <span className="text-[#E60012]">{i + 1}.</span> {f.titulo}
+                  </a>
+                ))}
+              </nav>
+
+              <div className="space-y-12 sm:space-y-16">
+                {fileiras.map((f, i) => (
+                  <FileiraDeProdutos
+                    key={f.id}
+                    id={`fileira-${f.id}`}
+                    numero={i + 1}
+                    titulo={f.titulo}
+                    subtitulo={f.subtitulo}
+                    produtos={f.produtos}
+                  />
+                ))}
+              </div>
+
+              <div className="mt-12 flex justify-center">
+                <a
+                  href={todosOsPcs}
+                  className="bg-[#161f32] hover:bg-slate-800 text-slate-200 border border-slate-700 font-bold py-4 px-8 rounded-2xl transition-all text-base flex items-center gap-2"
+                >
+                  Ver os {vitrine.total.toLocaleString("pt-BR")} PCs gamer, com filtros por marca e preço
+                  <ArrowRight className="w-4 h-4" />
+                </a>
+              </div>
+            </>
+          ) : (
+            <div className="bg-[#111827] border border-slate-800 rounded-3xl p-8 sm:p-12 text-center space-y-4">
+              <p className="text-slate-300 text-sm sm:text-base">
+                Não conseguimos carregar os PCs gamer agora. Chame no WhatsApp e mandamos as configurações e os preços.
+              </p>
+              <a
+                href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(
+                  "Olá! Gostaria de consultar os PCs Gamer disponíveis na Balão."
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-3 bg-[#E60012] hover:bg-red-700 text-white font-black py-4 px-8 rounded-2xl transition-all text-base"
+              >
+                <MessageCircle className="w-5 h-5" />
+                Consultar PCs gamer no WhatsApp
+              </a>
+            </div>
+          )}
         </section>
 
         {/* PILARES DE PERFORMANCE */}
