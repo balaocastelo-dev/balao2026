@@ -9,7 +9,12 @@
     "segurança",
     "notebook"
   ],
-  "capa": null,
+  "capa": {
+    "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/windows-10-ate-quando-tem-atualizacao-80a07a46.jpg",
+    "alt": "Computador de mesa mais antigo em um escritório de casa, com o monitor apagado sobre a mesa",
+    "largura": 1600,
+    "altura": 900
+  },
   "publicadoEm": "2026-10-09T09:09:24.725Z",
   "blocos": [
     {
