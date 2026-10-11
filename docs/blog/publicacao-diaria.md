@@ -31,6 +31,30 @@ do Projeto "Balao.info" e na nota `11-Claude\Fabrica-de-Conteudo.md` do cérebro
 A régua confere o roteiro como confere o texto: de 45 a 85 palavras de fala,
 sem preço, sem promessa, sem número que a voz sintética lê mal.
 
+## A foto de capa
+
+A foto é feita **no computador da loja, na placa de vídeo local** — não
+depende de serviço de imagem pago (até 11/10/2026 era o gerador do Figma, que
+parou no meio do dia por limite de créditos).
+
+1. A rotina, na nuvem, só **descreve** a foto no artigo:
+   `"capa": { "alt": "o que a foto mostra", "pedido": "a cena, em inglês, para o gerador" }`.
+2. O `publicar` põe o artigo no ar com a capa desenhada pelo site e grava o
+   pedido na fila `capas/pendentes.json`, no ramo de conteúdo.
+3. No computador, `balao-content-factory\publisher\capa_blog.py` (a fonte
+   fica em `scripts/fabrica/capa_blog.py`) lê a fila, espera a placa ficar
+   livre, gera a foto com o Flux no ComfyUI e mostra a um modelo de visão do
+   Ollama, que reprova marca, texto, rosto, deformação ou cena errada. Até
+   três tentativas por rodada.
+4. Aprovada, a foto é presa ao artigo com
+   `node scripts/blog-publicar.mjs capa <endereço> foto.jpg` (confere tamanho
+   e proporção, grava em `capas/` e tira o pedido da fila).
+5. Dois dias sem foto boa: o pedido sai da fila (`capa <endereço> --desistir`)
+   e o artigo fica com a capa desenhada.
+
+Enquanto o computador estiver desligado, os artigos saem normalmente, com a
+capa desenhada; as fotos são feitas quando ele voltar.
+
 ## Como funciona
 
 1. A tarefa agendada abre uma sessão do Claude.
@@ -68,7 +92,7 @@ código (`lib/blog/regua.ts`), não a boa vontade de quem escreve:
 | só aponta para páginas da loja de uma lista conferida | Link quebrado é o erro mais comum de texto automático |
 | precisa de ao menos duas fontes | Fato sem origem não entra |
 | não afirma "testamos" | A rotina não testou nada |
-| não traz imagem de fora | Imagem tem dono; a capa é a foto gerada e enviada pelo comando (`--capa`) |
+| não traz imagem de fora | Imagem tem dono; a capa é a foto gerada no computador da loja e enviada pelo comando (`capa`) |
 
 O site aplica as mesmas conferências **de novo** na hora de mostrar. Um
 arquivo colocado no ramo por outro caminho, se não passar, não aparece.
@@ -84,6 +108,9 @@ node scripts/blog-publicar.mjs preparar               # regras, pauta e o que j�
 node scripts/blog-publicar.mjs listar                 # só o que já saiu
 node scripts/blog-publicar.mjs conferir artigo.json   # confere, sem publicar
 node scripts/blog-publicar.mjs publicar artigo.json   # confere e publica
+node scripts/blog-publicar.mjs pendentes              # fotos de capa que faltam gerar (JSON)
+node scripts/blog-publicar.mjs capa <endereço> foto.jpg   # prende a foto a um artigo publicado
+node scripts/blog-publicar.mjs capa <endereço> --pedir --alt "…" --pedido "…"   # pede a foto de um artigo sem foto
 node scripts/blog-publicar.mjs retirar <endereço>     # tira um artigo do ar
 ```
 

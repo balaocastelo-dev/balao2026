@@ -5,7 +5,9 @@
  *   node scripts/blog-publicar.mjs preparar
  *   node scripts/blog-publicar.mjs listar
  *   node scripts/blog-publicar.mjs conferir artigo.json
- *   node scripts/blog-publicar.mjs publicar artigo.json --capa foto.jpg
+ *   node scripts/blog-publicar.mjs publicar artigo.json
+ *   node scripts/blog-publicar.mjs pendentes
+ *   node scripts/blog-publicar.mjs capa <endereço-do-artigo> foto.jpg
  *   node scripts/blog-publicar.mjs retirar <endereço-do-artigo>
  *
  * O artigo é um arquivo JSON no formato de `lib/blog/tipos.ts`. Antes de
@@ -18,9 +20,14 @@
  * o artigo, a foto de capa e a lista. O site não é refeito, e o ramo principal
  * não é tocado.
  *
- * Todo artigo novo leva uma foto de capa (`--capa`): fotografia ou imagem
- * simulada do assunto, sem texto e sem marca. O artigo diz só o texto
- * alternativo (`"capa": { "alt": "…" }`); o endereço quem preenche é o comando.
+ * Todo artigo novo leva uma foto de capa: fotografia ou imagem simulada do
+ * assunto, sem texto e sem marca. Quem escreve o artigo (na nuvem) não gera a
+ * imagem: descreve a foto (`"capa": { "alt": "…", "pedido": "…" }`) e publica.
+ * O artigo sai com a capa desenhada pelo site e o pedido entra na fila
+ * `capas/pendentes.json`. A fábrica de conteúdo, no computador da loja, lê a
+ * fila (`pendentes`), gera a foto na placa de vídeo local e a prende ao
+ * artigo (`capa <endereço> foto.jpg`). Quem já tem a foto em mãos pode
+ * publicar direto com `--capa foto.jpg`.
  *
  * Não precisa de `npm install`: usa só o Node (22.18 ou mais novo) e o git.
  */
@@ -226,6 +233,42 @@ function capasNoRamo(pasta, slug) {
     .map((nome) => path.join(dir, nome));
 }
 
+// ------------------------------------------------- fotos de capa por fazer
+
+const PEDIDO_MINIMO = 60;
+const PEDIDO_MAXIMO = 900;
+
+/** A fila de fotos que o computador da loja ainda tem de gerar. */
+function lerPendentes(pasta) {
+  const arquivo = path.join(pasta, "capas", "pendentes.json");
+  if (!fs.existsSync(arquivo)) return [];
+  try {
+    const lido = JSON.parse(fs.readFileSync(arquivo, "utf8"));
+    return Array.isArray(lido.pendentes) ? lido.pendentes.filter((p) => p && typeof p.slug === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+function gravarPendentes(pasta, pendentes) {
+  fs.mkdirSync(path.join(pasta, "capas"), { recursive: true });
+  const ordenados = [...pendentes].sort((a, b) => Date.parse(a.pedidoEm) - Date.parse(b.pedidoEm));
+  fs.writeFileSync(path.join(pasta, "capas", "pendentes.json"), `${JSON.stringify({ versao: 1, pendentes: ordenados }, null, 2)}\n`);
+}
+
+/** Confere a descrição da foto que ainda vai ser gerada. Devolve os erros. */
+function conferirPedidoDeCapa(capa) {
+  const erros = [];
+  const alt = typeof capa.alt === "string" ? capa.alt.trim() : "";
+  const pedido = typeof capa.pedido === "string" ? capa.pedido.replace(/\s+/g, " ").trim() : "";
+  if (alt.length < 12) erros.push('A capa precisa dizer o que a foto mostra: "capa": { "alt": "…" }.');
+  if (pedido.length < PEDIDO_MINIMO || pedido.length > PEDIDO_MAXIMO) {
+    erros.push(`A capa precisa do pedido da foto ("capa": { "pedido": "…" }), em inglês, de ${PEDIDO_MINIMO} a ${PEDIDO_MAXIMO} caracteres: a cena, os objetos, a luz. Tem ${pedido.length}.`);
+  }
+  if (/https?:|www\./i.test(pedido)) erros.push("O pedido da foto não leva endereço de site.");
+  return { erros, alt, pedido };
+}
+
 /**
  * Lê o arquivo e aplica as duas conferências. Devolve o artigo pronto (e a
  * foto de capa, quando veio uma), ou encerra.
@@ -242,16 +285,23 @@ function conferir(arquivo, { dataPadrao, arquivoDaFoto }) {
   // A data é a da publicação: quem escreve não precisa preencher.
   if (bruto && typeof bruto === "object" && !bruto.publicadoEm) bruto.publicadoEm = dataPadrao;
 
-  // A foto vem em arquivo; o artigo só descreve o que ela mostra.
+  // A foto vem em arquivo, ou fica para o computador da loja gerar; o artigo
+  // só descreve o que ela mostra.
   let foto = null;
-  if (arquivoDaFoto) {
+  let pendente = null;
+  if (semCapa) {
+    if (bruto && typeof bruto === "object" && bruto.capa && !bruto.capa.src) delete bruto.capa;
+  } else if (arquivoDaFoto) {
     if (!bruto || typeof bruto !== "object" || typeof bruto.slug !== "string") sair("O artigo precisa do campo slug.");
     const alt = typeof bruto.capa?.alt === "string" ? bruto.capa.alt.trim() : "";
     if (alt.length < 12) sair('Com --capa, o artigo precisa dizer o que a foto mostra: "capa": { "alt": "…" }.');
     foto = lerCapa(arquivoDaFoto, bruto.slug);
     bruto.capa = { src: foto.src, alt, largura: foto.largura, altura: foto.altura };
   } else if (bruto?.capa && typeof bruto.capa === "object" && !bruto.capa.src) {
-    sair("O artigo descreve uma capa, mas a foto não veio: passe --capa foto.jpg.");
+    const pedido = conferirPedidoDeCapa(bruto.capa);
+    if (pedido.erros.length > 0) sair(`Capa reprovada:\n- ${pedido.erros.join("\n- ")}`);
+    pendente = { alt: pedido.alt, pedido: pedido.pedido };
+    delete bruto.capa;
   }
 
   const lido = lerArtigo(bruto);
@@ -266,10 +316,12 @@ function conferir(arquivo, { dataPadrao, arquivoDaFoto }) {
   console.log(`Tipo: ${TIPOS[tipoDe(artigo)]}`);
   if (artigo.roteiro) console.log(`Roteiro do vídeo: ${artigo.roteiro.fala.split(/\s+/).length} palavras de fala, ${artigo.roteiro.destaques.length} destaques`);
   if (foto) console.log(`Capa: ${foto.largura} × ${foto.altura}, ${Math.round(foto.bytes.length / 1024)} KB`);
-  if (avaliacao.avisos.length > 0) console.log(`\nAvisos (não impedem a publicação):\n- ${avaliacao.avisos.join("\n- ")}`);
+  if (pendente) console.log("Capa: a foto será gerada no computador da loja; até lá o site mostra a capa desenhada.");
+  const avisos = pendente ? avaliacao.avisos.filter((a) => !a.startsWith("Sem imagem de capa")) : avaliacao.avisos;
+  if (avisos.length > 0) console.log(`\nAvisos (não impedem a publicação):\n- ${avisos.join("\n- ")}`);
   if (!avaliacao.aprovado) sair(`Reprovado na régua editorial:\n- ${avaliacao.erros.join("\n- ")}`);
 
-  return { artigo, foto };
+  return { artigo, foto, pendente };
 }
 
 /** Conferências que dependem do que já está publicado. */
@@ -388,15 +440,17 @@ if (comando === "listar") {
     fecharRamo(pasta);
   }
 } else if (comando === "conferir") {
-  const { artigo } = conferir(alvo, { dataPadrao: new Date().toISOString(), arquivoDaFoto });
-  if (!artigo.capa) console.log("\nAtenção: sem foto de capa. O comando publicar exige --capa foto.jpg.");
+  const { artigo, pendente } = conferir(alvo, { dataPadrao: new Date().toISOString(), arquivoDaFoto });
+  if (!artigo.capa && !pendente && !semCapa) {
+    console.log('\nAtenção: o artigo não descreve a foto de capa. O comando publicar exige "capa": { "alt": "…", "pedido": "…" }.');
+  }
   console.log("\n✓ Aprovado. (Nada foi publicado: use o comando publicar.)");
 } else if (comando === "publicar") {
-  const { artigo, foto } = conferir(alvo, { dataPadrao: new Date().toISOString(), arquivoDaFoto });
+  const { artigo, foto, pendente } = conferir(alvo, { dataPadrao: new Date().toISOString(), arquivoDaFoto });
   if (Date.parse(artigo.publicadoEm) > Date.now() + 60_000) sair("A data de publicação está no futuro.");
-  // Capa desenhada só por exceção declarada: quando não foi possível gerar a foto.
-  if (!artigo.capa && !semCapa) {
-    sair("Falta a foto de capa: gere a imagem e passe --capa foto.jpg. (Se não foi possível gerar, publique com --sem-capa e relate.)");
+  // Todo artigo novo descreve a sua foto; capa desenhada para sempre, só por exceção declarada.
+  if (!artigo.capa && !pendente && !semCapa) {
+    sair('Falta a foto de capa: descreva-a no artigo ("capa": { "alt": "…", "pedido": "…" }) para o computador da loja gerar, ou passe --capa foto.jpg.');
   }
 
   const pasta = abrirRamo();
@@ -443,8 +497,89 @@ if (comando === "listar") {
     });
     gravarIndice(pasta, indice);
 
+    // A fila de fotos: entra quem descreveu a foto, sai quem já chegou com ela.
+    const fila = lerPendentes(pasta).filter((p) => p.slug !== artigo.slug);
+    if (pendente && !artigo.capa) {
+      fila.push({ slug: artigo.slug, titulo: artigo.titulo, categoria: artigo.categoria, alt: pendente.alt, pedido: pendente.pedido, pedidoEm: new Date().toISOString() });
+    }
+    if (pendente || fs.existsSync(path.join(pasta, "capas", "pendentes.json"))) gravarPendentes(pasta, fila);
+
     enviar(pasta, `${anterior ? "Atualiza" : "Publica"}: ${artigo.titulo}`);
     console.log(`\n✓ Publicado no ramo de conteúdo. Em até uma hora aparece em:\n  ${SITE}/blog/${artigo.slug}`);
+    if (pendente && !artigo.capa) console.log("  A foto de capa está na fila do computador da loja (capas/pendentes.json).");
+  } finally {
+    fecharRamo(pasta);
+  }
+} else if (comando === "pendentes") {
+  // O que o computador da loja lê: uma linha de JSON, sem mais nada.
+  const pasta = abrirRamo();
+  try {
+    console.log(JSON.stringify(lerPendentes(pasta)));
+  } finally {
+    fecharRamo(pasta);
+  }
+} else if (comando === "capa") {
+  // Prende a foto a um artigo já publicado. Só mexe na capa: o texto fica como está.
+  if (!alvo || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(alvo)) sair("Diga o endereço do artigo: capa <endereço> foto.jpg");
+  const desistir = opcoes.has("--desistir");
+  const trocar = opcoes.has("--trocar");
+  // `--pedir` põe na fila a foto de um artigo que saiu sem ela: --alt "…" --pedido "…".
+  const pedir = opcoes.has("--pedir");
+  const altPedido = pedir ? valorDaOpcao("--alt") : null;
+  const textoPedido = pedir ? valorDaOpcao("--pedido") : null;
+  const valores = new Set([altPedido, textoPedido].filter(Boolean));
+  const arquivo = resto.find((a) => !a.startsWith("--") && !valores.has(a));
+  if (!desistir && !pedir && !arquivo) sair("Diga o arquivo da foto: capa <endereço> foto.jpg (ou --pedir, ou --desistir).");
+
+  const pasta = abrirRamo();
+  try {
+    const indice = lerIndice(pasta);
+    const noIndice = indice.artigos.find((a) => a.slug === alvo);
+    if (!noIndice) sair(`/blog/${alvo} não está entre os artigos da rotina diária.`);
+    const fila = lerPendentes(pasta);
+    const pedido = fila.find((p) => p.slug === alvo);
+
+    if (pedir) {
+      if (noIndice.capa && !trocar) sair(`/blog/${alvo} já tem foto de capa. Para pedir outra, use --trocar.`);
+      const novo = conferirPedidoDeCapa({ alt: altPedido, pedido: textoPedido });
+      if (novo.erros.length > 0) sair(`Pedido reprovado:\n- ${novo.erros.join("\n- ")}`);
+      gravarPendentes(pasta, [
+        ...fila.filter((p) => p.slug !== alvo),
+        { slug: alvo, titulo: noIndice.titulo, categoria: noIndice.categoria, alt: novo.alt, pedido: novo.pedido, pedidoEm: new Date().toISOString() },
+      ]);
+      enviar(pasta, `Capa: pede a foto de ${noIndice.titulo}`);
+      console.log(`\n✓ Foto de /blog/${alvo} na fila do computador da loja.`);
+    } else if (desistir) {
+      if (!pedido) sair(`/blog/${alvo} não tem foto na fila.`);
+      gravarPendentes(pasta, fila.filter((p) => p.slug !== alvo));
+      enviar(pasta, `Capa: sem foto para ${noIndice.titulo}`);
+      console.log(`\n✓ Pedido retirado da fila. /blog/${alvo} fica com a capa desenhada pelo site.`);
+    } else {
+      const caminhoDoArtigo = path.join(pasta, "artigos", `${alvo}.json`);
+      const bruto = JSON.parse(fs.readFileSync(caminhoDoArtigo, "utf8"));
+      if (bruto.capa && !trocar) sair(`/blog/${alvo} já tem foto de capa. Para trocar, use --trocar.`);
+      const alt = (pedido?.alt ?? bruto.capa?.alt ?? "").trim();
+      if (alt.length < 12) sair(`/blog/${alvo} não tem a descrição da foto (nem na fila, nem no artigo).`);
+
+      const foto = lerCapa(arquivo, alvo);
+      bruto.capa = { src: foto.src, alt, largura: foto.largura, altura: foto.altura };
+      const lido = lerArtigo(bruto);
+      if (!lido.ok) sair(`Formato reprovado:\n- ${lido.erros.join("\n- ")}`);
+      const avaliacao = avaliarArtigo(lido.valor);
+      if (!avaliacao.aprovado) sair(`Reprovado na régua editorial:\n- ${avaliacao.erros.join("\n- ")}`);
+
+      fs.mkdirSync(path.join(pasta, "capas"), { recursive: true });
+      const novo = path.join(pasta, foto.noRamo);
+      fs.writeFileSync(novo, foto.bytes);
+      for (const antiga of capasNoRamo(pasta, alvo)) if (antiga !== novo) fs.rmSync(antiga, { force: true });
+      fs.writeFileSync(caminhoDoArtigo, `${JSON.stringify(bruto, null, 2)}\n`);
+      noIndice.capa = lido.valor.capa;
+      gravarIndice(pasta, indice);
+      if (pedido) gravarPendentes(pasta, fila.filter((p) => p.slug !== alvo));
+
+      enviar(pasta, `Capa: ${noIndice.titulo}`);
+      console.log(`\n✓ Foto de capa publicada (${foto.largura} × ${foto.altura}, ${Math.round(foto.bytes.length / 1024)} KB). Em até uma hora aparece em:\n  ${SITE}/blog/${alvo}`);
+    }
   } finally {
     fecharRamo(pasta);
   }
@@ -459,6 +594,8 @@ if (comando === "listar") {
     fs.rmSync(path.join(pasta, "artigos", `${alvo}.json`), { force: true });
     for (const capa of capasNoRamo(pasta, alvo)) fs.rmSync(capa, { force: true });
     gravarIndice(pasta, indice);
+    const fila = lerPendentes(pasta);
+    if (fila.some((p) => p.slug === alvo)) gravarPendentes(pasta, fila.filter((p) => p.slug !== alvo));
     enviar(pasta, `Retira: ${artigo.titulo}`);
     console.log(`\n✓ Retirado. Em até uma hora ${SITE}/blog/${alvo} sai do ar.`);
   } finally {
@@ -469,8 +606,12 @@ if (comando === "listar") {
   node scripts/blog-publicar.mjs preparar                  as regras, a pauta e o que já foi publicado
   node scripts/blog-publicar.mjs listar                    só o que já foi publicado
   node scripts/blog-publicar.mjs conferir artigo.json      confere formato e régua, sem publicar   [--capa foto.jpg]
-  node scripts/blog-publicar.mjs publicar artigo.json --capa foto.jpg
-                                                           confere e publica   [--atualizar] [--forcar] [--sem-capa]
+  node scripts/blog-publicar.mjs publicar artigo.json      confere e publica; a foto descrita no artigo entra na fila
+                                                           [--capa foto.jpg] [--sem-capa] [--atualizar] [--forcar]
+  node scripts/blog-publicar.mjs pendentes                 as fotos de capa que faltam gerar (JSON)
+  node scripts/blog-publicar.mjs capa <endereço> foto.jpg  prende a foto a um artigo já publicado   [--trocar]
+  node scripts/blog-publicar.mjs capa <endereço> --pedir --alt "…" --pedido "…"   põe na fila a foto de um artigo sem foto
+  node scripts/blog-publicar.mjs capa <endereço> --desistir               tira o pedido da fila
   node scripts/blog-publicar.mjs retirar <endereço>        tira um artigo do ar`);
   process.exit(comando ? 2 : 0);
 }
