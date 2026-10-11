@@ -288,5 +288,45 @@ test("serviço do CRM", { skip: pular ? "sem CRM_TESTE_DB" : false }, async (t) 
     assert.ok(doBanco.seq > 0);
   });
 
+  await t.test("e-mail: guarda na ficha, registra o envio e acha o clique", async () => {
+    const chat = "5519999990000@c.us";
+    // Conversa sem ficha também ganha o e-mail (cria a linha).
+    await crm.definirEmail("5519900001111@c.us", "Novo@Exemplo.com");
+    assert.strictEqual((await crm.contato("5519900001111@c.us")).email, "novo@exemplo.com");
+
+    const nota = await crm.registrarEmailEnviado({
+      chatId: chat,
+      para: "cliente@exemplo.com",
+      assunto: "Orçamento com 2 produtos — Balão da Informática",
+      envioId: "ENVIO123",
+      provedor: "resend",
+      vendedor: "Thiago",
+      itens: [
+        { id: "P1", nome: "Fonte 650W", preco: 399.9, quantidade: 2 },
+        { id: "P2", nome: "SSD 1 TB", preco: 349.9, quantidade: 1 },
+      ],
+    });
+    assert.match(nota.texto, /E-mail enviado para cliente@exemplo\.com/);
+    assert.match(nota.texto, /2 × Fonte 650W — R\$ 399,90/);
+    const ficha = await crm.contato(chat);
+    assert.strictEqual(ficha.email, "cliente@exemplo.com");
+    assert.ok(ficha.notas.some((n) => n.texto.includes("Fonte 650W")));
+
+    // Envio desconhecido: nada a avisar.
+    assert.strictEqual(await crm.registrarCliqueNoEmail({ envioId: "NAOEXISTE", destino: "/x" }), null);
+
+    const c1 = await crm.registrarCliqueNoEmail({ envioId: "ENVIO123", produtoId: "P1", destino: "/product/fonte" });
+    assert.strictEqual(c1.chatId, chat);
+    assert.strictEqual(c1.produto, "Fonte 650W");
+    assert.strictEqual(c1.primeiroClique, true);
+    assert.ok(c1.segundosDepois < 60);
+    // O mesmo link de novo não é "primeiro clique" (o vendedor não é chamado duas vezes).
+    const c2 = await crm.registrarCliqueNoEmail({ envioId: "ENVIO123", produtoId: "P1", destino: "/product/fonte" });
+    assert.strictEqual(c2.primeiroClique, false);
+    const wa = await crm.registrarCliqueNoEmail({ envioId: "ENVIO123", destino: "wa" });
+    assert.strictEqual(wa.whatsapp, true);
+    assert.strictEqual(wa.primeiroClique, true);
+  });
+
   await db.pool.end();
 });

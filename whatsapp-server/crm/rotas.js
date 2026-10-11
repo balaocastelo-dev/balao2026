@@ -5,7 +5,7 @@
 
 const express = require("express");
 
-function montarRotasDoCrm(app, { acesso, servico, equipe }) {
+function montarRotasDoCrm(app, { acesso, servico, equipe, avisarPainel = () => {} }) {
   const r = express.Router();
   const json = express.json({ limit: "2mb" });
 
@@ -84,6 +84,53 @@ function montarRotasDoCrm(app, { acesso, servico, equipe }) {
     }))
   );
   r.delete("/notas/:id", rota(async (req) => (await servico.excluirNota(req.params.id), {})));
+
+  // ---- e-mail de produtos (o envio sai do site; aqui fica o registro) ----
+  r.put(
+    "/contatos/:chatId/email",
+    json,
+    rota(async (req) => {
+      const email = String(req.body?.email ?? "").trim().toLowerCase();
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+        throw Object.assign(new Error("E-mail inválido."), { status: 400 });
+      }
+      await servico.definirEmail(req.params.chatId, email);
+      return { email: email || null };
+    })
+  );
+  r.post(
+    "/contatos/:chatId/email-enviado",
+    json,
+    rota(async (req) => {
+      const b = req.body || {};
+      const nota = await servico.registrarEmailEnviado({ ...b, chatId: req.params.chatId, por: nomeDeQuem(req) });
+      return { nota };
+    })
+  );
+  r.post(
+    "/email-clique",
+    json,
+    rota(async (req) => {
+      const b = req.body || {};
+      const clique = await servico.registrarCliqueNoEmail({
+        envioId: b.envioId,
+        chatId: b.chatId,
+        produtoId: b.produtoId,
+        destino: b.destino,
+      });
+      // Leitor de e-mail conferindo o link sozinho acontece nos primeiros
+      // segundos depois da entrega: registra, mas não chama o vendedor.
+      if (clique && clique.primeiroClique && clique.segundosDepois >= 45) {
+        const oque = clique.whatsapp
+          ? "tocou em \"Falar no WhatsApp\""
+          : clique.produto
+          ? `abriu "${clique.produto}"`
+          : "abriu um link";
+        avisarPainel(`📧 ${clique.cliente} ${oque} do e-mail agora. Bom momento para chamar no WhatsApp.`);
+      }
+      return { registrado: Boolean(clique) };
+    })
+  );
 
   // ---- respostas rápidas ----
   r.get("/respostas", rota(async () => ({ itens: await servico.listarRespostas() })));

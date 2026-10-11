@@ -199,6 +199,17 @@ const MIGRACOES = [
       CREATE UNIQUE INDEX IF NOT EXISTS crm_mensagem_seq ON crm_mensagem (seq);
     `,
   },
+  {
+    id: "crm_004_email_do_cliente",
+    sql: `
+      -- E-mail do cliente, para o vendedor mandar produto, preço e link do
+      -- site por e-mail direto do CRM. Os envios e os cliques ficam em
+      -- crm_evento (tipos email_enviado e email_clique).
+      ALTER TABLE crm_contato ADD COLUMN IF NOT EXISTS email text;
+      CREATE INDEX IF NOT EXISTS crm_evento_envio_email
+        ON crm_evento ((detalhes->>'envioId')) WHERE tipo = 'email_enviado';
+    `,
+  },
 ];
 
 async function garantirBanco(urlAdmin, nome) {
