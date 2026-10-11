@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "rtx-spark-notebooks-windows-chip-nvidia-pre-venda",
+      "titulo": "RTX Spark: notebooks Windows com chip Nvidia chegam dia 16",
+      "resumo": "Nvidia e Microsoft abriram em 7 de outubro a pré-venda dos notebooks com RTX Spark. Veja o que é a plataforma e o que muda para quem vai comprar.",
+      "categoria": "noticias",
+      "etiquetas": [
+        "notebook",
+        "nvidia",
+        "windows",
+        "ia local"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-11T15:03:37.532Z",
+      "minutos": 3
+    },
+    {
       "slug": "ddr4-ou-ddr5-da-para-aproveitar-a-memoria-antiga",
       "titulo": "DDR4 ou DDR5: dá para aproveitar a memória antiga?",
       "resumo": "DDR4 ou DDR5? Os dois padrões não se misturam: veja em quais placas a memória antiga ainda serve e quando a troca de plataforma pede pentes novos.",
@@ -57,5 +72,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-11T09:02:55.386Z"
+  "atualizadoEm": "2026-10-11T15:03:38.296Z"
 }

@@ -1,0 +1,117 @@
+{
+  "slug": "rtx-spark-notebooks-windows-chip-nvidia-pre-venda",
+  "titulo": "RTX Spark: notebooks Windows com chip Nvidia chegam dia 16",
+  "resumo": "Nvidia e Microsoft abriram em 7 de outubro a pré-venda dos notebooks com RTX Spark. Veja o que é a plataforma e o que muda para quem vai comprar.",
+  "categoria": "noticias",
+  "etiquetas": [
+    "notebook",
+    "nvidia",
+    "windows",
+    "ia local"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-11T15:03:37.532Z",
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Em 7 de outubro de 2026, em um evento da Microsoft em San Francisco, a Nvidia e a Microsoft abriram a pré-venda dos primeiros notebooks com Windows equipados com o RTX Spark, o processador da própria Nvidia para computadores pessoais. Segundo a Nvidia, os notebooks chegam às lojas em 16 de outubro, e os computadores de mesa compactos, em novembro."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é tratar a novidade como mais uma placa de vídeo. Não é: o RTX Spark reúne processador e chip gráfico na mesma peça e usa uma arquitetura diferente da que equipa a maioria dos computadores com Windows. Isso muda o que você precisa conferir antes de comprar, e nada foi informado ainda sobre a venda no Brasil."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que foi anunciado"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Pela descrição da Nvidia, o RTX Spark junta um processador Grace de até 20 núcleos a um chip gráfico RTX da geração Blackwell, com até 128 GB de memória unificada. Memória unificada quer dizer que processador e vídeo dividem o mesmo conjunto de memória, em vez de a placa de vídeo ter a sua, separada."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Nvidia cita como fabricantes Acer, Asus, Dell, HP, Lenovo, Microsoft, MSI e Gigabyte. A página da Microsoft sobre a plataforma lista seis notebooks em pré-venda: Surface Laptop Ultra, Asus ProArt P14 e P16, Dell XPS 16, HP OmniBook Ultra 16 e Lenovo Yoga 9n 2-in-1. O Windows Central informa que os modelos da HP só são entregues em novembro."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O uso que as duas empresas destacam é rodar inteligência artificial no próprio computador, sem enviar os dados para a nuvem, além de edição de vídeo, criação e jogos."
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "Segundo o Windows Central, o processador do RTX Spark é de arquitetura Arm, a mesma família dos chips Snapdragon X, e não a x86 dos processadores Intel e AMD. Programas e jogos que não têm versão para Arm rodam por emulação, uma camada de tradução do próprio Windows, e nem todos se comportam bem assim.",
+      "titulo": "A arquitetura é Arm"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que isso muda para você"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem vai comprar agora:** as lojas citadas nas páginas consultadas são dos Estados Unidos, e nenhuma delas traz data nem configuração para o Brasil. Se você precisa de um notebook neste mês, a escolha continua entre os modelos que já estão à venda. Vale ver o que há em [notebooks](/notebooks) e decidir pelo uso, não pela novidade."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem quer rodar IA local:** a quantidade de memória disponível para o chip gráfico é o que define o tamanho do modelo que cabe na máquina, e a memória unificada ataca justamente esse limite. Mas o mesmo resultado hoje se busca com um computador de mesa e placa de vídeo com bastante memória, como os da nossa seleção de [computadores para IA local](/ia-local)."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem joga ou depende de um programa específico:** confira antes se ele tem versão para Windows em Arm. O Windows Central aponta os jogos e os sistemas antitrapaça deles como o ponto em que a arquitetura Arm ainda pode trazer incompatibilidade."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem já tem um computador bom:** nada muda por enquanto. O anúncio trata de máquinas novas, e as páginas consultadas não falam em mudança para os computadores atuais. Se a dúvida é sobre o sistema, e não sobre a máquina, o guia sobre [até quando o Windows 10 tem atualização](/blog/windows-10-ate-quando-tem-atualizacao) responde melhor do que esta notícia."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que ainda não se sabe"
+    },
+    {
+      "tipo": "lista",
+      "ordenada": false,
+      "itens": [
+        "Se e quando esses notebooks serão vendidos oficialmente no Brasil.",
+        "Quais configurações de memória e armazenamento cada fabricante vai oferecer fora dos Estados Unidos.",
+        "Se a memória pode ser ampliada depois da compra: as páginas não dizem, e em máquinas de memória unificada isso normalmente não é possível."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, vende computadores e notebooks novos e seminovos e monta máquinas sob medida, inclusive para rodar IA localmente. Você pode ver o computador ligado e testar antes de pagar. Em uma linha: se a compra é para já, escolha entre o que existe hoje; se pode esperar, acompanhe a chegada dessa plataforma ao Brasil."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "ia-local"
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "NVIDIA, Microsoft Kick Off a New Beginning for Windows PCs with RTX Spark and AI Agents — NVIDIA Blog",
+      "url": "https://blogs.nvidia.com/blog/local-ai-rtx-spark-microsoft-windows-event/",
+      "data": "7 de outubro de 2026"
+    },
+    {
+      "nome": "NVIDIA RTX Spark High-Performance Laptops — Microsoft",
+      "url": "https://www.microsoft.com/en-us/windows/rtx-spark-laptops",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Windows and Surface October 2026 news — Microsoft",
+      "url": "https://news.microsoft.com/windows-surface-october-2026-news/",
+      "data": "7 de outubro de 2026"
+    },
+    {
+      "nome": "I rounded up all the RTX Spark laptops you can preorder — Windows Central",
+      "url": "https://www.windowscentral.com/hardware/laptops/rtx-spark-laptops-list-available-buy",
+      "data": "7 de outubro de 2026"
+    },
+    {
+      "nome": "The Surface Laptop Ultra's RTX GPU has the power to game — Windows Central",
+      "url": "https://www.windowscentral.com/hardware/surface/surface-laptop-ultra-gaming-pc-rtx-spark",
+      "data": "7 de outubro de 2026"
+    }
+  ]
+}
