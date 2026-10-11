@@ -411,6 +411,7 @@ export async function updateProduct(id: string, updates: Partial<Product>) {
     const dbUpdates: Record<string, string | number | null> = {};
     if (updates.name !== undefined) dbUpdates.name = updates.name;
     if (updates.price !== undefined) dbUpdates.price = String(updates.price);
+    if (updates.brand !== undefined) dbUpdates.brand = updates.brand ? String(updates.brand) : null;
     if (updates.image !== undefined) dbUpdates.image = updates.image;
     if (updates.image_urls !== undefined) dbUpdates.image_urls = Array.isArray(updates.image_urls) ? JSON.stringify(updates.image_urls) : updates.image_urls;
     if (updates.product_url !== undefined) dbUpdates.product_url = updates.product_url;

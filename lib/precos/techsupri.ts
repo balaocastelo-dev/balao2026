@@ -1,5 +1,7 @@
 // ============================================================
-// Fornecedor local: TechSupri (catálogo na Kyte, techsupri.kyte.site).
+// Fornecedores locais com catálogo na Kyte: TechSupri (techsupri.kyte.site)
+// e qualquer outro que o Thiago cadastrar pelo link (ex.: Robson Atacado,
+// robsonatacadoogmailcom.catalog.kyte.site).
 //
 // O catálogo da Kyte fica atrás de uma proteção contra robôs que recusa
 // servidores (Vercel incluída). Por isso a TechSupri NÃO é lida pelo
@@ -10,15 +12,24 @@
 // que o resto do sistema de preços já entende, e decide em que categoria do
 // site ele entra. Funções puras, testadas.
 //
-// Fotos: as da Kyte têm marca d'água do fornecedor e NÃO são usadas. A foto
-// vem de fora (busca na internet) e chega pronta no campo `foto`.
+// Fotos: depende do fornecedor. As da TechSupri têm marca d'água e NÃO são
+// usadas (a foto vem de busca na internet, no campo `foto`). Fornecedor cujas
+// fotos são limpas (conferido por marca-dagua.ts) usa as fotos dele mesmo.
 // ============================================================
 
 import type { ItemDeOrigem } from "./kabum";
+import { ehCompativel } from "./fotos";
 
 export const SITE_TECHSUPRI = "techsupri";
 export const URL_TECHSUPRI = "https://techsupri.kyte.site/pt-BR";
 export const PREFIXO_TECHSUPRI = "ts-";
+
+/** Outros fornecedores na Kyte, cadastrados pelo link no painel. */
+export const SITE_KYTE = "kyte";
+export const PREFIXO_KYTE = "ky-";
+
+/** As fotos da Kyte ficam no Firebase Storage; a Kyte serve por um endereço próprio, atrás da proteção. */
+const FOTOS_KYTE = "https://firebasestorage.googleapis.com/v0/b/kyte-7c484.appspot.com/o";
 
 /** O que interessa do produto da Kyte. */
 export interface ProdutoKyte {
@@ -35,6 +46,9 @@ export interface ProdutoKyte {
   stockStatus?: string | null;
   /** Link do produto na Kyte (para conferência no painel). */
   url?: string | null;
+  /** Foto do próprio fornecedor (endereço do Firebase ou caminho "/uid%2F...jpg"). */
+  image?: string | null;
+  gallery?: (string | null)[] | null;
 }
 
 /** Produto já capturado, com a foto achada na internet. */
@@ -84,6 +98,31 @@ export function disponivelNoKyte(p: ProdutoKyte): boolean {
  * que misturam fone, relógio e carregador.
  */
 const REGRAS: [RegExp, string][] = [
+  // Tipos que apareceram com o Robson Atacado (11/10): o começo do nome manda.
+  [/^ controle (remoto|tv)\b|^ controle\b.*\b(tv|smart|roku|netflix|universal|ar condicionado)\b/, "Eletrônicos/Controles Remotos"],
+  [/^ (conversor|receptor) digital\b|\bdtv\b/, "Eletrônicos/TV e Streaming"],
+  [/^ (tape|som automotivo|radio automotivo|carplay|transmissor fm)\b|^ receptor bluetooth carro\b/, "Automotivo/Som Automotivo"],
+  [/^ (base|cooler|suporte)\b.*\bnotebook\b/, "Informática/Suportes para Notebook"],
+  [/^ suporte (de |para )?(carro|moto|retrovisor|veicular|magnetico|mesa|de mesa|celular|tablet)\b/, "Celular & Smartphone/Suportes"],
+  [/^ (maquina de (cabelo|acabamento|nariz|barbear|corte)|barbeador|aparador|secador|chapinha|prancha|depilador)\b/, "Diversos/Cuidados Pessoais"],
+  [/^ (balanca|mini batedor|batedor|liquidificador|mixer|cafeteira|chaleira)\b/, "Diversos/Casa e Cozinha"],
+  [/^ chip\b/, "Celular & Smartphone/Chips"],
+  [/^ radio\b/, "Áudio/Rádios"],
+  [/^ lanterna\b/, "Diversos/Lanternas"],
+  [/^ projetor\b/, "Eletrônicos/Projetores"],
+  [/^ (fita de led|bastao (de )?iluminacao|lampada)\b/, "Diversos/Iluminação"],
+  [/^ (video game|videogame) portatil\b/, "Games/Consoles Portáteis"],
+  [/^ memory card\b.*\bplay/, "Games/Playstation"],
+  [/^ (fonte|carregador|carreg) not\b/, "Energia/Fontes para Notebook"],
+  [/^ (carreg|carregador) (de )?pilhas?\b/, "Energia/Pilhas e Baterias"],
+  [/^ (carreg|carregador) portatil\b/, "Celular & Smartphone/Carregadores e Power Banks"],
+  [/^ (tripe|bastao,? tripe)\b/, "Periféricos/Streaming"],
+  [/^ base tomada\b|^ fonte (pd|tomada|usb|turbo)\b|^ carreg\b/, "Celular & Smartphone/Carregadores e Power Banks"],
+  [/^ (filtro|extensao|extencao|extacao|estacao|regua)\b.*\btomadas?\b/, "Energia/Protetor Eletrônico"],
+  [/^ fonte\b(?!.*\b(notebook|macbook|laptop|not|ultrabook)\b).*\b\d{1,2}(\.\d)?v\b/, "Energia/Fontes e Adaptadores"],
+  [/^ cx (de )?som\b|\bsound.?bar\b/, "Áudio/Caixa de Som"],
+  [/^ adap\b/, "Informática/Cabos e Adaptadores"],
+  [/\brastreador\b/, "Celular & Smartphone/Acessórios para Smartphones"],
   // O começo do nome diz o que o produto É ("Cabo USB de Impressora" é cabo).
   [/^ cabo de rede\b|\bpatch cord\b|^ emenda rj45/, "Conectividade/Cabo de Rede"],
   [/^ (adaptador|placa|receptor)\b.*\b(wi.?fi|wireless|de rede|rj45)\b/, "Conectividade/Dispositivo de Rede"],
@@ -220,6 +259,25 @@ const POR_CATEGORIA_KYTE: [RegExp, string][] = [
   [/hidratante/, "Diversos/Cuidados Pessoais"],
   [/streaming/, "Periféricos/Streaming"],
   [/eletronicos/, "Eletrônicos/Diversos"],
+  // Categorias do Robson Atacado
+  [/controle tv/, "Eletrônicos/Controles Remotos"],
+  [/suporte (carro|moto|celular)/, "Celular & Smartphone/Suportes"],
+  [/maquina de cabelo/, "Diversos/Cuidados Pessoais"],
+  [/balanca/, "Diversos/Casa e Cozinha"],
+  [/^chip/, "Celular & Smartphone/Chips"],
+  [/radio/, "Áudio/Rádios"],
+  [/lanterna/, "Diversos/Lanternas"],
+  [/projetor/, "Eletrônicos/Projetores"],
+  [/tape carro|bluetooth p\/ carro/, "Automotivo/Som Automotivo"],
+  [/relogio/, "Celular & Smartphone/Wearables"],
+  [/ring light|tripe/, "Periféricos/Streaming"],
+  [/power bank|carregador portatil/, "Celular & Smartphone/Carregadores e Power Banks"],
+  [/carregador|fonte carregador/, "Celular & Smartphone/Carregadores e Power Banks"],
+  [/fone|heaphone|headphone/, "Áudio/Fone de Ouvido"],
+  [/caixa (de )?som|sound/, "Áudio/Caixa de Som"],
+  [/cabo|adaptador|conversor|hub|extensor/, "Informática/Cabos e Adaptadores"],
+  [/camera/, "Automação/Câmeras de Segurança"],
+  [/roteador|repetidor|antena|switch/, "Conectividade/Dispositivo de Rede"],
 ];
 
 export const CATEGORIA_PADRAO_TECHSUPRI = "Informática/Acessórios";
@@ -244,6 +302,8 @@ const MARCAS = [
 const MARCAS_NORMALIZADAS = MARCAS.map((m) => [semAcento(m).replace(/[^a-z0-9]+/g, ""), m] as const);
 
 export function marcaDoTechsupri(nome: string): string | null {
+  // "Cartucho Compatível HP 932XL" não é da HP: a marca no anúncio enganaria.
+  if (ehCompativel(nome)) return null;
   const palavras = semAcento(nome).split(/[^a-z0-9-]+/).filter(Boolean);
   for (const palavra of palavras) {
     const limpa = palavra.replace(/-/g, "");
@@ -279,23 +339,71 @@ export function nomeDoTechsupri(nome: string): string {
     .join(" ");
 }
 
-export function paraItemTechsupri(p: ProdutoCapturado): ItemDeOrigem | null {
+/**
+ * Endereço público de uma foto da Kyte, ou "" se não for foto da Kyte.
+ * Aceita o caminho cru do catálogo ("/uid%2Fxxx.jpg?alt=media"), o endereço
+ * do Firebase e o endereço que a Kyte usa (firebasestorage.*.kyte.site).
+ */
+export function fotoDaKyte(valor: unknown): string {
+  const bruto = String(valor ?? "").trim();
+  if (!bruto) return "";
+  let caminho = "";
+  if (bruto.startsWith("/") && !bruto.startsWith("//")) caminho = bruto;
+  else {
+    const m = bruto.match(/^https:\/\/(?:firebasestorage\.googleapis\.com|firebasestorage\.[a-z0-9.-]*kyte\.site)\/v0\/b\/kyte-7c484\.appspot\.com\/o(\/[^#\s]+)$/i);
+    if (m) caminho = m[1];
+  }
+  if (!caminho || !/^\/[A-Za-z0-9%._~+=-]+(\?alt=media(&token=[A-Za-z0-9-]+)?)?$/.test(caminho)) return "";
+  const semConsulta = caminho.split("?")[0];
+  // A miniatura (thumb_280_) é pequena demais para a página do produto.
+  return `${FOTOS_KYTE}${semConsulta.replace(/%2Fthumb_\d+_/i, "%2F")}?alt=media`;
+}
+
+export interface OpcoesDoFornecedor {
+  /** Começo do código do produto no site ("ts-", "ky-"). */
+  prefixo: string;
+  /** Nome do fornecedor gravado no produto. */
+  vendedor: string;
+  /** Link do catálogo (vai como link de origem quando o produto não tem o seu). */
+  urlDoCatalogo: string;
+  /** true = as fotos do fornecedor são limpas e podem ir para o site. */
+  usarFotoDoFornecedor: boolean;
+}
+
+const ehFotoDeFora = (u: unknown): u is string => typeof u === "string" && /^https:\/\//.test(u) && !/kyte/i.test(u);
+
+/** Produto da Kyte (de qualquer fornecedor) no formato que o resto do sistema entende. */
+export function paraItemKyte(p: ProdutoCapturado, opcoes: OpcoesDoFornecedor): ItemDeOrigem | null {
   const id = String(p?.id || "").trim();
   const nomeCru = String(p?.name || "").trim();
-  if (!id || !nomeCru) return null;
+  if (!id || !nomeCru || !/^[A-Za-z0-9-]{6,60}$/.test(id)) return null;
   const nome = nomeDoTechsupri(nomeCru);
   const preco = precoDoKyte(p);
-  const fotos = (Array.isArray(p.fotos) ? p.fotos : [])
-    .filter((u): u is string => typeof u === "string" && /^https:\/\//.test(u) && !/kyte/i.test(u))
-    .slice(0, 6);
-  const foto = typeof p.foto === "string" && /^https:\/\//.test(p.foto) && !/kyte/i.test(p.foto) ? p.foto : fotos[0] || "";
+
+  // Foto achada na internet (busca) sempre vale; a do fornecedor, só se for limpa.
+  let fotos = (Array.isArray(p.fotos) ? p.fotos : []).filter(ehFotoDeFora).slice(0, 6);
+  let foto = ehFotoDeFora(p.foto) ? p.foto : fotos[0] || "";
+  if (!foto && opcoes.usarFotoDoFornecedor) {
+    const doFornecedor = [p.image, ...(Array.isArray(p.gallery) ? p.gallery : [])].map(fotoDaKyte).filter(Boolean);
+    fotos = [...new Set(doFornecedor)].slice(0, 6);
+    foto = fotos[0] || "";
+  }
+
+  const host = (() => {
+    try {
+      return new URL(opcoes.urlDoCatalogo).host;
+    } catch {
+      return "";
+    }
+  })();
+  const urlDoProduto = typeof p.url === "string" && host && p.url.startsWith(`https://${host}/`) ? p.url : opcoes.urlDoCatalogo;
 
   return {
-    codigo: `${PREFIXO_TECHSUPRI}${id}`,
+    codigo: `${opcoes.prefixo}${id}`,
     nome,
     marca: marcaDoTechsupri(nomeCru),
     categoria: categoriaDoTechsupri(nomeCru, p.category?.name),
-    vendedor: "TechSupri",
+    vendedor: opcoes.vendedor,
     marketplace: false,
     openbox: false,
     preVenda: false,
@@ -304,11 +412,51 @@ export function paraItemTechsupri(p: ProdutoCapturado): ItemDeOrigem | null {
     cartao: preco,
     parcelas: 0,
     oferta: null,
-    url: p.url && /^https:\/\/techsupri\.kyte\.site\//.test(p.url) ? p.url : URL_TECHSUPRI,
+    url: urlDoProduto,
     foto,
     fotos: fotos.length ? fotos : foto ? [foto] : [],
     garantia: null,
   };
+}
+
+export function paraItemTechsupri(p: ProdutoCapturado): ItemDeOrigem | null {
+  return paraItemKyte(p, {
+    prefixo: PREFIXO_TECHSUPRI,
+    vendedor: "TechSupri",
+    urlDoCatalogo: URL_TECHSUPRI,
+    usarFotoDoFornecedor: false,
+  });
+}
+
+// ---------- link do fornecedor ----------
+
+export type LinkDeFornecedor =
+  | { plataforma: "kabum" }
+  | { plataforma: "kyte"; host: string; url: string; nomeSugerido: string };
+
+const PROVEDORES_DE_EMAIL = /(gmail|hotmail|outlook|yahoo|icloud|live|bol|uol|terra)(com)?(br)?$/;
+
+/** Diz de que plataforma é o link colado no painel. */
+export function identificarLink(texto: string): LinkDeFornecedor | null {
+  let url: URL;
+  try {
+    url = new URL(String(texto || "").trim().replace(/^(?!https?:\/\/)/i, "https://"));
+  } catch {
+    return null;
+  }
+  const host = url.hostname.toLowerCase();
+  if (host === "kabum.com.br" || host.endsWith(".kabum.com.br")) return { plataforma: "kabum" };
+  const kyte = host.match(/^([a-z0-9-]{2,63})\.(catalog\.)?kyte\.site$/);
+  if (kyte && !["www", "app", "api", "web", "firebasestorage", "stagebeta"].includes(kyte[1])) {
+    const base = kyte[1].replace(PROVEDORES_DE_EMAIL, "").replace(/-/g, " ").trim() || kyte[1];
+    return {
+      plataforma: "kyte",
+      host,
+      url: `https://${host}/`,
+      nomeSugerido: base.charAt(0).toUpperCase() + base.slice(1),
+    };
+  }
+  return null;
 }
 
 /**

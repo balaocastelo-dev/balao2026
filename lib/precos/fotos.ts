@@ -100,7 +100,38 @@ function coresDoNome(nome: string): Set<string> {
  * aparecer; com 3 ou mais, basta 2/3) ou quando as cores se contradizem
  * (cartucho preto não pega foto do colorido).
  */
+// ---------- compatível x original ----------
+
+const MARCAS_DE_COMPATIVEL = ["evolut", "chinamate", "ollix", "byqualy", "premium", "nova", "multilaser", "maxprint", "bestcolor", "goldprint", "prints", "masterprint", "toner club", "colormax", "dataprint", "inktec"];
+
+/** O nome diz que é compatível/similar (cartucho, toner, controle...)? */
+export function ehCompativel(nome: string): boolean {
+  const n = ` ${semAcento(nome).replace(/[^a-z0-9.]+/g, " ")} `;
+  return / (compat\w*|comp\.|comp|similar|generico|paralelo|alternativo) /.test(n) || / p\/ uso /.test(` ${semAcento(nome)} `);
+}
+
+function pareceCompativel(nome: string): boolean {
+  if (ehCompativel(nome)) return true;
+  const n = ` ${semAcento(nome).replace(/[^a-z0-9]+/g, " ")} `;
+  return MARCAS_DE_COMPATIVEL.some((m) => n.includes(` ${m} `));
+}
+
+/**
+ * Foto de produto ORIGINAL em anúncio de COMPATÍVEL (ou o contrário) é proibida:
+ * a caixa da HP na foto de um cartucho compatível faz o preço do compatível
+ * parecer erro (o original custa várias vezes mais) e engana o cliente.
+ * Caso de 11/10: "Cartucho Compatível HP 932XL" com a foto do HP 932XL original.
+ */
+export function misturaOriginalECompativel(doFornecedor: string, achado: string): boolean {
+  const fornecedorCompativel = ehCompativel(doFornecedor);
+  const achadoOriginal = /\boriginal\b/.test(semAcento(achado));
+  if (fornecedorCompativel) return achadoOriginal || !pareceCompativel(achado);
+  if (/\boriginal\b/.test(semAcento(doFornecedor))) return ehCompativel(achado);
+  return false;
+}
+
 export function semelhanca(doFornecedor: string, achado: string): number {
+  if (misturaOriginalECompativel(doFornecedor, achado)) return 0;
   const modelos = modelosDoNome(doFornecedor);
   if (modelos.length > 0) {
     const bateu = modelos.filter((m) => temModelo(achado, m));
@@ -381,6 +412,7 @@ const singularIl = (p: string) => (p.length > 3 && p.endsWith("s") ? p.slice(0, 
  * ilustra pilha).
  */
 export function semelhancaIlustrativa(doFornecedor: string, achado: string, marcas: string[] = []): number {
+  if (misturaOriginalECompativel(doFornecedor, achado)) return 0;
   const primeiraAchada = semAcento(achado).split(/[^a-z0-9]+/).filter(Boolean)[0] || "";
   const palavrasForn = semAcento(doFornecedor).split(/[^a-z0-9]+/).filter(Boolean);
   if (OUTRO_TIPO.has(primeiraAchada) && !palavrasForn.includes(primeiraAchada)) return 0;

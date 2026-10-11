@@ -1,8 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { AlertTriangle, CheckCircle, ExternalLink, Loader2, Percent, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { AlertTriangle, CheckCircle, ExternalLink, Image as Imagem, Layers, Loader2, Percent, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { descreverRegra, type RegraDeMargem } from "@/lib/precos/margem";
+import MargemPorCategoria from "@/components/painel/MargemPorCategoria";
+import RegraEscalonada from "@/components/painel/RegraEscalonada";
+import FavoritoDoBalao from "@/components/painel/FavoritoDoBalao";
+
+/** Catálogo da Kyte (fornecedor local): <loja>.kyte.site ou <loja>.catalog.kyte.site. */
+const LINK_KYTE = /^(?:https?:\/\/)?([a-z0-9-]{2,63}\.(?:catalog\.)?kyte\.site)(?:\/|$)/i;
 
 interface Fonte {
   id: string;
@@ -26,6 +32,9 @@ interface Fonte {
   site?: string;
   regra_margem?: RegraDeMargem | null;
   pronta_entrega?: boolean;
+  margens_categoria?: Record<string, number> | null;
+  marca_dagua?: boolean | null;
+  fornecedor?: string | null;
 }
 
 interface Situacao {
@@ -120,6 +129,11 @@ export default function PrecosPage() {
   const [testando, setTestando] = useState(false);
   const [cadastrando, setCadastrando] = useState(false);
 
+  const [categoriasAbertas, setCategoriasAbertas] = useState<Record<string, boolean>>({});
+  const [novoProntaEntrega, setNovoProntaEntrega] = useState(true);
+  const [cadastradoKyte, setCadastradoKyte] = useState<Fonte | null>(null);
+  const hostKyte = novoLink.trim().match(LINK_KYTE)?.[1]?.toLowerCase() || null;
+
   const [palavra, setPalavra] = useState("");
   const [trocando, setTrocando] = useState(false);
 
@@ -180,6 +194,19 @@ export default function PrecosPage() {
     try {
       await chamar(`/api/precos/fontes/${fonte.id}`, { method: "PATCH", body: JSON.stringify(mudanca) });
       setAviso({ tipo: "ok", texto });
+      await carregar();
+    } catch (erro) {
+      setAviso({ tipo: "erro", texto: (erro as Error).message });
+    } finally {
+      marcar(fonte.id, null);
+    }
+  }
+
+  async function alterarMargem(fonte: Fonte, mudanca: Record<string, unknown>, texto: string) {
+    marcar(fonte.id, "Recalculando preços…");
+    try {
+      const r = await chamar<{ reprecificados: number }>(`/api/precos/fontes/${fonte.id}`, { method: "PATCH", body: JSON.stringify(mudanca) });
+      setAviso({ tipo: "ok", texto: `${fonte.nome}: ${texto} ${r.reprecificados} produtos com preço novo.` });
       await carregar();
     } catch (erro) {
       setAviso({ tipo: "erro", texto: (erro as Error).message });
@@ -257,6 +284,25 @@ export default function PrecosPage() {
       setPrevia(null);
       await carregar();
       await lerAgora(r.fonte);
+    } catch (erro) {
+      setAviso({ tipo: "erro", texto: (erro as Error).message });
+    } finally {
+      setCadastrando(false);
+    }
+  }
+
+  async function cadastrarFornecedor() {
+    setCadastrando(true);
+    try {
+      const r = await chamar<{ fonte: Fonte }>("/api/precos/fornecedores", {
+        method: "POST",
+        body: JSON.stringify({ url: novoLink, nome: novoNome, margem: Number(novaMargem.replace(",", ".")), pronta_entrega: novoProntaEntrega }),
+      });
+      setAviso({ tipo: "ok", texto: `${r.fonte.nome} cadastrado com ${r.fonte.margem}% de margem. Agora traga os produtos: abra o catálogo e clique no favorito "Enviar ao Balão".` });
+      setCadastradoKyte(r.fonte);
+      setNovoLink("");
+      setNovoNome("");
+      await carregar();
     } catch (erro) {
       setAviso({ tipo: "erro", texto: (erro as Error).message });
     } finally {
@@ -428,16 +474,45 @@ export default function PrecosPage() {
                       {porImportacao && (
                         <p className="mt-1 max-w-2xl text-xs text-gray-600">
                           Este fornecedor bloqueia leitura automática por servidor. Os preços são atualizados por importação, feita pelo
-                          navegador da loja.
+                          navegador da loja: abra o catálogo e clique no favorito &quot;Enviar ao Balão&quot;.
+                        </p>
+                      )}
+                      {porImportacao && (
+                        <p className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-600">
+                          <Imagem size={13} />
+                          {f.marca_dagua === true
+                            ? "Fotos do fornecedor têm a marca dele: o site usa fotos achadas na internet."
+                            : f.marca_dagua === false
+                              ? "Fotos do fornecedor são limpas: o site usa as fotos dele."
+                              : "Fotos: conferidas na primeira importação (se têm marca d'água ou não)."}
+                          {f.marca_dagua != null && (
+                            <button
+                              type="button"
+                              disabled={!!ocupada[f.id]}
+                              onClick={() =>
+                                alterar(
+                                  f,
+                                  { marca_dagua: !f.marca_dagua },
+                                  f.marca_dagua
+                                    ? `${f.nome}: as fotos do fornecedor passam a ser usadas nos produtos novos.`
+                                    : `${f.nome}: as fotos do fornecedor não serão mais usadas nos produtos novos.`
+                                )
+                              }
+                              className="font-semibold text-gray-700 underline"
+                            >
+                              {f.marca_dagua ? "Usar as fotos dele" : "Não usar as fotos dele"}
+                            </button>
+                          )}
                         </p>
                       )}
                       {f.ultimo_erro && <p className="mt-1 text-xs text-red-700">{f.ultimo_erro}</p>}
                     </div>
 
                     {f.regra_margem ? (
-                      <div className="max-w-xs rounded-md border border-gray-200 bg-gray-50 p-3 text-xs text-gray-700">
-                        <span className="mb-1 block font-semibold text-gray-600">Margem escalonada</span>
-                        {descreverRegra(f.regra_margem)}
+                      <div className="max-w-xs space-y-2 rounded-md border border-gray-200 bg-gray-50 p-3 text-xs text-gray-700">
+                        <span className="block font-semibold text-gray-600">Margem escalonada</span>
+                        <span className="block">{descreverRegra(f.regra_margem)}</span>
+                        <RegraEscalonada margem={f.margem} regra={f.regra_margem} ocupada={!!ocupada[f.id]} onSalvar={(m, t) => alterarMargem(f, m, t)} />
                       </div>
                     ) : (
                     <div className="flex flex-wrap items-end gap-3">
@@ -462,6 +537,9 @@ export default function PrecosPage() {
                           </button>
                         </span>
                       </label>
+                      {porImportacao && (
+                        <RegraEscalonada margem={f.margem} regra={null} ocupada={!!ocupada[f.id]} onSalvar={(m, t) => alterarMargem(f, m, t)} />
+                      )}
                     </div>
                     )}
                   </div>
@@ -498,6 +576,24 @@ export default function PrecosPage() {
                           <Loader2 size={14} className="animate-spin" /> {ocupada[f.id]}
                         </span>
                       )}
+                      <button
+                        type="button"
+                        onClick={() => setCategoriasAbertas((a) => ({ ...a, [f.id]: !a[f.id] }))}
+                        className="inline-flex items-center gap-1 rounded-md border border-gray-300 px-3 py-1.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                      >
+                        <Layers size={14} /> Margem por categoria
+                        {f.margens_categoria && Object.keys(f.margens_categoria).length > 0 ? ` (${Object.keys(f.margens_categoria).length})` : ""}
+                      </button>
+                      {porImportacao && (
+                        <a
+                          href={f.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 rounded-md border border-gray-300 px-3 py-1.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                        >
+                          <ExternalLink size={14} /> Abrir catálogo
+                        </a>
+                      )}
                       {!porImportacao && (
                       <button
                         type="button"
@@ -530,6 +626,18 @@ export default function PrecosPage() {
                       )}
                     </span>
                   </div>
+                  {categoriasAbertas[f.id] && (
+                    <div className="mt-3 border-t border-gray-100 pt-3">
+                      <MargemPorCategoria
+                        fonteId={f.id}
+                        margensAtuais={f.margens_categoria}
+                        onSalvo={(texto) => {
+                          setAviso({ tipo: "ok", texto: `${f.nome}: ${texto}` });
+                          carregar();
+                        }}
+                      />
+                    </div>
+                  )}
                 </article>
               );
             })}
@@ -587,11 +695,14 @@ export default function PrecosPage() {
         <h3 className="flex items-center gap-2 text-base font-bold text-gray-900">
           <Plus size={18} className="text-[#E60012]" /> Nova fonte
         </h3>
-        <p className="mt-1 text-sm text-gray-600">Abra a categoria na KaBuM!, copie o endereço e cole aqui.</p>
+        <p className="mt-1 text-sm text-gray-600">
+          Cole o link de uma categoria da KaBuM! ou do catálogo de um fornecedor na Kyte (ex.: robsonatacado.catalog.kyte.site). O
+          painel reconhece o fornecedor pelo link.
+        </p>
 
         <div className="mt-4 grid gap-4 md:grid-cols-[1fr_200px_110px]">
           <label className="text-xs font-semibold text-gray-600">
-            <span className="block mb-1">Link da categoria</span>
+            <span className="block mb-1">{hostKyte ? "Link do catálogo do fornecedor" : "Link da categoria"}</span>
             <input
               id="nova-fonte-link"
               value={novoLink}
@@ -605,7 +716,7 @@ export default function PrecosPage() {
           </label>
           <label className="text-xs font-semibold text-gray-600">
             <span className="block mb-1">Nome no painel</span>
-            <input id="nova-fonte-nome" value={novoNome} onChange={(e) => setNovoNome(e.target.value)} placeholder="Teclados" className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-normal text-gray-900" />
+            <input id="nova-fonte-nome" value={novoNome} onChange={(e) => setNovoNome(e.target.value)} placeholder={hostKyte ? "Nome do fornecedor" : "Teclados"} className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-normal text-gray-900" />
           </label>
           <label className="text-xs font-semibold text-gray-600">
             <span className="block mb-1">Margem (%)</span>
@@ -613,6 +724,32 @@ export default function PrecosPage() {
           </label>
         </div>
 
+        {hostKyte ? (
+          <div className="mt-3 space-y-3">
+            <div className="flex flex-wrap items-center gap-4">
+              <span className="rounded-full border border-emerald-300 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-800">
+                Fornecedor na Kyte · {hostKyte}
+              </span>
+              <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+                <input id="nova-fonte-pronta" type="checkbox" checked={novoProntaEntrega} onChange={(e) => setNovoProntaEntrega(e.target.checked)} />
+                Fornecedor local: faixa PRONTA ENTREGA nas fotos
+              </label>
+              <button
+                type="button"
+                onClick={cadastrarFornecedor}
+                disabled={cadastrando}
+                className="ml-auto inline-flex items-center gap-2 rounded-md bg-[#E60012] px-4 py-2 text-sm font-bold text-white hover:bg-red-700 disabled:opacity-40"
+              >
+                {cadastrando && <Loader2 size={14} className="animate-spin" />} Cadastrar fornecedor
+              </button>
+            </div>
+            <p className="text-xs text-gray-600">
+              A Kyte não deixa servidor ler o catálogo. Depois de cadastrar, abra o catálogo no Chrome e clique no favorito &quot;Enviar
+              ao Balão&quot;: os produtos chegam aqui para você confirmar. As fotos são conferidas sozinhas (com marca d&apos;água do
+              fornecedor, o site busca outra na internet).
+            </p>
+          </div>
+        ) : (
         <div className="mt-3 flex flex-wrap items-center gap-4">
           <label className="inline-flex items-center gap-2 text-sm text-gray-700">
             <input
@@ -634,6 +771,21 @@ export default function PrecosPage() {
               {cadastrando && <Loader2 size={14} className="animate-spin" />} Cadastrar e ler
             </button>
           </span>
+        </div>
+        )}
+
+        {cadastradoKyte && (
+          <p className="mt-3 rounded-md bg-emerald-50 p-3 text-sm text-emerald-900">
+            {cadastradoKyte.nome} cadastrado.{" "}
+            <a href={cadastradoKyte.url} target="_blank" rel="noopener noreferrer" className="font-semibold underline">
+              Abrir o catálogo dele
+            </a>{" "}
+            e clicar no favorito &quot;Enviar ao Balão&quot;.
+          </p>
+        )}
+
+        <div className="mt-4">
+          <FavoritoDoBalao />
         </div>
 
         {previa && (
