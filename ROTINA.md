@@ -1,7 +1,16 @@
 # Rotina diária do blog
 
-Todo dia a rotina publica **um artigo** no blog da Balão da Informática
-(https://www.balao.info/blog). Este arquivo é o passo a passo e as regras.
+O blog da Balão da Informática (https://www.balao.info/blog) publica **três
+vezes por dia**, e cada execução da rotina faz **uma** dessas publicações — a
+tarefa que chamou você diz qual:
+
+| Hora | Tipo | O que é |
+|---|---|---|
+| manhã | **Artigo principal** | Guia de compra, conserto, hardware, IA ou Apple. O texto longo, que responde a uma busca do Google |
+| meio-dia | **Notícia** | Um fato recente de tecnologia e o que ele muda para quem vai comprar ou consertar |
+| fim da tarde | **Dica** | Uma pergunta, uma resposta direta. Curta. Leva o roteiro do vídeo que o Thiago grava com o avatar |
+
+Este arquivo é o passo a passo e as regras dos três.
 
 Ninguém lê o artigo antes de ele ir ao ar. Por isso a regra que vale mais do
 que todas as outras é: **na dúvida, não afirme**. Um artigo simples e correto
@@ -22,7 +31,7 @@ capa do artigo e publicar os dois com `node scripts/blog-publicar.mjs publicar`.
   se muda a régua nem se envia por outro caminho;
 - mandar mensagem, e-mail ou WhatsApp para alguém, mexer em pedidos, estoque,
   preços ou em qualquer sistema da loja;
-- publicar mais de um artigo no mesmo dia (o comando recusa).
+- publicar duas vezes o mesmo tipo no mesmo dia (o comando recusa).
 
 Se algo impedir a publicação (GitHub fora do ar, comando com erro que não é do
 artigo), **pare e relate**. Não improvise outro caminho.
@@ -30,8 +39,9 @@ artigo), **pare e relate**. Não improvise outro caminho.
 ## Passo a passo
 
 1. `node scripts/blog-publicar.mjs preparar` — mostra este arquivo, a pauta, o
-   que já foi publicado e onde está um artigo-modelo. Se disser que o artigo de
-   hoje já saiu, encerre: não há nada a fazer.
+   que já foi publicado, o que já saiu hoje e onde está um modelo de cada
+   tipo. Se a publicação do **seu tipo** já saiu hoje, encerre: não há nada a
+   fazer.
 2. Escolha o assunto (seção "Como escolher o assunto").
 3. Pesquise. Abra de três a seis páginas boas sobre o assunto e leia de
    verdade; anote o endereço de cada uma que você usar.
@@ -46,11 +56,56 @@ artigo), **pare e relate**. Não improvise outro caminho.
 9. Relate em poucas linhas: título, endereço, de onde vieram os dados, como a
    capa foi feita e qualquer dúvida que tenha ficado.
 
+## Os três tipos
+
+### Artigo principal (manhã)
+
+É o que este arquivo descreve por padrão: 1.200 palavras ou mais (1.000 em
+assistência), quatro seções ou mais, "Em resumo", tabela, prós e contras,
+perguntas frequentes. Categorias: `guias`, `hardware`, `assistencia`, `ia` ou
+`apple`. Alterne: não publique a mesma categoria dois dias seguidos.
+
+### Notícia (meio-dia)
+
+`"categoria": "noticias"`. De 350 a 700 palavras, duas seções ou mais.
+
+- **O fato tem de ser dos últimos sete dias** e confirmado por ao menos duas
+  fontes abertas nesta sessão, uma delas a origem (o fabricante, a Microsoft,
+  a Apple, a própria pesquisa ou comunicado). Rumor, vazamento e "segundo
+  fontes" não são notícia para este blog.
+- Assuntos: lançamento de processador, placa de vídeo, Mac, iPhone ou iPad;
+  mudança no Windows, no macOS ou no iOS; fim de suporte; falha de segurança
+  que pede atualização; novidade de IA que muda o que um computador comum
+  consegue fazer. Nada de política, fofoca de empresa, bolsa ou processo.
+- Estrutura: abre contando o fato em um parágrafo, com a data. Primeira
+  seção: o que foi anunciado, com o que a fonte diz e nada além. Segunda
+  seção, obrigatória: **"O que isso muda para você"** — para quem vai comprar,
+  para quem já tem, para quem pode esperar.
+- Diga o que ainda não se sabe (preço no Brasil, data de chegada) em vez de
+  supor. Não escreva preço em reais nem em dólar.
+- Tom neutro: não torça por marca nem fale mal de nenhuma.
+- **Se não houver notícia que cumpra tudo isso, não publique.** Encerre com
+  `NÃO PUBLICADO: sem notícia confirmada por duas fontes hoje`. Notícia fraca
+  ou errada custa mais do que um meio-dia sem publicação.
+
+### Dica (fim da tarde)
+
+`"formato": "dica"`, em `guias`, `hardware`, `assistencia`, `ia` ou `apple`.
+De 450 a 950 palavras, duas seções ou mais.
+
+- Uma pergunta só, que o cliente faz no balcão: "como saber se o SSD está
+  morrendo", "posso deixar o notebook na tomada o tempo todo", "o que é esse
+  barulho no computador". O título é a pergunta ou a resposta dela.
+- Abre respondendo. Depois: "Em resumo", o passo a passo ou a comparação
+  (lista, tabela ou prós e contras — ao menos um), e quando a dica não vale.
+- Não é um guia encolhido: se o assunto pede mais de 950 palavras, ele é
+  artigo principal — deixe para a manhã.
+- **Leva o roteiro do vídeo** (seção "O roteiro do vídeo").
+
 ## Como escolher o assunto
 
-A fila está em `pauta.md`. Pegue o primeiro assunto ainda não publicado que
-não repita o tema dos últimos artigos, alternando assistência, guia de compra
-e hardware.
+A fila está em `pauta.md`, separada por tipo. Pegue o primeiro assunto do seu
+tipo ainda não publicado que não repita o tema dos últimos artigos.
 
 Um bom assunto é **uma busca que alguém faz antes de comprar ou de consertar**:
 "pc não liga", "quanta memória ram preciso", "nobreak ou estabilizador". O
@@ -61,10 +116,9 @@ loja não atende (celular Android, console que ela não conserta, software de
 nicho), assunto já coberto (o comando recusa título repetido) e "listas dos
 melhores produtos" — exigem preço e estoque, que o artigo não pode ter.
 
-**Notícia:** no máximo duas por semana, e só quando o fato muda a decisão de
-quem vai comprar ou consertar. Precisa de ao menos duas fontes que confirmem
-o fato, uma delas a origem (fabricante, Microsoft, a própria pesquisa). Sem
-isso, publique um assunto da fila.
+Em **IA** e **Apple**, o cuidado é dobrado: produto, versão e recurso mudam
+todo mês, e o que você lembra do treinamento provavelmente já mudou. Nada de
+nome de modelo, versão, recurso ou data sem a página aberta nesta sessão.
 
 ## Pesquisa e honestidade
 
@@ -98,14 +152,17 @@ do assunto, e não um desenho ou gráfico. Ela é criada junto com a matéria.
 
 **Como gerar.** Use a ferramenta de geração de imagem da sessão (hoje, a
 `generate_image` do Figma, no plano da equipe da loja; modelo
-`gemini-3.1-flash-image`, 1600 × 900). Uma tentativa, e no máximo mais duas se
-a primeira não servir: cada imagem consome créditos da conta da loja. Baixe o
+`gemini-3.1-flash-image`, 1600 × 900). Uma tentativa, e no máximo mais uma se
+a primeira não servir: são três publicações por dia, e cada imagem consome
+créditos da conta da loja. Baixe o
 arquivo em resolução cheia e salve em JPEG.
 
 **O que pedir.** Uma fotografia realista, deitada (16:9), da cena que o artigo
 trata: o equipamento, a bancada, a mesa de trabalho. Peça sempre: sem texto,
 sem logotipo, sem marca, sem marca-d'água, sem rosto de pessoa. Mãos podem
-aparecer. Nada de fachada, interior ou funcionário "da Balão": a imagem não
+aparecer. Em assunto de Apple, peça o aparelho de costas para a câmera ou em
+ângulo que não mostre a maçã; em assunto de IA, um computador comum em uso,
+nada de robô nem de cérebro luminoso. Nada de fachada, interior ou funcionário "da Balão": a imagem não
 pode passar por foto da loja.
 
 **Confira antes de publicar.** Abra a imagem e olhe. Reprove e gere de novo se
@@ -125,7 +182,7 @@ perto de 16:9, até 900 KB. No artigo vai só a descrição do que a foto mostra
 O endereço da imagem quem preenche é o comando. Não aponte para imagem de
 outro site: a régua reprova.
 
-**Se não der para gerar** (ferramenta fora do ar, sem crédito, três tentativas
+**Se não der para gerar** (ferramenta fora do ar, sem crédito, duas tentativas
 ruins): publique com `--sem-capa` no lugar de `--capa` — o site desenha a capa
 — e diga isso no relato. Artigo sem foto é melhor do que dia sem artigo, e
 muito melhor do que foto com marca ou erro.
@@ -139,6 +196,8 @@ Só o que está aqui:
 - Monta computador sob medida.
 - Tem assistência técnica no mesmo endereço: diagnóstico, limpeza, troca de
   peça, conserto, upgrade, recuperação de dados.
+- A assistência também atende aparelhos Apple (iPhone, iPad e Mac).
+- Tem uma seleção de computadores para rodar IA localmente.
 - O cliente pode ver o computador ligado e testar antes de pagar.
 - O atendimento no WhatsApp é feito por pessoas da equipe.
 
@@ -161,6 +220,10 @@ qualquer outro):
 | `/notebooks` | Notebooks |
 | `/seminovos` | Seminovos |
 | `/carregadores` | Carregadores de notebook |
+| `/reparoapple` | Assistência de iPhone, iPad e Mac |
+| `/ia-local` | Computadores para rodar IA local |
+| `/premium` | Computadores e workstations de maior desempenho |
+| `/pcgamer` | PC gamer |
 | `/categoria/computadores` | Computadores |
 | `/categoria/computadores-pc` | PCs de mesa |
 | `/categoria/computadores-pc-pc-gamer` | PCs gamer |
@@ -184,8 +247,10 @@ estrutura dele. Os campos:
   "resumo": "Uma ou duas frases que respondem à busca. De 110 a 165 caracteres.",
   "categoria": "assistencia",
   "etiquetas": ["manutenção", "fonte", "diagnóstico"],
+  "formato": "dica",
   "capa": { "alt": "O que a foto de capa mostra, em uma frase" },
   "seo": { "titulo": "Só se o título passar de 60 caracteres" },
+  "roteiro": { "fala": "…", "titulo": "…", "destaques": ["…", "…"], "legenda": "…", "hashtags": ["…"] },
   "blocos": [],
   "perguntas": [{ "pergunta": "…?", "resposta": "Duas ou três frases." }],
   "fontes": [{ "nome": "Nome da página — site", "url": "https://…", "data": "outubro de 2026" }]
@@ -193,8 +258,9 @@ estrutura dele. Os campos:
 ```
 
 - `slug`: minúsculas, números e hífens; as palavras da busca; até 70 caracteres.
-- `categoria`: `guias`, `hardware`, `assistencia` ou `noticias`. (`analises`
-  não: nota e veredito são da loja.)
+- `categoria`: `guias`, `hardware`, `assistencia`, `ia`, `apple` ou
+  `noticias`. (`analises` não: nota e veredito são da loja.)
+- `formato` e `roteiro`: **só na dica**. Nos outros dois tipos, não existem.
 - `publicadoEm` e `autor`: **não preencha**. A data é a da publicação e a
   assinatura é da equipe.
 - `capa`: só o campo `alt`, com 12 caracteres ou mais, descrevendo o que a
@@ -219,26 +285,63 @@ Texto aceita só `**negrito**`, `*itálico*` e `[texto](endereço)`. Nada de HTM
 | `chamada` | `tema` | O convite para a loja. Só o tema: o texto já está escrito |
 
 Temas de chamada: `manutencao`, `dados`, `montagem`, `pc-gamer`,
-`placas-de-video`, `notebooks`, `seminovos`, `upgrade`, `empresas`, `geral`.
-Escolha o que continua o assunto do artigo.
+`placas-de-video`, `notebooks`, `seminovos`, `upgrade`, `empresas`, `apple`
+(assistência de iPhone, iPad e Mac), `ia-local` (máquinas para rodar IA) e
+`geral`. Escolha o que continua o assunto do artigo.
 
 Não use `benchmark`, `citacao` nem `imagem`: a única imagem do artigo é a capa.
+
+## O roteiro do vídeo (só na dica)
+
+A dica vira um vídeo curto com o avatar do Thiago, com a voz dele. Quem grava
+é a fábrica de conteúdo, no computador da loja; o vídeo só vai ao Facebook e
+ao Instagram depois que o Thiago aprova no Telegram. Você escreve o roteiro:
+
+```json
+"roteiro": {
+  "fala": "Seu notebook demora para ligar e trava com poucas abas abertas? Antes de pensar em trocar, olhe duas coisas. …",
+  "titulo": "Notebook lento tem jeito",
+  "destaques": ["Trocar o disco por SSD", "Mais memória RAM", "Limpeza interna"],
+  "legenda": "Notebook lento nem sempre pede um novo. Veja as duas trocas que mais resolvem. A dica completa está no blog.",
+  "hashtags": ["notebook", "upgrade", "ssd", "informatica", "campinas"]
+}
+```
+
+- `fala`: de **45 a 85 palavras** (cerca de meio minuto). É o Thiago, dono da
+  loja, dando a dica com as palavras dele: primeira pessoa quando couber,
+  frases curtas, do jeito que se fala no balcão. **Comece direto no assunto**
+  — a fábrica acrescenta sozinha a saudação ("Fala pessoal! Aqui é o Thiago do
+  Balão da Informática.") e o convite final para ler a dica no blog.
+- A fala é lida por voz sintética. Por isso: sem parênteses, barras, siglas
+  soletradas difíceis nem código de peça; números só os pequenos e do jeito
+  que se fala ("dezesseis giga", "i cinco"); **nunca número de três dígitos ou
+  mais** ("quinhentos e doze giga" vira "bastante espaço").
+- É o rosto do Thiago dizendo: só o que o artigo sustenta. Nada de preço,
+  promoção, promessa ("garanto", "com certeza") nem "testamos".
+- `titulo`: até 40 caracteres. `destaques`: de 2 a 4, até 32 caracteres cada
+  — é o que aparece escrito na tela, e pode ter número e sigla.
+- `legenda`: de 40 a 320 caracteres, sem preço, convidando a ler a dica
+  completa no blog. `hashtags`: de 4 a 8, só letras e números, sem `#`.
 
 ## O que a régua cobra
 
 O comando `conferir` aplica tudo isto; saber antes poupa idas e vindas.
 
-- Guias, hardware: 1.200 palavras ou mais, 4 seções ou mais. Assistência:
-  1.000 e 4. Notícia: 350 e 2.
+- Guias, hardware, IA, Apple: 1.200 palavras ou mais, 4 seções ou mais.
+  Assistência: 1.000 e 4. Notícia: 350 e 2. Dica: de 450 a 950 palavras, 2
+  seções ou mais, com ao menos uma lista, tabela ou prós e contras, e com o
+  roteiro do vídeo.
 - Título de 30 a 80 caracteres, com a palavra da busca no começo.
 - Abre com parágrafo (antes de qualquer título) que já responde à busca.
-- "Em resumo" depois da abertura; ao menos dois elementos entre tabela e prós
-  e contras (um de cada, ou duas tabelas).
+- "Em resumo" depois da abertura (menos em notícia); no artigo principal, ao
+  menos dois elementos entre tabela e prós e contras (um de cada, ou duas
+  tabelas).
 - De 1 a 3 chamadas, nenhuma no primeiro quarto do texto, nunca duas seguidas.
   O comum: uma no meio, outra no fim.
 - Ao menos 2 links para a loja, da lista acima, dentro do texto.
 - Ao menos 2 fontes.
-- De 3 a 6 perguntas frequentes — as dúvidas que o cliente faria no balcão.
+- De 3 a 6 perguntas frequentes no artigo principal (2 ou 3 na dica) — as
+  dúvidas que o cliente faria no balcão.
 - Sem preço, parcela, desconto ou frete; sem "testamos".
 - Foto de capa enviada com `--capa` (o `publicar` recusa artigo novo sem ela).
 

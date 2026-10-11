@@ -3,10 +3,10 @@
 A fila de assuntos da rotina diária. Cada linha é uma busca que alguém faz no
 Google antes de comprar ou de levar o computador para consertar.
 
-**Como usar:** pegue o primeiro assunto que ainda não foi publicado (compare com
-a lista que o comando `preparar` mostra) e que não repita o tema de nenhum dos
-últimos cinco artigos — a ideia é alternar: um guia de compra, um de
-assistência, um de hardware. Não precisa seguir a ordem à risca. Quando a fila
+**Como usar:** pegue o primeiro assunto do **seu tipo** que ainda não foi
+publicado (compare com a lista que o comando `preparar` mostra) e que não
+repita o tema de nenhum dos últimos cinco artigos. No artigo principal a ideia
+é alternar: assistência, guia de compra, hardware, IA, Apple. Não precisa seguir a ordem à risca. Quando a fila
 acabar, escolha você mesmo, pelos critérios do `ROTINA.md`.
 
 ## Assistência (o cliente tem um problema agora)
@@ -77,8 +77,69 @@ acabar, escolha você mesmo, pelos critérios do `ROTINA.md`.
 - Fonte ATX 3.1 e o conector 12V-2x6: o que saber antes de trocar a placa de vídeo
 - PC com NPU ("AI PC"): o que muda hoje
 
-## Notícias
+## Inteligência artificial (artigo principal)
 
-Não têm fila. No máximo duas por semana, e só quando o fato muda a decisão de
-quem vai comprar ou consertar: lançamento de placa de vídeo ou processador,
-mudança no Windows, fim de suporte, falha de segurança que pede atualização.
+- Que computador eu preciso para rodar IA em casa
+- IA no computador ou IA na nuvem: o que muda para quem usa
+- Placa de vídeo para IA: por que a memória da placa manda mais que a velocidade
+- IA no trabalho do escritório: o que já dá para usar hoje com segurança
+- Como proteger seus arquivos e dados ao usar assistentes de IA
+- Notebook para usar IA: o que olhar antes de comprar
+- Mac ou PC para rodar IA local: como cada um lida com a memória
+- IA para estudar: como usar sem terceirizar o aprendizado
+- Transcrever reunião e resumir documento no próprio computador: o que a máquina precisa ter
+- Golpes com voz e vídeo falsos: como reconhecer e como se proteger
+
+## Apple (artigo principal)
+
+- MacBook Air ou MacBook Pro: como escolher pelo uso
+- Quanta memória escolher no Mac, já que depois não dá para trocar
+- iPhone com bateria durando pouco: quando a troca resolve
+- MacBook não liga ou não carrega: o que conferir antes de levar à assistência
+- iPad serve no lugar do notebook? Para quem sim e para quem não
+- Derramou líquido no MacBook: o que fazer nos primeiros minutos
+- Mac seminovo: o que conferir antes de comprar
+- Tela do iPhone trincada: por que não vale esperar
+- Backup do iPhone e do Mac: o mínimo para não perder fotos e arquivos
+- Windows no Mac e Mac no escritório: o que funciona e o que não
+
+## Dicas rápidas (fim da tarde)
+
+Uma pergunta, uma resposta. Cada linha vira uma dica e um vídeo com o avatar.
+
+- Como saber se o SSD está chegando ao fim
+- Posso deixar o notebook na tomada o tempo todo?
+- O computador faz barulho: o que cada som costuma indicar
+- De quanto em quanto tempo limpar o computador por dentro
+- Notebook lento: as duas trocas que mais resolvem
+- Como ver quanta memória RAM o seu computador tem e quanta está em uso
+- Desligar, suspender ou hibernar: qual usar no dia a dia
+- O que fazer antes de vender ou doar um computador usado
+- Como saber se o carregador do notebook é o problema
+- Senha boa em um minuto: o que realmente protege
+- Por que o Wi-Fi fica fraco em um cômodo e o que testar
+- O que é esse aviso de pouco espaço em disco e o que apagar primeiro
+- Como identificar o modelo exato do seu notebook para comprar a peça certa
+- Monitor piscando: cabo, placa ou o próprio monitor?
+- O que nunca fazer com um HD externo
+- Como saber se o seu PC aceita mais memória
+- Tela do notebook com mancha: quando é defeito e quando é pressão
+- Atualização do Windows travada: o que fazer e o que não fazer
+- Como testar a bateria do notebook pelo próprio Windows
+- Extensão, filtro de linha e régua: o que ligar onde
+- Teclado com tecla falhando: o que tentar antes de trocar
+- Como conferir a temperatura do computador sem instalar nada
+- Pen drive não aparece: o que testar
+- iPhone esquentando: quando é normal e quando preocupa
+- Como liberar espaço no iPhone sem apagar fotos
+- Dois monitores no notebook: qual cabo e qual porta usar
+- O que significa cada luz piscando no roteador
+- Posso usar o computador durante uma tempestade?
+
+## Notícias (meio-dia)
+
+Não têm fila: todo dia a rotina procura o fato da semana que mais muda a
+decisão de quem vai comprar ou consertar. As regras estão no `ROTINA.md`
+(seção "Notícia"). Fontes de origem para começar a busca: salas de imprensa
+e blogs oficiais de Apple, Microsoft, Nvidia, AMD, Intel, Qualcomm, Google e
+dos fabricantes de notebook; boletins de segurança da Microsoft e da Apple.
