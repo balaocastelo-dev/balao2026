@@ -35,7 +35,39 @@ sem servidor, em `dist/`).
 - `src/config.js` pessoas, cargos e textos. `src/manifest.js` animações usadas.
 - `app/template.html` a página; `app/ui.css` o visual; `app/font.css` a fonte Inter embutida.
 - `tools/build.mjs` builds (`dev`, `prod`, `web`). `tools/conv.mjs`, `tools/convert.html`, `tools/tex.py`, `tools/bundle.mjs` refazem o pacote de modelos a partir dos FBX do Microsoft Rocketbox (só se for trocar pessoas ou animações).
+- `tools/unpack.mjs` abre o pacote publicado de volta em `build/pack/`. `tools/thiago/` refaz o avatar do presidente a partir de uma foto.
 - `tools/multi.mjs`, `tools/soak2.mjs`, `tools/interact2.mjs`, `tools/mobile.mjs` testes em Chromium sem tela.
+
+## O avatar do Thiago Herrera
+
+O presidente não é um avatar de prateleira: é o `Business_Male_02` do Rocketbox
+refeito a partir de uma foto de referência dele (`tools/thiago/`):
+
+- rosto da foto projetado na textura da cabeça, tom de pele do rosto levado para
+  pescoço, orelhas e mãos, barba continuada nas laterais e sob o queixo;
+- formato da cabeça pelo contorno da foto (parte de baixo do rosto mais larga,
+  cabelo mais baixo), pescoço mais grosso, porte mais forte;
+- terno marinho mais vivo e gravata marinho lisa.
+
+Para refazer (trocar a foto, ajustar o porte):
+
+```bash
+cd office3d
+npm install
+node tools/unpack.mjs                 # abre o pacote publicado em build/pack/
+mkdir -p build/thiago/model
+# foto frontal, boca fechada, luz uniforme -> build/thiago/foto.png
+# (a usada veio de C:\Users\user\balao-content-factory\avatar\figurinos\12_terno_marinho.png)
+# modelo de pontos do rosto (MediaPipe) -> build/thiago/model/face_landmarker.task
+#   https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task
+pip install mediapipe opencv-python scipy numpy
+sh tools/thiago/build.sh 1.0 1.18     # 1º número: quanto do formato do rosto; 2º: quanto do porte
+ONLY='^(img/|an/|av/(Thiago_Herrera|Business_Male_0[2567]|Business_Female_0[1234]|Male_Adult_04|Female_Adult_15|Female_Adult_02)/)' node tools/bundle.mjs build/assets.bin
+npm run site
+```
+
+A foto de referência não fica no repositório; o que vai para o site é só a
+textura já aplicada, dentro do pacote de modelos.
 
 ## É uma simulação
 
