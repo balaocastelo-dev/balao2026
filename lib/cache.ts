@@ -11,6 +11,7 @@ import {
   searchProductsByKeywords,
   buscarProdutosPorTermos,
   getComputadoresDaVitrine,
+  getCandidatosANotebook,
 } from "./db";
 import { listVitrinePagesPublic } from "./vitrine/db";
 import {
@@ -27,6 +28,7 @@ import {
 } from "./catalogo-espelho";
 import { casaComTermos } from "./catalogo/filtros";
 import { montarVitrine, RAIZ_DESKTOPS, RAIZ_NOTEBOOKS, type VitrinePremium } from "./catalogo/vitrine-premium";
+import { selecionarNotebooks, type VitrineDeNotebooks } from "./catalogo/notebooks";
 import type { Product } from "./utils";
 
 const listaVazia = (itens: unknown[]) => !Array.isArray(itens) || itens.length === 0;
@@ -226,6 +228,25 @@ export const getCachedVitrinePremium = unstable_cache(
     return montarVitrine(computadores);
   },
   ["vitrine-premium-v1"],
+  { revalidate: 300, tags: [TAG_PRODUTOS] }
+);
+
+/**
+ * Vitrine da página /notebooks: só notebooks, do mais barato para o mais caro.
+ *
+ * A consulta traz a categoria de notebooks e os produtos cujo nome começa por
+ * "Notebook"/"MacBook"; `selecionarNotebooks` tira acessório, indisponível e
+ * repetido. Se o banco falhar ou vier vazio, a mesma seleção é feita sobre a
+ * cópia do catálogo.
+ */
+export const getCachedNotebooks = unstable_cache(
+  async (): Promise<VitrineDeNotebooks<Product>> =>
+    comEspelho<VitrineDeNotebooks<Product>>(
+      async () => selecionarNotebooks(await getCandidatosANotebook()),
+      (produtos) => selecionarNotebooks(produtos),
+      (vitrine) => !vitrine || vitrine.total === 0
+    ),
+  ["notebooks-vitrine-v1"],
   { revalidate: 300, tags: [TAG_PRODUTOS] }
 );
 

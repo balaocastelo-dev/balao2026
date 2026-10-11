@@ -276,6 +276,34 @@ export async function getComputadoresDaVitrine(): Promise<Product[]> {
   return res.rows.map((r) => mapTursoProduct(r as Row));
 }
 
+// Candidatos à vitrine da página /notebooks: a categoria de notebooks inteira
+// e, de qualquer fornecedor, o produto cujo nome começa dizendo que é
+// notebook. Quem decide o que entra de fato é `selecionarNotebooks`
+// (lib/catalogo/notebooks.ts); aqui só se evita trazer o catálogo inteiro.
+// Como em `getComputadoresDaVitrine`, erro de banco não é engolido: quem
+// chama cai na cópia do catálogo.
+export async function getCandidatosANotebook(): Promise<Product[]> {
+  if (!isTursoActive()) return [];
+  const res = await turso.execute({
+    sql: `SELECT id, name, price, image, category, slug, brand, rating, installment, discount_pix, price_card, availability
+          FROM products
+          WHERE category = ? OR category LIKE ?
+             OR LOWER(name) LIKE ? OR LOWER(name) LIKE ? OR LOWER(name) LIKE ?
+             OR LOWER(name) LIKE ? OR LOWER(name) LIKE ? OR LOWER(name) LIKE ?`,
+    args: [
+      'Computadores/Notebooks',
+      'Computadores/Notebooks/%',
+      'notebook%',
+      'macbook%',
+      'apple macbook%',
+      'laptop%',
+      'ultrabook%',
+      'chromebook%',
+    ],
+  });
+  return res.rows.map((r) => mapTursoProduct(r as Row));
+}
+
 export async function getProductByIdentifier(identifier: string): Promise<Product | null> {
   if (!isTursoActive()) return null;
 
