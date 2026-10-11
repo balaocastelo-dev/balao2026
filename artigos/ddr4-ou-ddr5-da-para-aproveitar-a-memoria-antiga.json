@@ -1,0 +1,348 @@
+{
+  "slug": "ddr4-ou-ddr5-da-para-aproveitar-a-memoria-antiga",
+  "titulo": "DDR4 ou DDR5: dá para aproveitar a memória antiga?",
+  "resumo": "DDR4 ou DDR5? Os dois padrões não se misturam: veja em quais placas a memória antiga ainda serve e quando a troca de plataforma pede pentes novos.",
+  "categoria": "hardware",
+  "etiquetas": [
+    "memória ram",
+    "upgrade",
+    "placa-mãe",
+    "processador"
+  ],
+  "capa": {
+    "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/ddr4-ou-ddr5-da-para-aproveitar-a-memoria-antiga-5816e85e.jpg",
+    "alt": "Dois pentes de memória RAM lado a lado sobre uma bancada, com uma placa-mãe de slots vazios ao fundo",
+    "largura": 1376,
+    "altura": 768
+  },
+  "publicadoEm": "2026-10-11T09:02:54.725Z",
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Você vai trocar o processador ou a placa-mãe e ficou na dúvida entre DDR4 ou DDR5 porque já tem pentes de memória em casa e gostaria de aproveitá-los. A pergunta é justa: a memória antiga funciona, está paga e parece desperdício deixá-la na gaveta. A resposta depende de uma única coisa, que é a placa-mãe que vai receber essa memória."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é tratar DDR5 como uma DDR4 mais rápida, que encaixaria no mesmo lugar. Não encaixa. São dois padrões diferentes, com encaixe e alimentação próprios, e nenhum dos dois funciona no slot do outro. Dá para aproveitar a memória antiga, sim, mas só se a placa nova for do mesmo padrão dela. O resto deste guia mostra como descobrir isso."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "DDR4 e DDR5 **não são intercambiáveis**: o chanfro do módulo fica em outra posição e a alimentação é diferente.",
+        "Quem define o padrão é a **placa-mãe**, dentro do que o processador aceita. Confira os dois antes de comprar.",
+        "Em plataformas que só aceitam DDR5, a memória antiga não acompanha a troca; em plataformas DDR4, ela continua servindo.",
+        "Ao comprar memória nova, prefira um par idêntico e confira a lista de compatibilidade da placa."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Por que a DDR4 não entra em placa DDR5, e vice-versa"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Todo módulo de memória tem um chanfro, aquele recorte na fileira de contatos dourados. Ele existe para impedir o encaixe errado. A Kingston explica, em sua página sobre o padrão, que na DDR5 esse recorte mudou de lugar em relação às gerações anteriores, justamente para que um módulo DDR4 ou DDR3 não possa ser instalado em um slot DDR5."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A diferença não é só mecânica. Segundo a mesma página, a DDR4 trabalha com 1,2 V e a DDR5 com 1,1 V. Além disso, o módulo DDR5 traz o próprio circuito de gerenciamento de energia, chamado PMIC, que nos pentes de computador pessoal recebe 5 V da placa e faz a regulagem ali mesmo. Na DDR4, esse trabalho fica com a placa-mãe."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Por isso não existe adaptador que resolva, e forçar o encaixe só danifica o slot ou o pente. Se o módulo não desce com a pressão normal dos dedos e as travas não fecham, pare e compare a posição do chanfro com a do slot. Memória certa entra sem esforço exagerado."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Característica",
+        "DDR4",
+        "DDR5"
+      ],
+      "linhas": [
+        [
+          "Tensão de trabalho",
+          "1,2 V",
+          "1,1 V"
+        ],
+        [
+          "Regulagem de energia",
+          "Na placa-mãe",
+          "No próprio módulo (PMIC)"
+        ],
+        [
+          "Velocidades de referência",
+          "Até 3200 MT/s",
+          "A partir de 4800 MT/s"
+        ],
+        [
+          "Encaixe",
+          "Chanfro próprio",
+          "Chanfro em outra posição"
+        ],
+        [
+          "Funciona no slot do outro padrão",
+          "Não",
+          "Não"
+        ]
+      ],
+      "titulo": "DDR4 e DDR5 lado a lado",
+      "colunaDestaque": 2,
+      "fonte": {
+        "nome": "Kingston — Visão geral da memória DDR5",
+        "url": "https://www.kingston.com/br/blog/pc-performance/ddr5-overview"
+      },
+      "nota": "MT/s é a taxa de transferência do módulo, o número que as lojas costumam anunciar como MHz. Kits com perfil de overclock passam das velocidades de referência nos dois padrões."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A tabela mostra que a DDR5 é o padrão mais novo e parte de velocidades mais altas. Mas isso não transforma a DDR4 em peça ruim. Para a pergunta deste artigo, a linha que importa é a última: cada padrão só funciona em placa feita para ele."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Placa-mãe e processador decidem: veja em qual caso você está"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O processador define quais padrões de memória ele sabe controlar, e a placa-mãe define qual deles tem slot. Em algumas plataformas só existe uma opção. Em outras, o processador aceita os dois padrões e a escolha fica com a placa, que normalmente vem com slots de um tipo só. A Corsair resume a orientação: conferir a ficha da placa e a do processador."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Plataforma",
+        "Memória",
+        "Dá para aproveitar DDR4?"
+      ],
+      "linhas": [
+        [
+          "AMD, soquete AM4 (Ryzen das séries 1000 a 5000)",
+          "DDR4",
+          "Sim"
+        ],
+        [
+          "AMD, soquete AM5 (Ryzen das séries 7000, 8000 e 9000)",
+          "DDR5",
+          "Não"
+        ],
+        [
+          "Intel Core de 12ª, 13ª e 14ª geração, soquete LGA1700",
+          "DDR4 ou DDR5, conforme a placa-mãe",
+          "Só em placa com slots DDR4"
+        ],
+        [
+          "Intel Core Ultra 7 265K, soquete LGA1851",
+          "DDR5",
+          "Não"
+        ]
+      ],
+      "titulo": "Qual memória cada plataforma de desktop usa",
+      "colunaDestaque": 2,
+      "fonte": {
+        "nome": "Intel — compatibilidade dos Core de 12ª, 13ª e 14ª geração",
+        "url": "https://www.intel.com/content/www/us/en/support/articles/000092149.html"
+      },
+      "nota": "As linhas da AMD e do Core Ultra vêm das páginas de produto listadas nas fontes do artigo. Vale para computadores de mesa. Confira sempre a ficha do modelo exato de processador e de placa-mãe."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Na AMD, a divisão é simples. A página da plataforma AM4 descreve placas com memória DDR4 e lista os Ryzen das séries 1000 a 5000. Já a página da AM5 fala apenas em DDR5, e a ficha do Ryzen 7 9700X, por exemplo, traz DDR5 como único tipo de memória do sistema. Mudou de AM4 para AM5, mudou de memória."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Na Intel, a página de suporte sobre os Core de 12ª, 13ª e 14ª geração informa que eles usam o soquete LGA1700, pedem placas com chipset das séries 600 ou 700 e aceitam tanto DDR5 quanto DDR4. É a única situação recente em que dá para trocar o processador, e até a placa, mantendo os pentes antigos."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas a porta se fecha na geração seguinte. A ficha do Core Ultra 7 265K, lançado no quarto trimestre de 2024 com o soquete LGA1851, lista somente DDR5. E a Intel avisa que os processadores de 12ª a 14ª geração não servem nas placas da série 800. Ou seja: quem escolhe a plataforma mais nova, de qualquer das duas marcas, leva memória nova junto."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como descobrir qual memória o seu computador usa hoje"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O caminho mais seguro é pelo modelo da placa-mãe. No Windows, a ferramenta Informações do Sistema costuma mostrar o fabricante e o modelo da placa; com esse nome, a página de suporte do fabricante informa o padrão de memória, a capacidade máxima e a lista de módulos homologados. Em computador de marca, vale o modelo do próprio equipamento."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "**Anote o modelo da placa-mãe** ou do computador, pelo Windows ou pela etiqueta do equipamento.",
+        "**Abra a página de especificações** do fabricante e procure a linha de memória: ali está escrito DDR4 ou DDR5.",
+        "**Anote o processador** e confira a ficha dele no site da Intel ou da AMD.",
+        "**Olhe a etiqueta do pente**, se o gabinete já estiver aberto: ela costuma trazer o padrão, a capacidade e a velocidade.",
+        "**Conte os slots livres**, para saber se cabe mais memória ou se será preciso substituir a que existe."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O Gerenciador de Tarefas do Windows, na aba de desempenho, também ajuda: mostra quanta memória há, a velocidade e quantos slots estão ocupados. Só não confie em palpite pela aparência. Dois pentes de padrões diferentes são quase do mesmo tamanho, e a diferença no chanfro passa despercebida até a hora do encaixe."
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "Desligue o computador, tire o cabo da tomada e toque em uma parte metálica do gabinete para descarregar a eletricidade estática. Segure o pente pelas bordas, sem tocar nos contatos. Se o módulo não encaixar com pressão moderada, não force: confira o chanfro.",
+      "titulo": "Antes de encostar na memória"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Em notebook a lógica é a mesma, com um detalhe a mais. Os módulos são menores, de outro formato, e muitos modelos finos trazem a memória soldada na placa, sem slot para troca. Antes de comprar um pente para notebook, confirme no manual do modelo se há slot livre e qual padrão ele aceita."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "upgrade"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando vale ficar na DDR4 e aproveitar o que você tem"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se o seu computador é AM4 ou tem um Intel de 12ª a 14ª geração em placa DDR4, aproveitar a memória é o caminho natural. Você pode somar mais um par de pentes, trocar por um kit de capacidade maior ou subir de processador dentro do mesmo soquete, sem tocar no restante. O artigo sobre [como aumentar a memória RAM do PC](/blog/como-aumentar-memoria-ram-pc) detalha os cuidados."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "Os pentes que você já tem continuam em uso.",
+        "A troca se limita à peça que realmente está faltando: mais memória, um SSD ou o processador.",
+        "É uma tecnologia madura, com farta oferta de módulos compatíveis.",
+        "Um computador DDR4 bem configurado segue atendendo trabalho, estudo e boa parte dos jogos."
+      ],
+      "contras": [
+        "As plataformas mais novas da AMD e da Intel pedem DDR5: a DDR4 não segue para elas.",
+        "Na próxima troca de placa-mãe, a memória terá de ser comprada de novo.",
+        "As velocidades de referência do padrão são mais baixas que as da DDR5.",
+        "Investir muito em memória DDR4 agora é investir em peça que não acompanha o próximo computador."
+      ],
+      "titulo": "Manter a plataforma DDR4"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O ponto de equilíbrio costuma ser este: completar a memória de um computador DDR4 que ainda atende faz sentido; montar um computador novo do zero em plataforma antiga só para reaproveitar dois pentes raramente compensa. A memória é a peça mais simples de substituir em uma montagem, e não deveria ditar a escolha do processador e da placa."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Há ainda o caso em que o computador está lento e a memória parece a culpada. Nem sempre é. Disco mecânico, sistema carregado de programas e aquecimento produzem a mesma sensação. Antes de comprar pentes, vale confirmar no Gerenciador de Tarefas se a memória está de fato perto do limite durante o uso normal."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando a troca para DDR5 é inevitável, e o que fazer com a memória antiga"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se o processador escolhido é de soquete AM5 ou LGA1851, não há decisão a tomar: a memória será DDR5. Nesse cenário, o planejamento muda de figura. Em vez de pensar em aproveitar pentes, pense em processador, placa-mãe e memória como um conjunto que se troca junto, e reserve a verba para os três."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A memória antiga não vira lixo. Ela pode continuar no computador antigo, se ele for passado adiante para alguém da família ou do escritório, e um computador completo e funcionando tem mais utilidade do que peças soltas. Também serve de reserva para testes: ter um pente sabidamente bom à mão ajuda a diagnosticar um PC que deixa de dar imagem."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Outra saída é manter a máquina antiga inteira como segundo computador, para tarefas leves como navegação, textos e planilhas. O que não funciona é guardar DDR4 esperando que uma placa DDR5 venha a aceitá-la: isso não vai acontecer, pelas razões físicas e elétricas já vistas."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Cuidados ao comprar a memória nova"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Escolhido o padrão, compre os pentes em par idêntico, de mesma capacidade e mesmo modelo, e instale nos slots que o manual da placa indica. Assim a memória trabalha em dois canais, e as fichas dos processadores de desktop citados aqui preveem exatamente dois canais de memória. Um pente sozinho funciona, mas deixa desempenho na mesa."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Atenção ao número de módulos. A ficha do Ryzen 7 9700X informa DDR5-5600 como velocidade máxima com dois pentes e DDR5-3600 com quatro. Ou seja, ocupar os quatro slots pode obrigar a memória a trabalhar mais devagar. Em DDR5, dois módulos de capacidade maior costumam ser escolha melhor do que quatro menores."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Os kits anunciados com velocidades acima das de referência dependem de um perfil gravado no pente, que precisa ser ativado na configuração da placa-mãe: XMP na Intel, EXPO na AMD. A própria AMD classifica o EXPO como overclock de memória e avisa que operar fora das especificações publicadas pode anular garantias. Sem ativar o perfil, a memória roda na velocidade padrão."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Por fim, consulte a lista de memórias homologadas da placa-mãe, que os fabricantes publicam na página de suporte de cada modelo. Ela não esgota o que funciona, mas reduz bastante a chance de surpresa. Misturar pentes de marcas, capacidades ou velocidades diferentes pode dar certo, porém é a origem mais comum de instabilidade depois de um upgrade."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Onde resolver isso em Campinas"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se você prefere não abrir o gabinete para conferir, a Balão da Informática, no Cambuí, em Campinas, tem [assistência técnica](/manutencao) no mesmo endereço da loja e faz diagnóstico e upgrade. A equipe identifica o padrão que a sua placa aceita, e você escolhe entre as opções de [memória RAM](/categoria/hardware-memoria-ram) compatíveis com ela."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Para quem vai trocar a plataforma inteira, a loja faz [montagem de PC sob medida](/montagempc), e você pode ver o computador ligado e testar antes de pagar. A decisão, em uma linha: descubra o padrão da placa-mãe antes de qualquer compra, aproveite a DDR4 enquanto a placa for DDR4 e conte com memória nova no dia em que a plataforma mudar."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "montagem"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Posso colocar memória DDR4 em uma placa-mãe DDR5?",
+      "resposta": "Não. O chanfro do módulo fica em posição diferente e a alimentação elétrica dos dois padrões não é a mesma. O pente não encaixa, e forçar danifica o slot. Também não existe adaptador para isso."
+    },
+    {
+      "pergunta": "Existe placa-mãe que aceita os dois tipos de memória?",
+      "resposta": "Há processadores que aceitam os dois padrões, como os Intel Core de 12ª a 14ª geração, mas a placa-mãe normalmente vem com slots de um tipo só. Por isso a ficha da placa é o que vale. Confira a linha de memória na página do fabricante antes de comprar."
+    },
+    {
+      "pergunta": "Vou trocar meu Ryzen de soquete AM4 por um de AM5. Preciso trocar a memória?",
+      "resposta": "Sim. A plataforma AM4 usa DDR4 e a AM5 trabalha com DDR5, segundo as páginas da AMD. Nessa mudança, processador, placa-mãe e memória são trocados juntos."
+    },
+    {
+      "pergunta": "Como sei se a minha memória é DDR4 ou DDR5 sem abrir o computador?",
+      "resposta": "Descubra o modelo da placa-mãe ou do computador pelo Windows e consulte as especificações no site do fabricante. A linha de memória informa o padrão aceito. A etiqueta do próprio pente também traz essa informação, mas exige abrir o gabinete."
+    },
+    {
+      "pergunta": "Posso misturar pentes de marcas ou velocidades diferentes?",
+      "resposta": "Dentro do mesmo padrão pode funcionar, e nesse caso o conjunto tende a operar no ritmo do módulo mais lento. Mas é uma fonte comum de instabilidade. O mais seguro é usar um par idêntico, de preferência vendido como kit."
+    },
+    {
+      "pergunta": "O que faço com a memória DDR4 que sobrou?",
+      "resposta": "Ela continua útil no computador antigo, se ele for repassado inteiro, ou como reserva para testes. Não vale guardá-la esperando compatibilidade futura com placas DDR5, porque os padrões não são intercambiáveis."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Kingston — Visão geral da memória DDR5",
+      "url": "https://www.kingston.com/br/blog/pc-performance/ddr5-overview",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Intel — Compatibility of Intel Core Desktop Processors (12th, 13th and 14th gen)",
+      "url": "https://www.intel.com/content/www/us/en/support/articles/000092149.html",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Intel — Core Ultra 7 Processor 265K: especificações",
+      "url": "https://www.intel.com/content/www/us/en/products/sku/241063/intel-core-ultra-7-processor-265k-30m-cache-up-to-5-50-ghz/specifications.html",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "AMD — Socket AM4 Platform",
+      "url": "https://www.amd.com/en/products/processors/chipsets/am4.html",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "AMD — Socket AM5 Chipsets",
+      "url": "https://www.amd.com/en/products/processors/chipsets/am5.html",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "AMD — Ryzen 7 9700X: especificações",
+      "url": "https://www.amd.com/en/products/processors/desktops/ryzen/9000-series/amd-ryzen-7-9700x.html",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Corsair — Does DDR5 work with both AMD and Intel?",
+      "url": "https://www.corsair.com/uk/fi/explorer/diy-builder/memory/does-ddr5-work-with-both-amd-and-intel/",
+      "data": "consultado em outubro de 2026"
+    }
+  ]
+}

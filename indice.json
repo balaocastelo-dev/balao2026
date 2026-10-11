@@ -2,6 +2,26 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "ddr4-ou-ddr5-da-para-aproveitar-a-memoria-antiga",
+      "titulo": "DDR4 ou DDR5: dá para aproveitar a memória antiga?",
+      "resumo": "DDR4 ou DDR5? Os dois padrões não se misturam: veja em quais placas a memória antiga ainda serve e quando a troca de plataforma pede pentes novos.",
+      "categoria": "hardware",
+      "etiquetas": [
+        "memória ram",
+        "upgrade",
+        "placa-mãe",
+        "processador"
+      ],
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/ddr4-ou-ddr5-da-para-aproveitar-a-memoria-antiga-5816e85e.jpg",
+        "alt": "Dois pentes de memória RAM lado a lado sobre uma bancada, com uma placa-mãe de slots vazios ao fundo",
+        "largura": 1376,
+        "altura": 768
+      },
+      "publicadoEm": "2026-10-11T09:02:54.725Z",
+      "minutos": 12
+    },
+    {
       "slug": "pc-nao-liga-o-que-verificar",
       "titulo": "PC não liga: o que verificar antes de levar à assistência",
       "resumo": "PC não liga? Veja o que dá para conferir em casa com segurança, como separar falta de energia de falta de imagem e em que ponto parar e chamar um técnico.",
@@ -37,5 +57,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-10T12:17:20.437Z"
+  "atualizadoEm": "2026-10-11T09:02:55.386Z"
 }
