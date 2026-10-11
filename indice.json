@@ -12,7 +12,12 @@
         "manutenção",
         "backup"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/como-saber-se-o-ssd-esta-chegando-ao-fim-8dcf3004.jpg",
+        "alt": "SSD do tipo M.2 sobre uma bancada, ao lado de um notebook virado com a tampa inferior removida",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-10-11T21:02:42.473Z",
       "minutos": 5,
       "formato": "dica"
@@ -98,5 +103,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-11T21:02:43.266Z"
+  "atualizadoEm": "2026-10-11T21:22:46.157Z"
 }

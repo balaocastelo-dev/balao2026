@@ -1,13 +1,4 @@
 {
   "versao": 1,
-  "pendentes": [
-    {
-      "slug": "como-saber-se-o-ssd-esta-chegando-ao-fim",
-      "titulo": "SSD chegando ao fim: como saber antes de perder os arquivos",
-      "categoria": "assistencia",
-      "alt": "SSD do tipo M.2 sobre uma bancada, ao lado de um notebook virado com a tampa inferior removida",
-      "pedido": "A plain black M.2 solid state drive without any sticker lying on a grey anti-static mat on a wooden workbench, seen from a low three-quarter angle. Behind it, slightly out of focus, a generic dark laptop turned upside down with its bottom cover removed, showing the internal boards. A small precision screwdriver rests beside the drive. Soft daylight from a window on the left, shallow depth of field.",
-      "pedidoEm": "2026-10-11T21:02:43.266Z"
-    }
-  ]
+  "pendentes": []
 }
