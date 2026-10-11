@@ -43,17 +43,52 @@ parou no meio do dia por limite de créditos).
    pedido na fila `capas/pendentes.json`, no ramo de conteúdo.
 3. No computador, `balao-content-factory\publisher\capa_blog.py` (a fonte
    fica em `scripts/fabrica/capa_blog.py`) lê a fila, espera a placa ficar
-   livre, gera a foto com o Flux no ComfyUI e mostra a um modelo de visão do
-   Ollama, que reprova marca, texto, rosto, deformação ou cena errada. Até
-   três tentativas por rodada.
+   livre, gera a foto com o Flux no ComfyUI (1600 × 900, cerca de um minuto) e
+   mostra a um modelo de visão do Ollama (`qwen2.5vl:7b`), que **lista** o
+   texto, a marca, o rosto e o defeito que encontrar. Qualquer item listado,
+   ou cena diferente da pedida, reprova. Até três tentativas por rodada.
 4. Aprovada, a foto é presa ao artigo com
    `node scripts/blog-publicar.mjs capa <endereço> foto.jpg` (confere tamanho
-   e proporção, grava em `capas/` e tira o pedido da fila).
+   e proporção, grava em `capas/` e tira o pedido da fila), num clone do
+   repositório só para isso (`balao-content-factory\_blog_repo`). O envio usa
+   o login do GitHub já guardado no Windows.
 5. Dois dias sem foto boa: o pedido sai da fila (`capa <endereço> --desistir`)
    e o artigo fica com a capa desenhada.
 
 Enquanto o computador estiver desligado, os artigos saem normalmente, com a
 capa desenhada; as fotos são feitas quando ele voltar.
+
+**Instalado e testado em 11/10/2026.** Tarefa do Windows `\BalaoFabrica\Capa
+do blog`, todo dia às 06h20, 09h20, 12h20, 15h20, 18h20 e 21h20 (instalador:
+`scripts/fabrica/instalar_tarefa_capa.ps1`). Com a fila vazia, sai na hora.
+Registro em `logs\capa_blog.log`; fotos em `data\capas_blog\`.
+
+Cuidados que o programa toma, porque a placa de vídeo é uma só:
+
+- **A URA tem prioridade.** Não começa com ligação em andamento e, se entrar
+  uma no meio, derruba o ComfyUI na hora; a foto fica para a rodada seguinte.
+- Não roda junto com o vídeo do dia, o vídeo da dica nem outro render, e
+  confere se há memória livre na placa (15 GB) antes de começar.
+- O texto do Flux roda na CPU e o Flux sai da placa antes de o modelo de visão
+  entrar: com tudo junto a memória transborda e a geração fica ~100 vezes mais
+  lenta, sem dar erro.
+- Fora da categoria Apple, o pedido ganha um reforço para o notebook não sair
+  com cara de MacBook (o Flux desenha "notebook prateado" assim).
+
+À mão, no computador (pasta `publisher`):
+
+- `python capa_blog.py --ver` — mostra a fila;
+- `python capa_blog.py --sem-publicar` — gera e confere, sem prender ao artigo;
+- `python capa_blog.py --teste saida.jpg "pedido em inglês"` — foto avulsa;
+- `python capa_blog.py --conferir foto.jpg "a cena"` — só o modelo de visão.
+
+Para pedir a foto de um artigo que saiu sem ela, ou trocar uma foto ruim:
+`node scripts/blog-publicar.mjs capa <endereço> --pedir --alt "…" --pedido "…"`
+(com `--trocar` se o artigo já tiver foto).
+
+Limite conhecido: quem aprova a foto é um modelo de visão pequeno. Nos testes
+ele pegou texto pequeno, etiqueta borrada, rosto e imagem errada, mas ninguém
+humano olha a foto antes de ela ir ao ar.
 
 ## Como funciona
 
