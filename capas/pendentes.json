@@ -1,13 +1,4 @@
 {
   "versao": 1,
-  "pendentes": [
-    {
-      "slug": "rtx-spark-notebooks-windows-chip-nvidia-pre-venda",
-      "titulo": "RTX Spark: notebooks Windows com chip Nvidia chegam dia 16",
-      "categoria": "noticias",
-      "alt": "Notebook fino e aberto sobre uma mesa de trabalho, visto de lado, ao lado de um caderno e uma xícara",
-      "pedido": "A thin generic silver laptop open on a wooden work desk, seen from behind at a three-quarter angle so the screen is not visible. Beside it, a closed plain paper notebook with a pen and a plain ceramic coffee cup. Soft natural daylight from a window, home office background out of focus.",
-      "pedidoEm": "2026-10-11T15:11:56.409Z"
-    }
-  ]
+  "pendentes": []
 }

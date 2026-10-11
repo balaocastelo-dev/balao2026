@@ -12,7 +12,12 @@
         "windows",
         "ia local"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/rtx-spark-notebooks-windows-chip-nvidia-pre-venda-836080ff.jpg",
+        "alt": "Notebook fino e aberto sobre uma mesa de trabalho, visto de lado, ao lado de um caderno e uma xícara",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-10-11T15:03:37.532Z",
       "minutos": 3
     },
@@ -72,5 +77,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-11T15:03:38.296Z"
+  "atualizadoEm": "2026-10-11T15:42:55.273Z"
 }
