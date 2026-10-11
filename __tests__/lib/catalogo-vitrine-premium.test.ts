@@ -159,9 +159,23 @@ describe("ficha — não afirmar o que o título não diz", () => {
   });
 
   it("placa fora da tabela não ganha memória pelo número ao lado", () => {
-    const f = ficha("Computador Gamer I7, GTX 1050 16GB, HD 1TB, SSD 120GB, Fonte 500W");
+    const f = ficha("Computador Gamer I7, GTX 660 16GB, HD 1TB, SSD 120GB, Fonte 500W");
     expect(f.vramGb).toBeNull();
+    expect(rotuloDePlaca(f)).toBe("GeForce GTX 660");
+  });
+
+  it("placa de entrada: o número que não existe para ela é a RAM, e vale a menor versão", () => {
+    // Não existe GTX 1050 de 16 GB: 16 é a memória do computador.
+    const f = ficha("Computador Gamer I7, GTX 1050 16GB, HD 1TB, SSD 120GB, Fonte 500W");
+    expect([f.vramGb, f.vramConfirmada, f.memoriaGb]).toEqual([2, false, 16]);
     expect(rotuloDePlaca(f)).toBe("GeForce GTX 1050");
+
+    const gt = ficha("Computador Gamer Completo Aires, GT 730 4GB, 8GB, Hd 500GB, Wi-fi");
+    expect([gt.vramGb, gt.vramConfirmada, gt.memoriaGb]).toEqual([4, true, 8]);
+
+    const rx = ficha("PC Gamer Completo I3 9° Ram 16gb Rx580 8GB SSD 240 Hd 1TB");
+    expect([rx.vramGb, rx.vramConfirmada]).toEqual([8, true]);
+    expect(nivelDeIA(rx)).toBeNull();
   });
 
   it('só diz "Integrada" quando o título diz', () => {
