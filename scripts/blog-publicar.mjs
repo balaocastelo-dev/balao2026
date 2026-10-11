@@ -76,6 +76,23 @@ function diaEmCampinas(iso) {
   return new Intl.DateTimeFormat("en-CA", { timeZone: FUSO, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(iso));
 }
 
+/**
+ * O blog publica três vezes por dia, e cada vez é de um tipo: o artigo
+ * principal (guia, conserto, hardware…) de manhã, a notícia ao meio-dia e a
+ * dica no fim da tarde. O tipo sai do próprio artigo — não é opção de comando.
+ */
+const TIPOS = {
+  principal: "artigo principal (manhã)",
+  noticia: "notícia (meio-dia)",
+  dica: "dica (fim da tarde)",
+};
+
+function tipoDe(artigo) {
+  if (artigo.categoria === "noticias") return "noticia";
+  if (artigo.formato === "dica") return "dica";
+  return "principal";
+}
+
 /** Os artigos que já existem no código do site: os escritos aqui e os do Soro. */
 function artigosDaCasa() {
   const lista = [];
@@ -246,6 +263,8 @@ function conferir(arquivo, { dataPadrao, arquivoDaFoto }) {
   console.log(`\n${artigo.titulo}`);
   console.log(`/blog/${artigo.slug} · ${artigo.categoria} · ${m.palavras} palavras · ${m.secoes} seções · ${minutosDeLeitura(artigo)} min de leitura`);
   console.log(`${m.tabelas} tabela(s) · ${m.perguntas} pergunta(s) · ${m.linksInternos} link(s) para a loja · ${m.chamadas} chamada(s) · ${artigo.fontes?.length ?? 0} fonte(s)`);
+  console.log(`Tipo: ${TIPOS[tipoDe(artigo)]}`);
+  if (artigo.roteiro) console.log(`Roteiro do vídeo: ${artigo.roteiro.fala.split(/\s+/).length} palavras de fala, ${artigo.roteiro.destaques.length} destaques`);
   if (foto) console.log(`Capa: ${foto.largura} × ${foto.altura}, ${Math.round(foto.bytes.length / 1024)} KB`);
   if (avaliacao.avisos.length > 0) console.log(`\nAvisos (não impedem a publicação):\n- ${avaliacao.avisos.join("\n- ")}`);
   if (!avaliacao.aprovado) sair(`Reprovado na régua editorial:\n- ${avaliacao.erros.join("\n- ")}`);
@@ -281,10 +300,12 @@ function conferirContraOPublicado(artigo, indice, { atualizar, forcar }) {
     if (!existentes.has(slug)) erros.push(`O texto aponta para /blog/${slug}, que não existe.`);
   }
 
+  // Um de cada tipo por dia: é o que impede a tarefa de publicar em dobro se rodar duas vezes.
   if (!atualizar && !forcar) {
     const hoje = diaEmCampinas(artigo.publicadoEm);
-    const doDia = indice.artigos.find((a) => diaEmCampinas(a.publicadoEm) === hoje);
-    if (doDia) erros.push(`O artigo de ${hoje} já foi publicado: "${doDia.titulo}". Use --forcar para publicar mais um no mesmo dia.`);
+    const tipo = tipoDe(artigo);
+    const doDia = indice.artigos.find((a) => diaEmCampinas(a.publicadoEm) === hoje && tipoDe(a) === tipo);
+    if (doDia) erros.push(`A publicação de hoje (${hoje}) do tipo ${TIPOS[tipo]} já saiu: "${doDia.titulo}". Use --forcar para publicar mais uma.`);
   }
 
   if (erros.length > 0) sair(`Não publicado:\n- ${[...new Set(erros)].join("\n- ")}`);
@@ -313,13 +334,18 @@ if (arquivoDaFoto && semCapa) sair("Use --capa ou --sem-capa, não os dois.");
 /** O que já está no ar — para a rotina não repetir assunto. */
 function mostrarPublicados(indice) {
   console.log(`Publicados pela rotina diária (${indice.artigos.length}), do mais novo para o mais antigo:`);
-  for (const a of indice.artigos) console.log(`- ${diaEmCampinas(a.publicadoEm)} · ${a.categoria} · ${a.titulo} · /blog/${a.slug}`);
+  for (const a of indice.artigos) {
+    console.log(`- ${diaEmCampinas(a.publicadoEm)} · ${a.categoria}${a.formato === "dica" ? " (dica)" : ""} · ${a.titulo} · /blog/${a.slug}`);
+  }
   const daCasa = artigosDaCasa();
   console.log(`\nArtigos da casa (${daCasa.length}) — assuntos que também já estão cobertos:`);
   for (const a of daCasa) console.log(`- ${a.titulo || a.slug} · /blog/${a.slug}`);
   const hoje = diaEmCampinas(new Date().toISOString());
-  const doDia = indice.artigos.find((a) => diaEmCampinas(a.publicadoEm) === hoje);
-  console.log(doDia ? `\nO artigo de hoje (${hoje}) JÁ foi publicado: ${doDia.titulo}` : `\nAinda não há artigo de hoje (${hoje}).`);
+  console.log(`\nHoje (${hoje}):`);
+  for (const [tipo, nome] of Object.entries(TIPOS)) {
+    const doDia = indice.artigos.find((a) => diaEmCampinas(a.publicadoEm) === hoje && tipoDe(a) === tipo);
+    console.log(`- ${nome}: ${doDia ? `JÁ PUBLICADO — ${doDia.titulo}` : "ainda não publicado"}`);
+  }
 }
 
 if (comando === "listar") {
@@ -342,15 +368,21 @@ if (comando === "listar") {
     console.log(`\n${"=".repeat(24)} O que já foi publicado ${"=".repeat(24)}\n`);
     mostrarPublicados(indice);
 
-    // O artigo-modelo: o mais longo dos publicados, que usa mais tipos de bloco.
-    const modelos = indice.artigos
-      .map((a) => path.join(pasta, "artigos", `${a.slug}.json`))
-      .filter((arquivo) => fs.existsSync(arquivo))
-      .sort((a, b) => fs.statSync(b).size - fs.statSync(a).size);
-    if (modelos[0]) {
-      const destino = path.join(os.tmpdir(), "blog-artigo-modelo.json");
+    // Um modelo de cada tipo: o mais longo dos publicados, que usa mais tipos de bloco.
+    console.log("\nModelos (copie a estrutura, não o texto):");
+    for (const [tipo, nome] of Object.entries(TIPOS)) {
+      const modelos = indice.artigos
+        .filter((a) => tipoDe(a) === tipo)
+        .map((a) => path.join(pasta, "artigos", `${a.slug}.json`))
+        .filter((arquivo) => fs.existsSync(arquivo))
+        .sort((a, b) => fs.statSync(b).size - fs.statSync(a).size);
+      if (!modelos[0]) {
+        console.log(`- ${nome}: ainda não há; siga o formato descrito no ROTINA.md`);
+        continue;
+      }
+      const destino = path.join(os.tmpdir(), `blog-modelo-${tipo}.json`);
       fs.copyFileSync(modelos[0], destino);
-      console.log(`\nArtigo-modelo (copie a estrutura, não o texto): ${destino}`);
+      console.log(`- ${nome}: ${destino}`);
     }
   } finally {
     fecharRamo(pasta);
@@ -407,6 +439,7 @@ if (comando === "listar") {
       capa: artigo.capa,
       publicadoEm: paraGravar.publicadoEm,
       minutos: minutosDeLeitura(artigo),
+      ...(artigo.formato ? { formato: artigo.formato } : {}),
     });
     gravarIndice(pasta, indice);
 
