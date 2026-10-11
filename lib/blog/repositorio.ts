@@ -114,6 +114,7 @@ export function resumir(artigo: Artigo): ArtigoResumido {
     temAnalise: Boolean(artigo.analise),
     nota: artigo.analise?.nota,
     ...(artigo.destaque ? { destaque: artigo.destaque } : {}),
+    ...(artigo.formato ? { formato: artigo.formato } : {}),
   };
 }
 
@@ -179,7 +180,7 @@ export function escolherRelacionados(
 }
 
 export function contarPorCategoria(artigos: { categoria: CategoriaSlug }[]): Record<CategoriaSlug, number> {
-  const contagem: Record<CategoriaSlug, number> = { guias: 0, hardware: 0, analises: 0, noticias: 0, assistencia: 0 };
+  const contagem: Record<CategoriaSlug, number> = { guias: 0, hardware: 0, ia: 0, apple: 0, analises: 0, noticias: 0, assistencia: 0 };
   for (const a of artigos) contagem[a.categoria] += 1;
   return contagem;
 }

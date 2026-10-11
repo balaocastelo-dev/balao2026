@@ -31,6 +31,8 @@ const MOTIVOS: Record<CategoriaSlug, Motivo[]> = {
   hardware: ["modulos", "trilhas", "barras"],
   analises: ["barras", "modulos", "linhas"],
   guias: ["pontos", "linhas", "barras"],
+  ia: ["pontos", "trilhas", "aneis"],
+  apple: ["aneis", "linhas", "modulos"],
   noticias: ["linhas", "pontos", "trilhas"],
   assistencia: ["aneis", "trilhas", "pontos"],
 };

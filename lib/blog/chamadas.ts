@@ -85,6 +85,20 @@ export const CHAMADAS: Record<TemaDeChamada, ChamadaPronta> = {
       "Conte quantas máquinas e para que tarefa. A equipe indica a configuração, e a assistência técnica fica no mesmo endereço.",
     rotulo: "Pedir orientação",
   },
+  apple: {
+    titulo: "iPhone, iPad ou Mac com defeito? A bancada avalia",
+    texto:
+      "A assistência da Balão, no Cambuí, também atende aparelhos Apple: tela, bateria, conector de carga e teclado, no mesmo endereço da loja.",
+    rotulo: "Ver assistência Apple",
+    href: "/reparoapple",
+  },
+  "ia-local": {
+    titulo: "Quer rodar IA no seu próprio computador?",
+    texto:
+      "A loja separa as máquinas com placa de vídeo e memória para rodar modelos de IA localmente. Diga o que você quer rodar e a equipe indica a configuração.",
+    rotulo: "Ver máquinas para IA local",
+    href: "/ia-local",
+  },
   geral: {
     titulo: "Ficou com dúvida? Fale com quem monta e conserta",
     texto:

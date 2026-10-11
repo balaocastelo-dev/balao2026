@@ -23,6 +23,18 @@ export const CATEGORIAS: Categoria[] = [
       "Placa de vídeo, memória, SSD, fonte e as outras peças: o que cada uma faz, o que combina com o quê e quando vale o upgrade.",
   },
   {
+    slug: "ia",
+    nome: "IA",
+    descricao:
+      "Inteligência artificial na prática: o que dá para fazer hoje, que computador cada uso pede e o que é só barulho.",
+  },
+  {
+    slug: "apple",
+    nome: "Apple",
+    descricao:
+      "Mac, iPhone e iPad: como escolher, o que muda a cada lançamento, cuidados do dia a dia e quando o conserto compensa.",
+  },
+  {
     slug: "analises",
     nome: "Análises",
     descricao:
@@ -65,6 +77,8 @@ export function classificarPorTitulo(titulo: string, slug = ""): CategoriaSlug {
     return "assistencia";
   }
   if (tem("vale a pena", " vs ", " versus ", "analise", "review", "comparativo")) return "analises";
+  if (tem("macbook", "iphone", "ipad", " imac", "mac mini", " apple ")) return "apple";
+  if (tem("inteligencia artificial", " ia ", "chatgpt", "copilot")) return "ia";
   if (
     tem(
       " ssd",

@@ -11,7 +11,7 @@ export function DadosDoArtigo({
   artigo,
   className = "",
 }: {
-  artigo: Pick<ArtigoResumido, "publicadoEm" | "minutos">;
+  artigo: Pick<ArtigoResumido, "publicadoEm" | "minutos" | "formato">;
   className?: string;
 }) {
   return (
@@ -19,6 +19,12 @@ export function DadosDoArtigo({
       <time dateTime={artigo.publicadoEm}>{dataCurta(artigo.publicadoEm)}</time>
       <span aria-hidden className="h-3 w-px bg-[var(--b-linha-forte)]" />
       <span>{artigo.minutos} min de leitura</span>
+      {artigo.formato === "dica" ? (
+        <>
+          <span aria-hidden className="h-3 w-px bg-[var(--b-linha-forte)]" />
+          <span className="font-semibold text-[var(--b-tinta-2)]">Dica rápida</span>
+        </>
+      ) : null}
     </p>
   );
 }

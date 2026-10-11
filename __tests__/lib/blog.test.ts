@@ -288,8 +288,8 @@ describe("vitrine e relacionados", () => {
     expect(relacionados.some((r) => r.slug === todos[0].slug)).toBe(false);
   });
 
-  it("as categorias do filtro são as cinco da taxonomia", () => {
-    expect(CATEGORIAS.map((c) => c.slug)).toEqual(["guias", "hardware", "analises", "noticias", "assistencia"]);
+  it("as categorias do filtro são as sete da taxonomia", () => {
+    expect(CATEGORIAS.map((c) => c.slug)).toEqual(["guias", "hardware", "ia", "apple", "analises", "noticias", "assistencia"]);
   });
 });
 
@@ -449,5 +449,78 @@ describe("rotina diária", () => {
     })!;
     const todos = [doDia, ...daCasa];
     expect(escolherDestaques(todos, 4).map((d) => d.slug).slice(0, 2)).toEqual(["rtx-5060-ti-8gb-ou-16gb", "artigo-do-dia"]);
+  });
+
+  // ---- A dica do fim da tarde e o roteiro do vídeo ----
+  const roteiro = () => ({
+    fala:
+      "Seu notebook demora para ligar e trava com poucas abas abertas? Antes de pensar em trocar, olhe duas coisas. Primeiro, se ele ainda usa disco rígido comum: trocar por um SSD muda tudo. Segundo, a memória: com pouca memória o sistema engasga. Na maioria dos casos esse upgrade resolve e sai bem mais em conta que um aparelho novo.",
+    titulo: "Notebook lento tem jeito",
+    destaques: ["Trocar o disco por SSD", "Mais memória RAM", "Limpeza interna"],
+    legenda: "Notebook lento nem sempre pede um novo. Veja as duas trocas que mais resolvem e quando vale a pena fazer. A dica completa está no blog.",
+    hashtags: ["notebook", "upgrade", "ssd", "informatica", "campinas"],
+  });
+  const dicaBruta = () => {
+    const base = artigoBruto();
+    return {
+      ...base,
+      slug: "notebook-lento-o-que-resolve",
+      titulo: "Notebook lento: as duas trocas que mais resolvem",
+      categoria: "assistencia",
+      formato: "dica",
+      roteiro: roteiro(),
+      blocos: [
+        { tipo: "paragrafo", texto: paragrafo("um notebook novo") },
+        { tipo: "resumo", itens: ["SSD no lugar do disco comum.", "Mais memória.", "Limpeza se esquenta."] },
+        { tipo: "titulo", nivel: 2, texto: "Por onde começar" },
+        ...Array.from({ length: 4 }, (_v, i) => ({ tipo: "paragrafo", texto: `${paragrafo("o upgrade")} Passo ${i + 1}.` })),
+        { tipo: "lista", ordenada: true, itens: ["Veja se o disco é mecânico.", "Veja quanta memória há.", "Confira a temperatura."] },
+        { tipo: "titulo", nivel: 2, texto: "Quando não compensa" },
+        ...Array.from({ length: 4 }, (_v, i) => ({ tipo: "paragrafo", texto: `${paragrafo("o conserto")} Caso ${i + 1}.` })),
+        { tipo: "paragrafo", texto: "Veja a [assistência técnica](/manutencao) e a [memória RAM](/categoria/hardware-memoria-ram) da loja." },
+        { tipo: "chamada", tema: "upgrade" },
+      ],
+    };
+  };
+  const erosDaDica = (mudar: (d: ReturnType<typeof dicaBruta>) => void = () => {}): string[] => {
+    const bruto = dicaBruta();
+    mudar(bruto);
+    const lido = lerArtigo(bruto);
+    if (!lido.ok) return lido.erros;
+    return avaliarArtigo(lido.valor).erros;
+  };
+
+  it("a dica é curta, tem régua própria e leva o roteiro do vídeo", () => {
+    expect(erosDaDica()).toEqual([]);
+    const lido = lerArtigo(dicaBruta());
+    expect(lido.ok && lido.valor.formato).toBe("dica");
+    expect(lido.ok && resumir(lido.valor).formato).toBe("dica");
+    // O mesmo texto, sem dizer que é dica, é um guia curto demais.
+    expect(erosDaDica((d) => delete (d as { formato?: string }).formato).join(" ")).toMatch(/mínimo para assistencia/);
+    expect(erosDaDica((d) => delete (d as { roteiro?: unknown }).roteiro).join(" ")).toMatch(/roteiro do vídeo/);
+    expect(erosDaDica((d) => (d.categoria = "noticias")).join(" ")).toMatch(/não é notícia/);
+    expect(erosDaDica((d) => (d.blocos = d.blocos.filter((b) => b.tipo !== "lista"))).join(" ")).toMatch(/organize a resposta/);
+  });
+
+  it("o vídeo com o avatar não fala preço, não promete e não lê número difícil", () => {
+    const comFala = (fala: string) => erosDaDica((d) => (d.roteiro.fala = `${roteiro().fala} ${fala}`)).join(" ");
+    expect(comFala("E está em promoção.")).toMatch(/preço ou promoção/);
+    expect(comFala("São quinhentos e doze giga.")).toMatch(/voz lê mal/);
+    expect(comFala("O modelo SA400S37 serve.")).toMatch(/voz lê mal/);
+    expect(comFala("Eu garanto que resolve.")).toMatch(/não promete/);
+    expect(erosDaDica((d) => (d.roteiro.fala = `Fala pessoal! ${roteiro().fala}`)).join(" ")).toMatch(/saudação/);
+    expect(erosDaDica((d) => (d.roteiro.fala = "Curta demais para um vídeo.")).join(" ")).toMatch(/palavras/);
+    expect(erosDaDica((d) => (d.roteiro.destaques = ["Um só"])).join(" ")).toMatch(/2 a 4 destaques/);
+    expect(erosDaDica((d) => (d.roteiro.hashtags = ["com espaço", "a", "b", "c"])).join(" ")).toMatch(/hashtags/);
+  });
+
+  it("IA e Apple são editorias, com chamada e página próprias", () => {
+    expect(erosDaDica((d) => ((d.categoria = "apple"), d.blocos.push({ tipo: "chamada", tema: "apple" } as never)))).toEqual(
+      ["Duas chamadas seguidas."],
+    );
+    expect(erosDaDica((d) => d.blocos.splice(-1, 1, { tipo: "paragrafo", texto: "Veja o [reparo](/reparoapple) e as [máquinas](/ia-local)." }, { tipo: "chamada", tema: "ia-local" } as never))).toEqual([]);
+    expect(resolverChamada({ tipo: "chamada", tema: "apple" }, { titulo: "x", slug: "x", categoria: "apple", etiquetas: [] }).href).toBe("/reparoapple");
+    expect(classificarPorTitulo("MacBook Air ou Pro: qual escolher")).toBe("apple");
+    expect(classificarPorTitulo("Manutenção de MacBook em Campinas")).toBe("assistencia");
   });
 });

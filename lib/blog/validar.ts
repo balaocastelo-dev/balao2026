@@ -1,6 +1,6 @@
 import { CATEGORIAS } from "./categorias";
 import { hrefSeguro } from "./texto";
-import type { Artigo, ArtigoResumido, Bloco, CategoriaSlug, Fonte, Imagem, TemaDeChamada } from "./tipos";
+import type { Artigo, ArtigoResumido, Bloco, CategoriaSlug, Fonte, Imagem, RoteiroDeVideo, TemaDeChamada } from "./tipos";
 
 /**
  * Confere o formato de um artigo que chega de fora do código — um arquivo
@@ -25,6 +25,8 @@ const TEMAS = new Set<string>([
   "seminovos",
   "upgrade",
   "empresas",
+  "apple",
+  "ia-local",
   "geral",
 ]);
 
@@ -183,6 +185,25 @@ function lerBloco(v: unknown, i: number, erros: string[]): Bloco | null {
   }
 }
 
+/** O roteiro do vídeo de uma dica. O conteúdo quem julga é a régua; aqui, só o formato. */
+function lerRoteiro(v: unknown, erros: string[]): RoteiroDeVideo | null {
+  if (!objeto(v)) {
+    erros.push("roteiro deve ser um objeto com fala, titulo, destaques, legenda e hashtags.");
+    return null;
+  }
+  if (!texto(v.fala) || !texto(v.titulo) || !texto(v.legenda) || !textos(v.destaques) || !textos(v.hashtags)) {
+    erros.push("roteiro incompleto: fala, titulo e legenda são textos; destaques e hashtags são listas de textos.");
+    return null;
+  }
+  return {
+    fala: v.fala.replace(/\s+/g, " ").trim(),
+    titulo: v.titulo.trim(),
+    destaques: v.destaques.map((d) => d.trim()),
+    legenda: v.legenda.trim(),
+    hashtags: v.hashtags.map((h) => h.replace(/^#/, "").trim()),
+  };
+}
+
 export function lerArtigo(bruto: unknown): Resultado<Artigo> {
   const erros: string[] = [];
   if (!objeto(bruto)) return { ok: false, erros: ["O arquivo não contém um artigo."] };
@@ -229,6 +250,9 @@ export function lerArtigo(bruto: unknown): Resultado<Artigo> {
     }
   }
 
+  if (bruto.formato !== undefined && bruto.formato !== "dica") erros.push('formato, quando existe, é "dica".');
+  const roteiro = bruto.roteiro === undefined ? null : lerRoteiro(bruto.roteiro, erros);
+
   // Veredito com nota fala em nome da loja: só entra em artigo escrito e
   // aprovado no repositório, nunca por arquivo publicado sozinho.
   if (bruto.analise !== undefined) erros.push("artigo publicado pela rotina não pode ter veredito com nota (campo analise).");
@@ -256,6 +280,8 @@ export function lerArtigo(bruto: unknown): Resultado<Artigo> {
       ...(texto(bruto.atualizadoEm) && Number.isFinite(Date.parse(bruto.atualizadoEm)) ? { atualizadoEm: new Date(bruto.atualizadoEm).toISOString() } : {}),
       autor: { nome: "Equipe Balão da Informática", url: "/sobre-nos" },
       origem: "diario",
+      ...(bruto.formato === "dica" ? { formato: "dica" as const } : {}),
+      ...(roteiro ? { roteiro } : {}),
       ...(seo ? { seo } : {}),
       blocos,
       ...(perguntas.length > 0 ? { perguntas } : {}),
@@ -282,5 +308,6 @@ export function lerResumo(bruto: unknown): ArtigoResumido | null {
     publicadoEm: new Date(bruto.publicadoEm).toISOString(),
     minutos: numero(bruto.minutos) && bruto.minutos > 0 ? Math.round(bruto.minutos) : 5,
     temAnalise: false,
+    ...(bruto.formato === "dica" ? { formato: "dica" as const } : {}),
   };
 }

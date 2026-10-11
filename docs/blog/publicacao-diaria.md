@@ -1,11 +1,33 @@
 # Publicação diária automática
 
-Todo dia, perto das 6 da manhã, uma tarefa agendada escreve e publica um
-artigo novo no blog. Ninguém precisa fazer nada.
+Três vezes por dia uma tarefa agendada escreve e publica no blog. Ninguém
+precisa fazer nada.
+
+| Hora | Tarefa agendada | O que publica |
+|---|---|---|
+| 05:54 | Blog Balão - artigo do dia | Guia de compra, conserto, hardware, IA ou Apple: o artigo longo, que traz busca do Google |
+| 11:54 | Blog Balão - notícia do dia | Notícia curta de tecnologia, com duas fontes e "o que isso muda para você" |
+| 17:54 | Blog Balão - dica do dia | Dica rápida (450 a 950 palavras), com o **roteiro do vídeo** |
+
+O comando de publicar aceita uma publicação de cada tipo por dia; o tipo sai
+do próprio artigo (categoria `noticias` é notícia, `"formato": "dica"` é dica,
+o resto é o artigo principal).
+
+## O vídeo da dica
+
+A dica leva um campo `roteiro` (fala, título, destaques, legenda, hashtags).
+A fábrica de conteúdo, no computador da loja, transforma esse roteiro em
+Reels com o avatar do Thiago (`balao-content-factory\publisher\video_dica.py`,
+segunda, quarta e sexta às 04:30), manda a prévia no Telegram dele e só
+publica no Facebook e no Instagram depois do OK. A legenda leva o link do
+artigo. O blog em si não passa pelo Telegram.
+
+A régua confere o roteiro como confere o texto: de 45 a 85 palavras de fala,
+sem preço, sem promessa, sem número que a voz sintética lê mal.
 
 ## Como funciona
 
-1. A tarefa agendada ("Blog Balão - artigo do dia") abre uma sessão do Claude.
+1. A tarefa agendada abre uma sessão do Claude.
 2. Ela lê as regras, a pauta e o que já foi publicado
    (`node scripts/blog-publicar.mjs preparar`).
 3. Escolhe o próximo assunto da pauta, pesquisa em fontes abertas e escreve o
@@ -40,7 +62,7 @@ código (`lib/blog/regua.ts`), não a boa vontade de quem escreve:
 | só aponta para páginas da loja de uma lista conferida | Link quebrado é o erro mais comum de texto automático |
 | precisa de ao menos duas fontes | Fato sem origem não entra |
 | não afirma "testamos" | A rotina não testou nada |
-| não traz imagem de fora | Imagem tem dono; a capa é desenhada pelo site |
+| não traz imagem de fora | Imagem tem dono; a capa é a foto gerada e enviada pelo comando (`--capa`) |
 
 O site aplica as mesmas conferências **de novo** na hora de mostrar. Um
 arquivo colocado no ramo por outro caminho, se não passar, não aparece.

@@ -42,6 +42,8 @@ export type Avaliacao = {
 const MINIMO_DE_PALAVRAS: Record<Artigo["categoria"], number> = {
   guias: 1200,
   hardware: 1200,
+  ia: 1200,
+  apple: 1200,
   analises: 1200,
   assistencia: 1000,
   noticias: 350,
@@ -50,10 +52,28 @@ const MINIMO_DE_PALAVRAS: Record<Artigo["categoria"], number> = {
 const MINIMO_DE_SECOES: Record<Artigo["categoria"], number> = {
   guias: 4,
   hardware: 4,
+  ia: 4,
+  apple: 4,
   analises: 4,
   assistencia: 4,
   noticias: 2,
 };
+
+/**
+ * A dica é o texto curto do fim da tarde: uma pergunta, uma resposta direta.
+ * Não substitui o guia; por isso tem piso e teto próprios.
+ */
+const DICA = { minimoDePalavras: 450, tetoDePalavras: 950, minimoDeSecoes: 2 };
+
+/**
+ * O roteiro do vídeo é falado por voz sintética, com o rosto do Thiago. As
+ * regras são as da fábrica de conteúdo: nada de preço, e nada que a voz leia
+ * mal — número de três dígitos, código de peça, parêntese, barra.
+ */
+const ROTEIRO = { minimoDePalavras: 45, tetoDePalavras: 85 };
+const NUMERO_QUE_A_VOZ_LE_MAL =
+  /\d{3,}|\b(?:cem|cento|mil|duzent\w*|trezent\w*|quatrocent\w*|quinhent\w*|seiscent\w*|setecent\w*|oitocent\w*|novecent\w*)\b/i;
+const FALA_DE_PRECO = /R\$|\breais\b|pre[çc]o|desconto|parcel|promo[çc]|oferta|\d+[.,]\d{2}/i;
 
 /**
  * Condição comercial não entra em artigo: preço, parcela, desconto e frete
@@ -82,6 +102,10 @@ export const PAGINAS_DA_LOJA = [
   "/carregadores",
   "/consignacao",
   "/pcgamer3d",
+  "/pcgamer",
+  "/reparoapple",
+  "/ia-local",
+  "/premium",
   "/fale-conosco",
   "/sobre-nos",
   "/categoria/computadores",
@@ -123,6 +147,7 @@ export function avaliarArtigo(artigo: Artigo): Avaliacao {
   const erros: string[] = [];
   const avisos: string[] = [];
   const noticia = artigo.categoria === "noticias";
+  const dica = artigo.formato === "dica";
   const blocos = artigo.blocos;
 
   // ---- Medidas ----
@@ -181,11 +206,16 @@ export function avaliarArtigo(artigo: Artigo): Avaliacao {
   } else if (artigo.capa.alt.trim().length < 12) erros.push("A capa precisa de um texto alternativo que descreva a imagem.");
 
   // ---- Estrutura ----
-  if (palavras < MINIMO_DE_PALAVRAS[artigo.categoria]) {
-    erros.push(`Artigo com ${palavras} palavras; o mínimo para ${artigo.categoria} é ${MINIMO_DE_PALAVRAS[artigo.categoria]}.`);
+  const minimoDePalavras = dica ? DICA.minimoDePalavras : MINIMO_DE_PALAVRAS[artigo.categoria];
+  const minimoDeSecoes = dica ? DICA.minimoDeSecoes : MINIMO_DE_SECOES[artigo.categoria];
+  if (palavras < minimoDePalavras) {
+    erros.push(`Artigo com ${palavras} palavras; o mínimo para ${dica ? "dica" : artigo.categoria} é ${minimoDePalavras}.`);
   }
-  if (secoes.length < MINIMO_DE_SECOES[artigo.categoria]) {
-    erros.push(`Artigo com ${secoes.length} seções (títulos de nível 2); o mínimo é ${MINIMO_DE_SECOES[artigo.categoria]}.`);
+  if (dica && palavras > DICA.tetoDePalavras) {
+    erros.push(`Dica com ${palavras} palavras; o teto é ${DICA.tetoDePalavras}. Assunto que pede mais do que isso é guia, não dica.`);
+  }
+  if (secoes.length < minimoDeSecoes) {
+    erros.push(`Artigo com ${secoes.length} seções (títulos de nível 2); o mínimo é ${minimoDeSecoes}.`);
   }
 
   const primeiroTitulo = blocos.findIndex((b) => b.tipo === "titulo");
@@ -233,13 +263,50 @@ export function avaliarArtigo(artigo: Artigo): Avaliacao {
   if (titulosRepetidos.size > 0) erros.push(`Títulos repetidos: ${[...titulosRepetidos].join("; ")}.`);
 
   // ---- Substância: o que separa artigo de página de produto ----
-  if (!noticia) {
+  if (dica) {
+    // A dica é curta, mas não é parede de texto: um passo a passo, uma tabela
+    // ou um prós e contras tem de carregar a resposta.
+    const listas = blocos.filter((b) => b.tipo === "lista");
+    if (tabelas.length + prosContras.length + listas.length < 1) {
+      erros.push("Dica precisa de ao menos um elemento que organize a resposta: lista de passos, tabela ou prós e contras.");
+    }
+    if (resumos.length === 0) erros.push('Falta o bloco "Em resumo" logo depois da abertura.');
+    if ((artigo.perguntas?.length ?? 0) < 2) avisos.push("Inclua 2 ou 3 perguntas frequentes.");
+    if (noticia || artigo.categoria === "analises") erros.push("Dica não é notícia nem análise: use guias, hardware, ia, apple ou assistencia.");
+  } else if (!noticia) {
     const ricos = tabelas.length + benchmarks.length + prosContras.length + citacoes.length;
     if (ricos < 2) {
       erros.push("Faltam elementos de apoio: use ao menos dois entre tabela, gráfico de benchmark, prós e contras e citação.");
     }
     if (resumos.length === 0) erros.push('Falta o bloco "Em resumo" logo depois da abertura.');
     if ((artigo.perguntas?.length ?? 0) < 3) avisos.push("Inclua de 3 a 6 perguntas frequentes: elas respondem buscas de cauda longa.");
+  }
+
+  // ---- Roteiro do vídeo ----
+  if (artigo.roteiro) {
+    const r = artigo.roteiro;
+    if (!dica) erros.push("Só a dica leva roteiro de vídeo.");
+    const palavrasDaFala = contarPalavras(r.fala);
+    if (palavrasDaFala < ROTEIRO.minimoDePalavras || palavrasDaFala > ROTEIRO.tetoDePalavras) {
+      erros.push(`A fala do vídeo tem ${palavrasDaFala} palavras; o intervalo é de ${ROTEIRO.minimoDePalavras} a ${ROTEIRO.tetoDePalavras} (cerca de meio minuto).`);
+    }
+    const preco = FALA_DE_PRECO.exec(`${r.fala}\n${r.legenda}\n${r.titulo}\n${r.destaques.join("\n")}`);
+    if (preco) erros.push(`O roteiro do vídeo fala de preço ou promoção ("${preco[0]}"): vídeo com o avatar não fala disso.`);
+    const numero = NUMERO_QUE_A_VOZ_LE_MAL.exec(r.fala);
+    if (numero) erros.push(`A fala do vídeo tem um número que a voz lê mal ("${numero[0]}"): diga de outro jeito ou deixe só na tela.`);
+    if (/[()\/\[\]#@*_]|https?:/.test(r.fala)) erros.push("A fala do vídeo é texto falado: sem parênteses, barras, links ou marcação.");
+    if (/\b(testamos|medimos|garant\w+|prometo|com certeza)\b/i.test(r.fala)) {
+      erros.push("A fala do vídeo não promete nem afirma teste próprio: é o rosto do Thiago dizendo.");
+    }
+    if (/^(ol[áa]|oi|fala\b|e a[íi])/i.test(r.fala.trim())) erros.push("A fala do vídeo começa direto no assunto: a saudação é posta pela fábrica.");
+    if (r.titulo.length > 40) erros.push(`O título do vídeo tem ${r.titulo.length} caracteres; o teto é 40.`);
+    if (r.destaques.length < 2 || r.destaques.length > 4) erros.push("O vídeo leva de 2 a 4 destaques na tela.");
+    const longo = r.destaques.find((d) => d.length > 32);
+    if (longo) erros.push(`Destaque do vídeo longo demais para a tela ("${longo}"): o teto é 32 caracteres.`);
+    if (r.legenda.length < 40 || r.legenda.length > 320) erros.push(`A legenda do vídeo tem ${r.legenda.length} caracteres; o intervalo é de 40 a 320.`);
+    if (r.hashtags.length < 4 || r.hashtags.length > 8 || r.hashtags.some((h) => !/^[\p{L}\p{N}]{2,30}$/u.test(h))) {
+      erros.push("O vídeo leva de 4 a 8 hashtags, cada uma só com letras e números, sem #.");
+    }
   }
   if ((artigo.perguntas?.length ?? 0) > 8) avisos.push("Mais de 8 perguntas frequentes dilui o artigo.");
 
@@ -320,6 +387,7 @@ export function avaliarArtigo(artigo: Artigo): Avaliacao {
   // Por isso ele só pode usar o que não depende de transcrever número ou
   // frase de terceiros, e só fala da loja com as chamadas já escritas.
   if (artigo.origem === "diario") {
+    if (dica && !artigo.roteiro) erros.push("Dica da rotina leva o roteiro do vídeo (campo roteiro).");
     if (artigo.categoria === "analises") erros.push("A rotina diária não publica análise: nota e veredito são da loja.");
     if (artigo.analise) erros.push("Artigo da rotina não pode ter veredito com nota.");
     if (benchmarks.length > 0) erros.push("Artigo da rotina não leva gráfico de benchmark: número de teste só entra em artigo revisado.");

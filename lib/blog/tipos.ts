@@ -11,7 +11,7 @@
  *   **negrito**   *itálico*   [texto do link](/caminho-ou-https://...)
  */
 
-export type CategoriaSlug = "guias" | "hardware" | "analises" | "noticias" | "assistencia";
+export type CategoriaSlug = "guias" | "hardware" | "ia" | "apple" | "analises" | "noticias" | "assistencia";
 
 /** Texto com a marcação mínima descrita acima. */
 export type TextoRico = string;
@@ -121,6 +121,8 @@ export type TemaDeChamada =
   | "seminovos"
   | "upgrade"
   | "empresas"
+  | "apple"
+  | "ia-local"
   | "geral";
 
 export type BlocoChamada = {
@@ -166,6 +168,24 @@ export type Analise = {
 
 export type Pergunta = { pergunta: string; resposta: string };
 
+/**
+ * O roteiro do vídeo curto que acompanha uma dica: o que o avatar do Thiago
+ * fala e o que aparece na tela. Quem transforma isto em vídeo é a fábrica de
+ * conteúdo, no computador da loja; o vídeo só vai às redes depois do OK do
+ * Thiago pelo Telegram.
+ */
+export type RoteiroDeVideo = {
+  /** O miolo da fala, sem a saudação e sem o convite final (a fábrica põe os dois). */
+  fala: string;
+  /** Título curto para a tela. */
+  titulo: string;
+  /** De 2 a 4 pontos curtos para a tela. */
+  destaques: string[];
+  /** Legenda da publicação nas redes. */
+  legenda: string;
+  hashtags: string[];
+};
+
 export type Autor = {
   nome: string;
   cargo?: string;
@@ -193,6 +213,12 @@ export type Artigo = {
   origem: "autoral" | "soro" | "diario";
   /** Sobe para a vitrine do topo. Número maior aparece primeiro. */
   destaque?: number;
+  /**
+   * `dica` é o texto curto do fim da tarde: uma pergunta, uma resposta direta.
+   * Tem régua própria (menor) e leva o roteiro do vídeo.
+   */
+  formato?: "dica";
+  roteiro?: RoteiroDeVideo;
   /** Ainda em escrita: fica fora do site até esta linha sair. */
   rascunho?: boolean;
   seo?: { titulo?: string; descricao?: string; palavrasChave?: string[] };
@@ -218,6 +244,7 @@ export type ArtigoResumido = {
   nota?: number;
   /** Peso na vitrine do topo (só os artigos marcados têm). */
   destaque?: number;
+  formato?: "dica";
 };
 
 export type ItemDoSumario = { id: string; texto: string; nivel: 2 | 3 };
