@@ -291,15 +291,8 @@ def stool(x, y, h=0.74):
 
 for xs in (36.3, 37.3, 39.3, 40.3, 41.1):
     stool(xs, 7.28)
-# mesa de jantar + bancos
-box('wood_x', 42.3, 44.5, 7.65, 8.55, 0.72, 0.78)
-for xx in (42.45, 44.3):
-    for yy in (7.75, 8.4):
-        box('wood_z', xx, xx + 0.08, yy, yy + 0.08, 0, 0.72)
-for yy in (7.2, 8.7):
-    box('wood_x', 42.4, 44.4, yy, yy + 0.3, 0.42, 0.46)
-    for xx in (42.5, 44.2):
-        box('wood_z', xx, xx + 0.07, yy + 0.05, yy + 0.25, 0, 0.42)
+# sem mesa de jantar aqui: o trecho entre o fogão a lenha e o desnível (x 42,9 a 46) fica livre,
+# porque é a passagem para a escada. Quem senta, senta nas banquetas do balcão.
 for xp in (36.6, 38.9, 40.9):                                    # pendentes sobre o balcão
     tube('rope', [(xp, 6.75, 2.45), (xp, 6.75, 2.0)], 0.004, seg=3)
     ellipsoid('pot_fiber', (xp, 6.75, 1.86), (0.19, 0.19, 0.17), seg=12, rings=6, zmin=-0.2)
@@ -601,7 +594,7 @@ for xx in np.arange(3.0, 30.0, 4.4):
     yy = 4.9 + 0.85 * math.sin(xx / 4.6) + 0.72
     cyl('metal_dark', (xx, yy, 0), 0.035, 0.42, seg=8); ellipsoid('bulb', (xx, yy, 0.45), 0.05, seg=8, rings=6)
 # vasos grandes de barro
-for vx, vy, kind in ((41.95, 5.9, 0), (44.72, 5.9, 1), (31.95, 5.55, 1), (0.75, 2.35, 2), (0.75, 7.05, 2), (45.55, 9.35, 0)):
+for vx, vy, kind in ((41.95, 5.9, 0), (44.72, 5.9, 1), (31.95, 5.55, 1), (0.75, 2.35, 2), (0.75, 7.05, 2), (45.55, 9.66, 0)):      # o último fica no canto, fora da boca da escada (y 7,7 a 9,3)
     top = P.pot((vx, vy, 0), 0.3, 0.6)
     if kind == 0:
         P.xanadu(top, rng, 0.9)
