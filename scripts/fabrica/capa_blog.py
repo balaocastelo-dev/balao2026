@@ -30,6 +30,8 @@ visão instalado, NÃO publica nada.
                                       próxima rodada normal a publica)
   python capa_blog.py --teste saida.jpg "pedido em inglês"
                                       gera e confere uma foto avulsa
+  python capa_blog.py --conferir foto.jpg "a cena em inglês"
+                                      só passa uma foto pronta pelo modelo de visão
 
 Registro: `logs\\capa_blog.log`. Fotos e estado: `data\\capas_blog\\` e
 `data\\capas_blog.json`. Tarefa agendada: `instalar_tarefa_capa.ps1`.
@@ -74,15 +76,21 @@ SEM_JANELA = 0x08000000 if os.name == "nt" else 0
 SEMPRE = (" Realistic photograph, landscape 16:9, natural light, shallow depth of field."
           " Generic unbranded equipment. No text, no letters, no numbers, no logos, no brand names,"
           " no stickers, no watermark, no people's faces.")
+# O Flux desenha "notebook prateado" com cara de MacBook. Fora da categoria Apple, o pedido ganha este reforço.
+SEM_CARA_DE_APPLE = (" Any laptop or computer is a generic dark gray or black Windows-style model, clearly not"
+                     " Apple-style, with a blank lid and a blank bezel without any marking.")
 
 PERGUNTA = """You are checking a blog cover photo before it is published. The photo should show: "{cena}".
 Answer ONLY with JSON: {{"texto": bool, "marca": bool, "rosto": bool, "deformado": bool, "cena_certa": bool, "motivo": "short reason"}}
 - texto: any readable letters, words or numbers anywhere (screens, keys, labels, boxes).
-- marca: any logo, brand name or recognizable brand symbol.
+- marca: any logo, brand name or recognizable brand symbol, or a blurred or illegible label where a brand name would be.{apple}
 - rosto: any human face.
 - deformado: warped hands, melted or impossible objects, broken geometry.
 - cena_certa: the photo plausibly shows the described scene.
 Be strict: when in doubt about texto, marca, rosto or deformado, answer true."""
+
+
+NAO_APPLE = " Also true if a laptop or computer clearly looks like an Apple product (MacBook, iMac)."
 
 
 class Interrompida(Exception):
@@ -251,14 +259,18 @@ def matar_comfy():
 
 # ------------------------------------------------------------------ a foto
 
-def fluxo(pedido, semente):
+def texto_do_pedido(pedido, categoria):
+    return pedido.strip() + SEMPRE + ("" if categoria == "apple" else SEM_CARA_DE_APPLE)
+
+
+def fluxo(texto, semente):
     return {
         "1": {"class_type": "UNETLoader", "inputs": {"unet_name": "flux1-dev-fp8.safetensors", "weight_dtype": "fp8_e4m3fn"}},
         "2": {"class_type": "DualCLIPLoader", "inputs": {"clip_name1": "t5xxl_fp8_e4m3fn_scaled.safetensors",
                                                          "clip_name2": "clip_l.safetensors", "type": "flux",
                                                          "device": "cpu"}},      # texto na CPU: sobra placa para o Flux
         "3": {"class_type": "VAELoader", "inputs": {"vae_name": "ae.safetensors"}},
-        "4": {"class_type": "CLIPTextEncode", "inputs": {"clip": ["2", 0], "text": pedido + SEMPRE}},
+        "4": {"class_type": "CLIPTextEncode", "inputs": {"clip": ["2", 0], "text": texto}},
         "5": {"class_type": "FluxGuidance", "inputs": {"conditioning": ["4", 0], "guidance": 3.5}},
         "6": {"class_type": "CLIPTextEncode", "inputs": {"clip": ["2", 0], "text": ""}},
         "7": {"class_type": "EmptySD3LatentImage", "inputs": {"width": LARGURA, "height": ALTURA, "batch_size": 1}},
@@ -270,10 +282,10 @@ def fluxo(pedido, semente):
     }
 
 
-def gerar(pedido, destino):
+def gerar(texto, destino):
     from PIL import Image
     semente = int.from_bytes(os.urandom(6), "big")
-    pid = json.loads(http(COMFY + "/prompt", {"prompt": fluxo(pedido, semente), "client_id": uuid.uuid4().hex}))["prompt_id"]
+    pid = json.loads(http(COMFY + "/prompt", {"prompt": fluxo(texto, semente), "client_id": uuid.uuid4().hex}))["prompt_id"]
     inicio = time.time()
     while True:
         time.sleep(2)
@@ -317,7 +329,7 @@ def modelo_de_visao():
     return None
 
 
-def conferir(arquivo, cena, modelo):
+def conferir(arquivo, cena, modelo, categoria=""):
     """Devolve (aprovada, motivo). Qualquer dúvida reprova."""
     try:                                  # o Flux sai da placa antes de o modelo de visão entrar
         http(COMFY + "/free", {"unload_models": True, "free_memory": True}, espera=10)
@@ -327,7 +339,7 @@ def conferir(arquivo, cena, modelo):
     resposta = json.loads(http(OLLAMA + "/api/chat", {
         "model": modelo, "stream": False, "format": "json", "keep_alive": 0,
         "options": {"temperature": 0, "num_ctx": 8192},
-        "messages": [{"role": "user", "content": PERGUNTA.format(cena=cena),
+        "messages": [{"role": "user", "content": PERGUNTA.format(cena=cena, apple="" if categoria == "apple" else NAO_APPLE),
                       "images": [base64.b64encode(arquivo.read_bytes()).decode()]}]}, espera=420))
     try:
         v = json.loads(resposta["message"]["content"])
@@ -339,11 +351,11 @@ def conferir(arquivo, cena, modelo):
     return (not ruins), (", ".join(ruins) + f" — {v.get('motivo', '')}" if ruins else "ok")
 
 
-def foto_aprovada(pedido, destino, modelo):
+def foto_aprovada(pedido, destino, modelo, categoria=""):
     """Devolve a semente da foto aprovada, ou None."""
     for n in range(1, TENTATIVAS + 1):
-        semente, segundos = gerar(pedido, destino)
-        ok, motivo = conferir(destino, pedido, modelo)
+        semente, segundos = gerar(texto_do_pedido(pedido, categoria), destino)
+        ok, motivo = conferir(destino, pedido, modelo, categoria)
         log(f"  tentativa {n} (semente {semente}, {segundos}s): {'aprovada' if ok else 'reprovada: ' + motivo}")
         if ok:
             return semente
@@ -413,6 +425,11 @@ def main():
             print(f"- {p['slug']} (pedido em {p['pedidoEm'][:16]}): {p['alt']}")
         return
 
+    if "--conferir" in sys.argv:          # --conferir foto.jpg "a cena": só passa a foto pelo modelo de visão
+        i = sys.argv.index("--conferir")
+        print(conferir(Path(sys.argv[i + 1]), sys.argv[i + 2], modelo_de_visao()))
+        return
+
     teste = "--teste" in sys.argv
     sem_publicar = "--sem-publicar" in sys.argv
     if teste:
@@ -442,7 +459,7 @@ def main():
                     return
                 abri = subir_comfy() or abri
                 log(f"{slug}: gerando a foto ({modelo} confere)")
-                semente = foto_aprovada(p["pedido"], destino, modelo)
+                semente = foto_aprovada(p["pedido"], destino, modelo, p.get("categoria", ""))
                 e["tentativas"] = e.get("tentativas", 0) + 1
                 if semente is None:
                     if not teste and idade_em_dias(p["pedidoEm"]) >= DIAS_ATE_DESISTIR and not sem_publicar:
