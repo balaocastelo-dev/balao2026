@@ -14,7 +14,42 @@ services:
       POSTGRES_DB: evolution
     volumes:
       - ${DADOS}/postgres:/var/lib/postgresql/data
-    mem_limit: 512m
+    # Memória. A VPS é a KVM 2 da Hostinger (2 vCPU, 8 GB) — confira com
+    # `free -h` antes do deploy (o deploy-evo.sh mostra e avisa se tiver menos
+    # de 4 GB). Somando os tetos: Postgres 1 GB + Evolution 1,5 GB + servidor
+    # 768 MB + Redis 256 MB = ~3,5 GB, folga de sobra em 8 GB.
+    #
+    # Com 512 MB e os padrões do Postgres (shared_buffers de 128 MB, work_mem
+    # de 4 MB), a tabela "Message" inteira não cabia no cache e o findChats
+    # ordenava em disco ("external merge"). Os números abaixo seguem a regra
+    # de bolso: shared_buffers ~25% do teto, effective_cache_size ~75%.
+    #
+    # plan_cache_mode=force_custom_plan: medido na Evolution 2.3.7 de verdade
+    # (bancada local, 200 mil mensagens falsas, log do auto_explain). O Prisma
+    # usa comandos preparados e manda o caminho JSON como PARÂMETRO
+    # ("key"#>ARRAY[$2]). Depois de 5 execuções o Postgres passa a usar um
+    # plano genérico, em que $2 é desconhecido — e aí NENHUM índice casa: o
+    # count(*) do findMessages voltava a ler a tabela inteira (115–195 ms)
+    # mesmo com balao_msg_jidjson_ts criado. Forçando o plano de cada
+    # execução, o índice vale sempre; o custo é planejar de novo cada
+    # consulta (frações de milissegundo).
+    command:
+      - postgres
+      - -c
+      - shared_buffers=256MB
+      - -c
+      - effective_cache_size=768MB
+      - -c
+      - work_mem=8MB
+      - -c
+      - maintenance_work_mem=64MB
+      - -c
+      - plan_cache_mode=force_custom_plan
+    mem_limit: 1g
+    # O /dev/shm padrão do Docker é 64 MB; consulta paralela do Postgres usa
+    # memória compartilhada de lá e falha ("could not resize shared memory
+    # segment") quando ela acaba.
+    shm_size: 256m
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U evolution -d evolution"]
       interval: 5s
