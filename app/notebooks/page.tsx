@@ -11,7 +11,8 @@ import JsonLd, {
 } from "@/components/JsonLd";
 import { SITE_CONFIG } from "@/lib/config";
 import ProductCard from "@/components/ProductCard";
-import { getCachedProducts, getCachedProductsByKeywords } from "@/lib/cache";
+import { getCachedCategories, getCachedNotebooks } from "@/lib/cache";
+import { RAIZ_NOTEBOOKS } from "@/lib/catalogo/notebooks";
 import {
   Laptop,
   Battery,
@@ -83,12 +84,18 @@ const NOTEBOOK_FAQS = [
 ];
 
 export default async function NotebooksPage() {
-  const [allProducts, keywordNotebooks] = await Promise.all([
-    getCachedProducts(),
-    getCachedProductsByKeywords(["notebook", "laptop", "macbook", "thinkpad", "dell", "lenovo", "acer"], 16),
+  // Só notebooks: a categoria Computadores/Notebooks do catálogo, sem peça nem
+  // acessório. Se o catálogo não responder, a vitrine fica vazia e a página
+  // chama para o WhatsApp — nunca mostra produto de outro departamento.
+  const [vitrine, categorias] = await Promise.all([
+    getCachedNotebooks().catch(() => ({ produtos: [], total: 0 })),
+    getCachedCategories().catch(() => []),
   ]);
 
-  let notebookProducts = keywordNotebooks.length > 0 ? keywordNotebooks : allProducts.slice(0, 8);
+  const notebookProducts = vitrine.produtos;
+  const slugDaCategoria =
+    categorias.find((c) => c.full_path === RAIZ_NOTEBOOKS)?.slug || "computadores-notebooks";
+  const todosOsNotebooks = `/categoria/${slugDaCategoria}`;
 
   const breadcrumbItems = [
     { name: "Home", item: "https://www.balao.info" },
@@ -198,11 +205,44 @@ export default async function NotebooksPage() {
             </a>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {notebookProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          {notebookProducts.length > 0 ? (
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                {notebookProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+
+              <div className="mt-8 flex justify-center">
+                <a
+                  href={todosOsNotebooks}
+                  className="bg-[#161f32] hover:bg-slate-800 text-slate-200 border border-slate-700 font-bold py-4 px-8 rounded-2xl transition-all text-base flex items-center gap-2"
+                >
+                  {vitrine.total > notebookProducts.length
+                    ? `Ver os ${vitrine.total} notebooks, com filtros por marca e preço`
+                    : "Filtrar notebooks por marca e preço"}
+                  <ArrowRight className="w-4 h-4" />
+                </a>
+              </div>
+            </>
+          ) : (
+            <div className="bg-[#111827] border border-slate-800 rounded-3xl p-8 sm:p-12 text-center space-y-4">
+              <p className="text-slate-300 text-sm sm:text-base">
+                Não conseguimos carregar os notebooks agora. Chame no WhatsApp e mandamos os modelos e os preços.
+              </p>
+              <a
+                href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(
+                  "Olá! Gostaria de consultar os modelos de notebook disponíveis."
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-3 bg-[#E60012] hover:bg-red-700 text-white font-black py-4 px-8 rounded-2xl transition-all text-base"
+              >
+                <MessageCircle className="w-5 h-5" />
+                Consultar notebooks no WhatsApp
+              </a>
+            </div>
+          )}
         </section>
 
         {/* CATEGORIAS DE NOTEBOOK */}
