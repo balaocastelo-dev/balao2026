@@ -2,6 +2,22 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "como-saber-se-o-ssd-esta-chegando-ao-fim",
+      "titulo": "SSD chegando ao fim: como saber antes de perder os arquivos",
+      "resumo": "SSD chegando ao fim quase nunca faz barulho: o aviso está nos dados de integridade. Veja onde o Windows mostra isso e o que fazer primeiro.",
+      "categoria": "assistencia",
+      "etiquetas": [
+        "ssd",
+        "diagnóstico",
+        "manutenção",
+        "backup"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-11T21:02:42.473Z",
+      "minutos": 5,
+      "formato": "dica"
+    },
+    {
       "slug": "rtx-spark-notebooks-windows-chip-nvidia-pre-venda",
       "titulo": "RTX Spark: notebooks Windows com chip Nvidia chegam dia 16",
       "resumo": "Nvidia e Microsoft abriram em 7 de outubro a pré-venda dos notebooks com RTX Spark. Veja o que é a plataforma e o que muda para quem vai comprar.",
@@ -82,5 +98,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-11T18:26:10.106Z"
+  "atualizadoEm": "2026-10-11T21:02:43.266Z"
 }

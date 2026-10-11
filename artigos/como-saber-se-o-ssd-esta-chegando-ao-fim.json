@@ -1,0 +1,172 @@
+{
+  "slug": "como-saber-se-o-ssd-esta-chegando-ao-fim",
+  "titulo": "SSD chegando ao fim: como saber antes de perder os arquivos",
+  "resumo": "SSD chegando ao fim quase nunca faz barulho: o aviso está nos dados de integridade. Veja onde o Windows mostra isso e o que fazer primeiro.",
+  "categoria": "assistencia",
+  "etiquetas": [
+    "ssd",
+    "diagnóstico",
+    "manutenção",
+    "backup"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-11T21:02:42.473Z",
+  "formato": "dica",
+  "roteiro": {
+    "fala": "Diferente do HD antigo, o SSD não faz barulho quando está acabando. Ele avisa nos números. No Windows, abra Configurações, Sistema, Armazenamento, e procure as propriedades do disco. Ali aparecem a vida útil estimada e a reserva disponível. Se o Windows mostrar um aviso crítico, não espere: copie seus arquivos para outro lugar na hora. E se o computador começou a travar ou a demorar para ligar, vale conferir antes que o problema cresça.",
+    "titulo": "Seu SSD avisa antes de acabar",
+    "destaques": [
+      "Sem barulho, só números",
+      "Vida útil no Windows",
+      "Aviso crítico: backup já"
+    ],
+    "legenda": "O SSD não faz barulho quando está chegando ao fim: o aviso aparece nos dados de integridade. Veja onde o Windows mostra isso e o que fazer primeiro. A dica completa está no blog.",
+    "hashtags": [
+      "ssd",
+      "backup",
+      "manutencao",
+      "informatica",
+      "notebook",
+      "campinas"
+    ]
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Para saber se o SSD está chegando ao fim, não adianta esperar um ruído, como acontecia com o HD: o SSD não tem partes móveis e se desgasta em silêncio. O que ele oferece são dados de integridade, um registro que a própria unidade mantém sobre o desgaste. No Windows, parte desse registro aparece nas Configurações, sem instalar nada."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que o SSD sempre avisa antes de parar. O desgaste por gravação, sim, costuma aparecer nos números com antecedência. Já um defeito no circuito ou no programa interno da unidade pode chegar sem aviso nenhum. Por isso a resposta tem duas partes: aprender a ler os sinais e manter uma cópia dos arquivos em outro lugar."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "O SSD se desgasta a cada gravação, e a própria unidade registra **quanto da vida útil já foi consumida**.",
+        "No Windows 10 e no 11, as Configurações mostram **vida útil estimada restante, reserva disponível e temperatura**, mas só em SSD do tipo NVMe.",
+        "**Aviso crítico** do Windows pede cópia imediata dos arquivos, antes de qualquer outra tentativa.",
+        "Nem toda falha avisa: o backup em dia vale mais do que qualquer indicador."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Onde o Windows mostra a saúde do SSD"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Microsoft explica, em sua página de suporte, que o Windows 10 e o Windows 11 acompanham a integridade apenas dos SSDs NVMe, aqueles em formato de pente, ligados direto à placa-mãe. SSD SATA e HD ficam de fora desse painel. Se o seu for NVMe, o caminho é este (os nomes podem mudar um pouco conforme a versão do sistema):"
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "Abra **Iniciar** e entre em **Configurações**.",
+        "Vá em **Sistema** e depois em **Armazenamento**.",
+        "Abra **Configurações avançadas de armazenamento** e escolha **Discos e volumes**.",
+        "Clique no disco e em **Propriedades**: a integridade da unidade aparece ali."
+      ]
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "O que aparece",
+        "O que significa",
+        "Quando se preocupar"
+      ],
+      "linhas": [
+        [
+          "Vida útil estimada restante",
+          "Quanto ainda sobra da durabilidade prevista pelo fabricante, em porcentagem",
+          "Quando está baixa e continua caindo: planeje a troca"
+        ],
+        [
+          "Reserva disponível",
+          "Quanto resta do espaço extra que o SSD guarda para substituir áreas gastas",
+          "Quando fica abaixo do limite definido pelo fabricante"
+        ],
+        [
+          "Temperatura",
+          "A temperatura geral da unidade, em graus Celsius",
+          "Quando a unidade acusa temperatura acima do limite"
+        ]
+      ],
+      "titulo": "O que cada informação quer dizer",
+      "fonte": {
+        "nome": "Suporte da Microsoft",
+        "url": "https://support.microsoft.com/en-us/windows/experience/storage-filemanagement/what-to-do-about-a-critical-warning-for-a-storage-device"
+      },
+      "nota": "Vida útil em zero não significa que o SSD parou: segundo a Microsoft, o desgaste por si só não indica falha. É sinal de que a unidade já passou do que o fabricante previu."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Além desses números, o Windows pode exibir um aviso crítico, em três situações descritas pela Microsoft: reserva baixa, confiabilidade degradada por erros na memória ou no funcionamento interno, e unidade em modo somente leitura, em que os arquivos ainda abrem mas nada novo é gravado. Em qualquer uma delas, a orientação é a mesma: copiar os dados antes de tudo."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "dados"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Os sinais no uso e quando a dica não basta"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "No dia a dia, a mesma página da Microsoft associa o aviso de armazenamento a três sintomas: computador lento ou travando, inicialização mais demorada e dificuldade para instalar atualizações do sistema. Nenhum deles prova sozinho que o SSD é o culpado, porque pouca memória, aquecimento e programas em excesso causam o mesmo efeito. Servem como motivo para conferir os números."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se o seu SSD for SATA, o painel do Windows não ajuda. A Kingston explica que, nesse tipo de unidade, o relatório de integridade (chamado SMART) não segue um padrão único, e cada fabricante oferece o próprio programa para lê-lo. Vale procurar o utilitário da marca do seu SSD no site oficial dela, e não em sites de download."
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "A NVM Express, entidade que mantém o padrão NVMe, lista entre as causas de falha de SSD não só o desgaste, mas também erros do programa interno e defeitos de componentes, estes mais raros e mais graves. Esses casos podem não aparecer antes nos indicadores. Mantenha uma cópia dos arquivos importantes fora do computador.",
+      "titulo": "Número bom não é garantia"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Com aviso crítico na tela, evite instalar programas, atualizar o sistema ou rodar ferramentas de reparo no disco: cada gravação a mais é um risco. Copie o que importa e pare de usar a unidade. Se os arquivos já não abrem ou o SSD sumiu do sistema, não insista em ligar e desligar. Nesse ponto o caso é de [recuperação de dados](/recuperacaodados)."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, faz o diagnóstico e a troca da unidade na [assistência técnica](/manutencao). Se a ideia for aproveitar a troca para ganhar velocidade, veja também [quando o SSD NVMe vale o upgrade no notebook](/blog/ssd-nvme-em-notebook-quando-vale-upgrade). Em uma linha: confira os números hoje e faça o backup antes de precisar dele."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "SSD avisa antes de parar de funcionar?",
+      "resposta": "Nem sempre. O desgaste por gravação costuma aparecer aos poucos nos dados de integridade, mas defeitos de circuito ou do programa interno da unidade podem acontecer de repente. Por isso o backup não deve depender do aviso."
+    },
+    {
+      "pergunta": "O Windows mostra a vida útil de qualquer SSD?",
+      "resposta": "Não. Segundo a Microsoft, o painel de integridade das Configurações acompanha apenas SSDs NVMe. Em SSD SATA, a leitura é feita pelo programa do próprio fabricante da unidade."
+    },
+    {
+      "pergunta": "Apareceu aviso crítico de armazenamento. O que faço primeiro?",
+      "resposta": "Copie os arquivos importantes para outro disco ou para a nuvem antes de qualquer outra coisa. Depois, evite gravar na unidade e leve o computador para diagnóstico."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "What to do about a critical warning for a storage device — Suporte da Microsoft",
+      "url": "https://support.microsoft.com/en-us/windows/experience/storage-filemanagement/what-to-do-about-a-critical-warning-for-a-storage-device",
+      "data": "setembro de 2026"
+    },
+    {
+      "nome": "How SSDs Fail: NVMe SSD management, error reporting and logging capabilities — NVM Express",
+      "url": "https://nvmexpress.org/how-ssds-fail-nvme-ssd-management-error-reporting-and-logging-capabilities/",
+      "data": "março de 2023"
+    },
+    {
+      "nome": "Maintaining Your SSD's Health Using SMART Monitoring — Kingston Technology",
+      "url": "https://www.kingston.com/en/blog/pc-performance/maintaining-ssds-health-smart-monitoring",
+      "data": "abril de 2022"
+    }
+  ]
+}
