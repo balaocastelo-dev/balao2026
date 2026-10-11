@@ -11,7 +11,9 @@ const TIPOS_DE_MIDIA = {
   stickerMessage: "sticker",
 };
 
-// Tipos que não são conversa: controle interno do WhatsApp.
+// Tipos que não viram balão de conversa. Reação, edição e "apagar para todos"
+// estão aqui porque não são mensagem nova — mas NÃO são jogados fora: quem os
+// lê é extrairEvento(), que diz qual mensagem mudou e como.
 const TIPOS_IGNORADOS = new Set([
   "protocolMessage",
   "senderKeyDistributionMessage",
@@ -137,8 +139,98 @@ function extrairConteudo(record) {
     mimetype: conteudo.mimetype || null,
     mediaName: tipo === "documentMessage" ? conteudo.fileName || conteudo.title || null : null,
     segundos: conteudo.seconds || null,
+    // Vídeo-recado (a bolinha de vídeo): é vídeo para tocar, mas é FALA para
+    // ler — entra na fila de transcrição junto com o áudio.
+    videoRecado: tipo === "ptvMessage",
     ignorar: TIPOS_IGNORADOS.has(tipo),
+    contextInfo: conteudo.contextInfo || null,
   };
+}
+
+/** Texto que uma mensagem crua mostra (texto, legenda, ou o rótulo da mídia). */
+function textoDe(message) {
+  const m = desembrulhar(message || {});
+  if (typeof m.conversation === "string" && m.conversation) return m.conversation;
+  if (m.extendedTextMessage?.text) return m.extendedTextMessage.text;
+  for (const tipo of ["imageMessage", "videoMessage", "documentMessage", "ptvMessage"]) {
+    if (m[tipo]?.caption) return m[tipo].caption;
+  }
+  const rotulos = {
+    imageMessage: "📷 Foto",
+    videoMessage: "🎥 Vídeo",
+    ptvMessage: "🎥 Vídeo-recado",
+    audioMessage: "🎤 Áudio",
+    documentMessage: "📄 Documento",
+    stickerMessage: "Figurinha",
+    locationMessage: "📍 Localização",
+    contactMessage: "👤 Contato",
+  };
+  for (const [tipo, rotulo] of Object.entries(rotulos)) if (m[tipo]) return rotulo;
+  return "";
+}
+
+/**
+ * A mensagem citada ("respondendo a…"). A Evolution tira o contextInfo de
+ * dentro do conteúdo e o põe no registro (prepareMessage); por isso procura
+ * nos dois lugares. Só o id e um trecho — o painel não precisa de mais.
+ */
+function extrairCitada(record, conteudo, numeroDaLoja) {
+  const ctx = record?.contextInfo || conteudo?.contextInfo || null;
+  if (!ctx?.quotedMessage || !ctx.stanzaId) return null;
+  const autor = String(ctx.participant || "");
+  return {
+    id: String(ctx.stanzaId),
+    trecho: textoDe(ctx.quotedMessage).slice(0, 200),
+    deMim: autor && numeroDaLoja ? digitos(autor) === digitos(numeroDaLoja) : null,
+  };
+}
+
+// Tipo do protocolMessage: o Baileys manda número; JSON às vezes vem com o nome.
+const PROTOCOLO_APAGAR = new Set([0, "0", "REVOKE"]);
+const PROTOCOLO_EDITAR = new Set([14, "14", "MESSAGE_EDIT"]);
+
+/**
+ * protocolMessage (o que a Evolution manda no webhook MESSAGES_EDITED, e o
+ * que vem dentro de uma mensagem de controle) -> evento. Para editar e
+ * apagar, o id que importa é o da mensagem ALVO (proto.key.id): o remoteJid
+ * de dentro vem do ponto de vista de quem mandou e não serve para achar a
+ * conversa — quem acha é o id.
+ */
+function eventoDoProtocolo(proto, emPadrao) {
+  if (!proto?.key?.id) return null;
+  const alvoId = String(proto.key.id);
+  if (PROTOCOLO_APAGAR.has(proto.type)) return { tipo: "apagada", alvoId, em: emPadrao || Date.now() };
+  if (PROTOCOLO_EDITAR.has(proto.type) || proto.editedMessage) {
+    const em = proto.timestampMs ? timestampMs(proto.timestampMs) : emPadrao || Date.now();
+    return { tipo: "edicao", alvoId, texto: textoDe(proto.editedMessage), em };
+  }
+  return null;
+}
+
+/**
+ * Mensagem que não é conversa mas MUDA outra: reação, edição, apagar para
+ * todos. Antes tudo isso caía em TIPOS_IGNORADOS e sumia — o cliente apagava
+ * a mensagem e o painel continuava mostrando; reagia e ninguém via.
+ * Devolve { tipo: "reacao"|"edicao"|"apagada", alvoId, ... } ou null.
+ */
+function extrairEvento(record) {
+  if (!record?.key) return null;
+  const message = desembrulhar(record.message);
+  const em = timestampMs(record.messageTimestamp);
+  if (message.reactionMessage?.key?.id) {
+    const r = message.reactionMessage;
+    return {
+      tipo: "reacao",
+      alvoId: String(r.key.id),
+      // Texto vazio = a reação foi retirada.
+      emoji: String(r.text || ""),
+      deMim: Boolean(record.key.fromMe),
+      em: r.senderTimestampMs ? timestampMs(r.senderTimestampMs) : em,
+    };
+  }
+  const proto = message.protocolMessage || message.editedMessage?.message?.protocolMessage;
+  if (proto) return eventoDoProtocolo(proto, em);
+  return null;
 }
 
 function statusDoPainel(status, fromMe) {
@@ -147,7 +239,13 @@ function statusDoPainel(status, fromMe) {
 }
 
 function timestampMs(valor) {
-  const n = Number(valor?.low ?? valor ?? 0);
+  // Long do protobuf serializado em JSON: {low, high}. O `low` sozinho só
+  // serve para segundos; milissegundos (timestampMs, senderTimestampMs)
+  // passam de 32 bits e precisam do `high`.
+  if (valor && typeof valor === "object" && "low" in valor) {
+    valor = (Number(valor.high) >>> 0) * 4294967296 + (Number(valor.low) >>> 0);
+  }
+  const n = Number(valor ?? 0);
   if (!n) return Date.now();
   return n < 10_000_000_000 ? n * 1000 : n;
 }
@@ -191,13 +289,16 @@ function normalizarMensagem(record, { lidParaNumero, numeroDaLoja } = {}) {
     // A mídia é servida sob demanda por este servidor (ele baixa da Evolution
     // na primeira vez e guarda em disco). O painel só precisa do caminho.
     mediaUrl: conteudo.mediaType ? `/midia/${encodeURIComponent(String(record.key.id))}` : null,
+    videoRecado: conteudo.videoRecado || undefined,
     status: statusDoPainel(statusCru, fromMe),
     chave: { id: String(record.key.id), remoteJid: record.key.remoteJid, fromMe },
+    citada: extrairCitada(record, conteudo, numeroDaLoja),
   };
 }
 
 function descreverResumo(msg) {
   if (!msg) return "";
+  if (msg.ligacao) return msg.ligacao.video ? "📹 Ligação de vídeo" : "📞 Ligação";
   if (msg.body) return msg.body.slice(0, 120);
   const rotulos = {
     image: "📷 Foto",
@@ -304,6 +405,9 @@ module.exports = {
   extrairConteudo,
   normalizarMensagem,
   normalizarConversa,
+  extrairEvento,
+  eventoDoProtocolo,
+  textoDe,
   descreverResumo,
   formatarNumero,
   separarDataUrl,
