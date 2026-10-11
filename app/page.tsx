@@ -7,9 +7,6 @@ import HomeLocalStoreInfo from "@/components/HomeLocalStoreInfo";
 import HomeHeroFullWidth from "@/components/HomeHeroFullWidth";
 import HomeMacbookM5Destaque from "@/components/HomeMacbookM5Destaque";
 import HomeTrustPillars from "@/components/HomeTrustPillars";
-import HomeDepartmentMenu from "@/components/HomeDepartmentMenu";
-import HomeCategoryShelf from "@/components/HomeCategoryShelf";
-import HomeMonitoresFullWidth from "@/components/HomeMonitoresFullWidth";
 import HomeBlogSection from "@/components/HomeBlogSection";
 
 import Paginacao from "@/components/catalogo/Paginacao";
@@ -17,9 +14,9 @@ import { BotaoDeFiltros, FiltrosLaterais } from "@/components/catalogo/FiltrosDo
 import HomeVitrines, { type Variante } from "@/components/home/HomeVitrines";
 import { aplicarFiltros, contarFiltros, lerFiltros, montarFacetas, ordenar, paraQuery, termosDaBusca } from "@/lib/catalogo/filtros";
 
-import { getCachedCategories, getCachedProducts, getCachedProductsByExactCategories, getCachedCarouselImages, getCachedBuscaCompleta } from "@/lib/cache";
+import { getCachedProducts, getCachedProductsByExactCategories, getCachedBuscaCompleta } from "@/lib/cache";
 import { listarNoFormatoAntigo } from "@/lib/blog/repositorio";
-import { parsePriceToNumber, Product, type Category } from "@/lib/utils";
+import { Product } from "@/lib/utils";
 import type { Metadata } from "next";
 import { SITE_CONFIG } from "@/lib/config";
 import Link from "next/link";
@@ -128,15 +125,7 @@ export default async function Home(props: {
   const search = searchParams?.search;
 
   let products: Product[] = [];
-  let categories: Category[] = [];
-  let carouselImages = [];
-  let blogPosts: HomeBlogPost[] = [];
-
-  [categories, carouselImages, blogPosts] = await Promise.all([
-    getCachedCategories(),
-    getCachedCarouselImages(),
-    listarNoFormatoAntigo(6) as Promise<HomeBlogPost[]>,
-  ]);
+  const blogPosts = (await listarNoFormatoAntigo(6)) as HomeBlogPost[];
 
   if (search) {
     // Todos os termos precisam bater (nome, categoria ou marca). Vem o
@@ -157,98 +146,12 @@ export default async function Home(props: {
     products = await getCachedProducts();
   }
 
-  // Extrai nota média e número de avaliações do texto salvo em `rating`
-  const parseRelevanceSignal = (p: Product): { rating: number; count: number } => {
-    const m = String(p.rating || "").match(/(\d+(?:[.,]\d+)?)\s*⭐?\s*\(?(\d+)?/);
-    const rating = m ? parseFloat(m[1].replace(",", ".")) : 0;
-    const count = m && m[2] ? parseInt(m[2], 10) : 0;
-    return { rating, count };
-  };
-
-  // Relevância real por avaliações/popularidade (nunca do mais barato para o mais caro)
-  const sortRelevance = (list: Product[]) =>
-    [...list].sort((a, b) => {
-      const ra = parseRelevanceSignal(a);
-      const rb = parseRelevanceSignal(b);
-      if (rb.count !== ra.count) return rb.count - ra.count;
-      if (rb.rating !== ra.rating) return rb.rating - ra.rating;
-      return parsePriceToNumber(a.price) - parsePriceToNumber(b.price);
-    });
-
-  // Filtros estritos solicitados:
-  // - PC Gamer: apenas computadores/PCs gamer
-  // - Notebooks: apenas notebooks/laptops/macbooks (sem impressoras, sem periféricos)
-  // - Monitores: estritamente monitores (sem suportes, cabos, adaptadores)
-  // - Hardwares: apenas hardware (placas de vídeo, processadores, SSDs, RAM, placas-mãe)
-  // - Periféricos: apenas periféricos (teclados, mouses, headsets)
-  // - Impressão: apenas impressoras, multifuncionais e toners
-
-  const pcGamerProducts = sortRelevance(
-    products.filter(p => 
-      (p.category === "Computadores" || p.name.toLowerCase().includes("pc gamer") || p.name.toLowerCase().includes("computador gamer")) &&
-      !p.name.toLowerCase().includes("notebook") &&
-      !p.name.toLowerCase().includes("monitor")
-    )
-  );
-
-  const notebookProducts = sortRelevance(
-    products.filter(p => 
-      (p.category === "Notebooks" || p.category === "Notebooks Seminovos" || p.name.toLowerCase().includes("notebook") || p.name.toLowerCase().includes("laptop") || p.name.toLowerCase().includes("macbook") || p.name.toLowerCase().includes("thinkpad")) &&
-      !p.name.toLowerCase().includes("suporte") &&
-      !p.name.toLowerCase().includes("bolsa") &&
-      !p.name.toLowerCase().includes("mouse")
-    )
-  );
-
-  const monitorProducts = sortRelevance(
-    products.filter(p => 
-      (p.category === "Monitores" || p.name.toLowerCase().includes("monitor")) &&
-      !p.name.toLowerCase().includes("suporte") &&
-      !p.name.toLowerCase().includes("cabo") &&
-      !p.name.toLowerCase().includes("adaptador") &&
-      !p.name.toLowerCase().includes("braço articulado") &&
-      !p.name.toLowerCase().includes("notebook")
-    )
-  );
-
-  const hardwareProducts = sortRelevance(
-    products.filter(p => 
-      (p.category === "Hardware" || p.name.toLowerCase().includes("placa de vídeo") || p.name.toLowerCase().includes("processador") || p.name.toLowerCase().includes("ssd") || p.name.toLowerCase().includes("memória ram") || p.name.toLowerCase().includes("placa-mãe") || p.name.toLowerCase().includes("fonte")) &&
-      !p.name.toLowerCase().includes("notebook") &&
-      !p.name.toLowerCase().includes("monitor")
-    )
-  );
-
-  const perifericoProducts = sortRelevance(
-    products.filter(p => 
-      (p.category === "Periféricos" || p.name.toLowerCase().includes("teclado") || p.name.toLowerCase().includes("mouse") || p.name.toLowerCase().includes("headset") || p.name.toLowerCase().includes("mousepad")) &&
-      !p.name.toLowerCase().includes("notebook") &&
-      !p.name.toLowerCase().includes("monitor")
-    )
-  );
-
-  const impressaoProducts = sortRelevance(
-    products.filter(p => 
-      p.category === "Impressoras" || 
-      p.name.toLowerCase().includes("impressora") || 
-      p.name.toLowerCase().includes("multifuncional") || 
-      p.name.toLowerCase().includes("toner") || 
-      p.name.toLowerCase().includes("cartucho") ||
-      p.name.toLowerCase().includes("ecotank")
-    )
-  );
-
-  const gamesProducts = sortRelevance(
-    products.filter(p => p.category === "Games" || p.name.toLowerCase().includes("console") || p.name.toLowerCase().includes("playstation") || p.name.toLowerCase().includes("xbox") || p.name.toLowerCase().includes("cadeira gamer"))
-  );
-
-  const dealOfTheDay = pcGamerProducts[0] || products[0] || null;
-
   // --- Navegação do catálogo (busca ou ?category=): filtros laterais ---
   const filtros = lerFiltros(searchParams || {});
   // ?pronta=1 sozinho também abre a lista: todos os produtos de pronta entrega.
   const navegando = Boolean(search || category || filtros.pronta);
-  // Novos desenhos da parte de produtos, em avaliação (?versao=a|b|c).
+  // Desenho da parte de produtos: B (escolhido pelo Thiago em 11/10). A e C
+  // continuam abrindo com ?versao=a e ?versao=c, para comparar.
   const versaoPedida = String(searchParams?.versao || "").toLowerCase();
   const versao: Variante | null = versaoPedida === "a" || versaoPedida === "b" || versaoPedida === "c" ? versaoPedida : null;
   const facetas = navegando ? montarFacetas(products, filtros) : null;
@@ -313,96 +216,9 @@ export default async function Home(props: {
         )}
 
         {/* 3. Main Body: Left Column (Department Menu) + Right Roomy Center Feed */}
-        {!navegando && versao ? (
+        {!navegando ? (
           <>
-            <HomeVitrines variante={versao} produtos={products} />
-            <div className="w-full">
-              <HomeBlogSection blogPosts={blogPosts} />
-            </div>
-          </>
-        ) : !navegando ? (
-          <>
-            <div className="flex flex-col lg:flex-row gap-8 xl:gap-10 items-start">
-              {/* Left Column: Dedicated Department Menu Sidebar */}
-              <div className="w-full lg:w-72 xl:w-80 2xl:w-96 shrink-0">
-                <HomeDepartmentMenu categories={categories} dealOfTheDay={dealOfTheDay} />
-              </div>
-
-              {/* Right Column: Roomy Main Highlights Feed */}
-              <div className="flex-1 min-w-0 space-y-12 sm:space-y-16">
-                {/* 1. Computador Gamer */}
-                {pcGamerProducts.length > 0 && (
-                  <HomeCategoryShelf
-                    title="🚀 Computador Gamer & Setups"
-                    subtitle="Máquinas de alta performance montadas com componentes selecionados e garantia total."
-                    categorySlug="computadores"
-                    products={pcGamerProducts}
-                  />
-                )}
-
-                {/* 2. Notebooks (Estritamente Notebooks) */}
-                {notebookProducts.length > 0 && (
-                  <HomeCategoryShelf
-                    title="💻 Notebooks & Laptops"
-                    subtitle="Modelos para trabalho, estudos e gamers com máxima autonomia e potência."
-                    categorySlug="notebooks"
-                    products={notebookProducts}
-                  />
-                )}
-              </div>
-            </div>
-
-            {/* 4. BLOCO FULL SIZE: Monitores Gamer & UltraWide */}
-            {monitorProducts.length > 0 && (
-              <div className="w-full">
-                <HomeMonitoresFullWidth products={monitorProducts} />
-              </div>
-            )}
-
-            {/* 5. Demais Categorias em Destaque com Filtros Estritos */}
-            <div className="space-y-12 sm:space-y-16">
-              {/* Hardware */}
-              {hardwareProducts.length > 0 && (
-                <HomeCategoryShelf
-                  title="⚡ Hardware & Peças para Upgrade"
-                  subtitle="Placas de vídeo RTX/Radeon, processadores Ryzen/Intel, SSDs NVMe e memórias RAM."
-                  categorySlug="hardware"
-                  products={hardwareProducts}
-                />
-              )}
-
-              {/* Periféricos */}
-              {perifericoProducts.length > 0 && (
-                <HomeCategoryShelf
-                  title="🎧 Periféricos & Setup Gamer"
-                  subtitle="Teclados mecânicos, mouses de precisão, headsets com áudio espacial e microfones."
-                  categorySlug="perifericos"
-                  products={perifericoProducts}
-                />
-              )}
-
-              {/* Impressão & Suprimentos */}
-              {impressaoProducts.length > 0 && (
-                <HomeCategoryShelf
-                  title="🖨️ Impressão & Suprimentos"
-                  subtitle="Impressoras tanque de tinta, multifuncionais e toners originais com ótimo rendimento."
-                  categorySlug="impressao"
-                  products={impressaoProducts}
-                />
-              )}
-
-              {/* Games & Consoles */}
-              {gamesProducts.length > 0 && (
-                <HomeCategoryShelf
-                  title="🎮 Consoles, Games & Acessórios"
-                  subtitle="PlayStation 5, Xbox, controles sem fio e cadeiras gamer ergonômicas."
-                  categorySlug="games"
-                  products={gamesProducts}
-                />
-              )}
-            </div>
-
-            {/* 6. Blog & Destaques de Conteúdo Full Width */}
+            <HomeVitrines variante={versao || "b"} produtos={products} />
             <div className="w-full">
               <HomeBlogSection blogPosts={blogPosts} />
             </div>
