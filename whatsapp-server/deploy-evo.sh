@@ -7,6 +7,8 @@
 #   REF=<commit> bash deploy-evo.sh   # sobe um commit ESPECÍFICO (é assim que se desfaz um deploy)
 #   bash deploy-evo.sh voltar    # NÃO use para desfazer: liga o servidor ANTIGO (whatsapp-web.js, pré-Evolution)
 #   bash deploy-evo.sh logs      # últimas linhas dos logs
+#   bash deploy-evo.sh importar  # copia o histórico da Evolution para o banco da loja (uma vez)
+#   bash deploy-evo.sh diagnostico   # raio-X do banco (só leitura, sem dado de cliente)
 #
 # O que fica onde:
 #   /var/lib/balao-evo/segredos.env   senhas geradas aqui (nunca vão para o git)
@@ -64,6 +66,17 @@ case "${1:-}" in
   logs)
     compose logs --tail 60 balao-whats evolution
     exit 0
+    ;;
+  importar)
+    # Copia o histórico da Evolution para o banco da loja (uma vez, depois do
+    # deploy da fase 1). Idempotente; só imprime contagens. Ver
+    # crm/importar-da-evolution.js e docs/whatsapp-fase1.md.
+    shift
+    compose exec -T balao-whats node crm/importar-da-evolution.js "$@"
+    exit $?
+    ;;
+  diagnostico)
+    exec bash "$CODIGO/whatsapp-server/diagnostico-banco.sh"
     ;;
 esac
 

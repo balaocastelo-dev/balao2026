@@ -162,6 +162,22 @@ services:
       VIGIA_SILENCIO_MIN: ${VIGIA_SILENCIO_MIN:-45}
       VIGIA_ESCALA_MIN: ${VIGIA_ESCALA_MIN:-45}
       VIGIA_AUTOCURA: ${VIGIA_AUTOCURA:-0}
+      # Transcrição de áudio no servidor (transcricao.js). Sem nenhuma destas
+      # linhas em segredos.env ela fica desligada e o painel transcreve como
+      # sempre. Ordem: servidor local no formato da OpenAI, depois a Groq,
+      # depois o trabalhador do computador do Thiago (modo puxado; a senha dele
+      # é gerada em /var/lib/balao-evo/painel/transcricao.segredo).
+      #
+      #   TRANSCRICAO_URL=http://<ip-do-pc>:8000        (opcional)
+      #   GROQ_API_KEY=gsk_...                          (opcional)
+      #   TRANSCRICAO_PUXADA=1                          (opcional)
+      TRANSCRICAO_URL: ${TRANSCRICAO_URL:-}
+      TRANSCRICAO_CHAVE: ${TRANSCRICAO_CHAVE:-}
+      TRANSCRICAO_MODELO: ${TRANSCRICAO_MODELO:-whisper-1}
+      TRANSCRICAO_PUXADA: ${TRANSCRICAO_PUXADA:-0}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      # Arquivo enviado pelo painel (upload direto, upload.js).
+      UPLOAD_LIMITE_MB: ${UPLOAD_LIMITE_MB:-64}
     ports:
       - "127.0.0.1:${PORTA:-4100}:4100"
     volumes:

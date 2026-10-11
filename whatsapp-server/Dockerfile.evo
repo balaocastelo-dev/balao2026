@@ -15,14 +15,14 @@ COPY evo/package.json evo/package-lock.json ./
 # npm às vezes "termina" sem instalar nada quando a rede falha (bug do
 # próprio npm). A checagem abaixo faz o build parar em vez de subir quebrado.
 RUN npm ci --omit=dev \
- && node -e "require('express'); require('socket.io'); require('pg'); require('sharp')" \
+ && node -e "require('express'); require('socket.io'); require('pg'); require('sharp'); require('busboy')" \
  || (echo "ERRO: npm nao instalou as dependencias" >&2 && exit 1)
 
 # ATENÇÃO: esta lista é arquivo por arquivo. Módulo novo na raiz do servidor
 # TEM de ser acrescentado aqui — senão o container sobe, o require falha e o
 # servidor morre no boot, com o painel em 502. Foi o que aconteceu em 02/10:
 # o vigia.js foi criado, testado, deployado... e não estava dentro da imagem.
-COPY servidor.js catalogo.js vigia.js vendedores-fixos.json confere-imagem.js ./
+COPY servidor.js catalogo.js vigia.js medicao.js recarga.js transcricao.js upload.js vendedores-fixos.json confere-imagem.js ./
 COPY evo ./evo
 COPY status ./status
 COPY crm ./crm

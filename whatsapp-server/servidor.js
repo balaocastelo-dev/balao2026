@@ -31,6 +31,11 @@ const { montarRotasDeStatus } = require("./status/rotas");
 const { abrirBanco: abrirBancoDoCrm } = require("./crm/db");
 const { criarServicoDoCrm } = require("./crm/servico");
 const { montarRotasDoCrm } = require("./crm/rotas");
+const { paraOBanco, paraOPainel } = require("./crm/formato");
+const { criarMedicao } = require("./medicao");
+const { proximaRecargaCompleta, lerHorario, filtroDeJanela } = require("./recarga");
+const { criarTranscricao } = require("./transcricao");
+const { montarRotaDeUpload } = require("./upload");
 
 process.on("unhandledRejection", (motivo) => console.warn("[processo] promessa rejeitada:", motivo?.message || motivo));
 process.on("uncaughtException", (erro) => console.warn("[processo] exceção:", erro?.message || erro));
@@ -42,6 +47,7 @@ const DATA_ROOT = process.env.DATA_ROOT || __dirname;
 const DATA_DIR = path.join(DATA_ROOT, "data");
 const MIDIA_DIR = path.join(DATA_DIR, "midia");
 const FOTOS_DIR = path.join(DATA_DIR, "fotos");
+const UPLOAD_DIR = path.join(DATA_DIR, "uploads");
 const ARQUIVO_PAINEL = path.join(DATA_DIR, "panel-data.json");
 const PORTA = Number(process.env.PORT || process.env.WHATSAPP_PANEL_PORT || 4100);
 const SITE_URL = (process.env.SITE_URL || "https://www.balao.info").replace(/\/$/, "");
@@ -62,7 +68,24 @@ const VERSAO = (() => {
   }
 })();
 
-for (const pasta of [DATA_DIR, MIDIA_DIR, FOTOS_DIR]) fs.mkdirSync(pasta, { recursive: true });
+for (const pasta of [DATA_DIR, MIDIA_DIR, FOTOS_DIR, UPLOAD_DIR]) fs.mkdirSync(pasta, { recursive: true });
+
+// Endereço deste servidor DENTRO da rede do Docker: é por ele que a Evolution
+// busca o arquivo enviado pelo painel (upload) e a mídia de status.
+const URL_INTERNA = (process.env.URL_INTERNA_SERVIDOR || `http://balao-whats:${PORTA}`).replace(/\/$/, "");
+const LIMITE_UPLOAD_BYTES = Math.max(1, Number(process.env.UPLOAD_LIMITE_MB || 64)) * 1024 * 1024;
+
+// Ritmo das releituras (padrões da loja; a bancada encurta pelo ambiente).
+const MIN = 60_000;
+const CONCILIAR_A_CADA_MS = Number(process.env.CONCILIAR_A_CADA_MS || 20_000);
+// A varredura relê as N mensagens mais recentes DESTA janela. Sem janela, o
+// findMessages contava a tabela inteira a cada 20 s só para devolver 40.
+const JANELA_CONCILIAR_MS = Number(process.env.JANELA_CONCILIAR_MS || 6 * 60 * MIN);
+// Rede de segurança da lista de conversas: a cada 5 min, só a última hora.
+const REDE_A_CADA_MS = Number(process.env.REDE_A_CADA_MS || 5 * MIN);
+const JANELA_REDE_MS = Number(process.env.JANELA_REDE_MS || 60 * MIN);
+// Lista inteira: no boot e uma vez de madrugada (fuso de São Paulo).
+const HORARIO_RECARGA = lerHorario(process.env.RECARGA_COMPLETA_AS || "03:30");
 
 function lerOuCriarSegredo(nomeVar, arquivo) {
   if (process.env[nomeVar]) return process.env[nomeVar];
@@ -79,6 +102,12 @@ function lerOuCriarSegredo(nomeVar, arquivo) {
 // Segredo que a Evolution manda no cabeçalho de cada webhook. Sem ele,
 // qualquer um poderia forjar "mensagem recebida" para o painel.
 const SEGREDO_WEBHOOK = lerOuCriarSegredo("WEBHOOK_SEGREDO", "webhook.segredo");
+// Chave da URL interna por onde a Evolution busca o arquivo enviado pelo painel.
+const SEGREDO_UPLOAD = lerOuCriarSegredo("UPLOAD_SEGREDO", "upload.segredo");
+// Senha do trabalhador de transcrição (modo puxado), mandada no cabeçalho
+// x-transcricao-segredo. Fica em DATA_ROOT/transcricao.segredo — é de lá que o
+// Thiago copia para o trabalhador no computador dele.
+const SEGREDO_TRANSCRICAO = lerOuCriarSegredo("TRANSCRICAO_SEGREDO", "transcricao.segredo");
 
 const evolution = criarEvolution({
   url: process.env.EVOLUTION_URL || "http://evolution:8080",
@@ -304,8 +333,23 @@ function guardarMensagem(msg) {
   }
   const anterior = mapa.get(msg.id);
   // Um evento posterior (status, reenvio do histórico) não pode apagar o que
-  // o primeiro trouxe, como o cartão do produto.
-  const final = anterior ? { ...anterior, ...msg, produto: msg.produto || anterior.produto || null } : msg;
+  // o primeiro trouxe, como o cartão do produto — nem o que aconteceu com a
+  // mensagem depois: reação, edição, "apagada", transcrição, o seq do banco.
+  const final = anterior
+    ? {
+        ...anterior,
+        ...msg,
+        produto: msg.produto || anterior.produto || null,
+        citada: msg.citada || anterior.citada || null,
+        reacoes: msg.reacoes || anterior.reacoes,
+        editadaEm: msg.editadaEm || anterior.editadaEm,
+        body: anterior.editadaEm && !msg.editadaEm ? anterior.body : msg.body,
+        apagada: msg.apagada || anterior.apagada,
+        ligacao: msg.ligacao || anterior.ligacao,
+        transcricao: msg.transcricao || anterior.transcricao,
+        seq: Math.max(Number(msg.seq) || 0, Number(anterior.seq) || 0) || undefined,
+      }
+    : msg;
   mapa.set(msg.id, final);
   if (mapa.size > LIMITE_POR_CHAT) {
     const ordenadas = [...mapa.values()].sort((a, b) => a.timestamp - b.timestamp);
@@ -466,7 +510,7 @@ async function processarFilaDeFotos() {
           if (resposta.ok && tipo.startsWith("image/")) {
             const bytes = Buffer.from(await resposta.arrayBuffer());
             if (bytes.length > 500) {
-              fs.writeFileSync(arquivoDaFoto(numero), bytes);
+              await fs.promises.writeFile(arquivoDaFoto(numero), bytes);
               numerosComFoto.add(numero);
               const c = conversas.get(`${numero}@c.us`);
               if (c) {
@@ -526,7 +570,10 @@ function configuracoes() {
     chatLabels: store.chatLabels,
     chatAssignments: store.chatAssignments,
     notifications: store.notifications,
-    apiInfo: { motor: "evolution", versao: VERSAO },
+    // transcricaoNoServidor: com provedor ligado aqui, o painel não precisa
+    // transcrever sozinho o áudio da conversa aberta (seriam duas transcrições
+    // do mesmo áudio, pagas duas vezes).
+    apiInfo: { motor: "evolution", versao: VERSAO, transcricaoNoServidor: transcricao.ativo },
   };
 }
 const emitirConfiguracoes = () => paraPainel().emit("whatsapp:settings", configuracoes());
@@ -608,7 +655,23 @@ const diag = {
   descartadas: 0,
   motivosDescarte: {},
   emitidasParaOPainel: 0,
+  // Reação, edição, apagada, ligação: só contagem por tipo.
+  eventos: {},
+  // Lista de conversas: quando a inteira foi lida, quantas janelas e
+  // releituras de uma conversa só (quanto se pede à Evolution).
+  recarga: {
+    completas: 0,
+    ultimaCompletaEm: null,
+    proximaCompletaEm: null,
+    janelas: 0,
+    ultimaJanelaEm: null,
+    releiturasDeConversa: 0,
+    conversasNovasPelaJanela: 0,
+  },
 };
+
+// Latência de cada mensagem nova, por caminho (medicao.js explica).
+const medicao = criarMedicao({ tamanho: 500 });
 
 // Ids que já foram entregues ao painel. Sem isto, uma mensagem que entrou em
 // silêncio (lote de histórico) ficava guardada no servidor sem nunca chegar à
@@ -618,6 +681,7 @@ function emitirMensagem(msg, extras = {}) {
   if (msg?.id) {
     if (jaEmitidas.size > 8000) jaEmitidas.clear();
     jaEmitidas.add(msg.id);
+    medicao.emitiu(msg.id);
   }
   diag.emitidasParaOPainel++;
   diag.ultimaMensagemEm = new Date().toISOString();
@@ -632,8 +696,16 @@ function agendarEnvioDasMensagens() {
   if (envioDasMensagensAgendado) return;
   envioDasMensagensAgendado = setTimeout(() => {
     envioDasMensagensAgendado = null;
-    paraPainel().emit("whatsapp:messages", mensagensRecentes());
+    const lote = mensagensRecentes();
+    paraPainel().emit("whatsapp:messages", lote);
+    const agora = Date.now();
+    for (const m of lote) medicao.emitiu(m.id, agora);
   }, 1500);
+}
+
+/** Muda uma mensagem que o painel já mostra (reação, edição, apagada, ligação). */
+function emitirMudanca(id, chatId, patch) {
+  paraPainel().emit("whatsapp:message-update", { id, chatId, patch });
 }
 
 // ------------------------------------------------------------------
@@ -651,6 +723,19 @@ const EVENTOS_WEBHOOK = [
   // reiniciando, ou logo depois de reconectar). Sem este evento essa mensagem
   // só apareceria no painel na varredura seguinte.
   "MESSAGES_SET",
+  // Editar e "apagar para todos" NÃO chegam como MESSAGES_UPSERT: a Evolution
+  // 2.3.7 manda o protocolMessage só por MESSAGES_EDITED (para os dois) e
+  // pula o upsert (whatsapp.baileys.service, messages.upsert: `continue` em
+  // editedMessage). Sem este evento, edição do cliente nunca aparecia.
+  "MESSAGES_EDITED",
+  // A conversa que mudou, sem reler a lista inteira. CHATS_UPDATE traz só o
+  // remoteJid; CHATS_UPSERT traz o remoteJid e as não lidas de conversa nova.
+  "CHATS_UPSERT",
+  "CHATS_UPDATE",
+  // Ligação recebida (oferta, atendida, perdida). A 2.3.7 manda o evento
+  // "call" do Baileys por webhook (os pacotes crus CB:call vão só para
+  // websocket e não chegam aqui).
+  "CALL",
 ];
 
 async function prepararInstancia() {
@@ -743,10 +828,30 @@ async function aoConectar(dados = {}) {
     Object.assign(estado, { status: "ready", connected: true, session: true, qrCode: null, rawQr: null });
   }
   emitirEstado();
-  sincronizarConversas().catch((e) => console.warn("[conversas] Falha na sincronização:", e.message));
+  // Lista inteira só na PRIMEIRA conexão depois do boot. Reconectar (a
+  // Evolution reinicia, o celular fica sem rede, o vigia mexe na conexão)
+  // relê só a janela em que se esteve fora — antes, cada "open" pedia as
+  // 12 mil conversas de novo.
+  if (!listaInteiraLidaNoBoot) {
+    listaInteiraLidaNoBoot = true;
+    sincronizarConversas({ motivo: "boot" }).catch((e) => console.warn("[conversas] Falha na sincronização:", e.message));
+  } else {
+    const fora = desconectadoEm ? Date.now() - desconectadoEm + 10 * MIN : 0;
+    desconectadoEm = null;
+    sincronizarJanela({ duracaoMs: Math.min(24 * 60 * MIN, Math.max(JANELA_REDE_MS, fora)), motivo: "reconexao" }).catch(
+      (e) => console.warn("[conversas] Falha na releitura da janela:", e.message)
+    );
+  }
+  reenfileirarTranscricoes();
 }
 
-async function sincronizarConversas() {
+let listaInteiraLidaNoBoot = false;
+let desconectadoEm = null;
+
+async function sincronizarConversas({ motivo = "manual" } = {}) {
+  diag.recarga.completas++;
+  diag.recarga.ultimaCompletaEm = new Date().toISOString();
+  console.log(`[conversas] Lista inteira (${motivo}).`);
   // Primeiro as mensagens recentes: são elas que ensinam qual @lid é qual
   // número (remoteJidAlt) e o nome de quem escreveu. Com isso a lista de
   // conversas já sai com número e nome certos.
@@ -815,9 +920,157 @@ async function sincronizarConversas() {
 
   paraPainel().emit("whatsapp:messages", mensagensRecentes());
 }
+
+// ------------------------------------------------------------------
+// Recarga incremental da lista de conversas (recarga.js explica o porquê)
+// ------------------------------------------------------------------
+
+/**
+ * Uma conversa vinda do findChats entra na lista sem desarrumar o que o
+ * servidor já sabe. Devolve o chatId se algo mudou (para mandar ao painel).
+ *
+ * Não lidas: em conversa NOVA, vale o número da Evolution. Em conversa que já
+ * conhecemos, NÃO: a 2.3.7 zera o "unreadMessages" do Chat a cada recibo de
+ * qualquer mensagem da conversa (inclusive "entregue" de mensagem NOSSA —
+ * whatsapp.baileys.service, messages.update, chat.update com unreadMessages
+ * 0), então copiar dali apagaria a bolinha de mensagem que ninguém leu. Quem
+ * zera aqui é o recibo de LEITURA de mensagem do cliente (ver
+ * conversaLidaNoCelular), que é o que acontece quando ela é lida no celular.
+ */
+function mesclarConversa(item) {
+  if (item?.lastMessage?.key) aprenderLid(item.lastMessage.key);
+  const c = N.normalizarConversa(item, { lidParaNumero, numeroDaLoja: estado.phoneNumber, fotoLocal });
+  if (!c) return null;
+  const nomeGuardado = store.nomes[c.chatId];
+  const nomeEhNumero = (n) => !n || n === "Contato" || /^\(?\d/.test(n);
+  if (nomeGuardado && nomeEhNumero(c.contactName)) c.contactName = nomeGuardado;
+  const atual = conversas.get(c.chatId);
+  if (!atual) {
+    conversas.set(c.chatId, c);
+    guardarConversaNoCrm(c);
+    pedirFoto(c.chatId);
+    return c.chatId;
+  }
+  let mudou = false;
+  if ((c.lastMessageTimestamp || 0) > (atual.lastMessageTimestamp || 0)) {
+    atual.lastMessageTimestamp = c.lastMessageTimestamp;
+    atual.lastMessageBody = c.lastMessageBody;
+    mudou = true;
+  }
+  if (!nomeEhNumero(c.contactName) && c.contactName !== atual.contactName && nomeEhNumero(atual.contactName)) {
+    atual.contactName = c.contactName;
+    mudou = true;
+  }
+  if (!atual.lid && c.lid) atual.lid = c.lid;
+  return mudou ? c.chatId : null;
+}
+
+/**
+ * Relê só as conversas com mensagem na janela (findChats com
+ * where.messageTimestamp.gte/lte — o filtro que a 2.3.7 aceita; com o índice
+ * balao_msg_inst_ts custa ~1 ms em vez de ler a tabela inteira).
+ */
+async function sincronizarJanela({ duracaoMs = JANELA_REDE_MS, motivo = "rede" } = {}) {
+  if (!estado.connected) return 0;
+  const lista = await evolution.buscarConversas(INSTANCIA, { where: filtroDeJanela(Date.now(), duracaoMs) }, { timeoutMs: 60_000 });
+  diag.recarga.janelas++;
+  diag.recarga.ultimaJanelaEm = new Date().toISOString();
+  const mudadas = [];
+  for (const item of Array.isArray(lista) ? lista : []) {
+    const antes = conversas.size;
+    const id = mesclarConversa(item);
+    if (conversas.size > antes) diag.recarga.conversasNovasPelaJanela++;
+    if (id) mudadas.push(id);
+  }
+  if (mudadas.length) {
+    agendarConversas(mudadas);
+    console.log(`[conversas] Janela (${motivo}): ${mudadas.length} conversa(s) atualizada(s).`);
+  }
+  if ((Array.isArray(lista) ? lista : []).some((i) => N.ehLid(i?.remoteJid))) {
+    resolverLids().catch(() => {});
+  }
+  return mudadas.length;
+}
+
+// CHATS_UPSERT / CHATS_UPDATE: relê SÓ a conversa que mudou. Juntadas em
+// lotes de 1,5 s, e cada conversa no máximo uma vez a cada 20 s: a 2.3.7
+// manda CHATS_UPSERT a cada recibo (entregue/lida) de cada mensagem.
+const conversasParaReler = new Set();
+const ultimaReleitura = new Map(); // remoteJid -> ms
+let releituraAgendada = null;
+function agendarReleitura(remoteJids) {
+  for (const jid of remoteJids) {
+    if (!jid || !N.ehConversaDireta(jid)) continue;
+    if (Date.now() - (ultimaReleitura.get(jid) || 0) < 20_000) continue;
+    conversasParaReler.add(jid);
+  }
+  if (releituraAgendada || !conversasParaReler.size) return;
+  releituraAgendada = setTimeout(() => {
+    releituraAgendada = null;
+    relerConversas().catch((e) => console.warn("[conversas] Falha ao reler conversa:", e.message));
+  }, 1500);
+}
+
+async function relerConversas() {
+  const jids = [...conversasParaReler];
+  conversasParaReler.clear();
+  if (!estado.connected || !jids.length) return;
+  // Muitas de uma vez (reconexão, sincronização do celular): uma janela só sai
+  // mais barato que uma consulta por conversa.
+  if (jids.length > 20) return void (await sincronizarJanela({ motivo: "muitas conversas mudaram" }));
+  const mudadas = [];
+  if (ultimaReleitura.size > 5000) ultimaReleitura.clear();
+  for (const jid of jids) {
+    ultimaReleitura.set(jid, Date.now());
+    diag.recarga.releiturasDeConversa++;
+    const lista = await evolution.buscarConversas(INSTANCIA, { where: { remoteJid: jid } }, { timeoutMs: 30_000 }).catch(() => null);
+    for (const item of Array.isArray(lista) ? lista : []) {
+      const id = mesclarConversa(item);
+      if (id) mudadas.push(id);
+    }
+  }
+  if (mudadas.length) agendarConversas(mudadas);
+}
+
+/**
+ * Recibo de LEITURA de mensagem do CLIENTE (fromMe=false, READ/PLAYED): é o
+ * que o Baileys emite quando outro aparelho da loja — o celular — lê a
+ * conversa (receipt "read-self"). As não lidas passam a ser só as que
+ * chegaram DEPOIS da mensagem lida.
+ */
+async function conversaLidaNoCelular(idLida, remoteJid) {
+  let lida = acharNaMemoria(idLida);
+  if (!lida && crmServico) {
+    const linha = (await noMaximo(crmServico.mensagem(idLida), 2000)).valor;
+    if (linha) lida = { chatId: linha.chat_id, timestamp: new Date(linha.em).getTime() };
+  }
+  const chatId = lida?.chatId || N.paraChatId(remoteJid, lidParaNumero);
+  const c = chatId ? conversas.get(chatId) : null;
+  if (!c || !lida) return;
+  let depois = 0;
+  for (const m of mensagensPorChat.get(chatId)?.values() || []) {
+    if (m.direction === "in" && m.timestamp > lida.timestamp) depois++;
+  }
+  if ((c.unreadCount || 0) !== depois) {
+    c.unreadCount = depois;
+    agendarConversas([chatId]);
+  }
+}
+
+function agendarRecargaCompleta() {
+  const proxima = proximaRecargaCompleta(Date.now(), HORARIO_RECARGA);
+  diag.recarga.proximaCompletaEm = new Date(proxima).toISOString();
+  setTimeout(() => {
+    if (estado.connected) sincronizarConversas({ motivo: "madrugada" }).catch(() => {});
+    agendarRecargaCompleta();
+  }, Math.max(1000, proxima - Date.now())).unref?.();
+}
+agendarRecargaCompleta();
+
+// A rede de segurança: só a última hora, a cada 5 minutos.
 setInterval(() => {
-  if (estado.connected) sincronizarConversas().catch(() => {});
-}, 5 * 60_000).unref?.();
+  if (estado.connected) sincronizarJanela({ motivo: "rede" }).catch((e) => console.warn("[conversas] Janela falhou:", e.message));
+}, REDE_A_CADA_MS).unref?.();
 
 // Conversas que o WhatsApp só identifica pelo código interno (@lid). Tenta
 // descobrir o número de verdade por dois caminhos oficiais da Evolution: o
@@ -897,28 +1150,168 @@ function tratarStatusRecebido(rec) {
 // O atendimento não pode depender do banco: se ele estiver fora, a loja
 // continua conversando e só a estatística fica para trás. Por isso tudo aqui
 // é "sem quebrar" — erro vira log, nunca exceção no caminho da mensagem.
+// Grava no banco da loja e devolve { nova, seq } — ou null se o banco não
+// estiver de pé. O seq vai junto da mensagem para o painel (panel:desde).
 function guardarNoCrm(msg, origem, vendedorId = null) {
-  if (!crmServico || !msg?.id) return;
-  crmServico.registrarMensagemSemQuebrar(
-    {
-      id: msg.id,
-      chatId: msg.chatId,
-      direcao: msg.direction === "out" ? "out" : "in",
-      corpo: msg.body || "",
-      tipoMidia: msg.mediaType || null,
-      mime: msg.mimetype || null,
-      nomeMidia: msg.mediaName || null,
-      transcricao: msg.transcricao || null,
-      produtoId: msg.produto?.id || null,
-      produtoNome: msg.produto?.nome || msg.produto?.name || null,
-      produtoCategoria: msg.produto?.categoria || msg.produto?.category || null,
-      situacao: msg.status || null,
-      numero: msg.realNumber || null,
-      contato: msg.contactName || null,
-      timestamp: msg.timestamp || Date.now(),
-    },
-    { origem, vendedorId }
-  );
+  if (!crmServico || !msg?.id) return Promise.resolve(null);
+  const linha = paraOBanco(msg);
+  if (!linha) return Promise.resolve(null);
+  return crmServico.registrarMensagemSemQuebrar(linha, { origem, vendedorId });
+}
+
+// Espera o banco no máximo isto antes de mandar a mensagem para a tela sem o
+// seq. O atendimento não pode ficar refém do banco: com ele lento ou fora, a
+// mensagem sai na hora e só o "desde" do painel perde aquela.
+const ESPERA_SEQ_MS = 300;
+
+/** A promessa, ou `padrao` se ela demorar mais que `ms`. Diz qual dos dois aconteceu. */
+function noMaximo(promessa, ms, padrao = null) {
+  let relogio;
+  const prazo = new Promise((ok) => {
+    relogio = setTimeout(() => ok({ valor: padrao, estourou: true }), ms);
+  });
+  return Promise.race([
+    Promise.resolve(promessa).then((valor) => ({ valor, estourou: false }), () => ({ valor: padrao, estourou: false })),
+    prazo,
+  ]).finally(() => clearTimeout(relogio));
+}
+
+// Disjuntor: se o banco estourou o prazo 3 vezes seguidas, para de esperar
+// por 1 minuto. Sem isto, com o banco lento cada mensagem de uma rajada
+// esperaria os 300 ms inteiros, uma atrás da outra.
+let esperasEstouradas = 0;
+let naoEsperarAte = 0;
+async function gravarComSeq(final, origem, vendedorId = null) {
+  const gravacao = guardarNoCrm(final, origem, vendedorId);
+  // Chegando tarde, o seq ainda vale para a memória (e o próximo bootstrap).
+  gravacao.then((r) => {
+    if (r?.seq && !(final.seq >= r.seq)) final.seq = r.seq;
+  });
+  if (Date.now() < naoEsperarAte) return null;
+  const { valor, estourou } = await noMaximo(gravacao, ESPERA_SEQ_MS);
+  if (!estourou) esperasEstouradas = 0;
+  else if (++esperasEstouradas >= 3) {
+    esperasEstouradas = 0;
+    naoEsperarAte = Date.now() + 60_000;
+    diag.bancoLentoDesde = new Date().toISOString();
+    console.warn("[comando] Banco lento: as mensagens vão para a tela sem esperar o seq por 1 minuto.");
+  }
+  return valor;
+}
+
+/** Mensagem pelo id: memória primeiro, depois o banco da loja. */
+function acharNaMemoria(id) {
+  if (!id) return null;
+  for (const mapa of mensagensPorChat.values()) {
+    const m = mapa.get(id);
+    if (m) return m;
+  }
+  return null;
+}
+async function acharMensagem(id) {
+  const m = acharNaMemoria(id);
+  if (m || !crmServico || !id) return m;
+  const linha = (await noMaximo(crmServico.mensagem(id), 2000)).valor;
+  return linha ? mensagemDoBanco(linha) : null;
+}
+
+/** Linha de crm_mensagem -> mensagem do painel (com o @lid já traduzido, se o número for conhecido). */
+function mensagemDoBanco(linha) {
+  const m = paraOPainel(linha, { numeroDaLoja: estado.phoneNumber, nomeDe: (c) => store.nomes[c] });
+  const numero = m && N.ehLid(m.chatId) ? store.lids[m.chatId] : null;
+  if (numero) {
+    m.lid = m.chatId;
+    m.chatId = `${numero}@c.us`;
+    m.realNumber = m.displayNumber = numero;
+  }
+  return m;
+}
+
+// panel:desde devolve no máximo isto por pedido (o painel pede de novo se
+// vier `completo: false`) e volta FOLGA seqs para trás: duas gravações
+// simultâneas podem terminar fora de ordem (o 105 chegar à tela antes do
+// 104), e repetir umas mensagens é inofensivo — o painel junta pelo id.
+const LIMITE_DO_DESDE = 2000;
+const FOLGA_DO_DESDE = 50;
+
+/** Os endereços pelos quais a Evolution conhece a conversa: o número e os @lid dela. */
+function enderecosDaConversa(chatId) {
+  if (N.ehLid(chatId)) return { jids: [chatId], chatIds: [chatId] };
+  const numero = N.digitos(chatId);
+  const lids = Object.entries(store.lids)
+    .filter(([, n]) => n === numero)
+    .map(([lid]) => lid);
+  return { jids: [`${numero}@s.whatsapp.net`, ...lids], chatIds: [chatId, ...lids] };
+}
+
+// Conversa em que a Evolution já foi conferida e não tinha nada além do que
+// o banco tem: não pergunta de novo por 6 horas (chave: conversa + página).
+const historicoConferido = new Map();
+
+/**
+ * Histórico de uma conversa: o banco da loja (crm_mensagem, índice
+ * chat_id+em) primeiro. A Evolution só é consultada quando o banco não
+ * encheu a página — conversa anterior à importação, ou o banco fora do ar —
+ * e o que vier de lá é gravado no banco para a próxima vez.
+ *
+ * Antes eram de 2 a 4 findMessages na Evolution a CADA conversa aberta, cada
+ * um lendo a tabela inteira de mensagens; e "carregar mais antigas" não
+ * paginava (o maisAntigas era ignorado), só pedia um número maior.
+ */
+async function historicoDaConversa({ chatId, limite = 80, antesDe = null }) {
+  const { jids, chatIds } = enderecosDaConversa(chatId);
+  const porId = new Map();
+  let temMais = false;
+  let fonte = "banco";
+
+  if (crmServico) {
+    const linhas = await crmServico.historico({ chatIds, antesDe, limite: limite + 1 });
+    temMais = linhas.length > limite;
+    for (const linha of linhas.slice(0, limite)) {
+      const m = mensagemDoBanco(linha);
+      if (m) porId.set(m.id, { ...m, chatId }); // a conversa aberta é a referência do painel
+    }
+  }
+
+  const chave = `${chatId}|${antesDe || "agora"}`;
+  const conferidaEm = historicoConferido.get(chave) || 0;
+  if (porId.size < limite && Date.now() - conferidaEm > 6 * 3600_000) {
+    const janela = antesDe
+      ? { messageTimestamp: { gte: new Date(0).toISOString(), lte: new Date(antesDe - 1).toISOString() } }
+      : {};
+    let novas = 0;
+    for (const jid of jids) {
+      for (const filtro of [{ key: { remoteJid: jid } }, { key: { remoteJidAlt: jid } }]) {
+        const r = await evolution
+          .buscarMensagens(INSTANCIA, { where: { ...filtro, ...janela }, offset: limite, page: 1 })
+          .catch(() => null);
+        for (const rec of r?.messages?.records || []) {
+          if (!rec?.key?.id || porId.has(String(rec.key.id))) continue;
+          aprenderLid(rec.key);
+          const m = N.normalizarMensagem(rec, { lidParaNumero, numeroDaLoja: estado.phoneNumber });
+          if (!m) continue;
+          m.chatId = chatId;
+          porId.set(m.id, m);
+          novas++;
+          // Fica no banco: da próxima vez, esta conversa abre sem a Evolution.
+          guardarNoCrm(m, "historico");
+        }
+      }
+    }
+    if (novas) fonte = crmServico ? "banco+evolution" : "evolution";
+    else {
+      if (historicoConferido.size > 5000) historicoConferido.clear();
+      historicoConferido.set(chave, Date.now());
+    }
+  }
+
+  const mensagens = [...porId.values()].sort((a, b) => b.timestamp - a.timestamp).slice(0, limite).reverse();
+  return {
+    mensagens,
+    fonte,
+    temMais: temMais || porId.size > limite,
+    maisAntiga: mensagens.length ? mensagens[0].timestamp : null,
+  };
 }
 
 function guardarConversaNoCrm(c) {
@@ -933,44 +1326,68 @@ function guardarConversaNoCrm(c) {
   });
 }
 
-function tratarMensagemRecebida(rec) {
+// Mídia é baixada na CHEGADA, nas duas direções: o link do WhatsApp expira
+// em alguns dias. Antes só a que ENTRAVA era baixada — foto que a loja mandou
+// pelo celular sumia do painel depois de uma semana. Histórico velho não
+// entra (seria baixar meses de mídia de uma vez); só o que tem menos de 1 dia.
+function baixarNaChegada(final) {
+  if (!final?.hasMedia || Date.now() - final.timestamp > JANELA_PARA_EMITIR) return;
+  baixarMidia(final.id).catch(() => {});
+}
+
+function ehAudioParaTranscrever(m) {
+  return m?.direction === "in" && (m.mediaType === "ptt" || m.mediaType === "audio" || Boolean(m.videoRecado));
+}
+
+function pedirTranscricao(final) {
+  if (!transcricao.ativo || !ehAudioParaTranscrever(final) || final.transcricao || store.transcricoes[final.id]) return;
+  if (Date.now() - final.timestamp > JANELA_PARA_EMITIR) return;
+  transcricao.enfileirar({ id: final.id, chatId: final.chatId });
+}
+
+function contarDescarte(rec) {
+  // Por que a mensagem foi descartada? Sem isso, "chegou e sumiu" é chute.
+  // Guardamos só a FORMA: tipo do endereço e nome do campo da mensagem.
+  // Nenhum número, nenhum nome, nenhum texto.
+  const jid = String(rec?.key?.remoteJid || "");
+  const tipoEndereco = jid.endsWith("@lid")
+    ? "@lid"
+    : jid.endsWith("@g.us")
+    ? "@g.us (grupo)"
+    : jid.endsWith("@newsletter")
+    ? "@newsletter"
+    : jid.includes("broadcast")
+    ? "broadcast"
+    : jid.endsWith("@s.whatsapp.net") || jid.endsWith("@c.us")
+    ? "numero"
+    : jid
+    ? "outro"
+    : "sem endereço";
+  const campos = Object.keys(rec?.message || {});
+  const motivo = `${tipoEndereco} / ${campos.length ? campos.join("+") : "sem conteúdo"}`;
+  diag.descartadas++;
+  diag.motivosDescarte[motivo] = (diag.motivosDescarte[motivo] || 0) + 1;
+}
+
+async function tratarMensagemRecebida(rec, { chegada = Date.now() } = {}) {
   if (rec.key.remoteJid === "status@broadcast") return tratarStatusRecebido(rec);
   aprenderLid(rec.key);
+  // Reação (e, se vier, edição/apagada embrulhada) muda OUTRA mensagem.
+  const evento = N.extrairEvento(rec);
+  if (evento) return aplicarEvento(evento);
   const msg = N.normalizarMensagem(rec, { lidParaNumero, numeroDaLoja: estado.phoneNumber });
-  if (!msg) {
-    // Por que a mensagem foi descartada? Sem isso, "chegou e sumiu" é chute.
-    // Guardamos só a FORMA: tipo do endereço e nome do campo da mensagem.
-    // Nenhum número, nenhum nome, nenhum texto.
-    const jid = String(rec?.key?.remoteJid || "");
-    const tipoEndereco = jid.endsWith("@lid")
-      ? "@lid"
-      : jid.endsWith("@g.us")
-      ? "@g.us (grupo)"
-      : jid.endsWith("@newsletter")
-      ? "@newsletter"
-      : jid.includes("broadcast")
-      ? "broadcast"
-      : jid.endsWith("@s.whatsapp.net") || jid.endsWith("@c.us")
-      ? "numero"
-      : jid
-      ? "outro"
-      : "sem endereço";
-    const campos = Object.keys(rec?.message || {});
-    const motivo = `${tipoEndereco} / ${campos.length ? campos.join("+") : "sem conteúdo"}`;
-    diag.descartadas++;
-    diag.motivosDescarte[motivo] = (diag.motivosDescarte[motivo] || 0) + 1;
-    return;
-  }
+  if (!msg) return contarDescarte(rec);
   aprenderNome(msg);
   const { final, nova } = guardarMensagem(msg);
+  if (nova) medicao.chegou(final.id, { caminho: "webhook", noWhatsapp: final.timestamp, chegada });
+  await gravarComSeq(final, "webhook");
   emitirMensagem(final);
-  guardarNoCrm(final, "webhook");
   diag.ultimaMensagemPor = "webhook";
   if (final.direction === "out") diag.ultimaSaindoDoCelularEm = new Date().toISOString();
   if (final.direction === "in") marcarEntrada(final.timestamp);
   if (nova) tocarConversa(final);
-  // Mídia recebida é baixada logo: o link do WhatsApp expira em alguns dias.
-  if (final.hasMedia && final.direction === "in") baixarMidia(final.id).catch(() => {});
+  baixarNaChegada(final);
+  pedirTranscricao(final);
   if (final.direction === "in" && /^(SAIR|PARAR|CANCELAR|DESCADASTRAR|STOP)$/i.test(final.body.trim())) {
     emitirToast(`Cliente ${final.contactName || final.realNumber} pediu para sair dos disparos.`);
     // Antes, o "não mandar mais" vivia só na tela de quem estava com o painel
@@ -993,6 +1410,133 @@ function tratarMensagemRecebida(rec) {
 }
 
 // ------------------------------------------------------------------
+// Reação, edição, "apagar para todos" e ligação
+// ------------------------------------------------------------------
+// Tudo isso existia no WhatsApp e não existia no painel: a reação do cliente
+// era descartada, a edição nem chegava (a Evolution manda só por
+// MESSAGES_EDITED) e "apagar para todos" trocava o texto da tela por
+// "Mensagem apagada" — inclusive o que a LOJA precisava guardar.
+//
+// Cada um vira um `whatsapp:message-update` { id, chatId, patch } para a tela
+// e uma alteração em crm_mensagem (com seq novo, para o painel que estava
+// dormindo receber no panel:desde). O texto de mensagem apagada NÃO é apagado
+// do banco: só a tela mostra o aviso.
+
+async function mudarNoBanco(id, mudanca) {
+  if (!crmServico) return null;
+  return (await noMaximo(crmServico.atualizarMensagemSemQuebrar(id, mudanca), ESPERA_SEQ_MS)).valor;
+}
+
+async function aplicarEvento(ev) {
+  if (!ev?.alvoId) return;
+  diag.eventos[ev.tipo] = (diag.eventos[ev.tipo] || 0) + 1;
+  const alvo = acharNaMemoria(ev.alvoId);
+  let patch;
+  let mudanca;
+  if (ev.tipo === "reacao") {
+    // Uma reação por pessoa: a nova substitui, e emoji vazio retira.
+    const de = ev.deMim ? "loja" : "cliente";
+    const reacoes = (alvo?.reacoes || []).filter((r) => r.de !== de);
+    if (ev.emoji) reacoes.push({ emoji: ev.emoji, de, em: ev.em });
+    patch = { reacoes };
+    mudanca = { reacao: { de, emoji: ev.emoji, em: ev.em } };
+  } else if (ev.tipo === "edicao") {
+    if (!ev.texto) return;
+    patch = { body: ev.texto, editadaEm: ev.em };
+    mudanca = { corpo: ev.texto, editadaEm: ev.em };
+  } else if (ev.tipo === "apagada") {
+    patch = { apagada: true };
+    mudanca = { apagada: true };
+  } else {
+    return;
+  }
+  if (alvo) Object.assign(alvo, patch);
+  const r = await mudarNoBanco(ev.alvoId, mudanca);
+  if (ev.tipo === "reacao" && r?.reacoes) {
+    patch.reacoes = r.reacoes; // o banco tem a lista completa (inclusive de antes do boot)
+    if (alvo) alvo.reacoes = r.reacoes;
+  }
+  if (r?.seq) {
+    patch.seq = r.seq;
+    if (alvo) alvo.seq = r.seq;
+  }
+  const chatId = alvo?.chatId || r?.chatId;
+  if (!chatId) return; // mensagem que ninguém conhece: nada a mostrar
+  emitirMudanca(ev.alvoId, chatId, patch);
+  // A prévia da lista acompanha quando a mudada é a última da conversa.
+  const c = conversas.get(chatId);
+  if (alvo && c && ev.tipo !== "reacao" && alvo.timestamp >= (c.lastMessageTimestamp || 0)) {
+    c.lastMessageBody = ev.tipo === "apagada" ? "🚫 Mensagem apagada" : N.descreverResumo(alvo);
+    agendarConversas([chatId]);
+  }
+}
+
+// Estado da ligação a partir do status do Baileys (offer, ringing, accept,
+// reject, timeout, terminate). "terminate" sem ter sido atendida é perdida.
+function estadoDaLigacao(status, anterior) {
+  switch (String(status || "")) {
+    case "offer":
+    case "ringing":
+      return anterior && anterior !== "tocando" ? anterior : "tocando";
+    case "accept":
+      return "atendida";
+    case "reject":
+      return "recusada";
+    case "timeout":
+      return "perdida";
+    case "terminate":
+      return anterior === "atendida" || anterior === "encerrada" ? "encerrada" : "perdida";
+    default:
+      return anterior || "tocando";
+  }
+}
+
+async function tratarLigacao(data) {
+  const lista = Array.isArray(data) ? data : [data];
+  for (const c of lista) {
+    if (!c?.id || c.isGroup) continue;
+    const chatId = N.paraChatId(c.from || c.chatId, lidParaNumero);
+    if (!chatId || (estado.phoneNumber && N.digitos(chatId) === N.digitos(estado.phoneNumber))) continue;
+    diag.eventos.ligacao = (diag.eventos.ligacao || 0) + 1;
+    const id = `ligacao-${String(c.id).replace(/[^A-Za-z0-9]/g, "").slice(0, 60)}`;
+    const ja = acharNaMemoria(id);
+    const estadoNovo = estadoDaLigacao(c.status, ja?.ligacao?.estado);
+    if (ja) {
+      if (ja.ligacao?.estado === estadoNovo) continue;
+      ja.ligacao = { ...ja.ligacao, estado: estadoNovo };
+      const r = await mudarNoBanco(id, { midia: { ligacao: ja.ligacao } });
+      if (r?.seq) ja.seq = r.seq;
+      emitirMudanca(id, ja.chatId, { ligacao: ja.ligacao, ...(r?.seq ? { seq: r.seq } : {}) });
+      continue;
+    }
+    const numero = chatId.endsWith("@c.us") ? N.digitos(chatId) : null;
+    const msg = {
+      id,
+      chatId,
+      lid: N.ehLid(c.from) ? c.from : null,
+      from: chatId,
+      to: estado.phoneNumber || null,
+      body: "",
+      direction: "in",
+      timestamp: Date.parse(c.date) || Date.now(),
+      contactName: store.nomes[chatId] || null,
+      realNumber: numero,
+      displayNumber: numero,
+      hasMedia: false,
+      mediaType: null,
+      status: "read",
+      ligacao: { estado: estadoNovo, video: Boolean(c.isVideo) },
+    };
+    const { final } = guardarMensagem(msg);
+    await gravarComSeq(final, "ligacao");
+    emitirMensagem(final);
+    tocarConversa(final);
+    const quem = store.nomes[chatId] || (numero ? N.formatarNumero(numero) : "um cliente");
+    emitirToast(`${c.isVideo ? "📹" : "📞"} Ligação de ${quem} no WhatsApp da loja.`);
+  }
+}
+
+// ------------------------------------------------------------------
 // Conciliação — a mensagem tem de aparecer no CRM venha de onde vier
 // ------------------------------------------------------------------
 // O webhook é o caminho normal, mas ele falha de vez em quando: mensagem
@@ -1011,9 +1555,21 @@ const JANELA_PARA_TOCAR = 10 * 60_000;
 // Mensagem com menos de um dia ainda vale um aviso individual para a tela.
 const JANELA_PARA_EMITIR = 24 * 3600_000;
 
-function absorverRegistro(rec, { emitir = true, origem = "conciliacao" } = {}) {
+async function absorverRegistro(rec, { emitir = true, origem = "conciliacao" } = {}) {
   if (!rec?.key?.id || rec.key.remoteJid === "status@broadcast") return null;
   aprenderLid(rec.key);
+  // Reação que só a varredura achou também vale (a Evolution guarda reação
+  // como mensagem; antes ela era descartada aqui). Só aplica se mudou algo.
+  const evento = N.extrairEvento(rec);
+  if (evento) {
+    if (evento.tipo === "reacao") {
+      const alvo = acharNaMemoria(evento.alvoId);
+      const de = evento.deMim ? "loja" : "cliente";
+      const atual = alvo?.reacoes?.find((r) => r.de === de);
+      if (alvo && (atual?.emoji || "") !== evento.emoji) await aplicarEvento(evento);
+    }
+    return null;
+  }
   const msg = N.normalizarMensagem(rec, { lidParaNumero, numeroDaLoja: estado.phoneNumber });
   if (!msg) return null;
   const { final, nova } = guardarMensagem(msg);
@@ -1025,7 +1581,19 @@ function absorverRegistro(rec, { emitir = true, origem = "conciliacao" } = {}) {
   const faltaEntregar = !jaEmitidas.has(final.id) && idade < JANELA_PARA_EMITIR;
   if (!nova && !faltaEntregar) return null;
   aprenderNome(final);
-  if (nova) guardarNoCrm(final, origem);
+  if (nova) {
+    medicao.chegou(final.id, { caminho: origem === "historico" ? "historico" : "varredura", noWhatsapp: final.timestamp });
+    if (origem === "historico") {
+      // Histórico vem aos milhares e sai num lote só, depois: esperar o banco
+      // mensagem a mensagem seguraria a fila do webhook (e as mensagens novas
+      // atrás dela). O seq entra quando o banco responder.
+      guardarNoCrm(final, origem).then((r) => {
+        if (r?.seq && !(final.seq >= r.seq)) final.seq = r.seq;
+      });
+    } else {
+      await gravarComSeq(final, origem);
+    }
+  }
   if (emitir && (nova || faltaEntregar)) {
     emitirMensagem(final);
     diag.ultimaMensagemPor = origem;
@@ -1041,7 +1609,10 @@ function absorverRegistro(rec, { emitir = true, origem = "conciliacao" } = {}) {
   // entrada falhando (hoje: 1 webhook contra 25 mensagens trazidas pela
   // varredura), era isso que deixava a lista com buracos de horas.
   if (nova || faltaEntregar) tocarConversa(final, { contarNaoLida: idade < JANELA_PARA_TOCAR });
-  if (nova && final.hasMedia && final.direction === "in") baixarMidia(final.id).catch(() => {});
+  if (nova) {
+    baixarNaChegada(final);
+    pedirTranscricao(final);
+  }
   return final;
 }
 
@@ -1051,9 +1622,16 @@ async function conciliarRecentes(quantas = 40) {
   if (conciliando || !estado.connected) return 0;
   conciliando = true;
   try {
-    const r = await evolution.buscarMensagens(INSTANCIA, { where: {}, offset: quantas, page: 1 });
+    // Só a janela recente: as N mais novas DELA. Sem janela, o findMessages
+    // da Evolution conta a tabela inteira (o count(*) que vem antes da
+    // página) a cada 20 segundos, só para devolver 40 mensagens.
+    const r = await evolution.buscarMensagens(INSTANCIA, {
+      where: filtroDeJanela(Date.now(), JANELA_CONCILIAR_MS),
+      offset: quantas,
+      page: 1,
+    });
     let novas = 0;
-    for (const rec of r?.messages?.records || []) if (absorverRegistro(rec)) novas++;
+    for (const rec of r?.messages?.records || []) if (await absorverRegistro(rec)) novas++;
     ultimaConciliacao = Date.now();
     diag.conciliacoes++;
     diag.conciliadasNovas += novas;
@@ -1274,7 +1852,7 @@ if (VIGIA_LIGADO) {
 // o webhook não chegou.
 setInterval(() => {
   conciliarRecentes().catch(() => {});
-}, 20_000).unref?.();
+}, CONCILIAR_A_CADA_MS).unref?.();
 
 // Painel voltando do sono / abrindo a tela pede a conciliação na hora, sem
 // esperar o próximo ciclo — no máximo uma vez a cada 3 segundos, para muitos
@@ -1284,6 +1862,12 @@ function conciliarAgora() {
   return conciliarRecentes();
 }
 
+// Os avisos são tratados UM DE CADA VEZ, na ordem em que chegaram. Agora que
+// gravar no banco é esperado (para o seq ir junto), dois avisos tratados em
+// paralelo podiam se cruzar: o recibo de "lida" de uma mensagem chegando
+// antes de a própria mensagem estar gravada.
+let filaDoWebhook = Promise.resolve();
+
 app.post("/evolution/webhook", express.json({ limit: "60mb" }), (req, res) => {
   const recebido = String(req.headers["x-balao-webhook"] || "");
   const ok =
@@ -1292,6 +1876,7 @@ app.post("/evolution/webhook", express.json({ limit: "60mb" }), (req, res) => {
   if (!ok) return res.status(401).end();
   res.status(200).json({ ok: true });
 
+  const chegada = Date.now();
   const { event, data, instance } = req.body || {};
   const evento = String(event || "").toLowerCase().replace(/_/g, ".");
   diag.ultimoWebhookEm = new Date().toISOString();
@@ -1304,75 +1889,106 @@ app.post("/evolution/webhook", express.json({ limit: "60mb" }), (req, res) => {
   if (instance && instance === INSTANCIA_TESTE && instance !== INSTANCIA) return tratarWebhookDeTeste(evento, data);
   if (instance && instance !== INSTANCIA) return;
 
-  try {
-    switch (evento) {
-      case "qrcode.updated": {
-        const qr = data?.qrcode;
-        if (qr?.base64) {
-          Object.assign(estado, { status: "qr", qrCode: qr.base64, rawQr: qr.code || null, connected: false });
-          emitirEstado();
-        }
-        break;
-      }
-      case "connection.update": {
-        if (data?.state === "open") aoConectar(data);
-        else if (data?.state === "close") {
-          Object.assign(estado, { status: "disconnected", connected: false, session: false });
-          estado.ultimoErro = { mensagem: `Conexão fechada (código ${data?.statusReason})`, quando: new Date().toISOString() };
-          emitirEstado();
-          // 401 = o aparelho desconectou este computador. Precisa de QR novo.
-          if (Number(data?.statusReason) === 401) setTimeout(pedirQr, 2000);
-        } else if (data?.state === "connecting" && !estado.connected) {
-          estado.status = estado.qrCode ? "qr" : "loading";
-          emitirEstado();
-        }
-        break;
-      }
-      case "messages.upsert":
-      case "send.message": {
-        const lista = Array.isArray(data) ? data : data?.messages || [data];
-        for (const rec of lista) if (rec?.key) tratarMensagemRecebida(rec);
-        break;
-      }
-      // Histórico sincronizado pelo celular. Pode vir aos milhares na primeira
-      // conexão, por isso guarda tudo em silêncio e manda uma lista só para o
-      // painel, em vez de um evento por mensagem.
-      case "messages.set": {
-        const lista = Array.isArray(data) ? data : data?.messages || [data];
-        let novas = 0;
-        for (const rec of lista) if (rec?.key && absorverRegistro(rec, { emitir: false, origem: "historico" })) novas++;
-        if (novas) agendarEnvioDasMensagens();
-        break;
-      }
-      case "messages.update": {
-        const lista = Array.isArray(data) ? data : [data];
-        for (const u of lista) {
-          const id = u?.keyId || u?.key?.id;
-          if (!id || !u?.status) continue;
-          const status = N.statusDoPainel(u.status, u.fromMe);
-          for (const mapa of mensagensPorChat.values()) {
-            const m = mapa.get(id);
-            if (m) {
-              m.status = status;
-              paraPainel().emit("whatsapp:message-status", { id, chatId: m.chatId, status });
-              break;
-            }
-          }
-        }
-        break;
-      }
-      case "messages.delete": {
-        const id = data?.id || data?.keyId || data?.key?.id;
-        if (id) paraPainel().emit("whatsapp:message-status", { id, status: "deleted" });
-        break;
-      }
-      default:
-        break;
-    }
-  } catch (erro) {
-    console.error("[webhook] Falha ao tratar", evento, erro);
-  }
+  filaDoWebhook = filaDoWebhook
+    .then(() => tratarEventoDoWebhook(evento, data, chegada))
+    .catch((erro) => console.error("[webhook] Falha ao tratar", evento, erro));
 });
+
+/** Recibo (entregue/lida/tocada) e, às vezes, edição: a 2.3.7 manda os dois por MESSAGES_UPDATE. */
+async function tratarAtualizacao(u) {
+  const id = u?.keyId || u?.key?.id;
+  if (!id) return;
+  // Edição feita no celular: o Baileys emite messages.update com
+  // message.editedMessage.message, e a Evolution repassa assim (com status
+  // "SERVER_ACK" de enfeite — não é recibo nenhum).
+  const editado = u.message?.editedMessage?.message;
+  if (editado) {
+    return aplicarEvento({ tipo: "edicao", alvoId: String(id), texto: N.textoDe(editado), em: Date.now() });
+  }
+  if (!u.status) return;
+  const status = N.statusDoPainel(u.status, u.fromMe);
+  const m = acharNaMemoria(id);
+  if (m) m.status = status;
+  const r = await mudarNoBanco(id, { situacao: status });
+  if (r?.seq && m) m.seq = r.seq;
+  const chatId = m?.chatId || r?.chatId;
+  if (chatId) paraPainel().emit("whatsapp:message-status", { id, chatId, status, ...(r?.seq ? { seq: r.seq } : {}) });
+  // Mensagem do CLIENTE marcada como lida: foi lida no celular da loja.
+  const leitura = String(u.status).toUpperCase();
+  if (u.fromMe === false && (leitura === "READ" || leitura === "PLAYED")) await conversaLidaNoCelular(id, u.remoteJid);
+}
+
+async function tratarEventoDoWebhook(evento, data, chegada) {
+  switch (evento) {
+    case "qrcode.updated": {
+      const qr = data?.qrcode;
+      if (qr?.base64) {
+        Object.assign(estado, { status: "qr", qrCode: qr.base64, rawQr: qr.code || null, connected: false });
+        emitirEstado();
+      }
+      break;
+    }
+    case "connection.update": {
+      if (data?.state === "open") aoConectar(data);
+      else if (data?.state === "close") {
+        if (estado.connected) desconectadoEm = Date.now();
+        Object.assign(estado, { status: "disconnected", connected: false, session: false });
+        estado.ultimoErro = { mensagem: `Conexão fechada (código ${data?.statusReason})`, quando: new Date().toISOString() };
+        emitirEstado();
+        // 401 = o aparelho desconectou este computador. Precisa de QR novo.
+        if (Number(data?.statusReason) === 401) setTimeout(pedirQr, 2000);
+      } else if (data?.state === "connecting" && !estado.connected) {
+        estado.status = estado.qrCode ? "qr" : "loading";
+        emitirEstado();
+      }
+      break;
+    }
+    case "messages.upsert":
+    case "send.message": {
+      const lista = Array.isArray(data) ? data : data?.messages || [data];
+      for (const rec of lista) if (rec?.key) await tratarMensagemRecebida(rec, { chegada });
+      break;
+    }
+    // Histórico sincronizado pelo celular. Pode vir aos milhares na primeira
+    // conexão, por isso guarda tudo em silêncio e manda uma lista só para o
+    // painel, em vez de um evento por mensagem.
+    case "messages.set": {
+      const lista = Array.isArray(data) ? data : data?.messages || [data];
+      let novas = 0;
+      for (const rec of lista) if (rec?.key && (await absorverRegistro(rec, { emitir: false, origem: "historico" }))) novas++;
+      if (novas) agendarEnvioDasMensagens();
+      break;
+    }
+    case "messages.update": {
+      const lista = Array.isArray(data) ? data : [data];
+      for (const u of lista) await tratarAtualizacao(u);
+      break;
+    }
+    // O protocolMessage de editar e de apagar para todos (a 2.3.7 manda os
+    // dois por aqui, e não por MESSAGES_UPSERT).
+    case "messages.edited": {
+      const lista = Array.isArray(data) ? data : [data];
+      for (const p of lista) await aplicarEvento(N.eventoDoProtocolo(p, Date.now()));
+      break;
+    }
+    case "messages.delete": {
+      const id = data?.id || data?.keyId || data?.key?.id;
+      if (id) await aplicarEvento({ tipo: "apagada", alvoId: String(id), em: Date.now() });
+      break;
+    }
+    case "chats.upsert":
+    case "chats.update": {
+      const lista = Array.isArray(data) ? data : [data];
+      agendarReleitura(lista.map((c) => c?.remoteJid).filter(Boolean));
+      break;
+    }
+    case "call":
+      await tratarLigacao(data);
+      break;
+    default:
+      break;
+  }
+}
 
 // ------------------------------------------------------------------
 // Teste cruzado: loja -> linha de teste (e volta), conferindo a chegada
@@ -1555,55 +2171,160 @@ async function testeCruzado({ produtoId } = {}) {
 const baixando = new Map();
 const nomeSeguro = (id) => String(id).replace(/[^A-Za-z0-9_-]/g, "").slice(0, 80);
 
-function midiaEmDisco(id) {
+// Tudo aqui é assíncrono (fs.promises). Antes, gravar a mídia era
+// writeFileSync: um vídeo de 50 MB parava o servidor inteiro — webhook,
+// painel, tudo — enquanto o disco escrevia. E com a mídia sendo baixada na
+// chegada nas duas direções, isso passaria a acontecer o tempo todo.
+
+async function midiaEmDisco(id) {
   const base = nomeSeguro(id);
   try {
-    const meta = JSON.parse(fs.readFileSync(path.join(MIDIA_DIR, `${base}.json`), "utf8"));
+    const meta = JSON.parse(await fs.promises.readFile(path.join(MIDIA_DIR, `${base}.json`), "utf8"));
     const arquivo = path.join(MIDIA_DIR, meta.arquivo);
-    if (fs.existsSync(arquivo)) return { ...meta, caminho: arquivo };
-  } catch {}
-  return null;
+    await fs.promises.access(arquivo);
+    return { ...meta, caminho: arquivo };
+  } catch {
+    return null;
+  }
 }
 
-function gravarMidia(id, buffer, mimetype, nomeOriginal) {
-  const base = nomeSeguro(id);
-  const arquivo = `${base}.${N.extensaoDoMime(mimetype)}`;
-  fs.writeFileSync(path.join(MIDIA_DIR, arquivo), buffer);
+async function gravarMeta(base, arquivo, mimetype, nomeOriginal) {
   const meta = { arquivo, mimetype: mimetype || "application/octet-stream", nome: nomeOriginal || null, em: Date.now() };
-  fs.writeFileSync(path.join(MIDIA_DIR, `${base}.json`), JSON.stringify(meta));
+  // O .json por último, e por rename: quem lê nunca vê meta de arquivo pela metade.
+  const temp = path.join(MIDIA_DIR, `${base}.json.tmp`);
+  await fs.promises.writeFile(temp, JSON.stringify(meta));
+  await fs.promises.rename(temp, path.join(MIDIA_DIR, `${base}.json`));
   return { ...meta, caminho: path.join(MIDIA_DIR, arquivo) };
 }
 
+async function gravarMidia(id, buffer, mimetype, nomeOriginal) {
+  const base = nomeSeguro(id);
+  const arquivo = `${base}.${N.extensaoDoMime(mimetype)}`;
+  const temp = path.join(MIDIA_DIR, `${arquivo}.tmp`);
+  await fs.promises.writeFile(temp, buffer);
+  await fs.promises.rename(temp, path.join(MIDIA_DIR, arquivo));
+  return gravarMeta(base, arquivo, mimetype, nomeOriginal);
+}
+
+/** Arquivo que já está em disco (upload do painel) vira a mídia da mensagem. */
+async function adotarArquivoComoMidia(id, caminho, mimetype, nomeOriginal) {
+  const base = nomeSeguro(id);
+  const arquivo = `${base}.${N.extensaoDoMime(mimetype)}`;
+  await fs.promises.rename(caminho, path.join(MIDIA_DIR, arquivo));
+  return gravarMeta(base, arquivo, mimetype, nomeOriginal);
+}
+
+// No máximo 2 downloads da Evolution ao mesmo tempo: cada um passa a mídia
+// inteira em base64 pela memória, e uma rajada de vídeos derrubaria o
+// container. Os outros esperam a vez.
+const MAX_DOWNLOADS = 2;
+let downloadsAtivos = 0;
+const esperandoVez = [];
+async function comVez(fn) {
+  if (downloadsAtivos >= MAX_DOWNLOADS) await new Promise((ok) => esperandoVez.push(ok));
+  downloadsAtivos++;
+  try {
+    return await fn();
+  } finally {
+    downloadsAtivos--;
+    esperandoVez.shift()?.();
+  }
+}
+
 async function baixarMidia(id) {
-  const pronto = midiaEmDisco(id);
+  const pronto = await midiaEmDisco(id);
   if (pronto) return pronto;
   if (!baixando.has(id)) {
     baixando.set(
       id,
-      evolution
-        .baixarMidia(INSTANCIA, id)
-        .then((r) => {
-          if (!r?.base64) throw new Error("a Evolution não devolveu a mídia");
-          return gravarMidia(id, Buffer.from(r.base64, "base64"), r.mimetype, r.fileName);
-        })
-        .finally(() => baixando.delete(id))
+      comVez(async () => {
+        const ja = await midiaEmDisco(id); // pode ter chegado enquanto esperava a vez
+        if (ja) return ja;
+        const r = await evolution.baixarMidia(INSTANCIA, id);
+        if (!r?.base64) throw new Error("a Evolution não devolveu a mídia");
+        return gravarMidia(id, Buffer.from(r.base64, "base64"), r.mimetype, r.fileName);
+      }).finally(() => baixando.delete(id))
     );
   }
   return baixando.get(id);
 }
 
-// Faxina: mídia com mais de 90 dias sai do disco (continua no celular).
-function faxinaDeMidia() {
-  const limite = Date.now() - 90 * 24 * 3600_000;
-  try {
-    for (const nome of fs.readdirSync(MIDIA_DIR)) {
-      const caminho = path.join(MIDIA_DIR, nome);
-      const st = fs.statSync(caminho);
-      if (st.mtimeMs < limite) fs.unlinkSync(caminho);
+// Faxina: mídia com mais de 90 dias sai do disco (continua no celular); upload
+// que ficou para trás (envio que falhou no meio) sai depois de 1 dia.
+async function faxinaDeMidia() {
+  const limpar = async (pasta, idadeMs) => {
+    const limite = Date.now() - idadeMs;
+    let nomes = [];
+    try {
+      nomes = await fs.promises.readdir(pasta);
+    } catch {
+      return;
     }
-  } catch {}
+    for (const nome of nomes) {
+      const caminho = path.join(pasta, nome);
+      try {
+        const st = await fs.promises.stat(caminho);
+        if (st.isFile() && st.mtimeMs < limite) await fs.promises.unlink(caminho);
+      } catch {}
+    }
+  };
+  await limpar(MIDIA_DIR, 90 * 24 * 3600_000);
+  await limpar(UPLOAD_DIR, 24 * 3600_000);
 }
-setInterval(faxinaDeMidia, 12 * 3600_000).unref?.();
+setInterval(() => faxinaDeMidia().catch(() => {}), 12 * 3600_000).unref?.();
+
+// ------------------------------------------------------------------
+// Transcrição no servidor (transcricao.js explica os três provedores)
+// ------------------------------------------------------------------
+async function guardarTranscricao(id, texto, { provedor } = {}) {
+  store.transcricoes[id] = texto;
+  salvarStore();
+  const m = acharNaMemoria(id);
+  if (m) m.transcricao = texto;
+  const r = await mudarNoBanco(id, { transcricao: texto });
+  if (r?.seq && m) m.seq = r.seq;
+  const chatId = m?.chatId || r?.chatId || null;
+  paraPainel().emit("whatsapp:transcricao", { id, chatId, texto, provedor: provedor || null, ...(r?.seq ? { seq: r.seq } : {}) });
+}
+
+const transcricao = criarTranscricao({
+  url: process.env.TRANSCRICAO_URL || "",
+  chaveUrl: process.env.TRANSCRICAO_CHAVE || "",
+  modeloUrl: process.env.TRANSCRICAO_MODELO || "whisper-1",
+  chaveGroq: process.env.GROQ_API_KEY || "",
+  modeloGroq: process.env.GROQ_WHISPER_MODEL || "whisper-large-v3-turbo",
+  puxada: process.env.TRANSCRICAO_PUXADA === "1",
+  obterAudio: async (id) => {
+    const m = await baixarMidia(id);
+    return { buffer: await fs.promises.readFile(m.caminho), mimetype: m.mimetype };
+  },
+  aoTranscrever: guardarTranscricao,
+});
+if (transcricao.ativo) console.log(`[transcricao] Ligada: ${transcricao.estado().provedores.join(" -> ")}`);
+
+/** Depois de (re)conectar: áudio do último dia que ficou sem texto volta para a fila. */
+function reenfileirarTranscricoes() {
+  if (!transcricao.ativo) return;
+  for (const mapa of mensagensPorChat.values()) for (const m of mapa.values()) pedirTranscricao(m);
+}
+
+// Modo puxado: o trabalhador no computador do Thiago. Autenticado pelo
+// cabeçalho x-transcricao-segredo (o conteúdo de DATA_ROOT/transcricao.segredo).
+function exigirTrabalhador(req, res, next) {
+  const k = String(req.headers["x-transcricao-segredo"] || "");
+  const ok = k.length === SEGREDO_TRANSCRICAO.length && crypto.timingSafeEqual(Buffer.from(k), Buffer.from(SEGREDO_TRANSCRICAO));
+  if (!ok) return res.status(401).json({ ok: false, erro: "segredo inválido" });
+  if (process.env.TRANSCRICAO_PUXADA !== "1") return res.status(409).json({ ok: false, erro: "modo puxado desligado (TRANSCRICAO_PUXADA=1)" });
+  next();
+}
+app.get("/api/transcricao/pendentes", exigirTrabalhador, async (req, res) => {
+  res.json({ ok: true, itens: await transcricao.pendentes({ limite: Math.min(10, Math.max(1, Number(req.query.limite) || 3)) }) });
+});
+app.post("/api/transcricao/resultado", exigirTrabalhador, express.json({ limit: "1mb" }), async (req, res) => {
+  const aceito = await transcricao.resultado({ id: req.body?.id, texto: req.body?.texto, erro: req.body?.erro });
+  res.status(aceito ? 200 : 404).json({ ok: aceito });
+});
+
 
 // ------------------------------------------------------------------
 // Rotas HTTP
@@ -1623,6 +2344,41 @@ app.use((req, res, next) => {
   next();
 });
 
+// O upload tem de vir DEPOIS do CORS acima: rota registrada antes responde
+// sem o Access-Control-Allow-Origin, e o navegador esconde a resposta do painel.
+// ------------------------------------------------------------------
+// Upload direto do painel (upload.js explica)
+// ------------------------------------------------------------------
+montarRotaDeUpload(app, {
+  acesso,
+  pasta: UPLOAD_DIR,
+  limiteBytes: LIMITE_UPLOAD_BYTES,
+  segredo: SEGREDO_UPLOAD,
+  extensaoDoMime: N.extensaoDoMime,
+  aoReceber: async ({ arquivo, campos, quem, urlInterna }) => {
+    const destino = campos.chatId || campos.number;
+    // A Evolution busca o arquivo pela rede interna, em vez de receber base64.
+    const rec = await enviarMidia({
+      destino,
+      url: urlInterna(URL_INTERNA),
+      mimetype: campos.mimetype || arquivo.mimetype,
+      filename: campos.nome || arquivo.nome,
+      caption: campos.legenda || "",
+      comoVoz: campos.comoVoz === "1" || campos.comoVoz === "true",
+      comoDocumento: campos.comoDocumento === "1" || campos.comoDocumento === "true",
+    }).catch((erro) => {
+      throw Object.assign(new Error(erro.message), { status: erro instanceof ErroEvolution && erro.status >= 400 && erro.status < 500 ? 422 : 502 });
+    });
+    const msg = registrarEnviada(rec, {
+      tempId: campos.tempId || undefined,
+      vendedorId: quem?.vendedor?.id || campos.vendedorId || null,
+    });
+    // O arquivo vira a mídia da mensagem: o painel mostra sem baixar de volta.
+    await adotarArquivoComoMidia(msg.id, arquivo.caminho, campos.mimetype || arquivo.mimetype, campos.nome || arquivo.nome).catch(() => {});
+    return { msgId: msg.id, bytes: arquivo.tamanho };
+  },
+});
+
 // Público de propósito: só diz se está no ar. Nada de QR, número ou conversa.
 app.get(["/health", "/status", "/api/status"], (_req, res) => {
   let mensagensNaMemoria = 0;
@@ -1637,6 +2393,12 @@ app.get(["/health", "/status", "/api/status"], (_req, res) => {
     // Diagnóstico: só horários e contagens, nenhum dado de cliente.
     diagnostico: {
       ...diag,
+      // Mediana e p95 das últimas 500 mensagens novas, por caminho, em ms:
+      // WhatsApp -> servidor (ateChegar), servidor -> painel (ateEmitir) e o
+      // total. Só números (medicao.js).
+      latencia: medicao.resumo(),
+      transcricao: transcricao.estado(),
+      downloadsDeMidia: { ativos: downloadsAtivos, esperando: esperandoVez.length },
       conversas: conversas.size,
       mensagensNaMemoria,
       paineisAbertos: io.sockets.adapter.rooms.get(SALA)?.size || 0,
@@ -1840,7 +2602,11 @@ function registrarEnviada(rec, extras = {}) {
     };
   const { final } = guardarMensagem({ ...msg, ...extras });
   emitirMensagem(final, extras.tempId ? { tempId: extras.tempId } : {});
-  guardarNoCrm(final, "crm", extras.vendedorId || null);
+  // O envio não espera o banco; o seq entra quando ele responder (e vai para
+  // a tela de novo com o eco do webhook, o send.message).
+  guardarNoCrm(final, "crm", extras.vendedorId || null).then((r) => {
+    if (r?.seq && !(final.seq >= r.seq)) final.seq = r.seq;
+  });
   tocarConversa(final);
   return final;
 }
@@ -1853,9 +2619,8 @@ async function enviarTexto({ destino, texto, signatureId, responderA }) {
   if (!corpo) throw new Error("Mensagem vazia.");
   const extras = {};
   if (responderA) {
-    const original = [...(mensagensPorChat.get(N.paraChatId(destino, lidParaNumero))?.values() || [])].find(
-      (m) => m.id === responderA
-    );
+    // Memória primeiro; mensagem antiga (aberta pelo histórico) vem do banco.
+    const original = await acharMensagem(responderA);
     if (original?.chave) extras.quoted = { key: original.chave, message: { conversation: original.body || "" } };
   }
   return evolution.enviarTexto(INSTANCIA, numero, corpo, extras);
@@ -2316,37 +3081,49 @@ io.on("connection", (socket) => {
   socket.on("panel:carregar-historico", async (p, cb) => {
     const chatId = String(p?.chatId || "").trim();
     const limite = Math.min(500, Math.max(20, Number(p?.limite) || 80));
+    // `antesDe` (ms): a página anterior à mensagem mais antiga que o painel já
+    // tem — é isso que "Carregar mensagens mais antigas" pede. Painel antigo
+    // manda só `maisAntigas` (um número que nada dizia ao servidor): aí vêm
+    // as `limite` mais recentes, como antes.
+    const antesDe = Number(p?.antesDe) > 0 ? Number(p.antesDe) : null;
     if (!chatId) return cb?.({ ok: false, erro: "Conversa inválida." });
     try {
-      const jids = new Set();
-      if (N.ehLid(chatId)) {
-        jids.add(chatId);
-      } else {
-        jids.add(`${N.digitos(chatId)}@s.whatsapp.net`);
-        for (const [lid, numero] of Object.entries(store.lids)) if (numero === N.digitos(chatId)) jids.add(lid);
-      }
-      const registros = [];
-      for (const jid of jids) {
-        for (const where of [{ key: { remoteJid: jid } }, { key: { remoteJidAlt: jid } }]) {
-          const r = await evolution.buscarMensagens(INSTANCIA, { where, offset: limite, page: 1 }).catch(() => null);
-          registros.push(...(r?.messages?.records || []));
-        }
-      }
-      const vistas = new Set();
-      const convertidas = [];
-      for (const rec of registros) {
-        if (!rec?.key?.id || vistas.has(rec.key.id)) continue;
-        vistas.add(rec.key.id);
-        aprenderLid(rec.key);
-        const m = N.normalizarMensagem(rec, { lidParaNumero, numeroDaLoja: estado.phoneNumber });
-        if (!m) continue;
-        m.chatId = chatId; // a conversa aberta é a referência do painel
-        convertidas.push(guardarMensagem(m).final);
-      }
-      socket.emit("whatsapp:messages", convertidas.sort((a, b) => a.timestamp - b.timestamp).map(comExtras));
-      cb?.({ ok: true, total: convertidas.length });
+      const r = await historicoDaConversa({ chatId, limite, antesDe });
+      socket.emit("whatsapp:messages", r.mensagens.map(comExtras));
+      cb?.({ ok: true, total: r.mensagens.length, fonte: r.fonte, temMais: r.temMais, maisAntiga: r.maisAntiga });
     } catch (erro) {
       cb?.({ ok: false, erro: `Falha ao carregar o histórico: ${erro.message}` });
+    }
+  });
+
+  // ---- o que veio depois do último seq que o painel viu ----
+  // O painel guarda o maior seq que recebeu e pergunta isto ao reconectar ou
+  // voltar do sono. Sem isto, a volta dependia das 300 mensagens mais
+  // recentes do bootstrap: numa tarde movimentada com o notebook dormindo uma
+  // hora, o que passou dessas 300 só aparecia abrindo a conversa.
+  socket.on("panel:desde", async (p, cb) => {
+    const responder = typeof cb === "function" ? cb : () => {};
+    if (!crmServico) return responder({ ok: false, erro: "Banco da loja indisponível." });
+    try {
+      const pedido = Math.max(0, Number(p?.seq) || 0);
+      const atual = await crmServico.seqAtual();
+      // Sem seq conhecido (painel acabou de abrir): o bootstrap já trouxe o
+      // recente; só devolve o número atual para ele começar a contar.
+      if (!pedido) return responder({ ok: true, seq: atual, ate: atual, completo: true, mensagens: [] });
+      const linhas = await crmServico.desde({ seq: Math.max(0, pedido - FOLGA_DO_DESDE), limite: LIMITE_DO_DESDE });
+      const mensagens = linhas
+        .map(mensagemDoBanco)
+        .filter((m) => m && !estaOculta(m.chatId, m.timestamp))
+        .map(comExtras);
+      responder({
+        ok: true,
+        seq: atual,
+        ate: linhas.length ? Number(linhas[linhas.length - 1].seq) : atual,
+        completo: linhas.length < LIMITE_DO_DESDE,
+        mensagens,
+      });
+    } catch (erro) {
+      responder({ ok: false, erro: erro.message });
     }
   });
 
@@ -2382,6 +3159,12 @@ io.on("connection", (socket) => {
       });
       const msg = registrarEnviada(rec, { tempId: p.tempId });
       ack(p, true, msg.id);
+      // O arquivo que o painel mandou já é a mídia da mensagem: guarda, em vez
+      // de baixar de volta da Evolution.
+      const partes = N.separarDataUrl(p.dataUrl || p.base64 || "");
+      if (partes.base64 && !/^https?:\/\//i.test(String(p.url || ""))) {
+        gravarMidia(msg.id, Buffer.from(partes.base64, "base64"), p.mimetype || partes.mimetype, p.filename).catch(() => {});
+      }
     } catch (erro) {
       ack(p, false, null, erro.message);
       emitirToast(`⛔ Arquivo não enviado: ${erro.message}`, socket);
@@ -2413,7 +3196,8 @@ io.on("connection", (socket) => {
 
   socket.on("panel:send-reaction", async (p) => {
     try {
-      const m = [...mensagensPorChat.values()].map((mp) => mp.get(p?.messageId)).find(Boolean);
+      // Mensagem antiga (aberta pelo histórico) não está na memória: vem do banco.
+      const m = await acharMensagem(p?.messageId);
       if (!m?.chave) throw new Error("mensagem não encontrada");
       await evolution.enviarReacao(INSTANCIA, m.chave, String(p.reaction || ""));
     } catch (erro) {
@@ -2451,11 +3235,12 @@ io.on("connection", (socket) => {
   });
 
   const apagar = async (id) => {
-    const m = [...mensagensPorChat.values()].map((mp) => mp.get(id)).find(Boolean);
+    const m = await acharMensagem(id);
     if (!m?.chave) throw new Error("mensagem não encontrada");
     if (!m.chave.fromMe) throw new Error("só dá para apagar mensagens da loja");
     await evolution.apagarParaTodos(INSTANCIA, m.chave);
-    paraPainel().emit("whatsapp:message-status", { id, chatId: m.chatId, status: "deleted" });
+    // Igual a quando o cliente apaga: a tela mostra o aviso e o banco guarda o texto.
+    await aplicarEvento({ tipo: "apagada", alvoId: String(id), em: Date.now() });
   };
   socket.on("panel:delete-message", async (p) => {
     try {
@@ -2574,11 +3359,8 @@ io.on("connection", (socket) => {
     const id = String(p?.id || "").trim();
     const texto = String(p?.texto || "").trim().slice(0, 20_000);
     if (!id || !texto) return;
-    store.transcricoes[id] = texto;
-    salvarStore();
-    let chatId = null;
-    for (const mapa of mensagensPorChat.values()) if (mapa.has(id)) chatId = mapa.get(id).chatId;
-    paraPainel().emit("whatsapp:transcricao", { id, chatId, texto });
+    // Mesmo caminho da transcrição feita aqui: memória, banco (com seq) e painéis.
+    guardarTranscricao(id, texto, { provedor: "painel" }).catch(() => {});
   });
 
   // ---- status (o módulo completo vive em /api/status) ----

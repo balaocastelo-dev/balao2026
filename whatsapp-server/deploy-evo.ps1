@@ -4,6 +4,8 @@
 #
 #   .\whatsapp-server\deploy-evo.ps1                    # instala / atualiza (o que está no main)
 #   .\whatsapp-server\deploy-evo.ps1 -Commit 8bded2f    # sobe um commit ESPECÍFICO (é assim que se desfaz)
+#   .\whatsapp-server\deploy-evo.ps1 -Importar          # copia o histórico da Evolution para o banco da loja (uma vez)
+#   .\whatsapp-server\deploy-evo.ps1 -Diagnostico       # raio-X do banco (só leitura)
 #   .\whatsapp-server\deploy-evo.ps1 -Voltar            # NÃO use para desfazer: liga o servidor ANTIGO,
 #                                                       # o do whatsapp-web.js, de antes da Evolution
 #
@@ -13,7 +15,9 @@
 param(
   [string]$Servidor = "root@179.199.148.87",
   [string]$Commit = "",
-  [switch]$Voltar
+  [switch]$Voltar,
+  [switch]$Importar,
+  [switch]$Diagnostico
 )
 
 $ErrorActionPreference = "Stop"
@@ -27,6 +31,18 @@ if ($Voltar) {
   $ok = Read-Host "Digite VOLTAR para seguir mesmo assim"
   if ($ok -ne "VOLTAR") { exit 1 }
   ssh $Servidor "bash /opt/balao2026/whatsapp-server/deploy-evo.sh voltar"
+  exit $LASTEXITCODE
+}
+
+if ($Importar) {
+  Write-Host "Copiando o historico da Evolution para o banco da loja (pode levar alguns minutos)" -ForegroundColor Cyan
+  ssh -t $Servidor "bash /opt/balao2026/whatsapp-server/deploy-evo.sh importar"
+  exit $LASTEXITCODE
+}
+
+if ($Diagnostico) {
+  Write-Host "Raio-X do banco (so leitura; nao mostra dado de cliente)" -ForegroundColor Cyan
+  ssh -t $Servidor "bash /opt/balao2026/whatsapp-server/deploy-evo.sh diagnostico"
   exit $LASTEXITCODE
 }
 
