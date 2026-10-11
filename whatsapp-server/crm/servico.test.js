@@ -176,5 +176,117 @@ test("serviço do CRM", { skip: pular ? "sem CRM_TESTE_DB" : false }, async (t) 
     assert.ok(e.contatos >= 1 && e.mensagens >= 3);
   });
 
+  // ---- Fase 1: o banco da loja passa a guardar a mensagem inteira ----
+
+  await t.test("migração 003: colunas novas e seq com índice único", async () => {
+    const r = await db.query(
+      `SELECT column_name FROM information_schema.columns WHERE table_name = 'crm_mensagem'`
+    );
+    const colunas = r.rows.map((x) => x.column_name);
+    for (const c of ["chave", "de_mim", "midia", "citada", "reacoes", "editada_em", "apagada", "lid", "seq"]) {
+      assert.ok(colunas.includes(c), `faltou a coluna ${c}`);
+    }
+    const idx = await db.query(`SELECT indexdef FROM pg_indexes WHERE indexname = 'crm_mensagem_seq'`);
+    assert.match(idx.rows[0].indexdef, /UNIQUE INDEX crm_mensagem_seq .*\(seq\)/);
+  });
+
+  await t.test("registrar devolve o seq; repetir a mesma mensagem não gasta seq", async () => {
+    const a = await crm.registrarMensagem(
+      msg("S1", "in", "tem fonte de 600W?", 3, {
+        chave: { id: "S1", remoteJid: "5519999990000@s.whatsapp.net", fromMe: false },
+        citada: { id: "A2", trecho: "Bom dia! Pode trazer na loja", deMim: true },
+        midia: { segundos: 4 },
+      })
+    );
+    assert.strictEqual(a.nova, true);
+    assert.ok(a.seq > 0);
+    const b = await crm.registrarMensagem(msg("S1", "in", "tem fonte de 600W?", 3));
+    assert.deepStrictEqual(b, { nova: false, seq: a.seq });
+    const linha = await crm.mensagem("S1");
+    assert.deepStrictEqual(linha.chave, { id: "S1", remoteJid: "5519999990000@s.whatsapp.net", fromMe: false });
+    assert.deepStrictEqual(linha.citada, { id: "A2", trecho: "Bom dia! Pode trazer na loja", deMim: true });
+    assert.strictEqual(linha.de_mim, false);
+  });
+
+  await t.test("mudança ganha seq novo; o que não muda, não", async () => {
+    const antes = Number((await crm.mensagem("S1")).seq);
+    const r = await crm.atualizarMensagem("S1", { situacao: "read" });
+    assert.ok(r.seq > antes);
+    assert.strictEqual(r.chatId, "5519999990000@c.us");
+    assert.strictEqual(await crm.atualizarMensagem("S1", { situacao: "read" }), null, "mesma situação não é mudança");
+    assert.strictEqual(await crm.atualizarMensagem("NAO-EXISTE", { situacao: "read" }), null);
+  });
+
+  await t.test("reação: uma por pessoa, e emoji vazio retira", async () => {
+    await crm.atualizarMensagem("A2", { reacao: { de: "cliente", emoji: "👍", em: 1 } });
+    await crm.atualizarMensagem("A2", { reacao: { de: "loja", emoji: "❤️", em: 2 } });
+    let r = await crm.atualizarMensagem("A2", { reacao: { de: "cliente", emoji: "😂", em: 3 } });
+    assert.deepStrictEqual(r.reacoes.map((x) => [x.de, x.emoji]).sort(), [["cliente", "😂"], ["loja", "❤️"]]);
+    r = await crm.atualizarMensagem("A2", { reacao: { de: "cliente", emoji: "", em: 4 } });
+    assert.deepStrictEqual(r.reacoes.map((x) => x.de), ["loja"]);
+  });
+
+  await t.test("apagada para todos NÃO apaga o texto guardado; editada troca o texto", async () => {
+    await crm.atualizarMensagem("A9", { apagada: true });
+    const a9 = await crm.mensagem("A9");
+    assert.strictEqual(a9.apagada, true);
+    assert.strictEqual(a9.corpo, "e aí, conseguiu ver?");
+    await crm.atualizarMensagem("S1", { corpo: "tem fonte de 650W?", editadaEm: Date.now() });
+    const s1 = await crm.mensagem("S1");
+    assert.strictEqual(s1.corpo, "tem fonte de 650W?");
+    assert.ok(s1.editada_em);
+  });
+
+  await t.test("histórico pelo banco: por data, e junta o @lid da conversa", async () => {
+    await crm.registrarMensagem({ ...msg("L1", "in", "mensagem antes do número aparecer", 600), chatId: "777@lid" });
+    const tudo = await crm.historico({ chatIds: ["5519999990000@c.us", "777@lid"], limite: 50 });
+    assert.ok(tudo.some((x) => x.id === "L1"), "a mensagem do @lid entra");
+    // Do mais novo para o mais velho.
+    for (let i = 1; i < tudo.length; i++) assert.ok(tudo[i - 1].em >= tudo[i].em);
+    const pagina = await crm.historico({ chatIds: ["5519999990000@c.us", "777@lid"], limite: 2 });
+    const antes = await crm.historico({ chatIds: ["5519999990000@c.us", "777@lid"], antesDe: pagina[1].em.getTime(), limite: 50 });
+    assert.ok(antes.every((x) => x.em < pagina[1].em), "maisAntigas pagina para trás pela data");
+    assert.strictEqual(antes.length, tudo.length - 2);
+  });
+
+  await t.test("desde: o que veio depois do seq, em ordem", async () => {
+    const atual = await crm.seqAtual();
+    await crm.registrarMensagem(msg("D1", "out", "chegou sim", 0));
+    await crm.atualizarMensagem("A2", { situacao: "delivered" });
+    const depois = await crm.desde({ seq: atual });
+    assert.deepStrictEqual(depois.map((x) => x.id), ["D1", "A2"]);
+    assert.ok(Number(depois[1].seq) > Number(depois[0].seq));
+    assert.strictEqual(await crm.seqAtual(), Number(depois[1].seq));
+    assert.deepStrictEqual((await crm.desde({ seq: atual, limite: 1 })).map((x) => x.id), ["D1"]);
+  });
+
+  await t.test("ida e volta: o que o banco devolve tem a mesma cara do webhook", async () => {
+    const N = require("../evo/normalizar");
+    const { paraOBanco, paraOPainel } = require("./formato");
+    const doWebhook = N.normalizarMensagem(
+      {
+        key: { id: "IDA1", remoteJid: "5519999990000@s.whatsapp.net", fromMe: false },
+        pushName: "Cliente Teste",
+        messageType: "audioMessage",
+        message: { audioMessage: { ptt: true, mimetype: "audio/ogg; codecs=opus", seconds: 9 } },
+        contextInfo: { stanzaId: "A2", participant: "5519987510267@s.whatsapp.net", quotedMessage: { conversation: "Bom dia!" } },
+        messageTimestamp: Math.floor(agora / 1000),
+      },
+      { numeroDaLoja: "5519987510267" }
+    );
+    await crm.registrarMensagem(paraOBanco(doWebhook), { origem: "webhook" });
+    const doBanco = paraOPainel(await crm.mensagem("IDA1"), {
+      numeroDaLoja: "5519987510267",
+      nomeDe: () => "Cliente Teste",
+    });
+    for (const campo of [
+      "id", "chatId", "from", "to", "body", "direction", "timestamp", "contactName", "realNumber",
+      "hasMedia", "mediaType", "mimetype", "segundos", "mediaUrl", "status", "chave", "citada",
+    ]) {
+      assert.deepStrictEqual(doBanco[campo], doWebhook[campo], campo);
+    }
+    assert.ok(doBanco.seq > 0);
+  });
+
   await db.pool.end();
 });
