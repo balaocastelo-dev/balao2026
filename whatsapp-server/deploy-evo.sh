@@ -4,7 +4,8 @@
 #
 # Uso, como root na VPS:
 #   bash deploy-evo.sh           # sobe/atualiza a Evolution e o servidor novo
-#   bash deploy-evo.sh voltar    # volta para o servidor antigo (whatsapp-web.js)
+#   REF=<commit> bash deploy-evo.sh   # sobe um commit ESPECÍFICO (é assim que se desfaz um deploy)
+#   bash deploy-evo.sh voltar    # NÃO use para desfazer: liga o servidor ANTIGO (whatsapp-web.js, pré-Evolution)
 #   bash deploy-evo.sh logs      # últimas linhas dos logs
 #
 # O que fica onde:
@@ -17,7 +18,22 @@
 
 set -euo pipefail
 
+# Este script troca o código de /opt/balao2026 no meio do caminho (git reset).
+# O bash lê o script aos pedaços enquanto roda; se o arquivo mudar por baixo,
+# ele pode executar metade de uma linha velha e metade de uma nova. Por isso a
+# primeira coisa é rodar a partir de uma cópia que ninguém mexe.
+if [ -z "${BALAO_DEPLOY_COPIA:-}" ]; then
+  copia="$(mktemp /tmp/deploy-evo.XXXXXX.sh)"
+  cp "$0" "$copia"
+  BALAO_DEPLOY_COPIA=1 exec bash "$copia" "$@"
+fi
+trap 'rm -f -- "$0"' EXIT
+
 REPO="${REPO:-https://github.com/balaocastelo-dev/balao2026.git}"
+# Qual commit subir. Padrão: o que está no main. Para desfazer um deploy,
+# REF=<commit anterior> — o código, o compose e os Dockerfiles passam a ser os
+# daquele commit, e o build sobe exatamente o que estava no ar antes.
+REF="${REF:-origin/main}"
 CODIGO="${CODIGO:-/opt/balao2026}"
 DADOS="${DADOS:-/var/lib/balao-evo}"
 DADOS_ANTIGOS="${DADOS_ANTIGOS:-/var/lib/balao-whats}"
@@ -60,11 +76,14 @@ docker compose version
 
 msg "Baixando o código"
 if [ -d "$CODIGO/.git" ]; then
-  git -C "$CODIGO" fetch origin main --depth=1
-  git -C "$CODIGO" reset --hard origin/main
+  # Profundidade 100: o bastante para achar o commit anterior quando REF aponta
+  # para trás (com --depth=1 só o último commit do main existiria aqui).
+  git -C "$CODIGO" fetch origin main --depth=100
+  git -C "$CODIGO" reset --hard "$REF"
 else
   rm -rf "$CODIGO"
-  git clone --depth=1 "$REPO" "$CODIGO"
+  git clone --depth=100 "$REPO" "$CODIGO"
+  git -C "$CODIGO" reset --hard "$REF"
 fi
 VERSAO="$(git -C "$CODIGO" log --format=%h -1)"
 export VERSAO
@@ -92,6 +111,14 @@ fi
 
 msg "Memória livre"
 free -h | sed -n 1,2p
+# Os tetos do compose somam ~3,5 GB (Postgres 1 GB, Evolution 1,5 GB,
+# servidor 768 MB, Redis 256 MB) e foram pensados para a KVM 2 (8 GB). Numa
+# máquina menor eles ainda sobem, mas o Linux pode matar um container.
+total_mb="$(awk '/MemTotal/ {print int($2/1024)}' /proc/meminfo)"
+if [ "${total_mb:-0}" -lt 4000 ]; then
+  aviso "ATENÇÃO: esta VPS tem ${total_mb} MB de memória. O compose foi dimensionado para 8 GB (KVM 2)."
+  aviso "Ajuste mem_limit/shared_buffers no docker-compose.evo.yml antes de seguir, ou aceite o risco."
+fi
 
 msg "Construindo e subindo a Evolution (o servidor antigo continua no ar por enquanto)"
 compose pull postgres redis
@@ -107,6 +134,28 @@ for _ in $(seq 1 60); do
   echo -n "."; sleep 3
 done
 
+# Índices que a Evolution não cria (evo/indices.sql explica). Roda depois de
+# ela subir porque é ela quem cria a tabela "Message" no primeiro boot. É
+# idempotente e não trava a escrita (CONCURRENTLY): a loja continua recebendo
+# enquanto o índice é montado. Se falhar, o deploy segue — tudo funciona,
+# só que lento como antes.
+INDICES="$CODIGO/whatsapp-server/evo/indices.sql"
+if [ -f "$INDICES" ]; then
+  msg "Índices na tabela de mensagens da Evolution"
+  for _ in $(seq 1 40); do
+    if compose exec -T postgres psql -U evolution -d evolution -tAc \
+      "SELECT to_regclass('public.\"Message\"') IS NOT NULL" 2>/dev/null | grep -q t; then
+      break
+    fi
+    sleep 3
+  done
+  if compose exec -T postgres psql -U evolution -d evolution -X -q -v ON_ERROR_STOP=1 < "$INDICES"; then
+    echo "Índices conferidos."
+  else
+    aviso "Não consegui aplicar os índices agora. O WhatsApp funciona sem eles; rode o deploy de novo depois."
+  fi
+fi
+
 msg "Trocando: para o servidor antigo e liga o novo na porta $PORTA"
 for c in "${ANTIGOS[@]}"; do
   if docker ps --format '{{.Names}}' | grep -qx "$c"; then
@@ -120,7 +169,10 @@ for _ in $(seq 1 40); do
   if curl -sf -m 3 "http://127.0.0.1:$PORTA/status" >/dev/null; then ok=1; break; fi
   sleep 2
 done
-[ "$ok" -eq 1 ] || { compose logs --tail 40 balao-whats; erro "O servidor novo não respondeu. Para voltar: bash $0 voltar"; }
+[ "$ok" -eq 1 ] || {
+  compose logs --tail 40 balao-whats
+  erro "O servidor novo não respondeu. Para desfazer, suba o commit anterior: REF=<commit> bash $CODIGO/whatsapp-server/deploy-evo.sh (docs/whatsapp-fase1.md). NÃO use 'voltar'."
+}
 
 msg "No ar"
 curl -s "http://127.0.0.1:$PORTA/status"; echo
@@ -128,6 +180,6 @@ echo
 echo "Agora abra www.balao.info/crm e leia o QR Code com o celular da LOJA."
 echo "Teste cruzado (depois de conectar):  www.balao.info/api/crm/teste-cruzado"
 echo
-echo "Logs:    bash $0 logs"
-echo "Voltar:  bash $0 voltar"
+echo "Logs:     bash $CODIGO/whatsapp-server/deploy-evo.sh logs"
+echo "Desfazer: REF=<commit anterior> bash $CODIGO/whatsapp-server/deploy-evo.sh   (docs/whatsapp-fase1.md)"
 docker stats --no-stream --format 'table {{.Name}}\t{{.MemUsage}}' | grep -E "NAME|$PROJETO" || true
