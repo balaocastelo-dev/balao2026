@@ -14,6 +14,7 @@ import HomeBlogSection from "@/components/HomeBlogSection";
 
 import Paginacao from "@/components/catalogo/Paginacao";
 import { BotaoDeFiltros, FiltrosLaterais } from "@/components/catalogo/FiltrosDoCatalogo";
+import HomeVitrines, { type Variante } from "@/components/home/HomeVitrines";
 import { aplicarFiltros, contarFiltros, lerFiltros, montarFacetas, ordenar, paraQuery, termosDaBusca } from "@/lib/catalogo/filtros";
 
 import { getCachedCategories, getCachedProducts, getCachedProductsByExactCategories, getCachedCarouselImages, getCachedBuscaCompleta } from "@/lib/cache";
@@ -35,6 +36,8 @@ type SearchParams = Promise<{
   tags?: string;
   ordem?: string;
   page?: string;
+  pronta?: string;
+  versao?: string;
 }>;
 
 const PRODUTOS_POR_PAGINA = 24;
@@ -245,6 +248,9 @@ export default async function Home(props: {
   const filtros = lerFiltros(searchParams || {});
   // ?pronta=1 sozinho também abre a lista: todos os produtos de pronta entrega.
   const navegando = Boolean(search || category || filtros.pronta);
+  // Novos desenhos da parte de produtos, em avaliação (?versao=a|b|c).
+  const versaoPedida = String(searchParams?.versao || "").toLowerCase();
+  const versao: Variante | null = versaoPedida === "a" || versaoPedida === "b" || versaoPedida === "c" ? versaoPedida : null;
   const facetas = navegando ? montarFacetas(products, filtros) : null;
   const filtrosLigados = contarFiltros(filtros);
   const ordemPadrao = search ? "relevancia" : "menor";
@@ -307,7 +313,14 @@ export default async function Home(props: {
         )}
 
         {/* 3. Main Body: Left Column (Department Menu) + Right Roomy Center Feed */}
-        {!navegando ? (
+        {!navegando && versao ? (
+          <>
+            <HomeVitrines variante={versao} produtos={products} />
+            <div className="w-full">
+              <HomeBlogSection blogPosts={blogPosts} />
+            </div>
+          </>
+        ) : !navegando ? (
           <>
             <div className="flex flex-col lg:flex-row gap-8 xl:gap-10 items-start">
               {/* Left Column: Dedicated Department Menu Sidebar */}
