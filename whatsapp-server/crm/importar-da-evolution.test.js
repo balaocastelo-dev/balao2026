@@ -48,6 +48,19 @@ test("importar o histórico da Evolution", { skip: pular }, async (t) => {
     reg("S1", "status@broadcast", false, { conversation: "status" }, 40),
     reg("G1", "1203@g.us", false, { conversation: "grupo" }, 50),
   ];
+  // A mesma mensagem duas vezes na Evolution (aconteceu na loja em 12/10/2026:
+  // "ON CONFLICT DO UPDATE command cannot affect row a second time"): uma
+  // linha pelo @lid (que o servidor não conhece), sem citação, e outra pelo
+  // número, com a citação.
+  registros.push(
+    { ...reg("D1", "987654321@lid", false, { conversation: "repetida" }, 55), id: "cm-D1a" },
+    {
+      ...reg("D1", A, false, { conversation: "repetida" }, 55, {
+        contextInfo: { stanzaId: "M2", participant: "5500000000999@s.whatsapp.net", quotedMessage: { conversation: "temos sim" } },
+      }),
+      id: "cm-D1b",
+    }
+  );
   // Mais que um lote, com timestamps repetidos (o desempate pelo id importa).
   for (let i = 0; i < 25; i++) registros.push(reg(`L${String(i).padStart(2, "0")}`, A, i % 2 === 0, { conversation: `lote ${i}` }, 60));
   for (const r of registros) {
@@ -72,8 +85,13 @@ test("importar o histórico da Evolution", { skip: pular }, async (t) => {
     await t.test("copia as mensagens de conversa, com chave, citação e @lid traduzido", async () => {
       const total = await rodar();
       assert.strictEqual(total.lidas, registros.length);
-      assert.strictEqual(total.novas, 28); // M1, M2, M3 + 25 do lote
+      assert.strictEqual(total.novas, 29); // M1, M2, M3, D1 (uma vez só) + 25 do lote
+      assert.strictEqual(total.repetidas, 1);
       assert.strictEqual(total.puladas, 2); // status e grupo
+      const d1 = (await crmPool.query(`SELECT * FROM crm_mensagem WHERE id = 'D1'`)).rows;
+      assert.strictEqual(d1.length, 1);
+      assert.strictEqual(d1[0].chat_id, "5500000000001@c.us", "fica a conversa pelo número, não a do @lid");
+      assert.strictEqual(d1[0].citada?.id, "M2", "e com o que a outra cópia tinha");
       const m2 = (await crmPool.query(`SELECT * FROM crm_mensagem WHERE id = 'M2'`)).rows[0];
       assert.strictEqual(m2.direcao, "out");
       assert.deepStrictEqual(m2.chave, { id: "M2", remoteJid: A, fromMe: true });
@@ -92,7 +110,7 @@ test("importar o histórico da Evolution", { skip: pular }, async (t) => {
 
     await t.test("refaz os contatos pelos totais do banco", async () => {
       const c = (await crmPool.query(`SELECT * FROM crm_contato WHERE chat_id = '5500000000001@c.us'`)).rows[0];
-      assert.strictEqual(c.total_entrada + c.total_saida, 27);
+      assert.strictEqual(c.total_entrada + c.total_saida, 28);
       assert.strictEqual(c.nome_whatsapp, "Cliente Falso");
     });
 
