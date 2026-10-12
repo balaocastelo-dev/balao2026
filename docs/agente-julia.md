@@ -48,6 +48,39 @@ Feito no PC da loja em 12/10/2026, 00h19: cópia do projeto em `C:\Users\user\ba
 Desligar: botão **Desligada** no mesmo lugar (vale na hora). PC desligado = ninguém é respondido pela
 JUL.IA; os vendedores atendem como sempre.
 
+## Velocidade e horário de pico (12/10/2026)
+
+No primeiro teste do Thiago cada resposta levou de 18 a 86 s. Medido no PC:
+
+| | Antes | Depois |
+|---|---|---|
+| Idas ao modelo por resposta | 3 a 5 | 1 (2 quando escolhe outros produtos) |
+| Resposta com a placa livre | 8 a 17 s | 1,3 a 4 s |
+| Duas conversas ao mesmo tempo | uma esperava a outra | as duas em ~4 a 6 s |
+| Recarga do modelo | 4 a 8 s a cada troca URA/fábrica/JUL.IA | só quando o Ollama reabre |
+
+O que mudou:
+- **Ollama no PC** (variáveis do usuário, valem ao reabrir o Ollama): `OLLAMA_CONTEXT_LENGTH=8192` (o mesmo da
+  JUL.IA e das rotinas da fábrica; a URA não pede contexto e usa o padrão) e `OLLAMA_NUM_PARALLEL=3` (3 conversas
+  juntas no Ollama; a JUL.IA usa 2 e deixa 1 sempre livre para a URA). Para desfazer: apagar as duas variáveis e
+  reabrir o Ollama (o `paralelo` da JUL.IA cai sozinho para 1).
+- **JUL.IA**: o primeiro pedido de produto já vai com a busca feita pelo código; o modelo responde em 1 frase + 1
+  pergunta (os cartões mostram foto, preço e link); resposta comprida é encurtada pelo código; histórico só da
+  conversa de agora; saída limitada; prazo de 70 s (passou: manda os produtos já escolhidos ou chama um vendedor).
+- **VPS**: "digitando…" para o cliente do pegar da conversa até a resposta; espera de 6 s (era 8) para o cliente
+  terminar de digitar; erro do PC volta a conversa para a fila em 20 s e, no segundo erro, chama um vendedor
+  avisando o cliente.
+- **Áudio**: não estava sendo transcrito (o PyAV novo recusava a chamada do faster-whisper); agora vai pelo ffmpeg.
+
+**O que ainda deixa lento:** a placa de vídeo e a memória do PC divididas com outros trabalhos. Com o ComfyUI
+gerando imagem (FLUX Kontext, ~12 GB) junto com a JUL.IA, a mesma leitura que leva 1 s levou de 13 a 85 s, e o
+Ollama chegou a levar 18 a 47 s só para guardar a conversa na memória do PC. Render de imagem/vídeo no horário da
+loja deixa a JUL.IA e a URA lentas.
+
+No pico: cada resposta ocupa o modelo por 1 a 4 s; com 2 ao mesmo tempo dá umas 30 respostas por minuto, o que
+atende dezenas de conversas abertas (cada cliente escreve a cada minuto ou dois). Quem chega na fila vê
+"digitando…" e é atendido por ordem de chegada.
+
 ## Conferido em 11/10/2026
 
 - VPS: `agente/agente.test.js` 16/16 (com Postgres); bancada `e2e/agente.e2e.mjs` 30/30 com o servidor e o
