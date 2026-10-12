@@ -122,6 +122,14 @@ describe("tranca do painel", () => {
     expect(seguiu(await passar("/api/coupons/validate", { metodo: "POST" }))).toBe(true);
   });
 
+  it("seminovos: o cliente manda o pedido sem senha; cadastro e foto só com a senha", async () => {
+    expect(seguiu(await passar("/api/seminovos/lead", { metodo: "POST" }))).toBe(true);
+    expect(seguiu(await passar("/api/seminovos"))).toBe(true);
+    expect((await passar("/api/seminovos", { metodo: "POST" })).status).toBe(401);
+    expect((await passar("/api/seminovos/foto", { metodo: "POST" })).status).toBe(401);
+    expect(seguiu(await passar("/api/seminovos/foto", { metodo: "POST", cookie: tokenDe(SENHA) }))).toBe(true);
+  });
+
   // A regra principal do matcher pula o que termina em .png/.jpg — e pulava
   // junto qualquer chamada de API com esse final. API e painel passam sempre.
   it("API e painel passam pela tranca mesmo com final de arquivo de imagem", async () => {

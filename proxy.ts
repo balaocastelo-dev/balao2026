@@ -78,7 +78,8 @@ const API_SO_ESCRITA = [
 ]
 
 // Dentro dos prefixos acima, estas continuam públicas (a loja depende delas).
-const EXCECOES_PUBLICAS = ['/api/coupons/validate']
+// O formulário da página /seminovos grava o lead do cliente (sem senha, é o público).
+const EXCECOES_PUBLICAS = ['/api/coupons/validate', '/api/seminovos/lead']
 
 /**
  * Rotas em que NEM LER é público, porque o GET delas ESCREVE no banco.
