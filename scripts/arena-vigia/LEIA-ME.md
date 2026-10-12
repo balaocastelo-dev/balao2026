@@ -1,0 +1,43 @@
+# Vigia da Arena
+
+Leva as vendas e os orçamentos do Bling para a corrida de vendas do site
+(`www.balao.info/arena`, administrada em `/painel/arena`).
+
+| | |
+|---|---|
+| Onde roda | PC do Thiago, tarefa `\BalaoFabrica\Arena Vigia`, a cada 2 minutos |
+| O que lê | Bling v3: `pedidos/vendas`, `propostas-comerciais` e `vendedores` (só leitura) |
+| Token do Bling | o mesmo da sentinela do Bionic (`07-Scripts\bling-oauth\bling_tokens.json`). **Nunca renova** |
+| Para onde manda | `POST https://www.balao.info/api/arena/bling`, com a chave do vigia |
+| Chave do vigia | gerada no painel (Conexão com o Bling); fica em `%USERPROFILE%\.balao-arena\chave.txt` |
+| Registro | `%USERPROFILE%\balao-arena-vigia\dados\vigia.log` |
+
+## Instalar ou atualizar
+
+1. No painel, `/painel/arena` → **Conexão com o Bling** → **Gerar chave do vigia** (baixa `arena-vigia-chave.txt`).
+2. No PowerShell:
+
+```powershell
+git -C $HOME\balao2026 pull
+& $HOME\balao2026\scripts\arena-vigia\instalar.ps1
+```
+
+## Cada volta
+
+- lista os pedidos e as propostas dos últimos 3 dias;
+- de hora em hora, dos últimos 40 dias (pega cancelamento de pedido antigo);
+- na primeira vez, dos últimos 3 meses (o hall da fama precisa);
+- abre o detalhe só do que é novo ou mudou — é no detalhe que vêm o vendedor e os itens;
+- o site pontua (as regras ficam no painel) e o telão atualiza em até 20 s.
+
+O painel pode pedir uma varredura desde uma data (botão "Buscar de novo no Bling"): o vigia lê o
+pedido na volta seguinte.
+
+## Comandos
+
+```powershell
+cd $HOME\balao-arena-vigia
+py -3 vigia.py --conferir            # confere Bling e site, não grava
+py -3 vigia.py --desde 2026-09-01    # varre desde uma data
+py -3 -m unittest discover -s testes # testes (sem Bling nem site de verdade)
+```

@@ -240,9 +240,9 @@ export const MENU_DO_PAINEL: GrupoDoPainel[] = [
       },
       {
         href: "/painel/arena",
-        palavras: "arena corrida meta ranking telão competidor",
+        palavras: "arena corrida meta ranking telão piloto kart bling prêmio airbnb viagem pontos",
         rotulo: "Arena de vendas",
-        descricao: "Lançar venda, metas, corredores e os avisos do telão.",
+        descricao: "Corrida de vendas ligada ao Bling: pilotos, metas, pontos e a viagem da equipe.",
         icone: Trophy,
         moldura: "livre",
       },
