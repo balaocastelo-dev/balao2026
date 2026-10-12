@@ -181,6 +181,28 @@ Corpo por campos de distância, esqueleto, pesos e animações próprios; as cor
 vêm de máscaras (`COLOR_0`) que a página pinta (o segundo cachorro é preto e
 branco com o mesmo modelo). Detalhes em `public/chacara3d/bichos/bichos.json`.
 
+### As pessoas
+
+Fonte, licenças (MakeHuman CC0 e captura de movimento da CMU) e como refazer em
+`chacara3d/pessoas/README.md`.
+
+### Os cenários e as projeções (conferir sem tela)
+
+Pelo console da página (ou pelo Playwright), com `window.__chacara`:
+
+```js
+await __chacara.cenarios.ativar('rave')       // aniversario, cinema, trabalho, piscina, rave; null desliga
+__chacara.cenarios.atual.pessoas.length        // quantas pessoas montou (a qualidade média põe 70%, a baixa 40%)
+__chacara.projecoes.escolher('parede_azul', 'galaxia')   // id do lugar e da animação; 'youtube' com {url}
+__chacara.irPara([x, y, rumo, altura]); __chacara.quadro(1); __chacara.snap()
+```
+
+Cada cenário escolhe a hora, a vista de entrada (`cn.vista`, longe de quem está parado), a música e
+as projeções. Na rave, o projetor de palco (`projetorPalco`) só acende a face voltada para ele e
+troca de cor a cada compasso; os fachos das cabeças móveis são aditivos e fracos de propósito
+(fortes, viram cones sólidos). As pessoas ficam na camada 3 da câmera, fora do reflexo da piscina:
+com elas no reflexo a festa na piscina custava o dobro.
+
 ### Os adereços dos cenários
 
 ```bash
@@ -228,8 +250,12 @@ Para conferir: `window.__chacara.renderer.info.programs.length` e `window.__chac
   casal, beliche e banheiro em cima); os móveis são proposta e mudam em `sobrado` no `build.py`.
 - **Lado do sol**: ainda não informado. Na página dá para escolher em
   "O sol nasce do lado"; o padrão é o muro da churrasqueira.
-- **YouTube no cineminha** aparece ao vivo na tela do muro, mas não sai nas
-  fotos nem no vídeo renderizado. Vídeo do computador sai nos dois.
-- **Peso**: uns 30 MB na primeira visita (texturas 18 MB, terreno 10 MB, bichos 1,6 MB).
+- **YouTube no cineminha e nas projeções** aparece ao vivo, mas não sai nas
+  fotos nem no vídeo renderizado, fica sem som e não recebe a luz da cena. Vídeo do
+  computador sai nos dois. Nas paredes, muro e portões o YouTube ocupa um retângulo 16:9
+  centrado no projetor, na altura dos olhos (o YouTube não pode ser esticado como as
+  animações); nas árvores só dá animação ou vídeo do computador.
+- **Peso**: uns 31 MB na primeira visita (texturas 18 MB, terreno 11 MB, bichos 1,6 MB),
+  mais 8,6 MB de pessoas e adereços na primeira vez que se liga um cenário.
 - **Placa de vídeo**: na qualidade alta, pede uma placa de computador razoável;
   no celular a página começa na baixa (sem grama 3D, sem oclusão e sem pelo).
