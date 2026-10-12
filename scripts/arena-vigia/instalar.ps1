@@ -5,9 +5,11 @@
 #   git -C $HOME\balao2026 pull
 #   & $HOME\balao2026\scripts\arena-vigia\instalar.ps1
 #
-# Antes, em www.balao.info/painel/arena > Conexao com o Bling, clique em
-# "Gerar chave do vigia": o navegador baixa arena-vigia-chave.txt para a pasta
-# Downloads. Este instalador pega a chave de la (e apaga o arquivo baixado).
+# A chave do vigia vem por pareamento: o instalador mostra um codigo, e em
+# www.balao.info/painel/arena > Conexao com o Bling aparece "O computador ...
+# quer ligar o vigia" com o mesmo codigo: clique em Aprovar.
+# (Ainda vale o jeito antigo: "Gerar chave do vigia" baixa arena-vigia-chave.txt
+# para Downloads e o instalador pega de la.)
 #
 # O que ele faz:
 #   1. copia o vigia para C:\Users\<voce>\balao-arena-vigia (dados\ e config.json ficam);
@@ -20,7 +22,8 @@
 
 param(
   [string]$Destino = (Join-Path $env:USERPROFILE "balao-arena-vigia"),
-  [switch]$SemTarefa
+  [switch]$SemTarefa,
+  [switch]$Parear   # pede chave nova mesmo se ja houver uma
 )
 
 $ErrorActionPreference = "Stop"
@@ -41,10 +44,6 @@ if ($baixada) {
   (Get-Content $baixada.FullName -Raw).Trim() | Set-Content -Path $arqChave -NoNewline -Encoding ascii
   Remove-Item $baixada.FullName -Force
   Write-Host "Chave nova lida de Downloads\$($baixada.Name) (o arquivo baixado foi apagado)." -ForegroundColor Green
-} elseif (-not (Test-Path $arqChave)) {
-  throw "Nao achei a chave. Em www.balao.info/painel/arena > Conexao com o Bling, clique em 'Gerar chave do vigia' e rode este instalador de novo."
-} else {
-  Write-Host "Usando a chave que ja estava em $arqChave." -ForegroundColor DarkGray
 }
 
 # Python (so a biblioteca padrao)
@@ -56,6 +55,15 @@ if ($py) {
 }
 $pythonw = Join-Path (Split-Path $python) "pythonw.exe"
 if (-not (Test-Path $pythonw)) { $pythonw = $python }
+
+if ($Parear -or -not (Test-Path $arqChave)) {
+  Write-Host "Pedindo para ligar este computador na Arena..." -ForegroundColor Cyan
+  Push-Location $Destino
+  try { & $python vigia.py --parear } finally { Pop-Location }
+  if ($LASTEXITCODE -ne 0 -or -not (Test-Path $arqChave)) { throw "O pareamento nao terminou. Rode o instalador de novo." }
+} else {
+  Write-Host "Usando a chave que ja estava em $arqChave." -ForegroundColor DarkGray
+}
 
 # Conferencia (nao grava nada)
 Push-Location $Destino

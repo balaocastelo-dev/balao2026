@@ -14,13 +14,16 @@ Leva as vendas e os orçamentos do Bling para a corrida de vendas do site
 
 ## Instalar ou atualizar
 
-1. No painel, `/painel/arena` → **Conexão com o Bling** → **Gerar chave do vigia** (baixa `arena-vigia-chave.txt`).
-2. No PowerShell:
+1. No PowerShell do PC com o Bling (o da sentinela do Bionic):
 
 ```powershell
 git -C $HOME\balao2026 pull
 & $HOME\balao2026\scripts\arena-vigia\instalar.ps1
 ```
+
+2. O instalador mostra um código de 4 números e espera. Em `/painel/arena` → **Conexão com o Bling** aparece
+   "O computador … quer ligar o vigia" com o mesmo código: **Aprovar**. A chave vai direto do site para o vigia
+   (pareamento, versão 1.2). Para trocar a chave depois: `instalar.ps1 -Parear`.
 
 ## Cada volta
 

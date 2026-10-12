@@ -17,6 +17,7 @@ Só usa a biblioteca padrão do Python. Uso:
   python vigia.py              uma volta (é o que a tarefa agendada roda)
   python vigia.py --conferir   confere Bling e site sem gravar nada
   python vigia.py --desde 2026-09-01   varre desde uma data
+  python vigia.py --parear     pede para entrar; aprove no painel (/painel/arena)
 """
 from __future__ import annotations
 
@@ -32,7 +33,7 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-VERSAO = "1.1"
+VERSAO = "1.2"
 AQUI = Path(__file__).resolve().parent
 CASA = Path(os.environ.get("USERPROFILE") or os.environ.get("HOME") or ".")
 
@@ -413,8 +414,44 @@ def uma_volta(cfg: dict, forcado: str | None = None, conferir: bool = False) -> 
             pass
 
 
+def parear(cfg: dict, espera_max_s: int = 15 * 60, intervalo_s: float = 3.0) -> int:
+    """Pede para entrar na Arena e espera a aprovação no painel; grava a chave."""
+    site = cfg["site"].rstrip("/")
+    try:
+        r = pedir(f"{site}/api/arena/vigia/parear", metodo="POST", dados={"maquina": socket.gethostname()})
+    except ErroHttp as e:
+        print(f"O site não aceitou o pedido ({e.status}). Tente de novo em 30 s.")
+        return 2
+    print("")
+    print(f"  Código: {r['codigo']}")
+    print(f"  Abra www.balao.info/painel/arena > Conexão com o Bling e aprove o computador {socket.gethostname()}.")
+    print("  Esperando a aprovação (até 15 minutos)...", flush=True)
+    fim = time.time() + espera_max_s
+    while time.time() < fim:
+        time.sleep(intervalo_s)
+        try:
+            j = pedir(f"{site}/api/arena/vigia/parear?pedido={r['pedido']}", cabecalhos={"Authorization": f"Bearer {r['token']}"})
+        except ErroHttp as e:
+            if e.status == 403:
+                print("O pedido venceu ou foi recusado no painel.")
+                return 3
+            continue
+        except OSError:
+            continue
+        if j.get("aprovado") and j.get("chave"):
+            arq = Path(cfg["arquivo_chave"])
+            arq.parent.mkdir(parents=True, exist_ok=True)
+            arq.write_text(j["chave"], encoding="ascii")
+            print(f"Aprovado! Chave guardada em {arq}.")
+            return 0
+    print("Ninguém aprovou em 15 minutos. Rode de novo.")
+    return 4
+
+
 def main(argv: list[str]) -> int:
     cfg = carregar_config()
+    if "--parear" in argv:
+        return parear(cfg)
     forcado = None
     if "--desde" in argv:
         i = argv.index("--desde")
