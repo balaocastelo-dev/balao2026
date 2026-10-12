@@ -44,6 +44,7 @@ interface Resultado {
   suspeita: boolean;
   concluida: boolean;
   fotosAchadas: number;
+  bloqueados?: number;
   inicio: string;
 }
 
@@ -115,7 +116,7 @@ export default function ReceberCatalogoPage() {
         setFonte(alvo);
       }
       let inicio: string | null = null;
-      const soma = { recebidos: 0, gravados: 0, novos: 0, retidos: 0, recusados: 0, removidos: 0, fotosAchadas: 0, suspeita: false };
+      const soma = { recebidos: 0, gravados: 0, novos: 0, retidos: 0, recusados: 0, removidos: 0, fotosAchadas: 0, bloqueados: 0, suspeita: false };
       const lotes = Math.ceil(captura.produtos.length / LOTE);
       for (let i = 0; i < lotes; i++) {
         setAndamento(`Importando: lote ${i + 1} de ${lotes}…`);
@@ -134,7 +135,7 @@ export default function ReceberCatalogoPage() {
         const r: Resultado = resposta!.resultado;
         inicio = r.inicio;
         setFonte(resposta!.fonte);
-        for (const k of ["recebidos", "gravados", "novos", "retidos", "recusados", "removidos", "fotosAchadas"] as const) soma[k] += r[k] || 0;
+        for (const k of ["recebidos", "gravados", "novos", "retidos", "recusados", "removidos", "fotosAchadas", "bloqueados"] as const) soma[k] += r[k] || 0;
         soma.suspeita = soma.suspeita || r.suspeita;
       }
       setTotal(soma);
@@ -263,7 +264,8 @@ export default function ReceberCatalogoPage() {
           </p>
           <p>
             {total.gravados.toLocaleString("pt-BR")} produtos no site · {total.novos} novos · {total.removidos} saíram · {total.retidos} quedas
-            de preço seguradas · {total.recusados} fora (indisponíveis ou sem preço).
+            de preço seguradas · {total.recusados} fora (indisponíveis ou sem preço)
+            {total.bloqueados ? ` · ${total.bloqueados} bloqueados por você (não voltaram)` : ""}.
           </p>
           {fonte?.marca_dagua === false && <p>As fotos deste fornecedor não têm marca d&apos;água: o site usa as fotos dele.</p>}
           {fonte?.marca_dagua === true && (

@@ -6,6 +6,7 @@ import { descreverRegra, type RegraDeMargem } from "@/lib/precos/margem";
 import MargemPorCategoria from "@/components/painel/MargemPorCategoria";
 import RegraEscalonada from "@/components/painel/RegraEscalonada";
 import FavoritoDoBalao from "@/components/painel/FavoritoDoBalao";
+import ProdutosBloqueados from "@/components/painel/ProdutosBloqueados";
 
 /** Catálogo da Kyte (fornecedor local): <loja>.kyte.site ou <loja>.catalog.kyte.site. */
 const LINK_KYTE = /^(?:https?:\/\/)?([a-z0-9-]{2,63}\.(?:catalog\.)?kyte\.site)(?:\/|$)/i;
@@ -644,6 +645,8 @@ export default function PrecosPage() {
           </div>
         </section>
       )}
+
+      <ProdutosBloqueados />
 
       {retidos.length > 0 && (
         <section className="rounded-lg border border-amber-200 bg-amber-50/50 p-4">

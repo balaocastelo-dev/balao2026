@@ -310,7 +310,7 @@ export default function ProductManager() {
         const chunkSize = 5;
         for (let i = 0; i < productsToDelete.length; i += chunkSize) {
              const chunk = productsToDelete.slice(i, i + chunkSize);
-             await Promise.all(chunk.map((p) => fetch(`/api/products/${p.id}`, { method: "DELETE" })));
+             await Promise.all(chunk.map((p) => fetch(`/api/products/${p.id}?motivo=${encodeURIComponent("Excluído na limpeza (sem foto)")}`, { method: "DELETE" })));
              deletedCount += chunk.length;
         }
 
@@ -379,7 +379,7 @@ export default function ProductManager() {
         const chunkSize = 5;
         for (let i = 0; i < productsToDelete.length; i += chunkSize) {
             const chunk = productsToDelete.slice(i, i + chunkSize);
-            await Promise.all(chunk.map(p => fetch(`/api/products/${p.id}`, { method: "DELETE" })));
+            await Promise.all(chunk.map(p => fetch(`/api/products/${p.id}?motivo=${encodeURIComponent("Excluído na limpeza (duplicado)")}`, { method: "DELETE" })));
             deletedCount += chunk.length;
         }
         alert(`${deletedCount} produtos duplicados excluídos com sucesso.`);
@@ -473,7 +473,7 @@ export default function ProductManager() {
   };
 
   const handleBulkDelete = async () => {
-    if (!confirm(`Tem certeza que deseja excluir ${selectedIds.size} produtos selecionados? Esta ação não pode ser desfeita.`)) return;
+    if (!confirm(`Excluir ${selectedIds.size} produtos selecionados?\n\nOs que vieram da KaBuM! ou de fornecedor ficam BLOQUEADOS: não voltam na próxima atualização. Para trazer de volta: Preços por fonte > Produtos bloqueados.`)) return;
     
     setIsProcessingBulk(true);
     let deletedCount = 0;
@@ -532,7 +532,7 @@ export default function ProductManager() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Tem certeza que deseja excluir?")) return;
+    if (!confirm("Excluir este produto?\n\nSe ele veio da KaBuM! ou de fornecedor, fica BLOQUEADO: não volta na próxima atualização. Para trazer de volta: Preços por fonte > Produtos bloqueados.")) return;
     try {
         await fetch(`/api/products/${id}`, { method: "DELETE" });
         fetchProducts();

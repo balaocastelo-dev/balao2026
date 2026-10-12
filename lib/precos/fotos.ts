@@ -485,8 +485,49 @@ const singularIl = (p: string) => (p.length > 3 && p.endsWith("s") ? p.slice(0, 
  * Acessório no lugar do produto continua recusado (foto de carregador não
  * ilustra pilha).
  */
+/**
+ * Marcas que, aparecendo só no anúncio da foto, mostram OUTRO produto (caso de
+ * 11/10: "Bateria Toply 27A 12V" de R$ 3,75 com a foto de uma bateria WEG
+ * selada de moto; controle genérico com a foto do Pro Controller da Nintendo).
+ */
+const MARCAS_QUE_ENGANAM = [
+  // Fabricantes conhecidos: a foto deles mostra outro produto, quase sempre bem mais caro.
+  "logitech", "apple", "sony", "xiaomi", "samsung", "jbl", "dell", "hp", "lenovo", "acer", "asus", "motorola", "lg", "intelbras",
+  "tramontina", "weg", "panasonic", "philips", "duracell", "microsoft", "attack shark", "8bitdo", "redragon", "havit", "sandisk",
+  "kingston", "wd", "seagate", "tp-link", "tplink", "edifier", "hyperx", "razer", "corsair", "amazon", "baseus", "ugreen", "multilaser",
+];
+
+function marcasNoTexto(t: string): Set<string> {
+  const n = ` ${semAcento(t).replace(/[^a-z0-9]+/g, " ")} `;
+  return new Set(MARCAS_QUE_ENGANAM.filter((m) => n.includes(` ${semAcento(m).replace(/[^a-z0-9]+/g, " ")} `)));
+}
+
+/**
+ * Linhas de produto que já dizem a marca: "Console PlayStation 5" é Sony,
+ * "Mi Band 9" é Xiaomi. Valem só do lado do fornecedor (para não perder a
+ * foto certa do console Sony quando o anúncio dele não escreve "Sony").
+ */
+const MARCA_PELA_LINHA: [RegExp, string][] = [
+  [/\b(playstation|dualsense)\b/, "sony"],
+  [/\b(xbox|x box)\b/, "microsoft"],
+  [/\b(iphone|ipad|macbook|airpods|apple watch)\b/, "apple"],
+  [/\b(galaxy)\b/, "samsung"],
+  [/\b(mi band|redmi|poco)\b/, "xiaomi"],
+];
+
+/** A foto "parecida" traz marca que o produto do fornecedor não tem? */
+export function marcaDeOutroProduto(doFornecedor: string, achado: string): boolean {
+  const doProduto = marcasNoTexto(doFornecedor);
+  const texto = semAcento(doFornecedor).replace(/[^a-z0-9]+/g, " ");
+  for (const [linha, marca] of MARCA_PELA_LINHA) if (linha.test(texto)) doProduto.add(marca);
+  for (const m of marcasNoTexto(achado)) if (!doProduto.has(m)) return true;
+  return false;
+}
+
 export function semelhancaIlustrativa(doFornecedor: string, achado: string, marcas: string[] = []): number {
   if (misturaOriginalECompativel(doFornecedor, achado)) return 0;
+  // Foto de outra marca mostra outro produto: não serve nem como ilustração.
+  if (marcaDeOutroProduto(doFornecedor, achado)) return 0;
   // Cartucho, tinta e toner nunca levam foto "parecida": ou é a exata, ou nenhuma.
   if (ehSuprimento(doFornecedor)) return 0;
   const primeiraAchada = semAcento(achado).split(/[^a-z0-9]+/).filter(Boolean)[0] || "";
