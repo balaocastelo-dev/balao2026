@@ -147,16 +147,13 @@ estrelas) a que se sobe por uma escada do lado de fora.
   `lugares` `[nome, x, y, rumo, z do pé]` (entrada e mirante de cada casa); `casas`
   `{nome, x, y, piso, z1, teto, deck, frente}`; `paredes_projecao`
   `{nome, x0, x1, y0, y1, z0, z1, normal}`.
-- **O que o passeio ainda precisa acompanhar** (`js/`): o chão em vários níveis (escolher o
-  piso mais alto que não passe de pé + 0,5, em vez do primeiro da lista); a colisão e o
-  chão do caracol a partir de `espirais`; a luz de ambiente menor dentro das casas
-  (`materiais.js` só baixa abaixo de 3,35 m de altura; agora vai até o forro, 5,45); os
-  círculos e caixas fixos de `mundo.js` que ficaram nas posições antigas (jabuticabeira
-  em (11,3; 2,3), goiabeira em (16,9; 8,0), limoeiro em (22,6; 1,9) e o banco em
-  x 12,6–14,1), que agora caem dentro da casa azul, no primeiro degrau do caracol da verde e
-  na cozinha da amarela (os troncos e o banco novos já vão em `colisores`), e os passarinhos
-  de `som.js`, que cantam nessas mesmas posições antigas; e a porta de
-  entrada, que o `casas.js` desenha com dobradiça e almofadas (o modelo pede pivotante lisa).
+- **Como o passeio usa isso** (`js/`): `mundo.js` escolhe o chão como o piso mais alto que não
+  passe de pé + 0,5 (assim dá para estar no térreo, em cima ou no deck no mesmo x, y), calcula o
+  degrau do caracol pelo ângulo e barra pelo corrimão, menos na entrada e na saída; dentro das
+  casas o raio de quem anda cai para 0,2 m para caber entre bacia e box. `principal.js` ajuda a
+  subir o caracol (andar para a frente segue o giro). `casas.js` desenha a porta pivotante lisa
+  e reveza 6 luzes de verdade entre os ~45 pontos de luz; `materiais.js` baixa a luz de ambiente
+  dentro das casas até o forro (`uTopoCasa`). Os troncos e passarinhos já estão nas posições novas.
 
 ### As texturas
 
