@@ -12,9 +12,11 @@ import HomeBlogSection from "@/components/HomeBlogSection";
 import Paginacao from "@/components/catalogo/Paginacao";
 import { BotaoDeFiltros, FiltrosLaterais } from "@/components/catalogo/FiltrosDoCatalogo";
 import HomeVitrines, { type Variante } from "@/components/home/HomeVitrines";
+import HomeQuedaDePreco from "@/components/home/HomeQuedaDePreco";
+import { produtosEmQueda } from "@/lib/precos/queda";
 import { aplicarFiltros, contarFiltros, lerFiltros, montarFacetas, ordenar, paraQuery, termosDaBusca } from "@/lib/catalogo/filtros";
 
-import { getCachedProducts, getCachedProductsByExactCategories, getCachedBuscaCompleta } from "@/lib/cache";
+import { getCachedProducts, getCachedProductsByExactCategories, getCachedBuscaCompleta, getCachedQuedasDePreco } from "@/lib/cache";
 import { listarNoFormatoAntigo } from "@/lib/blog/repositorio";
 import { Product } from "@/lib/utils";
 import type { Metadata } from "next";
@@ -146,6 +148,9 @@ export default async function Home(props: {
     products = await getCachedProducts();
   }
 
+  // Queda de preço: consulta pequena e em cache, só na página inicial.
+  const quedasDePreco: Product[] = search || category ? [] : await getCachedQuedasDePreco();
+
   // --- Navegação do catálogo (busca ou ?category=): filtros laterais ---
   const filtros = lerFiltros(searchParams || {});
   // ?pronta=1 sozinho também abre a lista: todos os produtos de pronta entrega.
@@ -203,6 +208,11 @@ export default async function Home(props: {
         {/* 1. Full-Width Stretched Hero Banner */}
         {!navegando && (
           <HomeHeroFullWidth />
+        )}
+
+        {/* 1.05 Queda de preço: produtos cujo preço baixou nos últimos 7 dias (some quando não há nenhum) */}
+        {!navegando && (
+          <HomeQuedaDePreco quedas={produtosEmQueda(quedasDePreco)} />
         )}
 
         {/* 1.1 Destaque: MacBook Pro M5 seminovo (produto único da loja, fora do espelhamento) */}

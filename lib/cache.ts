@@ -12,6 +12,7 @@ import {
   buscarProdutosPorTermos,
   getComputadoresDaVitrine,
   getCandidatosANotebook,
+  getProdutosComQueda,
 } from "./db";
 import { listVitrinePagesPublic } from "./vitrine/db";
 import {
@@ -31,6 +32,7 @@ import { montarVitrine, RAIZ_DESKTOPS, RAIZ_NOTEBOOKS, type VitrinePremium } fro
 import { selecionarNotebooks, type VitrineDeNotebooks } from "./catalogo/notebooks";
 import { montarFileiras, type VitrineDePcGamer } from "./catalogo/pc-gamer";
 import type { Product } from "./utils";
+import { DIAS_NA_VITRINE } from "./precos/queda";
 
 const listaVazia = (itens: unknown[]) => !Array.isArray(itens) || itens.length === 0;
 
@@ -40,6 +42,16 @@ const listaVazia = (itens: unknown[]) => !Array.isArray(itens) || itens.length =
  * o que foi mudado no site.
  */
 export const TAG_PRODUTOS = "products";
+
+/**
+ * Produtos com queda de preço nos últimos dias (container da página inicial e
+ * /queda-de-preco). Sem espelho: se o banco não responder, o container some.
+ */
+export const getCachedQuedasDePreco = unstable_cache(
+  async () => getProdutosComQueda(new Date(Date.now() - DIAS_NA_VITRINE * 86_400_000).toISOString()),
+  ["quedas-de-preco"],
+  { revalidate: 120, tags: [TAG_PRODUTOS] }
+);
 
 /**
  * Catálogo com cache e espelho de contingência.

@@ -14,13 +14,14 @@
 
 import { randomUUID } from "crypto";
 import { turso, isTursoActive } from "@/lib/turso";
-import { buildCategoryNodesFromPaths } from "@/lib/utils";
+import { buildCategoryNodesFromPaths, parsePriceToNumber } from "@/lib/utils";
 import { decidirPreco, normalizarMargem } from "./calculo";
 import { lerMargensPorCategoria, lerRegra, margemAutomatica, margemDoProduto, type MargensPorCategoria, type RegraDeMargem } from "./margem";
 import { vendaDoProduto } from "./faixas";
 import type { ItemDeOrigem } from "./kabum";
 import { montarProduto, motivoDeRecusa, type ProdutoDeOrigem, type RegrasDaFonte } from "./produto";
 import { codigosBloqueados } from "./bloqueio";
+import { decidirQueda, type EstadoDaQueda } from "./queda";
 
 type Linha = Record<string, unknown>;
 
@@ -78,6 +79,9 @@ const COLUNAS_DE_ORIGEM: Record<string, string> = {
   retido_pix: "DOUBLE NULL",
   retido_cartao: "DOUBLE NULL",
   retido_desde: "VARCHAR(40) NULL",
+  // Queda de preço (12/10): preço de venda (Pix) de antes da queda e quando baixou.
+  preco_anterior: "DOUBLE NULL",
+  queda_em: "VARCHAR(40) NULL",
 };
 
 let estruturaPronta: Promise<void> | null = null;
@@ -387,7 +391,7 @@ const COLUNAS_DO_PRODUTO = [
   "id", "name", "price", "price_card", "discount_pix", "installment", "brand", "availability", "source_url",
   "image", "image_urls", "description", "specs", "category", "slug", "cost", "supplier", "created_at",
   "fonte_id", "origem_codigo", "origem_pix", "origem_cartao", "origem_parcelas", "origem_visto_em",
-  "retido_pix", "retido_cartao", "retido_desde",
+  "retido_pix", "retido_cartao", "retido_desde", "preco_anterior", "queda_em",
 ] as const;
 
 // Numa releitura só muda o que vem da fonte. Nome, categoria, descrição, ficha
@@ -418,7 +422,9 @@ const AO_REPETIR = `
   origem_visto_em = VALUES(origem_visto_em),
   retido_pix = VALUES(retido_pix),
   retido_cartao = VALUES(retido_cartao),
-  retido_desde = VALUES(retido_desde)`;
+  retido_desde = VALUES(retido_desde),
+  preco_anterior = VALUES(preco_anterior),
+  queda_em = VALUES(queda_em)`;
 
 interface Retencao {
   pix: number;
@@ -426,13 +432,20 @@ interface Retencao {
   desde: string;
 }
 
-function valoresDoProduto(p: ProdutoDeOrigem, vistoEm: string, slug: string, retencao: Retencao | null) {
+function valoresDoProduto(
+  p: ProdutoDeOrigem,
+  vistoEm: string,
+  slug: string,
+  retencao: Retencao | null,
+  queda: EstadoDaQueda = { preco_anterior: null, queda_em: null }
+) {
   return [
     p.id, p.name, p.venda.price, p.venda.price_card, p.venda.discount_pix, p.venda.installment, p.brand,
     p.availability, p.source_url, p.image, JSON.stringify(p.image_urls), p.description, JSON.stringify(p.specs),
     p.category, slug, p.cost, p.supplier, vistoEm,
     p.fonte_id, p.origem_codigo, p.origem_pix, p.origem_cartao, p.origem_parcelas, vistoEm,
     retencao?.pix ?? null, retencao?.cartao ?? null, retencao?.desde ?? null,
+    queda.preco_anterior, queda.queda_em,
   ];
 }
 
@@ -463,6 +476,8 @@ export interface ResultadoDaPagina {
  */
 export async function gravarPagina(fonte: Fonte, itens: ItemDeOrigem[], agora: string): Promise<ResultadoDaPagina> {
   const saida: ResultadoDaPagina = { gravados: 0, novos: 0, retidos: 0, recusados: 0, deOutraFonte: 0, bloqueados: 0 };
+  // As colunas de queda de preço (12/10) precisam existir antes da leitura abaixo.
+  await garantirEstrutura();
 
   const candidatos: ItemDeOrigem[] = [];
   const vistos = new Set<string>();
@@ -479,7 +494,7 @@ export async function gravarPagina(fonte: Fonte, itens: ItemDeOrigem[], agora: s
   if (aceitos.length === 0) return saida;
 
   const atuais = await turso.execute({
-    sql: `SELECT id, fonte_id, origem_pix, origem_cartao, origem_parcelas, retido_desde FROM products WHERE id IN (${aceitos.map(() => "?").join(", ")})`,
+    sql: `SELECT id, fonte_id, price, origem_pix, origem_cartao, origem_parcelas, retido_desde, preco_anterior, queda_em FROM products WHERE id IN (${aceitos.map(() => "?").join(", ")})`,
     args: aceitos.map((i) => i.codigo),
   });
   const porId = new Map(atuais.rows.map((r) => [String((r as Linha).id), r as Linha]));
@@ -524,7 +539,14 @@ export async function gravarPagina(fonte: Fonte, itens: ItemDeOrigem[], agora: s
       saida.novos++;
     }
 
-    valores.push(...valoresDoProduto(produto, agora, produto.slug, retencao));
+    // Queda de preço: compara o preço de venda novo com o que está no site.
+    const queda = decidirQueda(
+      atual ? { preco: parsePriceToNumber(atual.price), preco_anterior: numOuNulo(atual.preco_anterior), queda_em: txtOuNulo(atual.queda_em) } : null,
+      produto.venda.pix,
+      agora
+    );
+
+    valores.push(...valoresDoProduto(produto, agora, produto.slug, retencao, queda));
     linhas++;
   }
 
@@ -701,7 +723,7 @@ export async function aceitarRetidos(fonte: Fonte, ids?: string[]): Promise<numb
   await garantirEstrutura();
   const filtroIds = ids && ids.length ? ` AND id IN (${ids.map(() => "?").join(", ")})` : "";
   const res = await turso.execute({
-    sql: `SELECT id, name, category, retido_pix, retido_cartao, origem_parcelas FROM products WHERE fonte_id = ? AND retido_desde IS NOT NULL${filtroIds}`,
+    sql: `SELECT id, name, category, price, preco_anterior, queda_em, retido_pix, retido_cartao, origem_parcelas FROM products WHERE fonte_id = ? AND retido_desde IS NOT NULL${filtroIds}`,
     args: [fonte.id, ...(ids && ids.length ? ids : [])],
   });
   if (res.rows.length === 0) return 0;
@@ -715,10 +737,15 @@ export async function aceitarRetidos(fonte: Fonte, ids?: string[]): Promise<numb
       nome: String(l.name ?? ""),
       categoria: String(l.category ?? ""),
     });
+    const queda = decidirQueda(
+      { preco: parsePriceToNumber(l.price), preco_anterior: numOuNulo(l.preco_anterior), queda_em: txtOuNulo(l.queda_em) },
+      venda.pix,
+      agoraIso()
+    );
     return {
       sql: `UPDATE products SET price = ?, price_card = ?, installment = ?, discount_pix = ?, cost = ?, origem_pix = ?, origem_cartao = ?,
-              retido_pix = NULL, retido_cartao = NULL, retido_desde = NULL WHERE id = ?`,
-      args: [venda.price, venda.price_card, venda.installment, venda.discount_pix, pix, pix, cartao, String(l.id)],
+              retido_pix = NULL, retido_cartao = NULL, retido_desde = NULL, preco_anterior = ?, queda_em = ? WHERE id = ?`,
+      args: [venda.price, venda.price_card, venda.installment, venda.discount_pix, pix, pix, cartao, queda.preco_anterior, queda.queda_em, String(l.id)],
     };
   });
   await turso.batch(comandos, "write");

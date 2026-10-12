@@ -27,6 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/ia-local',
     '/pcgamer',
     '/notebooks',
+    '/queda-de-preco',
     '/seminovos',
     '/monteseupc',
     '/departamentos',
