@@ -62,7 +62,9 @@ MODELOS_DE_VISAO = [m for m in [os.environ.get("CAPA_MODELO_VISAO")] if m] + [
     "qwen2.5vl", "qwen3-vl", "llama3.2-vision", "gemma3", "minicpm-v", "llava"]
 # Quem mais usa a placa de vídeo na fábrica. A URA é vista à parte, em `ligacoes()`.
 OCUPANTES = ["video_diario.py", "video_dica.py", "fila_avatar.py", "run_avatar.py", "upscale_seedvr2.py",
-             "criar_figurino.py", "capa_blog.py"]
+             "criar_figurino.py", "capa_blog.py",
+             # da conversa do Instagram (11–12/10/2026): vídeos da Pauta e fotos de corpo inteiro
+             "video_pauta.py", "corpo_inteiro.py", "kontext_corpo.py", "plano_aberto.py"]
 SO_OLHAM = ("--ver", "--painel", "--montar-teste", "--proximo")     # chamadas que não usam a placa
 
 LARGURA, ALTURA = 1600, 896          # o Flux quer múltiplos de 16; depois vira 1600 x 900
@@ -95,6 +97,9 @@ Answer ONLY with JSON in exactly this shape:
 
 
 NAO_APPLE = " Also list here any laptop or computer that clearly looks like an Apple product (MacBook, iMac)."
+
+
+ESTADO_COMFY = {"aberto_por_mim": False}
 
 
 class Interrompida(Exception):
@@ -136,8 +141,22 @@ def ler_fila():
 
 # ------------------------------------------------------------ placa de vídeo
 
+def _julia_atendendo():
+    """A JUL.IA (vendedora do WhatsApp) está atendendo ou atendeu há poucos minutos: a placa de vídeo é dela.
+    Prioridade decidida pelo Thiago em 12/10/2026 (ela atende dezenas de vezes mais que a URA). O sinal é escrito
+    pelo C:\\Users\\user\\balao-agente\\julia.py (placa.py): o horário até quando ela precisa da placa."""
+    try:
+        import time as _t
+        from pathlib import Path as _P
+        return float(_P(r"C:\Users\user\balao-agente\dados\placa-julia.txt").read_text().strip() or 0) > _t.time()
+    except Exception:
+        return False
+
+
 def ligacoes():
     """Ligações em andamento na URA (o mesmo sinal do avatar\\fila_avatar.py)."""
+    if _julia_atendendo():  # a JUL.IA tem prioridade na placa: conta como ligação (Thiago, 12/10/2026)
+        return 1
     try:
         r = rodar(["wsl.exe", "-d", "Ubuntu", "-u", "root", "--", "sh", "-lc",
                    "asterisk -rx 'core show channels count'"], espera=20)
@@ -254,6 +273,25 @@ def subir_comfy():
     raise RuntimeError("o ComfyUI não respondeu em 6 minutos")
 
 
+def outro_usando_o_comfy():
+    """Outro programa de placa rodando, ou trabalho de outro na fila do ComfyUI: aí não se fecha o ComfyUI.
+    Em 12/10/2026 às 06h20 um vídeo da Pauta começou junto com a capa e perdeu o ComfyUI quando a capa o fechou."""
+    if outro_render():
+        return True
+    try:
+        fila = json.loads(http(COMFY + "/queue", espera=5))
+        return bool(fila.get("queue_running") or fila.get("queue_pending"))
+    except Exception:
+        return False
+
+
+def soltar_flux():
+    try:
+        http(COMFY + "/free", {"unload_models": True, "free_memory": True}, espera=10)
+    except Exception:
+        pass
+
+
 def matar_comfy():
     rodar(["powershell", "-NoProfile", "-Command",
            "Get-CimInstance Win32_Process -Filter \"Name='python.exe'\" | "
@@ -293,8 +331,15 @@ def gerar(texto, destino):
     inicio = time.time()
     while True:
         time.sleep(2)
-        if ligacoes() > 0:                # a URA tem prioridade: solta a placa na hora
-            matar_comfy()
+        if ligacoes() > 0:                # URA ou JUL.IA têm prioridade: solta a placa na hora
+            try:
+                http(COMFY + "/interrupt", {}, espera=10)
+            except Exception:
+                pass
+            if ESTADO_COMFY["aberto_por_mim"] and not outro_usando_o_comfy():
+                matar_comfy()
+            else:
+                soltar_flux()
             raise Interrompida()
         if time.time() - inicio > LIMITE_POR_FOTO_S:
             try:
@@ -365,6 +410,10 @@ def conferir(arquivo, cena, modelo, categoria=""):
 def foto_aprovada(pedido, destino, modelo, categoria=""):
     """Devolve a semente da foto aprovada, ou None."""
     for n in range(1, TENTATIVAS + 1):
+        quem = outro_render()
+        if quem:                          # outro render começou depois que a rodada abriu: sai da frente
+            log(f"  {quem} começou a usar a placa: a foto fica para a próxima rodada")
+            raise Interrompida()
         semente, segundos = gerar(texto_do_pedido(pedido, categoria), destino)
         ok, motivo = conferir(destino, pedido, modelo, categoria)
         log(f"  tentativa {n} (semente {semente}, {segundos}s): {'aprovada' if ok else 'reprovada: ' + motivo}")
@@ -469,6 +518,7 @@ def main():
                 if not esperar_placa():
                     return
                 abri = subir_comfy() or abri
+                ESTADO_COMFY["aberto_por_mim"] = abri
                 log(f"{slug}: gerando a foto ({modelo} confere)")
                 semente = foto_aprovada(p["pedido"], destino, modelo, p.get("categoria", ""))
                 e["tentativas"] = e.get("tentativas", 0) + 1
@@ -490,12 +540,15 @@ def main():
             e["publicada"] = ok or ja_tinha
             log(f"  {'publicada' if ok else 'o comando recusou'}: {saida.splitlines()[-1] if saida else ''}")
     except Interrompida:
-        log("a URA atendeu uma ligação: placa liberada, a foto fica para a próxima rodada")
+        log("placa pedida por quem tem prioridade (URA, JUL.IA ou outro render): a foto fica para a próxima rodada")
     finally:
         if not teste:
             gravar_estado(estado)
-        if abri:
+        if abri and not outro_usando_o_comfy():
             matar_comfy()
+        elif abri:
+            log("o ComfyUI ficou aberto: outro programa começou a usá-lo durante a rodada")
+            soltar_flux()
         else:
             try:
                 http(COMFY + "/free", {"unload_models": True, "free_memory": True}, espera=10)
