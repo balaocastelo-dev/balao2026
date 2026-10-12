@@ -100,7 +100,12 @@ try {
     if (tempos.travadas.length > 40) { tempos.travadas.sort((a, b) => b[1] - a[1]); tempos.travadas.length = 20; }
   })).observe({ type: 'longtask', buffered: true });
 } catch (e) { /* navegador sem longtask */ }
-const proximoQuadro = () => new Promise(ok => requestAnimationFrame(() => ok()));
+// dá a vez para a página (desenhar, responder ao mouse); com a aba escondida o navegador
+// não chama requestAnimationFrame, então usa uma mensagem (que não fica parada)
+const proximoQuadro = () => new Promise(ok => {
+  if (!document.hidden) { requestAnimationFrame(() => ok()); return; }
+  const canal = new MessageChannel(); canal.port1.onmessage = () => ok(); canal.port2.postMessage(0);
+});
 const avisoCarga = t => { $('enter').textContent = t; };
 
 // Compila os programas da placa de vídeo sem travar a página: o Chrome compila em paralelo
