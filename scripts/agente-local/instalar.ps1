@@ -76,6 +76,12 @@ try {
 }
 if (-not $SemTarefa) {
   Stop-ScheduledTask -TaskPath "\BalaoFabrica\" -TaskName "JUL.IA" -ErrorAction SilentlyContinue
+  # Parar a tarefa fecha o lancador do .venv, mas o Python de verdade (filho dele)
+  # pode ficar vivo segurando a trava: a versao nova abriria e sairia na hora.
+  Get-CimInstance Win32_Process -Filter "Name='python.exe' or Name='pythonw.exe'" |
+    Where-Object { $_.CommandLine -match 'julia\.py' -and $_.CommandLine -notmatch '--conferir|--conversar' } |
+    ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+  Start-Sleep -Seconds 2
   Start-ScheduledTask -TaskPath "\BalaoFabrica\" -TaskName "JUL.IA"
   Write-Host ""
   Write-Host "JUL.IA rodando. No /crm > Centro de Comando > JUL.IA o computador aparece 'No ar'." -ForegroundColor Green

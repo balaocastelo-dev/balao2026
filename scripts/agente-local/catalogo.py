@@ -18,7 +18,8 @@ from pathlib import Path
 PALAVRAS_VAZIAS = set(
     """a o as os de da do das dos e em no na nos nas um uma uns umas para pra pro com sem por que qual quais
     quero queria gostaria preciso procuro procurando tem tenho voces vcs voce vc me mim algum alguma bom boa
-    melhor barato barata baratos baratas top legal ai ate mais menos ou muito muita uso usar""".split()
+    melhor barato barata baratos baratas top legal ai ate mais menos ou muito muita uso usar
+    polegada polegadas pol quanto custa custo preco valor esse essa este esta""".split()
 )
 
 # O cliente fala de um jeito, o catálogo escreve de outro.
@@ -256,8 +257,10 @@ class Catalogo:
             # É mesmo o produto pedido, e não um acessório ("suporte de placa de vídeo",
             # "memória para notebook")? O nome começa pelo tipo, ou a última parte da
             # categoria é o tipo.
-            ultima_cat = sem_acento(str(p.get("category") or "").split("/")[-1])
-            eh_do_tipo = any(nome.startswith(t + " ") or nome == t or casa(t, ultima_cat) for t in tipo)
+            # A categoria COMEÇA pelo tipo ("Notebooks", "Notebook Acer"); "Fontes para
+            # Notebook" é acessório (a busca por notebook devolvia só carregador).
+            ultima_cat = sem_acento(str(p.get("category") or "").split("/")[-1]).strip()
+            eh_do_tipo = any(nome.startswith(t + " ") or nome == t or ultima_cat.startswith(t) for t in tipo)
             if eh_do_tipo:
                 pontos += 5
             achados.append((pontos, eh_do_tipo, preco(p.get("price")), p, faltaram))

@@ -149,6 +149,28 @@ def valores_citados(texto: str) -> set[float]:
     return {v for v in achados if v > 0}
 
 
+PRECO_NA_FRASE = re.compile(
+    r"\b(?:ate|uns|umas|no maximo|por volta de|em torno de|na faixa de|de)?\s*(?:r\$\s*)?\d+(?:[.,]\d+)?\s*(?:mil|k|reais|conto)\b"
+    r"|r\$\s*\d[\d.,]*"
+)
+
+
+DISSE_QUE_NAO_TEM = re.compile(r"\bnao (temos|tem|encontrei|achei|ha|trabalhamos|vendemos)\b|\bem falta\b|\besgotad")
+
+
+def so_disse_que_nao_tem(texto: str) -> bool:
+    """"Não temos esse modelo no site" (sem oferecer outro): os cartões da busca não vão."""
+    t = sem_acento(texto)
+    oferece = re.search(r"\b(mas|porem|separei|veja|olha|alternativ\w*|opco\w*|opca\w*|(tenho|temos) (estas|estes|essas|esses|outr\w*|alguns|algumas|sim))\b", t)
+    return bool(DISSE_QUE_NAO_TEM.search(t)) and not oferece
+
+
+def sem_precos(texto: str) -> str:
+    """A frase do cliente sem o valor ("notebook pra estudar até 3 mil" -> "notebook pra estudar"),
+    para buscar no catálogo: o valor vai como preço máximo, não como palavra."""
+    return " ".join(PRECO_NA_FRASE.sub(" ", sem_acento(texto)).split())
+
+
 def problemas_da_resposta(texto: str, precos_permitidos: set[float]) -> list[str]:
     """O que impede a resposta de ir para o cliente."""
     problemas = []

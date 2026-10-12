@@ -599,11 +599,16 @@ class Atendimento:
         if not self._mostrados() and not self.memoria.get("orcamento"):
             consulta = self.consulta_do_cliente()
             if self._fala_de_produto(consulta):
-                args = {"busca": consulta}
+                args = {"busca": R.sem_precos(consulta) or consulta}
                 teto = self._teto(consulta)
                 if teto:
                     args["preco_maximo"] = teto
                 saida = self.f_buscar_produtos(**args)
+                if saida.get("produtos"):
+                    saida["instrucao"] = (
+                        "Os 3 primeiros vão para o cliente como cartões (foto, preço e link); para mandar outros, chame "
+                        "mostrar_produto com os ids. Responda em 1 ou 2 frases curtas, sem lista e sem repetir nomes e preços, "
+                        "e termine com uma pergunta. Se nenhum servir para o que o cliente pediu, diga isso.")
                 self.registrar(f"[cerebro] busca antes do modelo: {len(saida.get('produtos') or [])} produto(s)")
                 conversa.append({"role": "assistant", "content": "",
                                  "tool_calls": [{"function": {"name": "buscar_produtos", "arguments": args}}]})
@@ -646,7 +651,9 @@ class Atendimento:
 
         # Buscou, achou e não mostrou: o texto do modelo fala das opções, então
         # o cliente recebe as duas primeiras (senão "o segundo" não teria a que se referir).
-        if "buscar_produtos" in usadas and not self.cartoes and self.ultimos_achados:
+        # (Se o próprio texto diz que não tem o que o cliente pediu, nada de cartão.)
+        if ("buscar_produtos" in usadas and not self.cartoes and self.ultimos_achados
+                and not R.so_disse_que_nao_tem(texto)):
             for r in self.ultimos_achados[:MAX_CARTOES]:
                 self.f_mostrar_produto(r["id"])
 

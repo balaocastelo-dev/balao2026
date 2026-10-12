@@ -388,6 +388,26 @@ class TestRapidez(unittest.TestCase):
         self.assertTrue(all(len(m["texto"]) <= 610 for m in r if m["de"] != "cliente"), "mensagem comprida de vendedor é cortada")
         self.assertEqual(msgs[1]["texto"], "lista de preços " * 100, "não mexe na lista recebida")
 
+    def test_busca_antes_tira_o_valor_da_frase(self):
+        self.assertEqual(R.sem_precos("quero um notebook pra estudar até 3 mil"), "quero um notebook pra estudar")
+        self.assertEqual(R.sem_precos("pc gamer até R$ 5.000"), "pc gamer ate")
+        self.assertEqual(R.sem_precos("notebook i5 16gb"), "notebook i5 16gb", "16gb não é preço")
+
+    def test_disse_que_nao_tem_nao_manda_cartao(self):
+        self.assertTrue(R.so_disse_que_nao_tem("Não temos esse modelo no site agora. Quer falar com um vendedor?"))
+        self.assertFalse(R.so_disse_que_nao_tem("Não tenho o de 16GB, mas separei estas opções. Alguma serve?"))
+        self.assertFalse(R.so_disse_que_nao_tem("Tenho estas opções. Qual prefere?"))
+
+    def test_notebook_nao_devolve_carregador(self):
+        dados = {"produtos": [
+            {"id": 1, "name": "Fonte Notebook Dell 19.5V 65W", "price": "119,00", "category": "Energia/Fontes para Notebook", "availability": "Disponível"},
+            {"id": 2, "name": "Notebook Acer Aspire 5 Ryzen 5 16GB", "price": "5.185,67", "category": "Computadores/Notebooks/Notebook Acer", "availability": "Disponível"},
+        ]}
+        c = Catalogo(tempfile.mkdtemp(), buscar_remoto=lambda: dados)
+        c.atualizar(forcar=True)
+        self.assertEqual([p["id"] for p in c.buscar("notebook")], ["2"])
+        self.assertEqual([p["id"] for p in c.buscar("fonte notebook dell")], ["1"], "pedindo a fonte, vem a fonte")
+
     def test_conversas_ao_mesmo_tempo_deixa_uma_vaga_para_a_ura(self):
         import julia
 
