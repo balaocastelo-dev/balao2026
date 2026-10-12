@@ -2,6 +2,22 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "posso-deixar-o-notebook-na-tomada-o-tempo-todo",
+      "titulo": "Posso deixar o notebook na tomada o tempo todo? Pode, com um ajuste",
+      "resumo": "Deixar o notebook na tomada não estraga a bateria de uma vez, mas 100% o dia todo e calor aceleram o desgaste. Veja o ajuste que resolve.",
+      "categoria": "guias",
+      "etiquetas": [
+        "notebook",
+        "bateria",
+        "manutenção",
+        "carregador"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-12T21:12:06.804Z",
+      "minutos": 5,
+      "formato": "dica"
+    },
+    {
       "slug": "windows-11-24h2-fim-do-suporte-13-de-outubro",
       "titulo": "Windows 11 24H2 sai de suporte em 13 de outubro: o que fazer",
       "resumo": "A atualização de 13 de outubro é a última do Windows 11 24H2 nas edições Home e Pro. Veja como conferir sua versão e como passar para a 25H2 ou a 26H2.",
@@ -138,5 +154,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-12T15:05:40.362Z"
+  "atualizadoEm": "2026-10-12T21:12:07.582Z"
 }

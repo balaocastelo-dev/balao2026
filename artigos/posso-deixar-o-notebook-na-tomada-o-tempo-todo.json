@@ -1,0 +1,186 @@
+{
+  "slug": "posso-deixar-o-notebook-na-tomada-o-tempo-todo",
+  "titulo": "Posso deixar o notebook na tomada o tempo todo? Pode, com um ajuste",
+  "resumo": "Deixar o notebook na tomada não estraga a bateria de uma vez, mas 100% o dia todo e calor aceleram o desgaste. Veja o ajuste que resolve.",
+  "categoria": "guias",
+  "etiquetas": [
+    "notebook",
+    "bateria",
+    "manutenção",
+    "carregador"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-12T21:12:06.804Z",
+  "formato": "dica",
+  "roteiro": {
+    "fala": "Muita gente me pergunta se pode deixar o notebook na tomada o dia inteiro. Pode, sim. O carregador não fica empurrando energia sem parar. O que desgasta a bateria é ela ficar sempre cheia e quente. Por isso, procure no programa do fabricante a opção que limita a carga, que segura a bateria um pouco abaixo da carga cheia. E deixe o notebook num lugar ventilado. Se a bateria estufar, desligue e leve a um técnico.",
+    "titulo": "Notebook na tomada o dia todo?",
+    "destaques": [
+      "Pode deixar na tomada",
+      "Ative o limite de carga",
+      "Calor é o maior vilão",
+      "Bateria estufada: técnico"
+    ],
+    "legenda": "Deixar o notebook na tomada o dia todo não estraga a bateria de uma vez, mas carga sempre cheia e calor aceleram o desgaste. Veja o ajuste que resolve. A dica completa está no blog.",
+    "hashtags": [
+      "notebook",
+      "bateria",
+      "dica",
+      "informatica",
+      "campinas"
+    ]
+  },
+  "seo": {
+    "titulo": "Notebook na tomada o tempo todo: pode? Veja o ajuste"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Pode deixar o notebook na tomada o tempo todo, sim: quando a bateria enche, o próprio notebook interrompe a carga e passa a funcionar direto pelo carregador. O cuidado é outro. Uma bateria de íon-lítio que passa o dia inteiro em 100% e ainda esquenta perde capacidade mais depressa, e é isso que vale a pena evitar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que o risco está em \"carregar demais\" ou que o certo é deixar a bateria zerar toda vez. Nem uma coisa nem outra. A Microsoft afirma que manter a bateria em 100% o tempo todo acelera a deterioração. A saída é limitar a carga máxima, um recurso que muitos notebooks já trazem, e cuidar da ventilação."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "Ficar na tomada **não sobrecarrega** a bateria: a carga para quando ela enche.",
+        "O que desgasta é **carga alta por muito tempo** somada a **calor**.",
+        "Quem usa o notebook sempre ligado na tomada deve **ativar o limite de carga** do fabricante.",
+        "Bateria estufada ou notebook muito quente pedem **técnico**, não teste em casa."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como ativar o limite de carga no seu notebook"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Cada fabricante dá um nome e um limite diferente para o mesmo recurso. Por isso o primeiro passo é procurar no programa que veio instalado com o notebook, e não em ferramentas de terceiros. Os exemplos abaixo vêm das páginas de suporte dos próprios fabricantes:"
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Onde aparece",
+        "Nome do recurso",
+        "O que faz"
+      ],
+      "linhas": [
+        [
+          "Windows 10 e 11, em notebooks compatíveis",
+          "Carregamento inteligente (Smart charging)",
+          "Mantém a bateria abaixo de 100% enquanto o notebook fica na tomada; um coração aparece no ícone da bateria"
+        ],
+        [
+          "Lenovo, pelo Lenovo Vantage",
+          "Modo de conservação",
+          "Segura a carga entre 75% e 80% em modelos como o Yoga 9i; a Lenovo indica o recurso para quem fica sempre na tomada"
+        ],
+        [
+          "Microsoft Surface",
+          "Battery Limit Mode e Smart Charging",
+          "O primeiro limita a 50%; o segundo limita a 80% quando o aparelho fica muito tempo na tomada ou em temperatura alta"
+        ]
+      ],
+      "titulo": "O recurso de limite de carga em alguns fabricantes",
+      "fonte": {
+        "nome": "Suporte da Microsoft e manual da Lenovo",
+        "url": "https://support.microsoft.com/en-us/surface/battery/caring-for-your-surface-battery"
+      },
+      "nota": "Os nomes e as porcentagens variam de modelo para modelo. Confira no programa ou no manual do seu notebook."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "Abra o programa do fabricante do notebook (o nome costuma ter a marca do aparelho) ou as **Configurações de energia e bateria** do Windows.",
+        "Procure uma opção com nomes como **conservação**, **limite de carga**, **saúde da bateria** ou **carregamento inteligente**.",
+        "Ative a opção e deixe o notebook na tomada normalmente.",
+        "Antes de uma viagem ou de um dia longe da tomada, desative o limite para carregar até 100%."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Não estranhe se, depois disso, o indicador parar em 80% ou mostrar que a carga foi pausada. A Microsoft explica que o comportamento é intencional. A Lenovo também descreve que alguns ThinkPad só voltam a carregar quando a bateria cai abaixo de 95%, para evitar recargas curtas e repetidas."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "notebooks"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando a tomada pede outro cuidado"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O calor pesa tanto quanto a carga. A Microsoft informa que os Surface foram feitos para operar entre 0 °C e 35 °C, e a Lenovo recomenda carregar entre 10 °C e 35 °C. Notebook sobre colchão ou almofada, com as saídas de ar tapadas, ou esquecido no carro ao sol, trabalha fora dessa faixa. Se o seu esquenta demais, veja [por que o notebook esquenta muito](/blog/por-que-notebook-esquenta-muito)."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "Desempenho completo sem depender da bateria",
+        "Com limite de carga, a bateria envelhece mais devagar",
+        "Menos ciclos de carga e descarga no dia a dia"
+      ],
+      "contras": [
+        "Sem limite de carga, a bateria passa o dia em 100%",
+        "Em lugar abafado, o calor acelera o desgaste",
+        "Com carga limitada, sobra menos autonomia se você sair às pressas"
+      ],
+      "titulo": "Deixar o notebook sempre na tomada"
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "Se a carcaça levantou, o touchpad ficou alto ou a tampa não fecha direito, a bateria pode estar estufada. Desligue o notebook, tire da tomada e não aperte nem tente remover a bateria em casa: há risco de incêndio. Leve a um técnico.",
+      "titulo": "Bateria estufada é caso de técnico"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A dica não vale se a bateria já está gasta ou se o carregador é a dúvida. Nesse caso, a Balão da Informática, no Cambuí, em Campinas, faz o diagnóstico e a troca da bateria na [assistência técnica](/manutencao), e tem [carregadores de notebook](/carregadores) para quando o problema está na fonte. Em uma linha: deixe na tomada, ative o limite de carga e mantenha o notebook ventilado."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Deixar o notebook na tomada vicia a bateria?",
+      "resposta": "Não do jeito que muita gente imagina. O que acontece com a bateria de íon-lítio é perder capacidade mais depressa quando passa muito tempo em 100% e no calor. Por isso o limite de carga ajuda."
+    },
+    {
+      "pergunta": "Devo deixar a bateria zerar antes de carregar?",
+      "resposta": "Não é preciso zerar. A Microsoft recomenda, para quem não usa o limite de carga, descarregar abaixo de 50% algumas vezes por semana em vez de manter sempre cheio. Descarga total frequente não traz vantagem."
+    },
+    {
+      "pergunta": "Meu notebook parou de carregar em 80%. Está com defeito?",
+      "resposta": "Provavelmente é o limite de carga ativado, pelo Windows ou pelo programa do fabricante. Confira essa opção antes de suspeitar da bateria ou do carregador."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Use Smart charging in Windows — Suporte da Microsoft",
+      "url": "https://support.microsoft.com/en-us/windows/experience/power-battery/use-smart-charging-in-windows",
+      "data": "setembro de 2026"
+    },
+    {
+      "nome": "Caring for your Surface battery — Suporte da Microsoft",
+      "url": "https://support.microsoft.com/en-us/surface/battery/caring-for-your-surface-battery",
+      "data": "setembro de 2026"
+    },
+    {
+      "nome": "Stay energetic — Manual do Lenovo Yoga 9i",
+      "url": "https://download.lenovo.com/pccbbs/pubs/yoga9_14/html/html_en/moreinfo_stay_energetic.html",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Battery stops charging at 95% - Windows - ThinkPad — Suporte da Lenovo",
+      "url": "https://support.lenovo.com/qa/el/solutions/ht514263",
+      "data": "janeiro de 2025"
+    }
+  ]
+}
