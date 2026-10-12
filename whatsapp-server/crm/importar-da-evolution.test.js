@@ -61,6 +61,18 @@ test("importar o histórico da Evolution", { skip: pular }, async (t) => {
       id: "cm-D1b",
     }
   );
+  // O que o Postgres recusa (parou a importação da loja em 12/10/2026, "invalid
+  // input syntax for type json"): citação cortada nos 200 caracteres bem no
+  // meio de um emoji, e a metade dele ia para o JSON da coluna citada.
+  // (Caractere nulo não chega por aqui: a Evolution guarda em JSONB, que nem
+  // aceita; ele está no teste de crm/texto-seguro.js.)
+  const longa = "a".repeat(199) + "😀 fim";
+  registros.push(
+    reg("Q0", A, false, { conversation: longa }, 56),
+    reg("Q1", A, true, { conversation: "respondendo" }, 57, {
+      contextInfo: { stanzaId: "Q0", participant: A, quotedMessage: { conversation: longa } },
+    })
+  );
   // Mais que um lote, com timestamps repetidos (o desempate pelo id importa).
   for (let i = 0; i < 25; i++) registros.push(reg(`L${String(i).padStart(2, "0")}`, A, i % 2 === 0, { conversation: `lote ${i}` }, 60));
   for (const r of registros) {
@@ -85,13 +97,16 @@ test("importar o histórico da Evolution", { skip: pular }, async (t) => {
     await t.test("copia as mensagens de conversa, com chave, citação e @lid traduzido", async () => {
       const total = await rodar();
       assert.strictEqual(total.lidas, registros.length);
-      assert.strictEqual(total.novas, 29); // M1, M2, M3, D1 (uma vez só) + 25 do lote
+      assert.strictEqual(total.novas, 31); // M1, M2, M3, D1 (uma vez só), Q0, Q1 + 25 do lote
+      assert.strictEqual(total.comErro, 0);
       assert.strictEqual(total.repetidas, 1);
       assert.strictEqual(total.puladas, 2); // status e grupo
       const d1 = (await crmPool.query(`SELECT * FROM crm_mensagem WHERE id = 'D1'`)).rows;
       assert.strictEqual(d1.length, 1);
       assert.strictEqual(d1[0].chat_id, "5500000000001@c.us", "fica a conversa pelo número, não a do @lid");
       assert.strictEqual(d1[0].citada?.id, "M2", "e com o que a outra cópia tinha");
+      const q1 = (await crmPool.query(`SELECT citada FROM crm_mensagem WHERE id = 'Q1'`)).rows[0];
+      assert.strictEqual(q1.citada.trecho, "a".repeat(199), "a metade do emoji sai; o resto fica");
       const m2 = (await crmPool.query(`SELECT * FROM crm_mensagem WHERE id = 'M2'`)).rows[0];
       assert.strictEqual(m2.direcao, "out");
       assert.deepStrictEqual(m2.chave, { id: "M2", remoteJid: A, fromMe: true });
@@ -110,7 +125,7 @@ test("importar o histórico da Evolution", { skip: pular }, async (t) => {
 
     await t.test("refaz os contatos pelos totais do banco", async () => {
       const c = (await crmPool.query(`SELECT * FROM crm_contato WHERE chat_id = '5500000000001@c.us'`)).rows[0];
-      assert.strictEqual(c.total_entrada + c.total_saida, 28);
+      assert.strictEqual(c.total_entrada + c.total_saida, 30);
       assert.strictEqual(c.nome_whatsapp, "Cliente Falso");
     });
 
@@ -145,4 +160,25 @@ test("importar o histórico da Evolution", { skip: pular }, async (t) => {
     await crmPool.end();
     fs.rmSync(raiz, { recursive: true, force: true });
   }
+});
+
+test("lote recusado: grava uma a uma e pula só a mensagem ruim (sem banco)", async () => {
+  const { gravarLote } = require("./importar-da-evolution");
+  // Banco de mentira: recusa qualquer INSERT que leve a mensagem "RUIM".
+  const gravadas = [];
+  const db = {
+    query: async (_sql, valores) => {
+      const ids = [];
+      for (let i = 0; i < valores.length; i += 18) ids.push(valores[i]);
+      if (ids.includes("RUIM")) throw new Error("invalid input syntax for type json");
+      gravadas.push(...ids);
+      return { rows: ids.map(() => ({ nova: true })), rowCount: ids.length };
+    },
+  };
+  const linha = (id) => ({ id, chatId: "1@c.us", direcao: "in", corpo: "x", timestamp: Date.now() });
+  const puladas = [];
+  const g = await gravarLote(db, [linha("A1"), linha("RUIM"), linha("A2")], (l, e) => puladas.push([l.id, e.message]));
+  assert.deepStrictEqual(g, { novas: 2, completadas: 0, comErro: 1 });
+  assert.deepStrictEqual(gravadas, ["A1", "A2"]);
+  assert.deepStrictEqual(puladas, [["RUIM", "invalid input syntax for type json"]]);
 });

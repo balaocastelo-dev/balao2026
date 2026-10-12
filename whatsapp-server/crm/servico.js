@@ -6,6 +6,7 @@
 // estatística. Por isso quase tudo aqui devolve promessa que não rejeita.
 
 const I = require("./interesses");
+const { semQuebrados } = require("./texto-seguro");
 
 const JANELA_RODADA_HORAS = 6; // silêncio maior que isto começa um atendimento novo
 const JANELA_RESPOSTA_HORAS = 48; // depois disso não conta como "resposta"
@@ -22,8 +23,10 @@ function criarServicoDoCrm({ db, registrar = console.log }) {
    * Guarda uma mensagem e mantém o contato em dia. Idempotente: a mesma
    * mensagem pode chegar pelo webhook e pela varredura sem duplicar.
    */
-  async function registrarMensagem(msg, { origem = "webhook", vendedorId = null } = {}) {
-    if (!msg?.id || !msg?.chatId || !msg?.direcao) return null;
+  async function registrarMensagem(msgBruta, { origem = "webhook", vendedorId = null } = {}) {
+    if (!msgBruta?.id || !msgBruta?.chatId || !msgBruta?.direcao) return null;
+    // Caractere nulo ou metade de emoji derrubariam o INSERT (crm/texto-seguro.js).
+    const msg = semQuebrados(msgBruta);
     const em = new Date(msg.timestamp || Date.now());
     const corpo = String(msg.corpo || "").slice(0, 8000);
     const jsonOuNulo = (v) => (v == null ? null : JSON.stringify(v));
@@ -148,8 +151,9 @@ function criarServicoDoCrm({ db, registrar = console.log }) {
    * a mudança no panel:desde. Só grava (e só gasta seq) se algo mudou.
    * Devolve { seq, chatId, reacoes } ou null (mensagem fora do banco, ou nada mudou).
    */
-  async function atualizarMensagem(id, patch = {}) {
+  async function atualizarMensagem(id, patchBruto = {}) {
     if (!id) return null;
+    const patch = semQuebrados(patchBruto);
     const args = [String(id)];
     const sets = [];
     const mudou = [];
