@@ -18,7 +18,7 @@
 // ============================================================
 
 import type { ItemDeOrigem } from "./kabum";
-import { ehCompativel } from "./fotos";
+import { ehCompativel, ehSuprimento } from "./fotos";
 
 export const SITE_TECHSUPRI = "techsupri";
 export const URL_TECHSUPRI = "https://techsupri.kyte.site/pt-BR";
@@ -123,6 +123,17 @@ const REGRAS: [RegExp, string][] = [
   [/^ cx (de )?som\b|\bsound.?bar\b/, "Áudio/Caixa de Som"],
   [/^ adap\b/, "Informática/Cabos e Adaptadores"],
   [/\brastreador\b/, "Celular & Smartphone/Acessórios para Smartphones"],
+  [/^ fonte\b.*\b(x.?box|play ?\d|ps\d|playstation)\b/, "Games/Acessórios Gamer"],
+  [/^ fonte\b(?!.*\b(notebook|macbook|laptop|not|ultrabook)\b).*\b(tipo.?c|usb|type.?c)\b/, "Celular & Smartphone/Carregadores e Power Banks"],
+  [/^ tomada universal\b/, "Energia/Fontes e Adaptadores"],
+  [/^ (pipoqueira|processador de alimentos|escova eletrica churrasqueira|sanduicheira|air ?fryer|fritadeira)\b/, "Diversos/Casa e Cozinha"],
+  [/^ (modelador|massageador|escova (secadora|alisadora|rotativa))\b/, "Diversos/Cuidados Pessoais"],
+  [/^ (inversor veicular|bomba de ar|compressor de ar|aspirador automotivo)\b/, "Automotivo/Acessórios Automotivos"],
+  [/^ campainha\b/, "Automação/Casa Inteligente"],
+  [/^ mesa de som\b/, "Áudio/Microfone"],
+  [/^ (adesivo|super bonder|cola)\b/, "Informática/Limpeza e Manutenção"],
+  [/^ (pochete|bolsa|mochila)\b/, "Diversos/Bolsas e Mochilas"],
+  [/^ bomba de agua\b/, "Diversos/Casa e Cozinha"],
   // O começo do nome diz o que o produto É ("Cabo USB de Impressora" é cabo).
   [/^ cabo de rede\b|\bpatch cord\b|^ emenda rj45/, "Conectividade/Cabo de Rede"],
   [/^ (adaptador|placa|receptor)\b.*\b(wi.?fi|wireless|de rede|rj45)\b/, "Conectividade/Dispositivo de Rede"],
@@ -372,11 +383,23 @@ export interface OpcoesDoFornecedor {
 
 const ehFotoDeFora = (u: unknown): u is string => typeof u === "string" && /^https:\/\//.test(u) && !/kyte/i.test(u);
 
+/**
+ * Cartucho ou tinta compatível ("paralelo"). O Thiago decidiu em 11/10 vender
+ * só cartucho original: estes não entram no site (e saem na próxima passada).
+ * Toner compatível continua (decisão dele no mesmo dia).
+ */
+export function ehCartuchoCompativel(nome: string): boolean {
+  const n = ` ${semAcento(nome).replace(/[^a-z0-9]+/g, " ")} `;
+  if (!ehSuprimento(nome) || / (toner|fotocondutor|cilindro) /.test(n)) return false;
+  return ehCompativel(nome) || / (evolut|chinamate|ollix|byqualy|masterprint) /.test(n);
+}
+
 /** Produto da Kyte (de qualquer fornecedor) no formato que o resto do sistema entende. */
 export function paraItemKyte(p: ProdutoCapturado, opcoes: OpcoesDoFornecedor): ItemDeOrigem | null {
   const id = String(p?.id || "").trim();
   const nomeCru = String(p?.name || "").trim();
   if (!id || !nomeCru || !/^[A-Za-z0-9-]{6,60}$/.test(id)) return null;
+  if (ehCartuchoCompativel(nomeCru)) return null;
   const nome = nomeDoTechsupri(nomeCru);
   const preco = precoDoKyte(p);
 

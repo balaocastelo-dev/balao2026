@@ -22,10 +22,10 @@
 import { readFileSync, writeFileSync, existsSync } from "fs";
 import path from "path";
 import {
-  buscarFotoNaAmericanas, buscarFotoNaKabum, buscarFotoNaKalunga, MARCA_ILUSTRATIVA, misturaOriginalECompativel, NOTA_MINIMA, semelhanca,
+  buscarFotoNaAmericanas, buscarFotoNaKabum, buscarFotoNaKalunga, ehSuprimento, MARCA_ILUSTRATIVA, marcaDeOutroProduto, misturaOriginalECompativel, NOTA_MINIMA, semelhanca,
   semelhancaIlustrativa, termoCurto, termoGenerico,
 } from "../lib/precos/fotos";
-import { marcaDoTechsupri, produtosDaCaptura } from "../lib/precos/techsupri";
+import { ehCartuchoCompativel, marcaDoTechsupri, produtosDaCaptura } from "../lib/precos/techsupri";
 import type { ProdutoCapturado } from "../lib/precos/techsupri";
 
 const RAIZ = path.join(__dirname, "..");
@@ -45,10 +45,30 @@ const MARCAS_PEQUENAS = [
 ];
 
 function lerCaptura(arquivo: string): ProdutoCapturado[] {
-  return produtosDaCaptura(readFileSync(arquivo, "utf8"));
+  // Cartucho compatível não é mais vendido (11/10): nem entra no arquivo.
+  return produtosDaCaptura(readFileSync(arquivo, "utf8")).filter((p) => !ehCartuchoCompativel(p.name));
 }
 
 const dormir = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+// Fotos ilustrativas conferidas a olho em 11/10 e recusadas: mostram outro tipo
+// de produto (álcool com foto de enxaguante, jogo de chaves com foto de jogo
+// de PS4…). A regra de marca (marcaDeOutroProduto) não pega esses casos.
+// Cada par: [começo do nome do fornecedor, começo do nome da foto achada].
+const ILUSTRATIVAS_RECUSADAS: [RegExp, RegExp][] = [
+  [/^[aá]lcool isoprop/i, /enxaguante/i],
+  [/^[aá]lcool/i, /limpa ?vidro/i],
+  [/^jogo de chaves/i, /ps4|playstation|ps5/i],
+  [/^suporte vertical ps4/i, /monitor/i],
+  [/^escudo capit/i, /caneca/i],
+  [/^boneco luigi/i, /dinopark/i],
+  [/^bundle nintendo switch 2/i, /oled/i],
+  [/^controller glamp switch 2/i, /nintendo pro controller/i],
+  [/^ikarao joog shell/i, /joog x1/i],
+  [/^splitter hdmi 1x2/i, /8 portas/i],
+];
+const ilustrativaRecusada = (doFornecedor: string, achado: string) =>
+  ILUSTRATIVAS_RECUSADAS.some(([a, b]) => a.test(doFornecedor.trim()) && b.test(achado));
 
 async function main() {
   const [arquivo, ...opcoes] = process.argv.slice(2);
@@ -62,9 +82,22 @@ async function main() {
     let descartadas = 0;
     for (const [id, f] of Object.entries(fotos)) {
       if (!("foto" in f) || !nomes.has(id)) continue;
+      // Foto escolhida e conferida a olho (Mercado Livre) não é reavaliada.
+      if (f.origem === "mercadolivre-conferida") continue;
       // Foto de original em compatível (ou o contrário) sai sempre, até a ilustrativa.
-      const mistura = misturaOriginalECompativel(nomes.get(id)!, f.nome);
-      if (!mistura && String(f.origem || "").startsWith("ilustrativa")) continue;
+      // Cartucho, tinta e toner: foto ilustrativa também sai (só vale a exata).
+      const ilustrativa = String(f.origem || "").startsWith("ilustrativa");
+      // Ilustrativa com marca de outro fabricante (bateria "Toply" com foto de
+      // bateria WEG, mouse Aula com foto de Logitech) ou de outro tipo de produto: sai.
+      if (ilustrativa && (marcaDeOutroProduto(nomes.get(id)!, f.nome) || ilustrativaRecusada(nomes.get(id)!, f.nome))) {
+        console.log(`  ilustrativa de outro produto: ${nomes.get(id)} <- ${f.nome}`);
+        // Fica sem foto e não volta a ser buscado (melhor sem foto do que foto errada).
+        fotos[id] = { semFoto: true, tentadoEm: new Date().toISOString(), kalunga: true, curto: true, americanas: true, ilustrativa: true };
+        descartadas++;
+        continue;
+      }
+      const mistura = misturaOriginalECompativel(nomes.get(id)!, f.nome) || (ehSuprimento(nomes.get(id)!) && ilustrativa);
+      if (!mistura && ilustrativa) continue;
       if (mistura || semelhanca(nomes.get(id)!, f.nome) < NOTA_MINIMA) {
         if (mistura) console.log(`  original/compatível: ${nomes.get(id)} <- ${f.nome}`);
         delete fotos[id];
@@ -177,7 +210,7 @@ async function main() {
       const f = fotos[p.id];
       if (!f || !("semFoto" in f) || f.ilustrativa) continue;
       const marcas = [marcaDoTechsupri(p.name) || "", p.category?.name || "", ...MARCAS_PEQUENAS].filter(Boolean);
-      const avaliar = (a: string, b: string) => semelhancaIlustrativa(a, b, marcas);
+      const avaliar = (a: string, b: string) => (ilustrativaRecusada(a, b) ? 0 : semelhancaIlustrativa(a, b, marcas));
       const termos = [...new Set([termoCurto(p.name, marcaDoTechsupri(p.name)), termoGenerico(p.name, marcas)].filter((t): t is string => !!t))];
       let achada = null;
       let origem = "";

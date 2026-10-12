@@ -467,10 +467,18 @@ export async function updateProduct(id: string, updates: Partial<Product>) {
   }
 }
 
-export async function deleteProduct(id: string) {
+/**
+ * Apaga o produto. Se ele veio de uma fonte (KaBuM!, fornecedor), fica
+ * BLOQUEADO na entrada: não volta na próxima atualização (lib/precos/bloqueio.ts).
+ * Devolve se bloqueou.
+ */
+export async function deleteProduct(id: string, motivo?: string): Promise<{ bloqueado: boolean }> {
   try {
     if (!isTursoActive()) throw new Error('Banco de dados não configurado');
+    const { bloquearAntesDeApagar } = await import('@/lib/precos/bloqueio');
+    const bloqueado = await bloquearAntesDeApagar(id, motivo);
     await turso.execute({ sql: 'DELETE FROM products WHERE id = ?', args: [id] });
+    return { bloqueado };
   } catch (error) {
     console.error("Error deleting product:", error);
     throw error;
