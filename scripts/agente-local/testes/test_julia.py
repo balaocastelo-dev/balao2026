@@ -460,6 +460,54 @@ class TestRapidez(unittest.TestCase):
         self.assertEqual(recebido["tipo"], "ndarray", "o Whisper recebe as amostras, não o arquivo")
 
 
+class TestPrioridadeNaPlaca(unittest.TestCase):
+    """A JUL.IA vem primeiro na placa de vídeo (Thiago, 12/10/2026)."""
+
+    def test_pedir_grava_o_sinal_que_a_fabrica_le_e_so_estica(self):
+        from placa import ARQUIVO_DO_SINAL, Placa
+
+        pasta = Path(tempfile.mkdtemp())
+        relogio = [1_000_000.0]
+        p = Placa(str(pasta), agora=lambda: relogio[0])
+        p.pedir()
+        self.assertEqual(int((pasta / ARQUIVO_DO_SINAL).read_text()), 1_000_000 + 600)
+        p.pedir(minutos=1)  # pedido menor não encurta
+        self.assertEqual(int((pasta / ARQUIVO_DO_SINAL).read_text()), 1_000_000 + 600)
+
+    def test_espera_a_fabrica_soltar_a_memoria(self):
+        from placa import Placa
+
+        livres = [3.0, 6.0, 15.0]
+        relogio = [0.0]
+
+        def dormir(s):
+            relogio[0] += s
+
+        p = Placa(None, memoria_livre=lambda: livres.pop(0) if livres else 15.0, dormir=dormir, agora=lambda: relogio[0])
+        self.assertEqual(p.esperar_memoria(13, 30), 4.0, "esperou até ter 13 GB livres")
+        p2 = Placa(None, memoria_livre=lambda: 2.0, dormir=dormir, agora=lambda: relogio[0])
+        self.assertLessEqual(p2.esperar_memoria(13, 30), 32, "e não espera para sempre")
+
+    def test_nao_espera_ura_nem_render(self):
+        from placa import Placa
+
+        self.assertIsNone(Placa(None).ocupada(), "padrão: a JUL.IA não cede a vez")
+        import config as C
+
+        self.assertFalse(C.PADRAO["respeitar_placa"])
+
+    def test_confere_quem_na_fabrica_ainda_nao_cede(self):
+        from placa import ARQUIVO_DO_SINAL, QUEM_CEDE, fabrica_que_nao_cede
+
+        pasta = Path(tempfile.mkdtemp())
+        for rel in QUEM_CEDE:
+            (pasta / rel).parent.mkdir(parents=True, exist_ok=True)
+            (pasta / rel).write_text("def ligacoes(): pass\n", encoding="utf-8")
+        self.assertEqual(fabrica_que_nao_cede(pasta), QUEM_CEDE)
+        (pasta / QUEM_CEDE[0]).write_text(f"# lê {ARQUIVO_DO_SINAL}\n", encoding="utf-8")
+        self.assertEqual(fabrica_que_nao_cede(pasta), QUEM_CEDE[1:])
+
+
 class TestBling(unittest.TestCase):
     def setUp(self):
         self.tok = Path(tempfile.mkdtemp()) / "bling_tokens.json"
