@@ -64,3 +64,8 @@ whatsapp-server/server.log
 
 # saida de scrapers (dados brutos grandes, nao sao codigo)
 scripts/output/
+
+# JUL.IA no PC: dados locais (catálogo, log) e config de cada máquina
+scripts/agente-local/dados/
+scripts/agente-local/config.json
+scripts/agente-local/.venv/

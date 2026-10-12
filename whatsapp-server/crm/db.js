@@ -260,6 +260,28 @@ const MIGRACOES = [
         ON crm_campanha_envio (tentativa_em) WHERE tentativa_em IS NOT NULL;
     `,
   },
+  {
+    id: "crm_006_agente",
+    sql: `
+      -- Agente JUL.IA (whatsapp-server/agente). Uma linha por conversa que o
+      -- agente já tocou: se ele pode falar (ativo) ou se um humano assumiu,
+      -- o que o cliente já informou (dados) e o que o agente precisa lembrar
+      -- (produtos mostrados, orçamento, pedido). A chave liga/desliga mora em
+      -- crm_config (chave 'agente').
+      CREATE TABLE IF NOT EXISTS crm_agente_conversa (
+        chat_id        text PRIMARY KEY,
+        situacao       text NOT NULL DEFAULT 'ativo'
+                       CHECK (situacao IN ('ativo','humano','transferida')),
+        ate            timestamptz,
+        motivo         text,
+        dados          jsonb NOT NULL DEFAULT '{}'::jsonb,
+        memoria        jsonb NOT NULL DEFAULT '{}'::jsonb,
+        respondido_ate bigint NOT NULL DEFAULT 0,
+        atualizado_em  timestamptz NOT NULL DEFAULT now()
+      );
+      CREATE INDEX IF NOT EXISTS crm_evento_agente ON crm_evento (em) WHERE tipo LIKE 'agente_%';
+    `,
+  },
 ];
 
 async function garantirBanco(urlAdmin, nome) {

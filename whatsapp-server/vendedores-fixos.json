@@ -2,6 +2,13 @@
   "_leia_me": "Vendedores da equipe que entram pela pagina pessoal do site (ex.: www.balao.info/brendon). O 'id' precisa ser IGUAL ao id em lib/vendedores.ts do site - e a chave do kanban pessoal e da atribuicao de conversas, entao nunca deve mudar depois que a pessoa comecou a atender. Nao ha senha aqui: quem valida a senha e o site. O campo 'protegido' impede que o vendedor seja removido pelo painel por engano.",
   "vendedores": [
     {
+      "id": "julia-ia",
+      "nome": "JUL.IA",
+      "cargo": "Vendedora digital (robô)",
+      "assinatura": "",
+      "protegido": true
+    },
+    {
       "id": "thiago",
       "nome": "Thiago",
       "cargo": "Vendas",
