@@ -5,8 +5,9 @@
 
 const express = require("express");
 const { montarRotasDeCampanha } = require("./campanha-rotas");
+const { montarRotasDoAgenteNoComando } = require("../agente/rotas");
 
-function montarRotasDoCrm(app, { acesso, servico, equipe, campanhas = null, avisarPainel = () => {} }) {
+function montarRotasDoCrm(app, { acesso, servico, equipe, campanhas = null, agente = null, avisarPainel = () => {} }) {
   const r = express.Router();
   const json = express.json({ limit: "2mb" });
 
@@ -167,6 +168,9 @@ function montarRotasDoCrm(app, { acesso, servico, equipe, campanhas = null, avis
 
   // ---- disparo por tema (crm/campanha-rotas.js) ----
   if (campanhas) montarRotasDeCampanha(r, { campanhas, json, rota, nomeDeQuem });
+
+  // ---- agente JUL.IA (agente/rotas.js) ----
+  if (agente) montarRotasDoAgenteNoComando(r, { agente, json, rota, nomeDeQuem, acesso });
 
   app.use("/api/comando", r);
 }

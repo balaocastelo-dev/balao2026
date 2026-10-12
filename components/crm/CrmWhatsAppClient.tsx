@@ -23,6 +23,7 @@ import {
 import { blobDoDataUrl, enviarPorUpload } from "@/components/crm/upload-midia";
 import EnviarPorEmail, { type ProdutoParaEmail } from "@/components/crm/email/EnviarPorEmail";
 import DisparoPorTema from "@/components/crm/disparo/DisparoPorTema";
+import SeloDoAgente from "@/components/crm/agente/SeloDoAgente";
 import type { PonteStatus, StatusRecebido } from "@/components/crm/status/tipos";
 import {
   CrmChat,
@@ -891,6 +892,8 @@ export default function CrmWhatsAppClient({
   // Disparo por tema (components/crm/disparo/DisparoPorTema.tsx). Quem manda é
   // o servidor; aqui só um contador que muda a cada aviso de progresso.
   const [sinalCampanha, setSinalCampanha] = useState(0);
+  // Muda a cada evento da JUL.IA (sugestão, transferência, venda): o selo da conversa relê na hora.
+  const [sinalAgente, setSinalAgente] = useState(0);
 
   // Persistence & Storage Cleanup
   //
@@ -1687,6 +1690,9 @@ export default function CrmWhatsAppClient({
     // como whatsapp:toast).
     socket.on("whatsapp:campanha", () => {
       setSinalCampanha((n) => n + 1);
+    });
+    socket.on("whatsapp:agente", () => {
+      setSinalAgente((n) => n + 1);
     });
 
     // Confirmação real de envio (ligada ao tempId gerado ao criar o balão
@@ -4231,6 +4237,8 @@ export default function CrmWhatsAppClient({
                       {/* Enquete: o cliente responde num toque, em vez de
                           digitar. Serve para qualificar rápido — faixa de
                           preço, modelo, urgência. */}
+                      <SeloDoAgente ponte={ponteComando} chatId={chatSelecionado.id} sinal={sinalAgente} />
+
                       <button
                         onClick={() => setEmailAberto(true)}
                         title="Mandar produto, preço e link do site por e-mail"

@@ -32,6 +32,9 @@ const { abrirBanco: abrirBancoDoCrm } = require("./crm/db");
 const { criarServicoDoCrm } = require("./crm/servico");
 const { montarRotasDoCrm } = require("./crm/rotas");
 const { criarCampanhas, opcoesDoAmbiente } = require("./crm/campanha");
+const { criarAgente } = require("./agente/agente");
+const { montarRotasDoAgente } = require("./agente/rotas");
+const { ID_DO_AGENTE } = require("./agente/regras");
 const { paraOBanco, paraOPainel } = require("./crm/formato");
 const { criarMedicao } = require("./medicao");
 const { proximaRecargaCompleta, lerHorario, filtroDeJanela } = require("./recarga");
@@ -103,6 +106,9 @@ function lerOuCriarSegredo(nomeVar, arquivo) {
 // Segredo que a Evolution manda no cabeçalho de cada webhook. Sem ele,
 // qualquer um poderia forjar "mensagem recebida" para o painel.
 const SEGREDO_WEBHOOK = lerOuCriarSegredo("WEBHOOK_SEGREDO", "webhook.segredo");
+// Segredo do trabalhador do agente JUL.IA no PC (scripts/agente-local). Vai
+// para o PC pelo deploy-evo.ps1 -Agente, sem aparecer na tela.
+const SEGREDO_AGENTE = lerOuCriarSegredo("AGENTE_SEGREDO", "agente.segredo");
 // Chave da URL interna por onde a Evolution busca o arquivo enviado pelo painel.
 const SEGREDO_UPLOAD = lerOuCriarSegredo("UPLOAD_SEGREDO", "upload.segredo");
 // Senha do trabalhador de transcrição (modo puxado), mandada no cabeçalho
@@ -124,6 +130,7 @@ const SEGREDO_STATUS = lerOuCriarSegredo("STATUS_SEGREDO", "status.segredo");
 let statusServico = null; // módulo de Status (liga quando o banco responde)
 let crmServico = null; // Centro de Comando (contatos, mensagens, métricas)
 let campanhas = null; // Disparo por tema (crm/campanha.js), liga junto com o CRM
+let agente = null; // JUL.IA (agente/), liga junto com o CRM; quem pensa é o PC do Thiago
 const espelhoDoCatalogo = criarEspelhoDoCatalogo({ pasta: DATA_DIR, urlDoSite: SITE_URL });
 setTimeout(() => espelhoDoCatalogo.atualizar({ motivo: "boot" }), 20_000).unref?.();
 setInterval(() => espelhoDoCatalogo.atualizar({ motivo: "agendado" }), 30 * 60_000).unref?.();
@@ -1390,6 +1397,7 @@ async function tratarMensagemRecebida(rec, { chegada = Date.now() } = {}) {
   if (nova) tocarConversa(final);
   baixarNaChegada(final);
   pedirTranscricao(final);
+  agente?.aoMensagem(final, { nova }).catch(() => {});
   if (final.direction === "in" && /^(SAIR|PARAR|CANCELAR|DESCADASTRAR|STOP)$/i.test(final.body.trim())) {
     emitirToast(`Cliente ${final.contactName || final.realNumber} pediu para sair dos disparos.`);
     // Antes, o "não mandar mais" vivia só na tela de quem estava com o painel
@@ -1614,6 +1622,7 @@ async function absorverRegistro(rec, { emitir = true, origem = "conciliacao" } =
   if (nova) {
     baixarNaChegada(final);
     pedirTranscricao(final);
+    if (origem !== "historico") agente?.aoMensagem(final, { nova }).catch(() => {});
   }
   return final;
 }
@@ -2400,6 +2409,10 @@ app.get(["/health", "/status", "/api/status"], (_req, res) => {
       // total. Só números (medicao.js).
       latencia: medicao.resumo(),
       transcricao: transcricao.estado(),
+      // Só a chave e se o PC está de pé: nada de conversa.
+      agente: agente
+        ? { modo: agente.config.modo, publico: agente.config.publico, pcOnline: agente.estadoDoPc().online }
+        : null,
       downloadsDeMidia: { ativos: downloadsAtivos, esperando: esperandoVez.length },
       conversas: conversas.size,
       mensagensNaMemoria,
@@ -2591,8 +2604,11 @@ function exigirConectado() {
 }
 
 /** Registra o que a Evolution confirmou e devolve a mensagem do painel. */
-function registrarEnviada(rec, extras = {}) {
+function registrarEnviada(rec, extrasComOrigem = {}) {
   if (!rec?.key?.id) throw new Error("A Evolution não confirmou o envio (sem id).");
+  // automatico: "agente" | "campanha" — não vai para a mensagem, só diz ao
+  // agente que não foi gente da loja que escreveu.
+  const { automatico = null, ...extras } = extrasComOrigem;
   aprenderLid(rec.key);
   const msg =
     N.normalizarMensagem(rec, { lidParaNumero, numeroDaLoja: estado.phoneNumber }) || {
@@ -2610,6 +2626,7 @@ function registrarEnviada(rec, extras = {}) {
     if (r?.seq && !(final.seq >= r.seq)) final.seq = r.seq;
   });
   tocarConversa(final);
+  agente?.aoEnviarPelaLoja(final, { vendedorId: extras.vendedorId || null, automatico }).catch(() => {});
   return final;
 }
 
@@ -2963,6 +2980,7 @@ io.on("connection", (socket) => {
     else delete store.chatAssignments[chatId];
     salvarStore();
     crmServico?.definirVendedor(chatId, p.sellerId || null).catch(() => {});
+    agente?.aoAtribuir(chatId, p.sellerId ? String(p.sellerId) : null).catch(() => {});
     enviarListaCompleta();
     emitirConfiguracoes();
   });
@@ -3539,6 +3557,7 @@ async function ligarModuloDoCrm() {
       });
       crmServico = criarServicoDoCrm({ db });
       ligarDisparoPorTema(db);
+      await ligarAgente(db);
       console.log("[comando] Centro de Comando ligado.");
       importarHistoricoParaOCrm().catch((e) => console.warn("[comando] importação:", e.message));
       return;
@@ -3575,7 +3594,8 @@ function ligarDisparoPorTema(db) {
     ...opcoesDoAmbiente(process.env),
     conectado: () => estado.connected,
     enviar: async ({ chatId, texto }) => {
-      const final = registrarEnviada(await enviarTexto({ destino: chatId, texto }));
+      agente?.lembrarAutomatica(chatId, texto);
+      const final = registrarEnviada(await enviarTexto({ destino: chatId, texto }), { automatico: "campanha" });
       return { id: final.id };
     },
     // PARAR/SAIR e bloqueio também moram no store (valem mesmo com o banco fora).
@@ -3609,6 +3629,129 @@ function ligarDisparoPorTema(db) {
     },
   });
   campanhas.iniciar();
+}
+
+// ------------------------------------------------------------------
+// Agente JUL.IA (agente/). Quem pensa é o PC do Thiago (scripts/agente-local),
+// que puxa o trabalho por /api/agente/*. Aqui: quando ele pode falar, envio,
+// sugestão do copiloto e avisos de orçamento/venda.
+// ------------------------------------------------------------------
+
+function numeroDaConversa(chatId) {
+  if (N.ehLid(chatId)) return N.digitos(lidParaNumero(chatId) || "");
+  return N.digitos(chatId);
+}
+
+function ultimaMensagemDaConversa(chatId) {
+  const mapa = mensagensPorChat.get(chatId);
+  if (!mapa || !mapa.size) return null;
+  // O WhatsApp marca a hora em segundos: mensagem do cliente no mesmo segundo
+  // que a resposta da loja é a mais nova (senão ficaria sem resposta).
+  let ultima = null;
+  for (const m of mapa.values()) {
+    if (!ultima || m.timestamp > ultima.timestamp || (m.timestamp === ultima.timestamp && m.direction === "in")) ultima = m;
+  }
+  return ultima;
+}
+
+/** Histórico para o agente: o banco da loja mais o que acabou de chegar na memória. */
+async function mensagensParaOAgente(chatId, limite = 30) {
+  const porId = new Map();
+  try {
+    const h = await historicoDaConversa({ chatId, limite });
+    for (const m of h.mensagens) porId.set(m.id, m);
+  } catch (e) {
+    console.warn("[agente] histórico do banco falhou, uso só a memória:", e.message);
+  }
+  for (const m of (mensagensPorChat.get(chatId) || new Map()).values()) porId.set(m.id, { ...porId.get(m.id), ...m });
+  return [...porId.values()].sort((a, b) => a.timestamp - b.timestamp).slice(-limite);
+}
+
+function produtoDoEspelho(id) {
+  const alvo = String(id || "").trim();
+  if (!alvo) return null;
+  return espelhoDoCatalogo.ler().produtos.find((p) => String(p.id) === alvo || String(p.slug || "") === alvo) || null;
+}
+
+/** Legenda do produto mandado pelo agente: tudo do catálogo do site, nada inventado. */
+function legendaDoProdutoDoAgente(p) {
+  const limpar = (v) => String(v || "").replace(/\s+/g, " ").trim();
+  const preco = lerPreco(p.price);
+  const link = `${SITE_URL}/product/${encodeURIComponent(p.slug || p.id)}`;
+  return [
+    `*${limpar(p.name)}*`,
+    preco > 0 ? `💵 À vista no Pix: *R$ ${preco.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}*` : null,
+    limpar(p.price_card) ? `💳 No cartão: ${/^r\$/i.test(limpar(p.price_card)) ? "" : "R$ "}${limpar(p.price_card)}` : null,
+    limpar(p.installment) ? `🗓️ ${limpar(p.installment)}` : null,
+    `🔗 ${link}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+async function enviarProdutoDoAgente({ chatId, produto, vendedorId, aoMontar }) {
+  exigirConectado();
+  const numero = N.paraDestino(chatId);
+  if (!numero) throw new Error("Número de destino inválido.");
+  const legenda = legendaDoProdutoDoAgente(produto);
+  aoMontar?.(legenda);
+  let rec;
+  if (produto.image && /^https?:\/\//i.test(String(produto.image))) {
+    rec = await evolution
+      .enviarMidia(INSTANCIA, numero, { mediatype: "image", mimetype: "image/jpeg", media: produto.image, caption: legenda, fileName: "produto.jpg" })
+      .catch((erro) => {
+        console.warn("[agente] foto do produto recusada, mando só o texto:", erro.message);
+        return null;
+      });
+  }
+  if (!rec) rec = await evolution.enviarTexto(INSTANCIA, numero, legenda);
+  const p = { id: produto.id, nome: produto.name, preco: lerPreco(produto.price), imagem: produto.image || null };
+  return registrarEnviada(rec, { vendedorId, automatico: "agente", produto: p });
+}
+
+async function ligarAgente(db) {
+  if (agente) return;
+  try {
+    agente = criarAgente({
+      db,
+      ultimaDaConversa: ultimaMensagemDaConversa,
+      mensagensDaConversa: mensagensParaOAgente,
+      numeroDe: numeroDaConversa,
+      nomeDe: (chatId) => store.nomes?.[chatId] || null,
+      vendedorDe: (chatId) => store.chatAssignments?.[chatId] || null,
+      atribuir: (chatId, vendedorId) => {
+        if (vendedorId) store.chatAssignments[chatId] = vendedorId;
+        else delete store.chatAssignments[chatId];
+        salvarStore();
+        crmServico?.definirVendedor(chatId, vendedorId || null).catch(() => {});
+        enviarListaCompleta();
+        emitirConfiguracoes();
+      },
+      // Bloqueado não fala com o robô. Quem pediu SAIR saiu do DISPARO, não do
+      // atendimento: se perguntar algo depois, é respondido.
+      barrado: (chatId) => (equivalentesDaConversa(chatId).some((id) => store.bloqueados[id]) ? "contato bloqueado" : null),
+      produtoDoCatalogo: produtoDoEspelho,
+      enviarTexto: async ({ chatId, texto, vendedorId }) =>
+        registrarEnviada(await enviarTexto({ destino: chatId, texto }), { vendedorId: vendedorId || ID_DO_AGENTE, automatico: "agente" }),
+      enviarProduto: enviarProdutoDoAgente,
+      guardarTranscricao: (id, texto) => guardarTranscricao(id, texto, { provedor: "pc" }),
+      avisar: (dados) => {
+        paraPainel().emit("whatsapp:agente", dados);
+        if (dados?.texto) emitirToast(dados.texto);
+      },
+      telegram: avisarTelegram,
+      nota: ({ chatId, texto }) => crmServico?.adicionarNota({ chatId, texto, autor: "JUL.IA" }),
+      evento: (tipo, { chatId, detalhes }) => crmServico?.registrarEvento(tipo, { chatId, vendedorId: ID_DO_AGENTE, detalhes }),
+    });
+    await agente.iniciar();
+    // Depois de reiniciar: cliente que escreveu nos últimos minutos e ficou sem resposta.
+    for (const mapa of mensagensPorChat.values()) {
+      for (const m of mapa.values()) if (m.direction === "in") agente.aoMensagem(m, { nova: false }).catch(() => {});
+    }
+  } catch (e) {
+    console.warn("[agente] não liguei a JUL.IA:", e.message);
+    agente = null;
+  }
 }
 
 /**
@@ -3717,9 +3860,18 @@ const equipe = {
 };
 
 // As rotas existem desde o boot; enquanto o banco não liga, respondem 503.
+// Trabalhador do agente JUL.IA no PC do Thiago (x-agente-segredo).
+montarRotasDoAgente(app, {
+  agente: () => agente,
+  segredo: () => SEGREDO_AGENTE,
+  abrirMidia: (id) => baixarMidia(String(id)),
+  catalogo: () => espelhoDoCatalogo.ler(),
+});
+
 montarRotasDoCrm(app, {
   equipe,
   acesso,
+  agente: () => agente,
   // Clique do cliente num e-mail de produtos: o vendedor é avisado na hora.
   avisarPainel: (texto) => emitirToast(texto),
   campanhas: new Proxy(

@@ -78,4 +78,60 @@ export type AchadoBusca = {
   nome: string;
 };
 
-export type ModuloComando = "painel" | "clientes" | "catalogo" | "equipe" | "ajustes";
+export type ModuloComando = "painel" | "clientes" | "agente" | "catalogo" | "equipe" | "ajustes";
+
+// ---- agente JUL.IA (whatsapp-server/agente) ----
+export type RespostaDoAgente = { tipo: "texto"; texto: string } | { tipo: "produto"; produtoId: string; nome?: string | null };
+
+export type SugestaoDoAgente = {
+  id: string;
+  chatId: string;
+  nome: string | null;
+  respostas: RespostaDoAgente[];
+  criadaEm: number;
+};
+
+export type EstadoDoAgente = {
+  config: {
+    modo: "desligado" | "copiloto" | "automatico";
+    publico: "teste" | "clientes";
+    vendaAutomatica: boolean;
+    ligadoEm: number | null;
+  };
+  numerosDeTeste: string[];
+  trabalhador: {
+    online: boolean;
+    ultimaBatida: number | null;
+    info: {
+      versao?: string;
+      modelo?: string;
+      modeloNaPlaca?: boolean;
+      esperando?: string | null;
+      catalogo?: { produtos: number; atualizadoEm: string | null };
+      atendidas?: number;
+      erros?: number;
+    } | null;
+  };
+  hoje: Record<string, number> | null;
+  fila: number;
+  pensando: { chatId: string; nome: string | null }[];
+  sugestoes: SugestaoDoAgente[];
+  conversas: {
+    chatId: string;
+    nome: string | null;
+    numero: string;
+    situacao: "ativo" | "humano" | "transferida";
+    ate: number | null;
+    motivo: string | null;
+  }[];
+  recentes: { tipo: string; em: number; chatId?: string; nome?: string | null; texto?: string }[];
+};
+
+export type ConversaDoAgente = {
+  modo: "desligado" | "copiloto" | "automatico";
+  pode: boolean;
+  motivo: string | null;
+  situacao: "ativo" | "humano" | "transferida";
+  ate: number | null;
+  respondida: boolean;
+};

@@ -6,6 +6,7 @@
 #   .\whatsapp-server\deploy-evo.ps1 -Commit 8bded2f    # sobe um commit ESPECÍFICO (é assim que se desfaz)
 #   .\whatsapp-server\deploy-evo.ps1 -Importar          # copia o histórico da Evolution para o banco da loja (uma vez)
 #   .\whatsapp-server\deploy-evo.ps1 -Diagnostico       # raio-X do banco (só leitura)
+#   .\whatsapp-server\deploy-evo.ps1 -Agente            # traz o segredo da JUL.IA para ESTE PC (depois do deploy)
 #   .\whatsapp-server\deploy-evo.ps1 -Voltar            # NÃO use para desfazer: liga o servidor ANTIGO,
 #                                                       # o do whatsapp-web.js, de antes da Evolution
 #
@@ -17,7 +18,8 @@ param(
   [string]$Commit = "",
   [switch]$Voltar,
   [switch]$Importar,
-  [switch]$Diagnostico
+  [switch]$Diagnostico,
+  [switch]$Agente
 )
 
 $ErrorActionPreference = "Stop"
@@ -44,6 +46,28 @@ if ($Diagnostico) {
   Write-Host "Raio-X do banco (so leitura; nao mostra dado de cliente)" -ForegroundColor Cyan
   ssh -t $Servidor "bash /opt/balao2026/whatsapp-server/deploy-evo.sh diagnostico"
   exit $LASTEXITCODE
+}
+
+if ($Agente) {
+  # O trabalhador da JUL.IA (scripts/agente-local) prova quem é para a VPS com
+  # este segredo. Ele vem pela mesma conexão ssh do deploy e vai direto para o
+  # arquivo: não aparece na tela nem fica no histórico do PowerShell.
+  Write-Host "Trazendo o segredo da JUL.IA da VPS para este computador" -ForegroundColor Cyan
+  Write-Host "A senha pedida a seguir e a de root da VPS." -ForegroundColor DarkGray
+  $segredo = ssh $Servidor "cat /var/lib/balao-evo/painel/agente.segredo"
+  if ($LASTEXITCODE -ne 0 -or -not $segredo) {
+    Write-Host "Nao achei o segredo na VPS. Rode antes o deploy: .\whatsapp-server\deploy-evo.ps1" -ForegroundColor Red
+    exit 1
+  }
+  $pasta = Join-Path $env:USERPROFILE ".balao-agente"
+  New-Item -ItemType Directory -Force -Path $pasta | Out-Null
+  $arquivo = Join-Path $pasta "segredo.txt"
+  Set-Content -Path $arquivo -Value ([string]$segredo).Trim() -NoNewline -Encoding ascii
+  # So o seu usuario do Windows le o arquivo.
+  icacls $arquivo /inheritance:r /grant:r "$($env:USERNAME):(R,W)" | Out-Null
+  Write-Host "Pronto: segredo gravado em $arquivo" -ForegroundColor Green
+  Write-Host "Agora: .\scripts\agente-local\instalar.ps1" -ForegroundColor Cyan
+  exit 0
 }
 
 if ($Commit -and $Commit -notmatch '^[0-9a-fA-F]{7,40}$') {

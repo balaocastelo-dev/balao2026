@@ -26,6 +26,7 @@ COPY servidor.js catalogo.js vigia.js medicao.js recarga.js transcricao.js uploa
 COPY evo ./evo
 COPY status ./status
 COPY crm ./crm
+COPY agente ./agente
 
 # A rede de segurança para o erro acima: confere que todo require("./...") de
 # todo arquivo copiado resolve de verdade. Se faltar um, o BUILD falha aqui — e
