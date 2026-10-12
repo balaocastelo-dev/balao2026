@@ -69,6 +69,11 @@ Cuidados que o programa toma, porque a placa de vídeo é uma só:
   uma no meio, derruba o ComfyUI na hora; a foto fica para a rodada seguinte.
 - Não roda junto com o vídeo do dia, o vídeo da dica nem outro render, e
   confere se há memória livre na placa (15 GB) antes de começar.
+- Também cede a placa à JUL.IA (vendedora do WhatsApp; sinal em
+  `balao-agente\dados\placa-julia.txt`, regra do Thiago de 12/10/2026), aos
+  vídeos da Pauta e às fotos de corpo inteiro (`video_pauta.py`,
+  `corpo_inteiro.py`, `kontext_corpo.py`), e nunca fecha um ComfyUI que outro
+  programa esteja usando.
 - O texto do Flux roda na CPU e o Flux sai da placa antes de o modelo de visão
   entrar: com tudo junto a memória transborda e a geração fica ~100 vezes mais
   lenta, sem dar erro.
