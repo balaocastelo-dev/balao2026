@@ -336,7 +336,7 @@ class TestRapidez(unittest.TestCase):
         r, o = atender(trabalho("oi, quero um notebook pra estudar, até 3 mil"), [
             chamada("mostrar_produto", id=nid), fala("Este serve bem para estudar. Quer ver outros?")], self.cat)
         self.assertEqual(len(o.recebidas), 2, "mostrar + responder; sem pergunta antes e sem empurrão")
-        busca = o.recebidas[0]["mensagens"][-2]["tool_calls"][0]["function"]["arguments"]
+        busca = next(m for m in o.recebidas[0]["mensagens"] if m.get("tool_calls"))["tool_calls"][0]["function"]["arguments"]
         self.assertEqual(busca["preco_maximo"], 3000.0, "'até 3 mil' vira preço máximo")
         self.assertEqual(r["respostas"][1], {"tipo": "produto", "produtoId": nid})
 
@@ -570,10 +570,11 @@ class TestTrabalhador(unittest.TestCase):
         self.assertEqual(r["respostas"][1], {"tipo": "produto", "produtoId": nid})
         self.assertEqual(len(t.ollama.recebidas), 2, "duas idas ao modelo, sem empurrão")
         primeira = t.ollama.recebidas[0]["mensagens"]
-        self.assertIn("[áudio do cliente: quero um notebook]", primeira[-3]["content"])
-        self.assertEqual(primeira[-2]["tool_calls"][0]["function"]["arguments"], {"busca": "quero um notebook"},
+        self.assertIn("[áudio do cliente: quero um notebook]", primeira[-4]["content"])
+        self.assertEqual(primeira[-3]["tool_calls"][0]["function"]["arguments"], {"busca": "quero um notebook"},
                          "a busca usa a fala do áudio, sem o rótulo")
-        self.assertEqual(primeira[-1]["role"], "tool")
+        self.assertEqual(primeira[-2]["role"], "tool")
+        self.assertIn("Não liste os produtos", primeira[-1]["content"], "e o recado para não repetir os cartões")
         self.assertEqual(vps.batidas[0]["modelo"], "qwen3:14b")
 
     def test_bling_simulado_no_modo_teste(self):

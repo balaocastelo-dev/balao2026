@@ -604,16 +604,20 @@ class Atendimento:
                 if teto:
                     args["preco_maximo"] = teto
                 saida = self.f_buscar_produtos(**args)
-                if saida.get("produtos"):
-                    saida["instrucao"] = (
-                        "Os 3 primeiros vão para o cliente como cartões (foto, preço e link); para mandar outros, chame "
-                        "mostrar_produto com os ids. Responda em 1 ou 2 frases curtas, sem lista e sem repetir nomes e preços, "
-                        "e termine com uma pergunta. Se nenhum servir para o que o cliente pediu, diga isso.")
+
                 self.registrar(f"[cerebro] busca antes do modelo: {len(saida.get('produtos') or [])} produto(s)")
                 conversa.append({"role": "assistant", "content": "",
                                  "tool_calls": [{"function": {"name": "buscar_produtos", "arguments": args}}]})
                 conversa.append({"role": "tool", "content": json.dumps(saida, ensure_ascii=False), "tool_name": "buscar_produtos"})
                 usadas.append("buscar_produtos")
+                if saida.get("produtos"):
+                    # O Qwen segue recado como "user" marcado (no resultado da ferramenta ele ignorava
+                    # e listava os produtos com preço, o que os cartões já mostram).
+                    conversa.append({"role": "user", "content": NOTA + (
+                        "Os 3 primeiros produtos da busca já vão para o cliente como cartões, com foto, preço e link "
+                        "(para mandar outros, chame mostrar_produto com os ids). Responda ao cliente com 1 frase curta e "
+                        "1 pergunta (para que vai usar, ou qual prefere). Não liste os produtos e não repita nomes nem preços. "
+                        "Se nenhum servir para o que ele pediu, diga isso.")})
 
         for _ in range(MAX_RODADAS):
             msg = self._chamar_modelo(conversa, inicio, ferramentas=FERRAMENTAS)
