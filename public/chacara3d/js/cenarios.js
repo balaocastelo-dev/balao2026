@@ -544,7 +544,7 @@ export function criarCenarios(ctx) {
     const dj = gente(cn, r, 'homem', 'noite', 'noite', DJ[0], DJ[1], Math.PI, danca(['dj']), { anim: 'dj' });
     // público: mais denso perto do palco, longe da fogueira e das árvores
     const n = qtd(70);
-    const pos = espalhar(sorteio(3), n, [18.0, 28.1, 3.35, 7.8], 0.56, (x) => 0.35 + 0.65 * clamp((x - 18) / 10, 0, 1), (x, y) => Math.hypot(x - 20.6, y - 6.2) > 1.8 && Math.hypot(x - 26.4, y - 8.55) > 0.7 && Math.hypot(x - 23.7, y - 8.95) > 0.7 && Math.hypot(x - 21.2, y - 8.3) > 0.7);
+    const pos = espalhar(sorteio(3), n, [19.6, 28.1, 3.35, 7.8], 0.52, (x) => 0.35 + 0.65 * clamp((x - 19.6) / 8.5, 0, 1), (x, y) => Math.hypot(x - 20.6, y - 6.2) > 1.8 && Math.hypot(x - 26.4, y - 8.55) > 0.7 && Math.hypot(x - 23.7, y - 8.95) > 0.7 && Math.hypot(x - 21.2, y - 8.3) > 0.7);
     const DANCAS = ['pulando', 'pulando', 'pulando', 'dancando_3', 'dancando_3', 'dancando_1', 'dancando_2'];
     pos.forEach(([x, y], i) => {
       const t = r() < 0.52 ? 'homem' : 'mulher';
@@ -555,7 +555,7 @@ export function criarCenarios(ctx) {
     // fachos das cabeças móveis e lasers
     const fx = criarLuzesDePalco(tre, las);
     G.add(fx.obj);
-    cn.hora = 22.6; cn.proj = 'rave'; cn.vista = [17.5, 5.0, 0.08, 0];   // no fundo da pista, ao lado da fogueira, olhando o palco
+    cn.hora = 22.6; cn.proj = 'rave'; cn.vista = [17.0, 5.0, 0.08, 0];   // no fundo da pista, ao lado da fogueira, olhando o palco
     cn.musica = { estilo: 'rave', pontos: [[29.0, 3.4, 1.4], [29.0, 8.35, 1.4]], volume: 0.75, ref: 6 };
     cn.burburinho = [23.5, 5.6, Math.round(n * 0.6)];
     let ultimaEnergia = 0.7;
