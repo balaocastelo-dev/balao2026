@@ -1,0 +1,323 @@
+{
+  "slug": "que-computador-preciso-para-rodar-ia-em-casa",
+  "titulo": "Computador para rodar IA em casa: o que ele precisa ter",
+  "resumo": "Para rodar IA em casa, o que manda é a memória: a da placa de vídeo no PC, a unificada no Mac. Veja como dimensionar sem gastar com o que não importa.",
+  "categoria": "ia",
+  "etiquetas": [
+    "ia local",
+    "placa de vídeo",
+    "memória ram",
+    "upgrade"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-12T08:58:39.250Z",
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Você quer usar inteligência artificial sem depender de um serviço na internet, com os seus arquivos dentro de casa, e ficou na dúvida sobre qual computador consegue rodar IA em casa. A pergunta faz sentido: programas gratuitos já permitem baixar um modelo de linguagem, o tipo de IA que conversa e escreve, e usá-lo no próprio computador, sem mandar os textos para fora."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que a resposta está no processador mais caro. Para esse uso, o que decide é a **memória**: a memória da placa de vídeo, chamada VRAM, em um PC, ou a memória unificada, em um Mac. Se o modelo cabe nela, a IA responde com fluidez; se não cabe, ela até funciona, mas fica lenta. O resto deste guia mostra como fazer essa conta."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "Para rodar IA em casa, a **memória** pesa mais que o processador: o modelo inteiro precisa caber nela para responder rápido.",
+        "No PC, a referência é a **VRAM da placa de vídeo**; no Mac com chip Apple, a **memória unificada**, que o processador e o vídeo dividem.",
+        "Os programas mais usados recomendam **16 GB de RAM** ou mais; o LM Studio sugere ao menos 4 GB de VRAM dedicada no Windows.",
+        "Modelos maiores pedem mais memória, e conversas longas também: deixe folga."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Por que a memória decide o que você consegue rodar"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Um modelo de IA é, na prática, um arquivo enorme de números, os chamados parâmetros. Para responder, o computador precisa ler esses números o tempo todo, e por isso eles ficam carregados na memória mais rápida disponível. Quando o modelo é anunciado com \"8 bilhões de parâmetros\", isso diz quanto espaço ele vai ocupar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A documentação da Hugging Face, a maior biblioteca aberta de modelos, dá uma regra prática: carregar um modelo de X bilhões de parâmetros em precisão de 16 bits pede perto de 2 vezes X gigabytes de VRAM. Um modelo de 8 bilhões, nesse formato, já ocuparia cerca de 16 GB, mais do que a maioria das placas de vídeo domésticas tem."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "É aí que entra a **quantização**: guardar cada número com menos bits, por exemplo 4 em vez de 16. A mesma documentação mostra que esse processo reduz bastante a memória necessária, à custa de alguma perda de precisão. Pela conta, em 4 bits o modelo fica por volta de um quarto do tamanho em 16 bits, mais uma folga. É assim que a maioria das pessoas roda IA em casa."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas o modelo não é tudo. A Hugging Face explica que, durante a conversa, o programa guarda uma memória de trabalho, o cache de contexto, que cresce a cada palavra lida ou escrita. Em conversas longas ou documentos grandes, esse cache pode ocupar uma parte considerável da memória. Por isso a conta nunca deve fechar no limite."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Tamanho do modelo",
+        "Em 16 bits (aprox.)",
+        "Em 4 bits (estimativa)"
+      ],
+      "linhas": [
+        [
+          "3 bilhões de parâmetros",
+          "6 GB",
+          "perto de 2 GB, mais folga"
+        ],
+        [
+          "8 bilhões de parâmetros",
+          "16 GB",
+          "perto de 4 GB, mais folga"
+        ],
+        [
+          "14 bilhões de parâmetros",
+          "28 GB",
+          "perto de 7 GB, mais folga"
+        ],
+        [
+          "32 bilhões de parâmetros",
+          "64 GB",
+          "perto de 16 GB, mais folga"
+        ]
+      ],
+      "titulo": "Quanto um modelo ocupa, pela regra da Hugging Face",
+      "colunaDestaque": 2,
+      "fonte": {
+        "nome": "Hugging Face — Optimizing LLMs for Speed and Memory",
+        "url": "https://huggingface.co/docs/transformers/en/llm_tutorial_optimization"
+      },
+      "nota": "A coluna de 16 bits aplica a regra de 2 GB por bilhão de parâmetros. A de 4 bits é uma conta aproximada (um quarto do valor) e não inclui o cache de contexto, que cresce com o tamanho da conversa. O tamanho real varia de arquivo para arquivo."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Leia a tabela como ordem de grandeza, não como promessa. Ela serve para mostrar o salto: dobrar o tamanho do modelo dobra a memória necessária. E, na dúvida entre dois computadores, quase sempre vale mais o que tem mais memória disponível para o modelo."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que os programas de IA local pedem"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Os dois programas gratuitos mais conhecidos para rodar modelos em casa são o LM Studio, que tem janela e botões, e o Ollama, que funciona por linha de comando e serve de base para outros aplicativos. Os dois publicam requisitos, e eles são o ponto de partida mais seguro para conferir o seu computador."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Item",
+        "LM Studio",
+        "Ollama"
+      ],
+      "linhas": [
+        [
+          "Windows",
+          "PC x64 com instruções AVX2 ou ARM (Snapdragon X Elite)",
+          "Windows 10 22H2 ou mais novo, Home ou Pro"
+        ],
+        [
+          "Memória RAM",
+          "16 GB ou mais recomendados",
+          "Não informa um mínimo"
+        ],
+        [
+          "Placa de vídeo no Windows",
+          "Ao menos 4 GB de VRAM dedicada recomendados",
+          "Nvidia com driver 551.61 ou mais novo; Radeon com driver ROCm v7 ou Vulkan"
+        ],
+        [
+          "Mac",
+          "Chip Apple (série M) e macOS 14 ou mais novo; Mac com Intel não é aceito",
+          "Aceleração pelo Metal, nos aparelhos Apple"
+        ],
+        [
+          "Espaço em disco",
+          "Não informa",
+          "Ao menos 4 GB para o programa; modelos à parte"
+        ]
+      ],
+      "titulo": "Requisitos publicados pelos programas",
+      "colunaDestaque": 1,
+      "fonte": {
+        "nome": "LM Studio — System Requirements; Ollama — Windows e GPU",
+        "url": "https://lmstudio.ai/docs/app/system-requirements"
+      },
+      "nota": "Requisitos consultados em outubro de 2026. Eles mudam a cada versão; confira a página de cada programa antes de comprar ou instalar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Repare em dois detalhes. O primeiro é o disco: a documentação do Ollama avisa que cada modelo pode ter de dezenas a centenas de gigabytes, separado do programa. Um SSD com espaço sobrando faz diferença, porque o modelo é carregado dele para a memória toda vez que você o abre."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O segundo é a placa de vídeo. O Ollama aceita placas Nvidia a partir de uma geração razoavelmente antiga, enquanto o suporte às Radeon no Windows é mais estreito, concentrado nas séries RX 7000 e PRO W7000. Se você já tem uma placa, confira o modelo exato na página de GPUs do programa antes de contar com ela. Sem placa compatível, o programa usa o processador, e a resposta fica bem mais lenta."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "PC com placa de vídeo, Mac ou notebook com NPU: o que muda"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 3,
+      "texto": "PC com placa de vídeo dedicada"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "No PC, a regra é simples: a VRAM da placa limita o tamanho do modelo que roda com folga. O próprio Ollama mostra isso: o comando ollama ps indica se o modelo está 100% na placa de vídeo ou dividido entre placa e processador. Quando aparece a divisão, parte do trabalho foi para a memória comum, mais lenta. Veja as [placas de vídeo](/categoria/hardware-placa-de-video-vga) pela quantidade de VRAM, e não só pelo nome."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A vantagem do PC de mesa é a troca: dá para começar com uma placa e subir depois, ou acrescentar memória RAM. Mas a placa precisa caber no gabinete e ser bem alimentada pela fonte, então o upgrade pede conferência da montagem inteira."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 3,
+      "texto": "Mac com chip Apple"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Nos Macs com chip Apple, a memória é unificada: a Apple descreve um único conjunto de memória rápida que o processador e o vídeo acessam sem copiar dados de um lado para outro. Na prática, boa parte dessa memória fica disponível para o modelo de IA, o que torna um Mac com bastante memória uma opção interessante para modelos maiores."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O porém é que a memória do Mac não se troca depois da compra. O LM Studio recomenda 16 GB ou mais nos Macs e diz que os de 8 GB podem servir apenas para modelos pequenos e conversas curtas. Quem pensa em IA local deve escolher a memória do Mac já com essa folga."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 3,
+      "texto": "Notebook com NPU, o chamado AI PC"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A NPU é um chip dedicado a cálculos de IA. A Microsoft define os Copilot+ PCs como computadores com Windows 11 e uma NPU capaz de mais de 40 trilhões de operações por segundo, usada em recursos do próprio Windows, como tradução em tempo real e geração de imagens, com economia de bateria."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas a NPU não substitui a placa de vídeo para quem quer rodar modelos de linguagem grandes com os programas citados acima. Ela serve muito bem aos recursos de IA embutidos no sistema. Para conversar com um modelo maior em casa, o que continua contando é a memória disponível e, no PC, a VRAM."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "ia-local"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como dimensionar o computador pelo seu uso"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Antes de olhar modelos de computador, responda o que você quer fazer com a IA. Resumir textos, revisar e-mails e tirar dúvidas pede bem menos do que analisar documentos longos ou usar modelos grandes para programar. A lista abaixo ajuda a enquadrar o seu caso."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "**Experimentar e usar no dia a dia** com modelos pequenos: 16 GB de RAM e, no PC, uma placa com ao menos a VRAM recomendada pelo LM Studio. Em um Mac, 16 GB de memória unificada.",
+        "**Usar com frequência**, com modelos médios e conversas mais longas: mais VRAM na placa, ou mais memória unificada no Mac, para que o modelo e o cache caibam sem divisão.",
+        "**Trabalhar com modelos grandes** ou vários ao mesmo tempo: aí a quantidade de memória vira o critério principal da compra, e vale olhar máquinas de maior desempenho.",
+        "**Em qualquer caso**: SSD com espaço livre para guardar os modelos e uma fonte e uma refrigeração adequadas à placa."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se você já tem um computador, comece por ele. Instale um dos programas, baixe um modelo pequeno e veja como ele se comporta. Se a resposta vier lenta e o ollama ps mostrar o modelo dividido, o gargalo está na memória. Às vezes basta mais RAM; quando o caso é VRAM, a solução é a placa. O guia sobre [DDR4 ou DDR5](/blog/ddr4-ou-ddr5-da-para-aproveitar-a-memoria-antiga) ajuda a saber se a memória atual pode ser aproveitada."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "Os textos e arquivos ficam no seu computador; a documentação do Ollama diz que, no uso local, ele não vê seus textos.",
+        "Funciona sem internet depois que o modelo foi baixado.",
+        "Os programas mais conhecidos são gratuitos e há muitos modelos abertos para escolher.",
+        "O mesmo computador serve para trabalho, estudo e jogos."
+      ],
+      "contras": [
+        "Os modelos que cabem em casa costumam ser menores que os dos serviços na nuvem.",
+        "Exige memória: na placa de vídeo, no PC, ou unificada, no Mac.",
+        "Modelos ocupam muito espaço em disco.",
+        "Você cuida de instalar, atualizar e escolher os modelos."
+      ],
+      "titulo": "Rodar IA em casa: o que pesa"
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "Baixe programas e modelos só das páginas oficiais e de repositórios conhecidos. E lembre que o modelo pode errar com toda a confiança: confira qualquer informação importante antes de usar, como faria com um serviço na nuvem.",
+      "titulo": "Cuidado com o que você baixa"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Onde montar ou ajustar um computador para IA em Campinas"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, tem uma [seleção de computadores para rodar IA localmente](/ia-local) e monta computador sob medida, o que permite escolher a placa de vídeo e a quantidade de memória pelo uso que você descreveu. Antes de pagar, dá para ver o computador ligado e testar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se a ideia é aproveitar a máquina que você já tem, a assistência técnica faz o diagnóstico e o upgrade de memória ou de placa no mesmo endereço. Para modelos maiores, vale conhecer os [computadores de maior desempenho](/premium). O atendimento no WhatsApp é feito por pessoas da equipe. Em uma linha: para IA em casa, compre memória antes de comprar processador."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "montagem"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Dá para rodar IA em casa sem placa de vídeo?",
+      "resposta": "Dá. Programas como o Ollama e o LM Studio usam o processador quando não encontram uma placa compatível. A resposta fica mais lenta, então é melhor começar com modelos pequenos."
+    },
+    {
+      "pergunta": "16 GB de RAM são suficientes para IA local?",
+      "resposta": "Para começar com modelos pequenos, normalmente sim: é o que o LM Studio recomenda. Para modelos maiores ou conversas longas, mais memória e, no PC, mais VRAM na placa de vídeo fazem diferença."
+    },
+    {
+      "pergunta": "Notebook com NPU roda qualquer IA?",
+      "resposta": "Não. A NPU acelera recursos de IA do Windows e de aplicativos preparados para ela. Para rodar modelos de linguagem maiores em programas como o Ollama, o que pesa é a memória e a placa de vídeo."
+    },
+    {
+      "pergunta": "Mac com 8 GB serve para IA local?",
+      "resposta": "Serve só para modelos pequenos e conversas curtas, segundo o LM Studio, que recomenda 16 GB ou mais. Como a memória do Mac não pode ser ampliada depois, vale escolher já com folga."
+    },
+    {
+      "pergunta": "Meus arquivos saem do computador quando uso IA local?",
+      "resposta": "No uso local, o modelo roda na sua máquina e a documentação do Ollama diz que ele não vê seus textos. Isso muda se você usar modelos hospedados na nuvem pelo mesmo programa, então confira qual opção está usando."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "LM Studio — System Requirements",
+      "url": "https://lmstudio.ai/docs/app/system-requirements",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Ollama — Windows",
+      "url": "https://docs.ollama.com/windows",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Ollama — Hardware support (GPU)",
+      "url": "https://docs.ollama.com/gpu",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Ollama — FAQ",
+      "url": "https://docs.ollama.com/faq",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Hugging Face — Optimizing LLMs for Speed and Memory",
+      "url": "https://huggingface.co/docs/transformers/en/llm_tutorial_optimization",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Microsoft Learn — Copilot+ PCs developer guide (NPU)",
+      "url": "https://learn.microsoft.com/en-us/windows/ai/npu-devices/",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Apple Newsroom — Apple unleashes M1",
+      "url": "https://www.apple.com/newsroom/2020/11/apple-unleashes-m1/",
+      "data": "novembro de 2020"
+    }
+  ]
+}

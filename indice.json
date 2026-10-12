@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "que-computador-preciso-para-rodar-ia-em-casa",
+      "titulo": "Computador para rodar IA em casa: o que ele precisa ter",
+      "resumo": "Para rodar IA em casa, o que manda é a memória: a da placa de vídeo no PC, a unificada no Mac. Veja como dimensionar sem gastar com o que não importa.",
+      "categoria": "ia",
+      "etiquetas": [
+        "ia local",
+        "placa de vídeo",
+        "memória ram",
+        "upgrade"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-12T08:58:39.250Z",
+      "minutos": 11
+    },
+    {
       "slug": "como-saber-se-o-ssd-esta-chegando-ao-fim",
       "titulo": "SSD chegando ao fim: como saber antes de perder os arquivos",
       "resumo": "SSD chegando ao fim quase nunca faz barulho: o aviso está nos dados de integridade. Veja onde o Windows mostra isso e o que fazer primeiro.",
@@ -103,5 +118,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-11T21:22:46.157Z"
+  "atualizadoEm": "2026-10-12T08:58:40.030Z"
 }
