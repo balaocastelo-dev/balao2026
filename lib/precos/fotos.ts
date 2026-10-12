@@ -11,6 +11,9 @@
 // ============================================================
 
 import { interpretarPagina } from "./kabum";
+import { conflitoDeDetalhe } from "./conflitos-de-foto";
+
+export { conflitoDeDetalhe };
 
 const semAcento = (s: unknown) =>
   String(s ?? "")
@@ -205,6 +208,9 @@ export function suprimentoConfere(doFornecedor: string, achado: string): boolean
 
 export function semelhanca(doFornecedor: string, achado: string): number {
   if (misturaOriginalECompativel(doFornecedor, achado)) return 0;
+  // Auditoria de 12/10: tipo, marca, modelo, medida, quantidade, plataforma ou
+  // conector que se contradizem = outro produto (ver conflitos-de-foto.ts).
+  if (conflitoDeDetalhe(doFornecedor, achado)) return 0;
   if (ehSuprimento(doFornecedor)) return suprimentoConfere(doFornecedor, achado) ? 0.9 : 0;
   const modelos = modelosDoNome(doFornecedor);
   if (modelos.length > 0) {
@@ -238,8 +244,10 @@ export function semelhanca(doFornecedor: string, achado: string): number {
   const cobertura = comuns / a.size;
   const precisao = comuns / b.size;
   const nota = 0.75 * cobertura + 0.25 * precisao;
-  // Sem modelo para conferir, só vale se quase todo o nome do fornecedor estiver lá.
-  if (modelos.length === 0 && cobertura < 0.85) return 0;
+  // Sem código de modelo para conferir não dá para garantir que é o mesmo
+  // produto (auditoria de 12/10: "Cabo de Rede Cat5 Exbom" pegava a foto de uma
+  // caixa de 305 m da Furukawa). Fica sem foto.
+  if (modelos.length === 0) return 0;
   // Kit ou combo no achado, sem ser kit no fornecedor: a foto mostra outra coisa.
   const ehKit = (t: string) => /\b(kit|combo)\b|\+/.test(semAcento(t));
   let ajuste = ehKit(achado) && !ehKit(doFornecedor) ? 0.75 : 1;
@@ -455,6 +463,9 @@ export async function buscarFotoNaAmericanas(
 
 export const MARCA_ILUSTRATIVA = "#ilustrativa";
 
+/** Foto "ilustrativa" (de outro produto parecido) não é mais usada: 12/10/2026. */
+export const ILUSTRATIVA_DESLIGADA = true;
+
 export function ehIlustrativa(url: string | null | undefined): boolean {
   return String(url || "").endsWith(MARCA_ILUSTRATIVA);
 }
@@ -525,6 +536,11 @@ export function marcaDeOutroProduto(doFornecedor: string, achado: string): boole
 }
 
 export function semelhancaIlustrativa(doFornecedor: string, achado: string, marcas: string[] = []): number {
+  // Desligada em 12/10/2026: a auditoria foto a foto mostrou que a foto
+  // "parecida" quase sempre é de outro produto (o air cooler Redragon CC2000
+  // saiu com a foto de um water cooler 360mm). Regra do Thiago: a foto é a do
+  // produto exato ou nenhuma. A função fica só para os testes antigos.
+  if (ILUSTRATIVA_DESLIGADA) return 0;
   if (misturaOriginalECompativel(doFornecedor, achado)) return 0;
   // Foto de outra marca mostra outro produto: não serve nem como ilustração.
   if (marcaDeOutroProduto(doFornecedor, achado)) return 0;

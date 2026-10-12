@@ -21,6 +21,7 @@ import { vendaDoProduto } from "./faixas";
 import type { ItemDeOrigem } from "./kabum";
 import { montarProduto, motivoDeRecusa, type ProdutoDeOrigem, type RegrasDaFonte } from "./produto";
 import { codigosBloqueados } from "./bloqueio";
+import { fotosRecusadasDe, semFotosRecusadas } from "./fotos-recusadas";
 import { decidirQueda, type EstadoDaQueda } from "./queda";
 
 type Linha = Record<string, unknown>;
@@ -489,9 +490,13 @@ export async function gravarPagina(fonte: Fonte, itens: ItemDeOrigem[], agora: s
   }
   // Produto excluído no painel fica de fora até ser desbloqueado.
   const bloqueados = await codigosBloqueados(candidatos.map((i) => i.codigo));
-  const aceitos = candidatos.filter((i) => !bloqueados.has(i.codigo));
-  saida.bloqueados = candidatos.length - aceitos.length;
-  if (aceitos.length === 0) return saida;
+  const naoBloqueados = candidatos.filter((i) => !bloqueados.has(i.codigo));
+  saida.bloqueados = candidatos.length - naoBloqueados.length;
+  if (naoBloqueados.length === 0) return saida;
+  // Foto reprovada na conferência (fotos_recusadas) não volta pela fonte:
+  // o item entra sem ela e o produto mantém o que está no site.
+  const recusadas = await fotosRecusadasDe(naoBloqueados.map((i) => i.codigo));
+  const aceitos = recusadas.size ? naoBloqueados.map((i) => semFotosRecusadas(i, recusadas)) : naoBloqueados;
 
   const atuais = await turso.execute({
     sql: `SELECT id, fonte_id, price, origem_pix, origem_cartao, origem_parcelas, retido_desde, preco_anterior, queda_em FROM products WHERE id IN (${aceitos.map(() => "?").join(", ")})`,

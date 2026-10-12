@@ -170,7 +170,9 @@ describe("foto pela KaBuM!", () => {
     expect(semelhanca("Cartucho Compatível HP 932XL Preto 50ML", "Cartucho de Tinta Hp 932xl Cn053al Preto")).toBe(0);
     expect(semelhanca("Toner Compatível Hp 105A/107A 1K Evolut", "Toner Original Hp W1105a 105a 107a")).toBe(0);
     expect(semelhanca("Controle Ps4 Compativel Preto", "Controle Sony Dualshock 4, Playstation 4, Sem Fio, Preto - PS4")).toBe(0);
-    expect(semelhanca("Toner Evolut Compativel Hp CB541A/CE321A/CF211A Azul 1.8K", "Cart. Toner Comp. C/ Cb541a/ce321a/cf211a Cyan")).toBeGreaterThan(0);
+    // 12/10: a marca do compatível (Evolut) também tem de estar no anúncio da foto.
+    expect(semelhanca("Toner Evolut Compativel Hp CB541A/CE321A/CF211A Azul 1.8K", "Cart. Toner Comp. C/ Cb541a/ce321a/cf211a Cyan")).toBe(0);
+    expect(semelhanca("Toner Evolut Compativel Hp CB541A/CE321A/CF211A Azul 1.8K", "Toner Compatível Evolut HP Cb541a/ce321a/cf211a Cyan")).toBeGreaterThan(0);
     // e o original não leva foto de compatível
     expect(semelhanca("Cartucho HP 664 Preto Original", "Cartucho Compatível HP 664 Preto")).toBe(0);
     // compatível não diz que é da marca da impressora
@@ -194,7 +196,8 @@ describe("foto pela KaBuM!", () => {
     expect(ok("Toner Compatível Hp Cf382A/Ce412A/Cc532 Amarelo 2.8K", "Toner Compatível HP CF412A Amarelo")).toBe(false);
     expect(ok("Toner Evolut Compativel Hp CF230X Preto 3.5K", "Toner Compatível HP W2300X 230X Preto 7.5K")).toBe(false);
     expect(ok("Toner Compatível Brother TN2370/TN660 2.6K Evolut", "3x Toner Para Brother Compativel Tn2370 Tn2340")).toBe(false);
-    expect(ok("Toner Compatível Hp Cf381A/Ce411A/Cc531 Azul 2.8K Evolut", "Toner Compatível HP CF381A 312A Ciano")).toBe(true);
+    expect(ok("Toner Compatível Hp Cf381A/Ce411A/Cc531 Azul 2.8K Evolut", "Toner Compatível Evolut HP CF381A 312A Ciano")).toBe(true);
+    expect(ok("Toner Compatível Hp Cf381A/Ce411A/Cc531 Azul 2.8K Evolut", "Toner Compatível HP CF381A 312A Ciano")).toBe(false);
   });
 
   it("cartucho de tinta compatível não é vendido; toner compatível continua", () => {
@@ -205,9 +208,10 @@ describe("foto pela KaBuM!", () => {
     expect(ehCartuchoCompativel("Controle Ps4 Compativel Preto")).toBe(false);
   });
 
-  it("sem modelo, quase todo o nome precisa aparecer", () => {
+  it("sem código de modelo não há foto automática (auditoria de 12/10)", () => {
     expect(semelhanca("Pen Drive Sandisk 64GB Cruzer Blade", "Pen Drive Sandisk 64gb Usb C/lightning")).toBe(0);
-    expect(semelhanca("Pen Drive Sandisk 64GB Cruzer Blade", "Pen Drive 64gb Sandisk Cruzer Blade Z50")).toBeGreaterThan(0.55);
+    expect(semelhanca("Pen Drive Sandisk 64GB Cruzer Blade", "Pen Drive 64gb Sandisk Cruzer Blade Z50")).toBe(0);
+    expect(semelhanca("Cabo de Rede Cat5 Exbom 2 Metros", "Cabo De Rede Furukawa Sohoplus Cat5 Branco 24awg 305 Metros")).toBe(0);
   });
 
   it("termo de busca", () => {
