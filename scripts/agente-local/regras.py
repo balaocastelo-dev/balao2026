@@ -155,6 +155,10 @@ PRECO_NA_FRASE = re.compile(
 )
 
 
+# O cliente está escolhendo entre o que já viu, não pedindo produto novo.
+ESCOLHENDO = re.compile(r"\b(esse|essa|este|esta|esses|essas|primeir\w*|segund\w*|terceir\w*|ultim\w*|"
+                        r"opcao|gostei|vou querer|quero (o|a|esse|essa|este|esta)|pode fechar|fecha\w*)\b")
+
 DISSE_QUE_NAO_TEM = re.compile(r"\bnao (temos|tem|encontrei|achei|ha|trabalhamos|vendemos)\b|\bem falta\b|\besgotad")
 
 

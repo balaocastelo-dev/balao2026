@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
@@ -340,6 +341,28 @@ class TestRapidez(unittest.TestCase):
         self.assertEqual(busca["preco_maximo"], 3000.0, "'até 3 mil' vira preço máximo")
         self.assertEqual(r["respostas"][1], {"tipo": "produto", "produtoId": nid})
 
+    def test_pedido_novo_busca_mesmo_com_produtos_de_antes_na_memoria(self):
+        # 12/10, 6h08: com produtos de um atendimento antigo na memória, a busca antes não rodava e o
+        # modelo respondia "Como posso ajudar você hoje?" para "Preciso de um computador para o meu filho".
+        velho = self.cat.buscar("notebook")[0]
+        mem = {"produtos": {velho["id"]: {"nome": "N", "preco": velho["preco_a_vista_pix"], "precos": []}}, "mostrados": [velho["id"]]}
+        _, o = atender(trabalho("preciso de um monitor pro meu filho", memoria=mem), [fala("Tenho estes. Para jogar ou estudar?")], self.cat)
+        self.assertTrue(any(m.get("tool_calls") for m in o.recebidas[0]["mensagens"]), "buscou antes do modelo")
+
+    def test_escolhendo_o_que_ja_viu_nao_busca_de_novo(self):
+        velho = self.cat.buscar("notebook")[0]
+        mem = {"produtos": {velho["id"]: {"nome": "N", "preco": velho["preco_a_vista_pix"], "precos": []}}, "mostrados": [velho["id"]]}
+        _, o = atender(trabalho("quero o primeiro notebook", memoria=mem), [fala("Ótima escolha!")], self.cat)
+        self.assertFalse(any(m.get("tool_calls") for m in o.recebidas[0]["mensagens"]))
+
+    def test_resposta_repetida_leva_um_empurrao(self):
+        t = trabalho("oi bom dia")
+        t["mensagens"] += [{"id": "j1", "de": "julia", "tipo": "texto", "texto": "Oi Thiago! Tudo bem? 😊 Como posso ajudar você hoje?"},
+                           {"id": "c2", "de": "cliente", "tipo": "texto", "texto": "me fala do horário da loja"}]
+        r, o = atender(t, [fala("Oi Thiago! Tudo bem? 😊 Como posso ajudar você hoje?"), fala("Abrimos de segunda a sexta das 9h às 18h.")], self.cat)
+        self.assertIn("repetindo", o.recebidas[1]["mensagens"][-1]["content"])
+        self.assertEqual(r["respostas"][0]["texto"], "Abrimos de segunda a sexta das 9h às 18h.")
+
     def test_sem_tipo_de_produto_nao_busca_antes(self):
         _, o = atender(trabalho("bom dia, tudo bem?"), [fala("Bom dia! Como posso ajudar?")], self.cat)
         self.assertFalse(any(m["role"] == "tool" for m in o.recebidas[0]["mensagens"]))
@@ -467,12 +490,12 @@ class TestPrioridadeNaPlaca(unittest.TestCase):
         from placa import ARQUIVO_DO_SINAL, Placa
 
         pasta = Path(tempfile.mkdtemp())
-        relogio = [1_000_000.0]
-        p = Placa(str(pasta), agora=lambda: relogio[0])
+        dez_horas = time.mktime((2026, 10, 13, 10, 0, 0, 0, 0, -1))
+        p = Placa(str(pasta), agora=lambda: dez_horas)
         p.pedir()
-        self.assertEqual(int((pasta / ARQUIVO_DO_SINAL).read_text()), 1_000_000 + 600)
+        self.assertEqual(int((pasta / ARQUIVO_DO_SINAL).read_text()), int(dez_horas) + 600)
         p.pedir(minutos=1)  # pedido menor não encurta
-        self.assertEqual(int((pasta / ARQUIVO_DO_SINAL).read_text()), 1_000_000 + 600)
+        self.assertEqual(int((pasta / ARQUIVO_DO_SINAL).read_text()), int(dez_horas) + 600)
 
     def test_espera_a_fabrica_soltar_a_memoria(self):
         from placa import Placa
@@ -488,13 +511,28 @@ class TestPrioridadeNaPlaca(unittest.TestCase):
         p2 = Placa(None, memoria_livre=lambda: 2.0, dormir=dormir, agora=lambda: relogio[0])
         self.assertLessEqual(p2.esperar_memoria(13, 30), 32, "e não espera para sempre")
 
-    def test_nao_espera_ura_nem_render(self):
-        from placa import Placa
+    def test_das_8_as_18_a_julia_vem_primeiro_de_madrugada_a_fabrica(self):
+        import placa as P
 
-        self.assertIsNone(Placa(None).ocupada(), "padrão: a JUL.IA não cede a vez")
+        dez_horas = time.mktime((2026, 10, 13, 10, 0, 0, 0, 0, -1))
+        tres_horas = time.mktime((2026, 10, 13, 3, 0, 0, 0, 0, -1))
+        antigo = P.ligacoes_na_ura
+        P.ligacoes_na_ura = lambda: 1  # a URA em ligação
+        try:
+            dia = P.Placa(None, agora=lambda: dez_horas)
+            self.assertTrue(dia.julia_primeiro())
+            self.assertIsNone(dia.ocupada(), "de dia não espera nem ligação")
+            pasta = Path(tempfile.mkdtemp())
+            noite = P.Placa(str(pasta), agora=lambda: tres_horas)
+            self.assertFalse(noite.julia_primeiro())
+            self.assertEqual(noite.ocupada(), "URA em ligação (1)", "de madrugada espera")
+            noite.pedir()
+            self.assertFalse((pasta / P.ARQUIVO_DO_SINAL).exists(), "e não interrompe a fábrica")
+        finally:
+            P.ligacoes_na_ura = antigo
         import config as C
 
-        self.assertFalse(C.PADRAO["respeitar_placa"])
+        self.assertEqual((C.PADRAO["prioridade_das"], C.PADRAO["prioridade_ate"]), (8, 18))
 
     def test_confere_quem_na_fabrica_ainda_nao_cede(self):
         from placa import ARQUIVO_DO_SINAL, QUEM_CEDE, fabrica_que_nao_cede

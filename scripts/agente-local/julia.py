@@ -107,7 +107,8 @@ class Trabalhador:
         self.vps = vps
         self.ollama = Ollama(cfg["ollama_url"])
         self.catalogo = Catalogo(cfg["pasta_dados"], buscar_remoto=vps.catalogo if vps else None)
-        self.placa = Placa(cfg["pasta_dados"], respeitar=bool(cfg.get("respeitar_placa", False)))
+        self.placa = Placa(cfg["pasta_dados"], respeitar=bool(cfg.get("respeitar_placa", False)),
+                           das=int(cfg.get("prioridade_das", 8)), ate=int(cfg.get("prioridade_ate", 18)))
         self.sentidos = Sentidos(cfg, self.ollama, baixar=vps.midia if vps else (lambda _id: (b"", "")), registrar=log.info)
         self.bling_real = Bling(cfg["bling_tokens"], vendedor_id=cfg.get("bling_vendedor_id"))
         self.bling_teste = Bling(cfg["bling_tokens"], simular=True)
@@ -284,10 +285,12 @@ def conferir(cfg: dict) -> int:
           ", ".join(f"{k}: {v}" for k, v in b.items() if k in ("contatos", "propostas", "pedidos", "erro")))
     from placa import fabrica_que_nao_cede, memoria_livre_gb
 
-    motivo = Placa(None, respeitar=True, validade_s=0).ocupada()
+    p = Placa(None, respeitar=True, validade_s=0)
+    motivo = p.ocupada()
     livre = memoria_livre_gb()
+    das, ate = int(cfg.get("prioridade_das", 8)), int(cfg.get("prioridade_ate", 18))
     linha("placa de vídeo", True, (motivo or "livre") + (f", {livre} GB livres" if livre is not None else "")
-          + " (a JUL.IA tem prioridade: não espera URA nem render)")
+          + f" (das {das}h às {ate}h a JUL.IA vem primeiro; fora disso, a criação de conteúdo)")
     faltam = fabrica_que_nao_cede()
     linha("fábrica cede a placa à JUL.IA", True, "sim" if not faltam else "atenção: ainda não leem o sinal: " + ", ".join(faltam))
     # Contexto diferente entre URA, fábrica e JUL.IA = o Ollama recarrega o modelo a cada troca (4 a 8 s).

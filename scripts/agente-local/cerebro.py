@@ -241,6 +241,13 @@ class Atendimento:
         ordem = self.memoria.get("mostrados") or []
         return [(i, self.memoria["produtos"][i]) for i in ordem if i in self.memoria["produtos"]]
 
+    def _repetiu(self, texto: str) -> bool:
+        """A resposta é igual a uma das últimas que a JUL.IA mandou (o modelo entra em
+        repetição: o cliente pede computador e ele responde "Como posso ajudar?" de novo)."""
+        chave = R.sem_acento(re.sub(r"\W+", " ", texto)).strip()
+        anteriores = [m for m in (self.t.get("mensagens") or []) if m.get("de") in ("julia", "loja")][-3:]
+        return bool(chave) and any(R.sem_acento(re.sub(r"\W+", " ", m.get("texto") or "")).strip() == chave for m in anteriores)
+
     def consulta_do_cliente(self) -> str:
         """O que o cliente pediu, para buscar no catálogo: a fala do áudio entra, a descrição da foto não."""
         t = self.ultima_do_cliente()
@@ -592,12 +599,15 @@ class Atendimento:
         empurroes = 0
         estourou = False
 
-        # Primeiro pedido de produto da conversa: o código já busca (com as
-        # palavras do cliente) antes de chamar o modelo. Ele recebe as opções
-        # prontas e vai direto mostrar e responder: uma ida ao modelo a menos
-        # (antes ele perguntava, levava um empurrão e só depois buscava).
-        if not self._mostrados() and not self.memoria.get("orcamento"):
-            consulta = self.consulta_do_cliente()
+        # O cliente pediu um tipo de produto agora: o código já busca (com as
+        # palavras dele) antes de chamar o modelo. O modelo recebe as opções
+        # prontas e vai direto mostrar e responder: uma ida ao modelo a menos.
+        # Não busca quando ele está escolhendo entre o que já viu ("quero o
+        # primeiro", "esse aí"): aí é orçamento, não busca nova.
+        # (Até 12/10 só buscava se nada tivesse sido mostrado na conversa; com
+        # produtos de um atendimento antigo na memória, o modelo só cumprimentava.)
+        consulta = self.consulta_do_cliente()
+        if consulta and not (self._mostrados() and R.ESCOLHENDO.search(R.sem_acento(consulta))):
             if self._fala_de_produto(consulta):
                 args = {"busca": R.sem_precos(consulta) or consulta}
                 teto = self._teto(consulta)
@@ -632,6 +642,9 @@ class Atendimento:
                 nota = None
                 if not usadas and not self._mostrados() and self.pediu_produto() and not self.memoria.get("orcamento"):
                     nota = "O cliente já disse o tipo de produto. Chame buscar_produtos agora e mostre opções com mostrar_produto antes de perguntar mais."
+                elif texto and self._repetiu(texto):
+                    nota = ("Você está repetindo a mesma resposta. Responda ao que o cliente escreveu por último, sem "
+                            "cumprimentar de novo. Se ele pediu produto, chame buscar_produtos.")
                 elif R.VOU_FAZER.search(texto) and not usadas:
                     nota = ("Não diga que vai fazer: faça agora com as ferramentas (emitir_orcamento para orçamento, emitir_venda para "
                             "pedido, detalhes_do_produto para especificação, buscar_produtos para produto) e responda com o resultado.")

@@ -83,8 +83,12 @@ atende dezenas de conversas abertas (cada cliente escreve a cada minuto ou dois)
 
 ## Prioridade na placa de vídeo (12/10/2026)
 
-Decisão do Thiago: **a JUL.IA vem primeiro** (atende dezenas de vezes mais que a URA). Às 5h30 ela não conseguiu
-responder: um render de vídeo do avatar ocupava 19 GB da placa e o qwen3 nem carregava.
+Decisão do Thiago: **das 8h às 18h a JUL.IA vem primeiro** (atende dezenas de vezes mais que a URA); **de
+madrugada (fora desse horário) a criação de conteúdo vem primeiro** e a JUL.IA espera render e ligação
+(`prioridade_das`/`prioridade_ate` no `config.json`). Às 5h30 ela não conseguiu responder: um render de vídeo do
+avatar ocupava 19 GB da placa e o qwen3 nem carregava.
+
+O que vale das 8h às 18h:
 
 - A JUL.IA não espera mais nada (nem ligação da URA, nem render). `respeitar_placa` no `config.json` volta ao
   jeito antigo, se um dia precisar.
