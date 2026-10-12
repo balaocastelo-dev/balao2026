@@ -1,6 +1,11 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* A Chácara 3D tem arquivos grandes (modelo em base64, texturas, scripts) que
+   não usam classes do Tailwind; ler tudo isso estoura o tempo do build. */
+@source not "../public/chacara3d";
+@source not "../chacara3d";
+
 :root {
   --background: #090b11;
   --foreground: #f3f4f6;
