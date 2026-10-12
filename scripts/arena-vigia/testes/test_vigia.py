@@ -98,3 +98,37 @@ class TestColeta(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestSiteForaDoAr(unittest.TestCase):
+    def test_guarda_e_reenvia_na_proxima_volta(self):
+        pasta = tempfile.mkdtemp()
+        chave = Path(pasta) / "chave.txt"
+        chave.write_text("arena_" + "x" * 40, encoding="utf-8")
+        cfg = dict(vigia.PADRAO, pasta_dados=pasta, arquivo_chave=str(chave), bling_tokens=str(Path(pasta) / "t.json"))
+        original = (vigia.pedir, vigia.Bling)
+        respostas = []
+
+        def pedir_falso(url, metodo="GET", dados=None, cabecalhos=None, espera=30):
+            if metodo == "GET":
+                return {"ok": True, "varrerDesde": None}
+            respostas.append(dados)
+            if len(respostas) == 1:
+                raise vigia.ErroHttp(503, "fora do ar")
+            return {"gravados": len(dados["documentos"])}
+
+        class BlingFalso(FakeBling):
+            def __init__(self, *a, **k):
+                super().__init__()
+
+        try:
+            vigia.pedir = pedir_falso
+            vigia.Bling = BlingFalso
+            self.assertEqual(vigia.uma_volta(cfg), 1)
+            est = vigia.Estado(pasta)
+            self.assertEqual(len(est.d["docs"]), 2)
+            self.assertTrue(all(not v.get("enviado") for v in est.d["docs"].values()))
+            self.assertEqual(vigia.uma_volta(cfg), 0)
+            self.assertEqual(len(respostas[-1]["documentos"]), 2)
+        finally:
+            vigia.pedir, vigia.Bling = original

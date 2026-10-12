@@ -13,6 +13,8 @@ export const CORES_DE_KART = [
 
 export interface Piloto {
   id: string;
+  /** Endereço da página do piloto: www.balao.info/arena/<slug>. */
+  slug: string;
   nome: string;
   apelido: string | null;
   foto: string | null;
@@ -47,11 +49,25 @@ export interface Lancamento {
   itens: { descricao: string; quantidade: number; valor: number }[];
   licencas: number;
   pontos: number;
-  detalhe: { base: number; licencas: number; turbo: number; conversao: number } | null;
+  detalhe: DetalheDosPontos | null;
+  /** Multiplicador da hora do turbo, congelado quando o documento chegou (1 = sem turbo). */
+  turbo: number;
   status: StatusGravado;
   motivo: string | null;
   anuladoManual: boolean;
   pontosManual: number | null;
+  /** Resumo do documento do Bling: se mudar, os pontos são refeitos. */
+  assinatura?: string | null;
+}
+
+export interface DetalheDosPontos {
+  base: number;
+  licencas: number;
+  /** +pontos pelo valor da venda (a cada R$ X). */
+  ticket: number;
+  conversao: number;
+  /** Pontos a mais pela hora do turbo. */
+  turbo?: number;
 }
 
 export interface AjustesDaCorrida {
@@ -100,6 +116,47 @@ export const PREMIO_PADRAO: Premio = {
   periodo: "mes",
 };
 
+/** Hora do turbo: pontos multiplicados em horários fracos (ou ligada à mão no painel). */
+export interface JanelaDoTurbo {
+  /** 0 = domingo … 6 = sábado. */
+  dias: number[];
+  /** "14:00" — horário da loja. */
+  das: string;
+  ate: string;
+}
+
+export interface AjustesDoTurbo {
+  janelas: JanelaDoTurbo[];
+  multiplicador: number;
+  /** Turbo ligado à mão até este instante (ISO), ou null. */
+  manualAte: string | null;
+  manualMultiplicador: number;
+}
+
+export const TURBO_PADRAO: AjustesDoTurbo = { janelas: [], multiplicador: 2, manualAte: null, manualMultiplicador: 2 };
+
+/** Avisos da Arena num grupo (ou número) do WhatsApp, pela linha da loja. */
+export interface AjustesDoWhatsApp {
+  ativo: boolean;
+  /** "1203…@g.us" (grupo) ou número com DDI. */
+  destino: string;
+  nomeDestino: string;
+  meta: boolean;
+  equipe: boolean;
+  lideranca: boolean;
+  turbo: boolean;
+}
+
+export const WHATSAPP_PADRAO: AjustesDoWhatsApp = {
+  ativo: false,
+  destino: "",
+  nomeDestino: "",
+  meta: true,
+  equipe: true,
+  lideranca: false,
+  turbo: true,
+};
+
 export interface SituacaoDoVigia {
   ultimaVez: string | null;
   versao: string | null;
@@ -132,7 +189,20 @@ export interface PlacarDoPeriodo {
   equipe: { pontos: number; meta: number; progresso: number };
 }
 
-/** O que o telão recebe. Público: sem nome de cliente e sem valor em reais. */
+/** Uma jogada pública (sem cliente e sem reais). */
+export interface JogadaPublica {
+  id: string;
+  tipo: TipoDeLancamento;
+  pilotoId: string | null;
+  pontos: number;
+  licencas: number;
+  conversao: boolean;
+  turbo: number;
+  data: string;
+  registradoEm: string;
+}
+
+/** O que o telão e as páginas dos pilotos recebem. Público: sem nome de cliente e sem valor em reais. */
 export interface EstadoDoTelao {
   titulo: string;
   periodoTelao: AjustesDaCorrida["periodoTelao"];
@@ -140,16 +210,14 @@ export interface EstadoDoTelao {
   semana: PlacarDoPeriodo;
   mes: PlacarDoPeriodo;
   premio: Omit<Premio, "ativo"> | null;
-  recentes: {
-    id: string;
-    tipo: TipoDeLancamento;
-    pilotoId: string | null;
-    pontos: number;
-    licencas: number;
-    conversao: boolean;
-    registradoEm: string;
-  }[];
+  /** As últimas jogadas da loja (o telão comemora as que ainda não viu). */
+  recentes: JogadaPublica[];
+  /** As últimas de cada piloto, para a página dele. */
+  jogadasPorPiloto: Record<string, JogadaPublica[]>;
   hallDaFama: { rotulo: string; periodo: Periodo; campeao: string | null; foto: string | null; cor: string | null; pontos: number; chegaram: number }[];
-  vigiaOnline: boolean;
+  turbo: AjustesDoTurbo;
+  /** O que vale cada coisa (para a página do piloto dizer quanto falta). */
+  regras: { venda: number; orcamento: number; licencaBonus: number; conversaoBonus: number; ticketFaixa: number; ticketPontos: number };
+  vigiaUltimaVez: string | null;
   geradoEm: string;
 }

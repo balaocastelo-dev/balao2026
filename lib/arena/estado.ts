@@ -1,31 +1,32 @@
 // ============================================================
-// Arena: o que o telão (/arena) recebe.
+// Arena: a corrida já calculada, que o telão (/arena) e as páginas dos
+// pilotos (/arena/<piloto>) recebem.
 //
-// O telão é público (fica na TV da loja, sem login), então daqui não sai nome
-// de cliente nem valor em reais — só pilotos, pontos, metas e o prêmio.
+// Público (TV da loja, celular do vendedor): daqui não sai nome de cliente
+// nem valor em reais — só pilotos, pontos, metas, prêmio e turbo.
 //
-// Guardado em cache por 30 s com a etiqueta "arena": o banco da Hostinger tem
-// cota de conexões por hora, e várias telas abertas não podem virar várias
-// consultas. Quando o vigia grava algo novo, a etiqueta é limpa na hora.
+// A corrida é calculada quando algo muda (o vigia trouxe venda, o painel
+// mexeu) e guardada pronta na gaveta ("telao"). O telão só lê esse documento,
+// com uma cópia em memória. Se a gaveta falhar, serve a última cópia boa.
 // ============================================================
 
 import { createHash } from "crypto";
-import { unstable_cache } from "next/cache";
+import { ler, atualizar, tipoDaGaveta } from "./gaveta";
 import { janela, mesAnterior, semanaAnterior, somarDias } from "./periodos";
-import { lancamentosEntre, lancamentosRecentes, lerAjustesDoTelao, listarPilotos, bancoAtivo } from "./banco";
+import { lancamentosEntre, lerConfig, lerVigia, type ConfigDaArena } from "./dados";
 import { indexarPilotos, montarPlacar, pilotoDoLancamento } from "./placar";
-import type { EstadoDoTelao, Lancamento, Piloto, PlacarDoPeriodo } from "./tipos";
+import { avisoDeTurbo, avisosEntre, dispararAvisos, lerAvisos } from "./avisos";
+import { turboAgora } from "./turbo";
+import { enviarAviso } from "./whatsapp";
+import type { EstadoDoTelao, JogadaPublica, Lancamento, Piloto, PlacarDoPeriodo, SituacaoDoVigia } from "./tipos";
 
-export const ETIQUETA_ARENA = "arena";
-
-/** O vigia está vivo se falou com o site nos últimos 10 minutos. */
+/** O vigia está vivo se falou com o site nos últimos 15 minutos (ele só anota de 10 em 10 quando nada muda). */
 export function vigiaOnline(ultimaVez: string | null, agora = Date.now()) {
-  return Boolean(ultimaVez && agora - Date.parse(ultimaVez) < 10 * 60_000);
+  return Boolean(ultimaVez && agora - Date.parse(ultimaVez) < 15 * 60_000);
 }
 
 function campeao(placar: PlacarDoPeriodo) {
-  const porPontos = [...placar.linhas].sort((a, b) => b.pontos - a.pontos);
-  const top = porPontos[0];
+  const top = [...placar.linhas].sort((a, b) => b.pontos - a.pontos)[0];
   return {
     rotulo: placar.rotulo,
     periodo: placar.periodo,
@@ -37,26 +38,36 @@ function campeao(placar: PlacarDoPeriodo) {
   };
 }
 
-/** Foto guardada como imagem no banco vira um endereço (o telão pergunta a cada 20 s). */
-export function fotoPublica(p: Piloto): string | null {
+/** Foto guardada na gaveta (ou dentro da configuração) vira um endereço do site. */
+export function fotoPublica(p: Pick<Piloto, "id" | "foto">): string | null {
   if (!p.foto) return null;
-  if (!p.foto.startsWith("data:")) return p.foto;
+  if (/^https:\/\//.test(p.foto)) return p.foto;
   const v = createHash("sha1").update(p.foto).digest("hex").slice(0, 10);
   return `/api/arena/foto/${encodeURIComponent(p.id)}?v=${v}`;
 }
 
-export async function montarEstado(agora = new Date()): Promise<EstadoDoTelao> {
-  const [crus, { corrida, premio, vigia }] = await Promise.all([listarPilotos(), lerAjustesDoTelao()]);
-  const pilotos = crus.map((p) => ({ ...p, foto: fotoPublica(p) }));
+function jogada(l: Lancamento, p: Piloto): JogadaPublica {
+  return {
+    id: l.id,
+    tipo: l.tipo,
+    pilotoId: p.id,
+    pontos: l.pontos,
+    licencas: l.licencas,
+    conversao: Boolean(l.detalhe && l.detalhe.conversao > 0),
+    turbo: l.turbo > 1 ? l.turbo : 1,
+    data: l.data,
+    registradoEm: l.registradoEm,
+  };
+}
+
+/** Monta a corrida a partir da configuração e dos lançamentos (sem gaveta: dá para testar). */
+export function calcularEstado(config: ConfigDaArena, lancs: Lancamento[], vigia: SituacaoDoVigia, agora = new Date()): EstadoDoTelao {
+  const pilotos = config.pilotos.map((p) => ({ ...p, foto: fotoPublica(p) }));
+  const { corrida, premio, regras } = config;
   const semana = janela("semana", agora);
   const mes = janela("mes", agora);
-  // Um pedaço de banco só: do começo do mais antigo (3 meses ou 4 semanas
-  // atrás, para o hall da fama) até hoje.
   const antigas = [1, 2, 3, 4].map((n) => semanaAnterior(n, agora));
   const mesesAntigos = [1, 2, 3].map((n) => mesAnterior(n, agora));
-  const desde = [mes.inicio, semana.inicio, ...antigas.map((j) => j.inicio), ...mesesAntigos.map((j) => j.inicio)].sort()[0];
-  const ate = somarDias(mes.fim > semana.fim ? mes.fim : semana.fim, 0);
-  const [lancs, recentes] = await Promise.all([lancamentosEntre(desde, ate, 20000), lancamentosRecentes(15)]);
 
   const placarSemana = montarPlacar(pilotos, lancs, semana, corrida);
   const placarMes = montarPlacar(pilotos, lancs, mes, corrida);
@@ -66,44 +77,117 @@ export async function montarEstado(agora = new Date()): Promise<EstadoDoTelao> {
   ].filter((h) => h.campeao);
 
   const { porBling, porId } = indexarPilotos(pilotos.filter((p) => p.ativo));
+  const validos = lancs
+    .filter((l) => l.status === "valido")
+    .map((l) => ({ l, p: pilotoDoLancamento(l, porBling, porId) }))
+    .filter((x): x is { l: Lancamento; p: Piloto } => x.p !== null);
+
+  const recentes = validos
+    .filter((x) => !x.l.historico)
+    .sort((a, b) => b.l.registradoEm.localeCompare(a.l.registradoEm))
+    .slice(0, 15)
+    .map((x) => jogada(x.l, x.p));
+
+  const desde30 = somarDias(semana.fim, -37);
+  const jogadasPorPiloto: Record<string, JogadaPublica[]> = {};
+  for (const x of validos.filter((v) => v.l.data >= desde30).sort((a, b) => b.l.data.localeCompare(a.l.data) || b.l.registradoEm.localeCompare(a.l.registradoEm))) {
+    const lista = (jogadasPorPiloto[x.p.id] ??= []);
+    if (lista.length < 12) lista.push(jogada(x.l, x.p));
+  }
+
   return {
     titulo: corrida.titulo,
     periodoTelao: corrida.periodoTelao,
     som: corrida.som,
     semana: placarSemana,
     mes: placarMes,
-    premio: premio.ativo && (premio.titulo || premio.imagem)
-      ? { titulo: premio.titulo, link: premio.link, imagem: premio.imagem, local: premio.local, descricao: premio.descricao, periodo: premio.periodo }
-      : null,
-    recentes: recentes
-      .map((l: Lancamento) => ({ l, p: pilotoDoLancamento(l, porBling, porId) as Piloto | null }))
-      .filter((x) => x.p)
-      .map(({ l, p }) => ({
-        id: l.id,
-        tipo: l.tipo,
-        pilotoId: p!.id,
-        pontos: l.pontos,
-        licencas: l.licencas,
-        conversao: Boolean(l.detalhe && l.detalhe.conversao > 0),
-        registradoEm: l.registradoEm,
-      })),
+    premio:
+      premio.ativo && (premio.titulo || premio.imagem)
+        ? { titulo: premio.titulo, link: premio.link, imagem: premio.imagem, local: premio.local, descricao: "", periodo: premio.periodo }
+        : null,
+    recentes,
+    jogadasPorPiloto,
     hallDaFama: hall,
-    vigiaOnline: vigiaOnline(vigia.ultimaVez, agora.getTime()),
+    turbo: config.turbo,
+    regras: {
+      venda: regras.venda,
+      orcamento: regras.orcamento,
+      licencaBonus: regras.licencaBonus,
+      conversaoBonus: regras.conversaoBonus,
+      ticketFaixa: regras.ticketFaixa,
+      ticketPontos: regras.ticketPontos,
+    },
+    vigiaUltimaVez: vigia.ultimaVez,
     geradoEm: agora.toISOString(),
   };
 }
 
-const estadoEmCache = unstable_cache(async () => montarEstado(), ["arena-estado-v2"], {
-  revalidate: 30,
-  tags: [ETIQUETA_ARENA],
-});
+/** Do mais antigo que o hall da fama precisa (3 meses) até o fim do mês. */
+function janelaDeLeitura(agora: Date) {
+  const mes = janela("mes", agora);
+  const semana = janela("semana", agora);
+  const desde = [mesAnterior(3, agora).inicio, semanaAnterior(4, agora).inicio].sort()[0];
+  return { desde, ate: mes.fim > semana.fim ? mes.fim : semana.fim };
+}
+
+// ---------------------------------------------------------------- cópia em memória
+
+let memoria: { estado: EstadoDoTelao; em: number } | null = null;
+// No banco (reserva) a cópia dura mais: cada leitura pode gastar conexão da cota.
+const validadeMs = () => (tipoDaGaveta() === "banco" ? 90_000 : 10_000);
+
+function velho(e: EstadoDoTelao, agora = new Date()) {
+  return (
+    e.semana?.inicio !== janela("semana", agora).inicio ||
+    e.mes?.inicio !== janela("mes", agora).inicio ||
+    agora.getTime() - Date.parse(e.geradoEm) > 6 * 3600_000 ||
+    !e.jogadasPorPiloto
+  );
+}
+
+/**
+ * Recalcula a corrida, guarda pronta e manda os avisos do WhatsApp do que
+ * mudou (alguém cruzou a linha, a equipe bateu a meta…).
+ */
+export async function reconstruirTelao(agora = new Date()): Promise<EstadoDoTelao> {
+  const config = await lerConfig();
+  const { desde, ate } = janelaDeLeitura(agora);
+  const [lancs, vigia, anterior] = await Promise.all([lancamentosEntre(desde, ate), lerVigia(), ler<EstadoDoTelao>("telao")]);
+  const estado = calcularEstado(config, lancs, vigia, agora);
+  await atualizar<EstadoDoTelao>("telao", () => estado, () => estado);
+  memoria = { estado, em: Date.now() };
+
+  const avisos = avisosEntre(anterior.dados && !velho(anterior.dados, agora) ? anterior.dados : null, estado, config.whatsapp);
+  await dispararAvisos(avisos, config.whatsapp.destino, enviarAviso).catch((e) => console.error("[arena:avisos]", (e as Error).message));
+  return estado;
+}
+
+/** Aviso de começo da hora do turbo (o vigia chama a cada volta: é o relógio). */
+export async function conferirTurbo(config: ConfigDaArena, agora = new Date()) {
+  const t = turboAgora(config.turbo, agora);
+  if (!t.ativo || !t.ate) return;
+  const aviso = avisoDeTurbo(config.whatsapp, t.multiplicador, t.ate);
+  if (aviso) await dispararAvisos([aviso], config.whatsapp.destino, enviarAviso).catch(() => {});
+}
 
 export async function estadoDoTelao(): Promise<EstadoDoTelao | null> {
-  if (!bancoAtivo()) return null;
+  if (memoria && Date.now() - memoria.em < validadeMs() && !velho(memoria.estado)) return memoria.estado;
   try {
-    return await estadoEmCache();
+    const { dados } = await ler<EstadoDoTelao>("telao");
+    if (!dados || velho(dados)) return await reconstruirTelao();
+    let estado = dados;
+    if (tipoDaGaveta() === "blob") {
+      // O vigia anota de 10 em 10 minutos sem refazer a corrida: lê à parte.
+      const v = await lerVigia().catch(() => null);
+      if (v?.ultimaVez) estado = { ...dados, vigiaUltimaVez: v.ultimaVez };
+    }
+    memoria = { estado, em: Date.now() };
+    return estado;
   } catch (e) {
     console.error("[arena:estado]", (e as Error).message);
-    return null;
+    return memoria?.estado ?? null;
   }
 }
+
+/** Para o painel: último erro dos avisos. */
+export { lerAvisos };

@@ -136,6 +136,9 @@ function criarEvolution({ url, chave, buscar = fetch, registrar = console.log })
       chamar("DELETE", `/chat/deleteMessageForEveryone/${inst(nome)}`, chave),
     editarMensagem: (nome, numero, chave, texto) =>
       chamar("POST", `/chat/updateMessage/${inst(nome)}`, { number: numero, key: chave, text: texto }),
+    // ---------- grupos (avisos da Arena) ----------
+    listarGrupos: (nome) => chamar("GET", `/group/fetchAllGroups/${inst(nome)}?getParticipants=false`, undefined, { timeoutMs: 30_000 }),
+
     fotoDoPerfil: (nome, numero) =>
       chamar("POST", `/chat/fetchProfilePictureUrl/${inst(nome)}`, { number: numero }),
     temWhatsApp: (nome, numeros) =>

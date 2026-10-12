@@ -15,12 +15,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 import { KartG, TINTA } from "@/components/arena/Kart";
 import type { EstadoDoTelao, LinhaDoPlacar, PlacarDoPeriodo } from "@/lib/arena/tipos";
+import { proximoTurbo, turboAgora } from "@/lib/arena/turbo";
 import "./telao.css";
 
 const W = 1920;
 const TOPO_PISTA = 488;
 const FUNDO_PISTA = 992;
 const INTERVALO_MS = 20_000;
+const GUARDADO = "arena:ultima-corrida";
 const TROCA_PERIODO_MS = 45_000;
 
 // ------------------------------------------------------------------ som (sintetizado, sem arquivo)
@@ -226,6 +228,23 @@ function Pista({ faixas, luzes }: { faixas: { y0: number; y1: number }[]; luzes:
 
 export default function Telao({ inicial }: { inicial: EstadoDoTelao | null }) {
   const [estado, setEstado] = useState<EstadoDoTelao | null>(inicial);
+  // Sem resposta do site na abertura: mostra a última corrida guardada nesta TV.
+  useEffect(() => {
+    if (inicial) {
+      try {
+        localStorage.setItem(GUARDADO, JSON.stringify(inicial));
+      } catch {
+        /* sem armazenamento: segue */
+      }
+      return;
+    }
+    try {
+      const g = localStorage.getItem(GUARDADO);
+      if (g) setEstado(JSON.parse(g) as EstadoDoTelao);
+    } catch {
+      /* nada guardado */
+    }
+  }, [inicial]);
   const [offline, setOffline] = useState(false);
   const [vista, setVista] = useState<"semana" | "mes">(inicial?.periodoTelao === "mes" ? "mes" : "semana");
   const [agora, setAgora] = useState(() => Date.now());
@@ -386,15 +405,16 @@ export default function Telao({ inicial }: { inicial: EstadoDoTelao | null }) {
         const l = r.pilotoId ? linhas.get(r.pilotoId) : undefined;
         if (!l) continue;
         const dourado = r.licencas > 0;
+        const comTurbo = r.turbo > 1 ? ` · turbo ${r.turbo}x` : "";
         setTurbos((t) => ({ ...t, [l.piloto.id]: { tipo: dourado ? "dourado" : "normal", pontos: r.pontos, ate: Date.now() + 4500 } }));
         if (r.tipo === "venda") {
           som.current.turbo();
           if (dourado) {
-            anunciar({ id: r.id, titulo: "Turbo dourado!", sub: `${nomeCurto(l)} vendeu licença · +${pts(r.pontos)}`, cor: "ouro" });
+            anunciar({ id: r.id, titulo: "Turbo dourado!", sub: `${nomeCurto(l)} vendeu licença · +${pts(r.pontos)}${comTurbo}`, cor: "ouro" });
           } else if (r.conversao) {
-            anunciar({ id: r.id, titulo: "Orçamento virou venda!", sub: `${nomeCurto(l)} fechou · +${pts(r.pontos)}`, cor: "azul" });
+            anunciar({ id: r.id, titulo: "Orçamento virou venda!", sub: `${nomeCurto(l)} fechou · +${pts(r.pontos)}${comTurbo}`, cor: "azul" });
           } else {
-            anunciar({ id: r.id, titulo: `${nomeCurto(l)} vendeu!`, sub: `+${pts(r.pontos)} na corrida` });
+            anunciar({ id: r.id, titulo: `${nomeCurto(l)} vendeu!`, sub: `+${pts(r.pontos)} na corrida${comTurbo}` });
           }
         } else if (r.tipo === "orcamento") {
           som.current.moeda();
@@ -445,6 +465,11 @@ export default function Telao({ inicial }: { inicial: EstadoDoTelao | null }) {
         setOffline(false);
         comparar(novo);
         setEstado(novo);
+        try {
+          localStorage.setItem(GUARDADO, JSON.stringify(novo));
+        } catch {
+          /* sem armazenamento: segue */
+        }
       } catch {
         if (vivo) setOffline(true);
       }
@@ -470,6 +495,21 @@ export default function Telao({ inicial }: { inicial: EstadoDoTelao | null }) {
 
   const placar = estado ? estado[vista] : null;
   const placarPremio = estado?.premio ? estado[estado.premio.periodo] : placar;
+  const turbo = turboAgora(estado?.turbo, new Date(agora));
+  const proximo = !turbo.ativo ? proximoTurbo(estado?.turbo, new Date(agora)) : null;
+  const proximoEmBreve = proximo && Date.parse(proximo.inicio) - agora < 3 * 3600_000 ? proximo : null;
+  const hora = (iso: string) => new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
+
+  // Começou a hora do turbo: faixa dourada e motor.
+  const turboAntes = useRef<boolean | null>(null);
+  useEffect(() => {
+    if (turboAntes.current === false && turbo.ativo) {
+      som.current.turbo();
+      anunciar({ id: `turbo-${turbo.ate}`, titulo: "Hora do turbo!", sub: `Pontos em ${turbo.multiplicador}x até ${turbo.ate ? hora(turbo.ate) : ""}`, cor: "ouro" });
+    }
+    turboAntes.current = turbo.ativo;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [turbo.ativo]);
 
   // Faixa fixa para cada piloto (pelo número), para ninguém pular de faixa.
   const pistas = useMemo(() => {
@@ -510,6 +550,7 @@ export default function Telao({ inicial }: { inicial: EstadoDoTelao | null }) {
     );
   }
 
+  const vigiaVivo = Boolean(estado.vigiaUltimaVez && agora - Date.parse(estado.vigiaUltimaVez) < 15 * 60_000);
   const hall = estado.hallDaFama.length ? estado.hallDaFama[hallI % estado.hallDaFama.length] : null;
   const falta = placarPremio ? Math.max(0, Math.ceil(placarPremio.equipe.meta - placarPremio.equipe.pontos)) : 0;
   const recentes = estado.recentes.slice(0, 6);
@@ -521,6 +562,13 @@ export default function Telao({ inicial }: { inicial: EstadoDoTelao | null }) {
         <svg viewBox={`0 0 ${W} 1080`} width={W} height={1080} style={{ position: "absolute", inset: 0 }} aria-hidden>
           <Ceu />
           <Pista faixas={pistas} luzes={luzes} />
+          {turbo.ativo && (
+            <polygon
+              className="arn-turbo-brilho"
+              points={`${bordaEsq(TOPO_PISTA)},${TOPO_PISTA} ${bordaDir(TOPO_PISTA)},${TOPO_PISTA} ${bordaDir(FUNDO_PISTA)},${FUNDO_PISTA} ${bordaEsq(FUNDO_PISTA)},${FUNDO_PISTA}`}
+              fill="#FFD23F"
+            />
+          )}
 
           {/* nomes pintados no asfalto da largada */}
           {pistas.map(({ linha, y0, h }) => (
@@ -590,6 +638,22 @@ export default function Telao({ inicial }: { inicial: EstadoDoTelao | null }) {
             );
           })}
         </svg>
+
+        {/* ---------- hora do turbo ---------- */}
+        {(turbo.ativo || proximoEmBreve) && (
+          <div
+            className={`arn-chip ${turbo.ativo ? "arn-turbo-chip" : ""}`}
+            style={{ position: "absolute", left: 400, top: 152, padding: "8px 22px", borderRadius: 18, background: turbo.ativo ? "#FFD23F" : "#fff", zIndex: 5 }}
+          >
+            {turbo.ativo ? (
+              <span className="arn-letra" style={{ fontSize: 40, WebkitTextStroke: "6px #1a1440" }}>
+                ⚡ Hora do turbo · {turbo.multiplicador}x até {turbo.ate ? hora(turbo.ate) : ""}
+              </span>
+            ) : (
+              <span style={{ font: "800 22px Arial, sans-serif" }}>⚡ Hora do turbo às {hora(proximoEmBreve!.inicio)} · pontos em {proximoEmBreve!.multiplicador}x</span>
+            )}
+          </div>
+        )}
 
         {/* ---------- HUD de cima ---------- */}
         <div style={{ position: "absolute", left: 24, top: 18, right: 24, height: 118, display: "flex", gap: 20, alignItems: "stretch" }}>
@@ -796,9 +860,9 @@ export default function Telao({ inicial }: { inicial: EstadoDoTelao | null }) {
         <button onClick={() => setVista((v) => (v === "semana" ? "mes" : "semana"))}>{vista === "semana" ? "Ver o mês" : "Ver a semana"}</button>
         <button onClick={telaCheia}>⛶ Tela cheia</button>
       </div>
-      {(offline || !estado.vigiaOnline) && (
+      {(offline || !vigiaVivo) && (
         <div style={{ position: "fixed", left: 14, bottom: 14, zIndex: 60, font: "700 13px Arial, sans-serif", color: "#fff", background: "rgba(26,20,64,.8)", padding: "6px 10px", borderRadius: 8 }}>
-          {offline ? "Sem conexão com o site — tentando de novo" : "Bling sem atualizar há mais de 10 min (o vigia do PC está ligado?)"}
+          {offline ? "Sem conexão com o site — tentando de novo" : "Bling sem atualizar há mais de 15 min (o vigia do PC está ligado?)"}
         </div>
       )}
     </div>

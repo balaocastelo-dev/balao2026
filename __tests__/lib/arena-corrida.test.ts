@@ -47,7 +47,7 @@ describe("pontos de cada documento", () => {
   it("venda: base + turbo do ticket + licença", () => {
     const p = pontuar(doc({ total: 1200, itens: [{ descricao: "LICENÇA WINDOWS 11 PRO", quantidade: 1, valor: 349 }] }), R);
     expect(p.status).toBe("valido");
-    expect(p.detalhe).toEqual({ base: 10, licencas: 15, turbo: 2, conversao: 0 });
+    expect(p.detalhe).toEqual({ base: 10, licencas: 15, ticket: 2, conversao: 0 });
     expect(p.pontos).toBe(27);
   });
   it("venda cancelada ou estornada não pontua; em digitação espera", () => {
@@ -118,13 +118,13 @@ describe("semana e mês no relógio da loja", () => {
 });
 
 function piloto(id: string, p: Partial<Piloto> = {}): Piloto {
-  return { id, nome: id, apelido: null, foto: null, cor: "#E60012", kart: "classico", numero: 1, blingVendedorId: `b${id}`, metaSemana: null, metaMes: null, ativo: true, ...p };
+  return { id, slug: id, nome: id, apelido: null, foto: null, cor: "#E60012", kart: "classico", numero: 1, blingVendedorId: `b${id}`, metaSemana: null, metaMes: null, ativo: true, ...p };
 }
 function lanc(p: Partial<Lancamento>): Lancamento {
   return {
     id: Math.random().toString(), tipo: "venda", origem: "bling", blingId: "1", numero: "1", blingVendedorId: null, pilotoId: null,
     contatoId: null, contatoNome: null, data: "2026-10-13", registradoEm: "", historico: false, total: 0, situacaoId: 6, situacao: null,
-    itens: [], licencas: 0, pontos: 10, detalhe: null, status: "valido", motivo: null, anuladoManual: false, pontosManual: null, ...p,
+    itens: [], licencas: 0, pontos: 10, detalhe: null, turbo: 1, status: "valido", motivo: null, anuladoManual: false, pontosManual: null, ...p,
   };
 }
 

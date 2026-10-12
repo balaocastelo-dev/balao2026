@@ -41,8 +41,10 @@ export default function LayoutWrapper({
     isCrmPage ||
     isPaginaVendedor ||
     pathname === "/whatsapp" ||
-    // O telão da Arena ocupa a TV inteira: sem menu, rodapé nem botão.
+    // O telão da Arena ocupa a TV inteira, e a página de cada piloto é um
+    // "app" no celular dele: sem menu, rodapé nem botão.
     pathname === "/arena" ||
+    pathname.startsWith("/arena/") ||
     isPainel;
 
   return (

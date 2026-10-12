@@ -3,23 +3,13 @@
 //
 // O token do Bling só existe no PC (a sentinela do Bionic é quem renova), então
 // o site não busca no Bling: o vigia busca e entrega aqui. A porta pede a
-// chave do vigia, gerada no painel (/painel/arena → Conexão com o Bling); o
-// banco guarda só o resumo dela.
+// chave do vigia, gerada no painel (/painel/arena → Conexão com o Bling); a
+// gaveta guarda só o resumo dela. Nada aqui toca o MySQL (ver lib/arena/gaveta.ts).
 // ============================================================
 
 import { NextResponse } from "next/server";
-import { revalidateTag } from "next/cache";
-import {
-  bancoAtivo,
-  conferirChaveDoVigia,
-  gravarDocumentos,
-  gravarVendedoresDoBling,
-  gravarVigia,
-  lerVarredura,
-  lerVigia,
-  pedirVarredura,
-} from "@/lib/arena/banco";
-import { ETIQUETA_ARENA } from "@/lib/arena/estado";
+import { chaveConfere, gravarDocumentos, gravarVendedoresDoBling, lerConfig, pedirVarredura, registrarVigia } from "@/lib/arena/dados";
+import { conferirTurbo, reconstruirTelao } from "@/lib/arena/estado";
 import type { DocumentoDoBling } from "@/lib/arena/pontos";
 import { lerDocumento } from "@/lib/arena/entrada";
 
@@ -29,29 +19,36 @@ export const maxDuration = 60;
 const MAX_DOCUMENTOS = 500;
 
 function chaveDoPedido(req: Request): string | null {
-  const h = req.headers.get("authorization") || "";
-  const m = h.match(/^Bearer\s+(.+)$/i);
+  const m = (req.headers.get("authorization") || "").match(/^Bearer\s+(.+)$/i);
   return m ? m[1].trim() : null;
 }
 
 async function porta(req: Request) {
-  if (!bancoAtivo()) return NextResponse.json({ erro: "Banco de dados não configurado" }, { status: 503 });
-  if (!(await conferirChaveDoVigia(chaveDoPedido(req)))) {
-    return NextResponse.json({ erro: "Chave do vigia inválida. Gere outra em /painel/arena → Conexão com o Bling." }, { status: 401 });
+  try {
+    const config = await lerConfig({ tentarImportar: true });
+    if (!chaveConfere(chaveDoPedido(req), config.chaveHash)) {
+      return {
+        erro: NextResponse.json({ erro: "Chave do vigia inválida. Gere outra em /painel/arena → Conexão com o Bling." }, { status: 401 }),
+      };
+    }
+    return { config };
+  } catch (e) {
+    console.error("[arena:bling]", (e as Error).message);
+    return { erro: NextResponse.json({ erro: "Arena sem acesso à gaveta agora; o vigia tenta de novo." }, { status: 503 }) };
   }
-  return null;
 }
 
-/** O vigia confere a ligação (e o painel vê que ele está vivo). */
+/** O vigia confere a ligação e se há varredura pedida no painel. */
 export async function GET(req: Request) {
-  const barrado = await porta(req);
-  if (barrado) return barrado;
-  return NextResponse.json({ ok: true, varrerDesde: await lerVarredura() });
+  const p = await porta(req);
+  if (p.erro) return p.erro;
+  return NextResponse.json({ ok: true, varrerDesde: p.config.varrerDesde });
 }
 
 export async function POST(req: Request) {
-  const barrado = await porta(req);
-  if (barrado) return barrado;
+  const p = await porta(req);
+  if (p.erro) return p.erro;
+  const config = p.config;
 
   let corpo: Record<string, unknown>;
   try {
@@ -68,30 +65,28 @@ export async function POST(req: Request) {
   const vigiaInfo = (corpo.vigia ?? {}) as Record<string, unknown>;
 
   try {
-    if (Array.isArray(corpo.vendedores)) {
-      await gravarVendedoresDoBling(corpo.vendedores as { id: string; nome: string }[]);
-    }
+    if (Array.isArray(corpo.vendedores)) await gravarVendedoresDoBling(corpo.vendedores as { id: string; nome: string }[]);
     const { gravados, novos } = await gravarDocumentos(docs);
-    const anterior = await lerVigia();
-    await gravarVigia({
-      ultimaVez: new Date().toISOString(),
-      versao: vigiaInfo.versao ? String(vigiaInfo.versao).slice(0, 20) : anterior.versao,
-      maquina: vigiaInfo.maquina ? String(vigiaInfo.maquina).slice(0, 60) : anterior.maquina,
+    await registrarVigia({
+      versao: vigiaInfo.versao ? String(vigiaInfo.versao).slice(0, 20) : null,
+      maquina: vigiaInfo.maquina ? String(vigiaInfo.maquina).slice(0, 60) : null,
       ultimoLote: gravados,
       ultimoErro: vigiaInfo.erro ? String(vigiaInfo.erro).slice(0, 300) : null,
     });
 
     // A varredura pedida no painel terminou: limpa o pedido.
-    let varrerDesde = await lerVarredura();
+    let varrerDesde = config.varrerDesde;
     if (varrerDesde && corpo.varreduraFeita === varrerDesde) {
       await pedirVarredura(null);
       varrerDesde = null;
     }
 
-    if (gravados > 0) revalidateTag(ETIQUETA_ARENA, { expire: 0 });
+    if (gravados > 0) await reconstruirTelao();
+    // O vigia passa a cada 2 minutos: é ele que serve de relógio para o aviso do turbo.
+    await conferirTurbo(config);
     return NextResponse.json({ ok: true, recebidos: docs.length, gravados, novos, varrerDesde });
   } catch (e) {
     console.error("[arena:bling]", (e as Error).message);
-    return NextResponse.json({ erro: "Falha ao gravar" }, { status: 500 });
+    return NextResponse.json({ erro: "Falha ao gravar; o vigia manda de novo na próxima volta." }, { status: 503 });
   }
 }

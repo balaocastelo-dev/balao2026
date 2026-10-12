@@ -30,6 +30,8 @@ git -C $HOME\balao2026 pull
 - abre o detalhe só do que é novo ou mudou — é no detalhe que vêm o vendedor e os itens;
 - o site pontua (as regras ficam no painel) e o telão atualiza em até 20 s.
 
+Se o site estiver fora do ar, o vigia guarda o que trouxe do Bling e manda na volta seguinte (versão 1.1).
+
 O painel pode pedir uma varredura desde uma data (botão "Buscar de novo no Bling"): o vigia lê o
 pedido na volta seguinte.
 
