@@ -30,14 +30,20 @@ cliente ──WhatsApp──► VPS (servidor.js + agente/)          PC do Thiag
   **🤖 JUL.IA** no cabeçalho da conversa (atendendo / fora e por quê / pausar / devolver / sugestão do copiloto).
 - A JUL.IA aparece como vendedora (`julia-ia`) na atribuição: devolver a conversa para ela = atribuir a ela.
 
-## Ligar, na ordem
+## Ligar, na ordem (PowerShell, de qualquer pasta)
 
-1. Deploy da VPS: `.\whatsapp-server\deploy-evo.ps1`.
-2. `.\whatsapp-server\deploy-evo.ps1 -Agente` (segredo para o PC).
-3. `.\scripts\agente-local\instalar.ps1` (no fim roda `--conferir`).
-4. No /crm → Comando → JUL.IA: **Automático** com **"Só os números de teste"** marcado (é o padrão).
+1. Deploy da VPS (pede a senha de root):
+   `ssh -t root@179.199.148.87 "git -C /opt/balao2026 fetch origin main --depth=100 && git -C /opt/balao2026 reset --hard origin/main && bash /opt/balao2026/whatsapp-server/deploy-evo.sh"`
+   (é o que o `deploy-evo.ps1` faz; ele não depende da cópia do projeto no PC).
+2. Projeto no PC: `git -C $HOME\balao2026 pull` (primeira vez: `git clone --depth 1 https://github.com/balaocastelo-dev/balao2026.git $HOME\balao2026`).
+3. Só na primeira vez: `& $HOME\balao2026\whatsapp-server\deploy-evo.ps1 -Agente` (segredo para o PC).
+4. `& $HOME\balao2026\scripts\agente-local\instalar.ps1` (no fim roda `--conferir` e liga a tarefa).
+5. No /crm → Comando → JUL.IA: **Automático** com **"Só os números de teste"** marcado (é o padrão).
    Mandar mensagem do celular pessoal (5519984515960) para a loja. No teste o Bling é simulado.
-5. Conferido, desmarcar "Só os números de teste".
+6. Conferido, desmarcar "Só os números de teste".
+
+Feito no PC da loja em 12/10/2026, 00h19: cópia do projeto em `C:\Users\user\balao2026`, JUL.IA em
+`C:\Users\user\balao-agente`, tarefa `\BalaoFabrica\JUL.IA` rodando, conferência toda OK.
 
 Desligar: botão **Desligada** no mesmo lugar (vale na hora). PC desligado = ninguém é respondido pela
 JUL.IA; os vendedores atendem como sempre.

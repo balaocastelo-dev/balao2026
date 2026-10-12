@@ -1,9 +1,10 @@
 # Instala (ou atualiza) a JUL.IA neste computador.
 #
-# Como usar, no PowerShell, na pasta do projeto (depois de um git pull):
+# Como usar, no PowerShell, de qualquer pasta (a copia do projeto fica em $HOME\balao2026):
 #
-#   .\whatsapp-server\deploy-evo.ps1 -Agente      # uma vez: traz o segredo da VPS (pede a senha de root)
-#   .\scripts\agente-local\instalar.ps1           # copia, instala o Whisper e cria a tarefa "JUL.IA"
+#   git -C $HOME\balao2026 pull
+#   & $HOME\balao2026\whatsapp-server\deploy-evo.ps1 -Agente   # uma vez: traz o segredo da VPS (pede a senha de root)
+#   & $HOME\balao2026\scripts\agente-local\instalar.ps1        # copia, instala o Whisper e cria a tarefa "JUL.IA"
 #
 # O que ele faz:
 #   1. copia os arquivos para C:\Users\<voce>\balao-agente (dados e config.json ficam);

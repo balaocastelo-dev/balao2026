@@ -15,15 +15,18 @@ Trabalhador local da vendedora digital do WhatsApp. Roda no PC do Thiago (placa 
 Ele **puxa** da VPS as conversas que precisam de resposta (`/api/agente/*`, com o segredo de
 `%USERPROFILE%\.balao-agente\segredo.txt`). Não abre porta, não usa túnel.
 
-## Instalar (uma vez)
+## Instalar (ou atualizar)
 
-No PowerShell, na pasta do projeto, depois de `git pull`:
+No PowerShell, de qualquer pasta. A cópia do projeto no PC fica em `%USERPROFILE%\balao2026`
+(criada em 12/10/2026; se não existir: `git clone --depth 1 https://github.com/balaocastelo-dev/balao2026.git $HOME\balao2026`).
 
 ```powershell
-.\whatsapp-server\deploy-evo.ps1          # se a VPS ainda não tem o agente
-.\whatsapp-server\deploy-evo.ps1 -Agente  # traz o segredo para este PC (senha de root)
-.\scripts\agente-local\instalar.ps1       # copia para C:\Users\user\balao-agente, instala o Whisper, cria a tarefa
+git -C $HOME\balao2026 pull                                   # traz a versão nova
+& $HOME\balao2026\whatsapp-server\deploy-evo.ps1 -Agente      # só na primeira vez: segredo da VPS (senha de root)
+& $HOME\balao2026\scripts\agente-local\instalar.ps1           # copia para C:\Users\user\balao-agente, instala o Whisper, cria e liga a tarefa
 ```
+
+A VPS precisa ter o agente (deploy da VPS de 11/10/2026 em diante).
 
 A tarefa `\BalaoFabrica\JUL.IA` liga com o Windows e volta sozinha se cair. Ela só deixa o PC pronto:
 **quem liga o atendimento é o Centro de Comando do /crm, aba JUL.IA.**
@@ -31,9 +34,8 @@ A tarefa `\BalaoFabrica\JUL.IA` liga com o Windows e volta sozinha se cair. Ela 
 ## Testar sem WhatsApp
 
 ```powershell
-cd C:\Users\user\balao-agente
-.\.venv\Scripts\python.exe julia.py --conferir    # VPS, Ollama, Whisper, ffmpeg, catálogo, Bling (só leitura)
-.\.venv\Scripts\python.exe julia.py --conversar   # você é o cliente; Bling simulado; nada sai do PC
+& $HOME\balao-agente\.venv\Scripts\python.exe $HOME\balao-agente\julia.py --conferir    # VPS, Ollama, Whisper, ffmpeg, catálogo, Bling (só leitura)
+& $HOME\balao-agente\.venv\Scripts\python.exe $HOME\balao-agente\julia.py --conversar   # você é o cliente; Bling simulado; nada sai do PC
 ```
 
 ## As travas (código, não o modelo)
