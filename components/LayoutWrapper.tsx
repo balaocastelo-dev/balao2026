@@ -45,6 +45,9 @@ export default function LayoutWrapper({
     // "app" no celular dele: sem menu, rodapé nem botão.
     pathname === "/arena" ||
     pathname.startsWith("/arena/") ||
+    // O caixa (PDV) é tela de balcão: ocupa a tela toda e rola por dentro.
+    pathname === "/pdv" ||
+    pathname.startsWith("/pdv/") ||
     isPainel;
 
   return (

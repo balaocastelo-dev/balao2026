@@ -13,6 +13,11 @@ O que faz a cada volta:
      itens — a listagem do Bling não traz o vendedor);
   3. manda para www.balao.info/api/arena/bling, que pontua e põe no telão.
 
+E, desde a versão 1.3, leva ao PDV do site (www.balao.info/pdv) o
+access_token do Bling sempre que ele muda (ou quando o site pede): é com ele
+que o caixa lança a venda e emite a nota na hora. Só o access_token, que
+vale 6 horas; o refresh_token nunca sai do PC.
+
 Só usa a biblioteca padrão do Python. Uso:
   python vigia.py              uma volta (é o que a tarefa agendada roda)
   python vigia.py --conferir   confere Bling e site sem gravar nada
@@ -33,7 +38,7 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-VERSAO = "1.2"
+VERSAO = "1.3"
 AQUI = Path(__file__).resolve().parent
 CASA = Path(os.environ.get("USERPROFILE") or os.environ.get("HOME") or ".")
 
@@ -309,6 +314,61 @@ def enviar(cfg: dict, chave: str, corpo: dict) -> dict:
     )
 
 
+def acesso_do_bling(arquivo_tokens: str) -> dict | None:
+    """O access_token atual e quando vence (data do arquivo + expires_in). Nunca o refresh_token."""
+    arq = Path(arquivo_tokens)
+    try:
+        j = json.loads(arq.read_text(encoding="utf-8"))
+        token = str(j.get("access_token") or "").strip()
+        if not token:
+            return None
+        vence = arq.stat().st_mtime + float(j.get("expires_in") or 21600)
+    except (OSError, ValueError):
+        return None
+    return {
+        "token": token,
+        "resumo": hashlib.sha256(token.encode("utf-8")).hexdigest()[:16],
+        "vence": vence,
+    }
+
+
+def levar_acesso_ao_pdv(cfg: dict, chave: str, site_pediu: bool, log, conferir: bool = False) -> str:
+    """Entrega o access_token ao PDV quando ele mudou desde a última entrega, ou quando o site pede."""
+    acesso = acesso_do_bling(cfg["bling_tokens"])
+    if not acesso:
+        return "sem-token"
+    arq = Path(cfg["pasta_dados"]) / "pdv.json"
+    try:
+        entregue = json.loads(arq.read_text(encoding="utf-8")).get("resumo")
+    except (OSError, ValueError):
+        entregue = None
+    if acesso["vence"] < time.time() + 120:
+        if site_pediu:
+            log("PDV: o acesso do Bling venceu; esperando a sentinela do Bionic renovar.")
+        return "vencido"
+    if entregue == acesso["resumo"] and not site_pediu:
+        return "igual"
+    if conferir:
+        log("[conferir] o acesso do Bling seria levado ao PDV.")
+        return "conferir"
+    pedir(
+        f"{cfg['site'].rstrip('/')}/api/pdv/bling/acesso",
+        metodo="POST",
+        dados={
+            "accessToken": acesso["token"],
+            "expiraEm": dt.datetime.fromtimestamp(acesso["vence"], dt.timezone.utc).isoformat(),
+            "maquina": socket.gethostname(),
+        },
+        cabecalhos={"Authorization": f"Bearer {chave}"},
+        espera=60,
+    )
+    tmp = arq.with_suffix(".tmp")
+    tmp.write_text(json.dumps({"resumo": acesso["resumo"], "em": time.time()}), encoding="utf-8")
+    tmp.replace(arq)
+    log("PDV: acesso do Bling entregue ao site.")
+    return "entregue"
+
+
 def uma_volta(cfg: dict, forcado: str | None = None, conferir: bool = False) -> int:
     log = Registro(cfg["pasta_dados"])
     trava = Path(cfg["pasta_dados"]) / "rodando.trava"
@@ -336,6 +396,12 @@ def uma_volta(cfg: dict, forcado: str | None = None, conferir: bool = False) -> 
             log(f"Sem conexão com o site ({e}); tento na próxima volta.")
             return 1
         pedido_do_site = ping.get("varrerDesde")
+
+        # Primeiro o PDV: o caixa pode estar esperando o Bling para fechar uma venda.
+        try:
+            levar_acesso_ao_pdv(cfg, chave, bool(ping.get("pdvPrecisaAcesso")), log, conferir=conferir)
+        except (ErroHttp, OSError) as e:
+            log(f"PDV: o site não recebeu o acesso agora ({e}); tento na próxima volta.")
 
         estado = Estado(cfg["pasta_dados"])
         bling = Bling(cfg["bling_tokens"], log)

@@ -134,6 +134,53 @@ class TestSiteForaDoAr(unittest.TestCase):
             vigia.pedir, vigia.Bling = original
 
 
+class TestAcessoDoPdv(unittest.TestCase):
+    def setUp(self):
+        self.pasta = tempfile.mkdtemp()
+        self.tokens = Path(self.pasta) / "bling_tokens.json"
+        self.cfg = dict(vigia.PADRAO, pasta_dados=self.pasta, bling_tokens=str(self.tokens))
+        self.enviados = []
+        self.original = vigia.pedir
+
+        def pedir_falso(url, metodo="GET", dados=None, cabecalhos=None, espera=30):
+            self.enviados.append((url, dados, cabecalhos))
+            return {"ok": True}
+
+        vigia.pedir = pedir_falso
+
+    def tearDown(self):
+        vigia.pedir = self.original
+
+    def escrever(self, token):
+        self.tokens.write_text('{"access_token": "%s", "refresh_token": "NAO-SAI", "expires_in": 21600}' % token, encoding="utf-8")
+
+    def test_leva_so_o_access_token_e_so_quando_muda(self):
+        self.escrever("a" * 40)
+        self.assertEqual(vigia.levar_acesso_ao_pdv(self.cfg, "chave", False, print), "entregue")
+        url, dados, cab = self.enviados[0]
+        self.assertTrue(url.endswith("/api/pdv/bling/acesso"))
+        self.assertEqual(dados["accessToken"], "a" * 40)
+        self.assertNotIn("NAO-SAI", str(dados))
+        self.assertEqual(cab["Authorization"], "Bearer chave")
+        self.assertEqual(vigia.levar_acesso_ao_pdv(self.cfg, "chave", False, print), "igual")
+        self.assertEqual(len(self.enviados), 1)
+        self.assertEqual(vigia.levar_acesso_ao_pdv(self.cfg, "chave", True, print), "entregue")  # o site pediu
+        self.escrever("b" * 40)
+        self.assertEqual(vigia.levar_acesso_ao_pdv(self.cfg, "chave", False, print), "entregue")
+        self.assertEqual(len(self.enviados), 3)
+
+    def test_token_vencido_nao_vai(self):
+        self.escrever("c" * 40)
+        velho = vigia.time.time() - 7 * 3600
+        import os
+        os.utime(self.tokens, (velho, velho))
+        self.assertEqual(vigia.levar_acesso_ao_pdv(self.cfg, "chave", True, print), "vencido")
+        self.assertEqual(self.enviados, [])
+
+    def test_sem_arquivo_de_token(self):
+        self.assertEqual(vigia.levar_acesso_ao_pdv(self.cfg, "chave", True, print), "sem-token")
+
+
 class TestParear(unittest.TestCase):
     def test_pede_espera_e_grava_a_chave(self):
         pasta = tempfile.mkdtemp()

@@ -12,6 +12,7 @@ import { chaveConfere, gravarDocumentos, gravarVendedoresDoBling, lerConfig, ped
 import { reconstruirTelao } from "@/lib/arena/estado";
 import type { DocumentoDoBling } from "@/lib/arena/valores";
 import { lerDocumento } from "@/lib/arena/entrada";
+import { precisaDeAcesso } from "@/lib/pdv/acesso";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -38,11 +39,14 @@ async function porta(req: Request) {
   }
 }
 
-/** O vigia confere a ligação e se há varredura pedida no painel. */
+/**
+ * O vigia confere a ligação, se há varredura pedida no painel e se o PDV
+ * precisa do acesso ao Bling de novo (o vigia leva em POST /api/pdv/bling/acesso).
+ */
 export async function GET(req: Request) {
   const p = await porta(req);
   if (p.erro) return p.erro;
-  return NextResponse.json({ ok: true, varrerDesde: p.config.varrerDesde });
+  return NextResponse.json({ ok: true, varrerDesde: p.config.varrerDesde, pdvPrecisaAcesso: await precisaDeAcesso() });
 }
 
 export async function POST(req: Request) {
