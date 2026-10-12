@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import PainelLoginForm from "@/components/PainelLoginForm";
-import PainelLogoutButton from "@/components/PainelLogoutButton";
 import WhatsAppPanelClient from "@/components/WhatsAppPanelClient";
 import { isPainelAuthenticated } from "@/lib/painel-auth";
 
@@ -18,17 +17,19 @@ export default async function WhatsAppPage() {
 
   if (!authenticated) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-950 px-4 py-12">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(220,38,38,0.2),_transparent_35%)]" />
-        <div className="relative z-10 flex w-full max-w-5xl flex-col items-center gap-10 lg:flex-row lg:items-start">
+      // A moldura do site fixa a altura da tela; o login rola por dentro para
+      // caber no celular deitado e em telas baixas.
+      <main className="relative h-full overflow-y-auto bg-slate-950">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(220,38,38,0.2),_transparent_35%)]" />
+        <div className="relative z-10 mx-auto flex min-h-full w-full max-w-5xl flex-col items-center justify-center gap-8 px-4 py-10 lg:flex-row lg:gap-10">
           <div className="max-w-xl text-white">
-            <p className="mb-3 text-sm font-semibold uppercase tracking-[0.25em] text-red-300">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-red-300 sm:text-sm">
               www.balao.info/whatsapp
             </p>
-            <h2 className="text-4xl font-bold leading-tight">
+            <h2 className="text-2xl font-bold leading-tight sm:text-3xl lg:text-4xl">
               Central protegida do WhatsApp com QR Code, chat e atendimento.
             </h2>
-            <p className="mt-4 text-base text-slate-300">
+            <p className="mt-4 text-sm text-slate-300 sm:text-base">
               Entre com a senha para abrir o painel de atendimento do WhatsApp.
             </p>
           </div>
@@ -44,14 +45,6 @@ export default async function WhatsAppPage() {
     );
   }
 
-  return (
-    <main className="min-h-screen bg-[#fff7f7]">
-      <div className="mx-auto max-w-7xl px-4 pt-6 md:px-6">
-        <div className="mb-4 flex justify-end">
-          <PainelLogoutButton redirectTo="/whatsapp" label="Sair do WhatsApp" />
-        </div>
-      </div>
-      <WhatsAppPanelClient />
-    </main>
-  );
+  // O botão de sair fica dentro da barra do painel, junto das outras ações.
+  return <WhatsAppPanelClient />;
 }

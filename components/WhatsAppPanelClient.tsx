@@ -2,8 +2,10 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  ArrowLeft,
   CheckCircle2,
   LoaderCircle,
+  LogOut,
   MessageCircle,
   Package2,
   Plus,
@@ -14,6 +16,7 @@ import {
   UserRound,
   Wifi,
   WifiOff,
+  X,
 } from "lucide-react";
 import { io, type Socket } from "socket.io-client";
 
@@ -158,6 +161,11 @@ export default function WhatsAppPanelClient() {
   const [productLoading, setProductLoading] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<SiteProduct | null>(null);
   const [composerMode, setComposerMode] = useState<"chat" | "new">("chat");
+  // No celular cabe uma coisa por vez: a lista de conversas ou a conversa aberta.
+  const [telaCelular, setTelaCelular] = useState<"lista" | "conversa">("lista");
+  // Abaixo de 1280 px a busca de produtos vira gaveta lateral, aberta pelo botão "Produtos".
+  const [gavetaProdutos, setGavetaProdutos] = useState(false);
+  const [saindo, setSaindo] = useState(false);
 
   useEffect(() => {
     const socket = io(serverUrl, {
@@ -381,7 +389,7 @@ export default function WhatsAppPanelClient() {
       top: viewport.scrollHeight,
       behavior: "smooth",
     });
-  }, [selectedChatId, selectedChatMessages.length]);
+  }, [selectedChatId, selectedChatMessages.length, telaCelular]);
 
   const sendSocketEvent = (event: string, payload: Record<string, unknown>) => {
     socketRef.current?.emit(event, payload);
@@ -414,6 +422,23 @@ export default function WhatsAppPanelClient() {
     setNumber("");
     setMessage("");
     setSelectedProduct(null);
+    setTelaCelular("conversa");
+  };
+
+  const abrirConversa = (chat: PanelChat) => {
+    setComposerMode("chat");
+    setSelectedChatId(chat.chatId);
+    setNumber(formatPhoneNumber(getSummaryDisplayNumber(chat)));
+    setTelaCelular("conversa");
+  };
+
+  const handleLogout = async () => {
+    setSaindo(true);
+    try {
+      await fetch("/api/painel/logout", { method: "POST" });
+    } finally {
+      window.location.href = "/whatsapp";
+    }
   };
 
   const handleSyncConversations = () => {
@@ -438,6 +463,8 @@ export default function WhatsAppPanelClient() {
     const text = buildProductMessage(product);
     setSelectedProduct(product);
     setMessage((current) => (current.trim() ? `${current.trim()}\n\n${text}` : text));
+    setGavetaProdutos(false);
+    setTelaCelular("conversa");
   };
 
   const handleSendProduct = (product: SiteProduct) => {
@@ -457,403 +484,451 @@ export default function WhatsAppPanelClient() {
     setSelectedProduct(product);
   };
 
-  return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,#fff7f7_0%,#ffffff_100%)] text-slate-900">
-      <div className="mx-auto max-w-[1600px] px-4 py-4 md:px-6 md:py-6">
-        <section className="mb-6 overflow-hidden rounded-[30px] border border-red-100 bg-white shadow-[0_24px_60px_rgba(239,68,68,0.08)]">
-          <div className="bg-[linear-gradient(135deg,#dc2626_0%,#ef4444_65%,#b91c1c_100%)] px-6 py-7 text-white md:px-8">
-            <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-              <div className="max-w-3xl">
-                <p className="text-xs font-bold uppercase tracking-[0.30em] text-red-100">
-                  Balao da Informatica
-                </p>
-                <h1 className="mt-3 text-3xl font-black md:text-4xl">
-                  WhatsApp limpo e funcional
-                </h1>
-                <p className="mt-3 text-sm text-red-50 md:text-base">
-                  Painel focado no essencial: conexao, conversas atualizadas, leitura clara e envio
-                  rapido de mensagem e produto.
-                </p>
-              </div>
+  // Busca de produtos: a mesma peça serve de terceira coluna (telas largas) e de gaveta lateral.
+  const painelProdutos = (emGaveta: boolean) => (
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="shrink-0 border-b border-red-100 px-4 py-3">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Package2 className="text-red-600" size={18} />
+            <h4 className="font-black text-slate-900">Enviar produto do site</h4>
+          </div>
+          {emGaveta ? (
+            <button
+              onClick={() => setGavetaProdutos(false)}
+              aria-label="Fechar produtos"
+              className="rounded-xl p-2 text-slate-500 transition hover:bg-red-50"
+            >
+              <X size={18} />
+            </button>
+          ) : null}
+        </div>
+        <input
+          value={productSearch}
+          onChange={(event) => setProductSearch(event.target.value)}
+          placeholder="Buscar produto"
+          className="mt-3 w-full rounded-xl border border-red-100 bg-white px-4 py-2.5 text-base outline-none transition focus:border-red-400 sm:text-sm"
+        />
+      </div>
 
-              <div className="grid gap-3 sm:grid-cols-3">
-                <div className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-sm">
-                  <div className="flex items-center gap-2 text-sm font-bold">
-                    {socketConnected ? <Wifi size={16} /> : <WifiOff size={16} />}
-                    Servidor
-                  </div>
-                  <div className="mt-2 text-sm text-red-50">
-                    {socketConnected ? "Online" : "Offline"}
-                  </div>
-                </div>
-                <div className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-sm">
-                  <div className="flex items-center gap-2 text-sm font-bold">
-                    <CheckCircle2 size={16} />
-                    Sessao
-                  </div>
-                  <div className="mt-2 text-sm text-red-50">
-                    {session ? "Restaurada" : "Sem sessao"}
-                  </div>
-                </div>
-                <div className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-sm">
-                  <div className="flex items-center gap-2 text-sm font-bold">
-                    <UserRound size={16} />
-                    Numero
-                  </div>
-                  <div className="mt-2 text-sm text-red-50">{phoneNumber || "Nao conectado"}</div>
+      <div className="min-h-0 flex-1 space-y-2 overflow-y-auto p-3">
+        {productLoading ? (
+          <div className="rounded-xl bg-slate-50 px-4 py-5 text-sm text-slate-500">Buscando produtos...</div>
+        ) : productResults.length ? (
+          productResults.map((product) => (
+            <div key={product.id} className="flex gap-3 rounded-xl border border-red-100 bg-white p-2.5">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-50">
+                {product.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
+                ) : (
+                  <Package2 className="text-slate-400" size={18} />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="line-clamp-2 text-sm font-bold text-slate-900">{product.name}</div>
+                <div className="mt-0.5 text-sm font-semibold text-red-600">{product.price || "Consulte"}</div>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  <button
+                    onClick={() => handleInsertProduct(product)}
+                    className="rounded-full bg-red-50 px-3 py-1.5 text-xs font-bold text-red-700 transition hover:bg-red-100"
+                  >
+                    Inserir na mensagem
+                  </button>
+                  <button
+                    onClick={() => handleSendProduct(product)}
+                    className="rounded-full bg-red-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-red-700"
+                  >
+                    Enviar agora
+                  </button>
                 </div>
               </div>
+            </div>
+          ))
+        ) : (
+          <div className="rounded-xl bg-slate-50 px-4 py-5 text-sm text-slate-500">
+            Digite pelo menos 2 letras para buscar produtos do site.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  const botaoAcao =
+    "inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-xl px-2.5 text-sm font-bold transition lg:px-3";
+
+  return (
+    // Ocupa exatamente a área visível (o LayoutWrapper fixa a altura em 100dvh);
+    // quem rola é a lista, a conversa e os produtos, nunca a página inteira.
+    <div className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#fff7f7] text-slate-900">
+      {/* Barra do topo */}
+      <header className="shrink-0 bg-[linear-gradient(135deg,#dc2626_0%,#ef4444_65%,#b91c1c_100%)] px-3 py-2 text-white sm:px-5">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/15">
+              <MessageCircle size={18} />
+            </div>
+            <div className="min-w-0">
+              <h1 className="truncate text-base font-black leading-tight max-[359px]:sr-only sm:text-lg">WhatsApp</h1>
+              <p className="hidden truncate text-[11px] font-semibold uppercase tracking-[0.2em] text-red-100 sm:block [@media(max-height:480px)]:hidden">
+                Balão da Informática
+              </p>
             </div>
           </div>
 
-          <div className="grid gap-3 border-t border-red-100 px-6 py-4 md:grid-cols-[1fr_auto_auto_auto] md:px-8">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-              <div className="text-xs font-bold uppercase tracking-wide text-slate-500">Status</div>
-              <div className="mt-1 text-sm font-semibold text-slate-900">{serverHealthMessage}</div>
-            </div>
+          <div className="flex items-center gap-1 sm:gap-1.5">
             <button
               onClick={handleSyncConversations}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-red-100 bg-white px-4 py-3 font-bold text-slate-700 transition hover:bg-red-50"
+              title="Sincronizar conversas"
+              aria-label="Sincronizar conversas"
+              className={`${botaoAcao} bg-white/10 hover:bg-white/20`}
             >
               <RefreshCcw size={16} />
-              Sincronizar
+              <span className="hidden lg:inline">Sincronizar</span>
             </button>
             <button
               onClick={handleStartNewMessage}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-red-100 bg-white px-4 py-3 font-bold text-slate-700 transition hover:bg-red-50"
+              title="Nova mensagem"
+              aria-label="Nova mensagem"
+              className={`${botaoAcao} bg-white/10 hover:bg-white/20`}
             >
               <Plus size={16} />
-              Nova mensagem
+              <span className="hidden lg:inline">Nova mensagem</span>
+            </button>
+            <button
+              onClick={() => setGavetaProdutos(true)}
+              title="Produtos do site"
+              aria-label="Produtos do site"
+              className={`${botaoAcao} bg-white/10 hover:bg-white/20 xl:hidden`}
+            >
+              <Package2 size={16} />
+              <span className="hidden lg:inline">Produtos</span>
             </button>
             <button
               onClick={handleResetSession}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-600 px-4 py-3 font-bold text-white transition hover:bg-red-700"
+              title="Gerar novo QR Code"
+              aria-label="Gerar novo QR Code"
+              className={`${botaoAcao} bg-white text-red-700 hover:bg-red-50`}
             >
               <QrCode size={16} />
-              Novo QR
+              <span className="hidden lg:inline">Novo QR</span>
+            </button>
+            <button
+              onClick={handleLogout}
+              disabled={saindo}
+              title="Sair do WhatsApp"
+              aria-label="Sair do WhatsApp"
+              className={`${botaoAcao} bg-black/15 hover:bg-black/25 disabled:opacity-60`}
+            >
+              <LogOut size={16} />
+              <span className="hidden lg:inline">{saindo ? "Saindo..." : "Sair"}</span>
             </button>
           </div>
+        </div>
+      </header>
 
-          {toast ? (
-            <div className="border-t border-red-100 bg-red-50 px-6 py-3 text-sm font-medium text-red-700 md:px-8">
-              {toast}
-            </div>
-          ) : null}
-        </section>
+      {/* Situação do servidor, da sessão e do número */}
+      {/* Em tela baixa (celular deitado) a faixa some: o que importa é a conversa. */}
+      <div className="flex shrink-0 items-center gap-2 overflow-x-auto border-b border-red-100 bg-white px-3 py-1.5 text-xs sm:px-5 [@media(max-height:480px)]:hidden">
+        <span
+          className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 font-bold ${
+            socketConnected ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"
+          }`}
+        >
+          {socketConnected ? <Wifi size={13} /> : <WifiOff size={13} />}
+          {socketConnected ? "Online" : "Offline"}
+        </span>
+        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 font-bold text-slate-600">
+          <CheckCircle2 size={13} />
+          {session ? "Sessão restaurada" : "Sem sessão"}
+        </span>
+        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 font-bold text-slate-600">
+          <UserRound size={13} />
+          {phoneNumber || "Não conectado"}
+        </span>
+        <span className="hidden min-w-0 truncate text-slate-500 md:inline">{serverHealthMessage}</span>
+      </div>
 
-        {!connected && qrCode ? (
-          <section className="mb-6 rounded-[28px] border border-red-100 bg-white p-6 text-center shadow-sm">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={qrCode}
-              alt="QR Code do WhatsApp"
-              className="mx-auto w-full max-w-[260px] rounded-[28px] border border-red-100 bg-white p-3"
-            />
-            <div className="mt-4 text-base font-black text-slate-900">
-              Escaneie o QR Code para conectar
-            </div>
-            <div className="mt-2 text-sm text-slate-500">
-              Assim que conectar, a tela volta automaticamente para o modo de atendimento.
-            </div>
-          </section>
-        ) : null}
-
-        {!socketConnected && !qrCode ? (
-          <section className="mb-6 rounded-[28px] border border-red-100 bg-white p-6 text-center shadow-sm">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100 text-red-600">
-              <WifiOff />
-            </div>
-            <div className="mt-4 text-base font-black text-slate-900">
-              Servidor do WhatsApp indisponivel
-            </div>
-            <div className="mt-2 text-sm text-slate-500">{serverHealthMessage}</div>
-          </section>
-        ) : null}
-
-        {socketConnected && !connected && !qrCode ? (
-          <section className="mb-6 rounded-[28px] border border-red-100 bg-white p-6 text-center shadow-sm">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-amber-600">
-              <LoaderCircle className="animate-spin" />
-            </div>
-            <div className="mt-4 text-base font-black text-slate-900">
-              Preparando a conexao do WhatsApp
-            </div>
-            <div className="mt-2 text-sm text-slate-500">Status atual: {status}</div>
-          </section>
-        ) : null}
-
-        <section className="grid gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
-          <aside className="overflow-hidden rounded-[28px] border border-red-100 bg-white shadow-sm">
-            <div className="border-b border-red-100 px-5 py-5">
-              <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-50 text-red-600">
-                  <MessageCircle size={20} />
-                </div>
-                <div className="min-w-0">
-                  <h2 className="text-xl font-black text-slate-900">Conversas</h2>
-                  <p className="text-sm text-slate-500">
-                    {filteredChatList.length} contatos sincronizados
-                  </p>
-                </div>
+      {/* Conexão: QR Code, servidor fora do ar ou WhatsApp iniciando */}
+      {!connected ? (
+        <div className="max-h-[45%] shrink-0 overflow-y-auto border-b border-red-100 bg-white px-4 py-4 text-center">
+          {qrCode ? (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={qrCode}
+                alt="QR Code do WhatsApp"
+                className="mx-auto aspect-square w-[min(240px,60vw,28dvh)] rounded-2xl border border-red-100 bg-white p-2"
+              />
+              <div className="mt-3 text-sm font-black text-slate-900">Escaneie o QR Code para conectar</div>
+              <div className="mt-1 text-xs text-slate-500">
+                Assim que conectar, a tela volta sozinha para o atendimento.
               </div>
-
-              <div className="relative mt-4">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input
-                  value={chatSearch}
-                  onChange={(event) => setChatSearch(event.target.value)}
-                  placeholder="Buscar nome ou numero"
-                  className="w-full rounded-2xl border border-red-100 bg-white py-3 pl-11 pr-4 outline-none transition focus:border-red-400"
-                />
+            </>
+          ) : !socketConnected ? (
+            <div className="flex items-center justify-center gap-3 text-left">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600">
+                <WifiOff size={18} />
+              </div>
+              <div className="min-w-0">
+                <div className="text-sm font-black text-slate-900">Servidor do WhatsApp indisponível</div>
+                <div className="text-xs text-slate-500">{serverHealthMessage}</div>
               </div>
             </div>
-
-            <div className="max-h-[68vh] space-y-2 overflow-y-auto px-4 py-4">
-              {filteredChatList.length ? (
-                filteredChatList.map((chat) => (
-                  <button
-                    key={chat.chatId}
-                    onClick={() => {
-                      setComposerMode("chat");
-                      setSelectedChatId(chat.chatId);
-                      setNumber(formatPhoneNumber(getSummaryDisplayNumber(chat)));
-                    }}
-                    className={`w-full rounded-3xl border px-4 py-4 text-left transition ${
-                      selectedChatId === chat.chatId
-                        ? "border-red-200 bg-red-50/60 shadow-sm"
-                        : "border-transparent bg-transparent hover:border-red-100 hover:bg-red-50/40"
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-red-100 text-sm font-black text-red-700">
-                        {chat.profilePicUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={chat.profilePicUrl}
-                            alt={getSummaryDisplayName(chat)}
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          getInitials(getSummaryDisplayName(chat))
-                        )}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="truncate font-black text-slate-900">
-                            {getSummaryDisplayName(chat)}
-                          </div>
-                          <div className="shrink-0 text-[11px] font-medium text-slate-400">
-                            {formatTime(chat.lastMessageTimestamp)}
-                          </div>
-                        </div>
-                        <div className="mt-1 text-xs font-medium text-slate-500">
-                          {getSummaryDisplayNumber(chat) || chat.chatId}
-                        </div>
-                        <div className="mt-2 line-clamp-2 text-sm text-slate-600">
-                          {chat.lastMessageBody || "Sem mensagem recente"}
-                        </div>
-                      </div>
-                    </div>
-                  </button>
-                ))
-              ) : (
-                <div className="rounded-3xl bg-slate-50 px-5 py-8 text-center text-sm text-slate-500">
-                  Nenhuma conversa encontrada.
-                </div>
-              )}
+          ) : (
+            <div className="flex items-center justify-center gap-3 text-left">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+                <LoaderCircle className="animate-spin" size={18} />
+              </div>
+              <div className="min-w-0">
+                <div className="text-sm font-black text-slate-900">Preparando a conexão do WhatsApp</div>
+                <div className="text-xs text-slate-500">Status atual: {status}</div>
+              </div>
             </div>
-          </aside>
+          )}
+        </div>
+      ) : null}
 
-          <section className="overflow-hidden rounded-[28px] border border-red-100 bg-white shadow-sm">
-            <div className="border-b border-red-100 px-5 py-5 md:px-7">
-              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-red-100 text-base font-black text-red-700">
-                      {selectedChat?.profilePicUrl ? (
+      {/* Corpo: conversas | conversa aberta | produtos */}
+      <div className="flex min-h-0 flex-1">
+        <aside
+          className={`${
+            telaCelular === "lista" ? "flex" : "hidden"
+          } w-full min-w-0 shrink-0 flex-col border-red-100 bg-white md:flex md:w-[300px] md:border-r lg:w-[340px]`}
+        >
+          <div className="shrink-0 border-b border-red-100 px-3 py-3 sm:px-4">
+            <div className="flex items-baseline justify-between gap-2">
+              <h2 className="text-lg font-black text-slate-900">Conversas</h2>
+              <span className="text-xs text-slate-500">{filteredChatList.length} contatos</span>
+            </div>
+            <div className="relative mt-2">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+              <input
+                value={chatSearch}
+                onChange={(event) => setChatSearch(event.target.value)}
+                placeholder="Buscar nome ou número"
+                className="w-full rounded-xl border border-red-100 bg-white py-2.5 pl-9 pr-3 text-base outline-none transition focus:border-red-400 sm:text-sm"
+              />
+            </div>
+          </div>
+
+          <div className="min-h-0 flex-1 space-y-1 overflow-y-auto p-2">
+            {filteredChatList.length ? (
+              filteredChatList.map((chat) => (
+                <button
+                  key={chat.chatId}
+                  onClick={() => abrirConversa(chat)}
+                  className={`w-full rounded-2xl border px-3 py-2.5 text-left transition ${
+                    selectedChatId === chat.chatId
+                      ? "border-red-200 bg-red-50/70"
+                      : "border-transparent hover:border-red-100 hover:bg-red-50/40"
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-red-100 text-sm font-black text-red-700">
+                      {chat.profilePicUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
-                          src={selectedChat.profilePicUrl}
-                          alt={selectedChatName}
+                          src={chat.profilePicUrl}
+                          alt={getSummaryDisplayName(chat)}
                           className="h-full w-full object-cover"
                         />
                       ) : (
-                        getInitials(selectedChatName)
+                        getInitials(getSummaryDisplayName(chat))
                       )}
                     </div>
-                    <div className="min-w-0">
-                      <h3 className="truncate text-2xl font-black text-slate-900">
-                        {selectedChatName}
-                      </h3>
-                      <p className="mt-1 text-sm text-slate-500">
-                        {selectedChatNumber || "Escolha uma conversa ou inicie uma nova mensagem"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  {selectedChat?.isGroup ? (
-                    <span className="rounded-full bg-sky-50 px-3 py-2 text-xs font-bold text-sky-700">
-                      Grupo
-                    </span>
-                  ) : null}
-                  {selectedChat?.unreadCount ? (
-                    <span className="rounded-full bg-red-50 px-3 py-2 text-xs font-bold text-red-700">
-                      {selectedChat.unreadCount} nao lidas
-                    </span>
-                  ) : null}
-                  {selectedProduct ? (
-                    <span className="rounded-full bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700">
-                      Produto pronto: {selectedProduct.name}
-                    </span>
-                  ) : null}
-                </div>
-              </div>
-            </div>
-
-            <div
-              ref={messagesViewportRef}
-              className="max-h-[56vh] overflow-y-auto bg-[radial-gradient(circle_at_top,#fff7f7_0%,#fffefe_48%,#ffffff_100%)] px-5 py-6 md:px-7"
-            >
-              {selectedChatMessages.length ? (
-                <div className="space-y-4">
-                  {selectedChatMessages.map((item) => (
-                    <div
-                      key={item.id}
-                      className={`max-w-[88%] rounded-[28px] px-5 py-4 shadow-sm ${
-                        item.direction === "out"
-                          ? "ml-auto bg-[linear-gradient(135deg,#ef4444_0%,#dc2626_100%)] text-white"
-                          : "border border-red-100 bg-white text-slate-800"
-                      }`}
-                    >
-                      <div className="whitespace-pre-wrap text-[15px] leading-7">
-                        {item.body || (item.hasMedia ? "Midia enviada/recebida" : "")}
-                      </div>
-                      {item.hasMedia ? (
-                        <div
-                          className={`mt-3 inline-flex rounded-full px-3 py-1 text-xs font-bold ${
-                            item.direction === "out"
-                              ? "bg-white/15 text-white"
-                              : "bg-red-50 text-red-700"
-                          }`}
-                        >
-                          {item.mediaType || "midia"}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="truncate text-sm font-black text-slate-900">
+                          {getSummaryDisplayName(chat)}
                         </div>
-                      ) : null}
-                      <div className="mt-3 text-xs font-medium text-slate-400">
-                        {formatTime(item.timestamp)}
+                        <div className="shrink-0 text-[11px] font-medium text-slate-400">
+                          {formatTime(chat.lastMessageTimestamp)}
+                        </div>
+                      </div>
+                      <div className="truncate text-xs font-medium text-slate-500">
+                        {getSummaryDisplayNumber(chat) || chat.chatId}
+                      </div>
+                      <div className="mt-0.5 flex items-center gap-2">
+                        <div className="min-w-0 flex-1 truncate text-sm text-slate-600">
+                          {chat.lastMessageBody || "Sem mensagem recente"}
+                        </div>
+                        {chat.unreadCount ? (
+                          <span className="shrink-0 rounded-full bg-red-600 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                            {chat.unreadCount}
+                          </span>
+                        ) : null}
                       </div>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex min-h-[360px] items-center justify-center">
-                  <div className="max-w-md rounded-[32px] border border-red-100 bg-white px-8 py-10 text-center shadow-sm">
-                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 text-red-600">
-                      <MessageCircle />
-                    </div>
-                    <div className="text-2xl font-black text-slate-900">Atendimento direto</div>
-                    <div className="mt-3 text-sm leading-relaxed text-slate-500">
-                      Esta area mostra somente as mensagens da conversa selecionada.
-                    </div>
                   </div>
-                </div>
+                </button>
+              ))
+            ) : (
+              <div className="rounded-2xl bg-slate-50 px-4 py-8 text-center text-sm text-slate-500">
+                Nenhuma conversa encontrada.
+              </div>
+            )}
+          </div>
+        </aside>
+
+        <section
+          className={`${
+            telaCelular === "conversa" ? "flex" : "hidden"
+          } min-w-0 flex-1 flex-col bg-white md:flex`}
+        >
+          <div className="flex shrink-0 items-center gap-2 border-b border-red-100 px-2 py-2 sm:px-4">
+            <button
+              onClick={() => setTelaCelular("lista")}
+              aria-label="Voltar para as conversas"
+              className="rounded-xl p-2 text-slate-600 transition hover:bg-red-50 md:hidden"
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-red-100 text-sm font-black text-red-700">
+              {selectedChat?.profilePicUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={selectedChat.profilePicUrl} alt={selectedChatName} className="h-full w-full object-cover" />
+              ) : (
+                getInitials(selectedChatName)
               )}
             </div>
+            <div className="min-w-0 flex-1">
+              <h3 className="truncate text-base font-black text-slate-900 sm:text-lg">{selectedChatName}</h3>
+              <p className="truncate text-xs text-slate-500">
+                {selectedChatNumber || "Escolha uma conversa ou inicie uma nova mensagem"}
+              </p>
+            </div>
+            <div className="hidden shrink-0 items-center gap-1.5 sm:flex">
+              {selectedChat?.isGroup ? (
+                <span className="rounded-full bg-sky-50 px-2.5 py-1 text-xs font-bold text-sky-700">Grupo</span>
+              ) : null}
+              {selectedChat?.unreadCount ? (
+                <span className="rounded-full bg-red-50 px-2.5 py-1 text-xs font-bold text-red-700">
+                  {selectedChat.unreadCount} não lidas
+                </span>
+              ) : null}
+              {selectedProduct ? (
+                <span className="max-w-[220px] truncate rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700">
+                  Produto: {selectedProduct.name}
+                </span>
+              ) : null}
+            </div>
+          </div>
 
-            <div className="border-t border-red-100 bg-white px-5 py-5 md:px-7">
-              <div className="grid gap-3 lg:grid-cols-[220px_minmax(0,1fr)_auto]">
-                <input
-                  value={number}
-                  onChange={(event) => {
-                    setComposerMode("new");
-                    setNumber(formatPhoneNumber(event.target.value));
-                  }}
-                  placeholder="Numero com DDD"
-                  className="w-full rounded-2xl border border-red-100 px-4 py-3 outline-none transition focus:border-red-400"
-                />
+          <div
+            ref={messagesViewportRef}
+            className="min-h-0 flex-1 overflow-y-auto bg-[radial-gradient(circle_at_top,#fff7f7_0%,#fffefe_48%,#ffffff_100%)] px-3 py-4 sm:px-6"
+          >
+            {selectedChatMessages.length ? (
+              <div className="space-y-2.5">
+                {selectedChatMessages.map((item) => (
+                  <div
+                    key={item.id}
+                    className={`w-fit max-w-[88%] rounded-2xl px-4 py-2.5 shadow-sm sm:max-w-[75%] ${
+                      item.direction === "out"
+                        ? "ml-auto bg-[linear-gradient(135deg,#ef4444_0%,#dc2626_100%)] text-white"
+                        : "border border-red-100 bg-white text-slate-800"
+                    }`}
+                  >
+                    <div className="whitespace-pre-wrap text-[15px] leading-6 [overflow-wrap:anywhere]">
+                      {item.body || (item.hasMedia ? "Mídia enviada/recebida" : "")}
+                    </div>
+                    {item.hasMedia ? (
+                      <div
+                        className={`mt-2 inline-flex rounded-full px-2.5 py-0.5 text-xs font-bold ${
+                          item.direction === "out" ? "bg-white/15 text-white" : "bg-red-50 text-red-700"
+                        }`}
+                      >
+                        {item.mediaType || "mídia"}
+                      </div>
+                    ) : null}
+                    <div
+                      className={`mt-1 text-right text-[11px] font-medium ${
+                        item.direction === "out" ? "text-red-100" : "text-slate-400"
+                      }`}
+                    >
+                      {formatTime(item.timestamp)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex h-full items-center justify-center">
+                <div className="max-w-sm px-6 text-center">
+                  <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-red-600">
+                    <MessageCircle />
+                  </div>
+                  <div className="text-xl font-black text-slate-900">Atendimento direto</div>
+                  <div className="mt-2 text-sm text-slate-500">
+                    Esta área mostra somente as mensagens da conversa selecionada.
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Campo de envio — sempre visível no pé da conversa */}
+          <div className="shrink-0 border-t border-red-100 bg-white p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] sm:p-3">
+            <div className="flex flex-col gap-2 lg:flex-row lg:items-end">
+              <input
+                value={number}
+                onChange={(event) => {
+                  setComposerMode("new");
+                  setNumber(formatPhoneNumber(event.target.value));
+                }}
+                inputMode="tel"
+                placeholder="Número com DDD"
+                className={`${
+                  composerMode === "new" ? "block" : "hidden lg:block"
+                } w-full rounded-xl border border-red-100 px-3 py-2.5 text-base outline-none transition focus:border-red-400 sm:text-sm lg:w-44`}
+              />
+              <div className="flex min-w-0 flex-1 items-end gap-2">
                 <textarea
                   value={message}
                   onChange={(event) => setMessage(event.target.value)}
-                  placeholder="Digite sua mensagem ou insira um produto do site"
-                  rows={4}
-                  className="w-full rounded-[24px] border border-red-100 px-5 py-4 text-[15px] leading-7 outline-none transition focus:border-red-400"
+                  placeholder="Digite sua mensagem"
+                  rows={1}
+                  className="field-sizing-content max-h-40 min-h-[44px] w-full min-w-0 resize-none rounded-xl border border-red-100 px-3 py-2.5 text-base leading-6 outline-none transition focus:border-red-400 sm:text-[15px]"
                 />
                 <button
                   onClick={handleSendMessage}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-600 px-5 py-4 font-bold text-white transition hover:bg-red-700"
+                  aria-label="Enviar mensagem"
+                  className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-red-600 px-4 font-bold text-white transition hover:bg-red-700"
                 >
                   <Send size={16} />
-                  Enviar
+                  <span className="hidden sm:inline">Enviar</span>
                 </button>
               </div>
-
-              <div className="mt-5 rounded-[24px] border border-red-100 bg-[#fffafa] p-4">
-                <div className="mb-3 flex items-center gap-2">
-                  <Package2 className="text-red-600" size={18} />
-                  <h4 className="font-black text-slate-900">Enviar produto do site</h4>
-                </div>
-
-                <input
-                  value={productSearch}
-                  onChange={(event) => setProductSearch(event.target.value)}
-                  placeholder="Buscar produto"
-                  className="w-full rounded-2xl border border-red-100 bg-white px-4 py-3 outline-none transition focus:border-red-400"
-                />
-
-                <div className="mt-3 max-h-64 space-y-2 overflow-y-auto pr-1">
-                  {productLoading ? (
-                    <div className="rounded-2xl bg-white px-4 py-5 text-sm text-slate-500">
-                      Buscando produtos...
-                    </div>
-                  ) : productResults.length ? (
-                    productResults.map((product) => (
-                      <div
-                        key={product.id}
-                        className="flex gap-3 rounded-2xl border border-red-100 bg-white p-3"
-                      >
-                        <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-50">
-                          {product.image ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
-                          ) : (
-                            <Package2 className="text-slate-400" size={18} />
-                          )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="line-clamp-2 font-bold text-slate-900">{product.name}</div>
-                          <div className="mt-1 text-sm font-semibold text-red-600">
-                            {product.price || "Consulte"}
-                          </div>
-                          <div className="mt-3 flex flex-wrap gap-2">
-                            <button
-                              onClick={() => handleInsertProduct(product)}
-                              className="rounded-full bg-red-50 px-3 py-1.5 text-xs font-bold text-red-700 transition hover:bg-red-100"
-                            >
-                              Inserir na mensagem
-                            </button>
-                            <button
-                              onClick={() => handleSendProduct(product)}
-                              className="rounded-full bg-red-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-red-700"
-                            >
-                              Enviar agora
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="rounded-2xl bg-white px-4 py-5 text-sm text-slate-500">
-                      Digite pelo menos 2 letras para buscar produtos do site.
-                    </div>
-                  )}
-                </div>
-              </div>
             </div>
-          </section>
+          </div>
         </section>
+
+        <aside className="hidden w-[340px] shrink-0 flex-col border-l border-red-100 bg-white xl:flex 2xl:w-[380px]">
+          {painelProdutos(false)}
+        </aside>
       </div>
+
+      {/* Gaveta de produtos para telas menores que 1280 px */}
+      {gavetaProdutos ? (
+        <div className="fixed inset-0 z-40 flex justify-end xl:hidden">
+          <button
+            aria-label="Fechar produtos"
+            onClick={() => setGavetaProdutos(false)}
+            className="absolute inset-0 bg-slate-900/40"
+          />
+          <div className="relative flex h-full w-full max-w-sm flex-col bg-white shadow-2xl">
+            {painelProdutos(true)}
+          </div>
+        </div>
+      ) : null}
+
+      {toast ? (
+        <div className="pointer-events-none fixed inset-x-0 bottom-20 z-50 flex justify-center px-4">
+          <div className="max-w-md rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-lg">
+            {toast}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
