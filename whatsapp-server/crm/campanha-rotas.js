@@ -9,11 +9,14 @@ function montarRotasDeCampanha(r, { campanhas, json, rota, nomeDeQuem }) {
     json,
     rota((req) => campanhas.previa(req.body?.filtro || {}, { texto: req.body?.texto || null }))
   );
-  // Só para os números de teste do Thiago (fixos no código).
+  // Só para os números de teste do Thiago (fixos no código). Pedido com
+  // qualquer outro número é recusado inteiro (400), sem mandar nada.
   r.post(
     "/campanhas/teste",
     json,
-    rota((req) => campanhas.enviarTeste({ texto: req.body?.texto, por: nomeDeQuem(req) }))
+    rota((req) =>
+      campanhas.enviarTeste({ texto: req.body?.texto, numeros: req.body?.numeros ?? null, por: nomeDeQuem(req) })
+    )
   );
   r.get("/campanhas", rota((req) => campanhas.listar({ limite: req.query.limite })));
   r.post(

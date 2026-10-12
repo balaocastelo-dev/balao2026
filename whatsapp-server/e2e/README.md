@@ -87,3 +87,22 @@ e, às 19h, com a loja fechada e a fatia "parada", o parecer solto voltava a diz
 surdo. Daí o teste `6b` e a marca `entradaDoAlarme`: só mensagem nova desarma o
 alarme, nunca a passagem do relógio. Para conferir que o teste vale, troque
 `entrouCoisaNova` por `true` em `vigia.js` e rode: `6b` falha em três pontos.
+
+---
+
+## Bancada do disparo por tema
+
+```bash
+DISPARO_TESTE_DB=postgres://postgres:teste@localhost:5432/disparo_e2e node e2e/disparo.e2e.mjs
+```
+
+Servidor real, Evolution falsa (`e2e/evolution-falsa.js`) e Postgres de verdade
+(as tabelas `crm_*` do banco indicado são apagadas). Clientes inventados
+escrevem pelo webhook, viram tema, e a campanha sai pelo laço do servidor com
+intervalo de 300-500 ms e o horário comercial desligado
+(`DISPARO_INTERVALO_MS`, `DISPARO_JANELA_SEMPRE_ABERTA`). Prova: prévia sem
+quem pediu SAIR, teste só para os dois números da loja, `{nome}` e linha do
+SAIR no texto, SAIR no meio da campanha respeitado, progresso e fim pelo
+socket, a tela antiga (`panel:send-segmented`) virando campanha, e o servidor
+derrubado (SIGKILL) no meio da campanha voltando sem mandar duas vezes para
+ninguém. Ver `docs/disparo-por-tema.md`.

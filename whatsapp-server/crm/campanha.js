@@ -24,8 +24,12 @@ const R = require("./campanha-regras");
 const TRAVA_ENVIO = 4210923; // 4210921: Status; 4210922: migração do CRM
 const INTERROMPIDO_MS = 5 * 60_000; // tentativa sem resposta há mais que isto = processo caiu no meio
 const ESPERA_OCIOSA_MS = 60_000;
+// Desconectado não consulta o banco, então pode olhar de novo logo: no boot o
+// laço costuma começar antes de a Evolution responder "open".
+const ESPERA_DESCONECTADO_MS = 10_000;
 const ESPERA_MAXIMA_MS = 15 * 60_000;
 const CACHE_TETO_MS = 60_000;
+const MOTIVOS_DE_PARADA = new Set(["fora do horário", "teto do dia", "whatsapp desconectado", "outro processo enviando"]);
 
 const ESTADOS = ["enviando", "pausada", "concluida", "cancelada"];
 const TRANSICOES = {
@@ -485,7 +489,7 @@ function criarCampanhas({
    */
   async function passo() {
     const t = agora();
-    if (!conectado()) return { motivo: "whatsapp desconectado", esperarMs: ESPERA_OCIOSA_MS };
+    if (!conectado()) return { motivo: "whatsapp desconectado", esperarMs: ESPERA_DESCONECTADO_MS };
     if (!R.janelaAberta(t, janela)) {
       const abre = R.proximaAbertura(t, janela);
       return { motivo: "fora do horário", esperarMs: abre - t, retomaEm: abre };
@@ -568,7 +572,7 @@ function criarCampanhas({
           `UPDATE crm_campanha_envio SET tentativa_em = NULL WHERE campanha_id = $1 AND chat_id = $2 AND estado = 'pendente'`,
           [item.campanha_id, item.chat_id]
         );
-        return { motivo: "whatsapp desconectado", esperarMs: ESPERA_OCIOSA_MS };
+        return { motivo: "whatsapp desconectado", esperarMs: ESPERA_DESCONECTADO_MS };
       }
       resultado = { estado: "falhou", motivo: String(e?.message || e).slice(0, 300) };
     }
@@ -628,9 +632,13 @@ function criarCampanhas({
   function iniciar() {
     if (ligado) return;
     ligado = true;
+    const faixa =
+      intervalo.minMs < 1000
+        ? `${intervalo.minMs}-${intervalo.maxMs} ms`
+        : `${Math.round(intervalo.minMs / 1000)}-${Math.round(intervalo.maxMs / 1000)} s`;
     log(
       `laço ligado — ${janela.sempreAberta ? "SEM horário comercial" : `seg a sáb, ${janela.inicio}h às ${janela.fim}h (${R.FUSO})`}, ` +
-        `${Math.round(intervalo.minMs / 1000)}-${Math.round(intervalo.maxMs / 1000)} s entre envios`
+        `${faixa} entre envios`
     );
     (async () => {
       while (ligado) {
@@ -642,6 +650,10 @@ function criarCampanhas({
           r = { motivo: "erro", esperarMs: 30_000 };
         }
         const espera = Math.min(Math.max(0, r.esperarMs || 0), ESPERA_MAXIMA_MS);
+        // Só o que explica uma parada vai para o log, e só quando muda.
+        if (r.motivo !== ultimaSituacao.motivo && MOTIVOS_DE_PARADA.has(r.motivo)) {
+          log(`esperando: ${r.motivo}${r.retomaEm ? ` (volta ${new Date(r.retomaEm).toISOString()})` : ""}`);
+        }
         ultimaSituacao = { ...r, texto: undefined, em: agora(), proximoPassoEm: agora() + espera };
         if (!ligado) break;
         if (espera > 0) await dormir(espera);

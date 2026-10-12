@@ -4,6 +4,7 @@ import DisparoPorTema, { type CampanhaDisparo } from "@/components/crm/disparo/D
 
 // Servidor da VPS de mentira: responde as rotas do disparo e anota o que recebeu.
 function servidorFalso({ campanhas = [] as CampanhaDisparo[], status404 = false } = {}) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- corpo JSON livre, só para conferir
   const chamadas: { caminho: string; metodo: string; corpo: any }[] = [];
   let lista = [...campanhas];
   const resposta = (corpo: unknown, status = 200) =>
