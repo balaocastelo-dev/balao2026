@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  Laptop,
   BarChart3,
   Bike,
   Boxes,
@@ -144,6 +145,14 @@ export const MENU_DO_PAINEL: GrupoDoPainel[] = [
         rotulo: "Produtos",
         descricao: "Cadastrar, editar preço, foto e descrição, ou tirar do site.",
         icone: Boxes,
+        moldura: "folha",
+      },
+      {
+        href: "/painel/seminovos",
+        palavras: "seminovo seminovos usado notebook usado vitrine lead leads thinkpad latitude macbook consignação",
+        rotulo: "Seminovos",
+        descricao: "Aparelhos da página /seminovos, com foto, e os leads que ela capta.",
+        icone: Laptop,
         moldura: "folha",
       },
       {

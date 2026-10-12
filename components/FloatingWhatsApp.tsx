@@ -18,6 +18,13 @@ export default function FloatingWhatsApp() {
     return null;
   }
 
+  // Na /seminovos o celular tem a barra de pedido da própria página; o botão
+  // fica só no computador, com a mensagem de seminovos.
+  const naSeminovos = pathname === "/seminovos";
+  const mensagem = naSeminovos
+    ? "Olá! Vim pela página de seminovos e quero ver os notebooks que vocês têm hoje."
+    : SITE_CONFIG.whatsapp.messageDefault;
+
   const handleWhatsAppClick = () => {
     if (typeof window === "undefined") return;
 
@@ -30,14 +37,14 @@ export default function FloatingWhatsApp() {
 
     window.open(
       `https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(
-        SITE_CONFIG.whatsapp.messageDefault
+        mensagem
       )}`,
       "_blank"
     );
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-[9990] flex flex-col items-end gap-2 pointer-events-none">
+    <div className={`fixed bottom-6 right-6 z-[9990] ${naSeminovos ? "hidden sm:flex" : "flex"} flex-col items-end gap-2 pointer-events-none`}>
       {/* Badge with help text */}
       <div 
         onClick={handleWhatsAppClick}
