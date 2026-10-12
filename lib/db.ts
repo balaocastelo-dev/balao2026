@@ -40,6 +40,8 @@ function mapTursoProduct(r: Record<string, unknown>): Product {
     created_at: r.created_at ? String(r.created_at) : undefined,
     cost: r.cost != null && Number(r.cost) > 0 ? Number(r.cost) : undefined,
     supplier: r.supplier ? String(r.supplier) : undefined,
+    preco_anterior: r.preco_anterior != null && Number(r.preco_anterior) > 0 ? Number(r.preco_anterior) : undefined,
+    queda_em: r.queda_em ? String(r.queda_em) : undefined,
   } as Product;
 }
 
@@ -52,6 +54,26 @@ const toJsonText = (value: unknown): string | null => {
 
 const sortByPrice = (items: Product[]) =>
   items.sort((a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price));
+
+/**
+ * Produtos com queda de preço recente (lib/precos/queda.ts). Consulta pequena,
+ * separada da lista inteira: a lista inteira passa de 2 MB e o cache do Next
+ * não guarda, esta guarda. Antes da primeira gravação depois do deploy a
+ * coluna ainda não existe: devolve lista vazia.
+ */
+export async function getProdutosComQueda(desde: string): Promise<Product[]> {
+  if (!isTursoActive()) return [];
+  try {
+    const res = await turso.execute({
+      sql: 'SELECT * FROM products WHERE preco_anterior IS NOT NULL AND queda_em IS NOT NULL AND queda_em >= ? ORDER BY queda_em DESC LIMIT 500',
+      args: [desde],
+    });
+    return res.rows.map(r => mapTursoProduct(r as Row));
+  } catch (error) {
+    console.error('Error fetching price drops:', error);
+    return [];
+  }
+}
 
 export async function getProducts(): Promise<Product[]> {
   if (!isTursoActive()) return [];

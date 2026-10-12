@@ -22,6 +22,10 @@ export interface Product {
   price_card?: string;
   availability?: string;
   source_url?: string;
+  /** Queda de preço: preço Pix de antes da queda (lib/precos/queda.ts). */
+  preco_anterior?: number;
+  /** Quando o preço baixou (ISO). */
+  queda_em?: string;
 }
 
 export function getProductHref(product: Pick<Product, "id" | "slug" | "product_url">): string {
