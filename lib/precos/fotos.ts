@@ -130,8 +130,82 @@ export function misturaOriginalECompativel(doFornecedor: string, achado: string)
   return false;
 }
 
+// ---------- cartucho, tinta e toner: só a foto exata ----------
+
+const SUPRIMENTO = /\b(cartuchos?|tintas?|refil|refis|toner|garrafa|fotocondutor|cilindro)\b/;
+
+/** Cartucho, tinta, refil ou toner. */
+export function ehSuprimento(nome: string): boolean {
+  return SUPRIMENTO.test(semAcento(nome));
+}
+
+const ehXL = (t: string) => /\d\s?xl\b|\bxl\b/.test(semAcento(t));
+const ehLight = (t: string) => /\b(light|claro|clara|lc|lm)\b/.test(semAcento(t));
+const ehPacote = (t: string) => /\b(kit|combo|pack|litros?|\d+\s?(un|und|unid|unidades|cores|pcs|pecas|cartuchos)|\d\s?x)\b|\+/.test(semAcento(t));
+
+/** Códigos com prefixo (CF381A, CE412A, W2300X, TN2370, T1942): o prefixo faz parte do modelo. */
+function codigosComPrefixo(t: string): Set<string> {
+  const saida = new Set<string>();
+  for (const m of semAcento(t).matchAll(/\b(cf|ce|cb|cc|q|w|tn|dr|mlt-?d|d|pg|cl|to|t)-?(\d{2,4})/g)) {
+    const prefixo = m[1].replace(/^mlt-?d$/, "d").replace(/^to$/, "t");
+    saida.add(prefixo + m[2]);
+  }
+  return saida;
+}
+
+/** Números de modelo do suprimento, sem a capacidade nem a sigla da região: "667AL" e "667XL" viram "667". */
+function numerosDoSuprimento(t: string): string[] {
+  const saida = new Set<string>();
+  const texto = semAcento(t);
+  for (const m of texto.matchAll(/\b(?:t|pg|cl|ce|cf|cb|tn|dr|mlt-?d|w)?(\d{2,4})(?:xl|al|ab|br|n|a|x|l)?\b/g)) saida.add(m[1]);
+  // Epson: T1942 e T194220 são o modelo 194 (o resto é a cor).
+  for (const m of texto.matchAll(/\bto?(\d{3})\d{1,3}(?:-?(?:al|br|ab))?\b/g)) saida.add(m[1]);
+  return [...saida];
+}
+
+/**
+ * A foto achada serve para este suprimento? Pedido do Thiago em 11/10:
+ * cartucho normal (AL) e XL são produtos diferentes e não podem dividir foto,
+ * nem cor diferente, nem o kit de 4 cores, nem compatível no lugar do original.
+ */
+export function suprimentoConfere(doFornecedor: string, achado: string): boolean {
+  if (!ehSuprimento(achado)) return false;
+  if (!ehCompativel(doFornecedor) && (ehCompativel(achado) || /\b(evolut|chinamate|ollix|byqualy|masterprint|premium|multi|multilaser|lacrado)\b/.test(semAcento(achado)))) return false;
+  // Original: a marca do fornecedor (HP, Epson, Canon...) tem de estar no anúncio da foto.
+  const marca = semAcento(doFornecedor).match(/\b(hp|epson|canon|brother|samsung|lexmark|xerox|ricoh|kyocera)\b/)?.[1];
+  if (!ehCompativel(doFornecedor) && marca && !new RegExp(`\\b${marca}\\b`).test(semAcento(achado))) return false;
+  if (ehXL(doFornecedor) !== ehXL(achado)) return false;
+  if (ehLight(doFornecedor) !== ehLight(achado)) return false;
+  if (ehPacote(achado) && !ehPacote(doFornecedor)) return false;
+  const coresA = coresDoNome(doFornecedor);
+  const coresB = coresDoNome(achado);
+  if (coresA.size && (coresB.size === 0 || [...coresB].some((c) => !coresA.has(c)) || [...coresA].some((c) => !coresB.has(c)))) return false;
+  // Toner HP/Samsung: CF401A (normal) e CF401X (alto rendimento) também são produtos diferentes.
+  const letras = (t: string) => {
+    const m = new Map<string, string>();
+    for (const x of semAcento(t).matchAll(/\b(?:cf|ce|cb|cc|q|w|tn|mlt-?d)?(\d{2,4})([ax])\b/g)) m.set(x[1], x[2]);
+    return m;
+  };
+  const letrasA = letras(doFornecedor);
+  const letrasB = letras(achado);
+  for (const [num, letra] of letrasA) {
+    if (letrasB.has(num) ? letrasB.get(num) !== letra : letra === "x") return false;
+  }
+  // Com código de prefixo no nome (toner HP, Brother, Epson T...), o código tem de bater inteiro.
+  const codigosA = codigosComPrefixo(doFornecedor);
+  if (codigosA.size > 0) {
+    const codigosB = codigosComPrefixo(achado);
+    return [...codigosA].some((c) => codigosB.has(c));
+  }
+  const numerosA = numerosDoSuprimento(doFornecedor);
+  const numerosB = new Set(numerosDoSuprimento(achado));
+  if (numerosA.length === 0 || !numerosA.some((n) => numerosB.has(n))) return false;
+  return true;
+}
+
 export function semelhanca(doFornecedor: string, achado: string): number {
   if (misturaOriginalECompativel(doFornecedor, achado)) return 0;
+  if (ehSuprimento(doFornecedor)) return suprimentoConfere(doFornecedor, achado) ? 0.9 : 0;
   const modelos = modelosDoNome(doFornecedor);
   if (modelos.length > 0) {
     const bateu = modelos.filter((m) => temModelo(achado, m));
@@ -411,8 +485,51 @@ const singularIl = (p: string) => (p.length > 3 && p.endsWith("s") ? p.slice(0, 
  * Acessório no lugar do produto continua recusado (foto de carregador não
  * ilustra pilha).
  */
+/**
+ * Marcas que, aparecendo só no anúncio da foto, mostram OUTRO produto (caso de
+ * 11/10: "Bateria Toply 27A 12V" de R$ 3,75 com a foto de uma bateria WEG
+ * selada de moto; controle genérico com a foto do Pro Controller da Nintendo).
+ */
+const MARCAS_QUE_ENGANAM = [
+  // Fabricantes conhecidos: a foto deles mostra outro produto, quase sempre bem mais caro.
+  "logitech", "apple", "sony", "xiaomi", "samsung", "jbl", "dell", "hp", "lenovo", "acer", "asus", "motorola", "lg", "intelbras",
+  "tramontina", "weg", "panasonic", "philips", "duracell", "microsoft", "attack shark", "8bitdo", "redragon", "havit", "sandisk",
+  "kingston", "wd", "seagate", "tp-link", "tplink", "edifier", "hyperx", "razer", "corsair", "amazon", "baseus", "ugreen", "multilaser",
+];
+
+function marcasNoTexto(t: string): Set<string> {
+  const n = ` ${semAcento(t).replace(/[^a-z0-9]+/g, " ")} `;
+  return new Set(MARCAS_QUE_ENGANAM.filter((m) => n.includes(` ${semAcento(m).replace(/[^a-z0-9]+/g, " ")} `)));
+}
+
+/**
+ * Linhas de produto que já dizem a marca: "Console PlayStation 5" é Sony,
+ * "Mi Band 9" é Xiaomi. Valem só do lado do fornecedor (para não perder a
+ * foto certa do console Sony quando o anúncio dele não escreve "Sony").
+ */
+const MARCA_PELA_LINHA: [RegExp, string][] = [
+  [/\b(playstation|dualsense)\b/, "sony"],
+  [/\b(xbox|x box)\b/, "microsoft"],
+  [/\b(iphone|ipad|macbook|airpods|apple watch)\b/, "apple"],
+  [/\b(galaxy)\b/, "samsung"],
+  [/\b(mi band|redmi|poco)\b/, "xiaomi"],
+];
+
+/** A foto "parecida" traz marca que o produto do fornecedor não tem? */
+export function marcaDeOutroProduto(doFornecedor: string, achado: string): boolean {
+  const doProduto = marcasNoTexto(doFornecedor);
+  const texto = semAcento(doFornecedor).replace(/[^a-z0-9]+/g, " ");
+  for (const [linha, marca] of MARCA_PELA_LINHA) if (linha.test(texto)) doProduto.add(marca);
+  for (const m of marcasNoTexto(achado)) if (!doProduto.has(m)) return true;
+  return false;
+}
+
 export function semelhancaIlustrativa(doFornecedor: string, achado: string, marcas: string[] = []): number {
   if (misturaOriginalECompativel(doFornecedor, achado)) return 0;
+  // Foto de outra marca mostra outro produto: não serve nem como ilustração.
+  if (marcaDeOutroProduto(doFornecedor, achado)) return 0;
+  // Cartucho, tinta e toner nunca levam foto "parecida": ou é a exata, ou nenhuma.
+  if (ehSuprimento(doFornecedor)) return 0;
   const primeiraAchada = semAcento(achado).split(/[^a-z0-9]+/).filter(Boolean)[0] || "";
   const palavrasForn = semAcento(doFornecedor).split(/[^a-z0-9]+/).filter(Boolean);
   if (OUTRO_TIPO.has(primeiraAchada) && !palavrasForn.includes(primeiraAchada)) return 0;

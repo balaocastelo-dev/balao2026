@@ -1,5 +1,5 @@
 {
- "capturadoEm": "2026-10-11T09:55:49.400Z",
+ "capturadoEm": "2026-10-12T00:41:46.154Z",
  "produtos": [
   {
    "id": "1638128537832-X5mQX",
@@ -219,11 +219,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1644456659146-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/533231/Cartucho-Toner-Masterprint-Compativel-Samsung-Scx4200_1709230112_gg.jpg",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/533231/Cartucho-Toner-Masterprint-Compativel-Samsung-Scx4200_1709230112_gg.jpg"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1644456659146-X5mQX"
   },
   {
    "id": "1644457683643-X5mQX",
@@ -1538,110 +1534,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1648433186412-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/714279/xlarge/Hub-Baseus-Usb-C-17-Em-1-Multi-Portas-Macbook-Tipo-C-3-Hdmi_1751657391.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/714279/xlarge/Hub-Baseus-Usb-C-17-Em-1-Multi-Portas-Macbook-Tipo-C-3-Hdmi_1751657391.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/714279/xlarge/Hub-Baseus-Usb-C-17-Em-1-Multi-Portas-Macbook-Tipo-C-3-Hdmi_1751657392.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/714279/xlarge/Hub-Baseus-Usb-C-17-Em-1-Multi-Portas-Macbook-Tipo-C-3-Hdmi_1751657393.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/714279/xlarge/Hub-Baseus-Usb-C-17-Em-1-Multi-Portas-Macbook-Tipo-C-3-Hdmi_1751657395.jpg#ilustrativa"
-   ]
-  },
-  {
-   "id": "1650036159847-X5mQX",
-   "name": "Cartucho Compatível HP 933XL Azul 16ML",
-   "salePrice": 15,
-   "salePromotionalPrice": null,
-   "category": {
-    "name": "Cartucho Compatível"
-   },
-   "active": true,
-   "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1650036159847-X5mQX"
-  },
-  {
-   "id": "1650036506189-X5mQX",
-   "name": "Cartucho Compatível HP 932XL Preto 50ML",
-   "salePrice": 20,
-   "salePromotionalPrice": null,
-   "category": {
-    "name": "Cartucho Compatível"
-   },
-   "active": true,
-   "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1650036506189-X5mQX"
-  },
-  {
-   "id": "1650036684168-X5mQX",
-   "name": "Cartucho Compatível HP 933XL Amarelo 16ML",
-   "salePrice": 15,
-   "salePromotionalPrice": null,
-   "category": {
-    "name": "Cartucho Compatível"
-   },
-   "active": true,
-   "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1650036684168-X5mQX"
-  },
-  {
-   "id": "1650037477415-X5mQX",
-   "name": "Cartucho Compatível HP 951XL Amarelo 19,5ml",
-   "salePrice": 20,
-   "salePromotionalPrice": null,
-   "category": {
-    "name": "Cartucho Compatível"
-   },
-   "active": true,
-   "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1650037477415-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/645874/Cartucho-De-Tinta-Compat-vel-951xl-951-Amarelo-8100-8600_1728606043_gg.jpg",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/645874/Cartucho-De-Tinta-Compat-vel-951xl-951-Amarelo-8100-8600_1728606043_gg.jpg"
-   ]
-  },
-  {
-   "id": "1650234334226-X5mQX",
-   "name": "Cartucho Compatível HP 950XL Preto 80ML",
-   "salePrice": 25,
-   "salePromotionalPrice": null,
-   "category": {
-    "name": "Cartucho Compatível"
-   },
-   "active": true,
-   "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1650234334226-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/645876/Cartucho-De-Tinta-Compat-vel-950xl-950-Preto-8100-T-8600w_1728606811_gg.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/645876/Cartucho-De-Tinta-Compat-vel-950xl-950-Preto-8100-T-8600w_1728606811_gg.jpg#ilustrativa"
-   ]
-  },
-  {
-   "id": "1650234394280-X5mQX",
-   "name": "Cartucho Compatível HP 951XL Azul 19,5ML",
-   "salePrice": 20,
-   "salePromotionalPrice": null,
-   "category": {
-    "name": "Cartucho Compatível"
-   },
-   "active": true,
-   "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1650234394280-X5mQX"
-  },
-  {
-   "id": "1650234454258-X5mQX",
-   "name": "Cartucho Compatível HP 951XL Magenta 19,5ml",
-   "salePrice": 20,
-   "salePromotionalPrice": null,
-   "category": {
-    "name": "Cartucho Compatível"
-   },
-   "active": true,
-   "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1650234454258-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/645873/Cartucho-De-Tinta-Compat-vel-951xl-951magenta-8600-8100_1728590555_gg.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/645873/Cartucho-De-Tinta-Compat-vel-951xl-951magenta-8600-8100_1728590555_gg.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1648433186412-X5mQX"
   },
   {
    "id": "1650235528576-X5mQX",
@@ -1653,14 +1546,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1650235528576-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/637413/Toner-Comp-Lexmark-X264-X363-X364-X364dn-X264dn-X264a11g-9k_1726663739_gg.jpg",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/637413/Toner-Comp-Lexmark-X264-X363-X364-X364dn-X264dn-X264a11g-9k_1726663739_gg.jpg",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/637413/Toner-Comp-Lexmark-X264-X363-X364-X364dn-X264dn-X264a11g-9k_1726663750_gg.jpg",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/637413/Toner-Comp-Lexmark-X264-X363-X364-X364dn-X264dn-X264a11g-9k_1726663762_gg.jpg",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/637413/Toner-Comp-Lexmark-X264-X363-X364-X364dn-X264dn-X264a11g-9k_1726663773_gg.jpg"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1650235528576-X5mQX"
   },
   {
    "id": "1650235724996-X5mQX",
@@ -1673,13 +1559,13 @@
    "active": true,
    "showOnCatalog": true,
    "url": "https://techsupri.kyte.site/pt-BR/p/produto/1650235724996-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/614839/3x-Toner-Para-Brother-Compativel-Dcp-L2540dw-Tn2370-Tn2340-Tn660-L2520-L2360-L2700-Imprime-2-6k-Fls-Compativel-Evolut_1720809819_gg.jpg",
+   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/250294/xlarge/Toner-Compat-vel-Com-Tn2340-Tn2370-Tn660-Para-Brother-L2320-L2720-L2740-L2700-L2520-L2320d-L2360dw-L2540dw-Preto-2-600_1771853039.jpg",
    "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/614839/3x-Toner-Para-Brother-Compativel-Dcp-L2540dw-Tn2370-Tn2340-Tn660-L2520-L2360-L2700-Imprime-2-6k-Fls-Compativel-Evolut_1720809819_gg.jpg",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/614839/3x-Toner-Para-Brother-Compativel-Dcp-L2540dw-Tn2370-Tn2340-Tn660-L2520-L2360-L2700-Imprime-2-6k-Fls-Compativel-Evolut_1720809837_gg.jpg",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/614839/3x-Toner-Para-Brother-Compativel-Dcp-L2540dw-Tn2370-Tn2340-Tn660-L2520-L2360-L2700-Imprime-2-6k-Fls-Compativel-Evolut_1720809856_gg.jpg",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/614839/3x-Toner-Para-Brother-Compativel-Dcp-L2540dw-Tn2370-Tn2340-Tn660-L2520-L2360-L2700-Imprime-2-6k-Fls-Compativel-Evolut_1720809874_gg.jpg",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/614839/3x-Toner-Para-Brother-Compativel-Dcp-L2540dw-Tn2370-Tn2340-Tn660-L2520-L2360-L2700-Imprime-2-6k-Fls-Compativel-Evolut_1720809892_gg.jpg"
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/250294/xlarge/Toner-Compat-vel-Com-Tn2340-Tn2370-Tn660-Para-Brother-L2320-L2720-L2740-L2700-L2520-L2320d-L2360dw-L2540dw-Preto-2-600_1771853039.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/250294/xlarge/Toner-Compat-vel-Com-Tn2340-Tn2370-Tn660-Para-Brother-L2320-L2720-L2740-L2700-L2520-L2320d-L2360dw-L2540dw-Preto-2-600_1771853041.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/250294/xlarge/Toner-Compat-vel-Com-Tn2340-Tn2370-Tn660-Para-Brother-L2320-L2720-L2740-L2700-L2520-L2320d-L2360dw-L2540dw-Preto-2-600_1771853042.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/250294/xlarge/Toner-Compat-vel-Com-Tn2340-Tn2370-Tn660-Para-Brother-L2320-L2720-L2740-L2700-L2520-L2320d-L2360dw-L2540dw-Preto-2-600_1771853043.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/250294/xlarge/Toner-Compat-vel-Com-Tn2340-Tn2370-Tn660-Para-Brother-L2320-L2720-L2740-L2700-L2520-L2320d-L2360dw-L2540dw-Preto-2-600_1771853045.jpg"
    ]
   },
   {
@@ -1749,11 +1635,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1650238285984-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1026584/xlarge/Toner-Evolut-Compat-vel-Com-Samsung-D208-Scx-5635-5835-10k_1775159029.jpg",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1026584/xlarge/Toner-Evolut-Compat-vel-Com-Samsung-D208-Scx-5635-5835-10k_1775159029.jpg"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1650238285984-X5mQX"
   },
   {
    "id": "1656942250018-X5mQX",
@@ -1786,12 +1668,9 @@
    "active": true,
    "showOnCatalog": true,
    "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656944302744-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1044023/xlarge/Cartucho-De-Tinta-Hp-667xl-Preto-3ym81ab-Para-Hp-Deskjet-2376-2774-2776-6476-2874-Hp_1779996254.jpg#ilustrativa",
+   "foto": "https://http2.mlstatic.com/D_NQ_NP_829526-MLA99529733952_122025-O.webp",
    "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1044023/xlarge/Cartucho-De-Tinta-Hp-667xl-Preto-3ym81ab-Para-Hp-Deskjet-2376-2774-2776-6476-2874-Hp_1779996254.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1044023/xlarge/Cartucho-De-Tinta-Hp-667xl-Preto-3ym81ab-Para-Hp-Deskjet-2376-2774-2776-6476-2874-Hp_1779996255.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1044023/xlarge/Cartucho-De-Tinta-Hp-667xl-Preto-3ym81ab-Para-Hp-Deskjet-2376-2774-2776-6476-2874-Hp_1779996256.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1044023/xlarge/Cartucho-De-Tinta-Hp-667xl-Preto-3ym81ab-Para-Hp-Deskjet-2376-2774-2776-6476-2874-Hp_1779996258.jpg#ilustrativa"
+    "https://http2.mlstatic.com/D_NQ_NP_829526-MLA99529733952_122025-O.webp"
    ]
   },
   {
@@ -1805,12 +1684,9 @@
    "active": true,
    "showOnCatalog": true,
    "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656944454634-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1044023/xlarge/Cartucho-De-Tinta-Hp-667xl-Preto-3ym81ab-Para-Hp-Deskjet-2376-2774-2776-6476-2874-Hp_1779996254.jpg#ilustrativa",
+   "foto": "https://http2.mlstatic.com/D_NQ_NP_962877-MLA99371763142_112025-O.webp",
    "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1044023/xlarge/Cartucho-De-Tinta-Hp-667xl-Preto-3ym81ab-Para-Hp-Deskjet-2376-2774-2776-6476-2874-Hp_1779996254.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1044023/xlarge/Cartucho-De-Tinta-Hp-667xl-Preto-3ym81ab-Para-Hp-Deskjet-2376-2774-2776-6476-2874-Hp_1779996255.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1044023/xlarge/Cartucho-De-Tinta-Hp-667xl-Preto-3ym81ab-Para-Hp-Deskjet-2376-2774-2776-6476-2874-Hp_1779996256.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1044023/xlarge/Cartucho-De-Tinta-Hp-667xl-Preto-3ym81ab-Para-Hp-Deskjet-2376-2774-2776-6476-2874-Hp_1779996258.jpg#ilustrativa"
+    "https://http2.mlstatic.com/D_NQ_NP_962877-MLA99371763142_112025-O.webp"
    ]
   },
   {
@@ -1824,9 +1700,9 @@
    "active": true,
    "showOnCatalog": true,
    "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656944601174-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/294484/xlarge/Cartucho-HP-664XL-Jato-De-Tinta-8-5ml-Preto-F6V31AB_1787166641.png#ilustrativa",
+   "foto": "https://http2.mlstatic.com/D_NQ_NP_879680-MLA110079852917_042026-O.webp",
    "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/294484/xlarge/Cartucho-HP-664XL-Jato-De-Tinta-8-5ml-Preto-F6V31AB_1787166641.png#ilustrativa"
+    "https://http2.mlstatic.com/D_NQ_NP_879680-MLA110079852917_042026-O.webp"
    ]
   },
   {
@@ -1840,9 +1716,9 @@
    "active": true,
    "showOnCatalog": true,
    "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656944930006-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/285619/xlarge/Cartucho-De-Tinta-Preto-15ml-Pg-210xl-1-Un-Canon_1786988679.jpg",
+   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/618799/xlarge/Cartucho-De-Tinta-Canon-Pg-210xl-Preto-Ip2700-Mp230-Mp499_1786624738.png",
    "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/285619/xlarge/Cartucho-De-Tinta-Preto-15ml-Pg-210xl-1-Un-Canon_1786988679.jpg"
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/618799/xlarge/Cartucho-De-Tinta-Canon-Pg-210xl-Preto-Ip2700-Mp230-Mp499_1786624738.png"
    ]
   },
   {
@@ -1919,12 +1795,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656946206340-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/616014/xlarge/Tinta-Epson-673-Ecotank-T673320al-Magenta-L800-l805-l810-l850-l1800_1787328535.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/616014/xlarge/Tinta-Epson-673-Ecotank-T673320al-Magenta-L800-l805-l810-l850-l1800_1787328535.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/616014/xlarge/Tinta-Epson-673-Ecotank-T673320al-Magenta-L800-l805-l810-l850-l1800_1787328537.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656946206340-X5mQX"
   },
   {
    "id": "1656946258207-X5mQX",
@@ -1937,12 +1808,9 @@
    "active": true,
    "showOnCatalog": true,
    "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656946258207-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/197938/xlarge/Cartucho-de-Tinta-HP-662XL-Preto-Para-1516-2516-3516-2546-3546-CZ105AB_1787166648.jpg#ilustrativa",
+   "foto": "https://http2.mlstatic.com/D_NQ_NP_977593-MLA99992418083_112025-O.webp",
    "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/197938/xlarge/Cartucho-de-Tinta-HP-662XL-Preto-Para-1516-2516-3516-2546-3546-CZ105AB_1787166648.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/197938/xlarge/Cartucho-de-Tinta-HP-662XL-Preto-Para-1516-2516-3516-2546-3546-CZ105AB_1787166649.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/197938/xlarge/Cartucho-de-Tinta-HP-662XL-Preto-Para-1516-2516-3516-2546-3546-CZ105AB_1787166651.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/197938/xlarge/Cartucho-de-Tinta-HP-662XL-Preto-Para-1516-2516-3516-2546-3546-CZ105AB_1787166652.jpg#ilustrativa"
+    "https://http2.mlstatic.com/D_NQ_NP_977593-MLA99992418083_112025-O.webp"
    ]
   },
   {
@@ -1955,14 +1823,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656946481538-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/197938/xlarge/Cartucho-de-Tinta-HP-662XL-Preto-Para-1516-2516-3516-2546-3546-CZ105AB_1787166648.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/197938/xlarge/Cartucho-de-Tinta-HP-662XL-Preto-Para-1516-2516-3516-2546-3546-CZ105AB_1787166648.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/197938/xlarge/Cartucho-de-Tinta-HP-662XL-Preto-Para-1516-2516-3516-2546-3546-CZ105AB_1787166649.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/197938/xlarge/Cartucho-de-Tinta-HP-662XL-Preto-Para-1516-2516-3516-2546-3546-CZ105AB_1787166651.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/197938/xlarge/Cartucho-de-Tinta-HP-662XL-Preto-Para-1516-2516-3516-2546-3546-CZ105AB_1787166652.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656946481538-X5mQX"
   },
   {
    "id": "1656946693297-X5mQX",
@@ -1975,12 +1836,12 @@
    "active": true,
    "showOnCatalog": true,
    "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656946693297-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/206268/xlarge/Tinta-Refil-Epson-P-Ecotank-L200-L355-L365-L375-T664420AL-Amarelo_1790169826.png#ilustrativa",
+   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/206268/xlarge/Tinta-Refil-Epson-P-Ecotank-L200-L355-L365-L375-T664420AL-Amarelo_1790169826.png",
    "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/206268/xlarge/Tinta-Refil-Epson-P-Ecotank-L200-L355-L365-L375-T664420AL-Amarelo_1790169826.png#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/206268/xlarge/Tinta-Refil-Epson-P-Ecotank-L200-L355-L365-L375-T664420AL-Amarelo_1790169827.png#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/206268/xlarge/Tinta-Refil-Epson-P-Ecotank-L200-L355-L365-L375-T664420AL-Amarelo_1790169828.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/206268/xlarge/Tinta-Refil-Epson-P-Ecotank-L200-L355-L365-L375-T664420AL-Amarelo_1790169829.jpg#ilustrativa"
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/206268/xlarge/Tinta-Refil-Epson-P-Ecotank-L200-L355-L365-L375-T664420AL-Amarelo_1790169826.png",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/206268/xlarge/Tinta-Refil-Epson-P-Ecotank-L200-L355-L365-L375-T664420AL-Amarelo_1790169827.png",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/206268/xlarge/Tinta-Refil-Epson-P-Ecotank-L200-L355-L365-L375-T664420AL-Amarelo_1790169828.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/206268/xlarge/Tinta-Refil-Epson-P-Ecotank-L200-L355-L365-L375-T664420AL-Amarelo_1790169829.jpg"
    ]
   },
   {
@@ -1994,9 +1855,9 @@
    "active": true,
    "showOnCatalog": true,
    "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656946788179-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/695242/xlarge/Tinta-P-Impressora-Epson-664-4-Litros-Cores-Black-Ciano-Magenta-E-Yellow_1754395489.jpg",
+   "foto": "https://http2.mlstatic.com/D_NQ_NP_749963-MLA99511201704_112025-O.webp",
    "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/695242/xlarge/Tinta-P-Impressora-Epson-664-4-Litros-Cores-Black-Ciano-Magenta-E-Yellow_1754395489.jpg"
+    "https://http2.mlstatic.com/D_NQ_NP_749963-MLA99511201704_112025-O.webp"
    ]
   },
   {
@@ -2029,9 +1890,9 @@
    "active": true,
    "showOnCatalog": true,
    "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656947893653-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/294484/xlarge/Cartucho-HP-664XL-Jato-De-Tinta-8-5ml-Preto-F6V31AB_1787166641.png#ilustrativa",
+   "foto": "https://http2.mlstatic.com/D_NQ_NP_728885-MLA99454004450_112025-O.webp",
    "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/294484/xlarge/Cartucho-HP-664XL-Jato-De-Tinta-8-5ml-Preto-F6V31AB_1787166641.png#ilustrativa"
+    "https://http2.mlstatic.com/D_NQ_NP_728885-MLA99454004450_112025-O.webp"
    ]
   },
   {
@@ -2045,9 +1906,9 @@
    "active": true,
    "showOnCatalog": true,
    "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656951044255-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/695242/xlarge/Tinta-P-Impressora-Epson-664-4-Litros-Cores-Black-Ciano-Magenta-E-Yellow_1754395489.jpg",
+   "foto": "https://americanas.vtexassets.com/arquivos/ids/4306881/9890482_1_xlarge.jpg?v=638751248256970000",
    "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/695242/xlarge/Tinta-P-Impressora-Epson-664-4-Litros-Cores-Black-Ciano-Magenta-E-Yellow_1754395489.jpg"
+    "https://americanas.vtexassets.com/arquivos/ids/4306881/9890482_1_xlarge.jpg?v=638751248256970000"
    ]
   },
   {
@@ -2060,13 +1921,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656951207946-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/715074/xlarge/Cartucho-De-Tinta-Compat-vel-Hp-22xl-Color-Ollix-14ml_1752617377.jpg",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/715074/xlarge/Cartucho-De-Tinta-Compat-vel-Hp-22xl-Color-Ollix-14ml_1752617377.jpg",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/715074/xlarge/Cartucho-De-Tinta-Compat-vel-Hp-22xl-Color-Ollix-14ml_1752617379.png",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/715074/xlarge/Cartucho-De-Tinta-Compat-vel-Hp-22xl-Color-Ollix-14ml_1752617380.png"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656951207946-X5mQX"
   },
   {
    "id": "1656951425142-X5mQX",
@@ -2078,11 +1933,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656951425142-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/695242/xlarge/Tinta-P-Impressora-Epson-664-4-Litros-Cores-Black-Ciano-Magenta-E-Yellow_1754395489.jpg",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/695242/xlarge/Tinta-P-Impressora-Epson-664-4-Litros-Cores-Black-Ciano-Magenta-E-Yellow_1754395489.jpg"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656951425142-X5mQX"
   },
   {
    "id": "1656951528181-X5mQX",
@@ -2095,9 +1946,11 @@
    "active": true,
    "showOnCatalog": true,
    "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656951528181-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1065930/xlarge/Refil-Tinta-Compat-Epson-544-504-Amarelo-70ml_1787143113.jpg",
+   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/167876/xlarge/Refil-De-Tinta-Epson-T544-Amarelo-65ml-Para-Impressoras-L3110-L3150-L5190-T544420_1788438818.jpg",
    "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1065930/xlarge/Refil-Tinta-Compat-Epson-544-504-Amarelo-70ml_1787143113.jpg"
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/167876/xlarge/Refil-De-Tinta-Epson-T544-Amarelo-65ml-Para-Impressoras-L3110-L3150-L5190-T544420_1788438818.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/167876/xlarge/Refil-De-Tinta-Epson-T544-Amarelo-65ml-Para-Impressoras-L3110-L3150-L5190-T544420_1788438819.png",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/167876/xlarge/Refil-De-Tinta-Epson-T544-Amarelo-65ml-Para-Impressoras-L3110-L3150-L5190-T544420_1788438821.jpg"
    ]
   },
   {
@@ -2127,9 +1980,13 @@
    "active": true,
    "showOnCatalog": true,
    "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656951614964-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1065927/xlarge/Refil-Tinta-Compat-Epson-544-504-Magenta-70ml_1787143112.jpg",
+   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/688986/xlarge/Refil-De-Tinta-Epson-Para-Ecotank-T544322-br-Magenta_1772569437.jpg",
    "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1065927/xlarge/Refil-Tinta-Compat-Epson-544-504-Magenta-70ml_1787143112.jpg"
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/688986/xlarge/Refil-De-Tinta-Epson-Para-Ecotank-T544322-br-Magenta_1772569437.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/688986/xlarge/Refil-De-Tinta-Epson-Para-Ecotank-T544322-br-Magenta_1772569438.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/688986/xlarge/Refil-De-Tinta-Epson-Para-Ecotank-T544322-br-Magenta_1772569439.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/688986/xlarge/Refil-De-Tinta-Epson-Para-Ecotank-T544322-br-Magenta_1772569441.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/688986/xlarge/Refil-De-Tinta-Epson-Para-Ecotank-T544322-br-Magenta_1772569442.jpg"
    ]
   },
   {
@@ -2143,9 +2000,9 @@
    "active": true,
    "showOnCatalog": true,
    "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656951716800-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1065929/xlarge/Refil-Tinta-Compat-Epson-544-504-Cyan-70ml_1787143114.jpg",
+   "foto": "https://http2.mlstatic.com/D_NQ_NP_830479-MLA82633762501_022025-O.webp",
    "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1065929/xlarge/Refil-Tinta-Compat-Epson-544-504-Cyan-70ml_1787143114.jpg"
+    "https://http2.mlstatic.com/D_NQ_NP_830479-MLA82633762501_022025-O.webp"
    ]
   },
   {
@@ -2179,9 +2036,13 @@
    "active": true,
    "showOnCatalog": true,
    "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656951891484-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1048510/xlarge/Tinta-Epson-504_1781196853.jpg",
+   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/297883/xlarge/Refil-De-Tinta-Epson-Original-Ciano-T504120-al_1787166643.jpg",
    "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1048510/xlarge/Tinta-Epson-504_1781196853.jpg"
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/297883/xlarge/Refil-De-Tinta-Epson-Original-Ciano-T504120-al_1787166643.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/297883/xlarge/Refil-De-Tinta-Epson-Original-Ciano-T504120-al_1787166644.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/297883/xlarge/Refil-De-Tinta-Epson-Original-Ciano-T504120-al_1787166646.png",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/297883/xlarge/Refil-De-Tinta-Epson-Original-Ciano-T504120-al_1787166647.png",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/297883/xlarge/Refil-De-Tinta-Epson-Original-Ciano-T504120-al_1787166648.png"
    ]
   },
   {
@@ -2211,9 +2072,12 @@
    "active": true,
    "showOnCatalog": true,
    "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656951992236-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1048510/xlarge/Tinta-Epson-504_1781196853.jpg",
+   "foto": "https://americanas.vtexassets.com/arquivos/ids/36987076/image-21a16fb577da464893f2c88609c94942.jpg?v=638993433085830000",
    "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1048510/xlarge/Tinta-Epson-504_1781196853.jpg"
+    "https://americanas.vtexassets.com/arquivos/ids/36987076/image-21a16fb577da464893f2c88609c94942.jpg?v=638993433085830000",
+    "https://americanas.vtexassets.com/arquivos/ids/36987078/image-460a433b3931432c8c9f469904a4d082.jpg?v=638993433087070000",
+    "https://americanas.vtexassets.com/arquivos/ids/36987077/image-4dd9c04bfad34caeb6ba1edc2a944c2b.jpg?v=638993433085970000",
+    "https://americanas.vtexassets.com/arquivos/ids/36987079/image-fe9799ee41f1482eaf3711ea9d7edac6.jpg?v=638993433087400000"
    ]
   },
   {
@@ -2243,9 +2107,12 @@
    "active": true,
    "showOnCatalog": true,
    "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656952057063-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1048510/xlarge/Tinta-Epson-504_1781196853.jpg",
+   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/399186/xlarge/Refil-Tanque-Tinta-Epson-T504-Preto-L4150-60-6171-T504120-al_1787166645.jpg",
    "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1048510/xlarge/Tinta-Epson-504_1781196853.jpg"
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/399186/xlarge/Refil-Tanque-Tinta-Epson-T504-Preto-L4150-60-6171-T504120-al_1787166645.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/399186/xlarge/Refil-Tanque-Tinta-Epson-T504-Preto-L4150-60-6171-T504120-al_1787166646.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/399186/xlarge/Refil-Tanque-Tinta-Epson-T504-Preto-L4150-60-6171-T504120-al_1787166648.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/399186/xlarge/Refil-Tanque-Tinta-Epson-T504-Preto-L4150-60-6171-T504120-al_1787166649.jpg"
    ]
   },
   {
@@ -2299,9 +2166,9 @@
    "active": true,
    "showOnCatalog": true,
    "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656955210664-X5mQX",
-   "foto": "https://img.kalunga.com.br/fotosdeprodutos/797987.webp",
+   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/651846/xlarge/Cartucho-De-Tinta-Epson-T194420-T194-Yellow-Expression-Xp214-Xp-214-Xp204-Xp-204_1787328521.jpg",
    "fotos": [
-    "https://img.kalunga.com.br/fotosdeprodutos/797987.webp"
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/651846/xlarge/Cartucho-De-Tinta-Epson-T194420-T194-Yellow-Expression-Xp214-Xp-214-Xp204-Xp-204_1787328521.jpg"
    ]
   },
   {
@@ -2315,9 +2182,9 @@
    "active": true,
    "showOnCatalog": true,
    "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656955344536-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/651860/xlarge/Cartucho-De-Tinta-Epson-T194220-T194-Ciano-Expression-Xp214-Xp-214-Xp204-Xp-204_1787328530.jpg#ilustrativa",
+   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/651860/xlarge/Cartucho-De-Tinta-Epson-T194220-T194-Ciano-Expression-Xp214-Xp-214-Xp204-Xp-204_1787328530.jpg",
    "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/651860/xlarge/Cartucho-De-Tinta-Epson-T194220-T194-Ciano-Expression-Xp214-Xp-214-Xp204-Xp-204_1787328530.jpg#ilustrativa"
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/651860/xlarge/Cartucho-De-Tinta-Epson-T194220-T194-Ciano-Expression-Xp214-Xp-214-Xp204-Xp-204_1787328530.jpg"
    ]
   },
   {
@@ -2346,11 +2213,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656956111812-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/991773/xlarge/Cartucho-De-Tinta-Epson-T673-T673320-Magenta-L800-L810-L805-L1800-L850_1786625972.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/991773/xlarge/Cartucho-De-Tinta-Epson-T673-T673320-Magenta-L800-L810-L805-L1800-L850_1786625972.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656956111812-X5mQX"
   },
   {
    "id": "1656956194367-X5mQX",
@@ -2363,9 +2226,9 @@
    "active": true,
    "showOnCatalog": true,
    "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656956194367-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/998690/xlarge/Cartucho-Epson-135-T135120-T135-Preto-T25-Tx123-Tx125-5ml_1769017430.png#ilustrativa",
+   "foto": "https://http2.mlstatic.com/D_NQ_NP_965039-MLA99943084321_112025-O.webp",
    "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/998690/xlarge/Cartucho-Epson-135-T135120-T135-Preto-T25-Tx123-Tx125-5ml_1769017430.png#ilustrativa"
+    "https://http2.mlstatic.com/D_NQ_NP_965039-MLA99943084321_112025-O.webp"
    ]
   },
   {
@@ -2378,12 +2241,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656956336979-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1042611/xlarge/Cartucho-Epson-To82-Preto-T082120-Lacrado-7ml_1779741823.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1042611/xlarge/Cartucho-Epson-To82-Preto-T082120-Lacrado-7ml_1779741823.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1042611/xlarge/Cartucho-Epson-To82-Preto-T082120-Lacrado-7ml_1779741824.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656956336979-X5mQX"
   },
   {
    "id": "1656956407508-X5mQX",
@@ -2396,10 +2254,9 @@
    "active": true,
    "showOnCatalog": true,
    "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656956407508-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1042608/xlarge/Cartucho-Epson-To90120-To-90n-Preto-5ml-T20-T21-Tx10-tx11_1779741822.png#ilustrativa",
+   "foto": "https://http2.mlstatic.com/D_NQ_NP_930603-MLU78178149618_082024-O.webp",
    "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1042608/xlarge/Cartucho-Epson-To90120-To-90n-Preto-5ml-T20-T21-Tx10-tx11_1779741822.png#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1042608/xlarge/Cartucho-Epson-To90120-To-90n-Preto-5ml-T20-T21-Tx10-tx11_1779741824.jpg#ilustrativa"
+    "https://http2.mlstatic.com/D_NQ_NP_930603-MLU78178149618_082024-O.webp"
    ]
   },
   {
@@ -2412,11 +2269,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656957592803-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/616015/xlarge/Tinta-Epson-673-Ecotank-T673220al-Azul-L800-l805-l810-l850-l1800_1787328536.jpg",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/616015/xlarge/Tinta-Epson-673-Ecotank-T673220al-Azul-L800-l805-l810-l850-l1800_1787328536.jpg"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656957592803-X5mQX"
   },
   {
    "id": "1656957699857-X5mQX",
@@ -2429,10 +2282,9 @@
    "active": true,
    "showOnCatalog": true,
    "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656957699857-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/616014/xlarge/Tinta-Epson-673-Ecotank-T673320al-Magenta-L800-l805-l810-l850-l1800_1787328535.jpg",
+   "foto": "https://http2.mlstatic.com/D_NQ_NP_723814-MLA108909305758_032026-O.webp",
    "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/616014/xlarge/Tinta-Epson-673-Ecotank-T673320al-Magenta-L800-l805-l810-l850-l1800_1787328535.jpg",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/616014/xlarge/Tinta-Epson-673-Ecotank-T673320al-Magenta-L800-l805-l810-l850-l1800_1787328537.jpg"
+    "https://http2.mlstatic.com/D_NQ_NP_723814-MLA108909305758_032026-O.webp"
    ]
   },
   {
@@ -2463,10 +2315,10 @@
    "active": true,
    "showOnCatalog": true,
    "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656959380931-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/636474/Toner-Compat-vel-103a-W1103a-W1103-Neverstop-1200a-1200w-1000a-1000w-2-5k_1726492019_gg.jpg#ilustrativa",
+   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/636474/Toner-Compat-vel-103a-W1103a-W1103-Neverstop-1200a-1200w-1000a-1000w-2-5k_1726492019_gg.jpg",
    "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/636474/Toner-Compat-vel-103a-W1103a-W1103-Neverstop-1200a-1200w-1000a-1000w-2-5k_1726492019_gg.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/636474/Toner-Compat-vel-103a-W1103a-W1103-Neverstop-1200a-1200w-1000a-1000w-2-5k_1726492030_gg.jpg#ilustrativa"
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/636474/Toner-Compat-vel-103a-W1103a-W1103-Neverstop-1200a-1200w-1000a-1000w-2-5k_1726492019_gg.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/636474/Toner-Compat-vel-103a-W1103a-W1103-Neverstop-1200a-1200w-1000a-1000w-2-5k_1726492030_gg.jpg"
    ]
   },
   {
@@ -2490,25 +2342,6 @@
    ]
   },
   {
-   "id": "1656961091942-X5mQX",
-   "name": "Cartucho Compatível HP 662XL Color 10ML",
-   "salePrice": 80,
-   "salePromotionalPrice": null,
-   "category": {
-    "name": "Cartucho Compatível"
-   },
-   "active": true,
-   "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656961091942-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/715109/xlarge/Cartucho-De-Tinta-Compat-vel-Hp-662xl-Color-10ml-Ollix_1752617377.jpg",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/715109/xlarge/Cartucho-De-Tinta-Compat-vel-Hp-662xl-Color-10ml-Ollix_1752617377.jpg",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/715109/xlarge/Cartucho-De-Tinta-Compat-vel-Hp-662xl-Color-10ml-Ollix_1752617378.jpg",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/715109/xlarge/Cartucho-De-Tinta-Compat-vel-Hp-662xl-Color-10ml-Ollix_1752617379.jpg",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/715109/xlarge/Cartucho-De-Tinta-Compat-vel-Hp-662xl-Color-10ml-Ollix_1752617380.jpg"
-   ]
-  },
-  {
    "id": "1656962202065-X5mQX",
    "name": "Toner Compatível Hp CE255X 12.5K Chinamate Plus",
    "salePrice": 65,
@@ -2528,18 +2361,6 @@
    ]
   },
   {
-   "id": "1656962386511-X5mQX",
-   "name": "Cartucho Compatível HP 93 Color 18ML",
-   "salePrice": 40,
-   "salePromotionalPrice": null,
-   "category": {
-    "name": "Cartucho Compatível"
-   },
-   "active": true,
-   "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656962386511-X5mQX"
-  },
-  {
    "id": "1656962410375-X5mQX",
    "name": "Toner Compatível Hp Ce278A 2.1K Evolut",
    "salePrice": 30,
@@ -2557,18 +2378,6 @@
     "https://images.kabum.com.br/produtos/fotos/sync_mirakl/204614/xlarge/Toner-Compat-vel-Evolut-Hp-Ce278a-2-1k-Preto_1786737528.jpg",
     "https://images.kabum.com.br/produtos/fotos/sync_mirakl/204614/xlarge/Toner-Compat-vel-Evolut-Hp-Ce278a-2-1k-Preto_1786737529.jpg"
    ]
-  },
-  {
-   "id": "1656962565271-X5mQX",
-   "name": "Cartucho Compatível HP 92 Preto 18ML",
-   "salePrice": 25,
-   "salePromotionalPrice": null,
-   "category": {
-    "name": "Cartucho Compatível"
-   },
-   "active": true,
-   "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656962565271-X5mQX"
   },
   {
    "id": "1656962883636-X5mQX",
@@ -2652,12 +2461,12 @@
    "active": true,
    "showOnCatalog": true,
    "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656964366576-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/299587/xlarge/Toner-Premium-Quality-Compativel-Com-Hp-Cb540-ce320-210-Preto-Univ-_1787138921.jpg#ilustrativa",
+   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/299587/xlarge/Toner-Premium-Quality-Compativel-Com-Hp-Cb540-ce320-210-Preto-Univ-_1787138921.jpg",
    "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/299587/xlarge/Toner-Premium-Quality-Compativel-Com-Hp-Cb540-ce320-210-Preto-Univ-_1787138921.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/299587/xlarge/Toner-Premium-Quality-Compativel-Com-Hp-Cb540-ce320-210-Preto-Univ-_1787138923.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/299587/xlarge/Toner-Premium-Quality-Compativel-Com-Hp-Cb540-ce320-210-Preto-Univ-_1787138924.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/299587/xlarge/Toner-Premium-Quality-Compativel-Com-Hp-Cb540-ce320-210-Preto-Univ-_1787138925.jpg#ilustrativa"
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/299587/xlarge/Toner-Premium-Quality-Compativel-Com-Hp-Cb540-ce320-210-Preto-Univ-_1787138921.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/299587/xlarge/Toner-Premium-Quality-Compativel-Com-Hp-Cb540-ce320-210-Preto-Univ-_1787138923.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/299587/xlarge/Toner-Premium-Quality-Compativel-Com-Hp-Cb540-ce320-210-Preto-Univ-_1787138924.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/299587/xlarge/Toner-Premium-Quality-Compativel-Com-Hp-Cb540-ce320-210-Preto-Univ-_1787138925.jpg"
    ]
   },
   {
@@ -2690,14 +2499,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656965837974-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/713906/xlarge/Cart-Toner-Comp-C-Cb543a-ce323a-cf213a-Black_1753366183.png#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/713906/xlarge/Cart-Toner-Comp-C-Cb543a-ce323a-cf213a-Black_1753366183.png#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/713906/xlarge/Cart-Toner-Comp-C-Cb543a-ce323a-cf213a-Black_1753366184.png#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/713906/xlarge/Cart-Toner-Comp-C-Cb543a-ce323a-cf213a-Black_1753366186.png#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/713906/xlarge/Cart-Toner-Comp-C-Cb543a-ce323a-cf213a-Black_1753366187.png#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656965837974-X5mQX"
   },
   {
    "id": "1656965958253-X5mQX",
@@ -2715,22 +2517,6 @@
     "https://images.kabum.com.br/produtos/fotos/sync_mirakl/950835/xlarge/Cartucho-Toner-Mono-Hp-Cf217a-Byqualy-1-6k_1762177130.jpg",
     "https://images.kabum.com.br/produtos/fotos/sync_mirakl/950835/xlarge/Cartucho-Toner-Mono-Hp-Cf217a-Byqualy-1-6k_1762177131.jpg",
     "https://images.kabum.com.br/produtos/fotos/sync_mirakl/950835/xlarge/Cartucho-Toner-Mono-Hp-Cf217a-Byqualy-1-6k_1762177132.jpg"
-   ]
-  },
-  {
-   "id": "1656966149433-X5mQX",
-   "name": "Cartucho Compatível HP 75XL Color 18ML",
-   "salePrice": 45,
-   "salePromotionalPrice": null,
-   "category": {
-    "name": "Cartucho Compatível"
-   },
-   "active": true,
-   "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1656966149433-X5mQX",
-   "foto": "https://http2.mlstatic.com/D_NQ_NP_669595-MLB90923896161_082025-O.webp",
-   "fotos": [
-    "https://http2.mlstatic.com/D_NQ_NP_669595-MLB90923896161_082025-O.webp"
    ]
   },
   {
@@ -2929,9 +2715,9 @@
    "active": true,
    "showOnCatalog": true,
    "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657033365085-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1047627/xlarge/Toner-Compat-vel-Hp-Ce411a-305a-M351-M375-M451-M475-Ciano-2-2k_1781018027.jpg#ilustrativa",
+   "foto": "https://americanas.vtexassets.com/arquivos/ids/37614209/Toner-Compativel-HP-CF381A-312A-Ciano.jpg?v=639216160590500000",
    "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1047627/xlarge/Toner-Compat-vel-Hp-Ce411a-305a-M351-M375-M451-M475-Ciano-2-2k_1781018027.jpg#ilustrativa"
+    "https://americanas.vtexassets.com/arquivos/ids/37614209/Toner-Compativel-HP-CF381A-312A-Ciano.jpg?v=639216160590500000"
    ]
   },
   {
@@ -2944,11 +2730,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657034841877-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1047747/xlarge/Toner-Compat-vel-Hp-Ce412a-305a-M351-M375-M451-M475-Amarelo-2-6k_1781025819.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1047747/xlarge/Toner-Compat-vel-Hp-Ce412a-305a-M351-M375-M451-M475-Amarelo-2-6k_1781025819.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657034841877-X5mQX"
   },
   {
    "id": "1657035058199-X5mQX",
@@ -2961,9 +2743,9 @@
    "active": true,
    "showOnCatalog": true,
    "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657035058199-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1047629/xlarge/Toner-Compat-vel-Hp-Cf383a-312a-Magenta_1781018027.jpg#ilustrativa",
+   "foto": "https://americanas.vtexassets.com/arquivos/ids/37614403/Toner-Compativel-HP-CF383A-312A-Magenta.jpg?v=639216160764600000",
    "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1047629/xlarge/Toner-Compat-vel-Hp-Cf383a-312a-Magenta_1781018027.jpg#ilustrativa"
+    "https://americanas.vtexassets.com/arquivos/ids/37614403/Toner-Compativel-HP-CF383A-312A-Magenta.jpg?v=639216160764600000"
    ]
   },
   {
@@ -2976,13 +2758,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657036140205-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/948510/xlarge/Cartucho-Toner-Mono-Brother-B020-021-Evolut-Supreme-2-6k_1784808239.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/948510/xlarge/Cartucho-Toner-Mono-Brother-B020-021-Evolut-Supreme-2-6k_1784808239.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/948510/xlarge/Cartucho-Toner-Mono-Brother-B020-021-Evolut-Supreme-2-6k_1784808240.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/948510/xlarge/Cartucho-Toner-Mono-Brother-B020-021-Evolut-Supreme-2-6k_1784808242.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657036140205-X5mQX"
   },
   {
    "id": "1657036389877-X5mQX",
@@ -2994,13 +2770,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657036389877-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/713650/xlarge/Toner-Compat-vel-Hp-Cf233a-2-3k-M106w-M134a-M134fn-106w_1753389579.png#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/713650/xlarge/Toner-Compat-vel-Hp-Cf233a-2-3k-M106w-M134a-M134fn-106w_1753389579.png#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/713650/xlarge/Toner-Compat-vel-Hp-Cf233a-2-3k-M106w-M134a-M134fn-106w_1753389580.png#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/713650/xlarge/Toner-Compat-vel-Hp-Cf233a-2-3k-M106w-M134a-M134fn-106w_1753389581.png#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657036389877-X5mQX"
   },
   {
    "id": "1657036676412-X5mQX",
@@ -3012,11 +2782,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657036676412-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1047653/xlarge/Toner-Compat-vel-Hp-Cf412x-Amarelo_1781018029.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1047653/xlarge/Toner-Compat-vel-Hp-Cf412x-Amarelo_1781018029.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657036676412-X5mQX"
   },
   {
    "id": "1657037471584-X5mQX",
@@ -3060,11 +2826,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657112001586-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1047633/xlarge/Toner-Compat-vel-Hp-Cf411x-Ciano_1781018027.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1047633/xlarge/Toner-Compat-vel-Hp-Cf411x-Ciano_1781018027.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657112001586-X5mQX"
   },
   {
    "id": "1657112983165-X5mQX",
@@ -3077,12 +2839,13 @@
    "active": true,
    "showOnCatalog": true,
    "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657112983165-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1033252/xlarge/Toner-Cf502a-Amarelo-202a-Compat-vel-M254-M281-Cor-Brilhante-E-timo-Rendimento_1777399417.jpg#ilustrativa",
+   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1033252/xlarge/Toner-Cf502a-Amarelo-202a-Compat-vel-M254-M281-Cor-Brilhante-E-timo-Rendimento_1777399417.jpg",
    "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1033252/xlarge/Toner-Cf502a-Amarelo-202a-Compat-vel-M254-M281-Cor-Brilhante-E-timo-Rendimento_1777399417.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1033252/xlarge/Toner-Cf502a-Amarelo-202a-Compat-vel-M254-M281-Cor-Brilhante-E-timo-Rendimento_1777399419.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1033252/xlarge/Toner-Cf502a-Amarelo-202a-Compat-vel-M254-M281-Cor-Brilhante-E-timo-Rendimento_1777399420.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1033252/xlarge/Toner-Cf502a-Amarelo-202a-Compat-vel-M254-M281-Cor-Brilhante-E-timo-Rendimento_1777399421.jpg#ilustrativa"
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1033252/xlarge/Toner-Cf502a-Amarelo-202a-Compat-vel-M254-M281-Cor-Brilhante-E-timo-Rendimento_1777399417.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1033252/xlarge/Toner-Cf502a-Amarelo-202a-Compat-vel-M254-M281-Cor-Brilhante-E-timo-Rendimento_1777399419.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1033252/xlarge/Toner-Cf502a-Amarelo-202a-Compat-vel-M254-M281-Cor-Brilhante-E-timo-Rendimento_1777399420.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1033252/xlarge/Toner-Cf502a-Amarelo-202a-Compat-vel-M254-M281-Cor-Brilhante-E-timo-Rendimento_1777399421.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1033252/xlarge/Toner-Cf502a-Amarelo-202a-Compat-vel-M254-M281-Cor-Brilhante-E-timo-Rendimento_1777399422.jpg"
    ]
   },
   {
@@ -3095,14 +2858,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657204898208-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/573441/xlarge/Suporte-Para-4-Monitores-Vertical-17-32-Smq440c_1787277224.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/573441/xlarge/Suporte-Para-4-Monitores-Vertical-17-32-Smq440c_1787277224.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/573441/xlarge/Suporte-Para-4-Monitores-Vertical-17-32-Smq440c_1787277225.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/573441/xlarge/Suporte-Para-4-Monitores-Vertical-17-32-Smq440c_1787277226.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/573441/xlarge/Suporte-Para-4-Monitores-Vertical-17-32-Smq440c_1787277227.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657204898208-X5mQX"
   },
   {
    "id": "1657208875452-X5mQX",
@@ -3217,15 +2973,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657285738377-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/906696/xlarge/Toner-Compat-vel-Samsung-Mlt-d103l-D103l-2950-2955-4705-4727-4728-4729-2-5k_1770929390.png",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/906696/xlarge/Toner-Compat-vel-Samsung-Mlt-d103l-D103l-2950-2955-4705-4727-4728-4729-2-5k_1770929390.png",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/906696/xlarge/Toner-Compat-vel-Samsung-Mlt-d103l-D103l-2950-2955-4705-4727-4728-4729-2-5k_1770929391.png",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/906696/xlarge/Toner-Compat-vel-Samsung-Mlt-d103l-D103l-2950-2955-4705-4727-4728-4729-2-5k_1770929392.png",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/906696/xlarge/Toner-Compat-vel-Samsung-Mlt-d103l-D103l-2950-2955-4705-4727-4728-4729-2-5k_1770929394.png",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/906696/xlarge/Toner-Compat-vel-Samsung-Mlt-d103l-D103l-2950-2955-4705-4727-4728-4729-2-5k_1770929395.png"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657285738377-X5mQX"
   },
   {
    "id": "1657286306099-X5mQX",
@@ -3237,14 +2985,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657286306099-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/542541/xlarge/Toner-Samsung-Scx-3200-Mlt-d104-Compat-vel-1-5k_1764872690.jpg",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/542541/xlarge/Toner-Samsung-Scx-3200-Mlt-d104-Compat-vel-1-5k_1764872690.jpg",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/542541/xlarge/Toner-Samsung-Scx-3200-Mlt-d104-Compat-vel-1-5k_1764872692.jpg",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/542541/xlarge/Toner-Samsung-Scx-3200-Mlt-d104-Compat-vel-1-5k_1764872693.jpg",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/542541/xlarge/Toner-Samsung-Scx-3200-Mlt-d104-Compat-vel-1-5k_1764872694.jpg"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657286306099-X5mQX"
   },
   {
    "id": "1657286986550-X5mQX",
@@ -3275,13 +3016,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657288131646-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/882846/xlarge/Toner-Compat-vel-Samsung-Mlt-d111s-Scx-2060-1k-Evolut-D111_1787173122.jpg",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/882846/xlarge/Toner-Compat-vel-Samsung-Mlt-d111s-Scx-2060-1k-Evolut-D111_1787173122.jpg",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/882846/xlarge/Toner-Compat-vel-Samsung-Mlt-d111s-Scx-2060-1k-Evolut-D111_1787173123.jpg",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/882846/xlarge/Toner-Compat-vel-Samsung-Mlt-d111s-Scx-2060-1k-Evolut-D111_1787173124.jpg"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657288131646-X5mQX"
   },
   {
    "id": "1657288933882-X5mQX",
@@ -3293,13 +3028,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657288933882-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1026720/xlarge/Toner-Evolut-Compat-vel-Samsung-Mlt-d116l-3k-D116l_1787166699.jpg",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1026720/xlarge/Toner-Evolut-Compat-vel-Samsung-Mlt-d116l-3k-D116l_1787166699.jpg",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1026720/xlarge/Toner-Evolut-Compat-vel-Samsung-Mlt-d116l-3k-D116l_1787166701.jpg",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1026720/xlarge/Toner-Evolut-Compat-vel-Samsung-Mlt-d116l-3k-D116l_1787166702.jpg"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657288933882-X5mQX"
   },
   {
    "id": "1657289233514-X5mQX",
@@ -3311,13 +3040,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657289233514-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/950836/xlarge/Cartucho-Toner-Mono-Samsung-D203u-Byqualy-15k_1762177133.jpg",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/950836/xlarge/Cartucho-Toner-Mono-Samsung-D203u-Byqualy-15k_1762177133.jpg",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/950836/xlarge/Cartucho-Toner-Mono-Samsung-D203u-Byqualy-15k_1762177134.jpg",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/950836/xlarge/Cartucho-Toner-Mono-Samsung-D203u-Byqualy-15k_1762177135.jpg"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657289233514-X5mQX"
   },
   {
    "id": "1657547193843-X5mQX",
@@ -3329,14 +3052,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657547193843-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/949864/xlarge/Mouse-Para-Computador-Preto-E-Roxo-Conexao-Usb-Usb-c-Ms969wb-X-V-K-S-Gaming-Mouse-Havit_1770751414.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/949864/xlarge/Mouse-Para-Computador-Preto-E-Roxo-Conexao-Usb-Usb-c-Ms969wb-X-V-K-S-Gaming-Mouse-Havit_1770751414.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/949864/xlarge/Mouse-Para-Computador-Preto-E-Roxo-Conexao-Usb-Usb-c-Ms969wb-X-V-K-S-Gaming-Mouse-Havit_1770751416.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/949864/xlarge/Mouse-Para-Computador-Preto-E-Roxo-Conexao-Usb-Usb-c-Ms969wb-X-V-K-S-Gaming-Mouse-Havit_1770751417.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/949864/xlarge/Mouse-Para-Computador-Preto-E-Roxo-Conexao-Usb-Usb-c-Ms969wb-X-V-K-S-Gaming-Mouse-Havit_1770751418.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657547193843-X5mQX"
   },
   {
    "id": "1657547757492-X5mQX",
@@ -3402,11 +3118,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657716122094-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1046351/xlarge/Toner-Compat-vel-Com-Samsung-D204-Mlt-d204u_1780500521.jpg",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1046351/xlarge/Toner-Compat-vel-Com-Samsung-D204-Mlt-d204u_1780500521.jpg"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657716122094-X5mQX"
   },
   {
    "id": "1657716460013-X5mQX",
@@ -3418,11 +3130,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657716460013-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/886854/xlarge/Toner-Compat-vel-Com-Samsung-Mlt-d205-Mlt-d205e-ml3310-Ml3710-Scx5637-Ml3712-Scx4833-10k-Evolut_1770929390.jpg",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/886854/xlarge/Toner-Compat-vel-Com-Samsung-Mlt-d205-Mlt-d205e-ml3310-Ml3710-Scx5637-Ml3712-Scx4833-10k-Evolut_1770929390.jpg"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657716460013-X5mQX"
   },
   {
    "id": "1657716700168-X5mQX",
@@ -3434,14 +3142,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657716700168-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/540894/xlarge/Toner-Compat-vel-Samsung-Mlt-d204-D204-D204l-5k-M4025nd-M3325nd-M3375fd-M3875-M4075_1772047722.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/540894/xlarge/Toner-Compat-vel-Samsung-Mlt-d204-D204-D204l-5k-M4025nd-M3325nd-M3375fd-M3875-M4075_1772047722.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/540894/xlarge/Toner-Compat-vel-Samsung-Mlt-d204-D204-D204l-5k-M4025nd-M3325nd-M3375fd-M3875-M4075_1772047723.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/540894/xlarge/Toner-Compat-vel-Samsung-Mlt-d204-D204-D204l-5k-M4025nd-M3325nd-M3375fd-M3875-M4075_1772047725.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/540894/xlarge/Toner-Compat-vel-Samsung-Mlt-d204-D204-D204l-5k-M4025nd-M3325nd-M3375fd-M3875-M4075_1772047726.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1657716700168-X5mQX"
   },
   {
    "id": "1659101928607-X5mQX",
@@ -3805,14 +3506,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1659123234364-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/695209/xlarge/Fonte-Carregador-Para-Hp-Compaq-2230s-Notebook-PC-18-5v-3-5a-65w-713_1790001222.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/695209/xlarge/Fonte-Carregador-Para-Hp-Compaq-2230s-Notebook-PC-18-5v-3-5a-65w-713_1790001222.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/695209/xlarge/Fonte-Carregador-Para-Hp-Compaq-2230s-Notebook-PC-18-5v-3-5a-65w-713_1790001223.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/695209/xlarge/Fonte-Carregador-Para-Hp-Compaq-2230s-Notebook-PC-18-5v-3-5a-65w-713_1790001224.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/695209/xlarge/Fonte-Carregador-Para-Hp-Compaq-2230s-Notebook-PC-18-5v-3-5a-65w-713_1790001225.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1659123234364-X5mQX"
   },
   {
    "id": "1659619084345-X5mQX",
@@ -3843,12 +3537,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1659619841457-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1003522/xlarge/Fonte-Carregador-Notebook-Lenovo-20v-3-25a-65w-Pino-Quadrado_1770057529.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1003522/xlarge/Fonte-Carregador-Notebook-Lenovo-20v-3-25a-65w-Pino-Quadrado_1770057529.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1003522/xlarge/Fonte-Carregador-Notebook-Lenovo-20v-3-25a-65w-Pino-Quadrado_1770057530.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1659619841457-X5mQX"
   },
   {
    "id": "1659619949002-X5mQX",
@@ -3898,14 +3587,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1659620162874-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/818634/xlarge/Fonte-Carregador-Para-Notebook-Acer-Aspire-3-A315-24p-r611-19v-3-42a-65w-3-0mm-X-1-1mm_1791611016.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/818634/xlarge/Fonte-Carregador-Para-Notebook-Acer-Aspire-3-A315-24p-r611-19v-3-42a-65w-3-0mm-X-1-1mm_1791611016.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/818634/xlarge/Fonte-Carregador-Para-Notebook-Acer-Aspire-3-A315-24p-r611-19v-3-42a-65w-3-0mm-X-1-1mm_1791611017.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/818634/xlarge/Fonte-Carregador-Para-Notebook-Acer-Aspire-3-A315-24p-r611-19v-3-42a-65w-3-0mm-X-1-1mm_1791611018.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/818634/xlarge/Fonte-Carregador-Para-Notebook-Acer-Aspire-3-A315-24p-r611-19v-3-42a-65w-3-0mm-X-1-1mm_1791611019.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1659620162874-X5mQX"
   },
   {
    "id": "1659620251953-X5mQX",
@@ -3935,11 +3617,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1659635578228-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/717177/xlarge/Toner-Para-Hp-7553x-5949x-7k-Evolut_1786132133.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/717177/xlarge/Toner-Para-Hp-7553x-5949x-7k-Evolut_1786132133.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1659635578228-X5mQX"
   },
   {
    "id": "1659637539488-X5mQX",
@@ -4007,14 +3685,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1660243708510-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/magalu/188584/xlarge/Carregador-de-Pilhas-Recarreg-veis-AA-e-AAA_1763599890.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/magalu/188584/xlarge/Carregador-de-Pilhas-Recarreg-veis-AA-e-AAA_1763599890.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/magalu/188584/xlarge/Carregador-de-Pilhas-Recarreg-veis-AA-e-AAA_1763599892.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/magalu/188584/xlarge/Carregador-de-Pilhas-Recarreg-veis-AA-e-AAA_1763599896.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/magalu/188584/xlarge/Carregador-de-Pilhas-Recarreg-veis-AA-e-AAA_1763599898.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1660243708510-X5mQX"
   },
   {
    "id": "1660244512440-X5mQX",
@@ -4119,12 +3790,9 @@
    "active": true,
    "showOnCatalog": true,
    "url": "https://techsupri.kyte.site/pt-BR/p/produto/1660592803989-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/541636/xlarge/Toner-Preto-Compat-vel-Para-Brother-Tn-419-Tn419-Para-Mfc-l8900-L8690-Hl-l8360cdw-L8260cdw-L8360-L9310-L8260-L8610_1775839718.jpg#ilustrativa",
+   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1047893/xlarge/Toner-Brother-Tn-419-Tn419-Hl-l8360cdw-Mfc-l8610-L8900-L9570-Ciano-Compat-vel-9k-Linha-Compat-vel_1781027626.jpg",
    "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/541636/xlarge/Toner-Preto-Compat-vel-Para-Brother-Tn-419-Tn419-Para-Mfc-l8900-L8690-Hl-l8360cdw-L8260cdw-L8360-L9310-L8260-L8610_1775839718.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/541636/xlarge/Toner-Preto-Compat-vel-Para-Brother-Tn-419-Tn419-Para-Mfc-l8900-L8690-Hl-l8360cdw-L8260cdw-L8360-L9310-L8260-L8610_1775839719.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/541636/xlarge/Toner-Preto-Compat-vel-Para-Brother-Tn-419-Tn419-Para-Mfc-l8900-L8690-Hl-l8360cdw-L8260cdw-L8360-L9310-L8260-L8610_1775839720.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/541636/xlarge/Toner-Preto-Compat-vel-Para-Brother-Tn-419-Tn419-Para-Mfc-l8900-L8690-Hl-l8360cdw-L8260cdw-L8360-L9310-L8260-L8610_1775839721.jpg#ilustrativa"
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1047893/xlarge/Toner-Brother-Tn-419-Tn419-Hl-l8360cdw-Mfc-l8610-L8900-L9570-Ciano-Compat-vel-9k-Linha-Compat-vel_1781027626.jpg"
    ]
   },
   {
@@ -4138,12 +3806,13 @@
    "active": true,
    "showOnCatalog": true,
    "url": "https://techsupri.kyte.site/pt-BR/p/produto/1660592924131-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/541636/xlarge/Toner-Preto-Compat-vel-Para-Brother-Tn-419-Tn419-Para-Mfc-l8900-L8690-Hl-l8360cdw-L8260cdw-L8360-L9310-L8260-L8610_1775839718.jpg#ilustrativa",
+   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/541636/xlarge/Toner-Preto-Compat-vel-Para-Brother-Tn-419-Tn419-Para-Mfc-l8900-L8690-Hl-l8360cdw-L8260cdw-L8360-L9310-L8260-L8610_1775839718.jpg",
    "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/541636/xlarge/Toner-Preto-Compat-vel-Para-Brother-Tn-419-Tn419-Para-Mfc-l8900-L8690-Hl-l8360cdw-L8260cdw-L8360-L9310-L8260-L8610_1775839718.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/541636/xlarge/Toner-Preto-Compat-vel-Para-Brother-Tn-419-Tn419-Para-Mfc-l8900-L8690-Hl-l8360cdw-L8260cdw-L8360-L9310-L8260-L8610_1775839719.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/541636/xlarge/Toner-Preto-Compat-vel-Para-Brother-Tn-419-Tn419-Para-Mfc-l8900-L8690-Hl-l8360cdw-L8260cdw-L8360-L9310-L8260-L8610_1775839720.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/541636/xlarge/Toner-Preto-Compat-vel-Para-Brother-Tn-419-Tn419-Para-Mfc-l8900-L8690-Hl-l8360cdw-L8260cdw-L8360-L9310-L8260-L8610_1775839721.jpg#ilustrativa"
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/541636/xlarge/Toner-Preto-Compat-vel-Para-Brother-Tn-419-Tn419-Para-Mfc-l8900-L8690-Hl-l8360cdw-L8260cdw-L8360-L9310-L8260-L8610_1775839718.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/541636/xlarge/Toner-Preto-Compat-vel-Para-Brother-Tn-419-Tn419-Para-Mfc-l8900-L8690-Hl-l8360cdw-L8260cdw-L8360-L9310-L8260-L8610_1775839719.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/541636/xlarge/Toner-Preto-Compat-vel-Para-Brother-Tn-419-Tn419-Para-Mfc-l8900-L8690-Hl-l8360cdw-L8260cdw-L8360-L9310-L8260-L8610_1775839720.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/541636/xlarge/Toner-Preto-Compat-vel-Para-Brother-Tn-419-Tn419-Para-Mfc-l8900-L8690-Hl-l8360cdw-L8260cdw-L8360-L9310-L8260-L8610_1775839721.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/541636/xlarge/Toner-Preto-Compat-vel-Para-Brother-Tn-419-Tn419-Para-Mfc-l8900-L8690-Hl-l8360cdw-L8260cdw-L8360-L9310-L8260-L8610_1775839722.jpg"
    ]
   },
   {
@@ -4157,12 +3826,13 @@
    "active": true,
    "showOnCatalog": true,
    "url": "https://techsupri.kyte.site/pt-BR/p/produto/1660593002549-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/541636/xlarge/Toner-Preto-Compat-vel-Para-Brother-Tn-419-Tn419-Para-Mfc-l8900-L8690-Hl-l8360cdw-L8260cdw-L8360-L9310-L8260-L8610_1775839718.jpg#ilustrativa",
+   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/540793/xlarge/Toner-Magenta-Compat-vel-Para-Brother-Tn-419-Tn419-Para-Mfc-l9570cdw-Mfc-l8900cdw-L8610cdw-Hl-l8360cdw-Dcp-l8410_1775839716.jpg",
    "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/541636/xlarge/Toner-Preto-Compat-vel-Para-Brother-Tn-419-Tn419-Para-Mfc-l8900-L8690-Hl-l8360cdw-L8260cdw-L8360-L9310-L8260-L8610_1775839718.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/541636/xlarge/Toner-Preto-Compat-vel-Para-Brother-Tn-419-Tn419-Para-Mfc-l8900-L8690-Hl-l8360cdw-L8260cdw-L8360-L9310-L8260-L8610_1775839719.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/541636/xlarge/Toner-Preto-Compat-vel-Para-Brother-Tn-419-Tn419-Para-Mfc-l8900-L8690-Hl-l8360cdw-L8260cdw-L8360-L9310-L8260-L8610_1775839720.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/541636/xlarge/Toner-Preto-Compat-vel-Para-Brother-Tn-419-Tn419-Para-Mfc-l8900-L8690-Hl-l8360cdw-L8260cdw-L8360-L9310-L8260-L8610_1775839721.jpg#ilustrativa"
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/540793/xlarge/Toner-Magenta-Compat-vel-Para-Brother-Tn-419-Tn419-Para-Mfc-l9570cdw-Mfc-l8900cdw-L8610cdw-Hl-l8360cdw-Dcp-l8410_1775839716.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/540793/xlarge/Toner-Magenta-Compat-vel-Para-Brother-Tn-419-Tn419-Para-Mfc-l9570cdw-Mfc-l8900cdw-L8610cdw-Hl-l8360cdw-Dcp-l8410_1775839717.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/540793/xlarge/Toner-Magenta-Compat-vel-Para-Brother-Tn-419-Tn419-Para-Mfc-l9570cdw-Mfc-l8900cdw-L8610cdw-Hl-l8360cdw-Dcp-l8410_1775839718.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/540793/xlarge/Toner-Magenta-Compat-vel-Para-Brother-Tn-419-Tn419-Para-Mfc-l9570cdw-Mfc-l8900cdw-L8610cdw-Hl-l8360cdw-Dcp-l8410_1775839720.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/540793/xlarge/Toner-Magenta-Compat-vel-Para-Brother-Tn-419-Tn419-Para-Mfc-l9570cdw-Mfc-l8900cdw-L8610cdw-Hl-l8360cdw-Dcp-l8410_1775839721.jpg"
    ]
   },
   {
@@ -4208,13 +3878,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1660596080135-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1039755/xlarge/Cartucho-Toner-Mono-Hp-Q2612a-Byqualy-2k_1779201554.jpg",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1039755/xlarge/Cartucho-Toner-Mono-Hp-Q2612a-Byqualy-2k_1779201554.jpg",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1039755/xlarge/Cartucho-Toner-Mono-Hp-Q2612a-Byqualy-2k_1779201555.jpg",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1039755/xlarge/Cartucho-Toner-Mono-Hp-Q2612a-Byqualy-2k_1779201556.jpg"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1660596080135-X5mQX"
   },
   {
    "id": "1660653078153-X5mQX",
@@ -4242,14 +3906,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1660653466943-X5mQX",
-   "foto": "https://americanas.vtexassets.com/arquivos/ids/37538690/7891150084162_0.jpg?v=639166324052230000#ilustrativa",
-   "fotos": [
-    "https://americanas.vtexassets.com/arquivos/ids/37538690/7891150084162_0.jpg?v=639166324052230000#ilustrativa",
-    "https://americanas.vtexassets.com/arquivos/ids/37538691/7891150084162_2.jpg?v=639166324052400000#ilustrativa",
-    "https://americanas.vtexassets.com/arquivos/ids/37538692/7891150084162_3.jpg?v=639166324052400000#ilustrativa",
-    "https://americanas.vtexassets.com/arquivos/ids/37538693/7891150084162_4.jpg?v=639166324052530000#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1660653466943-X5mQX"
   },
   {
    "id": "1660653661566-X5mQX",
@@ -4277,11 +3934,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1660653992079-X5mQX",
-   "foto": "https://americanas.vtexassets.com/arquivos/ids/37338882/AZULIMLIMPAVIDROS500ML.png?v=639092700112830000#ilustrativa",
-   "fotos": [
-    "https://americanas.vtexassets.com/arquivos/ids/37338882/AZULIMLIMPAVIDROS500ML.png?v=639092700112830000#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1660653992079-X5mQX"
   },
   {
    "id": "1660654232861-X5mQX",
@@ -4397,14 +4050,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1660672385422-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/989639/mouse-logitech-mx-master-3s-bluetooth-edition-conexao-por-bluetooth-rolagem-ultra-rapida-8k-dpi-clique-silencioso-grafite-910-007502_1780940137_original.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/989639/mouse-logitech-mx-master-3s-bluetooth-edition-conexao-por-bluetooth-rolagem-ultra-rapida-8k-dpi-clique-silencioso-grafite-910-007502_1780940137_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/989639/mouse-logitech-mx-master-3s-bluetooth-edition-conexao-por-bluetooth-rolagem-ultra-rapida-8k-dpi-clique-silencioso-grafite-910-007502_1780940144_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/989639/mouse-logitech-mx-master-3s-bluetooth-edition-conexao-por-bluetooth-rolagem-ultra-rapida-8k-dpi-clique-silencioso-grafite-910-007502_1780940145_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/989639/mouse-logitech-mx-master-3s-bluetooth-edition-conexao-por-bluetooth-rolagem-ultra-rapida-8k-dpi-clique-silencioso-grafite-910-007502_1780940136_original.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1660672385422-X5mQX"
   },
   {
    "id": "1660672905070-X5mQX",
@@ -4474,14 +4120,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1660742027229-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/639954/Adaptador-Vesa-Monitor-Lg-All-in-One-Sem-Fura-o-Vesa-22v280-24v570-24v50n_1727127906_gg.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/639954/Adaptador-Vesa-Monitor-Lg-All-in-One-Sem-Fura-o-Vesa-22v280-24v570-24v50n_1727127906_gg.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/639954/Adaptador-Vesa-Monitor-Lg-All-in-One-Sem-Fura-o-Vesa-22v280-24v570-24v50n_1727127918_gg.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/639954/Adaptador-Vesa-Monitor-Lg-All-in-One-Sem-Fura-o-Vesa-22v280-24v570-24v50n_1727127931_gg.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/639954/Adaptador-Vesa-Monitor-Lg-All-in-One-Sem-Fura-o-Vesa-22v280-24v570-24v50n_1727127943_gg.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1660742027229-X5mQX"
   },
   {
    "id": "1660744924879-X5mQX",
@@ -4646,13 +4285,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1660913245355-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/512590/xlarge/Case-Gaveta-Ugreen-USB-3-0-Para-Hd-Externo-2-5-Preto_1788891818.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/512590/xlarge/Case-Gaveta-Ugreen-USB-3-0-Para-Hd-Externo-2-5-Preto_1788891818.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/512590/xlarge/Case-Gaveta-Ugreen-USB-3-0-Para-Hd-Externo-2-5-Preto_1788891819.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/512590/xlarge/Case-Gaveta-Ugreen-USB-3-0-Para-Hd-Externo-2-5-Preto_1788891821.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1660913245355-X5mQX"
   },
   {
    "id": "1660926677656-X5mQX",
@@ -4927,42 +4560,6 @@
    ]
   },
   {
-   "id": "1663348051217-X5mQX",
-   "name": "Cartucho Compatível Epson 2962 Azul 13ml",
-   "salePrice": 15,
-   "salePromotionalPrice": null,
-   "category": {
-    "name": "Cartucho Compatível"
-   },
-   "active": true,
-   "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1663348051217-X5mQX"
-  },
-  {
-   "id": "1663353819857-X5mQX",
-   "name": "Cartucho Compatível Epson 2964 Amarelo 13ml",
-   "salePrice": 15,
-   "salePromotionalPrice": null,
-   "category": {
-    "name": "Cartucho Compatível"
-   },
-   "active": true,
-   "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1663353819857-X5mQX"
-  },
-  {
-   "id": "1663353942469-X5mQX",
-   "name": "Cartucho Compatível Epson 2963 Magenta 13ml",
-   "salePrice": 15,
-   "salePromotionalPrice": null,
-   "category": {
-    "name": "Cartucho Compatível"
-   },
-   "active": true,
-   "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1663353942469-X5mQX"
-  },
-  {
    "id": "1663361421499-X5mQX",
    "name": "Jogo De Chaves 31 Em 1 Weed",
    "salePrice": 10,
@@ -4972,13 +4569,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1663361421499-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/943085/xlarge/Jogo-Snk-Vs-capcom-Svc-Chaos-Ps4-Americano_1775493350.png#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/943085/xlarge/Jogo-Snk-Vs-capcom-Svc-Chaos-Ps4-Americano_1775493350.png#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/943085/xlarge/Jogo-Snk-Vs-capcom-Svc-Chaos-Ps4-Americano_1775493351.png#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/943085/xlarge/Jogo-Snk-Vs-capcom-Svc-Chaos-Ps4-Americano_1775493353.png#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1663361421499-X5mQX"
   },
   {
    "id": "1663361699946-X5mQX",
@@ -5029,12 +4620,13 @@
    "active": true,
    "showOnCatalog": true,
    "url": "https://techsupri.kyte.site/pt-BR/p/produto/1663619227063-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/186799/xlarge/Cartucho-De-Tinta-Epson-Preto-194-T194120-br_1766093623.jpg#ilustrativa",
+   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/186799/xlarge/Cartucho-De-Tinta-Epson-Preto-194-T194120-br_1766093623.jpg",
    "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/186799/xlarge/Cartucho-De-Tinta-Epson-Preto-194-T194120-br_1766093623.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/186799/xlarge/Cartucho-De-Tinta-Epson-Preto-194-T194120-br_1766093625.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/186799/xlarge/Cartucho-De-Tinta-Epson-Preto-194-T194120-br_1766093626.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/186799/xlarge/Cartucho-De-Tinta-Epson-Preto-194-T194120-br_1766093627.jpg#ilustrativa"
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/186799/xlarge/Cartucho-De-Tinta-Epson-Preto-194-T194120-br_1766093623.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/186799/xlarge/Cartucho-De-Tinta-Epson-Preto-194-T194120-br_1766093625.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/186799/xlarge/Cartucho-De-Tinta-Epson-Preto-194-T194120-br_1766093626.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/186799/xlarge/Cartucho-De-Tinta-Epson-Preto-194-T194120-br_1766093627.jpg",
+    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/186799/xlarge/Cartucho-De-Tinta-Epson-Preto-194-T194120-br_1766093628.jpg"
    ]
   },
   {
@@ -5120,14 +4712,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1664041944677-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/466046/xlarge/C-mera-Inteligente-WIFI-Intelbras-Im5-Sc-FULL-HD-Externa-Preta-4590006_1790828617.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/466046/xlarge/C-mera-Inteligente-WIFI-Intelbras-Im5-Sc-FULL-HD-Externa-Preta-4590006_1790828617.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/466046/xlarge/C-mera-Inteligente-WIFI-Intelbras-Im5-Sc-FULL-HD-Externa-Preta-4590006_1790828618.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/466046/xlarge/C-mera-Inteligente-WIFI-Intelbras-Im5-Sc-FULL-HD-Externa-Preta-4590006_1790828619.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/466046/xlarge/C-mera-Inteligente-WIFI-Intelbras-Im5-Sc-FULL-HD-Externa-Preta-4590006_1790828620.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1664041944677-X5mQX"
   },
   {
    "id": "1664042109353-X5mQX",
@@ -5197,14 +4782,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1666030603631-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/387502/xlarge/Bateria-12v-23a-Panasonic-Alkaline-un-_1749851094.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/387502/xlarge/Bateria-12v-23a-Panasonic-Alkaline-un-_1749851094.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/387502/xlarge/Bateria-12v-23a-Panasonic-Alkaline-un-_1749851095.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/387502/xlarge/Bateria-12v-23a-Panasonic-Alkaline-un-_1749851096.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/387502/xlarge/Bateria-12v-23a-Panasonic-Alkaline-un-_1749851097.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1666030603631-X5mQX"
   },
   {
    "id": "1667046587946-X5mQX",
@@ -5290,15 +4868,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1667047692784-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/535435/Toner-Lexmark-X463x11g-P-Uso-X463-X464-E260-E360-E460-15k_1710766724_gg.jpg",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/535435/Toner-Lexmark-X463x11g-P-Uso-X463-X464-E260-E360-E460-15k_1710766724_gg.jpg",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/535435/Toner-Lexmark-X463x11g-P-Uso-X463-X464-E260-E360-E460-15k_1710766746_gg.jpg",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/535435/Toner-Lexmark-X463x11g-P-Uso-X463-X464-E260-E360-E460-15k_1710766768_gg.jpg",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/535435/Toner-Lexmark-X463x11g-P-Uso-X463-X464-E260-E360-E460-15k_1710766785_gg.jpg",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/535435/Toner-Lexmark-X463x11g-P-Uso-X463-X464-E260-E360-E460-15k_1710766799_gg.jpg"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1667047692784-X5mQX"
   },
   {
    "id": "1667911552089-X5mQX",
@@ -5872,138 +5442,6 @@
    ]
   },
   {
-   "id": "1677090605548-X5mQX",
-   "name": "Cartucho Compatível Epson TO90 Preto 15ML",
-   "salePrice": 10,
-   "salePromotionalPrice": null,
-   "category": {
-    "name": "Cartucho Compatível"
-   },
-   "active": true,
-   "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1677090605548-X5mQX"
-  },
-  {
-   "id": "1677090783134-X5mQX",
-   "name": "Cartucho Compatível Epson T117 Preto 13,5ML",
-   "salePrice": 10,
-   "salePromotionalPrice": null,
-   "category": {
-    "name": "Cartucho Compatível"
-   },
-   "active": true,
-   "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1677090783134-X5mQX"
-  },
-  {
-   "id": "1677090937505-X5mQX",
-   "name": "Cartucho Compatível Epson TO731N Preto 14,5ML",
-   "salePrice": 10,
-   "salePromotionalPrice": null,
-   "category": {
-    "name": "Cartucho Compatível"
-   },
-   "active": true,
-   "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1677090937505-X5mQX"
-  },
-  {
-   "id": "1677091055314-X5mQX",
-   "name": "Cartucho Compatível Epson TO732N Azul 13,5ML",
-   "salePrice": 10,
-   "salePromotionalPrice": null,
-   "category": {
-    "name": "Cartucho Compatível"
-   },
-   "active": true,
-   "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1677091055314-X5mQX"
-  },
-  {
-   "id": "1677091197883-X5mQX",
-   "name": "Cartucho Compatível Epson T0733N Magenta 13,5ML",
-   "salePrice": 10,
-   "salePromotionalPrice": null,
-   "category": {
-    "name": "Cartucho Compatível"
-   },
-   "active": true,
-   "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1677091197883-X5mQX"
-  },
-  {
-   "id": "1677091305579-X5mQX",
-   "name": "Cartucho Compatível Epson TO73N Amarelo 13,5ML",
-   "salePrice": 12,
-   "salePromotionalPrice": null,
-   "category": {
-    "name": "Cartucho Compatível"
-   },
-   "active": true,
-   "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1677091305579-X5mQX"
-  },
-  {
-   "id": "1677091395981-X5mQX",
-   "name": "Cartucho Compatível Epson E1331 Preto 14,5ML",
-   "salePrice": 10,
-   "salePromotionalPrice": null,
-   "category": {
-    "name": "Cartucho Compatível"
-   },
-   "active": true,
-   "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1677091395981-X5mQX"
-  },
-  {
-   "id": "1677091536966-X5mQX",
-   "name": "Cartucho Compatível Epson T1332 Epson Azul 11,5ML",
-   "salePrice": 10,
-   "salePromotionalPrice": null,
-   "category": {
-    "name": "Cartucho Compatível"
-   },
-   "active": true,
-   "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1677091536966-X5mQX"
-  },
-  {
-   "id": "1677091649642-X5mQX",
-   "name": "Cartucho Compatível Epson T1333 Magenta 11,5ML",
-   "salePrice": 10,
-   "salePromotionalPrice": null,
-   "category": {
-    "name": "Cartucho Compatível"
-   },
-   "active": true,
-   "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1677091649642-X5mQX"
-  },
-  {
-   "id": "1677091840205-X5mQX",
-   "name": "Cartucho Compatível Epson T1334 Amarelo 11,5ML",
-   "salePrice": 10,
-   "salePromotionalPrice": null,
-   "category": {
-    "name": "Cartucho Compatível"
-   },
-   "active": true,
-   "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1677091840205-X5mQX"
-  },
-  {
-   "id": "1677092109925-X5mQX",
-   "name": "Cartucho Compatível Epson T1351 Preto 14,5ML",
-   "salePrice": 10,
-   "salePromotionalPrice": null,
-   "category": {
-    "name": "Cartucho Compatível"
-   },
-   "active": true,
-   "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1677092109925-X5mQX"
-  },
-  {
    "id": "1677163514984-X5mQX",
    "name": "Toner Evolut Compatível Brother TNB020/B021/B022/B023 Preto 2.6K",
    "salePrice": 20,
@@ -6013,14 +5451,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1677163514984-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/713658/xlarge/Toner-Compat-vel-Brother-Tn-b021-Tnb021-B7520dw-B7535dw-B7530-2-6k_1753134883.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/713658/xlarge/Toner-Compat-vel-Brother-Tn-b021-Tnb021-B7520dw-B7535dw-B7530-2-6k_1753134883.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/713658/xlarge/Toner-Compat-vel-Brother-Tn-b021-Tnb021-B7520dw-B7535dw-B7530-2-6k_1753134884.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/713658/xlarge/Toner-Compat-vel-Brother-Tn-b021-Tnb021-B7520dw-B7535dw-B7530-2-6k_1753134885.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/713658/xlarge/Toner-Compat-vel-Brother-Tn-b021-Tnb021-B7520dw-B7535dw-B7530-2-6k_1753134886.png#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1677163514984-X5mQX"
   },
   {
    "id": "1677269779153-X5mQX",
@@ -6417,14 +5848,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1685629137018-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/677686/xlarge/Memory-Card-128-Mb-Para-Playstation-2-Ps2-Play-2-Sony_1767962628.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/677686/xlarge/Memory-Card-128-Mb-Para-Playstation-2-Ps2-Play-2-Sony_1767962628.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/677686/xlarge/Memory-Card-128-Mb-Para-Playstation-2-Ps2-Play-2-Sony_1767962629.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/677686/xlarge/Memory-Card-128-Mb-Para-Playstation-2-Ps2-Play-2-Sony_1767962630.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/677686/xlarge/Memory-Card-128-Mb-Para-Playstation-2-Ps2-Play-2-Sony_1767962631.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1685629137018-X5mQX"
   },
   {
    "id": "1686066116416-X5mQX",
@@ -6549,13 +5973,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1688059340717-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/887133/xlarge/Toner-Compat-vel-Com-Hp-Cf230x-30x-3-5k-Evolut_1770929386.jpg",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/887133/xlarge/Toner-Compat-vel-Com-Hp-Cf230x-30x-3-5k-Evolut_1770929386.jpg",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/887133/xlarge/Toner-Compat-vel-Com-Hp-Cf230x-30x-3-5k-Evolut_1770929388.jpg",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/887133/xlarge/Toner-Compat-vel-Com-Hp-Cf230x-30x-3-5k-Evolut_1770929389.jpg"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1688059340717-X5mQX"
   },
   {
    "id": "1688395338564-X5mQX",
@@ -7754,11 +7172,12 @@
    "active": true,
    "showOnCatalog": true,
    "url": "https://techsupri.kyte.site/pt-BR/p/produto/1712587892960-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1065928/xlarge/Refil-Tinta-Compat-Epson-544-504-Preto-70ml_1787767444.jpg",
+   "foto": "https://americanas.vtexassets.com/arquivos/ids/37018822/image-d4ce50429fac4413b3c18eefbd2c0fee.jpg?v=638997082115770000",
    "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1065928/xlarge/Refil-Tinta-Compat-Epson-544-504-Preto-70ml_1787767444.jpg",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1065928/xlarge/Refil-Tinta-Compat-Epson-544-504-Preto-70ml_1787767445.png",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1065928/xlarge/Refil-Tinta-Compat-Epson-544-504-Preto-70ml_1787767446.png"
+    "https://americanas.vtexassets.com/arquivos/ids/37018822/image-d4ce50429fac4413b3c18eefbd2c0fee.jpg?v=638997082115770000",
+    "https://americanas.vtexassets.com/arquivos/ids/37018819/image-f645d09d5737495988d7f78b7eaab0a6.jpg?v=638997082114700000",
+    "https://americanas.vtexassets.com/arquivos/ids/37018820/image-ccdb9ec949ea4379a108ea96700c7408.jpg?v=638997082114700000",
+    "https://americanas.vtexassets.com/arquivos/ids/37018821/image-123de7821d5648fa97942837e7514c79.jpg?v=638997082114830000"
    ]
   },
   {
@@ -7790,14 +7209,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1713275358680-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/904345/mouse-gamer-sem-fio-attack-shark-x11-com-dock-black_1767892101_original.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/904345/mouse-gamer-sem-fio-attack-shark-x11-com-dock-black_1767892101_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/904345/mouse-gamer-sem-fio-attack-shark-x11-com-dock-black_1767892100_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/904345/mouse-gamer-sem-fio-attack-shark-x11-com-base-de-carregamento-magnetico-rgb-tri-mode-22-000-dpi-sensor-optico-paw3311-5-botoes-preto_1767968868_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/904345/mouse-gamer-sem-fio-attack-shark-x11-com-base-de-carregamento-magnetico-rgb-tri-mode-22-000-dpi-sensor-optico-paw3311-5-botoes-preto_1767968869_original.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1713275358680-X5mQX"
   },
   {
    "id": "1713287219966-X5mQX",
@@ -8074,14 +7486,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1724239946117-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1045634/xlarge/Fonte-Carregador-Para-Notebook-Acer-Aspire-Go-15-Ag15-51p-55c8-5v-12v-15v-20v-3a-3-25a-65w-Usb-c_1791515923.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1045634/xlarge/Fonte-Carregador-Para-Notebook-Acer-Aspire-Go-15-Ag15-51p-55c8-5v-12v-15v-20v-3a-3-25a-65w-Usb-c_1791515923.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1045634/xlarge/Fonte-Carregador-Para-Notebook-Acer-Aspire-Go-15-Ag15-51p-55c8-5v-12v-15v-20v-3a-3-25a-65w-Usb-c_1791515924.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1045634/xlarge/Fonte-Carregador-Para-Notebook-Acer-Aspire-Go-15-Ag15-51p-55c8-5v-12v-15v-20v-3a-3-25a-65w-Usb-c_1791515925.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1045634/xlarge/Fonte-Carregador-Para-Notebook-Acer-Aspire-Go-15-Ag15-51p-55c8-5v-12v-15v-20v-3a-3-25a-65w-Usb-c_1791515926.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1724239946117-X5mQX"
   },
   {
    "id": "1724240161497-X5mQX",
@@ -8130,11 +7535,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1724240931516-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/80284/80284_index_gg.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/80284/80284_index_gg.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1724240931516-X5mQX"
   },
   {
    "id": "1724354547682-X5mQX",
@@ -8184,14 +7585,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1725471073238-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/394597/xlarge/Cabo-USB-Tipo-C-Ugreen-1m-Preto-Macho-60W-Premium_1787837622.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/394597/xlarge/Cabo-USB-Tipo-C-Ugreen-1m-Preto-Macho-60W-Premium_1787837622.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/394597/xlarge/Cabo-USB-Tipo-C-Ugreen-1m-Preto-Macho-60W-Premium_1787837623.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/394597/xlarge/Cabo-USB-Tipo-C-Ugreen-1m-Preto-Macho-60W-Premium_1787837624.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/394597/xlarge/Cabo-USB-Tipo-C-Ugreen-1m-Preto-Macho-60W-Premium_1787837625.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1725471073238-X5mQX"
   },
   {
    "id": "1725471425656-X5mQX",
@@ -8563,14 +7957,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1733844475501-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/109901/headset-gamer-hp-h320-led-drivers-50mm-8aa13aauuf_1773077937_original.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/109901/headset-gamer-hp-h320-led-drivers-50mm-8aa13aauuf_1773077937_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/109901/headset-gamer-hp-h320-led-drivers-50mm-8aa13aauuf_1773077938_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/109901/headset-gamer-hp-h320-led-drivers-50mm-8aa13aauuf_1773077943_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/109901/headset-gamer-hp-h320-led-drivers-50mm-8aa13aauuf_1773077945_original.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1733844475501-X5mQX"
   },
   {
    "id": "1733844626631-X5mQX",
@@ -8600,14 +7987,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1733845740495-X5mQX",
-   "foto": "https://americanas.vtexassets.com/arquivos/ids/37496764/Mouse-Pad-Desk-Mat-Logitech-Studio-Series---Cinza.jpg?v=639148028824300000#ilustrativa",
-   "fotos": [
-    "https://americanas.vtexassets.com/arquivos/ids/37496764/Mouse-Pad-Desk-Mat-Logitech-Studio-Series---Cinza.jpg?v=639148028824300000#ilustrativa",
-    "https://americanas.vtexassets.com/arquivos/ids/37496761/Mouse-Pad-Desk-Mat-Logitech-Studio-Series---Cinza.jpg?v=639148028822870000#ilustrativa",
-    "https://americanas.vtexassets.com/arquivos/ids/37496762/Mouse-Pad-Desk-Mat-Logitech-Studio-Series---Cinza.jpg?v=639148028823330000#ilustrativa",
-    "https://americanas.vtexassets.com/arquivos/ids/37496763/Mouse-Pad-Desk-Mat-Logitech-Studio-Series---Cinza.jpg?v=639148028823330000#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1733845740495-X5mQX"
   },
   {
    "id": "1733846737907-X5mQX",
@@ -8619,14 +7999,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1733846737907-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/93160/93160_1523969683_index_original.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/93160/93160_1523969683_index_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/93160/93160_1523969668_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/93160/93160_1_1523969668_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/93160/93160_2_1523969668_original.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1733846737907-X5mQX"
   },
   {
    "id": "1734629402232-X5mQX",
@@ -8695,14 +8068,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1734693025497-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/238164/base-de-carregamento-sony-para-controle-dualsense_1632859091_original.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/238164/base-de-carregamento-sony-para-controle-dualsense_1632859091_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/238164/base-de-carregamento-sony-para-controle-dualsense-cfi-zds1_1763981932_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/238164/base-de-carregamento-sony-para-controle-dualsense_1632859092_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/238164/base-de-carregamento-sony-para-controle-dualsense_1632859093_original.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1734693025497-X5mQX"
   },
   {
    "id": "1734723901318-X5mQX",
@@ -9165,14 +8531,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1742563243133-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1002577/xlarge/Caneca-Escudo-Capit-o-America-3D_1770930313.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1002577/xlarge/Caneca-Escudo-Capit-o-America-3D_1770930313.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1002577/xlarge/Caneca-Escudo-Capit-o-America-3D_1770930314.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1002577/xlarge/Caneca-Escudo-Capit-o-America-3D_1770930315.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1002577/xlarge/Caneca-Escudo-Capit-o-America-3D_1770930316.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1742563243133-X5mQX"
   },
   {
    "id": "1742563354121-X5mQX",
@@ -9249,14 +8608,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1743443942988-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1002577/xlarge/Caneca-Escudo-Capit-o-America-3D_1770930313.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1002577/xlarge/Caneca-Escudo-Capit-o-America-3D_1770930313.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1002577/xlarge/Caneca-Escudo-Capit-o-America-3D_1770930314.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1002577/xlarge/Caneca-Escudo-Capit-o-America-3D_1770930315.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1002577/xlarge/Caneca-Escudo-Capit-o-America-3D_1770930316.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1743443942988-X5mQX"
   },
   {
    "id": "1743515922784-X5mQX",
@@ -9284,14 +8636,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1743704168936-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/941954/xlarge/Controle-Remoto-Smart-Compat-vel-Com-Tv-Lg-Sem-Mouse-E-Comando-De-Voz-Modelo-Fbg-9166_1783164517.png#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/941954/xlarge/Controle-Remoto-Smart-Compat-vel-Com-Tv-Lg-Sem-Mouse-E-Comando-De-Voz-Modelo-Fbg-9166_1783164517.png#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/941954/xlarge/Controle-Remoto-Smart-Compat-vel-Com-Tv-Lg-Sem-Mouse-E-Comando-De-Voz-Modelo-Fbg-9166_1783164518.png#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/941954/xlarge/Controle-Remoto-Smart-Compat-vel-Com-Tv-Lg-Sem-Mouse-E-Comando-De-Voz-Modelo-Fbg-9166_1783164519.png#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/941954/xlarge/Controle-Remoto-Smart-Compat-vel-Com-Tv-Lg-Sem-Mouse-E-Comando-De-Voz-Modelo-Fbg-9166_1783164520.png#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1743704168936-X5mQX"
   },
   {
    "id": "1744308348607-X5mQX",
@@ -9977,13 +9322,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1753818289804-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1017965/xlarge/Analogico-Hall-Effect-V3-0-Dualsense-Sony-Playstation-5-Ps5-Controle-Anti-Drift_1773346428.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1017965/xlarge/Analogico-Hall-Effect-V3-0-Dualsense-Sony-Playstation-5-Ps5-Controle-Anti-Drift_1773346428.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1017965/xlarge/Analogico-Hall-Effect-V3-0-Dualsense-Sony-Playstation-5-Ps5-Controle-Anti-Drift_1773346429.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1017965/xlarge/Analogico-Hall-Effect-V3-0-Dualsense-Sony-Playstation-5-Ps5-Controle-Anti-Drift_1773346430.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1753818289804-X5mQX"
   },
   {
    "id": "1755025227640-X5mQX",
@@ -10012,14 +9351,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1755105975024-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/167105/xlarge/Carregador-de-Tomada-USB-C-Apple-para-Ipad-E-Iphone-20w-Turbo-1-Porta-Padr-o-brasileiro-Branco-MHJG3BZ-A_1791507510.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/167105/xlarge/Carregador-de-Tomada-USB-C-Apple-para-Ipad-E-Iphone-20w-Turbo-1-Porta-Padr-o-brasileiro-Branco-MHJG3BZ-A_1791507510.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/167105/xlarge/Carregador-de-Tomada-USB-C-Apple-para-Ipad-E-Iphone-20w-Turbo-1-Porta-Padr-o-brasileiro-Branco-MHJG3BZ-A_1791507511.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/167105/xlarge/Carregador-de-Tomada-USB-C-Apple-para-Ipad-E-Iphone-20w-Turbo-1-Porta-Padr-o-brasileiro-Branco-MHJG3BZ-A_1791507512.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/167105/xlarge/Carregador-de-Tomada-USB-C-Apple-para-Ipad-E-Iphone-20w-Turbo-1-Porta-Padr-o-brasileiro-Branco-MHJG3BZ-A_1791507513.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1755105975024-X5mQX"
   },
   {
    "id": "1755352544938-X5mQX",
@@ -10222,14 +9554,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1757511376904-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/693627/xlarge/Cabo-De-Rede-Ethernet-Flat-Cat6-U-utp-Ugreen-50174-2-Metros_1790618348.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/693627/xlarge/Cabo-De-Rede-Ethernet-Flat-Cat6-U-utp-Ugreen-50174-2-Metros_1790618348.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/693627/xlarge/Cabo-De-Rede-Ethernet-Flat-Cat6-U-utp-Ugreen-50174-2-Metros_1790618349.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/693627/xlarge/Cabo-De-Rede-Ethernet-Flat-Cat6-U-utp-Ugreen-50174-2-Metros_1790618350.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/693627/xlarge/Cabo-De-Rede-Ethernet-Flat-Cat6-U-utp-Ugreen-50174-2-Metros_1790618352.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1757511376904-X5mQX"
   },
   {
    "id": "1758563557036-X5mQX",
@@ -10279,14 +9604,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1758808259660-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/941356/xlarge/Kit-Teclado-e-Mouse-Logitech-MK250-Bluetooth-Grafite-920-013516_1791472113.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/941356/xlarge/Kit-Teclado-e-Mouse-Logitech-MK250-Bluetooth-Grafite-920-013516_1791472113.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/941356/xlarge/Kit-Teclado-e-Mouse-Logitech-MK250-Bluetooth-Grafite-920-013516_1791472115.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/941356/xlarge/Kit-Teclado-e-Mouse-Logitech-MK250-Bluetooth-Grafite-920-013516_1791472116.png#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/941356/xlarge/Kit-Teclado-e-Mouse-Logitech-MK250-Bluetooth-Grafite-920-013516_1791472117.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1758808259660-X5mQX"
   },
   {
    "id": "1758808326039-X5mQX",
@@ -10469,14 +9787,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1764878445692-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/693627/xlarge/Cabo-De-Rede-Ethernet-Flat-Cat6-U-utp-Ugreen-50174-2-Metros_1790618348.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/693627/xlarge/Cabo-De-Rede-Ethernet-Flat-Cat6-U-utp-Ugreen-50174-2-Metros_1790618348.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/693627/xlarge/Cabo-De-Rede-Ethernet-Flat-Cat6-U-utp-Ugreen-50174-2-Metros_1790618349.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/693627/xlarge/Cabo-De-Rede-Ethernet-Flat-Cat6-U-utp-Ugreen-50174-2-Metros_1790618350.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/693627/xlarge/Cabo-De-Rede-Ethernet-Flat-Cat6-U-utp-Ugreen-50174-2-Metros_1790618352.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1764878445692-X5mQX"
   },
   {
    "id": "1764948463752-X5mQX",
@@ -10541,12 +9852,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1767713527147-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1029028/xlarge/Bateria-Para-Notebook-Acer-Aspire-M5-583p-6428-3560mah-15v_1790883221.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1029028/xlarge/Bateria-Para-Notebook-Acer-Aspire-M5-583p-6428-3560mah-15v_1790883221.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1029028/xlarge/Bateria-Para-Notebook-Acer-Aspire-M5-583p-6428-3560mah-15v_1790883222.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1767713527147-X5mQX"
   },
   {
    "id": "1767722591797-X5mQX",
@@ -10879,13 +10185,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1769872530276-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/998729/mouse-gamer-sem-fio-attack-shark-g3-pro-black_1781632742_original.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/998729/mouse-gamer-sem-fio-attack-shark-g3-pro-black_1781632742_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/998729/mouse-gamer-sem-fio-attack-shark-g3-pro-black_1781632744_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/998729/mouse-gamer-sem-fio-attack-shark-g3-pro-black_1781632743_original.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1769872530276-X5mQX"
   },
   {
    "id": "1771873725295-X5mQX",
@@ -11072,14 +10372,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1772804877360-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/238164/base-de-carregamento-sony-para-controle-dualsense_1632859091_original.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/238164/base-de-carregamento-sony-para-controle-dualsense_1632859091_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/238164/base-de-carregamento-sony-para-controle-dualsense-cfi-zds1_1763981932_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/238164/base-de-carregamento-sony-para-controle-dualsense_1632859092_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/238164/base-de-carregamento-sony-para-controle-dualsense_1632859093_original.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1772804877360-X5mQX"
   },
   {
    "id": "1772805397743-X5mQX",
@@ -11108,13 +10401,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1772817079588-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/690549/xlarge/Maleta-Slim-Dell-Pro-Ecoloop-Cc5624s_1781629800.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/690549/xlarge/Maleta-Slim-Dell-Pro-Ecoloop-Cc5624s_1781629800.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/690549/xlarge/Maleta-Slim-Dell-Pro-Ecoloop-Cc5624s_1781629801.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/690549/xlarge/Maleta-Slim-Dell-Pro-Ecoloop-Cc5624s_1781629803.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1772817079588-X5mQX"
   },
   {
    "id": "1772817607229-X5mQX",
@@ -11183,14 +10470,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1772819232591-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/999772/xlarge/Pel-cula-Protetora-3d-De-Vidro-Para-Motorola-Moto-G22_1769450631.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/999772/xlarge/Pel-cula-Protetora-3d-De-Vidro-Para-Motorola-Moto-G22_1769450631.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/999772/xlarge/Pel-cula-Protetora-3d-De-Vidro-Para-Motorola-Moto-G22_1769450632.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/999772/xlarge/Pel-cula-Protetora-3d-De-Vidro-Para-Motorola-Moto-G22_1769450633.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/999772/xlarge/Pel-cula-Protetora-3d-De-Vidro-Para-Motorola-Moto-G22_1769450635.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1772819232591-X5mQX"
   },
   {
    "id": "1772819740903-X5mQX",
@@ -11662,13 +10942,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1779210925200-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/997955/teclado-mecanico-sem-fio-attack-shark-x98-rgb-tri-mode-star-black_1787575549_original.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/997955/teclado-mecanico-sem-fio-attack-shark-x98-rgb-tri-mode-star-black_1787575549_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/997955/teclado-mecanico-sem-fio-attack-shark-x98-rgb-tri-mode-star-black_1787575547_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/997955/teclado-mecanico-sem-fio-attack-shark-x98-rgb-tri-mode-star-black_1787575548_original.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1779210925200-X5mQX"
   },
   {
    "id": "1779210963958-X5mQX",
@@ -11680,11 +10954,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1779210963958-X5mQX",
-   "foto": "https://http2.mlstatic.com/D_NQ_NP_608827-MLA99539355138_122025-O.webp",
-   "fotos": [
-    "https://http2.mlstatic.com/D_NQ_NP_608827-MLA99539355138_122025-O.webp"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1779210963958-X5mQX"
   },
   {
    "id": "1779211076795-X5mQX",
@@ -11855,14 +11125,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1779814581628-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/579978/headset-sem-fio-logitech-zone-300-com-microfone-com-cancelamento-de-ruido-conexao-bluetooth-bateria-recarregavel-via-usb-c-grafite-981-001406_1780940755_original.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/579978/headset-sem-fio-logitech-zone-300-com-microfone-com-cancelamento-de-ruido-conexao-bluetooth-bateria-recarregavel-via-usb-c-grafite-981-001406_1780940755_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/579978/headset-sem-fio-logitech-zone-300-com-microfone-com-cancelamento-de-ruido-conexao-bluetooth-bateria-recarregavel-via-usb-c-grafite-981-001406_1780940757_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/579978/headset-sem-fio-logitech-zone-300-com-microfone-com-cancelamento-de-ruido-conexao-bluetooth-bateria-recarregavel-via-usb-c-grafite-981-001406_1780940756_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/579978/headset-sem-fio-logitech-zone-300-com-microfone-com-cancelamento-de-ruido-conexao-bluetooth-bateria-recarregavel-via-usb-c-grafite-981-001406_1780940758_original.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1779814581628-X5mQX"
   },
   {
    "id": "1779975618396-X5mQX",
@@ -12204,14 +11467,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1781186193109-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/181876/headset-gamer-logitech-g335-3-5mm-para-pc-playstation-xbox-switch-mobile-driver-40mm-arco-ajustavel-preto-981-000977_1781110720_original.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/181876/headset-gamer-logitech-g335-3-5mm-para-pc-playstation-xbox-switch-mobile-driver-40mm-arco-ajustavel-preto-981-000977_1781110720_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/181876/headset-gamer-logitech-g335-3-5mm-para-pc-playstation-xbox-switch-mobile-driver-40mm-arco-ajustavel-preto-981-000977_1781110721_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/181876/headset-gamer-logitech-g335-3-5mm-para-pc-playstation-xbox-switch-mobile-driver-40mm-arco-ajustavel-preto-981-000977_1781110722_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/181876/headset-gamer-logitech-g335-3-5mm-para-pc-playstation-xbox-switch-mobile-driver-40mm-arco-ajustavel-preto-981-000977_1781110723_original.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1781186193109-X5mQX"
   },
   {
    "id": "1781186243245-X5mQX",
@@ -12223,14 +11479,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1781186243245-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/181876/headset-gamer-logitech-g335-3-5mm-para-pc-playstation-xbox-switch-mobile-driver-40mm-arco-ajustavel-preto-981-000977_1781110720_original.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/181876/headset-gamer-logitech-g335-3-5mm-para-pc-playstation-xbox-switch-mobile-driver-40mm-arco-ajustavel-preto-981-000977_1781110720_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/181876/headset-gamer-logitech-g335-3-5mm-para-pc-playstation-xbox-switch-mobile-driver-40mm-arco-ajustavel-preto-981-000977_1781110721_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/181876/headset-gamer-logitech-g335-3-5mm-para-pc-playstation-xbox-switch-mobile-driver-40mm-arco-ajustavel-preto-981-000977_1781110722_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/181876/headset-gamer-logitech-g335-3-5mm-para-pc-playstation-xbox-switch-mobile-driver-40mm-arco-ajustavel-preto-981-000977_1781110723_original.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1781186243245-X5mQX"
   },
   {
    "id": "1781295699928-X5mQX",
@@ -12608,11 +11857,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1784033688625-X5mQX",
-   "foto": "https://americanas.vtexassets.com/arquivos/ids/36851075/CONSOLENSWOLEDMARIOWONDER3MNSO.jpg?v=638954556833770000#ilustrativa",
-   "fotos": [
-    "https://americanas.vtexassets.com/arquivos/ids/36851075/CONSOLENSWOLEDMARIOWONDER3MNSO.jpg?v=638954556833770000#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1784033688625-X5mQX"
   },
   {
    "id": "1784060705794-X5mQX",
@@ -12836,14 +12081,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1785159431273-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/954834/xlarge/Grip-Suporte-3d-Compativel-Com-Controle-8bitdo-Sn30-Pro-Preto-com-Ou-Sem-Fio-_1770928924.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/954834/xlarge/Grip-Suporte-3d-Compativel-Com-Controle-8bitdo-Sn30-Pro-Preto-com-Ou-Sem-Fio-_1770928924.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/954834/xlarge/Grip-Suporte-3d-Compativel-Com-Controle-8bitdo-Sn30-Pro-Preto-com-Ou-Sem-Fio-_1770928926.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/954834/xlarge/Grip-Suporte-3d-Compativel-Com-Controle-8bitdo-Sn30-Pro-Preto-com-Ou-Sem-Fio-_1770928927.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/954834/xlarge/Grip-Suporte-3d-Compativel-Com-Controle-8bitdo-Sn30-Pro-Preto-com-Ou-Sem-Fio-_1770928928.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1785159431273-X5mQX"
   },
   {
    "id": "1785159466341-X5mQX",
@@ -12931,14 +12169,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1785334916179-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/714013/xlarge/Cabo-Usb-Tipo-C-Nas-Duas-Pontas-Com-Potencia-60w-Com-2-Metros-Baseus-Cabo-Carregamento-Super-R-pido_1739458836.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/714013/xlarge/Cabo-Usb-Tipo-C-Nas-Duas-Pontas-Com-Potencia-60w-Com-2-Metros-Baseus-Cabo-Carregamento-Super-R-pido_1739458836.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/714013/xlarge/Cabo-Usb-Tipo-C-Nas-Duas-Pontas-Com-Potencia-60w-Com-2-Metros-Baseus-Cabo-Carregamento-Super-R-pido_1739458837.png#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/714013/xlarge/Cabo-Usb-Tipo-C-Nas-Duas-Pontas-Com-Potencia-60w-Com-2-Metros-Baseus-Cabo-Carregamento-Super-R-pido_1739458839.png#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/714013/xlarge/Cabo-Usb-Tipo-C-Nas-Duas-Pontas-Com-Potencia-60w-Com-2-Metros-Baseus-Cabo-Carregamento-Super-R-pido_1739458840.png#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1785334916179-X5mQX"
   },
   {
    "id": "1785334978501-X5mQX",
@@ -13022,14 +12253,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1785353126737-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/512804/xlarge/Pen-Drive-Sandisk-128GB-Ultra-USB-3-0-Micro-E-USB-Tipo-A_1767644662.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/512804/xlarge/Pen-Drive-Sandisk-128GB-Ultra-USB-3-0-Micro-E-USB-Tipo-A_1767644662.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/512804/xlarge/Pen-Drive-Sandisk-128GB-Ultra-USB-3-0-Micro-E-USB-Tipo-A_1767644663.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/512804/xlarge/Pen-Drive-Sandisk-128GB-Ultra-USB-3-0-Micro-E-USB-Tipo-A_1767644665.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/512804/xlarge/Pen-Drive-Sandisk-128GB-Ultra-USB-3-0-Micro-E-USB-Tipo-A_1767644666.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1785353126737-X5mQX"
   },
   {
    "id": "1785525285189-X5mQX",
@@ -13041,14 +12265,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1785525285189-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/954834/xlarge/Grip-Suporte-3d-Compativel-Com-Controle-8bitdo-Sn30-Pro-Preto-com-Ou-Sem-Fio-_1770928924.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/954834/xlarge/Grip-Suporte-3d-Compativel-Com-Controle-8bitdo-Sn30-Pro-Preto-com-Ou-Sem-Fio-_1770928924.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/954834/xlarge/Grip-Suporte-3d-Compativel-Com-Controle-8bitdo-Sn30-Pro-Preto-com-Ou-Sem-Fio-_1770928926.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/954834/xlarge/Grip-Suporte-3d-Compativel-Com-Controle-8bitdo-Sn30-Pro-Preto-com-Ou-Sem-Fio-_1770928927.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/954834/xlarge/Grip-Suporte-3d-Compativel-Com-Controle-8bitdo-Sn30-Pro-Preto-com-Ou-Sem-Fio-_1770928928.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1785525285189-X5mQX"
   },
   {
    "id": "1785525381421-X5mQX",
@@ -13117,14 +12334,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1785767768836-X5mQX",
-   "foto": "https://americanas.vtexassets.com/arquivos/ids/37732036/image-d8b367abe5f54fdfb0794bb84e24d571.jpg?v=639250791919500000#ilustrativa",
-   "fotos": [
-    "https://americanas.vtexassets.com/arquivos/ids/37732036/image-d8b367abe5f54fdfb0794bb84e24d571.jpg?v=639250791919500000#ilustrativa",
-    "https://americanas.vtexassets.com/arquivos/ids/37732037/image-6fdc032bb2f548c68aa2383851befa84.jpg?v=639250791919900000#ilustrativa",
-    "https://americanas.vtexassets.com/arquivos/ids/37732039/image-8055003c6164403cbae8c365ed2a4b7d.jpg?v=639250791923670000#ilustrativa",
-    "https://americanas.vtexassets.com/arquivos/ids/37732038/image-e57bd01adeff4a56ac4e177d4a985083.jpg?v=639250791921170000#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1785767768836-X5mQX"
   },
   {
    "id": "1786374132935-X5mQX",
@@ -13194,14 +12404,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1786469215171-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/911320/controle-wireless-8bitdo-ultimate-2-efeito-hall-bluetooth-com-dock-p-switch-pc-e-mobile-preto-80nd02_1756126810_original.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/911320/controle-wireless-8bitdo-ultimate-2-efeito-hall-bluetooth-com-dock-p-switch-pc-e-mobile-preto-80nd02_1756126810_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/911320/controle-wireless-8bitdo-ultimate-2-efeito-hall-bluetooth-com-dock-p-switch-pc-e-mobile-preto-80nd02_1756126808_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/911320/controle-wireless-8bitdo-ultimate-2-efeito-hall-bluetooth-com-dock-p-switch-pc-e-mobile-preto-80nd02_1756126809_original.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/911320/controle-wireless-8bitdo-ultimate-2-efeito-hall-bluetooth-com-dock-p-switch-pc-e-mobile-preto-80nd02_1756126811_original.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1786469215171-X5mQX"
   },
   {
    "id": "1786995652949-X5mQX",
@@ -13233,14 +12436,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1787054776869-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/360433/xlarge/Ugreen-Cabo-Optico-Audio-Digital-Toslink-Spdif-Tv-Home-1-5m_1767620945.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/360433/xlarge/Ugreen-Cabo-Optico-Audio-Digital-Toslink-Spdif-Tv-Home-1-5m_1767620945.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/360433/xlarge/Ugreen-Cabo-Optico-Audio-Digital-Toslink-Spdif-Tv-Home-1-5m_1767620946.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/360433/xlarge/Ugreen-Cabo-Optico-Audio-Digital-Toslink-Spdif-Tv-Home-1-5m_1767620947.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/360433/xlarge/Ugreen-Cabo-Optico-Audio-Digital-Toslink-Spdif-Tv-Home-1-5m_1767620949.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1787054776869-X5mQX"
   },
   {
    "id": "1787226695241-X5mQX",
@@ -13484,11 +12680,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1789072449004-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/729815/ssd-wd-blue-sn5000-nvme-1tb-m-2-pcle-gen4-ncache-4-0-leitura-5-150mb-s-e-gravacao-4-900mb-s-wds100t4b0e_1748260782_original.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/729815/ssd-wd-blue-sn5000-nvme-1tb-m-2-pcle-gen4-ncache-4-0-leitura-5-150mb-s-e-gravacao-4-900mb-s-wds100t4b0e_1748260782_original.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1789072449004-X5mQX"
   },
   {
    "id": "1789392189742-X5mQX",
@@ -13819,12 +13011,7 @@
    },
    "active": true,
    "showOnCatalog": true,
-   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1790779889891-X5mQX",
-   "foto": "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1073164/xlarge/Xiaomi-Tv-Box-S-4k-Ultra-Hd-3-Gera-o-Mdz-32-aa-2gb-Ram-32gb-Mem-ria-Wi-fi-6-Dolby-Vision-atmos-Hdr10-Dts-x-Preto_1789073624.jpg#ilustrativa",
-   "fotos": [
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1073164/xlarge/Xiaomi-Tv-Box-S-4k-Ultra-Hd-3-Gera-o-Mdz-32-aa-2gb-Ram-32gb-Mem-ria-Wi-fi-6-Dolby-Vision-atmos-Hdr10-Dts-x-Preto_1789073624.jpg#ilustrativa",
-    "https://images.kabum.com.br/produtos/fotos/sync_mirakl/1073164/xlarge/Xiaomi-Tv-Box-S-4k-Ultra-Hd-3-Gera-o-Mdz-32-aa-2gb-Ram-32gb-Mem-ria-Wi-fi-6-Dolby-Vision-atmos-Hdr10-Dts-x-Preto_1789073625.jpg#ilustrativa"
-   ]
+   "url": "https://techsupri.kyte.site/pt-BR/p/produto/1790779889891-X5mQX"
   },
   {
    "id": "1790781386723-X5mQX",

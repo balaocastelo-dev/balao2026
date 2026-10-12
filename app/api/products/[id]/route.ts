@@ -26,9 +26,11 @@ export async function DELETE(
 ) {
   const params = await props.params;
   try {
-    await deleteProduct(params.id);
+    // ?motivo=... vem das limpezas do painel (duplicados, sem foto).
+    const motivo = new URL(request.url).searchParams.get('motivo') || undefined;
+    const { bloqueado } = await deleteProduct(params.id, motivo);
     invalidarCacheProdutos();
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, bloqueado });
   } catch (error) {
     console.error('Failed to delete product:', error);
     return NextResponse.json({ error: 'Failed to delete product' }, { status: 500 });

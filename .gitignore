@@ -69,3 +69,9 @@ scripts/output/
 scripts/agente-local/dados/
 scripts/agente-local/config.json
 scripts/agente-local/.venv/
+
+# Chácara 3D: ambiente do Blender e saídas dos scripts do modelo
+/chacara3d/.venv
+/chacara3d/saida
+/chacara3d/modelo/chacara.blend*
+/chacara3d/modelo/__pycache__

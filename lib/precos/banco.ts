@@ -20,6 +20,7 @@ import { lerMargensPorCategoria, lerRegra, margemAutomatica, margemDoProduto, ty
 import { vendaDoProduto } from "./faixas";
 import type { ItemDeOrigem } from "./kabum";
 import { montarProduto, motivoDeRecusa, type ProdutoDeOrigem, type RegrasDaFonte } from "./produto";
+import { codigosBloqueados } from "./bloqueio";
 
 type Linha = Record<string, unknown>;
 
@@ -449,6 +450,8 @@ export interface ResultadoDaPagina {
   retidos: number;
   recusados: number;
   deOutraFonte: number;
+  /** Excluídos no painel (produtos_bloqueados): não voltam ao site. */
+  bloqueados: number;
 }
 
 /**
@@ -459,16 +462,20 @@ export interface ResultadoDaPagina {
  * fonte, e segura o preço quando a queda é grande demais para ser verdade.
  */
 export async function gravarPagina(fonte: Fonte, itens: ItemDeOrigem[], agora: string): Promise<ResultadoDaPagina> {
-  const saida: ResultadoDaPagina = { gravados: 0, novos: 0, retidos: 0, recusados: 0, deOutraFonte: 0 };
+  const saida: ResultadoDaPagina = { gravados: 0, novos: 0, retidos: 0, recusados: 0, deOutraFonte: 0, bloqueados: 0 };
 
-  const aceitos: ItemDeOrigem[] = [];
+  const candidatos: ItemDeOrigem[] = [];
   const vistos = new Set<string>();
   for (const item of itens) {
     if (vistos.has(item.codigo)) continue;
     vistos.add(item.codigo);
     if (motivoDeRecusa(item, fonte)) saida.recusados++;
-    else aceitos.push(item);
+    else candidatos.push(item);
   }
+  // Produto excluído no painel fica de fora até ser desbloqueado.
+  const bloqueados = await codigosBloqueados(candidatos.map((i) => i.codigo));
+  const aceitos = candidatos.filter((i) => !bloqueados.has(i.codigo));
+  saida.bloqueados = candidatos.length - aceitos.length;
   if (aceitos.length === 0) return saida;
 
   const atuais = await turso.execute({

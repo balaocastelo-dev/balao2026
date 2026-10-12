@@ -195,6 +195,8 @@ export interface ResultadoDaImportacao {
   suspeita: boolean;
   concluida: boolean;
   fotosAchadas: number;
+  /** Excluídos no painel: ficaram de fora (produtos_bloqueados). */
+  bloqueados: number;
 }
 
 export interface OpcoesDaImportacao {
@@ -228,7 +230,7 @@ export async function importarDoFornecedor(
   const saida: ResultadoDaImportacao = {
     fonte: fonte.nome, inicio, recebidos: produtos.length,
     gravados: 0, novos: 0, retidos: 0, recusados: produtos.length - itens.length,
-    removidos: 0, suspeita: false, concluida: false, fotosAchadas: 0,
+    removidos: 0, suspeita: false, concluida: false, fotosAchadas: 0, bloqueados: 0,
   };
 
   if (opcoes.buscarFotos !== false) {
@@ -242,6 +244,7 @@ export async function importarDoFornecedor(
     saida.novos += r.novos;
     saida.retidos += r.retidos;
     saida.recusados += r.recusados;
+    saida.bloqueados += r.bloqueados;
   }
 
   if (opcoes.final) {
@@ -261,7 +264,9 @@ export async function importarDoFornecedor(
     });
   }
 
-  if (saida.novos > 0 || saida.removidos > 0) {
+  // No fim da passada o menu é conferido sempre: categorias trocadas à mão
+  // (ou por regra nova) aparecem no menu sem esperar produto novo.
+  if (saida.novos > 0 || saida.removidos > 0 || opcoes.final) {
     await acrescentarCategorias().catch(() => 0);
     invalidarCacheCategorias();
   }
