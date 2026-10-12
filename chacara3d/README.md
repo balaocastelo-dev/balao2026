@@ -90,6 +90,24 @@ Corpo por campos de distância, esqueleto, pesos e animações próprios; as cor
 vêm de máscaras (`COLOR_0`) que a página pinta (o segundo cachorro é preto e
 branco com o mesmo modelo). Detalhes em `public/chacara3d/bichos/bichos.json`.
 
+## Para não travar
+
+No Windows o Chrome traduz os sombreadores para Direct3D, e cada programa demora.
+A primeira versão realista tinha 201 programas e a página ficava minutos parada.
+Hoje são 58, e todos ficam prontos antes do botão "Entrar" (nenhum novo ao andar):
+
+- a chave do programa (`customProgramCacheKey` em `remendar`) leva só as opções que
+  mudam o código; o que varia por material (força do vento, translucidez, cor) vai em
+  `uniform`. Não pôr nome de textura nem número na chave;
+- a sombra das nuvens é calculada uma vez por pixel, só no laço do sol;
+- `prepararProgramas()` (em `principal.js`) compila com `compileAsync` já com o alvo HDR
+  ligado e também a versão de sombra de cada objeto; bichos e água passam por ela;
+- o reflexo da piscina corta pelo plano oblíquo da câmera (sem `clippingPlanes`, que
+  dobraria os programas);
+- texturas vêm pelo `ImageBitmapLoader` e sobem para a placa aos poucos (`initTexture`).
+
+Para conferir: `window.__chacara.renderer.info.programs.length` e `window.__chacara.tempos`.
+
 ## O que vale saber
 
 - **Medidas estimadas por foto.** Só são exatas as que o Thiago passou: terreno

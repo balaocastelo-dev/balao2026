@@ -15,6 +15,12 @@ chácara), hospedado no site; não faz parte da loja.
   oclusão de ambiente, materiais com textura de verdade, grama 3D, vento nas plantas,
   água com reflexo e refração, cascata, bolhas, carpas, cachorros, galinhas, galo,
   passarinhos, borboletas, vaga-lumes, e as três tiny houses mobiliadas por dentro.
+- **Abertura**: fica pronta em ~8 s no Chrome com placa de vídeo (58 programas de
+  sombreamento compilados em paralelo, texturas decodificadas fora da linha principal).
+  Os tempos de cada etapa ficam em `window.__chacara.tempos`. Antes de mexer em material,
+  ver "Para não travar" no `chacara3d/README.md`.
+- **Build do site**: `app/globals.css` tem `@source not` para `public/chacara3d` e
+  `chacara3d/`; sem isso o Tailwind lê o modelo em base64 e o `next build` estoura o tempo.
 - **Busca**: a página leva `noindex, follow` e não está no sitemap.
 - **Peso**: cerca de 30 MB (texturas WebP 18 MB, terreno 10 MB, bichos 1,6 MB, three.js 0,8 MB).
 - **De onde veio**: projeto "Contrução " no Claude, docs
