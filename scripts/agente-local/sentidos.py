@@ -43,6 +43,7 @@ class Sentidos:
         self._whisper = None
         self._whisper_usado = 0.0
         self._trava = threading.Lock()
+        self._trava_visao = threading.Lock()
         self._modelo_visao = None
 
     # ------------------------------------------------------------ áudio
@@ -64,11 +65,36 @@ class Sentidos:
                 self._whisper = None
                 gc.collect()
 
+    @staticmethod
+    def amostras_de_audio(conteudo: bytes):
+        """Áudio (ogg, mp3, wav...) -> amostras 16 kHz mono, pelo ffmpeg.
+
+        O faster-whisper abre o arquivo pelo PyAV, e o PyAV novo recusa o jeito
+        como ele chama ("unexpected keyword argument 'metadata_errors'": nenhum
+        áudio era transcrito). Pelo ffmpeg não depende da versão do PyAV."""
+        ffmpeg = shutil.which("ffmpeg")
+        if not ffmpeg:
+            return None
+        r = subprocess.run([ffmpeg, "-nostdin", "-loglevel", "error", "-i", "pipe:0", "-f", "s16le", "-ac", "1", "-ar", "16000", "pipe:1"],
+                           input=conteudo, capture_output=True, timeout=120, check=False)
+        if r.returncode != 0 or not r.stdout:
+            return None
+        import numpy as np  # vem com o faster-whisper
+
+        return np.frombuffer(r.stdout, dtype=np.int16).astype(np.float32) / 32768.0
+
     def transcrever(self, conteudo: bytes, sufixo: str = ".ogg") -> str:
+        amostras = self.amostras_de_audio(conteudo)
         with self._trava:
             if self._whisper is None:
                 self._carregar_whisper()
             self._whisper_usado = time.time()
+            if amostras is not None:
+                if not len(amostras):
+                    return ""
+                segmentos, _ = self._whisper.transcribe(amostras, language="pt", vad_filter=True, beam_size=1)
+                return " ".join(s.text.strip() for s in segmentos).strip()
+            # Sem ffmpeg: o caminho antigo (arquivo, pelo PyAV).
             with tempfile.NamedTemporaryFile(suffix=sufixo, delete=False) as f:
                 f.write(conteudo)
                 caminho = f.name
@@ -103,7 +129,8 @@ class Sentidos:
         modelo = self.modelo_visao()
         if not modelo:
             return ""
-        return self.ollama.ver(modelo, conteudo, PERGUNTA_FOTO)
+        with self._trava_visao:
+            return self.ollama.ver(modelo, conteudo, PERGUNTA_FOTO)
 
     # ------------------------------------------------------------ vídeo
     def entender_video(self, conteudo: bytes) -> tuple[str, str]:
@@ -136,7 +163,8 @@ class Sentidos:
                 if saida.exists():
                     quadros.append(saida.read_bytes())
             modelo = self.modelo_visao()
-            visto = self.ollama.ver(modelo, quadros, PERGUNTA_VIDEO) if quadros and modelo else ""
+            with self._trava_visao:
+                visto = self.ollama.ver(modelo, quadros, PERGUNTA_VIDEO) if quadros and modelo else ""
             return fala, visto
         finally:
             shutil.rmtree(pasta, ignore_errors=True)
@@ -145,8 +173,11 @@ class Sentidos:
     def entender(self, mensagens: list[dict], memoria: dict) -> list[dict]:
         """Preenche `conteudo` de cada mensagem; devolve as transcrições novas (para a VPS)."""
         descricoes = memoria.setdefault("descricoes", {})
+        # Mídia que não abriu uma vez não é baixada de novo a cada resposta.
+        falharam = memoria.setdefault("midiaQueFalhou", [])
         novas_transcricoes = []
-        pendentes = [m for m in mensagens if m.get("midia") and m.get("de") == "cliente"][-MAX_MIDIAS_POR_RODADA:]
+        pendentes = [m for m in mensagens if m.get("midia") and m.get("de") == "cliente"
+                     and m.get("id") not in falharam][-MAX_MIDIAS_POR_RODADA:]
         for m in mensagens:
             texto = (m.get("texto") or "").strip()
             tipo = m.get("tipo") or "texto"
@@ -193,9 +224,12 @@ class Sentidos:
             except Exception as e:
                 self.registrar(f"[sentidos] não consegui ler a mídia {m.get('id')}: {e}")
                 partes.append(f"[{tipo} que não consegui abrir]")
+                if m.get("id") and m["id"] not in falharam:
+                    falharam.append(m["id"])
             if texto:
                 partes.append(texto)
             m["conteudo"] = " ".join(partes)
+        del falharam[:-30]
         # A memória guarda só as 30 descrições mais novas.
         if len(descricoes) > 30:
             for chave in list(descricoes)[:-30]:

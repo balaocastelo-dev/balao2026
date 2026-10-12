@@ -35,6 +35,8 @@ function criarAgente({
     throw new Error("envio não configurado");
   },
   guardarTranscricao = async () => {},
+  // "digitando…" para o cliente enquanto o PC pensa (só no automático).
+  digitando = async () => {},
   avisar = () => {},
   telegram = async () => {},
   nota = async () => {},
@@ -125,7 +127,7 @@ function criarAgente({
     if (novo.modo !== "desligado" && antes.modo === "desligado") novo.ligadoEm = agora();
     if (novo.modo === "desligado") {
       novo.ligadoEm = null;
-      arrendados.clear();
+      soltarTodos();
     }
     config = novo;
     await gravarConfig(por);
@@ -149,7 +151,7 @@ function criarAgente({
 
   async function humanoAssumiu(chatId, motivo) {
     const s = await situacaoDe(chatId);
-    arrendados.delete(chatId);
+    soltar(chatId);
     for (const [id, sug] of sugestoes) if (sug.chatId === chatId) sugestoes.delete(id);
     const ate = agora() + R.PAUSA_HUMANO_MS;
     if (s.situacao === "humano" && s.ate >= ate - 60_000) return; // nada novo
@@ -190,14 +192,14 @@ function criarAgente({
     if (!chatId) return;
     if (vendedorId === R.ID_DO_AGENTE) return retomar(chatId, "devolvida à JUL.IA");
     if (vendedorId) {
-      arrendados.delete(chatId);
+      soltar(chatId);
       for (const [id, sug] of sugestoes) if (sug.chatId === chatId) sugestoes.delete(id);
     }
   }
 
   async function pausar(chatId, por) {
     const s = await situacaoDe(chatId);
-    arrendados.delete(chatId);
+    soltar(chatId);
     await gravarSituacao(chatId, { ...s, situacao: "humano", ate: agora() + R.PAUSA_HUMANO_MS, motivo: `pausada por ${por || "vendedor"}` });
     lembrar("pausa", { chatId, nome: nomeDe(chatId), texto: `pausada por ${por || "vendedor"}` });
   }
@@ -214,8 +216,28 @@ function criarAgente({
   }
 
   // ---------------------------------------------------------------- fila do PC
+  function soltar(chatId) {
+    const a = arrendados.get(chatId);
+    if (a?.digitando) clearInterval(a.digitando);
+    arrendados.delete(chatId);
+  }
+
+  function soltarTodos() {
+    for (const chatId of [...arrendados.keys()]) soltar(chatId);
+  }
+
   function limparArrendados() {
-    for (const [chatId, a] of arrendados) if (a.ate < agora()) arrendados.delete(chatId);
+    for (const [chatId, a] of arrendados) if (a.ate < agora()) soltar(chatId);
+  }
+
+  /** O cliente vê "digitando…" do pegar da conversa até a resposta (o WhatsApp apaga em ~25 s; renova). */
+  function mostrarDigitando(chatId) {
+    if (config.modo !== "automatico") return null; // no copiloto quem responde é o vendedor
+    const uma = () => Promise.resolve(digitando(chatId)).catch(() => {});
+    uma();
+    const t = setInterval(uma, R.DIGITANDO_A_CADA_MS);
+    t.unref?.();
+    return t;
   }
 
   async function avaliar(chatId) {
@@ -253,8 +275,19 @@ function criarAgente({
     };
   }
 
-  /** Próxima conversa para o PC responder, ou null. */
-  async function proximoTrabalho() {
+  /**
+   * Próxima conversa para o PC responder, ou null. Um pedido por vez: o PC
+   * atende duas conversas ao mesmo tempo, e dois pedidos juntos não podem
+   * alugar a mesma conversa (o aluguel só é marcado depois das consultas).
+   */
+  let filaDoTrabalho = Promise.resolve();
+  function proximoTrabalho() {
+    const vez = filaDoTrabalho.then(proximoTrabalhoAgora);
+    filaDoTrabalho = vez.catch(() => {});
+    return vez;
+  }
+
+  async function proximoTrabalhoAgora() {
     if (config.modo === "desligado") return null;
     limparArrendados();
     const ordem = [...candidatas.entries()].sort((a, b) => a[1] - b[1]);
@@ -268,10 +301,16 @@ function criarAgente({
         if (!parecer.espera && parecer.motivo !== "agente desligado") candidatas.delete(chatId);
         continue;
       }
-      const historico = await mensagensDaConversa(chatId, 30);
+      const historico = await mensagensDaConversa(chatId, R.HISTORICO_PARA_O_PC);
       const enviadosPeloAgente = new Set(Array.isArray(s.memoria?.enviados) ? s.memoria.enviados : []);
       const id = crypto.randomBytes(9).toString("base64url");
-      arrendados.set(chatId, { id, ate: agora() + R.PRAZO_DO_TRABALHO_MS, ultimaId: ultima.id, ultimaTs: ultima.timestamp });
+      arrendados.set(chatId, {
+        id,
+        ate: agora() + R.PRAZO_DO_TRABALHO_MS,
+        ultimaId: ultima.id,
+        ultimaTs: ultima.timestamp,
+        digitando: mostrarDigitando(chatId),
+      });
       return {
         id,
         chatId,
@@ -346,7 +385,7 @@ function criarAgente({
       for (const t of r.transcricoes) await guardarTranscricao(t.id, t.texto).catch(() => {});
       return { aceito: false, motivo: "trabalho vencido ou cancelado" };
     }
-    arrendados.delete(r.chatId);
+    soltar(r.chatId);
 
     for (const t of r.transcricoes) await guardarTranscricao(t.id, t.texto).catch(() => {});
     const s = await situacaoDe(r.chatId);
@@ -359,8 +398,13 @@ function criarAgente({
       contagem.erros++;
       lembrar("erro", { chatId: r.chatId, nome: nomeDe(r.chatId), texto: r.erro });
       memoria.errosSeguidos = (Number(s.memoria?.errosSeguidos) || 0) + 1;
-      // Três erros seguidos na mesma conversa: chama gente em vez de insistir.
-      if (memoria.errosSeguidos >= 3) r.transferir = r.transferir || { motivo: `o agente falhou 3 vezes (${r.erro})` };
+      // Dois erros seguidos na mesma conversa: chama gente em vez de insistir
+      // (o cliente não fica esperando o PC se acertar).
+      if (memoria.errosSeguidos >= R.ERROS_ATE_CHAMAR_GENTE) {
+        r.transferir = r.transferir || { motivo: `o agente falhou ${memoria.errosSeguidos} vezes (${r.erro})` };
+        // O cliente fica sabendo (senão espera uma resposta que não vem).
+        if (!r.respostas.length) r.respostas = [{ tipo: "texto", texto: R.TEXTO_CHAMEI_VENDEDOR }];
+      }
     } else {
       memoria.errosSeguidos = 0;
     }
@@ -382,6 +426,13 @@ function criarAgente({
       !(depois.s.situacao !== "ativo" && depois.s.ate > agora());
 
     const novo = { ...s, dados, memoria, respondidoAte: Math.max(s.respondidoAte || 0, a.ultimaTs), respondidoId: a.ultimaId };
+    if (r.erro && !r.transferir) {
+      // O PC errou (Ollama fora, demora...): a mensagem continua sem resposta e
+      // a conversa volta para a fila daqui a pouco, sem esperar o cliente escrever de novo.
+      novo.respondidoAte = s.respondidoAte || 0;
+      novo.respondidoId = s.respondidoId || null;
+      novo.esperarAte = agora() + R.ESPERA_DEPOIS_DE_ERRO_MS;
+    }
     let enviados = 0;
     if (aindaPode && r.respostas.length) {
       if (config.modo === "automatico") {

@@ -15,6 +15,7 @@ from __future__ import annotations
 import datetime as dt
 import json
 import secrets
+import threading
 import time
 import urllib.parse
 from pathlib import Path
@@ -56,6 +57,7 @@ class Bling:
         self.dormir = dormir
         self.espera_401_s = espera_401_s
         self._ultima = 0.0
+        self._trava = threading.Lock()  # duas conversas ao mesmo tempo dividem o limite de 3 por segundo
 
     # ------------------------------------------------------------ base
     def _token(self) -> str:
@@ -69,10 +71,12 @@ class Bling:
         if params:
             url += "?" + urllib.parse.urlencode(params, doseq=True)
         for tentativa in range(4):
-            espaco = 0.4 - (time.time() - self._ultima)
+            with self._trava:  # reserva a vez: no máximo uma chamada a cada 0,4 s
+                vez = max(time.time(), self._ultima + 0.4)
+                self._ultima = vez
+            espaco = vez - time.time()
             if espaco > 0:
                 self.dormir(espaco)
-            self._ultima = time.time()
             try:
                 return self.http(url, metodo=metodo, dados=dados,
                                  cabecalhos={"Authorization": f"Bearer {self._token()}"}, espera=30)

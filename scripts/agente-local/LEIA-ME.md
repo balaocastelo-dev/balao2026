@@ -31,6 +31,18 @@ A VPS precisa ter o agente (deploy da VPS de 11/10/2026 em diante).
 A tarefa `\BalaoFabrica\JUL.IA` liga com o Windows e volta sozinha se cair. Ela só deixa o PC pronto:
 **quem liga o atendimento é o Centro de Comando do /crm, aba JUL.IA.**
 
+## Ollama no PC (12/10/2026)
+
+Variáveis do usuário do Windows, lidas quando o Ollama abre:
+
+- `OLLAMA_CONTEXT_LENGTH=8192`: o mesmo contexto da JUL.IA e da fábrica. Se cada programa pede um tamanho, o
+  Ollama recarrega o modelo (4 a 8 s) a cada troca.
+- `OLLAMA_NUM_PARALLEL=3`: três conversas juntas no Ollama. A JUL.IA usa `paralelo` (2) e deixa sempre uma vaga
+  para a URA; com 2 vagas ela cai sozinha para 1 conversa por vez.
+
+O `--conferir` avisa se o contexto não bate. O `julia.log` mostra, em cada resposta, quantas idas ao modelo houve,
+o tempo do modelo e o tempo de recarga.
+
 ## Testar sem WhatsApp
 
 ```powershell

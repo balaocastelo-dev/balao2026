@@ -149,6 +149,28 @@ def valores_citados(texto: str) -> set[float]:
     return {v for v in achados if v > 0}
 
 
+PRECO_NA_FRASE = re.compile(
+    r"\b(?:ate|uns|umas|no maximo|por volta de|em torno de|na faixa de|de)?\s*(?:r\$\s*)?\d+(?:[.,]\d+)?\s*(?:mil|k|reais|conto)\b"
+    r"|r\$\s*\d[\d.,]*"
+)
+
+
+DISSE_QUE_NAO_TEM = re.compile(r"\bnao (temos|tem|encontrei|achei|ha|trabalhamos|vendemos)\b|\bem falta\b|\besgotad")
+
+
+def so_disse_que_nao_tem(texto: str) -> bool:
+    """"Não temos esse modelo no site" (sem oferecer outro): os cartões da busca não vão."""
+    t = sem_acento(texto)
+    oferece = re.search(r"\b(mas|porem|separei|veja|olha|alternativ\w*|opco\w*|opca\w*|(tenho|temos) (estas|estes|essas|esses|outr\w*|alguns|algumas|sim))\b", t)
+    return bool(DISSE_QUE_NAO_TEM.search(t)) and not oferece
+
+
+def sem_precos(texto: str) -> str:
+    """A frase do cliente sem o valor ("notebook pra estudar até 3 mil" -> "notebook pra estudar"),
+    para buscar no catálogo: o valor vai como preço máximo, não como palavra."""
+    return " ".join(PRECO_NA_FRASE.sub(" ", sem_acento(texto)).split())
+
+
 def problemas_da_resposta(texto: str, precos_permitidos: set[float]) -> list[str]:
     """O que impede a resposta de ir para o cliente."""
     problemas = []
@@ -212,6 +234,26 @@ def problemas_de_estilo(texto: str) -> list[str]:
     if len(texto or "") > LIMITE_DE_TEXTO:
         p.append("a resposta está longa demais para WhatsApp: no máximo 4 frases curtas, sem lista (os cartões já mostram os detalhes)")
     return p
+
+
+def encurtar(texto: str, limite: int = LIMITE_DE_TEXTO) -> str:
+    """Resposta comprida demais vira as primeiras frases que cabem, mantendo a pergunta do fim
+    (sem outra ida ao modelo). Uma frase só, enorme, fica como está."""
+    t = (texto or "").strip()
+    if len(t) <= limite:
+        return t
+    frases = [f for f in re.split(r"(?<=[.!?])\s+|\n+", t) if f.strip()]
+    pergunta = frases[-1] if len(frases) > 1 and frases[-1].rstrip().endswith("?") else ""
+    corpo = frases[:-1] if pergunta else frases
+    escolhidas, tamanho = [], len(pergunta)
+    for f in corpo:
+        if escolhidas and tamanho + len(f) + 1 > limite:
+            break
+        escolhidas.append(f)
+        tamanho += len(f) + 1
+    if pergunta:
+        escolhidas.append(pergunta)
+    return " ".join(x.strip() for x in escolhidas).strip() or t
 
 
 def limpar_texto(texto: str) -> str:

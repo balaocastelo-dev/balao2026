@@ -28,8 +28,20 @@ const PADRAO = Object.freeze({
 // Espera depois da última mensagem do cliente antes de responder: cliente de
 // WhatsApp manda três mensagens seguidas ("oi" / "tudo bem?" / "queria ver
 // notebook"). Responder a primeira e ignorar as outras é o pior dos mundos.
-// (AGENTE_ESPERA_MS só para a bancada: a regra da loja é 8 s.)
-const ESPERA_MS = Number(process.env.AGENTE_ESPERA_MS) || 8_000;
+// 6 s (era 8 s até 12/10/2026): o "digitando…" aparece logo que o PC pega a
+// conversa, então a espera curta não deixa o cliente no vácuo.
+// (AGENTE_ESPERA_MS só para a bancada.)
+const ESPERA_MS = Number(process.env.AGENTE_ESPERA_MS) || 6_000;
+// "digitando…" renovado enquanto o PC pensa (o WhatsApp apaga sozinho).
+const DIGITANDO_A_CADA_MS = 12_000;
+// Mensagens que vão para o PC: ele ainda recorta para a conversa de agora
+// (scripts/agente-local/cerebro.py, conversa_atual).
+const HISTORICO_PARA_O_PC = 20;
+// Erros seguidos do PC na mesma conversa até passar para um vendedor. Entre um
+// e outro, a conversa volta para a fila depois desta pausa.
+const ERROS_ATE_CHAMAR_GENTE = 2;
+const ESPERA_DEPOIS_DE_ERRO_MS = 20_000;
+const TEXTO_CHAMEI_VENDEDOR = "Já chamei um vendedor da loja para continuar o seu atendimento 🙂";
 // Mensagem mais velha que isto não é respondida pelo robô: ligar o agente
 // não pode sair respondendo conversa de ontem.
 const JANELA_MS = 45 * 60_000;
@@ -97,7 +109,7 @@ function podeResponder({
   if (situacao?.situacao && situacao.situacao !== "ativo" && (situacao.ate || 0) > agora) {
     return { pode: false, motivo: situacao.situacao === "transferida" ? "pediu um vendedor" : "vendedor respondeu" };
   }
-  if ((situacao?.esperarAte || 0) > agora) return { pode: false, motivo: "o envio falhou; tenta de novo em instantes", espera: true };
+  if ((situacao?.esperarAte || 0) > agora) return { pode: false, motivo: "deu erro; tenta de novo em instantes", espera: true };
   if (!ultima) return { pode: false, motivo: "sem mensagem" };
   if (ultima.direction !== "in") return { pode: false, motivo: "a última mensagem é da loja" };
   // Hora em segundos: no mesmo segundo da última respondida só vale se for outra mensagem.
@@ -218,6 +230,11 @@ module.exports = {
   PUBLICOS,
   PADRAO,
   ESPERA_MS,
+  DIGITANDO_A_CADA_MS,
+  HISTORICO_PARA_O_PC,
+  ERROS_ATE_CHAMAR_GENTE,
+  ESPERA_DEPOIS_DE_ERRO_MS,
+  TEXTO_CHAMEI_VENDEDOR,
   JANELA_MS,
   PRAZO_DO_TRABALHO_MS,
   PAUSA_HUMANO_MS,

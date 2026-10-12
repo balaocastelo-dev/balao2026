@@ -3735,6 +3735,8 @@ async function ligarAgente(db) {
         registrarEnviada(await enviarTexto({ destino: chatId, texto }), { vendedorId: vendedorId || ID_DO_AGENTE, automatico: "agente" }),
       enviarProduto: enviarProdutoDoAgente,
       guardarTranscricao: (id, texto) => guardarTranscricao(id, texto, { provedor: "pc" }),
+      // "digitando…" enquanto o PC pensa; o pedido segura 15 s e é renovado.
+      digitando: (chatId) => evolution.presenca(INSTANCIA, N.paraDestino(chatId), "composing", 15_000),
       avisar: (dados) => {
         paraPainel().emit("whatsapp:agente", dados);
         if (dados?.texto) emitirToast(dados.texto);

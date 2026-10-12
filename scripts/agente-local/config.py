@@ -27,7 +27,16 @@ PADRAO = {
     "ollama_url": "http://127.0.0.1:11434",
     "modelo": "qwen3:14b",
     "modelo_visao": "",  # vazio = o primeiro instalado de MODELOS_DE_VISAO
-    "contexto": 16384,
+    # Contexto do modelo: o MESMO da URA e da fábrica. Se cada um pede um, o
+    # Ollama recarrega o modelo (4 a 8 s) a cada troca. O padrão do Ollama no PC
+    # fica em 8192 (OLLAMA_CONTEXT_LENGTH) e as rotinas da fábrica já usam 8192.
+    "contexto": 8192,
+    # Conversas atendidas ao mesmo tempo. Fica sempre uma vaga do Ollama para a
+    # URA: com OLLAMA_NUM_PARALLEL=3, são 2 da JUL.IA (com 2, só 1).
+    "paralelo": 2,
+    # Tempo máximo de uma resposta. Passou, o cliente recebe "um vendedor vai
+    # continuar" em vez de ficar esperando.
+    "prazo_s": 70,
     # Whisper: o mesmo modelo da URA (já baixado no cache do PC).
     "whisper_modelo": "deepdml/faster-whisper-large-v3-turbo-ct2",
     "whisper_dispositivo": "cuda",

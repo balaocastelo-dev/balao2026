@@ -30,3 +30,8 @@ def pedir(url: str, *, metodo: str = "GET", dados=None, cabecalhos: dict | None 
     except urllib.error.HTTPError as e:
         texto = e.read().decode("utf-8", "ignore")
         raise ErroHttp(e.code, texto, url) from None
+    except urllib.error.URLError as e:
+        # Demora para conectar também é demora: quem chama trata TimeoutError.
+        if isinstance(e.reason, TimeoutError):
+            raise TimeoutError(str(e.reason)) from None
+        raise

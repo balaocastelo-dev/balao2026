@@ -105,6 +105,38 @@ MAX_RODADAS = 6
 MAX_CARTOES = 3
 MAX_ORCAMENTOS_POR_DIA = 3
 
+# O histórico que vai ao modelo: só a conversa de agora. O que aconteceu antes
+# (produtos mostrados, orçamento, dados) está na memória da conversa e vai na
+# "situação". Histórico grande deixa cada resposta mais lenta e não ajuda.
+JANELA_DA_CONVERSA_S = 24 * 3600
+MAX_MENSAGENS_NO_HISTORICO = 16
+MAX_CARACTERES_NO_HISTORICO = 6000
+MAX_CARACTERES_POR_MENSAGEM = 600
+
+# "até 3 mil", "no máximo 2500", "tenho uns 4 mil": vira preço máximo da busca.
+TETO_DE_PRECO = re.compile(r"\b(ate|no maximo|maximo|menos de|abaixo de|uns|umas|por volta|em torno|orcamento de|tenho|gastar)\b")
+
+
+def conversa_atual(mensagens: list[dict] | None) -> list[dict]:
+    """As mensagens que importam para responder agora: últimas 24 h, no máximo 16 e uns 6 mil
+    caracteres (mensagem comprida de vendedor é cortada). Não muda a lista recebida."""
+    msgs = [dict(m) for m in (mensagens or [])]
+    if not msgs:
+        return []
+    ultimo = max((m.get("em") or 0) for m in msgs)
+    if ultimo:
+        msgs = [m for m in msgs if not m.get("em") or m["em"] >= ultimo - JANELA_DA_CONVERSA_S * 1000]
+    msgs = msgs[-MAX_MENSAGENS_NO_HISTORICO:]
+    for m in msgs:
+        t = m.get("texto") or ""
+        if m.get("de") != "cliente" and len(t) > MAX_CARACTERES_POR_MENSAGEM:
+            m["texto"] = t[:MAX_CARACTERES_POR_MENSAGEM].rsplit(" ", 1)[0] + " […]"
+    total = sum(len(m.get("texto") or "") for m in msgs)
+    while len(msgs) > 2 and total > MAX_CARACTERES_NO_HISTORICO:
+        total -= len(msgs[0].get("texto") or "")
+        msgs.pop(0)
+    return msgs
+
 
 def agora_sp() -> str:
     # O PC está no fuso de São Paulo.
@@ -114,8 +146,12 @@ def agora_sp() -> str:
 class Atendimento:
     """Uma rodada: as mensagens novas do cliente viram uma resposta."""
 
-    def __init__(self, *, trabalho: dict, ollama, modelo: str, catalogo, bling, contexto: int = 16384, registrar=print):
+    def __init__(self, *, trabalho: dict, ollama, modelo: str, catalogo, bling, contexto: int = 8192, registrar=print,
+                 prazo_s: float = 70):
+        trabalho = {**trabalho, "mensagens": conversa_atual(trabalho.get("mensagens"))}
         self.t = trabalho
+        self.prazo_s = prazo_s
+        self.medidas: list[dict] = []
         self.ollama = ollama
         self.modelo = modelo
         self.catalogo = catalogo
@@ -204,6 +240,39 @@ class Atendimento:
         """Produtos que o cliente VIU (cartão enviado), na ordem em que viu."""
         ordem = self.memoria.get("mostrados") or []
         return [(i, self.memoria["produtos"][i]) for i in ordem if i in self.memoria["produtos"]]
+
+    def consulta_do_cliente(self) -> str:
+        """O que o cliente pediu, para buscar no catálogo: a fala do áudio entra, a descrição da foto não."""
+        t = self.ultima_do_cliente()
+        t = re.sub(r"\[(foto|v[ií]deo)[^\]]*\]", " ", t, flags=re.I)
+        t = re.sub(r"\[[áa]udio do cliente:\s*([^\]]*)\]", r"\1", t, flags=re.I)
+        t = re.sub(r"\[[^\]]*\]", " ", t)
+        return " ".join(t.split())[:200]
+
+    def _fala_de_produto(self, texto: str) -> bool:
+        from catalogo import TIPOS_CONHECIDOS, palavras
+
+        tipos = TIPOS_CONHECIDOS | getattr(self.catalogo, "_tipos", set())
+        return any(p in tipos or p.rstrip("s") in tipos for p in palavras(texto))
+
+    def _teto(self, texto: str):
+        valores = R.valores_citados(texto)
+        return max(valores) if valores and TETO_DE_PRECO.search(R.sem_acento(texto)) else None
+
+    def _chamar_modelo(self, conversa, inicio, ferramentas=None) -> dict | None:
+        """Uma chamada ao modelo dentro do prazo da resposta. None = estourou o prazo."""
+        resta = self.prazo_s - (time.time() - inicio)
+        if resta < 5:
+            return None
+        try:
+            msg = self.ollama.conversar(self.modelo, conversa, ferramentas=ferramentas, contexto=self.contexto,
+                                        espera=max(5, min(60, int(resta))))
+        except TimeoutError:
+            return None
+        medida = msg.pop("_medida", None) if isinstance(msg, dict) else None
+        if medida:
+            self.medidas.append(medida)
+        return msg
 
     def pediu_produto(self) -> bool:
         """A última mensagem do cliente fala de um tipo de produto?"""
@@ -521,8 +590,40 @@ class Atendimento:
         texto = ""
         usadas: list[str] = []
         empurroes = 0
+        estourou = False
+
+        # Primeiro pedido de produto da conversa: o código já busca (com as
+        # palavras do cliente) antes de chamar o modelo. Ele recebe as opções
+        # prontas e vai direto mostrar e responder: uma ida ao modelo a menos
+        # (antes ele perguntava, levava um empurrão e só depois buscava).
+        if not self._mostrados() and not self.memoria.get("orcamento"):
+            consulta = self.consulta_do_cliente()
+            if self._fala_de_produto(consulta):
+                args = {"busca": R.sem_precos(consulta) or consulta}
+                teto = self._teto(consulta)
+                if teto:
+                    args["preco_maximo"] = teto
+                saida = self.f_buscar_produtos(**args)
+
+                self.registrar(f"[cerebro] busca antes do modelo: {len(saida.get('produtos') or [])} produto(s)")
+                conversa.append({"role": "assistant", "content": "",
+                                 "tool_calls": [{"function": {"name": "buscar_produtos", "arguments": args}}]})
+                conversa.append({"role": "tool", "content": json.dumps(saida, ensure_ascii=False), "tool_name": "buscar_produtos"})
+                usadas.append("buscar_produtos")
+                if saida.get("produtos"):
+                    # O Qwen segue recado como "user" marcado (no resultado da ferramenta ele ignorava
+                    # e listava os produtos com preço, o que os cartões já mostram).
+                    conversa.append({"role": "user", "content": NOTA + (
+                        "Os 3 primeiros produtos da busca já vão para o cliente como cartões, com foto, preço e link "
+                        "(para mandar outros, chame mostrar_produto com os ids). Responda ao cliente com 1 frase curta e "
+                        "1 pergunta (para que vai usar, ou qual prefere). Não liste os produtos e não repita nomes nem preços. "
+                        "Se nenhum servir para o que ele pediu, diga isso.")})
+
         for _ in range(MAX_RODADAS):
-            msg = self.ollama.conversar(self.modelo, conversa, ferramentas=FERRAMENTAS, contexto=self.contexto)
+            msg = self._chamar_modelo(conversa, inicio, ferramentas=FERRAMENTAS)
+            if msg is None:
+                estourou = True
+                break
             chamadas = msg.get("tool_calls") or []
             if not chamadas:
                 texto = R.limpar_texto(msg.get("content") or "")
@@ -554,7 +655,9 @@ class Atendimento:
 
         # Buscou, achou e não mostrou: o texto do modelo fala das opções, então
         # o cliente recebe as duas primeiras (senão "o segundo" não teria a que se referir).
-        if "buscar_produtos" in usadas and not self.cartoes and self.ultimos_achados:
+        # (Se o próprio texto diz que não tem o que o cliente pediu, nada de cartão.)
+        if ("buscar_produtos" in usadas and not self.cartoes and self.ultimos_achados
+                and not R.so_disse_que_nao_tem(texto)):
             for r in self.ultimos_achados[:MAX_CARTOES]:
                 self.f_mostrar_produto(r["id"])
 
@@ -566,15 +669,24 @@ class Atendimento:
             if self.f_emitir_venda().get("ok"):
                 texto = "Muito obrigada pela compra! 😊"
 
+        # Passou do prazo sem resposta: o cliente não fica esperando.
+        if estourou and not texto and not self.extras:
+            if self.cartoes:
+                texto = "Separei estas opções para você 👇 Qual delas te interessa mais?"
+            else:
+                self.registrar(f"[cerebro] passou do prazo ({self.prazo_s:.0f} s): chamo um vendedor")
+                texto = "Deixa eu chamar um vendedor para te atender, só um instante 🙂"
+                self.transferir = self.transferir or {"motivo": "a JUL.IA demorou demais para responder (computador ocupado)"}
+
         # Confere antes de deixar sair. Uma chance de consertar; depois, gente.
         for tentativa in range(2):
             numeros = {str(d["numero"]) for d in (self.memoria.get("orcamento"), self.memoria.get("venda")) if d}
             problemas = (R.problemas_da_resposta(texto, self.precos)
                          + R.afirmacoes_falsas(texto, venda_feita=bool(self.memoria.get("venda")), numeros_validos=numeros)) if texto else ["resposta vazia"]
-            estilo = R.problemas_de_estilo(texto) if texto and tentativa == 0 else []
-            if not problemas and not estilo:
-                break
-            if not problemas and tentativa == 1:
+            if not problemas:
+                # Só comprida demais: o código encurta (sem outra ida ao modelo).
+                if R.problemas_de_estilo(texto):
+                    texto = R.encurtar(texto)
                 break
             if tentativa == 1:
                 self.registrar(f"[cerebro] resposta barrada: {problemas}")
@@ -583,15 +695,10 @@ class Atendimento:
                 self.cartoes = []
                 break
             conversa.append({"role": "assistant", "content": texto})
-            conversa.append({"role": "user", "content": NOTA + "Sua última resposta não pode ir para o cliente: " + "; ".join(problemas + estilo)
+            conversa.append({"role": "user", "content": NOTA + "Sua última resposta não pode ir para o cliente: " + "; ".join(problemas)
                              + ". Reescreva a resposta corrigindo isso (sem chamar ferramentas)."})
-            anterior = texto
-            msg = self.ollama.conversar(self.modelo, conversa, contexto=self.contexto)
-            texto = R.limpar_texto(msg.get("content") or "")
-            # Era só estilo e a reescrita veio vazia ou pior: fica a primeira.
-            if not problemas and (not texto or R.problemas_da_resposta(texto, self.precos)):
-                texto = anterior
-                break
+            msg = self._chamar_modelo(conversa, inicio)
+            texto = R.limpar_texto((msg or {}).get("content") or "")
 
         if self.t.get("primeiraVez") and "JUL.IA" not in texto:
             # Sem "Oi! Aqui é a JUL.IA... Oi, Thiago!": tira a saudação do modelo.
@@ -615,4 +722,12 @@ class Atendimento:
             "transferir": self.transferir,
             "duracaoMs": int((time.time() - inicio) * 1000),
             "modelo": self.modelo,
+            # Só números (para o log do PC): quantas idas ao modelo e onde foi o tempo.
+            "medidas": {
+                "chamadas": len(self.medidas),
+                "modelo_ms": sum(m.get("ms", 0) for m in self.medidas),
+                "carga_ms": sum(m.get("carga_ms", 0) for m in self.medidas),
+                "entrada": sum(m.get("entrada", 0) for m in self.medidas),
+                "saida": sum(m.get("saida", 0) for m in self.medidas),
+            },
         }

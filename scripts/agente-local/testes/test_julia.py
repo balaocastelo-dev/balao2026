@@ -325,6 +325,141 @@ class TestAtendimento(unittest.TestCase):
         self.assertEqual(len([x for x in r["respostas"] if x["tipo"] == "produto"]), 3)
 
 
+class TestRapidez(unittest.TestCase):
+    """O que deixa cada resposta mais rápida (12/10/2026: no PC da loja levava de 18 a 86 s)."""
+
+    def setUp(self):
+        self.cat = catalogo()
+
+    def test_primeiro_pedido_de_produto_ja_vai_com_a_busca(self):
+        nid = self.cat.buscar("notebook")[0]["id"]
+        r, o = atender(trabalho("oi, quero um notebook pra estudar, até 3 mil"), [
+            chamada("mostrar_produto", id=nid), fala("Este serve bem para estudar. Quer ver outros?")], self.cat)
+        self.assertEqual(len(o.recebidas), 2, "mostrar + responder; sem pergunta antes e sem empurrão")
+        busca = next(m for m in o.recebidas[0]["mensagens"] if m.get("tool_calls"))["tool_calls"][0]["function"]["arguments"]
+        self.assertEqual(busca["preco_maximo"], 3000.0, "'até 3 mil' vira preço máximo")
+        self.assertEqual(r["respostas"][1], {"tipo": "produto", "produtoId": nid})
+
+    def test_sem_tipo_de_produto_nao_busca_antes(self):
+        _, o = atender(trabalho("bom dia, tudo bem?"), [fala("Bom dia! Como posso ajudar?")], self.cat)
+        self.assertFalse(any(m["role"] == "tool" for m in o.recebidas[0]["mensagens"]))
+
+    def test_resposta_comprida_e_encurtada_sem_outra_ida_ao_modelo(self):
+        longo = "Este notebook é ótimo para o dia a dia. " * 20 + "Quer que eu faça o orçamento?"
+        mem = {"mostrados": [], "produtos": {}}
+        r, o = atender(trabalho("me fala mais", memoria=mem), [fala(longo), fala("não devia ser chamado")], self.cat)
+        self.assertEqual(len(o.recebidas), 1)
+        texto = r["respostas"][0]["texto"]
+        self.assertLessEqual(len(texto), R.LIMITE_DE_TEXTO)
+        self.assertTrue(texto.endswith("Quer que eu faça o orçamento?"), "a pergunta do fim fica")
+
+    def test_passou_do_prazo_chama_vendedor_em_vez_de_deixar_esperando(self):
+        def demora(_mensagens):
+            raise TimeoutError("timed out")
+
+        r, _ = atender(trabalho("bom dia, tudo bem?"), [demora], self.cat)
+        self.assertIn("vendedor", r["respostas"][0]["texto"])
+        self.assertIn("demorou", r["transferir"]["motivo"])
+
+    def test_passou_do_prazo_depois_de_escolher_os_produtos_manda_os_produtos(self):
+        nid = self.cat.buscar("notebook")[0]["id"]
+
+        def demora(_mensagens):
+            raise TimeoutError("timed out")
+
+        r, _ = atender(trabalho("quero um notebook"), [chamada("mostrar_produto", id=nid), demora], self.cat)
+        self.assertIsNone(r["transferir"])
+        self.assertIn("opções", r["respostas"][0]["texto"])
+        self.assertEqual(r["respostas"][1], {"tipo": "produto", "produtoId": nid})
+
+    def test_historico_so_da_conversa_de_agora(self):
+        from cerebro import conversa_atual
+
+        hora = 3600 * 1000
+        agora = 1_800_000_000_000
+        msgs = [{"id": "velha", "de": "cliente", "texto": "mensagem de anteontem", "em": agora - 48 * hora}]
+        msgs += [{"id": f"v{i}", "de": "loja", "texto": "lista de preços " * 100, "em": agora - hora + i} for i in range(3)]
+        msgs += [{"id": f"c{i}", "de": "cliente", "texto": f"pergunta {i}", "em": agora - 30 * 60_000 + i} for i in range(20)]
+        r = conversa_atual(msgs)
+        ids = [m["id"] for m in r]
+        self.assertNotIn("velha", ids, "mais de 24 h antes da última sai")
+        self.assertLessEqual(len(r), 16)
+        self.assertEqual(ids[-1], "c19")
+        self.assertTrue(all(len(m["texto"]) <= 610 for m in r if m["de"] != "cliente"), "mensagem comprida de vendedor é cortada")
+        self.assertEqual(msgs[1]["texto"], "lista de preços " * 100, "não mexe na lista recebida")
+
+    def test_busca_antes_tira_o_valor_da_frase(self):
+        self.assertEqual(R.sem_precos("quero um notebook pra estudar até 3 mil"), "quero um notebook pra estudar")
+        self.assertEqual(R.sem_precos("pc gamer até R$ 5.000"), "pc gamer ate")
+        self.assertEqual(R.sem_precos("notebook i5 16gb"), "notebook i5 16gb", "16gb não é preço")
+
+    def test_disse_que_nao_tem_nao_manda_cartao(self):
+        self.assertTrue(R.so_disse_que_nao_tem("Não temos esse modelo no site agora. Quer falar com um vendedor?"))
+        self.assertFalse(R.so_disse_que_nao_tem("Não tenho o de 16GB, mas separei estas opções. Alguma serve?"))
+        self.assertFalse(R.so_disse_que_nao_tem("Tenho estas opções. Qual prefere?"))
+
+    def test_notebook_nao_devolve_carregador(self):
+        dados = {"produtos": [
+            {"id": 1, "name": "Fonte Notebook Dell 19.5V 65W", "price": "119,00", "category": "Energia/Fontes para Notebook", "availability": "Disponível"},
+            {"id": 2, "name": "Notebook Acer Aspire 5 Ryzen 5 16GB", "price": "5.185,67", "category": "Computadores/Notebooks/Notebook Acer", "availability": "Disponível"},
+        ]}
+        c = Catalogo(tempfile.mkdtemp(), buscar_remoto=lambda: dados)
+        c.atualizar(forcar=True)
+        self.assertEqual([p["id"] for p in c.buscar("notebook")], ["2"])
+        self.assertEqual([p["id"] for p in c.buscar("fonte notebook dell")], ["1"], "pedindo a fonte, vem a fonte")
+
+    def test_conversas_ao_mesmo_tempo_deixa_uma_vaga_para_a_ura(self):
+        import julia
+
+        self.assertEqual(julia.conversas_ao_mesmo_tempo({"paralelo": 2}, 3), 2)
+        self.assertEqual(julia.conversas_ao_mesmo_tempo({"paralelo": 2}, 2), 1)
+        self.assertEqual(julia.conversas_ao_mesmo_tempo({"paralelo": 2}, 0), 1, "sem saber, uma por vez")
+        self.assertEqual(julia.conversas_ao_mesmo_tempo({"paralelo": 1}, 4), 1)
+
+    def test_midia_que_falhou_nao_e_baixada_de_novo(self):
+        from sentidos import Sentidos
+
+        baixadas = []
+
+        def baixar(ident):
+            baixadas.append(ident)
+            raise RuntimeError("não abriu")
+
+        s = Sentidos({}, None, baixar=baixar, registrar=lambda *_: None)
+        memoria = {}
+        msgs = [{"id": "a1", "de": "cliente", "tipo": "ptt", "texto": "", "midia": {"id": "a1"}}]
+        s.entender([dict(m) for m in msgs], memoria)
+        s.entender([dict(m) for m in msgs], memoria)
+        self.assertEqual(baixadas, ["a1"])
+        self.assertEqual(memoria["midiaQueFalhou"], ["a1"])
+
+    def test_audio_vai_pelo_ffmpeg_e_nao_pelo_pyav(self):
+        import shutil
+        import subprocess
+        from sentidos import Sentidos
+
+        if not shutil.which("ffmpeg"):
+            self.skipTest("sem ffmpeg")
+        # 1 s de tom em ogg/opus, como o áudio do WhatsApp.
+        ogg = subprocess.run(["ffmpeg", "-loglevel", "error", "-f", "lavfi", "-i", "sine=frequency=440:duration=1",
+                              "-c:a", "libopus", "-f", "ogg", "pipe:1"], capture_output=True, check=True).stdout
+        amostras = Sentidos.amostras_de_audio(ogg)
+        self.assertIsNotNone(amostras)
+        self.assertTrue(15000 < len(amostras) < 17000, "16 mil amostras por segundo, mono")
+
+        recebido = {}
+
+        class WhisperFalso:
+            def transcribe(self, entrada, **_):
+                recebido["tipo"] = type(entrada).__name__
+                return [type("S", (), {"text": " oi"})()], None
+
+        s = Sentidos({}, None, baixar=None)
+        s._whisper = WhisperFalso()
+        self.assertEqual(s.transcrever(ogg), "oi")
+        self.assertEqual(recebido["tipo"], "ndarray", "o Whisper recebe as amostras, não o arquivo")
+
+
 class TestBling(unittest.TestCase):
     def setUp(self):
         self.tok = Path(tempfile.mkdtemp()) / "bling_tokens.json"
@@ -419,10 +554,9 @@ class TestTrabalhador(unittest.TestCase):
         t = julia.Trabalhador(cfg, vps)
         nid = catalogo().buscar("notebook")[0]["id"]
         valor = catalogo().buscar("notebook")[0]["preco_a_vista_pix"]
-        # O modelo só pergunta; o código empurra para buscar (o cliente já disse "notebook").
+        # O cliente disse "notebook" (no áudio): o código já busca antes de chamar o
+        # modelo, e ele vai direto mostrar e responder.
         t.ollama = FalsoOllama([
-            fala("Entendi, você quer um notebook. Para estudar ou jogar?"),
-            chamada("buscar_produtos", busca="notebook"),
             chamada("mostrar_produto", id=nid),
             fala(f"Separei este, {valor} no Pix. Para estudar ou jogar?"),
         ])
@@ -433,10 +567,14 @@ class TestTrabalhador(unittest.TestCase):
         self.assertEqual(r["transcricoes"], [{"id": "a1", "texto": "quero um notebook"}])
         self.assertEqual(r["chatId"], "5519984515960@c.us")
         self.assertIn("Para estudar", r["respostas"][0]["texto"])
-        self.assertEqual(r["respostas"][1], {"tipo": "produto", "produtoId": nid}, "o empurrão fez buscar e mostrar")
-        self.assertIn("buscar_produtos agora", t.ollama.recebidas[1]["mensagens"][-1]["content"])
+        self.assertEqual(r["respostas"][1], {"tipo": "produto", "produtoId": nid})
+        self.assertEqual(len(t.ollama.recebidas), 2, "duas idas ao modelo, sem empurrão")
         primeira = t.ollama.recebidas[0]["mensagens"]
-        self.assertIn("[áudio do cliente: quero um notebook]", primeira[-1]["content"])
+        self.assertIn("[áudio do cliente: quero um notebook]", primeira[-4]["content"])
+        self.assertEqual(primeira[-3]["tool_calls"][0]["function"]["arguments"], {"busca": "quero um notebook"},
+                         "a busca usa a fala do áudio, sem o rótulo")
+        self.assertEqual(primeira[-2]["role"], "tool")
+        self.assertIn("Não liste os produtos", primeira[-1]["content"], "e o recado para não repetir os cartões")
         self.assertEqual(vps.batidas[0]["modelo"], "qwen3:14b")
 
     def test_bling_simulado_no_modo_teste(self):
