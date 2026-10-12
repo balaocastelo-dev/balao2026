@@ -1,0 +1,552 @@
+{
+ "manga": {
+  "tipo": "cacho",
+  "px": [
+   1024,
+   1024
+  ],
+  "rugosidade": 0.42,
+  "translucidez_cor": [
+   0.5,
+   0.66,
+   0.14
+  ],
+  "desc": "Mangueira: raminho com dois verticilos de folhas lanceoladas coriáceas, verde-escuras e brilhantes, e um broto de folhas novas cor de cobre/bronze.",
+  "arquivos": {
+   "cor": "folhas/manga.png",
+   "normal": "folhas/manga_n.png"
+  },
+  "carta_m": 0.8,
+  "cobertura": 0.35
+ },
+ "amendoeira": {
+  "tipo": "cacho",
+  "px": [
+   1024,
+   1024
+  ],
+  "rugosidade": 0.48,
+  "translucidez_cor": [
+   0.55,
+   0.7,
+   0.15
+  ],
+  "desc": "Amendoeira-da-praia: roseta de folhas grandes obovadas na ponta do ramo, verde médio-escuro; uma folha avermelhando na roseta de trás.",
+  "arquivos": {
+   "cor": "folhas/amendoeira.png",
+   "normal": "folhas/amendoeira_n.png"
+  },
+  "carta_m": 0.85,
+  "cobertura": 0.383
+ },
+ "amendoeira_vermelha": {
+  "tipo": "cacho",
+  "px": [
+   1024,
+   1024
+  ],
+  "rugosidade": 0.55,
+  "translucidez_cor": [
+   0.85,
+   0.3,
+   0.08
+  ],
+  "desc": "Amendoeira-da-praia no \"outono\" tropical: folhas vermelhas, laranja, amarelas e marrons.",
+  "arquivos": {
+   "cor": "folhas/amendoeira_vermelha.png",
+   "normal": "folhas/amendoeira_vermelha_n.png"
+  },
+  "carta_m": 0.85,
+  "cobertura": 0.373
+ },
+ "jabuticaba": {
+  "tipo": "cacho",
+  "px": [
+   1024,
+   1024
+  ],
+  "rugosidade": 0.4,
+  "translucidez_cor": [
+   0.48,
+   0.66,
+   0.14
+  ],
+  "desc": "Jabuticabeira: raminhos finos com folhinhas opostas lanceoladas, verde-escuras, pares novos cor de salmão nas pontas.",
+  "arquivos": {
+   "cor": "folhas/jabuticaba.png",
+   "normal": "folhas/jabuticaba_n.png"
+  },
+  "carta_m": 0.45,
+  "cobertura": 0.361
+ },
+ "goiaba": {
+  "tipo": "cacho",
+  "px": [
+   1024,
+   1024
+  ],
+  "rugosidade": 0.72,
+  "translucidez_cor": [
+   0.6,
+   0.74,
+   0.2
+  ],
+  "desc": "Goiabeira: folhas ovais foscas, opostas cruzadas, com nervuras laterais paralelas bem marcadas (afundadas em cima, em relevo no mapa normal).",
+  "arquivos": {
+   "cor": "folhas/goiaba.png",
+   "normal": "folhas/goiaba_n.png"
+  },
+  "carta_m": 0.6,
+  "cobertura": 0.358
+ },
+ "citrico": {
+  "tipo": "cacho",
+  "px": [
+   1024,
+   1024
+  ],
+  "rugosidade": 0.38,
+  "translucidez_cor": [
+   0.48,
+   0.68,
+   0.12
+  ],
+  "desc": "Limoeiro/laranjeira: folhas elípticas brilhantes verde-escuras, alternas, pecíolo com asa; ramo verde com espinhos.",
+  "arquivos": {
+   "cor": "folhas/citrico.png",
+   "normal": "folhas/citrico_n.png"
+  },
+  "carta_m": 0.5,
+  "cobertura": 0.343
+ },
+ "fundo": {
+  "tipo": "cacho",
+  "px": [
+   1024,
+   1024
+  ],
+  "rugosidade": 0.6,
+  "translucidez_cor": [
+   0.42,
+   0.58,
+   0.12
+  ],
+  "desc": "Massa de folhagem genérica, densa e mais escura, para árvores longe (atrás dos muros).",
+  "arquivos": {
+   "cor": "folhas/fundo.png",
+   "normal": "folhas/fundo_n.png"
+  },
+  "carta_m": 1.6,
+  "cobertura": 0.362
+ },
+ "trepadeira": {
+  "tipo": "cacho",
+  "px": [
+   1024,
+   1024
+  ],
+  "rugosidade": 0.5,
+  "translucidez_cor": [
+   0.45,
+   0.65,
+   0.12
+  ],
+  "desc": "Trepadeira de muro (unha-de-gato, Ficus pumila): folhinhas cordiformes em hastes rasteiras, quase todas de frente; para cartas encostadas no muro.",
+  "arquivos": {
+   "cor": "folhas/trepadeira.png",
+   "normal": "folhas/trepadeira_n.png"
+  },
+  "carta_m": 0.45,
+  "cobertura": 0.326
+ },
+ "maracuja": {
+  "tipo": "cacho",
+  "px": [
+   1024,
+   1024
+  ],
+  "rugosidade": 0.45,
+  "translucidez_cor": [
+   0.52,
+   0.7,
+   0.14
+  ],
+  "desc": "Maracujazeiro: folhas trilobadas serrilhadas, gavinhas enroladas e uma flor branca e roxa.",
+  "arquivos": {
+   "cor": "folhas/maracuja.png",
+   "normal": "folhas/maracuja_n.png"
+  },
+  "carta_m": 0.6,
+  "cobertura": 0.286
+ },
+ "banana": {
+  "tipo": "tira",
+  "px": [
+   1024,
+   2048
+  ],
+  "rugosidade": 0.55,
+  "translucidez_cor": [
+   0.62,
+   0.78,
+   0.18
+  ],
+  "desc": "Bananeira: verde vivo, nervura central grossa e clara, nervuras laterais finíssimas quase perpendiculares, 8-11 rasgos de vento (transparentes) e margens secas. Pensada para tira \"paddle\" com largura/comprimento ~0,3.",
+  "arquivos": {
+   "cor": "folhas/banana.png",
+   "normal": "folhas/banana_n.png",
+   "normal_webp": "folhas/banana_n.webp"
+  },
+  "cobertura": 0.979
+ },
+ "tropical_larga": {
+  "tipo": "tira",
+  "px": [
+   512,
+   1024
+  ],
+  "rugosidade": 0.45,
+  "translucidez_cor": [
+   0.5,
+   0.7,
+   0.15
+  ],
+  "desc": "Helicônia/estrelítzia: verde médio-escuro, nervuras laterais paralelas a ~60°, dois ou três rasguinhos na margem. Tira \"paddle\", largura/comprimento ~0,3.",
+  "arquivos": {
+   "cor": "folhas/tropical_larga.png",
+   "normal": "folhas/tropical_larga_n.png"
+  },
+  "cobertura": 0.999
+ },
+ "tropical": {
+  "tipo": "tira",
+  "px": [
+   512,
+   1024
+  ],
+  "rugosidade": 0.5,
+  "translucidez_cor": [
+   0.55,
+   0.72,
+   0.16
+  ],
+  "desc": "Folha tropical menor (alpínia, filodendro xanadu): verde médio, nervuras laterais curvas.",
+  "arquivos": {
+   "cor": "folhas/tropical.png",
+   "normal": "folhas/tropical_n.png"
+  },
+  "cobertura": 1.0
+ },
+ "dracena": {
+  "tipo": "tira",
+  "px": [
+   512,
+   1024
+  ],
+  "rugosidade": 0.45,
+  "translucidez_cor": [
+   0.62,
+   0.74,
+   0.2
+  ],
+  "desc": "Dracena \"massangeana\": fita verde com faixa central larga amarelo-esverdeada e nervuras finas paralelas ao comprimento.",
+  "arquivos": {
+   "cor": "folhas/dracena.png",
+   "normal": "folhas/dracena_n.png"
+  },
+  "cobertura": 1.0
+ },
+ "rafis": {
+  "tipo": "tira",
+  "px": [
+   512,
+   1024
+  ],
+  "rugosidade": 0.35,
+  "translucidez_cor": [
+   0.42,
+   0.62,
+   0.12
+  ],
+  "desc": "Segmento de folha de ráfis: verde-escuro brilhante, costelas paralelas, ponta truncada e dentada (recortada no alfa).",
+  "arquivos": {
+   "cor": "folhas/rafis.png",
+   "normal": "folhas/rafis_n.png"
+  },
+  "cobertura": 0.965
+ },
+ "capim": {
+  "tipo": "tira",
+  "px": [
+   512,
+   1024
+  ],
+  "rugosidade": 0.6,
+  "translucidez_cor": [
+   0.58,
+   0.72,
+   0.22
+  ],
+  "desc": "Folhas em fita/capim (moreia, cebolinha, alecrim, liriope): verde a verde-acinzentado, nervuras paralelas finas, base mais escura e pontinha levemente seca.",
+  "arquivos": {
+   "cor": "folhas/capim.png"
+  },
+  "cobertura": 1.0
+ },
+ "grama_preta": {
+  "tipo": "tira",
+  "px": [
+   512,
+   1024
+  ],
+  "rugosidade": 0.45,
+  "translucidez_cor": [
+   0.3,
+   0.42,
+   0.1
+  ],
+  "desc": "Grama-preta (Ophiopogon): verde muito escuro, quase preto, nervuras paralelas finas.",
+  "arquivos": {
+   "cor": "folhas/grama_preta.png"
+  },
+  "cobertura": 1.0
+ },
+ "lima": {
+  "tipo": "tira",
+  "px": [
+   512,
+   1024
+  ],
+  "rugosidade": 0.4,
+  "translucidez_cor": [
+   0.7,
+   0.82,
+   0.22
+  ],
+  "desc": "Folha lanceolada verde-limão brilhante (pacová, manjericão, asplênio) com nervuras laterais.",
+  "arquivos": {
+   "cor": "folhas/lima.png",
+   "normal": "folhas/lima_n.png"
+  },
+  "cobertura": 1.0
+ },
+ "bromelia": {
+  "tipo": "tira",
+  "px": [
+   512,
+   1024
+  ],
+  "rugosidade": 0.35,
+  "translucidez_cor": [
+   0.55,
+   0.7,
+   0.18
+  ],
+  "desc": "Folha de bromélia: verde com faixas transversais prateadas discretas e espinhos miúdos na margem (dentes recortados no alfa); brilhante.",
+  "arquivos": {
+   "cor": "folhas/bromelia.png"
+  },
+  "cobertura": 0.989
+ },
+ "samambaia": {
+  "tipo": "tira",
+  "px": [
+   512,
+   1024
+  ],
+  "rugosidade": 0.55,
+  "translucidez_cor": [
+   0.55,
+   0.72,
+   0.16
+  ],
+  "desc": "Fronde de samambaia como tira: ráquis em u = 0,5 e folíolos dos dois lados; o resto é transparente. Pensada para tira \"lance\" com largura/comprimento ~0,1.",
+  "arquivos": {
+   "cor": "folhas/samambaia.png"
+  },
+  "cobertura": 0.463
+ },
+ "taioba_roxa": {
+  "tipo": "tira",
+  "px": [
+   512,
+   1024
+  ],
+  "rugosidade": 0.7,
+  "translucidez_cor": [
+   0.45,
+   0.1,
+   0.22
+  ],
+  "desc": "Taioba/inhame roxo (Colocasia \"black magic\"): roxo quase preto, aveludado, nervuras mais escuras. Tira \"heart\".",
+  "arquivos": {
+   "cor": "folhas/taioba_roxa.png",
+   "normal": "folhas/taioba_roxa_n.png"
+  },
+  "cobertura": 1.0
+ },
+ "flor_vermelha": {
+  "tipo": "tira",
+  "px": [
+   512,
+   1024
+  ],
+  "rugosidade": 0.35,
+  "translucidez_cor": [
+   0.95,
+   0.25,
+   0.1
+  ],
+  "desc": "Bráctea de helicônia bico-de-papagaio: vermelho cerado, borda e ponta verde-amareladas.",
+  "arquivos": {
+   "cor": "folhas/flor_vermelha.png"
+  },
+  "cobertura": 1.0
+ },
+ "flor_laranja": {
+  "tipo": "tira",
+  "px": [
+   512,
+   1024
+  ],
+  "rugosidade": 0.38,
+  "translucidez_cor": [
+   1.0,
+   0.55,
+   0.12
+  ],
+  "desc": "Bráctea laranja (alpínia/helicônia): laranja com amarelo nas bordas e na ponta.",
+  "arquivos": {
+   "cor": "folhas/flor_laranja.png"
+  },
+  "cobertura": 1.0
+ },
+ "coqueiro": {
+  "tipo": "fronde",
+  "px": [
+   2048,
+   512
+  ],
+  "rugosidade": 0.45,
+  "translucidez_cor": [
+   0.62,
+   0.74,
+   0.18
+  ],
+  "desc": "Um lado da fronde do coqueiro: 86 folíolos estreitos, dobrados em V (no mapa normal), verde-amarelado a verde médio, pontas secas e alguns rasgados.",
+  "arquivos": {
+   "cor": "folhas/coqueiro.png",
+   "normal": "folhas/coqueiro_n.png"
+  },
+  "cobertura": 0.275
+ },
+ "areca": {
+  "tipo": "fronde",
+  "px": [
+   2048,
+   512
+  ],
+  "rugosidade": 0.45,
+  "translucidez_cor": [
+   0.7,
+   0.8,
+   0.22
+  ],
+  "desc": "Um lado da fronde da areca-bambu: mais clara e amarelada, folíolos mais arqueados e densos, ráquis amarela.",
+  "arquivos": {
+   "cor": "folhas/areca.png",
+   "normal": "folhas/areca_n.png"
+  },
+  "cobertura": 0.344
+ },
+ "casca_escura": {
+  "tipo": "casca",
+  "px": [
+   1024,
+   1024
+  ],
+  "tamanho_m": [
+   0.6,
+   0.6
+  ],
+  "rugosidade": 0.9,
+  "desc": "Casca de mangueira/amendoeira/citros: cinza-marrom escura, áspera, fissuras verticais e placas soltando.",
+  "arquivos": {
+   "cor": "casca_escura_c.jpg",
+   "normal": "casca_escura_n.jpg",
+   "orm": "casca_escura_orm.jpg"
+  }
+ },
+ "casca_coqueiro": {
+  "tipo": "casca",
+  "px": [
+   1024,
+   1024
+  ],
+  "tamanho_m": [
+   0.5,
+   0.5
+  ],
+  "rugosidade": 0.87,
+  "desc": "Estipe do coqueiro: cinza-marrom com anéis de cicatriz a cada 6-10 cm e fibras verticais.",
+  "arquivos": {
+   "cor": "casca_coqueiro_c.jpg",
+   "normal": "casca_coqueiro_n.jpg",
+   "orm": "casca_coqueiro_orm.jpg"
+  }
+ },
+ "casca_goiaba": {
+  "tipo": "casca",
+  "px": [
+   1024,
+   1024
+  ],
+  "tamanho_m": [
+   0.5,
+   0.5
+  ],
+  "rugosidade": 0.62,
+  "desc": "Tronco de goiabeira: liso, descascando em placas finas (bege, cinza-esverdeado e marrom-acobreado).",
+  "arquivos": {
+   "cor": "casca_goiaba_c.jpg",
+   "normal": "casca_goiaba_n.jpg",
+   "orm": "casca_goiaba_orm.jpg"
+  }
+ },
+ "casca_jabuticaba": {
+  "tipo": "casca",
+  "px": [
+   1024,
+   1024
+  ],
+  "tamanho_m": [
+   0.5,
+   0.5
+  ],
+  "rugosidade": 0.6,
+  "desc": "Tronco de jabuticabeira: liso, manchado de bege, cinza e marrom claro, soltando lascas.",
+  "arquivos": {
+   "cor": "casca_jabuticaba_c.jpg",
+   "normal": "casca_jabuticaba_n.jpg",
+   "orm": "casca_jabuticaba_orm.jpg"
+  }
+ },
+ "cana": {
+  "tipo": "casca",
+  "px": [
+   1024,
+   1024
+  ],
+  "tamanho_m": [
+   0.3,
+   0.3
+  ],
+  "rugosidade": 0.73,
+  "desc": "Caule de dracena/cana: verde-amarronzado com anéis de cicatriz bem próximos.",
+  "arquivos": {
+   "cor": "cana_c.jpg",
+   "normal": "cana_n.jpg",
+   "orm": "cana_orm.jpg"
+  }
+ }
+}

@@ -75,3 +75,4 @@ scripts/agente-local/.venv/
 /chacara3d/saida
 /chacara3d/modelo/chacara.blend*
 /chacara3d/modelo/__pycache__
+/chacara3d/**/__pycache__

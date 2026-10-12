@@ -1,0 +1,444 @@
+{
+  "convencoes": {
+    "unidade": "metro",
+    "eixos": "glTF Y para cima; o bicho olha para +Z; esquerda do bicho = +X",
+    "origem": "no chão, centrada entre as patas (no meio do corpo)",
+    "animacoes_no_lugar": "nenhuma animação anda com a raiz; o motor desloca o bicho. O osso do corpo (quadril/corpo) só balança (sobe e desce, gira) e é o único que tem translação.",
+    "velocidade": "para as marchas, velocidade_m_s é a velocidade de deslocamento que casa com a passada (pata no chão sem escorregar). Para outra velocidade, ajustar timeScale = v / velocidade_m_s.",
+    "pele": "uma malha com esqueleto (skin), até 4 ossos por vértice, pesos normalizados",
+    "quadros_por_segundo": 30,
+    "canais": "todas as animações têm rotação de todos os ossos (troca de animação sem pose sobrando)",
+    "cabeca": "osso `cabeca` disponível para o olhar procedural por cima da animação",
+    "cor_de_vertice": "COLOR_0 é MÁSCARA (linear), não cor. O GLTFLoader do three.js liga vertexColors sozinho quando há COLOR_0: o motor deve desligar (material.vertexColors = false) e misturar as cores com as máscaras no shader (onBeforeCompile), ex.: cor = R*principal + G*secundaria + B*pele."
+  },
+  "bichos": {
+    "cachorro": {
+      "arquivo": "cachorro.glb",
+      "descricao": "cachorro vira-lata caramelo médio (cernelha ~0,53 m), pelo curto, orelhas semieretas",
+      "materiais_info": {
+        "pelo": {
+          "COLOR_0": {
+            "R": "pelo principal (caramelo)",
+            "G": "pelo claro (creme): focinho de baixo, queixo, garganta, peito, barriga, parte de dentro das patas, pés e ponta da cauda — transições suaves",
+            "B": "pele sem pelo: trufa, almofadas das patas, lábios e boca, pálpebras; dentro da orelha é metade pele, metade creme",
+            "A": "comprimento do pelo: 1 no corpo, ~0,4 na cabeça e nas patas, 0 na pele",
+            "soma": "R + G + B = 1 em todo vértice do pelo"
+          }
+        },
+        "olho": "olhos (malhas separadas presas ao osso cabeca), escuro e brilhante; COLOR_0 = 0",
+        "lingua": "língua (osso lingua, filho da mandibula), escondida na boca fechada; aparece ao ofegar"
+      },
+      "cores_sugeridas_srgb": {
+        "principal": "#c78545",
+        "secundaria": "#edd4a8",
+        "pele": "#291c1a",
+        "olho": "#1a0e08",
+        "lingua": "#cc616b"
+      },
+      "medidas_m": {
+        "altura_cernelha": 0.536,
+        "focinho_ate_base_da_cauda": 0.795,
+        "cauda": 0.35
+      },
+      "triangulos": 8742,
+      "caixa_min_m": [
+        -0.1081,
+        0.0002,
+        -0.5144
+      ],
+      "caixa_max_m": [
+        0.1072,
+        0.6947,
+        0.5327
+      ],
+      "tamanho_m": {
+        "largura_x": 0.215,
+        "altura_y": 0.694,
+        "comprimento_z": 1.047
+      },
+      "ossos": [
+        "raiz",
+        "quadril",
+        "coluna_1",
+        "coluna_2",
+        "coluna_3",
+        "pescoco_1",
+        "pescoco_2",
+        "cabeca",
+        "mandibula",
+        "lingua",
+        "orelha_e",
+        "orelha_e_ponta",
+        "orelha_d",
+        "orelha_d_ponta",
+        "escapula_fe",
+        "braco_fe",
+        "antebraco_fe",
+        "metacarpo_fe",
+        "dedos_fe",
+        "escapula_fd",
+        "braco_fd",
+        "antebraco_fd",
+        "metacarpo_fd",
+        "dedos_fd",
+        "cauda_1",
+        "cauda_2",
+        "cauda_3",
+        "cauda_4",
+        "cauda_5",
+        "coxa_te",
+        "perna_te",
+        "metatarso_te",
+        "dedos_te",
+        "coxa_td",
+        "perna_td",
+        "metatarso_td",
+        "dedos_td"
+      ],
+      "materiais": [
+        "pelo",
+        "olho",
+        "lingua"
+      ],
+      "bytes": 838292,
+      "animacoes": {
+        "parado": {
+          "duracao_s": 4.0,
+          "repete": true,
+          "quadros": 121
+        },
+        "andando": {
+          "duracao_s": 0.7,
+          "repete": true,
+          "quadros": 22,
+          "velocidade_m_s": 0.95
+        },
+        "trotando": {
+          "duracao_s": 0.5,
+          "repete": true,
+          "quadros": 16,
+          "velocidade_m_s": 2.2
+        },
+        "correndo": {
+          "duracao_s": 0.4,
+          "repete": true,
+          "quadros": 13,
+          "velocidade_m_s": 5.0
+        },
+        "farejando": {
+          "duracao_s": 2.4,
+          "repete": true,
+          "quadros": 73,
+          "velocidade_m_s": 0.4
+        },
+        "sentado": {
+          "duracao_s": 4.0,
+          "repete": true,
+          "quadros": 121
+        },
+        "deitado": {
+          "duracao_s": 6.0,
+          "repete": true,
+          "quadros": 181
+        },
+        "abanando": {
+          "duracao_s": 2.0,
+          "repete": true,
+          "quadros": 61
+        },
+        "sentando": {
+          "duracao_s": 0.8,
+          "repete": false,
+          "quadros": 25
+        },
+        "levantando": {
+          "duracao_s": 0.7,
+          "repete": false,
+          "quadros": 22
+        },
+        "deitando": {
+          "duracao_s": 1.4,
+          "repete": false,
+          "quadros": 43
+        },
+        "levantando_do_chao": {
+          "duracao_s": 1.0,
+          "repete": false,
+          "quadros": 31
+        }
+      },
+      "sequencias": {
+        "osso_raiz": "raiz",
+        "osso_corpo": "quadril",
+        "pose_de_ligacao": "em pé (igual ao primeiro quadro de parado)",
+        "uma_vez": {
+          "sentando": "de parado/em pé para sentado",
+          "levantando": "de sentado para em pé",
+          "deitando": "de em pé para deitado (senta e escorrega as patas)",
+          "levantando_do_chao": "de deitado para em pé"
+        },
+        "encadeamento": [
+          "parado -> sentando -> sentado -> levantando -> parado",
+          "parado -> deitando -> deitado -> levantando_do_chao -> parado"
+        ]
+      }
+    },
+    "galinha": {
+      "arquivo": "galinha.glb",
+      "descricao": "galinha caipira vermelha (~0,38 m até o alto da crista), crista simples pequena e barbelas",
+      "materiais_info": {
+        "penas": {
+          "COLOR_0": {
+            "R": "plumagem principal (castanho-avermelhado): corpo, peito, dorso, coberteiras das asas",
+            "G": "plumagem secundária (escura): cauda, rêmiges das asas; o pescoço tem G ~0,25 (um pouco mais escuro)",
+            "B": "0",
+            "A": "0"
+          },
+          "lados": "dois lados (asas e cauda são folhas de penas)"
+        },
+        "crista": "crista, barbelas, lóbulos e a pele vermelha da face",
+        "bico_pernas": "bico, canelas e dedos (amarelo)",
+        "olho": "olhos"
+      },
+      "cores_sugeridas_srgb": {
+        "principal": "#8c421c",
+        "secundaria": "#291a0f",
+        "crista": "#c71a14",
+        "bico_pernas": "#ebb840",
+        "olho": "#8c4c0d"
+      },
+      "medidas_m": {
+        "altura_ate_crista": 0.386,
+        "corpo_peito_ate_uropigio": 0.291
+      },
+      "triangulos": 4077,
+      "caixa_min_m": [
+        -0.088,
+        0.0008,
+        -0.2065
+      ],
+      "caixa_max_m": [
+        0.088,
+        0.3858,
+        0.1406
+      ],
+      "tamanho_m": {
+        "largura_x": 0.176,
+        "altura_y": 0.385,
+        "comprimento_z": 0.347
+      },
+      "ossos": [
+        "raiz",
+        "corpo",
+        "pescoco_1",
+        "pescoco_2",
+        "pescoco_3",
+        "cabeca",
+        "mandibula",
+        "crista",
+        "barbela",
+        "cauda",
+        "cauda_ponta",
+        "asa_e",
+        "asa_e_ponta",
+        "coxa_e",
+        "perna_e",
+        "canela_e",
+        "dedo_e_meio",
+        "dedo_e_ext",
+        "dedo_e_int",
+        "dedo_e_tras",
+        "asa_d",
+        "asa_d_ponta",
+        "coxa_d",
+        "perna_d",
+        "canela_d",
+        "dedo_d_meio",
+        "dedo_d_ext",
+        "dedo_d_int",
+        "dedo_d_tras"
+      ],
+      "materiais": [
+        "penas",
+        "bico_pernas",
+        "crista",
+        "olho"
+      ],
+      "bytes": 353924,
+      "animacoes": {
+        "parada": {
+          "duracao_s": 4.0,
+          "repete": true,
+          "quadros": 121
+        },
+        "andando": {
+          "duracao_s": 0.6667,
+          "repete": true,
+          "quadros": 21,
+          "velocidade_m_s": 0.26
+        },
+        "bicando": {
+          "duracao_s": 2.0,
+          "repete": true,
+          "quadros": 61
+        },
+        "ciscando": {
+          "duracao_s": 3.2,
+          "repete": true,
+          "quadros": 97
+        },
+        "correndo": {
+          "duracao_s": 0.3,
+          "repete": true,
+          "quadros": 10,
+          "velocidade_m_s": 1.6
+        },
+        "sacudindo": {
+          "duracao_s": 1.2,
+          "repete": false,
+          "quadros": 37
+        }
+      },
+      "sequencias": {
+        "osso_raiz": "raiz",
+        "osso_corpo": "corpo",
+        "pose_de_ligacao": "em pé (igual ao primeiro quadro de parada)",
+        "uma_vez": {
+          "sacudindo": "começa e termina em pé, na pose de parada"
+        }
+      }
+    },
+    "galo": {
+      "arquivo": "galo.glb",
+      "descricao": "galo caipira (~0,55 m até o alto da crista), crista serrilhada grande, barbelas compridas, foices e esporões",
+      "materiais_info": {
+        "penas": {
+          "COLOR_0": {
+            "R": "plumagem principal (vermelho-alaranjado): capa do pescoço, dorso e ombros das asas (os ombros têm G ~0,45 para sair um vermelho mais escuro)",
+            "G": "plumagem secundária (preto-esverdeado): peito, barriga, coxas, rêmiges das asas, cauda e foices",
+            "B": "0",
+            "A": "brilho/iridescência das penas: 1 nas foices e na cauda, ~0,5 no peito, 0 no resto",
+            "obs": "no galo a capa do pescoço fica no R porque é laranja e a cauda (G) é preta-esverdeada"
+          },
+          "lados": "dois lados (asas, cauda, foices e capa do pescoço são folhas de penas)"
+        },
+        "crista": "crista, barbelas, lóbulos e a pele vermelha da face",
+        "bico_pernas": "bico, canelas e dedos (amarelo)",
+        "olho": "olhos"
+      },
+      "cores_sugeridas_srgb": {
+        "principal": "#cc5414",
+        "secundaria": "#0f170f",
+        "crista": "#d1140f",
+        "bico_pernas": "#edbd42",
+        "olho": "#99520d"
+      },
+      "medidas_m": {
+        "altura_ate_crista": 0.543,
+        "corpo_peito_ate_uropigio": 0.294
+      },
+      "triangulos": 4571,
+      "caixa_min_m": [
+        -0.0969,
+        0.0016,
+        -0.2933
+      ],
+      "caixa_max_m": [
+        0.0981,
+        0.5433,
+        0.1636
+      ],
+      "tamanho_m": {
+        "largura_x": 0.195,
+        "altura_y": 0.542,
+        "comprimento_z": 0.457
+      },
+      "ossos": [
+        "raiz",
+        "corpo",
+        "pescoco_1",
+        "pescoco_2",
+        "pescoco_3",
+        "cabeca",
+        "mandibula",
+        "crista",
+        "barbela",
+        "cauda",
+        "cauda_ponta",
+        "asa_e",
+        "asa_e_ponta",
+        "coxa_e",
+        "perna_e",
+        "canela_e",
+        "dedo_e_meio",
+        "dedo_e_ext",
+        "dedo_e_int",
+        "dedo_e_tras",
+        "asa_d",
+        "asa_d_ponta",
+        "coxa_d",
+        "perna_d",
+        "canela_d",
+        "dedo_d_meio",
+        "dedo_d_ext",
+        "dedo_d_int",
+        "dedo_d_tras"
+      ],
+      "materiais": [
+        "penas",
+        "bico_pernas",
+        "crista",
+        "olho"
+      ],
+      "bytes": 418404,
+      "animacoes": {
+        "parada": {
+          "duracao_s": 4.0,
+          "repete": true,
+          "quadros": 121
+        },
+        "andando": {
+          "duracao_s": 0.7333,
+          "repete": true,
+          "quadros": 23,
+          "velocidade_m_s": 0.3
+        },
+        "bicando": {
+          "duracao_s": 2.0,
+          "repete": true,
+          "quadros": 61
+        },
+        "ciscando": {
+          "duracao_s": 3.2,
+          "repete": true,
+          "quadros": 97
+        },
+        "correndo": {
+          "duracao_s": 0.3333,
+          "repete": true,
+          "quadros": 11,
+          "velocidade_m_s": 1.8
+        },
+        "sacudindo": {
+          "duracao_s": 1.2,
+          "repete": false,
+          "quadros": 37
+        },
+        "cantando": {
+          "duracao_s": 2.5,
+          "repete": false,
+          "quadros": 76
+        }
+      },
+      "sequencias": {
+        "osso_raiz": "raiz",
+        "osso_corpo": "corpo",
+        "pose_de_ligacao": "em pé (igual ao primeiro quadro de parada)",
+        "uma_vez": {
+          "sacudindo": "começa e termina em pé, na pose de parada",
+          "cantando": "começa e termina em pé, na pose de parada"
+        }
+      }
+    }
+  }
+}
