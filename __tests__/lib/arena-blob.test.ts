@@ -47,6 +47,13 @@ describe("gaveta no Vercel Blob", () => {
     expect(tipoDaGaveta()).toBe("blob");
   });
 
+  it("usa o Blob ligado pelo painel da Vercel (só BLOB_STORE_ID, login OIDC)", () => {
+    delete process.env.BLOB_READ_WRITE_TOKEN;
+    process.env.BLOB_STORE_ID = "store_teste";
+    expect(tipoDaGaveta()).toBe("blob");
+    delete process.env.BLOB_STORE_ID;
+  });
+
   it("guarda em arena/<chave>.json e respeita a versão", async () => {
     const v1 = await gravar("config", { a: 1 }, null);
     expect(loja.has("arena/config.json")).toBe(true);

@@ -13,7 +13,9 @@
 //   fotos/<nome>  fotos dos pilotos
 //
 // Onde fica, na ordem:
-//   1. Vercel Blob (privado) — quando existe BLOB_READ_WRITE_TOKEN;
+//   1. Vercel Blob (privado) — quando existe BLOB_STORE_ID (Blob ligado ao
+//      projeto pelo painel da Vercel, com login OIDC, o jeito novo) ou
+//      BLOB_READ_WRITE_TOKEN (o jeito antigo, com chave);
 //   2. uma pasta (ARENA_GAVETA_DIR) — testes e desenvolvimento;
 //   3. o MySQL (tabela arena_ajustes) — só enquanto o Blob não for criado;
 //   4. memória — sem nada configurado (testes).
@@ -241,7 +243,9 @@ function bancoConfigurado() {
 }
 
 export function tipoDaGaveta(): TipoDeGaveta {
-  if (process.env.BLOB_READ_WRITE_TOKEN) return "blob";
+  // Em 12/10 o Thiago ligou o Blob pelo painel: a Vercel criou só BLOB_STORE_ID
+  // (o login é por OIDC, sem chave). A biblioteca do Blob entende os dois.
+  if (process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_STORE_ID) return "blob";
   if (process.env.ARENA_GAVETA_DIR) return "pasta";
   if (bancoConfigurado()) return "banco";
   return "memoria";

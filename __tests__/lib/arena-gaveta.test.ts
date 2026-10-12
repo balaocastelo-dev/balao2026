@@ -63,6 +63,7 @@ function doc(p: Partial<DocumentoDoBling>): DocumentoDoBling {
 
 beforeEach(() => {
   delete process.env.BLOB_READ_WRITE_TOKEN;
+  delete process.env.BLOB_STORE_ID;
   delete process.env.ARENA_GAVETA_DIR;
   delete process.env.MYSQL_HOST;
   _gavetaDeTeste();
