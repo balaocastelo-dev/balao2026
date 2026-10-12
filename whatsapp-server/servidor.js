@@ -3418,9 +3418,12 @@ io.on("connection", (socket) => {
   // era usado como milissegundos, e o {nome} chegava ao cliente como "{nome}".
   socket.on("panel:send-segmented", async (p) => {
     const lista = Array.isArray(p?.recipients) ? p.recipients : [];
+    // Até 100, como a tela antiga sempre fez: uma aba velha aberta não vira
+    // campanha para a lista inteira de conversas.
     const chatIds = lista
       .map((item) => item?.chatId || (item?.number ? N.paraChatId(item.number, lidParaNumero) : null))
-      .filter(Boolean);
+      .filter(Boolean)
+      .slice(0, 100);
     // {promocao} era preenchido pela tela antiga e não existe na campanha.
     const texto = String(p?.text || "")
       .replace(/^[ \t]*\{promocao\}[ \t]*(\r?\n|$)/gim, "")
