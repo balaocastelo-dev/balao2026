@@ -327,7 +327,7 @@ export function criarCenarios(ctx) {
     for (let i = 0; i < qtd(2); i++) { const t = tipoAdulto(r), [x, y] = pontosAnda[i]; const p = gente(cn, r, t, escolher(VIS.festa[t], r), 'festa', x, y, 0, passeio(pontosAnda, { vel: 0.85, pausa: 6, parados: ['bebendo', 'parado'] })); p.segurar(aderecoBruto('copo_festa')); p.copo = true; }
     cn.hora = 18.6; cn.proj = 'aniversario';
     cn.musica = { estilo: 'aniversario', pontos: [[12.2, 4.75, 0.4]], volume: 0.5 };
-    cn.vista = [19.6, 5.3, 3.3, 0];
+    cn.vista = [21.5, 5.0, 3.22, 0];   // atrás da roda de conversa, olhando a mesa do bolo
     cn.burburinho = [16.5, 5.2, cn.pessoas.length];
     cn.atualizarExtra = (dt, t, c) => {
       for (const m of chamas) m.emissiveIntensity = 2.2 + 0.8 * Math.sin(t * 23) * Math.sin(t * 13.7);

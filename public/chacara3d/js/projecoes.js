@@ -76,7 +76,7 @@ export function criarProjecoes(renderer, cena, camera, extra, M) {
   const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), matVideo); quad.frustumCulled = false; cenaQuad.add(quad);
 
   // ---- furo para o YouTube (como no cineminha)
-  const matFuro = new THREE.ShaderMaterial({ vertexShader: 'void main(){ gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }', fragmentShader: 'void main(){ gl_FragColor = vec4(0.0); }', blending: THREE.NoBlending });
+  const matFuro = new THREE.ShaderMaterial({ vertexShader: 'void main(){ gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }', fragmentShader: 'void main(){ gl_FragColor = vec4(0.0); }', blending: THREE.NoBlending, side: THREE.DoubleSide });
 
   // ---- projetores: geometria de cada um e o aparelho na cena
   const corpoMat = new THREE.MeshStandardMaterial({ color: 0x15171a, roughness: 0.45, metalness: 0.5 });
@@ -85,7 +85,7 @@ export function criarProjecoes(renderer, cena, camera, extra, M) {
   const P = lugares.map((l, i) => {
     const eye = W3(l.de[0], l.de[1], l.de[2]);
     const view = new THREE.Matrix4(), proj = new THREE.Matrix4(), mundo = new THREE.Matrix4();
-    let aspecto = 1, cantos = null, cantosTela = null, alvo;
+    let aspecto = 1, cantos = null, cantosTela = null, cantosYT = null, alvo;
     if (l.tipo === 'plano') {
       const r = l.ret, n = l.normal;
       const cx = (r.x0 + r.x1) / 2, cy = (r.y0 + r.y1) / 2;
@@ -101,7 +101,19 @@ export function criarProjecoes(renderer, cena, camera, extra, M) {
       for (const c of cantos) { v1.copy(c).applyMatrix4(view); vis.push([v1.x, v1.y, c]); xmin = Math.min(xmin, v1.x); xmax = Math.max(xmax, v1.x); ymin = Math.min(ymin, v1.y); ymax = Math.max(ymax, v1.y); d = Math.max(d, -v1.z); }
       // cantos na ordem de quem olha de frente: sup. esq., sup. dir., inf. dir., inf. esq.
       const xm = (xmin + xmax) / 2, ym = (ymin + ymax) / 2;
-      const pega = (sx, sy) => vis.find(q => Math.sign(q[0] - xm) === sx && Math.sign(q[1] - ym) === sy)[2];
+      // o YouTube não pode esticar: usa um retângulo 16:9 dentro da parede, perto da altura dos olhos
+      // e centrado no projetor
+      const largura = Math.hypot(a1[0] - a0[0], a1[1] - a0[1]), altura = r.z1 - r.z0;
+      let lw = largura, lh = largura * 9 / 16;
+      if (lh > altura) { lh = altura; lw = altura * 16 / 9; }
+      const ux = (a1[0] - a0[0]) / largura, uy = (a1[1] - a0[1]) / largura;
+      const tc = clamp((l.de[0] - a0[0]) * ux + (l.de[1] - a0[1]) * uy, lw / 2, largura - lw / 2);
+      const zc = clamp(r.z0 + 2.4, r.z0 + lh / 2, r.z1 - lh / 2);
+      const ponto = (t, z) => W3(a0[0] + ux * t + n[0] * 0.02, a0[1] + uy * t + n[1] * 0.02, z);
+      cantosYT = [ponto(tc - lw / 2, zc - lh / 2), ponto(tc + lw / 2, zc - lh / 2), ponto(tc + lw / 2, zc + lh / 2), ponto(tc - lw / 2, zc + lh / 2)];
+      const visYT = cantosYT.map(c => { v1.copy(c).applyMatrix4(view); return [v1.x, v1.y, c]; });
+      const xmY = visYT.reduce((s, q) => s + q[0], 0) / 4, ymY = visYT.reduce((s, q) => s + q[1], 0) / 4;
+      const pega = (sx, sy) => visYT.find(q => Math.sign(q[0] - xmY) === sx && Math.sign(q[1] - ymY) === sy)[2];
       cantosTela = [pega(-1, 1), pega(1, 1), pega(1, -1), pega(-1, -1)];
       const near = Math.max(0.1, d - l.fundo), far = d + 0.25;
       proj.makePerspective(xmin * near / d, xmax * near / d, ymax * near / d, ymin * near / d, near, far);
@@ -128,8 +140,8 @@ export function criarProjecoes(renderer, cena, camera, extra, M) {
     const rep = aspecto > 1.6 ? [Math.max(1, Math.round(aspecto / 1.15)), 1] : [1, 1];
     // furo do YouTube (só nos planos)
     let furo = null;
-    if (cantos) {
-      const geo = new THREE.BufferGeometry().setFromPoints(cantos); geo.setIndex([0, 1, 2, 0, 2, 3]);
+    if (cantosYT) {
+      const geo = new THREE.BufferGeometry().setFromPoints(cantosYT); geo.setIndex([0, 1, 2, 0, 2, 3]);
       furo = new THREE.Mesh(geo, matFuro); furo.visible = false; furo.renderOrder = 2; cena.add(furo);
     }
     const tile = new THREE.Vector4((i % 4) * LADO / ATLAS_W, Math.floor(i / 4) * LADO / ATLAS_H, LADO / ATLAS_W, LADO / ATLAS_H);
