@@ -5,7 +5,7 @@ Refeita em 12/10/2026 a pedido do Thiago: ligada ao Bling, com cara de jogo de k
 
 **Desde 12/10 à tarde a Arena não usa o MySQL.** O banco da Hostinger tem cota de 500 conexões por hora e,
 quando estoura, para o site inteiro (aconteceu às 8h56 de 12/10). A Arena guarda tudo na "gaveta"
-(`lib/arena/gaveta.ts`): **Vercel Blob privado** quando existe a variável `BLOB_READ_WRITE_TOKEN`;
+(`lib/arena/gaveta.ts`): **Vercel Blob privado** quando existe `BLOB_STORE_ID` (Blob ligado pelo painel da Vercel, login OIDC — é o caso desde 12/10) ou `BLOB_READ_WRITE_TOKEN`;
 sem ela, cai na reserva (tabela `arena_ajustes` do MySQL, chaves `g:…`) com cache mais longo. Quando o Blob é
 criado, a Arena copia sozinha o que estava na reserva (`lib/arena/migracao.ts`).
 
