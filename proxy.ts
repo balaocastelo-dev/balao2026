@@ -95,7 +95,10 @@ const EXCECOES_PUBLICAS = ['/api/coupons/validate']
 // `/api/dashboard` também: são o faturamento, os pedidos e as vendas por
 // vendedor da loja. Estavam abertos em /dashboard para quem tivesse o endereço;
 // hoje esses números só existem dentro do painel.
-const API_PROTEGIDA_SEMPRE = ['/api/seed', '/api/admin/seed-categories', '/api/precos', '/api/dashboard']
+// `/api/entregas/painel`: lista as corridas com nome e endereço de cliente e
+// chama motoboy (custa dinheiro). A cotação do carrinho (/api/entregas/cotar) e
+// o aviso da 99 (/api/entregas/webhook, com segredo próprio) ficam públicos.
+const API_PROTEGIDA_SEMPRE = ['/api/seed', '/api/admin/seed-categories', '/api/precos', '/api/dashboard', '/api/entregas/painel']
 
 /**
  * Endereços protegidos só no caminho exato, não no que vem embaixo.

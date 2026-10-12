@@ -104,7 +104,28 @@ export default function CartPage() {
                   // Keep number and complement if already typed, or clear if needed
               }));
 
-              const options = await getShippingOptions(cep, cartTotal);
+              const options: ShippingOption[] = await getShippingOptions(cep, cartTotal);
+
+              // Motoboy da 99: só entra quando a API real estiver ligada e
+              // liberada para o carrinho (ENTREGA99_NO_CARRINHO=1). Ver lib/entregas.
+              try {
+                  const r = await fetch('/api/entregas/cotar', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ cep, rua: data.logradouro, bairro: data.bairro, cidade: data.localidade, uf: data.uf, valorDosProdutos: cartTotal }),
+                  });
+                  const moto = await r.json();
+                  if (moto?.noCarrinho && moto?.disponivel && moto?.cotacao) {
+                      options.unshift({
+                          name: "Motoboy 99 (hoje)",
+                          days: `cerca de ${moto.cotacao.minutos} min após a separação`,
+                          cost: moto.cotacao.preco,
+                      });
+                  }
+              } catch {
+                  // Sem a cotação do motoboy, ficam as outras opções.
+              }
+
               setShippingOptions(options);
               const cheapestOption = options.reduce((acc, current) => (current.cost < acc.cost ? current : acc), options[0]);
               setShippingSelected(cheapestOption);
