@@ -47,9 +47,12 @@ PADRAO = {
     # não virar pedido de verdade no relatório. true = usar o Bling de verdade
     # também no teste.
     "bling_no_teste": False,
-    # Placa de vídeo: a JUL.IA tem prioridade (Thiago, 12/10/2026). Ela não espera
-    # URA nem render; a fábrica é que cede (placa.py). true = jeito antigo.
+    # Placa de vídeo (Thiago, 12/10/2026): das 8h às 18h a JUL.IA vem primeiro (não
+    # espera URA nem render; a fábrica cede); de madrugada a criação de conteúdo vem
+    # primeiro e a JUL.IA espera (placa.py). true = espera o dia todo.
     "respeitar_placa": False,
+    "prioridade_das": 8,
+    "prioridade_ate": 18,
     "pasta_dados": str(AQUI / "dados"),
     "intervalo_s": 2.0,
 }

@@ -1,10 +1,11 @@
 """A placa de vídeo é uma só, e a JUL.IA vem primeiro.
 
-Decisão do Thiago (12/10/2026): a JUL.IA atende dezenas de vezes mais que a URA
-e é venda acontecendo; ela tem prioridade na placa sobre a URA e sobre os
-renders da fábrica (avatar, capa do blog, vídeos).
+Decisões do Thiago (12/10/2026): das 8h às 18h a JUL.IA tem prioridade na placa
+sobre a URA e sobre os renders da fábrica (ela atende dezenas de vezes mais
+que a URA e é venda acontecendo); de madrugada (fora desse horário) a
+prioridade é da criação de conteúdo, e a JUL.IA espera render e ligação.
 
-Como a prioridade funciona:
+Como a prioridade funciona das 8h às 18h:
 - a JUL.IA não espera nada: nem ligação da URA, nem render da fábrica;
 - quando pega uma conversa, grava em dados/placa-julia.txt até quando precisa
   da placa (agora + 10 min, renovado a cada conversa). A fábrica lê esse sinal
@@ -26,6 +27,9 @@ import os
 import subprocess
 import time
 from pathlib import Path
+
+# Horário em que a JUL.IA vem primeiro (fora dele, a fábrica vem primeiro).
+PRIORIDADE_DAS, PRIORIDADE_ATE = 8, 18
 
 # O sinal que a fábrica lê (o caminho está escrito também nos arquivos dela).
 ARQUIVO_DO_SINAL = "placa-julia.txt"
@@ -106,9 +110,11 @@ def fabrica_que_nao_cede(pasta: Path = FABRICA) -> list[str]:
 
 class Placa:
     def __init__(self, pasta_dados: str | None = None, respeitar: bool = False, validade_s: float = 15,
-                 memoria_livre=memoria_livre_gb, dormir=time.sleep, agora=time.time):
-        # respeitar=True volta ao jeito antigo (a JUL.IA espera URA e render). Desde 12/10 é False.
+                 memoria_livre=memoria_livre_gb, dormir=time.sleep, agora=time.time,
+                 das: int = PRIORIDADE_DAS, ate: int = PRIORIDADE_ATE):
+        # respeitar=True: a JUL.IA espera URA e render o dia todo (o jeito antigo).
         self.respeitar = respeitar
+        self.das, self.ate = das, ate
         self.validade_s = validade_s
         self.sinal = Path(pasta_dados) / ARQUIVO_DO_SINAL if pasta_dados else None
         self.memoria_livre = memoria_livre
@@ -118,9 +124,17 @@ class Placa:
         self._motivo = None
 
     # ------------------------------------------------------------ prioridade
+    def julia_primeiro(self) -> bool:
+        """Das 8h às 18h (hora do PC, São Paulo) a placa é da JUL.IA; fora disso, da fábrica."""
+        if self.respeitar:
+            return False
+        hora = time.localtime(self.agora()).tm_hour
+        return self.das <= hora < self.ate
+
     def pedir(self, minutos: float = MINUTOS_DE_PRIORIDADE):
-        """A JUL.IA vai precisar da placa: a fábrica cede (lê este arquivo junto com a URA)."""
-        if not self.sinal:
+        """A JUL.IA vai precisar da placa: a fábrica cede (lê este arquivo junto com a URA).
+        Só no horário dela; de madrugada a fábrica não é interrompida."""
+        if not self.sinal or not self.julia_primeiro():
             return
         try:
             ate = self.agora() + minutos * 60
@@ -141,10 +155,11 @@ class Placa:
                 return self.agora() - inicio
             self.dormir(2)
 
-    # ------------------------------------------------------------ jeito antigo
+    # ------------------------------------------------------------ madrugada
     def ocupada(self) -> str | None:
-        """Motivo para esperar (só com respeitar=True), ou None."""
-        if not self.respeitar:
+        """Motivo para a JUL.IA esperar, ou None. No horário dela, nunca espera; de madrugada
+        espera ligação da URA e render da fábrica (a criação de conteúdo vem primeiro)."""
+        if self.julia_primeiro():
             return None
         if time.time() - self._em < self.validade_s:
             return self._motivo
