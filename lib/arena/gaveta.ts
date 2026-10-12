@@ -25,7 +25,7 @@
 // ============================================================
 
 import { createHash } from "crypto";
-import { get, put, BlobPreconditionFailedError } from "@vercel/blob";
+import { get, head, put, BlobNotFoundError, BlobPreconditionFailedError } from "@vercel/blob";
 import { promises as fs } from "fs";
 import path from "path";
 
@@ -45,12 +45,13 @@ export class ConflitoDeVersao extends Error {
 interface Backend {
   tipo: TipoDeGaveta;
   ler(chave: string): Promise<Lido<string>>;
-  /** versao null = só grava se ainda não existir. */
+  /** versao null = só grava se ainda não existir; "*" = grava por cima, sem conferir. */
   gravar(chave: string, texto: string, versao: string | null, tipoConteudo?: string): Promise<string>;
   lerArquivo?(chave: string): Promise<{ corpo: Buffer; tipo: string } | null>;
   gravarArquivo?(chave: string, corpo: Buffer, tipo: string): Promise<void>;
 }
 
+const POR_CIMA = "*";
 const resumo = (texto: string) => createHash("sha1").update(texto).digest("hex");
 const valida = (chave: string) => {
   if (!/^[a-z0-9][a-z0-9/_.-]{0,120}$/i.test(chave) || chave.includes("..")) throw new Error(`Chave inválida: ${chave}`);
@@ -64,10 +65,20 @@ function backendBlob(): Backend {
   return {
     tipo: "blob",
     async ler(chave) {
+      // A versão vem do head(): é a mesma etag que o put() confere no ifMatch.
+      // A etag do download (get) é outra — com ela toda gravação dava conflito
+      // e o painel mostrava "muitas escritas ao mesmo tempo" (12/10).
+      let versao: string;
+      try {
+        versao = (await head(caminho(chave))).etag;
+      } catch (e) {
+        if (e instanceof BlobNotFoundError) return { dados: null, versao: null };
+        throw e;
+      }
       const r = await get(caminho(chave), { access: "private", useCache: false });
       if (!r || r.statusCode !== 200) return { dados: null, versao: null };
       const texto = await new Response(r.stream).text();
-      return { dados: texto, versao: r.blob.etag };
+      return { dados: texto, versao };
     },
     async gravar(chave, texto, versao, tipoConteudo = "application/json") {
       try {
@@ -75,16 +86,17 @@ function backendBlob(): Backend {
           access: "private",
           addRandomSuffix: false,
           allowOverwrite: versao !== null,
-          ...(versao ? { ifMatch: versao } : {}),
+          ...(versao && versao !== POR_CIMA ? { ifMatch: versao } : {}),
           contentType: tipoConteudo,
           cacheControlMaxAge: 60,
         });
         return r.etag;
       } catch (e) {
         const msg = String((e as Error)?.message || "");
-        if (e instanceof BlobPreconditionFailedError || /precondition|already exists|exists/i.test(msg)) {
+        if (e instanceof BlobPreconditionFailedError || /already exists/i.test(msg)) {
           throw new ConflitoDeVersao(chave);
         }
+        console.error(`[arena:gaveta] falha ao gravar "${chave}" no Blob:`, msg);
         throw e;
       }
     },
@@ -116,7 +128,7 @@ function backendPasta(dir: string): Backend {
     async gravar(chave, texto, versao) {
       await fs.mkdir(dir, { recursive: true });
       const atual = await this.ler(chave);
-      if ((versao ?? null) !== (atual.versao ?? null)) throw new ConflitoDeVersao(chave);
+      if (versao !== POR_CIMA && (versao ?? null) !== (atual.versao ?? null)) throw new ConflitoDeVersao(chave);
       await fs.writeFile(arq(chave), texto, "utf8");
       return resumo(texto);
     },
@@ -197,10 +209,16 @@ function backendBanco(): Backend {
         }
         return nova;
       }
-      const r = await db.execute({
-        sql: "UPDATE arena_ajustes SET valor = ?, versao = ?, atualizado_em = ? WHERE chave = ? AND (versao = ? OR (versao IS NULL AND SHA1(valor) = ?))",
-        args: [texto, nova, new Date().toISOString(), chaveNoBanco(chave), versao, versao],
-      });
+      const r =
+        versao === POR_CIMA
+          ? await db.execute({
+              sql: "UPDATE arena_ajustes SET valor = ?, versao = ?, atualizado_em = ? WHERE chave = ?",
+              args: [texto, nova, new Date().toISOString(), chaveNoBanco(chave)],
+            })
+          : await db.execute({
+              sql: "UPDATE arena_ajustes SET valor = ?, versao = ?, atualizado_em = ? WHERE chave = ? AND (versao = ? OR (versao IS NULL AND SHA1(valor) = ?))",
+              args: [texto, nova, new Date().toISOString(), chaveNoBanco(chave), versao, versao],
+            });
       if (!r.rowsAffected) throw new ConflitoDeVersao(chave);
       return nova;
     },
@@ -220,7 +238,7 @@ function backendMemoria(): Backend {
     },
     async gravar(chave, texto, versao) {
       const atual = m.get(valida(chave));
-      if ((versao ?? null) !== (atual == null ? null : resumo(atual))) throw new ConflitoDeVersao(chave);
+      if (versao !== POR_CIMA && (versao ?? null) !== (atual == null ? null : resumo(atual))) throw new ConflitoDeVersao(chave);
       m.set(chave, texto);
       return resumo(texto);
     },
@@ -300,20 +318,31 @@ export async function gravar<T>(chave: string, dados: T, versao: string | null):
  * `mudar` devolve o documento novo, ou `undefined` para não gravar nada.
  */
 export async function atualizar<T>(chave: string, padrao: () => T, mudar: (atual: T) => T | undefined | Promise<T | undefined>): Promise<T> {
-  for (let tentativa = 0; tentativa < 6; tentativa++) {
+  const TENTATIVAS = 6;
+  for (let tentativa = 0; tentativa < TENTATIVAS; tentativa++) {
     const { dados, versao } = await ler<T>(chave);
     const atual = dados ?? padrao();
     const novo = await mudar(structuredClone(atual));
     if (novo === undefined) return atual;
+    // Última volta: grava por cima, sem conferir a versão. Na Arena quem
+    // escreve é o painel (uma pessoa) e o vigia (de 2 em 2 min); é melhor
+    // gravar o que acabou de ser lido do que deixar o painel travado.
+    const ultima = tentativa === TENTATIVAS - 1;
     try {
-      await gravar(chave, novo, versao);
+      await (ultima && versao ? gravarPorCima(chave, novo) : gravar(chave, novo, versao));
+      if (ultima) console.warn(`[arena:gaveta] "${chave}" gravado sem conferir a versão depois de ${TENTATIVAS - 1} conflitos`);
       return novo;
     } catch (e) {
       if (!(e instanceof ConflitoDeVersao)) throw e;
-      await new Promise((r) => setTimeout(r, 80 + Math.random() * 220));
+      await new Promise((r) => setTimeout(r, 80 + Math.random() * 220 * (tentativa + 1)));
     }
   }
   throw new Error(`Não consegui gravar "${chave}": muitas escritas ao mesmo tempo. Tente de novo.`);
+}
+
+/** Gravação sem conferir a versão (só a última tentativa de `atualizar`). */
+async function gravarPorCima<T>(chave: string, dados: T) {
+  return backend().gravar(chave, JSON.stringify(dados), POR_CIMA);
 }
 
 export function guardaArquivos(): boolean {
