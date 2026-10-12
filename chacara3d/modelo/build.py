@@ -105,6 +105,24 @@ m_plain('house_white', (0.90, 0.87, 0.79), 0.9, noise=0.04, nscale=2.0, bump=0.0
 m_plain('glass_dark', (0.03, 0.07, 0.09), 0.04)
 m_plain('acc_blue', (0.035, 0.19, 0.44), 0.55); m_plain('acc_yellow', (0.80, 0.48, 0.05), 0.55); m_plain('acc_green', (0.06, 0.34, 0.27), 0.55)
 m_plain('hen_w', (0.9, 0.88, 0.82), 0.9); m_plain('hen_b', (0.42, 0.22, 0.10), 0.9)
+m_plain('crista', (0.70, 0.02, 0.03), 0.3)
+# interior das tiny houses
+m_plain('piso_madeira', (0.45, 0.32, 0.20), 0.35, noise=0.1, nscale=4)
+m_plain('azulejo', (0.90, 0.90, 0.88), 0.1)
+m_plain('forro', (0.62, 0.45, 0.25), 0.6, noise=0.15, nscale=8)
+m_plain('louca', (0.92, 0.92, 0.90), 0.08)
+m_plain('espelho', (0.90, 0.90, 0.90), 0.02, **{'Metallic': 1.0})
+m_plain('vidro', (0.80, 0.90, 0.90), 0.02, **{'Alpha': 0.15})
+m_plain('armario', (0.85, 0.84, 0.80), 0.4)
+m_plain('tecido_branco', (0.85, 0.84, 0.80), 0.95)
+m_plain('tecido_cinza', (0.35, 0.35, 0.36), 0.95)
+m_plain('tecido_terra', (0.50, 0.25, 0.14), 0.95)
+m_plain('tecido_azul', (0.12, 0.22, 0.40), 0.95)
+m_plain('tecido_amarelo', (0.75, 0.55, 0.15), 0.95)
+m_plain('tecido_verde', (0.20, 0.38, 0.28), 0.95)
+m_plain('cortina', (0.85, 0.82, 0.74), 0.95)
+m_plain('abajur', (0.95, 0.88, 0.72), 0.9)
+m_plain('quadro', (0.35, 0.45, 0.30), 0.6)
 
 # ------------------------------------------------------------------ constantes
 WH = 2.3                      # altura do muro
@@ -556,7 +574,7 @@ box('mulch', 2.3, 5.25, 7.6, 9.8, 0, 0.02)
 for hx, hy, hm in ((3.2, 8.4, 'hen_w'), (4.3, 9.0, 'hen_b'), (4.6, 8.1, 'hen_b')):
     ellipsoid(hm, (hx, hy, 0.25), (0.17, 0.11, 0.13), seg=10, rings=6)
     ellipsoid(hm, (hx + 0.15, hy, 0.4), 0.06, seg=8, rings=5)
-    ellipsoid('fruit_red', (hx + 0.16, hy, 0.47), (0.03, 0.012, 0.025), seg=6, rings=4)
+    ellipsoid('crista', (hx + 0.16, hy, 0.47), (0.03, 0.012, 0.025), seg=6, rings=4)
 
 
 # ------------------------------------------------------------------ objetos de decoração
@@ -643,94 +661,331 @@ def path_y(x):
     return 4.9 + 0.85 * math.sin(x / 4.6)
 
 
-def tiny_house(x0, x1, side, acc, door_dx=1.3, win_dx=3.4):
-    """side 0: fundos no muro do lado da piscina (y=0); side 1: fundos no outro muro (y=10)."""
-    sg = 1 if side == 0 else -1
-    yr = 0.0 if side == 0 else 10.0
-    yf = yr + sg * HD
-    zr = HZH - 0.16; zf = HZH - HSL * HD - 0.16
-    ya, yb = (yr, yf) if side == 0 else (yf, yr)
-    za, zb2 = (zr, zf) if side == 0 else (zf, zr)
-    G['house_white'].add([[x0, ya, 0], [x1, ya, 0], [x1, yb, 0], [x0, yb, 0], [x0, ya, za], [x1, ya, za], [x1, yb, zb2], [x0, yb, zb2]], BOXF)
+class Casa:
+    """Referência local de uma tiny house: u corre ao longo do muro a partir da ponta da porta
+    (espelhado na casa azul), d é a distância a partir do muro de fundo (0) até a frente (HD)."""
 
-    def fy(d):
-        return yf + sg * d
+    def __init__(self, x0, x1, side, espelho):
+        self.x0, self.x1, self.side, self.esp = x0, x1, side, espelho
+        self.sg = 1 if side == 0 else -1
+        self.yr = 0.0 if side == 0 else 10.0
 
-    def fbox(mat, xa, xb, d0, d1, z0, z1):
-        ys = sorted((fy(d0), fy(d1)))
-        box(mat, xa, xb, ys[0], ys[1], z0, z1)
+    def X(self, u):
+        return self.x1 - u if self.esp else self.x0 + u
 
-    # barrado colorido na base das três faces livres
-    fbox(acc, x0 - 0.02, x1 + 0.02, 0.0, 0.02, 0.0, 0.55)
-    box(acc, x0 - 0.02, x0, min(ya, yb), max(ya, yb), 0.0, 0.55); box(acc, x1, x1 + 0.02, min(ya, yb), max(ya, yb), 0.0, 0.55)
-    # porta
-    xd = x0 + door_dx
-    fbox(acc, xd - 0.52, xd + 0.52, 0.02, 0.035, 0.1, 2.24)
-    fbox('house_white', xd - 0.43, xd + 0.43, 0.035, 0.045, 0.1, 2.16)
-    fbox(acc, xd - 0.41, xd + 0.41, 0.045, 0.07, 0.1, 2.14)
-    for zz in (0.3, 1.2):
-        fbox('house_white', xd - 0.3, xd + 0.3, 0.07, 0.075, zz, zz + 0.75)
-        fbox(acc, xd - 0.27, xd + 0.27, 0.075, 0.082, zz + 0.03, zz + 0.72)
-    ellipsoid('inox', (xd + 0.33, fy(0.1), 1.1), 0.03, seg=8, rings=5)
-    fbox('stone_cut', xd - 0.9, xd + 0.9, 0.0, 0.75, 0.0, 0.1)
-    fbox('metal_dark', xd + 0.66, xd + 0.74, 0.02, 0.12, 1.9, 1.96)
-    ellipsoid('bulb', (xd + 0.7, fy(0.13), 1.83), 0.055, seg=8, rings=6)
-    # janela com venezianas abertas e uma floreira
-    xw = x0 + win_dx
-    fbox(acc, xw - 0.74, xw + 0.74, 0.02, 0.04, 0.96, 2.14)
-    fbox('glass_dark', xw - 0.65, xw + 0.65, 0.04, 0.05, 1.05, 2.05)
-    fbox(acc, xw - 0.02, xw + 0.02, 0.05, 0.06, 1.05, 2.05); fbox(acc, xw - 0.65, xw + 0.65, 0.05, 0.06, 1.53, 1.57)
+    def Y(self, d):
+        return self.yr + self.sg * d
+
+    def fx(self, ua, ub):
+        a, b = self.X(ua), self.X(ub)
+        return min(a, b), max(a, b)
+
+    def fy(self, da, db):
+        a, b = self.Y(da), self.Y(db)
+        return min(a, b), max(a, b)
+
+    def p(self, u, d, z):
+        return (self.X(u), self.Y(d), z)
+
+    def caixa(self, mat, ua, ub, da, db, z0, z1, col=False):
+        xa, xb = self.fx(ua, ub); ya, yb = self.fy(da, db)
+        box(mat, xa, xb, ya, yb, z0, z1)
+        if col:
+            colisor(xa, xb, ya, yb, z0, z1)
+
+    def colide(self, ua, ub, da, db, z0, z1):
+        xa, xb = self.fx(ua, ub); ya, yb = self.fy(da, db)
+        colisor(xa, xb, ya, yb, z0, z1)
+
+    def prisma(self, mat, ua, ub, da, db, z0, topo, col=False):
+        """Caixa com o topo inclinado acompanhando o telhado (topo(d) dá a altura)."""
+        xa, xb = self.fx(ua, ub)
+        d0, d1 = (da, db) if self.Y(da) <= self.Y(db) else (db, da)
+        y0, y1 = self.Y(d0), self.Y(d1)
+        t0, t1 = topo(d0), topo(d1)
+        G[mat].add([[xa, y0, z0], [xb, y0, z0], [xb, y1, z0], [xa, y1, z0],
+                    [xa, y0, t0], [xb, y0, t0], [xb, y1, t1], [xa, y1, t1]], BOXF)
+        if col:
+            colisor(xa, xb, y0, y1, z0, max(t0, t1))
+
+    def laje(self, mat, ua, ub, da, db, topo, esp):
+        """Placa fina inclinada acompanhando o telhado (forro)."""
+        xa, xb = self.fx(ua, ub)
+        d0, d1 = (da, db) if self.Y(da) <= self.Y(db) else (db, da)
+        y0, y1 = self.Y(d0), self.Y(d1)
+        t0, t1 = topo(d0), topo(d1)
+        G[mat].add([[xa, y0, t0 - esp], [xb, y0, t0 - esp], [xb, y1, t1 - esp], [xa, y1, t1 - esp],
+                    [xa, y0, t0], [xb, y0, t0], [xb, y1, t1], [xa, y1, t1]], BOXF)
+
+    def parede_u(self, mat, ua, ub, da, db, aberturas, topo):
+        """Parede ao longo de u (frente ou fundo) com vãos [(u0, u1, z0, z1)]."""
+        cortes = sorted(set([ua, ub] + [c for a in aberturas for c in a[:2] if ua < c < ub]))
+        for a, b in zip(cortes[:-1], cortes[1:]):
+            vaos = sorted([o for o in aberturas if o[0] <= a + 1e-6 and o[1] >= b - 1e-6], key=lambda o: o[2])
+            z = 0.0
+            for o in vaos:
+                if o[2] - z > 1e-4:
+                    self.caixa(mat, a, b, da, db, z, o[2], col=z < 1.9)
+                z = o[3]
+            self.prisma(mat, a, b, da, db, z, topo, col=z < 1.9)
+
+    def parede_d(self, mat, ua, ub, da, db, aberturas, topo):
+        """Parede ao longo de d (pontas da casa) com vãos [(d0, d1, z0, z1)]."""
+        cortes = sorted(set([da, db] + [c for a in aberturas for c in a[:2] if da < c < db]))
+        for a, b in zip(cortes[:-1], cortes[1:]):
+            vaos = sorted([o for o in aberturas if o[0] <= a + 1e-6 and o[1] >= b - 1e-6], key=lambda o: o[2])
+            z = 0.0
+            for o in vaos:
+                if o[2] - z > 1e-4:
+                    self.caixa(mat, ua, ub, a, b, z, o[2], col=z < 1.9)
+                z = o[3]
+            self.prisma(mat, ua, ub, a, b, z, topo, col=z < 1.9)
+
+
+EXTRA = {'colisores': [], 'pisos': [], 'portas': [], 'luzes': [], 'ventiladores': [], 'lugares': [], 'casas': []}
+
+
+def colisor(x0, x1, y0, y1, z0, z1):
+    EXTRA['colisores'].append([round(min(x0, x1), 3), round(max(x0, x1), 3), round(min(y0, y1), 3), round(max(y0, y1), 3),
+                               round(z0, 3), round(z1, 3)])
+
+
+TP = 0.12          # espessura das paredes das casinhas
+PISO = 0.10        # o piso de dentro fica 10 cm acima do gramado
+
+
+def tiny_house(x0, x1, side, acc, tecido, nome, espelho=False, beliche=False):
+    """Tiny house de 5 x 2,8 m encostada no muro, oca, com banheiro, cama e copa.
+    Planta local: porta em u 0,85-1,75; janela da frente em u 2,75-4,05; copa na ponta da porta;
+    cama no meio; banheiro no fundo da outra ponta, com a janelinha alta; mesinha na frente do banheiro."""
+    c = Casa(x0, x1, side, espelho)
+    zr = HZH - 0.16
+    zf = HZH - HSL * HD - 0.16
+
+    def topo(d):
+        return zr + (zf - zr) * d / HD
+
+    U1 = 5.0
+    porta = (0.85, 1.75, PISO, 2.24)
+    janela = (2.75, 4.05, 1.05, 2.05)
+    janelinha = (0.25, 0.85, 1.69, 2.09)
+    # --- paredes (o fundo encosta no muro do terreno)
+    c.parede_u('house_white', 0.0, U1, HD - TP, HD, [porta, janela], topo)
+    c.parede_u('house_white', 0.0, U1, 0.0, TP, [], topo)
+    c.parede_d('house_white', 0.0, TP, TP, HD - TP, [], topo)
+    c.parede_d('house_white', U1 - TP, U1, TP, HD - TP, [janelinha], topo)
+    # --- piso, forro de madeira acompanhando o telhado, duas vigas aparentes
+    c.caixa('piso_madeira', TP, U1 - TP, TP, HD - TP, 0.0, PISO)
+    c.caixa('piso_madeira', porta[0], porta[1], HD - TP, HD, 0.0, PISO)
+    xa, xb = c.fx(TP, U1 - TP)
+    EXTRA['pisos'].append([round(xa, 3), round(xb, 3)] + [round(v, 3) for v in c.fy(TP, HD - TP)] + [PISO])
+    EXTRA['pisos'].append([round(v, 3) for v in c.fx(porta[0], porta[1])] + [round(v, 3) for v in c.fy(HD - TP - 0.01, HD + 0.76)] + [PISO])
+    c.laje('forro', TP, U1 - TP, TP, HD - TP, topo, 0.03)        # forro inclinado logo abaixo do telhado
+    for d in (0.95, 1.85):
+        zt = topo(d)
+        c.caixa('wood_x', TP, U1 - TP, d - 0.05, d + 0.05, zt - 0.14, zt)
+    # --- banheiro: divisórias, porta de correr aberta, revestimento
+    c.parede_d('house_white', 3.25, 3.33, TP, 1.68, [], topo)
+    c.parede_u('house_white', 3.33, U1 - TP, 1.60, 1.68, [(3.45, 4.05, PISO, 2.15)], topo)
+    c.caixa('armario', 3.97, 4.67, 1.685, 1.72, PISO, 2.13)
+    c.caixa('inox', 4.0, 4.04, 1.72, 1.735, 0.95, 1.25)
+    c.caixa('azulejo', 3.33, U1 - TP, TP, 1.60, PISO, PISO + 0.004)
+    c.caixa('azulejo', 3.33, U1 - TP, TP, TP + 0.006, PISO, 2.1)
+    c.caixa('azulejo', U1 - TP - 0.006, U1 - TP, TP, 1.60, PISO, 2.1)
+    c.caixa('azulejo', 3.33, 3.336, TP, 1.60, PISO, 2.1)
+    for a, b in ((3.33, 3.45), (4.05, U1 - TP)):
+        c.caixa('azulejo', a, b, 1.594, 1.60, PISO, 2.1)
+    # box do chuveiro no canto do fundo
+    c.caixa('vidro', 4.08, 4.09, TP, 0.92, PISO, 2.0, col=True)
+    c.caixa('vidro', 4.08, 4.50, 0.915, 0.925, PISO, 2.0, col=True)
+    c.caixa('inox', 4.08, 4.10, 0.905, 0.935, PISO, 2.0)
+    tube('inox', [c.p(U1 - TP, 0.5, 2.02), c.p(4.62, 0.5, 2.02)], 0.012, seg=6)
+    cyl('inox', c.p(4.62, 0.5, 1.98), 0.1, 0.03, seg=16)
+    disc('granite', c.p(4.5, 0.5, 0.0)[:2], 0.05, PISO + 0.006, seg=12)
+    # vaso sanitário com caixa acoplada
+    c.caixa('louca', 3.53, 3.91, TP, 0.30, 0.42, 0.80)
+    c.caixa('louca', 3.60, 3.84, 0.30, 0.62, PISO, 0.30)
+    ellipsoid('louca', c.p(3.72, 0.55, 0.32), (0.18, 0.26, 0.12), seg=14, rings=8)
+    ellipsoid('white', c.p(3.72, 0.56, 0.43), (0.18, 0.25, 0.012), seg=14, rings=4)
+    c.colide(3.53, 3.91, TP, 0.82, PISO, 0.6)
+    # gabinete com cuba e espelho na parede da ponta
+    c.caixa('armario', 4.43, U1 - TP, 1.02, 1.57, PISO, 0.80, col=True)
+    c.caixa('granite', 4.40, U1 - TP, 1.0, 1.59, 0.80, 0.83)
+    ellipsoid('louca', c.p(4.62, 1.30, 0.86), (0.17, 0.2, 0.07), seg=14, rings=6, zmin=-0.4)
+    tube('inox', [c.p(U1 - TP, 1.30, 0.95), c.p(4.78, 1.30, 1.02), c.p(4.70, 1.30, 0.98)], 0.01, seg=6)
+    c.caixa('espelho', U1 - TP - 0.012, U1 - TP - 0.006, 1.05, 1.55, 1.1, 1.8)
+    tube('inox', [c.p(3.40, 0.5, 1.2), c.p(3.40, 1.1, 1.2)], 0.01, seg=6)
+    c.caixa('tecido_branco', 3.35, 3.42, 0.6, 1.0, 0.75, 1.2)
+    # --- copa na ponta da porta
+    c.caixa('armario', TP, 0.70, 0.20, 1.70, PISO, 0.86, col=True)
+    c.caixa('granite', TP - 0.02, 0.72, 0.18, 1.72, 0.86, 0.89)
+    c.caixa('ladrilho', TP, TP + 0.006, 0.18, 1.72, 0.89, 1.55)
+    c.caixa('armario', TP, 0.47, 0.20, 1.70, 1.55, 2.15)
+    for d in (0.45, 0.95, 1.45):
+        c.caixa('inox', 0.70, 0.712, d - 0.08, d + 0.08, 0.74, 0.76)
+        c.caixa('inox', 0.47, 0.482, d - 0.08, d + 0.08, 1.60, 1.62)
+    c.caixa('inox', 0.25, 0.60, 0.35, 0.80, 0.885, 0.893)
+    tube('inox', [c.p(0.17, 0.58, 0.89), c.p(0.17, 0.58, 1.17), c.p(0.36, 0.58, 1.2), c.p(0.40, 0.58, 1.1)], 0.011, seg=6)
+    c.caixa('granite', 0.20, 0.64, 1.05, 1.60, 0.89, 0.896)
+    for d in (1.18, 1.46):
+        annulus('inox', c.p(0.42, d, 0)[:2], 0.06, 0.08, 0.897, seg=16)
+    ellipsoid('inox', c.p(0.42, 1.18, 0.98), (0.08, 0.08, 0.09), seg=12, rings=6, zmin=-0.9)
+    cyl('pot_fiber', c.p(0.4, 0.95, 0.89), 0.12, 0.07, seg=14)
+    for k in range(4):
+        ellipsoid('fruit_lemon' if k % 2 else 'fruit_red', c.p(0.36 + 0.06 * (k % 2), 0.9 + 0.05 * k, 0.98), 0.035, seg=8, rings=5)
+    # --- cama
+    if not beliche:
+        c.caixa('tecido_cinza', 1.80, 3.24, TP, 0.20, PISO, 1.15, col=True)
+        c.caixa('tecido_cinza', 1.87, 3.21, 0.20, 2.05, PISO + 0.05, 0.40)
+        c.caixa('tecido_branco', 1.88, 3.20, 0.22, 2.03, 0.40, 0.62)
+        c.caixa(tecido, 1.84, 3.24, 0.78, 2.08, 0.42, 0.66)
+        c.caixa('tecido_terra', 1.83, 3.25, 1.72, 1.94, 0.45, 0.675)
+        for u in (2.2, 2.88):
+            ellipsoid('tecido_branco', c.p(u, 0.42, 0.70), (0.28, 0.15, 0.08), seg=12, rings=6)
+        c.colide(1.80, 3.24, TP, 2.08, PISO, 0.66)
+        # criado-mudo com abajur
+        c.caixa('wood_x', 1.38, 1.76, 0.15, 0.53, PISO, 0.55, col=True)
+        cyl('louca', c.p(1.57, 0.34, 0.55), 0.06, 0.18, seg=12)
+        cyl('abajur', c.p(1.57, 0.34, 0.72), 0.13, 0.2, seg=16, r_top=0.09)
+        EXTRA['luzes'].append({'p': [round(v, 3) for v in c.p(1.57, 0.34, 0.82)], 'cor': [1.0, 0.72, 0.42], 'forca': 0.5, 'alcance': 3.5, 'casa': nome})
+    else:
+        for u in (2.20, 3.12):
+            for d in (0.16, 2.02):
+                c.caixa('wood_z', u, u + 0.06, d, d + 0.06, PISO, 1.95)
+        for zb in (0.20, 1.30):
+            c.caixa('wood_x', 2.20, 3.18, 0.16, 2.08, zb, zb + 0.12)
+            c.caixa('tecido_branco', 2.24, 3.14, 0.2, 2.04, zb + 0.12, zb + 0.27)
+            c.caixa(tecido if zb < 1 else 'tecido_amarelo', 2.22, 3.16, 0.7, 2.06, zb + 0.15, zb + 0.30)
+            ellipsoid('tecido_branco', c.p(2.68, 0.40, zb + 0.33), (0.3, 0.14, 0.07), seg=12, rings=6)
+        c.caixa('wood_x', 2.20, 3.18, 0.16, 0.22, 1.42, 1.75)
+        c.caixa('wood_x', 2.20, 3.18, 0.6, 2.08, 1.62, 1.68)
+        for k in range(5):
+            c.caixa('wood_x', 3.12, 3.18, 2.02, 2.08, 0.3 + k * 0.3, 0.34 + k * 0.3)
+        c.colide(2.20, 3.18, 0.16, 2.08, PISO, 1.95)
+        c.caixa('wood_x', 1.70, 2.12, 0.15, 0.53, PISO, 0.55, col=True)
+        cyl('louca', c.p(1.91, 0.34, 0.55), 0.06, 0.18, seg=12)
+        cyl('abajur', c.p(1.91, 0.34, 0.72), 0.13, 0.2, seg=16, r_top=0.09)
+        EXTRA['luzes'].append({'p': [round(v, 3) for v in c.p(1.91, 0.34, 0.82)], 'cor': [1.0, 0.72, 0.42], 'forca': 0.5, 'alcance': 3.5, 'casa': nome})
+        c.caixa('tecido_terra', 1.0, 2.1, 0.7, 1.9, PISO, PISO + 0.008)
+    if not beliche:
+        c.caixa('tecido_terra', 1.0, 1.8, 0.7, 1.9, PISO, PISO + 0.008)
+    # quadro sobre a cabeceira e ar-condicionado
+    uq = 2.52 if not beliche else 1.0
+    c.caixa('wood_x', uq - 0.42, uq + 0.42, TP, TP + 0.03, 1.33, 1.87)
+    c.caixa('quadro', uq - 0.38, uq + 0.38, TP + 0.03, TP + 0.035, 1.37, 1.83)
+    c.caixa('white', 2.08, 2.98, TP, 0.33, 2.42, 2.72)
+    c.caixa('granite', 2.12, 2.94, 0.33, 0.335, 2.45, 2.5)
+    # --- mesinha redonda e duas cadeiras na frente do banheiro
+    cyl('wood_z', c.p(4.2, 2.18, 0.72), 0.34, 0.035, seg=24)
+    cyl('metal_dark', c.p(4.2, 2.18, PISO), 0.035, 0.62, seg=8)
+    cyl('metal_dark', c.p(4.2, 2.18, PISO), 0.2, 0.02, seg=16)
+    c.colide(3.86, 4.54, 1.84, 2.52, PISO, 0.76)
+    for u, d in ((3.62, 2.18), (4.78, 2.22)):
+        c.caixa('wood_x', u - 0.2, u + 0.2, d - 0.2, d + 0.2, 0.44, 0.48)
+        for du in (-0.17, 0.15):
+            for dd in (-0.17, 0.15):
+                c.caixa('metal_dark', u + du, u + du + 0.02, d + dd, d + dd + 0.02, PISO, 0.44)
+        ub = u - 0.19 if u < 4.2 else u + 0.17
+        c.caixa('wood_x', ub, ub + 0.02, d - 0.2, d + 0.2, 0.48, 0.9)
+    cyl('louca', c.p(4.2, 2.18, 0.755), 0.05, 0.12, seg=10)
+    P.herbs(c.p(4.2, 2.18, 0.86), rv, kind=1)
+    # cortinas na janela da frente
+    for a, b in ((2.52, 2.74), (4.06, 4.28)):
+        c.caixa('cortina', a, b, HD - TP - 0.05, HD - TP - 0.02, 0.95, 2.25)
+    tube('metal_dark', [c.p(2.45, HD - TP - 0.035, 2.28), c.p(4.35, HD - TP - 0.035, 2.28)], 0.008, seg=5)
+    # --- luzes de dentro e ventilador de teto
+    dz = topo(1.35)
+    EXTRA['ventiladores'].append({'p': [round(v, 3) for v in c.p(2.5, 1.35, dz - 0.42)], 'teto': round(dz, 3), 'casa': nome})
+    EXTRA['luzes'].append({'p': [round(v, 3) for v in c.p(2.5, 1.35, dz - 0.6)], 'cor': [1.0, 0.8, 0.55], 'forca': 1.2, 'alcance': 6.5, 'casa': nome})
+    zb = topo(0.86)
+    cyl('bulb', c.p(4.1, 0.86, zb - 0.04), 0.13, 0.04, seg=16)
+    EXTRA['luzes'].append({'p': [round(v, 3) for v in c.p(4.1, 0.86, zb - 0.12)], 'cor': [1.0, 0.86, 0.68], 'forca': 0.55, 'alcance': 3.0, 'casa': nome})
+
+    # --- por fora: barrado colorido, batente da porta, janelas de vidro, venezianas, floreira
+    def fbox(mat, ua, ub, e0, e1, z0, z1):
+        c.caixa(mat, ua, ub, HD + e0, HD + e1, z0, z1)
+
+    fbox(acc, -0.02, porta[0] - 0.1, 0.0, 0.02, 0.0, 0.55)
+    fbox(acc, porta[1] + 0.1, U1 + 0.02, 0.0, 0.02, 0.0, 0.55)
+    for ue in (-0.02, U1):
+        c.caixa(acc, ue, ue + 0.02, 0.0, HD, 0.0, 0.55)
+    fbox(acc, porta[0] - 0.1, porta[0], 0.0, 0.03, 0.0, porta[3] + 0.1)
+    fbox(acc, porta[1], porta[1] + 0.1, 0.0, 0.03, 0.0, porta[3] + 0.1)
+    fbox(acc, porta[0] - 0.1, porta[1] + 0.1, 0.0, 0.03, porta[3], porta[3] + 0.1)
+    c.caixa('wood_x', porta[0], porta[1], HD - TP, HD - TP + 0.02, porta[3], porta[3] + 0.06)
+    # janela da frente: moldura, montante, travessa, vidro, peitoril
+    ua, ub, za, zb2 = janela
+    fbox(acc, ua - 0.09, ua, 0.0, 0.03, za - 0.09, zb2 + 0.09)
+    fbox(acc, ub, ub + 0.09, 0.0, 0.03, za - 0.09, zb2 + 0.09)
+    fbox(acc, ua, ub, 0.0, 0.03, zb2, zb2 + 0.09)
+    c.caixa(acc, (ua + ub) / 2 - 0.025, (ua + ub) / 2 + 0.025, HD - 0.075, HD - 0.035, za, zb2)
+    c.caixa(acc, ua, ub, HD - 0.075, HD - 0.035, 1.53, 1.57)
+    c.caixa('vidro', ua, ub, HD - 0.058, HD - 0.052, za, zb2)
+    fbox('stone_cut', ua - 0.1, ub + 0.1, -0.02, 0.06, za - 0.05, za)
     for sx in (-1, 1):
-        xs = xw + sx * 1.04
-        fbox(acc, xs - 0.27, xs + 0.27, 0.02, 0.05, 1.0, 2.1)
+        um = (ua + ub) / 2 + sx * 1.04
+        fbox(acc, um - 0.27, um + 0.27, 0.02, 0.05, 1.0, 2.1)
         for k in range(9):
-            fbox('house_white', xs - 0.22, xs + 0.22, 0.05, 0.054, 1.07 + k * 0.11, 1.09 + k * 0.11)
-    fbox('wood_x', xw - 0.72, xw + 0.72, 0.03, 0.22, 0.72, 0.92)
+            fbox('house_white', um - 0.22, um + 0.22, 0.05, 0.054, 1.07 + k * 0.11, 1.09 + k * 0.11)
+    fbox('wood_x', ua - 0.02, ub + 0.02, 0.03, 0.22, 0.72, 0.92)
     for k in range(7):
-        px = xw - 0.6 + k * 0.2
-        P.mound('leaf_trop2', (px, fy(0.125), 0.92), rv, n=9, L=0.17, W=0.07, e=(0.2, 1.3), droop=0.5, r0=0.03)
+        pu = ua + 0.05 + k * 0.2
+        P.mound('leaf_trop2', c.p(pu, HD + 0.125, 0.92), rv, n=9, L=0.17, W=0.07, e=(0.2, 1.3), droop=0.5, r0=0.03)
         for q in range(3):
             ellipsoid('flower_red' if (k + q) % 2 else 'flower_orange',
-                      (px + rv.uniform(-0.07, 0.07), fy(0.125 + rv.uniform(-0.05, 0.07)), 1.0 + rv.uniform(0, 0.1)), 0.028, seg=6, rings=4)
-    # janelinha alta na lateral que olha para o gramado
-    ym = (ya + yb) / 2
-    xside = x1 if side == 0 else x0
-    o = 1 if side == 0 else -1
-    box(acc, min(xside, xside + o * 0.03), max(xside, xside + o * 0.03), ym - 0.42, ym + 0.42, 1.62, 2.16)
-    box('glass_dark', min(xside + o * 0.03, xside + o * 0.04), max(xside + o * 0.03, xside + o * 0.04), ym - 0.35, ym + 0.35, 1.69, 2.09)
+                      c.p(pu + rv.uniform(-0.07, 0.07), HD + 0.125 + rv.uniform(-0.05, 0.07), 1.0 + rv.uniform(0, 0.1)), 0.028, seg=6, rings=4)
+    # janelinha alta do banheiro, na ponta
+    j0, j1, jz0, jz1 = janelinha
+    c.caixa(acc, U1, U1 + 0.035, j0 - 0.07, j1 + 0.07, jz0 - 0.07, jz0)
+    for a, b, z0, z1 in ((j0 - 0.07, j0, jz0, jz1), (j1, j1 + 0.07, jz0, jz1), (j0 - 0.07, j1 + 0.07, jz1, jz1 + 0.07)):
+        c.caixa(acc, U1, U1 + 0.035, a, b, z0, z1)
+    c.caixa('vidro', U1 - 0.064, U1 - 0.058, j0, j1, jz0, jz1)
+    # arandela ao lado da porta
+    xd = c.X(1.3)
+    fbox('metal_dark', 1.96, 2.04, 0.02, 0.12, 1.9, 1.96)
+    ellipsoid('bulb', c.p(2.0, HD + 0.13, 1.83), 0.055, seg=8, rings=6)
+    fbox('stone_cut', 0.4, 2.2, 0.0, 0.75, 0.0, 0.1)
+    EXTRA['portas'].append({'casa': nome, 'cor': acc,
+                            'dobradica': [round(v, 3) for v in c.p(porta[0] + 0.02, HD - 0.06, PISO)],
+                            'fechada': [1.0 if c.X(porta[1]) > c.X(porta[0]) else -1.0, 0.0],
+                            'para_dentro': [0.0, -c.sg], 'largura': 0.88, 'altura': round(porta[3] - PISO - 0.02, 3)})
     # telhado de telhas de barro com caimento para o gramado, caibros de cumaru aparentes sob o beiral
-    v = np.array([0, sg, -HSL]); v = v / np.linalg.norm(v)
-    tile_roof('rooftile', (x0 - 0.3, yr, HZH), (1, 0, 0), v, (x1 - x0) + 0.6, (HD + HEAVE) * math.sqrt(1 + HSL ** 2))
+    v = np.array([0, c.sg, -HSL]); v = v / np.linalg.norm(v)
+    tile_roof('rooftile', (x0 - 0.3, c.yr, HZH), (1, 0, 0), v, (x1 - x0) + 0.6, (HD + HEAVE) * math.sqrt(1 + HSL ** 2))
     for xr in np.arange(x0 - 0.22, x1 + 0.25, 0.6):
-        beam('wood_y', (xr, yr + sg * 0.04, HZH - 0.09 - HSL * 0.04), (xr, fy(HEAVE - 0.03), HZH - HSL * (HD + HEAVE - 0.03) - 0.09), 0.06, 0.11)
+        beam('wood_y', (xr, c.yr + c.sg * 0.04, HZH - 0.09 - HSL * 0.04), (xr, c.Y(HD + HEAVE - 0.03), HZH - HSL * (HD + HEAVE - 0.03) - 0.09), 0.06, 0.11)
     zl = HZH - HSL * (HD + HEAVE)
-    fbox('wood_x', x0 - 0.3, x1 + 0.3, HEAVE - 0.035, HEAVE, zl - 0.17, zl - 0.02)
-    # vasos na porta, um canteirinho sob a janela, pisantes até o caminho principal
-    for sx, kind in ((-0.72, 0), (0.72, 1)):
-        top = P.pot((xd + sx, fy(0.42), 0.1), 0.19, 0.4)
+    c.caixa('wood_x', -0.3, U1 + 0.3, HD + HEAVE - 0.035, HD + HEAVE, zl - 0.17, zl - 0.02)
+    # vasos na porta, canteirinho sob a janela, pisantes até o caminho principal
+    for su, kind in ((-0.72, 0), (0.72, 1)):
+        top = P.pot(c.p(1.3 + su, HD + 0.42, 0.1), 0.19, 0.4)
         if kind == 0:
             P.bromelia(top, rv, 0.8)
         else:
             P.moreia(top, rv, 0.7)
-    bx0, bx1 = (xd + 0.95, x1) if win_dx > door_dx else (x0, xd - 0.95)
-    fbox('mulch', bx0, bx1, 0.02, 0.55, 0.0, 0.012)
-    for k, px in enumerate(np.arange(bx0 + 0.3, bx1 - 0.1, 0.62)):
+    c.caixa('mulch', 2.25, U1, HD + 0.02, HD + 0.55, 0.0, 0.012)
+    for k, pu in enumerate(np.arange(2.55, U1 - 0.1, 0.62)):
         if k % 3 == 0:
-            P.xanadu((px, fy(0.3), 0.012), rv, 0.7)
+            P.xanadu(c.p(pu, HD + 0.3, 0.012), rv, 0.7)
         elif k % 3 == 1:
-            P.moreia((px, fy(0.3), 0.012), rv, 0.7)
+            P.moreia(c.p(pu, HD + 0.3, 0.012), rv, 0.7)
         else:
-            P.alpinia((px, fy(0.25), 0.012), rv, n=5, H=1.0)
-    y0p, y1p = fy(0.75 + 0.45), path_y(xd)
+            P.alpinia(c.p(pu, HD + 0.25, 0.012), rv, n=5, H=1.0)
+    y0p, y1p = c.Y(HD + 0.75 + 0.45), path_y(xd)
     npath = max(1, int(round(abs(y1p - y0p) / 0.8)))
     for k in range(npath):
         obox('stone_step', (xd, y0p + (y1p - y0p) * k / npath, 0.017), (0.8, 0.45, 0.03))
+    # lugar para entrar: logo depois da porta, olhando para a cama
+    ex, ey = c.X(1.3), c.Y(2.2)
+    bx, by = c.X(2.6), c.Y(1.0)
+    EXTRA['lugares'].append([nome, round(ex, 3), round(ey, 3), round(math.atan2(by - ey, bx - ex), 4)])
+    EXTRA['casas'].append({'nome': nome, 'x': [x0, x1], 'y': sorted([c.Y(0), c.Y(HD)]), 'piso': PISO})
     return xd
 
 
-d1 = tiny_house(3.0, 8.0, 0, 'acc_blue', door_dx=3.7, win_dx=1.6)      # porta voltada para a pracinha
-d2 = tiny_house(14.6, 19.6, 0, 'acc_yellow', door_dx=1.3, win_dx=3.4)
-d3 = tiny_house(8.8, 13.8, 1, 'acc_green', door_dx=1.3, win_dx=3.4)
+d1 = tiny_house(3.0, 8.0, 0, 'acc_blue', 'tecido_azul', 'Casa azul', espelho=True)      # porta voltada para a pracinha
+d2 = tiny_house(14.6, 19.6, 0, 'acc_yellow', 'tecido_amarelo', 'Casa amarela')
+d3 = tiny_house(8.8, 13.8, 1, 'acc_green', 'tecido_verde', 'Casa verde', beliche=True)
 # banco na pracinha sob o muro do maracujá, e varal de luzes em zigue-zague entre as casas
 box('wood_x', 12.6, 14.1, 0.2, 0.6, 0.41, 0.46)
 for xx in (12.7, 13.95):
