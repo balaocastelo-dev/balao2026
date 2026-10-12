@@ -20,7 +20,7 @@ import {
   ajustarLancamentoAcao, apagarManualAcao, carregarPainel, criarPilotosDoBlingAcao, gerarChaveAcao, lancarManualAcao,
   lerAnuncioAirbnbAcao, listarLancamentosAcao, pedirVarreduraAcao, recalcularAcao, removerPilotoAcao, salvarCorridaAcao,
   salvarMetasAcao, salvarPilotoAcao, salvarPremioAcao, salvarRegrasAcao, salvarTurboAcao, turboAgoraAcao,
-  salvarWhatsAppAcao, listarGruposAcao, testarWhatsAppAcao,
+  salvarWhatsAppAcao, listarGruposAcao, testarWhatsAppAcao, pedidoDoVigiaAcao, aprovarVigiaAcao, recusarVigiaAcao,
 } from "./acoes";
 
 type Dados = NonNullable<Extract<Awaited<ReturnType<typeof carregarPainel>>, { ok: true }>["dados"]>;
@@ -1223,6 +1223,61 @@ function AbaAvisos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Prom
 
 // ------------------------------------------------------------------ Bling
 
+/** Pedido de pareamento do vigia: aparece sozinho enquanto o instalador espera no PC. */
+function PedidoDoVigia({ recarregar, avisar }: { recarregar: () => Promise<void>; avisar: (t: "ok" | "erro", m: string) => void }) {
+  const [pedido, setPedido] = useState<{ id: string; codigo: string; maquina: string; criadoEm: string } | null>(null);
+  const [ocupado, setOcupado] = useState(false);
+  useEffect(() => {
+    let vivo = true;
+    const olhar = async () => {
+      const r = await pedidoDoVigiaAcao();
+      if (vivo && r.ok) setPedido(r.dados ?? null);
+    };
+    void olhar();
+    const t = setInterval(olhar, 4000);
+    return () => {
+      vivo = false;
+      clearInterval(t);
+    };
+  }, []);
+  if (!pedido) return null;
+  return (
+    <section className="rounded-lg border-2 border-[#E60012] bg-red-50 p-5">
+      <h2 className="text-lg font-bold text-gray-900">O computador {pedido.maquina} quer ligar o vigia</h2>
+      <p className="mt-1 text-sm text-gray-700">
+        Confira se o código no computador é <b className="text-2xl tracking-widest">{pedido.codigo}</b>. Aprovar gera uma chave nova só para ele (a anterior para de valer).
+      </p>
+      <div className="mt-3 flex gap-2">
+        <button
+          className={botaoPrimario}
+          disabled={ocupado}
+          onClick={async () => {
+            setOcupado(true);
+            const r = await aprovarVigiaAcao(pedido.id, pedido.codigo);
+            setOcupado(false);
+            if (!r.ok) return avisar("erro", r.erro);
+            setPedido(null);
+            avisar("ok", `Vigia de ${pedido.maquina} aprovado. Ele pega a chave em segundos.`);
+            await recarregar();
+          }}
+        >
+          {ocupado ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />} Aprovar
+        </button>
+        <button
+          className={botaoSecundario}
+          disabled={ocupado}
+          onClick={async () => {
+            await recusarVigiaAcao();
+            setPedido(null);
+          }}
+        >
+          Não reconheço
+        </button>
+      </div>
+    </section>
+  );
+}
+
 function AbaBling({ d, recarregar, avisar }: { d: Dados; recarregar: () => Promise<void>; avisar: (t: "ok" | "erro", m: string) => void }) {
   const [chave, setChave] = useState<string | null>(null);
   const [desde, setDesde] = useState(janela("mes").inicio);
@@ -1231,6 +1286,7 @@ function AbaBling({ d, recarregar, avisar }: { d: Dados; recarregar: () => Promi
 
   return (
     <div className="space-y-5">
+      <PedidoDoVigia recarregar={recarregar} avisar={avisar} />
       <section className={cartao}>
         <div className="flex items-center gap-3">
           {v.online ? <CheckCircle className="text-green-600" /> : <AlertTriangle className="text-orange-500" />}
@@ -1263,12 +1319,13 @@ function AbaBling({ d, recarregar, avisar }: { d: Dados; recarregar: () => Promi
       <section className={cartao}>
         <h2 className="text-lg font-bold text-gray-900">Instalar ou trocar a chave do vigia</h2>
         <ol className="mt-2 list-decimal pl-5 text-sm text-gray-700 space-y-1">
-          <li>Clique em “Gerar chave do vigia”: o navegador baixa o arquivo <code>arena-vigia-chave.txt</code>. A chave anterior para de valer.</li>
+          <li>No PC com o Bling (onde roda a sentinela do Bionic), rode o instalador abaixo. Ele mostra um código e espera.</li>
           <li>
             No PowerShell do PC da loja: <code className="rounded bg-gray-100 px-1">git -C $HOME\balao2026 pull</code> e depois{" "}
             <code className="rounded bg-gray-100 px-1">& $HOME\balao2026\scripts\arena-vigia\instalar.ps1</code>
           </li>
-          <li>O instalador pega a chave nos Downloads, apaga o arquivo e cria a tarefa “Arena Vigia”. A primeira volta traz os últimos 3 meses.</li>
+          <li>Aparece aqui em cima “O computador … quer ligar o vigia” com o mesmo código: clique em Aprovar. O instalador recebe a chave e cria a tarefa “Arena Vigia”. A primeira volta traz os últimos 3 meses.</li>
+          <li>Sem acesso a este painel no PC? “Gerar chave do vigia” baixa a chave em arquivo; o instalador também lê dos Downloads.</li>
         </ol>
         <div className="mt-4 flex flex-wrap gap-2">
           <button

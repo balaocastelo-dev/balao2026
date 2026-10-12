@@ -38,6 +38,7 @@ import { montarPlacar, sugerirMeta } from "@/lib/arena/placar";
 import { REGRAS_PADRAO } from "@/lib/arena/pontos";
 import { CORES_DE_KART, KARTS } from "@/lib/arena/tipos";
 import { enviarAviso, listarGrupos } from "@/lib/arena/whatsapp";
+import { aprovarPareamento, pedidoPendente, recusarPareamento } from "@/lib/arena/pareamento";
 
 type Resultado<T = undefined> = { ok: true; dados?: T } | { ok: false; erro: string };
 
@@ -340,4 +341,18 @@ export async function testarWhatsAppAcao(destino: string) {
     if (!d) throw new Error("Escolha um grupo ou digite um número com DDD.");
     await enviarAviso(d, "🏎️ Teste da Arena de vendas: os avisos vão chegar aqui.\n\nwww.balao.info/arena");
   });
+}
+
+// ---------------------------------------------------------------- pareamento do vigia
+
+export async function pedidoDoVigiaAcao() {
+  return comSessao(() => pedidoPendente());
+}
+
+export async function aprovarVigiaAcao(id: string, codigo: string) {
+  return comSessao(() => aprovarPareamento(id, codigo));
+}
+
+export async function recusarVigiaAcao() {
+  return comSessao(() => recusarPareamento());
 }

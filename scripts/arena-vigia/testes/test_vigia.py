@@ -132,3 +132,25 @@ class TestSiteForaDoAr(unittest.TestCase):
             self.assertEqual(len(respostas[-1]["documentos"]), 2)
         finally:
             vigia.pedir, vigia.Bling = original
+
+
+class TestParear(unittest.TestCase):
+    def test_pede_espera_e_grava_a_chave(self):
+        pasta = tempfile.mkdtemp()
+        cfg = dict(vigia.PADRAO, pasta_dados=pasta, arquivo_chave=str(Path(pasta) / "k" / "chave.txt"))
+        chamadas = []
+
+        def pedir_falso(url, metodo="GET", dados=None, cabecalhos=None, espera=30):
+            chamadas.append((metodo, url))
+            if metodo == "POST":
+                return {"pedido": "p1", "token": "t1", "codigo": "4821"}
+            self.assertEqual(cabecalhos["Authorization"], "Bearer t1")
+            return {"aprovado": True, "chave": "arena_" + "z" * 48} if len(chamadas) > 2 else {"aprovado": False}
+
+        original = vigia.pedir
+        try:
+            vigia.pedir = pedir_falso
+            self.assertEqual(vigia.parear(cfg, espera_max_s=5, intervalo_s=0.01), 0)
+        finally:
+            vigia.pedir = original
+        self.assertTrue(Path(cfg["arquivo_chave"]).read_text().startswith("arena_"))

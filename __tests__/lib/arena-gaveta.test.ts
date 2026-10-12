@@ -234,3 +234,23 @@ describe("relógio do turbo", () => {
     expect(normalizarTurbo({ janelas: [{ dias: [1], das: "16:00", ate: "14:00" }] }).janelas).toEqual([]);
   });
 });
+
+describe("pareamento do vigia (sem arquivo de chave)", () => {
+  it("pede, o painel aprova com o código, o vigia pega a chave uma vez só e ela vale", async () => {
+    const { pedirPareamento, pedidoPendente, aprovarPareamento, buscarChavePareada } = await import("@/lib/arena/pareamento");
+    const { chaveConfere } = await import("@/lib/arena/dados");
+    const p = await pedirPareamento("DESKTOP-5KUJCVJ");
+    expect(await buscarChavePareada(p.pedido, p.token)).toBeNull(); // ainda não aprovado
+    const visto = (await pedidoPendente())!;
+    expect(visto.maquina).toBe("DESKTOP-5KUJCVJ");
+    expect(JSON.stringify(visto)).not.toContain(p.token);
+    await expect(aprovarPareamento(visto.id, "0000")).rejects.toThrow(/código/);
+    await aprovarPareamento(visto.id, visto.codigo);
+    expect(await buscarChavePareada(p.pedido, "token-errado")).toEqual({ erro: "Token do pedido inválido." });
+    const r = (await buscarChavePareada(p.pedido, p.token)) as { chave: string };
+    expect(r.chave).toMatch(/^arena_/);
+    expect(chaveConfere(r.chave, (await lerConfig()).chaveHash)).toBe(true);
+    expect("erro" in ((await buscarChavePareada(p.pedido, p.token)) ?? {})).toBe(true); // só uma vez
+    expect(await pedidoPendente()).toBeNull();
+  });
+});
