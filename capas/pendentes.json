@@ -1,13 +1,4 @@
 {
   "versao": 1,
-  "pendentes": [
-    {
-      "slug": "que-computador-preciso-para-rodar-ia-em-casa",
-      "titulo": "Computador para rodar IA em casa: o que ele precisa ter",
-      "categoria": "ia",
-      "alt": "Computador de mesa com o painel lateral de vidro mostrando a placa de vídeo, sobre uma escrivaninha, com o monitor ao lado mostrando formas desfocadas",
-      "pedido": "A mid-tower desktop computer with a tempered glass side panel on a tidy wooden desk, the large graphics card clearly visible inside. Beside it, a monitor angled away from the camera showing only abstract blurred shapes on screen. A small potted plant and a closed notebook on the desk. Warm evening light from a desk lamp, shallow depth of field.",
-      "pedidoEm": "2026-10-12T08:58:40.031Z"
-    }
-  ]
+  "pendentes": []
 }

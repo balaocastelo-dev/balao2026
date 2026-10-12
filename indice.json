@@ -12,7 +12,12 @@
         "memória ram",
         "upgrade"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/que-computador-preciso-para-rodar-ia-em-casa-e10eb304.jpg",
+        "alt": "Computador de mesa com o painel lateral de vidro mostrando a placa de vídeo, sobre uma escrivaninha, com o monitor ao lado mostrando formas desfocadas",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-10-12T08:58:39.250Z",
       "minutos": 11
     },
@@ -118,5 +123,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-12T08:58:40.030Z"
+  "atualizadoEm": "2026-10-12T09:29:05.754Z"
 }
