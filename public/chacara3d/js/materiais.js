@@ -29,7 +29,7 @@ export const U = {
 };
 
 const GLSL_COMUM = /* glsl */`
-uniform float uTempo; uniform vec2 uVento;
+uniform float uTempo; uniform vec2 uVento; uniform float uVentoK; uniform float uTransK;
 uniform vec4 uCasas[3]; uniform float uFrente[3]; uniform float uFatorInt;
 uniform vec3 uSolVista; uniform vec3 uSolMundo; uniform vec3 uCorSol; uniform float uForcaSol;
 uniform float uCobertura; uniform float uSombraNuvem;
@@ -46,7 +46,7 @@ const VENTO_VERT = /* glsl */`
   float h = max(pw.y - base, 0.0);
   float fase = dot(pw.xz, vec2(0.23, 0.17));
   float s = sin(uTempo * 1.1 + fase) * 0.55 + sin(uTempo * 2.3 + fase * 1.7) * 0.25 + sin(uTempo * 0.31 + fase * 0.4) * 0.6;
-  vec2 d = uVento * s * h * h * VENTO_K;
+  vec2 d = uVento * s * h * h * uVentoK;
   transformed.x += d.x; transformed.z += d.y;
   #ifdef FOLHA
   {
@@ -78,12 +78,11 @@ float sombraDasNuvens(vec3 p){
 }
 void RE_Direct_Physical( const in IncidentLight directLight0, const in vec3 geometryPosition, const in vec3 geometryNormal, const in vec3 geometryViewDir, const in vec3 geometryClearcoatNormal, const in PhysicalMaterial material, inout ReflectedLight reflectedLight ) {
   IncidentLight directLight = directLight0;
-  if (dot(directLight.direction, uSolVista) > 0.9999) directLight.color *= sombraDasNuvens(vPosMundoR);
   #ifdef FOLHA
   {
     float tras = saturate(dot(-geometryNormal, directLight.direction));
     float contra = pow(saturate(dot(geometryViewDir, -directLight.direction)), 4.0);
-    reflectedLight.directDiffuse += directLight.color * uTransCor * (tras * 0.45 + contra * 0.9) * TRANS_K;
+    reflectedLight.directDiffuse += directLight.color * uTransCor * (tras * 0.45 + contra * 0.9) * uTransK;
   }
   #endif
 `);
@@ -94,8 +93,10 @@ const NUVEM_DEF = '\n' + GLSL_NUVENS + '\n';
 function remendar(material, o) {
   o = o || {};
   const defs = [];
-  if (o.vento) defs.push('#define VENTO\n#define VENTO_K ' + o.vento.toFixed(5));
-  if (o.folha) defs.push('#define FOLHA\n#define TRANS_K ' + (o.trans || 1).toFixed(3));
+  // força do vento e da translucidez vão como valores (uniform), não como #define:
+  // assim todas as plantas usam o mesmo programa
+  if (o.vento) defs.push('#define VENTO');
+  if (o.folha) defs.push('#define FOLHA');
   if (o.semVirar) defs.push('#define SEM_VIRAR');
   if (o.interior !== false) defs.push('#define INTERIOR');
   if (o.nuvens !== false) defs.push('#define NUVENS');
@@ -103,12 +104,18 @@ function remendar(material, o) {
   const prefixo = defs.join('\n') + '\n';
   material.onBeforeCompile = shader => {
     Object.assign(shader.uniforms, U);
+    shader.uniforms.uVentoK = { value: o.vento || 0 };
+    shader.uniforms.uTransK = { value: o.trans || 1 };
     if (o.folha) shader.uniforms.uTransCor = { value: o.transCor || new THREE.Color(0.4, 0.55, 0.12) };
     shader.vertexShader = prefixo + GLSL_COMUM + shader.vertexShader
       .replace('#include <begin_vertex>', VENTO_VERT)
       .replace('#include <project_vertex>', '#include <project_vertex>\n vPosMundoR = (modelMatrix * vec4(transformed, 1.0)).xyz;');
     let f = prefixo + GLSL_COMUM + (o.folha ? 'uniform vec3 uTransCor;\n' : '') + NUVEM_DEF + shader.fragmentShader;
     f = f.replace('#include <lights_physical_pars_fragment>', chunkLuzes());
+    // sombra das nuvens só na luz do sol (uma conta por pixel, não uma por lâmpada)
+    f = f.replace('#include <lights_fragment_begin>', THREE.ShaderChunk.lights_fragment_begin.replace(
+      'getDirectionalLightInfo( directionalLight, directLight );',
+      'getDirectionalLightInfo( directionalLight, directLight );\n\t\tdirectLight.color *= sombraDasNuvens( vPosMundoR );'));
     if (o.semVirar) f = f.replace('#include <normal_fragment_begin>', THREE.ShaderChunk.normal_fragment_begin.replace('normal *= faceDirection;', ''));
     f = f.replace('#include <lights_fragment_maps>', /* glsl */`#include <lights_fragment_maps>
 #ifdef INTERIOR
@@ -148,7 +155,9 @@ function remendar(material, o) {
     }
     shader.fragmentShader = f;
   };
-  material.customProgramCacheKey = () => prefixo + (o.folha ? 'f' : '') + (o.chave || '');
+  // o programa só depende das chaves acima: materiais com as mesmas chaves dividem o mesmo
+  // programa (menos programas = muito menos tempo compilando na placa de vídeo)
+  material.customProgramCacheKey = () => prefixo;
   material.userData.remendo = o;
   return material;
 }
@@ -156,21 +165,34 @@ function remendar(material, o) {
 // ---------------------------------------------------------------- texturas
 let carregador = null, aniso = 8, manifesto = {}, folhasMan = {};
 const cache = new Map();
+const pendentes = [];
 export async function prepararTexturas(renderer, gerenciador) {
-  carregador = new THREE.TextureLoader(gerenciador);
+  // as imagens são decodificadas fora da linha principal (createImageBitmap), já viradas;
+  // assim a página não trava quando as texturas sobem para a placa de vídeo
+  carregador = new THREE.ImageBitmapLoader(gerenciador);
+  carregador.setOptions({ imageOrientation: 'flipY', premultiplyAlpha: 'none', colorSpaceConversion: 'none' });
   aniso = Math.min(16, renderer.capabilities.getMaxAnisotropy());
   const [a, b] = await Promise.all([fetch(BASE + 'tex/superficies.json').then(r => r.json()), fetch(BASE + 'tex/folhas.json').then(r => r.json())]);
   manifesto = a; folhasMan = b;
 }
-function tex(arquivo, cor, repetir) {
+export function tex(arquivo, cor, repetir) {
   const chave = arquivo + (repetir ? '|r' : '');
   if (cache.has(chave)) return cache.get(chave);
-  const t = carregador.load(BASE + 'tex/' + arquivo);
+  const t = new THREE.Texture();
+  t.flipY = false; // já vem virada do createImageBitmap
   t.colorSpace = cor ? THREE.SRGBColorSpace : THREE.NoColorSpace;
   t.anisotropy = aniso;
   if (repetir) t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  pendentes.push(new Promise(ok => carregador.load(BASE + 'tex/' + arquivo,
+    imagem => { t.image = imagem; t.needsUpdate = true; ok(t); },
+    undefined,
+    erro => { console.warn('textura', arquivo, erro); ok(null); })));
   cache.set(chave, t);
   return t;
+}
+// espera todas as texturas pedidas até agora e devolve as que chegaram
+export function texturasProntas() {
+  return Promise.all(pendentes.slice()).then(l => l.filter(Boolean));
 }
 function conjunto(nome, tamanho) {
   const m = manifesto[nome] || folhasMan[nome] || {};

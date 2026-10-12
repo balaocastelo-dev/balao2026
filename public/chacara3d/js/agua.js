@@ -142,6 +142,8 @@ export function criarAgua(cenaPrincipal, ceu, qualidade) {
   let rtRefl = null;
   const camRefl = new THREE.PerspectiveCamera();
   const plano = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0.07 + 0.01);
+  const planoRefl = new THREE.Plane(), _cima = new THREE.Vector3(0, 1, 0), _pontoAgua = new THREE.Vector3();
+  const _corte = new THREE.Vector4(), _q = new THREE.Vector4();
   const matBias = new THREE.Matrix4().set(0.5, 0, 0, 0.5, 0, 0.5, 0, 0.5, 0, 0, 0.5, 0.5, 0, 0, 0, 1);
   function prepararReflexo(renderer, cena, camera, w, h) {
     if (qualidade.reflexo === false) { piscina.u.uTemReflexo.value = 0; return; }
@@ -163,12 +165,22 @@ export function criarAgua(cenaPrincipal, ceu, qualidade) {
     const vis = camera.position.y > nivel && camera.position.x > 30 && camera.position.x < 60;
     piscina.u.uTemReflexo.value = vis ? 1 : 0;
     if (!vis) return;
-    const antes = renderer.clippingPlanes;
-    renderer.clippingPlanes = [new THREE.Plane(new THREE.Vector3(0, 1, 0), -nivel + 0.005)];
+    // corta o que fica abaixo da água mudando o plano de perto da câmera (plano oblíquo),
+    // em vez de plano de corte do three.js: plano de corte faria outra versão de cada programa
+    planoRefl.setFromNormalAndCoplanarPoint(_cima, _pontoAgua.set(0, nivel + 0.005, 0)).applyMatrix4(camRefl.matrixWorldInverse);
+    _corte.set(planoRefl.normal.x, planoRefl.normal.y, planoRefl.normal.z, planoRefl.constant);
+    const pm = camRefl.projectionMatrix.elements;
+    _q.set((Math.sign(_corte.x) + pm[8]) / pm[0], (Math.sign(_corte.y) + pm[9]) / pm[5], -1, (1 + pm[10]) / pm[14]);
+    _corte.multiplyScalar(2 / _corte.dot(_q));
+    pm[2] = _corte.x; pm[6] = _corte.y; pm[10] = _corte.z + 1; pm[14] = _corte.w;
+    camRefl.projectionMatrixInverse.copy(camRefl.projectionMatrix).invert();
+    // a sombra do sol já foi feita neste quadro ou no anterior: não refaz para o reflexo
+    const sombraAuto = renderer.shadowMap.autoUpdate;
+    renderer.shadowMap.autoUpdate = false;
     renderer.setRenderTarget(rtRefl);
     renderer.clear();
     renderer.render(cena, camRefl);
-    renderer.clippingPlanes = antes;
+    renderer.shadowMap.autoUpdate = sombraAuto;
     piscina.u.tReflexo.value = rtRefl.texture;
   }
 

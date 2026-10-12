@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { $, W3, clamp, lerp, sstep, aviso, carimbo, estado } from './util.js';
 import { criarCeu } from './ceu.js';
 import { criarPipeline } from './pipeline.js';
-import { prepararTexturas, criarMateriais, U } from './materiais.js';
+import { prepararTexturas, criarMateriais, tex, texturasProntas, U } from './materiais.js';
 import { baixarModelo, construirTerreno, chaoDeFora, criarColisao, lugares, ondeEstou } from './mundo.js';
 import { mascaraDaGrama, criarGrama } from './grama.js';
 import { criarAgua } from './agua.js';
@@ -89,16 +89,66 @@ function definirTamanho(w, h, pr) {
 const barra = v => { $('carga').firstElementChild.style.width = Math.round(clamp(v, 0, 1) * 100) + '%'; };
 const gerenciador = new THREE.LoadingManager();
 let progTex = 0, progModelo = 0;
-gerenciador.onProgress = (url, n, total) => { progTex = n / Math.max(total, 1); barra(progTex * 0.55 + progModelo * 0.45); };
+gerenciador.onProgress = (url, n, total) => { progTex = n / Math.max(total, 1); barra(progTex * 0.4 + progModelo * 0.4); };
+
+// tempos do carregamento (para conferir em window.__chacara.tempos)
+const tempos = { marcas: [], travadas: [] };
+const marcar = nome => tempos.marcas.push([nome, Math.round(performance.now())]);
+try {
+  new PerformanceObserver(l => l.getEntries().forEach(e => {
+    tempos.travadas.push([Math.round(e.startTime), Math.round(e.duration)]);
+    if (tempos.travadas.length > 40) { tempos.travadas.sort((a, b) => b[1] - a[1]); tempos.travadas.length = 20; }
+  })).observe({ type: 'longtask', buffered: true });
+} catch (e) { /* navegador sem longtask */ }
+const proximoQuadro = () => new Promise(ok => requestAnimationFrame(() => ok()));
+const avisoCarga = t => { $('enter').textContent = t; };
+
+// Compila os programas da placa de vídeo sem travar a página: o Chrome compila em paralelo
+// (KHR_parallel_shader_compile) e a gente só espera ficarem prontos. Compila já para o alvo
+// de verdade (a cena em HDR) e também a versão da sombra de cada objeto.
+const LADO_DA_SOMBRA = { [THREE.FrontSide]: THREE.BackSide, [THREE.BackSide]: THREE.FrontSide, [THREE.DoubleSide]: THREE.DoubleSide };
+function grupoDaSombra(raiz) {
+  const g = new THREE.Group(), vistos = new Map();
+  raiz.traverse(o => {
+    if (!o.isMesh || !o.castShadow || Array.isArray(o.material)) return;
+    let d = o.customDepthMaterial;
+    if (!d) { // o material de profundidade padrão do three.js, com o que ele copia do material
+      const m = o.material, lado = m.shadowSide !== null ? m.shadowSide : LADO_DA_SOMBRA[m.side];
+      const chave = [!!m.map, m.alphaTest > 0, lado, !!o.isSkinnedMesh, !!o.isInstancedMesh].join();
+      if (vistos.has(chave)) return;
+      d = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: m.map || null, alphaTest: m.alphaTest, side: lado });
+      vistos.set(chave, d);
+    }
+    // cópia "de mentira" do objeto (herda geometria, esqueleto, instâncias) com o material da sombra;
+    // entra direto na lista para não tirar o original do lugar
+    const proxy = Object.create(o);
+    proxy.material = d;
+    g.children.push(proxy);
+  });
+  return g;
+}
+async function prepararProgramas(raiz, alvo = cena) {
+  const anterior = renderer.getRenderTarget();
+  let promessas;
+  renderer.setRenderTarget(pipeline.rtCena);
+  try {
+    promessas = [renderer.compileAsync(raiz, camera, alvo), renderer.compileAsync(grupoDaSombra(raiz), camera, alvo)];
+  } finally { renderer.setRenderTarget(anterior); }
+  await Promise.all(promessas);
+}
 
 async function carregar() {
+  marcar('início');
   ajustar();
   ceu.atualizar(0, true);
   renderUmQuadro();
+  marcar('céu');
   await prepararTexturas(renderer, gerenciador);
-  const dados = await baixarModelo(v => { progModelo = v; barra(progTex * 0.55 + progModelo * 0.45); });
+  // a geometria e as texturas baixam ao mesmo tempo
+  const dados = await baixarModelo(v => { progModelo = v; barra(progTex * 0.4 + progModelo * 0.4); },
+    meta => { M = criarMateriais(meta.mats); });
+  marcar('modelo baixado');
   extra = dados.meta.extra || {};
-  M = criarMateriais(dados.meta.mats);
   const terreno = construirTerreno(dados.meta, dados.buf, M, cena);
   chaoDeFora(cena, criarChaoDeFora());
   const colisao = criarColisao(extra);
@@ -121,17 +171,44 @@ async function carregar() {
   colocar(0);
   aplicarQualidade();
   ceu.atualizar(0, true);
-  // os bichos chegam depois (o passeio já pode começar)
-  criarBichos(cena, mundo, estado.qualidade).then(b => { bichos = b; aplicarQualidade(); }).catch(e => console.warn('bichos', e));
-  // prepara os shaders antes de entrar, para não engasgar no primeiro passo
-  try { renderer.compile(cena, camera); } catch (e) { /* segue */ }
-  $('enter').disabled = false; $('enter').textContent = 'Entrar no terreno'; barra(1);
+  marcar('montado');
+
+  // os bichos baixam enquanto o resto termina; entram na cena só com os programas prontos
+  const antesDosBichos = new Set(cena.children);
+  criarBichos(cena, mundo, estado.qualidade).then(async b => {
+    const novos = cena.children.filter(o => !antesDosBichos.has(o));
+    const espera = new THREE.Group();
+    novos.forEach(o => espera.add(o));
+    await prepararProgramas(espera);
+    novos.forEach(o => cena.add(o));
+    bichos = b; aplicarQualidade();
+    marcar('bichos');
+  }).catch(e => console.warn('bichos', e));
+
+  // os programas compilam enquanto as últimas texturas chegam
+  const programas = prepararProgramas(cena)
+    .then(() => prepararProgramas(agua.cenaAgua, agua.cenaAgua))
+    .then(() => marcar('programas prontos'));
+  avisoCarga('Baixando as texturas…');
+  const texturas = await texturasProntas();
+  marcar('texturas baixadas');
+  avisoCarga('Preparando os gráficos…'); barra(0.85);
+  await programas;
+  // sobe as texturas para a placa aos poucos, sem travar a página
+  for (let i = 0; i < texturas.length; i++) {
+    renderer.initTexture(texturas[i]);
+    if (i % 6 === 5) { barra(0.9 + 0.1 * i / texturas.length); await proximoQuadro(); }
+  }
+  marcar('texturas na placa');
+  renderUmQuadro();
+  marcar('primeiro quadro');
+  $('enter').disabled = false; avisoCarga('Entrar no terreno'); barra(1);
   requestAnimationFrame(quadro);
 }
 function criarChaoDeFora() {
   const m = M.grass.clone();
-  const t = new THREE.TextureLoader(gerenciador).load('/chacara3d/tex/chao_externo_c.webp');
-  t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(0.25, 0.25); t.anisotropy = 8;
+  const t = tex('chao_externo_c.webp', true, true);
+  t.repeat.set(0.25, 0.25);
   m.map = t; m.normalMap = null; m.roughnessMap = null; m.aoMap = null; m.roughness = 0.95;
   return m;
 }
@@ -431,7 +508,7 @@ function quadro(agora) {
 
 // gancho para testes automáticos
 window.__chacara = {
-  THREE, renderer, cena, camera, ceu, eu, estado, pipeline, pausa: false, U,
+  THREE, renderer, cena, camera, ceu, eu, estado, pipeline, pausa: false, U, tempos,
   get bichos() { return bichos; }, get casas() { return casas; }, get mundo() { return mundo; }, get agua() { return agua; },
   colocar, foto: () => foto(), cinema,
   quadro(passos) { for (let i = 0; i < (passos || 1); i++) { estado.tempo += 0.033; posicionarCamera(); atualizarMundo(0.033); } renderUmQuadro(); return true; },

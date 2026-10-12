@@ -6,8 +6,9 @@ import { remendar } from './materiais.js';
 
 const BASE = '/chacara3d/';
 
-export async function baixarModelo(progresso) {
+export async function baixarModelo(progresso, aoLerMeta) {
   const meta = await fetch(BASE + 'dados/terreno.json').then(r => { if (!r.ok) throw new Error('terreno.json'); return r.json(); });
+  if (aoLerMeta) aoLerMeta(meta); // os materiais já começam a baixar as texturas junto com a geometria
   const resp = await fetch(BASE + 'dados/terreno.txt');
   if (!resp.ok) throw new Error('terreno.txt');
   const total = +resp.headers.get('content-length') || 0;
@@ -24,6 +25,8 @@ export async function baixarModelo(progresso) {
 // eixo da fibra da madeira (u) por material
 const EIXO_U = { wood_x: 'x', wood_y: 'y', wood_z: 'z', log: 'z' };
 const PULAR = new Set(['water', 'water_pond', 'stream']);
+// na sombra o three.js desenha o lado de trás das faces de um lado só
+const LADO_DA_SOMBRA = { [THREE.FrontSide]: THREE.BackSide, [THREE.BackSide]: THREE.FrontSide, [THREE.DoubleSide]: THREE.DoubleSide };
 
 function uvCaixa(pos, nrm, eixo) {
   const n = pos.length / 3, uv = new Float32Array(n * 2);
@@ -93,8 +96,10 @@ export function construirTerreno(meta, buf, M, cena) {
     malha.matrixAutoUpdate = false;
     const r = mat.userData && mat.userData.remendo;
     if (r && (r.vento || r.folha) || mat.alphaTest > 0) {
-      const d = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: mat.map || null, alphaTest: mat.alphaTest || 0, side: THREE.DoubleSide });
-      if (r) remendar(d, Object.assign({}, r, { interior: false, nuvens: false, chave: 'prof' + (r.chave || '') }));
+      // o lado é o mesmo que o three.js põe na hora da sombra (assim o programa já fica pronto antes)
+      const lado = mat.shadowSide !== null ? mat.shadowSide : LADO_DA_SOMBRA[mat.side];
+      const d = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: mat.map || null, alphaTest: mat.alphaTest || 0, side: lado });
+      if (r) remendar(d, { vento: r.vento, folha: r.folha, trans: 1, semVirar: false, interior: false, nuvens: false });
       malha.customDepthMaterial = d;
     }
     if (g.m === 'vidro') malha.renderOrder = 5;
