@@ -297,16 +297,26 @@ export default function Agente({ ponte }: { ponte: PonteComando }) {
         </Secao>
       </div>
 
-      <Secao titulo="Como o computador entra no ar" ajuda="Uma vez só, no PowerShell, na pasta do projeto.">
+      <Secao
+        titulo="Como o computador entra no ar"
+        ajuda="No PowerShell, de qualquer pasta. Para atualizar, repita os passos 1 e 3."
+      >
         <ol className="list-decimal space-y-1 pl-5 text-xs text-[#202124]">
           <li>
-            <code>.\whatsapp-server\deploy-evo.ps1</code> e depois <code>.\whatsapp-server\deploy-evo.ps1 -Agente</code> (traz o segredo da VPS para o PC; pede a senha de root).
+            Trazer o projeto para o PC: <code>{"git -C $HOME\\balao2026 pull"}</code> (na primeira vez:{" "}
+            <code>{"git clone --depth 1 https://github.com/balaocastelo-dev/balao2026.git $HOME\\balao2026"}</code>).
           </li>
           <li>
-            <code>.\scripts\agente-local\instalar.ps1</code> (instala e cria a tarefa &quot;JUL.IA&quot;, que liga sozinha com o Windows).
+            Só na primeira vez: <code>{"& $HOME\\balao2026\\whatsapp-server\\deploy-evo.ps1 -Agente"}</code> (traz o
+            segredo da VPS para o PC; pede a senha de root).
           </li>
           <li>
-            Teste no terminal, sem WhatsApp: <code>python julia.py --conversar</code> na pasta <code>C:\Users\user\balao-agente</code>.
+            <code>{"& $HOME\\balao2026\\scripts\\agente-local\\instalar.ps1"}</code> (instala ou atualiza e liga a tarefa
+            &quot;JUL.IA&quot;, que volta sozinha com o Windows).
+          </li>
+          <li>
+            Teste no terminal, sem WhatsApp:{" "}
+            <code>{"& $HOME\\balao-agente\\.venv\\Scripts\\python.exe $HOME\\balao-agente\\julia.py --conversar"}</code>.
           </li>
           <li>Aqui: modo Automático com &quot;Só os números de teste&quot;, e mande mensagem do seu celular pessoal para a loja.</li>
         </ol>
