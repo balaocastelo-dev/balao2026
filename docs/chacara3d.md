@@ -14,7 +14,14 @@ chácara), hospedado no site; não faz parte da loja.
 - **Versão realista (12/10/2026)**: céu físico com nuvens e sombra delas, sombras macias,
   oclusão de ambiente, materiais com textura de verdade, grama 3D, vento nas plantas,
   água com reflexo e refração, cascata, bolhas, carpas, cachorros, galinhas, galo,
-  passarinhos, borboletas, vaga-lumes, e as três tiny houses mobiliadas por dentro.
+  passarinhos, borboletas, vaga-lumes, e a vilinha mobiliada por dentro.
+- **Vilinha (12/10/2026)**: as três tiny houses viraram sobrados de 7 × 3 m (42 m² em dois
+  pisos: sala, cozinha e banheiro embaixo; casal, beliche e banheiro em cima) com mirante
+  no lugar do telhado (deck a 5,75 m, teto verde, espreguiçadeiras, luneta), escada de
+  dentro em L com degraus flutuantes e caracol de fora. Azul em x 4,5–11,5 e amarela em
+  x 16,5–23,5 no muro y = 0, verde em x 8,5–15,5 no muro y = 10; pracinha com a
+  jabuticabeira em (14,0; 2,2). Detalhes, formato do `extra` e o que o passeio ainda
+  precisa acompanhar: seção "Os sobrados da vilinha" do `chacara3d/README.md`.
 - **Abertura**: fica pronta em ~8 s no Chrome com placa de vídeo (58 programas de
   sombreamento compilados em paralelo, texturas decodificadas fora da linha principal).
   Os tempos de cada etapa ficam em `window.__chacara.tempos`. Antes de mexer em material,

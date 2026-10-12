@@ -26,11 +26,29 @@ export const U = {
   uNivelLago: { value: -0.64 },
   uAguaHidro: { value: new THREE.Vector4(32.22, 33.98, -3.08, -1.32) },
   uNivelHidro: { value: 0.42 },
+  // sobrados: até onde vai a caixa de cada casa e o brilho quente de dentro à noite
+  uTopoCasa: { value: 5.5 },
+  uLuzCasa: { value: [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()] },
+  // projeção mapeada: até NPROJ projetores que lançam um ladrilho do atlas sobre o que estiver
+  // dentro do seu tronco de visão (o perto/longe do projetor limita a fatia iluminada)
+  uProjAtlas: { value: null },
+  uProjMat: { value: Array.from({ length: 12 }, () => new THREE.Matrix4()) },
+  uProjTile: { value: Array.from({ length: 12 }, () => new THREE.Vector4(0, 0, 1, 1)) },
+  uProjCor: { value: Array.from({ length: 12 }, () => new THREE.Vector4(0, 0, 0, 0)) },
+  uProjPos: { value: Array.from({ length: 12 }, () => new THREE.Vector4()) },
+  uProjRep: { value: Array.from({ length: 12 }, () => new THREE.Vector4(1, 1, 0, 0)) },
 };
+export const NPROJ = 12;
+let projecaoLigada = true;      // sem projeção no celular (economiza conta e uniforms)
+export function usarProjecao(sim) { projecaoLigada = sim; }
+{
+  const preto = new THREE.DataTexture(new Uint8Array([0, 0, 0, 255]), 1, 1); preto.needsUpdate = true;
+  U.uProjAtlas.value = preto;
+}
 
 const GLSL_COMUM = /* glsl */`
 uniform float uTempo; uniform vec2 uVento; uniform float uVentoK; uniform float uTransK;
-uniform vec4 uCasas[3]; uniform float uFrente[3]; uniform float uFatorInt;
+uniform vec4 uCasas[3]; uniform float uFrente[3]; uniform float uFatorInt; uniform float uTopoCasa; uniform vec3 uLuzCasa[3];
 uniform vec3 uSolVista; uniform vec3 uSolMundo; uniform vec3 uCorSol; uniform float uForcaSol;
 uniform float uCobertura; uniform float uSombraNuvem;
 uniform vec4 uAguaPiscina; uniform float uNivelPiscina; uniform vec4 uAguaLago; uniform float uNivelLago; uniform vec4 uAguaHidro; uniform float uNivelHidro;
@@ -90,6 +108,39 @@ void RE_Direct_Physical( const in IncidentLight directLight0, const in vec3 geom
 
 const NUVEM_DEF = '\n' + GLSL_NUVENS + '\n';
 
+// luz dos projetores (projeção mapeada e luz de jardim): soma como luz difusa sobre a cor do material
+const GLSL_PROJECAO = /* glsl */`
+#ifdef PROJECAO
+{
+  vec3 pw = vPosMundoR;
+  vec3 nw = normalize(inverseTransformDirection(normal, viewMatrix));
+  for (int i = 0; i < NPROJ; i++) {
+    vec4 pc = uProjCor[i];
+    if (pc.a <= 0.0) continue;
+    vec4 cl = uProjMat[i] * vec4(pw, 1.0);
+    if (cl.w <= 0.0) continue;
+    vec3 nd = cl.xyz / cl.w;
+    if (abs(nd.x) > 1.0 || abs(nd.y) > 1.0 || abs(nd.z) > 1.0) continue;
+    vec4 rp = uProjRep[i];
+    vec2 q = nd.xy * 0.5 + 0.5;
+    vec2 bq = smoothstep(vec2(0.0), vec2(0.03), q) * smoothstep(vec2(0.0), vec2(0.03), 1.0 - q);
+    vec2 qt = clamp(fract(q * rp.xy), vec2(0.002), vec2(0.998));
+    vec4 tl = uProjTile[i];
+    vec3 luz = texture2D(uProjAtlas, tl.xy + qt * tl.zw).rgb;
+    float ndl = dot(nw, normalize(uProjPos[i].xyz - pw));
+    float fac = rp.z > 0.5 ? (0.35 + 0.65 * abs(ndl)) : max(ndl, 0.0);
+    float fz = smoothstep(1.0, 0.85, abs(nd.z));
+    totalEmissiveRadiance += diffuseColor.rgb * luz * pc.rgb * (pc.a * fac * bq.x * bq.y * fz);
+  }
+}
+#endif
+`;
+
+const GLSL_PROJ_UNI = `#ifdef PROJECAO
+uniform sampler2D uProjAtlas; uniform mat4 uProjMat[NPROJ]; uniform vec4 uProjTile[NPROJ]; uniform vec4 uProjCor[NPROJ]; uniform vec4 uProjPos[NPROJ]; uniform vec4 uProjRep[NPROJ];
+#endif
+`;
+
 function remendar(material, o) {
   o = o || {};
   const defs = [];
@@ -101,6 +152,7 @@ function remendar(material, o) {
   if (o.interior !== false) defs.push('#define INTERIOR');
   if (o.nuvens !== false) defs.push('#define NUVENS');
   if (o.causticas) defs.push('#define CAUSTICAS');
+  if (projecaoLigada && o.projecao !== false) defs.push('#define PROJECAO\n#define NPROJ ' + NPROJ);
   const prefixo = defs.join('\n') + '\n';
   material.onBeforeCompile = shader => {
     Object.assign(shader.uniforms, U);
@@ -110,7 +162,7 @@ function remendar(material, o) {
     shader.vertexShader = prefixo + GLSL_COMUM + shader.vertexShader
       .replace('#include <begin_vertex>', VENTO_VERT)
       .replace('#include <project_vertex>', '#include <project_vertex>\n vPosMundoR = (modelMatrix * vec4(transformed, 1.0)).xyz;');
-    let f = prefixo + GLSL_COMUM + (o.folha ? 'uniform vec3 uTransCor;\n' : '') + NUVEM_DEF + shader.fragmentShader;
+    let f = prefixo + GLSL_COMUM + (o.folha ? 'uniform vec3 uTransCor;\n' : '') + GLSL_PROJ_UNI + NUVEM_DEF + shader.fragmentShader;
     f = f.replace('#include <lights_physical_pars_fragment>', chunkLuzes());
     // sombra das nuvens só na luz do sol (uma conta por pixel, não uma por lâmpada)
     f = f.replace('#include <lights_fragment_begin>', THREE.ShaderChunk.lights_fragment_begin.replace(
@@ -120,17 +172,19 @@ function remendar(material, o) {
     f = f.replace('#include <lights_fragment_maps>', /* glsl */`#include <lights_fragment_maps>
 #ifdef INTERIOR
 {
-  vec3 p = vPosMundoR; float fi = 1.0;
+  vec3 p = vPosMundoR; float fi = 1.0; vec3 brilho = vec3(0.0);
   for (int i = 0; i < 3; i++) {
     vec4 c = uCasas[i];
-    if (p.x > c.x + 0.05 && p.x < c.y - 0.05 && p.z > c.z + 0.05 && p.z < c.w - 0.05 && p.y < 3.35) {
+    if (p.x > c.x + 0.05 && p.x < c.y - 0.05 && p.z > c.z + 0.05 && p.z < c.w - 0.05 && p.y < uTopoCasa) {
       float dfr = abs(p.z - uFrente[i]);
       fi = mix(uFatorInt, 0.85, smoothstep(1.4, 0.0, dfr));
+      brilho = uLuzCasa[i];
     }
   }
-  iblIrradiance *= fi; radiance *= mix(1.0, fi, 0.8);
+  iblIrradiance = iblIrradiance * fi + brilho; radiance *= mix(1.0, fi, 0.8);
 }
 #endif`);
+    f = f.replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n' + GLSL_PROJECAO);
     if (o.causticas) {
       f = f.replace('#include <emissivemap_fragment>', /* glsl */`#include <emissivemap_fragment>
 {
@@ -285,6 +339,20 @@ export function criarMateriais(info) {
     tecido_amarelo: superficie('tecido', { cor: new THREE.Color(0.85, 0.6, 0.18) }),
     tecido_verde: superficie('tecido', { cor: new THREE.Color(0.22, 0.42, 0.3) }),
     cortina: superficie('tecido', { cor: new THREE.Color(0.93, 0.9, 0.82) }),
+    // sobrados da vilinha
+    deck_ipe: superficie('deck', { relevo: 0.9 }),
+    porcelanato: superficie('concreto', { cor: new THREE.Color(1.05, 1.03, 1.0), rug: 0.45, relevo: 0.4 }),
+    madeira_clara: superficie('madeira', { relevo: 0.6, cor: new THREE.Color(1.45, 1.25, 1.0) }),
+    tecido_grafite: superficie('tecido', { cor: new THREE.Color(0.2, 0.2, 0.21) }),
+    tapete: superficie('tecido', { cor: new THREE.Color(0.5, 0.48, 0.45) }),
+    aluminio_preto: liso(new THREE.Color(0.03, 0.03, 0.032), 0.38, { metal: 0.6 }),
+    corten: liso(new THREE.Color(0.36, 0.13, 0.045), 0.78, { metal: 0.25 }),
+    gesso: liso(new THREE.Color(0.9, 0.89, 0.86), 0.92),
+    laca_grafite: liso(new THREE.Color(0.06, 0.064, 0.07), 0.5),
+    quartzo: liso(new THREE.Color(0.88, 0.87, 0.85), 0.2),
+    tela_tv: liso(new THREE.Color(0.008, 0.009, 0.011), 0.08),
+    vidro_jateado: liso(new THREE.Color(0.82, 0.86, 0.86), 0.55),
+    couro: liso(new THREE.Color(0.4, 0.19, 0.08), 0.5),
     // pintura, metal, louça, vidro
     gate_green: liso(new THREE.Color(0.02, 0.13, 0.06), 0.45),
     metal_dark: liso(new THREE.Color(0.05, 0.05, 0.05), 0.42, { metal: 0.7 }),
