@@ -59,6 +59,35 @@ const COLUNAS = [
   "produto_id", "produto_nome", "origem", "situacao", "em", "chave", "de_mim", "midia", "citada", "lid",
 ];
 
+/**
+ * A Evolution às vezes guarda a mesma mensagem duas vezes (mesmo id: uma pelo
+ * @lid e outra pelo número, ou a do histórico e a do webhook). Num lote só, o
+ * Postgres recusa o INSERT inteiro ("ON CONFLICT DO UPDATE command cannot
+ * affect row a second time"; aconteceu na loja em 12/10/2026). Fica uma linha
+ * por id: a da conversa pelo número (@c.us) quando houver, completada com o
+ * que a outra cópia tinha.
+ */
+function juntarRepetidas(linhas) {
+  const porId = new Map();
+  let repetidas = 0;
+  for (const l of linhas) {
+    if (!l) continue;
+    const ja = porId.get(l.id);
+    if (!ja) {
+      porId.set(l.id, l);
+      continue;
+    }
+    repetidas++;
+    const pelaNova = !String(ja.chatId).endsWith("@c.us") && String(l.chatId).endsWith("@c.us");
+    const [fica, outra] = pelaNova ? [{ ...l }, ja] : [{ ...ja }, l];
+    for (const [k, v] of Object.entries(outra)) {
+      if ((fica[k] == null || fica[k] === "") && v != null && v !== "") fica[k] = v;
+    }
+    porId.set(l.id, fica);
+  }
+  return { linhas: [...porId.values()], repetidas };
+}
+
 /** Grava um lote; devolve { novas, completadas }. */
 async function gravarLote(db, linhas) {
   if (!linhas.length) return { novas: 0, completadas: 0 };
@@ -152,7 +181,7 @@ async function importar({
   const db = seco ? null : await abrirBanco({ url: urlLoja, urlAdmin: urlLojaAdmin, registrar });
   const painel = lerPainel(dataRoot);
   const lidParaNumero = (l) => painel.lids[l] || null;
-  const total = { lidas: 0, gravaveis: 0, novas: 0, completadas: 0, reacoes: 0, puladas: 0, lotes: 0 };
+  const total = { lidas: 0, gravaveis: 0, novas: 0, completadas: 0, reacoes: 0, puladas: 0, repetidas: 0, lotes: 0 };
 
   try {
     const inst = await origem.query(`SELECT id, "ownerJid" FROM "Instance" WHERE name = $1`, [instancia]);
@@ -202,11 +231,15 @@ async function importar({
           continue;
         }
         if (painel.transcricoes[m.id]) m.transcricao = painel.transcricoes[m.id];
-        linhas.push(paraOBanco(m));
+        const linha = paraOBanco(m);
+        if (linha) linhas.push(linha);
+        else total.puladas++;
       }
-      total.gravaveis += linhas.length;
+      const { linhas: unicas, repetidas } = juntarRepetidas(linhas);
+      total.repetidas += repetidas;
+      total.gravaveis += unicas.length;
       if (!seco) {
-        const g = await gravarLote(db, linhas);
+        const g = await gravarLote(db, unicas);
         total.novas += g.novas;
         total.completadas += g.completadas;
       }
@@ -234,7 +267,8 @@ async function importar({
     registrar(
       `[importar] Pronto${seco ? " (seco: nada gravado)" : ""}: ${total.lidas} lidas em ${total.lotes} lote(s); ` +
         `${total.gravaveis} de conversa; ${total.novas} novas no banco da loja; ${total.completadas} completadas; ` +
-        `${total.reacoes} reação(ões); ${total.puladas} fora do atendimento (grupo, status, controle).`
+        `${total.reacoes} reação(ões); ${total.repetidas} repetida(s) na Evolution (gravadas uma vez); ` +
+        `${total.puladas} fora do atendimento (grupo, status, controle).`
     );
     return total;
   } finally {
@@ -263,4 +297,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { importar, opcoes };
+module.exports = { importar, opcoes, juntarRepetidas };
