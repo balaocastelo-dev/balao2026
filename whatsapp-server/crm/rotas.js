@@ -4,8 +4,9 @@
 // (/api/crm/*), que continuam valendo e não mudaram.
 
 const express = require("express");
+const { montarRotasDeCampanha } = require("./campanha-rotas");
 
-function montarRotasDoCrm(app, { acesso, servico, equipe, avisarPainel = () => {} }) {
+function montarRotasDoCrm(app, { acesso, servico, equipe, campanhas = null, avisarPainel = () => {} }) {
   const r = express.Router();
   const json = express.json({ limit: "2mb" });
 
@@ -163,6 +164,9 @@ function montarRotasDoCrm(app, { acesso, servico, equipe, avisarPainel = () => {
     rota(async (req) => ({ vendedor: equipe.salvar(req.body || {}) }))
   );
   r.delete("/equipe/:id", acesso.exigir(["admin"]), rota(async (req) => (equipe.remover(req.params.id), {})));
+
+  // ---- disparo por tema (crm/campanha-rotas.js) ----
+  if (campanhas) montarRotasDeCampanha(r, { campanhas, json, rota, nomeDeQuem });
 
   app.use("/api/comando", r);
 }

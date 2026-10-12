@@ -31,6 +31,7 @@ const { montarRotasDeStatus } = require("./status/rotas");
 const { abrirBanco: abrirBancoDoCrm } = require("./crm/db");
 const { criarServicoDoCrm } = require("./crm/servico");
 const { montarRotasDoCrm } = require("./crm/rotas");
+const { criarCampanhas, opcoesDoAmbiente } = require("./crm/campanha");
 const { paraOBanco, paraOPainel } = require("./crm/formato");
 const { criarMedicao } = require("./medicao");
 const { proximaRecargaCompleta, lerHorario, filtroDeJanela } = require("./recarga");
@@ -122,6 +123,7 @@ const LER_STATUS_DOS_CONTATOS = process.env.STATUS_LER_CONTATOS !== "0";
 const SEGREDO_STATUS = lerOuCriarSegredo("STATUS_SEGREDO", "status.segredo");
 let statusServico = null; // módulo de Status (liga quando o banco responde)
 let crmServico = null; // Centro de Comando (contatos, mensagens, métricas)
+let campanhas = null; // Disparo por tema (crm/campanha.js), liga junto com o CRM
 const espelhoDoCatalogo = criarEspelhoDoCatalogo({ pasta: DATA_DIR, urlDoSite: SITE_URL });
 setTimeout(() => espelhoDoCatalogo.atualizar({ motivo: "boot" }), 20_000).unref?.();
 setInterval(() => espelhoDoCatalogo.atualizar({ motivo: "agendado" }), 30 * 60_000).unref?.();
@@ -3406,61 +3408,45 @@ io.on("connection", (socket) => {
     }
   });
 
-  // ---- disparo segmentado (com pausa aleatória e checagem de número) ----
+  // ---- disparo do painel antigo ----
+  //
+  // O painel novo usa o disparo por tema (/api/comando/campanhas). Este evento
+  // fica só para navegador com a tela velha em cache, e não manda mais nada
+  // sozinho: vira campanha e passa pelas mesmas travas (seg a sáb, 9h às 18h,
+  // até 100 por dia, 40 a 120 s entre envios, SAIR conferido antes de cada
+  // envio, {nome} trocado). Antes, o intervalo máximo chegava em segundos e
+  // era usado como milissegundos, e o {nome} chegava ao cliente como "{nome}".
   socket.on("panel:send-segmented", async (p) => {
-    const lista = (Array.isArray(p?.recipients) ? p.recipients : []).slice(0, 100);
-    const texto = String(p?.text || "").trim();
-    if (!lista.length || !texto) return;
-    const min = Math.max(15, Number(p.intervalMin) || 30) * 1000;
-    const max = Math.max(min, Number(p.intervalMax) || 60_000);
-
-    // A decisão de não mandar é do servidor, não da tela.
-    //
-    // O painel já filtrava, mas a lista chega aqui pronta: um navegador com
-    // cache velho, ou o painel de outro vendedor que não viu o "PARAR",
-    // mandava para quem pediu para sair. Isso é exposição de LGPD, então a
-    // checagem passa a ser feita de novo aqui, onde está a verdade.
-    const barrados = [];
-    const permitidos = lista.filter((item) => {
-      const chatId = item?.chatId || (item?.number ? N.paraChatId(item.number, lidParaNumero) : null);
-      if (!chatId) return true;
-      if (store.optout[chatId]) return (barrados.push("pediu para sair"), false);
-      if (store.bloqueados[chatId]) return (barrados.push("bloqueado"), false);
-      return true;
-    });
-    if (barrados.length) {
+    const lista = Array.isArray(p?.recipients) ? p.recipients : [];
+    // Até 100, como a tela antiga sempre fez: uma aba velha aberta não vira
+    // campanha para a lista inteira de conversas.
+    const chatIds = lista
+      .map((item) => item?.chatId || (item?.number ? N.paraChatId(item.number, lidParaNumero) : null))
+      .filter(Boolean)
+      .slice(0, 100);
+    // {promocao} era preenchido pela tela antiga e não existe na campanha.
+    const texto = String(p?.text || "")
+      .replace(/^[ \t]*\{promocao\}[ \t]*(\r?\n|$)/gim, "")
+      .replace(/\{promocao\}/gi, "")
+      .trim();
+    // A tela antiga trava o botão até ouvir isto.
+    socket.emit("whatsapp:disparo-status", { ativo: false });
+    if (!chatIds.length || !texto) return;
+    if (!campanhas) return emitirToast("O disparo depende do banco do CRM, que ainda está ligando. Tente de novo em instantes.", socket);
+    try {
+      const quem = socket.data.quem;
+      const c = await campanhas.criar({
+        nome: "Disparo do painel antigo",
+        texto,
+        filtro: { chatIds },
+        por: quem?.vendedor?.nome || quem?.papel || null,
+      });
       emitirToast(
-        `${barrados.length} contato(s) fora do disparo: ${barrados.filter((b) => b === "pediu para sair").length} pediram para sair, ${barrados.filter((b) => b === "bloqueado").length} bloqueado(s).`,
+        `O disparo virou campanha: ${c.total} contato(s), de seg a sáb das 9h às 18h, até 100 por dia. Acompanhe na aba Disparo.`,
         socket
       );
-    }
-    if (!permitidos.length) {
-      return emitirToast("Nenhum destinatário elegível: todos pediram para sair ou estão bloqueados.", socket);
-    }
-
-    paraPainel().emit("whatsapp:disparo-status", { ativo: true });
-    let enviados = 0, semWhats = 0, falhas = 0;
-    try {
-      for (let i = 0; i < permitidos.length; i++) {
-        const destino = permitidos[i].chatId || permitidos[i].number;
-        try {
-          if (!permitidos[i].chatId) {
-            const r = await evolution.temWhatsApp(INSTANCIA, [N.digitos(destino)]).catch(() => null);
-            if (Array.isArray(r) && r[0] && r[0].exists === false) {
-              semWhats++;
-              continue;
-            }
-          }
-          registrarEnviada(await enviarTexto({ destino, texto, signatureId: p.signatureId }));
-          enviados++;
-        } catch {
-          falhas++;
-        }
-        if (i < permitidos.length - 1) await new Promise((r) => setTimeout(r, min + Math.random() * (max - min)));
-      }
-      emitirToast(`Disparo concluído: ${enviados} enviada(s)${semWhats ? ` · ${semWhats} sem WhatsApp` : ""}${falhas ? ` · ${falhas} com erro` : ""}.`, socket);
-    } finally {
-      paraPainel().emit("whatsapp:disparo-status", { ativo: false });
+    } catch (erro) {
+      emitirToast(`Disparo não iniciado: ${erro.message}`, socket);
     }
   });
 
@@ -3552,6 +3538,7 @@ async function ligarModuloDoCrm() {
         urlAdmin: process.env.CRM_DB_URL_ADMIN || process.env.STATUS_DB_URL_ADMIN,
       });
       crmServico = criarServicoDoCrm({ db });
+      ligarDisparoPorTema(db);
       console.log("[comando] Centro de Comando ligado.");
       importarHistoricoParaOCrm().catch((e) => console.warn("[comando] importação:", e.message));
       return;
@@ -3561,6 +3548,67 @@ async function ligarModuloDoCrm() {
       await new Promise((r) => setTimeout(r, espera * 1000));
     }
   }
+}
+
+// ------------------------------------------------------------------
+// Disparo por tema (crm/campanha.js). O laço de envio roda aqui, no processo
+// do servidor, com o estado no banco: reiniciou, continua de onde parou.
+// ------------------------------------------------------------------
+
+/** A mesma conversa pelo número e pelo código interno (@lid). */
+function equivalentesDaConversa(chatId) {
+  const ids = new Set([String(chatId)]);
+  if (N.ehLid(chatId)) {
+    const numero = lidParaNumero(chatId);
+    if (numero) ids.add(`${N.digitos(numero)}@c.us`);
+  } else {
+    const d = N.digitos(chatId);
+    for (const [lid, numero] of Object.entries(store.lids)) if (N.digitos(numero) === d) ids.add(lid);
+  }
+  return [...ids];
+}
+
+function ligarDisparoPorTema(db) {
+  if (campanhas) return;
+  campanhas = criarCampanhas({
+    db,
+    ...opcoesDoAmbiente(process.env),
+    conectado: () => estado.connected,
+    enviar: async ({ chatId, texto }) => {
+      const final = registrarEnviada(await enviarTexto({ destino: chatId, texto }));
+      return { id: final.id };
+    },
+    // PARAR/SAIR e bloqueio também moram no store (valem mesmo com o banco fora).
+    motivoDeFora: (chatId) => {
+      for (const id of equivalentesDaConversa(chatId)) {
+        if (store.optout[id]) return "pediu para sair";
+        if (store.bloqueados[id]) return "bloqueado";
+      }
+      return null;
+    },
+    barrados: () => {
+      const ids = new Set();
+      for (const id of [...Object.keys(store.optout), ...Object.keys(store.bloqueados)]) {
+        for (const eq of equivalentesDaConversa(id)) ids.add(eq);
+      }
+      return [...ids];
+    },
+    pessoaDe: (chatId) => {
+      const numero = N.ehLid(chatId) ? lidParaNumero(chatId) : null;
+      return numero ? `${N.digitos(numero)}@c.us` : chatId;
+    },
+    etiquetasDoPainel: (nomes) => {
+      const alvo = new Set(nomes);
+      return Object.entries(store.chatLabels)
+        .filter(([, etiquetas]) => (etiquetas || []).some((e) => alvo.has(String(e).toLocaleLowerCase("pt-BR"))))
+        .map(([chatId]) => chatId);
+    },
+    avisar: (dados) => {
+      paraPainel().emit("whatsapp:campanha", dados);
+      if (dados?.texto) emitirToast(dados.texto);
+    },
+  });
+  campanhas.iniciar();
 }
 
 /**
@@ -3674,6 +3722,20 @@ montarRotasDoCrm(app, {
   acesso,
   // Clique do cliente num e-mail de produtos: o vendedor é avisado na hora.
   avisarPainel: (texto) => emitirToast(texto),
+  campanhas: new Proxy(
+    {},
+    {
+      get: (_alvo, nome) => {
+        if (!campanhas) {
+          return () => {
+            throw Object.assign(new Error("Disparo iniciando junto com o banco do CRM. Tente em alguns segundos."), { status: 503 });
+          };
+        }
+        const v = campanhas[nome];
+        return typeof v === "function" ? v.bind(campanhas) : v;
+      },
+    }
+  ),
   servico: new Proxy(
     {},
     {

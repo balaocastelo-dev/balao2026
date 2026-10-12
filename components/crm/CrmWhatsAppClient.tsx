@@ -22,6 +22,7 @@ import {
 } from "@/components/crm/mensagem-extras";
 import { blobDoDataUrl, enviarPorUpload } from "@/components/crm/upload-midia";
 import EnviarPorEmail, { type ProdutoParaEmail } from "@/components/crm/email/EnviarPorEmail";
+import DisparoPorTema from "@/components/crm/disparo/DisparoPorTema";
 import type { PonteStatus, StatusRecebido } from "@/components/crm/status/tipos";
 import {
   CrmChat,
@@ -30,7 +31,6 @@ import {
   CrmNotaCliente,
   CrmProdutoCatalogo,
   CrmProdutoResumo,
-  CrmPromocao,
   CrmRespostaRapida,
   CrmStatusFeed,
   CrmVendedor,
@@ -888,27 +888,9 @@ export default function CrmWhatsAppClient({
   const [fotosWebCarregando, setFotosWebCarregando] = useState(false);
   const [fotoDragSobre, setFotoDragSobre] = useState(false);
 
-  // Disparo em Massa State
-  const [disparoTexto, setDisparoTexto] = useState(
-    "Olá {nome}! Tudo bem? Passando para te avisar das novidades e ofertas especiais no PIX aqui no Balão da Informática Castelo Campinas!\n{promocao}\n\nPara garantir é só me chamar aqui! 🎈\n{whatsapp}"
-  );
-  const [disparoIntervalo, setDisparoIntervalo] = useState(25);
-  const [disparoIntervaloMax, setDisparoIntervaloMax] = useState(60);
-  const [disparoAtivo, setDisparoAtivo] = useState(false);
-  const [promocoes, setPromocoes] = useState<CrmPromocao[]>([
-    {
-      id: 1,
-      titulo: "PC Gamer Ryzen 5 + RTX 4060 10% OFF no Pix",
-      texto: "PC Gamer montado com garantia oficial Balão de R$ 4.890 por R$ 4.390 à vista no Pix!",
-      ativo: true,
-    },
-    {
-      id: 2,
-      titulo: "Limpeza Preventiva + Troca de Pasta Térmica",
-      texto: "Revisão completa de bancada com pasta térmica de alta condutividade por apenas R$ 120,00.",
-      ativo: true,
-    },
-  ]);
+  // Disparo por tema (components/crm/disparo/DisparoPorTema.tsx). Quem manda é
+  // o servidor; aqui só um contador que muda a cada aviso de progresso.
+  const [sinalCampanha, setSinalCampanha] = useState(0);
 
   // Persistence & Storage Cleanup
   //
@@ -1701,8 +1683,10 @@ export default function CrmWhatsAppClient({
       if (payload?.message) showToast(payload.message);
     });
 
-    socket.on("whatsapp:disparo-status", (payload: any) => {
-      setDisparoAtivo(Boolean(payload?.ativo));
+    // Progresso e fim das campanhas do disparo por tema (o fim também chega
+    // como whatsapp:toast).
+    socket.on("whatsapp:campanha", () => {
+      setSinalCampanha((n) => n + 1);
     });
 
     // Confirmação real de envio (ligada ao tempId gerado ao criar o balão
@@ -5221,99 +5205,14 @@ export default function CrmWhatsAppClient({
                   </div>
                 )}
 
-                {/* ABA 6: DISPARO EM MASSA */}
+                {/* ABA 6: DISPARO POR TEMA (a lista sai do banco, no servidor) */}
                 {abaAtual === "disparo" && (
-                  <div className="space-y-3">
-                    <div className="bg-[#fff4e5] border border-[#ffcc80] rounded-xl p-2.5 text-[11px] text-[#e65100]">
-                      ⚠️ <b>Proteção Anti-Ban & LGPD:</b> O disparo envia de forma cadenciada dentro da janela comercial e processa opt-out imediato.
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2 text-center text-xs">
-                      <div className="bg-[#f0f2f5] p-2 rounded-xl border border-[#e3e3e3]">
-                        <div className="text-[10px] text-[#5f6368]">Na Fila</div>
-                        <div className="text-base font-bold text-[#202124]">{chats.filter((c) => !c.optOut).length}</div>
-                      </div>
-                      <div className="bg-[#f0f2f5] p-2 rounded-xl border border-[#e3e3e3]">
-                        <div className="text-[10px] text-[#5f6368]">Opt-Out (LGPD)</div>
-                        <div className="text-base font-bold text-red-600">{chats.filter((c) => c.optOut).length}</div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-[#202124] mb-1">
-                        Mensagem da Campanha (Variáveis: {"{nome}"}, {"{promocao}"}, {"{whatsapp}"})
-                      </label>
-                      <textarea
-                        rows={4}
-                        value={disparoTexto}
-                        onChange={(e) => setDisparoTexto(e.target.value)}
-                        className="w-full p-2 border border-[#e3e3e3] rounded-xl text-xs bg-white outline-none"
-                      />
-                    </div>
-
-                    <div>
-                      <div className="flex justify-between text-xs font-semibold mb-1">
-                        <span>Intervalo entre envios:</span>
-                        <span className="font-bold text-[#0a6e3d]">{disparoIntervalo}s a {disparoIntervaloMax}s</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="15"
-                        max="90"
-                        value={disparoIntervalo}
-                        onChange={(e) => {
-                          const v = Number(e.target.value);
-                          setDisparoIntervalo(v);
-                          setDisparoIntervaloMax(Math.max(v * 2, 60));
-                        }}
-                        className="w-full accent-[#0f9d58]"
-                      />
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <div className="font-bold text-xs text-[#202124]">📢 Promoções Ativas no Disparo:</div>
-                      {promocoes.map((p) => (
-                        <div key={p.id} className="p-2 bg-white border border-[#e3e3e3] rounded-lg text-xs flex justify-between items-center">
-                          <div>
-                            <b>{p.titulo}</b>
-                            <p className="text-[10px] text-[#5f6368] line-clamp-1">{p.texto}</p>
-                          </div>
-                          <input
-                            type="checkbox"
-                            checked={p.ativo}
-                            onChange={(e) =>
-                              setPromocoes((prev) =>
-                                prev.map((x) => (x.id === p.id ? { ...x, ativo: e.target.checked } : x))
-                              )
-                            }
-                            className="accent-[#0f9d58]"
-                          />
-                        </div>
-                      ))}
-                    </div>
-
-                    <button
-                      onClick={() => {
-                        const elegiveis = chats.filter((c) => !c.optOut);
-                        if (!elegiveis.length || !disparoTexto.trim()) return;
-                        setDisparoAtivo(true);
-                        const recipients = elegiveis.map((c) => ({ number: c.numero, chatId: c.id }));
-                        if (socketRef.current?.connected) {
-                          socketRef.current.emit("panel:send-segmented", {
-                            recipients,
-                            text: disparoTexto,
-                            intervalMin: disparoIntervalo,
-                            intervalMax: disparoIntervaloMax,
-                          });
-                        } else setDisparoAtivo(false);
-                        showToast(`Disparo iniciado para ${elegiveis.length} contatos!`);
-                      }}
-                      disabled={disparoAtivo || chats.filter((c) => !c.optOut).length === 0}
-                      className="w-full bg-[#0f9d58] hover:bg-[#0a6e3d] disabled:opacity-50 text-white py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer"
-                    >
-                      {disparoAtivo ? "Campanha em Andamento…" : `Iniciar Disparo (${chats.filter((c) => !c.optOut).length})`}
-                    </button>
-                  </div>
+                  <DisparoPorTema
+                    fetchServidor={fetchServidor}
+                    avisar={showToast}
+                    etiquetasDaTela={etiquetas}
+                    sinal={sinalCampanha}
+                  />
                 )}
 
                 {/* ABA 7: DADOS DO CLIENTE */}
