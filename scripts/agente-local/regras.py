@@ -214,6 +214,26 @@ def problemas_de_estilo(texto: str) -> list[str]:
     return p
 
 
+def encurtar(texto: str, limite: int = LIMITE_DE_TEXTO) -> str:
+    """Resposta comprida demais vira as primeiras frases que cabem, mantendo a pergunta do fim
+    (sem outra ida ao modelo). Uma frase só, enorme, fica como está."""
+    t = (texto or "").strip()
+    if len(t) <= limite:
+        return t
+    frases = [f for f in re.split(r"(?<=[.!?])\s+|\n+", t) if f.strip()]
+    pergunta = frases[-1] if len(frases) > 1 and frases[-1].rstrip().endswith("?") else ""
+    corpo = frases[:-1] if pergunta else frases
+    escolhidas, tamanho = [], len(pergunta)
+    for f in corpo:
+        if escolhidas and tamanho + len(f) + 1 > limite:
+            break
+        escolhidas.append(f)
+        tamanho += len(f) + 1
+    if pergunta:
+        escolhidas.append(pergunta)
+    return " ".join(x.strip() for x in escolhidas).strip() or t
+
+
 def limpar_texto(texto: str) -> str:
     """Tira o "pensamento" e o markdown que o WhatsApp não mostra."""
     t = re.sub(r"<think>.*?</think>", "", texto or "", flags=re.S)

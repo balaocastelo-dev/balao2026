@@ -20,6 +20,7 @@ import logging.handlers
 import os
 import shutil
 import sys
+import threading
 import time
 import traceback
 from pathlib import Path
@@ -27,14 +28,14 @@ from pathlib import Path
 import config as C
 from bling import Bling
 from catalogo import Catalogo
-from cerebro import Atendimento
+from cerebro import Atendimento, conversa_atual
 from ollama import Ollama
 from placa import Placa
 from rede import ErroHttp
 from sentidos import Sentidos
 from vps import Vps
 
-VERSAO = "2026-10-12"
+VERSAO = "2026-10-12b"
 log = logging.getLogger("julia")
 
 
@@ -48,6 +49,37 @@ def configurar_log(pasta: str):
         tela = logging.StreamHandler(sys.stdout)
         tela.setFormatter(fmt)
         log.addHandler(tela)
+
+
+def variavel_do_usuario(nome: str) -> str | None:
+    """Variável de ambiente do usuário do Windows (a que o Ollama lê ao abrir), mesmo se mudou
+    depois que esta tarefa começou."""
+    valor = os.environ.get(nome)
+    if os.name == "nt":
+        try:
+            import winreg
+
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Environment") as k:
+                valor = winreg.QueryValueEx(k, nome)[0]
+        except OSError:
+            pass
+    return valor
+
+
+def vagas_do_ollama() -> int:
+    """OLLAMA_NUM_PARALLEL (conversas que o Ollama atende juntas); 0 = não sei."""
+    try:
+        return int(variavel_do_usuario("OLLAMA_NUM_PARALLEL") or 0)
+    except ValueError:
+        return 0
+
+
+def conversas_ao_mesmo_tempo(cfg: dict, vagas: int | None = None) -> int:
+    """Quantas conversas a JUL.IA atende ao mesmo tempo: o pedido no config, deixando sempre
+    uma vaga do Ollama livre para a URA (ligação não espera resposta de WhatsApp)."""
+    pedido = max(1, int(cfg.get("paralelo") or 1))
+    vagas = vagas_do_ollama() if vagas is None else vagas
+    return max(1, min(pedido, vagas - 1)) if vagas else 1
 
 
 def trava_unica(pasta: str):
@@ -83,6 +115,7 @@ class Trabalhador:
         self.atendidas = 0
         self.erros = 0
         self.motivo_espera = None
+        self._trava_catalogo = threading.Lock()
 
     def bling_para(self, trabalho: dict) -> Bling:
         teste = (trabalho.get("config") or {}).get("publico") == "teste"
@@ -92,6 +125,8 @@ class Trabalhador:
         inicio = time.time()
         memoria = dict(trabalho.get("memoria") or {})
         trabalho["memoria"] = memoria
+        # Só a conversa de agora (e só a mídia dela é baixada).
+        trabalho["mensagens"] = conversa_atual(trabalho.get("mensagens"))
         transcricoes = self.sentidos.entender(trabalho.get("mensagens") or [], memoria)
         resultado = Atendimento(
             trabalho=trabalho,
@@ -99,7 +134,8 @@ class Trabalhador:
             modelo=self.cfg["modelo"],
             catalogo=self.catalogo,
             bling=self.bling_para(trabalho),
-            contexto=int(self.cfg.get("contexto") or 16384),
+            contexto=int(self.cfg.get("contexto") or 8192),
+            prazo_s=float(self.cfg.get("prazo_s") or 70),
             registrar=log.info,
         ).responder()
         resultado.update({"id": trabalho["id"], "chatId": trabalho["chatId"], "ultimaId": trabalho.get("ultimaId"),
@@ -133,7 +169,11 @@ class Trabalhador:
     def uma_rodada(self) -> bool:
         """Atende uma conversa, se houver. Devolve True se trabalhou."""
         self.batida()
-        self.catalogo.atualizar()
+        if self._trava_catalogo.acquire(blocking=False):  # uma atualização por vez
+            try:
+                self.catalogo.atualizar()
+            finally:
+                self._trava_catalogo.release()
         self.sentidos.soltar_placa()
         self.motivo_espera = self.placa.ocupada()
         if self.motivo_espera:
@@ -152,12 +192,23 @@ class Trabalhador:
             log.info(f"[julia] erro …{sufixo}: {e}\n{traceback.format_exc(limit=3)}")
             resultado = {"id": trabalho["id"], "chatId": trabalho["chatId"], "erro": str(e)[:400]}
         resposta = self.vps.resultado(resultado)
-        log.info(f"[julia] …{sufixo}: {len(resultado.get('respostas') or [])} resposta(s) em {resultado.get('duracaoMs', 0)} ms -> {resposta}")
+        m = resultado.get("medidas") or {}
+        detalhe = (f" ({m.get('chamadas', 0)} ida(s) ao modelo: {m.get('modelo_ms', 0)} ms, recarga {m.get('carga_ms', 0)} ms, "
+                   f"{m.get('entrada', 0)}+{m.get('saida', 0)} tokens)") if m else ""
+        log.info(f"[julia] …{sufixo}: {len(resultado.get('respostas') or [])} resposta(s) em {resultado.get('duracaoMs', 0)} ms{detalhe} -> {resposta}")
         return True
 
     def laco(self):
-        log.info(f"[julia] JUL.IA {VERSAO} no ar: modelo {self.cfg['modelo']}, VPS {self.cfg['vps_url']}")
+        quantos = conversas_ao_mesmo_tempo(self.cfg)
+        log.info(f"[julia] JUL.IA {VERSAO} no ar: modelo {self.cfg['modelo']}, contexto {self.cfg.get('contexto')}, "
+                 f"{quantos} conversa(s) ao mesmo tempo, VPS {self.cfg['vps_url']}")
         self.catalogo.atualizar(forcar=True)
+        for i in range(1, quantos):
+            threading.Thread(target=self._laco_de_um, name=f"julia-{i + 1}", daemon=True).start()
+            time.sleep(0.5)
+        self._laco_de_um()
+
+    def _laco_de_um(self):
         espera = float(self.cfg.get("intervalo_s") or 2)
         while True:
             try:
@@ -220,6 +271,15 @@ def conferir(cfg: dict) -> int:
           ", ".join(f"{k}: {v}" for k, v in b.items() if k in ("contatos", "propostas", "pedidos", "erro")))
     motivo = Placa(True, 0).ocupada()
     linha("placa de vídeo", True, motivo or "livre")
+    # Contexto diferente entre URA, fábrica e JUL.IA = o Ollama recarrega o modelo a cada troca (4 a 8 s).
+    padrao = variavel_do_usuario("OLLAMA_CONTEXT_LENGTH")
+    igual = str(padrao or "") == str(cfg.get("contexto"))
+    linha("contexto do Ollama", True, f"{cfg.get('contexto')}, igual ao da URA" if igual else
+          f"atenção: a JUL.IA usa {cfg.get('contexto')} e o padrão do Ollama é {padrao or '4096'}; "
+          f"ponha OLLAMA_CONTEXT_LENGTH={cfg.get('contexto')} e reabra o Ollama (senão ele recarrega o modelo a cada troca)")
+    vagas = vagas_do_ollama()
+    linha("conversas ao mesmo tempo", True,
+          f"{conversas_ao_mesmo_tempo(cfg, vagas)} (o Ollama atende {vagas or '?'} de uma vez; uma vaga fica sempre para a URA)")
     print("\nTudo certo." if ok else "\nFalta alguma coisa acima.")
     return 0 if ok else 1
 
@@ -251,7 +311,7 @@ def conversar(cfg: dict) -> int:
         n += 1
         mensagens.append({"id": f"T{n}", "de": "cliente", "tipo": "texto", "texto": texto})
         trabalho = {"id": f"teste{n}", "chatId": "teste@c.us", "nome": "Teste", "numero": "5519984515960",
-                    "primeiraVez": not memoria.get("apresentou"), "mensagens": mensagens[-30:], "dados": dados,
+                    "primeiraVez": not memoria.get("apresentou"), "mensagens": mensagens[-20:], "dados": dados,
                     "memoria": memoria, "config": {"modo": "automatico", "publico": "teste", "vendaAutomatica": True}}
         r = t.atender(trabalho)
         dados, memoria = r["dados"], r["memoria"]
@@ -266,7 +326,8 @@ def conversar(cfg: dict) -> int:
             print(f"   [{a['tipo']} {'nº ' + str(a.get('numero')) if a.get('numero') else 'ERRO: ' + str(a.get('erro'))}]")
         if r.get("transferir"):
             print(f"   [chamou um vendedor: {r['transferir']['motivo']}]")
-        print(f"   ({r['duracaoMs'] / 1000:.1f} s)")
+        m = r.get("medidas") or {}
+        print(f"   ({r['duracaoMs'] / 1000:.1f} s; {m.get('chamadas', 0)} ida(s) ao modelo, recarga {m.get('carga_ms', 0) / 1000:.1f} s)")
 
 
 def main():

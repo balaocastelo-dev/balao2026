@@ -23,6 +23,7 @@ function bancada({ db = null } = {}) {
   const eventos = [];
   const telegramas = [];
   const transcricoes = [];
+  const digitando = [];
   let seq = 0;
   let falha = false;
   const catalogo = { 101: { id: 101, name: "Notebook Teste i5 16GB", price: "3.499,00", slug: "notebook-teste" } };
@@ -55,6 +56,7 @@ function bancada({ db = null } = {}) {
       return m;
     },
     guardarTranscricao: async (id, texto) => transcricoes.push({ id, texto }),
+    digitando: async (chatId) => digitando.push(chatId),
     avisar: (d) => avisos.push(d),
     telegram: async (t) => telegramas.push(t),
     nota: async (n) => notas.push(n),
@@ -76,7 +78,7 @@ function bancada({ db = null } = {}) {
   }
   const passar = (ms) => (relogio += ms);
 
-  return { agente, chega, saiDoCelular, passar, falhar: (v) => (falha = v), enviados, avisos, notas, eventos, telegramas, transcricoes, atribuicoes, conversas };
+  return { agente, chega, saiDoCelular, passar, falhar: (v) => (falha = v), enviados, avisos, notas, eventos, telegramas, transcricoes, atribuicoes, conversas, digitando };
 }
 
 test("desligado não entrega trabalho nenhum", async () => {
@@ -242,12 +244,12 @@ test("pedir um vendedor: conversa sai do robô, aviso no painel, atribuição li
   assert.equal(await b.agente.proximoTrabalho(), null);
 });
 
-test("três erros seguidos na mesma conversa: chama gente", async () => {
+test("erros seguidos na mesma conversa (o cliente mandando mais): chama gente", async () => {
   const b = bancada();
   await b.agente.configurar({ modo: "automatico", publico: "clientes" });
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < R.ERROS_ATE_CHAMAR_GENTE; i++) {
     await b.chega(CLIENTE, `msg ${i}`);
-    b.passar(9_000);
+    b.passar(R.ESPERA_DEPOIS_DE_ERRO_MS + 1_000);
     const t = await b.agente.proximoTrabalho();
     assert.ok(t, `trabalho ${i}`);
     await b.agente.concluir({ id: t.id, chatId: CLIENTE, erro: "Ollama fora do ar" });
@@ -359,4 +361,59 @@ test("Postgres: configuração e situação da conversa sobrevivem a reinício",
   } finally {
     await db.pool.end();
   }
+});
+
+test("o cliente vê \"digitando…\" do pegar da conversa até a resposta (só no automático)", async (t) => {
+  t.mock.timers.enable({ apis: ["setInterval"] });
+  const b = bancada();
+  await b.agente.configurar({ modo: "automatico" });
+  await b.chega(TESTE, "tem monitor 27?");
+  b.passar(R.ESPERA_MS + 1_000);
+  const tr = await b.agente.proximoTrabalho();
+  await new Promise((r) => setImmediate(r));
+  assert.deepEqual(b.digitando, [TESTE], "na hora em que o PC pega");
+  t.mock.timers.tick(R.DIGITANDO_A_CADA_MS);
+  await new Promise((r) => setImmediate(r));
+  assert.equal(b.digitando.length, 2, "renovado enquanto pensa");
+  await b.agente.concluir({ id: tr.id, chatId: TESTE, respostas: [{ tipo: "texto", texto: "Tenho sim!" }] });
+  t.mock.timers.tick(R.DIGITANDO_A_CADA_MS * 3);
+  await new Promise((r) => setImmediate(r));
+  assert.equal(b.digitando.length, 2, "depois da resposta, para");
+
+  const c = bancada();
+  await c.agente.configurar({ modo: "copiloto" });
+  await c.chega(TESTE, "tem monitor 27?");
+  c.passar(R.ESPERA_MS + 1_000);
+  assert.ok(await c.agente.proximoTrabalho());
+  await new Promise((r) => setImmediate(r));
+  assert.deepEqual(c.digitando, [], "no copiloto quem responde é o vendedor: nada de digitando");
+});
+
+test("duas conversas ao mesmo tempo: dois pedidos juntos não pegam a mesma", async () => {
+  const b = bancada();
+  await b.agente.configurar({ modo: "automatico" });
+  await b.chega(TESTE, "oi, tem notebook?");
+  b.passar(R.ESPERA_MS + 1_000);
+  const [t1, t2] = await Promise.all([b.agente.proximoTrabalho(), b.agente.proximoTrabalho()]);
+  assert.equal([t1, t2].filter(Boolean).length, 1, "uma conversa, um trabalho");
+  await b.chega("5519987510267@c.us", "e cadeira gamer?");
+  b.passar(R.ESPERA_MS + 1_000);
+  const t3 = await b.agente.proximoTrabalho();
+  assert.equal(t3.chatId, "5519987510267@c.us", "a outra conversa vai para o segundo trabalhador");
+});
+
+test("dois erros seguidos do PC: a conversa passa para um vendedor", async () => {
+  const b = bancada();
+  await b.agente.configurar({ modo: "automatico" });
+  await b.chega(TESTE, "tem notebook?");
+  for (let i = 0; i < R.ERROS_ATE_CHAMAR_GENTE; i++) {
+    b.passar(Math.max(R.ESPERA_MS, R.ESPERA_DEPOIS_DE_ERRO_MS) + 1_000);
+    const t = await b.agente.proximoTrabalho();
+    assert.ok(t, `trabalho ${i + 1}: o erro não deixa a mensagem sem resposta`);
+    await b.agente.concluir({ id: t.id, chatId: TESTE, erro: "timed out" });
+  }
+  b.passar(R.ESPERA_DEPOIS_DE_ERRO_MS + 1_000);
+  assert.equal(await b.agente.proximoTrabalho(), null, "depois do segundo erro, com gente");
+  assert.ok(b.avisos.some((a) => a.tipo === "transferencia"));
+  assert.equal(b.enviados.at(-1).body, R.TEXTO_CHAMEI_VENDEDOR, "e o cliente fica sabendo");
 });
