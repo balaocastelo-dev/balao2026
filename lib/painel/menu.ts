@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
+  Bike,
   Boxes,
   ClipboardList,
   FileStack,
@@ -104,6 +105,14 @@ export const MENU_DO_PAINEL: GrupoDoPainel[] = [
         rotulo: "Pedidos do site",
         descricao: "Ver cada pedido, mudar a situação e avisar o cliente.",
         icone: ShoppingBag,
+        moldura: "folha",
+      },
+      {
+        href: "/painel/entregas",
+        palavras: "entrega motoboy moto 99 99entrega frete corrida entregador",
+        rotulo: "Entregas por motoboy",
+        descricao: "Cotar e chamar motoboy da 99 para os pedidos do site.",
+        icone: Bike,
         moldura: "folha",
       },
       {
