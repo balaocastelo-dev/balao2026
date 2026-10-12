@@ -3,6 +3,8 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 
 // A gaveta no Vercel Blob, com um Blob de mentira que respeita as mesmas
 // regras do de verdade: privado, "allowOverwrite" e "ifMatch" (etag).
+// Como no de verdade, a etag do download (get) NÃO é a mesma que o put
+// confere: a certa vem do head(). Foi isso que travou o painel em 12/10.
 
 const loja = new Map<string, { corpo: Buffer; etag: string; tipo: string }>();
 let n = 0;
@@ -10,14 +12,21 @@ let n = 0;
 vi.mock("@vercel/blob", () => {
   class BlobError extends Error {}
   class BlobPreconditionFailedError extends BlobError {}
+  class BlobNotFoundError extends BlobError {}
   return {
     BlobError,
     BlobPreconditionFailedError,
+    BlobNotFoundError,
+    head: vi.fn(async (caminho: string) => {
+      const x = loja.get(caminho);
+      if (!x) throw new BlobNotFoundError("not found");
+      return { etag: x.etag, pathname: caminho };
+    }),
     get: vi.fn(async (caminho: string, o: { access: string }) => {
       if (o.access !== "private") throw new Error("a Arena só usa Blob privado");
       const x = loja.get(caminho);
       if (!x) return null;
-      return { statusCode: 200, stream: new Response(new Uint8Array(x.corpo)).body, blob: { etag: x.etag, contentType: x.tipo } };
+      return { statusCode: 200, stream: new Response(new Uint8Array(x.corpo)).body, blob: { etag: `W/${x.etag}-download`, contentType: x.tipo } };
     }),
     put: vi.fn(async (caminho: string, corpo: string | Buffer, o: { access: string; allowOverwrite?: boolean; ifMatch?: string; contentType?: string; addRandomSuffix?: boolean }) => {
       if (o.access !== "private" || o.addRandomSuffix) throw new Error("opções erradas");
@@ -63,6 +72,11 @@ describe("gaveta no Vercel Blob", () => {
     expect((await ler<{ a: number }>("config")).dados).toEqual({ a: 2 });
     const r = await atualizar<{ a: number }>("config", () => ({ a: 0 }), (d) => ({ a: d.a + 10 }));
     expect(r.a).toBe(12);
+  });
+
+  it("o painel grava várias vezes seguidas sem 'muitas escritas ao mesmo tempo'", async () => {
+    for (let i = 0; i < 5; i++) await salvarPiloto(null, { nome: `Piloto ${i}` });
+    expect((await lerConfig()).pilotos).toHaveLength(5);
   });
 
   it("vigia → Blob → corrida, e a foto vira arquivo privado", async () => {
