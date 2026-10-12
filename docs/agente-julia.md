@@ -81,6 +81,23 @@ No pico: cada resposta ocupa o modelo por 1 a 4 s; com 2 ao mesmo tempo dá umas
 atende dezenas de conversas abertas (cada cliente escreve a cada minuto ou dois). Quem chega na fila vê
 "digitando…" e é atendido por ordem de chegada.
 
+## Prioridade na placa de vídeo (12/10/2026)
+
+Decisão do Thiago: **a JUL.IA vem primeiro** (atende dezenas de vezes mais que a URA). Às 5h30 ela não conseguiu
+responder: um render de vídeo do avatar ocupava 19 GB da placa e o qwen3 nem carregava.
+
+- A JUL.IA não espera mais nada (nem ligação da URA, nem render). `respeitar_placa` no `config.json` volta ao
+  jeito antigo, se um dia precisar.
+- Ao pegar uma conversa, grava `C:\Users\user\balao-agente\dados\placa-julia.txt` (até quando precisa da placa:
+  agora + 10 min). A fábrica lê esse sinal junto com o da URA, nas funções `ligacoes()` de `avatar/fila_avatar.py`,
+  `avatar/vigiar.py`, `publisher/capa_blog.py` e `publisher/crescimento.py`: render não começa e, se estiver no
+  meio, derruba o ComfyUI na hora e tenta de novo depois (cópias dos originais com `.bak-…-antes-julia-prioridade`).
+- Com o modelo fora da placa (a fábrica o descarrega para renderizar), a JUL.IA espera até 30 s a memória liberar
+  antes de chamar o modelo, para ele carregar inteiro na placa.
+- A URA continua com uma vaga própria no Ollama e ninguém derruba ligação.
+- Scripts de imagem rodados à mão (kontext_corpo, plano_aberto, corpo_inteiro) não leem o sinal: rodar fora do
+  horário da loja. O `--conferir` diz se algum script da fábrica deixou de ceder.
+
 ## Conferido em 11/10/2026
 
 - VPS: `agente/agente.test.js` 16/16 (com Postgres); bancada `e2e/agente.e2e.mjs` 30/30 com o servidor e o

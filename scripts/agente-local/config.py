@@ -47,8 +47,9 @@ PADRAO = {
     # não virar pedido de verdade no relatório. true = usar o Bling de verdade
     # também no teste.
     "bling_no_teste": False,
-    # Placa de vídeo: a URA tem prioridade e render da fábrica não divide a placa.
-    "respeitar_placa": True,
+    # Placa de vídeo: a JUL.IA tem prioridade (Thiago, 12/10/2026). Ela não espera
+    # URA nem render; a fábrica é que cede (placa.py). true = jeito antigo.
+    "respeitar_placa": False,
     "pasta_dados": str(AQUI / "dados"),
     "intervalo_s": 2.0,
 }

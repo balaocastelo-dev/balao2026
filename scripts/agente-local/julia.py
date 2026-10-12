@@ -107,7 +107,7 @@ class Trabalhador:
         self.vps = vps
         self.ollama = Ollama(cfg["ollama_url"])
         self.catalogo = Catalogo(cfg["pasta_dados"], buscar_remoto=vps.catalogo if vps else None)
-        self.placa = Placa(cfg.get("respeitar_placa", True))
+        self.placa = Placa(cfg["pasta_dados"], respeitar=bool(cfg.get("respeitar_placa", False)))
         self.sentidos = Sentidos(cfg, self.ollama, baixar=vps.midia if vps else (lambda _id: (b"", "")), registrar=log.info)
         self.bling_real = Bling(cfg["bling_tokens"], vendedor_id=cfg.get("bling_vendedor_id"))
         self.bling_teste = Bling(cfg["bling_tokens"], simular=True)
@@ -166,6 +166,18 @@ class Trabalhador:
         except Exception as e:
             log.info(f"[vps] batida falhou: {e}")
 
+    def preparar_placa(self):
+        """A JUL.IA tem prioridade: avisa a fábrica e, com o modelo fora da placa (a fábrica o
+        descarrega para renderizar), espera a memória liberar antes de chamar o modelo."""
+        self.placa.pedir()
+        try:
+            carregado = any(m.startswith(self.cfg["modelo"]) for m in self.ollama.carregados())
+        except Exception:
+            return
+        if not carregado:
+            esperou = self.placa.esperar_memoria()
+            log.info(f"[placa] modelo fora da placa: pedi a vez à fábrica e esperei {esperou:.0f} s a memória liberar")
+
     def uma_rodada(self) -> bool:
         """Atende uma conversa, se houver. Devolve True se trabalhou."""
         self.batida()
@@ -184,6 +196,7 @@ class Trabalhador:
             return False
         sufixo = str(trabalho.get("chatId", ""))[-9:]
         log.info(f"[julia] atendendo …{sufixo} ({len(trabalho.get('mensagens') or [])} mensagens)")
+        self.preparar_placa()
         try:
             resultado = self.atender(trabalho)
             self.atendidas += 1
@@ -269,8 +282,14 @@ def conferir(cfg: dict) -> int:
     b = Bling(cfg["bling_tokens"]).conferir()
     linha("Bling (leitura)", b.get("token_lido") and all(b.get(k) == "ok" for k in ("contatos", "propostas", "pedidos")),
           ", ".join(f"{k}: {v}" for k, v in b.items() if k in ("contatos", "propostas", "pedidos", "erro")))
-    motivo = Placa(True, 0).ocupada()
-    linha("placa de vídeo", True, motivo or "livre")
+    from placa import fabrica_que_nao_cede, memoria_livre_gb
+
+    motivo = Placa(None, respeitar=True, validade_s=0).ocupada()
+    livre = memoria_livre_gb()
+    linha("placa de vídeo", True, (motivo or "livre") + (f", {livre} GB livres" if livre is not None else "")
+          + " (a JUL.IA tem prioridade: não espera URA nem render)")
+    faltam = fabrica_que_nao_cede()
+    linha("fábrica cede a placa à JUL.IA", True, "sim" if not faltam else "atenção: ainda não leem o sinal: " + ", ".join(faltam))
     # Contexto diferente entre URA, fábrica e JUL.IA = o Ollama recarrega o modelo a cada troca (4 a 8 s).
     padrao = variavel_do_usuario("OLLAMA_CONTEXT_LENGTH")
     igual = str(padrao or "") == str(cfg.get("contexto"))
