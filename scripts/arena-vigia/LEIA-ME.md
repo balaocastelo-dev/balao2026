@@ -33,6 +33,10 @@ git -C $HOME\balao2026 pull
 - abre o detalhe só do que é novo ou mudou — é no detalhe que vêm o vendedor e os itens;
 - o site pontua (as regras ficam no painel) e o telão atualiza em até 20 s.
 
+Desde a versão 1.3 o vigia também leva ao **PDV** (`www.balao.info/pdv`) o `access_token` do Bling, quando ele
+muda ou quando o site pede (`POST /api/pdv/bling/acesso`). Só o access_token — o refresh_token nunca sai do PC
+e o vigia continua sem renovar nada. Ver `docs/pdv.md`.
+
 Se o site estiver fora do ar, o vigia guarda o que trouxe do Bling e manda na volta seguinte (versão 1.1).
 
 O painel pode pedir uma varredura desde uma data (botão "Buscar de novo no Bling"): o vigia lê o
