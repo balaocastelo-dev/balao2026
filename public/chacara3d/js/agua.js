@@ -155,7 +155,7 @@ export function criarAgua(cenaPrincipal, ceu, qualidade) {
     // câmera espelhada em y = -0,07
     const nivel = -0.07;
     camRefl.copy(camera);
-    camRefl.layers.disable(2);
+    camRefl.layers.disable(2); camRefl.layers.disable(3);
     const p = camera.position.clone(); p.y = 2 * nivel - p.y;
     const alvo = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion).add(camera.position); alvo.y = 2 * nivel - alvo.y;
     const cima = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion); cima.y = -cima.y;

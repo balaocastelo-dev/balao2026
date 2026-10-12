@@ -42,6 +42,7 @@ const cena = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(66, 1, 0.08, 1500);
 camera.rotation.order = 'YXZ';
 camera.layers.enable(2);
+camera.layers.enable(3);   // pessoas dos cenários
 
 const pipeline = criarPipeline(renderer);
 const ceu = criarCeu(renderer, cena);

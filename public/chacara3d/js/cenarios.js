@@ -92,6 +92,8 @@ export function criarCenarios(ctx) {
     });
     const esc = o.escala || 1;
     obj.scale.setScalar(esc);
+    // camada 3: as pessoas não entram no reflexo da piscina (economiza um desenho inteiro da multidão)
+    obj.traverse(k => k.layers.set(3));
     const mixer = new THREE.AnimationMixer(obj);
     const info = rec.info.pessoas[tipo];
     const p = { tipo, visual, obj, mixer, acoes: {}, atual: null, anim: null, x: 0, y: 0, z: 0, rumo: 0, rumoAlvo: 0, esc, info, ossos: {}, mats, tt: Math.random() * 4, mov: null };
@@ -109,8 +111,8 @@ export function criarCenarios(ctx) {
     };
     p.colocar = (x, y, z, rumo) => { p.x = x; p.y = y; p.z = z; if (rumo !== undefined) { p.rumo = p.rumoAlvo = rumo; } p.aplicar(); };
     p.aplicar = () => { obj.position.copy(W3(p.x, p.y, p.z)); obj.rotation.y = p.rumo + Math.PI / 2; if (p.mov) { p.mov.x = p.x; p.mov.y = p.y; p.mov.z = p.z; } };
-    p.segurar = (ad, osso, pos) => { const b = p.ossos[osso || 'pega_d']; if (!b) return; b.add(ad); if (pos) ad.position.set(pos[0], pos[1], pos[2]); return ad; };
-    p.noColo = (ad, pos) => { obj.add(ad); ad.position.set(pos[0], pos[1], pos[2]); return ad; };
+    p.segurar = (ad, osso, pos) => { const b = p.ossos[osso || 'pega_d']; if (!b) return; ad.traverse(k => k.layers.set(3)); b.add(ad); if (pos) ad.position.set(pos[0], pos[1], pos[2]); return ad; };
+    p.noColo = (ad, pos) => { ad.traverse(k => k.layers.set(3)); obj.add(ad); ad.position.set(pos[0], pos[1], pos[2]); return ad; };
     // ponto de apoio de um objeto segundo as notas da animação (centro -> base do objeto)
     p.notaPos = (anim, chave, meiaAltura) => { const a = info.animacoes[anim] || {}; const v = a[chave] || [0, 1, 0.3]; return [v[0], v[1] - (meiaAltura || 0), v[2]]; };
     p.chapeu = ad => {
@@ -118,7 +120,7 @@ export function criarCenarios(ctx) {
       obj.updateMatrixWorld(true);
       const v = new THREE.Vector3(); b.getWorldPosition(v);
       const base = obj.position.y, topo = info.medidas.altura_m * esc;
-      b.add(ad); ad.position.set(0, (topo - (v.y - base)) / esc - 0.035, 0.01); ad.rotation.x = -0.12;
+      ad.traverse(k => k.layers.set(3)); b.add(ad); ad.position.set(0, (topo - (v.y - base)) / esc - 0.035, 0.01); ad.rotation.x = -0.12;
     };
     p.descartar = () => { for (const m of mats) m.dispose(); mixer.stopAllAction(); };
     return p;
@@ -535,7 +537,7 @@ export function criarCenarios(ctx) {
       pan.traverse(k => { if (k.isMesh && [].concat(k.material).some(m => m.name === 'tela_led')) k.material = mt; });
       projecoes.tela(11, 'equalizador');
       cn.sair.push(() => projecoes.tela(11, null));
-      projecoes.projetorPalco({ de: [29.4, 5.9, 3.7], para: [23.0, 5.6, 0.4], raio: 5.2, aspecto: 1.4, anim: 'luz_batida', ganho: 2.6 });
+      projecoes.projetorPalco({ de: [29.4, 5.9, 3.7], para: [23.0, 5.6, 0.4], raio: 5.2, aspecto: 1.4, anim: 'luz_batida', ganho: 1.1 });
       cn.sair.push(() => projecoes.projetorPalco(null));
     }
     // DJ
@@ -553,10 +555,11 @@ export function criarCenarios(ctx) {
     // fachos das cabeças móveis e lasers
     const fx = criarLuzesDePalco(tre, las);
     G.add(fx.obj);
-    cn.hora = 22.6; cn.proj = 'rave'; cn.vista = [19.2, 5.4, 0.02, 0];
+    cn.hora = 22.6; cn.proj = 'rave'; cn.vista = [17.5, 5.0, 0.08, 0];   // no fundo da pista, ao lado da fogueira, olhando o palco
     cn.musica = { estilo: 'rave', pontos: [[29.0, 3.4, 1.4], [29.0, 8.35, 1.4]], volume: 0.75, ref: 6 };
     cn.burburinho = [23.5, 5.6, Math.round(n * 0.6)];
     let ultimaEnergia = 0.7;
+    const corPalco = new THREE.Color(), PAL_PALCO = [[1, 0.15, 0.55], [0.25, 0.4, 1], [0.15, 0.9, 0.85], [0.75, 0.25, 1]].map(k => new THREE.Color(k[0], k[1], k[2]));
     cn.atualizarExtra = (dt, t, c) => {
       fx.atualizar(dt, t, c);
       const pulso = Math.pow(1 - c.batida, 2.5);
@@ -564,7 +567,12 @@ export function criarCenarios(ctx) {
       for (const m of lentes) m.emissiveIntensity = 4 * c.energia;
       for (const m of janelas) m.emissiveIntensity = c.energia > 0.8 ? 4 : 0.5;
       for (const m of neons) m.emissiveIntensity = 3.5;
-      if (projecoes) projecoes.animPalco(c.energia > 0.95 ? 'estrobo_cores' : c.energia < 0.5 ? 'luz_cores' : 'luz_batida');
+      if (projecoes) {
+        // a cor do foco no chão acompanha a dos fachos e troca a cada compasso
+        const comp = Math.max(0, Math.floor(c.batidas / 4));
+        corPalco.copy(PAL_PALCO[comp % PAL_PALCO.length]);
+        projecoes.animPalco(c.energia > 0.95 ? 'estrobo_cores' : c.energia < 0.5 ? 'luz_cores' : 'luz_batida', { cor: corPalco });
+      }
       if (c.energia > 0.95 && ultimaEnergia <= 0.95) gritaria(23.5, 5.6);
       ultimaEnergia = c.energia;
     };
@@ -604,7 +612,7 @@ export function criarCenarios(ctx) {
     const matF = () => new THREE.ShaderMaterial({
       uniforms: { uCor: { value: new THREE.Color(1, 1, 1) }, uForca: { value: 1 } },
       vertexShader: 'varying float vT; varying vec3 vN; varying vec3 vV; void main(){ vT = clamp(-position.y / 15.0, 0.0, 1.0); vec4 mv = modelViewMatrix * vec4(position, 1.0); vN = normalize(normalMatrix * normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix * mv; }',
-      fragmentShader: 'uniform vec3 uCor; uniform float uForca; varying float vT; varying vec3 vN; varying vec3 vV; void main(){ float b = pow(abs(dot(normalize(vN), normalize(vV))), 1.6); float a = uForca * pow(1.0 - vT, 1.7) * b * 0.32; gl_FragColor = vec4(uCor * a, 1.0); }',
+      fragmentShader: 'uniform vec3 uCor; uniform float uForca; varying float vT; varying vec3 vN; varying vec3 vV; void main(){ float b = pow(abs(dot(normalize(vN), normalize(vV))), 1.6); float a = uForca * pow(1.0 - vT, 2.2) * b * b * 0.22; gl_FragColor = vec4(uCor * a, 1.0); }',
       transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
     });
     const cabecas = [];
@@ -640,7 +648,7 @@ export function criarCenarios(ctx) {
           const corB = PAL[(((comp + (padrao === 1 ? h.i : 0)) % PAL.length) + PAL.length) % PAL.length];
           h.f.material.uniforms.uCor.value.copy(corB);
           const estrobo = e > 0.95 ? (Math.floor(c.batidas * 4 + h.i) % 2 ? 1 : 0.15) : 1;
-          h.f.material.uniforms.uForca.value = (0.35 + 0.9 * e) * estrobo;
+          h.f.material.uniforms.uForca.value = (0.14 + 0.4 * e) * estrobo;
         }
         const ligados = e > 0.8;
         for (const L of lasers) {

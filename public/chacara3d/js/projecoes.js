@@ -265,10 +265,10 @@ export function criarProjecoes(renderer, cena, camera, extra, M) {
     U.uProjMat.value[i].multiplyMatrices(proj, view);
     U.uProjTile.value[i].set((i % 4) * LADO / ATLAS_W, Math.floor(i / 4) * LADO / ATLAS_H, LADO / ATLAS_W, LADO / ATLAS_H);
     U.uProjPos.value[i].set(eye.x, eye.y, eye.z, 0);
-    U.uProjRep.value[i].set(1, 1, 1, 0);
+    U.uProjRep.value[i].set(1, 1, cfg.duasFaces ? 1 : 0, 0);   // só ilumina a face voltada para o projetor
     palco.ativo = true; palco.escolha = cfg.anim; palco.ganho = cfg.ganho || 3; palco.extras = cfg.extras || {};
   }
-  function animPalco(id) { palco.escolha = id; }
+  function animPalco(id, extras) { palco.escolha = id; if (extras) palco.extras = extras; }
 
   // ---- a cada quadro
   function atualizar(tempo, noite, extras) {
