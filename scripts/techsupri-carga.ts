@@ -96,6 +96,12 @@ async function main() {
         descartadas++;
         continue;
       }
+      // 12/10/2026: nenhuma foto ilustrativa fica (auditoria: quase sempre era outro produto).
+      if (ilustrativa) {
+        fotos[id] = { semFoto: true, tentadoEm: new Date().toISOString(), kalunga: true, curto: true, americanas: true, ilustrativa: true };
+        descartadas++;
+        continue;
+      }
       const mistura = misturaOriginalECompativel(nomes.get(id)!, f.nome) || (ehSuprimento(nomes.get(id)!) && ilustrativa);
       if (!mistura && ilustrativa) continue;
       if (mistura || semelhanca(nomes.get(id)!, f.nome) < NOTA_MINIMA) {
@@ -204,6 +210,11 @@ async function main() {
   }
 
   if (opcoes.includes("--ilustrativas")) {
+    // Desligado em 12/10/2026 (auditoria de fotos): foto "parecida" de outro
+    // produto não entra mais no site. Ou a foto exata, ou nenhuma.
+    throw new Error("--ilustrativas foi desligado em 12/10/2026: só entra a foto do produto exato.");
+  }
+  if (false as boolean) {
     let achadas = 0;
     let feitas = 0;
     for (const p of produtos) {

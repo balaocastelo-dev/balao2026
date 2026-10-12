@@ -38,6 +38,7 @@ import {
 } from "./techsupri";
 import type { ItemDeOrigem } from "./kabum";
 import { buscarFoto } from "./fotos";
+import { estaRecusada, fotosRecusadasDe } from "./fotos-recusadas";
 
 const LOTE = 150;
 
@@ -61,6 +62,8 @@ async function completarFotos(itens: ItemDeOrigem[], limiteMs: number): Promise<
     });
     for (const r of res.rows) comFotoNoSite.add(String((r as Record<string, unknown>).id));
   }
+  // Foto reprovada na auditoria não volta pela busca (fotos_recusadas, 12/10).
+  const recusadas = await fotosRecusadasDe(semFoto.map((x) => x.codigo));
   let achadas = 0;
   for (const item of semFoto) {
     if (comFotoNoSite.has(item.codigo) || !item.disponivel) continue;
@@ -70,7 +73,7 @@ async function completarFotos(itens: ItemDeOrigem[], limiteMs: number): Promise<
       if (busca.motivo === "bloqueado") break;
       continue;
     }
-    if (busca.achada) {
+    if (busca.achada && !estaRecusada(recusadas, item.codigo, busca.achada.foto)) {
       item.foto = busca.achada.foto;
       item.fotos = busca.achada.fotos.slice(0, 6);
       achadas++;
