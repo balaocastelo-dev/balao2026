@@ -46,10 +46,27 @@ function blingFalso() {
     const u = new URL(url);
     const c = u.pathname.replace("/Api/v3/", "");
     if (c === "contatos" && metodo === "GET") {
+      // Como o Bling: critério padrão (3) só ativos; 1 = todos menos excluídos; 2 = só excluídos.
       const doc = u.searchParams.get("numeroDocumento");
-      return resp(200, { data: estado.contatos.filter((x) => doc && x.numeroDocumento === doc) });
+      const criterio = u.searchParams.get("criterio") ?? "3";
+      const visiveis = estado.contatos.filter((x) =>
+        criterio === "2" ? x.situacao === "E" : criterio === "1" ? x.situacao !== "E" : (x.situacao ?? "A") === "A"
+      );
+      return resp(200, { data: visiveis.filter((x) => doc && x.numeroDocumento === doc) });
+    }
+    const situacao = /^contatos\/(\d+)\/situacoes$/.exec(c);
+    if (situacao && metodo === "PATCH") {
+      const x = estado.contatos.find((k) => String(k.id) === situacao[1]);
+      if (x) x.situacao = corpo.situacao;
+      return new Response(null, { status: 204 });
     }
     if (c === "contatos" && metodo === "POST") {
+      const dono = estado.contatos.find((x) => corpo.numeroDocumento && x.numeroDocumento === corpo.numeroDocumento);
+      if (dono) {
+        return resp(400, {
+          error: { description: "O contato não pode ser salvo, pois ocorreram problemas em sua validação.", fields: [{ msg: `O CPF já está cadastrado no contato ${dono.nome}` }] },
+        });
+      }
       const novo = { id: 900 + estado.contatos.length, ...corpo };
       estado.contatos.push(novo);
       return resp(201, { data: { id: novo.id } });
@@ -309,6 +326,41 @@ describe("venda do balcão até o Bling", () => {
     const r = await sincronizarVenda(venda.id);
     expect(r?.bling.estado).toBe("pendente");
     expect(await precisaDeAcesso()).toBe(true);
+  });
+
+  it("CPF de contato excluído no Bling: acha, reativa e usa (não tenta cadastrar de novo)", async () => {
+    const b = blingFalso();
+    b.estado.contatos.push({ id: 7830745032, nome: "Thiago Herrera", numeroDocumento: "52998224725", situacao: "E" });
+    _trocarRede(b.f as unknown as typeof fetch, async () => undefined);
+    await guardarAcesso({ token: TOKEN, expiraEm: new Date(Date.now() + 5 * 3600_000).toISOString(), maquina: "PC" });
+    const venda = await registrarVenda(lerEntrada({ ...ENTRADA, cliente: { ...CLIENTE_VAZIO, nome: "Thiago", documento: "52998224725" } }), "Balcão");
+    const r = await sincronizarVenda(venda.id);
+    expect(r?.bling.estado).toBe("no-bling");
+    expect(r?.bling.contatoId).toBe("7830745032");
+    expect(b.estado.pedidos[0].contato).toEqual({ id: 7830745032 });
+    expect(b.estado.contatos[0].situacao).toBe("A");
+    expect(b.chamadas.some((x) => x.metodo === "POST" && x.url.endsWith("/contatos"))).toBe(false);
+  });
+
+  it("se o Bling disser que o CPF já existe, usa o contato dono dele", async () => {
+    const b = blingFalso();
+    _trocarRede(b.f as unknown as typeof fetch, async () => undefined);
+    await guardarAcesso({ token: TOKEN, expiraEm: new Date(Date.now() + 5 * 3600_000).toISOString(), maquina: "PC" });
+    // Some da busca na primeira olhada (cadastrado por outro caixa no mesmo instante), aparece depois do erro.
+    let escondido = true;
+    const original = b.f.getMockImplementation()!;
+    b.f.mockImplementation(async (input, init) => {
+      const url = String(input);
+      if (escondido && url.includes("/contatos?") && (init?.method ?? "GET") === "GET" && url.includes("criterio=2")) {
+        escondido = false;
+        b.estado.contatos.push({ id: 4242, nome: "Maria", numeroDocumento: "52998224725", situacao: "A" });
+      }
+      return original(input, init);
+    });
+    const venda = await registrarVenda(lerEntrada({ ...ENTRADA, cliente: { ...CLIENTE_VAZIO, nome: "Maria", documento: "52998224725" } }), "Balcão");
+    const r = await sincronizarVenda(venda.id);
+    expect(r?.bling.estado).toBe("no-bling");
+    expect(r?.bling.contatoId).toBe("4242");
   });
 
   it("venda inválida nem é gravada", async () => {
