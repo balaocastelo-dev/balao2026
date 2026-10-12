@@ -1,0 +1,110 @@
+{
+  "slug": "windows-11-24h2-fim-do-suporte-13-de-outubro",
+  "titulo": "Windows 11 24H2 sai de suporte em 13 de outubro: o que fazer",
+  "resumo": "A atualização de 13 de outubro é a última do Windows 11 24H2 nas edições Home e Pro. Veja como conferir sua versão e como passar para a 25H2 ou a 26H2.",
+  "categoria": "noticias",
+  "etiquetas": [
+    "windows",
+    "atualização",
+    "segurança",
+    "fim de suporte"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-12T15:05:39.573Z",
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "O Windows 11 versão 24H2, nas edições Home e Pro, chega ao fim do suporte em 13 de outubro de 2026. A atualização de segurança que a Microsoft libera nessa data, a da segunda terça-feira do mês, é a última que essa versão recebe. Depois dela, computadores que continuarem na 24H2 deixam de receber correções contra novas ameaças."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que isso tem a ver com o fim do Windows 10 ou que o computador vai precisar ser trocado. Não é o caso: quem já usa o Windows 11 24H2 normalmente só precisa passar para uma versão mais nova do próprio Windows 11, numa atualização pequena e gratuita."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que a Microsoft informou"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Na página de ciclo de vida do Windows 11 Home e Pro, a Microsoft marca o fim do atendimento da versão 24H2 para esta semana. No painel de avisos do Windows, a empresa repetiu o lembrete em julho, agosto e setembro e recomenda levar os computadores compatíveis para a versão 25H2. As edições Enterprise e Education da 24H2 seguem com atualizações até 12 de outubro de 2027."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A versão mais nova, a 26H2, começou a ser liberada em 29 de setembro, de forma gradual. Segundo a Microsoft, ela chega primeiro a quem está na 25H2 ou na 24H2 e ligou a opção de receber as atualizações assim que ficam disponíveis. A instalação usa um pacote de habilitação: um download pequeno e uma reinicialização rápida, sem reinstalar o sistema."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O Windows Central, em texto de 7 de outubro, e a Help Net Security, em 9 de outubro, confirmam que a atualização de 13 de outubro é a última da 24H2 Home e Pro. A Microsoft também avisa que pode segurar a oferta da 26H2 em computadores com alguma incompatibilidade detectada, até que o problema seja resolvido."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que isso muda para você"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para saber em que versão você está:** aperte a tecla do Windows, digite *winver* e tecle Enter. A janela que abre mostra a versão logo na primeira linha. Se aparecer 25H2 ou 26H2, nada muda para você agora. Se aparecer 24H2, vale fazer a troca nos próximos dias."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem está na 24H2:** abra Configurações, entre em Windows Update e procure atualizações. Se a 25H2 ou a 26H2 aparecer oferecida, faça um backup dos arquivos importantes e instale com o notebook na tomada. Se nada aparecer ou a instalação falhar seguidas vezes, não force por caminhos alternativos: a [assistência técnica](/manutencao) consegue ver o que está travando."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem vai comprar:** confira se o computador, novo ou seminovo, já vem com uma versão atual do Windows 11. Uma máquina que sai da loja na 24H2 não está condenada, mas vai pedir a atualização logo no primeiro dia. Ao olhar [notebooks](/notebooks), pergunte qual versão está instalada."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem ainda usa o Windows 10:** esta notícia não trata do seu caso. O guia sobre [até quando o Windows 10 tem atualização](/blog/windows-10-ate-quando-tem-atualizacao) explica as opções."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que ainda não se sabe"
+    },
+    {
+      "tipo": "lista",
+      "ordenada": false,
+      "itens": [
+        "Quando a 26H2 estará disponível para todos os computadores: a Microsoft fala em liberação gradual ao longo dos próximos meses.",
+        "Se a Microsoft vai instalar a nova versão sozinha nos computadores que ficarem na 24H2: as páginas consultadas não dizem.",
+        "Quais incompatibilidades podem segurar a oferta em cada modelo: isso depende do aparelho e só aparece no próprio Windows Update."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, tem assistência técnica no mesmo endereço, com diagnóstico, limpeza, upgrade e conserto. Em uma linha: confira hoje a versão no *winver* e, se for 24H2, atualize para a 25H2 ou a 26H2 antes de ficar sem correções."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "geral"
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Windows 11 Home and Pro — Microsoft Lifecycle",
+      "url": "https://learn.microsoft.com/en-us/lifecycle/products/windows-11-home-and-pro",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Windows message center — Windows release health, Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-us/windows/release-health/windows-message-center",
+      "data": "setembro e outubro de 2026"
+    },
+    {
+      "nome": "Windows 11's latest Patch Tuesday update lands on October 13 — Windows Central",
+      "url": "https://www.windowscentral.com/microsoft/windows-11/windows-11s-october-patch-tuesday-update-on-the-13th-here-are-the-biggest-changes-coming-to-your-pc",
+      "data": "7 de outubro de 2026"
+    },
+    {
+      "nome": "October 2026 Patch Tuesday forecast — Help Net Security",
+      "url": "https://www.helpnetsecurity.com/2026/10/09/october-2026-patch-tuesday-forecast/",
+      "data": "9 de outubro de 2026"
+    }
+  ]
+}

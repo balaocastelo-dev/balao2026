@@ -1,4 +1,13 @@
 {
   "versao": 1,
-  "pendentes": []
+  "pendentes": [
+    {
+      "slug": "windows-11-24h2-fim-do-suporte-13-de-outubro",
+      "titulo": "Windows 11 24H2 sai de suporte em 13 de outubro: o que fazer",
+      "categoria": "noticias",
+      "alt": "Notebook aberto sobre uma mesa de escritório, visto de lado, com a tela apagada e uma xícara ao lado",
+      "pedido": "A generic silver laptop open on a light wooden office desk, seen from the side at a low angle so the screen is not visible. A white ceramic coffee cup and a closed paper notebook sit beside it. Soft morning daylight comes from a window on the right, with a shallow depth of field and a calm, uncluttered background.",
+      "pedidoEm": "2026-10-12T15:05:40.362Z"
+    }
+  ]
 }

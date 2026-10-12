@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "windows-11-24h2-fim-do-suporte-13-de-outubro",
+      "titulo": "Windows 11 24H2 sai de suporte em 13 de outubro: o que fazer",
+      "resumo": "A atualização de 13 de outubro é a última do Windows 11 24H2 nas edições Home e Pro. Veja como conferir sua versão e como passar para a 25H2 ou a 26H2.",
+      "categoria": "noticias",
+      "etiquetas": [
+        "windows",
+        "atualização",
+        "segurança",
+        "fim de suporte"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-12T15:05:39.573Z",
+      "minutos": 3
+    },
+    {
       "slug": "que-computador-preciso-para-rodar-ia-em-casa",
       "titulo": "Computador para rodar IA em casa: o que ele precisa ter",
       "resumo": "Para rodar IA em casa, o que manda é a memória: a da placa de vídeo no PC, a unificada no Mac. Veja como dimensionar sem gastar com o que não importa.",
@@ -123,5 +138,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-12T09:29:05.754Z"
+  "atualizadoEm": "2026-10-12T15:05:40.362Z"
 }
