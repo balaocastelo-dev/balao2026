@@ -3,14 +3,25 @@
 Corrida de vendas que passa na TV da loja (`www.balao.info/arena`), administrada em `/painel/arena`.
 Refeita em 12/10/2026 a pedido do Thiago: ligada ao Bling, com cara de jogo de kart.
 
+**Desde 12/10 à tarde a Arena não usa o MySQL.** O banco da Hostinger tem cota de 500 conexões por hora e,
+quando estoura, para o site inteiro (aconteceu às 8h56 de 12/10). A Arena guarda tudo na "gaveta"
+(`lib/arena/gaveta.ts`): **Vercel Blob privado** quando existe a variável `BLOB_READ_WRITE_TOKEN`;
+sem ela, cai na reserva (tabela `arena_ajustes` do MySQL, chaves `g:…`) com cache mais longo. Quando o Blob é
+criado, a Arena copia sozinha o que estava na reserva (`lib/arena/migracao.ts`).
+
+Para criar o Blob (a Vercel não deixa o Claude criar): projeto balao2026 → Storage → Create → Blob, nome
+`balao-arena`, Private, São Paulo (gru1) → Connect ao projeto. Depois, um redeploy.
+
 ## Como funciona
 
 ```
-Bling ──(vigia no PC, a cada 2 min)──▶ POST /api/arena/bling ──▶ arena_lancamentos (MySQL)
+Bling ──(vigia no PC, a cada 2 min)──▶ POST /api/arena/bling ──▶ gaveta: lanc-AAAA-MM
                                                                      │
-                     /painel/arena (regras, metas, prêmio) ──────────┤
+        /painel/arena (pilotos, regras, metas, prêmio, turbo, avisos) ──▶ gaveta: config
                                                                      ▼
-                                  GET /api/arena/estado (cache 30 s) ──▶ /arena (telão)
+                                    corrida recalculada ──▶ gaveta: telao ──▶ WhatsApp (avisos)
+                                                                     │
+              GET /api/arena/estado (CDN 10 s) ──▶ /arena (telão) e /arena/<piloto> (celular)
 ```
 
 - **Vigia** (`scripts/arena-vigia/`): roda no PC porque o token do Bling só existe lá (a sentinela do Bionic
@@ -39,21 +50,24 @@ Bling ──(vigia no PC, a cada 2 min)──▶ POST /api/arena/bling ──▶
 Licença = item cujo nome tem "windows", "office", "microsoft 365"… e nenhuma palavra de exclusão
 (notebook, computador, pc, cadeira, mesa…). As duas listas ficam na aba Pontuação.
 
-## Tabelas
+## A gaveta (documentos JSON)
 
-- `arena_vendedores` — os pilotos (tabela antiga; ganhou `bling_vendedor_id`, `apelido`, `cor`, `kart`,
-  `numero`, `meta_semana`, `meta_mes`, `ativo`). A foto pode ser link ou a imagem reduzida (192 px) no próprio
-  banco, servida por `/api/arena/foto/[id]`.
-- `arena_lancamentos` — um por documento do Bling (`venda:<id>`, `orcamento:<id>`) e os pontos à mão
-  (`manual:<uuid>`). Anular ou trocar pontos no painel nunca é desfeito pelo Bling.
-- `arena_ajustes` — chave/valor: `regras`, `corrida`, `premio`, `vigia`, `vigia_chave`, `bling_vendedores`,
-  `varrer_desde`.
+| documento | o que guarda |
+|---|---|
+| `config` | pilotos (com `slug` da página), regras, metas, prêmio, turbo, avisos do WhatsApp, vendedores do Bling, resumo da chave do vigia, varredura pedida |
+| `lanc-AAAA-MM` | vendas e orçamentos do Bling do mês (`venda:<id>`, `orcamento:<id>`) e pontos à mão (`manual:<uuid>`) |
+| `telao` | a corrida já calculada (o telão só lê isto) |
+| `vigia` | última conversa do vigia (gravada de 10 em 10 min quando nada muda) |
+| `avisos` | o que já foi avisado no WhatsApp (cada aviso sai uma vez) |
+| `fotos/<…>` | fotos dos pilotos (192 px), servidas por `/api/arena/foto/<id>` |
 
-A estrutura é criada na primeira chamada (`garantirEstrutura`), como em `lib/precos/banco.ts`.
+Toda gravação é condicional à versão lida (etag do Blob): vigia e painel ao mesmo tempo não se atropelam.
+Anular ou trocar pontos no painel nunca é desfeito pelo Bling.
 
-As tabelas antigas `arena_vendas`, `arena_config` e `arena_eventos_midia` ficaram no banco, sem uso pela tela
-nova (os GIFs de comemoração deram lugar às animações próprias). `app/arena/actions.ts` continua porque o caixa
-(PDV) e os indicadores leem `arena_vendedores`.
+As tabelas `arena_vendedores`, `arena_lancamentos`, `arena_vendas`, `arena_config` e `arena_eventos_midia` ficaram
+no MySQL só como histórico (a primeira configuração da gaveta copia pilotos, chave e pontos à mão de lá).
+`app/arena/actions.ts` e `/api/arena/vendedores` continuam porque o caixa (PDV) e os indicadores leem
+`arena_vendedores`.
 
 ## Telão
 
@@ -66,8 +80,25 @@ nova (os GIFs de comemoração deram lugar às animações próprias). `app/aren
   som" na TV). Tela cheia, cursor some sozinho, tela não apaga (Wake Lock).
 - Karts e personagens são desenhos originais: nada da Nintendo.
 
-## Ideias para depois
+## Hora do turbo (12/10)
 
-- Aviso no grupo do WhatsApp quando alguém cruza a linha (precisa da VPS).
-- "Hora do turbo": pontos em dobro num horário fraco, ligada no painel.
-- Página de cada vendedor mostrando quanto falta para a linha de chegada.
+Pontos multiplicados (1,5x, 2x ou 3x) em horários fixos (ex.: seg a sex, 14h–16h) ou ligados na hora pelo
+painel ("Ligar turbo agora" por 30 min a 4 h). O Bling não guarda a hora do pedido, então vale a hora em que o
+documento chega à Arena (o vigia passa a cada 2 min; quem chega até 5 min depois do fim ainda ganha). O
+multiplicador fica congelado no lançamento: desligar depois não tira pontos. Carga histórica nunca ganha.
+Lógica em `lib/arena/turbo.ts`. O telão mostra a faixa dourada e "Hora do turbo às 14:00" até 3 h antes.
+
+## Avisos no WhatsApp (12/10)
+
+Pela linha da loja, para um grupo da equipe (escolhido na lista dos grupos da loja) ou um número. Avisa quando
+alguém cruza a linha, quando a equipe bate a meta (com a viagem), quando começa a hora do turbo e, se ligado,
+troca de líder da semana. Os avisos saem pelas rotas `/api/arena/grupos` e `/api/arena/aviso` do servidor do
+WhatsApp (`whatsapp-server/servidor.js`), que **precisam do deploy da VPS** (`deploy-evo.ps1`). Não entram no
+CRM, só aceitam grupo ou número brasileiro e têm freio de 30 por hora. Comparação em `lib/arena/avisos.ts`.
+
+## Página de cada piloto (12/10)
+
+`www.balao.info/arena/<nome>` (o endereço aparece no cartão do piloto no painel). Feita para o celular:
+posição, quanto falta para a linha de chegada, "para cruzar a linha: 2 vendas com licença ou 3 vendas ou 15
+orçamentos" (com o turbo, se estiver ligado), quem está logo à frente e atrás, a meta da equipe com a viagem e
+as últimas jogadas. Pública como o telão: sem cliente e sem reais.

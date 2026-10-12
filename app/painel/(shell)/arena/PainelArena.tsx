@@ -9,29 +9,33 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle, CheckCircle, Download, ExternalLink, Flag, Gift, KeyRound, Loader2, Monitor, Plus, RefreshCw,
-  RotateCcw, Save, Target, Trophy, Upload, Users, Zap,
+  RotateCcw, Save, Target, Trophy, Upload, Users, Zap, Rocket, MessageCircle, Send, Power,
 } from "lucide-react";
 import { Kart } from "@/components/arena/Kart";
 import { janela } from "@/lib/arena/periodos";
-import type { Lancamento, ModeloDeKart, Piloto, PlacarDoPeriodo, AjustesDaCorrida, Premio } from "@/lib/arena/tipos";
+import type { Lancamento, ModeloDeKart, Piloto, PlacarDoPeriodo, AjustesDaCorrida, Premio, AjustesDoTurbo, AjustesDoWhatsApp, JanelaDoTurbo } from "@/lib/arena/tipos";
+import { descreverJanela, proximoTurbo, turboAgora } from "@/lib/arena/turbo";
 import type { RegrasDePontos } from "@/lib/arena/pontos";
 import {
   ajustarLancamentoAcao, apagarManualAcao, carregarPainel, criarPilotosDoBlingAcao, gerarChaveAcao, lancarManualAcao,
   lerAnuncioAirbnbAcao, listarLancamentosAcao, pedirVarreduraAcao, recalcularAcao, removerPilotoAcao, salvarCorridaAcao,
-  salvarMetasAcao, salvarPilotoAcao, salvarPremioAcao, salvarRegrasAcao,
+  salvarMetasAcao, salvarPilotoAcao, salvarPremioAcao, salvarRegrasAcao, salvarTurboAcao, turboAgoraAcao,
+  salvarWhatsAppAcao, listarGruposAcao, testarWhatsAppAcao,
 } from "./acoes";
 
 type Dados = NonNullable<Extract<Awaited<ReturnType<typeof carregarPainel>>, { ok: true }>["dados"]>;
 type PilotoDoPainel = Dados["pilotos"][number];
-type Aba = "corrida" | "pilotos" | "metas" | "pontos" | "pedidos" | "premio" | "bling";
+type Aba = "corrida" | "pilotos" | "metas" | "pontos" | "turbo" | "pedidos" | "premio" | "avisos" | "bling";
 
 const ABAS: { id: Aba; nome: string; icone: React.ReactNode }[] = [
   { id: "corrida", nome: "Corrida", icone: <Flag size={16} /> },
   { id: "pilotos", nome: "Pilotos", icone: <Users size={16} /> },
   { id: "metas", nome: "Metas", icone: <Target size={16} /> },
   { id: "pontos", nome: "Pontuação", icone: <Zap size={16} /> },
+  { id: "turbo", nome: "Hora do turbo", icone: <Rocket size={16} /> },
   { id: "pedidos", nome: "Pedidos e orçamentos", icone: <CheckCircle size={16} /> },
   { id: "premio", nome: "Prêmio", icone: <Gift size={16} /> },
+  { id: "avisos", nome: "Avisos no WhatsApp", icone: <MessageCircle size={16} /> },
   { id: "bling", nome: "Conexão com o Bling", icone: <KeyRound size={16} /> },
 ];
 
@@ -375,6 +379,9 @@ function AbaPilotos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Pro
             <div className="min-w-0 flex-1">
               <div className="font-bold text-gray-900 truncate">{p.apelido || p.nome}</div>
               <div className="text-xs text-gray-500 truncate">{p.nome}</div>
+              <a href={`/arena/${p.slug}`} target="_blank" rel="noreferrer" className="mt-0.5 block text-xs text-blue-700 hover:underline truncate">
+                balao.info/arena/{p.slug}
+              </a>
               <div className="mt-1 text-xs text-gray-600">
                 {p.blingVendedorId ? `Bling: ${nomeBling.get(p.blingVendedorId) || p.blingVendedorId}` : "Sem vendedor do Bling"}
                 {!p.ativo && " · fora da pista"}
@@ -518,7 +525,7 @@ function AbaPontos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Prom
       {ajuda && <span className="mt-1 block text-xs text-gray-500">{ajuda}</span>}
     </label>
   );
-  const exemplo = r.venda + r.licencaBonus + (r.turboFaixa > 0 ? Math.floor(3500 / r.turboFaixa) * r.turboPontos : 0) + r.conversaoBonus;
+  const exemplo = r.venda + r.licencaBonus + (r.ticketFaixa > 0 ? Math.floor(3500 / r.ticketFaixa) * r.ticketPontos : 0) + r.conversaoBonus;
 
   return (
     <div className="space-y-5">
@@ -531,8 +538,8 @@ function AbaPontos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Prom
           {n("conversaoBonus", "Bônus: orçamento que virou venda", "Mesmo cliente com orçamento antes da venda.")}
           {n("conversaoDias", "Janela da conversão (dias)")}
           {n("orcamentoMinimo", "Orçamento mínimo (R$)", "Abaixo disso o orçamento não pontua.")}
-          {n("turboFaixa", "Turbo do ticket: a cada R$", "0 desliga.")}
-          {n("turboPontos", "…vale quantos pontos")}
+          {n("ticketFaixa", "Bônus do ticket: a cada R$", "0 desliga.")}
+          {n("ticketPontos", "…vale quantos pontos")}
         </div>
         <label className="mt-4 inline-flex items-center gap-2 text-sm text-gray-700">
           <input type="checkbox" checked={r.umOrcamentoPorClienteDia} onChange={(e) => setR({ ...r, umOrcamentoPorClienteDia: e.target.checked })} />
@@ -703,13 +710,14 @@ function AbaPedidos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Pro
             {(lista ?? []).map((l) => {
               const st = STATUS[l.status] ?? STATUS.valido;
               const det = l.detalhe;
-              const partes = det ? [det.base && `base ${det.base}`, det.licencas && `licença ${det.licencas}`, det.turbo && `ticket ${det.turbo}`, det.conversao && `conversão ${det.conversao}`].filter(Boolean).join(" + ") : "";
+              const partes = det ? [det.base && `base ${det.base}`, det.licencas && `licença ${det.licencas}`, det.ticket && `ticket ${det.ticket}`, det.conversao && `conversão ${det.conversao}`, det.turbo && `turbo ${det.turbo}`].filter(Boolean).join(" + ") : "";
               return (
                 <tr key={l.id} className="border-t border-gray-100 align-top">
                   <td className="py-2 pr-3 whitespace-nowrap">{dataBr(l.data)}</td>
                   <td className="py-2 pr-3 whitespace-nowrap">
                     {l.tipo === "venda" ? `Pedido ${l.numero}` : l.tipo === "orcamento" ? `Orçamento ${l.numero}` : "Pontos à mão"}
                     {l.licencas > 0 && <span className="ml-1 rounded bg-yellow-100 px-1.5 text-xs font-semibold text-yellow-800">{l.licencas} licença{l.licencas > 1 ? "s" : ""}</span>}
+                    {l.turbo > 1 && <span className="ml-1 rounded bg-orange-100 px-1.5 text-xs font-semibold text-orange-800">turbo {l.turbo}x</span>}
                   </td>
                   <td className="py-2 pr-3">{quem(l)}</td>
                   <td className="py-2 pr-3 max-w-[200px] truncate" title={l.contatoNome ?? ""}>{l.contatoNome ?? (l.tipo === "manual" ? l.motivo : "—")}</td>
@@ -728,7 +736,7 @@ function AbaPedidos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Pro
                         className="text-xs font-semibold text-gray-500 hover:underline"
                         onClick={async () => {
                           if (!confirm("Apagar este lançamento à mão?")) return;
-                          const r = await apagarManualAcao(l.id);
+                          const r = await apagarManualAcao(l.id, l.data);
                           if (!r.ok) return avisar("erro", r.erro);
                           await buscar();
                           await recarregar();
@@ -743,7 +751,7 @@ function AbaPedidos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Pro
                           onClick={async () => {
                             const v = prompt("Pontos deste documento (vazio = voltar à regra):", l.pontosManual != null ? String(l.pontosManual) : "");
                             if (v === null) return;
-                            const r = await ajustarLancamentoAcao(l.id, { pontosManual: v.trim() === "" ? null : Number(v.replace(",", ".")) });
+                            const r = await ajustarLancamentoAcao(l.id, { pontosManual: v.trim() === "" ? null : Number(v.replace(",", ".")), data: l.data });
                             if (!r.ok) return avisar("erro", r.erro);
                             await buscar();
                             await recarregar();
@@ -754,7 +762,7 @@ function AbaPedidos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Pro
                         <button
                           className={`text-xs font-semibold hover:underline ${l.anuladoManual ? "text-green-700" : "text-[#E60012]"}`}
                           onClick={async () => {
-                            const r = await ajustarLancamentoAcao(l.id, { anular: !l.anuladoManual });
+                            const r = await ajustarLancamentoAcao(l.id, { anular: !l.anuladoManual, data: l.data });
                             if (!r.ok) return avisar("erro", r.erro);
                             await buscar();
                             await recarregar();
@@ -925,6 +933,294 @@ function AbaPremio({ d, recarregar, avisar }: { d: Dados; recarregar: () => Prom
   );
 }
 
+// ------------------------------------------------------------------ hora do turbo
+
+const DIAS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+const horaBr = (iso: string) => new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
+const diaHoraBr = (iso: string) =>
+  new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", weekday: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
+
+function AbaTurbo({ d, recarregar, avisar }: { d: Dados; recarregar: () => Promise<void>; avisar: (t: "ok" | "erro", m: string) => void }) {
+  const [t, setT] = useState<AjustesDoTurbo>(d.turbo);
+  const [nova, setNova] = useState<JanelaDoTurbo>({ dias: [1, 2, 3, 4, 5], das: "14:00", ate: "16:00" });
+  const [minutos, setMinutos] = useState(60);
+  const [ocupado, setOcupado] = useState(false);
+  const [agora, setAgora] = useState(() => Date.now());
+  useEffect(() => {
+    const i = setInterval(() => setAgora(Date.now()), 15000);
+    return () => clearInterval(i);
+  }, []);
+  const ativo = turboAgora(d.turbo, new Date(agora));
+  const proximo = proximoTurbo(d.turbo, new Date(agora));
+
+  const salvar = async (x: AjustesDoTurbo) => {
+    setOcupado(true);
+    const r = await salvarTurboAcao(x);
+    setOcupado(false);
+    if (!r.ok) return avisar("erro", r.erro);
+    setT(r.dados!);
+    avisar("ok", "Hora do turbo salva.");
+    await recarregar();
+  };
+
+  return (
+    <div className="space-y-5">
+      <section className={`${cartao} ${ativo.ativo ? "border-yellow-400 bg-yellow-50" : ""}`}>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">{ativo.ativo ? `⚡ Turbo ligado: ${ativo.multiplicador}x até ${horaBr(ativo.ate!)}` : "Turbo desligado agora"}</h2>
+            <p className="mt-1 text-sm text-gray-700">
+              {ativo.ativo
+                ? "Toda venda e orçamento que chegar do Bling agora vale mais. O telão mostra a faixa dourada."
+                : proximo
+                  ? `Próximo turbo: ${diaHoraBr(proximo.inicio)}, ${proximo.multiplicador}x.`
+                  : "Nenhum horário fixo cadastrado."}
+            </p>
+          </div>
+          {d.turbo.manualAte && Date.parse(d.turbo.manualAte) > agora && (
+            <button
+              className={botaoSecundario}
+              disabled={ocupado}
+              onClick={async () => {
+                setOcupado(true);
+                const r = await turboAgoraAcao(0, 1);
+                setOcupado(false);
+                if (!r.ok) return avisar("erro", r.erro);
+                avisar("ok", "Turbo desligado.");
+                await recarregar();
+              }}
+            >
+              <Power size={16} /> Desligar agora
+            </button>
+          )}
+        </div>
+      </section>
+
+      <section className={cartao}>
+        <h2 className="text-lg font-bold text-gray-900">Ligar agora</h2>
+        <p className="mt-1 text-sm text-gray-700">Para um dia parado: liga o turbo na hora, por um tempo. Se os avisos do WhatsApp estiverem ligados, a equipe recebe a chamada.</p>
+        <div className="mt-3 flex flex-wrap items-end gap-3">
+          <label>
+            <span className={rotulo}>Por quanto tempo</span>
+            <select className={campo} value={minutos} onChange={(e) => setMinutos(Number(e.target.value))}>
+              {[30, 60, 90, 120, 180, 240].map((m) => (
+                <option key={m} value={m}>{m < 60 ? `${m} min` : `${m / 60} h`}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span className={rotulo}>Pontos</span>
+            <select className={campo} value={t.manualMultiplicador} onChange={(e) => setT({ ...t, manualMultiplicador: Number(e.target.value) })}>
+              {[1.5, 2, 3].map((m) => (
+                <option key={m} value={m}>{m}x</option>
+              ))}
+            </select>
+          </label>
+          <button
+            className={botaoPrimario}
+            disabled={ocupado}
+            onClick={async () => {
+              setOcupado(true);
+              const r = await turboAgoraAcao(minutos, t.manualMultiplicador);
+              setOcupado(false);
+              if (!r.ok) return avisar("erro", r.erro);
+              avisar("ok", "Turbo ligado. O telão mostra em até 20 segundos.");
+              await recarregar();
+            }}
+          >
+            <Rocket size={16} /> Ligar turbo agora
+          </button>
+        </div>
+      </section>
+
+      <section className={cartao}>
+        <h2 className="text-lg font-bold text-gray-900">Horários fixos</h2>
+        <p className="mt-1 text-sm text-gray-700 max-w-3xl">
+          Escolha os horários fracos da loja. Vale a hora em que o documento chega à Arena (o Bling não guarda a hora do pedido): o vigia olha a cada 2 minutos, e o que chega até 5 minutos depois do fim ainda ganha o turbo.
+        </p>
+        {t.janelas.length > 0 ? (
+          <ul className="mt-3 divide-y divide-gray-100 text-sm text-gray-800">
+            {t.janelas.map((j, i) => (
+              <li key={i} className="flex items-center justify-between py-2">
+                <span>{descreverJanela(j)}</span>
+                <button className="text-xs font-semibold text-gray-500 hover:underline" onClick={() => void salvar({ ...t, janelas: t.janelas.filter((_, k) => k !== i) })}>
+                  Tirar
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-3 text-sm text-gray-500">Nenhum horário fixo.</p>
+        )}
+        <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto_auto_auto] items-end">
+          <div>
+            <span className={rotulo}>Dias</span>
+            <div className="flex flex-wrap gap-1.5">
+              {DIAS.map((nome, i) => (
+                <button
+                  key={nome}
+                  type="button"
+                  onClick={() => setNova({ ...nova, dias: nova.dias.includes(i) ? nova.dias.filter((x) => x !== i) : [...nova.dias, i].sort() })}
+                  className={`rounded-md border px-2 py-1 text-xs ${nova.dias.includes(i) ? "border-[#E60012] bg-red-50 font-semibold" : "border-gray-300"}`}
+                  aria-pressed={nova.dias.includes(i)}
+                >
+                  {nome}
+                </button>
+              ))}
+            </div>
+          </div>
+          <label>
+            <span className={rotulo}>Das</span>
+            <input className={campo} type="time" value={nova.das} onChange={(e) => setNova({ ...nova, das: e.target.value })} />
+          </label>
+          <label>
+            <span className={rotulo}>Até</span>
+            <input className={campo} type="time" value={nova.ate} onChange={(e) => setNova({ ...nova, ate: e.target.value })} />
+          </label>
+          <button className={botaoSecundario} disabled={ocupado || !nova.dias.length || nova.ate <= nova.das} onClick={() => void salvar({ ...t, janelas: [...t.janelas, nova] })}>
+            <Plus size={16} /> Pôr horário
+          </button>
+        </div>
+        <label className="mt-4 block max-w-xs">
+          <span className={rotulo}>Nos horários fixos, os pontos valem</span>
+          <select className={campo} value={t.multiplicador} onChange={(e) => void salvar({ ...t, multiplicador: Number(e.target.value) })}>
+            {[1.5, 2, 3].map((m) => (
+              <option key={m} value={m}>{m}x</option>
+            ))}
+          </select>
+        </label>
+      </section>
+    </div>
+  );
+}
+
+// ------------------------------------------------------------------ avisos no WhatsApp
+
+function AbaAvisos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Promise<void>; avisar: (t: "ok" | "erro", m: string) => void }) {
+  const [w, setW] = useState<AjustesDoWhatsApp>(d.whatsapp);
+  const [grupos, setGrupos] = useState<{ id: string; nome: string; participantes: number | null }[] | null>(null);
+  const [buscando, setBuscando] = useState(false);
+  const [erroGrupos, setErroGrupos] = useState<string | null>(null);
+  const [salvando, setSalvando] = useState(false);
+  const [testando, setTestando] = useState(false);
+  const ehGrupo = w.destino.endsWith("@g.us");
+
+  const buscarGrupos = async () => {
+    setBuscando(true);
+    const r = await listarGruposAcao();
+    setBuscando(false);
+    if (!r.ok) {
+      setErroGrupos(r.erro);
+      return;
+    }
+    setErroGrupos(null);
+    setGrupos(r.dados ?? []);
+  };
+
+  const caixa = (k: "meta" | "equipe" | "lideranca" | "turbo", texto: string) => (
+    <label className="flex items-center gap-2 text-sm text-gray-700">
+      <input type="checkbox" checked={w[k]} onChange={(e) => setW({ ...w, [k]: e.target.checked })} />
+      {texto}
+    </label>
+  );
+
+  return (
+    <div className="space-y-5">
+      <section className={cartao}>
+        <h2 className="text-lg font-bold text-gray-900">Para onde vão os avisos</h2>
+        <p className="mt-1 text-sm text-gray-700 max-w-3xl">
+          Saem pela linha da loja, para um grupo da equipe (a loja precisa estar no grupo) ou para um número. Não entram no CRM e nunca vão para cliente.
+        </p>
+        <div className="mt-4 flex flex-wrap items-end gap-2">
+          <button className={botaoSecundario} disabled={buscando} onClick={() => void buscarGrupos()}>
+            {buscando ? <Loader2 size={16} className="animate-spin" /> : <Users size={16} />} Buscar os grupos da loja
+          </button>
+          {grupos && (
+            <select
+              className={`${campo} max-w-md`}
+              value={ehGrupo ? w.destino : ""}
+              onChange={(e) => {
+                const g = grupos.find((x) => x.id === e.target.value);
+                setW({ ...w, destino: e.target.value, nomeDestino: g?.nome ?? "" });
+              }}
+            >
+              <option value="">— escolha o grupo —</option>
+              {grupos.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.nome}
+                  {g.participantes ? ` (${g.participantes})` : ""}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+        {erroGrupos && <p className="mt-2 text-sm text-red-700">{erroGrupos}</p>}
+        <label className="mt-4 block max-w-sm">
+          <span className={rotulo}>…ou um número (com DDD)</span>
+          <input
+            className={campo}
+            inputMode="tel"
+            placeholder="19 99999-9999"
+            value={ehGrupo ? "" : w.destino}
+            onChange={(e) => {
+              const dig = e.target.value.replace(/\D/g, "");
+              setW({ ...w, destino: dig.length === 10 || dig.length === 11 ? `55${dig}` : dig, nomeDestino: "" });
+            }}
+          />
+        </label>
+        {w.destino && <p className="mt-2 text-sm text-gray-600">Destino: <b>{w.nomeDestino || w.destino}</b></p>}
+      </section>
+
+      <section className={cartao}>
+        <h2 className="text-lg font-bold text-gray-900">O que avisar</h2>
+        <div className="mt-3 space-y-2">
+          {caixa("meta", "🏁 Quando alguém cruza a linha de chegada (bate a meta da semana ou do mês)")}
+          {caixa("equipe", "🏆 Quando a equipe bate a meta (e a viagem, se houver prêmio)")}
+          {caixa("turbo", "⚡ Quando começa a hora do turbo")}
+          {caixa("lideranca", "🥇 Quando muda o líder da semana (no máximo uma vez por dia para cada um)")}
+        </div>
+        <label className="mt-4 flex items-center gap-2 text-sm font-semibold text-gray-900">
+          <input type="checkbox" checked={w.ativo} onChange={(e) => setW({ ...w, ativo: e.target.checked })} />
+          Avisos ligados
+        </label>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button
+            className={botaoPrimario}
+            disabled={salvando || (w.ativo && !w.destino)}
+            onClick={async () => {
+              setSalvando(true);
+              const r = await salvarWhatsAppAcao(w);
+              setSalvando(false);
+              if (!r.ok) return avisar("erro", r.erro);
+              setW(r.dados!);
+              avisar("ok", r.dados!.ativo ? "Avisos ligados." : "Avisos salvos (desligados).");
+              await recarregar();
+            }}
+          >
+            {salvando ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} Salvar avisos
+          </button>
+          <button
+            className={botaoSecundario}
+            disabled={testando || !w.destino}
+            onClick={async () => {
+              if (!confirm(`Mandar uma mensagem de teste para ${w.nomeDestino || w.destino}?`)) return;
+              setTestando(true);
+              const r = await testarWhatsAppAcao(w.destino);
+              setTestando(false);
+              if (!r.ok) return avisar("erro", r.erro);
+              avisar("ok", "Mensagem de teste enviada.");
+            }}
+          >
+            {testando ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />} Mandar teste
+          </button>
+        </div>
+        {d.avisos?.ultimoErro && <p className="mt-3 text-sm text-red-700">Último aviso falhou: {d.avisos.ultimoErro}</p>}
+        {d.avisos?.ultimoEnvio && !d.avisos.ultimoErro && <p className="mt-3 text-sm text-gray-600">Último aviso enviado {haQuanto(d.avisos.ultimoEnvio)}.</p>}
+      </section>
+    </div>
+  );
+}
+
 // ------------------------------------------------------------------ Bling
 
 function AbaBling({ d, recarregar, avisar }: { d: Dados; recarregar: () => Promise<void>; avisar: (t: "ok" | "erro", m: string) => void }) {
@@ -948,6 +1244,15 @@ function AbaBling({ d, recarregar, avisar }: { d: Dados; recarregar: () => Promi
             </p>
             {v.ultimoErro && <p className="mt-1 text-sm text-red-700">Último erro no PC: {v.ultimoErro}</p>}
           </div>
+        </div>
+        <div className="mt-4">
+          {d.gaveta.tipo === "blob" || d.gaveta.tipo === "pasta" ? (
+            <Aviso tipo="ok">A Arena guarda tudo no Blob da Vercel: não depende do banco da loja.{d.gaveta.importacaoPendente ? " (Ainda tentando trazer os pilotos do banco antigo.)" : ""}</Aviso>
+          ) : (
+            <Aviso tipo="erro">
+              A Arena está guardando no banco da loja (reserva) e para quando a cota de conexões estoura. Crie o Blob na Vercel: projeto balao2026 → Storage → Create → Blob (Private, São Paulo) → Connect. Ela copia tudo sozinha.
+            </Aviso>
+          )}
         </div>
         <p className="mt-4 text-sm text-gray-700 max-w-3xl">
           O token do Bling só existe no seu PC (quem renova é a sentinela do Bionic), então quem busca as vendas e os orçamentos é o vigia, a cada 2 minutos,
@@ -1095,6 +1400,14 @@ export default function PainelArena() {
           </a>
         </header>
 
+        {d && (d.gaveta.tipo === "banco" || d.gaveta.tipo === "memoria") && (
+          <div className="mt-4">
+            <Aviso tipo="erro">
+              A Arena ainda depende do banco da loja. Para ela não cair junto quando a cota estoura, crie o Blob na Vercel (projeto balao2026 → Storage → Create → Blob, Private, São Paulo → Connect).{" "}
+              <button className="font-semibold underline" onClick={() => setAba("bling")}>Ver detalhes</button>
+            </Aviso>
+          </div>
+        )}
         {d && !d.vigia.online && (
           <div className="mt-4">
             <Aviso tipo="info">
@@ -1150,6 +1463,8 @@ export default function PainelArena() {
           {d && aba === "pontos" && <AbaPontos d={d} recarregar={recarregar} avisar={avisar} />}
           {d && aba === "pedidos" && <AbaPedidos d={d} recarregar={recarregar} avisar={avisar} />}
           {d && aba === "premio" && <AbaPremio d={d} recarregar={recarregar} avisar={avisar} />}
+          {d && aba === "turbo" && <AbaTurbo d={d} recarregar={recarregar} avisar={avisar} />}
+          {d && aba === "avisos" && <AbaAvisos d={d} recarregar={recarregar} avisar={avisar} />}
           {d && aba === "bling" && <AbaBling d={d} recarregar={recarregar} avisar={avisar} />}
         </div>
 

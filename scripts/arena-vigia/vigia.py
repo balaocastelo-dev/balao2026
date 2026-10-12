@@ -32,7 +32,7 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-VERSAO = "1.0"
+VERSAO = "1.1"
 AQUI = Path(__file__).resolve().parent
 CASA = Path(os.environ.get("USERPROFILE") or os.environ.get("HOME") or ".")
 
@@ -326,8 +326,14 @@ def uma_volta(cfg: dict, forcado: str | None = None, conferir: bool = False) -> 
         try:
             ping = pedir(site_url, cabecalhos={"Authorization": f"Bearer {chave}"})
         except ErroHttp as e:
-            log(f"O site recusou a chave ({e.status}). Gere outra no painel e rode o instalar.ps1 de novo.")
-            return 3
+            if e.status == 401:
+                log("O site recusou a chave. Gere outra no painel e rode o instalar.ps1 de novo.")
+                return 3
+            log(f"O site não respondeu direito ({e.status}); tento na próxima volta.")
+            return 1
+        except OSError as e:
+            log(f"Sem conexão com o site ({e}); tento na próxima volta.")
+            return 1
         pedido_do_site = ping.get("varrerDesde")
 
         estado = Estado(cfg["pasta_dados"])
@@ -366,6 +372,10 @@ def uma_volta(cfg: dict, forcado: str | None = None, conferir: bool = False) -> 
                 f"{len(vendedores or [])} vendedores no Bling. Nada foi gravado.")
             return 0
 
+        # O que já veio do Bling fica guardado antes de mandar: se o site
+        # estiver fora do ar, a próxima volta reenvia sem abrir o Bling de novo.
+        estado.salvar()
+
         enviados = 0
         lotes = [a_enviar[i:i + 300] for i in range(0, len(a_enviar), 300)] or [[]]
         for n, lote in enumerate(lotes):
@@ -377,7 +387,12 @@ def uma_volta(cfg: dict, forcado: str | None = None, conferir: bool = False) -> 
                 corpo["vendedores"] = vendedores
             if n == len(lotes) - 1 and pedido_do_site and not erro:
                 corpo["varreduraFeita"] = pedido_do_site
-            r = enviar(cfg, chave, corpo)
+            try:
+                r = enviar(cfg, chave, corpo)
+            except (ErroHttp, OSError) as e:
+                log(f"O site não recebeu agora ({e}); mando de novo na próxima volta.")
+                estado.salvar()
+                return 1
             for k, _, ass in lote:
                 estado.d["docs"][k]["enviado"] = ass
             enviados += r.get("gravados", 0)

@@ -2806,6 +2806,43 @@ app.post(["/api/enviar", "/api/send", "/api/crm/send"], acesso.exigir(), json, r
   return { msgId: registrarEnviada(rec).id };
 }));
 
+// ---------- Arena de vendas: avisos no grupo da equipe ----------
+// O site (www.balao.info/painel/arena) escolhe um grupo da linha da loja e,
+// quando alguém bate a meta, pede o aviso aqui. Não entra no CRM (não chama
+// registrarEnviada) e só aceita grupo (…@g.us) ou número brasileiro.
+const avisosDaArena = [];
+function destinoDaArena(v) {
+  const s = String(v || "").trim();
+  if (/^[0-9-]{10,40}@g\.us$/.test(s)) return s;
+  const d = s.replace(/\D/g, "");
+  return d.length >= 12 && d.length <= 13 && d.startsWith("55") ? d : null;
+}
+
+app.get("/api/arena/grupos", acesso.exigir(["admin"]), rotaHttp(async () => {
+  exigirConectado();
+  const lista = await evolution.listarGrupos(INSTANCIA);
+  const grupos = (Array.isArray(lista) ? lista : [])
+    .filter((g) => g && typeof g.id === "string" && g.id.endsWith("@g.us"))
+    .map((g) => ({ id: g.id, nome: String(g.subject || "Grupo sem nome").slice(0, 80), participantes: Number(g.size) || null }))
+    .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+  return { grupos };
+}));
+
+app.post("/api/arena/aviso", acesso.exigir(["admin"]), json, rotaHttp(async (b) => {
+  exigirConectado();
+  const destino = destinoDaArena(b.destino);
+  if (!destino) throw new Error("Destino inválido: use um grupo da loja ou um número com DDD.");
+  const texto = String(b.texto || "").trim().slice(0, 1500);
+  if (!texto) throw new Error("Aviso vazio.");
+  // Freio: no máximo 30 avisos por hora (a Arena manda poucos; isto só segura erro).
+  const umaHora = Date.now() - 3600_000;
+  while (avisosDaArena.length && avisosDaArena[0] < umaHora) avisosDaArena.shift();
+  if (avisosDaArena.length >= 30) throw new Error("Muitos avisos da Arena na última hora; segurei este.");
+  avisosDaArena.push(Date.now());
+  await evolution.enviarTexto(INSTANCIA, destino, texto);
+  return {};
+}));
+
 app.post(["/api/enviar-foto", "/api/crm/enviar-foto", "/api/enviar-midia", "/api/enviar-documento", "/api/crm/enviar-documento"],
   acesso.exigir(), json, rotaHttp(async (b, req) => {
     const rec = await enviarMidia({

@@ -6,40 +6,38 @@
 // pode ser chamada direto.
 // ============================================================
 
-import { revalidateTag } from "next/cache";
 import { isPainelAuthenticated } from "@/lib/painel-auth";
 import {
   ajustarLancamento,
   apagarManual,
   buscarLancamentos,
-  existeChaveDoVigia,
   gerarChaveDoVigia,
   gravarCorrida,
   gravarMetas,
   gravarPremio,
   gravarRegras,
+  gravarTurbo,
+  gravarWhatsApp,
   lancamentosEntre,
   lancarManual,
-  lerCorrida,
-  lerPremio,
-  lerRegras,
-  lerVarredura,
-  lerVendedoresDoBling,
+  lerConfig,
   lerVigia,
-  listarPilotos,
   pedirVarredura,
   recalcularTudo,
   removerPiloto,
   salvarPiloto,
+  tipoDaGaveta,
   vendedoresSemPiloto,
+  destinoValido,
   type DadosDoPiloto,
   type FiltroDeLancamentos,
-} from "@/lib/arena/banco";
-import { ETIQUETA_ARENA, fotoPublica, vigiaOnline } from "@/lib/arena/estado";
+} from "@/lib/arena/dados";
+import { conferirTurbo, fotoPublica, reconstruirTelao, vigiaOnline, lerAvisos } from "@/lib/arena/estado";
 import { janela, mesAnterior, semanaAnterior } from "@/lib/arena/periodos";
 import { montarPlacar, sugerirMeta } from "@/lib/arena/placar";
 import { REGRAS_PADRAO } from "@/lib/arena/pontos";
 import { CORES_DE_KART, KARTS } from "@/lib/arena/tipos";
+import { enviarAviso, listarGrupos } from "@/lib/arena/whatsapp";
 
 type Resultado<T = undefined> = { ok: true; dados?: T } | { ok: false; erro: string };
 
@@ -52,27 +50,22 @@ async function comSessao<T>(fn: () => Promise<T>): Promise<Resultado<T>> {
   }
 }
 
-const mexeuNaArena = () => revalidateTag(ETIQUETA_ARENA, { expire: 0 });
+/** Mexeu em algo que o telão mostra: refaz a corrida pronta (e os avisos). */
+const mexeuNaArena = async () => {
+  await reconstruirTelao().catch((e) => console.error("[arena:painel] telão:", (e as Error).message));
+};
 
 export async function carregarPainel() {
   return comSessao(async () => {
-    const [crus, corrida, regras, premio, vigia, temChave, vendedoresBling, semPiloto, varrerDesde] = await Promise.all([
-      listarPilotos(),
-      lerCorrida(),
-      lerRegras(),
-      lerPremio(),
-      lerVigia(),
-      existeChaveDoVigia(),
-      lerVendedoresDoBling(),
-      vendedoresSemPiloto(),
-      lerVarredura(),
-    ]);
+    const [config, vigia, avisos] = await Promise.all([lerConfig({ tentarImportar: true }), lerVigia(), lerAvisos().catch(() => null)]);
+    const crus = config.pilotos;
     const pilotos = crus.map((p) => ({ ...p, fotoTelao: fotoPublica(p) }));
     const semana = janela("semana");
     const mes = janela("mes");
     const semanas = [1, 2, 3, 4].map((n) => semanaAnterior(n));
     const meses = [1, 2, 3].map((n) => mesAnterior(n));
-    const lancs = await lancamentosEntre(meses[2].inicio, mes.fim, 20000);
+    const lancs = await lancamentosEntre(meses[2].inicio, mes.fim > semana.fim ? mes.fim : semana.fim);
+    const { corrida } = config;
     const placarSemana = montarPlacar(crus, lancs, semana, corrida);
     const placarMes = montarPlacar(crus, lancs, mes, corrida);
 
@@ -100,12 +93,16 @@ export async function carregarPainel() {
     return {
       pilotos,
       corrida,
-      regras,
+      regras: config.regras,
       regrasPadrao: REGRAS_PADRAO,
-      premio,
-      vigia: { ...vigia, online: vigiaOnline(vigia.ultimaVez), temChave, varrerDesde },
-      vendedoresBling,
-      semPiloto,
+      premio: config.premio,
+      turbo: config.turbo,
+      whatsapp: config.whatsapp,
+      avisos: avisos ? { ultimoErro: avisos.ultimoErro, ultimoEnvio: avisos.ultimoEnvio } : null,
+      vigia: { ...vigia, online: vigiaOnline(vigia.ultimaVez), temChave: Boolean(config.chaveHash), varrerDesde: config.varrerDesde },
+      gaveta: { tipo: tipoDaGaveta(), importacaoPendente: Boolean(config.importacaoPendente) },
+      vendedoresBling: config.vendedoresBling,
+      semPiloto: await vendedoresSemPiloto(crus, lancs),
       placarSemana,
       placarMes,
       sugestoes,
@@ -119,7 +116,7 @@ export async function carregarPainel() {
 export async function salvarPilotoAcao(id: string | null, dados: DadosDoPiloto) {
   return comSessao(async () => {
     const novo = await salvarPiloto(id, dados);
-    mexeuNaArena();
+    await mexeuNaArena();
     return novo;
   });
 }
@@ -127,7 +124,7 @@ export async function salvarPilotoAcao(id: string | null, dados: DadosDoPiloto) 
 export async function removerPilotoAcao(id: string) {
   return comSessao(async () => {
     await removerPiloto(id);
-    mexeuNaArena();
+    await mexeuNaArena();
   });
 }
 
@@ -148,7 +145,11 @@ function nomeBonito(nome: string) {
 /** Cria um piloto para cada vendedor do Bling que ainda não tem. */
 export async function criarPilotosDoBlingAcao(ids?: string[]) {
   return comSessao(async () => {
-    const [pilotos, vendedores, semPiloto] = await Promise.all([listarPilotos(), lerVendedoresDoBling(), vendedoresSemPiloto()]);
+    const config = await lerConfig();
+    const pilotos = config.pilotos;
+    const vendedores = config.vendedoresBling;
+    const hoje = janela("mes");
+    const semPiloto = await vendedoresSemPiloto(pilotos, await lancamentosEntre(mesAnterior(3).inicio, hoje.fim));
     const ligados = new Set(pilotos.map((p) => p.blingVendedorId).filter(Boolean));
     const nomes = new Map(vendedores.map((v) => [v.id, v.nome]));
     const candidatos = [...new Set([...vendedores.map((v) => v.id), ...semPiloto.map((s) => s.id)])]
@@ -167,7 +168,7 @@ export async function criarPilotosDoBlingAcao(ids?: string[]) {
         numero: n,
       });
     }
-    mexeuNaArena();
+    await mexeuNaArena();
     return candidatos.length;
   });
 }
@@ -175,14 +176,14 @@ export async function criarPilotosDoBlingAcao(ids?: string[]) {
 export async function salvarMetasAcao(metas: { id: string; metaSemana: number | null; metaMes: number | null }[]) {
   return comSessao(async () => {
     await gravarMetas(metas);
-    mexeuNaArena();
+    await mexeuNaArena();
   });
 }
 
 export async function salvarCorridaAcao(c: unknown) {
   return comSessao(async () => {
     await gravarCorrida(c);
-    mexeuNaArena();
+    await mexeuNaArena();
   });
 }
 
@@ -190,7 +191,7 @@ export async function salvarRegrasAcao(r: unknown) {
   return comSessao(async () => {
     await gravarRegras(r);
     const mudados = await recalcularTudo();
-    mexeuNaArena();
+    await mexeuNaArena();
     return mudados;
   });
 }
@@ -198,7 +199,7 @@ export async function salvarRegrasAcao(r: unknown) {
 export async function salvarPremioAcao(p: unknown) {
   return comSessao(async () => {
     await gravarPremio(p);
-    mexeuNaArena();
+    await mexeuNaArena();
   });
 }
 
@@ -257,31 +258,31 @@ export async function listarLancamentosAcao(f: FiltroDeLancamentos) {
   return comSessao(() => buscarLancamentos(f));
 }
 
-export async function ajustarLancamentoAcao(id: string, acao: { anular?: boolean; pontosManual?: number | null }) {
+export async function ajustarLancamentoAcao(id: string, acao: { anular?: boolean; pontosManual?: number | null; data?: string }) {
   return comSessao(async () => {
     await ajustarLancamento(id, acao);
-    mexeuNaArena();
+    await mexeuNaArena();
   });
 }
 
 export async function lancarManualAcao(pilotoId: string, pontos: number, motivo: string) {
   return comSessao(async () => {
     await lancarManual(pilotoId, pontos, motivo);
-    mexeuNaArena();
+    await mexeuNaArena();
   });
 }
 
-export async function apagarManualAcao(id: string) {
+export async function apagarManualAcao(id: string, data?: string) {
   return comSessao(async () => {
-    await apagarManual(id);
-    mexeuNaArena();
+    await apagarManual(id, data);
+    await mexeuNaArena();
   });
 }
 
 export async function recalcularAcao() {
   return comSessao(async () => {
     const n = await recalcularTudo();
-    mexeuNaArena();
+    await mexeuNaArena();
     return n;
   });
 }
@@ -295,5 +296,48 @@ export async function pedirVarreduraAcao(desde: string) {
   return comSessao(async () => {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(desde)) throw new Error("Data inválida.");
     await pedirVarredura(desde);
+  });
+}
+
+// ---------------------------------------------------------------- hora do turbo
+
+export async function salvarTurboAcao(t: unknown) {
+  return comSessao(async () => {
+    const turbo = await gravarTurbo(t);
+    await mexeuNaArena();
+    return turbo;
+  });
+}
+
+/** Liga o turbo agora por X minutos (0 desliga). Avisa no WhatsApp, se ligado. */
+export async function turboAgoraAcao(minutos: number, multiplicador: number) {
+  return comSessao(async () => {
+    const m = Math.max(0, Math.min(8 * 60, Math.round(Number(minutos) || 0)));
+    const turbo = await gravarTurbo({
+      manualAte: m > 0 ? new Date(Date.now() + m * 60_000).toISOString() : null,
+      manualMultiplicador: multiplicador,
+    });
+    await mexeuNaArena();
+    if (m > 0) await conferirTurbo(await lerConfig());
+    return turbo;
+  });
+}
+
+// ---------------------------------------------------------------- avisos no WhatsApp
+
+export async function salvarWhatsAppAcao(w: unknown) {
+  return comSessao(async () => gravarWhatsApp(w));
+}
+
+export async function listarGruposAcao() {
+  return comSessao(() => listarGrupos());
+}
+
+/** Mensagem de teste para o destino escolhido (só o Thiago aperta, no painel). */
+export async function testarWhatsAppAcao(destino: string) {
+  return comSessao(async () => {
+    const d = destinoValido(destino);
+    if (!d) throw new Error("Escolha um grupo ou digite um número com DDD.");
+    await enviarAviso(d, "🏎️ Teste da Arena de vendas: os avisos vão chegar aqui.\n\nwww.balao.info/arena");
   });
 }

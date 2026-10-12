@@ -11,6 +11,8 @@
 // "Recalcular" do painel refazer a temporada inteira sem chamar o Bling.
 // ============================================================
 
+import type { DetalheDosPontos } from "./tipos";
+
 export interface RegrasDePontos {
   /** Pontos de cada pedido de venda válido. */
   venda: number;
@@ -22,9 +24,9 @@ export interface RegrasDePontos {
   licencaPalavras: string[];
   /** …e nenhuma destas (para "Cadeira Office" e "Notebook com Windows 11" não contarem). */
   licencaExcluir: string[];
-  /** Turbo do ticket: +turboPontos a cada turboFaixa reais da venda. 0 desliga. */
-  turboFaixa: number;
-  turboPontos: number;
+  /** Bônus do ticket: +ticketPontos a cada ticketFaixa reais da venda. 0 desliga. */
+  ticketFaixa: number;
+  ticketPontos: number;
   /** Bônus da venda quando o mesmo cliente recebeu orçamento antes. */
   conversaoBonus: number;
   /** Janela (dias) para o orçamento anterior contar como conversão. */
@@ -44,8 +46,8 @@ export const REGRAS_PADRAO: RegrasDePontos = {
     "notebook", "computador", "desktop", "pc ", "pc gamer", "all in one", "cadeira", "mesa",
     "teclado", "mouse", "monitor", "gabinete", "tablet",
   ],
-  turboFaixa: 500,
-  turboPontos: 1,
+  ticketFaixa: 500,
+  ticketPontos: 1,
   conversaoBonus: 5,
   conversaoDias: 30,
   orcamentoMinimo: 100,
@@ -91,12 +93,7 @@ export interface Pontuacao {
   pontos: number;
   motivo: string | null;
   licencas: number;
-  detalhe: {
-    base: number;
-    licencas: number;
-    turbo: number;
-    conversao: number;
-  };
+  detalhe: DetalheDosPontos;
 }
 
 const normalizar = (s: string) =>
@@ -126,7 +123,7 @@ export function contarLicencas(itens: ItemDoDocumento[], regras: RegrasDePontos)
   return n;
 }
 
-const zerado = { base: 0, licencas: 0, turbo: 0, conversao: 0 };
+const zerado: DetalheDosPontos = { base: 0, licencas: 0, ticket: 0, conversao: 0 };
 
 export function pontuar(
   doc: DocumentoDoBling,
@@ -143,17 +140,17 @@ export function pontuar(
     }
     const base = regras.venda;
     const lic = licencas * regras.licencaBonus;
-    const turbo =
-      regras.turboFaixa > 0 && regras.turboPontos > 0
-        ? Math.floor(Math.max(0, doc.total) / regras.turboFaixa) * regras.turboPontos
+    const ticket =
+      regras.ticketFaixa > 0 && regras.ticketPontos > 0
+        ? Math.floor(Math.max(0, doc.total) / regras.ticketFaixa) * regras.ticketPontos
         : 0;
     const conversao = ctx.temOrcamentoAnterior ? regras.conversaoBonus : 0;
     return {
       status: "valido",
-      pontos: base + lic + turbo + conversao,
+      pontos: base + lic + ticket + conversao,
       motivo: null,
       licencas,
-      detalhe: { base, licencas: lic, turbo, conversao },
+      detalhe: { base, licencas: lic, ticket, conversao },
     };
   }
 
@@ -204,12 +201,24 @@ export function normalizarRegras(entrada: unknown): RegrasDePontos {
     licencaBonus: n(e.licencaBonus, P.licencaBonus),
     licencaPalavras: lista(e.licencaPalavras, P.licencaPalavras),
     licencaExcluir: lista(e.licencaExcluir, P.licencaExcluir),
-    turboFaixa: n(e.turboFaixa, P.turboFaixa, 1_000_000),
-    turboPontos: n(e.turboPontos, P.turboPontos),
+    // (turboFaixa/turboPontos: nomes da primeira versão, de 12/10 de manhã)
+    ticketFaixa: n(e.ticketFaixa ?? e.turboFaixa, P.ticketFaixa, 1_000_000),
+    ticketPontos: n(e.ticketPontos ?? e.turboPontos, P.ticketPontos),
     conversaoBonus: n(e.conversaoBonus, P.conversaoBonus),
     conversaoDias: n(e.conversaoDias, P.conversaoDias, 365),
     orcamentoMinimo: n(e.orcamentoMinimo, P.orcamentoMinimo, 1_000_000),
     umOrcamentoPorClienteDia:
       typeof e.umOrcamentoPorClienteDia === "boolean" ? e.umOrcamentoPorClienteDia : P.umOrcamentoPorClienteDia,
   };
+}
+
+/**
+ * Aplica a hora do turbo: o total do documento vezes o multiplicador
+ * (congelado quando o documento chegou). Só vale para o que pontua.
+ */
+export function comTurbo(p: Pontuacao, multiplicador: number): Pontuacao {
+  const m = Number.isFinite(multiplicador) && multiplicador > 1 ? Math.min(multiplicador, 10) : 1;
+  if (m === 1 || p.status !== "valido" || p.pontos <= 0) return p;
+  const total = Math.round(p.pontos * m * 10) / 10;
+  return { ...p, pontos: total, detalhe: { ...p.detalhe, turbo: Math.round((total - p.pontos) * 10) / 10 } };
 }

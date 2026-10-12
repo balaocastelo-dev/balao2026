@@ -1,0 +1,164 @@
+/* Página do piloto (/arena/<nome>), feita para o celular. Prefixo ap-. */
+
+.ap-fundo {
+  --tinta: #1a1440;
+  --papel: #ffffff;
+  --ceu: #3fa9f5;
+  --ceu-claro: #c6eeff;
+  --grama: #4db34a;
+  --ouro: #ffd23f;
+  height: 100%;
+  overflow-y: auto;
+  background: linear-gradient(180deg, var(--ceu) 0%, var(--ceu-claro) 55%, var(--grama) 55%, var(--grama) 100%);
+  background-attachment: local;
+  color: var(--tinta);
+  font: 500 16px/1.5 Arial, Helvetica, sans-serif;
+}
+
+.ap-coluna {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 20px 16px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ap-topo { display: flex; align-items: center; gap: 12px; }
+.ap-kart {
+  flex-shrink: 0;
+  background: var(--papel);
+  border: 4px solid var(--tinta);
+  border-radius: 20px;
+  padding: 6px;
+  box-shadow: 0 6px 0 rgba(26, 20, 64, 0.3);
+  width: 132px;
+}
+.ap-kart svg { width: 100%; height: auto; }
+
+.ap-nome {
+  font-family: var(--font-bangers), "Arial Black", sans-serif;
+  font-size: 46px;
+  line-height: 1;
+  letter-spacing: 0.03em;
+  color: #fff;
+  -webkit-text-stroke: 7px var(--tinta);
+  paint-order: stroke fill;
+  margin: 0;
+}
+.ap-sub { margin: 4px 0 0; font-weight: 700; color: var(--tinta); }
+
+.ap-abas { display: flex; gap: 8px; }
+.ap-abas button {
+  flex: 1;
+  font: 800 16px Arial, sans-serif;
+  color: var(--tinta);
+  background: rgba(255, 255, 255, 0.7);
+  border: 3px solid var(--tinta);
+  border-radius: 999px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+.ap-abas button.ativa { background: var(--ouro); }
+.ap-abas button:focus-visible, .ap-lista-pilotos a:focus-visible, .ap-link:focus-visible { outline: 3px solid #e60012; outline-offset: 2px; }
+
+.ap-cartao {
+  background: var(--papel);
+  border: 4px solid var(--tinta);
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 6px 0 rgba(26, 20, 64, 0.3);
+}
+.ap-cartao p { margin: 0; }
+.ap-cartao p + p { margin-top: 6px; }
+
+.ap-titulo {
+  font-family: var(--font-bangers), "Arial Black", sans-serif;
+  font-size: 26px;
+  line-height: 1.1;
+  letter-spacing: 0.03em;
+  margin: 0 0 8px;
+}
+
+.ap-corrida { position: relative; }
+.ap-corrida.chegou { background: #fff7d6; }
+.ap-posicao { display: flex; align-items: baseline; gap: 6px; }
+.ap-posicao-num {
+  font-family: var(--font-bangers), "Arial Black", sans-serif;
+  font-size: 64px;
+  line-height: 1;
+  color: #e60012;
+  -webkit-text-stroke: 3px var(--tinta);
+  paint-order: stroke fill;
+}
+.ap-posicao-o { font-weight: 900; font-size: 20px; margin-left: -2px; }
+.ap-posicao-de { font-weight: 800; }
+.ap-grande { font-size: 20px; font-weight: 700; margin-top: 4px !important; }
+.ap-grande b { color: #e60012; }
+
+.ap-pista {
+  position: relative;
+  height: 26px;
+  margin: 12px 0 8px;
+  background: #5a5a6e;
+  border: 4px solid var(--tinta);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.ap-pista.pequena { height: 18px; }
+.ap-pista-cheia { height: 100%; transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1); }
+.ap-pista-xadrez {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 18px;
+  height: 100%;
+  background: conic-gradient(var(--tinta) 25%, #fff 0 50%, var(--tinta) 0 75%, #fff 0) 0 0 / 9px 9px;
+}
+
+.ap-numeros { font-weight: 700; }
+.ap-relogio, .ap-miudo, .ap-vizinhos { font-size: 14px; color: #3d3866; }
+.ap-relogio { margin-top: 6px !important; }
+.ap-vizinhos { margin-top: 8px !important; }
+
+.ap-conselhos { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 18px; font-weight: 800; }
+.ap-conselhos li { display: flex; align-items: baseline; gap: 8px; }
+.ap-ou { font-size: 13px; font-weight: 700; color: #6b6690; }
+.ap-miudo { margin-top: 10px !important; }
+
+.ap-turbo { background: #fff; }
+.ap-turbo.ligado { background: var(--ouro); }
+
+.ap-premio-foto { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 12px; border: 3px solid var(--tinta); margin-bottom: 10px; }
+
+.ap-jogadas { list-style: none; margin: 0; padding: 0; }
+.ap-jogada { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 2px dashed #e4e0f2; }
+.ap-jogada:first-child { border-top: 0; }
+.ap-jogada-icone { font-size: 22px; width: 28px; text-align: center; }
+.ap-jogada-texto { flex: 1; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.ap-jogada-data { font-size: 13px; color: #6b6690; }
+.ap-jogada-pontos { font-family: var(--font-bangers), "Arial Black", sans-serif; font-size: 24px; letter-spacing: 0.03em; }
+.ap-selo { font-size: 12px; font-weight: 800; border-radius: 999px; padding: 1px 8px; }
+.ap-selo.ouro { background: #fff1b8; }
+.ap-selo.azul { background: #dbe8ff; }
+.ap-selo.turbo { background: #ffe0c2; }
+
+.ap-lista-pilotos { list-style: none; padding: 0; margin: 12px 0; display: grid; gap: 8px; }
+.ap-lista-pilotos a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--tinta);
+  text-decoration: none;
+  border: 3px solid var(--tinta);
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+.ap-bolinha { width: 18px; height: 18px; border-radius: 50%; border: 3px solid var(--tinta); }
+.ap-link { align-self: center; font-weight: 800; color: var(--tinta); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ap-pista-cheia { transition: none; }
+}

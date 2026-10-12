@@ -136,3 +136,10 @@
   .arn-nuvens, .arn-balao, .arn-torcida, .arn-bandeira, .arn-kart-pulo, .arn-roda, .arn-fumaca, .arn-velocidade { animation: none !important; }
   .arn-kart { transition-duration: 0.2s; }
 }
+
+/* ---- hora do turbo ---- */
+@keyframes arn-brilho { 0%, 100% { opacity: 0.08; } 50% { opacity: 0.22; } }
+.arn-turbo-brilho { animation: arn-brilho 1.2s ease-in-out infinite; pointer-events: none; }
+@keyframes arn-chip-turbo { 0%, 100% { transform: rotate(-1.5deg) scale(1); } 50% { transform: rotate(1.5deg) scale(1.04); } }
+.arn-turbo-chip { animation: arn-chip-turbo 0.9s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .arn-turbo-brilho, .arn-turbo-chip { animation: none !important; } }
