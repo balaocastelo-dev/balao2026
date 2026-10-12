@@ -1,22 +1,19 @@
 "use client";
 
 // ============================================================
-// A corrida de um vendedor, no celular dele: posição, quanto falta para a
-// linha de chegada (a meta dele), o que fazer para chegar lá, a hora do
-// turbo, a meta da equipe com a viagem e as últimas jogadas.
+// A corrida de um vendedor (ou técnico), no celular dele: posição, quanto
+// falta em reais para a linha de chegada (a parte dele na meta), quanto por
+// dia, a meta da equipe com a viagem e as últimas jogadas.
 // ============================================================
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Kart, TINTA } from "@/components/arena/Kart";
 import type { EstadoDoTelao, JogadaPublica, LinhaDoPlacar } from "@/lib/arena/tipos";
-import { proximoTurbo, turboAgora } from "@/lib/arena/turbo";
 import "./piloto.css";
 
 const INTERVALO_MS = 30_000;
-const hora = (iso: string) => new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
-const diaHora = (iso: string) =>
-  new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", weekday: "long", hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
+const rs = (n: number) => `R$ ${Math.round(Number(n) || 0).toLocaleString("pt-BR")}`;
 const dataCurta = (d: string) => `${d.slice(8, 10)}/${d.slice(5, 7)}`;
 const plural = (n: number, um: string, varios: string) => `${n} ${n === 1 ? um : varios}`;
 const nomeDe = (l: LinhaDoPlacar) => l.piloto.apelido || l.piloto.nome.split(" ")[0];
@@ -30,8 +27,8 @@ function relogio(ate: string, agora: number) {
 }
 
 function Jogada({ j }: { j: JogadaPublica }) {
-  const titulo = j.tipo === "venda" ? "Venda" : j.tipo === "orcamento" ? "Orçamento" : j.pontos >= 0 ? "Bônus" : "Ajuste";
-  const icone = j.tipo === "venda" ? (j.licencas > 0 ? "⚡" : "💰") : j.tipo === "orcamento" ? "📝" : "⭐";
+  const titulo = j.tipo === "venda" ? "Venda" : j.tipo === "os" ? "Ordem de serviço" : j.tipo === "orcamento" ? "Orçamento" : j.valor >= 0 ? "Lançado à mão" : "Ajuste";
+  const icone = j.tipo === "venda" ? (j.licencas > 0 ? "⚡" : "💰") : j.tipo === "os" ? "🔧" : j.tipo === "orcamento" ? "📝" : "⭐";
   return (
     <li className="ap-jogada">
       <span className="ap-jogada-icone" aria-hidden>{icone}</span>
@@ -39,10 +36,8 @@ function Jogada({ j }: { j: JogadaPublica }) {
         <b>{titulo}</b>
         <span className="ap-jogada-data">{dataCurta(j.data)}</span>
         {j.licencas > 0 && <span className="ap-selo ouro">{plural(j.licencas, "licença", "licenças")}</span>}
-        {j.conversao && <span className="ap-selo azul">orçamento virou venda</span>}
-        {j.turbo > 1 && <span className="ap-selo turbo">turbo {j.turbo}x</span>}
       </span>
-      <span className="ap-jogada-pontos">{j.pontos > 0 ? "+" : ""}{Math.round(j.pontos * 10) / 10}</span>
+      <span className="ap-jogada-pontos">{j.tipo === "orcamento" ? "—" : `${j.valor > 0 ? "+" : ""}${rs(j.valor)}`}</span>
     </li>
   );
 }
@@ -75,18 +70,23 @@ export default function PaginaDoPiloto({ slug, inicial }: { slug: string; inicia
   const placar = estado?.[periodo] ?? null;
   const linha = placar?.linhas.find((l) => l.piloto.slug === slug) ?? null;
 
+  // O que falta, em coisas concretas: por dia até o fim, e em vendas (ou OS)
+  // do tamanho das que ele já fez.
   const conselho = useMemo(() => {
-    if (!estado || !linha || linha.chegou) return [];
-    const faltam = Math.max(0, linha.meta - linha.pontos);
-    const t = turboAgora(estado.turbo, new Date(agora));
-    const m = t.ativo ? t.multiplicador : 1;
-    const r = estado.regras;
+    if (!placar || !linha || linha.chegou) return [];
+    const faltam = Math.max(0, linha.meta - linha.valor);
+    const dias = Math.max(1, Math.ceil((Date.parse(placar.terminaEm) - agora) / 86_400_000));
     const op: string[] = [];
-    if (r.venda + r.licencaBonus > 0) op.push(`${plural(Math.ceil(faltam / ((r.venda + r.licencaBonus) * m)), "venda", "vendas")} com licença do Windows ou do Office`);
-    if (r.venda > 0) op.push(plural(Math.ceil(faltam / (r.venda * m)), "venda", "vendas"));
-    if (r.orcamento > 0 && Math.ceil(faltam / (r.orcamento * m)) <= 40) op.push(plural(Math.ceil(faltam / (r.orcamento * m)), "orçamento", "orçamentos"));
+    if (dias > 1) op.push(`${rs(Math.ceil(faltam / dias))} por dia até o fim ${placar.periodo === "semana" ? "da semana" : "do mês"}`);
+    const tecnico = linha.piloto.funcao === "tecnico";
+    const feitos = tecnico ? linha.os : linha.vendas;
+    const valorFeito = tecnico ? linha.valorOS : linha.valorVendas;
+    if (feitos > 0 && valorFeito > 0) {
+      const medio = valorFeito / feitos;
+      op.push(`${plural(Math.ceil(faltam / medio), tecnico ? "OS" : "venda", tecnico ? "OS" : "vendas")} do seu valor médio (${rs(medio)})`);
+    }
     return op;
-  }, [estado, linha, agora]);
+  }, [placar, linha, agora]);
 
   if (!estado) {
     return (
@@ -127,15 +127,13 @@ export default function PaginaDoPiloto({ slug, inicial }: { slug: string; inicia
   }
 
   const p = linha.piloto;
-  const faltam = Math.max(0, Math.ceil(linha.meta - linha.pontos));
+  const faltam = Math.max(0, Math.ceil(linha.meta - linha.valor));
   const frente = placar.linhas.find((l) => l.posicao === linha.posicao - 1) ?? null;
   const tras = placar.linhas.find((l) => l.posicao === linha.posicao + 1) ?? null;
-  const turbo = turboAgora(estado.turbo, new Date(agora));
-  const proximo = !turbo.ativo ? proximoTurbo(estado.turbo, new Date(agora)) : null;
   const jogadas = estado.jogadasPorPiloto?.[p.id] ?? [];
   const premio = estado.premio;
   const equipe = estado[premio?.periodo ?? periodo].equipe;
-  const faltaEquipe = Math.max(0, Math.ceil(equipe.meta - equipe.pontos));
+  const faltaEquipe = Math.max(0, Math.ceil(equipe.meta - equipe.valor));
   const progresso = Math.min(1, linha.progresso);
 
   return (
@@ -143,7 +141,7 @@ export default function PaginaDoPiloto({ slug, inicial }: { slug: string; inicia
       <div className="ap-coluna">
         <header className="ap-topo">
           <div className="ap-kart" style={{ ["--cor" as string]: p.cor }}>
-            <Kart modelo={p.kart} cor={p.cor} nome={nomeDe(linha)} numero={p.numero} foto={p.foto} largura={200} girando turbo={turbo.ativo ? "dourado" : null} />
+            <Kart modelo={p.kart} cor={p.cor} nome={nomeDe(linha)} numero={p.numero} foto={p.foto} largura={200} girando />
           </div>
           <div>
             <h1 className="ap-nome">{nomeDe(linha)}</h1>
@@ -169,7 +167,7 @@ export default function PaginaDoPiloto({ slug, inicial }: { slug: string; inicia
             <p className="ap-grande">🏁 Você cruzou a linha de chegada!</p>
           ) : (
             <p className="ap-grande">
-              Faltam <b>{faltam} pts</b> para a linha de chegada
+              Faltam <b>{rs(faltam)}</b> para a linha de chegada
             </p>
           )}
           <div className="ap-pista" aria-hidden>
@@ -177,8 +175,11 @@ export default function PaginaDoPiloto({ slug, inicial }: { slug: string; inicia
             <div className="ap-pista-xadrez" />
           </div>
           <p className="ap-numeros">
-            {Math.round(linha.pontos)} de {Math.round(linha.meta)} pts · {plural(linha.vendas, "venda", "vendas")} · {plural(linha.orcamentos, "orçamento", "orçamentos")}
+            {rs(linha.valor)} de {rs(linha.meta)}
+            {linha.vendas > 0 || p.funcao !== "tecnico" ? ` · ${plural(linha.vendas, "venda", "vendas")}` : ""}
+            {linha.os > 0 || p.funcao === "tecnico" ? ` · ${linha.os} OS` : ""}
             {linha.licencas > 0 ? ` · ${plural(linha.licencas, "licença", "licenças")}` : ""}
+            {linha.orcamentos > 0 ? ` · ${plural(linha.orcamentos, "orçamento", "orçamentos")}` : ""}
           </p>
           <p className="ap-relogio">{placar.rotulo} · termina em {relogio(placar.terminaEm, agora)}</p>
           {(frente || tras) && (
@@ -191,7 +192,7 @@ export default function PaginaDoPiloto({ slug, inicial }: { slug: string; inicia
 
         {conselho.length > 0 && (
           <section className="ap-cartao">
-            <h2 className="ap-titulo">Para cruzar a linha{turbo.ativo ? ", com o turbo" : ""}</h2>
+            <h2 className="ap-titulo">Para cruzar a linha</h2>
             <ul className="ap-conselhos">
               {conselho.map((c, i) => (
                 <li key={c}>
@@ -201,24 +202,8 @@ export default function PaginaDoPiloto({ slug, inicial }: { slug: string; inicia
               ))}
             </ul>
             <p className="ap-miudo">
-              Venda vale {estado.regras.venda} pts, orçamento {estado.regras.orcamento}, licença +{estado.regras.licencaBonus}
-              {estado.regras.conversaoBonus > 0 ? `, orçamento que vira venda +${estado.regras.conversaoBonus}` : ""}
-              {estado.regras.ticketFaixa > 0 ? `, e +${estado.regras.ticketPontos} a cada R$ ${estado.regras.ticketFaixa}` : ""}.
+              Conta o valor de cada venda no Bling{p.funcao === "tecnico" ? " e de cada OS (mão de obra + peças)" : ""}. A meta da equipe é dividida entre vendedores e técnicos.
             </p>
-          </section>
-        )}
-
-        {(turbo.ativo || proximo) && (
-          <section className={`ap-cartao ap-turbo ${turbo.ativo ? "ligado" : ""}`}>
-            {turbo.ativo ? (
-              <p>
-                ⚡ <b>Hora do turbo!</b> Pontos em {turbo.multiplicador}x até as {hora(turbo.ate!)}.
-              </p>
-            ) : (
-              <p>
-                ⚡ Próxima hora do turbo: <b>{diaHora(proximo!.inicio)}</b>, pontos em {proximo!.multiplicador}x.
-              </p>
-            )}
           </section>
         )}
 
@@ -234,7 +219,7 @@ export default function PaginaDoPiloto({ slug, inicial }: { slug: string; inicia
           <p className="ap-numeros">
             {equipe.progresso >= 1
               ? "A equipe bateu a meta!"
-              : `Faltam ${faltaEquipe} pts da equipe ${premio ? (premio.periodo === "mes" ? "no mês" : "na semana") : periodo === "mes" ? "no mês" : "na semana"}${premio ? " para a viagem" : ""}.`}
+              : `Faltam ${rs(faltaEquipe)} da equipe ${premio ? (premio.periodo === "mes" ? "no mês" : "na semana") : periodo === "mes" ? "no mês" : "na semana"}${premio ? " para a viagem" : ""}.`}
           </p>
         </section>
 

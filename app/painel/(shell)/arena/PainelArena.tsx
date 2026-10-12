@@ -2,38 +2,38 @@
 
 // ============================================================
 // Painel da Arena (/painel/arena): a corrida de vendas do telão.
-// Abas: Corrida · Pilotos · Metas · Pontuação · Pedidos e orçamentos ·
-// Prêmio · Conexão com o Bling. Os dados vêm do Bling pelo vigia do PC.
+// Abas: Corrida · Pilotos · Metas · Como conta · Lançamentos · Prêmio ·
+// Avisos · Conexão com o Bling. Desde 12/10 (tarde) tudo é em reais: vendas
+// do Bling (pelo vigia do PC) e ordens de serviço do Fechamento da assistência.
 // ============================================================
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle, CheckCircle, Download, ExternalLink, Flag, Gift, KeyRound, Loader2, Monitor, Plus, RefreshCw,
-  RotateCcw, Save, Target, Trophy, Upload, Users, Zap, Rocket, MessageCircle, Send, Power,
+  RotateCcw, Save, Target, Trophy, Upload, Users, Zap, MessageCircle, Send, Wrench,
 } from "lucide-react";
 import { Kart } from "@/components/arena/Kart";
 import { janela } from "@/lib/arena/periodos";
-import type { Lancamento, ModeloDeKart, Piloto, PlacarDoPeriodo, AjustesDaCorrida, Premio, AjustesDoTurbo, AjustesDoWhatsApp, JanelaDoTurbo } from "@/lib/arena/tipos";
-import { descreverJanela, proximoTurbo, turboAgora } from "@/lib/arena/turbo";
-import type { RegrasDePontos } from "@/lib/arena/pontos";
+import { dividirMetas } from "@/lib/arena/placar";
+import type { Lancamento, ModeloDeKart, Piloto, PlacarDoPeriodo, AjustesDaCorrida, Premio, AjustesDoWhatsApp } from "@/lib/arena/tipos";
+import { reais as reaisCurto, type RegrasDeValor } from "@/lib/arena/valores";
 import {
   ajustarLancamentoAcao, apagarManualAcao, carregarPainel, criarPilotosDoBlingAcao, gerarChaveAcao, lancarManualAcao,
   lerAnuncioAirbnbAcao, listarLancamentosAcao, pedirVarreduraAcao, recalcularAcao, removerPilotoAcao, salvarCorridaAcao,
-  salvarMetasAcao, salvarPilotoAcao, salvarPremioAcao, salvarRegrasAcao, salvarTurboAcao, turboAgoraAcao,
+  salvarMetasAcao, salvarPilotoAcao, salvarPremioAcao, salvarRegrasAcao, trocarTecnicoAcao, trazerOSAcao,
   salvarWhatsAppAcao, listarGruposAcao, testarWhatsAppAcao, pedidoDoVigiaAcao, aprovarVigiaAcao, recusarVigiaAcao,
 } from "./acoes";
 
 type Dados = NonNullable<Extract<Awaited<ReturnType<typeof carregarPainel>>, { ok: true }>["dados"]>;
 type PilotoDoPainel = Dados["pilotos"][number];
-type Aba = "corrida" | "pilotos" | "metas" | "pontos" | "turbo" | "pedidos" | "premio" | "avisos" | "bling";
+type Aba = "corrida" | "pilotos" | "metas" | "regras" | "pedidos" | "premio" | "avisos" | "bling";
 
 const ABAS: { id: Aba; nome: string; icone: React.ReactNode }[] = [
   { id: "corrida", nome: "Corrida", icone: <Flag size={16} /> },
   { id: "pilotos", nome: "Pilotos", icone: <Users size={16} /> },
   { id: "metas", nome: "Metas", icone: <Target size={16} /> },
-  { id: "pontos", nome: "Pontuação", icone: <Zap size={16} /> },
-  { id: "turbo", nome: "Hora do turbo", icone: <Rocket size={16} /> },
-  { id: "pedidos", nome: "Pedidos e orçamentos", icone: <CheckCircle size={16} /> },
+  { id: "regras", nome: "Como conta", icone: <Zap size={16} /> },
+  { id: "pedidos", nome: "Vendas e OS", icone: <CheckCircle size={16} /> },
   { id: "premio", nome: "Prêmio", icone: <Gift size={16} /> },
   { id: "avisos", nome: "Avisos no WhatsApp", icone: <MessageCircle size={16} /> },
   { id: "bling", nome: "Conexão com o Bling", icone: <KeyRound size={16} /> },
@@ -93,10 +93,11 @@ function TabelaDoPlacar({ placar }: { placar: PlacarDoPeriodo }) {
             <th className="py-1 pr-3">Pos.</th>
             <th className="py-1 pr-3">Piloto</th>
             <th className="py-1 pr-3 w-[38%]">Rumo à meta</th>
-            <th className="py-1 pr-3 text-right">Pontos</th>
+            <th className="py-1 pr-3 text-right">Feito</th>
             <th className="py-1 pr-3 text-right">Vendas</th>
-            <th className="py-1 pr-3 text-right">Orçam.</th>
-            <th className="py-1 text-right">Licenças</th>
+            <th className="py-1 pr-3 text-right">OS</th>
+            <th className="py-1 pr-3 text-right">Licenças</th>
+            <th className="py-1 text-right">Orçam.</th>
           </tr>
         </thead>
         <tbody>
@@ -107,6 +108,7 @@ function TabelaDoPlacar({ placar }: { placar: PlacarDoPeriodo }) {
                 <span className="inline-flex items-center gap-2">
                   <span className="inline-block h-3 w-3 rounded-full" style={{ background: l.piloto.cor }} />
                   {l.piloto.apelido || l.piloto.nome}
+                  {l.piloto.funcao === "tecnico" && <span className="rounded bg-gray-100 px-1 text-[10px] font-semibold uppercase text-gray-600">técnico</span>}
                   {l.chegou && <span title="Bateu a meta">🏁</span>}
                 </span>
               </td>
@@ -115,13 +117,15 @@ function TabelaDoPlacar({ placar }: { placar: PlacarDoPeriodo }) {
                   <div className="h-full rounded-full" style={{ width: `${Math.min(100, l.progresso * 100)}%`, background: l.piloto.cor }} />
                 </div>
                 <div className="mt-0.5 text-xs text-gray-500 tabular-nums">
-                  {Math.round(l.progresso * 100)}% de {Math.round(l.meta)} pts
+                  {Math.round(l.progresso * 100)}% de {reaisCurto(l.meta)}
+                  {l.chegou ? "" : ` · faltam ${reaisCurto(Math.max(0, l.meta - l.valor))}`}
                 </div>
               </td>
-              <td className="py-2 pr-3 text-right tabular-nums font-semibold">{Math.round(l.pontos)}</td>
-              <td className="py-2 pr-3 text-right tabular-nums">{l.vendas}</td>
-              <td className="py-2 pr-3 text-right tabular-nums">{l.orcamentos}</td>
-              <td className="py-2 text-right tabular-nums">{l.licencas}</td>
+              <td className="py-2 pr-3 text-right tabular-nums font-semibold">{reaisCurto(l.valor)}</td>
+              <td className="py-2 pr-3 text-right tabular-nums" title={reais(l.valorVendas)}>{l.vendas}</td>
+              <td className="py-2 pr-3 text-right tabular-nums" title={reais(l.valorOS)}>{l.os}</td>
+              <td className="py-2 pr-3 text-right tabular-nums" title={reais(l.valorLicencas)}>{l.licencas}</td>
+              <td className="py-2 text-right tabular-nums">{l.orcamentos}</td>
             </tr>
           ))}
         </tbody>
@@ -143,7 +147,8 @@ function AbaCorrida({ d, salvar }: { d: Dados; salvar: (c: AjustesDaCorrida) => 
             <span className="text-sm text-gray-600">{p.rotulo}</span>
           </div>
           <div className="mt-2 mb-4 text-sm text-gray-700">
-            Equipe: <b className="tabular-nums">{Math.round(p.equipe.pontos)}</b> de <b className="tabular-nums">{Math.round(p.equipe.meta)}</b> pts ({Math.round(p.equipe.progresso * 100)}%)
+            Equipe: <b className="tabular-nums">{reaisCurto(p.equipe.valor)}</b> de <b className="tabular-nums">{reaisCurto(p.equipe.meta)}</b> ({Math.round(p.equipe.progresso * 100)}%)
+            {p.equipe.progresso < 1 && <> · faltam <b className="tabular-nums">{reaisCurto(p.equipe.meta - p.equipe.valor)}</b></>}
           </div>
           <TabelaDoPlacar placar={p} />
         </section>
@@ -201,7 +206,7 @@ function EditorDePiloto({
   onCancelar: () => void;
 }) {
   const [p, setP] = useState<Partial<Piloto>>(
-    inicial ?? { nome: "", apelido: "", cor: d.cores[d.pilotos.length % d.cores.length], kart: d.karts[d.pilotos.length % d.karts.length] as ModeloDeKart, numero: d.pilotos.length + 1, ativo: true }
+    inicial ?? { nome: "", apelido: "", funcao: "vendedor", cor: d.cores[d.pilotos.length % d.cores.length], kart: d.karts[d.pilotos.length % d.karts.length] as ModeloDeKart, numero: d.pilotos.length + 1, ativo: true }
   );
   const [salvando, setSalvando] = useState(false);
   const [erroFoto, setErroFoto] = useState<string | null>(null);
@@ -224,9 +229,16 @@ function EditorDePiloto({
             <input className={campo} value={p.apelido ?? ""} placeholder="Ex.: Brendon" onChange={(e) => setP({ ...p, apelido: e.target.value })} />
           </label>
           <label>
-            <span className={rotulo}>Vendedor no Bling</span>
+            <span className={rotulo}>Função</span>
+            <select className={campo} value={p.funcao ?? "vendedor"} onChange={(e) => setP({ ...p, funcao: e.target.value === "tecnico" ? "tecnico" : "vendedor" })}>
+              <option value="vendedor">Vendedor (vendas do Bling)</option>
+              <option value="tecnico">Técnico (ordens de serviço do Fechamento)</option>
+            </select>
+          </label>
+          <label>
+            <span className={rotulo}>Vendedor no Bling{p.funcao === "tecnico" ? " (se ele também vende)" : ""}</span>
             <select className={campo} value={p.blingVendedorId ?? ""} onChange={(e) => setP({ ...p, blingVendedorId: e.target.value || null })}>
-              <option value="">— sem ligação (só pontos à mão) —</option>
+              <option value="">— sem ligação —</option>
               {d.vendedoresBling.map((v) => (
                 <option key={v.id} value={v.id} disabled={ligados.has(v.id)}>
                   {v.nome || v.id}
@@ -327,7 +339,7 @@ function AbaPilotos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Pro
   const salvar = async (id: string | null, p: Partial<Piloto>) => {
     const r = await salvarPilotoAcao(id, {
       nome: p.nome ?? "", apelido: p.apelido, foto: p.foto, cor: p.cor, kart: p.kart, numero: p.numero,
-      blingVendedorId: p.blingVendedorId, metaSemana: p.metaSemana, metaMes: p.metaMes, ativo: p.ativo,
+      blingVendedorId: p.blingVendedorId, funcao: p.funcao, metaSemana: p.metaSemana, metaMes: p.metaMes, ativo: p.ativo,
     });
     if (!r.ok) {
       avisar("erro", r.erro);
@@ -383,7 +395,9 @@ function AbaPilotos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Pro
                 balao.info/arena/{p.slug}
               </a>
               <div className="mt-1 text-xs text-gray-600">
-                {p.blingVendedorId ? `Bling: ${nomeBling.get(p.blingVendedorId) || p.blingVendedorId}` : "Sem vendedor do Bling"}
+                {p.funcao === "tecnico" ? "Técnico (OS do Fechamento)" : "Vendedor"}
+                {" · "}
+                {p.blingVendedorId ? `Bling: ${nomeBling.get(p.blingVendedorId) || p.blingVendedorId}` : "sem vendedor do Bling"}
                 {!p.ativo && " · fora da pista"}
               </div>
               <div className="mt-2 flex gap-2">
@@ -391,7 +405,7 @@ function AbaPilotos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Pro
                 <button
                   className="text-xs font-semibold text-gray-500 hover:underline"
                   onClick={async () => {
-                    if (!confirm(`Apagar ${p.nome}? Os pontos do Bling continuam guardados e voltam se você ligar o vendedor a outro piloto.`)) return;
+                    if (!confirm(`Apagar ${p.nome}? As vendas do Bling e as OS continuam guardadas e voltam se você ligar a outro piloto.`)) return;
                     const r = await removerPilotoAcao(p.id);
                     if (!r.ok) return avisar("erro", r.erro);
                     await recarregar();
@@ -414,8 +428,14 @@ function AbaMetas({ d, recarregar, avisar }: { d: Dados; recarregar: () => Promi
   const [metas, setMetas] = useState(() => Object.fromEntries(d.pilotos.map((p) => [p.id, { s: p.metaSemana ?? "", m: p.metaMes ?? "" }])) as Record<string, { s: number | ""; m: number | "" }>);
   const [c, setC] = useState(d.corrida);
   const [salvando, setSalvando] = useState(false);
+
+  // A divisão como vai ficar com o que está digitado agora.
+  const comMetas = d.pilotos.map((p) => ({ ...p, metaSemana: metas[p.id]?.s === "" ? null : Number(metas[p.id]?.s) || null, metaMes: metas[p.id]?.m === "" ? null : Number(metas[p.id]?.m) || null }));
+  const divSemana = dividirMetas(comMetas, "semana", c);
+  const divMes = dividirMetas(comMetas, "mes", c);
+  const somaSemana = [...divSemana.values()].reduce((t, x) => t + x.meta, 0);
+  const somaMes = [...divMes.values()].reduce((t, x) => t + x.meta, 0);
   const ativos = d.pilotos.filter((p) => p.ativo);
-  const soma = (k: "s" | "m") => ativos.reduce((t, p) => t + (Number(metas[p.id]?.[k]) || (k === "s" ? c.metaPadraoSemana : c.metaPadraoMes)), 0);
 
   const usarSugestoes = () =>
     setMetas((atual) => {
@@ -430,70 +450,78 @@ function AbaMetas({ d, recarregar, avisar }: { d: Dados; recarregar: () => Promi
   return (
     <div className="space-y-5">
       <section className={cartao}>
+        <h2 className="text-lg font-bold text-gray-900">Meta da equipe</h2>
+        <p className="mt-1 text-sm text-gray-700 max-w-3xl">
+          Tudo em reais: vendas do Bling e ordens de serviço. A meta da equipe é dividida em partes iguais entre os {ativos.length} pilotos que estão correndo
+          ({ativos.filter((p) => p.funcao !== "tecnico").length} vendedores e {ativos.filter((p) => p.funcao === "tecnico").length} técnicos), menos quem tem meta própria.
+        </p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 max-w-xl">
+          <label>
+            <span className={rotulo}>Meta da equipe na semana (R$)</span>
+            <input className={campo} type="number" min={1} step={100} value={c.metaGlobalSemana || ""} onChange={(e) => setC({ ...c, metaGlobalSemana: Number(e.target.value) || 0 })} />
+          </label>
+          <label>
+            <span className={rotulo}>Meta da equipe no mês (R$)</span>
+            <input className={campo} type="number" min={1} step={100} value={c.metaGlobalMes || ""} onChange={(e) => setC({ ...c, metaGlobalMes: Number(e.target.value) || 0 })} />
+          </label>
+        </div>
+      </section>
+
+      <section className={cartao}>
         <h2 className="text-lg font-bold text-gray-900">Meta de cada piloto</h2>
         <p className="mt-1 text-sm text-gray-700 max-w-3xl">
-          A linha de chegada de cada um é a própria meta. A sugestão é a média dos pontos das últimas 4 semanas (ou 3 meses) com 15% a mais.
-          Em branco, vale a meta padrão.
+          Em branco, o piloto fica com a parte dele na divisão. Preencha só para quem deve ter uma meta diferente: o resto da meta da equipe é redividido entre os outros.
+          A sugestão é a média do que ele fez nas últimas 4 semanas (ou 3 meses) com 15% a mais.
         </p>
         <div className="mt-4 overflow-x-auto">
-          <table className="min-w-[620px] w-full text-sm text-gray-800">
+          <table className="min-w-[760px] w-full text-sm text-gray-800">
             <thead>
               <tr className="text-left text-xs text-gray-500">
                 <th className="py-1 pr-3">Piloto</th>
-                <th className="py-1 pr-3">Meta da semana</th>
+                <th className="py-1 pr-3">Semana: meta própria</th>
+                <th className="py-1 pr-3">Fica com</th>
                 <th className="py-1 pr-3">Sugestão</th>
-                <th className="py-1 pr-3">Meta do mês</th>
+                <th className="py-1 pr-3">Mês: meta própria</th>
+                <th className="py-1 pr-3">Fica com</th>
                 <th className="py-1">Sugestão</th>
               </tr>
             </thead>
             <tbody>
               {d.pilotos.map((p) => (
                 <tr key={p.id} className={`border-t border-gray-100 ${p.ativo ? "" : "opacity-50"}`}>
-                  <td className="py-2 pr-3 font-semibold">{p.apelido || p.nome}</td>
-                  <td className="py-2 pr-3">
-                    <input className={`${campo} w-28`} type="number" min={0} placeholder={String(c.metaPadraoSemana)} value={metas[p.id]?.s ?? ""} onChange={(e) => setMetas({ ...metas, [p.id]: { ...metas[p.id], s: e.target.value === "" ? "" : Number(e.target.value) } })} />
+                  <td className="py-2 pr-3 font-semibold">
+                    {p.apelido || p.nome}
+                    {p.funcao === "tecnico" && <span className="ml-1 rounded bg-gray-100 px-1 text-[10px] font-semibold uppercase text-gray-600">técnico</span>}
                   </td>
-                  <td className="py-2 pr-3 text-gray-500 tabular-nums">{d.sugestoes[p.id]?.semana ?? "sem histórico"}</td>
                   <td className="py-2 pr-3">
-                    <input className={`${campo} w-28`} type="number" min={0} placeholder={String(c.metaPadraoMes)} value={metas[p.id]?.m ?? ""} onChange={(e) => setMetas({ ...metas, [p.id]: { ...metas[p.id], m: e.target.value === "" ? "" : Number(e.target.value) } })} />
+                    <input className={`${campo} w-32`} type="number" min={0} step={100} placeholder="dividida" value={metas[p.id]?.s ?? ""} onChange={(e) => setMetas({ ...metas, [p.id]: { ...metas[p.id], s: e.target.value === "" ? "" : Number(e.target.value) } })} />
                   </td>
-                  <td className="py-2 text-gray-500 tabular-nums">{d.sugestoes[p.id]?.mes ?? "sem histórico"}</td>
+                  <td className="py-2 pr-3 tabular-nums font-semibold">{p.ativo ? reaisCurto(divSemana.get(p.id)?.meta ?? 0) : "—"}</td>
+                  <td className="py-2 pr-3 text-gray-500 tabular-nums">{d.sugestoes[p.id]?.semana != null ? reaisCurto(d.sugestoes[p.id].semana!) : "sem histórico"}</td>
+                  <td className="py-2 pr-3">
+                    <input className={`${campo} w-32`} type="number" min={0} step={100} placeholder="dividida" value={metas[p.id]?.m ?? ""} onChange={(e) => setMetas({ ...metas, [p.id]: { ...metas[p.id], m: e.target.value === "" ? "" : Number(e.target.value) } })} />
+                  </td>
+                  <td className="py-2 pr-3 tabular-nums font-semibold">{p.ativo ? reaisCurto(divMes.get(p.id)?.meta ?? 0) : "—"}</td>
+                  <td className="py-2 text-gray-500 tabular-nums">{d.sugestoes[p.id]?.mes != null ? reaisCurto(d.sugestoes[p.id].mes!) : "sem histórico"}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+        <p className="mt-2 text-xs text-gray-600">
+          Soma das metas: {reaisCurto(somaSemana)} na semana e {reaisCurto(somaMes)} no mês
+          {(somaSemana > c.metaGlobalSemana * 1.02 || somaMes > c.metaGlobalMes * 1.02) && (
+            <b className="text-orange-700"> · as metas próprias passam da meta da equipe: quem não tem meta própria fica com quase nada.</b>
+          )}
+        </p>
         <button className={`${botaoSecundario} mt-3`} onClick={usarSugestoes}>
           <Target size={16} /> Usar as sugestões
         </button>
       </section>
 
-      <section className={cartao}>
-        <h2 className="text-lg font-bold text-gray-900">Meta da equipe e meta padrão</h2>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <label>
-            <span className={rotulo}>Meta da equipe na semana</span>
-            <input className={campo} type="number" min={0} value={c.metaGlobalSemana || ""} placeholder={`soma: ${soma("s")}`} onChange={(e) => setC({ ...c, metaGlobalSemana: Number(e.target.value) || 0 })} />
-          </label>
-          <label>
-            <span className={rotulo}>Meta da equipe no mês</span>
-            <input className={campo} type="number" min={0} value={c.metaGlobalMes || ""} placeholder={`soma: ${soma("m")}`} onChange={(e) => setC({ ...c, metaGlobalMes: Number(e.target.value) || 0 })} />
-          </label>
-          <label>
-            <span className={rotulo}>Meta padrão (semana)</span>
-            <input className={campo} type="number" min={1} value={c.metaPadraoSemana} onChange={(e) => setC({ ...c, metaPadraoSemana: Number(e.target.value) || 1 })} />
-          </label>
-          <label>
-            <span className={rotulo}>Meta padrão (mês)</span>
-            <input className={campo} type="number" min={1} value={c.metaPadraoMes} onChange={(e) => setC({ ...c, metaPadraoMes: Number(e.target.value) || 1 })} />
-          </label>
-        </div>
-        <p className="mt-2 text-xs text-gray-500">Meta da equipe em branco = soma das metas dos pilotos que estão correndo.</p>
-      </section>
-
       <button
         className={botaoPrimario}
-        disabled={salvando}
+        disabled={salvando || !(c.metaGlobalSemana > 0) || !(c.metaGlobalMes > 0)}
         onClick={async () => {
           setSalvando(true);
           const r1 = await salvarMetasAcao(d.pilotos.map((p) => ({ id: p.id, metaSemana: metas[p.id]?.s === "" ? null : Number(metas[p.id]?.s), metaMes: metas[p.id]?.m === "" ? null : Number(metas[p.id]?.m) })));
@@ -511,43 +539,48 @@ function AbaMetas({ d, recarregar, avisar }: { d: Dados; recarregar: () => Promi
   );
 }
 
-// ------------------------------------------------------------------ pontuação
+// ------------------------------------------------------------------ como conta
 
-function AbaPontos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Promise<void>; avisar: (t: "ok" | "erro", m: string) => void }) {
-  const [r, setR] = useState<RegrasDePontos>(d.regras);
+function AbaRegras({ d, recarregar, avisar }: { d: Dados; recarregar: () => Promise<void>; avisar: (t: "ok" | "erro", m: string) => void }) {
   const [palavras, setPalavras] = useState(d.regras.licencaPalavras.join(", "));
   const [excluir, setExcluir] = useState(d.regras.licencaExcluir.join(", "));
   const [salvando, setSalvando] = useState(false);
-  const n = (k: keyof RegrasDePontos, label: string, ajuda?: string) => (
-    <label>
-      <span className={rotulo}>{label}</span>
-      <input className={campo} type="number" min={0} value={r[k] as number} onChange={(e) => setR({ ...r, [k]: Number(e.target.value) || 0 })} />
-      {ajuda && <span className="mt-1 block text-xs text-gray-500">{ajuda}</span>}
-    </label>
-  );
-  const exemplo = r.venda + r.licencaBonus + (r.ticketFaixa > 0 ? Math.floor(3500 / r.ticketFaixa) * r.ticketPontos : 0) + r.conversaoBonus;
+  const [trazendo, setTrazendo] = useState(false);
 
   return (
     <div className="space-y-5">
       <section className={cartao}>
-        <h2 className="text-lg font-bold text-gray-900">Quanto vale cada coisa</h2>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {n("venda", "Venda (pedido no Bling)")}
-          {n("orcamento", "Orçamento (proposta comercial)")}
-          {n("licencaBonus", "Bônus por licença Windows/Office", "Por unidade vendida.")}
-          {n("conversaoBonus", "Bônus: orçamento que virou venda", "Mesmo cliente com orçamento antes da venda.")}
-          {n("conversaoDias", "Janela da conversão (dias)")}
-          {n("orcamentoMinimo", "Orçamento mínimo (R$)", "Abaixo disso o orçamento não pontua.")}
-          {n("ticketFaixa", "Bônus do ticket: a cada R$", "0 desliga.")}
-          {n("ticketPontos", "…vale quantos pontos")}
-        </div>
-        <label className="mt-4 inline-flex items-center gap-2 text-sm text-gray-700">
-          <input type="checkbox" checked={r.umOrcamentoPorClienteDia} onChange={(e) => setR({ ...r, umOrcamentoPorClienteDia: e.target.checked })} />
-          Mesmo vendedor, mesmo cliente, mesmo dia: só o primeiro orçamento pontua
-        </label>
-        <div className="mt-4 rounded-md bg-gray-50 p-3 text-sm text-gray-700">
-          Exemplo: venda de R$ 3.500 com uma licença do Windows, para um cliente que tinha orçamento, vale <b>{exemplo} pts</b>. Venda cancelada no Bling perde os pontos sozinha.
-        </div>
+        <h2 className="text-lg font-bold text-gray-900">Como a corrida conta</h2>
+        <ul className="mt-3 list-disc space-y-1.5 pl-5 text-sm text-gray-700 max-w-3xl">
+          <li><b>Venda</b> (pedido de venda no Bling): conta o valor total do pedido, para o vendedor do pedido.</li>
+          <li><b>Licença</b> Windows/Office: o valor dela já está dentro da venda; o placar mostra à parte quantas e quanto.</li>
+          <li><b>Ordem de serviço</b> (Fechamento da assistência): conta mão de obra + peças, para o técnico escolhido na OS.</li>
+          <li><b>Orçamento</b>: aparece no placar (quantos cada um fez), mas não soma valor.</li>
+          <li>Pedido cancelado ou estornado no Bling sai sozinho. Pedido em digitação espera virar &quot;em aberto&quot;.</li>
+        </ul>
+      </section>
+
+      <section className={cartao}>
+        <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2"><Wrench size={18} /> Ordens de serviço</h2>
+        <p className="mt-1 text-sm text-gray-700 max-w-3xl">
+          Cada OS salva no Fechamento da assistência entra sozinha, para o técnico escolhido lá. Para trazer as OS que já estavam lançadas
+          (antes de a Arena contar OS), use o botão. As que vierem sem técnico aparecem em <b>Vendas e OS</b> para você escolher de quem são.
+        </p>
+        <button
+          className={`${botaoSecundario} mt-3`}
+          disabled={trazendo}
+          onClick={async () => {
+            setTrazendo(true);
+            const r = await trazerOSAcao();
+            setTrazendo(false);
+            if (!r.ok) return avisar("erro", r.erro);
+            const x = r.dados!;
+            avisar("ok", `${x.trazidas} OS trazidas do Fechamento${x.semTecnico ? `; ${x.semTecnico} sem técnico (escolha em Vendas e OS)` : ""}.`);
+            await recarregar();
+          }}
+        >
+          {trazendo ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />} Trazer as OS do Fechamento
+        </button>
       </section>
 
       <section className={cartao}>
@@ -565,49 +598,47 @@ function AbaPontos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Prom
             <textarea className={campo} rows={3} value={excluir} onChange={(e) => setExcluir(e.target.value)} />
           </label>
         </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button
+            className={botaoPrimario}
+            disabled={salvando}
+            onClick={async () => {
+              setSalvando(true);
+              const regras: RegrasDeValor = {
+                licencaPalavras: palavras.split(",").map((x) => x.trim()).filter(Boolean),
+                licencaExcluir: excluir.split(",").map((x) => x.replace(/^\s+/, "")).filter((x) => x.trim()),
+              };
+              const res = await salvarRegrasAcao(regras);
+              setSalvando(false);
+              if (!res.ok) return avisar("erro", res.erro);
+              avisar("ok", `Salvo. ${res.dados} lançamento(s) refeitos.`);
+              await recarregar();
+            }}
+          >
+            {salvando ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} Salvar e refazer
+          </button>
+          <button
+            className={botaoSecundario}
+            onClick={() => {
+              setPalavras(d.regrasPadrao.licencaPalavras.join(", "));
+              setExcluir(d.regrasPadrao.licencaExcluir.join(", "));
+            }}
+          >
+            <RotateCcw size={16} /> Voltar ao padrão
+          </button>
+        </div>
       </section>
-
-      <div className="flex flex-wrap gap-2">
-        <button
-          className={botaoPrimario}
-          disabled={salvando}
-          onClick={async () => {
-            setSalvando(true);
-            const res = await salvarRegrasAcao({
-              ...r,
-              licencaPalavras: palavras.split(",").map((s) => s.trim()).filter(Boolean),
-              licencaExcluir: excluir.split(",").map((s) => s.replace(/^\s+/, "")).filter((s) => s.trim()),
-            });
-            setSalvando(false);
-            if (!res.ok) return avisar("erro", res.erro);
-            avisar("ok", `Regras salvas. ${res.dados} lançamento(s) recalculados com as regras novas.`);
-            await recarregar();
-          }}
-        >
-          {salvando ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} Salvar e recalcular
-        </button>
-        <button
-          className={botaoSecundario}
-          onClick={() => {
-            setR(d.regrasPadrao);
-            setPalavras(d.regrasPadrao.licencaPalavras.join(", "));
-            setExcluir(d.regrasPadrao.licencaExcluir.join(", "));
-          }}
-        >
-          <RotateCcw size={16} /> Voltar ao padrão
-        </button>
-      </div>
     </div>
   );
 }
 
-// ------------------------------------------------------------------ pedidos e orçamentos
+// ------------------------------------------------------------------ vendas, orçamentos e OS
 
 const STATUS: Record<string, { nome: string; cor: string }> = {
   valido: { nome: "Conta", cor: "bg-green-100 text-green-800" },
   cancelado: { nome: "Cancelado", cor: "bg-gray-200 text-gray-700" },
   pendente: { nome: "Em digitação", cor: "bg-yellow-100 text-yellow-800" },
-  ignorado: { nome: "Não pontua", cor: "bg-orange-100 text-orange-800" },
+  ignorado: { nome: "Não conta", cor: "bg-orange-100 text-orange-800" },
   anulado: { nome: "Anulado", cor: "bg-red-100 text-red-800" },
 };
 
@@ -616,7 +647,8 @@ function AbaPedidos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Pro
   const [f, setF] = useState({ inicio: mes.inicio, fim: mes.fim, tipo: "", status: "", busca: "" });
   const [lista, setLista] = useState<Lancamento[] | null>(null);
   const [carregando, setCarregando] = useState(false);
-  const [manual, setManual] = useState({ piloto: d.pilotos[0]?.id ?? "", pontos: "", motivo: "" });
+  const [manual, setManual] = useState({ piloto: d.pilotos[0]?.id ?? "", valor: "", motivo: "" });
+  const tecnicos = d.pilotos.filter((p) => p.funcao === "tecnico");
   const porBling = new Map(d.pilotos.filter((p) => p.blingVendedorId).map((p) => [p.blingVendedorId!, p]));
   const porId = new Map(d.pilotos.map((p) => [p.id, p]));
   const nomeBling = new Map(d.vendedoresBling.map((v) => [v.id, v.nome]));
@@ -637,12 +669,13 @@ function AbaPedidos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Pro
     const p = l.pilotoId ? porId.get(l.pilotoId) : l.blingVendedorId ? porBling.get(l.blingVendedorId) : undefined;
     if (p) return p.apelido || p.nome;
     if (l.blingVendedorId) return `${nomeBling.get(l.blingVendedorId) || l.blingVendedorId} (sem kart)`;
+    if (l.tipo === "os") return "Sem técnico";
     return "Sem vendedor no Bling";
   };
 
   const totais = useMemo(() => {
     const v = (lista ?? []).filter((l) => l.status === "valido");
-    return { pontos: v.reduce((t, l) => t + l.pontos, 0), vendas: v.filter((l) => l.tipo === "venda").length, orcamentos: v.filter((l) => l.tipo === "orcamento").length };
+    return { valor: v.reduce((t, l) => t + (l.valor || 0), 0), vendas: v.filter((l) => l.tipo === "venda").length, os: v.filter((l) => l.tipo === "os").length, orcamentos: v.filter((l) => l.tipo === "orcamento").length };
   }, [lista]);
 
   return (
@@ -662,8 +695,9 @@ function AbaPedidos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Pro
             <select className={campo} value={f.tipo} onChange={(e) => setF({ ...f, tipo: e.target.value })}>
               <option value="">Todos</option>
               <option value="venda">Vendas</option>
+              <option value="os">Ordens de serviço</option>
               <option value="orcamento">Orçamentos</option>
-              <option value="manual">Pontos à mão</option>
+              <option value="manual">Lançados à mão</option>
             </select>
           </label>
           <label>
@@ -686,7 +720,7 @@ function AbaPedidos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Pro
           </button>
           {lista && (
             <span className="text-sm text-gray-600">
-              {lista.length} lançamentos · contam {totais.vendas} vendas, {totais.orcamentos} orçamentos, {Math.round(totais.pontos)} pts
+              {lista.length} lançamentos · contam {totais.vendas} vendas e {totais.os} OS, somando {reais(totais.valor)} · {totais.orcamentos} orçamentos
             </span>
           )}
         </div>
@@ -701,7 +735,7 @@ function AbaPedidos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Pro
               <th className="py-1 pr-3">Piloto</th>
               <th className="py-1 pr-3">Cliente</th>
               <th className="py-1 pr-3 text-right">Total</th>
-              <th className="py-1 pr-3 text-right">Pontos</th>
+              <th className="py-1 pr-3 text-right">Conta</th>
               <th className="py-1 pr-3">Situação</th>
               <th className="py-1" />
             </tr>
@@ -709,22 +743,41 @@ function AbaPedidos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Pro
           <tbody>
             {(lista ?? []).map((l) => {
               const st = STATUS[l.status] ?? STATUS.valido;
-              const det = l.detalhe;
-              const partes = det ? [det.base && `base ${det.base}`, det.licencas && `licença ${det.licencas}`, det.ticket && `ticket ${det.ticket}`, det.conversao && `conversão ${det.conversao}`, det.turbo && `turbo ${det.turbo}`].filter(Boolean).join(" + ") : "";
               return (
                 <tr key={l.id} className="border-t border-gray-100 align-top">
                   <td className="py-2 pr-3 whitespace-nowrap">{dataBr(l.data)}</td>
                   <td className="py-2 pr-3 whitespace-nowrap">
-                    {l.tipo === "venda" ? `Pedido ${l.numero}` : l.tipo === "orcamento" ? `Orçamento ${l.numero}` : "Pontos à mão"}
-                    {l.licencas > 0 && <span className="ml-1 rounded bg-yellow-100 px-1.5 text-xs font-semibold text-yellow-800">{l.licencas} licença{l.licencas > 1 ? "s" : ""}</span>}
-                    {l.turbo > 1 && <span className="ml-1 rounded bg-orange-100 px-1.5 text-xs font-semibold text-orange-800">turbo {l.turbo}x</span>}
+                    {l.tipo === "venda" ? `Pedido ${l.numero}` : l.tipo === "orcamento" ? `Orçamento ${l.numero}` : l.tipo === "os" ? `OS ${l.numero ?? ""}` : "Lançado à mão"}
+                    {l.licencas > 0 && (
+                      <span className="ml-1 rounded bg-yellow-100 px-1.5 text-xs font-semibold text-yellow-800" title={reais(l.valorLicencas)}>
+                        {l.licencas} licença{l.licencas > 1 ? "s" : ""}
+                      </span>
+                    )}
                   </td>
-                  <td className="py-2 pr-3">{quem(l)}</td>
+                  <td className="py-2 pr-3">
+                    {l.tipo === "os" && tecnicos.length > 0 ? (
+                      <select
+                        className="rounded border border-gray-300 px-1 py-0.5 text-xs"
+                        value={l.pilotoId ?? ""}
+                        onChange={async (e) => {
+                          const r = await trocarTecnicoAcao(l.id, e.target.value || null, l.data);
+                          if (!r.ok) return avisar("erro", r.erro);
+                          await buscar();
+                          await recarregar();
+                        }}
+                      >
+                        <option value="">— escolha o técnico —</option>
+                        {tecnicos.map((t) => <option key={t.id} value={t.id}>{t.apelido || t.nome}</option>)}
+                      </select>
+                    ) : (
+                      quem(l)
+                    )}
+                  </td>
                   <td className="py-2 pr-3 max-w-[200px] truncate" title={l.contatoNome ?? ""}>{l.contatoNome ?? (l.tipo === "manual" ? l.motivo : "—")}</td>
                   <td className="py-2 pr-3 text-right tabular-nums whitespace-nowrap">{l.tipo === "manual" ? "—" : reais(l.total)}</td>
-                  <td className="py-2 pr-3 text-right tabular-nums font-semibold" title={partes}>
-                    {Math.round(l.pontos * 10) / 10}
-                    {l.pontosManual != null && <span className="ml-1 text-xs font-normal text-gray-500">(à mão)</span>}
+                  <td className="py-2 pr-3 text-right tabular-nums font-semibold whitespace-nowrap">
+                    {l.tipo === "orcamento" ? "—" : reais(l.valor || 0)}
+                    {l.valorManual != null && <span className="ml-1 text-xs font-normal text-gray-500">(à mão)</span>}
                   </td>
                   <td className="py-2 pr-3">
                     <span className={`rounded px-2 py-0.5 text-xs font-semibold ${st.cor}`}>{st.nome}</span>
@@ -746,19 +799,23 @@ function AbaPedidos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Pro
                       </button>
                     ) : (
                       <span className="inline-flex gap-3">
-                        <button
-                          className="text-xs font-semibold text-gray-600 hover:underline"
-                          onClick={async () => {
-                            const v = prompt("Pontos deste documento (vazio = voltar à regra):", l.pontosManual != null ? String(l.pontosManual) : "");
-                            if (v === null) return;
-                            const r = await ajustarLancamentoAcao(l.id, { pontosManual: v.trim() === "" ? null : Number(v.replace(",", ".")), data: l.data });
-                            if (!r.ok) return avisar("erro", r.erro);
-                            await buscar();
-                            await recarregar();
-                          }}
-                        >
-                          Mudar pontos
-                        </button>
+                        {l.tipo !== "orcamento" && (
+                          <button
+                            className="text-xs font-semibold text-gray-600 hover:underline"
+                            onClick={async () => {
+                              const v = prompt("Quanto este documento conta, em reais (vazio = o valor do documento):", l.valorManual != null ? String(l.valorManual) : "");
+                              if (v === null) return;
+                              const n = v.trim() === "" ? null : Number(v.replace(/\./g, "").replace(",", "."));
+                              if (n !== null && !Number.isFinite(n)) return avisar("erro", "Valor inválido.");
+                              const r = await ajustarLancamentoAcao(l.id, { valorManual: n, data: l.data });
+                              if (!r.ok) return avisar("erro", r.erro);
+                              await buscar();
+                              await recarregar();
+                            }}
+                          >
+                            Mudar valor
+                          </button>
+                        )}
                         <button
                           className={`text-xs font-semibold hover:underline ${l.anuladoManual ? "text-green-700" : "text-[#E60012]"}`}
                           onClick={async () => {
@@ -782,8 +839,8 @@ function AbaPedidos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Pro
       </section>
 
       <section className={cartao}>
-        <h2 className="text-lg font-bold text-gray-900">Lançar pontos à mão</h2>
-        <p className="mt-1 text-sm text-gray-700">Bônus por um atendimento caprichado, desafio do dia, ou penalidade (número negativo). Aparece no telão como bônus.</p>
+        <h2 className="text-lg font-bold text-gray-900">Lançar valor à mão</h2>
+        <p className="mt-1 text-sm text-gray-700">Venda que não passou pelo Bling, acerto de valor, ou desconto (número negativo). Entra no placar do piloto em reais.</p>
         <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_120px_2fr_auto] items-end">
           <label>
             <span className={rotulo}>Piloto</span>
@@ -794,21 +851,21 @@ function AbaPedidos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Pro
             </select>
           </label>
           <label>
-            <span className={rotulo}>Pontos</span>
-            <input className={campo} type="number" value={manual.pontos} onChange={(e) => setManual({ ...manual, pontos: e.target.value })} />
+            <span className={rotulo}>Valor (R$)</span>
+            <input className={campo} type="number" step="0.01" value={manual.valor} onChange={(e) => setManual({ ...manual, valor: e.target.value })} />
           </label>
           <label>
             <span className={rotulo}>Motivo</span>
-            <input className={campo} value={manual.motivo} maxLength={300} placeholder="Ex.: avaliação 5 estrelas no Google" onChange={(e) => setManual({ ...manual, motivo: e.target.value })} />
+            <input className={campo} value={manual.motivo} maxLength={300} placeholder="Ex.: venda no balcão fora do Bling" onChange={(e) => setManual({ ...manual, motivo: e.target.value })} />
           </label>
           <button
             className={botaoPrimario}
-            disabled={!manual.piloto || !manual.pontos || !manual.motivo.trim()}
+            disabled={!manual.piloto || !manual.valor || !manual.motivo.trim()}
             onClick={async () => {
-              const r = await lancarManualAcao(manual.piloto, Number(manual.pontos), manual.motivo);
+              const r = await lancarManualAcao(manual.piloto, Number(manual.valor), manual.motivo);
               if (!r.ok) return avisar("erro", r.erro);
-              avisar("ok", "Pontos lançados.");
-              setManual({ ...manual, pontos: "", motivo: "" });
+              avisar("ok", "Valor lançado.");
+              setManual({ ...manual, valor: "", motivo: "" });
               await buscar();
               await recarregar();
             }}
@@ -828,7 +885,7 @@ function AbaPremio({ d, recarregar, avisar }: { d: Dados; recarregar: () => Prom
   const [lendo, setLendo] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const placar = p.periodo === "semana" ? d.placarSemana : d.placarMes;
-  const falta = Math.max(0, Math.ceil(placar.equipe.meta - placar.equipe.pontos));
+  const falta = Math.max(0, Math.ceil(placar.equipe.meta - placar.equipe.valor));
 
   return (
     <div className="grid gap-5 lg:grid-cols-[1fr_420px]">
@@ -918,7 +975,7 @@ function AbaPremio({ d, recarregar, avisar }: { d: Dados; recarregar: () => Prom
           <div className="p-4">
             <div className="text-xl font-black">{p.titulo || p.local || "Viagem da equipe"}</div>
             <div className="mt-1 text-sm text-yellow-300 font-bold">
-              {falta > 0 ? `Faltam ${falta} pts da equipe ${p.periodo === "mes" ? "no mês" : "na semana"}` : "Meta batida!"}
+              {falta > 0 ? `Faltam ${reaisCurto(falta)} da equipe ${p.periodo === "mes" ? "no mês" : "na semana"}` : "Meta batida!"}
             </div>
             {p.link && (
               <a href={p.link} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-xs text-white/80 hover:underline">
@@ -929,167 +986,6 @@ function AbaPremio({ d, recarregar, avisar }: { d: Dados; recarregar: () => Prom
         </div>
         <p className="mt-2 text-xs text-gray-500">Prévia do outdoor do telão.</p>
       </aside>
-    </div>
-  );
-}
-
-// ------------------------------------------------------------------ hora do turbo
-
-const DIAS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-const horaBr = (iso: string) => new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
-const diaHoraBr = (iso: string) =>
-  new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", weekday: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
-
-function AbaTurbo({ d, recarregar, avisar }: { d: Dados; recarregar: () => Promise<void>; avisar: (t: "ok" | "erro", m: string) => void }) {
-  const [t, setT] = useState<AjustesDoTurbo>(d.turbo);
-  const [nova, setNova] = useState<JanelaDoTurbo>({ dias: [1, 2, 3, 4, 5], das: "14:00", ate: "16:00" });
-  const [minutos, setMinutos] = useState(60);
-  const [ocupado, setOcupado] = useState(false);
-  const [agora, setAgora] = useState(() => Date.now());
-  useEffect(() => {
-    const i = setInterval(() => setAgora(Date.now()), 15000);
-    return () => clearInterval(i);
-  }, []);
-  const ativo = turboAgora(d.turbo, new Date(agora));
-  const proximo = proximoTurbo(d.turbo, new Date(agora));
-
-  const salvar = async (x: AjustesDoTurbo) => {
-    setOcupado(true);
-    const r = await salvarTurboAcao(x);
-    setOcupado(false);
-    if (!r.ok) return avisar("erro", r.erro);
-    setT(r.dados!);
-    avisar("ok", "Hora do turbo salva.");
-    await recarregar();
-  };
-
-  return (
-    <div className="space-y-5">
-      <section className={`${cartao} ${ativo.ativo ? "border-yellow-400 bg-yellow-50" : ""}`}>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-bold text-gray-900">{ativo.ativo ? `⚡ Turbo ligado: ${ativo.multiplicador}x até ${horaBr(ativo.ate!)}` : "Turbo desligado agora"}</h2>
-            <p className="mt-1 text-sm text-gray-700">
-              {ativo.ativo
-                ? "Toda venda e orçamento que chegar do Bling agora vale mais. O telão mostra a faixa dourada."
-                : proximo
-                  ? `Próximo turbo: ${diaHoraBr(proximo.inicio)}, ${proximo.multiplicador}x.`
-                  : "Nenhum horário fixo cadastrado."}
-            </p>
-          </div>
-          {d.turbo.manualAte && Date.parse(d.turbo.manualAte) > agora && (
-            <button
-              className={botaoSecundario}
-              disabled={ocupado}
-              onClick={async () => {
-                setOcupado(true);
-                const r = await turboAgoraAcao(0, 1);
-                setOcupado(false);
-                if (!r.ok) return avisar("erro", r.erro);
-                avisar("ok", "Turbo desligado.");
-                await recarregar();
-              }}
-            >
-              <Power size={16} /> Desligar agora
-            </button>
-          )}
-        </div>
-      </section>
-
-      <section className={cartao}>
-        <h2 className="text-lg font-bold text-gray-900">Ligar agora</h2>
-        <p className="mt-1 text-sm text-gray-700">Para um dia parado: liga o turbo na hora, por um tempo. Se os avisos do WhatsApp estiverem ligados, a equipe recebe a chamada.</p>
-        <div className="mt-3 flex flex-wrap items-end gap-3">
-          <label>
-            <span className={rotulo}>Por quanto tempo</span>
-            <select className={campo} value={minutos} onChange={(e) => setMinutos(Number(e.target.value))}>
-              {[30, 60, 90, 120, 180, 240].map((m) => (
-                <option key={m} value={m}>{m < 60 ? `${m} min` : `${m / 60} h`}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span className={rotulo}>Pontos</span>
-            <select className={campo} value={t.manualMultiplicador} onChange={(e) => setT({ ...t, manualMultiplicador: Number(e.target.value) })}>
-              {[1.5, 2, 3].map((m) => (
-                <option key={m} value={m}>{m}x</option>
-              ))}
-            </select>
-          </label>
-          <button
-            className={botaoPrimario}
-            disabled={ocupado}
-            onClick={async () => {
-              setOcupado(true);
-              const r = await turboAgoraAcao(minutos, t.manualMultiplicador);
-              setOcupado(false);
-              if (!r.ok) return avisar("erro", r.erro);
-              avisar("ok", "Turbo ligado. O telão mostra em até 20 segundos.");
-              await recarregar();
-            }}
-          >
-            <Rocket size={16} /> Ligar turbo agora
-          </button>
-        </div>
-      </section>
-
-      <section className={cartao}>
-        <h2 className="text-lg font-bold text-gray-900">Horários fixos</h2>
-        <p className="mt-1 text-sm text-gray-700 max-w-3xl">
-          Escolha os horários fracos da loja. Vale a hora em que o documento chega à Arena (o Bling não guarda a hora do pedido): o vigia olha a cada 2 minutos, e o que chega até 5 minutos depois do fim ainda ganha o turbo.
-        </p>
-        {t.janelas.length > 0 ? (
-          <ul className="mt-3 divide-y divide-gray-100 text-sm text-gray-800">
-            {t.janelas.map((j, i) => (
-              <li key={i} className="flex items-center justify-between py-2">
-                <span>{descreverJanela(j)}</span>
-                <button className="text-xs font-semibold text-gray-500 hover:underline" onClick={() => void salvar({ ...t, janelas: t.janelas.filter((_, k) => k !== i) })}>
-                  Tirar
-                </button>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="mt-3 text-sm text-gray-500">Nenhum horário fixo.</p>
-        )}
-        <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto_auto_auto] items-end">
-          <div>
-            <span className={rotulo}>Dias</span>
-            <div className="flex flex-wrap gap-1.5">
-              {DIAS.map((nome, i) => (
-                <button
-                  key={nome}
-                  type="button"
-                  onClick={() => setNova({ ...nova, dias: nova.dias.includes(i) ? nova.dias.filter((x) => x !== i) : [...nova.dias, i].sort() })}
-                  className={`rounded-md border px-2 py-1 text-xs ${nova.dias.includes(i) ? "border-[#E60012] bg-red-50 font-semibold" : "border-gray-300"}`}
-                  aria-pressed={nova.dias.includes(i)}
-                >
-                  {nome}
-                </button>
-              ))}
-            </div>
-          </div>
-          <label>
-            <span className={rotulo}>Das</span>
-            <input className={campo} type="time" value={nova.das} onChange={(e) => setNova({ ...nova, das: e.target.value })} />
-          </label>
-          <label>
-            <span className={rotulo}>Até</span>
-            <input className={campo} type="time" value={nova.ate} onChange={(e) => setNova({ ...nova, ate: e.target.value })} />
-          </label>
-          <button className={botaoSecundario} disabled={ocupado || !nova.dias.length || nova.ate <= nova.das} onClick={() => void salvar({ ...t, janelas: [...t.janelas, nova] })}>
-            <Plus size={16} /> Pôr horário
-          </button>
-        </div>
-        <label className="mt-4 block max-w-xs">
-          <span className={rotulo}>Nos horários fixos, os pontos valem</span>
-          <select className={campo} value={t.multiplicador} onChange={(e) => void salvar({ ...t, multiplicador: Number(e.target.value) })}>
-            {[1.5, 2, 3].map((m) => (
-              <option key={m} value={m}>{m}x</option>
-            ))}
-          </select>
-        </label>
-      </section>
     </div>
   );
 }
@@ -1117,7 +1013,7 @@ function AbaAvisos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Prom
     setGrupos(r.dados ?? []);
   };
 
-  const caixa = (k: "meta" | "equipe" | "lideranca" | "turbo", texto: string) => (
+  const caixa = (k: "meta" | "equipe" | "lideranca", texto: string) => (
     <label className="flex items-center gap-2 text-sm text-gray-700">
       <input type="checkbox" checked={w[k]} onChange={(e) => setW({ ...w, [k]: e.target.checked })} />
       {texto}
@@ -1176,7 +1072,6 @@ function AbaAvisos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Prom
         <div className="mt-3 space-y-2">
           {caixa("meta", "🏁 Quando alguém cruza a linha de chegada (bate a meta da semana ou do mês)")}
           {caixa("equipe", "🏆 Quando a equipe bate a meta (e a viagem, se houver prêmio)")}
-          {caixa("turbo", "⚡ Quando começa a hora do turbo")}
           {caixa("lideranca", "🥇 Quando muda o líder da semana (no máximo uma vez por dia para cada um)")}
         </div>
         <label className="mt-4 flex items-center gap-2 text-sm font-semibold text-gray-900">
@@ -1312,7 +1207,7 @@ function AbaBling({ d, recarregar, avisar }: { d: Dados; recarregar: () => Promi
         </div>
         <p className="mt-4 text-sm text-gray-700 max-w-3xl">
           O token do Bling só existe no seu PC (quem renova é a sentinela do Bionic), então quem busca as vendas e os orçamentos é o vigia, a cada 2 minutos,
-          e entrega aqui. Pedido cancelado no Bling perde os pontos sozinho.
+          e entrega aqui. Pedido cancelado no Bling sai da corrida sozinho.
         </p>
       </section>
 
@@ -1382,7 +1277,7 @@ function AbaBling({ d, recarregar, avisar }: { d: Dados; recarregar: () => Promi
               await recarregar();
             }}
           >
-            <RotateCcw size={16} /> Recalcular pontos
+            <RotateCcw size={16} /> Refazer os valores
           </button>
         </div>
         {v.varrerDesde && <p className="mt-2 text-sm text-gray-600">Aguardando o vigia buscar desde {dataBr(v.varrerDesde)}.</p>}
@@ -1450,7 +1345,7 @@ export default function PainelArena() {
             <h1 className="flex items-center gap-2 text-2xl font-black text-gray-900">
               <Trophy className="text-[#E60012]" /> Arena de vendas
             </h1>
-            <p className="text-sm text-gray-600">A corrida do telão: vendas e orçamentos do Bling viram pontos, e cada um corre até a própria meta.</p>
+            <p className="text-sm text-gray-600">A corrida do telão, em reais: vendas do Bling e ordens de serviço da assistência. Cada um corre até a própria parte da meta.</p>
           </div>
           <a className={botaoSecundario} href="/arena" target="_blank" rel="noreferrer">
             <Monitor size={16} /> Abrir o telão
@@ -1517,10 +1412,9 @@ export default function PainelArena() {
           )}
           {d && aba === "pilotos" && <AbaPilotos d={d} recarregar={recarregar} avisar={avisar} />}
           {d && aba === "metas" && <AbaMetas key={JSON.stringify(d.corrida)} d={d} recarregar={recarregar} avisar={avisar} />}
-          {d && aba === "pontos" && <AbaPontos d={d} recarregar={recarregar} avisar={avisar} />}
+          {d && aba === "regras" && <AbaRegras d={d} recarregar={recarregar} avisar={avisar} />}
           {d && aba === "pedidos" && <AbaPedidos d={d} recarregar={recarregar} avisar={avisar} />}
           {d && aba === "premio" && <AbaPremio d={d} recarregar={recarregar} avisar={avisar} />}
-          {d && aba === "turbo" && <AbaTurbo d={d} recarregar={recarregar} avisar={avisar} />}
           {d && aba === "avisos" && <AbaAvisos d={d} recarregar={recarregar} avisar={avisar} />}
           {d && aba === "bling" && <AbaBling d={d} recarregar={recarregar} avisar={avisar} />}
         </div>
@@ -1535,7 +1429,7 @@ export default function PainelArena() {
                 <li key={h.rotulo} className="flex flex-wrap justify-between gap-2 py-2">
                   <span className="text-gray-600">{h.rotulo}</span>
                   <span>
-                    <b>{h.campeao}</b> ({Math.round(h.pontos)} pts)
+                    <b>{h.campeao}</b> ({reaisCurto(h.valor)})
                     {h.chegaram.length > 0 && <span className="text-gray-500"> · cruzaram a linha: {h.chegaram.join(", ")}</span>}
                     {h.equipe.progresso >= 1 && <span className="ml-1 font-semibold text-green-700">· equipe bateu a meta</span>}
                   </span>

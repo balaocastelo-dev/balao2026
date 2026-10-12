@@ -9,8 +9,8 @@
 
 import { NextResponse } from "next/server";
 import { chaveConfere, gravarDocumentos, gravarVendedoresDoBling, lerConfig, pedirVarredura, registrarVigia } from "@/lib/arena/dados";
-import { conferirTurbo, reconstruirTelao } from "@/lib/arena/estado";
-import type { DocumentoDoBling } from "@/lib/arena/pontos";
+import { reconstruirTelao } from "@/lib/arena/estado";
+import type { DocumentoDoBling } from "@/lib/arena/valores";
 import { lerDocumento } from "@/lib/arena/entrada";
 
 export const dynamic = "force-dynamic";
@@ -82,8 +82,6 @@ export async function POST(req: Request) {
     }
 
     if (gravados > 0) await reconstruirTelao();
-    // O vigia passa a cada 2 minutos: é ele que serve de relógio para o aviso do turbo.
-    await conferirTurbo(config);
     return NextResponse.json({ ok: true, recebidos: docs.length, gravados, novos, varrerDesde });
   } catch (e) {
     console.error("[arena:bling]", (e as Error).message);

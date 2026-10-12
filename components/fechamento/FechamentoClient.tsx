@@ -23,6 +23,9 @@ interface ServiceOrder {
   partsExpense: number;
 
   paymentMethod: "PIX" | "Cartão" | "Dinheiro";
+
+  /** Técnico da OS na Arena de vendas (o valor vai para ele). */
+  tecnicoId?: string | null;
 }
 
 interface OperationalExpense {
@@ -85,6 +88,16 @@ export default function WeeklyClosing() {
     partsExpense: 0,
     date: new Date().toISOString().split('T')[0]
   });
+
+  // Técnicos da Arena: cada OS conta para o técnico escolhido.
+  const [tecnicos, setTecnicos] = useState<{ id: string; nome: string }[]>([]);
+  useEffect(() => {
+    fetch('/api/weekly/tecnicos')
+      .then(r => (r.ok ? r.json() : []))
+      .then(l => { if (Array.isArray(l)) setTecnicos(l); })
+      .catch(() => {});
+  }, []);
+  const nomeDoTecnico = (id?: string | null) => tecnicos.find(t => t.id === id)?.nome ?? null;
 
   // Form State - Expense
   const [newExpense, setNewExpense] = useState<Partial<OperationalExpense>>({
@@ -310,6 +323,10 @@ export default function WeeklyClosing() {
       showToast("Número da OS é obrigatório!");
       return;
     }
+    if (tecnicos.length > 0 && !newOrder.tecnicoId) {
+      showToast("Escolha o técnico da OS (ela conta na Arena para ele).");
+      return;
+    }
     
     // Optimistic Update
     const tempId = crypto.randomUUID();
@@ -322,7 +339,8 @@ export default function WeeklyClosing() {
       partsIncome: Number(newOrder.partsIncome) || 0,
       laborExpense: Number(newOrder.laborExpense) || 0,
       partsExpense: Number(newOrder.partsExpense) || 0,
-      date: newOrder.date || new Date().toISOString().split('T')[0]
+      date: newOrder.date || new Date().toISOString().split('T')[0],
+      tecnicoId: newOrder.tecnicoId || null
     };
 
     // Remove ID for creation (let DB handle it or use temp, but here we use UUID)
@@ -351,6 +369,7 @@ export default function WeeklyClosing() {
         laborExpense: 0,
         partsExpense: 0,
         osNumber: "",
+        tecnicoId: newOrder.tecnicoId ?? null,
         date: new Date().toISOString().split('T')[0]
       });
       showToast("OS Adicionada e Salva!");
@@ -691,6 +710,17 @@ export default function WeeklyClosing() {
                 <option>Cartão</option>
                 <option>Dinheiro</option>
               </select>
+              {tecnicos.length > 0 && (
+                <select
+                  value={newOrder.tecnicoId ?? ""}
+                  onChange={e => setNewOrder({...newOrder, tecnicoId: e.target.value || null})}
+                  className="col-span-2 md:col-span-4 p-2 border rounded text-sm"
+                  aria-label="Técnico da OS"
+                >
+                  <option value="">Técnico da OS (conta na Arena)…</option>
+                  {tecnicos.map(t => <option key={t.id} value={t.id}>{t.nome}</option>)}
+                </select>
+              )}
               
               <div className="col-span-2 grid grid-cols-2 gap-2">
                 <div className="space-y-1">
@@ -920,7 +950,7 @@ export default function WeeklyClosing() {
                                         {parseDate(order.date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})}
                                       </td>
                                       <td className="px-3 py-1 font-medium text-slate-700 print:py-0.5">
-                                        OS: {order.osNumber} <span className="text-slate-400 font-normal ml-2">({order.status})</span>
+                                        OS: {order.osNumber} <span className="text-slate-400 font-normal ml-2">({order.status}{nomeDoTecnico(order.tecnicoId) ? ` · ${nomeDoTecnico(order.tecnicoId)}` : ''})</span>
                                       </td>
                                       <td className="px-3 py-1 text-right text-green-600 print:py-0.5">{fmt(rev)}</td>
                                       <td className="px-3 py-1 text-right text-red-500 print:py-0.5">{fmt(cost)}</td>

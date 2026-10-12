@@ -5,9 +5,9 @@
 // Hostinger, que tem cota de 500 conexões por hora e para o site inteiro
 // quando estoura. A Arena guarda documentos JSON pequenos:
 //
-//   config        pilotos, regras, metas, prêmio, turbo, avisos, chave do vigia
+//   config        pilotos, regras, metas, prêmio, avisos, chave do vigia
 //   vigia         última conversa do vigia do PC
-//   lanc-AAAA-MM  vendas e orçamentos do mês (um documento por mês)
+//   lanc-AAAA-MM  vendas, orçamentos e OS do mês (um documento por mês)
 //   telao         a corrida já calculada, pronta para o telão
 //   avisos        o que já foi avisado no WhatsApp
 //   fotos/<nome>  fotos dos pilotos

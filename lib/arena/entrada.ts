@@ -1,5 +1,5 @@
 // Arena: confere e limpa cada documento que o vigia manda (nada confiado de olhos fechados).
-import type { DocumentoDoBling } from "./pontos";
+import type { DocumentoDoBling } from "./valores";
 
 const id = (v: unknown) => {
   const s = String(v ?? "").replace(/\D/g, "").slice(0, 32);

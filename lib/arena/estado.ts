@@ -2,8 +2,8 @@
 // Arena: a corrida já calculada, que o telão (/arena) e as páginas dos
 // pilotos (/arena/<piloto>) recebem.
 //
-// Público (TV da loja, celular do vendedor): daqui não sai nome de cliente
-// nem valor em reais — só pilotos, pontos, metas, prêmio e turbo.
+// Público (TV da loja, celular do vendedor): daqui não sai nome de cliente.
+// Desde 12/10 (tarde) a corrida é em reais, então os valores aparecem.
 //
 // A corrida é calculada quando algo muda (o vigia trouxe venda, o painel
 // mexeu) e guardada pronta na gaveta ("telao"). O telão só lê esse documento,
@@ -15,8 +15,7 @@ import { ler, atualizar, tipoDaGaveta } from "./gaveta";
 import { janela, mesAnterior, semanaAnterior, somarDias } from "./periodos";
 import { lancamentosEntre, lerConfig, lerVigia, type ConfigDaArena } from "./dados";
 import { indexarPilotos, montarPlacar, pilotoDoLancamento } from "./placar";
-import { avisoDeTurbo, avisosEntre, dispararAvisos, lerAvisos } from "./avisos";
-import { turboAgora } from "./turbo";
+import { avisosEntre, dispararAvisos, lerAvisos } from "./avisos";
 import { enviarAviso } from "./whatsapp";
 import type { EstadoDoTelao, JogadaPublica, Lancamento, Piloto, PlacarDoPeriodo, SituacaoDoVigia } from "./tipos";
 
@@ -26,14 +25,14 @@ export function vigiaOnline(ultimaVez: string | null, agora = Date.now()) {
 }
 
 function campeao(placar: PlacarDoPeriodo) {
-  const top = [...placar.linhas].sort((a, b) => b.pontos - a.pontos)[0];
+  const top = [...placar.linhas].sort((a, b) => b.valor - a.valor)[0];
   return {
     rotulo: placar.rotulo,
     periodo: placar.periodo,
-    campeao: top && top.pontos > 0 ? top.piloto.apelido || top.piloto.nome : null,
-    foto: top && top.pontos > 0 ? top.piloto.foto : null,
-    cor: top && top.pontos > 0 ? top.piloto.cor : null,
-    pontos: top ? top.pontos : 0,
+    campeao: top && top.valor > 0 ? top.piloto.apelido || top.piloto.nome : null,
+    foto: top && top.valor > 0 ? top.piloto.foto : null,
+    cor: top && top.valor > 0 ? top.piloto.cor : null,
+    valor: top ? top.valor : 0,
     chegaram: placar.linhas.filter((l) => l.chegou).length,
   };
 }
@@ -51,10 +50,8 @@ function jogada(l: Lancamento, p: Piloto): JogadaPublica {
     id: l.id,
     tipo: l.tipo,
     pilotoId: p.id,
-    pontos: l.pontos,
+    valor: l.valor,
     licencas: l.licencas,
-    conversao: Boolean(l.detalhe && l.detalhe.conversao > 0),
-    turbo: l.turbo > 1 ? l.turbo : 1,
     data: l.data,
     registradoEm: l.registradoEm,
   };
@@ -63,7 +60,7 @@ function jogada(l: Lancamento, p: Piloto): JogadaPublica {
 /** Monta a corrida a partir da configuração e dos lançamentos (sem gaveta: dá para testar). */
 export function calcularEstado(config: ConfigDaArena, lancs: Lancamento[], vigia: SituacaoDoVigia, agora = new Date()): EstadoDoTelao {
   const pilotos = config.pilotos.map((p) => ({ ...p, foto: fotoPublica(p) }));
-  const { corrida, premio, regras } = config;
+  const { corrida, premio } = config;
   const semana = janela("semana", agora);
   const mes = janela("mes", agora);
   const antigas = [1, 2, 3, 4].map((n) => semanaAnterior(n, agora));
@@ -108,15 +105,6 @@ export function calcularEstado(config: ConfigDaArena, lancs: Lancamento[], vigia
     recentes,
     jogadasPorPiloto,
     hallDaFama: hall,
-    turbo: config.turbo,
-    regras: {
-      venda: regras.venda,
-      orcamento: regras.orcamento,
-      licencaBonus: regras.licencaBonus,
-      conversaoBonus: regras.conversaoBonus,
-      ticketFaixa: regras.ticketFaixa,
-      ticketPontos: regras.ticketPontos,
-    },
     vigiaUltimaVez: vigia.ultimaVez,
     geradoEm: agora.toISOString(),
   };
@@ -141,7 +129,9 @@ function velho(e: EstadoDoTelao, agora = new Date()) {
     e.semana?.inicio !== janela("semana", agora).inicio ||
     e.mes?.inicio !== janela("mes", agora).inicio ||
     agora.getTime() - Date.parse(e.geradoEm) > 6 * 3600_000 ||
-    !e.jogadasPorPiloto
+    !e.jogadasPorPiloto ||
+    // Corrida guardada quando ainda era em pontos (antes de 12/10, tarde).
+    typeof e.semana?.equipe?.valor !== "number"
   );
 }
 
@@ -160,14 +150,6 @@ export async function reconstruirTelao(agora = new Date()): Promise<EstadoDoTela
   const avisos = avisosEntre(anterior.dados && !velho(anterior.dados, agora) ? anterior.dados : null, estado, config.whatsapp);
   await dispararAvisos(avisos, config.whatsapp.destino, enviarAviso).catch((e) => console.error("[arena:avisos]", (e as Error).message));
   return estado;
-}
-
-/** Aviso de começo da hora do turbo (o vigia chama a cada volta: é o relógio). */
-export async function conferirTurbo(config: ConfigDaArena, agora = new Date()) {
-  const t = turboAgora(config.turbo, agora);
-  if (!t.ativo || !t.ate) return;
-  const aviso = avisoDeTurbo(config.whatsapp, t.multiplicador, t.ate);
-  if (aviso) await dispararAvisos([aviso], config.whatsapp.destino, enviarAviso).catch(() => {});
 }
 
 export async function estadoDoTelao(): Promise<EstadoDoTelao | null> {

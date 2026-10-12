@@ -2,12 +2,13 @@
 // Arena: o que avisar no WhatsApp, comparando a corrida antes e depois.
 //
 // Pedido do Thiago (12/10/2026): avisar no grupo quando alguém cruza a linha
-// de chegada. Também: a equipe bater a meta, troca de líder da semana (se
-// ligado) e o começo da hora do turbo. Cada aviso sai uma vez só (a chave
-// fica guardada no documento "avisos" da gaveta).
+// de chegada. Também: a equipe bater a meta e troca de líder da semana (se
+// ligado). Cada aviso sai uma vez só (a chave fica guardada no documento
+// "avisos" da gaveta). Desde 12/10 (tarde) os valores são em reais.
 // ============================================================
 
 import { atualizar } from "./gaveta";
+import { reais } from "./valores";
 import type { AjustesDoWhatsApp, EstadoDoTelao, PlacarDoPeriodo } from "./tipos";
 
 export interface Aviso {
@@ -16,7 +17,6 @@ export interface Aviso {
 }
 
 const nome = (l: PlacarDoPeriodo["linhas"][number]) => l.piloto.apelido || l.piloto.nome.split(" ")[0];
-const pts = (n: number) => `${Math.round(n)} pts`;
 const RODAPE = "\n\nwww.balao.info/arena";
 
 export function avisosEntre(antes: EstadoDoTelao | null, depois: EstadoDoTelao, w: AjustesDoWhatsApp): Aviso[] {
@@ -35,7 +35,7 @@ export function avisosEntre(antes: EstadoDoTelao | null, depois: EstadoDoTelao, 
         if (x && !x.chegou && l.chegou) {
           out.push({
             chave: `meta:${per}:${d.inicio}:${l.piloto.id}`,
-            texto: `🏁 *${nome(l)}* cruzou a linha de chegada! Bateu a meta ${qual} com ${pts(l.pontos)}.${RODAPE}`,
+            texto: `🏁 *${nome(l)}* cruzou a linha de chegada! Bateu a meta ${qual}: ${reais(l.valor)} de ${reais(l.meta)}.${RODAPE}`,
           });
         }
       }
@@ -46,14 +46,14 @@ export function avisosEntre(antes: EstadoDoTelao | null, depois: EstadoDoTelao, 
       const viagem = premio ? ` A viagem${premio.titulo || premio.local ? ` (${premio.titulo || premio.local})` : ""} é de vocês! ✈️` : "";
       out.push({
         chave: `equipe:${per}:${d.inicio}`,
-        texto: `🏆 *A equipe bateu a meta ${qual}!* ${pts(d.equipe.pontos)} no total.${viagem}${RODAPE}`,
+        texto: `🏆 *A equipe bateu a meta ${qual}!* ${reais(d.equipe.valor)} no total.${viagem}${RODAPE}`,
       });
     }
 
     if (w.lideranca && per === "semana") {
       const liderAntes = a.linhas.find((l) => l.posicao === 1);
       const liderAgora = d.linhas.find((l) => l.posicao === 1);
-      if (liderAntes && liderAgora && liderAntes.piloto.id !== liderAgora.piloto.id && liderAgora.pontos > 0 && liderAntes.pontos > 0) {
+      if (liderAntes && liderAgora && liderAntes.piloto.id !== liderAgora.piloto.id && liderAgora.valor > 0 && liderAntes.valor > 0) {
         out.push({
           chave: `lider:${d.inicio}:${liderAgora.piloto.id}:${depois.geradoEm.slice(0, 10)}`,
           texto: `🥇 *${nome(liderAgora)}* assumiu a liderança da semana! ${nome(liderAntes)} está logo atrás.${RODAPE}`,
@@ -62,15 +62,6 @@ export function avisosEntre(antes: EstadoDoTelao | null, depois: EstadoDoTelao, 
     }
   }
   return out;
-}
-
-export function avisoDeTurbo(w: AjustesDoWhatsApp, multiplicador: number, ate: string): Aviso | null {
-  if (!w.ativo || !w.destino || !w.turbo) return null;
-  const hora = new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit" }).format(new Date(ate));
-  return {
-    chave: `turbo:${ate}`,
-    texto: `⚡ *Hora do turbo!* Até as ${hora}, cada venda e orçamento vale ${multiplicador}x os pontos. Bora!${RODAPE}`,
-  };
 }
 
 interface DocDeAvisos {

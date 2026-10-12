@@ -6,8 +6,9 @@
 // O palco tem 1920 × 1080 e é escalado para a tela. A pista vai da largada
 // (esquerda) à linha de chegada (direita); a linha de chegada de cada piloto
 // é a META DELE. Depois da chegada fica o outdoor com a viagem do Airbnb.
-// Pergunta ao site a cada 20 s e comemora o que mudou: venda, orçamento,
+// Pergunta ao site a cada 20 s e comemora o que mudou: venda, OS, orçamento,
 // licença (turbo dourado), ultrapassagem, meta batida e meta da equipe.
+// Desde 12/10 (tarde) a corrida é em reais (vendas do Bling + OS).
 // ============================================================
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -15,7 +16,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 import { KartG, TINTA } from "@/components/arena/Kart";
 import type { EstadoDoTelao, LinhaDoPlacar, PlacarDoPeriodo } from "@/lib/arena/tipos";
-import { proximoTurbo, turboAgora } from "@/lib/arena/turbo";
 import "./telao.css";
 
 const W = 1920;
@@ -83,7 +83,15 @@ class Som {
 const nomeCurto = (l: LinhaDoPlacar) => l.piloto.apelido || l.piloto.nome.split(" ")[0];
 const ORDINAIS = ["primeiro", "segundo", "terceiro", "quarto", "quinto", "sexto", "sétimo", "oitavo", "nono", "décimo"];
 const lugar = (n: number) => ORDINAIS[n - 1] ?? `${n}`;
-const pts = (n: number) => `${Math.round(n)} pt${Math.round(n) === 1 ? "" : "s"}`;
+/** "R$ 12.345" */
+const rs = (n: number) => `R$ ${Math.round(Number(n) || 0).toLocaleString("pt-BR")}`;
+/** "12,3 mil" / "850" — para a plaquinha do kart, onde cabe pouco. */
+const rsCurto = (n: number) => {
+  const v = Math.round(Number(n) || 0);
+  if (Math.abs(v) < 1000) return `R$ ${v}`;
+  if (Math.abs(v) < 100_000) return `${(v / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} mil`;
+  return `${Math.round(v / 1000).toLocaleString("pt-BR")} mil`;
+};
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 const bordaEsq = (y: number) => lerp(520, 392, (y - TOPO_PISTA) / (FUNDO_PISTA - TOPO_PISTA));
 const linhaChegada = (y: number) => lerp(1500, 1590, (y - TOPO_PISTA) / (FUNDO_PISTA - TOPO_PISTA));
@@ -253,7 +261,7 @@ export default function Telao({ inicial }: { inicial: EstadoDoTelao | null }) {
   const [largou, setLargou] = useState(false);
   const [faixa, setFaixa] = useState<Faixa | null>(null);
   const [festa, setFesta] = useState<Festa | null>(null);
-  const [turbos, setTurbos] = useState<Record<string, { tipo: "normal" | "dourado"; pontos: number; ate: number }>>({});
+  const [turbos, setTurbos] = useState<Record<string, { tipo: "normal" | "dourado"; valor: number; ate: number }>>({});
   const [somLigado, setSomLigado] = useState(false);
   const [quieto, setQuieto] = useState(false);
   const [hallI, setHallI] = useState(0);
@@ -398,29 +406,29 @@ export default function Telao({ inicial }: { inicial: EstadoDoTelao | null }) {
       anterior.current = novo;
       const linhas = new Map(novo.semana.linhas.map((l) => [l.piloto.id, l]));
 
-      // vendas e orçamentos que acabaram de entrar
+      // vendas, OS e orçamentos que acabaram de entrar
       const chegaram = novo.recentes.filter((r) => !vistos.current.has(r.id)).reverse();
       for (const r of chegaram) {
         vistos.current.add(r.id);
         const l = r.pilotoId ? linhas.get(r.pilotoId) : undefined;
         if (!l) continue;
         const dourado = r.licencas > 0;
-        const comTurbo = r.turbo > 1 ? ` · turbo ${r.turbo}x` : "";
-        setTurbos((t) => ({ ...t, [l.piloto.id]: { tipo: dourado ? "dourado" : "normal", pontos: r.pontos, ate: Date.now() + 4500 } }));
+        if (r.valor > 0) setTurbos((t) => ({ ...t, [l.piloto.id]: { tipo: dourado ? "dourado" : "normal", valor: r.valor, ate: Date.now() + 4500 } }));
         if (r.tipo === "venda") {
           som.current.turbo();
           if (dourado) {
-            anunciar({ id: r.id, titulo: "Turbo dourado!", sub: `${nomeCurto(l)} vendeu licença · +${pts(r.pontos)}${comTurbo}`, cor: "ouro" });
-          } else if (r.conversao) {
-            anunciar({ id: r.id, titulo: "Orçamento virou venda!", sub: `${nomeCurto(l)} fechou · +${pts(r.pontos)}${comTurbo}`, cor: "azul" });
+            anunciar({ id: r.id, titulo: "Turbo dourado!", sub: `${nomeCurto(l)} vendeu licença · +${rs(r.valor)}`, cor: "ouro" });
           } else {
-            anunciar({ id: r.id, titulo: `${nomeCurto(l)} vendeu!`, sub: `+${pts(r.pontos)} na corrida${comTurbo}` });
+            anunciar({ id: r.id, titulo: `${nomeCurto(l)} vendeu!`, sub: `+${rs(r.valor)} na corrida` });
           }
+        } else if (r.tipo === "os") {
+          som.current.turbo();
+          anunciar({ id: r.id, titulo: `${nomeCurto(l)} entregou uma OS!`, sub: `+${rs(r.valor)} na corrida`, cor: "azul" });
         } else if (r.tipo === "orcamento") {
           som.current.moeda();
-        } else if (r.pontos > 0) {
+        } else if (r.valor > 0) {
           som.current.moeda();
-          anunciar({ id: r.id, titulo: `Bônus para ${nomeCurto(l)}`, sub: `+${pts(r.pontos)}`, cor: "azul" });
+          anunciar({ id: r.id, titulo: `${nomeCurto(l)} na corrida`, sub: `+${rs(r.valor)}`, cor: "azul" });
         }
       }
       if (!velho) return;
@@ -432,10 +440,10 @@ export default function Telao({ inicial }: { inicial: EstadoDoTelao | null }) {
         if (per === vista) {
           for (const l of agoraL) {
             const a = antes.get(l.piloto.id);
-            if (!a || l.posicao >= a.posicao || l.pontos <= a.pontos) continue;
+            if (!a || l.posicao >= a.posicao || l.valor <= a.valor) continue;
             const passado = agoraL.find((x) => x.posicao === l.posicao + 1);
             const pa = passado ? antes.get(passado.piloto.id) : undefined;
-            if (passado && pa && pa.posicao < a.posicao && passado.pontos > 0) {
+            if (passado && pa && pa.posicao < a.posicao && passado.valor > 0) {
               anunciar({ id: `ult-${l.piloto.id}-${Date.now()}`, titulo: "Ultrapassagem!", sub: `${nomeCurto(l)} passou ${nomeCurto(passado)} e agora é o ${lugar(l.posicao)}` });
             }
           }
@@ -495,21 +503,6 @@ export default function Telao({ inicial }: { inicial: EstadoDoTelao | null }) {
 
   const placar = estado ? estado[vista] : null;
   const placarPremio = estado?.premio ? estado[estado.premio.periodo] : placar;
-  const turbo = turboAgora(estado?.turbo, new Date(agora));
-  const proximo = !turbo.ativo ? proximoTurbo(estado?.turbo, new Date(agora)) : null;
-  const proximoEmBreve = proximo && Date.parse(proximo.inicio) - agora < 3 * 3600_000 ? proximo : null;
-  const hora = (iso: string) => new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
-
-  // Começou a hora do turbo: faixa dourada e motor.
-  const turboAntes = useRef<boolean | null>(null);
-  useEffect(() => {
-    if (turboAntes.current === false && turbo.ativo) {
-      som.current.turbo();
-      anunciar({ id: `turbo-${turbo.ate}`, titulo: "Hora do turbo!", sub: `Pontos em ${turbo.multiplicador}x até ${turbo.ate ? hora(turbo.ate) : ""}`, cor: "ouro" });
-    }
-    turboAntes.current = turbo.ativo;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [turbo.ativo]);
 
   // Faixa fixa para cada piloto (pelo número), para ninguém pular de faixa.
   const pistas = useMemo(() => {
@@ -552,7 +545,7 @@ export default function Telao({ inicial }: { inicial: EstadoDoTelao | null }) {
 
   const vigiaVivo = Boolean(estado.vigiaUltimaVez && agora - Date.parse(estado.vigiaUltimaVez) < 15 * 60_000);
   const hall = estado.hallDaFama.length ? estado.hallDaFama[hallI % estado.hallDaFama.length] : null;
-  const falta = placarPremio ? Math.max(0, Math.ceil(placarPremio.equipe.meta - placarPremio.equipe.pontos)) : 0;
+  const falta = placarPremio ? Math.max(0, Math.ceil(placarPremio.equipe.meta - placarPremio.equipe.valor)) : 0;
   const recentes = estado.recentes.slice(0, 6);
   const nomes = new Map(placar.linhas.map((l) => [l.piloto.id, nomeCurto(l)]));
 
@@ -562,13 +555,6 @@ export default function Telao({ inicial }: { inicial: EstadoDoTelao | null }) {
         <svg viewBox={`0 0 ${W} 1080`} width={W} height={1080} style={{ position: "absolute", inset: 0 }} aria-hidden>
           <Ceu />
           <Pista faixas={pistas} luzes={luzes} />
-          {turbo.ativo && (
-            <polygon
-              className="arn-turbo-brilho"
-              points={`${bordaEsq(TOPO_PISTA)},${TOPO_PISTA} ${bordaDir(TOPO_PISTA)},${TOPO_PISTA} ${bordaDir(FUNDO_PISTA)},${FUNDO_PISTA} ${bordaEsq(FUNDO_PISTA)},${FUNDO_PISTA}`}
-              fill="#FFD23F"
-            />
-          )}
 
           {/* nomes pintados no asfalto da largada */}
           {pistas.map(({ linha, y0, h }) => (
@@ -617,43 +603,27 @@ export default function Telao({ inicial }: { inicial: EstadoDoTelao | null }) {
                     />
                   </g>
                 </g>
-                {/* plaquinha com nome e pontos */}
+                {/* plaquinha com nome e quanto já fez */}
                 <g transform={`translate(${100 * s} ${4 * s}) scale(${Math.max(0.62, s * 1.15)})`}>
-                  <rect x={-78} y={-34} width={156} height={34} rx={17} fill="#fff" stroke={TINTA} strokeWidth={4} />
+                  <rect x={-104} y={-34} width={208} height={34} rx={17} fill="#fff" stroke={TINTA} strokeWidth={4} />
                   <text x={0} y={-10} textAnchor="middle" fontSize={20} fontWeight={900} fill={TINTA}>
-                    {nomeCurto(linha).slice(0, 10)} · {Math.round(linha.pontos)}
+                    {nomeCurto(linha).slice(0, 10)} · {rsCurto(linha.valor)}
                   </text>
                   {linha.chegou && (
-                    <g transform="translate(70 -44)">
+                    <g transform="translate(96 -44)">
                       <rect x={0} y={0} width={30} height={22} fill="url(#arn-xadrez)" stroke={TINTA} strokeWidth={3} />
                     </g>
                   )}
                 </g>
                 {tb && (
                   <text className="arn-mais" x={100 * s} y={-40 * s} textAnchor="middle" fontSize={44} fontWeight={900} fontStyle="italic" fill={tb.tipo === "dourado" ? "#FFD23F" : "#fff"} stroke={TINTA} strokeWidth={8} paintOrder="stroke">
-                    +{Math.round(tb.pontos)}
+                    +{rsCurto(tb.valor)}
                   </text>
                 )}
               </g>
             );
           })}
         </svg>
-
-        {/* ---------- hora do turbo ---------- */}
-        {(turbo.ativo || proximoEmBreve) && (
-          <div
-            className={`arn-chip ${turbo.ativo ? "arn-turbo-chip" : ""}`}
-            style={{ position: "absolute", left: 400, top: 152, padding: "8px 22px", borderRadius: 18, background: turbo.ativo ? "#FFD23F" : "#fff", zIndex: 5 }}
-          >
-            {turbo.ativo ? (
-              <span className="arn-letra" style={{ fontSize: 40, WebkitTextStroke: "6px #1a1440" }}>
-                ⚡ Hora do turbo · {turbo.multiplicador}x até {turbo.ate ? hora(turbo.ate) : ""}
-              </span>
-            ) : (
-              <span style={{ font: "800 22px Arial, sans-serif" }}>⚡ Hora do turbo às {hora(proximoEmBreve!.inicio)} · pontos em {proximoEmBreve!.multiplicador}x</span>
-            )}
-          </div>
-        )}
 
         {/* ---------- HUD de cima ---------- */}
         <div style={{ position: "absolute", left: 24, top: 18, right: 24, height: 118, display: "flex", gap: 20, alignItems: "stretch" }}>
@@ -671,7 +641,7 @@ export default function Telao({ inicial }: { inicial: EstadoDoTelao | null }) {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", fontFamily: "Arial, sans-serif", fontWeight: 800, fontSize: 22 }}>
               <span>Meta da equipe</span>
               <span style={{ fontVariantNumeric: "tabular-nums" }}>
-                {Math.round(placar.equipe.pontos)} de {Math.round(placar.equipe.meta)} pts
+                {rs(placar.equipe.valor)} de {rs(placar.equipe.meta)}
               </span>
             </div>
             <div style={{ position: "relative", height: 40, marginTop: 8, borderRadius: 20, background: "#E9E4F5", border: `5px solid ${TINTA}`, overflow: "hidden" }}>
@@ -741,8 +711,8 @@ export default function Telao({ inicial }: { inicial: EstadoDoTelao | null }) {
                   <div style={{ height: 10, borderRadius: 5, background: "#E9E4F5", border: `3px solid ${TINTA}`, marginTop: 4, overflow: "hidden" }}>
                     <div style={{ width: `${Math.min(100, l.progresso * 100)}%`, height: "100%", background: l.piloto.cor, transition: "width 1.5s" }} />
                   </div>
-                  <div style={{ fontWeight: 700, fontSize: 15, marginTop: 3, fontVariantNumeric: "tabular-nums" }}>
-                    {Math.round(l.pontos)} / {Math.round(l.meta)} pts · {l.vendas} {l.vendas === 1 ? "venda" : "vendas"}
+                  <div style={{ fontWeight: 700, fontSize: 15, marginTop: 3, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    {rsCurto(l.valor)} de {rsCurto(l.meta)}
                   </div>
                 </div>
               </motion.div>
@@ -766,9 +736,9 @@ export default function Telao({ inicial }: { inicial: EstadoDoTelao | null }) {
               <div style={{ color: "#FFD23F", fontFamily: "Arial, sans-serif", fontWeight: 900, fontSize: 20, marginTop: 6 }}>
                 {estado.premio
                   ? falta > 0
-                    ? `Faltam ${falta} pts da equipe ${estado.premio.periodo === "mes" ? "no mês" : "na semana"} para a viagem`
+                    ? `Faltam ${rs(falta)} da equipe ${estado.premio.periodo === "mes" ? "no mês" : "na semana"} para a viagem`
                     : "Meta batida: a viagem é da equipe!"
-                  : `Faltam ${falta} pts para a equipe bater a meta`}
+                  : `Faltam ${rs(falta)} para a equipe bater a meta`}
               </div>
             </div>
           </div>
@@ -788,7 +758,8 @@ export default function Telao({ inicial }: { inicial: EstadoDoTelao | null }) {
             {recentes.length === 0 && <span style={{ opacity: 0.6 }}>A primeira venda do dia abre a corrida.</span>}
             {recentes.map((r) => (
               <span key={r.id} style={{ whiteSpace: "nowrap" }}>
-                {r.tipo === "venda" ? (r.licencas > 0 ? "⚡" : "💰") : r.tipo === "orcamento" ? "📝" : "⭐"} {nomes.get(r.pilotoId ?? "") ?? "—"} +{Math.round(r.pontos)}
+                {r.tipo === "venda" ? (r.licencas > 0 ? "⚡" : "💰") : r.tipo === "os" ? "🔧" : r.tipo === "orcamento" ? "📝" : "⭐"} {nomes.get(r.pilotoId ?? "") ?? "—"}
+                {r.tipo === "orcamento" ? " orçou" : ` +${rsCurto(r.valor)}`}
               </span>
             ))}
           </div>
@@ -799,7 +770,7 @@ export default function Telao({ inicial }: { inicial: EstadoDoTelao | null }) {
                 <motion.div key={hallI} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} style={{ minWidth: 0 }}>
                   <div style={{ fontSize: 15, fontWeight: 700, opacity: 0.7 }}>Hall da fama · {hall.rotulo}</div>
                   <div style={{ fontSize: 22, fontWeight: 900, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                    {hall.campeao} · {Math.round(hall.pontos)} pts{hall.chegaram > 1 ? ` · ${hall.chegaram} cruzaram a linha` : ""}
+                    {hall.campeao} · {rs(hall.valor)}{hall.chegaram > 1 ? ` · ${hall.chegaram} cruzaram a linha` : ""}
                   </div>
                 </motion.div>
               </AnimatePresence>
@@ -831,7 +802,7 @@ export default function Telao({ inicial }: { inicial: EstadoDoTelao | null }) {
                 </svg>
                 <div className="arn-letra" style={{ fontSize: 110, marginTop: 10 }}>{nomeCurto(festa.linha)} cruzou a linha!</div>
                 <div className="arn-letra" style={{ fontSize: 46, WebkitTextStroke: "6px #1a1440", marginTop: 14 }}>
-                  Bateu a meta {festa.placar.periodo === "semana" ? "da semana" : "do mês"} com {pts(festa.linha.pontos)}
+                  Bateu a meta {festa.placar.periodo === "semana" ? "da semana" : "do mês"}: {rs(festa.linha.valor)}
                 </div>
               </>
             ) : (
@@ -842,7 +813,7 @@ export default function Telao({ inicial }: { inicial: EstadoDoTelao | null }) {
                 )}
                 <div className="arn-letra" style={{ fontSize: 104, marginTop: 24 }}>A equipe bateu a meta!</div>
                 <div className="arn-letra" style={{ fontSize: 46, WebkitTextStroke: "6px #1a1440", marginTop: 12 }}>
-                  {estado.premio ? `${estado.premio.titulo || estado.premio.local} — a viagem é de vocês` : `${Math.round(festa.placar.equipe.pontos)} pts ${festa.placar.periodo === "semana" ? "na semana" : "no mês"}`}
+                  {estado.premio ? `${estado.premio.titulo || estado.premio.local} — a viagem é de vocês` : `${rs(festa.placar.equipe.valor)} ${festa.placar.periodo === "semana" ? "na semana" : "no mês"}`}
                 </div>
               </>
             )}

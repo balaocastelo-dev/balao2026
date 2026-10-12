@@ -4,9 +4,10 @@
 //  1. Se o Blob acabou de ser criado e a Arena vinha guardando na gaveta do
 //     banco (tabela arena_ajustes, chaves "g:…"), copia tudo de lá.
 //  2. Senão, lê as tabelas da primeira versão (PR #47): arena_vendedores,
-//     arena_ajustes (regras, corrida, prêmio, chave do vigia) e os pontos
-//     lançados à mão. As vendas e orçamentos do Bling não são copiados: o
-//     vigia manda tudo de novo (a configuração nova pede a varredura).
+//     arena_ajustes (regras, corrida, prêmio, chave do vigia). Os pontos
+//     lançados à mão ficam de fora (pontos não viram reais). As vendas e
+//     orçamentos do Bling não são copiados: o vigia manda tudo de novo (a
+//     configuração nova pede a varredura).
 //
 // Devolve null se o banco estiver fora do ar (a Arena começa vazia e tenta de
 // novo depois), e uma configuração vazia se não houver nada para trazer.
@@ -14,7 +15,7 @@
 
 import { gavetaDoBanco, gravar, ConflitoDeVersao } from "./gaveta";
 import type { ConfigDaArena } from "./dados";
-import type { Lancamento, Piloto } from "./tipos";
+import type { Piloto } from "./tipos";
 
 type Linha = Record<string, unknown>;
 
@@ -106,50 +107,8 @@ async function lerTabelasDaPrimeiraVersao(): Promise<Importacao> {
     if (!naoExiste(e)) throw e;
   }
 
-  // Pontos lançados à mão
-  try {
-    const r = await turso.execute("SELECT * FROM arena_lancamentos WHERE origem = 'manual'");
-    const porMes = new Map<string, Record<string, Lancamento>>();
-    for (const x of r.rows as Linha[]) {
-      const l = {
-        id: String(x.id),
-        tipo: "manual",
-        origem: "manual",
-        blingId: null,
-        numero: null,
-        blingVendedorId: null,
-        pilotoId: x.piloto_id ? String(x.piloto_id) : null,
-        contatoId: null,
-        contatoNome: null,
-        data: String(x.data),
-        registradoEm: String(x.registrado_em ?? new Date().toISOString()),
-        historico: false,
-        total: 0,
-        situacaoId: null,
-        situacao: null,
-        itens: [],
-        licencas: 0,
-        pontos: Number(x.pontos) || 0,
-        detalhe: null,
-        turbo: 1,
-        status: String(x.status ?? "valido"),
-        motivo: x.motivo ? String(x.motivo) : null,
-        anuladoManual: false,
-        pontosManual: null,
-      } as Lancamento;
-      const mes = l.data.slice(0, 7);
-      porMes.set(mes, { ...(porMes.get(mes) ?? {}), [l.id]: l });
-    }
-    for (const [mes, itens] of porMes) {
-      try {
-        await gravar(`lanc-${mes}`, { versao: 1, itens }, null);
-      } catch (e) {
-        if (!(e instanceof ConflitoDeVersao)) throw e;
-      }
-    }
-  } catch (e) {
-    if (!naoExiste(e)) throw e;
-  }
+  // Os pontos lançados à mão na primeira versão não vêm: desde 12/10 (tarde)
+  // a Arena conta em reais, e pontos não viram dinheiro.
 
   return { config, trouxeLancamentos: false };
 }
