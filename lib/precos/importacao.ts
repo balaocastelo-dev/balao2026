@@ -261,7 +261,9 @@ export async function importarDoFornecedor(
     });
   }
 
-  if (saida.novos > 0 || saida.removidos > 0) {
+  // No fim da passada o menu é conferido sempre: categorias trocadas à mão
+  // (ou por regra nova) aparecem no menu sem esperar produto novo.
+  if (saida.novos > 0 || saida.removidos > 0 || opcoes.final) {
     await acrescentarCategorias().catch(() => 0);
     invalidarCacheCategorias();
   }

@@ -126,5 +126,8 @@ describe("categorias do Robson Atacado", () => {
     expect(categoriaDoTechsupri("CARREG PORTÁTIL TOMATE TK1001", "POWER BANK")).toBe("Celular & Smartphone/Carregadores e Power Banks");
     expect(categoriaDoTechsupri("TAPE CARRO LEHMOX LEY-1845A", "TAPE CARRO")).toBe("Automotivo/Som Automotivo");
     expect(categoriaDoTechsupri("FONTE TOMATE 12V/1AP MTT-121", "FONTE")).toBe("Energia/Fontes e Adaptadores");
+    expect(categoriaDoTechsupri("Fonte Tipo-c Skaiky 25W SK-UR-90", "SKAIKY")).toBe("Celular & Smartphone/Carregadores e Power Banks");
+    expect(categoriaDoTechsupri("Fonte X-box 360 1 Pino KP-W017", "DIVERSOS")).toBe("Games/Acessórios Gamer");
+    expect(categoriaDoTechsupri("Pipoqueira Tomate MAZ-118A", "DIVERSOS")).toBe("Diversos/Casa e Cozinha");
   });
 });
