@@ -12,6 +12,7 @@ import {
 } from "@/lib/precos/techsupri";
 import { montarProduto, type RegrasDaFonte } from "@/lib/precos/produto";
 import { semelhanca, modelosDoNome, termoDeBusca } from "@/lib/precos/fotos";
+import { ehCartuchoCompativel } from "@/lib/precos/techsupri";
 
 const m = (nome: string, preco: number, categoria = "Informática/Acessórios") =>
   margemPelaRegra(REGRA_TECHSUPRI, { nome, categoria, preco });
@@ -175,6 +176,33 @@ describe("foto pela KaBuM!", () => {
     // compatível não diz que é da marca da impressora
     expect(marcaDoTechsupri("Cartucho Compatível HP 932XL Preto 50ML")).toBeNull();
     expect(marcaDoTechsupri("Cartucho HP 664 Preto Original")).toBe("HP");
+  });
+
+  it("cartucho e toner: só a foto exata (normal x XL, A x X, cor, kit, marca) — pedido de 11/10", () => {
+    const ok = (a: string, b: string) => semelhanca(a, b) > 0.55;
+    expect(ok("Cartucho Hp 667AL Preto Original", "Cartucho De Tinta Hp 667xl Preto (3ym81ab)")).toBe(false);
+    expect(ok("Cartucho Hp 667AL Preto Original", "Cartucho de Tinta HP 667 Preto 3YM79AB")).toBe(true);
+    expect(ok("Cartucho Hp 667xl Preto Original", "Cartucho Hp 667xl - Preto -")).toBe(true);
+    expect(ok("Cartucho Hp 98al Preto Original", "Cartucho HP 664XL, Jato De Tinta, 8.5ml, Preto - F6V31AB")).toBe(false);
+    expect(ok("Tinta Epson 673 Preto Original", "Tinta Epson 673 Ecotank T673320al Magenta")).toBe(false);
+    expect(ok("Tinta Epson 673 Magenta Light Original", "Tinta Epson 673 Ecotank T673320al Magenta")).toBe(false);
+    expect(ok("Tinta Epson 664 Azul Original", "Tinta P/ Impressora Epson 664 4 Litros Cores Black, Ciano, Magenta E Y")).toBe(false);
+    expect(ok("Cartucho Hp 22XL Color 11ml", "Cartucho De Tinta Compatível Hp 22xl Color - Ollix 14ml")).toBe(false);
+    expect(ok("Refil De Tinta Epson 544 Preto", "Refil De Tinta P/ Impressora Epson T504/544 100ml Preto Multi - Rf027")).toBe(false);
+    expect(ok("Cartucho Epson T1942 Azul 3ml", "Cartucho De Tinta Epson T194220 T194 Ciano")).toBe(true);
+    expect(ok("Toner Compatível Hp Cf401X Azul 2.3K Evolut", "Toner Cf401a Ciano 201a Compatível M252")).toBe(false);
+    expect(ok("Toner Compatível Hp Cf382A/Ce412A/Cc532 Amarelo 2.8K", "Toner Compatível HP CF412A Amarelo")).toBe(false);
+    expect(ok("Toner Evolut Compativel Hp CF230X Preto 3.5K", "Toner Compatível HP W2300X 230X Preto 7.5K")).toBe(false);
+    expect(ok("Toner Compatível Brother TN2370/TN660 2.6K Evolut", "3x Toner Para Brother Compativel Tn2370 Tn2340")).toBe(false);
+    expect(ok("Toner Compatível Hp Cf381A/Ce411A/Cc531 Azul 2.8K Evolut", "Toner Compatível HP CF381A 312A Ciano")).toBe(true);
+  });
+
+  it("cartucho de tinta compatível não é vendido; toner compatível continua", () => {
+    expect(ehCartuchoCompativel("Cartucho Compatível HP 932XL Preto 50ML")).toBe(true);
+    expect(ehCartuchoCompativel("Cartucho Compatível Epson T1351 Preto 14,5ML")).toBe(true);
+    expect(ehCartuchoCompativel("Cartucho Hp 667AL Preto Original")).toBe(false);
+    expect(ehCartuchoCompativel("Toner Compatível Hp CF230A 1.6K Evolut")).toBe(false);
+    expect(ehCartuchoCompativel("Controle Ps4 Compativel Preto")).toBe(false);
   });
 
   it("sem modelo, quase todo o nome precisa aparecer", () => {

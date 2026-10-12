@@ -22,10 +22,10 @@
 import { readFileSync, writeFileSync, existsSync } from "fs";
 import path from "path";
 import {
-  buscarFotoNaAmericanas, buscarFotoNaKabum, buscarFotoNaKalunga, MARCA_ILUSTRATIVA, misturaOriginalECompativel, NOTA_MINIMA, semelhanca,
+  buscarFotoNaAmericanas, buscarFotoNaKabum, buscarFotoNaKalunga, ehSuprimento, MARCA_ILUSTRATIVA, misturaOriginalECompativel, NOTA_MINIMA, semelhanca,
   semelhancaIlustrativa, termoCurto, termoGenerico,
 } from "../lib/precos/fotos";
-import { marcaDoTechsupri, produtosDaCaptura } from "../lib/precos/techsupri";
+import { ehCartuchoCompativel, marcaDoTechsupri, produtosDaCaptura } from "../lib/precos/techsupri";
 import type { ProdutoCapturado } from "../lib/precos/techsupri";
 
 const RAIZ = path.join(__dirname, "..");
@@ -45,7 +45,8 @@ const MARCAS_PEQUENAS = [
 ];
 
 function lerCaptura(arquivo: string): ProdutoCapturado[] {
-  return produtosDaCaptura(readFileSync(arquivo, "utf8"));
+  // Cartucho compatível não é mais vendido (11/10): nem entra no arquivo.
+  return produtosDaCaptura(readFileSync(arquivo, "utf8")).filter((p) => !ehCartuchoCompativel(p.name));
 }
 
 const dormir = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -62,8 +63,11 @@ async function main() {
     let descartadas = 0;
     for (const [id, f] of Object.entries(fotos)) {
       if (!("foto" in f) || !nomes.has(id)) continue;
+      // Foto escolhida e conferida a olho (Mercado Livre) não é reavaliada.
+      if (f.origem === "mercadolivre-conferida") continue;
       // Foto de original em compatível (ou o contrário) sai sempre, até a ilustrativa.
-      const mistura = misturaOriginalECompativel(nomes.get(id)!, f.nome);
+      // Cartucho, tinta e toner: foto ilustrativa também sai (só vale a exata).
+      const mistura = misturaOriginalECompativel(nomes.get(id)!, f.nome) || (ehSuprimento(nomes.get(id)!) && String(f.origem || "").startsWith("ilustrativa"));
       if (!mistura && String(f.origem || "").startsWith("ilustrativa")) continue;
       if (mistura || semelhanca(nomes.get(id)!, f.nome) < NOTA_MINIMA) {
         if (mistura) console.log(`  original/compatível: ${nomes.get(id)} <- ${f.nome}`);
