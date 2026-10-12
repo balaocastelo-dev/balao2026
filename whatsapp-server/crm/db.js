@@ -210,6 +210,56 @@ const MIGRACOES = [
         ON crm_evento ((detalhes->>'envioId')) WHERE tipo = 'email_enviado';
     `,
   },
+  {
+    id: "crm_005_campanha",
+    sql: `
+      -- Disparo por tema de conversa (crm/campanha.js). A campanha guarda o
+      -- texto e o filtro; a lista de quem recebe é tirada do banco na hora de
+      -- criar e fica em crm_campanha_envio, uma linha por conversa. É isso
+      -- que deixa o envio continuar de onde parou depois de um reinício.
+      CREATE TABLE IF NOT EXISTS crm_campanha (
+        id          bigserial PRIMARY KEY,
+        nome        text NOT NULL,
+        texto       text NOT NULL,
+        filtro      jsonb NOT NULL DEFAULT '{}'::jsonb,
+        estado      text NOT NULL DEFAULT 'enviando'
+                    CHECK (estado IN ('enviando','pausada','concluida','cancelada')),
+        criada_por  text,
+        criada_em   timestamptz NOT NULL DEFAULT now(),
+        total       int NOT NULL DEFAULT 0,
+        enviados    int NOT NULL DEFAULT 0,
+        falhas      int NOT NULL DEFAULT 0,
+        pulados     int NOT NULL DEFAULT 0,
+        inicio      timestamptz,
+        fim         timestamptz
+      );
+      CREATE INDEX IF NOT EXISTS crm_campanha_estado ON crm_campanha (estado, criada_em);
+
+      -- tentativa_em: marcada ANTES de mandar. Linha pendente com tentativa
+      -- antiga quer dizer que o processo caiu no meio do envio — ela não é
+      -- repetida (melhor perder uma do que mandar duas vezes ao cliente).
+      CREATE TABLE IF NOT EXISTS crm_campanha_envio (
+        campanha_id  bigint NOT NULL REFERENCES crm_campanha(id) ON DELETE CASCADE,
+        chat_id      text NOT NULL,
+        ordem        int NOT NULL DEFAULT 0,
+        estado       text NOT NULL DEFAULT 'pendente'
+                     CHECK (estado IN ('pendente','enviado','falhou','pulado')),
+        motivo       text,
+        tentativa_em timestamptz,
+        enviado_em   timestamptz,
+        mensagem_id  text,
+        PRIMARY KEY (campanha_id, chat_id)
+      );
+      CREATE INDEX IF NOT EXISTS crm_campanha_envio_fila
+        ON crm_campanha_envio (campanha_id, ordem) WHERE estado = 'pendente';
+      CREATE INDEX IF NOT EXISTS crm_campanha_envio_enviado
+        ON crm_campanha_envio (enviado_em) WHERE estado = 'enviado';
+      CREATE INDEX IF NOT EXISTS crm_campanha_envio_chat
+        ON crm_campanha_envio (chat_id, enviado_em DESC);
+      CREATE INDEX IF NOT EXISTS crm_campanha_envio_tentativa
+        ON crm_campanha_envio (tentativa_em) WHERE tentativa_em IS NOT NULL;
+    `,
+  },
 ];
 
 async function garantirBanco(urlAdmin, nome) {
