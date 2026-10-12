@@ -1,23 +1,17 @@
-import { getVendedores, getConfig, getEventosMidia, getVendasRecentes } from './actions';
-import ArenaClient from './ArenaClient';
+import type { Metadata } from "next";
+import { estadoDoTelao } from "@/lib/arena/estado";
+import Telao from "./Telao";
 
-// Força renderização dinâmica
-export const dynamic = 'force-dynamic';
+export const metadata: Metadata = {
+  title: "Arena de vendas",
+  robots: { index: false, follow: false },
+};
 
+// Muda a cada venda: o estado vem do cache de 20 s (lib/arena/estado.ts).
+export const dynamic = "force-dynamic";
+
+/** O telão da loja: a corrida de vendas, ligada ao Bling pelo vigia do PC. */
 export default async function ArenaPage() {
-  const [vendedores, config, eventos, vendasRecentes] = await Promise.all([
-    getVendedores(),
-    getConfig(),
-    getEventosMidia(),
-    getVendasRecentes(10)
-  ]);
-
-  return (
-    <ArenaClient 
-      vendedoresIniciais={vendedores} 
-      configInicial={config} 
-      eventosIniciais={eventos}
-      vendasRecentesIniciais={vendasRecentes}
-    />
-  );
+  const estado = await estadoDoTelao();
+  return <Telao inicial={estado} />;
 }
