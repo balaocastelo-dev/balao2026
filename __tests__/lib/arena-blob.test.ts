@@ -87,7 +87,7 @@ describe("gaveta no Vercel Blob", () => {
       { tipo: "venda", blingId: "9", numero: "9", data: hoje, vendedorBlingId: "222", contatoId: "1", contatoNome: "X", total: 100, situacaoId: 6, situacao: null, itens: [] },
     ]);
     expect(loja.has(`arena/lanc-${hoje.slice(0, 7)}.json`)).toBe(true);
-    expect((await lancamentosEntre(hoje, hoje))[0].pontos).toBe(10);
+    expect((await lancamentosEntre(hoje, hoje))[0].valor).toBe(100);
     const foto = (await lerConfig()).pilotos.find((p) => p.id === id)!.foto!;
     const arq = await lerArquivo(foto.slice("gaveta:".length));
     expect(arq?.corpo.toString()).toBe("rosto");

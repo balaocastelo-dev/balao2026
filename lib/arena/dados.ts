@@ -10,20 +10,17 @@
 import { createHash, randomBytes, randomUUID, timingSafeEqual } from "crypto";
 import { atualizar, gravar, gravarArquivo, guardaArquivos, ler, ConflitoDeVersao, tipoDaGaveta } from "./gaveta";
 import { hojeNaLoja, somarDias } from "./periodos";
-import { comTurbo, normalizarRegras, REGRAS_PADRAO, type DocumentoDoBling, type RegrasDePontos } from "./pontos";
-import { pontuarLote, type OrcamentoConhecido } from "./lote";
-import { multiplicadorNaChegada, normalizarTurbo } from "./turbo";
+import { centavos, normalizarRegras, REGRAS_PADRAO, valorar, type DocumentoDoBling, type RegrasDeValor, type Valoracao } from "./valores";
 import { importarConfig } from "./migracao";
 import {
   CORES_DE_KART,
   CORRIDA_PADRAO,
   KARTS,
   PREMIO_PADRAO,
-  TURBO_PADRAO,
   WHATSAPP_PADRAO,
   type AjustesDaCorrida,
-  type AjustesDoTurbo,
   type AjustesDoWhatsApp,
+  type FuncaoDoPiloto,
   type Lancamento,
   type ModeloDeKart,
   type Piloto,
@@ -34,13 +31,17 @@ import {
 
 // ---------------------------------------------------------------- config
 
+/**
+ * versao 3 (12/10, tarde): tudo em reais. A versão 2 contava pontos; ao ler uma
+ * configuração antiga, as metas dos pilotos (que eram em pontos) são apagadas,
+ * a meta da equipe vira R$ 63 mil / R$ 250 mil e os lançamentos são refeitos.
+ */
 export interface ConfigDaArena {
-  versao: 2;
+  versao: 3;
   pilotos: Piloto[];
-  regras: RegrasDePontos;
+  regras: RegrasDeValor;
   corrida: AjustesDaCorrida;
   premio: Premio;
-  turbo: AjustesDoTurbo;
   whatsapp: AjustesDoWhatsApp;
   vendedoresBling: { id: string; nome: string }[];
   chaveHash: string | null;
@@ -52,12 +53,11 @@ export interface ConfigDaArena {
 
 export function configVazia(): ConfigDaArena {
   return {
-    versao: 2,
+    versao: 3,
     pilotos: [],
     regras: { ...REGRAS_PADRAO },
     corrida: { ...CORRIDA_PADRAO },
     premio: { ...PREMIO_PADRAO },
-    turbo: { ...TURBO_PADRAO },
     whatsapp: { ...WHATSAPP_PADRAO },
     vendedoresBling: [],
     chaveHash: null,
@@ -69,13 +69,16 @@ export function configVazia(): ConfigDaArena {
 /** Completa o que faltar (documento antigo, campo novo). */
 function completar(c: Partial<ConfigDaArena> | null): ConfigDaArena {
   const base = configVazia();
-  const x = { ...base, ...(c ?? {}) } as ConfigDaArena;
+  const antiga = Boolean(c) && Number((c as { versao?: number }).versao ?? 2) < 3;
+  const x = { ...base, ...(c ?? {}) } as ConfigDaArena & { turbo?: unknown };
+  delete x.turbo;
   x.regras = normalizarRegras(x.regras);
-  x.corrida = normalizarCorrida(x.corrida);
+  x.corrida = normalizarCorrida(antiga ? { ...x.corrida, metaGlobalSemana: CORRIDA_PADRAO.metaGlobalSemana, metaGlobalMes: CORRIDA_PADRAO.metaGlobalMes } : x.corrida);
   x.premio = normalizarPremio(x.premio);
-  x.turbo = normalizarTurbo(x.turbo);
   x.whatsapp = normalizarWhatsApp(x.whatsapp);
-  x.pilotos = (x.pilotos ?? []).map((p, i) => completarPiloto(p, i));
+  // As metas da versão 2 eram em pontos: não valem como reais.
+  x.pilotos = (x.pilotos ?? []).map((p, i) => completarPiloto(antiga ? { ...p, metaSemana: null, metaMes: null } : p, i));
+  x.versao = 3;
   return x;
 }
 
@@ -91,6 +94,7 @@ function completarPiloto(p: Partial<Piloto>, i: number): Piloto {
     kart: (KARTS as readonly string[]).includes(kart) ? (kart as ModeloDeKart) : KARTS[i % KARTS.length],
     numero: Number(p.numero) > 0 ? Number(p.numero) : i + 1,
     blingVendedorId: p.blingVendedorId ? String(p.blingVendedorId) : null,
+    funcao: p.funcao === "tecnico" ? "tecnico" : "vendedor",
     metaSemana: p.metaSemana != null && Number(p.metaSemana) > 0 ? Number(p.metaSemana) : null,
     metaMes: p.metaMes != null && Number(p.metaMes) > 0 ? Number(p.metaMes) : null,
     ativo: p.ativo !== false,
@@ -141,6 +145,7 @@ export async function lerConfig(opcoes: { tentarImportar?: boolean } = {}): Prom
     }
     return nova;
   }
+  if (Number((dados as { versao?: number }).versao ?? 2) < 3) return migrarParaReais();
   const c = completar(dados);
   if (c.importacaoPendente && opcoes.tentarImportar && Date.now() - ultimaTentativaDeImportar > 5 * 60_000) {
     ultimaTentativaDeImportar = Date.now();
@@ -154,13 +159,23 @@ export async function lerConfig(opcoes: { tentarImportar?: boolean } = {}): Prom
         if (!atual.chaveHash) atual.chaveHash = i.chaveHash;
         if (!atual.premio.titulo && !atual.premio.imagem) atual.premio = i.premio;
         if (atual.vendedoresBling.length === 0) atual.vendedoresBling = i.vendedoresBling;
-        atual.regras = i.regras;
-        atual.corrida = i.corrida;
         return atual;
       });
     }
   }
   return c;
+}
+
+/**
+ * 12/10 (tarde): a Arena deixou de contar pontos e passou a contar reais.
+ * Grava a configuração na versão 3 e refaz os lançamentos guardados.
+ */
+async function migrarParaReais(): Promise<ConfigDaArena> {
+  const r = await atualizar<ConfigDaArena>("config", configVazia, (c) =>
+    Number((c as { versao?: number }).versao ?? 2) < 3 ? completar(c) : undefined
+  );
+  await recalcularTudo(completar(r)).catch((e) => console.error("[arena:reais]", (e as Error).message));
+  return completar(r);
 }
 
 function primeiroDiaDeTresMesesAtras() {
@@ -187,15 +202,13 @@ export async function mudarConfig(fn: (c: ConfigDaArena) => ConfigDaArena | unde
 
 export function normalizarCorrida(e: unknown): AjustesDaCorrida {
   const o = (e && typeof e === "object" ? e : {}) as Record<string, unknown>;
-  const n = (v: unknown, p: number) => (Number.isFinite(Number(v)) && Number(v) >= 0 ? Math.min(Number(v), 1_000_000) : p);
+  const n = (v: unknown, p: number) => (Number.isFinite(Number(v)) && Number(v) > 0 ? Math.min(Number(v), 100_000_000) : p);
   const P = CORRIDA_PADRAO;
   return {
     titulo: String(o.titulo ?? P.titulo).slice(0, 80) || P.titulo,
     periodoTelao: o.periodoTelao === "semana" || o.periodoTelao === "mes" ? o.periodoTelao : "alternar",
     metaGlobalSemana: n(o.metaGlobalSemana, P.metaGlobalSemana),
     metaGlobalMes: n(o.metaGlobalMes, P.metaGlobalMes),
-    metaPadraoSemana: Math.max(1, n(o.metaPadraoSemana, P.metaPadraoSemana)),
-    metaPadraoMes: Math.max(1, n(o.metaPadraoMes, P.metaPadraoMes)),
     som: typeof o.som === "boolean" ? o.som : P.som,
   };
 }
@@ -238,7 +251,6 @@ export function normalizarWhatsApp(e: unknown): AjustesDoWhatsApp {
     meta: b(o.meta, P.meta),
     equipe: b(o.equipe, P.equipe),
     lideranca: b(o.lideranca, P.lideranca),
-    turbo: b(o.turbo, P.turbo),
   };
 }
 
@@ -252,6 +264,7 @@ export interface DadosDoPiloto {
   kart?: string | null;
   numero?: number | null;
   blingVendedorId?: string | null;
+  funcao?: FuncaoDoPiloto | null;
   metaSemana?: number | null;
   metaMes?: number | null;
   ativo?: boolean;
@@ -286,7 +299,7 @@ export async function salvarPiloto(id: string | null, d: DadosDoPiloto): Promise
   const nome = String(d.nome ?? "").trim().slice(0, 120);
   if (!nome) throw new Error("O piloto precisa de um nome.");
   const bling = d.blingVendedorId ? String(d.blingVendedorId).replace(/\D/g, "").slice(0, 32) || null : null;
-  const meta = (v: unknown) => (v === null || v === undefined || v === "" || !(Number(v) > 0) ? null : Math.min(Number(v), 1_000_000));
+  const meta = (v: unknown) => (v === null || v === undefined || v === "" || !(Number(v) > 0) ? null : Math.min(Number(v), 100_000_000));
   const novoId = id ?? randomUUID();
   const atual = (await lerConfig()).pilotos.find((p) => p.id === novoId);
   const foto = await guardarFoto(novoId, d.foto, atual?.foto ?? null);
@@ -310,6 +323,7 @@ export async function salvarPiloto(id: string | null, d: DadosDoPiloto): Promise
         kart: (d.kart as ModeloDeKart) ?? anterior?.kart,
         numero: d.numero && Number(d.numero) > 0 ? Math.min(99, Math.round(Number(d.numero))) : anterior?.numero ?? c.pilotos.length + 1,
         blingVendedorId: bling,
+        funcao: d.funcao ?? anterior?.funcao ?? "vendedor",
         metaSemana: d.metaSemana === undefined ? anterior?.metaSemana ?? null : meta(d.metaSemana),
         metaMes: d.metaMes === undefined ? anterior?.metaMes ?? null : meta(d.metaMes),
         ativo: d.ativo !== false,
@@ -328,7 +342,7 @@ export async function removerPiloto(id: string) {
 }
 
 export async function gravarMetas(metas: { id: string; metaSemana: number | null; metaMes: number | null }[]) {
-  const v = (x: number | null) => (x && x > 0 ? Math.min(x, 1_000_000) : null);
+  const v = (x: number | null) => (x && x > 0 ? Math.min(x, 100_000_000) : null);
   await mudarConfig((c) => {
     for (const m of metas.slice(0, 100)) {
       const p = c.pilotos.find((x) => x.id === m.id);
@@ -348,9 +362,6 @@ export async function gravarCorrida(x: unknown) {
 }
 export async function gravarPremio(x: unknown) {
   await mudarConfig((c) => ({ ...c, premio: normalizarPremio(x) }));
-}
-export async function gravarTurbo(x: unknown) {
-  return (await mudarConfig((c) => ({ ...c, turbo: normalizarTurbo({ ...c.turbo, ...(x as object) }) }))).turbo;
 }
 export async function gravarWhatsApp(x: unknown) {
   return (await mudarConfig((c) => ({ ...c, whatsapp: normalizarWhatsApp(x) }))).whatsapp;
@@ -453,9 +464,20 @@ export async function lancamentosEntre(inicio: string, fim: string): Promise<Lan
   return out.sort((a, b) => (b.data === a.data ? b.registradoEm.localeCompare(a.registradoEm) : b.data.localeCompare(a.data)));
 }
 
+/**
+ * Lançamento guardado na versão 2 (pontos) ainda sem "valor": o valor sai do
+ * próprio documento até o "Recalcular" gravar a versão nova.
+ */
 function completarLancamento(l: Lancamento): Lancamento {
-  const d = (l.detalhe ?? null) as (Lancamento["detalhe"] & { turbo?: number }) | null;
-  return { ...l, turbo: Number(l.turbo) > 1 ? Number(l.turbo) : 1, detalhe: d ? { ...d, ticket: d.ticket ?? 0 } : null };
+  if (typeof l.valor === "number") return { ...l, valorLicencas: l.valorLicencas ?? 0, valorManual: l.valorManual ?? null };
+  const velho = l as Lancamento & { pontos?: number; pontosManual?: number | null; detalhe?: unknown; turbo?: number };
+  const { pontos: _p, pontosManual: _pm, detalhe: _d, turbo: _t, ...resto } = velho;
+  void _p; void _pm; void _d; void _t;
+  const base = { ...resto, valorLicencas: 0, valorManual: null } as Lancamento;
+  if (l.origem === "manual") {
+    return { ...base, valor: 0, status: "anulado", anuladoManual: true, motivo: `Lançado em pontos (${_p ?? 0}), antes da Arena contar em reais` };
+  }
+  return { ...base, valor: l.status === "valido" && l.tipo === "venda" ? centavos(l.total) : 0 };
 }
 
 export interface FiltroDeLancamentos {
@@ -504,46 +526,36 @@ function docDoLancamento(l: Lancamento): DocumentoDoBling {
   };
 }
 
-/** Pontos finais: regra × turbo, e o que foi mexido à mão no painel. */
-function aplicarAjustes(l: Pick<Lancamento, "anuladoManual" | "pontosManual" | "turbo">, p: ReturnType<typeof pontuarLote> extends Map<string, infer P> ? P : never) {
-  const t = comTurbo(p, l.turbo);
-  let status: StatusGravado = t.status;
-  let pontos = t.pontos;
-  let motivo = t.motivo;
+/** Valor final: o do documento, ou o que foi mexido à mão no painel. */
+function aplicarAjustes(l: Pick<Lancamento, "anuladoManual" | "valorManual">, v: Valoracao) {
+  let status: StatusGravado = v.status;
+  let valor = v.valor;
+  let motivo = v.motivo;
   if (l.anuladoManual) {
     status = "anulado";
-    pontos = 0;
+    valor = 0;
     motivo = "Anulado no painel";
-  } else if (l.pontosManual != null && t.status === "valido") {
-    pontos = l.pontosManual;
+  } else if (l.valorManual != null && v.status === "valido") {
+    valor = l.valorManual;
   }
-  return { status, pontos, motivo, licencas: t.licencas, detalhe: t.detalhe };
-}
-
-function orcamentosDosMeses(meses: { doc: DocDoMes }[], excluir: Set<string>): OrcamentoConhecido[] {
-  const out: OrcamentoConhecido[] = [];
-  for (const m of meses)
-    for (const l of Object.values(m.doc.itens))
-      if (l.tipo === "orcamento" && l.blingId && !excluir.has(l.id))
-        out.push({ blingId: l.blingId, contatoId: l.contatoId, vendedorBlingId: l.blingVendedorId, data: l.data, total: l.total, status: l.status });
-  return out;
+  return { status, valor: centavos(valor), motivo, licencas: v.licencas, valorLicencas: v.valorLicencas };
 }
 
 /**
  * Grava um lote vindo do vigia. Documento igual ao gravado é pulado; ajuste
- * feito à mão no painel (anular, trocar os pontos) nunca é desfeito pelo Bling.
+ * feito à mão no painel (anular, trocar o valor) nunca é desfeito pelo Bling.
  */
 export async function gravarDocumentos(docs: DocumentoDoBling[], agora = new Date()): Promise<{ gravados: number; novos: number }> {
   if (docs.length === 0) return { gravados: 0, novos: 0 };
   const config = await lerConfig({ tentarImportar: true });
   const regras = config.regras;
   const hoje = hojeNaLoja(agora);
-  const multiplicador = multiplicadorNaChegada(config.turbo, agora);
 
   for (let tentativa = 0; tentativa < 5; tentativa++) {
     const menor = docs.reduce((m, d) => (d.data < m ? d.data : m), docs[0].data);
     const maior = docs.reduce((m, d) => (d.data > m ? d.data : m), docs[0].data);
-    const meses = await Promise.all(mesesEntre(somarDias(menor, -Math.round(regras.conversaoDias) - 1), maior).map(lerMes));
+    // Um mês para trás: o pedido que mudou de data no Bling sai do mês antigo.
+    const meses = await Promise.all(mesesEntre(somarDias(menor, -31), maior).map(lerMes));
     const porMes = new Map(meses.map((m) => [m.mes, m]));
     const existente = (id: string) => {
       for (const m of meses) if (m.doc.itens[id]) return m.doc.itens[id];
@@ -553,22 +565,19 @@ export async function gravarDocumentos(docs: DocumentoDoBling[], agora = new Dat
     const mudados = docs.filter((d) => existente(`${d.tipo}:${d.blingId}`)?.assinatura !== assinar(d));
     if (mudados.length === 0) return { gravados: 0, novos: 0 };
 
-    const ids = new Set(mudados.map((d) => `${d.tipo}:${d.blingId}`));
-    const pontos = pontuarLote(mudados, orcamentosDosMeses(meses, ids), regras);
     const agoraTxt = agora.toISOString();
     let novos = 0;
     const tocados = new Set<string>();
 
     for (const d of mudados) {
       const id = `${d.tipo}:${d.blingId}`;
-      const e = existente(id);
+      const e = existente(id) ? completarLancamento(existente(id)!) : null;
       if (!e) novos++;
       // O que chega com data de mais de um dia atrás entra como histórico:
-      // conta no placar, mas o telão não comemora e não ganha turbo.
+      // conta no placar, mas o telão não comemora.
       const historico = e ? e.historico : d.data < somarDias(hoje, -1);
-      const turbo = e ? Number(e.turbo) || 1 : historico ? 1 : multiplicador;
-      const base = { anuladoManual: e?.anuladoManual ?? false, pontosManual: e?.pontosManual ?? null, turbo };
-      const p = aplicarAjustes(base, pontos.get(id)!);
+      const base = { anuladoManual: e?.anuladoManual ?? false, valorManual: e?.valorManual ?? null };
+      const v = aplicarAjustes(base, valorar(d, regras));
       const l: Lancamento = {
         id,
         tipo: d.tipo,
@@ -587,7 +596,7 @@ export async function gravarDocumentos(docs: DocumentoDoBling[], agora = new Dat
         situacao: d.situacao ? d.situacao.slice(0, 60) : null,
         itens: itensCurtos(d),
         ...base,
-        ...p,
+        ...v,
         assinatura: assinar(d),
       };
       // Mudou de mês no Bling: sai do mês antigo.
@@ -621,24 +630,29 @@ export async function gravarDocumentos(docs: DocumentoDoBling[], agora = new Dat
   throw new Error("Muitas gravações ao mesmo tempo na Arena; o vigia manda de novo na próxima volta.");
 }
 
-/** Refaz os pontos dos últimos 6 meses com as regras atuais (mantém turbo e ajustes à mão). */
-export async function recalcularTudo(): Promise<number> {
-  const config = await lerConfig();
+/**
+ * Refaz os valores dos últimos 6 meses com as regras atuais (mantém os ajustes
+ * à mão). Também passa para reais o que ainda estava em pontos.
+ */
+export async function recalcularTudo(configPronta?: ConfigDaArena): Promise<number> {
+  const config = configPronta ?? (await lerConfig());
   const hoje = hojeNaLoja();
   for (let tentativa = 0; tentativa < 4; tentativa++) {
     const meses = await Promise.all(mesesEntre(somarDias(hoje, -186), hoje).map(lerMes));
-    const todos = meses.flatMap((m) => Object.values(m.doc.itens).filter((l) => l.origem === "bling"));
-    const pontos = pontuarLote(todos.map(docDoLancamento), [], config.regras);
     const tocados = new Set<string>();
     let mudou = 0;
     for (const m of meses) {
-      for (const l of Object.values(m.doc.itens)) {
-        if (l.origem !== "bling") continue;
-        const p = pontos.get(l.id);
-        if (!p) continue;
-        const r = aplicarAjustes(completarLancamento(l), p);
-        if (r.status === l.status && r.pontos === l.pontos && r.licencas === l.licencas && JSON.stringify(r.detalhe) === JSON.stringify(l.detalhe)) continue;
-        Object.assign(l, r);
+      for (const [id, cru] of Object.entries(m.doc.itens)) {
+        const l = completarLancamento(cru);
+        const antigo = typeof cru.valor !== "number";
+        let novo: Lancamento = l;
+        if (l.origem === "bling") {
+          novo = { ...l, ...aplicarAjustes(l, valorar(docDoLancamento(l), config.regras)) };
+        } else if (l.origem === "assistencia") {
+          novo = { ...l, ...aplicarAjustes(l, { status: l.total > 0 ? "valido" : "ignorado", valor: l.total, motivo: l.total > 0 ? null : "OS sem valor", licencas: 0, valorLicencas: 0 }) };
+        }
+        if (!antigo && novo.status === cru.status && novo.valor === cru.valor && novo.licencas === cru.licencas && novo.valorLicencas === cru.valorLicencas) continue;
+        m.doc.itens[id] = novo;
         tocados.add(m.mes);
         mudou++;
       }
@@ -673,13 +687,13 @@ async function mudarLancamento(id: string, data: string | null, fn: (l: Lancamen
   return false;
 }
 
-/** Ajuste à mão: anular/reativar ou trocar os pontos de um lançamento do Bling. */
-export async function ajustarLancamento(id: string, acao: { anular?: boolean; pontosManual?: number | null; data?: string }) {
+/** Ajuste à mão: anular/reativar ou trocar o valor de um lançamento do Bling ou de uma OS. */
+export async function ajustarLancamento(id: string, acao: { anular?: boolean; valorManual?: number | null; data?: string }) {
   const ok = await mudarLancamento(id, acao.data ?? null, (l) => {
     if (acao.anular !== undefined) l.anuladoManual = acao.anular;
-    if (acao.pontosManual !== undefined) {
-      const v = acao.pontosManual;
-      l.pontosManual = v == null || !Number.isFinite(Number(v)) ? null : Number(v);
+    if (acao.valorManual !== undefined) {
+      const v = acao.valorManual;
+      l.valorManual = v == null || !Number.isFinite(Number(v)) ? null : centavos(Number(v));
     }
     l.assinatura = null; // o próximo recálculo refaz
     return l;
@@ -688,40 +702,42 @@ export async function ajustarLancamento(id: string, acao: { anular?: boolean; po
   await recalcularTudo();
 }
 
-/** Pontos lançados à mão (bônus por um bom atendimento, penalidade…). */
-export async function lancarManual(pilotoId: string, pontos: number, motivo: string, data?: string) {
-  const p = Number(pontos);
-  if (!Number.isFinite(p) || p === 0 || Math.abs(p) > 100000) throw new Error("Pontos inválidos.");
-  const m = String(motivo ?? "").trim().slice(0, 300);
-  if (!m) throw new Error("Diga o motivo do lançamento.");
-  const dia = data && /^\d{4}-\d{2}-\d{2}$/.test(data) ? data : hojeNaLoja();
-  const agora = new Date().toISOString();
-  const l: Lancamento = {
-    id: `manual:${randomUUID()}`,
-    tipo: "manual",
-    origem: "manual",
+function lancamentoVazio(id: string, tipo: Lancamento["tipo"], origem: Lancamento["origem"], dia: string): Lancamento {
+  return {
+    id,
+    tipo,
+    origem,
     blingId: null,
     numero: null,
     blingVendedorId: null,
-    pilotoId,
+    pilotoId: null,
     contatoId: null,
     contatoNome: null,
     data: dia,
-    registradoEm: agora,
+    registradoEm: new Date().toISOString(),
     historico: false,
     total: 0,
     situacaoId: null,
     situacao: null,
     itens: [],
     licencas: 0,
-    pontos: p,
-    detalhe: null,
-    turbo: 1,
+    valorLicencas: 0,
+    valor: 0,
     status: "valido",
-    motivo: m,
+    motivo: null,
     anuladoManual: false,
-    pontosManual: null,
+    valorManual: null,
   };
+}
+
+/** Valor lançado à mão (venda fora do Bling, acerto…). Negativo desconta. */
+export async function lancarManual(pilotoId: string, valor: number, motivo: string, data?: string) {
+  const v = centavos(Number(valor));
+  if (!Number.isFinite(v) || v === 0 || Math.abs(v) > 10_000_000) throw new Error("Valor inválido.");
+  const m = String(motivo ?? "").trim().slice(0, 300);
+  if (!m) throw new Error("Diga o motivo do lançamento.");
+  const dia = data && /^\d{4}-\d{2}-\d{2}$/.test(data) ? data : hojeNaLoja();
+  const l = { ...lancamentoVazio(`manual:${randomUUID()}`, "manual", "manual", dia), pilotoId, total: v, valor: v, motivo: m };
   await atualizar<DocDoMes>(chaveDoMes(mesDe(dia)), () => ({ versao: 1, itens: {} }), (doc) => {
     doc.itens[l.id] = l;
     return doc;
@@ -729,8 +745,97 @@ export async function lancarManual(pilotoId: string, pontos: number, motivo: str
 }
 
 export async function apagarManual(id: string, data?: string) {
-  if (!id.startsWith("manual:")) throw new Error("Só lançamento manual pode ser apagado; os do Bling se anulam.");
+  if (!id.startsWith("manual:")) throw new Error("Só lançamento manual pode ser apagado; os do Bling e as OS se anulam.");
   if (!(await mudarLancamento(id, data ?? null, () => null))) throw new Error("Lançamento não encontrado.");
+}
+
+// ---------------------------------------------------------------- ordens de serviço
+
+/** Uma OS do Fechamento da assistência (tabela weekly_orders). */
+export interface OrdemDeServico {
+  id: string;
+  numero: string | null;
+  data: string;
+  /** Mão de obra + peças cobradas do cliente. */
+  valor: number;
+  tecnicoId: string | null;
+  status: string | null;
+}
+
+/** Tira a OS de qualquer mês dos últimos 7 (e do mês dela), sem gravar mês que não mudou. */
+async function tirarOS(id: string, menos: string | null) {
+  const hoje = hojeNaLoja();
+  const meses = new Set(mesesEntre(somarDias(hoje, -215), somarDias(hoje, 31)));
+  for (const mes of meses) {
+    if (mes === menos) continue;
+    await atualizar<DocDoMes>(chaveDoMes(mes), () => ({ versao: 1, itens: {} }), (doc) => {
+      if (!doc.itens[id]) return undefined;
+      delete doc.itens[id];
+      return doc;
+    });
+  }
+}
+
+/**
+ * Grava (ou atualiza) a OS na corrida: o valor vai para o técnico dela. OS sem
+ * técnico fica guardada, mas não conta para ninguém até alguém ser escolhido.
+ */
+export async function registrarOS(os: OrdemDeServico, agora = new Date()) {
+  if (!os.id || !/^\d{4}-\d{2}-\d{2}$/.test(os.data)) return;
+  const id = `os:${String(os.id).slice(0, 80)}`;
+  const mes = mesDe(os.data);
+  const valor = centavos(Math.max(0, Number(os.valor) || 0));
+  await tirarOS(id, mes);
+  const hoje = hojeNaLoja(agora);
+  await atualizar<DocDoMes>(chaveDoMes(mes), () => ({ versao: 1, itens: {} }), (doc) => {
+    const e = doc.itens[id] ? completarLancamento(doc.itens[id]) : null;
+    const base = lancamentoVazio(id, "os", "assistencia", os.data);
+    const ajustes = { anuladoManual: e?.anuladoManual ?? false, valorManual: e?.valorManual ?? null };
+    const v = aplicarAjustes(ajustes, {
+      status: valor > 0 ? "valido" : "ignorado",
+      valor,
+      motivo: valor > 0 ? null : "OS sem valor",
+      licencas: 0,
+      valorLicencas: 0,
+    });
+    doc.itens[id] = {
+      ...base,
+      ...ajustes,
+      ...v,
+      numero: os.numero ? String(os.numero).slice(0, 40) : null,
+      // Técnico escolhido no painel da Arena não se perde se a OS vier de novo sem técnico.
+      pilotoId: os.tecnicoId || e?.pilotoId || null,
+      total: valor,
+      situacao: os.status ? String(os.status).slice(0, 40) : null,
+      registradoEm: e?.registradoEm ?? agora.toISOString(),
+      historico: e ? e.historico : os.data < somarDias(hoje, -1),
+      motivo: v.motivo ?? (os.tecnicoId || e?.pilotoId ? null : "OS sem técnico"),
+    };
+    return doc;
+  });
+}
+
+/** A OS foi apagada no Fechamento: sai da corrida. */
+export async function apagarOS(osId: string) {
+  await tirarOS(`os:${String(osId).slice(0, 80)}`, null);
+}
+
+/** Troca (ou escolhe) o técnico de uma OS direto no painel da Arena. */
+export async function trocarTecnicoDaOS(id: string, tecnicoId: string | null, data?: string) {
+  if (!id.startsWith("os:")) throw new Error("Só OS tem técnico.");
+  const ok = await mudarLancamento(id, data ?? null, (l) => {
+    l.pilotoId = tecnicoId || null;
+    l.motivo = l.status === "valido" && !tecnicoId ? "OS sem técnico" : l.status === "valido" ? null : l.motivo;
+    return l;
+  });
+  if (!ok) throw new Error("OS não encontrada.");
+}
+
+/** Técnicos (pilotos com função técnico), para o Fechamento da assistência. */
+export async function listarTecnicos(): Promise<{ id: string; nome: string }[]> {
+  return (await lerConfig()).pilotos
+    .filter((p) => p.ativo && p.funcao === "tecnico")
+    .map((p) => ({ id: p.id, nome: p.apelido || p.nome }));
 }
 
 /** Vendedores do Bling que aparecem nos lançamentos e ainda não têm piloto. */

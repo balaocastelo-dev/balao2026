@@ -16,7 +16,6 @@ import {
   gravarMetas,
   gravarPremio,
   gravarRegras,
-  gravarTurbo,
   gravarWhatsApp,
   lancamentosEntre,
   lancarManual,
@@ -27,15 +26,17 @@ import {
   removerPiloto,
   salvarPiloto,
   tipoDaGaveta,
+  trocarTecnicoDaOS,
   vendedoresSemPiloto,
   destinoValido,
   type DadosDoPiloto,
   type FiltroDeLancamentos,
 } from "@/lib/arena/dados";
-import { conferirTurbo, fotoPublica, reconstruirTelao, vigiaOnline, lerAvisos } from "@/lib/arena/estado";
+import { fotoPublica, reconstruirTelao, vigiaOnline, lerAvisos } from "@/lib/arena/estado";
 import { janela, mesAnterior, semanaAnterior } from "@/lib/arena/periodos";
 import { montarPlacar, sugerirMeta } from "@/lib/arena/placar";
-import { REGRAS_PADRAO } from "@/lib/arena/pontos";
+import { REGRAS_PADRAO } from "@/lib/arena/valores";
+import { trazerOSDoFechamento } from "@/lib/arena/assistencia";
 import { CORES_DE_KART, KARTS } from "@/lib/arena/tipos";
 import { enviarAviso, listarGrupos } from "@/lib/arena/whatsapp";
 import { aprovarPareamento, pedidoPendente, recusarPareamento } from "@/lib/arena/pareamento";
@@ -70,22 +71,22 @@ export async function carregarPainel() {
     const placarSemana = montarPlacar(crus, lancs, semana, corrida);
     const placarMes = montarPlacar(crus, lancs, mes, corrida);
 
-    // Meta sugerida de cada piloto: média do que ele fez nas 4 semanas e nos
-    // 3 meses anteriores, com 15% a mais.
+    // Meta sugerida de cada piloto: média do que ele fez (em reais) nas 4
+    // semanas e nos 3 meses anteriores, com 15% a mais.
     const passadasS = semanas.map((j) => montarPlacar(crus, lancs, j, corrida));
     const passadasM = meses.map((j) => montarPlacar(crus, lancs, j, corrida));
     const sugestoes: Record<string, { semana: number | null; mes: number | null }> = {};
     for (const p of crus) {
-      const pts = (pl: typeof passadasS) => pl.map((x) => x.linhas.find((l) => l.piloto.id === p.id)?.pontos ?? 0);
-      sugestoes[p.id] = { semana: sugerirMeta(pts(passadasS)), mes: sugerirMeta(pts(passadasM)) };
+      const feito = (pl: typeof passadasS) => pl.map((x) => x.linhas.find((l) => l.piloto.id === p.id)?.valor ?? 0);
+      sugestoes[p.id] = { semana: sugerirMeta(feito(passadasS)), mes: sugerirMeta(feito(passadasM)) };
     }
     const hall = [...passadasS, ...passadasM].map((pl) => {
-      const top = [...pl.linhas].sort((a, b) => b.pontos - a.pontos)[0];
+      const top = [...pl.linhas].sort((a, b) => b.valor - a.valor)[0];
       return {
         rotulo: pl.rotulo,
         periodo: pl.periodo,
-        campeao: top && top.pontos > 0 ? top.piloto.apelido || top.piloto.nome : null,
-        pontos: top?.pontos ?? 0,
+        campeao: top && top.valor > 0 ? top.piloto.apelido || top.piloto.nome : null,
+        valor: top?.valor ?? 0,
         chegaram: pl.linhas.filter((l) => l.chegou).map((l) => l.piloto.apelido || l.piloto.nome),
         equipe: pl.equipe,
       };
@@ -97,7 +98,6 @@ export async function carregarPainel() {
       regras: config.regras,
       regrasPadrao: REGRAS_PADRAO,
       premio: config.premio,
-      turbo: config.turbo,
       whatsapp: config.whatsapp,
       avisos: avisos ? { ultimoErro: avisos.ultimoErro, ultimoEnvio: avisos.ultimoEnvio } : null,
       vigia: { ...vigia, online: vigiaOnline(vigia.ultimaVez), temChave: Boolean(config.chaveHash), varrerDesde: config.varrerDesde },
@@ -259,16 +259,16 @@ export async function listarLancamentosAcao(f: FiltroDeLancamentos) {
   return comSessao(() => buscarLancamentos(f));
 }
 
-export async function ajustarLancamentoAcao(id: string, acao: { anular?: boolean; pontosManual?: number | null; data?: string }) {
+export async function ajustarLancamentoAcao(id: string, acao: { anular?: boolean; valorManual?: number | null; data?: string }) {
   return comSessao(async () => {
     await ajustarLancamento(id, acao);
     await mexeuNaArena();
   });
 }
 
-export async function lancarManualAcao(pilotoId: string, pontos: number, motivo: string) {
+export async function lancarManualAcao(pilotoId: string, valor: number, motivo: string) {
   return comSessao(async () => {
-    await lancarManual(pilotoId, pontos, motivo);
+    await lancarManual(pilotoId, valor, motivo);
     await mexeuNaArena();
   });
 }
@@ -300,27 +300,22 @@ export async function pedirVarreduraAcao(desde: string) {
   });
 }
 
-// ---------------------------------------------------------------- hora do turbo
+// ---------------------------------------------------------------- ordens de serviço
 
-export async function salvarTurboAcao(t: unknown) {
+/** Escolhe o técnico de uma OS (a que veio do Fechamento sem técnico, por exemplo). */
+export async function trocarTecnicoAcao(id: string, tecnicoId: string | null, data?: string) {
   return comSessao(async () => {
-    const turbo = await gravarTurbo(t);
+    await trocarTecnicoDaOS(id, tecnicoId, data);
     await mexeuNaArena();
-    return turbo;
   });
 }
 
-/** Liga o turbo agora por X minutos (0 desliga). Avisa no WhatsApp, se ligado. */
-export async function turboAgoraAcao(minutos: number, multiplicador: number) {
+/** Traz as OS que já estão no Fechamento da assistência (lançadas antes de a Arena contar OS). */
+export async function trazerOSAcao() {
   return comSessao(async () => {
-    const m = Math.max(0, Math.min(8 * 60, Math.round(Number(minutos) || 0)));
-    const turbo = await gravarTurbo({
-      manualAte: m > 0 ? new Date(Date.now() + m * 60_000).toISOString() : null,
-      manualMultiplicador: multiplicador,
-    });
+    const r = await trazerOSDoFechamento();
     await mexeuNaArena();
-    if (m > 0) await conferirTurbo(await lerConfig());
-    return turbo;
+    return r;
   });
 }
 

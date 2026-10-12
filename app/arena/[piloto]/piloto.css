@@ -126,8 +126,6 @@
 .ap-ou { font-size: 13px; font-weight: 700; color: #6b6690; }
 .ap-miudo { margin-top: 10px !important; }
 
-.ap-turbo { background: #fff; }
-.ap-turbo.ligado { background: var(--ouro); }
 
 .ap-premio-foto { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 12px; border: 3px solid var(--tinta); margin-bottom: 10px; }
 
@@ -141,7 +139,6 @@
 .ap-selo { font-size: 12px; font-weight: 800; border-radius: 999px; padding: 1px 8px; }
 .ap-selo.ouro { background: #fff1b8; }
 .ap-selo.azul { background: #dbe8ff; }
-.ap-selo.turbo { background: #ffe0c2; }
 
 .ap-lista-pilotos { list-style: none; padding: 0; margin: 12px 0; display: grid; gap: 8px; }
 .ap-lista-pilotos a {

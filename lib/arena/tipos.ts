@@ -11,6 +11,9 @@ export const CORES_DE_KART = [
   "#00C2D1", "#FF7A00", "#2D2D2D", "#8BC34A",
 ];
 
+/** Quem corre: vendedor (vendas do Bling) ou técnico (ordens de serviço do Fechamento da assistência). */
+export type FuncaoDoPiloto = "vendedor" | "tecnico";
+
 export interface Piloto {
   id: string;
   /** Endereço da página do piloto: www.balao.info/arena/<slug>. */
@@ -22,18 +25,25 @@ export interface Piloto {
   kart: ModeloDeKart;
   numero: number;
   blingVendedorId: string | null;
+  funcao: FuncaoDoPiloto;
+  /** Meta própria em reais. Vazio = a parte dele na divisão da meta da equipe. */
   metaSemana: number | null;
   metaMes: number | null;
   ativo: boolean;
 }
 
-export type TipoDeLancamento = "venda" | "orcamento" | "manual";
+export type TipoDeLancamento = "venda" | "orcamento" | "os" | "manual";
 export type StatusGravado = "valido" | "cancelado" | "pendente" | "ignorado" | "anulado";
 
+/**
+ * Um documento que entra na corrida. Desde 12/10 (tarde) tudo conta em REAIS:
+ * venda = total do pedido, ordem de serviço = mão de obra + peças, lançamento
+ * à mão = o valor digitado. Orçamento aparece no placar, mas vale R$ 0.
+ */
 export interface Lancamento {
   id: string;
   tipo: TipoDeLancamento;
-  origem: "bling" | "manual";
+  origem: "bling" | "assistencia" | "manual";
   blingId: string | null;
   numero: string | null;
   blingVendedorId: string | null;
@@ -47,49 +57,36 @@ export interface Lancamento {
   situacaoId: number | null;
   situacao: string | null;
   itens: { descricao: string; quantidade: number; valor: number }[];
+  /** Unidades de licença (Windows/Office) na venda. */
   licencas: number;
-  pontos: number;
-  detalhe: DetalheDosPontos | null;
-  /** Multiplicador da hora do turbo, congelado quando o documento chegou (1 = sem turbo). */
-  turbo: number;
+  /** Quanto das licenças em reais (já está dentro do valor da venda). */
+  valorLicencas: number;
+  /** O que conta na corrida, em reais. */
+  valor: number;
   status: StatusGravado;
   motivo: string | null;
   anuladoManual: boolean;
-  pontosManual: number | null;
-  /** Resumo do documento do Bling: se mudar, os pontos são refeitos. */
+  /** Valor trocado à mão no painel (null = o do documento). */
+  valorManual: number | null;
+  /** Resumo do documento do Bling: se mudar, o valor é refeito. */
   assinatura?: string | null;
-}
-
-export interface DetalheDosPontos {
-  base: number;
-  licencas: number;
-  /** +pontos pelo valor da venda (a cada R$ X). */
-  ticket: number;
-  conversao: number;
-  /** Pontos a mais pela hora do turbo. */
-  turbo?: number;
 }
 
 export interface AjustesDaCorrida {
   titulo: string;
   /** O que o telão mostra: a corrida da semana, a do mês ou as duas alternando. */
   periodoTelao: Periodo | "alternar";
-  /** 0 = soma das metas dos pilotos. */
+  /** Meta da equipe em reais, dividida entre vendedores e técnicos (menos quem tem meta própria). */
   metaGlobalSemana: number;
   metaGlobalMes: number;
-  /** Meta de quem não tem meta própria. */
-  metaPadraoSemana: number;
-  metaPadraoMes: number;
   som: boolean;
 }
 
 export const CORRIDA_PADRAO: AjustesDaCorrida = {
   titulo: "Grande Prêmio Balão",
   periodoTelao: "alternar",
-  metaGlobalSemana: 0,
-  metaGlobalMes: 0,
-  metaPadraoSemana: 60,
-  metaPadraoMes: 240,
+  metaGlobalSemana: 63_000,
+  metaGlobalMes: 250_000,
   som: true,
 };
 
@@ -116,25 +113,6 @@ export const PREMIO_PADRAO: Premio = {
   periodo: "mes",
 };
 
-/** Hora do turbo: pontos multiplicados em horários fracos (ou ligada à mão no painel). */
-export interface JanelaDoTurbo {
-  /** 0 = domingo … 6 = sábado. */
-  dias: number[];
-  /** "14:00" — horário da loja. */
-  das: string;
-  ate: string;
-}
-
-export interface AjustesDoTurbo {
-  janelas: JanelaDoTurbo[];
-  multiplicador: number;
-  /** Turbo ligado à mão até este instante (ISO), ou null. */
-  manualAte: string | null;
-  manualMultiplicador: number;
-}
-
-export const TURBO_PADRAO: AjustesDoTurbo = { janelas: [], multiplicador: 2, manualAte: null, manualMultiplicador: 2 };
-
 /** Avisos da Arena num grupo (ou número) do WhatsApp, pela linha da loja. */
 export interface AjustesDoWhatsApp {
   ativo: boolean;
@@ -144,7 +122,6 @@ export interface AjustesDoWhatsApp {
   meta: boolean;
   equipe: boolean;
   lideranca: boolean;
-  turbo: boolean;
 }
 
 export const WHATSAPP_PADRAO: AjustesDoWhatsApp = {
@@ -154,7 +131,6 @@ export const WHATSAPP_PADRAO: AjustesDoWhatsApp = {
   meta: true,
   equipe: true,
   lideranca: false,
-  turbo: true,
 };
 
 export interface SituacaoDoVigia {
@@ -167,15 +143,21 @@ export interface SituacaoDoVigia {
 
 export interface LinhaDoPlacar {
   piloto: Piloto;
-  pontos: number;
+  /** Reais feitos no período. */
+  valor: number;
+  /** Meta em reais (a própria ou a parte dele na divisão). */
   meta: number;
+  metaPropria: boolean;
   /** 0 a 1+ (passa de 1 quando a meta é batida). */
   progresso: number;
   posicao: number;
   vendas: number;
+  valorVendas: number;
   orcamentos: number;
+  os: number;
+  valorOS: number;
   licencas: number;
-  conversoes: number;
+  valorLicencas: number;
   chegou: boolean;
 }
 
@@ -186,23 +168,21 @@ export interface PlacarDoPeriodo {
   fim: string;
   terminaEm: string;
   linhas: LinhaDoPlacar[];
-  equipe: { pontos: number; meta: number; progresso: number };
+  equipe: { valor: number; meta: number; progresso: number };
 }
 
-/** Uma jogada pública (sem cliente e sem reais). */
+/** Uma jogada da corrida (sem nome de cliente). */
 export interface JogadaPublica {
   id: string;
   tipo: TipoDeLancamento;
   pilotoId: string | null;
-  pontos: number;
+  valor: number;
   licencas: number;
-  conversao: boolean;
-  turbo: number;
   data: string;
   registradoEm: string;
 }
 
-/** O que o telão e as páginas dos pilotos recebem. Público: sem nome de cliente e sem valor em reais. */
+/** O que o telão e as páginas dos pilotos recebem. Sem nome de cliente; os valores em reais aparecem (pedido de 12/10). */
 export interface EstadoDoTelao {
   titulo: string;
   periodoTelao: AjustesDaCorrida["periodoTelao"];
@@ -214,10 +194,7 @@ export interface EstadoDoTelao {
   recentes: JogadaPublica[];
   /** As últimas de cada piloto, para a página dele. */
   jogadasPorPiloto: Record<string, JogadaPublica[]>;
-  hallDaFama: { rotulo: string; periodo: Periodo; campeao: string | null; foto: string | null; cor: string | null; pontos: number; chegaram: number }[];
-  turbo: AjustesDoTurbo;
-  /** O que vale cada coisa (para a página do piloto dizer quanto falta). */
-  regras: { venda: number; orcamento: number; licencaBonus: number; conversaoBonus: number; ticketFaixa: number; ticketPontos: number };
+  hallDaFama: { rotulo: string; periodo: Periodo; campeao: string | null; foto: string | null; cor: string | null; valor: number; chegaram: number }[];
   vigiaUltimaVez: string | null;
   geradoEm: string;
 }

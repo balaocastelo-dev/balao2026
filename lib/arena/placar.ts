@@ -1,15 +1,18 @@
 // ============================================================
-// Arena: o placar de um período (semana ou mês).
+// Arena: o placar de um período (semana ou mês), em reais.
 //
-// A linha de chegada de cada piloto é a META DELE, não um número igual para
-// todos: assim o vendedor que está começando também cruza a linha. A posição
-// na corrida é o quanto da própria meta cada um já fez (empate: mais pontos).
+// A meta da equipe (R$ 63 mil na semana, R$ 250 mil no mês — pedido de 12/10)
+// é dividida entre os pilotos ativos, vendedores e técnicos. Quem tem meta
+// própria fica com ela; o resto da meta da equipe é dividido em partes iguais
+// entre os demais. A linha de chegada de cada um é a meta dele, e a posição na
+// corrida é quanto da própria meta já fez (empate: mais reais).
 // ============================================================
 
 import { dentro, type JanelaDoPeriodo, type Periodo } from "./periodos";
+import { centavos } from "./valores";
 import type { AjustesDaCorrida, Lancamento, LinhaDoPlacar, Piloto, PlacarDoPeriodo } from "./tipos";
 
-/** Liga o lançamento ao piloto: manual pelo id, Bling pelo vendedor. */
+/** Liga o lançamento ao piloto: manual e OS pelo id, Bling pelo vendedor. */
 export function pilotoDoLancamento(l: Pick<Lancamento, "pilotoId" | "blingVendedorId">, porBling: Map<string, Piloto>, porId: Map<string, Piloto>): Piloto | null {
   if (l.pilotoId) return porId.get(l.pilotoId) ?? null;
   if (l.blingVendedorId) return porBling.get(l.blingVendedorId) ?? null;
@@ -26,11 +29,33 @@ export function indexarPilotos(pilotos: Piloto[]) {
   return { porBling, porId };
 }
 
-export function metaDoPiloto(p: Piloto, periodo: Periodo, ajustes: AjustesDaCorrida): number {
-  const propria = periodo === "semana" ? p.metaSemana : p.metaMes;
-  const padrao = periodo === "semana" ? ajustes.metaPadraoSemana : ajustes.metaPadraoMes;
-  return Math.max(1, Number(propria) > 0 ? Number(propria) : padrao);
+export function metaGlobal(periodo: Periodo, ajustes: AjustesDaCorrida): number {
+  return periodo === "semana" ? ajustes.metaGlobalSemana : ajustes.metaGlobalMes;
 }
+
+/**
+ * A meta de cada piloto ativo no período: a própria, ou a parte dele no que
+ * sobra da meta da equipe. Arredonda para cima, de 10 em 10 reais, para a soma
+ * nunca ficar abaixo da meta da equipe.
+ */
+export function dividirMetas(pilotos: Piloto[], periodo: Periodo, ajustes: AjustesDaCorrida): Map<string, { meta: number; propria: boolean }> {
+  const ativos = pilotos.filter((p) => p.ativo);
+  const propria = (p: Piloto) => {
+    const v = periodo === "semana" ? p.metaSemana : p.metaMes;
+    return Number(v) > 0 ? Number(v) : null;
+  };
+  const comPropria = ativos.filter((p) => propria(p) !== null);
+  const semPropria = ativos.filter((p) => propria(p) === null);
+  const somaPropria = comPropria.reduce((t, p) => t + propria(p)!, 0);
+  const sobra = Math.max(0, metaGlobal(periodo, ajustes) - somaPropria);
+  const parte = semPropria.length ? Math.ceil(sobra / semPropria.length / 10) * 10 : 0;
+  const out = new Map<string, { meta: number; propria: boolean }>();
+  for (const p of comPropria) out.set(p.id, { meta: propria(p)!, propria: true });
+  for (const p of semPropria) out.set(p.id, { meta: Math.max(1, parte), propria: false });
+  return out;
+}
+
+type Somas = Pick<LinhaDoPlacar, "valor" | "vendas" | "valorVendas" | "orcamentos" | "os" | "valorOS" | "licencas" | "valorLicencas">;
 
 export function montarPlacar(
   pilotos: Piloto[],
@@ -40,36 +65,54 @@ export function montarPlacar(
 ): PlacarDoPeriodo {
   const ativos = pilotos.filter((p) => p.ativo);
   const { porBling, porId } = indexarPilotos(ativos);
-  const soma = new Map<string, Omit<LinhaDoPlacar, "piloto" | "meta" | "progresso" | "posicao" | "chegou">>();
-  for (const p of ativos) soma.set(p.id, { pontos: 0, vendas: 0, orcamentos: 0, licencas: 0, conversoes: 0 });
+  const metas = dividirMetas(ativos, j.periodo, ajustes);
+  const soma = new Map<string, Somas>();
+  for (const p of ativos) soma.set(p.id, { valor: 0, vendas: 0, valorVendas: 0, orcamentos: 0, os: 0, valorOS: 0, licencas: 0, valorLicencas: 0 });
 
   for (const l of lancamentos) {
     if (l.status !== "valido" || !dentro(l.data, j)) continue;
     const p = pilotoDoLancamento(l, porBling, porId);
     if (!p) continue;
     const s = soma.get(p.id)!;
-    s.pontos += l.pontos;
+    const v = Number(l.valor) || 0;
+    s.valor += v;
     if (l.tipo === "venda") {
       s.vendas += 1;
-      s.licencas += l.licencas;
-      if (l.detalhe && l.detalhe.conversao > 0) s.conversoes += 1;
+      s.valorVendas += v;
+      s.licencas += l.licencas || 0;
+      s.valorLicencas += l.valorLicencas || 0;
     } else if (l.tipo === "orcamento") {
       s.orcamentos += 1;
+    } else if (l.tipo === "os") {
+      s.os += 1;
+      s.valorOS += v;
     }
   }
 
   const linhas: LinhaDoPlacar[] = ativos.map((p) => {
     const s = soma.get(p.id)!;
-    const meta = metaDoPiloto(p, j.periodo, ajustes);
-    const pontos = Math.round(s.pontos * 10) / 10;
-    return { piloto: p, ...s, pontos, meta, progresso: Math.max(0, pontos) / meta, posicao: 0, chegou: pontos >= meta };
+    const { meta, propria } = metas.get(p.id)!;
+    const valor = centavos(s.valor);
+    return {
+      piloto: p,
+      ...s,
+      valor,
+      valorVendas: centavos(s.valorVendas),
+      valorOS: centavos(s.valorOS),
+      valorLicencas: centavos(s.valorLicencas),
+      meta,
+      metaPropria: propria,
+      progresso: Math.max(0, valor) / meta,
+      posicao: 0,
+      chegou: valor >= meta,
+    };
   });
-  linhas.sort((a, b) => b.progresso - a.progresso || b.pontos - a.pontos || a.piloto.nome.localeCompare(b.piloto.nome));
+  linhas.sort((a, b) => b.progresso - a.progresso || b.valor - a.valor || a.piloto.nome.localeCompare(b.piloto.nome));
   linhas.forEach((l, i) => (l.posicao = i + 1));
 
-  const pontosEquipe = linhas.reduce((t, l) => t + Math.max(0, l.pontos), 0);
-  const metaGlobalAjuste = j.periodo === "semana" ? ajustes.metaGlobalSemana : ajustes.metaGlobalMes;
-  const metaEquipe = Math.max(1, metaGlobalAjuste > 0 ? metaGlobalAjuste : linhas.reduce((t, l) => t + l.meta, 0));
+  const valorEquipe = centavos(linhas.reduce((t, l) => t + Math.max(0, l.valor), 0));
+  const global = metaGlobal(j.periodo, ajustes);
+  const metaEquipe = Math.max(1, global > 0 ? global : linhas.reduce((t, l) => t + l.meta, 0));
 
   return {
     periodo: j.periodo,
@@ -78,17 +121,16 @@ export function montarPlacar(
     fim: j.fim,
     terminaEm: j.terminaEm,
     linhas,
-    equipe: { pontos: Math.round(pontosEquipe * 10) / 10, meta: metaEquipe, progresso: pontosEquipe / metaEquipe },
+    equipe: { valor: valorEquipe, meta: metaEquipe, progresso: valorEquipe / metaEquipe },
   };
 }
 
 /**
- * Meta sugerida: a média de pontos das semanas (ou meses) passadas com 15% a
- * mais, arredondada de 5 em 5. Sem histórico, devolve null (fica a padrão).
+ * Meta sugerida: a média do que o piloto fez nas semanas (ou meses) passadas
+ * com 15% a mais, arredondada de 500 em 500 reais. Sem histórico, null.
  */
-export function sugerirMeta(pontosPorPeriodo: number[]): number | null {
-  const comMovimento = pontosPorPeriodo.filter((p) => p > 0);
-  if (comMovimento.length === 0) return null;
-  const media = pontosPorPeriodo.reduce((a, b) => a + b, 0) / pontosPorPeriodo.length;
-  return Math.max(5, Math.ceil((media * 1.15) / 5) * 5);
+export function sugerirMeta(valoresPorPeriodo: number[]): number | null {
+  if (!valoresPorPeriodo.some((v) => v > 0)) return null;
+  const media = valoresPorPeriodo.reduce((a, b) => a + b, 0) / valoresPorPeriodo.length;
+  return Math.max(500, Math.ceil((media * 1.15) / 500) * 500);
 }
