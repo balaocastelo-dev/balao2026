@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { $, W3, clamp, lerp, sstep, aviso, carimbo, estado } from './util.js';
 import { criarCeu } from './ceu.js';
 import { criarPipeline } from './pipeline.js';
-import { prepararTexturas, criarMateriais, tex, texturasProntas, U } from './materiais.js';
+import { prepararTexturas, criarMateriais, tex, texturasProntas, U, usarProjecao } from './materiais.js';
 import { baixarModelo, construirTerreno, chaoDeFora, criarColisao, lugares, ondeEstou } from './mundo.js';
 import { mascaraDaGrama, criarGrama } from './grama.js';
 import { criarAgua } from './agua.js';
@@ -12,6 +12,8 @@ import { criarCasas } from './casas.js';
 import { criarBichos } from './bichos.js';
 import { criarSom } from './som.js';
 import { criarCinema } from './cinema.js';
+import { criarProjecoes } from './projecoes.js';
+import { criarCenarios } from './cenarios.js';
 
 const canvas = $('c');
 const falha = (titulo, texto) => { $('enter').textContent = titulo; $('enter').disabled = true; $('loadInfo').textContent = texto; };
@@ -34,11 +36,13 @@ estado.qualidade = celular ? 0 : 2;
 const qParam = new URLSearchParams(location.search).get('q');
 if (qParam !== null && /^[012]$/.test(qParam)) estado.qualidade = +qParam;
 $('qual').value = String(estado.qualidade);
+usarProjecao(estado.qualidade >= 1);
 
 const cena = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(66, 1, 0.08, 1500);
 camera.rotation.order = 'YXZ';
 camera.layers.enable(2);
+camera.layers.enable(3);   // pessoas dos cenários
 
 const pipeline = criarPipeline(renderer);
 const ceu = criarCeu(renderer, cena);
@@ -54,6 +58,7 @@ const LAMPS = [ // x, y, z no terreno, cor, força, alcance
 const fogueira = LAMPS[4];
 
 let M = null, mundo = null, agua = null, grama = null, casas = null, bichos = null, extra = {}, LUGARES = [];
+let projecoes = null, cenarios = null;
 const eu = { x: 1.6, y: 4.7, pes: 0, vz: 0, rumo: 0, inclina: -0.03, vx: 0, vy: 0, chao: true, dist: 0, balanco: 0 };
 const teclas = {}; const alavanca = { x: 0, y: 0 };
 let comecou = false, modoToque = false;
@@ -165,6 +170,7 @@ async function carregar() {
     const frente = c.y[0] < 1 ? c.y[1] : c.y[0];
     U.uFrente.value[i] = -frente;
   });
+  U.uTopoCasa.value = Math.max(3.35, ...(extra.casas || []).map(c => (c.teto || 3.3) + 0.05));
   casas = criarCasas(cena, extra, M, colisao);
   agua = criarAgua(cena, ceu, { reflexo: estado.qualidade >= 2, nivel: estado.qualidade });
   if (estado.qualidade >= 1) {
@@ -172,6 +178,8 @@ async function carregar() {
     grama = criarGrama(cena, masc, M.grass.map, estado.qualidade);
     grama.malha.layers.set(2);
   }
+  if (estado.qualidade >= 1) { try { projecoes = criarProjecoes(renderer, cena, camera, extra, M); } catch (e) { console.warn('projeções', e); } }
+  else if ($('projInfo')) $('projInfo').textContent = 'Na qualidade baixa as projeções e a luz de jardim ficam desligadas.';
   montarLugares();
   colocar(0);
   aplicarQualidade();
@@ -207,6 +215,7 @@ async function carregar() {
   marcar('texturas na placa');
   renderUmQuadro();
   marcar('primeiro quadro');
+  cenarios = criarCenarios({ cena, colisao: mundo.colisao, som, projecoes, cinema, prepararProgramas, mudarHora, irPara });
   $('enter').disabled = false; avisoCarga('Entrar no terreno'); barra(1);
   requestAnimationFrame(quadro);
 }
@@ -218,10 +227,17 @@ function criarChaoDeFora() {
   return m;
 }
 
+function mudarHora(h) { estado.hora = h; estado.mudouHora = true; estado.auto = false; $('tod').value = h; $('auto').setAttribute('aria-pressed', 'false'); }
+function irPara(v) {
+  eu.x = v[0]; eu.y = v[1]; eu.rumo = v[2]; eu.inclina = -0.06; eu.vx = eu.vy = eu.vz = 0;
+  eu.pes = mundo ? mundo.colisao.chaoEm(eu.x, eu.y, v[3] || 0) : (v[3] || 0);
+}
+
 // ---------------------------------------------------------------- caminhada
 function colocar(i) {
   const p = LUGARES[i]; if (!p) return;
-  eu.x = p[1]; eu.y = p[2]; eu.rumo = p[3]; eu.inclina = -0.03; eu.pes = mundo ? mundo.colisao.chaoEm(eu.x, eu.y) : 0; eu.vz = 0; eu.vx = eu.vy = 0;
+  const z = p[4] || 0;
+  eu.x = p[1]; eu.y = p[2]; eu.rumo = p[3]; eu.inclina = -0.03; eu.pes = mundo ? mundo.colisao.chaoEm(eu.x, eu.y, z) : z; eu.vz = 0; eu.vx = eu.vy = 0;
 }
 function andar(dt) {
   const C = mundo.colisao;
@@ -231,21 +247,36 @@ function andar(dt) {
   const naAgua = eu.pes < -0.2 && eu.x > 34.2 && eu.x < 44 && eu.y > 1.1 && eu.y < 4.7;
   const vel = (teclas.ShiftLeft || teclas.ShiftRight ? 5.2 : 1.55) * (naAgua ? 0.45 : 1);
   const ca = Math.cos(eu.rumo), sa = Math.sin(eu.rumo);
-  const tx = (ca * f + sa * s) * vel, ty = (sa * f - ca * s) * vel, k = Math.min(1, dt * 9);
+  let tx = (ca * f + sa * s) * vel, ty = (sa * f - ca * s) * vel;
+  const k = Math.min(1, dt * 9);
+  // escada caracol: no meio dela, andar para a frente segue o giro da escada (sobe ou desce
+  // conforme o lado para onde se olha) e a vista acompanha a curva
+  const esp = C.espiralEm(eu.x, eu.y);
+  if (esp && esp.r < esp.e.r1 && eu.pes > 0.25 && eu.pes < esp.e.topo - 0.1 && (tx || ty)) {
+    const sg = Math.sign(esp.e.passo), ux = -Math.sin(esp.a) * sg, uy = Math.cos(esp.a) * sg;   // tangente de quem sobe
+    const proj = (tx * ux + ty * uy) >= 0 ? 1 : -1, vv = Math.min(Math.hypot(tx, ty), 1.3);
+    const rx = Math.cos(esp.a), ry = Math.sin(esp.a), mola = (0.55 - esp.r) * 3;
+    tx = ux * proj * vv + rx * mola; ty = uy * proj * vv + ry * mola;
+    if (f > 0.3) {
+      let d = Math.atan2(uy * proj, ux * proj) - eu.rumo; d = Math.atan2(Math.sin(d), Math.cos(d));
+      eu.rumo += d * Math.min(1, dt * 3.5);
+    }
+  }
   eu.vx += (tx - eu.vx) * k; eu.vy += (ty - eu.vy) * k;
   const nx = eu.x + eu.vx * dt, ny = eu.y + eu.vy * dt, ox = eu.x, oy = eu.y;
-  if (!C.barra(nx, ny, eu.pes)) { eu.x = nx; eu.y = ny; }
-  else if (!C.barra(nx, eu.y, eu.pes)) { eu.x = nx; eu.vy = 0; }
-  else if (!C.barra(eu.x, ny, eu.pes)) { eu.y = ny; eu.vx = 0; }
+  const R = estado.dentroDeCasa ? 0.2 : 0.27;     // dentro dos sobrados os vãos são justos
+  if (!C.barra(nx, ny, eu.pes, R)) { eu.x = nx; eu.y = ny; }
+  else if (!C.barra(nx, eu.y, eu.pes, R)) { eu.x = nx; eu.vy = 0; }
+  else if (!C.barra(eu.x, ny, eu.pes, R)) { eu.y = ny; eu.vx = 0; }
   else { eu.vx = eu.vy = 0; }
-  const g = C.chaoEm(eu.x, eu.y);
+  const g = C.chaoEm(eu.x, eu.y, eu.pes);
   if (eu.pes > g + 0.002) { eu.vz -= 9.8 * dt; eu.pes += eu.vz * dt; eu.chao = false; if (eu.pes <= g) { eu.pes = g; if (eu.vz < -3 || g < -0.2) som.passo(g < -0.2 ? 2 : 1); eu.vz = 0; eu.chao = true; } }
   else { eu.pes += (g - eu.pes) * Math.min(1, dt * 14); eu.chao = true; eu.vz = 0; }
   if (teclas.Space && eu.chao && !naAgua) { eu.vz = 3.3; eu.pes += 0.01; eu.chao = false; }
   const mov = Math.hypot(eu.x - ox, eu.y - oy); eu.dist += mov;
   if (eu.chao && mov > 0) {
     eu.balanco += mov;
-    if (eu.dist > 0.68) { eu.dist = 0; som.passo(naAgua ? 2 : (eu.x > 31.6 || estado.dentroDeCasa ? (estado.dentroDeCasa ? 3 : 1) : 0)); }
+    if (eu.dist > 0.68) { eu.dist = 0; som.passo(naAgua ? 2 : (estado.dentroDeCasa || (eu.pes > 0.3 && eu.x < 31.6) ? 3 : (eu.x > 31.6 ? 1 : 0))); }
   }
 }
 function posicionarCamera() {
@@ -274,8 +305,8 @@ function foto() {
   const wh = $('photoRes').value.split('x').map(Number);
   const max = Math.min(renderer.capabilities.maxRenderbufferSize || 4096, renderer.capabilities.maxTextureSize || 4096);
   const k = Math.min(1, max / wh[0], max / wh[1]), w = Math.round(wh[0] * k), h = Math.round(wh[1] * k);
-  const ytLigado = cinema.c.modo === 'yt';
-  cinema.paraFoto(true);
+  const ytLigado = cinema.c.modo === 'yt' || (projecoes && projecoes.lugares.some(p => p.escolha === 'youtube'));
+  cinema.paraFoto(true); if (projecoes) projecoes.paraFoto(true);
   try {
     definirTamanho(w, h, 1);
     posicionarCamera();
@@ -287,7 +318,7 @@ function foto() {
       modal('Foto renderizada', img, w + ' × ' + h + ' pixels' + (ytLigado ? '. O vídeo do YouTube não sai na foto.' : ''), true);
     }, 'image/jpeg', 0.94);
   } catch (e) { aviso('A foto falhou neste tamanho. Tente um menor.'); }
-  cinema.paraFoto(false);
+  cinema.paraFoto(false); if (projecoes) projecoes.paraFoto(false);
   ajustar();
 }
 function alternarGravacao() {
@@ -439,7 +470,7 @@ function atualizarMundo(dt) {
     M.abajur.emissiveIntensity = 2.2 * n;
     M.ember.emissiveIntensity = (1.2 + 2.5 * n) * (0.8 + 0.2 * Math.sin(estado.tempo * 9));
   }
-  if (casas) casas.atualizar(dt, eu, n, bichos ? bichos.cachorros : null);
+  if (casas) casas.atualizar(dt, eu, n, bichos ? bichos.cachorros : null, camera.position);
   if (bichos) bichos.atualizar(dt, estado.tempo, eu, camera.position);
   if (bichos && comecou) {
     // vozes dos bichos
@@ -450,15 +481,18 @@ function atualizarMundo(dt) {
     for (const c of bichos.cachorros) if (c.latir) { c.latir = false; som.latido(c.x, c.y); }
   }
   if (agua) agua.atualizar(estado.tempo, info, { lago: bichos ? bichos.fontesLago : [] });
+  const cc = cenarios ? cenarios.atualizar(dt, estado.tempo, camera.position) : null;
+  if (projecoes) projecoes.atualizar(estado.tempo, n, cc ? { batida: cc.batida, energia: cc.energia } : null);
   if (grama) {
     const pis = [[camera.position.x, camera.position.z, 0.45, eu.chao ? 0.9 : 0]];
     if (bichos) pis.push(...bichos.pisadas());
+    if (cenarios) pis.push(...cenarios.pisadas(camera.position, 24));
     grama.atualizar(camera.position, pis);
   }
   cinema.atualizar(estado.tempo, n);
   // dentro de casa de dia: o olho se acostuma com a pouca luz
   let dentro = null;
-  for (const c of (extra.casas || [])) if (eu.x > c.x[0] && eu.x < c.x[1] && eu.y > c.y[0] && eu.y < c.y[1]) dentro = c.nome;
+  for (const c of (extra.casas || [])) if (eu.x > c.x[0] && eu.x < c.x[1] && eu.y > c.y[0] && eu.y < c.y[1] && eu.pes < (c.deck || 9) - 0.4) dentro = c.nome;
   estado.dentroDeCasa = dentro;
   const alvo = info.exposicao * (dentro ? lerp(1.0, 2.3, estado.dia) : 1);
   exposicao += (alvo - exposicao) * Math.min(1, dt * 1.5);
@@ -489,13 +523,17 @@ function quadro(agora) {
   }
   posicionarCamera();
   atualizarMundo(dt);
-  if (cinema.c.modo === 'yt' && !capt.renderizando) { const r = canvas.getBoundingClientRect(); cinema.posicionarYT(camera, r.width, r.height); }
+  if (!capt.renderizando) {
+    const r = canvas.getBoundingClientRect();
+    if (cinema.c.modo === 'yt') cinema.posicionarYT(camera, r.width, r.height);
+    if (projecoes) projecoes.posicionarYT(camera, r.width, r.height);
+  }
   som.quadro(camera, v4);
   renderUmQuadro();
   relogio.acc += dt;
   if (relogio.acc > 0.4) {
     relogio.acc = 0;
-    if (mundo) $('where').textContent = ondeEstou(eu.x, eu.y, extra);
+    if (mundo) $('where').textContent = ondeEstou(eu.x, eu.y, extra, eu.pes);
     cinema.volumeYT(camera.position, +$('vol').value);
     const p = casas && casas.maisPerto(eu.x, eu.y);
     $('portaBtn').hidden = !(modoToque && p && p.dist < 2.2);
@@ -515,7 +553,9 @@ function quadro(agora) {
 window.__chacara = {
   THREE, renderer, cena, camera, ceu, eu, estado, pipeline, pausa: false, U, tempos,
   get bichos() { return bichos; }, get casas() { return casas; }, get mundo() { return mundo; }, get agua() { return agua; },
-  colocar, foto: () => foto(), cinema,
+  get projecoes() { return projecoes; }, get cenarios() { return cenarios; }, irPara, mudarHora,
+  colocar, foto: () => foto(), cinema, teclas,
+  andar(dt, t) { for (const k in teclas) teclas[k] = false; Object.assign(teclas, t || {}); andar(dt); for (const k in teclas) teclas[k] = false; },
   quadro(passos) { for (let i = 0; i < (passos || 1); i++) { estado.tempo += 0.033; posicionarCamera(); atualizarMundo(0.033); } renderUmQuadro(); return true; },
   snap() { posicionarCamera(); atualizarMundo(0.001); renderUmQuadro(); return canvas.toDataURL('image/jpeg', 0.9); },
 };

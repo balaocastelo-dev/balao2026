@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Adereços — conferência</title>
+<style>
+  html, body { margin: 0; background: #20242a; font: 13px/1.25 system-ui, sans-serif; color: #fff; overflow: hidden; }
+  #rotulos { position: absolute; inset: 0; pointer-events: none; }
+  .rot { position: absolute; padding: 3px 6px; background: rgba(0,0,0,.55); border-radius: 0 0 6px 0; white-space: nowrap; }
+  .rot b { font-size: 13px; }
+  .rot span { font-size: 11px; opacity: .85; }
+  #titulo { position: absolute; left: 10px; bottom: 8px; padding: 4px 8px; background: rgba(0,0,0,.55); border-radius: 6px; }
+</style>
+<script type="importmap">
+{ "imports": { "three": "/public/chacara3d/vendor/three/three.module.min.js", "three/addons/": "/public/chacara3d/vendor/three/addons/" } }
+</script>
+</head>
+<body>
+<div id="rotulos"></div>
+<script type="module">
+// Página de conferência dos adereços: carrega o GLB com o GLTFLoader do three r170 e desenha
+//   ?modo=grade              todos os objetos em grade (cada um com uma silhueta de 1,75 m)
+//   ?modo=cena&cenario=X     os objetos de um cenário lado a lado, em escala, com silhuetas
+//   ?modo=close&obj=nome     close de um objeto (&ang=graus &alt=graus &noite=1)
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+const q = new URLSearchParams(location.search);
+const modo = q.get('modo') || 'grade';
+const W = +(q.get('w') || 1600), H = +(q.get('h') || 1000);
+const noite = q.get('noite') === '1';
+const arquivo = q.get('glb') || '/public/chacara3d/cenarios/aderecos.glb';
+const jsonArq = arquivo.replace(/\.glb$/, '.json');
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1);
+renderer.setSize(W, H);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.AgXToneMapping;
+renderer.toneMappingExposure = noite ? 1.0 : 1.05;
+renderer.shadowMap.enabled = q.get('sombra') !== '0';
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.setScissorTest(true);
+document.body.appendChild(renderer.domElement);
+
+const cena = new THREE.Scene();
+
+// céu em degradê como ambiente (reflexos e luz difusa)
+function ambiente() {
+  const c = new THREE.Scene();
+  const geo = new THREE.SphereGeometry(50, 32, 16);
+  const mat = new THREE.ShaderMaterial({
+    side: THREE.BackSide,
+    uniforms: { noite: { value: noite ? 1 : 0 } },
+    vertexShader: 'varying vec3 vP; void main(){ vP = position; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }',
+    fragmentShader: `varying vec3 vP; uniform float noite;
+      void main(){ float h = normalize(vP).y;
+        vec3 ceu = mix(vec3(0.75,0.85,1.0), vec3(0.25,0.45,0.9), clamp(h,0.,1.));
+        vec3 chao = vec3(0.32,0.30,0.26);
+        vec3 c = h > 0. ? ceu : mix(chao, vec3(0.5,0.5,0.45), clamp(h+1.,0.,1.)*0.3);
+        vec3 sol = vec3(12.0, 11.0, 9.5) * smoothstep(0.985, 0.995, dot(normalize(vP), normalize(vec3(0.5,0.7,0.6))));
+        c += sol;
+        if (noite > 0.5) c = c * 0.04 + vec3(0.0,0.0,0.01);
+        gl_FragColor = vec4(c, 1.); }`,
+  });
+  c.add(new THREE.Mesh(geo, mat));
+  const pm = new THREE.PMREMGenerator(renderer);
+  return pm.fromScene(c, 0.02).texture;
+}
+cena.environment = ambiente();
+cena.environmentIntensity = noite ? 0.25 : 0.55;
+cena.background = new THREE.Color(noite ? 0x05070c : 0xa9c4e6);
+
+const sol = new THREE.DirectionalLight(noite ? 0x8899cc : 0xfff1dd, noite ? 0.25 : 3.0);
+sol.castShadow = true;
+sol.shadow.mapSize.set(2048, 2048);
+sol.shadow.bias = -0.0004;
+sol.shadow.normalBias = 0.01;
+cena.add(sol, sol.target);
+cena.add(new THREE.HemisphereLight(noite ? 0x223355 : 0xcfe3ff, noite ? 0x111111 : 0x5a5040, noite ? 0.25 : 0.6));
+
+// chão com linhas de 1 m e 10 cm
+function texChao() {
+  const cv = document.createElement('canvas'); cv.width = cv.height = 512;
+  const g = cv.getContext('2d');
+  g.fillStyle = '#8a8a80'; g.fillRect(0, 0, 512, 512);
+  g.strokeStyle = 'rgba(0,0,0,0.10)'; g.lineWidth = 1;
+  for (let i = 0; i <= 10; i++) { g.beginPath(); g.moveTo(i * 51.2, 0); g.lineTo(i * 51.2, 512); g.moveTo(0, i * 51.2); g.lineTo(512, i * 51.2); g.stroke(); }
+  g.strokeStyle = 'rgba(0,0,0,0.35)'; g.lineWidth = 3; g.strokeRect(0, 0, 512, 512);
+  const t = new THREE.CanvasTexture(cv);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(4000, 4000); t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 8;
+  return t;
+}
+const chao = new THREE.Mesh(new THREE.PlaneGeometry(4000, 4000), new THREE.MeshStandardMaterial({ map: texChao(), roughness: 0.95 }));
+chao.rotation.x = -Math.PI / 2;
+chao.receiveShadow = true;
+cena.add(chao);
+
+// silhueta humana de 1,75 m (cápsulas)
+function silhueta() {
+  const g = new THREE.Group();
+  const m = new THREE.MeshStandardMaterial({ color: 0x3b4a5c, roughness: 0.7 });
+  const cap = (r, l, x, y, z, rz = 0) => { const o = new THREE.Mesh(new THREE.CapsuleGeometry(r, l, 4, 12), m); o.position.set(x, y, z); o.rotation.z = rz; o.castShadow = true; g.add(o); };
+  cap(0.065, 0.78, -0.09, 0.455, 0, 0.02); cap(0.065, 0.78, 0.09, 0.455, 0, -0.02);   // pernas
+  cap(0.17, 0.38, 0, 1.17, 0);                                                         // tronco
+  cap(0.045, 0.6, -0.235, 1.12, 0, 0.08); cap(0.045, 0.6, 0.235, 1.12, 0, -0.08);     // braços
+  cap(0.05, 0.06, 0, 1.47, 0);                                                         // pescoço
+  const cab = new THREE.Mesh(new THREE.SphereGeometry(0.105, 20, 14), m); cab.position.set(0, 1.635, 0); cab.scale.set(0.9, 1.08, 1); cab.castShadow = true; g.add(cab);
+  return g;
+}
+
+const caixaDe = o => new THREE.Box3().setFromObject(o);
+
+function enquadrar(cam, caixa, dir, folga = 1.15) {
+  const centro = caixa.getCenter(new THREE.Vector3());
+  const tam = caixa.getSize(new THREE.Vector3());
+  const raio = Math.max(tam.length() / 2, 0.05);
+  const dist = raio * folga / Math.sin(THREE.MathUtils.degToRad(cam.fov / 2)) ;
+  cam.position.copy(centro).addScaledVector(dir.clone().normalize(), dist);
+  cam.near = Math.max(dist / (+(q.get('perto') || 200)), 0.005); cam.far = dist * 20;
+  cam.lookAt(centro);
+  cam.updateProjectionMatrix();
+}
+
+function luzPara(caixa) {
+  const c = caixa.getCenter(new THREE.Vector3());
+  const r = Math.max(caixa.getSize(new THREE.Vector3()).length() / 2, 0.3) * 1.6 + 1.0;
+  sol.target.position.copy(c);
+  sol.position.copy(c).add(new THREE.Vector3(0.55, 0.75, 0.6).normalize().multiplyScalar(r * 2));
+  const sc = sol.shadow.camera;
+  sc.left = -r; sc.right = r; sc.top = r; sc.bottom = -r; sc.near = 0.05; sc.far = r * 5;
+  sc.updateProjectionMatrix();
+  sol.target.updateMatrixWorld();
+}
+
+function rotulo(x, y, html) {
+  const d = document.createElement('div'); d.className = 'rot';
+  d.style.left = x + 'px'; d.style.top = y + 'px'; d.innerHTML = html;
+  document.getElementById('rotulos').appendChild(d);
+}
+
+const erros = [];
+window.addEventListener('error', e => erros.push(String(e.message)));
+
+async function principal() {
+  const [gltf, info] = await Promise.all([
+    new GLTFLoader().loadAsync(arquivo),
+    fetch(jsonArq).then(r => r.json()),
+  ]);
+  const todos = Object.keys(info.aderecos);
+  const pegar = nome => {
+    const o = gltf.scene.getObjectByName(nome);
+    if (!o) throw new Error('nó não encontrado: ' + nome);
+    const c = o.clone(true);
+    c.position.set(0, 0, 0);
+    c.traverse(m => { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true;
+      if (q.get('so_mat') && m.material.name !== q.get('so_mat')) m.visible = false;
+      if (q.get('sem_mat') && m.material.name === q.get('sem_mat')) m.visible = false; } });
+    return c;
+  };
+  // objetos de mão: no chão, deitados de lado? não: mostra em pé, com a base no chão
+  const assentar = (o) => {
+    o.updateMatrixWorld(true);
+    const b = caixaDe(o);
+    o.position.y -= b.min.y;
+  };
+
+  if (modo === 'grade') {
+    const nomes = (q.get('objs') || '').split(',').filter(Boolean);
+    const lista = nomes.length ? nomes : todos;
+    const cols = +(q.get('cols') || 8);
+    const linhas = Math.ceil(lista.length / cols);
+    const cw = Math.floor(W / cols), ch = Math.floor(H / linhas);
+    const cam = new THREE.PerspectiveCamera(30, cw / ch, 0.01, 200);
+    const grupos = [];
+    lista.forEach((nome, i) => {
+      const g = new THREE.Group();
+      g.position.x = i * 30;
+      const o = pegar(nome);
+      assentar(o);
+      g.add(o);
+      const b = caixaDe(o);
+      const s = silhueta();
+      s.position.set(b.min.x - 0.35, 0, Math.max(b.min.z, -0.3) + 0.25);
+      g.add(s);
+      cena.add(g);
+      grupos.push({ g, o, s, nome });
+    });
+    cena.updateMatrixWorld(true);
+    grupos.forEach(({ g, o, s, nome }, i) => {
+      const cx = (i % cols) * cw, cy = Math.floor(i / cols) * ch;
+      const bo = caixaDe(o);
+      const tam = bo.getSize(new THREE.Vector3());
+      const caixa = bo.clone();
+      if (tam.y > 0.5 || Math.max(tam.x, tam.z) > 0.9) caixa.union(caixaDe(s));
+      luzPara(caixa);
+      cam.aspect = cw / ch;
+      enquadrar(cam, caixa, new THREE.Vector3(-0.35, 0.42, 1), 1.0);
+      renderer.setViewport(cx, H - cy - ch, cw, ch);
+      renderer.setScissor(cx, H - cy - ch, cw, ch);
+      renderer.render(cena, cam);
+      const a = info.aderecos[nome];
+      const t = a.tamanho_m;
+      rotulo(cx, cy, `<b>${nome}</b><br><span>${t.x.toFixed(2)} × ${t.y.toFixed(2)} × ${t.z.toFixed(2)} m · ${a.triangulos} tri</span>`);
+    });
+  } else if (modo === 'cena') {
+    const chave = q.get('cenario');
+    const lista = info.cenarios[chave].aderecos;
+    const cam = new THREE.PerspectiveCamera(30, W / H, 0.05, 400);
+    let x = 0;
+    const grupo = new THREE.Group();
+    const vao = 0.35;
+    let k = 0;
+    const objs = [];
+    for (const nome of lista) {
+      const o = pegar(nome);
+      assentar(o);
+      const b = caixaDe(o);
+      o.position.x += x - b.min.x;
+      o.position.z -= (b.min.z + b.max.z) / 2;
+      grupo.add(o);
+      objs.push(o);
+      x += (b.max.x - b.min.x) + vao;
+      if (k % 4 === 1) { const s = silhueta(); s.position.set(x, 0, 0.0); grupo.add(s); x += 0.6 + vao; }
+      k++;
+    }
+    grupo.position.x = -x / 2;
+    cena.add(grupo);
+    cena.updateMatrixWorld(true);
+    const caixa = caixaDe(grupo);
+    luzPara(caixa);
+    sol.shadow.mapSize.set(4096, 4096);
+    {
+      const c = caixa.getCenter(new THREE.Vector3()), t = caixa.getSize(new THREE.Vector3());
+      const hf = 2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(cam.fov / 2)) * cam.aspect);
+      const dist = (t.x / 2) / Math.tan(hf / 2) * 1.04 + t.z / 2;
+      const dir = new THREE.Vector3(0, 0.3, 1).normalize();
+      cam.position.copy(c).addScaledVector(dir, dist);
+      cam.lookAt(c.x, c.y * 0.8, c.z);
+      cam.updateProjectionMatrix();
+    }
+    renderer.setViewport(0, 0, W, H); renderer.setScissor(0, 0, W, H);
+    renderer.render(cena, cam);
+    // rótulos sob cada objeto
+    for (let i = 0; i < objs.length; i++) {
+      const b = caixaDe(objs[i]);
+      const p = new THREE.Vector3((b.min.x + b.max.x) / 2, b.max.y, b.max.z).project(cam);
+      rotulo((p.x * 0.5 + 0.5) * W - 30, (-p.y * 0.5 + 0.5) * H - 34, `<span>${lista[i]}</span>`);
+    }
+    const d = document.createElement('div'); d.id = 'titulo'; d.textContent = info.cenarios[chave].titulo + ' — silhuetas de 1,75 m, linhas do chão a cada 10 cm';
+    document.body.appendChild(d);
+  } else {
+    const nome = q.get('obj');
+    const o = pegar(nome);
+    assentar(o);
+    cena.add(o);
+    let s = null;
+    if (q.get('sil') === '1') { s = silhueta(); const b = caixaDe(o); s.position.set(b.min.x - 0.45, 0, 0); cena.add(s); }
+    cena.updateMatrixWorld(true);
+    const caixa = caixaDe(o);
+    if (s) caixa.union(caixaDe(s));
+    luzPara(caixa);
+    const ang = THREE.MathUtils.degToRad(+(q.get('ang') || -30));
+    const alt = THREE.MathUtils.degToRad(+(q.get('alt') || 22));
+    const cam = new THREE.PerspectiveCamera(+(q.get('fov') || 30), W / H, 0.005, 200);
+    enquadrar(cam, caixa, new THREE.Vector3(Math.sin(ang) * Math.cos(alt), Math.sin(alt), Math.cos(ang) * Math.cos(alt)), +(q.get('folga') || 0.85));
+    if (noite) {
+      const p = new THREE.PointLight(0xffd0a0, 2, 10); p.position.copy(cam.position).add(new THREE.Vector3(0.5, 1, 0)); cena.add(p);
+    }
+    renderer.setViewport(0, 0, W, H); renderer.setScissor(0, 0, W, H);
+    renderer.render(cena, cam);
+    const a = info.aderecos[nome]; const t = a.tamanho_m;
+    rotulo(0, 0, `<b>${nome}</b> <span>${t.x.toFixed(2)} × ${t.y.toFixed(2)} × ${t.z.toFixed(2)} m · ${a.triangulos} tri</span>`);
+  }
+  window.__pronto = { erros, programas: renderer.info.programs.length, chamadas: renderer.info.render.calls };
+}
+principal().catch(e => { erros.push(String(e && e.stack || e)); window.__pronto = { erros }; });
+</script>
+</body>
+</html>

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Chácara 3D</title>
-<meta name="description" content="Passeio em 3D pela chácara pronta: vilinha, gramado, piscina, churrasqueira, deck com lago e cineminha, com dia e noite.">
+<meta name="description" content="Passeio em 3D pela chácara pronta: sobrados com mirante, gramado, piscina, churrasqueira, deck com lago e cineminha, com cenários de festa e projeção mapeada à noite.">
 <link rel="canonical" href="https://www.balao.info/chacara3d">
 <meta name="robots" content="noindex, follow">
 <meta name="theme-color" content="#0c1310">
@@ -30,7 +30,7 @@ img { max-width: 100%; }
 }
 html, body { height: 100%; margin: 0; background: var(--ground); color: var(--ink); font-family: var(--body); font-size: 15px; overflow: hidden; }
 #app { position: relative; width: 100%; height: 100%; overflow: hidden; background: #000; }
-#yt { position: absolute; left: 0; top: 0; z-index: 0; transform-origin: 0 0; border: 0; pointer-events: none; visibility: hidden; background: #000; }
+#yt, .ytProj { position: absolute; left: 0; top: 0; z-index: 0; transform-origin: 0 0; border: 0; pointer-events: none; visibility: hidden; background: #000; }
 #c { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 1; touch-action: none; outline: none; }
 .layer { position: absolute; z-index: 3; }
 h1, h2 { font-family: var(--display); margin: 0; line-height: 1.1; text-wrap: balance; }
@@ -63,7 +63,7 @@ kbd { font: 600 0.85em var(--body); background: var(--panel2); border: 1px solid
 #menuBtn { right: 12px; top: calc(12px + env(safe-area-inset-top, 0px)); }
 #portaBtn { right: 12px; bottom: calc(60px + env(safe-area-inset-bottom, 0px)); }
 
-#panel { right: 0; top: 0; bottom: 0; width: min(340px, 100%); background: var(--panel); border-left: 1px solid var(--line); overflow-y: auto; padding: 16px; padding-top: calc(16px + env(safe-area-inset-top, 0px)); display: flex; flex-direction: column; gap: 18px; z-index: 5; box-sizing: border-box; }
+#panel { right: 0; top: 0; bottom: 0; width: min(372px, 100%); background: var(--panel); border-left: 1px solid var(--line); overflow-y: auto; padding: 16px; padding-top: calc(16px + env(safe-area-inset-top, 0px)); display: flex; flex-direction: column; gap: 18px; z-index: 5; box-sizing: border-box; }
 #panel h2 { font-size: 1.02rem; }
 #panel section { display: flex; flex-direction: column; gap: 9px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
 #panel section:last-child { border-bottom: 0; }
@@ -73,6 +73,10 @@ kbd { font: 600 0.85em var(--body); background: var(--panel2); border: 1px solid
 input[type=range] { width: 100%; accent-color: var(--tile); }
 input[type=text], select { background: var(--panel2); border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; min-width: 0; flex: 1; }
 .head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.projItem { display: flex; flex-direction: column; gap: 4px; }
+.projItem > label { color: var(--soft); font-size: .9rem; }
+.projItem select { width: 100%; }
+#projLista { display: flex; flex-direction: column; gap: 10px; }
 
 #modal { inset: 0; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(4, 7, 6, .8); z-index: 8; }
 #modal .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; max-width: 880px; width: 100%; display: flex; flex-direction: column; gap: 12px; max-height: 100%; overflow: auto; box-sizing: border-box; }
@@ -107,6 +111,19 @@ input[type=text], select { background: var(--panel2); border: 1px solid var(--li
     <div class="head"><h1 style="font-size:1.5rem">Chácara 3D</h1><button class="primary" id="back" style="padding:7px 16px;font-size:.95rem">Voltar a caminhar</button></div>
 
     <section>
+      <h2>Cenários</h2>
+      <div class="row">
+        <button class="ghost" data-cen="aniversario" aria-pressed="false">Festa de aniversário</button>
+        <button class="ghost" data-cen="cinema" aria-pressed="false">Reunião no cineminha</button>
+        <button class="ghost" data-cen="trabalho" aria-pressed="false">Trabalhadores</button>
+        <button class="ghost" data-cen="piscina" aria-pressed="false">Festa na piscina</button>
+        <button class="ghost" data-cen="rave" aria-pressed="false">Rave lotada</button>
+      </div>
+      <div class="row"><button class="ghost" id="parabensBtn" hidden>Cantar parabéns</button><button class="ghost" id="cenNada">Sem cenário</button></div>
+      <p class="small" id="cenInfo">Escolha um cenário para encher a chácara de gente.</p>
+    </section>
+
+    <section>
       <h2>Hora do dia</h2>
       <input type="range" id="tod" min="0" max="24" step="0.05" value="10" aria-label="Hora do dia">
       <div class="row">
@@ -127,6 +144,14 @@ input[type=text], select { background: var(--panel2); border: 1px solid var(--li
     <section>
       <h2>Ir para</h2>
       <div class="row" id="tp"></div>
+    </section>
+
+    <section>
+      <h2>Iluminação e projeções</h2>
+      <div class="row"><button class="ghost" data-proj="jardim">Luz de jardim</button><button class="ghost" data-proj="show">Show de projeções</button><button class="ghost" data-proj="desligado">Desligar tudo</button></div>
+      <div class="row"><button class="ghost" id="projNoite" aria-pressed="true">Acender só à noite</button></div>
+      <div id="projLista"></div>
+      <p class="small" id="projInfo">Projeção mapeada nas árvores, no muro da piscina, nos portões e nas paredes laterais das casinhas. O YouTube só dá nas paredes, no muro e nos portões (sem som e sem sair na foto); o vídeo do computador vale em todo lugar.</p>
     </section>
 
     <section>
@@ -164,7 +189,7 @@ input[type=text], select { background: var(--panel2); border: 1px solid var(--li
     <div class="card">
       <span class="small" style="letter-spacing:.09em;text-transform:uppercase;font-weight:600">Terreno de 60 × 10 m</span>
       <h1>Chácara 3D</h1>
-      <p>Caminhe pelo terreno pronto: vilinha com as três casinhas (dá para entrar), gramado, piscina, churrasqueira, deck com o laguinho das carpas e cineminha. Os cachorros e as galinhas andam por aí; tem passarinho, água correndo, dia e noite.</p>
+      <p>Caminhe pelo terreno pronto: vilinha com três sobrados (dá para entrar, subir a escada e ir ao mirante do teto pela escada caracol), gramado, piscina, churrasqueira, deck com o laguinho das carpas e cineminha. No menu tem cenários com gente (aniversário, cinema, trabalhadores, festa na piscina, rave) e projeção mapeada à noite.</p>
       <dl class="keys">
         <dt><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd></dt><dd>andar (segure <kbd>Shift</kbd> para correr, <kbd>Espaço</kbd> pula)</dd>
         <dt>Mouse</dt><dd>olhar em volta</dd>
@@ -176,7 +201,7 @@ input[type=text], select { background: var(--panel2); border: 1px solid var(--li
       </dl>
       <div id="carga"><i></i></div>
       <div class="row"><button class="primary" id="enter" disabled>Carregando o terreno…</button></div>
-      <p class="small" id="loadInfo">São uns 30 MB de texturas e modelos na primeira vez. No celular, use o círculo à esquerda para andar e arraste a tela para olhar.</p>
+      <p class="small" id="loadInfo">São uns 32 MB de texturas e modelos na primeira vez (os cenários baixam mais uns 9 MB quando você escolhe um). No celular, use o círculo à esquerda para andar e arraste a tela para olhar.</p>
     </div>
   </div>
 

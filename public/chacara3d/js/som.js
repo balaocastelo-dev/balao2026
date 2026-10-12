@@ -41,6 +41,10 @@ export function criarSom() {
   }
   const api = {
     get ctx() { return AC; },
+    get mestre() { return mestre; },
+    get ruido() { return ruido; },
+    // fonte posicionada no terreno (para a música e os sons dos cenários)
+    painel(x, y, z, ref, roll) { return AC ? pan(x, y, z, ref || 2, roll || 1) : null; },
     get fluxoGravacao() { return gravacao ? gravacao.stream : null; },
     iniciar() {
       if (AC) { AC.resume(); return; }
@@ -54,7 +58,7 @@ export function criarSom() {
       const lago = pan(46.7, 4.7, -0.5, 1.0, 2.0); laco('bandpass', 3100, 3.0, 0.07, lago); laco('bandpass', 1100, 2.0, 0.05, lago);
       vento = laco('lowpass', 260, 0.5, 0.014, mestre);
       // os passarinhos ficam nas copas
-      passaros = [[30.3, 2.1, 6, 1.4], [47.6, 1.7, 5, 1.2], [11.3, 2.3, 3, 0.8], [16.9, 8.0, 3.5, 0.8], [23.7, 8.8, 6, 0.7], [22.6, 1.9, 2.4, 0.4], [5, -6, 5, 0.6], [26, 22, 6, 0.5], [52, -7, 5, 0.6]]
+      passaros = [[30.3, 2.1, 6, 1.4], [47.6, 1.7, 5, 1.2], [14.0, 2.2, 3, 0.8], [19.2, 8.2, 3.5, 0.8], [23.7, 8.8, 6, 0.7], [27.2, 1.5, 2.4, 0.4], [5, -6, 5, 0.6], [26, 22, 6, 0.5], [52, -7, 5, 0.6]]
         .map(b => ({ p: pan(b[0], b[1], b[2], 3.0, 1.15), w: b[3] }));
       sapoP = pan(48.6, 4.6, -0.6, 1.5, 1.6);
       const fp = pan(20.6, 6.2, 0.4, 1.2, 1.7); fogoG = AC.createBiquadFilter(); fogoG.type = 'bandpass'; fogoG.frequency.value = 2600; fogoG.Q.value = 0.6; fogoG.connect(fp); api.fogoBase = laco('lowpass', 300, 0.6, 0, fp);

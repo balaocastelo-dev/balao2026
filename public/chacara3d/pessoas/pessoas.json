@@ -1,0 +1,1204 @@
+{
+  "convencoes": {
+    "unidade": "metro",
+    "eixos": "glTF Y para cima; a pessoa olha para +Z; esquerda da pessoa = +X (sufixo _e), direita = −X (_d)",
+    "origem": "no chão, entre os pés (debaixo dos tornozelos); nas sentadas e na deitada, veja as notas de cada animação",
+    "escala": "o motor pode aplicar uma escala uniforme de 0,94–1,06 no nó da pessoa",
+    "quadros_por_segundo": 30,
+    "animacoes_no_lugar": "nenhuma animação anda com a raiz; o motor desloca a pessoa. Só o osso `quadril` tem translação (balanço, pulo, sentar).",
+    "velocidade": "nas animações de andar/correr/carregar, velocidade_m_s é a velocidade que casa com a passada (pé no chão sem escorregar). Para outra velocidade, timeScale = v / velocidade_m_s.",
+    "canais": "todas as animações têm rotação de todos os ossos (troca sem pose sobrando); todas são laços: o último quadro é igual ao primeiro",
+    "repouso_dos_ossos": "todos os ossos têm rotação de repouso identidade (eixos do mundo), menos pega_e/pega_d; assim girar `cabeca` em Y vira a cabeça para a esquerda (olhar procedural por cima)",
+    "pele": "cada visual é uma malha com esqueleto (skin), até 4 ossos por vértice, pesos normalizados (uint8)",
+    "visuais": "cada visual é um nó com o nome do visual; o nó tem uma malha com duas primitivas: material `pessoa` (corpo, roupa, cabelo, calçado) e material `olhos`. Todas as malhas usam o mesmo esqueleto. O motor clona o arquivo (SkeletonUtils.clone) e deixa visível só um visual por pessoa.",
+    "formato": "GLB 2.0 com KHR_mesh_quantization: posição em int16 normalizado (a escala de 2 m está nas matrizes inversas de ligação da pele) e normal em int8; TEXCOORD_0 uint16, COLOR_0/JOINTS_0/WEIGHTS_0 uint8; rotações das animações em int16 normalizado, com chaves reduzidas (interpolação linear). O GLTFLoader do three.js r170 lê tudo sem configuração extra.",
+    "sola": "no repouso a sola do pé descalço fica a 1,2 cm do chão e os calçados ocupam essa folga; nos visuais descalços a planta desce até o chão. Assim todos os visuais pisam em y = 0 com o mesmo esqueleto."
+  },
+  "mascaras": {
+    "COLOR_0": "RGBA linear (uint8 normalizado) é MÁSCARA, não cor: R = peça de cima (camiseta, blusa, vestido, biquíni de cima, uniforme, maiô), G = peça de baixo (bermuda, calça, saia, sunga, biquíni de baixo), B = pele, A = cabelo e sobrancelhas. Onde R+G+B+A = 0 é calçado/acessório (boné, chapéu, sola, tiras do chinelo, elástico do cabelo; e a camiseta de baixo do visual `camisa`). Soma ≤ 1; as transições são suaves (linha do cabelo, sobrancelhas).",
+    "mistura": "o GLTFLoader liga vertexColors quando há COLOR_0: o motor desliga (vertexColors = false), lê o atributo `color` (vec4) e mistura no shader: cor = R·cima + G·baixo + B·pele + A·cabelo + (1 − soma)·acessório, depois × textura de detalhe (map).",
+    "detalhe": "TEXCOORD_0 + textura do material `pessoa` (JPEG sRGB 1024², uma por arquivo, compartilhada pelos visuais): dobras, costuras, cavidades, mechas, sobrancelhas, contorno dos olhos, narinas e lábios. Valor ~0,90 nas áreas lisas (≈0,79 depois da conversão sRGB→linear). A pele é neutra (cinza) e serve a qualquer tom; os lábios são levemente mais rosados.",
+    "olhos": "material `olhos` com textura própria (esclera e íris castanha do MakeHuman), sem máscara",
+    "preto_e_branco": "para conferir as máscaras: ver chacara3d/pessoas/previa/previa.js (materialPessoa)"
+  },
+  "pegas": {
+    "ossos": "pega_e e pega_d, filhos de mao_e/mao_d, sem pesos",
+    "origem": "no ponto de pegada, dentro da mão: no meio do anel formado pelos dedos dobrados (onde passa o eixo de um cabo ou o centro de um copo segurado)",
+    "eixos": "Y = eixo do cabo, saindo pelo lado do polegar/indicador (do nó do mínimo para o nó do indicador); Z = para onde os dedos apontam (do punho para os nós), perpendicular a Y; X = Y × Z (na mão direita aponta para a palma, na esquerda para o dorso)",
+    "como_usar": "modele o objeto com a origem no ponto de pegada e o eixo do cabo (ou o eixo de um copo, boca para cima) em +Y e prenda como filho do osso pega_d (ou pega_e), sem rotação nem deslocamento. Com a mão em repouso (braço solto) o +Y fica mais ou menos para a frente/baixo; nas animações com objeto (bebendo, ferramentas) o +Y fica certo.",
+    "copo": "copo de ~11 cm: centro do copo na origem da pega; a borda fica em +Y a ~5,5 cm (bebendo encosta a borda na boca)",
+    "ferramentas_de_cabo": "rastelo, vassoura, peneira da piscina e pegador: presos na pega_d com o cabo em +Y; nessas animações o +Y aponta da mão direita para a esquerda e a mão esquerda fica sobre a linha do cabo (distâncias nas notas de cada animação)"
+  },
+  "pessoas": {
+    "homem": {
+      "arquivo": "homem.glb",
+      "descricao": "homem adulto (~1,76 m), corpo do MakeHuman (CC0)",
+      "medidas": {
+        "altura_m": 1.801,
+        "altura_corpo_m": 1.76,
+        "quadril_m": 0.945,
+        "ombro_m": 1.405,
+        "olhos_m": 1.65,
+        "pega_d_repouso_m": [
+          -0.514,
+          0.991,
+          0.293
+        ],
+        "pega_e_repouso_m": [
+          0.514,
+          0.991,
+          0.293
+        ]
+      },
+      "ossos": [
+        "raiz",
+        "quadril",
+        "coluna_1",
+        "coluna_2",
+        "peito",
+        "pescoco",
+        "cabeca",
+        "clavicula_e",
+        "braco_e",
+        "antebraco_e",
+        "mao_e",
+        "pega_e",
+        "clavicula_d",
+        "braco_d",
+        "antebraco_d",
+        "mao_d",
+        "pega_d",
+        "coxa_e",
+        "canela_e",
+        "pe_e",
+        "dedos_pe_e",
+        "coxa_d",
+        "canela_d",
+        "pe_d",
+        "dedos_pe_d"
+      ],
+      "visuais": {
+        "casual": {
+          "descricao": "camiseta, bermuda, tênis, cabelo curto",
+          "categorias": [
+            "casual",
+            "festa"
+          ],
+          "triangulos": 8067,
+          "triangulos_sem_olhos": 7895,
+          "vertices": 5652
+        },
+        "camisa": {
+          "descricao": "camisa de manga curta aberta sobre camiseta (camiseta no canal de acessório), calça, sapatênis",
+          "categorias": [
+            "casual",
+            "festa",
+            "noite"
+          ],
+          "triangulos": 8855,
+          "triangulos_sem_olhos": 8683,
+          "vertices": 6394
+        },
+        "regata": {
+          "descricao": "regata, bermuda, chinelo, boné",
+          "categorias": [
+            "casual",
+            "piscina",
+            "festa"
+          ],
+          "triangulos": 9218,
+          "triangulos_sem_olhos": 9046,
+          "vertices": 6391
+        },
+        "praia": {
+          "descricao": "sunga, sem camisa, chinelo",
+          "categorias": [
+            "piscina"
+          ],
+          "triangulos": 8652,
+          "triangulos_sem_olhos": 8480,
+          "vertices": 5362
+        },
+        "praia_2": {
+          "descricao": "bermuda de praia, sem camisa, descalço, cabelo raspado",
+          "categorias": [
+            "piscina"
+          ],
+          "triangulos": 7016,
+          "triangulos_sem_olhos": 6844,
+          "vertices": 4327
+        },
+        "trabalho": {
+          "descricao": "camisa de uniforme de manga comprida, calça de brim, botina, chapéu de palha",
+          "categorias": [
+            "trabalho"
+          ],
+          "triangulos": 7734,
+          "triangulos_sem_olhos": 7562,
+          "vertices": 5629
+        },
+        "noite": {
+          "descricao": "camiseta, calça jeans, tênis, cabelo crespo volumoso",
+          "categorias": [
+            "noite",
+            "festa"
+          ],
+          "triangulos": 7466,
+          "triangulos_sem_olhos": 7294,
+          "vertices": 5272
+        }
+      },
+      "animacoes": {
+        "parado": {
+          "duracao_s": 5.8667,
+          "repete": true,
+          "quadros": 177,
+          "notas": "em pé, respiração e troca de apoio (captura CMU 18_08)"
+        },
+        "parado_2": {
+          "duracao_s": 5.8667,
+          "repete": true,
+          "quadros": 177,
+          "notas": "mãos na cintura, apoio trocando (base: captura CMU 18_08 espelhada)"
+        },
+        "conversando": {
+          "duracao_s": 5.8667,
+          "repete": true,
+          "quadros": 177,
+          "notas": "conversando: gestos de explicação na frente do corpo (mão direita mais ativa), palmas para cima, cabeça acompanhando; corpo da captura CMU 18_08"
+        },
+        "ouvindo": {
+          "duracao_s": 5.8667,
+          "repete": true,
+          "quadros": 177,
+          "notas": "escutando: mãos juntas na frente, cabeça inclinada que concorda de vez em quando"
+        },
+        "andando": {
+          "duracao_s": 2.2667,
+          "repete": true,
+          "quadros": 69,
+          "velocidade_m_s": 1.287,
+          "notas": "duas passadas (captura CMU 35_01)"
+        },
+        "andando_devagar": {
+          "duracao_s": 1.4333,
+          "repete": true,
+          "quadros": 44,
+          "velocidade_m_s": 0.997,
+          "notas": "passada lenta (captura CMU 07_04)"
+        },
+        "correndo": {
+          "duracao_s": 0.7667,
+          "repete": true,
+          "quadros": 24,
+          "velocidade_m_s": 3.155,
+          "notas": "corrida (captura CMU 35_17)"
+        },
+        "acenando": {
+          "duracao_s": 2.4667,
+          "repete": true,
+          "quadros": 75,
+          "notas": "acenando com a mão direita (braço da captura CMU 111_37 sobre o parado)"
+        },
+        "batendo_palmas": {
+          "duracao_s": 4.0,
+          "repete": true,
+          "quadros": 121,
+          "notas": "palmas na frente do peito, ~2,25 por segundo"
+        },
+        "rindo": {
+          "duracao_s": 4.8,
+          "repete": true,
+          "quadros": 145,
+          "notas": "rindo, mão na barriga (captura CMU 80_44)"
+        },
+        "bebendo": {
+          "duracao_s": 5.5,
+          "repete": true,
+          "quadros": 166,
+          "notas": "copo na mão direita: segura na altura da cintura e leva à boca entre 1,3 s e 4,2 s (inclina 45° para beber)"
+        },
+        "sentado": {
+          "duracao_s": 6.0,
+          "repete": true,
+          "quadros": 181,
+          "notas": "assento a 0,45 m (nádegas encostam); quadril (articulação) em y=0.541, z=0: a origem fica no chão debaixo dos ísquios, ~0,12 m à frente do encosto.",
+          "assento_m": 0.45
+        },
+        "sentado_conversando": {
+          "duracao_s": 8.0,
+          "repete": true,
+          "quadros": 241,
+          "notas": "sentado (assento 0,45 m) conversando com alguém à direita: gestos e acenos de cabeça",
+          "assento_m": 0.45
+        },
+        "sentado_comendo": {
+          "duracao_s": 6.0,
+          "repete": true,
+          "quadros": 181,
+          "notas": "balde de pipoca no colo: centro da boca do balde em (0.00, 0.65, 0.18) m no referencial da pessoa; mão esquerda na borda esquerda, mão direita pega e leva à boca a cada 3 s",
+          "assento_m": 0.45,
+          "balde_m": [
+            0.0,
+            0.647,
+            0.18
+          ]
+        },
+        "sentado_assistindo": {
+          "duracao_s": 8.0,
+          "repete": true,
+          "quadros": 241,
+          "notas": "sentado (assento 0,45 m) assistindo, recostado, quase parado",
+          "assento_m": 0.45
+        },
+        "sentado_chao": {
+          "duracao_s": 6.0,
+          "repete": true,
+          "quadros": 181,
+          "notas": "sentado no chão de pernas cruzadas, mãos nos joelhos; quadril em y=0.066"
+        },
+        "sentado_borda": {
+          "duracao_s": 6.0,
+          "repete": true,
+          "quadros": 181,
+          "notas": "sentado na borda (y = 0) com a borda em z = 0; pernas pendem e batem na água; tornozelos em y≈-0.37 m",
+          "pes_m": -0.371
+        },
+        "deitado": {
+          "duracao_s": 8.0,
+          "repete": true,
+          "quadros": 241,
+          "notas": "deitado de costas na espreguiçadeira: assento a 0.32 m, encosto a 35° da horizontal começando no quadril (articulação em y=0.413, z=0); pernas esticadas para +Z; braço direito atrás da cabeça",
+          "assento_m": 0.32,
+          "angulo_encosto_graus": 35.0
+        },
+        "dancando_1": {
+          "duracao_s": 4.0,
+          "repete": true,
+          "quadros": 121,
+          "notas": "passo e toque para os lados com balanço do quadril, 120 bpm, 2 compassos (8 tempos)",
+          "bpm": 120.0
+        },
+        "dancando_2": {
+          "duracao_s": 4.0,
+          "repete": true,
+          "quadros": 121,
+          "notas": "molejo de axé/samba: joelhos alternando, quadril e braços girando, 120 bpm, 2 compassos",
+          "bpm": 120.0
+        },
+        "dancando_3": {
+          "duracao_s": 4.0,
+          "repete": true,
+          "quadros": 121,
+          "notas": "braços para cima balançando, joelhos no tempo, 120 bpm, 2 compassos",
+          "bpm": 120.0
+        },
+        "pulando": {
+          "duracao_s": 3.7333,
+          "repete": true,
+          "quadros": 113,
+          "notas": "pulos no tempo (128 bpm, 2 compassos = 3,75 s): no 1º compasso só o braço direito soca para o alto, no 2º os dois; pés saem ~10 cm do chão",
+          "bpm": 128.0
+        },
+        "dj": {
+          "duracao_s": 3.8333,
+          "repete": true,
+          "quadros": 116,
+          "notas": "DJ (125 bpm, 2 compassos): mesa com o tampo a 0.95 m e a frente em z≈0,30·k; mão esquerda no mixer (~0,42 m à frente), mão direita segurando o fone na orelha direita",
+          "bpm": 125.0,
+          "mesa_m": 0.95
+        },
+        "cantando_parabens": {
+          "duracao_s": 4.0,
+          "repete": true,
+          "quadros": 121,
+          "notas": "palmas em todo tempo (120 bpm, 2 compassos) e balanço de um lado para o outro",
+          "bpm": 120.0
+        },
+        "na_agua": {
+          "duracao_s": 8.0,
+          "repete": true,
+          "quadros": 241,
+          "notas": "em pé dentro da água: linha d'água em y=1.29 m acima da sola dos pés (pés no fundo); mãos mexendo logo abaixo da superfície",
+          "linha_dagua_m": 1.285
+        },
+        "nadando_parado": {
+          "duracao_s": 4.0,
+          "repete": true,
+          "quadros": 121,
+          "notas": "boiando na vertical, pedalando: linha d'água em y=1.50 m (logo abaixo do queixo) no referencial da pessoa; os pés não tocam o fundo",
+          "linha_dagua_m": 1.5
+        },
+        "cortando_grama": {
+          "duracao_s": 3.6,
+          "repete": true,
+          "quadros": 109,
+          "velocidade_m_s": 0.8,
+          "notas": "empurrando o cortador a 0.80 m/s: as duas mãos no guidão a 0.95 m de altura e 0.45 m à frente da origem, a ±0.22 m (guidão horizontal, no eixo X)",
+          "guidao_m": {
+            "altura": 0.95,
+            "frente": 0.45,
+            "meia_largura": 0.22
+          }
+        },
+        "rastelando": {
+          "duracao_s": 3.2,
+          "repete": true,
+          "quadros": 97,
+          "notas": "rastelando no lugar (duas puxadas em 3,2 s). Rastelo preso na pega_d com o cabo em +Y (+Y aponta da mão direita para a esquerda); a cabeça do rastelo fica em −Y a 1.05 m e encosta no chão; a mão esquerda segura em +Y entre 0.40 e 0.40 m (escorrega no cabo)",
+          "ferramenta": {
+            "osso": "pega_d",
+            "cabeca_em_y": -1.05,
+            "mao_esquerda_em_y": 0.4,
+            "mao_esquerda_faixa_y": [
+              0.4,
+              0.4
+            ]
+          }
+        },
+        "varrendo": {
+          "duracao_s": 3.2,
+          "repete": true,
+          "quadros": 97,
+          "notas": "varrendo (quatro varridas em 3,2 s, da direita para a esquerda). Vassoura presa na pega_d com o cabo em +Y; a palha fica em −Y a 0.95 m (encosta no chão); a mão esquerda segura em +Y entre 0.42 e 0.42 m",
+          "ferramenta": {
+            "osso": "pega_d",
+            "cabeca_em_y": -0.95,
+            "mao_esquerda_em_y": 0.42,
+            "mao_esquerda_faixa_y": [
+              0.42,
+              0.42
+            ]
+          }
+        },
+        "colhendo_alto": {
+          "duracao_s": 7.0,
+          "repete": true,
+          "quadros": 211,
+          "notas": "colhendo no alto: a mão direita e depois a esquerda alcançam a fruta a 2.07 m (na ponta dos pés) e põem no cesto na cintura, centro em (0, 1.00, 0.26) m; a outra mão segura a borda do cesto",
+          "fruta_m": 2.07,
+          "cesto_m": [
+            0.0,
+            1.0,
+            0.26
+          ]
+        },
+        "carregando_cesto": {
+          "duracao_s": 2.8667,
+          "repete": true,
+          "quadros": 87,
+          "velocidade_m_s": 1.0,
+          "notas": "andando a 1.00 m/s com um cesto na frente: centro do cesto em (0, 0.93, 0.33) m (sobe e desce com o quadril), mãos nas alças laterais a ±0.19 m",
+          "cesto_m": [
+            0.0,
+            0.93,
+            0.33
+          ]
+        },
+        "limpando_piscina": {
+          "duracao_s": 4.0,
+          "repete": true,
+          "quadros": 121,
+          "notas": "limpando a piscina com a peneira de cabo comprido: vai e volta (duas vezes em 4 s). Cabo preso na pega_d em +Y (para a frente, um pouco para a esquerda, ~20° abaixo da horizontal); a mão esquerda segura em +Y entre 0.39 e 0.47 m (escorrega no cabo); a peneira fica em +Y a ~3 m",
+          "ferramenta": {
+            "osso": "pega_d",
+            "mao_esquerda_em_y": 0.475,
+            "mao_esquerda_faixa_y": [
+              0.388,
+              0.475
+            ],
+            "peneira_em_y": 3.0
+          }
+        },
+        "grelhando": {
+          "duracao_s": 5.0,
+          "repete": true,
+          "quadros": 151,
+          "notas": "grelhando numa bancada de 0.90 m (frente em z≈0,30 m, carne em (-0.05, 0.95, 0.50)): pegador preso na pega_d, pontas em +Y a 0.26 m; vira a carne entre 1,7 s e 2,3 s; mão esquerda apoiada na beira da bancada",
+          "ferramenta": {
+            "osso": "pega_d",
+            "pontas_em_y": 0.26
+          },
+          "bancada_m": 0.9
+        }
+      },
+      "bytes": 2363988,
+      "alvos_makehuman": [
+        "macrodetails/african-male-young.target",
+        "macrodetails/asian-male-young.target",
+        "macrodetails/caucasian-male-young.target",
+        "macrodetails/universal-male-young-averagemuscle-averageweight.target"
+      ]
+    },
+    "mulher": {
+      "arquivo": "mulher.glb",
+      "descricao": "mulher adulta (~1,63 m), corpo do MakeHuman (CC0)",
+      "medidas": {
+        "altura_m": 1.65,
+        "altura_corpo_m": 1.63,
+        "quadril_m": 0.852,
+        "ombro_m": 1.296,
+        "olhos_m": 1.524,
+        "pega_d_repouso_m": [
+          -0.445,
+          0.916,
+          0.206
+        ],
+        "pega_e_repouso_m": [
+          0.445,
+          0.916,
+          0.206
+        ]
+      },
+      "ossos": [
+        "raiz",
+        "quadril",
+        "coluna_1",
+        "coluna_2",
+        "peito",
+        "pescoco",
+        "cabeca",
+        "clavicula_e",
+        "braco_e",
+        "antebraco_e",
+        "mao_e",
+        "pega_e",
+        "clavicula_d",
+        "braco_d",
+        "antebraco_d",
+        "mao_d",
+        "pega_d",
+        "coxa_e",
+        "canela_e",
+        "pe_e",
+        "dedos_pe_e",
+        "coxa_d",
+        "canela_d",
+        "pe_d",
+        "dedos_pe_d"
+      ],
+      "visuais": {
+        "casual": {
+          "descricao": "blusa, short jeans, tênis, cabelo longo solto",
+          "categorias": [
+            "casual",
+            "festa"
+          ],
+          "triangulos": 8516,
+          "triangulos_sem_olhos": 8344,
+          "vertices": 5972
+        },
+        "vestido": {
+          "descricao": "vestido leve até o joelho, sandália, coque",
+          "categorias": [
+            "festa",
+            "casual"
+          ],
+          "triangulos": 9226,
+          "triangulos_sem_olhos": 9054,
+          "vertices": 5937
+        },
+        "praia": {
+          "descricao": "biquíni, chinelo, rabo de cavalo",
+          "categorias": [
+            "piscina"
+          ],
+          "triangulos": 8861,
+          "triangulos_sem_olhos": 8689,
+          "vertices": 5805
+        },
+        "praia_2": {
+          "descricao": "maiô, descalça, cabelo solto",
+          "categorias": [
+            "piscina"
+          ],
+          "triangulos": 8308,
+          "triangulos_sem_olhos": 8136,
+          "vertices": 5352
+        },
+        "trabalho": {
+          "descricao": "camiseta de uniforme, calça, bota, rabo de cavalo, boné",
+          "categorias": [
+            "trabalho"
+          ],
+          "triangulos": 7483,
+          "triangulos_sem_olhos": 7311,
+          "vertices": 5388
+        },
+        "noite": {
+          "descricao": "top, saia curta, tênis, cabelo solto",
+          "categorias": [
+            "noite",
+            "festa"
+          ],
+          "triangulos": 9061,
+          "triangulos_sem_olhos": 8889,
+          "vertices": 5853
+        }
+      },
+      "animacoes": {
+        "parado": {
+          "duracao_s": 5.8667,
+          "repete": true,
+          "quadros": 177,
+          "notas": "em pé, respiração e troca de apoio (captura CMU 18_08)"
+        },
+        "parado_2": {
+          "duracao_s": 5.8667,
+          "repete": true,
+          "quadros": 177,
+          "notas": "mãos na cintura, apoio trocando (base: captura CMU 18_08 espelhada)"
+        },
+        "conversando": {
+          "duracao_s": 5.8667,
+          "repete": true,
+          "quadros": 177,
+          "notas": "conversando: gestos de explicação na frente do corpo (mão direita mais ativa), palmas para cima, cabeça acompanhando; corpo da captura CMU 18_08"
+        },
+        "ouvindo": {
+          "duracao_s": 5.8667,
+          "repete": true,
+          "quadros": 177,
+          "notas": "escutando: mãos juntas na frente, cabeça inclinada que concorda de vez em quando"
+        },
+        "andando": {
+          "duracao_s": 2.2667,
+          "repete": true,
+          "quadros": 69,
+          "velocidade_m_s": 1.139,
+          "notas": "duas passadas (captura CMU 35_01)"
+        },
+        "andando_devagar": {
+          "duracao_s": 1.4333,
+          "repete": true,
+          "quadros": 44,
+          "velocidade_m_s": 0.883,
+          "notas": "passada lenta (captura CMU 07_04)"
+        },
+        "correndo": {
+          "duracao_s": 0.7667,
+          "repete": true,
+          "quadros": 24,
+          "velocidade_m_s": 2.794,
+          "notas": "corrida (captura CMU 35_17)"
+        },
+        "acenando": {
+          "duracao_s": 2.4667,
+          "repete": true,
+          "quadros": 75,
+          "notas": "acenando com a mão direita (braço da captura CMU 111_37 sobre o parado)"
+        },
+        "batendo_palmas": {
+          "duracao_s": 4.0,
+          "repete": true,
+          "quadros": 121,
+          "notas": "palmas na frente do peito, ~2,25 por segundo"
+        },
+        "rindo": {
+          "duracao_s": 4.8,
+          "repete": true,
+          "quadros": 145,
+          "notas": "rindo, mão na barriga (captura CMU 80_44)"
+        },
+        "bebendo": {
+          "duracao_s": 5.5,
+          "repete": true,
+          "quadros": 166,
+          "notas": "copo na mão direita: segura na altura da cintura e leva à boca entre 1,3 s e 4,2 s (inclina 45° para beber)"
+        },
+        "sentado": {
+          "duracao_s": 6.0,
+          "repete": true,
+          "quadros": 181,
+          "notas": "assento a 0,45 m (nádegas encostam); quadril (articulação) em y=0.555, z=0: a origem fica no chão debaixo dos ísquios, ~0,12 m à frente do encosto.",
+          "assento_m": 0.45
+        },
+        "sentado_conversando": {
+          "duracao_s": 8.0,
+          "repete": true,
+          "quadros": 241,
+          "notas": "sentado (assento 0,45 m) conversando com alguém à direita: gestos e acenos de cabeça",
+          "assento_m": 0.45
+        },
+        "sentado_comendo": {
+          "duracao_s": 6.0,
+          "repete": true,
+          "quadros": 181,
+          "notas": "balde de pipoca no colo: centro da boca do balde em (0.00, 0.65, 0.16) m no referencial da pessoa; mão esquerda na borda esquerda, mão direita pega e leva à boca a cada 3 s",
+          "assento_m": 0.45,
+          "balde_m": [
+            0.0,
+            0.652,
+            0.164
+          ]
+        },
+        "sentado_assistindo": {
+          "duracao_s": 8.0,
+          "repete": true,
+          "quadros": 241,
+          "notas": "sentado (assento 0,45 m) assistindo, recostado, quase parado",
+          "assento_m": 0.45
+        },
+        "sentado_chao": {
+          "duracao_s": 6.0,
+          "repete": true,
+          "quadros": 181,
+          "notas": "sentado no chão de pernas cruzadas, mãos nos joelhos; quadril em y=0.077"
+        },
+        "sentado_borda": {
+          "duracao_s": 6.0,
+          "repete": true,
+          "quadros": 181,
+          "notas": "sentado na borda (y = 0) com a borda em z = 0; pernas pendem e batem na água; tornozelos em y≈-0.31 m",
+          "pes_m": -0.307
+        },
+        "deitado": {
+          "duracao_s": 8.0,
+          "repete": true,
+          "quadros": 241,
+          "notas": "deitado de costas na espreguiçadeira: assento a 0.32 m, encosto a 35° da horizontal começando no quadril (articulação em y=0.423, z=0); pernas esticadas para +Z; braço direito atrás da cabeça",
+          "assento_m": 0.32,
+          "angulo_encosto_graus": 35.0
+        },
+        "dancando_1": {
+          "duracao_s": 4.0,
+          "repete": true,
+          "quadros": 121,
+          "notas": "passo e toque para os lados com balanço do quadril, 120 bpm, 2 compassos (8 tempos)",
+          "bpm": 120.0
+        },
+        "dancando_2": {
+          "duracao_s": 4.0,
+          "repete": true,
+          "quadros": 121,
+          "notas": "molejo de axé/samba: joelhos alternando, quadril e braços girando, 120 bpm, 2 compassos",
+          "bpm": 120.0
+        },
+        "dancando_3": {
+          "duracao_s": 4.0,
+          "repete": true,
+          "quadros": 121,
+          "notas": "braços para cima balançando, joelhos no tempo, 120 bpm, 2 compassos",
+          "bpm": 120.0
+        },
+        "pulando": {
+          "duracao_s": 3.7333,
+          "repete": true,
+          "quadros": 113,
+          "notas": "pulos no tempo (128 bpm, 2 compassos = 3,75 s): no 1º compasso só o braço direito soca para o alto, no 2º os dois; pés saem ~10 cm do chão",
+          "bpm": 128.0
+        },
+        "dj": {
+          "duracao_s": 3.8333,
+          "repete": true,
+          "quadros": 116,
+          "notas": "DJ (125 bpm, 2 compassos): mesa com o tampo a 0.95 m e a frente em z≈0,30·k; mão esquerda no mixer (~0,42 m à frente), mão direita segurando o fone na orelha direita",
+          "bpm": 125.0,
+          "mesa_m": 0.95
+        },
+        "cantando_parabens": {
+          "duracao_s": 4.0,
+          "repete": true,
+          "quadros": 121,
+          "notas": "palmas em todo tempo (120 bpm, 2 compassos) e balanço de um lado para o outro",
+          "bpm": 120.0
+        },
+        "na_agua": {
+          "duracao_s": 8.0,
+          "repete": true,
+          "quadros": 241,
+          "notas": "em pé dentro da água: linha d'água em y=1.19 m acima da sola dos pés (pés no fundo); mãos mexendo logo abaixo da superfície",
+          "linha_dagua_m": 1.185
+        },
+        "nadando_parado": {
+          "duracao_s": 4.0,
+          "repete": true,
+          "quadros": 121,
+          "notas": "boiando na vertical, pedalando: linha d'água em y=1.39 m (logo abaixo do queixo) no referencial da pessoa; os pés não tocam o fundo",
+          "linha_dagua_m": 1.394
+        },
+        "cortando_grama": {
+          "duracao_s": 3.1333,
+          "repete": true,
+          "quadros": 95,
+          "velocidade_m_s": 0.8,
+          "notas": "empurrando o cortador a 0.80 m/s: as duas mãos no guidão a 0.95 m de altura e 0.45 m à frente da origem, a ±0.20 m (guidão horizontal, no eixo X)",
+          "guidao_m": {
+            "altura": 0.95,
+            "frente": 0.45,
+            "meia_largura": 0.204
+          }
+        },
+        "rastelando": {
+          "duracao_s": 3.2,
+          "repete": true,
+          "quadros": 97,
+          "notas": "rastelando no lugar (duas puxadas em 3,2 s). Rastelo preso na pega_d com o cabo em +Y (+Y aponta da mão direita para a esquerda); a cabeça do rastelo fica em −Y a 0.97 m e encosta no chão; a mão esquerda segura em +Y entre 0.37 e 0.37 m (escorrega no cabo)",
+          "ferramenta": {
+            "osso": "pega_d",
+            "cabeca_em_y": -0.972,
+            "mao_esquerda_em_y": 0.37,
+            "mao_esquerda_faixa_y": [
+              0.37,
+              0.37
+            ]
+          }
+        },
+        "varrendo": {
+          "duracao_s": 3.2,
+          "repete": true,
+          "quadros": 97,
+          "notas": "varrendo (quatro varridas em 3,2 s, da direita para a esquerda). Vassoura presa na pega_d com o cabo em +Y; a palha fica em −Y a 0.88 m (encosta no chão); a mão esquerda segura em +Y entre 0.39 e 0.39 m",
+          "ferramenta": {
+            "osso": "pega_d",
+            "cabeca_em_y": -0.88,
+            "mao_esquerda_em_y": 0.389,
+            "mao_esquerda_faixa_y": [
+              0.389,
+              0.389
+            ]
+          }
+        },
+        "colhendo_alto": {
+          "duracao_s": 7.0,
+          "repete": true,
+          "quadros": 211,
+          "notas": "colhendo no alto: a mão direita e depois a esquerda alcançam a fruta a 1.86 m (na ponta dos pés) e põem no cesto na cintura, centro em (0, 0.90, 0.24) m; a outra mão segura a borda do cesto",
+          "fruta_m": 1.858,
+          "cesto_m": [
+            0.0,
+            0.896,
+            0.241
+          ]
+        },
+        "carregando_cesto": {
+          "duracao_s": 2.5333,
+          "repete": true,
+          "quadros": 77,
+          "velocidade_m_s": 1.0,
+          "notas": "andando a 1.00 m/s com um cesto na frente: centro do cesto em (0, 0.86, 0.31) m (sobe e desce com o quadril), mãos nas alças laterais a ±0.18 m",
+          "cesto_m": [
+            0.0,
+            0.861,
+            0.306
+          ]
+        },
+        "limpando_piscina": {
+          "duracao_s": 4.0,
+          "repete": true,
+          "quadros": 121,
+          "notas": "limpando a piscina com a peneira de cabo comprido: vai e volta (duas vezes em 4 s). Cabo preso na pega_d em +Y (para a frente, um pouco para a esquerda, ~20° abaixo da horizontal); a mão esquerda segura em +Y entre 0.29 e 0.38 m (escorrega no cabo); a peneira fica em +Y a ~3 m",
+          "ferramenta": {
+            "osso": "pega_d",
+            "mao_esquerda_em_y": 0.377,
+            "mao_esquerda_faixa_y": [
+              0.289,
+              0.377
+            ],
+            "peneira_em_y": 3.0
+          }
+        },
+        "grelhando": {
+          "duracao_s": 5.0,
+          "repete": true,
+          "quadros": 151,
+          "notas": "grelhando numa bancada de 0.90 m (frente em z≈0,30 m, carne em (-0.05, 0.95, 0.50)): pegador preso na pega_d, pontas em +Y a 0.24 m; vira a carne entre 1,7 s e 2,3 s; mão esquerda apoiada na beira da bancada",
+          "ferramenta": {
+            "osso": "pega_d",
+            "pontas_em_y": 0.241
+          },
+          "bancada_m": 0.9
+        }
+      },
+      "bytes": 2187508,
+      "alvos_makehuman": [
+        "macrodetails/african-female-young.target",
+        "macrodetails/asian-female-young.target",
+        "macrodetails/caucasian-female-young.target",
+        "macrodetails/universal-female-young-averagemuscle-averageweight.target"
+      ]
+    },
+    "crianca": {
+      "arquivo": "crianca.glb",
+      "descricao": "criança de 8–9 anos (~1,30 m), corpo do MakeHuman (CC0)",
+      "medidas": {
+        "altura_m": 1.307,
+        "altura_corpo_m": 1.3,
+        "quadril_m": 0.689,
+        "ombro_m": 1.012,
+        "olhos_m": 1.204,
+        "pega_d_repouso_m": [
+          -0.356,
+          0.725,
+          0.195
+        ],
+        "pega_e_repouso_m": [
+          0.356,
+          0.725,
+          0.195
+        ]
+      },
+      "ossos": [
+        "raiz",
+        "quadril",
+        "coluna_1",
+        "coluna_2",
+        "peito",
+        "pescoco",
+        "cabeca",
+        "clavicula_e",
+        "braco_e",
+        "antebraco_e",
+        "mao_e",
+        "pega_e",
+        "clavicula_d",
+        "braco_d",
+        "antebraco_d",
+        "mao_d",
+        "pega_d",
+        "coxa_e",
+        "canela_e",
+        "pe_e",
+        "dedos_pe_e",
+        "coxa_d",
+        "canela_d",
+        "pe_d",
+        "dedos_pe_d"
+      ],
+      "visuais": {
+        "menino": {
+          "descricao": "camiseta, short, tênis, cabelo curto",
+          "categorias": [
+            "casual",
+            "festa"
+          ],
+          "triangulos": 6560,
+          "triangulos_sem_olhos": 6388,
+          "vertices": 4796
+        },
+        "menina": {
+          "descricao": "vestidinho, tênis, rabo de cavalo",
+          "categorias": [
+            "casual",
+            "festa"
+          ],
+          "triangulos": 7094,
+          "triangulos_sem_olhos": 6922,
+          "vertices": 4729
+        },
+        "praia_menino": {
+          "descricao": "sunga, descalço",
+          "categorias": [
+            "piscina"
+          ],
+          "triangulos": 6132,
+          "triangulos_sem_olhos": 5960,
+          "vertices": 3800
+        },
+        "praia_menina": {
+          "descricao": "maiô, descalça, rabo de cavalo",
+          "categorias": [
+            "piscina"
+          ],
+          "triangulos": 6572,
+          "triangulos_sem_olhos": 6400,
+          "vertices": 4357
+        }
+      },
+      "animacoes": {
+        "parado": {
+          "duracao_s": 5.8667,
+          "repete": true,
+          "quadros": 177,
+          "notas": "em pé, respiração e troca de apoio (captura CMU 18_08)"
+        },
+        "parado_2": {
+          "duracao_s": 5.8667,
+          "repete": true,
+          "quadros": 177,
+          "notas": "mãos na cintura, apoio trocando (base: captura CMU 18_08 espelhada)"
+        },
+        "conversando": {
+          "duracao_s": 5.8667,
+          "repete": true,
+          "quadros": 177,
+          "notas": "conversando: gestos de explicação na frente do corpo (mão direita mais ativa), palmas para cima, cabeça acompanhando; corpo da captura CMU 18_08"
+        },
+        "ouvindo": {
+          "duracao_s": 5.8667,
+          "repete": true,
+          "quadros": 177,
+          "notas": "escutando: mãos juntas na frente, cabeça inclinada que concorda de vez em quando"
+        },
+        "andando": {
+          "duracao_s": 2.2667,
+          "repete": true,
+          "quadros": 69,
+          "velocidade_m_s": 0.921,
+          "notas": "duas passadas (captura CMU 35_01)"
+        },
+        "andando_devagar": {
+          "duracao_s": 1.4333,
+          "repete": true,
+          "quadros": 44,
+          "velocidade_m_s": 0.714,
+          "notas": "passada lenta (captura CMU 07_04)"
+        },
+        "correndo": {
+          "duracao_s": 0.6,
+          "repete": true,
+          "quadros": 19,
+          "velocidade_m_s": 2.9,
+          "notas": "corrida (captura CMU 35_17)"
+        },
+        "acenando": {
+          "duracao_s": 2.4667,
+          "repete": true,
+          "quadros": 75,
+          "notas": "acenando com a mão direita (braço da captura CMU 111_37 sobre o parado)"
+        },
+        "batendo_palmas": {
+          "duracao_s": 4.0,
+          "repete": true,
+          "quadros": 121,
+          "notas": "palmas na frente do peito, ~2,25 por segundo"
+        },
+        "rindo": {
+          "duracao_s": 4.8,
+          "repete": true,
+          "quadros": 145,
+          "notas": "rindo, mão na barriga (captura CMU 80_44)"
+        },
+        "bebendo": {
+          "duracao_s": 5.5,
+          "repete": true,
+          "quadros": 166,
+          "notas": "copo na mão direita: segura na altura da cintura e leva à boca entre 1,3 s e 4,2 s (inclina 45° para beber)"
+        },
+        "sentado": {
+          "duracao_s": 6.0,
+          "repete": true,
+          "quadros": 181,
+          "notas": "assento a 0,45 m (nádegas encostam); quadril (articulação) em y=0.536, z=0: a origem fica no chão debaixo dos ísquios, ~0,12 m à frente do encosto. Criança: na cadeira de adulto os pés ficam pendurados (~10 cm do chão), balançando.",
+          "assento_m": 0.45
+        },
+        "sentado_conversando": {
+          "duracao_s": 8.0,
+          "repete": true,
+          "quadros": 241,
+          "notas": "sentado (assento 0,45 m) conversando com alguém à direita: gestos e acenos de cabeça",
+          "assento_m": 0.45
+        },
+        "sentado_comendo": {
+          "duracao_s": 6.0,
+          "repete": true,
+          "quadros": 181,
+          "notas": "balde de pipoca no colo: centro da boca do balde em (0.00, 0.62, 0.14) m no referencial da pessoa; mão esquerda na borda esquerda, mão direita pega e leva à boca a cada 3 s",
+          "assento_m": 0.45,
+          "balde_m": [
+            0.0,
+            0.622,
+            0.135
+          ]
+        },
+        "sentado_assistindo": {
+          "duracao_s": 8.0,
+          "repete": true,
+          "quadros": 241,
+          "notas": "sentado (assento 0,45 m) assistindo, recostado, quase parado",
+          "assento_m": 0.45
+        },
+        "sentado_chao": {
+          "duracao_s": 6.0,
+          "repete": true,
+          "quadros": 181,
+          "notas": "sentado no chão de pernas cruzadas, mãos nos joelhos; quadril em y=0.067"
+        },
+        "sentado_borda": {
+          "duracao_s": 6.0,
+          "repete": true,
+          "quadros": 181,
+          "notas": "sentado na borda (y = 0) com a borda em z = 0; pernas pendem e batem na água; tornozelos em y≈-0.25 m",
+          "pes_m": -0.252
+        },
+        "deitado": {
+          "duracao_s": 8.0,
+          "repete": true,
+          "quadros": 241,
+          "notas": "deitado de costas na espreguiçadeira: assento a 0.32 m, encosto a 35° da horizontal começando no quadril (articulação em y=0.400, z=0); pernas esticadas para +Z; braço direito atrás da cabeça",
+          "assento_m": 0.32,
+          "angulo_encosto_graus": 35.0
+        },
+        "dancando_1": {
+          "duracao_s": 4.0,
+          "repete": true,
+          "quadros": 121,
+          "notas": "passo e toque para os lados com balanço do quadril, 120 bpm, 2 compassos (8 tempos)",
+          "bpm": 120.0
+        },
+        "dancando_2": {
+          "duracao_s": 4.0,
+          "repete": true,
+          "quadros": 121,
+          "notas": "molejo de axé/samba: joelhos alternando, quadril e braços girando, 120 bpm, 2 compassos",
+          "bpm": 120.0
+        },
+        "dancando_3": {
+          "duracao_s": 4.0,
+          "repete": true,
+          "quadros": 121,
+          "notas": "braços para cima balançando, joelhos no tempo, 120 bpm, 2 compassos",
+          "bpm": 120.0
+        },
+        "pulando": {
+          "duracao_s": 3.7333,
+          "repete": true,
+          "quadros": 113,
+          "notas": "pulos no tempo (128 bpm, 2 compassos = 3,75 s): no 1º compasso só o braço direito soca para o alto, no 2º os dois; pés saem ~10 cm do chão",
+          "bpm": 128.0
+        },
+        "dj": {
+          "duracao_s": 3.8333,
+          "repete": true,
+          "quadros": 116,
+          "notas": "DJ (125 bpm, 2 compassos): mesa com o tampo a 0.70 m e a frente em z≈0,30·k; mão esquerda no mixer (~0,42 m à frente), mão direita segurando o fone na orelha direita",
+          "bpm": 125.0,
+          "mesa_m": 0.7017045454545454
+        },
+        "cantando_parabens": {
+          "duracao_s": 4.0,
+          "repete": true,
+          "quadros": 121,
+          "notas": "palmas em todo tempo (120 bpm, 2 compassos) e balanço de um lado para o outro",
+          "bpm": 120.0
+        },
+        "na_agua": {
+          "duracao_s": 8.0,
+          "repete": true,
+          "quadros": 241,
+          "notas": "em pé dentro da água: linha d'água em y=0.92 m acima da sola dos pés (pés no fundo); mãos mexendo logo abaixo da superfície",
+          "linha_dagua_m": 0.923
+        },
+        "nadando_parado": {
+          "duracao_s": 4.0,
+          "repete": true,
+          "quadros": 121,
+          "notas": "boiando na vertical, pedalando: linha d'água em y=1.09 m (logo abaixo do queixo) no referencial da pessoa; os pés não tocam o fundo",
+          "linha_dagua_m": 1.091
+        },
+        "cortando_grama": {
+          "duracao_s": 2.5333,
+          "repete": true,
+          "quadros": 77,
+          "velocidade_m_s": 0.8,
+          "notas": "empurrando o cortador a 0.80 m/s: as duas mãos no guidão a 0.70 m de altura e 0.33 m à frente da origem, a ±0.16 m (guidão horizontal, no eixo X)",
+          "guidao_m": {
+            "altura": 0.702,
+            "frente": 0.332,
+            "meia_largura": 0.163
+          }
+        },
+        "rastelando": {
+          "duracao_s": 3.2,
+          "repete": true,
+          "quadros": 97,
+          "notas": "rastelando no lugar (duas puxadas em 3,2 s). Rastelo preso na pega_d com o cabo em +Y (+Y aponta da mão direita para a esquerda); a cabeça do rastelo fica em −Y a 0.78 m e encosta no chão; a mão esquerda segura em +Y entre 0.30 e 0.30 m (escorrega no cabo)",
+          "ferramenta": {
+            "osso": "pega_d",
+            "cabeca_em_y": -0.776,
+            "mao_esquerda_em_y": 0.295,
+            "mao_esquerda_faixa_y": [
+              0.295,
+              0.295
+            ]
+          }
+        },
+        "varrendo": {
+          "duracao_s": 3.2,
+          "repete": true,
+          "quadros": 97,
+          "notas": "varrendo (quatro varridas em 3,2 s, da direita para a esquerda). Vassoura presa na pega_d com o cabo em +Y; a palha fica em −Y a 0.70 m (encosta no chão); a mão esquerda segura em +Y entre 0.31 e 0.31 m",
+          "ferramenta": {
+            "osso": "pega_d",
+            "cabeca_em_y": -0.702,
+            "mao_esquerda_em_y": 0.31,
+            "mao_esquerda_faixa_y": [
+              0.31,
+              0.31
+            ]
+          }
+        },
+        "colhendo_alto": {
+          "duracao_s": 7.0,
+          "repete": true,
+          "quadros": 211,
+          "notas": "colhendo no alto: a mão direita e depois a esquerda alcançam a fruta a 1.47 m (na ponta dos pés) e põem no cesto na cintura, centro em (0, 0.72, 0.19) m; a outra mão segura a borda do cesto",
+          "fruta_m": 1.475,
+          "cesto_m": [
+            0.0,
+            0.72,
+            0.192
+          ]
+        },
+        "carregando_cesto": {
+          "duracao_s": 2.0667,
+          "repete": true,
+          "quadros": 63,
+          "velocidade_m_s": 1.0,
+          "notas": "andando a 1.00 m/s com um cesto na frente: centro do cesto em (0, 0.69, 0.24) m (sobe e desce com o quadril), mãos nas alças laterais a ±0.14 m",
+          "cesto_m": [
+            0.0,
+            0.687,
+            0.244
+          ]
+        },
+        "limpando_piscina": {
+          "duracao_s": 4.0,
+          "repete": true,
+          "quadros": 121,
+          "notas": "limpando a piscina com a peneira de cabo comprido: vai e volta (duas vezes em 4 s). Cabo preso na pega_d em +Y (para a frente, um pouco para a esquerda, ~20° abaixo da horizontal); a mão esquerda segura em +Y entre 0.26 e 0.34 m (escorrega no cabo); a peneira fica em +Y a ~3 m",
+          "ferramenta": {
+            "osso": "pega_d",
+            "mao_esquerda_em_y": 0.34,
+            "mao_esquerda_faixa_y": [
+              0.261,
+              0.34
+            ],
+            "peneira_em_y": 3.0
+          }
+        },
+        "grelhando": {
+          "duracao_s": 5.0,
+          "repete": true,
+          "quadros": 151,
+          "notas": "grelhando numa bancada de 0.90 m (frente em z≈0,30 m, carne em (-0.05, 0.95, 0.50)): pegador preso na pega_d, pontas em +Y a 0.19 m; vira a carne entre 1,7 s e 2,3 s; mão esquerda apoiada na beira da bancada",
+          "ferramenta": {
+            "osso": "pega_d",
+            "pontas_em_y": 0.192
+          },
+          "bancada_m": 0.9
+        }
+      },
+      "bytes": 1552848,
+      "alvos_makehuman": [
+        "macrodetails/african-female-child.target",
+        "macrodetails/asian-female-child.target",
+        "macrodetails/caucasian-female-child.target",
+        "macrodetails/universal-female-child-averagemuscle-averageweight.target",
+        "macrodetails/african-female-young.target",
+        "macrodetails/asian-female-young.target",
+        "macrodetails/caucasian-female-young.target",
+        "macrodetails/universal-female-young-averagemuscle-averageweight.target",
+        "macrodetails/african-male-child.target",
+        "macrodetails/asian-male-child.target",
+        "macrodetails/caucasian-male-child.target",
+        "macrodetails/universal-male-child-averagemuscle-averageweight.target",
+        "macrodetails/african-male-young.target",
+        "macrodetails/asian-male-young.target",
+        "macrodetails/caucasian-male-young.target",
+        "macrodetails/universal-male-young-averagemuscle-averageweight.target"
+      ]
+    }
+  },
+  "bytes_total": 6104344
+}

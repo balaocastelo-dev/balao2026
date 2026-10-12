@@ -1,0 +1,2979 @@
+{
+  "arquivo": "aderecos.glb",
+  "bytes": 2747440,
+  "convencoes": {
+    "unidade": "metro",
+    "eixos": "glTF: Y para cima; a frente do objeto olha para +Z; a direita do objeto (vista de quem está de frente para ele) é -X",
+    "origem": "no ponto de apoio: no chão (y = 0), no centro da base",
+    "origem_de_mao": "objetos de segurar na mão têm a origem no ponto onde a mão pega e o cabo/eixo ao longo de +Y",
+    "duas_pegas": "objetos de duas mãos têm filhos vazios pega_d (mão direita) e pega_e (mão esquerda); nas ferramentas de cabo comprido a origem fica na pega_d",
+    "apoio": "objetos de mão que também ficam sobre a mesa (copo_festa, lata, copo_drink) têm o filho vazio apoio no fundo: para pousar, ponha o apoio sobre a superfície",
+    "clonar": "clonar o nó raiz pelo nome (ex.: gltf.scene.getObjectByName(\"bolo\").clone()) e zerar a posição do clone antes de pôr no lugar; os raízes estão todos na origem",
+    "baloes": "cada cor de balão é um material próprio (balao_vermelho, balao_rosa, balao_branco, balao_dourado, balao_azul, balao_amarelo, balao_lilas), compartilhado entre cacho_baloes e arco_baloes: para trocar o tema, mudar a cor do material (ou clonar o material no clone)",
+    "emissivos": "materiais que o motor acende: chama, led_som, led_cabine, lente_movel, tela_led, neon (emissiveIntensity vem de KHR_materials_emissive_strength)",
+    "materiais": "só MeshStandardMaterial (cor, rugosidade, metálico, normal, emissão); vidro e bebida com mistura (BLEND); folhas secas e tela da peneira com recorte (MASK)",
+    "sombras": "castShadow/receiveShadow ficam por conta do motor; as malhas são fechadas onde dá, e os tecidos finos são de dupla face"
+  },
+  "cenarios": {
+    "aniversario": {
+      "titulo": "Festa de aniversário",
+      "aderecos": [
+        "mesa_bolo",
+        "bolo",
+        "bandeja_doces",
+        "presentes",
+        "cacho_baloes",
+        "arco_baloes",
+        "faixa_parabens",
+        "mesa_redonda_festa",
+        "cadeira_festa",
+        "chapeu_festa",
+        "copo_festa",
+        "pratinho_bolo"
+      ]
+    },
+    "cinema": {
+      "titulo": "Reunião no cineminha à noite",
+      "aderecos": [
+        "puff",
+        "cadeira_dobravel",
+        "manta",
+        "balde_pipoca",
+        "projetor",
+        "cooler",
+        "mesinha_lateral"
+      ]
+    },
+    "trabalho": {
+      "titulo": "Trabalhadores limpando a chácara, colhendo frutas e cortando grama",
+      "aderecos": [
+        "cortador_grama",
+        "rastelo",
+        "vassoura",
+        "carrinho_mao",
+        "escada_aluminio",
+        "cesto_frutas",
+        "peneira_piscina",
+        "mangueira_enrolada",
+        "monte_folhas",
+        "saco_lixo"
+      ]
+    },
+    "piscina": {
+      "titulo": "Festa na piscina com churrasqueira lotada",
+      "aderecos": [
+        "boia_rosquinha",
+        "boia_colchao",
+        "boia_flamingo",
+        "bola_praia",
+        "guarda_sol",
+        "espreguicadeira",
+        "toalha",
+        "caixa_som",
+        "lata",
+        "copo_drink",
+        "espeto_carne",
+        "espeto_linguica",
+        "travessa_carne",
+        "pegador"
+      ]
+    },
+    "rave": {
+      "titulo": "Rave lotada à noite",
+      "aderecos": [
+        "cabine_dj",
+        "caixa_som_grande",
+        "trelica_luzes",
+        "painel_led",
+        "emissor_laser",
+        "maquina_fumaca",
+        "bastao_neon"
+      ]
+    }
+  },
+  "aderecos": {
+    "mesa_bolo": {
+      "cenario": "aniversario",
+      "descricao": "Mesa retangular de 1,8 x 0,8 x 0,76 m coberta com toalha branca até o chão, com caimento e dobras nos cantos.",
+      "tamanho_m": {
+        "x": 1.965,
+        "y": 0.758,
+        "z": 0.965
+      },
+      "caixa_min": [
+        -0.981,
+        0.002,
+        -0.485
+      ],
+      "caixa_max": [
+        0.985,
+        0.76,
+        0.48
+      ],
+      "triangulos": 3842,
+      "materiais": [
+        "toalha_branca"
+      ]
+    },
+    "bolo": {
+      "cenario": "aniversario",
+      "descricao": "Bolo de dois andares (rosa com conchinhas brancas e morangos; branco com escorrido rosa) sobre boleira de porcelana, com seis velinhas acesas.",
+      "tamanho_m": {
+        "x": 0.344,
+        "y": 0.402,
+        "z": 0.344
+      },
+      "caixa_min": [
+        -0.172,
+        0.0,
+        -0.172
+      ],
+      "caixa_max": [
+        0.172,
+        0.402,
+        0.172
+      ],
+      "triangulos": 6824,
+      "materiais": [
+        "porcelana",
+        "cobertura_rosa",
+        "cobertura_branca",
+        "morango",
+        "folha_morango",
+        "vela",
+        "pavio",
+        "chama"
+      ],
+      "emissivos": [
+        "chama"
+      ]
+    },
+    "bandeja_doces": {
+      "cenario": "aniversario",
+      "descricao": "Bandeja prateada com 15 docinhos em forminhas: brigadeiros (granulado) e beijinhos (com cravo).",
+      "tamanho_m": {
+        "x": 0.384,
+        "y": 0.041,
+        "z": 0.284
+      },
+      "caixa_min": [
+        -0.192,
+        0.0,
+        -0.142
+      ],
+      "caixa_max": [
+        0.192,
+        0.041,
+        0.142
+      ],
+      "triangulos": 4328,
+      "materiais": [
+        "bandeja_prata",
+        "forminha_dourada",
+        "brigadeiro",
+        "forminha_rosa",
+        "beijinho",
+        "cravo"
+      ]
+    },
+    "presentes": {
+      "cenario": "aniversario",
+      "descricao": "Pilha de cinco presentes embrulhados em papéis variados, com fitas e laços.",
+      "tamanho_m": {
+        "x": 0.973,
+        "y": 0.627,
+        "z": 0.447
+      },
+      "caixa_min": [
+        -0.487,
+        0.0,
+        -0.223
+      ],
+      "caixa_max": [
+        0.487,
+        0.627,
+        0.223
+      ],
+      "triangulos": 2468,
+      "materiais": [
+        "papel_listras",
+        "fita_dourada",
+        "papel_vermelho",
+        "fita_branca",
+        "papel_dourado",
+        "fita_vermelha",
+        "papel_bolinhas",
+        "papel_verde"
+      ]
+    },
+    "cacho_baloes": {
+      "cenario": "aniversario",
+      "descricao": "Cacho de 7 balões de látex em fitas, preso num peso de papel laminado no chão (~2,2 m).",
+      "tamanho_m": {
+        "x": 0.857,
+        "y": 2.24,
+        "z": 0.801
+      },
+      "caixa_min": [
+        -0.421,
+        0.0,
+        -0.424
+      ],
+      "caixa_max": [
+        0.436,
+        2.24,
+        0.377
+      ],
+      "triangulos": 2212,
+      "materiais": [
+        "peso_balao",
+        "balao_vermelho",
+        "fita_balao",
+        "balao_dourado",
+        "balao_azul",
+        "balao_amarelo",
+        "balao_rosa",
+        "balao_branco",
+        "balao_lilas"
+      ],
+      "notas": "cada balão usa o material da sua cor (balao_*)"
+    },
+    "arco_baloes": {
+      "cenario": "aniversario",
+      "descricao": "Arco orgânico de balões (rosa, branco, dourado e lilás) de ~3,0 m de largura por 2,4 m de altura.",
+      "tamanho_m": {
+        "x": 3.182,
+        "y": 2.402,
+        "z": 0.641
+      },
+      "caixa_min": [
+        -1.597,
+        0.0,
+        -0.318
+      ],
+      "caixa_max": [
+        1.585,
+        2.402,
+        0.323
+      ],
+      "triangulos": 12148,
+      "materiais": [
+        "balao_rosa",
+        "balao_lilas",
+        "balao_dourado",
+        "balao_branco"
+      ],
+      "notas": "frente e verso iguais; os pés do arco ficam em x = ±1,3 m"
+    },
+    "faixa_parabens": {
+      "cenario": "aniversario",
+      "descricao": "Faixa de bandeirolas \"FELIZ ANIVERSÁRIO\" num cordão de 2,5 m, para pendurar entre dois pontos.",
+      "tamanho_m": {
+        "x": 2.504,
+        "y": 0.303,
+        "z": 0.013
+      },
+      "caixa_min": [
+        -1.252,
+        -0.289,
+        -0.004
+      ],
+      "caixa_max": [
+        1.252,
+        0.014,
+        0.009
+      ],
+      "triangulos": 1772,
+      "materiais": [
+        "cordao",
+        "faixa_letras",
+        "faixa_verso"
+      ],
+      "filhos_especiais": {
+        "ponta_d": [
+          1.25,
+          0.0,
+          0.0
+        ],
+        "ponta_e": [
+          -1.25,
+          0.0,
+          0.0
+        ]
+      },
+      "notas": "origem no meio da linha entre as duas pontas do cordão (o cordão faz barriga para baixo); filhos ponta_e (x = -1,25) e ponta_d (x = +1,25), esquerda e direita de quem lê; as letras olham para +Z"
+    },
+    "mesa_redonda_festa": {
+      "cenario": "aniversario",
+      "descricao": "Mesa redonda de Ø 1,2 m (0,76 m de altura) com toalha branca até o chão.",
+      "tamanho_m": {
+        "x": 1.336,
+        "y": 0.758,
+        "z": 1.341
+      },
+      "caixa_min": [
+        -0.656,
+        0.002,
+        -0.665
+      ],
+      "caixa_max": [
+        0.68,
+        0.76,
+        0.677
+      ],
+      "triangulos": 2602,
+      "materiais": [
+        "toalha_branca"
+      ]
+    },
+    "cadeira_festa": {
+      "cenario": "aniversario",
+      "descricao": "Cadeira de festa branca empilhável (estilo Tiffany, resina) com almofada; assento a 0,46 m.",
+      "tamanho_m": {
+        "x": 0.403,
+        "y": 0.918,
+        "z": 0.493
+      },
+      "caixa_min": [
+        -0.202,
+        0.0,
+        -0.264
+      ],
+      "caixa_max": [
+        0.202,
+        0.918,
+        0.229
+      ],
+      "triangulos": 2148,
+      "materiais": [
+        "plastico_branco",
+        "almofada_branca",
+        "borracha"
+      ],
+      "notas": "quem senta olha para +Z"
+    },
+    "chapeu_festa": {
+      "cenario": "aniversario",
+      "descricao": "Chapeuzinho de festa em cone listrado com pompom dourado; origem no centro da base (encaixe na cabeça).",
+      "tamanho_m": {
+        "x": 0.139,
+        "y": 0.201,
+        "z": 0.139
+      },
+      "caixa_min": [
+        -0.069,
+        -0.0,
+        -0.069
+      ],
+      "caixa_max": [
+        0.069,
+        0.201,
+        0.069
+      ],
+      "triangulos": 624,
+      "materiais": [
+        "chapeu_listras",
+        "pompom_dourado"
+      ]
+    },
+    "copo_festa": {
+      "cenario": "aniversario",
+      "descricao": "Copo de papel de festa (bolinhas coloridas) com refrigerante.",
+      "tamanho_m": {
+        "x": 0.077,
+        "y": 0.097,
+        "z": 0.077
+      },
+      "caixa_min": [
+        -0.039,
+        -0.045,
+        -0.039
+      ],
+      "caixa_max": [
+        0.039,
+        0.052,
+        0.039
+      ],
+      "triangulos": 380,
+      "materiais": [
+        "copo_bolinhas",
+        "plastico_branco",
+        "refrigerante"
+      ],
+      "filhos_especiais": {
+        "apoio": [
+          0.0,
+          -0.045,
+          0.0
+        ]
+      },
+      "notas": "origem no ponto da mão (meio do copo), eixo +Y; filho apoio no fundo para pousar na mesa"
+    },
+    "pratinho_bolo": {
+      "cenario": "aniversario",
+      "descricao": "Pratinho de papel com fatia de bolo recheado e garfinho de plástico.",
+      "tamanho_m": {
+        "x": 0.191,
+        "y": 0.068,
+        "z": 0.164
+      },
+      "caixa_min": [
+        -0.082,
+        0.0,
+        -0.082
+      ],
+      "caixa_max": [
+        0.109,
+        0.068,
+        0.082
+      ],
+      "triangulos": 616,
+      "materiais": [
+        "prato_festa",
+        "bolo_massa",
+        "recheio_chocolate",
+        "cobertura_rosa",
+        "plastico_branco"
+      ],
+      "notas": "origem no centro do fundo do prato (é onde a mão segura por baixo e onde ele apoia)"
+    },
+    "puff": {
+      "cenario": "cinema",
+      "descricao": "Pufe saco (pera) de tecido verde-oliva, com a marca do assento, costuras e rugas.",
+      "tamanho_m": {
+        "x": 0.945,
+        "y": 0.666,
+        "z": 0.944
+      },
+      "caixa_min": [
+        -0.469,
+        0.0,
+        -0.491
+      ],
+      "caixa_max": [
+        0.477,
+        0.666,
+        0.453
+      ],
+      "triangulos": 2172,
+      "materiais": [
+        "tecido_pufe"
+      ],
+      "notas": "quem senta olha para +Z"
+    },
+    "cadeira_dobravel": {
+      "cenario": "cinema",
+      "descricao": "Cadeira de diretor dobrável: madeira clara, assento e encosto de lona azul-marinho; assento a 0,45 m.",
+      "tamanho_m": {
+        "x": 0.555,
+        "y": 0.901,
+        "z": 0.537
+      },
+      "caixa_min": [
+        -0.278,
+        0.0,
+        -0.277
+      ],
+      "caixa_max": [
+        0.278,
+        0.901,
+        0.26
+      ],
+      "triangulos": 998,
+      "materiais": [
+        "madeira_clara",
+        "aco_inox",
+        "lona_cadeira"
+      ],
+      "notas": "quem senta olha para +Z"
+    },
+    "manta": {
+      "cenario": "cinema",
+      "descricao": "Manta xadrez estendida no chão (1,8 x 1,4 m) com ondulações e franjas nas pontas curtas.",
+      "tamanho_m": {
+        "x": 1.908,
+        "y": 0.041,
+        "z": 1.421
+      },
+      "caixa_min": [
+        -0.953,
+        0.002,
+        -0.712
+      ],
+      "caixa_max": [
+        0.955,
+        0.043,
+        0.709
+      ],
+      "triangulos": 1932,
+      "materiais": [
+        "manta_xadrez"
+      ]
+    },
+    "balde_pipoca": {
+      "cenario": "cinema",
+      "descricao": "Balde de papel listrado vermelho e branco, cheio de pipoca.",
+      "tamanho_m": {
+        "x": 0.209,
+        "y": 0.283,
+        "z": 0.21
+      },
+      "caixa_min": [
+        -0.105,
+        0.0,
+        -0.105
+      ],
+      "caixa_max": [
+        0.104,
+        0.283,
+        0.105
+      ],
+      "triangulos": 4124,
+      "materiais": [
+        "balde_vermelho",
+        "balde_branco",
+        "pipoca"
+      ]
+    },
+    "projetor": {
+      "cenario": "cinema",
+      "descricao": "Projetor branco sobre mesinha de madeira (lente a ~0,62 m), com cabo até o chão.",
+      "tamanho_m": {
+        "x": 0.42,
+        "y": 0.661,
+        "z": 0.481
+      },
+      "caixa_min": [
+        -0.21,
+        0.0,
+        -0.271
+      ],
+      "caixa_max": [
+        0.21,
+        0.661,
+        0.21
+      ],
+      "triangulos": 1792,
+      "materiais": [
+        "madeira_escura",
+        "projetor_corpo",
+        "plastico_preto",
+        "lente_projetor",
+        "plastico_cinza",
+        "borracha"
+      ],
+      "filhos_especiais": {
+        "lente": [
+          -0.07,
+          0.6095,
+          0.1195
+        ]
+      },
+      "emissivos": [
+        "lente_projetor"
+      ],
+      "notas": "a lente olha para +Z; filho vazio lente na frente do vidro (ponto de onde sai a luz); vidro em lente_projetor (emissivo fraco, o motor pode acender)"
+    },
+    "cooler": {
+      "cenario": "cinema",
+      "descricao": "Caixa térmica (cooler) azul e branca de ~50 L, com alças, trava e porta-copos na tampa.",
+      "tamanho_m": {
+        "x": 0.658,
+        "y": 0.377,
+        "z": 0.393
+      },
+      "caixa_min": [
+        -0.329,
+        0.0,
+        -0.194
+      ],
+      "caixa_max": [
+        0.329,
+        0.377,
+        0.199
+      ],
+      "triangulos": 1496,
+      "materiais": [
+        "cooler_azul",
+        "cooler_branco",
+        "plastico_preto"
+      ]
+    },
+    "mesinha_lateral": {
+      "cenario": "cinema",
+      "descricao": "Mesinha lateral redonda de madeira (Ø 0,45 m, 0,5 m de altura) com três pés abertos.",
+      "tamanho_m": {
+        "x": 0.45,
+        "y": 0.503,
+        "z": 0.45
+      },
+      "caixa_min": [
+        -0.225,
+        0.0,
+        -0.225
+      ],
+      "caixa_max": [
+        0.225,
+        0.503,
+        0.225
+      ],
+      "triangulos": 1044,
+      "materiais": [
+        "madeira_escura",
+        "aco_inox"
+      ]
+    },
+    "cortador_grama": {
+      "cenario": "trabalho",
+      "descricao": "Cortador de grama a gasolina de empurrar: casco verde, motor com partida retrátil, rodas, guidão e coletor atrás.",
+      "tamanho_m": {
+        "x": 0.624,
+        "y": 0.971,
+        "z": 1.177
+      },
+      "caixa_min": [
+        -0.312,
+        0.0,
+        -0.877
+      ],
+      "caixa_max": [
+        0.312,
+        0.971,
+        0.3
+      ],
+      "triangulos": 8882,
+      "materiais": [
+        "aco_verde",
+        "borracha",
+        "plastico_cinza",
+        "aco_inox",
+        "plastico_preto",
+        "motor_cinza",
+        "plastico_preto_fosco",
+        "plastico_vermelho",
+        "plastico_amarelo",
+        "metal_preto",
+        "aco_vermelho",
+        "lona_coletor"
+      ],
+      "filhos_especiais": {
+        "pega_d": [
+          -0.13,
+          0.9538,
+          -0.86
+        ],
+        "pega_e": [
+          0.13,
+          0.9538,
+          -0.86
+        ]
+      },
+      "notas": "a frente (lâmina, rodas menores) olha para +Z; quem empurra fica em -Z; pega_d (-X) e pega_e (+X) na barra do guidão a 0,95 m"
+    },
+    "rastelo": {
+      "cenario": "trabalho",
+      "descricao": "Rastelo (ancinho de 14 dentes retos) com cabo de madeira, 1,6 m.",
+      "tamanho_m": {
+        "x": 0.37,
+        "y": 1.72,
+        "z": 0.105
+      },
+      "caixa_min": [
+        -0.185,
+        -1.112,
+        -0.088
+      ],
+      "caixa_max": [
+        0.185,
+        0.607,
+        0.017
+      ],
+      "triangulos": 1084,
+      "materiais": [
+        "madeira_cabo",
+        "metal_preto"
+      ],
+      "filhos_especiais": {
+        "pega_d": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pega_e": [
+          0.0,
+          0.5,
+          0.0
+        ]
+      },
+      "notas": "origem na pega_d (mão de baixo), cabo em +Y; pega_e 0,5 m acima; cabeça em y = -1,1; os dentes apontam para -Z"
+    },
+    "vassoura": {
+      "cenario": "trabalho",
+      "descricao": "Vassoura de jardim (leque de 20 lâminas de aço) com cabo de madeira, 1,7 m.",
+      "tamanho_m": {
+        "x": 0.542,
+        "y": 1.768,
+        "z": 0.071
+      },
+      "caixa_min": [
+        -0.271,
+        -1.26,
+        -0.055
+      ],
+      "caixa_max": [
+        0.271,
+        0.507,
+        0.016
+      ],
+      "triangulos": 1492,
+      "materiais": [
+        "madeira_cabo",
+        "aco_galvanizado"
+      ],
+      "filhos_especiais": {
+        "pega_d": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pega_e": [
+          0.0,
+          0.42,
+          0.0
+        ]
+      },
+      "notas": "origem na pega_d, cabo em +Y; pega_e 0,42 m acima; leque para baixo; as pontas das lâminas curvam para -Z"
+    },
+    "carrinho_mao": {
+      "cenario": "trabalho",
+      "descricao": "Carrinho de mão de caçamba galvanizada, chassi preto e pneu, cheio de folhas secas.",
+      "tamanho_m": {
+        "x": 0.649,
+        "y": 0.753,
+        "z": 1.701
+      },
+      "caixa_min": [
+        -0.33,
+        0.0,
+        -1.024
+      ],
+      "caixa_max": [
+        0.319,
+        0.753,
+        0.677
+      ],
+      "triangulos": 4256,
+      "materiais": [
+        "aco_galvanizado",
+        "metal_preto",
+        "borracha",
+        "aco_vermelho",
+        "aco_inox",
+        "folhas_monte",
+        "folhas_secas"
+      ],
+      "filhos_especiais": {
+        "pega_d": [
+          -0.278,
+          0.5316,
+          -0.95
+        ],
+        "pega_e": [
+          0.278,
+          0.5316,
+          -0.95
+        ]
+      },
+      "notas": "a roda fica na frente (+Z); pega_d (-X) e pega_e (+X) nas manoplas; origem no meio entre o pneu e os pés"
+    },
+    "escada_aluminio": {
+      "cenario": "trabalho",
+      "descricao": "Escada de abrir de alumínio de 1,8 m (aberta), com cinco degraus e plataforma de topo.",
+      "tamanho_m": {
+        "x": 0.55,
+        "y": 1.795,
+        "z": 0.905
+      },
+      "caixa_min": [
+        -0.275,
+        0.0,
+        -0.452
+      ],
+      "caixa_max": [
+        0.275,
+        1.795,
+        0.452
+      ],
+      "triangulos": 1196,
+      "materiais": [
+        "aluminio",
+        "borracha",
+        "aco_galvanizado",
+        "aco_inox",
+        "aluminio_escovado",
+        "plastico_cinza",
+        "plastico_preto_fosco"
+      ],
+      "notas": "os degraus ficam do lado +Z"
+    },
+    "cesto_frutas": {
+      "cenario": "trabalho",
+      "descricao": "Cesto de vime com alça, cheio de mangas (verde, amarela e vermelha) e goiabas.",
+      "tamanho_m": {
+        "x": 0.439,
+        "y": 0.441,
+        "z": 0.439
+      },
+      "caixa_min": [
+        -0.219,
+        0.0,
+        -0.219
+      ],
+      "caixa_max": [
+        0.219,
+        0.441,
+        0.219
+      ],
+      "triangulos": 4482,
+      "materiais": [
+        "vime",
+        "manga",
+        "goiaba",
+        "folha_verde"
+      ],
+      "notas": "as cores das frutas estão na cor de vértice (COLOR_0, multiplica a cor do material)"
+    },
+    "peneira_piscina": {
+      "cenario": "trabalho",
+      "descricao": "Vara telescópica de alumínio (~3 m) com trava azul e peneira de folhas na ponta.",
+      "tamanho_m": {
+        "x": 0.458,
+        "y": 3.329,
+        "z": 0.081
+      },
+      "caixa_min": [
+        -0.229,
+        -2.519,
+        -0.06
+      ],
+      "caixa_max": [
+        0.229,
+        0.81,
+        0.021
+      ],
+      "triangulos": 1584,
+      "materiais": [
+        "aluminio",
+        "plastico_azul",
+        "tela_peneira"
+      ],
+      "filhos_especiais": {
+        "pega_d": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pega_e": [
+          0.0,
+          0.6,
+          0.0
+        ]
+      },
+      "notas": "origem na pega_d, vara em +Y; pega_e 0,6 m acima; a peneira (no plano XY) fica na ponta de baixo, até y = -2,48"
+    },
+    "mangueira_enrolada": {
+      "cenario": "trabalho",
+      "descricao": "Carretel de mangueira em cavalete, com a mangueira verde enrolada e a ponta com esguicho no chão.",
+      "tamanho_m": {
+        "x": 0.43,
+        "y": 0.764,
+        "z": 0.754
+      },
+      "caixa_min": [
+        -0.18,
+        0.0,
+        -0.25
+      ],
+      "caixa_max": [
+        0.25,
+        0.764,
+        0.504
+      ],
+      "triangulos": 4004,
+      "materiais": [
+        "plastico_verde_escuro",
+        "plastico_amarelo",
+        "mangueira_verde",
+        "plastico_preto"
+      ]
+    },
+    "monte_folhas": {
+      "cenario": "trabalho",
+      "descricao": "Monte de folhas secas varridas (~1,2 x 0,9 x 0,3 m), com folhas soltas em volta.",
+      "tamanho_m": {
+        "x": 1.424,
+        "y": 0.366,
+        "z": 1.433
+      },
+      "caixa_min": [
+        -0.717,
+        0.0,
+        -0.694
+      ],
+      "caixa_max": [
+        0.707,
+        0.366,
+        0.739
+      ],
+      "triangulos": 1070,
+      "materiais": [
+        "folhas_monte",
+        "folhas_secas"
+      ]
+    },
+    "saco_lixo": {
+      "cenario": "trabalho",
+      "descricao": "Saco de lixo verde cheio (~0,7 m), amarrado em cima.",
+      "tamanho_m": {
+        "x": 0.533,
+        "y": 0.701,
+        "z": 0.46
+      },
+      "caixa_min": [
+        -0.275,
+        0.0,
+        -0.249
+      ],
+      "caixa_max": [
+        0.258,
+        0.701,
+        0.211
+      ],
+      "triangulos": 1384,
+      "materiais": [
+        "saco_verde"
+      ]
+    },
+    "boia_rosquinha": {
+      "cenario": "piscina",
+      "descricao": "Boia de rosquinha (Ø ~1,0 m): massa dourada e cobertura rosa com granulado colorido.",
+      "tamanho_m": {
+        "x": 1.008,
+        "y": 0.29,
+        "z": 1.009
+      },
+      "caixa_min": [
+        -0.504,
+        0.0,
+        -0.505
+      ],
+      "caixa_max": [
+        0.504,
+        0.29,
+        0.504
+      ],
+      "triangulos": 6016,
+      "materiais": [
+        "vinil_creme",
+        "vinil_rosa",
+        "confeitos",
+        "vinil_branco"
+      ],
+      "notas": "origem embaixo, no centro; na água, a linha d'água fica por volta de y = 0,08"
+    },
+    "boia_colchao": {
+      "cenario": "piscina",
+      "descricao": "Colchão inflável de piscina (1,8 x 0,7 m) azul por cima e branco por baixo, com gomos e travesseiro.",
+      "tamanho_m": {
+        "x": 0.744,
+        "y": 0.206,
+        "z": 1.844
+      },
+      "caixa_min": [
+        -0.372,
+        0.0,
+        -0.922
+      ],
+      "caixa_max": [
+        0.372,
+        0.206,
+        0.922
+      ],
+      "triangulos": 2684,
+      "materiais": [
+        "vinil_azul",
+        "vinil_branco"
+      ],
+      "notas": "travesseiro (cabeceira) do lado -Z"
+    },
+    "boia_flamingo": {
+      "cenario": "piscina",
+      "descricao": "Boia genérica em forma de flamingo rosa (~1,3 m de altura): anel do corpo, asas, rabo e pescoço com cabeça.",
+      "tamanho_m": {
+        "x": 1.369,
+        "y": 1.374,
+        "z": 1.494
+      },
+      "caixa_min": [
+        -0.685,
+        0.0,
+        -0.774
+      ],
+      "caixa_max": [
+        0.685,
+        1.374,
+        0.72
+      ],
+      "triangulos": 3276,
+      "materiais": [
+        "vinil_flamingo",
+        "vinil_branco",
+        "bico_preto"
+      ],
+      "notas": "a cabeça olha para +Z"
+    },
+    "bola_praia": {
+      "cenario": "piscina",
+      "descricao": "Bola de praia de vinil (Ø 0,5 m) com seis gomos coloridos e tampas brancas.",
+      "tamanho_m": {
+        "x": 0.504,
+        "y": 0.507,
+        "z": 0.509
+      },
+      "caixa_min": [
+        -0.252,
+        0.0,
+        -0.254
+      ],
+      "caixa_max": [
+        0.252,
+        0.507,
+        0.254
+      ],
+      "triangulos": 996,
+      "materiais": [
+        "vinil_vermelho",
+        "vinil_amarelo",
+        "vinil_azul",
+        "vinil_branco",
+        "vinil_verde",
+        "vinil_laranja"
+      ]
+    },
+    "guarda_sol": {
+      "cenario": "piscina",
+      "descricao": "Guarda-sol aberto de 2,4 m (Ø 2,2 m), gomos brancos e azuis com babado, base redonda.",
+      "tamanho_m": {
+        "x": 2.248,
+        "y": 2.4,
+        "z": 2.248
+      },
+      "caixa_min": [
+        -1.124,
+        0.0,
+        -1.124
+      ],
+      "caixa_max": [
+        1.124,
+        2.4,
+        1.124
+      ],
+      "triangulos": 2348,
+      "materiais": [
+        "lona_branca",
+        "aluminio",
+        "lona_azul",
+        "plastico_branco",
+        "base_concreto",
+        "plastico_preto"
+      ]
+    },
+    "espreguicadeira": {
+      "cenario": "piscina",
+      "descricao": "Espreguiçadeira de madeira (1,95 x 0,66 m) com encosto levantado e rodinhas na cabeceira.",
+      "tamanho_m": {
+        "x": 0.666,
+        "y": 0.939,
+        "z": 1.976
+      },
+      "caixa_min": [
+        -0.333,
+        0.0,
+        -1.001
+      ],
+      "caixa_max": [
+        0.333,
+        0.939,
+        0.975
+      ],
+      "triangulos": 2236,
+      "materiais": [
+        "madeira_cumaru",
+        "borracha"
+      ],
+      "notas": "os pés de quem deita ficam para +Z, o encosto em -Z"
+    },
+    "toalha": {
+      "cenario": "piscina",
+      "descricao": "Toalha de praia listrada (azul, laranja e branco) dobrada.",
+      "tamanho_m": {
+        "x": 0.364,
+        "y": 0.063,
+        "z": 0.246
+      },
+      "caixa_min": [
+        -0.18,
+        0.0,
+        -0.126
+      ],
+      "caixa_max": [
+        0.184,
+        0.063,
+        0.12
+      ],
+      "triangulos": 564,
+      "materiais": [
+        "toalha_listrada"
+      ]
+    },
+    "caixa_som": {
+      "cenario": "piscina",
+      "descricao": "Caixa de som portátil de festa (~0,57 m) com grade, alça e anéis de LED em volta dos alto-falantes.",
+      "tamanho_m": {
+        "x": 0.3,
+        "y": 0.585,
+        "z": 0.271
+      },
+      "caixa_min": [
+        -0.15,
+        0.0,
+        -0.13
+      ],
+      "caixa_max": [
+        0.15,
+        0.585,
+        0.141
+      ],
+      "triangulos": 2836,
+      "materiais": [
+        "plastico_preto",
+        "grelha_som",
+        "led_som",
+        "plastico_preto_fosco",
+        "plastico_cinza",
+        "borracha"
+      ],
+      "emissivos": [
+        "led_som"
+      ],
+      "notas": "o alto-falante olha para +Z; anéis em led_som (emissivo)"
+    },
+    "lata": {
+      "cenario": "piscina",
+      "descricao": "Lata de bebida de 350 ml, sem marca (vermelha com faixa clara).",
+      "tamanho_m": {
+        "x": 0.066,
+        "y": 0.122,
+        "z": 0.065
+      },
+      "caixa_min": [
+        -0.033,
+        -0.06,
+        -0.033
+      ],
+      "caixa_max": [
+        0.033,
+        0.062,
+        0.033
+      ],
+      "triangulos": 616,
+      "materiais": [
+        "lata_aluminio",
+        "lata_pintura",
+        "lata_faixa"
+      ],
+      "filhos_especiais": {
+        "apoio": [
+          0.0,
+          -0.06,
+          0.0
+        ]
+      },
+      "notas": "origem no ponto da mão (meio da lata), eixo +Y; filho apoio no fundo; a cor está no material lata_pintura"
+    },
+    "copo_drink": {
+      "cenario": "piscina",
+      "descricao": "Copo longo de vidro com drinque de laranja, gelo, canudo e rodela de fruta na borda.",
+      "tamanho_m": {
+        "x": 0.088,
+        "y": 0.216,
+        "z": 0.071
+      },
+      "caixa_min": [
+        -0.036,
+        -0.07,
+        -0.035
+      ],
+      "caixa_max": [
+        0.052,
+        0.146,
+        0.035
+      ],
+      "triangulos": 900,
+      "materiais": [
+        "vidro",
+        "bebida_laranja",
+        "gelo",
+        "canudo",
+        "limao_casca",
+        "limao_polpa"
+      ],
+      "filhos_especiais": {
+        "apoio": [
+          0.0,
+          -0.07,
+          0.0
+        ]
+      },
+      "notas": "origem no ponto da mão, eixo +Y; filho apoio no fundo; vidro, gelo e bebida com mistura (BLEND)"
+    },
+    "espeto_carne": {
+      "cenario": "piscina",
+      "descricao": "Espeto de picanha: três fatias dobradas em C, tostadas, com a capa de gordura para fora.",
+      "tamanho_m": {
+        "x": 0.082,
+        "y": 0.76,
+        "z": 0.08
+      },
+      "caixa_min": [
+        -0.017,
+        -0.065,
+        -0.041
+      ],
+      "caixa_max": [
+        0.065,
+        0.695,
+        0.039
+      ],
+      "triangulos": 1748,
+      "materiais": [
+        "madeira_escura",
+        "aco_inox",
+        "carne_tostada",
+        "gordura_tostada"
+      ],
+      "notas": "origem no meio do cabo (mão), espeto ao longo de +Y"
+    },
+    "espeto_linguica": {
+      "cenario": "piscina",
+      "descricao": "Espeto com quatro linguiças douradas da grelha.",
+      "tamanho_m": {
+        "x": 0.135,
+        "y": 0.74,
+        "z": 0.048
+      },
+      "caixa_min": [
+        -0.068,
+        -0.065,
+        -0.024
+      ],
+      "caixa_max": [
+        0.068,
+        0.675,
+        0.024
+      ],
+      "triangulos": 1260,
+      "materiais": [
+        "madeira_escura",
+        "aco_inox",
+        "linguica"
+      ],
+      "notas": "origem no meio do cabo (mão), espeto ao longo de +Y"
+    },
+    "travessa_carne": {
+      "cenario": "piscina",
+      "descricao": "Tábua de madeira com picanha fatiada em leque.",
+      "tamanho_m": {
+        "x": 0.495,
+        "y": 0.071,
+        "z": 0.27
+      },
+      "caixa_min": [
+        -0.248,
+        0.0,
+        -0.135
+      ],
+      "caixa_max": [
+        0.248,
+        0.071,
+        0.135
+      ],
+      "triangulos": 1528,
+      "materiais": [
+        "madeira_tabua",
+        "madeira_escura",
+        "carne_ponto",
+        "carne_tostada",
+        "gordura_tostada"
+      ]
+    },
+    "pegador": {
+      "cenario": "piscina",
+      "descricao": "Pegador de churrasco de inox com capa preta no cabo.",
+      "tamanho_m": {
+        "x": 0.074,
+        "y": 0.384,
+        "z": 0.026
+      },
+      "caixa_min": [
+        -0.037,
+        -0.114,
+        -0.013
+      ],
+      "caixa_max": [
+        0.037,
+        0.27,
+        0.013
+      ],
+      "triangulos": 444,
+      "materiais": [
+        "aco_inox",
+        "borracha"
+      ],
+      "notas": "origem no ponto da mão, pontas em +Y"
+    },
+    "cabine_dj": {
+      "cenario": "rave",
+      "descricao": "Cabine de DJ (2,2 x 0,75 x 1,0 m): frente com faixas de LED (led_cabine), dois players, mixer, notebook no suporte, fones e cabos.",
+      "tamanho_m": {
+        "x": 2.2,
+        "y": 1.355,
+        "z": 0.763
+      },
+      "caixa_min": [
+        -1.1,
+        0.0,
+        -0.375
+      ],
+      "caixa_max": [
+        1.1,
+        1.355,
+        0.388
+      ],
+      "triangulos": 9140,
+      "materiais": [
+        "madeira_preta",
+        "caixa_preta",
+        "led_cabine",
+        "metal_preto",
+        "aluminio_escovado",
+        "plastico_preto",
+        "tela_cdj",
+        "plastico_cinza",
+        "plastico_preto_fosco",
+        "aluminio",
+        "tela_notebook"
+      ],
+      "emissivos": [
+        "led_cabine",
+        "tela_cdj",
+        "tela_notebook"
+      ],
+      "notas": "a frente com o LED olha para +Z (público); o DJ fica em -Z; telas dos aparelhos em tela_cdj e tela_notebook (emissivos fracos)"
+    },
+    "caixa_som_grande": {
+      "cenario": "rave",
+      "descricao": "Torre de caixas de som de show (~1,9 m): subwoofer embaixo e duas caixas de médio/agudo em cima.",
+      "tamanho_m": {
+        "x": 0.656,
+        "y": 1.902,
+        "z": 0.728
+      },
+      "caixa_min": [
+        -0.328,
+        0.0,
+        -0.36
+      ],
+      "caixa_max": [
+        0.328,
+        1.902,
+        0.368
+      ],
+      "triangulos": 1392,
+      "materiais": [
+        "caixa_preta",
+        "grelha_som",
+        "metal_preto",
+        "plastico_preto",
+        "borracha"
+      ],
+      "notas": "os alto-falantes olham para +Z"
+    },
+    "trelica_luzes": {
+      "cenario": "rave",
+      "descricao": "Pórtico de treliça de alumínio (6 m de vão entre as torres, 3,5 m de altura) com seis cabeças móveis penduradas.",
+      "tamanho_m": {
+        "x": 6.6,
+        "y": 3.5,
+        "z": 0.6
+      },
+      "caixa_min": [
+        -3.3,
+        0.0,
+        -0.3
+      ],
+      "caixa_max": [
+        3.3,
+        3.5,
+        0.3
+      ],
+      "triangulos": 11668,
+      "materiais": [
+        "aluminio",
+        "aco_galvanizado",
+        "aluminio_escovado",
+        "metal_preto",
+        "plastico_preto",
+        "tela_cdj",
+        "lente_movel"
+      ],
+      "filhos_especiais": {
+        "cabeca_movel_1": [
+          -2.5,
+          3.075,
+          0.0
+        ],
+        "inclina_1": [
+          -2.5,
+          2.84,
+          0.0
+        ],
+        "cabeca_movel_2": [
+          -1.5,
+          3.075,
+          0.0
+        ],
+        "inclina_2": [
+          -1.5,
+          2.84,
+          0.0
+        ],
+        "cabeca_movel_3": [
+          -0.5,
+          3.075,
+          0.0
+        ],
+        "inclina_3": [
+          -0.5,
+          2.84,
+          0.0
+        ],
+        "cabeca_movel_4": [
+          0.5,
+          3.075,
+          0.0
+        ],
+        "inclina_4": [
+          0.5,
+          2.84,
+          0.0
+        ],
+        "cabeca_movel_5": [
+          1.5,
+          3.075,
+          0.0
+        ],
+        "inclina_5": [
+          1.5,
+          2.84,
+          0.0
+        ],
+        "cabeca_movel_6": [
+          2.5,
+          3.075,
+          0.0
+        ],
+        "inclina_6": [
+          2.5,
+          2.84,
+          0.0
+        ]
+      },
+      "emissivos": [
+        "tela_cdj",
+        "lente_movel"
+      ],
+      "notas": "cabeca_movel_1..6: pivô no topo do garfo (sob a base presa na treliça); girar rotation.y para o pan. Cada uma tem o filho inclina_N (eixo da cabeça, entre os braços do garfo, 0,235 m abaixo do pivô): girar rotation.x para o tilt. Na posição neutra a lente (lente_movel) aponta para -Y; a face da lente fica 0,12 m abaixo do eixo do inclina_N. Se girar só o cabeca_movel_N em qualquer direção, garfo e cabeça giram juntos e a lente segue o -Y local"
+    },
+    "painel_led": {
+      "cenario": "rave",
+      "descricao": "Painel de LED de 3 x 2 m (24 gabinetes de 0,5 m) sobre estrutura de chão, tela de 0,63 a 2,63 m de altura.",
+      "tamanho_m": {
+        "x": 3.2,
+        "y": 2.752,
+        "z": 1.3
+      },
+      "caixa_min": [
+        -1.6,
+        0.0,
+        -0.85
+      ],
+      "caixa_max": [
+        1.6,
+        2.752,
+        0.45
+      ],
+      "triangulos": 2208,
+      "materiais": [
+        "tela_led",
+        "metal_preto",
+        "plastico_preto",
+        "borracha"
+      ],
+      "emissivos": [
+        "tela_led"
+      ],
+      "notas": "a tela (material tela_led, emissivo) é uma grade plana de 12 x 8 quadrados virada para +Z, com UV de 0 a 1 na tela inteira: no arquivo glTF v = 0 é a beira de cima (convenção do glTF), então uma textura de vídeo do three com flipY = false aparece em pé; u cresce da esquerda para a direita de quem olha"
+    },
+    "emissor_laser": {
+      "cenario": "rave",
+      "descricao": "Projetor de laser compacto (preto, com aletas) numa alça em U; janela de saída na frente.",
+      "tamanho_m": {
+        "x": 0.3,
+        "y": 0.22,
+        "z": 0.24
+      },
+      "caixa_min": [
+        -0.15,
+        0.0,
+        -0.127
+      ],
+      "caixa_max": [
+        0.15,
+        0.22,
+        0.113
+      ],
+      "triangulos": 1372,
+      "materiais": [
+        "metal_preto",
+        "aluminio_escovado",
+        "plastico_preto",
+        "abertura_laser",
+        "plastico_cinza"
+      ],
+      "filhos_especiais": {
+        "saida": [
+          0.0,
+          0.152,
+          0.112
+        ]
+      },
+      "emissivos": [
+        "abertura_laser"
+      ],
+      "notas": "filho vazio saida no meio da janela; o feixe sai para +Z; a janela usa abertura_laser (emissivo)"
+    },
+    "maquina_fumaca": {
+      "cenario": "rave",
+      "descricao": "Máquina de fumaça com bocal na frente, alça e galão de fluido ao lado.",
+      "tamanho_m": {
+        "x": 0.382,
+        "y": 0.274,
+        "z": 0.473
+      },
+      "caixa_min": [
+        -0.127,
+        0.0,
+        -0.215
+      ],
+      "caixa_max": [
+        0.255,
+        0.274,
+        0.258
+      ],
+      "triangulos": 1228,
+      "materiais": [
+        "metal_preto",
+        "plastico_preto",
+        "aluminio_escovado",
+        "plastico_cinza",
+        "borracha",
+        "plastico_branco",
+        "plastico_azul"
+      ],
+      "filhos_especiais": {
+        "saida": [
+          0.0,
+          0.105,
+          0.26
+        ]
+      },
+      "notas": "filho vazio saida na ponta do bocal; a fumaça sai para +Z"
+    },
+    "bastao_neon": {
+      "cenario": "rave",
+      "descricao": "Bastão de luz de segurar (~0,4 m): cabo preto e tubo luminoso verde (material neon).",
+      "tamanho_m": {
+        "x": 0.038,
+        "y": 0.412,
+        "z": 0.041
+      },
+      "caixa_min": [
+        -0.019,
+        -0.07,
+        -0.019
+      ],
+      "caixa_max": [
+        0.019,
+        0.342,
+        0.022
+      ],
+      "triangulos": 458,
+      "materiais": [
+        "plastico_preto_fosco",
+        "plastico_cinza",
+        "neon"
+      ],
+      "emissivos": [
+        "neon"
+      ],
+      "notas": "origem no ponto da mão (meio do cabo), tubo luminoso em +Y"
+    }
+  },
+  "triangulos_total": 137874,
+  "materiais": {
+    "toalha_branca": {
+      "cor_base_linear": [
+        0.8963,
+        0.8796,
+        0.8388,
+        1
+      ],
+      "rugosidade": 0.8500000238418579,
+      "metalico": 0,
+      "normal": true,
+      "doubleSided": true
+    },
+    "porcelana": {
+      "cor_base_linear": [
+        0.9216,
+        0.9131,
+        0.8796,
+        1
+      ],
+      "rugosidade": 0.11999999731779099,
+      "metalico": 0
+    },
+    "cobertura_rosa": {
+      "cor_base_linear": [
+        0.8714,
+        0.4508,
+        0.552,
+        1
+      ],
+      "rugosidade": 0.550000011920929,
+      "metalico": 0
+    },
+    "cobertura_branca": {
+      "cor_base_linear": [
+        0.9301,
+        0.8714,
+        0.7913,
+        1
+      ],
+      "rugosidade": 0.5,
+      "metalico": 0
+    },
+    "morango": {
+      "cor_base_linear": [
+        0.552,
+        0.008,
+        0.0232,
+        1
+      ],
+      "rugosidade": 0.30000001192092896,
+      "metalico": 0
+    },
+    "folha_morango": {
+      "cor_base_linear": [
+        0.0497,
+        0.1946,
+        0.0232,
+        1
+      ],
+      "rugosidade": 0.5,
+      "metalico": 0,
+      "doubleSided": true
+    },
+    "vela": {
+      "cor_base_linear": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "rugosidade": 0.44999998807907104,
+      "metalico": 0
+    },
+    "pavio": {
+      "cor_base_linear": [
+        0.013,
+        0.0103,
+        0.0086,
+        1
+      ],
+      "rugosidade": 0.8999999761581421,
+      "metalico": 0
+    },
+    "chama": {
+      "cor_base_linear": [
+        1,
+        0.6445,
+        0.1946,
+        1
+      ],
+      "rugosidade": 1,
+      "metalico": 0,
+      "emissivo": [
+        1,
+        0.4507857859134674,
+        0.06301001459360123
+      ],
+      "forca_emissao": 6
+    },
+    "bandeja_prata": {
+      "cor_base_linear": [
+        0.7157,
+        0.7157,
+        0.7157,
+        1
+      ],
+      "rugosidade": 0.2199999988079071,
+      "metalico": 1
+    },
+    "forminha_dourada": {
+      "cor_base_linear": [
+        0.6867,
+        0.4125,
+        0.0844,
+        1
+      ],
+      "rugosidade": 0.30000001192092896,
+      "metalico": 0.75,
+      "doubleSided": true
+    },
+    "brigadeiro": {
+      "cor_base_linear": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "rugosidade": 0.6000000238418579,
+      "metalico": 0,
+      "textura": true
+    },
+    "forminha_rosa": {
+      "cor_base_linear": [
+        0.7758,
+        0.1095,
+        0.2623,
+        1
+      ],
+      "rugosidade": 0.44999998807907104,
+      "metalico": 0,
+      "doubleSided": true
+    },
+    "beijinho": {
+      "cor_base_linear": [
+        0.8796,
+        0.8308,
+        0.7454,
+        1
+      ],
+      "rugosidade": 0.8500000238418579,
+      "metalico": 0
+    },
+    "cravo": {
+      "cor_base_linear": [
+        0.0242,
+        0.0103,
+        0.0052,
+        1
+      ],
+      "rugosidade": 0.699999988079071,
+      "metalico": 0
+    },
+    "papel_listras": {
+      "cor_base_linear": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "rugosidade": 0.44999998807907104,
+      "metalico": 0,
+      "textura": true
+    },
+    "fita_dourada": {
+      "cor_base_linear": [
+        0.7605,
+        0.5089,
+        0.107,
+        1
+      ],
+      "rugosidade": 0.30000001192092896,
+      "metalico": 0.550000011920929
+    },
+    "papel_vermelho": {
+      "cor_base_linear": [
+        0.5395,
+        0.0137,
+        0.0284,
+        1
+      ],
+      "rugosidade": 0.4000000059604645,
+      "metalico": 0
+    },
+    "fita_branca": {
+      "cor_base_linear": [
+        0.9216,
+        0.9047,
+        0.8714,
+        1
+      ],
+      "rugosidade": 0.3499999940395355,
+      "metalico": 0
+    },
+    "papel_dourado": {
+      "cor_base_linear": [
+        0.6867,
+        0.4564,
+        0.1221,
+        1
+      ],
+      "rugosidade": 0.3199999928474426,
+      "metalico": 0.6499999761581421
+    },
+    "fita_vermelha": {
+      "cor_base_linear": [
+        0.4508,
+        0.0065,
+        0.0123,
+        1
+      ],
+      "rugosidade": 0.3499999940395355,
+      "metalico": 0
+    },
+    "papel_bolinhas": {
+      "cor_base_linear": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "rugosidade": 0.44999998807907104,
+      "metalico": 0,
+      "textura": true
+    },
+    "papel_verde": {
+      "cor_base_linear": [
+        0.0273,
+        0.2051,
+        0.0908,
+        1
+      ],
+      "rugosidade": 0.41999998688697815,
+      "metalico": 0
+    },
+    "peso_balao": {
+      "cor_base_linear": [
+        0.5841,
+        0.5841,
+        0.6376,
+        1
+      ],
+      "rugosidade": 0.25,
+      "metalico": 0.8999999761581421
+    },
+    "balao_vermelho": {
+      "cor_base_linear": [
+        0.6514,
+        0.0097,
+        0.0242,
+        1
+      ],
+      "rugosidade": 0.30000001192092896,
+      "metalico": 0
+    },
+    "fita_balao": {
+      "cor_base_linear": [
+        0.7913,
+        0.7913,
+        0.807,
+        1
+      ],
+      "rugosidade": 0.25,
+      "metalico": 0.4000000059604645,
+      "doubleSided": true
+    },
+    "balao_dourado": {
+      "cor_base_linear": [
+        0.7157,
+        0.4508,
+        0.107,
+        1
+      ],
+      "rugosidade": 0.2199999988079071,
+      "metalico": 0.8500000238418579
+    },
+    "balao_azul": {
+      "cor_base_linear": [
+        0.0232,
+        0.1329,
+        0.6867,
+        1
+      ],
+      "rugosidade": 0.30000001192092896,
+      "metalico": 0
+    },
+    "balao_amarelo": {
+      "cor_base_linear": [
+        0.9216,
+        0.5583,
+        0.011,
+        1
+      ],
+      "rugosidade": 0.30000001192092896,
+      "metalico": 0
+    },
+    "balao_rosa": {
+      "cor_base_linear": [
+        0.8879,
+        0.2122,
+        0.4233,
+        1
+      ],
+      "rugosidade": 0.30000001192092896,
+      "metalico": 0
+    },
+    "balao_branco": {
+      "cor_base_linear": [
+        0.8963,
+        0.8714,
+        0.8228,
+        1
+      ],
+      "rugosidade": 0.30000001192092896,
+      "metalico": 0
+    },
+    "balao_lilas": {
+      "cor_base_linear": [
+        0.4621,
+        0.2542,
+        0.6939,
+        1
+      ],
+      "rugosidade": 0.30000001192092896,
+      "metalico": 0
+    },
+    "cordao": {
+      "cor_base_linear": [
+        0.7913,
+        0.7157,
+        0.552,
+        1
+      ],
+      "rugosidade": 0.8999999761581421,
+      "metalico": 0
+    },
+    "faixa_letras": {
+      "cor_base_linear": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "rugosidade": 0.6000000238418579,
+      "metalico": 0,
+      "textura": true
+    },
+    "faixa_verso": {
+      "cor_base_linear": [
+        0.855,
+        0.7913,
+        0.6724,
+        1
+      ],
+      "rugosidade": 0.699999988079071,
+      "metalico": 0
+    },
+    "plastico_branco": {
+      "cor_base_linear": [
+        0.8796,
+        0.8714,
+        0.8388,
+        1
+      ],
+      "rugosidade": 0.3199999928474426,
+      "metalico": 0
+    },
+    "almofada_branca": {
+      "cor_base_linear": [
+        0.8632,
+        0.8469,
+        0.7991,
+        1
+      ],
+      "rugosidade": 0.800000011920929,
+      "metalico": 0
+    },
+    "borracha": {
+      "cor_base_linear": [
+        0.008,
+        0.008,
+        0.008,
+        1
+      ],
+      "rugosidade": 0.8799999952316284,
+      "metalico": 0
+    },
+    "chapeu_listras": {
+      "cor_base_linear": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "rugosidade": 0.44999998807907104,
+      "metalico": 0,
+      "textura": true,
+      "doubleSided": true
+    },
+    "pompom_dourado": {
+      "cor_base_linear": [
+        0.7913,
+        0.5457,
+        0.1144,
+        1
+      ],
+      "rugosidade": 0.550000011920929,
+      "metalico": 0.6000000238418579
+    },
+    "copo_bolinhas": {
+      "cor_base_linear": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "rugosidade": 0.5,
+      "metalico": 0,
+      "textura": true,
+      "doubleSided": true
+    },
+    "refrigerante": {
+      "cor_base_linear": [
+        0.0685,
+        0.0144,
+        0.0037,
+        1
+      ],
+      "rugosidade": 0.07999999821186066,
+      "metalico": 0
+    },
+    "prato_festa": {
+      "cor_base_linear": [
+        0.9131,
+        0.3968,
+        0.5395,
+        1
+      ],
+      "rugosidade": 0.44999998807907104,
+      "metalico": 0,
+      "doubleSided": true
+    },
+    "bolo_massa": {
+      "cor_base_linear": [
+        0.8148,
+        0.5841,
+        0.2747,
+        1
+      ],
+      "rugosidade": 0.8500000238418579,
+      "metalico": 0
+    },
+    "recheio_chocolate": {
+      "cor_base_linear": [
+        0.0685,
+        0.0176,
+        0.007,
+        1
+      ],
+      "rugosidade": 0.44999998807907104,
+      "metalico": 0
+    },
+    "tecido_pufe": {
+      "cor_base_linear": [
+        0.5271,
+        0.2542,
+        0.0331,
+        1
+      ],
+      "rugosidade": 0.9200000166893005,
+      "metalico": 0,
+      "normal": true
+    },
+    "madeira_clara": {
+      "cor_base_linear": [
+        0.4851,
+        0.2423,
+        0.1022,
+        1
+      ],
+      "rugosidade": 0.550000011920929,
+      "metalico": 0
+    },
+    "aco_inox": {
+      "cor_base_linear": [
+        0.6445,
+        0.6584,
+        0.6724,
+        1
+      ],
+      "rugosidade": 0.2199999988079071,
+      "metalico": 1
+    },
+    "lona_cadeira": {
+      "cor_base_linear": [
+        0.0176,
+        0.0296,
+        0.0685,
+        1
+      ],
+      "rugosidade": 0.8999999761581421,
+      "metalico": 0,
+      "doubleSided": true
+    },
+    "manta_xadrez": {
+      "cor_base_linear": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "rugosidade": 0.949999988079071,
+      "metalico": 0,
+      "textura": true,
+      "doubleSided": true
+    },
+    "balde_vermelho": {
+      "cor_base_linear": [
+        0.5776,
+        0.007,
+        0.0252,
+        1
+      ],
+      "rugosidade": 0.550000011920929,
+      "metalico": 0
+    },
+    "balde_branco": {
+      "cor_base_linear": [
+        0.9131,
+        0.8796,
+        0.807,
+        1
+      ],
+      "rugosidade": 0.6000000238418579,
+      "metalico": 0
+    },
+    "pipoca": {
+      "cor_base_linear": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "rugosidade": 0.8500000238418579,
+      "metalico": 0
+    },
+    "madeira_escura": {
+      "cor_base_linear": [
+        0.1119,
+        0.0482,
+        0.0194,
+        1
+      ],
+      "rugosidade": 0.5,
+      "metalico": 0
+    },
+    "projetor_corpo": {
+      "cor_base_linear": [
+        0.807,
+        0.807,
+        0.7913,
+        1
+      ],
+      "rugosidade": 0.3799999952316284,
+      "metalico": 0
+    },
+    "plastico_preto": {
+      "cor_base_linear": [
+        0.0116,
+        0.0116,
+        0.013,
+        1
+      ],
+      "rugosidade": 0.44999998807907104,
+      "metalico": 0
+    },
+    "lente_projetor": {
+      "cor_base_linear": [
+        0.0033,
+        0.008,
+        0.016,
+        1
+      ],
+      "rugosidade": 0.05000000074505806,
+      "metalico": 0.30000001192092896,
+      "emissivo": [
+        0.68668532371521,
+        0.7912979125976562,
+        1
+      ],
+      "forca_emissao": 1.5
+    },
+    "plastico_cinza": {
+      "cor_base_linear": [
+        0.2664,
+        0.2831,
+        0.3005,
+        1
+      ],
+      "rugosidade": 0.5,
+      "metalico": 0
+    },
+    "cooler_azul": {
+      "cor_base_linear": [
+        0.0123,
+        0.1119,
+        0.3916,
+        1
+      ],
+      "rugosidade": 0.3799999952316284,
+      "metalico": 0
+    },
+    "cooler_branco": {
+      "cor_base_linear": [
+        0.8796,
+        0.8796,
+        0.8469,
+        1
+      ],
+      "rugosidade": 0.4000000059604645,
+      "metalico": 0
+    },
+    "aco_verde": {
+      "cor_base_linear": [
+        0.0284,
+        0.1022,
+        0.0331,
+        1
+      ],
+      "rugosidade": 0.3799999952316284,
+      "metalico": 0.4000000059604645
+    },
+    "motor_cinza": {
+      "cor_base_linear": [
+        0.3325,
+        0.3467,
+        0.3663,
+        1
+      ],
+      "rugosidade": 0.44999998807907104,
+      "metalico": 0.699999988079071
+    },
+    "plastico_preto_fosco": {
+      "cor_base_linear": [
+        0.0144,
+        0.0144,
+        0.016,
+        1
+      ],
+      "rugosidade": 0.75,
+      "metalico": 0
+    },
+    "plastico_vermelho": {
+      "cor_base_linear": [
+        0.4621,
+        0.016,
+        0.016,
+        1
+      ],
+      "rugosidade": 0.4000000059604645,
+      "metalico": 0
+    },
+    "plastico_amarelo": {
+      "cor_base_linear": [
+        0.8714,
+        0.4793,
+        0.0116,
+        1
+      ],
+      "rugosidade": 0.4000000059604645,
+      "metalico": 0
+    },
+    "metal_preto": {
+      "cor_base_linear": [
+        0.0123,
+        0.0123,
+        0.0137,
+        1
+      ],
+      "rugosidade": 0.5,
+      "metalico": 0.6000000238418579
+    },
+    "aco_vermelho": {
+      "cor_base_linear": [
+        0.3916,
+        0.0194,
+        0.013,
+        1
+      ],
+      "rugosidade": 0.4000000059604645,
+      "metalico": 0.3499999940395355
+    },
+    "lona_coletor": {
+      "cor_base_linear": [
+        0.0423,
+        0.0513,
+        0.0395,
+        1
+      ],
+      "rugosidade": 0.8999999761581421,
+      "metalico": 0
+    },
+    "madeira_cabo": {
+      "cor_base_linear": [
+        0.552,
+        0.3005,
+        0.1221,
+        1
+      ],
+      "rugosidade": 0.550000011920929,
+      "metalico": 0
+    },
+    "aco_galvanizado": {
+      "cor_base_linear": [
+        0.3968,
+        0.4179,
+        0.4342,
+        1
+      ],
+      "rugosidade": 0.5,
+      "metalico": 0.8999999761581421
+    },
+    "folhas_monte": {
+      "cor_base_linear": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "rugosidade": 0.949999988079071,
+      "metalico": 0,
+      "textura": true
+    },
+    "folhas_secas": {
+      "cor_base_linear": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "rugosidade": 0.8500000238418579,
+      "metalico": 0,
+      "textura": true,
+      "alphaMode": "MASK",
+      "doubleSided": true
+    },
+    "aluminio": {
+      "cor_base_linear": [
+        0.5776,
+        0.5972,
+        0.6172,
+        1
+      ],
+      "rugosidade": 0.3199999928474426,
+      "metalico": 1
+    },
+    "aluminio_escovado": {
+      "cor_base_linear": [
+        0.4851,
+        0.5029,
+        0.521,
+        1
+      ],
+      "rugosidade": 0.44999998807907104,
+      "metalico": 1
+    },
+    "vime": {
+      "cor_base_linear": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "rugosidade": 0.699999988079071,
+      "metalico": 0,
+      "textura": true,
+      "normal": true
+    },
+    "manga": {
+      "cor_base_linear": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "rugosidade": 0.3799999952316284,
+      "metalico": 0
+    },
+    "goiaba": {
+      "cor_base_linear": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "rugosidade": 0.550000011920929,
+      "metalico": 0
+    },
+    "folha_verde": {
+      "cor_base_linear": [
+        0.0452,
+        0.147,
+        0.0232,
+        1
+      ],
+      "rugosidade": 0.5,
+      "metalico": 0,
+      "doubleSided": true
+    },
+    "plastico_azul": {
+      "cor_base_linear": [
+        0.0168,
+        0.1195,
+        0.4793,
+        1
+      ],
+      "rugosidade": 0.4000000059604645,
+      "metalico": 0
+    },
+    "tela_peneira": {
+      "cor_base_linear": [
+        0.807,
+        0.8469,
+        0.8879,
+        1
+      ],
+      "rugosidade": 0.6000000238418579,
+      "metalico": 0,
+      "textura": true,
+      "alphaMode": "MASK",
+      "doubleSided": true
+    },
+    "plastico_verde_escuro": {
+      "cor_base_linear": [
+        0.0137,
+        0.0742,
+        0.0242,
+        1
+      ],
+      "rugosidade": 0.44999998807907104,
+      "metalico": 0
+    },
+    "mangueira_verde": {
+      "cor_base_linear": [
+        0.0284,
+        0.2542,
+        0.0452,
+        1
+      ],
+      "rugosidade": 0.41999998688697815,
+      "metalico": 0
+    },
+    "saco_verde": {
+      "cor_base_linear": [
+        0.0242,
+        0.1441,
+        0.0331,
+        1
+      ],
+      "rugosidade": 0.30000001192092896,
+      "metalico": 0
+    },
+    "vinil_creme": {
+      "cor_base_linear": [
+        0.8632,
+        0.624,
+        0.3095,
+        1
+      ],
+      "rugosidade": 0.25,
+      "metalico": 0
+    },
+    "vinil_rosa": {
+      "cor_base_linear": [
+        0.9047,
+        0.2542,
+        0.4678,
+        1
+      ],
+      "rugosidade": 0.2199999988079071,
+      "metalico": 0
+    },
+    "confeitos": {
+      "cor_base_linear": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "rugosidade": 0.4000000059604645,
+      "metalico": 0
+    },
+    "vinil_branco": {
+      "cor_base_linear": [
+        0.9216,
+        0.9216,
+        0.9047,
+        1
+      ],
+      "rugosidade": 0.2199999988079071,
+      "metalico": 0
+    },
+    "vinil_azul": {
+      "cor_base_linear": [
+        0.0176,
+        0.3564,
+        0.6939,
+        1
+      ],
+      "rugosidade": 0.2199999988079071,
+      "metalico": 0
+    },
+    "vinil_flamingo": {
+      "cor_base_linear": [
+        1,
+        0.2384,
+        0.4452,
+        1
+      ],
+      "rugosidade": 0.2199999988079071,
+      "metalico": 0
+    },
+    "bico_preto": {
+      "cor_base_linear": [
+        0.0103,
+        0.0103,
+        0.0103,
+        1
+      ],
+      "rugosidade": 0.30000001192092896,
+      "metalico": 0
+    },
+    "vinil_vermelho": {
+      "cor_base_linear": [
+        0.6867,
+        0.0144,
+        0.0252,
+        1
+      ],
+      "rugosidade": 0.25,
+      "metalico": 0
+    },
+    "vinil_amarelo": {
+      "cor_base_linear": [
+        0.9301,
+        0.5776,
+        0.0116,
+        1
+      ],
+      "rugosidade": 0.25,
+      "metalico": 0
+    },
+    "vinil_verde": {
+      "cor_base_linear": [
+        0.0284,
+        0.4233,
+        0.0685,
+        1
+      ],
+      "rugosidade": 0.25,
+      "metalico": 0
+    },
+    "vinil_laranja": {
+      "cor_base_linear": [
+        0.8879,
+        0.1946,
+        0.0103,
+        1
+      ],
+      "rugosidade": 0.25,
+      "metalico": 0
+    },
+    "lona_branca": {
+      "cor_base_linear": [
+        0.8879,
+        0.8632,
+        0.7913,
+        1
+      ],
+      "rugosidade": 0.8500000238418579,
+      "metalico": 0,
+      "doubleSided": true
+    },
+    "lona_azul": {
+      "cor_base_linear": [
+        0.0116,
+        0.1095,
+        0.3419,
+        1
+      ],
+      "rugosidade": 0.8500000238418579,
+      "metalico": 0,
+      "doubleSided": true
+    },
+    "base_concreto": {
+      "cor_base_linear": [
+        0.159,
+        0.1529,
+        0.1384,
+        1
+      ],
+      "rugosidade": 0.8999999761581421,
+      "metalico": 0
+    },
+    "madeira_cumaru": {
+      "cor_base_linear": [
+        0.2542,
+        0.0908,
+        0.0343,
+        1
+      ],
+      "rugosidade": 0.550000011920929,
+      "metalico": 0
+    },
+    "toalha_listrada": {
+      "cor_base_linear": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "rugosidade": 0.949999988079071,
+      "metalico": 0,
+      "textura": true
+    },
+    "grelha_som": {
+      "cor_base_linear": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "rugosidade": 0.6000000238418579,
+      "metalico": 0.4000000059604645,
+      "textura": true
+    },
+    "led_som": {
+      "cor_base_linear": [
+        0.159,
+        0.5776,
+        1,
+        1
+      ],
+      "rugosidade": 0.4000000059604645,
+      "metalico": 0,
+      "emissivo": [
+        0.04970656707882881,
+        0.3967552185058594,
+        1
+      ],
+      "forca_emissao": 4
+    },
+    "lata_aluminio": {
+      "cor_base_linear": [
+        0.6584,
+        0.6724,
+        0.6867,
+        1
+      ],
+      "rugosidade": 0.25,
+      "metalico": 1
+    },
+    "lata_pintura": {
+      "cor_base_linear": [
+        0.5711,
+        0.0194,
+        0.0252,
+        1
+      ],
+      "rugosidade": 0.30000001192092896,
+      "metalico": 0.6499999761581421
+    },
+    "lata_faixa": {
+      "cor_base_linear": [
+        0.8796,
+        0.8388,
+        0.7605,
+        1
+      ],
+      "rugosidade": 0.30000001192092896,
+      "metalico": 0.4000000059604645
+    },
+    "vidro": {
+      "cor_base_linear": [
+        0.807,
+        0.8879,
+        0.8879,
+        0.22
+      ],
+      "rugosidade": 0.05000000074505806,
+      "metalico": 0,
+      "alphaMode": "BLEND"
+    },
+    "bebida_laranja": {
+      "cor_base_linear": [
+        0.8714,
+        0.2051,
+        0.0116,
+        0.9
+      ],
+      "rugosidade": 0.10000000149011612,
+      "metalico": 0,
+      "alphaMode": "BLEND"
+    },
+    "gelo": {
+      "cor_base_linear": [
+        0.855,
+        0.9216,
+        0.956,
+        0.55
+      ],
+      "rugosidade": 0.07999999821186066,
+      "metalico": 0,
+      "alphaMode": "BLEND"
+    },
+    "canudo": {
+      "cor_base_linear": [
+        0.807,
+        0.0423,
+        0.1946,
+        1
+      ],
+      "rugosidade": 0.3499999940395355,
+      "metalico": 0
+    },
+    "limao_casca": {
+      "cor_base_linear": [
+        0.159,
+        0.3763,
+        0.0284,
+        1
+      ],
+      "rugosidade": 0.44999998807907104,
+      "metalico": 0
+    },
+    "limao_polpa": {
+      "cor_base_linear": [
+        0.6939,
+        0.8228,
+        0.2705,
+        1
+      ],
+      "rugosidade": 0.4000000059604645,
+      "metalico": 0
+    },
+    "carne_tostada": {
+      "cor_base_linear": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "rugosidade": 0.6000000238418579,
+      "metalico": 0
+    },
+    "gordura_tostada": {
+      "cor_base_linear": [
+        0.7991,
+        0.5711,
+        0.2542,
+        1
+      ],
+      "rugosidade": 0.44999998807907104,
+      "metalico": 0
+    },
+    "linguica": {
+      "cor_base_linear": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "rugosidade": 0.3499999940395355,
+      "metalico": 0
+    },
+    "madeira_tabua": {
+      "cor_base_linear": [
+        0.4793,
+        0.2307,
+        0.0844,
+        1
+      ],
+      "rugosidade": 0.6000000238418579,
+      "metalico": 0
+    },
+    "carne_ponto": {
+      "cor_base_linear": [
+        0.4851,
+        0.0865,
+        0.0723,
+        1
+      ],
+      "rugosidade": 0.5,
+      "metalico": 0
+    },
+    "madeira_preta": {
+      "cor_base_linear": [
+        0.007,
+        0.007,
+        0.007,
+        1
+      ],
+      "rugosidade": 0.6000000238418579,
+      "metalico": 0
+    },
+    "caixa_preta": {
+      "cor_base_linear": [
+        0.0103,
+        0.0103,
+        0.011,
+        1
+      ],
+      "rugosidade": 0.8199999928474426,
+      "metalico": 0
+    },
+    "led_cabine": {
+      "cor_base_linear": [
+        1,
+        0.0685,
+        0.6867,
+        1
+      ],
+      "rugosidade": 0.4000000059604645,
+      "metalico": 0,
+      "emissivo": [
+        1,
+        0.028426039963960648,
+        0.6307571530342102
+      ],
+      "forca_emissao": 5
+    },
+    "tela_cdj": {
+      "cor_base_linear": [
+        0.003,
+        0.006,
+        0.0144,
+        1
+      ],
+      "rugosidade": 0.10000000149011612,
+      "metalico": 0,
+      "emissivo": [
+        0.11443537473678589,
+        0.43415364623069763,
+        1
+      ],
+      "forca_emissao": 1.2000000476837158
+    },
+    "tela_notebook": {
+      "cor_base_linear": [
+        0.003,
+        0.0048,
+        0.0091,
+        1
+      ],
+      "rugosidade": 0.07999999821186066,
+      "metalico": 0,
+      "emissivo": [
+        0.2541520893573761,
+        0.4564110338687897,
+        1
+      ]
+    },
+    "lente_movel": {
+      "cor_base_linear": [
+        0.9047,
+        0.9216,
+        1,
+        1
+      ],
+      "rugosidade": 0.10000000149011612,
+      "metalico": 0,
+      "emissivo": [
+        1,
+        1,
+        1
+      ],
+      "forca_emissao": 6
+    },
+    "tela_led": {
+      "cor_base_linear": [
+        0.0015,
+        0.0015,
+        0.0015,
+        1
+      ],
+      "rugosidade": 0.25,
+      "metalico": 0,
+      "emissivo": [
+        1,
+        1,
+        1
+      ]
+    },
+    "abertura_laser": {
+      "cor_base_linear": [
+        0.0018,
+        0.007,
+        0.003,
+        1
+      ],
+      "rugosidade": 0.03999999910593033,
+      "metalico": 0.30000001192092896,
+      "emissivo": [
+        0.013702083379030228,
+        0.2746773064136505,
+        0.0423114113509655
+      ]
+    },
+    "neon": {
+      "cor_base_linear": [
+        0.3916,
+        1,
+        0.4342,
+        1
+      ],
+      "rugosidade": 0.30000001192092896,
+      "metalico": 0,
+      "emissivo": [
+        0.040915198624134064,
+        1,
+        0.006995410192757845
+      ],
+      "forca_emissao": 5
+    }
+  }
+}
