@@ -32,6 +32,7 @@ const N = require("../evo/normalizar");
 const { abrirBanco } = require("./db");
 const { criarServicoDoCrm } = require("./servico");
 const { paraOBanco } = require("./formato");
+const { semQuebrados } = require("./texto-seguro");
 
 function opcoes(argv) {
   const o = { lote: 1000, desde: null, seco: false, interesses: false };
@@ -88,8 +89,8 @@ function juntarRepetidas(linhas) {
   return { linhas: [...porId.values()], repetidas };
 }
 
-/** Grava um lote; devolve { novas, completadas }. */
-async function gravarLote(db, linhas) {
+/** INSERT de várias linhas de uma vez; devolve { novas, completadas }. */
+async function inserir(db, linhas) {
   if (!linhas.length) return { novas: 0, completadas: 0 };
   const valores = [];
   const tuplas = linhas.map((l, i) => {
@@ -121,6 +122,34 @@ async function gravarLote(db, linhas) {
   );
   const novas = r.rows.filter((x) => x.nova).length;
   return { novas, completadas: r.rowCount - novas };
+}
+
+/**
+ * Grava um lote; devolve { novas, completadas, comErro }.
+ *
+ * Antes, tira o que o Postgres recusa (caractere nulo, metade de emoji:
+ * crm/texto-seguro.js). Se ainda assim o lote for recusado, grava uma a uma e
+ * pula só a mensagem ruim: uma linha não pode parar a importação inteira
+ * (em 12/10/2026 parou em 2026-05-18, com 520 mil lidas, por um JSON recusado).
+ */
+async function gravarLote(db, linhas, aoPular = () => {}) {
+  const limpas = linhas.map(semQuebrados);
+  try {
+    return { ...(await inserir(db, limpas)), comErro: 0 };
+  } catch {
+    const soma = { novas: 0, completadas: 0, comErro: 0 };
+    for (const l of limpas) {
+      try {
+        const g = await inserir(db, [l]);
+        soma.novas += g.novas;
+        soma.completadas += g.completadas;
+      } catch (e) {
+        soma.comErro++;
+        aoPular(l, e);
+      }
+    }
+    return soma;
+  }
 }
 
 /** Contatos: cria quem só existe nas mensagens e refaz totais e "última" pelo crm_mensagem. */
@@ -181,7 +210,7 @@ async function importar({
   const db = seco ? null : await abrirBanco({ url: urlLoja, urlAdmin: urlLojaAdmin, registrar });
   const painel = lerPainel(dataRoot);
   const lidParaNumero = (l) => painel.lids[l] || null;
-  const total = { lidas: 0, gravaveis: 0, novas: 0, completadas: 0, reacoes: 0, puladas: 0, repetidas: 0, lotes: 0 };
+  const total = { lidas: 0, gravaveis: 0, novas: 0, completadas: 0, reacoes: 0, puladas: 0, repetidas: 0, comErro: 0, lotes: 0 };
 
   try {
     const inst = await origem.query(`SELECT id, "ownerJid" FROM "Instance" WHERE name = $1`, [instancia]);
@@ -239,9 +268,13 @@ async function importar({
       total.repetidas += repetidas;
       total.gravaveis += unicas.length;
       if (!seco) {
-        const g = await gravarLote(db, unicas);
+        const g = await gravarLote(db, unicas, (l, erro) => {
+          // Só o dia e o motivo do Postgres: nada do conteúdo.
+          if (total.comErro < 10) registrar(`[importar] Mensagem pulada (${dia(Math.floor(l.timestamp / 1000))}): ${erro.message}`);
+        });
         total.novas += g.novas;
         total.completadas += g.completadas;
+        total.comErro += g.comErro;
       }
       const ultimo = r.rows[r.rows.length - 1];
       cursor = { ts: ultimo.messageTimestamp, id: ultimo.id };
@@ -268,6 +301,7 @@ async function importar({
       `[importar] Pronto${seco ? " (seco: nada gravado)" : ""}: ${total.lidas} lidas em ${total.lotes} lote(s); ` +
         `${total.gravaveis} de conversa; ${total.novas} novas no banco da loja; ${total.completadas} completadas; ` +
         `${total.reacoes} reação(ões); ${total.repetidas} repetida(s) na Evolution (gravadas uma vez); ` +
+        `${total.comErro} recusada(s) pelo banco e pulada(s); ` +
         `${total.puladas} fora do atendimento (grupo, status, controle).`
     );
     return total;
@@ -297,4 +331,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { importar, opcoes, juntarRepetidas };
+module.exports = { importar, opcoes, juntarRepetidas, gravarLote };
