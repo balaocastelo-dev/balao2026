@@ -224,13 +224,37 @@ async function contatoDetalhado(id: string | number): Promise<ContatoDoBling | n
   return c && c.id ? c : null;
 }
 
-export async function buscarClientePorDocumento(documento: string): Promise<ClienteDaVenda | null> {
+/**
+ * O contato dono do CPF/CNPJ no Bling, esteja ele ativo, inativo ou EXCLUÍDO.
+ *
+ * Caso real (12/10): a listagem padrão do Bling (critério 3) não traz contato
+ * excluído, mas o Bling continua guardando o CPF nele. O PDV não achava o
+ * cliente, tentava cadastrar e o Bling recusava: "O CPF já está cadastrado no
+ * contato Thiago Herrera". Agora procura em "Todos" e depois em "Excluídos".
+ */
+export async function acharContatoPorDocumento(documento: string): Promise<ContatoDoBling | null> {
   const doc = soDigitos(documento);
   if (doc.length !== 11 && doc.length !== 14) return null;
-  const r = await chamarBling("GET", "contatos", { consulta: { numeroDocumento: doc, limite: 1 } });
-  const achado = dados<ContatoDoBling[]>(r)[0];
-  if (!achado?.id) return null;
-  const det = await contatoDetalhado(achado.id);
+  for (const criterio of [1, 2]) {
+    const r = await chamarBling("GET", "contatos", { consulta: { numeroDocumento: doc, criterio, limite: 10 } });
+    // Confere o documento de cada um: se o Bling ignorar o filtro, não pega o cliente errado.
+    const iguais = dados<ContatoDoBling[]>(r).filter((x) => x?.id && soDigitos(x.numeroDocumento) === doc);
+    const achado = iguais.find((x) => (x.situacao ?? "A") === "A") ?? iguais[0];
+    if (achado) return achado;
+  }
+  return null;
+}
+
+/** Contato inativo ou excluído volta a ativo antes de entrar num pedido. */
+async function garantirAtivo(c: ContatoDoBling): Promise<void> {
+  if (!c.situacao || c.situacao === "A") return;
+  await chamarBling("PATCH", `contatos/${c.id}/situacoes`, { corpo: { situacao: "A" } });
+}
+
+export async function buscarClientePorDocumento(documento: string): Promise<ClienteDaVenda | null> {
+  const achado = await acharContatoPorDocumento(documento);
+  if (!achado) return null;
+  const det = await contatoDetalhado(achado.id).catch(() => null);
   return det ? clienteDoContato(det) : clienteDoContato(achado);
 }
 
@@ -239,7 +263,8 @@ function corpoDoContato(c: ClienteDaVenda, base: Partial<ContatoDoBling> = {}) {
   const corpo: Record<string, unknown> = {
     ...base,
     nome: c.nome.trim().slice(0, 120) || base.nome || "Consumidor final",
-    situacao: base.situacao || "A",
+    // Cliente comprando agora: o contato fica ativo, mesmo que estivesse inativo ou excluído.
+    situacao: "A",
     tipo: doc.length === 14 ? "J" : "F",
   };
   delete corpo.id;
@@ -270,13 +295,26 @@ export async function contatoParaVenda(c: ClienteDaVenda): Promise<string> {
 
   let id: string | null = c.blingId ? String(c.blingId) : null;
   if (!id) {
-    const r = await chamarBling("GET", "contatos", { consulta: { numeroDocumento: doc, limite: 1 } });
-    const achado = dados<ContatoDoBling[]>(r)[0];
-    id = achado?.id ? String(achado.id) : null;
+    const achado = await acharContatoPorDocumento(doc);
+    if (achado) {
+      await garantirAtivo(achado);
+      id = String(achado.id);
+    }
   }
   if (!id) {
-    const r = await chamarBling("POST", "contatos", { corpo: corpoDoContato(c) });
-    return String(dados<{ id: number }>(r).id);
+    try {
+      const r = await chamarBling("POST", "contatos", { corpo: corpoDoContato(c) });
+      return String(dados<{ id: number }>(r).id);
+    } catch (e) {
+      // "O CPF já está cadastrado no contato …": o contato existe, só não veio na busca. Usa ele.
+      if (!(e instanceof ErroDoBling) || !/j[aá] est[aá] cadastrado/i.test(e.message)) throw e;
+      const achado = await acharContatoPorDocumento(doc);
+      if (!achado) {
+        throw new ErroDoBling(e.status, `${e.message} — e a busca pelo documento no Bling não achou esse contato. Abra o contato no Bling e confira o CPF/CNPJ.`, e.corpo);
+      }
+      await garantirAtivo(achado);
+      id = String(achado.id);
+    }
   }
   // Já existe. Se o balcão trouxe endereço e o Bling não tem (ou mudou), atualiza:
   // a nota sai com o endereço do contato.
@@ -312,6 +350,16 @@ async function contatoConsumidorFinal(c: ClienteDaVenda): Promise<string> {
   }
   const guardado = (await ler<{ id: string }>("pdv/consumidor-final").catch(() => ({ dados: null }))).dados;
   if (guardado?.id) return guardado.id;
+  // O Bling tem um "Consumidor Final" de fábrica, que não pode ser alterado: é ele o preferido.
+  try {
+    const padrao = dados<ContatoDoBling>(await chamarBling("GET", "contatos/consumidor-final"));
+    if (padrao?.id) {
+      await gravar("pdv/consumidor-final", { id: String(padrao.id) }, "*").catch(() => undefined);
+      return String(padrao.id);
+    }
+  } catch (e) {
+    if (e instanceof SemAcessoAoBling) throw e;
+  }
   const r = await chamarBling("GET", "contatos", { consulta: { pesquisa: "Consumidor final", limite: 5 } });
   const achado = dados<ContatoDoBling[]>(r).find((x) => /consumidor\s+final/i.test(String(x.nome || "")) && !soDigitos(x.numeroDocumento));
   let id = achado?.id ? String(achado.id) : null;
