@@ -1,44 +1,75 @@
 import { NextResponse } from "next/server";
 import { sendEmail, sendSystemNotification } from "@/lib/mail";
 
+const emailValido = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+const escapar = (texto: string) =>
+  texto.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+const corte = (valor: unknown, max: number) => (typeof valor === "string" ? valor.slice(0, max).trim() : "");
+
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { name, email, phone, message, subject, source, city, service } = body;
+    const body = await req.json().catch(() => ({}));
 
-    if (!email || !message) {
-      return NextResponse.json({ error: "Email and message required" }, { status: 400 });
+    // Campo escondido que só robô preenche: finge que deu certo e não avisa ninguém.
+    if (corte(body?.honeypot, 200)) {
+      return NextResponse.json({ success: true });
     }
 
-    // 1. Notificar Admin (Formulário enviado)
-    await sendSystemNotification('Novo Formulário de Contato', {
+    const name = corte(body?.name, 120);
+    const email = corte(body?.email, 200);
+    const phone = corte(body?.phone, 40);
+    const message = corte(body?.message, 3000);
+    const subject = corte(body?.subject, 200);
+    const source = corte(body?.source, 120);
+    const city = corte(body?.city, 120);
+    const service = corte(body?.service, 160);
+    const urgency = corte(body?.urgency, 60);
+    const page = corte(body?.page, 200);
+
+    const temEmail = emailValido(email);
+    const temTelefone = phone.replace(/\D/g, "").length >= 10;
+
+    // Lead de triagem (ex.: /especialidades) chega só com nome e WhatsApp:
+    // basta um jeito de responder — e-mail OU telefone.
+    if (!message || (!temEmail && !temTelefone)) {
+      return NextResponse.json({ error: "Informe a mensagem e um e-mail ou WhatsApp para retorno." }, { status: 400 });
+    }
+
+    // 1. Avisa a loja
+    await sendSystemNotification(subject || "Novo Formulário de Contato", {
       name,
-      email,
-      phone,
+      email: email || null,
+      phone: phone || null,
       message,
       subject: subject || null,
       source: source || null,
       city: city || null,
       service: service || null,
+      urgency: urgency || null,
+      page: page || null,
     });
 
-    // 2. Confirmação para o usuário
-    const userHtml = `
-      <h2>Olá, ${name || 'Visitante'}!</h2>
+    // 2. Confirmação para o cliente, quando ele deixou e-mail
+    if (temEmail) {
+      const userHtml = `
+      <h2>Olá, ${escapar(name || "Visitante")}!</h2>
       <p>Recebemos sua mensagem e retornaremos em breve.</p>
       <hr>
       <p><strong>Sua mensagem:</strong></p>
-      <blockquote>${message.replace(/\n/g, '<br>')}</blockquote>
+      <blockquote>${escapar(message).replace(/\n/g, "<br>")}</blockquote>
       <br>
       <p>Atenciosamente,<br>Equipe Balão Castelo</p>
     `;
 
-    await sendEmail({
+      await sendEmail({
         to: email,
-        subject: subject || 'Recebemos sua mensagem - Balão Castelo',
+        subject: subject || "Recebemos sua mensagem - Balão Castelo",
         html: userHtml,
-        eventType: 'contact_form'
-    });
+        eventType: "contact_form",
+      });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
