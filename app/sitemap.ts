@@ -6,6 +6,7 @@ import { LEAD_INTENTS } from '@/lib/lead-intents'
 import { REGIONAL_CITIES, REGIONAL_SERVICES, buildRegionalServicePath } from '@/lib/local-seo'
 import { CAMPINAS_NEIGHBORHOODS } from '@/lib/neighborhood-seo'
 import { listVitrinePagesPublic } from '@/lib/vitrine/db'
+import { PAGINAS } from '@/lib/landing/paginas'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.balao.info'
@@ -59,7 +60,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ].map((route) => ({
     url: `${baseUrl}${route}`,
     changeFrequency: route === '' ? 'daily' as const : 'weekly' as const,
-    priority: route === '' ? 1 : 0.7,
+    // As páginas de captação (lib/landing/paginas) vêm logo depois da home.
+    priority: route === '' ? 1 : PAGINAS[route.slice(1)] ? 0.9 : 0.7,
   }))
 
   // Categorias

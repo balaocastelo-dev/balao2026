@@ -1,0 +1,619 @@
+/* ============================================================
+   Páginas de captação (serviços, vitrines e institucionais).
+
+   Carbono da loja, uma família só (Archivo: larga nos títulos, normal no
+   texto) e o vermelho Balão reservado para a ação — o botão que leva ao
+   WhatsApp. O momento marcante de cada página é o palco do topo: a foto do
+   serviço num plano em perspectiva que deita conforme a rolagem, com os
+   produtos da própria vitrine flutuando em profundidades diferentes.
+   O resto fica quieto.
+
+   Tudo começa com .cpt para não vazar para o resto do site.
+   ============================================================ */
+
+.cpt {
+  --cpt-carbono: #090d16;
+  --cpt-painel: #111827;
+  --cpt-superficie: #161f32;
+  --cpt-fio: rgba(148, 163, 184, 0.18);
+  --cpt-fio-forte: rgba(148, 163, 184, 0.32);
+  --cpt-texto: #ffffff;
+  --cpt-texto-2: #cbd5e1;
+  --cpt-texto-3: #94a3b8;
+  --cpt-vermelho: #e60012;
+  --cpt-vermelho-escuro: #b8000e;
+  --cpt-margem: clamp(1.25rem, 4vw, 2.5rem);
+  --cpt-curva: cubic-bezier(0.16, 1, 0.3, 1);
+
+  font-family: var(--font-archivo), "Helvetica Neue", Arial, sans-serif;
+  color: var(--cpt-texto);
+  background: var(--cpt-carbono);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  font-variant-numeric: tabular-nums;
+}
+
+.cpt-miolo {
+  width: 100%;
+  max-width: 76rem;
+  margin-inline: auto;
+  padding-inline: var(--cpt-margem);
+}
+
+.cpt-titulo {
+  font-stretch: 112%;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+
+.cpt-h2 {
+  font-stretch: 108%;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  line-height: 1.1;
+  font-size: clamp(1.625rem, 1.2rem + 1.6vw, 2.5rem);
+  text-wrap: balance;
+}
+
+.cpt-h3 {
+  font-weight: 700;
+  font-size: 1.125rem;
+  line-height: 1.3;
+}
+
+.cpt-lead {
+  color: var(--cpt-texto-2);
+  font-size: clamp(1.0625rem, 1rem + 0.35vw, 1.25rem);
+  line-height: 1.6;
+  max-width: 38rem;
+  text-wrap: pretty;
+}
+
+.cpt-corpo {
+  color: var(--cpt-texto-2);
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  max-width: 40rem;
+  text-wrap: pretty;
+}
+
+.cpt-secao {
+  padding-block: clamp(3.5rem, 8vw, 6rem);
+}
+
+.cpt-secao + .cpt-secao {
+  border-top: 1px solid var(--cpt-fio);
+}
+
+.cpt-secao--painel {
+  background: var(--cpt-painel);
+}
+
+/* ---------- botões ---------- */
+
+.cpt-botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  min-height: 3.25rem;
+  padding: 0.875rem 1.5rem;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 1rem;
+  line-height: 1.2;
+  text-align: center;
+  transition: background-color 150ms ease, transform 150ms ease, border-color 150ms ease;
+}
+
+.cpt-botao:active {
+  transform: scale(0.97);
+}
+
+.cpt-botao:focus-visible,
+.cpt a:focus-visible,
+.cpt button:focus-visible,
+.cpt summary:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+.cpt-botao--acao {
+  background: var(--cpt-vermelho);
+  color: #fff;
+  box-shadow: 0 18px 40px -18px rgba(230, 0, 18, 0.8);
+}
+
+.cpt-botao--acao:hover {
+  background: var(--cpt-vermelho-escuro);
+}
+
+.cpt-botao--linha {
+  border: 1px solid var(--cpt-fio-forte);
+  color: #fff;
+  background: transparent;
+}
+
+.cpt-botao--linha:hover {
+  border-color: #fff;
+}
+
+/* ---------- palco do topo ---------- */
+
+.cpt-palco {
+  position: relative;
+  overflow: clip;
+  isolation: isolate;
+  padding-block: clamp(2rem, 5vw, 3.5rem) clamp(3rem, 7vw, 5rem);
+}
+
+.cpt-palco__grade {
+  display: grid;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+@media (min-width: 1024px) {
+  .cpt-palco {
+    min-height: min(92vh, 860px);
+    display: flex;
+    align-items: center;
+  }
+
+  .cpt-palco__grade {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: 4.5rem;
+  }
+}
+
+.cpt-palco__cena {
+  position: relative;
+  perspective: 1400px;
+  perspective-origin: 30% 40%;
+}
+
+.cpt-palco__plano {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  border-radius: 28px;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  box-shadow:
+    0 60px 120px -40px rgba(0, 0, 0, 0.9),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+  background: var(--cpt-superficie);
+}
+
+.cpt-palco__plano::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(9, 13, 22, 0) 45%, rgba(9, 13, 22, 0.55) 100%),
+    linear-gradient(90deg, rgba(230, 0, 18, 0.18), rgba(230, 0, 18, 0) 35%);
+  pointer-events: none;
+}
+
+.cpt-palco__luz {
+  position: absolute;
+  inset: auto -10% -30% 10%;
+  height: 70%;
+  background: radial-gradient(closest-side, rgba(230, 0, 18, 0.32), rgba(230, 0, 18, 0));
+  filter: blur(20px);
+  z-index: -1;
+}
+
+/* Produtos da vitrine flutuando ao redor da foto. */
+.cpt-flutua {
+  position: absolute;
+  width: clamp(5rem, 7.5vw, 7.25rem);
+  aspect-ratio: 1;
+  border-radius: 22px;
+  background: #fff;
+  padding: 0.6rem;
+  box-shadow: 0 30px 60px -24px rgba(0, 0, 0, 0.85);
+  will-change: transform;
+}
+
+.cpt-flutua img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* No celular os produtos flutuantes cobririam o texto: fica só o plano da foto. */
+@media (max-width: 1023px) {
+  .cpt-flutua {
+    display: none;
+  }
+}
+
+.cpt-contexto {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--cpt-texto-2);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.cpt-contexto__ponto {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--cpt-vermelho);
+  box-shadow: 0 0 0 4px rgba(230, 0, 18, 0.2);
+}
+
+.cpt-fatos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem 1.5rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--cpt-fio);
+}
+
+@media (min-width: 640px) {
+  .cpt-fatos {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.cpt-fatos dt {
+  font-stretch: 112%;
+  font-weight: 800;
+  font-size: 1.125rem;
+  line-height: 1.2;
+  color: #fff;
+}
+
+.cpt-fatos dd {
+  color: var(--cpt-texto-3);
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  margin-top: 0.2rem;
+}
+
+/* ---------- assistente ---------- */
+
+.cpt-assistente {
+  position: relative;
+  z-index: 2;
+  border-radius: 24px;
+  background: rgba(17, 24, 39, 0.94);
+  border: 1px solid var(--cpt-fio-forte);
+  box-shadow: 0 40px 80px -40px rgba(0, 0, 0, 0.95);
+  padding: clamp(1.25rem, 3vw, 1.75rem);
+  backdrop-filter: blur(14px);
+}
+
+@media (min-width: 1024px) {
+  /* O assistente sobe um pouco sobre a base da foto, sem cobri-la. */
+  .cpt-palco__cena .cpt-assistente {
+    margin-top: -4.5rem;
+    margin-inline: 2.5rem -0.5rem;
+  }
+}
+
+.cpt-opcao {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--cpt-fio-forte);
+  background: var(--cpt-superficie);
+  color: #fff;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.2;
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.cpt-opcao:hover {
+  border-color: #fff;
+}
+
+.cpt-opcao[aria-pressed="true"] {
+  background: #fff;
+  color: var(--cpt-carbono);
+  border-color: #fff;
+}
+
+.cpt-progresso {
+  height: 3px;
+  border-radius: 999px;
+  background: var(--cpt-fio);
+  overflow: hidden;
+}
+
+.cpt-progresso > span {
+  display: block;
+  height: 100%;
+  background: var(--cpt-vermelho);
+  transition: width 300ms var(--cpt-curva);
+}
+
+/* ---------- faixa de prova ---------- */
+
+.cpt-prova {
+  display: grid;
+  gap: 1.25rem 2rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 900px) {
+  .cpt-prova {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.cpt-prova strong {
+  display: block;
+  font-stretch: 106%;
+  font-weight: 800;
+  font-size: clamp(1.25rem, 1.05rem + 0.6vw, 1.5rem);
+  line-height: 1.1;
+  color: #fff;
+}
+
+.cpt-prova span {
+  color: var(--cpt-texto-3);
+  font-size: 0.9375rem;
+}
+
+/* ---------- listas e grades ---------- */
+
+.cpt-grade {
+  display: grid;
+  gap: 1px;
+  background: var(--cpt-fio);
+  border: 1px solid var(--cpt-fio);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+@media (min-width: 720px) {
+  .cpt-grade--2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .cpt-grade--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.cpt-grade > * {
+  background: var(--cpt-carbono);
+  padding: clamp(1.25rem, 3vw, 1.75rem);
+}
+
+.cpt-secao--painel .cpt-grade > * {
+  background: var(--cpt-painel);
+}
+
+.cpt-passos {
+  counter-reset: passo;
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 900px) {
+  .cpt-passos {
+    grid-template-columns: repeat(var(--cpt-colunas, 4), minmax(0, 1fr));
+  }
+}
+
+.cpt-passos > li {
+  counter-increment: passo;
+  position: relative;
+  padding-top: 3.25rem;
+}
+
+.cpt-passos > li::before {
+  content: counter(passo);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid var(--cpt-fio-forte);
+  font-weight: 800;
+  font-stretch: 112%;
+}
+
+.cpt-passos > li::after {
+  content: "";
+  position: absolute;
+  top: 1.125rem;
+  left: 2.75rem;
+  right: 0;
+  height: 1px;
+  background: var(--cpt-fio);
+}
+
+.cpt-passos > li:last-child::after {
+  display: none;
+}
+
+.cpt-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+.cpt-tabela th,
+.cpt-tabela td {
+  text-align: left;
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--cpt-fio);
+  vertical-align: top;
+}
+
+.cpt-tabela thead th {
+  color: var(--cpt-texto-3);
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+.cpt-tabela tbody th {
+  color: #fff;
+  font-weight: 700;
+}
+
+.cpt-tabela td {
+  color: var(--cpt-texto-2);
+}
+
+.cpt-tabela td:nth-child(2) {
+  color: #fff;
+}
+
+.cpt-marca {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--cpt-fio-forte);
+  font-weight: 700;
+  font-size: 0.9375rem;
+}
+
+/* Imagem de seção com profundidade ao rolar. */
+.cpt-imagem {
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  background: var(--cpt-superficie);
+}
+
+.cpt-imagem img {
+  will-change: transform;
+}
+
+/* ---------- perguntas ---------- */
+
+.cpt-faq {
+  border-top: 1px solid var(--cpt-fio);
+}
+
+.cpt-faq details {
+  border-bottom: 1px solid var(--cpt-fio);
+}
+
+.cpt-faq summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding-block: 1.25rem;
+  font-weight: 700;
+  font-size: 1.0625rem;
+  line-height: 1.4;
+}
+
+.cpt-faq summary::-webkit-details-marker {
+  display: none;
+}
+
+.cpt-faq summary::after {
+  content: "+";
+  flex: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--cpt-texto-3);
+  transition: transform 200ms var(--cpt-curva);
+}
+
+.cpt-faq details[open] summary::after {
+  transform: rotate(45deg);
+}
+
+.cpt-faq details p {
+  padding-bottom: 1.25rem;
+  padding-right: 2rem;
+  color: var(--cpt-texto-2);
+  line-height: 1.7;
+  max-width: 46rem;
+}
+
+/* ---------- links para outras páginas e artigos ---------- */
+
+.cpt-vizinha {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+  border-radius: 18px;
+  border: 1px solid var(--cpt-fio);
+  transition: border-color 150ms ease;
+}
+
+.cpt-vizinha:hover {
+  border-color: var(--cpt-fio-forte);
+}
+
+.cpt-vizinha:hover .cpt-vizinha__nome {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.cpt-vizinha__foto {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--cpt-superficie);
+}
+
+/* ---------- barra do celular ---------- */
+
+.cpt-barra {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 9991;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.625rem 0.75rem calc(0.625rem + env(safe-area-inset-bottom));
+  background: rgba(9, 13, 22, 0.94);
+  border-top: 1px solid var(--cpt-fio-forte);
+  backdrop-filter: blur(12px);
+  transform: translateY(110%);
+  transition: transform 300ms var(--cpt-curva);
+}
+
+.cpt-barra[data-visivel="true"] {
+  transform: translateY(0);
+}
+
+@media (min-width: 768px) {
+  .cpt-barra {
+    display: none;
+  }
+}
+
+/* Com a barra no celular, o botão flutuante do site sai (ele ficaria em cima dela). */
+@media (max-width: 767px) {
+  html[data-barra-whats] .balao-whats-flutuante {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cpt *,
+  .cpt *::before,
+  .cpt *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

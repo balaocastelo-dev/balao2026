@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, ShoppingCart, User, Menu, X, Loader2, Crown } from "lucide-react";
 import Link from "next/link";
@@ -13,9 +13,22 @@ import SearchPreview from "@/components/SearchPreview";
 import CartPreview from "@/components/CartPreview";
 import TopBar from "@/components/TopBar";
 
+/**
+ * Copia o termo da URL (?search=) para a caixa de busca. Fica num componente
+ * próprio, dentro de Suspense: `useSearchParams` direto no cabeçalho fazia
+ * toda página estática sair do servidor sem conteúdo (o Next só desenhava no
+ * navegador), e o Google via as páginas vazias.
+ */
+function SincronizarBusca({ aoMudar }: { aoMudar: (termo: string) => void }) {
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    aoMudar(searchParams.get("search") || "");
+  }, [searchParams, aoMudar]);
+  return null;
+}
+
 export default function Header() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { cartCount } = useCart();
   const { toggleSidebar } = useSidebar();
   const [logoClicks, setLogoClicks] = useState(0);
@@ -23,15 +36,6 @@ export default function Header() {
   const [showCartPreview, setShowCartPreview] = useState(false);
   const cartPreviewTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
-  // Sync search query with URL params
-  useEffect(() => {
-    const query = searchParams.get("search");
-    if (query) {
-      setSearchQuery(query);
-    } else {
-      setSearchQuery("");
-    }
-  }, [searchParams]);
   
   // Search Preview State
   const [showPreview, setShowPreview] = useState(false);
@@ -142,6 +146,9 @@ export default function Header() {
 
   return (
     <header className={`${headerClassName} sticky top-0 z-[900] flex w-full max-w-full flex-col overflow-x-clip border-b shadow-lg backdrop-blur-md transition-colors`}>
+      <Suspense fallback={null}>
+        <SincronizarBusca aoMudar={setSearchQuery} />
+      </Suspense>
       <TopBar />
       <div className="w-full max-w-[1920px] mx-auto flex min-w-0 items-center justify-between gap-4 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 py-3.5 sm:gap-6">
         

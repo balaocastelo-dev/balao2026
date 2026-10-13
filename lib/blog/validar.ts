@@ -27,6 +27,10 @@ const TEMAS = new Set<string>([
   "empresas",
   "apple",
   "ia-local",
+  "carregadores",
+  "licencas",
+  "impressao",
+  "games",
   "geral",
 ]);
 

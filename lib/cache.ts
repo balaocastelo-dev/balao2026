@@ -13,6 +13,7 @@ import {
   getComputadoresDaVitrine,
   getCandidatosANotebook,
   getProdutosComQueda,
+  getCandidatosPorOrigens,
 } from "./db";
 import { listVitrinePagesPublic } from "./vitrine/db";
 import {
@@ -33,6 +34,14 @@ import { selecionarNotebooks, type VitrineDeNotebooks } from "./catalogo/noteboo
 import { montarFileiras, type VitrineDePcGamer } from "./catalogo/pc-gamer";
 import type { Product } from "./utils";
 import { DIAS_NA_VITRINE } from "./precos/queda";
+import {
+  montarFileiras as montarFileirasDaPagina,
+  naCategoria,
+  normalizar,
+  origensDasRegras,
+  type FileiraPronta,
+} from "./landing/vitrine";
+import type { RegraDeVitrine } from "./landing/tipos";
 
 const listaVazia = (itens: unknown[]) => !Array.isArray(itens) || itens.length === 0;
 
@@ -282,6 +291,37 @@ export const getCachedVitrinePcGamer = unstable_cache(
   ["pcgamer-fileiras-v1"],
   { revalidate: 300, tags: [TAG_PRODUTOS] }
 );
+
+/**
+ * Fileiras das páginas de captação (/manutencao, /tonner, /reparoapple...).
+ *
+ * Pede ao banco só as categorias e os começos de nome que as regras da página
+ * usam, monta as fileiras (lib/landing/vitrine.ts) e guarda só o resultado —
+ * algumas dezenas de produtos, bem abaixo do limite de 2 MB do cache do Next.
+ * Sem banco, a mesma seleção sai da cópia do catálogo.
+ */
+export function getCachedFileirasDaPagina(slug: string, regras: RegraDeVitrine[]) {
+  const origens = origensDasRegras(regras);
+  const chave = ["landing-fileiras-v1", slug, JSON.stringify(regras)];
+  return unstable_cache(
+    async (): Promise<FileiraPronta<Product>[]> =>
+      comEspelho<FileiraPronta<Product>[]>(
+        async () => montarFileirasDaPagina(await getCandidatosPorOrigens(origens), regras),
+        (produtos) =>
+          montarFileirasDaPagina(
+            produtos.filter(
+              (p) =>
+                naCategoria(p.category, origens.categorias) ||
+                origens.nomes.some((n) => normalizar(p.name).startsWith(n))
+            ),
+            regras
+          ),
+        (fileiras) => !Array.isArray(fileiras) || fileiras.length === 0
+      ),
+    chave,
+    { revalidate: 300, tags: [TAG_PRODUTOS] }
+  )();
+}
 
 export const TAG_CATEGORIAS = "categories";
 

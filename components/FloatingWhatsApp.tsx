@@ -28,23 +28,26 @@ export default function FloatingWhatsApp() {
   const handleWhatsAppClick = () => {
     if (typeof window === "undefined") return;
 
+    // Páginas de captação deixam a mensagem do assunto delas (BarraDoCelular).
+    const daPagina = window.__balaoWhats;
+
     trackWhatsAppClick({
       page_path: window.location.pathname,
-      source: "floating_whatsapp_btn",
+      source: daPagina ? `flutuante_${daPagina.origem}` : "floating_whatsapp_btn",
       label: "Chamar no WhatsApp agora",
       product_name: "Geral",
     });
 
     window.open(
       `https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(
-        mensagem
+        daPagina?.mensagem || mensagem
       )}`,
       "_blank"
     );
   };
 
   return (
-    <div className={`fixed bottom-6 right-6 z-[9990] ${naSeminovos ? "hidden sm:flex" : "flex"} flex-col items-end gap-2 pointer-events-none`}>
+    <div className={`balao-whats-flutuante fixed bottom-6 right-6 z-[9990] ${naSeminovos ? "hidden sm:flex" : "flex"} flex-col items-end gap-2 pointer-events-none`}>
       {/* Badge with help text */}
       <div 
         onClick={handleWhatsAppClick}
