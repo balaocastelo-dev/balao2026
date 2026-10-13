@@ -51,6 +51,31 @@ A lista inteira (produto, foto, motivo) está em `data/auditoria-fotos-2026-10-1
   - `POST { auditoria: "2026-10-12", inicio, quantidade }` aplica a lista guardada, em partes;
   - `DELETE { id, foto }` desfaz.
 
+## Fotos novas para os que ficaram sem foto (12/10, noite)
+
+Pedido do Thiago: "buscar foto dos fabricantes 1 a 1 para completar todos os itens sem foto, analisando um por 1".
+
+Eram 758 produtos sem foto (554 avulsos + 204 PCs de lojistas). Cada um foi conferido sozinho, lado a lado com a
+foto da própria TechSupri (a referência) e o nome:
+
+| De onde veio a foto | Produtos |
+|---|---|
+| Anúncio KaBuM!/Americanas com o mesmo código | 88 |
+| Site do fabricante (Knup, TP-Link, Redragon, Havit, Onikuma, H'Maston, Peining, Apple, Xiaomi…) ou loja com a página do mesmo modelo (Buscapé/Zoom, Best Buy, Webcontinental…) | 175 |
+| PCs: outra foto da galeria do **próprio anúncio**, que não contradiz a configuração | 74 |
+| **Total com foto** | **337** |
+
+- As fotos ficam no servidor da loja: `public/fotos-produtos/<id>.webp` (até 800 px), PR #63. A lista
+  (produto, foto, de onde veio) está em `data/fotos-novas-2026-10-12.json`.
+- A troca no banco é pelo `POST /api/precos/fotos-recusadas` com `{ itens: [{ id, nova }] }`. A foto em
+  `www.balao.info/...` não é sobrescrita pelas leituras das fontes (só troca foto vazia, da KaBuM! ou "sem foto").
+- **Continuam sem foto: 421** (`data/sem-foto-2026-10-12.json`, com o motivo de cada um): 130 PCs de lojista sem
+  foto que mostre o PC anunciado; fontes de notebook compatíveis genéricas; toners Evolut/Chinamate (a caixa é a
+  mesma para todos os modelos); peças 3D e decoração sem fabricante; modelos que não existem em nenhum site
+  acessível. Melhor sem foto do que foto errada.
+- Ficaram de fora por dúvida, na conferência final: #140 (Dobe TNS-852B, a ref mostra dois pares) e #331
+  (La Belle Yara, tom de rosa diferente).
+
 ## Regra que fica
 
 A foto é a do produto exato — mesma marca, modelo, variante, medida, cor e quantidade — ou nenhuma.
