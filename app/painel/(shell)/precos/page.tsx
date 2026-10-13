@@ -10,6 +10,10 @@ import ProdutosBloqueados from "@/components/painel/ProdutosBloqueados";
 
 /** Catálogo da Kyte (fornecedor local): <loja>.kyte.site ou <loja>.catalog.kyte.site. */
 const LINK_KYTE = /^(?:https?:\/\/)?([a-z0-9-]{2,63}\.(?:catalog\.)?kyte\.site)(?:\/|$)/i;
+/** Catálogo da TOB Distribuição (representante): o servidor lê sozinho. */
+const LINK_TOB = /^(?:https?:\/\/)?catalogotob\.tobdistribuicao\.com\.br\/c\/([a-z0-9_-]{2,60})/i;
+/** Fontes que chegam por importação do navegador (Kyte); as outras o servidor lê. */
+const SITES_POR_IMPORTACAO = ["techsupri", "kyte"];
 
 interface Fonte {
   id: string;
@@ -133,7 +137,8 @@ export default function PrecosPage() {
   const [categoriasAbertas, setCategoriasAbertas] = useState<Record<string, boolean>>({});
   const [novoProntaEntrega, setNovoProntaEntrega] = useState(true);
   const [cadastradoKyte, setCadastradoKyte] = useState<Fonte | null>(null);
-  const hostKyte = novoLink.trim().match(LINK_KYTE)?.[1]?.toLowerCase() || null;
+  const representanteTob = novoLink.trim().match(LINK_TOB)?.[1]?.toLowerCase() || null;
+  const hostKyte = novoLink.trim().match(LINK_KYTE)?.[1]?.toLowerCase() || (representanteTob ? "catalogotob.tobdistribuicao.com.br" : null);
 
   const [palavra, setPalavra] = useState("");
   const [trocando, setTrocando] = useState(false);
@@ -299,10 +304,17 @@ export default function PrecosPage() {
         method: "POST",
         body: JSON.stringify({ url: novoLink, nome: novoNome, margem: Number(novaMargem.replace(",", ".")), pronta_entrega: novoProntaEntrega }),
       });
-      setAviso({ tipo: "ok", texto: `${r.fonte.nome} cadastrado com ${r.fonte.margem}% de margem. Agora traga os produtos: abra o catálogo e clique no favorito "Enviar ao Balão".` });
-      setCadastradoKyte(r.fonte);
       setNovoLink("");
       setNovoNome("");
+      if (r.fonte.site && !SITES_POR_IMPORTACAO.includes(r.fonte.site)) {
+        // TOB: o servidor lê o catálogo sozinho; já traz os produtos.
+        setAviso({ tipo: "ok", texto: `${r.fonte.nome} cadastrado com ${r.fonte.margem}% de margem. Lendo os produtos agora…` });
+        await carregar();
+        await lerAgora(r.fonte);
+        return;
+      }
+      setAviso({ tipo: "ok", texto: `${r.fonte.nome} cadastrado com ${r.fonte.margem}% de margem. Agora traga os produtos: abra o catálogo e clique no favorito "Enviar ao Balão".` });
+      setCadastradoKyte(r.fonte);
       await carregar();
     } catch (erro) {
       setAviso({ tipo: "erro", texto: (erro as Error).message });
@@ -451,7 +463,7 @@ export default function PrecosPage() {
                 ? { texto: `Lendo (página ${f.passo_pagina}${f.passo_total_pag ? ` de ${f.passo_total_pag}` : ""})`, classe: "bg-blue-50 text-blue-800 border-blue-200" }
                 : ROTULO_DO_STATUS[f.ultimo_status || ""] || { texto: "Aguardando a primeira leitura", classe: "bg-gray-50 text-gray-700 border-gray-200" };
               const mexeu = String(f.margem) !== String(margens[f.id] ?? "").replace(",", ".");
-              const porImportacao = !!f.site && f.site !== "kabum";
+              const porImportacao = !!f.site && SITES_POR_IMPORTACAO.includes(f.site);
               return (
                 <article key={f.id} className={`rounded-lg border p-4 ${f.ativa ? "border-gray-200" : "border-dashed border-gray-300 bg-gray-50"}`}>
                   <div className="flex flex-wrap items-start justify-between gap-3">
@@ -699,7 +711,8 @@ export default function PrecosPage() {
           <Plus size={18} className="text-[#E60012]" /> Nova fonte
         </h3>
         <p className="mt-1 text-sm text-gray-600">
-          Cole o link de uma categoria da KaBuM! ou do catálogo de um fornecedor na Kyte (ex.: robsonatacado.catalog.kyte.site). O
+          Cole o link de uma categoria da KaBuM!, do catálogo de um fornecedor na Kyte (ex.: robsonatacado.catalog.kyte.site) ou do
+          catálogo da TOB Distribuição. O
           painel reconhece o fornecedor pelo link.
         </p>
 
@@ -731,7 +744,7 @@ export default function PrecosPage() {
           <div className="mt-3 space-y-3">
             <div className="flex flex-wrap items-center gap-4">
               <span className="rounded-full border border-emerald-300 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-800">
-                Fornecedor na Kyte · {hostKyte}
+                {representanteTob ? `Fornecedor TOB Distribuição · representante ${representanteTob}` : `Fornecedor na Kyte · ${hostKyte}`}
               </span>
               <label className="inline-flex items-center gap-2 text-sm text-gray-700">
                 <input id="nova-fonte-pronta" type="checkbox" checked={novoProntaEntrega} onChange={(e) => setNovoProntaEntrega(e.target.checked)} />
@@ -746,11 +759,18 @@ export default function PrecosPage() {
                 {cadastrando && <Loader2 size={14} className="animate-spin" />} Cadastrar fornecedor
               </button>
             </div>
+            {representanteTob ? (
+              <p className="text-xs text-gray-600">
+                O site lê o catálogo da TOB sozinho, uma vez por dia (e quando você clicar em &quot;Ler agora&quot;). Ao cadastrar, os
+                produtos já entram. Depois ajuste a margem de cada categoria em &quot;Margem por categoria&quot;.
+              </p>
+            ) : (
             <p className="text-xs text-gray-600">
               A Kyte não deixa servidor ler o catálogo. Depois de cadastrar, abra o catálogo no Chrome e clique no favorito &quot;Enviar
               ao Balão&quot;: os produtos chegam aqui para você confirmar. As fotos são conferidas sozinhas (com marca d&apos;água do
               fornecedor, o site busca outra na internet).
             </p>
+            )}
           </div>
         ) : (
         <div className="mt-3 flex flex-wrap items-center gap-4">

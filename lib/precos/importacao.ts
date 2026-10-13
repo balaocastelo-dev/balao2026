@@ -37,6 +37,7 @@ import {
   type ProdutoCapturado,
 } from "./techsupri";
 import type { ItemDeOrigem } from "./kabum";
+import { identificarLinkTob, SITE_TOB } from "./tob";
 import { buscarFoto } from "./fotos";
 
 const LOTE = 150;
@@ -156,6 +157,41 @@ export async function cadastrarFornecedorKyte(dados: NovoFornecedor): Promise<Fo
     site: SITE_KYTE,
     url: link.url,
     caminho: link.host,
+    so_loja: true,
+    margem: dados.margem ?? MARGEM_PADRAO_DE_FORNECEDOR,
+    regra_margem: dados.regra_margem ?? null,
+    pronta_entrega: dados.pronta_entrega !== false,
+    fornecedor: nome,
+    intervalo_min: 24 * 60,
+  });
+}
+
+/** A fonte da TOB deste representante (caminho = host/c/slug), se já existir. */
+export async function fonteDaTob(caminho: string): Promise<Fonte | null> {
+  await garantirEstrutura();
+  const res = await turso.execute({
+    sql: "SELECT id FROM fontes_preco WHERE site = ? AND caminho = ? LIMIT 1",
+    args: [SITE_TOB, String(caminho || "").toLowerCase()],
+  });
+  const id = res.rows[0] ? String((res.rows[0] as Record<string, unknown>).id) : null;
+  return id ? buscarFonte(id) : null;
+}
+
+/**
+ * Cadastra a TOB Distribuição (catálogo do representante) pelo link. O
+ * servidor lê esse catálogo sozinho: depois de cadastrar, "Ler agora" no
+ * painel (ou o agendador, uma vez por dia) traz os produtos.
+ */
+export async function cadastrarFornecedorTob(dados: NovoFornecedor): Promise<Fonte> {
+  const link = identificarLinkTob(dados.url);
+  if (!link) throw new Error("Esse link não é do catálogo da TOB (catalogotob.tobdistribuicao.com.br/c/…).");
+  if (await fonteDaTob(link.caminho)) throw new Error("Este fornecedor já está cadastrado.");
+  const nome = String(dados.nome || "").trim().slice(0, 120) || link.nomeSugerido;
+  return criarFonte({
+    nome,
+    site: SITE_TOB,
+    url: link.url,
+    caminho: link.caminho,
     so_loja: true,
     margem: dados.margem ?? MARGEM_PADRAO_DE_FORNECEDOR,
     regra_margem: dados.regra_margem ?? null,
