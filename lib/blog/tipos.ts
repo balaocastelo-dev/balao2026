@@ -123,6 +123,10 @@ export type TemaDeChamada =
   | "empresas"
   | "apple"
   | "ia-local"
+  | "carregadores"
+  | "licencas"
+  | "impressao"
+  | "games"
   | "geral";
 
 export type BlocoChamada = {

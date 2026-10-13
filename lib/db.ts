@@ -298,6 +298,33 @@ export async function getComputadoresDaVitrine(): Promise<Product[]> {
   return res.rows.map((r) => mapTursoProduct(r as Row));
 }
 
+// Candidatos às vitrines das páginas de captação (lib/landing/vitrine.ts):
+// só os caminhos de categoria e os começos de nome que as fileiras da página
+// pedem, com as colunas que o card desenha. Quem decide o que entra é
+// `montarFileiras`. Como nas consultas acima, erro de banco não é engolido:
+// quem chama cai na cópia do catálogo.
+export async function getCandidatosPorOrigens(origens: { categorias: string[]; nomes: string[] }): Promise<Product[]> {
+  if (!isTursoActive()) return [];
+  const condicoes: string[] = [];
+  const args: string[] = [];
+  for (const c of origens.categorias) {
+    condicoes.push('category = ? OR category LIKE ?');
+    args.push(c, `${c}/%`);
+  }
+  for (const n of origens.nomes) {
+    condicoes.push('LOWER(name) LIKE ?');
+    args.push(`${n.toLowerCase()}%`);
+  }
+  if (condicoes.length === 0) return [];
+  const res = await turso.execute({
+    sql: `SELECT id, name, price, image, category, slug, brand, installment, discount_pix, price_card, availability, supplier
+          FROM products
+          WHERE ${condicoes.map((c) => `(${c})`).join(' OR ')}`,
+    args,
+  });
+  return res.rows.map((r) => mapTursoProduct(r as Row));
+}
+
 // Candidatos à vitrine da página /notebooks: a categoria de notebooks inteira
 // e, de qualquer fornecedor, o produto cujo nome começa dizendo que é
 // notebook. Quem decide o que entra de fato é `selecionarNotebooks`

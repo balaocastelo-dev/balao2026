@@ -99,6 +99,32 @@ export const CHAMADAS: Record<TemaDeChamada, ChamadaPronta> = {
     rotulo: "Ver máquinas para IA local",
     href: "/ia-local",
   },
+  carregadores: {
+    titulo: "Precisa de carregador para o notebook?",
+    texto:
+      "Mande uma foto da etiqueta da fonte antiga (voltagem, watts e pino). A equipe confere o modelo certo e combina a retirada ou a entrega em Campinas.",
+    rotulo: "Ver carregadores",
+    href: "/carregadores",
+  },
+  licencas: {
+    titulo: "Windows e Office originais, ativados na loja",
+    texto:
+      "Traga o computador ao Cambuí: a equipe confere se ele roda o Windows 11, instala e ativa a licença original na hora.",
+    rotulo: "Ver licenças",
+    href: "/microsoft",
+  },
+  impressao: {
+    titulo: "Toner e cartucho para a sua impressora",
+    texto: "Diga a marca e o modelo da impressora. A loja confere o suprimento certo e combina a entrega em Campinas e região.",
+    rotulo: "Ver toner e cartucho",
+    href: "/tonner",
+  },
+  games: {
+    titulo: "Console ou controle com defeito?",
+    texto: "A bancada do Cambuí avalia PlayStation, Xbox e Nintendo Switch e manda o orçamento antes de qualquer serviço.",
+    rotulo: "Ver assistência de games",
+    href: "/assistenciagames",
+  },
   geral: {
     titulo: "Ficou com dúvida? Fale com quem monta e conserta",
     texto:
@@ -117,8 +143,12 @@ export function escolherTema(artigo: Pick<Artigo, "titulo" | "slug" | "categoria
   const tem = (...termos: string[]) => termos.some((termo) => t.includes(termo));
 
   if (tem("recuperar dados", "recuperacao de dados", "dados de hd")) return "dados";
+  if (tem("carregador", "fonte de notebook", "notebook na tomada")) return "carregadores";
   if (tem("manutencao", "assistencia", "esquenta", "conserto")) return "manutencao";
   if (tem("placa de video", "rtx", "radeon", "vram")) return "placas-de-video";
+  if (tem("toner", "impressora", "cartucho")) return "impressao";
+  if (tem("playstation", "ps5", "ps4", "xbox", "nintendo", "console")) return "games";
+  if (tem("windows", "office", "licenca")) return "licencas";
   if (tem("montagem")) return "montagem";
   if (tem("pc gamer", "fonte ideal", "pc pronto")) return "pc-gamer";
   if (tem("seminovo")) return "seminovos";
