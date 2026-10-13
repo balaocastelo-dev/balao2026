@@ -1,0 +1,306 @@
+{
+  "slug": "macbook-air-ou-macbook-pro-como-escolher",
+  "titulo": "MacBook Air ou MacBook Pro: como escolher pelo seu uso",
+  "resumo": "MacBook Air ou MacBook Pro? O Air atende estudo e escritório em silêncio; o Pro vale para trabalho pesado, mais portas e monitores. Veja como decidir.",
+  "categoria": "apple",
+  "etiquetas": [
+    "mac",
+    "macbook",
+    "notebook",
+    "memória ram"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-13T08:59:37.712Z",
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Você decidiu ir para o Mac e travou na escolha entre MacBook Air ou MacBook Pro. Os dois têm o mesmo visual de alumínio, os dois usam chips da própria Apple e, na geração atual, o modelo de entrada de cada linha traz o mesmo processador, o M5. A dúvida é natural: o que muda de verdade e para quem a diferença vale a pena?"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano mais comum é achar que o Pro é simplesmente um Air mais rápido, e que comprar o Pro é sempre a escolha segura. Não é bem assim. Para estudo, escritório e uso pessoal, o Air costuma bastar com folga. O Pro faz sentido quando o seu trabalho pede tela melhor, mais portas, mais monitores ou um chip de categoria acima. A seguir, como saber em qual grupo você está."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "O **MacBook Air com M5** não tem ventoinha, é mais leve e atende bem estudo, escritório e uso pessoal.",
+        "O **MacBook Pro** traz tela Liquid Retina XDR com taxa de até 120 Hz, mais portas (incluindo HDMI e leitor de cartão SD) e a opção dos chips M5 Pro e M5 Max.",
+        "No Mac, **a memória é escolhida na compra** e não se troca depois; o armazenamento também é definido na configuração. Decida pensando em alguns anos.",
+        "Se o trabalho é pesado e contínuo (vídeo, 3D, IA local), o Pro com M5 Pro ou M5 Max é o caminho; para o resto, o Air."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que os dois têm em comum na geração M5"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Segundo a página de comparação da Apple, o MacBook Air de 13 e de 15 polegadas e o MacBook Pro de 14 polegadas de entrada usam o mesmo chip M5. Na prática, isso quer dizer que, para tarefas que duram poucos minutos (abrir programas, editar uma planilha, tratar algumas fotos), a sensação de velocidade dos dois é parecida. A diferença aparece em outros pontos."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A memória de partida também é a mesma: 16 GB nos dois, configuráveis até 32 GB no Air e no Pro de 14 polegadas com M5. A Apple chama essa memória de unificada, porque o processador e a parte gráfica do chip usam o mesmo conjunto. Ela fica junto do chip e, por isso, não dá para ampliar depois da compra."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Os dois carregam pela porta MagSafe 3 ou pelas portas USB-C, e o Air com M5 chegou ao mercado em março de 2026, já com o macOS Tahoe. Mas o fato de o chip ser o mesmo no modelo de entrada não significa que os dois aguentam o mesmo tipo de trabalho pelo mesmo tempo, como você vai ver na seção sobre refrigeração."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "As diferenças que pesam na escolha"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A tabela abaixo junta o que a Apple informa nas fichas técnicas dos modelos atuais. Ela não traz números de desempenho, e sim o que cada aparelho tem: tela, portas, quantos monitores aceita, até quanta memória vai e a autonomia declarada pelo fabricante."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Item",
+        "MacBook Air (M5)",
+        "MacBook Pro 14 (M5)",
+        "MacBook Pro 14 e 16 (M5 Pro ou M5 Max)"
+      ],
+      "linhas": [
+        [
+          "Tamanhos de tela",
+          "13,6 e 15,3 polegadas",
+          "14,2 polegadas",
+          "14,2 e 16,2 polegadas"
+        ],
+        [
+          "Tipo de tela",
+          "Liquid Retina, 500 nits",
+          "Liquid Retina XDR (mini-LED), até 120 Hz",
+          "Liquid Retina XDR (mini-LED), até 120 Hz"
+        ],
+        [
+          "Refrigeração",
+          "Passiva, sem ventoinha",
+          "Ativa, com ventoinha",
+          "Ativa, com ventoinha"
+        ],
+        [
+          "Memória",
+          "16 GB a 32 GB",
+          "16 GB a 32 GB",
+          "24 GB a 128 GB, conforme o chip"
+        ],
+        [
+          "Armazenamento inicial",
+          "512 GB",
+          "1 TB",
+          "1 TB (M5 Pro) ou 2 TB (M5 Max)"
+        ],
+        [
+          "Portas",
+          "2 Thunderbolt 4, MagSafe 3, fone",
+          "3 Thunderbolt 4, HDMI, SD, MagSafe 3, fone",
+          "3 Thunderbolt 5, HDMI, SD, MagSafe 3, fone"
+        ],
+        [
+          "Monitores externos",
+          "Até 2",
+          "Até 2",
+          "Até 3 (M5 Pro) ou até 4 (M5 Max)"
+        ],
+        [
+          "Bateria (até, segundo a Apple)",
+          "18 horas",
+          "24 horas",
+          "De 20 a 24 horas, conforme o modelo"
+        ],
+        [
+          "Peso",
+          "1,23 kg (13) e 1,51 kg (15)",
+          "1,55 kg",
+          "De 1,60 kg a 2,15 kg"
+        ]
+      ],
+      "titulo": "MacBook Air e MacBook Pro da geração M5, lado a lado",
+      "colunaDestaque": 1,
+      "fonte": {
+        "nome": "Apple — Compare os modelos de Mac e fichas técnicas do MacBook Air e do MacBook Pro",
+        "url": "https://www.apple.com/mac/compare/"
+      },
+      "nota": "A linha de refrigeração vem da Apple (Air) e do comparativo do AppleInsider (Pro). Autonomia é a declarada pela Apple para reprodução de vídeo, em condições de laboratório; no uso real ela varia. Nits medem o brilho da tela."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Repare em três linhas. A de **refrigeração** explica por que o Air é silencioso e por que o Pro sustenta trabalho pesado por mais tempo. A de **portas** decide se você vai viver com adaptadores. E a de **memória** mostra que, se o seu trabalho pede mais de 32 GB, só o Pro com M5 Pro ou M5 Max resolve."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Sem ventoinha ou com ventoinha: o que isso muda no dia a dia"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Apple descreve o MacBook Air com M5 como um projeto fino, leve e completamente silencioso, sem ventoinha. É uma vantagem real: nenhum ruído em sala de aula, em reunião ou à noite, e nenhuma entrada de ar puxando poeira para dentro. Para o uso comum, em que o chip trabalha forte por alguns segundos e depois descansa, isso não faz falta."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O limite aparece no esforço longo. Sem ventoinha, o calor sai só pelo corpo de alumínio, e o chip reduz o ritmo quando esquenta para se proteger. É um comportamento normal, não defeito. Quem exporta vídeo longo, renderiza projeto 3D ou roda modelo de IA por muito tempo sente essa diferença, e é para esse uso que a refrigeração ativa do Pro, com ventoinha, existe: ela ajuda o chip a manter o ritmo por mais tempo."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas não exagere o problema: exportar um vídeo curto de celular, editar fotos ou rodar algumas abas pesadas no navegador está dentro do que o Air faz bem. Se o seu trabalho pesado acontece de vez em quando, e não o dia inteiro, o Air continua sendo uma escolha razoável."
+    },
+    {
+      "tipo": "destaque",
+      "tom": "dica",
+      "texto": "Pense no seu trabalho mais pesado. Ele dura minutos ou horas seguidas? Se dura minutos, o Air atende. Se dura horas e se repete toda semana, o Pro tende a compensar.",
+      "titulo": "Uma pergunta que resolve boa parte da dúvida"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Tela, portas e monitores: quando o Pro vale pelo conjunto"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A tela do Pro é do tipo Liquid Retina XDR, com iluminação mini-LED e tecnologia ProMotion, que ajusta a taxa de atualização até 120 Hz. Na prática, a rolagem fica mais suave e o brilho em conteúdo HDR vai bem além do Air. Para quem trata foto e vídeo com cor e contraste, essa diferença é de trabalho, não de enfeite."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "As portas também contam. O Air tem duas portas Thunderbolt 4 (USB-C), MagSafe 3 e entrada de fone. O Pro acrescenta uma terceira porta USB-C, uma saída HDMI e o leitor de cartão SD. Quem descarrega cartão de câmera ou liga projetor toda semana economiza adaptadores com o Pro. Se você ainda compara o Mac com notebooks Windows, veja também nosso guia de [notebook para estudar e trabalhar](/blog/notebook-para-estudar-e-trabalhar)."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Em monitores externos, o Air e o Pro de 14 polegadas com M5 aceitam até dois. Com M5 Pro, o Pro chega a três; com M5 Max, a quatro. Se você trabalha com uma mesa de três telas, essa linha decide sozinha. Mas, para um monitor na mesa de casa, qualquer um dos dois atende."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "notebooks"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quanto de memória e de armazenamento escolher"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Esta é a decisão mais importante, porque no Mac não há volta. A memória fica junto do chip e não se troca, e o armazenamento também é definido na configuração do aparelho. Comprar justo hoje pode virar aperto daqui a três anos, quando os programas e o sistema estiverem mais exigentes."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": false,
+      "itens": [
+        "**Estudo, escritório e navegação:** 16 GB de memória costumam bastar. Considere 24 GB se você mantém muitos programas abertos ao mesmo tempo.",
+        "**Foto, design e edição de vídeo leve:** 24 GB a 32 GB dão mais folga. O armazenamento de 1 TB ajuda quem guarda projetos no próprio aparelho.",
+        "**Vídeo pesado, 3D, programação com máquinas virtuais:** o Pro com M5 Pro, a partir de 24 GB, com espaço para ir a 36 GB ou mais.",
+        "**IA rodando no próprio computador:** a memória limita o tamanho do modelo que cabe. Aqui o Pro com M5 Max, que vai até 128 GB, é o que mais abre possibilidades."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se você está no meio do caminho entre duas faixas, suba uma. É mais sensato do que gastar com um chip maior e ficar com pouca memória. Para entender por que a memória pesa tanto em inteligência artificial, leia o nosso guia sobre [computador para rodar IA em casa](/blog/que-computador-preciso-para-rodar-ia-em-casa)."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Qual escolher pelo seu uso"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Com tudo isso na mesa, a escolha fica mais simples. Os prós e contras abaixo resumem o que pesa a favor de ficar no Air e o que pesa a favor de subir para o Pro."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "Silencioso, sem ventoinha e sem entrada de poeira.",
+        "Mais leve, principalmente o de 13 polegadas.",
+        "O mesmo chip M5 do Pro de entrada, suficiente para estudo e escritório.",
+        "Versão de 15 polegadas para quem quer tela maior sem o peso do Pro de 16."
+      ],
+      "contras": [
+        "Reduz o ritmo em trabalho pesado e longo, por não ter ventoinha.",
+        "Só duas portas USB-C: HDMI e cartão SD pedem adaptador.",
+        "Tela sem mini-LED e sem a taxa de 120 Hz.",
+        "Memória limitada a 32 GB."
+      ],
+      "titulo": "Ficar no MacBook Air"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Fica no **Air** quem estuda, trabalha com documentos, navega, faz reuniões e edita fotos ou vídeos curtos. Vai para o **Pro com M5** quem quer a tela XDR e as portas extras, mas não precisa de mais memória. E vai para o **Pro com M5 Pro ou M5 Max** quem edita vídeo longo, trabalha com 3D, roda IA local ou precisa de três ou quatro monitores."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "E se o orçamento não fecha com o modelo novo? Um Mac seminovo de geração anterior pode atender bem, desde que você confira a bateria, a memória e o armazenamento antes de levar. Também vale saber que a escolha de tamanho é independente: o Air de 15 polegadas é uma alternativa para quem quer tela grande e não precisa do Pro."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Antes de comprar o seu Mac em Campinas"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática fica no Cambuí, em Campinas, e você pode ver o computador ligado e testar antes de pagar. Para comparar opções e tirar dúvidas sobre configuração, veja a seção de [notebooks](/notebooks) e a de [seminovos](/seminovos). Se o seu trabalho é de alto desempenho, a seleção [premium](/premium) reúne máquinas pensadas para isso."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Já tem um Mac e quer saber se ele ainda dá conta, ou se precisa de conserto antes de decidir pela troca? A [assistência de iPhone, iPad e Mac](/reparoapple) faz diagnóstico, limpeza e troca de peça no mesmo endereço. Em resumo: Air para o dia a dia, Pro quando o trabalho pesado é rotina."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "apple"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Dá para aumentar a memória do MacBook depois?",
+      "resposta": "Não. A memória unificada fica junto do chip e é definida na compra. Por isso vale escolher pensando em alguns anos de uso, e não só no que você precisa hoje."
+    },
+    {
+      "pergunta": "O MacBook Air esquenta por não ter ventoinha?",
+      "resposta": "Ele aquece em trabalho pesado e longo e, nesse caso, reduz o ritmo para se proteger, o que é normal. No uso de estudo e escritório isso raramente aparece. Quem faz trabalho pesado por horas costuma se dar melhor com o Pro."
+    },
+    {
+      "pergunta": "O MacBook Air liga em dois monitores?",
+      "resposta": "Sim. Segundo a Apple, o Air com M5 aceita até dois monitores externos, além da própria tela. Para três ou quatro, é preciso o MacBook Pro com M5 Pro ou M5 Max."
+    },
+    {
+      "pergunta": "Air de 15 polegadas ou Pro de 14 polegadas?",
+      "resposta": "Depende do que pesa mais para você. O Air de 15 dá tela maior e é mais leve. O Pro de 14 traz tela XDR com 120 Hz, mais portas e refrigeração com ventoinha, em corpo menor."
+    },
+    {
+      "pergunta": "Para editar vídeo, o Air serve?",
+      "resposta": "Para vídeos curtos e edições ocasionais, normalmente serve. Se você edita vídeos longos com frequência, a refrigeração ativa e as opções de memória do Pro fazem diferença ao longo das horas de trabalho."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Apple — Compare os modelos de Mac",
+      "url": "https://www.apple.com/mac/compare/",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Apple — MacBook Air (M5): especificações técnicas",
+      "url": "https://www.apple.com/macbook-air/specs/",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Apple — MacBook Pro: especificações técnicas",
+      "url": "https://www.apple.com/macbook-pro/specs/",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Apple Newsroom — Apple introduces the new MacBook Air with M5",
+      "url": "https://www.apple.com/newsroom/2026/03/apple-introduces-the-new-macbook-air-with-m5/",
+      "data": "3 de março de 2026"
+    },
+    {
+      "nome": "AppleInsider — M5 13-inch MacBook Air vs M5 14-inch MacBook Pro compared",
+      "url": "https://appleinsider.com/articles/26/03/06/m5-13-inch-macbook-air-vs-m5-14-inch-macbook-pro----compared",
+      "data": "6 de março de 2026"
+    },
+    {
+      "nome": "iGeeksBlog — What is unified memory on Mac and how it works",
+      "url": "https://www.igeeksblog.com/what-is-unified-memory-on-mac/",
+      "data": "consultado em outubro de 2026"
+    }
+  ]
+}
