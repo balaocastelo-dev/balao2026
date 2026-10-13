@@ -9,7 +9,12 @@
     "manutenção",
     "carregador"
   ],
-  "capa": null,
+  "capa": {
+    "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/posso-deixar-o-notebook-na-tomada-o-tempo-todo-e31d8e6d.jpg",
+    "alt": "Notebook fechado sobre uma mesa de trabalho, ligado ao carregador na tomada, com luz suave da janela",
+    "largura": 1600,
+    "altura": 900
+  },
   "publicadoEm": "2026-10-12T21:12:06.804Z",
   "formato": "dica",
   "roteiro": {
