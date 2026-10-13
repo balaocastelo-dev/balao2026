@@ -391,7 +391,7 @@ const ehFotoDeFora = (u: unknown): u is string => typeof u === "string" && /^htt
 export function ehCartuchoCompativel(nome: string): boolean {
   const n = ` ${semAcento(nome).replace(/[^a-z0-9]+/g, " ")} `;
   if (!ehSuprimento(nome) || / (toner|fotocondutor|cilindro) /.test(n)) return false;
-  return ehCompativel(nome) || / (evolut|chinamate|ollix|byqualy|masterprint) /.test(n);
+  return ehCompativel(nome) || / (evolut|chinamate|ollix|byqualy|masterprint|kora|formulabs) /.test(n);
 }
 
 /** Produto da Kyte (de qualquer fornecedor) no formato que o resto do sistema entende. */

@@ -14,6 +14,7 @@ import { invalidarCacheProdutos, invalidarCacheCategorias } from "@/lib/cache";
 import {
   acrescentarCategorias,
   adiarFontesDoSite,
+  atualizarFonte,
   buscarFonte,
   concluirPassada,
   destravarFonte,
@@ -24,6 +25,14 @@ import {
   type Fonte,
 } from "./banco";
 import { lerPaginaDaCategoria } from "./kabum";
+import { fotosTemMarca } from "./marca-dagua";
+import { itensDaTob, lerCatalogoTob, PREFIXO_TOB, SITE_TOB, slugDoCaminho } from "./tob";
+
+/** Fontes que o servidor lê sozinho (agendador e botão "Ler agora"). */
+export const SITES_LIDOS_PELO_SERVIDOR = ["kabum", SITE_TOB];
+
+/** Produtos gravados por vez na leitura da TOB (catálogo inteiro numa chamada). */
+const LOTE_TOB = 150;
 
 /** Pausa entre uma página e a próxima. */
 const PAUSA_ENTRE_PAGINAS_MS = 1500;
@@ -76,11 +85,13 @@ export async function lerFonteAte(fonteId: string, limiteMs: number): Promise<Re
     mensagem: null,
   };
 
-  // Só a KaBuM! é lida pelo servidor. Fornecedor com proteção contra robôs
-  // (TechSupri, na Kyte) é atualizado por importação, pelo navegador da loja.
-  if (fonte.site !== "kabum") {
+  // A KaBuM! e a TOB são lidas pelo servidor. Fornecedor com proteção contra
+  // robôs (TechSupri e outros na Kyte) é atualizado por importação, pelo
+  // navegador da loja.
+  if (!SITES_LIDOS_PELO_SERVIDOR.includes(fonte.site)) {
     return { ...resumo, estado: "erro", mensagem: "Esta fonte é atualizada por importação, não pela leitura automática." };
   }
+  if (fonte.site === SITE_TOB) return lerFonteTob(fonte, resumo);
 
   if (!(await travarFonte(fonte.id, 90))) {
     return { ...resumo, estado: "ocupada", mensagem: "Esta fonte já está sendo lida agora." };
@@ -185,13 +196,91 @@ export async function lerFonteAte(fonteId: string, limiteMs: number): Promise<Re
 }
 
 /**
+ * Lê o catálogo da TOB inteiro (uma chamada) e grava numa passada só.
+ * Na primeira leitura confere se as fotos têm marca d'água (como na Kyte).
+ */
+async function lerFonteTob(fonteAntes: Fonte, resumo: ResumoDoPasso): Promise<ResumoDoPasso> {
+  let fonte = fonteAntes;
+  const slug = slugDoCaminho(fonte.caminho);
+  if (!slug) return { ...resumo, estado: "erro", mensagem: "O link desta fonte não tem o representante (/c/…)." };
+  if (!(await travarFonte(fonte.id, 120))) {
+    return { ...resumo, estado: "ocupada", mensagem: "Esta fonte já está sendo lida agora." };
+  }
+  let mudouAlgo = false;
+  try {
+    const inicio = new Date().toISOString();
+    const leitura = await lerCatalogoTob(slug);
+    if (!leitura.ok) {
+      await gravarAndamento(fonte.id, {
+        passo_pagina: 0, passo_inicio: null, passo_falhas: 0,
+        ultima_tentativa_em: inicio, ultimo_status: leitura.motivo === "bloqueado" ? "bloqueado" : "erro", ultimo_erro: leitura.detalhe,
+      });
+      return { ...resumo, estado: leitura.motivo === "bloqueado" ? "bloqueada" : "erro", mensagem: `O catálogo da TOB não respondeu (${leitura.detalhe}).` };
+    }
+    const { catalogo } = leitura;
+
+    if (fonte.marca_dagua === null) {
+      const urls = [...new Set(catalogo.products.map((p) => String(p.photo || "")).filter((u) => u.startsWith("https://")))];
+      if (urls.length >= 8) {
+        try {
+          const analise = await fotosTemMarca(urls, { limite: 24 });
+          if (analise.fotos >= 6) fonte = (await atualizarFonte(fonte.id, { marca_dagua: analise.temMarca })) || fonte;
+        } catch {
+          /* fica para a próxima leitura */
+        }
+      }
+    }
+
+    const itens = itensDaTob(catalogo, {
+      prefixo: PREFIXO_TOB,
+      vendedor: fonte.fornecedor || fonte.nome,
+      urlDoCatalogo: fonte.url,
+      // Sem conferência ainda, a foto do fornecedor entra (as da TOB são limpas, conferido em 13/10).
+      usarFotoDoFornecedor: fonte.marca_dagua !== true,
+    });
+
+    for (let i = 0; i < itens.length; i += LOTE_TOB) {
+      const g = await gravarPagina(fonte, itens.slice(i, i + LOTE_TOB), inicio);
+      resumo.gravados += g.gravados;
+      resumo.novos += g.novos;
+      resumo.retidos += g.retidos;
+      mudouAlgo = mudouAlgo || g.gravados > 0;
+    }
+
+    const fim = await concluirPassada(fonte, inicio);
+    resumo.removidos = fim.removidos;
+    mudouAlgo = mudouAlgo || fim.removidos > 0;
+    await gravarAndamento(fonte.id, {
+      passo_pagina: 0, passo_inicio: null, passo_falhas: 0, passo_lidos: 0, passo_total_pag: 1,
+      ultima_coleta_em: inicio, ultima_tentativa_em: null,
+      ultimo_status: fim.suspeita ? "suspeita" : "ok",
+      ultimo_erro: fim.suspeita
+        ? `A leitura trouxe ${resumo.gravados} produtos, menos da metade dos ${fim.total} que havia. Nada foi removido.`
+        : null,
+      ultimo_total: fim.total,
+      ultimo_removidos: fim.removidos,
+    });
+    await acrescentarCategorias().catch(() => 0);
+    invalidarCacheCategorias();
+    resumo.pagina = 1;
+    resumo.totalDePaginas = 1;
+    resumo.estado = fim.suspeita ? "suspeita" : "concluida";
+    resumo.mensagem = fim.suspeita ? "A leitura veio pequena demais; nenhum produto foi removido." : null;
+    return resumo;
+  } finally {
+    await destravarFonte(fonte.id).catch(() => {});
+    if (mudouAlgo) invalidarCacheProdutos();
+  }
+}
+
+/**
  * O que o agendador roda: lê as fontes vencidas, a mais atrasada primeiro,
  * enquanto houver tempo.
  */
 export async function rodarAgendado(orcamentoMs: number): Promise<ResumoDoPasso[]> {
   const limite = Date.now() + orcamentoMs;
   const fontes = (await listarFontes())
-    .filter((f) => f.site === "kabum" && estaVencida(f))
+    .filter((f) => SITES_LIDOS_PELO_SERVIDOR.includes(f.site) && estaVencida(f))
     .sort((a, b) => {
       // Passada pela metade vem antes; depois, a que está há mais tempo sem ler.
       if ((a.passo_pagina > 0) !== (b.passo_pagina > 0)) return a.passo_pagina > 0 ? -1 : 1;
