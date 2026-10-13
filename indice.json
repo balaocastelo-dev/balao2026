@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "windows-update-certificados-2027-pc-desatualizado",
+      "titulo": "Windows Update: PC desatualizado perde as atualizações em 2027",
+      "resumo": "A Microsoft avisou em 8 de outubro que certificados do Windows Update vencem em 2027. Veja quem precisa agir e como conferir o seu computador.",
+      "categoria": "noticias",
+      "etiquetas": [
+        "windows",
+        "atualização",
+        "segurança",
+        "windows 10"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-13T15:19:16.763Z",
+      "minutos": 4
+    },
+    {
       "slug": "macbook-air-ou-macbook-pro-como-escolher",
       "titulo": "MacBook Air ou MacBook Pro: como escolher pelo seu uso",
       "resumo": "MacBook Air ou MacBook Pro? O Air atende estudo e escritório em silêncio; o Pro vale para trabalho pesado, mais portas e monitores. Veja como decidir.",
@@ -174,5 +189,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-13T08:59:38.678Z"
+  "atualizadoEm": "2026-10-13T15:19:17.505Z"
 }

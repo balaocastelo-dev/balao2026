@@ -1,0 +1,151 @@
+{
+  "slug": "windows-update-certificados-2027-pc-desatualizado",
+  "titulo": "Windows Update: PC desatualizado perde as atualizações em 2027",
+  "resumo": "A Microsoft avisou em 8 de outubro que certificados do Windows Update vencem em 2027. Veja quem precisa agir e como conferir o seu computador.",
+  "categoria": "noticias",
+  "etiquetas": [
+    "windows",
+    "atualização",
+    "segurança",
+    "windows 10"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-13T15:19:16.763Z",
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Em 8 de outubro de 2026, a Microsoft publicou um aviso no centro de mensagens do Windows: os certificados que o computador usa para confirmar que está falando com o Windows Update de verdade vencem em 17 de maio e em 19 de junho de 2027. O computador que não tiver recebido os certificados novos até lá perde o acesso ao Windows Update."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que isso atinge todo mundo. Não atinge: segundo a Microsoft, quem usa uma versão do Windows com suporte e instala as atualizações mensais recebe os certificados novos sem fazer nada. O risco está no computador parado há meses sem atualizar e no que roda uma versão que já saiu de suporte."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que a Microsoft anunciou"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Certificado digital é uma espécie de documento de identidade que o Windows confere antes de baixar uma atualização. Os atuais têm data de validade, e a Microsoft já distribui os substitutos dentro das atualizações mensais. O aviso diz qual atualização cada versão precisa ter instalada para receber os novos."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Versão do Windows",
+        "O que é preciso",
+        "Prazo"
+      ],
+      "linhas": [
+        [
+          "Windows 11 25H2 ou mais nova",
+          "Nada",
+          "Não se aplica"
+        ],
+        [
+          "Windows 11 24H2",
+          "Atualização de segurança de setembro de 2025 ou posterior",
+          "Antes de 19 de junho de 2027"
+        ],
+        [
+          "Outras versões com suporte do Windows 11 e do Windows 10",
+          "Atualização de segurança de julho de 2026 ou posterior",
+          "Antes de 19 de junho de 2027"
+        ],
+        [
+          "Windows 10 Enterprise 2019 LTSC",
+          "Atualização de segurança de julho de 2026 ou posterior",
+          "Antes de 17 de maio de 2027"
+        ],
+        [
+          "Versões sem suporte",
+          "Migrar para uma versão com suporte",
+          "Não se aplica"
+        ]
+      ],
+      "titulo": "O que cada versão precisa ter instalado",
+      "fonte": {
+        "nome": "Centro de mensagens do Windows — Microsoft, 8 de outubro de 2026",
+        "url": "https://learn.microsoft.com/en-us/windows/release-health/windows-message-center"
+      }
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Microsoft informa ainda que a mudança não vale para computadores de empresa que recebem atualizações por um servidor interno (o WSUS). A Help Net Security acrescenta que um sistema com suporte que perder o prazo pode voltar a receber atualizações depois de instalar a atualização exigida, baixada do Catálogo do Microsoft Update."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que isso muda para você"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem tem Windows 11 em dia:** nada muda. Na versão 25H2 ou mais nova, ou recebendo as atualizações do mês normalmente, os certificados chegam sozinhos. Só não adie as atualizações por meses."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem usa um computador parado ou esquecido:** aquele PC do escritório que fica desligado, ou o notebook guardado na gaveta, é o caso mais exposto. Ligue, conecte à internet e deixe o Windows Update terminar antes de 2027. Se a atualização trava ou não aparece, a [assistência técnica](/manutencao) consegue ver o que está impedindo."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem ainda está no Windows 10:** a tabela só cobre as versões do Windows 10 que continuam com suporte. Um Windows 10 que deixou de receber atualizações cai na última linha, e a orientação da Microsoft é migrar. O guia sobre [até quando o Windows 10 tem atualização](/blog/windows-10-ate-quando-tem-atualizacao) explica as saídas, e a notícia sobre o [fim do suporte do Windows 11 24H2](/blog/windows-11-24h2-fim-do-suporte-13-de-outubro) ajuda quem está nessa versão."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem vai comprar um computador usado:** confira a versão do Windows e o histórico de atualizações antes de fechar negócio. Um equipamento que não aceita o Windows 11 tende a ficar sem atualização mais cedo. Nos [seminovos](/seminovos), você pode ver a máquina ligada e conferir isso antes de pagar."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como conferir o seu computador"
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "Aperte as teclas Windows e R, digite winver e confirme: a janela mostra a versão instalada.",
+        "Abra Configurações, entre em Windows Update e veja o Histórico de atualizações.",
+        "Procure uma atualização de segurança de julho de 2026 ou mais nova (de setembro de 2025 em diante, se o seu Windows 11 for 24H2).",
+        "Se não houver, clique em Verificar se há atualizações e deixe terminar, reiniciando quando pedir."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que ainda não se sabe"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O aviso não detalha quantos computadores estão nessa situação nem se haverá outro lembrete perto das datas. Se você tem dúvida sobre o seu caso, o caminho seguro é atualizar agora, com folga."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, tem assistência técnica para atualização, diagnóstico e upgrade, e vende computadores novos e seminovos. Em uma linha: computador em dia não precisa fazer nada; computador parado precisa ser atualizado antes de maio de 2027."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "upgrade"
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Windows message center: Prepare for Windows Update certificate rotation in 2027 — Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-us/windows/release-health/windows-message-center",
+      "data": "8 de outubro de 2026"
+    },
+    {
+      "nome": "Windows PCs missing key updates could lose security fixes in 2027 — Help Net Security",
+      "url": "https://www.helpnetsecurity.com/2026/10/12/microsoft-windows-update-certificate-rotation/",
+      "data": "12 de outubro de 2026"
+    },
+    {
+      "nome": "Windows Update: Outdated PCs will stop getting updates in June 2027 — Notebookcheck",
+      "url": "https://www.notebookcheck.net/Windows-Update-Outdated-PCs-will-stop-getting-updates-in-June-2027.1421432.0.html",
+      "data": "11 de outubro de 2026"
+    }
+  ]
+}
