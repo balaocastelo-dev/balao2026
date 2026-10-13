@@ -37,7 +37,17 @@ function Flutua({ item, ordem, progresso, parado }: { item: Flutuante; ordem: nu
       aria-hidden
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={item.src} alt="" loading="lazy" decoding="async" />
+      <img
+        src={item.src}
+        alt=""
+        loading="lazy"
+        decoding="async"
+        // Foto de fornecedor que não abre: o cartão some em vez de mostrar o ícone quebrado.
+        onError={(e) => {
+          const cartao = e.currentTarget.parentElement;
+          if (cartao) cartao.style.display = "none";
+        }}
+      />
     </motion.div>
   );
 }
@@ -75,7 +85,7 @@ export default function PalcoDoTopo({
   const progresso = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.4 });
 
   const girarX = useTransform(progresso, [0, 1], parado ? [4, 4] : [4, 26]);
-  const girarY = useTransform(progresso, [0, 1], parado ? [-12, -12] : [-12, -3]);
+  const girarY = useTransform(progresso, [0, 1], parado ? [-8, -8] : [-8, -2]);
   const descer = useTransform(progresso, [0, 1], parado ? [0, 0] : [0, -90]);
   const escala = useTransform(progresso, [0, 1], parado ? [1, 1] : [1, 0.92]);
   const fotoY = useTransform(progresso, [0, 1], parado ? ["0%", "0%"] : ["0%", "12%"]);
@@ -93,7 +103,7 @@ export default function PalcoDoTopo({
             <h1 id="cpt-titulo" className="cpt-titulo mt-5 text-[2.125rem] sm:text-[2.75rem] lg:text-[3.25rem]">
               {titulo}
             </h1>
-            <p className="cpt-lead mt-6">{texto}</p>
+            <p className="cpt-lead mt-6 lg:max-w-[34rem]">{texto}</p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <a

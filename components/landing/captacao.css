@@ -164,7 +164,7 @@
 
   .cpt-palco__grade {
     grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
-    gap: 3rem;
+    gap: 4.5rem;
   }
 }
 
