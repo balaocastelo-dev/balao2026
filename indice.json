@@ -2,6 +2,22 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "computador-lento-o-que-resolve-de-verdade",
+      "titulo": "Computador lento: o que resolve de verdade e o que é perda de tempo",
+      "resumo": "Computador lento tem causa: disco, memória, processador ou temperatura. Veja como descobrir qual é, o que resolve de graça e o que é perda de tempo.",
+      "categoria": "assistencia",
+      "etiquetas": [
+        "manutenção",
+        "diagnóstico",
+        "ssd",
+        "memória ram",
+        "windows"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-15T08:59:13.802Z",
+      "minutos": 10
+    },
+    {
       "slug": "windows-update-certificados-2027-pc-desatualizado",
       "titulo": "Windows Update: PC desatualizado perde as atualizações em 2027",
       "resumo": "A Microsoft avisou em 8 de outubro que certificados do Windows Update vencem em 2027. Veja quem precisa agir e como conferir o seu computador.",
@@ -199,5 +215,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-15T01:05:12.090Z"
+  "atualizadoEm": "2026-10-15T08:59:14.465Z"
 }

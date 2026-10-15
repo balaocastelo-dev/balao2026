@@ -1,0 +1,265 @@
+{
+  "slug": "computador-lento-o-que-resolve-de-verdade",
+  "titulo": "Computador lento: o que resolve de verdade e o que é perda de tempo",
+  "resumo": "Computador lento tem causa: disco, memória, processador ou temperatura. Veja como descobrir qual é, o que resolve de graça e o que é perda de tempo.",
+  "categoria": "assistencia",
+  "etiquetas": [
+    "manutenção",
+    "diagnóstico",
+    "ssd",
+    "memória ram",
+    "windows"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-15T08:59:13.802Z",
+  "seo": {
+    "titulo": "Computador lento: o que resolve e o que é perda de tempo"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Seu computador lento demora vários minutos para ficar utilizável depois de ligado, trava ao abrir o navegador e parece pensar antes de cada clique. Antes de comprar um equipamento novo ou pagar por um programa que promete deixá-lo rápido, vale entender de onde vem a lentidão. Quase sempre há uma causa principal, e ela costuma ser identificável em poucos minutos."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que lentidão se resolve com programas de otimização ou com uma formatação a cada poucos meses. Esses atalhos raramente atacam a causa. O que resolve de verdade é descobrir qual peça está no limite, seja o disco, a memória, o processador ou a refrigeração, e agir sobre ela. Este guia mostra como fazer esse diagnóstico e quando parar."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "Comece pelo **Gerenciador de Tarefas** (Ctrl + Shift + Esc): ele mostra se o gargalo é o disco, a memória ou o processador.",
+        "Desativar programas da inicialização, liberar espaço e atualizar o Windows são passos gratuitos que a própria Microsoft recomenda.",
+        "Em computador com **HD mecânico**, trocar por SSD costuma ser a mudança que o usuário mais percebe.",
+        "Limpadores de registro e programas milagrosos são perda de tempo: a Microsoft não dá suporte a eles e alerta para os riscos."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como descobrir o que está deixando o computador lento"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O diagnóstico começa no Gerenciador de Tarefas, que abre com as teclas Ctrl + Shift + Esc. Na guia **Processos** aparecem os programas abertos e quanto cada um consome de processador, memória e disco. Na guia **Desempenho**, os mesmos recursos são exibidos em gráficos, o que ajuda a ver qual deles fica no limite enquanto você trabalha."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A leitura é simples. Se o disco passa longos períodos perto de 100% enquanto o resto está folgado, o gargalo é o armazenamento. Se a memória fica quase toda ocupada com poucos programas abertos, falta memória RAM, que é a área de trabalho rápida do computador. Se o processador vive no topo mesmo parado, algum programa, às vezes indesejado, está trabalhando escondido."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Faça essa observação com o computador em uso normal, e não logo depois de ligar, quando o Windows ainda carrega serviços e atualizações. Anote o que ficou no limite e quais programas apareceram no topo da lista. Essa anotação vale também para a assistência técnica, se o problema continuar: ela encurta o diagnóstico."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "O que você vê",
+        "Causa provável",
+        "O que costuma resolver"
+      ],
+      "linhas": [
+        [
+          "Disco perto de 100% por longos períodos",
+          "HD mecânico, disco quase cheio ou disco com defeito",
+          "Liberar espaço; trocar o HD por SSD; conferir a saúde do disco"
+        ],
+        [
+          "Memória quase toda ocupada com poucos programas",
+          "Pouca memória RAM para o uso atual",
+          "Fechar abas e programas; aumentar a memória, se a máquina aceitar"
+        ],
+        [
+          "Processador alto com o computador parado",
+          "Programa em segundo plano ou software malicioso",
+          "Verificar com o Windows Security; desinstalar o que não usa"
+        ],
+        [
+          "Lentidão que piora com o tempo de uso e ventoinha barulhenta",
+          "Superaquecimento, poeira ou ventoinha com defeito",
+          "Limpeza interna e revisão da refrigeração por um técnico"
+        ]
+      ],
+      "titulo": "O que o Gerenciador de Tarefas indica",
+      "colunaDestaque": 2,
+      "nota": "O quadro resume situações comuns; um mesmo computador pode ter mais de uma causa ao mesmo tempo."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que resolve sem gastar nada"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Microsoft mantém uma página de dicas de desempenho para o Windows, e a maior parte delas não custa nada. Elas não fazem milagre em máquina muito antiga, como a própria página reconhece, mas eliminam o desperdício. Siga a ordem abaixo e observe o resultado depois de cada passo, para saber o que de fato fez diferença."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "**Reinicie de verdade.** Feche programas e abas que não está usando e reinicie pelo menu Iniciar. Computadores que só são suspensos acumulam processos por dias.",
+        "**Atualize o Windows e os drivers** em Configurações, Windows Update. As atualizações opcionais ficam em Opções avançadas.",
+        "**Desative programas da inicialização** no Gerenciador de Tarefas, guia Aplicativos de inicialização. Clique com o botão direito e escolha Desabilitar no que não precisa abrir sozinho.",
+        "**Libere espaço** em Configurações, Sistema, Armazenamento, com o Sensor de Armazenamento ou removendo arquivos temporários.",
+        "**Desinstale o que não usa** em Configurações, Aplicativos, Aplicativos instalados.",
+        "**Faça uma verificação rápida** em Segurança do Windows, Proteção contra vírus e ameaças."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Dois ajustes extras ajudam em máquinas mais modestas. Em Ajustar a aparência e o desempenho do Windows, a opção de melhor desempenho desliga animações e sombras. Em Energia, o modo de melhor desempenho deixa o processador mais solto, mas a Microsoft avisa que isso aumenta o consumo, gasta a bateria do notebook mais depressa e pode esquentar o aparelho."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se esses passos melhoraram pouco, a causa provavelmente é física: o disco, a memória ou a temperatura. Aí não adianta insistir em ajustes de software. É hora de olhar para o que está dentro do gabinete, ou de pedir para alguém olhar."
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "Se o computador ficou lento de repente, trava ao abrir arquivos ou o disco faz estalos, a lentidão pode ser sinal de falha. Faça cópia dos arquivos importantes antes de qualquer outra coisa e não rode programas de reparo por conta própria. Veja [os sinais de que o SSD está chegando ao fim](/blog/como-saber-se-o-ssd-esta-chegando-ao-fim).",
+      "titulo": "Disco lento pode ser disco morrendo"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que é perda de tempo (e às vezes risco)"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Os limpadores de registro estão no topo dessa lista. O registro é o banco de configurações do Windows, e esses programas prometem acelerar o computador apagando entradas que consideram inúteis. A Microsoft afirma, em página de suporte, que não dá suporte ao uso desses utilitários e que alterações incorretas no registro podem deixar o sistema instável a ponto de exigir reinstalação."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A mesma página faz um alerta adicional: alguns limpadores gratuitos trazem programas espiões, propaganda indesejada ou vírus. Ou seja, o programa instalado para deixar o computador mais rápido pode ser justamente o que passa a deixá-lo lento. O mesmo cuidado vale para os otimizadores que prometem dobrar a velocidade com um clique."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Formatar com frequência também entra aqui. Uma reinstalação limpa resolve quando o sistema está realmente bagunçado, mas não muda nada se o gargalo for um HD mecânico ou falta de memória: em poucas semanas a lentidão volta. Antes de formatar, faça o diagnóstico. E nunca formate sem cópia de segurança dos arquivos."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "Alguns removem arquivos temporários, o que o próprio Windows já faz pelo Sensor de Armazenamento.",
+        "Podem listar programas da inicialização, função que o Gerenciador de Tarefas já oferece."
+      ],
+      "contras": [
+        "A Microsoft não dá suporte a limpadores de registro e alerta que eles podem desestabilizar o sistema.",
+        "Versões gratuitas podem trazer programas espiões, propaganda ou vírus.",
+        "Não resolvem gargalo de disco, de memória ou de temperatura, que são as causas mais comuns.",
+        "Costumam ficar rodando em segundo plano e consumindo os mesmos recursos que prometem liberar."
+      ],
+      "titulo": "Programas de otimização e limpeza de registro"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Na prática, tudo o que esses programas fazem de útil o Windows já faz sozinho, com menos risco. Se você instalou algum e o computador piorou, desinstale-o em Aplicativos instalados e observe por alguns dias."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando a solução é uma peça: SSD, memória ou refrigeração"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O caso mais comum de computador lento que chega à bancada é a máquina que ainda usa HD mecânico. A Kingston explica que o HD lê os dados com cabeças móveis sobre discos que giram, enquanto o SSD guarda tudo em memória flash, sem partes móveis. Por isso o SSD dá acesso mais rápido a programas e arquivos, e o HD ainda fica mais lento quando os arquivos se fragmentam."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A mesma página lembra que o HD é mais sujeito a falhas mecânicas e sensível a calor, frio, impacto e vibração. Trocar o HD pelo SSD costuma ser a mudança mais perceptível em computador antigo, e o sistema e os arquivos podem ser transferidos para o disco novo. Mas, se o computador já usa SSD, a troca do disco não é o caminho."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "upgrade"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A memória é a segunda candidata. Se o Gerenciador de Tarefas mostra a memória quase toda ocupada no seu uso normal, aumentar a quantidade costuma resolver os travamentos ao alternar entre programas. Antes, confira se a placa aceita mais memória e de qual tipo; o guia sobre [como aumentar a memória RAM com segurança](/blog/como-aumentar-memoria-ram-pc) mostra o caminho."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A terceira causa é a temperatura. A Intel lista, entre os sinais de superaquecimento do processador, a frequência abaixo do esperado, a lentidão geral e o barulho excessivo das ventoinhas. Quando esquenta demais, o processador reduz a velocidade para se proteger. Poeira acumulada no dissipador, ventoinha parada e pasta térmica ressecada estão entre as causas apontadas."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Aqui está o ponto de parar. Conferir se as saídas de ar estão livres e se a ventoinha gira é seguro. Abrir notebook, trocar pasta térmica ou desmontar o dissipador já é trabalho de bancada, com risco de quebrar presilhas e cabos. E a fonte de alimentação nunca deve ser aberta em casa: ela guarda carga elétrica mesmo desligada. No notebook, [o superaquecimento tem causas próprias](/blog/por-que-notebook-esquenta-muito)."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Vale consertar ou é hora de trocar o computador"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Nem todo computador lento compensa um upgrade. Uma máquina muito antiga pode não ter onde instalar um SSD moderno, aceitar pouca memória ou não receber mais atualizações do Windows. Nesse caso, investir em peças prolonga um equipamento que vai continuar limitado. Veja também [até quando o Windows 10 recebe atualização](/blog/windows-10-ate-quando-tem-atualizacao)."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Por outro lado, um computador com processador razoável que só sofre por causa de um HD mecânico ou de pouca memória costuma ganhar anos de uso com uma troca simples. A decisão depende do que o diagnóstico mostrou, do que a placa aceita e do que você precisa fazer com a máquina."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Diagnóstico e upgrade na Balão da Informática"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se os passos gratuitos não resolveram, a [assistência técnica da Balão da Informática](/manutencao), no Cambuí, em Campinas, faz o diagnóstico, a limpeza interna, a troca de peça e o upgrade no mesmo endereço. Se o disco estiver falhando e houver arquivos importantes nele, a [recuperação de dados](/recuperacaodados) é feita pela mesma equipe."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se a conclusão for trocar de máquina, a loja vende computadores e notebooks novos e [seminovos](/seminovos), e você pode ver o equipamento ligado e testar antes de pagar. Em resumo: diagnostique antes de gastar, ignore os programas milagrosos e troque a peça que está no limite."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Formatar deixa o computador mais rápido?",
+      "resposta": "Às vezes, por um tempo. Se a causa for excesso de programas e sujeira no sistema, a reinstalação ajuda. Se o gargalo for um HD mecânico ou falta de memória, a lentidão volta em poucas semanas. Faça o diagnóstico antes e sempre guarde cópia dos arquivos."
+    },
+    {
+      "pergunta": "Programa limpador de registro funciona?",
+      "resposta": "A Microsoft não dá suporte a esses utilitários e alerta que alterações incorretas no registro podem deixar o Windows instável. Algumas versões gratuitas ainda trazem programas indesejados. O próprio Windows já remove arquivos temporários pelo Sensor de Armazenamento."
+    },
+    {
+      "pergunta": "Trocar o HD por SSD resolve qualquer lentidão?",
+      "resposta": "Resolve quando o gargalo é o disco, o caso mais comum em computadores com HD mecânico. Se a máquina já tem SSD, ou se o problema é falta de memória ou superaquecimento, a troca não ataca a causa."
+    },
+    {
+      "pergunta": "Como saber se falta memória RAM?",
+      "resposta": "Abra o Gerenciador de Tarefas com Ctrl + Shift + Esc e veja a guia Desempenho durante o uso normal. Se a memória fica quase toda ocupada com os programas que você costuma usar, aumentar a quantidade tende a ajudar, desde que a placa aceite."
+    },
+    {
+      "pergunta": "Computador lento pode ser vírus?",
+      "resposta": "Pode. Programas maliciosos consomem processador e disco escondidos. Faça uma verificação rápida em Segurança do Windows e desinstale programas que você não reconhece ou não instalou."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Microsoft — Tips to improve PC performance in Windows",
+      "url": "https://support.microsoft.com/en-us/help/4002019",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Microsoft — Microsoft support policy for the use of registry cleaning utilities",
+      "url": "https://support.microsoft.com/en-us/topic/microsoft-support-policy-for-the-use-of-registry-cleaning-utilities-0485f4df-9520-3691-2461-7b0fd54e8b3a",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Kingston — SSD vs HDD: differences",
+      "url": "https://www.kingston.com/en/blog/personal-storage/ssd-vs-hdd-differences",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Intel — Overheating Symptoms and Troubleshooting for Intel Boxed Processors",
+      "url": "https://www.intel.com/content/www/us/en/support/articles/000005791.html",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "HP — How to speed up a slow PC",
+      "url": "https://www.hp.com/us-en/tech-takes/desktops/troubleshooting/how-to-speed-up-a-slow-pc.html",
+      "data": "consultado em outubro de 2026"
+    }
+  ]
+}
