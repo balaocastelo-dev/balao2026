@@ -1,0 +1,104 @@
+/*
+ * Identidade do Overclock: grafite, laranja de "temperatura de processador" e
+ * verde de "OK". Não é a cara da loja Balão — é o produto.
+ */
+
+.raiz {
+  --oc-fundo: #1c1f25;
+  --oc-painel: #252930;
+  --oc-painel-2: #2e333b;
+  --oc-linha: #424854;
+  --oc-texto: #f3f1ec;
+  --oc-suave: #c2c6ce;
+  --oc-laranja: #ff7a1f;
+  --oc-laranja-claro: #ff9a52;
+  --oc-amarelo: #ffc845;
+  --oc-verde: #4fe08f;
+
+  background: var(--oc-fundo);
+  color: var(--oc-texto);
+  font-family: var(--fonte-oc-texto), system-ui, sans-serif;
+  font-size: 1.1875rem; /* 19px no celular: público com mais de 40 anos */
+  line-height: 1.55;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (min-width: 768px) {
+  .raiz {
+    font-size: 1.25rem;
+  }
+}
+
+.raiz ::selection {
+  background: var(--oc-laranja);
+  color: var(--oc-fundo);
+}
+
+.raiz :focus-visible {
+  outline: 3px solid var(--oc-amarelo);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* Títulos: Archivo larga e pesada, como a etiqueta de uma peça. */
+.titulo {
+  font-family: var(--fonte-oc-titulo), system-ui, sans-serif;
+  font-stretch: 125%;
+  font-variation-settings: "wdth" 125;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  line-height: 1.04;
+  text-wrap: balance;
+}
+
+.numero {
+  font-family: var(--fonte-oc-titulo), system-ui, sans-serif;
+  font-stretch: 112%;
+  font-variation-settings: "wdth" 112;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.texto {
+  max-width: 62ch;
+  text-wrap: pretty;
+}
+
+/* Faixa de temperatura: frio (verde) → quente (laranja). */
+.escalaTermica {
+  background: linear-gradient(90deg, var(--oc-verde) 0%, var(--oc-amarelo) 55%, var(--oc-laranja) 100%);
+}
+
+/* Trilhas de placa, bem apagadas, só no topo. */
+.trilhas {
+  background-image:
+    linear-gradient(var(--oc-linha) 1px, transparent 1px),
+    linear-gradient(90deg, var(--oc-linha) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 70% 60% at 70% 20%, black 0%, transparent 70%);
+  opacity: 0.22;
+}
+
+.perguntas summary {
+  list-style: none;
+}
+.perguntas summary::-webkit-details-marker {
+  display: none;
+}
+.perguntas details[open] .seta {
+  transform: rotate(45deg);
+}
+.seta {
+  transition: transform 0.2s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .raiz *,
+  .raiz *::before,
+  .raiz *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
