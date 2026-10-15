@@ -67,6 +67,7 @@ export default function Footer() {
               <li><Link href="/especialidades" className="hover:text-[#E60012] transition-colors">Especialidades</Link></li>
               <li><Link href="/regiao" className="hover:text-[#E60012] transition-colors">Atendimento Regional</Link></li>
               <li><Link href="/urgente" className="hover:text-[#E60012] transition-colors">Atendimento Urgente</Link></li>
+              <li><Link href="/overclock" className="hover:text-[#E60012] transition-colors">Sistema para Lojas de Informática</Link></li>
             </ul>
           </div>
 

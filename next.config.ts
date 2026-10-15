@@ -51,6 +51,9 @@ const nextConfig: NextConfig = {
         destination: "/blog/:slug",
         permanent: true,
       },
+      // O produto white label ganhou nome: Overclock. Quem tiver o endereço
+      // antigo (/whitelabel) cai na página de vendas dele.
+      { source: "/whitelabel", destination: "/overclock", statusCode: 301 },
       // A administração inteira mora em /painel. Os endereços de antes
       // (/admin, /crm, /arena/admin…) continuam valendo e levam para lá.
       // Temporário (307) de propósito: são endereços internos, e um 308 fica

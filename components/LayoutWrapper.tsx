@@ -33,7 +33,10 @@ export default function LayoutWrapper({
   // Página de vendas dos sistemas: tem cabeçalho, rodapé e barra de compra
   // próprios. O menu, o rodapé da loja e o botão flutuante de WhatsApp
   // competiriam com o único botão que importa ali.
-  const isPaginaDeVendas = pathname === "/sistemasdeia" || pathname === "/macbookm5";
+  // O Overclock (/overclock) é o sistema vendido para outras lojas: tem
+  // identidade própria e não leva nada da cara da loja Balão.
+  const isPaginaDeVendas =
+    pathname === "/sistemasdeia" || pathname === "/macbookm5" || pathname === "/overclock";
   // O painel inteiro (/painel e tudo embaixo dele) é tela de trabalho: tem o
   // próprio menu e rola por dentro, sem o rodapé nem o botão da loja.
   const isPainel = pathname === "/painel" || pathname.startsWith("/painel/");
