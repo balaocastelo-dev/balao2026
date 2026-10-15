@@ -63,7 +63,12 @@
         "segurança",
         "fim de suporte"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/windows-11-24h2-fim-do-suporte-13-de-outubro-8957057a.jpg",
+        "alt": "Notebook aberto sobre uma mesa de escritório, visto de lado, com a tela apagada e uma xícara ao lado",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-10-12T15:05:39.573Z",
       "minutos": 3
     },
@@ -189,5 +194,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-13T15:19:17.505Z"
+  "atualizadoEm": "2026-10-15T01:03:20.903Z"
 }
