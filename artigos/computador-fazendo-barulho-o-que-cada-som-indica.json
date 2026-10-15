@@ -1,0 +1,188 @@
+{
+  "slug": "computador-fazendo-barulho-o-que-cada-som-indica",
+  "titulo": "Computador fazendo barulho: o que cada som costuma indicar",
+  "resumo": "Chiado, estalo, zumbido ou bipe: cada barulho do computador aponta para uma peça. Veja o que cada som costuma indicar e quando desligar na hora.",
+  "categoria": "assistencia",
+  "etiquetas": [
+    "diagnóstico",
+    "manutenção",
+    "ventoinha",
+    "hd"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-15T20:57:01.089Z",
+  "formato": "dica",
+  "roteiro": {
+    "fala": "Computador fazendo barulho? Repare no tipo de som. Chiado de ventoinha que aumenta quando você usa muito costuma ser poeira ou calor, e uma limpeza resolve. Ventoinha raspando ou batendo pede troca da peça. Agora, estalo ou rangido no HD é sinal de alerta: copie seus arquivos antes de qualquer coisa. E zumbido vindo da fonte, desligue e leve a um técnico. Nunca abra a fonte em casa.",
+    "titulo": "O que o barulho do PC quer dizer",
+    "destaques": [
+      "Chiado: poeira ou calor",
+      "Ventoinha raspando: troca",
+      "HD estalando: backup já",
+      "Fonte zumbindo: desligue"
+    ],
+    "legenda": "Chiado, estalo, zumbido ou bipe: cada barulho do computador aponta para uma peça diferente. Veja o que cada som costuma indicar e quando desligar na hora. A dica completa está no blog.",
+    "hashtags": [
+      "computador",
+      "manutencao",
+      "hd",
+      "ventoinha",
+      "informatica",
+      "campinas"
+    ]
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Computador fazendo barulho quase sempre está dizendo de onde vem o problema. Um chiado de ar que sobe e desce, um estalo repetido, um zumbido elétrico e uma sequência de bipes ao ligar são sons diferentes, de peças diferentes, e pedem atitudes diferentes. Saber reconhecer cada um ajuda a decidir se basta uma limpeza ou se é hora de desligar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é tratar todo barulho como ventoinha suja. Muitas vezes é isso mesmo, e o conserto é simples. Mas um estalo no HD ou um zumbido na fonte não melhoram com limpeza, e insistir pode custar os arquivos ou outra peça. A regra prática é: identifique o som primeiro, mexa depois."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "Ventoinha mais alta em uso pesado é normal; **barulho alto e constante** costuma ser poeira, calor ou ventoinha com defeito.",
+        "Ventoinha **raspando ou chacoalhando** indica peça solta ou gasta, que precisa de troca.",
+        "**Estalo ou rangido no HD** é sinal de desgaste mecânico: faça cópia dos arquivos antes de tudo.",
+        "**Zumbido na fonte** ou no carregador: desligue da tomada e leve a um técnico."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como identificar cada barulho"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Para descobrir a origem, a Dell sugere isolar o som: desligue o computador, desconecte os acessórios que não são essenciais, ligue de novo e veja se o barulho continua. Depois, escute de perto o gabinete ou a lateral do notebook, sem abrir nada. A tabela resume os sons mais comuns, com base nas páginas de suporte da Dell e da Lenovo."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "O som",
+        "De onde costuma vir",
+        "O que fazer"
+      ],
+      "linhas": [
+        [
+          "Chiado de ar que aumenta em uso pesado",
+          "Ventoinha trabalhando contra calor, poeira ou processador ocupado",
+          "Limpar as saídas de ar e fechar programas desnecessários"
+        ],
+        [
+          "Raspado, rangido ou chacoalhar na ventoinha",
+          "Ventoinha gasta, solta ou danificada",
+          "Trocar a ventoinha; o uso contínuo pode superaquecer o computador"
+        ],
+        [
+          "Estalo repetido ou rangido no disco",
+          "HD com desgaste mecânico",
+          "Copiar os arquivos importantes na hora"
+        ],
+        [
+          "Zumbido elétrico na fonte ou no carregador",
+          "Possível problema elétrico na fonte",
+          "Desligar da tomada e levar a um técnico"
+        ],
+        [
+          "Bipes ao ligar, sem imagem",
+          "Aviso da placa-mãe sobre falha na inicialização",
+          "Contar os bipes e consultar o manual da placa"
+        ],
+        [
+          "Chiado ou estalo nas caixas de som",
+          "Driver desatualizado ou interferência",
+          "Atualizar os drivers de áudio"
+        ]
+      ],
+      "titulo": "O que cada som costuma indicar",
+      "fonte": {
+        "nome": "Suporte da Dell e da Lenovo",
+        "url": "https://www.dell.com/support/contents/en-hk/article/product-support/self-support-knowledgebase/fix-common-issues/common-noises-from-computer"
+      }
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Os bipes merecem uma observação. Eles são a forma de a placa-mãe avisar que algo falhou antes de o sistema carregar, e a quantidade de bipes aponta a peça, como memória ou vídeo. Como o significado de cada sequência depende da placa, anote a sequência exata e confira no manual do seu modelo antes de trocar qualquer coisa."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que dá para fazer em casa e onde parar"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Quando o barulho é da ventoinha e vem junto com calor, Dell e Lenovo recomendam o mesmo começo: desligar, tirar da tomada e soprar as saídas de ar com ar comprimido, sem aspirador, que pode gerar eletricidade estática. Notebook vai sobre mesa firme, nunca sobre cama ou almofada, que tapam a ventilação. Se o calor é o problema, veja também [por que o notebook esquenta muito](/blog/por-que-notebook-esquenta-muito)."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "Limpar as saídas de ar por fora, com o aparelho desligado",
+        "Fechar programas e tirar da inicialização o que não precisa",
+        "Mudar o notebook para uma superfície firme e ventilada",
+        "Atualizar drivers quando o chiado vem das caixas de som"
+      ],
+      "contras": [
+        "Abrir a fonte de alimentação ou o carregador, que guardam carga elétrica",
+        "Continuar usando um HD que estala sem ter cópia dos arquivos",
+        "Ignorar ventoinha raspando, que pode levar a superaquecimento",
+        "Abrir o notebook sem experiência, com risco de quebrar travas e cabos"
+      ],
+      "titulo": "Resolver em casa ou levar à assistência"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A dica não vale quando o som vem do disco. A Dell avisa que HD barulhento pode falhar em breve, e cada hora ligado é um risco. Copie o que importa, desligue e, se os arquivos já não abrem, não fique ligando e desligando: o caso é de [recuperação de dados](/recuperacaodados). Se o seu disco é SSD, que não faz barulho, veja [como saber se ele está chegando ao fim](/blog/como-saber-se-o-ssd-esta-chegando-ao-fim)."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, faz o diagnóstico, a limpeza interna e a troca de ventoinha, disco ou fonte na [assistência técnica](/manutencao). Em uma linha: chiado pede limpeza, raspado pede troca, e estalo ou zumbido pedem que você desligue antes de qualquer coisa."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "dados"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "É normal a ventoinha ficar mais alta em jogo ou programa pesado?",
+      "resposta": "Sim. A ventoinha acelera quando as peças esquentam, e a Dell considera esse aumento esperado em uso pesado. O sinal de problema é o barulho alto o tempo todo, mesmo com o computador parado, ou junto com desligamentos."
+    },
+    {
+      "pergunta": "O HD está fazendo um estalo de vez em quando. Posso continuar usando?",
+      "resposta": "Só depois de copiar os arquivos importantes para outro lugar. Estalo e rangido costumam indicar desgaste mecânico, e o HD pode parar de vez. Depois da cópia, leve para diagnóstico."
+    },
+    {
+      "pergunta": "O carregador do notebook está zumbindo. É perigoso?",
+      "resposta": "Um zumbido diferente do normal pode indicar problema elétrico. Desconecte o carregador do notebook e da tomada, não abra a peça e procure um técnico para avaliar."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Computer Making Noises? Troubleshoot Loud Fans, Hard Drive & More — Suporte da Dell",
+      "url": "https://www.dell.com/support/contents/en-hk/article/product-support/self-support-knowledgebase/fix-common-issues/common-noises-from-computer",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "How to Troubleshoot Fan Issues — Suporte da Dell",
+      "url": "https://www.dell.com/support/kbdoc/en-us/000179087",
+      "data": "setembro de 2026"
+    },
+    {
+      "nome": "Why is my laptop fan making noise and how can I silence it? — Lenovo",
+      "url": "https://lenovo.com/us/en/glossary/silence-your-laptop-fan-noise-smart-sense",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "My Computer Beeps on Startup — CTL Support",
+      "url": "https://support.ctl.net/hc/en-us/articles/230061288-My-Computer-Beeps-on-Startup",
+      "data": "outubro de 2016"
+    }
+  ]
+}
