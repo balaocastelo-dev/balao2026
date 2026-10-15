@@ -24,7 +24,50 @@ export type VideoOverclock = {
   capa?: string;
 };
 
-export const VIDEOS: VideoOverclock[] = [];
+export const VIDEOS: VideoOverclock[] = [
+  {
+    tipo: "demonstracao",
+    titulo: "Overclock em 3 minutos: da instalação à loja vendendo",
+    descricao: "A instalação guiada, a loja no ar, o painel e o caso real.",
+    arquivo: "/overclock/videos/demonstracao-overclock.mp4",
+    capa: "/overclock/videos/demonstracao-overclock.jpg",
+  },
+  {
+    tipo: "comercial",
+    titulo: "R$ 169 por dia",
+    descricao: "O anúncio que foi a zero.",
+    arquivo: "/overclock/videos/comercial-1-r169-por-dia.mp4",
+    capa: "/overclock/videos/comercial-1-r169-por-dia.jpg",
+  },
+  {
+    tipo: "comercial",
+    titulo: "Vendendo 24 horas",
+    descricao: "Loja virtual, KaBuM com preço ao vivo e WhatsApp da equipe.",
+    arquivo: "/overclock/videos/comercial-2-vendendo-24-horas.mp4",
+    capa: "/overclock/videos/comercial-2-vendendo-24-horas.jpg",
+  },
+  {
+    tipo: "comercial",
+    titulo: "Profissionalize",
+    descricao: "Orçamento por link, OS que o cliente acompanha, estoque e financeiro.",
+    arquivo: "/overclock/videos/comercial-3-profissionalize.mp4",
+    capa: "/overclock/videos/comercial-3-profissionalize.jpg",
+  },
+  {
+    tipo: "comercial",
+    titulo: "Instala numa tarde, com IA",
+    descricao: "A tela de instalação mostra onde conseguir cada coisa.",
+    arquivo: "/overclock/videos/comercial-4-instala-numa-tarde.mp4",
+    capa: "/overclock/videos/comercial-4-instala-numa-tarde.jpg",
+  },
+  {
+    tipo: "comercial",
+    titulo: "É seu, não é aluguel",
+    descricao: "Roda nas contas da sua loja, sem mensalidade para nós.",
+    arquivo: "/overclock/videos/comercial-5-e-seu-nao-e-aluguel.mp4",
+    capa: "/overclock/videos/comercial-5-e-seu-nao-e-aluguel.jpg",
+  },
+];
 
 /** Tira o código do vídeo de qualquer formato de endereço do YouTube. */
 export function idDoYoutube(endereco: string): string | null {
