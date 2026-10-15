@@ -1,0 +1,139 @@
+{
+  "slug": "atualizacao-windows-outubro-2026-falha-explorada",
+  "titulo": "Atualização do Windows de outubro corrige falha já usada em ataques",
+  "resumo": "A Microsoft lançou em 13 de outubro a atualização mensal do Windows 11, que fecha uma falha já explorada. Veja quem precisa instalar e como conferir.",
+  "categoria": "noticias",
+  "etiquetas": [
+    "windows",
+    "atualização",
+    "segurança",
+    "windows 11"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-15T15:03:24.574Z",
+  "seo": {
+    "titulo": "Windows de outubro corrige falha já usada em ataques"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Em 13 de outubro de 2026, a Microsoft liberou a atualização de segurança mensal do Windows 11, a KB5127648 para as versões 24H2, 25H2 e 26H2 e a KB5127646 para a 26H1. No mesmo dia, a empresa corrigiu mais de 1.400 falhas em seus produtos, e uma delas, no Windows Shell, já estava sendo usada em ataques antes da correção."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que só empresas precisam correr. A falha explorada depende de a pessoa abrir um anexo ou clicar em um link preparado, o que acontece no computador de casa tanto quanto no do escritório. Para a maioria, a resposta é simples: deixar o Windows Update instalar e reiniciar."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que a Microsoft lançou"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A página de informações de versão do Windows 11 lista as quatro atualizações com data de 13 de outubro. A falha mais urgente, a CVE-2026-96951, permite contornar a *Marca da Web*, o aviso que o Windows põe em arquivos baixados da internet. Sem essa marca, proteções como o SmartScreen e o Modo de Exibição Protegido do Office podem deixar de alertar."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Versão",
+        "Atualização",
+        "Compilação"
+      ],
+      "linhas": [
+        [
+          "26H2",
+          "KB5127648",
+          "26300.9711"
+        ],
+        [
+          "25H2",
+          "KB5127648",
+          "26200.9711"
+        ],
+        [
+          "24H2",
+          "KB5127648",
+          "26100.9711"
+        ],
+        [
+          "26H1",
+          "KB5127646",
+          "28000.3231"
+        ]
+      ],
+      "titulo": "Atualizações de 13 de outubro de 2026 no Windows 11",
+      "fonte": {
+        "nome": "Windows 11 release information — Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/release-health/windows11-release-information"
+      }
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Além da segurança, a Microsoft registra que a atualização resolve a tela preta depois do login, vista sobretudo em ambientes de área de trabalho virtual, e o fechamento de programas que usam áudio AC-3. Segue em aberto um problema em conexões de Área de Trabalho Remota para usuários sem privilégio de administrador, com solução temporária publicada."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que isso muda para você"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem tem Windows 11 em dia:** abra Configurações, entre em Windows Update e clique em Verificar se há atualizações. Depois de reiniciar, confira em Histórico de atualizações se a KB5127648 ou a KB5127646 aparece. Enquanto isso, desconfie de anexo inesperado, mesmo vindo de conhecido."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem está no Windows 11 24H2 Home ou Pro:** a tabela de suporte da Microsoft já marca o fim das atualizações para essas edições. A notícia sobre o [fim do suporte do Windows 11 24H2](/blog/windows-11-24h2-fim-do-suporte-13-de-outubro) explica como passar para uma versão mais nova sem perder arquivos."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem usa Windows 10:** as atualizações citadas aqui são do Windows 11. O guia sobre [até quando o Windows 10 tem atualização](/blog/windows-10-ate-quando-tem-atualizacao) mostra as saídas para quem ainda não migrou."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem vai comprar um computador:** confira se o equipamento aceita o Windows 11 e se está com as atualizações do mês instaladas. Nos [seminovos](/seminovos), dá para ver a máquina ligada e conferir isso antes de pagar."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que ainda não se sabe"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Microsoft não detalhou como a falha foi usada nos ataques nem quem foi atingido. O número total de falhas corrigidas varia um pouco conforme quem conta, porque cada empresa de segurança agrupa os registros de um jeito. Se a atualização travar ou não aparecer, a [assistência técnica](/manutencao) consegue ver o que está impedindo."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, tem assistência técnica para atualização, diagnóstico e upgrade, e vende computadores novos e seminovos. Em uma linha: instale a atualização de outubro agora e reinicie o computador."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "upgrade"
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Windows 11 release information — Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-us/windows/release-health/windows11-release-information",
+      "data": "13 de outubro de 2026"
+    },
+    {
+      "nome": "Windows 11, version 25H2 known issues and notifications — Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-us/windows/release-health/status-windows-11-25h2",
+      "data": "13 de outubro de 2026"
+    },
+    {
+      "nome": "Microsoft Patch Tuesday Fixes 1,413 Flaws: Windows Zero-Day Already Under Attack — TechRepublic",
+      "url": "https://www.techrepublic.com/article/news-microsoft-october-2026-patch-tuesday/",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Windows 11 October updates fix zero-day, VPN failures, and black screens — CyberInsider",
+      "url": "https://cyberinsider.com/windows-11-october-updates-fix-zero-day-vpn-failures-and-black-screens/",
+      "data": "outubro de 2026"
+    }
+  ]
+}

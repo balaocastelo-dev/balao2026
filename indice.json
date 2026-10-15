@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "atualizacao-windows-outubro-2026-falha-explorada",
+      "titulo": "Atualização do Windows de outubro corrige falha já usada em ataques",
+      "resumo": "A Microsoft lançou em 13 de outubro a atualização mensal do Windows 11, que fecha uma falha já explorada. Veja quem precisa instalar e como conferir.",
+      "categoria": "noticias",
+      "etiquetas": [
+        "windows",
+        "atualização",
+        "segurança",
+        "windows 11"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-15T15:03:24.574Z",
+      "minutos": 3
+    },
+    {
       "slug": "computador-lento-o-que-resolve-de-verdade",
       "titulo": "Computador lento: o que resolve de verdade e o que é perda de tempo",
       "resumo": "Computador lento tem causa: disco, memória, processador ou temperatura. Veja como descobrir qual é, o que resolve de graça e o que é perda de tempo.",
@@ -215,5 +230,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-15T08:59:14.465Z"
+  "atualizadoEm": "2026-10-15T15:03:25.806Z"
 }
