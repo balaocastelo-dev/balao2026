@@ -12,7 +12,12 @@
         "ventoinha",
         "hd"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/computador-fazendo-barulho-o-que-cada-som-indica-3e62bd11.jpg",
+        "alt": "Gabinete de computador com a lateral aberta sobre uma bancada, mostrando a ventoinha do processador, com um pincel macio ao lado",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-10-15T20:57:01.089Z",
       "minutos": 5,
       "formato": "dica"
@@ -251,5 +256,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-16T01:07:13.905Z"
+  "atualizadoEm": "2026-10-16T01:23:45.716Z"
 }
