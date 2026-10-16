@@ -19,8 +19,8 @@ chácara), hospedado no site; não faz parte da loja.
   Thiago mandou ("casa container com terraço"): um container de 7 × 3 m por casa (sala, cozinha,
   banheiro e quarto de casal), chapa ondulada pintada com quinas de outra cor (azul-marinho com
   amarelo, amarelo com azul-marinho, verde com amarelo), janelas e porta de vidro com caixilho
-  branco; em cima, terraço todo coberto por telhado metálico sobre pilares, com guarda-corpo, mesa,
-  cadeiras, espreguiçadeiras e vasos; escada metálica reta de fora, na lateral. Azul em x 4,5–11,5
+  branco; em cima, terraço de cumaru aberto para o céu (o telhado metálico da foto saiu a pedido dele),
+  com guarda-corpo, mesa, cadeiras, espreguiçadeiras e vasos; escada metálica reta de fora, na lateral. Azul em x 4,5–11,5
   e amarela em x 16,5–23,5 no muro y = 0, verde em x 8,5–15,5 no muro y = 10. Antes (12/10) eram
   sobrados com mirante e escada caracol. Detalhes e o formato do `extra`: seção "As casas container
   da vilinha" do `chacara3d/README.md`; conferência sem Blender em `chacara3d/modelo/teste_casas.py`.

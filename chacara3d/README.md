@@ -1,7 +1,7 @@
 # Chácara 3D — fonte da página `/chacara3d`
 
 Passeio em 3D pelo terreno do Thiago (60 × 10 m) como ele fica pronto: a
-vilinha de três casas container com terraço coberto no teto (dá para entrar nelas e
+vilinha de três casas container com terraço aberto no teto (dá para entrar nelas e
 subir pela escada reta de fora até o terraço), o gramado com o pomar, a
 piscina com a hidro e a cascata, a churrasqueira coberta, o deck com o laguinho
 das carpas e o cineminha no muro. Anda-se com W A S D; tem dia e noite, foto,
@@ -86,16 +86,15 @@ cp ../saida/terreno.json ../../public/chacara3d/dados/terreno.json
 ### As casas container da vilinha
 
 Pedido do Thiago (15/10/2026, com a foto de uma "casa container com terraço"): as três casas no
-modelo container de um piso, com sala, cozinha, banheiro e quarto, e em cima um terraço todo
-coberto por telhado metálico sobre pilares, a que se sobe por uma escada reta do lado de fora.
-Antes (12/10) eram sobrados de 42 m² com mirante de teto verde e escada caracol; o histórico
-está no git.
+modelo container de um piso, com sala, cozinha, banheiro e quarto, e em cima um terraço a que se
+sobe por uma escada reta do lado de fora. No mesmo dia ele pediu para tirar o telhado metálico da
+foto: o deck fica aberto para o céu. Antes (12/10) eram sobrados de 42 m² com mirante de teto verde
+e escada caracol; o histórico está no git.
 
 - **Medidas**: 7 × 3 m (a medida que ele deu para a vilinha; o container da foto tem 5,5 m),
   2,60 m de altura sobre sapatas de concreto de 10 cm. Piso de dentro a 0,25, forro a 2,55
   (pé-direito de 2,30), terraço a 2,76, guarda-corpo de 1,10 (o da foto tem 0,80, abaixo da
-  norma), telhado a uns 5 m (face de baixo de 5,05 no muro a 4,95 na frente), beiral de 0,50 na
-  frente e na ponta lisa. Escada de 0,80 (a da foto tem 0,60): 14 espelhos de 0,197 e pisada de
+  norma), sem cobertura. Escada de 0,80 (a da foto tem 0,60): 14 espelhos de 0,197 e pisada de
   0,23, sobe da frente para o fundo encostada na ponta da casa e chega a um patamar de 0,85 junto
   ao muro, no nível do terraço; o pé fica 0,84 à frente da fachada.
 - **Onde**: azul em x 4,5–11,5 × y 0–3 (escada a oeste), amarela em x 16,5–23,5 × y 0–3 (escada a
@@ -107,7 +106,7 @@ está no git.
   `iu`/`id` contam da face interna das paredes (u = iu + 0,12).
 - **Cores**: chapa ondulada trapezoidal de verdade (`Casa.chapa`, passo de 0,28 e 3,5 cm de
   fundo, crista no plano da parede para a projeção e o YouTube não ficarem atrás das ondas);
-  colunas de canto, longarinas, corrimãos e testeira do telhado em outra cor. Azul = azul-marinho
+  colunas de canto, longarinas e corrimãos em outra cor. Azul = azul-marinho
   com amarelo (como na foto), amarela = amarelo com azul-marinho, verde = verde com amarelo.
   Janelas de 1,00 × 1,00 e porta de vidro de 0,80 × 2,00 com caixilho e requadro brancos.
 - **Dentro** (proposta): hall na porta; quarto de casal na ponta lisa (cama 1,38 × 1,88 com
@@ -120,15 +119,17 @@ está no git.
 - **Terraço**: réguas de cumaru, guarda-corpo de barras horizontais pretas com corrimão na cor
   das quinas, mesa com quatro cadeiras (o lado da frente fica livre para passar), duas
   espreguiçadeiras na ponta lisa viradas para o gramado, vasos com areca, moreia, bromélia e
-  xanadu, spots embaixo das terças.
+  xanadu (plantados depois da poda, senão a areca, que usa os materiais do coqueiro, seria podada
+  junto), fita de LED na base do guarda-corpo e duas luzes baixas para a noite.
 - **Poda**: no fim do `build.py`, `podar()` tira folhas e galhos das árvores grandes que
-  entrariam no volume de cada casa com o telhado e no da escada.
+  entrariam em cada casa até 2,5 m acima do terraço (cabeça livre de quem está em pé lá em cima)
+  e na escada.
 - **`extra` no `terreno.json`**: `pisos` `[x0, x1, y0, y1, z]` (dentro, soleira, degrau da porta,
   terraço, patamar e cada degrau); `colisores` `[x0, x1, y0, y1, z0, z1]` (barram quando cruzam a
   faixa [pé + 0,35; pé + 1,7]); `portas` (as três de entrada, com `estilo: 'vidro'`); `luzes`
   `{p, cor, forca, alcance, casa, andar (0 dentro, 2 terraço), comodo}`; `ventiladores` (vazio);
   `lugares` `[nome, x, y, rumo, z do pé]` (entrada e terraço de cada casa); `casas`
-  `{nome, x, y, piso, teto, deck, frente, telhado}`; `escadas` `{casa, x, y}` (para o "onde
+  `{nome, x, y, piso, teto, deck, frente, volume}` (`volume` é a caixa da poda); `escadas` `{casa, x, y}` (para o "onde
   estou"); `paredes_projecao` `{nome, x0, x1, y0, y1, z0, z1, normal}`; `espirais` (vazio).
 - **Como o passeio usa isso** (`js/`): `mundo.js` escolhe o chão como o piso mais alto que não
   passe de pé + 0,5 (assim a escada reta sobe sozinha, degrau a degrau); dentro das casas o raio de

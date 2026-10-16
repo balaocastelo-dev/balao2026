@@ -137,14 +137,13 @@ m_plain('tecido_grafite', (0.16, 0.16, 0.17), 0.95)                            #
 m_plain('vidro_jateado', (0.80, 0.84, 0.84), 0.45, **{'Alpha': 0.7})           # janelinha do banheiro de cima
 m_plain('tapete', (0.42, 0.40, 0.37), 0.98, noise=0.08, nscale=30)
 m_plain('couro', (0.36, 0.17, 0.07), 0.5)                                      # cadeiras e pufes
-# casas container da vilinha (chapa pintada, quinas, caixilhos brancos, telha metálica)
+# casas container da vilinha (chapa pintada, quinas, caixilhos brancos)
 m_plain('chapa_azul', (0.024, 0.038, 0.082), 0.5)                                # azul-marinho da foto
 m_plain('chapa_amarela', (0.83, 0.46, 0.021), 0.5)
 m_plain('chapa_verde', (0.026, 0.127, 0.07), 0.5)
 m_plain('pintura_amarela', (0.95, 0.60, 0.012), 0.45)                           # quinas e requadros (azul e verde)
 m_plain('pintura_marinho', (0.022, 0.036, 0.08), 0.45)                          # quinas e requadros da amarela
 m_plain('esquadria_branca', (0.86, 0.86, 0.84), 0.35)
-m_plain('telha_metalica', (0.34, 0.35, 0.37), 0.42, **{'Metallic': 0.75})
 
 # ------------------------------------------------------------------ constantes
 WH = 2.3                      # altura do muro
@@ -687,10 +686,11 @@ for xx in np.arange(7.8, 33.0, 1.7):
 P.heliconia((1.0, 1.2, 0), rng, n=9, H=1.8, spread=0.3); P.heliconia((1.75, 0.55, 0), rng, n=7, H=1.5, flower='flower_orange', spread=0.3)
 
 
-# ------------------------------------------------------------------ a vilinha: três casas container com terraço coberto
+# ------------------------------------------------------------------ a vilinha: três casas container com terraço aberto
 # Pedido do Thiago (15/10/2026): as casas da vilinha no modelo "casa container com terraço" da foto que ele mandou.
 # Um container por casa, de 7 x 3 m (a medida que ele deu para a vilinha), com sala, cozinha, banheiro e quarto;
-# em cima, um terraço todo coberto por telhado metálico sobre pilares, com guarda-corpo, mesa, cadeiras e vasos;
+# em cima, um terraço de cumaru com guarda-corpo, mesa, cadeiras e vasos, sem cobertura (pedido do Thiago em
+# 15/10/2026, depois de ver o telhado metálico da foto: o deck fica aberto para o céu);
 # escada metálica reta do lado de fora, na lateral. Chapa ondulada pintada, quinas e requadros de outra cor,
 # janelas de 1,00 x 1,00 e porta de vidro de 0,80 x 2,00 com caixilho branco.
 # A ponta lisa (sem aberturas) de cada casa recebe projeção mapeada.
@@ -705,10 +705,8 @@ ONDA, FUNDO_ONDA = 0.28, 0.035          # chapa ondulada trapezoidal: passo e pr
 NESC, LARG = 14, 0.80                   # escada de fora: espelhos e largura (na foto é de 0,60)
 ESPE, PISE = DECK / NESC, 0.23          # espelho (0,197) e pisada
 PAT = 0.85                              # patamar da escada no alto, encostado no muro
-BEIRAL_F, BEIRAL_P = 0.50, 0.50         # beiral do telhado na frente e na ponta lisa (como na foto)
-UE = CL + LARG + 0.06                   # do lado da escada o telhado vai até cobrir o patamar
-TELHA_FUNDO, TELHA_FRENTE = 5.05, 4.95  # face de baixo do telhado (cai 10 cm para a frente)
 rv = np.random.default_rng(23)
+PLANTIO_TERRACO = []                    # (tipo, topo do vaso) dos vasos do terraço, plantados depois da poda
 LUZ_QUENTE, LUZ_LED = [1.0, 0.82, 0.62], [1.0, 0.72, 0.42]
 
 EXTRA = {'colisores': [], 'pisos': [], 'portas': [], 'luzes': [], 'ventiladores': [], 'lugares': [], 'casas': [],
@@ -993,13 +991,8 @@ def florzinhas(pos, rng, cor='flower_red'):
         ellipsoid(cor, (pos[0] + r * math.cos(a), pos[1] + r * math.sin(a), pos[2] + rng.uniform(0.07, 0.13)), 0.022, seg=6, rings=4)
 
 
-def ztelha(d):
-    """Altura da face de baixo do telhado (cai para a frente)."""
-    return TELHA_FUNDO + (TELHA_FRENTE - TELHA_FUNDO) * d / (CD + BEIRAL_F)
-
-
 def container(x0, side, espelho, nome, corpo, quina, tecido):
-    """Casa container de 7 x 3 m encostada no muro, frente para o gramado, terraço coberto em cima e escada
+    """Casa container de 7 x 3 m encostada no muro, frente para o gramado, terraço aberto em cima e escada
     reta de fora na ponta u = 7 (sobe da frente para o fundo e chega a um patamar junto ao muro)."""
     c = Casa(x0, side, espelho)
     I = c.i
@@ -1220,7 +1213,7 @@ def container(x0, side, espelho, nome, corpo, quina, tecido):
             else:
                 P.bromelia(q, rv, 0.85)
 
-    # ============================================================ terraço coberto
+    # ============================================================ terraço aberto (sem cobertura)
     zg = DECK + 0.02
     c.guarda_corpo((0.05, CD - 0.05), (CL - 0.05, CD - 0.05), zg, quina)
     c.guarda_corpo((0.05, 0.05), (CL - 0.05, 0.05), zg, quina)
@@ -1257,49 +1250,22 @@ def container(x0, side, espelho, nome, corpo, quina, tecido):
     c.cil('aluminio_preto', (1.18, 0.62, zg), 0.02, 0.44, seg=6)
     c.cil('aluminio_preto', (1.18, 0.62, zg), 0.11, 0.015, seg=14)
     c.colide(1.03, 1.33, 0.47, 0.77, DECK, DECK + 0.47)
-    # vasos com plantas junto ao guarda-corpo (como na foto)
+    # vasos com plantas junto ao guarda-corpo (como na foto); as plantas entram depois da poda das árvores
+    # grandes (senão a areca, que usa os materiais do coqueiro, seria podada junto)
     for k, (u, d) in enumerate(((0.40, 0.40), (2.15, 0.40), (5.60, 0.40), (6.52, 2.60))):
         top = P.pot(c.p(u, d, zg), 0.24, 0.52, mat='pot_fiber')
-        if k in (0, 3):
-            P.areca(top, rv, H=1.6, stems=5)
-        elif k == 1:
-            P.moreia(top, rv, 0.9); P.bromelia(top, rv, 0.8)
-        else:
-            P.xanadu(top, rv, 0.9)
+        PLANTIO_TERRACO.append((k, top))
         c.colide(u - 0.25, u + 0.25, d - 0.25, d + 0.25, DECK, DECK + 1.2)
 
-    # ============================================================ telhado metálico sobre pilares
-    U0, U1, D1 = -BEIRAL_P, UE, CD + BEIRAL_F
-    pilares = [(0.12, CD - 0.12), (CL / 2, CD - 0.12), (CL - 0.12, CD - 0.12), (0.12, 0.12), (CL / 2, 0.12)]
-    for u, d in pilares:
-        c.caixa('aluminio_preto', u - 0.05, u + 0.05, d - 0.05, d + 0.05, zg, ztelha(d) - 0.17)
-        c.colide(u - 0.06, u + 0.06, d - 0.06, d + 0.06, DECK, ztelha(d))
-    # vigas ao longo do muro e da frente, caibros e terças
-    for d in (0.12, CD - 0.12):
-        c.caixa('aluminio_preto', U0, U1, d - 0.05, d + 0.05, ztelha(d) - 0.17, ztelha(d) - 0.07)
-    for u in (U0 + 0.06, 0.12, CL / 2, CL - 0.12, U1 - 0.06):
-        c.viga('aluminio_preto', (u, 0.0, ztelha(0.0) - 0.035), (u, D1, ztelha(D1) - 0.035), 0.05, 0.07)
-    for d in np.arange(0.55, D1 - 0.1, 0.72):
-        c.caixa('aluminio_preto', U0, U1, d - 0.025, d + 0.025, ztelha(d) - 0.07, ztelha(d) - 0.002)
-    # telha trapezoidal (ondas no sentido da caída)
-    pts = pontos_onda(U0, U1, U0, 0.25)
-    verts, faces = [], []
-    for x, y in zip(pts[:-1], pts[1:]):
-        i = len(verts)
-        for aa, dd in ((x, 0.0), (y, 0.0), (y, D1), (x, D1)):
-            verts.append(c.p(aa, dd, ztelha(dd) + 0.04 - perfil_onda(aa, U0, 0.25, 0.04)))
-        faces.append([i, i + 1, i + 2, i + 3])
-    G['telha_metalica'].add(verts, faces)
-    # testeira pintada em volta do telhado
-    c.caixa(quina, U0 - 0.03, U1 + 0.03, D1, D1 + 0.035, ztelha(D1) - 0.10, ztelha(D1) + 0.13)
-    c.caixa(quina, U0 - 0.03, U1 + 0.03, 0.0, 0.035, ztelha(0.0) - 0.10, ztelha(0.0) + 0.13)
-    for u in (U0 - 0.015, U1 + 0.015):
-        c.viga(quina, (u, 0.0, ztelha(0.0) + 0.015), (u, D1, ztelha(D1) + 0.015), 0.03, 0.23)
-    # spots embaixo das terças
-    for u, d in ((1.20, 0.55 + 0.72), (3.50, 0.55 + 0.72), (5.80, 0.55 + 0.72), (1.20, 0.55 + 2 * 0.72), (3.50, 0.55 + 2 * 0.72), (5.80, 0.55 + 2 * 0.72)):
-        c.elip('bulb', (u, d, ztelha(d) - 0.075), (0.05, 0.05, 0.012), seg=10, rings=3)
-    c.luz(nome, 1.60 - TP, 1.60 - TP, ztelha(1.6) - 0.25, LUZ_QUENTE, 0.6, 4.5, 2, 'terraco')
-    c.luz(nome, 5.20 - TP, 1.60 - TP, ztelha(1.6) - 0.25, LUZ_QUENTE, 0.6, 4.5, 2, 'terraco')
+    # fita de LED na base do guarda-corpo e duas luzes baixas (o terraço fica aberto para o céu)
+    for (ua, da), (ub, db) in (((0.10, CD - 0.10), (CL - 0.10, CD - 0.10)), ((0.10, 0.10), (CL - 0.10, 0.10)), ((0.10, 0.10), (0.10, CD - 0.10)),
+                               ((CL - 0.10, PAT + 0.05), (CL - 0.10, CD - 0.10))):
+        if abs(ub - ua) > abs(db - da):
+            c.caixa('bulb', ua, ub, da - 0.006, da + 0.006, DECK + 0.03, DECK + 0.045)
+        else:
+            c.caixa('bulb', ua - 0.006, ua + 0.006, da, db, DECK + 0.03, DECK + 0.045)
+    c.luz(nome, 1.60 - TP, 1.60 - TP, DECK + 0.6, LUZ_LED, 0.45, 4.0, 2, 'terraco')
+    c.luz(nome, 5.20 - TP, 1.60 - TP, DECK + 0.6, LUZ_LED, 0.45, 4.0, 2, 'terraco')
 
     # ============================================================ escada de fora: reta, sobe da frente para o fundo
     us0, us1 = CL + 0.02, CL + 0.02 + LARG                  # 7,02 a 7,82
@@ -1314,11 +1280,11 @@ def container(x0, side, espelho, nome, corpo, quina, tecido):
     c.caixa('deck_ipe', CL, us1 + 0.04, 0.0, PAT, DECK - 0.05, DECK)
     c.caixa('aluminio_preto', CL, us1 + 0.04, 0.0, PAT, DECK - 0.17, DECK - 0.05)
     c.piso(CL, us1 + 0.04, 0.0, PAT, DECK)
-    # longarinas de aço preto, pilares do patamar (o do canto sobe até o telhado)
+    # longarinas de aço preto e pilares do patamar
     for u in (us0 + 0.02, us1 - 0.02):
         c.viga('aluminio_preto', (u, dpe + 0.05, 0.02), (u, PAT, DECK - 0.15), 0.04, 0.24)
-    c.caixa('aluminio_preto', us1 - 0.04, us1 + 0.04, 0.0, 0.08, 0.0, ztelha(0.04) - 0.17)
-    c.colide(us1 - 0.05, us1 + 0.05, 0.0, 0.09, 0.0, ztelha(0.04))
+    c.caixa('aluminio_preto', us1 - 0.04, us1 + 0.04, 0.0, 0.08, 0.0, DECK - 0.17)
+    c.colide(us1 - 0.05, us1 + 0.05, 0.0, 0.09, 0.0, DECK - 0.17)
     c.caixa('aluminio_preto', us1 - 0.04, us1 + 0.04, PAT - 0.08, PAT, 0.0, DECK - 0.17)
     c.caixa('concrete', us0, us1, dpe - 0.05, dpe + 0.25, 0.0, 0.02)
     # guarda-corpo do lado de fora (montantes pretos e corrimão na cor das quinas)
@@ -1345,7 +1311,7 @@ def container(x0, side, espelho, nome, corpo, quina, tecido):
     EXTRA['lugares'].append(['Terraço da ' + nome.lower(), round(mx, 3), round(my, 3), round(c.ang(math.pi / 2), 4), DECK])
     EXTRA['casas'].append({'nome': nome, 'x': [round(c.x0, 3), round(c.x1, 3)], 'y': [round(v, 3) for v in c.fy(0.0, CD)],
                            'piso': PISO, 'teto': FORRO, 'deck': DECK, 'frente': round(c.Y(CD), 3),
-                           'telhado': [round(v, 3) for v in c.fx(U0, U1)] + [round(v, 3) for v in c.fy(0.0, D1)] + [round(TELHA_FUNDO + 0.2, 3)]})
+                           'volume': [round(v, 3) for v in c.fx(0.0, us1 + 0.05)] + [round(v, 3) for v in c.fy(0.0, CD)] + [round(DECK + 2.2, 3)]})   # poda deixa 2,5 m livres sobre o terraço
     EXTRA['paredes_projecao'].append({'nome': 'Parede da ' + nome.lower(), 'x0': round(c.X(0.0), 3), 'x1': round(c.X(0.0), 3),
                                       'y0': round(c.fy(0.0, CD)[0], 3), 'y1': round(c.fy(0.0, CD)[1], 3), 'z0': Z0C, 'z1': ZTC,
                                       'normal': [float(-c.su), 0.0]})
@@ -1386,7 +1352,7 @@ for sgn in (1, -1):
     tile_roof('rooftile', (38.2, -5.3, 4.15), (1, 0, 0), v, 9.1, L)
 
 # ------------------------------------------------------------------ poda: o que das árvores grandes encostaria nas casas
-# (folhas e galhos dentro do volume de cada casa com o telhado e da escada saem, como numa poda de verdade)
+# (folhas e galhos dentro de cada casa, até 2,5 m acima do terraço, e da escada saem, como numa poda de verdade)
 PODA_MATS = ('leaf_mango', 'leaf_palm', 'leaf_palm_rachis', 'leaf_palm_base', 'leaf_goiaba', 'leaf_banana', 'leaf_jabu',
              'leaf_citrus', 'leaf_core', 'leaf_core_big', 'leaf_amend', 'leaf_amend_red', 'leaf_areca', 'leaf_vine_light',
              'fruit_mango', 'fruit_goiaba', 'fruit_banana', 'fruit_black', 'fruit_lemon', 'coconut', 'stem_banana',
@@ -1410,9 +1376,16 @@ def podar(mats, cilindros, caixas):
                     g.f[k] = [fa[~fora[fa].any(axis=1)] for fa in g.f[k]]
 
 
-podar(PODA_MATS, [], [(t[0] - 0.05, t[1] + 0.05, t[2] - 0.05, t[3] + 0.05, -0.1, t[4] + 0.3) for t in (cs['telhado'] for cs in EXTRA['casas'])]
+podar(PODA_MATS, [], [(t[0] - 0.05, t[1] + 0.05, t[2] - 0.05, t[3] + 0.05, -0.1, t[4] + 0.3) for t in (cs['volume'] for cs in EXTRA['casas'])]
       + [(e['x'][0] - 0.1, e['x'][1] + 0.1, e['y'][0] - 0.1, e['y'][1] + 0.1, -0.1, GUARDA + 0.3) for e in EXTRA['escadas']])
 podar(('leaf_vine',), [], [(cs['x'][0] + TP, cs['x'][1] - TP, cs['y'][0] + TP, cs['y'][1] - TP, 0.0, FORRO) for cs in EXTRA['casas']])
+for k, top in PLANTIO_TERRACO:                                  # plantas dos vasos do terraço, já depois da poda
+    if k in (0, 3):
+        P.areca(top, rv, H=1.6, stems=5)
+    elif k == 1:
+        P.moreia(top, rv, 0.9); P.bromelia(top, rv, 0.8)
+    else:
+        P.xanadu(top, rv, 0.9)
 
 objs = geo.build_objects()
 print('objects', len(objs), 'polys', sum(len(o.data.polygons) for o in objs))

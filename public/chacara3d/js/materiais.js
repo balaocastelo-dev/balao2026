@@ -368,14 +368,13 @@ export function criarMateriais(info) {
     acc_blue: liso(new THREE.Color(0.03, 0.17, 0.42), 0.4),
     acc_yellow: liso(new THREE.Color(0.78, 0.45, 0.04), 0.4),
     acc_green: liso(new THREE.Color(0.04, 0.3, 0.23), 0.4),
-    // casas container da vilinha: chapa pintada, quinas, caixilhos brancos, telha metálica
+    // casas container da vilinha: chapa pintada, quinas, caixilhos brancos
     chapa_azul: liso(new THREE.Color(0.024, 0.038, 0.082), 0.5),
     chapa_amarela: liso(new THREE.Color(0.83, 0.46, 0.021), 0.5),
     chapa_verde: liso(new THREE.Color(0.026, 0.127, 0.07), 0.5),
     pintura_amarela: liso(new THREE.Color(0.95, 0.6, 0.012), 0.45),
     pintura_marinho: liso(new THREE.Color(0.022, 0.036, 0.08), 0.45),
     esquadria_branca: liso(new THREE.Color(0.86, 0.86, 0.84), 0.35),
-    telha_metalica: liso(new THREE.Color(0.34, 0.35, 0.37), 0.42, { metal: 0.75 }),
     mesh: null,
     leaf_core: liso(new THREE.Color(0.012, 0.03, 0.01), 1, { vento: 0.0016 }),
     leaf_core_big: liso(new THREE.Color(0.01, 0.025, 0.009), 1, { vento: 0.0016 }),
