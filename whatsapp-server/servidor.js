@@ -399,11 +399,72 @@ function comCamposDoPainel(c) {
   };
 }
 
-function listaDeConversas() {
+// Janela da lista de conversas.
+//
+// O painel recebia as mais de 12 mil conversas da loja ao abrir — vários
+// megabytes, e a tela desenhava todas. Agora vai só o que importa no dia a dia:
+// as conversas dos últimos 30 dias, mais as que não podem sumir em hipótese
+// nenhuma (fixadas, com mensagem não lida, ou numa etapa do funil). As mais
+// antigas continuam aqui e chegam ao painel sob pedido (panel:conversas-antigas),
+// pela busca ou pelo botão "carregar mais antigas".
+const DIAS_DA_LISTA = Math.max(1, Number(process.env.CRM_DIAS_LISTA) || 30);
+const DIA_MS = 86_400_000;
+const ETAPAS_QUE_NAO_SEGURAM = new Set(["novos", "__fora_do_funil__"]);
+
+function estaNoFunil(chatId) {
+  for (const mapa of Object.values(store.kanbanPorVendedor || {})) {
+    const etapa = mapa?.[chatId];
+    if (etapa && !ETAPAS_QUE_NAO_SEGURAM.has(String(etapa))) return true;
+  }
+  return false;
+}
+
+function entraNaLista(c, corte) {
+  if ((c.lastMessageTimestamp || 0) >= corte) return true;
+  if (store.fixadas[c.chatId] || c.isPinned) return true;
+  if ((c.unreadCount || 0) > 0) return true;
+  return estaNoFunil(c.chatId);
+}
+
+function listaDeConversas({ todas = false } = {}) {
+  const corte = Date.now() - DIAS_DA_LISTA * DIA_MS;
   return [...conversas.values()]
     .filter((c) => !estaOculta(c.chatId, c.lastMessageTimestamp))
+    .filter((c) => todas || entraNaLista(c, corte))
     .map(comCamposDoPainel)
     .sort((a, b) => (b.lastMessageTimestamp || 0) - (a.lastMessageTimestamp || 0));
+}
+
+/**
+ * Conversas fora da janela, sob pedido do painel.
+ * - com `busca`: procura em TODAS pelo nome ou pelo número (mínimo 3 letras);
+ * - sem busca: as de um período mais antigo (`antesDe` menos `dias`).
+ */
+function conversasSobPedido(p) {
+  const limite = Math.min(1500, Math.max(1, Number(p?.limite) || 300));
+  const busca = String(p?.busca || "").trim().toLowerCase();
+  const digitos = busca.replace(/\D/g, "");
+  const visiveis = [...conversas.values()].filter((c) => !estaOculta(c.chatId, c.lastMessageTimestamp));
+  let itens;
+  if (busca) {
+    if (busca.length < 3) return { ok: true, conversas: [], total: 0 };
+    itens = visiveis.filter((c) => {
+      if (String(c.contactName || "").toLowerCase().includes(busca)) return true;
+      if (digitos.length < 3) return false;
+      const numeros = `${c.realNumber || ""} ${c.displayNumber || ""} ${c.chatId || ""}`.replace(/\D/g, " ");
+      return numeros.includes(digitos);
+    });
+  } else {
+    const antesDe = Number(p?.antesDe) || Date.now() - DIAS_DA_LISTA * DIA_MS;
+    const dias = Math.min(365, Math.max(1, Number(p?.dias) || DIAS_DA_LISTA));
+    const desde = antesDe - dias * DIA_MS;
+    itens = visiveis.filter((c) => {
+      const t = c.lastMessageTimestamp || 0;
+      return t < antesDe && t >= desde;
+    });
+  }
+  itens.sort((a, b) => (b.lastMessageTimestamp || 0) - (a.lastMessageTimestamp || 0));
+  return { ok: true, total: itens.length, conversas: itens.slice(0, limite).map(comCamposDoPainel) };
 }
 
 /**
@@ -2907,13 +2968,30 @@ io.on("connection", (socket) => {
       });
     }
   };
-  entregar();
+  // O painel pede panel:bootstrap logo ao conectar, e a conexão aqui já
+  // entrega tudo. Sem esta trava a lista completa ia DUAS vezes (três, com o
+  // panel:identify-vendedor) a cada vez que alguém abria o /crm.
+  let entregueEm = 0;
+  const entregarSeFaz = () => {
+    if (Date.now() - entregueEm < 15_000) return false;
+    entregar();
+    entregueEm = Date.now();
+    return true;
+  };
+  entregarSeFaz();
   // Painel abrindo (ou voltando do sono) relê as mensagens recentes na hora:
   // se alguma escrita no celular não chegou pelo webhook, ela aparece aqui.
   conciliarAgora().catch(() => {});
   socket.on("panel:bootstrap", () => {
-    entregar();
-    conciliarAgora().catch(() => {});
+    if (entregarSeFaz()) conciliarAgora().catch(() => {});
+  });
+  // Conversas fora da janela de 30 dias: busca por nome/número ou período antigo.
+  socket.on("panel:conversas-antigas", (p, cb) => {
+    try {
+      cb?.(conversasSobPedido(p));
+    } catch (erro) {
+      cb?.({ ok: false, erro: erro.message });
+    }
   });
   // Chamado quando a aba volta a ficar visível.
   socket.on("panel:conciliar", (_p, cb) => {
@@ -2960,7 +3038,9 @@ io.on("connection", (socket) => {
     socket.join(`vendedor:${id}`);
     socket.emit("whatsapp:kanban", store.kanbanPorVendedor[id] || {});
     socket.emit("whatsapp:preferencias", store.preferenciasPorVendedor[id] || {});
-    socket.emit("whatsapp:chats", listaDeConversas());
+    // A lista é a mesma para todos os vendedores: só manda se a conexão ainda
+    // não tiver entregado agora há pouco.
+    if (Date.now() - entregueEm >= 15_000) socket.emit("whatsapp:chats", listaDeConversas());
   });
 
   socket.on("panel:set-preferencias", (p) => {
@@ -3018,7 +3098,8 @@ io.on("connection", (socket) => {
     salvarStore();
     crmServico?.definirVendedor(chatId, p.sellerId || null).catch(() => {});
     agente?.aoAtribuir(chatId, p.sellerId ? String(p.sellerId) : null).catch(() => {});
-    enviarListaCompleta();
+    // Só a conversa que mudou de dono — não a lista inteira para todo mundo.
+    agendarConversas([chatId]);
     emitirConfiguracoes();
   });
 
@@ -3761,7 +3842,7 @@ async function ligarAgente(db) {
         else delete store.chatAssignments[chatId];
         salvarStore();
         crmServico?.definirVendedor(chatId, vendedorId || null).catch(() => {});
-        enviarListaCompleta();
+        agendarConversas([chatId]);
         emitirConfiguracoes();
       },
       // Bloqueado não fala com o robô. Quem pediu SAIR saiu do DISPARO, não do
