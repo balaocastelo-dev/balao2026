@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "muse-spark-open-meta-ia-aberta-memoria",
+      "titulo": "Muse Spark Open: IA aberta da Meta roda em casa, mas pede 1 TB de memória",
+      "resumo": "A Meta liberou em 15 de outubro os pesos do Muse Spark Open. Ele roda fora da nuvem, mas só em máquinas com muita memória. Veja o que muda para você.",
+      "categoria": "noticias",
+      "etiquetas": [
+        "ia",
+        "ia local",
+        "memória",
+        "mac"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-16T15:06:20.082Z",
+      "minutos": 3
+    },
+    {
       "slug": "como-escolher-monitor-para-trabalho",
       "titulo": "Monitor para trabalho: como escolher tamanho, resolução e painel",
       "resumo": "Monitor para trabalho: veja como combinar tamanho e resolução, qual painel cansa menos a vista e como posicionar a tela para trabalhar o dia todo.",
@@ -271,5 +286,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-16T08:58:17.872Z"
+  "atualizadoEm": "2026-10-16T15:06:20.802Z"
 }

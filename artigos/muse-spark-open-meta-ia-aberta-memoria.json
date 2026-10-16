@@ -1,0 +1,99 @@
+{
+  "slug": "muse-spark-open-meta-ia-aberta-memoria",
+  "titulo": "Muse Spark Open: IA aberta da Meta roda em casa, mas pede 1 TB de memória",
+  "resumo": "A Meta liberou em 15 de outubro os pesos do Muse Spark Open. Ele roda fora da nuvem, mas só em máquinas com muita memória. Veja o que muda para você.",
+  "categoria": "noticias",
+  "etiquetas": [
+    "ia",
+    "ia local",
+    "memória",
+    "mac"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-16T15:06:20.082Z",
+  "seo": {
+    "titulo": "Muse Spark Open: IA aberta da Meta pede 1 TB de memória"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Em 15 de outubro de 2026, a Meta publicou o Muse Spark Open, um modelo de inteligência artificial de **pesos abertos**: em vez de usar a IA só pela internet, qualquer pessoa pode baixar o modelo e rodá-lo no próprio equipamento. O detalhe que pesa é o tamanho: para funcionar inteiro, ele precisa de cerca de 1 TB de memória."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é ler \"roda em casa\" e pensar no notebook da mesa. Não é o caso: a própria Meta mostra o modelo rodando em dois Mac Studio ligados entre si. Para o computador comum, a novidade não muda o que ele consegue fazer hoje, mas mostra de novo que, em IA local, a memória manda."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que a Meta anunciou"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Segundo o blog de pesquisa da Meta, o modelo tem 816 bilhões de parâmetros no total, dos quais 42 bilhões trabalham em cada etapa da resposta. Parâmetro é cada um dos valores que o modelo aprendeu no treino; quanto mais deles, mais memória é preciso para carregá-lo. Ele entende texto e imagem e aceita textos muito longos de uma vez."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A demonstração da Meta usa dois Mac Studio com o chip M5 Ultra e o programa MLX, da Apple; cada um tem até 512 GB de memória unificada, a memória que o processador e a parte gráfica dividem. O Engadget acrescenta que quatro unidades de 256 GB também dão conta e que a Apple só prometeu a versão de 512 GB para o fim de outubro."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Os pesos estão no Hugging Face e em serviços de nuvem da Amazon, do Google e da Microsoft, e o modelo também pode ser usado por meio de empresas que o hospedam. A licença é da própria Meta e tem limites para uso comercial. A Meta não fala em versões menores, feitas para computadores comuns."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que isso muda para você"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem quer só usar a IA no dia a dia:** quase nada muda. Um modelo desse porte não cabe num computador de 16 GB ou 32 GB, e o caminho prático continua sendo usá-lo pela internet, num dos serviços que o hospedam. Mas lembre que, nesse caso, o que você digita sai do seu computador."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem pensa em rodar IA no próprio computador:** a notícia reforça a regra de sempre. O que decide quais modelos cabem na máquina é a quantidade de memória, da placa de vídeo no PC ou unificada no Mac, mais do que a velocidade do processador. O guia sobre [que computador você precisa para rodar IA em casa](/blog/que-computador-preciso-para-rodar-ia-em-casa) explica como dimensionar isso."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "ia-local"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem já tem um computador e pode esperar:** modelos abertos menores, de outros projetos, já rodam em máquinas com uma boa placa de vídeo ou num Mac com bastante memória. Se o seu computador atual não dá conta, um upgrade de memória ou de placa de vídeo costuma resolver antes da troca, e a [assistência técnica](/manutencao) avalia o que o seu equipamento aceita."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que ainda não se sabe"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Meta não diz se fará versões reduzidas do Muse Spark Open, nem quando os equipamentos de 512 GB chegam ao Brasil. Também não há, nas páginas oficiais, uma lista de configurações de PC com placas de vídeo comuns que rodem o modelo inteiro."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, tem uma seleção de [computadores para rodar IA localmente](/ia-local), e você pode ver a máquina ligada antes de pagar. Em uma linha: o novo modelo da Meta não é para o computador comum, mas confirma que, para IA em casa, memória vem primeiro."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "upgrade"
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Introducing Muse Spark Open, The Most Capable US Open-Weight Model to Date — Meta AI Research",
+      "url": "https://research.meta.ai/blog/muse-spark-open",
+      "data": "15 de outubro de 2026"
+    },
+    {
+      "nome": "Meta launches an open-weight AI model that runs on Macs — TechCrunch",
+      "url": "https://techcrunch.com/2026/10/15/meta-launches-an-open-weight-model-that-runs-on-macs/",
+      "data": "15 de outubro de 2026"
+    },
+    {
+      "nome": "Meta built a huge open-weight AI model for Macs, but you'll need 1TB of RAM to run it — Engadget",
+      "url": "https://www.engadget.com/2287833/meta-built-a-huge-open-weight-ai-model-for-macs-but-youll-need-1tb-of-ram-to-run-it/",
+      "data": "15 de outubro de 2026"
+    }
+  ]
+}
