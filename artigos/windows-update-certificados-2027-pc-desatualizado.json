@@ -9,7 +9,12 @@
     "segurança",
     "windows 10"
   ],
-  "capa": null,
+  "capa": {
+    "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/windows-update-certificados-2027-pc-desatualizado-994a244a.jpg",
+    "alt": "Notebook aberto sobre uma mesa de escritório em casa, visto de lado, com a tela apagada, ao lado de uma xícara e de um vaso com planta",
+    "largura": 1600,
+    "altura": 900
+  },
   "publicadoEm": "2026-10-13T15:19:16.763Z",
   "blocos": [
     {

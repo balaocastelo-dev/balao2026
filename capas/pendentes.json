@@ -2,14 +2,6 @@
   "versao": 1,
   "pendentes": [
     {
-      "slug": "windows-update-certificados-2027-pc-desatualizado",
-      "titulo": "Windows Update: PC desatualizado perde as atualizações em 2027",
-      "categoria": "noticias",
-      "alt": "Notebook aberto sobre uma mesa de escritório em casa, visto de lado, com a tela apagada, ao lado de uma xícara e de um vaso com planta",
-      "pedido": "A generic silver laptop open on a tidy wooden home office desk, seen from a three-quarter side angle so the screen is switched off and barely visible. Next to it, a white ceramic coffee cup and a small potted green plant. Soft morning daylight comes from a window on the left, with a calm, neutral background slightly out of focus.",
-      "pedidoEm": "2026-10-13T15:19:17.505Z"
-    },
-    {
       "slug": "computador-lento-o-que-resolve-de-verdade",
       "titulo": "Computador lento: o que resolve de verdade e o que é perda de tempo",
       "categoria": "assistencia",
