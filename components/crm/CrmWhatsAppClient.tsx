@@ -98,6 +98,14 @@ function descreverPreviewMensagem(body: string | null | undefined, hasMedia?: bo
 
 // Formata número de WhatsApp no formato solicitado: xx xx xxxxxxxxx (ex: 55 19 987510267)
 /** Nome que é só o código interno do WhatsApp (@lid), não um nome de verdade. */
+/** Conversas que a lista mostra: as com mensagem nos últimos N dias. */
+const DIAS_DA_LISTA = 30;
+const DIA_MS = 86_400_000;
+/** Quantas conversas a lista desenha de cada vez (o resto vem ao rolar). */
+const LISTA_POR_VEZ = 80;
+/** Quantos cards cada coluna do funil desenha de cada vez. */
+const KANBAN_POR_VEZ = 40;
+
 function nomeEhCodigo(nome: string | null | undefined, chatId?: string | null) {
   const n = String(nome || "").trim();
   if (!n) return true;
@@ -804,6 +812,15 @@ export default function CrmWhatsAppClient({
   // de um jeito rápido de ver só o que está com ele.
   const [filtroMeus, setFiltroMeus] = useState(false);
   const [buscaChat, setBuscaChat] = useState("");
+  // Leveza da lista: só as conversas dos últimos `janelaDias` ficam na tela,
+  // e delas só as `limiteLista` primeiras são desenhadas (mais ao rolar).
+  // Desenhar as 12 mil conversas de uma vez — e de novo na coluna "Novos" do
+  // funil — era o que deixava o /crm lento.
+  const [janelaDias, setJanelaDias] = useState(DIAS_DA_LISTA);
+  const [limiteLista, setLimiteLista] = useState(LISTA_POR_VEZ);
+  const [carregandoAntigas, setCarregandoAntigas] = useState(false);
+  const [buscandoNoServidor, setBuscandoNoServidor] = useState(false);
+  const [kanbanLimite, setKanbanLimite] = useState<Record<string, number>>({});
   const [mostrarRapidasBar, setMostrarRapidasBar] = useState(false);
   const [campoTexto, setCampoTexto] = useState("");
   const [toastMsg, setToastMsg] = useState<string | null>(null);
@@ -1343,7 +1360,14 @@ export default function CrmWhatsAppClient({
               } as CrmChat;
             });
 
-          return [...novasAindaLocais, ...doServidor].sort(
+          // Conversas antigas trazidas pela busca ou pelo "carregar mais
+          // antigas": o servidor só lista os últimos 30 dias, então sem isto
+          // elas sumiriam na próxima sincronização.
+          const sobDemanda = prev.filter(
+            (c) => c.sobDemanda && !idsDoServidor.has(c.id) && !c.localDesde
+          );
+
+          return [...novasAindaLocais, ...sobDemanda, ...doServidor].sort(
             (a, b) => b.timestamp - a.timestamp
           );
         });
@@ -2466,17 +2490,33 @@ export default function CrmWhatsAppClient({
     });
   }, [mensagens, chatSelecionadoId, chatSelecionado]);
 
+  // As conversas que a tela trabalha no dia a dia: últimos `janelaDias` dias,
+  // mais as que não podem sumir (fixada, não lida, numa etapa do funil, a
+  // aberta agora ou a recém-criada aqui).
+  const chatsDaJanela = useMemo(() => {
+    const corte = Date.now() - janelaDias * DIA_MS;
+    return chats.filter((c) => {
+      if (!isRealDirectChat(c.id)) return false;
+      if ((c.timestamp || 0) >= corte) return true;
+      if (c.fixado || c.unread > 0 || c.localDesde) return true;
+      if (c.id === chatSelecionadoId) return true;
+      const etapa = kanbanPorChat[c.id];
+      return Boolean(etapa && etapa !== "novos" && etapa !== FORA_DO_FUNIL);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chats, janelaDias, chatSelecionadoId, kanbanPorChat]);
+
   const chatsFiltrados = useMemo(() => {
-    let list = chats
-      .filter((c) => isRealDirectChat(c.id))
-      .filter((c) => {
-        const b = buscaChat.trim().toLowerCase();
-        if (!b) return true;
-        return (
-          (c.nome + " " + c.numero).toLowerCase().includes(b) ||
-          formatarNumeroExibicao(c.numero).includes(b)
-        );
-      });
+    const b = buscaChat.trim().toLowerCase();
+    // Com busca, procura em tudo o que a tela tem (inclusive o que veio do
+    // servidor pela busca); sem busca, só na janela.
+    let list = (b ? chats.filter((c) => isRealDirectChat(c.id)) : chatsDaJanela).filter((c) => {
+      if (!b) return true;
+      return (
+        (c.nome + " " + c.numero).toLowerCase().includes(b) ||
+        formatarNumeroExibicao(c.numero).includes(b)
+      );
+    });
 
     if (filtroNaoLidas) {
       list = list.filter((c) => c.unread > 0);
@@ -2486,7 +2526,101 @@ export default function CrmWhatsAppClient({
       list = list.filter((c) => String(c.vendedorId ?? "") === String(vendedorAtivoId));
     }
     return list;
-  }, [chats, buscaChat, filtroNaoLidas, filtroMeus, vendedorAtivoId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chats, chatsDaJanela, buscaChat, filtroNaoLidas, filtroMeus, vendedorAtivoId]);
+
+  // Filtro mudou: volta a desenhar só o começo da lista.
+  useEffect(() => {
+    setLimiteLista(LISTA_POR_VEZ);
+  }, [buscaChat, filtroNaoLidas, filtroMeus]);
+
+  // Junta à tela conversas que o servidor mandou sob pedido.
+  const juntarConversasSobDemanda = (lista: any[]) => {
+    if (!Array.isArray(lista) || lista.length === 0) return;
+    setChats((prev) => {
+      const porId = new Map(prev.map((c) => [c.id, c]));
+      let mudou = false;
+      for (const sc of lista) {
+        if (!sc?.chatId || !isRealDirectChat(sc.chatId) || porId.has(sc.chatId)) continue;
+        const ehLid = String(sc.chatId).endsWith("@lid");
+        const realNum =
+          sc.realNumber || sc.displayNumber || (ehLid ? "" : String(sc.chatId).replace(/@.*$/, ""));
+        const nomeServidor = String(sc.contactName || "").replace(/@.*$/, "");
+        porId.set(sc.chatId, {
+          id: sc.chatId,
+          nome:
+            (!nomeEhCodigo(nomeServidor, sc.chatId) ? nomeServidor : "") ||
+            realNum ||
+            (ehLid ? "Contato (número oculto)" : "Contato"),
+          numero: realNum,
+          pic: sc.profilePicUrl || null,
+          picOriginal: sc.profilePicOriginal || null,
+          unread: sc.unreadCount || 0,
+          lastMessage: sc.lastMessageBody || "",
+          timestamp: sc.lastMessageTimestamp || 0,
+          tags: Array.isArray(sc.labels) ? sc.labels : [],
+          vendedorId: sc.assignedSellerId ?? null,
+          kanbanColId: "novos",
+          fixado: Boolean(sc.isPinned),
+          optOut: Boolean(sc.optOut),
+          bloqueado: Boolean(sc.isBlocked),
+          lid: sc.lid ?? null,
+          sobDemanda: Date.now(),
+        } as CrmChat);
+        mudou = true;
+      }
+      if (!mudou) return prev;
+      return [...porId.values()].sort((a, b) => b.timestamp - a.timestamp);
+    });
+  };
+
+  // Busca pelo nome/número: além do que já está na tela, pergunta ao servidor,
+  // que procura nas 12 mil (inclusive as de mais de 30 dias).
+  useEffect(() => {
+    const termo = buscaChat.trim();
+    if (termo.length < 3 || !socketRef.current) {
+      setBuscandoNoServidor(false);
+      return;
+    }
+    const t = setTimeout(() => {
+      const socket = socketRef.current;
+      if (!socket?.connected) return;
+      setBuscandoNoServidor(true);
+      // Servidor antigo não conhece o pedido e não responde: desiste sozinho.
+      const desiste = setTimeout(() => setBuscandoNoServidor(false), 8000);
+      socket.emit("panel:conversas-antigas", { busca: termo, limite: 80 }, (r: any) => {
+        clearTimeout(desiste);
+        setBuscandoNoServidor(false);
+        if (r?.ok) juntarConversasSobDemanda(r.conversas || []);
+      });
+    }, 450);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [buscaChat]);
+
+  // Mais 30 dias para trás.
+  const carregarConversasAntigas = () => {
+    if (carregandoAntigas) return;
+    const socket = socketRef.current;
+    const antesDe = Date.now() - janelaDias * DIA_MS;
+    const abrir = () => {
+      setJanelaDias((d) => d + DIAS_DA_LISTA);
+      setCarregandoAntigas(false);
+    };
+    if (!socket?.connected) return abrir();
+    setCarregandoAntigas(true);
+    // Servidor antigo (que ainda manda tudo) não responde: só alarga a janela.
+    const desiste = setTimeout(abrir, 8000);
+    socket.emit(
+      "panel:conversas-antigas",
+      { antesDe, dias: DIAS_DA_LISTA, limite: 1500 },
+      (r: any) => {
+        clearTimeout(desiste);
+        if (r?.ok) juntarConversasSobDemanda(r.conversas || []);
+        abrir();
+      }
+    );
+  };
 
   // Clientes que o vendedor tirou do quadro. Ficam guardados para poderem
   // voltar — tirar do funil não é apagar a conversa.
@@ -3943,7 +4077,18 @@ export default function CrmWhatsAppClient({
               </button>
 
               {/* Chat list items with real profile pics and formatted numbers */}
-              <div className="flex-1 overflow-y-auto px-2 pb-2 space-y-1">
+              <div
+                className="flex-1 overflow-y-auto px-2 pb-2 space-y-1"
+                onScroll={(e) => {
+                  const el = e.currentTarget;
+                  if (
+                    el.scrollTop + el.clientHeight >= el.scrollHeight - 300 &&
+                    chatsFiltrados.length > limiteLista
+                  ) {
+                    setLimiteLista((n) => n + LISTA_POR_VEZ);
+                  }
+                }}
+              >
                 {/* Resultados da busca por texto ocupam o lugar da lista
                     enquanto ela está ativa — clicar abre a conversa. */}
                 {mostrarBuscaMensagem && buscaMensagem.trim().length >= 2 ? (
@@ -4000,7 +4145,7 @@ export default function CrmWhatsAppClient({
                       : "Nenhuma conversa encontrada."}
                   </div>
                 ) : (
-                  chatsFiltrados.map((chat) => {
+                  chatsFiltrados.slice(0, limiteLista).map((chat) => {
                     const isAtivo = chat.id === chatSelecionadoId;
                     const numeroFormatado = formatarNumeroExibicao(chat.numero || chat.id);
 
@@ -4090,6 +4235,36 @@ export default function CrmWhatsAppClient({
                       </div>
                     );
                   })
+                )}
+
+                {/* Rodapé da lista: mais da mesma lista, ou mais antigas. */}
+                {!(mostrarBuscaMensagem && buscaMensagem.trim().length >= 2) && (
+                  <div className="pt-1 pb-2 space-y-1">
+                    {chatsFiltrados.length > limiteLista ? (
+                      <button
+                        onClick={() => setLimiteLista((n) => n + LISTA_POR_VEZ * 2)}
+                        className="w-full py-1.5 rounded-lg text-xs font-bold border border-[#e3e3e3] bg-white text-[#202124] hover:bg-[#f0f2f5] cursor-pointer"
+                      >
+                        Mostrar mais ({chatsFiltrados.length - limiteLista} restantes)
+                      </button>
+                    ) : buscaChat.trim() ? (
+                      buscandoNoServidor && (
+                        <div className="text-center text-[11px] text-[#5f6368] py-1">
+                          Procurando também nas conversas antigas…
+                        </div>
+                      )
+                    ) : (
+                      <button
+                        onClick={carregarConversasAntigas}
+                        disabled={carregandoAntigas}
+                        className="w-full py-1.5 rounded-lg text-xs font-bold border border-dashed border-[#c4c7c5] bg-white text-[#5f6368] hover:bg-[#f0f2f5] cursor-pointer disabled:opacity-60"
+                      >
+                        {carregandoAntigas
+                          ? "Carregando…"
+                          : `Carregar conversas mais antigas (mostrando ${janelaDias} dias)`}
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
             </aside>
@@ -5459,8 +5634,7 @@ export default function CrmWhatsAppClient({
             {kanbanTamanho !== "recolhido" && (
               <div className="flex-1 flex gap-3 overflow-x-auto pb-1 items-stretch min-h-0">
                 {kanbanColunas.map((col) => {
-                  const cardsNaColuna = chats
-                    .filter((c) => isRealDirectChat(c.id))
+                  const cardsNaColuna = chatsDaJanela
                     .filter((c) => {
                       const matchCol = getKanbanCol(c.id) === col.id;
                       const matchBusca =
@@ -5517,7 +5691,7 @@ export default function CrmWhatsAppClient({
                             Sem cards
                           </div>
                         ) : (
-                          cardsNaColuna.map((card) => (
+                          cardsNaColuna.slice(0, kanbanLimite[col.id] || KANBAN_POR_VEZ).map((card) => (
                             <div
                               key={card.id}
                               draggable={kanbanComposerId !== card.id}
@@ -5674,6 +5848,19 @@ export default function CrmWhatsAppClient({
                               )}
                             </div>
                           ))
+                        )}
+                        {cardsNaColuna.length > (kanbanLimite[col.id] || KANBAN_POR_VEZ) && (
+                          <button
+                            onClick={() =>
+                              setKanbanLimite((m) => ({
+                                ...m,
+                                [col.id]: (m[col.id] || KANBAN_POR_VEZ) + KANBAN_POR_VEZ,
+                              }))
+                            }
+                            className="w-full py-1 rounded-lg text-[11px] font-bold border border-[#e3e3e3] bg-white text-[#5f6368] hover:bg-[#f8f9fa] cursor-pointer"
+                          >
+                            Mostrar mais ({cardsNaColuna.length - (kanbanLimite[col.id] || KANBAN_POR_VEZ)})
+                          </button>
                         )}
                       </div>
                     </div>

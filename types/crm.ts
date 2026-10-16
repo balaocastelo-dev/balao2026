@@ -77,6 +77,12 @@ export interface CrmChat {
    * chegar — o servidor só passa a listá-la depois que houver mensagem.
    */
   localDesde?: number;
+  /**
+   * Veio de fora da janela de 30 dias, sob pedido (busca ou "carregar mais
+   * antigas"). A lista completa do servidor não a traz, então ela é guardada
+   * quando a lista chega.
+   */
+  sobDemanda?: number;
 }
 
 export interface CrmProdutoResumo {
