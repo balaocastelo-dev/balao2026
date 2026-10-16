@@ -2,6 +2,22 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "como-ver-quanta-memoria-ram-o-computador-tem",
+      "titulo": "Como ver quanta memória RAM o computador tem e quanta está em uso",
+      "resumo": "Em menos de um minuto o Windows e o Mac mostram quanta memória RAM o computador tem e se ela está faltando. Veja onde olhar e que número importa.",
+      "categoria": "hardware",
+      "etiquetas": [
+        "memória ram",
+        "upgrade",
+        "diagnóstico",
+        "windows"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-16T20:56:48.928Z",
+      "minutos": 5,
+      "formato": "dica"
+    },
+    {
       "slug": "muse-spark-open-meta-ia-aberta-memoria",
       "titulo": "Muse Spark Open: IA aberta da Meta roda em casa, mas pede 1 TB de memória",
       "resumo": "A Meta liberou em 15 de outubro os pesos do Muse Spark Open. Ele roda fora da nuvem, mas só em máquinas com muita memória. Veja o que muda para você.",
@@ -286,5 +302,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-16T15:06:20.802Z"
+  "atualizadoEm": "2026-10-16T20:56:49.556Z"
 }

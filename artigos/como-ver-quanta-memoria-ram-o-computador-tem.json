@@ -1,0 +1,189 @@
+{
+  "slug": "como-ver-quanta-memoria-ram-o-computador-tem",
+  "titulo": "Como ver quanta memória RAM o computador tem e quanta está em uso",
+  "resumo": "Em menos de um minuto o Windows e o Mac mostram quanta memória RAM o computador tem e se ela está faltando. Veja onde olhar e que número importa.",
+  "categoria": "hardware",
+  "etiquetas": [
+    "memória ram",
+    "upgrade",
+    "diagnóstico",
+    "windows"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-16T20:56:48.928Z",
+  "formato": "dica",
+  "roteiro": {
+    "fala": "Quer saber se falta memória no seu computador? No Windows, abra o Gerenciador de Tarefas, vá em Desempenho e clique em Memória. Ali aparece quanto você tem, quanto está em uso e quantos encaixes estão ocupados. Memória quase cheia não é defeito: o sistema aproveita o que sobra. O número que importa é o disponível. Se ele fica sempre baixo e o computador trava com o que você usa todo dia, aí sim vale pensar em mais memória.",
+    "titulo": "Falta memória no seu PC?",
+    "destaques": [
+      "Gerenciador de Tarefas",
+      "Olhe o Disponível",
+      "Mac: pressão de memória",
+      "Slots livres = upgrade"
+    ],
+    "legenda": "Em menos de um minuto dá para ver quanta memória RAM o computador tem e se ela está faltando no seu uso. A dica completa, para Windows e Mac, está no blog.",
+    "hashtags": [
+      "memoriaram",
+      "windows",
+      "mac",
+      "upgrade",
+      "informatica",
+      "campinas"
+    ]
+  },
+  "seo": {
+    "titulo": "Como ver quanta memória RAM o PC tem e quanta está em uso"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Para ver quanta memória RAM o computador tem e quanta está em uso, não precisa abrir o gabinete nem instalar programa. No Windows, o Gerenciador de Tarefas mostra tudo numa tela só; no Mac, o Monitor de Atividade faz o mesmo papel. A memória RAM é a área de trabalho rápida do computador, onde ficam os programas e arquivos abertos."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é se assustar com a memória quase toda ocupada. Tanto o Windows quanto o macOS usam a memória livre para guardar dados que podem ser reaproveitados, e liberam esse espaço quando um programa pede. O número que diz se falta memória não é o usado: no Windows é o disponível e, no Mac, a pressão de memória."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "Em **Configurações > Sistema > Sobre**, o Windows mostra a quantidade de RAM instalada.",
+        "No **Gerenciador de Tarefas**, em Desempenho e Memória, aparecem o uso, o disponível, a velocidade e os **encaixes ocupados**.",
+        "No Mac, o gráfico de **pressão de memória** do Monitor de Atividade diz se a memória está dando conta.",
+        "Memória cheia, sozinha, não é problema; disponível sempre baixo com lentidão no uso diário, sim."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Onde ver a memória no Windows"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Para saber só o total, a página de suporte da Microsoft indica o caminho: clique com o botão direito em Iniciar, entre em Configurações, depois em Sistema e em Sobre. Em Especificações do dispositivo aparece a quantidade de RAM instalada, junto com o processador. Para ver o uso, siga estes passos:"
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "Aperte **Ctrl + Shift + Esc** para abrir o Gerenciador de Tarefas. Se ele abrir em modo simples, clique em **Mais detalhes**.",
+        "Entre em **Desempenho** e escolha **Memória**.",
+        "Abra os programas que você usa no dia a dia e observe os números por alguns minutos, não só logo depois de ligar."
+      ]
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "O que aparece",
+        "O que significa"
+      ],
+      "linhas": [
+        [
+          "Em uso",
+          "A memória ocupada agora pelo Windows e pelos programas abertos. Alto é normal"
+        ],
+        [
+          "Disponível",
+          "O que um programa novo consegue usar na hora, contando o cache que o Windows libera. É o número que mais importa"
+        ],
+        [
+          "Em cache",
+          "Dados guardados para os arquivos e programas abrirem mais rápido; o Windows devolve quando precisa"
+        ],
+        [
+          "Confirmada",
+          "Memória prometida aos programas, somando a RAM e o arquivo de paginação no disco. Pode passar do total de RAM"
+        ],
+        [
+          "Reservado para hardware",
+          "Parte separada para o vídeo integrado e outros componentes, que o Windows não usa"
+        ],
+        [
+          "Slots usados",
+          "Quantos encaixes de memória da placa-mãe estão ocupados"
+        ]
+      ],
+      "titulo": "O que cada número do Gerenciador de Tarefas quer dizer",
+      "fonte": {
+        "nome": "Help Desk Geek",
+        "url": "https://helpdeskgeek.com/task-manager-ram-meaning-explained/"
+      },
+      "nota": "Os nomes podem mudar um pouco conforme a versão do Windows."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A linha de encaixes já adianta a conversa sobre upgrade: se aparecem encaixes livres, normalmente dá para acrescentar um pente sem tirar o atual. Antes de comprar, confira o tipo e a velocidade da memória; o artigo sobre [DDR4 e DDR5](/blog/ddr4-ou-ddr5-da-para-aproveitar-a-memoria-antiga) explica por que um tipo não serve no lugar do outro."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "upgrade"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "No Mac e quando o número engana"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "No Mac, abra o Monitor de Atividade e clique em Memória. Segundo a Apple, a parte de baixo da janela mostra a memória física, ou seja, quanto está instalado, a memória usada, a comprimida e o espaço de troca no disco. O gráfico de pressão de memória resume tudo: verde indica que a memória está sendo bem usada, amarelo pede atenção e vermelho indica que falta memória."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Apple também ensina a ver se o Mac aceita mais memória: com a tecla Option apertada, abra o menu Apple e Informações do Sistema, e em Hardware clique em Memória. Se não aparecer a parte de encaixes com memória atualizável, a memória não pode ser trocada. Nesse caso, o jeito é ajustar o uso ou escolher melhor na próxima compra."
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "Computador lento com bastante memória disponível tem outra causa: disco cheio ou desgastado, aquecimento, programa em excesso. E se o Windows mostra menos memória instalada do que você comprou, pode ser pente mal encaixado, limite da versão do sistema ou memória reservada pela placa. Nesses casos, diagnóstico antes de compra.",
+      "titulo": "Quando esta dica não basta"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se o disponível fica baixo no uso de todo dia e o computador trava, o caminho costuma ser acrescentar memória; o guia de [como aumentar a memória RAM com segurança](/blog/como-aumentar-memoria-ram-pc) mostra os cuidados. Na Balão da Informática, no Cambuí, em Campinas, há [memória RAM](/categoria/hardware-memoria-ram) e a [assistência técnica](/manutencao) faz o upgrade e o diagnóstico. Em uma linha: olhe o disponível, não o usado, antes de decidir."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Memória RAM quase toda em uso é sinal de defeito?",
+      "resposta": "Não. O Windows e o macOS aproveitam a memória livre para guardar dados que aceleram o uso e liberam esse espaço quando precisam. O sinal de falta é o disponível baixo o tempo todo, junto com travamentos."
+    },
+    {
+      "pergunta": "Como saber se o computador aceita mais memória?",
+      "resposta": "No Windows, o Gerenciador de Tarefas mostra quantos encaixes estão ocupados; se sobra algum, costuma dar para acrescentar. No Mac, as Informações do Sistema dizem se a memória é atualizável. Em notebook com memória soldada, não há troca."
+    },
+    {
+      "pergunta": "Por que o Windows mostra menos memória do que eu comprei?",
+      "resposta": "Parte pode estar reservada para o vídeo integrado, a versão do Windows pode ter um limite, ou um pente pode estar mal encaixado ou com defeito. Se a diferença for grande, vale um diagnóstico."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Find information about your Windows device — Suporte da Microsoft",
+      "url": "https://support.microsoft.com/en-in/help/13443",
+      "data": "setembro de 2026"
+    },
+    {
+      "nome": "Task Manager RAM Meaning: What In Use, Available, Committed, and Cached Really Mean — Help Desk Geek",
+      "url": "https://helpdeskgeek.com/task-manager-ram-meaning-explained/",
+      "data": "setembro de 2026"
+    },
+    {
+      "nome": "View memory usage in Activity Monitor on Mac — Suporte da Apple",
+      "url": "https://support.apple.com/guide/activity-monitor/view-memory-usage-actmntr1004/mac",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Check if your Mac needs more RAM in Activity Monitor — Suporte da Apple",
+      "url": "https://support.apple.com/kb/PH19650",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Installed 4 x 48 GB Memory on Windows 11 Home, but Task Manager Only Shows 128 GB in Use — MSI",
+      "url": "https://us.msi.com/support/technical_details/NB_Win11_Home_Mem_128GB",
+      "data": "outubro de 2024"
+    }
+  ]
+}
