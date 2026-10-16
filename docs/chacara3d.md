@@ -15,13 +15,15 @@ chácara), hospedado no site; não faz parte da loja.
   oclusão de ambiente, materiais com textura de verdade, grama 3D, vento nas plantas,
   água com reflexo e refração, cascata, bolhas, carpas, cachorros, galinhas, galo,
   passarinhos, borboletas, vaga-lumes, e a vilinha mobiliada por dentro.
-- **Vilinha (12/10/2026)**: as três tiny houses viraram sobrados de 7 × 3 m (42 m² em dois
-  pisos: sala, cozinha e banheiro embaixo; casal, beliche e banheiro em cima) com mirante
-  no lugar do telhado (deck a 5,75 m, teto verde, espreguiçadeiras, luneta), escada de
-  dentro em L com degraus flutuantes e caracol de fora. Azul em x 4,5–11,5 e amarela em
-  x 16,5–23,5 no muro y = 0, verde em x 8,5–15,5 no muro y = 10; pracinha com a
-  jabuticabeira em (14,0; 2,2). Detalhes, formato do `extra` e o que o passeio ainda
-  precisa acompanhar: seção "Os sobrados da vilinha" do `chacara3d/README.md`.
+- **Vilinha (15/10/2026)**: as três casas viraram **casas container** no modelo da foto que o
+  Thiago mandou ("casa container com terraço"): um container de 7 × 3 m por casa (sala, cozinha,
+  banheiro e quarto de casal), chapa ondulada pintada com quinas de outra cor (azul-marinho com
+  amarelo, amarelo com azul-marinho, verde com amarelo), janelas e porta de vidro com caixilho
+  branco; em cima, terraço todo coberto por telhado metálico sobre pilares, com guarda-corpo, mesa,
+  cadeiras, espreguiçadeiras e vasos; escada metálica reta de fora, na lateral. Azul em x 4,5–11,5
+  e amarela em x 16,5–23,5 no muro y = 0, verde em x 8,5–15,5 no muro y = 10. Antes (12/10) eram
+  sobrados com mirante e escada caracol. Detalhes e o formato do `extra`: seção "As casas container
+  da vilinha" do `chacara3d/README.md`; conferência sem Blender em `chacara3d/modelo/teste_casas.py`.
 - **Cenários (12/10/2026)**: botão no menu liga um de cinco, com gente animada (corpos
   MakeHuman CC0, movimentos da captura da CMU), música gerada no navegador e a hora certa:
   festa de aniversário (18h36), reunião no cineminha (20h48), trabalhadores limpando,
@@ -31,7 +33,7 @@ chácara), hospedado no site; não faz parte da loja.
   `chacara3d/cenarios/`, pessoas em `chacara3d/pessoas/`.
 - **Projeção mapeada (12/10/2026)**: plano de iluminação noturna com 10 projetores
   (mangueira, jabuticabeira, coqueiros, amendoeira, muro da piscina, os dois portões e a
-  parede lateral de cada sobrado). No menu, "Iluminação e projeções" escolhe por lugar:
+  parede lateral de cada casa container). No menu, "Iluminação e projeções" escolhe por lugar:
   26 animações (carpas, fogo, aurora, galáxia, mandala, fogos...), luz de jardim, vídeo do
   computador ou YouTube (só nas superfícies planas, em 16:9, como no cineminha). Atalhos
   "Luz de jardim", "Show de projeções" e "Desligar tudo"; a escolha fica guardada no navegador.

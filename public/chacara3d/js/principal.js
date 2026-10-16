@@ -170,7 +170,8 @@ async function carregar() {
     const frente = c.y[0] < 1 ? c.y[1] : c.y[0];
     U.uFrente.value[i] = -frente;
   });
-  U.uTopoCasa.value = Math.max(3.35, ...(extra.casas || []).map(c => (c.teto || 3.3) + 0.05));
+  // a luz de dentro só baixa até o forro (o terraço em cima do container fica com a luz de fora)
+  U.uTopoCasa.value = Math.max(...(extra.casas || []).map(c => (c.teto || 3.3) + 0.05), 0);
   casas = criarCasas(cena, extra, M, colisao);
   agua = criarAgua(cena, ceu, { reflexo: estado.qualidade >= 2, nivel: estado.qualidade });
   if (estado.qualidade >= 1) {
@@ -264,7 +265,7 @@ function andar(dt) {
   }
   eu.vx += (tx - eu.vx) * k; eu.vy += (ty - eu.vy) * k;
   const nx = eu.x + eu.vx * dt, ny = eu.y + eu.vy * dt, ox = eu.x, oy = eu.y;
-  const R = estado.dentroDeCasa ? 0.2 : 0.27;     // dentro dos sobrados os vãos são justos
+  const R = estado.dentroDeCasa ? 0.2 : 0.27;     // dentro das casas os vãos são justos
   if (!C.barra(nx, ny, eu.pes, R)) { eu.x = nx; eu.y = ny; }
   else if (!C.barra(nx, eu.y, eu.pes, R)) { eu.x = nx; eu.vy = 0; }
   else if (!C.barra(eu.x, ny, eu.pes, R)) { eu.y = ny; eu.vx = 0; }

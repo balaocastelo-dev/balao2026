@@ -26,7 +26,7 @@ export const U = {
   uNivelLago: { value: -0.64 },
   uAguaHidro: { value: new THREE.Vector4(32.22, 33.98, -3.08, -1.32) },
   uNivelHidro: { value: 0.42 },
-  // sobrados: até onde vai a caixa de cada casa e o brilho quente de dentro à noite
+  // casas da vilinha: até onde vai a caixa de cada casa e o brilho quente de dentro à noite
   uTopoCasa: { value: 5.5 },
   uLuzCasa: { value: [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()] },
   // projeção mapeada: até NPROJ projetores que lançam um ladrilho do atlas sobre o que estiver
@@ -339,7 +339,7 @@ export function criarMateriais(info) {
     tecido_amarelo: superficie('tecido', { cor: new THREE.Color(0.85, 0.6, 0.18) }),
     tecido_verde: superficie('tecido', { cor: new THREE.Color(0.22, 0.42, 0.3) }),
     cortina: superficie('tecido', { cor: new THREE.Color(0.93, 0.9, 0.82) }),
-    // sobrados da vilinha
+    // casas da vilinha (interior)
     deck_ipe: superficie('deck', { relevo: 0.9 }),
     porcelanato: superficie('concreto', { cor: new THREE.Color(1.05, 1.03, 1.0), rug: 0.45, relevo: 0.4 }),
     madeira_clara: superficie('madeira', { relevo: 0.6, cor: new THREE.Color(1.45, 1.25, 1.0) }),
@@ -368,6 +368,14 @@ export function criarMateriais(info) {
     acc_blue: liso(new THREE.Color(0.03, 0.17, 0.42), 0.4),
     acc_yellow: liso(new THREE.Color(0.78, 0.45, 0.04), 0.4),
     acc_green: liso(new THREE.Color(0.04, 0.3, 0.23), 0.4),
+    // casas container da vilinha: chapa pintada, quinas, caixilhos brancos, telha metálica
+    chapa_azul: liso(new THREE.Color(0.035, 0.055, 0.11), 0.5),
+    chapa_amarela: liso(new THREE.Color(0.83, 0.46, 0.021), 0.5),
+    chapa_verde: liso(new THREE.Color(0.026, 0.127, 0.07), 0.5),
+    pintura_amarela: liso(new THREE.Color(0.95, 0.6, 0.012), 0.45),
+    pintura_marinho: liso(new THREE.Color(0.022, 0.036, 0.08), 0.45),
+    esquadria_branca: liso(new THREE.Color(0.86, 0.86, 0.84), 0.35),
+    telha_metalica: liso(new THREE.Color(0.34, 0.35, 0.37), 0.42, { metal: 0.75 }),
     mesh: null,
     leaf_core: liso(new THREE.Color(0.012, 0.03, 0.01), 1, { vento: 0.0016 }),
     leaf_core_big: liso(new THREE.Color(0.01, 0.025, 0.009), 1, { vento: 0.0016 }),
