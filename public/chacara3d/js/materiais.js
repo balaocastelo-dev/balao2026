@@ -369,7 +369,7 @@ export function criarMateriais(info) {
     acc_yellow: liso(new THREE.Color(0.78, 0.45, 0.04), 0.4),
     acc_green: liso(new THREE.Color(0.04, 0.3, 0.23), 0.4),
     // casas container da vilinha: chapa pintada, quinas, caixilhos brancos, telha metálica
-    chapa_azul: liso(new THREE.Color(0.035, 0.055, 0.11), 0.5),
+    chapa_azul: liso(new THREE.Color(0.024, 0.038, 0.082), 0.5),
     chapa_amarela: liso(new THREE.Color(0.83, 0.46, 0.021), 0.5),
     chapa_verde: liso(new THREE.Color(0.026, 0.127, 0.07), 0.5),
     pintura_amarela: liso(new THREE.Color(0.95, 0.6, 0.012), 0.45),

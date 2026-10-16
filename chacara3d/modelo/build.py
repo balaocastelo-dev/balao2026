@@ -138,7 +138,7 @@ m_plain('vidro_jateado', (0.80, 0.84, 0.84), 0.45, **{'Alpha': 0.7})           #
 m_plain('tapete', (0.42, 0.40, 0.37), 0.98, noise=0.08, nscale=30)
 m_plain('couro', (0.36, 0.17, 0.07), 0.5)                                      # cadeiras e pufes
 # casas container da vilinha (chapa pintada, quinas, caixilhos brancos, telha metálica)
-m_plain('chapa_azul', (0.035, 0.055, 0.11), 0.5)                                # azul-marinho da foto
+m_plain('chapa_azul', (0.024, 0.038, 0.082), 0.5)                                # azul-marinho da foto
 m_plain('chapa_amarela', (0.83, 0.46, 0.021), 0.5)
 m_plain('chapa_verde', (0.026, 0.127, 0.07), 0.5)
 m_plain('pintura_amarela', (0.95, 0.60, 0.012), 0.45)                           # quinas e requadros (azul e verde)
