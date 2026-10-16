@@ -1,6 +1,6 @@
 // Plano de iluminação noturna: projetores virtuais que lançam animações, cores de luz de jardim,
 // vídeos do computador ou o YouTube sobre as copas das árvores, o muro da piscina, os portões
-// e as paredes laterais lisas dos sobrados (projeção mapeada / video mapping).
+// e as paredes laterais lisas das casas container (projeção mapeada / video mapping).
 //
 // Como funciona: cada projetor ocupa um ladrilho de 512² de um atlas (2048 × 1536). A cada quadro
 // o ladrilho é desenhado (animação procedural de projecoes_anim.js, vídeo do computador ou cor) e os

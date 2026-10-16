@@ -178,7 +178,7 @@ export function criarColisao(extra) {
     return -1;
   }
   // altura do chão em (x, y) para quem está com os pés em `pes`: a superfície mais alta que dá para
-  // alcançar dali (os sobrados têm pisos empilhados: térreo, andar de cima, mirante e as escadas)
+  // alcançar dali (as casas têm pisos empilhados: o de dentro, o terraço em cima e os degraus da escada)
   function chaoEm(x, y, pes) {
     const lim = (pes === undefined ? 0 : pes) + SUBIDA;
     let z = chaoBase(x, y);
@@ -237,12 +237,13 @@ export function ondeEstou(x, y, extra, pes) {
   pes = pes || 0;
   for (const c of (extra.casas || [])) if (x > c.x[0] && x < c.x[1] && y > c.y[0] && y < c.y[1]) {
     const nome = c.nome.toLowerCase();
-    if (c.deck && pes > c.deck - 0.4) return 'Mirante da ' + nome;
+    if (c.deck && pes > c.deck - 0.4) return 'Terraço da ' + nome;
     if (c.z1 && pes > c.z1 - 0.4) return 'Andar de cima da ' + nome;
     return 'Dentro da ' + nome;
   }
   for (const e of (extra.espirais || [])) if (pes > 0.4 && Math.hypot(x - e.cx, y - e.cy) < 1.3) return 'Escada do mirante (' + e.casa.toLowerCase() + ')';
-  for (const c of (extra.casas || [])) if (c.deck && pes > c.deck - 0.4 && x > c.x[0] - 0.6 && x < c.x[1] + 0.6 && y > c.y[0] - 0.6 && y < c.y[1] + 0.6) return 'Mirante da ' + c.nome.toLowerCase();
+  for (const e of (extra.escadas || [])) if (pes > 0.15 && x > e.x[0] && x < e.x[1] && y > e.y[0] && y < e.y[1]) return 'Escada do terraço (' + e.casa.toLowerCase() + ')';
+  for (const c of (extra.casas || [])) if (c.deck && pes > c.deck - 0.4 && x > c.x[0] - 0.6 && x < c.x[1] + 0.6 && y > c.y[0] - 0.6 && y < c.y[1] + 0.6) return 'Terraço da ' + c.nome.toLowerCase();
   if (x < 21) return x < 2.6 ? 'Portão do gramado' : 'Vilinha';
   if (x < 31.6) return 'Gramado';
   if (x < 46) return y > 6.2 ? 'Churrasqueira' : (x > 34.2 && x < 44 && y > 1.1 && y < 4.7 ? 'Dentro da piscina' : 'Piscina');
