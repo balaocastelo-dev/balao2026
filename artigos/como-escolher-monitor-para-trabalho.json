@@ -1,0 +1,312 @@
+{
+  "slug": "como-escolher-monitor-para-trabalho",
+  "titulo": "Monitor para trabalho: como escolher tamanho, resolução e painel",
+  "resumo": "Monitor para trabalho: veja como combinar tamanho e resolução, qual painel cansa menos a vista e como posicionar a tela para trabalhar o dia todo.",
+  "categoria": "guias",
+  "etiquetas": [
+    "monitor",
+    "home office",
+    "ergonomia",
+    "escritório"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-16T08:58:17.220Z",
+  "seo": {
+    "titulo": "Monitor para trabalho: tamanho, resolução e painel"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Escolher monitor para trabalho parece simples até você abrir a lista de opções: tamanho em polegadas, resolução, tipo de painel, taxa de atualização, entradas. Quem passa oito horas por dia diante da tela sente cada uma dessas escolhas nos olhos, no pescoço e na quantidade de janelas que consegue manter abertas ao mesmo tempo."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que monitor maior é sempre melhor. Não é: o que define a nitidez do texto é a combinação de tamanho com resolução, e o que define o conforto é a posição da tela na mesa. Para a maioria dos escritórios, um painel IPS de 24 polegadas em Full HD ou de 27 polegadas em resolução mais alta resolve bem. O resto deste guia explica como decidir."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "**Tamanho e resolução andam juntos**: 24 polegadas combina com Full HD; 27 polegadas pede resolução maior para o texto não ficar granulado.",
+        "Para planilhas, textos e sistemas, o painel **IPS** costuma ser a escolha mais equilibrada, pela cor estável e pelos bons ângulos de visão.",
+        "Frequência de 60 Hz a 75 Hz atende bem o trabalho de escritório; mais do que isso é conforto extra, não necessidade.",
+        "Confira as **entradas**: quem usa notebook ganha muito com USB-C que transmite imagem e carrega a bateria pelo mesmo cabo."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Tamanho e resolução: como escolher o par certo"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Resolução é a quantidade de pontos (pixels) que formam a imagem: Full HD tem 1920 por 1080, QHD tem 2560 por 1440 e 4K tem 3840 por 2160. O mesmo número de pixels espalhado numa tela maior deixa cada ponto maior, e o texto perde definição. Por isso a pergunta certa não é qual o tamanho, e sim quantos pixels cabem em cada polegada."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Essa medida se chama densidade de pixels, ou PPI. Ela sai de uma conta simples com a diagonal da tela e a resolução, e a tabela abaixo mostra as combinações mais comuns. Quanto maior o número, mais fino e nítido o texto aparece, desde que a escala do sistema esteja ajustada."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Tamanho",
+        "Resolução",
+        "Pixels por polegada (aprox.)",
+        "Para quem"
+      ],
+      "linhas": [
+        [
+          "24 polegadas",
+          "Full HD (1920 × 1080)",
+          "92",
+          "Escritório, sistemas, navegação"
+        ],
+        [
+          "27 polegadas",
+          "Full HD (1920 × 1080)",
+          "82",
+          "Quem senta mais longe; texto fica menos nítido"
+        ],
+        [
+          "27 polegadas",
+          "QHD (2560 × 1440)",
+          "109",
+          "Planilhas grandes, várias janelas lado a lado"
+        ],
+        [
+          "27 polegadas",
+          "4K (3840 × 2160)",
+          "163",
+          "Foto, design, leitura longa com texto muito fino"
+        ]
+      ],
+      "titulo": "Densidade de pixels das combinações mais comuns",
+      "colunaDestaque": 2,
+      "nota": "Valores calculados a partir da diagonal e da resolução de cada tela. No 4K, o Windows normalmente aplica uma escala maior para o texto não ficar pequeno demais."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Na prática, o Full HD de 24 polegadas segue como um padrão confortável para quem trabalha com sistemas de gestão, e-mail e documentos. O de 27 polegadas em Full HD é o caso que mais decepciona: a tela é grande, mas as letras ficam visivelmente serrilhadas de perto. Se o espaço e o orçamento permitem 27 polegadas, prefira QHD."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas resolução alta tem um custo escondido. Em 4K, o texto fica pequeno demais sem ampliação, e o Windows compensa com a escala, que aumenta o tamanho de letras e ícones. A Microsoft orienta manter a resolução marcada como recomendada e escolher também a escala recomendada; fora dela, o texto tende a perder nitidez."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Tipo de painel: IPS, VA ou TN para o trabalho"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O painel é a tecnologia da tela de cristal líquido, e cada tipo tem um ponto forte. A diferença aparece na cor, no contraste (o quanto o preto é preto ao lado do branco) e no ângulo de visão, que diz se a imagem muda quando você olha de lado ou de cima."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Painel",
+        "Ponto forte",
+        "Ponto fraco",
+        "Indicado para"
+      ],
+      "linhas": [
+        [
+          "IPS",
+          "Cor fiel e ângulo de visão amplo",
+          "Brilho leve nos cantos em cena escura, visto de lado",
+          "Escritório, design, foto, uso geral"
+        ],
+        [
+          "VA",
+          "Contraste alto, pretos mais profundos",
+          "Cor e contraste mudam um pouco fora do centro",
+          "Uso misto, filmes, quem trabalha em ambiente escuro"
+        ],
+        [
+          "TN",
+          "Resposta rápida e custo menor",
+          "Ângulo de visão estreito e cor limitada",
+          "Tarefas básicas e jogos competitivos"
+        ]
+      ],
+      "titulo": "Os três tipos de painel LCD no uso de escritório",
+      "colunaDestaque": 0,
+      "fonte": {
+        "nome": "TechSpot — Display Tech Compared: TN vs. VA vs. IPS",
+        "url": "https://www.techspot.com/article/1788-display-tech-compared/"
+      },
+      "nota": "Os pontos de VA e TN também aparecem no guia de painéis do HDMI Licensing Administrator, listado nas fontes."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Para trabalho, o IPS costuma ganhar porque a imagem continua igual quando você se mexe na cadeira ou quando um colega olha a tela de lado durante uma reunião. É também o tipo mais comum em monitores de escritório e em notebooks, segundo a TechSpot. Quem lida com foto, catálogo de produtos ou identidade visual se beneficia da cor mais fiel."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O VA tem seu lugar. O contraste maior deixa o preto mais escuro, o que agrada em ambiente com pouca luz e em quem também usa o monitor para filmes. O guia do HDMI Licensing Administrator descreve o VA justamente como opção intermediária para trabalho misto. Já o TN, mais barato, serve para tarefas simples, mas a cor muda bastante conforme o ângulo, o que incomoda em telas grandes."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Existe ainda o OLED, que acende cada ponto individualmente e entrega preto absoluto. É uma tecnologia excelente para imagem, mas para quem deixa planilhas e barras de tarefas paradas na tela o dia inteiro, vale ler com atenção as recomendações do fabricante sobre conteúdo estático antes de decidir."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "geral"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Taxa de atualização e acabamento da tela"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Taxa de atualização é quantas vezes por segundo a imagem é redesenhada, medida em hertz (Hz). Para planilha, texto e sistema, 60 Hz a 75 Hz atendem bem, e a TechSpot aponta essa faixa como suficiente para produtividade. Telas de 100 Hz ou mais deixam a rolagem e o movimento do mouse mais suaves, um conforto agradável, mas não indispensável."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas frequência alta só aparece se o computador e o cabo acompanharem: a placa de vídeo precisa entregar aquela taxa na resolução escolhida, e a entrada usada precisa suportá-la. Para o escritório, a prioridade costuma ser outra: um bom painel, a resolução certa e um pé que permita ajustar a altura."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Repare também no acabamento. Telas foscas (antirreflexo) espalham a luz de janelas e lâmpadas e cansam menos em ambiente claro. Telas brilhantes deixam a imagem mais viva, mas refletem tudo o que está atrás de você. Em escritório com janela grande ou luz forte no teto, a tela fosca normalmente é a escolha mais tranquila."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Posição na mesa: o que muda no conforto"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Um bom monitor mal posicionado cansa tanto quanto um monitor ruim. A OSHA, agência de segurança do trabalho dos Estados Unidos, recomenda manter a tela entre 50 e 100 centímetros dos olhos e deixar a linha de cima na altura dos olhos ou um pouco abaixo. O centro da tela deve ficar de 15 a 20 graus abaixo da linha do olhar."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "**Distância**: estique o braço; a tela deve ficar mais ou menos onde está a ponta dos dedos, dentro da faixa de 50 a 100 cm.",
+        "**Altura**: a borda de cima na altura dos olhos ou um pouco abaixo. Quem usa óculos multifocais costuma precisar da tela mais baixa.",
+        "**Inclinação**: a OSHA sugere inclinar de 10 a 20 graus para trás, de modo que a tela fique de frente para o seu olhar.",
+        "**Janela**: posicione o monitor de lado para a janela, e não de frente nem de costas para ela, para reduzir reflexo e ofuscamento.",
+        "**Texto pequeno**: se você se inclina para ler, aumente a escala ou o zoom antes de aproximar a tela."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Por isso o pé do monitor merece atenção. Muitos modelos só inclinam; outros sobem, descem e giram. Se o seu não ajusta a altura, um suporte articulado resolve, e já explicamos como escolher um no guia sobre [suporte articulado para monitor](/blog/suporte-articulado-para-monitor). Confira se o monitor tem furação padrão VESA na traseira, que é onde o suporte se prende."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Dois monitores ou um maior?"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Dois monitores ajudam quem copia dados de um sistema para outro ou compara documentos lado a lado. O guia de ergonomia da Universidade da Califórnia em Davis recomenda telas do mesmo tamanho e da mesma resolução, na mesma altura e com bordas finas, para reduzir o esforço dos olhos e o giro do pescoço."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A posição muda conforme o uso. Se você usa uma tela na maior parte do tempo, ela fica bem à sua frente, com o teclado, e a segunda vai ao lado, girada uns 30 graus. Se usa as duas por igual, elas ficam lado a lado, com a junção bem no centro do seu corpo. Mas dois monitores ocupam mais mesa e pedem duas saídas de vídeo no computador."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "Mais área útil para comparar documentos e sistemas lado a lado.",
+        "Uma tela pode ficar fixa com e-mail ou atendimento, sem atrapalhar a principal.",
+        "Funciona bem com notebook: a tela dele vira a segunda."
+      ],
+      "contras": [
+        "Ocupa mais mesa e exige duas saídas de vídeo ou uma dock.",
+        "Telas de tamanhos diferentes ficam desalinhadas e cansam o pescoço.",
+        "A emenda das bordas no meio atrapalha quem usa as duas por igual."
+      ],
+      "titulo": "Dois monitores no trabalho"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Entradas: confira antes de comprar"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Antes de fechar a escolha, confira se as entradas do monitor batem com as saídas do seu computador. Os mais comuns são HDMI e DisplayPort; computadores mais antigos ainda podem ter só VGA, o que pede adaptador. Para notebook moderno, a entrada USB-C faz diferença real no dia a dia."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Segundo o guia da BenQ sobre o tema, um bom monitor USB-C transmite a imagem pelo modo DisplayPort, pode carregar o notebook pelo mesmo cabo e ainda funcionar como hub para teclado, mouse e câmera. Mas dois cuidados: confirme no manual do notebook que a porta dele aceita vídeo e carga, e compare a potência que o monitor entrega com a do carregador original. Se for menor, a bateria pode descarregar em tarefas pesadas."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O cabo também conta. Nem todo cabo USB-C transmite vídeo: alguns só carregam e passam dados em velocidade baixa. Use o cabo que vem com o monitor ou um que informe suporte a vídeo. Se a sua dúvida é sobre a bateria do notebook ligado o tempo todo, há um artigo sobre [deixar o notebook na tomada](/blog/posso-deixar-o-notebook-na-tomada-o-tempo-todo)."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Onde ver monitores e montar o posto de trabalho em Campinas"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, vende computadores, notebooks e peças, e você pode ver a seleção de [monitores](/categoria/computadores-monitores-monitor-gamer) no site. Na loja, você pode ver o computador ligado e testar antes de pagar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se o monitor novo vai trabalhar ao lado de um notebook, vale olhar também os [notebooks](/notebooks) e confirmar as portas antes. E se o computador atual não tem a saída de vídeo certa, a [assistência técnica](/manutencao) da loja faz diagnóstico e upgrade. A decisão, em uma linha: escolha primeiro o par tamanho e resolução, depois o painel, e só então os extras."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "notebooks"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Qual o melhor tamanho de monitor para trabalhar em escritório?",
+      "resposta": "Para a maioria das pessoas, 24 polegadas em Full HD ou 27 polegadas em QHD. A combinação de tamanho com resolução importa mais do que o tamanho sozinho. Telas de 27 polegadas em Full HD costumam mostrar texto menos nítido."
+    },
+    {
+      "pergunta": "IPS ou VA: qual é melhor para planilha e texto?",
+      "resposta": "O IPS costuma ser a escolha mais equilibrada, porque mantém a cor estável mesmo vista de lado. O VA tem contraste maior e agrada em ambiente escuro, mas a imagem muda um pouco fora do centro."
+    },
+    {
+      "pergunta": "Monitor 4K vale a pena para trabalho?",
+      "resposta": "Vale para quem lê muito, trabalha com imagem ou quer texto muito fino. Em 27 polegadas, o Windows aplica escala para o texto não ficar pequeno. Ajuste a escala pela opção recomendada nas configurações de tela."
+    },
+    {
+      "pergunta": "A que distância devo ficar do monitor?",
+      "resposta": "A OSHA recomenda de 50 a 100 centímetros dos olhos, com a borda de cima da tela na altura dos olhos ou um pouco abaixo. Se precisar se inclinar para ler, aumente a escala do texto."
+    },
+    {
+      "pergunta": "Dá para ligar o notebook ao monitor por um cabo só?",
+      "resposta": "Dá, se o monitor tiver USB-C com vídeo e carga e a porta do notebook aceitar os dois. Compare a potência que o monitor fornece com a do carregador original do notebook."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "OSHA — Computer Workstations eTool: Monitors",
+      "url": "https://www.osha.gov/etools/computer-workstations/components/monitors",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "TechSpot — Display Tech Compared: TN vs. VA vs. IPS",
+      "url": "https://www.techspot.com/article/1788-display-tech-compared/",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "HDMI Licensing Administrator — IPS vs. TN vs. VA Panels",
+      "url": "https://www.hdmi.org/blog/detail/127",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Microsoft — Change your screen resolution and layout in Windows",
+      "url": "https://support.microsoft.com/en-us/kb/3025083",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "BenQ — How to choose a USB-C monitor",
+      "url": "https://www.benq.com/ar-me/knowledge-center/knowledge/usbc-monitor.html",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "UC Davis Safety Services — Dual Monitor Setup",
+      "url": "https://safetyservices.ucdavis.edu/node/2116",
+      "data": "consultado em outubro de 2026"
+    }
+  ]
+}

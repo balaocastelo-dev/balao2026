@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "como-escolher-monitor-para-trabalho",
+      "titulo": "Monitor para trabalho: como escolher tamanho, resolução e painel",
+      "resumo": "Monitor para trabalho: veja como combinar tamanho e resolução, qual painel cansa menos a vista e como posicionar a tela para trabalhar o dia todo.",
+      "categoria": "guias",
+      "etiquetas": [
+        "monitor",
+        "home office",
+        "ergonomia",
+        "escritório"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-16T08:58:17.220Z",
+      "minutos": 11
+    },
+    {
       "slug": "computador-fazendo-barulho-o-que-cada-som-indica",
       "titulo": "Computador fazendo barulho: o que cada som costuma indicar",
       "resumo": "Chiado, estalo, zumbido ou bipe: cada barulho do computador aponta para uma peça. Veja o que cada som costuma indicar e quando desligar na hora.",
@@ -256,5 +271,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-16T01:23:45.716Z"
+  "atualizadoEm": "2026-10-16T08:58:17.872Z"
 }
