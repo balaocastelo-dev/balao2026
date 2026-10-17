@@ -2,6 +2,22 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "desligar-suspender-ou-hibernar-qual-usar",
+      "titulo": "Desligar, suspender ou hibernar: qual usar no dia a dia",
+      "resumo": "Suspender serve para pausas curtas, hibernar para longos períodos longe da tomada e desligar quando o computador vai ficar parado. Veja quando usar cada um.",
+      "categoria": "guias",
+      "etiquetas": [
+        "windows",
+        "notebook",
+        "bateria",
+        "energia"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-17T21:00:00.000Z",
+      "minutos": 4,
+      "formato": "dica"
+    },
+    {
       "slug": "iphone-duo-pre-venda-brasil-iphone-dobravel",
       "titulo": "iPhone Duo: pré-venda do iPhone dobrável começa com o Brasil na lista",
       "resumo": "A pré-venda do iPhone Duo, o primeiro iPhone dobrável, abriu em 16 de outubro de 2026, com o Brasil na primeira leva. Veja o que muda para quem compra e conserta.",
@@ -357,5 +373,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-17T02:32:18.081Z"
+  "atualizadoEm": "2026-10-17T02:39:15.260Z"
 }

@@ -1,0 +1,149 @@
+{
+  "slug": "desligar-suspender-ou-hibernar-qual-usar",
+  "titulo": "Desligar, suspender ou hibernar: qual usar no dia a dia",
+  "resumo": "Suspender serve para pausas curtas, hibernar para longos períodos longe da tomada e desligar quando o computador vai ficar parado. Veja quando usar cada um.",
+  "categoria": "guias",
+  "etiquetas": [
+    "windows",
+    "notebook",
+    "bateria",
+    "energia"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-17T21:00:00.000Z",
+  "formato": "dica",
+  "roteiro": {
+    "fala": "Desligar, suspender ou hibernar? Na pausa curta, tipo um café, suspende. O computador volta em segundos, do jeito que você deixou. Vai ficar muito tempo sem usar o notebook e longe da tomada? Hiberna, que gasta menos bateria. E no fim do dia, ou se ele vai ficar parado por dias, desliga. Uma dica a mais: se algo falhar depois de suspender, reinicie antes de se preocupar.",
+    "titulo": "Desligar, suspender ou hibernar?",
+    "destaques": [
+      "Pausa curta: suspender",
+      "Longe da tomada: hibernar",
+      "Dias parado: desligar",
+      "Falhou? Reinicie"
+    ],
+    "legenda": "Cada botão do menu de energia tem a sua hora. Veja quando suspender, quando hibernar e quando desligar o computador. A dica completa está no blog.",
+    "hashtags": [
+      "windows",
+      "notebook",
+      "bateria",
+      "dicas",
+      "informatica",
+      "campinas"
+    ]
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Desligar, suspender ou hibernar é uma dúvida comum de quem abre o menu de energia do Windows e vê as três opções. A resposta curta: **suspender** para pausas curtas, **hibernar** quando o notebook vai ficar muito tempo sem uso e longe da tomada, e **desligar** quando o computador vai ficar parado por bastante tempo."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que uma das opções faz mal ao computador e deve ser evitada. Nenhuma delas estraga nada: cada uma troca rapidez na volta por economia de energia. Suspender volta mais rápido e gasta um pouco; hibernar volta mais devagar e gasta menos; desligar gasta quase nada, mas fecha tudo o que estava aberto."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "**Suspender** deixa o trabalho na memória e volta em segundos. Bom para o café ou o almoço.",
+        "**Hibernar** grava a sessão no disco e quase não gasta energia. Bom para notebook longe da tomada por muito tempo.",
+        "**Desligar** fecha tudo e é o indicado para longos períodos sem uso.",
+        "Se algo estranho acontece depois de suspender, reinicie antes de procurar defeito."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que cada opção faz e quando usar"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Segundo a Microsoft, a suspensão usa pouquíssima energia e devolve você ao ponto onde parou quase na hora. Se a bateria ficar muito baixa durante a suspensão, o Windows salva o trabalho e desliga o computador. Muitos notebooks suspendem sozinhos quando você fecha a tampa, e isso pode ser mudado nas opções de energia."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Opção",
+        "O que acontece",
+        "Quando usar"
+      ],
+      "linhas": [
+        [
+          "Suspender",
+          "A sessão fica na memória, com o computador em baixo consumo. Volta em segundos",
+          "Pausas curtas, como um café ou uma reunião"
+        ],
+        [
+          "Hibernar",
+          "A sessão é gravada no disco e o computador se desliga. Volta mais devagar que da suspensão",
+          "Notebook que vai ficar muito tempo sem uso e sem carregar"
+        ],
+        [
+          "Desligar",
+          "Fecha todos os programas e corta a energia. A volta leva de segundos a alguns minutos",
+          "Fim do dia ou dias sem uso"
+        ]
+      ],
+      "titulo": "As três opções do menu de energia",
+      "fonte": {
+        "nome": "Microsoft e Dell",
+        "url": "https://support.microsoft.com/en-us/windows/shut-down-sleep-or-hibernate-your-pc-2941d165-7d0a-a5e8-c5ad-8c972e8e6eff"
+      }
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A hibernação foi pensada principalmente para notebooks, diz a Microsoft, e pode não aparecer em todo computador. Quando o aparelho oferece a opção, ela fica escondida: é preciso marcá-la nas configurações do botão de energia, na parte de desligamento. Em computadores com o recurso InstantGo, por exemplo, ela não existe."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "notebooks"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando a suspensão não é a melhor escolha"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Suspender todo dia é prático, mas tem limites. No notebook fora da tomada, a suspensão não dura para sempre, porque continua gastando um pouco de bateria. A Dell recomenda desligar nos longos períodos sem uso, para economizar energia e diminuir o risco de arquivo corrompido. Se o notebook passa a noite na tomada, vale ler a dica sobre [deixar o notebook carregando o tempo todo](/blog/posso-deixar-o-notebook-na-tomada-o-tempo-todo)."
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "Se o computador acorda sozinho, não volta da suspensão ou o monitor e a impressora falham depois dela, tente reiniciar e reconectar os aparelhos. Atualizar o Windows e os drivers costuma resolver. Se continuar, o problema pode ser de configuração ou de peça, e vale um diagnóstico.",
+      "titulo": "Quando esta dica não basta"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Na Balão da Informática, no Cambuí, em Campinas, a [assistência técnica](/manutencao) investiga computador que não volta da suspensão, desliga sozinho ou acorda sem motivo, e há [notebooks](/notebooks) novos e [seminovos](/seminovos) para quem pensa em trocar. Em uma linha: suspenda nas pausas, hiberne longe da tomada e desligue quando for ficar dias sem usar."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Deixar o computador suspenso a noite inteira faz mal?",
+      "resposta": "Não estraga o computador, mas ele continua gastando um pouco de energia. Para longos períodos sem uso, desligar é o mais indicado."
+    },
+    {
+      "pergunta": "Por que não aparece a opção hibernar no meu Windows?",
+      "resposta": "Ela pode estar desmarcada nas configurações do botão de energia ou não ser oferecida pelo aparelho. Segundo a Microsoft, computadores com InstantGo não têm hibernação."
+    },
+    {
+      "pergunta": "Fechar a tampa do notebook desliga o computador?",
+      "resposta": "Normalmente não: em muitos notebooks, fechar a tampa só suspende. Dá para escolher o que a tampa faz nas opções de energia do Windows."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Shut down, sleep, or hibernate your PC — Microsoft Support",
+      "url": "https://support.microsoft.com/en-us/windows/shut-down-sleep-or-hibernate-your-pc-2941d165-7d0a-a5e8-c5ad-8c972e8e6eff",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Shut down, Sleep, Hibernate, or Change the Power Plan in Windows 11 and Windows 10 — Dell Support",
+      "url": "https://www.dell.com/support/kbdoc/en-us/000132056/power-management-options-in-bios",
+      "data": "outubro de 2026"
+    }
+  ]
+}
