@@ -28,7 +28,12 @@
         "memória",
         "mac"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/muse-spark-open-meta-ia-aberta-memoria-10cd367e.jpg",
+        "alt": "Dois computadores compactos de mesa empilhados sobre uma bancada de madeira, ligados por um cabo, com um monitor apagado ao fundo",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-10-16T15:06:20.082Z",
       "minutos": 3
     },
@@ -317,5 +322,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-17T01:12:28.715Z"
+  "atualizadoEm": "2026-10-17T01:14:21.350Z"
 }
