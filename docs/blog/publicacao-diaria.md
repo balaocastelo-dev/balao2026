@@ -1,13 +1,23 @@
 # Publicação diária automática
 
-Três vezes por dia uma tarefa agendada escreve e publica no blog. Ninguém
-precisa fazer nada.
+Três publicações por dia, escritas por tarefas agendadas. Ninguém precisa
+fazer nada.
 
-| Hora | Tarefa agendada | O que publica |
-|---|---|---|
-| 05:54 | Blog Balão - artigo do dia | Guia de compra, conserto, hardware, IA ou Apple: o artigo longo, que traz busca do Google |
-| 11:54 | Blog Balão - notícia do dia | Notícia curta de tecnologia, com duas fontes e "o que isso muda para você" |
-| 17:54 | Blog Balão - dica do dia | Dica rápida (450 a 950 palavras), com o **roteiro do vídeo** |
+**Nenhuma publicação sai sem foto** (regra do Thiago, 16/10/2026). Como a
+foto só pode ser feita de noite (de dia a placa de vídeo do computador da loja
+é da JUL.IA e da URA), as tarefas escrevem **na véspera** e agendam
+(`publicar --amanha`); o computador faz as fotos às 22h e às 5h30; o artigo
+aparece na hora marcada, já com a foto. O site esconde qualquer artigo da
+rotina que ainda não tenha foto (`diarioNoAr`, em `lib/blog/repositorio.ts`).
+
+| Escreve (véspera) | Tarefa agendada | Aparece | O que é |
+|---|---|---|---|
+| 19:06 | Blog Balão - artigo do dia | 06:00 | Guia de compra, conserto, hardware, IA ou Apple: o artigo longo, que traz busca do Google |
+| 19:26 | Blog Balão - notícia do dia | 12:00 | Notícia curta de tecnologia, com duas fontes e "o que isso muda para você" |
+| 19:46 | Blog Balão - dica do dia | 18:00 | Dica rápida (450 a 950 palavras), com o **roteiro do vídeo** |
+
+Até 16/10/2026 cada tarefa escrevia e publicava na hora (05:54, 11:54, 17:54)
+e o artigo ficava com a capa desenhada pelo site até a foto chegar.
 
 O comando de publicar aceita uma publicação de cada tipo por dia; o tipo sai
 do próprio artigo (categoria `noticias` é notícia, `"formato": "dica"` é dica,
@@ -24,7 +34,8 @@ depois do OK. A legenda do Facebook leva o link do artigo. O blog em si não
 passa pelo Telegram.
 
 O script lê este ramo de conteúdo direto do GitHub e pega a dica mais nova
-(até quatro dias) que ainda não virou vídeo; confere o roteiro de novo antes
+(até quatro dias) que ainda não virou vídeo e que já está no ar (hora marcada
+passada e com foto: assim o link do vídeo nunca cai em página escondida); confere o roteiro de novo antes
 de gravar. Os detalhes da fábrica estão no doc `claude/fabrica-de-conteudo-11-10.md`
 do Projeto "Balao.info" e na nota `11-Claude\Fabrica-de-Conteudo.md` do cérebro.
 
@@ -39,27 +50,33 @@ parou no meio do dia por limite de créditos).
 
 1. A rotina, na nuvem, só **descreve** a foto no artigo:
    `"capa": { "alt": "o que a foto mostra", "pedido": "a cena, em inglês, para o gerador" }`.
-2. O `publicar` põe o artigo no ar com a capa desenhada pelo site e grava o
-   pedido na fila `capas/pendentes.json`, no ramo de conteúdo.
+2. O `publicar --amanha` grava o artigo agendado e o pedido na fila
+   `capas/pendentes.json`, no ramo de conteúdo. Sem foto, o site não mostra o
+   artigo. `--sem-capa` não existe mais.
 3. No computador, `balao-content-factory\publisher\capa_blog.py` (a fonte
    fica em `scripts/fabrica/capa_blog.py`) lê a fila, espera a placa ficar
    livre, gera a foto com o Flux no ComfyUI (1600 × 900, cerca de um minuto) e
    mostra a um modelo de visão do Ollama (`qwen2.5vl:7b`), que **lista** o
    texto, a marca, o rosto e o defeito que encontrar. Qualquer item listado,
-   ou cena diferente da pedida, reprova. Até três tentativas por rodada.
+   ou cena diferente da pedida, reprova. Até três tentativas com a cena do
+   artigo e, se todas forem reprovadas, duas cenas de reserva simples e sem
+   notebook (`RESERVA_*` no programa; a foto vai com a descrição da reserva,
+   `capa <endereço> foto.jpg --alt "…"`). O motivo mais comum de reprovação é
+   o Flux desenhar notebook com cara de MacBook.
 4. Aprovada, a foto é presa ao artigo com
    `node scripts/blog-publicar.mjs capa <endereço> foto.jpg` (confere tamanho
    e proporção, grava em `capas/` e tira o pedido da fila), num clone do
    repositório só para isso (`balao-content-factory\_blog_repo`). O envio usa
    o login do GitHub já guardado no Windows.
-5. Dois dias sem foto boa: o pedido sai da fila (`capa <endereço> --desistir`)
-   e o artigo fica com a capa desenhada.
+5. Sem foto boa, o pedido continua na fila e o programa tenta de novo na
+   rodada seguinte; o artigo espera fora do site. Ele nunca desiste sozinho
+   (`capa <endereço> --desistir` ficou só para uso à mão).
 
-Enquanto o computador estiver desligado, os artigos saem normalmente, com a
-capa desenhada; as fotos são feitas quando ele voltar.
+Enquanto o computador estiver desligado, os artigos esperam fora do site; as
+fotos são feitas quando ele voltar e o artigo aparece em seguida.
 
-**Instalado e testado em 11/10/2026.** Tarefa do Windows `\BalaoFabrica\Capa
-do blog`, todo dia às 06h20, 09h20, 12h20, 15h20, 18h20 e 21h20 (instalador:
+**Instalado em 11/10/2026.** Tarefa do Windows `\BalaoFabrica\Capa do blog`,
+todo dia às 22h00 e às 5h30, nas brechas da placa de vídeo (instalador:
 `scripts/fabrica/instalar_tarefa_capa.ps1`). Com a fila vazia, sai na hora.
 Registro em `logs\capa_blog.log`; fotos em `data\capas_blog\`.
 

@@ -11,9 +11,10 @@ $pasta = '\BalaoFabrica\'
 $user = "$env:USERDOMAIN\$env:USERNAME"
 $principal = New-ScheduledTaskPrincipal -UserId $user -LogonType Interactive -RunLevel Limited
 
-# O blog publica perto das 6h, do meio-dia e das 18h. A tarefa olha a fila a cada tres horas: com a fila vazia
-# sai na hora; com pedido, espera a placa de video ficar livre (ate 90 min) e deixa para a rodada seguinte se nao der.
-$gatilhos = '06:20', '09:20', '12:20', '15:20', '18:20', '21:20' | ForEach-Object { New-ScheduledTaskTrigger -Daily -At $_ }
+# De dia a placa de video e da JUL.IA e da URA. A foto e feita nas brechas da noite: 22h00 (antes do video da Pauta)
+# e 5h30 (depois do video do dia e da dica, antes das 6h, quando o primeiro artigo agendado aparece).
+# A rotina do blog escreve as 19h e agenda os artigos para o dia seguinte; sem foto, o site nao mostra o artigo.
+$gatilhos = '22:00', '05:30' | ForEach-Object { New-ScheduledTaskTrigger -Daily -At $_ }
 $act = New-ScheduledTaskAction -Execute $PYW -Argument 'capa_blog.py' -WorkingDirectory $WD
 $set = New-ScheduledTaskSettingsSet -StartWhenAvailable -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries `
     -MultipleInstances IgnoreNew -ExecutionTimeLimit (New-TimeSpan -Minutes 150)

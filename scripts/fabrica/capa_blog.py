@@ -15,14 +15,17 @@ A rotina do blog, na nuvem, publica o artigo e deixa na fila o pedido da foto
   3. gera a foto com o Flux, no ComfyUI local;
   4. mostra a foto a um modelo de visão do Ollama local, que lista texto, marca,
      rosto e defeito que encontrar; achou qualquer coisa ou a cena não é a
-     pedida, reprova e gera outra (até 3 por rodada);
+     pedida, reprova e gera outra (até 3 por rodada); se as 3 forem
+     reprovadas, tenta duas cenas de reserva, simples e sem notebook (o Flux
+     desenha notebook com cara de MacBook e a conferência reprova pela marca);
   5. prende a foto ao artigo com `node scripts/blog-publicar.mjs capa`, num
      clone do repositório só para isso (`balao-content-factory\\_blog_repo`).
 
 A URA tem prioridade: se entrar ligação no meio, derruba o ComfyUI na hora e
-deixa a foto para a próxima rodada. Se nenhuma foto passar em dois dias, tira o
-pedido da fila e o artigo fica com a capa desenhada pelo site. Sem modelo de
-visão instalado, NÃO publica nada.
+deixa a foto para a próxima rodada. O pedido NUNCA sai da fila sem foto: desde
+16/10/2026 o site não mostra artigo da rotina sem foto (regra do Thiago:
+nenhuma publicação sai sem imagem), então o programa tenta de novo em toda
+rodada até conseguir. Sem modelo de visão instalado, NÃO publica nada.
 
   python capa_blog.py                 faz o que estiver na fila
   python capa_blog.py --ver           só mostra a fila
@@ -70,7 +73,21 @@ SO_OLHAM = ("--ver", "--painel", "--montar-teste", "--proximo")     # chamadas q
 LARGURA, ALTURA = 1600, 896          # o Flux quer múltiplos de 16; depois vira 1600 x 900
 PASSOS = 26
 TENTATIVAS = 3
-DIAS_ATE_DESISTIR = 2
+# Cenas de reserva: quando a cena pedida pelo artigo é reprovada 3 vezes. Sem notebook, sem tela e sem pessoa,
+# que é onde aparecem marca e texto. O `alt` vai junto, para a descrição da foto bater com o que ela mostra.
+RESERVA_PECAS = ("A computer motherboard with one stick of RAM and a small screwdriver lying on a clean light wooden "
+                 "workbench, soft daylight from a window on the left, shallow depth of field, close-up.",
+                 "Placa-mãe de computador com um pente de memória e uma chave de fenda sobre uma bancada de madeira clara")
+RESERVA_MESA = ("A tidy light wooden desk by a window with a closed plain paper notebook, a pen and a white ceramic "
+                "coffee cup, soft morning daylight, shallow depth of field.",
+                "Mesa de trabalho clara perto da janela, com um caderno fechado, uma caneta e uma xícara branca")
+RESERVA_FERRAMENTAS = ("Small precision screwdrivers and tweezers laid out neatly on a grey anti-static mat, soft light "
+                       "from above, shallow depth of field, close-up.",
+                       "Chaves de precisão e uma pinça arrumadas sobre uma manta antiestática cinza")
+
+
+def reservas(categoria):
+    return [RESERVA_MESA, RESERVA_FERRAMENTAS] if categoria == "apple" else [RESERVA_PECAS, RESERVA_MESA]
 ESPERA_DA_PLACA_MIN = 90
 VRAM_MINIMA_MB = 15000               # o Flux em 1600 x 896 ocupa perto disso
 LIMITE_POR_FOTO_S = 8 * 60           # normal: 1 a 2 minutos. Passou disso, a placa transbordou
@@ -408,20 +425,23 @@ def conferir(arquivo, cena, modelo, categoria=""):
 
 
 def foto_aprovada(pedido, destino, modelo, categoria=""):
-    """Devolve a semente da foto aprovada, ou None."""
-    for n in range(1, TENTATIVAS + 1):
+    """Devolve (semente, alt) da foto aprovada, ou (None, None). `alt` só vem preenchido se a foto é de uma
+    cena de reserva (aí a descrição do artigo não serve)."""
+    cenas = [(pedido, None)] * TENTATIVAS + list(reservas(categoria))
+    for n, (cena, alt) in enumerate(cenas, start=1):
         quem = outro_render()
         if quem:                          # outro render começou depois que a rodada abriu: sai da frente
             log(f"  {quem} começou a usar a placa: a foto fica para a próxima rodada")
             raise Interrompida()
-        semente, segundos = gerar(texto_do_pedido(pedido, categoria), destino)
-        ok, motivo = conferir(destino, pedido, modelo, categoria)
-        log(f"  tentativa {n} (semente {semente}, {segundos}s): {'aprovada' if ok else 'reprovada: ' + motivo}")
+        semente, segundos = gerar(texto_do_pedido(cena, categoria), destino)
+        ok, motivo = conferir(destino, cena, modelo, categoria)
+        nome = f"tentativa {n}" + (" (cena de reserva)" if alt else "")
+        log(f"  {nome} (semente {semente}, {segundos}s): {'aprovada' if ok else 'reprovada: ' + motivo}")
         if ok:
-            return semente
+            return semente, alt
         if ligacoes() > 0:
             raise Interrompida()
-    return None
+    return None, None
 
 
 # --------------------------------------------------------------- publicação
@@ -453,13 +473,6 @@ def preparar_repo():
 def comando_do_blog(*args):
     r = rodar(["node", "scripts/blog-publicar.mjs", *args], espera=600, cwd=str(REPO), env=ambiente())
     return r.returncode == 0, (r.stdout + r.stderr).strip()[-500:]
-
-
-def idade_em_dias(pedido_em):
-    try:
-        return (time.time() - calendar.timegm(time.strptime(pedido_em[:19], "%Y-%m-%dT%H:%M:%S"))) / 86400
-    except Exception:
-        return 0.0
 
 
 def ler_estado():
@@ -520,22 +533,19 @@ def main():
                 abri = subir_comfy() or abri
                 ESTADO_COMFY["aberto_por_mim"] = abri
                 log(f"{slug}: gerando a foto ({modelo} confere)")
-                semente = foto_aprovada(p["pedido"], destino, modelo, p.get("categoria", ""))
+                semente, alt = foto_aprovada(p["pedido"], destino, modelo, p.get("categoria", ""))
                 e["tentativas"] = e.get("tentativas", 0) + 1
                 if semente is None:
-                    if not teste and idade_em_dias(p["pedidoEm"]) >= DIAS_ATE_DESISTIR and not sem_publicar:
-                        ok, saida = comando_do_blog("capa", slug, "--desistir")
-                        e["publicada"] = ok
-                        log(f"  {DIAS_ATE_DESISTIR} dias sem foto boa: pedido retirado, o artigo fica com a capa desenhada")
-                    else:
-                        log(f"  nenhuma das {TENTATIVAS} passou: tenta de novo na próxima rodada")
+                    log("  nenhuma passou, nem as cenas de reserva: o artigo continua fora do site e tenta de novo "
+                        "na próxima rodada")
                     continue
-                e.update({"aprovada": True, "semente": semente})
+                e.update({"aprovada": True, "semente": semente, "alt": alt})
                 gravar_estado(estado)
             if teste or sem_publicar:
                 log(f"  foto guardada em {destino} (não publicada)")
                 continue
-            ok, saida = comando_do_blog("capa", slug, str(destino))
+            extra = ["--alt", e["alt"]] if e.get("alt") else []
+            ok, saida = comando_do_blog("capa", slug, str(destino), *extra)
             ja_tinha = "já tem foto de capa" in saida
             e["publicada"] = ok or ja_tinha
             log(f"  {'publicada' if ok else 'o comando recusou'}: {saida.splitlines()[-1] if saida else ''}")
