@@ -9,7 +9,12 @@
     "diagnóstico",
     "windows"
   ],
-  "capa": null,
+  "capa": {
+    "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/como-ver-quanta-memoria-ram-o-computador-tem-bc8c8720.jpg",
+    "alt": "Dois pentes de memória RAM sobre uma mesa de madeira, ao lado de um notebook aberto com a tela apagada",
+    "largura": 1600,
+    "altura": 900
+  },
   "publicadoEm": "2026-10-16T20:56:48.928Z",
   "formato": "dica",
   "roteiro": {
