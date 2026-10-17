@@ -12,7 +12,12 @@
         "bateria",
         "energia"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/desligar-suspender-ou-hibernar-qual-usar-126c8d63.jpg",
+        "alt": "Notebook preto fechado sobre uma mesa de madeira, ao lado de uma xícara de café, com luz suave de fim de tarde",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-10-17T21:00:00.000Z",
       "minutos": 4,
       "formato": "dica"
@@ -383,5 +388,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-17T08:36:19.746Z"
+  "atualizadoEm": "2026-10-17T08:38:27.813Z"
 }
