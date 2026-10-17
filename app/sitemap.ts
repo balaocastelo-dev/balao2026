@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next'
-import { getCategories, getProductsForSitemap } from '@/lib/db'
+import { getCachedCategories } from '@/lib/cache'
+import { lerProdutosDoSitemap, dataDoProduto } from '@/lib/sitemap/produtos'
 import { CATEGORIAS } from '@/lib/blog/categorias'
 import { listarResumos } from '@/lib/blog/repositorio'
 import { LEAD_INTENTS } from '@/lib/lead-intents'
@@ -65,21 +66,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: route === '' ? 1 : PAGINAS[route.slice(1)] ? 0.9 : 0.7,
   }))
 
-  // Categorias
-  const categories = await getCategories()
+  // Categorias (com a cópia do catálogo de reserva quando o banco recusa)
+  const categories = await getCachedCategories().catch(() => [])
   const categoryRoutes = categories.map((category) => ({
     url: `${baseUrl}/categoria/${category.slug}`,
     changeFrequency: 'weekly' as const,
     priority: 0.7,
   }))
 
-  // Produtos (Limitado aos 1000 mais recentes para performance)
-  // Nota: getProducts já tem paginação interna, mas aqui vamos pegar tudo o que ele retornar
-  // Se getProducts retornar muitos, pode ser lento.
-  const products = await getProductsForSitemap(1000)
+  // Produtos: o catálogo inteiro. Se o banco recusar (cota de conexões),
+  // vêm da cópia do catálogo — ver lib/sitemap/produtos.ts.
+  const products = await lerProdutosDoSitemap()
   const productRoutes = products.map((product) => ({
-    url: `${baseUrl}/product/${product.slug || product.id}`,
-    lastModified: new Date(product.created_at || new Date()),
+    url: `${baseUrl}/product/${product.slug}`,
+    lastModified: dataDoProduto(product.created_at),
     changeFrequency: 'weekly' as const,
     priority: 0.6,
   }))
