@@ -12,6 +12,12 @@ tarefa que chamou você diz qual:
 
 Este arquivo é o passo a passo e as regras dos três.
 
+**Você escreve na véspera.** As três execuções rodam de noite (por volta das
+19h) e agendam o artigo para o dia seguinte com `publicar --amanha`: o
+principal aparece às 6h, a notícia às 12h e a dica às 18h. Nesse intervalo o
+computador da loja faz a foto de capa. **Nenhum artigo aparece no site sem a
+foto** (regra do Thiago, 16/10/2026): se ela atrasar, o artigo espera.
+
 Ninguém lê o artigo antes de ele ir ao ar. Por isso a regra que vale mais do
 que todas as outras é: **na dúvida, não afirme**. Um artigo simples e correto
 ajuda a loja; um artigo vistoso com um dado errado prejudica.
@@ -19,7 +25,7 @@ ajuda a loja; um artigo vistoso com um dado errado prejudica.
 ## O que a rotina pode e o que não pode
 
 **Pode:** pesquisar na internet, escrever um arquivo JSON (que descreve a
-foto de capa) e publicar com `node scripts/blog-publicar.mjs publicar`.
+foto de capa) e publicar com `node scripts/blog-publicar.mjs publicar --amanha`.
 
 **Não pode, em nenhuma hipótese:**
 
@@ -38,10 +44,10 @@ artigo), **pare e relate**. Não improvise outro caminho.
 
 ## Passo a passo
 
-1. `node scripts/blog-publicar.mjs preparar` — mostra este arquivo, a pauta, o
-   que já foi publicado, o que já saiu hoje e onde está um modelo de cada
-   tipo. Se a publicação do **seu tipo** já saiu hoje, encerre: não há nada a
-   fazer.
+1. `node scripts/blog-publicar.mjs preparar --amanha` — mostra este arquivo,
+   a pauta, o que já foi publicado, o que já há para amanhã e onde está um
+   modelo de cada tipo. Se a linha **"Amanhã"** do seu tipo disser JÁ AGENDADO,
+   encerre: não há nada a fazer.
 2. Escolha o assunto (seção "Como escolher o assunto").
 3. Pesquise. Abra de três a seis páginas boas sobre o assunto e leia de
    verdade; anote o endereço de cada uma que você usar.
@@ -52,7 +58,7 @@ artigo), **pare e relate**. Não improvise outro caminho.
    nome contra a página de onde saiu.
 7. Descreva a foto de capa no artigo (seção "A foto de capa"). **Você não
    gera imagem nenhuma**: a foto é feita depois, no computador da loja.
-8. `node scripts/blog-publicar.mjs publicar artigo.json`.
+8. `node scripts/blog-publicar.mjs publicar artigo.json --amanha`.
 9. Relate em poucas linhas: título, endereço, de onde vieram os dados, a foto
    que você pediu e qualquer dúvida que tenha ficado.
 
@@ -151,10 +157,12 @@ Todo artigo novo sai com uma foto de capa: uma fotografia ou imagem simulada
 do assunto, e não um desenho ou gráfico.
 
 **Quem faz a foto é o computador da loja**, na placa de vídeo de lá, e não
-você. Você escreve o pedido; o comando `publicar` põe o artigo no ar com a
-capa desenhada pelo site e deixa o pedido numa fila; o computador gera a foto,
-um modelo de visão confere (marca, texto, rosto, deformação, cena errada) e a
-foto entra no artigo sozinha, em geral em menos de uma hora. Não use
+você. Você escreve o pedido; o comando `publicar --amanha` agenda o artigo e
+deixa o pedido numa fila; de noite (22h e 5h30) o computador gera a foto, um
+modelo de visão confere (marca, texto, rosto, deformação, cena errada) e a
+foto entra no artigo sozinha. **O site só mostra o artigo depois que a foto
+chegou.** Se a sua cena for reprovada três vezes, o computador usa uma cena
+de reserva simples (peças numa bancada ou uma mesa de trabalho). Não use
 ferramenta de imagem nenhuma (nem Figma, nem outra) e não baixe foto de lugar
 nenhum.
 
@@ -186,6 +194,10 @@ pede o impossível:
 - Equipamento genérico ("a generic laptop"): não escreva marca nem nome de
   produto no pedido — escrever a marca faz o logotipo aparecer. Em assunto de
   Apple, peça o aparelho de costas ou em ângulo que não mostre o símbolo.
+- **Notebook fino e prateado sai com cara de MacBook** e a foto é reprovada
+  pela marca (foi o motivo de quase todas as reprovações até 16/10). Fora do
+  assunto Apple, prefira cena sem notebook (gabinete, peças, bancada) ou peça
+  "a black plastic laptop with a thick bezel", fechado ou de lado.
 - Em assunto de IA: um computador comum em uso, nada de robô nem de cérebro
   luminoso.
 - Nada de fachada, interior ou funcionário "da Balão": a imagem não pode
@@ -196,8 +208,9 @@ pede o impossível:
 O "sem texto, sem logotipo, sem marca-d'água, sem rosto" o computador
 acrescenta sozinho a todo pedido; não precisa repetir.
 
-**Se você não conseguir descrever uma foto honesta para o assunto**, publique
-com `--sem-capa` (sem o campo `capa`): o site desenha a capa. É raro.
+**Toda publicação tem foto: não existe mais `--sem-capa`.** Se o assunto é
+difícil de mostrar, descreva uma cena simples e honesta do ambiente — a
+bancada com peças, um gabinete aberto, uma mesa de trabalho.
 
 ## O que se pode dizer da loja
 
@@ -356,7 +369,7 @@ O comando `conferir` aplica tudo isto; saber antes poupa idas e vindas.
   dúvidas que o cliente faria no balcão.
 - Sem preço, parcela, desconto ou frete; sem "testamos".
 - Foto de capa descrita no artigo (`alt` e `pedido`): o `publicar` recusa
-  artigo novo sem a descrição, a não ser com `--sem-capa`.
+  artigo sem a descrição.
 
 ## Como o texto soa
 
