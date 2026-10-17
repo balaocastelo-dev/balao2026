@@ -6,7 +6,7 @@ import { escolherTema, resolverChamada } from "@/lib/blog/chamadas";
 import { artigosGuardadosDoSoro, extrairListaDoScript, inserirChamadas } from "@/lib/blog/fontes/soro";
 import { ajustarLink, htmlParaBlocos } from "@/lib/blog/html-para-blocos";
 import { avaliarArtigo } from "@/lib/blog/regua";
-import { contarPorCategoria, escolherDestaques, escolherRelacionados, prontoParaPublicar, resumir } from "@/lib/blog/repositorio";
+import { contarPorCategoria, diarioNoAr, escolherDestaques, escolherRelacionados, prontoParaPublicar, resumir } from "@/lib/blog/repositorio";
 import { desenharFundo } from "@/lib/blog/fundo";
 import { fundoGerado, jsonLdDoArtigo, metadataDoArtigo } from "@/lib/blog/seo";
 import { hrefSeguro, lerTextoRico, linksDoTexto, minutosDeLeitura, montarSumario, textoPuro } from "@/lib/blog/texto";
@@ -163,6 +163,25 @@ describe("régua editorial", () => {
       expect(avaliacao.erros, avaliacao.erros.join("\n")).toEqual([]);
     },
   );
+
+  it("artigo da rotina só aparece com foto de capa e na hora marcada", () => {
+    const base = {
+      slug: "teste-rotina",
+      titulo: "Teste",
+      resumo: "Resumo",
+      categoria: "guias" as const,
+      etiquetas: [],
+      minutos: 5,
+      temAnalise: false,
+      publicadoEm: "2026-10-17T09:00:00.000Z",
+    };
+    const foto = { src: "https://raw.githubusercontent.com/x.jpg", alt: "Foto de teste", largura: 1600, altura: 900 };
+    const depois = Date.parse("2026-10-17T10:00:00.000Z");
+    const antes = Date.parse("2026-10-17T08:00:00.000Z");
+    expect(diarioNoAr({ ...base, capa: foto }, depois)).toBe(true);
+    expect(diarioNoAr({ ...base, capa: null }, depois)).toBe(false);
+    expect(diarioNoAr({ ...base, capa: foto }, antes)).toBe(false);
+  });
 
   it("rascunho e artigo reprovado ficam fora do site", () => {
     const aprovado = ARTIGOS_AUTORAIS.find((a) => !a.rascunho)!;

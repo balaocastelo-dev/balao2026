@@ -80,6 +80,16 @@ function montandoOSite(): boolean {
 }
 
 /**
+ * Um artigo da rotina diária só aparece no site na hora marcada e com a foto
+ * de capa já presa a ele. Regra do Thiago (16/10/2026): nenhuma publicação
+ * sai sem imagem. A rotina agenda o artigo na véspera e o computador da loja
+ * faz a foto de noite; se a foto ainda não chegou, o artigo espera escondido.
+ */
+export function diarioNoAr(resumo: ArtigoResumido, agora: number = Date.now()): boolean {
+  return resumo.capa !== null && (Date.parse(resumo.publicadoEm) || 0) <= agora;
+}
+
+/**
  * A lista da rotina diária.
  *
  * Se o ramo de conteúdo não responder, há duas saídas, e a certa depende de
@@ -93,7 +103,7 @@ function montandoOSite(): boolean {
  */
 const resumosDoDiario = cache(async (tolerante: boolean): Promise<ArtigoResumido[]> => {
   try {
-    return (await listarResumosDoDiario()).filter(jaPublicado);
+    return (await listarResumosDoDiario()).filter((r) => diarioNoAr(r));
   } catch (erro) {
     if (!tolerante && !montandoOSite()) throw erro;
     console.error("[blog] Falha ao ler o ramo de conteúdo; seguindo sem os artigos da rotina:", (erro as Error)?.message || erro);

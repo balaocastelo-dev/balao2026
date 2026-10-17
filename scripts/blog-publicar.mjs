@@ -5,7 +5,7 @@
  *   node scripts/blog-publicar.mjs preparar
  *   node scripts/blog-publicar.mjs listar
  *   node scripts/blog-publicar.mjs conferir artigo.json
- *   node scripts/blog-publicar.mjs publicar artigo.json
+ *   node scripts/blog-publicar.mjs publicar artigo.json [--amanha]
  *   node scripts/blog-publicar.mjs pendentes
  *   node scripts/blog-publicar.mjs capa <endereço-do-artigo> foto.jpg
  *   node scripts/blog-publicar.mjs retirar <endereço-do-artigo>
@@ -20,14 +20,19 @@
  * o artigo, a foto de capa e a lista. O site não é refeito, e o ramo principal
  * não é tocado.
  *
- * Todo artigo novo leva uma foto de capa: fotografia ou imagem simulada do
- * assunto, sem texto e sem marca. Quem escreve o artigo (na nuvem) não gera a
- * imagem: descreve a foto (`"capa": { "alt": "…", "pedido": "…" }`) e publica.
- * O artigo sai com a capa desenhada pelo site e o pedido entra na fila
+ * Todo artigo leva uma foto de capa: fotografia ou imagem simulada do
+ * assunto, sem texto e sem marca. NENHUM artigo da rotina aparece no site sem
+ * ela (regra do Thiago, 16/10/2026): o site esconde o artigo até a foto chegar.
+ * Quem escreve o artigo (na nuvem) não gera a imagem: descreve a foto
+ * (`"capa": { "alt": "…", "pedido": "…" }`) e publica; o pedido entra na fila
  * `capas/pendentes.json`. A fábrica de conteúdo, no computador da loja, lê a
- * fila (`pendentes`), gera a foto na placa de vídeo local e a prende ao
- * artigo (`capa <endereço> foto.jpg`). Quem já tem a foto em mãos pode
- * publicar direto com `--capa foto.jpg`.
+ * fila (`pendentes`), gera a foto na placa de vídeo local (às 22h e às 5h30,
+ * quando a placa está livre) e a prende ao artigo (`capa <endereço> foto.jpg`).
+ * Quem já tem a foto em mãos pode publicar direto com `--capa foto.jpg`.
+ *
+ * Por isso a rotina escreve na véspera e agenda (`--amanha`): o artigo fica
+ * marcado para 6h, 12h ou 18h do dia seguinte (conforme o tipo), a foto é
+ * feita de noite, e ele aparece na hora marcada já com a foto.
  *
  * Não precisa de `npm install`: usa só o Node (22.18 ou mais novo) e o git.
  */
@@ -93,6 +98,24 @@ const TIPOS = {
   noticia: "notícia (meio-dia)",
   dica: "dica (fim da tarde)",
 };
+
+/**
+ * A hora em que cada tipo aparece no site quando é agendado (`--amanha`).
+ * Campinas não tem horário de verão desde 2019: o fuso é sempre -03:00.
+ */
+const HORARIOS = { principal: "06:00", noticia: "12:00", dica: "18:00" };
+
+function amanhaEmCampinas() {
+  return diaEmCampinas(new Date(Date.now() + 24 * 3600 * 1000).toISOString());
+}
+
+function agendadoParaAmanha(tipo) {
+  return new Date(`${amanhaEmCampinas()}T${HORARIOS[tipo]}:00-03:00`).toISOString();
+}
+
+function quando(iso) {
+  return new Intl.DateTimeFormat("pt-BR", { timeZone: FUSO, day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
+}
 
 function tipoDe(artigo) {
   if (artigo.categoria === "noticias") return "noticia";
@@ -316,7 +339,7 @@ function conferir(arquivo, { dataPadrao, arquivoDaFoto }) {
   console.log(`Tipo: ${TIPOS[tipoDe(artigo)]}`);
   if (artigo.roteiro) console.log(`Roteiro do vídeo: ${artigo.roteiro.fala.split(/\s+/).length} palavras de fala, ${artigo.roteiro.destaques.length} destaques`);
   if (foto) console.log(`Capa: ${foto.largura} × ${foto.altura}, ${Math.round(foto.bytes.length / 1024)} KB`);
-  if (pendente) console.log("Capa: a foto será gerada no computador da loja; até lá o site mostra a capa desenhada.");
+  if (pendente) console.log("Capa: a foto será gerada no computador da loja; o artigo só aparece no site depois que ela chegar.");
   const avisos = pendente ? avaliacao.avisos.filter((a) => !a.startsWith("Sem imagem de capa")) : avaliacao.avisos;
   if (avisos.length > 0) console.log(`\nAvisos (não impedem a publicação):\n- ${avisos.join("\n- ")}`);
   if (!avaliacao.aprovado) sair(`Reprovado na régua editorial:\n- ${avaliacao.erros.join("\n- ")}`);
@@ -357,7 +380,7 @@ function conferirContraOPublicado(artigo, indice, { atualizar, forcar }) {
     const hoje = diaEmCampinas(artigo.publicadoEm);
     const tipo = tipoDe(artigo);
     const doDia = indice.artigos.find((a) => diaEmCampinas(a.publicadoEm) === hoje && tipoDe(a) === tipo);
-    if (doDia) erros.push(`A publicação de hoje (${hoje}) do tipo ${TIPOS[tipo]} já saiu: "${doDia.titulo}". Use --forcar para publicar mais uma.`);
+    if (doDia) erros.push(`A publicação do dia ${hoje} do tipo ${TIPOS[tipo]} já existe: "${doDia.titulo}". Use --forcar para publicar mais uma.`);
   }
 
   if (erros.length > 0) sair(`Não publicado:\n- ${[...new Set(erros)].join("\n- ")}`);
@@ -371,6 +394,7 @@ const opcoes = new Set(argumentos.filter((a) => a.startsWith("--")).map((a) => a
 const atualizar = opcoes.has("--atualizar");
 const forcar = opcoes.has("--forcar");
 const semCapa = opcoes.has("--sem-capa");
+const amanha = opcoes.has("--amanha");
 
 /** `--capa foto.jpg` ou `--capa=foto.jpg`. */
 function valorDaOpcao(nome) {
@@ -386,17 +410,25 @@ if (arquivoDaFoto && semCapa) sair("Use --capa ou --sem-capa, não os dois.");
 /** O que já está no ar — para a rotina não repetir assunto. */
 function mostrarPublicados(indice) {
   console.log(`Publicados pela rotina diária (${indice.artigos.length}), do mais novo para o mais antigo:`);
+  const agora = Date.now();
   for (const a of indice.artigos) {
-    console.log(`- ${diaEmCampinas(a.publicadoEm)} · ${a.categoria}${a.formato === "dica" ? " (dica)" : ""} · ${a.titulo} · /blog/${a.slug}`);
+    const marcas = [
+      Date.parse(a.publicadoEm) > agora ? `agendado para ${quando(a.publicadoEm)}` : "",
+      a.capa ? "" : "esperando a foto, fora do site",
+    ].filter(Boolean);
+    console.log(`- ${diaEmCampinas(a.publicadoEm)} · ${a.categoria}${a.formato === "dica" ? " (dica)" : ""} · ${a.titulo} · /blog/${a.slug}${marcas.length ? ` (${marcas.join("; ")})` : ""}`);
   }
   const daCasa = artigosDaCasa();
   console.log(`\nArtigos da casa (${daCasa.length}) — assuntos que também já estão cobertos:`);
   for (const a of daCasa) console.log(`- ${a.titulo || a.slug} · /blog/${a.slug}`);
   const hoje = diaEmCampinas(new Date().toISOString());
-  console.log(`\nHoje (${hoje}):`);
-  for (const [tipo, nome] of Object.entries(TIPOS)) {
-    const doDia = indice.artigos.find((a) => diaEmCampinas(a.publicadoEm) === hoje && tipoDe(a) === tipo);
-    console.log(`- ${nome}: ${doDia ? `JÁ PUBLICADO — ${doDia.titulo}` : "ainda não publicado"}`);
+  for (const [rotulo, dia, ja] of [["Hoje", hoje, "JÁ PUBLICADO"], ["Amanhã", amanhaEmCampinas(), "JÁ AGENDADO"]]) {
+    if (rotulo === "Amanhã" && !amanha) continue;
+    console.log(`\n${rotulo} (${dia}):`);
+    for (const [tipo, nome] of Object.entries(TIPOS)) {
+      const doDia = indice.artigos.find((a) => diaEmCampinas(a.publicadoEm) === dia && tipoDe(a) === tipo);
+      console.log(`- ${nome}: ${doDia ? `${ja} — ${doDia.titulo}` : "ainda não tem"}`);
+    }
   }
 }
 
@@ -441,15 +473,18 @@ if (comando === "listar") {
   }
 } else if (comando === "conferir") {
   const { artigo, pendente } = conferir(alvo, { dataPadrao: new Date().toISOString(), arquivoDaFoto });
-  if (!artigo.capa && !pendente && !semCapa) {
+  if (!artigo.capa && !pendente) {
     console.log('\nAtenção: o artigo não descreve a foto de capa. O comando publicar exige "capa": { "alt": "…", "pedido": "…" }.');
   }
+  if (amanha) console.log(`Com --amanha, aparece no site em ${quando(agendadoParaAmanha(tipoDe(artigo)))}, já com a foto.`);
   console.log("\n✓ Aprovado. (Nada foi publicado: use o comando publicar.)");
 } else if (comando === "publicar") {
+  // Regra do Thiago (16/10/2026): nenhuma publicação sai sem imagem.
+  if (semCapa) sair('Publicar sem foto de capa não é mais permitido: descreva a foto no artigo ("capa": { "alt": "…", "pedido": "…" }).');
   const { artigo, foto, pendente } = conferir(alvo, { dataPadrao: new Date().toISOString(), arquivoDaFoto });
-  if (Date.parse(artigo.publicadoEm) > Date.now() + 60_000) sair("A data de publicação está no futuro.");
-  // Todo artigo novo descreve a sua foto; capa desenhada para sempre, só por exceção declarada.
-  if (!artigo.capa && !pendente && !semCapa) {
+  if (amanha) artigo.publicadoEm = agendadoParaAmanha(tipoDe(artigo));
+  else if (Date.parse(artigo.publicadoEm) > Date.now() + 60_000) sair("A data de publicação está no futuro. Para agendar, use --amanha.");
+  if (!artigo.capa && !pendente) {
     sair('Falta a foto de capa: descreva-a no artigo ("capa": { "alt": "…", "pedido": "…" }) para o computador da loja gerar, ou passe --capa foto.jpg.');
   }
 
@@ -504,9 +539,12 @@ if (comando === "listar") {
     }
     if (pendente || fs.existsSync(path.join(pasta, "capas", "pendentes.json"))) gravarPendentes(pasta, fila);
 
-    enviar(pasta, `${anterior ? "Atualiza" : "Publica"}: ${artigo.titulo}`);
-    console.log(`\n✓ Publicado no ramo de conteúdo. Em até uma hora aparece em:\n  ${SITE}/blog/${artigo.slug}`);
-    if (pendente && !artigo.capa) console.log("  A foto de capa está na fila do computador da loja (capas/pendentes.json).");
+    const futuro = Date.parse(paraGravar.publicadoEm) > Date.now();
+    enviar(pasta, `${anterior ? "Atualiza" : futuro ? "Agenda" : "Publica"}: ${artigo.titulo}`);
+    const semFoto = pendente && !artigo.capa;
+    if (futuro) console.log(`\n✓ Agendado no ramo de conteúdo para ${quando(paraGravar.publicadoEm)}:\n  ${SITE}/blog/${artigo.slug}`);
+    else console.log(`\n✓ Publicado no ramo de conteúdo:\n  ${SITE}/blog/${artigo.slug}`);
+    if (semFoto) console.log("  O site só mostra o artigo depois que a foto chegar: ela está na fila do computador da loja (capas/pendentes.json), que faz as fotos às 22h e às 5h30.");
   } finally {
     fecharRamo(pasta);
   }
@@ -525,7 +563,8 @@ if (comando === "listar") {
   const trocar = opcoes.has("--trocar");
   // `--pedir` põe na fila a foto de um artigo que saiu sem ela: --alt "…" --pedido "…".
   const pedir = opcoes.has("--pedir");
-  const altPedido = pedir ? valorDaOpcao("--alt") : null;
+  // `--alt` também vale com arquivo: a foto saiu de outra cena (a reserva do computador da loja).
+  const altPedido = valorDaOpcao("--alt");
   const textoPedido = pedir ? valorDaOpcao("--pedido") : null;
   const valores = new Set([altPedido, textoPedido].filter(Boolean));
   const arquivo = resto.find((a) => !a.startsWith("--") && !valores.has(a));
@@ -558,7 +597,7 @@ if (comando === "listar") {
       const caminhoDoArtigo = path.join(pasta, "artigos", `${alvo}.json`);
       const bruto = JSON.parse(fs.readFileSync(caminhoDoArtigo, "utf8"));
       if (bruto.capa && !trocar) sair(`/blog/${alvo} já tem foto de capa. Para trocar, use --trocar.`);
-      const alt = (pedido?.alt ?? bruto.capa?.alt ?? "").trim();
+      const alt = (altPedido ?? pedido?.alt ?? bruto.capa?.alt ?? "").trim();
       if (alt.length < 12) sair(`/blog/${alvo} não tem a descrição da foto (nem na fila, nem no artigo).`);
 
       const foto = lerCapa(arquivo, alvo);
@@ -603,13 +642,14 @@ if (comando === "listar") {
   }
 } else {
   console.log(`Uso:
-  node scripts/blog-publicar.mjs preparar                  as regras, a pauta e o que já foi publicado
+  node scripts/blog-publicar.mjs preparar [--amanha]       as regras, a pauta e o que já foi publicado (e o que já há para amanhã)
   node scripts/blog-publicar.mjs listar                    só o que já foi publicado
   node scripts/blog-publicar.mjs conferir artigo.json      confere formato e régua, sem publicar   [--capa foto.jpg]
   node scripts/blog-publicar.mjs publicar artigo.json      confere e publica; a foto descrita no artigo entra na fila
-                                                           [--capa foto.jpg] [--sem-capa] [--atualizar] [--forcar]
+                                                           [--amanha] [--capa foto.jpg] [--atualizar] [--forcar]
+                                                           --amanha: agenda para 6h, 12h ou 18h de amanhã (conforme o tipo)
   node scripts/blog-publicar.mjs pendentes                 as fotos de capa que faltam gerar (JSON)
-  node scripts/blog-publicar.mjs capa <endereço> foto.jpg  prende a foto a um artigo já publicado   [--trocar]
+  node scripts/blog-publicar.mjs capa <endereço> foto.jpg  prende a foto a um artigo já publicado   [--trocar] [--alt "…"]
   node scripts/blog-publicar.mjs capa <endereço> --pedir --alt "…" --pedido "…"   põe na fila a foto de um artigo sem foto
   node scripts/blog-publicar.mjs capa <endereço> --desistir               tira o pedido da fila
   node scripts/blog-publicar.mjs retirar <endereço>        tira um artigo do ar`);
