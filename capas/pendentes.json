@@ -1,4 +1,13 @@
 {
   "versao": 1,
-  "pendentes": []
+  "pendentes": [
+    {
+      "slug": "ia-no-computador-ou-ia-na-nuvem-o-que-muda",
+      "titulo": "IA no computador ou IA na nuvem: o que muda para quem usa",
+      "categoria": "ia",
+      "alt": "Gabinete de computador de mesa com a lateral de vidro ao lado de um roteador sem fio sobre uma mesa de escritório, com o monitor apagado ao fundo",
+      "pedido": "A mid-tower desktop computer with a tempered glass side panel stands on a light wooden office desk, a graphics card visible inside. Next to it sits a small black wireless router with its antennas up and a few status lights. A switched-off monitor is in the background, slightly out of focus. Soft natural daylight from a window on the right, calm and tidy workspace.",
+      "pedidoEm": "2026-10-17T22:19:54.978Z"
+    }
+  ]
 }

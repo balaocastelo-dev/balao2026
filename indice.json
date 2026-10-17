@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "ia-no-computador-ou-ia-na-nuvem-o-que-muda",
+      "titulo": "IA no computador ou IA na nuvem: o que muda para quem usa",
+      "resumo": "IA no computador ou na nuvem? Veja o que muda em privacidade, internet, qualidade das respostas e no computador que cada caminho pede.",
+      "categoria": "ia",
+      "etiquetas": [
+        "ia local",
+        "privacidade",
+        "memória ram",
+        "placa de vídeo"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-18T09:00:00.000Z",
+      "minutos": 11
+    },
+    {
       "slug": "desligar-suspender-ou-hibernar-qual-usar",
       "titulo": "Desligar, suspender ou hibernar: qual usar no dia a dia",
       "resumo": "Suspender serve para pausas curtas, hibernar para longos períodos longe da tomada e desligar quando o computador vai ficar parado. Veja quando usar cada um.",
@@ -388,5 +403,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-17T09:22:17.126Z"
+  "atualizadoEm": "2026-10-17T22:19:54.978Z"
 }

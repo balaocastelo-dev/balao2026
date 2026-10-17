@@ -1,0 +1,300 @@
+{
+  "slug": "ia-no-computador-ou-ia-na-nuvem-o-que-muda",
+  "titulo": "IA no computador ou IA na nuvem: o que muda para quem usa",
+  "resumo": "IA no computador ou na nuvem? Veja o que muda em privacidade, internet, qualidade das respostas e no computador que cada caminho pede.",
+  "categoria": "ia",
+  "etiquetas": [
+    "ia local",
+    "privacidade",
+    "memória ram",
+    "placa de vídeo"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-18T09:00:00.000Z",
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Você usa um assistente de inteligência artificial para escrever e-mails, resumir documentos ou tirar dúvidas e começou a se perguntar se vale mais a pena usar IA no computador ou IA na nuvem. A dúvida aparece quando o assunto envolve dados da empresa, quando a internet cai ou quando alguém comenta que dá para rodar o assistente na própria máquina."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que uma opção substitui a outra por completo. Não substitui. A IA na nuvem roda nos servidores de uma empresa e costuma entregar respostas mais completas; a IA local roda no seu computador, mantém os dados em casa e funciona sem internet, mas depende do hardware que você tem. Para a maioria das pessoas, a resposta é usar as duas, cada uma no que faz melhor."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "Na **nuvem**, o texto que você digita vai para os servidores do serviço, que tem regras próprias de guarda e de revisão das conversas.",
+        "No **computador**, programas como Ollama e LM Studio rodam o modelo na sua máquina, e a conversa não sai dela.",
+        "A IA local depende da **memória**: da placa de vídeo, ou do sistema em computadores com memória unificada. Quanto maior o modelo, mais memória.",
+        "Use a nuvem para tarefas gerais e a IA local para documentos sigilosos e para trabalhar sem internet."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que acontece com o que você digita em cada caso"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Quando você conversa com um assistente na nuvem, o seu texto viaja pela internet até os servidores do serviço, é processado lá e a resposta volta. Isso não é segredo nem defeito: é como o serviço funciona. O que muda de um serviço para outro são as regras sobre o que fica guardado, por quanto tempo e quem pode ler."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A OpenAI, por exemplo, explica na central de ajuda que o usuário pode desligar a opção que permite usar as conversas para melhorar os modelos, em Configurações e Controles de dados. A mesma página diz que os chats temporários não entram no histórico nem no treino, mas podem ficar guardados por até 30 dias por motivo de segurança. Nos planos para empresas e escolas, o conteúdo não vai para o treino por padrão."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O Google, na central de privacidade do Gemini, informa que uma parte das conversas é lida por revisores humanos e pede que o usuário não digite informação confidencial que não gostaria que um revisor visse. Segundo a página, as conversas revisadas ficam guardadas por até três anos, e mesmo com o histórico desligado as conversas ficam com a conta por 72 horas."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Na IA local, o caminho é outro. A documentação do Ollama diz que a empresa não vê os comandos nem os dados quando o modelo roda na máquina do usuário. A do LM Studio afirma que nada do que você digita ao conversar com os modelos sai do aparelho, e que os documentos enviados ao programa são processados ali mesmo. Mas atenção: o Ollama também oferece modelos na nuvem, e quem usa esse recurso volta a mandar o texto para fora."
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "A conversa não sai do computador, mas fica nele. Se a máquina não tem senha, backup e antivírus em dia, os arquivos continuam expostos como qualquer outro documento. Privacidade na IA local depende também de cuidar do próprio computador.",
+      "titulo": "Local não quer dizer protegido de tudo"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando a IA na nuvem é a melhor escolha"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Os serviços na nuvem rodam modelos muito grandes, em servidores com muito mais memória do que qualquer computador de casa. Na prática, isso costuma significar respostas mais completas em temas variados, melhor desempenho em textos longos e recursos que um modelo pequeno não tem, como pesquisa na internet e leitura de imagens e arquivos variados."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Também não pedem quase nada do seu equipamento. Um notebook simples, um celular ou um computador antigo conseguem usar o assistente pelo navegador, porque o trabalho pesado acontece longe dali. Para quem usa IA de vez em quando, para pesquisar, revisar um texto ou planejar uma viagem, a nuvem resolve sem exigir troca de máquina."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas há limites. Sem internet, o assistente para. Com conexão instável, a resposta demora ou cai no meio. E tudo o que você digita fica sujeito às regras do serviço, que podem mudar com o tempo. Por isso vale reler as configurações de privacidade de vez em quando e evitar colar ali contrato, dado de cliente ou documento pessoal."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando a IA no computador compensa"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A IA local faz sentido quando o conteúdo é sensível: contratos, prontuários, planilhas de clientes, documentos internos de uma empresa. Como o texto não sai da máquina, você não depende da política de privacidade de ninguém para saber onde ele está. Para escritórios que lidam com dados pessoais de terceiros, esse controle costuma pesar bastante na decisão."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Ela também funciona sem internet. O LM Studio informa que conversar com modelos já baixados, conversar com documentos e rodar o servidor local funcionam sem conexão. A internet só é necessária para procurar e baixar modelos, baixar os componentes de execução e atualizar o programa. O Ollama tem ainda um modo só local, que desliga os recursos de nuvem dele."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O preço dessa independência é o hardware. O modelo fica inteiro na memória enquanto trabalha, e um computador comum roda modelos bem menores do que os dos grandes serviços. Isso costuma bastar para resumir, reescrever, traduzir e responder sobre um documento, mas as respostas tendem a ser menos completas em perguntas abertas e em temas que pedem muito conhecimento geral."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "A conversa e os documentos não saem da máquina.",
+        "Funciona sem internet depois que o modelo foi baixado.",
+        "Você escolhe o modelo e decide quando atualizar.",
+        "Não depende de regra de privacidade de terceiros."
+      ],
+      "contras": [
+        "Pede memória de sobra, na placa de vídeo ou no sistema.",
+        "Os modelos que cabem em casa são menores e menos completos.",
+        "A instalação e a escolha do modelo pedem algum aprendizado.",
+        "A segurança dos arquivos passa a ser responsabilidade sua."
+      ],
+      "titulo": "IA no computador: o que pesa a favor e contra"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que o computador precisa ter para a IA local"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O ponto central é a memória. A documentação da Hugging Face dá uma regra prática: carregar um modelo de X bilhões de parâmetros em meia precisão (bfloat16 ou float16) pede cerca de 2 vezes X gigabytes de memória de vídeo. Parâmetros são os valores que o modelo aprendeu; quanto mais deles, maior o arquivo e maior a memória necessária."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A quantização ajuda bastante. É a técnica de guardar esses valores com menos precisão, em 8 ou 4 bits, para o modelo ocupar menos espaço. No exemplo da própria Hugging Face, um modelo que pedia perto de 30 GB em meia precisão caiu para cerca de 15 GB em 8 bits e para pouco mais de 9 GB em 4 bits. Em troca, a resposta pode perder um pouco de qualidade."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Tamanho do modelo",
+        "Meia precisão (16 bits)",
+        "8 bits",
+        "4 bits"
+      ],
+      "linhas": [
+        [
+          "7 bilhões de parâmetros",
+          "Cerca de 14 GB",
+          "Cerca de 7 GB",
+          "Cerca de 3,5 GB"
+        ],
+        [
+          "13 bilhões de parâmetros",
+          "Cerca de 26 GB",
+          "Cerca de 13 GB",
+          "Cerca de 6,5 GB"
+        ],
+        [
+          "30 bilhões de parâmetros",
+          "Cerca de 60 GB",
+          "Cerca de 30 GB",
+          "Cerca de 15 GB"
+        ]
+      ],
+      "titulo": "Memória aproximada só para carregar o modelo",
+      "colunaDestaque": 3,
+      "fonte": {
+        "nome": "Hugging Face — Optimizing LLMs for Speed and Memory",
+        "url": "https://huggingface.co/docs/transformers/llm_tutorial_optimization"
+      },
+      "nota": "Cálculo pela regra de 2 bytes por parâmetro em 16 bits, 1 byte em 8 bits e meio byte em 4 bits. Na prática é preciso uma folga a mais para o texto da conversa e para o próprio programa."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Em um PC com placa de vídeo dedicada, o que conta é a memória da placa: se o modelo cabe nela, roda com folga; se não cabe, parte vai para a memória do sistema e tudo fica bem mais lento. Em computadores com memória unificada, como os Mac com chip Apple, a memória do sistema é dividida com o processador gráfico, e o total de memória passa a ser o limite."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "E a NPU? A Microsoft explica que a NPU é um chip feito para as contas da inteligência artificial e que os Copilot+ PC trazem uma capaz de mais de 40 trilhões de operações por segundo. Ela gasta pouca energia e atende bem aos recursos de IA do próprio Windows. Mas os programas que rodam modelos de conversa em casa ainda tiram mais proveito de placa de vídeo e de memória."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "ia-local"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se você quer o passo a passo para dimensionar a máquina, o artigo [Computador para rodar IA em casa](/blog/que-computador-preciso-para-rodar-ia-em-casa) detalha placa de vídeo, Mac e notebook com NPU. Aqui, o que importa é a ideia geral: quem já tem uma placa de vídeo com boa memória costuma conseguir testar a IA local sem trocar nada."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Nuvem, computador ou os dois: como decidir pelo seu uso"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A decisão fica mais simples quando você pensa no tipo de tarefa, e não na tecnologia. A tabela abaixo resume os casos mais comuns de quem usa IA no trabalho e em casa. Ela não é regra fixa: depende do que o seu computador aguenta e de quanto o conteúdo precisa ficar reservado."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Situação",
+        "Nuvem",
+        "No computador"
+      ],
+      "linhas": [
+        [
+          "Pesquisa e perguntas gerais",
+          "Mais indicada",
+          "Funciona, com respostas mais curtas"
+        ],
+        [
+          "Contrato, dado de cliente ou documento interno",
+          "Evite colar o conteúdo",
+          "Mais indicada"
+        ],
+        [
+          "Trabalho sem internet ou com conexão ruim",
+          "Não funciona",
+          "Funciona com o modelo já baixado"
+        ],
+        [
+          "Computador simples ou antigo",
+          "Funciona pelo navegador",
+          "Fica limitada a modelos pequenos"
+        ],
+        [
+          "Resumo e revisão de textos do dia a dia",
+          "Funciona bem",
+          "Funciona bem com modelo médio"
+        ]
+      ],
+      "titulo": "Qual caminho costuma servir melhor",
+      "colunaDestaque": 2
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Para uma pessoa que usa IA de vez em quando, a nuvem basta, desde que ela revise as configurações de privacidade e não cole ali o que não mostraria a um desconhecido. Para um escritório que lida com documentos de clientes, vale ter um computador preparado para a IA local e deixar a nuvem para as tarefas que não envolvem dados sensíveis."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas não espere que o modelo local faça tudo o que o serviço grande faz. Se a tarefa pede muito conhecimento geral ou textos longos e bem elaborados, a nuvem continua na frente. O caminho que costuma funcionar é combinar: o que é sigiloso fica em casa, o que é geral vai para fora."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Onde preparar um computador para IA local em Campinas"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática é uma loja de informática no Cambuí, em Campinas, e tem uma [seleção de computadores para rodar IA localmente](/ia-local). Também monta [computador sob medida](/montagempc) para quem quer escolher placa de vídeo e memória pelo modelo que pretende usar, e você pode ver a máquina ligada e testar antes de pagar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se você já tem um computador e quer saber se ele aguenta a IA local, a [assistência técnica](/manutencao) da loja faz diagnóstico e upgrade, como a troca de memória ou de placa de vídeo. O atendimento pelo WhatsApp é feito por pessoas da equipe. Em resumo: use a nuvem para o que é geral e o computador para o que é seu."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "montagem"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "A IA local funciona sem internet?",
+      "resposta": "Sim, depois que o modelo foi baixado. Programas como o LM Studio funcionam sem conexão para conversar e ler documentos; a internet só é necessária para baixar modelos e atualizar o programa."
+    },
+    {
+      "pergunta": "Os serviços de IA na nuvem leem o que eu escrevo?",
+      "resposta": "Depende do serviço e das configurações. O Google informa que uma parte das conversas do Gemini passa por revisores humanos, e a OpenAI permite desligar o uso das conversas para treino. Leia as configurações de privacidade de cada um."
+    },
+    {
+      "pergunta": "Meu notebook roda IA local?",
+      "resposta": "Costuma rodar modelos pequenos. O que decide é a memória: a da placa de vídeo, se houver, ou a do sistema. Modelos maiores pedem bem mais memória do que um notebook comum tem."
+    },
+    {
+      "pergunta": "A IA local é tão boa quanto a da nuvem?",
+      "resposta": "Normalmente não em conhecimento geral, porque os modelos que cabem em casa são menores. Para resumir, reescrever e responder sobre um documento seu, um modelo médio costuma dar conta."
+    },
+    {
+      "pergunta": "Preciso de um computador com NPU para usar IA local?",
+      "resposta": "Não. A NPU atende bem aos recursos de IA do Windows, mas os programas que rodam modelos de conversa ainda tiram mais proveito de placa de vídeo e de memória."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Data Controls FAQ — OpenAI Help Center",
+      "url": "https://help.openai.com/en/articles/7730893-data-controls-faq",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Gemini Apps Privacy Hub — Google",
+      "url": "https://support.google.com/gemini/answer/13594961",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "FAQ — documentação do Ollama (GitHub)",
+      "url": "https://raw.githubusercontent.com/ollama/ollama/main/docs/faq.mdx",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Offline Operation — LM Studio Docs",
+      "url": "https://lmstudio.ai/docs/offline",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Optimizing LLMs for Speed and Memory — Hugging Face",
+      "url": "https://huggingface.co/docs/transformers/llm_tutorial_optimization",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Copilot+ PCs developer guide — Microsoft Learn",
+      "url": "https://learn.microsoft.com/windows/ai/npu-devices",
+      "data": "outubro de 2026"
+    }
+  ]
+}
