@@ -95,7 +95,12 @@
         "memória ram",
         "windows"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/computador-lento-o-que-resolve-de-verdade-69096b8d.jpg",
+        "alt": "Computador de mesa com a tampa lateral aberta sobre uma bancada, ao lado de um HD e um SSD, com o monitor apagado ao fundo",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-10-15T08:59:13.802Z",
       "minutos": 10
     },
@@ -302,5 +307,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-16T20:56:49.556Z"
+  "atualizadoEm": "2026-10-17T01:03:32.875Z"
 }
