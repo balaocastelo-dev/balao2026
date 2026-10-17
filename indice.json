@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "windows-11-pc-8-gb-memoria-melhorias-outubro",
+      "titulo": "Windows 11 promete rodar melhor em PC com 8 GB de memória: o que muda",
+      "resumo": "A Microsoft anunciou em 15 de outubro melhorias no Windows 11 que aliviam a memória de PCs com 8 GB. Veja o que chega, o que falta provar e se vale esperar.",
+      "categoria": "noticias",
+      "etiquetas": [
+        "windows",
+        "memória ram",
+        "atualização",
+        "desempenho"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-18T15:00:00.000Z",
+      "minutos": 3
+    },
+    {
       "slug": "ia-no-computador-ou-ia-na-nuvem-o-que-muda",
       "titulo": "IA no computador ou IA na nuvem: o que muda para quem usa",
       "resumo": "IA no computador ou na nuvem? Veja o que muda em privacidade, internet, qualidade das respostas e no computador que cada caminho pede.",
@@ -403,5 +418,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-17T22:19:54.978Z"
+  "atualizadoEm": "2026-10-17T22:29:50.912Z"
 }

@@ -1,0 +1,103 @@
+{
+  "slug": "windows-11-pc-8-gb-memoria-melhorias-outubro",
+  "titulo": "Windows 11 promete rodar melhor em PC com 8 GB de memória: o que muda",
+  "resumo": "A Microsoft anunciou em 15 de outubro melhorias no Windows 11 que aliviam a memória de PCs com 8 GB. Veja o que chega, o que falta provar e se vale esperar.",
+  "categoria": "noticias",
+  "etiquetas": [
+    "windows",
+    "memória ram",
+    "atualização",
+    "desempenho"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-18T15:00:00.000Z",
+  "seo": {
+    "titulo": "Windows 11 em PC com 8 GB de memória: o que muda"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Em 15 de outubro de 2026, a Microsoft publicou no blog oficial do Windows um pacote de melhorias para o Windows 11 voltado para deixar o sistema mais ágil, com atenção especial aos computadores com 8 GB de memória RAM ou menos. Segundo a empresa, as mudanças começam a ser distribuídas de forma ampla depois de passar pelos testes com o programa Windows Insider."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é ler isso como \"8 GB voltou a ser suficiente\". O anúncio fala em aliviar a memória, não em dobrar o que a máquina consegue fazer. Quem já sofre com o computador travando com poucas janelas abertas tende a notar alguma melhora, mas o limite físico dos 8 GB continua lá."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que a Microsoft anunciou"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A memória RAM é a área de trabalho rápida do computador. Quando ela enche, o Windows passa parte dos dados para o disco, que é bem mais lento, e é aí que a máquina engasga. A Microsoft diz que o Windows 11 agora consegue manter até 2 GB a mais de dados em uso na memória, em vez de empurrá-los para o disco."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Nos computadores com 8 GB ou menos, os Widgets (o painel de notícias, clima e cotações que abre pela barra de tarefas) só passam a ser carregados quando você os abre. Pelas contas da empresa, isso libera mais de 200 MB para os programas que você está usando de fato."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O pacote também mexe no menu Iniciar, no Explorador de Arquivos, na busca, na Ferramenta de Captura, no Edge e nos aplicativos do Microsoft 365. Há ainda mais opções de posição para a barra de tarefas, ajustes no Windows Update para escolher melhor a hora de reiniciar e entrada mais rápida pelo Windows Hello. A Microsoft avisa que o resultado varia conforme o aparelho, a configuração e o uso."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que isso muda para você"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem já tem um PC ou notebook com 8 GB:** vale manter o Windows Update em dia para receber as melhorias assim que chegarem. Se a máquina continuar lenta, antes de culpar o sistema confira [quanta memória o computador tem e quanta está em uso](/blog/como-ver-quanta-memoria-ram-o-computador-tem): se ela vive perto do limite, o ganho de software tende a ser pequeno."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Nesse caso, quando a placa-mãe aceita, acrescentar [memória RAM](/categoria/hardware-memoria-ram) e trocar o disco por SSD continuam sendo os ajustes que mais resolvem. O guia sobre [computador lento](/blog/computador-lento-o-que-resolve-de-verdade) explica o que costuma funcionar e o que é perda de tempo."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "upgrade"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem vai comprar agora:** o anúncio não muda a recomendação de sempre. Para escritório leve, navegador e e-mail, 8 GB ficam mais confortáveis com essas melhorias; para quem abre muitas abas, trabalha com planilhas grandes ou edita foto, 16 GB seguem sendo a escolha mais segura. Em notebook com memória soldada, que não aceita upgrade, a decisão da compra é definitiva."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem pensava em esperar:** não há motivo para adiar a compra por causa disso. As mudanças chegam por atualização a máquinas que já rodam o Windows 11, então valem tanto para o computador que você tem quanto para o que você comprar."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que ainda não se sabe"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O texto da Microsoft não diz em qual atualização mensal cada mudança chega nem quando todos os computadores terão recebido o pacote. Também ainda não há medição independente que confirme o alívio de memória em máquinas de 8 GB; as publicações que repercutiram o anúncio lembram que os números são da própria empresa. A nova busca, que executa ações como ligar o modo escuro, segue só para participantes do Insider, com chegada geral prevista para o fim do ano."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, faz upgrade de memória e de SSD na [assistência técnica](/manutencao) e vende [notebooks](/notebooks) novos e seminovos, que você pode ver ligados antes de pagar. Em uma linha: atualize o Windows e aproveite o alívio, mas, se a memória vive cheia, a solução continua sendo mais memória."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "notebooks"
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "What's new in Windows 11: Everyday experiences, reimagined — Windows Experience Blog (Microsoft)",
+      "url": "https://blogs.windows.com/windowsexperience/2026/10/15/whats-new-in-windows-11-everyday-experiences-reimagined/",
+      "data": "15 de outubro de 2026"
+    },
+    {
+      "nome": "Microsoft says Windows 11 is now more responsive and better on 8GB of RAM — The Next Web",
+      "url": "https://thenextweb.com/news/windows-11-20-percent-8gb-ram",
+      "data": "15 de outubro de 2026"
+    },
+    {
+      "nome": "Microsoft Says Windows 11 Is Now More Responsive, Especially On 8GB RAM PCs — Lowyat.NET",
+      "url": "https://www.lowyat.net/2026/407610/microsoft-windows-11-more-responsive/",
+      "data": "16 de outubro de 2026"
+    }
+  ]
+}
