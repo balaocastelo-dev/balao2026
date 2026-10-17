@@ -43,7 +43,12 @@
         "ergonomia",
         "escritório"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/como-escolher-monitor-para-trabalho-02408d2b.jpg",
+        "alt": "Monitor desligado sobre uma mesa de escritório clara, com um notebook fechado ao lado e uma planta ao fundo",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-10-16T08:58:17.220Z",
       "minutos": 11
     },
@@ -312,5 +317,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-17T01:09:46.055Z"
+  "atualizadoEm": "2026-10-17T01:12:28.715Z"
 }
