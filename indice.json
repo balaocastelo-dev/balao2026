@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "iphone-duo-pre-venda-brasil-iphone-dobravel",
+      "titulo": "iPhone Duo: pré-venda do iPhone dobrável começa com o Brasil na lista",
+      "resumo": "A pré-venda do iPhone Duo, o primeiro iPhone dobrável, abriu em 16 de outubro de 2026, com o Brasil na primeira leva. Veja o que muda para quem compra e conserta.",
+      "categoria": "noticias",
+      "etiquetas": [
+        "iphone",
+        "apple",
+        "lançamento",
+        "assistência"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-17T15:00:00.000Z",
+      "minutos": 3
+    },
+    {
       "slug": "como-ver-quanta-memoria-ram-o-computador-tem",
       "titulo": "Como ver quanta memória RAM o computador tem e quanta está em uso",
       "resumo": "Em menos de um minuto o Windows e o Mac mostram quanta memória RAM o computador tem e se ela está faltando. Veja onde olhar e que número importa.",
@@ -327,5 +342,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-17T01:16:15.133Z"
+  "atualizadoEm": "2026-10-17T02:08:32.886Z"
 }

@@ -1,0 +1,102 @@
+{
+  "slug": "iphone-duo-pre-venda-brasil-iphone-dobravel",
+  "titulo": "iPhone Duo: pré-venda do iPhone dobrável começa com o Brasil na lista",
+  "resumo": "A pré-venda do iPhone Duo, o primeiro iPhone dobrável, abriu em 16 de outubro de 2026, com o Brasil na primeira leva. Veja o que muda para quem compra e conserta.",
+  "categoria": "noticias",
+  "etiquetas": [
+    "iphone",
+    "apple",
+    "lançamento",
+    "assistência"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-17T15:00:00.000Z",
+  "seo": {
+    "titulo": "iPhone Duo: pré-venda do iPhone dobrável inclui o Brasil"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "A Apple abriu em 16 de outubro de 2026 a pré-venda do iPhone Duo, o primeiro iPhone que dobra ao meio. O aparelho foi apresentado em 9 de setembro, e o Brasil aparece na lista de países da primeira leva, que recebe as unidades a partir de 23 de outubro, segundo o comunicado da empresa."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Para quem acompanha a marca, a novidade não é só o formato. Um celular dobrável tem peças que o iPhone comum não tem, como a dobradiça e a tela interna flexível, e isso muda a conta de quem pensa em comprar e também de quem vai cuidar do aparelho por alguns anos."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que a Apple anunciou"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Fechado, o iPhone Duo usa uma tela externa de 5,4 polegadas; aberto, mostra uma tela interna de 7,6 polegadas, a maior já colocada em um iPhone, de acordo com a Apple. As duas são do tipo Super Retina XDR, com ProMotion. O processador é o A20 Pro, e o aparelho sai com o iOS 27 e certificação IP68 contra água e poeira."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A dobradiça tem mais de cem componentes e foi desenhada para a tela ficar plana quando aberta. A tela interna recebe uma camada de polímero com acabamento fosco (o nano-texture), que segundo a Apple deixa o vinco menos visível. A estrutura é de titânio, e a bateria usa uma arquitetura dupla, nas palavras da Apple."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": false,
+      "itens": [
+        "Pré-venda: 16 de outubro de 2026, em mais de 70 países e regiões, entre eles o Brasil.",
+        "Entrega nesses países: a partir de 23 de outubro de 2026.",
+        "Outros 28 países: a partir de 30 de outubro de 2026.",
+        "Armazenamento: 256 GB, 512 GB, 1 TB ou 2 TB.",
+        "Cores: star white e night sky, nos nomes usados pela Apple."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que isso muda para você"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem pensa em comprar:** o Duo é para quem quer uma tela grande sem carregar um tablet. Mas é um primeiro modelo, e a própria Apple lembra que a resistência à água pode diminuir com o uso e que dano por líquido não entra na garantia. Vale esperar as primeiras semanas de uso real antes de decidir."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem quer cuidar bem do aparelho:** dobradiça e tela flexível pedem atenção. Evite poeira e areia no vão da dobra, não force a abertura além do ponto e use capa feita para o modelo. Se a tela interna apresentar mancha ou linha, ou a dobradiça ficar dura, não insista: procure a [assistência de iPhone, iPad e Mac](/reparoapple) antes que o defeito aumente."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "apple"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem já tem iPhone e não pretende trocar:** o lançamento não exige nada de você. Se o seu aparelho está com bateria fraca ou tela trincada, um conserto bem feito costuma resolver sem mudar de categoria. E quem também usa notebook pode ver as opções em [notebooks](/notebooks) ou o guia [MacBook Air ou MacBook Pro](/blog/macbook-air-ou-macbook-pro-como-escolher)."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que ainda não se sabe"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Apple não informou quanto tempo a tela interna e a dobradiça aguentam de aberturas, nem detalhou como será o reparo dessas peças fora da garantia. Também não há, nos comunicados, o peso nem a espessura exata do aparelho. A disponibilidade nas lojas físicas brasileiras depende das revendas e das operadoras."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, tem assistência técnica que também atende iPhone, iPad e Mac. Em uma linha: o iPhone Duo chega ao Brasil na primeira leva, mas, sendo o primeiro dobrável da marca, vale esperar o uso real antes de comprar."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Apple unveils iPhone Duo — Apple Newsroom",
+      "url": "https://www.apple.com/newsroom/2026/09/apple-unveils-iphone-duo/",
+      "data": "9 de setembro de 2026"
+    },
+    {
+      "nome": "Open up to new possibilities with iPhone Duo — Apple Newsroom",
+      "url": "https://www.apple.com/newsroom/2026/10/open-up-to-new-possibilities-with-iphone-duo/",
+      "data": "15 de outubro de 2026"
+    },
+    {
+      "nome": "iPhone Duo now available to pre-order — 9to5Mac",
+      "url": "https://9to5mac.com/2026/10/16/iphone-duo-now-available-to-pre-order-prices-start-at-1999/",
+      "data": "16 de outubro de 2026"
+    }
+  ]
+}
