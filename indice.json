@@ -17,6 +17,21 @@
       "minutos": 3
     },
     {
+      "slug": "nvme-gen-3-gen-4-gen-5-diferenca",
+      "titulo": "NVMe Gen 3, Gen 4 e Gen 5: a diferença que você percebe no dia a dia",
+      "resumo": "NVMe Gen 3, Gen 4 ou Gen 5? Veja o que cada geração muda, quando o SSD mais novo faz diferença e quando a placa-mãe ou o calor limitam o ganho.",
+      "categoria": "hardware",
+      "etiquetas": [
+        "ssd",
+        "nvme",
+        "upgrade",
+        "placa-mãe"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-17T09:00:00.000Z",
+      "minutos": 10
+    },
+    {
       "slug": "como-ver-quanta-memoria-ram-o-computador-tem",
       "titulo": "Como ver quanta memória RAM o computador tem e quanta está em uso",
       "resumo": "Em menos de um minuto o Windows e o Mac mostram quanta memória RAM o computador tem e se ela está faltando. Veja onde olhar e que número importa.",
@@ -342,5 +357,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-17T02:08:32.886Z"
+  "atualizadoEm": "2026-10-17T02:32:18.081Z"
 }

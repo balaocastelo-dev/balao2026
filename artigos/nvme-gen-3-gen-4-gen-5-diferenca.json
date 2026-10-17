@@ -1,0 +1,278 @@
+{
+  "slug": "nvme-gen-3-gen-4-gen-5-diferenca",
+  "titulo": "NVMe Gen 3, Gen 4 e Gen 5: a diferença que você percebe no dia a dia",
+  "resumo": "NVMe Gen 3, Gen 4 ou Gen 5? Veja o que cada geração muda, quando o SSD mais novo faz diferença e quando a placa-mãe ou o calor limitam o ganho.",
+  "categoria": "hardware",
+  "etiquetas": [
+    "ssd",
+    "nvme",
+    "upgrade",
+    "placa-mãe"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-17T09:00:00.000Z",
+  "seo": {
+    "titulo": "NVMe Gen 3, Gen 4 e Gen 5: a diferença no dia a dia"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Você vai comprar um SSD e esbarrou em NVMe Gen 3, Gen 4 e Gen 5, com números de velocidade que dobram de uma geração para outra. A dúvida é natural: vale pagar pelo mais novo ou um Gen 3 ou Gen 4 resolve? A resposta depende menos do SSD e mais do que o seu computador aceita e do que você faz com ele."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que a geração mais nova deixa o computador proporcionalmente mais rápido. Não deixa. Ligar o sistema, abrir programas e carregar jogos já fica muito mais ágil na troca de um HD ou SSD SATA para qualquer NVMe. Entre as gerações de NVMe, a diferença aparece sobretudo em quem copia arquivos muito grandes com frequência."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "Gen 3, Gen 4 e Gen 5 são gerações do **PCI Express**, o caminho de dados entre o SSD e o processador; cada uma **dobra a taxa** da anterior.",
+        "Todas são **compatíveis entre si**: um SSD mais novo funciona em slot mais antigo, mas na velocidade do slot.",
+        "No uso comum (sistema, programas, jogos), a diferença entre as gerações é **pequena**; quem ganha é quem move arquivos enormes.",
+        "SSD Gen 5 esquenta mais e **precisa de dissipador**; confira se a placa-mãe tem um para o slot M.2."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que o Gen 3, o Gen 4 e o Gen 5 querem dizer"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "NVMe é o protocolo que o SSD usa para conversar com o computador, e ele trafega pelo PCI Express, o mesmo barramento da placa de vídeo. O \"Gen\" é a geração desse barramento. Segundo a Intel, o PCIe 3.0 trabalha a 8 GT/s por linha, o 4.0 a 16 GT/s e o 5.0 a 32 GT/s: cada geração dobra a anterior."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "GT/s é a taxa de transferência bruta de cada linha, a pista por onde os dados passam. Um SSD M.2 NVMe usa quatro linhas, o que a ficha técnica escreve como x4. Com quatro linhas, o teto teórico fica perto de 4 GB/s no Gen 3, 8 GB/s no Gen 4 e 16 GB/s no Gen 5. É o limite da estrada, não a velocidade que o SSD de fato alcança."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Geração",
+        "Taxa por linha",
+        "Teto teórico com x4",
+        "Para quem costuma fazer sentido"
+      ],
+      "linhas": [
+        [
+          "PCIe 3.0 (Gen 3)",
+          "8 GT/s",
+          "Cerca de 4 GB/s",
+          "Computador mais antigo, uso de escritório e estudo"
+        ],
+        [
+          "PCIe 4.0 (Gen 4)",
+          "16 GT/s",
+          "Cerca de 8 GB/s",
+          "A maioria das máquinas atuais, jogos e trabalho em geral"
+        ],
+        [
+          "PCIe 5.0 (Gen 5)",
+          "32 GT/s",
+          "Cerca de 16 GB/s",
+          "Quem copia e edita arquivos muito grandes, em placa com slot Gen 5"
+        ]
+      ],
+      "titulo": "As três gerações lado a lado, com quatro linhas (x4)",
+      "colunaDestaque": 2,
+      "fonte": {
+        "nome": "Intel — What Are PCIe 4.0 and 5.0?",
+        "url": "https://www.intel.com/content/www/us/en/gaming/resources/what-is-pcie-4-and-why-does-it-matter.html"
+      },
+      "nota": "Os tetos com x4 são aproximados e consideram a largura de banda por linha indicada pela FS. A velocidade real de cada SSD depende do controlador e da memória dele."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas a tabela fala da estrada, não do carro. Um SSD Gen 4 de entrada pode ficar longe do teto da própria geração, e um bom Gen 4 pode superar um Gen 3 simples em tudo. A geração diz quanto cabe no caminho; a ficha do SSD diz quanto ele realmente usa."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como saber qual geração o seu computador aceita"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O que manda é o slot M.2 da placa-mãe, dentro do que o processador suporta. A Intel lembra que todas as gerações do PCI Express são compatíveis para trás e para frente: um SSD Gen 4 funciona num slot Gen 3, e um Gen 3 funciona num slot Gen 4 ou Gen 5. Em todos os casos, vale a velocidade da parte mais lenta."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Na prática, isso quer dizer que um SSD Gen 5 instalado num slot Gen 4 trabalha como Gen 4, como explica a FS em seu comparativo. Ele funciona, só não entrega o que foi pago a mais; a Kingston, ao lançar seu SSD Gen 5 em 2025, informou a compatibilidade com sistemas Gen 3 e Gen 4. Antes de comprar, procure no manual ou no site do fabricante da placa a descrição de cada slot M.2: muitas placas têm um slot de geração mais nova ligado ao processador e outros mais lentos, ligados ao chipset."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "Descubra o modelo exato da placa-mãe (no Windows, o aplicativo Informações do Sistema mostra o fabricante e o modelo da placa).",
+        "Abra a página de especificações da placa no site do fabricante e procure a seção de armazenamento ou M.2.",
+        "Veja a geração de cada slot (PCIe 3.0, 4.0 ou 5.0 x4) e se algum deles desativa portas SATA quando usado.",
+        "Em notebook, consulte o manual de serviço do modelo: além da geração, o tamanho do slot (2280, 2242, 2230) precisa bater com o do SSD."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se a placa só tem slot Gen 3, um SSD Gen 4 ainda pode ser uma boa compra, porque costuma ser o que há de mais comum nas prateleiras e acompanha uma troca de plataforma no futuro. Mas não espere dele, nesse computador, mais do que um Gen 3 entrega."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "upgrade"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando a geração mais nova faz diferença no seu uso"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Para ligar o Windows, abrir o navegador, usar planilhas e carregar jogos, a própria Intel reconhece que a vantagem prática do Gen 4 sobre o Gen 3 ainda é pequena. Essas tarefas leem muitos arquivos pequenos, e aí pesa mais o tempo de resposta do SSD do que a largura da estrada. O salto que se sente é o de sair do HD ou do SSD SATA."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A geração começa a pesar quando o trabalho envolve leitura e gravação contínua de arquivos grandes: editar vídeo em alta resolução direto do SSD, mover projetos de dezenas de gigabytes, lidar com máquinas virtuais ou carregar modelos de IA grandes do disco para a memória. Nesses casos, um Gen 4 rápido ou um Gen 5 encurtam a espera. Mas só se o resto do computador acompanhar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Há ainda o DirectStorage, uma tecnologia do Windows que permite aos jogos aproveitarem melhor os SSDs NVMe modernos. A Intel aponta que isso pode aumentar a importância do SSD nos jogos com o tempo, mas o efeito depende de cada jogo adotar o recurso. Não vale comprar um Gen 5 pensando só nisso hoje."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "Maior teto de transferência entre as três gerações.",
+        "Funciona também em slots Gen 4 e Gen 3, então acompanha uma troca futura de placa.",
+        "Faz diferença real para quem copia e edita arquivos muito grandes todos os dias."
+      ],
+      "contras": [
+        "Só entrega a velocidade toda em placa com slot M.2 Gen 5.",
+        "Esquenta mais e precisa de dissipador; em gabinete abafado, pode reduzir a velocidade para se proteger.",
+        "No uso comum, a diferença para um bom Gen 4 é difícil de perceber.",
+        "Em notebook, o espaço e a ventilação costumam limitar o uso de um modelo assim."
+      ],
+      "titulo": "SSD Gen 5: o que pesa a favor e contra"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Calor e dissipador: o detalhe que limita o Gen 5"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Quanto mais rápido o controlador do SSD trabalha, mais calor ele gera. Quando passa do limite, o SSD reduz a própria velocidade para não se danificar, o que se chama de *thermal throttling*, a redução por temperatura. Em análises de SSDs Gen 5 noticiadas pelo Neowin, modelos com o mesmo controlador chegaram a reduzir muito a velocidade e até a desligar por superaquecimento."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Segundo a mesma reportagem, a Phison, fabricante do controlador, orientou que os SSDs vendidos sem dissipador são para quem já tem refrigeração própria, e que a maioria das placas com Gen 5 traz um dissipador para o slot. Por isso, ao escolher um Gen 5, confira se a placa tem a tampa metálica sobre o M.2 ou compre a versão do SSD com dissipador."
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "Desligue o computador, tire o cabo da tomada e toque numa parte metálica do gabinete. Retire o adesivo protetor da almofada térmica do dissipador, se houver. Não aperte demais o parafuso do M.2. Em notebook, se for preciso desconectar a bateria interna e você não tem prática, leve a um técnico.",
+      "titulo": "Antes de instalar o SSD"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Gen 4 também esquenta, mas bem menos, e muitos funcionam bem com o dissipador da placa ou até sem ele em gabinete ventilado. Em notebook, onde não cabe dissipador grande, um Gen 4 de bom fabricante costuma ser a escolha mais sensata. Mas confira o espaço do slot antes, porque alguns modelos são finos demais até para isso."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Qual geração escolher para o seu caso"
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Situação",
+        "Escolha que costuma fazer sentido",
+        "Por quê"
+      ],
+      "linhas": [
+        [
+          "Placa só com slot Gen 3",
+          "Gen 3 ou Gen 4",
+          "O slot limita; o Gen 4 só compensa se você pensa em trocar a placa"
+        ],
+        [
+          "Placa com slot Gen 4, uso geral e jogos",
+          "Gen 4",
+          "Aproveita o slot sem pagar por velocidade que não aparece no uso"
+        ],
+        [
+          "Placa com slot Gen 5, edição de vídeo e arquivos enormes",
+          "Gen 5 com dissipador",
+          "É onde o teto maior encurta a espera"
+        ],
+        [
+          "Notebook",
+          "Gen 4 de bom fabricante",
+          "Menos calor e espaço limitado para dissipador"
+        ]
+      ],
+      "titulo": "Qual SSD NVMe faz sentido para cada situação",
+      "colunaDestaque": 1,
+      "nota": "Em todos os casos, confira o tamanho do slot (2280, 2242 ou 2230) e a geração no manual da placa ou do notebook."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se você está trocando um HD por SSD, o ganho de qualquer NVMe será tão grande que a geração vira detalhe. Se já usa um NVMe e quer mais velocidade, antes de trocar por um Gen 5 veja se o gargalo não é outro: pouca memória RAM ou SSD quase cheio deixam qualquer disco lento. O artigo sobre [SSD NVMe em notebook](/blog/ssd-nvme-em-notebook-quando-vale-upgrade) ajuda nessa conta."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Upgrade de SSD com a Balão da Informática"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, vende peças e faz upgrade na [assistência técnica](/manutencao): confere a geração e o tamanho do slot do seu computador, instala o SSD e passa o sistema e os arquivos para ele. Se a ideia é um computador novo, a [montagem sob medida](/montagempc) já sai com a placa e o SSD certos para o seu uso."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "montagem"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Em uma linha: compre a geração que o seu slot aceita e que o seu trabalho aproveita; para a maioria das pessoas, um bom Gen 4 resolve."
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "SSD Gen 4 funciona em placa-mãe Gen 3?",
+      "resposta": "Funciona. As gerações do PCI Express são compatíveis entre si, e o SSD trabalha na velocidade do slot, ou seja, como Gen 3. Confira só se o tamanho do SSD é o mesmo do slot."
+    },
+    {
+      "pergunta": "Vale a pena comprar SSD Gen 5 para jogar?",
+      "resposta": "Para a maioria dos jogos, a diferença em relação a um bom Gen 4 é pequena hoje. O Gen 5 faz mais sentido para quem trabalha com arquivos muito grandes e tem placa com slot Gen 5."
+    },
+    {
+      "pergunta": "Todo SSD M.2 é NVMe?",
+      "resposta": "Não. M.2 é o formato do encaixe, e existem SSDs M.2 que usam o padrão SATA, mais lento. Confira na ficha se o SSD diz NVMe e PCIe, e se o slot da sua placa aceita esse tipo."
+    },
+    {
+      "pergunta": "Preciso de dissipador no SSD NVMe?",
+      "resposta": "No Gen 5, sim: ele esquenta bastante e reduz a velocidade sem refrigeração. No Gen 4, o dissipador da placa costuma bastar. Em notebook, escolha um modelo fino que caiba no espaço disponível."
+    },
+    {
+      "pergunta": "Como sei a geração do slot M.2 do meu computador?",
+      "resposta": "Descubra o modelo da placa-mãe ou do notebook e consulte as especificações no site do fabricante. A seção de armazenamento lista cada slot M.2 com a geração do PCIe."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Intel — What Are PCIe 4.0 and 5.0?",
+      "url": "https://www.intel.com/content/www/us/en/gaming/resources/what-is-pcie-4-and-why-does-it-matter.html",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "FS — PCIe 5.0 vs. PCIe 4.0: Which One to Choose?",
+      "url": "https://community.fs.com/article/pcie-50-vs-pcie-40-which-one-to-choose.html",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Kingston FURY lança SSD NVMe PCIe 5.0 — Business Wire",
+      "url": "https://www.businesswire.com/news/home/20250512113766/en/Kingston-FURY-Releases-High-Performance-PCIe-5.0-NVMe-SSD",
+      "data": "maio de 2025"
+    },
+    {
+      "nome": "Neowin — Crucial, Corsair PCIe 5.0 SSDs running hot, throttling and shutting down",
+      "url": "https://www.neowin.net/news/crucial-corsair-pcie-50-ssds-running-hot-throttling-and-shutting-down-without-heatsink/",
+      "data": "consultado em outubro de 2026"
+    }
+  ]
+}
