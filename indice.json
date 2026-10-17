@@ -28,7 +28,12 @@
         "lançamento",
         "assistência"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/iphone-duo-pre-venda-brasil-iphone-dobravel-b8f263de.jpg",
+        "alt": "Celular dobrável genérico meio aberto sobre uma mesa de madeira clara, com a tela apagada, ao lado de uma capa de tecido azul",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-10-17T15:00:00.000Z",
       "minutos": 3
     },
@@ -373,5 +378,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-17T02:39:15.260Z"
+  "atualizadoEm": "2026-10-17T08:34:00.629Z"
 }
