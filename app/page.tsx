@@ -215,7 +215,7 @@ export default async function Home(props: {
           <HomeQuedaDePreco quedas={produtosEmQueda(quedasDePreco)} />
         )}
 
-        {/* 1.1 Destaque: MacBook Pro M5 seminovo (produto único da loja, fora do espelhamento) */}
+        {/* 1.1 Destaque: MacBook M2 da vitrine (produto único da loja, fora do espelhamento) */}
         {!navegando && (
           <HomeMacbookM5Destaque />
         )}

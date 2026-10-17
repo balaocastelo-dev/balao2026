@@ -1,23 +1,22 @@
 import Image from "next/image";
-import Link from "next/link";
-import { ArrowRight, BadgeCheck, Clock3, PackageCheck, ShieldCheck } from "lucide-react";
+import { ArrowRight, BadgeCheck, MapPin, PackageCheck, Store } from "lucide-react";
 
 /**
- * Destaque da home: MacBook Pro M5 seminovo.
+ * Destaque da home: MacBook M2 que está na vitrine da loja.
+ *
+ * (Até 16/10 este bloco anunciava o MacBook Pro M5, que foi vendido. A foto
+ * continua a mesma, a pedido do Thiago.)
  *
  * É um produto único da loja — não vem do espelhamento de preços (Kabum e
- * afins), então os valores ficam aqui, à mão. Mudou o preço? É só trocar as
- * constantes abaixo; a parcela e o "abaixo do mercado" se ajustam sozinhos.
- *
- * Os mesmos dois preços (à vista e no cartão) aparecem em /macbookm5 — se
- * mudar aqui, mude lá também.
+ * afins), então o valor fica aqui, à mão. Mudou o preço? É só trocar as
+ * constantes abaixo; a parcela se ajusta sozinha.
  */
-const PRECO_DE_MERCADO = 15000;
-const PRECO_A_VISTA = 9999;
-const PRECO_NO_CARTAO = 10999;
+const PRECO_NO_CARTAO = 4499;
 const PARCELAS = 10;
 
-const PAGINA_DO_PRODUTO = "/macbookm5";
+const MENSAGEM_WHATSAPP =
+  "Olá! Vi no site o MacBook M2 (8GB / 256GB) por R$ 4.499 em até 10x sem juros. Ainda está disponível?";
+const LINK_WHATSAPP = `https://wa.me/5519987510267?text=${encodeURIComponent(MENSAGEM_WHATSAPP)}`;
 
 const emReais = (valor: number) =>
   valor.toLocaleString("pt-BR", {
@@ -31,19 +30,15 @@ const valorDaParcela = (PRECO_NO_CARTAO / PARCELAS).toLocaleString("pt-BR", {
   currency: "BRL",
 });
 
-// O preço de mercado é aproximado, então a economia também é dita por alto.
-const economiaEmMil = Math.round((PRECO_DE_MERCADO - PRECO_A_VISTA) / 1000);
-
 const condicoes = [
-  { icon: Clock3, texto: "6 meses de uso" },
-  { icon: PackageCheck, texto: "Caixa original" },
-  { icon: ShieldCheck, texto: "Na garantia Apple" },
+  { icon: PackageCheck, texto: "Pronta entrega" },
+  { icon: Store, texto: "Na vitrine da loja" },
 ];
 
 export default function HomeMacbookM5Destaque() {
   return (
     <section
-      aria-labelledby="destaque-macbook-m5"
+      aria-labelledby="destaque-macbook-m2"
       className="group relative isolate w-full overflow-hidden rounded-[2.5rem] border-2 border-[#E60012]/70 bg-[#06070b] shadow-2xl shadow-red-950/40 transition-colors duration-300 hover:border-[#E60012]"
     >
       <div
@@ -58,7 +53,7 @@ export default function HomeMacbookM5Destaque() {
               O arquivo já tem as bordas transparentes, então some no fundo sem emenda. */}
           <Image
             src="/images/macbook-m5/macbook-pro-m5-destaque.webp"
-            alt="MacBook Pro M5 seminovo à venda na Balão da Informática"
+            alt="MacBook M2 à venda na Balão da Informática"
             fill
             sizes="(max-width: 1023px) 100vw, 55vw"
             className="object-cover object-center transition-transform duration-700 ease-out motion-safe:group-hover:scale-[1.03] lg:object-contain"
@@ -73,13 +68,13 @@ export default function HomeMacbookM5Destaque() {
             className="pointer-events-none absolute inset-y-0 left-0 hidden w-24 bg-gradient-to-r from-[#06070b] to-transparent lg:block"
           />
 
-          {/* Selo de seminovo: discreto, no canto da foto */}
+          {/* Selo discreto no canto da foto */}
           <div
             aria-hidden="true"
             className="absolute right-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/60 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-100 backdrop-blur-sm sm:right-6 sm:top-6 sm:text-[11px]"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-[#E60012]" />
-            Seminovo
+            Pronta entrega
           </div>
         </div>
 
@@ -88,7 +83,7 @@ export default function HomeMacbookM5Destaque() {
           <div className="flex flex-wrap items-center gap-2.5">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-[#E60012] px-3.5 py-1.5 text-[11px] font-black uppercase tracking-widest text-white shadow-md">
               <BadgeCheck size={14} aria-hidden="true" />
-              Seminovo
+              Na vitrine
             </span>
             <span className="text-[11px] font-black uppercase tracking-widest text-slate-300">
               Destaque da loja
@@ -96,13 +91,13 @@ export default function HomeMacbookM5Destaque() {
           </div>
 
           <h2
-            id="destaque-macbook-m5"
+            id="destaque-macbook-m2"
             className="mt-4 text-4xl font-black leading-[1.02] tracking-tight text-white sm:text-5xl lg:text-4xl xl:text-5xl"
           >
-            MacBook Pro M5
+            MacBook M2
           </h2>
           <p className="mt-2 text-lg font-bold text-slate-200 sm:text-xl">
-            16GB de RAM · SSD de 512GB
+            8GB de RAM · SSD de 256GB
           </p>
 
           <ul className="mt-5 flex flex-wrap gap-2">
@@ -117,65 +112,51 @@ export default function HomeMacbookM5Destaque() {
             ))}
           </ul>
 
-          {/* Preço cheio riscado + preço promocional (à vista) + preço no cartão */}
+          {/* Preço no cartão */}
           <div className="mt-6 border-t border-slate-700/80 pt-5">
-            <p className="text-sm font-bold text-slate-300 sm:text-base">
-              Preço de mercado:{" "}
-              <s className="text-lg font-black text-slate-200 decoration-[#E60012] decoration-2 sm:text-xl">
-                {emReais(PRECO_DE_MERCADO)}
-              </s>
-            </p>
-
-            <div className="mt-1.5 flex flex-wrap items-end gap-x-4 gap-y-2.5">
+            <div className="flex flex-wrap items-end gap-x-4 gap-y-2.5">
               <p className="whitespace-nowrap text-6xl font-black leading-none tracking-tight text-white sm:text-7xl">
-                <span className="sr-only">Preço promocional à vista: </span>
-                {emReais(PRECO_A_VISTA)}
+                <span className="sr-only">Preço: </span>
+                {emReais(PRECO_NO_CARTAO)}
               </p>
-              <span
-                aria-hidden="true"
-                className="mb-1 rounded-full bg-[#E60012] px-3.5 py-1.5 text-[11px] font-black uppercase tracking-widest text-white sm:mb-2"
-              >
-                À vista
-              </span>
             </div>
 
             <p className="mt-3 text-base font-bold text-slate-100 sm:text-lg">
-              ou <span className="font-black text-white">{emReais(PRECO_NO_CARTAO)}</span> em até{" "}
-              {PARCELAS}x de {valorDaParcela} sem juros
-            </p>
-            <p className="mt-1.5 text-sm text-slate-300">
-              À vista, cerca de R$ {economiaEmMil} mil abaixo do preço de mercado.
+              em até <span className="font-black text-white">{PARCELAS}x de {valorDaParcela}</span>{" "}
+              sem juros
             </p>
           </div>
 
-          {/* Garantia */}
+          {/* Onde ver */}
           <div className="mt-5 flex items-start gap-3.5 border-t border-slate-700/80 pt-5">
-            <ShieldCheck size={26} className="mt-0.5 shrink-0 text-[#E60012]" aria-hidden="true" />
+            <MapPin size={26} className="mt-0.5 shrink-0 text-[#E60012]" aria-hidden="true" />
             <div>
               <p className="text-base font-black text-white sm:text-lg">
-                Garantia Apple + garantia Balão
+                Venha ver de perto
               </p>
               <p className="mt-1 text-sm leading-relaxed text-slate-300">
-                O aparelho ainda está na garantia Apple. Quando ela terminar, a Balão completa
-                1 ano com garantia própria da loja.
+                Está na vitrine da loja, na Av. Anchieta, 789, Cambuí, Campinas. Ou chame no
+                WhatsApp e garanta o seu.
               </p>
             </div>
           </div>
 
-          {/* O ::after estica o link: o bloco inteiro leva para a página do produto.
+          {/* O ::after estica o link: o bloco inteiro leva para o WhatsApp da loja.
               Não pôr scale/transform neste link: isso encolheria a área clicável
               de volta para o botão bem na hora do clique. */}
-          <Link
-            href={PAGINA_DO_PRODUTO}
+          <a
+            href={LINK_WHATSAPP}
+            target="_blank"
+            rel="noopener noreferrer"
             className="mt-7 inline-flex w-full items-center justify-center gap-2.5 rounded-2xl bg-[#E60012] px-6 py-4 text-sm font-black uppercase tracking-wider text-white shadow-lg shadow-red-950/50 transition-colors after:absolute after:inset-0 after:content-[''] hover:bg-red-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/70 group-hover:bg-red-700 sm:w-fit sm:px-9 sm:text-base"
           >
-            Ver o MacBook Pro M5
+            Quero o MacBook M2
             <ArrowRight
               size={18}
               aria-hidden="true"
               className="transition-transform motion-safe:group-hover:translate-x-1"
             />
-          </Link>
+          </a>
         </div>
       </div>
     </section>
