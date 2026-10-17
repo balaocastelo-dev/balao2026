@@ -2,6 +2,22 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "de-quanto-em-quanto-tempo-limpar-o-computador-por-dentro",
+      "titulo": "De quanto em quanto tempo limpar o computador por dentro",
+      "resumo": "Na maioria das casas e escritórios, uma limpeza interna a cada seis meses basta. Com pet, fumaça ou muita poeira, o intervalo cai para dois a quatro meses.",
+      "categoria": "assistencia",
+      "etiquetas": [
+        "limpeza",
+        "manutenção",
+        "superaquecimento",
+        "diagnóstico"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-18T21:00:00.000Z",
+      "minutos": 5,
+      "formato": "dica"
+    },
+    {
       "slug": "windows-11-pc-8-gb-memoria-melhorias-outubro",
       "titulo": "Windows 11 promete rodar melhor em PC com 8 GB de memória: o que muda",
       "resumo": "A Microsoft anunciou em 15 de outubro melhorias no Windows 11 que aliviam a memória de PCs com 8 GB. Veja o que chega, o que falta provar e se vale esperar.",
@@ -418,5 +434,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-17T22:29:50.912Z"
+  "atualizadoEm": "2026-10-17T22:48:54.891Z"
 }

@@ -1,0 +1,182 @@
+{
+  "slug": "de-quanto-em-quanto-tempo-limpar-o-computador-por-dentro",
+  "titulo": "De quanto em quanto tempo limpar o computador por dentro",
+  "resumo": "Na maioria das casas e escritórios, uma limpeza interna a cada seis meses basta. Com pet, fumaça ou muita poeira, o intervalo cai para dois a quatro meses.",
+  "categoria": "assistencia",
+  "etiquetas": [
+    "limpeza",
+    "manutenção",
+    "superaquecimento",
+    "diagnóstico"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-18T21:00:00.000Z",
+  "formato": "dica",
+  "roteiro": {
+    "fala": "Quando limpar o computador por dentro? Na maioria das casas, a cada seis meses. Se tem cachorro ou gato, alguém fuma perto ou a sala pega muita poeira, encurte para três meses. E não espere só o calendário: ventoinha chiando com pouca coisa aberta e gabinete quente são sinais de que a poeira chegou. No desktop dá para limpar o filtro com tudo desligado. Notebook e fonte, deixe com o técnico.",
+    "titulo": "Quando limpar o PC por dentro",
+    "destaques": [
+      "Casa comum: a cada 6 meses",
+      "Pet ou poeira: 2 a 4 meses",
+      "Ventoinha alta é sinal",
+      "Fonte e notebook: técnico"
+    ],
+    "legenda": "Poeira dentro do computador faz barulho, esquenta e deixa tudo mais lento. Veja de quanto em quanto tempo limpar e o que dá para fazer em casa. A dica completa está no blog.",
+    "hashtags": [
+      "limpeza",
+      "computador",
+      "manutencao",
+      "informatica",
+      "campinas"
+    ]
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Limpar o computador por dentro a cada seis meses é o suficiente para a maioria das casas e dos escritórios. Esse é o intervalo que fabricantes como Corsair e HP e o guia da TeamViewer indicam como ponto de partida. Com animais em casa, alguém fumando perto ou um ambiente com muita poeira, o intervalo cai para algo entre dois e quatro meses."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é esperar o computador dar problema para lembrar da limpeza. A poeira se acumula aos poucos nas ventoinhas, nos dissipadores e nas grades de ventilação, e o efeito também chega aos poucos: mais barulho, mais calor e, quando o processador reduz a velocidade para não esquentar, mais lentidão. Por isso vale combinar o calendário com os sinais."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "Ponto de partida: **a cada seis meses** em casa ou no escritório.",
+        "Com **animal em casa, fumaça ou muita poeira**, de dois a quatro meses.",
+        "Quem usa o computador pesado todo dia, como em jogos ou edição, deve limpar mais vezes do que quem só navega.",
+        "Ventoinha alta com pouca coisa aberta, gabinete quente e lentidão são sinais de que a limpeza atrasou."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Qual intervalo serve para o seu caso"
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Situação",
+        "Intervalo sugerido"
+      ],
+      "linhas": [
+        [
+          "Escritório ou casa sem animais e com pouca poeira",
+          "A cada seis meses"
+        ],
+        [
+          "Uso pesado todo dia (jogos, edição, programas exigentes)",
+          "De quatro a seis meses"
+        ],
+        [
+          "Animais em casa ou muita poeira no ambiente",
+          "De dois a quatro meses"
+        ],
+        [
+          "Fumante por perto ou obra na vizinhança",
+          "De dois a três meses"
+        ]
+      ],
+      "titulo": "Intervalos de limpeza interna sugeridos pelos fabricantes",
+      "colunaDestaque": 1,
+      "fonte": {
+        "nome": "Corsair, HP e TeamViewer",
+        "url": "https://www.corsair.com/us/sl/explorer/diy-builder/how-tos/how-to-clean-your-pc-and-how-often-you-should-do-it/"
+      },
+      "nota": "As faixas variam um pouco entre as fontes; use como referência e ajuste pelos sinais do seu computador."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A HP sugere um jeito prático de ajustar: parta dos seis meses e encurte o prazo para cada fator que traz poeira, como animal, cigarro ou ambiente empoeirado. Um computador que fica no chão, perto de tapete, costuma puxar mais sujeira do que um que fica sobre a mesa. Mas o calendário é só uma estimativa: o computador avisa quando a poeira passou do ponto."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Os sinais de que a limpeza atrasou"
+    },
+    {
+      "tipo": "lista",
+      "ordenada": false,
+      "itens": [
+        "A ventoinha muda de um zumbido baixo para um chiado ou gira forte mesmo com tarefas leves. O artigo sobre [o que cada barulho do computador indica](/blog/computador-fazendo-barulho-o-que-cada-som-indica) ajuda a separar poeira de peça gasta.",
+        "O gabinete ou a base do notebook ficam quentes ao toque no uso comum.",
+        "O computador trava, fica lento depois de alguns minutos de uso ou desliga sozinho.",
+        "Dá para ver poeira na grade de ventilação, ou a saída de ar fica escurecida e o vento sai fraco."
+      ]
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que dá para fazer em casa e onde parar"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "No desktop, com o computador desligado pelo sistema, a chave da fonte em desligado e o cabo fora da tomada, dá para tirar e lavar os filtros de poeira do gabinete, quando ele tem. Eles só voltam ao lugar completamente secos. Para soprar a poeira de dentro, as fontes recomendam jatos curtos de ar comprimido, com a lata em pé e a ventoinha segura com o dedo para não girar solta."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "Lavar e secar bem os filtros de poeira do gabinete",
+        "Jatos curtos de ar comprimido com a ventoinha travada",
+        "Pincel macio nas pás da ventoinha e no dissipador",
+        "Pano de microfibra por fora e nas partes lisas"
+      ],
+      "contras": [
+        "Aspirador de pó comum, que pode gerar eletricidade estática",
+        "Qualquer líquido de limpeza nos componentes",
+        "Abrir a fonte de alimentação: sopre só pelas grades",
+        "Abrir notebook sem o manual do modelo e sem prática"
+      ],
+      "titulo": "Limpeza em casa: o que pode e o que evitar"
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "Se depois da limpeza a ventoinha continua raspando, fazendo clique ou balançando, o problema pode ser a peça, e não a poeira. Notebook esquentando é outro caso: abrir exige o manual do modelo, e a troca de pasta térmica fica melhor com um técnico. O artigo sobre [por que o notebook esquenta muito](/blog/por-que-notebook-esquenta-muito) mostra as outras causas.",
+      "titulo": "Quando esta dica não basta"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se você não quer abrir o gabinete ou o computador é um notebook, a [assistência técnica](/manutencao) da Balão da Informática, no Cambuí, em Campinas, faz a limpeza interna e o diagnóstico no mesmo endereço, inclusive em Mac na [assistência Apple](/reparoapple). Em uma linha: limpe a cada seis meses, encurte o prazo se a casa tem poeira e não ignore a ventoinha alta."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Posso usar aspirador de pó para limpar o computador?",
+      "resposta": "As fontes desaconselham o aspirador comum, porque o bico de plástico pode gerar eletricidade estática e danificar componentes. O mais indicado é ar comprimido em jatos curtos, pincel macio e pano de microfibra, com o computador desligado e fora da tomada."
+    },
+    {
+      "pergunta": "Limpar por dentro faz perder a garantia?",
+      "resposta": "Segundo a HP, a limpeza básica normalmente não anula a garantia, mas as condições mudam de fabricante para fabricante. Confira os termos do seu antes de abrir, principalmente em notebook."
+    },
+    {
+      "pergunta": "Notebook também precisa de limpeza interna?",
+      "resposta": "Precisa, e com mais cuidado: a ventoinha e o dissipador são pequenos e entopem com facilidade. Como abrir um notebook exige o manual do modelo, em geral é melhor deixar com um técnico."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "How to clean your PC and how often you should do it — Corsair",
+      "url": "https://www.corsair.com/us/sl/explorer/diy-builder/how-tos/how-to-clean-your-pc-and-how-often-you-should-do-it/",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "HP OMEN fan cleaning maintenance guide — HP",
+      "url": "https://www.hp.com/us-en/shop/tech-takes/hp-omen-fan-cleaning-maintenance-guide",
+      "data": "outubro de 2025"
+    },
+    {
+      "nome": "The safe and easy way to clean dust from your computer — TeamViewer",
+      "url": "https://www.teamviewer.com/en-mea/insights/how-to-clean-computer-dust/",
+      "data": "outubro de 2026"
+    }
+  ]
+}
