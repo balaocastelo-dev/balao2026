@@ -79,7 +79,12 @@
         "segurança",
         "windows 11"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/atualizacao-windows-outubro-2026-falha-explorada-e427169d.jpg",
+        "alt": "Notebook aberto sobre uma mesa de escritório, com a tela mostrando formas desfocadas e uma xícara ao lado",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-10-15T15:03:24.574Z",
       "minutos": 3
     },
@@ -307,5 +312,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-17T01:03:32.875Z"
+  "atualizadoEm": "2026-10-17T01:09:46.055Z"
 }
