@@ -28,7 +28,12 @@
         "atualização",
         "desempenho"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/windows-11-pc-8-gb-memoria-melhorias-outubro-e83c3624.jpg",
+        "alt": "Gabinete de computador de mesa aberto sobre uma bancada, com dois pentes de memória RAM ao lado e um monitor apagado ao fundo",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-10-18T15:00:00.000Z",
       "minutos": 3
     },
@@ -439,5 +444,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-18T01:06:55.989Z"
+  "atualizadoEm": "2026-10-18T01:12:24.993Z"
 }
