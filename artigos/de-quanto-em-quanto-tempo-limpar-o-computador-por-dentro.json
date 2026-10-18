@@ -9,7 +9,12 @@
     "superaquecimento",
     "diagnóstico"
   ],
-  "capa": null,
+  "capa": {
+    "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/de-quanto-em-quanto-tempo-limpar-o-computador-por-dentro-71acfb30.jpg",
+    "alt": "Placa-mãe de computador com um pente de memória e uma chave de fenda sobre uma bancada de madeira clara",
+    "largura": 1600,
+    "altura": 900
+  },
   "publicadoEm": "2026-10-18T21:00:00.000Z",
   "formato": "dica",
   "roteiro": {

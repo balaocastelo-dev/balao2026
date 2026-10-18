@@ -1,13 +1,4 @@
 {
   "versao": 1,
-  "pendentes": [
-    {
-      "slug": "de-quanto-em-quanto-tempo-limpar-o-computador-por-dentro",
-      "titulo": "De quanto em quanto tempo limpar o computador por dentro",
-      "categoria": "assistencia",
-      "alt": "Gabinete de computador aberto sobre uma bancada, com poeira nas ventoinhas, um pincel macio e uma lata de ar comprimido ao lado",
-      "pedido": "A mid-tower desktop computer case lying on its side on a clean wooden workbench, side panel removed, showing a light layer of gray dust on the cooling fans and heatsink. A soft paintbrush and a can of compressed air rest beside the case. A folded microfiber cloth in the foreground. Soft daylight from a window on the left, shallow depth of field.",
-      "pedidoEm": "2026-10-17T22:48:54.891Z"
-    }
-  ]
+  "pendentes": []
 }
