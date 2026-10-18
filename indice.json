@@ -2,6 +2,22 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "macbook-nao-liga-ou-nao-carrega-o-que-conferir",
+      "titulo": "MacBook não liga ou não carrega: o que conferir antes da assistência",
+      "resumo": "MacBook não liga ou não carrega? Veja o que testar em casa, na ordem certa: cabo, tomada, carregador, porta e ajustes da bateria, e quando parar e chamar o técnico.",
+      "categoria": "apple",
+      "etiquetas": [
+        "macbook",
+        "bateria",
+        "carregador",
+        "assistência",
+        "apple"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-19T09:00:00.000Z",
+      "minutos": 11
+    },
+    {
       "slug": "de-quanto-em-quanto-tempo-limpar-o-computador-por-dentro",
       "titulo": "De quanto em quanto tempo limpar o computador por dentro",
       "resumo": "Na maioria das casas e escritórios, uma limpeza interna a cada seis meses basta. Com pet, fumaça ou muita poeira, o intervalo cai para dois a quatro meses.",
@@ -449,5 +465,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-18T01:30:12.922Z"
+  "atualizadoEm": "2026-10-18T22:10:58.997Z"
 }

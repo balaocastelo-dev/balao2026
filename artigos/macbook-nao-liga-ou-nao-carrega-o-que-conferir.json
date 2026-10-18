@@ -1,0 +1,311 @@
+{
+  "slug": "macbook-nao-liga-ou-nao-carrega-o-que-conferir",
+  "titulo": "MacBook não liga ou não carrega: o que conferir antes da assistência",
+  "resumo": "MacBook não liga ou não carrega? Veja o que testar em casa, na ordem certa: cabo, tomada, carregador, porta e ajustes da bateria, e quando parar e chamar o técnico.",
+  "categoria": "apple",
+  "etiquetas": [
+    "macbook",
+    "bateria",
+    "carregador",
+    "assistência",
+    "apple"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-19T09:00:00.000Z",
+  "seo": {
+    "titulo": "MacBook não liga ou não carrega: o que conferir"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Seu MacBook não liga, ou está ligado na tomada e a bateria não sobe. Antes de concluir que a placa queimou, vale saber que boa parte dos casos de MacBook que não liga ou não carrega começa em coisas simples: o cabo, o carregador, a tomada, a sujeira na porta ou uma configuração de bateria que o macOS aplica de propósito."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano mais comum é achar que \"não carrega\" é sempre defeito. Às vezes o Mac para de carregar antes dos 100% por escolha do próprio sistema, para poupar a bateria. Em outras, o computador está ligado e só a tela ficou escura. Este guia segue a ordem que a própria Apple recomenda e mostra até onde dá para ir em casa com segurança."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "Comece pelo básico: **outro cabo, outra tomada e o botão de ligar pressionado por cerca de 10 segundos**, sem nenhum acessório conectado.",
+        "Parar de carregar perto de 80% pode ser **o recurso de carregamento otimizado**, e não defeito. O menu da bateria avisa quando é isso.",
+        "Luz âmbar piscando no conector MagSafe 3 indica problema de carregamento: limpe o conector e a porta e troque o cabo para testar.",
+        "Bateria estufada, líquido derramado ou cheiro de queimado: **não insista**. Desligue, desconecte e leve a um técnico."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Primeiro passo: descubra se o Mac está desligado ou só sem imagem"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "\"Não liga\" pode ser duas situações bem diferentes. Na primeira, nada acontece: nenhum som, nenhuma luz, nenhuma reação ao toque. Na segunda, o Mac está funcionando, mas a tela continua preta, ou mostra um símbolo e não passa dele. A Apple trata as duas de forma separada, e saber em qual você está poupa tempo."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se aparece um ponto de interrogação piscando, um círculo cortado por uma linha ou outra imagem, o computador ligou, mas não conseguiu terminar a inicialização. É um problema de sistema ou de disco, e não de energia. Se a tela fica totalmente preta, pode ser apenas o brilho no mínimo ou uma falha de software. Uma tela escura por alguns instantes durante a partida é normal."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Em um Mac de mesa, ou quando você usa o MacBook fechado com monitor externo, confira se o monitor está ligado, conectado e na entrada certa. Parece óbvio, mas é um descuido comum. Mas, se o seu caso é o MacBook sozinho, sem reação nenhuma, siga para a próxima seção."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que testar quando o MacBook não liga"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A sequência abaixo resume o que a página de suporte da Apple orienta para um Mac que não liga. Faça na ordem e teste o computador depois de cada passo. Não é preciso abrir nada nem usar ferramenta: tudo se resolve com o cabo, o carregador e o botão de ligar."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "**Confira a energia.** Veja se o cabo está inteiro e bem encaixado no Mac e na tomada. Se tiver outro cabo ou carregador compatível, teste com ele.",
+        "**Segure o botão de ligar por cerca de 10 segundos.** Nos notebooks com Touch ID, o botão é o próprio Touch ID, e ele precisa ser pressionado com firmeza, não só tocado. Depois solte e aperte de novo, normalmente.",
+        "**Tire todos os acessórios.** Hub, pen drive, HD externo, impressora, celular: desconecte tudo e repita o passo anterior.",
+        "**Deixe carregando um tempo.** Um Mac que passou muito tempo guardado pode precisar de cerca de 20 minutos na tomada antes de voltar a ligar, segundo a Apple.",
+        "**Em Mac com processador Intel, redefina o SMC**, o controlador que gerencia a energia. Em Mac com chip da Apple isso não existe: reiniciar já faz o mesmo papel."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se o Mac reagiu, mas parou numa tela preta, a Apple sugere tentar a inicialização pela Recuperação do macOS, onde o Utilitário de Disco consegue reparar o disco de inicialização. Esse caminho já mexe no sistema, e reinstalar o macOS sem backup pode custar arquivos. Se você não tem cópia dos seus dados, pare aqui e procure ajuda antes."
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "Se o Mac caiu, molhou, cheira a queimado ou a carcaça parece estufada, desligue, desconecte o carregador e não tente ligar de novo. Bateria estufada e placa molhada pioram com energia. Nesses casos, quem deve abrir o aparelho é um técnico.",
+      "titulo": "Quando não insistir"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "MacBook não carrega: carregador, cabo, tomada ou bateria"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Quando o Mac liga, mas a bateria não sobe, a investigação é parecida, só que com mais suspeitos. A Apple lista quatro lugares para olhar: a tomada, o carregador, o cabo e a porta do computador. A bateria vem por último, porque é a peça mais cara e a que menos falha de repente."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Comece pela tomada. Ligue nela um aparelho que você sabe que funciona, como um abajur. Se a tomada estiver boa, tire o carregador da parede, espere de 30 a 60 segundos e ligue de novo. A Apple explica que ruído na rede elétrica, causado por geladeira ou lâmpadas com reator no mesmo circuito, pode fazer o carregador se desligar sozinho. Outra tomada, em outro circuito, ou um nobreak, costuma resolver."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Depois, o cabo. Nem todo cabo USB-C carrega: a Apple avisa que alguns servem só para dados. Teste com outro cabo feito para carregar. Se o Mac só carrega com outro cabo, ou só quando você mexe no fio, o cabo original está com defeito e deve sair de uso. O mesmo vale para o plugue que encaixa na tomada."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Por fim, a porta. Poeira e fiapo de tecido de bolsa se acumulam na entrada USB-C e no MagSafe e impedem o contato. Com o Mac desligado da tomada, limpe com um pano macio, seco e sem fiapos. A Apple também menciona ar comprimido para a porta USB-C. Nunca use objeto de metal ou palito: a porta MagSafe é magnética e atrai partículas metálicas."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "O que você vê",
+        "O que pode ser",
+        "O que fazer"
+      ],
+      "linhas": [
+        [
+          "Nenhuma reação ao botão",
+          "Bateria totalmente descarregada, cabo, carregador ou tomada",
+          "Outra tomada e outro cabo; carregar por cerca de 20 minutos; segurar o botão por 10 segundos"
+        ],
+        [
+          "Liga, mas a tela fica preta",
+          "Brilho, monitor externo ou falha de software",
+          "Conferir o monitor; tentar a Recuperação do macOS, com backup em dia"
+        ],
+        [
+          "Ponto de interrogação ou círculo cortado na tela",
+          "Mac ligou, mas não achou o sistema",
+          "Seguir a orientação da Apple para Mac que não termina de iniciar"
+        ],
+        [
+          "Carregamento em espera perto de 80%",
+          "Carregamento otimizado ou limite de carga ligado",
+          "Escolher \"Carregar Totalmente Agora\" ou rever os ajustes de Bateria"
+        ],
+        [
+          "Luz âmbar piscando no MagSafe 3",
+          "Problema de carregamento",
+          "Limpar conector e porta, reiniciar e testar outro cabo"
+        ],
+        [
+          "Carrega só mexendo no fio",
+          "Cabo danificado",
+          "Parar de usar o cabo e trocar"
+        ]
+      ],
+      "titulo": "O que o sintoma costuma indicar",
+      "colunaDestaque": 2,
+      "fonte": {
+        "nome": "Apple — páginas de suporte sobre Mac que não liga e não carrega",
+        "url": "https://support.apple.com/en-us/102623"
+      },
+      "nota": "Os nomes dos ajustes podem variar conforme a versão do macOS. Confira na tela do seu Mac."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando parar em 80% é o macOS cuidando da bateria"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Uma reclamação frequente é o MacBook que fica na tomada a noite toda e amanhece com 80%. Desde o macOS Big Sur 11 existe o Carregamento Otimizado da Bateria, que aprende a sua rotina e segura a carga acima de 80% em certas situações, para completar perto da hora em que você costuma tirar o Mac da tomada. O menu da bateria mostra \"Carregamento em Espera\" quando isso acontece."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Nos Macs com chip da Apple e macOS Tahoe 26.4 ou mais novo há também o Limite de Carga, em que você escolhe um teto entre 80% e 100%. Quando o Mac chega a esse teto, para de carregar, e a mensagem indica o limite. Os dois ajustes ficam em Ajustes do Sistema, na seção Bateria. Já explicamos por que eles fazem sentido no artigo sobre [deixar o notebook na tomada](/blog/posso-deixar-o-notebook-na-tomada-o-tempo-todo)."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Temperatura também conta. A Apple diz que os notebooks Mac trabalham melhor entre 10 °C e 35 °C e que, acima da faixa recomendada, o carregamento pode parar em 80%. No calor de Campinas, um MacBook usado sobre o cobertor ou dentro da mochila pode estar só se protegendo. O carregador também esquenta: use em lugar ventilado, nunca sobre sofá, cama ou travesseiro."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "E existe o caso em que o Mac carrega, mas devagar demais ou nada enquanto você trabalha. Programas pesados, como edição de vídeo e jogos, brilho alto e muitos acessórios ligados podem gastar mais energia do que um carregador fraco entrega. Aí o Mac funciona na tomada, mas a bateria não sobe."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "apple"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Carregador de outra marca: pode usar?"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Pode, com um cuidado. A Apple informa que qualquer carregador USB-C funciona com o Mac, mas recomenda que a potência, medida em watts, seja igual ou maior que a do carregador que veio com o computador. Um carregador de celular, de potência baixa, pode até manter o Mac ligado, sem carregar a bateria. A potência original costuma estar escrita no próprio carregador."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "Funciona com o Mac, segundo a Apple, se for USB-C",
+        "Um carregador de mesma potência ou maior carrega normalmente",
+        "Ajuda a descobrir se o defeito está no carregador original"
+      ],
+      "contras": [
+        "Potência menor que a original pode não carregar enquanto você usa o Mac",
+        "Cabo só de dados não carrega, mesmo com carregador bom",
+        "Carregador de procedência duvidosa esquenta e arrisca o equipamento"
+      ],
+      "titulo": "Usar um carregador USB-C que não é o original"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas atenção: se você precisa comprar um carregador novo, confira a potência e o tipo de conector antes. Nos modelos com MagSafe 3, o cabo que liga o carregador USB-C ao conector magnético é vendido à parte pela Apple. Na dúvida sobre qual serve no seu modelo, a loja tem uma seção de [carregadores de notebook](/carregadores)."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como ver se a bateria está pedindo troca"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se o Mac liga e carrega, mas a bateria dura pouco, olhe a saúde dela. No menu Apple, abra Ajustes do Sistema e clique em Bateria; pode ser preciso rolar a tela. A linha Saúde da Bateria mostra \"Normal\" ou \"Manutenção recomendada\" (em inglês, Service Recommended; o nome pode variar com a versão do sistema). A segunda indica que a bateria segura menos carga do que quando era nova, ou que não está funcionando normalmente."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Apple afirma que dá para continuar usando o Mac com segurança nesse estado, e que a troca depende de quanto a autonomia menor atrapalha o seu dia. Mas ela também alerta que reparo feito por pessoa sem treino ou com peça de qualidade ruim pode afetar a segurança. Troca de bateria de MacBook não é serviço para fazer em casa."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Quando a causa não aparece, o Diagnóstico Apple ajuda a apontar a peça com problema. Em Mac com chip da Apple, segure o botão de ligar até aparecer a tela de Opções, solte e pressione Command e D. Em Mac com Intel, segure a tecla D logo ao ligar. O teste mostra um código de referência; anote e leve junto à assistência."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Antes de levar o MacBook à assistência"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se nada disso resolveu, o defeito provavelmente está dentro do Mac: placa, conector de carga ou bateria. Leve o computador com o carregador e os cabos que você usa, como a própria Apple sugere: assim o técnico consegue separar o defeito do Mac de um defeito do acessório. Anote também o que já testou, o que viu na tela e o código do diagnóstico, se houver."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, tem assistência técnica que também atende Mac, iPhone e iPad, no mesmo endereço da loja. A equipe faz o diagnóstico, a troca de peça e a recuperação de dados quando o disco não aparece mais. Veja como funciona na página de [assistência Apple](/reparoapple), ou fale com a equipe pelo WhatsApp, onde quem atende são pessoas."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se o seu MacBook já está velho e o conserto não compensa, vale comparar com os modelos atuais no guia [MacBook Air ou MacBook Pro](/blog/macbook-air-ou-macbook-pro-como-escolher). A decisão, em uma linha: troque cabo, tomada e carregador antes de suspeitar da placa, e leve ao técnico sem insistir quando houver líquido, queda ou bateria estufada."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "apple"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Meu MacBook para de carregar em 80%. Está com defeito?",
+      "resposta": "Provavelmente não. O Carregamento Otimizado da Bateria segura a carga em 80% em certas situações, e o Limite de Carga, quando ligado, faz o mesmo. Calor acima da faixa recomendada também pode parar o carregamento. Veja a mensagem no menu da bateria."
+    },
+    {
+      "pergunta": "Posso carregar o MacBook com carregador de celular?",
+      "resposta": "Ele pode até manter o Mac ligado, mas costuma não carregar a bateria enquanto você usa o computador. A Apple recomenda carregador USB-C com potência igual ou maior que a do original."
+    },
+    {
+      "pergunta": "O que significa a luz âmbar piscando no MagSafe?",
+      "resposta": "Segundo a Apple, pode indicar um problema de carregamento. Desconecte tudo, limpe o conector e a porta com pano seco, reinicie o Mac e teste com outro cabo antes de concluir que é defeito."
+    },
+    {
+      "pergunta": "Dá para continuar usando o Mac com a bateria em \"Manutenção recomendada\"?",
+      "resposta": "A Apple diz que sim, com segurança. A troca depende de quanto a autonomia menor atrapalha. Se a carcaça estiver estufada, porém, pare de usar e leve a um técnico."
+    },
+    {
+      "pergunta": "Derramei líquido no MacBook e ele desligou. Coloco para carregar?",
+      "resposta": "Não. Desconecte o carregador, não tente ligar e leve à assistência o quanto antes. Energia em placa molhada pode transformar um conserto simples em perda do aparelho."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Apple — If your Mac doesn't turn on",
+      "url": "https://support.apple.com/en-us/102623",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Apple — If your Mac starts up to a blank screen",
+      "url": "https://support.apple.com/en-us/102575",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Apple — If your USB-C power adapter isn't charging your Mac laptop",
+      "url": "https://support.apple.com/en-us/102464",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Apple — If your MagSafe cable or power adapter isn't working",
+      "url": "https://support.apple.com/en-us/102372",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Apple — If your Mac battery won't charge",
+      "url": "https://support.apple.com/guide/mac-help/if-your-battery-wont-charge-mh29198/mac",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Apple — About Optimized Battery Charging and Charge Limit on Mac",
+      "url": "https://support.apple.com/en-us/102338",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Apple — Check the condition of your Mac laptop's battery",
+      "url": "https://support.apple.com/guide/mac-help/check-the-condition-of-your-computers-battery-mh20865/mac",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Apple — If you see battery Service Recommended on your Mac laptop",
+      "url": "https://support.apple.com/en-us/108376",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Apple — Use Apple Diagnostics to test your Mac",
+      "url": "https://support.apple.com/en-us/102550",
+      "data": "consultado em outubro de 2026"
+    }
+  ]
+}
