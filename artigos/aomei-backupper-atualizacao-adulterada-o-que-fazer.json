@@ -1,0 +1,99 @@
+{
+  "slug": "aomei-backupper-atualizacao-adulterada-o-que-fazer",
+  "titulo": "AOMEI Backupper: atualização adulterada levou invasor a PCs; veja o que fazer",
+  "resumo": "Pesquisa do Google publicada em 15 de outubro mostra que o AOMEI Backupper baixou um programa invasor em alguns PCs. Veja quem deve conferir o computador.",
+  "categoria": "noticias",
+  "etiquetas": [
+    "segurança",
+    "backup",
+    "windows",
+    "atualização"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-19T15:00:00.000Z",
+  "seo": {
+    "titulo": "AOMEI Backupper: atualização adulterada; veja o que fazer"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Em 15 de outubro de 2026, o grupo de análise de ameaças do Google e a Mandiant publicaram uma investigação sobre o AOMEI Backupper, programa de backup e de clonagem de disco para Windows. Entre abril e julho de 2026, alguém alterou por poucos minutos os arquivos de configuração que o programa consulta para se atualizar, e os computadores que fizeram a consulta nesses intervalos baixaram um programa invasor."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que todo mundo que usa o programa foi afetado. Segundo os pesquisadores, quem consultou as atualizações fora desses intervalos recebeu os arquivos verdadeiros. Mas eles também dizem que houve, provavelmente, intervalos que ninguém registrou, e o Brasil aparece na lista de países com organizações atingidas. Por isso, quem tem o programa instalado deve conferir o computador."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que a investigação mostrou"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Não foi uma falha no código do programa. O invasor mexeu em dois arquivos de configuração nos servidores da AOMEI: um diz qual pacote de atualização baixar, e o outro controla os avisos que aparecem na tela. Cada alteração ficou no ar de 5 a 10 minutos e depois voltou ao normal, o que dificulta perceber o ataque olhando o site depois."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O pacote falso instalava uma porta dos fundos, que é um programa escondido que deixa outra pessoa controlar o computador a distância. Ele se mantinha ativo por meio de uma tarefa agendada do Windows. O AnyViewer, programa de acesso remoto da mesma empresa, usa o mesmo sistema de atualização e também é citado na pesquisa."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Mandiant avisou a AOMEI em 17 de julho, e a empresa respondeu em 29 de julho que tinha corrigido os servidores. A The Hacker News confirma essas datas, e o laboratório da ManageEngine, que também estudou o caso, descreve o mesmo ataque. Os três relatos fazem o mesmo alerta: arrumar o servidor não limpa o computador que já recebeu o pacote falso."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que isso muda para você"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem usa o AOMEI Backupper ou o AnyViewer:** abra o Agendador de Tarefas do Windows e procure tarefas chamadas RadminComponentRuntime ou NitroRuntime. Veja também se existe uma pasta chamada Radmin dentro da pasta de dados de aplicativos do seu usuário, sem que você tenha instalado esse programa. Esses são sinais citados nas pesquisas."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Se encontrar algum desses sinais:** desconecte o computador da internet, não tente apagar nada por conta própria e troque as senhas importantes usando outro aparelho. Um técnico da [assistência técnica](/manutencao) consegue verificar a máquina e limpar o sistema sem perder os seus arquivos. Se os arquivos estiverem em risco, a [recuperação de dados](/recuperacaodados) vem antes de qualquer formatação."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem não usa esses programas:** nada muda no seu computador. O caso serve de lembrete: mantenha só os programas que você usa e baixe instaladores apenas do site oficial. Mas o site oficial nem sempre basta, porque aqui a falha estava na origem. Por isso, antivírus atualizado e backup em mais de um lugar continuam valendo."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que ainda não se sabe"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "As pesquisas não dizem quais versões do programa foram afetadas nem como o invasor conseguiu mexer nos servidores. Também não há um número de computadores atingidos, e, segundo a The Hacker News, a ManageEngine ainda não tinha confirmado por conta própria que o problema foi contido. Na dúvida, a conferência acima é o caminho seguro."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, tem assistência técnica para diagnóstico, limpeza de sistema e recuperação de dados. Em uma linha: quem usa o AOMEI Backupper deve conferir o computador; quem não usa não precisa fazer nada."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "dados"
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Investigating Ephemeral Supply Chain Tampering — Google Threat Intelligence Group e Mandiant (Google Cloud Blog)",
+      "url": "https://cloud.google.com/blog/topics/threat-intelligence/investigating-ephemeral-supply-chain-tampering",
+      "data": "15 de outubro de 2026"
+    },
+    {
+      "nome": "Attackers Tampered with AOMEI Backupper's Update Servers for Minutes to Deliver a Backdoor — The Hacker News",
+      "url": "https://thehackernews.com/2026/10/attackers-tampered-with-aomei.html",
+      "data": "16 de outubro de 2026"
+    },
+    {
+      "nome": "AOMEI Backupper supply chain attack — ManageEngine METAL",
+      "url": "https://www.manageengine.com/threat-analysis-lab/aomei-backupper-supply-chain-compromise.html",
+      "data": "16 de outubro de 2026"
+    }
+  ]
+}
