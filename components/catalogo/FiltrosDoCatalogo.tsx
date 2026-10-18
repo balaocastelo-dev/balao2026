@@ -5,11 +5,12 @@ import { createPortal } from "react-dom";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Check, ChevronLeft, Loader2, SlidersHorizontal, X } from "lucide-react";
 import type { Facetas, Filtros } from "@/lib/catalogo/filtros";
+import type { OpcaoContada } from "@/lib/catalogo/maquinas";
 
 // ============================================================
 // Painel de filtros das páginas de navegação do catálogo.
 //
-// O estado mora na URL (?cat=&marca=&min=&max=&tags=&pronta=&ordem=): cada clique
+// O estado mora na URL (?cat=&marca=&min=&max=&tags=&pronta=&geracao=&placa=&ordem=): cada clique
 // troca o endereço e o servidor devolve a lista já filtrada. Assim o filtro
 // vale para o resultado inteiro, não só para a página que está na tela, e o
 // link pode ser copiado e mandado para um cliente.
@@ -27,6 +28,7 @@ interface Props {
 }
 
 const MARCAS_VISIVEIS = 8;
+const PLACAS_VISIVEIS = 10;
 
 function useNavegacaoDeFiltros() {
   const router = useRouter();
@@ -68,6 +70,76 @@ function Caixa({ marcada }: { marcada: boolean }) {
     >
       {marcada && <Check size={11} className="text-white" strokeWidth={3} />}
     </span>
+  );
+}
+
+/**
+ * Lista de caixas com contagem, separada por fabricante (Intel / AMD / Apple,
+ * NVIDIA / AMD / Intel). Usada na geração do processador e na placa de vídeo.
+ */
+function ListaDeOpcoes({
+  opcoes,
+  marcadas,
+  aoAlternar,
+  visiveis,
+  nomeNoPlural,
+}: {
+  opcoes: OpcaoContada[];
+  marcadas: string[];
+  aoAlternar: (chave: string) => void;
+  visiveis?: number;
+  nomeNoPlural: string;
+}) {
+  const [todas, setTodas] = useState(false);
+  // Opção marcada fica sempre à vista, mesmo além do corte.
+  const mostradas =
+    !visiveis || todas || opcoes.length <= visiveis
+      ? opcoes
+      : opcoes.filter((o, i) => i < visiveis || marcadas.includes(o.chave));
+  const grupos = [...new Set(mostradas.map((o) => o.grupo))];
+  const variosGrupos = grupos.length > 1;
+
+  return (
+    <>
+      {grupos.map((grupo) => (
+        <div key={grupo} className={variosGrupos ? "mb-2 last:mb-0" : undefined}>
+          {variosGrupos && grupo !== "Integrado" && (
+            <p className="mb-1 px-2 text-[11px] font-bold uppercase tracking-wider text-[var(--site-muted)]">{grupo}</p>
+          )}
+          <ul className="space-y-0.5">
+            {mostradas
+              .filter((o) => o.grupo === grupo)
+              .map((o) => {
+                const marcada = marcadas.includes(o.chave);
+                return (
+                  <li key={o.chave}>
+                    <button
+                      type="button"
+                      role="checkbox"
+                      aria-checked={marcada}
+                      onClick={() => aoAlternar(o.chave)}
+                      className="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-[var(--site-panel-muted)]"
+                    >
+                      <Caixa marcada={marcada} />
+                      <span className={`flex-1 truncate ${marcada ? "font-semibold text-[var(--site-text)]" : "text-[var(--site-soft)]"}`}>{o.rotulo}</span>
+                      <span className="shrink-0 text-xs tabular-nums text-[var(--site-muted)]">{o.total}</span>
+                    </button>
+                  </li>
+                );
+              })}
+          </ul>
+        </div>
+      ))}
+      {visiveis && opcoes.length > visiveis && (
+        <button
+          type="button"
+          onClick={() => setTodas((v) => !v)}
+          className="mt-2 cursor-pointer px-2 text-xs font-semibold text-[#E60012] hover:underline"
+        >
+          {todas ? "Ver menos" : `Ver todas as ${opcoes.length} ${nomeNoPlural}`}
+        </button>
+      )}
+    </>
   );
 }
 
@@ -117,7 +189,7 @@ function Painel({ facetas, filtros, ligados, ordemPadrao, idBase }: Props & { id
   const { mudar, pendente } = useNavegacaoDeFiltros();
   const [todasAsMarcas, setTodasAsMarcas] = useState(false);
 
-  const alternar = (chave: "marca" | "tags", atuais: string[], valor: string) => {
+  const alternar = (chave: "marca" | "tags" | "geracao" | "placa", atuais: string[], valor: string) => {
     const novos = atuais.includes(valor) ? atuais.filter((v) => v !== valor) : [...atuais, valor];
     mudar({ [chave]: novos.length ? novos.join(",") : null });
   };
@@ -140,7 +212,7 @@ function Painel({ facetas, filtros, ligados, ordemPadrao, idBase }: Props & { id
         {ligados > 0 && (
           <button
             type="button"
-            onClick={() => mudar({ cat: null, marca: null, min: null, max: null, tags: null, pronta: null })}
+            onClick={() => mudar({ cat: null, marca: null, min: null, max: null, tags: null, pronta: null, geracao: null, placa: null })}
             className="cursor-pointer text-xs font-semibold text-[#E60012] hover:underline"
           >
             Limpar ({ligados})
@@ -212,6 +284,29 @@ function Painel({ facetas, filtros, ligados, ordemPadrao, idBase }: Props & { id
               </li>
             ))}
           </ul>
+        </Bloco>
+      )}
+
+      {facetas.geracoes.length > 0 && (
+        <Bloco titulo="Geração do processador">
+          <ListaDeOpcoes
+            opcoes={facetas.geracoes}
+            marcadas={filtros.geracoes}
+            aoAlternar={(chave) => alternar("geracao", filtros.geracoes, chave)}
+            nomeNoPlural="gerações"
+          />
+        </Bloco>
+      )}
+
+      {facetas.placas.length > 0 && (
+        <Bloco titulo="Placa de vídeo">
+          <ListaDeOpcoes
+            opcoes={facetas.placas}
+            marcadas={filtros.placas}
+            aoAlternar={(chave) => alternar("placa", filtros.placas, chave)}
+            visiveis={PLACAS_VISIVEIS}
+            nomeNoPlural="placas"
+          />
         </Bloco>
       )}
 

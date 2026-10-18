@@ -8,10 +8,13 @@
 //
 // Tudo aqui é função pura. O estado dos filtros mora na URL:
 //   ?cat=Hardware/Memória RAM&marca=Kingston,Corsair&min=100&max=900&tags=DDR5&ordem=menor&page=2
+// Na parte de computadores há também ?geracao=intel-12,ryzen-5000&placa=rtx-4060
+// (geração do processador e placa de vídeo, lidas do título; ver maquinas.ts).
 // ============================================================
 
 import { extractTags, filterProductsByTags, type FilterTag } from "@/lib/product-filters";
 import { parsePriceToNumber, type Product } from "@/lib/utils";
+import { caminhoDeComputadores, contarOpcoes, lerMaquina, type OpcaoContada } from "@/lib/catalogo/maquinas";
 
 export type Ordem = "relevancia" | "menor" | "maior";
 
@@ -24,6 +27,10 @@ export interface Filtros {
   tags: string[];
   /** Só produtos com "Pronta entrega" (fornecedor local). */
   pronta: boolean;
+  /** Geração do processador ("intel-12", "ryzen-5000", "apple-m4"). */
+  geracoes: string[];
+  /** Placa de vídeo ("rtx-4060", "rx-6600", "integrado"). */
+  placas: string[];
   ordem: Ordem | null;
   pagina: number;
 }
@@ -64,6 +71,8 @@ export function lerFiltros(sp: Parametros): Filtros {
     max,
     tags: lista(sp.tags),
     pronta: ["1", "sim", "true"].includes(primeiro(sp.pronta).trim().toLowerCase()),
+    geracoes: lista(sp.geracao).map((s) => s.toLowerCase()),
+    placas: lista(sp.placa).map((s) => s.toLowerCase()),
     ordem: ordem === "menor" || ordem === "maior" || ordem === "relevancia" ? ordem : null,
     pagina: Number.isFinite(pagina) && pagina > 0 ? pagina : 1,
   };
@@ -71,7 +80,7 @@ export function lerFiltros(sp: Parametros): Filtros {
 
 /** Quantos filtros estão ligados (ordem e página não contam). */
 export function contarFiltros(f: Filtros): number {
-  return (f.cat ? 1 : 0) + f.marcas.length + (f.min != null || f.max != null ? 1 : 0) + f.tags.length + (f.pronta ? 1 : 0);
+  return (f.cat ? 1 : 0) + f.marcas.length + (f.min != null || f.max != null ? 1 : 0) + f.tags.length + (f.pronta ? 1 : 0) + f.geracoes.length + f.placas.length;
 }
 
 // ---------- aplicar ----------
@@ -90,7 +99,7 @@ export function dentroDaCategoria(categoriaDoProduto: unknown, caminho: string):
   return atual === alvo || atual.startsWith(`${alvo}/`);
 }
 
-type Dimensao = "cat" | "marca" | "preco" | "tags" | "pronta";
+type Dimensao = "cat" | "marca" | "preco" | "tags" | "pronta" | "geracao" | "placa";
 
 export function ehProntaEntrega(produto: Pick<Product, "availability">): boolean {
   return semAcento(produto.availability) === "pronta entrega";
@@ -125,6 +134,20 @@ export function aplicarFiltros<T extends Product>(produtos: T[], f: Filtros, men
   if (menos !== "tags" && f.tags.length > 0) {
     saida = filterProductsByTags(saida, f.tags) as T[];
   }
+  if (menos !== "geracao" && f.geracoes.length > 0) {
+    const alvos = new Set(f.geracoes);
+    saida = saida.filter((p) => {
+      const g = lerMaquina(p).geracao;
+      return g != null && alvos.has(g.chave);
+    });
+  }
+  if (menos !== "placa" && f.placas.length > 0) {
+    const alvos = new Set(f.placas);
+    saida = saida.filter((p) => {
+      const g = lerMaquina(p).placa;
+      return g != null && alvos.has(g.chave);
+    });
+  }
   return saida;
 }
 
@@ -145,6 +168,9 @@ export interface Facetas {
   faixa: { min: number; max: number } | null;
   /** Quantos produtos com pronta entrega há com os outros filtros ligados. */
   prontaEntrega: number;
+  /** Só na parte de computadores; vazias no resto do catálogo. */
+  geracoes: OpcaoContada[];
+  placas: OpcaoContada[];
 }
 
 /**
@@ -207,7 +233,18 @@ export function montarFacetas(produtos: Product[], f: Filtros, raiz = "", nomeDa
 
   const prontaEntrega = aplicarFiltros(produtos, f, "pronta").filter(ehProntaEntrega).length;
 
-  return { trilha, categorias, marcas, tags, faixa, prontaEntrega };
+  // --- geração do processador e placa de vídeo (só computadores) ---
+  const emComputadores = caminhoDeComputadores(base) || f.geracoes.length > 0 || f.placas.length > 0;
+  const geracoes = emComputadores ? contarOpcoes(aplicarFiltros(produtos, f, "geracao"), "geracao", ["Intel", "AMD", "Apple"]) : [];
+  const placas = emComputadores ? contarOpcoes(aplicarFiltros(produtos, f, "placa"), "placa", ["NVIDIA", "AMD", "Intel", "Integrado"]) : [];
+  // Opção marcada nunca some da lista.
+  for (const [marcadas, opcoes] of [[f.geracoes, geracoes], [f.placas, placas]] as const) {
+    for (const chave of marcadas) {
+      if (!opcoes.some((o) => o.chave === chave)) opcoes.push({ chave, rotulo: chave, peso: -2, grupo: "Integrado", total: 0 });
+    }
+  }
+
+  return { trilha, categorias, marcas, tags, faixa, prontaEntrega, geracoes, placas };
 }
 
 // ---------- ordenação ----------
@@ -288,6 +325,8 @@ export function paraQuery(f: Partial<Filtros>, fixos: Record<string, string | un
   if (f.max != null) q.set("max", String(f.max));
   if (f.tags?.length) q.set("tags", f.tags.join(","));
   if (f.pronta) q.set("pronta", "1");
+  if (f.geracoes?.length) q.set("geracao", f.geracoes.join(","));
+  if (f.placas?.length) q.set("placa", f.placas.join(","));
   if (f.ordem) q.set("ordem", f.ordem);
   if (f.pagina && f.pagina > 1) q.set("page", String(f.pagina));
   return q.toString();

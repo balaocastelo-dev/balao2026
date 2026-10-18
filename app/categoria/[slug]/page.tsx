@@ -26,6 +26,9 @@ type Props = {
     min?: string;
     max?: string;
     ordem?: string;
+    pronta?: string;
+    geracao?: string;
+    placa?: string;
   }>;
 };
 
