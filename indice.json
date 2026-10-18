@@ -43,7 +43,12 @@
         "memória ram",
         "placa de vídeo"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/ia-no-computador-ou-ia-na-nuvem-o-que-muda-16229c89.jpg",
+        "alt": "Gabinete de computador de mesa com a lateral de vidro ao lado de um roteador sem fio sobre uma mesa de escritório, com o monitor apagado ao fundo",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-10-18T09:00:00.000Z",
       "minutos": 11
     },
@@ -434,5 +439,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-17T22:48:54.891Z"
+  "atualizadoEm": "2026-10-18T01:06:55.989Z"
 }
