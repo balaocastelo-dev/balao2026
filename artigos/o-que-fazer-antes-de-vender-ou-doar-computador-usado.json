@@ -1,0 +1,156 @@
+{
+  "slug": "o-que-fazer-antes-de-vender-ou-doar-computador-usado",
+  "titulo": "O que fazer antes de vender ou doar um computador usado",
+  "resumo": "Antes de vender ou doar o computador: backup, sair das contas e restaurar com limpeza da unidade. Veja os passos no Windows e no Mac, na ordem certa.",
+  "categoria": "guias",
+  "etiquetas": [
+    "backup",
+    "windows",
+    "mac",
+    "segurança",
+    "seminovos"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-19T21:00:00.000Z",
+  "formato": "dica",
+  "roteiro": {
+    "fala": "Vai vender ou doar o computador? Não basta apagar as pastas. Primeiro, faça o backup de tudo. Depois saia das suas contas e tire o aparelho da conta da Microsoft ou da Apple. Por fim, restaure de fábrica. No Windows, escolha Remover tudo e ligue a opção de limpar os dados. Demora mais, mas dificulta recuperar o que você apagou. E se o disco estiver criptografado, anote a chave antes de começar.",
+    "titulo": "Antes de vender o seu PC",
+    "destaques": [
+      "1. Backup de tudo",
+      "2. Saia das contas",
+      "3. Remover tudo",
+      "Ligue a limpeza dos dados"
+    ],
+    "legenda": "Apagar as pastas não protege seus dados quando o computador muda de dono. Veja os três passos, no Windows e no Mac, na dica completa no blog.",
+    "hashtags": [
+      "computador",
+      "windows",
+      "mac",
+      "seguranca",
+      "informatica",
+      "campinas"
+    ]
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Antes de vender ou doar um computador usado, faça três coisas, nesta ordem: copie seus arquivos para outro lugar, saia das suas contas e restaure o sistema de fábrica com a limpeza da unidade ligada. Assim o próximo dono recebe uma máquina zerada, e suas fotos, senhas e documentos não vão junto."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que apagar as pastas e esvaziar a lixeira resolve. Arquivo apagado desse jeito continua no disco até ser sobrescrito, e há programas que recuperam. Outro engano é restaurar sem tirar o aparelho da sua conta da Microsoft ou da Apple: ele continua aparecendo como seu na lista de dispositivos, e o novo dono começa com pendências que não são dele."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "**Backup primeiro**: depois da restauração, o que não foi copiado não volta.",
+        "No Windows, use **Restaurar o PC** com **Remover tudo** e ligue a opção de **limpar os dados**.",
+        "No Mac recente, **Apagar Conteúdo e Ajustes** faz quase tudo sozinho.",
+        "Depois, tire o aparelho da lista de dispositivos da sua conta."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como zerar um computador com Windows"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Microsoft recomenda começar pelo backup e, só depois, restaurar. Antes de mexer, desligue HDs externos e pen drives, para não apagar a unidade errada. Se o disco estiver criptografado com o BitLocker, que é a proteção que embaralha os dados do disco, tenha a chave de recuperação em mãos: o próprio suporte da Microsoft avisa que ela pode ser pedida no meio do processo."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "Copie documentos, fotos e senhas salvas para um HD externo ou para a nuvem, e confira se a cópia abre em outro aparelho.",
+        "No Windows 11, abra **Configurações > Sistema > Recuperação** e clique em **Restaurar o PC**. No Windows 10, o caminho é **Atualização e Segurança > Recuperação**.",
+        "Escolha **Remover tudo**. A opção que mantém os arquivos serve para consertar o sistema, não para passar a máquina adiante.",
+        "Em alterar configurações, ligue a **limpeza dos dados**. Ela deixa a restauração mais demorada, mas dificulta recuperar o que foi apagado.",
+        "Quando a máquina reiniciar na tela de configuração inicial, não precisa continuar: quem vai configurar é o novo dono.",
+        "Em outro aparelho, entre em account.microsoft.com/devices, abra o computador, escolha **Remover** e, se aparecer, **Desvincular**."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Os nomes das opções podem mudar um pouco entre versões do Windows. E a própria Microsoft avisa que essa limpeza é pensada para o uso doméstico e não segue normas de apagamento exigidas por governo ou empresas. Para a maioria das pessoas, ela basta; para computador de empresa com dados de clientes, vale pedir uma orientação antes."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "dados"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como zerar um Mac"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "No Mac, a Apple também pede o backup antes de tudo. Depois, se o Mac tem chip da Apple ou o chip de segurança T2 e está com o macOS Monterey ou mais novo, use **Apagar Conteúdo e Ajustes**. Segundo a Apple, quando essa opção está disponível, os outros passos não são necessários: ela sai das contas e devolve o Mac ao estado de fábrica."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Em Mac mais antigo, o caminho é manual: sair do iCloud e do iMessage, esquecer os acessórios Bluetooth que vão ficar com você, apagar o disco pelo Utilitário de Disco no modo de recuperação e reinstalar o macOS. Quando o Mac reiniciar no assistente de configuração, a Apple orienta desligar com Command e Q, sem continuar."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "Os passos do Windows e do Mac são guiados e não exigem abrir o computador",
+        "Você confere pessoalmente que o backup ficou bom"
+      ],
+      "contras": [
+        "Se o computador não liga direito, a restauração pode travar no meio",
+        "Disco com defeito pode falhar durante a limpeza, antes de você copiar tudo"
+      ],
+      "titulo": "Restaurar você mesmo ou pedir ajuda"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando esta dica não basta"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se o computador não liga, não chega à tela do sistema ou o disco está com defeito, a restauração não resolve e pode piorar a situação dos arquivos que você ainda não copiou. Nesses casos, pare e leve a um técnico. Se o disco vai embora junto e os arquivos ainda estão nele, a [recuperação de dados](/recuperacaodados) vem antes de qualquer formatação."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Na Balão da Informática, no Cambuí, em Campinas, a [assistência técnica](/manutencao) faz diagnóstico, backup e recuperação de dados no mesmo endereço. E se a troca é para um modelo mais novo, há [computadores seminovos](/seminovos) para ver ligados e testar antes de pagar. Em uma linha: backup, sair das contas e Remover tudo com limpeza, nessa ordem."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "seminovos"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Formatar o disco já apaga meus dados de vez?",
+      "resposta": "Nem sempre. Uma formatação rápida ou apagar as pastas deixa dados que programas conseguem recuperar. Na restauração do Windows, a opção de limpar os dados dificulta essa recuperação, e no Mac recente o Apagar Conteúdo e Ajustes cuida disso."
+    },
+    {
+      "pergunta": "Preciso tirar o computador da minha conta da Microsoft?",
+      "resposta": "Sim. A Microsoft orienta remover o aparelho em account.microsoft.com/devices depois da restauração. Assim ele deixa de aparecer como seu e não ocupa vaga no limite de dispositivos da loja de aplicativos."
+    },
+    {
+      "pergunta": "E se o computador não liga para eu fazer a restauração?",
+      "resposta": "Não tente forçar. Se ainda há arquivos importantes no disco, a prioridade é recuperá-los com um técnico; depois disso, a unidade pode ser limpa com segurança."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Before you recycle, sell, or gift your Xbox or Windows PC — Suporte da Microsoft",
+      "url": "https://support.microsoft.com/en-us/accounts-billing/security/before-you-recycle-sell-or-gift-your-xbox-or-windows-pc",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Reset your PC — Suporte da Microsoft",
+      "url": "https://support.microsoft.com/en-us/topic/0ef73740-b927-549b-b7c9-e6f2b48d275e",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "What to do before you sell, give away, trade in, or recycle your Mac — Suporte da Apple",
+      "url": "https://support.apple.com/en-afri/102773",
+      "data": "outubro de 2026"
+    }
+  ]
+}
