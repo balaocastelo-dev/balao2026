@@ -22,6 +22,7 @@ import type { ItemDeOrigem } from "./kabum";
 import { montarProduto, motivoDeRecusa, type ProdutoDeOrigem, type RegrasDaFonte } from "./produto";
 import { codigosBloqueados } from "./bloqueio";
 import { fotosRecusadasDe, semFotosRecusadas } from "./fotos-recusadas";
+import { comFotoConferida } from "@/lib/precos/fotos-conferidas";
 import { decidirQueda, type EstadoDaQueda } from "./queda";
 
 type Linha = Record<string, unknown>;
@@ -496,7 +497,9 @@ export async function gravarPagina(fonte: Fonte, itens: ItemDeOrigem[], agora: s
   // Foto reprovada na conferência (fotos_recusadas) não volta pela fonte:
   // o item entra sem ela e o produto mantém o que está no site.
   const recusadas = await fotosRecusadasDe(naoBloqueados.map((i) => i.codigo));
-  const aceitos = recusadas.size ? naoBloqueados.map((i) => semFotosRecusadas(i, recusadas)) : naoBloqueados;
+  // Foto conferida e guardada no site vale mais que a da fonte, e não se
+  // perde quando o produto some do fornecedor e volta (18/10).
+  const aceitos = (recusadas.size ? naoBloqueados.map((i) => semFotosRecusadas(i, recusadas)) : naoBloqueados).map(comFotoConferida);
 
   const atuais = await turso.execute({
     sql: `SELECT id, fonte_id, price, origem_pix, origem_cartao, origem_parcelas, retido_desde, preco_anterior, queda_em FROM products WHERE id IN (${aceitos.map(() => "?").join(", ")})`,
