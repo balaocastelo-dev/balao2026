@@ -23,7 +23,7 @@ function definirLugares(extra) {
     { id: 'mangueira', nome: 'Mangueira', tipo: 'arvore', de: [25.2, 6.8, 0.35], para: [30.3, 2.4, 5.8], raio: 4.6, ganho: 4.2 },
     { id: 'jabuticabeira', nome: 'Jabuticabeira', tipo: 'arvore', de: [14.0, 5.9, 0.25], para: [14.0, 2.2, 1.75], raio: 2.1, ganho: 4.0 },
     { id: 'coqueiros', nome: 'Coqueiros', tipo: 'arvore', de: [23.8, 4.3, 0.25], para: [23.6, 8.2, 6.0], raio: 4.3, ganho: 4.4 },
-    { id: 'amendoeira', nome: 'Amendoeira', tipo: 'arvore', de: [51.4, 6.6, -0.7], para: [47.6, 1.7, 4.6], raio: 4.6, ganho: 4.2 },
+    { id: 'amendoeira', nome: 'Amendoeira', tipo: 'arvore', de: [51.4, 6.6, -0.7], para: [47.0, 1.5, 4.6], raio: 4.6, ganho: 4.2 },
     { id: 'muro_piscina', nome: 'Muro da piscina', tipo: 'plano', ret: { x0: 31.4, x1: 44.8, y0: 0.0, y1: 0.0, z0: -0.1, z1: 2.32 }, normal: [0, 1], de: [38.1, 6.25, 2.5], fundo: 1.1, ganho: 1.7 },
     { id: 'portao_gramado', nome: 'Portão do gramado', tipo: 'plano', ret: { x0: 0.0, x1: 0.0, y0: 2.55, y1: 6.85, z0: 0.0, z1: 3.5 }, normal: [1, 0], de: [6.4, 4.7, 1.1], fundo: 0.9, ganho: 1.8 },
     { id: 'portao_baixo', nome: 'Portão de baixo', tipo: 'plano', ret: { x0: 60.0, x1: 60.0, y0: 2.75, y1: 7.45, z0: -1.0, z1: 2.5 }, normal: [-1, 0], de: [54.4, 5.1, -0.1], fundo: 0.9, ganho: 1.8 },

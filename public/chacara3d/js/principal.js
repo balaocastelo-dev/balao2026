@@ -52,7 +52,7 @@ const cinema = criarCinema(cena, som);
 // luminárias de fora (acesas à noite)
 const LAMPS = [ // x, y, z no terreno, cor, força, alcance
   [39.5, 8.2, 2.3, 0xffc98a, 1.6, 12], [32.6, 4.4, 2.6, 0xffc98a, 1.0, 10], [8.5, 5.0, 2.3, 0xffc98a, 1.1, 11], [14.2, 5.0, 2.3, 0xffc98a, 1.1, 11],
-  [20.6, 6.2, 0.7, 0xff7a2a, 1.6, 10], [39.0, 2.9, -0.4, 0x49d6ff, 1.2, 10], [48.6, 4.7, 0.3, 0xffc98a, 0.9, 9],
+  [20.6, 6.2, 0.7, 0xff7a2a, 1.6, 10], [39.0, 2.9, -0.4, 0x49d6ff, 1.2, 10], [48.9, 2.0, -0.5, 0xffc98a, 0.9, 9],
   [56.0, 8.0, 1.2, 0xffc98a, 0.8, 10], [2.2, 5.0, 2.2, 0xffc98a, 0.8, 10],
 ].map(l => { const p = new THREE.PointLight(l[3], 0, l[5], 2); p.position.copy(W3(l[0], l[1], l[2])); p.userData.k = l[4]; cena.add(p); return p; });
 const fogueira = LAMPS[4];

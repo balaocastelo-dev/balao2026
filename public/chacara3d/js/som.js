@@ -55,12 +55,12 @@ export function criarSom() {
       // água: as duas bicas da cascata, a hidro, um fio d'água no laguinho
       const casc = pan(39.4, 1.7, 0.2, 1.6, 1.25); laco('bandpass', 1500, 0.5, 0.5, casc); laco('lowpass', 420, 0.7, 0.28, casc); laco('highpass', 4200, 0.7, 0.07, casc);
       const hid = pan(33.1, 2.2, 0.4, 1.0, 2.0); laco('lowpass', 650, 1.0, 0.26, hid); laco('bandpass', 2300, 2.0, 0.05, hid);
-      const lago = pan(46.7, 4.7, -0.5, 1.0, 2.0); laco('bandpass', 3100, 3.0, 0.07, lago); laco('bandpass', 1100, 2.0, 0.05, lago);
+      const lago = pan(47.6, 2.6, -0.9, 1.0, 2.0); laco('bandpass', 3100, 3.0, 0.07, lago); laco('bandpass', 1100, 2.0, 0.05, lago);
       vento = laco('lowpass', 260, 0.5, 0.014, mestre);
       // os passarinhos ficam nas copas
-      passaros = [[30.3, 2.1, 6, 1.4], [47.6, 1.7, 5, 1.2], [14.0, 2.2, 3, 0.8], [19.2, 8.2, 3.5, 0.8], [23.7, 8.8, 6, 0.7], [27.2, 1.5, 2.4, 0.4], [5, -6, 5, 0.6], [26, 22, 6, 0.5], [52, -7, 5, 0.6]]
+      passaros = [[30.3, 2.1, 6, 1.4], [47.1, 1.6, 5, 1.2], [14.0, 2.2, 3, 0.8], [19.2, 8.2, 3.5, 0.8], [23.7, 8.8, 6, 0.7], [27.2, 1.5, 2.4, 0.4], [5, -6, 5, 0.6], [26, 22, 6, 0.5], [52, -7, 5, 0.6]]
         .map(b => ({ p: pan(b[0], b[1], b[2], 3.0, 1.15), w: b[3] }));
-      sapoP = pan(48.6, 4.6, -0.6, 1.5, 1.6);
+      sapoP = pan(49.4, 1.6, -0.9, 1.5, 1.6);
       const fp = pan(20.6, 6.2, 0.4, 1.2, 1.7); fogoG = AC.createBiquadFilter(); fogoG.type = 'bandpass'; fogoG.frequency.value = 2600; fogoG.Q.value = 0.6; fogoG.connect(fp); api.fogoBase = laco('lowpass', 300, 0.6, 0, fp);
       timers.push(setInterval(() => {
         if (AC.state !== 'running') return;

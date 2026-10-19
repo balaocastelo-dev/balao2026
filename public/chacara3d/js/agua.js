@@ -275,7 +275,7 @@ export function criarAgua(cenaPrincipal, ceu, qualidade, quintal) {
   const matFlor = new THREE.MeshStandardMaterial({ color: new THREE.Color(0.95, 0.75, 0.82), roughness: 0.6, side: THREE.DoubleSide, emissive: new THREE.Color(0.08, 0.04, 0.05) });
   const rn = aleatorio(31), listaNinf = [];
   // lugar de cada folha: dentro do contorno do lago, longe da borda e fora de baixo do deck
-  const deckX1 = quintal && quintal.deck ? quintal.deck[1] : 48.0;
+  const deckX1 = quintal && quintal.deck ? quintal.deck[1] : (quintal ? 0 : 48.0);
   const livre = (x, y, r) => !QL.contorno || ([0, 1, 2, 3, 4, 5, 6, 7].every(k => dentroPoli(x + Math.cos(k * 0.785) * (r + 0.12), y + Math.sin(k * 0.785) * (r + 0.12), QL.contorno)) && x > deckX1 + r);
   const nivelNinf = QL.nivel + 0.008;
   for (let i = 0; i < 9; i++) {

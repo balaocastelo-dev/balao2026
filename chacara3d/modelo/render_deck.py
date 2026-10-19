@@ -16,7 +16,7 @@ from bpy_extras.object_utils import world_to_camera_view
 
 ap = argparse.ArgumentParser()
 ap.add_argument('saida'); ap.add_argument('--res', type=int, default=1600); ap.add_argument('--samples', type=int, default=48)
-ap.add_argument('--vistas', default='quintal,piscina,estrutura')
+ap.add_argument('--vistas', default='quintal,cascata,laje')
 args = ap.parse_args(sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else sys.argv[1:])
 os.makedirs(args.saida, exist_ok=True)
 
@@ -51,26 +51,30 @@ def recortar(manter, tirar, tirar_mats=()):
                 g.f[k] = [fa[~fora[fa].any(axis=1)] for fa in g.f[k]]
 
 
-TIRAR = [(46.3, 50.8, -0.3, 2.66, LOW + 0.006, 9.0),   # amendoeira, casa na árvore e balanço (a grama e o chão ficam)
-         (50.3, 60.5, -0.3, 10.3, LOW + 0.006, 9.0),     # poço, garagem, pergolado e cinema
+O = ns['obra']
+TIRAR = [(51.3, 60.5, -0.3, 10.3, LOW + 0.006, 9.0),     # garagem, pergolado e cinema (atrás de quem olha o lago)
          (30.0, 44.45, -0.3, 10.3, -3.0, 0.05),        # piscina
          (40.0, 45.85, -0.3, 10.3, -0.035, 9.0),        # churrasqueira, chuveirão e vasos acima do piso
         ]
+sem_copa = set(args.vistas.split(',')) <= {'planta', 'estrutura'}
 estrutura = 'estrutura' in args.vistas.split(',') and len(args.vistas.split(',')) == 1
 if estrutura:
-    # metade das tábuas sai (as que ficam do lado de fora), a água e os peixes também
-    TIRAR.append((46.95, 48.1, 3.15, 6.25, -0.03, 0.01, ('wood_y',)))
+    # o lago vazio: saem a água, os peixes e as plantas de dentro d'água, para aparecer o fundo
     TIRAR.append((44.0, 52.0, -1.0, 11.0, -3.0, 9.0, ('ninfeia', 'flor_ninfeia')))
-ARVORES = ('leaf_amend', 'leaf_amend_red', 'leaf_mango', 'leaf_core', 'leaf_core_big', 'leaf_bg', 'leaf_palm', 'leaf_palm_base',
-           'leaf_palm_rachis', 'leaf_areca', 'leaf_citrus', 'leaf_goiaba', 'leaf_jabu', 'leaf_vine', 'leaf_vine_light', 'bark_dark',
+COPA = ('leaf_amend', 'leaf_amend_red', 'leaf_core_big')       # a amendoeira fica nas vistas em perspectiva, sai na planta e na estrutura
+if sem_copa:
+    TIRAR.append((44.0, 52.0, -0.3, 4.5, 1.25, 12.0, ('bark_dark',)))   # na planta e na estrutura fica só o tronco
+ARVORES = ('leaf_mango', 'leaf_core', 'leaf_bg', 'leaf_palm', 'leaf_palm_base',
+           'leaf_palm_rachis', 'leaf_areca', 'leaf_citrus', 'leaf_goiaba', 'leaf_jabu', 'leaf_vine', 'leaf_vine_light',
            'bark_palm', 'bark_jabu', 'bark_goiaba', 'fruit_mango', 'fruit_goiaba', 'fruit_black', 'fruit_lemon', 'fruit_red',
            'coconut', 'rope', 'caco', 'terrain', 'street', 'wall_sand', 'wall_moss', 'wall_out', 'wall_white')
-recortar((43.6, 60.5, -0.3, 10.3, -3.0, 9.0), TIRAR,
-         tirar_mats=ARVORES + (('water_pond', 'veu_agua', 'koi_o', 'koi_w', 'koi_k', 'leaf_purple', 'stem_purple') if estrutura else ()))
-# chão de novo, só na área (o recorte tira as peças grandes que passam da caixa)
+recortar((43.6, 60.5, -0.3, 10.3, -3.0, 12.0), TIRAR,
+         tirar_mats=ARVORES + (COPA if sem_copa else ()) + (('water_pond', 'veu_agua', 'koi_o', 'koi_w', 'koi_k', 'leaf_purple', 'stem_purple') if estrutura else ()))
+# chão de novo onde o recorte tirou as peças grandes que passam da caixa
 geo.box('caco', 43.6, EDGE, -0.3, 10.3, -0.04, 0.0)                         # piso da piscina (nível 0,00)
-geo.box('pedrisco', EDGE, 60.0, -0.3, 2.70, LOW - 0.04, LOW - 0.004)         # quintal de baixo onde o recorte tirou o chão
-geo.box('pedrisco', 50.30, 60.0, 2.70, 10.3, LOW - 0.04, LOW - 0.004)
+if sem_copa:                                                                 # tampa do tronco cortado da amendoeira
+    _h = (1.25 - LOW) / 3.4
+    geo.disc('bark_dark', (O.ARVORE[0] + 0.35 * _h, O.ARVORE[1] - 0.12 * _h), 0.235, 1.24, seg=20)
 geo.box('wall_sand', 60.0, 60.15, -0.15, 10.15, LOW - 0.04, LOW + ns['WH'])     # muro do fundo (sem o portão)
 geo.box('terrain', 20.0, 80.0, -40.0, 40.0, LOW - 0.6, LOW - 0.55)           # fundo neutro bem abaixo
 for y0_, y1_ in ((-0.15, 0.0), (10.0, 10.15)):                                # muros laterais do terreno
@@ -112,27 +116,37 @@ cam = bpy.data.cameras.new('Cam'); co = bpy.data.objects.new('Cam', cam); scene.
 cam.sensor_width = 36; cam.clip_start = 0.05; cam.clip_end = 400
 scene.camera = co
 
+# enquadramento a partir do lago (obra.py)
+LX0, LX1 = float(O.LAGO[:, 0].min()), float(O.LAGO[:, 0].max()); LY0, LY1 = float(O.LAGO[:, 1].min()), float(O.LAGO[:, 1].max())
+CXc, CYc = (EDGE - 0.4 + LX1) / 2, (LY0 + max(LY1, O.ESCADA_Y1)) / 2
+PLANTA_W, PLANTA_H = 6.6, 6.0
+CY_ = O.CASCATA['origem'][1]
 VISTAS = {
     # nome: (câmera, alvo, lente, azimute do sol, elevação do sol, exposição)
-    'quintal': ((51.3, 8.8, LOW + 1.65), (47.6, 4.9, -0.75), 22, 215, 48, 0.1),
-    'piscina': ((45.55, 9.2, 1.7), (48.4, 4.7, -1.0), 20, 215, 52, 0.05),
-    'estrutura': ((51.6, 1.1, LOW + 2.25), (47.9, 4.9, -0.85), 20, 215, 55, 0.25),
-    'planta': ((48.2, 5.0, 12.0), (48.2, 5.0001, -1.0), 0, 215, 62, 0.15),
+    'quintal': ((LX1 + 1.5, O.POCO[1] - 0.9, LOW + 1.7), (EDGE + 0.9, (LY0 + LY1) / 2 + 0.3, -0.85), 19, 215, 52, 0.1),
+    'cascata': ((LX1 - 0.4, 0.45, LOW + 1.45), (EDGE + 0.2, CY_ + 0.1, -0.6), 19, 215, 50, 0.1),
+    'laje': ((EDGE - 0.35, O.ESCADA_Y0 + 0.45, 1.7), (EDGE + 2.1, (LY0 + LY1) / 2 - 0.2, -1.05), 18, 215, 55, 0.05),
+    'estrutura': ((LX1 + 1.2, O.POCO[1] - 1.1, LOW + 1.9), (EDGE + 1.6, (LY0 + LY1) / 2 - 0.1, -1.15), 19, 215, 58, 0.2),
+    'planta': ((CXc, CYc, 12.0), (CXc, CYc + 0.0001, -1.0), 0, 215, 62, 0.15),
 }
-# pontos numerados da vista da estrutura (centro de cada peça)
-B = ns
+# pontos numerados da vista do lago vazio (centro de cada coisa)
+_gx, _gy = np.meshgrid(np.arange(LX0, LX1, 0.05), np.arange(LY0, LY1, 0.05), indexing='ij')
+_dd = O.dentro_lago(_gx, _gy)
+_pp = np.where(_dd, O.prof_lago(_gx, _gy), -1)
+_kf = np.unravel_index(np.argmax(_pp + 0.001 * _gx), _pp.shape)
+_ks = np.argwhere(_dd & (np.abs(_pp - O.PRAT_PROF) < 0.01) & (_gx > EDGE + 2.5)); _ks = tuple(_ks[np.argmax(_gy[_ks[:, 0], _ks[:, 1]])]) if len(_ks) else _kf
+_kb = int(np.argmin(np.hypot(O.LAGO[:, 0] - (LX1 - 0.2), O.LAGO[:, 1] - (LY1 - 1.0))))
+_co = np.array(O.CASCATA['origem']); _cd = np.array([math.cos(O.CASCATA['ang']), math.sin(O.CASCATA['ang'])])
+_br = lambda v: f'{v:.2f}'.replace('.', ',')
 PONTOS = [
-    (1, 'Tábuas de cumaru 10 x 2,5 cm (19 peças de 3,00 m, junta de 5 mm)', (46.5, 3.9, 0.0)),
-    (2, 'Barrotes de cumaru 6 x 16 cm, 7 peças a cada 49 cm', (47.45, B['BARROTES'][1], B['ZB0'] - 0.08)),
-    (3, 'Viga externa de cumaru 12 x 20 cm, 3,00 m', (B['VX0'] + 0.06, 4.7, (B['ZV0'] + B['ZV1']) / 2)),
-    (4, 'Pilar de cumaru 12 x 12 cm com sapata de concreto (fora da água)', (B['VX0'] + 0.06, B['DY0'] + 0.06, -0.75)),
-    (5, 'Viga de apoio 6 x 12 cm chumbada no muro de arrimo', (B['DX0'] + 0.14, 4.4, B['ZB0'] - B['DBAR'] - 0.06)),
-    (6, 'Muro de arrimo existente (desnível de 1,00 m)', (EDGE + 0.04, 2.95, -0.45)),
-    (7, 'Cascata de lajes de pedra (3 quedas) com pedras empilhadas', (EDGE + 0.45, 6.8, -0.42)),
-    (8, 'Borda de pedras arredondadas, meio enterradas', (49.95, 5.6, LOW + 0.1)),
-    (9, 'Prateleira de plantas a 30 cm de fundo', (49.55, 6.15, B['ZAGUA'] - 0.30)),
-    (10, 'Parte funda: 1,00 m de água para as carpas', (48.85, 4.6, B['ZAGUA'] - 1.0)),
-    (11, 'Guarda-corpo de madeira 1,10 m (vão entre balaústres até 9 cm)', (48.0, 5.3, 0.95)),
+    (1, f'Guarda-corpo de madeira de {_br(O.GUARDA_H)} m na beira da laje (vão entre balaústres até 9 cm)', (EDGE - 0.04, CY_ - 0.9, 0.95)),
+    (2, 'Muro de arrimo novo, revestido de pedra (desnível de 1,00 m)', (O.FACE + 0.06, 1.2, -0.55)),
+    (3, 'Cascata de lajes de pedra (3 quedas) descendo do alto do muro', tuple(_co + _cd * 0.45) + (O.CASCATA['lajes'][1][1],)),
+    (4, 'Borda de pedras arredondadas, meio enterradas', (float(O.LAGO[_kb, 0]), float(O.LAGO[_kb, 1]), LOW + 0.1)),
+    (5, f'Prateleira de plantas a {round(O.PRAT_PROF * 100)} cm de fundo', (float(_gx[_ks]), float(_gy[_ks]), O.ZAGUA - O.PRAT_PROF)),
+    (6, f'Parte funda: {_br(O.PROF)} m de água', (float(_gx[_kf]), float(_gy[_kf]), O.ZAGUA - O.PROF)),
+    (7, 'Amendoeira: o lago fica a 1,20 m do tronco', (O.ARVORE[0], O.ARVORE[1], LOW + 1.3)),
+    (8, 'Poço: o lago fica a 1,50 m da boca', (O.POCO[0], O.POCO[1] - O.POCO_R, LOW + 0.5)),
 ]
 
 
@@ -141,7 +155,7 @@ def mirar(v):
     co.location = loc
     co.rotation_euler = (Vector(tgt) - Vector(loc)).to_track_quat('-Z', 'Y').to_euler()
     if lens == 0:                                       # planta: câmera ortográfica olhando de cima
-        cam.type = 'ORTHO'; cam.ortho_scale = 6.4; co.rotation_euler = (0, 0, 0)
+        cam.type = 'ORTHO'; cam.ortho_scale = PLANTA_W; co.rotation_euler = (0, 0, 0)
     else:
         cam.type = 'PERSP'; cam.lens = lens
     a, e = math.radians(az), math.radians(el)
@@ -156,7 +170,7 @@ def mirar(v):
 
 for nome in args.vistas.split(','):
     t0 = time.time()
-    scene.render.resolution_x = args.res; scene.render.resolution_y = int(args.res * (5.6 / 6.4 if nome == 'planta' else 2 / 3))
+    scene.render.resolution_x = args.res; scene.render.resolution_y = int(args.res * (PLANTA_H / PLANTA_W if nome == 'planta' else 2 / 3))
     scene.render.resolution_percentage = 100
     mirar(VISTAS[nome])
     scene.render.filepath = os.path.join(args.saida, nome + '.jpg')
