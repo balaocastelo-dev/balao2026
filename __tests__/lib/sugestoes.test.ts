@@ -81,6 +81,42 @@ describe("escolherSugestoes", () => {
   });
 });
 
+describe("PC que já vem com monitor e periféricos", () => {
+  it("não sugere o que já vem no kit", () => {
+    const pc = p(
+      "PC Computador Gamer Completo Intel i5 8GB SSD 120GB Monitor Teclado Mouse Headset Mouse Pad Wi-Fi",
+      "2.500,00",
+      "Computadores/PC/PC Gamer/PC Gamer Completo"
+    );
+    const catalogo = [
+      pc,
+      p("Monitor Gamer LG 22", "585,19", "Computadores/Monitores/Monitor Gamer"),
+      p("Teclado Gamer Redragon", "120,00", "Periféricos/Teclados"),
+      p("Mouse Gamer Redragon", "80,00", "Periféricos/Mouses"),
+      p("Headset Gamer Husky", "110,00", "Áudio/Headset"),
+      p("Mouse Pad Gamer Grande", "40,00", "Periféricos/Mousepads"),
+      p("Cadeira Gamer Husky Storm", "560,00", "Espaço Gamer/Cadeiras Gamer/Husky Gaming"),
+      p("Nobreak 600VA", "359,09", "Energia/Protetor Eletrônico/Nobreak"),
+    ];
+    const plano = planoDeSugestoes(pc.category);
+    const nomes = escolherSugestoes(pc, montarBase(catalogo, plano), plano).combina.map((x) => x.name);
+    expect(nomes).toEqual(["Cadeira Gamer Husky Storm", "Nobreak 600VA"]);
+  });
+
+  it("PC só com o gabinete continua recebendo monitor, teclado e mouse", () => {
+    const pc = p("PC Gamer Ryzen 5 5600 RTX 4060 16GB SSD 1TB", "4.800,00", "Computadores/PC/PC Gamer");
+    const catalogo = [
+      pc,
+      p("Monitor Gamer LG 24", "900,00", "Computadores/Monitores/Monitor Gamer"),
+      p("Mouse Gamer Redragon", "80,00", "Periféricos/Mouses"),
+    ];
+    const plano = planoDeSugestoes(pc.category);
+    const nomes = escolherSugestoes(pc, montarBase(catalogo, plano), plano).combina.map((x) => x.name);
+    expect(nomes).toContain("Monitor Gamer LG 24");
+    expect(nomes).toContain("Mouse Gamer Redragon");
+  });
+});
+
 describe("compativel", () => {
   const proc = (nome: string) => ({ name: nome, category: "Hardware/Processadores/Processador AMD" });
   const placa = (nome: string, cat = "Hardware/Placas-mãe/Placa-Mãe AMD") => ({ name: nome, category: cat });

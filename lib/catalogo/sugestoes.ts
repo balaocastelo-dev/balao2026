@@ -33,6 +33,11 @@ export type GrupoQueCombina = {
   exige?: RegExp;
   /** O nome não pode casar (ex.: fonte de CFTV cadastrada em Hardware/Fontes). */
   exclui?: RegExp;
+  /**
+   * Se o nome do PRODUTO casar, o grupo não entra: o "PC Gamer Completo com
+   * monitor, teclado, mouse e headset" não precisa de sugestão de monitor.
+   */
+  jaVem?: RegExp;
 };
 
 type Regra = { prefixo: string; combina: GrupoQueCombina[] };
@@ -47,6 +52,15 @@ const fonteDePc = (fracao: number): GrupoQueCombina => ({
   exclui: /cftv|12\s?v|gan\d|notebook/i,
 });
 
+/** O mesmo grupo, mas que não entra quando o produto já traz a peça. */
+const sem = (jaVem: RegExp, grupo: GrupoQueCombina): GrupoQueCombina => ({ ...grupo, jaVem });
+
+const VEM_MONITOR = /\bmonitor\b/i;
+const VEM_TECLADO = /\bteclado\b/i;
+const VEM_MOUSE = /\bmouse\b(?!\s?-?pad)/i;
+const VEM_HEADSET = /\bheadset\b|\bfone\b/i;
+const VEM_MOUSEPAD = /\bmouse\s?-?pad\b/i;
+
 const HEADSET = ["Áudio/Headset", "Periféricos/Headset"];
 const KIT_TECLADO_MOUSE = ["Periféricos/Kit Teclado e Mouse", "Periféricos/Kits Teclado e Mouse"];
 
@@ -58,25 +72,25 @@ export const REGRAS: Regra[] = [
   {
     prefixo: "Computadores/PC/PC Gamer",
     combina: [
-      g(0.3, "Computadores/Monitores/Monitor Gamer"),
-      g(0.04, ...KIT_TECLADO_MOUSE, "Periféricos/Teclados"),
-      g(0.03, "Periféricos/Mouses"),
-      g(0.05, ...HEADSET),
+      sem(VEM_MONITOR, g(0.3, "Computadores/Monitores/Monitor Gamer")),
+      sem(VEM_TECLADO, g(0.04, ...KIT_TECLADO_MOUSE, "Periféricos/Teclados")),
+      sem(VEM_MOUSE, g(0.03, "Periféricos/Mouses")),
+      sem(VEM_HEADSET, g(0.05, ...HEADSET)),
       g(0.15, "Espaço Gamer/Cadeiras Gamer"),
       g(0.15, "Energia/Protetor Eletrônico/Nobreak"),
-      g(0.01, "Periféricos/Mousepads"),
+      sem(VEM_MOUSEPAD, g(0.01, "Periféricos/Mousepads")),
     ],
   },
   {
     prefixo: "Computadores/PC",
     combina: [
-      g(0.3, "Computadores/Monitores/Monitor Office", "Computadores/Monitores"),
-      g(0.06, ...KIT_TECLADO_MOUSE),
-      g(0.05, ...HEADSET),
+      sem(VEM_MONITOR, g(0.3, "Computadores/Monitores/Monitor Office", "Computadores/Monitores")),
+      sem(VEM_TECLADO, g(0.06, ...KIT_TECLADO_MOUSE)),
+      sem(VEM_HEADSET, g(0.05, ...HEADSET)),
       g(0.06, "Energia/Estabilizadores de Energia"),
       g(0.25, "Energia/Protetor Eletrônico/Nobreak"),
       g(0.05, "Periféricos/Webcams", "Áudio/Caixa de Som para PC"),
-      g(0.03, "Conectividade/Dispositivo de Rede/Adaptador usb"),
+      sem(/wi-?fi|wireless/i, g(0.03, "Conectividade/Dispositivo de Rede/Adaptador usb")),
     ],
   },
   {
@@ -616,6 +630,7 @@ export function escolherSugestoes(
 
   // 2. Combina: um de cada grupo por vez, o de preço mais perto do alvo do grupo.
   const filas = plano.combina.map((grupo, i) => {
+    if (grupo.jaVem && grupo.jaVem.test(produto.name)) return [];
     const alvo = preco > 0 ? preco * grupo.fracao : 0;
     return [...(base.combina[i] || [])]
       // Da mesma categoria do produto é "parecido", não "combina" (mouse com mouse).

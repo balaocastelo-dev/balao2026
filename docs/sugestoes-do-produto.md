@@ -41,4 +41,5 @@ preço, aparece uma vez só.
 ## Para mudar
 - **O que combina com o quê:** edite `REGRAS`. A primeira regra cujo prefixo casa com a categoria vale, então
   as mais específicas ficam em cima. `g(fração, caminhos…)`.
+- **PC que já vem com a peça:** um "PC Gamer Completo com monitor, teclado, mouse e headset" não recebe sugestão de monitor, teclado, mouse nem headset (campo `jaVem` do grupo).
 - **Quantos itens aparecem:** `LIMITE_PARECIDOS` e `LIMITE_COMBINA`, hoje 12 cada.
