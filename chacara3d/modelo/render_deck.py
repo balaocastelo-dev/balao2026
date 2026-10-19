@@ -55,7 +55,7 @@ O = ns['obra']
 TIRAR = [(51.3, 60.5, -0.3, 10.3, LOW + 0.006, 9.0),     # garagem, pergolado e cinema (atrás de quem olha o lago)
          (30.0, 44.45, -0.3, 10.3, -3.0, 0.05),        # piscina
          (40.0, 45.85, -0.3, 10.3, -0.035, 9.0),        # churrasqueira, chuveirão e vasos acima do piso
-         (51.3, 60.5, -0.3, 10.3, LOW - 0.05, 9.0, ('wood_z', 'bark_cane', 'stone_cut', 'screen', 'wood_x')),   # pés cortados do pergolado
+         (51.3, 60.5, -0.3, 10.3, LOW - 0.05, 9.0, ('wood_z', 'bark_cane', 'stone_cut', 'screen', 'wood_x', 'cushion', 'cushion_teal', 'couro', 'wood_y')),   # pés cortados do pergolado e do cinema
         ]
 sem_copa = set(args.vistas.split(',')) <= {'planta', 'estrutura'}
 estrutura = 'estrutura' in args.vistas.split(',') and len(args.vistas.split(',')) == 1
