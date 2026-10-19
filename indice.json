@@ -13,7 +13,12 @@
         "segurança",
         "seminovos"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/o-que-fazer-antes-de-vender-ou-doar-computador-usado-9407a13b.jpg",
+        "alt": "Gabinete de computador de mesa sobre uma bancada de madeira, ao lado de um HD externo e de um cabo USB enrolado",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-10-19T21:00:00.000Z",
       "minutos": 4,
       "formato": "dica"
@@ -507,5 +512,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-19T01:09:26.102Z"
+  "atualizadoEm": "2026-10-19T01:11:43.783Z"
 }
