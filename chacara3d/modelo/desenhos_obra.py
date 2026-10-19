@@ -374,7 +374,7 @@ def folha3():
     ax.fill_between([0.0, 1.4], [-1.1, -1.1], [0, 0], color=TERRA, lw=0)
     muro_corte(ax, 0.0, False)
     ax.plot([0.14, 1.4], [0, 0], color='#5b4a33', lw=1.2)
-    cota(ax, (0.6, 0), (0.6, A), 0.0, g=-0.16, tick=0.035, txt=f'{br(A)} desnível')
+    cota(ax, (0.6, 0), (0.6, A), 0.0, g=0.16, tick=0.035, txt=f'{br(A)} desnível')
     cota(ax, (-0.40, -1.05), (0.35, -1.05), -0.12, g=-0.1, tick=0.03, fs=7.5, txt='sapata 75 x 20')
     cota(ax, (0.9, -0.75), (0.9, 0.0), 0.0, g=-0.16, tick=0.035, txt='0,75 abaixo')
     cota(ax, (-0.04 - 0.35, A), (-0.04 - 0.35, A + O.GUARDA_H), 0.0, g=0.13, tick=0.035)
