@@ -137,6 +137,13 @@ m_plain('tecido_grafite', (0.16, 0.16, 0.17), 0.95)                            #
 m_plain('vidro_jateado', (0.80, 0.84, 0.84), 0.45, **{'Alpha': 0.7})           # janelinha do banheiro de cima
 m_plain('tapete', (0.42, 0.40, 0.37), 0.98, noise=0.08, nscale=30)
 m_plain('couro', (0.36, 0.17, 0.07), 0.5)                                      # cadeiras e pufes
+# laguinho orgânico
+m_plain('pedra_cinza', (0.15, 0.15, 0.14), 0.88, noise=0.4, nscale=5, bump=0.6)
+m_plain('pedra_ferrugem', (0.25, 0.15, 0.085), 0.88, noise=0.4, nscale=6, bump=0.6)
+m_plain('pedra_bege', (0.30, 0.24, 0.155), 0.88, noise=0.4, nscale=5, bump=0.6)
+m_plain('veu_agua', (0.70, 0.84, 0.90), 0.03, **{'Alpha': 0.28})
+m_plain('ninfeia', (0.10, 0.28, 0.06), 0.35, noise=0.15, nscale=12)
+m_plain('flor_ninfeia', (0.95, 0.55, 0.70), 0.5)
 # casas container da vilinha (chapa pintada, quinas, caixilhos brancos)
 m_plain('chapa_azul', (0.024, 0.038, 0.082), 0.5)                                # azul-marinho da foto
 m_plain('chapa_amarela', (0.83, 0.46, 0.021), 0.5)
@@ -394,51 +401,233 @@ guarda((EDGE - 0.04, 9.3), (EDGE - 0.04, 9.95), 0.0)
 box('filete', EDGE, EDGE + 0.08, 0, 10, -1.47, 0.0)               # revestimento do muro de arrimo
 
 # ------------------------------------------------------------------ deck de madeira sobre o laguinho das carpas
-DX0, DX1, DY0, DY1 = EDGE, 48.0, 3.2, 6.2      # 2 m de fundo x 3 m de largura, 1 m acima do quintal de baixo
+# Medidas do Thiago: deck de 2 m de fundo x 3 m de largura, 1 m acima do quintal de baixo, saindo do piso da piscina.
+# Projeto para a obra (19/10/2026): tábuas de cumaru de 10 x 2,5 cm ao longo do muro, barrotes de 6 x 16 a cada
+# 49 cm apoiados numa viga de apoio presa no muro de arrimo e numa viga de 12 x 20 cm do lado de fora, em dois
+# pilares de 12 x 12 nos cantos do deck, com sapata de concreto; os pilares ficam na borda de pedras, fora da água.
+DX0, DX1, DY0, DY1 = EDGE, 48.0, 3.2, 6.2      # plataforma de 2,00 x 3,00, topo no nível do piso da piscina (0,00)
+DTAB, DBAR = 0.025, 0.16                        # tábua e barrote (altura)
+ZB0 = -DTAB                                     # topo dos barrotes
+ZV0, ZV1 = ZB0 - DBAR - 0.20, ZB0 - DBAR        # viga de 12 x 20 embaixo dos barrotes
+BARROTES = [DY0 + 0.03 + k * (DY1 - DY0 - 0.06) / 6 for k in range(7)]     # 7 barrotes, eixos a cada 0,49
+VX0, VX1 = 47.79, 47.91                          # viga externa (12 cm)
 nb = 19
-for i in range(nb):
+for i in range(nb):                              # 19 tábuas de 3,00 com junta de 5 mm
     x0 = DX0 + i * (DX1 - DX0) / nb
-    box('wood_y', x0 + 0.004, x0 + (DX1 - DX0) / nb - 0.004, DY0, DY1, -0.028, 0.004)
-for yy in (3.28, 3.98, 4.7, 5.42, 6.12):
-    box('wood_x', DX0, DX1, yy - 0.035, yy + 0.035, -0.19, -0.028)
-box('wood_y', DX1 - 0.2, DX1 - 0.06, DY0, DY1, -0.38, -0.19)
-for yy in (DY0, DY1 - 0.14):
-    box('wood_z', DX1 - 0.19, DX1 - 0.07, yy + 0.01, yy + 0.13, -1.5, -0.38)
-box('wood_y', DX1, DX1 + 0.03, DY0, DY1, -0.19, -0.002)
+    box('wood_y', x0 + 0.0025, x0 + (DX1 - DX0) / nb - 0.0025, DY0, DY1, ZB0, 0.0)
+for yy in BARROTES:
+    box('wood_x', DX0 + 0.08, DX1, yy - 0.03, yy + 0.03, ZB0 - DBAR, ZB0)
+box('wood_y', DX0 + 0.08, DX0 + 0.20, DY0, DY1, ZB0 - DBAR - 0.12, ZB0 - DBAR)          # viga de apoio no muro de arrimo
+box('wood_y', VX0, VX1, DY0, DY1, ZV0, ZV1)                                           # viga externa
+for py_ in (DY0 + 0.06, DY1 - 0.06):                                                   # pilares 12 x 12 nos cantos
+    box('wood_z', VX0, VX1, py_ - 0.06, py_ + 0.06, LOW + 0.05, ZV0)
+    box('concrete', VX0 - 0.09, VX1 + 0.09, py_ - 0.15, py_ + 0.15, LOW - 0.02, LOW + 0.05)
+box('wood_y', DX1, DX1 + 0.025, DY0, DY1, ZB0 - DBAR, 0.0)                            # testeira
 guarda((DX0, DY0 + 0.04), (DX1 - 0.04, DY0 + 0.04), 0.0)
 guarda((DX1 - 0.04, DY0 + 0.04), (DX1 - 0.04, DY1 - 0.04), 0.0)
 guarda((DX1 - 0.04, DY1 - 0.04), (DX0, DY1 - 0.04), 0.0)
-# laguinho: metade sob o deck, metade aberta; borda de tijolo elevada, na altura de um banco
-QX0, QX1, QY0, QY1 = EDGE + 0.08, 49.4, 2.95, 6.45
-ZR = LOW + 0.45
-box('brick', QX1 - 0.2, QX1, QY0, QY1, -1.47, ZR)
-box('brick', QX0, QX1 - 0.2, QY0, QY0 + 0.2, -1.47, ZR)
-box('brick', QX0, QX1 - 0.2, QY1 - 0.2, QY1, -1.47, ZR)
-box('stone_cut', QX1 - 0.25, QX1 + 0.04, QY0 - 0.04, QY1 + 0.04, ZR, ZR + 0.035)
-box('stone_cut', QX0, QX1 - 0.25, QY0 - 0.04, QY0 + 0.25, ZR, ZR + 0.035)
-box('stone_cut', QX0, QX1 - 0.25, QY1 - 0.25, QY1 + 0.04, ZR, ZR + 0.035)
-quad('pond_floor', (QX0, QY0, -1.46), (QX1, QY0, -1.46), (QX1, QY1, -1.46), (QX0, QY1, -1.46))
-quad('water_pond', (QX0, QY0 + 0.2, ZR - 0.09), (QX1 - 0.2, QY0 + 0.2, ZR - 0.09), (QX1 - 0.2, QY1 - 0.2, ZR - 0.09), (QX0, QY1 - 0.2, ZR - 0.09))
-koi = [(48.7, 4.2, 0.3, 'koi_o'), (48.4, 5.3, 2.2, 'koi_w'), (48.85, 5.6, 1.2, 'koi_o'), (47.9, 4.6, 4.0, 'koi_k'),
-       (48.55, 3.75, 5.1, 'koi_w'), (47.5, 5.5, 0.9, 'koi_o'), (48.9, 4.85, 2.9, 'koi_o'), (47.2, 3.9, 3.5, 'koi_w')]
+# laguinho orgânico (pedido do Thiago em 19/10/2026, com foto de referência): contorno curvo, borda de pedras
+# arredondadas meio enterradas, cascata de lajes de pedra descendo do muro de arrimo, plantas na beira e na água.
+# Fundo em degraus: talude, prateleira de plantas a 30 cm e o meio com 1,00 m de água para as carpas; perto do
+# muro de arrimo fica raso (não cavar fundo junto ao pé do muro). Os pilares do deck ficam fora da água.
+ZAGUA = LOW - 0.06                                      # nível d'água (6 cm abaixo do chão do quintal de baixo)
+PROF = 1.00                                             # lâmina d'água no meio
+LAGO_CTRL = [(46.38, 3.75), (46.30, 4.80), (46.32, 5.90), (46.30, 6.70), (46.62, 7.26), (47.22, 7.28), (47.56, 6.82),
+             (47.58, 6.10), (47.92, 5.74), (48.45, 6.06), (49.10, 6.52), (49.78, 6.22), (50.08, 5.20), (49.88, 4.08),
+             (49.32, 3.22), (48.62, 2.92), (48.12, 3.56), (47.60, 3.62), (47.02, 3.36)]
+
+
+def catmull(pts, n_por=10):
+    P_ = np.array(pts, float); m = len(P_); out = []
+    for i in range(m):
+        p0, p1, p2, p3 = P_[(i - 1) % m], P_[i], P_[(i + 1) % m], P_[(i + 2) % m]
+        for t in np.linspace(0, 1, n_por, endpoint=False):
+            t2, t3 = t * t, t * t * t
+            out.append(0.5 * ((2 * p1) + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 + (-p0 + 3 * p1 - 3 * p2 + p3) * t3))
+    return np.array(out)
+
+
+LAGO = catmull(LAGO_CTRL)                                # contorno da água (fechado, ~190 pontos)
+
+
+def dentro_lago(X, Y, poli=None):
+    poli = LAGO if poli is None else poli
+    x0, y0 = poli[:, 0], poli[:, 1]; x1, y1 = np.roll(x0, -1), np.roll(y0, -1)
+    X = np.asarray(X, float)[..., None]; Y = np.asarray(Y, float)[..., None]
+    cruza = ((y0 > Y) != (y1 > Y)) & (X < (x1 - x0) * (Y - y0) / (y1 - y0 + 1e-12) + x0)
+    return cruza.sum(axis=-1) % 2 == 1
+
+
+def dist_borda(X, Y):
+    a = LAGO; b = np.roll(LAGO, -1, axis=0)
+    X = np.asarray(X, float)[..., None]; Y = np.asarray(Y, float)[..., None]
+    ab = b - a; L2 = (ab ** 2).sum(axis=1)
+    t = np.clip(((X - a[:, 0]) * ab[:, 0] + (Y - a[:, 1]) * ab[:, 1]) / L2, 0, 1)
+    px, py = a[:, 0] + t * ab[:, 0], a[:, 1] + t * ab[:, 1]
+    return np.sqrt((X - px) ** 2 + (Y - py) ** 2).min(axis=-1)
+
+
+def prof_lago(X, Y):
+    d = dist_borda(X, Y)
+    # beira de 15 cm para as pedras (10 a 30 cm), prateleira de plantas a 30 cm até 40 cm da beira, parede inclinada
+    # até 62 cm da beira e o fundo a 1,00 m
+    p = np.where(d < 0.15, 0.10 + d / 0.15 * 0.20, np.where(d < 0.40, 0.30, np.where(d < 0.62, 0.30 + (d - 0.40) / 0.22 * (PROF - 0.30), PROF)))
+    dm = np.asarray(X, float) - (EDGE + 0.08)              # perto do muro de arrimo: no máximo 35 cm de fundo
+    lim = np.where(dm < 0.75, 0.35, np.where(dm < 1.15, 0.35 + (dm - 0.75) / 0.40 * (PROF - 0.35), PROF))
+    return np.minimum(p, lim)
+
+
+def pedra(mat, c, r, rng, R=None, seg=10, rings=6):
+    """Pedra arredondada irregular (elipsoide com o raio deformado), facetada."""
+    rx, ry, rz = r
+    fase = rng.uniform(0, 2 * math.pi, 6)
+    vs = []
+    for j in range(rings + 1):
+        th = math.pi * j / rings
+        for i in range(seg):
+            ph = 2 * math.pi * i / seg
+            k = (1 + 0.16 * math.sin(2 * ph + fase[0]) * math.sin(th) + 0.11 * math.sin(3 * ph + fase[1]) + 0.08 * math.cos(2 * th + fase[2])
+                 + 0.06 * math.sin(5 * ph + fase[3]) * math.sin(2 * th + fase[4]))
+            v = np.array([rx * k * math.sin(th) * math.cos(ph), ry * k * math.sin(th) * math.sin(ph), rz * k * math.cos(th)])
+            if v[2] > 0.7 * rz:
+                v[2] = 0.7 * rz + (v[2] - 0.7 * rz) * 0.4    # topo mais chato
+            vs.append(v)
+    V = np.array(vs)
+    if R is not None:
+        V = V @ np.asarray(R).T
+    V = V + np.asarray(c, float)
+    F = []
+    for j in range(rings):
+        for i in range(seg):
+            a, b = j * seg + i, j * seg + (i + 1) % seg
+            F.append([a, b, b + seg, a + seg])
+    G[mat].add(V, F)
+
+
+rp = np.random.default_rng(31)
+# fundo (manta escura) e espelho d'água numa grade de 8 cm; a borda serrilhada fica embaixo das pedras
+gx = np.linspace(EDGE + 0.08, 50.30, 54); gy = np.linspace(2.70, 7.50, 61)
+GX, GY = np.meshgrid(gx, gy, indexing='ij')
+dentro = dentro_lago(GX, GY)
+borda = dist_borda(GX, GY)
+perto = dentro | (borda < 0.12)
+ZF = np.where(dentro, ZAGUA - prof_lago(GX, GY), ZAGUA + 0.02)
+vf, ff, vw, fw, vg, fg, vp, fp = [], [], [], [], [], [], [], []
+for i in range(len(gx) - 1):
+    for j in range(len(gy) - 1):
+        cel = [(i, j), (i + 1, j), (i + 1, j + 1), (i, j + 1)]
+        if all(perto[a, b] for a, b in cel):
+            k = len(vf); vf += [[gx[a], gy[b], ZF[a, b]] for a, b in cel]; ff.append([k, k + 1, k + 2, k + 3])
+        if all(dentro[a, b] or borda[a, b] < 0.06 for a, b in cel):
+            k = len(vw); vw += [[gx[a], gy[b], ZAGUA] for a, b in cel]; fw.append([k, k + 1, k + 2, k + 3])
+        if not all(dentro[a, b] for a, b in cel):
+            k = len(vp); vp += [[gx[a], gy[b], LOW - 0.004] for a, b in cel]; fp.append([k, k + 1, k + 2, k + 3])
+G['pond_floor'].add(vf, ff)
+G['water_pond'].add(vw, fw)
+G['pedrisco'].add(vp, fp)                               # chão da área do laguinho (com o buraco do lago)
+# faixa de grama de contorno livre em volta do laguinho (por cima do pedrisco): o contorno de fora sai de um raio
+# medido do centro do lago (largura de 0,65 a 1,45 m, que varia em volta) e a grama é a área entre ele e a água
+from mathutils import geometry as _mgeo, Vector as _V
+C_LAGO = LAGO.mean(axis=0)
+ang = np.linspace(0, 2 * math.pi, 144, endpoint=False)
+larg = 1.00 + 0.35 * np.sin(3 * ang + 0.7) + 0.12 * np.sin(7 * ang)
+rr = np.arange(0.2, 4.2, 0.02)
+PX = C_LAGO[0] + np.cos(ang)[:, None] * rr[None, :]; PY = C_LAGO[1] + np.sin(ang)[:, None] * rr[None, :]
+cobre = dentro_lago(PX, PY) | (dist_borda(PX, PY) < larg[:, None])
+# limite: o pé do muro de arrimo, os muros laterais e a parede do poço (centro 51,9 x 6,3, raio 0,97), com folga
+livre = (PX > EDGE + 0.09) & (PY > 0.25) & (PY < 9.75) & (np.hypot(PX - 51.9, PY - 6.3) > 1.04)
+r_max = np.array([rr[np.argmin(l)] if not l.all() else rr[-1] for l in livre])
+r_out = np.minimum(np.array([rr[np.nonzero(l)[0].max()] for l in cobre]), r_max)
+r_out = np.minimum(np.convolve(np.concatenate([r_out[-3:], r_out, r_out[:3]]), np.ones(7) / 7, mode='valid'), r_max)
+GRAMA = np.stack([C_LAGO[0] + np.cos(ang) * r_out, C_LAGO[1] + np.sin(ang) * r_out], axis=1)
+ZG = LOW + 0.003                                        # um pouco acima do pedrisco (sem brigar com ele no render)
+laco_f = [_V((x_, y_, ZG)) for x_, y_ in GRAMA]; laco_d = [_V((x_, y_, ZG)) for x_, y_ in LAGO]
+G['grass'].add([tuple(v) for v in laco_f + laco_d], [list(t) for t in _mgeo.tessellate_polygon([laco_f, laco_d])])
+# borda de pedras arredondadas, meio enterradas, uma encostada na outra
+PEDRAS = ('pedra_bege', 'pedra_cinza', 'pedra_bege', 'pedra_ferrugem', 'pedra_cinza')
+seg_len = np.sqrt(((np.roll(LAGO, -1, axis=0) - LAGO) ** 2).sum(axis=1)); s_acum = np.concatenate([[0], np.cumsum(seg_len)])
+per = s_acum[-1]
+s = 0.0
+while s < per - 0.15:
+    k = np.searchsorted(s_acum, s) - 1; k = max(0, min(k, len(LAGO) - 1))
+    p = LAGO[k]; q = LAGO[(k + 1) % len(LAGO)]
+    tng = (q - p) / (np.linalg.norm(q - p) + 1e-9); nrm = np.array([tng[1], -tng[0]])
+    if dentro_lago(*(p + nrm * 0.3)):
+        nrm = -nrm                                      # normal para fora
+    r = rp.uniform(0.13, 0.36) if rp.random() < 0.8 else rp.uniform(0.30, 0.42)
+    c = p + nrm * rp.uniform(0.0, 0.12)
+    if c[0] < EDGE + 0.30:                              # junto ao muro de arrimo as pedras são menores
+        r *= 0.75
+    laje = rp.random() < 0.22                           # de vez em quando uma laje chata, de pisar
+    pedra(PEDRAS[int(rp.integers(len(PEDRAS)))], (c[0], c[1], LOW - (0.03 if laje else 0.04)),
+          (r * rp.uniform(1.1, 1.5), r * rp.uniform(0.8, 1.0), r * (rp.uniform(0.22, 0.32) if laje else rp.uniform(0.45, 0.75))), rp,
+          R=rotz(rp.uniform(0, math.pi)), seg=int(rp.integers(7, 11)))
+    if rp.random() < 0.35:                              # algumas pedras de trás, maiores, fazendo o segundo nível
+        c2 = p + nrm * rp.uniform(0.28, 0.42); r2 = rp.uniform(0.20, 0.34)
+        if c2[0] > EDGE + 0.25:
+            pedra(PEDRAS[int(rp.integers(len(PEDRAS)))], (c2[0], c2[1], LOW + 0.02), (r2 * 1.2, r2, r2 * 0.7), rp, R=rotz(rp.uniform(0, math.pi)))
+    s += r * rp.uniform(1.25, 1.6)
+# pedras em volta da base dos pilares do deck
+for py_ in (DY0 + 0.06, DY1 - 0.06):
+    for a in (0.4, 2.1, 3.8, 5.3):
+        pedra('pedra_cinza', (VX0 + 0.06 + 0.24 * math.cos(a), py_ + 0.24 * math.sin(a), LOW - 0.02), (0.17, 0.14, 0.11), rp, R=rotz(a))
+# cascata de lajes de pedra descendo do muro de arrimo (a água sai de um cano escondido entre as pedras)
+CY0, CY1 = 6.42, 7.18
+LAJES = [(0.36, -0.06), (0.56, -0.42), (0.78, -0.78)]           # (avanço a partir do muro, topo da laje)
+for k, (av, zt) in enumerate(LAJES):
+    obox('pedra_cinza', (EDGE + 0.08 + av / 2, (CY0 + CY1) / 2 + rp.uniform(-0.03, 0.03), zt - 0.04), (av, CY1 - CY0 + 0.08 - 0.06 * k, 0.08),
+         rotz(rp.uniform(-0.05, 0.05)))
+    zb = LAJES[k + 1][1] if k + 1 < len(LAJES) else ZAGUA
+    lip = EDGE + 0.08 + av + 0.01                                # véu de água caindo da beira de cada laje, em filetes
+    ts = np.linspace(0, 1, 8); y_ = CY0 + 0.12 + 0.03 * k
+    while y_ < CY1 - 0.14 - 0.03 * k:
+        w_ = rp.uniform(0.06, 0.16); ya, yb = y_, min(y_ + w_, CY1 - 0.12 - 0.03 * k)
+        sx = rp.uniform(0.09, 0.14)
+        vv = [(lip + sx * t, yy, zt - (zt - zb) * t * t) for t in ts for yy in (ya, yb)]
+        G['veu_agua'].add(vv, [[2 * i, 2 * i + 1, 2 * i + 3, 2 * i + 2] for i in range(len(ts) - 1)])
+        y_ = yb + rp.uniform(0.01, 0.04)
+for k in range(9):                                              # pedras empilhadas de cada lado e embaixo das lajes
+    lado = CY0 - 0.12 if k % 2 == 0 else CY1 + 0.12
+    zc = LOW + 0.10 + (k // 2) * 0.26
+    pedra(PEDRAS[k % 5], (EDGE + 0.30 - 0.03 * (k // 2), lado, zc), (0.26, 0.20, 0.17), rp, R=rotz(rp.uniform(0, math.pi)))
+for k, (av, zt) in enumerate(LAJES[:-1]):
+    pedra('pedra_bege', (EDGE + 0.20, (CY0 + CY1) / 2, zt - 0.22), (0.16, 0.30, 0.15), rp)
+P.mound('leaf_fern', (EDGE + 0.30, CY0 - 0.25, -0.05), rng, n=22, L=0.55, W=0.12, e=(0.1, 1.2), droop=0.9, r0=0.06)
+P.mound('leaf_fern', (EDGE + 0.28, CY1 + 0.28, -0.32), rng, n=18, L=0.5, W=0.11, e=(0.1, 1.2), droop=0.9, r0=0.06)
+koi = [(48.9, 4.3, 0.3, 'koi_o'), (48.6, 5.2, 2.2, 'koi_w'), (49.3, 5.5, 1.2, 'koi_o'), (48.2, 4.7, 4.0, 'koi_k'),
+       (49.0, 3.7, 5.1, 'koi_w'), (47.4, 5.1, 0.9, 'koi_o'), (49.5, 4.75, 2.9, 'koi_o'), (47.6, 4.2, 3.5, 'koi_w'), (48.6, 6.1, 1.9, 'koi_o')]
 for kx, ky, ka, km in koi:
     R = rotz(ka)
-    ellipsoid(km, (kx, ky, ZR - 0.17), (0.25, 0.07, 0.055), seg=10, rings=6, R=R)
-    tail = np.array([kx, ky, ZR - 0.17]) - R @ np.array([0.3, 0, 0])
+    zk = ZAGUA - 0.14
+    ellipsoid(km, (kx, ky, zk), (0.25, 0.07, 0.055), seg=10, rings=6, R=R)
+    tail = np.array([kx, ky, zk]) - R @ np.array([0.3, 0, 0])
     ellipsoid(km, tail, (0.09, 0.015, 0.06), seg=6, rings=4, R=R)
-    ellipsoid('koi_w' if km != 'koi_w' else 'koi_o', np.array([kx, ky, ZR - 0.135]) + R @ np.array([0.06, 0, 0]), (0.09, 0.05, 0.03), seg=7, rings=4, R=R)
-# chão do quintal de baixo em volta do laguinho
-for a in ((QX1, 60, 0, 10), (EDGE, QX1, 0, QY0), (EDGE, QX1, QY1, 10)):
+    ellipsoid('koi_w' if km != 'koi_w' else 'koi_o', np.array([kx, ky, zk + 0.035]) + R @ np.array([0.06, 0, 0]), (0.09, 0.05, 0.03), seg=7, rings=4, R=R)
+# ninfeias boiando (folhas redondas com um corte) e uma flor
+for nx, ny, nr in ((49.35, 4.35, 0.22), (49.55, 4.9, 0.17), (49.15, 4.75, 0.14), (48.75, 3.55, 0.2), (48.4, 3.85, 0.13), (49.45, 5.7, 0.18)):
+    a0 = rp.uniform(0, 2 * math.pi)
+    pts = [(nx, ny, ZAGUA + 0.006)] + [(nx + nr * math.cos(a0 + t), ny + nr * math.sin(a0 + t), ZAGUA + 0.006) for t in np.linspace(0.25, 2 * math.pi - 0.25, 16)]
+    G['ninfeia'].add(pts, [[0, i, i + 1] for i in range(1, 16)])
+for fx_, fy_ in ((49.3, 4.55), (48.85, 3.75)):
+    for a in np.linspace(0, 2 * math.pi, 8, endpoint=False):
+        ellipsoid('flor_ninfeia', (fx_ + 0.05 * math.cos(a), fy_ + 0.05 * math.sin(a), ZAGUA + 0.04), (0.055, 0.025, 0.02), seg=6, rings=3, R=rotz(a))
+    ellipsoid('flower_orange', (fx_, fy_, ZAGUA + 0.05), 0.025, seg=6, rings=3)
+# chão do quintal de baixo fora da área do laguinho
+for a in ((50.30, 60, 0, 10), (EDGE, 50.30, 0, 2.70), (EDGE, 50.30, 7.50, 10)):
     box('pedrisco', a[0], a[1], a[2], a[3], LOW - 0.04, LOW)
 # escada
 for i in range(5):
     box('stone_cut', EDGE + 0.08 + 0.3 * i, EDGE + 0.08 + 0.3 * (i + 1), 7.7, 9.3, LOW, -(i + 1) / 6.0 + 0.0)
 box('stone_cut', EDGE - 0.3, EDGE + 0.08, 7.7, 9.3, -0.02, 0.02)
-# plantas na beira do laguinho
-P.papiro((49.0, 3.35, ZR - 0.1), rng); P.papiro((48.95, 6.05, ZR - 0.1), rng, n=10)
-P.inhame((48.7, 3.42, ZR - 0.1), rng, n=7); P.inhame((48.62, 6.08, ZR - 0.1), rng, n=7)
-P.pacova((48.7, 2.55, LOW), rng, 1.1); P.pacova((48.8, 6.85, LOW), rng, 1.1); P.moreia((49.6, 2.75, LOW), rng); P.moreia((49.65, 6.6, LOW), rng)
-P.asplenio((46.5, 2.5, LOW), rng, 1.1); P.xanadu((47.3, 6.95, LOW), rng, 1.1); P.xanadu((46.6, 7.15, LOW), rng, 0.9)
+# plantas na beira do laguinho (como na foto: samambaias, folhagens, moreia, papiro e taioba roxa na água)
+P.papiro((49.78, 5.45, ZAGUA - 0.25), rng, n=16, H=1.0); P.papiro((48.28, 6.18, ZAGUA - 0.25), rng, n=10)
+P.inhame((49.55, 3.55, LOW), rng, n=7); P.inhame((47.75, 6.95, LOW), rng, n=6)
+P.mound('leaf_fern', (50.45, 4.4, LOW), rng, n=26, L=0.6, W=0.13, e=(0.1, 1.2), droop=0.9, r0=0.07)
+P.mound('leaf_fern', (48.2, 2.45, LOW), rng, n=22, L=0.55, W=0.12, e=(0.1, 1.2), droop=0.9, r0=0.06)
+P.pacova((50.4, 6.4, LOW), rng, 1.0); P.pacova((47.4, 7.55, LOW), rng, 0.9)
+P.moreia((50.35, 3.3, LOW), rng); P.moreia((49.75, 6.95, LOW), rng); P.moreia((46.75, 2.95, LOW), rng, 0.8)
+P.asplenio((49.0, 2.55, LOW), rng, 1.0); P.xanadu((48.9, 7.15, LOW), rng, 1.0); P.xanadu((46.6, 7.6, LOW), rng, 0.9)
+P.alpinia((50.55, 5.4, LOW), rng, n=6, H=1.3)
 
 # ------------------------------------------------------------------ poço antigo com cara de poço de fazenda
 WC = (51.9, 6.3)
