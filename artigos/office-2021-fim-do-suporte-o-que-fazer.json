@@ -1,0 +1,133 @@
+{
+  "slug": "office-2021-fim-do-suporte-o-que-fazer",
+  "titulo": "Office 2021 perdeu o suporte em 13 de outubro: o que fazer agora",
+  "resumo": "O Office 2021 deixou de receber correções de segurança em 13 de outubro de 2026. Veja quem é afetado, o que continua funcionando e quais são as saídas.",
+  "categoria": "noticias",
+  "etiquetas": [
+    "office",
+    "segurança",
+    "atualização",
+    "fim de suporte"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-20T15:00:00.000Z",
+  "seo": {
+    "titulo": "Office 2021 sem suporte: o que fazer agora"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Em 13 de outubro de 2026, a Microsoft encerrou o suporte do Office 2021, o pacote com Word, Excel, PowerPoint e Outlook vendido em licença única. Desde essa data, o programa não recebe mais correções de segurança nem atualizações, e a Microsoft avisa que não haverá prorrogação nem atualização de segurança estendida."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que o Office vai parar de abrir. Não vai: segundo a própria Microsoft, os aplicativos podem continuar funcionando. O que muda é o risco. Uma falha descoberta daqui para a frente não será corrigida, e quem abre arquivos recebidos por e-mail fica mais exposto a cada mês."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que a Microsoft anunciou"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A página de ciclo de vida da Microsoft lista o fim do Office 2021 nas edições Home and Student e Home and Business, para Windows e para Mac, e na edição Professional. A mesma data vale para os programas avulsos da versão 2021, como Word 2021, Excel 2021 e Outlook 2021, e para as versões LTSC 2021, usadas em empresas."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Na página de aviso aos usuários, a Microsoft detalha o que deixa de existir: correções para falhas de segurança descobertas a partir de agora, atualizações do programa e atendimento técnico por telefone ou chat. A empresa diz ainda que a maior parte do conteúdo de ajuda on-line sobre o Office 2021 será retirada do ar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O Office 2016 e o Office 2019 já tinham perdido o suporte em 14 de outubro de 2025. Ou seja: quem ainda usa qualquer uma dessas três versões está, desde 13 de outubro, sem atualização de segurança no pacote de escritório."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que isso muda para você"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem usa o Office 2021 em casa:** dá para continuar usando, mas com cuidado redobrado com anexos de quem você não conhece. A Microsoft recomenda migrar para uma versão mais nova. As saídas oficiais são a assinatura do Microsoft 365 ou a compra de uma licença de uma versão mais recente, como o Office 2024. Também existem suítes de escritório gratuitas de outros desenvolvedores."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para o escritório e a pequena empresa:** é o caso mais urgente, porque ali se abrem planilhas, notas e contratos que chegam de fora o dia inteiro. Vale levantar quais computadores ainda rodam o Office 2021, 2019 ou 2016 e planejar a troca. Às vezes a mesma máquina também está atrasada no Windows, e a [assistência técnica](/manutencao) consegue revisar as duas coisas de uma vez."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem vai comprar um computador:** pergunte qual Office vem instalado e se a licença é sua. Um computador usado com Office 2021 ou mais antigo já chega sem suporte no pacote de escritório. Nos [seminovos](/seminovos), você pode ver a máquina ligada e conferir o que está instalado antes de pagar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem já está com o Windows em dia:** o fim do Office não tem relação com o Windows. Um Windows 11 atualizado continua recebendo correções; só o pacote de escritório ficou para trás. O contrário também acontece, como mostra a notícia sobre o [fim do suporte do Windows 11 24H2](/blog/windows-11-24h2-fim-do-suporte-13-de-outubro)."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como saber qual Office você tem"
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "Abra o Word ou o Excel.",
+        "Clique em Arquivo e depois em Conta.",
+        "Veja o nome do produto em Informações do Produto: se aparecer Office 2021, 2019 ou 2016, a versão está sem suporte.",
+        "Se aparecer Microsoft 365, o pacote é por assinatura e continua recebendo atualizações enquanto ela estiver ativa."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que ainda não se sabe"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "As páginas da Microsoft não dizem até quando o Outlook 2021 vai continuar se conectando sem problema aos serviços de e-mail da própria empresa, nem em que data o conteúdo de ajuda sai do ar. Se o Office faz parte do seu trabalho, não espere esse tipo de problema aparecer para decidir."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, tem assistência técnica para revisão, atualização e upgrade, e vende computadores e [notebooks](/notebooks) novos e seminovos. Em uma linha: o Office 2021 continua abrindo, mas está sem correção de segurança desde 13 de outubro, e vale planejar a troca agora."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "empresas"
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "End of support for Office 2021 — Microsoft Support",
+      "url": "https://support.microsoft.com/en-us/office/system-requirements/end-of-support-for-office-2021",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Office 2021 — Microsoft Lifecycle",
+      "url": "https://learn.microsoft.com/lifecycle/products/office-2021",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Ending Support in 2026 — Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-us/lifecycle/end-of-support/end-of-support-2026",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "End of support resources for Office — Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-us/microsoft-365-apps/end-of-support/resources",
+      "data": "outubro de 2025"
+    },
+    {
+      "nome": "Microsoft's 2026 end of support wave includes Windows 11 24H2, Office 2021 and more — Windows Latest",
+      "url": "https://www.windowslatest.com/2026/01/01/microsofts-2026-end-of-support-wave-includes-windows-11-24h2-office-2021-and-more/",
+      "data": "1º de janeiro de 2026"
+    },
+    {
+      "nome": "Microsoft to End Support for Windows 11 24H2, Office 2021, and More in 2026 — TechRepublic",
+      "url": "https://www.techrepublic.com/article/news-microsoft-end-of-support-2026/",
+      "data": "8 de janeiro de 2026"
+    }
+  ]
+}

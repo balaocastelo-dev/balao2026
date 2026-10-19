@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "office-2021-fim-do-suporte-o-que-fazer",
+      "titulo": "Office 2021 perdeu o suporte em 13 de outubro: o que fazer agora",
+      "resumo": "O Office 2021 deixou de receber correções de segurança em 13 de outubro de 2026. Veja quem é afetado, o que continua funcionando e quais são as saídas.",
+      "categoria": "noticias",
+      "etiquetas": [
+        "office",
+        "segurança",
+        "atualização",
+        "fim de suporte"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-20T15:00:00.000Z",
+      "minutos": 3
+    },
+    {
       "slug": "tela-azul-no-windows-causas-e-o-que-anotar",
       "titulo": "Tela azul no Windows: as causas mais comuns e o que anotar",
       "resumo": "Tela azul no Windows quase sempre vem de driver, peça nova ou memória. Veja o que anotar, o que fazer em casa e quando levar a um técnico.",
@@ -528,5 +543,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-19T22:10:53.401Z"
+  "atualizadoEm": "2026-10-19T22:42:26.406Z"
 }
