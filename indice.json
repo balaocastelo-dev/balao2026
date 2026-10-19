@@ -2,6 +2,22 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "tela-azul-no-windows-causas-e-o-que-anotar",
+      "titulo": "Tela azul no Windows: as causas mais comuns e o que anotar",
+      "resumo": "Tela azul no Windows quase sempre vem de driver, peça nova ou memória. Veja o que anotar, o que fazer em casa e quando levar a um técnico.",
+      "categoria": "assistencia",
+      "etiquetas": [
+        "windows",
+        "diagnóstico",
+        "manutenção",
+        "memória ram",
+        "drivers"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-20T09:00:00.000Z",
+      "minutos": 10
+    },
+    {
       "slug": "o-que-fazer-antes-de-vender-ou-doar-computador-usado",
       "titulo": "O que fazer antes de vender ou doar um computador usado",
       "resumo": "Antes de vender ou doar o computador: backup, sair das contas e restaurar com limpeza da unidade. Veja os passos no Windows e no Mac, na ordem certa.",
@@ -512,5 +528,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-19T01:11:43.783Z"
+  "atualizadoEm": "2026-10-19T22:10:53.401Z"
 }

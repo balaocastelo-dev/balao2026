@@ -1,0 +1,262 @@
+{
+  "slug": "tela-azul-no-windows-causas-e-o-que-anotar",
+  "titulo": "Tela azul no Windows: as causas mais comuns e o que anotar",
+  "resumo": "Tela azul no Windows quase sempre vem de driver, peça nova ou memória. Veja o que anotar, o que fazer em casa e quando levar a um técnico.",
+  "categoria": "assistencia",
+  "etiquetas": [
+    "windows",
+    "diagnóstico",
+    "manutenção",
+    "memória ram",
+    "drivers"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-20T09:00:00.000Z",
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "O computador estava funcionando, de repente a tela azul no Windows aparece com a mensagem de que o dispositivo encontrou um problema e precisa reiniciar, e o equipamento volta sozinho. Às vezes acontece uma vez e nunca mais. Outras vezes se repete toda semana, ou todo dia, e aí a pergunta é inevitável: o que está causando isso e o que dá para fazer antes de levar a uma assistência?"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que a tela azul é sempre defeito grave de peça ou vírus. Na maioria das vezes não é. A própria Microsoft aponta que a maior parte desses erros vem de um driver, o programa que faz o Windows conversar com uma peça. O segredo é anotar o que a tela mostra e observar quando ela aparece: com isso, a causa costuma ficar bem mais fácil de achar."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "Uma tela azul isolada, que não volta, normalmente **não pede conserto**: reiniciar costuma resolver.",
+        "Quando ela se repete, **anote o código de parada** (stop code) e o nome do arquivo que aparecer: é a pista principal.",
+        "As causas mais comuns são **driver com problema**, peça nova ou com defeito, memória RAM e falta de espaço no disco.",
+        "Pare e procure um técnico se o erro voltar mesmo depois dos passos básicos, ou se o computador não chegar mais ao Windows."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Tela azul ou tela preta: o que mudou no Windows 11"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O nome popular continua sendo tela azul, mas a cor depende da versão do sistema. Segundo a página de suporte da Microsoft sobre reinicializações inesperadas, o Windows 11 na versão 24H2 e nas seguintes mostra uma **tela preta** com a mensagem de erro inesperado, enquanto a versão 23H2 e as anteriores, assim como o Windows 10, seguem com a tela de código de parada tradicional."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A mudança veio em uma atualização de julho de 2025 para o Windows 11 24H2. A nova tela perdeu o rosto triste e o código QR, mas, segundo a cobertura da Campus Technology, continua mostrando o código de parada e o nome do driver envolvido. Ou seja: a informação que interessa ao diagnóstico continua lá, só que com outra aparência."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Junto com a nova tela, a Microsoft passou a oferecer a recuperação rápida do computador, que tenta corrigir sozinha problemas graves de inicialização por meio do ambiente de recuperação do Windows e de correções entregues pelo Windows Update. Mas ela não substitui o diagnóstico: se o erro continua aparecendo no uso normal, a causa ainda está lá."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que anotar quando a tela aparecer"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A tela fica pouco tempo à vista, porque o Windows reinicia sozinho. Por isso, se ela aparecer de novo, tire uma foto com o celular. A Microsoft explica que o código de parada aparece na parte de baixo da tela, em letras maiúsculas separadas por sublinhado, e que, quando possível, o sistema mostra também o nome do módulo, normalmente um arquivo terminado em .sys."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "**O código de parada**, como MEMORY_MANAGEMENT ou PAGE_FAULT_IN_NONPAGED_AREA.",
+        "**O nome do arquivo** que aparecer junto, se houver. Ele costuma indicar o driver envolvido.",
+        "**O que você estava fazendo**: jogando, ligando o computador, conectando um aparelho, saindo da suspensão.",
+        "**O que mudou nos últimos dias**: peça nova, programa instalado, atualização do Windows, driver de placa de vídeo.",
+        "**Com que frequência acontece** e se o código é sempre o mesmo ou muda a cada vez."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se a foto não deu tempo, ainda existe um registro. A documentação da Microsoft informa que os detalhes de cada parada ficam no log de Sistema do Visualizador de Eventos. Procure pelo programa no menu Iniciar, abra Logs do Windows, depois Sistema, e veja os erros críticos no horário em que o computador reiniciou. Mas não precisa entender tudo o que está escrito ali: basta anotar ou fotografar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Código que muda a cada tela azul é uma pista importante por si só. Quando o erro é sempre o mesmo, a causa tende a ser um driver ou programa específico. Quando o código varia sem padrão, a suspeita costuma recair sobre o hardware, como a memória, o disco ou a alimentação, e esse caso merece um diagnóstico mais cuidadoso."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "As causas mais comuns e o que cada código costuma indicar"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Microsoft resume as origens possíveis em três grupos: uma peça, o driver dessa peça ou algum programa. Na página técnica sobre os dados da tela azul, a empresa afirma que cerca de três quartos dos erros de parada são causados por drivers com falha. É por isso que atualização de driver e peça recém-instalada aparecem no topo de qualquer roteiro."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Código",
+        "O que costuma indicar",
+        "Por onde começar"
+      ],
+      "linhas": [
+        [
+          "MEMORY_MANAGEMENT",
+          "Erro grave no gerenciamento da memória, por driver ou por defeito físico",
+          "Diagnóstico de Memória do Windows"
+        ],
+        [
+          "IRQL_NOT_LESS_OR_EQUAL",
+          "Driver acessando um endereço de memória que não deveria",
+          "Driver ou programa instalado há pouco"
+        ],
+        [
+          "DRIVER_POWER_STATE_FAILURE",
+          "Falha de driver ligada ao estado de energia, como o próprio nome indica",
+          "Erros ao suspender, hibernar ou ligar"
+        ],
+        [
+          "PAGE_FAULT_IN_NONPAGED_AREA",
+          "Aparece entre os exemplos de código de parada da Microsoft",
+          "Driver recente e teste de memória"
+        ]
+      ],
+      "titulo": "Códigos de parada frequentes e por onde começar",
+      "colunaDestaque": 2,
+      "fonte": {
+        "nome": "Microsoft Learn — referência de códigos de verificação de erro",
+        "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/bug-check-0x1a--memory-management"
+      },
+      "nota": "A mesma mensagem pode ter mais de uma origem. O código aponta o caminho, mas não fecha o diagnóstico sozinho."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O MEMORY_MANAGEMENT é o caso clássico que pode ser tanto software quanto peça. A página da Microsoft sobre ele lista situações provocadas por driver e outras que provavelmente são falha de hardware, e recomenda rodar o Diagnóstico de Memória do Windows para verificar os pentes. Mas um teste sem erro não absolve a memória por completo: defeitos intermitentes às vezes escapam."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O IRQL_NOT_LESS_OR_EQUAL, segundo a documentação, costuma surgir depois da instalação de um driver, serviço do sistema ou BIOS com defeito, e também em atualizações do Windows quando algum programa antigo, como antivírus ou ferramenta de backup, não é compatível com a versão nova. Já o DRIVER_POWER_STATE_FAILURE, pelo próprio nome, aponta para um driver que falhou numa mudança de estado de energia; por isso vale reparar se ele surge ao suspender o computador ou ao voltar da suspensão."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Fora dos drivers, vale lembrar duas causas simples. A Microsoft recomenda manter de 10% a 15% do disco livre, porque o Windows usa esse espaço para arquivos de troca e outras funções. E um disco com defeito também pode provocar paradas; se o seu SSD já dá outros sinais, leia [como saber se o SSD está chegando ao fim](/blog/como-saber-se-o-ssd-esta-chegando-ao-fim)."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que você pode fazer em casa, com segurança"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se a tela azul apareceu uma vez só, reinicie e siga usando. A orientação da Microsoft é agir quando a mesma parada se repete. Nesse caso, os passos abaixo seguem a ordem da página de suporte e não exigem abrir o computador. Antes de tudo, se os seus arquivos importantes não têm cópia, faça uma agora, enquanto o Windows ainda funciona."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "**Desconecte o que é novo.** Desligue o computador, tire o aparelho ou acessório instalado pouco antes de o erro começar e ligue de novo.",
+        "**Atualize o Windows.** Em Configurações, Windows Update, verifique se há atualizações e instale.",
+        "**Olhe o Gerenciador de Dispositivos.** Um ponto de exclamação amarelo marca a peça com problema: atualize o driver dela e, se não resolver, desative o dispositivo.",
+        "**Libere espaço** até sobrar de 10% a 15% do disco.",
+        "**Rode o Diagnóstico de Memória do Windows**, procurando pelo nome no menu Iniciar. O computador reinicia para fazer o teste.",
+        "**Se não conseguir ligar normalmente, use o Modo de Segurança**, que carrega o mínimo de drivers, e faça os passos acima por lá.",
+        "**Como último recurso, use um ponto de restauração** do sistema, que desfaz mudanças recentes sem apagar seus documentos."
+      ]
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "Os passos básicos não exigem abrir o computador nem instalar programas",
+        "Driver e atualização, as causas mais comuns, costumam ser resolvidos assim",
+        "Você já chega à assistência com o código anotado, se precisar ir"
+      ],
+      "contras": [
+        "Teste de memória sem erro não descarta defeito intermitente",
+        "Fonte, placa-mãe e disco exigem ferramenta e peça para teste",
+        "Insistir com um disco falhando pode piorar a perda de arquivos"
+      ],
+      "titulo": "Resolver em casa ou levar à assistência"
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "Se a tela azul vem com cheiro de queimado, estalos, aquecimento anormal ou desligamentos fora do Windows, desligue da tomada e não insista. Também não abra a fonte de alimentação nem mexa em bateria estufada: leve a um técnico.",
+      "titulo": "Onde parar"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando é hora de levar a um técnico"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Vale procurar ajuda quando o erro volta depois de todos os passos básicos, quando o código muda a cada vez, quando o computador não chega mais à área de trabalho nem pelo Modo de Segurança, ou quando há sinais de que o disco está falhando. Nesses cenários, o diagnóstico costuma exigir trocar peças por outras sabidamente boas, um teste que é difícil fazer em casa."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Leve a foto da tela, a lista do que mudou recentemente e, se puder, anote a senha do Windows para o teste. Se o computador também está lento ou travando, o artigo sobre [computador lento](/blog/computador-lento-o-que-resolve-de-verdade) ajuda a separar o que é sistema do que é peça. E se ele parou de ligar de vez, veja [o que verificar quando o PC não liga](/blog/pc-nao-liga-o-que-verificar)."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Onde resolver isso em Campinas"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, tem [assistência técnica](/manutencao) no mesmo endereço da loja, com diagnóstico, limpeza, troca de peça, conserto e upgrade. É o lugar para levar o computador quando a tela azul resiste aos passos deste guia ou quando a suspeita recai sobre memória, disco ou fonte."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se os arquivos ficaram presos em um disco que começou a falhar, a loja também faz [recuperação de dados](/recuperacaodados). A decisão, em uma linha: uma tela azul isolada pede só reiniciar; a que volta pede anotar o código, seguir os passos básicos e, se persistir, um diagnóstico com teste de peças."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "dados"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Uma tela azul só já significa que o computador está com defeito?",
+      "resposta": "Não necessariamente. A Microsoft orienta que muitas vezes basta reiniciar. O sinal de alerta é a repetição, principalmente com o mesmo código de parada."
+    },
+    {
+      "pergunta": "No meu Windows 11 a tela ficou preta. É outro problema?",
+      "resposta": "Provavelmente é a mesma coisa. Desde o Windows 11 24H2, a tela de erro inesperado é preta, mas continua mostrando o código de parada e o driver envolvido."
+    },
+    {
+      "pergunta": "Formatar o computador resolve a tela azul?",
+      "resposta": "Resolve quando a causa é driver ou programa, mas apaga tudo e pode ser desnecessário. Se a causa é peça, como memória ou disco, a tela volta depois da formatação. Vale tentar os passos básicos e diagnosticar antes."
+    },
+    {
+      "pergunta": "Como vejo o código se a tela sumiu rápido demais?",
+      "resposta": "Abra o Visualizador de Eventos, entre em Logs do Windows e depois em Sistema, e procure os erros críticos no horário da reinicialização. A Microsoft informa que os detalhes da parada ficam registrados ali."
+    },
+    {
+      "pergunta": "Tela azul pode ser vírus?",
+      "resposta": "Pode, mas não é o mais comum. A própria Microsoft atribui a maior parte dos erros de parada a drivers com falha. Mantenha o Windows atualizado e o antivírus em dia, e investigue primeiro o que mudou recentemente."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Troubleshooting Windows unexpected restarts and stop code errors — Microsoft Support",
+      "url": "https://support.microsoft.com/en-us/help/17075",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Analyze Bug Check Blue Screen Data — Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-ie/windows-hardware/drivers/debugger/blue-screen-data",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Bug Check 0x1A: MEMORY_MANAGEMENT — Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/bug-check-0x1a--memory-management",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Bug Check 0xA: IRQL_NOT_LESS_OR_EQUAL — Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-sg/WINDOWS-HARDWARE/DRIVERS/debugger/bug-check-0xa--irql-not-less-or-equal",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Microsoft Updates Windows 11 with Faster Recovery, Redesigned Restart Screen — Campus Technology",
+      "url": "https://campustechnology.com/articles/2025/07/30/microsoft-updates-windows-11-with-faster-recovery-redesigned-restart-screen.aspx",
+      "data": "julho de 2025"
+    }
+  ]
+}
