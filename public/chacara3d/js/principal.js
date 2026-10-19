@@ -173,7 +173,7 @@ async function carregar() {
   // a luz de dentro só baixa até o forro (o terraço em cima do container fica com a luz de fora)
   U.uTopoCasa.value = Math.max(...(extra.casas || []).map(c => (c.teto || 3.3) + 0.05), 0);
   casas = criarCasas(cena, extra, M, colisao);
-  agua = criarAgua(cena, ceu, { reflexo: estado.qualidade >= 2, nivel: estado.qualidade });
+  agua = criarAgua(cena, ceu, { reflexo: estado.qualidade >= 2, nivel: estado.qualidade }, extra.quintal);
   if (estado.qualidade >= 1) {
     const masc = mascaraDaGrama(dados.meta, dados.buf);
     grama = criarGrama(cena, masc, M.grass.map, estado.qualidade);

@@ -51,7 +51,7 @@ def recortar(manter, tirar, tirar_mats=()):
                 g.f[k] = [fa[~fora[fa].any(axis=1)] for fa in g.f[k]]
 
 
-TIRAR = [(46.1, 50.8, -0.3, 2.66, LOW + 0.006, 9.0),   # amendoeira, casa na árvore e balanço (a grama e o chão ficam)
+TIRAR = [(46.3, 50.8, -0.3, 2.66, LOW + 0.006, 9.0),   # amendoeira, casa na árvore e balanço (a grama e o chão ficam)
          (50.3, 60.5, -0.3, 10.3, LOW + 0.006, 9.0),     # poço, garagem, pergolado e cinema
          (30.0, 44.45, -0.3, 10.3, -3.0, 0.05),        # piscina
          (40.0, 45.85, -0.3, 10.3, -0.035, 9.0),        # churrasqueira, chuveirão e vasos acima do piso
@@ -73,7 +73,6 @@ geo.box('pedrisco', EDGE, 60.0, -0.3, 2.70, LOW - 0.04, LOW - 0.004)         # q
 geo.box('pedrisco', 50.30, 60.0, 2.70, 10.3, LOW - 0.04, LOW - 0.004)
 geo.box('wall_sand', 60.0, 60.15, -0.15, 10.15, LOW - 0.04, LOW + ns['WH'])     # muro do fundo (sem o portão)
 geo.box('terrain', 20.0, 80.0, -40.0, 40.0, LOW - 0.6, LOW - 0.55)           # fundo neutro bem abaixo
-geo.box('filete', EDGE, EDGE + 0.08, -0.3, 10.3, -1.47, 0.0)                  # face do muro de arrimo (revestimento)
 for y0_, y1_ in ((-0.15, 0.0), (10.0, 10.15)):                                # muros laterais do terreno
     geo.box('wall_sand', 43.6, EDGE, y0_, y1_, -0.04, ns['WH'])
     geo.box('wall_sand', EDGE, 60.15, y0_, y1_, LOW - 0.04, LOW + ns['WH'])

@@ -2,7 +2,8 @@
 // reflexo do céu (e da cena, na piscina, com espelho plano), brilho do sol, espuma e anéis onde a água cai.
 // Mais: a cascata caindo, as bolhas da hidro, as gotas e as folhas de ninfeia boiando no laguinho.
 import * as THREE from 'three';
-import { W3, aleatorio } from './util.js';
+import { W3, aleatorio, dentroPoli } from './util.js';
+import { U } from './materiais.js';
 
 // mapa de normais das ondinhas, repetível (soma de ondas com frequências inteiras)
 function mapaOndas() {
@@ -107,7 +108,7 @@ void main(){
   gl_FragColor = vec4(texture2D(tCena, vUv).rgb * T + uCorAgua * uAmb * (1.0 - T), 1.0);
 }`;
 
-export function criarAgua(cenaPrincipal, ceu, qualidade) {
+export function criarAgua(cenaPrincipal, ceu, qualidade, quintal) {
   const cenaAgua = new THREE.Scene();
   const normais = mapaOndas();
   const corpos = [];
@@ -133,7 +134,11 @@ export function criarAgua(cenaPrincipal, ceu, qualidade) {
   }
   const piscina = corpo('piscina', [34.2, 44.0, 1.1, 4.7], -0.07, { sigma: new THREE.Vector3(0.32, 0.075, 0.055), cor: new THREE.Color(0.02, 0.22, 0.30), ondas: 0.45 });
   const hidro = corpo('hidro', [32.22, 33.98, 1.32, 3.08], 0.42, { sigma: new THREE.Vector3(0.35, 0.09, 0.07), cor: new THREE.Color(0.03, 0.22, 0.3), ondas: 0.9, escala: 1.6 });
-  const lago = corpo('lago', [46.08, 49.2, 3.15, 6.25], -0.64, { sigma: new THREE.Vector3(1.1, 0.55, 0.75), cor: new THREE.Color(0.03, 0.09, 0.05), ondas: 0.3, refr: 0.02 });
+  // laguinho: retângulo em volta do contorno, no nível da água do modelo; o chão e as pedras de fora ficam acima da
+  // água e tapam o que sobra do retângulo
+  const QL = (quintal && quintal.lago) || { ret: [46.08, 49.2, 3.15, 6.25], nivel: -0.64 };
+  const lago = corpo('lago', [QL.ret[0] - 0.05, QL.ret[1] + 0.05, QL.ret[2] - 0.05, QL.ret[3] + 0.05], QL.nivel, { sigma: new THREE.Vector3(1.1, 0.55, 0.75), cor: new THREE.Color(0.03, 0.09, 0.05), ondas: 0.3, refr: 0.02 });
+  U.uAguaLago.value.set(QL.ret[0], QL.ret[1], -QL.ret[3], -QL.ret[2]); U.uNivelLago.value = QL.nivel;
   // fontes fixas: as duas bicas da cascata e os três jatos da hidro
   piscina.fontes = [[39.0, 1.85, 3.5, 1.0], [39.8, 1.85, 3.5, 1.0]];
   hidro.fontes = [[32.6, 1.45, 3.0, 0.8], [33.1, 1.45, 3.0, 0.8], [33.6, 1.45, 3.0, 0.8]];
@@ -269,12 +274,17 @@ export function criarAgua(cenaPrincipal, ceu, qualidade) {
   const matNinf = new THREE.MeshStandardMaterial({ color: new THREE.Color(0.08, 0.22, 0.05), roughness: 0.35, side: THREE.DoubleSide });
   const matFlor = new THREE.MeshStandardMaterial({ color: new THREE.Color(0.95, 0.75, 0.82), roughness: 0.6, side: THREE.DoubleSide, emissive: new THREE.Color(0.08, 0.04, 0.05) });
   const rn = aleatorio(31), listaNinf = [];
+  // lugar de cada folha: dentro do contorno do lago, longe da borda e fora de baixo do deck
+  const deckX1 = quintal && quintal.deck ? quintal.deck[1] : 48.0;
+  const livre = (x, y, r) => !QL.contorno || ([0, 1, 2, 3, 4, 5, 6, 7].every(k => dentroPoli(x + Math.cos(k * 0.785) * (r + 0.12), y + Math.sin(k * 0.785) * (r + 0.12), QL.contorno)) && x > deckX1 + r);
+  const nivelNinf = QL.nivel + 0.008;
   for (let i = 0; i < 9; i++) {
     const r = 0.1 + rn() * 0.09;
     const g = new THREE.CircleGeometry(r, 20, 0.25, Math.PI * 2 - 0.25); g.rotateX(-Math.PI / 2);
     const m = new THREE.Mesh(g, matNinf);
-    const x = 47.9 + rn() * 1.2, y = 3.4 + rn() * 2.6;
-    m.position.copy(W3(x, y, -0.632)); m.rotation.y = rn() * 6.28;
+    let x = 47.9 + rn() * 1.2, y = 3.4 + rn() * 2.6;
+    for (let t = 0; t < 60 && !livre(x, y, r); t++) { x = QL.ret[0] + rn() * (QL.ret[1] - QL.ret[0]); y = QL.ret[2] + rn() * (QL.ret[3] - QL.ret[2]); }
+    m.position.copy(W3(x, y, nivelNinf)); m.rotation.y = rn() * 6.28;
     m.receiveShadow = true;
     ninfeias.add(m); listaNinf.push({ m, x, y, f: rn() * 6.28 });
     if (i % 3 === 0) {
@@ -336,7 +346,7 @@ export function criarAgua(cenaPrincipal, ceu, qualidade) {
     matGotas.uniforms.uTempo.value = t; matGotas.uniforms.uLuz.value.copy(luz);
     matBolhas.uniforms.uTempo.value = t; matBolhas.uniforms.uLuz.value.copy(luz);
     for (const n of listaNinf) {
-      n.m.position.copy(W3(n.x + Math.sin(t * 0.05 + n.f) * 0.06, n.y + Math.cos(t * 0.04 + n.f) * 0.05, -0.632 + Math.sin(t * 0.9 + n.f) * 0.002));
+      n.m.position.copy(W3(n.x + Math.sin(t * 0.05 + n.f) * 0.06, n.y + Math.cos(t * 0.04 + n.f) * 0.05, nivelNinf + Math.sin(t * 0.9 + n.f) * 0.002));
       n.m.rotation.y = n.f + Math.sin(t * 0.03 + n.f) * 0.3;
     }
   }

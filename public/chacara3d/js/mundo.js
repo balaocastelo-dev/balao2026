@@ -1,7 +1,7 @@
 // Monta o terreno a partir do modelo exportado (chacara3d/modelo/export_rt.py) e guarda
 // o que a caminhada precisa: o que barra a passagem e a altura do chão em cada ponto.
 import * as THREE from 'three';
-import { W3 } from './util.js';
+import { W3, dentroPoli } from './util.js';
 import { remendar } from './materiais.js';
 
 const BASE = '/chacara3d/';
@@ -135,12 +135,12 @@ const BOX_FIXO = [ // x0, x1, y0, y1, z0, z1 (sem as tiny houses, que vêm do mo
   [33.75, 34.98, 7.0, 9.8, 0, 0.5], [32, 34.2, 1.1, 3.3, -0.4, 0.55], [38.6, 40.2, 0.8, 1.1, -1.4, 1.7], [31.6, 44.3, 0, 0.72, -0.2, 2.3],
   [35, 35.2, 6.71, 10, 0, 3], [35, 35.42, 6.29, 6.71, 0, 3], [38.29, 38.71, 6.29, 6.71, 0, 3], [41.59, 42.01, 6.29, 6.71, 0, 3], [44.79, 45.21, 6.29, 6.71, 0, 3], [44.79, 45.21, 9.58, 10, 0, 3],
   [35.5, 41.6, 6.3, 7.02, 0, 1.1], [35.2, 42.9, 9.0, 10, 0, 2.2],
-  [45.9, 46.02, 0, 3.2, 0, 1.1], [45.9, 46.02, 6.2, 7.7, 0, 1.1], [45.9, 46.02, 9.3, 10, 0, 1.1], [46, 48, 3.16, 3.26, 0, 1.1], [47.92, 48.02, 3.2, 6.2, 0, 1.1], [46, 48, 6.14, 6.24, 0, 1.1],
-  [46.08, 49.4, 2.95, 6.45, -1.6, -0.5], [52.5, 55.5, 3.05, 3.85, -1, -0.1], [46.55, 48.75, 0.3, 2.65, 1.0, 2.3], [44.6, 45.0, 0, 0.4, 0, 0.5],
+  // guarda-corpos da beira da laje e do deck, pilares do deck, lago, poço e amendoeira vêm do modelo (extra.quintal)
+  [52.5, 55.5, 3.05, 3.85, -1, -0.1], [46.55, 48.75, 0.3, 2.65, 1.0, 2.3], [44.6, 45.0, 0, 0.4, 0, 0.5],
 ];
 const CIR = [ // x, y, raio, z0, z1
   [30.3, 2.1, 1.2, 0, 2], [21.2, 8.3, 0.28, 0, 8], [23.7, 8.95, 0.25, 0, 8], [26.4, 8.55, 0.28, 0, 8], [30.4, 8.75, 0.15, 0, 2],
-  [6.9, 8.9, 0.45, 0, 3], [20.6, 6.2, 0.7, 0, 0.4], [47.4, 1.5, 0.45, -1, 4], [51.9, 6.3, 1.0, -1, 0.2], [50.2, 9.15, 0.15, -1, 2],
+  [6.9, 8.9, 0.45, 0, 3], [20.6, 6.2, 0.7, 0, 0.4], [50.2, 9.15, 0.15, -1, 2],
 ];
 
 const SUBIDA = 0.5;   // o que a pessoa consegue subir num passo (degrau, meio-fio)
@@ -161,8 +161,14 @@ function degrauEspiral(e, x, y, lim) {
   return melhor;
 }
 
+// quintal de baixo (deck, escada e lago) com as medidas do modelo; sem o dado, as medidas antigas
+const QUINTAL_PADRAO = { deck: [46, 48, 3.2, 6.2, 0], escada: { x0: 46.08, piso: 0.3, n: 5, y: [7.7, 9.3], espelho: 1 / 6 }, lago: null };
+
 export function criarColisao(extra) {
   const BOX = BOX_FIXO.concat(extra.colisores || []);
+  const CIRC = CIR.concat(extra.circulos || []);
+  const Q = extra.quintal || QUINTAL_PADRAO;
+  const lago = Q.lago;
   const pisos = extra.pisos || [];
   const espirais = (extra.espirais || []).map(e => Object.assign({ topo: e.z0 + e.n * e.espelho }, e));
   const dinamicos = [];   // portas
@@ -173,8 +179,9 @@ export function criarColisao(extra) {
       const i = Math.floor((44 - x) / 0.6); return i < 4 ? [-0.25, -0.55, -0.85, -1.15][i] : -1.4;
     }
     if (x < 46) return 0;
-    if (x <= 48 && y >= 3.2 && y <= 6.2) return 0;
-    if (y > 7.7 && y < 9.3 && x < 47.58) { const i = Math.floor((x - 46.08) / 0.3); return i < 0 ? 0 : -(i + 1) / 6; }
+    const d = Q.deck, e = Q.escada;
+    if (x <= d[1] && y >= d[2] && y <= d[3]) return d[4];
+    if (y > e.y[0] && y < e.y[1] && x < e.x0 + e.n * e.piso) { const i = Math.floor((x - e.x0) / e.piso); return i < 0 ? 0 : -(i + 1) * e.espelho; }
     return -1;
   }
   // altura do chão em (x, y) para quem está com os pés em `pes`: a superfície mais alta que dá para
@@ -217,18 +224,21 @@ export function criarColisao(extra) {
     if (x < 0.32 || x > 59.72 || y < 0.32 || y > 9.68) return true;
     for (const b of BOX) if (x > b[0] - R && x < b[1] + R && y > b[2] - R && y < b[3] + R && pes + 1.7 > b[4] && pes + 0.35 < b[5]) return true;
     for (const b of dinamicos) if (b.ativo && x > b.c[0] - R && x < b.c[1] + R && y > b.c[2] - R && y < b.c[3] + R && pes < (b.z1 === undefined ? 2.2 : b.z1)) return true;
-    for (const c of CIR) if (pes + 1.7 > c[3] && pes + 0.35 < c[4] && Math.hypot(x - c[0], y - c[1]) < c[2] + R) return true;
+    for (const c of CIRC) if (pes + 1.7 > c[3] && pes + 0.35 < c[4] && Math.hypot(x - c[0], y - c[1]) < c[2] + R) return true;
+    if (lago && pes < lago.nivel + 0.6 && x > lago.ret[0] && x < lago.ret[1] && y > lago.ret[2] && y < lago.ret[3] && dentroPoli(x, y, lago.contorno)) return true;
     if (espirais.length && barraEspiral(x, y, pes, R)) return true;
     // gente parada ou dançando: dá para passar espremido entre duas pessoas
     for (const m of moveis) if (m !== ignorar && m.ativo && Math.abs(pes - m.z) < 1.4 && Math.hypot(x - m.x, y - m.y) < m.r + R * 0.45) return true;
     return chaoEm(x, y, pes) - pes > SUBIDA;
   }
-  return { BOX, CIR, chaoEm, barra, dinamicos, moveis, espiralEm, espirais };
+  return { BOX, CIR: CIRC, chaoEm, barra, dinamicos, moveis, espiralEm, espirais };
 }
 
 export function lugares(extra) {
   const L = [['Portão do gramado', 1.6, 4.7, 0], ['Vilinha', 10.6, 4.9, -0.5], ['Gramado', 26, 5.2, 3.14], ['Piscina', 45.1, 3.6, 3.14], ['Churrasqueira', 43.4, 5.7, 2.2],
     ['Deck', 46.4, 4.7, 0], ['Lago', 50.4, 5.0, 3.14], ['Cineminha', 54, 2.7, -1.5708], ['Portão de baixo', 58.6, 5.1, 3.14]];
+  const ql = (extra.quintal || {}).lugares || {};
+  for (const l of L) if (ql[l[0]]) l.splice(1, 3, ...ql[l[0]]);
   for (const l of (extra.lugares || [])) L.splice(2, 0, l);
   return L;
 }
@@ -247,7 +257,9 @@ export function ondeEstou(x, y, extra, pes) {
   if (x < 21) return x < 2.6 ? 'Portão do gramado' : 'Vilinha';
   if (x < 31.6) return 'Gramado';
   if (x < 46) return y > 6.2 ? 'Churrasqueira' : (x > 34.2 && x < 44 && y > 1.1 && y < 4.7 ? 'Dentro da piscina' : 'Piscina');
-  if (x <= 48 && y >= 3.2 && y <= 6.2) return 'Deck';
+  const Q = extra.quintal || QUINTAL_PADRAO, d = Q.deck;
+  if (x <= d[1] && y >= d[2] && y <= d[3] && pes > d[4] - 0.4) return 'Deck';
+  if (Q.lago && Math.hypot(x - (Q.lago.ret[0] + Q.lago.ret[1]) / 2, y - (Q.lago.ret[2] + Q.lago.ret[3]) / 2) < 3.2) return 'Laguinho';
   if (y < 4.5 && x > 51) return 'Cineminha';
   return 'Parte de baixo';
 }

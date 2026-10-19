@@ -322,6 +322,11 @@ export function criarMateriais(info) {
     tile: superficie('pastilha', { causticas: true }),
     ladrilho: superficie('ladrilho'),
     pond_floor: superficie('fundo_lago', { causticas: true }),
+    // laguinho orgânico e muro de arrimo de pedra (pedras arredondadas em três tons, juntas de argamassa)
+    pedra_cinza: superficie('pedra_natural', { cor: new THREE.Color(0.62, 0.62, 0.6), relevo: 1.1, causticas: true }),
+    pedra_bege: superficie('pedra_natural', { cor: new THREE.Color(1.05, 0.9, 0.7), relevo: 1.1, causticas: true }),
+    pedra_ferrugem: superficie('pedra_natural', { cor: new THREE.Color(0.95, 0.62, 0.4), relevo: 1.1, causticas: true }),
+    argamassa: superficie('concreto', { cor: new THREE.Color(0.62, 0.58, 0.52), relevo: 0.6 }),
     granite: superficie('granito'),
     pot_clay: superficie('barro'),
     clay_dome: superficie('barro', { cor: new THREE.Color(1.15, 1.05, 0.95) }),
@@ -409,6 +414,7 @@ export function criarMateriais(info) {
   M.ember = new THREE.MeshStandardMaterial({ color: 0x220800, emissive: new THREE.Color(1.0, 0.28, 0.04), emissiveIntensity: 2, roughness: 0.9 });
   M.abajur = remendar(new THREE.MeshStandardMaterial({ color: new THREE.Color(0.92, 0.84, 0.68), emissive: new THREE.Color(1.0, 0.7, 0.4), emissiveIntensity: 0, roughness: 0.9, side: THREE.DoubleSide }), { chave: 'abajur' });
   M.quadro = remendar(new THREE.MeshStandardMaterial({ map: quadroPintado(), roughness: 0.7, side: THREE.DoubleSide }), { chave: 'quadro' });
+  M.veu_agua = new THREE.MeshStandardMaterial({ color: new THREE.Color(0.85, 0.93, 0.96), roughness: 0.05, metalness: 0, transparent: true, opacity: 0.35, side: THREE.DoubleSide, depthWrite: false });
   M.vidro = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.03, metalness: 0, transparent: true, opacity: 0.12, side: THREE.DoubleSide, depthWrite: false, envMapIntensity: 1.2 });
   M.mesh = new THREE.MeshStandardMaterial({ map: telaGalinheiro(), alphaTest: 0.5, alphaToCoverage: true, side: THREE.DoubleSide, roughness: 0.5, metalness: 0.6, color: 0x9a9a9a });
   return M;

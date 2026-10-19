@@ -105,3 +105,9 @@ GRAMA = np.stack([C_LAGO[0] + np.cos(_ang) * _r_out, C_LAGO[1] + np.sin(_ang) * 
 # ------------------------------------------------------------------ cascata de lajes de pedra junto ao muro de arrimo
 CY0, CY1 = 6.42, 7.18                                            # largura da cascata (ao longo do muro)
 LAJES = [(0.36, -0.06), (0.56, -0.42), (0.78, -0.78)]           # (avanço a partir do muro, topo da laje)
+
+# ------------------------------------------------------------------ muro de arrimo revestido de pedra na beira da laje
+# (aprovado pelo Thiago em 19/10/2026: hoje a beira é barranco de terra). Trechos ao longo do muro, sem a escada.
+MURO_TRECHOS = [(0.0, ESCADA_Y0), (ESCADA_Y1, LARGURA)]
+MURO_CINTA = 0.06                 # capa de pedra lisa no topo do muro (fica no nível do piso da laje)
+

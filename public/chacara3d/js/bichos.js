@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
-import { W3, clamp, lerp, aleatorio, estado } from './util.js';
+import { W3, clamp, lerp, aleatorio, estado, dentroPoli } from './util.js';
 import { U } from './materiais.js';
 
 const BASE = '/chacara3d/bichos/';
@@ -16,8 +16,11 @@ const giroDe = rumo => Math.atan2(Math.cos(rumo), -Math.sin(rumo));
 function difAng(a, b) { let d = b - a; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; return d; }
 
 // áreas onde bicho não entra (água)
-const AGUA = [[34.1, 44.1, 1.0, 4.8], [31.9, 34.3, 1.0, 3.4], [46.0, 49.5, 2.9, 6.5]];
-const naAgua = (x, y) => AGUA.some(a => x > a[0] && x < a[1] && y > a[2] && y < a[3]);
+const AGUA = [[34.1, 44.1, 1.0, 4.8], [31.9, 34.3, 1.0, 3.4]];
+let LAGO = null;      // contorno do laguinho, do modelo (extra.quintal.lago)
+const naLago = (x, y) => LAGO ? (x > LAGO.ret[0] && x < LAGO.ret[1] && y > LAGO.ret[2] && y < LAGO.ret[3] && dentroPoli(x, y, LAGO.contorno))
+  : (x > 46.0 && x < 49.5 && y > 2.9 && y < 6.5);
+const naAgua = (x, y) => AGUA.some(a => x > a[0] && x < a[1] && y > a[2] && y < a[3]) || naLago(x, y);
 
 // ---------------------------------------------------------------- materiais com as máscaras de cor dos modelos
 function matMascara(cores, o) {
@@ -274,8 +277,18 @@ function cerebroGalinha(b, mundo, galo, cacs) {
 }
 
 // ---------------------------------------------------------------- carpas (feitas aqui mesmo)
-function criarCarpas(cena, n) {
+function criarCarpas(cena, n, lago) {
   const grupo = new THREE.Group();
+  // onde dá para nadar: grade de 10 cm com o fundo de 55 cm ou mais (do modelo); sem ela, o retângulo antigo
+  const G = lago && lago.nado;
+  const pode = G ? (x, y) => {
+    const i = Math.floor((x - G.x0) / G.passo), j = Math.floor((y - G.y0) / G.passo);
+    return i >= 0 && j >= 0 && i < G.nx && j < G.ny && G.bits.charCodeAt(i * G.ny + j) === 49;
+  } : (x, y) => x > 46.45 && x < 48.9 && y > 3.45 && y < 5.95;
+  const cx = lago ? lago.centro[0] : 47.65, cy = lago ? lago.centro[1] : 4.7;
+  const nivel = lago ? lago.nivel : -0.64;
+  const celulas = [];
+  if (G) for (let i = 0; i < G.nx; i++) for (let j = 0; j < G.ny; j++) if (G.bits.charCodeAt(i * G.ny + j) === 49) celulas.push([G.x0 + (i + 0.5) * G.passo, G.y0 + (j + 0.5) * G.passo]);
   const lista = [];
   const L = 0.42, seg = 24, voltas = 12;
   function geometria(semente) {
@@ -333,27 +346,27 @@ function criarCarpas(cena, n) {
     const m = new THREE.Mesh(geometria(17 + i * 7), mat);
     m.castShadow = false; m.receiveShadow = true;
     grupo.add(m);
-    lista.push({ m, un, x: rnd(47.2, 48.8), y: rnd(3.6, 5.8), z: rnd(-1.25, -0.95), rumo: r() * 6.28, v: rnd(0.08, 0.2), t: r() * 100, sobe: 0 });
+    const c0 = celulas.length ? celulas[Math.floor(r() * celulas.length)] : [rnd(47.2, 48.8), rnd(3.6, 5.8)];
+    lista.push({ m, un, x: c0[0], y: c0[1], z: nivel - rnd(0.3, 0.6), rumo: r() * 6.28, v: rnd(0.08, 0.2), t: r() * 100, sobe: 0 });
   }
   cena.add(grupo);
   return function (dt, fontes) {
     for (const k of lista) {
       k.t += dt;
-      const cx = 47.65, cy = 4.7;
       let alvoRumo = k.rumo + Math.sin(k.t * 0.3 + k.un.uFase.value) * 0.6 * dt * 3;
-      // volta para o meio quando chega perto da borda
-      const bx = k.x < 46.45 || k.x > 48.9, by = k.y < 3.45 || k.y > 5.95;
-      if (bx || by) alvoRumo = Math.atan2(cy - k.y, cx - k.x);
+      // volta para o meio quando a frente chega perto da borda (ou do raso)
+      if (!pode(k.x + Math.cos(k.rumo) * 0.25, k.y + Math.sin(k.rumo) * 0.25)) alvoRumo = Math.atan2(cy - k.y, cx - k.x);
       k.rumo += clamp(difAng(k.rumo, alvoRumo), -1.2 * dt, 1.2 * dt);
-      k.x += Math.cos(k.rumo) * k.v * dt; k.y += Math.sin(k.rumo) * k.v * dt;
+      const nx = k.x + Math.cos(k.rumo) * k.v * dt, ny = k.y + Math.sin(k.rumo) * k.v * dt;
+      if (pode(nx, ny) || !pode(k.x, k.y)) { k.x = nx; k.y = ny; }
       if (r() < dt * 0.02) k.sobe = 4;
       k.sobe = Math.max(0, k.sobe - dt);
-      const zAlvo = k.sobe > 0 ? -0.72 : -1.1 + Math.sin(k.t * 0.2) * 0.12;
+      const zAlvo = k.sobe > 0 ? nivel - 0.08 : nivel - 0.45 + Math.sin(k.t * 0.2) * 0.12;
       k.z = lerp(k.z, zAlvo, dt * 0.6);
       k.m.position.copy(W3(k.x, k.y, k.z));
       k.m.rotation.y = giroDe(k.rumo);
       k.un.uVelNado.value = 0.6 + k.v * 4;
-      if (k.z > -0.78 && fontes.length < 3) fontes.push([k.x, k.y, 6.0, 0.35]);
+      if (k.z > nivel - 0.14 && fontes.length < 3) fontes.push([k.x, k.y, 6.0, 0.35]);
     }
   };
 }
@@ -556,6 +569,7 @@ function criarVagalumes(cena) {
 
 // ---------------------------------------------------------------- tudo junto
 export async function criarBichos(cena, mundo, qualidade, progresso) {
+  LAGO = (mundo.extra && mundo.extra.quintal && mundo.extra.quintal.lago) || null;
   const loader = new GLTFLoader();
   const carregar = n => new Promise((ok, erro) => loader.load(BASE + n + '.glb', ok, undefined, erro));
   const [gC, gG, gGalo] = await Promise.all([carregar('cachorro'), carregar('galinha'), carregar('galo')]);
@@ -582,7 +596,7 @@ export async function criarBichos(cena, mundo, qualidade, progresso) {
     .concat(galinhas.map(b => cerebroGalinha(b, mundo, false, cachorros)))
     .concat([cerebroGalinha(galo, mundo, true, cachorros)]);
   const todos = cachorros.concat(galinhas, [galo]);
-  const carpas = criarCarpas(cena, 8);
+  const carpas = criarCarpas(cena, 8, LAGO);
   const passaros = criarPassaros(cena, mundo);
   const borboletas = criarBorboletas(cena);
   const vaga = criarVagalumes(cena);

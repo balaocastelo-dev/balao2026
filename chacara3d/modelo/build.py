@@ -141,6 +141,7 @@ m_plain('couro', (0.36, 0.17, 0.07), 0.5)                                      #
 m_plain('pedra_cinza', (0.15, 0.15, 0.14), 0.88, noise=0.4, nscale=5, bump=0.6)
 m_plain('pedra_ferrugem', (0.25, 0.15, 0.085), 0.88, noise=0.4, nscale=6, bump=0.6)
 m_plain('pedra_bege', (0.30, 0.24, 0.155), 0.88, noise=0.4, nscale=5, bump=0.6)
+m_plain('argamassa', (0.30, 0.28, 0.25), 0.95, noise=0.3, nscale=18, bump=0.3)
 m_plain('veu_agua', (0.70, 0.84, 0.90), 0.03, **{'Alpha': 0.28})
 m_plain('ninfeia', (0.10, 0.28, 0.06), 0.35, noise=0.15, nscale=12)
 m_plain('flor_ninfeia', (0.95, 0.55, 0.70), 0.5)
@@ -155,7 +156,7 @@ m_plain('esquadria_branca', (0.86, 0.86, 0.84), 0.35)
 # ------------------------------------------------------------------ constantes
 WH = 2.3                      # altura do muro
 PX0, PX1, PY0, PY1, PD = 34.2, 44.0, 1.1, 4.7, 1.4   # piscina
-from obra import LOW, EDGE    # nível do quintal de baixo (x > 46) e a beira da laje; medidas da obra no obra.py
+from obra import LOW, EDGE, FACE    # nível do quintal de baixo (x > 46) e a beira da laje; medidas da obra no obra.py
 import obra
 
 
@@ -395,10 +396,16 @@ def guarda(p0, p1, zb, h=1.1, mat_long='wood_x'):
         obox('wood_z', c + np.array([0, 0, 0.1 + (h - 0.2) / 2]), (0.028, 0.028, h - 0.25))
 
 
-guarda((EDGE - 0.04, 0.12), (EDGE - 0.04, 3.2), 0.0)
-guarda((EDGE - 0.04, 6.2), (EDGE - 0.04, 7.7), 0.0)
-guarda((EDGE - 0.04, 9.3), (EDGE - 0.04, 9.95), 0.0)
-box('filete', EDGE, EDGE + 0.08, 0, 10, -1.47, 0.0)               # revestimento do muro de arrimo
+# guarda-corpo na beira da laje, menos onde ficam o deck e a escada
+GUARDA_BEIRA = []
+_cortes = sorted([(obra.DY0, obra.DY1), (obra.ESCADA_Y0, obra.ESCADA_Y1)])
+_y = 0.12
+for _a, _b in _cortes + [(9.95, 9.95)]:
+    if _a - _y > 0.05:
+        GUARDA_BEIRA.append((_y, _a))
+    _y = max(_y, _b)
+for _a, _b in GUARDA_BEIRA:
+    guarda((EDGE - 0.04, _a), (EDGE - 0.04, _b), 0.0)
 
 # ------------------------------------------------------------------ deck de madeira sobre o laguinho das carpas
 # Medidas do Thiago: deck de 2 m de fundo x 3 m de largura, 1 m acima do quintal de baixo, saindo do piso da piscina.
@@ -454,6 +461,31 @@ def pedra(mat, c, r, rng, R=None, seg=10, rings=6):
             F.append([a, b, b + seg, a + seg])
     G[mat].add(V, F)
 
+
+# muro de arrimo na beira da laje: bloco com revestimento de pedras arredondadas assentadas com argamassa (as juntas
+# aparecem entre as pedras), capa de pedra lisa no topo; embaixo do deck o topo é uma cinta de concreto com a viga de apoio
+PEDRAS_MURO = ('pedra_cinza', 'pedra_bege', 'pedra_cinza', 'pedra_ferrugem', 'pedra_bege', 'pedra_cinza')
+rm = np.random.default_rng(57)
+for y0m, y1m in obra.MURO_TRECHOS:
+    box('argamassa', EDGE, FACE + 0.02, y0m, y1m, LOW - 0.02, -obra.MURO_CINTA)
+    z_ = LOW - 0.03; fila = 0
+    while z_ < -obra.MURO_CINTA - 0.05:
+        h = rm.uniform(0.17, 0.27); y_ = y0m + (0.0 if fila % 2 == 0 else -rm.uniform(0.08, 0.16)); fila += 1
+        while y_ < y1m:
+            ry = rm.uniform(0.13, 0.25); yc = y_ + ry
+            no_deck = DY0 - 0.02 < yc < DY1 + 0.02
+            topo = (ZB0 - DBAR - 0.14) if no_deck else -obra.MURO_CINTA
+            rz = min(h / 2 * rm.uniform(0.85, 1.02), (topo - z_) / 2)
+            if rz > 0.05 and y0m + 0.06 < yc < y1m - 0.06:
+                pedra(PEDRAS_MURO[int(rm.integers(len(PEDRAS_MURO)))], (FACE + 0.015, min(yc, y1m - 0.08), z_ + rz + rm.uniform(-0.01, 0.01)),
+                      (rm.uniform(0.07, 0.10), ry * rm.uniform(0.95, 1.05), rz), rm, R=rotx(rm.uniform(-0.12, 0.12)), seg=9, rings=5)
+            y_ += 2 * ry * rm.uniform(0.86, 0.96)
+        z_ += h * rm.uniform(0.86, 0.94)
+    for yy0, yy1 in ((y0m, min(y1m, DY0)), (max(y0m, DY1), y1m)):
+        if yy1 > yy0:
+            box('stone_cut', EDGE, FACE + 0.10, yy0, yy1, -obra.MURO_CINTA, 0.0)                 # capa de pedra no topo
+    if y0m < DY1 and y1m > DY0:
+        box('concrete', EDGE, FACE + 0.005, max(y0m, DY0), min(y1m, DY1), ZB0 - DBAR - 0.16, ZB0)   # cinta onde a viga de apoio é chumbada
 
 rp = np.random.default_rng(31)
 # fundo (manta escura) e espelho d'água numa grade de 8 cm; a borda serrilhada fica embaixo das pedras
@@ -1512,6 +1544,40 @@ for k, top in PLANTIO_TERRACO:                                  # plantas dos va
         P.moreia(top, rv, 0.9); P.bromelia(top, rv, 0.8)
     else:
         P.xanadu(top, rv, 0.9)
+
+# ------------------------------------------------------------------ quintal de baixo para o passeio
+# deck, escada, lago, poço e amendoeira saem do obra.py: o passeio lê daqui (terreno.json) em vez de ter as medidas no código
+_Gx = np.arange(LAGO[:, 0].min() - 0.05, LAGO[:, 0].max() + 0.05, 0.1)
+_Gy = np.arange(LAGO[:, 1].min() - 0.05, LAGO[:, 1].max() + 0.05, 0.1)
+_CX, _CY = np.meshgrid(_Gx + 0.05, _Gy + 0.05, indexing='ij')
+_nado = dentro_lago(_CX, _CY) & (prof_lago(_CX, _CY) >= 0.55)          # onde as carpas nadam (fundo de 55 cm ou mais)
+_cont = [LAGO[0]]
+for _p in LAGO[1:]:
+    if np.hypot(*(_p - _cont[-1])) >= 0.18:
+        _cont.append(_p)
+_ilx = np.nonzero(_nado.any(axis=1))[0]
+EXTRA['quintal'] = {
+    'deck': [round(DX0, 3), round(DX1, 3), round(DY0, 3), round(DY1, 3), 0.0],
+    'escada': {'x0': round(FACE, 3), 'piso': obra.ESCADA_PISO, 'n': obra.ESCADA_N, 'y': [obra.ESCADA_Y0, obra.ESCADA_Y1],
+               'espelho': round(-LOW / (obra.ESCADA_N + 1), 4)},
+    'lago': {'nivel': round(ZAGUA, 3), 'ret': [round(float(v), 3) for v in (LAGO[:, 0].min(), LAGO[:, 0].max(), LAGO[:, 1].min(), LAGO[:, 1].max())],
+             'contorno': [[round(float(a), 3), round(float(b), 3)] for a, b in _cont],
+             'centro': [round(float(v), 3) for v in (_CX[_nado].mean(), _CY[_nado].mean())],
+             'nado': {'x0': round(float(_Gx[0]), 3), 'y0': round(float(_Gy[0]), 3), 'passo': 0.1, 'nx': len(_Gx), 'ny': len(_Gy),
+                      'bits': ''.join('1' if v else '0' for v in _nado.ravel())}},
+}
+EXTRA['quintal']['lugares'] = {'Deck': [round(DX0 + 0.45, 2), round((DY0 + DY1) / 2, 2), 0.0],
+                                'Lago': [round(float(LAGO[:, 0].max()) + 0.55, 2), round(float(obra.C_LAGO[1]), 2), round(math.pi, 4)]}
+EXTRA.setdefault('circulos', [])
+EXTRA['circulos'] += [[obra.ARVORE[0], obra.ARVORE[1], 0.45, LOW, 4.0], [obra.POCO[0], obra.POCO[1], obra.POCO_R + 0.03, LOW, 0.2]]
+for _a, _b in GUARDA_BEIRA:                                   # guarda-corpo da beira da laje
+    colisor(EDGE - 0.1, EDGE + 0.02, _a, _b, 0.0, 1.1)
+colisor(DX0, DX1, DY0 - 0.04, DY0 + 0.06, 0.0, 1.1)             # guarda-corpo do deck (três lados)
+colisor(DX1 - 0.08, DX1 + 0.02, DY0, DY1, 0.0, 1.1)
+colisor(DX0, DX1, DY1 - 0.06, DY1 + 0.04, 0.0, 1.1)
+for _px, _py in PILARES:                                        # pilares do deck, embaixo
+    colisor(VX0, VX1, _py - 0.06, _py + 0.06, LOW, ZV0)
+colisor(VX0, VX1, DY0, DY1, ZV0, ZV1)                           # viga externa (bate a cabeça embaixo do deck)
 
 objs = geo.build_objects()
 print('objects', len(objs), 'polys', sum(len(o.data.polygons) for o in objs))
