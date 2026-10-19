@@ -2,6 +2,23 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "notebook-lento-as-duas-trocas-que-mais-resolvem",
+      "titulo": "Notebook lento: as duas trocas que mais resolvem e como saber qual fazer",
+      "resumo": "Notebook lento costuma melhorar com duas trocas: HD por SSD e mais memória RAM. Veja como descobrir qual faz falta no seu e quando nenhuma resolve.",
+      "categoria": "hardware",
+      "etiquetas": [
+        "notebook",
+        "upgrade",
+        "ssd",
+        "memória ram",
+        "diagnóstico"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-20T21:00:00.000Z",
+      "minutos": 5,
+      "formato": "dica"
+    },
+    {
       "slug": "office-2021-fim-do-suporte-o-que-fazer",
       "titulo": "Office 2021 perdeu o suporte em 13 de outubro: o que fazer agora",
       "resumo": "O Office 2021 deixou de receber correções de segurança em 13 de outubro de 2026. Veja quem é afetado, o que continua funcionando e quais são as saídas.",
@@ -543,5 +560,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-19T22:42:26.406Z"
+  "atualizadoEm": "2026-10-19T22:48:38.457Z"
 }

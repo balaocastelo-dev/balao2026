@@ -1,0 +1,179 @@
+{
+  "slug": "notebook-lento-as-duas-trocas-que-mais-resolvem",
+  "titulo": "Notebook lento: as duas trocas que mais resolvem e como saber qual fazer",
+  "resumo": "Notebook lento costuma melhorar com duas trocas: HD por SSD e mais memória RAM. Veja como descobrir qual faz falta no seu e quando nenhuma resolve.",
+  "categoria": "hardware",
+  "etiquetas": [
+    "notebook",
+    "upgrade",
+    "ssd",
+    "memória ram",
+    "diagnóstico"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-20T21:00:00.000Z",
+  "formato": "dica",
+  "roteiro": {
+    "fala": "Notebook lento nem sempre pede um novo. Duas trocas resolvem a maioria dos casos. Se ele ainda tem HD, o disco antigo, a troca por SSD é a que você mais sente: liga e abre os programas bem mais rápido. Se trava com muitas abas abertas, o que falta é memória. Antes de comprar, confira se a memória do seu modelo não é soldada. E se nenhuma das duas é o gargalo, o caminho é diagnóstico, não peça.",
+    "titulo": "Notebook lento tem jeito",
+    "destaques": [
+      "HD por SSD",
+      "Mais memória RAM",
+      "Confira se é soldada",
+      "Diagnóstico antes da peça"
+    ],
+    "legenda": "Notebook lento nem sempre pede um novo. Veja as duas trocas que mais resolvem e como descobrir qual faz falta no seu. A dica completa está no blog.",
+    "hashtags": [
+      "notebook",
+      "upgrade",
+      "ssd",
+      "memoriaram",
+      "informatica",
+      "campinas"
+    ]
+  },
+  "seo": {
+    "titulo": "Notebook lento: as duas trocas que mais resolvem"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Notebook lento que demora para ligar, engasga ao abrir programas ou trava com poucas abas abertas nem sempre precisa ser trocado. Em boa parte dos casos, duas trocas de peça resolvem: o **HD por um SSD** e a **memória RAM** por uma maior. O segredo é descobrir qual das duas faz falta no seu, porque cada uma ataca um tipo de lentidão diferente."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é comprar memória para um notebook que ainda usa HD, o disco mecânico com prato giratório, e não sentir diferença. Ou o contrário. A regra prática é simples: lentidão para ligar e abrir as coisas costuma ser do disco; lentidão quando há muita coisa aberta ao mesmo tempo costuma ser da memória."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "Notebook com **HD**: a troca por **SSD** costuma ser a que mais se percebe na hora de ligar e abrir programas.",
+        "Trava com muitas abas e programas abertos: o que falta costuma ser **memória RAM**.",
+        "Antes de comprar, confira o modelo exato: em muitos notebooks finos a memória é **soldada** na placa.",
+        "Se o notebook já tem SSD e memória de sobra, nenhuma das duas resolve: o caminho é diagnóstico."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como saber qual troca o seu notebook pede"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O próprio Windows responde, sem abrir nada. Abra o Gerenciador de Tarefas com **Ctrl + Shift + Esc** e entre em **Desempenho**. No item Disco aparece o tipo da unidade, HDD ou SSD; no item Memória aparecem o total, o uso e quantos encaixes estão ocupados. Outro caminho para ver o tipo do disco é o utilitário Desfragmentar e Otimizar Unidades, na coluna Tipo de mídia."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "O que você nota",
+        "O que costuma ser",
+        "A troca"
+      ],
+      "linhas": [
+        [
+          "Demora para ligar e para abrir programas e arquivos",
+          "Disco mecânico no limite",
+          "HD por SSD"
+        ],
+        [
+          "Trava quando há muitas abas e programas abertos",
+          "Memória RAM pouca para o seu uso",
+          "Mais memória, se o modelo aceitar"
+        ],
+        [
+          "Lento mesmo com SSD e memória sobrando",
+          "Programas demais, sistema, aquecimento ou defeito",
+          "Nenhuma: diagnóstico antes"
+        ]
+      ],
+      "titulo": "Sintoma e troca que costuma resolver",
+      "colunaDestaque": 2
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Para a memória, olhe o número **disponível** com os programas de sempre abertos, e não logo depois de ligar. Memória quase toda ocupada não é defeito, como explica a dica sobre [como ver quanta memória RAM o computador tem](/blog/como-ver-quanta-memoria-ram-o-computador-tem). O sinal de falta é o disponível baixo o tempo todo, junto com travamentos."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "upgrade"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Antes de comprar a peça: o que conferir"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Notebook não é tudo igual por dentro. Muitos modelos finos vêm com a memória soldada na placa, sem encaixe para trocar; outros misturam memória soldada com um encaixe livre, e aí dá para acrescentar. O tipo também precisa bater: DDR3 e DDR4, por exemplo, não servem uma no lugar da outra. E o SSD muda de formato e de encaixe conforme o modelo."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "Descubra o **modelo exato** do notebook, na etiqueta de baixo ou nas configurações do sistema.",
+        "Procure na página do fabricante ou no manual quantos encaixes de memória existem e qual tipo de disco o modelo aceita.",
+        "Ferramentas de fabricantes de memória, como as da Crucial, mostram por marca e modelo se a memória e o disco podem ser trocados.",
+        "Na troca do disco, decida se o sistema será **clonado** para o SSD novo ou instalado do zero, e faça backup antes."
+      ]
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "Se o notebook já tem SSD e memória disponível de sobra, trocar peça não deve mudar muito. Programas demais na inicialização, falta de espaço, sistema desatualizado, vírus ou aquecimento são outras causas comuns. E notebook muito antigo pode não melhorar o bastante: às vezes a troca do aparelho é a decisão melhor.",
+      "titulo": "Quando esta dica não vale"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Antes de gastar, vale fazer o básico que a Microsoft recomenda: desativar programas que abrem com o sistema, liberar espaço, atualizar o Windows e verificar vírus. O artigo sobre [computador lento](/blog/computador-lento-o-que-resolve-de-verdade) mostra esses passos e o que é perda de tempo. Se o seu notebook já tem SSD, a dica de [SSD NVMe em notebook](/blog/ssd-nvme-em-notebook-quando-vale-upgrade) ajuda a ver se ainda há ganho."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Na Balão da Informática, no Cambuí, em Campinas, a [assistência técnica](/manutencao) faz o diagnóstico, a troca do HD por SSD e o upgrade de memória, e há [memória RAM](/categoria/hardware-memoria-ram) e [notebooks](/notebooks) para quando a troca do aparelho for o melhor caminho. Em uma linha: HD pede SSD, travamento com tudo aberto pede memória, e o resto pede diagnóstico."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "O que fazer primeiro no notebook lento: SSD ou memória?",
+      "resposta": "Se ele ainda usa HD e demora para ligar e abrir programas, o SSD costuma vir primeiro. Se já tem SSD e trava quando há muita coisa aberta, a memória é a candidata. Na dúvida, o Gerenciador de Tarefas mostra o tipo do disco e o uso da memória."
+    },
+    {
+      "pergunta": "Todo notebook aceita mais memória?",
+      "resposta": "Não. Em muitos modelos finos a memória é soldada na placa e não há encaixe para trocar; outros têm parte soldada e um encaixe livre. Confira pelo modelo exato antes de comprar."
+    },
+    {
+      "pergunta": "Trocar o HD por SSD apaga meus arquivos?",
+      "resposta": "Depende de como é feita. Dá para clonar o disco antigo para o novo e manter tudo, ou instalar o sistema do zero. Em qualquer caso, faça backup antes da troca."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Tips to improve PC performance in Windows — Suporte da Microsoft",
+      "url": "https://support.microsoft.com/en-us/help/4002019",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Laptop RAM vs SSD upgrade: which should you do first — Itechguides",
+      "url": "https://www.itechguides.com/laptop-ram-vs-ssd-upgrade-which-should-you-do-first/",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Can you still add more memory to your laptop if it has soldered RAM? — SlashGear",
+      "url": "https://www.slashgear.com/1871357/laptop-soldered-ram-how-add-more-memory",
+      "data": "junho de 2025"
+    },
+    {
+      "nome": "How to find out if you can upgrade your laptop — Windows Central",
+      "url": "https://www.windowscentral.com/how-find-out-if-you-can-upgrade-your-laptop",
+      "data": "março de 2019"
+    },
+    {
+      "nome": "How to check if your Windows laptop has an HDD or SSD — Guiding Tech",
+      "url": "https://www.guidingtech.com/check-if-windows-laptop-has-hdd-or-ssd/",
+      "data": "junho de 2024"
+    }
+  ]
+}
