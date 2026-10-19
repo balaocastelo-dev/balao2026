@@ -11,7 +11,11 @@ pts = json.load(open(os.path.join(pasta, 'estrutura_pontos.json'), encoding='utf
 fonte = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
 r = max(14, W // 70)
 fb = ImageFont.truetype(fonte, int(r * 1.05)); ft = ImageFont.truetype(fonte.replace('-Bold', ''), max(16, W // 62))
-linha = int(ft.size * 1.55); n_col = 2; n_lin = (len(pts) + n_col - 1) // n_col
+linha = int(ft.size * 1.55)
+_med = ImageDraw.Draw(im)
+_larg = max(_med.textlength(p['texto'], font=ft) for p in pts) + 2 * r + 60
+n_col = 2 if _larg < W / 2 else 1                     # textos compridos: uma coluna só, sem encavalar
+n_lin = (len(pts) + n_col - 1) // n_col
 out = Image.new('RGB', (W, H + linha * n_lin + 40), 'white'); out.paste(im, (0, 0))
 d = ImageDraw.Draw(out)
 for p in pts:
