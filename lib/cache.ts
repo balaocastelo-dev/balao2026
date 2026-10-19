@@ -42,6 +42,12 @@ import {
   type FileiraPronta,
 } from "./landing/vitrine";
 import type { RegraDeVitrine } from "./landing/tipos";
+import {
+  caminhosDoPlano,
+  montarBase,
+  planoDeSugestoes,
+  type BaseDeSugestoes,
+} from "./catalogo/sugestoes";
 
 const listaVazia = (itens: unknown[]) => !Array.isArray(itens) || itens.length === 0;
 
@@ -320,6 +326,28 @@ export function getCachedFileirasDaPagina(slug: string, regras: RegraDeVitrine[]
       ),
     chave,
     { revalidate: 300, tags: [TAG_PRODUTOS] }
+  )();
+}
+
+/**
+ * Base das sugestões da página do produto (lib/catalogo/sugestoes.ts), por
+ * categoria: os parecidos da categoria e os candidatos de cada grupo "combina
+ * com". Uma consulta enxuta por categoria a cada 30 minutos, no máximo (cota
+ * de 500 conexões/hora do banco); a escolha para cada produto é feita na hora,
+ * sem banco. Guarda só os campos do card, no máximo ~1.500 itens.
+ */
+export function getCachedBaseDeSugestoes(categoria: string) {
+  const plano = planoDeSugestoes(categoria);
+  const caminhos = caminhosDoPlano(plano);
+  return unstable_cache(
+    async (): Promise<BaseDeSugestoes> =>
+      comEspelho<BaseDeSugestoes>(
+        async () => montarBase(await getCandidatosPorOrigens({ categorias: caminhos, nomes: [] }), plano),
+        (produtos) => montarBase(produtos.filter((p) => naCategoria(p.category, caminhos)), plano),
+        (base) => !base || (base.parecidos.length === 0 && base.combina.every((g) => g.length === 0))
+      ),
+    ["sugestoes-v1", plano.categoria],
+    { revalidate: 1800, tags: [TAG_PRODUTOS] }
   )();
 }
 

@@ -1,4 +1,6 @@
 import { Metadata } from 'next';
+import { Suspense } from 'react';
+import SugestoesDoProduto from '@/components/produto/SugestoesDoProduto';
 import Header from '@/components/Header';
 import SeloProntaEntrega, { ehImagemIlustrativa } from "@/components/SeloProntaEntrega";
 import Sidebar from '@/components/Sidebar';
@@ -256,6 +258,11 @@ export default async function ProductPage({ params }: Props) {
                 </div>
             </div>
           </div>
+
+          {/* Carrosséis de sugestões: chegam depois do produto, sem atrasar a página. */}
+          <Suspense fallback={null}>
+            <SugestoesDoProduto produto={product} />
+          </Suspense>
         </main>
       </div>
      </div>
