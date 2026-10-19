@@ -23,7 +23,14 @@ const nextConfig: NextConfig = {
         { source: "/3d", destination: "/3d/index.html" },
         { source: "/chacara3d", destination: "/chacara3d/index.html" },
       ],
-      afterFiles: [],
+      // MEU BLING (ERP próprio, substituto do Bling) mora na VPS da loja
+      // (srv1963897.hstgr.cloud, Caddy → container meu-bling) e aparece aqui em
+      // www.balao.info/sistema: a Vercel repassa a chamada e o endereço não muda.
+      // Código e deploy: github.com/balaocastelo-dev/meu-bling (deploy/vps/).
+      afterFiles: [
+        { source: "/sistema", destination: "https://srv1963897.hstgr.cloud/sistema/" },
+        { source: "/sistema/:caminho*", destination: "https://srv1963897.hstgr.cloud/sistema/:caminho*" },
+      ],
       fallback: [],
     };
   },
