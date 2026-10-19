@@ -10,7 +10,12 @@
     "assistência",
     "apple"
   ],
-  "capa": null,
+  "capa": {
+    "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/macbook-nao-liga-ou-nao-carrega-o-que-conferir-defc310b.jpg",
+    "alt": "Notebook fechado de costas sobre uma mesa de madeira, com um carregador e um cabo enrolado ao lado",
+    "largura": 1600,
+    "altura": 900
+  },
   "publicadoEm": "2026-10-19T09:00:00.000Z",
   "seo": {
     "titulo": "MacBook não liga ou não carrega: o que conferir"
