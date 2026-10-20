@@ -45,7 +45,12 @@
         "memória ram",
         "drivers"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/tela-azul-no-windows-causas-e-o-que-anotar-1972be37.jpg",
+        "alt": "Gabinete de computador de mesa com a tampa lateral aberta sobre uma bancada, ao lado de um monitor apagado e uma chave de fenda",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-10-20T09:00:00.000Z",
       "minutos": 10
     },
@@ -560,5 +565,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-19T22:48:38.457Z"
+  "atualizadoEm": "2026-10-20T08:35:24.933Z"
 }
