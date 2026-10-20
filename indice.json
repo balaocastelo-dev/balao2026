@@ -13,7 +13,12 @@
         "memória ram",
         "diagnóstico"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/notebook-lento-as-duas-trocas-que-mais-resolvem-a16e9583.jpg",
+        "alt": "Notebook preto virado de cabeça para baixo sobre uma bancada, com a tampa de baixo aberta, ao lado de um HD, um SSD e um pente de memória",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-10-20T21:00:00.000Z",
       "minutos": 5,
       "formato": "dica"
@@ -570,5 +575,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-20T08:45:04.052Z"
+  "atualizadoEm": "2026-10-20T08:51:02.991Z"
 }

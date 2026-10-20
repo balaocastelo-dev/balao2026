@@ -1,13 +1,4 @@
 {
   "versao": 1,
-  "pendentes": [
-    {
-      "slug": "notebook-lento-as-duas-trocas-que-mais-resolvem",
-      "titulo": "Notebook lento: as duas trocas que mais resolvem e como saber qual fazer",
-      "categoria": "hardware",
-      "alt": "Notebook preto virado de cabeça para baixo sobre uma bancada, com a tampa de baixo aberta, ao lado de um HD, um SSD e um pente de memória",
-      "pedido": "A black plastic laptop with a thick bezel lying upside down on a clean wooden workbench, its bottom cover removed and set beside it, showing the internal components. Next to it lie a 2.5-inch hard drive, a small M.2 solid-state drive and a laptop memory module. A small screwdriver rests on the bench. Soft daylight from a window on the left, shallow depth of field.",
-      "pedidoEm": "2026-10-19T22:48:38.457Z"
-    }
-  ]
+  "pendentes": []
 }
