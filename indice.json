@@ -29,7 +29,12 @@
         "atualização",
         "fim de suporte"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/office-2021-fim-do-suporte-o-que-fazer-a4d8a5c9.jpg",
+        "alt": "Mesa de escritório arrumada com um notebook preto fechado, uma pilha de folhas impressas, uma caneca e um monitor apagado ao fundo",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-10-20T15:00:00.000Z",
       "minutos": 3
     },
@@ -565,5 +570,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-20T08:35:24.933Z"
+  "atualizadoEm": "2026-10-20T08:45:04.052Z"
 }
