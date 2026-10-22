@@ -1,0 +1,99 @@
+{
+  "slug": "plex-media-server-falha-explorada-atualizar",
+  "titulo": "Plex Media Server: falha usada em ataques pede atualização imediata",
+  "resumo": "Em 19 de outubro, a Plex avisou que servidores desatualizados estão sendo invadidos. Veja quem corre risco, como conferir a versão e o que fazer.",
+  "categoria": "noticias",
+  "etiquetas": [
+    "segurança",
+    "atualização",
+    "plex",
+    "servidor de mídia"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-23T15:00:00.000Z",
+  "seo": {
+    "titulo": "Plex Media Server: falha usada em ataques pede atualização"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Em 19 de outubro de 2026, a Plex atualizou o aviso de segurança do Plex Media Server, o programa que transforma um computador ou um NAS (um aparelho de armazenamento em rede) num servidor de filmes, séries e músicas para a casa. Segundo a empresa, falhas já corrigidas estão sendo usadas em ataques contra servidores desatualizados e acessíveis pela internet."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que o problema é novo e ainda sem solução. Não é: a versão que corrige as falhas já existe, e a Plex pede a atualização desde 1º de setembro. O risco está em quem deixou o servidor parado numa versão antiga, principalmente com o acesso remoto ligado."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que a Plex anunciou"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O aviso lista quatro falhas que, encadeadas, deixam um invasor sem senha nenhuma executar comandos no computador com as permissões do Plex Media Server. Uma demonstração pública do ataque saiu em 16 de outubro, e a Plex relata invasões que instalaram programas de mineração de criptomoeda e de proxy (que usam a sua conexão para o tráfego de outras pessoas)."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Estão expostas as versões anteriores à 1.43.3.10861. Em 20 de outubro, a CISA, agência de cibersegurança dos Estados Unidos, colocou as quatro falhas na sua lista de vulnerabilidades exploradas em ataques reais, o que confirma o alerta por uma fonte independente da empresa."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que isso muda para você"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem tem um servidor Plex em casa:** abra o Plex no navegador, entre em Configurações e depois em Geral, e confira o número da versão. Se for anterior à 1.43.3.10861, atualize agora. No Windows e no macOS dá para baixar a versão nova na página oficial da Plex; num NAS, siga o procedimento do fabricante do aparelho, porque a versão da loja de aplicativos dele pode demorar a chegar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem não usa o acesso remoto:** a própria Plex recomenda desligá-lo se você não assiste fora de casa. Com ele desligado, o servidor deixa de ficar acessível para quem procura máquinas vulneráveis na internet."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem desconfia que já foi invadido:** a Plex aponta como sinais o processador trabalhando alto sem motivo, processos desconhecidos rodando e arquivos estranhos na pasta Codecs do programa. Nesse caso, a orientação é reinstalar o servidor do zero, sair da conta em todos os aparelhos e trocar a senha. Um computador que ficou lento de repente pode ter essa causa, como explica o guia sobre [computador lento](/blog/computador-lento-o-que-resolve-de-verdade)."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem não usa Plex:** nada muda diretamente. Mas o caso repete a lição da notícia sobre a [atualização adulterada do AOMEI Backupper](/blog/aomei-backupper-atualizacao-adulterada-o-que-fazer): programa que fica ligado o tempo todo e conversa com a internet precisa estar sempre na versão mais nova."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que ainda não se sabe"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Plex não informou quantos servidores foram atacados nem em quais países. O aviso também não diz se dados de contas foram acessados nos ataques; é por isso que a troca de senha aparece entre as recomendações para quem foi invadido."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, tem [assistência técnica](/manutencao) para diagnóstico, limpeza de vírus e reinstalação do sistema. Em uma linha: confira a versão do seu Plex ainda esta semana e, se não usa o acesso remoto, desligue-o."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "geral"
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Important Security Update for Plex Media Server v1.43.2 and earlier — Plex Forum (atualização de 19 de outubro)",
+      "url": "https://forums.plex.tv/t/important-security-update-for-plex-media-server-v1-43-2-and-earlier/942319",
+      "data": "19 de outubro de 2026"
+    },
+    {
+      "nome": "CISA Orders Federal Agencies to Patch Exploited Plex2Shell, Siemens, and SiteGuard Flaws — The Hacker News",
+      "url": "https://thehackernews.com/2026/10/cisa-orders-federal-agencies-to-patch.html",
+      "data": "21 de outubro de 2026"
+    },
+    {
+      "nome": "Plex2Shell Exploited in the Wild — SecurityOnline",
+      "url": "https://securityonline.info/plex2shell-plex-media-server-exploited/",
+      "data": "19 de outubro de 2026"
+    }
+  ]
+}

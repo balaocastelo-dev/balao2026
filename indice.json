@@ -18,6 +18,21 @@
       "formato": "dica"
     },
     {
+      "slug": "plex-media-server-falha-explorada-atualizar",
+      "titulo": "Plex Media Server: falha usada em ataques pede atualização imediata",
+      "resumo": "Em 19 de outubro, a Plex avisou que servidores desatualizados estão sendo invadidos. Veja quem corre risco, como conferir a versão e o que fazer.",
+      "categoria": "noticias",
+      "etiquetas": [
+        "segurança",
+        "atualização",
+        "plex",
+        "servidor de mídia"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-23T15:00:00.000Z",
+      "minutos": 3
+    },
+    {
       "slug": "nobreak-estabilizador-ou-filtro-de-linha",
       "titulo": "Nobreak, estabilizador ou filtro de linha: o que protege o computador",
       "resumo": "Nobreak, estabilizador ou filtro de linha? Veja o que cada um faz, por que o estabilizador quase sempre sobra hoje e quando o nobreak vale a pena.",
@@ -606,5 +621,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-22T22:49:45.220Z"
+  "atualizadoEm": "2026-10-22T23:09:49.884Z"
 }
