@@ -1,6 +1,6 @@
 "use client";
 
-// Fechar a venda: pagamento, cliente (o Bling preenche quem já é cliente) e nota.
+// Fechar a venda: pagamento, cliente (o /sistema preenche quem já é cliente) e nota.
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
@@ -29,14 +29,14 @@ interface Props {
   estado: EstadoDoCaixa;
   despachar: React.Dispatch<Acao>;
   vendedor: { id: string; nome: string } | null;
-  blingLigado: boolean;
+  sistemaLigado: boolean;
   enviando: boolean;
   erro: string | null;
   aoVoltar: () => void;
   aoFinalizar: () => void;
 }
 
-export default function Fechamento({ estado, despachar, vendedor, blingLigado, enviando, erro, aoVoltar, aoFinalizar }: Props) {
+export default function Fechamento({ estado, despachar, vendedor, sistemaLigado, enviando, erro, aoVoltar, aoFinalizar }: Props) {
   const t = totaisDa(estado);
   const [dividir, setDividir] = useState(estado.pagamentos.length > 1);
   const pagamentos = estado.pagamentos;
@@ -186,7 +186,7 @@ export default function Fechamento({ estado, despachar, vendedor, blingLigado, e
           <h3 id="titulo-cliente" className="text-lg font-bold">
             Cliente
           </h3>
-          <Cliente cliente={estado.cliente} pedirNota={estado.pedirNota} blingLigado={blingLigado} mudar={(c) => despachar({ tipo: "cliente", cliente: c })} />
+          <Cliente cliente={estado.cliente} pedirNota={estado.pedirNota} sistemaLigado={sistemaLigado} mudar={(c) => despachar({ tipo: "cliente", cliente: c })} />
 
           <label
             className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition ${
@@ -204,7 +204,7 @@ export default function Fechamento({ estado, despachar, vendedor, blingLigado, e
                 <FileText className="h-5 w-5" aria-hidden /> Emitir nota fiscal (NF-e)
               </span>
               <span className="mt-1 block text-sm text-[var(--texto-suave)]">
-                O Bling gera a nota pelo pedido e manda para a Sefaz na hora. Precisa de CPF/CNPJ e endereço completo.
+                O sistema gera a nota pela venda e manda para a Sefaz na hora. Precisa de CPF/CNPJ e endereço completo; se faltar algo, ele diz o quê.
                 {estado.cliente.email ? " O cliente recebe a nota no e-mail." : ""}
               </span>
             </span>
@@ -226,7 +226,7 @@ export default function Fechamento({ estado, despachar, vendedor, blingLigado, e
       <div className="border-t border-[var(--linha)] bg-[var(--painel)] px-5 py-4 lg:px-8">
         {(problemas.length > 0 || semVendedor || erro) && (
           <ul className="mb-3 space-y-1 text-sm">
-            {semVendedor && <li className="text-red-200">Escolha o vendedor no alto da tela: a venda entra no Bling (e na Arena) com o nome dele.</li>}
+            {semVendedor && <li className="text-red-200">Escolha o vendedor no alto da tela: a venda entra no sistema com o nome dele (é dele a comissão).</li>}
             {problemas.slice(0, 3).map((p, i) => (
               <li key={i} className="text-red-200">
                 {p.mensagem}
@@ -243,14 +243,14 @@ export default function Fechamento({ estado, despachar, vendedor, blingLigado, e
             <div className="text-3xl font-black tracking-tight">{reais(t.total)}</div>
           </div>
           <div className="flex items-center gap-3">
-            {!blingLigado && <span className="max-w-[16rem] text-xs text-[var(--texto-suave)]">Bling fora agora: a venda fica gravada e entra sozinha quando ele voltar.</span>}
+            {!sistemaLigado && <span className="max-w-[16rem] text-xs text-[var(--texto-suave)]">Sistema fora agora: a venda fica gravada e entra sozinha quando ele voltar.</span>}
             <button
               onClick={aoFinalizar}
               disabled={!pode}
               className="flex items-center gap-2 rounded-2xl bg-[var(--vermelho)] px-8 py-4 text-lg font-black text-white shadow-lg shadow-red-950/50 transition hover:bg-red-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Receipt className="h-5 w-5" aria-hidden />
-              {enviando ? (estado.pedirNota ? "Lançando e emitindo a nota…" : "Lançando no Bling…") : estado.pedirNota ? "Finalizar e emitir nota" : "Finalizar venda"}
+              {enviando ? (estado.pedirNota ? "Lançando e emitindo a nota…" : "Lançando no sistema…") : estado.pedirNota ? "Finalizar e emitir nota" : "Finalizar venda"}
             </button>
           </div>
         </div>
@@ -293,27 +293,27 @@ function PixNoBalcao({ valor }: { valor: number }) {
 export function Cliente({
   cliente,
   pedirNota,
-  blingLigado,
+  sistemaLigado,
   mudar,
 }: {
   cliente: ClienteDaVenda;
   pedirNota: boolean;
-  blingLigado: boolean;
+  sistemaLigado: boolean;
   mudar: (c: Partial<ClienteDaVenda>) => void;
 }) {
-  const [busca, setBusca] = useState<"" | "procurando" | "achado" | "novo" | "sem-bling">("");
+  const [busca, setBusca] = useState<"" | "procurando" | "achado" | "novo" | "sem-sistema">("");
   const [cepBusca, setCepBusca] = useState("");
   const [enderecoAberto, setEnderecoAberto] = useState(Boolean(cliente.cep));
   const ultimoDoc = useRef("");
   const ultimoCep = useRef("");
   const doc = soDigitos(cliente.documento);
 
-  // CPF/CNPJ válido: procura no Bling e preenche o que ele já sabe.
+  // CPF/CNPJ válido: procura no /sistema e preenche o que ele já sabe.
   useEffect(() => {
     if (!documentoValido(doc) || ultimoDoc.current === doc) return;
     ultimoDoc.current = doc;
-    if (!blingLigado) {
-      setBusca("sem-bling");
+    if (!sistemaLigado) {
+      setBusca("sem-sistema");
       return;
     }
     setBusca("procurando");
@@ -323,7 +323,7 @@ export function Cliente({
         if (j.cliente) {
           const c = j.cliente;
           mudar({
-            blingId: c.blingId,
+            sistemaId: c.sistemaId ?? null,
             nome: c.nome || cliente.nome,
             email: c.email || cliente.email,
             telefone: c.telefone || cliente.telefone,
@@ -332,13 +332,13 @@ export function Cliente({
           if (c.cep) setEnderecoAberto(true);
           setBusca("achado");
         } else {
-          mudar({ blingId: null });
+          mudar({ sistemaId: null });
           setBusca("novo");
         }
       })
-      .catch(() => setBusca("sem-bling"));
+      .catch(() => setBusca("sem-sistema"));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [doc, blingLigado]);
+  }, [doc, sistemaLigado]);
 
   // CEP completo: rua, bairro e cidade pelo ViaCEP.
   const cep = soDigitos(cliente.cep);
@@ -379,13 +379,13 @@ export function Cliente({
             {doc && !documentoValido(doc) && (doc.length === 11 || doc.length === 14)
               ? "Documento inválido."
               : busca === "procurando"
-                ? "Procurando no Bling…"
+                ? "Procurando no sistema…"
                 : busca === "achado"
-                  ? "Cliente do Bling: dados preenchidos."
+                  ? "Cliente do sistema: dados preenchidos."
                   : busca === "novo"
-                    ? "Cliente novo: será cadastrado no Bling."
-                    : busca === "sem-bling"
-                      ? "Sem Bling agora: preencha à mão."
+                    ? "Cliente novo: será cadastrado no sistema."
+                    : busca === "sem-sistema"
+                      ? "Sem o sistema agora: preencha à mão."
                       : ""}
           </span>
         </label>

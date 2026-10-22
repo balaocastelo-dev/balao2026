@@ -1,6 +1,6 @@
 "use client";
 
-// Depois de finalizar: onde a venda chegou (Bling, Sefaz) e a escolha do papel.
+// Depois de finalizar: onde a venda chegou (/sistema, Sefaz) e a escolha do papel.
 
 import { useEffect, useState } from "react";
 import { Check, CircleAlert, ExternalLink, FileText, LoaderCircle, Printer, RotateCw, ScrollText } from "lucide-react";
@@ -21,23 +21,28 @@ type Passo = { estado: "feito" | "andando" | "parado" | "erro"; titulo: string; 
 
 function passos(c: DadosDoComprovante): Passo[] {
   const lista: Passo[] = [{ estado: "feito", titulo: "Venda gravada", detalhe: c.pdvId }];
-  if (c.estadoNoBling === "no-bling") lista.push({ estado: "feito", titulo: `Pedido nº ${c.numeroBling ?? "…"} no Bling`, detalhe: c.vendedor ? `Vendedor ${c.vendedor}` : null });
-  else if (c.estadoNoBling === "erro") lista.push({ estado: "erro", titulo: "O Bling recusou o pedido", detalhe: c.mensagemDoBling });
+  if (c.estadoNoSistema === "no-sistema")
+    lista.push({
+      estado: "feito",
+      titulo: c.numeroSistema?.startsWith("Bling") ? `Pedido ${c.numeroSistema} (antes do sistema)` : `Venda nº ${c.numeroSistema ?? "…"} no sistema`,
+      detalhe: c.vendedor ? `Vendedor ${c.vendedor}` : null,
+    });
+  else if (c.estadoNoSistema === "erro") lista.push({ estado: "erro", titulo: "O sistema recusou a venda", detalhe: c.mensagemDoSistema });
   else
     lista.push({
       estado: "parado",
-      titulo: "Aguardando o Bling",
-      detalhe: c.mensagemDoBling ? `${c.mensagemDoBling} A venda entra sozinha quando ele voltar.` : "A venda entra sozinha em instantes.",
+      titulo: "Aguardando o sistema",
+      detalhe: c.mensagemDoSistema ? `${c.mensagemDoSistema} A venda entra sozinha quando ele voltar.` : "A venda entra sozinha em instantes.",
     });
 
   if (c.pedirNota && c.nota) {
     const n = c.nota;
     if (n.estado === "autorizada") lista.push({ estado: "feito", titulo: `NF-e nº ${n.numero} autorizada`, detalhe: n.serie ? `Série ${n.serie}` : null });
     else if (n.estado === "enviada") lista.push({ estado: "andando", titulo: "Nota na Sefaz", detalhe: "Esperando a autorização (costuma levar segundos)." });
-    else if (n.estado === "gerada") lista.push({ estado: "andando", titulo: "Nota gerada no Bling", detalhe: "Indo para a Sefaz." });
+    else if (n.estado === "gerada") lista.push({ estado: "andando", titulo: "Nota criada no sistema", detalhe: "Indo para a Sefaz." });
     else if (n.estado === "rejeitada") lista.push({ estado: "erro", titulo: "A Sefaz rejeitou a nota", detalhe: n.mensagem });
     else if (n.estado === "erro") lista.push({ estado: "erro", titulo: "A nota não saiu", detalhe: n.mensagem });
-    else lista.push({ estado: "parado", titulo: "Nota pedida", detalhe: "Sai assim que o pedido estiver no Bling." });
+    else lista.push({ estado: "parado", titulo: "Nota pedida", detalhe: "Sai assim que a venda estiver no sistema." });
   }
   return lista;
 }
@@ -96,9 +101,9 @@ export default function Resultado({ c, aoImprimir, aoAcao, aoNovaVenda, ocupado 
         ))}
       </ol>
 
-      {(temErro || notaAndando || c.estadoNoBling === "pendente") && c.pdvId && (
+      {(temErro || notaAndando || c.estadoNoSistema === "pendente") && c.pdvId && (
         <div className="flex flex-wrap gap-2">
-          {(temErro || c.estadoNoBling === "pendente") && (
+          {(temErro || c.estadoNoSistema === "pendente") && (
             <button
               onClick={() => aoAcao("tentar-de-novo")}
               disabled={ocupado}
@@ -153,9 +158,9 @@ export default function Resultado({ c, aoImprimir, aoAcao, aoNovaVenda, ocupado 
             </span>
           </button>
         </div>
-        {c.nota?.estado === "autorizada" && (c.nota.linkDanfe || c.nota.linkPdf) && (
+        {c.nota?.estado === "autorizada" && c.nota.linkDanfe && (
           <a
-            href={c.nota.linkPdf || c.nota.linkDanfe || "#"}
+            href={c.nota.linkDanfe}
             target="_blank"
             rel="noreferrer"
             className="flex items-center justify-center gap-2 rounded-2xl border border-[var(--linha)] bg-[var(--superficie)] p-4 font-bold hover:border-slate-500"

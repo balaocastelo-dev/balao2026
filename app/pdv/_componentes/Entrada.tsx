@@ -42,7 +42,7 @@ export default function Entrada() {
           </div>
           <div>
             <h1 className="text-xl font-black tracking-tight">Caixa do balcão</h1>
-            <p className="text-sm text-[var(--texto-suave)]">Vendas ligadas ao Bling</p>
+            <p className="text-sm text-[var(--texto-suave)]">Vendas ligadas ao sistema</p>
           </div>
         </div>
         <label htmlFor="senha" className="mb-2 block text-sm font-semibold">

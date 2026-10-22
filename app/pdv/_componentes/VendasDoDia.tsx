@@ -1,6 +1,6 @@
 "use client";
 
-// As vendas do dia: as do caixa e as lançadas direto no Bling, na mesma lista.
+// As vendas do dia: as do caixa e as lançadas direto no /sistema, na mesma lista.
 
 import { useCallback, useEffect, useState } from "react";
 import { ArrowLeft, FileText, RefreshCw, X } from "lucide-react";
@@ -14,7 +14,7 @@ import Resultado from "./Resultado";
 interface Props {
   resumo: ResumoDoDia | null;
   carregando: boolean;
-  blingLigado: boolean;
+  sistemaLigado: boolean;
   aoAtualizar: () => void;
   aoFechar: () => void;
   aoImprimir: (c: DadosDoComprovante, f: Formato) => void;
@@ -22,9 +22,9 @@ interface Props {
 
 function Etiqueta({ l }: { l: LinhaDoDia }) {
   if (l.cancelada) return <span className="rounded-md bg-slate-700/60 px-2 py-0.5 text-xs text-slate-300 line-through">{l.situacao}</span>;
-  if (l.estadoNoBling === "erro") return <span className="rounded-md bg-[var(--vermelho)] px-2 py-0.5 text-xs font-bold text-white">Erro no Bling</span>;
-  if (l.estadoNoBling === "pendente" || l.estadoNoBling === "enviando")
-    return <span className="rounded-md border border-[var(--ceu)] px-2 py-0.5 text-xs text-[var(--ceu)]">Aguardando o Bling</span>;
+  if (l.estadoNoSistema === "erro") return <span className="rounded-md bg-[var(--vermelho)] px-2 py-0.5 text-xs font-bold text-white">Erro no sistema</span>;
+  if (l.estadoNoSistema === "pendente" || l.estadoNoSistema === "enviando")
+    return <span className="rounded-md border border-[var(--ceu)] px-2 py-0.5 text-xs text-[var(--ceu)]">Aguardando o sistema</span>;
   return <span className="rounded-md bg-white/10 px-2 py-0.5 text-xs text-slate-200">{l.situacao}</span>;
 }
 
@@ -41,7 +41,7 @@ function EtiquetaNota({ l }: { l: LinhaDoDia }) {
   );
 }
 
-export default function VendasDoDia({ resumo, carregando, blingLigado, aoAtualizar, aoFechar, aoImprimir }: Props) {
+export default function VendasDoDia({ resumo, carregando, sistemaLigado, aoAtualizar, aoFechar, aoImprimir }: Props) {
   const [aberta, setAberta] = useState<string | null>(null);
   const [detalhe, setDetalhe] = useState<DadosDoComprovante | null>(null);
   const [erro, setErro] = useState<string | null>(null);
@@ -75,7 +75,7 @@ export default function VendasDoDia({ resumo, carregando, blingLigado, aoAtualiz
           body: JSON.stringify({ acao: nome, cliente }),
         });
         const j = await r.json();
-        if (!r.ok) throw new Error(j.erro || "O Bling não respondeu.");
+        if (!r.ok) throw new Error(j.erro || "O sistema não respondeu.");
         setDetalhe(j.comprovante);
         setParaNota(null);
         aoAtualizar();
@@ -143,14 +143,14 @@ export default function VendasDoDia({ resumo, carregando, blingLigado, aoAtualiz
                     <span>{reais(i.valor * i.quantidade)}</span>
                   </div>
                 ))}
-                {detalhe.origem === "bling" && <p className="pt-2 text-xs text-[var(--texto-suave)]">Lançada direto no Bling. Mudanças nela se fazem no Bling.</p>}
+                {detalhe.origem === "sistema" && <p className="pt-2 text-xs text-[var(--texto-suave)]">Lançada direto no sistema (www.balao.info/sistema). Mudanças nela se fazem lá.</p>}
               </div>
               {erro && <p className="mx-5 mt-4 rounded-xl bg-red-950/40 p-3 text-sm text-red-200 lg:mx-8">{erro}</p>}
               {semNota && !paraNota && (
                 <div className="px-5 pt-5 lg:px-8">
                   <button
                     onClick={() => setParaNota({ ...CLIENTE_VAZIO, ...detalhe.cliente })}
-                    disabled={!blingLigado}
+                    disabled={!sistemaLigado}
                     className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[var(--linha)] bg-[var(--superficie)] p-4 font-bold hover:border-slate-500 disabled:opacity-50"
                   >
                     <FileText className="h-5 w-5" aria-hidden /> {detalhe.pedirNota ? "Emitir a nota de novo" : "Emitir nota fiscal desta venda"}
@@ -160,7 +160,7 @@ export default function VendasDoDia({ resumo, carregando, blingLigado, aoAtualiz
               {paraNota && (
                 <div className="space-y-3 px-5 pt-5 lg:px-8">
                   <p className="text-sm text-[var(--texto-suave)]">Confira os dados do cliente para a nota.</p>
-                  <Cliente cliente={paraNota} pedirNota blingLigado={blingLigado} mudar={(c) => setParaNota({ ...paraNota, ...c })} />
+                  <Cliente cliente={paraNota} pedirNota sistemaLigado={sistemaLigado} mudar={(c) => setParaNota({ ...paraNota, ...c })} />
                   <div className="flex gap-2">
                     <button
                       onClick={() => acao("emitir-nota", paraNota)}
@@ -182,9 +182,9 @@ export default function VendasDoDia({ resumo, carregando, blingLigado, aoAtualiz
           <p className="p-5 text-[var(--texto-suave)]">{carregando ? "Lendo as vendas…" : "Sem dados ainda."}</p>
         ) : (
           <>
-            {!resumo.bling.lido && (
+            {!resumo.sistema.lido && (
               <p className="m-4 rounded-xl border border-[var(--linha)] p-3 text-sm text-[var(--texto-suave)]">
-                Sem a lista do Bling agora{resumo.bling.mensagem ? `: ${resumo.bling.mensagem}` : "."} Mostrando as vendas do caixa.
+                Sem a lista do sistema agora{resumo.sistema.mensagem ? `: ${resumo.sistema.mensagem}` : "."} Mostrando as vendas do caixa.
               </p>
             )}
             {resumo.linhas.length === 0 ? (
@@ -196,7 +196,7 @@ export default function VendasDoDia({ resumo, carregando, blingLigado, aoAtualiz
                     <button onClick={() => abrir(l.chave)} className="flex w-full items-center gap-4 border-b border-[var(--linha)] px-5 py-3.5 text-left hover:bg-white/[0.03]">
                       <div className="pdv-numeros w-16 shrink-0 text-sm">
                         <div className="font-bold">{l.numero ?? "—"}</div>
-                        <div className="text-xs text-[var(--texto-suave)]">{l.hora ?? (l.origem === "bling" ? "Bling" : "")}</div>
+                        <div className="text-xs text-[var(--texto-suave)]">{l.hora ?? ""}</div>
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className={`truncate font-semibold ${l.cancelada ? "text-slate-500 line-through" : ""}`}>{l.cliente}</div>

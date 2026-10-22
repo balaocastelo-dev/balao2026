@@ -1,10 +1,11 @@
 // @vitest-environment node
-/* eslint-disable @typescript-eslint/no-explicit-any -- o Bling de mentira guarda JSON solto */
+/* eslint-disable @typescript-eslint/no-explicit-any -- o sistema de mentira guarda JSON solto */
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
-// PDV novo (12/10/2026): contas da venda, acesso ao Bling vindo do vigia,
-// ida da venda ao Bling (contato → pedido → nota) e a lista do dia que junta
-// o PDV com os pedidos lançados direto no Bling. Sem MySQL e sem Bling de verdade.
+// PDV: contas da venda, acesso ao Bling vindo do vigia (ainda usado pela Arena)
+// e, desde 22/10/2026, a ida da venda ao /sistema (MEU BLING) — venda, nota e a
+// lista do dia que junta o caixa com o que foi lançado direto no /sistema.
+// Sem MySQL e sem /sistema de verdade.
 
 vi.mock("@/lib/turso", () => ({
   turso: {
@@ -16,101 +17,101 @@ vi.mock("@/lib/turso", () => ({
 }));
 
 process.env.PAINEL_PASSWORD = "senha-de-teste";
+const CHAVE = "chave-do-sistema-de-teste-com-48-caracteres-aaaa";
+process.env.MEU_BLING_CHAVE = CHAVE;
 
 import { _gavetaDeTeste, ler } from "@/lib/arena/gaveta";
 import { _limparCacheDoAcesso, guardarAcesso, marcarRecusado, precisaDeAcesso, tokenAtual } from "@/lib/pdv/acesso";
-import { _trocarRede, corpoDoPedido, escolherForma, montarConsulta, type FormaDoBling } from "@/lib/pdv/bling";
+import { _trocarRede, assinaturaConfere } from "@/lib/pdv/sistema";
 import { conferirVenda, documentoValido, lerPreco, novoIdDeVenda, tabelaPelosPagamentos, totaisDa, valorDoDesconto } from "@/lib/pdv/calculos";
 import { CLIENTE_VAZIO } from "@/lib/pdv/tipos";
-import { diaDoId, lerEntrada, lerVenda, registrarVenda, seguirPendentes, sincronizarVenda, VendaInvalida, vendasDoDia } from "@/lib/pdv/vendas";
+import {
+  diaDoId,
+  lerEntrada,
+  lerVenda,
+  normalizarVenda,
+  pedirNotaDepois,
+  registrarVenda,
+  seguirPendentes,
+  sincronizarVenda,
+  tentarDeNovo,
+  VendaInvalida,
+  vendasDoDia,
+} from "@/lib/pdv/vendas";
 
 const TOKEN = "t".repeat(40);
-const FORMAS = [
-  { id: 1562401, descricao: "PIX", tipoPagamento: 17, situacao: 1, padrao: 0 },
-  { id: 2, descricao: "Dinheiro", tipoPagamento: 1, situacao: 1, padrao: 1 },
-  { id: 3, descricao: "Cartão de Crédito", tipoPagamento: 3, situacao: 1, padrao: 0 },
-  { id: 4, descricao: "Cartão de Débito", tipoPagamento: 4, situacao: 1, padrao: 0 },
-];
 
-/** Um Bling de mentira, com o mínimo de estado para seguir uma venda. */
-function blingFalso() {
-  const chamadas: { metodo: string; url: string; corpo: any }[] = [];
-  const estado = { pedidos: [] as any[], nota: 0, notaEnviada: false, recusar401: false, contatos: [] as any[] };
+/** Um /sistema de mentira (a porta /api/v1/integracoes/site do MEU BLING), com o mínimo de estado. */
+function sistemaFalso() {
+  const chamadas: { metodo: string; url: string; corpo: any; auth: string | null }[] = [];
+  const estado = { vendas: [] as any[], fora: false, pendenciaNaNota: null as string | null, notas: new Map<number, any>() };
   const resp = (status: number, j: unknown) => new Response(JSON.stringify(j), { status, headers: { "content-type": "application/json" } });
+  const vendaCompleta = (v: any) => ({
+    id: v.id,
+    numero: v.numero,
+    data: v.criadaEm,
+    criadaEm: v.criadaEm,
+    origem: "BALCAO",
+    pdvId: v.pdvId,
+    situacao: { id: 3, nome: "Fechada", final: true, cancelamento: false },
+    cancelada: false,
+    vendedor: v.vendedorId ? { id: v.vendedorId, nome: "JULIA SOUZA" } : null,
+    cliente: { ...v.cliente, sistemaId: 77 },
+    itens: [],
+    totalProdutos: v.total,
+    desconto: 0,
+    total: v.total,
+    pagamentos: [],
+    observacoes: null,
+    nota: v.notaId ? estado.notas.get(v.notaId) : null,
+  });
   const f = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = String(input);
     const metodo = init?.method || "GET";
     const corpo = init?.body ? JSON.parse(String(init.body)) : null;
-    chamadas.push({ metodo, url, corpo });
-    if (estado.recusar401) return resp(401, { error: { type: "invalid_token" } });
+    const auth = (init?.headers as Record<string, string>)?.Authorization ?? null;
+    chamadas.push({ metodo, url, corpo, auth });
+    if (estado.fora) throw new TypeError("fetch failed");
+    if (auth !== `Bearer ${CHAVE}`) return resp(401, { erro: "Chave do site inválida" });
     const u = new URL(url);
-    const c = u.pathname.replace("/Api/v3/", "");
-    if (c === "contatos" && metodo === "GET") {
-      // Como o Bling: critério padrão (3) só ativos; 1 = todos menos excluídos; 2 = só excluídos.
-      const doc = u.searchParams.get("numeroDocumento");
-      const criterio = u.searchParams.get("criterio") ?? "3";
-      const visiveis = estado.contatos.filter((x) =>
-        criterio === "2" ? x.situacao === "E" : criterio === "1" ? x.situacao !== "E" : (x.situacao ?? "A") === "A"
-      );
-      return resp(200, { data: visiveis.filter((x) => doc && x.numeroDocumento === doc) });
+    const r = u.pathname.replace(/^\/sistema\/api\/v1\/integracoes\/site/, "");
+    if (r === "/vendas" && metodo === "POST") {
+      const ja = estado.vendas.find((v) => v.pdvId === corpo.pdvId);
+      if (ja) return resp(200, { venda: vendaCompleta(ja), criada: false });
+      const total = corpo.itens.reduce((s: number, i: any) => s + i.quantidade * i.valor, 0) - corpo.descontoEmReais;
+      const v = { ...corpo, id: 501 + estado.vendas.length, numero: 24838 + estado.vendas.length, criadaEm: "2026-10-22T18:00:00.000Z", total };
+      estado.vendas.push(v);
+      return resp(201, { venda: vendaCompleta(v), criada: true });
     }
-    const situacao = /^contatos\/(\d+)\/situacoes$/.exec(c);
-    if (situacao && metodo === "PATCH") {
-      const x = estado.contatos.find((k) => String(k.id) === situacao[1]);
-      if (x) x.situacao = corpo.situacao;
-      return new Response(null, { status: 204 });
-    }
-    if (c === "contatos" && metodo === "POST") {
-      const dono = estado.contatos.find((x) => corpo.numeroDocumento && x.numeroDocumento === corpo.numeroDocumento);
-      if (dono) {
-        return resp(400, {
-          error: { description: "O contato não pode ser salvo, pois ocorreram problemas em sua validação.", fields: [{ msg: `O CPF já está cadastrado no contato ${dono.nome}` }] },
-        });
-      }
-      const novo = { id: 900 + estado.contatos.length, ...corpo };
-      estado.contatos.push(novo);
-      return resp(201, { data: { id: novo.id } });
-    }
-    if (c === "formas-pagamentos") return resp(200, { data: FORMAS });
-    if (c === "pedidos/vendas" && metodo === "POST") {
-      const p = { id: 555 + estado.pedidos.length, numero: 24800 + estado.pedidos.length, ...corpo };
-      estado.pedidos.push(p);
-      return resp(201, { data: { id: p.id } });
-    }
-    if (c === "pedidos/vendas" && metodo === "GET") {
-      const idContato = u.searchParams.get("idContato");
-      const lista = estado.pedidos
-        .filter((p) => !idContato || String(p.contato.id) === idContato)
-        .map((p) => ({ id: p.id, numero: p.numero, data: p.data, total: p.totalCalculado ?? 0, contato: { id: p.contato.id, nome: "Cliente" }, situacao: { id: 6, valor: 0 } }));
-      return resp(200, { data: lista });
-    }
-    const pedido = /^pedidos\/vendas\/(\d+)$/.exec(c);
-    if (pedido) {
-      const p = estado.pedidos.find((x) => String(x.id) === pedido[1]);
-      return resp(200, { data: { ...p, notaFiscal: { id: estado.nota } } });
-    }
-    if (/^pedidos\/vendas\/\d+\/gerar-nfe$/.test(c)) {
-      estado.nota = 777;
-      return resp(201, { idNotaFiscal: 777 });
-    }
-    if (c === "nfe/777/enviar") {
-      estado.notaEnviada = true;
-      return resp(200, { data: { xml: "<x/>" } });
-    }
-    if (c === "nfe/777") {
+    if (r === "/vendas" && metodo === "GET") {
       return resp(200, {
-        data: {
-          id: 777,
-          numero: "002198",
-          serie: 4,
-          situacao: estado.notaEnviada ? 6 : 1,
-          chaveAcesso: estado.notaEnviada ? "3526" + "1".repeat(40) : "",
-          linkDanfe: estado.notaEnviada ? "https://www.bling.com.br/doc.view.php?id=x" : "",
-          valorNota: 100,
-        },
+        vendas: estado.vendas.map((v) => ({
+          id: v.id,
+          numero: v.numero,
+          criadaEm: v.criadaEm,
+          origem: "BALCAO",
+          pdvId: v.pdvId ?? null,
+          cliente: v.cliente?.nome || "Consumidor Final",
+          vendedor: v.vendedorId ? { id: v.vendedorId, nome: "JULIA SOUZA" } : null,
+          total: v.total,
+          situacao: { id: 3, nome: "Fechada", final: true, cancelamento: false },
+          cancelada: false,
+          nota: v.notaId ? estado.notas.get(v.notaId) : null,
+        })),
       });
     }
-    return resp(404, { error: { description: `rota de teste desconhecida: ${metodo} ${c}` } });
+    const nfe = /^\/vendas\/(\d+)\/nfe$/.exec(r);
+    if (nfe && metodo === "POST") {
+      if (estado.pendenciaNaNota) return resp(422, { erro: estado.pendenciaNaNota, code: "NFE_PENDENCIAS" });
+      const v = estado.vendas.find((x) => String(x.id) === nfe[1]);
+      const nota = { id: 9001, numero: 2206, serie: 4, modelo: 55, situacao: "AUTORIZADA", chave: "3526" + "1".repeat(40), motivo: "Autorizado o uso da NF-e", cStat: "100", autorizadaEm: "2026-10-22T18:00:05.000Z" };
+      estado.notas.set(nota.id, nota);
+      v.notaId = nota.id;
+      return resp(200, { nota });
+    }
+    const consulta = /^\/notas\/(\d+)\/consultar$/.exec(r);
+    if (consulta) return resp(200, { nota: estado.notas.get(Number(consulta[1])) ?? null });
+    return resp(404, { erro: `rota de teste desconhecida: ${metodo} ${r}` });
   });
   return { f, chamadas, estado };
 }
@@ -121,7 +122,7 @@ const ENTRADA = {
     { produtoId: "avulso-1", nome: "Instalação", foto: null, quantidade: 1, valor: 50, valorDoSite: null },
   ],
   cliente: { ...CLIENTE_VAZIO },
-  vendedor: { id: "15596536241", nome: "JULIA SOUZA" },
+  vendedor: { id: "3", nome: "JULIA SOUZA" },
   desconto: { tipo: "valor" as const, valor: 49.8 },
   pagamentos: [{ forma: "pix" as const, valor: 800 }],
   observacao: "",
@@ -131,6 +132,7 @@ const ENTRADA = {
 beforeEach(() => {
   _gavetaDeTeste();
   _limparCacheDoAcesso();
+  process.env.MEU_BLING_CHAVE = CHAVE;
 });
 
 describe("contas da venda", () => {
@@ -191,11 +193,11 @@ describe("contas da venda", () => {
     const id = novoIdDeVenda("2026-10-12", () => 0);
     expect(id).toBe("PDV-261012-AAAA");
     expect(diaDoId(id)).toBe("2026-10-12");
-    expect(diaDoId("bling-123")).toBeNull();
+    expect(diaDoId("sistema-123")).toBeNull();
   });
 });
 
-describe("acesso ao Bling", () => {
+describe("acesso ao Bling (vigia — ainda usado pela Arena)", () => {
   it("guarda cifrado, devolve o token e para de usar depois do 401", async () => {
     expect(await precisaDeAcesso()).toBe(true);
     const expira = new Date(Date.now() + 5 * 3600_000).toISOString();
@@ -220,79 +222,55 @@ describe("acesso ao Bling", () => {
   });
 });
 
-describe("pedido no Bling", () => {
-  const formas: FormaDoBling[] = FORMAS.map((f) => ({ id: f.id, descricao: f.descricao, tipo: f.tipoPagamento, padrao: f.padrao }));
-
-  it("lista com colchetes (armadilha 4)", () => {
-    expect(montarConsulta({ "idsSituacoes": [6, 9], limite: 1 })).toBe("?idsSituacoes%5B%5D=6&idsSituacoes%5B%5D=9&limite=1");
-  });
-
-  it("forma de pagamento pelo tipo do Bling", () => {
-    expect(escolherForma(formas, "pix")?.id).toBe(1562401);
-    expect(escolherForma(formas, "credito")?.id).toBe(3);
-    expect(escolherForma(formas, "boleto")?.id).toBe(2); // sem boleto: a padrão
-  });
-
-  it("monta o corpo com desconto, parcelas e vendedor; recusa item zerado", () => {
-    const corpo = corpoDoPedido(
-      {
-        data: "2026-10-12",
-        contatoId: "900",
-        vendedorId: "15596536241",
-        itens: [{ codigo: "SITE-abc", descricao: "SSD", quantidade: 1, valor: 100 }],
-        descontoEmReais: 10,
-        parcelas: [{ forma: "pix", valor: 90 }],
-        observacoes: "",
-        observacoesInternas: "PDV",
-      },
-      formas
-    );
-    expect(corpo).toMatchObject({
-      contato: { id: 900 },
-      vendedor: { id: 15596536241 },
-      desconto: { valor: 10, unidade: "REAL" },
-      parcelas: [{ valor: 90, formaPagamento: { id: 1562401 }, dataVencimento: "2026-10-12" }],
-    });
-    expect(() =>
-      corpoDoPedido({ data: "2026-10-12", contatoId: "1", vendedorId: null, itens: [{ codigo: "", descricao: "x", quantidade: 1, valor: 0 }], descontoEmReais: 0, parcelas: [], observacoes: "", observacoesInternas: "" }, formas)
-    ).toThrow(/zerado/);
-  });
-});
-
-describe("venda do balcão até o Bling", () => {
-  it("sem acesso, grava e fica aguardando; com acesso, segue sozinha", async () => {
-    const b = blingFalso();
-    _trocarRede(b.f as unknown as typeof fetch, async () => undefined);
-    const venda = await registrarVenda(lerEntrada(ENTRADA), "Balcão", new Date("2026-10-12T15:00:00-03:00"));
+describe("venda do balcão até o /sistema", () => {
+  it("sem a chave do sistema, grava e fica aguardando; com a chave, segue sozinha", async () => {
+    const s = sistemaFalso();
+    _trocarRede(s.f as unknown as typeof fetch);
+    delete process.env.MEU_BLING_CHAVE;
+    const venda = await registrarVenda(lerEntrada(ENTRADA), "Balcão", new Date("2026-10-22T15:00:00-03:00"));
     expect(venda.total).toBe(800);
     const sem = await sincronizarVenda(venda.id);
-    expect(sem?.bling.estado).toBe("pendente");
-    expect(sem?.bling.mensagem).toMatch(/vigia/);
-    expect(b.chamadas).toHaveLength(0);
+    expect(sem?.sistema.estado).toBe("pendente");
+    expect(sem?.sistema.mensagem).toMatch(/MEU_BLING_CHAVE/);
+    expect(s.chamadas).toHaveLength(0);
 
-    await guardarAcesso({ token: TOKEN, expiraEm: new Date(Date.now() + 5 * 3600_000).toISOString(), maquina: "PC" });
+    process.env.MEU_BLING_CHAVE = CHAVE;
     expect(await seguirPendentes()).toBe(1);
     const depois = await lerVenda(venda.id);
-    expect(depois?.bling.estado).toBe("no-bling");
-    expect(depois?.bling.pedidoId).toBe("555");
-    expect(depois?.bling.numero).toBe("24800");
-    const pedido = b.estado.pedidos[0];
-    expect(pedido.itens).toEqual([
-      { codigo: "SITE-abc123", descricao: "SSD Kingston 1TB", unidade: "UN", quantidade: 2, valor: 399.9 },
-      { codigo: "", descricao: "Instalação", unidade: "UN", quantidade: 1, valor: 50 },
+    expect(depois?.sistema.estado).toBe("no-sistema");
+    expect(depois?.sistema.vendaId).toBe(501);
+    expect(depois?.sistema.numero).toBe("24838");
+    const enviada = s.estado.vendas[0];
+    expect(s.chamadas[0].auth).toBe(`Bearer ${CHAVE}`);
+    expect(enviada.pdvId).toBe(venda.id);
+    expect(enviada.vendedorId).toBe(3);
+    expect(enviada.itens).toEqual([
+      { siteId: "abc123", nome: "SSD Kingston 1TB", foto: null, quantidade: 2, valor: 399.9 },
+      { siteId: null, nome: "Instalação", foto: null, quantidade: 1, valor: 50 },
     ]);
-    expect(pedido.desconto).toEqual({ valor: 49.8, unidade: "REAL" });
-    expect(pedido.vendedor).toEqual({ id: 15596536241 });
-    expect(pedido.observacoesInternas).toContain(venda.id);
-    // Consumidor final: um contato só, reaproveitado.
-    expect(b.estado.contatos).toHaveLength(1);
-    expect(b.estado.contatos[0].nome).toBe("Consumidor final");
+    expect(enviada.descontoEmReais).toBe(49.8);
+    expect(enviada.pagamentos).toEqual([{ forma: "pix", valor: 800, parcelas: null }]);
+    expect(enviada.observacoesInternas).toContain(venda.id);
+    expect(await ler("pdv/pendentes")).toMatchObject({ dados: { ids: [] } });
   });
 
-  it("com nota: gera, manda à Sefaz e guarda o DANFE", async () => {
-    const b = blingFalso();
-    _trocarRede(b.f as unknown as typeof fetch, async () => undefined);
-    await guardarAcesso({ token: TOKEN, expiraEm: new Date(Date.now() + 5 * 3600_000).toISOString(), maquina: "PC" });
+  it("o sistema fora do ar não perde a venda; quando volta, não duplica", async () => {
+    const s = sistemaFalso();
+    s.estado.fora = true;
+    _trocarRede(s.f as unknown as typeof fetch);
+    const venda = await registrarVenda(lerEntrada(ENTRADA), "Balcão");
+    const r = await sincronizarVenda(venda.id);
+    expect(r?.sistema.estado).toBe("pendente");
+    s.estado.fora = false;
+    await sincronizarVenda(venda.id);
+    await tentarDeNovo(venda.id); // repetir não cria outra venda
+    expect(s.estado.vendas).toHaveLength(1);
+    expect((await lerVenda(venda.id))?.sistema.estado).toBe("no-sistema");
+  });
+
+  it("com nota: emite pelo sistema e o QR leva ao DANFE assinado", async () => {
+    const s = sistemaFalso();
+    _trocarRede(s.f as unknown as typeof fetch);
     const cliente = {
       ...CLIENTE_VAZIO,
       nome: "Maria Teste",
@@ -308,81 +286,80 @@ describe("venda do balcão até o Bling", () => {
     const venda = await registrarVenda(lerEntrada({ ...ENTRADA, cliente, pedirNota: true }), "Painel");
     const r = await sincronizarVenda(venda.id);
     expect(r?.nota.estado).toBe("autorizada");
-    expect(r?.nota.numero).toBe("002198");
-    expect(r?.nota.linkDanfe).toContain("bling.com.br");
-    expect(b.estado.notaEnviada).toBe(true);
-    const envio = b.chamadas.find((c) => c.url.includes("nfe/777/enviar"))!;
-    expect(envio.url).toContain("enviarEmail=true");
-    expect(b.estado.contatos[0]).toMatchObject({ numeroDocumento: "52998224725", tipo: "F" });
+    expect(r?.nota.numero).toBe("2206");
+    expect(r?.nota.serie).toBe("4");
+    expect(r?.cliente.sistemaId).toBe(77);
+    const link = r!.nota.linkDanfe!;
+    expect(link).toMatch(/^https:\/\/www\.balao\.info\/api\/pdv\/danfe\/9001\?t=[0-9a-f]{32}$/);
+    const t = new URL(link).searchParams.get("t");
+    expect(assinaturaConfere(9001, t)).toBe(true);
+    expect(assinaturaConfere(9002, t)).toBe(false);
     expect(await ler("pdv/pendentes")).toMatchObject({ dados: { ids: [] } });
   });
 
-  it("401 do Bling: a venda espera e o acesso vira 'precisa de novo'", async () => {
-    const b = blingFalso();
-    b.estado.recusar401 = true;
-    _trocarRede(b.f as unknown as typeof fetch, async () => undefined);
-    await guardarAcesso({ token: TOKEN, expiraEm: new Date(Date.now() + 5 * 3600_000).toISOString(), maquina: "PC" });
+  it("nota com pendência: a venda fica feita e o balcão lê o que falta", async () => {
+    const s = sistemaFalso();
+    s.estado.pendenciaNaNota = "Não dá para emitir a nota ainda — 1 pendência: produto sem NCM.";
+    _trocarRede(s.f as unknown as typeof fetch);
+    const cliente = { ...CLIENTE_VAZIO, nome: "Maria", documento: "52998224725", cep: "13025000", endereco: "Rua", numero: "1", bairro: "B", cidade: "Campinas", uf: "SP" };
+    const venda = await registrarVenda(lerEntrada({ ...ENTRADA, cliente, pedirNota: true }), "Balcão");
+    const r = await sincronizarVenda(venda.id);
+    expect(r?.sistema.estado).toBe("no-sistema");
+    expect(r?.nota.estado).toBe("erro");
+    expect(r?.nota.mensagem).toMatch(/NCM/);
+    // corrigido no sistema: "tentar de novo" emite
+    s.estado.pendenciaNaNota = null;
+    const de = await tentarDeNovo(venda.id);
+    expect(de?.nota.estado).toBe("autorizada");
+  });
+
+  it("nota pedida depois leva o cliente novo junto", async () => {
+    const s = sistemaFalso();
+    _trocarRede(s.f as unknown as typeof fetch);
     const venda = await registrarVenda(lerEntrada(ENTRADA), "Balcão");
-    const r = await sincronizarVenda(venda.id);
-    expect(r?.bling.estado).toBe("pendente");
-    expect(await precisaDeAcesso()).toBe(true);
-  });
-
-  it("CPF de contato excluído no Bling: acha, reativa e usa (não tenta cadastrar de novo)", async () => {
-    const b = blingFalso();
-    b.estado.contatos.push({ id: 7830745032, nome: "Thiago Herrera", numeroDocumento: "52998224725", situacao: "E" });
-    _trocarRede(b.f as unknown as typeof fetch, async () => undefined);
-    await guardarAcesso({ token: TOKEN, expiraEm: new Date(Date.now() + 5 * 3600_000).toISOString(), maquina: "PC" });
-    const venda = await registrarVenda(lerEntrada({ ...ENTRADA, cliente: { ...CLIENTE_VAZIO, nome: "Thiago", documento: "52998224725" } }), "Balcão");
-    const r = await sincronizarVenda(venda.id);
-    expect(r?.bling.estado).toBe("no-bling");
-    expect(r?.bling.contatoId).toBe("7830745032");
-    expect(b.estado.pedidos[0].contato).toEqual({ id: 7830745032 });
-    expect(b.estado.contatos[0].situacao).toBe("A");
-    expect(b.chamadas.some((x) => x.metodo === "POST" && x.url.endsWith("/contatos"))).toBe(false);
-  });
-
-  it("se o Bling disser que o CPF já existe, usa o contato dono dele", async () => {
-    const b = blingFalso();
-    _trocarRede(b.f as unknown as typeof fetch, async () => undefined);
-    await guardarAcesso({ token: TOKEN, expiraEm: new Date(Date.now() + 5 * 3600_000).toISOString(), maquina: "PC" });
-    // Some da busca na primeira olhada (cadastrado por outro caixa no mesmo instante), aparece depois do erro.
-    let escondido = true;
-    const original = b.f.getMockImplementation()!;
-    b.f.mockImplementation(async (input, init) => {
-      const url = String(input);
-      if (escondido && url.includes("/contatos?") && (init?.method ?? "GET") === "GET" && url.includes("criterio=2")) {
-        escondido = false;
-        b.estado.contatos.push({ id: 4242, nome: "Maria", numeroDocumento: "52998224725", situacao: "A" });
-      }
-      return original(input, init);
-    });
-    const venda = await registrarVenda(lerEntrada({ ...ENTRADA, cliente: { ...CLIENTE_VAZIO, nome: "Maria", documento: "52998224725" } }), "Balcão");
-    const r = await sincronizarVenda(venda.id);
-    expect(r?.bling.estado).toBe("no-bling");
-    expect(r?.bling.contatoId).toBe("4242");
+    await sincronizarVenda(venda.id);
+    const cliente = { ...CLIENTE_VAZIO, nome: "João", documento: "52998224725", cep: "13025000", endereco: "Rua", numero: "1", bairro: "B", cidade: "Campinas", uf: "SP" };
+    const r = await pedirNotaDepois(venda.id, cliente);
+    expect(r?.nota.estado).toBe("autorizada");
+    const pedido = s.chamadas.find((c) => c.metodo === "POST" && c.url.endsWith("/vendas/501/nfe"))!;
+    expect(pedido.corpo.cliente.documento).toBe("52998224725");
   });
 
   it("venda inválida nem é gravada", async () => {
     await expect(registrarVenda(lerEntrada({ ...ENTRADA, pagamentos: [] }), "Balcão")).rejects.toBeInstanceOf(VendaInvalida);
   });
 
-  it("lista do dia junta o PDV com o que foi lançado direto no Bling", async () => {
-    const b = blingFalso();
-    _trocarRede(b.f as unknown as typeof fetch, async () => undefined);
-    await guardarAcesso({ token: TOKEN, expiraEm: new Date(Date.now() + 5 * 3600_000).toISOString(), maquina: "PC" });
-    const venda = await registrarVenda(lerEntrada(ENTRADA), "Balcão");
+  it("lista do dia junta o caixa com o que foi lançado direto no sistema", async () => {
+    const s = sistemaFalso();
+    _trocarRede(s.f as unknown as typeof fetch);
+    const venda = await registrarVenda(lerEntrada(ENTRADA), "Balcão", new Date("2026-10-22T15:00:00-03:00"));
     await sincronizarVenda(venda.id);
-    // Um pedido feito no próprio Bling, no mesmo dia.
-    b.estado.pedidos.push({ id: 999, numero: 24850, data: venda.dia, totalCalculado: 150, contato: { id: 1 } });
-    b.estado.pedidos[0].totalCalculado = 800;
+    // uma venda feita na tela do /sistema, no mesmo dia
+    s.estado.vendas.push({ id: 502, numero: 24839, criadaEm: "2026-10-22T19:30:00.000Z", pdvId: null, cliente: { nome: "Cliente da loja" }, total: 150, nota: null });
     const resumo = await vendasDoDia(venda.dia);
-    expect(resumo.bling.lido).toBe(true);
+    expect(resumo.sistema.lido).toBe(true);
     expect(resumo.linhas.map((l) => [l.origem, l.numero])).toEqual([
-      ["bling", "24850"],
-      ["pdv", "24800"],
+      ["sistema", "24839"],
+      ["pdv", "24838"],
     ]);
     expect(resumo.linhas[1].vendedor).toBe("JULIA SOUZA");
-    expect(resumo.totais).toMatchObject({ vendas: 2, valor: 950 });
+    expect(resumo.totais).toMatchObject({ vendas: 2, valor: 950, aguardando: 0 });
+  });
+
+  it("venda gravada no tempo do Bling não vai para o sistema", async () => {
+    const s = sistemaFalso();
+    _trocarRede(s.f as unknown as typeof fetch);
+    const antiga = normalizarVenda({
+      id: "PDV-261020-ABCD",
+      bling: { estado: "no-bling", pedidoId: "555", numero: "24800" },
+      nota: { estado: "nao-pedida" },
+      cliente: { nome: "X", blingId: "9" },
+    } as any);
+    expect(antiga.legadoBling).toEqual({ pedidoId: "555", numero: "24800" });
+    expect(antiga.sistema.estado).toBe("no-sistema");
+    const nuncaFoi = normalizarVenda({ id: "PDV-261020-ABCE", bling: { estado: "pendente", pedidoId: null }, nota: { estado: "nao-pedida" }, cliente: {} } as any);
+    expect(nuncaFoi.legadoBling).toBeNull();
+    expect(nuncaFoi.sistema.estado).toBe("pendente");
+    expect(s.chamadas).toHaveLength(0);
   });
 });
