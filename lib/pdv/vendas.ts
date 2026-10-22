@@ -1,45 +1,41 @@
 // ============================================================
-// PDV: as vendas do balcão e o caminho delas até o Bling.
+// PDV: as vendas do balcão e o caminho delas até o /sistema (MEU BLING).
 //
-// Guardadas na gaveta (Vercel Blob privado), fora do MySQL da Hostinger: a
-// cota de conexões por hora do banco já derrubou a Arena (12/10), e o caixa
-// não pode parar junto com ele.
+// Até 21/10/2026 iam para o Bling; desde 22/10 vão para o /sistema (pedido do
+// Thiago). Guardadas primeiro na gaveta (Vercel Blob privado), fora do MySQL
+// da Hostinger: a cota de conexões por hora do banco já derrubou a Arena
+// (12/10), e o caixa não pode parar junto com ele.
 //
 //   pdv/dia-AAAA-MM-DD   as vendas do dia
-//   pdv/pendentes        o que ainda não terminou de ir para o Bling
+//   pdv/pendentes        o que ainda não terminou de ir para o /sistema
 //
-// Venda feita aqui vai para o Bling na hora (contato → pedido → nota). Sem
-// acesso ao Bling naquele instante (o token venceu e a sentinela do PC ainda
-// não renovou), a venda fica "aguardando o Bling" e segue sozinha assim que
-// o vigia trouxer o acesso novo. A lista do dia junta as vendas daqui com os
-// pedidos lançados direto no Bling.
+// Venda feita aqui vai para o /sistema na hora (cliente → venda "Fechada" →
+// nota, se pedida). Com o /sistema fora naquele instante, a venda fica
+// "aguardando o sistema" e segue sozinha depois. O /sistema não duplica: a
+// venda leva o id do PDV e repetir a chamada devolve a mesma venda. A lista do
+// dia junta as vendas daqui com as lançadas direto no /sistema.
 // ============================================================
 
 import { atualizar, ler } from "@/lib/arena/gaveta";
 import { hojeNaLoja } from "@/lib/arena/periodos";
 import {
-  ErroDoBling,
-  SemAcessoAoBling,
-  acharPedidoIgual,
-  contatoParaVenda,
-  criarPedido,
-  enviarNota,
-  formasDePagamento,
-  gerarNota,
-  lerNota,
-  pedidoDetalhado,
-  pedidosDoDia,
-  vendedores,
-  type FormaDoBling,
-} from "./bling";
+  ErroDoSistema,
+  SemAcessoAoSistema,
+  consultarNota,
+  emitirNota,
+  enviarVenda,
+  linkDoDanfe,
+  vendaDoSistema,
+  vendasDoDiaNoSistema,
+  type LinhaDoSistema,
+  type NotaResumo,
+} from "./sistema";
 import { centavos, conferirVenda, novoIdDeVenda, soDigitos, tabelaPelosPagamentos, totaisDa } from "./calculos";
 import {
   CLIENTE_VAZIO,
   NOMES_DAS_FORMAS,
   NOTA_NAO_PEDIDA,
-  SITUACOES_CANCELADAS,
-  SITUACOES_DO_PEDIDO,
-  estadoDaNotaNoBling,
+  estadoDaNotaNoSistema,
   type ClienteDaVenda,
   type Desconto,
   type EstadoDaNota,
@@ -68,6 +64,48 @@ export function diaDoId(id: string): string | null {
   return m ? `20${m[1]}-${m[2]}-${m[3]}` : null;
 }
 
+// ---------------------------------------------------------------- vendas antigas (do tempo do Bling)
+
+type VendaGuardada = VendaDoPdv & {
+  bling?: { estado?: string; pedidoId?: string | null; numero?: string | null; tentativas?: number; ultimaTentativa?: string | null; mensagem?: string | null };
+};
+
+/**
+ * Venda gravada antes de 22/10 tem `bling` em vez de `sistema`. A que chegou ao
+ * Bling fica como está (não vai de novo para o /sistema); a que nunca chegou
+ * segue agora para o /sistema.
+ */
+export function normalizarVenda(v: VendaGuardada): VendaDoPdv {
+  if (v.sistema) return v;
+  const b = v.bling ?? {};
+  const noBling = Boolean(b.pedidoId);
+  const notaAntiga = (v.nota ?? {}) as Partial<NotaDaVenda> & { blingId?: string | null; linkPdf?: string | null };
+  const { bling: _antigo, ...resto } = v;
+  void _antigo;
+  return {
+    ...resto,
+    cliente: { ...CLIENTE_VAZIO, ...v.cliente, sistemaId: null },
+    sistema: {
+      estado: noBling ? "no-sistema" : "pendente",
+      vendaId: null,
+      numero: null,
+      tentativas: 0,
+      ultimaTentativa: null,
+      mensagem: null,
+    },
+    legadoBling: noBling ? { pedidoId: b.pedidoId ?? null, numero: b.numero ?? null } : null,
+    nota: {
+      ...NOTA_NAO_PEDIDA,
+      ...notaAntiga,
+      notaId: null,
+      linkDanfe: notaAntiga.linkPdf || notaAntiga.linkDanfe || null,
+      // nota que não chegou ao fim pelo Bling: sem ele, não há mais como seguir daqui
+      estado: noBling && notaAntiga.estado && !["autorizada", "cancelada", "rejeitada", "nao-pedida"].includes(notaAntiga.estado) ? "erro" : notaAntiga.estado ?? "nao-pedida",
+      mensagem: noBling && notaAntiga.estado && !["autorizada", "cancelada", "rejeitada", "nao-pedida"].includes(notaAntiga.estado) ? "Venda do tempo do Bling: confira a nota no Bling." : notaAntiga.mensagem ?? null,
+    } as NotaDaVenda,
+  };
+}
+
 // ---------------------------------------------------------------- leitura e gravação
 
 const cacheDoDia = new Map<string, { em: number; vendas: VendaDoPdv[] }>();
@@ -76,7 +114,7 @@ export async function vendasDoPdv(dia: string, fresco = false): Promise<VendaDoP
   const c = cacheDoDia.get(dia);
   if (!fresco && c && Date.now() - c.em < 10_000) return c.vendas;
   const { dados } = await ler<DocDoDia>(chaveDoDia(dia));
-  const vendas = dados?.vendas ?? [];
+  const vendas = (dados?.vendas ?? []).map((v) => normalizarVenda(v as VendaGuardada));
   cacheDoDia.set(dia, { em: Date.now(), vendas });
   return vendas;
 }
@@ -98,16 +136,19 @@ async function mudarVenda(id: string, mudar: (v: VendaDoPdv) => VendaDoPdv | und
       resultado = null;
       return undefined;
     }
-    const nova = mudar(atual.vendas[i]);
+    const nova = mudar(normalizarVenda(atual.vendas[i] as VendaGuardada));
     if (!nova) {
-      resultado = atual.vendas[i];
+      resultado = normalizarVenda(atual.vendas[i] as VendaGuardada);
       return undefined;
     }
     atual.vendas[i] = nova;
     resultado = nova;
     return atual;
   });
-  cacheDoDia.set(dia, { em: Date.now(), vendas: doc.vendas });
+  cacheDoDia.set(
+    dia,
+    { em: Date.now(), vendas: doc.vendas.map((v) => normalizarVenda(v as VendaGuardada)) }
+  );
   return resultado;
 }
 
@@ -153,6 +194,7 @@ export function lerEntrada(bruto: unknown): EntradaDeVenda {
     } satisfies ItemDaVenda;
   });
   const c = (o.cliente ?? {}) as Record<string, unknown>;
+  const sistemaId = Math.trunc(numero(c.sistemaId));
   const cliente: ClienteDaVenda = {
     nome: texto(c.nome, 120),
     documento: soDigitos(String(c.documento ?? "")).slice(0, 14),
@@ -165,7 +207,7 @@ export function lerEntrada(bruto: unknown): EntradaDeVenda {
     bairro: texto(c.bairro, 60),
     cidade: texto(c.cidade, 60),
     uf: texto(c.uf, 2).toUpperCase(),
-    blingId: c.blingId ? soDigitos(String(c.blingId)) || null : null,
+    sistemaId: sistemaId > 0 ? sistemaId : null,
   };
   const v = (o.vendedor ?? null) as Record<string, unknown> | null;
   const d = (o.desconto ?? null) as Record<string, unknown> | null;
@@ -212,7 +254,7 @@ export async function registrarVenda(entrada: EntradaDeVenda, operador: string, 
     troco: t.troco,
     observacao: entrada.observacao,
     pedirNota: entrada.pedirNota,
-    bling: { estado: "pendente", pedidoId: null, numero: null, contatoId: null, tentativas: 0, ultimaTentativa: null, mensagem: null },
+    sistema: { estado: "pendente", vendaId: null, numero: null, tentativas: 0, ultimaTentativa: null, mensagem: null },
     nota: entrada.pedirNota ? { ...NOTA_NAO_PEDIDA, estado: "pendente" } : { ...NOTA_NAO_PEDIDA },
   };
   const doc = await atualizar<DocDoDia>(chaveDoDia(dia), () => ({ vendas: [] }), (atual) => {
@@ -220,7 +262,7 @@ export async function registrarVenda(entrada: EntradaDeVenda, operador: string, 
     atual.vendas.push(venda);
     return atual;
   });
-  cacheDoDia.set(dia, { em: Date.now(), vendas: doc.vendas });
+  cacheDoDia.set(dia, { em: Date.now(), vendas: doc.vendas.map((v) => normalizarVenda(v as VendaGuardada)) });
   await marcarPendente(venda.id, dia, true);
   return venda;
 }
@@ -232,7 +274,7 @@ export class VendaInvalida extends Error {
   }
 }
 
-// ---------------------------------------------------------------- ida ao Bling
+// ---------------------------------------------------------------- ida ao /sistema
 
 function observacoesDaVenda(v: VendaDoPdv): { publica: string; interna: string } {
   const formas = v.pagamentos
@@ -240,23 +282,28 @@ function observacoesDaVenda(v: VendaDoPdv): { publica: string; interna: string }
     .join(" | ");
   return {
     publica: [v.observacao, `Venda no balcão — Balão da Informática Castelo · balao.info`].filter(Boolean).join("\n"),
-    interna: `PDV balao.info ${v.id} · operador: ${v.operador}${v.troco > 0 ? ` · troco R$ ${v.troco.toFixed(2).replace(".", ",")}` : ""}\n${formas}`,
+    interna: `PDV balao.info ${v.id}${v.troco > 0 ? ` · troco R$ ${v.troco.toFixed(2).replace(".", ",")}` : ""}\n${formas}`,
   };
 }
 
 const notaTerminada = (e: EstadoDaNota) => e === "nao-pedida" || e === "autorizada" || e === "rejeitada" || e === "cancelada" || e === "erro";
 
-function notaDoBling(n: Awaited<ReturnType<typeof lerNota>>, anterior: NotaDaVenda): NotaDaVenda {
+/** A nota do /sistema no formato do balcão. */
+export function notaDoSistema(n: NotaResumo | null | undefined, anterior: NotaDaVenda): NotaDaVenda {
+  if (!n) return anterior;
+  const estado = estadoDaNotaNoSistema(n.situacao);
   return {
     ...anterior,
-    estado: estadoDaNotaNoBling(n.situacao),
-    blingId: n.id,
-    numero: n.numero,
-    serie: n.serie,
+    estado,
+    notaId: n.id,
+    numero: n.numero ? String(n.numero) : null,
+    serie: n.serie != null ? String(n.serie) : null,
     chave: n.chave,
-    linkDanfe: n.linkDanfe,
-    linkPdf: n.linkPdf,
-    mensagem: n.situacao === 4 ? "A Sefaz rejeitou a nota. Abra a nota no Bling para ver o motivo e corrigir." : null,
+    linkDanfe: estado === "autorizada" ? linkDoDanfe(n.id) : null,
+    mensagem:
+      estado === "rejeitada" || estado === "erro"
+        ? `${n.cStat ? `${n.cStat} - ` : ""}${n.motivo || "A nota não saiu."} Abra a venda no /sistema para ver o que corrigir.`
+        : null,
     atualizadaEm: new Date().toISOString(),
   };
 }
@@ -264,20 +311,23 @@ function notaDoBling(n: Awaited<ReturnType<typeof lerNota>>, anterior: NotaDaVen
 const esperarUmPouco = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /**
- * Leva a venda até onde der: contato → pedido → nota gerada → enviada → autorizada.
+ * Leva a venda até onde der: venda no /sistema → nota → autorizada.
  * Cada passo é gravado na hora, então uma volta interrompida continua de onde parou.
  */
-export async function sincronizarVenda(id: string, opcoes: { esperarNota?: boolean } = {}): Promise<VendaDoPdv | null> {
+export async function sincronizarVenda(id: string, opcoes: { esperarNota?: boolean; clienteDaNota?: ClienteDaVenda | null } = {}): Promise<VendaDoPdv | null> {
   // Trava: duas abas (ou a volta automática e o botão) não mandam a mesma venda ao mesmo tempo.
   const trava = { pegou: false };
   let venda = await mudarVenda(id, (v) => {
-    if (v.cancelada) return undefined;
-    const ocupada = v.bling.estado === "enviando" && v.bling.ultimaTentativa && Date.now() - new Date(v.bling.ultimaTentativa).getTime() < TRAVA_MS;
+    if (v.cancelada || v.legadoBling) return undefined;
+    const ocupada = v.sistema.estado === "enviando" && v.sistema.ultimaTentativa && Date.now() - new Date(v.sistema.ultimaTentativa).getTime() < TRAVA_MS;
     if (ocupada) return undefined;
     trava.pegou = true;
-    return { ...v, bling: { ...v.bling, estado: "enviando", tentativas: v.bling.tentativas + 1, ultimaTentativa: new Date().toISOString() } };
+    return { ...v, sistema: { ...v.sistema, estado: "enviando", tentativas: v.sistema.tentativas + 1, ultimaTentativa: new Date().toISOString() } };
   });
-  if (!venda || !trava.pegou) return venda;
+  if (!venda || !trava.pegou) {
+    if (venda?.legadoBling) await marcarPendente(venda.id, venda.dia, false).catch(() => undefined);
+    return venda;
+  }
 
   const gravar = async (mudar: (v: VendaDoPdv) => VendaDoPdv) => {
     venda = (await mudarVenda(id, mudar)) ?? venda;
@@ -285,155 +335,151 @@ export async function sincronizarVenda(id: string, opcoes: { esperarNota?: boole
   };
 
   try {
-    // 1. pedido
-    if (!venda.bling.pedidoId) {
-      const contatoId = venda.bling.contatoId ?? (await contatoParaVenda(venda.cliente));
-      await gravar((v) => ({ ...v, bling: { ...v.bling, contatoId } }));
-      // Tentativa anterior pode ter criado o pedido e perdido a resposta.
-      const repetido = venda.bling.tentativas > 1 ? await acharPedidoIgual(venda.dia, contatoId, venda.total) : null;
+    // 1. venda
+    if (!venda.sistema.vendaId) {
       const obs = observacoesDaVenda(venda);
-      const pedido = repetido
-        ? { id: repetido, numero: null as string | null }
-        : await criarPedido({
-            data: venda.dia,
-            contatoId,
-            vendedorId: venda.vendedor?.id ?? null,
-            itens: venda.itens.map((i) => ({
-              codigo: i.produtoId.startsWith("avulso") ? "" : `SITE-${i.produtoId}`,
-              descricao: i.nome,
-              quantidade: i.quantidade,
-              valor: i.valor,
-            })),
-            descontoEmReais: venda.valorDoDesconto,
-            parcelas: venda.pagamentos.map((p) => ({
-              forma: p.forma,
-              valor: p.valor,
-              observacao: p.parcelas && p.parcelas > 1 ? `${p.parcelas}x no cartão` : undefined,
-            })),
-            observacoes: obs.publica,
-            observacoesInternas: obs.interna,
-          });
-      if (repetido && !pedido.numero) {
-        pedido.numero = (await pedidoDetalhado(repetido).catch(() => null))?.numero ?? null;
-      }
-      await gravar((v) => ({ ...v, bling: { ...v.bling, pedidoId: pedido.id, numero: pedido.numero, mensagem: null } }));
+      const vendedorId = Number(venda.vendedor?.id);
+      const criada = await enviarVenda({
+        pdvId: venda.id,
+        data: venda.dia,
+        operador: venda.operador,
+        vendedorId: Number.isInteger(vendedorId) && vendedorId > 0 ? vendedorId : null,
+        cliente: venda.cliente,
+        itens: venda.itens.map((i) => ({
+          siteId: i.produtoId.startsWith("avulso") ? null : i.produtoId,
+          nome: i.nome,
+          foto: i.foto,
+          quantidade: i.quantidade,
+          valor: i.valor,
+        })),
+        descontoEmReais: venda.valorDoDesconto,
+        pagamentos: venda.pagamentos.map((p) => ({ forma: p.forma, valor: p.valor, parcelas: p.parcelas ?? null })),
+        observacoes: obs.publica,
+        observacoesInternas: obs.interna,
+      });
+      await gravar((v) => ({
+        ...v,
+        cliente: { ...v.cliente, sistemaId: criada.cliente?.sistemaId ?? v.cliente.sistemaId ?? null },
+        sistema: { ...v.sistema, vendaId: criada.id, numero: String(criada.numero), mensagem: null },
+        // a venda já tinha nota (repetição depois de uma resposta perdida): usa ela
+        nota: criada.nota ? notaDoSistema(criada.nota, v.nota) : v.nota,
+      }));
     }
 
     // 2. nota
     if (venda.pedirNota && !notaTerminada(venda.nota.estado)) {
-      if (!venda.nota.blingId) {
-        try {
-          const notaId = await gerarNota(venda.bling.pedidoId!);
-          await gravar((v) => ({ ...v, nota: { ...v.nota, estado: "gerada", blingId: notaId, mensagem: null, atualizadaEm: new Date().toISOString() } }));
-        } catch (e) {
-          // O pedido já tem nota (gerada no Bling ou numa volta anterior): usa ela.
-          const det = await pedidoDetalhado(venda.bling.pedidoId!).catch(() => null);
-          if (!det?.notaId) throw e;
-          await gravar((v) => ({ ...v, nota: { ...v.nota, estado: "gerada", blingId: det.notaId, atualizadaEm: new Date().toISOString() } }));
-        }
+      let n: NotaResumo | null;
+      try {
+        n =
+          venda.nota.notaId && venda.nota.estado === "enviada"
+            ? await consultarNota(venda.nota.notaId)
+            : await emitirNota(venda.sistema.vendaId!, opcoes.clienteDaNota ?? null);
+      } catch (e) {
+        if (!(e instanceof ErroDoSistema)) throw e;
+        // o /sistema diz o que falta para a nota (IE, NCM, endereço…): a venda está feita, a nota fica com o recado
+        const msg = e.message;
+        await gravar((v) => ({ ...v, nota: { ...v.nota, estado: "erro", mensagem: msg, atualizadaEm: new Date().toISOString() } }));
+        n = null;
       }
-      if (venda.nota.estado === "gerada" || venda.nota.estado === "pendente") {
-        const n = await lerNota(venda.nota.blingId!);
-        if (estadoDaNotaNoBling(n.situacao) === "gerada") {
-          await enviarNota(venda.nota.blingId!, Boolean(venda.cliente.email));
-          await gravar((v) => ({ ...v, nota: { ...v.nota, estado: "enviada", atualizadaEm: new Date().toISOString() } }));
-        } else {
-          await gravar((v) => ({ ...v, nota: notaDoBling(n, v.nota) }));
-        }
-      }
+      if (n) await gravar((v) => ({ ...v, nota: notaDoSistema(n, v.nota) }));
       // A Sefaz costuma responder em poucos segundos: espera um pouco para o balcão já imprimir.
-      for (let i = 0; i < (opcoes.esperarNota ? 4 : 1) && venda.nota.estado === "enviada"; i++) {
-        if (i > 0 || opcoes.esperarNota) await esperarUmPouco(2500);
-        const n = await lerNota(venda.nota.blingId!);
-        await gravar((v) => ({ ...v, nota: notaDoBling(n, v.nota) }));
+      for (let i = 0; i < (opcoes.esperarNota ? 3 : 0) && venda.nota.estado === "enviada" && venda.nota.notaId; i++) {
+        await esperarUmPouco(2500);
+        const atual = await consultarNota(venda.nota.notaId);
+        await gravar((v) => ({ ...v, nota: notaDoSistema(atual, v.nota) }));
       }
     }
 
-    await gravar((v) => ({ ...v, bling: { ...v.bling, estado: "no-bling", mensagem: null } }));
+    await gravar((v) => ({ ...v, sistema: { ...v.sistema, estado: "no-sistema", mensagem: null } }));
   } catch (e) {
-    const semAcesso = e instanceof SemAcessoAoBling;
+    const semAcesso = e instanceof SemAcessoAoSistema;
     const msg = e instanceof Error ? e.message : String(e);
-    const naNota = Boolean(venda.bling.pedidoId);
+    const jaNoSistema = Boolean(venda.sistema.vendaId);
     await gravar((v) => ({
       ...v,
-      bling: { ...v.bling, estado: naNota ? "no-bling" : semAcesso ? "pendente" : "erro", mensagem: naNota ? null : msg },
-      nota:
-        naNota && v.pedirNota
-          ? { ...v.nota, estado: semAcesso ? v.nota.estado : "erro", mensagem: msg, atualizadaEm: new Date().toISOString() }
-          : v.nota,
+      sistema: { ...v.sistema, estado: jaNoSistema ? "no-sistema" : semAcesso ? "pendente" : "erro", mensagem: jaNoSistema ? null : msg },
+      // venda já no /sistema e a nota travou no caminho: segue tentando sozinha se for falta de acesso
+      nota: jaNoSistema && v.pedirNota && !semAcesso ? { ...v.nota, estado: "erro", mensagem: msg, atualizadaEm: new Date().toISOString() } : v.nota,
     }));
-    if (!semAcesso && !(e instanceof ErroDoBling)) console.error("[pdv] falha ao mandar ao Bling:", msg);
+    if (!semAcesso && !(e instanceof ErroDoSistema)) console.error("[pdv] falha ao mandar ao /sistema:", msg);
   }
 
-  const pronta = venda.bling.estado === "no-bling" && notaTerminada(venda.nota.estado);
-  const parada = venda.bling.estado === "erro";
+  const pronta = venda.sistema.estado === "no-sistema" && notaTerminada(venda.nota.estado);
+  const parada = venda.sistema.estado === "erro";
   await marcarPendente(venda.id, venda.dia, !pronta && !parada).catch(() => undefined);
   return venda;
 }
 
-/** Volta automática: segue as vendas que esperavam o Bling (sem acesso) ou a Sefaz. */
+/** Volta automática: segue as vendas que esperavam o /sistema ou a Sefaz. */
 export async function seguirPendentes(limite = 3): Promise<number> {
   const { dados } = await ler<DocPendentes>("pdv/pendentes");
   let feitas = 0;
   for (const p of (dados?.ids ?? []).slice(0, limite)) {
     const v = await lerVenda(p.id);
-    if (!v) {
+    if (!v || v.legadoBling) {
       await marcarPendente(p.id, p.dia, false);
       continue;
     }
-    if (v.bling.estado === "erro") continue;
+    if (v.sistema.estado === "erro") continue;
     const r = await sincronizarVenda(p.id);
     feitas++;
-    if (r && r.bling.estado === "pendente") break; // sem acesso: não adianta tentar as outras agora
+    if (r && r.sistema.estado === "pendente") break; // sistema fora: não adianta tentar as outras agora
   }
   return feitas;
 }
 
-/** Nota pedida depois da venda (ou nova tentativa depois de erro). */
+/** Nota pedida depois da venda (ou nova tentativa depois de erro), com os dados do cliente para a nota. */
 export async function pedirNotaDepois(id: string, cliente: ClienteDaVenda | null): Promise<VendaDoPdv | null> {
   const atual = await lerVenda(id);
   if (!atual) return null;
-  const novoCliente = cliente ? { ...atual.cliente, ...cliente, blingId: atual.cliente.blingId ?? cliente.blingId ?? null } : atual.cliente;
+  if (atual.legadoBling) throw new VendaInvalida(["Venda do tempo do Bling: a nota dela se emite no Bling."]);
+  const novoCliente = cliente ? { ...atual.cliente, ...cliente, sistemaId: cliente.sistemaId ?? atual.cliente.sistemaId ?? null } : atual.cliente;
   const problemas = conferirVenda({ ...atual, cliente: novoCliente, pedirNota: true }).filter((p) => p.campo === "cliente");
   if (problemas.length) throw new VendaInvalida(problemas.map((p) => p.mensagem));
-  const mudouCliente = soDigitos(novoCliente.documento) !== soDigitos(atual.cliente.documento);
   await mudarVenda(id, (v) => ({
     ...v,
     cliente: novoCliente,
     pedirNota: true,
-    // Cliente trocado antes do pedido existir: o contato é refeito.
-    bling: mudouCliente && !v.bling.pedidoId ? { ...v.bling, contatoId: null } : { ...v.bling, estado: v.bling.estado === "erro" ? "pendente" : v.bling.estado, mensagem: null },
-    nota: v.nota.estado === "nao-pedida" || v.nota.estado === "erro" ? { ...v.nota, estado: v.nota.blingId ? "gerada" : "pendente", mensagem: null } : v.nota,
+    sistema: { ...v.sistema, estado: v.sistema.estado === "erro" ? "pendente" : v.sistema.estado, mensagem: null },
+    nota:
+      v.nota.estado === "nao-pedida" || v.nota.estado === "erro" || v.nota.estado === "rejeitada"
+        ? { ...v.nota, estado: "pendente", mensagem: null }
+        : v.nota,
   }));
   await marcarPendente(id, atual.dia, true);
-  return sincronizarVenda(id, { esperarNota: true });
+  // venda já no /sistema: o cliente da nota vai junto (ele passa a ser o cliente da venda lá)
+  return sincronizarVenda(id, { esperarNota: true, clienteDaNota: novoCliente });
 }
 
 export async function tentarDeNovo(id: string): Promise<VendaDoPdv | null> {
   const v = await mudarVenda(id, (x) =>
-    x.bling.estado === "erro" ? { ...x, bling: { ...x.bling, estado: "pendente", mensagem: null } } : x.nota.estado === "erro" ? { ...x, nota: { ...x.nota, estado: x.nota.blingId ? "gerada" : "pendente" } } : x
+    x.sistema.estado === "erro"
+      ? { ...x, sistema: { ...x.sistema, estado: "pendente", mensagem: null } }
+      : x.nota.estado === "erro" || x.nota.estado === "rejeitada"
+        ? { ...x, nota: { ...x.nota, estado: "pendente", mensagem: null } }
+        : x
   );
   if (!v) return null;
   await marcarPendente(id, v.dia, true);
   return sincronizarVenda(id, { esperarNota: true });
 }
 
-/** Confere no Bling como está a nota (o balcão aperta "atualizar"). */
+/** Confere no /sistema como está a nota (o balcão aperta "atualizar"). */
 export async function atualizarNota(id: string): Promise<VendaDoPdv | null> {
   const v = await lerVenda(id);
-  if (!v?.nota.blingId) return v;
-  const n = await lerNota(v.nota.blingId);
-  return mudarVenda(id, (x) => ({ ...x, nota: notaDoBling(n, x.nota) }));
+  if (!v?.nota.notaId) return v;
+  const n = await consultarNota(v.nota.notaId);
+  return mudarVenda(id, (x) => ({ ...x, nota: notaDoSistema(n, x.nota) }));
 }
 
-// ---------------------------------------------------------------- vendas do dia (PDV + Bling)
+// ---------------------------------------------------------------- vendas do dia (PDV + /sistema)
 
-let cacheDoBling: { dia: string; em: number; pedidos: Awaited<ReturnType<typeof pedidosDoDia>> } | null = null;
+let cacheDoSistema: { dia: string; em: number; vendas: LinhaDoSistema[] } | null = null;
 
 export interface ResumoDoDia {
   dia: string;
   linhas: LinhaDoDia[];
-  bling: { lido: boolean; mensagem: string | null; lidoEm: string | null };
+  sistema: { lido: boolean; mensagem: string | null; lidoEm: string | null };
   totais: { vendas: number; valor: number; notas: number; aguardando: number };
 }
 
@@ -442,88 +488,92 @@ const horaDe = (iso: string) =>
 
 function situacaoDaLinhaPdv(v: VendaDoPdv): string {
   if (v.cancelada) return "Cancelada";
-  if (v.bling.estado === "pendente") return "Aguardando o Bling";
-  if (v.bling.estado === "enviando") return "Enviando ao Bling";
-  if (v.bling.estado === "erro") return "Erro no Bling";
-  return "No Bling";
+  if (v.legadoBling) return "No Bling (antes do sistema)";
+  if (v.sistema.estado === "pendente") return "Aguardando o sistema";
+  if (v.sistema.estado === "enviando") return "Enviando ao sistema";
+  if (v.sistema.estado === "erro") return "Erro no sistema";
+  return "No sistema";
+}
+
+function notaDaLinha(n: NotaResumo | null): LinhaDoDia["nota"] {
+  if (!n) return null;
+  const estado = estadoDaNotaNoSistema(n.situacao);
+  return { estado, numero: n.numero ? String(n.numero) : null, linkDanfe: estado === "autorizada" ? linkDoDanfe(n.id) : null };
 }
 
 export async function vendasDoDia(dia = hojeNaLoja()): Promise<ResumoDoDia> {
   const locais = await vendasDoPdv(dia);
-  let pedidos: Awaited<ReturnType<typeof pedidosDoDia>> = [];
-  let bling: ResumoDoDia["bling"] = { lido: false, mensagem: null, lidoEm: null };
+  let doSistema: LinhaDoSistema[] = [];
+  let sistema: ResumoDoDia["sistema"] = { lido: false, mensagem: null, lidoEm: null };
   try {
-    if (cacheDoBling && cacheDoBling.dia === dia && Date.now() - cacheDoBling.em < 15_000) {
-      pedidos = cacheDoBling.pedidos;
+    if (cacheDoSistema && cacheDoSistema.dia === dia && Date.now() - cacheDoSistema.em < 15_000) {
+      doSistema = cacheDoSistema.vendas;
     } else {
-      pedidos = await pedidosDoDia(dia);
-      cacheDoBling = { dia, em: Date.now(), pedidos };
+      doSistema = await vendasDoDiaNoSistema(dia);
+      cacheDoSistema = { dia, em: Date.now(), vendas: doSistema };
     }
-    bling = { lido: true, mensagem: null, lidoEm: new Date(cacheDoBling!.em).toISOString() };
+    sistema = { lido: true, mensagem: null, lidoEm: new Date(cacheDoSistema!.em).toISOString() };
   } catch (e) {
-    bling = { lido: false, mensagem: e instanceof Error ? e.message : String(e), lidoEm: cacheDoBling?.dia === dia ? new Date(cacheDoBling.em).toISOString() : null };
-    if (cacheDoBling?.dia === dia) pedidos = cacheDoBling.pedidos;
+    sistema = { lido: false, mensagem: e instanceof Error ? e.message : String(e), lidoEm: cacheDoSistema?.dia === dia ? new Date(cacheDoSistema.em).toISOString() : null };
+    if (cacheDoSistema?.dia === dia) doSistema = cacheDoSistema.vendas;
   }
 
-  const porPedido = new Map(locais.filter((v) => v.bling.pedidoId).map((v) => [v.bling.pedidoId!, v]));
+  const porPdv = new Map(locais.map((v) => [v.id, v]));
+  const porVendaId = new Map(locais.filter((v) => v.sistema.vendaId).map((v) => [v.sistema.vendaId!, v]));
   const linhas: LinhaDoDia[] = [];
   const usados = new Set<string>();
 
-  for (const p of pedidos) {
-    const local = porPedido.get(p.id);
-    const cancelada = p.situacaoId != null && SITUACOES_CANCELADAS.has(p.situacaoId);
+  for (const s of doSistema) {
+    const local = (s.pdvId ? porPdv.get(s.pdvId) : undefined) ?? porVendaId.get(s.id);
     if (local) usados.add(local.id);
     linhas.push({
-      chave: local ? local.id : `bling-${p.id}`,
-      origem: local ? "pdv" : "bling",
+      chave: local ? local.id : `sistema-${s.id}`,
+      origem: local ? "pdv" : "sistema",
       pdvId: local?.id ?? null,
-      blingId: p.id,
-      numero: p.numero || local?.bling.numero || null,
-      hora: local ? horaDe(local.criadaEm) : null,
-      cliente: p.contatoNome || local?.cliente.nome || "Consumidor final",
-      vendedor: local?.vendedor?.nome ?? null,
-      total: p.total,
-      situacao: p.situacaoId != null ? SITUACOES_DO_PEDIDO[p.situacaoId] ?? `Situação ${p.situacaoId}` : "No Bling",
-      situacaoId: p.situacaoId,
-      estadoNoBling: "no-bling",
-      nota: local?.pedirNota ? { estado: local.nota.estado, numero: local.nota.numero, linkDanfe: local.nota.linkDanfe } : null,
-      cancelada,
+      vendaId: s.id,
+      numero: String(s.numero),
+      hora: horaDe(local?.criadaEm ?? s.criadaEm),
+      cliente: s.cliente || local?.cliente.nome || "Consumidor final",
+      vendedor: s.vendedor?.nome ?? local?.vendedor?.nome ?? null,
+      total: s.total,
+      situacao: s.situacao.nome,
+      estadoNoSistema: "no-sistema",
+      nota: notaDaLinha(s.nota) ?? (local?.pedirNota ? { estado: local.nota.estado, numero: local.nota.numero, linkDanfe: local.nota.linkDanfe } : null),
+      cancelada: s.cancelada,
     });
   }
   for (const v of locais) {
     if (usados.has(v.id)) continue;
-    // Já está no Bling mas a lista do Bling (cache de 15 s) ainda não trouxe: aparece como do PDV.
+    // ainda não chegou ao /sistema (ou a lista de lá ainda não trouxe), ou é do tempo do Bling
     linhas.push({
       chave: v.id,
       origem: "pdv",
       pdvId: v.id,
-      blingId: v.bling.pedidoId,
-      numero: v.bling.numero,
+      vendaId: v.sistema.vendaId,
+      numero: v.sistema.numero ?? (v.legadoBling?.numero ? `Bling ${v.legadoBling.numero}` : null),
       hora: horaDe(v.criadaEm),
       cliente: v.cliente.nome || "Consumidor final",
       vendedor: v.vendedor?.nome ?? null,
       total: v.total,
       situacao: situacaoDaLinhaPdv(v),
-      situacaoId: null,
-      estadoNoBling: v.bling.estado,
+      estadoNoSistema: v.sistema.estado,
       nota: v.pedirNota ? { estado: v.nota.estado, numero: v.nota.numero, linkDanfe: v.nota.linkDanfe } : null,
       cancelada: Boolean(v.cancelada),
     });
   }
-  // Mais nova em cima: o número do Bling cresce; as do PDV sem número vão para o topo.
-  linhas.sort((a, b) => Number(b.numero || 1e12) - Number(a.numero || 1e12) || (b.hora || "").localeCompare(a.hora || ""));
+  // Mais nova em cima.
+  linhas.sort((a, b) => (b.hora || "").localeCompare(a.hora || "") || Number(b.numero?.replace(/\D/g, "") || 0) - Number(a.numero?.replace(/\D/g, "") || 0));
 
-  // Faturamento do dia como o resto do sistema conta: fora cancelado e "em digitação" (21).
-  const valendo = linhas.filter((l) => !l.cancelada && l.situacaoId !== 21);
+  const valendo = linhas.filter((l) => !l.cancelada);
   return {
     dia,
     linhas,
-    bling,
+    sistema,
     totais: {
       vendas: valendo.length,
       valor: centavos(valendo.reduce((s, l) => s + l.total, 0)),
       notas: linhas.filter((l) => l.nota?.estado === "autorizada").length,
-      aguardando: linhas.filter((l) => l.estadoNoBling === "pendente" || l.estadoNoBling === "enviando" || l.estadoNoBling === "erro").length,
+      aguardando: linhas.filter((l) => l.estadoNoSistema === "pendente" || l.estadoNoSistema === "enviando" || l.estadoNoSistema === "erro").length,
     },
   };
 }
@@ -532,10 +582,11 @@ export async function vendasDoDia(dia = hojeNaLoja()): Promise<ResumoDoDia> {
 
 export interface DadosDoComprovante {
   chave: string;
-  origem: "pdv" | "bling";
+  origem: "pdv" | "sistema";
   pdvId: string | null;
-  numeroBling: string | null;
-  dataHora: string; // ISO (do Bling só a data)
+  /** nº da venda no /sistema */
+  numeroSistema: string | null;
+  dataHora: string; // ISO
   soData: boolean;
   vendedor: string | null;
   operador: string | null;
@@ -548,8 +599,8 @@ export interface DadosDoComprovante {
   troco: number;
   observacao: string;
   situacao: string;
-  estadoNoBling: VendaDoPdv["bling"]["estado"];
-  mensagemDoBling: string | null;
+  estadoNoSistema: VendaDoPdv["sistema"]["estado"];
+  mensagemDoSistema: string | null;
   pedirNota: boolean;
   nota: NotaDaVenda | null;
   cancelada: boolean;
@@ -560,7 +611,7 @@ export function comprovanteDaVenda(v: VendaDoPdv): DadosDoComprovante {
     chave: v.id,
     origem: "pdv",
     pdvId: v.id,
-    numeroBling: v.bling.numero,
+    numeroSistema: v.sistema.numero ?? (v.legadoBling?.numero ? `Bling ${v.legadoBling.numero}` : null),
     dataHora: v.criadaEm,
     soData: false,
     vendedor: v.vendedor?.nome ?? null,
@@ -590,59 +641,40 @@ export function comprovanteDaVenda(v: VendaDoPdv): DadosDoComprovante {
     troco: v.troco,
     observacao: v.observacao,
     situacao: situacaoDaLinhaPdv(v),
-    estadoNoBling: v.bling.estado,
-    mensagemDoBling: v.bling.mensagem,
+    estadoNoSistema: v.sistema.estado,
+    mensagemDoSistema: v.sistema.mensagem,
     pedirNota: v.pedirNota,
     nota: v.pedirNota ? v.nota : null,
     cancelada: Boolean(v.cancelada),
   };
 }
 
-function nomeDaForma(formas: FormaDoBling[], id: number | null): string {
-  const f = formas.find((x) => x.id === id);
-  return f?.descricao || "Pagamento";
-}
-
-/** Pedido lançado direto no Bling, no mesmo formato do comprovante do balcão. */
-export async function comprovanteDoBling(pedidoId: string): Promise<DadosDoComprovante> {
-  const [p, formas, vend] = await Promise.all([
-    pedidoDetalhado(pedidoId),
-    formasDePagamento().catch(() => [] as FormaDoBling[]),
-    vendedores().catch(() => ({ lista: [] as { id: string; nome: string }[], doBling: false })),
-  ]);
-  let nota: NotaDaVenda | null = null;
-  if (p.notaId) {
-    const n = await lerNota(p.notaId).catch(() => null);
-    nota = n ? notaDoBling(n, { ...NOTA_NAO_PEDIDA }) : { ...NOTA_NAO_PEDIDA, estado: "gerada", blingId: p.notaId };
-  }
-  const cliente = { ...CLIENTE_VAZIO, nome: p.contato.nome, documento: p.contato.documento, blingId: p.contato.id };
+/** Venda lançada direto no /sistema, no mesmo formato do comprovante do balcão. */
+export async function comprovanteDoSistema(vendaId: number): Promise<DadosDoComprovante> {
+  const v = await vendaDoSistema(vendaId);
+  const nota = v.nota ? notaDoSistema(v.nota, { ...NOTA_NAO_PEDIDA }) : null;
   return {
-    chave: `bling-${p.id}`,
-    origem: "bling",
+    chave: `sistema-${v.id}`,
+    origem: "sistema",
     pdvId: null,
-    numeroBling: p.numero,
-    dataHora: `${p.data}T12:00:00-03:00`,
-    soData: true,
-    vendedor: vend.lista.find((x) => x.id === p.vendedorId)?.nome ?? null,
+    numeroSistema: String(v.numero),
+    dataHora: v.criadaEm,
+    soData: false,
+    vendedor: v.vendedor?.nome ?? null,
     operador: null,
-    cliente,
-    itens: p.itens.map((i) => ({ nome: i.descricao, quantidade: i.quantidade, valor: i.valor, valorDoSite: null, foto: null, codigo: i.codigo })),
-    subtotal: p.totalProdutos,
-    desconto: p.desconto,
-    total: p.total,
-    pagamentos: p.parcelas.map((x) => ({ nome: nomeDaForma(formas, x.formaId), valor: x.valor, detalhe: null })),
+    cliente: { ...CLIENTE_VAZIO, ...v.cliente },
+    itens: v.itens.map((i) => ({ nome: i.nome, quantidade: i.quantidade, valor: i.valor, valorDoSite: null, foto: i.foto, codigo: i.codigo || "" })),
+    subtotal: v.totalProdutos,
+    desconto: v.desconto,
+    total: v.total,
+    pagamentos: v.pagamentos.map((p) => ({ nome: p.forma, valor: p.valor, detalhe: p.observacao })),
     troco: 0,
-    observacao: "",
-    situacao: p.situacaoId != null ? SITUACOES_DO_PEDIDO[p.situacaoId] ?? `Situação ${p.situacaoId}` : "",
-    estadoNoBling: "no-bling",
-    mensagemDoBling: null,
-    pedirNota: Boolean(p.notaId),
+    observacao: v.observacoes || "",
+    situacao: v.situacao.nome,
+    estadoNoSistema: "no-sistema",
+    mensagemDoSistema: null,
+    pedirNota: Boolean(v.nota),
     nota,
-    cancelada: p.situacaoId != null && SITUACOES_CANCELADAS.has(p.situacaoId),
+    cancelada: v.cancelada,
   };
-}
-
-/** A venda do PDV por trás de um pedido do Bling, se houver. */
-export async function vendaPeloPedido(pedidoId: string, dia: string): Promise<VendaDoPdv | null> {
-  return (await vendasDoPdv(dia)).find((v) => v.bling.pedidoId === pedidoId) ?? null;
 }

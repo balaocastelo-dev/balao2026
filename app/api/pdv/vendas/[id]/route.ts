@@ -1,16 +1,16 @@
 // ============================================================
 // PDV: uma venda — para o comprovante (A4 ou 80 mm) e as ações do balcão:
-// tentar de novo no Bling, emitir a nota depois, conferir a nota na Sefaz.
-// `id` é o do PDV (PDV-AAMMDD-XXXX) ou "bling-<id do pedido>".
+// tentar de novo no /sistema, emitir a nota depois, conferir a nota na Sefaz.
+// `id` é o do PDV (PDV-AAMMDD-XXXX) ou "sistema-<id da venda no /sistema>".
 // ============================================================
 
 import { NextResponse } from "next/server";
 import { operadorDoPdv, RESPOSTA_SEM_SESSAO } from "@/lib/pdv/sessao";
-import { SemAcessoAoBling } from "@/lib/pdv/bling";
+import { SemAcessoAoSistema } from "@/lib/pdv/sistema";
 import {
   atualizarNota,
   comprovanteDaVenda,
-  comprovanteDoBling,
+  comprovanteDoSistema,
   diaDoId,
   lerEntrada,
   lerVenda,
@@ -28,10 +28,10 @@ export async function GET(_req: Request, ctx: Ctx) {
   if (!(await operadorDoPdv())) return NextResponse.json(RESPOSTA_SEM_SESSAO, { status: 401 });
   const { id } = await ctx.params;
   try {
-    if (id.startsWith("bling-")) {
-      const pedido = id.slice(6).replace(/\D/g, "");
-      if (!pedido) return NextResponse.json({ erro: "Pedido inválido" }, { status: 400 });
-      return NextResponse.json({ comprovante: await comprovanteDoBling(pedido) });
+    if (id.startsWith("sistema-")) {
+      const vendaId = Number(id.slice(8));
+      if (!Number.isInteger(vendaId) || vendaId <= 0) return NextResponse.json({ erro: "Venda inválida" }, { status: 400 });
+      return NextResponse.json({ comprovante: await comprovanteDoSistema(vendaId) });
     }
     if (!diaDoId(id)) return NextResponse.json({ erro: "Venda inválida" }, { status: 400 });
     let venda = await lerVenda(id);
@@ -40,7 +40,7 @@ export async function GET(_req: Request, ctx: Ctx) {
     if (venda.nota.estado === "enviada") venda = (await atualizarNota(id).catch(() => venda)) ?? venda;
     return NextResponse.json({ comprovante: comprovanteDaVenda(venda) });
   } catch (e) {
-    const status = e instanceof SemAcessoAoBling ? 503 : 502;
+    const status = e instanceof SemAcessoAoSistema ? 503 : 502;
     return NextResponse.json({ erro: (e as Error).message }, { status });
   }
 }
@@ -48,7 +48,7 @@ export async function GET(_req: Request, ctx: Ctx) {
 export async function POST(req: Request, ctx: Ctx) {
   if (!(await operadorDoPdv())) return NextResponse.json(RESPOSTA_SEM_SESSAO, { status: 401 });
   const { id } = await ctx.params;
-  if (!diaDoId(id)) return NextResponse.json({ erro: "Só vendas feitas no PDV têm ações aqui; as do Bling se resolvem no Bling." }, { status: 400 });
+  if (!diaDoId(id)) return NextResponse.json({ erro: "Só vendas feitas no PDV têm ações aqui; as lançadas no /sistema se resolvem no /sistema." }, { status: 400 });
   let corpo: Record<string, unknown> = {};
   try {
     corpo = (await req.json()) as Record<string, unknown>;
@@ -65,7 +65,7 @@ export async function POST(req: Request, ctx: Ctx) {
     return NextResponse.json({ venda, comprovante: comprovanteDaVenda(venda) });
   } catch (e) {
     if (e instanceof VendaInvalida) return NextResponse.json({ erro: e.message, problemas: e.problemas }, { status: 422 });
-    const status = e instanceof SemAcessoAoBling ? 503 : 502;
+    const status = e instanceof SemAcessoAoSistema ? 503 : 502;
     return NextResponse.json({ erro: (e as Error).message }, { status });
   }
 }

@@ -2,7 +2,7 @@
 // PDV: quem pode usar o caixa.
 //
 // Até 12/10/2026 o /pdv abria para qualquer pessoa na internet. Agora, com
-// emissão de nota fiscal e pedido no Bling, entra quem tem uma das duas
+// emissão de nota fiscal e venda no /sistema, entra quem tem uma das duas
 // senhas da loja (as mesmas do resto do sistema):
 //   - a senha do painel (cookie do /painel), ou
 //   - a senha do dia do balcão (a mesma do /controle e do /fechamento).

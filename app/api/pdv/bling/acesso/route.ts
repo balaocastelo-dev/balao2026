@@ -1,14 +1,14 @@
 // ============================================================
-// PDV: o vigia do PC entrega aqui o access_token do Bling (só ele — o
+// O vigia do PC entrega aqui o access_token do Bling (só ele — o
 // refresh_token nunca sai do PC, e só a sentinela do Bionic renova).
 // A porta é a mesma chave do vigia da Arena (pareada em /painel/arena).
-// Assim que o acesso chega, as vendas que esperavam o Bling seguem.
+// Desde 22/10/2026 o PDV manda as vendas para o /sistema, não para o Bling:
+// o acesso continua chegando aqui só para quem ainda lê o Bling (a Arena).
 // ============================================================
 
-import { after, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { chaveConfere, lerConfig } from "@/lib/arena/dados";
 import { guardarAcesso } from "@/lib/pdv/acesso";
-import { seguirPendentes } from "@/lib/pdv/vendas";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -35,13 +35,6 @@ export async function POST(req: Request) {
       token: String(corpo.accessToken ?? ""),
       expiraEm: String(corpo.expiraEm ?? ""),
       maquina: corpo.maquina ? String(corpo.maquina).slice(0, 60) : null,
-    });
-    after(async () => {
-      try {
-        await seguirPendentes(5);
-      } catch (e) {
-        console.error("[pdv:acesso] pendentes:", (e as Error).message);
-      }
     });
     return NextResponse.json({ ok: true, mudou });
   } catch (e) {

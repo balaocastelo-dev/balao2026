@@ -1,4 +1,4 @@
-// Dados da loja no comprovante (os mesmos do Bling e do site).
+// Dados da loja no comprovante (os mesmos do /sistema e do site).
 import { SITE_CONFIG } from "@/lib/config";
 
 export const LOJA = {
