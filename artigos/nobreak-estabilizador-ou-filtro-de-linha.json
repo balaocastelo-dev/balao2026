@@ -1,0 +1,354 @@
+{
+  "slug": "nobreak-estabilizador-ou-filtro-de-linha",
+  "titulo": "Nobreak, estabilizador ou filtro de linha: o que protege o computador",
+  "resumo": "Nobreak, estabilizador ou filtro de linha? Veja o que cada um faz, por que o estabilizador quase sempre sobra hoje e quando o nobreak vale a pena.",
+  "categoria": "guias",
+  "etiquetas": [
+    "nobreak",
+    "energia",
+    "fonte",
+    "proteção"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-23T09:00:00.000Z",
+  "seo": {
+    "titulo": "Nobreak, estabilizador ou filtro de linha: qual usar no PC"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Você comprou um computador novo, ou cansou de ver a luz piscar nos dias de chuva, e agora quer saber se precisa de nobreak, estabilizador ou filtro de linha. Os três ficam entre a tomada e o computador e parecem fazer a mesma coisa. Não fazem. Cada um resolve um problema diferente da rede elétrica, e escolher errado pode significar pagar por uma proteção que não protege do que você teme."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano mais comum é achar que o estabilizador é o item obrigatório, como foi por muitos anos. Nos computadores atuais, com fonte de faixa ampla de tensão, ele quase sempre sobra. Para a maioria das pessoas, a combinação sensata é um filtro de linha com proteção contra surtos e, quando o trabalho não pode parar nem perder arquivo aberto, um nobreak. O resto deste guia explica por quê."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "**Filtro de linha** com DPS reduz o efeito de surtos e ruídos; a régua comum, sem proteção, só distribui tomadas.",
+        "**Estabilizador** corrige variação de tensão, algo que a fonte com PFC ativo já faz sozinha. Nesses casos, ele perde a função.",
+        "**Nobreak** é o único que mantém o computador ligado quando a energia cai, dando minutos para salvar e desligar.",
+        "Nenhum deles garante proteção contra raio direto: aterramento e DPS no quadro de entrada fazem parte da solução."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que cada aparelho faz, e o que não faz"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 3,
+      "texto": "Filtro de linha"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O filtro de linha distribui energia para várias tomadas e reduz parte do ruído elétrico da rede. A proteção contra picos de tensão, porém, só existe quando ele traz um DPS, sigla de dispositivo de proteção contra surtos. O coração do DPS é o varistor, componente que absorve o excesso de tensão de um surto antes que ele chegue aos aparelhos ligados."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas nem todo filtro tem DPS, e uma régua comum não deve ser tratada como protetor. O fabricante precisa informar a proteção com clareza na embalagem e no manual. Outro detalhe pouco lembrado: o varistor tem vida útil limitada e se desgasta a cada surto absorvido. Um filtro antigo, que já segurou muitos picos, pode continuar ligando as tomadas sem proteger mais nada."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 3,
+      "texto": "Estabilizador"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O estabilizador corrige a tensão quando ela sobe ou desce demais, entregando à saída um valor mais constante. Foi útil na época em que as fontes de computador trabalhavam numa faixa estreita de tensão. Ele não segura o computador ligado quando a energia acaba, e também não substitui o DPS na proteção contra surtos."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 3,
+      "texto": "Nobreak"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O nobreak tem baterias e um inversor, circuito que transforma a energia da bateria em corrente alternada para os aparelhos. Quando a energia cai, ou quando a tensão sai da faixa segura, ele passa a alimentar o computador pela bateria. É o único dos três que evita o desligamento abrupto, que faz você perder o trabalho que estava aberto e pode corromper arquivos."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Situação",
+        "Filtro de linha com DPS",
+        "Estabilizador",
+        "Nobreak"
+      ],
+      "linhas": [
+        [
+          "Queda de energia",
+          "Não segura",
+          "Não segura",
+          "Mantém ligado por alguns minutos"
+        ],
+        [
+          "Variação de tensão",
+          "Não corrige",
+          "Corrige",
+          "Corrige (interativo e online)"
+        ],
+        [
+          "Surto de tensão",
+          "Reduz o efeito",
+          "Não substitui o DPS",
+          "Costuma ter proteção, conforme o modelo"
+        ],
+        [
+          "Ruído elétrico",
+          "Reduz",
+          "Varia conforme o modelo",
+          "Varia conforme o modelo"
+        ],
+        [
+          "Raio direto",
+          "Não garante",
+          "Não garante",
+          "Não garante"
+        ]
+      ],
+      "titulo": "Filtro de linha, estabilizador e nobreak lado a lado",
+      "colunaDestaque": 3,
+      "fonte": {
+        "nome": "Canaltech — Filtro de linha protege a TV de raio?",
+        "url": "https://canaltech.com.br/tv/filtro-de-linha-protege-a-tv-de-raio-o-que-ele-realmente-faz/"
+      },
+      "nota": "Resumo das funções descritas nas fontes do artigo. Confira sempre o manual do modelo: a proteção contra surtos varia de aparelho para aparelho."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Por que o estabilizador perdeu espaço nos computadores atuais"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A mudança veio de dentro do computador. Boa parte das fontes de hoje tem PFC ativo, sigla para correção ativa do fator de potência. Esse circuito faz a fonte aproveitar melhor a energia que puxa da tomada e, de quebra, permite trabalhar numa faixa larga de tensão. O site Hardware.com.br cita fontes que aceitam de 90 V a 264 V sem chave seletora."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Com uma fonte dessas, a própria fonte ajusta a tensão de entrada melhor do que o estabilizador faria. O mesmo texto vai além e diz que, nesse caso, o estabilizador só atrapalha. O Canaltech lembra ainda que ele consome mais energia. Mesmo com fonte genérica, sem PFC ativo, o Hardware.com.br considera a utilidade do estabilizador discutível."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Como saber se a sua fonte é assim? A etiqueta lateral costuma informar a faixa de tensão de entrada, como 100 V a 240 V, e o fabricante indica o PFC ativo na ficha técnica. Notebooks seguem a mesma lógica: o carregador original já é de faixa ampla. Se o seu PC tem fonte de boa procedência, guarde o dinheiro do estabilizador para um filtro com DPS ou um nobreak."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas há uma ressalva: em computadores muito antigos, com fonte de chave 127/220 V e sem informação de faixa de tensão, a situação é outra. Nesse caso, vale avaliar a troca da fonte antes de qualquer aparelho externo. Uma fonte nova e de qualidade costuma proteger o restante das peças melhor do que um estabilizador na frente de uma fonte ruim. O guia sobre [como escolher a fonte](/blog/fonte-ideal-para-pc-gamer) ajuda nessa escolha."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Qual tipo de nobreak escolher"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Os nobreaks se dividem em três famílias, conforme o caminho que a energia faz quando a rede está normal. A Schneider Electric, dona da marca APC, descreve as três em seu blog. A diferença prática está em quanto o aparelho corrige a energia antes de entregá-la ao computador e em quanto tempo ele leva para assumir quando a rede falha."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Tipo",
+        "Com a rede normal",
+        "Quando a rede falha",
+        "Para quem serve"
+      ],
+      "linhas": [
+        [
+          "Standby (offline)",
+          "Repassa a energia da rede direto para a saída",
+          "O inversor assume com a bateria",
+          "Uso simples e eventual"
+        ],
+        [
+          "Interativo",
+          "Um estabilizador interno corrige a tensão",
+          "O inversor assume com a bateria",
+          "Casa e escritório"
+        ],
+        [
+          "Online de dupla conversão",
+          "Converte a energia o tempo todo; a carga fica isolada da rede",
+          "Sem transferência: o inversor já estava alimentando",
+          "Servidores e equipamentos críticos"
+        ]
+      ],
+      "titulo": "Os três tipos de nobreak",
+      "colunaDestaque": 3,
+      "fonte": {
+        "nome": "Schneider Electric — Quais os tipos de nobreaks existentes no mercado?",
+        "url": "https://blog.se.com/br/infraestrutura-e-rede/gestao-de-infraestruturas/2017/04/12/tipos-de-nobreaks/"
+      },
+      "nota": "A indicação de uso segue o guia de compra da Schneider Electric, que aponta o interativo para casa e escritório e o online para servidores e infraestrutura crítica."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Para o computador de casa ou do escritório, o interativo é o meio-termo mais comum. Ele já faz o papel do estabilizador e, na falta de energia, entra a bateria. O online de dupla conversão protege mais, porque a tensão e a frequência na saída não dependem da rede, mas costuma ser reservado a servidores e equipamentos que não podem sofrer nenhuma interrupção."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Repare também na forma de onda que o nobreak entrega na bateria. A senoidal por aproximação é a mais barata e atende equipamentos de baixa potência. A senoidal pura imita a energia da rede e é a indicada pela Schneider Electric para equipamentos mais sensíveis, entre eles as fontes com PFC ativo. Se o seu PC tem esse tipo de fonte, confira a forma de onda antes de comprar."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "upgrade"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como calcular a potência e quanto tempo de bateria você precisa"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O nobreak é vendido em VA, a potência aparente, enquanto o computador consome em watts, a potência ativa. A Schneider Electric explica que a capacidade em VA é sempre igual ou maior do que a capacidade em watts, e a relação entre as duas é o fator de potência. Por isso um nobreak de muitos VA pode entregar bem menos watts do que o número sugere."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O guia de compra da mesma empresa propõe uma conta simples: some os watts dos aparelhos que vão na bateria e divida pelo fator de potência do nobreak. No exemplo da página, 500 W divididos por 0,8 pedem ao menos 625 VA. Depois, acrescente uma folga de 20% a 30%, o que leva a algo entre 750 VA e 810 VA. Na dúvida, a ficha técnica do nobreak informa os watts que ele suporta."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "**Liste o que vai na bateria:** gabinete, monitor e o roteador, se a internet precisar continuar.",
+        "**Anote a potência de cada um** pela etiqueta ou pela ficha técnica, em watts.",
+        "**Some e divida pelo fator de potência** informado pelo fabricante do nobreak.",
+        "**Acrescente a folga** de 20% a 30% sugerida pela Schneider Electric.",
+        "**Confira os watts máximos** na ficha do modelo antes de fechar a compra."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Sobre autonomia, o mesmo guia diz que modelos interativos básicos costumam dar de 5 a 20 minutos. Parece pouco, mas o objetivo é salvar o trabalho e desligar com calma, não continuar trabalhando durante o apagão. Quanto mais aparelhos na bateria, menor o tempo. Impressora e caixa de som podem ir nas tomadas que só têm proteção, se o modelo oferecer."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas lembre que a bateria envelhece. A Schneider Electric indica troca dos cartuchos de reposição a cada dois a cinco anos, conforme o modelo, e cita baterias de íons de lítio com vida útil maior. Um nobreak antigo que nunca trocou de bateria pode desligar segundos depois da queda. Prefira modelos com bateria que o usuário consegue substituir."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "Evita perder o trabalho aberto quando a energia cai",
+        "Reduz o risco de arquivos corrompidos por desligamento abrupto",
+        "O modelo interativo já corrige a variação de tensão",
+        "Mantém o roteador ligado, se ele estiver na bateria"
+      ],
+      "contras": [
+        "Bateria precisa ser trocada de tempos em tempos",
+        "Autonomia curta nos modelos básicos",
+        "Precisa ser dimensionado para a potência real do computador",
+        "Fonte com PFC ativo pede atenção à forma de onda"
+      ],
+      "titulo": "Vale a pena ter nobreak no computador?"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Raio e tempestade: o limite de cada proteção"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Nenhum aparelho de tomada garante proteção contra uma descarga direta de raio. O Canaltech recomenda pensar em camadas: instalação elétrica correta, DPS no quadro de entrada, colocado por um eletricista qualificado, e, se fizer sentido, um filtro com DPS perto dos equipamentos. O DPS do quadro protege a casa inteira e complementa o que está na tomada."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O aterramento é parte essencial dessa segurança e ajuda o DPS a funcionar, mas o terceiro pino, sozinho, não torna nada à prova de raio. Se a tomada não tem fio terra ligado de verdade, a proteção fica comprometida. Só um eletricista consegue verificar isso com segurança; não abra o quadro nem a tomada por conta própria."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Duas regras práticas. Não ligue um filtro de linha em outro, e siga o manual do nobreak sobre a tomada em que ele deve ficar. E se a previsão é de tempestade forte, desligue os aparelhos da tomada antes de ela começar, nunca durante. O cabo de internet que vem de fora e a antena também podem trazer surtos; desconectar o computador da energia não protege a porta de rede."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Qual combinação faz sentido para o seu caso"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Com as funções separadas, a escolha fica mais simples. Pense no que acontece se a energia cair agora: se a resposta é só um incômodo, o filtro com DPS resolve; se é trabalho perdido, cliente esperando ou arquivo corrompido, o nobreak se paga. Veja os casos mais comuns."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": false,
+      "itens": [
+        "**Notebook em casa:** a bateria do próprio notebook já faz o papel do nobreak; um filtro de linha com DPS completa.",
+        "**PC de casa para estudo e lazer:** filtro de linha com DPS; nobreak se as quedas forem frequentes no seu bairro.",
+        "**Home office e PC de trabalho:** nobreak interativo dimensionado para o gabinete, o monitor e o roteador.",
+        "**Servidor ou computador que não pode parar:** nobreak online de dupla conversão, com bateria externa se precisar de mais tempo.",
+        "**Estabilizador:** só faz sentido em casos específicos, como equipamento antigo de fonte sem faixa ampla, e mesmo assim a troca da fonte costuma resolver melhor."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Onde resolver isso em Campinas"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se você não sabe se a fonte do seu computador tem PFC ativo ou faixa ampla de tensão, a Balão da Informática, no Cambuí, em Campinas, tem [assistência técnica](/manutencao) no mesmo endereço da loja. A equipe faz o diagnóstico, confere a fonte e, se for o caso, faz a troca da peça. Também é o lugar para levar o PC que parou depois de um pico de energia."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Para quem vai montar ou trocar de máquina, a loja faz [montagem de PC sob medida](/montagempc) e vende [fontes](/categoria/hardware-fontes) para quem quer começar a proteção por dentro, e você pode ver o computador ligado e testar antes de pagar. A decisão, em uma linha: filtro de linha com DPS para todos, nobreak interativo para quem não pode perder trabalho, e estabilizador só em casos raros."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Preciso de estabilizador para o meu computador novo?",
+      "resposta": "Na maioria dos casos, não. Fontes com PFC ativo e faixa ampla de tensão já fazem a correção sozinhas, e o estabilizador perde a função. Confira a etiqueta da fonte."
+    },
+    {
+      "pergunta": "Filtro de linha protege contra raio?",
+      "resposta": "Não garante. O filtro com DPS reduz o efeito de surtos, mas não segura uma descarga direta. A proteção completa envolve aterramento e DPS no quadro de entrada, instalados por eletricista."
+    },
+    {
+      "pergunta": "Quanto tempo o nobreak segura o computador ligado?",
+      "resposta": "Modelos interativos básicos costumam dar de 5 a 20 minutos, segundo a Schneider Electric. O tempo diminui conforme a quantidade de aparelhos ligados na bateria. A ideia é salvar e desligar com calma."
+    },
+    {
+      "pergunta": "Posso ligar o nobreak em um filtro de linha?",
+      "resposta": "Evite montar proteções em cascata, como um filtro ligado em outro. O mais seguro é seguir o manual do fabricante do nobreak, que indica como e onde ligá-lo."
+    },
+    {
+      "pergunta": "Notebook precisa de nobreak?",
+      "resposta": "Normalmente não, porque a bateria do notebook já mantém o aparelho ligado na queda de energia. Um filtro de linha com DPS no carregador é suficiente para a maioria dos casos."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Schneider Electric — Quais os tipos de nobreaks existentes no mercado?",
+      "url": "https://blog.se.com/br/infraestrutura-e-rede/gestao-de-infraestruturas/2017/04/12/tipos-de-nobreaks/",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Schneider Electric — Watts x Volt-Ampere: como dimensionar um nobreak",
+      "url": "https://blog.se.com/br/gestao-de-energia/2016/12/01/watts-x-volt-ampere-nobreak/",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Schneider Electric — Guia de compra de nobreak",
+      "url": "https://www.se.com/br/pt/work/support/product-support/ups-buying-guide-for-selecting-a-battery-backup-system",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Hardware.com.br — Fontes: entendendo o PFC",
+      "url": "https://www.hardware.com.br/dicas/entendendo-pfc/",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Canaltech — O que é DPS no filtro de linha",
+      "url": "https://canaltech.com.br/produtos/o-que-e-dps-no-filtro-de-linha-295687/",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Canaltech — Filtro de linha protege a TV de raio? O que ele realmente faz",
+      "url": "https://canaltech.com.br/tv/filtro-de-linha-protege-a-tv-de-raio-o-que-ele-realmente-faz/",
+      "data": "consultado em outubro de 2026"
+    }
+  ]
+}

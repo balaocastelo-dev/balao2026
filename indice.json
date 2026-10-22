@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "nobreak-estabilizador-ou-filtro-de-linha",
+      "titulo": "Nobreak, estabilizador ou filtro de linha: o que protege o computador",
+      "resumo": "Nobreak, estabilizador ou filtro de linha? Veja o que cada um faz, por que o estabilizador quase sempre sobra hoje e quando o nobreak vale a pena.",
+      "categoria": "guias",
+      "etiquetas": [
+        "nobreak",
+        "energia",
+        "fonte",
+        "proteção"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-23T09:00:00.000Z",
+      "minutos": 12
+    },
+    {
       "slug": "notebook-lento-as-duas-trocas-que-mais-resolvem",
       "titulo": "Notebook lento: as duas trocas que mais resolvem e como saber qual fazer",
       "resumo": "Notebook lento costuma melhorar com duas trocas: HD por SSD e mais memória RAM. Veja como descobrir qual faz falta no seu e quando nenhuma resolve.",
@@ -575,5 +590,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-20T08:51:02.991Z"
+  "atualizadoEm": "2026-10-22T22:10:42.378Z"
 }
