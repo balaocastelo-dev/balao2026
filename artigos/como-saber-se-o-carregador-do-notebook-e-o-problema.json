@@ -1,0 +1,180 @@
+{
+  "slug": "como-saber-se-o-carregador-do-notebook-e-o-problema",
+  "titulo": "Como saber se o carregador do notebook é o problema",
+  "resumo": "Notebook ligado na tomada e sem carregar nem sempre é o carregador. Veja o que conferir em casa para separar carregador, conector, configuração e bateria.",
+  "categoria": "assistencia",
+  "etiquetas": [
+    "carregador",
+    "bateria",
+    "notebook",
+    "diagnóstico"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-23T21:00:00.000Z",
+  "formato": "dica",
+  "roteiro": {
+    "fala": "Notebook na tomada e a bateria não sobe? Antes de comprar outro carregador, confira três coisas. Veja se a luzinha do carregador fica acesa e ligue direto na parede, sem extensão. Olhe o cabo inteiro e o conector, procurando dobra, corte ou sujeira. E veja se não tem um modo de proteção da bateria ligado, que para a carga de propósito. Se o cabo está bom e mesmo assim não carrega, o problema pode estar no conector ou na bateria.",
+    "titulo": "O carregador é o culpado?",
+    "destaques": [
+      "Luz acesa e tomada direto",
+      "Cabo e conector inteiros",
+      "Modo de proteção da bateria",
+      "Teste em outro notebook"
+    ],
+    "legenda": "Notebook ligado na tomada e sem carregar nem sempre é culpa do carregador. Veja como separar carregador, conector, configuração e bateria. A dica completa está no blog.",
+    "hashtags": [
+      "notebook",
+      "carregador",
+      "bateria",
+      "assistenciatecnica",
+      "informatica",
+      "campinas"
+    ]
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Para saber se o carregador do notebook é o problema, comece pelo mais simples: a luz do carregador, a tomada, o cabo e o conector. Se tudo isso estiver em ordem e a bateria continuar parada, a causa costuma estar em outro lugar, como uma configuração que limita a carga, a entrada de energia do notebook ou a própria bateria."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é comprar outro carregador logo de cara. Muitos notebooks param de carregar de propósito, para poupar a bateria, e mostram a mensagem de que estão ligados na tomada sem carregar. Outros recebem energia de um carregador mais fraco do que o original e carregam devagar ou nem carregam enquanto estão em uso."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "Antes de tudo, veja se não há um **modo de conservação da bateria** ligado: ele para a carga de propósito.",
+        "Ligue o carregador **direto na tomada da parede** e confira se a luz dele fica acesa.",
+        "Procure **dobra, corte ou pino torto** no cabo e no conector, e sujeira na entrada do notebook.",
+        "O teste que mais separa os culpados é usar um **carregador compatível de outro aparelho**, ou o seu em outro notebook."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Antes de culpar o carregador: o limite de carga"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se a bateria trava sempre no mesmo ponto, como 60% ou 80%, e o Windows diz que o notebook está na tomada sem carregar, desconfie primeiro de uma configuração. A Lenovo explica que vários programas de energia limitam a carga para aumentar a vida útil da bateria; nos aparelhos dela, o ajuste fica no Lenovo Vantage, com o nome de Modo de Conservação."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Outros fabricantes têm recursos parecidos, com nomes diferentes. A Lenovo também avisa que, com a bateria quase cheia, a carga pode não recomeçar ao ligar o carregador, como forma de proteção. Isso não é defeito. Para entender quando vale manter esse limite ligado, veja a dica sobre [deixar o notebook na tomada o tempo todo](/blog/posso-deixar-o-notebook-na-tomada-o-tempo-todo)."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como testar o carregador em casa"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Descartada a configuração, siga a ordem abaixo. Ela vem dos guias de suporte da Dell e da ASUS e não exige abrir nada. Faça os testes com o notebook desligado da extensão e com calma, olhando um item de cada vez."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "Ligue o carregador **direto na tomada da parede**, sem régua nem extensão, e teste a tomada com outro aparelho.",
+        "Veja se a **luz do carregador** fica acesa enquanto ele está ligado. Se ela apaga ou pisca, o carregador fica sob suspeita.",
+        "Passe os olhos pelo **cabo inteiro**, dos dois lados da caixinha, procurando dobra, corte ou fio aparecendo, e confira se o pino do conector não está torto.",
+        "Olhe a **entrada do notebook**: poeira e fiapos atrapalham o contato. Um jato de ar comprimido costuma bastar.",
+        "Leia a **etiqueta do carregador** e compare a potência, em watts, com a do original. Carregador mais fraco pode gerar aviso de carga lenta.",
+        "Se puder, teste o seu carregador em outro notebook compatível, ou um carregador compatível no seu."
+      ]
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "O que você vê",
+        "Suspeito mais provável"
+      ],
+      "linhas": [
+        [
+          "Luz do carregador apagada em tomada que funciona",
+          "Carregador"
+        ],
+        [
+          "Carga parada sempre no mesmo ponto, como 60% ou 80%",
+          "Configuração de conservação da bateria"
+        ],
+        [
+          "Aviso de carregador lento ou carga só com o notebook desligado",
+          "Carregador de potência menor que a do original"
+        ],
+        [
+          "Carrega só com o cabo numa certa posição",
+          "Cabo ou entrada do notebook"
+        ],
+        [
+          "Outro carregador compatível também não carrega",
+          "Entrada de energia, placa ou bateria"
+        ]
+      ],
+      "titulo": "O que cada sinal costuma indicar",
+      "nota": "É um ponto de partida para o diagnóstico, não uma certeza."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "No USB-C, há um detalhe a mais: nem toda porta USB-C do notebook aceita carga, e um carregador de celular raramente tem potência para um notebook. A ASUS lembra que um carregador USB-C abaixo da potência recomendada pode gerar o aviso de carregador lento e deixar a bateria descarregar mesmo na tomada, enquanto o notebook está em uso."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando parar e levar a um técnico"
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "Carregador zumbindo, cheirando a queimado, esquentando demais ou com o cabo descascado deve ser desligado da tomada na hora e não deve ser usado nem aberto. O mesmo vale para bateria estufada, que levanta o teclado ou a tampa de baixo: desligue o notebook e leve a um técnico.",
+      "titulo": "Pare aqui"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se o cabo está inteiro, a luz acende e nem outro carregador compatível resolve, o problema provavelmente está no notebook: a entrada de energia, um componente da placa ou a bateria. A Dell sugere ainda conferir no BIOS se o carregador é reconhecido; quando aparece como desconhecido, ele pode ser incompatível ou estar com defeito."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Na Balão da Informática, no Cambuí, em Campinas, a [assistência técnica](/manutencao) faz o diagnóstico de carregador, conector e bateria, e há [carregadores de notebook](/carregadores) na loja. Leve o carregador junto com o notebook, para os dois serem testados. Em uma linha: confira configuração, tomada, cabo e conector antes de trocar o carregador."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "notebooks"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Posso usar um carregador de outra marca no meu notebook?",
+      "resposta": "Os fabricantes recomendam o carregador original ou um compatível com a mesma potência e a mesma tensão de saída, conferidas na etiqueta. Carregador mais fraco pode carregar devagar ou não dar conta do notebook em uso."
+    },
+    {
+      "pergunta": "Por que o Windows diz que o notebook está na tomada, mas não está carregando?",
+      "resposta": "Muitas vezes é um modo de conservação que limita a carga para poupar a bateria. Se não for isso, pode ser carregador fraco, mau contato no conector ou desgaste da bateria."
+    },
+    {
+      "pergunta": "Carregador esquentando é normal?",
+      "resposta": "Ficar morno durante a carga é comum, e a Dell sugere deixar o ar circular em volta dele. Muito quente, com zumbido ou cheiro de queimado, ele deve ser desligado e não usado mais."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Laptop Battery Not Charging: Resolve AC Adapter Issues — Suporte da Dell",
+      "url": "https://www.dell.com/support/contents/en-bb/article/product-support/self-support-knowledgebase/battery-and-power/AC-Adapter",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Battery not charging, stops at 60% - Windows - ideapad — Suporte da Lenovo",
+      "url": "https://support.lenovo.com/hn/en/solutions/ht103159",
+      "data": "fevereiro de 2025"
+    },
+    {
+      "nome": "Troubleshooting - An Exclamation Mark Appears on the Taskbar Battery Icon or a 'Slow Charger' Message Is Displayed — Suporte da ASUS",
+      "url": "https://www.asus.com/support/faq/1044361/",
+      "data": "outubro de 2026"
+    }
+  ]
+}

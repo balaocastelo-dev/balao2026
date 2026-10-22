@@ -2,6 +2,22 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "como-saber-se-o-carregador-do-notebook-e-o-problema",
+      "titulo": "Como saber se o carregador do notebook é o problema",
+      "resumo": "Notebook ligado na tomada e sem carregar nem sempre é o carregador. Veja o que conferir em casa para separar carregador, conector, configuração e bateria.",
+      "categoria": "assistencia",
+      "etiquetas": [
+        "carregador",
+        "bateria",
+        "notebook",
+        "diagnóstico"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-23T21:00:00.000Z",
+      "minutos": 5,
+      "formato": "dica"
+    },
+    {
       "slug": "nobreak-estabilizador-ou-filtro-de-linha",
       "titulo": "Nobreak, estabilizador ou filtro de linha: o que protege o computador",
       "resumo": "Nobreak, estabilizador ou filtro de linha? Veja o que cada um faz, por que o estabilizador quase sempre sobra hoje e quando o nobreak vale a pena.",
@@ -590,5 +606,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-22T22:10:42.378Z"
+  "atualizadoEm": "2026-10-22T22:49:45.220Z"
 }
