@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "dual-channel-por-que-duas-memorias-rendem-mais",
+      "titulo": "Dual channel: por que duas memórias rendem mais que uma",
+      "resumo": "Dual channel é usar os dois canais de memória do computador. Veja quando dois pentes rendem mais que um, como instalar e como conferir se está ativo.",
+      "categoria": "hardware",
+      "etiquetas": [
+        "memória ram",
+        "upgrade",
+        "placa-mãe",
+        "dual channel"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-24T09:00:00.000Z",
+      "minutos": 10
+    },
+    {
       "slug": "como-saber-se-o-carregador-do-notebook-e-o-problema",
       "titulo": "Como saber se o carregador do notebook é o problema",
       "resumo": "Notebook ligado na tomada e sem carregar nem sempre é o carregador. Veja o que conferir em casa para separar carregador, conector, configuração e bateria.",
@@ -621,5 +636,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-22T23:09:49.884Z"
+  "atualizadoEm": "2026-10-23T22:17:37.560Z"
 }
