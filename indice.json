@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "fsr-4-1-radeon-rx-6000-driver-amd",
+      "titulo": "FSR 4.1 chega às Radeon RX 6000: o que muda para quem tem a placa",
+      "resumo": "Em 20 de outubro, a AMD liberou o FSR 4.1 para as Radeon RX 6000 e para os Ryzen AI. Veja quem ganha, o que ainda não se sabe e se vale trocar de placa.",
+      "categoria": "noticias",
+      "etiquetas": [
+        "placa de vídeo",
+        "amd",
+        "jogos",
+        "driver"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-24T15:00:00.000Z",
+      "minutos": 3
+    },
+    {
       "slug": "dual-channel-por-que-duas-memorias-rendem-mais",
       "titulo": "Dual channel: por que duas memórias rendem mais que uma",
       "resumo": "Dual channel é usar os dois canais de memória do computador. Veja quando dois pentes rendem mais que um, como instalar e como conferir se está ativo.",
@@ -636,5 +651,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-23T22:17:37.560Z"
+  "atualizadoEm": "2026-10-23T22:43:45.266Z"
 }

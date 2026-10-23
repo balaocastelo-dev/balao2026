@@ -1,0 +1,118 @@
+{
+  "slug": "fsr-4-1-radeon-rx-6000-driver-amd",
+  "titulo": "FSR 4.1 chega às Radeon RX 6000: o que muda para quem tem a placa",
+  "resumo": "Em 20 de outubro, a AMD liberou o FSR 4.1 para as Radeon RX 6000 e para os Ryzen AI. Veja quem ganha, o que ainda não se sabe e se vale trocar de placa.",
+  "categoria": "noticias",
+  "etiquetas": [
+    "placa de vídeo",
+    "amd",
+    "jogos",
+    "driver"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-24T15:00:00.000Z",
+  "seo": {
+    "titulo": "FSR 4.1 chega às Radeon RX 6000: o que muda para você"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Em 20 de outubro de 2026, a AMD lançou o driver Adrenalin Edition 26.10.1, que leva o **FSR 4.1** às placas de vídeo Radeon RX 6000 e aos processadores Ryzen AI Max e Ryzen AI 9 das séries 300 e 400. Até agora, essa versão do recurso que melhora a imagem nos jogos estava restrita às placas RX 7000 e RX 9000, mais novas."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que o recurso faz uma placa antiga virar uma placa nova. Não faz: ele ajuda o jogo a rodar em resolução menor e reconstrói a imagem com aparência mais nítida. Para quem tem uma RX 6000, é uma melhoria gratuita, que chega por atualização de driver, mas o ganho real em cada jogo ainda precisa ser conferido."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que a AMD anunciou"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O FSR (FidelityFX Super Resolution) é a tecnologia da AMD de aumento de resolução: o jogo desenha a cena com menos pixels e o recurso completa a imagem. Desde a versão 4, isso é feito com aprendizado de máquina, um modelo treinado para reconstruir detalhes. A versão 4 estreou em 2025 nas RX 9000, e a 4.1 chegou às RX 7000 em julho de 2026."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Segundo a AMD, cada família de hardware recebe um modelo ajustado. As RX 6000 usam uma versão adaptada da que roda nas RX 7000, e os chips Ryzen AI 9 e Z2 recebem um modelo mais leve, feito para eles. A eTeknix e a The FPS Review lembram que a orientação anterior apontava a chegada às RX 6000 só para o começo de 2027."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": false,
+      "itens": [
+        "**Já disponível pelo driver 26.10.1:** placas Radeon RX 6000 (da RX 6400 às mais altas da série), Ryzen AI Max 300 e 400 e Ryzen AI 9 300 e 400.",
+        "**Portáteis de jogo com Ryzen Z2:** depende do fabricante de cada aparelho.",
+        "**Consoles Xbox Series X e S:** a AMD diz que chega em breve, sem data.",
+        "**Fora da lista:** as placas RX 5000, que continuam sem o recurso."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O driver funciona no Windows 11 e no Windows 10 de 64 bits a partir da versão 21H2, conforme as notas da AMD. Em notebook, a própria AMD recomenda usar o driver do fabricante do aparelho. Entre os problemas conhecidos citados pelas duas publicações, o Smart Access Memory pode ficar desligado depois da instalação no Windows 10."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que isso muda para você"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem já tem uma RX 6000:** vale atualizar o driver pelo AMD Software e testar o FSR 4.1 nos jogos que oferecem o recurso. Como essas placas não têm unidades dedicadas a inteligência artificial, o modelo roda nos núcleos comuns da placa, e a AMD não divulgou quanto isso custa em desempenho."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem estava pensando em trocar de placa só por causa disso:** espere as primeiras análises independentes. Se a sua RX 6000 já atende bem, o novo recurso pode adiar a troca. Se o problema é falta de memória na placa ou jogo travando, o upscaling não resolve, e aí faz sentido olhar as [placas de vídeo](/categoria/hardware-placa-de-video-vga) mais novas."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "placas-de-video"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem tem notebook com Ryzen AI 9 ou Ryzen AI Max:** o recurso também vale para o vídeo integrado desses processadores, mas a atualização pode demorar a aparecer se o fabricante do notebook distribuir o próprio driver."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem ainda usa Windows 10:** o driver continua aceitando o sistema, mas isso não resolve o fim das atualizações do Windows. O guia sobre [até quando o Windows 10 tem atualização](/blog/windows-10-ate-quando-tem-atualizacao) mostra as saídas."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que ainda não se sabe"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A AMD não informou o custo de desempenho nas RX 6000, não publicou uma lista de jogos específica para essas placas e não deu data para o Xbox. A qualidade de imagem em placas mais antigas também ainda não passou por avaliações independentes. Por isso, a melhor decisão agora é atualizar, testar e só depois pensar em gastar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, vende placas de vídeo e monta [PC gamer](/pcgamer) sob medida, e a [assistência técnica](/manutencao) faz upgrade e diagnóstico quando o driver novo dá problema. Em uma linha: quem tem RX 6000 ganhou um recurso de graça; atualize e teste antes de trocar a placa."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "upgrade"
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "AMD FSR Upscaling 4.1 Boosts Frames and Image Quality — AMD Newsroom",
+      "url": "https://newsroom.amd.com/news/amd-fsr-upscaling-4-1-boosts-frames-image-quality/",
+      "data": "20 de outubro de 2026"
+    },
+    {
+      "nome": "AMD Software: Adrenalin Edition 26.10.1 Driver Release Notes — AMD",
+      "url": "https://www.amd.com/en/resources/support-articles/release-notes/RN-RAD-WIN-26-10-1.html",
+      "data": "20 de outubro de 2026"
+    },
+    {
+      "nome": "AMD Software Adrenalin 26.10.1 WHQL Driver Brings FSR 4.1 Support to Radeon RX 6000 GPUs — eTeknix",
+      "url": "https://www.eteknix.com/amd-software-adrenalin-26-10-1-whql-driver-brings-fsr-4-1-support-to-radeon-rx-6000-gpus/",
+      "data": "21 de outubro de 2026"
+    },
+    {
+      "nome": "AMD Adrenalin 26.10.1 Brings FSR 4.1 to the Radeon RX 6000 Series, Months Ahead of Schedule — The FPS Review",
+      "url": "https://www.thefpsreview.com/2026/10/23/amd-adrenalin-26-10-1-brings-fsr-4-1-to-the-radeon-rx-6000-series-months-ahead-of-schedule/",
+      "data": "23 de outubro de 2026"
+    }
+  ]
+}
