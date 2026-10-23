@@ -2,6 +2,22 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "senha-boa-o-que-realmente-protege",
+      "titulo": "Senha boa em um minuto: o que realmente protege a sua conta",
+      "resumo": "Senha boa é longa, única em cada conta e acompanhada de verificação em duas etapas. Veja o que vale hoje e quais hábitos antigos dá para abandonar.",
+      "categoria": "guias",
+      "etiquetas": [
+        "segurança",
+        "senha",
+        "windows",
+        "dicas"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-24T21:00:00.000Z",
+      "minutos": 4,
+      "formato": "dica"
+    },
+    {
       "slug": "fsr-4-1-radeon-rx-6000-driver-amd",
       "titulo": "FSR 4.1 chega às Radeon RX 6000: o que muda para quem tem a placa",
       "resumo": "Em 20 de outubro, a AMD liberou o FSR 4.1 para as Radeon RX 6000 e para os Ryzen AI. Veja quem ganha, o que ainda não se sabe e se vale trocar de placa.",
@@ -651,5 +667,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-23T22:43:45.266Z"
+  "atualizadoEm": "2026-10-23T22:49:59.512Z"
 }

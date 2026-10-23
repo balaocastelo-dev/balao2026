@@ -1,0 +1,165 @@
+{
+  "slug": "senha-boa-o-que-realmente-protege",
+  "titulo": "Senha boa em um minuto: o que realmente protege a sua conta",
+  "resumo": "Senha boa é longa, única em cada conta e acompanhada de verificação em duas etapas. Veja o que vale hoje e quais hábitos antigos dá para abandonar.",
+  "categoria": "guias",
+  "etiquetas": [
+    "segurança",
+    "senha",
+    "windows",
+    "dicas"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-24T21:00:00.000Z",
+  "formato": "dica",
+  "roteiro": {
+    "fala": "Senha boa não é a cheia de símbolo que você esquece no dia seguinte. É a comprida, tipo uma frase com quatro ou cinco palavras que não combinam entre si. E uma diferente para cada conta, principalmente o e-mail, porque é por ele que se recupera todo o resto. Para lembrar de tudo, use um gerenciador de senhas. E ligue a verificação em duas etapas. Isso protege mais do que trocar a senha todo mês.",
+    "titulo": "Senha boa em um minuto",
+    "destaques": [
+      "Comprida vale mais",
+      "Uma senha por conta",
+      "Gerenciador de senhas",
+      "Verificação em 2 etapas"
+    ],
+    "legenda": "Senha boa não precisa ser difícil de lembrar: precisa ser longa, única e ter uma segunda etapa. A dica completa, com o que vale abandonar, está no blog.",
+    "hashtags": [
+      "senha",
+      "seguranca",
+      "dicas",
+      "informatica",
+      "campinas"
+    ]
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Senha boa é a senha longa, usada em uma conta só e acompanhada de uma segunda verificação. Não precisa ser uma sopa de letras, números e símbolos que você esquece no dia seguinte: uma frase de quatro ou cinco palavras sem relação entre si costuma ser mais forte e bem mais fácil de lembrar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que trocar a senha todo mês e enfeitá-la com símbolos resolve. A revisão de 2025 das diretrizes do NIST, o instituto de padrões dos Estados Unidos que orienta governos e empresas, abandonou essas duas exigências. O que pesa é o tamanho, não repetir a senha e barrar as que já vazaram."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "**Tamanho conta mais que símbolo**: o NIST pede ao menos 15 caracteres quando a senha é a única proteção da conta.",
+        "**Uma senha por conta**, a começar pelo e-mail, que serve para recuperar todas as outras.",
+        "Um **gerenciador de senhas** guarda tudo; você só decora a senha dele.",
+        "**Verificação em duas etapas** ou **chave de acesso** protegem mesmo quando a senha vaza."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como montar uma senha boa em um minuto"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Segundo os resumos das novas diretrizes, os sistemas devem aceitar senhas de pelo menos 64 caracteres, permitir colar e preencher com gerenciador e recusar senhas que aparecem em listas de vazamentos ou que sejam palavras óbvias, como o nome do serviço. Na prática, isso vira uma receita simples:"
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "Junte quatro ou cinco palavras que não formem uma frase conhecida, como objetos que não combinam entre si.",
+        "Fuja de nome, data de nascimento, placa do carro, time e sequências como 123456.",
+        "Use essa senha em **uma conta só**. Comece pelo e-mail principal e pelo banco.",
+        "Guarde as demais num gerenciador de senhas, protegido por uma senha longa e pela verificação em duas etapas.",
+        "Troque a senha quando houver sinal de problema, como aviso de vazamento ou acesso estranho, e não por calendário."
+      ]
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Hábito antigo",
+        "O que vale hoje"
+      ],
+      "linhas": [
+        [
+          "Senha curta cheia de símbolos",
+          "Senha longa, de preferência uma frase de várias palavras"
+        ],
+        [
+          "Trocar a senha por calendário, todo mês ou todo trimestre",
+          "Trocar só quando há sinal de vazamento ou invasão"
+        ],
+        [
+          "A mesma senha em vários sites",
+          "Uma senha diferente em cada conta"
+        ],
+        [
+          "Pergunta secreta, como o nome do primeiro animal",
+          "Verificação em duas etapas ou chave de acesso"
+        ],
+        [
+          "Anotar as senhas num arquivo no computador",
+          "Gerenciador de senhas"
+        ]
+      ],
+      "titulo": "Hábito antigo e o que vale hoje",
+      "fonte": {
+        "nome": "Enzoic e Sakimura, sobre o NIST SP 800-63B revisão 4",
+        "url": "https://www.enzoic.com/blog/nist-sp-800-63b-rev4/"
+      },
+      "nota": "As diretrizes do NIST são para quem cria sistemas de login; a coluna da direita adapta a lógica delas para o uso pessoal."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando só a senha não basta"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Nenhuma senha, por melhor que seja, protege contra um site falso em que você mesmo a digita. Por isso a segunda etapa importa tanto: um código no celular ou uma confirmação no aplicativo barra quem só tem a senha. Ative primeiro no e-mail, no banco e nas redes sociais, que são as contas mais visadas."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Um passo além é a chave de acesso, chamada em inglês de passkey. Segundo a Microsoft, ela substitui a senha digitada: você confirma o acesso com o PIN, a digital ou o rosto, e a chave só funciona no site para o qual foi criada. Num site falso, o aparelho simplesmente não a oferece. Mas guarde uma forma de recuperação, porque perder o único aparelho com a chave complica o acesso."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "Se o computador está com vírus, a senha nova pode ser capturada assim que você a digita. Sinais como janelas que abrem sozinhas, navegador com página inicial trocada ou contas acessadas sem você pedem diagnóstico antes da troca de senhas, e a troca deve ser feita de um aparelho limpo.",
+      "titulo": "Quando esta dica não resolve"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Na Balão da Informática, no Cambuí, em Campinas, a [assistência técnica](/manutencao) faz o diagnóstico do computador que está estranho, e a [recuperação de dados](/recuperacaodados) ajuda quando arquivos importantes somem. Vai passar o computador adiante? Veja [o que fazer antes de vender ou doar](/blog/o-que-fazer-antes-de-vender-ou-doar-computador-usado). Em uma linha: senha longa, uma por conta e a segunda etapa ligada."
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Preciso trocar a senha de tempos em tempos?",
+      "resposta": "Não por calendário. As diretrizes atuais do NIST recomendam trocar quando há sinal de que a senha vazou ou de que alguém acessou a conta. Troca frequente costuma levar a senhas mais fracas e previsíveis."
+    },
+    {
+      "pergunta": "É seguro usar gerenciador de senhas?",
+      "resposta": "É o jeito prático de ter uma senha diferente em cada conta. O cuidado é proteger o próprio gerenciador com uma senha longa e com a verificação em duas etapas, porque ele passa a guardar tudo."
+    },
+    {
+      "pergunta": "Chave de acesso substitui a senha?",
+      "resposta": "Nos sites que aceitam, sim: você entra confirmando com o PIN, a digital ou o rosto. Ela só funciona no site certo, o que ajuda contra páginas falsas. Mantenha uma forma de recuperação caso perca o aparelho."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "NIST SP 800-63B Rev 4: password policy changes — Enzoic",
+      "url": "https://www.enzoic.com/blog/nist-sp-800-63b-rev4/",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "NIST-SP800-63B-4: Deciphering the New Password Security Standard — Sakimura",
+      "url": "https://www.sakimura.org/en/2025/10/7710/",
+      "data": "outubro de 2025"
+    },
+    {
+      "nome": "What are passkeys and why they matter — Suporte da Microsoft",
+      "url": "https://support.microsoft.com/windows/passkeys-overview-301c8944-5ea2-452b-9886-97e4d2ef4422",
+      "data": "outubro de 2026"
+    }
+  ]
+}
