@@ -2,6 +2,22 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "wi-fi-fraco-em-um-comodo-o-que-testar",
+      "titulo": "Wi-Fi fraco em um cômodo: por que acontece e o que testar primeiro",
+      "resumo": "Wi-Fi fraco em um cômodo costuma ser distância, parede e lugar do roteador. Veja o que testar em casa, na ordem, antes de comprar outro aparelho.",
+      "categoria": "guias",
+      "etiquetas": [
+        "wi-fi",
+        "rede",
+        "roteador",
+        "diagnóstico"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-25T21:00:00.000Z",
+      "minutos": 4,
+      "formato": "dica"
+    },
+    {
       "slug": "chrome-156-atualizacao-falhas-de-seguranca",
       "titulo": "Chrome 156 corrige 353 falhas de segurança: como atualizar o navegador",
       "resumo": "O Google liberou o Chrome 156 em 20 de outubro com 353 correções de segurança, seis delas críticas. Veja como conferir a versão e o que fazer.",
@@ -697,5 +713,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-24T22:37:57.800Z"
+  "atualizadoEm": "2026-10-24T22:48:17.668Z"
 }

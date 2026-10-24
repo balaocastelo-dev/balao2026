@@ -1,0 +1,169 @@
+{
+  "slug": "wi-fi-fraco-em-um-comodo-o-que-testar",
+  "titulo": "Wi-Fi fraco em um cômodo: por que acontece e o que testar primeiro",
+  "resumo": "Wi-Fi fraco em um cômodo costuma ser distância, parede e lugar do roteador. Veja o que testar em casa, na ordem, antes de comprar outro aparelho.",
+  "categoria": "guias",
+  "etiquetas": [
+    "wi-fi",
+    "rede",
+    "roteador",
+    "diagnóstico"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-25T21:00:00.000Z",
+  "formato": "dica",
+  "roteiro": {
+    "fala": "O Wi-Fi é bom na sala e some no quarto? Quase sempre o problema é o caminho do sinal. Parede de concreto, espelho, aquário e móvel de metal seguram muito. Antes de comprar qualquer coisa, tire o roteador do chão e de dentro do armário, deixe ele no alto e mais no meio da casa. Afaste do micro-ondas. Se o cômodo continuar ruim, aí sim vale pensar em um ponto extra de rede ou num sistema mesh.",
+    "titulo": "Wi-Fi fraco num cômodo?",
+    "destaques": [
+      "Roteador alto e no centro",
+      "Longe do micro-ondas",
+      "Concreto e metal bloqueiam",
+      "Mesh para casa grande"
+    ],
+    "legenda": "Wi-Fi bom na sala e fraco no quarto tem explicação, e quase sempre começa pelo lugar do roteador. Veja o que testar, na ordem, na dica completa no blog.",
+    "hashtags": [
+      "wifi",
+      "roteador",
+      "internet",
+      "dica",
+      "informatica",
+      "campinas"
+    ]
+  },
+  "seo": {
+    "titulo": "Wi-Fi fraco em um cômodo: por que acontece e o que testar"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Quando o Wi-Fi fica fraco em um cômodo e funciona bem no resto da casa, a causa quase nunca é a internet contratada. O que muda de um cômodo para o outro é o caminho que o sinal faz: a distância até o roteador, as paredes e os objetos no meio e os aparelhos que disputam a mesma frequência."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que a solução é comprar um repetidor logo de cara. Muitas vezes basta mudar o roteador de lugar: tirá-lo do chão, de dentro do armário ou do canto da casa já costuma resolver. O repetidor e o sistema mesh entram depois, quando o lugar certo não basta."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "Roteador **no alto e no centro** da área que você quer cobrir, fora de armário e longe do chão.",
+        "**Concreto, gesso e metal** seguram mais o sinal do que madeira e vidro.",
+        "A faixa de **2,4 GHz** alcança mais longe; a de **5 GHz** é mais rápida, mas sofre mais com parede.",
+        "Se o lugar certo não basta, um **ponto extra** ou um sistema **mesh** cobre o cômodo difícil."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que testar, nesta ordem"
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "**Veja se o problema é do aparelho ou do cômodo.** Leve outro celular ou notebook ao mesmo lugar. Se só um aparelho sofre, o problema é dele, não da rede.",
+        "**Mude o roteador de lugar.** Fabricantes como a Nokia e a TP-Link recomendam uma posição central e elevada, sobre uma mesa ou estante, longe de obstáculos.",
+        "**Afaste-o de quem atrapalha.** Micro-ondas, telefone sem fio, babá eletrônica e aparelhos Bluetooth usam as mesmas frequências e podem derrubar o sinal.",
+        "**Teste as duas faixas.** Perto do roteador, a rede de 5 GHz costuma ser melhor; no cômodo distante, a de 2,4 GHz pode chegar com mais força.",
+        "**Troque o canal, se a rede da vizinhança for grande.** Na faixa de 2,4 GHz, a Intel e a TP-Link indicam os canais 1, 6 ou 11, que não se sobrepõem."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Também ajuda conferir as antenas. A TP-Link orienta deixá-las na vertical para cobrir um andar só e lembra que o sinal é mais fraco logo abaixo do aparelho. Pequenos ajustes de posição, segundo a Intel, já podem fazer diferença grande no cômodo que estava ruim."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Material",
+        "Quanto atrapalha"
+      ],
+      "linhas": [
+        [
+          "Madeira, vidro, plástico",
+          "Pouco"
+        ],
+        [
+          "Tijolo, mármore, água (aquário)",
+          "Médio"
+        ],
+        [
+          "Gesso e concreto",
+          "Muito"
+        ],
+        [
+          "Metal (armário, espelho, geladeira)",
+          "Bloqueia quase tudo"
+        ]
+      ],
+      "titulo": "Quanto cada material atrapalha o Wi-Fi",
+      "fonte": {
+        "nome": "Nokia WiFi Help Center",
+        "url": "https://wifi-helpcenter.nokia.com/hc/en-us/articles/360052317574-WiFi-interference"
+      },
+      "nota": "É uma referência geral: a espessura da parede e a quantidade de obstáculos pesam tanto quanto o material."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando mudar o roteador de lugar não basta"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Em casa grande, com laje entre os andares ou paredes grossas, um roteador só não alcança tudo. A TP-Link sugere o repetidor para um ponto fraco no mesmo andar, colocado mais ou menos no meio do caminho entre o roteador e o cômodo ruim. Para cobrir a casa toda, o sistema mesh, com vários aparelhos formando uma rede só, costuma funcionar melhor."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas o repetidor tem limite: a Intel lembra que ele é mais lento do que a ligação direta com o roteador. Se o cômodo é onde fica o computador de trabalho, um cabo de rede até lá continua sendo a ligação mais estável. E roteador muito antigo, numa vizinhança com muitas redes, tende a cair e ficar lento qualquer que seja o ajuste."
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "Se outros aparelhos pegam bem no mesmo cômodo e só o seu notebook sofre, o problema pode ser o driver, a placa de rede ou a antena interna mal encaixada depois de um conserto. Aí a troca de roteador não resolve: vale um diagnóstico do notebook.",
+      "titulo": "Quando a culpa é do notebook"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se só o notebook perde o sinal, a [assistência técnica](/manutencao) da Balão da Informática, no Cambuí, em Campinas, faz o diagnóstico da placa de rede e da antena. Se o aparelho já está no fim da vida, dá para ver [notebooks](/notebooks) novos e seminovos ligados antes de decidir. Em uma linha: primeiro o lugar do roteador, depois o aparelho extra."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "notebooks"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Repetidor de sinal resolve Wi-Fi fraco no quarto?",
+      "resposta": "Pode resolver um ponto fraco no mesmo andar, se ficar no meio do caminho entre o roteador e o cômodo. Mas a conexão por ele costuma ser mais lenta que a direta; para a casa toda, o mesh tende a funcionar melhor."
+    },
+    {
+      "pergunta": "Devo usar a rede de 2,4 GHz ou a de 5 GHz?",
+      "resposta": "Perto do roteador, a de 5 GHz costuma ser mais rápida e menos congestionada. Longe dele e com paredes no caminho, a de 2,4 GHz alcança mais. Teste as duas no cômodo que está ruim."
+    },
+    {
+      "pergunta": "Por que só o meu notebook tem sinal fraco?",
+      "resposta": "Se outros aparelhos pegam bem no mesmo lugar, a causa está no notebook: driver desatualizado, configuração de economia de energia da placa de rede ou antena interna com problema. Nesse caso, o diagnóstico é no notebook."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "WiFi interference — Nokia WiFi Help Center",
+      "url": "https://wifi-helpcenter.nokia.com/hc/en-us/articles/360052317574-WiFi-interference",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "How to Improve Your Wi-Fi Signal and Wireless Range — TP-Link Omada",
+      "url": "https://www.omadanetworks.com/mx/support/faq/468/",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Wireless connectivity and performance troubleshooting — Suporte da Intel",
+      "url": "https://www.intel.com/content/www/us/en/support/articles/000005493/wireless.html",
+      "data": "outubro de 2026"
+    }
+  ]
+}
