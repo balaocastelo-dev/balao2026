@@ -1,0 +1,115 @@
+{
+  "slug": "chrome-156-atualizacao-falhas-de-seguranca",
+  "titulo": "Chrome 156 corrige 353 falhas de segurança: como atualizar o navegador",
+  "resumo": "O Google liberou o Chrome 156 em 20 de outubro com 353 correções de segurança, seis delas críticas. Veja como conferir a versão e o que fazer.",
+  "categoria": "noticias",
+  "etiquetas": [
+    "segurança",
+    "atualização",
+    "navegador",
+    "windows"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-25T15:00:00.000Z",
+  "seo": {
+    "titulo": "Chrome 156 corrige 353 falhas: como atualizar o navegador"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Em 20 de outubro de 2026, o Google anunciou o Chrome 156 para Windows, Mac e Linux. A nova versão do navegador traz 353 correções de segurança, das quais seis foram classificadas como críticas, o nível mais alto da escala do Google. A atualização chega aos computadores aos poucos, ao longo de dias ou semanas."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que o Chrome se atualiza sozinho e pronto. Ele baixa a versão nova por conta própria, mas só passa a usá-la depois que o navegador é fechado e aberto de novo. Quem deixa o Chrome aberto por dias seguidos, com dezenas de abas, pode continuar na versão antiga sem perceber."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que o Google anunciou"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Segundo o blog oficial de versões do Chrome, a versão 156 recebe o número 156.0.8078.47 no Linux e 156.0.8078.47 ou 156.0.8078.48 no Windows e no Mac. Das 353 falhas corrigidas, seis são críticas, 68 são de gravidade alta e as demais, média ou baixa, conforme a contagem publicada pela GBHackers."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "As falhas críticas envolvem corrupção de memória, um tipo de erro em que uma página mal-intencionada consegue mexer em partes da memória que não deveria. Elas aparecem em componentes que desenham a página na tela, nos recursos de acessibilidade, no CSS (a linguagem que define a aparência dos sites) e no WebRTC, usado em chamadas de vídeo pelo navegador."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O comunicado do Google não diz que alguma dessas falhas esteja sendo usada em ataques. A empresa informa apenas que vai manter parte dos detalhes em sigilo até que a maioria das pessoas tenha atualizado, prática comum para não entregar o caminho a quem quer explorar os erros."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que isso muda para você"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem já usa o Chrome:** o navegador é a porta de entrada para e-mail, banco e redes sociais, por isso vale atualizar agora, sem esperar a distribuição gradual. O passo a passo abaixo leva um minuto e não apaga abas, senhas nem favoritos. Depois de reiniciar o navegador, confira de novo o número da versão."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem tem um computador antigo:** se a atualização não aparece ou falha sempre, o problema costuma estar no sistema, e não no navegador. Um Windows sem suporte deixa de receber correções, como explica o guia sobre [até quando o Windows 10 tem atualização](/blog/windows-10-ate-quando-tem-atualizacao). Nesses casos, a [assistência técnica](/manutencao) consegue ver o que está travando."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem vai comprar um computador usado:** abra o navegador e o Windows Update antes de fechar negócio e veja se os dois aceitam atualizar. Máquina que não recebe mais atualizações fica mais exposta a cada mês. Nos [seminovos](/seminovos), você pode ver o computador ligado e conferir isso antes de pagar."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como conferir e atualizar o Chrome"
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "Abra o Chrome e clique nos três pontinhos, no canto superior direito.",
+        "Entre em Ajuda e depois em Sobre o Google Chrome.",
+        "O navegador procura a versão nova e começa a baixar sozinho.",
+        "Quando aparecer o botão Reiniciar, clique nele: as abas voltam abertas.",
+        "Confira se o número da versão começa com 156."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que ainda não se sabe"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O Google ainda não detalhou as novidades de recursos do Chrome 156 e prometeu publicá-las em outros textos. Também não há data para que todos os computadores recebam a versão de forma automática. Para quem quer se proteger já, o caminho é forçar a atualização pelo menu, como mostrado acima, e manter o sistema em dia, como na [atualização do Windows de outubro](/blog/atualizacao-windows-outubro-2026-falha-explorada)."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, tem assistência técnica para atualização, diagnóstico e upgrade, e vende computadores novos e seminovos. Em uma linha: abra o menu do Chrome hoje, deixe a versão 156 instalar e reinicie o navegador."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "seminovos"
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Stable Channel Update for Desktop — Chrome Releases (Google)",
+      "url": "https://chromereleases.googleblog.com/2026/10/stable-channel-update-for-desktop_02018666648.html",
+      "data": "20 de outubro de 2026"
+    },
+    {
+      "nome": "Google Chrome 156 Fixes 353 Security Vulnerabilities, Including 6 Critical Flaws — GBHackers",
+      "url": "https://gbhackers.com/google-chrome-156-fixes-353-security-vulnerabilities/",
+      "data": "21 de outubro de 2026"
+    },
+    {
+      "nome": "Google Chrome Update Fixes 353 Security Vulnerabilities, Including 6 Critical Flaws — Cyber Press",
+      "url": "https://cyberpress.org/google-chrome-update-353-security-vulnerabilities/",
+      "data": "21 de outubro de 2026"
+    }
+  ]
+}

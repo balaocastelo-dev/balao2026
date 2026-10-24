@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "chrome-156-atualizacao-falhas-de-seguranca",
+      "titulo": "Chrome 156 corrige 353 falhas de segurança: como atualizar o navegador",
+      "resumo": "O Google liberou o Chrome 156 em 20 de outubro com 353 correções de segurança, seis delas críticas. Veja como conferir a versão e o que fazer.",
+      "categoria": "noticias",
+      "etiquetas": [
+        "segurança",
+        "atualização",
+        "navegador",
+        "windows"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-25T15:00:00.000Z",
+      "minutos": 3
+    },
+    {
       "slug": "quanta-memoria-escolher-no-mac",
       "titulo": "Quanta memória escolher no Mac, já que depois não dá para trocar",
       "resumo": "Quanta memória escolher no Mac? Ela não pode ser ampliada depois: veja as opções dos modelos atuais e quanto cada tipo de uso pede, de 16 GB para cima.",
@@ -682,5 +697,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-24T22:11:12.453Z"
+  "atualizadoEm": "2026-10-24T22:37:57.800Z"
 }
