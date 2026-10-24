@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "quanta-memoria-escolher-no-mac",
+      "titulo": "Quanta memória escolher no Mac, já que depois não dá para trocar",
+      "resumo": "Quanta memória escolher no Mac? Ela não pode ser ampliada depois: veja as opções dos modelos atuais e quanto cada tipo de uso pede, de 16 GB para cima.",
+      "categoria": "apple",
+      "etiquetas": [
+        "mac",
+        "memória ram",
+        "macbook",
+        "compra"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-25T09:00:00.000Z",
+      "minutos": 11
+    },
+    {
       "slug": "senha-boa-o-que-realmente-protege",
       "titulo": "Senha boa em um minuto: o que realmente protege a sua conta",
       "resumo": "Senha boa é longa, única em cada conta e acompanhada de verificação em duas etapas. Veja o que vale hoje e quais hábitos antigos dá para abandonar.",
@@ -667,5 +682,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-23T22:49:59.512Z"
+  "atualizadoEm": "2026-10-24T22:11:12.453Z"
 }

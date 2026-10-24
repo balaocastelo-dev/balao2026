@@ -1,0 +1,306 @@
+{
+  "slug": "quanta-memoria-escolher-no-mac",
+  "titulo": "Quanta memória escolher no Mac, já que depois não dá para trocar",
+  "resumo": "Quanta memória escolher no Mac? Ela não pode ser ampliada depois: veja as opções dos modelos atuais e quanto cada tipo de uso pede, de 16 GB para cima.",
+  "categoria": "apple",
+  "etiquetas": [
+    "mac",
+    "memória ram",
+    "macbook",
+    "compra"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-25T09:00:00.000Z",
+  "seo": {
+    "titulo": "Quanta memória escolher no Mac: guia por tipo de uso"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Você está escolhendo um Mac e travou na pergunta de quanta memória escolher. A dúvida tem peso: nos Macs com chip da Apple, a memória é definida na hora da compra e não pode ser ampliada depois. O que vier na configuração é o que o computador terá pelos anos em que você usá-lo, por isso vale pensar um pouco antes de fechar o pedido."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é decidir pelo que você faz hoje, como se o Mac fosse durar só alguns meses. A conta certa olha para o uso dos próximos anos e para o tempo que você pretende ficar com a máquina. Para quem usa navegador, escritório e fotos, a configuração de entrada atual costuma bastar; quem edita vídeo, programa ou quer rodar IA no próprio computador deve subir um degrau ou mais."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "Nos Macs com chip da Apple a memória **não é ampliável**: o que você escolhe na compra fica para sempre.",
+        "Os MacBook Air e MacBook Pro de entrada atuais partem de **16 GB**, configuráveis para 24 GB ou 32 GB.",
+        "Uso de escritório, estudo e navegação: 16 GB costumam sobrar. Vídeo, programação e máquinas virtuais: 24 GB ou mais. IA local: quanto mais, melhor.",
+        "No Monitor de Atividade, o gráfico **Pressão da Memória** mostra se o Mac atual está no limite: verde está bem, amarelo pede atenção, vermelho indica falta de memória."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Por que no Mac a memória não pode ser trocada depois"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Nos Macs com chip da Apple, como os das famílias M5 e M6, a memória faz parte do conjunto do chip. A Apple chama isso de memória unificada: um único reservatório de memória que o processador, a parte gráfica e o Neural Engine, o circuito dedicado a tarefas de IA, usam ao mesmo tempo. Na apresentação do M5, a empresa descreve exatamente essa arquitetura de um só reservatório acessado pelo chip inteiro."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O benefício é que os componentes do chip não precisam copiar dados de uma memória para outra. O custo é que não existe slot, aquele encaixe onde se coloca um pente de memória em um computador comum. As páginas de especificação da Apple mostram as opções apenas como configuração no momento do pedido, e não há caminho oficial para ampliar depois."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O próprio suporte da Apple ensina a conferir isso: segurando a tecla Option, abra o menu Apple, escolha Informações do Sistema e clique em Memória. Se aparecer um painel de slots de memória com a indicação de memória ampliável, o Mac aceita ampliação. Se esse painel não aparecer, o Mac não aceita. Nos modelos com chip da Apple, é esse o resultado esperado."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas isso não quer dizer que todo mundo precise comprar o máximo. O macOS é bom em administrar a memória que tem, e a Apple lembra que memória sobrando não melhora o desempenho por si só. O objetivo é escolher o suficiente para o seu uso com folga, e não pagar por capacidade que vai ficar parada."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quais opções de memória os Macs atuais oferecem"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Antes de decidir, vale saber o que existe hoje. A tabela abaixo reúne as configurações de memória publicadas nas páginas de especificação da Apple em outubro de 2026. Elas mudam a cada geração, então confira a ficha do modelo exato antes de comprar, principalmente se for um Mac de estoque antigo ou seminovo."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Modelo",
+        "Memória de entrada",
+        "Até quanto dá para configurar"
+      ],
+      "linhas": [
+        [
+          "MacBook Air 13 e 15 polegadas (M5)",
+          "16 GB",
+          "32 GB"
+        ],
+        [
+          "MacBook Pro 14 polegadas (M5)",
+          "16 GB",
+          "32 GB"
+        ],
+        [
+          "MacBook Pro 14 e 16 polegadas (M5 Pro e M5 Max)",
+          "24 GB",
+          "128 GB, conforme o chip"
+        ],
+        [
+          "Mac mini (M6)",
+          "16 GB",
+          "32 GB"
+        ],
+        [
+          "Mac mini (M5 Pro)",
+          "24 GB",
+          "64 GB"
+        ]
+      ],
+      "titulo": "Memória unificada nos Macs atuais",
+      "colunaDestaque": 2,
+      "fonte": {
+        "nome": "Apple — especificações técnicas do MacBook Air, do MacBook Pro e do Mac mini",
+        "url": "https://www.apple.com/macbook-pro/specs/"
+      },
+      "nota": "Os dados do MacBook Air e do Mac mini vêm das páginas de especificação listadas nas fontes do artigo. Cada configuração de memória pode depender da versão do chip escolhida."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Dois pontos chamam a atenção. Primeiro, a memória de entrada dos modelos mais vendidos agora é de 16 GB, o que deixa para trás a dúvida antiga sobre se 8 GB bastam em um Mac novo. Segundo, o MacBook Air e o MacBook Pro de 14 polegadas com M5 têm o mesmo teto, de 32 GB. Quem precisa de mais do que isso já está no território dos chips Pro e Max."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas atenção ao comprar um Mac de geração anterior, novo de estoque ou seminovo. Muitos modelos mais antigos saíram com 8 GB, e essa configuração continua circulando. Nesses casos a régua deste artigo vale do mesmo jeito: olhe a memória na ficha antes do processador, porque é ela que você não vai conseguir mudar depois."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quanta memória para cada tipo de uso"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Não existe número mágico, mas existe uma orientação razoável por perfil. A tabela abaixo é um ponto de partida baseado nas configurações que a Apple oferece e em como cada tipo de trabalho costuma usar a memória. Se você ficar entre duas faixas, escolha a de cima: é a decisão que menos se arrepende com o tempo."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Perfil de uso",
+        "Exemplos",
+        "Memória sugerida"
+      ],
+      "linhas": [
+        [
+          "Uso pessoal e estudo",
+          "Navegador, e-mail, textos, planilhas, fotos, videochamada",
+          "16 GB"
+        ],
+        [
+          "Trabalho com muitas janelas",
+          "Dezenas de abas, planilhas grandes, reuniões e apps de escritório abertos juntos",
+          "16 GB a 24 GB"
+        ],
+        [
+          "Criação e desenvolvimento",
+          "Edição de foto e vídeo, programação, máquinas virtuais",
+          "24 GB a 32 GB"
+        ],
+        [
+          "Vídeo pesado, 3D e IA local",
+          "Projetos de vídeo longos, modelos de IA rodando no próprio Mac",
+          "32 GB ou mais, em chip Pro ou Max quando for preciso passar disso"
+        ]
+      ],
+      "titulo": "Uma referência de memória por perfil de uso",
+      "colunaDestaque": 2,
+      "nota": "Referência geral, não regra. Programas específicos podem publicar requisitos próprios: confira a página do fabricante do software que você usa."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Em IA local, a memória pesa mais do que em qualquer outro uso. Para rodar um modelo de linguagem no próprio computador, o modelo inteiro precisa caber na memória, e no Mac essa memória é a mesma usada pela parte gráfica. A Apple destaca justamente que a memória unificada do M5 permite rodar modelos de IA maiores diretamente no aparelho. Explicamos isso com mais calma em [computador para rodar IA em casa](/blog/que-computador-preciso-para-rodar-ia-em-casa)."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas também não é preciso exagerar no uso comum. Um Mac com 16 GB usado para estudo e trabalho de escritório não fica mais rápido com 32 GB se nunca chega perto do limite. Nesse perfil, a diferença costuma ser melhor aproveitada em armazenamento, que também não se troca depois em boa parte dos Macs."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "apple"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como saber se o seu Mac atual está com pouca memória"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se você já tem um Mac e está pensando em trocar, ele mesmo pode dizer quanto de memória o seu uso pede. O Monitor de Atividade, que vem no macOS, tem uma aba Memória com um gráfico chamado Pressão da Memória. A Apple explica as cores: verde indica que a memória está sendo bem usada, amarelo que o Mac pode precisar de mais memória no futuro e vermelho que precisa de mais agora."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "**Abra o Monitor de Atividade**, pela pasta Utilitários ou buscando pelo nome no Spotlight.",
+        "**Clique na aba Memória** e deixe a janela aberta enquanto usa o Mac como num dia normal de trabalho.",
+        "**Observe o gráfico de Pressão da Memória** por alguns dias, principalmente nos momentos mais pesados.",
+        "**Anote o valor de Memória Usada e de Swap Usado**, que aparecem no rodapé da janela.",
+        "**Some uma folga** a esse uso para escolher a memória do próximo Mac."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O swap é espaço do disco que o macOS usa para guardar temporariamente dados que não cabem na memória. A memória comprimida é outra técnica: o sistema compacta dados de apps parados para abrir espaço aos que estão em uso. As duas são normais em pequena quantidade. O sinal de alerta é a combinação de gráfico amarelo ou vermelho com swap alto e lentidão frequente."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas ver a memória quase toda ocupada não é, por si só, problema. A Apple explica que o macOS usa a memória livre para guardar arquivos em cache, o que acelera a reabertura de apps. Por isso o número de memória usada costuma parecer alto mesmo em um Mac folgado. O que manda é a cor do gráfico, e não quanto sobra."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Memória ou armazenamento: onde vale colocar a diferença"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Na hora de configurar, a dúvida costuma ser entre subir a memória ou o armazenamento. Os dois são escolhidos na compra. Nos MacBook Air atuais, por exemplo, a página da Apple mostra o armazenamento partindo de 512 GB e indo até 4 TB. A memória decide quantas coisas o Mac faz ao mesmo tempo sem engasgar; o armazenamento decide quantos arquivos cabem nele."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "É a única chance: depois da compra não há como ampliar.",
+        "Dá mais folga para muitos apps abertos, edição de vídeo, programação e IA local.",
+        "Ajuda o Mac a continuar confortável com as versões futuras de sistema e de apps.",
+        "Costuma valorizar o Mac na revenda, porque o próximo dono também não pode ampliar."
+      ],
+      "contras": [
+        "Quem usa navegador, textos e planilhas raramente percebe diferença acima de 16 GB.",
+        "O valor investido poderia ir para mais armazenamento, que acaba mais rápido para quem guarda fotos e vídeos.",
+        "Em uso leve, a memória extra fica parada boa parte do tempo."
+      ],
+      "titulo": "Subir a memória na compra"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Para quem guarda muitas fotos e vídeos, armazenamento externo resolve parte do problema: um SSD externo ligado pela porta USB-C serve para arquivo e backup. Para a memória não há esse remédio. Por isso, se for preciso escolher um dos dois para esticar, a memória costuma ser a escolha mais segura para quem trabalha com programas pesados."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas para quem só usa o básico e tem muitos arquivos, a lógica se inverte. Um Mac de 16 GB com mais armazenamento atende melhor do que um de 32 GB que vive com o disco cheio, porque disco quase lotado também deixa o sistema lento e sem espaço para o swap. A decisão depende do que acaba primeiro no seu uso."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Mac seminovo e assistência em Campinas"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se você vai comprar um Mac usado, confira a memória na própria máquina, pelo menu Apple, em Sobre Este Mac, e compare com a ficha do modelo. É um ponto que o vendedor às vezes descreve errado e que não tem conserto depois. A Balão da Informática, no Cambuí, em Campinas, tem [seminovos](/seminovos) que você pode ver ligados e testar antes de pagar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se o seu Mac atual está lento e você quer saber se o problema é mesmo a memória, a [assistência de iPhone, iPad e Mac](/reparoapple) da loja faz o diagnóstico e verifica se a causa é memória, disco cheio, bateria ou sistema. A decisão, em uma linha: escolha a memória pelo uso dos próximos anos, e na dúvida entre duas opções fique com a maior."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "seminovos"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Dá para aumentar a memória do Mac depois da compra?",
+      "resposta": "Nos Macs com chip da Apple, não. A memória faz parte do conjunto do chip e só é escolhida na configuração do pedido. Por isso vale decidir com calma antes de comprar."
+    },
+    {
+      "pergunta": "16 GB bastam em um MacBook Air?",
+      "resposta": "Para navegação, estudo, escritório, fotos e videochamadas, normalmente sim. Se você edita vídeo, programa com máquinas virtuais ou quer rodar IA no próprio Mac, 24 GB ou 32 GB dão mais folga."
+    },
+    {
+      "pergunta": "Ainda vale comprar Mac com 8 GB?",
+      "resposta": "Os MacBook Air e MacBook Pro atuais já partem de 16 GB. Um modelo antigo com 8 GB pode servir para uso leve, mas tem pouca folga para os próximos anos, e a memória não pode ser ampliada."
+    },
+    {
+      "pergunta": "Como vejo quanta memória o meu Mac tem?",
+      "resposta": "No menu Apple, escolha Sobre Este Mac: a memória aparece na janela. Para ver se ela está no limite, abra o Monitor de Atividade, aba Memória, e observe a cor do gráfico de Pressão da Memória."
+    },
+    {
+      "pergunta": "Memória unificada é igual à memória RAM de um PC?",
+      "resposta": "Cumpre a mesma função, mas é compartilhada entre o processador, a parte gráfica e o Neural Engine do chip, sem uma memória de vídeo separada. Por isso, no Mac, a quantidade também define o espaço disponível para gráficos e IA."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Apple — MacBook Air: especificações técnicas",
+      "url": "https://www.apple.com/pt/macbook-air/specs/",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Apple — MacBook Pro: especificações técnicas",
+      "url": "https://www.apple.com/macbook-pro/specs/",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Apple — Mac mini: especificações técnicas",
+      "url": "https://www.apple.com/mac-mini/specs/",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Apple Newsroom — The new Mac mini and Mac Studio are available today",
+      "url": "https://www.apple.com/newsroom/2026/09/the-new-mac-mini-and-mac-studio-are-available-today/",
+      "data": "22 de setembro de 2026"
+    },
+    {
+      "nome": "Apple Newsroom — Apple unleashes M5",
+      "url": "https://www.apple.com/newsroom/2025/10/apple-unleashes-m5-the-next-big-leap-in-ai-performance-for-apple-silicon/",
+      "data": "outubro de 2025"
+    },
+    {
+      "nome": "Suporte Apple — Check if your Mac needs more RAM in Activity Monitor",
+      "url": "https://support.apple.com/kb/PH19650",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Suporte Apple — View memory usage in Activity Monitor on Mac",
+      "url": "https://support.apple.com/guide/activity-monitor/view-memory-usage-actmntr1004/mac",
+      "data": "consultado em outubro de 2026"
+    }
+  ]
+}
