@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { comOrigemDaPagina } from "@/lib/whatsapp/origem";
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -46,7 +47,7 @@ export default function HomeHeroInteractive({ carouselImages }: HomeHeroInteract
     const goal = goals.find(g => g.id === selectedGoal)?.label || "um PC Gamer";
     const budget = budgets[selectedBudget]?.label || "sob medida";
     const text = `Olá! Estou procurando ${goal} na faixa de ${budget} no site da Balão da Informática. Podem me ajudar com as melhores opções?`;
-    window.open(`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(text)}`, "_blank");
+    window.open(comOrigemDaPagina(`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(text)}`), "_blank");
   };
 
   return (

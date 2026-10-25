@@ -3,6 +3,26 @@ import { isTursoActive } from "@/lib/turso";
 import { isPainelAuthenticated } from "@/lib/painel-auth";
 import { rodarAgendado } from "@/lib/precos/coleta";
 import { situacaoDaTroca } from "@/lib/precos/banco";
+import { dispararAvisos, enviarNoWhatsApp } from "@/lib/avisos-de-preco/disparo";
+import { avisosParaConferir, marcarAvisado, marcarFalha, marcarVencidos } from "@/lib/avisos-de-preco/banco";
+
+/** "Me avise se baixar": confere quem está esperando e manda os avisos (lib/avisos-de-preco). */
+async function rodadaDosAvisos() {
+  try {
+    const r = await dispararAvisos({
+      conferir: avisosParaConferir,
+      enviar: enviarNoWhatsApp,
+      marcarAvisado,
+      marcarFalha,
+      marcarVencidos,
+    });
+    if (r.esperando > 0) console.log("[cron/precos] avisos de preço:", JSON.stringify(r));
+    return r;
+  } catch (erro) {
+    console.error("[cron/precos] avisos de preço:", (erro as Error).message);
+    return { erro: (erro as Error).message };
+  }
+}
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -38,9 +58,12 @@ export async function GET(req: Request) {
     // Antes da troca do catálogo não há o que atualizar: as fontes ainda não existem.
     const situacao = await situacaoDaTroca();
     if (situacao.comFonte === 0) {
-      return NextResponse.json({ ok: true, passos: [], aviso: "Catálogo ainda não vem das fontes." });
+      const avisos = await rodadaDosAvisos();
+      return NextResponse.json({ ok: true, passos: [], avisos, aviso: "Catálogo ainda não vem das fontes." });
     }
-    const passos = await rodarAgendado(45_000);
+    // Leitura das fontes primeiro (até ~40 s); os avisos usam os preços já gravados.
+    const passos = await rodarAgendado(40_000);
+    const avisos = await rodadaDosAvisos();
     // Uma linha por rodada, para dar para conferir nos logs que o agendador está vivo.
     console.log(
       "[cron/precos]",
@@ -48,7 +71,7 @@ export async function GET(req: Request) {
         ? "nenhuma fonte vencida"
         : passos.map((p) => `${p.fonte}: ${p.estado}${p.totalDePaginas ? ` (pág. ${p.pagina}/${p.totalDePaginas})` : ""}`).join("; ")
     );
-    return NextResponse.json({ ok: true, passos });
+    return NextResponse.json({ ok: true, passos, avisos });
   } catch (erro) {
     const mensagem = String((erro as Error)?.message || erro);
     console.error("[cron/precos]", mensagem);
