@@ -20,10 +20,12 @@ import type { Product } from "@/lib/utils";
 import { parsePriceToNumber } from "@/lib/utils";
 import { extractParts } from "./core";
 import type { VitrineCategory, VitrinePageRecord } from "./types";
-import { candidatos, diaDeHoje, escolherDoDia, QUANTOS_POR_DIA, setupDoProduto } from "./rotativa";
+import { candidatos, diaDeHoje, rankingDoDia, QUANTOS_POR_DIA, setupDoProduto } from "./rotativa";
 
 export const FAIXA_MINIMA = 5000;
 export const FAIXA_MAXIMA = 10000;
+/** Quantos sorteados a vitrine confere no catálogo, no máximo, por montagem. */
+export const MAXIMO_DE_CONFERENCIAS = 25;
 
 export interface SetupAssinado {
   /** Endereço da página: /p/<slug>. */
@@ -162,13 +164,31 @@ export async function paginasDaVitrine(
   const paginas: VitrinePageRecord[] = [];
   const usados = new Set<string>();
 
-  for (const produto of escolherDoDia(pcs, dia)) {
-    const pagina = montarPaginaAssinada(setupDoProduto(produto, dia), produto);
+  // A lista da categoria pode trazer produto que a busca individual não acha,
+  // ou com preço diferente do que o checkout cobra (achado em 25/10). Por isso
+  // cada sorteado é conferido pela MESMA busca da página do produto e do
+  // checkout, e a vitrine usa o registro dela.
+  const chaves = new Set<string>();
+  let tentativas = 0;
+  for (const sorteado of rankingDoDia(pcs, dia)) {
+    if (paginas.length >= QUANTOS_POR_DIA || tentativas >= MAXIMO_DE_CONFERENCIAS) break;
+    tentativas++;
+    let identificador = String(sorteado.id);
+    let real = await buscar(identificador).catch(() => null);
+    if (!real && sorteado.slug && sorteado.slug !== identificador) {
+      identificador = sorteado.slug;
+      real = await buscar(identificador).catch(() => null);
+    }
+    const conferido = real ? candidatos([real])[0] : undefined;
+    if (!real || !conferido || chaves.has(conferido.chave) || usados.has(String(real.id))) continue;
+    const pagina = montarPaginaAssinada(setupDoProduto(real, dia, identificador), real);
     if (pagina) {
       paginas.push(pagina);
-      usados.add(String(produto.id));
+      chaves.add(conferido.chave);
+      usados.add(String(real.id));
     }
   }
+  paginas.sort((a, b) => parsePriceToNumber((a.extras as any)?.price_text) - parsePriceToNumber((b.extras as any)?.price_text));
 
   if (paginas.length < QUANTOS_POR_DIA) {
     for (const setup of SETUPS_ASSINADOS) {
@@ -182,6 +202,7 @@ export async function paginasDaVitrine(
       }
     }
   }
+  paginas.sort((a, b) => parsePriceToNumber((a.extras as any)?.price_text) - parsePriceToNumber((b.extras as any)?.price_text));
   return paginas;
 }
 
