@@ -50,7 +50,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const canonical = `https://www.balao.info/urgente/${intent.slug}`;
 
   return {
-    title: `${intent.title} em Campinas | Balão da Informática`,
+    title: { absolute: `${intent.title} em Campinas | Balão da Informática` },
     description: intent.description,
     keywords: [
       intent.slug.replace(/-/g, " "),

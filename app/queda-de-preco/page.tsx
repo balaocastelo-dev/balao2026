@@ -13,7 +13,7 @@ import { DIAS_NA_VITRINE, produtosEmQueda } from "@/lib/precos/queda";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "Queda de preço | Produtos que baixaram de preço | Balão da Informática",
+  title: { absolute: "Queda de preço | Produtos que baixaram de preço | Balão da Informática" },
   description:
     "Produtos que baixaram de preço na Balão da Informática, no Cambuí, em Campinas. O preço anterior e o novo, lado a lado, atualizados todos os dias.",
   alternates: { canonical: "https://www.balao.info/queda-de-preco" },

@@ -40,7 +40,7 @@ const REGIAO_FAQS = [
 ];
 
 export const metadata: Metadata = {
-  title: "Atendimento em Campinas e Região Metropolitana | Balão da Informática",
+  title: { absolute: "Atendimento em Campinas e Região Metropolitana | Balão da Informática" },
   description:
     "Assistência técnica especializada, venda de computadores, notebooks, PC Gamer e Apple para Campinas, Sumaré, Hortolândia, Paulínia, Valinhos e Vinhedo.",
   alternates: { canonical: "https://www.balao.info/regiao" },

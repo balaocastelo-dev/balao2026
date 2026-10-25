@@ -235,7 +235,7 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
   const ogImage = (page as any)?.images?.hero || pickPcHeroImage({ categoria: page.categoria } as any);
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: { canonical },
     openGraph: {

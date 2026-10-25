@@ -4,6 +4,19 @@ import { sendEmail, sendNewOrderNotification } from "@/lib/mail";
 import { getOrderCustomerWhatsAppTemplate } from "@/lib/mail-templates";
 import { validateCoupon } from "@/lib/coupons";
 import { isTursoActive } from "@/lib/turso";
+import { getCachedProductByIdentifier } from "@/lib/cache";
+import { reprecificar, type ItemEnviado } from "@/lib/carrinho/precos";
+import type { Product } from "@/lib/utils";
+
+/**
+ * Preço do produto agora: banco direto (sem cache) e, se ele falhar, o cache do
+ * catálogo (que já cai no espelho da VPS). Ver lib/carrinho/precos.ts.
+ */
+async function buscarProdutoAtual(id: string): Promise<Product | null> {
+  const direto = await getProductById(id).catch(() => null);
+  if (direto) return direto;
+  return getCachedProductByIdentifier(id).catch(() => null);
+}
 
 type CheckoutCustomerInput = {
   name?: unknown;
@@ -73,20 +86,62 @@ export async function POST(req: Request) {
     console.log(`[Checkout] Values received - Total: ${total}, Discount: ${discountValue}, Coupon: ${couponCode}`);
 
     // --- Backend Validation Start ---
-    let calculatedTotalItems = 0;
-    const cleanItems = items.map((item) => {
+    // O preço vem do BANCO, nunca do navegador (lib/carrinho/precos.ts).
+    const enviados: ItemEnviado[] = items.map((item) => {
         const productId = typeof item.product_id === "string"
           ? item.product_id
           : (typeof item.id === "string" ? item.id : "");
-        const quantity = typeof item.quantity === "number" ? item.quantity : Number(item.quantity) || 1;
         let price = item.price;
         if (typeof price === "string") {
              price = parseFloat(price.replace("R$", "").replace(/\./g, "").replace(",", ".")) || 0;
         }
-        const parsedPrice = typeof price === "number" ? price : Number(price) || 0;
-        calculatedTotalItems += parsedPrice * quantity;
-        return { ...item, product_id: productId, quantity, price: parsedPrice };
+        return {
+          product_id: productId,
+          name: String(item.name ?? ""),
+          image: typeof item.image === "string" ? item.image : "",
+          quantity: Number(item.quantity) || 1,
+          price_enviado: typeof price === "number" ? price : Number(price) || 0,
+        };
     });
+
+    const repreco = await reprecificar(enviados, buscarProdutoAtual);
+
+    if (repreco.faltando.length > 0) {
+        console.warn(`[Checkout] Itens que não existem mais no site: ${repreco.faltando.join(", ")}`);
+        return NextResponse.json(
+          {
+            error: "produto_indisponivel",
+            message: "Algum produto do carrinho não está mais disponível no site. Remova-o ou fale com a gente no WhatsApp.",
+            faltando: repreco.faltando,
+            itens: repreco.itens.map((i) => i.atual),
+          },
+          { status: 409 }
+        );
+    }
+
+    if (repreco.algumMudou) {
+        console.warn(
+          `[Checkout] Preço do carrinho diferente do site, pedido não criado: ` +
+          repreco.itens.filter((i) => i.mudou).map((i) => `${i.product_id} ${i.price_enviado} -> ${i.price}`).join("; ")
+        );
+        return NextResponse.json(
+          {
+            error: "precos_atualizados",
+            message: "O preço de algum item mudou. Atualizamos o carrinho: confira o total e confirme de novo.",
+            itens: repreco.itens.map((i) => i.atual),
+          },
+          { status: 409 }
+        );
+    }
+
+    const cleanItems = repreco.itens.map((i) => ({
+      product_id: i.product_id,
+      name: i.name,
+      image: i.image,
+      quantity: i.quantity,
+      price: i.price,
+    }));
+    const calculatedTotalItems = repreco.subtotal;
 
     let calculatedDiscount = 0;
     if (couponCode) {
@@ -132,7 +187,7 @@ export async function POST(req: Request) {
       total: expectedTotal,
       status: 'pending' as const,
       coupon_code: couponCode,
-      discount_value: discountValue
+      discount_value: calculatedDiscount
     };
 
     const orderItems = cleanItems.map((item) => ({

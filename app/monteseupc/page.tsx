@@ -16,7 +16,7 @@ import { getCachedProducts } from "@/lib/cache";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Monte seu PC Gamer Customizado em Campinas | Balão da Informática",
+  title: { absolute: "Monte seu PC Gamer Customizado em Campinas | Balão da Informática" },
   description:
     "Configurador inteligente de PC Gamer peça por peça com verificação automática de compatibilidade, cable management profissional e retirada no Cambuí em Campinas.",
   keywords: [
