@@ -2,6 +2,23 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "aviso-de-pouco-espaco-em-disco-o-que-apagar-primeiro",
+      "titulo": "Aviso de pouco espaço em disco: o que apagar primeiro e o que não tocar",
+      "resumo": "O aviso de pouco espaço em disco se resolve sem risco quando você apaga na ordem certa. Veja por onde começar no Windows e no Mac e o que nunca apagar à mão.",
+      "categoria": "assistencia",
+      "etiquetas": [
+        "armazenamento",
+        "windows",
+        "mac",
+        "manutenção",
+        "ssd"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-26T21:00:00.000Z",
+      "minutos": 5,
+      "formato": "dica"
+    },
+    {
       "slug": "secure-boot-certificado-venceu-19-de-outubro",
       "titulo": "Secure Boot: último certificado de 2011 venceu em 19 de outubro",
       "resumo": "O certificado que assina o carregador de inicialização do Windows venceu em 19 de outubro. O PC continua ligando, mas pode perder proteções. Veja como conferir.",
@@ -788,5 +805,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-25T22:36:36.818Z"
+  "atualizadoEm": "2026-10-25T22:49:26.774Z"
 }

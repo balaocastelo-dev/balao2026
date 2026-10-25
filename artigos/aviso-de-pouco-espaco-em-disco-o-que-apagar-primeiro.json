@@ -1,0 +1,195 @@
+{
+  "slug": "aviso-de-pouco-espaco-em-disco-o-que-apagar-primeiro",
+  "titulo": "Aviso de pouco espaço em disco: o que apagar primeiro e o que não tocar",
+  "resumo": "O aviso de pouco espaço em disco se resolve sem risco quando você apaga na ordem certa. Veja por onde começar no Windows e no Mac e o que nunca apagar à mão.",
+  "categoria": "assistencia",
+  "etiquetas": [
+    "armazenamento",
+    "windows",
+    "mac",
+    "manutenção",
+    "ssd"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-26T21:00:00.000Z",
+  "formato": "dica",
+  "roteiro": {
+    "fala": "Apareceu o aviso de pouco espaço em disco? Não saia apagando pasta do sistema. Comece pelo que o próprio computador oferece: no Windows, Configurações, Sistema, Armazenamento, e as recomendações de limpeza. Depois olhe a pasta Downloads, ordene por tamanho e esvazie a lixeira. Fotos e vídeos podem ir para um disco externo. Só um cuidado: se você atualizou o Windows há menos de dez dias, a instalação anterior é o que permite voltar atrás.",
+    "titulo": "Disco cheio: por onde começar",
+    "destaques": [
+      "Recomendações de limpeza",
+      "Downloads por tamanho",
+      "Esvazie a lixeira",
+      "Não apague pasta do sistema"
+    ],
+    "legenda": "O aviso de pouco espaço em disco tem uma ordem certa para resolver, sem apagar o que não deve. A dica completa, para Windows e Mac, está no blog.",
+    "hashtags": [
+      "windows",
+      "mac",
+      "armazenamento",
+      "dicas",
+      "informatica",
+      "campinas"
+    ]
+  },
+  "seo": {
+    "titulo": "Pouco espaço em disco: o que apagar primeiro no PC e no Mac"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "O aviso de pouco espaço em disco aparece quando a unidade principal, normalmente a C: no Windows, está quase cheia. A primeira coisa a apagar não é pasta do sistema: são os arquivos temporários, a lixeira e os downloads esquecidos. O próprio Windows e o macOS mostram o que ocupa espaço e oferecem a limpeza segura."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é tratar o aviso como um detalhe ou, no outro extremo, sair apagando pastas que parecem grandes. Segundo a Microsoft, pouco espaço livre prejudica o desempenho e atrapalha as atualizações do sistema. E apagar à mão dentro de Windows ou de Arquivos de Programas pode deixar o computador sem ligar. A ordem certa resolve a maioria dos casos."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "Comece pelas **recomendações de limpeza** do Windows ou pelo painel de **Armazenamento** do Mac.",
+        "Depois, a pasta **Downloads** ordenada por tamanho, e só então fotos e vídeos, que podem ir para um disco externo.",
+        "Arquivo apagado continua ocupando espaço até você **esvaziar a lixeira**.",
+        "Nunca apague à mão pastas do sistema nem a instalação anterior do Windows logo depois de uma atualização."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que apagar primeiro no Windows"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A página de suporte da Microsoft sugere seguir os passos em ordem e conferir o espaço livre depois de cada um. Para ver quanto sobra, abra o Explorador de Arquivos, clique em Este Computador e olhe a barra de cada unidade. Então siga esta sequência:"
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "Abra **Iniciar > Configurações > Sistema > Armazenamento > Recomendações de limpeza**. O Windows separa arquivos temporários, arquivos grandes ou sem uso, arquivos já sincronizados com a nuvem e aplicativos sem uso, e mostra quanto cada item libera.",
+        "Marque o que não faz falta e clique em **Limpar** em cada parte. Os temporários são o item mais seguro da lista.",
+        "No Explorador de Arquivos, abra **Downloads**, depois Vídeos e Imagens. Em Exibir, escolha Detalhes e ordene por tamanho: os maiores aparecem em cima.",
+        "Apague o que não precisa e **esvazie a Lixeira**. Sem isso, o espaço não volta.",
+        "O que você quer guardar mas não usa todo dia, como fotos antigas e vídeos, pode ir para um HD externo ou pen drive."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Para o problema não voltar, a Microsoft recomenda o **Sensor de Armazenamento**, que se liga em Configurações, Sistema, Armazenamento. Ele vem desligado e, quando ativado, remove arquivos temporários e esvazia a lixeira depois do prazo que você escolher. A pasta Downloads e os arquivos da nuvem só entram na limpeza se você configurar. Ele cuida apenas da unidade do sistema."
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "Se você atualizou o Windows nos últimos dez dias, a versão anterior aparece na limpeza como um item grande. Apagar esse item remove a pasta Windows.old, que é o que permite voltar à versão anterior, e não dá para desfazer. Se o computador estiver se comportando bem há alguns dias, aí sim pode apagar.",
+      "titulo": "Cuidado com a instalação anterior do Windows"
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "No Mac, e o que fica na tabela de não tocar"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "No Mac com macOS Ventura ou mais novo, o caminho indicado pela Apple é menu Apple, Ajustes do Sistema, Geral e Armazenamento. A tela mostra o que ocupa espaço por categoria e traz recomendações para otimizar. A Apple sugere apagar arquivos da pasta Downloads, filmes e músicas que dá para baixar de novo, backups antigos de iPhone e iPad guardados no Mac e aplicativos sem uso, e esvaziar a Lixeira no fim."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Item",
+        "Pode apagar?",
+        "Observação"
+      ],
+      "linhas": [
+        [
+          "Arquivos temporários",
+          "Sim",
+          "Pelas recomendações de limpeza ou pelo Sensor de Armazenamento"
+        ],
+        [
+          "Lixeira",
+          "Sim",
+          "Confira antes se não há nada que você queira de volta"
+        ],
+        [
+          "Downloads",
+          "Sim, com conferência",
+          "Instaladores velhos e arquivos repetidos costumam ser os maiores"
+        ],
+        [
+          "Aplicativos sem uso",
+          "Sim",
+          "Desinstale pelo sistema, não apagando a pasta do programa"
+        ],
+        [
+          "Fotos e vídeos",
+          "Melhor mover",
+          "Para um disco externo, e só apague depois de conferir a cópia"
+        ],
+        [
+          "Instalação anterior do Windows",
+          "Só depois de alguns dias",
+          "Remove a volta para a versão anterior"
+        ],
+        [
+          "Pastas Windows, Arquivos de Programas e Sistema",
+          "Não",
+          "Apagar à mão pode impedir o computador de ligar"
+        ]
+      ],
+      "titulo": "O que pode apagar e o que deixar como está",
+      "colunaDestaque": 1,
+      "fonte": {
+        "nome": "Suporte da Microsoft e Suporte da Apple",
+        "url": "https://support.microsoft.com/en-us/windows/free-up-drive-space-in-windows-85529ccb-c365-490d-b548-831022bc9b32"
+      },
+      "nota": "Os nomes dos menus mudam um pouco conforme a versão do sistema."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A dica não basta quando o disco enche de novo em poucos dias sem você ter salvo nada. A Microsoft lembra que vírus pode ocupar muito espaço; rode uma verificação no Segurança do Windows. Se o espaço some sozinho ou o computador ficou lento junto, pode ser o disco dando sinais, e o artigo sobre [SSD chegando ao fim](/blog/como-saber-se-o-ssd-esta-chegando-ao-fim) mostra o que olhar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Quando o disco de fato ficou pequeno para o seu uso, a saída é um SSD maior ou um segundo disco. Na Balão da Informática, no Cambuí, em Campinas, a [assistência técnica](/manutencao) faz a troca e passa os arquivos; e se algum arquivo importante foi apagado por engano, existe a [recuperação de dados](/recuperacaodados). Em uma linha: limpe pelo próprio sistema, mova o que é grande e nunca apague pasta do sistema."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "upgrade"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Disco cheio deixa o computador lento?",
+      "resposta": "Pode deixar. A Microsoft diz que pouco espaço livre prejudica o desempenho e atrapalha as atualizações. Mas, se o computador está lento com bastante espaço livre, a causa é outra e vale ler o artigo sobre [computador lento](/blog/computador-lento-o-que-resolve-de-verdade)."
+    },
+    {
+      "pergunta": "Apaguei vários arquivos e o espaço não aumentou. Por quê?",
+      "resposta": "Os arquivos apagados ficam na Lixeira até você esvaziá-la, tanto no Windows quanto no Mac. Esvazie a Lixeira e confira o espaço de novo."
+    },
+    {
+      "pergunta": "Posso apagar a pasta Windows.old?",
+      "resposta": "Pode, mas pelo próprio Windows, nas configurações de armazenamento, e de preferência depois de alguns dias sem problema com a atualização. Sem ela, não dá para voltar à versão anterior."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Free up drive space in Windows — Suporte da Microsoft",
+      "url": "https://support.microsoft.com/en-us/windows/free-up-drive-space-in-windows-85529ccb-c365-490d-b548-831022bc9b32",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Manage drive space with Storage Sense — Suporte da Microsoft",
+      "url": "https://support.microsoft.com/kb/5000679",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Free up storage space on Mac — Suporte da Apple",
+      "url": "https://support.apple.com/en-au/102624",
+      "data": "dezembro de 2025"
+    }
+  ]
+}
