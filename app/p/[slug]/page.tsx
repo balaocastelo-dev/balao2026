@@ -31,7 +31,9 @@ import {
 
 import { getVitrinePageBySlug } from "@/lib/vitrine/db";
 import { paginaAssinadaPorSlug } from "@/lib/vitrine/assinadas";
-import { getCachedProductByIdentifier } from "@/lib/cache";
+import { getCachedProductByIdentifier, getCachedProductsByCategoryFullPath } from "@/lib/cache";
+import { CATEGORIA_DA_PECA, fotoDaPeca, comoIlustrativa, type TipoDePeca } from "@/lib/vitrine/fotos-pecas";
+import { AvisoImagemIlustrativa } from "@/components/SeloProntaEntrega";
 
 /** Setup assinado (lib/vitrine/assinadas.ts) primeiro; depois a página do painel. */
 async function buscarPaginaDaVitrine(slug: string) {
@@ -201,8 +203,9 @@ function PieceRow({
             </div>
           </div>
           <div className="lg:ml-auto w-full lg:w-[380px]">
-            <div className="rounded-2xl bg-white border border-gray-200 flex items-center justify-center overflow-hidden p-4">
-              <Image src={imageSrc} alt="" width={900} height={700} className="w-full h-[340px] sm:h-[340px] object-contain" unoptimized />
+            <div className="relative rounded-2xl bg-white border border-gray-200 flex items-center justify-center overflow-hidden p-4">
+              <AvisoImagemIlustrativa url={imageSrc} />
+              <Image src={imageSrc} alt={`${label}: ${name}`} width={900} height={700} className="w-full h-[340px] sm:h-[340px] object-contain" unoptimized />
             </div>
           </div>
         </div>
@@ -279,11 +282,34 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
 
   const copy = makeCommercialCopy(page.nome_pc, parts as any);
 
-  const cpuImg = (page as any)?.images?.cpu || pickComponentImage("cpu", parts as any);
-  const ramImg = (page as any)?.images?.ram || pickComponentImage("ram", parts as any);
-  const storageImg = (page as any)?.images?.storage || pickComponentImage("storage", parts as any);
-  const gpuImg = (page as any)?.images?.gpu || pickComponentImage("gpu", parts as any);
-  const coolingImg = (page as any)?.images?.cooling || pickComponentImage("cooling", parts as any);
+  // Foto de verdade de cada peça (produto do mesmo tipo no catálogo, com o
+  // selo "Imagem ilustrativa") no lugar dos desenhos — lib/vitrine/fotos-pecas.ts.
+  const nomeDoPc = `${page.nome_pc} ${String((page as any)?.extras?.main_product?.name || "")}`;
+  const descricaoDaPeca: Record<TipoDePeca, string> = {
+    cpu: page.processador || nomeDoPc,
+    ram: `${page.memoria_ram || ""} ${nomeDoPc}`,
+    storage: `${page.armazenamento || ""} ${nomeDoPc}`,
+    gpu: page.placa_video || nomeDoPc,
+    cooling: page.resfriamento || "",
+  };
+  const tipos = Object.keys(CATEGORIA_DA_PECA) as TipoDePeca[];
+  const faltam = tipos.filter((k) => !(page as any)?.images?.[k]);
+  const catalogos = Object.fromEntries(
+    await Promise.all(
+      faltam.map(async (k) => [k, await getCachedProductsByCategoryFullPath(CATEGORIA_DA_PECA[k]).catch(() => [])] as const)
+    )
+  ) as Partial<Record<TipoDePeca, any[]>>;
+  const fotoDoPc = String(hero || "").startsWith("http") ? comoIlustrativa(hero) : "";
+  const imagemDaPeca = (k: TipoDePeca) =>
+    (page as any)?.images?.[k] ||
+    fotoDaPeca(k, descricaoDaPeca[k], catalogos[k] || []) ||
+    fotoDoPc ||
+    pickComponentImage(k, parts as any);
+  const cpuImg = imagemDaPeca("cpu");
+  const ramImg = imagemDaPeca("ram");
+  const storageImg = imagemDaPeca("storage");
+  const gpuImg = imagemDaPeca("gpu");
+  const coolingImg = imagemDaPeca("cooling");
 
   const extras = (page as any)?.extras && typeof (page as any).extras === "object" ? (page as any).extras : {};
   const mainProduct = extras?.main_product && typeof extras.main_product === "object" ? extras.main_product : null;

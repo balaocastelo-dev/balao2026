@@ -12,8 +12,9 @@ import {
 import Header from "@/components/Header";
 import { SITE_CONFIG } from "@/lib/config";
 import { listVitrinePagesPublic } from "@/lib/vitrine/db";
-import { paginasAssinadas } from "@/lib/vitrine/assinadas";
-import { getCachedProductByIdentifier } from "@/lib/cache";
+import { paginasDaVitrine } from "@/lib/vitrine/assinadas";
+import { CAMINHO_PC_GAMER_COMPLETO } from "@/lib/vitrine/rotativa";
+import { getCachedProductByIdentifier, getCachedProductsByCategoryFullPath } from "@/lib/cache";
 import { pickPcHeroImage } from "@/lib/vitrine/core";
 import type { VitrinePageRecord } from "@/lib/vitrine/types";
 
@@ -54,9 +55,13 @@ function buildSpecs(page: VitrinePageView) {
 }
 
 export default async function VitrinePage() {
-  // Setups assinados (preço lido do catálogo agora) + páginas feitas no painel.
+  // Cinco setups do dia (mudam sozinhos todo dia, preço lido do catálogo agora)
+  // + páginas feitas no painel.
   const [assinadas, doPainel] = await Promise.all([
-    paginasAssinadas(getCachedProductByIdentifier).catch(() => []),
+    paginasDaVitrine(
+      () => getCachedProductsByCategoryFullPath(CAMINHO_PC_GAMER_COMPLETO),
+      getCachedProductByIdentifier
+    ).catch(() => []),
     listVitrinePagesPublic().catch(() => []),
   ]);
   const slugsAssinados = new Set(assinadas.map((p) => p.slug));
