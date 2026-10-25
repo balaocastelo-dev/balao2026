@@ -1,0 +1,288 @@
+{
+  "slug": "derramou-liquido-no-notebook-o-que-fazer",
+  "titulo": "Derramou líquido no notebook: o que fazer nos primeiros minutos",
+  "resumo": "Derramou líquido no notebook? Desligue na hora, tire o carregador e não religue para testar. Veja o passo a passo e o que só a assistência resolve.",
+  "categoria": "assistencia",
+  "etiquetas": [
+    "notebook",
+    "manutenção",
+    "diagnóstico",
+    "recuperação de dados"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-26T09:00:00.000Z",
+  "seo": {
+    "titulo": "Derramou líquido no notebook: o que fazer agora"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "O copo virou, o café escorreu pelo teclado e agora você está olhando para o notebook sem saber se ele ainda tem salvação. Quem derramou líquido no notebook costuma ter o mesmo impulso: secar por cima, ver se a tela continua acesa e seguir trabalhando. Os próximos minutos pesam mais do que tudo o que vem depois, e quase todos os erros acontecem justamente aí."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano mais comum é achar que, se o notebook continuou ligado, nada aconteceu. O líquido costuma fazer o estrago aos poucos: a corrente que passa pela placa molhada pode causar curto, e o resíduo que fica depois de seco corrói os contatos ao longo de dias. Por isso a ordem é desligar primeiro, secar sem calor e só religar quando houver certeza de que está seco, de preferência depois de uma avaliação."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "**Desligue na hora** e tire o carregador da tomada. Perder um arquivo aberto custa menos do que perder a placa.",
+        "Desconecte pendrives, cabos e mouse. Bateria, só se ela sair por fora, com trava; **nunca abra o notebook** para tirá-la.",
+        "Seque o que está visível com pano sem fiapo, **sem calor** e sem arroz, e espere ao menos 24 horas antes de religar.",
+        "Café com açúcar, refrigerante, suco ou leite pedem limpeza interna: aí o caminho é a assistência, mesmo que o notebook pareça funcionar."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Os primeiros minutos: o passo a passo seguro"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "As orientações dos fabricantes coincidem no essencial. A Lenovo, nos manuais dos seus notebooks, manda tirar o carregador com cuidado e desligar o aparelho imediatamente, e avisa que você pode perder o trabalho não salvo, mas que deixar o computador ligado pode inutilizá-lo. A Sony, em artigo de suporte para os notebooks VAIO, segue a mesma linha e acrescenta desconectar tudo o que estiver ligado nele."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "**Tire o carregador da tomada**, segurando pelo plugue e com as mãos secas. Se houver líquido perto da tomada ou do cabo, desligue o disjuntor antes de mexer.",
+        "**Desligue o notebook** segurando o botão de energia por alguns segundos. Não espere o sistema fechar os programas.",
+        "**Desconecte tudo**: pendrive, HD externo, mouse, cabo de rede, fone.",
+        "**Bateria removível por fora**, com trava, pode sair. Se ela for interna, presa por parafusos, deixe onde está.",
+        "**Absorva o líquido visível** com pano sem fiapo ou papel-toalha, encostando em vez de esfregar, para não espalhar.",
+        "**Deixe o notebook aberto** em lugar seco e ventilado, longe de sol e de aquecedor, e não ligue para testar."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Sobre inclinar o notebook para escorrer, as orientações divergem, e vale conferir o manual do seu modelo. A Lenovo pede para não virar o aparelho, porque em teclados com furos de drenagem o líquido sai sozinho por baixo. Já o guia da Sony para VAIO sugere inclinar com cuidado para os lados. O que todas evitam é chacoalhar: isso leva o líquido para partes que ainda estavam secas."
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "Não abra a tampa de baixo, não solte a bateria interna e não religue para ver se funciona. Se a bateria esquentar, estufar, soltar fumaça ou cheiro de queimado, afaste o notebook de objetos que pegam fogo, não toque nele e procure ajuda. Esse não é um conserto para casa.",
+      "titulo": "Onde parar"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que não fazer, mesmo que pareça ajudar"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O arroz é a receita mais repetida e a menos útil. O iFixit, site conhecido por guias de conserto, lembra que, num teste comparativo citado por eles, o arroz cru foi o material que menos absorveu água entre os sete avaliados. Além de secar pouco, o grão solta pó e amido, que podem entrar pelas frestas do teclado e das saídas de ar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O secador de cabelo é a segunda tentação. O guia de suporte técnico da Bowdoin College desaconselha secador, forno, aquecedor e sol direto, porque o calor causa novos danos. Uma oficina de conserto britânica acrescenta que o calor empurra a umidade para dentro da placa e acelera a corrosão. Mesmo quem admite o secador, como um texto do iFixit, o trata como acabamento depois do aparelho aberto, não como primeiro socorro."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Atitude",
+        "Ajuda ou atrapalha",
+        "Por quê"
+      ],
+      "linhas": [
+        [
+          "Desligar e tirar da tomada na hora",
+          "Ajuda",
+          "Corta a corrente que causa o curto"
+        ],
+        [
+          "Religar para ver se ainda funciona",
+          "Atrapalha",
+          "Passa corrente pela placa ainda molhada"
+        ],
+        [
+          "Absorver com pano, sem esfregar",
+          "Ajuda",
+          "Tira o excesso sem espalhar"
+        ],
+        [
+          "Chacoalhar o notebook",
+          "Atrapalha",
+          "Leva o líquido para partes secas"
+        ],
+        [
+          "Secador, forno ou sol",
+          "Atrapalha",
+          "O calor pode causar novos danos"
+        ],
+        [
+          "Colocar no arroz",
+          "Atrapalha",
+          "Absorve pouco e solta pó"
+        ],
+        [
+          "Secar em local ventilado por 24 a 48 horas",
+          "Ajuda",
+          "Dá tempo para a umidade sair"
+        ]
+      ],
+      "titulo": "Primeiros socorros: o que ajuda e o que atrapalha",
+      "colunaDestaque": 1,
+      "fonte": {
+        "nome": "Lenovo, Sony e Bowdoin College — orientações de suporte",
+        "url": "https://bowdoin.teamdynamix.com/TDClient/1814/Portal/KB/Article/170973/Save-Your-Laptop-After-a-Liquid-Spill"
+      },
+      "nota": "Resumo das orientações de suporte listadas nas fontes do artigo. Siga também o manual do seu modelo."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Outro erro é limpar com produto de limpeza, álcool de cozinha ou spray. O guia da Bowdoin pede para não usar limpadores fortes nem sprays. Para bebida com açúcar, ele admite apenas um pano umedecido com água limpa nas superfícies de fora. Dentro, a limpeza é outra conversa, e fica para a bancada."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Água, café ou refrigerante: quanto o tipo de líquido pesa"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Nem todo derramamento é igual. Segundo a oficina britânica citada acima, a água pura deixa pouco resíduo, enquanto bebidas com açúcar são as piores, porque o açúcar cristaliza entre os componentes e é difícil de tirar. Leite e café com leite entram no mesmo grupo. Quanto mais coisa dissolvida no líquido, mais sujeira sobra quando a água evapora."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A quantidade e o caminho também contam. Algumas gotas na borda do teclado são uma coisa; meio copo que escorreu até as saídas de ar é outra. O iFixit observa que o resultado depende do tipo, da quantidade e de onde o líquido caiu. Mas o fato de o notebook ligar normalmente no dia seguinte não encerra a história, porque a corrosão segue trabalhando por dentro."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "Secar em casa basta em respingos pequenos de água pura que não passaram do teclado",
+        "Não custa nada e não exige ferramenta",
+        "Dá para fazer de imediato, enquanto você organiza a ida à assistência"
+      ],
+      "contras": [
+        "Secar por fora não tira o resíduo de açúcar, leite ou café",
+        "Defeitos podem aparecer dias ou semanas depois, como teclas mortas e reinícios",
+        "Religar cedo demais pode transformar um problema de limpeza em troca de placa"
+      ],
+      "titulo": "Secar em casa ou levar logo para avaliação"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando religar e quais sinais pedem assistência"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Sony recomenda esperar pelo menos 24 horas antes de ligar de novo; o guia da Bowdoin fala em 24 a 48 horas em local seco, ventilado e à temperatura ambiente. Se foi água e pouca quantidade, depois desse prazo você pode ligar o carregador e apertar o botão uma vez. Se algo parecer errado, segure o botão até desligar e não insista."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se ligou, teste com calma: teclado, touchpad, tela, som e portas, uma coisa de cada vez. E faça backup dos arquivos importantes logo, antes de qualquer outra coisa, porque o comportamento pode piorar. Se o notebook não ligar, não tente várias vezes seguidas: cada tentativa passa corrente por onde pode haver curto."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": false,
+      "itens": [
+        "Teclas que grudam, falham ou digitam sozinhas",
+        "Touchpad que não responde ou mexe o cursor sem toque",
+        "Listras, manchas ou tela piscando",
+        "Reinícios ou desligamentos sem motivo",
+        "Bateria que não carrega ou carregador que esquenta mais que o normal",
+        "Cheiro de queimado perto do teclado ou das saídas de ar"
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Esses sinais podem surgir dias depois do acidente, como o próprio guia da Bowdoin alerta. Mas nem tudo está perdido quando aparecem: em muitos casos a limpeza interna resolve, e quando há peça danificada, como o teclado, a troca pode valer a pena. O que define é o estado da placa depois de aberta e limpa."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que a assistência faz e o que acontece com os seus arquivos"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Na bancada, o técnico desmonta o notebook, desconecta a bateria interna e procura onde o líquido chegou. A oficina britânica descreve a limpeza da placa com álcool isopropílico de alta pureza e, nos casos mais sérios, limpeza por ultrassom. Ela também avisa que trilhas corroídas e componentes queimados nem sempre têm conserto, e é por isso que o tempo até a limpeza conta."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Antes de levar, verifique a garantia do seu modelo, mas sem grande expectativa. A Sony informa que derramamento de líquido fica fora da garantia dos notebooks VAIO, e muitas marcas seguem regra parecida; algumas instituições e planos de seguro cobrem esse tipo de acidente. Na dúvida, guarde a nota fiscal e anote o que caiu, quanto e quando."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Os arquivos costumam ser a maior preocupação. Em muitos casos o disco ou SSD sai ileso, mesmo quando a placa precisa de reparo, mas isso só se confirma na bancada. Se o notebook não liga e há fotos ou documentos sem cópia, conte isso ao técnico logo no começo. Para quem tem MacBook, o cuidado é o mesmo, mas a avaliação é feita por quem atende Mac."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Onde levar o notebook molhado em Campinas"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, tem [assistência técnica](/manutencao) no mesmo endereço da loja, com diagnóstico, limpeza, troca de peça e conserto. Se o notebook não liga e os arquivos não têm cópia, a equipe também faz [recuperação de dados](/recuperacaodados). Para MacBook, iPhone e iPad, há a [assistência Apple](/reparoapple). Se o seu caso é outro, o guia [PC não liga: o que verificar](/blog/pc-nao-liga-o-que-verificar) pode ajudar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se o conserto não compensar, a loja também vende [notebooks](/notebooks), novos e seminovos, e você pode ver o aparelho ligado e testar antes de pagar. A decisão, em uma linha: desligue na hora, seque sem calor, não religue para testar e, se a bebida tinha açúcar ou leite, leve para limpeza antes de a corrosão avançar."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "dados"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Se o notebook continuou funcionando depois que derramei água, está tudo bem?",
+      "resposta": "Não necessariamente. A corrosão e o resíduo podem causar defeitos dias ou semanas depois. Desligue, deixe secar por ao menos 24 horas e observe teclado, tela e carregamento quando religar."
+    },
+    {
+      "pergunta": "Colocar o notebook no arroz ajuda a secar?",
+      "resposta": "Não. O arroz absorve pouca umidade e pode soltar pó e amido pelas frestas. Deixar o notebook aberto em local seco e ventilado funciona melhor."
+    },
+    {
+      "pergunta": "Posso usar secador de cabelo para acelerar?",
+      "resposta": "É melhor não. Guias de suporte desaconselham calor de secador, forno, aquecedor ou sol, porque ele pode causar novos danos e empurrar a umidade para dentro da placa."
+    },
+    {
+      "pergunta": "Quanto tempo esperar antes de ligar de novo?",
+      "resposta": "Pelo menos 24 horas, segundo a Sony; outros guias falam em 24 a 48 horas. Com bebida doce, café ou leite, o ideal é passar por limpeza interna antes de religar."
+    },
+    {
+      "pergunta": "Vou perder meus arquivos?",
+      "resposta": "Nem sempre. Muitas vezes o disco ou SSD sai ileso mesmo quando a placa precisa de reparo. Se não houver cópia, avise a assistência logo no começo para que os dados sejam tratados com prioridade."
+    },
+    {
+      "pergunta": "A garantia cobre líquido derramado?",
+      "resposta": "Normalmente não. A Sony, por exemplo, deixa esse tipo de dano fora da garantia dos notebooks VAIO. Confira as condições do seu fabricante e de algum seguro que você tenha."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Lenovo — What should I do if I spill liquid on the computer (manual LOQ 15/16)",
+      "url": "https://download.lenovo.com/pccbbs/pubs/loq_15_16/html_en/EN/faq_liquid.html",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Sony — artigo de suporte S700023594 sobre líquido derramado em notebook VAIO",
+      "url": "https://www.sonylatvija.com/electronics/support/articles/S700023594",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Bowdoin College — Save Your Laptop After a Liquid Spill",
+      "url": "https://bowdoin.teamdynamix.com/TDClient/1814/Portal/KB/Article/170973/Save-Your-Laptop-After-a-Liquid-Spill",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "iFixit — Rice Is for Dinner, Not Repair",
+      "url": "https://www.ifixit.com/News/30047/rice-is-for-dinner-not-repair",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "iFixit — Spills that kill",
+      "url": "https://www.ifixit.com/News/spills-that-kill",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Gadget Scout — From the Repair Bench: why spilling tea on a laptop is never as simple",
+      "url": "https://www.gadgetscout.co.uk/articles/repair-bench-why-spilling-tea-on-a-laptop-is-never-as.html",
+      "data": "consultado em outubro de 2026"
+    }
+  ]
+}
