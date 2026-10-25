@@ -9,7 +9,12 @@
     "fonte",
     "proteção"
   ],
-  "capa": null,
+  "capa": {
+    "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/nobreak-estabilizador-ou-filtro-de-linha-a7c7481e.jpg",
+    "alt": "Placa-mãe de computador com um pente de memória e uma chave de fenda sobre uma bancada de madeira clara",
+    "largura": 1600,
+    "altura": 900
+  },
   "publicadoEm": "2026-10-23T09:00:00.000Z",
   "seo": {
     "titulo": "Nobreak, estabilizador ou filtro de linha: qual usar no PC"
