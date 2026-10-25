@@ -36,7 +36,7 @@ export default function LayoutWrapper({
   // O Overclock (/overclock) é o sistema vendido para outras lojas: tem
   // identidade própria e não leva nada da cara da loja Balão.
   const isPaginaDeVendas =
-    pathname === "/sistemasdeia" || pathname === "/overclock";
+    pathname === "/sistemasdeia" || pathname === "/overclock" || pathname === "/avellstorm480";
   // O painel inteiro (/painel e tudo embaixo dele) é tela de trabalho: tem o
   // próprio menu e rola por dentro, sem o rodapé nem o botão da loja.
   const isPainel = pathname === "/painel" || pathname.startsWith("/painel/");

@@ -43,6 +43,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/carregadores',
     '/microsoft',
     '/reparoapple',
+    '/avellstorm480',
     '/telaiphone',
     '/tonner',
     '/wendell/apple',
