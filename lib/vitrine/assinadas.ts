@@ -154,6 +154,10 @@ export function montarPaginaAssinada(setup: SetupAssinado, produto: Product | nu
  * As páginas da vitrine HOJE: os cinco PCs sorteados do dia (lib/vitrine/rotativa.ts),
  * completados pelos setups fixos acima se o catálogo não tiver cinco que sirvam.
  */
+function precoDaPagina(p: VitrinePageRecord): number {
+  return parsePriceToNumber(p.extras?.price_text);
+}
+
 export async function paginasDaVitrine(
   listarPcsCompletos: () => Promise<Product[]>,
   buscar: (id: string) => Promise<Product | null>,
@@ -188,7 +192,7 @@ export async function paginasDaVitrine(
       usados.add(String(real.id));
     }
   }
-  paginas.sort((a, b) => parsePriceToNumber((a.extras as any)?.price_text) - parsePriceToNumber((b.extras as any)?.price_text));
+  paginas.sort((a, b) => precoDaPagina(a) - precoDaPagina(b));
 
   if (paginas.length < QUANTOS_POR_DIA) {
     for (const setup of SETUPS_ASSINADOS) {
@@ -202,7 +206,7 @@ export async function paginasDaVitrine(
       }
     }
   }
-  paginas.sort((a, b) => parsePriceToNumber((a.extras as any)?.price_text) - parsePriceToNumber((b.extras as any)?.price_text));
+  paginas.sort((a, b) => precoDaPagina(a) - precoDaPagina(b));
   return paginas;
 }
 

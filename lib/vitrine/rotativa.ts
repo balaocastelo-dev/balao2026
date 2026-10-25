@@ -20,6 +20,7 @@
 import type { Product } from "@/lib/utils";
 import { parsePriceToNumber } from "@/lib/utils";
 import { extractParts } from "./core";
+import { lerPlaca } from "./pecas-do-nome";
 import type { SetupAssinado } from "./assinadas";
 
 export const CAMINHO_PC_GAMER_COMPLETO = "Computadores/PC/PC Gamer/PC Gamer Completo";
@@ -215,7 +216,7 @@ export function setupDoProduto(p: Product, dia: string, identificador = String(p
   const kit = /\bkit\b|\bcombo\b|teclado|mouse|headset/.test(t);
   const ssd1tb = /\b(1|2)\s?tb\b/.test(t);
   // "RTX 3060 12gb", "Rx 6600 8GB": a memória que vem logo depois do modelo da placa.
-  const vram = t.match(/\b(?:rtx|gtx|rx|arc)\s?-?[a-z]?\d{3,4}(?:\s?(?:ti|xt|super))?\s?(8|10|12|16)\s?gb\b/);
+  const vram = lerPlaca(nome)?.memoria ?? null;
 
   let rotulo = "Full HD";
   if (hz && hz >= 144) rotulo = `Competitivo ${hz} Hz`;
@@ -225,7 +226,7 @@ export function setupDoProduto(p: Product, dia: string, identificador = String(p
 
   const frases: string[] = [];
   frases.push(
-    `${cpu ? `${cpu} com ` : ""}${placa}${vram ? ` de ${vram[1]} GB` : ""}: placa de vídeo dedicada para rodar os jogos atuais em Full HD.`
+    `${cpu ? `${cpu} com ` : ""}${placa}${vram ? ` de ${vram} GB` : ""}: placa de vídeo dedicada para rodar os jogos atuais em Full HD.`
   );
   if (pol || hz) {
     frases.push(`Vem com monitor${pol ? ` de ${pol} polegadas` : ""}${hz ? ` e ${hz} Hz` : ""}${hz && hz >= 144 ? ", ideal para jogos competitivos" : ""}.`);
