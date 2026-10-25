@@ -9,7 +9,12 @@
     "notebook",
     "diagnóstico"
   ],
-  "capa": null,
+  "capa": {
+    "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/como-saber-se-o-carregador-do-notebook-e-o-problema-fed76ded.jpg",
+    "alt": "Fonte de notebook preta com o cabo enrolado sobre uma bancada de madeira, com um notebook preto fechado ao fundo",
+    "largura": 1600,
+    "altura": 900
+  },
   "publicadoEm": "2026-10-23T21:00:00.000Z",
   "formato": "dica",
   "roteiro": {
