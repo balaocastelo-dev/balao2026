@@ -28,7 +28,12 @@
         "navegador",
         "windows"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/chrome-156-atualizacao-falhas-de-seguranca-cd6ec89f.jpg",
+        "alt": "Notebook preto fechado sobre uma mesa de madeira, ao lado de um cadeado de metal e de uma xícara, com luz natural da janela",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-10-25T15:00:00.000Z",
       "minutos": 3
     },
@@ -748,5 +753,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-25T18:50:48.673Z"
+  "atualizadoEm": "2026-10-25T18:54:23.342Z"
 }
