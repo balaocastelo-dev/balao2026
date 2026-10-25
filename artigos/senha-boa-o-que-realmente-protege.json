@@ -9,7 +9,12 @@
     "windows",
     "dicas"
   ],
-  "capa": null,
+  "capa": {
+    "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/senha-boa-o-que-realmente-protege-038b5b6b.jpg",
+    "alt": "Notebook preto fechado sobre uma mesa de madeira, com um pequeno cadeado de metal e um caderno ao lado",
+    "largura": 1600,
+    "altura": 900
+  },
   "publicadoEm": "2026-10-24T21:00:00.000Z",
   "formato": "dica",
   "roteiro": {
