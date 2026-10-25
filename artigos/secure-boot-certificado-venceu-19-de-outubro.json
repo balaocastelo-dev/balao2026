@@ -1,0 +1,113 @@
+{
+  "slug": "secure-boot-certificado-venceu-19-de-outubro",
+  "titulo": "Secure Boot: último certificado de 2011 venceu em 19 de outubro",
+  "resumo": "O certificado que assina o carregador de inicialização do Windows venceu em 19 de outubro. O PC continua ligando, mas pode perder proteções. Veja como conferir.",
+  "categoria": "noticias",
+  "etiquetas": [
+    "windows",
+    "segurança",
+    "atualização",
+    "secure boot"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-26T15:00:00.000Z",
+  "seo": {
+    "titulo": "Secure Boot: certificado de 2011 venceu em 19 de outubro"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Em 19 de outubro de 2026 venceu o certificado Microsoft Windows Production PCA 2011, o último dos três certificados de 2011 que sustentam a Inicialização Segura (Secure Boot) dos computadores com Windows. Ele é o que assina o carregador de inicialização do sistema. Os outros dois já tinham vencido em 24 e 27 de junho, segundo a tabela publicada pela Microsoft."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que o computador vai parar de ligar. Não vai: a Microsoft diz que o aparelho sem os certificados novos continua iniciando, funcionando e recebendo as atualizações normais do Windows. O que ele perde são as proteções novas da fase de inicialização, justamente a parte que vírus mais sofisticados tentam atacar."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que a Microsoft informou"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Inicialização Segura é um recurso da placa-mãe que só deixa o computador carregar programas de inicialização assinados por quem ele confia. Essas assinaturas dependem de certificados com prazo de validade. Os substitutos, de 2023, se chamam Windows UEFI CA 2023, Microsoft UEFI CA 2023 e Microsoft Corporation KEK 2K CA 2023."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Segundo a Microsoft, a maior parte dos computadores pessoais recebe os certificados novos sozinha, pelo Windows Update. Alguns modelos, porém, precisam antes de uma atualização de firmware (o software da placa-mãe, também chamado de BIOS) feita pelo fabricante, que costuma sair só enquanto o aparelho está dentro do período de suporte."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Sem os certificados novos, o computador deixa de receber atualizações do gerenciador de inicialização, da lista de componentes bloqueados e das correções para falhas novas nessa etapa. Recursos que dependem da Inicialização Segura, como parte das proteções do BitLocker, também podem ser afetados. A Microsoft é direta: desligar a Inicialização Segura não é saída para o vencimento."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que isso muda para você"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem tem Windows em dia:** provavelmente nada. Abra Segurança do Windows, entre em Segurança do dispositivo e procure a área de Inicialização Segura. Se aparecer que tudo foi atualizado, não há o que fazer. Se aparecer configuração antiga, instale as atualizações pendentes e reinicie."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem vê aviso de limitação de hardware ou firmware:** a Microsoft orienta procurar o fabricante do computador, que é quem publica a atualização da placa-mãe. Atualizar firmware tem risco se for interrompido no meio, e antes disso vale ter guardada a chave de recuperação do BitLocker. Se você não se sente seguro, a [assistência técnica](/manutencao) faz esse serviço."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem ainda usa Windows 10:** segundo o Windows Latest, o certificado novo só chega a quem está no programa de atualizações estendidas. O guia sobre [até quando o Windows 10 tem atualização](/blog/windows-10-ate-quando-tem-atualizacao) explica as saídas, e a notícia sobre os [certificados do Windows Update que vencem em 2027](/blog/windows-update-certificados-2027-pc-desatualizado) trata de outro prazo parecido."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem vai comprar um computador usado:** peça para ver a tela de Inicialização Segura na Segurança do Windows antes de fechar negócio. Placa-mãe que o fabricante deixou de atualizar tende a ficar presa aos certificados antigos. Nos [seminovos](/seminovos), você pode ver a máquina ligada e conferir isso antes de pagar."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que ainda não se sabe"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Microsoft não diz quantos computadores ainda estão sem os certificados novos, e, segundo o Windows Latest, a entrega continua em etapas, por grupos de modelos. Também não há uma lista única de quais placas-mãe vão ganhar atualização de firmware: isso depende de cada fabricante."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, tem assistência técnica para atualização, diagnóstico e upgrade, e vende computadores novos e seminovos. Em uma linha: confira a tela de Inicialização Segura e não a desligue para fugir do problema."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "upgrade"
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Windows Secure Boot certificate expiration and CA updates (KB5062710) — Microsoft Support",
+      "url": "https://support.microsoft.com/help/5062710",
+      "data": "maio de 2026"
+    },
+    {
+      "nome": "When Secure Boot certificates expire on Windows devices (KB5079373) — Microsoft Support",
+      "url": "https://support.microsoft.com/en-US/servicing/os/secure-boot/2026/02/when-secure-boot-certificates-expire-on-windows-devices",
+      "data": "setembro de 2026"
+    },
+    {
+      "nome": "Secure Boot certificate update status in the Windows Security app — Microsoft Support",
+      "url": "https://support.microsoft.com/en-us/servicing/os/secure-boot/2026/03/secure-boot-certificate-update-status-in-the-windows-security-app",
+      "data": "maio de 2026"
+    },
+    {
+      "nome": "Windows 11's last Secure Boot deadline hits Monday, Microsoft reveals what happens to your PC — Windows Latest",
+      "url": "https://www.windowslatest.com/2026/10/17/windows-11s-last-secure-boot-deadline-hits-monday-microsoft-reveals-what-happens-to-your-pc/",
+      "data": "17 de outubro de 2026"
+    },
+    {
+      "nome": "Secure Boot, Take 3: The Last 2011 Certificate Expires on Monday — Mr T-Bone's Blog",
+      "url": "https://www.tbone.se/2026/10/16/secure-boot-take-3-the-last-2011-certificate-expires-on-monday/",
+      "data": "16 de outubro de 2026"
+    }
+  ]
+}
