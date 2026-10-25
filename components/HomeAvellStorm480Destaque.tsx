@@ -1,4 +1,6 @@
 import Image from "next/image";
+import Link from "next/link";
+import { PRECO, VALOR_DA_NOTA_FISCAL } from "@/app/avellstorm480/dados";
 import { ArrowRight, BadgeCheck, Cpu, HardDrive, MemoryStick, Monitor, ShieldCheck } from "lucide-react";
 
 /**
@@ -8,18 +10,13 @@ import { ArrowRight, BadgeCheck, Cpu, HardDrive, MemoryStick, Monitor, ShieldChe
  * em 25/10) → Avell Storm 480.
  *
  * É um produto único da loja — não vem do espelhamento de preços (Kabum e
- * afins), então os valores ficam aqui, à mão. Mudou o preço? É só trocar as
- * constantes abaixo; a economia se ajusta sozinha.
+ * afins). O preço fica em app/avellstorm480/dados.ts, junto com a página do
+ * produto (/avellstorm480), para os dois nunca mostrarem valores diferentes.
  *
  * Mídia em public/images/avell-storm-480/: foto oficial da Avell e um vídeo de
  * 4 s em loop feito a partir dela (scripts/gerar-video-destaque.py).
  */
-const VALOR_DA_NOTA_FISCAL = 19333;
-const PRECO = 13999;
-
-const MENSAGEM_WHATSAPP =
-  "Olá! Vi no site o notebook Avell Storm 480 (i9 14ª geração, 64GB DDR5, SSD 1TB, RTX 4080 12GB) por R$ 13.999. Ainda está disponível?";
-const LINK_WHATSAPP = `https://wa.me/5519987510267?text=${encodeURIComponent(MENSAGEM_WHATSAPP)}`;
+const PAGINA_DO_PRODUTO = "/avellstorm480";
 
 const MIDIA = "/images/avell-storm-480";
 
@@ -161,22 +158,20 @@ export default function HomeAvellStorm480Destaque() {
             </div>
           </div>
 
-          {/* O ::after estica o link: o bloco inteiro leva para o WhatsApp da loja.
+          {/* O ::after estica o link: o bloco inteiro leva para a página do produto.
               Não pôr scale/transform neste link: isso encolheria a área clicável
               de volta para o botão bem na hora do clique. */}
-          <a
-            href={LINK_WHATSAPP}
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href={PAGINA_DO_PRODUTO}
             className="mt-7 inline-flex w-full items-center justify-center gap-2.5 rounded-2xl bg-[#E60012] px-6 py-4 text-sm font-black uppercase tracking-wider text-white shadow-lg shadow-red-950/50 transition-colors after:absolute after:inset-0 after:content-[''] hover:bg-red-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/70 group-hover:bg-red-700 sm:w-fit sm:px-9 sm:text-base"
           >
-            Quero o Avell Storm 480
+            Conhecer o Avell Storm 480
             <ArrowRight
               size={18}
               aria-hidden="true"
               className="transition-transform motion-safe:group-hover:translate-x-1"
             />
-          </a>
+          </Link>
         </div>
       </div>
     </section>
