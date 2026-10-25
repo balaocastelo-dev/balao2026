@@ -93,7 +93,7 @@ describe("semana e mês no relógio da loja", () => {
 });
 
 function piloto(id: string, p: Partial<Piloto> = {}): Piloto {
-  return { id, slug: id, nome: id, apelido: null, foto: null, cor: "#E60012", kart: "classico", numero: 1, blingVendedorId: `b${id}`, funcao: "vendedor", metaSemana: null, metaMes: null, ativo: true, ...p };
+  return { id, slug: id, nome: id, apelido: null, foto: null, cor: "#E60012", kart: "classico", numero: 1, blingVendedorId: `b${id}`, sistemaVendedorId: null, funcao: "vendedor", metaSemana: null, metaMes: null, ativo: true, ...p };
 }
 function lanc(p: Partial<Lancamento>): Lancamento {
   return {

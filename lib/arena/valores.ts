@@ -5,11 +5,13 @@
 // ser calculado em valores: venda conta como valor, licença como valor, cada
 // ordem de serviço conta como valor."
 //
-//  - Venda do Bling: o total do pedido. As licenças (Windows/Office) já estão
+//  - Venda do MEU BLING (/sistema, desde 25/10/2026) e do Bling (histórico até
+//    24/10): o total do pedido. As licenças (Windows/Office) já estão
 //    dentro desse total; aqui só se separa quanto delas, para o placar mostrar.
 //  - Orçamento: aparece no placar (quantos), mas vale R$ 0.
 //  - Ordem de serviço (Fechamento da assistência): mão de obra + peças.
-//  - Cancelado/estornado no Bling: R$ 0. Em digitação: espera.
+//  - Cancelado no MEU BLING (situação de cancelamento): R$ 0.
+//  - Histórico do Bling: cancelado/estornado R$ 0; em digitação espera.
 //
 // Funções puras: a gravação e o "Recalcular" do painel usam as mesmas.
 // ============================================================
@@ -29,7 +31,7 @@ export const REGRAS_PADRAO: RegrasDeValor = {
   ],
 };
 
-/** Situações de pedido de venda no Bling (módulo 98310, conferido em 15/09). */
+/** Situações de pedido de venda no Bling (módulo 98310, conferido em 15/09). Só para o histórico. */
 export const SITUACOES_QUE_ZERAM = new Set([12, 32597, 32598]); // cancelado, aguardando estorno, estornado
 /** Em digitação: o pedido ainda está sendo montado — espera virar "em aberto". */
 export const SITUACOES_PENDENTES = new Set([21]);
@@ -111,6 +113,31 @@ export function valorar(doc: DocumentoDoBling, regras: RegrasDeValor): Valoracao
     return { status: "pendente", valor: 0, motivo: "Em digitação no Bling", licencas: lic.unidades, valorLicencas: lic.valor };
   }
   return { status: "valido", valor: centavos(Math.max(0, doc.total)), motivo: null, licencas: lic.unidades, valorLicencas: lic.valor };
+}
+
+/** Uma venda do MEU BLING (/sistema), já limpa, como a Arena guarda. */
+export interface DocumentoDoSistema {
+  sistemaId: string;
+  numero: string;
+  data: string; // AAAA-MM-DD
+  vendedorId: string | null;
+  vendedorNome: string | null;
+  contatoNome: string | null;
+  total: number;
+  situacaoId: number | null;
+  situacao: string | null;
+  cancelada: boolean;
+  /** Vazio quando os itens ainda não foram lidos (a lista do sistema não traz itens). */
+  itens: ItemDoDocumento[];
+}
+
+/** Venda do MEU BLING: o total; cancelada lá vale R$ 0. Todo pedido não cancelado conta. */
+export function valorarDoSistema(doc: Pick<DocumentoDoSistema, "total" | "cancelada" | "itens">, regras: RegrasDeValor): Valoracao {
+  const lic = licencasDa(doc.itens, regras);
+  if (doc.cancelada) {
+    return { status: "cancelado", valor: 0, motivo: "Cancelado no sistema", licencas: lic.unidades, valorLicencas: lic.valor };
+  }
+  return { status: "valido", valor: centavos(Math.max(0, Number(doc.total) || 0)), motivo: null, licencas: lic.unidades, valorLicencas: lic.valor };
 }
 
 /** Junta o que veio do painel com o padrão. */

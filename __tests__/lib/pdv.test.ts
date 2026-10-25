@@ -2,8 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- o sistema de mentira guarda JSON solto */
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
-// PDV: contas da venda, acesso ao Bling vindo do vigia (ainda usado pela Arena)
-// e, desde 22/10/2026, a ida da venda ao /sistema (MEU BLING) — venda, nota e a
+// PDV: contas da venda e, desde 22/10/2026, a ida da venda ao /sistema (MEU BLING) — venda, nota e a
 // lista do dia que junta o caixa com o que foi lançado direto no /sistema.
 // Sem MySQL e sem /sistema de verdade.
 
@@ -21,7 +20,6 @@ const CHAVE = "chave-do-sistema-de-teste-com-48-caracteres-aaaa";
 process.env.MEU_BLING_CHAVE = CHAVE;
 
 import { _gavetaDeTeste, ler } from "@/lib/arena/gaveta";
-import { _limparCacheDoAcesso, guardarAcesso, marcarRecusado, precisaDeAcesso, tokenAtual } from "@/lib/pdv/acesso";
 import { _trocarRede, assinaturaConfere } from "@/lib/pdv/sistema";
 import { conferirVenda, documentoValido, lerPreco, novoIdDeVenda, tabelaPelosPagamentos, totaisDa, valorDoDesconto } from "@/lib/pdv/calculos";
 import { CLIENTE_VAZIO } from "@/lib/pdv/tipos";
@@ -39,7 +37,6 @@ import {
   vendasDoDia,
 } from "@/lib/pdv/vendas";
 
-const TOKEN = "t".repeat(40);
 
 /** Um /sistema de mentira (a porta /api/v1/integracoes/site do MEU BLING), com o mínimo de estado. */
 function sistemaFalso() {
@@ -131,7 +128,6 @@ const ENTRADA = {
 
 beforeEach(() => {
   _gavetaDeTeste();
-  _limparCacheDoAcesso();
   process.env.MEU_BLING_CHAVE = CHAVE;
 });
 
@@ -194,31 +190,6 @@ describe("contas da venda", () => {
     expect(id).toBe("PDV-261012-AAAA");
     expect(diaDoId(id)).toBe("2026-10-12");
     expect(diaDoId("sistema-123")).toBeNull();
-  });
-});
-
-describe("acesso ao Bling (vigia — ainda usado pela Arena)", () => {
-  it("guarda cifrado, devolve o token e para de usar depois do 401", async () => {
-    expect(await precisaDeAcesso()).toBe(true);
-    const expira = new Date(Date.now() + 5 * 3600_000).toISOString();
-    expect(await guardarAcesso({ token: TOKEN, expiraEm: expira, maquina: "PC" })).toBe(true);
-    expect(await guardarAcesso({ token: TOKEN, expiraEm: expira, maquina: "PC" })).toBe(false);
-    const guardado = await ler<Record<string, string>>("pdv/acesso");
-    expect(JSON.stringify(guardado.dados)).not.toContain(TOKEN);
-    _limparCacheDoAcesso();
-    expect((await tokenAtual()).token).toBe(TOKEN);
-    await marcarRecusado(TOKEN);
-    expect((await tokenAtual()).token).toBeNull();
-    expect(await precisaDeAcesso()).toBe(true);
-  });
-
-  it("token perto de vencer não é usado", async () => {
-    await guardarAcesso({ token: TOKEN, expiraEm: new Date(Date.now() + 60_000).toISOString(), maquina: null });
-    expect((await tokenAtual()).motivo).toMatch(/venceu/);
-  });
-
-  it("recusa coisa que não parece token", async () => {
-    await expect(guardarAcesso({ token: "x y", expiraEm: new Date().toISOString(), maquina: null })).rejects.toThrow();
   });
 });
 

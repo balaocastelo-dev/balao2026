@@ -12,21 +12,32 @@ import { dentro, type JanelaDoPeriodo, type Periodo } from "./periodos";
 import { centavos } from "./valores";
 import type { AjustesDaCorrida, Lancamento, LinhaDoPlacar, Piloto, PlacarDoPeriodo } from "./tipos";
 
-/** Liga o lançamento ao piloto: manual e OS pelo id, Bling pelo vendedor. */
-export function pilotoDoLancamento(l: Pick<Lancamento, "pilotoId" | "blingVendedorId">, porBling: Map<string, Piloto>, porId: Map<string, Piloto>): Piloto | null {
+/**
+ * Liga o lançamento ao piloto: manual e OS pelo id; venda do MEU BLING pelo
+ * vendedor do sistema; venda antiga do Bling (histórico) pelo vendedor do Bling.
+ */
+export function pilotoDoLancamento(
+  l: Pick<Lancamento, "pilotoId" | "blingVendedorId"> & { sistemaVendedorId?: string | null },
+  porBling: Map<string, Piloto>,
+  porId: Map<string, Piloto>,
+  porSistema: Map<string, Piloto> = new Map()
+): Piloto | null {
   if (l.pilotoId) return porId.get(l.pilotoId) ?? null;
+  if (l.sistemaVendedorId) return porSistema.get(l.sistemaVendedorId) ?? null;
   if (l.blingVendedorId) return porBling.get(l.blingVendedorId) ?? null;
   return null;
 }
 
 export function indexarPilotos(pilotos: Piloto[]) {
   const porBling = new Map<string, Piloto>();
+  const porSistema = new Map<string, Piloto>();
   const porId = new Map<string, Piloto>();
   for (const p of pilotos) {
     porId.set(p.id, p);
     if (p.blingVendedorId) porBling.set(p.blingVendedorId, p);
+    if (p.sistemaVendedorId) porSistema.set(p.sistemaVendedorId, p);
   }
-  return { porBling, porId };
+  return { porBling, porId, porSistema };
 }
 
 export function metaGlobal(periodo: Periodo, ajustes: AjustesDaCorrida): number {
@@ -64,14 +75,14 @@ export function montarPlacar(
   ajustes: AjustesDaCorrida
 ): PlacarDoPeriodo {
   const ativos = pilotos.filter((p) => p.ativo);
-  const { porBling, porId } = indexarPilotos(ativos);
+  const { porBling, porId, porSistema } = indexarPilotos(ativos);
   const metas = dividirMetas(ativos, j.periodo, ajustes);
   const soma = new Map<string, Somas>();
   for (const p of ativos) soma.set(p.id, { valor: 0, vendas: 0, valorVendas: 0, orcamentos: 0, os: 0, valorOS: 0, licencas: 0, valorLicencas: 0 });
 
   for (const l of lancamentos) {
     if (l.status !== "valido" || !dentro(l.data, j)) continue;
-    const p = pilotoDoLancamento(l, porBling, porId);
+    const p = pilotoDoLancamento(l, porBling, porId, porSistema);
     if (!p) continue;
     const s = soma.get(p.id)!;
     const v = Number(l.valor) || 0;

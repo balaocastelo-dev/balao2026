@@ -3,8 +3,9 @@
 // ============================================================
 // Painel da Arena (/painel/arena): a corrida de vendas do telão.
 // Abas: Corrida · Pilotos · Metas · Como conta · Lançamentos · Prêmio ·
-// Avisos · Conexão com o Bling. Desde 12/10 (tarde) tudo é em reais: vendas
-// do Bling (pelo vigia do PC) e ordens de serviço do Fechamento da assistência.
+// Avisos · Ligação com o MEU BLING. Tudo em reais: vendas do MEU BLING (/sistema,
+// lidas pelo site desde 25/10/2026; antes vinham do Bling, que fica como histórico)
+// e ordens de serviço do Fechamento da assistência.
 // ============================================================
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -16,9 +17,10 @@ import { Kart } from "@/components/arena/Kart";
 import { janela } from "@/lib/arena/periodos";
 import { dividirMetas } from "@/lib/arena/placar";
 import type { Lancamento, ModeloDeKart, Piloto, PlacarDoPeriodo, AjustesDaCorrida, Premio, AjustesDoWhatsApp } from "@/lib/arena/tipos";
+import type { ResultadoDaSincronia } from "@/lib/arena/sistema";
 import { reais as reaisCurto, type RegrasDeValor } from "@/lib/arena/valores";
 import {
-  ajustarLancamentoAcao, apagarManualAcao, carregarPainel, criarPilotosDoBlingAcao, gerarChaveAcao, lancarManualAcao,
+  ajustarLancamentoAcao, apagarManualAcao, carregarPainel, criarPilotosDoSistemaAcao, gerarChaveAcao, lancarManualAcao, lerAgoraAcao,
   lerAnuncioAirbnbAcao, listarLancamentosAcao, pedirVarreduraAcao, recalcularAcao, removerPilotoAcao, salvarCorridaAcao,
   salvarMetasAcao, salvarPilotoAcao, salvarPremioAcao, salvarRegrasAcao, trocarTecnicoAcao, trazerOSAcao,
   salvarWhatsAppAcao, listarGruposAcao, testarWhatsAppAcao, pedidoDoVigiaAcao, aprovarVigiaAcao, recusarVigiaAcao,
@@ -26,7 +28,7 @@ import {
 
 type Dados = NonNullable<Extract<Awaited<ReturnType<typeof carregarPainel>>, { ok: true }>["dados"]>;
 type PilotoDoPainel = Dados["pilotos"][number];
-type Aba = "corrida" | "pilotos" | "metas" | "regras" | "pedidos" | "premio" | "avisos" | "bling";
+type Aba = "corrida" | "pilotos" | "metas" | "regras" | "pedidos" | "premio" | "avisos" | "sistema";
 
 const ABAS: { id: Aba; nome: string; icone: React.ReactNode }[] = [
   { id: "corrida", nome: "Corrida", icone: <Flag size={16} /> },
@@ -36,7 +38,7 @@ const ABAS: { id: Aba; nome: string; icone: React.ReactNode }[] = [
   { id: "pedidos", nome: "Vendas e OS", icone: <CheckCircle size={16} /> },
   { id: "premio", nome: "Prêmio", icone: <Gift size={16} /> },
   { id: "avisos", nome: "Avisos no WhatsApp", icone: <MessageCircle size={16} /> },
-  { id: "bling", nome: "Conexão com o Bling", icone: <KeyRound size={16} /> },
+  { id: "sistema", nome: "Ligação com o MEU BLING", icone: <KeyRound size={16} /> },
 ];
 
 const reais = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -75,6 +77,10 @@ async function reduzirFoto(arquivo: File): Promise<string> {
   } finally {
     URL.revokeObjectURL(url);
   }
+}
+
+function nomeDoBling(d: Dados, id: string) {
+  return d.vendedoresBling.find((v) => v.id === id)?.nome || id;
 }
 
 function Aviso({ tipo, children }: { tipo: "ok" | "erro" | "info"; children: React.ReactNode }) {
@@ -210,7 +216,7 @@ function EditorDePiloto({
   );
   const [salvando, setSalvando] = useState(false);
   const [erroFoto, setErroFoto] = useState<string | null>(null);
-  const ligados = new Map(d.pilotos.filter((x) => x.blingVendedorId && x.id !== inicial?.id).map((x) => [x.blingVendedorId!, x.nome]));
+  const ligados = new Map(d.pilotos.filter((x) => x.sistemaVendedorId && x.id !== inicial?.id).map((x) => [x.sistemaVendedorId!, x.nome]));
   const fotoPrevia = p.foto ?? null;
 
   return (
@@ -231,29 +237,30 @@ function EditorDePiloto({
           <label>
             <span className={rotulo}>Função</span>
             <select className={campo} value={p.funcao ?? "vendedor"} onChange={(e) => setP({ ...p, funcao: e.target.value === "tecnico" ? "tecnico" : "vendedor" })}>
-              <option value="vendedor">Vendedor (vendas do Bling)</option>
+              <option value="vendedor">Vendedor (vendas do sistema)</option>
               <option value="tecnico">Técnico (ordens de serviço do Fechamento)</option>
             </select>
           </label>
           <label>
-            <span className={rotulo}>Vendedor no Bling{p.funcao === "tecnico" ? " (se ele também vende)" : ""}</span>
-            <select className={campo} value={p.blingVendedorId ?? ""} onChange={(e) => setP({ ...p, blingVendedorId: e.target.value || null })}>
+            <span className={rotulo}>Vendedor do sistema (MEU BLING){p.funcao === "tecnico" ? " (se ele também vende)" : ""}</span>
+            <select className={campo} value={p.sistemaVendedorId ?? ""} onChange={(e) => setP({ ...p, sistemaVendedorId: e.target.value || null })}>
               <option value="">— sem ligação —</option>
-              {d.vendedoresBling.map((v) => (
+              {d.vendedoresSistema.map((v) => (
                 <option key={v.id} value={v.id} disabled={ligados.has(v.id)}>
                   {v.nome || v.id}
                   {ligados.has(v.id) ? ` (já é de ${ligados.get(v.id)})` : ""}
                 </option>
               ))}
               {d.semPiloto
-                .filter((s) => !d.vendedoresBling.some((v) => v.id === s.id))
+                .filter((s) => !d.vendedoresSistema.some((v) => v.id === s.id))
                 .map((s) => (
-                  <option key={s.id} value={s.id}>Vendedor {s.id} ({s.documentos} documentos)</option>
+                  <option key={s.id} value={s.id}>Vendedor {s.id} ({s.documentos} vendas)</option>
                 ))}
-              {p.blingVendedorId && !d.vendedoresBling.some((v) => v.id === p.blingVendedorId) && !d.semPiloto.some((s) => s.id === p.blingVendedorId) && (
-                <option value={p.blingVendedorId}>Vendedor {p.blingVendedorId}</option>
+              {p.sistemaVendedorId && !d.vendedoresSistema.some((v) => v.id === p.sistemaVendedorId) && !d.semPiloto.some((s) => s.id === p.sistemaVendedorId) && (
+                <option value={p.sistemaVendedorId}>Vendedor {p.sistemaVendedorId}</option>
               )}
             </select>
+            {p.blingVendedorId && <span className="mt-1 block text-xs text-gray-500">Histórico do Bling (até 24/10/2026): vendedor {nomeDoBling(d, p.blingVendedorId)}.</span>}
           </label>
           <label>
             <span className={rotulo}>Número do kart</span>
@@ -331,15 +338,15 @@ function EditorDePiloto({
 function AbaPilotos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Promise<void>; avisar: (t: "ok" | "erro", m: string) => void }) {
   const [editando, setEditando] = useState<PilotoDoPainel | "novo" | null>(null);
   const [criando, setCriando] = useState(false);
-  const nomeBling = new Map(d.vendedoresBling.map((v) => [v.id, v.nome]));
-  const faltam = [...d.vendedoresBling.map((v) => v.id), ...d.semPiloto.map((s) => s.id)].filter(
-    (id, i, arr) => arr.indexOf(id) === i && !d.pilotos.some((p) => p.blingVendedorId === id)
+  const nomeSistema = new Map(d.vendedoresSistema.map((v) => [v.id, v.nome]));
+  const faltam = [...d.vendedoresSistema.map((v) => v.id), ...d.semPiloto.map((s) => s.id)].filter(
+    (id, i, arr) => arr.indexOf(id) === i && !d.pilotos.some((p) => p.sistemaVendedorId === id)
   );
 
   const salvar = async (id: string | null, p: Partial<Piloto>) => {
     const r = await salvarPilotoAcao(id, {
       nome: p.nome ?? "", apelido: p.apelido, foto: p.foto, cor: p.cor, kart: p.kart, numero: p.numero,
-      blingVendedorId: p.blingVendedorId, funcao: p.funcao, metaSemana: p.metaSemana, metaMes: p.metaMes, ativo: p.ativo,
+      sistemaVendedorId: p.sistemaVendedorId, funcao: p.funcao, metaSemana: p.metaSemana, metaMes: p.metaMes, ativo: p.ativo,
     });
     if (!r.ok) {
       avisar("erro", r.erro);
@@ -356,14 +363,14 @@ function AbaPilotos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Pro
         <Aviso tipo="info">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <span>
-              {faltam.length} vendedor{faltam.length > 1 ? "es" : ""} do Bling ainda sem kart: {faltam.map((id) => nomeBling.get(id) || id).join(", ")}.
+              {faltam.length} vendedor{faltam.length > 1 ? "es" : ""} do sistema ainda sem kart: {faltam.map((id) => nomeSistema.get(id) || id).join(", ")}.
             </span>
             <button
               className={botaoPrimario}
               disabled={criando}
               onClick={async () => {
                 setCriando(true);
-                const r = await criarPilotosDoBlingAcao();
+                const r = await criarPilotosDoSistemaAcao();
                 setCriando(false);
                 if (!r.ok) return avisar("erro", r.erro);
                 avisar("ok", `${r.dados} piloto(s) criados. Confira nome, foto e quem corre.`);
@@ -397,7 +404,7 @@ function AbaPilotos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Pro
               <div className="mt-1 text-xs text-gray-600">
                 {p.funcao === "tecnico" ? "Técnico (OS do Fechamento)" : "Vendedor"}
                 {" · "}
-                {p.blingVendedorId ? `Bling: ${nomeBling.get(p.blingVendedorId) || p.blingVendedorId}` : "sem vendedor do Bling"}
+                {p.sistemaVendedorId ? `Sistema: ${nomeSistema.get(p.sistemaVendedorId) || p.sistemaVendedorId}` : "sem vendedor do sistema"}
                 {!p.ativo && " · fora da pista"}
               </div>
               <div className="mt-2 flex gap-2">
@@ -405,7 +412,7 @@ function AbaPilotos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Pro
                 <button
                   className="text-xs font-semibold text-gray-500 hover:underline"
                   onClick={async () => {
-                    if (!confirm(`Apagar ${p.nome}? As vendas do Bling e as OS continuam guardadas e voltam se você ligar a outro piloto.`)) return;
+                    if (!confirm(`Apagar ${p.nome}? As vendas e as OS continuam guardadas e voltam se você ligar a outro piloto.`)) return;
                     const r = await removerPilotoAcao(p.id);
                     if (!r.ok) return avisar("erro", r.erro);
                     await recarregar();
@@ -452,7 +459,7 @@ function AbaMetas({ d, recarregar, avisar }: { d: Dados; recarregar: () => Promi
       <section className={cartao}>
         <h2 className="text-lg font-bold text-gray-900">Meta da equipe</h2>
         <p className="mt-1 text-sm text-gray-700 max-w-3xl">
-          Tudo em reais: vendas do Bling e ordens de serviço. A meta da equipe é dividida em partes iguais entre os {ativos.length} pilotos que estão correndo
+          Tudo em reais: vendas do sistema e ordens de serviço. A meta da equipe é dividida em partes iguais entre os {ativos.length} pilotos que estão correndo
           ({ativos.filter((p) => p.funcao !== "tecnico").length} vendedores e {ativos.filter((p) => p.funcao === "tecnico").length} técnicos), menos quem tem meta própria.
         </p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2 max-w-xl">
@@ -552,11 +559,12 @@ function AbaRegras({ d, recarregar, avisar }: { d: Dados; recarregar: () => Prom
       <section className={cartao}>
         <h2 className="text-lg font-bold text-gray-900">Como a corrida conta</h2>
         <ul className="mt-3 list-disc space-y-1.5 pl-5 text-sm text-gray-700 max-w-3xl">
-          <li><b>Venda</b> (pedido de venda no Bling): conta o valor total do pedido, para o vendedor do pedido.</li>
+          <li><b>Venda</b> (pedido de venda no MEU BLING): conta o valor total do pedido, para o vendedor do pedido.</li>
           <li><b>Licença</b> Windows/Office: o valor dela já está dentro da venda; o placar mostra à parte quantas e quanto.</li>
           <li><b>Ordem de serviço</b> (Fechamento da assistência): conta mão de obra + peças, para o técnico escolhido na OS.</li>
           <li><b>Orçamento</b>: aparece no placar (quantos cada um fez), mas não soma valor.</li>
-          <li>Pedido cancelado ou estornado no Bling sai sozinho. Pedido em digitação espera virar &quot;em aberto&quot;.</li>
+          <li>Venda cancelada no sistema sai sozinha (R$ 0).</li>
+          <li>As vendas antigas do Bling (até 24/10/2026) continuam valendo como histórico; o pedido que foi migrado para o sistema com o mesmo número não conta duas vezes.</li>
         </ul>
       </section>
 
@@ -650,8 +658,10 @@ function AbaPedidos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Pro
   const [manual, setManual] = useState({ piloto: d.pilotos[0]?.id ?? "", valor: "", motivo: "" });
   const tecnicos = d.pilotos.filter((p) => p.funcao === "tecnico");
   const porBling = new Map(d.pilotos.filter((p) => p.blingVendedorId).map((p) => [p.blingVendedorId!, p]));
+  const porSistema = new Map(d.pilotos.filter((p) => p.sistemaVendedorId).map((p) => [p.sistemaVendedorId!, p]));
   const porId = new Map(d.pilotos.map((p) => [p.id, p]));
   const nomeBling = new Map(d.vendedoresBling.map((v) => [v.id, v.nome]));
+  const nomeSistema = new Map(d.vendedoresSistema.map((v) => [v.id, v.nome]));
 
   const buscar = useCallback(async () => {
     setCarregando(true);
@@ -666,11 +676,12 @@ function AbaPedidos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Pro
   }, []);
 
   const quem = (l: Lancamento) => {
-    const p = l.pilotoId ? porId.get(l.pilotoId) : l.blingVendedorId ? porBling.get(l.blingVendedorId) : undefined;
+    const p = l.pilotoId ? porId.get(l.pilotoId) : l.sistemaVendedorId ? porSistema.get(l.sistemaVendedorId) : l.blingVendedorId ? porBling.get(l.blingVendedorId) : undefined;
     if (p) return p.apelido || p.nome;
-    if (l.blingVendedorId) return `${nomeBling.get(l.blingVendedorId) || l.blingVendedorId} (sem kart)`;
+    if (l.sistemaVendedorId) return `${nomeSistema.get(l.sistemaVendedorId) || l.sistemaVendedorId} (sem kart)`;
+    if (l.blingVendedorId) return `${nomeBling.get(l.blingVendedorId) || l.blingVendedorId} (Bling, sem kart)`;
     if (l.tipo === "os") return "Sem técnico";
-    return "Sem vendedor no Bling";
+    return "Sem vendedor";
   };
 
   const totais = useMemo(() => {
@@ -835,12 +846,12 @@ function AbaPedidos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Pro
             })}
           </tbody>
         </table>
-        {lista && lista.length === 0 && <p className="py-4 text-sm text-gray-500">Nada nesse período. Se o vigia ainda não foi instalado, veja a aba Conexão com o Bling.</p>}
+        {lista && lista.length === 0 && <p className="py-4 text-sm text-gray-500">Nada nesse período. Se o sistema ainda não foi lido, veja a aba Ligação com o MEU BLING.</p>}
       </section>
 
       <section className={cartao}>
         <h2 className="text-lg font-bold text-gray-900">Lançar valor à mão</h2>
-        <p className="mt-1 text-sm text-gray-700">Venda que não passou pelo Bling, acerto de valor, ou desconto (número negativo). Entra no placar do piloto em reais.</p>
+        <p className="mt-1 text-sm text-gray-700">Venda que não passou pelo sistema, acerto de valor, ou desconto (número negativo). Entra no placar do piloto em reais.</p>
         <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_120px_2fr_auto] items-end">
           <label>
             <span className={rotulo}>Piloto</span>
@@ -856,7 +867,7 @@ function AbaPedidos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Pro
           </label>
           <label>
             <span className={rotulo}>Motivo</span>
-            <input className={campo} value={manual.motivo} maxLength={300} placeholder="Ex.: venda no balcão fora do Bling" onChange={(e) => setManual({ ...manual, motivo: e.target.value })} />
+            <input className={campo} value={manual.motivo} maxLength={300} placeholder="Ex.: venda fora do sistema" onChange={(e) => setManual({ ...manual, motivo: e.target.value })} />
           </label>
           <button
             className={botaoPrimario}
@@ -1116,9 +1127,9 @@ function AbaAvisos({ d, recarregar, avisar }: { d: Dados; recarregar: () => Prom
   );
 }
 
-// ------------------------------------------------------------------ Bling
+// ------------------------------------------------------------------ Ligação com o MEU BLING
 
-/** Pedido de pareamento do vigia: aparece sozinho enquanto o instalador espera no PC. */
+/** Pedido de pareamento do PC da loja: aparece sozinho enquanto o instalador espera no PC. */
 function PedidoDoVigia({ recarregar, avisar }: { recarregar: () => Promise<void>; avisar: (t: "ok" | "erro", m: string) => void }) {
   const [pedido, setPedido] = useState<{ id: string; codigo: string; maquina: string; criadoEm: string } | null>(null);
   const [ocupado, setOcupado] = useState(false);
@@ -1138,7 +1149,7 @@ function PedidoDoVigia({ recarregar, avisar }: { recarregar: () => Promise<void>
   if (!pedido) return null;
   return (
     <section className="rounded-lg border-2 border-[#E60012] bg-red-50 p-5">
-      <h2 className="text-lg font-bold text-gray-900">O computador {pedido.maquina} quer ligar o vigia</h2>
+      <h2 className="text-lg font-bold text-gray-900">O computador {pedido.maquina} quer a chave do PC da loja</h2>
       <p className="mt-1 text-sm text-gray-700">
         Confira se o código no computador é <b className="text-2xl tracking-widest">{pedido.codigo}</b>. Aprovar gera uma chave nova só para ele (a anterior para de valer).
       </p>
@@ -1152,7 +1163,7 @@ function PedidoDoVigia({ recarregar, avisar }: { recarregar: () => Promise<void>
             setOcupado(false);
             if (!r.ok) return avisar("erro", r.erro);
             setPedido(null);
-            avisar("ok", `Vigia de ${pedido.maquina} aprovado. Ele pega a chave em segundos.`);
+            avisar("ok", `${pedido.maquina} aprovado. Ele pega a chave em segundos.`);
             await recarregar();
           }}
         >
@@ -1173,28 +1184,54 @@ function PedidoDoVigia({ recarregar, avisar }: { recarregar: () => Promise<void>
   );
 }
 
-function AbaBling({ d, recarregar, avisar }: { d: Dados; recarregar: () => Promise<void>; avisar: (t: "ok" | "erro", m: string) => void }) {
+function AbaSistema({ d, recarregar, avisar }: { d: Dados; recarregar: () => Promise<void>; avisar: (t: "ok" | "erro", m: string) => void }) {
   const [chave, setChave] = useState<string | null>(null);
   const [desde, setDesde] = useState(janela("mes").inicio);
-  const v = d.vigia;
-  const ligados = new Map(d.pilotos.filter((p) => p.blingVendedorId).map((p) => [p.blingVendedorId!, p.apelido || p.nome]));
+  const [lendo, setLendo] = useState(false);
+  const s = d.sincronia;
+  const ligados = new Map(d.pilotos.filter((p) => p.sistemaVendedorId).map((p) => [p.sistemaVendedorId!, p]));
+
+  const ler = async (acao: () => ReturnType<typeof lerAgoraAcao>, texto: (r: ResultadoDaSincronia | undefined) => string) => {
+    setLendo(true);
+    const r = await acao();
+    setLendo(false);
+    if (!r.ok) {
+      avisar("erro", r.erro);
+    } else {
+      avisar("ok", texto(r.dados));
+    }
+    await recarregar();
+  };
 
   return (
     <div className="space-y-5">
       <PedidoDoVigia recarregar={recarregar} avisar={avisar} />
       <section className={cartao}>
-        <div className="flex items-center gap-3">
-          {v.online ? <CheckCircle className="text-green-600" /> : <AlertTriangle className="text-orange-500" />}
-          <div>
-            <h2 className="text-lg font-bold text-gray-900">{v.online ? "Bling ligado" : v.ultimaVez ? "O vigia parou de falar" : "Vigia ainda não instalado"}</h2>
-            <p className="text-sm text-gray-600">
-              Última conversa {haQuanto(v.ultimaVez)}
-              {v.maquina && ` · computador ${v.maquina}`}
-              {v.versao && ` · versão ${v.versao}`}
-              {v.ultimaVez && ` · ${v.ultimoLote} documento(s) na última volta`}
-            </p>
-            {v.ultimoErro && <p className="mt-1 text-sm text-red-700">Último erro no PC: {v.ultimoErro}</p>}
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="flex items-start gap-3">
+            {s.emDia ? <CheckCircle className="mt-0.5 text-green-600" /> : <AlertTriangle className="mt-0.5 text-orange-500" />}
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">
+                {s.emDia ? "MEU BLING ligado" : s.ultimoOk ? "A leitura do sistema está atrasada" : "Ainda sem leitura do sistema"}
+              </h2>
+              <p className="text-sm text-gray-600">
+                Última leitura que deu certo: {haQuanto(s.ultimoOk)}
+                {s.ultimoOk && ` · ${s.vendasLidas} venda(s) lidas`}
+                {s.de && s.ate && ` (${dataBr(s.de)} a ${dataBr(s.ate)})`}
+                {s.modo === "por-dia" && " · dia a dia (o sistema ainda não tem a consulta por período)"}
+              </p>
+              {s.ultimaVez && s.ultimaVez !== s.ultimoOk && <p className="text-sm text-gray-600">Última tentativa: {haQuanto(s.ultimaVez)}</p>}
+              {s.semItens > 0 && <p className="text-sm text-gray-600">{s.semItens} venda(s) com os itens (licenças) para ler nas próximas voltas.</p>}
+              {s.ultimoErro && <p className="mt-1 text-sm text-red-700">Último erro: {s.ultimoErro}</p>}
+            </div>
           </div>
+          <button
+            className={botaoPrimario}
+            disabled={lendo}
+            onClick={() => ler(lerAgoraAcao, (r) => `Leitura feita: ${r?.vendasLidas ?? 0} venda(s) lidas, ${r?.gravadas ?? 0} nova(s) ou mudada(s).`)}
+          >
+            {lendo ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />} Ler agora
+          </button>
         </div>
         <div className="mt-4">
           {d.gaveta.tipo === "blob" || d.gaveta.tipo === "pasta" ? (
@@ -1206,52 +1243,14 @@ function AbaBling({ d, recarregar, avisar }: { d: Dados; recarregar: () => Promi
           )}
         </div>
         <p className="mt-4 text-sm text-gray-700 max-w-3xl">
-          O token do Bling só existe no seu PC (quem renova é a sentinela do Bionic), então quem busca as vendas e os orçamentos é o vigia, a cada 2 minutos,
-          e entrega aqui. Pedido cancelado no Bling sai da corrida sozinho.
+          O site lê as vendas no MEU BLING (www.balao.info/sistema) a cada 5 minutos: hoje e ontem, e na primeira leitura do dia desde o começo do mês.
+          Venda cancelada no sistema sai da corrida sozinha. As vendas antigas do Bling (até 24/10/2026) continuam guardadas como histórico.
         </p>
       </section>
 
       <section className={cartao}>
-        <h2 className="text-lg font-bold text-gray-900">Instalar ou trocar a chave do vigia</h2>
-        <ol className="mt-2 list-decimal pl-5 text-sm text-gray-700 space-y-1">
-          <li>No PC com o Bling (onde roda a sentinela do Bionic), rode o instalador abaixo. Ele mostra um código e espera.</li>
-          <li>
-            No PowerShell do PC da loja: <code className="rounded bg-gray-100 px-1">git -C $HOME\balao2026 pull</code> e depois{" "}
-            <code className="rounded bg-gray-100 px-1">& $HOME\balao2026\scripts\arena-vigia\instalar.ps1</code>
-          </li>
-          <li>Aparece aqui em cima “O computador … quer ligar o vigia” com o mesmo código: clique em Aprovar. O instalador recebe a chave e cria a tarefa “Arena Vigia”. A primeira volta traz os últimos 3 meses.</li>
-          <li>Sem acesso a este painel no PC? “Gerar chave do vigia” baixa a chave em arquivo; o instalador também lê dos Downloads.</li>
-        </ol>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <button
-            className={botaoPrimario}
-            onClick={async () => {
-              if (v.temChave && !confirm("Gerar chave nova? O vigia instalado para até você rodar o instalar.ps1 de novo.")) return;
-              const r = await gerarChaveAcao();
-              if (!r.ok) return avisar("erro", r.erro);
-              const k = r.dados!;
-              setChave(k);
-              const a = document.createElement("a");
-              a.href = URL.createObjectURL(new Blob([k], { type: "text/plain" }));
-              a.download = "arena-vigia-chave.txt";
-              a.click();
-              URL.revokeObjectURL(a.href);
-              await recarregar();
-            }}
-          >
-            <KeyRound size={16} /> Gerar chave do vigia
-          </button>
-        </div>
-        {chave && (
-          <div className="mt-3">
-            <Aviso tipo="info">Chave baixada. Ela não aparece de novo depois que você sair desta tela.</Aviso>
-          </div>
-        )}
-      </section>
-
-      <section className={cartao}>
-        <h2 className="text-lg font-bold text-gray-900">Buscar de novo no Bling</h2>
-        <p className="mt-1 text-sm text-gray-700">O vigia relê tudo desde a data na próxima volta (até 2 minutos). Use se um pedido antigo mudou de vendedor no Bling.</p>
+        <h2 className="text-lg font-bold text-gray-900">Buscar de novo no sistema</h2>
+        <p className="mt-1 text-sm text-gray-700">Relê tudo desde a data (agora, e o agendador termina se faltar). Use se uma venda antiga mudou de vendedor no sistema.</p>
         <div className="mt-3 flex flex-wrap items-end gap-2">
           <label>
             <span className={rotulo}>Desde</span>
@@ -1259,12 +1258,8 @@ function AbaBling({ d, recarregar, avisar }: { d: Dados; recarregar: () => Promi
           </label>
           <button
             className={botaoSecundario}
-            onClick={async () => {
-              const r = await pedirVarreduraAcao(desde);
-              if (!r.ok) return avisar("erro", r.erro);
-              avisar("ok", "Pedido anotado. O vigia busca na próxima volta.");
-              await recarregar();
-            }}
+            disabled={lendo}
+            onClick={() => ler(() => pedirVarreduraAcao(desde), (r) => `Lido desde ${dataBr(desde)}: ${r?.vendasLidas ?? 0} venda(s), ${r?.gravadas ?? 0} nova(s) ou mudada(s).`)}
           >
             <RefreshCw size={16} /> Buscar desde essa data
           </button>
@@ -1280,27 +1275,93 @@ function AbaBling({ d, recarregar, avisar }: { d: Dados; recarregar: () => Promi
             <RotateCcw size={16} /> Refazer os valores
           </button>
         </div>
-        {v.varrerDesde && <p className="mt-2 text-sm text-gray-600">Aguardando o vigia buscar desde {dataBr(v.varrerDesde)}.</p>}
+        {s.varrerDesde && <p className="mt-2 text-sm text-gray-600">Busca desde {dataBr(s.varrerDesde)} ainda em andamento (o agendador continua).</p>}
       </section>
 
       <section className={cartao}>
-        <h2 className="text-lg font-bold text-gray-900">Vendedores do Bling</h2>
-        {d.vendedoresBling.length === 0 ? (
-          <p className="mt-2 text-sm text-gray-600">A lista chega na primeira volta do vigia.</p>
+        <h2 className="text-lg font-bold text-gray-900">Vendedores do sistema</h2>
+        <p className="mt-1 text-sm text-gray-700">
+          Vendedor que ainda não tem kart é ligado sozinho ao piloto de mesmo nome (sem acento, sem maiúscula; ou só o primeiro nome, se não houver dois iguais).
+          Ligação feita à mão na aba Pilotos nunca é trocada.
+        </p>
+        {d.vendedoresSistema.length === 0 ? (
+          <p className="mt-2 text-sm text-gray-600">A lista chega na primeira leitura do sistema.</p>
         ) : (
           <table className="mt-3 w-full text-sm text-gray-800">
             <tbody>
-              {d.vendedoresBling.map((x) => (
-                <tr key={x.id} className="border-t border-gray-100">
-                  <td className="py-1.5 pr-3">{x.nome}</td>
-                  <td className="py-1.5 pr-3 text-gray-500 tabular-nums">{x.id}</td>
-                  <td className="py-1.5">{ligados.has(x.id) ? `kart de ${ligados.get(x.id)}` : <span className="text-orange-700">sem kart</span>}</td>
-                </tr>
-              ))}
+              {d.vendedoresSistema.map((x) => {
+                const p = ligados.get(x.id);
+                return (
+                  <tr key={x.id} className="border-t border-gray-100">
+                    <td className="py-1.5 pr-3">{x.nome}</td>
+                    <td className="py-1.5 pr-3 text-gray-500 tabular-nums">{x.id}</td>
+                    <td className="py-1.5">
+                      {p ? `kart de ${p.apelido || p.nome}${p.sistemaLigadoPor === "auto" ? " (ligado pelo nome)" : ""}` : <span className="text-orange-700">sem kart</span>}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}
       </section>
+
+      <section className={cartao}>
+        <h2 className="text-lg font-bold text-gray-900">Chave do PC da loja</h2>
+        <p className="mt-1 text-sm text-gray-700 max-w-3xl">
+          É a antiga chave do vigia. O vigia não roda mais, mas a mesma chave deixa o PC da loja (JUL.IA, relatórios do Telegram) consultar e lançar no MEU BLING
+          pelo site (<code className="rounded bg-gray-100 px-1">/api/pc/sistema/*</code>). Só gere outra se a do PC vazou ou se perdeu: a atual para de valer na hora.
+        </p>
+        <p className="mt-1 text-sm text-gray-600">{d.pc.temChave ? "Há uma chave ativa." : "Ainda não há chave."}</p>
+        <div className="mt-3">
+          <button
+            className={botaoSecundario}
+            onClick={async () => {
+              if (d.pc.temChave && !confirm("Gerar chave nova? O PC da loja para de falar com o sistema até receber a nova chave.")) return;
+              const r = await gerarChaveAcao();
+              if (!r.ok) return avisar("erro", r.erro);
+              const k = r.dados!;
+              setChave(k);
+              const a = document.createElement("a");
+              a.href = URL.createObjectURL(new Blob([k], { type: "text/plain" }));
+              a.download = "chave-pc-da-loja.txt";
+              a.click();
+              URL.revokeObjectURL(a.href);
+              await recarregar();
+            }}
+          >
+            <KeyRound size={16} /> Gerar chave do PC da loja
+          </button>
+        </div>
+        {chave && (
+          <div className="mt-3">
+            <Aviso tipo="info">Chave baixada. Ela não aparece de novo depois que você sair desta tela.</Aviso>
+          </div>
+        )}
+      </section>
+
+      {d.vendedoresBling.length > 0 && (
+        <section className={cartao}>
+          <h2 className="text-lg font-bold text-gray-900">Histórico do Bling</h2>
+          <p className="mt-1 text-sm text-gray-700">
+            Até 24/10/2026 as vendas vinham do Bling. Elas continuam no placar e no hall da fama pelo vendedor do Bling de cada piloto.
+          </p>
+          <table className="mt-3 w-full text-sm text-gray-800">
+            <tbody>
+              {d.vendedoresBling.map((x) => {
+                const p = d.pilotos.find((y) => y.blingVendedorId === x.id);
+                return (
+                  <tr key={x.id} className="border-t border-gray-100">
+                    <td className="py-1.5 pr-3">{x.nome}</td>
+                    <td className="py-1.5 pr-3 text-gray-500 tabular-nums">{x.id}</td>
+                    <td className="py-1.5">{p ? `kart de ${p.apelido || p.nome}` : <span className="text-gray-500">sem kart</span>}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </section>
+      )}
     </div>
   );
 }
@@ -1345,7 +1406,7 @@ export default function PainelArena() {
             <h1 className="flex items-center gap-2 text-2xl font-black text-gray-900">
               <Trophy className="text-[#E60012]" /> Arena de vendas
             </h1>
-            <p className="text-sm text-gray-600">A corrida do telão, em reais: vendas do Bling e ordens de serviço da assistência. Cada um corre até a própria parte da meta.</p>
+            <p className="text-sm text-gray-600">A corrida do telão, em reais: vendas do MEU BLING (/sistema) e ordens de serviço da assistência. Cada um corre até a própria parte da meta.</p>
           </div>
           <a className={botaoSecundario} href="/arena" target="_blank" rel="noreferrer">
             <Monitor size={16} /> Abrir o telão
@@ -1356,15 +1417,16 @@ export default function PainelArena() {
           <div className="mt-4">
             <Aviso tipo="erro">
               A Arena ainda depende do banco da loja. Para ela não cair junto quando a cota estoura, crie o Blob na Vercel (projeto balao2026 → Storage → Create → Blob, Private, São Paulo → Connect).{" "}
-              <button className="font-semibold underline" onClick={() => setAba("bling")}>Ver detalhes</button>
+              <button className="font-semibold underline" onClick={() => setAba("sistema")}>Ver detalhes</button>
             </Aviso>
           </div>
         )}
-        {d && !d.vigia.online && (
+        {d && !d.sincronia.emDia && (
           <div className="mt-4">
             <Aviso tipo="info">
-              {d.vigia.ultimaVez ? `O vigia do Bling não fala com o site ${haQuanto(d.vigia.ultimaVez)}.` : "O Bling ainda não está ligado à Arena."}{" "}
-              <button className="font-semibold underline" onClick={() => setAba("bling")}>Ver como ligar</button>
+              {d.sincronia.ultimoOk ? `A última leitura das vendas do sistema foi ${haQuanto(d.sincronia.ultimoOk)}.` : "As vendas do MEU BLING ainda não foram lidas."}
+              {d.sincronia.ultimoErro ? ` ${d.sincronia.ultimoErro}` : ""}{" "}
+              <button className="font-semibold underline" onClick={() => setAba("sistema")}>Ver a ligação</button>
             </Aviso>
           </div>
         )}
@@ -1416,7 +1478,7 @@ export default function PainelArena() {
           {d && aba === "pedidos" && <AbaPedidos d={d} recarregar={recarregar} avisar={avisar} />}
           {d && aba === "premio" && <AbaPremio d={d} recarregar={recarregar} avisar={avisar} />}
           {d && aba === "avisos" && <AbaAvisos d={d} recarregar={recarregar} avisar={avisar} />}
-          {d && aba === "bling" && <AbaBling d={d} recarregar={recarregar} avisar={avisar} />}
+          {d && aba === "sistema" && <AbaSistema d={d} recarregar={recarregar} avisar={avisar} />}
         </div>
 
         {d && aba === "corrida" && d.hall.some((h) => h.campeao) && (
