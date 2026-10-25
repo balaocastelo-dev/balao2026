@@ -43,7 +43,12 @@
         "macbook",
         "compra"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/quanta-memoria-escolher-no-mac-17115c8c.jpg",
+        "alt": "Mesa de trabalho clara perto da janela, com um caderno fechado, uma caneta e uma xícara branca",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-10-25T09:00:00.000Z",
       "minutos": 11
     },
@@ -743,5 +748,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-25T18:38:16.268Z"
+  "atualizadoEm": "2026-10-25T18:50:48.673Z"
 }
