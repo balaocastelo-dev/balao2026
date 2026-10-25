@@ -5,7 +5,7 @@ import JsonLd, { generateHomeAiAndGoogleSchema } from "@/components/JsonLd";
 import QuickLeadSection from "@/components/QuickLeadSection";
 import HomeLocalStoreInfo from "@/components/HomeLocalStoreInfo";
 import HomeHeroFullWidth from "@/components/HomeHeroFullWidth";
-import HomeMacbookM5Destaque from "@/components/HomeMacbookM5Destaque";
+import HomeAvellStorm480Destaque from "@/components/HomeAvellStorm480Destaque";
 import HomeTrustPillars from "@/components/HomeTrustPillars";
 import HomeBlogSection from "@/components/HomeBlogSection";
 
@@ -215,9 +215,9 @@ export default async function Home(props: {
           <HomeQuedaDePreco quedas={produtosEmQueda(quedasDePreco)} />
         )}
 
-        {/* 1.1 Destaque: MacBook M2 da vitrine (produto único da loja, fora do espelhamento) */}
+        {/* 1.1 Destaque: notebook Avell Storm 480 da vitrine (produto único da loja, fora do espelhamento) */}
         {!navegando && (
-          <HomeMacbookM5Destaque />
+          <HomeAvellStorm480Destaque />
         )}
 
         {/* 2. Trust Pillars (4 interactive cards) */}

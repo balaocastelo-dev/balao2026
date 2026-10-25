@@ -1,22 +1,27 @@
 import Image from "next/image";
-import { ArrowRight, BadgeCheck, MapPin, PackageCheck, Store } from "lucide-react";
+import { ArrowRight, BadgeCheck, Cpu, HardDrive, MemoryStick, Monitor, ShieldCheck } from "lucide-react";
 
 /**
- * Destaque da home: MacBook M2 que está na vitrine da loja.
+ * Destaque da home: notebook gamer Avell Storm 480 que está na vitrine da loja.
  *
- * (Até 16/10 este bloco anunciava o MacBook Pro M5, que foi vendido. A foto
- * continua a mesma, a pedido do Thiago.)
+ * Histórico do bloco: MacBook Pro M5 (vendido em 16/10) → MacBook M2 (vendido
+ * em 25/10) → Avell Storm 480.
  *
  * É um produto único da loja — não vem do espelhamento de preços (Kabum e
- * afins), então o valor fica aqui, à mão. Mudou o preço? É só trocar as
- * constantes abaixo; a parcela se ajusta sozinha.
+ * afins), então os valores ficam aqui, à mão. Mudou o preço? É só trocar as
+ * constantes abaixo; a economia se ajusta sozinha.
+ *
+ * Mídia em public/images/avell-storm-480/: foto oficial da Avell e um vídeo de
+ * 4 s em loop feito a partir dela (scripts/gerar-video-destaque.py).
  */
-const PRECO_NO_CARTAO = 4499;
-const PARCELAS = 10;
+const VALOR_DA_NOTA_FISCAL = 19333;
+const PRECO = 13999;
 
 const MENSAGEM_WHATSAPP =
-  "Olá! Vi no site o MacBook M2 (8GB / 256GB) por R$ 4.499 em até 10x sem juros. Ainda está disponível?";
+  "Olá! Vi no site o notebook Avell Storm 480 (i9 14ª geração, 64GB DDR5, SSD 1TB, RTX 4080 12GB) por R$ 13.999. Ainda está disponível?";
 const LINK_WHATSAPP = `https://wa.me/5519987510267?text=${encodeURIComponent(MENSAGEM_WHATSAPP)}`;
+
+const MIDIA = "/images/avell-storm-480";
 
 const emReais = (valor: number) =>
   valor.toLocaleString("pt-BR", {
@@ -25,20 +30,19 @@ const emReais = (valor: number) =>
     maximumFractionDigits: 0,
   });
 
-const valorDaParcela = (PRECO_NO_CARTAO / PARCELAS).toLocaleString("pt-BR", {
-  style: "currency",
-  currency: "BRL",
-});
+const economia = VALOR_DA_NOTA_FISCAL - PRECO;
 
-const condicoes = [
-  { icon: PackageCheck, texto: "Pronta entrega" },
-  { icon: Store, texto: "Na vitrine da loja" },
+const especificacoes = [
+  { icon: Cpu, texto: "Intel Core i9 14ª geração" },
+  { icon: MemoryStick, texto: "64GB DDR5" },
+  { icon: HardDrive, texto: "SSD de 1TB" },
+  { icon: Monitor, texto: "RTX 4080 de 12GB" },
 ];
 
-export default function HomeMacbookM5Destaque() {
+export default function HomeAvellStorm480Destaque() {
   return (
     <section
-      aria-labelledby="destaque-macbook-m2"
+      aria-labelledby="destaque-avell-storm-480"
       className="group relative isolate w-full overflow-hidden rounded-[2.5rem] border-2 border-[#E60012]/70 bg-[#06070b] shadow-2xl shadow-red-950/40 transition-colors duration-300 hover:border-[#E60012]"
     >
       <div
@@ -47,18 +51,32 @@ export default function HomeMacbookM5Destaque() {
       />
 
       <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
-        {/* Foto do produto: em cima no celular, à direita no computador */}
-        <div className="relative min-h-[230px] overflow-hidden bg-black sm:min-h-[340px] lg:order-last lg:min-h-[460px] lg:bg-[radial-gradient(ellipse_75%_62%_at_55%_46%,rgba(150,12,24,0.34),#000_74%)]">
-          {/* No celular a foto preenche a faixa; no computador aparece inteira.
-              O arquivo já tem as bordas transparentes, então some no fundo sem emenda. */}
+        {/* Vídeo do produto: em cima no celular, à direita no computador */}
+        <div className="relative min-h-[230px] overflow-hidden bg-black sm:min-h-[340px] lg:order-last lg:min-h-[460px]">
+          {/* A foto parada fica por baixo: aparece enquanto o vídeo carrega e
+              para quem pediu ao aparelho menos movimento na tela. */}
           <Image
-            src="/images/macbook-m5/macbook-pro-m5-destaque.webp"
-            alt="MacBook M2 à venda na Balão da Informática"
+            src={`${MIDIA}/avell-storm-480-poster.webp`}
+            alt="Notebook gamer Avell Storm 480 à venda na Balão da Informática"
             fill
             sizes="(max-width: 1023px) 100vw, 55vw"
-            className="object-cover object-center transition-transform duration-700 ease-out motion-safe:group-hover:scale-[1.03] lg:object-contain"
+            className="object-cover object-center lg:object-contain"
           />
-          {/* Funde a foto com o painel, sem deixar emenda */}
+          <video
+            aria-hidden="true"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            poster={`${MIDIA}/avell-storm-480-poster.jpg`}
+            className="absolute inset-0 h-full w-full object-cover object-center motion-reduce:hidden lg:object-contain"
+          >
+            <source src={`${MIDIA}/avell-storm-480.webm`} type="video/webm" />
+            <source src={`${MIDIA}/avell-storm-480.mp4`} type="video/mp4" />
+          </video>
+
+          {/* Funde o vídeo com o painel, sem deixar emenda */}
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#06070b] to-transparent lg:hidden"
@@ -68,7 +86,7 @@ export default function HomeMacbookM5Destaque() {
             className="pointer-events-none absolute inset-y-0 left-0 hidden w-24 bg-gradient-to-r from-[#06070b] to-transparent lg:block"
           />
 
-          {/* Selo discreto no canto da foto */}
+          {/* Selo discreto no canto */}
           <div
             aria-hidden="true"
             className="absolute right-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/60 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-100 backdrop-blur-sm sm:right-6 sm:top-6 sm:text-[11px]"
@@ -91,17 +109,17 @@ export default function HomeMacbookM5Destaque() {
           </div>
 
           <h2
-            id="destaque-macbook-m2"
+            id="destaque-avell-storm-480"
             className="mt-4 text-4xl font-black leading-[1.02] tracking-tight text-white sm:text-5xl lg:text-4xl xl:text-5xl"
           >
-            MacBook M2
+            Avell Storm 480
           </h2>
           <p className="mt-2 text-lg font-bold text-slate-200 sm:text-xl">
-            8GB de RAM · SSD de 256GB
+            Notebook gamer · <span className="whitespace-nowrap">tela de 17&quot; 240 Hz</span>
           </p>
 
           <ul className="mt-5 flex flex-wrap gap-2">
-            {condicoes.map(({ icon: Icon, texto }) => (
+            {especificacoes.map(({ icon: Icon, texto }) => (
               <li
                 key={texto}
                 className="inline-flex items-center gap-1.5 rounded-full border border-slate-600 bg-white/5 px-3 py-1.5 text-xs font-bold text-slate-100 sm:gap-2 sm:px-3.5 sm:py-2 sm:text-sm"
@@ -112,31 +130,33 @@ export default function HomeMacbookM5Destaque() {
             ))}
           </ul>
 
-          {/* Preço no cartão */}
+          {/* Valor da nota fiscal riscado + preço da loja */}
           <div className="mt-6 border-t border-slate-700/80 pt-5">
-            <div className="flex flex-wrap items-end gap-x-4 gap-y-2.5">
-              <p className="whitespace-nowrap text-6xl font-black leading-none tracking-tight text-white sm:text-7xl">
-                <span className="sr-only">Preço: </span>
-                {emReais(PRECO_NO_CARTAO)}
-              </p>
-            </div>
+            <p className="text-sm font-bold text-slate-300 sm:text-base">
+              Valor na nota fiscal:{" "}
+              <s className="text-lg font-black text-slate-200 decoration-[#E60012] decoration-2 sm:text-xl">
+                {emReais(VALOR_DA_NOTA_FISCAL)}
+              </s>
+            </p>
 
-            <p className="mt-3 text-base font-bold text-slate-100 sm:text-lg">
-              em até <span className="font-black text-white">{PARCELAS}x de {valorDaParcela}</span>{" "}
-              sem juros
+            <p className="mt-1.5 whitespace-nowrap text-6xl font-black leading-none tracking-tight text-white sm:text-7xl">
+              <span className="sr-only">Preço: </span>
+              {emReais(PRECO)}
+            </p>
+
+            <p className="mt-3 text-sm text-slate-300 sm:text-base">
+              {emReais(economia)} abaixo do valor da nota fiscal.
             </p>
           </div>
 
-          {/* Onde ver */}
+          {/* Garantia */}
           <div className="mt-5 flex items-start gap-3.5 border-t border-slate-700/80 pt-5">
-            <MapPin size={26} className="mt-0.5 shrink-0 text-[#E60012]" aria-hidden="true" />
+            <ShieldCheck size={26} className="mt-0.5 shrink-0 text-[#E60012]" aria-hidden="true" />
             <div>
-              <p className="text-base font-black text-white sm:text-lg">
-                Venha ver de perto
-              </p>
+              <p className="text-base font-black text-white sm:text-lg">1 ano de garantia</p>
               <p className="mt-1 text-sm leading-relaxed text-slate-300">
-                Está na vitrine da loja, na Av. Anchieta, 789, Cambuí, Campinas. Ou chame no
-                WhatsApp e garanta o seu.
+                Está na vitrine da loja, na Av. Anchieta, 789, Cambuí, Campinas. Venha ver de perto
+                ou chame no WhatsApp.
               </p>
             </div>
           </div>
@@ -150,7 +170,7 @@ export default function HomeMacbookM5Destaque() {
             rel="noopener noreferrer"
             className="mt-7 inline-flex w-full items-center justify-center gap-2.5 rounded-2xl bg-[#E60012] px-6 py-4 text-sm font-black uppercase tracking-wider text-white shadow-lg shadow-red-950/50 transition-colors after:absolute after:inset-0 after:content-[''] hover:bg-red-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/70 group-hover:bg-red-700 sm:w-fit sm:px-9 sm:text-base"
           >
-            Quero o MacBook M2
+            Quero o Avell Storm 480
             <ArrowRight
               size={18}
               aria-hidden="true"
