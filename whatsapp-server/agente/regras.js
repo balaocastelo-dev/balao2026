@@ -19,7 +19,7 @@ const PUBLICOS = ["teste", "clientes"];
 const PADRAO = Object.freeze({
   modo: "desligado",
   publico: "teste",
-  // Decisão do Thiago (11/10/2026): o pedido entra sozinho no Bling, em aberto,
+  // Decisão do Thiago (11/10/2026): o pedido entra sozinho no MEU BLING (/sistema; até 22/10 era o Bling), em aberto,
   // e ele e o vendedor são avisados.
   vendaAutomatica: true,
   ligadoEm: null,
@@ -172,7 +172,8 @@ function validarResultado(corpo) {
     .map((a) => ({
       tipo: a.tipo,
       numero: a.numero != null ? String(a.numero).slice(0, 40) : null,
-      blingId: a.blingId != null ? String(a.blingId).slice(0, 40) : null,
+      // MEU BLING (/sistema) desde 25/10/2026. O PC antigo ainda manda blingId: vale igual.
+      sistemaId: (a.sistemaId ?? a.blingId) != null ? String(a.sistemaId ?? a.blingId).slice(0, 40) : null,
       total: Number(a.total) || 0,
       itens: (Array.isArray(a.itens) ? a.itens : []).slice(0, 20).map((i) => ({
         nome: String(i?.nome || "").slice(0, 160),
@@ -208,13 +209,13 @@ function validarResultado(corpo) {
   };
 }
 
-/** Nota que fica na ficha do cliente quando o agente mexe no Bling. */
+/** Nota que fica na ficha do cliente quando o agente grava no MEU BLING (/sistema). */
 function notaDaAcao(acao) {
-  const tipo = acao.tipo === "venda" ? "Pedido de venda" : "Orçamento (proposta comercial)";
-  if (acao.erro) return `⚠️ JUL.IA tentou emitir ${tipo.toLowerCase()} no Bling e não conseguiu: ${acao.erro}`;
+  const tipo = acao.tipo === "venda" ? "Pedido de venda" : "Orçamento";
+  if (acao.erro) return `⚠️ JUL.IA tentou emitir ${tipo.toLowerCase()} no MEU BLING (/sistema) e não conseguiu: ${acao.erro}`;
   const linhas = acao.itens.map((i) => `• ${i.quantidade} × ${i.nome} — ${reais(i.valor)}`);
   return [
-    `${acao.tipo === "venda" ? "🛒" : "🧾"} ${tipo} nº ${acao.numero || "?"} emitido pela JUL.IA no Bling${
+    `${acao.tipo === "venda" ? "🛒" : "🧾"} ${tipo} nº ${acao.numero || "?"} emitido pela JUL.IA no MEU BLING (/sistema)${
       acao.tipo === "venda" ? " (em aberto)" : ""
     }`,
     ...linhas,
