@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { trackEvent, trackMailClick, trackPhoneClick, trackWhatsAppClick } from "@/lib/tracking";
+import { comOrigem, origemDaPagina } from "@/lib/whatsapp/origem";
 
 function getAbsoluteHref(href: string) {
   try {
@@ -74,15 +75,23 @@ export default function GlobalConversionTracker() {
       }
 
       if (href.includes("wa.me") || href.includes("api.whatsapp.com")) {
-        const absolute = getAbsoluteHref(href);
+        // Acrescenta "(vim pelo site: …)" à mensagem antes de o link abrir
+        // (lib/whatsapp/origem.ts). O clique entra no painel com essa origem.
+        const origem = anchor.getAttribute("data-whatsapp-origem") || origemDaPagina(pathname);
+        const original = getAbsoluteHref(href)?.toString() || href;
+        const comAOrigem = comOrigem(original, origem);
+        if (comAOrigem !== original) anchor.setAttribute("href", comAOrigem);
         trackWhatsAppClick({
           page_path: pathname,
-          source,
+          source:
+            anchor.getAttribute("data-conversion-source") ||
+            anchor.getAttribute("data-track-source") ||
+            origem,
           label,
           city,
           service,
           product_name: productName,
-          destination: absolute?.toString() || href,
+          destination: comAOrigem,
         });
       }
     };
