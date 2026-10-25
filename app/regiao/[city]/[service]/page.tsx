@@ -55,7 +55,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const canonical = `https://www.balao.info${buildRegionalServicePath(city.slug, service.slug)}`;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     keywords: [
       `${service.shortName.toLowerCase()} ${city.name.toLowerCase()}`,
