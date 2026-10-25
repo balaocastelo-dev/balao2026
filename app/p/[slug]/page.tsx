@@ -30,6 +30,15 @@ import {
 } from "lucide-react";
 
 import { getVitrinePageBySlug } from "@/lib/vitrine/db";
+import { paginaAssinadaPorSlug } from "@/lib/vitrine/assinadas";
+import { getCachedProductByIdentifier } from "@/lib/cache";
+
+/** Setup assinado (lib/vitrine/assinadas.ts) primeiro; depois a página do painel. */
+async function buscarPaginaDaVitrine(slug: string) {
+  const assinada = await paginaAssinadaPorSlug(slug, getCachedProductByIdentifier).catch(() => null);
+  if (assinada) return assinada;
+  return getVitrinePageBySlug(slug).catch(() => null);
+}
 import { makeCommercialCopy, pickComponentImage, pickPcHeroImage } from "@/lib/vitrine/core";
 import ProductMediaSwitcher from "@/components/ProductMediaSwitcher";
 import { enhanceImageUrl } from "@/lib/utils";
@@ -226,7 +235,7 @@ function AppCard({
 
 export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await props.params;
-  const page = await getVitrinePageBySlug(slug).catch(() => null);
+  const page = await buscarPaginaDaVitrine(slug);
   if (!page) return {};
 
   const title = `${page.nome_pc} | Balão da Informática`;
@@ -251,7 +260,7 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
 
 export default async function PublicPPage(props: { params: Promise<{ slug: string }> }) {
   const { slug } = await props.params;
-  const page = await getVitrinePageBySlug(slug);
+  const page = await buscarPaginaDaVitrine(slug);
   if (!page) return notFound();
 
   const priceText = priceTextFromPage(page as any);
@@ -431,7 +440,7 @@ export default async function PublicPPage(props: { params: Promise<{ slug: strin
               <h1 className="mt-4 text-3xl sm:text-5xl font-extrabold tracking-tight text-gray-900 whitespace-normal break-words">
                 {page.nome_pc}
               </h1>
-              <p className="mt-4 text-base sm:text-lg text-gray-700 leading-relaxed">{copy.heroSubtitle}</p>
+              <p className="mt-4 text-base sm:text-lg text-gray-700 leading-relaxed">{typeof extras?.chamada === "string" && extras.chamada.trim() ? extras.chamada : copy.heroSubtitle}</p>
 
               <div className="mt-6 rounded-3xl border border-black/10 bg-white/80 p-5 backdrop-blur">
                 <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">

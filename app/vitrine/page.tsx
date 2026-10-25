@@ -12,6 +12,8 @@ import {
 import Header from "@/components/Header";
 import { SITE_CONFIG } from "@/lib/config";
 import { listVitrinePagesPublic } from "@/lib/vitrine/db";
+import { paginasAssinadas } from "@/lib/vitrine/assinadas";
+import { getCachedProductByIdentifier } from "@/lib/cache";
 import { pickPcHeroImage } from "@/lib/vitrine/core";
 import type { VitrinePageRecord } from "@/lib/vitrine/types";
 
@@ -52,7 +54,13 @@ function buildSpecs(page: VitrinePageView) {
 }
 
 export default async function VitrinePage() {
-  const pages = (await listVitrinePagesPublic().catch(() => [])) as VitrinePageView[];
+  // Setups assinados (preço lido do catálogo agora) + páginas feitas no painel.
+  const [assinadas, doPainel] = await Promise.all([
+    paginasAssinadas(getCachedProductByIdentifier).catch(() => []),
+    listVitrinePagesPublic().catch(() => []),
+  ]);
+  const slugsAssinados = new Set(assinadas.map((p) => p.slug));
+  const pages = [...assinadas, ...doPainel.filter((p) => !slugsAssinados.has(p.slug))] as VitrinePageView[];
   const featured = pages[0];
   const featuredHero = featured
     ? featured.images?.hero || pickPcHeroImage({ categoria: featured.categoria })

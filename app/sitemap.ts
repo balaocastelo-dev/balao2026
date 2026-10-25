@@ -7,6 +7,7 @@ import { LEAD_INTENTS } from '@/lib/lead-intents'
 import { REGIONAL_CITIES, REGIONAL_SERVICES, buildRegionalServicePath } from '@/lib/local-seo'
 import { CAMPINAS_NEIGHBORHOODS } from '@/lib/neighborhood-seo'
 import { listVitrinePagesPublic } from '@/lib/vitrine/db'
+import { SETUPS_ASSINADOS } from '@/lib/vitrine/assinadas'
 import { PAGINAS } from '@/lib/landing/paginas'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -101,7 +102,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   ]
 
-  const vitrinePages = await listVitrinePagesPublic().catch(() => [])
+  const vitrinePages = [
+    ...SETUPS_ASSINADOS.map((s) => ({ slug: s.slug, data_publicacao: s.publicado_em, data_criacao: s.publicado_em })),
+    ...(await listVitrinePagesPublic().catch(() => [])),
+  ]
   const vitrineRoutes = vitrinePages.map((p) => ({
     url: `${baseUrl}/p/${p.slug}`,
     lastModified: new Date(p.data_publicacao || p.data_criacao || new Date()),
