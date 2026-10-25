@@ -9,7 +9,12 @@
     "roteador",
     "diagnóstico"
   ],
-  "capa": null,
+  "capa": {
+    "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/wi-fi-fraco-em-um-comodo-o-que-testar-eb3abed7.jpg",
+    "alt": "Roteador Wi-Fi branco com antenas sobre uma estante de madeira, com a porta de outro cômodo ao fundo",
+    "largura": 1600,
+    "altura": 900
+  },
   "publicadoEm": "2026-10-25T21:00:00.000Z",
   "formato": "dica",
   "roteiro": {
