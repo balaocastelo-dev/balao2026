@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { SETUPS_ASSINADOS, montarPaginaAssinada, paginasAssinadas } from "@/lib/vitrine/assinadas";
+import { SETUPS_ASSINADOS, montarPaginaAssinada, paginasDaVitrine } from "@/lib/vitrine/assinadas";
 import type { Product } from "@/lib/utils";
 
 const pc = (price: string, extra: Partial<Product> = {}): Product => ({
@@ -32,8 +32,8 @@ describe("setups assinados da vitrine", () => {
     expect(montarPaginaAssinada(SETUPS_ASSINADOS[0], null)).toBeNull();
   });
 
-  it("lista só os que o catálogo achou", async () => {
-    const lista = await paginasAssinadas(async (id) => (id === SETUPS_ASSINADOS[2].produto ? pc("8.833,50") : null));
+  it("sem PCs para sortear, usa os setups fixos que o catálogo achou", async () => {
+    const lista = await paginasDaVitrine(async () => [], async (id) => (id === SETUPS_ASSINADOS[2].produto ? pc("8.833,50") : null));
     expect(lista.map((p) => p.slug)).toEqual([SETUPS_ASSINADOS[2].slug]);
   });
 });

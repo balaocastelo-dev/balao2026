@@ -20,6 +20,7 @@ import type { Product } from "@/lib/utils";
 import { parsePriceToNumber } from "@/lib/utils";
 import { extractParts } from "./core";
 import type { VitrineCategory, VitrinePageRecord } from "./types";
+import { candidatos, diaDeHoje, escolherDoDia, QUANTOS_POR_DIA, setupDoProduto } from "./rotativa";
 
 export const FAIXA_MINIMA = 5000;
 export const FAIXA_MAXIMA = 10000;
@@ -147,21 +148,58 @@ export function montarPaginaAssinada(setup: SetupAssinado, produto: Product | nu
   };
 }
 
-/** Os setups assinados que estão valendo agora, já com preço do catálogo. */
-export async function paginasAssinadas(
-  buscar: (id: string) => Promise<Product | null>
+/**
+ * As páginas da vitrine HOJE: os cinco PCs sorteados do dia (lib/vitrine/rotativa.ts),
+ * completados pelos setups fixos acima se o catálogo não tiver cinco que sirvam.
+ */
+export async function paginasDaVitrine(
+  listarPcsCompletos: () => Promise<Product[]>,
+  buscar: (id: string) => Promise<Product | null>,
+  agora = new Date()
 ): Promise<VitrinePageRecord[]> {
-  const paginas = await Promise.all(
-    SETUPS_ASSINADOS.map(async (setup) => montarPaginaAssinada(setup, await buscar(setup.produto).catch(() => null)))
-  );
-  return paginas.filter((p): p is VitrinePageRecord => p !== null);
+  const dia = diaDeHoje(agora);
+  const pcs = await listarPcsCompletos().catch(() => [] as Product[]);
+  const paginas: VitrinePageRecord[] = [];
+  const usados = new Set<string>();
+
+  for (const produto of escolherDoDia(pcs, dia)) {
+    const pagina = montarPaginaAssinada(setupDoProduto(produto, dia), produto);
+    if (pagina) {
+      paginas.push(pagina);
+      usados.add(String(produto.id));
+    }
+  }
+
+  if (paginas.length < QUANTOS_POR_DIA) {
+    for (const setup of SETUPS_ASSINADOS) {
+      if (paginas.length >= QUANTOS_POR_DIA) break;
+      const produto = await buscar(setup.produto).catch(() => null);
+      if (!produto || usados.has(String(produto.id))) continue;
+      const pagina = montarPaginaAssinada(setup, produto);
+      if (pagina) {
+        paginas.push(pagina);
+        usados.add(String(produto.id));
+      }
+    }
+  }
+  return paginas;
 }
 
+/**
+ * Página /p/<slug> de um setup: os fixos pelo slug e os do sorteio por
+ * "setup-<id do produto>". O link de um setup de ontem continua abrindo
+ * enquanto o PC estiver no catálogo e dentro da faixa.
+ */
 export async function paginaAssinadaPorSlug(
   slug: string,
-  buscar: (id: string) => Promise<Product | null>
+  buscar: (id: string) => Promise<Product | null>,
+  agora = new Date()
 ): Promise<VitrinePageRecord | null> {
-  const setup = SETUPS_ASSINADOS.find((s) => s.slug === slug);
-  if (!setup) return null;
-  return montarPaginaAssinada(setup, await buscar(setup.produto).catch(() => null));
+  const fixo = SETUPS_ASSINADOS.find((s) => s.slug === slug);
+  if (fixo) return montarPaginaAssinada(fixo, await buscar(fixo.produto).catch(() => null));
+
+  if (!slug.startsWith("setup-")) return null;
+  const produto = await buscar(slug.slice("setup-".length)).catch(() => null);
+  if (!produto || candidatos([produto]).length === 0) return null;
+  return montarPaginaAssinada(setupDoProduto(produto, diaDeHoje(agora)), produto);
 }
