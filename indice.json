@@ -89,7 +89,12 @@
         "placa-mãe",
         "dual channel"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/dual-channel-por-que-duas-memorias-rendem-mais-73408941.jpg",
+        "alt": "Dois pentes de memória RAM iguais encaixados em slots alternados de uma placa-mãe sobre uma bancada",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-10-24T09:00:00.000Z",
       "minutos": 10
     },
@@ -728,5 +733,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-25T18:29:49.743Z"
+  "atualizadoEm": "2026-10-25T18:32:22.664Z"
 }
