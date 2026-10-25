@@ -2,7 +2,7 @@
   "_leia_me": "Configuração da JUL.IA neste PC (sem segredo nenhum). Apague a linha para voltar ao padrão.",
   "modelo": "qwen3:14b",
   "modelo_visao": "",
-  "bling_vendedor_id": null,
-  "bling_no_teste": false,
+  "vendedor_id_sistema": null,
+  "sistema_no_teste": false,
   "respeitar_placa": true
 }

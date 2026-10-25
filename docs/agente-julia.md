@@ -1,13 +1,34 @@
 # JUL.IA — vendedora digital do WhatsApp (outubro de 2026)
 
 Pedido do Thiago (11/10/2026): um agente que entende texto, foto, vídeo e áudio do cliente, ajuda a
-escolher um produto do site, coleta os dados, emite orçamento no Bling e emite a venda quando o cliente
+escolher um produto do site, coleta os dados, emite orçamento no MEU BLING e emite a venda quando o cliente
 confirma. Liga e desliga no Centro de Comando. Roda local, sem API, crédito ou token pago. Só recomenda
 produto do site.
 
 Decisões dele no mesmo dia:
 - no automático, ela responde **conversa sem vendedor** (vendedor respondeu ou pegou: ela sai na hora);
-- a venda entra **sozinha no Bling, em aberto**, e ele é avisado.
+- a venda entra **sozinha no MEU BLING, em aberto**, e ele é avisado.
+
+## MEU BLING no lugar do Bling (25/10/2026)
+
+A loja parou de usar o Bling em 22/10 e passou ao **MEU BLING** (ERP próprio, em www.balao.info/sistema).
+Pedido do Thiago em 25/10: "desconecta de vez o Bling". Desde então:
+
+- A JUL.IA grava orçamento (`ORCAMENTO`) e pedido (`PEDIDO`, em aberto) no MEU BLING **pelo site**:
+  `POST https://www.balao.info/api/pc/sistema/documentos` (e `GET /api/pc/sistema/status` no `--conferir`),
+  com `Authorization: Bearer <chave do PC da loja>`. Código: `scripts/agente-local/sistema.py`.
+- A chave é a mesma do vigia da Arena (`python vigia.py --parear`, aprovada em /painel/arena), lida de
+  `%USERPROFILE%\.balao-arena\chave.txt` (ou do `arquivo_chave` do `config.json` do vigia, ou do
+  `arquivo_chave_pc` do `config.json` da JUL.IA). Nunca aparece na tela nem no log.
+- O MEU BLING acha ou cria o cliente sozinho (nome, CPF/CNPJ validado no PC, telefone, endereço); os itens vão
+  pelo id do produto no site (`siteId`).
+- Cada documento leva `idExterno` (`julia-orc-…` / `julia-ped-…`, 6 a 40 caracteres): trabalho refeito ou rede
+  que caiu não duplica orçamento nem pedido.
+- O token da sentinela do Bling (`bling_tokens.json`) **não é mais lido**; `bling.py` saiu. Config:
+  `vendedor_id_sistema` (opcional) e `sistema_no_teste` no lugar de `bling_vendedor_id`/`bling_no_teste`.
+- As ações que o PC devolve trazem `sistemaId`; a VPS aceita também o `blingId` antigo (PC ainda não atualizado).
+- A JUL.IA estava **desligada** desde 21/10 e continua desligada: o código fica pronto e só passa a gravar
+  no MEU BLING quando o Thiago ligar de novo no Centro de Comando.
 
 ## Como funciona
 
@@ -15,7 +36,7 @@ Decisões dele no mesmo dia:
 cliente ──WhatsApp──► VPS (servidor.js + agente/)          PC do Thiago (scripts/agente-local)
                        decide se a JUL.IA pode falar  ◄──── puxa /api/agente/trabalho (a cada 2 s)
                        envia ou vira sugestão          ────► Whisper / qwen2.5vl / qwen3:14b
-                       avisa painel, ficha, Telegram  ◄──── /api/agente/resultado (+ Bling direto do PC)
+                       avisa painel, ficha, Telegram  ◄──── /api/agente/resultado (+ MEU BLING pelo site)
 ```
 
 - **VPS** (`whatsapp-server/agente/`): chave em `crm_config` (`agente`), situação de cada conversa em
@@ -39,7 +60,7 @@ cliente ──WhatsApp──► VPS (servidor.js + agente/)          PC do Thiag
 3. Só na primeira vez: `& $HOME\balao2026\whatsapp-server\deploy-evo.ps1 -Agente` (segredo para o PC).
 4. `& $HOME\balao2026\scripts\agente-local\instalar.ps1` (no fim roda `--conferir` e liga a tarefa).
 5. No /crm → Comando → JUL.IA: **Automático** com **"Só os números de teste"** marcado (é o padrão).
-   Mandar mensagem do celular pessoal (5519984515960) para a loja. No teste o Bling é simulado.
+   Mandar mensagem do celular pessoal (5519984515960) para a loja. No teste o MEU BLING é simulado.
 6. Conferido, desmarcar "Só os números de teste".
 
 Feito no PC da loja em 12/10/2026, 00h19: cópia do projeto em `C:\Users\user\balao2026`, JUL.IA em
@@ -108,7 +129,7 @@ O que vale das 8h às 18h:
   trabalhador Python de verdade (Ollama de mentira): modo teste, foto, orçamento, venda, vendedor pelo
   celular, copiloto, preço inventado barrado, desligar. `e2e/fase1` 36/36 e `e2e/disparo` 33/33 seguem passando.
 - PC: `testes/test_julia.py` 35/35.
-- **Com o modelo de verdade** (qwen3:14b no PC da loja, catálogo de 4.854 produtos, Bling simulado):
+- **Com o modelo de verdade** (qwen3:14b no PC da loja, catálogo de 4.854 produtos, Bling simulado, na época):
   "pc gamer com rtx 4060?" → 3 opções com RTX 4060 (6 s) → "quero o mais barato" → orçamento → "pode fechar,
   cartão 10x, retiro, nome e CPF" → pedido com o preço de cartão e conversa passada a um vendedor.
   Desconto e conserto foram para um vendedor. As travas foram feitas a partir do que o modelo errou nesses
@@ -117,7 +138,8 @@ O que vale das 8h às 18h:
 
 ## O que ainda não foi exercitado
 
-- **Gravação no Bling de verdade** (proposta e pedido): os campos seguem a API v3 e pedidos reais lidos da
-  conta, mas a primeira gravação real só acontece no público "clientes" (ou com `bling_no_teste`). Se o
-  Bling recusar, a JUL.IA avisa no painel, passa a conversa a um vendedor e o erro do Bling aparece na nota.
-- A JUL.IA ainda não é vendedora no Bling: `bling_vendedor_id` vazio (já existe uma JULIA SOUZA humana).
+- **Gravação no MEU BLING de verdade** (orçamento e pedido): testada com rede de mentira
+  (`testes/test_julia.py`, classe `TestSistema`); a primeira gravação real só acontece no público "clientes"
+  (ou com `sistema_no_teste`). Se o MEU BLING recusar, a JUL.IA avisa no painel, passa a conversa a um
+  vendedor e o motivo aparece na nota ("MEU BLING recusou (422): …").
+- A JUL.IA ainda não é vendedora no MEU BLING: `vendedor_id_sistema` vazio.

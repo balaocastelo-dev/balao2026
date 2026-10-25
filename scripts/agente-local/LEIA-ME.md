@@ -9,11 +9,24 @@ Trabalhador local da vendedora digital do WhatsApp. Roda no PC do Thiago (placa 
 | Foto | Ollama `qwen2.5vl:7b`, sai da placa depois de responder | `sentidos.py` |
 | Vídeo | ffmpeg: áudio para o Whisper e 3 quadros para o modelo de visão | `sentidos.py` |
 | Produtos | catálogo do site espelhado pela VPS (nunca o MySQL), sem custo nem fornecedor | `catalogo.py` |
-| Orçamento e pedido | Bling v3, lendo o token que a sentinela do Bionic renova (nunca renova daqui) | `bling.py` |
+| Orçamento e pedido | MEU BLING (/sistema), pelo site, com a chave do PC da loja (a do vigia da Arena) | `sistema.py` |
 | Placa de vídeo | espera ligação da URA e render da fábrica terminarem | `placa.py` |
 
 Ele **puxa** da VPS as conversas que precisam de resposta (`/api/agente/*`, com o segredo de
 `%USERPROFILE%\.balao-agente\segredo.txt`). Não abre porta, não usa túnel.
+
+## MEU BLING (desde 25/10/2026)
+
+O Bling saiu de vez. Orçamento e pedido vão para o MEU BLING passando pelo site:
+`POST https://www.balao.info/api/pc/sistema/documentos` (o `--conferir` só lê `GET /api/pc/sistema/status`).
+
+- **Chave:** a "chave do PC da loja", a mesma do vigia da Arena. Se ainda não existir:
+  `cd $HOME\balao-arena-vigia ; py -3 vigia.py --parear` e aprovar o computador em www.balao.info/painel/arena.
+  A JUL.IA lê `%USERPROFILE%\.balao-arena\chave.txt` (ou o `arquivo_chave` do `config.json` do vigia, ou o
+  caminho em `arquivo_chave_pc` no `config.json` daqui). A chave nunca vai para a tela nem para o log.
+- O token da sentinela do Bling **não é mais lido** (`bling.py` saiu).
+- O cliente é achado ou criado pelo próprio MEU BLING; os itens vão pelo id do produto no site.
+- `idExterno` (`julia-orc-…`, `julia-ped-…`): repetir a gravação devolve o mesmo documento, nunca um segundo.
 
 ## Instalar (ou atualizar)
 
@@ -46,8 +59,8 @@ o tempo do modelo e o tempo de recarga.
 ## Testar sem WhatsApp
 
 ```powershell
-& $HOME\balao-agente\.venv\Scripts\python.exe $HOME\balao-agente\julia.py --conferir    # VPS, Ollama, Whisper, ffmpeg, catálogo, Bling (só leitura)
-& $HOME\balao-agente\.venv\Scripts\python.exe $HOME\balao-agente\julia.py --conversar   # você é o cliente; Bling simulado; nada sai do PC
+& $HOME\balao-agente\.venv\Scripts\python.exe $HOME\balao-agente\julia.py --conferir    # VPS, Ollama, Whisper, ffmpeg, catálogo, MEU BLING (só o status)
+& $HOME\balao-agente\.venv\Scripts\python.exe $HOME\balao-agente\julia.py --conversar   # você é o cliente; MEU BLING simulado; nada sai do PC
 ```
 
 ## As travas (código, não o modelo)
@@ -61,18 +74,20 @@ o tempo do modelo e o tempo de recarga.
 - Venda só com orçamento emitido, "sim" do cliente para aquele orçamento, nome completo, CPF/CNPJ válido,
   forma de pagamento e retirada/entrega. No cartão vale o preço de cartão do site.
 - Depois da venda a conversa passa para um vendedor (pagamento e entrega são com gente).
-- No modo teste (só os números do Thiago) o Bling é simulado: orçamento e pedido saem como "(teste)".
-  Para testar o Bling de verdade, `"bling_no_teste": true` no `config.json`.
+- No modo teste (só os números do Thiago) o MEU BLING é simulado: orçamento e pedido saem como "(teste)".
+  Para gravar de verdade também no teste, `"sistema_no_teste": true` no `config.json`.
 
 ## Configuração
 
 `config.json` ao lado do `julia.py` (copiado de `config.exemplo.json`): modelo, modelo de visão,
-`bling_vendedor_id` (id do vendedor no Bling para a JUL.IA), `bling_no_teste`, `respeitar_placa`.
+`vendedor_id_sistema` (id do vendedor no MEU BLING para a JUL.IA), `sistema_no_teste`, `arquivo_chave_pc`
+(só se a chave não estiver no lugar do vigia), `respeitar_placa`. As linhas `bling_*` de um `config.json` antigo
+são ignoradas; pode apagar.
 Também por variável de ambiente `JULIA_<CHAVE>` (ex.: `JULIA_MODELO=gpt-oss:20b`).
 
 Log: `dados\julia.log` (sem texto de cliente: só a conversa abreviada e o tempo).
 
 ## Testes
 
-`python -m unittest discover -s testes` (modelo, Bling e VPS de mentira). A bancada de ponta a ponta,
+`python -m unittest discover -s testes` (modelo, MEU BLING e VPS de mentira). A bancada de ponta a ponta,
 com o servidor de verdade, está em `whatsapp-server/e2e/agente.e2e.mjs`.

@@ -3,13 +3,14 @@
 Roda no PC do Thiago (tarefa do Agendador do Windows, instalada pelo
 instalar.ps1). Puxa da VPS as conversas que precisam de resposta, entende
 texto, áudio, foto e vídeo com modelos locais (Ollama + faster-whisper), busca
-no catálogo do site, emite orçamento e pedido no Bling e devolve a resposta.
+no catálogo do site, emite orçamento e pedido no MEU BLING (/sistema, pelo site)
+e devolve a resposta.
 Liga e desliga no Centro de Comando do /crm (aba JUL.IA). Sem API paga.
 
   python julia.py              laço contínuo (o que a tarefa agendada roda)
-  python julia.py --conferir   confere tudo (VPS, Ollama, Whisper, ffmpeg, catálogo, Bling) sem mandar nada
+  python julia.py --conferir   confere tudo (VPS, Ollama, Whisper, ffmpeg, catálogo, MEU BLING) sem mandar nada
   python julia.py --conversar  conversa com a JUL.IA aqui no terminal, como se fosse um cliente
-                               (catálogo de verdade, Bling simulado, nada vai para o WhatsApp)
+                               (catálogo de verdade, MEU BLING simulado, nada vai para o WhatsApp)
   python julia.py --uma-vez    atende uma conversa (se houver) e sai
 """
 from __future__ import annotations
@@ -26,16 +27,16 @@ import traceback
 from pathlib import Path
 
 import config as C
-from bling import Bling
 from catalogo import Catalogo
 from cerebro import Atendimento, conversa_atual
 from ollama import Ollama
 from placa import Placa
 from rede import ErroHttp
 from sentidos import Sentidos
+from sistema import Sistema
 from vps import Vps
 
-VERSAO = "2026-10-12b"
+VERSAO = "2026-10-25-sistema"
 log = logging.getLogger("julia")
 
 
@@ -101,6 +102,12 @@ def trava_unica(pasta: str):
     return arq
 
 
+def sistema_de(cfg: dict, *, simular: bool = False) -> Sistema:
+    """MEU BLING pelo site, com a chave do PC da loja (a do vigia da Arena)."""
+    return Sistema(cfg.get("arquivo_chave_pc") or None, site=cfg.get("site_url") or "https://www.balao.info",
+                   simular=simular, vendedor_id=None if simular else cfg.get("vendedor_id_sistema"))
+
+
 class Trabalhador:
     def __init__(self, cfg: dict, vps: Vps | None):
         self.cfg = cfg
@@ -110,17 +117,17 @@ class Trabalhador:
         self.placa = Placa(cfg["pasta_dados"], respeitar=bool(cfg.get("respeitar_placa", False)),
                            das=int(cfg.get("prioridade_das", 8)), ate=int(cfg.get("prioridade_ate", 18)))
         self.sentidos = Sentidos(cfg, self.ollama, baixar=vps.midia if vps else (lambda _id: (b"", "")), registrar=log.info)
-        self.bling_real = Bling(cfg["bling_tokens"], vendedor_id=cfg.get("bling_vendedor_id"))
-        self.bling_teste = Bling(cfg["bling_tokens"], simular=True)
+        self.sistema_real = sistema_de(cfg)
+        self.sistema_teste = sistema_de(cfg, simular=True)
         self.ultima_batida = 0.0
         self.atendidas = 0
         self.erros = 0
         self.motivo_espera = None
         self._trava_catalogo = threading.Lock()
 
-    def bling_para(self, trabalho: dict) -> Bling:
+    def sistema_para(self, trabalho: dict) -> Sistema:
         teste = (trabalho.get("config") or {}).get("publico") == "teste"
-        return self.bling_teste if teste and not self.cfg.get("bling_no_teste") else self.bling_real
+        return self.sistema_teste if teste and not self.cfg.get("sistema_no_teste") else self.sistema_real
 
     def atender(self, trabalho: dict) -> dict:
         inicio = time.time()
@@ -134,7 +141,7 @@ class Trabalhador:
             ollama=self.ollama,
             modelo=self.cfg["modelo"],
             catalogo=self.catalogo,
-            bling=self.bling_para(trabalho),
+            sistema=self.sistema_para(trabalho),
             contexto=int(self.cfg.get("contexto") or 8192),
             prazo_s=float(self.cfg.get("prazo_s") or 70),
             registrar=log.info,
@@ -280,9 +287,9 @@ def conferir(cfg: dict) -> int:
     cat = Catalogo(cfg["pasta_dados"], buscar_remoto=vps.catalogo if vps else None)
     cat.atualizar(forcar=True)
     linha("catálogo do site", bool(cat.produtos), f"{len(cat.produtos)} produtos, de {cat.atualizado_em}")
-    b = Bling(cfg["bling_tokens"]).conferir()
-    linha("Bling (leitura)", b.get("token_lido") and all(b.get(k) == "ok" for k in ("contatos", "propostas", "pedidos")),
-          ", ".join(f"{k}: {v}" for k, v in b.items() if k in ("contatos", "propostas", "pedidos", "erro")))
+    s = sistema_de(cfg).conferir()  # só lê o status; a chave nunca aparece
+    linha("MEU BLING (pelo site)", s.get("chave_lida") and s.get("ligado") and not s.get("erro"),
+          s.get("erro") or f"ligado, chave do PC em {s.get('chave')}")
     from placa import fabrica_que_nao_cede, memoria_livre_gb
 
     p = Placa(None, respeitar=True, validade_s=0)
@@ -307,7 +314,7 @@ def conferir(cfg: dict) -> int:
 
 
 def conversar(cfg: dict) -> int:
-    """Você é o cliente; nada sai do PC (Bling simulado, sem WhatsApp)."""
+    """Você é o cliente; nada sai do PC (MEU BLING simulado, sem WhatsApp)."""
     segredo = None
     try:
         segredo = C.ler_segredo(cfg)
@@ -315,7 +322,7 @@ def conversar(cfg: dict) -> int:
         pass
     vps = Vps(cfg["vps_url"], segredo) if segredo else None
     t = Trabalhador(cfg, vps)
-    t.bling_real = t.bling_teste  # nunca de verdade aqui
+    t.sistema_real = t.sistema_teste  # nunca de verdade aqui
     t.catalogo.atualizar(forcar=True)
     if not t.catalogo.produtos:
         print("Sem catálogo: rode uma vez com a VPS acessível (segredo instalado).")

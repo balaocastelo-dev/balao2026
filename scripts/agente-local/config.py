@@ -5,9 +5,11 @@ segredo nenhum) ou em variável de ambiente. Segredos ficam fora da pasta:
 
 - o segredo da VPS em %USERPROFILE%\\.balao-agente\\segredo.txt, gravado pelo
   `deploy-evo.ps1 -Agente` (vem da VPS por ssh, sem aparecer na tela);
-- o acesso ao Bling é o mesmo arquivo que a sentinela do Bionic renova a cada
-  2 minutos (07-Scripts\\bling-oauth\\bling_tokens.json). Aqui só LEMOS: renovar
-  daqui trocaria o refresh_token e derrubaria a sentinela.
+- o orçamento e o pedido vão para o MEU BLING (/sistema) pelo site, com a
+  "chave do PC da loja": a mesma do vigia da Arena, gravada pelo
+  `python vigia.py --parear` em %USERPROFILE%\\.balao-arena\\chave.txt. Aqui só
+  LEMOS a chave (sistema.py); ela nunca vai para a tela nem para o log.
+  O Bling saiu de tudo em 25/10/2026: o token da sentinela não é mais lido.
 """
 from __future__ import annotations
 
@@ -40,13 +42,15 @@ PADRAO = {
     # Whisper: o mesmo modelo da URA (já baixado no cache do PC).
     "whisper_modelo": "deepdml/faster-whisper-large-v3-turbo-ct2",
     "whisper_dispositivo": "cuda",
-    # Bling
-    "bling_tokens": r"C:\Users\user\Documents\07-Scripts\bling-oauth\bling_tokens.json",
-    "bling_vendedor_id": None,  # id do vendedor no Bling para a JUL.IA (opcional)
-    # No modo teste (só os números do Thiago) o Bling é SIMULADO, para teste
-    # não virar pedido de verdade no relatório. true = usar o Bling de verdade
-    # também no teste.
-    "bling_no_teste": False,
+    # MEU BLING (/sistema), pelo site.
+    "site_url": "https://www.balao.info",
+    # Vazio = a chave do vigia da Arena (%USERPROFILE%\.balao-arena\chave.txt,
+    # ou o "arquivo_chave" do config.json do vigia). Só o CAMINHO, nunca a chave.
+    "arquivo_chave_pc": "",
+    "vendedor_id_sistema": None,  # id do vendedor no MEU BLING para a JUL.IA (opcional)
+    # No modo teste (só os números do Thiago) o MEU BLING é SIMULADO, para teste
+    # não virar venda de verdade no relatório. true = gravar de verdade também no teste.
+    "sistema_no_teste": False,
     # Placa de vídeo (Thiago, 12/10/2026): das 8h às 18h a JUL.IA vem primeiro (não
     # espera URA nem render; a fábrica cede); de madrugada a criação de conteúdo vem
     # primeiro e a JUL.IA espera (placa.py). true = espera o dia todo.

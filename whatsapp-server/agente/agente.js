@@ -3,7 +3,7 @@
 // Quem pensa é o computador do Thiago (scripts/agente-local): ele PUXA daqui
 // as conversas que precisam de resposta, entende texto, áudio, foto e vídeo
 // com modelos locais, consulta o catálogo do site, emite orçamento e pedido no
-// Bling e devolve o que falar. A VPS não abre porta no PC e o PC não abre
+// MEU BLING (/sistema, pelo site) e devolve o que falar. A VPS não abre porta no PC e o PC não abre
 // porta na internet: a conexão sai sempre do PC, como a da transcrição.
 //
 // Aqui fica só o que precisa estar perto do WhatsApp:
@@ -355,13 +355,13 @@ function criarAgente({
       await evento(a.tipo === "venda" ? "agente_venda" : "agente_orcamento", { chatId, detalhes: a }).catch(() => {});
       if (a.erro) {
         contagem.erros++;
-        avisar({ tipo: "acao", texto: `⚠️ JUL.IA não conseguiu emitir ${a.tipo === "venda" ? "o pedido" : "o orçamento"} de ${nome} no Bling: ${a.erro}` });
+        avisar({ tipo: "acao", texto: `⚠️ JUL.IA não conseguiu emitir ${a.tipo === "venda" ? "o pedido" : "o orçamento"} de ${nome} no MEU BLING (/sistema): ${a.erro}` });
         lembrar("erro", { chatId, nome, texto: a.erro });
         continue;
       }
       if (a.tipo === "venda") {
         contagem.vendas++;
-        const aviso = `🛒 JUL.IA fechou venda com ${nome}: pedido nº ${a.numero} em aberto no Bling, ${R.reais(a.total)}. Confira pagamento e entrega.`;
+        const aviso = `🛒 JUL.IA fechou venda com ${nome}: pedido nº ${a.numero} em aberto no MEU BLING (/sistema), ${R.reais(a.total)}. Confira pagamento e entrega.`;
         avisar({ tipo: "acao", texto: aviso });
         await telegram(aviso).catch(() => {});
         lembrar("venda", { chatId, nome, texto: `pedido nº ${a.numero} · ${R.reais(a.total)}` });
@@ -380,7 +380,7 @@ function criarAgente({
     const a = arrendados.get(r.chatId);
     if (!a || a.id !== r.id) {
       // Prazo vencido ou conversa que um vendedor assumiu no meio. As ações
-      // no Bling, se houve, já aconteceram: registra mesmo assim.
+      // no MEU BLING, se houve, já aconteceram: registra mesmo assim.
       if (r.acoes.length) await registrarAcoes(r.chatId, r.acoes);
       for (const t of r.transcricoes) await guardarTranscricao(t.id, t.texto).catch(() => {});
       return { aceito: false, motivo: "trabalho vencido ou cancelado" };
