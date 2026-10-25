@@ -2,14 +2,6 @@
   "versao": 1,
   "pendentes": [
     {
-      "slug": "plex-media-server-falha-explorada-atualizar",
-      "titulo": "Plex Media Server: falha usada em ataques pede atualização imediata",
-      "categoria": "noticias",
-      "alt": "Pequeno computador preto sobre uma estante de madeira, ao lado de um roteador com cabos de rede ligados",
-      "pedido": "A small black mini desktop computer used as a home media server, standing on a wooden shelf next to a matte black Wi-Fi router. Two blue network cables connect them. A few small green status lights glow on the router. Soft warm evening light from a lamp on the right, shallow depth of field, cozy living room background out of focus.",
-      "pedidoEm": "2026-10-22T23:09:49.884Z"
-    },
-    {
       "slug": "dual-channel-por-que-duas-memorias-rendem-mais",
       "titulo": "Dual channel: por que duas memórias rendem mais que uma",
       "categoria": "hardware",

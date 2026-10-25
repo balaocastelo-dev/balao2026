@@ -9,7 +9,12 @@
     "plex",
     "servidor de mídia"
   ],
-  "capa": null,
+  "capa": {
+    "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/plex-media-server-falha-explorada-atualizar-f74a8615.jpg",
+    "alt": "Pequeno computador preto sobre uma estante de madeira, ao lado de um roteador com cabos de rede ligados",
+    "largura": 1600,
+    "altura": 900
+  },
   "publicadoEm": "2026-10-23T15:00:00.000Z",
   "seo": {
     "titulo": "Plex Media Server: falha usada em ataques pede atualização"
