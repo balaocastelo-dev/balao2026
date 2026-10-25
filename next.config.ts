@@ -61,6 +61,9 @@ const nextConfig: NextConfig = {
       // O produto white label ganhou nome: Overclock. Quem tiver o endereço
       // antigo (/whitelabel) cai na página de vendas dele.
       { source: "/whitelabel", destination: "/overclock", statusCode: 301 },
+      // O MacBook Pro M5 foi vendido e a página dele saiu (25/10). Quem chegar
+      // por um link antigo ou pelo Google cai na home, onde está o destaque da vez.
+      { source: "/macbookm5", destination: "/", permanent: true },
       // A administração inteira mora em /painel. Os endereços de antes
       // (/admin, /crm, /arena/admin…) continuam valendo e levam para lá.
       // Temporário (307) de propósito: são endereços internos, e um 308 fica
