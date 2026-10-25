@@ -37,29 +37,6 @@ function pickFirstMatch(text: string, patterns: RegExp[]) {
   return "";
 }
 
-function findAllMatches(text: string, re: RegExp) {
-  const out: string[] = [];
-  const rx = new RegExp(re.source, re.flags.includes("g") ? re.flags : `${re.flags}g`);
-  let m: RegExpExecArray | null = null;
-  while ((m = rx.exec(text)) !== null) {
-    if (m[0]) out.push(m[0].trim());
-  }
-  return out;
-}
-
-function bestByNumber(matches: string[]) {
-  let best = "";
-  let bestScore = -1;
-  for (const m of matches) {
-    const num = Number((m.match(/\d+/) || [])[0] || 0);
-    if (Number.isFinite(num) && num > bestScore) {
-      bestScore = num;
-      best = m;
-    }
-  }
-  return best;
-}
-
 export function inferCategoryFromText(text: string): VitrineCategory | "" {
   const t = stripDiacritics(text).toLowerCase();
   if (/\bworkstation\b/.test(t)) return "Workstation";
@@ -124,42 +101,31 @@ function guessApplications(parts: VitrineExtractedParts) {
   return Array.from(apps);
 }
 
+import { lerArmazenamento, lerPlaca, lerRam } from "./pecas-do-nome";
+
 export function extractParts(textInput: string, selectedCategory?: VitrineCategory): VitrineExtractedParts {
   const raw = normalizeInputText(textInput);
   const text = stripDiacritics(raw);
 
   const cpu = pickFirstMatch(text, [
-    /\bAMD\s*Ryzen\s*(?:[3-9])\s*\d{4,5}[A-Z]?\b/i,
-    /\bRyzen\s*(?:[3-9])\s*\d{4,5}[A-Z]?\b/i,
-    /\bIntel\s*Core\s*i[3-9]\s*\d{4,5}[A-Z]?\b/i,
-    /\bCore\s*i[3-9]\s*\d{4,5}[A-Z]?\b/i,
+    /\bAMD\s*Ryzen\s*(?:[3-9])\s*\d{4,5}[A-Z]{0,2}\b/i,
+    /\bRyzen\s*(?:[3-9])\s*\d{4,5}[A-Z]{0,2}\b/i,
+    /\bRyzne\s*(?:[3-9])\s*\d{4,5}[A-Z]{0,2}\b/i,
+    /\bIntel\s*Core\s*i[3-9]\s*-?\d{4,5}[A-Z]{0,2}\b/i,
+    /\bCore\s*i[3-9]\s*-?\d{4,5}[A-Z]{0,2}\b/i,
+    /\bi[3-9]\s*-?\d{4,5}[A-Z]{0,2}\b/i,
+    /\bCore\s*Ultra\s*[579]\s*\d{3}[A-Z]?\b/i,
     /\bXeon\s*[A-Za-z0-9-]+\b/i,
   ]);
 
-  const gpuRaw = pickFirstMatch(text, [
-    /\bRTX\s*\d{3,4}\s*Ti\b/i,
-    /\bRTX\s*\d{3,4}\b/i,
-    /\bGTX\s*\d{3,4}\b/i,
-    /\bRX\s*\d{4,5}\s*(?:XT|XTX)?\b/i,
-  ]);
-  const vram = pickFirstMatch(text, [/\b(\d{1,2})\s*GB\s*(?:GDDR6X|GDDR6|GDDR5X|GDDR5)\b/i, /\b(\d{1,2})\s*GB\b/i]);
-  const gpuModel = gpuRaw ? titleCase(gpuRaw) + (vram ? ` ${vram.toUpperCase()}` : "") : "";
-  const gpuFinal = gpuModel
-    ? /^rx/i.test(gpuRaw || "")
-      ? `AMD Radeon ${gpuModel}`
-      : /^rtx|^gtx/i.test(gpuRaw || "")
-        ? `NVIDIA GeForce ${gpuModel}`
-        : gpuModel
-    : "";
-
-  const ramMatches = findAllMatches(text, /\b(\d{1,3})\s*GB\s*(DDR[345])?\b/i);
-  const ramBest = bestByNumber(ramMatches);
-  const ram = ramBest ? ramBest.toUpperCase().replace(/\s+/g, " ") : "";
-
-  const storageNvme = pickFirstMatch(text, [/\b(\d+(?:[.,]\d+)?)\s*TB\s*NVMe\b/i, /\b(\d{3,4})\s*GB\s*NVMe\b/i]);
-  const storageSsd = pickFirstMatch(text, [/\b(\d+(?:[.,]\d+)?)\s*TB\s*SSD\b/i, /\b(\d{3,4})\s*GB\s*SSD\b/i]);
-  const storageHdd = pickFirstMatch(text, [/\b(\d+(?:[.,]\d+)?)\s*TB\s*HDD\b/i]);
-  const storage = (storageNvme || storageSsd || storageHdd || "").toUpperCase().replace(/\s+/g, " ");
+  // Placa, RAM e armazenamento: regras em lib/vitrine/pecas-do-nome.ts
+  // (memória da placa conferida contra a tabela do fabricante; RAM e SSD lidos
+  // pela palavra ao lado, sem confundir um com o outro).
+  const placa = lerPlaca(text);
+  const gpuFinal = placa ? placa.nome : "";
+  const gpuRaw = placa ? placa.modelo : "";
+  const ram = lerRam(text);
+  const storage = lerArmazenamento(text);
 
   const os = pickFirstMatch(text, [
     /\bWindows\s*11\b/i,
@@ -181,7 +147,7 @@ export function extractParts(textInput: string, selectedCategory?: VitrineCatego
   const inferredCategory = selectedCategory || inferCategoryFromText(text) || "PC Gamer";
 
   const parts: VitrineExtractedParts = {
-    processador: cpu ? titleCase(cpu.replace(/\s+/g, " ")) : undefined,
+    processador: cpu ? titleCase(cpu.replace(/\s+/g, " ").replace(/^ryzne/i, "Ryzen")) : undefined,
     placa_video: gpuFinal || (gpuRaw ? titleCase(gpuRaw) : undefined),
     memoria_ram: ram || undefined,
     armazenamento: storage || undefined,
