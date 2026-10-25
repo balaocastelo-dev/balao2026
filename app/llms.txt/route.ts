@@ -3,7 +3,7 @@ import { SITE_CONFIG } from "@/lib/config";
 
 // /llms.txt: o resumo da loja para os assistentes de IA (ChatGPT, Gemini,
 // Perplexity, Claude) acharem e citarem as páginas certas. O começo é o texto
-// que estava em public/llms.txt (MacBook M5, seminovos, serviços e ofertas,
+// que estava em public/llms.txt (oferta destacada, seminovos, serviços e ofertas,
 // especialidades — escritos por outras conversas); o resto sai das páginas de
 // captação (lib/landing/paginas), então página nova entra sozinha.
 // Para mudar o começo, edite CABECALHO aqui (o arquivo em public/ saiu).
