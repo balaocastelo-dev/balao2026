@@ -92,9 +92,30 @@ describe("vitrine rotativa", () => {
   });
 
   it("monta as cinco páginas do dia", async () => {
-    const paginas = await paginasDaVitrine(async () => catalogo, async () => null, new Date("2026-10-25T15:00:00Z"));
+    const porId = new Map(catalogo.map((p) => [p.id, p]));
+    const paginas = await paginasDaVitrine(async () => catalogo, async (id) => porId.get(id) ?? null, new Date("2026-10-25T15:00:00Z"));
     expect(paginas).toHaveLength(5);
     expect(paginas.every((p) => p.status === "publicada" && p.slug.startsWith("setup-"))).toBe(true);
+  });
+});
+
+describe("vitrine confere no catálogo", () => {
+  it("pula o sorteado que a busca não acha e usa o preço da busca", async () => {
+    const porId = new Map(catalogo.map((p) => [p.id, p]));
+    const sumido = new Set(escolherDoDia(catalogo, "2026-10-25").slice(0, 2).map((p) => p.id));
+    const paginas = await paginasDaVitrine(
+      async () => catalogo,
+      async (id) => (sumido.has(id) ? null : porId.get(id) ?? null),
+      new Date("2026-10-25T15:00:00Z")
+    );
+    expect(paginas).toHaveLength(5);
+    expect(paginas.some((p) => sumido.has(String((p.extras as any).main_product.id)))).toBe(false);
+  });
+
+  it("descarta quando a busca devolve preço fora da faixa", async () => {
+    const caro = new Map(catalogo.map((p) => [p.id, { ...p, price: "10.837,50" }]));
+    const paginas = await paginasDaVitrine(async () => catalogo, async (id) => caro.get(id) ?? null, new Date("2026-10-25T15:00:00Z"));
+    expect(paginas).toHaveLength(0);
   });
 });
 

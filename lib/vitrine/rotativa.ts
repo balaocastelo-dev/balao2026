@@ -140,30 +140,43 @@ export function candidatos(produtos: Product[]): Candidato[] {
   return saida;
 }
 
-/** Os cinco PCs do dia, do mais barato para o mais caro. */
-export function escolherDoDia(produtos: Product[], dia: string, quantos = QUANTOS_POR_DIA): Product[] {
+/**
+ * Ordem de preferência do dia: primeiro um de cada faixa de preço (pronta
+ * entrega antes), depois todo o resto, sem repetir processador + placa.
+ * Quem monta a vitrine confere cada um no catálogo e vai descendo a lista.
+ */
+export function rankingDoDia(produtos: Product[], dia: string): Product[] {
   const aleatorio = sorteador(semente(`vitrine:${dia}`));
   const todos = embaralhar(candidatos(produtos), aleatorio);
-  // Pronta entrega primeiro (estável: mantém o sorteio dentro de cada grupo).
   todos.sort((a, b) => Number(ehProntaEntrega(b.produto)) - Number(ehProntaEntrega(a.produto)));
 
-  const escolhidos: Candidato[] = [];
+  const primeiro: Candidato[] = [];
+  const usados = new Set<Candidato>();
   const chaves = new Set<string>();
-  const pegar = (c: Candidato) => {
-    escolhidos.push(c);
-    chaves.add(c.chave);
-  };
-
   for (const [min, max] of FAIXAS) {
-    if (escolhidos.length >= quantos) break;
     const c = todos.find((x) => x.preco >= min && x.preco < max + (max === 10000 ? 0.01 : 0) && !chaves.has(x.chave));
-    if (c) pegar(c);
+    if (c) {
+      primeiro.push(c);
+      usados.add(c);
+      chaves.add(c.chave);
+    }
   }
-  for (const c of todos) {
+  const resto = todos.filter((c) => !usados.has(c));
+  return [...primeiro, ...resto].map((c) => c.produto);
+}
+
+/** Os cinco PCs do dia, do mais barato para o mais caro (sem conferir no catálogo). */
+export function escolherDoDia(produtos: Product[], dia: string, quantos = QUANTOS_POR_DIA): Product[] {
+  const escolhidos: Product[] = [];
+  const chaves = new Set<string>();
+  for (const p of rankingDoDia(produtos, dia)) {
     if (escolhidos.length >= quantos) break;
-    if (!chaves.has(c.chave)) pegar(c);
+    const chave = candidatos([p])[0]?.chave;
+    if (!chave || chaves.has(chave)) continue;
+    chaves.add(chave);
+    escolhidos.push(p);
   }
-  return escolhidos.sort((a, b) => a.preco - b.preco).map((c) => c.produto);
+  return escolhidos.sort((a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price));
 }
 
 // ---------- título e frase, só com o que está no nome ----------
@@ -190,7 +203,7 @@ export function cpuCurta(nome: string): string {
   return "";
 }
 
-export function setupDoProduto(p: Product, dia: string): SetupAssinado {
+export function setupDoProduto(p: Product, dia: string, identificador = String(p.id)): SetupAssinado {
   const nome = String(p.name || "");
   const t = sem(nome);
   const placa = placaDedicada(nome) || "placa de vídeo dedicada";
@@ -229,10 +242,10 @@ export function setupDoProduto(p: Product, dia: string): SetupAssinado {
   const aplicacoes = [hz && hz >= 144 ? "Jogos competitivos" : "Jogos em Full HD", "Estudos", "Navegação"];
 
   return {
-    slug: `setup-${String(p.id)}`,
+    slug: `setup-${identificador}`,
     titulo: `Setup ${rotulo} · ${cpu ? `${cpu} + ` : ""}${placa}`,
     categoria: "PC Gamer",
-    produto: String(p.id),
+    produto: identificador,
     chamada: frases.join(" "),
     aplicacoes,
     publicado_em: `${dia}T03:00:00.000Z`,
