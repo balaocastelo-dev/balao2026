@@ -57,13 +57,13 @@ Vendas gravadas antes de 22/10 (campo `bling`) continuam aparecendo: as que cheg
   tentar de novo.
 - Selo no alto: "Sistema ligado" / "Sistema fora: vendas ficam guardadas".
 
-## O que ainda é do Bling
+## O Bling saiu (25/10/2026)
 
-`lib/pdv/acesso.ts` e `POST /api/pdv/bling/acesso` (o vigia do PC entrega o access_token do Bling) continuam só
-para quem ainda lê o Bling — a **Arena** (`app/api/arena/bling`). Com as vendas saindo do Bling, a Arena precisa
-passar a ler o /sistema.
+`lib/pdv/acesso.ts` e `POST /api/pdv/bling/acesso` (o vigia do PC entregava o access_token do Bling) foram
+apagados: o PDV manda para o /sistema desde 22/10 e a **Arena** passou a ler as vendas direto do MEU BLING em
+25/10 (ver `docs/arena.md`). O site não guarda mais nenhum acesso ao Bling.
 
 ## Arquivos
 
-`lib/pdv/` (tipos, contas, sistema, vendas, produtos, sessão, acesso), `app/api/pdv/`, `app/pdv/`,
+`lib/pdv/` (tipos, contas, sistema, vendas, produtos, sessão), `app/api/pdv/`, `app/pdv/`,
 testes em `__tests__/lib/pdv.test.ts`.

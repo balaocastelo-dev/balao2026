@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 /**
  * Administração da Arena (a corrida de vendas do telão da loja, em /arena).
- * Pilotos, metas em reais, vendas do Bling, OS da assistência, prêmio e o vigia.
+ * Pilotos, metas em reais, vendas do MEU BLING (/sistema), OS da assistência, prêmio e a ligação com o sistema.
  */
 export default async function PainelArenaPage() {
   // A porta do painel já barra quem não entrou; cada ação confere de novo.

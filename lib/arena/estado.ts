@@ -5,23 +5,26 @@
 // Público (TV da loja, celular do vendedor): daqui não sai nome de cliente.
 // Desde 12/10 (tarde) a corrida é em reais, então os valores aparecem.
 //
-// A corrida é calculada quando algo muda (o vigia trouxe venda, o painel
-// mexeu) e guardada pronta na gaveta ("telao"). O telão só lê esse documento,
+// A corrida é calculada quando algo muda (a leitura do MEU BLING trouxe venda,
+// o painel mexeu) e guardada pronta na gaveta ("telao"). O telão só lê esse documento,
 // com uma cópia em memória. Se a gaveta falhar, serve a última cópia boa.
 // ============================================================
 
 import { createHash } from "crypto";
 import { ler, atualizar, tipoDaGaveta } from "./gaveta";
 import { janela, mesAnterior, semanaAnterior, somarDias } from "./periodos";
-import { lancamentosEntre, lerConfig, lerVigia, type ConfigDaArena } from "./dados";
+import { lancamentosEntre, lerConfig, lerSincronia, type ConfigDaArena } from "./dados";
 import { indexarPilotos, montarPlacar, pilotoDoLancamento } from "./placar";
 import { avisosEntre, dispararAvisos, lerAvisos } from "./avisos";
 import { enviarAviso } from "./whatsapp";
-import type { EstadoDoTelao, JogadaPublica, Lancamento, Piloto, PlacarDoPeriodo, SituacaoDoVigia } from "./tipos";
+import type { EstadoDoTelao, JogadaPublica, Lancamento, Piloto, PlacarDoPeriodo, SituacaoDaSincronia } from "./tipos";
 
-/** O vigia está vivo se falou com o site nos últimos 15 minutos (ele só anota de 10 em 10 quando nada muda). */
-export function vigiaOnline(ultimaVez: string | null, agora = Date.now()) {
-  return Boolean(ultimaVez && agora - Date.parse(ultimaVez) < 15 * 60_000);
+/**
+ * A leitura do MEU BLING está em dia se deu certo nos últimos 20 minutos
+ * (o agendador roda a cada 5 e só anota de 10 em 10 quando nada muda).
+ */
+export function sistemaEmDia(ultimoOk: string | null, agora = Date.now()) {
+  return Boolean(ultimoOk && agora - Date.parse(ultimoOk) < 20 * 60_000);
 }
 
 function campeao(placar: PlacarDoPeriodo) {
@@ -58,7 +61,7 @@ function jogada(l: Lancamento, p: Piloto): JogadaPublica {
 }
 
 /** Monta a corrida a partir da configuração e dos lançamentos (sem gaveta: dá para testar). */
-export function calcularEstado(config: ConfigDaArena, lancs: Lancamento[], vigia: SituacaoDoVigia, agora = new Date()): EstadoDoTelao {
+export function calcularEstado(config: ConfigDaArena, lancs: Lancamento[], sincronia: Pick<SituacaoDaSincronia, "ultimoOk">, agora = new Date()): EstadoDoTelao {
   const pilotos = config.pilotos.map((p) => ({ ...p, foto: fotoPublica(p) }));
   const { corrida, premio } = config;
   const semana = janela("semana", agora);
@@ -73,10 +76,10 @@ export function calcularEstado(config: ConfigDaArena, lancs: Lancamento[], vigia
     ...mesesAntigos.map((j) => campeao(montarPlacar(pilotos, lancs, j, corrida))),
   ].filter((h) => h.campeao);
 
-  const { porBling, porId } = indexarPilotos(pilotos.filter((p) => p.ativo));
+  const { porBling, porId, porSistema } = indexarPilotos(pilotos.filter((p) => p.ativo));
   const validos = lancs
     .filter((l) => l.status === "valido")
-    .map((l) => ({ l, p: pilotoDoLancamento(l, porBling, porId) }))
+    .map((l) => ({ l, p: pilotoDoLancamento(l, porBling, porId, porSistema) }))
     .filter((x): x is { l: Lancamento; p: Piloto } => x.p !== null);
 
   const recentes = validos
@@ -105,7 +108,7 @@ export function calcularEstado(config: ConfigDaArena, lancs: Lancamento[], vigia
     recentes,
     jogadasPorPiloto,
     hallDaFama: hall,
-    vigiaUltimaVez: vigia.ultimaVez,
+    sistemaUltimaVez: sincronia.ultimoOk,
     geradoEm: agora.toISOString(),
   };
 }
@@ -142,8 +145,8 @@ function velho(e: EstadoDoTelao, agora = new Date()) {
 export async function reconstruirTelao(agora = new Date()): Promise<EstadoDoTelao> {
   const config = await lerConfig();
   const { desde, ate } = janelaDeLeitura(agora);
-  const [lancs, vigia, anterior] = await Promise.all([lancamentosEntre(desde, ate), lerVigia(), ler<EstadoDoTelao>("telao")]);
-  const estado = calcularEstado(config, lancs, vigia, agora);
+  const [lancs, sincronia, anterior] = await Promise.all([lancamentosEntre(desde, ate), lerSincronia(), ler<EstadoDoTelao>("telao")]);
+  const estado = calcularEstado(config, lancs, sincronia, agora);
   await atualizar<EstadoDoTelao>("telao", () => estado, () => estado);
   memoria = { estado, em: Date.now() };
 
@@ -159,9 +162,9 @@ export async function estadoDoTelao(): Promise<EstadoDoTelao | null> {
     if (!dados || velho(dados)) return await reconstruirTelao();
     let estado = dados;
     if (tipoDaGaveta() === "blob") {
-      // O vigia anota de 10 em 10 minutos sem refazer a corrida: lê à parte.
-      const v = await lerVigia().catch(() => null);
-      if (v?.ultimaVez) estado = { ...dados, vigiaUltimaVez: v.ultimaVez };
+      // A leitura do MEU BLING anota de 10 em 10 minutos sem refazer a corrida: lê à parte.
+      const s = await lerSincronia().catch(() => null);
+      if (s?.ultimoOk) estado = { ...dados, sistemaUltimaVez: s.ultimoOk };
     }
     memoria = { estado, em: Date.now() };
     return estado;

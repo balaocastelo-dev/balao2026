@@ -10,7 +10,17 @@
 import { createHash, randomBytes, randomUUID, timingSafeEqual } from "crypto";
 import { atualizar, gravar, gravarArquivo, guardaArquivos, ler, ConflitoDeVersao, tipoDaGaveta } from "./gaveta";
 import { hojeNaLoja, somarDias } from "./periodos";
-import { centavos, normalizarRegras, REGRAS_PADRAO, valorar, type DocumentoDoBling, type RegrasDeValor, type Valoracao } from "./valores";
+import {
+  centavos,
+  normalizarRegras,
+  REGRAS_PADRAO,
+  valorar,
+  valorarDoSistema,
+  type DocumentoDoBling,
+  type DocumentoDoSistema,
+  type RegrasDeValor,
+  type Valoracao,
+} from "./valores";
 import { importarConfig } from "./migracao";
 import {
   CORES_DE_KART,
@@ -25,7 +35,7 @@ import {
   type ModeloDeKart,
   type Piloto,
   type Premio,
-  type SituacaoDoVigia,
+  type SituacaoDaSincronia,
   type StatusGravado,
 } from "./tipos";
 
@@ -43,7 +53,11 @@ export interface ConfigDaArena {
   corrida: AjustesDaCorrida;
   premio: Premio;
   whatsapp: AjustesDoWhatsApp;
+  /** Vendedores do Bling: só para mostrar o histórico (a Arena leu o Bling até 24/10/2026). */
   vendedoresBling: { id: string; nome: string }[];
+  /** Vendedores do MEU BLING (GET /vendedores do /sistema), anotados a cada leitura. */
+  vendedoresSistema: { id: string; nome: string }[];
+  /** Resumo (sha256) da chave do PC da loja (antes "chave do vigia"): abre /api/pc/sistema/*. */
   chaveHash: string | null;
   varrerDesde: string | null;
   /** O banco antigo estava fora do ar na primeira vez: tentar copiar de novo. */
@@ -60,6 +74,7 @@ export function configVazia(): ConfigDaArena {
     premio: { ...PREMIO_PADRAO },
     whatsapp: { ...WHATSAPP_PADRAO },
     vendedoresBling: [],
+    vendedoresSistema: [],
     chaveHash: null,
     varrerDesde: null,
     criadoEm: new Date().toISOString(),
@@ -76,6 +91,7 @@ function completar(c: Partial<ConfigDaArena> | null): ConfigDaArena {
   x.corrida = normalizarCorrida(antiga ? { ...x.corrida, metaGlobalSemana: CORRIDA_PADRAO.metaGlobalSemana, metaGlobalMes: CORRIDA_PADRAO.metaGlobalMes } : x.corrida);
   x.premio = normalizarPremio(x.premio);
   x.whatsapp = normalizarWhatsApp(x.whatsapp);
+  x.vendedoresSistema = Array.isArray(x.vendedoresSistema) ? x.vendedoresSistema : [];
   // As metas da versão 2 eram em pontos: não valem como reais.
   x.pilotos = (x.pilotos ?? []).map((p, i) => completarPiloto(antiga ? { ...p, metaSemana: null, metaMes: null } : p, i));
   x.versao = 3;
@@ -94,6 +110,8 @@ function completarPiloto(p: Partial<Piloto>, i: number): Piloto {
     kart: (KARTS as readonly string[]).includes(kart) ? (kart as ModeloDeKart) : KARTS[i % KARTS.length],
     numero: Number(p.numero) > 0 ? Number(p.numero) : i + 1,
     blingVendedorId: p.blingVendedorId ? String(p.blingVendedorId) : null,
+    sistemaVendedorId: p.sistemaVendedorId ? String(p.sistemaVendedorId) : null,
+    sistemaLigadoPor: p.sistemaLigadoPor === "auto" || p.sistemaLigadoPor === "manual" ? p.sistemaLigadoPor : null,
     funcao: p.funcao === "tecnico" ? "tecnico" : "vendedor",
     metaSemana: p.metaSemana != null && Number(p.metaSemana) > 0 ? Number(p.metaSemana) : null,
     metaMes: p.metaMes != null && Number(p.metaMes) > 0 ? Number(p.metaMes) : null,
@@ -263,7 +281,10 @@ export interface DadosDoPiloto {
   cor?: string | null;
   kart?: string | null;
   numero?: number | null;
+  /** Sem o campo (undefined), fica o que já estava: o painel não mexe mais na ligação com o Bling. */
   blingVendedorId?: string | null;
+  /** Vendedor do MEU BLING. Undefined = fica o que estava. */
+  sistemaVendedorId?: string | null;
   funcao?: FuncaoDoPiloto | null;
   metaSemana?: number | null;
   metaMes?: number | null;
@@ -298,20 +319,34 @@ export async function listarPilotos(): Promise<Piloto[]> {
 export async function salvarPiloto(id: string | null, d: DadosDoPiloto): Promise<string> {
   const nome = String(d.nome ?? "").trim().slice(0, 120);
   if (!nome) throw new Error("O piloto precisa de um nome.");
-  const bling = d.blingVendedorId ? String(d.blingVendedorId).replace(/\D/g, "").slice(0, 32) || null : null;
+  const idLimpo = (v: string | null | undefined) => (v ? String(v).replace(/\D/g, "").slice(0, 32) || null : null);
   const meta = (v: unknown) => (v === null || v === undefined || v === "" || !(Number(v) > 0) ? null : Math.min(Number(v), 100_000_000));
   const novoId = id ?? randomUUID();
   const atual = (await lerConfig()).pilotos.find((p) => p.id === novoId);
   const foto = await guardarFoto(novoId, d.foto, atual?.foto ?? null);
 
   await mudarConfig((c) => {
+    const i = c.pilotos.findIndex((p) => p.id === novoId);
+    const anterior = i >= 0 ? c.pilotos[i] : null;
+    const bling = d.blingVendedorId === undefined ? anterior?.blingVendedorId ?? null : idLimpo(d.blingVendedorId);
+    const sistema = d.sistemaVendedorId === undefined ? anterior?.sistemaVendedorId ?? null : idLimpo(d.sistemaVendedorId);
     if (bling) {
       const dono = c.pilotos.find((p) => p.blingVendedorId === bling && p.id !== novoId);
       if (dono) throw new Error(`Esse vendedor do Bling já está ligado a ${dono.nome}.`);
     }
+    if (sistema) {
+      const dono = c.pilotos.find((p) => p.sistemaVendedorId === sistema && p.id !== novoId);
+      if (dono) throw new Error(`Esse vendedor do sistema já está ligado a ${dono.nome}.`);
+    }
+    // Ligação escolhida no painel é "manual": a ligação automática por nome nunca mexe nela
+    // (nem quando foi desfeita de propósito). Sem mudança, fica como estava.
+    const ligadoPor: Piloto["sistemaLigadoPor"] =
+      d.sistemaVendedorId === undefined || sistema === (anterior?.sistemaVendedorId ?? null)
+        ? anterior?.sistemaLigadoPor ?? null
+        : sistema || anterior?.sistemaVendedorId
+          ? "manual"
+          : null;
     const apelido = d.apelido ? String(d.apelido).trim().slice(0, 60) || null : null;
-    const i = c.pilotos.findIndex((p) => p.id === novoId);
-    const anterior = i >= 0 ? c.pilotos[i] : null;
     const piloto: Piloto = completarPiloto(
       {
         id: novoId,
@@ -323,6 +358,8 @@ export async function salvarPiloto(id: string | null, d: DadosDoPiloto): Promise
         kart: (d.kart as ModeloDeKart) ?? anterior?.kart,
         numero: d.numero && Number(d.numero) > 0 ? Math.min(99, Math.round(Number(d.numero))) : anterior?.numero ?? c.pilotos.length + 1,
         blingVendedorId: bling,
+        sistemaVendedorId: sistema,
+        sistemaLigadoPor: ligadoPor,
         funcao: d.funcao ?? anterior?.funcao ?? "vendedor",
         metaSemana: d.metaSemana === undefined ? anterior?.metaSemana ?? null : meta(d.metaSemana),
         metaMes: d.metaMes === undefined ? anterior?.metaMes ?? null : meta(d.metaMes),
@@ -370,20 +407,25 @@ export async function gravarRegras(r: unknown) {
   await mudarConfig((c) => ({ ...c, regras: normalizarRegras(r) }));
 }
 
-export async function gravarVendedoresDoBling(lista: { id: string; nome: string }[]) {
+/** Vendedores do MEU BLING (GET /vendedores do /sistema). Só grava se a lista mudou. */
+export async function gravarVendedoresDoSistema(lista: { id: string | number; nome: string }[]) {
   const limpa = lista
-    .map((v) => ({ id: String(v.id).replace(/\D/g, "").slice(0, 32), nome: String(v.nome ?? "").slice(0, 120) }))
+    .map((v) => ({ id: String(v.id).replace(/\D/g, "").slice(0, 32), nome: String(v.nome ?? "").trim().slice(0, 120) }))
     .filter((v) => v.id)
     .slice(0, 200);
   if (!limpa.length) return;
-  await mudarConfig((c) => (JSON.stringify(c.vendedoresBling) === JSON.stringify(limpa) ? undefined : { ...c, vendedoresBling: limpa }));
+  await mudarConfig((c) => (JSON.stringify(c.vendedoresSistema) === JSON.stringify(limpa) ? undefined : { ...c, vendedoresSistema: limpa }));
 }
 
 export async function pedirVarredura(desde: string | null) {
   await mudarConfig((c) => (c.varrerDesde === desde ? undefined : { ...c, varrerDesde: desde }));
 }
 
-// ---------------------------------------------------------------- chave do vigia
+// ---------------------------------------------------------------- chave do PC da loja
+//
+// Nasceu como "chave do vigia" (o script do PC que trazia as vendas do Bling).
+// Desde 25/10/2026 o vigia não roda mais, e a mesma chave abre as rotas do PC
+// da loja (/api/pc/sistema/*: JUL.IA e relatórios do Telegram).
 
 const hash = (s: string) => createHash("sha256").update(s).digest("hex");
 
@@ -400,27 +442,46 @@ export function chaveConfere(recebida: string | null, guardada: string | null): 
   return a.length === b.length && timingSafeEqual(a, b);
 }
 
-// ---------------------------------------------------------------- vigia
+// ---------------------------------------------------------------- leitura do MEU BLING
 
-const VIGIA_VAZIO: SituacaoDoVigia = { ultimaVez: null, versao: null, maquina: null, ultimoLote: 0, ultimoErro: null };
+const SINCRONIA_VAZIA: SituacaoDaSincronia = {
+  ultimaVez: null,
+  ultimoOk: null,
+  vendasLidas: 0,
+  gravadas: 0,
+  ultimoErro: null,
+  de: null,
+  ate: null,
+  varreduraDoMesEm: null,
+  modo: null,
+  semItens: 0,
+  continuarDe: null,
+};
 
-export async function lerVigia(): Promise<SituacaoDoVigia> {
-  return { ...VIGIA_VAZIO, ...((await ler<SituacaoDoVigia>("vigia")).dados ?? {}) };
+export async function lerSincronia(): Promise<SituacaoDaSincronia> {
+  return { ...SINCRONIA_VAZIA, ...((await ler<SituacaoDaSincronia>("sincronia-sistema")).dados ?? {}) };
 }
 
 /**
- * Anota que o vigia falou. Para não gravar a cada 2 minutos (cada gravação
- * no Blob conta), só grava se passaram 10 min, se chegou documento ou se o
- * erro mudou.
+ * Anota a leitura do MEU BLING. O agendador roda a cada 5 minutos: para não
+ * gravar no Blob toda vez (cada gravação conta), só grava se passaram 10 min,
+ * se algo foi gravado, se o erro mudou ou se a varredura do mês terminou.
  */
-export async function registrarVigia(info: Omit<SituacaoDoVigia, "ultimaVez">, agora = new Date()) {
-  const atual = await ler<SituacaoDoVigia>("vigia");
-  const v = { ...VIGIA_VAZIO, ...(atual.dados ?? {}) };
+export async function registrarSincronia(info: Omit<SituacaoDaSincronia, "ultimaVez">, agora = new Date(), forcar = false) {
+  const atual = await ler<SituacaoDaSincronia>("sincronia-sistema");
+  const v = { ...SINCRONIA_VAZIA, ...(atual.dados ?? {}) };
   const velho = !v.ultimaVez || agora.getTime() - Date.parse(v.ultimaVez) > 10 * 60_000;
-  if (!velho && info.ultimoLote === 0 && (info.ultimoErro ?? null) === (v.ultimoErro ?? null)) return v;
-  const novo = { ...info, ultimaVez: agora.toISOString() };
+  const igual =
+    info.gravadas === 0 &&
+    (info.ultimoErro ?? null) === (v.ultimoErro ?? null) &&
+    info.varreduraDoMesEm === v.varreduraDoMesEm &&
+    info.modo === v.modo &&
+    info.semItens === v.semItens &&
+    (info.continuarDe ?? null) === (v.continuarDe ?? null);
+  if (!forcar && !velho && igual) return v;
+  const novo: SituacaoDaSincronia = { ...info, ultimaVez: agora.toISOString() };
   try {
-    await gravar("vigia", novo, atual.versao);
+    await gravar("sincronia-sistema", novo, atual.versao);
   } catch (e) {
     if (!(e instanceof ConflitoDeVersao)) throw e;
   }
@@ -542,8 +603,9 @@ function aplicarAjustes(l: Pick<Lancamento, "anuladoManual" | "valorManual">, v:
 }
 
 /**
- * Grava um lote vindo do vigia. Documento igual ao gravado é pulado; ajuste
- * feito à mão no painel (anular, trocar o valor) nunca é desfeito pelo Bling.
+ * Grava um lote de documentos do Bling (o vigia do PC mandava até 24/10/2026;
+ * hoje só os testes e o histórico usam). Documento igual ao gravado é pulado;
+ * ajuste feito à mão no painel (anular, trocar o valor) nunca é desfeito.
  */
 export async function gravarDocumentos(docs: DocumentoDoBling[], agora = new Date()): Promise<{ gravados: number; novos: number }> {
   if (docs.length === 0) return { gravados: 0, novos: 0 };
@@ -630,6 +692,174 @@ export async function gravarDocumentos(docs: DocumentoDoBling[], agora = new Dat
   throw new Error("Muitas gravações ao mesmo tempo na Arena; o vigia manda de novo na próxima volta.");
 }
 
+// ---------------------------------------------------------------- vendas do MEU BLING
+
+/** Id do lançamento de uma venda do MEU BLING ("mb" separa dos ids do Bling, que eram só números). */
+export const idDaVendaDoSistema = (sistemaId: string) => `venda:mb${sistemaId}`;
+
+/**
+ * Resumo do que a LISTA do sistema traz (sem os itens): se mudar, a venda é
+ * gravada de novo e os itens são relidos.
+ */
+export function assinarVendaDoSistema(d: DocumentoDoSistema): string {
+  const base = [d.sistemaId, d.numero, d.data, d.vendedorId, centavos(d.total), d.situacaoId, d.cancelada ? 1 : 0, d.contatoNome];
+  return `mb:${resumo(JSON.stringify(base)).slice(0, 37)}`;
+}
+
+export const numeroDe = (n: string | null | undefined) => {
+  const s = String(n ?? "").replace(/\D/g, "").replace(/^0+/, "");
+  return s || null;
+};
+
+export interface DocumentoDoSistemaParaGravar extends DocumentoDoSistema {
+  /** Os itens vieram (do detalhe GET /vendas/:id). Sem eles, a venda grava sem licenças e os itens são lidos depois. */
+  itensLidos: boolean;
+}
+
+/**
+ * Grava as vendas lidas do MEU BLING. Venda igual à gravada é pulada; ajuste à
+ * mão no painel (anular, trocar o valor) nunca é desfeito pelo sistema.
+ *
+ * Os pedidos antigos do Bling foram migrados para o MEU BLING com o mesmo
+ * número: se a Arena já tem o pedido do Bling com esse número, a venda do
+ * sistema fica guardada como "ignorada" (já contou pelo Bling), sem contar duas vezes.
+ *
+ * `tudoHistorico`: na primeira leitura de todas, nada é comemorado no telão.
+ */
+export async function gravarDocumentosDoSistema(
+  docs: DocumentoDoSistemaParaGravar[],
+  agora = new Date(),
+  opcoes: { tudoHistorico?: boolean } = {}
+): Promise<{ gravados: number; novos: number; duplicados: number }> {
+  if (docs.length === 0) return { gravados: 0, novos: 0, duplicados: 0 };
+  const config = await lerConfig();
+  const regras = config.regras;
+  const hoje = hojeNaLoja(agora);
+
+  for (let tentativa = 0; tentativa < 5; tentativa++) {
+    const menor = docs.reduce((m, d) => (d.data < m ? d.data : m), docs[0].data);
+    const maior = docs.reduce((m, d) => (d.data > m ? d.data : m), docs[0].data);
+    // Um mês para trás: a venda que mudou de data sai do mês antigo.
+    const meses = await Promise.all(mesesEntre(somarDias(menor, -31), maior).map(lerMes));
+    const porMes = new Map(meses.map((m) => [m.mes, m]));
+    const existente = (id: string) => {
+      for (const m of meses) if (m.doc.itens[id]) return m.doc.itens[id];
+      return null;
+    };
+    const numerosDoBling = new Set<string>();
+    for (const m of meses) {
+      for (const l of Object.values(m.doc.itens)) {
+        if (l.origem === "bling" && l.tipo === "venda") {
+          const n = numeroDe(l.numero);
+          if (n) numerosDoBling.add(n);
+        }
+      }
+    }
+
+    const mudados = docs.filter((d) => {
+      const e = existente(idDaVendaDoSistema(d.sistemaId));
+      if (!e) return true;
+      if (e.assinatura !== assinarVendaDoSistema(d)) return true;
+      return d.itensLidos && Boolean(e.semItens);
+    });
+    if (mudados.length === 0) return { gravados: 0, novos: 0, duplicados: 0 };
+
+    const agoraTxt = agora.toISOString();
+    let novos = 0;
+    let duplicados = 0;
+    const tocados = new Set<string>();
+
+    for (const d of mudados) {
+      const id = idDaVendaDoSistema(d.sistemaId);
+      const e = existente(id) ? completarLancamento(existente(id)!) : null;
+      if (!e) novos++;
+      // Itens: os do detalhe; sem eles, os que já estavam guardados (se havia).
+      const itens = d.itensLidos ? d.itens : e?.itens ?? [];
+      const semItens = !d.itensLidos && !(e && !e.semItens && e.itens.length > 0);
+      const historico = e ? e.historico : Boolean(opcoes.tudoHistorico) || d.data < somarDias(hoje, -1);
+      const base = { anuladoManual: e?.anuladoManual ?? false, valorManual: e?.valorManual ?? null };
+      const n = numeroDe(d.numero);
+      const duplicado = Boolean(n && numerosDoBling.has(n));
+      if (duplicado) duplicados++;
+      const v: ReturnType<typeof aplicarAjustes> = duplicado
+        ? { status: "ignorado", valor: 0, motivo: "Mesmo pedido que já veio do Bling (migrado para o sistema)", licencas: 0, valorLicencas: 0 }
+        : aplicarAjustes(base, valorarDoSistema({ total: d.total, cancelada: d.cancelada, itens }, regras));
+      const l: Lancamento = {
+        id,
+        tipo: "venda",
+        origem: "sistema",
+        blingId: null,
+        numero: d.numero || null,
+        blingVendedorId: null,
+        sistemaVendedorId: d.vendedorId,
+        pilotoId: null,
+        contatoId: null,
+        contatoNome: d.contatoNome ? d.contatoNome.slice(0, 190) : null,
+        data: d.data,
+        registradoEm: e?.registradoEm ?? agoraTxt,
+        historico,
+        total: centavos(d.total),
+        situacaoId: d.situacaoId,
+        situacao: d.situacao ? d.situacao.slice(0, 60) : null,
+        itens: itens.slice(0, 40).map((i) => ({
+          descricao: String(i.descricao ?? "").slice(0, 160),
+          quantidade: Number(i.quantidade) || 1,
+          valor: Number(i.valor) || 0,
+        })),
+        ...base,
+        ...v,
+        assinatura: assinarVendaDoSistema(d),
+        canceladoNaOrigem: d.cancelada,
+        duplicadoDoBling: duplicado,
+        semItens,
+      };
+      for (const m of meses) {
+        if (m.mes !== mesDe(d.data) && m.doc.itens[id]) {
+          delete m.doc.itens[id];
+          tocados.add(m.mes);
+        }
+      }
+      let alvo = porMes.get(mesDe(d.data));
+      if (!alvo) {
+        alvo = { mes: mesDe(d.data), versao: null, doc: { versao: 1, itens: {} } };
+        porMes.set(alvo.mes, alvo);
+        meses.push(alvo);
+      }
+      alvo.doc.itens[id] = l;
+      tocados.add(alvo.mes);
+    }
+
+    try {
+      for (const mes of tocados) {
+        const m = porMes.get(mes)!;
+        m.versao = await gravar(chaveDoMes(mes), m.doc, m.versao);
+      }
+      return { gravados: mudados.length, novos, duplicados };
+    } catch (e) {
+      if (!(e instanceof ConflitoDeVersao)) throw e;
+      await new Promise((r) => setTimeout(r, 150 + Math.random() * 300));
+    }
+  }
+  throw new Error("Muitas gravações ao mesmo tempo na Arena; a próxima leitura do sistema tenta de novo.");
+}
+
+/**
+ * Vendas do sistema guardadas perto das datas (para saber quais já têm itens)
+ * e os números dos pedidos do Bling (o pedido migrado não pede detalhe à toa).
+ */
+export async function vendasDoSistemaGuardadas(inicio: string, fim: string): Promise<{ vendas: Map<string, Lancamento>; numerosDoBling: Set<string> }> {
+  const vendas = new Map<string, Lancamento>();
+  const numerosDoBling = new Set<string>();
+  for (const l of await lancamentosEntre(somarDias(inicio, -31), fim)) {
+    if (l.origem === "sistema") vendas.set(l.id, l);
+    else if (l.origem === "bling" && l.tipo === "venda") {
+      const n = numeroDe(l.numero);
+      if (n) numerosDoBling.add(n);
+    }
+  }
+  return { vendas, numerosDoBling };
+}
+
 /**
  * Refaz os valores dos últimos 6 meses com as regras atuais (mantém os ajustes
  * à mão). Também passa para reais o que ainda estava em pontos.
@@ -648,6 +878,9 @@ export async function recalcularTudo(configPronta?: ConfigDaArena): Promise<numb
         let novo: Lancamento = l;
         if (l.origem === "bling") {
           novo = { ...l, ...aplicarAjustes(l, valorar(docDoLancamento(l), config.regras)) };
+        } else if (l.origem === "sistema") {
+          if (l.duplicadoDoBling) continue;
+          novo = { ...l, ...aplicarAjustes(l, valorarDoSistema({ total: l.total, cancelada: Boolean(l.canceladoNaOrigem), itens: l.itens }, config.regras)) };
         } else if (l.origem === "assistencia") {
           novo = { ...l, ...aplicarAjustes(l, { status: l.total > 0 ? "valido" : "ignorado", valor: l.total, motivo: l.total > 0 ? null : "OS sem valor", licencas: 0, valorLicencas: 0 }) };
         }
@@ -687,7 +920,7 @@ async function mudarLancamento(id: string, data: string | null, fn: (l: Lancamen
   return false;
 }
 
-/** Ajuste à mão: anular/reativar ou trocar o valor de um lançamento do Bling ou de uma OS. */
+/** Ajuste à mão: anular/reativar ou trocar o valor de uma venda (do sistema ou do Bling) ou de uma OS. */
 export async function ajustarLancamento(id: string, acao: { anular?: boolean; valorManual?: number | null; data?: string }) {
   const ok = await mudarLancamento(id, acao.data ?? null, (l) => {
     if (acao.anular !== undefined) l.anuladoManual = acao.anular;
@@ -730,7 +963,7 @@ function lancamentoVazio(id: string, tipo: Lancamento["tipo"], origem: Lancament
   };
 }
 
-/** Valor lançado à mão (venda fora do Bling, acerto…). Negativo desconta. */
+/** Valor lançado à mão (venda fora do sistema, acerto…). Negativo desconta. */
 export async function lancarManual(pilotoId: string, valor: number, motivo: string, data?: string) {
   const v = centavos(Number(valor));
   if (!Number.isFinite(v) || v === 0 || Math.abs(v) > 10_000_000) throw new Error("Valor inválido.");
@@ -745,7 +978,7 @@ export async function lancarManual(pilotoId: string, valor: number, motivo: stri
 }
 
 export async function apagarManual(id: string, data?: string) {
-  if (!id.startsWith("manual:")) throw new Error("Só lançamento manual pode ser apagado; os do Bling e as OS se anulam.");
+  if (!id.startsWith("manual:")) throw new Error("Só lançamento manual pode ser apagado; as vendas e as OS se anulam.");
   if (!(await mudarLancamento(id, data ?? null, () => null))) throw new Error("Lançamento não encontrado.");
 }
 
@@ -838,15 +1071,86 @@ export async function listarTecnicos(): Promise<{ id: string; nome: string }[]> 
     .map((p) => ({ id: p.id, nome: p.apelido || p.nome }));
 }
 
-/** Vendedores do Bling que aparecem nos lançamentos e ainda não têm piloto. */
+/** Vendedores do MEU BLING que aparecem nas vendas e ainda não têm piloto. */
 export async function vendedoresSemPiloto(pilotos: Piloto[], lancs: Lancamento[]): Promise<{ id: string; documentos: number }[]> {
-  const ligados = new Set(pilotos.map((p) => p.blingVendedorId).filter(Boolean));
+  const ligados = new Set(pilotos.map((p) => p.sistemaVendedorId).filter(Boolean));
   const conta = new Map<string, number>();
   for (const l of lancs) {
-    if (!l.blingVendedorId || ligados.has(l.blingVendedorId)) continue;
-    conta.set(l.blingVendedorId, (conta.get(l.blingVendedorId) ?? 0) + 1);
+    if (l.origem !== "sistema" || !l.sistemaVendedorId || ligados.has(l.sistemaVendedorId)) continue;
+    conta.set(l.sistemaVendedorId, (conta.get(l.sistemaVendedorId) ?? 0) + 1);
   }
   return [...conta.entries()].sort((a, b) => b[1] - a[1]).slice(0, 50).map(([id, documentos]) => ({ id, documentos }));
+}
+
+// ---------------------------------------------------------------- ligação automática pelo nome
+
+/** "JÚLIA  Souza" → "julia souza". */
+export function nomeNormalizado(s: string | null | undefined): string {
+  return String(s ?? "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9 ]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+const primeiroDe = (s: string) => s.split(" ")[0] || "";
+
+/**
+ * Para cada vendedor do sistema ainda sem piloto, acha o piloto pelo nome:
+ * o nome completo igual (sem acento, sem caixa); senão o primeiro nome, se só
+ * um piloto e só um vendedor tiverem esse primeiro nome. Nunca mexe em piloto
+ * que já tem vendedor do sistema nem em ligação feita (ou desfeita) à mão.
+ */
+export function ligacoesPeloNome(pilotos: Piloto[], vendedores: { id: string; nome: string }[]): { pilotoId: string; vendedorId: string }[] {
+  const ocupados = new Set(pilotos.map((p) => p.sistemaVendedorId).filter(Boolean) as string[]);
+  const livre = (p: Piloto) => !p.sistemaVendedorId && p.sistemaLigadoPor !== "manual";
+  const semDono = vendedores.filter((v) => v.id && !ocupados.has(v.id) && nomeNormalizado(v.nome));
+  const usados = new Set<string>();
+  const ligados = new Set<string>();
+  const out: { pilotoId: string; vendedorId: string }[] = [];
+
+  // 1) nome completo (ou o nome no telão) igual
+  for (const v of semDono) {
+    const nv = nomeNormalizado(v.nome);
+    const achados = pilotos.filter((p) => nomeNormalizado(p.nome) === nv || (p.apelido && nomeNormalizado(p.apelido) === nv));
+    if (achados.length !== 1 || !livre(achados[0]) || usados.has(achados[0].id)) continue;
+    out.push({ pilotoId: achados[0].id, vendedorId: v.id });
+    usados.add(achados[0].id);
+    ligados.add(v.id);
+  }
+  // 2) primeiro nome único dos dois lados
+  for (const v of semDono) {
+    if (ligados.has(v.id)) continue;
+    const pv = primeiroDe(nomeNormalizado(v.nome));
+    if (!pv) continue;
+    if (vendedores.filter((x) => primeiroDe(nomeNormalizado(x.nome)) === pv).length !== 1) continue;
+    const achados = pilotos.filter((p) => primeiroDe(nomeNormalizado(p.nome)) === pv || (p.apelido && primeiroDe(nomeNormalizado(p.apelido)) === pv));
+    if (achados.length !== 1 || !livre(achados[0]) || usados.has(achados[0].id)) continue;
+    out.push({ pilotoId: achados[0].id, vendedorId: v.id });
+    usados.add(achados[0].id);
+    ligados.add(v.id);
+  }
+  return out;
+}
+
+/** Faz (e grava) as ligações automáticas pelo nome. Devolve quantas fez. */
+export async function ligarVendedoresPeloNome(vendedores: { id: string; nome: string }[]): Promise<number> {
+  const config = await lerConfig();
+  if (ligacoesPeloNome(config.pilotos, vendedores).length === 0) return 0;
+  let feitas = 0;
+  await mudarConfig((c) => {
+    feitas = 0;
+    for (const { pilotoId, vendedorId } of ligacoesPeloNome(c.pilotos, vendedores)) {
+      const p = c.pilotos.find((x) => x.id === pilotoId);
+      if (!p || p.sistemaVendedorId || p.sistemaLigadoPor === "manual") continue;
+      p.sistemaVendedorId = vendedorId;
+      p.sistemaLigadoPor = "auto";
+      feitas++;
+    }
+    return feitas ? c : undefined;
+  });
+  return feitas;
 }
 
 export { tipoDaGaveta };

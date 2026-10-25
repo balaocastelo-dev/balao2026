@@ -1,5 +1,11 @@
 # Vigia da Arena
 
+> **Desligado desde 25/10/2026 — não instalar de novo.** A loja saiu do Bling: a Arena lê as vendas direto do
+> MEU BLING pelo site (`lib/arena/sistema.ts`, agendador `/api/cron/arena-sistema`, ver `docs/arena.md`), e
+> `POST /api/arena/bling` responde 410. A chave do vigia continua valendo como **chave do PC da loja**
+> (rotas `/api/pc/sistema/*`); para trocar só a chave, sem criar a tarefa, use `python vigia.py --parear`.
+> O texto abaixo fica só como histórico.
+
 Leva as vendas e os orçamentos do Bling para a corrida de vendas do site
 (`www.balao.info/arena`, administrada em `/painel/arena`).
 
