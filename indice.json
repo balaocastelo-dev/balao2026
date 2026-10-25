@@ -74,7 +74,12 @@
         "jogos",
         "driver"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/fsr-4-1-radeon-rx-6000-driver-amd-531f2e5a.jpg",
+        "alt": "Placa de vídeo com dois ventiladores sobre uma bancada de madeira, ao lado de um gabinete aberto",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-10-24T15:00:00.000Z",
       "minutos": 3
     },
@@ -733,5 +738,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-25T18:32:22.664Z"
+  "atualizadoEm": "2026-10-25T18:35:27.758Z"
 }
