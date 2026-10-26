@@ -29,7 +29,12 @@
         "atualização",
         "secure boot"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/secure-boot-certificado-venceu-19-de-outubro-5dacc20d.jpg",
+        "alt": "Gabinete de computador aberto sobre uma bancada de madeira, com a placa-mãe à mostra e um monitor apagado ao fundo",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-10-26T15:00:00.000Z",
       "minutos": 3
     },
@@ -810,5 +815,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-26T01:03:48.576Z"
+  "atualizadoEm": "2026-10-26T01:06:53.534Z"
 }
