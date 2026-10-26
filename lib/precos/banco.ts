@@ -973,13 +973,16 @@ export async function desfazerTroca(): Promise<{ restaurados: number }> {
     args: [TABELA_DE_RESERVA],
   });
   const lista = colunas.rows.map((r) => `\`${String((r as Linha).nome)}\``).join(", ");
+  // Consultado ANTES da transação: o pool tem 1 conexão (lib/turso.ts) e a
+  // transação a segura; consultar pelo pool lá dentro esperaria para sempre.
+  const temReservaDeCategorias = await tabelaExiste(RESERVA_DE_CATEGORIAS);
 
   const tx = await turso.transaction("write");
   try {
     await tx.execute("DELETE FROM products");
     await tx.execute(`INSERT INTO products (${lista}) SELECT ${lista} FROM ${TABELA_DE_RESERVA}`);
     await tx.execute("UPDATE fontes_preco SET ativa = 0");
-    if (await tabelaExiste(RESERVA_DE_CATEGORIAS)) {
+    if (temReservaDeCategorias) {
       await tx.execute("DELETE FROM categories");
       await tx.execute(`INSERT INTO categories SELECT * FROM ${RESERVA_DE_CATEGORIAS}`);
     }
