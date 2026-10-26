@@ -85,7 +85,13 @@ function getConfig() {
     // poucas conexões por hora. Se o banco derrubar a conexão antes disso,
     // execute() tenta de novo uma vez quando é seguro (deveTentarDeNovo).
     idleTimeout: IDLE_MS,
-    maxIdle: 1,
+    // maxIdle IGUAL a connectionLimit. Medido em 25/10 pelo log "[db] conexão
+    // nova": com maxIdle 1 e limite 2, a página abria 2 conexões em paralelo
+    // (consultas em Promise.all), devolvia as 2, e a limpeza do mysql2 (que só
+    // roda quando maxIdle < connectionLimit) destruía uma em ~1 s. Na visita
+    // seguinte abria outra: ~1 conexão nova por visita, ~700/hora. Guardando as
+    // 2, a limpeza nem é criada e a instância reaproveita as mesmas conexões.
+    maxIdle: 2,
     enableKeepAlive: true,
     keepAliveInitialDelay: 30_000,
     queueLimit: 0,

@@ -1,9 +1,18 @@
 import { describe, it, expect } from "vitest";
 import { deveTentarDeNovo, IDLE_MS } from "@/lib/turso";
+import { readFileSync } from "fs";
 
 describe("conexão com o banco (cota de 500 conexões/hora)", () => {
   it("conexão parada fica aberta minutos, não 20 segundos", () => {
     expect(IDLE_MS).toBeGreaterThanOrEqual(5 * 60_000);
+  });
+
+  it("guarda paradas todas as conexões que abre (senão a limpeza do mysql2 destrói e reabre a cada visita)", () => {
+    const fonte = readFileSync("lib/turso.ts", "utf8");
+    const limite = Number(fonte.match(/connectionLimit:\s*(\d+)/)?.[1]);
+    const maxIdle = Number(fonte.match(/maxIdle:\s*(\d+)/)?.[1]);
+    expect(limite).toBeGreaterThan(0);
+    expect(maxIdle).toBe(limite);
   });
 
   it("conexão morta antes de enviar: sempre tenta de novo", () => {
