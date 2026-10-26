@@ -1,0 +1,312 @@
+{
+  "slug": "avell-storm-480-notebook-gamer-i9-rtx-4080",
+  "titulo": "Avell Storm 480: o que entrega um notebook com i9 e RTX 4080",
+  "resumo": "O Avell Storm 480 junta i9-14900HX, RTX 4080 de 12 GB e tela de 240 Hz. Veja o que cada peça entrega e para quem esse notebook gamer vale.",
+  "categoria": "hardware",
+  "etiquetas": [
+    "notebook gamer",
+    "placa de vídeo",
+    "processador",
+    "ia local"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-25T18:00:00.000Z",
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Você viu o Avell Storm 480 com Intel Core i9-14900HX e NVIDIA GeForce RTX 4080 e quer saber se essa ficha se traduz em algo que você vai sentir no uso. É uma dúvida justa: notebook gamer de topo costuma vir com siglas demais e explicação de menos, e a mesma configuração pode servir muito bem a um jogador e ser exagero para quem só edita planilhas."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é olhar só o nome da placa de vídeo e imaginar o desempenho de um PC de mesa com a mesma sigla. No notebook, a RTX 4080 é outro chip, com outra memória e um limite de energia que o fabricante define. O que torna o Storm 480 interessante é o conjunto: processador de 24 núcleos, 12 GB de memória de vídeo, tela grande e rápida e espaço para crescer. Este guia mostra o que cada peça faz e para quem ela compensa."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "O **Core i9-14900HX** tem 24 núcleos e 32 threads: sobra fôlego para jogo, edição, compilação e máquina virtual ao mesmo tempo.",
+        "A **RTX 4080 de notebook** tem 12 GB de memória de vídeo e 7.424 núcleos CUDA; não é a mesma placa da versão de mesa, e o rendimento depende do limite de energia.",
+        "A tela de **17 polegadas, 2560 × 1600 e 240 Hz** combina com jogo competitivo e com trabalho que pede área de tela.",
+        "É uma máquina para ficar na mesa e na tomada: pesa cerca de 2,4 kg e usa carregador de 280 W."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "A ficha técnica do Storm 480, peça por peça"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Antes de decidir, vale separar o que é do modelo e o que pode variar. A Avell permite personalizar a configuração na compra, então dois Storm 480 podem sair com memória ou armazenamento diferentes. A tabela abaixo junta o que as páginas de ficha técnica e os fabricantes dos componentes informam sobre o modelo com i9-14900HX e RTX 4080."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Peça",
+        "Especificação",
+        "O que isso significa"
+      ],
+      "linhas": [
+        [
+          "Processador",
+          "Intel Core i9-14900HX: 24 núcleos (8 de desempenho e 16 de eficiência), 32 threads, até 5,8 GHz, 36 MB de cache",
+          "Muito fôlego para tarefas pesadas e para várias coisas abertas ao mesmo tempo"
+        ],
+        [
+          "Placa de vídeo",
+          "GeForce RTX 4080 Laptop: 12 GB GDDR6, barramento de 192 bits, 7.424 núcleos CUDA",
+          "Jogos atuais em resolução alta, edição de vídeo, 3D e IA no próprio aparelho"
+        ],
+        [
+          "Tela",
+          "17 polegadas, 16:10, 2560 × 1600, 240 Hz, painel WVA antirreflexo, 100% sRGB, 350 nits",
+          "Movimento nítido no jogo e cor confiável para edição"
+        ],
+        [
+          "Memória",
+          "DDR5 em dois módulos removíveis; o modelo sai com 32 GB e aceita até 64 GB",
+          "Dá para ampliar depois, sem trocar o notebook"
+        ],
+        [
+          "Armazenamento",
+          "SSD NVMe PCIe 4.0 de 1 TB e um segundo slot M.2 livre",
+          "Espaço para crescer com um segundo SSD"
+        ],
+        [
+          "Conexões",
+          "Wi-Fi 6, Bluetooth 5.2, HDMI, Mini DisplayPort, USB-C, três USB-A, rede cabeada e leitor de cartões",
+          "Liga monitor externo, rede e periféricos sem adaptador"
+        ],
+        [
+          "Bateria e carregador",
+          "80 Wh, carregador de 280 W",
+          "Para jogar e renderizar, o lugar dele é na tomada"
+        ],
+        [
+          "Peso",
+          "Cerca de 2,4 kg",
+          "Transportável, mas não é para levar todo dia na mochila"
+        ]
+      ],
+      "titulo": "Avell Storm 480 com i9-14900HX e RTX 4080: o que vem no modelo",
+      "colunaDestaque": 1,
+      "fonte": {
+        "nome": "Que Notebook Comprar — ficha técnica do Avell Storm 480",
+        "url": "https://quenotebookcomprar.com.br/?p=175188"
+      }
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Dois pontos da tabela pesam mais do que parecem. A memória não é soldada: os dois módulos podem ser trocados, o que permite chegar aos 64 GB depois. E o segundo slot M.2 vazio resolve a falta de espaço sem abrir mão do SSD original. São detalhes que fazem um notebook caro durar mais anos em uso."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Processador: o que os 24 núcleos fazem no seu dia"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O i9-14900HX é o processador mais forte da 14ª geração Intel para notebooks, lançado no começo de 2024. Ele mistura dois tipos de núcleo. Os 8 de desempenho cuidam do que exige velocidade, como o jogo ou a exportação de um vídeo. Os 16 de eficiência tocam as tarefas de fundo, como navegador, chamadas e sincronização de arquivos, sem disputar espaço com o trabalho principal."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Na prática, isso aparece quando você faz muita coisa junta: um jogo aberto com transmissão ao vivo, uma renderização enquanto responde mensagens, um projeto grande compilando enquanto outra janela fica livre. A Intel indica potência base de 55 W e máxima de 157 W. Esse número explica por que o notebook precisa de boa ventilação e de um carregador forte."
+    },
+    {
+      "tipo": "destaque",
+      "tom": "nota",
+      "texto": "Para escritório, estudo e navegação, um i5 ou um Ryzen 5 recentes já sobram. Os 24 núcleos fazem diferença em trabalho pesado e contínuo: edição, 3D, engenharia, programação com projetos grandes e jogo com transmissão.",
+      "titulo": "Mas nem todo mundo aproveita"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "RTX 4080 de notebook não é a RTX 4080 de mesa"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A placa de vídeo é onde mais se confunde o nome com o desempenho. A RTX 4080 Laptop GPU tem 12 GB de memória GDDR6 e 7.424 núcleos CUDA, segundo a NVIDIA. A versão de mesa é maior, gasta muito mais energia e tem mais memória. Por isso, a comparação certa é com as outras placas de notebook da mesma geração, e não com a placa de PC."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Placa",
+        "Núcleos CUDA",
+        "Memória de vídeo",
+        "Barramento"
+      ],
+      "linhas": [
+        [
+          "RTX 4070 Laptop",
+          "4.608",
+          "8 GB GDDR6",
+          "128 bits"
+        ],
+        [
+          "RTX 4080 Laptop",
+          "7.424",
+          "12 GB GDDR6",
+          "192 bits"
+        ],
+        [
+          "RTX 4090 Laptop",
+          "9.728",
+          "16 GB GDDR6",
+          "256 bits"
+        ]
+      ],
+      "titulo": "Placas RTX 40 de notebook lado a lado",
+      "colunaDestaque": 0,
+      "fonte": {
+        "nome": "NVIDIA — Compare notebooks GeForce RTX",
+        "url": "https://www.nvidia.com/en-us/geforce/laptops/compare/"
+      },
+      "nota": "A NVIDIA informa faixa de energia de 60 W a 150 W para a RTX 4080 de notebook; o valor usado depende do projeto de cada fabricante."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A faixa de energia é o detalhe que mais muda o resultado. O fabricante escolhe quanto a placa pode consumir dentro dessa faixa, e notebooks grandes, de 17 polegadas, como o Storm 480, costumam ter mais espaço para dissipar calor do que modelos finos. Mesmo assim, desempenho real depende de refrigeração limpa, do perfil de energia escolhido e do jogo."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Os 12 GB de memória de vídeo são o salto mais útil em relação à RTX 4070 de notebook, que tem 8 GB. Jogos recentes em resolução alta e com texturas no máximo já passam de 8 GB, e a memória faz ainda mais diferença longe do jogo. O artigo sobre [8 GB ou 16 GB de vídeo](/blog/rtx-5060-ti-8gb-ou-16gb) explica por que esse número pesa cada vez mais."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A placa também traz recursos que contam no trabalho. A geração de quadros do DLSS 3 aumenta a fluidez em jogos compatíveis, os núcleos de ray tracing cuidam de luz e reflexo realistas e o codificador de vídeo grava e transmite em AV1, um formato que entrega boa imagem com arquivos menores. Para quem edita, os drivers Studio da NVIDIA priorizam estabilidade em programas de criação."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "ia-local"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Para quem vale um notebook desse porte"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O Storm 480 faz sentido quando a pessoa precisa de desempenho de estação de trabalho e não quer ficar presa a uma mesa só. Ele resolve bem quatro perfis, e em cada um deles há um porém que vale pesar antes de decidir. Se o seu uso não aparece aqui, provavelmente um notebook mais leve atende melhor e custa menos para manter."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": false,
+      "itens": [
+        "**Jogo em resolução alta e tela rápida.** A tela de 240 Hz e a RTX 4080 combinam com jogos competitivos e com títulos recentes em 2560 × 1600. Mas, para jogar só em 1080p e a 60 quadros, é muita máquina.",
+        "**Criação de conteúdo.** Edição de vídeo, modelagem e renderização 3D aproveitam processador, memória e placa juntos. Mas quem edita em 4K todos os dias pode preferir um PC de mesa, mais fácil de ampliar.",
+        "**Inteligência artificial no próprio aparelho.** Com 12 GB de vídeo e até 64 GB de memória, dá para rodar modelos de texto e imagem sem mandar seus dados para fora. O guia de [computador para rodar IA em casa](/blog/que-computador-preciso-para-rodar-ia-em-casa) mostra o que cada tamanho de modelo pede.",
+        "**Engenharia e programação.** Programas de CAD, simulação, máquinas virtuais e compilação usam bem as 32 threads. Mas confira antes se o seu programa recomenda placa de linha profissional."
+      ]
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "Com bateria de 80 Wh e um conjunto que consome muito, o notebook não foi feito para jogar ou renderizar longe da tomada. Na bateria, o sistema reduz o desempenho para durar mais. Para trabalho leve em trânsito ele atende; para o pesado, conte com o carregador.",
+      "titulo": "Pense no uso fora da tomada"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Notebook gamer ou PC gamer de mesa?"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Esta é a escolha que mais pesa. Pelo mesmo desempenho, um PC de mesa costuma ser mais fácil de ampliar e de manter frio, e aceita placas mais fortes. O notebook ganha quando você precisa levar a máquina: trabalhar em casa e no escritório, jogar em viagem, apresentar um projeto no cliente. Se ele vai ficar sempre no mesmo lugar, compare com uma [montagem de PC gamer](/pcgamer) antes de decidir."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "Processador de 24 núcleos e placa com 12 GB de vídeo no mesmo aparelho",
+        "Tela grande, rápida e com cobertura total do sRGB",
+        "Memória removível até 64 GB e segundo slot M.2 livre",
+        "Conexões completas: HDMI, Mini DisplayPort, USB-C e rede cabeada",
+        "Leva para onde precisar, com teclado e tela já inclusos"
+      ],
+      "contras": [
+        "Cerca de 2,4 kg, mais o carregador de 280 W",
+        "Desempenho cai bastante longe da tomada",
+        "Esquenta mais e faz mais barulho do que um notebook comum sob carga",
+        "A placa de vídeo não pode ser trocada no futuro",
+        "Exagero para escritório, estudo e navegação"
+      ],
+      "titulo": "Avell Storm 480 com i9 e RTX 4080: pesa a favor e contra"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Cuidados para um notebook gamer durar"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Notebook gamer trabalha quente por natureza, e poeira é o que mais encurta a vida dele. Use sempre sobre uma superfície dura, nunca em cama ou almofada, para não tapar a entrada de ar. Se a ventoinha passa a fazer barulho o tempo todo ou o desempenho cai depois de alguns minutos de jogo, o artigo sobre [por que o notebook esquenta](/blog/por-que-notebook-esquenta-muito) ajuda a entender a causa."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Uma limpeza interna periódica e a troca da pasta térmica no tempo certo mantêm o desempenho perto do original. Não abra o notebook nem mexa na bateria por conta própria: peça a quem tem a ferramenta e o procedimento certos. A [assistência técnica](/manutencao) faz a limpeza, o diagnóstico e o upgrade de memória e de SSD no mesmo lugar."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Onde ver o Avell Storm 480 de perto em Campinas"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, loja de informática no Cambuí, em Campinas, tem um Avell Storm 480 com i9-14900HX e RTX 4080 na vitrine. A unidade está com 64 GB de memória DDR5, o máximo que o modelo aceita, além do SSD de 1 TB e da tela de 240 Hz. Como é uma unidade só, vale confirmar se ainda está disponível."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Você pode ver o notebook ligado e testar antes de pagar, abrindo o jogo ou o programa que você usa. Todos os detalhes da unidade, com a ficha completa e as condições, estão na [página do Avell Storm 480](/avellstorm480). Se preferir comparar com outras opções, veja os [notebooks da loja](/notebooks) ou fale com a equipe pelo WhatsApp."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "notebooks"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Em uma linha: o Storm 480 vale para quem precisa de desempenho de estação de trabalho que caiba na mochila; para quem nunca tira a máquina da mesa, um PC de mesa costuma ser a escolha mais sensata."
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "A RTX 4080 do notebook é igual à do PC de mesa?",
+      "resposta": "Não. A RTX 4080 de notebook é outro chip, com 12 GB de memória de vídeo e consumo bem menor que a placa de mesa. A comparação justa é com as outras placas de notebook, como a RTX 4070 e a RTX 4090 de notebook."
+    },
+    {
+      "pergunta": "Dá para aumentar a memória do Avell Storm 480?",
+      "resposta": "Sim. A memória fica em dois módulos DDR5 removíveis, e o modelo aceita até 64 GB. Também há um segundo slot M.2 livre para um segundo SSD."
+    },
+    {
+      "pergunta": "Ele roda inteligência artificial no próprio notebook?",
+      "resposta": "Roda. Os 12 GB de memória de vídeo e até 64 GB de memória permitem rodar modelos de texto e de imagem de tamanho pequeno e médio sem depender da nuvem. Modelos muito grandes ainda pedem mais memória de vídeo."
+    },
+    {
+      "pergunta": "Dá para jogar na bateria?",
+      "resposta": "Dá, mas com desempenho bem menor e por pouco tempo. Para jogar e renderizar com todo o desempenho, o notebook precisa estar ligado ao carregador de 280 W."
+    },
+    {
+      "pergunta": "Posso ver o notebook funcionando antes de comprar?",
+      "resposta": "Pode. A unidade está na vitrine da Balão da Informática, no Cambuí, em Campinas, e dá para vê-la ligada e testar antes de pagar."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Intel — Core i9-14900HX: especificações",
+      "url": "https://www.intel.com/content/www/us/en/products/sku/235995/intel-core-i9-processor-14900hx-36m-cache-up-to-5-80-ghz/specifications.html",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "NVIDIA — Compare notebooks GeForce RTX",
+      "url": "https://www.nvidia.com/en-us/geforce/laptops/compare/",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Que Notebook Comprar — Avell Storm 480: ficha técnica",
+      "url": "https://quenotebookcomprar.com.br/?p=175188",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Canaltech — Avell lança notebooks gamer com RTX 4090 e telas de até 240 Hz",
+      "url": "https://canaltech.com.br/notebook/avell-lanca-notebooks-gamer-com-rtx-4090-e-telas-de-ate-240-hz-295879/",
+      "data": "julho de 2024"
+    }
+  ]
+}

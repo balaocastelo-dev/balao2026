@@ -85,6 +85,21 @@
       "formato": "dica"
     },
     {
+      "slug": "avell-storm-480-notebook-gamer-i9-rtx-4080",
+      "titulo": "Avell Storm 480: o que entrega um notebook com i9 e RTX 4080",
+      "resumo": "O Avell Storm 480 junta i9-14900HX, RTX 4080 de 12 GB e tela de 240 Hz. Veja o que cada peça entrega e para quem esse notebook gamer vale.",
+      "categoria": "hardware",
+      "etiquetas": [
+        "notebook gamer",
+        "placa de vídeo",
+        "processador",
+        "ia local"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-25T18:00:00.000Z",
+      "minutos": 11
+    },
+    {
       "slug": "chrome-156-atualizacao-falhas-de-seguranca",
       "titulo": "Chrome 156 corrige 353 falhas de segurança: como atualizar o navegador",
       "resumo": "O Google liberou o Chrome 156 em 20 de outubro com 353 correções de segurança, seis delas críticas. Veja como conferir a versão e o que fazer.",
@@ -820,5 +835,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-26T01:12:34.270Z"
+  "atualizadoEm": "2026-10-26T17:13:00.492Z"
 }
