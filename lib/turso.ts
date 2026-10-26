@@ -75,7 +75,14 @@ function getConfig() {
     // o banco recusa tudo até a hora virar. Era o que fazia o catálogo sumir
     // "só às vezes". Cada instância atende uma requisição por vez, então 2
     // conexões dão conta.
-    connectionLimit: 2,
+    // 1 conexão por instância (26/10). Medido com o log "[db] conexão nova":
+    // quando a instância fica ~40 s sem visita, a conexão parada é fechada em
+    // silêncio e a próxima visita abre outra; com limite 2, abriam DUAS (as
+    // páginas fazem consultas em paralelo). Com 1, as consultas da mesma
+    // página entram em fila na mesma conexão — milissegundos a mais — e a
+    // cota gasta cai à metade. ATENÇÃO: dentro de turso.transaction(), use só
+    // tx.execute; turso.execute lá dentro esperaria a própria transação.
+    connectionLimit: 1,
     // A cota da Hostinger conta CONEXÕES ABERTAS por hora, não consultas.
     // Até 25/10 a conexão parada era destruída em 20 s (idleTimeout: 20_000
     // com maxIdle < connectionLimit faz o mysql2 fechar até a única conexão
@@ -85,13 +92,13 @@ function getConfig() {
     // poucas conexões por hora. Se o banco derrubar a conexão antes disso,
     // execute() tenta de novo uma vez quando é seguro (deveTentarDeNovo).
     idleTimeout: IDLE_MS,
-    // maxIdle IGUAL a connectionLimit. Medido em 25/10 pelo log "[db] conexão
+    // maxIdle SEMPRE igual a connectionLimit. Medido em 25/10 pelo log "[db] conexão
     // nova": com maxIdle 1 e limite 2, a página abria 2 conexões em paralelo
     // (consultas em Promise.all), devolvia as 2, e a limpeza do mysql2 (que só
     // roda quando maxIdle < connectionLimit) destruía uma em ~1 s. Na visita
     // seguinte abria outra: ~1 conexão nova por visita, ~700/hora. Guardando as
     // 2, a limpeza nem é criada e a instância reaproveita as mesmas conexões.
-    maxIdle: 2,
+    maxIdle: 1,
     enableKeepAlive: true,
     keepAliveInitialDelay: 30_000,
     queueLimit: 0,
