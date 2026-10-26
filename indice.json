@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "como-proteger-seus-dados-ao-usar-assistentes-de-ia",
+      "titulo": "Como proteger seus dados ao usar assistentes de IA no dia a dia",
+      "resumo": "Proteger seus dados ao usar IA começa pelo que você cola na conversa. Veja o que evitar, quais ajustes de privacidade ligar e quando rodar a IA no próprio PC.",
+      "categoria": "ia",
+      "etiquetas": [
+        "inteligência artificial",
+        "privacidade",
+        "segurança",
+        "ia local"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-27T09:00:00.000Z",
+      "minutos": 10
+    },
+    {
       "slug": "aviso-de-pouco-espaco-em-disco-o-que-apagar-primeiro",
       "titulo": "Aviso de pouco espaço em disco: o que apagar primeiro e o que não tocar",
       "resumo": "O aviso de pouco espaço em disco se resolve sem risco quando você apaga na ordem certa. Veja por onde começar no Windows e no Mac e o que nunca apagar à mão.",
@@ -840,5 +855,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-26T18:07:15.707Z"
+  "atualizadoEm": "2026-10-26T22:12:07.808Z"
 }

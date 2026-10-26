@@ -1,0 +1,267 @@
+{
+  "slug": "como-proteger-seus-dados-ao-usar-assistentes-de-ia",
+  "titulo": "Como proteger seus dados ao usar assistentes de IA no dia a dia",
+  "resumo": "Proteger seus dados ao usar IA começa pelo que você cola na conversa. Veja o que evitar, quais ajustes de privacidade ligar e quando rodar a IA no próprio PC.",
+  "categoria": "ia",
+  "etiquetas": [
+    "inteligência artificial",
+    "privacidade",
+    "segurança",
+    "ia local"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-27T09:00:00.000Z",
+  "seo": {
+    "titulo": "Como proteger seus dados ao usar assistentes de IA"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Você usa um assistente de IA para resumir um contrato, revisar um e-mail ou organizar uma planilha, e em algum momento bate a dúvida: para onde vai o que eu digito? Proteger seus dados ao usar assistentes de IA é uma preocupação justa, porque esses serviços rodam na nuvem e o texto que você cola sai do seu computador e vai para o servidor da empresa."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que a conversa some quando você fecha a janela. Em geral ela fica guardada na sua conta por um tempo, pode servir para melhorar o serviço e, em alguns casos, pode ser lida por revisores. Isso não quer dizer que você deva parar de usar IA. Quer dizer que vale escolher o que entra na conversa e ligar alguns ajustes. É o que este guia mostra."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "O que você digita num assistente na nuvem **sai do seu computador** e costuma ficar guardado na sua conta por meses.",
+        "Nunca cole **senhas, documentos pessoais, dados de clientes** ou informação que você não mostraria a um estranho.",
+        "Use o **chat temporário** e desligue o uso das conversas para treino quando o serviço oferecer essas opções.",
+        "Para documentos sensíveis, a alternativa é **rodar a IA no próprio computador**, onde o texto não sai da máquina."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que acontece com o que você digita num assistente de IA"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Quando você manda uma pergunta para um assistente na nuvem, o texto e os arquivos anexados viajam até os servidores da empresa, que processam o pedido e devolvem a resposta. Até aqui, nada diferente de um e-mail. A diferença está no que acontece depois: a conversa costuma ser guardada no histórico da conta, e as regras de quanto tempo e para quê variam de serviço para serviço."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A central de privacidade do Gemini, do Google, é um bom exemplo de como isso funciona, porque explica as regras em detalhe. Com a atividade ligada, as conversas ficam na conta e são apagadas automaticamente depois de 18 meses, por padrão; dá para mudar para 3 ou 36 meses, ou para não apagar. Mesmo com a atividade desligada, o Google informa que guarda as conversas por 72 horas para responder e por segurança."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Há um terceiro ponto que pouca gente conhece: a **revisão humana**. A mesma página do Google explica que uma parte das conversas é lida por revisores, inclusive de empresas contratadas, para melhorar o serviço. Essas conversas são desligadas da sua conta antes da revisão, mas podem ficar guardadas por até três anos, mesmo que você apague a sua atividade. Por isso o próprio Google pede que não se digite ali informação confidencial."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Outros assistentes têm regras parecidas, com nomes e prazos próprios, e elas mudam com frequência. Antes de confiar um assunto delicado a um serviço, abra a página de privacidade dele e procure três respostas: por quanto tempo a conversa fica guardada, se ela pode ser usada para treinar os modelos e se pode ser lida por pessoas. Mas não espere que algum ajuste zere o risco: o que foi enviado já saiu da sua máquina."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que nunca colar numa conversa com IA na nuvem"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A regra mais útil é simples: trate a caixa de texto do assistente como um lugar onde outra pessoa pode ler. Se você não mandaria aquilo por e-mail para um desconhecido, não cole na conversa. Na prática, alguns tipos de informação merecem atenção especial, porque o estrago de um vazamento é grande e porque quase sempre dá para trabalhar sem eles."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": false,
+      "itens": [
+        "**Senhas, códigos de verificação e chaves de acesso**, inclusive dentro de prints de tela e de trechos de configuração.",
+        "**Documentos pessoais**: CPF, RG, comprovantes, extratos bancários e fotos de cartão.",
+        "**Dados de clientes, pacientes ou funcionários**: nomes com telefone, endereço, histórico de compra ou de saúde.",
+        "**Contratos, propostas e números internos** da empresa que ainda não são públicos.",
+        "**Arquivos inteiros** quando só um trecho resolveria: quanto menos você manda, menos fica guardado."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Na maioria das tarefas dá para trocar o dado real por um genérico sem perder nada. Em vez de colar a planilha de clientes, descreva as colunas e peça a fórmula. Em vez do contrato assinado, cole só a cláusula que gerou a dúvida, com os nomes trocados por \"Empresa A\" e \"Empresa B\". A resposta costuma ser a mesma, e o que fica guardado no servidor não identifica ninguém."
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "Informação de clientes, pacientes ou funcionários não é só sua. Se você trabalha com esse tipo de dado, confira a política da empresa sobre uso de IA antes de colar qualquer coisa, mesmo que pareça inofensiva.",
+      "titulo": "Dados de terceiros pedem cuidado redobrado"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Os ajustes que reduzem a exposição"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Os principais assistentes oferecem dois tipos de ajuste. O primeiro é uma conversa temporária, que não entra no histórico. O segundo é uma opção para que as suas conversas não sejam usadas no treino dos modelos de IA. Nenhum dos dois apaga a conversa na hora: o serviço ainda guarda uma cópia por algum tempo, por segurança. Mas eles reduzem bastante o que fica associado à sua conta."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "No ChatGPT, o chat temporário abre uma conversa que não aparece no histórico, não usa as memórias salvas e não serve para melhorar os modelos, segundo a central de ajuda da OpenAI. A empresa avisa que pode guardar uma cópia por até 30 dias, por segurança. No Gemini, o chat temporário também fica fora da atividade e do treino, e é mantido por 72 horas."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Ajuste",
+        "Entra no histórico?",
+        "Usado para treinar?",
+        "Cópia guardada"
+      ],
+      "linhas": [
+        [
+          "Chat temporário do ChatGPT",
+          "Não",
+          "Não",
+          "Até 30 dias, por segurança"
+        ],
+        [
+          "Chat temporário do Gemini",
+          "Não",
+          "Não",
+          "72 horas"
+        ],
+        [
+          "Gemini com a atividade desligada",
+          "Não",
+          "Não",
+          "72 horas"
+        ],
+        [
+          "Gemini com a atividade ligada",
+          "Sim",
+          "Pode ser",
+          "18 meses por padrão, ajustável"
+        ]
+      ],
+      "titulo": "O que cada ajuste faz, segundo as páginas de ajuda",
+      "fonte": {
+        "nome": "Central de privacidade dos apps Gemini e Central de ajuda da OpenAI",
+        "url": "https://support.google.com/gemini/answer/13594961?hl=en"
+      },
+      "nota": "As regras mudam com frequência. Confira a página de privacidade do serviço antes de tratar de um assunto delicado."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Além disso, vale apagar de tempos em tempos o histórico que você não precisa mais e encurtar o prazo de exclusão automática quando o serviço permitir. Mas lembre o que a tabela não mostra: conversas que já foram separadas para revisão humana podem seguir regras próprias de guarda, como no caso do Gemini. O ajuste vale para o que vem depois, não para o que já foi enviado."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "ia-local"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Conta pessoal ou conta da empresa: as regras mudam"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Muita gente usa o mesmo assistente com a conta pessoal e com a conta do trabalho sem perceber que as regras são diferentes. Os planos para empresas e escolas costumam ter compromissos de privacidade mais rígidos, porque o cliente é a organização, que responde pelos dados que trata."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O Google, por exemplo, informa na central de privacidade do Workspace que não usa os dados dos clientes para treinar modelos sem permissão ou instrução prévia, e que as conversas e os arquivos enviados ao Gemini nessas contas não são lidos por revisores humanos sem permissão. Isso é bem diferente da regra das contas pessoais descrita acima."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A lição prática: se o assunto é da empresa, use a conta da empresa, dentro das regras que o responsável pela tecnologia definiu. Colar um documento do trabalho na conta pessoal, só porque ela já estava aberta, leva o dado para um lugar com regras menos protetoras. Mas conta corporativa não é licença para colar tudo: a política interna continua valendo."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando vale rodar a IA no próprio computador"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Existe um caminho em que o texto não sai da sua máquina: rodar um modelo de IA localmente, com programas gratuitos como o LM Studio. A documentação do programa informa que, depois de baixado o modelo, as conversas e os documentos que você anexa ficam no computador. A internet só é usada para buscar e baixar modelos, baixar os motores de execução e atualizar o aplicativo."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Para quem lida com contratos, documentos de clientes ou informação de saúde, isso muda a conta. Em vez de depender das regras de guarda de um serviço, você controla onde o arquivo fica. Já explicamos as diferenças práticas entre os dois caminhos no guia [IA no computador ou IA na nuvem](/blog/ia-no-computador-ou-ia-na-nuvem-o-que-muda)."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "O texto e os arquivos da conversa não saem da máquina depois que o modelo está baixado.",
+        "Funciona sem internet para conversar e para consultar documentos.",
+        "Não há histórico guardado no servidor de uma empresa."
+      ],
+      "contras": [
+        "Pede um computador com bastante memória para rodar bem.",
+        "Os modelos que cabem num computador doméstico costumam ser menores que os dos serviços na nuvem.",
+        "A segurança passa a depender de você: o próprio computador precisa estar protegido e com backup."
+      ],
+      "titulo": "Rodar a IA no próprio computador"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O limite está no hardware. Rodar IA localmente pede memória, e no PC a memória da placa de vídeo pesa muito. O guia [Computador para rodar IA em casa](/blog/que-computador-preciso-para-rodar-ia-em-casa) mostra como dimensionar a máquina. Mas para perguntas comuns, que não envolvem dado sensível, o assistente na nuvem continua prático e não precisa ser abandonado."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Cuidados com o próprio computador e com os aplicativos"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Proteger os dados não depende só do assistente. Um computador com vírus ou com uma extensão de navegador maliciosa pode ler o que você digita antes mesmo de o texto chegar ao serviço. Baixe aplicativos de IA apenas das páginas oficiais e desconfie de extensões que prometem recursos gratuitos de IA em troca de acesso a todas as páginas que você visita."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mantenha o sistema e o navegador atualizados, use senha forte e verificação em duas etapas na conta do assistente, e tenha backup dos arquivos importantes. Se o computador anda lento, mostra janelas estranhas ou o navegador mudou sozinho, vale um diagnóstico na [assistência técnica](/manutencao) antes de confiar documentos a ele, seja para IA na nuvem ou local."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Onde montar um computador para IA local em Campinas"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, tem uma [seleção de computadores para rodar IA localmente](/ia-local) e monta computador sob medida, com a memória e a placa de vídeo escolhidas pelo tipo de documento e de modelo que você pretende usar. Antes de pagar, dá para ver o computador ligado e testar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se a ideia é aproveitar a máquina que você já tem, a assistência técnica faz diagnóstico, limpeza e upgrade no mesmo endereço, e também ajuda a deixar o computador em ordem antes de guardar arquivos sensíveis nele. O atendimento no WhatsApp é feito por pessoas da equipe. Em uma linha: na nuvem, cole só o que você mostraria a um estranho; o resto, rode em casa."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Apagar a conversa garante que ela some do servidor?",
+      "resposta": "Nem sempre na hora. Os serviços costumam guardar uma cópia por um período, por segurança, e conversas já separadas para revisão humana podem seguir regras próprias, como informa o Google sobre o Gemini. Confira a página de privacidade do serviço que você usa."
+    },
+    {
+      "pergunta": "O chat temporário é seguro para colar documentos pessoais?",
+      "resposta": "Ele reduz o que fica associado à sua conta e não entra no treino, mas o texto ainda vai para o servidor e pode ficar guardado por alguns dias. Para documentos pessoais, o mais seguro é não colar ou trocar os dados reais por genéricos."
+    },
+    {
+      "pergunta": "Usar a conta da empresa é mais seguro que a pessoal?",
+      "resposta": "Costuma ser, porque os planos corporativos têm compromissos de privacidade mais rígidos, como não usar os dados para treino sem permissão. Mas a política interna da empresa continua valendo: confira o que é permitido antes de usar."
+    },
+    {
+      "pergunta": "IA rodando no computador funciona sem internet?",
+      "resposta": "Depois que o programa e o modelo estão baixados, sim. A documentação do LM Studio informa que conversar e consultar documentos funciona offline; a internet só é necessária para baixar modelos e atualizar o aplicativo."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Central de privacidade dos apps Gemini — Ajuda do Google",
+      "url": "https://support.google.com/gemini/answer/13594961?hl=en",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Generative AI in Google Workspace Privacy Hub — Google Workspace",
+      "url": "https://knowledge.workspace.google.com/admin/generative-ai/generative-ai-in-google-workspace-privacy-hub",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Temporary Chat FAQ — Central de ajuda da OpenAI",
+      "url": "https://help.openai.com/en/articles/8914046-temporary-chat-faq",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Offline Operation — documentação do LM Studio",
+      "url": "https://lmstudio.ai/docs/offline",
+      "data": "outubro de 2026"
+    }
+  ]
+}
