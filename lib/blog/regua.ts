@@ -106,6 +106,7 @@ export const PAGINAS_DA_LOJA = [
   "/reparoapple",
   "/ia-local",
   "/premium",
+  "/avellstorm480",
   "/fale-conosco",
   "/sobre-nos",
   "/categoria/computadores",
