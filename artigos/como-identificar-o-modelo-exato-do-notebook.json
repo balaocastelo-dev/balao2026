@@ -1,0 +1,171 @@
+{
+  "slug": "como-identificar-o-modelo-exato-do-notebook",
+  "titulo": "Como identificar o modelo exato do notebook para comprar a peça certa",
+  "resumo": "O nome comercial do notebook não basta para comprar peça. Veja onde achar o modelo completo e o número de série: na etiqueta, no Windows e no setup.",
+  "categoria": "hardware",
+  "etiquetas": [
+    "notebook",
+    "upgrade",
+    "peças",
+    "windows",
+    "manutenção"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-27T21:00:00.000Z",
+  "formato": "dica",
+  "roteiro": {
+    "fala": "Vai comprar memória, carregador ou bateria para o notebook? O nome que aparece na tampa não basta. Uma mesma linha tem várias versões, e a peça de uma pode não servir na outra. Vire o notebook e procure a etiqueta embaixo, com o modelo completo e o número de série. Se a etiqueta apagou, no Windows abra Informações do Sistema e anote o campo Modelo do Sistema. Tire uma foto e traga junto.",
+    "titulo": "Qual é o modelo do seu notebook?",
+    "destaques": [
+      "Etiqueta embaixo do notebook",
+      "Informações do Sistema",
+      "Anote o número de série",
+      "Leve a foto da etiqueta"
+    ],
+    "legenda": "Antes de comprar memória, bateria ou carregador, descubra o modelo exato do notebook. Onde olhar e o que anotar está na dica completa no blog.",
+    "hashtags": [
+      "notebook",
+      "upgrade",
+      "dicas",
+      "informatica",
+      "campinas"
+    ]
+  },
+  "seo": {
+    "titulo": "Modelo exato do notebook: onde achar para comprar a peça certa"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Para identificar o modelo exato do notebook, vire o aparelho e procure a etiqueta na tampa de baixo: ali ficam o modelo completo e o número de série. Se ela estiver apagada, o Windows mostra o mesmo dado em Informações do Sistema, no campo Modelo do Sistema. Com isso em mãos, a chance de comprar a peça errada cai muito."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é confiar no nome que aparece na tampa ou na caixa, como a linha e o tamanho da tela. Uma mesma linha costuma ter muitas versões, com processador, memória, bateria e carregador diferentes. A HP, por exemplo, explica que um número de modelo pode ser compartilhado por milhares de aparelhos, e só o número de série é único de cada um."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "O nome comercial **não basta**: anote o modelo completo e o número de série.",
+        "O lugar mais rápido é a **etiqueta embaixo do notebook**; em alguns, ela fica no compartimento da bateria.",
+        "No Windows, **Informações do Sistema** mostra o campo Modelo do Sistema.",
+        "Para bateria e carregador, vale também o código impresso **na própria peça**."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Onde achar o modelo, do mais rápido ao mais trabalhoso"
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "**Etiqueta do aparelho.** Desligue, tire da tomada e vire o notebook. A Dell indica a tampa de baixo, em adesivo ou gravado; a HP diz que a etiqueta pode estar embaixo, na lateral ou dentro do compartimento da bateria.",
+        "**Configurações do Windows.** Em Iniciar, Configurações, Sistema, Sobre, aparece o nome do aparelho e, em muitos casos, o modelo. No Windows 11, a Dell lembra que o modelo também aparece no alto da tela inicial das Configurações.",
+        "**Informações do Sistema.** Digite *informações do sistema* (ou *msinfo32*) na busca do Windows e abra o programa. Em Resumo do Sistema, anote **Fabricante do Sistema** e **Modelo do Sistema**.",
+        "**Programa do fabricante ou atalho.** Em notebooks HP, a HP indica apertar Fn e Esc juntos para abrir uma janela com o nome do produto e o número de série. Na Dell, o aplicativo SupportAssist mostra a etiqueta de serviço.",
+        "**Setup da placa-mãe.** Ao ligar, a tecla de acesso ao setup costuma levar a uma tela de resumo com o modelo e o número de série. Na Dell, é a tecla F2, e os dados ficam na aba de visão geral. Só olhe e saia sem mudar nada."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Com o número de série ou a etiqueta de serviço, o site de suporte do fabricante costuma mostrar a configuração original, os manuais e os drivers daquele aparelho. A Dell, por exemplo, usa a etiqueta de serviço para indicar o modelo, a garantia e os drivers certos. Tire uma foto da etiqueta: ela serve de referência em qualquer compra."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "upgrade"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando o modelo do notebook não basta"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Para memória e SSD, o modelo exato normalmente resolve, porque mostra o tipo aceito e quantos encaixes existem. Mas bateria e carregador pedem mais cuidado: o mesmo modelo pode ter saído com bateria ou fonte diferentes. Nesses casos, confira também o código e as especificações impressos na própria peça, como tensão e potência no carregador."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Peça",
+        "O que anotar",
+        "Cuidado"
+      ],
+      "linhas": [
+        [
+          "Memória RAM",
+          "Modelo completo do notebook",
+          "Alguns modelos têm memória soldada, sem encaixe livre"
+        ],
+        [
+          "SSD",
+          "Modelo completo do notebook",
+          "O formato e o tipo de encaixe variam entre versões"
+        ],
+        [
+          "Carregador",
+          "Modelo e etiqueta do carregador original",
+          "Tensão, potência e conector precisam bater"
+        ],
+        [
+          "Bateria",
+          "Modelo e código impresso na bateria",
+          "Bateria estufada não se manuseia: leve a um técnico"
+        ],
+        [
+          "Tela e teclado",
+          "Modelo completo e número de série",
+          "Versões da mesma linha mudam de tela e de teclado"
+        ]
+      ],
+      "titulo": "O que levar anotado para cada compra",
+      "colunaDestaque": 1,
+      "nota": "Na dúvida, leve o notebook ou a peça antiga junto."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se o problema é o carregador, antes de comprar outro vale ler [como saber se o carregador do notebook é o problema](/blog/como-saber-se-o-carregador-do-notebook-e-o-problema). Na Balão da Informática, no Cambuí, em Campinas, você encontra [carregadores de notebook](/carregadores) e a [assistência técnica](/manutencao) identifica o modelo e a peça compatível quando a etiqueta sumiu. Em uma linha: anote o modelo completo e o número de série antes de comprar qualquer peça."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "A etiqueta embaixo do notebook apagou. E agora?",
+      "resposta": "Procure no compartimento da bateria, se houver, e depois no Windows, em Informações do Sistema, no campo Modelo do Sistema. O setup da placa-mãe também mostra o modelo e o número de série."
+    },
+    {
+      "pergunta": "Modelo e número de série são a mesma coisa?",
+      "resposta": "Não. O modelo é compartilhado por muitos aparelhos; o número de série é único de cada unidade. No site do fabricante, o número de série costuma mostrar a configuração original daquele notebook."
+    },
+    {
+      "pergunta": "Posso usar um carregador de outro modelo da mesma marca?",
+      "resposta": "Só se tensão, potência e conector forem compatíveis com o original. Na dúvida, leve o carregador antigo ou o notebook na hora de comprar."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "How to Find the Model Number of Your Dell Computer — Suporte da Dell",
+      "url": "https://www.dell.com/support/kbdoc/en-us/000124353",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Locate Your Laptop's Service Tag — Suporte da Dell",
+      "url": "https://www.dell.com/support/contents/en-gd/article/product-support/self-support-knowledgebase/locate-service-tag/notebook",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "How to find your HP laptop model number — HP",
+      "url": "https://hp.com/gb-en/shop/tech-takes/how-to-find-hp-laptop-model-number",
+      "data": "fevereiro de 2019"
+    },
+    {
+      "nome": "Description of Microsoft System Information (Msinfo32.exe) Tool — Suporte da Microsoft",
+      "url": "https://support.microsoft.com/help/300887",
+      "data": "setembro de 2026"
+    }
+  ]
+}

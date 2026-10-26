@@ -2,6 +2,23 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "como-identificar-o-modelo-exato-do-notebook",
+      "titulo": "Como identificar o modelo exato do notebook para comprar a peça certa",
+      "resumo": "O nome comercial do notebook não basta para comprar peça. Veja onde achar o modelo completo e o número de série: na etiqueta, no Windows e no setup.",
+      "categoria": "hardware",
+      "etiquetas": [
+        "notebook",
+        "upgrade",
+        "peças",
+        "windows",
+        "manutenção"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-27T21:00:00.000Z",
+      "minutos": 4,
+      "formato": "dica"
+    },
+    {
       "slug": "novo-ipad-mini-oled-a20-pro-o-que-muda",
       "titulo": "Novo iPad mini: tela OLED, chip A20 Pro e o que muda para você",
       "resumo": "A Apple anunciou em 26 de outubro de 2026 o iPad mini com tela OLED de 8,5 polegadas e chip A20 Pro. Veja o que muda para quem vai comprar ou já tem um.",
@@ -870,5 +887,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-26T22:28:49.694Z"
+  "atualizadoEm": "2026-10-26T22:48:53.795Z"
 }
