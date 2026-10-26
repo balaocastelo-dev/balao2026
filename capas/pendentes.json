@@ -1,13 +1,4 @@
 {
   "versao": 1,
-  "pendentes": [
-    {
-      "slug": "avell-storm-480-notebook-gamer-i9-rtx-4080",
-      "titulo": "Avell Storm 480: o que entrega um notebook com i9 e RTX 4080",
-      "categoria": "hardware",
-      "alt": "Notebook gamer preto e robusto, fechado, sobre uma mesa escura com luz vermelha suave ao fundo",
-      "pedido": "A large, thick black plastic gaming laptop, lid closed, resting on a dark matte desk, seen from a low three-quarter angle. Angular vents on its back edge catch a faint red rim light. A coiled power cable and a bulky power brick sit beside it. Dark, moody background with soft red ambient glow, shallow depth of field, cinematic product photography.",
-      "pedidoEm": "2026-10-26T17:13:00.493Z"
-    }
-  ]
+  "pendentes": []
 }

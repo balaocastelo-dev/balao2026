@@ -9,7 +9,12 @@
     "processador",
     "ia local"
   ],
-  "capa": null,
+  "capa": {
+    "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/avell-storm-480-notebook-gamer-i9-rtx-4080-c8615081.jpg",
+    "alt": "Notebook gamer preto e robusto, fechado, sobre uma mesa escura com luz vermelha suave ao fundo",
+    "largura": 1600,
+    "altura": 900
+  },
   "publicadoEm": "2026-10-25T18:00:00.000Z",
   "blocos": [
     {
