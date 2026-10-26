@@ -9,7 +9,12 @@
     "diagnóstico",
     "recuperação de dados"
   ],
-  "capa": null,
+  "capa": {
+    "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/derramou-liquido-no-notebook-o-que-fazer-7db30b28.jpg",
+    "alt": "Notebook preto entreaberto sobre uma mesa de madeira, ao lado de uma xícara de café tombada e de uma pequena poça",
+    "largura": 1600,
+    "altura": 900
+  },
   "publicadoEm": "2026-10-26T09:00:00.000Z",
   "seo": {
     "titulo": "Derramou líquido no notebook: o que fazer agora"
