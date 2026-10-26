@@ -10,7 +10,12 @@
     "manutenção",
     "ssd"
   ],
-  "capa": null,
+  "capa": {
+    "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/aviso-de-pouco-espaco-em-disco-o-que-apagar-primeiro-9b7ea7a3.jpg",
+    "alt": "Gabinete de computador aberto sobre uma bancada, com uma unidade SSD e um HD externo ao lado",
+    "largura": 1600,
+    "altura": 900
+  },
   "publicadoEm": "2026-10-26T21:00:00.000Z",
   "formato": "dica",
   "roteiro": {

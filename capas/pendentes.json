@@ -1,13 +1,4 @@
 {
   "versao": 1,
-  "pendentes": [
-    {
-      "slug": "aviso-de-pouco-espaco-em-disco-o-que-apagar-primeiro",
-      "titulo": "Aviso de pouco espaço em disco: o que apagar primeiro e o que não tocar",
-      "categoria": "assistencia",
-      "alt": "Gabinete de computador aberto sobre uma bancada, com uma unidade SSD e um HD externo ao lado",
-      "pedido": "A desktop computer case with the side panel removed, standing on a clean light wooden workbench, an M.2 solid state drive and a small black external hard drive lying beside it. A switched-off monitor in the background, out of focus. Soft natural daylight from a window on the right, calm and tidy atmosphere, shallow depth of field.",
-      "pedidoEm": "2026-10-25T22:49:26.774Z"
-    }
-  ]
+  "pendentes": []
 }
