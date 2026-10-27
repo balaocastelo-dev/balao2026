@@ -1,0 +1,13 @@
+{
+  "appId": "info.balao.app",
+  "appName": "Balão da Informática",
+  "webDir": "www",
+  "appendUserAgent": "BalaoApp",
+  "backgroundColor": "#090d16",
+  "server": {
+    "url": "https://www.balao.info",
+    "androidScheme": "https",
+    "errorPath": "erro.html",
+    "allowNavigation": ["www.balao.info", "balao.info", "*.balao.info"]
+  }
+}
