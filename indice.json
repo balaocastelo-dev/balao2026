@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "imac-e-macbook-pro-14-com-m6-o-que-muda",
+      "titulo": "iMac e MacBook Pro de 14 polegadas com M6: o que muda para você",
+      "resumo": "A Apple anunciou em 27 de outubro de 2026 o iMac e o MacBook Pro de 14 polegadas com chip M6. Veja o que mudou e o que considerar antes de comprar.",
+      "categoria": "noticias",
+      "etiquetas": [
+        "apple",
+        "mac",
+        "macbook pro",
+        "imac"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-28T15:00:00.000Z",
+      "minutos": 4
+    },
+    {
       "slug": "ssd-de-500-gb-ou-1-tb-quanto-espaco-voce-usa",
       "titulo": "SSD de 500 GB ou de 1 TB: quanto espaço você usa de verdade",
       "resumo": "SSD de 500 GB ou de 1 TB? Veja quanto o Windows, os programas, os jogos e as fotos ocupam e qual tamanho combina com o seu uso sem apertar.",
@@ -917,5 +932,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-27T22:15:55.422Z"
+  "atualizadoEm": "2026-10-27T22:28:47.824Z"
 }

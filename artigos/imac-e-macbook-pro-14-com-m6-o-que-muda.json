@@ -1,0 +1,154 @@
+{
+  "slug": "imac-e-macbook-pro-14-com-m6-o-que-muda",
+  "titulo": "iMac e MacBook Pro de 14 polegadas com M6: o que muda para você",
+  "resumo": "A Apple anunciou em 27 de outubro de 2026 o iMac e o MacBook Pro de 14 polegadas com chip M6. Veja o que mudou e o que considerar antes de comprar.",
+  "categoria": "noticias",
+  "etiquetas": [
+    "apple",
+    "mac",
+    "macbook pro",
+    "imac"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-28T15:00:00.000Z",
+  "seo": {
+    "titulo": "iMac e MacBook Pro 14 com M6: o que muda para você"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Em 27 de outubro de 2026, a Apple anunciou duas máquinas com o novo chip M6: o MacBook Pro de 14 polegadas e o iMac de 24 polegadas. A pré-venda começa em 28 de outubro e as entregas, em 6 de novembro, em 35 países e regiões, segundo os comunicados da empresa."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que todo Mac anterior ficou ultrapassado de uma hora para outra. Não ficou: o M6 traz mais núcleos e conexões mais novas, mas a decisão de compra continua dependendo do uso e, principalmente, de quanta memória você escolhe, porque ela não pode ser trocada depois."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que a Apple anunciou"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O M6 chega com até 12 núcleos de processador e até 12 núcleos gráficos, dois a mais de cada do que a geração anterior, além de um Neural Engine duplo de 16 núcleos, a parte do chip dedicada a tarefas de inteligência artificial. A largura de banda da memória chega a 170 GB/s, de acordo com a Apple."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Item",
+        "MacBook Pro de 14 polegadas",
+        "iMac de 24 polegadas"
+      ],
+      "linhas": [
+        [
+          "Processador e gráfico",
+          "12 núcleos e 12 núcleos",
+          "10 e 10 núcleos, ou 12 e 12 núcleos"
+        ],
+        [
+          "Memória unificada",
+          "16 GB, configurável até 32 GB",
+          "Não informada no comunicado"
+        ],
+        [
+          "Tela",
+          "Liquid Retina XDR, opção nano-texture",
+          "Retina 4.5K, opção nano-texture nos modelos de 12 núcleos"
+        ],
+        [
+          "Conexões",
+          "HDMI, MagSafe 3, três Thunderbolt 4, leitor SDXC e fone",
+          "Até quatro Thunderbolt 4; Ethernet de 2,5 Gb nos modelos de 12 núcleos"
+        ],
+        [
+          "Sem fio",
+          "Wi-Fi 7 e Bluetooth 6",
+          "Wi-Fi 7 e Bluetooth 6"
+        ],
+        [
+          "Bateria",
+          "Até 24 horas, segundo a Apple",
+          "Não se aplica"
+        ],
+        [
+          "Cores",
+          "Preto espacial e prateado",
+          "Sete cores"
+        ]
+      ],
+      "titulo": "As duas máquinas com M6, lado a lado",
+      "fonte": {
+        "nome": "Apple Newsroom, 27 de outubro de 2026",
+        "url": "https://www.apple.com/newsroom/2026/10/apple-introduces-the-new-14-inch-macbook-pro-with-m6/"
+      }
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "As duas máquinas saem com o macOS 27. A MacRumors aponta que o MacBook Pro com M6 substitui o modelo de 14 polegadas com M5, e a 9to5Mac registra que o iMac mantém o mesmo desenho da versão anterior, com chip M4."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que isso muda para você"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem vai comprar agora:** o ponto que mais pesa continua sendo a memória. No MacBook Pro, a configuração básica tem 16 GB e vai até 32 GB. Quem edita vídeo, programa ou quer rodar IA no próprio computador costuma ganhar mais com memória extra do que com a geração do chip. O guia sobre [quanta memória escolher no Mac](/blog/quanta-memoria-escolher-no-mac) ajuda nessa conta."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem já tem um Mac com M4 ou M5:** a troca raramente se justifica só pelo M6. As diferenças estão em núcleos a mais, Wi-Fi 7 e Bluetooth 6. Se a máquina atende o seu trabalho, não há pressa. Se o problema é bateria fraca ou outro defeito, a [assistência para Mac](/reparoapple) pode avaliar se um conserto resolve antes de você partir para uma máquina nova."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "apple"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem ainda usa um Mac com processador Intel:** a Apple compara o novo MacBook Pro justamente com modelos Intel e com o de chip M1, e é aí que a diferença no dia a dia tende a ser maior. Antes de decidir entre os dois modelos, vale ler a comparação entre [MacBook Air e MacBook Pro](/blog/macbook-air-ou-macbook-pro-como-escolher)."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem pode esperar:** a chegada de uma geração nova costuma movimentar o mercado de usados. Um Mac com chip da Apple de uma geração anterior pode atender bem quem faz trabalho de escritório, e nos [seminovos](/seminovos) dá para ver a máquina ligada antes de pagar."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que ainda não se sabe"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Os comunicados não dizem se o Brasil está entre os 35 países da primeira leva, nem quando as máquinas chegam por aqui. O comunicado do iMac também não informa as opções de memória e armazenamento. A Apple não falou de versões com chips mais potentes da família M6."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, tem assistência técnica para iPhone, iPad e Mac e vende computadores novos e seminovos. Em uma linha: o M6 é um passo à frente, mas quem tem um Mac recente pode seguir com ele; quem vai comprar deve escolher primeiro a memória."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "seminovos"
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Apple introduces the new 14-inch MacBook Pro with M6 — Apple Newsroom",
+      "url": "https://www.apple.com/newsroom/2026/10/apple-introduces-the-new-14-inch-macbook-pro-with-m6/",
+      "data": "27 de outubro de 2026"
+    },
+    {
+      "nome": "Apple unveils new iMac with M6 — Apple Newsroom",
+      "url": "https://www.apple.com/newsroom/2026/10/apple-unveils-new-imac-with-m6/",
+      "data": "27 de outubro de 2026"
+    },
+    {
+      "nome": "Apple Announces New 14-Inch MacBook Pro With M6 Chip — MacRumors",
+      "url": "https://www.macrumors.com/2026/10/27/14-inch-macbook-pro-with-m6-chip/",
+      "data": "27 de outubro de 2026"
+    },
+    {
+      "nome": "Apple launches new iMac with powerful M6 chip — 9to5Mac",
+      "url": "https://9to5mac.com/2026/10/27/apple-launches-new-imac-with-powerful-m6-chip",
+      "data": "27 de outubro de 2026"
+    }
+  ]
+}
