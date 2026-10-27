@@ -35,11 +35,16 @@ jobs:
           distribution: "temurin"
           java-version: "17"
 
-      - name: Android SDK
-        uses: android-actions/setup-android@v3
+      # O runner do GitHub já vem com o Android SDK instalado (ANDROID_SDK_ROOT).
+      # Só aceitamos as licenças e garantimos a plataforma/build-tools usados pelo
+      # Capacitor 6. (A action setup-android tropeçava na aceitação das licenças.)
+      - name: Aceitar licenças do Android SDK
+        run: yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null 2>&1 || true
 
-      - name: Instalar plataformas do Android
-        run: sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+      - name: Garantir plataforma e build-tools
+        run: |
+          "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" \
+            "platform-tools" "platforms;android-34" "build-tools;34.0.0"
 
       - name: Instalar dependências do Capacitor
         working-directory: app-mobile
