@@ -43,8 +43,14 @@ export default function VendedorWorkspace({
   }, [caminho, vendedor.slug]);
 
   return (
-    <div className="flex h-full min-h-screen flex-col bg-slate-100">
-      <div className="flex items-center gap-1 border-b border-slate-200 bg-white px-2">
+    <div className="flex h-[100dvh] flex-col overflow-hidden bg-slate-100">
+      {/* No celular, durante o atendimento, as abas somem: a tela é só da
+          conversa, como no WhatsApp. "Enviar promoção" fica no menu ⋮. */}
+      <div
+        className={`items-center gap-1 overflow-x-auto border-b border-slate-200 bg-white px-2 ${
+          aba === "atendimento" ? "hidden md:flex" : "flex"
+        }`}
+      >
         <button
           onClick={() => setAba("atendimento")}
           className={`inline-flex items-center gap-1.5 border-b-2 px-3 py-2.5 text-sm font-bold transition-colors ${
@@ -63,13 +69,14 @@ export default function VendedorWorkspace({
               : "border-transparent text-slate-500 hover:text-slate-800"
           }`}
         >
-          <Megaphone size={16} /> Enviar promoção
+          <Megaphone size={16} /> <span className="whitespace-nowrap">Enviar promoção</span>
         </button>
       </div>
 
-      <div className="min-h-0 flex-1">
+      <div className={`min-h-0 flex-1 ${aba === "atendimento" ? "" : "overflow-y-auto"}`}>
         {aba === "atendimento" ? (
           <CrmWhatsAppClient
+            menuExtra={[{ rotulo: "📣 Enviar promoção", aoTocar: () => setAba("promocao") }]}
             vendedorFixo={{
               id: vendedor.id,
               nome: vendedor.nome,
