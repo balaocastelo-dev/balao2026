@@ -29,7 +29,12 @@
         "lançamento",
         "tablet"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/novo-ipad-mini-oled-a20-pro-o-que-muda-6fcd6a9c.jpg",
+        "alt": "Tablet pequeno de tela apagada deitado sobre uma mesa de madeira clara, ao lado de uma caneta digital branca e de uma xícara",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-10-27T15:00:00.000Z",
       "minutos": 3
     },
@@ -892,5 +897,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-27T01:02:52.377Z"
+  "atualizadoEm": "2026-10-27T01:04:22.857Z"
 }
