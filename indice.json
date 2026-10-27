@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "ssd-de-500-gb-ou-1-tb-quanto-espaco-voce-usa",
+      "titulo": "SSD de 500 GB ou de 1 TB: quanto espaço você usa de verdade",
+      "resumo": "SSD de 500 GB ou de 1 TB? Veja quanto o Windows, os programas, os jogos e as fotos ocupam e qual tamanho combina com o seu uso sem apertar.",
+      "categoria": "guias",
+      "etiquetas": [
+        "ssd",
+        "armazenamento",
+        "upgrade",
+        "windows"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-28T09:00:00.000Z",
+      "minutos": 10
+    },
+    {
       "slug": "como-identificar-o-modelo-exato-do-notebook",
       "titulo": "Como identificar o modelo exato do notebook para comprar a peça certa",
       "resumo": "O nome comercial do notebook não basta para comprar peça. Veja onde achar o modelo completo e o número de série: na etiqueta, no Windows e no setup.",
@@ -902,5 +917,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-27T08:37:16.409Z"
+  "atualizadoEm": "2026-10-27T22:15:55.422Z"
 }

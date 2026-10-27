@@ -1,0 +1,281 @@
+{
+  "slug": "ssd-de-500-gb-ou-1-tb-quanto-espaco-voce-usa",
+  "titulo": "SSD de 500 GB ou de 1 TB: quanto espaço você usa de verdade",
+  "resumo": "SSD de 500 GB ou de 1 TB? Veja quanto o Windows, os programas, os jogos e as fotos ocupam e qual tamanho combina com o seu uso sem apertar.",
+  "categoria": "guias",
+  "etiquetas": [
+    "ssd",
+    "armazenamento",
+    "upgrade",
+    "windows"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-28T09:00:00.000Z",
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Na hora de comprar um computador ou trocar o disco, a dúvida entre SSD de 500 GB ou de 1 TB aparece quase sempre. Parece pouca coisa, mas é uma escolha que acompanha a máquina por anos: espaço que falta vira aviso de disco cheio, arquivos espalhados por pen drives e programas que se recusam a atualizar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é escolher pelo tamanho dos seus arquivos de hoje. O sistema, as atualizações, os programas e a folga de que o SSD precisa para trabalhar bem ocupam bem mais do que parece. Para quem só navega, usa e-mail e escritório, 500 GB costuma bastar com folga. Para quem joga, edita vídeo ou guarda fotos no próprio computador, 1 TB é o ponto de partida mais seguro."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "Um SSD vendido como 1 TB aparece no Windows com **cerca de 931 GB**: é só outra forma de contar, não defeito.",
+        "O Windows 11 pede **64 GB ou mais** de espaço só para ser instalado, e a Microsoft avisa que as atualizações podem pedir mais com o tempo.",
+        "Uso de escritório e internet cabe em **500 GB**; jogos, vídeo e bibliotecas grandes de fotos pedem **1 TB ou mais**.",
+        "Não encha o SSD até o fim: a **folga** ajuda o próprio disco a manter o desempenho e a durar."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Por que o disco de 1 TB aparece com 931 GB"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O primeiro susto de quem instala um SSD novo é ver menos espaço do que está na caixa. A explicação está na conta. Os fabricantes de disco contam em base decimal, em que cada degrau vale mil: 1 TB são um trilhão de bytes. O Windows conta em base binária, em que cada degrau vale 1.024. O mesmo número de bytes, dividido de outro jeito, resulta em um valor menor."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A TerraMaster, fabricante de equipamentos de armazenamento, mostra o exemplo clássico: um disco de 1 TB aparece com cerca de 931 GB no computador. Pela mesma conta, um SSD de 500 GB aparece com algo perto de 465 GB, e um de 2 TB, com cerca de 1.862 GB. Nada sumiu: o espaço é o mesmo, medido com outra régua."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Na prática, isso significa que a diferença entre os dois tamanhos é um pouco menor do que os números da caixa sugerem, mas a proporção se mantém: o SSD de 1 TB tem o dobro do espaço do de 500 GB. É com o número que o Windows mostra que você deve fazer as contas deste guia."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Vendido como",
+        "Aparece no Windows (aprox.)",
+        "Depois de instalar o Windows 11"
+      ],
+      "linhas": [
+        [
+          "500 GB",
+          "465 GB",
+          "Cerca de 400 GB livres"
+        ],
+        [
+          "1 TB",
+          "931 GB",
+          "Cerca de 865 GB livres"
+        ],
+        [
+          "2 TB",
+          "1.862 GB",
+          "Cerca de 1.800 GB livres"
+        ]
+      ],
+      "titulo": "Quanto espaço cada SSD mostra no Windows",
+      "colunaDestaque": 2,
+      "fonte": {
+        "nome": "TerraMaster — diferença entre a capacidade marcada e a exibida",
+        "url": "https://www.terra-master.com/blogs/tdas-faq/why-is-the-hard-drive-capacity-displayed-on-the-computer-different-from-that-marked-on-the-hard-drive"
+      },
+      "nota": "A segunda coluna segue a conta decimal contra binária explicada pela fonte. A terceira desconta só os 64 GB mínimos que a Microsoft pede para o Windows 11; programas, atualizações e arquivos vêm depois disso."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que ocupa espaço antes dos seus arquivos"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Antes de pensar em fotos e documentos, o disco já recebe o sistema. A página de requisitos do Windows 11 informa que a instalação pede 64 GB ou mais de espaço disponível. E a própria Microsoft acrescenta que podem surgir exigências maiores com o tempo, para atualizações e para ativar certos recursos do sistema. Ou seja, o espaço do Windows tende a crescer, não a diminuir."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O Windows também separa uma parte do disco para si. Segundo o suporte da Microsoft, o armazenamento reservado existe para que as atualizações sejam instaladas sem falhar e o computador continue estável. Ele guarda arquivos temporários e caches, e você pode ver quanto ocupa em Configurações, Sistema, Armazenamento, na categoria Sistema e reservado."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Depois vêm os programas. Navegador, pacote de escritório e aplicativos de reunião ocupam relativamente pouco. Programas de edição de imagem, de vídeo, de engenharia e arquitetura pesam bem mais, e alguns guardam arquivos temporários grandes enquanto trabalham. Mas o que costuma decidir a conta são os jogos e os arquivos de mídia, que veremos a seguir."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Jogos, fotos e vídeos: o que realmente enche o SSD"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Jogo atual é o maior consumidor de espaço em um computador doméstico. Um exemplo: a página de requisitos do Battlefield 6, no site da EA, pede 55 GiB de espaço na configuração mínima e 80 GiB em SSD na recomendada. Com as atualizações e conteúdos adicionais, títulos desse porte costumam crescer depois de instalados. Meia dúzia deles já ocupa boa parte de um SSD de 500 GB."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Fotos e vídeos são o segundo vilão, e o mais traiçoeiro, porque crescem devagar. Quem copia o celular para o computador, guarda vídeos de família ou trabalha com fotografia vê o espaço sumir ao longo de meses. Vídeo em alta resolução ocupa muito mais do que foto, e projetos de edição costumam guardar várias versões do mesmo material."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas há uma ressalva importante: nem tudo precisa morar no SSD interno. Acervo de fotos antigas, vídeos já editados e cópias de segurança podem ficar em um [SSD externo](/blog/ssd-externo-como-escolher) ou em outro disco. O SSD principal rende mais quando guarda o sistema, os programas e aquilo com que você trabalha agora."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "upgrade"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quanto espaço cada perfil costuma precisar"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Com essas peças na mesa, dá para separar os usos em perfis. A tabela abaixo é um ponto de partida, não uma regra: o que vale é o seu hábito. Se você já tem um computador, veja quanto usa hoje em Configurações, Sistema, Armazenamento, e some o que pretende acrescentar nos próximos anos."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Perfil de uso",
+        "O que pesa",
+        "Tamanho indicado"
+      ],
+      "linhas": [
+        [
+          "Internet, e-mail, escritório e estudo",
+          "Sistema e programas leves",
+          "500 GB"
+        ],
+        [
+          "Escritório com muitos arquivos e fotos do celular",
+          "Documentos, planilhas e acervo de fotos",
+          "500 GB a 1 TB"
+        ],
+        [
+          "Jogos atuais",
+          "Cada jogo pode passar de 50 GB",
+          "1 TB ou mais"
+        ],
+        [
+          "Edição de vídeo, fotografia e projetos de engenharia",
+          "Arquivos grandes e temporários",
+          "1 TB a 2 TB, com disco extra para acervo"
+        ]
+      ],
+      "titulo": "Qual tamanho de SSD combina com cada uso",
+      "colunaDestaque": 2,
+      "nota": "Os tamanhos consideram a folga recomendada para o SSD e alguns anos de uso. O exemplo de jogo vem da página de requisitos do Battlefield 6, listada nas fontes."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Repare que o perfil de escritório aparece em duas linhas. A diferença está nos arquivos: quem trabalha só com textos e planilhas mal sente os 500 GB; quem descarrega o celular no computador toda semana chega ao limite mais rápido do que imagina. Na dúvida entre as duas linhas, o tamanho maior evita a troca de disco no meio do caminho."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Por que não vale encher o SSD até o fim"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Um SSD não grava como um HD. A memória flash dele pode ser escrita em pedaços pequenos, chamados páginas, mas só pode ser apagada em blocos maiores. Para reaproveitar um bloco, o controlador do disco precisa mover os dados ainda válidos para outro lugar e só então apagar o bloco inteiro. É um trabalho de arrumação que acontece o tempo todo, sem você ver."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Kingston explica que manter blocos vazios em reserva ajuda o SSD a manter o desempenho constante e a espalhar o desgaste pelas células, o que prolonga a vida do disco. Por isso os fabricantes já escondem uma parte da capacidade para esse fim. O comando TRIM, que o Windows envia ao apagar arquivos, também ajuda o disco a saber o que pode ser liberado."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A consequência prática é simples: um SSD sempre no limite trabalha com menos espaço para essa arrumação, e o próprio Windows passa a ter dificuldade de instalar atualizações. Não existe um número mágico, mas planejar o tamanho de modo que sobre uma folga confortável depois de alguns anos de uso é o caminho mais seguro."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "Espaço para jogos, vídeos e programas pesados sem malabarismo",
+        "Folga para o SSD trabalhar bem por mais tempo",
+        "Menos chance de precisar trocar o disco em poucos anos",
+        "Atualizações do Windows instalam sem aviso de espaço"
+      ],
+      "contras": [
+        "Custa mais, e esse valor poderia ir para memória ou processador",
+        "Para uso leve, boa parte do espaço pode ficar sem uso",
+        "Em alguns notebooks, o disco que vem de fábrica não é fácil de trocar depois"
+      ],
+      "titulo": "SSD de 1 TB em vez de 500 GB"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando 500 GB basta e quando é melhor ir para 1 TB"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O SSD de 500 GB faz sentido em computador de escritório, de estudo ou de recepção, em que os arquivos importantes ficam na nuvem ou em um servidor e o uso é previsível. Também serve em desktop que tem espaço para um segundo disco: dá para começar com 500 GB e acrescentar outro SSD ou um HD quando precisar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O de 1 TB é a escolha mais segura para quem joga, edita, guarda fotos no computador ou simplesmente não quer pensar em espaço pelos próximos anos. Em notebook, o peso é maior, porque muitos modelos têm um único encaixe para SSD, e trocar o disco depois significa copiar tudo de novo. Mas, se o notebook tem um segundo encaixe livre, a decisão fica menos crítica."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Um último cuidado: tamanho não é velocidade. Um SSD de 1 TB não é automaticamente mais rápido que um de 500 GB, e o tipo de conexão também pesa na escolha. Se essa dúvida também é sua, o guia sobre [NVMe Gen 3, Gen 4 e Gen 5](/blog/nvme-gen-3-gen-4-gen-5-diferenca) explica o que muda no dia a dia. E se o seu disco já está apertado, veja [o que apagar primeiro](/blog/aviso-de-pouco-espaco-em-disco-o-que-apagar-primeiro)."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Trocar o SSD ou montar com o tamanho certo em Campinas"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se o seu computador já está com o disco cheio, a Balão da Informática, no Cambuí, em Campinas, tem [assistência técnica](/manutencao) no mesmo endereço da loja e faz upgrade e troca de peça, incluindo a passagem do sistema e dos arquivos para um SSD maior. A equipe confere quantos encaixes a sua máquina tem antes de você decidir."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Para quem vai comprar, a loja faz [montagem de PC sob medida](/montagempc) e tem [notebooks](/notebooks) novos e seminovos, e você pode ver o computador ligado e testar antes de pagar. A decisão, em uma linha: 500 GB para uso leve e previsível, 1 TB para jogos, mídia e para quem não quer trocar de disco tão cedo."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "montagem"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Por que meu SSD de 1 TB mostra só 931 GB?",
+      "resposta": "Porque o fabricante conta em base decimal, em que cada degrau vale mil, e o Windows conta em base binária, em que cada degrau vale 1.024. O espaço é o mesmo, só medido de outro jeito. Não é defeito nem espaço perdido."
+    },
+    {
+      "pergunta": "500 GB é suficiente para o Windows 11?",
+      "resposta": "Sim. A Microsoft pede 64 GB ou mais para instalar o sistema, e sobra bastante espaço para programas de escritório e documentos. O limite aparece quando entram jogos, vídeos e grandes bibliotecas de fotos."
+    },
+    {
+      "pergunta": "Posso deixar o SSD quase cheio?",
+      "resposta": "Não é recomendado. O SSD usa espaço livre para reorganizar os dados e distribuir o desgaste, e o Windows precisa de folga para instalar atualizações. Planeje o tamanho para sobrar espaço mesmo depois de alguns anos."
+    },
+    {
+      "pergunta": "SSD de 1 TB é mais rápido que o de 500 GB?",
+      "resposta": "Não necessariamente. A velocidade depende principalmente do tipo de conexão e do modelo do SSD, e não só da capacidade. Compare a ficha técnica dos dois modelos antes de decidir."
+    },
+    {
+      "pergunta": "Dá para colocar um segundo SSD depois?",
+      "resposta": "Depende do computador. Muitos desktops têm encaixes extras para SSD ou HD, e alguns notebooks têm um segundo encaixe livre. Outros notebooks têm um só, e aí a saída é trocar o disco por um maior."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Microsoft — Windows 11 requirements",
+      "url": "https://learn.microsoft.com/windows/whats-new/windows-11-requirements",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Microsoft — Storage settings in Windows (armazenamento reservado)",
+      "url": "https://support.microsoft.com/en-us/help/4496396/windows-10-how-reserved-storage-works",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "TerraMaster — Why is the hard drive capacity displayed on the computer different from that marked on the hard drive?",
+      "url": "https://www.terra-master.com/blogs/tdas-faq/why-is-the-hard-drive-capacity-displayed-on-the-computer-different-from-that-marked-on-the-hard-drive",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Kingston — Understanding SSD Over-provisioning (OP)",
+      "url": "https://kingston.com/en/ssd/overprovisioning",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "EA — Battlefield 6: requisitos de sistema",
+      "url": "https://www.ea.com/pt-br/games/battlefield/battlefield-6/system-requirements",
+      "data": "consultado em outubro de 2026"
+    }
+  ]
+}
