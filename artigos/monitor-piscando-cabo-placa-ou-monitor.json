@@ -1,0 +1,178 @@
+{
+  "slug": "monitor-piscando-cabo-placa-ou-monitor",
+  "titulo": "Monitor piscando: cabo, placa de vídeo ou o próprio monitor?",
+  "resumo": "Monitor piscando quase sempre tem causa que dá para isolar em casa: cabo, ajuste, driver ou o painel. Veja os testes, na ordem, e quando é hora da assistência.",
+  "categoria": "assistencia",
+  "etiquetas": [
+    "monitor",
+    "placa de vídeo",
+    "diagnóstico",
+    "windows",
+    "manutenção"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-28T21:00:00.000Z",
+  "formato": "dica",
+  "roteiro": {
+    "fala": "Monitor piscando? Antes de trocar qualquer coisa, faça um teste simples. Abra o Gerenciador de Tarefas. Se ele pisca junto com o resto da tela, a suspeita é o driver da placa de vídeo. Se só o resto pisca, o problema costuma ser um programa. Depois troque o cabo e confira se ele está na saída da placa de vídeo. E se o monitor pisca até sem cabo nenhum, aí é o próprio monitor.",
+    "titulo": "Monitor piscando: de quem é a culpa",
+    "destaques": [
+      "Teste do Gerenciador de Tarefas",
+      "Troque o cabo",
+      "Confira a taxa de atualização",
+      "Autoteste do monitor"
+    ],
+    "legenda": "Monitor piscando nem sempre é defeito do monitor. Veja os testes, na ordem certa, para descobrir se é o cabo, a placa de vídeo, um programa ou o painel. A dica completa está no blog.",
+    "hashtags": [
+      "monitor",
+      "placadevideo",
+      "windows",
+      "dicas",
+      "informatica",
+      "campinas"
+    ]
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Monitor piscando costuma ter uma de quatro origens: o cabo de vídeo, um ajuste errado de taxa de atualização, o driver da placa de vídeo ou um programa, e, por último, o próprio monitor. Dá para descobrir qual é em casa, em poucos minutos, sem abrir nada, seguindo os testes na ordem certa."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é concluir logo que o monitor estragou e comprar outro. Muitas vezes a troca não resolve, porque a causa estava no cabo ou no driver. O caminho mais curto é eliminar o que é barato e fácil primeiro e deixar o monitor por último: ele é a peça mais cara da lista."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "Abra o **Gerenciador de Tarefas**: se ele pisca junto, a suspeita é o driver; se não pisca, é um programa.",
+        "Troque o **cabo** e ligue na saída da **placa de vídeo**, não na da placa-mãe.",
+        "Confira a **taxa de atualização** e desligue o overclock do monitor e recursos como G-Sync em monitor não compatível.",
+        "Se o monitor pisca no **autoteste**, sem cabo nenhum, o defeito é dele."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Os testes, na ordem, para achar o culpado"
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "**Reinicie o driver de vídeo.** No Windows, aperte a tecla do Windows com Ctrl, Shift e B ao mesmo tempo. A tela apaga por um instante e o sistema dá um aviso sonoro, o que é normal. Se não adiantar, reinicie o computador.",
+        "**Faça o teste do Gerenciador de Tarefas.** Abra com Ctrl + Shift + Esc. Segundo a Microsoft, se ele pisca junto com o resto da tela, a causa provável é o driver de vídeo; se ele fica parado e o resto pisca, a causa provável é um aplicativo incompatível.",
+        "**Troque o cabo.** Um cabo com defeito interrompe o sinal. Use outro cabo, de preferência um que funcione em outro monitor, e confira se os dois lados estão bem encaixados.",
+        "**Confira a porta.** Em computador com placa de vídeo separada, o cabo vai nas saídas da placa, normalmente mais embaixo na traseira do gabinete, e não na saída da placa-mãe.",
+        "**Confira a taxa de atualização.** No Windows 11: Configurações, Sistema, Tela, Vídeo avançado, e escolha uma taxa da lista. Se o monitor tem a opção de overclock no menu dele, desligue.",
+        "**Rode o autoteste do monitor.** Muitos monitores têm um teste interno, feito com o cabo de vídeo desconectado; o manual do seu modelo diz como acionar. Se o monitor pisca ou mostra linhas durante o autoteste, o problema é o painel."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se o teste apontou para o driver, a Microsoft indica, no Gerenciador de Dispositivos, em Adaptadores de vídeo, primeiro **reverter o driver** quando o problema começou depois de uma atualização; senão, atualizar com o driver do fabricante do computador ou da placa. Se apontou para um programa, desinstale os instalados recentemente, um de cada vez, e reinicie entre um e outro."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que cada sinal costuma indicar, e quando a dica não basta"
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "O que você vê",
+        "Suspeita",
+        "O que fazer"
+      ],
+      "linhas": [
+        [
+          "Gerenciador de Tarefas pisca junto",
+          "Driver de vídeo",
+          "Reverter ou atualizar o driver"
+        ],
+        [
+          "Só o resto da tela pisca",
+          "Um programa",
+          "Atualizar ou desinstalar, um de cada vez"
+        ],
+        [
+          "Pisca ao mexer no cabo",
+          "Cabo ou conector",
+          "Trocar o cabo e testar outra porta"
+        ],
+        [
+          "Pisca só em taxa alta ou com G-Sync",
+          "Ajuste do monitor",
+          "Baixar a taxa e desligar overclock e G-Sync"
+        ],
+        [
+          "Pisca até no autoteste, sem cabo",
+          "O próprio monitor",
+          "Levar para avaliação"
+        ]
+      ],
+      "titulo": "Sinal e suspeita mais provável",
+      "colunaDestaque": 1,
+      "fonte": {
+        "nome": "Suporte da Microsoft e Suporte da Dell",
+        "url": "https://support.microsoft.com/pt-BR/Windows/Hardware/Display-Graphics/troubleshoot-screen-flickering-in-windows"
+      },
+      "nota": "Os nomes dos menus mudam um pouco conforme a versão do Windows e o modelo do monitor."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Em monitor gamer, a Dell lembra que alguns modelos piscam com o G-Sync da Nvidia ligado quando não são compatíveis com ele, e que recursos de nitidez de movimento, como MPRT e ULMB, também podem causar a cintilação. Ela recomenda ainda tirar da mesma régua outros aparelhos ligados junto com o monitor, porque interferência elétrica também faz a imagem piscar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A dica não basta quando tudo passou e o problema continua, ou quando a imagem pisca em qualquer computador e com qualquer cabo. Aí pode ser a placa de vídeo, que precisa ser testada em outra máquina, ou o painel. Não abra o monitor: a parte de energia dele guarda carga elétrica mesmo desligada da tomada."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Na Balão da Informática, no Cambuí, em Campinas, a [assistência técnica](/manutencao) faz o diagnóstico testando o monitor, o cabo e a placa separadamente. Se a conclusão for trocar, vale ver os [monitores](/categoria/computadores-monitores-monitor-gamer) e o guia de [como escolher monitor para trabalho](/blog/como-escolher-monitor-para-trabalho). Em uma linha: teste o Gerenciador de Tarefas, troque o cabo e só depois culpe o monitor."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "placas-de-video"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Monitor piscando pode ser vírus?",
+      "resposta": "É raro. Quando só o resto da tela pisca e o Gerenciador de Tarefas fica parado, a Microsoft aponta como causa provável um aplicativo incompatível. Atualize ou desinstale os programas recentes, um de cada vez."
+    },
+    {
+      "pergunta": "Cabo HDMI barato faz o monitor piscar?",
+      "resposta": "Um cabo com defeito, mal encaixado ou que não aguenta a resolução e a taxa usadas pode interromper o sinal e fazer a imagem piscar. Trocar o cabo é um dos primeiros testes, e o mais barato."
+    },
+    {
+      "pergunta": "Se o monitor pisca no autoteste, tem conserto?",
+      "resposta": "Depende do defeito e do modelo. O autoteste mostra que o problema está no monitor, e não no computador, mas só a avaliação técnica diz se o conserto compensa."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Solucionar problemas de cintilação da tela no Windows — Suporte da Microsoft",
+      "url": "https://support.microsoft.com/pt-BR/Windows/Hardware/Display-Graphics/troubleshoot-screen-flickering-in-windows",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Troubleshooting Flickering Video on Dell Gaming or Alienware Monitors — Suporte da Dell",
+      "url": "https://www.dell.com/support/kbdoc/000175292/troubleshooting-flickering-video-on-dell-gaming-monitors",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Fix Dell Monitor Display Issues — Suporte da Dell",
+      "url": "https://www.dell.com/support/article/SLN155134/en",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Monitor Turns Off When Trying to Play Video or Game — Suporte da Intel",
+      "url": "https://www.intel.com/content/www/us/en/support/articles/000089717/processors.html",
+      "data": "outubro de 2026"
+    }
+  ]
+}
