@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Balão da Informática</title>
+    <style>
+      html, body { height: 100%; margin: 0; background: #090d16; color: #fff;
+        font: 500 15px/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        -webkit-tap-highlight-color: transparent; }
+      body { display: flex; flex-direction: column; align-items: center; justify-content: center;
+        gap: 20px; padding: 24px; box-sizing: border-box; text-align: center; }
+      .marca { font-size: 20px; font-weight: 900; letter-spacing: -0.02em; }
+      .marca span { color: #E60012; }
+      p { margin: 0; color: #94a3b8; max-width: 30ch; }
+      button { appearance: none; min-height: 48px; padding: 0 24px; border: none; border-radius: 14px;
+        background: #E60012; color: #fff; font: inherit; font-weight: 800; }
+      button:active { opacity: .85; }
+    </style>
+  </head>
+  <body>
+    <div class="marca">Balão da <span>Informática</span></div>
+    <p>Sem conexão com a internet. Confira sua rede e tente de novo.</p>
+    <button onclick="location.replace('https://www.balao.info')">Tentar de novo</button>
+  </body>
+</html>

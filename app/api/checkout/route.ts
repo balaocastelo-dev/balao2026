@@ -6,6 +6,7 @@ import { validateCoupon } from "@/lib/coupons";
 import { isTursoActive } from "@/lib/turso";
 import { getCachedProductByIdentifier } from "@/lib/cache";
 import { reprecificar, type ItemEnviado } from "@/lib/carrinho/precos";
+import { pedidoVeioDoApp, DESCONTO_APP_PIX, emCentavos } from "@/lib/app-balao";
 import type { Product } from "@/lib/utils";
 
 /**
@@ -143,6 +144,15 @@ export async function POST(req: Request) {
     }));
     const calculatedTotalItems = repreco.subtotal;
 
+    // Desconto extra de 15% no Pix para quem comprou PELO APP. Lido do
+    // User-Agent no servidor (não do navegador), igual a loja já faz com o
+    // cron da Vercel. Ver lib/app-balao.ts. Fora do app, descontoApp = 0.
+    const ehApp = pedidoVeioDoApp(req);
+    const descontoApp = ehApp ? emCentavos(calculatedTotalItems * DESCONTO_APP_PIX) : 0;
+    if (ehApp) {
+        console.log(`[Checkout] Pedido pelo app: -15% no Pix = -R$ ${descontoApp.toFixed(2)}`);
+    }
+
     let calculatedDiscount = 0;
     if (couponCode) {
         try {
@@ -157,8 +167,11 @@ export async function POST(req: Request) {
         }
     }
 
-    const expectedTotal = Math.max(0, calculatedTotalItems - calculatedDiscount + parsedShippingCost);
-    
+    // Desconto do app + cupom somam. O piso de 0 e o recálculo pelo banco
+    // garantem que nunca saia um total negativo nem o valor que o cliente mandou.
+    const descontoTotal = emCentavos(calculatedDiscount + descontoApp);
+    const expectedTotal = Math.max(0, calculatedTotalItems - descontoTotal + parsedShippingCost);
+
     // Check for discrepancy (> 0.10 to allow minor rounding diffs)
     if (Math.abs(expectedTotal - Number(total)) > 0.1) {
         console.warn(`[Checkout] CRITICAL: Price mismatch! Received: ${total}, Calculated: ${expectedTotal}. Using calculated value.`);
@@ -186,8 +199,8 @@ export async function POST(req: Request) {
       },
       total: expectedTotal,
       status: 'pending' as const,
-      coupon_code: couponCode,
-      discount_value: calculatedDiscount
+      coupon_code: couponCode || (ehApp ? "APP15" : undefined),
+      discount_value: descontoTotal
     };
 
     const orderItems = cleanItems.map((item) => ({
@@ -235,7 +248,7 @@ export async function POST(req: Request) {
     
     // E-mail para o Cliente usando Template
     const emailHtml = getOrderCustomerWhatsAppTemplate(
-      { ...orderData, id: order.id, discount_value: calculatedDiscount },
+      { ...orderData, id: order.id, discount_value: descontoTotal },
       orderItems,
       relatedProducts,
       { whatsappNumber: "19987510267" }
@@ -270,7 +283,7 @@ export async function POST(req: Request) {
           cost: parsedShippingCost
         },
         couponCode: couponCode || null,
-        discountValue: typeof calculatedDiscount === "number" ? calculatedDiscount : null,
+        discountValue: typeof descontoTotal === "number" ? descontoTotal : null,
         total: expectedTotal,
         items: orderItems.map((it) => ({
           productId: it.product_id,

@@ -8,6 +8,8 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import ApplyCoupon from "@/components/ApplyCoupon";
+import { useEhApp } from "@/lib/useEhApp";
+import { DESCONTO_APP_PIX, emCentavos, ROTULO_APP_PIX } from "@/lib/app-balao";
 import { calculateShipping as getShippingOptions } from "@/lib/shipping";
 import { quedaDoProduto } from "@/lib/precos/queda";
 import type { Product } from "@/lib/utils";
@@ -58,7 +60,12 @@ export default function CartPage() {
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [appliedCouponCode, setAppliedCouponCode] = useState("");
 
-  const finalTotal = Math.max(0, cartTotal - couponDiscount);
+  // No app, 15% a mais de desconto no Pix sobre o subtotal. O servidor recalcula
+  // esse mesmo desconto no checkout (lib/app-balao.ts), então os dois batem.
+  const ehApp = useEhApp();
+  const descontoApp = ehApp ? emCentavos(cartTotal * DESCONTO_APP_PIX) : 0;
+
+  const finalTotal = Math.max(0, cartTotal - couponDiscount - descontoApp);
   const [shippingOptions, setShippingOptions] = useState<ShippingOption[] | null>(null);
   const [shippingSelected, setShippingSelected] = useState<ShippingOption | null>(null);
   const totalWithShipping = Math.max(0, finalTotal + (shippingSelected?.cost ?? 0));
@@ -659,6 +666,13 @@ export default function CartPage() {
                             <div className="flex justify-between text-green-600 font-medium">
                                 <span>Desconto ({appliedCouponCode})</span>
                                 <span>- {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(couponDiscount)}</span>
+                            </div>
+                        )}
+
+                        {descontoApp > 0 && (
+                            <div className="flex justify-between text-[#E60012] font-medium">
+                                <span>Desconto do app ({ROTULO_APP_PIX})</span>
+                                <span>- {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(descontoApp)}</span>
                             </div>
                         )}
 

@@ -11,6 +11,7 @@ import ProductActions from '@/components/ProductActions';
 import AvisoDeQuedaDePreco from '@/components/AvisoDeQuedaDePreco';
 import ShippingCalculator from '@/components/ShippingCalculator';
 import ProductMediaSwitcher from '@/components/ProductMediaSwitcher';
+import SeloAppPix from '@/components/SeloAppPix';
 import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema, generateProductSchema } from '@/components/JsonLd';
 import { getProductHref } from '@/lib/utils';
 import { getCachedCategories, getCachedProductByIdentifier } from "@/lib/cache";
@@ -195,6 +196,7 @@ export default async function ProductPage({ params }: Props) {
                              <div className="text-sm font-medium text-[var(--site-soft)] mt-1">
                                  à vista no PIX com <strong>{product.discount_pix || "10% de desconto"}</strong>
                              </div>
+                             <SeloAppPix price={product.price} />
                           </div>
 
                           {/* Installment Price */}

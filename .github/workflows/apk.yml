@@ -1,0 +1,74 @@
+name: Build APK do app
+
+# Compila o app Android (casca Capacitor em app-mobile/) na nuvem e publica o
+# APK numa release do GitHub. A página /apk do site aponta sempre para a release
+# mais nova (releases/latest/download/balao-da-informatica.apk).
+#
+# Rodar na mão: aba Actions -> "Build APK do app" -> Run workflow.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "app-mobile/**"
+      - ".github/workflows/apk.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Java 17 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Instalar plataformas do Android
+        run: sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+
+      - name: Instalar dependências do Capacitor
+        working-directory: app-mobile
+        run: npm install
+
+      - name: Gerar o projeto Android
+        working-directory: app-mobile
+        run: |
+          npx cap add android
+          npx cap sync android
+
+      - name: Compilar o APK (debug)
+        working-directory: app-mobile/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Renomear o APK
+        run: |
+          mkdir -p dist
+          cp app-mobile/android/app/build/outputs/apk/debug/app-debug.apk dist/balao-da-informatica.apk
+
+      - name: Publicar na release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: app-build-${{ github.run_number }}
+          name: App Balão — build ${{ github.run_number }}
+          body: |
+            APK do app do Balão da Informática (abre www.balao.info, 15% a mais no Pix).
+            Baixe em: https://github.com/${{ github.repository }}/releases/latest/download/balao-da-informatica.apk
+          make_latest: true
+          files: dist/balao-da-informatica.apk

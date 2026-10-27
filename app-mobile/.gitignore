@@ -1,0 +1,5 @@
+# Capacitor gera estas pastas no build (local e no CI). Não versionar.
+node_modules/
+android/
+package-lock.json
+.DS_Store
