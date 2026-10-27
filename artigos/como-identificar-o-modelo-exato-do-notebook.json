@@ -10,7 +10,12 @@
     "windows",
     "manutenção"
   ],
-  "capa": null,
+  "capa": {
+    "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/como-identificar-o-modelo-exato-do-notebook-5faa651a.jpg",
+    "alt": "Placa-mãe de computador com um pente de memória e uma chave de fenda sobre uma bancada de madeira clara",
+    "largura": 1600,
+    "altura": 900
+  },
   "publicadoEm": "2026-10-27T21:00:00.000Z",
   "formato": "dica",
   "roteiro": {
