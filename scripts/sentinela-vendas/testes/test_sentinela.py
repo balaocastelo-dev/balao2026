@@ -35,13 +35,27 @@ class Testes(unittest.TestCase):
 
     def test_resumo_ignora_cancelada_e_mostra_vendedores(self):
         t = s.resumo(RESPOSTA, "Vendas de hoje")
-        self.assertIn("R$ 1.800,00", t); self.assertIn("2 pedidos", t); self.assertIn("ticket R$ 900,00", t)
+        self.assertIn("R$ 1.800,00", t); self.assertIn("Pedidos: <b>2</b>", t); self.assertIn("Ticket médio: <b>R$ 900,00", t)
         self.assertIn("1 cancelada", t); self.assertIn("Maria Silva", t); self.assertNotIn("9.999", t)
-        self.assertIn("Julia R$ 1.500,00", t)
+        self.assertIn("Julia Souza", t); self.assertIn("R$ 1.500,00 · 1 pedido · 83%", t)
+        for secao in ("RESUMO", "POR VENDEDOR", "MAIOR VENDA", "PEDIDOS"): self.assertIn(secao, t)
+
+    def test_nome_completo_e_escapado(self):
+        r = {"vendas": [{"numero": 77, "cliente": "Kauan Caetano de Almeida Matos & <Cia>", "total": 10.0,
+                         "cancelada": False, "vendedor": {"id": 2, "nome": "Isabella"}}],
+             "totais": {"quantidade": 1, "valor": 10.0, "canceladas": 0, "porVendedor": [{"nome": "Isabella", "quantidade": 1, "valor": 10.0}]}}
+        t = s.resumo(r, "Hoje")
+        self.assertIn("Kauan Caetano de Almeida Matos &amp; &lt;Cia&gt;", t); self.assertIn("Pedido nº 77", t)
+        self.assertNotIn("<Cia>", t)
+
+    def test_periodo_mostra_so_as_5_maiores(self):
+        vs = [{"numero": i, "cliente": f"C{i}", "total": float(i), "cancelada": False, "vendedor": None} for i in range(1, 21)]
+        t = s.resumo({"vendas": vs, "totais": {"quantidade": 20, "valor": 210.0, "canceladas": 0, "porVendedor": []}}, "Semana", um_dia=False)
+        self.assertIn("5 MAIORES", t); self.assertIn("nº 20", t); self.assertNotIn("nº 15 ", t)
 
     def test_dia_sem_venda(self):
         t = s.resumo({"vendas": [], "totais": {"quantidade": 0, "valor": 0, "canceladas": 0, "porVendedor": []}}, "Hoje")
-        self.assertIn("R$ 0,00", t); self.assertIn("0 pedidos", t)
+        self.assertIn("R$ 0,00", t); self.assertIn("Pedidos: <b>0</b>", t); self.assertIn("Nenhuma venda", t)
 
     def test_sem_chave_explica_o_que_fazer(self):
         os.remove(self.arq)

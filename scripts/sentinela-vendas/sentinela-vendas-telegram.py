@@ -74,28 +74,99 @@ def vendas(de, ate, abrir=None):
         raise RuntimeError(erro or f"o site respondeu {e.code}") from None
 
 
-def resumo(r, titulo, icone="💰"):
+LINHA = "━━━━━━━━━━━━━━━━━━"
+DIAS_SEMANA = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"]
+MEDALHAS = ["🥇", "🥈", "🥉"]
+MAX_PEDIDOS_LISTADOS = 15
+
+
+def esc(t):
+    """Texto vindo do sistema (nome de cliente/vendedor) seguro para o HTML do Telegram."""
+    return str(t or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+def corta(t, n):
+    t = " ".join(str(t or "").split())
+    return t if len(t) <= n else t[: n - 1].rstrip() + "…"
+
+
+def plural(n, um, varios):
+    return f"{n} {um if n == 1 else varios}"
+
+
+def nome_vendedor(v):
+    vend = v.get("vendedor") or {}
+    return " ".join(str(vend.get("nome") or "").split()) or "Sem vendedor"
+
+
+def resumo(r, titulo, subtitulo="", icone="📊", um_dia=True):
+    """Mensagem em seções: resumo, por vendedor, maior venda e pedidos (ou maiores vendas no período)."""
     validas = [v for v in r.get("vendas", []) if not v.get("cancelada")]
     t = r.get("totais") or {}
     total = float(t.get("valor", sum(float(v.get("total") or 0) for v in validas)))
     n = int(t.get("quantidade", len(validas)))
     tick = total / n if n else 0
-    linhas = [f"{icone} <b>{titulo}</b>", f"💵 <b>{reais(total)}</b>", f"🧾 {n} pedidos · 🎫 ticket {reais(tick)}"]
-    if t.get("canceladas"):
-        linhas.append(f"❌ {t['canceladas']} cancelada(s), fora da conta")
-    if validas:
-        top = max(validas, key=lambda v: float(v.get("total") or 0))
-        linhas.append(f"🥇 Maior: {str(top.get('cliente') or '?')[:28]} — {reais(top.get('total'))}")
+    canceladas = int(t.get("canceladas") or 0)
+
+    b = [f"{icone} <b>{esc(titulo)}</b>"]
+    if subtitulo:
+        b.append(subtitulo)
+    b += [LINHA, "", "💰 <b>RESUMO</b>",
+          f"💵 Faturamento: <b>{reais(total)}</b>",
+          f"🧾 Pedidos: <b>{n}</b>",
+          f"🎫 Ticket médio: <b>{reais(tick)}</b>"]
+    if canceladas:
+        b.append(f"❌ {plural(canceladas, 'cancelada', 'canceladas')} (fora da conta)")
+
+    if not validas:
+        b += ["", "😴 Nenhuma venda registrada no período."]
+        return "\n".join(b)
+
     por = t.get("porVendedor") or []
     if por:
-        linhas.append("👥 " + " · ".join(f"{p['nome'].split()[0] if p.get('nome') else '?'} {reais(p['valor'])}" for p in por[:6]))
-    return "\n".join(linhas)
+        b += ["", LINHA, "", "👥 <b>POR VENDEDOR</b>"]
+        for i, p in enumerate(por[:10]):
+            valor = float(p.get("valor") or 0)
+            pct = round(valor * 100 / total) if total else 0
+            qtd = int(p.get("quantidade") or 0)
+            icon = MEDALHAS[i] if i < len(MEDALHAS) else "🔹"
+            b.append(f"{icon} <b>{esc(corta(p.get('nome') or 'Sem vendedor', 26))}</b>")
+            b.append(f"      {reais(valor)} · {plural(qtd, 'pedido', 'pedidos')} · {pct}%")
+
+    top = max(validas, key=lambda v: float(v.get("total") or 0))
+    b += ["", LINHA, "", "🏆 <b>MAIOR VENDA</b>",
+          f"👤 {esc(corta(top.get('cliente') or 'Cliente não informado', 60))}",
+          f"💵 <b>{reais(top.get('total'))}</b>"]
+    detalhe = []
+    if top.get("numero"):
+        detalhe.append(f"🔢 Pedido nº {esc(top['numero'])}")
+    detalhe.append(f"🧑‍💼 {esc(corta(nome_vendedor(top), 26))}")
+    b.append(" · ".join(detalhe))
+
+    ordenadas = sorted(validas, key=lambda v: float(v.get("total") or 0), reverse=True)
+    if um_dia:
+        lista, cab = ordenadas[:MAX_PEDIDOS_LISTADOS], "🛒 <b>PEDIDOS</b>"
+    else:
+        lista, cab = ordenadas[:5], "🔝 <b>5 MAIORES VENDAS</b>"
+    b += ["", LINHA, "", cab]
+    for v in lista:
+        num = f"nº {esc(v['numero'])} · " if v.get("numero") else ""
+        b.append(f"▪️ {num}<b>{reais(v.get('total'))}</b>")
+        b.append(f"      👤 {esc(corta(v.get('cliente') or 'Cliente não informado', 34))}"
+                 f" · 🧑‍💼 {esc(nome_vendedor(v).split()[0])}")
+    if um_dia and len(ordenadas) > len(lista):
+        b.append(f"➕ e mais {plural(len(ordenadas) - len(lista), 'pedido', 'pedidos')}")
+    return "\n".join(b)
 
 
 def enviar(partes, rotulo):
-    partes.append("<i>🤖 Relatório automático — dados do MEU BLING</i>")
+    partes.append(f"{LINHA}\n🤖 <i>Relatório automático · dados do MEU BLING</i>")
     ok = telegram("\n\n".join(partes))
     print(f"{rotulo} ENVIADO:", ok)
+
+
+def data_br(d):
+    return f"{DIAS_SEMANA[d.weekday()]}, {d:%d/%m/%Y}"
 
 
 def main():
@@ -103,21 +174,26 @@ def main():
     hoje = datetime.date.today()
     h = hoje.strftime("%Y-%m-%d")
     try:
+        agora = datetime.datetime.now().strftime("%H:%M")
         if modo == "teste":
-            enviar(["🤖 <b>TESTE da sentinela de vendas (MEU BLING)</b>", resumo(vendas(h, h), f"Vendas de hoje ({hoje:%d/%m})")], "TESTE")
+            enviar(["🧪 <b>TESTE da sentinela de vendas</b>",
+                    resumo(vendas(h, h), "VENDAS DE HOJE", f"📅 {data_br(hoje)} · ⏰ até {agora}", "💰")], "TESTE")
         elif modo == "previa":
-            enviar([resumo(vendas(h, h), f"📊 PRÉVIA do faturamento — {hoje:%d/%m/%Y} (13h)", "📊")], "PRÉVIA")
+            enviar([resumo(vendas(h, h), "PRÉVIA DO FATURAMENTO",
+                           f"📅 {data_br(hoje)} · ⏰ parcial até {agora}", "📊")], "PRÉVIA")
         elif modo == "semana":
             ini = hoje - datetime.timedelta(days=(hoje.weekday() + 1) % 7)  # domingo da semana
-            enviar([resumo(vendas(ini.strftime("%Y-%m-%d"), h), f"📅 Relatório Semanal ({ini:%d/%m}–{hoje:%d/%m})", "📅")], "SEMANAL")
+            enviar([resumo(vendas(ini.strftime("%Y-%m-%d"), h), "RELATÓRIO SEMANAL",
+                           f"📅 {ini:%d/%m} a {hoje:%d/%m/%Y}", "📅", um_dia=False)], "SEMANAL")
         elif modo == "mes":
             if (hoje + datetime.timedelta(days=1)).month == hoje.month:
                 print("Não é último dia do mês. Saindo.")
                 return
             ini = hoje.replace(day=1)
-            enviar([resumo(vendas(ini.strftime("%Y-%m-%d"), h), f"🗓️ Relatório Mensal — {hoje:%m/%Y}", "🗓️")], "MENSAL")
+            enviar([resumo(vendas(ini.strftime("%Y-%m-%d"), h), "RELATÓRIO MENSAL",
+                           f"📅 {ini:%d/%m} a {hoje:%d/%m/%Y}", "🗓️", um_dia=False)], "MENSAL")
         else:
-            enviar([resumo(vendas(h, h), f"Vendas de hoje — {hoje:%d/%m/%Y}")], "DIÁRIO")
+            enviar([resumo(vendas(h, h), "FECHAMENTO DO DIA", f"📅 {data_br(hoje)} · ⏰ até {agora}", "💰")], "DIÁRIO")
     except Exception as e:
         try:
             telegram(f"⚠️ <b>Sentinela de vendas ({modo}) com erro</b>\n<code>{str(e)[:200]}</code>")
