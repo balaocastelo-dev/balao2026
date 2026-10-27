@@ -1,30 +1,36 @@
 
 import nodemailer from 'nodemailer';
-import { Resend } from 'resend';
 import { getAdminNotificationTemplate, getNewOrderAdminTemplate } from "@/lib/mail-templates";
 import { SITE_CONFIG } from "@/lib/config";
 
-// Configuração do Resend
-const resendApiKey = process.env.RESEND_API_KEY;
-const resend = resendApiKey ? new Resend(resendApiKey) : null;
+// Envio de e-mail do site e do CRM.
+//
+// Até 27/10/2026 o site mandava pela Resend, mas a Resend recusava o domínio
+// balao.info ("domain is not verified") e nada saía. Agora a Resend saiu do
+// caminho. Provedores, nesta ordem:
+//   1. Gmail da loja (SMTP) — basta SMTP_PASS (senha de app do Google) na Vercel.
+//      SMTP_USER vazio = balaocastelo@gmail.com. Outro SMTP? SMTP_HOST/SMTP_PORT.
+//   2. Brevo (API HTTP) — se BREVO_API_KEY existir. Remetente: BREVO_FROM
+//      (precisa estar validado na Brevo); vazio = o e-mail do SMTP_USER/loja.
+// Nenhum configurado: o envio falha dizendo exatamente o que falta.
 
-// Configuração SMTP (Padrão: Gmail)
-const smtpConfig = {
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: process.env.SMTP_PORT === '465', // True para 465, false para outras
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-    },
-};
+export const CONTA_PADRAO = "balaocastelo@gmail.com";
+const LINK_SENHA_DE_APP = "https://myaccount.google.com/apppasswords";
 
-// Cria o transportador apenas se as credenciais existirem
+function usuarioSmtp(): string {
+    return (process.env.SMTP_USER || "").trim() || CONTA_PADRAO;
+}
+
 const createTransporter = () => {
-    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-        return null;
-    }
-    return nodemailer.createTransport(smtpConfig);
+    const pass = (process.env.SMTP_PASS || "").replace(/\s+/g, "");
+    if (!pass) return null;
+    const port = parseInt(process.env.SMTP_PORT || '465');
+    return nodemailer.createTransport({
+        host: process.env.SMTP_HOST || 'smtp.gmail.com',
+        port,
+        secure: port === 465,
+        auth: { user: usuarioSmtp(), pass },
+    });
 };
 
 interface SendEmailParams {
@@ -42,25 +48,38 @@ interface SendEmailParams {
     bcc?: string | string[];
 }
 
-// Remetente padrão.
-//
-// Até outubro de 2026 o padrão era o endereço de SITE_CONFIG.email, do domínio
-// balaodainformatica.com.br — que NÃO está verificado na Resend (não há o
-// registro resend._domainkey nesse domínio). A Resend recusava, o SMTP não tem
-// senha cadastrada, e o envio terminava "simulado": pedido novo, contato e
-// lead não chegavam a ninguém. O domínio balao.info, sim, está pronto na
-// Resend (DKIM em resend._domainkey.balao.info, retorno em send.balao.info).
-// RESEND_FROM na Vercel continua mandando, se existir.
-export const REMETENTE_PADRAO = "vendas@balao.info";
+/** Separa "Nome <email>" ou "email" em partes. */
+function remetente(bruto: string, nomePadrao: string): { name: string; email: string } {
+    const m = bruto.match(/^\s*(.*?)\s*<([^>]+)>\s*$/);
+    if (m) return { name: m[1] || nomePadrao, email: m[2].trim() };
+    return { name: nomePadrao, email: bruto.trim() };
+}
 
-function remetenteDaResend(fromName: string): string {
-    const bruto = (process.env.RESEND_FROM || "").trim();
-    if (bruto.includes("<")) return bruto;
-    return `${fromName} <${bruto || REMETENTE_PADRAO}>`;
+async function enviarPelaBrevo(p: {
+    apiKey: string; fromName: string; to: string; subject: string; html: string; text?: string; bcc: string[]; replyTo: string;
+}): Promise<string | undefined> {
+    const de = remetente((process.env.BREVO_FROM || "").trim() || usuarioSmtp(), p.fromName);
+    const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: { "api-key": p.apiKey, "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+            sender: de,
+            to: [{ email: p.to }],
+            subject: p.subject,
+            htmlContent: p.html,
+            ...(p.text ? { textContent: p.text } : {}),
+            ...(p.bcc.length ? { bcc: p.bcc.map((email) => ({ email })) } : {}),
+            replyTo: { email: p.replyTo },
+        }),
+        signal: AbortSignal.timeout(15000),
+    });
+    const corpo = await res.json().catch(() => ({} as Record<string, unknown>));
+    if (!res.ok) throw new Error(String((corpo as any)?.message || `HTTP ${res.status}`));
+    return (corpo as any)?.messageId;
 }
 
 /**
- * Envia um e-mail (Tenta Resend primeiro, depois SMTP, depois simula)
+ * Envia um e-mail (Gmail/SMTP primeiro, depois Brevo). Não simula: se nada sair, diz o motivo.
  */
 export async function sendEmail({
     to,
@@ -69,73 +88,59 @@ export async function sendEmail({
     text,
     eventType = 'general',
     campaignId,
-    fromName = "Balão Castelo",
+    fromName = "Balão da Informática",
     replyTo,
     bcc,
 }: SendEmailParams): Promise<{ success: boolean; messageId?: string; provider?: string; error?: string }> {
     console.log(`[Mail] Iniciando envio (${eventType}): ${subject}`);
     const copia = bcc ? (Array.isArray(bcc) ? bcc : [bcc]).filter(Boolean) : [];
+    const responderPara = replyTo || SITE_CONFIG.email;
     let ultimoErro = "";
 
-    // 1. Tentar via RESEND (Prioridade)
-    if (resend) {
-        try {
-            const { data, error } = await resend.emails.send({
-                from: remetenteDaResend(fromName),
-                to: [to],
-                subject: subject,
-                html: html,
-                ...(text ? { text } : {}),
-                ...(copia.length ? { bcc: copia } : {}),
-                replyTo: replyTo || SITE_CONFIG.email,
-            });
-
-            if (error) {
-                console.error('[Mail] Erro Resend:', error);
-                throw new Error(error.message);
-            }
-
-            console.log(`[Mail] Sucesso via Resend ID: ${data?.id}`);
-            await logEmail(eventType, to, 'success', null, { provider: 'resend', messageId: data?.id, campaignId });
-            return { success: true, messageId: data?.id, provider: 'resend' };
-        } catch (error: any) {
-            ultimoErro = `Resend: ${error?.message || error}`;
-            console.warn('[Mail] Falha no Resend, tentando fallback para SMTP...', error?.message);
-        }
-    }
-
-    // 2. Tentar via SMTP (Fallback)
+    // 1. Gmail da loja (SMTP)
     const transporter = createTransporter();
     if (transporter) {
         try {
             const info = await transporter.sendMail({
-                from: `"${fromName}" <${process.env.SMTP_USER}>`,
+                from: { name: fromName, address: usuarioSmtp() },
                 to,
                 subject,
                 html,
                 ...(text ? { text } : {}),
                 ...(copia.length ? { bcc: copia } : {}),
-                ...(replyTo ? { replyTo } : {}),
+                replyTo: responderPara,
             });
-
             console.log(`[Mail] Sucesso via SMTP ID: ${info.messageId}`);
             await logEmail(eventType, to, 'success', null, { provider: 'smtp', messageId: info.messageId, campaignId });
             return { success: true, messageId: info.messageId, provider: 'smtp' };
-
         } catch (error: any) {
-            ultimoErro = `${ultimoErro ? `${ultimoErro} · ` : ""}SMTP: ${error?.message || error}`;
+            const msg = String(error?.message || error);
+            ultimoErro = /Invalid login|Username and Password not accepted|535/i.test(msg)
+                ? `Gmail recusou a senha (SMTP_PASS). Gere uma nova senha de app em ${LINK_SENHA_DE_APP} e troque na Vercel.`
+                : `SMTP: ${msg}`;
             console.error('[Mail] Erro SMTP:', error);
         }
     }
 
-    // 3. Nada saiu. Antes isto era "simulado" em silêncio; quem chama precisa
-    // saber o motivo para não dizer ao vendedor que o e-mail foi.
-    console.warn('[Mail] E-mail NÃO enviado.', ultimoErro || 'Nenhum provedor configurado.');
-    await logEmail(eventType, to, 'simulated', ultimoErro || 'Nenhum provedor configurado', { subject });
-    return {
-        success: false,
-        error: ultimoErro || 'Serviço de e-mail não configurado. Adicione RESEND_API_KEY ou SMTP_USER/PASS no .env',
-    };
+    // 2. Brevo
+    const brevoKey = (process.env.BREVO_API_KEY || "").trim();
+    if (brevoKey) {
+        try {
+            const messageId = await enviarPelaBrevo({ apiKey: brevoKey, fromName, to, subject, html, text, bcc: copia, replyTo: responderPara });
+            console.log(`[Mail] Sucesso via Brevo ID: ${messageId}`);
+            await logEmail(eventType, to, 'success', null, { provider: 'brevo', messageId, campaignId });
+            return { success: true, messageId, provider: 'brevo' };
+        } catch (error: any) {
+            ultimoErro = `${ultimoErro ? `${ultimoErro} · ` : ""}Brevo: ${error?.message || error}`;
+            console.error('[Mail] Erro Brevo:', error);
+        }
+    }
+
+    const motivo = ultimoErro
+        || `E-mail não configurado: falta a senha de app do Gmail (${usuarioSmtp()}). Gere em ${LINK_SENHA_DE_APP} e cadastre como SMTP_PASS na Vercel (projeto balao2026).`;
+    console.warn('[Mail] E-mail NÃO enviado.', motivo);
+    await logEmail(eventType, to, 'failed', motivo, { subject });
+    return { success: false, error: motivo };
 }
 
 /**
@@ -161,7 +166,7 @@ export async function sendSystemNotification(event: string, data: any) {
     `;
 
     // Tenta enviar para o e-mail administrativo definido ou usa o SMTP user como fallback
-    const adminEmail = process.env.ADMIN_EMAIL || process.env.SMTP_USER || 'balaocastelo@gmail.com';
+    const adminEmail = process.env.ADMIN_EMAIL || usuarioSmtp();
 
     return sendEmail({
         to: adminEmail,

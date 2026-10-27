@@ -14,8 +14,8 @@ pede "me manda por e-mail" e para deixar um registro com foto, preço e link.
 
 ## O que acontece
 
-- O e-mail sai de **vendas@balao.info** (com o nome do vendedor, quando há um), a resposta do cliente vai para
-  **balaocastelo@gmail.com** e a loja recebe uma **cópia oculta**.
+- O e-mail sai pelo **Gmail da loja (balaocastelo@gmail.com)**, com o nome do vendedor, quando há um; a resposta
+  do cliente vai para **balaocastelo@gmail.com** e a loja recebe uma **cópia oculta**.
 - Nome, foto, preço à vista, preço no cartão, parcelamento e link vêm do site, não do navegador.
 - Os botões passam por `/api/crm/email/clique`: o clique é registrado e o painel avisa
   "📧 Fulano abriu … do e-mail agora". Cliques nos primeiros 45 segundos não avisam (são os leitores de e-mail
@@ -34,18 +34,23 @@ pede "me manda por e-mail" e para deixar um registro com foto, preço e link.
 | `components/crm/email/EnviarPorEmail.tsx` | a janela no painel |
 | `whatsapp-server/crm/` | e-mail na ficha (`crm_004_email_do_cliente`), nota e eventos; rotas `/api/comando/contatos/:chatId/email`, `.../email-enviado` e `/api/comando/email-clique` |
 
-## O remetente do site inteiro também mudou
+## Provedor de e-mail (desde 27/10/2026: sem Resend)
 
-Até aqui o site mandava e-mail (pedido novo, contato, lead) de `balaocastelo@balaodainformatica.com.br`. Esse
-domínio **não está verificado na Resend** (não existe o registro `resend._domainkey.balaodainformatica.com.br`),
-então a Resend recusava, o SMTP não tem senha e o envio terminava "simulado": ninguém recebia. O padrão agora é
-`vendas@balao.info`, domínio que já tem o DKIM da Resend (`resend._domainkey.balao.info`). Se `RESEND_FROM`
-existir na Vercel, ele continua mandando.
+A Resend recusava o envio ("The balao.info domain is not verified"), então saiu do caminho. `lib/mail.ts` tenta,
+nesta ordem:
+
+1. **Gmail da loja por SMTP** — só precisa de `SMTP_PASS` na Vercel: uma *senha de app* do Google, criada em
+   https://myaccount.google.com/apppasswords na conta balaocastelo@gmail.com (exige verificação em duas etapas).
+   Limite do Gmail: ~500 e-mails por dia.
+2. **Brevo** (API) — se `BREVO_API_KEY` existir. O remetente (`BREVO_FROM`) precisa estar validado na Brevo.
+
+Sem nenhum dos dois, o envio falha dizendo exatamente o que falta e onde criar.
 
 ## Variáveis (Vercel)
 
-- `RESEND_API_KEY` — já existe.
-- `RESEND_FROM` — opcional; vazio = `vendas@balao.info`.
+- `SMTP_PASS` — senha de app do Gmail (obrigatória para o Gmail).
+- `SMTP_USER` — opcional; vazio = `balaocastelo@gmail.com`. `SMTP_HOST`/`SMTP_PORT` para outro servidor (padrão Gmail, 465).
+- `BREVO_API_KEY` / `BREVO_FROM` — opcionais, alternativa ao Gmail.
 - `EMAIL_RESPOSTA` — opcional; padrão `balaocastelo@gmail.com`.
 - `EMAIL_COPIA_LOJA` — opcional; padrão `balaocastelo@gmail.com`; `0` desliga a cópia.
 

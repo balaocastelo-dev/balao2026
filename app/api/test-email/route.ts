@@ -10,8 +10,8 @@ export async function POST(req: Request) {
         
         // Verifica o que está configurado
         const configStatus = {
-            resend: !!process.env.RESEND_API_KEY,
-            smtp: !!(process.env.SMTP_USER && process.env.SMTP_PASS),
+            smtp: !!process.env.SMTP_PASS,
+            brevo: !!process.env.BREVO_API_KEY,
             adminEmail: process.env.ADMIN_EMAIL || process.env.SMTP_USER || 'balaocastelo@gmail.com'
         };
 
@@ -134,10 +134,10 @@ export async function POST(req: Request) {
                     <hr>
                     <h3>Diagnóstico de Configuração:</h3>
                     <ul>
-                        <li><strong>Resend API Key:</strong> ${configStatus.resend ? '✅ Configurado' : '❌ Ausente'}</li>
                         <li><strong>SMTP (Gmail):</strong> ${configStatus.smtp ? '✅ Configurado' : '❌ Ausente'}</li>
+                        <li><strong>Brevo:</strong> ${configStatus.brevo ? '✅ Configurado' : '❌ Ausente'}</li>
                     </ul>
-                    <p><em>Este e-mail foi enviado via: ${process.env.RESEND_API_KEY ? 'Resend' : (configStatus.smtp ? 'SMTP' : 'Simulação')}</em></p>
+                    <p><em>Este e-mail foi enviado via: ${configStatus.smtp ? 'Gmail (SMTP)' : (configStatus.brevo ? 'Brevo' : 'nenhum provedor')}</em></p>
                 `,
                 eventType: "test_email",
             };
