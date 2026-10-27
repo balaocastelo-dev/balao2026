@@ -48,13 +48,13 @@ export default function CentroDeComando({
 
   return (
     <div className="fixed inset-0 z-40 flex flex-col bg-[#f0f2f5]">
-      <header className="flex shrink-0 flex-wrap items-center gap-2 border-b border-[#e3e3e3] bg-white px-4 py-2">
-        <div className="mr-2 flex items-center gap-2">
+      <header className="flex shrink-0 flex-wrap items-center gap-2 border-b border-[#e3e3e3] bg-white px-3 pb-2 pt-[max(0.5rem,env(safe-area-inset-top))] md:px-4">
+        <div className="mr-auto flex items-center gap-2 md:mr-2">
           <span className="text-lg">🎈</span>
           <span className="text-sm font-bold text-[#202124]">Centro de Comando</span>
         </div>
 
-        <nav className="flex flex-1 flex-wrap gap-1">
+        <nav className="order-last flex w-full gap-1 overflow-x-auto [scrollbar-width:none] md:order-none md:w-auto md:flex-1 md:flex-wrap">
           {MODULOS.map((m) => (
             <button
               key={m.chave}
@@ -64,7 +64,7 @@ export default function CentroDeComando({
                 if (m.chave !== "clientes") setSegmento("");
               }}
               title={m.ajuda}
-              className={`cursor-pointer rounded-lg px-3 py-1.5 text-xs font-bold transition-colors ${
+              className={`shrink-0 cursor-pointer whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-bold transition-colors ${
                 modulo === m.chave
                   ? "bg-[#0f9d58] text-white"
                   : "text-[#5f6368] hover:bg-[#f0f2f5]"
@@ -81,11 +81,11 @@ export default function CentroDeComando({
           onClick={aoFechar}
           className="cursor-pointer rounded-lg border border-[#e3e3e3] px-3 py-1.5 text-xs font-bold text-[#5f6368] hover:bg-[#f0f2f5]"
         >
-          ← Voltar ao atendimento
+          ← Voltar<span className="hidden sm:inline"> ao atendimento</span>
         </button>
       </header>
 
-      <main className="flex-1 overflow-y-auto p-4">
+      <main className="flex-1 overflow-y-auto p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:p-4">
         <div className="mx-auto max-w-6xl">
           {modulo === "painel" && (
             <PainelOperacao

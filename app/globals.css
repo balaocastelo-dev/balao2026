@@ -331,3 +331,36 @@ main {
 .animate-sway {
   animation: sway 2.5s ease-in-out infinite;
 }
+
+/* ── CRM no celular (components/crm) ──────────────────────────────────────
+   Rede de segurança para o que vem de módulos que não conhecem o tamanho da
+   tela (modais, Centro de Comando, Central de Status). O desenho principal
+   do celular está no próprio componente. */
+@media (max-width: 767px) {
+  /* 16px nos campos: abaixo disso o iPhone dá zoom ao tocar e a tela "pula". */
+  .crm-raiz input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  .crm-raiz textarea,
+  .crm-raiz select {
+    font-size: 16px;
+  }
+
+  /* Janelas centralizadas cabem na tela e rolam por dentro. */
+  .crm-raiz .fixed.inset-0.items-center > div {
+    max-height: calc(100dvh - 2rem);
+    overflow-y: auto;
+    max-width: 100%;
+  }
+
+  /* Tabelas dos módulos rolam de lado, em vez de empurrar a página. */
+  .crm-raiz main table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Menu de opções (toque longo) como folha: itens altos para o dedo. */
+  .crm-folha-menu button {
+    padding: 0.85rem 1.25rem;
+    font-size: 15px;
+  }
+}

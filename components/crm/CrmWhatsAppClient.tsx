@@ -21,6 +21,7 @@ import {
   type MudancaDeMensagem,
 } from "@/components/crm/mensagem-extras";
 import { blobDoDataUrl, enviarPorUpload } from "@/components/crm/upload-midia";
+import { useTamanhoTela, useToqueLongo } from "@/components/crm/tela";
 import EnviarPorEmail, { type ProdutoParaEmail } from "@/components/crm/email/EnviarPorEmail";
 import DisparoPorTema from "@/components/crm/disparo/DisparoPorTema";
 import SeloDoAgente from "@/components/crm/agente/SeloDoAgente";
@@ -295,6 +296,12 @@ export interface CrmWhatsAppClientProps {
   sairLabel?: string;
   /** Texto de ajuda do botão de sair, quando ele não encerra a sessão. */
   sairTitulo?: string;
+  /**
+   * Itens a mais no menu ⋮ do topo (ex.: "Enviar promoção" na página do
+   * vendedor). No celular é por ali que se chega às outras áreas, já que a
+   * tela fica só com a conversa.
+   */
+  menuExtra?: { rotulo: string; aoTocar: () => void }[];
 }
 
 // Identidade usada no cabeçalho quando quem está na tela é a administração e
@@ -387,7 +394,25 @@ export default function CrmWhatsAppClient({
   onSair,
   sairLabel,
   sairTitulo,
+  menuExtra,
 }: CrmWhatsAppClientProps = {}) {
+  // Celular, tablet ou computador: muda o desenho da tela (ver tela.ts).
+  const tela = useTamanhoTela();
+  const celular = tela === "celular";
+  const compacto = tela !== "desktop";
+  const toqueLongo = useToqueLongo();
+  // Painel de ferramentas (catálogo, respostas, cliente…) aberto por cima,
+  // no celular e no tablet. No computador ele fica sempre à direita.
+  const [painelLateralAberto, setPainelLateralAberto] = useState(false);
+  // Menus ⋮ e a folha de anexos do celular.
+  const [menuTopoAberto, setMenuTopoAberto] = useState(false);
+  const [menuConversaAberto, setMenuConversaAberto] = useState(false);
+  const [anexosAbertos, setAnexosAbertos] = useState(false);
+  const inputFotoRef = useRef<HTMLInputElement | null>(null);
+  const inputArquivoRef = useRef<HTMLInputElement | null>(null);
+  // No celular, abrir uma conversa empilha uma entrada no histórico, para o
+  // "voltar" do Android voltar à lista em vez de sair do CRM.
+  const conversaNoHistoricoRef = useRef(false);
   const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const campoTextoRef = useRef<HTMLTextAreaElement | null>(null);
@@ -2263,6 +2288,58 @@ export default function CrmWhatsAppClient({
     return () => window.removeEventListener("click", handler);
   }, []);
 
+  // ── Celular e tablet ────────────────────────────────────────────────────
+  // Abrir conversa no celular empilha uma entrada no histórico: o botão
+  // "voltar" do Android (ou o gesto do iPhone) volta para a lista, como no
+  // WhatsApp, em vez de sair do CRM.
+  useEffect(() => {
+    if (!celular || !chatSelecionadoId || conversaNoHistoricoRef.current) return;
+    window.history.pushState({ crmConversa: true }, "");
+    conversaNoHistoricoRef.current = true;
+  }, [celular, chatSelecionadoId]);
+
+  useEffect(() => {
+    const aoVoltar = () => {
+      if (!conversaNoHistoricoRef.current) return;
+      conversaNoHistoricoRef.current = false;
+      setPainelLateralAberto(false);
+      setMenuConversaAberto(false);
+      setAnexosAbertos(false);
+      setChatSelecionadoId(null);
+    };
+    window.addEventListener("popstate", aoVoltar);
+    return () => window.removeEventListener("popstate", aoVoltar);
+  }, []);
+
+  const voltarParaLista = useCallback(() => {
+    setMenuConversaAberto(false);
+    setAnexosAbertos(false);
+    if (conversaNoHistoricoRef.current) window.history.back();
+    else setChatSelecionadoId(null);
+  }, []);
+
+  // No tablet o kanban começa recolhido (sobra tela para a conversa); no
+  // computador os painéis por cima não existem, então fecham.
+  useEffect(() => {
+    if (tela === "tablet") setKanbanTamanho("recolhido");
+    if (tela === "desktop") {
+      setPainelLateralAberto(false);
+      setMenuTopoAberto(false);
+      setMenuConversaAberto(false);
+      setAnexosAbertos(false);
+    }
+  }, [tela]);
+
+  // Abre uma aba do painel de ferramentas. No celular e no tablet ele vem por
+  // cima da conversa; no computador já está sempre à vista.
+  const abrirFerramenta = (aba: typeof abaAtual) => {
+    setAbaAtual(aba);
+    if (compacto) setPainelLateralAberto(true);
+    setMenuConversaAberto(false);
+    setMenuTopoAberto(false);
+    setAnexosAbertos(false);
+  };
+
   // Central de Status: o módulo recebe só o que precisa do painel.
   const [centralStatusAberta, setCentralStatusAberta] = useState(false);
   // Centro de Comando: gestão da operação (painel, clientes, ajustes). Fica
@@ -2667,8 +2744,14 @@ export default function CrmWhatsAppClient({
   ) => {
     e.preventDefault();
     e.stopPropagation();
-    const x = Math.min(e.clientX, window.innerWidth - 240);
-    const y = Math.min(e.clientY, window.innerHeight - 280);
+    abrirMenuEm(e.clientX, e.clientY, title, items);
+  };
+
+  // Mesmo menu, aberto por coordenada (toque longo no celular). No celular ele
+  // aparece como folha de baixo para cima, então a posição só vale no PC.
+  const abrirMenuEm = (cx: number, cy: number, title: string, items: CtxMenuItem[]) => {
+    const x = Math.max(8, Math.min(cx, window.innerWidth - 240));
+    const y = Math.max(8, Math.min(cy, window.innerHeight - 280));
     setCtxPos({ x, y });
     setCtxStack([{ title, items }]);
     setCtxVisible(true);
@@ -3306,7 +3389,9 @@ export default function CrmWhatsAppClient({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    // No celular o Enter do teclado quebra a linha, como no WhatsApp; quem
+    // envia é o botão verde.
+    if (e.key === "Enter" && !e.shiftKey && !celular) {
       e.preventDefault();
       enviarMensagem();
     }
@@ -3582,7 +3667,7 @@ export default function CrmWhatsAppClient({
   if (!vendedorAutenticado) {
     if (!vendedoresCarregados) {
       return (
-        <div className="flex items-center justify-center h-screen w-screen bg-[#f0f2f5] text-[#5f6368] text-sm">
+        <div className="flex items-center justify-center min-h-[100dvh] w-full bg-[#f0f2f5] text-[#5f6368] text-sm">
           Conectando ao painel...
         </div>
       );
@@ -3590,7 +3675,7 @@ export default function CrmWhatsAppClient({
 
     if (vendedores.length === 0) {
       return (
-        <div className="flex items-center justify-center h-screen w-screen bg-[#f0f2f5] p-4">
+        <div className="flex items-center justify-center min-h-[100dvh] w-full bg-[#f0f2f5] p-4">
           <div className="bg-white rounded-2xl shadow-md p-6 w-full max-w-sm space-y-3">
             <h1 className="text-lg font-bold text-[#202124]">🎈 Balão da Informática</h1>
             <p className="text-xs text-[#5f6368]">
@@ -3645,7 +3730,7 @@ export default function CrmWhatsAppClient({
     }
 
     return (
-      <div className="flex items-center justify-center h-screen w-screen bg-[#f0f2f5] p-4">
+      <div className="flex items-center justify-center min-h-[100dvh] w-full bg-[#f0f2f5] p-4">
         <div className="bg-white rounded-2xl shadow-md p-6 w-full max-w-sm space-y-3">
           <h1 className="text-lg font-bold text-[#202124]">🎈 Balão da Informática</h1>
           <p className="text-xs text-[#5f6368]">Digite seu PIN de vendedor para entrar no atendimento.</p>
@@ -3671,8 +3756,38 @@ export default function CrmWhatsAppClient({
     );
   }
 
+  // Puxa a conversa aberta para o vendedor da tela (mesmo efeito do botão
+  // "Pegar este atendimento" do topo da conversa no computador).
+  const pegarAtendimento = () => {
+    if (!chatSelecionado) return;
+    const donoId = chatSelecionado.vendedorId;
+    const dono = donoId ? vendedores.find((v) => String(v.id) === String(donoId)) : null;
+    if (
+      dono &&
+      String(donoId) !== String(vendedorAtivoId ?? "") &&
+      !confirm(`Esta conversa está com ${dono.nome}. Passar o atendimento para você?`)
+    ) {
+      return;
+    }
+    setChats((prev) =>
+      prev.map((c) =>
+        c.id === chatSelecionado.id ? { ...c, precisaAtencao: false, vendedorId: vendedorAtivoId } : c
+      )
+    );
+    socketRef.current?.emit("panel:assign-seller", {
+      chatId: chatSelecionado.id,
+      sellerId: vendedorAtivoId,
+    });
+    showToast("Atendimento assumido 🟢");
+  };
+  const conversaEhMinha =
+    Boolean(chatSelecionado?.vendedorId) &&
+    String(chatSelecionado?.vendedorId ?? "") === String(vendedorAtivoId ?? "");
+
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-[#f0f2f5] text-[#202124] font-['Segoe_UI',Tahoma,Arial,sans-serif]">
+    <div
+      className={`crm-raiz crm-${tela} flex flex-col h-full min-h-0 w-full overflow-hidden bg-[#f0f2f5] text-[#202124] font-['Segoe_UI',Tahoma,Arial,sans-serif]`}
+    >
       {/* Vigia de recebimento: a faixa que faltava em 29/09. Fica em cima de
           tudo, vermelha, e não se fecha sozinha — some quando entrar mensagem
           de cliente de verdade. */}
@@ -3695,7 +3810,135 @@ export default function CrmWhatsAppClient({
         </div>
       )}
 
-      {/* HEADER TOPBAR */}
+      {/* TOPO DO CELULAR E DO TABLET: só o essencial à vista, o resto no ⋮.
+          Com uma conversa aberta no celular ele some — quem manda é o topo
+          da conversa, como no WhatsApp. */}
+      {compacto && !(celular && chatSelecionado) && (
+        <header className="crm-topo-compacto shrink-0 z-20 bg-white border-b border-[#e9edef] px-4 pt-[max(0.5rem,env(safe-area-inset-top))] pb-2 flex items-center gap-3">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-[22px] font-bold leading-tight text-[#111b21] truncate">
+              {celular ? "Conversas" : "🎈 Atendimento"}
+            </h1>
+            <p className="text-[12px] text-[#667781] truncate flex items-center gap-1.5">
+              <span
+                className={`inline-block h-2 w-2 rounded-full shrink-0 ${
+                  isConnected && aoVivo ? "bg-[#25d366]" : isConnected ? "bg-amber-400" : "bg-[#d93025]"
+                }`}
+              />
+              {isConnected
+                ? aoVivo
+                  ? `${vendedorAtivo0?.nome || "—"} · ao vivo`
+                  : "Reconectando ao servidor…"
+                : estado === "loading"
+                ? "Sincronizando…"
+                : "WhatsApp desconectado"}
+            </p>
+          </div>
+
+          {!celular && (
+            <>
+              <button
+                onClick={() => setCentralStatusAberta(true)}
+                className="rounded-full px-3 py-2 text-xs font-bold text-[#0a6e3d] bg-[#e7f6ec] cursor-pointer"
+              >
+                🟢 Status
+              </button>
+              <button
+                onClick={() => setComandoAberto(true)}
+                className="rounded-full px-3 py-2 text-xs font-bold text-[#0a6e3d] bg-[#e7f6ec] cursor-pointer"
+              >
+                📊 Comando
+              </button>
+              <button
+                onClick={() => abrirFerramenta(abaAtual)}
+                className="rounded-full px-3 py-2 text-xs font-bold text-[#0a6e3d] bg-[#e7f6ec] cursor-pointer"
+              >
+                🧰 Ferramentas
+              </button>
+            </>
+          )}
+
+          {celular && (
+            <button
+              onClick={() => setCentralStatusAberta(true)}
+              aria-label="Status"
+              className="h-10 w-10 rounded-full flex items-center justify-center text-xl hover:bg-[#f0f2f5] cursor-pointer"
+            >
+              ◎
+            </button>
+          )}
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setMenuTopoAberto((v) => !v);
+            }}
+            aria-label="Mais opções"
+            className="h-10 w-10 rounded-full flex items-center justify-center text-2xl leading-none text-[#54656f] hover:bg-[#f0f2f5] cursor-pointer"
+          >
+            ⋮
+          </button>
+        </header>
+      )}
+
+      {/* Menu ⋮ do topo (celular e tablet) */}
+      {compacto && menuTopoAberto && (
+        <div className="fixed inset-0 z-[70]" onClick={() => setMenuTopoAberto(false)}>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="absolute right-2 top-[max(3.5rem,calc(env(safe-area-inset-top)+3rem))] w-[min(18rem,calc(100vw-1rem))] max-h-[calc(100dvh-5rem)] overflow-y-auto rounded-2xl bg-white py-2 shadow-2xl border border-[#e9edef] text-[15px] text-[#111b21]"
+          >
+            <div className="px-4 pb-2 mb-1 border-b border-[#f0f2f5] text-[12px] text-[#667781]">
+              👤 Atendendo: <b className="text-[#111b21]">{vendedorAtivo0?.nome || "—"}</b>
+              <br />
+              {isConnected
+                ? `WhatsApp conectado${numeroConectado ? ` · ${formatarNumeroExibicao(numeroConectado)}` : ""}`
+                : "WhatsApp desconectado"}
+            </div>
+            {[
+              ...(celular
+                ? [
+                    { rotulo: "🟢 Status do WhatsApp", aoTocar: () => setCentralStatusAberta(true) },
+                    { rotulo: "📊 Centro de Comando", aoTocar: () => setComandoAberto(true) },
+                    { rotulo: "📦 Catálogo e ferramentas", aoTocar: () => abrirFerramenta("catalogo") },
+                  ]
+                : []),
+              { rotulo: "✏️ Nova conversa", aoTocar: () => setModalNovaConversa(true) },
+              ...(menuExtra || []),
+              { rotulo: "♻️ Reconectar o WhatsApp", aoTocar: reconectar },
+              { rotulo: "🔁 Relogar (novo QR Code)", aoTocar: relogar },
+              {
+                rotulo: vendedorFixo || admin ? `🚪 ${sairLabel || "Sair"}` : "🔁 Trocar de vendedor",
+                aoTocar: sairDoVendedor,
+              },
+              ...(vendedorFixo || admin ? [] : [{ rotulo: "🚪 Sair", aoTocar: sair }]),
+            ].map((item) => (
+              <button
+                key={item.rotulo}
+                onClick={() => {
+                  setMenuTopoAberto(false);
+                  item.aoTocar();
+                }}
+                className="w-full text-left px-4 py-3 hover:bg-[#f5f6f6] cursor-pointer"
+              >
+                {item.rotulo}
+              </button>
+            ))}
+            <label className="flex items-center justify-between px-4 py-3 cursor-pointer select-none border-t border-[#f0f2f5] mt-1">
+              <span>✍️ Assinatura automática</span>
+              <input
+                type="checkbox"
+                checked={assinaturaAuto}
+                onChange={(e) => setAssinaturaAuto(e.target.checked)}
+                className="w-5 h-5 accent-[#0f9d58]"
+              />
+            </label>
+          </div>
+        </div>
+      )}
+
+      {/* HEADER TOPBAR (computador) */}
+      {!compacto && (
       <header className="bg-[#0f9d58] text-white px-4 py-2.5 shadow-sm z-20 flex items-center justify-between gap-3 shrink-0">
         <div className="flex items-center gap-2">
           <span className="text-base font-bold flex items-center gap-1.5">
@@ -3818,11 +4061,12 @@ export default function CrmWhatsAppClient({
           </button>
         </div>
       </header>
+      )}
 
       {/* SCREEN 1: QR CODE SCREEN */}
       {!isConnected && (
         <div className="flex-1 flex items-center justify-center bg-[#f0f2f5] p-4">
-          <div className="bg-white rounded-2xl shadow-lg p-8 text-center max-w-md w-full border border-[#e3e3e3]">
+          <div className="bg-white rounded-2xl shadow-lg p-5 sm:p-8 text-center max-w-md w-full border border-[#e3e3e3]">
             <div className="text-4xl mb-2">
               {estado === "loading" ? "⏳" : "📱"}
             </div>
@@ -3840,7 +4084,7 @@ export default function CrmWhatsAppClient({
               )}
             </p>
 
-            <div className="inline-flex items-center justify-center min-w-[280px] min-h-[280px] bg-white border border-[#e3e3e3] rounded-xl p-4 shadow-inner">
+            <div className="inline-flex items-center justify-center min-w-[250px] min-h-[250px] sm:min-w-[280px] sm:min-h-[280px] max-w-full bg-white border border-[#e3e3e3] rounded-xl p-4 shadow-inner">
               {estado === "loading" ? (
                 <div className="flex flex-col items-center justify-center p-6 space-y-3">
                   <div className="w-12 h-12 border-4 border-[#0f9d58] border-t-transparent rounded-full animate-spin" />
@@ -3966,7 +4210,7 @@ export default function CrmWhatsAppClient({
           Aparece para quem estiver com o painel aberto, porque disco cheio
           derruba o atendimento de todo mundo. */}
       {armazenamento?.alerta && !avisoDiscoFechado && (
-        <div className="bg-[#fff3cd] border-b border-[#ffeeba] px-4 py-2 flex items-center gap-3 shrink-0">
+        <div className={`bg-[#fff3cd] border-b border-[#ffeeba] px-4 py-2 items-center gap-3 shrink-0 ${celular && chatSelecionado ? "hidden" : "flex"}`}>
           <span className="text-base">⚠️</span>
           <p className="text-xs text-[#856404] flex-1 leading-relaxed">
             <b>Espaço de mídia quase no limite:</b> {armazenamento.mb} MB de{" "}
@@ -3991,8 +4235,12 @@ export default function CrmWhatsAppClient({
           {/* Main 3 Panels Row */}
           <div className="flex-1 flex overflow-hidden min-h-0">
             {/* PANE 1: CHATS LIST (REAL NUMBERS & PROFILE PICTURES) */}
-            <aside className="w-76 bg-white border-r border-[#e3e3e3] flex flex-col shrink-0">
-              <div className="p-3 pb-1.5 font-bold text-sm text-[#202124] flex items-center justify-between">
+            <aside
+              className={`bg-white border-r border-[#e3e3e3] flex-col shrink-0 relative ${
+                celular ? (chatSelecionado ? "hidden" : "flex w-full") : tela === "tablet" ? "flex w-72" : "flex w-76"
+              }`}
+            >
+              <div className={`p-3 pb-1.5 font-bold text-sm text-[#202124] items-center justify-between ${celular ? "hidden" : "flex"}`}>
                 <span>Conversas ({chatsFiltrados.length})</span>
                 {chats.some((c) => c.precisaAtencao) && (
                   <span className="bg-[#fff3cd] text-[#856404] text-[10px] px-2 py-0.5 rounded-full font-bold border border-[#ffeeba]">
@@ -4003,11 +4251,15 @@ export default function CrmWhatsAppClient({
 
               <div className="px-3 py-1.5 space-y-1.5">
                 <input
-                  type="text"
-                  placeholder="Buscar nome ou número (ex: 55 19…)"
+                  type="search"
+                  placeholder={celular ? "Pesquisar…" : "Buscar nome ou número (ex: 55 19…)"}
                   value={buscaChat}
                   onChange={(e) => setBuscaChat(e.target.value)}
-                  className="w-full px-3 py-1.5 border border-[#e3e3e3] rounded-full text-xs outline-none focus:border-[#0f9d58]"
+                  className={
+                    celular
+                      ? "w-full px-4 py-2.5 bg-[#f0f2f5] rounded-full text-base outline-none placeholder:text-[#667781]"
+                      : "w-full px-3 py-1.5 border border-[#e3e3e3] rounded-full text-xs outline-none focus:border-[#0f9d58]"
+                  }
                 />
                 {/* Busca pelo TEXTO das conversas. A de cima acha pelo nome;
                     esta acha pelo que foi falado, em todas as conversas. */}
@@ -4021,6 +4273,8 @@ export default function CrmWhatsAppClient({
                     }
                   }}
                   className={`w-full py-1 px-3 rounded-full text-xs font-bold border transition-colors cursor-pointer ${
+                    celular ? "hidden" : ""
+                  } ${
                     mostrarBuscaMensagem
                       ? "bg-[#0f9d58] text-white border-[#0f9d58]"
                       : "bg-white text-[#202124] border-[#e3e3e3] hover:bg-[#f0f2f5]"
@@ -4044,7 +4298,52 @@ export default function CrmWhatsAppClient({
                   />
                 )}
 
-                <div className="flex gap-1.5">
+                {/* Celular: filtros em fichinhas roláveis, como no WhatsApp */}
+                {celular && (
+                  <div className="flex gap-2 overflow-x-auto pt-1 pb-0.5 -mx-3 px-3 [scrollbar-width:none]">
+                    {[
+                      {
+                        rotulo: "Todas",
+                        ativo: !filtroNaoLidas && !filtroMeus && !mostrarBuscaMensagem,
+                        aoTocar: () => {
+                          setFiltroNaoLidas(false);
+                          setFiltroMeus(false);
+                          setMostrarBuscaMensagem(false);
+                          setBuscaMensagem("");
+                          setResultadosBusca([]);
+                        },
+                      },
+                      { rotulo: "Não lidas", ativo: filtroNaoLidas, aoTocar: () => setFiltroNaoLidas(!filtroNaoLidas) },
+                      { rotulo: `Meus ${totalMeusChats}`, ativo: filtroMeus, aoTocar: () => setFiltroMeus(!filtroMeus) },
+                      {
+                        rotulo: "🔍 No texto",
+                        ativo: mostrarBuscaMensagem,
+                        aoTocar: () => {
+                          const abrindo = !mostrarBuscaMensagem;
+                          setMostrarBuscaMensagem(abrindo);
+                          if (!abrindo) {
+                            setBuscaMensagem("");
+                            setResultadosBusca([]);
+                          }
+                        },
+                      },
+                    ].map((f) => (
+                      <button
+                        key={f.rotulo}
+                        onClick={f.aoTocar}
+                        className={`shrink-0 rounded-full px-3.5 py-1.5 text-[14px] font-medium border cursor-pointer ${
+                          f.ativo
+                            ? "bg-[#d9fdd3] text-[#008069] border-[#d9fdd3]"
+                            : "bg-white text-[#54656f] border-[#d1d7db]"
+                        }`}
+                      >
+                        {f.rotulo}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                <div className={`gap-1.5 ${celular ? "hidden" : "flex"}`}>
                   <button
                     onClick={() => setFiltroNaoLidas(!filtroNaoLidas)}
                     className={`flex-1 py-1 px-2 rounded-full text-xs font-bold border transition-colors cursor-pointer ${
@@ -4069,16 +4368,27 @@ export default function CrmWhatsAppClient({
                 </div>
               </div>
 
-              <button
-                onClick={() => setModalNovaConversa(true)}
-                className="mx-3 my-1.5 bg-[#0f9d58] hover:bg-[#0a6e3d] text-white py-1.5 px-3 rounded-lg text-xs font-bold transition-colors cursor-pointer shadow-xs"
-              >
-                ＋ Nova conversa
-              </button>
+              {celular ? (
+                /* Botão flutuante de nova conversa, no canto como no WhatsApp */
+                <button
+                  onClick={() => setModalNovaConversa(true)}
+                  aria-label="Nova conversa"
+                  className="absolute right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-10 h-14 w-14 rounded-2xl bg-[#0f9d58] text-white text-2xl shadow-lg flex items-center justify-center active:scale-95 transition-transform cursor-pointer"
+                >
+                  ✚
+                </button>
+              ) : (
+                <button
+                  onClick={() => setModalNovaConversa(true)}
+                  className="mx-3 my-1.5 bg-[#0f9d58] hover:bg-[#0a6e3d] text-white py-1.5 px-3 rounded-lg text-xs font-bold transition-colors cursor-pointer shadow-xs"
+                >
+                  ＋ Nova conversa
+                </button>
+              )}
 
               {/* Chat list items with real profile pics and formatted numbers */}
               <div
-                className="flex-1 overflow-y-auto px-2 pb-2 space-y-1"
+                className={celular ? "flex-1 overflow-y-auto pb-24" : "flex-1 overflow-y-auto px-2 pb-2 space-y-1"}
                 onScroll={(e) => {
                   const el = e.currentTarget;
                   if (
@@ -4163,8 +4473,17 @@ export default function CrmWhatsAppClient({
                         onContextMenu={(e) =>
                           openContextMenu(e, chat.nome, getChatMenuItems(chat))
                         }
-                        className={`flex items-center gap-2.5 p-2 rounded-xl cursor-pointer transition-colors ${
-                          isAtivo
+                        {...(celular
+                          ? toqueLongo((x, y) => abrirMenuEm(x, y, chat.nome, getChatMenuItems(chat)))
+                          : {})}
+                        className={`flex items-center cursor-pointer transition-colors ${
+                          celular
+                            ? "gap-3 px-4 py-3 select-none active:bg-[#f5f6f6]"
+                            : "gap-2.5 p-2 rounded-xl"
+                        } ${
+                          celular
+                            ? ""
+                            : isAtivo
                             ? "bg-[#e7f6ec]"
                             : chat.unread > 0
                             ? "bg-[#eef7ee] hover:bg-[#e7f6ec]"
@@ -4175,7 +4494,7 @@ export default function CrmWhatsAppClient({
                         <AvatarContato
                           fontes={fontesDaFoto(chat)}
                           nome={chat.nome}
-                          tamanho={40}
+                          tamanho={celular ? 50 : 40}
                           naoLidas={chat.unread}
                           atencao={Boolean(chat.precisaAtencao)}
                         />
@@ -4184,7 +4503,7 @@ export default function CrmWhatsAppClient({
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
                             <h4
-                              className={`text-xs truncate ${
+                              className={`${celular ? "text-[16px]" : "text-xs"} truncate ${
                                 chat.unread > 0 ? "font-bold text-[#202124]" : "font-semibold text-[#202124]"
                               }`}
                             >
@@ -4192,7 +4511,11 @@ export default function CrmWhatsAppClient({
                               {chat.nome}
                             </h4>
                             <span
-                              className="text-[10px] text-[#5f6368] font-mono shrink-0 ml-1 whitespace-nowrap"
+                              className={`shrink-0 ml-1 whitespace-nowrap ${
+                                celular
+                                  ? `text-[12px] ${chat.unread > 0 ? "text-[#25d366] font-semibold" : "text-[#667781]"}`
+                                  : "text-[10px] text-[#5f6368] font-mono"
+                              }`}
                               title={formatHora(chat.timestamp, true)}
                             >
                               {formatHora(chat.timestamp)}
@@ -4200,12 +4523,15 @@ export default function CrmWhatsAppClient({
                           </div>
 
                           {/* Clean Phone Number Format: xx xx xxxxxxxxx (ex: 55 19 987510267) */}
-                          <div className="text-[11px] font-mono text-[#0a6e3d] font-semibold tracking-tight">
-                            {numeroFormatado}
-                          </div>
+                          {/* No celular o número só aparece quando a conversa não tem nome */}
+                          {(!celular || nomeEhCodigo(chat.nome, chat.id)) && (
+                            <div className="text-[11px] font-mono text-[#0a6e3d] font-semibold tracking-tight">
+                              {numeroFormatado}
+                            </div>
+                          )}
 
                           <p
-                            className={`text-[11px] truncate mt-0.5 ${
+                            className={`${celular ? "text-[14px]" : "text-[11px]"} truncate mt-0.5 ${
                               chat.unread > 0
                                 ? "text-[#202124] font-medium"
                                 : "text-[#5f6368]"
@@ -4287,14 +4613,72 @@ export default function CrmWhatsAppClient({
                   setModalFotoAberto(true);
                 }
               }}
-              className={`flex-1 flex flex-col min-w-0 bg-[#e5ddd5] relative transition-colors ${
+              className={`flex-1 flex-col min-w-0 relative transition-colors ${
+                celular ? (chatSelecionado ? "flex bg-[#efeae2]" : "hidden") : "flex bg-[#e5ddd5]"
+              } ${
                 fotoDragSobre ? "ring-4 ring-inset ring-[#0f9d58] bg-[#d7ecd9]" : ""
               }`}
             >
               {chatSelecionado ? (
                 <>
+                  {celular ? (
+                    <>
+                      {/* Topo da conversa no celular: voltar, foto, nome e ⋮ */}
+                      <div className="shrink-0 z-10 bg-white border-b border-[#e9edef] pt-[env(safe-area-inset-top)] flex items-center pr-1">
+                        <button
+                          onClick={voltarParaLista}
+                          aria-label="Voltar para as conversas"
+                          className="h-14 w-11 flex items-center justify-center text-[26px] leading-none text-[#54656f] cursor-pointer"
+                        >
+                          ←
+                        </button>
+                        <AvatarContato
+                          fontes={fontesDaFoto(chatSelecionado)}
+                          nome={chatSelecionado.nome}
+                          tamanho={40}
+                          naoLidas={0}
+                          atencao={false}
+                        />
+                        <button
+                          onClick={() => abrirFerramenta("cliente")}
+                          className="flex-1 min-w-0 text-left px-3 py-2 cursor-pointer"
+                          title="Dados do cliente"
+                        >
+                          <div className="text-[16px] font-semibold text-[#111b21] truncate">
+                            {chatSelecionado.fixado && "📌 "}
+                            {chatSelecionado.nome}
+                          </div>
+                          <div className="text-[12px] text-[#667781] truncate">
+                            {conversaEhMinha
+                              ? "🟢 Seu atendimento"
+                              : formatarNumeroExibicao(chatSelecionado.numero)}
+                          </div>
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setMenuConversaAberto(true);
+                          }}
+                          aria-label="Opções da conversa"
+                          className="h-11 w-11 rounded-full flex items-center justify-center text-2xl leading-none text-[#54656f] cursor-pointer"
+                        >
+                          ⋮
+                        </button>
+                      </div>
+                      {/* Pedido de atenção: o único aviso que fica à vista */}
+                      {chatSelecionado.precisaAtencao && (
+                        <button
+                          onClick={pegarAtendimento}
+                          className="shrink-0 bg-amber-100 text-amber-900 text-[13px] font-semibold py-2 px-4 text-left cursor-pointer"
+                        >
+                          ⚠️ Cliente aguardando — toque para assumir o atendimento
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                  <>
                   {/* Header with Profile Pic & Real Number */}
-                  <div className="bg-white border-b border-[#e3e3e3] p-2.5 px-4 flex items-center justify-between shrink-0 shadow-xs">
+                  <div className="bg-white border-b border-[#e3e3e3] p-2.5 px-4 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 shrink-0 shadow-xs">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-[#0f9d58] text-white flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden border border-[#e3e3e3]">
                         {formatAvatarUrl(chatSelecionado.pic, serverUrl) ? (
@@ -4442,9 +4826,15 @@ export default function CrmWhatsAppClient({
                       </button>
                     </div>
                   </div>
+                  </>
+                  )}
 
                   {/* Messages Feed with Sent Product Photos Preview */}
-                  <div className="flex-1 overflow-y-auto p-4 space-y-2.5 flex flex-col">
+                  <div
+                    className={`flex-1 overflow-y-auto flex flex-col overscroll-contain ${
+                      celular ? "px-3 py-2 space-y-1.5" : "p-4 space-y-2.5"
+                    }`}
+                  >
                     {/* O WhatsApp Web entrega só o pedaço recente da conversa.
                         Este botão pede o resto ao servidor do WhatsApp. */}
                     {mensagensChatAtual.length > 0 && (
@@ -4479,8 +4869,17 @@ export default function CrmWhatsAppClient({
                             onContextMenu={(e) =>
                               openContextMenu(e, "Opções da Mensagem", getMessageMenuItems(m))
                             }
-                            className={`max-w-[70%] p-2.5 px-3 rounded-2xl text-xs shadow-sm break-words whitespace-pre-wrap leading-relaxed cursor-pointer ${
-                              isEu
+                            {...(celular
+                              ? toqueLongo((x, y) => abrirMenuEm(x, y, "Opções da Mensagem", getMessageMenuItems(m)))
+                              : {})}
+                            className={`${
+                              celular ? "max-w-[85%] p-2 px-2.5 text-[14.5px] select-none" : "max-w-[70%] p-2.5 px-3 text-xs"
+                            } rounded-2xl shadow-sm break-words whitespace-pre-wrap leading-relaxed cursor-pointer ${
+                              celular
+                                ? isEu
+                                  ? "self-end bg-[#d9fdd3] rounded-tr-none text-[#111b21]"
+                                  : "self-start bg-white rounded-tl-none text-[#111b21]"
+                                : isEu
                                 ? "self-end bg-[#e7f6ec] border border-[#0f9d58] rounded-tr-none text-[#202124]"
                                 : "self-start bg-[#dff0fd] border border-[#a9cdf0] rounded-tl-none text-[#202124]"
                             }`}
@@ -4521,7 +4920,7 @@ export default function CrmWhatsAppClient({
                             {/* Áudio / mensagem de voz, com transcrição */}
                             {m.mediaType === "audio" || m.mediaType === "ptt" || m.isVoice ? (
                               <div className="py-1">
-                                <audio src={urlMidia(m.mediaUrl)} controls preload="none" className="w-60 h-8" />
+                                <audio src={urlMidia(m.mediaUrl)} controls preload="none" className="w-60 max-w-full h-8" />
                                 {m.transcricao ? (
                                   <p className="mt-1 text-[12px] italic text-[#3c4043] whitespace-pre-wrap">
                                     📝 {m.transcricao}
@@ -4635,7 +5034,13 @@ export default function CrmWhatsAppClient({
                   </div>
 
                   {/* Input Area */}
-                  <div className="bg-white border-t border-[#e3e3e3] p-2.5 px-3 shadow-xs">
+                  <div
+                    className={
+                      celular
+                        ? "shrink-0 bg-[#efeae2] px-2 pt-1 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+                        : "bg-white border-t border-[#e3e3e3] p-2.5 px-3 shadow-xs"
+                    }
+                  >
                     {/* Quoting Banner */}
                     {msgRespondendo && (
                       <div className="bg-[#f0f2f5] border-l-4 border-[#0f9d58] p-2 rounded flex items-center justify-between mb-2 text-xs">
@@ -4698,29 +5103,47 @@ export default function CrmWhatsAppClient({
                     )}
 
                     {/* Input Row */}
-                    <div className="flex items-end gap-2">
+                    <div className={`flex items-end ${celular ? "gap-1.5" : "gap-2"}`}>
+                      {/* Celular: um "+" junta tudo o que não cabe na linha */}
+                      {celular && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setAnexosAbertos(true);
+                          }}
+                          aria-label="Anexar, catálogo, respostas rápidas"
+                          className="order-1 h-11 w-11 shrink-0 rounded-full bg-white text-[#54656f] text-2xl leading-none flex items-center justify-center shadow-sm cursor-pointer"
+                        >
+                          +
+                        </button>
+                      )}
                       <button
                         onClick={() => setMostrarRapidasBar(!mostrarRapidasBar)}
                         title="Respostas rápidas (mostrar/ocultar)"
-                        className="bg-[#e7f6ec] text-[#0a6e3d] border border-[#0f9d58] rounded-lg p-2 text-sm font-bold hover:bg-[#0f9d58] hover:text-white transition-colors cursor-pointer"
+                        className="max-md:hidden bg-[#e7f6ec] text-[#0a6e3d] border border-[#0f9d58] rounded-lg p-2 text-sm font-bold hover:bg-[#0f9d58] hover:text-white transition-colors cursor-pointer"
                       >
                         ⚡
                       </button>
 
                       <button
-                        onClick={() => setAbaAtual("catalogo")}
+                        onClick={() => abrirFerramenta("catalogo")}
                         title="Abrir catálogo de produtos"
-                        className="bg-[#e7f6ec] text-[#0a6e3d] border border-[#0f9d58] rounded-lg p-2 text-sm font-bold hover:bg-[#0f9d58] hover:text-white transition-colors cursor-pointer"
+                        className="max-md:hidden bg-[#e7f6ec] text-[#0a6e3d] border border-[#0f9d58] rounded-lg p-2 text-sm font-bold hover:bg-[#0f9d58] hover:text-white transition-colors cursor-pointer"
                       >
                         📦
                       </button>
 
                       <label
                         title="Enviar foto do computador ou da web"
-                        className="bg-[#e7f6ec] text-[#0a6e3d] border border-[#0f9d58] rounded-lg p-2 text-sm font-bold hover:bg-[#0f9d58] hover:text-white transition-colors cursor-pointer"
+                        className={
+                          celular
+                            ? "order-3 h-11 w-11 shrink-0 rounded-full bg-white text-xl flex items-center justify-center shadow-sm cursor-pointer"
+                            : "bg-[#e7f6ec] text-[#0a6e3d] border border-[#0f9d58] rounded-lg p-2 text-sm font-bold hover:bg-[#0f9d58] hover:text-white transition-colors cursor-pointer"
+                        }
                       >
                         📷
                         <input
+                          ref={inputFotoRef}
                           type="file"
                           accept="image/*"
                           className="hidden"
@@ -4753,7 +5176,11 @@ export default function CrmWhatsAppClient({
                           }
                         }}
                         title={gravando ? "Parar e enviar (botão direito cancela)" : "Gravar mensagem de voz"}
-                        className={`rounded-lg p-2 text-sm font-bold border transition-colors cursor-pointer ${
+                        className={`${
+                          celular
+                            ? `order-5 h-11 min-w-11 px-2 shrink-0 rounded-full ${campoTexto.trim() && !gravando ? "hidden" : ""}`
+                            : "rounded-lg p-2"
+                        } text-sm font-bold border transition-colors cursor-pointer ${
                           gravando
                             ? "bg-[#b3261e] text-white border-[#b3261e] animate-pulse"
                             : "bg-[#e7f6ec] text-[#0a6e3d] border-[#0f9d58] hover:bg-[#0f9d58] hover:text-white"
@@ -4764,10 +5191,11 @@ export default function CrmWhatsAppClient({
 
                       <label
                         title="Enviar arquivo: vídeo, áudio, PDF, planilha…"
-                        className="bg-[#e7f6ec] text-[#0a6e3d] border border-[#0f9d58] rounded-lg p-2 text-sm font-bold hover:bg-[#0f9d58] hover:text-white transition-colors cursor-pointer"
+                        className="max-md:hidden bg-[#e7f6ec] text-[#0a6e3d] border border-[#0f9d58] rounded-lg p-2 text-sm font-bold hover:bg-[#0f9d58] hover:text-white transition-colors cursor-pointer"
                       >
                         📎
                         <input
+                          ref={inputArquivoRef}
                           type="file"
                           accept="video/*,audio/*,image/*,application/pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.zip,.rar"
                           className="hidden"
@@ -4797,16 +5225,25 @@ export default function CrmWhatsAppClient({
                       <textarea
                         ref={campoTextoRef}
                         rows={1}
-                        placeholder="Digite sua mensagem… (Enter envia, Shift+Enter quebra linha)"
+                        placeholder={celular ? "Mensagem" : compacto ? "Digite sua mensagem…" : "Digite sua mensagem… (Enter envia, Shift+Enter quebra linha)"}
                         value={campoTexto}
                         onChange={(e) => setCampoTexto(e.target.value)}
                         onKeyDown={handleKeyDown}
-                        className="flex-1 resize-none border border-[#e3e3e3] rounded-2xl px-3 py-2 text-xs outline-none focus:border-[#0f9d58] max-h-28"
+                        className={
+                          celular
+                            ? "order-2 flex-1 min-w-0 resize-none bg-white rounded-3xl px-4 py-2.5 text-base leading-6 outline-none shadow-sm max-h-32"
+                            : "flex-1 resize-none border border-[#e3e3e3] rounded-2xl px-3 py-2 text-xs outline-none focus:border-[#0f9d58] max-h-28"
+                        }
                       />
 
                       <button
                         onClick={enviarMensagem}
-                        className="bg-[#0f9d58] hover:bg-[#0a6e3d] text-white rounded-full w-9 h-9 flex items-center justify-center text-sm font-bold shadow-sm transition-colors cursor-pointer shrink-0"
+                        aria-label="Enviar"
+                        className={`bg-[#0f9d58] hover:bg-[#0a6e3d] text-white rounded-full flex items-center justify-center font-bold shadow-sm transition-colors cursor-pointer shrink-0 ${
+                          celular
+                            ? `order-5 w-11 h-11 text-lg ${campoTexto.trim() && !gravando ? "" : "hidden"}`
+                            : "w-9 h-9 text-sm"
+                        }`}
                       >
                         ➤
                       </button>
@@ -4820,10 +5257,43 @@ export default function CrmWhatsAppClient({
               )}
             </section>
 
-            {/* PANE 3: PANE LATERAL */}
-            <aside className="w-88 bg-white border-l border-[#e3e3e3] flex flex-col shrink-0">
+            {/* PANE 3: PANE LATERAL. No computador fica sempre à direita; no
+                celular e no tablet abre por cima, chamado pelo ⋮, pelo "+" ou
+                pelo botão Ferramentas, e fecha no ✕. */}
+            {compacto && painelLateralAberto && tela === "tablet" && (
+              <div className="fixed inset-0 z-40 bg-black/30" onClick={() => setPainelLateralAberto(false)} />
+            )}
+            <aside
+              className={`bg-white flex-col ${
+                !compacto
+                  ? "flex w-88 border-l border-[#e3e3e3] shrink-0"
+                  : !painelLateralAberto
+                  ? "hidden"
+                  : celular
+                  ? "flex fixed inset-0 z-40"
+                  : "flex fixed right-0 top-0 bottom-0 z-40 w-[min(26rem,92vw)] shadow-2xl"
+              }`}
+            >
+              {compacto && (
+                <div className="shrink-0 flex items-center gap-2 border-b border-[#e9edef] px-2 pt-[env(safe-area-inset-top)]">
+                  <button
+                    onClick={() => setPainelLateralAberto(false)}
+                    aria-label="Fechar ferramentas"
+                    className="h-12 w-11 flex items-center justify-center text-2xl text-[#54656f] cursor-pointer"
+                  >
+                    {celular ? "←" : "✕"}
+                  </button>
+                  <span className="flex-1 truncate text-[16px] font-semibold text-[#111b21]">
+                    {chatSelecionado ? chatSelecionado.nome : "Ferramentas"}
+                  </span>
+                </div>
+              )}
               {/* Abas */}
-              <div className="flex flex-wrap border-b border-[#e3e3e3] p-1 gap-1">
+              <div
+                className={`flex border-b border-[#e3e3e3] p-1 gap-1 ${
+                  compacto ? "overflow-x-auto [scrollbar-width:none]" : "flex-wrap"
+                }`}
+              >
                 {([
                   { id: "catalogo", label: "Catálogo" },
                   { id: "fotos", label: "Google Fotos" },
@@ -4841,7 +5311,9 @@ export default function CrmWhatsAppClient({
                   <button
                     key={aba.id}
                     onClick={() => setAbaAtual(aba.id as any)}
-                    className={`flex-1 min-w-[28%] py-1.5 px-2 rounded-lg text-[11px] font-bold transition-colors cursor-pointer text-center ${
+                    className={`${
+                      compacto ? "shrink-0 px-3 py-2 text-[13px]" : "flex-1 min-w-[28%] py-1.5 px-2 text-[11px]"
+                    } rounded-lg font-bold transition-colors cursor-pointer text-center ${
                       abaAtual === aba.id
                         ? "bg-[#e7f6ec] text-[#0a6e3d]"
                         : "text-[#5f6368] hover:bg-[#f0f2f5]"
@@ -5552,9 +6024,11 @@ export default function CrmWhatsAppClient({
             </aside>
           </div>
 
-          {/* BOTTOM KANBAN TRAY */}
+          {/* BOTTOM KANBAN TRAY (no celular fica escondido: a tela é da conversa) */}
           <div
-            className={`border-t border-[#e3e3e3] bg-[#f0f2f5] flex flex-col px-3.5 py-2 transition-all duration-200 shrink-0 ${
+            className={`border-t border-[#e3e3e3] bg-[#f0f2f5] flex-col px-3.5 py-2 transition-all duration-200 shrink-0 ${
+              celular ? "hidden" : "flex"
+            } ${
               kanbanTamanho === "expandido"
                 ? "h-[65vh] min-h-[300px]"
                 : kanbanTamanho === "recolhido"
@@ -6013,12 +6487,116 @@ export default function CrmWhatsAppClient({
         />
       )}
 
-      {/* CONTEXT MENU MODAL */}
+      {/* FOLHAS DO CELULAR: opções da conversa e o "+" dos anexos. Sobem de
+          baixo, com alvos grandes para o dedo. */}
+      {celular && chatSelecionado && (menuConversaAberto || anexosAbertos) && (
+        <div
+          className="fixed inset-0 z-[70] bg-black/40 flex items-end"
+          onClick={() => {
+            setMenuConversaAberto(false);
+            setAnexosAbertos(false);
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-h-[80dvh] overflow-y-auto rounded-t-3xl bg-white pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] text-[15px] text-[#111b21]"
+          >
+            <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-[#d1d7db]" />
+            {anexosAbertos ? (
+              <div className="grid grid-cols-3 gap-y-4 px-4 py-3">
+                {[
+                  { icone: "📎", rotulo: "Arquivo", cor: "#7f66ff", aoTocar: () => inputArquivoRef.current?.click() },
+                  { icone: "🖼️", rotulo: "Foto", cor: "#007bfc", aoTocar: () => inputFotoRef.current?.click() },
+                  { icone: "📦", rotulo: "Catálogo", cor: "#0f9d58", aoTocar: () => abrirFerramenta("catalogo") },
+                  {
+                    icone: "⚡",
+                    rotulo: "Respostas",
+                    cor: "#ff9f0a",
+                    aoTocar: () => setMostrarRapidasBar(true),
+                  },
+                  { icone: "📊", rotulo: "Enquete", cor: "#02a698", aoTocar: () => setModalEnqueteAberto(true) },
+                  {
+                    icone: "📧",
+                    rotulo: produtosParaEmail.length ? `E-mail (${produtosParaEmail.length})` : "E-mail",
+                    cor: "#d3396d",
+                    aoTocar: () => setEmailAberto(true),
+                  },
+                ].map((item) => (
+                  <button
+                    key={item.icone}
+                    onClick={() => {
+                      setAnexosAbertos(false);
+                      item.aoTocar();
+                    }}
+                    className="flex flex-col items-center gap-1.5 cursor-pointer"
+                  >
+                    <span
+                      className="h-14 w-14 rounded-full flex items-center justify-center text-2xl text-white"
+                      style={{ backgroundColor: item.cor }}
+                    >
+                      {item.icone}
+                    </span>
+                    <span className="text-[13px] text-[#54656f]">{item.rotulo}</span>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div>
+                <div className="px-5 pb-2 text-[13px] text-[#667781] truncate">
+                  {chatSelecionado.nome} · {formatarNumeroExibicao(chatSelecionado.numero)}
+                </div>
+                <div className="px-5 py-2">
+                  <SeloDoAgente ponte={ponteComando} chatId={chatSelecionado.id} sinal={sinalAgente} />
+                </div>
+                {[
+                  ...(conversaEhMinha
+                    ? []
+                    : [{ rotulo: "✋ Pegar este atendimento", aoTocar: pegarAtendimento }]),
+                  { rotulo: "👤 Dados do cliente", aoTocar: () => abrirFerramenta("cliente") },
+                  { rotulo: "📦 Catálogo de produtos", aoTocar: () => abrirFerramenta("catalogo") },
+                  {
+                    rotulo: chatSelecionado.fixado ? "📌 Desafixar conversa" : "📌 Fixar conversa",
+                    aoTocar: alternarFixar,
+                  },
+                  { rotulo: "📧 Mandar por e-mail", aoTocar: () => setEmailAberto(true) },
+                  { rotulo: "📊 Enviar enquete", aoTocar: () => setModalEnqueteAberto(true) },
+                  {
+                    rotulo: "🏷️ Etiquetas, funil e mais…",
+                    aoTocar: () =>
+                      abrirMenuEm(0, window.innerHeight, chatSelecionado.nome, getChatMenuItems(chatSelecionado)),
+                  },
+                ].map((item) => (
+                  <button
+                    key={item.rotulo}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setMenuConversaAberto(false);
+                      item.aoTocar();
+                    }}
+                    className="w-full text-left px-5 py-3.5 active:bg-[#f5f6f6] cursor-pointer"
+                  >
+                    {item.rotulo}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* CONTEXT MENU MODAL (no celular vira folha de baixo para cima) */}
+      {ctxVisible && ctxStack.length > 0 && celular && (
+        <div className="fixed inset-0 z-[99998] bg-black/40" />
+      )}
       {ctxVisible && ctxStack.length > 0 && (
         <div
-          style={{ top: ctxPos.y, left: ctxPos.x }}
+          style={celular ? undefined : { top: ctxPos.y, left: ctxPos.x }}
           onClick={(e) => e.stopPropagation()}
-          className="fixed z-[99999] bg-white border border-[#e3e3e3] rounded-xl shadow-2xl py-1.5 min-w-[210px] max-w-[260px] text-xs text-[#202124] animate-in fade-in zoom-in-95 duration-100"
+          className={
+            celular
+              ? "crm-folha-menu fixed inset-x-0 bottom-0 z-[99999] bg-white rounded-t-3xl shadow-2xl pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] max-h-[75dvh] overflow-y-auto text-[15px] text-[#111b21]"
+              : "fixed z-[99999] bg-white border border-[#e3e3e3] rounded-xl shadow-2xl py-1.5 min-w-[210px] max-w-[260px] text-xs text-[#202124] animate-in fade-in zoom-in-95 duration-100"
+          }
         >
           {ctxStack.length > 1 && (
             <button
