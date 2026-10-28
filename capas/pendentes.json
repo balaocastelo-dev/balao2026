@@ -1,13 +1,4 @@
 {
   "versao": 1,
-  "pendentes": [
-    {
-      "slug": "monitor-piscando-cabo-placa-ou-monitor",
-      "titulo": "Monitor piscando: cabo, placa de vídeo ou o próprio monitor?",
-      "categoria": "assistencia",
-      "alt": "Monitor desligado sobre uma bancada, com um cabo de vídeo desconectado enrolado à frente",
-      "pedido": "A plain black computer monitor, switched off, standing on a clean wooden workbench, seen from a slight angle. In front of it lies a coiled black video cable with its connector unplugged, next to a small desktop computer case with the side panel closed. Soft daylight from a window on the left, shallow depth of field, calm and tidy workshop atmosphere.",
-      "pedidoEm": "2026-10-27T22:49:26.971Z"
-    }
-  ]
+  "pendentes": []
 }

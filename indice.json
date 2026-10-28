@@ -13,7 +13,12 @@
         "windows",
         "manutenção"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/monitor-piscando-cabo-placa-ou-monitor-9280a8b0.jpg",
+        "alt": "Placa-mãe de computador com um pente de memória e uma chave de fenda sobre uma bancada de madeira clara",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-10-28T21:00:00.000Z",
       "minutos": 5,
       "formato": "dica"
@@ -959,5 +964,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-28T01:11:13.296Z"
+  "atualizadoEm": "2026-10-28T01:25:52.538Z"
 }
