@@ -9,7 +9,12 @@
     "upgrade",
     "windows"
   ],
-  "capa": null,
+  "capa": {
+    "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/ssd-de-500-gb-ou-1-tb-quanto-espaco-voce-usa-2a1e45a3.jpg",
+    "alt": "Dois SSDs M.2 lado a lado sobre uma bancada de madeira, com um gabinete aberto desfocado ao fundo",
+    "largura": 1600,
+    "altura": 900
+  },
   "publicadoEm": "2026-10-28T09:00:00.000Z",
   "blocos": [
     {
