@@ -405,8 +405,14 @@
 @media (max-width: 860px) {
   .marca p,
   .medalha small,
-  .papel {
+  .papel,
+  .linha {
     display: none;
+  }
+
+  .etiqueta {
+    max-width: 128px;
+    padding: 3px 7px;
   }
 
   .corpo {
