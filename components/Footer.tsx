@@ -90,6 +90,7 @@ export default function Footer() {
               <li><Link href="/ia-local" className="hover:text-[#E60012] transition-colors">IA Local</Link></li>
               <li><Link href="/promocao" className="hover:text-[#E60012] transition-colors">Promoções</Link></li>
               <li><Link href="/seminovos" className="hover:text-[#E60012] transition-colors">Seminovos</Link></li>
+              <li><Link href="/consignados" className="hover:text-[#E60012] transition-colors">Consignados</Link></li>
             </ul>
           </div>
 

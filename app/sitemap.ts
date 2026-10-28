@@ -9,6 +9,7 @@ import { CAMPINAS_NEIGHBORHOODS } from '@/lib/neighborhood-seo'
 import { listVitrinePagesPublic } from '@/lib/vitrine/db'
 import { SETUPS_ASSINADOS } from '@/lib/vitrine/assinadas'
 import { PAGINAS } from '@/lib/landing/paginas'
+import { listarConsignados, urlDoConsignado } from '@/lib/consignados'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.balao.info'
@@ -26,6 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/sistemasdeia',
     '/pcgamer3d',
     '/consignacao',
+    '/consignados',
     '/premium',
     '/ia-local',
     '/pcgamer',
@@ -133,5 +135,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.85,
   }))
 
-  return [...staticRoutes, ...categoryRoutes, ...productRoutes, ...blogRoutes, ...vitrineRoutes, ...regionalRoutes, ...urgentRoutes, ...neighborhoodRoutes]
+  // Consignados (MEU BLING): giram rápido, então só entram os que estão à
+  // venda agora. Se o MEU BLING não responder, fica só a página da vitrine.
+  const consignados = await listarConsignados().catch(() => [])
+  const consignadoRoutes = consignados.map((item) => ({
+    url: urlDoConsignado(item),
+    lastModified: new Date(item.desde),
+    changeFrequency: 'daily' as const,
+    priority: 0.7,
+  }))
+
+  return [...staticRoutes, ...consignadoRoutes, ...categoryRoutes, ...productRoutes, ...blogRoutes, ...vitrineRoutes, ...regionalRoutes, ...urgentRoutes, ...neighborhoodRoutes]
 }
