@@ -9,7 +9,12 @@
     "macbook pro",
     "imac"
   ],
-  "capa": null,
+  "capa": {
+    "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/imac-e-macbook-pro-14-com-m6-o-que-muda-5ed1bcaf.jpg",
+    "alt": "Computador de mesa tudo-em-um visto de costas sobre uma mesa clara, com um notebook escuro fechado ao lado",
+    "largura": 1600,
+    "altura": 900
+  },
   "publicadoEm": "2026-10-28T15:00:00.000Z",
   "seo": {
     "titulo": "iMac e MacBook Pro 14 com M6: o que muda para você"
