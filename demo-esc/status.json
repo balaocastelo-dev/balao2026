@@ -1,0 +1,175 @@
+{
+  "updatedAt": "2026-01-15T12:00:00.000Z",
+  "agents": [
+    {
+      "id": "thiaguito",
+      "name": "Thiaguito",
+      "status": "em_conversa",
+      "currentTask": "Respondendo o cliente",
+      "lastMessage": "Vi o e-mail. Respondo e confirmo a retirada na loja.",
+      "talkingTo": "futrico",
+      "whatsappConnected": true
+    },
+    {
+      "id": "michael",
+      "name": "Michael",
+      "status": "trabalhando",
+      "currentTask": "Atualizando anúncio na OLX",
+      "lastMessage": "",
+      "talkingTo": null,
+      "whatsappConnected": false
+    },
+    {
+      "id": "hunter",
+      "name": "Hunter",
+      "status": "ocioso",
+      "currentTask": "Disponível para a equipe",
+      "lastMessage": "",
+      "talkingTo": null,
+      "whatsappConnected": false
+    },
+    {
+      "id": "sagrado",
+      "name": "Sagrado",
+      "status": "trabalhando",
+      "currentTask": "Preparando uma pausa da equipe",
+      "lastMessage": "",
+      "talkingTo": null,
+      "whatsappConnected": false
+    },
+    {
+      "id": "kevinho",
+      "name": "Kevinho",
+      "status": "trabalhando",
+      "currentTask": "Acompanhando acordo em aberto",
+      "lastMessage": "",
+      "talkingTo": null,
+      "whatsappConnected": false
+    },
+    {
+      "id": "herrera",
+      "name": "Herrera",
+      "status": "trabalhando",
+      "currentTask": "Montando o relatório do dia",
+      "lastMessage": "",
+      "talkingTo": null,
+      "whatsappConnected": false
+    },
+    {
+      "id": "wendell",
+      "name": "Wendell",
+      "status": "em_reuniao",
+      "currentTask": "Entregando ordem concluída",
+      "lastMessage": "A ordem do notebook ficou pronta. Pode faturar.",
+      "talkingTo": "dinherildo",
+      "whatsappConnected": false
+    },
+    {
+      "id": "kenlinho",
+      "name": "Kenlinho",
+      "status": "trabalhando",
+      "currentTask": "Organizando visita a um imóvel",
+      "lastMessage": "",
+      "talkingTo": null,
+      "whatsappConnected": false
+    },
+    {
+      "id": "robertinho",
+      "name": "Robertinho",
+      "status": "trabalhando",
+      "currentTask": "Conferindo lançamento do caixa",
+      "lastMessage": "",
+      "talkingTo": null,
+      "whatsappConnected": false
+    },
+    {
+      "id": "joao",
+      "name": "João",
+      "status": "em_conversa",
+      "currentTask": "Gravando vídeo da campanha",
+      "lastMessage": "Fecho. Me manda o texto e eu corto hoje ainda.",
+      "talkingTo": "malaquias",
+      "whatsappConnected": false
+    },
+    {
+      "id": "malaquias",
+      "name": "Malaquias",
+      "status": "em_conversa",
+      "currentTask": "Pedindo vídeo da campanha",
+      "lastMessage": "João, fecha um vídeo curto da campanha da semana?",
+      "talkingTo": "joao",
+      "whatsappConnected": false
+    },
+    {
+      "id": "futrico",
+      "name": "Futrico",
+      "status": "em_conversa",
+      "currentTask": "Encaminhando e-mail de cliente",
+      "lastMessage": "Thiaguito, te encaminhei o e-mail da retirada.",
+      "talkingTo": "thiaguito",
+      "whatsappConnected": false
+    },
+    {
+      "id": "dinherildo",
+      "name": "Dinherildo",
+      "status": "em_reuniao",
+      "currentTask": "Faturando ordem de serviço",
+      "lastMessage": "Pode deixar que eu lanço e te confirmo.",
+      "talkingTo": "wendell",
+      "whatsappConnected": false
+    },
+    {
+      "id": "atendente-whatsapp",
+      "name": "Atendente WhatsApp",
+      "status": "em_breve",
+      "currentTask": "Chegando em breve",
+      "lastMessage": "",
+      "talkingTo": null,
+      "whatsappConnected": false
+    },
+    {
+      "id": "assistente-estoque",
+      "name": "Assistente de Estoque",
+      "status": "em_breve",
+      "currentTask": "Chegando em breve",
+      "lastMessage": "",
+      "talkingTo": null,
+      "whatsappConnected": false
+    },
+    {
+      "id": "suporte-remoto",
+      "name": "Suporte Remoto",
+      "status": "em_breve",
+      "currentTask": "Chegando em breve",
+      "lastMessage": "",
+      "talkingTo": null,
+      "whatsappConnected": false
+    }
+  ],
+  "events": [
+    {
+      "at": "2026-01-15T11:40:00.000Z",
+      "from": "malaquias",
+      "to": "joao",
+      "text": "João, fecha um vídeo curto da campanha da semana?"
+    },
+    {
+      "at": "2026-01-15T11:42:00.000Z",
+      "from": "joao",
+      "to": "malaquias",
+      "text": "Fecho. Me manda o texto e eu corto hoje ainda."
+    },
+    {
+      "at": "2026-01-15T11:50:00.000Z",
+      "from": "wendell",
+      "to": "dinherildo",
+      "text": "A ordem do notebook ficou pronta. Pode faturar."
+    },
+    {
+      "at": "2026-01-15T11:58:00.000Z",
+      "from": "futrico",
+      "to": "thiaguito",
+      "text": "Thiaguito, te encaminhei o e-mail da retirada."
+    }
+  ]
+}
