@@ -1,0 +1,121 @@
+{
+  "slug": "ios-18-7-11-falha-explorada-iphone-xs-xr",
+  "titulo": "iOS 18.7.11: atualização fecha falha explorada em iPhone XS e XR",
+  "resumo": "A Apple lançou em 26 de outubro o iOS 18.7.11, que corrige uma falha usada em ataques. Veja quem precisa instalar e como atualizar o iPhone antigo.",
+  "categoria": "noticias",
+  "etiquetas": [
+    "apple",
+    "iphone",
+    "segurança",
+    "atualização"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-29T15:00:00.000Z",
+  "seo": {
+    "titulo": "iOS 18.7.11 fecha falha explorada em iPhone XS e XR"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Em 26 de outubro de 2026, a Apple liberou o iOS 18.7.11 e o iPadOS 18.7.11, uma atualização de segurança para aparelhos que não recebem as versões mais novas do sistema. A principal correção é de uma falha no CoreGraphics, a parte do sistema que desenha imagens e documentos, que segundo a Apple pode ter sido usada em ataques."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que iPhone antigo já não recebe nada. O iPhone XS, o XS Max e o XR não instalam o iOS 26, mas continuam ganhando correções de segurança pela linha 18. Quem tem um deles e deixou a atualização para depois deve instalar esta agora."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que a Apple corrigiu"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A página de segurança da Apple lista três correções. A mais grave permite que um arquivo preparado de propósito execute código no aparelho só ao ser aberto. A empresa diz ter recebido relato de que a falha pode ter sido explorada em um ataque muito sofisticado contra pessoas específicas, em versões anteriores ao iOS 27."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Parte do sistema",
+        "O que a falha permitia"
+      ],
+      "linhas": [
+        [
+          "CoreGraphics",
+          "Um arquivo malicioso podia executar código no aparelho (com relato de exploração)"
+        ],
+        [
+          "CoreMedia",
+          "Um aplicativo malicioso podia usar a câmera sem permissão"
+        ],
+        [
+          "Áudio",
+          "Um aplicativo podia vazar informação do usuário"
+        ]
+      ],
+      "titulo": "As três correções do iOS 18.7.11",
+      "fonte": {
+        "nome": "About the security content of iOS 18.7.11 and iPadOS 18.7.11 — Apple, 26 de outubro de 2026",
+        "url": "https://support.apple.com/en-us/149225"
+      }
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A lista de aparelhos da Apple inclui o iPhone XS, o iPhone XS Max, o iPhone XR e modelos de iPad que ficaram na linha 18, como o iPad de sétima geração. No mesmo dia saíram o iOS 27.2 e o iOS 26.7.2 para os aparelhos mais novos, segundo o MacRumors e o CyberInsider; o MacRumors registra também atualizações do macOS."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que isso muda para você"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem tem iPhone XS, XS Max ou XR:** abra Ajustes, toque em Geral e depois em Atualização de Software. Deixe o aparelho na tomada e no Wi-Fi até terminar. Antes, vale fazer uma cópia das fotos e dos contatos no iCloud ou no computador, como em qualquer atualização."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem tem iPhone ou iPad mais novo:** o caminho é o mesmo. Instale a versão mais recente que aparecer em Atualização de Software, seja da linha 26 ou da 27. A Apple não informou que essas versões corrigem falha explorada, mas manter o sistema em dia é a proteção mais simples."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "apple"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem pensa em comprar um iPhone usado:** a atualização mostra que modelos que ficaram fora do iOS 26 ainda recebem correções, mas não diz por quanto tempo isso continua. A Apple não divulga data de fim das atualizações. Num aparelho mais antigo, confira a versão instalada e a saúde da bateria antes de fechar negócio."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Se a atualização não aparece ou trava:** pode faltar espaço, a bateria pode estar fraca ou o aparelho pode ter outro problema. Nesse caso, a [assistência de iPhone, iPad e Mac](/reparoapple) consegue fazer o diagnóstico sem arriscar seus arquivos."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que ainda não se sabe"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Apple não contou quem foi atacado, como o arquivo chegava às vítimas nem se os modelos antigos foram alvo direto. Também não há data para o fim das correções na linha 18. Ataques desse tipo costumam mirar poucas pessoas, mas a correção vale para todos."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, tem assistência técnica que atende iPhone, iPad e Mac, e vende computadores [seminovos](/seminovos) que você pode ver ligados antes de pagar. Em uma linha: se o seu iPhone é XS ou XR, instale o iOS 18.7.11 agora."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "About the security content of iOS 18.7.11 and iPadOS 18.7.11 — Apple Support",
+      "url": "https://support.apple.com/en-us/149225",
+      "data": "26 de outubro de 2026"
+    },
+    {
+      "nome": "Apple Fixes Possibly Exploited CoreGraphics Flaw on Older iPhones — MacRumors",
+      "url": "https://www.macrumors.com/2026/10/27/apple-fixes-coregraphics-flaw-older-iphones/",
+      "data": "27 de outubro de 2026"
+    },
+    {
+      "nome": "Apple patches CoreGraphics flaw exploited on older iPhones — CyberInsider",
+      "url": "https://cyberinsider.com/apple-coregraphics-flaw-older-iphones/",
+      "data": "27 de outubro de 2026"
+    }
+  ]
+}
