@@ -1,0 +1,176 @@
+{
+  "slug": "o-que-nunca-fazer-com-um-hd-externo",
+  "titulo": "O que nunca fazer com um HD externo: seis erros que custam arquivos",
+  "resumo": "Puxar o cabo sem ejetar, mexer no disco em uso e guardar tudo numa cópia só estão entre os erros que mais fazem perder arquivos de um HD externo. Veja como evitar.",
+  "categoria": "guias",
+  "etiquetas": [
+    "armazenamento",
+    "backup",
+    "hd externo",
+    "recuperação de dados"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-29T21:00:00.000Z",
+  "formato": "dica",
+  "roteiro": {
+    "fala": "Quer que o seu HD externo dure? Fique longe de três erros. Primeiro: puxar o cabo sem ejetar. Espere o sistema avisar que pode remover. Segundo: mexer ou derrubar o disco enquanto ele está trabalhando. Deixe ele parado, numa superfície firme. Terceiro: guardar as fotos só nele. HD externo é cópia, não é cofre. E se o Windows pedir para formatar um disco com arquivos importantes, não formate.",
+    "titulo": "HD externo: o que nunca fazer",
+    "destaques": [
+      "Sempre ejete antes",
+      "Não mexa com ele ligado",
+      "Uma cópia só não basta",
+      "Não formate no susto"
+    ],
+    "legenda": "Alguns hábitos simples fazem o HD externo perder arquivos antes da hora. Veja os seis erros mais comuns e como evitar cada um na dica completa do blog.",
+    "hashtags": [
+      "hdexterno",
+      "backup",
+      "dicas",
+      "informatica",
+      "campinas"
+    ]
+  },
+  "seo": {
+    "titulo": "O que nunca fazer com um HD externo: 6 erros comuns"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "O que nunca fazer com um HD externo, em poucas palavras: puxar o cabo sem ejetar, mexer no disco enquanto ele trabalha, deixar nele a única cópia dos seus arquivos e aceitar formatar quando o sistema pede. São hábitos comuns que deixam o disco sem abrir ou com pastas corrompidas, e quase todos se evitam com segundos de cuidado."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que HD externo é um lugar seguro por natureza, porque fica guardado na gaveta. Na prática, ele é um disco como o de dentro do computador, só que viaja na mochila, cai da mesa e é desligado no meio de uma cópia. O cuidado é pouco, mas precisa virar costume."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "Sempre **ejete** o disco e espere o aviso antes de tirar o cabo.",
+        "Não mova, não sacuda e não derrube o disco **enquanto ele está em uso**.",
+        "HD externo com a **única cópia** das fotos não é backup: é risco.",
+        "Se o Windows pedir para **formatar** um disco com arquivos importantes, recuse e procure ajuda."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Os seis erros e o que fazer no lugar"
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "**Tirar o cabo sem ejetar.** A Microsoft orienta remover com segurança antes de desconectar, para não perder dados. Use o ícone de remover hardware perto do relógio ou Configurações, Bluetooth e dispositivos, e só tire o cabo quando o Windows avisar. No Mac, use a opção Ejetar antes.",
+        "**Mexer no disco enquanto ele trabalha.** O manual da Western Digital pede para não derrubar nem dar trancos no disco e não movê-lo durante a atividade. HD mecânico tem disco girando e uma cabeça de leitura que trabalha muito perto dele; um tranco nessa hora pode riscar a superfície.",
+        "**Desligar o computador com o disco conectado sem ejetar.** A Western Digital recomenda ejetar antes de desligar. Alguns modelos continuam energizados se o computador desliga com eles plugados.",
+        "**Ligar em hub ou extensão USB fraca.** A fabricante sugere conectar o disco direto no computador: hubs podem não entregar energia suficiente, e o disco desconecta sozinho no meio da cópia.",
+        "**Formatar no susto.** Quando o sistema enxerga o disco mas diz que é preciso formatar, formatar apaga os dados, como lembra a própria Western Digital. Se há arquivos importantes ali, pare.",
+        "**Guardar tudo numa cópia só.** O disco externo resolve como segunda cópia, não como a única."
+      ]
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "Estalos repetidos, chiado ou um disco que liga e desliga sozinho costumam indicar defeito físico. Insistir em ligar pode piorar o dano e diminuir a chance de recuperar os arquivos. Desconecte e não abra o disco em casa.",
+      "titulo": "Se o disco começou a fazer barulho, desligue"
+    },
+    {
+      "tipo": "chamada",
+      "tema": "dados"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Por que uma cópia só não é backup"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A regra 3-2-1, descrita pela Backblaze, pede três cópias dos dados, em dois tipos de mídia diferentes, com uma delas fora de casa. O HD externo entra bem como a cópia local. Mas se as fotos foram apagadas do computador depois de passadas para ele, o disco virou o original, e qualquer queda leva tudo junto."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Cópia",
+        "Onde fica",
+        "Protege contra"
+      ],
+      "linhas": [
+        [
+          "Original",
+          "No computador",
+          "Uso do dia a dia"
+        ],
+        [
+          "Segunda cópia",
+          "HD externo",
+          "Defeito no disco do computador"
+        ],
+        [
+          "Terceira cópia",
+          "Nuvem ou outro disco fora de casa",
+          "Roubo, incêndio, enchente e queda do próprio HD externo"
+        ]
+      ],
+      "titulo": "Onde o HD externo entra na regra 3-2-1",
+      "colunaDestaque": 1,
+      "fonte": {
+        "nome": "Backblaze — 3-2-1 Backup Strategy",
+        "url": "https://www.backblaze.com/learning-center/3-2-1-backup-strategy"
+      },
+      "nota": "O mínimo é ter os arquivos importantes em dois lugares diferentes."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A dica tem limite: SSD externo não tem peça girando e costuma tolerar melhor um tranco, mas também perde dados se for desconectado no meio de uma gravação, e também pode falhar sem aviso. Os cuidados com ejetar, formatar e manter duas cópias valem para os dois. Para entender os sinais de desgaste, veja como saber se o [SSD está chegando ao fim](/blog/como-saber-se-o-ssd-esta-chegando-ao-fim)."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando levar o disco para a assistência"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se o disco caiu, faz barulho estranho, não aparece em computador nenhum ou o sistema insiste em formatar, o caminho seguro é parar de tentar. A Balão da Informática, no Cambuí, em Campinas, faz [recuperação de dados](/recuperacaodados) e tem [assistência técnica](/manutencao) para diagnosticar o disco antes de qualquer tentativa. Em uma linha: ejete sempre, deixe o disco parado e nunca guarde nele a única cópia."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Já tirei o HD externo sem ejetar várias vezes e nada aconteceu. Então tanto faz?",
+      "resposta": "Não. O risco aparece quando há gravação pendente no momento em que o cabo sai: aí arquivos e pastas podem corromper. Ejetar leva segundos e evita o problema."
+    },
+    {
+      "pergunta": "O Windows pediu para formatar o HD externo. O que eu faço?",
+      "resposta": "Se o disco tem arquivos que importam, não formate: formatar apaga os dados. Desconecte e procure a [recuperação de dados](/recuperacaodados) antes de qualquer outra tentativa."
+    },
+    {
+      "pergunta": "Posso deixar o HD externo ligado no computador o tempo todo?",
+      "resposta": "Pode, desde que fique parado num lugar firme e ventilado. Mas um disco sempre conectado corre os mesmos riscos do computador, como vírus que apaga ou sequestra arquivos; por isso vale ter também uma cópia fora dele."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Safely remove hardware in Windows — Suporte da Microsoft",
+      "url": "https://support.microsoft.com/en-us/kb/4051300",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Drive will not power on or power down — Suporte da Western Digital",
+      "url": "https://support.wdc.com/knowledgebase/answer.aspx?ID=3537",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Manual do usuário My Passport, precauções de manuseio — Western Digital (cópia em ManualOwl)",
+      "url": "https://www.manualowl.com/m/Western%20Digital/My-Passport/Manual/503920?page=8",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "3-2-1 Backup Strategy — Backblaze",
+      "url": "https://www.backblaze.com/learning-center/3-2-1-backup-strategy",
+      "data": "outubro de 2026"
+    }
+  ]
+}

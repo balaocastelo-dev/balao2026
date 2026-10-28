@@ -2,6 +2,22 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "o-que-nunca-fazer-com-um-hd-externo",
+      "titulo": "O que nunca fazer com um HD externo: seis erros que custam arquivos",
+      "resumo": "Puxar o cabo sem ejetar, mexer no disco em uso e guardar tudo numa cópia só estão entre os erros que mais fazem perder arquivos de um HD externo. Veja como evitar.",
+      "categoria": "guias",
+      "etiquetas": [
+        "armazenamento",
+        "backup",
+        "hd externo",
+        "recuperação de dados"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-29T21:00:00.000Z",
+      "minutos": 5,
+      "formato": "dica"
+    },
+    {
       "slug": "ios-18-7-11-falha-explorada-iphone-xs-xr",
       "titulo": "iOS 18.7.11: atualização fecha falha explorada em iPhone XS e XR",
       "resumo": "A Apple lançou em 26 de outubro o iOS 18.7.11, que corrige uma falha usada em ataques. Veja quem precisa instalar e como atualizar o iPhone antigo.",
@@ -994,5 +1010,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-28T22:39:43.109Z"
+  "atualizadoEm": "2026-10-28T22:55:03.401Z"
 }
