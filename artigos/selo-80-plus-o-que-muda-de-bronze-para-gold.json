@@ -1,0 +1,331 @@
+{
+  "slug": "selo-80-plus-o-que-muda-de-bronze-para-gold",
+  "titulo": "Selo 80 Plus: o que muda de Bronze para Gold na fonte do PC",
+  "resumo": "Selo 80 Plus Bronze ou Gold? A diferença é a eficiência: quanto da energia vira calor. Veja os números do padrão e quando o Gold compensa.",
+  "categoria": "hardware",
+  "etiquetas": [
+    "fonte",
+    "montagem",
+    "energia",
+    "hardware"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-29T09:00:00.000Z",
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Você está escolhendo a fonte do computador e encontrou o selo 80 Plus em quase todas as opções, mas com nomes diferentes: Bronze, Silver, Gold e outros acima. A dúvida é natural, porque a diferença entre um Bronze e um Gold costuma ser o que mais pesa na escolha entre dois modelos de mesma potência. Vale entender o que o selo mede antes de decidir."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que Gold quer dizer fonte mais forte ou mais bem construída. O selo mede uma coisa só: eficiência, ou seja, quanto da energia puxada da tomada chega de fato às peças e quanto se perde como calor. Um Gold desperdiça menos que um Bronze. Isso ajuda, mas não diz nada sobre proteções, cabos ou qualidade dos componentes."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "O 80 Plus é um programa **voluntário de eficiência**: mede a energia perdida em calor, não a qualidade geral da fonte.",
+        "Na categoria de 115 V, o **Bronze** exige 85% de eficiência com metade da carga, e o **Gold**, 90%.",
+        "Na prática, o Gold esquenta menos e puxa um pouco menos da tomada; o ganho cresce em computador que passa muitas horas sob carga.",
+        "Mais importante que o metal do selo é a **potência certa** e a procedência do modelo, que dá para conferir no site do programa."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que o selo 80 Plus mede, e o que ele não mede"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A fonte transforma a corrente alternada da tomada na corrente contínua que a placa-mãe, o processador e a placa de vídeo usam. Nenhuma conversão é perfeita: uma parte da energia vira calor dentro da fonte. Eficiência é a proporção que sobra para as peças. Uma fonte com 90% de eficiência entrega 90 watts para cada 100 watts que puxa da tomada."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O programa existe desde 2004 e hoje é administrado pela CLEAResult. Segundo a página oficial, a exigência básica é eficiência de 80% ou mais em pontos definidos da carga nominal, com fator de potência verdadeiro de 0,9 ou superior. Fator de potência é um índice de quão bem a fonte aproveita a corrente que recebe da rede; quanto mais perto de 1, melhor."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Acima do nível básico vêm Bronze, Silver, Gold, Platinum e Titanium, cada um com exigências maiores. A página do programa lista ainda o Ruby, criado para fontes de servidores de data center, que não interessa a quem monta um computador de casa ou de escritório."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Agora o que o selo não diz. Uma análise do Tom's Hardware aponta que poucas medições bastam para definir o nível, que o fabricante pode enviar amostras escolhidas a dedo e que o teste é feito em temperatura ambiente amena, por volta de 23 °C. O consumo em espera também fica de fora. Proteções elétricas, qualidade dos capacitores e ruído não fazem parte da conta."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Bronze, Silver e Gold em números: a diferença real"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "As exigências variam conforme a carga, medida em proporção da potência nominal da fonte. Uma fonte de 600 W com 300 W de consumo está em 50% da carga. O programa testa em 20%, 50% e 100% (e também em 10% no Titanium), e cada nível precisa atingir o mínimo em todos esses pontos. A tabela abaixo mostra a categoria de 115 V, a de fontes internas de desktop."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Nível",
+        "20% da carga",
+        "50% da carga",
+        "100% da carga"
+      ],
+      "linhas": [
+        [
+          "80 Plus (básico)",
+          "80%",
+          "80%",
+          "80%"
+        ],
+        [
+          "Bronze",
+          "82%",
+          "85%",
+          "82%"
+        ],
+        [
+          "Silver",
+          "85%",
+          "88%",
+          "85%"
+        ],
+        [
+          "Gold",
+          "87%",
+          "90%",
+          "87%"
+        ],
+        [
+          "Platinum",
+          "90%",
+          "92%",
+          "89%"
+        ],
+        [
+          "Titanium",
+          "92%",
+          "94%",
+          "90%"
+        ]
+      ],
+      "titulo": "Eficiência mínima exigida, categoria 115 V (fonte interna de desktop)",
+      "colunaDestaque": 2,
+      "fonte": {
+        "nome": "80 Plus — Wikipedia (tabela de exigências do programa)",
+        "url": "https://en.wikipedia.org/wiki/80_Plus"
+      },
+      "nota": "O Titanium também exige 90% com 10% da carga. Na categoria de 230 V europeia as exigências são um pouco mais altas: o Bronze pede 85%, 88% e 85%, e o Gold, 90%, 92% e 89%."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Do Bronze para o Gold, a exigência sobe cinco pontos em cada ponto de carga. Parece pouco, mas a conta que importa é a da perda. Um Bronze no limite, a 85%, perde 15% da energia; um Gold no limite, a 90%, perde 10%. Em termos de calor dentro da fonte, o Bronze pode gerar até cerca de metade a mais que o Gold no mesmo trabalho."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Repare também na forma da curva: a eficiência mais alta está no meio, perto de 50% da carga, e cai nas pontas. Isso vale para todos os níveis e tem consequência direta na escolha da potência, como se verá adiante. Lembre ainda que a tabela traz o mínimo exigido: muitos modelos ficam acima dele."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 3,
+      "texto": "Na tomada de 127 V ou de 220 V"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "No Brasil, a tensão residencial varia de cidade para cidade: algumas usam 127 V e outras 220 V, e a Aneel informa o padrão de cada localidade. A categoria de 115 V é a referência mais próxima de quem liga o computador em 127 V. Em 220 V, as fontes costumam render um pouco mais, e por isso a categoria de 230 V tem exigências maiores para o mesmo nível."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quanto o Gold economiza na prática"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Uma conta ilustrativa ajuda a ter noção. Imagine um computador cujas peças pedem 300 W durante um jogo ou uma renderização. Com uma fonte a 85%, a tomada fornece cerca de 353 W. Com uma fonte a 90%, cerca de 333 W. A diferença, de uns 20 W, é a energia que deixa de virar calor dentro do gabinete."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Esses 20 W somam pouco em um computador de escritório que passa o dia quase parado, consumindo uma fração disso. Já em uma máquina que fica muitas horas sob carga pesada, como um PC de jogo usado todas as noites, uma estação de edição de vídeo ou um computador que roda IA local, a diferença se acumula ao longo dos anos de uso da fonte."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Há também o efeito no calor. Menos perda significa menos aquecimento dentro da fonte, o que permite à ventoinha girar mais devagar e tende a deixar o conjunto mais silencioso. Como lembra o Tom's Hardware, menos calor costuma favorecer a durabilidade, mantidas as outras condições iguais. Mas a construção do modelo pesa tanto quanto o selo."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "Desperdiça menos energia em calor em todos os pontos de carga.",
+        "Tende a aquecer menos e a deixar a ventoinha mais calma.",
+        "O ganho faz diferença em computador que passa muitas horas sob carga pesada.",
+        "A linha Gold costuma reunir modelos de categoria mais alta dos fabricantes."
+      ],
+      "contras": [
+        "Em uso leve, como escritório e navegação, a economia na tomada é pequena.",
+        "O selo não garante proteções, cabos melhores nem componentes de qualidade.",
+        "Uma fonte Gold de procedência duvidosa vale menos que uma Bronze de boa linha.",
+        "Potência mal escolhida anula boa parte da vantagem da eficiência."
+      ],
+      "titulo": "Escolher uma fonte Gold em vez de Bronze"
+    },
+    {
+      "tipo": "chamada",
+      "tema": "montagem"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como escolher a fonte sem olhar só o selo"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A potência vem antes do metal do selo. Some o consumo previsto do processador e da placa de vídeo, conforme a ficha dos fabricantes, acrescente o restante das peças e deixe uma folga. Como a eficiência é maior no meio da curva, uma fonte que trabalha entre metade e dois terços da capacidade nos momentos de carga costuma ficar na região mais favorável."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas folga demais também não ajuda. Uma fonte muito maior que o necessário passa a maior parte do tempo abaixo de 20% da carga, ponto que o 80 Plus nem mede fora do Titanium e onde a eficiência costuma cair. O artigo sobre [como escolher a fonte ideal para PC gamer](/blog/fonte-ideal-para-pc-gamer) detalha a conta da potência."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "**Defina a potência** pelo consumo das peças, com folga, sem exagero.",
+        "**Escolha o nível de eficiência** pelo uso: Bronze atende bem o uso leve; Gold compensa em quem passa horas sob carga.",
+        "**Confira a certificação** pelo modelo exato no site do programa 80 Plus.",
+        "**Olhe os conectores**: os cabos precisam atender a placa de vídeo e a placa-mãe que você vai usar.",
+        "**Prefira linhas conhecidas** do fabricante, com ficha técnica completa e proteções descritas."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O site da CLEAResult tem uma lista pública das fontes certificadas. Na página de cada modelo aparecem o nível, a categoria de tensão, a potência e o relatório de teste. Se o modelo que você está olhando não aparece ali, desconfie do selo na caixa. A Wikipedia registra casos de empresas que exibem o selo sem certificação e lembra que nomes como \"90 Plus\" não existem no programa."
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "Mesmo desligada da tomada, a fonte guarda carga nos capacitores internos. Se ela faz barulho, cheira a queimado ou o computador desliga sozinho, desligue tudo e leve a um técnico. Não abra a caixa da fonte para limpar nem para conferir componentes.",
+      "titulo": "Fonte não se abre em casa"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 3,
+      "texto": "E a certificação Cybenetics?"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Você pode encontrar também o selo da Cybenetics, outro certificador de fontes. Ele usa nomes parecidos, de Bronze a Diamond, além de uma classificação de ruído. Em agosto de 2024, segundo a PC Gamer, a Corsair anunciou que deixaria o 80 Plus e passaria a usar só a Cybenetics. As duas escalas não são idênticas; compare sempre selos do mesmo programa."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando o Bronze basta e quando vale o Gold"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Para um computador de trabalho, estudo ou navegação, com processador de consumo moderado e sem placa de vídeo dedicada, uma boa fonte Bronze na potência certa resolve. O consumo fica baixo boa parte do tempo, e a diferença na tomada é pequena. O dinheiro rende mais em um SSD ou em memória, que mudam o dia a dia."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Para um PC gamer, uma máquina de edição ou um computador que roda IA local, o Gold costuma fazer mais sentido: são horas sob carga alta, e menos calor dentro do gabinete ajuda o conjunto. Mas não é regra fixa. Se o orçamento obriga a escolher, uma Bronze de boa linha vale mais que uma Gold desconhecida. Veja as opções de [fontes](/categoria/hardware-fontes) para comparar."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Uso do computador",
+        "Tempo sob carga pesada",
+        "Nível que costuma bastar"
+      ],
+      "linhas": [
+        [
+          "Escritório, estudo, navegação",
+          "Pouco",
+          "Bronze de boa linha"
+        ],
+        [
+          "PC de jogo usado algumas horas por semana",
+          "Moderado",
+          "Bronze ou Gold"
+        ],
+        [
+          "PC de jogo usado todos os dias",
+          "Muito",
+          "Gold"
+        ],
+        [
+          "Edição de vídeo, renderização, IA local",
+          "Muito, às vezes por horas seguidas",
+          "Gold ou acima"
+        ]
+      ],
+      "titulo": "Que nível de eficiência faz sentido para cada uso",
+      "colunaDestaque": 2,
+      "nota": "Orientação geral, não regra. A potência certa e a procedência do modelo pesam mais que o nível do selo."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Fonte certa na montagem e na troca, na Balão"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, monta computador sob medida e ajuda a escolher a fonte pela potência e pelo uso, sem pagar por eficiência que você não vai aproveitar. Na [montagem de PC](/montagempc), você vê o computador ligado e testa antes de pagar. Se a sua fonte atual está dando sinais de problema, a [assistência técnica](/manutencao) faz o diagnóstico no mesmo endereço."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Em uma linha: o selo mede eficiência, não qualidade; escolha a potência certa primeiro e fique com o Gold quando o computador passa muitas horas trabalhando pesado."
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Fonte 80 Plus Gold dura mais que uma Bronze?",
+      "resposta": "Não necessariamente. O selo mede só a eficiência. Uma fonte Gold aquece menos, o que costuma ajudar, mas a durabilidade depende dos componentes e da construção de cada modelo."
+    },
+    {
+      "pergunta": "Vale trocar uma fonte Bronze que funciona bem por uma Gold?",
+      "resposta": "Raramente compensa só pela eficiência. A troca faz mais sentido quando a fonte atual não tem potência ou conectores para uma peça nova, ou quando apresenta defeito."
+    },
+    {
+      "pergunta": "Como saber se o selo 80 Plus da caixa é verdadeiro?",
+      "resposta": "Procure o modelo exato na lista de fontes certificadas do site da CLEAResult. A página do modelo mostra o nível, a categoria de tensão e o relatório de teste."
+    },
+    {
+      "pergunta": "Fonte sem selo 80 Plus é ruim?",
+      "resposta": "Não é obrigatório ter o selo, e alguns fabricantes usam outra certificação, como a Cybenetics. Mas fonte sem nenhuma certificação e sem ficha técnica completa merece desconfiança."
+    },
+    {
+      "pergunta": "Uma fonte de mais watts gasta mais energia?",
+      "resposta": "Não. O computador puxa o que as peças pedem. Mas uma fonte muito grande trabalha com carga baixa a maior parte do tempo, onde a eficiência costuma cair."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "What is 80 PLUS certification program? — CLEAResult",
+      "url": "https://clearesult.com/80plus/program-details",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "80 PLUS certified PSU: Corsair RM850e, 115V Internal — CLEAResult",
+      "url": "https://www.clearesult.com/80plus/certified-psus/Corsair/RPS0178-CP-9020263-RM850e-115V-Internal-7133",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "80 Plus — Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/80_Plus",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Tom's Explains: What Do 80 PLUS Bronze, Silver, Gold & Titanium Signify? — Tom's Hardware",
+      "url": "https://www.tomshardware.com/news/what-80-plus-levels-mean,36721.html",
+      "data": "abril de 2018"
+    },
+    {
+      "nome": "Corsair ditches 80 Plus for PSUs: here are the Cybenetics ratings it'll use instead — PC Gamer",
+      "url": "https://www.pcgamer.com/hardware/power-supplies/corsair-ditches-80-plus-for-psus-here-are-the-cybenetics-ratings-itll-use-instead",
+      "data": "agosto de 2024"
+    },
+    {
+      "nome": "Voltagem: saiba como funciona o fornecimento de energia elétrica — QuintoAndar",
+      "url": "https://www.quintoandar.com.br/guias/?p=478862",
+      "data": "setembro de 2024"
+    }
+  ]
+}

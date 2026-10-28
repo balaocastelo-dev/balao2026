@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "selo-80-plus-o-que-muda-de-bronze-para-gold",
+      "titulo": "Selo 80 Plus: o que muda de Bronze para Gold na fonte do PC",
+      "resumo": "Selo 80 Plus Bronze ou Gold? A diferença é a eficiência: quanto da energia vira calor. Veja os números do padrão e quando o Gold compensa.",
+      "categoria": "hardware",
+      "etiquetas": [
+        "fonte",
+        "montagem",
+        "energia",
+        "hardware"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-29T09:00:00.000Z",
+      "minutos": 11
+    },
+    {
       "slug": "monitor-piscando-cabo-placa-ou-monitor",
       "titulo": "Monitor piscando: cabo, placa de vídeo ou o próprio monitor?",
       "resumo": "Monitor piscando quase sempre tem causa que dá para isolar em casa: cabo, ajuste, driver ou o painel. Veja os testes, na ordem, e quando é hora da assistência.",
@@ -964,5 +979,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-28T01:25:52.538Z"
+  "atualizadoEm": "2026-10-28T22:11:57.613Z"
 }
