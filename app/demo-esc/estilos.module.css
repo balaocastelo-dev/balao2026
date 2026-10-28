@@ -1,0 +1,444 @@
+.pagina {
+  position: fixed;
+  inset: 0;
+  z-index: 10100;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: linear-gradient(180deg, #3a78ff 0%, #8fd4ff 70%, #e7f8ff 100%);
+  color: #3a2415;
+  font-family: inherit;
+}
+
+.topo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 14px 8px;
+  background: linear-gradient(180deg, rgba(255, 246, 220, 0.96), rgba(255, 232, 176, 0.94));
+  border-bottom: 4px solid #5c3b22;
+  box-shadow: 0 4px 0 rgba(92, 59, 34, 0.18);
+}
+
+.marca {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin-right: auto;
+}
+
+.marca h1 {
+  margin: 0;
+  font-size: clamp(1.15rem, 2vw, 1.7rem);
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.marca p {
+  margin: 2px 0 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  opacity: 0.75;
+}
+
+.medalha {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px 4px 6px;
+  background: #fffaf0;
+  border: 3px solid #5c3b22;
+  border-radius: 999px;
+  box-shadow: 0 3px 0 #5c3b22;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.medalha svg {
+  width: 28px;
+  height: 28px;
+  display: block;
+}
+
+.medalha small {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.medalha strong {
+  font-size: 1.15rem;
+}
+
+.selo,
+.botao {
+  font: inherit;
+  font-weight: 800;
+  border: 3px solid #5c3b22;
+  border-radius: 999px;
+  background: #ffe08a;
+  color: #3a2415;
+  box-shadow: 0 3px 0 #5c3b22;
+}
+
+.selo {
+  padding: 6px 12px;
+  font-size: 0.82rem;
+}
+
+.seloVivo {
+  background: #b6f5c4;
+}
+
+.botao {
+  padding: 7px 14px;
+  border-radius: 14px;
+  cursor: pointer;
+  background: #ffcf4d;
+}
+
+.botao:hover {
+  background: #ffe08a;
+}
+
+.botao:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #5c3b22;
+}
+
+.botao:focus-visible,
+.tarefa:focus-visible,
+.etiqueta:focus-visible,
+.fechar:focus-visible {
+  outline: 3px solid #1aa6ff;
+  outline-offset: 2px;
+}
+
+.corpo {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.palco {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.tela {
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+  cursor: grab;
+}
+
+.tela:active {
+  cursor: grabbing;
+}
+
+.camada {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.etiqueta {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  max-width: 190px;
+  padding: 4px 8px 5px;
+  border: 3px solid #5c3b22;
+  border-radius: 14px;
+  background: rgba(255, 248, 228, 0.94);
+  color: #3a2415;
+  font: inherit;
+  font-weight: 800;
+  line-height: 1.15;
+  text-align: left;
+  cursor: pointer;
+  pointer-events: auto;
+  box-shadow: 0 3px 0 #5c3b22;
+}
+
+.etiqueta[data-ativa="sim"] {
+  background: #ffffff;
+  box-shadow: 0 3px 0 #1aa6ff;
+  border-color: #1a6fd4;
+}
+
+.nome {
+  font-size: clamp(12px, 1vw, 15px);
+}
+
+.papel {
+  max-width: 170px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 700;
+  opacity: 0.75;
+}
+
+.linha {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.ponto {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 0 2px #fffaf0;
+  flex: none;
+}
+
+.balao {
+  position: absolute;
+  left: 0;
+  top: 0;
+  max-width: min(240px, 46vw);
+  padding: 7px 10px;
+  background: #fffaf0;
+  color: #3a2415;
+  border: 3px solid #5c3b22;
+  border-radius: 16px 16px 16px 6px;
+  box-shadow: 0 3px 0 #5c3b22;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.25;
+  pointer-events: none;
+}
+
+.balao::after {
+  content: "";
+  position: absolute;
+  left: 16px;
+  bottom: -9px;
+  border-width: 9px 8px 0 0;
+  border-style: solid;
+  border-color: #5c3b22 transparent transparent transparent;
+}
+
+.aviso {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  text-align: center;
+  font-weight: 800;
+  font-size: 1.15rem;
+  pointer-events: none;
+  text-shadow: 0 2px 0 rgba(255, 255, 255, 0.45);
+}
+
+.cartao {
+  position: absolute;
+  z-index: 2;
+  top: 12px;
+  left: 12px;
+  width: min(320px, calc(100% - 24px));
+  padding: 14px;
+  background: #fffaf0;
+  border: 4px solid #5c3b22;
+  border-radius: 20px;
+  box-shadow: 0 6px 0 #5c3b22;
+}
+
+.cartaoCabeca {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.emoji {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.cartao h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  line-height: 1.05;
+}
+
+.cartao .papelCard {
+  margin: 2px 0 0;
+  font-weight: 700;
+  opacity: 0.8;
+}
+
+.fechar {
+  margin-left: auto;
+  font: inherit;
+  font-weight: 800;
+  border: 3px solid #5c3b22;
+  background: #ffe08a;
+  border-radius: 10px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  color: #3a2415;
+}
+
+.statusLinha {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 0;
+  font-weight: 800;
+}
+
+.tarefaAtual {
+  margin: 8px 0 0;
+  font-weight: 700;
+}
+
+.zap {
+  display: inline-flex;
+  margin: 8px 0 0;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #b6f5c4;
+  border: 3px solid #1d7a3a;
+  font-weight: 800;
+  font-size: 0.82rem;
+}
+
+.cartao h3,
+.painel h2 {
+  margin: 14px 0 8px;
+  font-size: 0.95rem;
+}
+
+.recado,
+.tarefa {
+  background: #fff;
+  border: 3px solid #5c3b22;
+  border-radius: 14px;
+  padding: 8px 10px;
+  margin: 0 0 8px;
+}
+
+.tarefa {
+  width: 100%;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  text-align: left;
+  font: inherit;
+  font-weight: 700;
+  color: inherit;
+  cursor: pointer;
+  box-shadow: 0 3px 0 #e7c48a;
+}
+
+.tarefa[data-ativa="sim"] {
+  background: #fff4c8;
+}
+
+.recado small,
+.tarefa small {
+  display: block;
+  font-weight: 800;
+  opacity: 0.65;
+}
+
+.painel {
+  width: min(380px, 34vw);
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: #fff6dc;
+  border-left: 4px solid #5c3b22;
+}
+
+.painelCabeca {
+  padding: 12px 14px 0;
+}
+
+.painel h2 {
+  margin: 0 0 8px;
+}
+
+.lista {
+  overflow: auto;
+  padding: 0 14px 16px;
+  min-height: 0;
+}
+
+.lista::-webkit-scrollbar {
+  width: 10px;
+}
+
+.lista::-webkit-scrollbar-thumb {
+  background: #e7c48a;
+  border-radius: 99px;
+}
+
+.vazio {
+  margin: 0 0 12px;
+  font-weight: 700;
+  opacity: 0.7;
+}
+
+@media (max-width: 860px) {
+  .marca p,
+  .medalha small,
+  .papel,
+  .linha {
+    display: none;
+  }
+
+  .etiqueta {
+    max-width: 128px;
+    padding: 3px 7px;
+  }
+
+  .corpo {
+    flex-direction: column;
+  }
+
+  .palco {
+    min-height: 52vh;
+    flex: 1.2;
+  }
+
+  .painel {
+    width: 100%;
+    max-height: 40vh;
+    border-left: 0;
+    border-top: 4px solid #5c3b22;
+  }
+
+  .cartao {
+    top: auto;
+    bottom: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .botao:active {
+    transform: none;
+  }
+}
