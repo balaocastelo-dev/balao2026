@@ -13,6 +13,7 @@ import Paginacao from "@/components/catalogo/Paginacao";
 import { BotaoDeFiltros, FiltrosLaterais } from "@/components/catalogo/FiltrosDoCatalogo";
 import HomeVitrines, { type Variante } from "@/components/home/HomeVitrines";
 import HomeQuedaDePreco from "@/components/home/HomeQuedaDePreco";
+import FaixaDeConsignados from "@/components/consignados/FaixaDeConsignados";
 import { produtosEmQueda } from "@/lib/precos/queda";
 import { aplicarFiltros, contarFiltros, lerFiltros, montarFacetas, ordenar, paraQuery, termosDaBusca } from "@/lib/catalogo/filtros";
 
@@ -213,6 +214,11 @@ export default async function Home(props: {
         {/* 1.05 Queda de preço: produtos cujo preço baixou nos últimos 7 dias (some quando não há nenhum) */}
         {!navegando && (
           <HomeQuedaDePreco quedas={produtosEmQueda(quedasDePreco)} />
+        )}
+
+        {/* 1.07 Consignados em destaque: usados da consignação, vindos do MEU BLING (some quando não há nenhum ou o MEU BLING não responde) */}
+        {!navegando && (
+          <FaixaDeConsignados />
         )}
 
         {/* 1.1 Destaque: notebook Avell Storm 480 da vitrine (produto único da loja, fora do espelhamento) */}

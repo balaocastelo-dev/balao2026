@@ -1,4 +1,5 @@
 import PaginaDeCaptacao from "@/components/landing/PaginaDeCaptacao";
+import FaixaDeConsignados from "@/components/consignados/FaixaDeConsignados";
 import { carregarDadosDaPagina } from "@/lib/landing/dados";
 import { metadadosDaPagina } from "@/lib/landing/metadados";
 import { paginaPorSlug } from "@/lib/landing/paginas";
@@ -12,5 +13,11 @@ const pagina = paginaPorSlug("consignacao");
 export const metadata = metadadosDaPagina(pagina);
 
 export default async function Page() {
-  return <PaginaDeCaptacao pagina={pagina} dados={await carregarDadosDaPagina(pagina)} />;
+  return (
+    <PaginaDeCaptacao
+      pagina={pagina}
+      dados={await carregarDadosDaPagina(pagina)}
+      especiais={{ "faixa-consignados": <FaixaDeConsignados naCaptacao /> }}
+    />
+  );
 }
