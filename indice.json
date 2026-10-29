@@ -43,7 +43,12 @@
         "energia",
         "hardware"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/selo-80-plus-o-que-muda-de-bronze-para-gold-2222dfb8.jpg",
+        "alt": "Fonte de alimentação de computador sobre uma bancada de madeira, com cabos modulares enrolados ao lado",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-10-29T09:00:00.000Z",
       "minutos": 11
     },
@@ -1010,5 +1015,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-28T22:55:03.401Z"
+  "atualizadoEm": "2026-10-29T01:07:11.884Z"
 }
