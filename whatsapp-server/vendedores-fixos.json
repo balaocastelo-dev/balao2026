@@ -49,6 +49,13 @@
       "cargo": "Vendas",
       "assinatura": "Atenciosamente,\n*Brendon* — Balão da Informática Castelo",
       "protegido": true
+    },
+    {
+      "id": "mybots",
+      "nome": "MyBots",
+      "cargo": "Equipe de IA (robô)",
+      "assinatura": "_Mensagem enviada pela equipe de IA do Balão da Informática Castelo._",
+      "protegido": true
     }
   ]
 }

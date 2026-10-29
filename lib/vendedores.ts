@@ -62,6 +62,19 @@ export const VENDEDORES: VendedorRegistro[] = [
   registro("gabriel", "Gabriel"),
   registro("wendell", "Wendell"),
   registro("brendon", "Brendon"),
+  // A equipe de bots do MyBots entra pela mesma porta dos vendedores, com login
+  // proprio, para a mensagem dela chegar identificada no CRM e para o acesso
+  // poder ser revogado trocando uma variavel, sem mexer em codigo.
+  // Cargo e assinatura dizem que e robo DE PROPOSITO: isto sai para cliente,
+  // e cliente tem o direito de saber que nao esta falando com uma pessoa.
+  {
+    slug: "mybots",
+    id: "mybots",
+    nome: "MyBots",
+    cargo: "Equipe de IA (rob\u00f4)",
+    assinatura: "_Mensagem enviada pela equipe de IA do Bal\u00e3o da Inform\u00e1tica Castelo._",
+    envSenha: "VENDEDOR_MYBOTS_SENHA",
+  },
 ];
 
 export function getVendedorPorSlug(slug: string): VendedorRegistro | null {
