@@ -1,0 +1,159 @@
+{
+  "slug": "macbook-pro-tela-oled-touch-o-que-muda",
+  "titulo": "MacBook Pro com tela OLED e toque: o que muda para quem vai comprar",
+  "resumo": "A Apple anunciou em 28 de outubro o primeiro Mac com tela sensível ao toque, um MacBook Pro com OLED. Veja o que muda para quem vai comprar e quem já tem.",
+  "categoria": "noticias",
+  "etiquetas": [
+    "apple",
+    "macbook",
+    "mac",
+    "tela"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-30T15:00:00.000Z",
+  "seo": {
+    "titulo": "MacBook Pro com tela OLED e toque: o que muda"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Em 28 de outubro de 2026, a Apple anunciou um MacBook Pro com tela OLED e sensível ao toque, nos tamanhos de 14 e 16 polegadas. É a primeira vez que um Mac aceita toque direto na tela. A pré-venda começou no mesmo dia em 30 países e regiões, e a chegada às lojas está marcada para 6 de novembro."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que todo MacBook Pro passou a ter toque. Não passou: a Apple continua vendendo o modelo com a tela de antes, a Liquid Retina XDR, sem toque, inclusive o de 14 polegadas com M6 lançado na mesma semana. O toque e o OLED são de uma linha à parte, a mais cara."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que a Apple anunciou"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A tela se chama PROLED XDR e usa OLED em tandem, ou seja, duas camadas de pixels que produzem a própria luz, sem iluminação por trás. Segundo a Apple, o sensor de toque fica dentro do próprio painel, e não numa camada por cima. Dá para rolar, aproximar com dois dedos, girar e desenhar direto na tela."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O recorte no alto da tela dá lugar à Dynamic Island, a faixa que já existe no iPhone. No Mac, ela concentra a busca do Spotlight, avisos em andamento, como chamadas e transferências por AirDrop, e a Siri."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Item",
+        "O que a Apple informa"
+      ],
+      "linhas": [
+        [
+          "Tamanhos",
+          "14 e 16 polegadas"
+        ],
+        [
+          "Tela",
+          "OLED em tandem, sensível ao toque, de 10 a 120 Hz"
+        ],
+        [
+          "Processador",
+          "M5 Pro ou M5 Max"
+        ],
+        [
+          "Memória unificada",
+          "Até 128 GB"
+        ],
+        [
+          "Armazenamento",
+          "Até 16 TB"
+        ],
+        [
+          "Conexões",
+          "Três Thunderbolt 5, HDMI, leitor de cartão SD, MagSafe e fone de ouvido"
+        ],
+        [
+          "Rede sem fio",
+          "Wi-Fi 7 e Bluetooth 6"
+        ],
+        [
+          "Bateria",
+          "Até 24 horas, pela medição da própria Apple"
+        ],
+        [
+          "Cores",
+          "Preto-espacial e prateado"
+        ]
+      ],
+      "titulo": "MacBook Pro com tela PROLED XDR: a ficha básica",
+      "fonte": {
+        "nome": "Apple Newsroom e página do MacBook Pro com tela PROLED XDR — Apple, 28 de outubro de 2026",
+        "url": "https://www.apple.com/newsroom/2026/10/apple-unveils-groundbreaking-macbook-pro-with-proled-xdr-display/"
+      }
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Os processadores são os mesmos M5 Pro e M5 Max lançados em março. A novidade está na tela, no toque e no corpo, mais leve que o da geração anterior. No mesmo dia, a Apple publicou para desenvolvedores um material sobre como preparar aplicativos para o toque no Mac."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que isso muda para você"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem vai comprar um Mac agora:** o toque não é obrigatório para ninguém. Se o seu uso é escrever, navegar e trabalhar com planilhas, o MacBook Pro sem toque e o MacBook Air seguem atendendo. O guia sobre [MacBook Air ou MacBook Pro](/blog/macbook-air-ou-macbook-pro-como-escolher) ajuda a escolher pelo uso, e a notícia do [MacBook Pro de 14 polegadas com M6](/blog/imac-e-macbook-pro-14-com-m6-o-que-muda) explica o modelo mais simples."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem trabalha com desenho, foto ou vídeo:** a tela OLED e o toque fazem mais sentido aqui, porque permitem ajustar e desenhar direto sobre a imagem. Mas o quanto o toque ajuda depende de cada programa ser adaptado, e isso ainda está começando. Vale esperar as primeiras versões dos aplicativos que você usa."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "apple"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem já tem um MacBook Pro recente:** não há motivo para correr. O processador é o mesmo da geração de março, e a mudança está na tela. Como no Mac a memória não se troca depois, o artigo sobre [quanta memória escolher no Mac](/blog/quanta-memoria-escolher-no-mac) continua valendo para quem for trocar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem pode esperar:** a primeira geração de um recurso novo costuma receber ajustes no sistema e nos aplicativos nos meses seguintes. Esperar também traz informação que hoje falta, como a data de chegada ao Brasil."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que ainda não se sabe"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O comunicado da Apple não diz se o Brasil está entre os 30 países da pré-venda, nem quando o modelo chega aqui. Também não há informação sobre o custo de conserto de uma tela OLED com toque, que tende a ser uma peça mais complexa que a anterior. E ainda não se sabe quantos aplicativos vão aproveitar o toque logo no começo."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, tem [assistência para iPhone, iPad e Mac](/reparoapple) e vende [notebooks](/notebooks) novos e seminovos, que você pode ver ligados antes de pagar. Em uma linha: o toque chegou ao Mac, mas só na linha mais cara, e quem não precisa dele pode comprar sem esperar."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Apple unveils groundbreaking MacBook Pro with PROLED XDR Display — Apple Newsroom",
+      "url": "https://www.apple.com/newsroom/2026/10/apple-unveils-groundbreaking-macbook-pro-with-proled-xdr-display/",
+      "data": "28 de outubro de 2026"
+    },
+    {
+      "nome": "MacBook Pro with PROLED XDR Display — Apple",
+      "url": "https://www.apple.com/macbook-pro/proled-xdr-display/",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Say hello to Touch on Mac — Apple Developer",
+      "url": "https://developer.apple.com/news/?id=i9boeiqc",
+      "data": "28 de outubro de 2026"
+    },
+    {
+      "nome": "Here's Everything Apple Announced This Week — MacRumors",
+      "url": "https://www.macrumors.com/2026/10/28/apple-announcements-october-2026/",
+      "data": "28 de outubro de 2026"
+    },
+    {
+      "nome": "New MacBook Pro Release October 2026 — Forbes",
+      "url": "https://forbes.com/sites/forbes-personal-shopper/2026/10/28/new-macbook-pro-release-october-2026",
+      "data": "28 de outubro de 2026"
+    }
+  ]
+}
