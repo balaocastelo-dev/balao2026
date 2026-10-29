@@ -2,6 +2,22 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "como-saber-se-o-pc-aceita-mais-memoria",
+      "titulo": "Como saber se o seu PC aceita mais memória RAM antes de comprar",
+      "resumo": "Para saber se o PC aceita mais memória, veja os encaixes livres no Gerenciador de Tarefas e o limite da placa-mãe e do processador. Veja o passo a passo.",
+      "categoria": "hardware",
+      "etiquetas": [
+        "memória ram",
+        "upgrade",
+        "windows",
+        "placa-mãe"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-30T21:00:00.000Z",
+      "minutos": 5,
+      "formato": "dica"
+    },
+    {
       "slug": "macbook-pro-tela-oled-touch-o-que-muda",
       "titulo": "MacBook Pro com tela OLED e toque: o que muda para quem vai comprar",
       "resumo": "A Apple anunciou em 28 de outubro o primeiro Mac com tela sensível ao toque, um MacBook Pro com OLED. Veja o que muda para quem vai comprar e quem já tem.",
@@ -1055,5 +1071,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-29T22:29:29.050Z"
+  "atualizadoEm": "2026-10-29T22:49:39.050Z"
 }

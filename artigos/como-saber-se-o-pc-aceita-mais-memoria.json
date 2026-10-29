@@ -1,0 +1,187 @@
+{
+  "slug": "como-saber-se-o-pc-aceita-mais-memoria",
+  "titulo": "Como saber se o seu PC aceita mais memória RAM antes de comprar",
+  "resumo": "Para saber se o PC aceita mais memória, veja os encaixes livres no Gerenciador de Tarefas e o limite da placa-mãe e do processador. Veja o passo a passo.",
+  "categoria": "hardware",
+  "etiquetas": [
+    "memória ram",
+    "upgrade",
+    "windows",
+    "placa-mãe"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-30T21:00:00.000Z",
+  "formato": "dica",
+  "roteiro": {
+    "fala": "Quer colocar mais memória no computador? Antes de comprar, abra o Gerenciador de Tarefas, vá em Desempenho e clique em Memória. Lá embaixo aparece quantos encaixes estão em uso e quantos existem. Se estiver tudo ocupado, a saída é trocar os pentes por outros maiores. Depois confira o limite no manual da placa-mãe ou na página do fabricante. E em notebook fino, muitas vezes a memória é soldada e não dá para aumentar.",
+    "titulo": "Seu PC aceita mais memória?",
+    "destaques": [
+      "Encaixes em uso no Windows",
+      "Limite da placa-mãe",
+      "Tipo DDR4 ou DDR5",
+      "Notebook: memória soldada?"
+    ],
+    "legenda": "Antes de comprar memória, descubra se sobra encaixe, qual é o limite do seu computador e que tipo ele usa. A dica completa está no blog.",
+    "hashtags": [
+      "memoriaram",
+      "upgrade",
+      "windows",
+      "hardware",
+      "informatica",
+      "campinas"
+    ]
+  },
+  "seo": {
+    "titulo": "Seu PC aceita mais memória RAM? Como saber antes de comprar"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Para saber se o seu PC aceita mais memória RAM, você precisa de três respostas: se sobra encaixe livre, qual é o limite de memória do computador e que tipo de pente ele usa. A primeira o próprio Windows mostra em um minuto, no Gerenciador de Tarefas. As outras duas estão no manual da placa-mãe ou na página do fabricante."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que todo computador aceita qualquer quantidade, bastando comprar mais um pente. Na prática, o limite vem de três lugares ao mesmo tempo: a placa-mãe, o processador e a edição do Windows. E em muitos notebooks a memória vem soldada na placa, sem encaixe nenhum para aumentar. Conferir antes evita comprar peça que não serve."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "No **Gerenciador de Tarefas**, em Desempenho > Memória, o campo **Slots usados** mostra quantos encaixes estão ocupados e quantos existem.",
+        "O limite real é o **menor** entre o da placa-mãe, o do processador e o da edição do Windows.",
+        "O pente novo precisa ser do **mesmo tipo** (DDR4 ou DDR5, por exemplo) que a placa aceita.",
+        "Em notebook, confira se a memória é **soldada**: sem encaixe, não há como aumentar."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como ver os encaixes livres no Windows"
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "Abra o **Gerenciador de Tarefas** com as teclas Ctrl + Shift + Esc.",
+        "Clique na aba **Desempenho** e escolha **Memória** na lista da esquerda.",
+        "Olhe o campo **Slots usados**, embaixo do gráfico. \"2 de 4\" quer dizer que há dois encaixes livres; \"2 de 2\", que estão todos ocupados.",
+        "Na mesma tela, anote a quantidade instalada e a velocidade. Se precisar de mais detalhes, o artigo sobre [como ver quanta memória o computador tem](/blog/como-ver-quanta-memoria-ram-o-computador-tem) mostra onde olhar."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se os encaixes estiverem todos ocupados, ainda dá para aumentar, mas trocando os pentes atuais por outros de maior capacidade. Programas gratuitos como o CPU-Z também listam cada encaixe e o pente que está nele, o que ajuda a descobrir o modelo exato. Mas a contagem do Windows nem sempre é confiável em notebook: o mais seguro é confirmar na ficha do modelo."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Qual é o limite do seu computador"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Encaixe livre não basta: cada peça impõe um teto, e vale o menor deles. A placa-mãe tem o seu, escrito no manual e na página do modelo no site do fabricante. O processador também tem: a Intel publica o tamanho máximo de memória de cada chip na ficha técnica, e indica o manual da placa-mãe para confirmar o que ela aceita. E a edição do Windows tem o último limite."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "De onde vem o limite",
+        "Onde conferir",
+        "O que observar"
+      ],
+      "linhas": [
+        [
+          "Placa-mãe",
+          "Manual ou página do modelo no site do fabricante",
+          "Capacidade máxima, número de encaixes e tipo de memória"
+        ],
+        [
+          "Processador",
+          "Ficha técnica do fabricante do processador",
+          "Tamanho máximo de memória, que depende do tipo de memória"
+        ],
+        [
+          "Windows 11 Home",
+          "Página de limites de memória da Microsoft",
+          "Até 128 GB na versão de 64 bits"
+        ],
+        [
+          "Windows 11 Pro",
+          "Página de limites de memória da Microsoft",
+          "Até 2 TB na versão de 64 bits"
+        ],
+        [
+          "Windows de 32 bits",
+          "Página de limites de memória da Microsoft",
+          "No Windows 10 de 32 bits, no máximo 4 GB"
+        ]
+      ],
+      "titulo": "Onde está cada limite e como conferir",
+      "colunaDestaque": 2,
+      "fonte": {
+        "nome": "Memory Limits for Windows and Windows Server Releases — Microsoft Learn",
+        "url": "https://learn.microsoft.com/en-us/windows/desktop/Memory/memory-limits-for-windows-releases"
+      },
+      "nota": "Para quem usa o computador em casa ou no escritório, o teto do Windows de 64 bits quase nunca é o que limita; a placa-mãe costuma limitar antes."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O caso que mais engana é o do Windows de 32 bits. Segundo a Microsoft, o Windows 10 de 32 bits usa no máximo 4 GB, e parte disso ainda pode ficar reservada para os dispositivos. Se esse é o seu caso, comprar mais memória não adianta nada: primeiro é preciso passar para um Windows de 64 bits."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "upgrade"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando a dica não resolve sozinha"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Em notebook, o primeiro passo é saber o modelo exato, porque a mesma linha pode ter versões com e sem encaixe livre; o artigo sobre [como identificar o modelo do notebook](/blog/como-identificar-o-modelo-exato-do-notebook) ensina. Muitos notebooks finos têm a memória soldada, e aí não há o que fazer. Também é preciso acertar o tipo: o artigo sobre [DDR4 ou DDR5](/blog/ddr4-ou-ddr5-da-para-aproveitar-a-memoria-antiga) explica por que um não entra no lugar do outro."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Outro cuidado é o par: dois pentes iguais costumam render mais que um só, como mostra o artigo sobre [dual channel](/blog/dual-channel-por-que-duas-memorias-rendem-mais). Se preferir não abrir o computador, a Balão da Informática, no Cambuí, em Campinas, confere a compatibilidade e instala a memória na [assistência técnica](/manutencao), e tem [memória RAM](/categoria/hardware-memoria-ram) para PC e notebook. Em uma linha: confira encaixe, limite e tipo antes de comprar."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Posso misturar um pente de memória novo com o antigo?",
+      "resposta": "Normalmente funciona se os dois forem do mesmo tipo, como DDR4 com DDR4. Mas pentes diferentes podem rodar na velocidade do mais lento, e o mais seguro é usar dois iguais."
+    },
+    {
+      "pergunta": "O Gerenciador de Tarefas mostra 2 de 2 slots usados. Não dá para aumentar?",
+      "resposta": "Dá, trocando os dois pentes por outros de maior capacidade, desde que fique dentro do limite da placa-mãe. Os pentes antigos saem do computador."
+    },
+    {
+      "pergunta": "Como sei se o meu Windows é de 32 ou de 64 bits?",
+      "resposta": "Em Configurações, Sistema, Sobre, o item Tipo de sistema mostra se é de 32 ou de 64 bits. Com 32 bits, memória acima de 4 GB não é aproveitada."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Memory Limits for Windows and Windows Server Releases — Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-us/windows/desktop/Memory/memory-limits-for-windows-releases",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "How to Find Max Memory Size, Max Speed, and Max Number of Channels Supported by Intel Processors — Suporte da Intel",
+      "url": "https://www.intel.com/content/www/us/en/support/articles/000055474/processors.html",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "How to quickly determine memory slots available on motherboard — Windows Central",
+      "url": "https://www.windowscentral.com/how-quickly-determine-memory-slots-available-motherboard-windows-10",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "How to find how many memory slots are in a computer — Computer Hope",
+      "url": "https://computerhope.com/issues/ch001405.htm",
+      "data": "outubro de 2026"
+    }
+  ]
+}
