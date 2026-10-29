@@ -9,7 +9,12 @@
     "hd externo",
     "recuperação de dados"
   ],
-  "capa": null,
+  "capa": {
+    "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/o-que-nunca-fazer-com-um-hd-externo-cdaf1592.jpg",
+    "alt": "HD externo preto ligado por cabo a um gabinete de computador sobre uma mesa de madeira",
+    "largura": 1600,
+    "altura": 900
+  },
   "publicadoEm": "2026-10-29T21:00:00.000Z",
   "formato": "dica",
   "roteiro": {
