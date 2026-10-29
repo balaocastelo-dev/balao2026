@@ -1,0 +1,266 @@
+{
+  "slug": "iphone-bateria-durando-pouco-quando-trocar",
+  "titulo": "iPhone com bateria durando pouco: quando a troca resolve",
+  "resumo": "iPhone com bateria durando pouco? Veja como ler a Saúde da Bateria, o que ajustar antes e em quais casos a troca da bateria devolve a autonomia.",
+  "categoria": "apple",
+  "etiquetas": [
+    "iphone",
+    "bateria",
+    "apple",
+    "assistência"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-30T09:00:00.000Z",
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "O seu iPhone com bateria durando pouco já não chega ao fim do dia, desliga com 20% de carga ou ficou lento de uma hora para outra. A primeira ideia costuma ser trocar o aparelho, e a segunda, trocar a bateria. Antes das duas, vale descobrir se a culpa é mesmo da bateria gasta ou de algo que o próprio iPhone permite ajustar em poucos minutos."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que toda bateria que dura pouco está estragada. Às vezes ela está boa e o consumo é que subiu: um aplicativo trabalhando em segundo plano, sinal fraco, uma atualização recente ainda terminando tarefas. Em outras, a bateria envelheceu de fato, e aí nenhum ajuste devolve a autonomia. A troca resolve no segundo caso, e este guia mostra como diferenciar um do outro."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "Veja primeiro em **Ajustes > Bateria > Saúde da Bateria**: a capacidade máxima e o aviso de serviço dizem se a bateria envelheceu.",
+        "A Apple projeta as baterias para manter **80% da capacidade original** depois de 500 ciclos completos (até o iPhone 14) ou 1.000 ciclos (do iPhone 15 em diante), em condições ideais.",
+        "Desligamentos inesperados e lentidão com bateria envelhecida costumam melhorar com a troca; consumo alto por aplicativo ou sinal fraco, não.",
+        "Bateria estufada, tela levantando ou aparelho muito quente: desligue e leve a um técnico, sem tentar abrir."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como ver se a bateria do seu iPhone envelheceu"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O iPhone mede a própria bateria. Segundo o suporte da Apple, o caminho é **Ajustes > Bateria > Saúde da Bateria**; nos modelos do iPhone 11 ao 14, a opção aparece com o nome Saúde e Carregamento da Bateria. Ali está a **capacidade máxima**, que compara quanto a bateria guarda hoje com o que guardava quando era nova."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Do iPhone 15 em diante, a mesma tela mostra também a contagem de ciclos, a data de fabricação da bateria e a data do primeiro uso, de acordo com a Apple. Um ciclo é uma carga completa somada aos poucos: usar metade hoje e metade amanhã conta como um. Quanto mais ciclos, mais a bateria se aproxima do fim da vida útil prevista."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Um detalhe: aparelho novo pode mostrar um pouco menos de 100%. A Apple explica que isso depende do tempo entre a fabricação e a ativação, e não indica defeito. O que pesa é a tendência ao longo dos meses e, principalmente, a mensagem que aparece logo abaixo da capacidade."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Modelo",
+        "Projeto da bateria",
+        "Onde ver"
+      ],
+      "linhas": [
+        [
+          "iPhone 14 e anteriores",
+          "80% da capacidade original após 500 ciclos completos",
+          "Ajustes > Bateria > Saúde e Carregamento da Bateria (iPhone 11 ao 14)"
+        ],
+        [
+          "iPhone 15 e posteriores",
+          "80% da capacidade original após 1.000 ciclos completos",
+          "Ajustes > Bateria > Saúde da Bateria, com ciclos e datas"
+        ]
+      ],
+      "titulo": "Quanto a Apple prevê que a bateria aguente",
+      "colunaDestaque": 1,
+      "fonte": {
+        "nome": "Apple — About the battery and performance of iPhone 11 and later",
+        "url": "https://support.apple.com/en-us/106348"
+      },
+      "nota": "Os valores valem em condições ideais. Calor, carga e o jeito de usar mudam o resultado de cada aparelho."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas a porcentagem sozinha não decide. Uma bateria com capacidade razoável pode já não conseguir entregar energia nos picos de uso, e é isso que provoca desligamentos. Por isso a frase sobre o desempenho máximo, na mesma tela, costuma dizer mais do que o número."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "As mensagens da tela de Saúde da Bateria, e o que cada uma pede"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Quando tudo vai bem, a tela informa que a bateria está suportando o desempenho máximo normal. Isso quer dizer que o iPhone não está reduzindo nada para se proteger. Se a autonomia está curta mesmo assim, a causa provavelmente está no consumo, e não na bateria."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Nos modelos mais antigos, a Apple descreve outra mensagem: o aparelho teve um **desligamento inesperado** porque a bateria não conseguiu entregar a potência de pico, e por isso foi aplicado o gerenciamento de desempenho. Na prática, o iPhone passa a segurar o processador para não desligar de novo. Do iPhone 11 em diante, esse controle é automático e funciona o tempo todo, segundo o suporte da empresa."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A mensagem mais clara é a de serviço. Quando a saúde caiu bastante, o iPhone avisa que a bateria está significativamente degradada e que pode ser substituída para recuperar o desempenho e a capacidade; em alguns modelos aparece apenas a palavra Serviço ao lado de Saúde da Bateria. A Apple frisa que esse aviso não indica problema de segurança, mas recomenda considerar a troca."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Há ainda o aviso de peça desconhecida. Do iPhone XS em diante, o aparelho pode dizer que não consegue verificar se a bateria é original da Apple. Nesse caso, segundo a própria Apple, as informações de saúde podem não ser confiáveis, e o recomendado é uma avaliação técnica. É comum em aparelho que já passou por troca de bateria fora da rede autorizada."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que acontece quando a bateria está gasta"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Bateria de íon de lítio envelhece quimicamente com o tempo e com os ciclos. A primeira consequência é a óbvia: menos horas por carga. A segunda é menos visível. A bateria envelhecida tem mais dificuldade para atender aos picos de energia, e o iPhone pode desligar de repente, principalmente com pouca carga ou no frio."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Para evitar esses desligamentos, o sistema reduz o desempenho. A Apple lista os efeitos que podem aparecer nos casos mais sérios: aplicativos demorando mais para abrir, rolagem menos fluida, brilho da tela reduzido, volume do alto-falante um pouco mais baixo, aplicativos em segundo plano recarregando ao serem abertos e, no extremo, o flash da câmera desativado."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Segundo a mesma página, a qualidade das ligações, a velocidade da rede, a qualidade de fotos e vídeos, o GPS e o Apple Pay não são afetados. Ou seja: se o problema é sinal ruim, câmera borrada ou internet lenta, trocar a bateria não vai ajudar, e vale procurar a causa em outro lugar."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "Devolve a autonomia de uma bateria nova quando a capacidade caiu",
+        "Acaba com os desligamentos causados por bateria que não entrega potência de pico",
+        "Tira o freio que o sistema aplica ao desempenho por causa da bateria",
+        "Prolonga a vida de um aparelho que ainda atende bem ao uso"
+      ],
+      "contras": [
+        "Não resolve consumo alto causado por aplicativo, sinal fraco ou configuração",
+        "Não melhora câmera, rede nem tela com defeito",
+        "Bateria de procedência duvidosa pode mostrar aviso de peça desconhecida",
+        "Em aparelho muito antigo, sem atualização do sistema, pode valer mais trocar o iPhone"
+      ],
+      "titulo": "Trocar a bateria do iPhone: o que pesa"
+    },
+    {
+      "tipo": "chamada",
+      "tema": "apple"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Antes de trocar: o que conferir no próprio iPhone"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se a tela de saúde não mostra aviso nenhum, vale olhar o consumo. Em **Ajustes > Bateria**, a Apple mostra sugestões no alto da tela e, abaixo, um gráfico que compara o uso de hoje com o dos últimos sete dias, além dos aplicativos que mais gastaram. Tocar em um aplicativo revela se o gasto veio de uso em segundo plano, de notificações ou de sinal fraco."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "**Veja as sugestões** em Ajustes > Bateria, como ativar o brilho automático e reduzir o tempo de bloqueio da tela.",
+        "**Descubra o aplicativo que mais consome** e limite a atualização em segundo plano, o acesso à localização ou as notificações dele.",
+        "**Prefira o Wi-Fi** quando houver: segundo a Apple, ele gasta menos que a rede celular. Em lugar sem sinal, o modo avião evita que o aparelho fique procurando antena.",
+        "**Espere alguns dias depois de uma atualização**: o sistema continua organizando arquivos em segundo plano, e a Apple recomenda conferir de novo depois disso.",
+        "**Use o Modo de Pouca Energia** nos dias longos. Ele desliga recursos como a busca de e-mail e a atualização em segundo plano e se desativa sozinho acima de 80% de carga.",
+        "**Mantenha o iOS em dia**, em Ajustes > Geral > Atualização de Software."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Nos iPhones compatíveis com o iOS 26 ou posterior, a Apple descreve ainda um recurso que ela chama, em inglês, de Adaptive Power: ele prevê os dias de uso mais pesado, ajusta o desempenho e pode ligar o Modo de Pouca Energia sozinha com 20% de carga. Vale testar por alguns dias antes de concluir que a bateria acabou."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas esses ajustes têm limite. Eles reduzem o consumo; não devolvem a capacidade perdida. Se a saúde da bateria está baixa, aparece o aviso de serviço ou o iPhone desliga sozinho com carga sobrando, a configuração só adia o problema. Nesse ponto, a troca é o que resolve."
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "Tela levantando nas bordas, traseira estufada, cheiro estranho ou aparelho muito quente sem motivo podem indicar bateria inchada. Desligue o iPhone, não carregue, não aperte e não tente abrir. Bateria de lítio danificada tem risco de incêndio e deve ser retirada por quem tem ferramenta e procedimento.",
+      "titulo": "Quando parar e levar a um técnico"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como cuidar da bateria nova para ela durar mais"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O maior inimigo da bateria é o calor. A Apple indica que o iPhone funciona melhor entre 0 °C e 35 °C de temperatura ambiente, com a faixa ideal entre 16 °C e 22 °C, e avisa que usar ou carregar acima de 35 °C pode reduzir a capacidade de forma permanente. Painel de carro ao sol e travesseiro durante a carga são exemplos clássicos do que evitar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se o aparelho esquenta enquanto carrega dentro da capinha, a Apple recomenda tirar a capa. O carregamento otimizado, que vem ativado, também ajuda: ele aprende a sua rotina e segura a carga antes dos 100% até perto da hora em que você costuma tirar o iPhone da tomada. Deixar o celular carregando durante a noite é seguro, segundo a empresa."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O frio funciona de outro jeito. Em temperatura muito baixa a bateria rende menos, mas a autonomia volta quando o aparelho aquece. E, se for guardar um iPhone parado por muito tempo, a orientação da Apple é deixá-lo com cerca de metade da carga, desligado e em local fresco, recarregando até a metade a cada seis meses."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Onde trocar a bateria do iPhone em Campinas"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Pela página de suporte da Apple, o AppleCare inclui o serviço de bateria quando a capacidade cai abaixo de 80%, e o reparo certificado usa peças originais. Fora dessa cobertura, o conserto é pago. Antes de qualquer serviço, faça um backup das fotos e dos arquivos: é o cuidado básico para qualquer aparelho que vai para a bancada."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se preferir resolver perto de casa, a Balão da Informática, no Cambuí, em Campinas, tem [assistência para iPhone, iPad e Mac](/reparoapple) no mesmo endereço da loja, com diagnóstico, troca de peça e conserto. A equipe confere se a autonomia curta vem mesmo da bateria antes de indicar a troca. Para Mac, vale também o guia sobre [MacBook que não liga ou não carrega](/blog/macbook-nao-liga-ou-nao-carrega-o-que-conferir)."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se a conclusão for trocar de aparelho e não de bateria, a loja também tem [seminovos](/seminovos), e você pode ver o equipamento ligado e testar antes de pagar. A decisão, em uma linha: confira a Saúde da Bateria, corte o consumo que sobra e, se o aviso de serviço ou os desligamentos continuarem, troque a bateria."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "apple"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Com quantos por cento de saúde vale trocar a bateria do iPhone?",
+      "resposta": "Não existe um número mágico. A Apple projeta as baterias para manter 80% da capacidade original depois de 500 ou 1.000 ciclos, conforme o modelo. Abaixo disso, ou quando aparece o aviso de serviço, a troca costuma fazer diferença no dia a dia."
+    },
+    {
+      "pergunta": "Trocar a bateria deixa o iPhone mais rápido?",
+      "resposta": "Pode deixar, quando a lentidão vem do gerenciamento de desempenho aplicado por causa da bateria envelhecida. Se a lentidão vem de falta de espaço, de um aplicativo pesado ou de um aparelho antigo para o sistema atual, a bateria nova não muda isso."
+    },
+    {
+      "pergunta": "Posso deixar o iPhone carregando a noite toda?",
+      "resposta": "Pode. Segundo a Apple, o iPhone para de carregar quando enche, e o carregamento otimizado segura a carga antes dos 100% até perto da hora em que você costuma usar o aparelho. O cuidado é com o calor: evite carregar sob travesseiro ou com a capa esquentando."
+    },
+    {
+      "pergunta": "O que significa o aviso de que não foi possível verificar se a bateria é original?",
+      "resposta": "Aparece do iPhone XS em diante quando o aparelho não reconhece a bateria instalada, o que é comum depois de uma troca fora da rede autorizada. Nesse caso as informações de saúde podem não ser confiáveis, e vale uma avaliação técnica."
+    },
+    {
+      "pergunta": "A bateria do iPhone estufou. Posso continuar usando?",
+      "resposta": "Não. Desligue o aparelho, não carregue e não tente abrir ou apertar a tela. Bateria inchada tem risco de incêndio e precisa ser retirada por um técnico."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Apple — iPhone battery and performance",
+      "url": "https://support.apple.com/en-us/101575",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Apple — About the battery and performance of iPhone 11 and later",
+      "url": "https://support.apple.com/en-us/106348",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Apple — If the battery in your iPhone or iPad drains too quickly",
+      "url": "https://support.apple.com/en-us/120745",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Apple — Batteries: Maximizing Performance",
+      "url": "https://www.apple.com/batteries/maximizing-performance/",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Apple — Charge and maintain your iPhone battery",
+      "url": "https://support.apple.com/en-us/105105",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Suporte da Apple — Substituição da bateria do iPhone",
+      "url": "https://support.apple.com/iphone/repair/battery-replacement",
+      "data": "consultado em outubro de 2026"
+    }
+  ]
+}

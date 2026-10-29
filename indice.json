@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "iphone-bateria-durando-pouco-quando-trocar",
+      "titulo": "iPhone com bateria durando pouco: quando a troca resolve",
+      "resumo": "iPhone com bateria durando pouco? Veja como ler a Saúde da Bateria, o que ajustar antes e em quais casos a troca da bateria devolve a autonomia.",
+      "categoria": "apple",
+      "etiquetas": [
+        "iphone",
+        "bateria",
+        "apple",
+        "assistência"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-30T09:00:00.000Z",
+      "minutos": 11
+    },
+    {
       "slug": "o-que-nunca-fazer-com-um-hd-externo",
       "titulo": "O que nunca fazer com um HD externo: seis erros que custam arquivos",
       "resumo": "Puxar o cabo sem ejetar, mexer no disco em uso e guardar tudo numa cópia só estão entre os erros que mais fazem perder arquivos de um HD externo. Veja como evitar.",
@@ -1025,5 +1040,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-29T01:14:08.773Z"
+  "atualizadoEm": "2026-10-29T22:12:30.708Z"
 }

@@ -1,4 +1,13 @@
 {
   "versao": 1,
-  "pendentes": []
+  "pendentes": [
+    {
+      "slug": "iphone-bateria-durando-pouco-quando-trocar",
+      "titulo": "iPhone com bateria durando pouco: quando a troca resolve",
+      "categoria": "apple",
+      "alt": "Smartphone de costas sobre uma bancada de madeira, ao lado de um carregador com cabo enrolado e uma pequena chave de precisão",
+      "pedido": "A generic modern smartphone lying face down on a clean light wooden workbench, its plain matte back facing up with no markings. Beside it, a small white charging adapter with a neatly coiled cable and a slim precision screwdriver. Soft natural daylight from a window on the left, shallow depth of field, calm and tidy workshop atmosphere, photographed from a 45-degree angle.",
+      "pedidoEm": "2026-10-29T22:12:30.709Z"
+    }
+  ]
 }
