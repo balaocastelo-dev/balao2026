@@ -28,7 +28,12 @@
         "segurança",
         "atualização"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/ios-18-7-11-falha-explorada-iphone-xs-xr-d38c4af4.jpg",
+        "alt": "Smartphone antigo deitado de costas sobre uma mesa de madeira, ao lado de um cabo de carregador enrolado",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-10-29T15:00:00.000Z",
       "minutos": 3
     },
@@ -1015,5 +1020,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-29T01:07:11.884Z"
+  "atualizadoEm": "2026-10-29T01:12:44.209Z"
 }
