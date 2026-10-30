@@ -9,7 +9,12 @@
     "apple",
     "assistência"
   ],
-  "capa": null,
+  "capa": {
+    "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/iphone-bateria-durando-pouco-quando-trocar-9096abda.jpg",
+    "alt": "Smartphone de costas sobre uma bancada de madeira, ao lado de um carregador com cabo enrolado e uma pequena chave de precisão",
+    "largura": 1600,
+    "altura": 900
+  },
   "publicadoEm": "2026-10-30T09:00:00.000Z",
   "blocos": [
     {
