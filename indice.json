@@ -28,7 +28,12 @@
         "mac",
         "tela"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/macbook-pro-tela-oled-touch-o-que-muda-9d92806d.jpg",
+        "alt": "Notebook cinza-escuro aberto sobre uma mesa de madeira, visto de lado, com a tela apagada, ao lado de um caderno fechado e de um lápis",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-10-30T15:00:00.000Z",
       "minutos": 4
     },
@@ -1076,5 +1081,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-30T01:14:44.624Z"
+  "atualizadoEm": "2026-10-30T02:22:29.437Z"
 }
