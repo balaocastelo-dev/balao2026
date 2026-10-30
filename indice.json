@@ -2,6 +2,22 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "pc-desligando-sozinho-temperatura-fonte-ou-sistema",
+      "titulo": "PC desligando sozinho: temperatura, fonte ou sistema?",
+      "resumo": "PC desligando sozinho quase sempre aponta para calor, fonte ou um erro do Windows. Veja como separar as três causas em casa e onde parar.",
+      "categoria": "assistencia",
+      "etiquetas": [
+        "manutenção",
+        "diagnóstico",
+        "fonte",
+        "temperatura",
+        "windows"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-31T09:00:00.000Z",
+      "minutos": 10
+    },
+    {
       "slug": "como-saber-se-o-pc-aceita-mais-memoria",
       "titulo": "Como saber se o seu PC aceita mais memória RAM antes de comprar",
       "resumo": "Para saber se o PC aceita mais memória, veja os encaixes livres no Gerenciador de Tarefas e o limite da placa-mãe e do processador. Veja o passo a passo.",
@@ -1081,5 +1097,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-30T02:22:29.437Z"
+  "atualizadoEm": "2026-10-30T22:09:51.687Z"
 }

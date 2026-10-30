@@ -1,0 +1,264 @@
+{
+  "slug": "pc-desligando-sozinho-temperatura-fonte-ou-sistema",
+  "titulo": "PC desligando sozinho: temperatura, fonte ou sistema?",
+  "resumo": "PC desligando sozinho quase sempre aponta para calor, fonte ou um erro do Windows. Veja como separar as três causas em casa e onde parar.",
+  "categoria": "assistencia",
+  "etiquetas": [
+    "manutenção",
+    "diagnóstico",
+    "fonte",
+    "temperatura",
+    "windows"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-31T09:00:00.000Z",
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "O PC desligando sozinho é um dos problemas mais irritantes que chegam a uma assistência: você está no meio de um trabalho ou de um jogo e a tela simplesmente apaga, às vezes com reinício, às vezes não. Antes de culpar a placa-mãe ou comprar peça nova, vale entender que esse sintoma costuma ter três origens bem diferentes."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que todo desligamento repentino é defeito grave. Muitas vezes é proteção: o processador se desliga quando esquenta demais, e o Windows reinicia depois de um erro sério. O que separa as causas é o jeito como o computador apaga e o que fica registrado no sistema. Este guia mostra como ler esses sinais e onde parar."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "As três causas mais comuns são **temperatura alta**, **fonte de alimentação** sem folga ou com defeito, e **erro do sistema ou de driver**.",
+        "Desligar sob carga (jogo, renderização) aponta para calor ou fonte; tela azul antes do reinício aponta para driver, memória ou sistema.",
+        "O Windows registra o desligamento sem aviso no **Visualizador de Eventos** (evento 41) e no **Monitor de Confiabilidade**: comece por lá.",
+        "Em casa, dá para limpar poeira, conferir ventoinhas e desfazer mudanças recentes. Fonte de alimentação nunca se abre."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como o PC desliga diz muito sobre a causa"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Antes de mexer em qualquer coisa, observe o padrão. O computador apaga de uma vez, como se alguém tivesse tirado o cabo da tomada? Mostra uma tela azul com uma mensagem antes de reiniciar? Trava com a imagem congelada e só volta quando você segura o botão? Cada um desses comportamentos leva a uma linha de investigação diferente."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Repare também no momento. Se o desligamento acontece sempre minutos depois de abrir um jogo ou um programa pesado, a suspeita recai sobre calor e energia, que aumentam com a carga. Se acontece em qualquer hora, até com o computador parado, o sistema, um driver ou a memória ganham peso. Anote dia, hora e o que estava aberto."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "O que você vê",
+        "Causa mais provável",
+        "Primeiro passo"
+      ],
+      "linhas": [
+        [
+          "Apaga de uma vez sob carga, ventoinhas barulhentas antes",
+          "Temperatura alta",
+          "Limpar poeira e conferir ventoinhas"
+        ],
+        [
+          "Apaga de uma vez sob carga, sem barulho nem calor aparente",
+          "Fonte sem folga ou com defeito",
+          "Rever o que foi instalado e levar à assistência"
+        ],
+        [
+          "Tela azul com código e reinício",
+          "Driver, memória ou sistema",
+          "Anotar o código de parada"
+        ],
+        [
+          "Reinicia de madrugada ou fora do horário de uso",
+          "Atualização do Windows",
+          "Ajustar o horário de uso ativo"
+        ],
+        [
+          "Congela e só volta segurando o botão",
+          "Hardware ou driver travando",
+          "Desfazer mudanças recentes"
+        ]
+      ],
+      "titulo": "O sintoma e a causa mais provável",
+      "colunaDestaque": 1,
+      "nota": "É um ponto de partida, não um diagnóstico. Duas causas podem aparecer juntas, como uma fonte no limite em um gabinete quente."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que o Windows registrou: evento 41 e Monitor de Confiabilidade"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Toda vez que o computador desliga sem passar pelo menu Iniciar, o Windows anota isso na inicialização seguinte. No Visualizador de Eventos, em Logs do Windows e Sistema, aparece o evento 41 da origem Kernel-Power, avisando que o sistema reiniciou sem desligar corretamente. Segundo a Microsoft, ele sozinho não aponta a causa, mas os detalhes ajudam."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O campo que mais importa é o BugcheckCode. Se ele for zero, não houve tela azul registrada: a página da Microsoft liga esse caso a falta de energia, travamento total ou a um problema de hardware ou driver. Se for diferente de zero, houve um erro de parada, e o número precisa ser convertido de decimal para hexadecimal, na calculadora do Windows em modo Programador, para virar o código conhecido."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Um caminho mais amigável é o Monitor de Confiabilidade. Abra o Painel de Controle, entre em Segurança e Manutenção, depois em Manutenção, e clique em exibir o histórico de confiabilidade. A ferramenta mostra um gráfico diário com falhas do Windows, de aplicativos e avisos. Se todo desligamento coincide com o mesmo programa ou driver, você já tem uma pista forte."
+    },
+    {
+      "tipo": "destaque",
+      "tom": "dica",
+      "texto": "Fotografe com o celular o código da tela azul, se ele aparecer, e a lista de eventos do dia do desligamento. Essas informações encurtam o diagnóstico na assistência e evitam trocar peça às cegas.",
+      "titulo": "Anote antes de levar"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como saber se é temperatura"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O processador tem uma proteção térmica embutida que o desliga se ele esquentar demais, justamente para evitar dano. A Intel lista como sinais de superaquecimento um computador que liga e apaga pouco tempo depois, frequência abaixo do esperado, lentidão geral e ventoinhas muito barulhentas. Se o seu PC faz barulho de turbina antes de apagar, a pista é forte."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A causa mais comum é simples: poeira. Ela entope o dissipador do processador, as grades do gabinete e as ventoinhas, e o ar quente deixa de sair. Outras causas que o fabricante aponta são ventoinha parada ou com cabo solto, fluxo de ar mal distribuído dentro do gabinete e pasta térmica ressecada entre o processador e o cooler."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "**Desligue e tire da tomada** antes de abrir a tampa lateral.",
+        "**Olhe as ventoinhas** do processador, do gabinete e da placa de vídeo: precisam girar livres, sem cabo encostando.",
+        "**Retire a poeira** das grades e do dissipador com pincel macio ou ar comprimido, segurando as hélices paradas.",
+        "**Confira o lugar do gabinete**: encostado na parede, dentro de móvel fechado ou sobre carpete, ele respira mal.",
+        "**Ligue de novo e observe** se o desligamento sob carga continua."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas há limites para o que se faz em casa. Trocar pasta térmica exige remover o cooler do processador, e um aperto desigual causa o problema que você queria resolver. Em notebook, a limpeza interna pede desmontagem cuidadosa. O artigo sobre [de quanto em quanto tempo limpar o computador por dentro](/blog/de-quanto-em-quanto-tempo-limpar-o-computador-por-dentro) mostra o que deixar para o técnico."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como saber se é a fonte de alimentação"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A fonte é a peça que transforma a energia da tomada no que o computador usa. Quando ela não dá conta, o PC costuma apagar de uma vez, sem tela azul, exatamente no momento de maior consumo. A Microsoft recomenda conferir se a potência da fonte cobre o que está instalado, porque mais memória, um processador mais forte, discos extras e aparelhos externos somam consumo."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O caso clássico é o de quem trocou a placa de vídeo e manteve a fonte antiga. Tudo funciona na área de trabalho e o computador apaga no jogo. Outro sinal é o desligamento coincidir com quedas e oscilações de energia na casa, situação em que a proteção elétrica faz diferença, como explica o artigo sobre [nobreak, estabilizador ou filtro de linha](/blog/nobreak-estabilizador-ou-filtro-de-linha)."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "Conferir na etiqueta lateral a potência e comparar com o que a placa de vídeo pede na ficha do fabricante.",
+        "Verificar se os cabos de energia da placa-mãe e da placa de vídeo estão bem encaixados, com o computador desligado.",
+        "Ligar o computador direto em outra tomada, sem extensão, para descartar problema na instalação.",
+        "Lembrar o que mudou: peça nova costuma ser o gatilho."
+      ],
+      "contras": [
+        "Abrir a fonte: os capacitores guardam carga mesmo desligada e há risco de choque.",
+        "Testar fonte com clipe ou fio improvisado.",
+        "Trocar por uma fonte qualquer sem conferir potência e conectores.",
+        "Continuar usando uma fonte com cheiro de queimado, estalos ou fumaça: desligue da tomada e leve a um técnico."
+      ],
+      "titulo": "O que dá e o que não dá para fazer com a fonte em casa"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Confirmar que a fonte é a culpada exige testá-la com equipamento ou substituí-la por uma sabidamente boa, o que é trabalho de bancada. Se for trocar, os artigos sobre [como escolher a fonte ideal](/blog/fonte-ideal-para-pc-gamer) e sobre o [selo 80 Plus](/blog/selo-80-plus-o-que-muda-de-bronze-para-gold) ajudam a não errar de novo."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como saber se é o sistema, um driver ou a memória"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Quando o Windows encontra um erro sério, ele mostra por instantes uma tela com a mensagem de que o dispositivo teve um problema e precisa reiniciar, junto com um código de parada. A Microsoft explica que hardware, driver ou programa podem causar isso. Se você já viu essa tela, o artigo sobre [tela azul no Windows](/blog/tela-azul-no-windows-causas-e-o-que-anotar) detalha o que anotar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Os primeiros passos que a Microsoft indica são práticos: remover qualquer peça ou aparelho instalado pouco antes do problema, procurar no Gerenciador de Dispositivos itens com ponto de exclamação e atualizar o driver deles, instalar as atualizações do Windows e manter livre parte do disco. Se o computador não consegue nem iniciar direito, esses passos podem ser feitos no Modo de Segurança."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A memória entra aqui também. A página da Microsoft sobre o evento 41 sugere rodar um teste de memória, desfazer qualquer overclock e conferir se os pentes estão na mesma velocidade e bem configurados. Memória instável costuma causar telas azuis variadas, com códigos diferentes a cada vez, e não um único erro repetido."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Há ainda um falso alarme comum: o computador que reinicia sozinho fora do seu horário para terminar uma atualização. Isso não é defeito. Em Configurações, Windows Update, Opções avançadas, o item de horário ativo deixa você dizer quando costuma usar o PC, para o Windows evitar reiniciar nesse período."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Onde parar e quando levar à assistência"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Limpou, conferiu ventoinhas, desfez a última mudança e o PC continua apagando? É hora de parar. Desligamentos repetidos podem corromper arquivos que estavam abertos, e insistir com uma fonte defeituosa arrisca outras peças. Também pare de imediato se houver cheiro de queimado, estalo, fumaça ou, no notebook, bateria estufada: desligue da tomada e não tente ligar de novo."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, tem [assistência técnica](/manutencao) no mesmo endereço da loja, com diagnóstico, limpeza, troca de peça e conserto. Se a fonte precisar ser substituída, você pode escolher entre as [fontes](/categoria/hardware-fontes) compatíveis com o seu computador. Se houver arquivos importantes em risco, a loja também faz [recuperação de dados](/recuperacaodados)."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Leve as anotações: quando o computador apaga, o que estava aberto, o código da tela azul, se houve, e o que mudou nas últimas semanas. A decisão, em uma linha: observe como o PC desliga, limpe a poeira e desfaça a última mudança em casa, e deixe fonte e diagnóstico de peças para a bancada."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "geral"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "O PC desligando sozinho pode estragar alguma peça?",
+      "resposta": "O desligamento por temperatura é uma proteção e serve justamente para evitar dano ao processador. O risco maior está nos arquivos abertos, que podem se corromper, e numa fonte com defeito, que pode afetar outras peças. Por isso não vale adiar o diagnóstico."
+    },
+    {
+      "pergunta": "Como sei se o computador desligou por superaquecimento?",
+      "resposta": "Os sinais mais comuns são o desligamento sob carga, como em jogos, as ventoinhas muito barulhentas antes de apagar e a lentidão anterior. Poeira acumulada no dissipador e nas grades reforça a suspeita."
+    },
+    {
+      "pergunta": "Troquei a placa de vídeo e agora o PC desliga no jogo. É a fonte?",
+      "resposta": "É a primeira suspeita. Confira na etiqueta a potência da fonte e compare com o que o fabricante da placa recomenda, e veja se os cabos de energia estão bem encaixados. A confirmação, porém, exige teste em bancada."
+    },
+    {
+      "pergunta": "O que é o evento 41 Kernel-Power que aparece no Visualizador de Eventos?",
+      "resposta": "É o registro de que o Windows reiniciou sem ter desligado corretamente antes. Ele não aponta a causa sozinho, mas o campo BugcheckCode indica se houve tela azul ou se o desligamento foi por falta de energia ou travamento."
+    },
+    {
+      "pergunta": "Formatar o computador resolve desligamentos repentinos?",
+      "resposta": "Só quando a causa é o sistema ou um driver. Se o problema for calor ou fonte, o computador continua apagando depois da formatação, e você perde tempo. Investigue a causa antes."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Microsoft Learn — Kernel-Power Event ID 41",
+      "url": "https://learn.microsoft.com/en-us/archive/technet-wiki/14246.kernel-power-event-id-41",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Microsoft Support — Troubleshooting Windows unexpected restarts and stop code errors",
+      "url": "https://support.microsoft.com/en-us/help/17075",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Intel — Overheating Symptoms and Troubleshooting for Intel Boxed Processors",
+      "url": "https://www.intel.com/content/www/us/en/support/articles/000005791.html",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Microsoft Learn — Review reliability with Reliability Monitor",
+      "url": "https://learn.microsoft.com/en-us/training/modules/monitor-windows-server-performance/4-review-reliability-with-reliability-monitor",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Microsoft Support — Keep your PC up to date with active hours",
+      "url": "https://support.microsoft.com/windows/de79813c-7919-5fed-080f-0871c7bd9bde",
+      "data": "consultado em outubro de 2026"
+    }
+  ]
+}
