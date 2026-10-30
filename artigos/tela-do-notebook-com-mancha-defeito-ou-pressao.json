@@ -1,0 +1,200 @@
+{
+  "slug": "tela-do-notebook-com-mancha-defeito-ou-pressao",
+  "titulo": "Tela do notebook com mancha: quando é defeito e quando é pressão",
+  "resumo": "Mancha na tela do notebook pode ser sujeira, marca de pressão, vazamento de luz ou pixel com defeito. Veja como separar cada caso em casa e quando levar.",
+  "categoria": "assistencia",
+  "etiquetas": [
+    "notebook",
+    "tela",
+    "diagnóstico",
+    "manutenção"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-31T21:00:00.000Z",
+  "formato": "dica",
+  "roteiro": {
+    "fala": "Apareceu uma mancha na tela do notebook? Primeiro, desligue e limpe com um pano de microfibra levemente úmido. Se sumiu, era sujeira. Se continua, ligue de novo e abra uma tela toda branca, depois toda preta. Mancha clara em forma de tecla ou de objeto costuma ser pressão, de mochila cheia ou de algo esquecido sobre o teclado. E um conselho: nunca aperte a tela para tentar consertar. Isso pode piorar.",
+    "titulo": "Mancha na tela: o que é?",
+    "destaques": [
+      "Limpe com a tela desligada",
+      "Teste com fundo branco e preto",
+      "Marca de tecla = pressão",
+      "Nunca aperte a tela"
+    ],
+    "legenda": "Mancha na tela do notebook nem sempre é defeito. Veja como separar sujeira, marca de pressão, vazamento de luz e pixel morto. A dica completa está no blog.",
+    "hashtags": [
+      "notebook",
+      "tela",
+      "manutencao",
+      "dicas",
+      "informatica",
+      "campinas"
+    ]
+  },
+  "seo": {
+    "titulo": "Mancha na tela do notebook: defeito ou pressão?"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "A tela do notebook com mancha costuma ter uma de quatro causas: sujeira na superfície, marca de pressão, vazamento de luz pelas bordas ou pixel com defeito. Dá para descobrir qual é em poucos minutos, em casa, sem abrir nada: basta limpar do jeito certo e olhar a tela com um fundo branco e depois com um fundo preto."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que toda mancha é defeito de fábrica. Muitas vezes é a marca do próprio teclado, que encosta na tela quando o notebook vai fechado numa mochila apertada. Outras vezes é um brilho nas bordas que só aparece no escuro e que os fabricantes consideram normal. E, em alguns casos, é dano de verdade, que só se resolve com a troca da tela."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "Primeiro **limpe com a tela desligada**, usando microfibra levemente úmida: se a mancha some, era sujeira.",
+        "Mancha clara em forma de **tecla ou de objeto** costuma ser marca de pressão, de mochila cheia ou algo esquecido sobre o teclado.",
+        "Brilho nas bordas que **só aparece no escuro** é vazamento de luz, considerado normal até certo ponto.",
+        "Não aperte nem massageie a tela para tentar consertar: pode piorar e até trincar."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como fazer o teste em casa"
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "**Desligue o notebook.** A HP lembra que a tela apagada mostra melhor a sujeira e é mais segura para limpar.",
+        "Passe um **pano de microfibra seco** e, se precisar, o mesmo pano levemente úmido com água. Molhe o pano, nunca a tela, e não use limpa-vidros com amônia, papel-toalha nem lenço de papel.",
+        "Use **pouca força**. Apertar a tela durante a limpeza pode danificá-la. Espere secar antes de fechar ou ligar.",
+        "Ligue e abra uma imagem **toda branca** em tela cheia: procure pontos escuros e manchas claras ou amareladas.",
+        "Depois, uma imagem **toda preta**: procure pontos acesos e brilho saindo pelas bordas.",
+        "Suba e desça o brilho e olhe a tela também num cômodo iluminado. Anote ou fotografe o que viu, com luz normal."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que cada tipo de mancha costuma indicar"
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Como aparece",
+        "Causa provável",
+        "O que fazer"
+      ],
+      "linhas": [
+        [
+          "Some com a limpeza",
+          "Sujeira ou gordura na superfície",
+          "Limpar com a tela desligada e microfibra"
+        ],
+        [
+          "Marcas no desenho das teclas",
+          "Teclado encostando na tela fechada",
+          "Mudar o jeito de transportar; se não somem, avaliar a tela"
+        ],
+        [
+          "Mancha clara e arredondada",
+          "Pressão de objeto, queda ou batida",
+          "Parar de usar o notebook na mochila cheia e levar para avaliação"
+        ],
+        [
+          "Brilho nas bordas só no escuro",
+          "Vazamento de luz, comum em telas LCD",
+          "Normal se mal aparece com luz ambiente"
+        ],
+        [
+          "Mancha clara visível com a luz acesa",
+          "Ponto quente na iluminação da tela",
+          "Considerado fora do padrão pela Dell: assistência"
+        ],
+        [
+          "Ponto fixo aceso ou apagado",
+          "Pixel preso ou morto",
+          "Poucos são tolerados; muitos, troca da tela"
+        ]
+      ],
+      "titulo": "Mancha na tela do notebook: o que é e o que fazer",
+      "colunaDestaque": 1,
+      "fonte": {
+        "nome": "Suporte da Dell e Suporte da HP",
+        "url": "https://www.dell.com/support/kbdoc/000215193/troubleshooting-light-leakage-or-light-bleeding-on-a-dell-laptop-lcd-screen"
+      },
+      "nota": "Cada fabricante tem a sua própria tolerância para pixel e para vazamento de luz."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Sobre o vazamento de luz, a Dell explica que os fabricantes avaliam a tela com a iluminação normal de escritório. Brilho que só se vê no quarto totalmente escuro está, em geral, dentro do normal. Já uma mancha clara que aparece com a luz acesa e não muda quando você mexe no brilho é sinal de defeito."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Com os pixels, a lógica é parecida. Segundo a Dell, um número pequeno de pixels presos é considerado normal na fabricação de telas LCD, e cada linha de produto tem a sua tolerância. Pixel morto não tem conserto: só a troca do painel resolve."
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "Vídeos ensinam a massagear a tela ou pressionar o ponto com o dedo para \"destravar\" pixel ou apagar mancha. A Dell desaconselha: a pressão pode aumentar o dano, trincar a tela e até prejudicar a garantia.",
+      "titulo": "Não aperte a tela"
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando a mancha pede assistência"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A dica caseira não basta quando a mancha cresce, quando aparecem linhas ou trincas finas, ou quando o notebook caiu, levou uma batida ou teve contato com líquido. Nesse último caso, desligue e siga o passo a passo do artigo sobre [líquido no notebook](/blog/derramou-liquido-no-notebook-o-que-fazer). Marca de pressão que continua com a tela limpa e ligada é do painel, e a limpeza não resolve."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Para evitar a próxima, transporte o notebook numa capa acolchoada, sem carregador nem cabos no mesmo bolso, e nunca feche a tampa com caneta ou fone sobre o teclado. Na Balão da Informática, no Cambuí, em Campinas, a [assistência técnica](/manutencao) avalia a tela e faz a troca quando compensa; se o conserto não valer, há opções em [notebooks](/notebooks) e [seminovos](/seminovos)."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Em uma linha: limpe com a tela desligada, teste com fundo branco e preto, e leve para avaliação a mancha que aparece com a luz acesa ou continua crescendo."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "notebooks"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Marca de teclado na tela sai com limpeza?",
+      "resposta": "Se for gordura das teclas na superfície, sai com microfibra levemente úmida e a tela desligada. Se a marca continua com a tela limpa e ligada, ela é da pressão sobre o painel e a limpeza não resolve."
+    },
+    {
+      "pergunta": "Brilho nas bordas da tela é defeito?",
+      "resposta": "Depende de quando aparece. Se só se vê com fundo preto num cômodo escuro, a Dell considera dentro do normal. Se aparece com a luz acesa e atrapalha o uso, vale levar para avaliação."
+    },
+    {
+      "pergunta": "Um pixel morto justifica trocar a tela?",
+      "resposta": "Em geral, não. Poucos pixels presos são tolerados pelos fabricantes. A troca faz sentido quando eles são muitos, ficam no meio da tela ou aumentam com o tempo."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Troubleshooting Light Leakage or Light Bleeding on a Dell Laptop LCD Screen — Suporte da Dell",
+      "url": "https://www.dell.com/support/kbdoc/000215193/troubleshooting-light-leakage-or-light-bleeding-on-a-dell-laptop-lcd-screen",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Dell Display Pixel Guidelines — Suporte da Dell",
+      "url": "https://www.dell.com/support/kbdoc/en-us/000126004",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Laptop Cleaning and Care — HP Tech Takes",
+      "url": "https://www.hp.com/us-en/tech-takes/laptops/glossary/cleaning-care.html",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "From the Repair Bench: pressão na mochila e telas de notebook — Gadget Scout",
+      "url": "https://www.gadgetscout.co.uk/articles/repair-bench-the-40-habit-that-s-quietly-killing-laptop.html",
+      "data": "outubro de 2026"
+    }
+  ]
+}

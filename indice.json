@@ -2,6 +2,22 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "tela-do-notebook-com-mancha-defeito-ou-pressao",
+      "titulo": "Tela do notebook com mancha: quando é defeito e quando é pressão",
+      "resumo": "Mancha na tela do notebook pode ser sujeira, marca de pressão, vazamento de luz ou pixel com defeito. Veja como separar cada caso em casa e quando levar.",
+      "categoria": "assistencia",
+      "etiquetas": [
+        "notebook",
+        "tela",
+        "diagnóstico",
+        "manutenção"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-31T21:00:00.000Z",
+      "minutos": 5,
+      "formato": "dica"
+    },
+    {
       "slug": "windows-11-cloud-rebuild-reinstalar-sem-pen-drive",
       "titulo": "Windows 11 ganha Cloud rebuild: reinstalação pela internet, sem pen drive",
       "resumo": "Atualização de 28 de outubro traz o Cloud rebuild, que reinstala o Windows 11 baixando tudo da internet, mesmo sem o sistema ligar. Veja o que muda.",
@@ -1112,5 +1128,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-30T22:35:45.894Z"
+  "atualizadoEm": "2026-10-30T22:49:26.814Z"
 }
