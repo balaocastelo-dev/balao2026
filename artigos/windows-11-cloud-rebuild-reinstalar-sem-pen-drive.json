@@ -1,0 +1,103 @@
+{
+  "slug": "windows-11-cloud-rebuild-reinstalar-sem-pen-drive",
+  "titulo": "Windows 11 ganha Cloud rebuild: reinstalação pela internet, sem pen drive",
+  "resumo": "Atualização de 28 de outubro traz o Cloud rebuild, que reinstala o Windows 11 baixando tudo da internet, mesmo sem o sistema ligar. Veja o que muda.",
+  "categoria": "noticias",
+  "etiquetas": [
+    "windows",
+    "atualização",
+    "formatação",
+    "backup"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-10-31T15:00:00.000Z",
+  "seo": {
+    "titulo": "Cloud rebuild: Windows 11 reinstala sem pen drive"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Em 28 de outubro de 2026, a Microsoft liberou a atualização de prévia KB5127936 para o Windows 11 nas versões 25H2 e 26H2. A principal novidade para quem conserta computador é o Cloud rebuild, uma opção de recuperação que reinstala o Windows baixando a imagem do sistema e os drivers pelo Windows Update, inclusive quando o Windows não consegue iniciar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que se trata de um conserto que preserva tudo. Não é: segundo a documentação da Microsoft, o Cloud rebuild formata o disco do sistema e apaga arquivos, contas, programas e configurações guardados no computador. Ele substitui o pen drive de instalação, mas não substitui o backup."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que a Microsoft anunciou"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Pelas notas da atualização, o Cloud rebuild fica em Configurações, Sistema, Recuperação, no botão Rebuild PC. Se o Windows não liga, o computador entra sozinho no ambiente de recuperação (o WinRE) depois de algumas falhas seguidas na inicialização, e a opção aparece no menu de solução de problemas. Não é preciso pen drive nem imagem preparada."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Antes de começar, a ferramenta mostra a versão, a edição e o idioma que serão instalados e pede a confirmação do aviso de perda de dados. Há duas escolhas: remover os arquivos, mais rápida, ou remover e higienizar, que usa o apagamento do próprio disco e é irreversível. A Microsoft indica a segunda para quem vai devolver, doar ou repassar a máquina."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A documentação lista três exigências: o computador precisa cumprir os requisitos mínimos do Windows 11, ter o ambiente de recuperação funcionando e conseguir acessar a internet a partir dele, o que depende de o fabricante ter incluído o driver de rede. No Wi-Fi, a ferramenta aceita redes com senha comum. A mesma atualização faz o WinRE reaproveitar redes Wi-Fi já salvas no Windows."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A KB5127936 é uma prévia sem correções de segurança, e a Microsoft distribui as novidades em etapas, então o recurso pode demorar a aparecer em cada computador. O pacote traz ainda um menu de contexto do Explorador de Arquivos mais rápido e personalizável e uma hibernação que age menos com a bateria acima de 80% e mais cedo abaixo de 10%."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que isso muda para você"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem tem um PC que não liga mais o Windows:** passa a existir um caminho de reinstalação sem pen drive. Mas, se os arquivos importam e não há cópia, não comece por ele. Tire o disco ou procure a [recuperação de dados](/recuperacaodados) antes, porque depois da reinstalação recuperar fica bem mais difícil. O guia [tela azul no Windows](/blog/tela-azul-no-windows-causas-e-o-que-anotar) ajuda a anotar o erro."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem vai vender ou doar o computador:** a opção de remover e higienizar resolve numa tacada só o apagamento seguro e o Windows limpo para o próximo dono. O passo a passo de [o que fazer antes de vender ou doar um computador usado](/blog/o-que-fazer-antes-de-vender-ou-doar-computador-usado) continua valendo para o backup e para sair das contas."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "dados"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem está em outra versão:** a prévia só vale para o Windows 11 25H2 e 26H2. Computador que não cumpre os requisitos do Windows 11 fica de fora. E reinstalar não conserta disco com defeito nem memória falhando: se o Windows volta a quebrar depois, o problema costuma ser de peça, e a [assistência técnica](/manutencao) faz o diagnóstico."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que ainda não se sabe"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Microsoft não informou quando o Cloud rebuild chega a todos os computadores nem quanto tempo a reinstalação leva, que depende da internet e do disco. Também não está claro quantos fabricantes já colocam o driver de rede no ambiente de recuperação. Quem quiser testar já pode instalar a prévia pelo Windows Update, em Verificar se há atualizações."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, tem assistência técnica com diagnóstico, formatação, troca de peça e recuperação de dados no mesmo endereço. Em uma linha: o Cloud rebuild dispensa o pen drive, mas apaga tudo; faça o backup antes de usar."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "October 28, 2026—KB5127936 (OS Builds 26300.9818 and 26200.9818) Preview — Microsoft Support",
+      "url": "https://support.microsoft.com/en-us/servicing/os/windows-11/2026/10/kb5127936-windows-11-25h2-26h2-update",
+      "data": "28 de outubro de 2026"
+    },
+    {
+      "nome": "Cloud rebuild — Microsoft Learn",
+      "url": "https://learn.microsoft.com/windows/configuration/cloud-rebuild/",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Windows 11 KB5127936 update released with 41 changes and fixes — BleepingComputer",
+      "url": "https://www.bleepingcomputer.com/news/microsoft/windows-11-kb5127936-update-released-with-41-changes-and-fixes/",
+      "data": "29 de outubro de 2026"
+    }
+  ]
+}

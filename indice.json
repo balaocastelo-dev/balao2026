@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "windows-11-cloud-rebuild-reinstalar-sem-pen-drive",
+      "titulo": "Windows 11 ganha Cloud rebuild: reinstalação pela internet, sem pen drive",
+      "resumo": "Atualização de 28 de outubro traz o Cloud rebuild, que reinstala o Windows 11 baixando tudo da internet, mesmo sem o sistema ligar. Veja o que muda.",
+      "categoria": "noticias",
+      "etiquetas": [
+        "windows",
+        "atualização",
+        "formatação",
+        "backup"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-10-31T15:00:00.000Z",
+      "minutos": 3
+    },
+    {
       "slug": "pc-desligando-sozinho-temperatura-fonte-ou-sistema",
       "titulo": "PC desligando sozinho: temperatura, fonte ou sistema?",
       "resumo": "PC desligando sozinho quase sempre aponta para calor, fonte ou um erro do Windows. Veja como separar as três causas em casa e onde parar.",
@@ -1097,5 +1112,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-30T22:09:51.687Z"
+  "atualizadoEm": "2026-10-30T22:35:45.894Z"
 }
