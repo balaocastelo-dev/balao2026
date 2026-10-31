@@ -2,6 +2,22 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "teamviewer-15-83-falhas-de-seguranca-atualizar",
+      "titulo": "TeamViewer 15.83 corrige três falhas graves: veja quem precisa atualizar",
+      "resumo": "A TeamViewer publicou em 27 de outubro um alerta sobre três falhas graves no programa de acesso remoto. A versão 15.83 corrige todas. Veja o que fazer.",
+      "categoria": "noticias",
+      "etiquetas": [
+        "segurança",
+        "atualização",
+        "acesso remoto",
+        "windows",
+        "mac"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-11-01T15:00:00.000Z",
+      "minutos": 3
+    },
+    {
       "slug": "computador-para-arquitetura-e-engenharia-autocad-revit-sketchup",
       "titulo": "Computador para arquitetura: o que AutoCAD, Revit e SketchUp pedem",
       "resumo": "Computador para arquitetura e engenharia: veja o que AutoCAD, Revit e SketchUp pedem de memória, processador e placa de vídeo, e como dimensionar a máquina.",
@@ -1164,5 +1180,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-31T22:15:51.854Z"
+  "atualizadoEm": "2026-10-31T22:29:16.860Z"
 }

@@ -1,0 +1,104 @@
+{
+  "slug": "teamviewer-15-83-falhas-de-seguranca-atualizar",
+  "titulo": "TeamViewer 15.83 corrige três falhas graves: veja quem precisa atualizar",
+  "resumo": "A TeamViewer publicou em 27 de outubro um alerta sobre três falhas graves no programa de acesso remoto. A versão 15.83 corrige todas. Veja o que fazer.",
+  "categoria": "noticias",
+  "etiquetas": [
+    "segurança",
+    "atualização",
+    "acesso remoto",
+    "windows",
+    "mac"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-11-01T15:00:00.000Z",
+  "seo": {
+    "titulo": "TeamViewer 15.83 corrige falhas graves: quem deve atualizar"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Em 27 de outubro de 2026, a TeamViewer publicou um boletim de segurança sobre três falhas no seu programa de acesso remoto, aquele usado para controlar outro computador pela internet. As falhas foram classificadas como de gravidade alta e estão corrigidas na versão 15.83, disponível para Windows, macOS, Linux e para o aplicativo de Android."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O detalhe que chama atenção é a direção do ataque. Normalmente se pensa no risco de alguém entrar no seu computador. Uma das falhas faz o contrário: quem se conecta a uma máquina mal-intencionada ou já invadida é que pode ser atacado. Segundo a empresa, até a publicação não havia sinal de que as falhas estivessem sendo exploradas."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que a TeamViewer anunciou"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O boletim, identificado como TV-2026-1011, descreve três problemas. O primeiro está no tratamento da imagem da tela durante o controle remoto, no Windows, no macOS, no Linux e no Android: um computador remoto preparado para isso pode travar o programa de quem se conecta e, conforme o sistema, executar código nele."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": false,
+      "itens": [
+        "**Imagem da tela (todas as plataformas):** o ataque parte do computador que está sendo controlado e exige que você inicie a sessão com ele.",
+        "**Decodificador de imagem (macOS e Linux):** além da sessão remota, pode ser acionado ao abrir uma gravação de sessão adulterada, os arquivos com final .tvs.",
+        "**Ajudante de instalação (macOS):** um usuário com poucas permissões no próprio Mac pode instalar um pacote malicioso e ganhar controle total do sistema."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A correção vale para o programa completo, para o módulo Host (que deixa o computador pronto para receber acessos), para a versão portátil e para o aplicativo de controle remoto do Android. Quem ainda usa versões antigas, como as linhas 13 e 14 ou a 15.64 para Windows 7 e 8, tem atualizações próprias, listadas no boletim. A SecurityOnline, que acompanhou o alerta, também não relata ataque em andamento."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que isso muda para você"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem tem o TeamViewer instalado:** abra o programa e confira a versão instalada. Se for anterior à 15.83, atualize agora, no próprio programa ou no site oficial. No celular Android, a atualização sai pela loja de aplicativos. Vale também para aquele computador da família que você acessa de vez em quando para ajudar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem usa Mac:** a empresa pede prioridade aos usuários de macOS, que estão expostos às três falhas. Se o Mac é dividido com outras pessoas, a falha do ajudante de instalação pesa ainda mais. Se a atualização não termina ou o programa some depois dela, a [assistência para Mac](/reparoapple) consegue ver o que está acontecendo."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem recebe pedido de acesso remoto:** a regra de sempre continua valendo. Só se conecte a computadores de pessoas que você conhece e não abra gravações de sessão enviadas por desconhecidos. E nunca instale um programa de acesso remoto a pedido de alguém que ligou dizendo ser do banco ou do suporte."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem não usa o programa:** vale conferir se ele não ficou instalado de algum atendimento antigo. Se não precisa mais dele, desinstale. Manter atualizados só os programas que você usa, como mostra a notícia sobre a [atualização do Chrome](/blog/chrome-156-atualizacao-falhas-de-seguranca), reduz bastante o risco."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que ainda não se sabe"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O boletim não informa quantos computadores usam versões afetadas nem se outros programas de acesso remoto têm problemas parecidos. Também não há, até agora, notícia confirmada de ataque usando essas falhas. Isso pode mudar, e por isso o momento de atualizar é antes."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, tem [assistência técnica](/manutencao) para diagnóstico, limpeza e conserto de computadores e Macs. Em uma linha: quem tem o TeamViewer deve atualizar para a 15.83 agora; quem não usa pode desinstalar."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "apple"
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Security Bulletin TV-2026-1011: Security Update for Vulnerabilities in TeamViewer Clients — TeamViewer",
+      "url": "https://www.teamviewer.com/en/resources/trust-center/security-bulletins/tv-2026-1011/",
+      "data": "27 de outubro de 2026"
+    },
+    {
+      "nome": "TeamViewer 15.83 Patches 3 High TeamViewer Vulnerabilities — SecurityOnline",
+      "url": "https://securityonline.info/teamviewer-vulnerabilities-patched-tv-2026-1011/",
+      "data": "28 de outubro de 2026"
+    }
+  ]
+}
