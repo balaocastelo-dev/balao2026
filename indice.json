@@ -59,7 +59,12 @@
         "windows",
         "placa-mãe"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/como-saber-se-o-pc-aceita-mais-memoria-d37b9210.jpg",
+        "alt": "Placa-mãe de computador sobre uma bancada, com dois pentes de memória encaixados e dois encaixes vazios ao lado",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-10-30T21:00:00.000Z",
       "minutos": 5,
       "formato": "dica"
@@ -1128,5 +1133,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-30T22:49:26.814Z"
+  "atualizadoEm": "2026-10-31T01:03:15.616Z"
 }
