@@ -1,13 +1,4 @@
 {
   "versao": 1,
-  "pendentes": [
-    {
-      "slug": "tela-do-notebook-com-mancha-defeito-ou-pressao",
-      "titulo": "Tela do notebook com mancha: quando é defeito e quando é pressão",
-      "categoria": "assistencia",
-      "alt": "Notebook preto de plástico aberto sobre uma bancada clara, com a tela apagada e um pano de microfibra dobrado ao lado",
-      "pedido": "A black plastic laptop with a thick bezel standing open on a light grey workbench, seen from a three-quarter side angle. The screen is switched off and dark, with a soft reflection of window light across it. A folded blue microfiber cloth lies next to the laptop. The keyboard is out of focus in the foreground. Soft natural daylight from the left, shallow depth of field.",
-      "pedidoEm": "2026-10-30T22:49:26.815Z"
-    }
-  ]
+  "pendentes": []
 }

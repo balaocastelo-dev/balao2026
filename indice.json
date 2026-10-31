@@ -12,7 +12,12 @@
         "diagnóstico",
         "manutenção"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/tela-do-notebook-com-mancha-defeito-ou-pressao-0194962b.jpg",
+        "alt": "Notebook preto de plástico aberto sobre uma bancada clara, com a tela apagada e um pano de microfibra dobrado ao lado",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-10-31T21:00:00.000Z",
       "minutos": 5,
       "formato": "dica"
@@ -1143,5 +1148,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-31T01:08:10.425Z"
+  "atualizadoEm": "2026-10-31T01:10:07.838Z"
 }
