@@ -2,6 +2,22 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "windows-update-parado-esperar-ou-reiniciar",
+      "titulo": "Windows Update parado na mesma porcentagem: esperar ou reiniciar?",
+      "resumo": "Atualização do Windows parada na mesma porcentagem? Veja quanto esperar, quando reiniciar com segurança e o que nunca fazer no meio da instalação.",
+      "categoria": "assistencia",
+      "etiquetas": [
+        "windows",
+        "windows update",
+        "manutenção",
+        "diagnóstico"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-11-01T21:00:00.000Z",
+      "minutos": 4,
+      "formato": "dica"
+    },
+    {
       "slug": "teamviewer-15-83-falhas-de-seguranca-atualizar",
       "titulo": "TeamViewer 15.83 corrige três falhas graves: veja quem precisa atualizar",
       "resumo": "A TeamViewer publicou em 27 de outubro um alerta sobre três falhas graves no programa de acesso remoto. A versão 15.83 corrige todas. Veja o que fazer.",
@@ -1180,5 +1196,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-31T22:29:16.860Z"
+  "atualizadoEm": "2026-10-31T22:49:13.484Z"
 }

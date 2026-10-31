@@ -1,0 +1,169 @@
+{
+  "slug": "windows-update-parado-esperar-ou-reiniciar",
+  "titulo": "Windows Update parado na mesma porcentagem: esperar ou reiniciar?",
+  "resumo": "Atualização do Windows parada na mesma porcentagem? Veja quanto esperar, quando reiniciar com segurança e o que nunca fazer no meio da instalação.",
+  "categoria": "assistencia",
+  "etiquetas": [
+    "windows",
+    "windows update",
+    "manutenção",
+    "diagnóstico"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-11-01T21:00:00.000Z",
+  "formato": "dica",
+  "roteiro": {
+    "fala": "A atualização do Windows parou na mesma porcentagem? Calma, e não desligue na tomada. Muitas vezes ela só está lenta, principalmente em computador com HD. Espere um bom tempo e veja se a luz do disco pisca. Se nada mudar depois de horas, aí sim segure o botão e ligue de novo: o Windows costuma retomar ou desfazer sozinho. Antes de tentar de novo, libere espaço, tire o que estiver no USB e confira a internet.",
+    "titulo": "Atualização travada: calma",
+    "destaques": [
+      "Não puxe da tomada",
+      "Espere e olhe a luz do disco",
+      "Libere espaço no disco",
+      "Tire o que estiver no USB"
+    ],
+    "legenda": "Atualização do Windows parada na mesma porcentagem nem sempre está travada. Veja quanto esperar e o que fazer com segurança. A dica completa está no blog.",
+    "hashtags": [
+      "windows",
+      "windowsupdate",
+      "dicas",
+      "informatica",
+      "campinas"
+    ]
+  },
+  "seo": {
+    "titulo": "Windows Update parado: esperar ou reiniciar?"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Quando a atualização do Windows parece travada, a primeira coisa a fazer é esperar, e não desligar. A tela com a porcentagem parada costuma estar trabalhando por trás, principalmente em computador com HD comum ou com pouco espaço livre. Só depois de bastante tempo sem nenhum sinal de atividade vale reiniciar, e do jeito certo."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que puxar da tomada resolve. Cortar a energia no meio da instalação pode deixar arquivos do sistema pela metade. Na maioria das vezes, porém, o Windows se recupera sozinho: retoma a instalação ou desfaz as mudanças e volta à versão anterior. O que mais ajuda é preparar o computador antes de tentar de novo."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "Porcentagem parada **não quer dizer travada**: dê tempo, sobretudo em computador com HD.",
+        "Sinal de vida: a **luz de atividade do disco** piscando no gabinete ou no notebook.",
+        "Se nada mudar por horas, segure o botão de ligar para desligar. **Nunca** tire da tomada à toa.",
+        "Antes de repetir: **espaço livre**, internet, aparelhos USB desconectados e a ferramenta de solução de problemas."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quanto esperar e quando reiniciar"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Microsoft não dá um tempo fixo: diz que depende da conexão e do tamanho da atualização. Uma atualização grande em computador com HD pode demorar bastante, às vezes mais de uma hora. Notebook deve ficar ligado no carregador, como a própria Microsoft recomenda. Enquanto a luz de atividade do disco piscar, o computador ainda está trabalhando."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Segundo o suporte da Microsoft, se a atualização para entre 51% e 99%, vale procurar atualizações de novo ou rodar a ferramenta de solução de problemas. Se ela fica em 0% ou em 100%, a orientação é reiniciar, conferir a internet e o espaço livre. Quando a tela está parada há horas, sem luz de disco, segure o botão de ligar até desligar e ligue outra vez."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "Esperar com o notebook no carregador",
+        "Reiniciar pelo botão só depois de horas sem atividade",
+        "Desconectar HD externo, dock e outros aparelhos USB que não sejam essenciais",
+        "Deixar o Windows desfazer as mudanças, se ele oferecer"
+      ],
+      "contras": [
+        "Puxar da tomada logo nos primeiros minutos",
+        "Desligar várias vezes seguidas sem esperar",
+        "Apagar pastas do sistema à mão para liberar espaço",
+        "Formatar por impulso, antes de tentar a recuperação do próprio Windows"
+      ],
+      "titulo": "O que fazer e o que não fazer com a atualização parada"
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como tentar de novo sem travar outra vez"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Com o Windows de volta, prepare o computador antes de atualizar de novo. Estes são os passos que o suporte da Microsoft lista, na ordem que costuma resolver:"
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "Faça uma cópia dos seus arquivos importantes num disco externo ou na nuvem.",
+        "Libere espaço: a Microsoft pede ao menos **20 GB livres** no Windows de 64 bits. O artigo sobre [pouco espaço em disco](/blog/aviso-de-pouco-espaco-em-disco-o-que-apagar-primeiro) mostra o que apagar sem risco.",
+        "Confira a internet e deixe o notebook no carregador.",
+        "Desconecte HD externo, dock e aparelhos USB que não sejam necessários.",
+        "Rode a ferramenta em **Iniciar > Configurações > Sistema > Solução de problemas > Outras soluções de problemas > Windows Update**. No Windows 11 também existe o diagnóstico pelo aplicativo Obter Ajuda.",
+        "Confira se data e hora estão no automático, em Configurações, Hora e idioma.",
+        "Procure atualizações de novo em **Configurações > Windows Update** e reinicie quando pedir."
+      ]
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "Depois de algumas falhas seguidas na inicialização, o Windows abre sozinho o Ambiente de Recuperação. Em Solução de problemas e Opções avançadas, há o Reparo de Inicialização e a opção Desinstalar Atualizações, que remove a atualização mais recente. Se mesmo assim ele não inicia, pare por aí e leve a um técnico, principalmente se houver arquivos sem cópia.",
+      "titulo": "Se o Windows não volta a ligar"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando a dica não resolve"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Atualização que trava sempre no mesmo ponto, mesmo com espaço livre e tudo desconectado, pode indicar disco com defeito, arquivo do sistema corrompido ou driver incompatível. Comandos de reparo e a limpeza do cache de atualização existem, mas pedem conta de administrador e cuidado. Se apareceu [tela azul](/blog/tela-azul-no-windows-causas-e-o-que-anotar) junto, anote o código que ela mostra."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Na Balão da Informática, no Cambuí, em Campinas, a [assistência técnica](/manutencao) faz o diagnóstico, confere a saúde do disco e conclui a atualização. Se o computador não liga mais e há arquivos importantes sem cópia, a [recuperação de dados](/recuperacaodados) vem antes de qualquer reinstalação. Em uma linha: espere, não puxe da tomada e prepare o computador antes de tentar de novo."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "dados"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Posso usar o computador enquanto a atualização baixa?",
+      "resposta": "Pode. O download e boa parte da instalação acontecem com o Windows aberto. A parte que pede para não desligar é a que roda durante a reinicialização, e nela o melhor é deixar o computador quieto."
+    },
+    {
+      "pergunta": "Dá para adiar a atualização para não travar na hora errada?",
+      "resposta": "Dá. Em Configurações e Windows Update existe a opção de pausar as atualizações por um tempo e de agendar a reinicialização. A pausa tem limite: depois dela, o Windows instala o que estiver pendente."
+    },
+    {
+      "pergunta": "Desinstalar a atualização deixa o computador inseguro?",
+      "resposta": "Pode deixar, se for uma atualização de segurança. Use a opção só para fazer o Windows voltar a funcionar e tente instalar de novo depois, seguindo os passos de preparação."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Troubleshoot problems updating Windows — Suporte da Microsoft",
+      "url": "https://support.microsoft.com/en-us/windows/deployment/updates-lifecycle/troubleshoot-problems-updating-windows",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Windows Update: FAQ — Suporte da Microsoft",
+      "url": "https://support.microsoft.com/en-us/windows/deployment/updates-lifecycle/windows-update-faq",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "How to uninstall a Windows Update — Suporte da Microsoft",
+      "url": "https://support.microsoft.com/en-us/windows/deployment/updates-lifecycle/how-to-uninstall-a-windows-update",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Windows recovery environment — Suporte da Microsoft",
+      "url": "https://support.microsoft.com/en-us/windows/experience/backup-recovery/windows-recovery-environment",
+      "data": "outubro de 2026"
+    }
+  ]
+}
