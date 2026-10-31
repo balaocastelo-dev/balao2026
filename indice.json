@@ -28,7 +28,12 @@
         "formatação",
         "backup"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/windows-11-cloud-rebuild-reinstalar-sem-pen-drive-e0788c40.jpg",
+        "alt": "Gabinete de computador de mesa fechado sobre uma bancada de madeira, com um monitor apagado ao lado e um cabo de rede ligado na parte de trás",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-10-31T15:00:00.000Z",
       "minutos": 3
     },
@@ -1138,5 +1143,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-31T01:05:28.672Z"
+  "atualizadoEm": "2026-10-31T01:08:10.425Z"
 }
