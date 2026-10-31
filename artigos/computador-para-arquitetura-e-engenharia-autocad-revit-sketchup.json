@@ -1,0 +1,316 @@
+{
+  "slug": "computador-para-arquitetura-e-engenharia-autocad-revit-sketchup",
+  "titulo": "Computador para arquitetura: o que AutoCAD, Revit e SketchUp pedem",
+  "resumo": "Computador para arquitetura e engenharia: veja o que AutoCAD, Revit e SketchUp pedem de memória, processador e placa de vídeo, e como dimensionar a máquina.",
+  "categoria": "guias",
+  "etiquetas": [
+    "arquitetura",
+    "memória ram",
+    "placa de vídeo",
+    "processador",
+    "montagem"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-11-01T09:00:00.000Z",
+  "seo": {
+    "titulo": "Computador para arquitetura: AutoCAD, Revit e SketchUp"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Você vai comprar ou montar um computador para arquitetura ou engenharia e quer ter certeza de que ele dá conta do AutoCAD, do Revit e do SketchUp sem travar no meio do projeto. A dúvida é comum entre estudantes que entram na faculdade e entre escritórios pequenos que trocam as máquinas, e a resposta está nas páginas de requisitos que os próprios fabricantes publicam."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano mais frequente é olhar só o requisito mínimo e achar que ele basta. O mínimo diz que o programa abre; não diz que um projeto grande vai girar com fluidez. Para esse tipo de trabalho, o que mais pesa costuma ser a **memória RAM**, seguida da placa de vídeo e da velocidade de cada núcleo do processador. O resto deste guia mostra o que cada programa pede e como traduzir isso em uma configuração."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "O **Revit 2027** e o **SketchUp 2027** pedem Windows 11; o AutoCAD 2027, um Windows de 64 bits ainda atualizado pela Microsoft. No Mac, o SketchUp 2027 exige chip Apple.",
+        "Na **memória RAM**, a Autodesk recomenda 32 GB para o AutoCAD e liga a quantidade do Revit ao tamanho do arquivo do projeto: 16, 32 ou 64 GB.",
+        "A **placa de vídeo dedicada** é recomendada pelo SketchUp, e o AutoCAD e o Revit sugerem 8 GB de memória de vídeo nas configurações mais fortes.",
+        "Um **SSD** com folga e um processador com boa velocidade por núcleo completam a máquina."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que cada programa pede, segundo o fabricante"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Os três programas publicam requisitos oficiais, e eles são o ponto de partida mais seguro. A Autodesk, dona do AutoCAD e do Revit, separa o que é básico do que é recomendado. A Trimble, dona do SketchUp, dá um mínimo recomendado e um alerta para quem usa os recursos de visualização mais pesados. A tabela abaixo junta as linhas que mais importam na hora de escolher o computador."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Item",
+        "AutoCAD 2027",
+        "Revit 2027",
+        "SketchUp 2027"
+      ],
+      "linhas": [
+        [
+          "Sistema",
+          "Windows de 64 bits ainda atualizado pela Microsoft",
+          "Windows 11 de 64 bits",
+          "Windows 11"
+        ],
+        [
+          "Memória RAM",
+          "Básico: 8 GB. Recomendado: 32 GB",
+          "De 16 GB a 64 GB, conforme o tamanho do projeto",
+          "Ao menos 8 GB"
+        ],
+        [
+          "Processador",
+          "Básico: de 2,5 a 2,9 GHz com 8 núcleos lógicos. Recomendado: base de 3 GHz e turbo de 4 GHz ou mais",
+          "Intel ou AMD com 2 GHz ou mais; maior velocidade por núcleo é recomendada",
+          "2 GHz ou mais"
+        ],
+        [
+          "Placa de vídeo",
+          "Básico: 2 GB de memória de vídeo. Recomendado: 8 GB, compatível com DirectX 12",
+          "De 4 GB a 8 GB de memória de vídeo, conforme o tamanho do projeto",
+          "Placa dedicada recomendada; 8 GB ou mais para texturas PBR e iluminação avançada"
+        ],
+        [
+          "Espaço em disco",
+          "10 GB, com SSD sugerido",
+          "30 GB para instalar e 100 GB livres para arquivos temporários",
+          "Ao menos 6 GB"
+        ]
+      ],
+      "titulo": "Requisitos publicados para as versões 2027 no Windows",
+      "colunaDestaque": 1,
+      "fonte": {
+        "nome": "Autodesk — AutoCAD e Revit, detalhes do produto; SketchUp Help Center — System requirements",
+        "url": "https://help.sketchup.com/en/sketchup/system-requirements"
+      },
+      "nota": "As linhas do AutoCAD e do Revit vêm das páginas de produto da Autodesk listadas nas fontes do artigo. Os requisitos mudam a cada versão: confira a página oficial da versão que você vai instalar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Repare no sistema operacional. A página de instalação do AutoCAD 2027 diz que a Autodesk só dá suporte às versões do Windows que a Microsoft ainda mantém, e o SketchUp avisa que a versão 2027 não roda mais no Windows 10. Se o computador ainda está no Windows 10, veja antes o guia sobre [até quando o Windows 10 tem atualização](/blog/windows-10-ate-quando-tem-atualizacao)."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "No Mac, o cenário também mudou. A central de ajuda do SketchUp informa que, da versão 2027 em diante, só Macs com chip Apple instalam o programa, e que todos os modelos da série M atendem ao mínimo de memória e de vídeo. Já o Revit 2027 aparece na página da Autodesk apenas com Windows 11, o que pesa para quem trabalha com BIM e pensa em comprar um Mac."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quanta memória RAM escolher pelo tamanho dos seus projetos"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A memória RAM é onde o programa guarda o projeto aberto, com todas as camadas, famílias, vistas e texturas. Quando ela acaba, o Windows passa a usar o disco como reserva, e tudo fica lento: trocar de vista demora, salvar leva mais tempo e o programa pode fechar sozinho. Por isso, em arquitetura e engenharia, faltar memória costuma doer mais do que ter um processador um pouco mais simples."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O Revit é o caso mais claro, porque a Autodesk liga a memória ao tamanho do arquivo do modelo. A página do produto descreve três configurações, chamadas de entrada, equilibrada e grande, e cada uma delas indica até que tamanho de projeto ela atende. A tabela resume essa relação, que serve de régua também para quem usa outros programas de BIM."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Configuração",
+        "Memória RAM",
+        "Tamanho do modelo em disco",
+        "Memória de vídeo"
+      ],
+      "linhas": [
+        [
+          "Entrada",
+          "16 GB",
+          "Até cerca de 300 MB",
+          "4 GB recomendados"
+        ],
+        [
+          "Equilibrada",
+          "32 GB",
+          "Até cerca de 600 MB",
+          "6 GB; 8 GB ou mais para gráficos acelerados"
+        ],
+        [
+          "Grande",
+          "64 GB",
+          "Até cerca de 1 GB",
+          "8 GB ou mais"
+        ]
+      ],
+      "titulo": "Configurações do Revit 2027 conforme o tamanho do modelo",
+      "colunaDestaque": 1,
+      "fonte": {
+        "nome": "Autodesk — Revit LT, detalhes do produto (seção de requisitos do Revit 2027)",
+        "url": "https://www.autodesk.com/products/revit-lt/product-details"
+      },
+      "nota": "O tamanho do modelo é o do arquivo do projeto salvo no disco. Projetos com vínculos de outros arquivos somam o peso de todos eles."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Para saber em qual linha você está, abra a pasta dos seus projetos e veja o tamanho dos arquivos maiores, somando os vínculos. Um estudante com trabalhos de faculdade costuma ficar na primeira linha. Um escritório que modela edifícios inteiros, com instalações e estrutura no mesmo arquivo, logo chega à segunda ou à terceira. Mas lembre que o projeto de hoje tende a crescer: deixe margem."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Na prática, 32 GB virou o ponto de equilíbrio para quem trabalha todos os dias com esses programas, e é também o valor que a Autodesk recomenda para o AutoCAD. Prefira dois pentes iguais a um só, para a memória funcionar em canal duplo, como explica o guia sobre [dual channel](/blog/dual-channel-por-que-duas-memorias-rendem-mais). As opções de [memória RAM](/categoria/hardware-memoria-ram) ajudam a comparar capacidades."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Processador: por que a velocidade de cada núcleo pesa"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Boa parte do trabalho de modelagem acontece em sequência: o programa recalcula um elemento, depois o seguinte, e esse tipo de tarefa aproveita pouco os muitos núcleos de um processador. É por isso que a Autodesk recomenda, para o Revit, maior velocidade por núcleo, e para o AutoCAD, frequência base de 3 GHz com turbo de 4 GHz ou mais, em vez de pedir apenas muitos núcleos."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas há uma exceção importante: a renderização. Quando você gera imagens realistas do projeto com programas de renderização, o trabalho se divide bem entre muitos núcleos, ou vai para a placa de vídeo, conforme o programa. Quem renderiza com frequência deve somar esse uso à conta e olhar processadores com mais núcleos ou uma placa de vídeo mais forte."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Placa de vídeo: quando a integrada basta e quando não"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A placa de vídeo cuida de desenhar o modelo na tela enquanto você gira, aproxima e muda de vista. O dado que as fichas destacam é a memória de vídeo, a VRAM, onde ficam a geometria e as texturas exibidas. A Autodesk também cita a largura de banda, a velocidade com que a placa lê essa memória: 29 GB/s no básico e 106 GB/s no recomendado do AutoCAD 2027."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Para desenho em duas dimensões no AutoCAD, um vídeo integrado moderno costuma bastar. Para modelagem em três dimensões, o SketchUp já recomenda placa dedicada como mínimo e pede 8 GB de VRAM para texturas PBR, que imitam materiais reais, oclusão de ambiente e iluminação por imagem. Nas [placas de vídeo](/categoria/hardware-placa-de-video-vga), compare a VRAM antes do nome do modelo."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Uma dúvida comum é sobre placas profissionais e de jogo. A Autodesk mantém uma lista de placas certificadas, testadas pelos fabricantes para os seus programas, e diz que placas fora da lista podem funcionar, apenas sem esse teste registrado. Para escritórios que dependem de estabilidade, consultar essa lista antes da compra é um cuidado que vale a pena."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "montagem"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Notebook ou desktop para arquitetura e engenharia"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Estudantes que levam o computador para a faculdade e profissionais que visitam obra costumam preferir notebook. Quem trabalha sempre na mesma mesa ganha com o desktop. Os requisitos são os mesmos nos dois casos, mas a forma de atendê-los muda bastante, principalmente na memória, na placa de vídeo e na refrigeração."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "Mais fácil chegar a 32 GB ou 64 GB de memória e acrescentar pentes depois.",
+        "Troca de placa de vídeo quando os projetos ficarem mais pesados.",
+        "Refrigeração mais folgada, que segura o desempenho em tarefas longas, como a renderização.",
+        "Liga com facilidade a dois monitores grandes."
+      ],
+      "contras": [
+        "Não acompanha você na faculdade nem na obra.",
+        "Ocupa espaço na mesa e precisa de um bom monitor à parte.",
+        "Pede atenção à fonte e ao gabinete quando a placa de vídeo é mais forte."
+      ],
+      "titulo": "Desktop para projetos: o que pesa"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "No notebook, a regra é olhar com cuidado o que não muda depois da compra. Em muitos modelos finos, a memória vem soldada na placa e a placa de vídeo nunca é trocada. Por isso, se a escolha for notebook, compre já com a memória e a VRAM que você vai precisar daqui a alguns anos. Veja os [notebooks](/notebooks) pela ficha completa, e não só pelo processador."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como montar a configuração pelo seu tipo de trabalho"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Com os requisitos em mãos, a escolha fica mais simples quando você parte do trabalho que faz, e não de um modelo de computador. A lista abaixo junta os casos mais comuns em escritórios e faculdades. Ela não substitui a conferência da versão exata de cada programa, mas ajuda a evitar os erros mais caros."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": false,
+      "itens": [
+        "**Desenho 2D e projetos pequenos** no AutoCAD ou no SketchUp: 16 GB de RAM, processador com boa velocidade por núcleo, SSD e vídeo integrado moderno ou placa dedicada de entrada.",
+        "**Modelagem 3D e BIM no dia a dia**, com projetos de tamanho médio no Revit: 32 GB de RAM, placa dedicada com 6 GB a 8 GB de VRAM e SSD com folga para os arquivos temporários.",
+        "**Projetos grandes, vínculos pesados e renderização frequente**: 64 GB de RAM, placa com 8 GB de VRAM ou mais e processador com mais núcleos para render.",
+        "**Em qualquer caso**: Windows 11, SSD com espaço livre e um monitor com resolução de ao menos 1920 x 1080, de preferência maior."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O disco também merece atenção. A Autodesk sugere SSD para o AutoCAD e recomenda deixar 100 GB livres para os arquivos temporários do Revit, além dos projetos e das bibliotecas. O guia sobre [SSD de 500 GB ou de 1 TB](/blog/ssd-de-500-gb-ou-1-tb-quanto-espaco-voce-usa) ajuda a fazer essa conta, e o de [monitor para trabalho](/blog/como-escolher-monitor-para-trabalho) mostra como escolher a tela."
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "Os requisitos mudam a cada versão anual dos programas. Faculdades e escritórios às vezes usam versões anteriores, e plugins de cálculo ou de renderização podem pedir mais do que o programa principal. Antes de fechar a compra, confira a página oficial de cada software que você usa.",
+      "titulo": "Confira a versão que você vai usar"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Onde montar um computador para projetos em Campinas"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, faz [montagem de computador sob medida](/montagempc), o que permite escolher a memória, a placa de vídeo e o disco pelo tamanho dos projetos que você descreveu. Para modelos grandes e renderização, vale conhecer os [computadores de maior desempenho](/premium). Antes de pagar, dá para ver o computador ligado e testar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se a ideia é aproveitar a máquina que você já tem, a assistência técnica da loja faz o diagnóstico e o upgrade de memória, disco ou placa de vídeo no mesmo endereço. O atendimento no WhatsApp é feito por pessoas da equipe. Em uma linha: para arquitetura e engenharia, escolha a memória pelo tamanho dos seus projetos e só depois o resto."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "upgrade"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "16 GB de memória RAM bastam para o Revit?",
+      "resposta": "Para projetos pequenos, sim: a Autodesk indica 16 GB para modelos de até cerca de 300 MB em disco. Para projetos maiores ou com muitos vínculos, a recomendação sobe para 32 GB ou 64 GB."
+    },
+    {
+      "pergunta": "Dá para usar AutoCAD com vídeo integrado?",
+      "resposta": "Para desenho em duas dimensões, um vídeo integrado moderno costuma atender ao básico. Para modelagem em três dimensões e visualização mais pesada, a Autodesk recomenda placa com 8 GB de memória de vídeo."
+    },
+    {
+      "pergunta": "O SketchUp 2027 roda no Windows 10?",
+      "resposta": "Não. A central de ajuda do SketchUp informa que a versão 2027 e as seguintes exigem Windows 11. Quem ainda está no Windows 10 precisa atualizar o sistema ou usar uma versão anterior."
+    },
+    {
+      "pergunta": "Posso usar Mac para arquitetura?",
+      "resposta": "Depende dos programas. O SketchUp 2027 roda em Macs com chip Apple, e o AutoCAD tem versão para Mac. Já os requisitos do Revit 2027 publicados pela Autodesk são apenas para Windows 11."
+    },
+    {
+      "pergunta": "Vale mais investir em processador ou em memória?",
+      "resposta": "Em arquitetura e engenharia, a memória costuma vir primeiro, porque faltar RAM deixa tudo lento. Depois dela, escolha um processador com boa velocidade por núcleo e uma placa de vídeo adequada ao tipo de modelagem."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Autodesk — AutoCAD, detalhes do produto e requisitos do AutoCAD 2027",
+      "url": "https://www.autodesk.com/products/autocad/product-details",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Autodesk — Installation requirements AutoCAD 2027",
+      "url": "https://help.autodesk.com/cloudhelp/2027/ENU/AutoCAD-ReleaseNotes/files/installation/INSTALLATION_REQUIREMENTS_AUTOCAD_2027.html",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Autodesk — Revit LT, detalhes do produto e requisitos do Revit 2027",
+      "url": "https://www.autodesk.com/products/revit-lt/product-details",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "SketchUp Help Center — System requirements",
+      "url": "https://help.sketchup.com/en/sketchup/system-requirements",
+      "data": "consultado em outubro de 2026"
+    },
+    {
+      "nome": "Autodesk — Certified graphics hardware (AutoCAD)",
+      "url": "https://www.autodesk.com/support/system-requirements/certified-graphics-hardware/autocad",
+      "data": "consultado em outubro de 2026"
+    }
+  ]
+}

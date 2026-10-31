@@ -1,4 +1,13 @@
 {
   "versao": 1,
-  "pendentes": []
+  "pendentes": [
+    {
+      "slug": "computador-para-arquitetura-e-engenharia-autocad-revit-sketchup",
+      "titulo": "Computador para arquitetura: o que AutoCAD, Revit e SketchUp pedem",
+      "categoria": "guias",
+      "alt": "Mesa de trabalho com um computador de mesa preto, monitor apagado, régua e plantas de papel enroladas ao lado",
+      "pedido": "A tidy architect's desk seen from a slight side angle: a black mid-tower desktop computer standing on the floor beside the desk, a large switched-off monitor on the desk, rolled paper blueprints tied with a rubber band, a metal ruler and a small white architectural scale model of a house. Keyboard pushed to the back and out of focus. Soft natural daylight from a window on the left, neutral grey and wood tones.",
+      "pedidoEm": "2026-10-31T22:15:51.855Z"
+    }
+  ]
 }

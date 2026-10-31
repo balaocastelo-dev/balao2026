@@ -2,6 +2,22 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "computador-para-arquitetura-e-engenharia-autocad-revit-sketchup",
+      "titulo": "Computador para arquitetura: o que AutoCAD, Revit e SketchUp pedem",
+      "resumo": "Computador para arquitetura e engenharia: veja o que AutoCAD, Revit e SketchUp pedem de memória, processador e placa de vídeo, e como dimensionar a máquina.",
+      "categoria": "guias",
+      "etiquetas": [
+        "arquitetura",
+        "memória ram",
+        "placa de vídeo",
+        "processador",
+        "montagem"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-11-01T09:00:00.000Z",
+      "minutos": 12
+    },
+    {
       "slug": "tela-do-notebook-com-mancha-defeito-ou-pressao",
       "titulo": "Tela do notebook com mancha: quando é defeito e quando é pressão",
       "resumo": "Mancha na tela do notebook pode ser sujeira, marca de pressão, vazamento de luz ou pixel com defeito. Veja como separar cada caso em casa e quando levar.",
@@ -1148,5 +1164,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-31T01:10:07.838Z"
+  "atualizadoEm": "2026-10-31T22:15:51.854Z"
 }
