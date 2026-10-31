@@ -2,14 +2,6 @@
   "versao": 1,
   "pendentes": [
     {
-      "slug": "pc-desligando-sozinho-temperatura-fonte-ou-sistema",
-      "titulo": "PC desligando sozinho: temperatura, fonte ou sistema?",
-      "categoria": "assistencia",
-      "alt": "Gabinete de computador aberto sobre uma bancada, com o cooler do processador e a fonte de alimentação à mostra",
-      "pedido": "A black mid-tower desktop computer case lying on its side on a clean wooden workbench, side panel removed, showing a CPU tower cooler with a large fan, neatly routed cables and a power supply unit at the bottom of the case. A small can of compressed air and a soft brush rest beside the case. A switched-off monitor stands slightly out of focus in the background. Soft daylight from a window on the left, shallow depth of field.",
-      "pedidoEm": "2026-10-30T22:09:51.688Z"
-    },
-    {
       "slug": "windows-11-cloud-rebuild-reinstalar-sem-pen-drive",
       "titulo": "Windows 11 ganha Cloud rebuild: reinstalação pela internet, sem pen drive",
       "categoria": "noticias",

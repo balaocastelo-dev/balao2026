@@ -10,7 +10,12 @@
     "temperatura",
     "windows"
   ],
-  "capa": null,
+  "capa": {
+    "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/pc-desligando-sozinho-temperatura-fonte-ou-sistema-245eeb98.jpg",
+    "alt": "Gabinete de computador aberto sobre uma bancada, com o cooler do processador e a fonte de alimentação à mostra",
+    "largura": 1600,
+    "altura": 900
+  },
   "publicadoEm": "2026-10-31T09:00:00.000Z",
   "blocos": [
     {
