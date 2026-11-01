@@ -62,6 +62,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/trocas-e-devolucoes',
     '/seguranca-e-privacidade',
     '/overclock',
+    '/mybots-app',
   ].map((route) => ({
     url: `${baseUrl}${route}`,
     changeFrequency: route === '' ? 'daily' as const : 'weekly' as const,

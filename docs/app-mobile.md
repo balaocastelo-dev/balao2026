@@ -1,5 +1,7 @@
 # App do Balão (Android) + 15% a mais no Pix pelo app
 
+Este documento é o app da loja (`/apk`, desconto no Pix). O app **MyBots** (bots de IA, grátis) é outro: página `/mybots-app`, doc `docs/mybots-app.md`. O endereço `/mybots` é o Hub, não a landing.
+
 Casca **Capacitor** que abre `https://www.balao.info` ao vivo. Não tem conteúdo
 embutido: o que muda no site já aparece no app, sem reenviar nada.
 

@@ -46,6 +46,16 @@ const nextConfig: NextConfig = {
         source: "/3d/:arquivo((?:assets|engine|ui)\\.[0-9a-f]{10}\\.(?:pack|js|css))",
         headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
       },
+      {
+        // APK do app MyBots (landing em /mybots-app). O tipo certo faz o
+        // Android baixar e oferecer a instalação. Não tem relação com o
+        // rewrite de /mybots, que continua sendo o Hub.
+        source: "/downloads/MyBots.apk",
+        headers: [
+          { key: "Content-Type", value: "application/vnd.android.package-archive" },
+          { key: "Content-Disposition", value: 'attachment; filename="MyBots.apk"' },
+        ],
+      },
     ];
   },
   async redirects() {

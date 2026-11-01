@@ -34,6 +34,8 @@ novo o que já foi feito em outra conversa.
 - `docs/blog/publicacao-diaria.md` — as três publicações do dia e o vídeo da dica.
 - `whatsapp-server/` — o servidor do CRM (roda na VPS, não na Vercel).
 - `office3d/` — fonte do Office 3D (`/3d`).
+- `/mybots-app` — landing do app MyBots (APK grátis, vídeo e passo a passo). Doc: `docs/mybots-app.md`.
+  O endereço `/mybots` é outra coisa: rewrite para o Hub (túnel Cloudflare). Não trocar um pelo outro.
 - `/sistema` — **MEU BLING**, o ERP próprio que substitui o Bling. Não mora neste repositório: é só um rewrite em
   `next.config.ts` (`/sistema` → VPS Hostinger, container `meu-bling`). Código no repo privado `balaocastelo-dev/meu-bling`
   (`C:\meu-bling` no PC), deploy por `.\scripts\deploy-vps.ps1`; doc no cérebro `11-Claude\MEU-BLING.md` e no projeto "MEU BLING" do Claude.
