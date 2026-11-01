@@ -1,0 +1,113 @@
+{
+  "slug": "windows-11-menu-botao-direito-personalizavel-kb5127936",
+  "titulo": "Windows 11 libera menu do botão direito personalizável na KB5127936",
+  "resumo": "A atualização opcional de 28 de outubro deixa você escolher o que aparece no menu do botão direito do Explorador de Arquivos. Veja o que muda e se vale instalar.",
+  "categoria": "noticias",
+  "etiquetas": [
+    "windows",
+    "atualização",
+    "windows 11"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-11-02T15:00:00.000Z",
+  "seo": {
+    "titulo": "Windows 11: menu do botão direito personalizável chega"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Em 28 de outubro de 2026, a Microsoft liberou a KB5127936, a atualização de prévia de outubro para o Windows 11 nas versões 25H2 e 26H2. A novidade mais visível é o menu do botão direito do Explorador de Arquivos: ele foi redesenhado, abre mais rápido e agora pode ser personalizado, com os comandos que você usa e sem os que não usa."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que essa atualização chega sozinha como as de segurança. Ela é opcional e não traz correção de segurança: você instala se quiser. E, mesmo instalada, a Microsoft libera os recursos aos poucos, então o menu novo pode demorar a aparecer em alguns computadores."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que a Microsoft liberou"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Segundo a página da atualização, o menu do botão direito ganhou uma opção para personalizar o menu (em inglês, Customize menu). Com ela dá para mostrar ou esconder comandos como Enviar para e Criar atalho, incluir Imprimir, escolher onde aparecem as opções que os programas instalados acrescentam, trocar os ícones de Recortar, Copiar, Colar, Renomear, Excluir e Compartilhar por texto e levar Propriedades para o fim da lista."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": false,
+      "itens": [
+        "**Explorador de Arquivos:** resultados de pesquisa com nome, local e data sempre na mesma ordem; o til (~) na barra de endereço leva direto à pasta do usuário; Opções de Pasta no modo escuro.",
+        "**Reprodução Automática:** a janela que aparece ao conectar celular, câmera ou pen drive passa a ter modo escuro e respeita o tamanho de texto escolhido.",
+        "**Configurações:** a página de Privacidade e segurança reúne câmera, microfone e localização e mostra na mesma página informações sobre o uso de cada um.",
+        "**Modo Xbox:** a tela de jogos ganhou uma barra com atalhos para voltar à área de trabalho e para as opções de energia."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A página também avisa que o Windows 11 24H2 deixou de receber as atualizações de prévia a partir desta de outubro. As edições Enterprise e Education dessa versão continuam com as atualizações mensais de segurança. A mesma leva traz a reinstalação pela internet, explicada na notícia sobre o [Cloud rebuild do Windows 11](/blog/windows-11-cloud-rebuild-reinstalar-sem-pen-drive)."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que isso muda para você"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem já usa o Windows 11 em dia:** não há pressa. Quem quiser o menu novo agora encontra a atualização em Configurações, Windows Update, Opções avançadas, Atualizações opcionais. Quem preferir esperar recebe as mesmas mudanças, com o tempo, nas atualizações mensais normais, sem fazer nada."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem usa fone ou placa de som USB:** o NT Compatible e o Admin365 relatam que a Microsoft lista, nesta atualização, um problema com aparelhos de áudio USB mais antigos (os do padrão USB Audio Class 1.0). O aparelho pode ficar sem som e o Gerenciador de Dispositivos mostrar o erro Código 10. A correção ainda não saiu; se você depende de um aparelho assim, vale esperar."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem ainda está no 24H2:** o computador continua recebendo as atualizações de segurança por enquanto, mas fica de fora das novidades. A notícia sobre o [fim do suporte do Windows 11 24H2](/blog/windows-11-24h2-fim-do-suporte-13-de-outubro) mostra como conferir a versão e atualizar. Se a atualização trava ou dá erro, a [assistência técnica](/manutencao) consegue ver o que está impedindo."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem vai comprar um computador:** a novidade não muda a escolha da máquina, porque roda em qualquer PC com Windows 11 atualizado. Nos [seminovos](/seminovos) e nos novos, vale conferir no momento da compra se o sistema já está numa versão com suporte."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que ainda não se sabe"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Microsoft não informou em que data o menu novo chega a todos os computadores nem quando sai a correção para o áudio USB. Até lá, a regra prática é simples: as atualizações de segurança do mês devem ser instaladas sempre; as de prévia, só se a novidade fizer diferença para você."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, tem assistência técnica para atualização, diagnóstico e conserto, e vende computadores novos e seminovos. Em uma linha: o menu personalizável é bem-vindo, mas não há motivo para correr atrás dele, principalmente se você usa áudio USB."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "seminovos"
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "October 28, 2026 — KB5127936 (OS Builds 26300.9818 and 26200.9818) Preview — Microsoft Support",
+      "url": "https://support.microsoft.com/en-us/servicing/os/windows-11/2026/10/kb5127936-windows-11-25h2-26h2-update",
+      "data": "28 de outubro de 2026"
+    },
+    {
+      "nome": "Microsoft Ships October 2026 Windows 11 Preview Updates for 26H1, 26H2, and 25H2 — NT Compatible",
+      "url": "https://www.ntcompatible.com/story/microsoft-ships-october-2026-windows-11-preview-updates-for-26h1-26h2-and-25h2",
+      "data": "28 de outubro de 2026"
+    },
+    {
+      "nome": "KB5127936 Windows 11 Preview Update: What's New and Fixed — Admin365.Blog",
+      "url": "https://admin365.blog/2026/10/29/kb5127936-windows-11-preview-update-whats-new-and-fixed/",
+      "data": "29 de outubro de 2026"
+    },
+    {
+      "nome": "Microsoft Ships October 2026 Windows 11 Preview Updates — Warp2Search",
+      "url": "https://www.warp2search.net/story/microsoft-ships-october-2026-windows-11-preview-updates-for-26h1-26h2-and-25h2",
+      "data": "28 de outubro de 2026"
+    }
+  ]
+}

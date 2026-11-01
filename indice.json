@@ -2,6 +2,20 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "windows-11-menu-botao-direito-personalizavel-kb5127936",
+      "titulo": "Windows 11 libera menu do botão direito personalizável na KB5127936",
+      "resumo": "A atualização opcional de 28 de outubro deixa você escolher o que aparece no menu do botão direito do Explorador de Arquivos. Veja o que muda e se vale instalar.",
+      "categoria": "noticias",
+      "etiquetas": [
+        "windows",
+        "atualização",
+        "windows 11"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-11-02T15:00:00.000Z",
+      "minutos": 3
+    },
+    {
       "slug": "notebook-para-usar-ia-o-que-olhar-antes-de-comprar",
       "titulo": "Notebook para usar IA: o que olhar antes de comprar",
       "resumo": "Notebook para usar IA: veja quando a memória da placa de vídeo, a NPU e a RAM importam, e o que não dá para trocar depois da compra.",
@@ -1211,5 +1225,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-11-01T22:15:20.672Z"
+  "atualizadoEm": "2026-11-01T22:30:13.490Z"
 }
