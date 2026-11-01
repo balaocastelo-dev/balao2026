@@ -1,0 +1,184 @@
+{
+  "slug": "como-testar-a-bateria-do-notebook-pelo-windows",
+  "titulo": "Como testar a bateria do notebook pelo próprio Windows, sem instalar nada",
+  "resumo": "Um comando do Windows gera o relatório da bateria do notebook e mostra quanto ela ainda segura. Veja como abrir, o que olhar e quando a troca faz sentido.",
+  "categoria": "hardware",
+  "etiquetas": [
+    "bateria",
+    "notebook",
+    "windows",
+    "diagnóstico"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-11-02T21:00:00.000Z",
+  "formato": "dica",
+  "roteiro": {
+    "fala": "Quer saber se a bateria do seu notebook ainda está boa? O próprio Windows mostra. Abra o Prompt de Comando, digite powercfg espaço barra batteryreport e aperte Enter. Ele cria um relatório na sua pasta de usuário. Abra e compare duas linhas: a capacidade de fábrica e a capacidade de carga completa. Se a segunda caiu para perto da metade da primeira, a bateria já perdeu muito e vale pensar na troca.",
+    "titulo": "Teste a bateria pelo Windows",
+    "destaques": [
+      "powercfg /batteryreport",
+      "Design Capacity",
+      "Full Charge Capacity",
+      "Perto da metade: troca"
+    ],
+    "legenda": "Dá para saber quanto a bateria do notebook ainda segura sem instalar nada. O passo a passo e o que olhar no relatório estão na dica completa do blog.",
+    "hashtags": [
+      "notebook",
+      "bateria",
+      "windows",
+      "dicas",
+      "informatica",
+      "campinas"
+    ]
+  },
+  "seo": {
+    "titulo": "Testar a bateria do notebook pelo Windows, sem instalar nada"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Para testar a bateria do notebook pelo próprio Windows, basta um comando: **powercfg /batteryreport**. Ele gera um relatório em HTML, que abre no navegador, com a capacidade original da bateria, quanto ela segura hoje e o histórico de uso. Não precisa baixar programa nenhum, e o comando funciona no Windows 10 e no Windows 11."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é julgar a bateria pela porcentagem do ícone. Os 100% mostram que ela está cheia, não quanto cabe nela. Uma bateria gasta também chega a 100%, só que guarda bem menos energia e dura menos longe da tomada. O relatório do Windows compara a capacidade de fábrica com a atual, e é essa diferença que diz se está na hora de trocar."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "No Prompt de Comando, digite **powercfg /batteryreport** e aperte Enter.",
+        "O arquivo **battery-report.html** fica na pasta do seu usuário e abre no navegador.",
+        "Compare **Design Capacity** (de fábrica) com **Full Charge Capacity** (o que ela segura hoje).",
+        "Perto da metade da capacidade original, ou abaixo, a bateria já está bem gasta."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como gerar o relatório da bateria"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O passo a passo abaixo segue a página de suporte da Dell, mas vale para notebook de qualquer marca com Windows. Segundo a documentação da Microsoft, o comando grava o arquivo na pasta em que o Prompt de Comando está aberto, que normalmente é a pasta do seu usuário."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "Aperte a tecla do Windows junto com a tecla **R**, digite **cmd** e aperte Enter.",
+        "Na janela preta, digite **powercfg /batteryreport**, com um espaço antes da barra, e aperte Enter.",
+        "O Windows avisa onde salvou o arquivo. Abra o Explorador de Arquivos e vá até **C:\\Usuários\\seu nome**.",
+        "Clique duas vezes em **battery-report.html** para abrir no navegador.",
+        "Se preferir escolher o lugar, use **powercfg /batteryreport /output \"C:\\bateria.html\"**, como mostra a documentação."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que olhar no relatório e quando trocar"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O relatório tem várias partes, mas a decisão está no começo, em **Installed batteries**. Ali aparecem a capacidade de projeto (Design Capacity) e a de carga completa (Full Charge Capacity), em mWh, a unidade de energia que a bateria guarda. Em alguns modelos aparece também a contagem de ciclos (Cycle Count), o número de cargas completas que ela já fez."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Seção",
+        "O que mostra",
+        "Para que serve"
+      ],
+      "linhas": [
+        [
+          "Installed batteries",
+          "Capacidade de fábrica, capacidade atual e, em alguns modelos, ciclos",
+          "Saber quanto a bateria já perdeu"
+        ],
+        [
+          "Recent usage",
+          "Quando o notebook ficou ligado, suspenso e na tomada",
+          "Achar descarga estranha ou notebook que não dorme"
+        ],
+        [
+          "Battery capacity history",
+          "A capacidade ao longo do tempo",
+          "Ver se a perda foi aos poucos ou de repente"
+        ],
+        [
+          "Battery life estimates",
+          "A autonomia estimada pelo Windows",
+          "Comparar com o tempo que você consegue de fato"
+        ]
+      ],
+      "titulo": "As partes do relatório que mais ajudam",
+      "colunaDestaque": 0,
+      "fonte": {
+        "nome": "Suporte da Dell e Windows Central",
+        "url": "https://www.dell.com/support/kbdoc/en-au/000130117/how-to-generate-battery-report-using-the-powercfg-command"
+      },
+      "nota": "Os nomes das seções aparecem em inglês mesmo no Windows em português."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Quanto mais perto os dois números, mais saudável a bateria. Uma diferença pequena é normal: a Dell explica que a capacidade atual varia com a temperatura, com as descargas até zero e com os ciclos. Para a troca, as referências variam: o Windows Central sugere pensar nela quando a capacidade atual chega perto de 50% da original; a Dell trata abaixo de 40% como bateria bem degradada."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "notebooks"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando o relatório não resolve"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O relatório mede a bateria, não o carregador nem o conector. Se a bateria aparece saudável e o notebook mesmo assim não carrega, o problema costuma estar em outro lugar, e a dica sobre [como saber se o carregador é o problema](/blog/como-saber-se-o-carregador-do-notebook-e-o-problema) mostra o que conferir. Em Windows recém-instalado, o histórico ainda é curto: espere alguns dias de uso antes de tirar conclusões."
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "Se o touchpad levantou, a tampa não fecha direito ou o gabinete abriu uma fresta, a bateria pode estar estufada. Não aperte, não fure e não tente tirar em casa. Desligue o notebook, deixe fora da tomada e leve a um técnico.",
+      "titulo": "Bateria estufada não é caso de relatório"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Para a bateria durar mais daqui para a frente, vale ler sobre [deixar o notebook na tomada o tempo todo](/blog/posso-deixar-o-notebook-na-tomada-o-tempo-todo). Se a troca chegou, a [assistência técnica](/manutencao) da Balão da Informática, no Cambuí, em Campinas, faz o diagnóstico e a troca da peça, e a loja também tem [carregadores de notebook](/carregadores). Em uma linha: rode o comando, compare as duas capacidades e decida pela diferença, não pelo ícone."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Preciso abrir o Prompt de Comando como administrador?",
+      "resposta": "Para o comando simples, normalmente não. Se você usar a opção de salvar direto na raiz do disco C:, como no exemplo com /output, pode ser preciso abrir como administrador."
+    },
+    {
+      "pergunta": "O relatório não mostra a contagem de ciclos. A bateria está com defeito?",
+      "resposta": "Não necessariamente. Nem todo notebook informa os ciclos ao Windows. O que decide é a comparação entre a capacidade de fábrica e a capacidade de carga completa."
+    },
+    {
+      "pergunta": "Funciona em computador de mesa?",
+      "resposta": "O comando roda, mas sem bateria não há o que medir. Ele é feito para notebooks e outros aparelhos com bateria."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "How to Generate a Battery Report Using the POWERCFG Command — Suporte da Dell",
+      "url": "https://www.dell.com/support/kbdoc/en-au/000130117/how-to-generate-battery-report-using-the-powercfg-command",
+      "data": "outubro de 2026"
+    },
+    {
+      "nome": "Powercfg command-line options — Microsoft Learn",
+      "url": "https://learn.microsoft.com/windows-hardware/design/device-experiences/powercfg-command-line-options",
+      "data": "dezembro de 2021"
+    },
+    {
+      "nome": "How to check battery health on Windows 11 — Windows Central",
+      "url": "https://windowscentral.com/how-check-battery-health-windows-11",
+      "data": "agosto de 2023"
+    }
+  ]
+}

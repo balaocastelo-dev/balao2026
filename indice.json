@@ -2,6 +2,22 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "como-testar-a-bateria-do-notebook-pelo-windows",
+      "titulo": "Como testar a bateria do notebook pelo próprio Windows, sem instalar nada",
+      "resumo": "Um comando do Windows gera o relatório da bateria do notebook e mostra quanto ela ainda segura. Veja como abrir, o que olhar e quando a troca faz sentido.",
+      "categoria": "hardware",
+      "etiquetas": [
+        "bateria",
+        "notebook",
+        "windows",
+        "diagnóstico"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-11-02T21:00:00.000Z",
+      "minutos": 5,
+      "formato": "dica"
+    },
+    {
       "slug": "windows-11-menu-botao-direito-personalizavel-kb5127936",
       "titulo": "Windows 11 libera menu do botão direito personalizável na KB5127936",
       "resumo": "A atualização opcional de 28 de outubro deixa você escolher o que aparece no menu do botão direito do Explorador de Arquivos. Veja o que muda e se vale instalar.",
@@ -1225,5 +1241,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-11-01T22:30:13.490Z"
+  "atualizadoEm": "2026-11-01T22:48:12.266Z"
 }
