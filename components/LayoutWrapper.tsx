@@ -35,8 +35,13 @@ export default function LayoutWrapper({
   // competiriam com o único botão que importa ali.
   // O Overclock (/overclock) é o sistema vendido para outras lojas: tem
   // identidade própria e não leva nada da cara da loja Balão.
+  // /mybots-app é a landing do aplicativo MyBots (visual próprio). O endereço
+  // /mybots é o Hub, via rewrite, e não passa por aqui.
   const isPaginaDeVendas =
-    pathname === "/sistemasdeia" || pathname === "/overclock" || pathname === "/avellstorm480";
+    pathname === "/sistemasdeia" ||
+    pathname === "/overclock" ||
+    pathname === "/avellstorm480" ||
+    pathname === "/mybots-app";
   // O painel inteiro (/painel e tudo embaixo dele) é tela de trabalho: tem o
   // próprio menu e rola por dentro, sem o rodapé nem o botão da loja.
   const isPainel = pathname === "/painel" || pathname.startsWith("/painel/");
