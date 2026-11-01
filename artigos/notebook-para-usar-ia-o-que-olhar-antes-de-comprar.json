@@ -1,0 +1,311 @@
+{
+  "slug": "notebook-para-usar-ia-o-que-olhar-antes-de-comprar",
+  "titulo": "Notebook para usar IA: o que olhar antes de comprar",
+  "resumo": "Notebook para usar IA: veja quando a memória da placa de vídeo, a NPU e a RAM importam, e o que não dá para trocar depois da compra.",
+  "categoria": "ia",
+  "etiquetas": [
+    "ia local",
+    "notebook",
+    "placa de vídeo",
+    "memória ram"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-11-02T09:00:00.000Z",
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Você quer trocar de notebook e ouviu que agora existe o notebook para usar IA, com selo novo, chip de inteligência artificial e uma lista de siglas na ficha técnica. A dúvida é razoável: dá para pagar por um recurso que você nunca vai usar, ou comprar uma máquina que não aguenta justamente o que motivou a troca."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que existe um único \"notebook de IA\". Na prática há três usos diferentes: usar assistentes pela internet, usar os recursos de IA do próprio Windows e rodar modelos inteiros no computador. Cada um pede uma peça diferente. Quem só usa IA pela internet quase não precisa de nada especial; quem quer rodar IA local precisa olhar, antes de tudo, a memória."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "Para usar assistentes pela internet, qualquer notebook atual e bem configurado serve: o trabalho pesado acontece no servidor.",
+        "Os recursos de IA do Windows ficam nos **Copilot+ PCs**, que pedem NPU de 40 TOPS ou mais, 16 GB de memória e SSD de 256 GB.",
+        "Para rodar IA no próprio notebook, o número que mais pesa é a **memória da placa de vídeo (VRAM)**, seguida da RAM.",
+        "Memória soldada não se troca depois: escolha a quantidade pensando nos próximos anos, não no uso de hoje."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Primeiro decida qual IA você vai usar"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Quando você conversa com um assistente no navegador ou num aplicativo, o modelo roda num centro de dados. O notebook só envia o texto e mostra a resposta. Nesse caso, o que importa é o de sempre: um processador atual, memória suficiente para várias abas abertas, SSD e uma boa conexão. Nenhum chip especial muda a qualidade dessas respostas."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O segundo uso são os recursos de IA embutidos no Windows, que rodam no próprio aparelho, sem mandar dados para fora. A Microsoft reserva parte deles para uma categoria específica de máquina, que veremos adiante. O terceiro é a IA local propriamente dita: baixar um modelo de linguagem e usá-lo em programas gratuitos, com os seus arquivos dentro de casa."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Essa diferença entre nuvem e computador está explicada em detalhe no artigo [IA no computador ou IA na nuvem](/blog/ia-no-computador-ou-ia-na-nuvem-o-que-muda). Vale lê-lo antes de comprar, porque muita gente descobre que o uso real é só pela internet e que não precisa pagar por uma configuração pensada para rodar modelos em casa."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Memória da placa de vídeo: o número que decide a IA local"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Um modelo de IA é um conjunto enorme de números, os parâmetros, que o computador consulta a cada palavra que escreve. Para responder rápido, esses números precisam caber na memória da placa de vídeo, a VRAM. A documentação da Hugging Face, a maior biblioteca aberta de modelos, dá uma regra prática: um modelo de X bilhões de parâmetros em 16 bits ocupa perto de 2 vezes X gigabytes."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Os programas caseiros quase sempre usam modelos **quantizados**, que guardam cada número com menos bits, e por isso cabem em bem menos memória, com alguma perda de precisão. A mesma documentação lembra que a conversa também ocupa espaço: o cache de contexto cresce a cada palavra. Em textos longos, a conta precisa de folga, e não pode fechar no limite."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "No notebook, esse cuidado é maior porque a placa de vídeo vem soldada e não há upgrade. A tabela abaixo mostra quanta VRAM cada placa da linha atual da Nvidia para notebooks traz, segundo a página de comparação do fabricante. Repare que vários modelos têm a mesma quantidade, e que a RTX 5070 aparece em duas versões."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Placa de vídeo",
+        "Memória (VRAM)",
+        "Faixa de potência"
+      ],
+      "linhas": [
+        [
+          "RTX 5050",
+          "8 GB GDDR7",
+          "35 W a 100 W"
+        ],
+        [
+          "RTX 5060",
+          "8 GB GDDR7",
+          "45 W a 100 W"
+        ],
+        [
+          "RTX 5070",
+          "8 GB ou 12 GB GDDR7",
+          "50 W a 100 W"
+        ],
+        [
+          "RTX 5070 Ti",
+          "12 GB GDDR7",
+          "60 W a 115 W"
+        ],
+        [
+          "RTX 5080",
+          "16 GB GDDR7",
+          "80 W a 150 W"
+        ],
+        [
+          "RTX 5090",
+          "24 GB GDDR7",
+          "95 W a 150 W"
+        ]
+      ],
+      "titulo": "Memória das placas Nvidia RTX série 50 para notebook",
+      "colunaDestaque": 1,
+      "fonte": {
+        "nome": "Nvidia — Compare Gaming Laptops",
+        "url": "https://www.nvidia.com/en-gb/geforce/laptops/compare.md"
+      },
+      "nota": "A potência é a do conjunto da placa de vídeo e quem define o valor, dentro da faixa, é o fabricante do notebook."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A RTX 5070 merece atenção. Em abril de 2026 a Nvidia passou a oferecer uma versão com 12 GB, e a versão original de 8 GB continua à venda, segundo a Club386. O nome na caixa é o mesmo; a diferença está na ficha técnica. Para IA local, os 4 GB a mais pesam bastante, então confira a quantidade exata antes de fechar a compra."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O LM Studio, um dos programas mais usados para rodar modelos em casa, recomenda no Windows ao menos 4 GB de VRAM dedicada e 16 GB de RAM, e pede um processador com o conjunto de instruções AVX2. Isso é o piso para modelos pequenos. Para entender como a conta muda com modelos maiores, veja [que computador você precisa para rodar IA em casa](/blog/que-computador-preciso-para-rodar-ia-em-casa)."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "NPU e selo Copilot+: quando o chip de IA faz diferença"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A NPU, ou unidade de processamento neural, é um pedaço do processador feito para cálculos de IA gastando pouca energia. Sua força é medida em TOPS, trilhões de operações por segundo. A Microsoft chama de **Copilot+ PC** o computador com Windows 11 cuja NPU passa de 40 TOPS, e diz que muitos dos novos recursos de IA do Windows dependem dela."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Na página de requisitos, a Microsoft lista o que essa categoria exige além do Windows 11 comum. Entre os processadores aprovados, a empresa cita o Snapdragon X Elite, a série Ryzen AI 300 da AMD e a série Core Ultra 200V da Intel. Se a ficha do notebook não traz um deles, ou um sucessor que conste na lista, ele não terá os recursos exclusivos."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Item",
+        "Requisito mínimo"
+      ],
+      "linhas": [
+        [
+          "Processador",
+          "Da lista aprovada, sempre com NPU"
+        ],
+        [
+          "NPU",
+          "40 TOPS ou mais"
+        ],
+        [
+          "Memória RAM",
+          "16 GB DDR5 ou LPDDR5"
+        ],
+        [
+          "Armazenamento",
+          "256 GB ou mais, em SSD ou UFS"
+        ]
+      ],
+      "titulo": "O que a Microsoft exige de um Copilot+ PC",
+      "colunaDestaque": 1,
+      "fonte": {
+        "nome": "Microsoft — Requisitos de hardware dos dispositivos de IA",
+        "url": "https://support.microsoft.com/en-us/topic/windows-next-generation-ai-device-hardware-requirements-35782169-6eab-4d63-a5c5-c498c3037364"
+      },
+      "nota": "Os requisitos se somam aos do Windows 11. TOPS é a capacidade de pico da NPU, informada pelo fabricante."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas a NPU e a placa de vídeo atendem a coisas diferentes. Os recursos do Windows foram feitos para rodar na NPU, enquanto programas de IA local como o LM Studio listam, nos requisitos, memória RAM e VRAM, e não NPU. Um notebook fino com selo Copilot+ e sem placa de vídeo dedicada pode ser ótimo para o primeiro uso e limitado para o segundo."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "Dá acesso aos recursos de IA do Windows que rodam no próprio aparelho.",
+        "A NPU faz esse trabalho gastando menos bateria do que o processador ou a placa de vídeo.",
+        "O requisito já garante 16 GB de memória e SSD, uma base boa para o resto do uso."
+      ],
+      "contras": [
+        "Não substitui uma placa de vídeo com bastante VRAM para rodar modelos maiores.",
+        "Quem só usa assistentes pela internet não aproveita a NPU.",
+        "Alguns programas e acessórios antigos podem não ter versão para processadores Arm, como o Snapdragon."
+      ],
+      "titulo": "Vale pagar pelo selo Copilot+?"
+    },
+    {
+      "tipo": "chamada",
+      "tema": "ia-local"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "RAM, SSD e potência: o que não se troca depois"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Em muitos notebooks finos a memória RAM vem soldada na placa e não aceita ampliação. Para IA, isso pesa duas vezes: os programas recomendam 16 GB ou mais, e o modelo que não cabe na VRAM passa a ocupar a RAM, deixando tudo mais lento. Se o notebook não tem slot livre, compre já com a quantidade que vai precisar daqui a alguns anos."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O SSD também conta. Cada modelo baixado é um arquivo de vários gigabytes, e quem testa alguns logo ocupa uma boa parte do disco. Diferente da RAM, muitos notebooks aceitam trocar ou somar um SSD, mas vale conferir isso na ficha antes. Se você ficou em dúvida sobre o tamanho, o guia [SSD de 500 GB ou de 1 TB](/blog/ssd-de-500-gb-ou-1-tb-quanto-espaco-voce-usa) ajuda na conta."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Por último, a potência. Pela tabela da Nvidia, a mesma placa de vídeo pode trabalhar numa faixa larga de watts, conforme o projeto de cada notebook. Um modelo fino costuma usar a parte de baixo da faixa para controlar o calor e o ruído; um mais grosso, com mais ventilação, costuma usar a de cima. Duas máquinas com o mesmo nome de placa podem render bem diferente."
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "O nome da placa de vídeo e o selo de IA não dizem tudo. Antes de comprar, procure na ficha técnica a quantidade de VRAM, a potência da placa definida pelo fabricante, a quantidade de RAM e se ela é soldada ou tem slot livre.",
+      "titulo": "Confira a ficha, não o adesivo"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "E o Mac? Como ele entra nessa conta"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Nos Macs com chip da Apple, o processador e a parte de vídeo dividem a mesma memória, a memória unificada. Para IA local, isso significa que a quantidade total de memória faz o papel que a VRAM faz no PC. O LM Studio funciona nesses Macs com macOS 14 ou mais novo, recomenda 16 GB ou mais e informa que Macs com processador Intel não são suportados."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas a memória do Mac também não se troca depois da compra, e a escolha da configuração pesa ainda mais. Se você está entre um Mac e um notebook com Windows, o artigo [quanta memória escolher no Mac](/blog/quanta-memoria-escolher-no-mac) mostra como pensar essa quantidade para os próximos anos, inclusive para quem pretende usar IA."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Qual notebook combina com o seu uso de IA"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Juntando tudo, a escolha fica mais simples quando você parte do uso, e não da sigla. A lista abaixo resume os perfis mais comuns. Mas lembre que notebook é sempre um meio-termo entre desempenho, peso e bateria: se a IA local vai ser o uso principal, com modelos grandes, um computador de mesa costuma entregar mais memória de vídeo e mais folga."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "**Só assistentes pela internet:** processador atual, 16 GB de RAM, SSD e boa tela. Selo de IA é opcional.",
+        "**Recursos de IA do Windows:** um Copilot+ PC, com NPU de 40 TOPS ou mais e processador da lista da Microsoft.",
+        "**IA local com modelos pequenos:** placa de vídeo dedicada com 8 GB de VRAM ou mais e 16 GB de RAM, de preferência 32 GB.",
+        "**IA local como uso principal:** placa com 12 GB ou 16 GB de VRAM, RAM ampliável e boa refrigeração, ou um computador de mesa."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Veja o notebook ligado antes de decidir"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Na Balão da Informática, no Cambuí, em Campinas, você encontra [notebooks](/notebooks) novos e seminovos e pode ver o aparelho ligado e testar antes de pagar, conferindo memória, placa de vídeo e armazenamento na prática. Para quem quer rodar IA em casa, a loja também tem uma seleção de [computadores para IA local](/ia-local)."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se o seu notebook atual ainda tem slot livre, uma ampliação de memória ou de SSD pode adiar a troca, e a [assistência técnica](/manutencao) da loja faz esse upgrade no mesmo endereço. O atendimento pelo WhatsApp é feito por pessoas da equipe. Em uma linha: decida primeiro qual IA vai usar, depois compre a memória que ela pede."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "notebooks"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Preciso de um notebook com NPU para usar assistentes de IA?",
+      "resposta": "Não. Assistentes usados pelo navegador ou por aplicativo rodam nos servidores da empresa, e o notebook só envia e recebe o texto. A NPU importa para os recursos de IA que rodam no próprio Windows, os dos Copilot+ PCs."
+    },
+    {
+      "pergunta": "8 GB de VRAM são suficientes para rodar IA no notebook?",
+      "resposta": "Para modelos pequenos e quantizados, costumam ser. Para modelos maiores ou conversas longas, falta espaço e o programa passa a usar a RAM, o que deixa tudo mais lento. Se a IA local é prioridade, procure 12 GB ou mais."
+    },
+    {
+      "pergunta": "Dá para aumentar a memória da placa de vídeo do notebook depois?",
+      "resposta": "Não. A placa de vídeo do notebook vem soldada, com a memória dela. Em alguns modelos é possível ampliar a RAM e o SSD, mas a VRAM fica a mesma da compra."
+    },
+    {
+      "pergunta": "Um Copilot+ PC roda qualquer modelo de IA local?",
+      "resposta": "Não necessariamente. O selo garante NPU de 40 TOPS, 16 GB de memória e SSD, o que atende aos recursos do Windows. Modelos maiores dependem de memória, e muitos Copilot+ PCs finos não têm placa de vídeo dedicada."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Requisitos de hardware dos dispositivos de IA de nova geração (Copilot+ PC) — Microsoft Support",
+      "url": "https://support.microsoft.com/en-us/topic/windows-next-generation-ai-device-hardware-requirements-35782169-6eab-4d63-a5c5-c498c3037364",
+      "data": "novembro de 2026"
+    },
+    {
+      "nome": "Copilot+ PCs developer guide — Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-us/windows/ai/npu-devices/",
+      "data": "novembro de 2026"
+    },
+    {
+      "nome": "System Requirements — LM Studio",
+      "url": "https://lmstudio.ai/docs/app/system-requirements",
+      "data": "novembro de 2026"
+    },
+    {
+      "nome": "Compare Gaming Laptops — Nvidia",
+      "url": "https://www.nvidia.com/en-gb/geforce/laptops/compare.md",
+      "data": "novembro de 2026"
+    },
+    {
+      "nome": "Nvidia GeForce RTX 5070 laptop GPU now has 12GB of VRAM — Club386",
+      "url": "https://www.club386.com/nvidia-geforce-rtx-5070-12gb-laptop-launch/",
+      "data": "abril de 2026"
+    },
+    {
+      "nome": "Optimizing LLMs for Speed and Memory — Hugging Face",
+      "url": "https://huggingface.co/docs/transformers/main/llm_tutorial_optimization",
+      "data": "novembro de 2026"
+    }
+  ]
+}

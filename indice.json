@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "notebook-para-usar-ia-o-que-olhar-antes-de-comprar",
+      "titulo": "Notebook para usar IA: o que olhar antes de comprar",
+      "resumo": "Notebook para usar IA: veja quando a memória da placa de vídeo, a NPU e a RAM importam, e o que não dá para trocar depois da compra.",
+      "categoria": "ia",
+      "etiquetas": [
+        "ia local",
+        "notebook",
+        "placa de vídeo",
+        "memória ram"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-11-02T09:00:00.000Z",
+      "minutos": 11
+    },
+    {
       "slug": "windows-update-parado-esperar-ou-reiniciar",
       "titulo": "Windows Update parado na mesma porcentagem: esperar ou reiniciar?",
       "resumo": "Atualização do Windows parada na mesma porcentagem? Veja quanto esperar, quando reiniciar com segurança e o que nunca fazer no meio da instalação.",
@@ -1196,5 +1211,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-10-31T22:49:13.484Z"
+  "atualizadoEm": "2026-11-01T22:15:20.672Z"
 }
