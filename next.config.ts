@@ -31,8 +31,8 @@ const nextConfig: NextConfig = {
         { source: "/sistema", destination: "https://srv1963897.hstgr.cloud/sistema/" },
         { source: "/sistema/:caminho*", destination: "https://srv1963897.hstgr.cloud/sistema/:caminho*" },
         // MyBots Hub (PC do Thiago via tunel Cloudflare). Mesmo-origin p/ cookie de sessao.
-        { source: "/mybots", destination: "https://shortcuts-proper-solely-other.trycloudflare.com/mybots/" },
-        { source: "/mybots/:caminho*", destination: "https://shortcuts-proper-solely-other.trycloudflare.com/mybots/:caminho*" },
+        { source: "/mybots", destination: "https://put-order-exist-actual.trycloudflare.com/mybots/" },
+        { source: "/mybots/:caminho*", destination: "https://put-order-exist-actual.trycloudflare.com/mybots/:caminho*" },
       ],
       fallback: [],
     };
