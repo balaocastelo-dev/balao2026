@@ -17,6 +17,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import estilos from "./estilos.module.css";
+import PlayerDoComercial from "./PlayerDoComercial";
 
 // Landing de divulgação do app MyBots.
 // O endereço é /mybots-app de propósito: /mybots é o Hub (rewrite no
@@ -289,16 +290,7 @@ export default function PaginaMyBots() {
           <figcaption className={estilos.legenda}>
             <span aria-hidden>▶</span> Conheça os Bots MyBots
           </figcaption>
-          <video
-            className={estilos.video}
-            controls
-            playsInline
-            preload="metadata"
-            poster={POSTER}
-            aria-label="Comercial dos bots MyBots, 20 segundos"
-          >
-            <source src={VIDEO} type="video/mp4" />
-          </video>
+          <PlayerDoComercial src={VIDEO} poster={POSTER} />
         </figure>
 
         <section className={estilos.grade} aria-label="O que o MyBots oferece">

@@ -16,7 +16,9 @@ Não confundir com:
   (`isPaginaDeVendas` em `components/LayoutWrapper.tsx`).
 - `public/downloads/MyBots.apk` — o aplicativo. O botão usa `<a href="/downloads/MyBots.apk" download="MyBots.apk">`.
   O cabeçalho desse arquivo (`Content-Type` de APK e `Content-Disposition`) está em `next.config.ts`.
-- `public/mybots-app/comercial.mp4` — comercial de 20s das amebas. O `<video>` tem `controls` e `playsInline`.
+- `public/mybots-app/comercial.mp4` — comercial das amebas (narração atual). O player
+  (`app/mybots-app/PlayerDoComercial.tsx`) tem `controls` e `playsinline`. A primeira
+  passagem toca com som, quando a pessoa dá play. Ao terminar, volta sozinho, em loop e sem som.
 - `public/mybots-app/poster.jpg` — quadro do comercial, antes de dar play.
 
 Para trocar o APK ou o vídeo, substitua esses arquivos (mesmo nome) e publique. Não aponte o botão
