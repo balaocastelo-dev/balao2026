@@ -2,14 +2,6 @@
   "versao": 1,
   "pendentes": [
     {
-      "slug": "teamviewer-15-83-falhas-de-seguranca-atualizar",
-      "titulo": "TeamViewer 15.83 corrige três falhas graves: veja quem precisa atualizar",
-      "categoria": "noticias",
-      "alt": "Notebook preto fechado sobre uma mesa de escritório, ao lado de um monitor apagado visto de lado e de um roteador com luzes acesas",
-      "pedido": "A quiet home office desk seen from a low side angle. A closed black plastic laptop with a thick bezel rests on the wooden desk. Behind it, a switched-off desktop monitor is turned slightly away from the camera. A small generic Wi-Fi router with tiny green status lights sits at the edge of the desk. Soft evening light from a window on the right, shallow depth of field.",
-      "pedidoEm": "2026-10-31T22:29:16.861Z"
-    },
-    {
       "slug": "windows-update-parado-esperar-ou-reiniciar",
       "titulo": "Windows Update parado na mesma porcentagem: esperar ou reiniciar?",
       "categoria": "assistencia",

@@ -74,7 +74,12 @@
         "windows",
         "mac"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/teamviewer-15-83-falhas-de-seguranca-atualizar-02bf466b.jpg",
+        "alt": "Notebook preto fechado sobre uma mesa de escritório, ao lado de um monitor apagado visto de lado e de um roteador com luzes acesas",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-11-01T15:00:00.000Z",
       "minutos": 3
     },
@@ -1246,5 +1251,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-11-02T02:57:22.241Z"
+  "atualizadoEm": "2026-11-02T08:37:11.363Z"
 }
