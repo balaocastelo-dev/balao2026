@@ -9,7 +9,12 @@
     "placa de vídeo",
     "memória ram"
   ],
-  "capa": null,
+  "capa": {
+    "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/notebook-para-usar-ia-o-que-olhar-antes-de-comprar-2e05219a.jpg",
+    "alt": "Notebook preto de plástico fechado sobre uma mesa de trabalho de madeira, ao lado de um caderno e de uma caneca, com luz natural da janela",
+    "largura": 1600,
+    "altura": 900
+  },
   "publicadoEm": "2026-11-02T09:00:00.000Z",
   "blocos": [
     {
