@@ -10,7 +10,12 @@
     "processador",
     "montagem"
   ],
-  "capa": null,
+  "capa": {
+    "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/computador-para-arquitetura-e-engenharia-autocad-revit-sketchup-874d081e.jpg",
+    "alt": "Mesa de trabalho com um computador de mesa preto, monitor apagado, régua e plantas de papel enroladas ao lado",
+    "largura": 1600,
+    "altura": 900
+  },
   "publicadoEm": "2026-11-01T09:00:00.000Z",
   "seo": {
     "titulo": "Computador para arquitetura: AutoCAD, Revit e SketchUp"
