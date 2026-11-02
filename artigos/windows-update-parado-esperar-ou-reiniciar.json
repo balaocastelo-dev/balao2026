@@ -9,7 +9,12 @@
     "manutenção",
     "diagnóstico"
   ],
-  "capa": null,
+  "capa": {
+    "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/windows-update-parado-esperar-ou-reiniciar-369d822a.jpg",
+    "alt": "Computador de mesa ligado sobre uma escrivaninha, com o monitor de lado mostrando uma tela azul desfocada e a luz do gabinete acesa",
+    "largura": 1600,
+    "altura": 900
+  },
   "publicadoEm": "2026-11-01T21:00:00.000Z",
   "formato": "dica",
   "roteiro": {
