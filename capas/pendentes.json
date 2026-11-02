@@ -1,13 +1,4 @@
 {
   "versao": 1,
-  "pendentes": [
-    {
-      "slug": "como-testar-a-bateria-do-notebook-pelo-windows",
-      "titulo": "Como testar a bateria do notebook pelo próprio Windows, sem instalar nada",
-      "categoria": "hardware",
-      "alt": "Notebook preto fechado sobre uma bancada de madeira, com a bateria removível e o carregador ao lado",
-      "pedido": "A closed black plastic laptop with a thick bezel lying on a clean wooden workbench, seen from a three-quarter angle. Next to it rests a rectangular laptop battery pack and a coiled power adapter with its cable. A small screwdriver lies slightly out of focus in the background. Soft daylight coming from a window on the left, shallow depth of field, calm and tidy workspace.",
-      "pedidoEm": "2026-11-01T22:48:12.267Z"
-    }
-  ]
+  "pendentes": []
 }

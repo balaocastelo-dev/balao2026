@@ -12,7 +12,12 @@
         "windows",
         "diagnóstico"
       ],
-      "capa": null,
+      "capa": {
+        "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/como-testar-a-bateria-do-notebook-pelo-windows-5cb5429f.jpg",
+        "alt": "Notebook preto fechado sobre uma bancada de madeira, com a bateria removível e o carregador ao lado",
+        "largura": 1600,
+        "altura": 900
+      },
       "publicadoEm": "2026-11-02T21:00:00.000Z",
       "minutos": 5,
       "formato": "dica"
@@ -1266,5 +1271,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-11-02T09:18:22.646Z"
+  "atualizadoEm": "2026-11-02T09:21:42.880Z"
 }
