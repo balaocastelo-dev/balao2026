@@ -8,7 +8,12 @@
     "atualização",
     "windows 11"
   ],
-  "capa": null,
+  "capa": {
+    "src": "https://raw.githubusercontent.com/balaocastelo-dev/balao2026/refs/heads/claude/blog-conteudo/capas/windows-11-menu-botao-direito-personalizavel-kb5127936-4cb7974b.jpg",
+    "alt": "Computador de mesa com o gabinete preto sobre uma escrivaninha de madeira, monitor apagado ao lado e um mouse em primeiro plano",
+    "largura": 1600,
+    "altura": 900
+  },
   "publicadoEm": "2026-11-02T15:00:00.000Z",
   "seo": {
     "titulo": "Windows 11: menu do botão direito personalizável chega"
