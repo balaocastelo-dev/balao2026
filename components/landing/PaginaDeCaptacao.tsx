@@ -9,6 +9,7 @@ import CapaArtigo from "@/components/blog/CapaArtigo";
 import JsonLd, {
   generateArticleSchema,
   generateBreadcrumbSchema,
+  generateCollectionSchema,
   generateFAQSchema,
   generateItemListSchema,
   generateOrganizationSchema,
@@ -512,6 +513,16 @@ export default function PaginaDeCaptacao({
             : []),
           ...(pagina.seo.artigo
             ? [generateArticleSchema({ headline: pagina.seo.titulo, description: pagina.seo.descricao, url })]
+            : []),
+          ...(pagina.seo.partes?.length
+            ? [
+                generateCollectionSchema({
+                  name: pagina.seo.titulo.split("|")[0].trim(),
+                  description: pagina.seo.descricao,
+                  url,
+                  partes: pagina.seo.partes,
+                }),
+              ]
             : []),
           ...(produtosDaPagina.length ? [generateItemListSchema(produtosDaPagina.slice(0, 24), url)] : []),
         ]}

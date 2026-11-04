@@ -12,10 +12,20 @@ URLs novas: `/upgrade-ssd`, `/formatacao`, `/qual-pc-gamer` e uma por marca (`/n
 
 Preço de serviço, prazo fechado, FPS medido, tempo de boot e defeito “típico” de modelo não entram enquanto a loja não mandar o dado. O que falta está na descrição do PR. O formulário “Pedir retorno rápido” reaproveita `POST /api/leads/servicos`.
 
+## Licenciamento Microsoft (04/11/2026)
+
+`/microsoft` virou o hub. Os filhos são rotas próprias, então o endereço antigo continua:
+`/microsoft/windows`, `/microsoft/windows-server` e `/microsoft/office-365`.
+
+Texto confirmado pela loja: "licenças originais adquiridas de fornecedores oficiais Microsoft",
+nota fiscal de venda, 12x sem juros também para CNPJ, ativação e instalação. Não entra parceiro,
+CSP, revenda oficial, preço, certificação de técnico nem prazo de garantia.
+
 ## As páginas
 
 `/manutencao`, `/upgrade-ssd`, `/formatacao`, `/notebook-dell`, `/notebook-lenovo`, `/notebook-acer`, `/notebook-hp`, `/notebook-asus`, `/notebook-samsung`, `/qual-pc-gamer`, `/recuperacaodados`, `/reparoapple`, `/telaiphone`, `/wendell/apple`, `/assistenciagames`,
 `/montagempc`, `/pcgamer`, `/pcgamer3d`, `/notebooks`, `/carregadores`, `/toner`, `/microsoft`,
+`/microsoft/windows`, `/microsoft/windows-server`, `/microsoft/office-365`,
 `/consignacao`, `/sistemas`, `/promocao`, `/envio-e-entrega`, `/trocas-e-devolucoes`, `/como-comprar`,
 `/sobre-a-empresa`, `/sobre-nos`.
 
