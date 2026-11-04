@@ -71,9 +71,10 @@ próprio em `lib/servicos-e-ofertas/`); ficou a versão dela. O mesmo vale para 
   isolada num componente dentro de `Suspense` (`components/Header.tsx`), o que vale para o site inteiro.
 - **IA:** `/llms.txt` agora é gerado (`app/llms.txt/route.ts`) com todas as páginas, os contatos e as três
   primeiras perguntas de cada uma. O começo é o texto que estava em `public/llms.txt`.
-- **Fotos do topo:** `public/images/landing/v2/<slug>.jpg`, geradas na placa de vídeo do computador da loja
+- **Fotos do topo:** a maior parte continua em `public/images/landing/v2/<slug>.jpg`, geradas na placa de vídeo do computador da loja
   com o mesmo motor da capa do blog (Flux no ComfyUI + conferência do Ollama: sem texto, marca nem rosto).
   Script: `C:\Users\user\balao-content-factory\data\heros_landing\gerar_heros.py` (pedidos em `pedidos.json`).
+  Nove páginas usam arquivos novos em `public/images/landing/v3/` (04/11/2026): `/iphone`, `/android`, `/macbook`, `/imac`, `/reparoapple`, `/microsoft`, `/microsoft/windows`, `/microsoft/windows-server` e `/microsoft/office-365`. O `og:image` de cada uma é a foto do topo. `/android` tem hero próprio (`v3/android/android-hero.webp`). `/manutencao`, `/montagempc`, `/pcgamer`, a home e as demais páginas seguem nos arquivos antigos. Foto de produto da KaBuM, logo e capa de blog ficam de fora.
 
 ## Régua
 

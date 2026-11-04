@@ -31,8 +31,8 @@ export const imac: PaginaDeCaptacao = {
     texto:
       "O iMac é um Mac de mesa, com tela e fonte no mesmo corpo. A Balão da Informática Anchieta diagnostica no Cambuí e só abre o aparelho depois do orçamento. Assistência especializada e independente. O reparo é rápido: em média 60 minutos, conforme o defeito e a peça. Parcelamento em até 12x sem juros. Preço confirmado pelo WhatsApp.",
     imagem: {
-      src: "/images/apple/imac-hero.webp",
-      alt: "iMac sobre a bancada durante avaliação técnica",
+      src: "/images/landing/v3/imac/imac-hero.webp",
+      alt: "Computador tudo-em-um azul sobre a mesa durante avaliação técnica, com chave de precisão na mão do técnico",
     },
     mensagem: MENSAGEM,
     botao: "Pedir preço no WhatsApp",
@@ -129,12 +129,12 @@ export const imac: PaginaDeCaptacao = {
       tipo: "atalhos",
       titulo: "Outros aparelhos da mesma bancada",
       itens: [
-        { titulo: "Serviços Apple", texto: "Hub com iPhone, iPad, MacBook, Mac mini e Watch.", href: "/reparoapple", imagem: "/images/landing/v2/reparoapple.jpg" },
-        { titulo: "MacBook", texto: "Air e Pro: tela, bateria e teclado.", href: "/macbook", imagem: "/images/apple/macbook-hero.webp" },
-        { titulo: "Mac mini", texto: "Não liga, desliga sozinho e portas.", href: "/wendell/apple/mac-mini", imagem: "/images/apple/subcategories/macmini-card.png" },
-        { titulo: "iPhone", texto: "Tela, bateria e conector.", href: "/iphone", imagem: "/images/landing/v2/telaiphone.jpg" },
-        { titulo: "Celular Android", texto: "Samsung, Motorola e outras marcas.", href: "/android", imagem: "/images/landing/v2/como-comprar.jpg" },
-        { titulo: "Recuperação de dados", texto: "iMac que não liga e arquivos sem backup.", href: "/recuperacaodados", imagem: "/images/landing/v2/recuperacaodados.jpg" },
+        { titulo: "Serviços Apple", texto: "Hub com iPhone, iPad, MacBook, Mac mini e Watch.", href: "/reparoapple", imagem: "/images/landing/v3/reparoapple/reparoapple.webp", alt: "Bancada de assistência técnica com notebook, celular no suporte, lupa iluminada e ferramentas organizadas" },
+        { titulo: "MacBook", texto: "Air e Pro: tela, bateria e teclado.", href: "/macbook", imagem: "/images/landing/v3/macbook/macbook-hero.webp", alt: "Técnico de luvas trabalhando na placa de um MacBook aberto na bancada" },
+        { titulo: "Mac mini", texto: "Não liga, desliga sozinho e portas.", href: "/wendell/apple/mac-mini", imagem: "/images/landing/v3/reparoapple/macmini-card.webp", alt: "Computador compacto aberto mostrando a placa interna, com ferramentas de precisão ao redor" },
+        { titulo: "iPhone", texto: "Tela, bateria e conector.", href: "/iphone", imagem: "/images/landing/v3/iphone/telaiphone.webp", alt: "Técnico de luvas avaliando um iPhone com a tela trincada na bancada de reparo" },
+        { titulo: "Celular Android", texto: "Samsung, Motorola e outras marcas.", href: "/android", imagem: "/images/landing/v3/android/como-comprar.webp", alt: "Cliente entregando o celular ao técnico no balcão da loja" },
+        { titulo: "Recuperação de dados", texto: "iMac que não liga e arquivos sem backup.", href: "/recuperacaodados", imagem: "/images/landing/v3/android/recuperacaodados.webp", alt: "Técnico segurando um SSD ao lado de notebook e disco externo para recuperação de dados" },
       ],
     },
     {

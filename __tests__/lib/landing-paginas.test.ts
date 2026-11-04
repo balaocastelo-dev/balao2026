@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { metadadosDaPagina } from "@/lib/landing/metadados";
 import { PAGINAS } from "@/lib/landing/paginas";
 import { montarFileiras } from "@/lib/landing/vitrine";
 import type { PaginaDeCaptacao, RegraDeVitrine } from "@/lib/landing/tipos";
@@ -25,6 +26,17 @@ const PROIBIDAS: [RegExp, string][] = [
   [/100% (seguro|garantid)/i, "promessa vazia"],
   [/\bR\$ ?\d/i, "texto não fala preço; preço só na vitrine"],
 ];
+
+function fotosDaPagina(p: PaginaDeCaptacao): { src: string; alt?: string }[] {
+  const fotos: { src: string; alt?: string }[] = [p.hero.imagem];
+  for (const s of p.secoes) {
+    if ((s.tipo === "texto" || s.tipo === "beneficios") && s.imagem) fotos.push(s.imagem);
+    if (s.tipo === "atalhos") {
+      for (const item of s.itens) if (item.imagem) fotos.push({ src: item.imagem, alt: item.alt });
+    }
+  }
+  return fotos;
+}
 
 function textosDaPagina(p: PaginaDeCaptacao): string[] {
   const textos: string[] = [p.chamada, p.seo.titulo, p.seo.descricao, p.hero.titulo, p.hero.texto, p.hero.contexto, p.final.titulo, p.final.texto];
@@ -68,6 +80,58 @@ describe("páginas de captação", () => {
       if (/^https?:/.test(src)) continue;
       expect(fs.existsSync(path.join(RAIZ, "public", src)), src).toBe(true);
     }
+  });
+
+  it("nove páginas usam as fotos v3; as outras ficam nos arquivos antigos", () => {
+    const nove = [
+      "iphone",
+      "android",
+      "macbook",
+      "imac",
+      "reparoapple",
+      "microsoft",
+      "microsoft/windows",
+      "microsoft/windows-server",
+      "microsoft/office-365",
+    ];
+    const herois: Record<string, string> = {
+      iphone: "/images/landing/v3/iphone/telaiphone.webp",
+      android: "/images/landing/v3/android/android-hero.webp",
+      macbook: "/images/landing/v3/macbook/macbook-hero.webp",
+      imac: "/images/landing/v3/imac/imac-hero.webp",
+      reparoapple: "/images/landing/v3/reparoapple/reparoapple.webp",
+      microsoft: "/images/landing/v3/microsoft/microsoft.webp",
+      "microsoft/windows": "/images/landing/v3/microsoft/microsoft.webp",
+      "microsoft/windows-server": "/images/landing/v3/microsoft-windows-server/sistemas.webp",
+      "microsoft/office-365": "/images/landing/v3/microsoft-office-365/notebooks.webp",
+    };
+
+    for (const p of paginas) {
+      const fotos = fotosDaPagina(p);
+      if (nove.includes(p.slug)) {
+        expect(p.hero.imagem.src, p.slug).toBe(herois[p.slug]);
+        expect(p.hero.imagem.alt.length, p.slug).toBeGreaterThan(10);
+        expect(p.seo.imagem, p.slug).toBeUndefined();
+        const og = metadadosDaPagina(p).openGraph?.images;
+        const cartao = Array.isArray(og) ? og[0] : og;
+        const url = typeof cartao === "string" ? cartao : cartao?.url;
+        const alt = typeof cartao === "object" && cartao && "alt" in cartao ? cartao.alt : undefined;
+        expect(url, p.slug).toBe(p.hero.imagem.src);
+        expect(alt, p.slug).toBe(p.hero.imagem.alt);
+        for (const foto of fotos) {
+          expect(foto.src, `${p.slug} ${foto.src}`).toMatch(/^\/images\/landing\/v3\/.+\.webp$/);
+          expect(foto.alt && foto.alt.length > 10, `${p.slug} ${foto.src}`).toBeTruthy();
+        }
+      } else {
+        for (const foto of fotos) {
+          expect(foto.src.includes("/images/landing/v3/"), `${p.slug} ${foto.src}`).toBe(false);
+        }
+      }
+    }
+
+    expect(PAGINAS.manutencao.hero.imagem.src).toBe("/images/landing/v2/manutencao.jpg");
+    expect(PAGINAS.montagempc.hero.imagem.src).toBe("/images/landing/v2/montagempc.jpg");
+    expect(PAGINAS.pcgamer.hero.imagem.src).toBe("/images/landing/v2/pcgamer.jpg");
   });
 
   it.each(paginas.map((p) => [p.slug, p] as const))("%s: sem promessa que a loja não confirmou", (_slug, p) => {

@@ -41,8 +41,8 @@ export const android: PaginaDeCaptacao = {
     texto:
       "Samsung, Motorola, Xiaomi e outras marcas. Diagnóstico grátis na Av. Anchieta, 789. O reparo é rápido: em média 60 minutos, conforme o defeito e a peça.",
     imagem: {
-      src: "/images/apple/hub-hero-real.png",
-      alt: "Balcão da loja Balão da Informática Anchieta no Cambuí, em Campinas",
+      src: "/images/landing/v3/android/android-hero.webp",
+      alt: "Técnico de luvas trocando a bateria de um celular Android aberto na bancada",
     },
     mensagem: MENSAGEM,
     botao: "Orçar no WhatsApp",
@@ -99,8 +99,8 @@ export const android: PaginaDeCaptacao = {
         },
       ],
       imagem: {
-        src: "/images/landing/v2/como-comprar.jpg",
-        alt: "Smartphone na mão, sem marca à vista, sobre a mesa",
+        src: "/images/landing/v3/android/como-comprar.webp",
+        alt: "Cliente entregando o celular ao técnico no balcão da loja",
       },
     },
     {
@@ -208,10 +208,10 @@ export const android: PaginaDeCaptacao = {
         { titulo: "Celulares no catálogo", texto: "O que está à venda no site, para comparar com o conserto.", href: "/categoria/celular-smartphone-smartphones" },
         { titulo: "Carregadores", texto: "Quando o teste mostrar que o cabo é que falhou.", href: "/categoria/celular-smartphone-acessorios-para-smartphones-carregadores" },
         { titulo: "Capas e películas", texto: "Para o vidro novo não repetir a trinca na mesma semana.", href: "/categoria/celular-smartphone-acessorios-para-smartphones-capas-e-peliculas" },
-        { titulo: "iPhone", texto: "A mesma bancada, para a linha Apple.", href: "/iphone", imagem: "/images/landing/v2/telaiphone.jpg" },
-        { titulo: "Serviços Apple", texto: "MacBook, iMac, iPad e o resto da linha.", href: "/reparoapple", imagem: "/images/landing/v2/reparoapple.jpg" },
-        { titulo: "Conserto de notebook", texto: "Quando o problema é o notebook, não o celular.", href: "/manutencao", imagem: "/images/landing/v2/manutencao.jpg" },
-        { titulo: "Recuperação de dados", texto: "Celular que não liga e fotos sem backup.", href: "/recuperacaodados", imagem: "/images/landing/v2/recuperacaodados.jpg" },
+        { titulo: "iPhone", texto: "A mesma bancada, para a linha Apple.", href: "/iphone", imagem: "/images/landing/v3/iphone/telaiphone.webp", alt: "Técnico de luvas avaliando um iPhone com a tela trincada na bancada de reparo" },
+        { titulo: "Serviços Apple", texto: "MacBook, iMac, iPad e o resto da linha.", href: "/reparoapple", imagem: "/images/landing/v3/reparoapple/reparoapple.webp", alt: "Bancada de assistência técnica com notebook, celular no suporte, lupa iluminada e ferramentas organizadas" },
+        { titulo: "Conserto de notebook", texto: "Quando o problema é o notebook, não o celular.", href: "/manutencao", imagem: "/images/landing/v3/android/manutencao.webp", alt: "Técnico limpando a ventoinha e trocando a pasta térmica de um notebook aberto" },
+        { titulo: "Recuperação de dados", texto: "Celular que não liga e fotos sem backup.", href: "/recuperacaodados", imagem: "/images/landing/v3/android/recuperacaodados.webp", alt: "Técnico segurando um SSD ao lado de notebook e disco externo para recuperação de dados" },
       ],
     },
   ],

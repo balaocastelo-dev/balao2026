@@ -37,8 +37,8 @@ export const macbook: PaginaDeCaptacao = {
     texto:
       "Tela, bateria, teclado, líquido ou Mac que não liga: a bancada da Balão da Informática Anchieta testa o modelo e manda o orçamento pelo WhatsApp. Assistência especializada e independente, na Av. Anchieta, 789. O reparo é rápido: em média 60 minutos, conforme o defeito e a peça. Parcelamento em até 12x sem juros. Preço confirmado pelo WhatsApp.",
     imagem: {
-      src: "/images/apple/macbook-hero.webp",
-      alt: "MacBook aberto na bancada durante avaliação de tela e teclado",
+      src: "/images/landing/v3/macbook/macbook-hero.webp",
+      alt: "Técnico de luvas trabalhando na placa de um MacBook aberto na bancada",
     },
     mensagem: MENSAGEM,
     botao: "Pedir preço no WhatsApp",
@@ -155,12 +155,12 @@ export const macbook: PaginaDeCaptacao = {
       tipo: "atalhos",
       titulo: "Se o caso for outro aparelho",
       itens: [
-        { titulo: "Serviços Apple", texto: "O hub da linha: iPhone, iPad, iMac, Mac mini e Watch.", href: "/reparoapple", imagem: "/images/landing/v2/reparoapple.jpg" },
-        { titulo: "iMac", texto: "O Mac de mesa: tela, fonte e o que não liga.", href: "/imac", imagem: "/images/apple/imac-hero.webp" },
-        { titulo: "iPhone", texto: "Tela, bateria, carga e aparelho que molhou.", href: "/iphone", imagem: "/images/landing/v2/telaiphone.jpg" },
-        { titulo: "Celular Android", texto: "A mesma bancada, para Samsung, Motorola e outras marcas.", href: "/android", imagem: "/images/landing/v2/como-comprar.jpg" },
-        { titulo: "Upgrade de SSD", texto: "Quando a lentidão é de disco e o modelo aceita troca.", href: "/upgrade-ssd", imagem: "/images/landing/v2/manutencao.jpg" },
-        { titulo: "Notebooks de outras marcas", texto: "Dell, Lenovo, Acer, HP, Asus e Samsung.", href: "/manutencao", imagem: "/images/landing/v2/manutencao.jpg" },
+        { titulo: "Serviços Apple", texto: "O hub da linha: iPhone, iPad, iMac, Mac mini e Watch.", href: "/reparoapple", imagem: "/images/landing/v3/reparoapple/reparoapple.webp", alt: "Bancada de assistência técnica com notebook, celular no suporte, lupa iluminada e ferramentas organizadas" },
+        { titulo: "iMac", texto: "O Mac de mesa: tela, fonte e o que não liga.", href: "/imac", imagem: "/images/landing/v3/imac/imac-hero.webp", alt: "Computador tudo-em-um azul sobre a mesa durante avaliação técnica, com chave de precisão na mão do técnico" },
+        { titulo: "iPhone", texto: "Tela, bateria, carga e aparelho que molhou.", href: "/iphone", imagem: "/images/landing/v3/iphone/telaiphone.webp", alt: "Técnico de luvas avaliando um iPhone com a tela trincada na bancada de reparo" },
+        { titulo: "Celular Android", texto: "A mesma bancada, para Samsung, Motorola e outras marcas.", href: "/android", imagem: "/images/landing/v3/android/como-comprar.webp", alt: "Cliente entregando o celular ao técnico no balcão da loja" },
+        { titulo: "Upgrade de SSD", texto: "Quando a lentidão é de disco e o modelo aceita troca.", href: "/upgrade-ssd", imagem: "/images/landing/v3/android/manutencao.webp", alt: "Técnico limpando a ventoinha e trocando a pasta térmica de um notebook aberto" },
+        { titulo: "Notebooks de outras marcas", texto: "Dell, Lenovo, Acer, HP, Asus e Samsung.", href: "/manutencao", imagem: "/images/landing/v3/android/manutencao.webp", alt: "Técnico limpando a ventoinha e trocando a pasta térmica de um notebook aberto" },
       ],
     },
     {
