@@ -1,7 +1,12 @@
 /**
- * soubots.com mostra a landing do MyBots na raiz.
+ * O site oficial da landing é o www. O apex também abre a mesma página.
  * www.balao.info e os outros domínios deste projeto não entram aqui.
+ *
+ * Para trocar o painel (login Google), mude só URL_PAINEL.
  */
+
+export const URL_SITE = "https://www.soubots.com";
+export const URL_PAINEL = "https://app.soubots.com";
 
 const HOSTS = new Set(["soubots.com", "www.soubots.com"]);
 

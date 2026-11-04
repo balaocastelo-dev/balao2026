@@ -2,7 +2,7 @@ import { existsSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { repetirSemSom } from "@/app/mybots-app/PlayerDoComercial";
-import { ehHostSoubots, hostLimpo } from "@/lib/soubots";
+import { ehHostSoubots, hostLimpo, URL_PAINEL, URL_SITE } from "@/lib/soubots";
 
 const raiz = process.cwd();
 
@@ -73,6 +73,8 @@ describe("landing /mybots-app", () => {
   it("só o soubots.com abre a landing na raiz", () => {
     expect(ehHostSoubots("soubots.com")).toBe(true);
     expect(ehHostSoubots("www.soubots.com")).toBe(true);
+    expect(URL_SITE).toBe("https://www.soubots.com");
+    expect(URL_PAINEL).toBe("https://app.soubots.com");
     expect(ehHostSoubots("Soubots.com:443")).toBe(true);
     expect(ehHostSoubots("www.soubots.com, outro")).toBe(true);
     expect(ehHostSoubots("www.balao.info")).toBe(false);
@@ -97,6 +99,15 @@ describe("landing /mybots-app", () => {
     expect(pagina).toContain('const APK = "/downloads/MyBots.apk"');
     expect(pagina).toContain('href={APK}');
     expect(pagina).toContain("<PlayerDoComercial");
+    expect(pagina).toContain("canonical: URL_PAGINA");
+    expect(pagina).toContain("url: URL_PAGINA");
+    expect(pagina).toContain("const URL_PAGINA = URL_SITE");
+    expect(pagina).toContain("href={URL_PAINEL}");
+    expect(pagina).toContain("Já tenho conta — Entrar");
+    expect(pagina).toMatch(/>\s*Entrar\s*</);
+    const sitemap = ler("app/sitemap.ts");
+    expect(sitemap).toContain("URL_SITE");
+    expect(sitemap).not.toContain("'/mybots-app'");
   });
 
   it("publica o apk e o vídeo de verdade", () => {

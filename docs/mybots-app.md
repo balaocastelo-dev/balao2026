@@ -37,9 +37,14 @@ está nas constantes `VIDEO` e `POSTER` de `app/mybots-app/page.tsx`. Não apont
 
 ## soubots.com
 
-`soubots.com` e `www.soubots.com`, quando ligados neste projeto da Vercel, abrem esta landing
-na raiz `/`. A regra está em `proxy.ts` (`ehHostSoubots` em `lib/soubots.ts`): só esses dois
-hosts, e só o caminho `/`. www.balao.info continua a loja na raiz e a landing em `/mybots-app`.
+O endereço oficial é **https://www.soubots.com** (canonical, Open Graph e sitemap).
+`soubots.com` (sem www) e `www.soubots.com`, quando ligados neste projeto da Vercel, abrem
+esta landing na raiz `/`. A regra está em `proxy.ts` (`ehHostSoubots` em `lib/soubots.ts`):
+os dois hosts, e só o caminho `/`. www.balao.info continua a loja na raiz e a mesma landing
+em `/mybots-app`, com o canonical apontando para o www.
+
+O botão **Entrar** (topo, também no celular) e o link **Já tenho conta — Entrar** vão para
+o painel online. A URL está em `URL_PAINEL` (`lib/soubots.ts`), hoje `https://app.soubots.com`.
 O menu, o rodapé e o WhatsApp da loja não aparecem nessa raiz (`html.soubots-raiz` em
 `app/globals.css`).
 
