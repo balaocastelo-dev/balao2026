@@ -1,0 +1,59 @@
+{
+  "name": "mybots-desktop",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MyBots para Windows: janela própria que abre o Hub em soubots.com/app.",
+  "author": "Balão da Informática",
+  "homepage": "https://www.soubots.com",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist:win": "electron-builder --win nsis --x64"
+  },
+  "devDependencies": {
+    "electron": "33.4.11",
+    "electron-builder": "25.1.8"
+  },
+  "build": {
+    "appId": "info.balao.mybots",
+    "productName": "MyBots",
+    "copyright": "Copyright © Balão da Informática",
+    "artifactName": "MyBots-Setup.${ext}",
+    "asar": true,
+    "npmRebuild": false,
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "executableName": "MyBots"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": "always",
+      "createStartMenuShortcut": true,
+      "shortcutName": "MyBots",
+      "uninstallDisplayName": "MyBots",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico",
+      "installerLanguages": ["pt_BR"],
+      "displayLanguageSelector": false,
+      "runAfterFinish": false,
+      "menuCategory": false,
+      "artifactName": "MyBots-Setup.${ext}"
+    }
+  }
+}

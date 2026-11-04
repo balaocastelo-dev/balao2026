@@ -4,7 +4,7 @@ import Cenario from "./Cenario";
 import VideoFundoHero from "./VideoFundoHero";
 import VideoLeve from "./VideoLeve";
 import estilos from "./estilos.module.css";
-import { arquivoPublicoExiste, midiaDoSlot } from "@/lib/mybots-arquivos";
+import { midiaDoSlot } from "@/lib/mybots-arquivos";
 import {
   AMEBAS,
   BOTS,
@@ -104,22 +104,10 @@ function EntrarGoogle({ classe }: { classe: string }) {
   );
 }
 
-function Baixar({
-  curto = false,
-  windowsPronto,
-}: {
-  curto?: boolean;
-  windowsPronto: boolean;
-}) {
+function Baixar({ curto = false }: { curto?: boolean }) {
   return (
     <>
-      <a
-        className={estilos.botaoWindows}
-        href={URL_INSTALADOR_WINDOWS}
-        {...(windowsPronto
-          ? { download: NOME_INSTALADOR_WINDOWS }
-          : { "aria-describedby": "aviso-windows" })}
-      >
+      <a className={estilos.botaoWindows} href={URL_INSTALADOR_WINDOWS} download={NOME_INSTALADOR_WINDOWS}>
         <IconeWindows />
         {curto ? "Windows" : "Baixar para Windows"}
       </a>
@@ -149,7 +137,6 @@ export default function PaginaMyBots() {
   const equipe = midiaDoSlot(VIDEO_EQUIPE);
   const beneficios = midiaDoSlot(VIDEO_BENEFICIOS);
   const antesDepois = midiaDoSlot(VIDEO_ANTES_DEPOIS);
-  const windowsPronto = arquivoPublicoExiste(URL_INSTALADOR_WINDOWS);
   const jsonLd = JSON.stringify(jsonLdDaLanding()).replace(/</g, "\\u003c");
 
   return (
@@ -202,7 +189,7 @@ export default function PaginaMyBots() {
             </div>
             <div className={estilos.acoes}>
               <EntrarGoogle classe={estilos.botaoEntrar} />
-              <Baixar windowsPronto={windowsPronto} />
+              <Baixar />
             </div>
           </div>
         </section>
@@ -281,13 +268,8 @@ export default function PaginaMyBots() {
           <p>App para Windows e Android, com suas conversas sincronizadas.</p>
           <Quadro slot={VIDEO_ANTES_DEPOIS} midia={antesDepois} />
           <div className={estilos.acoes}>
-            <Baixar windowsPronto={windowsPronto} />
+            <Baixar />
           </div>
-          {windowsPronto ? null : (
-            <p className={estilos.aviso} id="aviso-windows">
-              O instalador para Windows ainda não foi publicado.
-            </p>
-          )}
           <h3 className={estilos.sub}>No Android</h3>
           <ol className={estilos.passos}>
             <li className={estilos.passo}>
@@ -354,7 +336,7 @@ export default function PaginaMyBots() {
       </footer>
 
       <div className={estilos.barraFixa}>
-        <Baixar curto windowsPronto={windowsPronto} />
+        <Baixar curto />
       </div>
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />

@@ -1,4 +1,5 @@
 import { existsSync, readFileSync, statSync } from "node:fs";
+import { createRequire } from "node:module";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { repetirSemSom } from "@/app/mybots-app/PlayerDoComercial";
@@ -11,6 +12,7 @@ import {
   TITULO,
   URL_APK,
   URL_INSTALADOR_WINDOWS,
+  URL_RELEASE_WINDOWS,
   balancoDoHero,
   deslocamentoDaAmeba,
   jsonLdDaLanding,
@@ -59,6 +61,8 @@ describe("landing /mybots-app", () => {
     expect(pagina).toContain("href={URL_APK}");
     expect(pagina).toContain("download={NOME_APK}");
     expect(pagina).toContain("href={URL_INSTALADOR_WINDOWS}");
+    expect(pagina).toContain("download={NOME_INSTALADOR_WINDOWS}");
+    expect(pagina).not.toContain("ainda não foi publicado");
     expect(pagina).toContain("Baixar para Android");
     expect(pagina).toContain("Baixar para Windows");
     expect(pagina).toContain("href={URL_PAINEL}");
@@ -101,6 +105,7 @@ describe("landing /mybots-app", () => {
       "app/mybots-app/Cenario.tsx",
       "app/mybots-app/estilos.module.css",
       "lib/mybots-landing.ts",
+      "lib/mybots-windows.ts",
       "lib/mybots-arquivos.ts",
       "docs/mybots-app.md",
     ]
@@ -239,7 +244,7 @@ describe("landing /mybots-app", () => {
     expect(sitemap).not.toContain("'/mybots-app'");
   });
 
-  it("publica o apk do MyBots e ainda não o instalador Windows", () => {
+  it("publica o apk do MyBots e aponta o Windows para a Release", () => {
     const apk = path.join(raiz, "public/downloads/MyBots.apk");
     expect(statSync(apk).size).toBeGreaterThan(1_000_000);
     const bytes = readFileSync(apk);
@@ -247,8 +252,62 @@ describe("landing /mybots-app", () => {
     const pacote = Buffer.from("info.balao.mybots", "utf16le");
     expect(bytes.includes(pacote) || bytes.includes(Buffer.from("info.balao.mybots"))).toBe(true);
     expect(arquivoPublicoExiste(URL_APK)).toBe(true);
-    expect(arquivoPublicoExiste(URL_INSTALADOR_WINDOWS)).toBe(false);
+    expect(arquivoPublicoExiste(URL_INSTALADOR_WINDOWS)).toBe(true);
+    expect(existsSync(path.join(raiz, "public/downloads/MyBots-Setup.exe"))).toBe(false);
     expect(existsSync(path.join(raiz, "public/mybots-app/amebas/ameba-092.webp"))).toBe(true);
     expect(existsSync(path.join(raiz, "public/mybots-app/logo.png"))).toBe(true);
+
+    expect(URL_INSTALADOR_WINDOWS).toBe("/downloads/MyBots-Setup.exe");
+    expect(URL_RELEASE_WINDOWS).toBe(
+      "https://github.com/balaocastelo-dev/balao2026/releases/download/mybots-windows-1.0.0/MyBots-Setup.exe",
+    );
+    const config = ler("next.config.ts");
+    expect(config).toContain("source: URL_INSTALADOR_WINDOWS");
+    expect(config).toContain("destination: URL_RELEASE_WINDOWS");
+    expect(config).toContain("permanent: false");
+  });
+
+  it("o app de Windows abre o painel e o NSIS cria os atalhos", () => {
+    const exigir = createRequire(path.join(raiz, "mybots-desktop", "package.json"));
+    const enderecos = exigir("./src/enderecos.js") as {
+      URL_PAINEL: string;
+      podeFicarNaJanela: (url: string) => boolean;
+      agenteSemElectron: (agente: string) => string;
+    };
+    expect(enderecos.URL_PAINEL).toBe("https://www.soubots.com/app");
+    expect(enderecos.podeFicarNaJanela("https://www.soubots.com/app")).toBe(true);
+    expect(enderecos.podeFicarNaJanela("https://accounts.google.com/o/oauth2/v2/auth")).toBe(true);
+    expect(enderecos.podeFicarNaJanela("https://www.balao.info/mybots")).toBe(true);
+    expect(enderecos.podeFicarNaJanela("https://evil.example/app")).toBe(false);
+    expect(enderecos.podeFicarNaJanela("file:///etc/passwd")).toBe(false);
+    expect(enderecos.podeFicarNaJanela("javascript:alert(1)")).toBe(false);
+    expect(enderecos.agenteSemElectron("Mozilla/5.0 Electron/33.4.11 mybots-desktop/1.0.0")).toBe("Mozilla/5.0");
+
+    const principal = ler("mybots-desktop/src/main.js");
+    expect(principal).toContain('require("./enderecos")');
+    expect(principal).toContain("setAppUserModelId");
+    expect(principal).toContain("info.balao.mybots");
+    expect(principal).toContain("loadURL(URL_PAINEL)");
+    expect(principal).not.toMatch(/ghp_|sk-|xox[baprs]-|BEGIN [A-Z ]*PRIVATE KEY|api[_-]?key\s*[:=]/i);
+
+    const manifesto = JSON.parse(ler("mybots-desktop/package.json")) as {
+      build: {
+        appId: string;
+        artifactName: string;
+        files: string[];
+        win: { icon: string; target: { target: string }[] };
+        nsis: { createDesktopShortcut: string; createStartMenuShortcut: boolean; shortcutName: string };
+      };
+    };
+    expect(manifesto.build.appId).toBe("info.balao.mybots");
+    expect(manifesto.build.artifactName).toBe("MyBots-Setup.${ext}");
+    expect(manifesto.build.win.icon).toBe("build/icon.ico");
+    expect(manifesto.build.win.target[0].target).toBe("nsis");
+    expect(manifesto.build.nsis.createDesktopShortcut).toBe("always");
+    expect(manifesto.build.nsis.createStartMenuShortcut).toBe(true);
+    expect(manifesto.build.nsis.shortcutName).toBe("MyBots");
+    expect(manifesto.build.files.some((item) => item.includes(".env"))).toBe(false);
+    expect(existsSync(path.join(raiz, "mybots-desktop/build/icon.ico"))).toBe(true);
+    expect(existsSync(path.join(raiz, "mybots-desktop/src/icon.png"))).toBe(true);
   });
 });
