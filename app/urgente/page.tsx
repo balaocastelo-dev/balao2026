@@ -153,6 +153,24 @@ export default async function UrgenteHubPage() {
           </div>
         </section>
 
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl font-black text-white">Serviços da bancada</h2>
+          <div className="mt-4 flex flex-wrap gap-3">
+            {[
+              ["/manutencao", "Conserto de notebook"],
+              ["/upgrade-ssd", "Upgrade de SSD"],
+              ["/formatacao", "Formatação com backup"],
+              ["/notebook-dell", "Notebook Dell"],
+              ["/notebook-lenovo", "Notebook Lenovo"],
+              ["/pcgamer", "PC gamer"],
+            ].map(([href, nome]) => (
+              <Link key={href} href={href} className="rounded-2xl border border-slate-700 bg-[#161f32] px-4 py-2 text-sm font-bold text-slate-200 hover:border-[#E60012]">
+                {nome}
+              </Link>
+            ))}
+          </div>
+        </section>
+
         {/* VITRINE DE HARDWARE DISPONÍVEL IMEDIATAMENTE */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">

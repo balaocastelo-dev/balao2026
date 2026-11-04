@@ -4,9 +4,17 @@ Pedido do Thiago: reformular 22 páginas (21 ficaram neste molde) do site para q
 com produtos com foto, bem preenchida, com palavras-chave para o Google e para as IAs, e que leve a
 pessoa a chamar no WhatsApp. Cada página é única.
 
+## Páginas de SEO/AEO (04/11/2026)
+
+Oito briefings entraram no mesmo molde. Onde já havia URL, o texto foi refeito nela:
+`/manutencao` (conserto por defeito), `/pcgamer`, `/montagempc` e `/toner` (o endereço antigo `/tonner` já redireciona).
+URLs novas: `/upgrade-ssd`, `/formatacao`, `/qual-pc-gamer` e uma por marca (`/notebook-dell`, `/notebook-lenovo`, `/notebook-acer`, `/notebook-hp`, `/notebook-asus`, `/notebook-samsung`).
+
+Preço de serviço, prazo fechado, FPS medido, tempo de boot e defeito “típico” de modelo não entram enquanto a loja não mandar o dado. O que falta está na descrição do PR. O formulário “Pedir retorno rápido” reaproveita `POST /api/leads/servicos`.
+
 ## As páginas
 
-`/manutencao`, `/recuperacaodados`, `/reparoapple`, `/telaiphone`, `/wendell/apple`, `/assistenciagames`,
+`/manutencao`, `/upgrade-ssd`, `/formatacao`, `/notebook-dell`, `/notebook-lenovo`, `/notebook-acer`, `/notebook-hp`, `/notebook-asus`, `/notebook-samsung`, `/qual-pc-gamer`, `/recuperacaodados`, `/reparoapple`, `/telaiphone`, `/wendell/apple`, `/assistenciagames`,
 `/montagempc`, `/pcgamer`, `/pcgamer3d`, `/notebooks`, `/carregadores`, `/toner`, `/microsoft`,
 `/consignacao`, `/sistemas`, `/promocao`, `/envio-e-entrega`, `/trocas-e-devolucoes`, `/como-comprar`,
 `/sobre-a-empresa`, `/sobre-nos`.

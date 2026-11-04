@@ -91,7 +91,8 @@ const jsonLd = {
     {
       "@type": ["ComputerStore", "Store", "LocalBusiness"],
       "@id": "https://www.balao.info/#store",
-      name: SITE_CONFIG.name,
+      name: SITE_CONFIG.companyName,
+      alternateName: SITE_CONFIG.name,
       image: "https://www.balao.info/logo.png",
       description:
         "Loja de informática em Campinas especializada em computadores, PC Gamer, notebooks, hardware, periféricos e assistência técnica, com atendimento pelo WhatsApp e retirada na loja física.",

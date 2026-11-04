@@ -35,8 +35,8 @@ function textosDaPagina(p: PaginaDeCaptacao): string[] {
 }
 
 describe("páginas de captação", () => {
-  it("são 21 e cada uma tem a rota em app/", () => {
-    expect(paginas.length).toBe(21);
+  it("cada uma tem a rota em app/", () => {
+    expect(paginas.length).toBe(30);
     for (const p of paginas) {
       expect(fs.existsSync(path.join(RAIZ, "app", p.slug, "page.tsx")), p.slug).toBe(true);
     }

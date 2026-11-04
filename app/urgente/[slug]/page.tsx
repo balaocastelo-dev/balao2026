@@ -153,6 +153,12 @@ export default async function UrgenteIntentPage({ params }: Props) {
                   <MessageCircle className="w-6 h-6" />
                   Pedir Ajuda Urgente no WhatsApp
                 </a>
+                <Link
+                  href={intent.primaryHref}
+                  className="inline-flex items-center gap-2 rounded-2xl border border-slate-600 px-6 py-4 text-base font-bold text-white hover:border-white"
+                >
+                  Ver o serviço <ArrowRight className="h-5 w-5" />
+                </Link>
               </div>
 
               <div className="pt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-slate-800/80 text-left">

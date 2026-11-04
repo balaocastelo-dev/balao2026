@@ -271,6 +271,9 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
           <CustomLink href="/notebooks" icon={Laptop} label="Notebooks" />
           <CustomLink href="/promocao" icon={Tag} label="Promoção" />
           <CustomLink href="/manutencao" icon={Wrench} label="Manutenção" />
+          <CustomLink href="/upgrade-ssd" icon={HardDrive} label="Upgrade de SSD" />
+          <CustomLink href="/formatacao" icon={Wrench} label="Formatação" />
+          <CustomLink href="/qual-pc-gamer" icon={Gamepad} label="Qual PC gamer" />
           <CustomLink href="/consignados" icon={RefreshCcw} label="Consignados" />
           <CustomLink href="/consignacao" icon={Handshake} label="Consignação" />
           <CustomLink href="/carregadores" icon={Battery} label="Carregadores" />
@@ -363,6 +366,9 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
             <CustomLink href="/notebooks" icon={Laptop} label="Notebooks" />
             <CustomLink href="/promocao" icon={Tag} label="Promoção" />
             <CustomLink href="/manutencao" icon={Wrench} label="Manutenção" />
+            <CustomLink href="/upgrade-ssd" icon={HardDrive} label="Upgrade de SSD" />
+            <CustomLink href="/formatacao" icon={Wrench} label="Formatação" />
+            <CustomLink href="/qual-pc-gamer" icon={Gamepad} label="Qual PC gamer" />
             <CustomLink href="/consignados" icon={RefreshCcw} label="Consignados" />
             <CustomLink href="/consignacao" icon={Handshake} label="Consignação" />
             <CustomLink href="/assistenciagames" icon={Gamepad2} label="Assistência Games" />

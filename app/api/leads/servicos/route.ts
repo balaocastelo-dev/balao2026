@@ -32,7 +32,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Informe um WhatsApp com DDD." }, { status: 400 });
     }
 
-    await sendSystemNotification("Novo lead - Serviços e Ofertas", {
+    const pagina = origem || "/servicos-e-ofertas";
+    await sendSystemNotification(pagina === "/servicos-e-ofertas" ? "Novo lead - Serviços e Ofertas" : `Novo lead ${pagina}`, {
       nome,
       whatsapp,
       chamar: `https://wa.me/${whatsapp.length <= 11 ? `55${whatsapp}` : whatsapp}`,

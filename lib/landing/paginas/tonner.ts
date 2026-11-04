@@ -7,9 +7,9 @@ export const tonner: PaginaDeCaptacao = {
   nome: "Toner e cartucho em Campinas",
   chamada: "Toner original e compatível, cartucho e tinta originais, com entrega por motoboy para casa e escritório.",
   seo: {
-    titulo: "Toner e cartucho em Campinas com entrega | Balão da Informática (Cambuí)",
+    titulo: "Toner e Cartucho em Campinas com Entrega Hoje | Balão da Informática Anchieta",
     descricao:
-      "Toner original e compatível, cartucho e tinta originais HP, Brother, Epson, Samsung e Canon no Cambuí, em Campinas. Entrega por motoboy para casa e empresa.",
+      "Acabou o toner? Diga o modelo da impressora e receba hoje por motoboy em Campinas e região. Original ou compatível, com nota fiscal.",
     palavras: [
       "toner em Campinas",
       "toner compatível Campinas",
@@ -28,12 +28,13 @@ export const tonner: PaginaDeCaptacao = {
   },
   hero: {
     contexto: "Suprimentos de impressão no Cambuí, em Campinas",
-    titulo: "A impressora imprimindo de novo, sem sair do escritório",
+    titulo: "Toner e cartucho entregues em Campinas",
     texto:
       "Diga a marca e o modelo da impressora e a equipe da Balão confere o toner, o cartucho ou a tinta certos. Retire no balcão do Cambuí ou receba por motoboy em Campinas e região, para casa ou para a empresa.",
     imagem: { src: "/images/landing/v2/tonner.jpg", alt: "Mãos encaixando um cartucho de toner numa impressora a laser aberta" },
-    mensagem: "Olá! Vim pela página de toner e cartucho da Balão e preciso de suprimento para a minha impressora.",
-    botao: "Pedir toner ou cartucho",
+    mensagem:
+      "Olá! Preciso de toner/cartucho para a impressora ____ (modelo). Quantidade: __. Entrega no bairro ____. Tem hoje?",
+    botao: "Pedir entrega no WhatsApp",
     secundario: { rotulo: "Ver toners e cartuchos", href: "#vitrine" },
     fatos: [
       { valor: "Cartucho e tinta", rotulo: "só originais" },
@@ -45,7 +46,8 @@ export const tonner: PaginaDeCaptacao = {
   assistente: {
     titulo: "Suprimento certo em três toques",
     texto: "Com a impressora e o que precisa, a equipe responde se tem e quanto fica.",
-    abertura: "Olá! Vim pela página de toner e cartucho e preciso de suprimento.",
+    abertura:
+      "Olá! Preciso de toner/cartucho para a impressora ____ (modelo). Quantidade: __. Entrega no bairro ____. Tem hoje?",
     fecho: "Posso mandar foto da etiqueta da impressora ou do cartucho/toner usado?",
     botao: "Enviar para a loja",
     perguntas: [
@@ -69,8 +71,16 @@ export const tonner: PaginaDeCaptacao = {
   },
   secoes: [
     {
+      tipo: "texto",
+      titulo: "Toner e cartucho para retirar ou receber por motoboy",
+      paragrafos: [
+        "Acabou no meio do expediente: diga o modelo da impressora. A Balão da Informática Anchieta, na Av. Anchieta, 789, separa toner original ou compatível e cartucho ou tinta originais. A retirada é no balcão do Cambuí. A entrega por motoboy em Campinas e região sai quando há estoque e rota; o prazo do bairro é confirmado pelo WhatsApp. Preço e prazo confirmados pelo WhatsApp.",
+        "A vitrine lista o que o catálogo tem agora, com o preço da peça. Se o código da sua impressora não aparecer, a equipe confere com o fornecedor. Não há recarga anunciada nesta página.",
+      ],
+    },
+    {
       tipo: "comparativo",
-      titulo: "Toner, cartucho ou tinta: qual é o da sua impressora",
+      titulo: "Encontre pelo tipo da impressora",
       texto: "Cada tipo de impressora usa um suprimento diferente. Saber qual é a sua evita comprar errado.",
       colunas: ["Impressora", "O que ela usa", "O que vendemos"],
       linhas: [
@@ -81,7 +91,7 @@ export const tonner: PaginaDeCaptacao = {
     },
     {
       tipo: "texto",
-      titulo: "Toner compatível ou original: a diferença sem enrolação",
+      titulo: "Original, compatível ou recarga?",
       paragrafos: [
         "O toner original é feito pelo fabricante da impressora. O compatível é um cartucho novo feito por outra fábrica para o mesmo modelo, com o mesmo encaixe e chip que a impressora reconhece. Os compatíveis que a loja vende são de marcas de linha, com rendimento parecido com o do original, e custam bem menos. Para escritório que imprime muito, a economia ao longo do ano é grande.",
         "Vale ser honesto sobre o que muda. Em impressão de texto do dia a dia, a diferença costuma ser pequena ou nenhuma. Em impressoras que estão na garantia do fabricante, ou em trabalhos em que a cor e o preto precisam ser exatos, o original é a escolha mais segura. Por isso a loja vende as duas opções e explica qual faz sentido para o seu caso.",
@@ -141,7 +151,7 @@ export const tonner: PaginaDeCaptacao = {
     },
     {
       tipo: "regras",
-      titulo: "Para empresa e escritório",
+      titulo: "Para empresas: nota fiscal e pedido recorrente",
       texto: "Quem imprime todo dia não pode ficar esperando toner acabar para pedir.",
       itens: [
         {
@@ -157,6 +167,25 @@ export const tonner: PaginaDeCaptacao = {
       ],
     },
     {
+      tipo: "texto",
+      titulo: "Entrega por motoboy: prazos e bairros",
+      paragrafos: [
+        "A entrega é por motoboy em Campinas e na região, ou retirada no balcão da Av. Anchieta, 789. Muitos pedidos saem no mesmo dia; o prazo do seu bairro não está tabelado nesta página. Preço e prazo confirmados pelo WhatsApp (19) 98751-0267.",
+        "Diga o modelo da impressora, a quantidade e o bairro. Sem o modelo, a loja não separa o toner. Cartucho e tinta continuam só originais; toner pode ser original ou compatível.",
+      ],
+    },
+    {
+      tipo: "retorno",
+      titulo: "Pedir retorno rápido",
+      texto: "Modelo da impressora, quantidade e se é para empresa. A equipe responde se tem e como entrega.",
+      assunto: "Toner ou cartucho",
+      campos: [
+        { nome: "impressora", rotulo: "Modelo da impressora" },
+        { nome: "quantidade", rotulo: "Quantidade" },
+        { nome: "empresa", rotulo: "Empresa? (CNPJ opcional)" },
+      ],
+    },
+    {
       tipo: "passos",
       titulo: "Como pedir",
       itens: [
@@ -165,8 +194,28 @@ export const tonner: PaginaDeCaptacao = {
         { titulo: "Retire ou receba", texto: "No balcão do Cambuí ou por motoboy em Campinas e região." },
       ],
     },
+    {
+      tipo: "atalhos",
+      titulo: "Também na loja",
+      itens: [
+        { titulo: "Envio e entrega", texto: "Como a loja entrega em Campinas e região.", href: "/envio-e-entrega", imagem: "/images/landing/v2/envio-e-entrega.jpg" },
+        { titulo: "Departamentos", texto: "O resto do catálogo, por categoria.", href: "/departamentos" },
+        { titulo: "Fale conosco", texto: "Telefone e WhatsApp da loja.", href: "/fale-conosco" },
+        { titulo: "Serviços e ofertas", texto: "Assistência, montagem e suprimentos.", href: "/servicos-e-ofertas" },
+      ],
+    },
   ],
   perguntas: [
+    {
+      pergunta: "Onde comprar toner em Campinas com entrega no mesmo dia?",
+      resposta:
+        "A Balão da Informática Anchieta, na Av. Anchieta, 789, Cambuí, entrega toner e cartucho por motoboy em Campinas e região ou para retirada no balcão. O pedido é pelo WhatsApp (19) 98751-0267, informando o modelo da impressora. Muitos pedidos saem no mesmo dia; o prazo do bairro é confirmado na conversa. Preço e prazo confirmados pelo WhatsApp.",
+    },
+    {
+      pergunta: "A loja emite nota fiscal para empresa?",
+      resposta:
+        "Sim, as vendas saem com nota fiscal. Condição de faturamento para CNPJ é confirmada pelo WhatsApp, junto com o pedido.",
+    },
     {
       pergunta: "Toner compatível estraga a impressora?",
       resposta:
@@ -205,7 +254,8 @@ export const tonner: PaginaDeCaptacao = {
   ],
   temas: ["impressao", "empresa", "entrega", "compra"],
   termosDoBlog: ["toner", "cartucho", "impressora", "tinta", "impressão"],
-  relacionadas: ["envio-e-entrega", "microsoft", "manutencao", "sistemas"],
+  tituloDasPerguntas: "Perguntas frequentes",
+  relacionadas: ["envio-e-entrega", "manutencao", "microsoft", "sistemas"],
   final: {
     titulo: "Diga a impressora e receba o suprimento certo",
     texto: "Marca, modelo e o que precisa: com isso a equipe confere o toner, o cartucho ou a tinta e combina a retirada no Cambuí ou a entrega por motoboy.",
