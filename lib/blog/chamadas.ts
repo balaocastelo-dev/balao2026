@@ -108,9 +108,9 @@ export const CHAMADAS: Record<TemaDeChamada, ChamadaPronta> = {
     href: "/carregadores",
   },
   licencas: {
-    titulo: "Windows e Office originais, ativados na loja",
+    titulo: "Windows, Windows Server e Office originais",
     texto:
-      "Traga o computador ao Cambuí: a equipe confere se ele roda o Windows 11, instala e ativa a licença original na hora.",
+      "Licenças originais adquiridas de fornecedores oficiais Microsoft, com nota fiscal de venda, ativação e instalação no Cambuí. 12x sem juros também para CNPJ.",
     rotulo: "Ver licenças",
     href: "/microsoft",
   },

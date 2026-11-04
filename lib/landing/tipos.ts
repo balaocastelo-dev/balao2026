@@ -172,6 +172,8 @@ export type PaginaDeCaptacao = {
     catalogo?: string[];
     /** Guia com data de publicação no schema de artigo. */
     artigo?: boolean;
+    /** Páginas que este hub reúne, para o schema CollectionPage. */
+    partes?: { nome: string; url: string }[];
   };
   hero: {
     /** Linha de contexto acima do título (local + o que é). */

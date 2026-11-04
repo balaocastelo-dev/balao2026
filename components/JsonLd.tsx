@@ -256,6 +256,33 @@ export function generateServiceSchema({
   };
 }
 
+export function generateCollectionSchema({
+  name,
+  description,
+  url,
+  partes,
+}: {
+  name: string;
+  description: string;
+  url: string;
+  partes: { nome: string; url: string }[];
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name,
+    description,
+    url,
+    isPartOf: { "@id": "https://www.balao.info/#store" },
+    about: { "@id": "https://www.balao.info/#store" },
+    hasPart: partes.map((parte) => ({
+      "@type": "WebPage",
+      name: parte.nome,
+      url: parte.url,
+    })),
+  };
+}
+
 export function generateArticleSchema({
   headline,
   description,

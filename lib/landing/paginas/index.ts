@@ -8,6 +8,9 @@ import { formatacao } from "./formatacao";
 import { manutencao } from "./manutencao";
 import { notebookAcer, notebookAsus, notebookDell, notebookHp, notebookLenovo, notebookSamsung } from "./marcas-notebook";
 import { microsoft } from "./microsoft";
+import { microsoftOffice365 } from "./microsoft-office-365";
+import { microsoftWindows } from "./microsoft-windows";
+import { microsoftWindowsServer } from "./microsoft-windows-server";
 import { montagempc } from "./montagempc";
 import { notebooks } from "./notebooks";
 import { pcgamer } from "./pcgamer";
@@ -55,6 +58,9 @@ export const PAGINAS: Record<string, PaginaDeCaptacao> = Object.fromEntries(
     carregadores,
     tonner,
     microsoft,
+    microsoftWindows,
+    microsoftWindowsServer,
+    microsoftOffice365,
     consignacao,
     sistemas,
     promocao,

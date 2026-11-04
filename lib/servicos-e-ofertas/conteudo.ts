@@ -36,6 +36,7 @@ export const NECESSIDADES: Necessidade[] = [
   { id: "dados", rotulo: "Recuperar arquivos", mensagem: "Olá! Perdi arquivos de um HD/SSD/pendrive e preciso recuperar." },
   { id: "console", rotulo: "Consertar videogame", mensagem: "Olá! Meu videogame está com defeito e quero um orçamento." },
   { id: "empresa", rotulo: "Suporte para empresa", mensagem: "Olá! Sou de uma empresa da região e quero suporte de TI / contrato de manutenção." },
+  { id: "licencas", rotulo: "Licença Windows ou Office", mensagem: "Olá! Quero regularizar as licenças Microsoft da minha empresa." },
   { id: "comprar", rotulo: "Comprar com desconto", mensagem: "Olá! Quero comprar um produto e saber o melhor preço no Pix e a disponibilidade." },
 ];
 
