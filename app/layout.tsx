@@ -205,6 +205,20 @@ export default async function RootLayout({
       }
     })();
   `;
+    // A raiz do soubots.com é a landing do MyBots (proxy.ts). O endereço na barra
+  // continua /, então o menu da loja não sabe que deve sair. Esta marca esconde
+  // o menu, o rodapé e o WhatsApp da loja antes da primeira pintura.
+  const soubotsRaizScript = `
+    (function () {
+      try {
+        var host = (location.hostname || "").toLowerCase();
+        var path = location.pathname || "/";
+        if ((host === "soubots.com" || host === "www.soubots.com") && (path === "/" || path === "")) {
+          document.documentElement.classList.add("soubots-raiz");
+        }
+      } catch (e) {}
+    })();
+  `;
   const googleTagConfigScript = `
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
@@ -226,6 +240,9 @@ export default async function RootLayout({
       >
         <Script id="theme-init" strategy="beforeInteractive">
           {themeInitScript}
+        </Script>
+        <Script id="soubots-raiz" strategy="beforeInteractive">
+          {soubotsRaizScript}
         </Script>
         {gtmId && (
           <>

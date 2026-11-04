@@ -66,9 +66,13 @@ export default function LayoutWrapper({
       {!isRoletaPage && !isFullscreenPanel && !isPaginaDeVendas && (
         // O menu lê os filtros da URL; dentro do Suspense, só ele espera o
         // navegador — o resto da página continua saindo pronto do servidor.
-        <Suspense fallback={null}>
-          <Sidebar categories={categories} mobileOnly />
-        </Suspense>
+        // data-loja: no soubots.com a raiz é a landing e este bloco some
+        // (app/globals.css, html.soubots-raiz).
+        <div data-loja="">
+          <Suspense fallback={null}>
+            <Sidebar categories={categories} mobileOnly />
+          </Suspense>
+        </div>
       )}
       <div
         className={
@@ -100,9 +104,17 @@ export default function LayoutWrapper({
         >
           {children}
         </main>
-        {!isRoletaPage && !isFullscreenPanel && !isPaginaDeVendas && <Footer />}
+        {!isRoletaPage && !isFullscreenPanel && !isPaginaDeVendas && (
+          <div data-loja="">
+            <Footer />
+          </div>
+        )}
       </div>
-      {!isFullscreenPanel && !isPaginaDeVendas && <FloatingWhatsApp />}
+      {!isFullscreenPanel && !isPaginaDeVendas && (
+        <div data-loja="">
+          <FloatingWhatsApp />
+        </div>
+      )}
     </SidebarProvider>
   );
 }

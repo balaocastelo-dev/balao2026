@@ -2,6 +2,7 @@ import { existsSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { repetirSemSom } from "@/app/mybots-app/PlayerDoComercial";
+import { ehHostSoubots, hostLimpo } from "@/lib/soubots";
 
 const raiz = process.cwd();
 
@@ -67,6 +68,35 @@ describe("landing /mybots-app", () => {
     expect(video.loop).toBe(true);
     expect(video.currentTime).toBe(0);
     expect(video.play).toHaveBeenCalledOnce();
+  });
+
+  it("só o soubots.com abre a landing na raiz", () => {
+    expect(ehHostSoubots("soubots.com")).toBe(true);
+    expect(ehHostSoubots("www.soubots.com")).toBe(true);
+    expect(ehHostSoubots("Soubots.com:443")).toBe(true);
+    expect(ehHostSoubots("www.soubots.com, outro")).toBe(true);
+    expect(ehHostSoubots("www.balao.info")).toBe(false);
+    expect(ehHostSoubots("balao.info")).toBe(false);
+    expect(ehHostSoubots("soubots.com.evil.com")).toBe(false);
+    expect(ehHostSoubots("nao-soubots.com")).toBe(false);
+    expect(ehHostSoubots("localhost")).toBe(false);
+    expect(ehHostSoubots("")).toBe(false);
+    expect(hostLimpo("WWW.SOUBOTS.COM:3456")).toBe("www.soubots.com");
+
+    const proxy = ler("proxy.ts");
+    expect(proxy).toContain("ehHostSoubots");
+    expect(proxy).toContain("destino.pathname = '/mybots-app'");
+    expect(proxy).toContain("pathname === '/'");
+    expect(ler("app/layout.tsx")).toContain("soubots-raiz");
+    expect(ler("app/globals.css")).toContain("html.soubots-raiz [data-loja]");
+    expect(ler("components/LayoutWrapper.tsx")).toContain("data-loja");
+
+    const pagina = ler("app/mybots-app/page.tsx");
+    expect(pagina).toContain('const VIDEO = "/mybots-app/comercial.mp4"');
+    expect(pagina).toContain('const POSTER = "/mybots-app/poster.jpg"');
+    expect(pagina).toContain('const APK = "/downloads/MyBots.apk"');
+    expect(pagina).toContain('href={APK}');
+    expect(pagina).toContain("<PlayerDoComercial");
   });
 
   it("publica o apk e o vídeo de verdade", () => {
