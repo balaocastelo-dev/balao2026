@@ -260,7 +260,9 @@ export const config = {
      * - public folder
      * Feel free to modify this pattern to include more paths.
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    // google1b28e73344ff3a8c.html é o arquivo de verificação do Search Console
+    // na raiz. Fica fora da tranca para ninguém reescrever nem redirecionar.
+    '/((?!_next/static|_next/image|favicon.ico|google1b28e73344ff3a8c\\.html|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
     // A regra de cima pula tudo o que termina em .png, .jpg… — pensada para
     // os arquivos de imagem do site. Só que ela pulava também uma chamada de
     // API cujo endereço terminasse assim (DELETE /api/products/qualquer.png),

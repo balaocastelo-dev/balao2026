@@ -10,7 +10,7 @@ describe('Mail Templates', () => {
         const html = getBaseTemplate(content, 'Test Title');
         expect(html).toContain('Hello World');
         expect(html).toContain('Test Title');
-        expect(html).toContain('Balão Castelo');
+        expect(html).toContain('Balão da Informática Anchieta');
     });
 
     it('should include unsubscribe link when email is provided', () => {

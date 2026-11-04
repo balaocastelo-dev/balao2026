@@ -48,7 +48,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/reparoapple',
     '/avellstorm480',
     '/telaiphone',
-    '/tonner',
+    '/toner',
     '/wendell/apple',
     '/wendell/apple/blog',
     '/wendell/apple/macbook',

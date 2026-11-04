@@ -532,7 +532,7 @@ export default function RoletaPage() {
                </h2>
                <div className={`bg-white p-6 rounded-2xl mx-auto w-fit mb-8 shadow-[0_0_30px_${step === 'challenge1' ? 'rgba(0,255,255,0.3)' : 'rgba(255,0,128,0.3)'}]`}>
                  <QRCodeSVG 
-                    value={step === 'challenge1' ? "https://g.page/r/CRDiroCe65RREAE/review" : "https://www.instagram.com/balaodainformatica_castelo/"} 
+                    value={step === 'challenge1' ? "https://g.page/r/CRDiroCe65RREAE/review" : "https://www.instagram.com/balaoanchieta/"} 
                     size={220} 
                  />
                </div>
@@ -782,7 +782,7 @@ export default function RoletaPage() {
       </div>
 
       <footer className="mt-12 text-slate-500 text-sm text-center z-10">
-        &copy; 2026 Balão da Informática Castelo.
+        &copy; 2026 Balão da Informática Anchieta.
       </footer>
     </div>
   );

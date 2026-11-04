@@ -26,7 +26,7 @@ export const sobreNos: PaginaDeCaptacao = {
       "loja de informática com assistência técnica própria Campinas",
       "loja de informática confiável Campinas",
       "onde comprar computador e consertar no mesmo lugar Campinas",
-      "Balão da Informática Castelo",
+      "Balão da Informática Anchieta",
       "loja de informática na Av. Anchieta Campinas",
       "assistência técnica de confiança Cambuí",
     ],

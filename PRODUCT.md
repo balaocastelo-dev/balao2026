@@ -1,5 +1,5 @@
 <!-- impeccable:product-schema 1 -->
-# Product Context: Balão da Informática Castelo
+# Product Context: Balão da Informática Anchieta
 
 ## 1. Target Audience & Core Value Proposition
 - **Audience**: Gamers, professionals, students, IT enthusiasts, and local businesses in Campinas and the Metropolitan Region (Sumaré, Hortolândia, Paulínia, Valinhos, Vinhedo, Indaiatuba).

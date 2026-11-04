@@ -138,7 +138,7 @@ export default function VendedorLoginForm({
 
         <div className="mt-4 rounded-xl bg-white/70 px-4 py-3 text-center">
           <p className="text-[11px] leading-relaxed text-[#5f6368]">
-            🎈 <b className="text-[#202124]">Balão da Informática Castelo</b>
+            🎈 <b className="text-[#202124]">Balão da Informática Anchieta</b>
             {numeroLoja && (
               <>
                 <br />

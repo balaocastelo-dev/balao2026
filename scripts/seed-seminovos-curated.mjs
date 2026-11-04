@@ -28,7 +28,7 @@ const iphones = [
     image: "https://images.kabum.com.br/produtos/fotos/130190/130190_1603977341_index_gg.jpg",
     category: "iPhones Seminovos",
     slug: "iphone-12-128gb-azul-seminovo",
-    description: "iPhone 12 128GB Azul 5G Seminovo. Tela Super Retina XDR OLED, chip A14 Bionic ultra rápido, Ceramic Shield resistente. Revisado e garantido pela equipe técnica Balão Castelo.",
+    description: "iPhone 12 128GB Azul 5G Seminovo. Tela Super Retina XDR OLED, chip A14 Bionic ultra rápido, Ceramic Shield resistente. Revisado e garantido pela equipe técnica Balão da Informática Anchieta.",
     specs: { "Armazenamento": "128GB", "Conectividade": "5G", "Condição": "Seminovo Impecável", "Bateria": "88%+", "Garantia": "90 dias" }
   },
   {

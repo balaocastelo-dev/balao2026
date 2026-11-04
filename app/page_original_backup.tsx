@@ -114,7 +114,7 @@ export async function generateMetadata(props: { searchParams: SearchParams }): P
   const hasFacet = Boolean((sp?.category || "").trim() || (sp?.search || "").trim());
   const title = "Loja de Informática em Campinas | PC Gamer, Peças, Notebooks e Assistência Técnica";
   const description =
-    "Balão da Informática Castelo: loja física de informática em Campinas. Mais de 5.000 produtos com até 10% de desconto no PIX ou 10x sem juros. PC Gamer, Hardware, Notebooks e Assistência no Cambuí.";
+    "Balão da Informática Anchieta: loja física de informática em Campinas. Mais de 5.000 produtos com até 10% de desconto no PIX ou 10x sem juros. PC Gamer, Hardware, Notebooks e Assistência no Cambuí.";
   const canonical = "https://www.balao.info/";
 
   return {
@@ -131,7 +131,7 @@ export async function generateMetadata(props: { searchParams: SearchParams }): P
       "placa de vídeo campinas",
       "processador ryzen intel",
       "hardware campinas cambuí",
-      "balão da informática castelo",
+      "balão da informática anchieta",
       "conserto de notebook campinas",
       "peças de informática campinas",
       "ssd nvme ram ddr4 ddr5",
@@ -732,7 +732,7 @@ export default async function Home(props: {
           {!search && !category && (
             <SeoContent title="LOJA DE INFORMATICA EM CAMPINAS COM WHATSAPP, RETIRADA E ASSISTENCIA TECNICA">
               <p className="mb-4 text-[var(--home-muted)]">
-                A <strong>Balão da Informática Castelo</strong> é a principal <strong>loja de informática em Campinas</strong> para quem busca
+                A <strong>Balão da Informática Anchieta</strong> é a principal <strong>loja de informática em Campinas</strong> para quem busca
                 <strong>PC Gamer em Campinas</strong>, <strong>notebooks</strong>, peças de hardware para upgrade (placas de vídeo RTX/Radeon,
                 processadores Intel e AMD Ryzen, memórias RAM DDR4/DDR5, SSDs NVMe e fontes selo 80 Plus), periféricos gamer e <strong>assistência técnica especializada em Campinas</strong> com atendimento imediato no balcão e no WhatsApp.
                 Compre online com desconto progressivo no PIX ou em até 10x sem juros no cartão de crédito e retire seu pedido em até 30 minutos na loja física no bairro Cambuí.

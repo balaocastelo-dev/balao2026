@@ -11,7 +11,7 @@ const fonte = Baloo_2({
 export const metadata: Metadata = {
   title: { absolute: "Escritório Digital | Balão da Informática" },
   description:
-    "Equipe Digital Balão em um escritório virtual da Balão da Informática Castelo, em Campinas.",
+    "Equipe Digital Balão em um escritório virtual da Balão da Informática Anchieta, em Campinas.",
   robots: {
     index: false,
     follow: false,

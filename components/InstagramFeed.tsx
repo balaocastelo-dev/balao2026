@@ -18,7 +18,7 @@ export default function InstagramFeed() {
   const [posts, setPosts] = useState<InstaPost[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const PROFILE_URL = "https://www.instagram.com/balaodainformatica_castelo/";
+  const PROFILE_URL = "https://www.instagram.com/balaoanchieta/";
 
   useEffect(() => {
     fetch("/api/instagram")
@@ -61,7 +61,7 @@ export default function InstagramFeed() {
                 rel="noopener noreferrer"
                 className="text-xs text-gray-500 hover:text-[#E60012] transition-colors block -mt-0.5"
             >
-                @balaodainformatica_castelo
+                @balaoanchieta
             </a>
         </div>
       </div>

@@ -127,7 +127,7 @@ export async function POST(req: Request) {
             }
 
             return {
-                subject: "Teste de Integração de E-mail - Balão Castelo",
+                subject: "Teste de Integração de E-mail - Balão da Informática Anchieta",
                 html: `
                     <h1>Teste de E-mail</h1>
                     <p>Se você recebeu este e-mail, o sistema de envio está funcionando corretamente.</p>

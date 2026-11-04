@@ -196,7 +196,7 @@ export const microsoft: PaginaDeCaptacao = {
   ],
   temas: ["licenca", "empresa", "notebook", "pc", "assistencia", "compra"],
   termosDoBlog: ["windows", "windows 11", "windows 10", "office", "microsoft", "licença"],
-  relacionadas: ["notebooks", "manutencao", "sistemas", "tonner"],
+  relacionadas: ["notebooks", "manutencao", "sistemas", "toner"],
   final: {
     titulo: "Peça a licença e saia com o computador ativado",
     texto: "Diga qual licença precisa e para quantos computadores. A equipe confere a sua máquina e instala e ativa na loja da Av. Anchieta, no Cambuí.",

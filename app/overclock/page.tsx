@@ -143,7 +143,7 @@ const jsonLd = {
       brand: { "@type": "Brand", name: "Overclock" },
       publisher: {
         "@type": "Organization",
-        name: "Balão da Informática Castelo",
+        name: "Balão da Informática Anchieta",
         url: "https://www.balao.info",
       },
       offers: FORMAS_DE_PAGAMENTO.map((forma) => ({
@@ -154,7 +154,7 @@ const jsonLd = {
         priceCurrency: "BRL",
         availability: "https://schema.org/InStock",
         url: URL_PAGINA,
-        seller: { "@type": "Organization", name: "Balão da Informática Castelo" },
+        seller: { "@type": "Organization", name: "Balão da Informática Anchieta" },
       })),
     },
     {
@@ -750,7 +750,7 @@ export default function PaginaOverclock() {
       <footer className="border-t border-(--oc-linha) px-4 py-8 sm:px-6">
         <div className="mx-auto flex max-w-6xl flex-col gap-3 text-base text-(--oc-suave) sm:flex-row sm:items-center sm:justify-between">
           <p>
-            Overclock é um produto de Balão da Informática Castelo — CNPJ 34.397.947/0001-08 — Campinas-SP
+            Overclock é um produto de Balão da Informática Anchieta — CNPJ 34.397.947/0001-08 — Campinas-SP
           </p>
           <a href="https://www.balao.info" className="underline hover:text-(--oc-texto)">
             balao.info

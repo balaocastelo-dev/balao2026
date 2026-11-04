@@ -135,12 +135,12 @@ export const comoComprar: PaginaDeCaptacao = {
       tipo: "texto",
       titulo: "Como saber se a loja é de verdade antes de comprar",
       paragrafos: [
-        "Comprar tecnologia pela internet exige um cuidado básico: saber quem está do outro lado. A Balão da Informática tem nome empresarial e CNPJ públicos (Balão da Informática Castelo, CNPJ 34.397.947/0001-08), endereço físico aberto ao público na Av. Anchieta, 789, no Cambuí, e mais de 700 avaliações no Google que qualquer pessoa pode ler antes de comprar.",
-        "Toda compra sai com nota fiscal, seja pelo site, pelo WhatsApp ou no balcão. No Pix, confira que o recebedor é a Balão da Informática Castelo antes de confirmar o pagamento. Se tiver qualquer dúvida sobre um pedido, um link ou uma mensagem que diga ser da loja, ligue para (19) 3255-1661 ou chame no WhatsApp oficial (19) 98751-0267.",
+        "Comprar tecnologia pela internet exige um cuidado básico: saber quem está do outro lado. A Balão da Informática tem nome empresarial e CNPJ públicos (Balão da Informática Anchieta, CNPJ 34.397.947/0001-08), endereço físico aberto ao público na Av. Anchieta, 789, no Cambuí, e mais de 700 avaliações no Google que qualquer pessoa pode ler antes de comprar.",
+        "Toda compra sai com nota fiscal, seja pelo site, pelo WhatsApp ou no balcão. No Pix, confira que o recebedor é a Balão da Informática Anchieta antes de confirmar o pagamento. Se tiver qualquer dúvida sobre um pedido, um link ou uma mensagem que diga ser da loja, ligue para (19) 3255-1661 ou chame no WhatsApp oficial (19) 98751-0267.",
         "Outra vantagem de comprar de uma loja com endereço: se o produto der problema, você sabe onde levar. A assistência técnica fica no mesmo endereço e avalia o produto no balcão, e a política de trocas segue o Código de Defesa do Consumidor.",
       ],
       lista: [
-        "CNPJ 34.397.947/0001-08, Balão da Informática Castelo",
+        "CNPJ 34.397.947/0001-08, Balão da Informática Anchieta",
         "Loja física na Av. Anchieta, 789, Cambuí, Campinas",
         "Nota fiscal em toda compra",
         "Mais de 700 avaliações públicas no Google",
@@ -192,7 +192,7 @@ export const comoComprar: PaginaDeCaptacao = {
     },
     {
       pergunta: "A compra sai com nota fiscal?",
-      resposta: "Sim, toda compra sai com nota fiscal em nome de Balão da Informática Castelo, seja pelo site, pelo WhatsApp ou no balcão.",
+      resposta: "Sim, toda compra sai com nota fiscal em nome de Balão da Informática Anchieta, seja pelo site, pelo WhatsApp ou no balcão.",
     },
   ],
   temas: ["compra", "entrega", "ofertas", "garantia"],

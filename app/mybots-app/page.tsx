@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
-import { Outfit } from "next/font/google";
+import localFont from "next/font/local";
 import { Gift, Home, Infinity as Infinito, Monitor, Rocket, ShieldCheck, Smartphone, Bot, type LucideIcon } from "lucide-react";
 import estilos from "./estilos.module.css";
 import PlayerDoComercial from "./PlayerDoComercial";
@@ -13,9 +13,12 @@ import PlayerDoComercial from "./PlayerDoComercial";
 //   public/mybots-app/comercial.mp4
 //   public/mybots-app/poster.jpg
 
-const fonte = Outfit({
-  subsets: ["latin"],
-  weight: ["400", "600", "700", "800"],
+// Mesma Outfit (latin, variável, pesos 400–800). Arquivo no repositório para o
+// build não baixar do Google Fonts: a URL sem extensão quebra o Turbopack
+// ("next/font/google queries have exactly one entry").
+const fonte = localFont({
+  src: "./outfit-latin-wght-normal.woff2",
+  weight: "100 900",
   variable: "--fonte-mybots",
   display: "swap",
 });
