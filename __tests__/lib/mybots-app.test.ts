@@ -21,7 +21,7 @@ describe("landing /mybots-app", () => {
     expect(config).not.toMatch(/source:\s*"\/app\/"/);
     const vercel = ler("vercel.json");
     expect(vercel).toContain('"value": "soubots.com"');
-    expect(vercel).toContain("https://www.soubots.com/:caminho+");
+    expect(vercel).toContain("https://www.soubots.com/:path*");
     expect(vercel).toContain('"permanent": true');
     expect(existsSync(path.join(raiz, "app/mybots/page.tsx"))).toBe(false);
     expect(existsSync(path.join(raiz, "public/mybots"))).toBe(false);

@@ -18,15 +18,9 @@
   ],
   "redirects": [
     {
-      "source": "/",
+      "source": "/:path*",
       "has": [{ "type": "host", "value": "soubots.com" }],
-      "destination": "https://www.soubots.com/",
-      "permanent": true
-    },
-    {
-      "source": "/:caminho+",
-      "has": [{ "type": "host", "value": "soubots.com" }],
-      "destination": "https://www.soubots.com/:caminho+",
+      "destination": "https://www.soubots.com/:path*",
       "permanent": true
     }
   ]
