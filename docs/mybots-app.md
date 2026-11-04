@@ -18,7 +18,7 @@ Não confundir com:
   (`isPaginaDeVendas` em `components/LayoutWrapper.tsx`).
 - `public/downloads/MyBots.apk` — o aplicativo. O botão usa `<a href="/downloads/MyBots.apk" download="MyBots.apk">`.
   O cabeçalho desse arquivo (`Content-Type` de APK e `Content-Disposition`) está em `next.config.ts`.
-- `public/mybots-app/comercial.mp4` — comercial das amebas (narração atual). O player
+- `public/mybots-app/comercial.mp4` — comercial com a narração atual (cerca de 57 s). O player
   (`app/mybots-app/PlayerDoComercial.tsx`) tem `controls` e `playsinline`. A primeira
   passagem toca com som, quando a pessoa dá play. Ao terminar, volta sozinho, em loop e sem som.
 - `public/mybots-app/poster.jpg` — quadro do comercial, antes de dar play.
@@ -31,3 +31,15 @@ Não confundir com:
 
 Para trocar o APK ou o vídeo, substitua esses arquivos (mesmo nome) e publique. O caminho do vídeo
 está nas constantes `VIDEO` e `POSTER` de `app/mybots-app/page.tsx`. Não aponte o botão para `/mybots`.
+
+## soubots.com
+
+`soubots.com` e `www.soubots.com`, quando ligados neste projeto da Vercel, abrem esta landing
+na raiz `/`. A regra está em `proxy.ts` (`ehHostSoubots` em `lib/soubots.ts`): só esses dois
+hosts, e só o caminho `/`. www.balao.info continua a loja na raiz e a landing em `/mybots-app`.
+O menu, o rodapé e o WhatsApp da loja não aparecem nessa raiz (`html.soubots-raiz` em
+`app/globals.css`).
+
+O vídeo, as imagens e o APK usam caminho a partir da raiz (`/mybots-app/comercial.mp4`,
+`/mybots-app/poster.jpg`, `/mybots-app/telas/…`, `/downloads/MyBots.apk`). Por isso carregam
+no soubots.com sem um endereço diferente. Esses caminhos não são reescritos.
