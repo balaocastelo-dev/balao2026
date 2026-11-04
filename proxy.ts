@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import { ehHostSoubots } from './lib/soubots'
 
 /**
  * Tranca do administrativo.
@@ -164,9 +165,30 @@ async function estaAutenticado(request: NextRequest) {
   return iguais(sessao, await calcularToken(senha))
 }
 
+function pedidoEhSoubots(request: NextRequest) {
+  // Na Vercel o domínio pedido chega no host e no x-forwarded-host. No teste
+  // local o curl manda só o Host. Qualquer um dos dois, se for o soubots,
+  // vale. Outro domínio (www.balao.info, localhost) não entra.
+  return (
+    ehHostSoubots(request.headers.get('x-forwarded-host')) ||
+    ehHostSoubots(request.headers.get('host')) ||
+    ehHostSoubots(request.nextUrl.host)
+  )
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const metodo = request.method.toUpperCase()
+
+  // soubots.com e www.soubots.com: a raiz é a landing do MyBots. O endereço
+  // na barra continua /. Os arquivos (vídeo, imagens, APK) ficam nos caminhos
+  // de sempre e não são reescritos — senão o comercial não carregaria.
+  // www.balao.info e o restante dos domínios não passam por aqui.
+  if ((pathname === '/' || pathname === '') && pedidoEhSoubots(request)) {
+    const destino = request.nextUrl.clone()
+    destino.pathname = '/mybots-app'
+    return NextResponse.rewrite(destino)
+  }
 
   // Telas do administrativo: pede a senha antes de mostrar qualquer coisa.
   if (pathname === '/admin' || pathname.startsWith('/admin/')) {

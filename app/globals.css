@@ -40,6 +40,11 @@
   --home-primary-soft: rgba(230, 0, 18, 0.1);
 }
 
+/* soubots.com na raiz: a landing ocupa a tela. O menu da loja sai antes de pintar. */
+html.soubots-raiz [data-loja] {
+  display: none !important;
+}
+
 html {
   width: 100%;
   max-width: 100%;
@@ -364,3 +369,4 @@ main {
     font-size: 15px;
   }
 }
+
