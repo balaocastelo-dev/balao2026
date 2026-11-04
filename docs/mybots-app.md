@@ -34,15 +34,24 @@ O botão **Entrar** (topo) e **Entrar com Google** vão para `URL_PAINEL`
 
 - **Android:** `public/downloads/MyBots.apk` (pacote `info.balao.mybots`). O botão usa
   `URL_APK` (`/downloads/MyBots.apk`). O cabeçalho `Content-Type` de APK está em `next.config.ts`.
-- **Windows:** ainda **não há** instalador publicado. Conferido em 04/11/2026 nos repositórios
-  `balaocastelo-dev/balao2026` (public/, releases, workflows) e `balaocastelo-dev/Mybots`
-  (releases, public/, workflows). A release `app-build-3` deste repo é o APK da loja
-  (`balao-da-informatica.apk`), não o MyBots. No MyBots, `android-apk.yml` só gera APK de debug
-  como artefato, e `scripts/install-hub.ps1` é script local. O botão aponta para a constante
-  `URL_INSTALADOR_WINDOWS` (`/downloads/MyBots-Setup.exe`). Quando o arquivo existir em
-  `public/`, acrescente essa URL em `ARQUIVOS_PUBLICADOS` (`lib/mybots-arquivos.ts`). A página
-  passa a oferecer o download e tira o aviso. Enquanto a URL não está nessa lista, o botão
-  continua no mesmo endereço e a página avisa que o instalador ainda não foi publicado.
+- **Windows:** o botão usa `URL_INSTALADOR_WINDOWS` (`/downloads/MyBots-Setup.exe`).
+  Esse caminho redireciona (307) para `URL_RELEASE_WINDOWS`, a Release
+  `mybots-windows-1.0.0` deste repositório, arquivo `MyBots-Setup.exe`. A URL está em
+  `ARQUIVOS_PUBLICADOS`, então a página oferece o download. O `.exe` não fica em `public/`:
+  o instalador do Electron é grande e o file tracer já levou `public/` para dentro da função
+  `/mybots-app` (limite de 250 MB). A release `app-build-3` continua sendo o APK da loja
+  (`balao-da-informatica.apk`), outra coisa.
+
+  O app em si está em `mybots-desktop/`. Conferido em 04/11/2026: `balaocastelo-dev/Mybots`
+  não tem Electron, Tauri nem NSIS. Lá existem o app Android (WebView) e os scripts
+  `scripts/open-mybots.ps1` / `abrir-mybots.ps1`, que abrem o Chrome ou o Edge com `--app`.
+  Por isso o instalador novo é uma janela Electron (alvo NSIS do electron-builder) que abre
+  `https://www.soubots.com/app`, com o ícone do MyBots (`public/mybots-app/logo.png`) na
+  barra de tarefas e atalhos na área de trabalho e no menu Iniciar. Não entra segredo,
+  chave nem variável de ambiente no pacote. Para gerar de novo, no Linux com Wine:
+  `cd mybots-desktop && npm ci && npm run dist:win`. O arquivo sai em
+  `mybots-desktop/dist/MyBots-Setup.exe`. Publicar é subir esse arquivo na Release
+  `mybots-windows-1.0.0` (ou apontar `URL_RELEASE_WINDOWS` para a Release nova).
 
 ## Vídeos
 
@@ -79,9 +88,13 @@ Com `prefers-reduced-motion: reduce`, nada disso se move.
 
 - `app/mybots-app/page.tsx` — a página. Fonte Outfit em arquivo
   (`outfit-latin-wght-normal.woff2`, via `next/font/local`). Não usar `next/font/google`.
-- `lib/mybots-landing.ts` — textos, slots, botões e JSON-LD.
+- `lib/mybots-landing.ts` — textos, slots, botões e JSON-LD. Reexporta os endereços
+  do instalador.
+- `lib/mybots-windows.ts` — `URL_INSTALADOR_WINDOWS` e `URL_RELEASE_WINDOWS`. Sem alias,
+  porque o `next.config.ts` importa daqui.
 - `lib/mybots-arquivos.ts` — lista fechada (`ARQUIVOS_PUBLICADOS`) do que a landing pode
   citar. Não usa `fs` nem `process.cwd()`: isso puxava `public/` inteira para a função.
+- `mybots-desktop/` — app Electron e o alvo NSIS. O `.exe` gerado não entra no Git.
 - `lib/soubots.ts` — hosts, `URL_PAINEL` e o rewrite de `/app`.
 
 ## Tamanho da função na Vercel

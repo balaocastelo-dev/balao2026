@@ -13,6 +13,9 @@
  */
 
 import { URL_SITE } from "@/lib/soubots";
+import { NOME_INSTALADOR_WINDOWS, URL_INSTALADOR_WINDOWS, URL_RELEASE_WINDOWS } from "@/lib/mybots-windows";
+
+export { NOME_INSTALADOR_WINDOWS, URL_INSTALADOR_WINDOWS, URL_RELEASE_WINDOWS };
 
 /** Primeira opção de title do anexo de SEO. Sem o sufixo da loja. */
 export const TITULO = "MyBots: crie sua equipe de bots de IA que trabalham por você";
@@ -36,19 +39,6 @@ export const SUBTITULO =
  */
 export const URL_APK = "/downloads/MyBots.apk";
 export const NOME_APK = "MyBots.apk";
-
-/**
- * Instalador Windows.
- * Conferido em 04/11/2026: não há .exe nem .msi publicado.
- * - balaocastelo-dev/balao2026: public/downloads só tem MyBots.apk.
- *   A release app-build-3 é balao-da-informatica.apk (app da loja, não o MyBots).
- * - balaocastelo-dev/Mybots: nenhuma release. O workflow android-apk.yml
- *   só sobe um APK de debug como artefato. install-hub.ps1 é script local.
- * Quando o arquivo existir, troque só esta constante (caminho em public/
- * ou URL absoluta). O botão da landing já aponta para cá.
- */
-export const URL_INSTALADOR_WINDOWS = "/downloads/MyBots-Setup.exe";
-export const NOME_INSTALADOR_WINDOWS = "MyBots-Setup.exe";
 
 export type SlotDeVideo = {
   id: string;

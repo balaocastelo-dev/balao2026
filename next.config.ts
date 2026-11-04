@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { ENDERECOS_ANTIGOS } from "./lib/painel/enderecos-antigos";
+import { URL_INSTALADOR_WINDOWS, URL_RELEASE_WINDOWS } from "./lib/mybots-windows";
 import { rewritesDoPainel, TUNEL_HUB } from "./lib/soubots";
 
 const nextConfig: NextConfig = {
@@ -75,6 +76,14 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // Instalador Windows do MyBots. O .exe fica na Release (não em public/,
+      // para não estourar o limite de 250 MB da função). 307 de propósito:
+      // a Release pode trocar de endereço sem o navegador gravar o destino.
+      {
+        source: URL_INSTALADOR_WINDOWS,
+        destination: URL_RELEASE_WINDOWS,
+        permanent: false,
+      },
       // "IA local" é uma categoria por regra, com página própria. Quem chegar
       // pelo endereço no formato das outras categorias cai nela.
       { source: "/categoria/ia-local", destination: "/ia-local", permanent: true },

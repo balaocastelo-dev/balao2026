@@ -1,4 +1,4 @@
-import { SLOTS_DE_VIDEO, URL_APK, type SlotDeVideo } from "@/lib/mybots-landing";
+import { SLOTS_DE_VIDEO, URL_APK, URL_INSTALADOR_WINDOWS, type SlotDeVideo } from "@/lib/mybots-landing";
 
 /**
  * URLs de public/ que a landing pode citar.
@@ -9,10 +9,13 @@ import { SLOTS_DE_VIDEO, URL_APK, type SlotDeVideo } from "@/lib/mybots-landing"
  * 250 MB descompactados. Estes arquivos continuam em public/ e o site os
  * serve como estáticos; a função não lê o disco.
  *
- * Para ligar o instalador Windows ou um webm, acrescente a URL aqui.
+ * O instalador Windows entra nesta lista para o botão oferecer o download.
+ * O arquivo em si não está em public/: /downloads/MyBots-Setup.exe redireciona
+ * para a Release. Um webm novo também se liga acrescentando a URL aqui.
  */
 export const ARQUIVOS_PUBLICADOS: readonly string[] = [
   URL_APK,
+  URL_INSTALADOR_WINDOWS,
   ...SLOTS_DE_VIDEO.flatMap((slot) => [slot.mp4, slot.poster]),
 ];
 
