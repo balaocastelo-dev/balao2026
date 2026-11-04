@@ -1,64 +1,79 @@
-# Landing do app MyBots (`/mybots-app`)
+# Landing do MyBots (`/mybots-app`, www.soubots.com)
 
-Página de divulgação do aplicativo **MyBots** (bots de IA no celular). O app e o uso são grátis.
-O visual segue o mockup aprovado: fundo roxo/ciano, botão verde de APK e o comercial.
-A página explica as funções com telas reais do produto (dados de exemplo, sem cliente e sem chave)
-e repete dois caminhos: baixar o APK e chamar no WhatsApp (19) 98751-0267.
+Página de apresentação do **MyBots**. O endereço oficial é **https://www.soubots.com**.
+`soubots.com` (sem www) e `www.soubots.com` abrem esta landing na raiz `/`. A regra está em
+`proxy.ts` (`ehHostSoubots` em `lib/soubots.ts`): os dois hosts, e só o caminho `/`.
+www.balao.info continua a loja na raiz e a mesma landing em `/mybots-app`, com o canonical
+apontando para o www.
 
 Não confundir com:
 
-- `/mybots` — Hub MyBots no PC do Thiago, via rewrite para o túnel Cloudflare (`next.config.ts`,
-  `afterFiles`). Essa rota não tem página neste repositório. Não criar `app/mybots/` nem
-  `public/mybots/`, senão o arquivo local passa na frente do rewrite.
-- `/apk` — outro aplicativo, o da loja (desconto no Pix). Ver `docs/app-mobile.md`.
+- `/mybots` — Hub MyBots, via rewrite para o túnel Cloudflare (`next.config.ts`, `afterFiles`).
+  Essa rota não tem página neste repositório. Não criar `app/mybots/` nem `public/mybots/`.
+- `/app` — o mesmo Hub, só nos hosts `soubots.com` e `www.soubots.com` (`rewritesDoPainel` em
+  `lib/soubots.ts`, `beforeFiles`). O Hub não recebe o prefixo `/app`. Não redirecionar `/app`.
+- `/apk` — outro aplicativo, o da loja. Ver `docs/app-mobile.md`.
 
-## Onde está
+A página não leva menu, rodapé nem botão da loja (`isPaginaDeVendas` em
+`components/LayoutWrapper.tsx`, e `html.soubots-raiz` em `app/globals.css`).
+Não há telefone nesta landing.
 
-- `app/mybots-app/page.tsx` — a página. Fica fora do menu, do rodapé e do WhatsApp da loja
-  (`isPaginaDeVendas` em `components/LayoutWrapper.tsx`). A fonte é a Outfit em arquivo
-  (`outfit-latin-wght-normal.woff2`, via `next/font/local`). Não voltar para `next/font/google`:
-  o build da Vercel quebra quando o Google devolve a URL da fonte sem extensão.
+## Textos
 
-- `public/downloads/MyBots.apk` — o aplicativo. O botão usa `<a href="/downloads/MyBots.apk" download="MyBots.apk">`.
-  O cabeçalho desse arquivo (`Content-Type` de APK e `Content-Disposition`) está em `next.config.ts`.
-- `public/mybots-app/comercial.mp4` — comercial com a narração atual (cerca de 57 s). O player
-  (`app/mybots-app/PlayerDoComercial.tsx`) tem `controls` e `playsinline`. A primeira
-  passagem toca com som, quando a pessoa dá play. Ao terminar, volta sozinho, em loop e sem som.
-- `public/mybots-app/poster.jpg` — quadro do comercial, antes de dar play.
-- `public/mybots-app/logo.png` — logo oficial do app (ameba de cartola), copiado de
-  `packages/ui/public/icon-256.png` do repositório Mybots. O favicon da rota usa o mesmo desenho
-  (`app/mybots-app/icon.png` e `apple-icon.png`).
-- `public/mybots-app/telas/` — prints da interface real (`packages/ui`), com bots de exemplo
-  (Pixel, Ana, Heitor, Gerente Geral). Para refazer, rode a UI com dados fictícios e substitua
-  o jpg de mesmo nome.
+Title, description, H1 e seções vêm de `lib/mybots-landing.ts` (primeira opção de title e de
+meta description). O JSON-LD é `SoftwareApplication` + `FAQPage`, **sem** `offers` e sem valor.
+A pergunta de valor não entra no FAQ. O title da página é absoluto, para não ganhar o sufixo
+da loja (`| Balão da Informática`).
 
-Para trocar o APK ou o vídeo, substitua esses arquivos (mesmo nome) e publique. O caminho do vídeo
-está nas constantes `VIDEO` e `POSTER` de `app/mybots-app/page.tsx`. Não aponte o botão para `/mybots`.
+O botão **Entrar** (topo) e **Entrar com Google** vão para `URL_PAINEL`
+(`https://www.soubots.com/app`).
 
-## soubots.com
+## Downloads
 
-O endereço oficial é **https://www.soubots.com** (canonical, Open Graph e sitemap).
-`soubots.com` (sem www) e `www.soubots.com`, quando ligados neste projeto da Vercel, abrem
-esta landing na raiz `/`. A regra está em `proxy.ts` (`ehHostSoubots` em `lib/soubots.ts`):
-os dois hosts, e só o caminho `/`. www.balao.info continua a loja na raiz e a mesma landing
-em `/mybots-app`, com o canonical apontando para o www.
+- **Android:** `public/downloads/MyBots.apk` (pacote `info.balao.mybots`). O botão usa
+  `URL_APK` (`/downloads/MyBots.apk`). O cabeçalho `Content-Type` de APK está em `next.config.ts`.
+- **Windows:** ainda **não há** instalador publicado. Conferido em 04/11/2026 nos repositórios
+  `balaocastelo-dev/balao2026` (public/, releases, workflows) e `balaocastelo-dev/Mybots`
+  (releases, public/, workflows). A release `app-build-3` deste repo é o APK da loja
+  (`balao-da-informatica.apk`), não o MyBots. No MyBots, `android-apk.yml` só gera APK de debug
+  como artefato, e `scripts/install-hub.ps1` é script local. O botão aponta para a constante
+  `URL_INSTALADOR_WINDOWS` (`/downloads/MyBots-Setup.exe`). Quando o arquivo existir, troque só
+  essa constante — se for um caminho em `public/`, a página passa a oferecer o download e tira
+  o aviso. Enquanto o arquivo não está lá, o botão continua no mesmo endereço e a página avisa
+  que o instalador ainda não foi publicado.
 
-O botão **Entrar** (topo, também no celular) e o link **Já tenho conta — Entrar** vão para
-o painel em **https://www.soubots.com/app**. A URL está em `URL_PAINEL` (`lib/soubots.ts`).
+## Vídeos
 
-`/app` e `/app/:caminho` (login Google em `/app/api/auth/google/callback`, websocket em
-`/app/ws/…`) só nos hosts `soubots.com` e `www.soubots.com` são reescritos para o mesmo túnel
-de `/mybots` (`TUNEL_HUB`). O Hub não recebe o prefixo `/app`. Não há redirect de `/app` para
-`/app/`: o Next só tira uma barra sobrando (`/app/` → `/app`, 308) e a reescrita não manda
-de volta, então não fecha loop.
+Componente leve: `app/mybots-app/VideoLeve.tsx` (mp4 e webm, mudo, `playsinline`, `preload="none"`,
+poster, fonte só quando o quadro chega perto da tela). O fundo do hero é
+`app/mybots-app/VideoFundoHero.tsx`: loop, mudo, `playsinline`, poster `00_hero_poster.jpg`.
+`prefers-reduced-motion` não dá play sozinho.
 
-O `vercel.json` pede 308 de `soubots.com` para `https://www.soubots.com`. No painel da Vercel
-do projeto balao2026, em Domains, o www hoje redireciona para o apex. Enquanto isso estiver
-assim, os dois redirects brigam (loop). O Thiago precisa inverter: www como domínio principal
-e o apex redirecionando para o www. Sem essa inversão, o 308 deste arquivo não pode valer.
-O menu, o rodapé e o WhatsApp da loja não aparecem nessa raiz (`html.soubots-raiz` em
-`app/globals.css`).
+Coloque os arquivos em `public/mybots-app/videos/` (pode ser só mp4, só webm, ou os dois):
 
-O vídeo, as imagens e o APK usam caminho a partir da raiz (`/mybots-app/comercial.mp4`,
-`/mybots-app/poster.jpg`, `/mybots-app/telas/…`, `/downloads/MyBots.apk`). Por isso carregam
-no soubots.com sem um endereço diferente. Esses caminhos não são reescritos.
+| Ordem | Onde | Arquivos |
+| --- | --- | --- |
+| 1 | Fundo do hero | `00_hero_loop.mp4`, `00_hero_loop.webm`, `00_hero_poster.jpg` |
+| 2 | Logo abaixo do hero | `01_documentario.mp4`, `01_documentario.webm`, `01_documentario_poster.jpg` |
+| 3 | Seção Conheça os bots | `02_equipe_de_bolso.mp4`, `02_equipe_de_bolso.webm`, `02_equipe_de_bolso_poster.jpg` |
+| 4 | Seção O dia que sobrou | `03_dia_que_sobrou.mp4`, `03_dia_que_sobrou.webm`, `03_dia_que_sobrou_poster.jpg` |
+| 5 | Perto dos downloads | `04_antes_e_depois.mp4`, `04_antes_e_depois.webm`, `04_antes_e_depois_poster.jpg` |
+
+Enquanto o mp4/webm não existe, a seção mostra um quadro (“Vídeo em preparação”). O comercial
+antigo continua em `public/mybots-app/comercial.mp4` e não entra nesses slots.
+
+## Amebas e parallax
+
+As quatro figuras em `public/mybots-app/amebas/` são as amebas oficiais do MyBots
+(`packages/ui/public/amebas/v2/`, números 001, 042, 065 e 092), reduzidas para WebP.
+No computador elas acompanham a rolagem nas bordas (`app/mybots-app/Cenario.tsx`).
+No celular ficam duas no hero. O parallax é a variável CSS `--rolagem`.
+Com `prefers-reduced-motion: reduce`, nada disso se move.
+
+## Onde está o código
+
+- `app/mybots-app/page.tsx` — a página. Fonte Outfit em arquivo
+  (`outfit-latin-wght-normal.woff2`, via `next/font/local`). Não usar `next/font/google`.
+- `lib/mybots-landing.ts` — textos, slots, botões e JSON-LD.
+- `lib/mybots-arquivos.ts` — confere se o arquivo já está em `public/`.
+- `lib/soubots.ts` — hosts, `URL_PAINEL` e o rewrite de `/app`.
