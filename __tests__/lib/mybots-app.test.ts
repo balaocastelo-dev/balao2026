@@ -23,6 +23,10 @@ function ler(relativo: string) {
   return readFileSync(path.join(raiz, relativo), "utf8");
 }
 
+function semComentario(fonte: string) {
+  return fonte.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
+}
+
 function temChave(valor: unknown, chave: string): boolean {
   if (!valor || typeof valor !== "object") return false;
   if (Array.isArray(valor)) return valor.some((item) => temChave(item, chave));
@@ -38,6 +42,7 @@ describe("landing /mybots-app", () => {
     expect(config).toContain("rewritesDoPainel()");
     expect(config).not.toMatch(/source:\s*"\/mybots-app/);
     expect(config).not.toMatch(/source:\s*"\/app\/"/);
+    expect(config).toContain('"/mybots-app": ["./public/**/*"]');
     const vercel = ler("vercel.json");
     expect(vercel).toContain('"value": "soubots.com"');
     expect(vercel).toContain("https://www.soubots.com/:path*");
@@ -155,6 +160,11 @@ describe("landing /mybots-app", () => {
       expect(midia.poster).toBe(slot.poster);
       expect(arquivoPublicoExiste(slot.webm)).toBe(false);
     }
+
+    const arquivos = semComentario(ler("lib/mybots-arquivos.ts"));
+    const fonteDaPagina = semComentario(ler("app/mybots-app/page.tsx"));
+    expect(arquivos).not.toMatch(/node:fs|from ["']fs["']|existsSync|readFile|process\.cwd/);
+    expect(fonteDaPagina).not.toMatch(/node:fs|from ["']fs["']|existsSync|process\.cwd/);
   });
 
   it("respeita menos movimento e faz as amebas descerem com a rolagem", () => {
