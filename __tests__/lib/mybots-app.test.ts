@@ -41,6 +41,16 @@ describe("landing /mybots-app", () => {
     expect(pagina).toContain("fontes desconhecidas");
     expect(pagina).toContain("Balão da Informática Anchieta");
     expect(pagina).toContain("Grátis para sempre");
+    expect(pagina).toContain("5519987510267");
+    expect(pagina).toContain("(19) 98751-0267");
+    expect(pagina).toContain('const LOGO = "/mybots-app/logo.png"');
+    expect(pagina).toContain("/mybots-app/telas/lista.jpg");
+    expect(pagina).toContain("/mybots-app/telas/pc.jpg");
+    expect(pagina).toContain("/mybots-app/telas/celular.jpg");
+    expect(pagina).toContain("/mybots-app/telas/trabalho.jpg");
+    expect(pagina).toContain("/mybots-app/telas/arquivos.jpg");
+    expect(existsSync(path.join(raiz, "public/mybots-app/logo.png"))).toBe(true);
+    expect(existsSync(path.join(raiz, "app/mybots-app/icon.png"))).toBe(true);
   });
 
   it("depois da primeira passagem, repete do começo, mudo e em loop", async () => {

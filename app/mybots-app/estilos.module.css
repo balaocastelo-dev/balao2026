@@ -108,9 +108,42 @@
 
 .inicio:focus-visible,
 .botao:focus-visible,
-.loja:focus-visible {
+.whats:focus-visible,
+.loja:focus-visible,
+.faq summary:focus-visible {
   outline: 2px solid #67e8f9;
   outline-offset: 3px;
+}
+
+.logo {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 16px rgba(192, 132, 252, 0.45));
+}
+
+.topoAcoes {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.whatsTopo {
+  display: none;
+  border-radius: 999px;
+  border: 1px solid rgba(61, 220, 132, 0.7);
+  padding: 0.55rem 0.9rem;
+  color: #bbf7d0;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+@media (min-width: 720px) {
+  .whatsTopo {
+    display: inline-flex;
+  }
 }
 
 .hero {
@@ -159,11 +192,85 @@
   color: transparent;
 }
 
-.chamada {
+.lead {
   margin: 1rem 0 0;
+  max-width: 38rem;
+  color: rgba(241, 245, 249, 0.92);
+  font-size: clamp(1.05rem, 2.4vw, 1.25rem);
+  line-height: 1.45;
+}
+
+.chamada {
+  margin: 0.85rem 0 0;
   font-size: clamp(1.2rem, 3.4vw, 1.7rem);
   font-weight: 600;
   color: #ffffff;
+}
+
+.acoes {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.7rem;
+  margin-top: 1.15rem;
+}
+
+.acoes .botao,
+.barraFixa .botao {
+  margin-top: 0;
+}
+
+@media (min-width: 520px) {
+  .acoes {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+}
+
+.whats {
+  display: inline-flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  border-radius: 999px;
+  border: 2px solid #3ddc84;
+  background: rgba(22, 163, 74, 0.16);
+  padding: 0.9rem 1.2rem;
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.1;
+  text-decoration: none;
+}
+
+.whats:hover {
+  background: rgba(22, 163, 74, 0.32);
+}
+
+@media (min-width: 480px) {
+  .whats {
+    width: auto;
+  }
+}
+
+.moldura {
+  width: min(280px, 72vw);
+  border-radius: 36px;
+  padding: 10px;
+  background: linear-gradient(160deg, #3a3a44, #121218 42%, #1c1c24);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.14),
+    0 24px 60px rgba(0, 0, 0, 0.5),
+    0 0 70px rgba(124, 58, 237, 0.28);
+}
+
+.moldura img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 28px;
 }
 
 .gratis {
@@ -555,5 +662,198 @@
 @media (max-width: 380px) {
   .loja strong {
     font-size: 0.95rem;
+  }
+}
+
+.bloco {
+  margin-top: 1.6rem;
+}
+
+.bloco > h2,
+.ctaFinal h2 {
+  margin: 0;
+  font-size: clamp(1.45rem, 3.4vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.bloco > p,
+.notaTelas,
+.ctaFinal p {
+  margin: 0.55rem 0 0;
+  color: rgba(226, 232, 240, 0.86);
+  font-size: 1.02rem;
+  line-height: 1.5;
+}
+
+.notaTelas {
+  font-size: 0.92rem;
+  color: rgba(186, 230, 253, 0.8);
+}
+
+.funcao {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.35rem;
+  padding-top: 1.35rem;
+  border-top: 1px solid rgba(167, 139, 250, 0.22);
+}
+
+.funcao h3 {
+  margin: 0;
+  font-size: clamp(1.2rem, 2.6vw, 1.45rem);
+}
+
+.funcao p,
+.funcao li,
+.perfil p,
+.faq p,
+.listaSegura li {
+  color: rgba(226, 232, 240, 0.84);
+  line-height: 1.5;
+}
+
+.funcao p {
+  margin: 0.45rem 0 0;
+}
+
+.funcao ul,
+.listaSegura {
+  margin: 0.7rem 0 0;
+  padding-left: 1.15rem;
+}
+
+.funcao li + li,
+.listaSegura li + li {
+  margin-top: 0.35rem;
+}
+
+@media (min-width: 960px) {
+  .funcao {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    align-items: center;
+    gap: 1.4rem;
+  }
+
+  .invert .foto {
+    order: -1;
+  }
+}
+
+.foto {
+  margin: 0;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 1px solid rgba(125, 211, 252, 0.4);
+  background: #05030d;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+}
+
+.foto img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.foto figcaption {
+  margin: 0;
+  padding: 0.7rem 0.9rem 0.9rem;
+  color: rgba(221, 214, 254, 0.86);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.perfis {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.9rem;
+}
+
+@media (min-width: 760px) {
+  .perfis {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.perfil {
+  border-radius: 18px;
+  border: 1px solid rgba(167, 139, 250, 0.32);
+  background: rgba(12, 8, 30, 0.55);
+  padding: 1rem;
+}
+
+.perfil h3 {
+  margin: 0;
+  font-size: 1.08rem;
+}
+
+.perfil p {
+  margin: 0.35rem 0 0;
+}
+
+.faq {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.9rem;
+}
+
+.faq details {
+  border-radius: 16px;
+  border: 1px solid rgba(167, 139, 250, 0.32);
+  background: rgba(12, 8, 30, 0.45);
+  padding: 0.75rem 0.95rem;
+}
+
+.faq summary {
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.faq p {
+  margin: 0.45rem 0 0;
+}
+
+.ctaFinal {
+  margin-top: 1.5rem;
+  border-radius: 22px;
+  border: 1px solid rgba(61, 220, 132, 0.35);
+  background:
+    radial-gradient(ellipse at 0% 0%, rgba(61, 220, 132, 0.16), transparent 55%),
+    rgba(12, 8, 30, 0.72);
+  padding: 1.2rem 1rem 1.3rem;
+}
+
+.barraFixa {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 5;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.65rem 0.8rem calc(0.65rem + env(safe-area-inset-bottom));
+  background: rgba(7, 4, 20, 0.92);
+  border-top: 1px solid rgba(167, 139, 250, 0.35);
+  backdrop-filter: blur(10px);
+}
+
+@media (max-width: 859px) {
+  .pagina {
+    padding-bottom: 4.6rem;
+  }
+}
+
+.barraFixa .botao,
+.barraFixa .whats {
+  flex: 1;
+  width: auto;
+  margin-top: 0;
+  padding: 0.75rem 0.7rem;
+  font-size: 0.95rem;
+}
+
+@media (min-width: 860px) {
+  .barraFixa {
+    display: none;
   }
 }
