@@ -43,7 +43,8 @@ describe("landing /mybots-app", () => {
     expect(vercel).toContain("https://www.soubots.com/:path*");
     expect(vercel).toContain('"permanent": true');
     expect(existsSync(path.join(raiz, "app/mybots/page.tsx"))).toBe(false);
-    expect(existsSync(path.join(raiz, "public/mybots"))).toBe(false);
+    expect(existsSync(path.join(raiz, "public/mybots/index.html"))).toBe(false);
+    expect(existsSync(path.join(raiz, "public/mybots/videos/00_hero_loop.mp4"))).toBe(true);
   });
 
   it("aponta Entrar para o painel e os downloads para as constantes", () => {
@@ -113,7 +114,11 @@ describe("landing /mybots-app", () => {
       "03_dia_que_sobrou",
       "04_antes_e_depois",
     ]);
-    expect(SLOTS_DE_VIDEO[0].poster).toBe("/mybots-app/videos/00_hero_poster.jpg");
+    expect(SLOTS_DE_VIDEO[0].mp4).toBe("/mybots/videos/00_hero_loop.mp4");
+    expect(SLOTS_DE_VIDEO[0].poster).toBe("/mybots/videos/00_hero_poster.jpg");
+    expect(SLOTS_DE_VIDEO[1].poster).toBe("/mybots/videos/01_documentario_poster.jpg");
+    expect(SLOTS_DE_VIDEO[4].mp4).toBe("/mybots/videos/04_antes_e_depois.mp4");
+    expect(SLOTS_DE_VIDEO[4].poster).toBe("/mybots/videos/04_antes_e_depois_poster.jpg");
     const pagina = ler("app/mybots-app/page.tsx").slice(ler("app/mybots-app/page.tsx").indexOf("export default function"));
     const hero = pagina.indexOf("VIDEO_HERO");
     const doc = pagina.indexOf("VIDEO_DOCUMENTARIO");
@@ -144,7 +149,11 @@ describe("landing /mybots-app", () => {
     expect(fundo).toContain("prefers-reduced-motion");
 
     for (const slot of SLOTS_DE_VIDEO) {
-      expect(midiaDoSlot(slot).disponivel).toBe(false);
+      const midia = midiaDoSlot(slot);
+      expect(midia.disponivel).toBe(true);
+      expect(midia.mp4).toBe(slot.mp4);
+      expect(midia.poster).toBe(slot.poster);
+      expect(arquivoPublicoExiste(slot.webm)).toBe(false);
     }
   });
 

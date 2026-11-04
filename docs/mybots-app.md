@@ -9,7 +9,9 @@ apontando para o www.
 Não confundir com:
 
 - `/mybots` — Hub MyBots, via rewrite para o túnel Cloudflare (`next.config.ts`, `afterFiles`).
-  Essa rota não tem página neste repositório. Não criar `app/mybots/` nem `public/mybots/`.
+  Essa rota não tem página neste repositório. Não criar `app/mybots/` nem `public/mybots/index.html`.
+  A única exceção é `public/mybots/videos/`: os mp4 e os pôsteres da landing. Um arquivo
+  solto nessa pasta não cobre o endereço `/mybots` do Hub.
 - `/app` — o mesmo Hub, só nos hosts `soubots.com` e `www.soubots.com` (`rewritesDoPainel` em
   `lib/soubots.ts`, `beforeFiles`). O Hub não recebe o prefixo `/app`. Não redirecionar `/app`.
 - `/apk` — outro aplicativo, o da loja. Ver `docs/app-mobile.md`.
@@ -49,18 +51,20 @@ poster, fonte só quando o quadro chega perto da tela). O fundo do hero é
 `app/mybots-app/VideoFundoHero.tsx`: loop, mudo, `playsinline`, poster `00_hero_poster.jpg`.
 `prefers-reduced-motion` não dá play sozinho.
 
-Coloque os arquivos em `public/mybots-app/videos/` (pode ser só mp4, só webm, ou os dois):
+Os arquivos finais estão em `public/mybots/videos/`. O hero usa o mp4 em loop, mudo e
+`playsinline`, com o pôster `00_hero_poster.jpg`. Os quatro de baixo usam `preload="none"`,
+o pôster e só baixam a fonte quando o quadro chega perto da tela. Webm, se existir com o
+mesmo nome, entra junto. Sem o mp4 e sem o webm, a seção mostra o quadro “Vídeo em preparação”.
 
 | Ordem | Onde | Arquivos |
 | --- | --- | --- |
-| 1 | Fundo do hero | `00_hero_loop.mp4`, `00_hero_loop.webm`, `00_hero_poster.jpg` |
-| 2 | Logo abaixo do hero | `01_documentario.mp4`, `01_documentario.webm`, `01_documentario_poster.jpg` |
-| 3 | Seção Conheça os bots | `02_equipe_de_bolso.mp4`, `02_equipe_de_bolso.webm`, `02_equipe_de_bolso_poster.jpg` |
-| 4 | Seção O dia que sobrou | `03_dia_que_sobrou.mp4`, `03_dia_que_sobrou.webm`, `03_dia_que_sobrou_poster.jpg` |
-| 5 | Perto dos downloads | `04_antes_e_depois.mp4`, `04_antes_e_depois.webm`, `04_antes_e_depois_poster.jpg` |
+| 1 | Fundo do hero | `00_hero_loop.mp4`, `00_hero_poster.jpg` |
+| 2 | Logo abaixo do hero | `01_documentario.mp4`, `01_documentario_poster.jpg` |
+| 3 | Seção Conheça os bots | `02_equipe_de_bolso.mp4`, `02_equipe_de_bolso_poster.jpg` |
+| 4 | Seção O dia que sobrou | `03_dia_que_sobrou.mp4`, `03_dia_que_sobrou_poster.jpg` |
+| 5 | Perto dos downloads | `04_antes_e_depois.mp4`, `04_antes_e_depois_poster.jpg` |
 
-Enquanto o mp4/webm não existe, a seção mostra um quadro (“Vídeo em preparação”). O comercial
-antigo continua em `public/mybots-app/comercial.mp4` e não entra nesses slots.
+O comercial antigo continua em `public/mybots-app/comercial.mp4` e não entra nesses slots.
 
 ## Amebas e parallax
 

@@ -1,26 +1,15 @@
 /**
  * Textos e endereços da landing www.soubots.com.
  *
- * Vídeos (ainda não publicados — a página mostra um quadro até o arquivo existir):
- *   public/mybots-app/videos/00_hero_loop.mp4
- *   public/mybots-app/videos/00_hero_loop.webm
- *   public/mybots-app/videos/00_hero_poster.jpg
- *   public/mybots-app/videos/01_documentario.mp4
- *   public/mybots-app/videos/01_documentario.webm
- *   public/mybots-app/videos/01_documentario_poster.jpg
- *   public/mybots-app/videos/02_equipe_de_bolso.mp4
- *   public/mybots-app/videos/02_equipe_de_bolso.webm
- *   public/mybots-app/videos/02_equipe_de_bolso_poster.jpg
- *   public/mybots-app/videos/03_dia_que_sobrou.mp4
- *   public/mybots-app/videos/03_dia_que_sobrou.webm
- *   public/mybots-app/videos/03_dia_que_sobrou_poster.jpg
- *   public/mybots-app/videos/04_antes_e_depois.mp4
- *   public/mybots-app/videos/04_antes_e_depois.webm
- *   public/mybots-app/videos/04_antes_e_depois_poster.jpg
- *
- * O hero usa o 00 em loop, mudo, playsinline, com o poster 00_hero_poster.jpg.
- * Os quatro de baixo usam preload=none e o poster do próprio slot.
- * Pode mandar só o mp4, só o webm, ou os dois. O poster é opcional.
+ * Vídeos finais em public/mybots/videos/ (só essa pasta; não criar
+ * public/mybots/index.html nem app/mybots/, senão o Hub deixa de abrir em /mybots):
+ *   00_hero_loop.mp4 + 00_hero_poster.jpg          fundo do hero, mudo, loop, playsinline
+ *   01_documentario.mp4 + 01_documentario_poster.jpg
+ *   02_equipe_de_bolso.mp4 + 02_equipe_de_bolso_poster.jpg
+ *   03_dia_que_sobrou.mp4 + 03_dia_que_sobrou_poster.jpg
+ *   04_antes_e_depois.mp4 + 04_antes_e_depois_poster.jpg
+ * Os quatro de baixo usam preload=none, poster e a fonte só perto da tela.
+ * Webm é opcional, no mesmo nome.
  */
 
 import { URL_SITE } from "@/lib/soubots";
@@ -73,19 +62,19 @@ function slot(id: string, titulo: string, poster: string): SlotDeVideo {
   return {
     id,
     titulo,
-    mp4: `/mybots-app/videos/${id}.mp4`,
-    webm: `/mybots-app/videos/${id}.webm`,
+    mp4: `/mybots/videos/${id}.mp4`,
+    webm: `/mybots/videos/${id}.webm`,
     poster,
   };
 }
 
 /** Ordem fixa. O primeiro é o fundo do hero; os outros descem a página. */
 export const SLOTS_DE_VIDEO: SlotDeVideo[] = [
-  slot("00_hero_loop", "MyBots", "/mybots-app/videos/00_hero_poster.jpg"),
-  slot("01_documentario", "Documentário", "/mybots-app/videos/01_documentario_poster.jpg"),
-  slot("02_equipe_de_bolso", "Conheça os bots", "/mybots-app/videos/02_equipe_de_bolso_poster.jpg"),
-  slot("03_dia_que_sobrou", "O dia que sobrou", "/mybots-app/videos/03_dia_que_sobrou_poster.jpg"),
-  slot("04_antes_e_depois", "Antes e depois", "/mybots-app/videos/04_antes_e_depois_poster.jpg"),
+  slot("00_hero_loop", "MyBots", "/mybots/videos/00_hero_poster.jpg"),
+  slot("01_documentario", "Documentário", "/mybots/videos/01_documentario_poster.jpg"),
+  slot("02_equipe_de_bolso", "Conheça os bots", "/mybots/videos/02_equipe_de_bolso_poster.jpg"),
+  slot("03_dia_que_sobrou", "O dia que sobrou", "/mybots/videos/03_dia_que_sobrou_poster.jpg"),
+  slot("04_antes_e_depois", "Antes e depois", "/mybots/videos/04_antes_e_depois_poster.jpg"),
 ];
 
 export const VIDEO_HERO = SLOTS_DE_VIDEO[0];
