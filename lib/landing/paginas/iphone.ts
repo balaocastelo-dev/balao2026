@@ -41,8 +41,8 @@ export const iphone: PaginaDeCaptacao = {
     texto:
       "Tela, bateria, conector, câmera, Face ID, placa ou água. Diagnóstico grátis na Av. Anchieta, 789. O reparo é rápido: em média 60 minutos, conforme o defeito e a peça.",
     imagem: {
-      src: "/images/landing/v2/telaiphone.jpg",
-      alt: "Técnico de luvas avaliando um smartphone com a tela trincada na bancada",
+      src: "/images/landing/v3/iphone/telaiphone.webp",
+      alt: "Técnico de luvas avaliando um iPhone com a tela trincada na bancada de reparo",
     },
     mensagem: MENSAGEM,
     botao: "Orçar no WhatsApp",
@@ -103,8 +103,8 @@ export const iphone: PaginaDeCaptacao = {
         },
       ],
       imagem: {
-        src: "/images/apple/hub-hero-real.png",
-        alt: "Balcão da loja Balão da Informática Anchieta no Cambuí, em Campinas",
+        src: "/images/landing/v3/reparoapple/hub-hero.webp",
+        alt: "Bancada clara com notebook, computador tudo-em-um, celular e kit de ferramentas de precisão",
       },
     },
     {
@@ -234,14 +234,14 @@ export const iphone: PaginaDeCaptacao = {
       tipo: "atalhos",
       titulo: "Siga para o aparelho ou para a peça",
       itens: [
-        { titulo: "Serviços Apple", texto: "O hub da linha: MacBook, iMac, iPad, Mac mini e Watch.", href: "/reparoapple", imagem: "/images/landing/v2/reparoapple.jpg" },
-        { titulo: "Especialista por aparelho", texto: "Como achar o modelo exato antes de vir.", href: "/wendell/apple", imagem: "/images/landing/v2/wendell-apple.jpg" },
-        { titulo: "Tela e bateria", texto: "Trinca, toque e saúde da bateria, em detalhe.", href: "/telaiphone", imagem: "/images/landing/v2/telaiphone.jpg" },
-        { titulo: "MacBook", texto: "Air e Pro, no mesmo endereço.", href: "/macbook", imagem: "/images/apple/macbook-hero.webp" },
-        { titulo: "Celular Android", texto: "Samsung, Motorola e Xiaomi, na mesma bancada.", href: "/android", imagem: "/images/apple/hub-hero-real.png" },
+        { titulo: "Serviços Apple", texto: "O hub da linha: MacBook, iMac, iPad, Mac mini e Watch.", href: "/reparoapple", imagem: "/images/landing/v3/reparoapple/reparoapple.webp", alt: "Bancada de assistência técnica com notebook, celular no suporte, lupa iluminada e ferramentas organizadas" },
+        { titulo: "Especialista por aparelho", texto: "Como achar o modelo exato antes de vir.", href: "/wendell/apple", imagem: "/images/landing/v3/reparoapple/wendell-apple.webp", alt: "Técnico fazendo microsolda em placa de celular sob microscópio" },
+        { titulo: "Tela e bateria", texto: "Trinca, toque e saúde da bateria, em detalhe.", href: "/telaiphone", imagem: "/images/landing/v3/iphone/telaiphone.webp", alt: "Técnico de luvas avaliando um iPhone com a tela trincada na bancada de reparo" },
+        { titulo: "MacBook", texto: "Air e Pro, no mesmo endereço.", href: "/macbook", imagem: "/images/landing/v3/macbook/macbook-hero.webp", alt: "Técnico de luvas trabalhando na placa de um MacBook aberto na bancada" },
+        { titulo: "Celular Android", texto: "Samsung, Motorola e Xiaomi, na mesma bancada.", href: "/android", imagem: "/images/landing/v3/reparoapple/hub-hero.webp", alt: "Bancada clara com notebook, computador tudo-em-um, celular e kit de ferramentas de precisão" },
         { titulo: "iPhones à venda", texto: "Quando trocar compensar mais que consertar.", href: "/categoria/celular-smartphone-smartphones-iphone" },
         { titulo: "Capas e películas", texto: "Para sair da loja com o vidro protegido.", href: "/categoria/celular-smartphone-acessorios-para-smartphones-capas-e-peliculas" },
-        { titulo: "Recuperação de dados", texto: "iPhone que não liga e fotos sem backup.", href: "/recuperacaodados", imagem: "/images/landing/v2/recuperacaodados.jpg" },
+        { titulo: "Recuperação de dados", texto: "iPhone que não liga e fotos sem backup.", href: "/recuperacaodados", imagem: "/images/landing/v3/android/recuperacaodados.webp", alt: "Técnico segurando um SSD ao lado de notebook e disco externo para recuperação de dados" },
       ],
     },
     {

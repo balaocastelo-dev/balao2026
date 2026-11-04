@@ -137,7 +137,7 @@ export type Secao =
       titulo: string;
       texto?: string;
       /** Slugs de páginas desta mesma rede (ou caminhos internos). */
-      itens: { titulo: string; texto: string; href: string; imagem?: string }[];
+      itens: { titulo: string; texto: string; href: string; imagem?: string; alt?: string }[];
     }
   | { tipo: "vitrine"; regras: RegraDeVitrine[]; titulo?: string; texto?: string }
   | { tipo: "quedas"; titulo: string; texto?: string; limite?: number }

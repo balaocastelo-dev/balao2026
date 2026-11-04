@@ -319,7 +319,7 @@ function RenderSecao({
                 <li key={item.href}>
                   <Link href={item.href} className="cpt-vizinha h-full">
                     <span className="cpt-vizinha__foto">
-                      {item.imagem ? <Image src={item.imagem} alt="" fill sizes="88px" className="object-cover" /> : null}
+                      {item.imagem ? <Image src={item.imagem} alt={item.alt ?? ""} fill sizes="88px" className="object-cover" /> : null}
                     </span>
                     <span>
                       <span className="cpt-vizinha__nome block font-bold leading-snug text-white">{item.titulo}</span>
