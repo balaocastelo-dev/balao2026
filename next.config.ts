@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { ENDERECOS_ANTIGOS } from "./lib/painel/enderecos-antigos";
+import { rewritesDoPainel, TUNEL_HUB } from "./lib/soubots";
 
 const nextConfig: NextConfig = {
   turbopack: {
@@ -22,6 +23,12 @@ const nextConfig: NextConfig = {
       beforeFiles: [
         { source: "/3d", destination: "/3d/index.html" },
         { source: "/chacara3d", destination: "/chacara3d/index.html" },
+        // Painel do MyBots em www.soubots.com/app (e no apex). O Hub fica no
+        // mesmo túnel de /mybots e não vê o prefixo /app. Só esses hosts:
+        // www.balao.info/app não é o painel. /app/api/auth/google/callback e
+        // /app/ws/* entram em /app/:caminho*. Não redirecionamos /app → /app/:
+        // o 308 automático do Next só tira a barra (/app/ → /app) uma vez.
+        ...rewritesDoPainel(),
       ],
       // MEU BLING (ERP próprio, substituto do Bling) mora na VPS da loja
       // (srv1963897.hstgr.cloud, Caddy → container meu-bling) e aparece aqui em
@@ -31,8 +38,9 @@ const nextConfig: NextConfig = {
         { source: "/sistema", destination: "https://srv1963897.hstgr.cloud/sistema/" },
         { source: "/sistema/:caminho*", destination: "https://srv1963897.hstgr.cloud/sistema/:caminho*" },
         // MyBots Hub (PC do Thiago via tunel Cloudflare). Mesmo-origin p/ cookie de sessao.
-        { source: "/mybots", destination: "https://put-order-exist-actual.trycloudflare.com/mybots/" },
-        { source: "/mybots/:caminho*", destination: "https://put-order-exist-actual.trycloudflare.com/mybots/:caminho*" },
+        // /app no soubots usa o mesmo TUNEL_HUB (beforeFiles, só naqueles hosts).
+        { source: "/mybots", destination: `${TUNEL_HUB}/` },
+        { source: "/mybots/:caminho*", destination: `${TUNEL_HUB}/:caminho*` },
       ],
       fallback: [],
     };

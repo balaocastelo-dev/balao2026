@@ -15,5 +15,13 @@
   ],
   "regions": [
     "iad1"
+  ],
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "soubots.com" }],
+      "destination": "https://www.soubots.com/:path*",
+      "permanent": true
+    }
   ]
 }
