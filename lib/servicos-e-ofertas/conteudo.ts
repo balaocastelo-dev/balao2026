@@ -6,7 +6,7 @@
 // Tudo o que a página afirma sobre a loja está aqui, num lugar só, para
 // conferir e mudar sem mexer no desenho. Regra: só entra o que o Thiago já
 // disse ou o que o site já anunciava (10% no Pix, 10x sem juros, tela de
-// iPhone em até 3 horas, retirada no balcão). Preço de serviço não entra:
+// retirada no balcão). Preço de serviço não entra:
 // o orçamento é sempre pelo WhatsApp.
 // ============================================================
 
@@ -67,14 +67,24 @@ export const SERVICOS: Servico[] = [
   },
   {
     id: "reparoapple",
-    titulo: "Reparo Apple: iPhone, MacBook, iPad",
-    resumo: "Troca de tela e bateria de iPhone em até 3 horas.",
-    itens: ["Tela e bateria de iPhone", "MacBook e iMac: placa, SSD, tela", "iPad e Apple Watch"],
+    titulo: "Serviços Apple: iPhone, MacBook, iMac",
+    resumo: "Especialista em Apple. Reparo em média 60 minutos, conforme o defeito e a peça. Até 12x sem juros.",
+    itens: ["iPhone, iPad e Apple Watch", "MacBook e iMac", "Assistência especializada e independente"],
     href: "/reparoapple",
     foto: "/images/servicos-e-ofertas/reparoapple.webp",
-    fotoAlt: "Reparo de iPhone e MacBook na assistência Apple da Balão da Informática no Cambuí",
+    fotoAlt: "Reparo de iPhone e MacBook na assistência da Balão da Informática no Cambuí",
     mensagem: "Olá! Quero orçar um reparo no meu aparelho Apple.",
-    selo: "Até 3 horas",
+    selo: "Em média 60 min",
+  },
+  {
+    id: "android",
+    titulo: "Celular Android",
+    resumo: "Samsung, Motorola e outras marcas, na mesma bancada. Reparo em média 60 minutos, conforme o defeito e a peça.",
+    itens: ["Tela, bateria e conector", "Celular que molhou ou não liga", "Parcelamento em até 12x sem juros"],
+    href: "/android",
+    foto: "/images/servicos-e-ofertas/reparoapple.webp",
+    fotoAlt: "Smartphone na bancada da assistência técnica da Balão da Informática no Cambuí",
+    mensagem: "Olá! Quero orçar o conserto do meu celular Android.",
   },
   {
     id: "montagempc",
@@ -170,7 +180,8 @@ export const PERGUNTAS = [
   },
   {
     question: "Quanto tempo demora para trocar a tela ou a bateria do iPhone?",
-    answer: "A troca de tela e de bateria de iPhone é feita em até 3 horas na loja do Cambuí, conforme o modelo e a disponibilidade da peça. Confirme o seu modelo pelo WhatsApp antes de vir.",
+    answer:
+      "O reparo é rápido: em média 60 minutos, conforme o defeito e a peça. Placa ou peça encomendada podem levar mais. Confirme o modelo pelo WhatsApp antes de vir. Parcelamento em até 12x sem juros.",
   },
   {
     question: "Como faço um orçamento de conserto?",

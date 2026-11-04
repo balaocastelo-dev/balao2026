@@ -169,7 +169,8 @@ export const REGIONAL_SERVICES: RegionalService[] = [
     slug: "reparo-apple",
     shortName: "Reparo Apple",
     headline: "Reparo Apple para iPhone, iPad, MacBook e iMac",
-    description: "Atendimento para linha Apple com foco em reparo, diagnóstico, troca de tela, bateria e manutenção avançada.",
+    description:
+      "Assistência especializada e independente para a linha Apple, no Cambuí. Reparo em média 60 minutos, conforme o defeito e a peça. Parcelamento em até 12x sem juros.",
     serviceType: "Reparo Apple",
     hero: "Quem procura reparo Apple na região geralmente quer rapidez, transparência e alguém que realmente entenda do equipamento. É isso que esta página entrega.",
     benefits: [

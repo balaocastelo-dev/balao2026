@@ -3,8 +3,8 @@ import { carregarDadosDaPagina } from "@/lib/landing/dados";
 import { metadadosDaPagina } from "@/lib/landing/metadados";
 import { paginaPorSlug } from "@/lib/landing/paginas";
 
-// Conteúdo em lib/landing/paginas/wendell-apple.ts (hub Apple; as páginas de
-// cada aparelho continuam em app/wendell/apple/<aparelho>).
+// Conteúdo em lib/landing/paginas/wendell-apple.ts. MacBook, iMac e iPhone
+// estão em /macbook, /imac e /iphone. iPad, Mac mini e Apple Watch seguem aqui.
 export const revalidate = 300;
 
 const pagina = paginaPorSlug("wendell/apple");

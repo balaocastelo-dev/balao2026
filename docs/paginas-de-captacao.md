@@ -4,6 +4,12 @@ Pedido do Thiago: reformular 22 páginas (21 ficaram neste molde) do site para q
 com produtos com foto, bem preenchida, com palavras-chave para o Google e para as IAs, e que leve a
 pessoa a chamar no WhatsApp. Cada página é única.
 
+## Serviços Apple e Android (04/11/2026)
+
+O hub continua em `/reparoapple` (não abriu URL nova). MacBook, iMac e iPhone saíram de `/wendell/apple/...` para slugs curtos, com 301: `/macbook`, `/imac`, `/iphone`. Celular Android é página nova: `/android`. iPad, Mac mini e Apple Watch seguem em `/wendell/apple/...`. Tela e bateria de iPhone seguem em `/telaiphone`.
+
+Dado confirmado pelo dono e usado nas páginas: especialista em Apple; todos os serviços Apple e Android; reparo rápido em média 60 minutos, conforme o defeito e a peça; parcelamento em até 12x sem juros. O briefing de 04/11/2026 acrescenta, nas páginas de celular, diagnóstico grátis e coleta por motoboy (custo e prazo da coleta no WhatsApp). Sem "autorizada", "oficial", "credenciada" ou logo da Apple. Preço de serviço, tipo de peça e dias de garantia não são publicados: o texto fica neutro onde o briefing pedia para preencher. Hub Android: `/android`. Sem depoimento e sem número novo de avaliação.
+
 ## Páginas de SEO/AEO (04/11/2026)
 
 Oito briefings entraram no mesmo molde. Onde já havia URL, o texto foi refeito nela:
@@ -14,7 +20,7 @@ Preço de serviço, prazo fechado, FPS medido, tempo de boot e defeito “típic
 
 ## As páginas
 
-`/manutencao`, `/upgrade-ssd`, `/formatacao`, `/notebook-dell`, `/notebook-lenovo`, `/notebook-acer`, `/notebook-hp`, `/notebook-asus`, `/notebook-samsung`, `/qual-pc-gamer`, `/recuperacaodados`, `/reparoapple`, `/telaiphone`, `/wendell/apple`, `/assistenciagames`,
+`/manutencao`, `/upgrade-ssd`, `/formatacao`, `/notebook-dell`, `/notebook-lenovo`, `/notebook-acer`, `/notebook-hp`, `/notebook-asus`, `/notebook-samsung`, `/qual-pc-gamer`, `/recuperacaodados`, `/reparoapple`, `/macbook`, `/imac`, `/iphone`, `/android`, `/telaiphone`, `/wendell/apple`, `/assistenciagames`,
 `/montagempc`, `/pcgamer`, `/pcgamer3d`, `/notebooks`, `/carregadores`, `/toner`, `/microsoft`,
 `/consignacao`, `/sistemas`, `/promocao`, `/envio-e-entrega`, `/trocas-e-devolucoes`, `/como-comprar`,
 `/sobre-a-empresa`, `/sobre-nos`.
@@ -80,7 +86,7 @@ recuperação de dados, percentuais e prazos da consignação, preços no texto.
 
 ## Para conferir com o Thiago
 
-- A página `/wendell/apple` diz que a Balão não é assistência autorizada Apple.
+- A página `/wendell/apple` diz que a assistência é especializada e independente, sem falar em nome do fabricante.
 - A recuperação de dados não diz se o trabalho é feito na loja ou num parceiro.
 - Troca de compra feita no balcão sem defeito: o texto diz "combinada com a loja".
 - O carrinho (`lib/shipping.ts`) ainda mostra "Entrega Flash (Campinas) — Até 24h" com um cálculo simulado,

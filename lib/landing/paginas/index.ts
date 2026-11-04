@@ -1,10 +1,14 @@
 import type { PaginaDeCaptacao } from "../tipos";
+import { android } from "./android";
 import { assistenciagames } from "./assistenciagames";
 import { carregadores } from "./carregadores";
 import { comoComprar } from "./como-comprar";
 import { consignacao } from "./consignacao";
 import { envioEEntrega } from "./envio-e-entrega";
 import { formatacao } from "./formatacao";
+import { imac } from "./imac";
+import { iphone } from "./iphone";
+import { macbook } from "./macbook";
 import { manutencao } from "./manutencao";
 import { notebookAcer, notebookAsus, notebookDell, notebookHp, notebookLenovo, notebookSamsung } from "./marcas-notebook";
 import { microsoft } from "./microsoft";
@@ -35,6 +39,10 @@ export const PAGINAS: Record<string, PaginaDeCaptacao> = Object.fromEntries(
   [
     manutencao,
     upgradeSsd,
+    android,
+    macbook,
+    imac,
+    iphone,
     formatacao,
     notebookDell,
     notebookLenovo,

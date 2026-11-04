@@ -393,7 +393,7 @@ export const paginasDeMarca: PaginaDeCaptacao[] = MARCAS.map((m) => {
           { titulo: "Conserto de notebook", texto: "Por sintoma, qualquer marca.", href: "/manutencao", imagem: "/images/landing/v2/manutencao.jpg" },
           { titulo: "Carregadores", texto: "Fonte conferida pela etiqueta.", href: "/carregadores", imagem: "/images/landing/v2/carregadores.jpg" },
           { titulo: "Upgrade de SSD", texto: "Quando o caso é lentidão de disco.", href: "/upgrade-ssd", imagem: "/images/landing/v2/manutencao.jpg" },
-          { titulo: "Reparo Apple", texto: "MacBook e iPhone ficam nesta página.", href: "/reparoapple", imagem: "/images/landing/v2/reparoapple.jpg" },
+          { titulo: "Serviços Apple", texto: "MacBook, iPhone e iMac, na assistência independente.", href: "/reparoapple", imagem: "/images/landing/v2/reparoapple.jpg" },
           { titulo: "Licenças", texto: "Windows, se a formatação entrar no serviço.", href: "/microsoft", imagem: "/images/landing/v2/microsoft.jpg" },
           ...outras(m.slug).slice(0, 3),
         ],

@@ -182,7 +182,10 @@ export const manutencao: PaginaDeCaptacao = {
         { titulo: "Formatação com backup", texto: "Vírus ou sistema, com arquivos salvos.", href: "/formatacao", imagem: "/images/landing/v2/sistemas.jpg" },
         { titulo: "Urgente", texto: "Quando não dá para esperar a semana.", href: "/urgente" },
         { titulo: "Recuperação de dados", texto: "Disco que já não abre.", href: "/recuperacaodados", imagem: "/images/landing/v2/recuperacaodados.jpg" },
-        { titulo: "Reparo Apple", texto: "MacBook e iPhone, na mesma loja.", href: "/reparoapple", imagem: "/images/landing/v2/reparoapple.jpg" },
+        { titulo: "Serviços Apple", texto: "iPhone, MacBook, iMac e o resto da linha.", href: "/reparoapple", imagem: "/images/landing/v2/reparoapple.jpg" },
+        { titulo: "MacBook", texto: "Air e Pro, na assistência independente.", href: "/macbook", imagem: "/images/apple/macbook-hero.webp" },
+        { titulo: "iPhone", texto: "Tela, bateria, carga e líquido.", href: "/iphone", imagem: "/images/landing/v2/telaiphone.jpg" },
+        { titulo: "Celular Android", texto: "Samsung, Motorola e outras marcas.", href: "/android", imagem: "/images/landing/v2/como-comprar.jpg" },
         { titulo: "Carregadores", texto: "Fonte pela foto da etiqueta.", href: "/carregadores", imagem: "/images/landing/v2/carregadores.jpg" },
         { titulo: "Dell", texto: "Inspiron, Latitude, Vostro, XPS e G.", href: "/notebook-dell", imagem: "/images/landing/v2/manutencao.jpg" },
         { titulo: "Lenovo", texto: "IdeaPad, ThinkPad, Legion e Yoga.", href: "/notebook-lenovo", imagem: "/images/landing/v2/manutencao.jpg" },
@@ -222,7 +225,8 @@ export const manutencao: PaginaDeCaptacao = {
     },
     {
       pergunta: "Consertam MacBook?",
-      resposta: "Sim, na página de reparo Apple, no mesmo endereço. A Balão não é canal do fabricante.",
+      resposta:
+        "Sim. MacBook, iMac e iPhone têm página própria, no mesmo endereço. A assistência é especializada e independente. Celular Android também é na mesma bancada.",
     },
   ],
   tituloDasPerguntas: "Perguntas frequentes",

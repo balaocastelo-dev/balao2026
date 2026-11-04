@@ -81,13 +81,13 @@ export const wendellApple: PaginaDeCaptacao = {
         {
           titulo: "iPhone",
           texto: "Tela, bateria, conector de carga, câmera, aparelho que molhou ou não liga.",
-          href: "/wendell/apple/iphone",
+          href: "/iphone",
           imagem: "/images/apple/subcategories/iphone-card.png",
         },
         {
           titulo: "MacBook Air e MacBook Pro",
           texto: "Bateria, tela, teclado, trackpad, carregador e Mac que não liga.",
-          href: "/wendell/apple/macbook",
+          href: "/macbook",
           imagem: "/images/apple/subcategories/macbook-card.png",
         },
         {
@@ -99,7 +99,7 @@ export const wendellApple: PaginaDeCaptacao = {
         {
           titulo: "iMac",
           texto: "Lentidão, tela, fonte e iMac que não liga.",
-          href: "/wendell/apple/imac",
+          href: "/imac",
           imagem: "/images/apple/subcategories/imac-card.png",
         },
         {
@@ -169,6 +169,11 @@ export const wendellApple: PaginaDeCaptacao = {
           href: "/reparoapple",
         },
         {
+          titulo: "Celular Android",
+          texto: "Samsung, Motorola e outras marcas, na mesma bancada.",
+          href: "/android",
+        },
+        {
           titulo: "Recuperação de dados",
           texto: "Mac ou iPhone que não liga e arquivos sem backup.",
           href: "/recuperacaodados",
@@ -206,9 +211,9 @@ export const wendellApple: PaginaDeCaptacao = {
   ],
   perguntas: [
     {
-      pergunta: "A Balão é assistência autorizada Apple?",
+      pergunta: "A Balão é canal do fabricante?",
       resposta:
-        "Não. A Balão é uma loja de informática com assistência técnica própria no Cambuí, que atende aparelhos Apple. O técnico explica no orçamento as opções de peça para o seu modelo e o que muda em cada uma.",
+        "Não. É assistência especializada e independente, especialista em Apple, na loja do Cambuí. Também faz todos os serviços de celular Android. O técnico explica no orçamento as opções de peça para o seu modelo. A loja não usa o logo da marca.",
     },
     {
       pergunta: "Quais aparelhos Apple vocês atendem?",
@@ -238,7 +243,7 @@ export const wendellApple: PaginaDeCaptacao = {
   ],
   temas: ["apple", "iphone", "assistencia", "notebook", "compra"],
   termosDoBlog: ["apple", "iphone", "macbook", "imac", "mac mini", "ipad", "apple watch", "macos", "ios"],
-  relacionadas: ["reparoapple", "telaiphone", "recuperacaodados", "notebooks"],
+  relacionadas: ["reparoapple", "macbook", "iphone", "imac"],
   final: {
     titulo: "Diga o aparelho e o modelo, e a bancada Apple responde",
     texto:

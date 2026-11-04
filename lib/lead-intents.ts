@@ -106,7 +106,7 @@ export const LEAD_INTENTS: LeadIntent[] = [
       "Quem quebra a tela do iPhone normalmente busca solução no mesmo dia. Essa é uma das buscas mais quentes para reparo Apple.",
     city: "Campinas",
     serviceLabel: "Reparo Apple",
-    primaryHref: "/reparoapple",
+    primaryHref: "/iphone",
     problems: [
       "Tela trincada ou sem imagem",
       "Touch falhando",

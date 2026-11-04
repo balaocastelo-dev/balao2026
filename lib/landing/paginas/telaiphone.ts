@@ -273,7 +273,7 @@ export const telaiphone: PaginaDeCaptacao = {
   ],
   temas: ["iphone", "apple", "assistencia", "garantia"],
   termosDoBlog: ["iphone", "bateria", "tela", "apple", "celular", "carregador"],
-  relacionadas: ["reparoapple", "wendell/apple", "carregadores", "recuperacaodados"],
+  relacionadas: ["iphone", "reparoapple", "macbook", "android"],
   final: {
     titulo: "Mande o modelo do seu iPhone e o que aconteceu",
     texto:

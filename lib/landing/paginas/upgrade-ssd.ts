@@ -160,6 +160,7 @@ export const upgradeSsd: PaginaDeCaptacao = {
       titulo: "Se o problema não for só lentidão",
       itens: [
         { titulo: "Conserto de notebook", texto: "Não liga, esquenta, tela, teclado ou líquido.", href: "/manutencao", imagem: "/images/landing/v2/manutencao.jpg" },
+        { titulo: "MacBook", texto: "Quando o notebook é Apple: tela, bateria e o que não liga.", href: "/macbook", imagem: "/images/apple/macbook-hero.webp" },
         { titulo: "Notebooks", texto: "Quando trocar de máquina compensa mais que o upgrade.", href: "/notebooks", imagem: "/images/landing/v2/notebooks.jpg" },
         { titulo: "Peças de hardware", texto: "SSD, memória e o resto do estoque, com filtro.", href: "/categoria/hardware" },
         { titulo: "Formatação com backup", texto: "Quando a lentidão é de sistema, não de disco.", href: "/formatacao", imagem: "/images/landing/v2/sistemas.jpg" },
