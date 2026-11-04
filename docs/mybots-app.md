@@ -15,7 +15,10 @@ Não confundir com:
 ## Onde está
 
 - `app/mybots-app/page.tsx` — a página. Fica fora do menu, do rodapé e do WhatsApp da loja
-  (`isPaginaDeVendas` em `components/LayoutWrapper.tsx`).
+  (`isPaginaDeVendas` em `components/LayoutWrapper.tsx`). A fonte é a Outfit em arquivo
+  (`outfit-latin-wght-normal.woff2`, via `next/font/local`). Não voltar para `next/font/google`:
+  o build da Vercel quebra quando o Google devolve a URL da fonte sem extensão.
+
 - `public/downloads/MyBots.apk` — o aplicativo. O botão usa `<a href="/downloads/MyBots.apk" download="MyBots.apk">`.
   O cabeçalho desse arquivo (`Content-Type` de APK e `Content-Disposition`) está em `next.config.ts`.
 - `public/mybots-app/comercial.mp4` — comercial das amebas (narração atual). O player
