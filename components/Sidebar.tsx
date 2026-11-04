@@ -276,7 +276,7 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
           <CustomLink href="/carregadores" icon={Battery} label="Carregadores" />
           <CustomLink href="/microsoft" icon={Key} label="Licenças Microsoft" />
           <CustomLink href="/assistenciagames" icon={Gamepad2} label="Assistência Games" />
-          <CustomLink href="/tonner" icon={Printer} label="Toners" />
+          <CustomLink href="/toner" icon={Printer} label="Toners" />
           <CustomLink href="/reparoapple" icon={Smartphone} label="Reparo Apple" />
           <CustomLink href="/telaiphone" icon={Zap} label="Troca de Tela & Bateria" />
           <CustomLink href="/recuperacaodados" icon={HardDrive} label="Recuperação de Dados" />
@@ -366,7 +366,7 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
             <CustomLink href="/consignados" icon={RefreshCcw} label="Consignados" />
             <CustomLink href="/consignacao" icon={Handshake} label="Consignação" />
             <CustomLink href="/assistenciagames" icon={Gamepad2} label="Assistência Games" />
-            <CustomLink href="/tonner" icon={Printer} label="Toners" />
+            <CustomLink href="/toner" icon={Printer} label="Toners" />
             <CustomLink href="/reparoapple" icon={Smartphone} label="Reparo Apple" />
             <CustomLink href="/telaiphone" icon={Zap} label="Troca de Tela & Bateria" />
             <CustomLink href="/recuperacaodados" icon={HardDrive} label="Recuperação de Dados" />

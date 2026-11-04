@@ -3197,7 +3197,7 @@ app.post(["/api/enviar-produto", "/api/crm/enviar-produto"], async (req, res) =>
     const specsVisiveis = filtrarSpecsInternos(prod.specs);
     const specs = specsVisiveis.length ? `\n• ${specsVisiveis.join("\n• ")}` : "";
     const precoFmt = precoFinal.toLocaleString("pt-BR", { minimumFractionDigits: 2 });
-    const text = `⚡ *Oferta Balão da Informática*\n*${prodNome}*\n\n💵 *Preço Especial:* *R$ ${precoFmt}*${specs}${obsTxt}\n\n📍 Pronta entrega na loja do Castelo Campinas!\nPara reservar ou tirar dúvidas, é só responder aqui! 🎈`;
+    const text = `⚡ *Oferta Balão da Informática*\n*${prodNome}*\n\n💵 *Preço Especial:* *R$ ${precoFmt}*${specs}${obsTxt}\n\n📍 Pronta entrega na loja da Anchieta, Campinas!\nPara reservar ou tirar dúvidas, é só responder aqui! 🎈`;
 
     let mediaSent = false;
     const bestChatId = getBestTargetChatId(targetChat, number || targetChat);
@@ -3963,7 +3963,7 @@ io.on("connection", (socket) => {
       const specs = specsVisiveis.length ? `\n• ${specsVisiveis.join("\n• ")}` : "";
       const precoFmt = precoFinal.toLocaleString("pt-BR", { minimumFractionDigits: 2 });
 
-      const text = `⚡ *Oferta Balão da Informática*\n*${prodNome}*\n\n💵 *Preço Especial:* *R$ ${precoFmt}*${specs}${obs}\n\n📍 Pronta entrega na loja do Castelo Campinas!\nPara reservar ou tirar dúvidas, é só responder aqui! 🎈`;
+      const text = `⚡ *Oferta Balão da Informática*\n*${prodNome}*\n\n💵 *Preço Especial:* *R$ ${precoFmt}*${specs}${obs}\n\n📍 Pronta entrega na loja da Anchieta, Campinas!\nPara reservar ou tirar dúvidas, é só responder aqui! 🎈`;
 
       let mediaSent = false;
       let sentId = null;

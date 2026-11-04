@@ -117,7 +117,7 @@ export const CHAMADAS: Record<TemaDeChamada, ChamadaPronta> = {
     titulo: "Toner e cartucho para a sua impressora",
     texto: "Diga a marca e o modelo da impressora. A loja confere o suprimento certo e combina a entrega em Campinas e região.",
     rotulo: "Ver toner e cartucho",
-    href: "/tonner",
+    href: "/toner",
   },
   games: {
     titulo: "Console ou controle com defeito?",

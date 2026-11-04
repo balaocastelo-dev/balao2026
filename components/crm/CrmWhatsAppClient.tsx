@@ -3122,7 +3122,7 @@ export default function CrmWhatsAppClient({
         ? ` à vista no Pix\n💳 *No cartão:* R$ ${prod.precoCartao.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}${prod.parcelamento ? ` em até ${prod.parcelamento}` : ""}`
         : "";
 
-    const textoFormatado = `⚡ *Oferta Balão da Informática:*\n*${prod.nome}*\n\n💵 *Preço Especial:* *${precoFmt}*${cartaoTxt}${specsTxt}${obsTxt}\n\n📍 Pronta entrega na loja do Castelo Campinas!\nPara garantir a reserva ou tirar dúvidas, é só responder aqui! 🎈`;
+    const textoFormatado = `⚡ *Oferta Balão da Informática:*\n*${prod.nome}*\n\n💵 *Preço Especial:* *${precoFmt}*${cartaoTxt}${specsTxt}${obsTxt}\n\n📍 Pronta entrega na loja da Anchieta, Campinas!\nPara garantir a reserva ou tirar dúvidas, é só responder aqui! 🎈`;
 
     const produtoResumo: CrmProdutoResumo = {
       id: prod.id,

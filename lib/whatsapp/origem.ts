@@ -35,7 +35,7 @@ const ORIGENS: [RegExp, string][] = [
   [/^\/promocao/, "Promoções"],
   [/^\/premium/, "Premium"],
   [/^\/ia-local/, "IA local"],
-  [/^\/tonner/, "Toners"],
+  [/^\/tonn?er/, "Toners"],
   [/^\/(carregadores|microsoft)(\/|$)/, "Acessórios e licenças"],
   [/^\/(sistemas|sistemasdeia|overclock|software)(\/|$)/, "Sites e sistemas"],
   [/^\/blog/, "Blog"],

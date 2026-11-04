@@ -24,7 +24,7 @@ export async function POST(req: Request) {
         const welcomeHtml = getWelcomeTemplate(name, email);
         await sendEmail({
             to: email,
-            subject: "Bem-vindo à Balão Castelo!",
+            subject: "Bem-vindo à Balão da Informática Anchieta!",
             html: welcomeHtml,
             eventType: 'welcome_email'
         });

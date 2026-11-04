@@ -102,7 +102,7 @@ export function generateHomeAiAndGoogleSchema() {
           name: "Onde comprar PC Gamer e peças de informática em Campinas?",
           acceptedAnswer: {
             "@type": "Answer",
-            text: "Na Balão da Informática Castelo no Cambuí em Campinas. Oferecemos computadores montados, placas de vídeo RTX/Radeon, processadores Intel/Ryzen, SSDs e periféricos com pronta entrega, desconto de 10% no PIX ou até 10x sem juros e retirada no balcão em até 30 minutos."
+            text: "Na Balão da Informática Anchieta no Cambuí em Campinas. Oferecemos computadores montados, placas de vídeo RTX/Radeon, processadores Intel/Ryzen, SSDs e periféricos com pronta entrega, desconto de 10% no PIX ou até 10x sem juros e retirada no balcão em até 30 minutos."
           }
         },
         {

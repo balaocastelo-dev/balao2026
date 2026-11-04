@@ -50,7 +50,7 @@ function registro(slug: string, nome: string): VendedorRegistro {
     // Cargo igual para todo mundo, sem flexão de gênero — muda aqui se
     // alguém tiver função diferente.
     cargo: "Vendas",
-    assinatura: `Atenciosamente,\n*${nome}* — Balão da Informática Castelo`,
+    assinatura: `Atenciosamente,\n*${nome}* — Balão da Informática Anchieta`,
     envSenha: `VENDEDOR_${slug.toUpperCase()}_SENHA`,
   };
 }
@@ -72,7 +72,7 @@ export const VENDEDORES: VendedorRegistro[] = [
     id: "mybots",
     nome: "MyBots",
     cargo: "Equipe de IA (rob\u00f4)",
-    assinatura: "_Mensagem enviada pela equipe de IA do Bal\u00e3o da Inform\u00e1tica Castelo._",
+    assinatura: "_Mensagem enviada pela equipe de IA do Bal\u00e3o da Inform\u00e1tica Anchieta._",
     envSenha: "VENDEDOR_MYBOTS_SENHA",
   },
 ];

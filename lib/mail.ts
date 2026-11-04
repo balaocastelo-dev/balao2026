@@ -162,7 +162,7 @@ export async function sendSystemNotification(event: string, data: any) {
         <h3>Detalhes:</h3>
         ${dataHtml}
         <br>
-        <p>Este é um e-mail automático do sistema Balão Castelo.</p>
+        <p>Este é um e-mail automático do sistema Balão da Informática Anchieta.</p>
     `;
 
     // Tenta enviar para o e-mail administrativo definido ou usa o SMTP user como fallback

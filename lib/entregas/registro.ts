@@ -175,7 +175,7 @@ function textoInterno(e: Entrega) {
 
 export function textoParaOCliente(e: Entrega): string | null {
   const nome = e.cliente.nome.split(" ")[0] || "";
-  const assinatura = "\n\nBalão da Informática Castelo\n🌐 balao.info";
+  const assinatura = "\n\nBalão da Informática Anchieta\n🌐 balao.info";
   switch (e.situacao) {
     case "a_caminho_da_loja":
       return `Olá, ${nome}! Um entregador da 99 já está vindo buscar o seu pedido na loja.${assinatura}`;

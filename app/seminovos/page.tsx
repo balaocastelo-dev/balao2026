@@ -168,7 +168,7 @@ const FAQ = [
   },
   {
     question: "O notebook seminovo vem com nota fiscal?",
-    answer: "Sim. Todo seminovo vendido pela Balão da Informática Castelo sai com nota fiscal, o que vale também para empresa que precisa lançar a compra.",
+    answer: "Sim. Todo seminovo vendido pela Balão da Informática Anchieta sai com nota fiscal, o que vale também para empresa que precisa lançar a compra.",
   },
   {
     question: "Vocês entregam em Campinas e região?",
