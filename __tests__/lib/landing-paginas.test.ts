@@ -36,7 +36,7 @@ function textosDaPagina(p: PaginaDeCaptacao): string[] {
 
 describe("páginas de captação", () => {
   it("cada uma tem a rota em app/", () => {
-    expect(paginas.length).toBe(33);
+    expect(paginas.length).toBe(37);
     for (const p of paginas) {
       expect(fs.existsSync(path.join(RAIZ, "app", p.slug, "page.tsx")), p.slug).toBe(true);
     }
@@ -75,6 +75,21 @@ describe("páginas de captação", () => {
     for (const [padrao, motivo] of PROIBIDAS) {
       const achado = texto.match(padrao);
       expect(achado ? `${achado[0]} (${motivo})` : null).toBeNull();
+    }
+  });
+
+  it("Apple e Android repetem só o que o dono confirmou", () => {
+    const slugs = ["reparoapple", "macbook", "imac", "iphone", "android"];
+    for (const slug of slugs) {
+      const pagina = PAGINAS[slug];
+      const texto = textosDaPagina(pagina).join("\n");
+      expect(texto, slug).toMatch(/em média 60 minutos/i);
+      expect(texto, slug).toMatch(/conforme o defeito e a peça/i);
+      expect(texto, slug).toMatch(/12x sem juros/);
+      expect(texto, slug).not.toMatch(/autorizad|credenciad|\boficial\b/i);
+      expect(pagina.seo.tipoDeServico, slug).toBeTruthy();
+      expect(pagina.secoes.some((s) => s.tipo === "retorno"), slug).toBe(true);
+      expect(pagina.perguntas.length, slug).toBeGreaterThanOrEqual(4);
     }
   });
 

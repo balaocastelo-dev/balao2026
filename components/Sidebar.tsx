@@ -283,7 +283,11 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
           <CustomLink href="/microsoft/office-365" icon={Key} label="Office e 365" />
           <CustomLink href="/assistenciagames" icon={Gamepad2} label="Assistência Games" />
           <CustomLink href="/toner" icon={Printer} label="Toners" />
-          <CustomLink href="/reparoapple" icon={Smartphone} label="Reparo Apple" />
+          <CustomLink href="/reparoapple" icon={Smartphone} label="Serviços Apple" />
+          <CustomLink href="/macbook" icon={Laptop} label="MacBook" />
+          <CustomLink href="/imac" icon={Laptop} label="iMac" />
+          <CustomLink href="/iphone" icon={Smartphone} label="iPhone" />
+          <CustomLink href="/android" icon={Smartphone} label="Android" />
           <CustomLink href="/telaiphone" icon={Zap} label="Troca de Tela & Bateria" />
           <CustomLink href="/recuperacaodados" icon={HardDrive} label="Recuperação de Dados" />
           <CustomLink href="/montagempc" icon={Cpu} label="Montagem PC Gamer" />
@@ -380,7 +384,11 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
             <CustomLink href="/consignacao" icon={Handshake} label="Consignação" />
             <CustomLink href="/assistenciagames" icon={Gamepad2} label="Assistência Games" />
             <CustomLink href="/toner" icon={Printer} label="Toners" />
-            <CustomLink href="/reparoapple" icon={Smartphone} label="Reparo Apple" />
+            <CustomLink href="/reparoapple" icon={Smartphone} label="Serviços Apple" />
+            <CustomLink href="/macbook" icon={Laptop} label="MacBook" />
+            <CustomLink href="/imac" icon={Laptop} label="iMac" />
+            <CustomLink href="/iphone" icon={Smartphone} label="iPhone" />
+            <CustomLink href="/android" icon={Smartphone} label="Android" />
             <CustomLink href="/telaiphone" icon={Zap} label="Troca de Tela & Bateria" />
             <CustomLink href="/recuperacaodados" icon={HardDrive} label="Recuperação de Dados" />
             <CustomLink href="/montagempc" icon={Cpu} label="Montagem PC Gamer" />

@@ -84,6 +84,11 @@ const nextConfig: NextConfig = {
       { source: "/whitelabel", destination: "/overclock", statusCode: 301 },
       // O endereço antigo da página de toner era /tonner. 301 permanente para /toner.
       { source: "/tonner", destination: "/toner", statusCode: 301 },
+      // MacBook, iMac e iPhone ganharam slug curto. O endereço antigo, sob
+      // /wendell/apple, leva para a página nova para não haver duas URLs.
+      { source: "/wendell/apple/macbook", destination: "/macbook", statusCode: 301 },
+      { source: "/wendell/apple/imac", destination: "/imac", statusCode: 301 },
+      { source: "/wendell/apple/iphone", destination: "/iphone", statusCode: 301 },
       // O MacBook Pro M5 foi vendido e a página dele saiu (25/10). Quem chegar
       // por um link antigo ou pelo Google cai na home, onde está o destaque da vez.
       { source: "/macbookm5", destination: "/", permanent: true },

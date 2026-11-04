@@ -11,6 +11,9 @@ describe("origem do lead no WhatsApp", () => {
     expect(origemDaPagina("/product/rtx-3060")).toBe("Página de produto");
     expect(origemDaPagina("/categoria/hardware?page=2")).toBe("Catálogo");
     expect(origemDaPagina("/telaiphone")).toBe("Assistência Apple");
+    expect(origemDaPagina("/macbook")).toBe("Assistência Apple");
+    expect(origemDaPagina("/iphone")).toBe("Assistência Apple");
+    expect(origemDaPagina("/android")).toBe("Celulares Android");
     expect(origemDaPagina("/manutencao")).toBe("Assistência técnica");
     expect(origemDaPagina("/regiao/valinhos/conserto")).toBe("Atendimento regional");
     expect(origemDaPagina("/algo-novo")).toBe("Algo novo");

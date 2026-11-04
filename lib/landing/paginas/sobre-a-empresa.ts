@@ -104,7 +104,11 @@ export const sobreAEmpresa: PaginaDeCaptacao = {
       texto: "Loja e bancada técnica ficam no mesmo endereço. Cada área tem uma página com os detalhes.",
       itens: [
         { titulo: "Assistência de notebook e PC", texto: "Diagnóstico, conserto, upgrade e formatação com backup.", href: "/manutencao", imagem: foto("manutencao") },
-        { titulo: "Reparo Apple", texto: "iPhone, iPad, MacBook, iMac, Mac mini e Apple Watch.", href: "/reparoapple", imagem: foto("reparoapple") },
+        { titulo: "Serviços Apple", texto: "iPhone, iPad, MacBook, iMac, Mac mini e Apple Watch.", href: "/reparoapple", imagem: foto("reparoapple") },
+        { titulo: "MacBook", texto: "Air e Pro: tela, bateria e teclado.", href: "/macbook", imagem: "/images/apple/macbook-hero.webp" },
+        { titulo: "iMac", texto: "Mac de mesa: tela, fonte e o que não liga.", href: "/imac", imagem: "/images/apple/imac-hero.webp" },
+        { titulo: "iPhone", texto: "Tela, bateria, carga e líquido.", href: "/iphone", imagem: foto("telaiphone") },
+        { titulo: "Celular Android", texto: "Samsung, Motorola e outras marcas.", href: "/android", imagem: foto("como-comprar") },
         { titulo: "Recuperação de dados", texto: "HD, SSD, pen drive e cartão de memória.", href: "/recuperacaodados", imagem: foto("recuperacaodados") },
         { titulo: "Assistência de consoles", texto: "PlayStation, Xbox, Nintendo Switch e controles.", href: "/assistenciagames", imagem: foto("assistenciagames") },
         { titulo: "Notebooks", texto: "Novos, para ver ligados no balcão.", href: "/notebooks", imagem: foto("notebooks") },

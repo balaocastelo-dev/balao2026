@@ -236,7 +236,7 @@ export default async function AppleBlogPage() {
                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/80">Atendimento rápido</p>
                 <h2 className="mt-3 text-2xl font-black">Precisa de assistencia Apple em Campinas?</h2>
                 <p className="mt-3 text-sm leading-6 text-white/90">
-                  Atendimento Apple com assistência em 1 hora para muitos reparos, motoboy grátis, orçamento sem compromisso e até 12x sem juros.
+                  Especialista em Apple, com assistência independente. Reparo em média 60 minutos, conforme o defeito e a peça. Parcelamento em até 12x sem juros. Preço confirmado pelo WhatsApp.
                 </p>
                 <a
                   href={`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=Olá! Quero orçamento para um equipamento Apple.`}
@@ -247,14 +247,14 @@ export default async function AppleBlogPage() {
                   Solicitar atendimento
                 </a>
                 <div className="mt-4 grid gap-2 text-xs font-bold text-white/95">
-                  <div className="rounded-xl bg-white/10 px-3 py-2">Assistência Apple em 1 hora</div>
-                  <div className="rounded-xl bg-white/10 px-3 py-2">Motoboy grátis para retirada e entrega</div>
-                  <div className="rounded-xl bg-white/10 px-3 py-2">Orçamento sem compromisso e 12x sem juros</div>
+                  <div className="rounded-xl bg-white/10 px-3 py-2">Reparo em média 60 minutos, conforme o defeito e a peça</div>
+                  <div className="rounded-xl bg-white/10 px-3 py-2">Orçamento no WhatsApp antes do serviço</div>
+                  <div className="rounded-xl bg-white/10 px-3 py-2">Parcelamento em até 12x sem juros</div>
                 </div>
                 <div className="mt-5 grid grid-cols-2 gap-2 text-xs font-bold">
-                  <Link href="/wendell/apple/iphone" className="rounded-xl bg-white/10 px-3 py-3 hover:bg-white/15">iPhone</Link>
-                  <Link href="/wendell/apple/macbook" className="rounded-xl bg-white/10 px-3 py-3 hover:bg-white/15">MacBook</Link>
-                  <Link href="/wendell/apple/imac" className="rounded-xl bg-white/10 px-3 py-3 hover:bg-white/15">iMac</Link>
+                  <Link href="/iphone" className="rounded-xl bg-white/10 px-3 py-3 hover:bg-white/15">iPhone</Link>
+                  <Link href="/macbook" className="rounded-xl bg-white/10 px-3 py-3 hover:bg-white/15">MacBook</Link>
+                  <Link href="/imac" className="rounded-xl bg-white/10 px-3 py-3 hover:bg-white/15">iMac</Link>
                   <Link href="/wendell/apple/ipad" className="rounded-xl bg-white/10 px-3 py-3 hover:bg-white/15">iPad</Link>
                   <Link href="/wendell/apple/apple-watch" className="rounded-xl bg-white/10 px-3 py-3 hover:bg-white/15">Apple Watch</Link>
                 </div>
