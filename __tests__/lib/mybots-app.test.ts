@@ -2,7 +2,7 @@ import { existsSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { repetirSemSom } from "@/app/mybots-app/PlayerDoComercial";
-import { ehHostSoubots, hostLimpo, URL_PAINEL, URL_SITE } from "@/lib/soubots";
+import { ehHostSoubots, hostLimpo, rewritesDoPainel, TUNEL_HUB, URL_PAINEL, URL_SITE } from "@/lib/soubots";
 
 const raiz = process.cwd();
 
@@ -15,9 +15,14 @@ describe("landing /mybots-app", () => {
     const config = ler("next.config.ts");
     expect(config).toMatch(/source:\s*"\/mybots"/);
     expect(config).toMatch(/source:\s*"\/mybots\/:caminho\*"/);
-    expect(config).toContain("trycloudflare.com/mybots/");
-    expect(config).toContain("trycloudflare.com/mybots/:caminho*");
+    expect(config).toContain("TUNEL_HUB");
+    expect(config).toContain("rewritesDoPainel()");
     expect(config).not.toMatch(/source:\s*"\/mybots-app/);
+    expect(config).not.toMatch(/source:\s*"\/app\/"/);
+    const vercel = ler("vercel.json");
+    expect(vercel).toContain('"value": "soubots.com"');
+    expect(vercel).toContain("https://www.soubots.com/:caminho+");
+    expect(vercel).toContain('"permanent": true');
     expect(existsSync(path.join(raiz, "app/mybots/page.tsx"))).toBe(false);
     expect(existsSync(path.join(raiz, "public/mybots"))).toBe(false);
   });
@@ -74,7 +79,20 @@ describe("landing /mybots-app", () => {
     expect(ehHostSoubots("soubots.com")).toBe(true);
     expect(ehHostSoubots("www.soubots.com")).toBe(true);
     expect(URL_SITE).toBe("https://www.soubots.com");
-    expect(URL_PAINEL).toBe("https://app.soubots.com");
+    expect(URL_PAINEL).toBe("https://www.soubots.com/app");
+    expect(TUNEL_HUB).toContain("trycloudflare.com/mybots");
+    const regras = rewritesDoPainel();
+    expect(regras.filter((r) => r.source === "/app").map((r) => r.has[0].value).sort()).toEqual([
+      "soubots.com",
+      "www.soubots.com",
+    ]);
+    expect(regras.filter((r) => r.source === "/app/:caminho*").map((r) => r.has[0].value).sort()).toEqual([
+      "soubots.com",
+      "www.soubots.com",
+    ]);
+    expect(regras.every((r) => r.destination.startsWith(`${TUNEL_HUB}/`))).toBe(true);
+    expect(regras.some((r) => r.destination.endsWith(":caminho*"))).toBe(true);
+    expect(regras.some((r) => r.has[0].value === "www.balao.info")).toBe(false);
     expect(ehHostSoubots("Soubots.com:443")).toBe(true);
     expect(ehHostSoubots("www.soubots.com, outro")).toBe(true);
     expect(ehHostSoubots("www.balao.info")).toBe(false);

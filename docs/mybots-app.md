@@ -44,7 +44,18 @@ os dois hosts, e só o caminho `/`. www.balao.info continua a loja na raiz e a m
 em `/mybots-app`, com o canonical apontando para o www.
 
 O botão **Entrar** (topo, também no celular) e o link **Já tenho conta — Entrar** vão para
-o painel online. A URL está em `URL_PAINEL` (`lib/soubots.ts`), hoje `https://app.soubots.com`.
+o painel em **https://www.soubots.com/app**. A URL está em `URL_PAINEL` (`lib/soubots.ts`).
+
+`/app` e `/app/:caminho` (login Google em `/app/api/auth/google/callback`, websocket em
+`/app/ws/…`) só nos hosts `soubots.com` e `www.soubots.com` são reescritos para o mesmo túnel
+de `/mybots` (`TUNEL_HUB`). O Hub não recebe o prefixo `/app`. Não há redirect de `/app` para
+`/app/`: o Next só tira uma barra sobrando (`/app/` → `/app`, 308) e a reescrita não manda
+de volta, então não fecha loop.
+
+O `vercel.json` pede 308 de `soubots.com` para `https://www.soubots.com`. No painel da Vercel
+do projeto balao2026, em Domains, o www hoje redireciona para o apex. Enquanto isso estiver
+assim, os dois redirects brigam (loop). O Thiago precisa inverter: www como domínio principal
+e o apex redirecionando para o www. Sem essa inversão, o 308 deste arquivo não pode valer.
 O menu, o rodapé e o WhatsApp da loja não aparecem nessa raiz (`html.soubots-raiz` em
 `app/globals.css`).
 

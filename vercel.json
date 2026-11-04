@@ -15,5 +15,19 @@
   ],
   "regions": [
     "iad1"
+  ],
+  "redirects": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "soubots.com" }],
+      "destination": "https://www.soubots.com/",
+      "permanent": true
+    },
+    {
+      "source": "/:caminho+",
+      "has": [{ "type": "host", "value": "soubots.com" }],
+      "destination": "https://www.soubots.com/:caminho+",
+      "permanent": true
+    }
   ]
 }
