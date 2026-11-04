@@ -128,7 +128,7 @@ export const REGIONAL_SERVICES: RegionalService[] = [
         answer: "Sim. A substituição e a mão de obra são entregues com garantia.",
       },
     ],
-    primaryHref: "/notebooks",
+    primaryHref: "/manutencao",
   },
   {
     slug: "pc-gamer",

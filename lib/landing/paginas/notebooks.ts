@@ -191,7 +191,7 @@ export const notebooks: PaginaDeCaptacao = {
   ],
   temas: ["notebook", "compra", "upgrade", "ssd", "memoria", "assistencia", "apple", "licenca"],
   termosDoBlog: ["notebook", "escolher notebook", "ssd", "memória ram", "macbook", "bateria", "notebook gamer"],
-  relacionadas: ["manutencao", "microsoft", "carregadores", "consignacao"],
+  relacionadas: ["upgrade-ssd", "manutencao", "microsoft", "carregadores"],
   final: {
     titulo: "Conte para que é o notebook e receba as opções",
     texto: "Uma mensagem com o uso e o que pesa mais já basta para a equipe indicar os modelos certos. Depois, é só ver ligado na loja da Av. Anchieta, no Cambuí.",

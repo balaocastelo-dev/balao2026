@@ -34,8 +34,8 @@ export default async function Page() {
   const blocoDasFileiras = (
     <SecaoEspecial
       id="vitrine"
-      titulo="Escolha pela placa de vídeo, pelo processador ou pelo setup"
-      texto="Só PC gamer, do básico ao de elite. Cada fileira junta as máquinas de uma faixa; toque no PC para ver a ficha completa."
+      titulo="Escolha pelo seu jogo e pelo monitor"
+      texto="As fileiras separam os PCs gamer pela placa de vídeo, que é o que muda o jogo na sua tela. O número de máquinas é o do catálogo agora, não um selo de estoque da loja física. Para ver ligado, combine pelo WhatsApp. A página não publica FPS medido."
     >
       {fileiras.length > 0 ? (
         <>

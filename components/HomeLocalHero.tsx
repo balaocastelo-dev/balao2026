@@ -26,10 +26,12 @@ export default function HomeLocalHero() {
   );
 
   const quickLinks = [
-    { title: "PC Gamer", subtitle: "Máquinas prontas e montagem", href: "/pcgamer", icon: Cpu },
+    { title: "PC Gamer", subtitle: "Veja ligado e retire no Cambuí", href: "/pcgamer", icon: Cpu },
+    { title: "Qual PC comprar", subtitle: "Faixas de 3, 5 e 8 mil", href: "/qual-pc-gamer", icon: Monitor },
     { title: "Notebooks", subtitle: "Novos, seminovos e upgrades", href: "/notebooks", icon: Laptop },
-    { title: "Assistência", subtitle: "Diagnóstico e reparo local", href: "/manutencao", icon: Wrench },
-    { title: "Monitores e peças", subtitle: "Estoque para retirada rápida", href: "/departamentos", icon: Monitor },
+    { title: "Upgrade de SSD", subtitle: "Troca de HD e memória", href: "/upgrade-ssd", icon: Cpu },
+    { title: "Assistência", subtitle: "Conserto por defeito", href: "/manutencao", icon: Wrench },
+    { title: "Toner", subtitle: "Cartucho com motoboy", href: "/toner", icon: Monitor },
   ];
 
   const trustItems = [
@@ -200,7 +202,7 @@ export default function HomeLocalHero() {
         </div>
       </div>
 
-      <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-3">
         {quickLinks.map((link) => {
           const Icon = link.icon;
           return (

@@ -262,6 +262,16 @@
   }
 }
 
+/* No topo a coluna é estreita: quatro fatos lado a lado se atropelam. */
+.cpt-palco .cpt-fatos {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cpt-fatos dt,
+.cpt-fatos dd {
+  overflow-wrap: anywhere;
+}
+
 .cpt-fatos dt {
   font-stretch: 112%;
   font-weight: 800;
@@ -606,6 +616,10 @@
 @media (max-width: 767px) {
   html[data-barra-whats] .balao-whats-flutuante {
     display: none;
+  }
+
+  .cpt {
+    padding-bottom: 5.25rem;
   }
 }
 

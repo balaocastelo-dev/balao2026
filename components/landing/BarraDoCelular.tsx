@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MessageCircle, Phone } from "lucide-react";
+import { MapPin, MessageCircle, Phone } from "lucide-react";
 import { SITE_CONFIG } from "@/lib/config";
 import { trackPhoneClick, trackWhatsAppClick } from "@/lib/tracking";
 
@@ -18,17 +18,14 @@ declare global {
  * Também entrega a mensagem da página ao botão flutuante do site.
  */
 export default function BarraDoCelular({ mensagem, origem, rotulo }: { mensagem: string; origem: string; rotulo: string }) {
-  const [visivel, setVisivel] = useState(false);
+  const [visivel, setVisivel] = useState(true);
 
   useEffect(() => {
     window.__balaoWhats = { mensagem, origem };
     // No celular a barra substitui o botão flutuante (captacao.css).
     document.documentElement.dataset.barraWhats = "1";
-    const aoRolar = () => setVisivel(window.scrollY > window.innerHeight * 0.75);
-    aoRolar();
-    window.addEventListener("scroll", aoRolar, { passive: true });
+    setVisivel(true);
     return () => {
-      window.removeEventListener("scroll", aoRolar);
       if (window.__balaoWhats?.origem === origem) delete window.__balaoWhats;
       delete document.documentElement.dataset.barraWhats;
     };
@@ -47,16 +44,26 @@ export default function BarraDoCelular({ mensagem, origem, rotulo }: { mensagem:
         onClick={() => trackWhatsAppClick({ page_path: `/${origem}`, source: `barra_${origem}`, label: rotulo })}
       >
         <MessageCircle className="h-5 w-5" aria-hidden />
-        {rotulo}
+        WhatsApp
+        <span className="sr-only">: {rotulo}</span>
       </a>
       <a
         href={`tel:+${SITE_CONFIG.phone.number}`}
         tabIndex={visivel ? 0 : -1}
-        className="cpt-botao cpt-botao--linha !min-h-[3rem] !px-4"
+        className="cpt-botao cpt-botao--linha flex-1 !min-h-[3rem] !px-3"
         aria-label={`Ligar para a loja: ${SITE_CONFIG.phone.display}`}
         onClick={() => trackPhoneClick({ page_path: `/${origem}`, source: `barra_${origem}` })}
       >
         <Phone className="h-5 w-5" aria-hidden />
+        Ligar
+      </a>
+      <a
+        href="#como-chegar"
+        tabIndex={visivel ? 0 : -1}
+        className="cpt-botao cpt-botao--linha flex-1 !min-h-[3rem] !px-3"
+      >
+        <MapPin className="h-5 w-5" aria-hidden />
+        Como chegar
       </a>
     </div>
   );

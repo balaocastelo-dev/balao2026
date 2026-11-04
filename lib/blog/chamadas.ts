@@ -77,7 +77,8 @@ export const CHAMADAS: Record<TemaDeChamada, ChamadaPronta> = {
     titulo: "Na dúvida se a peça serve no seu computador?",
     texto:
       "Mande o modelo da placa-mãe ou do notebook. A equipe confere a compatibilidade antes de você comprar — e instala, se preferir.",
-    rotulo: "Conferir compatibilidade",
+    rotulo: "Ver upgrade de SSD",
+    href: "/upgrade-ssd",
   },
   empresas: {
     titulo: "Computadores para a empresa, com suporte por perto",

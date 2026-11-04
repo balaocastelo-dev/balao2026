@@ -3,8 +3,9 @@
 import { useRef, type ReactNode } from "react";
 import Image from "next/image";
 import { motion, useReducedMotion, useScroll, useSpring, useTransform, type MotionValue } from "framer-motion";
-import { MessageCircle } from "lucide-react";
-import { trackWhatsAppClick } from "@/lib/tracking";
+import { MessageCircle, Phone } from "lucide-react";
+import { SITE_CONFIG } from "@/lib/config";
+import { trackPhoneClick, trackWhatsAppClick } from "@/lib/tracking";
 
 /**
  * O topo das páginas de captação: a foto do serviço num plano em perspectiva
@@ -117,6 +118,14 @@ export default function PalcoDoTopo({
               >
                 <MessageCircle className="h-5 w-5" aria-hidden />
                 {botao}
+              </a>
+              <a
+                href={`tel:+${SITE_CONFIG.phone.number}`}
+                className="cpt-botao cpt-botao--linha"
+                onClick={() => trackPhoneClick({ page_path: `/${origem}`, source: `topo_${origem}` })}
+              >
+                <Phone className="h-5 w-5" aria-hidden />
+                Ligar {SITE_CONFIG.phone.display}
               </a>
               {secundario ? (
                 <a href={secundario.href} className="cpt-botao cpt-botao--linha">

@@ -50,7 +50,7 @@ export const LEAD_INTENTS: LeadIntent[] = [
       "Muita gente procura solução para PC lento quando já perdeu tempo demais. Essa é uma busca quente e com chance alta de conversão.",
     city: "Campinas",
     serviceLabel: "Otimização e Upgrade",
-    primaryHref: "/manutencao",
+    primaryHref: "/upgrade-ssd",
     problems: [
       "Computador demora para ligar",
       "Sistema trava com frequência",

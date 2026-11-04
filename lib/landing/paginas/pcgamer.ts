@@ -3,11 +3,11 @@ import type { PaginaDeCaptacao } from "../tipos";
 export const pcgamer: PaginaDeCaptacao = {
   slug: "pcgamer",
   nome: "PC gamer pronto",
-  chamada: "PCs gamer já montados, separados pela placa de vídeo: escolha pela resolução e pelo FPS e veja ligado antes de pagar.",
+  chamada: "PC gamer no Cambuí: escolha pelo jogo, veja ligado na loja e retire no balcão quando estiver em estoque.",
   seo: {
-    titulo: "PC Gamer Pronto em Campinas: Escolha pela Placa de Vídeo | Balão",
+    titulo: "PC Gamer em Campinas: Veja Rodando e Leve Hoje | Balão da Informática Anchieta",
     descricao:
-      "PC gamer montado em Campinas, separado pela placa de vídeo: 1080p, 1440p ou 4K. Veja ligado no Cambuí antes de pagar, 10% no Pix ou até 10x sem juros.",
+      "PC gamer pronto no Cambuí: escolha pelo seu jogo, veja rodando na loja e leve hoje. 10% no Pix ou 10x sem juros. Fale no WhatsApp.",
     palavras: [
       "PC gamer pronto em Campinas",
       "comprar PC gamer no Cambuí",
@@ -32,8 +32,9 @@ export const pcgamer: PaginaDeCaptacao = {
       src: "/images/landing/v2/pcgamer.jpg",
       alt: "PC gamer com lateral de vidro e luz vermelha ao lado de um monitor curvo mostrando uma paisagem de jogo",
     },
-    mensagem: "Olá! Vim pela página de PC gamer da Balão e quero ajuda para escolher um PC.",
-    botao: "Escolher meu PC no WhatsApp",
+    mensagem:
+      "Olá! Quero um PC gamer para jogar ____ em monitor ____. Meu orçamento é de até R$ ____. Quais vocês têm pronta entrega?",
+    botao: "Ver pronta entrega no WhatsApp",
     secundario: { rotulo: "Como escolher a placa de vídeo", href: "#secao-2" },
     fatos: [
       { valor: "Veja ligado", rotulo: "e teste antes de pagar" },
@@ -45,7 +46,8 @@ export const pcgamer: PaginaDeCaptacao = {
   assistente: {
     titulo: "Qual PC gamer serve para você?",
     texto: "Diga o que joga e em que tela: o vendedor responde com as opções certas.",
-    abertura: "Olá! Vim pela página de PC gamer e quero ajuda para escolher.",
+    abertura:
+      "Olá! Quero um PC gamer para jogar ____ em monitor ____. Meu orçamento é de até R$ ____. Quais vocês têm pronta entrega?",
     fecho: "Pode me mandar duas ou três opções com fotos?",
     botao: "Pedir indicação",
     perguntas: [
@@ -95,7 +97,7 @@ export const pcgamer: PaginaDeCaptacao = {
     },
     {
       tipo: "beneficios",
-      titulo: "Por que comprar o PC gamer numa loja física",
+      titulo: "Por que comprar na loja física e não num site nacional",
       texto: "O PC é caro e tem muitas peças. Comprar perto de casa muda o que acontece depois.",
       itens: [
         {
@@ -114,6 +116,33 @@ export const pcgamer: PaginaDeCaptacao = {
           titulo: "Pagamento sem complicação",
           texto: "10% de desconto no Pix ou até 10x sem juros no cartão, fechando pelo WhatsApp ou no balcão.",
         },
+      ],
+    },
+    {
+      tipo: "texto",
+      titulo: "Garantia, nota fiscal e upgrade depois",
+      paragrafos: [
+        "PC comprado aqui sai com nota fiscal. A peça nova segue a garantia de quem a fabricou. O serviço de montagem, quando entra, segue a garantia legal. O prazo de cada peça não é um número único: está na nota e na conversa, e a loja não publica um prazo genérico nesta página.",
+        "Upgrade depois acontece no mesmo balcão do Cambuí. Memória, SSD, placa e limpeza não exigem mandar o computador para outra cidade. A página de montagem e a de upgrade de notebook explicam os serviços vizinhos.",
+      ],
+    },
+    {
+      tipo: "texto",
+      titulo: "Pagamento e entrega",
+      paragrafos: [
+        "10% de desconto no Pix ou até 10x sem juros no cartão, fechando pelo WhatsApp ou no balcão, como no resto da loja. Pedido pelo site termina no Pix.",
+        "Retirada no balcão quando o PC está na loja. Entrega por motoboy em Campinas, Sumaré, Hortolândia, Valinhos e região: preço e prazo confirmados pelo WhatsApp. Não há frete fixo publicado aqui.",
+      ],
+    },
+    {
+      tipo: "retorno",
+      titulo: "Pedir retorno rápido",
+      texto: "Jogo, faixa e monitor. A equipe responde quais PCs dá para ver ligados.",
+      assunto: "PC gamer pronto",
+      campos: [
+        { nome: "jogo", rotulo: "Qual jogo você mais joga?" },
+        { nome: "orcamento", rotulo: "Orçamento aproximado", opcoes: ["Até 3 mil", "Até 5 mil", "Até 8 mil", "Acima de 8 mil"] },
+        { nome: "monitor", rotulo: "Monitor", opcoes: ["Full HD", "2K", "144 Hz", "Não sei"] },
       ],
     },
     {
@@ -150,9 +179,43 @@ export const pcgamer: PaginaDeCaptacao = {
       texto: "Se nenhuma fileira bate com o que você precisa, a loja monta do zero ou mostra como cada peça trabalha.",
       itens: [
         {
+          titulo: "Qual PC gamer comprar",
+          texto: "As faixas de 3, 5 e 8 mil, sem FPS inventado.",
+          href: "/qual-pc-gamer",
+          imagem: "/images/landing/v2/pcgamer.jpg",
+        },
+        {
           titulo: "Montagem de PC sob medida",
           texto: "Diga o uso e a faixa de orçamento; a loja escolhe as peças e monta.",
           href: "/montagempc",
+          imagem: "/images/landing/v2/montagempc.jpg",
+        },
+        {
+          titulo: "Monte o seu PC",
+          texto: "Outro caminho para fechar a configuração.",
+          href: "/monteseupc",
+        },
+        {
+          titulo: "Overclock",
+          texto: "Sistema da loja para quem vende informática.",
+          href: "/overclock",
+        },
+        {
+          titulo: "Seminovos",
+          texto: "Quando a faixa pede máquina revisada.",
+          href: "/seminovos",
+        },
+        {
+          titulo: "Envio e entrega",
+          texto: "Motoboy em Campinas e região.",
+          href: "/envio-e-entrega",
+          imagem: "/images/landing/v2/envio-e-entrega.jpg",
+        },
+        {
+          titulo: "Como comprar",
+          texto: "Pix, cartão e retirada no balcão.",
+          href: "/como-comprar",
+          imagem: "/images/landing/v2/como-comprar.jpg",
         },
         {
           titulo: "PC gamer por dentro, em 3D",
@@ -168,6 +231,21 @@ export const pcgamer: PaginaDeCaptacao = {
     },
   ],
   perguntas: [
+    {
+      pergunta: "Onde comprar PC gamer em Campinas e testar antes?",
+      resposta:
+        "Na Balão da Informática Anchieta, na Av. Anchieta, 789, Cambuí, o PC é ligado na loja para você testar antes de pagar e, se estiver em estoque, sai na hora. Agendamento pelo WhatsApp (19) 98751-0267.",
+    },
+    {
+      pergunta: "A loja entrega PC gamer em Sumaré, Hortolândia ou Valinhos?",
+      resposta:
+        "Sim, a entrega por motoboy em Campinas e região é combinada pelo WhatsApp. Preço e prazo confirmados pelo WhatsApp.",
+    },
+    {
+      pergunta: "Quais formas de pagamento para PC gamer?",
+      resposta:
+        "10% de desconto no Pix ou até 10x sem juros no cartão, com nota fiscal e garantia do fabricante nas peças.",
+    },
     {
       pergunta: "Qual placa de vídeo eu preciso para jogar em 1440p?",
       resposta:
@@ -206,7 +284,8 @@ export const pcgamer: PaginaDeCaptacao = {
   ],
   temas: ["pcgamer", "pc", "games", "compra", "entrega", "garantia", "upgrade"],
   termosDoBlog: ["pc gamer", "placa de vídeo", "vram", "rtx", "fps", "processador", "memória ram", "fonte", "steam"],
-  relacionadas: ["montagempc", "pcgamer3d", "promocao", "assistenciagames"],
+  tituloDasPerguntas: "Perguntas frequentes",
+  relacionadas: ["qual-pc-gamer", "montagempc", "pcgamer3d", "promocao"],
   final: {
     titulo: "Diga o que você joga e em que tela",
     texto:

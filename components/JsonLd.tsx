@@ -211,12 +211,18 @@ export function generateServiceSchema({
   url,
   serviceType,
   areaServed = ["Campinas", "Sumaré", "Hortolândia", "Paulínia", "Valinhos", "Vinhedo", "Brasil"],
+  marca,
+  catalogo,
 }: {
   name: string;
   description: string;
   url: string;
   serviceType: string;
   areaServed?: string[];
+  /** Assunto do serviço. Não sugere vínculo com o fabricante. */
+  marca?: string;
+  /** Serviços oferecidos, sem preço. */
+  catalogo?: string[];
 }) {
   return {
     "@context": "https://schema.org",
@@ -227,12 +233,49 @@ export function generateServiceSchema({
     url,
     areaServed,
     provider: {
-      "@id": "https://www.balao.info/#organization",
+      "@id": "https://www.balao.info/#store",
     },
+    ...(marca ? { brand: { "@type": "Brand", name: marca } } : {}),
+    ...(catalogo?.length
+      ? {
+          hasOfferCatalog: {
+            "@type": "OfferCatalog",
+            name,
+            itemListElement: catalogo.map((item) => ({
+              "@type": "Offer",
+              itemOffered: { "@type": "Service", name: item },
+            })),
+          },
+        }
+      : {}),
     availableChannel: {
       "@type": "ServiceChannel",
       serviceUrl: url,
       servicePhone: `+${SITE_CONFIG.phone.number}`,
     },
+  };
+}
+
+export function generateArticleSchema({
+  headline,
+  description,
+  url,
+}: {
+  headline: string;
+  description: string;
+  url: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline,
+    description,
+    url,
+    mainEntityOfPage: url,
+    datePublished: "2026-11-04",
+    dateModified: "2026-11-04",
+    inLanguage: "pt-BR",
+    author: { "@id": "https://www.balao.info/#store" },
+    publisher: { "@id": "https://www.balao.info/#store" },
   };
 }
