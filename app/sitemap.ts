@@ -10,6 +10,7 @@ import { listVitrinePagesPublic } from '@/lib/vitrine/db'
 import { SETUPS_ASSINADOS } from '@/lib/vitrine/assinadas'
 import { PAGINAS } from '@/lib/landing/paginas'
 import { listarConsignados, urlDoConsignado } from '@/lib/consignados'
+import { URL_SITE } from '@/lib/soubots'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.balao.info'
@@ -62,7 +63,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/trocas-e-devolucoes',
     '/seguranca-e-privacidade',
     '/overclock',
-    '/mybots-app',
   ].map((route) => ({
     url: `${baseUrl}${route}`,
     changeFrequency: route === '' ? 'daily' as const : 'weekly' as const,
@@ -146,5 +146,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }))
 
-  return [...staticRoutes, ...consignadoRoutes, ...categoryRoutes, ...productRoutes, ...blogRoutes, ...vitrineRoutes, ...regionalRoutes, ...urgentRoutes, ...neighborhoodRoutes]
+  // A landing do MyBots tem endereço oficial no www. O /mybots-app do balao.info
+  // aponta para lá no canonical, então não entra de novo neste sitemap.
+  const landingMyBots = [{
+    url: URL_SITE,
+    changeFrequency: 'weekly' as const,
+    priority: 0.8,
+  }]
+
+  return [...staticRoutes, ...landingMyBots, ...consignadoRoutes, ...categoryRoutes, ...productRoutes, ...blogRoutes, ...vitrineRoutes, ...regionalRoutes, ...urgentRoutes, ...neighborhoodRoutes]
 }

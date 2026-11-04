@@ -4,6 +4,7 @@ import localFont from "next/font/local";
 import { Gift, Home, Infinity as Infinito, Monitor, Rocket, ShieldCheck, Smartphone, Bot, type LucideIcon } from "lucide-react";
 import estilos from "./estilos.module.css";
 import PlayerDoComercial from "./PlayerDoComercial";
+import { URL_PAINEL, URL_SITE } from "@/lib/soubots";
 
 // Landing de divulgação do app MyBots.
 // O endereço é /mybots-app de propósito: /mybots é o Hub (rewrite no
@@ -23,7 +24,7 @@ const fonte = localFont({
   display: "swap",
 });
 
-const URL_PAGINA = "https://www.balao.info/mybots-app";
+const URL_PAGINA = URL_SITE;
 const APK = "/downloads/MyBots.apk";
 const VIDEO = "/mybots-app/comercial.mp4";
 const POSTER = "/mybots-app/poster.jpg";
@@ -400,6 +401,9 @@ export default function PaginaMyBots() {
           </div>
         </div>
         <div className={estilos.topoAcoes}>
+          <a className={estilos.entrar} href={URL_PAINEL}>
+            Entrar
+          </a>
           <a className={estilos.whatsTopo} href={WHATS} target="_blank" rel="noopener noreferrer">
             WhatsApp
           </a>
@@ -583,6 +587,9 @@ export default function PaginaMyBots() {
           <h2 id="cta-final">Comece agora, no seu celular</h2>
           <p>Baixe o aplicativo ou chame no WhatsApp {WHATS_NUMERO} que a gente te ajuda a abrir o primeiro bot.</p>
           <Acoes />
+          <p className={estilos.jaTenho}>
+            <a href={URL_PAINEL}>Já tenho conta — Entrar</a>
+          </p>
         </section>
       </main>
 

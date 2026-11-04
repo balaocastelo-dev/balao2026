@@ -106,7 +106,26 @@
   background: rgba(76, 29, 149, 0.65);
 }
 
+.entrar {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  border-radius: 999px;
+  background: #ffffff;
+  padding: 0.55rem 0.95rem;
+  color: #12081f;
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.entrar:hover {
+  background: #e0f2fe;
+}
+
 .inicio:focus-visible,
+.entrar:focus-visible,
+.jaTenho a:focus-visible,
 .botao:focus-visible,
 .whats:focus-visible,
 .loja:focus-visible,
@@ -811,6 +830,22 @@
 
 .faq p {
   margin: 0.45rem 0 0;
+}
+
+.jaTenho {
+  margin: 0.9rem 0 0;
+  font-size: 1rem;
+}
+
+.jaTenho a {
+  color: #67e8f9;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.jaTenho a:hover {
+  color: #ffffff;
 }
 
 .ctaFinal {
