@@ -273,6 +273,12 @@ export const montagempc: PaginaDeCaptacao = {
           imagem: "/images/landing/v2/manutencao.jpg",
         },
         {
+          titulo: "Licença Windows",
+          texto: "Windows original, com nota fiscal de venda, se a máquina ainda não tem.",
+          href: "/microsoft/windows",
+          imagem: "/images/landing/v2/microsoft.jpg",
+        },
+        {
           titulo: "Veja um PC por dentro em 3D",
           texto: "O papel de cada peça, o caminho do ar e a organização dos cabos, girando o modelo.",
           href: "/pcgamer3d",

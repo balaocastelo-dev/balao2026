@@ -5,6 +5,7 @@ import {
   ArrowRight,
   Clock,
   Cpu,
+  Key,
   Laptop,
   MapPin,
   MessageCircle,
@@ -31,6 +32,7 @@ export default function HomeLocalHero() {
     { title: "Notebooks", subtitle: "Novos, seminovos e upgrades", href: "/notebooks", icon: Laptop },
     { title: "Upgrade de SSD", subtitle: "Troca de HD e memória", href: "/upgrade-ssd", icon: Cpu },
     { title: "Assistência", subtitle: "Conserto por defeito", href: "/manutencao", icon: Wrench },
+    { title: "Licenças", subtitle: "Windows, Server e Office", href: "/microsoft", icon: Key },
     { title: "Toner", subtitle: "Cartucho com motoboy", href: "/toner", icon: Monitor },
   ];
 

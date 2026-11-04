@@ -10,8 +10,12 @@
 export const URL_SITE = "https://www.soubots.com";
 export const URL_PAINEL = "https://www.soubots.com/app";
 
-/** Destino do Hub no túnel Cloudflare. Sem barra no fim: a barra entra na rota. */
-export const TUNEL_HUB = "https://put-order-exist-actual.trycloudflare.com/mybots";
+/** Destino do Hub no túnel Cloudflare. Sem barra no fim: a barra entra na rota.
+ * Preferência: MYBOTS_TUNNEL_HUB (env na Vercel). Fallback = túnel atual do PC.
+ */
+export const TUNEL_HUB =
+  (typeof process !== "undefined" && process.env.MYBOTS_TUNNEL_HUB?.replace(/\/$/, "")) ||
+  "https://orbit-tool-crucial-drop.trycloudflare.com/mybots";
 
 export const HOSTS_SOUBOTS = ["soubots.com", "www.soubots.com"] as const;
 

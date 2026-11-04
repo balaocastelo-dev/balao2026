@@ -36,7 +36,7 @@ function textosDaPagina(p: PaginaDeCaptacao): string[] {
 
 describe("páginas de captação", () => {
   it("cada uma tem a rota em app/", () => {
-    expect(paginas.length).toBe(34);
+    expect(paginas.length).toBe(37);
     for (const p of paginas) {
       expect(fs.existsSync(path.join(RAIZ, "app", p.slug, "page.tsx")), p.slug).toBe(true);
     }
@@ -90,6 +90,44 @@ describe("páginas de captação", () => {
       expect(pagina.seo.tipoDeServico, slug).toBeTruthy();
       expect(pagina.secoes.some((s) => s.tipo === "retorno"), slug).toBe(true);
       expect(pagina.perguntas.length, slug).toBeGreaterThanOrEqual(4);
+    }
+  });
+
+  it("licenciamento Microsoft usa só o que a loja confirmou", () => {
+    const frase = "licenças originais adquiridas de fornecedores oficiais Microsoft";
+    const proibidas: [RegExp, string][] = [
+      [/\bparceiro\b/i, "parceiro"],
+      [/\bpartner\b/i, "Partner"],
+      [/\bCSP\b/, "CSP"],
+      [/revenda (oficial|autorizada)/i, "revenda oficial ou autorizada"],
+      [/distribuidor oficial/i, "distribuidor oficial"],
+      [/autorizad/i, "autorizada"],
+      [/credenciad/i, "credenciada"],
+      [/certificad/i, "certificação"],
+      [/\[PREENCHER\]|\[CONFIRMAR\]/, "placeholder"],
+      [/\bR\$ ?\d/, "preço"],
+      [/ativador/i, "ativador"],
+      [/vital[ií]cia por/i, "vitalícia com preço"],
+    ];
+    const licencas = paginas.filter((p) => p.slug === "microsoft" || p.slug.startsWith("microsoft/"));
+    expect(licencas.map((p) => p.slug).sort()).toEqual([
+      "microsoft",
+      "microsoft/office-365",
+      "microsoft/windows",
+      "microsoft/windows-server",
+    ]);
+    for (const p of licencas) {
+      const texto = textosDaPagina(p).join("\n");
+      expect(texto, p.slug).toContain(frase);
+      expect(texto, p.slug).toContain("nota fiscal de venda");
+      expect(texto, p.slug).toContain("12x sem juros");
+      expect(p.secoes.some((s) => s.tipo === "retorno"), p.slug).toBe(true);
+      for (const [padrao, motivo] of proibidas) {
+        const achado = texto.match(padrao);
+        expect(achado ? `${p.slug}: ${achado[0]} (${motivo})` : null).toBeNull();
+      }
+      const foraDaFrase = texto.split(frase).join("");
+      expect(foraDaFrase, p.slug).not.toMatch(/oficial/i);
     }
   });
 

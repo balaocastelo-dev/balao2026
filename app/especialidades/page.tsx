@@ -28,6 +28,7 @@ import {
   Clock,
   Cpu,
   Gamepad2,
+  Key,
   HandCoins,
   Instagram,
   MapPin,
@@ -271,6 +272,7 @@ const MAIS_SERVICOS = [
   { titulo: "Monte seu PC", texto: "Escolha peça por peça com o preço na tela", href: "/monteseupc", icone: Cpu },
   { titulo: "Atendimento regional", texto: "Motoboy na Região de Campinas", href: "/regiao", icone: Truck },
   { titulo: "Sites e sistemas", texto: "Site, loja virtual e sistema sob medida", href: "/sistemas", icone: Briefcase },
+  { titulo: "Licenças Microsoft", texto: "Windows, Windows Server e Office", href: "/microsoft", icone: Key },
   { titulo: "Manutenção preventiva", texto: "Limpeza, pasta térmica e revisão", href: "/manutencao", icone: Wrench },
 ];
 

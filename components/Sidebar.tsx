@@ -278,6 +278,9 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
           <CustomLink href="/consignacao" icon={Handshake} label="Consignação" />
           <CustomLink href="/carregadores" icon={Battery} label="Carregadores" />
           <CustomLink href="/microsoft" icon={Key} label="Licenças Microsoft" />
+          <CustomLink href="/microsoft/windows" icon={Key} label="Windows" />
+          <CustomLink href="/microsoft/windows-server" icon={Key} label="Windows Server" />
+          <CustomLink href="/microsoft/office-365" icon={Key} label="Office e 365" />
           <CustomLink href="/assistenciagames" icon={Gamepad2} label="Assistência Games" />
           <CustomLink href="/toner" icon={Printer} label="Toners" />
           <CustomLink href="/reparoapple" icon={Smartphone} label="Serviços Apple" />
@@ -373,6 +376,10 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
             <CustomLink href="/upgrade-ssd" icon={HardDrive} label="Upgrade de SSD" />
             <CustomLink href="/formatacao" icon={Wrench} label="Formatação" />
             <CustomLink href="/qual-pc-gamer" icon={Gamepad} label="Qual PC gamer" />
+            <CustomLink href="/microsoft" icon={Key} label="Licenças Microsoft" />
+            <CustomLink href="/microsoft/windows" icon={Key} label="Windows" />
+            <CustomLink href="/microsoft/windows-server" icon={Key} label="Windows Server" />
+            <CustomLink href="/microsoft/office-365" icon={Key} label="Office e 365" />
             <CustomLink href="/consignados" icon={RefreshCcw} label="Consignados" />
             <CustomLink href="/consignacao" icon={Handshake} label="Consignação" />
             <CustomLink href="/assistenciagames" icon={Gamepad2} label="Assistência Games" />

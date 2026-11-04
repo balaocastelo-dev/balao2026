@@ -206,6 +206,12 @@ export const pcgamer: PaginaDeCaptacao = {
           href: "/seminovos",
         },
         {
+          titulo: "Licença Windows",
+          texto: "Se o PC não veio com Windows, a licença original entra à parte.",
+          href: "/microsoft/windows",
+          imagem: "/images/landing/v2/microsoft.jpg",
+        },
+        {
           titulo: "Envio e entrega",
           texto: "Motoboy em Campinas e região.",
           href: "/envio-e-entrega",

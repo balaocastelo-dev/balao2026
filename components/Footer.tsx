@@ -88,6 +88,10 @@ export default function Footer() {
               <li><Link href="/notebooks" className="hover:text-[#E60012] transition-colors">Notebooks</Link></li>
               <li><Link href="/upgrade-ssd" className="hover:text-[#E60012] transition-colors">Upgrade de SSD</Link></li>
               <li><Link href="/formatacao" className="hover:text-[#E60012] transition-colors">Formatação</Link></li>
+              <li><Link href="/microsoft" className="hover:text-[#E60012] transition-colors">Licenças Microsoft</Link></li>
+              <li><Link href="/microsoft/windows" className="hover:text-[#E60012] transition-colors">Windows</Link></li>
+              <li><Link href="/microsoft/windows-server" className="hover:text-[#E60012] transition-colors">Windows Server</Link></li>
+              <li><Link href="/microsoft/office-365" className="hover:text-[#E60012] transition-colors">Office e Microsoft 365</Link></li>
               <li><Link href="/montagempc" className="hover:text-[#E60012] transition-colors">Montagem de PC</Link></li>
               <li><Link href="/qual-pc-gamer" className="hover:text-[#E60012] transition-colors">Qual PC gamer</Link></li>
               <li><Link href="/toner" className="hover:text-[#E60012] transition-colors">Toner e cartucho</Link></li>
