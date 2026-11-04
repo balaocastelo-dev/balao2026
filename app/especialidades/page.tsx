@@ -130,7 +130,7 @@ const PROBLEMAS = [
   { texto: "Quero trocar para SSD", href: "/manutencao" },
   { texto: "PS5, Xbox ou controle com defeito", href: "/assistenciagames" },
   { texto: "Montar um PC gamer", href: "/montagempc" },
-  { texto: "Toner e impressora", href: "/tonner" },
+  { texto: "Toner e impressora", href: "/toner" },
   { texto: "Vender meu equipamento", href: "/consignacao" },
 ];
 
@@ -261,7 +261,7 @@ const ESPECIALIDADES: Especialidade[] = [
 
 const MAIS_SERVICOS = [
   { titulo: "Assistência de games", texto: "PS5, Xbox, Nintendo e controles", href: "/assistenciagames", icone: Gamepad2 },
-  { titulo: "Toners e impressão", texto: "Toner, cartucho original e impressora", href: "/tonner", icone: Printer },
+  { titulo: "Toners e impressão", texto: "Toner, cartucho original e impressora", href: "/toner", icone: Printer },
   { titulo: "Consignação", texto: "A loja vende o seu equipamento", href: "/consignacao", icone: HandCoins },
   { titulo: "Atendimento urgente", texto: "Prioridade para resolver no mesmo dia", href: "/urgente", icone: Zap },
   { titulo: "Monte seu PC", texto: "Escolha peça por peça com o preço na tela", href: "/monteseupc", icone: Cpu },

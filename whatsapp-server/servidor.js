@@ -2793,7 +2793,7 @@ async function montarOferta({ product = {}, price, obs }) {
     obs ? `\n_Obs: ${String(obs).trim()}_` : null,
     link ? `\n🔗 ${link}` : null,
     ``,
-    `📍 Pronta entrega na loja do Castelo, Campinas.`,
+    `📍 Pronta entrega na loja da Anchieta, Campinas.`,
     `Para reservar ou tirar dúvidas, é só responder aqui! 🎈`,
   ]
     .filter((l) => l !== null)

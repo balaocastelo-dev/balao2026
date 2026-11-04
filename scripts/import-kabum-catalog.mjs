@@ -159,7 +159,7 @@ async function run() {
       "Margem Aplicada": `${Math.round(margin * 100)}%`
     };
 
-    const description = `${name} disponível na Balão da Informática Castelo em Campinas. Aproveite o melhor preço à vista no PIX por ${pixPriceFormatted} com desconto progressivo ou parcele em até 10x de ${singleInstallmentFormatted} sem juros. Compre online com entrega rápida para Campinas e região ou retire diretamente no balcão no Cambuí. Garantia total, procedência garantida e suporte técnico especializado.`;
+    const description = `${name} disponível na Balão da Informática Anchieta em Campinas. Aproveite o melhor preço à vista no PIX por ${pixPriceFormatted} com desconto progressivo ou parcele em até 10x de ${singleInstallmentFormatted} sem juros. Compre online com entrega rápida para Campinas e região ou retire diretamente no balcão no Cambuí. Garantia total, procedência garantida e suporte técnico especializado.`;
 
     productsToInsert.push({
       id: randomUUID(),

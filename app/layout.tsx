@@ -51,12 +51,15 @@ export const metadata: Metadata = {
     "montagem de pc gamer campinas",
     "hardware campinas",
     "loja de computadores cambuí",
-    "balão da informática castelo",
+    "balão da informática anchieta",
     "balão da informática",
   ],
   authors: [{ name: "Balão da Informática" }],
   creator: "Balão da Informática",
   publisher: "Balão da Informática",
+  verification: {
+    google: "TRpT6cALErdwYWtR1HWKQZJlVBmX0RFPlxi5g3ZDuyM",
+  },
   robots: {
     index: true,
     follow: true,

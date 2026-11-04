@@ -3,7 +3,7 @@ import type { PaginaDeCaptacao } from "../tipos";
 // Regra do Thiago: cartucho e tinta só ORIGINAL; toner original e compatível.
 // As fileiras de cartucho e tinta excluem qualquer "compatível".
 export const tonner: PaginaDeCaptacao = {
-  slug: "tonner",
+  slug: "toner",
   nome: "Toner e cartucho em Campinas",
   chamada: "Toner original e compatível, cartucho e tinta originais, com entrega por motoboy para casa e escritório.",
   seo: {

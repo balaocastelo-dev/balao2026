@@ -14,7 +14,7 @@ const products = [
     category: "Computadores",
     image: "https://images.kabum.com.br/produtos/fotos/506720/computador-gamer-neologic-amd-ryzen-5-5600gt-16gb-ddr4-radeon-graphics-ssd-480gb-500w-80-plus-nli85984_1707921609_gg.jpg",
     slug: "pc-gamer-ryzen-5-5600gt-16gb-ssd-512gb",
-    specs: { "Processador": "AMD Ryzen 5 5600GT 6-Core", "Memória": "16GB DDR4 3200MHz", "Armazenamento": "512GB SSD NVMe M.2", "Gráficos": "Radeon Vega 7 Integrada", "Fonte": "500W 80 Plus Bronze", "Garantia": "1 Ano Balão Castelo" }
+    specs: { "Processador": "AMD Ryzen 5 5600GT 6-Core", "Memória": "16GB DDR4 3200MHz", "Armazenamento": "512GB SSD NVMe M.2", "Gráficos": "Radeon Vega 7 Integrada", "Fonte": "500W 80 Plus Bronze", "Garantia": "1 Ano Balão da Informática Anchieta" }
   },
   {
     name: "PC Gamer Intel Core i5 12400F, GeForce RTX 3060 12GB, 16GB RAM DDR4, SSD 1TB NVMe, Fonte 600W 80 Plus",
@@ -22,7 +22,7 @@ const products = [
     category: "Computadores",
     image: "https://images.kabum.com.br/produtos/fotos/476274/computador-gamer-neologic-intel-core-i5-12400f-16gb-geforce-rtx-3060-12gb-ssd-480gb-500w-80-plus-nli85669_1692288339_gg.jpg",
     slug: "pc-gamer-core-i5-12400f-rtx-3060-12gb-16gb-ssd-1tb",
-    specs: { "Processador": "Intel Core i5-12400F 12ª Ger", "Placa de Vídeo": "NVIDIA GeForce RTX 3060 12GB GDDR6", "Memória": "16GB DDR4", "Armazenamento": "1TB SSD NVMe", "Fonte": "600W 80 Plus", "Garantia": "1 Ano Balão Castelo" }
+    specs: { "Processador": "Intel Core i5-12400F 12ª Ger", "Placa de Vídeo": "NVIDIA GeForce RTX 3060 12GB GDDR6", "Memória": "16GB DDR4", "Armazenamento": "1TB SSD NVMe", "Fonte": "600W 80 Plus", "Garantia": "1 Ano Balão da Informática Anchieta" }
   },
   {
     name: "PC Gamer AMD Ryzen 7 5700X, GeForce RTX 4060 8GB, 32GB RAM DDR4, SSD 1TB NVMe Gen4, Water Cooler 240mm RGB",
@@ -38,7 +38,7 @@ const products = [
     category: "Computadores",
     image: "https://images.kabum.com.br/produtos/fotos/506727/computador-gamer-neologic-intel-core-i7-13700kf-32gb-ddr5-geforce-rtx-4070-super-12gb-ssd-1tb-750w-80-plus-water-cooler-nli85991_1707924294_gg.jpg",
     slug: "pc-gamer-core-i7-13700kf-rtx-4070-super-32gb-ddr5-2tb",
-    specs: { "Processador": "Intel Core i7-13700KF 16-Core", "Placa de Vídeo": "RTX 4070 Super 12GB GDDR6X", "Memória": "32GB DDR5 6000MHz", "Armazenamento": "2TB NVMe", "Garantia": "1 Ano Balão Castelo" }
+    specs: { "Processador": "Intel Core i7-13700KF 16-Core", "Placa de Vídeo": "RTX 4070 Super 12GB GDDR6X", "Memória": "32GB DDR5 6000MHz", "Armazenamento": "2TB NVMe", "Garantia": "1 Ano Balão da Informática Anchieta" }
   },
 
   // 2. Notebooks
@@ -254,7 +254,7 @@ async function seed() {
       "Disponibilidade": "Pronta Entrega em Campinas / Retirada em 30 min no Cambuí"
     };
 
-    const description = `${item.name} disponível na Balão da Informática Castelo em Campinas. Preço especial à vista no PIX por ${item.price} ou em até 10x de ${singleInstallmentStr} sem juros no cartão de crédito. Compre online e retire no balcão no Cambuí em até 30 minutos ou solicite entrega express por motoboy em Campinas e região.`;
+    const description = `${item.name} disponível na Balão da Informática Anchieta em Campinas. Preço especial à vista no PIX por ${item.price} ou em até 10x de ${singleInstallmentStr} sem juros no cartão de crédito. Compre online e retire no balcão no Cambuí em até 30 minutos ou solicite entrega express por motoboy em Campinas e região.`;
 
     await db.execute({
       sql: `INSERT INTO products (id, name, price, image, image_urls, category, slug, description, specs, created_at)

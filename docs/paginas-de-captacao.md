@@ -7,7 +7,7 @@ pessoa a chamar no WhatsApp. Cada página é única.
 ## As páginas
 
 `/manutencao`, `/recuperacaodados`, `/reparoapple`, `/telaiphone`, `/wendell/apple`, `/assistenciagames`,
-`/montagempc`, `/pcgamer`, `/pcgamer3d`, `/notebooks`, `/carregadores`, `/tonner`, `/microsoft`,
+`/montagempc`, `/pcgamer`, `/pcgamer3d`, `/notebooks`, `/carregadores`, `/toner`, `/microsoft`,
 `/consignacao`, `/sistemas`, `/promocao`, `/envio-e-entrega`, `/trocas-e-devolucoes`, `/como-comprar`,
 `/sobre-a-empresa`, `/sobre-nos`.
 
@@ -40,7 +40,7 @@ próprio em `lib/servicos-e-ofertas/`); ficou a versão dela. O mesmo vale para 
   páginas pedidas no arquivo e as que dividem temas; "Antes de decidir, leia" acha os artigos do blog pelo
   assunto (etiquetas, título, endereço). No sentido contrário, as chamadas dos artigos (`lib/blog/chamadas.ts`)
   ganharam os temas carregadores, licenças, impressão e games, que levam para `/carregadores`, `/microsoft`,
-  `/tonner` e `/assistenciagames`.
+  `/toner` e `/assistenciagames`. O endereço antigo `/tonner` responde 301 para `/toner`.
 - **Velocidade:** as páginas saem prontas do servidor e são refeitas a cada 5 minutos (`revalidate = 300`),
   em vez de consultar o banco a cada visita. Antes, quase todas carregavam o catálogo inteiro (12 MB) por visita.
   O cabeçalho do site lia a URL direto e fazia as páginas estáticas saírem vazias do servidor; a leitura foi

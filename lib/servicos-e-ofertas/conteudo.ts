@@ -131,7 +131,7 @@ export const SERVICOS: Servico[] = [
     titulo: "Impressoras, toners e cartuchos",
     resumo: "Suprimentos para casa e escritório, com entrega rápida na região.",
     itens: ["Cartuchos originais", "Toners para escritório", "Instalação de impressora Wi-Fi"],
-    href: "/tonner",
+    href: "/toner",
     foto: "/images/servicos-e-ofertas/tonner.webp",
     fotoAlt: "Toners, cartuchos e impressoras para empresas em Campinas",
     mensagem: "Olá! Preciso de toner/cartucho ou ajuda com impressora.",

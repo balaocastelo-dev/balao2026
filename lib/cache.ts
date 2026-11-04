@@ -299,7 +299,7 @@ export const getCachedVitrinePcGamer = unstable_cache(
 );
 
 /**
- * Fileiras das páginas de captação (/manutencao, /tonner, /reparoapple...).
+ * Fileiras das páginas de captação (/manutencao, /toner, /reparoapple...).
  *
  * Pede ao banco só as categorias e os começos de nome que as regras da página
  * usam, monta as fileiras (lib/landing/vitrine.ts) e guarda só o resultado —

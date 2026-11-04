@@ -281,7 +281,7 @@ function observacoesDaVenda(v: VendaDoPdv): { publica: string; interna: string }
     .map((p) => `${NOMES_DAS_FORMAS[p.forma]}${p.parcelas && p.parcelas > 1 ? ` ${p.parcelas}x` : ""}: R$ ${p.valor.toFixed(2).replace(".", ",")}`)
     .join(" | ");
   return {
-    publica: [v.observacao, `Venda no balcão — Balão da Informática Castelo · balao.info`].filter(Boolean).join("\n"),
+    publica: [v.observacao, `Venda no balcão — Balão da Informática Anchieta · balao.info`].filter(Boolean).join("\n"),
     interna: `PDV balao.info ${v.id}${v.troco > 0 ? ` · troco R$ ${v.troco.toFixed(2).replace(".", ",")}` : ""}\n${formas}`,
   };
 }

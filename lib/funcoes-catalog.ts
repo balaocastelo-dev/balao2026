@@ -151,9 +151,9 @@ export const FUNCOES_CATALOG: FuncaoCategory[] = [
         image: IMAGES.loja,
       },
       {
-        href: "/tonner",
-        title: "Tonner",
-        description: "Landing page para venda de tonner e suprimentos de impressao.",
+        href: "/toner",
+        title: "Toner",
+        description: "Landing page para venda de toner e suprimentos de impressao.",
         image: IMAGES.loja,
       },
       {

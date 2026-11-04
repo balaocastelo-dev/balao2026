@@ -81,6 +81,13 @@ Depois envie para:
 
 ## Passo 4: Search Console
 
+A propriedade `https://www.balao.info/` já tem as duas provas no código:
+
+- meta `google-site-verification` no layout (`app/layout.tsx`), então entra no `<head>` de todas as páginas do Next; as páginas HTML soltas em `public/` levam a mesma meta;
+- arquivo `public/google1b28e73344ff3a8c.html`, servido em `/google1b28e73344ff3a8c.html`. O `proxy.ts` não casa esse caminho, e não há rewrite nem redirect para ele.
+
+O nome da unidade no site é Balão da Informática Anchieta (antes, Castelo). CNPJ e endereço continuam 34.397.947/0001-08 e Av. Anchieta, 789, Cambuí. O Instagram oficial é https://www.instagram.com/balaoanchieta/ . O e-mail balaocastelo@balaodainformatica.com.br continua o mesmo. A página de toner responde em /toner; /tonner devolve 301.
+
 Assim que publicar:
 
 1. Entre no Search Console da propriedade `https://www.balao.info/`.

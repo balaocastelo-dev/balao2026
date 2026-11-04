@@ -62,7 +62,7 @@ type Props = {
 };
 
 const TEXTO_PADRAO =
-  "Olá, {nome}! Tudo bem? Aqui é da Balão da Informática Castelo, em Campinas.\n\n" +
+  "Olá, {nome}! Tudo bem? Aqui é da Balão da Informática Anchieta, em Campinas.\n\n" +
   "Separamos novidades e condições especiais pensando no que você conversou com a gente. Quer que eu te mande as opções?\n\n" +
   "É só responder aqui ou chamar: {whatsapp}";
 

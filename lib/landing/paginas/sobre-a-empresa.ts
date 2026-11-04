@@ -15,11 +15,11 @@ export const sobreAEmpresa: PaginaDeCaptacao = {
   nome: "Dados da empresa",
   chamada: "Razão social, CNPJ, endereço, horário e contatos oficiais da Balão da Informática no Cambuí.",
   seo: {
-    titulo: "Balão da Informática Castelo: CNPJ, endereço e contatos em Campinas",
+    titulo: "Balão da Informática Anchieta: CNPJ, endereço e contatos em Campinas",
     descricao:
-      "Dados oficiais da Balão da Informática Castelo: CNPJ 34.397.947/0001-08, Av. Anchieta, 789, Cambuí, Campinas/SP, telefone, WhatsApp, horário e Instagram.",
+      "Dados oficiais da Balão da Informática Anchieta: CNPJ 34.397.947/0001-08, Av. Anchieta, 789, Cambuí, Campinas/SP, telefone, WhatsApp, horário e Instagram.",
     palavras: [
-      "Balão da Informática Castelo CNPJ",
+      "Balão da Informática Anchieta CNPJ",
       "Balão da Informática endereço Campinas",
       "Balão da Informática Av. Anchieta 789 Cambuí",
       "telefone Balão da Informática Campinas",
@@ -77,7 +77,7 @@ export const sobreAEmpresa: PaginaDeCaptacao = {
       texto: "Os mesmos que aparecem na nota fiscal e no recebedor do Pix.",
       linhas: [
         ["Nome fantasia", "Balão da Informática"],
-        ["Razão social", "Balão da Informática Castelo"],
+        ["Razão social", "Balão da Informática Anchieta"],
         ["CNPJ", "34.397.947/0001-08"],
         ["Endereço", "Av. Anchieta, 789, Cambuí, Campinas/SP"],
         ["CEP", "13015-101"],
@@ -92,7 +92,7 @@ export const sobreAEmpresa: PaginaDeCaptacao = {
       linhas: [
         ["Telefone", "(19) 3255-1661"],
         ["WhatsApp", "(19) 98751-0267"],
-        ["Instagram", "@balaodainformatica_castelo"],
+        ["Instagram", "@balaoanchieta"],
         ["Segunda a sexta", "9h às 18h"],
         ["Sábado", "9h às 13h"],
         ["Domingo", "Fechado; o WhatsApp recebe mensagens"],
@@ -109,7 +109,7 @@ export const sobreAEmpresa: PaginaDeCaptacao = {
         { titulo: "Assistência de consoles", texto: "PlayStation, Xbox, Nintendo Switch e controles.", href: "/assistenciagames", imagem: foto("assistenciagames") },
         { titulo: "Notebooks", texto: "Novos, para ver ligados no balcão.", href: "/notebooks", imagem: foto("notebooks") },
         { titulo: "PC gamer e montagem", texto: "Montados na loja e testados antes da entrega.", href: "/montagempc", imagem: foto("montagempc") },
-        { titulo: "Toner e cartucho", texto: "Cartucho e tinta originais; toner original e compatível.", href: "/tonner", imagem: foto("tonner") },
+        { titulo: "Toner e cartucho", texto: "Cartucho e tinta originais; toner original e compatível.", href: "/toner", imagem: foto("tonner") },
         { titulo: "Windows e Office", texto: "Licenças originais, com instalação se precisar.", href: "/microsoft", imagem: foto("microsoft") },
         { titulo: "Consignação de usados", texto: "Seu usado exposto e vendido pela loja.", href: "/consignacao", imagem: foto("consignacao") },
         { titulo: "Sites e sistemas", texto: "A mesma equipe que fez os sistemas da loja.", href: "/sistemas", imagem: foto("sistemas") },
@@ -143,7 +143,7 @@ export const sobreAEmpresa: PaginaDeCaptacao = {
         },
         {
           titulo: "Confira o recebedor do Pix",
-          texto: "No Pix, o recebedor aparece como Balão da Informática Castelo, CNPJ 34.397.947/0001-08. Se aparecer outro nome, não pague e ligue para a loja.",
+          texto: "No Pix, o recebedor aparece como Balão da Informática Anchieta, CNPJ 34.397.947/0001-08. Se aparecer outro nome, não pague e ligue para a loja.",
         },
         {
           titulo: "Confira o endereço do site",
@@ -160,7 +160,7 @@ export const sobreAEmpresa: PaginaDeCaptacao = {
     {
       pergunta: "Qual é o CNPJ da Balão da Informática?",
       resposta:
-        "O CNPJ é 34.397.947/0001-08, com a razão social Balão da Informática Castelo. É o mesmo que aparece na nota fiscal e no recebedor do Pix.",
+        "O CNPJ é 34.397.947/0001-08, com a razão social Balão da Informática Anchieta. É o mesmo que aparece na nota fiscal e no recebedor do Pix.",
     },
     {
       pergunta: "Onde fica a Balão da Informática em Campinas?",
@@ -175,7 +175,7 @@ export const sobreAEmpresa: PaginaDeCaptacao = {
     {
       pergunta: "Qual é o WhatsApp oficial da loja?",
       resposta:
-        "É o (19) 98751-0267. O telefone fixo é (19) 3255-1661 e o Instagram é @balaodainformatica_castelo; outros números falando em nome da loja não são oficiais.",
+        "É o (19) 98751-0267. O telefone fixo é (19) 3255-1661 e o Instagram é @balaoanchieta; outros números falando em nome da loja não são oficiais.",
     },
     {
       pergunta: "A Balão tem outras lojas?",

@@ -28,7 +28,7 @@ export const RESPOSTAS_BASE: CrmRespostaRapida[] = [
   {
     id: 4,
     titulo: "Endereço da loja",
-    texto: "📍 Balão da Informática Castelo\nRua Santo Antonio Claret, 241 – Castelo – Campinas/SP\nVenha nos visitar, temos estacionamento próprio e testamos tudo na bancada! 😉",
+    texto: "📍 Balão da Informática Anchieta\nAv. Anchieta, 789 – Cambuí – Campinas/SP\nVenha nos visitar, temos estacionamento próprio e testamos tudo na bancada! 😉",
     categoria: "Loja",
   },
   {
@@ -82,7 +82,7 @@ export const RESPOSTAS_BASE: CrmRespostaRapida[] = [
   {
     id: 13,
     titulo: "Garantia",
-    texto: "🛡️ Todos os nossos produtos e serviços acompanham garantia com nota fiscal e suporte técnico dedicado na nossa loja física do Castelo.",
+    texto: "🛡️ Todos os nossos produtos e serviços acompanham garantia com nota fiscal e suporte técnico dedicado na nossa loja física da Anchieta.",
     categoria: "Atendimento",
   },
   {
@@ -94,7 +94,7 @@ export const RESPOSTAS_BASE: CrmRespostaRapida[] = [
   {
     id: 15,
     titulo: "Entrega Campinas e região",
-    texto: "🚚 Atendemos Campinas, Valinhos, Vinhedo, Sumaré, Paulínia e região via motoboy express/Uber Flash ou retirada imediata no balcão da loja Castelo. Me passa seu CEP!",
+    texto: "🚚 Atendemos Campinas, Valinhos, Vinhedo, Sumaré, Paulínia e região via motoboy express/Uber Flash ou retirada imediata no balcão da loja Anchieta. Me passa seu CEP!",
     categoria: "Entrega",
   },
   {

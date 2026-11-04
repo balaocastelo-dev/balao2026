@@ -60,12 +60,12 @@ export async function POST(req: Request) {
       <p><strong>Sua mensagem:</strong></p>
       <blockquote>${escapar(message).replace(/\n/g, "<br>")}</blockquote>
       <br>
-      <p>Atenciosamente,<br>Equipe Balão Castelo</p>
+      <p>Atenciosamente,<br>Equipe Balão da Informática Anchieta</p>
     `;
 
       await sendEmail({
         to: email,
-        subject: subject || "Recebemos sua mensagem - Balão Castelo",
+        subject: subject || "Recebemos sua mensagem - Balão da Informática Anchieta",
         html: userHtml,
         eventType: "contact_form",
       });

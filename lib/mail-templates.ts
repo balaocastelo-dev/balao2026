@@ -44,7 +44,7 @@ const getUnsubscribeLink = (email?: string) => {
   return `${baseUrl}/unsubscribe?email=${encodeURIComponent(email)}`;
 };
 
-export const getBaseTemplate = (content: string, title: string = "Balão Castelo", email?: string) => `
+export const getBaseTemplate = (content: string, title: string = "Balão da Informática Anchieta", email?: string) => `
 <!DOCTYPE html>
 <html>
 <head>
@@ -69,7 +69,7 @@ export const getBaseTemplate = (content: string, title: string = "Balão Castelo
       </p>
       <div style="margin-top: 20px; pt-10px; border-top: 1px solid #e5e7eb;">
         <p style="font-size: 11px; color: #9ca3af;">
-          &copy; ${new Date().getFullYear()} Balão Castelo. Todos os direitos reservados.<br>
+          &copy; ${new Date().getFullYear()} Balão da Informática Anchieta. Todos os direitos reservados.<br>
           Este e-mail foi enviado automaticamente.
         </p>
         ${email ? `<p><a href="${getUnsubscribeLink(email)}" style="color: #9ca3af; text-decoration: underline;">Descadastrar-se</a></p>` : ''}
@@ -380,7 +380,7 @@ export const getWelcomeTemplate = (name: string, email: string) => {
     </div>
 
     <p>Olá, <strong>${name.split(' ')[0]}</strong>!</p>
-    <p>Estamos muito felizes em ter você na família <strong>Balão da Informática Castelo</strong>! 🚀</p>
+    <p>Estamos muito felizes em ter você na família <strong>Balão da Informática Anchieta</strong>! 🚀</p>
     
     <p>Agora você tem acesso às melhores ofertas de hardware e informática de Campinas e região.</p>
 
@@ -399,7 +399,7 @@ export const getWelcomeTemplate = (name: string, email: string) => {
       <a href="https://balaocastelo.com.br" class="button">Começar a Comprar</a>
     </p>
   `;
-  return getBaseTemplate(content, "Bem-vindo à Balão Castelo! 🎈", email);
+  return getBaseTemplate(content, "Bem-vindo à Balão da Informática Anchieta! 🎈", email);
 };
 
 export const getAdminNotificationTemplate = (title: string, data: any) => {
