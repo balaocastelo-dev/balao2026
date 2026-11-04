@@ -19,7 +19,7 @@ const HOSTS = new Set<string>(HOSTS_SOUBOTS);
 
 export type RewriteDeHost = {
   source: string;
-  has: [{ type: "host"; value: string }];
+  has: { type: "host"; value: string }[];
   destination: string;
 };
 
