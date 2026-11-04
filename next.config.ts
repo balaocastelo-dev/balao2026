@@ -12,6 +12,13 @@ const nextConfig: NextConfig = {
     "/api/precos/troca": ["./data/catalogo-inicial.json"],
     "/api/precos/importar": ["./data/techsupri-catalogo.json"],
   },
+  // A landing /mybots-app não lê public/ no servidor. Sem esta exclusão, o
+  // file tracer leva vídeo, apk e imagem para dentro da função (passou de
+  // 250 MB descompactados no deploy do PR #122). Os arquivos seguem em
+  // public/ e continuam servidos como estáticos.
+  outputFileTracingExcludes: {
+    "/mybots-app": ["./public/**/*"],
+  },
   // O Office 3D (escritório virtual) é uma página pronta, em public/3d: não
   // passa pelo layout da loja. O endereço /3d abre o index.html dela.
   // O código-fonte e o comando para republicar estão em office3d/README.md.

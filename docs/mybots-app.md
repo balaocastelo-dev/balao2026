@@ -39,10 +39,10 @@ O botão **Entrar** (topo) e **Entrar com Google** vão para `URL_PAINEL`
   (releases, public/, workflows). A release `app-build-3` deste repo é o APK da loja
   (`balao-da-informatica.apk`), não o MyBots. No MyBots, `android-apk.yml` só gera APK de debug
   como artefato, e `scripts/install-hub.ps1` é script local. O botão aponta para a constante
-  `URL_INSTALADOR_WINDOWS` (`/downloads/MyBots-Setup.exe`). Quando o arquivo existir, troque só
-  essa constante — se for um caminho em `public/`, a página passa a oferecer o download e tira
-  o aviso. Enquanto o arquivo não está lá, o botão continua no mesmo endereço e a página avisa
-  que o instalador ainda não foi publicado.
+  `URL_INSTALADOR_WINDOWS` (`/downloads/MyBots-Setup.exe`). Quando o arquivo existir em
+  `public/`, acrescente essa URL em `ARQUIVOS_PUBLICADOS` (`lib/mybots-arquivos.ts`). A página
+  passa a oferecer o download e tira o aviso. Enquanto a URL não está nessa lista, o botão
+  continua no mesmo endereço e a página avisa que o instalador ainda não foi publicado.
 
 ## Vídeos
 
@@ -53,8 +53,9 @@ poster, fonte só quando o quadro chega perto da tela). O fundo do hero é
 
 Os arquivos finais estão em `public/mybots/videos/`. O hero usa o mp4 em loop, mudo e
 `playsinline`, com o pôster `00_hero_poster.jpg`. Os quatro de baixo usam `preload="none"`,
-o pôster e só baixam a fonte quando o quadro chega perto da tela. Webm, se existir com o
-mesmo nome, entra junto. Sem o mp4 e sem o webm, a seção mostra o quadro “Vídeo em preparação”.
+o pôster e só baixam a fonte quando o quadro chega perto da tela. Webm entra se a URL
+(`slot.webm`) estiver em `ARQUIVOS_PUBLICADOS`. Sem o mp4 e sem o webm, a seção mostra o
+quadro “Vídeo em preparação”.
 
 | Ordem | Onde | Arquivos |
 | --- | --- | --- |
@@ -79,5 +80,33 @@ Com `prefers-reduced-motion: reduce`, nada disso se move.
 - `app/mybots-app/page.tsx` — a página. Fonte Outfit em arquivo
   (`outfit-latin-wght-normal.woff2`, via `next/font/local`). Não usar `next/font/google`.
 - `lib/mybots-landing.ts` — textos, slots, botões e JSON-LD.
-- `lib/mybots-arquivos.ts` — confere se o arquivo já está em `public/`.
+- `lib/mybots-arquivos.ts` — lista fechada (`ARQUIVOS_PUBLICADOS`) do que a landing pode
+  citar. Não usa `fs` nem `process.cwd()`: isso puxava `public/` inteira para a função.
 - `lib/soubots.ts` — hosts, `URL_PAINEL` e o rewrite de `/app`.
+
+## Tamanho da função na Vercel
+
+O deploy de produção depois do merge do PR #122 falhou: a função `mybots-app` ficou com
+282,07 MB descompactados, acima do limite de 250 MB. A causa era
+`existsSync(path.join(process.cwd(), "public", url))` em `lib/mybots-arquivos.ts`. O
+caminho variável faz o file tracer incluir a pasta `public/` (vídeos, apk, imagens).
+
+A correção tem duas partes, sem `VERCEL_SUPPORT_LARGE_FUNCTIONS`:
+
+1. A landing não lê mais o disco. Os mp4, pôsteres e o APK continuam em `public/` e são
+   servidos como arquivos estáticos.
+2. `outputFileTracingExcludes` em `next.config.ts` tira `./public/**/*` da rota
+   `/mybots-app`.
+
+Medido em `npx next build --webpack`, somando os arquivos de
+`.next/server/app/mybots-app/page.js.nft.json`:
+
+| | Total | De `public/` | Arquivos de `public/` |
+| --- | ---: | ---: | ---: |
+| Antes | 294,96 MB | 289,62 MB | 1212 |
+| Depois | 5,34 MB | 0 | 0 |
+
+O número que a Vercel mostrou no deploy (282,07 MB) é a mesma função, medida por eles.
+Os vídeos e o APK continuam no HTML da página, servidos de `public/`.
+
+A landing não publica telefone nem link de conversa. O botão flutuante da loja não entra em `/mybots-app`.
