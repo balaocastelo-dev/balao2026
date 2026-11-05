@@ -2,6 +2,22 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "extensao-filtro-de-linha-e-regua-o-que-ligar-onde",
+      "titulo": "Extensão, filtro de linha e régua: o que ligar em cada um",
+      "resumo": "Extensão só leva a tomada mais longe; filtro de linha bom também corta surtos. Veja o que ligar em cada um e o que deve ir direto na parede.",
+      "categoria": "guias",
+      "etiquetas": [
+        "energia",
+        "filtro de linha",
+        "proteção",
+        "segurança"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-11-06T21:00:00.000Z",
+      "minutos": 4,
+      "formato": "dica"
+    },
+    {
       "slug": "ataque-iphone-desatualizado-sites-invadidos-sekoia",
       "titulo": "iPhone desatualizado: sites invadidos roubavam dados sem nenhum clique",
       "resumo": "A Sekoia revelou em 4 de novembro ataques que roubavam dados de iPhones e celulares desatualizados só pela visita a um site. Veja quem precisa agir.",
@@ -1301,5 +1317,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-11-05T22:41:56.478Z"
+  "atualizadoEm": "2026-11-05T22:49:04.429Z"
 }

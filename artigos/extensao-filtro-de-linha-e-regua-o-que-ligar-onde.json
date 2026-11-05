@@ -1,0 +1,175 @@
+{
+  "slug": "extensao-filtro-de-linha-e-regua-o-que-ligar-onde",
+  "titulo": "Extensão, filtro de linha e régua: o que ligar em cada um",
+  "resumo": "Extensão só leva a tomada mais longe; filtro de linha bom também corta surtos. Veja o que ligar em cada um e o que deve ir direto na parede.",
+  "categoria": "guias",
+  "etiquetas": [
+    "energia",
+    "filtro de linha",
+    "proteção",
+    "segurança"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-11-06T21:00:00.000Z",
+  "formato": "dica",
+  "roteiro": {
+    "fala": "Extensão, filtro de linha e régua parecem a mesma coisa, mas não são. A extensão só leva a tomada mais longe. O filtro de linha bom tem fusível e proteção contra surto, e é nele que vão o computador, o monitor e o roteador. Agora, micro-ondas, airfryer, aquecedor e ar-condicionado vão direto na tomada da parede. E nunca ligue um filtro dentro do outro. Se a tomada esquenta ou cheira a queimado, desligue e chame um eletricista.",
+    "titulo": "Extensão ou filtro de linha?",
+    "destaques": [
+      "Extensão só leva mais longe",
+      "PC e monitor no filtro",
+      "Alta potência na parede",
+      "Nunca filtro no filtro"
+    ],
+    "legenda": "Extensão, filtro de linha e régua não fazem a mesma coisa. Veja o que ligar em cada um e o que tem de ir direto na parede. A dica completa está no blog.",
+    "hashtags": [
+      "filtrodelinha",
+      "energia",
+      "computador",
+      "seguranca",
+      "informatica",
+      "campinas"
+    ]
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Extensão, filtro de linha e régua costumam ser vendidos lado a lado e parecem iguais, mas fazem coisas diferentes. A extensão só leva a tomada mais longe. O filtro de linha de qualidade tem fusível ou disjuntor e componentes que seguram picos de tensão. Computador, monitor e roteador vão no filtro; aparelho que esquenta ou gela vai direto na parede."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que qualquer régua com várias tomadas protege o computador. \"Régua\" é só o formato: pode ser uma extensão simples ou um filtro de verdade. E mesmo o melhor filtro não segura o computador ligado quando a energia cai, nem corrige tensão baixa. Para isso existem o nobreak e, em alguns casos, o estabilizador."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "**Extensão** só aumenta o alcance da tomada; não protege contra surto.",
+        "**Filtro de linha** bom tem fusível ou disjuntor e proteção contra surtos; é onde ficam o computador e seus periféricos.",
+        "Micro-ondas, airfryer, aquecedor, ferro e ar-condicionado vão **direto na tomada da parede**.",
+        "Nunca ligue um filtro ou uma extensão dentro de outro."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como saber o que é cada um"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Olhe a embalagem e o próprio aparelho, não o nome no anúncio. Muitos produtos chamados de filtro só multiplicam tomadas. Um filtro que protege costuma informar proteção contra surtos, ter fusível ou disjuntor e trazer a potência máxima suportada. Prefira os que têm o selo do Inmetro, que indica que o produto passou por ensaios de segurança."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Aparelho",
+        "O que faz",
+        "O que não faz"
+      ],
+      "linhas": [
+        [
+          "Extensão",
+          "Leva a tomada para mais longe",
+          "Não protege contra surto nem sobrecarga da rede"
+        ],
+        [
+          "Filtro de linha",
+          "Multiplica tomadas, corta em sobrecarga e segura picos de tensão",
+          "Não mantém nada ligado na falta de energia"
+        ],
+        [
+          "Régua",
+          "É só o formato com várias tomadas",
+          "Pode ser extensão ou filtro: confira a embalagem"
+        ],
+        [
+          "Benjamim ou T",
+          "Divide uma tomada em duas ou três",
+          "Não protege e esquenta no uso constante"
+        ]
+      ],
+      "titulo": "O que cada um faz",
+      "colunaDestaque": 1,
+      "fonte": {
+        "nome": "Hardware.com.br e Correio Braziliense",
+        "url": "https://www.hardware.com.br/hardware/o-que-e-para-que-serve-filtro-de-linha/amp/"
+      },
+      "nota": "Para manter o computador ligado quando a energia cai, o equipamento é o nobreak."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que ligar onde"
+    },
+    {
+      "tipo": "lista",
+      "ordenada": false,
+      "itens": [
+        "**No filtro de linha:** computador, monitor, roteador, impressora, carregador do notebook e caixa de som.",
+        "**Na extensão:** um aparelho leve que precisa alcançar um canto longe da tomada, como um abajur ou um carregador de celular, de preferência por pouco tempo.",
+        "**Direto na parede:** micro-ondas, airfryer, forno elétrico, aquecedor, secador, ferro de passar, geladeira e máquina de lavar. Chuveiro e ar-condicionado pedem circuito próprio, feito por eletricista.",
+        "**Em lugar nenhum:** um filtro ligado dentro de outro filtro, extensão em sequência ou benjamim pendurado em extensão."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A conta que importa é a soma. Cada aparelho informa a potência em watts na etiqueta ou no carregador, e o total ligado ao mesmo tempo tem de ficar abaixo do que o filtro aceita. Tomadas de 10 A dão conta de computador e TV; para cargas maiores, a indicação é um modelo com tomadas de 20 A. Ligar filtro em filtro soma tudo numa única tomada da parede."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando a dica não basta"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A troca do filtro não resolve quando a instalação da casa já dá sinais de sobrecarga. Os avisos mais citados por distribuidoras de energia e bombeiros são tomada ou fio quente, plástico derretido ou escurecido, disjuntor que desarma com frequência, lâmpada que oscila e cheiro de queimado. Nesses casos, desligue o disjuntor e chame um eletricista. Trocar o disjuntor por um maior, por conta própria, tira a proteção da fiação."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Deixe o filtro em lugar visível e ventilado, nunca debaixo de tapete ou atrás de móvel, e confira de tempos em tempos se há cabo rachado ou tomada frouxa. Se o seu computador desliga sozinho ou não liga depois de uma queda de energia, a [assistência técnica](/manutencao) da Balão da Informática, no Cambuí, em Campinas, faz o diagnóstico. Quando o problema é o carregador do notebook, veja os [carregadores](/carregadores)."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Para saber quando vale ir além do filtro, o artigo [nobreak, estabilizador ou filtro de linha](/blog/nobreak-estabilizador-ou-filtro-de-linha) compara os três. Em uma linha: computador no filtro de linha, aparelho de alta potência na parede e nunca um filtro dentro do outro."
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Posso ligar o computador numa extensão comum?",
+      "resposta": "Funciona, mas a extensão não protege contra picos de tensão. Para o computador e o monitor, o melhor é um filtro de linha com proteção contra surtos e selo do Inmetro."
+    },
+    {
+      "pergunta": "Filtro de linha protege na falta de energia?",
+      "resposta": "Não. Ele não guarda energia: quando a luz cai, tudo desliga na hora. Quem mantém o computador ligado por alguns minutos para salvar o trabalho é o nobreak."
+    },
+    {
+      "pergunta": "Posso ligar a airfryer no filtro de linha?",
+      "resposta": "Não é recomendado. Airfryer, micro-ondas e aquecedor puxam muita corrente e devem ir direto na tomada da parede, sem filtro, extensão ou benjamim."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "O que é e para quê serve um filtro de linha? — Hardware.com.br",
+      "url": "https://www.hardware.com.br/hardware/o-que-e-para-que-serve-filtro-de-linha/amp/",
+      "data": "maio de 2024"
+    },
+    {
+      "nome": "Usa filtro de linha? Veja 6 cuidados que você precisa tomar — Correio Braziliense",
+      "url": "https://www.correiobraziliense.com.br/cbradar/usa-filtro-de-linha-veja-6-cuidados-que-voce-precisa-tomar/",
+      "data": "junho de 2025"
+    },
+    {
+      "nome": "O risco invisível que vem da tomada — Diario de Pernambuco",
+      "url": "https://www.diariodepernambuco.com.br/vida-urbana/2026/04/11711896-o-risco-invisivel-que-vem-da-tomada-saiba-como-evitar-sobrecarga-eletrica-e-incendio.html",
+      "data": "abril de 2026"
+    },
+    {
+      "nome": "Orientações da Cemig sobre segurança com energia elétrica — Agência Minas",
+      "url": "https://agenciaminas.mg.gov.br/news/pdf/129837.pdf",
+      "data": "abril de 2026"
+    }
+  ]
+}
