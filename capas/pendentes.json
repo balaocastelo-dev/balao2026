@@ -1,4 +1,13 @@
 {
   "versao": 1,
-  "pendentes": []
+  "pendentes": [
+    {
+      "slug": "hdmi-ou-displayport-qual-cabo-usar",
+      "titulo": "HDMI ou DisplayPort: qual cabo usar no monitor, na TV e no notebook",
+      "categoria": "hardware",
+      "alt": "Dois cabos de vídeo enrolados sobre uma bancada de madeira, ao lado da traseira de um monitor apagado com as portas à mostra",
+      "pedido": "Two coiled black video cables with metal connectors resting on a light wooden workbench. Behind them, the back panel of a switched-off computer monitor, seen from a low angle, showing a row of empty rectangular video ports. A small desktop graphics card lies flat at the edge of the bench, slightly out of focus. Soft daylight from a window on the right, shallow depth of field.",
+      "pedidoEm": "2026-11-05T22:11:50.985Z"
+    }
+  ]
 }

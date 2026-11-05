@@ -1,0 +1,295 @@
+{
+  "slug": "hdmi-ou-displayport-qual-cabo-usar",
+  "titulo": "HDMI ou DisplayPort: qual cabo usar no monitor, na TV e no notebook",
+  "resumo": "HDMI ou DisplayPort? Os dois levam imagem e som; a escolha depende da porta, da taxa de atualização e do cabo certificado. Veja qual usar em cada caso.",
+  "categoria": "hardware",
+  "etiquetas": [
+    "monitor",
+    "placa de vídeo",
+    "cabos",
+    "notebook"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-11-06T09:00:00.000Z",
+  "seo": {
+    "titulo": "HDMI ou DisplayPort: qual cabo usar em cada caso"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Você comprou um monitor novo ou uma placa de vídeo e encontrou na caixa, ou na traseira do equipamento, as duas opções: HDMI ou DisplayPort. As duas portas levam imagem e som, os dois cabos parecem fazer a mesma coisa, e a dúvida é se tanto faz ou se existe um jeito certo. Existe, e ele depende menos do nome da porta do que do que você vai ligar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que um dos dois é sempre melhor. Não é assim. No computador ligado a monitor, o DisplayPort costuma ser a escolha natural; na TV, quase sempre só há HDMI, e ele dá conta. O que realmente estraga a imagem é usar o cabo de uma geração antiga em uma ligação que pede mais banda. Este guia mostra como decidir e como conferir o cabo."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "**Computador e monitor**: use DisplayPort quando as duas pontas tiverem a porta, principalmente em monitor de alta taxa de atualização.",
+        "**TV, console e projetor**: use HDMI, que é a porta que esses aparelhos trazem.",
+        "**O cabo importa tanto quanto a porta**: procure o nome certificado na embalagem (Ultra High Speed ou Ultra96 no HDMI, DP40 ou DP80 no DisplayPort).",
+        "**Vários monitores em cadeia** só funcionam por DisplayPort ou USB-C com modo DisplayPort, nunca por HDMI."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que diferencia as duas portas na prática"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "HDMI e DisplayPort resolvem o mesmo problema: levar vídeo digital, com áudio junto, de uma fonte para uma tela. A diferença está na origem. O HDMI nasceu para a sala de casa, ligando aparelho de Blu-ray, console e decodificador à TV. O DisplayPort foi criado pela VESA, a associação de fabricantes de monitores e computadores, pensando na mesa de trabalho."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Isso explica onde cada um aparece. TVs trazem várias entradas HDMI e normalmente nenhuma DisplayPort. Placas de vídeo de computador de mesa costumam trazer mais saídas DisplayPort do que HDMI. Monitores ficam no meio: muitos têm as duas entradas, e os de entrada às vezes trazem só HDMI. Notebooks variam bastante, e cada vez mais usam a porta USB-C para levar o sinal de vídeo."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Os dois padrões têm versões, e cada versão aumenta a quantidade de dados que passa pelo cabo, a chamada banda, medida em gigabits por segundo (Gbps). Mais banda permite resolução maior, taxa de atualização mais alta e mais cor sem compressão. É por isso que olhar só o nome da porta engana: um HDMI antigo e um HDMI recente têm o mesmo formato e capacidades muito diferentes."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Padrão",
+        "Banda máxima",
+        "Cabo indicado",
+        "Exemplos que a especificação cita"
+      ],
+      "linhas": [
+        [
+          "HDMI com cabo Premium High Speed",
+          "Até 18 Gbps",
+          "Premium High Speed",
+          "4K a 60 Hz com HDR"
+        ],
+        [
+          "HDMI 2.1 com cabo Ultra High Speed",
+          "Até 48 Gbps",
+          "Ultra High Speed",
+          "8K a 60 Hz e 4K a 120 Hz"
+        ],
+        [
+          "HDMI 2.2 com cabo Ultra96",
+          "Até 96 Gbps",
+          "Ultra96",
+          "4K a 240 Hz e 8K a 60 Hz sem compressão, com cor de 10 e 12 bits"
+        ],
+        [
+          "DisplayPort 2.1, modo UHBR10",
+          "40 Gbps",
+          "DP40",
+          "8K a 30 Hz sem compressão"
+        ],
+        [
+          "DisplayPort 2.1, modo UHBR20",
+          "80 Gbps",
+          "DP80",
+          "10K a 60 Hz sem compressão"
+        ]
+      ],
+      "titulo": "As versões recentes lado a lado",
+      "colunaDestaque": 2,
+      "fonte": {
+        "nome": "HDMI Licensing Administrator — tipos de cabo HDMI",
+        "url": "https://www.hdmi.org/resource/cables"
+      },
+      "nota": "As linhas do DisplayPort vêm do programa de certificação de cabos da VESA, conforme a reportagem do Tom's Hardware listada nas fontes. A banda real de uma ligação é sempre a menor entre a saída, a entrada e o cabo."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A tabela não diz que um padrão vence o outro. Diz que, dentro de cada um, a versão e o cabo definem o teto. E que, na maior parte dos usos de escritório e estudo, como um monitor Full HD ou 2K a 60 Hz ou 75 Hz, qualquer das duas portas, mesmo em versões mais antigas, sobra. A escolha só aperta quando a resolução e a taxa de atualização sobem juntas."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando usar DisplayPort"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se o computador e o monitor têm DisplayPort, ele costuma ser o primeiro a experimentar. Em monitor de alta taxa de atualização, de 144 Hz para cima, as versões recentes do DisplayPort têm banda de sobra. Nas placas de vídeo mais novas, o DisplayPort 2.1 com o modo de 80 Gbps já aparece, por exemplo, nas GeForce da série 50, segundo a Corsair."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A outra vantagem é ligar vários monitores com um cabo só. O recurso chama-se MST, sigla em inglês para transporte de múltiplos fluxos, e permite encadear monitores: o computador vai ao primeiro, que repassa o sinal ao segundo. A Dell, no guia de monitores em cadeia, informa que isso funciona por DisplayPort 1.2 ou mais novo, por USB-C com modo DisplayPort ou por Thunderbolt, e não por HDMI."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas há condições. Segundo o mesmo guia, o primeiro monitor da fila precisa ter saída DisplayPort e suporte a MST, que às vezes vem desligado no menu do monitor. Quantos monitores a cadeia aguenta depende da placa de vídeo. E no Mac o encadeamento só funciona por Thunderbolt, com monitores que tenham porta de saída Thunderbolt."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "Presente em quase toda placa de vídeo dedicada de computador de mesa.",
+        "Versões recentes com banda alta para monitores de alta taxa de atualização.",
+        "Permite encadear monitores com MST, dentro dos limites da placa.",
+        "O mesmo sinal passa pela porta USB-C de muitos notebooks, no modo DisplayPort."
+      ],
+      "contras": [
+        "TVs normalmente não têm entrada DisplayPort.",
+        "Nos cabos de 80 Gbps, o passivo fica curto, perto de um metro, segundo a VESA.",
+        "Monitores mais simples às vezes trazem só HDMI.",
+        "Cabo sem certificação pode falhar nas taxas mais altas sem dar sinal claro do motivo."
+      ],
+      "titulo": "DisplayPort no computador"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando usar HDMI"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Para TV, console, projetor e caixa de som com entrada de vídeo, a resposta é HDMI, porque é a porta que esses aparelhos têm. O HDMI também traz recursos pensados para a sala: o eARC, que manda o áudio da TV para a barra de som ou o receiver pelo mesmo cabo, e o ALLM, que coloca a TV sozinha no modo de baixo atraso quando um jogo começa, conforme a página de especificação do HDMI."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "No computador, o HDMI também serve bem, desde que as versões das duas pontas e o cabo acompanhem o que você quer. A taxa de atualização variável, que evita aqueles rasgos horizontais na imagem quando o jogo oscila, existe nos dois padrões. A AMD, por exemplo, informa que o FreeSync funciona tanto por DisplayPort quanto por HDMI."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas o HDMI é onde mais aparece a armadilha da versão. Um monitor anunciado como 144 Hz pode chegar a essa taxa só pela entrada DisplayPort e ficar limitado pela HDMI, ou o contrário. A ficha técnica do monitor costuma dizer a taxa máxima em cada entrada. Leia essa linha antes de decidir o cabo, e não suponha que todas as entradas do mesmo monitor são iguais."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "É a porta universal de TVs, consoles e projetores.",
+        "Recursos de sala, como eARC e ALLM, nas versões recentes.",
+        "Funciona com a taxa de atualização variável em placas e telas compatíveis.",
+        "Fácil de achar em monitores, notebooks e adaptadores."
+      ],
+      "contras": [
+        "Não encadeia monitores: cada tela pede uma saída.",
+        "A mesma aparência esconde versões de capacidades bem diferentes.",
+        "Em monitores, a entrada HDMI às vezes tem taxa máxima menor que a DisplayPort.",
+        "O HDMI 2.2 ainda é novo: confira se as duas pontas o têm antes de pagar por um cabo Ultra96."
+      ],
+      "titulo": "HDMI no computador e na sala"
+    },
+    {
+      "tipo": "chamada",
+      "tema": "placas-de-video"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como conferir se o cabo aguenta o que você quer"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O cabo é a peça que mais causa problema e a menos lembrada. Ele não ganha recurso novo: só deixa passar, ou não, a banda que as pontas tentam usar. Cabo fraco costuma dar sinais conhecidos, como tela que pisca, pontos coloridos, imagem que some por um segundo ou um monitor que só aceita taxa mais baixa. O artigo sobre [monitor piscando](/blog/monitor-piscando-cabo-placa-ou-monitor) ajuda a separar a culpa."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "**Descubra o que a ligação pede**: resolução e taxa de atualização que você quer usar, conferidas na ficha do monitor e da placa.",
+        "**Leia o nome no cabo**: segundo o HDMI Licensing Administrator, todo cabo HDMI certificado traz o nome da categoria escrito na capa, como Ultra High Speed.",
+        "**Confira a etiqueta da embalagem**: as dos cabos Ultra96 e Ultra High Speed têm um código QR que confirma a certificação.",
+        "**No DisplayPort, procure DP40 ou DP80**: são as marcas da certificação da VESA para as taxas mais altas.",
+        "**Prefira o cabo mais curto que alcança**: nas bandas mais altas, comprimento pesa contra.",
+        "**Teste trocando um item por vez**: outro cabo, outra porta, outra entrada do monitor."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Sobre comprimento, a VESA anunciou em janeiro de 2025 o cabo DP80LL, ativo, que leva os 80 Gbps a até três metros, justamente porque a ligação passiva nessa banda fica em torno de um metro. Para quem usa monitor a menos de dois metros do gabinete em taxas comuns, isso raramente pesa. Em instalações longas, como projetor no teto, vale pedir orientação antes de comprar."
+    },
+    {
+      "tipo": "destaque",
+      "tom": "dica",
+      "texto": "Adaptadores de DisplayPort para HDMI, ou de USB-C para HDMI, funcionam, mas costumam limitar a ligação à capacidade do adaptador. Se a taxa de atualização caiu depois de colocar um, ele é o primeiro suspeito. Sempre que possível, use um cabo direto com a mesma porta nas duas pontas.",
+      "titulo": "Adaptador muda o jogo"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Notebook: USB-C, HDMI ou DisplayPort?"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Em muitos notebooks, a porta de vídeo mais capaz é a USB-C. Pelo modo alternativo DisplayPort, ela leva o sinal de vídeo e, no mesmo cabo, dados e carga, como lembra a própria VESA. Um monitor com entrada USB-C pode, assim, ligar o notebook com um cabo só. Mas nem toda porta USB-C faz vídeo: o manual do notebook diz quais fazem."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se o notebook só tem HDMI, ele resolve monitor Full HD e 2K no uso de escritório. Se tem as duas opções e o monitor aceita USB-C ou DisplayPort, essa costuma ser a ligação com mais folga. Quem vai ligar dois monitores no notebook deve conferir, antes, quantas telas externas o modelo aceita: esse limite é do notebook, e nenhum cabo o contorna."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Ainda em dúvida? A loja ajuda a escolher"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Antes de comprar monitor, placa ou cabo, vale ler o guia de [como escolher monitor para trabalho](/blog/como-escolher-monitor-para-trabalho) e anotar as portas do que você já tem. Na Balão da Informática, no Cambuí, em Campinas, você pode ver [monitores](/categoria/computadores-monitores-monitor-gamer) e [placas de vídeo](/categoria/hardware-placa-de-video-vga) ligados e testar antes de pagar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se a imagem já está falhando, com o cabo trocado e o problema mantido, a [assistência técnica](/manutencao) da loja faz o diagnóstico da placa de vídeo, da porta e do monitor no mesmo endereço. Leve o cabo que você usa: ele faz parte do teste. Em resumo, use DisplayPort entre computador e monitor, HDMI na TV, e confira sempre o nome certificado do cabo."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Cabo HDMI caro tem imagem melhor?",
+      "resposta": "Não pelo preço. O sinal é digital: ou o cabo dá conta da banda e a imagem sai perfeita, ou ele falha com piscadas e cortes. O que importa é a categoria certificada, como Ultra High Speed, e não acabamento ou marca."
+    },
+    {
+      "pergunta": "Posso usar um cabo HDMI antigo em uma TV ou monitor novo?",
+      "resposta": "Pode, e ele costuma funcionar em resoluções e taxas mais baixas. Para 4K a 120 Hz ou mais, a especificação pede o cabo Ultra High Speed ou o Ultra96. Se a imagem falhar nessas taxas, troque o cabo antes de suspeitar da tela."
+    },
+    {
+      "pergunta": "O DisplayPort leva som?",
+      "resposta": "Leva. Monitores com alto-falante ou saída de fone recebem o áudio pelo DisplayPort, assim como pelo HDMI. Se o som não sair, confira no Windows qual dispositivo de áudio está selecionado."
+    },
+    {
+      "pergunta": "Dá para ligar dois monitores em uma saída só?",
+      "resposta": "Por DisplayPort com MST, USB-C com modo DisplayPort ou Thunderbolt, sim, se o primeiro monitor tiver saída para o segundo e a placa aceitar. Por HDMI, não: cada monitor precisa de uma saída própria."
+    },
+    {
+      "pergunta": "Meu monitor de 144 Hz só mostra 60 Hz. É o cabo?",
+      "resposta": "Pode ser o cabo, a entrada usada ou a configuração. Confira na ficha do monitor a taxa máxima de cada entrada, escolha a taxa nas configurações de vídeo do Windows e, se não aparecer, teste outro cabo certificado."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "HDMI 2.2 Specification Technology Overview — HDMI Licensing Administrator",
+      "url": "https://www.hdmi.org/spec/hdmi2",
+      "data": "novembro de 2026"
+    },
+    {
+      "nome": "HDMI Cable Types — HDMI Licensing Administrator",
+      "url": "https://www.hdmi.org/resource/cables",
+      "data": "novembro de 2026"
+    },
+    {
+      "nome": "VESA to Update DisplayPort 2.1 with New Active Cable Specification for Up to 3X Longer DP80 Cables — VESA",
+      "url": "https://www.displayport.org/pr/vesa-to-update-displayport-2-1-with-new-active-cable-specification-for-up-to-3x-longer-dp80-cables/",
+      "data": "janeiro de 2025"
+    },
+    {
+      "nome": "VESA Announces DisplayPort 2.0 UHBR Certification — Tom's Hardware",
+      "url": "https://www.tomshardware.com/news/vesa-announces-displayport-2-uhbr-certification",
+      "data": "março de 2022"
+    },
+    {
+      "nome": "DisplayPort 2.1b and HDMI 2.1b: everything you need to know — Corsair",
+      "url": "https://corsair.com/explorer/gamer/monitors/displayport-21b-and-hdmi-21b-everything-you-need-to-know",
+      "data": "novembro de 2026"
+    },
+    {
+      "nome": "AMD FreeSync Technology — AMD",
+      "url": "https://amd.com/en/products/graphics/technologies/freesync.html",
+      "data": "novembro de 2026"
+    },
+    {
+      "nome": "Guide to Daisy Chain Monitors — Dell",
+      "url": "https://www.dell.com/support/contents/en-us/article/product-support/self-support-knowledgebase/monitor-screen-video/guide-daisy-chain-monitors",
+      "data": "novembro de 2026"
+    }
+  ]
+}

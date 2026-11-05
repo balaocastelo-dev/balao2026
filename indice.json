@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "hdmi-ou-displayport-qual-cabo-usar",
+      "titulo": "HDMI ou DisplayPort: qual cabo usar no monitor, na TV e no notebook",
+      "resumo": "HDMI ou DisplayPort? Os dois levam imagem e som; a escolha depende da porta, da taxa de atualização e do cabo certificado. Veja qual usar em cada caso.",
+      "categoria": "hardware",
+      "etiquetas": [
+        "monitor",
+        "placa de vídeo",
+        "cabos",
+        "notebook"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-11-06T09:00:00.000Z",
+      "minutos": 10
+    },
+    {
       "slug": "como-testar-a-bateria-do-notebook-pelo-windows",
       "titulo": "Como testar a bateria do notebook pelo próprio Windows, sem instalar nada",
       "resumo": "Um comando do Windows gera o relatório da bateria do notebook e mostra quanto ela ainda segura. Veja como abrir, o que olhar e quando a troca faz sentido.",
@@ -1271,5 +1286,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-11-02T09:21:42.880Z"
+  "atualizadoEm": "2026-11-05T22:11:50.985Z"
 }
