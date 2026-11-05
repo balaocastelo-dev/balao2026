@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "ataque-iphone-desatualizado-sites-invadidos-sekoia",
+      "titulo": "iPhone desatualizado: sites invadidos roubavam dados sem nenhum clique",
+      "resumo": "A Sekoia revelou em 4 de novembro ataques que roubavam dados de iPhones e celulares desatualizados só pela visita a um site. Veja quem precisa agir.",
+      "categoria": "noticias",
+      "etiquetas": [
+        "segurança",
+        "iphone",
+        "atualização",
+        "apple"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-11-06T15:00:00.000Z",
+      "minutos": 3
+    },
+    {
       "slug": "hdmi-ou-displayport-qual-cabo-usar",
       "titulo": "HDMI ou DisplayPort: qual cabo usar no monitor, na TV e no notebook",
       "resumo": "HDMI ou DisplayPort? Os dois levam imagem e som; a escolha depende da porta, da taxa de atualização e do cabo certificado. Veja qual usar em cada caso.",
@@ -1286,5 +1301,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-11-05T22:11:50.985Z"
+  "atualizadoEm": "2026-11-05T22:41:56.478Z"
 }

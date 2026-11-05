@@ -1,0 +1,99 @@
+{
+  "slug": "ataque-iphone-desatualizado-sites-invadidos-sekoia",
+  "titulo": "iPhone desatualizado: sites invadidos roubavam dados sem nenhum clique",
+  "resumo": "A Sekoia revelou em 4 de novembro ataques que roubavam dados de iPhones e celulares desatualizados só pela visita a um site. Veja quem precisa agir.",
+  "categoria": "noticias",
+  "etiquetas": [
+    "segurança",
+    "iphone",
+    "atualização",
+    "apple"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-11-06T15:00:00.000Z",
+  "seo": {
+    "titulo": "iPhone desatualizado: sites roubavam dados sem um clique"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Em 4 de novembro de 2026, a empresa de segurança Sekoia publicou a investigação de uma campanha que roubava dados de iPhones e celulares Android só porque o dono visitou um site. Não era preciso clicar em nada nem instalar coisa alguma. O detalhe que importa para você: todas as falhas usadas já tinham correção, e só caía quem estava com o sistema atrasado."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é pensar que ataque desse tipo depende de uma falha nova e desconhecida, contra a qual não há o que fazer. Aqui foi o contrário. Segundo a Sekoia, quem usa o sistema operacional em dia está protegido contra esses ataques. O risco ficou com o aparelho parado em versões antigas."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que a Sekoia descobriu"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A equipe de pesquisa da Sekoia identificou a campanha em meados de outubro e a atribui, com confiança de moderada a alta, a um grupo de espionagem conhecido como APT29. Os atacantes inseriam código em sites legítimos invadidos, usavam endereços parecidos com os verdadeiros e chegaram a adulterar, por uma semana, um serviço de estatísticas de sites."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Esse código examinava o aparelho do visitante e escolhia o ataque certo para ele. Num iPhone com iOS 16.7, roubava os *cookies* do navegador, que são os arquivos que mantêm você conectado a sites como o e-mail. Num iPhone com iOS 18.5, levava mensagens, senhas guardadas, localização e fotos. No Android, mirava o Chrome das versões 139 a 145 e as senhas de Wi-Fi."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Help Net Security e o The Hacker News, que repercutiram a pesquisa no mesmo dia, confirmam as versões atacadas. A Help Net Security informa ainda que uma das falhas do iPhone foi corrigida no iOS 16.7.8 e no iOS 17.5, e que o órgão de cibersegurança dos Estados Unidos a incluiu na lista de falhas exploradas em 4 de novembro. Segundo a Sekoia, os programas de ataque não ficavam instalados no aparelho depois do roubo."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que isso muda para você"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem já tem iPhone:** abra Ajustes, entre em Geral e depois em Atualização de Software. Se houver atualização, instale. Vale também para o aparelho que não recebe mais a versão nova do iOS: ele ainda pode ter correções de segurança da versão em que parou. A notícia sobre o [iOS 18.7.11](/blog/ios-18-7-11-falha-explorada-iphone-xs-xr) mostra um caso assim."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem usa Android:** atualize o Chrome pela loja de aplicativos e o sistema pelas configurações do aparelho. No computador, o cuidado é o mesmo: navegador em dia fecha a porta para boa parte desses ataques, como explicamos na notícia sobre o [Chrome 156](/blog/chrome-156-atualizacao-falhas-de-seguranca)."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "apple"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem vai comprar um iPhone usado:** antes de pagar, confira em Ajustes qual versão do iOS está instalada e se o aparelho aceita atualização. Um iPhone que ficou meses sem atualizar, ou que trava no meio da instalação, merece atenção. Se a atualização não termina ou a bateria não aguenta o processo, a [assistência de iPhone, iPad e Mac](/reparoapple) consegue ver o que está impedindo."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que ainda não se sabe"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Sekoia não divulgou quantas pessoas foram atingidas nem a lista completa dos sites invadidos, e informa que trabalha com equipes de resposta de outros países para identificar vítimas. Como os ataques miravam versões antigas, atualizar continua sendo a defesa que resolve."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, tem assistência técnica que também atende iPhone, iPad e Mac, e vende computadores e [seminovos](/seminovos) que você pode ver ligados antes de pagar. Em uma linha: celular com o sistema em dia estava protegido; celular atrasado precisa ser atualizado hoje."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Poisoned Source: APT29 watering holes targets mobile devices with n-day exploits — Sekoia",
+      "url": "https://www.sekoia.com/blog/poisoned-source-apt29-watering-holes-targets-mobile-devices-with-n-day-exploits",
+      "data": "4 de novembro de 2026"
+    },
+    {
+      "nome": "Russian hackers target iOS and Android users with n-day exploits — Help Net Security",
+      "url": "https://www.helpnetsecurity.com/2026/11/04/apt29-watering-hole-mobile-devices-n-day-exploits/",
+      "data": "4 de novembro de 2026"
+    },
+    {
+      "nome": "APT29-Linked Hackers Hijack Web Analytics Script to Deliver iOS and Android Exploits — The Hacker News",
+      "url": "https://thehackernews.com/2026/11/apt29-linked-hackers-hijack-web.html",
+      "data": "4 de novembro de 2026"
+    }
+  ]
+}
