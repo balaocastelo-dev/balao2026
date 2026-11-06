@@ -1,0 +1,160 @@
+{
+  "slug": "teclado-com-tecla-falhando-o-que-tentar-antes-de-trocar",
+  "titulo": "Teclado com tecla falhando: o que tentar antes de trocar",
+  "resumo": "Tecla que falha nem sempre é teclado estragado. Veja o que conferir no Windows, como limpar sem estragar e quando o conserto é o caminho certo.",
+  "categoria": "assistencia",
+  "etiquetas": [
+    "teclado",
+    "notebook",
+    "manutenção",
+    "windows",
+    "diagnóstico"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-11-07T21:00:00.000Z",
+  "formato": "dica",
+  "roteiro": {
+    "fala": "Tem tecla falhando no teclado? Antes de trocar, faça três testes. Primeiro, ligue um teclado externo: se ele funciona, o problema é do teclado e não do Windows. Segundo, veja se as teclas de filtragem não ficaram ligadas sem querer, porque elas fazem o computador ignorar toque rápido. Terceiro, sopre ar comprimido com o notebook inclinado. Se caiu líquido, nada disso: desligue e traga para a assistência.",
+    "titulo": "Tecla falhando: três testes",
+    "destaques": [
+      "Teste um teclado externo",
+      "Confira as teclas de filtragem",
+      "Ar comprimido, inclinado",
+      "Líquido: desligue e leve"
+    ],
+    "legenda": "Tecla falhando nem sempre pede teclado novo. Veja os três testes que separam sujeira, configuração e defeito. A dica completa está no blog.",
+    "hashtags": [
+      "teclado",
+      "notebook",
+      "windows",
+      "manutencao",
+      "informatica",
+      "campinas"
+    ]
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Quando uma tecla do teclado começa a falhar, ela pode não responder, exigir mais força ou repetir a letra sozinha. Antes de trocar o teclado, vale separar três causas: sujeira embaixo da tecla, uma configuração do Windows que ignora toques rápidos e defeito físico de verdade. Os dois primeiros você resolve em casa, em poucos minutos."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é concluir que o teclado morreu na primeira falha, ou o contrário: sair batendo e forçando a tecla até ela soltar. Os fabricantes indicam começar pelo mais simples, que é limpar e testar com outro teclado. Esse teste diz se o problema está na peça ou no sistema, e evita comprar algo de que você não precisa."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "Ligue um **teclado externo**: se ele funciona, o defeito é do teclado, e não do Windows.",
+        "Confira se as **Teclas de Filtragem** não foram ligadas sem querer; elas fazem o Windows ignorar toques rápidos.",
+        "Limpe com **ar comprimido**, com o aparelho inclinado, sem arrancar a tecla.",
+        "Se caiu líquido ou a tecla está solta e quebrada, pare e leve a um técnico."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que testar em casa, nesta ordem"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A sequência abaixo vai do mais rápido para o mais trabalhoso. Depois de cada passo, abra o Bloco de Notas e digite a tecla que falha algumas vezes, com toques curtos e longos, para ver se mudou alguma coisa."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "**Desconecte o que estiver ligado** no USB, como hub, dock e monitor externo, e reinicie. A Dell sugere esse passo para descartar interferência de outro aparelho.",
+        "**Ligue um teclado externo**, USB ou sem fio. Se ele digita normal, o problema está no teclado do notebook, e você pode continuar usando o externo enquanto resolve.",
+        "**Confira as Teclas de Filtragem**: tecla Windows + U, ou Iniciar, Configurações, Acessibilidade, Teclado. Segundo a Microsoft, esse recurso ajusta a sensibilidade para ignorar toques breves ou repetidos. Se estiver ligado sem você ter pedido, desligue.",
+        "**Reinstale o driver**: no Gerenciador de Dispositivos, abra Teclados, desinstale o item e reinicie. O Windows instala de novo sozinho.",
+        "**Rode o Windows Update** e, no notebook, o programa de atualização do próprio fabricante, que também cuida do BIOS."
+      ]
+    },
+    {
+      "tipo": "destaque",
+      "tom": "dica",
+      "texto": "O Windows tem um Teclado Virtual, que aparece na tela e funciona com o mouse. Ele fica em Configurações, Acessibilidade, Teclado, e a Dell indica também o atalho tecla Windows + Ctrl + O. Serve para terminar um trabalho enquanto o teclado não é resolvido.",
+      "titulo": "Precisa digitar agora?"
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como limpar sem piorar"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Farelo e poeira embaixo da tecla são a causa física mais comum. Use ar comprimido com o canudinho que vem na lata, sem virar a lata de cabeça para baixo, porque assim pode sair líquido. Para os MacBook, a Apple orienta inclinar o notebook a cerca de 75 graus, soprar da esquerda para a direita e repetir com o aparelho deitado sobre cada lado."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "Ar comprimido com o canudinho, a pouca distância",
+        "Notebook desligado e inclinado, para a sujeira cair",
+        "Pano de microfibra seco na superfície das teclas"
+      ],
+      "contras": [
+        "Arrancar a tecla com faca ou chave: as presilhas quebram fácil",
+        "Borrifar produto ou água direto no teclado",
+        "Aspirador de pó encostado nas teclas"
+      ],
+      "titulo": "O que fazer e o que evitar na limpeza"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando a dica não resolve"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se caiu café, refrigerante ou água, não faça os testes acima: desligue, tire da tomada e siga o que explica o artigo sobre [líquido no notebook](/blog/derramou-liquido-no-notebook-o-que-fazer). Também não adianta insistir quando a tecla está solta, quebrada ou quando uma fileira inteira parou de uma vez; nesses casos o defeito costuma estar no teclado ou no cabo dele."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Na Balão da Informática, no Cambuí, em Campinas, a [assistência técnica](/manutencao) faz o diagnóstico e a troca do teclado, inclusive em Mac pela [assistência Apple](/reparoapple). E se o notebook já está velho para valer o conserto, os [seminovos](/seminovos) são uma saída. Em uma linha: teste um teclado externo, confira as Teclas de Filtragem, limpe com ar e só então pense em trocar."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "notebooks"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "A tecla só funciona se eu segurar um tempo. É defeito?",
+      "resposta": "Nem sempre. Esse é o comportamento das Teclas de Filtragem do Windows, que ignoram toques breves. Confira em Configurações, Acessibilidade, Teclado antes de pensar em troca."
+    },
+    {
+      "pergunta": "Posso tirar a tecla para limpar embaixo?",
+      "resposta": "Não é recomendado em casa. As presilhas são pequenas e quebram com facilidade, e aí uma tecla suja vira uma tecla perdida. Prefira o ar comprimido."
+    },
+    {
+      "pergunta": "Usar um teclado externo resolve de vez?",
+      "resposta": "Resolve para continuar trabalhando, e no desktop é a própria troca. No notebook, porém, o teclado embutido com defeito pode piorar com o tempo, então vale avaliar o conserto."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Laptop Keyboard Isn't Working — Suporte da Dell",
+      "url": "https://www.dell.com/support/contents/en-in/article/product-support/self-support-knowledgebase/mouse-keyboard-touchpad/laptop-keyboard-not-working",
+      "data": "novembro de 2026"
+    },
+    {
+      "nome": "Make your mouse, keyboard, and other input devices easier to use — Suporte da Microsoft",
+      "url": "https://support.microsoft.com/en-us/accessibility/windows/make-your-mouse-keyboard-and-other-input-devices-easier-to-use",
+      "data": "novembro de 2026"
+    },
+    {
+      "nome": "Use the On-Screen Keyboard (OSK) to type — Suporte da Microsoft",
+      "url": "https://support.microsoft.com/en-gb/accessibility/windows/use-the-on-screen-keyboard-osk-to-type",
+      "data": "novembro de 2026"
+    },
+    {
+      "nome": "How to clean the keyboard of your MacBook or MacBook Pro — Suporte da Apple",
+      "url": "https://support.apple.com/en-gb/102365",
+      "data": "junho de 2026"
+    }
+  ]
+}

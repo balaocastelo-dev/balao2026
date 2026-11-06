@@ -2,6 +2,23 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "teclado-com-tecla-falhando-o-que-tentar-antes-de-trocar",
+      "titulo": "Teclado com tecla falhando: o que tentar antes de trocar",
+      "resumo": "Tecla que falha nem sempre é teclado estragado. Veja o que conferir no Windows, como limpar sem estragar e quando o conserto é o caminho certo.",
+      "categoria": "assistencia",
+      "etiquetas": [
+        "teclado",
+        "notebook",
+        "manutenção",
+        "windows",
+        "diagnóstico"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-11-07T21:00:00.000Z",
+      "minutos": 4,
+      "formato": "dica"
+    },
+    {
       "slug": "ipad-serve-no-lugar-do-notebook",
       "titulo": "iPad no lugar do notebook: para quem serve e para quem não serve",
       "resumo": "iPad no lugar do notebook funciona para estudo, leitura, e-mail e desenho. Veja o que o iPadOS já faz como computador e onde ele ainda fica para trás.",
@@ -1332,5 +1349,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-11-06T22:09:49.504Z"
+  "atualizadoEm": "2026-11-06T22:48:57.097Z"
 }
