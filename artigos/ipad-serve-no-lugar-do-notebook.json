@@ -1,0 +1,301 @@
+{
+  "slug": "ipad-serve-no-lugar-do-notebook",
+  "titulo": "iPad no lugar do notebook: para quem serve e para quem não serve",
+  "resumo": "iPad no lugar do notebook funciona para estudo, leitura, e-mail e desenho. Veja o que o iPadOS já faz como computador e onde ele ainda fica para trás.",
+  "categoria": "apple",
+  "etiquetas": [
+    "ipad",
+    "apple",
+    "notebook",
+    "estudo"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-11-07T09:00:00.000Z",
+  "seo": {
+    "titulo": "iPad no lugar do notebook: para quem serve e quem não"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Você está pensando em usar o iPad no lugar do notebook: ele é leve, a bateria dura o dia, liga na hora e, com um teclado acoplado, parece um computador pequeno. A dúvida aparece na hora de decidir se ele dá conta da faculdade, do trabalho ou do dia a dia da casa sem que você sinta falta de um computador de verdade."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que a resposta depende do chip. Os modelos atuais têm processamento de sobra para quase tudo. O que decide é o sistema: o iPad roda o iPadOS e só instala aplicativos da App Store. Se tudo o que você usa existe ali, ele serve muito bem. Se depende de um programa de Windows ou de Mac, não serve."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "Para **ler, estudar, escrever, fazer reunião, desenhar e assistir**, um iPad com teclado substitui bem um notebook.",
+        "O limite é o software: o iPad só instala aplicativos da App Store, e muitos programas de escritório e de engenharia não têm versão completa ali.",
+        "Desde o iPadOS 26, o iPad tem **janelas redimensionáveis, barra de menus** e um app Arquivos mais completo, o que aproxima o uso de um computador.",
+        "Antes de decidir, liste os programas que você usa toda semana e confira se cada um existe para iPad."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que o iPad já faz como computador"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Por muitos anos, o iPad mostrava um aplicativo por vez, no máximo dois lado a lado. Isso mudou com o iPadOS 26, anunciado pela Apple em junho de 2025. O sistema passou a abrir os aplicativos em janelas que você redimensiona e posiciona onde quiser, com mais janelas abertas ao mesmo tempo, e elas voltam no tamanho e na posição em que foram deixadas."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A mesma versão trouxe uma barra de menus, que aparece quando você desliza o dedo do alto da tela ou leva o cursor até lá, e um app Arquivos com lista em colunas, pastas recolhíveis e a opção de escolher qual aplicativo abre cada tipo de arquivo. Chegou também o Preview, para ver e anotar PDF e imagem, e preencher formulário em PDF."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Outra novidade que pesa para quem trabalha: tarefas longas, como exportar um vídeo, podem continuar em segundo plano enquanto você usa outro aplicativo. Segundo a página de suporte da Apple, o modo de janelas precisa ser ligado nos Ajustes, em Multitarefa e Gestos. Quem prefere o jeito antigo pode continuar com um aplicativo em tela cheia."
+    },
+    {
+      "tipo": "destaque",
+      "tom": "dica",
+      "texto": "Os recursos de janela e a barra de menus dependem do iPadOS 26 ou mais novo. Em Ajustes, Geral, Sobre, você vê a versão instalada. Se o seu iPad não recebe mais atualizações, ele fica com o modo de multitarefa antigo, e a experiência de computador é bem mais limitada.",
+      "titulo": "Confira a versão do sistema"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Para quem o iPad substitui bem o notebook"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O iPad vai bem quando o trabalho cabe em navegador e aplicativos comuns: e-mail, mensagens, videochamada, pacote de escritório para textos e planilhas simples, leitura de PDF, anotações à mão e streaming. Para o estudante que lê muito, grifa material e escreve trabalhos, a combinação de tela de toque, caneta e teclado costuma ser mais prática que um notebook."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Quem desenha, ilustra ou faz anotações à mão também ganha. A caneta é o ponto forte do iPad, e não há equivalente comum no notebook. Em casa, para quem usa o computador para conta bancária, compras, fotos e vídeos, o iPad resolve com menos manutenção: os aplicativos vêm da App Store e as atualizações chegam pelo próprio sistema."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas há um cuidado: muitos aplicativos de escritório têm versão para iPad mais simples que a de computador. Planilhas com macros, formulários internos de empresa e sistemas que só rodam em Windows costumam travar a substituição. Antes de vender o notebook, passe uma semana fazendo o seu trabalho real só no iPad."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando o notebook continua sendo a escolha certa"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se o seu curso ou trabalho pede AutoCAD completo, Revit, SolidWorks, programas de contabilidade que só existem para Windows ou ambientes de programação que rodam no próprio computador, o iPad não substitui. Ele pode até ter um aplicativo com o mesmo nome, mas a versão para tablet costuma ser para visualizar ou fazer ajustes, e não para o trabalho inteiro."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Também pesa quem precisa de muitas portas. Os modelos atuais têm uma única entrada USB-C. Para ligar pen drive, monitor, rede com fio e carregador ao mesmo tempo, você vai precisar de um hub. No notebook, boa parte disso já vem no corpo do aparelho. Para quem passa oito horas digitando, um notebook com teclado de tamanho normal também cansa menos."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se a sua lista de programas mostrou que o computador é inevitável, veja o nosso guia de [notebook para estudar e trabalhar](/blog/notebook-para-estudar-e-trabalhar). E, se a dúvida for entre os portáteis da própria Apple, o artigo sobre [MacBook Air ou MacBook Pro](/blog/macbook-air-ou-macbook-pro-como-escolher) ajuda a escolher pelo uso."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Uso",
+        "iPad com teclado",
+        "Notebook"
+      ],
+      "linhas": [
+        [
+          "Leitura, PDF e anotações à mão",
+          "Muito bom, com a caneta",
+          "Bom, sem caneta"
+        ],
+        [
+          "Textos, e-mail e videochamada",
+          "Bom",
+          "Bom"
+        ],
+        [
+          "Planilhas avançadas e macros",
+          "Limitado",
+          "Completo"
+        ],
+        [
+          "Programas só para Windows ou Mac",
+          "Não roda",
+          "Roda no sistema certo"
+        ],
+        [
+          "Desenho e ilustração",
+          "Ponto forte",
+          "Pede mesa digitalizadora"
+        ],
+        [
+          "Portas para acessórios",
+          "Uma USB-C, hub à parte",
+          "Várias, conforme o modelo"
+        ],
+        [
+          "Monitor externo",
+          "Depende do modelo de iPad",
+          "Na maioria dos modelos"
+        ]
+      ],
+      "titulo": "iPad com teclado ou notebook: o que pesa em cada uso",
+      "colunaDestaque": 1,
+      "nota": "Visão geral para escolher o tipo de aparelho. Antes de comprar, confira se cada programa que você usa tem versão para iPadOS."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Qual iPad faz mais sentido como computador"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A página de comparação da Apple lista hoje o iPad de entrada com chip A16, o iPad mini com A20 Pro, o iPad Air com M4 em 11 e 13 polegadas e o iPad Pro com M5, também em 11 e 13 polegadas. Para fazer papel de notebook, a tela maior e o teclado próprio contam mais do que o chip."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Modelo",
+        "Tela",
+        "Teclado da Apple",
+        "Porta"
+      ],
+      "linhas": [
+        [
+          "iPad (A16)",
+          "11 polegadas",
+          "Magic Keyboard Folio",
+          "USB-C"
+        ],
+        [
+          "iPad mini (A20 Pro)",
+          "8,5 polegadas",
+          "Sem teclado próprio, só Bluetooth",
+          "USB-C"
+        ],
+        [
+          "iPad Air (M4)",
+          "11 ou 13 polegadas",
+          "Magic Keyboard para iPad Air",
+          "USB-C"
+        ],
+        [
+          "iPad Pro (M5)",
+          "11 ou 13 polegadas",
+          "Magic Keyboard para iPad Pro",
+          "USB-C com Thunderbolt / USB 4"
+        ]
+      ],
+      "titulo": "Os iPads atuais pensando em uso como computador",
+      "colunaDestaque": 2,
+      "fonte": {
+        "nome": "Apple — iPad: comparar modelos",
+        "url": "https://www.apple.com/ipad/compare/"
+      },
+      "nota": "Armazenamento inicial de 128 GB no iPad, no mini e no Air, e de 256 GB no Pro, conforme a página de comparação."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O iPad mini é ótimo para ler e anotar, mas a tela de 8,5 polegadas e a falta de teclado próprio o tiram da disputa com o notebook. O iPad de entrada atende quem escreve pouco. O iPad Air é o meio-termo mais comum: segundo o anúncio da Apple de março de 2026, o modelo com M4 tem 12 GB de memória, e o teclado dele traz trackpad e fileira de teclas de função."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Para quem quer ligar o iPad a um monitor e trabalhar em mesa, o modelo importa. No anúncio do iPadOS 26, a Apple informou que o suporte completo a monitor externo vale para o iPad Air a partir do M2, o iPad Air de 5ª geração e os iPad Pro mais recentes. O iPad de entrada e o mini não aparecem nessa lista."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "notebooks"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como decidir antes de gastar"
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "**Liste os programas** que você abre toda semana, inclusive os do trabalho e da faculdade.",
+        "**Procure cada um na App Store** e veja se a versão para iPad faz o que você precisa, e não só abre o arquivo.",
+        "**Pense nas portas**: monitor, pen drive, HD externo, impressora. Se usa vários ao mesmo tempo, conte com um hub.",
+        "**Escolha a tela**: para digitar todo dia, prefira 11 polegadas ou mais e um teclado próprio do modelo.",
+        "**Teste o uso real**: se puder, passe alguns dias fazendo o seu trabalho só no iPad antes de abrir mão do notebook."
+      ]
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "Leve, silencioso e com tela de toque e caneta.",
+        "Liga na hora e costuma aguentar o dia longe da tomada.",
+        "Menos manutenção de sistema: os aplicativos vêm todos da App Store.",
+        "Com o iPadOS 26, janelas e barra de menus deixam o trabalho mais parecido com o de um computador."
+      ],
+      "contras": [
+        "Só roda aplicativos da App Store: programas de Windows e de Mac ficam de fora.",
+        "Versões para iPad de alguns programas de escritório e engenharia são mais simples.",
+        "Uma única porta USB-C: acessórios pedem hub.",
+        "Teclado e caneta são comprados à parte e fazem parte da conta."
+      ],
+      "titulo": "Usar o iPad no lugar do notebook"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Já tem iPad ou vai trocar de aparelho"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se o seu iPad atual está com bateria fraca, tela trincada ou conector de carga com mau contato, o conserto pode ser o que falta para ele virar o seu aparelho do dia a dia. A Balão da Informática, no Cambuí, em Campinas, tem [assistência para iPhone, iPad e Mac](/reparoapple) no mesmo endereço da loja."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se a conclusão foi que você precisa de um computador, a loja vende [notebooks](/notebooks) novos e também [seminovos](/seminovos), e você pode ver o aparelho ligado e testar antes de pagar. Leve a sua lista de programas: ela responde mais do que qualquer ficha técnica."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "apple"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Em uma linha: se tudo o que você usa existe na App Store, o iPad com teclado substitui o notebook; se depende de um programa de computador, fique com o notebook."
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "O iPad roda programas de Windows?",
+      "resposta": "Não. O iPad usa o iPadOS e instala apenas aplicativos da App Store. Alguns programas têm versão própria para iPad, mas costumam ser mais simples que a de computador."
+    },
+    {
+      "pergunta": "Dá para usar o iPad com mouse e teclado?",
+      "resposta": "Sim. Os teclados da Apple para iPad Air e iPad Pro têm trackpad, e o iPad também aceita teclado e mouse Bluetooth. Com o iPadOS 26, o cursor ainda abre a barra de menus no alto da tela."
+    },
+    {
+      "pergunta": "Posso ligar o iPad a um monitor para trabalhar?",
+      "resposta": "Depende do modelo. Segundo a Apple, o suporte completo a monitor externo vale para o iPad Air a partir do M2, o iPad Air de 5ª geração e os iPad Pro mais recentes. Nos outros, confira a ficha do modelo antes de contar com isso."
+    },
+    {
+      "pergunta": "iPad serve para faculdade?",
+      "resposta": "Para ler, grifar, anotar e escrever trabalhos, serve muito bem. Em cursos que pedem programas específicos de computador, como engenharia e arquitetura, ele funciona como complemento, e não no lugar do notebook."
+    },
+    {
+      "pergunta": "Qual iPad é melhor para usar como computador?",
+      "resposta": "O iPad Air e o iPad Pro, pela tela de 11 ou 13 polegadas e pelo teclado com trackpad feito para eles. O iPad de entrada atende quem digita pouco; o mini é melhor para leitura."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Apple — iPad: comparar modelos",
+      "url": "https://www.apple.com/ipad/compare/",
+      "data": "consultado em novembro de 2026"
+    },
+    {
+      "nome": "Apple Newsroom — iPadOS 26 introduces powerful new features that push iPad even further",
+      "url": "https://www.apple.com/newsroom/2025/06/ipados-26-introduces-powerful-new-features-that-push-ipad-even-further/",
+      "data": "junho de 2025"
+    },
+    {
+      "nome": "Apple Newsroom — Apple introduces the new iPad Air, powered by M4",
+      "url": "https://www.apple.com/newsroom/2026/03/apple-introduces-the-new-ipad-air-powered-by-m4/",
+      "data": "março de 2026"
+    },
+    {
+      "nome": "Apple Support — Multitask on iPad with iPadOS 26",
+      "url": "https://support.apple.com/en-nz/125309",
+      "data": "consultado em novembro de 2026"
+    }
+  ]
+}

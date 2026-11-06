@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "ipad-serve-no-lugar-do-notebook",
+      "titulo": "iPad no lugar do notebook: para quem serve e para quem não serve",
+      "resumo": "iPad no lugar do notebook funciona para estudo, leitura, e-mail e desenho. Veja o que o iPadOS já faz como computador e onde ele ainda fica para trás.",
+      "categoria": "apple",
+      "etiquetas": [
+        "ipad",
+        "apple",
+        "notebook",
+        "estudo"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-11-07T09:00:00.000Z",
+      "minutos": 10
+    },
+    {
       "slug": "extensao-filtro-de-linha-e-regua-o-que-ligar-onde",
       "titulo": "Extensão, filtro de linha e régua: o que ligar em cada um",
       "resumo": "Extensão só leva a tomada mais longe; filtro de linha bom também corta surtos. Veja o que ligar em cada um e o que deve ir direto na parede.",
@@ -1317,5 +1332,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-11-05T22:49:04.429Z"
+  "atualizadoEm": "2026-11-06T22:09:49.504Z"
 }
