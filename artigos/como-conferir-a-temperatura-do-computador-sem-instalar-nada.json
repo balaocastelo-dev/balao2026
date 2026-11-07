@@ -1,0 +1,162 @@
+{
+  "slug": "como-conferir-a-temperatura-do-computador-sem-instalar-nada",
+  "titulo": "Como conferir a temperatura do computador sem instalar nada",
+  "resumo": "O Windows mostra a temperatura da placa de vídeo no Gerenciador de Tarefas; a do processador aparece na BIOS. Veja os dois caminhos e quando o calor preocupa.",
+  "categoria": "hardware",
+  "etiquetas": [
+    "temperatura",
+    "windows",
+    "processador",
+    "placa de vídeo",
+    "manutenção"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-11-08T21:00:00.000Z",
+  "formato": "dica",
+  "roteiro": {
+    "fala": "Quer saber se o computador está esquentando sem instalar programa nenhum? No Windows, abra o Gerenciador de Tarefas, vá em Desempenho e clique na placa de vídeo: se ela for dedicada, a temperatura aparece ali. A do processador o Windows não mostra, mas a BIOS mostra, logo que o computador liga. E guarde isto: processador quente trabalhando pesado é normal. O sinal de alerta é o computador ficar lento, barulhento ou desligar sozinho.",
+    "titulo": "Temperatura do PC sem instalar nada",
+    "destaques": [
+      "Gerenciador de Tarefas",
+      "Aba Desempenho",
+      "Processador: veja na BIOS",
+      "Alerta: desligar sozinho"
+    ],
+    "legenda": "Dá para ver a temperatura do computador sem baixar nada: a da placa de vídeo no próprio Windows e a do processador na BIOS. O passo a passo e quando se preocupar estão no blog.",
+    "hashtags": [
+      "windows",
+      "temperatura",
+      "pcgamer",
+      "dicas",
+      "informatica",
+      "campinas"
+    ]
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Para conferir a temperatura do computador sem instalar nada, há dois caminhos. A da **placa de vídeo** aparece no próprio Windows, no Gerenciador de Tarefas, desde que a placa seja dedicada. A do **processador** o Windows não mostra; ela aparece na tela de configuração da placa-mãe, a BIOS ou UEFI, que você abre antes de o sistema carregar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que todo número alto é defeito. A Intel explica que chegar perto do limite durante um trabalho pesado não é, por si só, motivo de preocupação: o processador se protege sozinho, reduzindo a velocidade e, em último caso, desligando. O que importa é o número junto com o comportamento do computador."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "Placa de vídeo dedicada: **Gerenciador de Tarefas > Desempenho**, clicando na GPU.",
+        "Processador: só na **BIOS/UEFI**, e com o computador parado, sem carga.",
+        "Compare com o limite que o **fabricante** informa para o seu modelo, e não com um número da internet.",
+        "Lentidão, ventoinha disparada e desligamento sozinho dizem mais do que um número isolado."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como ver a temperatura da placa de vídeo no Windows"
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "Abra o **Gerenciador de Tarefas**: clique com o botão direito no botão Iniciar ou aperte Ctrl + Shift + Esc.",
+        "Vá na aba **Desempenho**.",
+        "Clique na placa de vídeo na coluna da esquerda, onde aparece GPU. A temperatura, em graus Celsius, fica ao lado do nome e no quadro de detalhes."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Quando a Microsoft trouxe esse recurso, avisou que ele só funciona com **placa de vídeo dedicada** e com um driver de vídeo que use o modelo WDDM 2.4 ou mais novo. Para conferir, aperte Windows + R, digite dxdiag e veja a aba Exibir, no campo Modelo de Driver. Notebook e PC só com o vídeo integrado ao processador costumam não mostrar o número."
+    },
+    {
+      "tipo": "destaque",
+      "tom": "dica",
+      "texto": "Com tudo fechado, quase qualquer placa fica fria. Para o número dizer alguma coisa, deixe o Gerenciador de Tarefas aberto enquanto roda o jogo ou o programa pesado que costuma travar, e olhe logo depois.",
+      "titulo": "Olhe a temperatura com o computador trabalhando"
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como ver a temperatura do processador pela BIOS"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "No Windows 11, abra **Configurações > Sistema > Recuperação** e, em Inicialização avançada, clique em Reiniciar agora. Depois escolha Solucionar problemas, Opções avançadas e **Configurações de Firmware UEFI**. O computador reinicia direto na BIOS, e a temperatura da CPU costuma aparecer na tela principal ou numa página chamada Monitor, Hardware Monitor ou PC Health, conforme a marca da placa-mãe."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "Gerenciador de Tarefas: mostra a placa de vídeo em tempo real, durante o uso",
+        "BIOS: mostra o processador em qualquer computador, sem programa",
+        "Nenhum dos dois exige baixar nada nem mexer em configuração"
+      ],
+      "contras": [
+        "Gerenciador de Tarefas: não mostra o processador nem o vídeo integrado",
+        "BIOS: o número é do computador parado, sem carga, então serve mais para achar algo muito fora do normal",
+        "BIOS: dentro dela, não altere nada que você não conheça; só olhe e saia sem salvar"
+      ],
+      "titulo": "Os dois métodos lado a lado"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando a temperatura preocupa e quando a dica não basta"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Intel não publica uma faixa de temperatura normal para cada processador, porque ela depende do gabinete, do cooler e do uso. O limite máximo, a temperatura de junção, fica tipicamente entre 100 °C e 110 °C, conforme o modelo, e aparece na ficha técnica do fabricante. Perto disso em uso pesado pode ser normal; perto disso parado na BIOS, não."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A dica não basta quando você precisa ver o processador em uso, durante o jogo: aí só um programa de monitoramento resolve. E se o computador desliga sozinho, fica lento depois de alguns minutos ou a ventoinha não para de acelerar, leia o artigo sobre [PC desligando sozinho](/blog/pc-desligando-sozinho-temperatura-fonte-ou-sistema) e veja [de quanto em quanto tempo limpar por dentro](/blog/de-quanto-em-quanto-tempo-limpar-o-computador-por-dentro)."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Poeira no cooler e pasta térmica ressecada são causas comuns de calor, e a limpeza interna envolve desmontar peças. Na Balão da Informática, no Cambuí, em Campinas, a [assistência técnica](/manutencao) faz o diagnóstico, a limpeza e a troca de peça; se o problema é cooler fraco para a máquina, a [montagem sob medida](/montagempc) ajuda a escolher melhor. Em uma linha: placa de vídeo no Gerenciador de Tarefas, processador na BIOS, e o comportamento do computador como juiz."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "upgrade"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Por que a temperatura da placa de vídeo não aparece no meu Gerenciador de Tarefas?",
+      "resposta": "O recurso só funciona com placa de vídeo dedicada e com driver no modelo WDDM 2.4 ou mais novo. Em computador só com vídeo integrado o número costuma não aparecer; se a placa é dedicada, atualize o driver pelo site do fabricante."
+    },
+    {
+      "pergunta": "O número que aparece na BIOS vale para quando estou jogando?",
+      "resposta": "Não. Na BIOS o processador está praticamente parado, então o número é baixo. Ele serve para notar algo muito fora do normal, como um processador já quente sem fazer nada."
+    },
+    {
+      "pergunta": "Processador quente estraga?",
+      "resposta": "Segundo a Intel, é improvável, porque o processador reduz a velocidade e, se preciso, desliga para se proteger. O problema é que, nesse estado, o computador fica lento ou desliga no meio do uso, e aí vale procurar a causa."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Announcing Windows 10 Insider Preview Build 18963 — Windows Blog (Microsoft)",
+      "url": "https://blogs.windows.com/windows-insider/2019/08/16/announcing-windows-10-insider-preview-build-18963/",
+      "data": "agosto de 2019"
+    },
+    {
+      "nome": "Information about Temperature for Intel Processors — Suporte da Intel",
+      "url": "https://www.intel.com/content/www/us/en/support/articles/000005597/processors.html",
+      "data": "fevereiro de 2025"
+    },
+    {
+      "nome": "How to check graphics card temperature on Windows 11 — Windows Central",
+      "url": "https://www.windowscentral.com/software-apps/windows-11/how-to-check-graphics-card-temperature-on-windows-11",
+      "data": "novembro de 2022"
+    },
+    {
+      "nome": "How to check CPU temperature on Windows 11 — Pureinfotech",
+      "url": "https://pureinfotech.com/check-cpu-temp-windows-11/",
+      "data": "consultado em novembro de 2026"
+    }
+  ]
+}

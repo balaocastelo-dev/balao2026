@@ -2,6 +2,23 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "como-conferir-a-temperatura-do-computador-sem-instalar-nada",
+      "titulo": "Como conferir a temperatura do computador sem instalar nada",
+      "resumo": "O Windows mostra a temperatura da placa de vídeo no Gerenciador de Tarefas; a do processador aparece na BIOS. Veja os dois caminhos e quando o calor preocupa.",
+      "categoria": "hardware",
+      "etiquetas": [
+        "temperatura",
+        "windows",
+        "processador",
+        "placa de vídeo",
+        "manutenção"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-11-08T21:00:00.000Z",
+      "minutos": 4,
+      "formato": "dica"
+    },
+    {
       "slug": "paint-windows-11-falha-de-seguranca-correcao-microsoft-store",
       "titulo": "Paint do Windows 11: correção de falha de segurança vem só pela Store",
       "resumo": "Uma falha no Paint do Windows 11 só é corrigida pela Microsoft Store, não pelo Windows Update. Veja como conferir a versão e atualizar o aplicativo.",
@@ -1380,5 +1397,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-11-07T22:34:58.085Z"
+  "atualizadoEm": "2026-11-07T22:48:36.963Z"
 }
