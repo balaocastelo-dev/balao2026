@@ -1,0 +1,113 @@
+{
+  "slug": "paint-windows-11-falha-de-seguranca-correcao-microsoft-store",
+  "titulo": "Paint do Windows 11: correção de falha de segurança vem só pela Store",
+  "resumo": "Uma falha no Paint do Windows 11 só é corrigida pela Microsoft Store, não pelo Windows Update. Veja como conferir a versão e atualizar o aplicativo.",
+  "categoria": "noticias",
+  "etiquetas": [
+    "windows",
+    "segurança",
+    "atualização",
+    "windows 11"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-11-08T15:00:00.000Z",
+  "seo": {
+    "titulo": "Paint do Windows 11: falha corrigida só pela Store"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "O Paint, o programa de desenho que vem no Windows 11, tem uma falha de segurança que a Microsoft classifica como Importante, a CVE-2026-83844. A empresa registrou o problema em 13 de outubro de 2026, mas relatos publicados entre 4 e 6 de novembro mostram que a versão corrigida demorou a aparecer na Microsoft Store. O registro oficial da falha foi revisado em 6 de novembro."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que o Windows Update em dia resolve tudo. Neste caso, não resolve: o Paint é atualizado pela Microsoft Store, à parte do sistema. Quem instalou a atualização de outubro do Windows pode continuar com o Paint antigo, e é isso que vale conferir."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que a Microsoft informou sobre a falha"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Segundo o registro da Microsoft, o defeito é uma leitura fora dos limites da memória (o programa lê uma área que não deveria) e pode permitir que um invasor execute código pela rede, sem senha e sem que você clique em nada. A própria Microsoft considera o ataque difícil: ele exige conhecer bem o computador alvo."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Até 6 de novembro, a falha não aparecia como explorada em ataques, segundo o The Hacker News e o Windows Latest. A versão corrigida indicada no aviso da Microsoft é a 11.2609.401.0 ou mais nova. O número mudou durante o caminho: uma versão anterior do aviso citava a 11.2605.91.0."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O atraso aconteceu na entrega. No começo de novembro, o Windows Latest e outros sites relataram que a Store ainda não oferecia a versão corrigida em vários países, mesmo com a atualização automática ligada. Em 6 de novembro, o The Hacker News encontrou a 11.2609.401.0 disponível na Store dos países que consultou."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "**Para quem tem Windows 11 em casa:** o risco descrito é baixo, mas a correção é simples. Abra a Microsoft Store, entre em Biblioteca e clique em Obter atualizações. Isso atualiza o Paint e os outros aplicativos do Windows que também são atualizados pela Store."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem tem Windows 11 em casa:** o risco descrito é baixo, mas a correção é simples. Abra a Microsoft Store, entre em Biblioteca e clique em Obter atualizações. Isso atualiza o Paint e os outros aplicativos que também dependem da Store, como a Calculadora e o Bloco de Notas."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem quer conferir a versão:** o Windows Latest sugere abrir o PowerShell e rodar o comando Get-AppxPackage -Name Microsoft.Paint. Se a versão mostrada for menor que 11.2609.401.0, o computador ainda não recebeu a correção. Se a Store não oferecer nada mais novo, instale o que houver e confira de novo nos dias seguintes."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem cuida dos computadores de um escritório:** lembre que aplicativos da Store são instalados por usuário. Em uma máquina com várias contas, cada uma precisa receber a atualização. Se a Store está bloqueada ou não atualiza, a [assistência técnica](/manutencao) consegue ver o que está impedindo, junto com o [Windows Update parado](/blog/windows-update-parado-esperar-ou-reiniciar)."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem vai comprar um computador:** a falha não muda a escolha da máquina. Mas vale pedir para ver o Windows atualizado, incluindo os aplicativos da Store, antes de levar. Nos [seminovos](/seminovos), você pode ver o computador ligado e conferir isso antes de pagar."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que ainda não se sabe"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O aviso da Microsoft não diz qual serviço de rede do Paint é usado no ataque nem explica por que o número da versão corrigida mudou. Também não há data para todos os computadores receberem a versão nova pela Store. Remover o Paint chegou a ser sugerido por um pesquisador, mas sem teste que confirme que isso protege."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Outras falhas recentes do Windows estão na notícia sobre a [atualização de outubro](/blog/atualizacao-windows-outubro-2026-falha-explorada). A Balão da Informática, no Cambuí, em Campinas, tem assistência técnica para atualização e diagnóstico do Windows. Em uma linha: atualize o Paint pela Microsoft Store, porque o Windows Update não faz isso por você."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "upgrade"
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "CVE-2026-83844: Windows Paint Remote Code Execution Vulnerability — Microsoft Security Response Center",
+      "url": "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-83844",
+      "data": "13 de outubro de 2026, revisado em novembro de 2026"
+    },
+    {
+      "nome": "Registro oficial da CVE-2026-83844 (Microsoft como emissora) — OpenCVE",
+      "url": "https://app.opencve.io/cve/CVE-2026-83844",
+      "data": "atualizado em 6 de novembro de 2026"
+    },
+    {
+      "nome": "Microsoft Paint RCE Fix Now Available, but Windows Update Won't Deliver It — The Hacker News",
+      "url": "https://thehackernews.com/2026/11/microsoft-paint-rce-fix-now-available.html",
+      "data": "6 de novembro de 2026"
+    },
+    {
+      "nome": "Windows 11's Paint has a no-click hacking bug, and even with auto-updates on, you may not have the fix — Windows Latest",
+      "url": "https://windowslatest.com/2026/11/05/windows-11s-paint-has-a-no-click-hacking-bug-and-even-with-auto-updates-on-you-may-not-have-the-fix",
+      "data": "5 de novembro de 2026"
+    },
+    {
+      "nome": "Microsoft Paint: Sicherheitslücke mit CVSS 8,1 – Version 11.2609.401.0 schützt — Borncity",
+      "url": "https://borncity.com/news/microsoft-paint-sicherheitsluecke-mit-cvss-81-version-11-2609-401-0-schuetzt/",
+      "data": "4 de novembro de 2026"
+    }
+  ]
+}

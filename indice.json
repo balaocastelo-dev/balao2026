@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "paint-windows-11-falha-de-seguranca-correcao-microsoft-store",
+      "titulo": "Paint do Windows 11: correção de falha de segurança vem só pela Store",
+      "resumo": "Uma falha no Paint do Windows 11 só é corrigida pela Microsoft Store, não pelo Windows Update. Veja como conferir a versão e atualizar o aplicativo.",
+      "categoria": "noticias",
+      "etiquetas": [
+        "windows",
+        "segurança",
+        "atualização",
+        "windows 11"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-11-08T15:00:00.000Z",
+      "minutos": 3
+    },
+    {
       "slug": "computador-liga-mas-nao-da-imagem",
       "titulo": "Computador liga mas não dá imagem: como descobrir de quem é a culpa",
       "resumo": "Computador liga mas não dá imagem? Veja como separar monitor, cabo, placa de vídeo, memória e Windows com testes seguros e saiba onde parar.",
@@ -1365,5 +1380,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-11-07T22:09:47.879Z"
+  "atualizadoEm": "2026-11-07T22:34:58.085Z"
 }
