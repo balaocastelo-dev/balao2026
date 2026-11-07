@@ -1,0 +1,270 @@
+{
+  "slug": "computador-liga-mas-nao-da-imagem",
+  "titulo": "Computador liga mas não dá imagem: como descobrir de quem é a culpa",
+  "resumo": "Computador liga mas não dá imagem? Veja como separar monitor, cabo, placa de vídeo, memória e Windows com testes seguros e saiba onde parar.",
+  "categoria": "assistencia",
+  "etiquetas": [
+    "diagnóstico",
+    "monitor",
+    "placa de vídeo",
+    "memória ram",
+    "manutenção"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-11-08T09:00:00.000Z",
+  "seo": {
+    "titulo": "Computador liga mas não dá imagem: de quem é a culpa"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Você aperta o botão, as ventoinhas giram, as luzes do gabinete acendem, mas o monitor continua preto ou mostra só um aviso de \"sem sinal\". O computador liga mas não dá imagem, e a sensação é de que algo grave aconteceu. Na maioria das vezes não é: o problema costuma estar em um ponto pequeno do caminho entre a máquina e a tela."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é concluir de cara que a placa de vídeo ou a placa-mãe queimou. Antes disso, vale separar três suspeitos: o monitor e o cabo, as peças que precisam passar no autoteste da placa-mãe (processador, memória e vídeo) e o próprio Windows. Cada um deixa pistas diferentes, e boa parte dos testes dá para fazer em casa, sem abrir nada."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "Comece pelo mais simples: **monitor ligado, entrada certa, cabo firme** nas duas pontas e na saída correta do computador.",
+        "Se a placa-mãe tem **luzes de diagnóstico** (CPU, DRAM, VGA, BOOT), a que fica acesa aponta o suspeito.",
+        "Imagem que aparece na inicialização e some depois costuma ser **Windows ou driver**, não peça queimada.",
+        "Depois de trocar memória ou atualizar a BIOS, a primeira partida pode demorar alguns minutos. **Espere antes de desligar.**"
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Primeiro, descarte o monitor e o cabo"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Parece óbvio, mas é a causa mais frequente. A ASUS, no guia de solução para placas-mãe sem imagem, começa justamente pelo monitor: conferir se ele está ligado e com a luz de energia acesa, recolocar o cabo nas duas pontas e escolher no menu do monitor a entrada que corresponde à porta em uso, seja HDMI, DisplayPort, DVI ou VGA."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "**Veja a luz do monitor.** Apagada indica falta de energia no próprio monitor: confira a tomada e o cabo de força dele.",
+        "**Confira a entrada.** Muitos monitores não trocam de entrada sozinhos. Escolha no menu a porta em que o cabo está ligado.",
+        "**Encaixe o cabo de novo** nas duas pontas, olhando se há pino torto ou sujeira no conector.",
+        "**Troque o cabo** por outro, de preferência de outro tipo, se o monitor tiver mais de uma entrada.",
+        "**Teste o monitor em outro aparelho**, como um notebook. Se lá também não dá imagem, o problema é dele."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O detalhe que mais engana está atrás do gabinete. Quem tem placa de vídeo dedicada precisa ligar o monitor na saída da placa, mais abaixo, e não nas saídas da placa-mãe, que ficam perto das portas USB. A ASUS lembra esse ponto: com placa dedicada, o cabo vai na saída da própria placa. Com o cabo na placa-mãe, o resultado costuma ser tela preta."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O contrário também acontece. A Intel avisa que os processadores com a letra F no fim do nome, como o Core i3-13100F, não têm vídeo integrado e dependem de placa de vídeo. Nesse caso, as saídas da placa-mãe simplesmente não funcionam. Se o monitor pisca, mas chega a mostrar imagem, o assunto é outro: veja o artigo sobre [monitor piscando](/blog/monitor-piscando-cabo-placa-ou-monitor)."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Ventoinha girando não quer dizer que o computador ligou de verdade"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Quando você aperta o botão, a placa-mãe faz um autoteste, chamado POST, antes de entregar o controle ao sistema. Ela confere se encontrou processador, memória e vídeo. Se uma dessas peças falha, o teste para ali, e as ventoinhas continuam girando normalmente. Por isso um gabinete todo aceso pode estar parado antes mesmo de mandar qualquer imagem para a tela."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Muitas placas-mãe mostram em que ponto o teste parou. Algumas têm quatro pequenas luzes perto da memória, com os nomes CPU, DRAM, VGA e BOOT; outras têm um mostrador com códigos ou emitem bipes. A Intel orienta consultar o manual da placa-mãe para traduzir os bipes e as luzes, porque cada fabricante usa o próprio código."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Luz acesa",
+        "O que a placa não encontrou",
+        "Suspeito principal"
+      ],
+      "linhas": [
+        [
+          "CPU",
+          "Processador ausente ou com falha",
+          "Processador, encaixe ou pinos do soquete"
+        ],
+        [
+          "DRAM",
+          "Memória ausente ou com falha",
+          "Pente mal encaixado, incompatível ou com defeito"
+        ],
+        [
+          "VGA",
+          "Vídeo ausente ou com falha",
+          "Placa de vídeo, slot ou alimentação dela"
+        ],
+        [
+          "BOOT",
+          "Dispositivo de inicialização",
+          "SSD, HD ou cabo do disco (a imagem costuma aparecer)"
+        ]
+      ],
+      "titulo": "Luz de diagnóstico que fica acesa e o que ela costuma indicar",
+      "colunaDestaque": 2,
+      "fonte": {
+        "nome": "ASUS — Troubleshooting via Q-LED indicators",
+        "url": "https://asus.com/support/FAQ/1042678"
+      },
+      "nota": "Os nomes e o comportamento das luzes variam entre fabricantes e modelos. O manual da sua placa-mãe é a referência final."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A tabela ajuda a não gastar energia no lugar errado. Uma luz DRAM acesa, por exemplo, tira o monitor e o Windows da lista de suspeitos de uma vez. Mas se a sua placa não tem luzes nem alto-falante, a pista some, e o caminho passa a ser a eliminação, peça por peça, que é trabalho para bancada com peças de teste."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Memória: o suspeito mais comum dentro do gabinete"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Pente de memória mal encaixado é uma das causas mais frequentes de computador sem imagem, sobretudo depois de transporte, limpeza ou upgrade. A ASUS recomenda recolocar os módulos, testar um de cada vez quando houver mais de um e seguir a ordem de slots indicada no manual. A Intel sugere começar com um único pente no primeiro canal."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Antes de mexer, porém, vale saber de um caso que assusta à toa. Segundo o guia da montadora Aftershock sobre treinamento de memória, a placa-mãe ajusta sozinha velocidade, tensão e temporização da memória quando ela é trocada, quando o perfil XMP ou EXPO é ativado ou quando a BIOS é atualizada ou volta ao padrão. Nesse processo, a tela pode ficar preta por alguns minutos e o computador pode reiniciar."
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "Dê alguns minutos antes de concluir que algo quebrou. Desligar no meio do treinamento da memória só faz o processo recomeçar. Preocupe-se se, depois de vários minutos, continua sem imagem ou se o computador reinicia sem parar.",
+      "titulo": "Acabou de trocar memória ou atualizar a BIOS?"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se você já abre o gabinete com tranquilidade, recolocar a memória é um teste razoável: computador desligado, cabo fora da tomada, mão em uma parte metálica do gabinete para descarregar a estática, travas do slot abertas e o pente encaixado até as travas fecharem. Se a ideia de abrir a máquina deixa você inseguro, pare aqui. Um pino torto no slot custa mais do que o diagnóstico."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Placa de vídeo, alimentação e configurações da BIOS"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Placas de vídeo intermediárias e grandes precisam de cabos de energia próprios, vindos da fonte. A Intel lembra que os conectores de energia da placa de vídeo e do processador precisam estar ligados e que eles não são intercambiáveis, mesmo parecendo semelhantes. Uma placa sem esse cabo pode até acender as luzes, mas não entrega imagem."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Outra causa conhecida é configuração alterada. Quem mexeu em overclock, tensões ou no perfil de memória pode ter deixado a máquina instável a ponto de não completar o autoteste. Tanto a Intel quanto a ASUS citam limpar a CMOS, que devolve a BIOS às configurações de fábrica. O procedimento muda de placa para placa e está no manual; em caso de dúvida, deixe para o técnico."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "Monitor, entrada, cabo e porta certa resolvem boa parte dos casos sem abrir nada.",
+        "Ler a luz de diagnóstico da placa-mãe já aponta o suspeito.",
+        "Testar o monitor em outro aparelho custa só alguns minutos.",
+        "Esperar o treinamento da memória evita desmontar uma máquina que não tem defeito."
+      ],
+      "contras": [
+        "Trocar peça por peça exige memória, placa de vídeo e fonte de teste que quase ninguém tem em casa.",
+        "Mexer no soquete do processador sem prática pode entortar pinos.",
+        "Fonte de alimentação não se abre em casa: há risco de choque mesmo desligada.",
+        "Insistir em ligar e desligar uma máquina com cheiro de queimado pode piorar o estrago."
+      ],
+      "titulo": "Verificar em casa ou levar direto à assistência"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A linha que separa as duas colunas é a tampa do gabinete. Do lado de fora, quase tudo é seguro. Dentro, recolocar memória é o limite razoável para quem não tem prática. Processador, fonte e testes com peças trocadas pedem bancada. E se houver cheiro de queimado, estalo ou fumaça, desligue da tomada e não tente de novo."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "A imagem aparece e depois some: aí o suspeito é o Windows"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se o logotipo do fabricante ou a tela da BIOS aparecem e a imagem some depois, a parte física quase certamente está funcionando. O autoteste passou, e o problema surgiu quando o Windows assumiu, muitas vezes por causa do driver de vídeo ou de uma atualização. É uma ótima notícia: costuma ter conserto sem troca de peça."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Microsoft, na página de solução para telas em branco, sugere alguns atalhos. A combinação **Windows + Ctrl + Shift + B** reinicia o vídeo; um bipe ou uma piscada indica que funcionou. **Windows + P**, seguido de P e Enter, alterna os modos de projeção, útil quando o sistema está mandando imagem só para uma tela que não existe mais."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se a tela fica preta só com o cursor depois de entrar na conta, a Microsoft indica **Ctrl + Shift + Esc** para abrir o Gerenciador de Tarefas e reiniciar o Windows Explorer. Quando nada disso adianta, o caminho é o Modo de Segurança, onde dá para atualizar ou reverter o driver de vídeo pelo Gerenciador de Dispositivos ou voltar a um ponto de restauração anterior ao problema."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Para chegar ao Modo de Segurança sem imagem, a Microsoft descreve forçar o desligamento segurando o botão por dez segundos, duas ou três vezes seguidas, até o Windows abrir a recuperação. Mas use esse recurso com moderação: desligar à força repetidamente durante uma atualização pode corromper arquivos. Se houver dados importantes sem cópia, vale parar e pedir ajuda."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que anotar antes de levar à assistência"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Algumas informações encurtam bastante o diagnóstico: se o problema começou depois de alguma troca de peça, limpeza, mudança de casa ou atualização; se aparece alguma imagem em algum momento; qual luz da placa-mãe fica acesa; se há bipes, e quantos; e se o monitor funciona em outro aparelho. A Intel, aliás, recomenda desfazer qualquer mudança recente de hardware como um dos primeiros passos."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, tem [assistência técnica](/manutencao) no mesmo endereço da loja, com diagnóstico, limpeza, troca de peça e conserto. Se o defeito estiver na placa de vídeo, você pode comparar as opções de [placas de vídeo](/categoria/hardware-placa-de-video-vga) e ver o computador ligado e testar antes de pagar. Se a máquina nem chega a ligar, comece pelo guia de [PC que não liga](/blog/pc-nao-liga-o-que-verificar)."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A decisão, em uma linha: confira monitor, entrada e cabo, leia a luz da placa-mãe e espere o treinamento da memória; se a tela continuar preta depois disso, leve a máquina a um técnico em vez de desmontar peça por peça."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "placas-de-video"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "O computador liga, as ventoinhas giram, mas o monitor diz sem sinal. A placa de vídeo queimou?",
+      "resposta": "Não necessariamente. Antes, confira se o monitor está na entrada certa e se o cabo está ligado na saída da placa de vídeo, e não na da placa-mãe. Memória mal encaixada também produz exatamente esse sintoma."
+    },
+    {
+      "pergunta": "Troquei a memória e agora não aparece nada na tela. Fiz algo errado?",
+      "resposta": "Talvez não. Depois de uma troca de memória, a placa-mãe faz o treinamento dela, e a tela pode ficar preta por alguns minutos. Espere antes de desligar. Se continuar sem imagem depois de vários minutos, confira o encaixe ou procure a assistência."
+    },
+    {
+      "pergunta": "Aparece o logotipo e depois a tela fica preta. É defeito de peça?",
+      "resposta": "Costuma ser problema no Windows ou no driver de vídeo, porque o autoteste da placa-mãe já passou. Tente Windows + Ctrl + Shift + B e, se não resolver, o Modo de Segurança para reverter o driver."
+    },
+    {
+      "pergunta": "Posso limpar a CMOS sozinho?",
+      "resposta": "O procedimento está no manual da placa-mãe e é simples em muitos modelos, mas exige o computador desligado e fora da tomada. Se você não se sente seguro para abrir o gabinete, deixe para o técnico."
+    },
+    {
+      "pergunta": "Meu processador tem a letra F no nome. Posso ligar o monitor na placa-mãe?",
+      "resposta": "Não. Segundo a Intel, os processadores com F no fim do nome não têm vídeo integrado, então as saídas da placa-mãe não funcionam. O monitor precisa estar na placa de vídeo."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Intel — No Boot/No Display troubleshooting for Intel Boxed Desktop Processors",
+      "url": "https://www.intel.com/content/www/us/en/support/articles/000021605.html",
+      "data": "consultado em novembro de 2026"
+    },
+    {
+      "nome": "ASUS — Troubleshooting: No Power/No Boot/No Display",
+      "url": "https://asus.com/support/FAQ/1042632",
+      "data": "consultado em novembro de 2026"
+    },
+    {
+      "nome": "ASUS — Troubleshooting via Q-LED indicators",
+      "url": "https://asus.com/support/FAQ/1042678",
+      "data": "consultado em novembro de 2026"
+    },
+    {
+      "nome": "Microsoft — Troubleshooting blank screens in Windows",
+      "url": "https://support.microsoft.com/en-us/help/14106",
+      "data": "consultado em novembro de 2026"
+    },
+    {
+      "nome": "Aftershock PC — Understanding memory training on your PC",
+      "url": "https://aftershockpc.com.au/knowledge-hub/guides/understanding-memory-training-on-your-pc",
+      "data": "consultado em novembro de 2026"
+    }
+  ]
+}

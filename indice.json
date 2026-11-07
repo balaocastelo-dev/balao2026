@@ -2,6 +2,22 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "computador-liga-mas-nao-da-imagem",
+      "titulo": "Computador liga mas não dá imagem: como descobrir de quem é a culpa",
+      "resumo": "Computador liga mas não dá imagem? Veja como separar monitor, cabo, placa de vídeo, memória e Windows com testes seguros e saiba onde parar.",
+      "categoria": "assistencia",
+      "etiquetas": [
+        "diagnóstico",
+        "monitor",
+        "placa de vídeo",
+        "memória ram",
+        "manutenção"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-11-08T09:00:00.000Z",
+      "minutos": 10
+    },
+    {
       "slug": "teclado-com-tecla-falhando-o-que-tentar-antes-de-trocar",
       "titulo": "Teclado com tecla falhando: o que tentar antes de trocar",
       "resumo": "Tecla que falha nem sempre é teclado estragado. Veja o que conferir no Windows, como limpar sem estragar e quando o conserto é o caminho certo.",
@@ -1349,5 +1365,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-11-06T22:48:57.097Z"
+  "atualizadoEm": "2026-11-07T22:09:47.879Z"
 }
