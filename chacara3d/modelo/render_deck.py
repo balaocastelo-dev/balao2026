@@ -140,8 +140,8 @@ _kb = int(np.argmin(np.hypot(O.LAGO[:, 0] - (LX1 - 0.2), O.LAGO[:, 1] - (LY1 - 1
 _co = np.array(O.CASCATA['origem']); _cd = np.array([math.cos(O.CASCATA['ang']), math.sin(O.CASCATA['ang'])])
 _br = lambda v: f'{v:.2f}'.replace('.', ',')
 PONTOS = [
-    (1, f'Guarda-corpo de madeira de {_br(O.GUARDA_H)} m na beira da laje (vão entre balaústres até 9 cm)', (EDGE - 0.04, CY_ - 0.9, 0.95)),
-    (2, 'Muro de arrimo novo, revestido de pedra (desnível de 1,00 m)', (O.FACE + 0.06, 1.2, -0.55)),
+    (1, f'Guarda-corpo de madeira de {_br(O.GUARDA_H)} m no topo do muro (vão entre balaústres até 9 cm)', (EDGE + O.GUARDA_U, CY_ - 0.9, 0.95)),
+    (2, 'Muro de arrimo novo na frente da beira da laje, revestido de pedra (desnível de 1,00 m)', (O.FACE - 0.05, 1.2, -0.55)),
     (3, 'Cascata de lajes de pedra (3 quedas) descendo do alto do muro', tuple(_co + _cd * 0.45) + (O.CASCATA['lajes'][1][1],)),
     (4, 'Borda de pedras arredondadas, meio enterradas', (float(O.LAGO[_kb, 0]), float(O.LAGO[_kb, 1]), LOW + 0.1)),
     (5, f'Prateleira de plantas a {round(O.PRAT_PROF * 100)} cm de fundo', (float(_gx[_ks]), float(_gy[_ks]), O.ZAGUA - O.PRAT_PROF)),

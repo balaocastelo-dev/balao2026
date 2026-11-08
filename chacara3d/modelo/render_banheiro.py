@@ -136,7 +136,7 @@ VISTAS = {
 PONTOS = {
     'piso': [(BX0, BY0, LOW + 0.02), (BX1, BY0, LOW + 0.02), (BX1, BY1, LOW + 0.02), (BX0, BY1, LOW + 0.02)],
     'topo': [(BX0, BY0, BZ1), (BX1, BY0, BZ1), (BX1, BY1, BZ1), (BX0, BY1, BZ1)],
-    'escada': [(O.FACE + O.ESCADA_N * O.ESCADA_PISO * 0.55, (O.ESCADA_Y0 + O.ESCADA_Y1) / 2, LOW * 0.45)],
+    'escada': [(O.ESCADA_X0 + O.ESCADA_N * O.ESCADA_PISO * 0.55, (O.ESCADA_Y0 + O.ESCADA_Y1) / 2, LOW * 0.45)],
     'poco': [(O.POCO[0], O.POCO[1], LOW + 0.7)],
     'lago': [(float(O.LAGO[:, 0].mean()), float(O.LAGO[:, 1].mean()), LOW)],
     'churrasqueira': [(43.6, 8.3, 2.6)],

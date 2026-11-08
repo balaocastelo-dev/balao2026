@@ -405,7 +405,7 @@ for _a, _b in _cortes + [(9.95, 9.95)]:
         GUARDA_BEIRA.append((_y, _a))
     _y = max(_y, _b)
 for _a, _b in GUARDA_BEIRA:
-    guarda((EDGE - 0.04, _a), (EDGE - 0.04, _b), 0.0)
+    guarda((EDGE + obra.GUARDA_U, _a), (EDGE + obra.GUARDA_U, _b), 0.0)          # postes presos no topo do muro novo
 
 # (o deck sobre o laguinho saiu em 19/10/2026, a pedido do Thiago: fica só o guarda-corpo da beira da laje)
 from obra import GUARDA_H
@@ -443,12 +443,13 @@ def pedra(mat, c, r, rng, R=None, seg=10, rings=6):
     G[mat].add(V, F)
 
 
-# muro de arrimo na beira da laje: bloco com revestimento de pedras arredondadas assentadas com argamassa (as juntas
-# aparecem entre as pedras), capa de pedra lisa no topo, no nível do piso da laje
+# muro de arrimo NA FRENTE da beira da laje (revisão de 08/11/2026): bloco de 19 cm com a face de trás no prumo da
+# beira, revestimento de pedras arredondadas assentadas com argamassa (as juntas aparecem entre as pedras) até a face
+# da pedra (FACE) e capa de pedra lisa no topo, no nível do piso da laje
 PEDRAS_MURO = ('pedra_cinza', 'pedra_bege', 'pedra_cinza', 'pedra_ferrugem', 'pedra_bege', 'pedra_cinza')
 rm = np.random.default_rng(57)
 for y0m, y1m in obra.MURO_TRECHOS:
-    box('argamassa', EDGE, FACE + 0.02, y0m, y1m, LOW - 0.02, -obra.MURO_CINTA)
+    box('argamassa', EDGE, FACE - 0.05, y0m, y1m, LOW - 0.02, -obra.MURO_CINTA)
     z_ = LOW - 0.03; fila = 0
     while z_ < -obra.MURO_CINTA - 0.05:
         h = rm.uniform(0.17, 0.27); y_ = y0m + (0.0 if fila % 2 == 0 else -rm.uniform(0.08, 0.16)); fila += 1
@@ -457,15 +458,15 @@ for y0m, y1m in obra.MURO_TRECHOS:
             topo = -obra.MURO_CINTA
             rz = min(h / 2 * rm.uniform(0.85, 1.02), (topo - z_) / 2)
             if rz > 0.05 and y0m + 0.06 < yc < y1m - 0.06:
-                pedra(PEDRAS_MURO[int(rm.integers(len(PEDRAS_MURO)))], (FACE + 0.015, min(yc, y1m - 0.08), z_ + rz + rm.uniform(-0.01, 0.01)),
+                pedra(PEDRAS_MURO[int(rm.integers(len(PEDRAS_MURO)))], (FACE - 0.055, min(yc, y1m - 0.08), z_ + rz + rm.uniform(-0.01, 0.01)),
                       (rm.uniform(0.07, 0.10), ry * rm.uniform(0.95, 1.05), rz), rm, R=rotx(rm.uniform(-0.12, 0.12)), seg=9, rings=5)
             y_ += 2 * ry * rm.uniform(0.86, 0.96)
         z_ += h * rm.uniform(0.86, 0.94)
-    box('stone_cut', EDGE, FACE + 0.10, y0m, y1m, -obra.MURO_CINTA, 0.0)                         # capa de pedra no topo
+    box('stone_cut', EDGE, EDGE + obra.CAPA, y0m, y1m, -obra.MURO_CINTA, 0.0)                     # capa de pedra no topo
 
 rp = np.random.default_rng(31)
 # fundo (manta escura) e espelho d'água numa grade de 5 cm; a borda serrilhada fica embaixo das pedras
-LGX0, LGX1 = EDGE + 0.08, round(float(max(LAGO[:, 0].max(), GRAMA[:, 0].max())) + 0.3, 2)
+LGX0, LGX1 = FACE, round(float(max(LAGO[:, 0].max(), GRAMA[:, 0].max())) + 0.3, 2)
 LGY0, LGY1 = round(max(0.0, float(min(LAGO[:, 1].min(), GRAMA[:, 1].min())) - 0.3), 2), round(min(10.0, float(max(LAGO[:, 1].max(), GRAMA[:, 1].max())) + 0.3), 2)
 gx = np.linspace(LGX0, LGX1, int(round((LGX1 - LGX0) / 0.05)) + 1); gy = np.linspace(LGY0, LGY1, int(round((LGY1 - LGY0) / 0.05)) + 1)
 GX, GY = np.meshgrid(gx, gy, indexing='ij')
@@ -513,11 +514,13 @@ def lugar_livre(c, folga=0.25):
     x_, y_ = c
     if x_ < FACE + 0.15 or y_ < 0.2 or y_ > 9.8:
         return False
-    if x_ < FACE + obra.ESCADA_N * obra.ESCADA_PISO + folga and obra.ESCADA_Y0 - folga < y_ < obra.ESCADA_Y1 + folga:
+    if x_ < obra.ESCADA_X0 + obra.ESCADA_N * obra.ESCADA_PISO + folga and obra.ESCADA_Y0 - folga < y_ < obra.ESCADA_Y1 + folga:
         return False
     if math.hypot(x_ - obra.POCO[0], y_ - obra.POCO[1]) < obra.POCO_R + folga:
         return False
     if math.hypot(x_ - obra.ARVORE[0], y_ - obra.ARVORE[1]) < 0.3 + folga:
+        return False
+    if abs(x_ - obra.CAIXA_FILTRO[0]) < 0.35 + folga and abs(y_ - obra.CAIXA_FILTRO[1]) < 0.3 + folga:
         return False
     return True
 
@@ -531,7 +534,7 @@ while s < per - 0.15:
         nrm = -nrm                                      # normal para fora
     r = rp.uniform(0.10, 0.22) if rp.random() < 0.8 else rp.uniform(0.20, 0.28)     # lago pequeno: pedras menores
     c = p + nrm * rp.uniform(0.0, 0.10)
-    if c[0] < EDGE + 0.30:                              # junto ao muro de arrimo as pedras são menores
+    if c[0] < FACE + 0.30:                              # no vão junto ao muro de arrimo as pedras são menores
         r *= 0.75
     laje = rp.random() < 0.22                           # de vez em quando uma laje chata, de pisar
     pedra(PEDRAS[int(rp.integers(len(PEDRAS)))], (c[0], c[1], LOW - (0.03 if laje else 0.04)),
@@ -539,7 +542,7 @@ while s < per - 0.15:
           R=rotz(rp.uniform(0, math.pi)), seg=int(rp.integers(7, 11)))
     if rp.random() < 0.25:                              # algumas pedras de trás, maiores, fazendo o segundo nível
         c2 = p + nrm * rp.uniform(0.26, 0.38); r2 = rp.uniform(0.15, 0.24)
-        if c2[0] > EDGE + 0.25 and lugar_livre(c2, 0.1):
+        if c2[0] > FACE + 0.08 and lugar_livre(c2, 0.1):
             pedra(PEDRAS[int(rp.integers(len(PEDRAS)))], (c2[0], c2[1], LOW + 0.02), (r2 * 1.2, r2, r2 * 0.7), rp, R=rotz(rp.uniform(0, math.pi)))
     s += r * rp.uniform(1.25, 1.6)
 # cascata de lajes de pedra (a água sai de um cano escondido entre as pedras, no alto, e cai de laje em laje)
@@ -569,6 +572,14 @@ for k in range(10):                                             # pedras empilha
     zc = LOW + 0.10 + nivel_ * (ztopo - LOW) / 5
     if zc < ztopo + 0.05:
         pedra(PEDRAS[k % 5], (c[0], c[1], zc), (0.24, 0.19, 0.16), rp, R=rotz(rp.uniform(0, math.pi)))
+if CASCATA.get('pilar'):                                         # pilar de pedras assentadas no vão, embaixo da laje de baixo
+    _zt3 = LJ[-1][1] - 0.08
+    _np = 3
+    for k in range(_np):
+        c = CO + CD * 0.16
+        h_ = (_zt3 - LOW) / _np
+        pedra(PEDRAS[(k + 1) % 5], (c[0], c[1] + rp.uniform(-0.03, 0.03), LOW + h_ * (k + 0.5)), (0.14, CW / 2 - 0.04, h_ * 0.55), rp,
+              R=rotz(CASCATA['ang'] + rp.uniform(-0.1, 0.1)), seg=9, rings=5)
 for k, (av, zt) in enumerate(LJ[:-1]):                          # pedras de apoio embaixo das lajes
     c = CO + CD * (av * 0.5)
     pedra('pedra_bege', (c[0], c[1], zt - 0.20), (0.16, CW / 2, 0.14), rp, R=rotz(CASCATA['ang']))
@@ -614,6 +625,13 @@ for fx_, fy_, _r in _ninf[:1]:
     for a in np.linspace(0, 2 * math.pi, 8, endpoint=False):
         ellipsoid('flor_ninfeia', (fx_ + 0.05 * math.cos(a), fy_ + 0.05 * math.sin(a), ZAGUA + 0.04), (0.055, 0.025, 0.02), seg=6, rings=3, R=rotz(a))
     ellipsoid('flower_orange', (fx_, fy_, ZAGUA + 0.05), 0.025, seg=6, rings=3)
+# caixa do filtro (enterrada, com tampa de pedra) e tomada externa no muro lateral (revisão de 08/11/2026)
+_cf = obra.CAIXA_FILTRO
+box('concrete', _cf[0] - 0.27, _cf[0] + 0.27, _cf[1] - 0.22, _cf[1] + 0.22, LOW - 0.02, LOW + 0.03)
+box('stone_cut', _cf[0] - 0.25, _cf[0] + 0.25, _cf[1] - 0.20, _cf[1] + 0.20, LOW + 0.03, LOW + 0.05)
+_tm = obra.TOMADA
+box('white', _tm[0] - 0.05, _tm[0] + 0.05, 0.0, 0.05, LOW + 0.55, LOW + 0.68)
+box('metal_dark', _tm[0] - 0.012, _tm[0] + 0.012, 0.0, 0.03, LOW, LOW + 0.55)          # eletroduto descendo até o chão
 # chão do quintal de baixo fora da área do laguinho
 for a in ((LGX1, 60, 0, 10), (EDGE, LGX1, 0, LGY0), (EDGE, LGX1, LGY1, 10)):
     if a[1] - a[0] > 0.01 and a[3] - a[2] > 0.01:
@@ -669,7 +687,7 @@ tube('rope', [(WC[0], WC[1] + 0.2 * WS, 0.55), (WC[0], WC[1] + 0.2 * WS, -0.05)]
 cyl('wood_z', (WC[0], WC[1] + 0.2 * WS, -0.3), 0.13, 0.26, seg=12, r_top=0.16)
 for a in np.linspace(0, 2 * math.pi, 9)[:-1]:
     c_ = (WC[0] + (obra.POCO_R + 0.18) * math.cos(a), WC[1] + (obra.POCO_R + 0.18) * math.sin(a))
-    if not (c_[0] < FACE + obra.ESCADA_N * obra.ESCADA_PISO + 0.3 and obra.ESCADA_Y0 - 0.3 < c_[1] < obra.ESCADA_Y1 + 0.3) and not dentro_lago(*c_):
+    if not (c_[0] < obra.ESCADA_X0 + obra.ESCADA_N * obra.ESCADA_PISO + 0.3 and obra.ESCADA_Y0 - 0.3 < c_[1] < obra.ESCADA_Y1 + 0.3) and not dentro_lago(*c_):
         P.moreia((c_[0], c_[1], LOW), rng, 0.6)
 
 # ------------------------------------------------------------------ cobertura da garagem (baixa, encostada no muro lateral)
@@ -730,7 +748,7 @@ P.heliconia((58.95, 7.2, LOW), rng, n=8, H=1.7)
 P.small_tree((50.2, 9.15, LOW), rng, fruit='fruit_red')          # pitangueira
 disc('mulch', (50.2, 9.15), 0.8, LOW + 0.006)
 # pisantes do pé da escada até o portão, contornando o poço pelo lado de lá (longe do laguinho)
-_e1 = FACE + obra.ESCADA_N * obra.ESCADA_PISO
+_e1 = obra.ESCADA_X0 + obra.ESCADA_N * obra.ESCADA_PISO
 _cam = [(_e1 + 0.25, obra.ESCADA_Y1 - 0.35), (obra.POCO[0] - 0.5, obra.POCO[1] + obra.POCO_R + 0.55),
         (obra.POCO[0] + 0.6, obra.POCO[1] + obra.POCO_R + 0.6), (52.5, 6.0), (56.0, 5.5), (59.3, 5.1)]
 _cp = np.array(_cam, float); _amostra = []
@@ -1603,7 +1621,7 @@ for _p in LAGO[1:]:
 _ilx = np.nonzero(_nado.any(axis=1))[0]
 EXTRA['quintal'] = {
     'deck': None,
-    'escada': {'x0': round(FACE, 3), 'piso': obra.ESCADA_PISO, 'n': obra.ESCADA_N, 'y': [obra.ESCADA_Y0, obra.ESCADA_Y1],
+    'escada': {'x0': round(obra.ESCADA_X0, 3), 'piso': obra.ESCADA_PISO, 'n': obra.ESCADA_N, 'y': [obra.ESCADA_Y0, obra.ESCADA_Y1],
                'espelho': round(-LOW / (obra.ESCADA_N + 1), 4)},
     'lago': {'nivel': round(ZAGUA, 3), 'ret': [round(float(v), 3) for v in (LAGO[:, 0].min(), LAGO[:, 0].max(), LAGO[:, 1].min(), LAGO[:, 1].max())],
              'contorno': [[round(float(a), 3), round(float(b), 3)] for a, b in _cont],
@@ -1616,7 +1634,7 @@ EXTRA['quintal']['lugares'] = {'Beira do laguinho': [round(EDGE - 0.75, 2), roun
 EXTRA.setdefault('circulos', [])
 EXTRA['circulos'] += [[obra.ARVORE[0], obra.ARVORE[1], 0.45, LOW, 4.0], [obra.POCO[0], obra.POCO[1], obra.POCO_R + 0.03, LOW, 0.2]]
 for _a, _b in GUARDA_BEIRA:                                   # guarda-corpo da beira da laje
-    colisor(EDGE - 0.1, EDGE + 0.02, _a, _b, 0.0, 1.1)
+    colisor(EDGE + obra.GUARDA_U - 0.06, EDGE + obra.GUARDA_U + 0.06, _a, _b, 0.0, 1.1)
 
 objs = geo.build_objects()
 print('objects', len(objs), 'polys', sum(len(o.data.polygons) for o in objs))

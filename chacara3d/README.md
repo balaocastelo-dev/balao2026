@@ -248,14 +248,22 @@ para o pedreiro. Eixos: x a partir da beira da laje (`EDGE` = 46), y a partir do
 - **Medidas reais** (Thiago, tijolinho de 18 cm): beira da laje até a ponta da escada 1,60; escada com 1,40 de
   largura; da ponta da escada ao poço 1,08; poço até o muro da amendoeira 4,14; tronco até o poço 2,34. Diâmetro do
   poço (1,25), posição do tronco e lado exato da escada são estimados pelas fotos.
-- **Projeto aprovado em 08/11/2026** (opção A, sem deck): lago orgânico de 6,4 m² (2.600 L, 0,90 m na parte funda,
-  prateleira de plantas a 25 cm) entre a amendoeira e a escada, a 1,54 m da boca do poço e 1,26 m do centro do
-  tronco; cascata de três lajes de pedra descendo do alto do muro (de 3,00 a 3,60 do muro da amendoeira); muro de
-  arrimo novo revestido de pedra arredondada; guarda-corpo de madeira de 1,10 m na beira da laje. Saíram a casa na
-  árvore, o balanço e o deck.
+- **Projeto aprovado em 08/11/2026** (opção A, sem deck), **revisado no mesmo dia** depois da revisão da ficha:
+  - muro de arrimo novo **na frente da beira da laje** (face de trás do bloco no prumo da beira, bloco 19 + pedra 14:
+    a face da pedra fica a 0,33 m da beira, `FACE` no `obra.py`); sapata 75 × 20 com topo a 0,80 abaixo do chão de
+    baixo; capa de 36 cm; dreno com 1% até o sumidouro;
+  - lago orgânico de **5,75 m²** (2.400 L, 0,90 m na parte funda, prateleira de plantas a 25 cm, até 0,55 m da face
+    no máximo 50 cm de água) entre a amendoeira e a escada: 0,30 m da face da pedra, 0,45 m da escada, 1,53 m da boca
+    do poço, 1,22 m do centro do tronco e fora do piso do pergolado do cineminha;
+  - cascata de três lajes (saem 0,22 / 0,38 / 0,55 da face, topos a +0,84 / +0,50 / +0,16 do chão, de 2,92 a 3,52
+    do muro da amendoeira), a de baixo num pilar de pedras; caixa do filtro, sumidouro e tomada (a 2,3 m da água) na
+    faixa junto ao muro da amendoeira;
+  - guarda-corpo de madeira de 1,10 m no topo do muro novo, com barras roscadas no graute. Saíram a casa na árvore, o
+    balanço e o deck.
 - **Scripts**: `render_deck.py PASTA --vistas quintal,cascata,laje,planta,estrutura` (fotos Cycles só da área; a vista
   `estrutura` é o lago vazio, numerado por `legenda_lago.py`); `desenhos_obra.py PASTA` (3 folhas A3 + PDF: locação
-  com 18 piquetes, cortes A–A e B–B, detalhes do muro, da cascata e do guarda-corpo).
+  com 17 piquetes, caixa do filtro, sumidouro, tomada e trajeto dos canos; cortes A–A e B–B; corte do muro, cascata e
+  guarda-corpo).
 - **Passeio**: o `extra.quintal` do `terreno.json` leva escada, lago (contorno, nível, grade onde as carpas nadam) e
   lugares; `mundo.js` tira daí o chão, a colisão do lago, do poço e da amendoeira (`extra.circulos`), `agua.js` o
   espelho do lago e `bichos.js` as carpas e as ninfeias.
