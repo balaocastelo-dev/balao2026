@@ -1,0 +1,147 @@
+{
+  "slug": "steam-outubro-2026-16-gb-de-ram-volta-a-frente",
+  "titulo": "Steam de outubro: 16 GB de RAM voltam à frente dos 32 GB",
+  "resumo": "A pesquisa de hardware da Steam de outubro de 2026 pôs 16 GB de memória de volta no topo. Veja por que o número oscilou e o que ele muda na sua compra.",
+  "categoria": "noticias",
+  "etiquetas": [
+    "memória ram",
+    "steam",
+    "placa de vídeo",
+    "pc gamer"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-11-09T15:00:00.000Z",
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "A Valve divulgou no começo de novembro de 2026 o resultado de outubro da sua pesquisa de hardware e software, feita com quem usa a loja de jogos Steam. A memória de 16 GB voltou a ser a quantidade mais comum entre os computadores pesquisados, passando à frente dos 32 GB, que tinham assumido a liderança em setembro."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano seria ler isso como sinal de que os jogadores trocaram 32 GB por 16 GB de um mês para o outro. Não foi o que aconteceu: a própria pesquisa mostra uma mudança grande no perfil de quem respondeu, e é isso que mexe nos números. A conclusão útil para quem vai comprar é outra, e está mais adiante."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que a pesquisa de outubro mostra"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Segundo a página da Valve, 41,42% dos computadores pesquisados tinham 16 GB de memória RAM em outubro, alta de 3,60 pontos sobre setembro. Os de 32 GB ficaram com 37,06%, queda de 5,16 pontos. Os de 8 GB somaram 7,52%. Na memória da placa de vídeo, 8 GB e 16 GB aparecem quase empatados, com 8 GB ligeiramente à frente."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Item",
+        "Participação",
+        "Variação sobre setembro"
+      ],
+      "linhas": [
+        [
+          "Memória RAM de 16 GB",
+          "41,42%",
+          "+3,60 pontos"
+        ],
+        [
+          "Memória RAM de 32 GB",
+          "37,06%",
+          "−5,16 pontos"
+        ],
+        [
+          "Memória RAM de 8 GB",
+          "7,52%",
+          "+1,05 ponto"
+        ],
+        [
+          "Placa de vídeo com 8 GB",
+          "26,92%",
+          "+0,21 ponto"
+        ],
+        [
+          "Placa de vídeo com 16 GB",
+          "26,35%",
+          "−0,86 ponto"
+        ],
+        [
+          "Windows 11",
+          "72,51%",
+          "+1,17 ponto"
+        ],
+        [
+          "Windows 10",
+          "21,11%",
+          "−2,50 pontos"
+        ]
+      ],
+      "titulo": "Pesquisa da Steam, outubro de 2026",
+      "colunaDestaque": 1,
+      "fonte": {
+        "nome": "Steam Hardware & Software Survey: October 2026 — Valve",
+        "url": "https://store.steampowered.com/hwsurvey/Steam-Hardware-Software-Survey-Welcome-to-Steam"
+      }
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A explicação está no idioma de quem respondeu. A fatia de usuários em chinês simplificado caiu 9,41 pontos, para 21,98%, enquanto a de inglês subiu 4,84 pontos. A Hardware Busters lembra que a Valve não equilibra a amostra por região: quando um grupo grande entra ou sai, os percentuais de hardware acompanham, sem que ninguém tenha trocado de peça."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O mesmo movimento aparece em outros itens. A resolução de 2560 x 1440 perdeu 5,22 pontos e a de 1920 x 1080 passou a ocupar pouco mais da metade dos monitores principais. Já o Windows 10 caiu 2,50 pontos e o Windows 11 subiu, chegando a 72,51% dos computadores pesquisados."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que isso muda para você"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem vai montar ou comprar um PC para jogar:** a pesquisa confirma que 16 GB ainda são o patamar mais comum, e não um mínimo apertado. Mas 32 GB seguem muito perto e dão folga para jogo, navegador e programas abertos ao mesmo tempo. O guia [quanta memória RAM você precisa](/blog/quanta-memoria-ram-voce-precisa-8-16-ou-32-gb) ajuda a decidir pelo seu uso."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem já tem 16 GB:** não há motivo para correr atrás de upgrade por causa desse resultado. Se o computador fica lento com muitas coisas abertas, aí sim vale conferir se a placa-mãe aceita mais memória e se os pentes trabalham em par. Os textos sobre [como saber se o PC aceita mais memória](/blog/como-saber-se-o-pc-aceita-mais-memoria) e sobre [dual channel](/blog/dual-channel-por-que-duas-memorias-rendem-mais) explicam como ver isso."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "upgrade"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem escolhe placa de vídeo:** o quase empate entre 8 GB e 16 GB de memória na placa mostra que as duas faixas convivem. A notícia sobre a [pesquisa de setembro](/blog/steam-setembro-2026-vram-16gb) e o comparativo da [RTX 5060 Ti de 8 GB ou 16 GB](/blog/rtx-5060-ti-8gb-ou-16gb) ajudam a pesar as duas opções antes de escolher."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que ainda não se sabe"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Não dá para dizer, com um mês só, se a liderança dos 16 GB vai se manter. A Hardware Busters sugere esperar dois meses seguidos com uma mistura de idiomas parecida antes de falar em tendência. Também vale lembrar que a pesquisa retrata quem joga na Steam, e não o computador médio de casa ou do escritório."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A Balão da Informática, no Cambuí, em Campinas, faz [upgrade de memória](/manutencao) e [monta computador sob medida](/montagempc), e você pode ver a máquina ligada antes de pagar. Em uma linha: 16 GB seguem como base segura para jogar, e 32 GB são a escolha de quem quer folga."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "montagem"
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Steam Hardware & Software Survey: October 2026 — Valve",
+      "url": "https://store.steampowered.com/hwsurvey/Steam-Hardware-Software-Survey-Welcome-to-Steam",
+      "data": "novembro de 2026"
+    },
+    {
+      "nome": "Steam Hardware Survey: October Undoes September, Putting 16GB and the RTX 3060 Back on Top — Hardware Busters",
+      "url": "https://hwbusters.com/news/steam-hardware-survey-october-undoes-september-putting-16gb-and-the-rtx-3060-back-on-top/",
+      "data": "2 de novembro de 2026"
+    },
+    {
+      "nome": "October 2026 Steam Hardware Survey: 16 GB RAM Reclaims Top Spot — Wccftech",
+      "url": "https://wccftech.com/october-2026-steam-hardware-survey-16-gb-ram-reclaims-top-spot-intel-gains-cpu-share-linux-approaches-4/",
+      "data": "2 de novembro de 2026"
+    }
+  ]
+}

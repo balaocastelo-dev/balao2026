@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "steam-outubro-2026-16-gb-de-ram-volta-a-frente",
+      "titulo": "Steam de outubro: 16 GB de RAM voltam à frente dos 32 GB",
+      "resumo": "A pesquisa de hardware da Steam de outubro de 2026 pôs 16 GB de memória de volta no topo. Veja por que o número oscilou e o que ele muda na sua compra.",
+      "categoria": "noticias",
+      "etiquetas": [
+        "memória ram",
+        "steam",
+        "placa de vídeo",
+        "pc gamer"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-11-09T15:00:00.000Z",
+      "minutos": 4
+    },
+    {
       "slug": "quanta-memoria-ram-voce-precisa-8-16-ou-32-gb",
       "titulo": "Quanta memória RAM você precisa: 8, 16 ou 32 GB",
       "resumo": "Quanta memória RAM você precisa? Veja quando 8 GB ainda servem, por que 16 GB viraram o ponto de partida e para quem 32 GB fazem diferença.",
@@ -1412,5 +1427,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-11-08T22:14:31.761Z"
+  "atualizadoEm": "2026-11-08T22:34:32.444Z"
 }
