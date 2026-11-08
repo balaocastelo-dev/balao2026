@@ -18,7 +18,7 @@ from bpy_extras.object_utils import world_to_camera_view
 
 ap = argparse.ArgumentParser()
 ap.add_argument('saida'); ap.add_argument('--res', type=int, default=1400); ap.add_argument('--samples', type=int, default=32)
-ap.add_argument('--vistas', default='planta,quintal,laje'); ap.add_argument('--estudo', action='store_true')
+ap.add_argument('--vistas', default='planta,quintal,laje'); ap.add_argument('--estudo', action='store_true'); ap.add_argument('--modelo', type=int, default=1)
 args = ap.parse_args(sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else sys.argv[1:])
 os.makedirs(args.saida, exist_ok=True)
 
@@ -60,14 +60,15 @@ def recortar(manter, tirar, tirar_mats=()):
 
 
 planta_so = set(args.vistas.split(',')) <= {'planta'}
-TIRAR = [(51.3, 60.5, -0.3, 10.3, LOW + 0.006, 9.0),          # garagem, pergolado e cinema
-         (51.3, 60.5, -0.3, 10.3, LOW - 0.05, 9.0, ('wood_z', 'bark_cane', 'stone_cut', 'screen', 'wood_x', 'cushion', 'cushion_teal', 'couro', 'wood_y'))]
+_yt = 4.6 if args.estudo else 10.3                    # no estudo a garagem fica (o banheiro termina perto dela)
+TIRAR = [(51.3, 60.5, -0.3, _yt, LOW + 0.006, 9.0),          # garagem, pergolado e cinema
+         (51.3, 60.5, -0.3, _yt, LOW - 0.05, 9.0, ('wood_z', 'bark_cane', 'stone_cut', 'screen', 'wood_x', 'cushion', 'cushion_teal', 'couro', 'wood_y'))]
 if planta_so:
     TIRAR.append((44.0, 52.0, -0.3, 4.5, 1.25, 12.0, ('bark_dark',)))          # na planta fica só o tronco da amendoeira
 if args.estudo:
     import banheiro as B
-    TIRAR.append((B.X0 + 0.06, B.X1 + 1.1, B.Y0, B.Y1, LOW + 0.012, LOW + 3.2))     # o que estava no lugar do banheiro
-    TIRAR.append((EDGE - 0.15, B.X0, O.ESCADA_Y1 + 0.03, B.Y1, 0.02, 1.3, ('wood_x', 'wood_y', 'wood_z')))  # guarda-corpo: vira parede
+    TIRAR.append((B.XB0 - 0.02, B.XB1 + 0.05, B.YB0 - B.PISO_FRENTE - 0.02, B.YB1, LOW + 0.012, LOW + 3.2))  # o que estava no lugar
+    TIRAR.append((52.2, B.XB1 + 0.15, 6.7, 10.2, LOW - 0.03, 4.0, ('rooftile', 'wood_y', 'wood_x', 'wood_z', 'stone_cut')))  # garagem encolhe
 COPA = ('leaf_amend', 'leaf_amend_red', 'leaf_core_big')
 ARVORES = ('leaf_mango', 'leaf_core', 'leaf_bg', 'leaf_palm', 'leaf_palm_base', 'leaf_palm_rachis', 'leaf_areca', 'leaf_citrus',
            'leaf_goiaba', 'leaf_jabu', 'leaf_vine', 'leaf_vine_light', 'bark_palm', 'bark_jabu', 'bark_goiaba', 'fruit_mango',
@@ -85,8 +86,15 @@ for y0_, y1_ in ((-0.15, 0.0), (10.0, 10.15)):                              # mu
 # ---- a marca do banheiro: piso laranja, caixa transparente e as arestas (ou o estudo, com --estudo)
 if args.estudo:
     import plants as P
-    B.construir(geo, P, np.random.default_rng(31))
-    BZ1 = B.ZT
+    B.construir(geo, P, np.random.default_rng(31), args.modelo)
+    BZ1 = B.topo(args.modelo)
+    # a cobertura da garagem encolhe até o banheiro: vigas, piso e pilares refeitos a partir de GX
+    GX = B.XB1 + 0.15; zbm = ns['zbm']; GZH = ns['GZH']
+    geo.box('wood_x', GX, 58.7, 6.92, 7.08, zbm - 0.18, zbm)
+    geo.box('wood_x', GX, 58.7, 9.9, 9.98, GZH - 0.32, GZH - 0.13)
+    geo.box('wood_z', GX, GX + 0.16, 6.92, 7.08, LOW, zbm - 0.18)
+    geo.box('wood_z', GX, GX + 0.12, 9.86, 9.98, LOW, GZH - 0.32)
+    geo.box('stone_cut', GX, 58.7, 6.9, 9.98, LOW - 0.01, LOW + 0.012)
 geo.m_plain('marca_piso', (1.0, 0.42, 0.04), 0.6, **{'Alpha': 0.55})
 geo.m_plain('marca_caixa', (1.0, 0.45, 0.06), 0.5, **{'Alpha': 0.16})
 geo.m_emit('marca_aresta', (1.0, 0.38, 0.02), 2.2)
@@ -143,6 +151,13 @@ VISTAS = {
     'laje': ((44.0, 3.0, 1.65), (47.2, 7.9, -0.75), 17, 215, 55, 0.05),
     'nicho': ((50.9, 6.3, LOW + 1.55), (46.5, 8.3, LOW + 1.05), 22, 215, 52, 0.1),
 }
+if args.estudo:                                        # o estudo fica de frente para o poço: câmeras viradas para ele
+    VISTAS.update({
+        'quintal': ((52.1, 2.9, LOW + 1.75), (50.0, 8.7, LOW + 1.15), 16, 215, 52, 0.1),
+        'alto': ((54.2, 2.4, LOW + 3.7), (49.9, 8.6, LOW + 0.9), 17, 215, 52, 0.1),
+        'nicho': (((B.XN0 + B.XN1) / 2, 5.85, LOW + 1.55), ((B.XN0 + B.XN1) / 2, 9.6, LOW + 1.0), 20, 215, 52, 0.1),
+        'laje': ((44.1, 3.9, 1.7), (49.0, 8.6, -0.6), 17, 215, 55, 0.05),
+    })
 # pontos que o legenda_banheiro.py usa (cantos do piso e do topo da área, e onde ficam as coisas em volta)
 PONTOS = {
     'piso': [(BX0, BY0, LOW + 0.02), (BX1, BY0, LOW + 0.02), (BX1, BY1, LOW + 0.02), (BX0, BY1, LOW + 0.02)],
@@ -155,14 +170,15 @@ PONTOS = {
 MEDIDAS = {'largura': BY1 - BY0, 'fundo': BX1 - BX0, 'altura': BZ1 - LOW}
 if args.estudo:
     PONTOS.update({
-        'banheiro1': [(B.X1 + 0.02, (B.YA0 + B.YA1) / 2, LOW + 1.3)],
-        'banheiro2': [(B.X1 + 0.02, (B.YB0 + B.YB1) / 2, LOW + 1.3)],
-        'pia': [(B.CUBA[0], B.CUBA[1], B.BANC_Z + 0.1)],
-        'jardineira': [(B.X1 + B.MARQUISE - 0.2, (B.Y0 + B.Y1) / 2 + 0.9, B.ZT + 0.3)],
-        'parapeito': [(EDGE + 0.04, B.Y0 + 0.4, B.ZT - 0.45)],
+        'banheiro1': [((B.XA0 + B.XA1) / 2, B.YB0 - 0.02, LOW + 1.3)],
+        'banheiro2': [((B.XC0 + B.XC1) / 2, B.YB0 - 0.02, LOW + 1.3)],
+        'pia': [(B.CUBAS[0][0], B.CUBAS[0][1], B.BANC_Z + 0.1)],
+        'jardineira': [((B.XB0 + B.XB1) / 2 + 0.9, B.YB0 - B.MARQUISE + 0.2, B.ZT + 0.3)],
+        'corredor': [(B.XB0 - 0.5, B.YB0 + 1.0, LOW + 0.05)],
     })
-    MEDIDAS.update({'estudo': True, 'banheiro': [B.CAB, B.FUNDO - B.PE], 'nicho': B.NICHO, 'pe_direito': B.PD,
-                    'acima_da_laje': B.ZT})
+    MEDIDAS.update({'estudo': True, 'largura': B.LARG, 'fundo': B.FUNDO, 'banheiro': [B.CAB, B.LIVRE], 'nicho': B.NICHO,
+                    'pe_direito': B.PD, 'acima_da_laje': B.topo(args.modelo), 'afastamento': B.AFASTAMENTO, 'ate_poco': B.ATE_POCO,
+                    'modelo': args.modelo, 'modelo_nome': B.MODELOS[args.modelo]['nome'], 'modelo_desc': B.MODELOS[args.modelo]['desc']})
 
 
 def mirar(v):
