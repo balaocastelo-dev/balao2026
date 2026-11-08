@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "quanta-memoria-ram-voce-precisa-8-16-ou-32-gb",
+      "titulo": "Quanta memória RAM você precisa: 8, 16 ou 32 GB",
+      "resumo": "Quanta memória RAM você precisa? Veja quando 8 GB ainda servem, por que 16 GB viraram o ponto de partida e para quem 32 GB fazem diferença.",
+      "categoria": "guias",
+      "etiquetas": [
+        "memória ram",
+        "upgrade",
+        "guia de compra",
+        "windows"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-11-09T09:00:00.000Z",
+      "minutos": 10
+    },
+    {
       "slug": "como-conferir-a-temperatura-do-computador-sem-instalar-nada",
       "titulo": "Como conferir a temperatura do computador sem instalar nada",
       "resumo": "O Windows mostra a temperatura da placa de vídeo no Gerenciador de Tarefas; a do processador aparece na BIOS. Veja os dois caminhos e quando o calor preocupa.",
@@ -1397,5 +1412,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-11-07T22:48:36.963Z"
+  "atualizadoEm": "2026-11-08T22:14:31.761Z"
 }
