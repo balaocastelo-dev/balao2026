@@ -91,19 +91,23 @@ for jp in sorted(glob.glob(os.path.join(pasta, '*_pontos.json'))):
     rotulos = {'escada': 'escada\n(sobe para a churrasqueira)', 'poco': 'poço', 'lago': 'laguinho', 'churrasqueira': 'churrasqueira'}
     if estudo:
         rotulos = {'banheiro1': 'BANHEIRO 1', 'banheiro2': 'BANHEIRO 2', 'pia': 'pia lavabo\n(do lado de fora)',
-                   'jardineira': 'jardineira de pendentes', 'parapeito': 'parede de trás do banheiro:\nvira o parapeito da laje',
+                   'jardineira': 'jardineira de pendentes', 'corredor': '1 m até o muro de pedra',
                    'escada': 'escada\n(sobe para a churrasqueira)', 'poco': 'poço', 'churrasqueira': 'churrasqueira'}
     desloc_estudo = {'quintal': {'banheiro1': (0, 0), 'banheiro2': (0, 0), 'pia': (150, 300), 'jardineira': (120, -70),
-                                 'escada': (-140, 230), 'poco': (-20, -230), 'parapeito': None, 'churrasqueira': None},
+                                 'escada': (-140, 230), 'poco': (-60, -200), 'corredor': (-120, -150), 'churrasqueira': None},
                      'nicho': {'banheiro1': (0, 0), 'banheiro2': (0, 0), 'pia': (180, 330), 'jardineira': (-150, 40),
-                               'escada': None, 'poco': None, 'parapeito': None, 'churrasqueira': None},
-                     'laje': {'parapeito': (-150, 260), 'jardineira': (60, -110), 'churrasqueira': (90, 60), 'escada': (-120, 220),
-                              'poco': (60, 230), 'banheiro1': None, 'banheiro2': None, 'pia': None}}
+                               'escada': None, 'poco': None, 'corredor': None, 'churrasqueira': None},
+                     'laje': {'corredor': (-170, 200), 'jardineira': (60, -110), 'churrasqueira': (90, 60), 'escada': (-120, 220),
+                              'poco': (60, 230), 'banheiro1': (0, 0), 'banheiro2': (0, 0), 'pia': None}}
     desloc = {'planta': {'escada': (-60, 150), 'poco': (110, 30), 'lago': (80, 120), 'churrasqueira': (0, 0)},
               'quintal': {'escada': (80, 200), 'poco': (-20, -260), 'lago': (0, 0), 'churrasqueira': (-120, -60)},
               'laje': {'escada': (-120, 220), 'poco': (60, 230), 'lago': (0, 0), 'churrasqueira': (90, 60)}}.get(nome, {})
     if estudo:
         desloc = desloc_estudo.get(nome, {})
+    if 'modelo' in M:                                   # estudo dos 5 modelos: foto limpa, só o selo e o rodapé
+        rotulos = {}
+        fs_ = ImageFont.truetype(FB, int(40 * s) + 2)
+        caixa_texto(d, (18 * s, 18 * s), [f"MODELO {M['modelo']}"], [fs_], cor_borda=LARANJA)
     for k, txt in rotulos.items():
         for p in P.get(k, []):
             x, y = px(p)
@@ -121,12 +125,15 @@ for jp in sorted(glob.glob(os.path.join(pasta, '*_pontos.json'))):
             r = caixa_texto(d, (x + dx * s, y + dy * s), ls, fs, ancora=('r' if dx < 0 else 'l') + 'm')
             seta(d, ((r[2] if dx < 0 else r[0]), (r[1] + r[3]) / 2), (x, y), ESCURO, larg=2)
     # rodapé
-    if estudo:
-        d.text((24 * s, H + rod * 0.14), 'Banheiro duplo externo, estudo 1: 2 banheiros e a pia lavabo central, de fora',
+    if 'modelo' in M:
+        d.text((24 * s, H + rod * 0.12), f"Modelo {M['modelo']}: {M['modelo_nome']}", fill=ESCURO, font=f1)
+        d.text((24 * s, H + rod * 0.56), M['modelo_desc'], fill=(70, 70, 70), font=f3)
+    elif estudo:
+        d.text((24 * s, H + rod * 0.14), 'Banheiro duplo externo, estudo 2: de frente para o poço',
                fill=ESCURO, font=f1)
-        d.text((24 * s, H + rod * 0.56), f"Uns {br(M['largura'])} x {br(M['fundo'])} m (a largura ainda precisa ser medida no local). "
-               f"Pé-direito de {br(M['pe_direito'])} m: o banheiro fica {br(M['acima_da_laje'])} m acima do piso da churrasqueira.",
-               fill=(70, 70, 70), font=f3)
+        d.text((24 * s, H + rod * 0.56), f"{br(M['largura'])} x {br(M['fundo'])} m, a {br(M['afastamento'])} m do muro de pedra e "
+               f"{br(M['ate_poco'])} m da boca do poço. Pé-direito {br(M['pe_direito'])} m: o telhado fica {br(M['acima_da_laje'])} m "
+               "acima do piso da churrasqueira.", fill=(70, 70, 70), font=f3)
     elif nome == 'planta':
         d.text((24 * s, H + rod * 0.10), 'Banheiro duplo externo: 2 banheiros e a pia lavabo central do lado de fora', fill=ESCURO, font=f2)
         d.text((24 * s, H + rod * 0.40), f"Área ao lado da escada: uns {br(M['largura'])} x {br(M['fundo'])} m, encostada no muro de pedra.", fill=(70, 70, 70), font=f3)
