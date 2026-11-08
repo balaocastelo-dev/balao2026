@@ -3,8 +3,8 @@
 Passeio em 3D pelo terreno do Thiago (60 × 10 m) como ele fica pronto: a
 vilinha de três casas container com terraço aberto no teto (dá para entrar nelas e
 subir pela escada reta de fora até o terraço), o gramado com o pomar, a
-piscina com a hidro e a cascata, a churrasqueira coberta, o deck com o laguinho
-das carpas e o cineminha no muro. Anda-se com W A S D; tem dia e noite, foto,
+piscina com a hidro e a cascata, a churrasqueira coberta, o laguinho de pedras com
+cascata no pé do muro de arrimo do quintal de baixo e o cineminha no muro. Anda-se com W A S D; tem dia e noite, foto,
 gravação da caminhada com vídeo renderizado e o cineminha passando vídeo do
 computador ou do YouTube. Cachorros, galinhas, galo, carpas, passarinhos,
 borboletas e vaga-lumes se mexem sozinhos. No menu há **cenários com gente**
@@ -224,7 +224,8 @@ Para conferir: `window.__chacara.renderer.info.programs.length` e `window.__chac
 ## O que vale saber
 
 - **Medidas estimadas por foto.** Só são exatas as que o Thiago passou: terreno
-  60 × 10 m, faixa do jardim com 80 cm, deck de 2 × 3 m a 1 m do chão.
+  60 × 10 m, faixa do jardim com 80 cm, desnível de 1 m da laje ao quintal de baixo e as
+  medidas do quintal de baixo tiradas com tijolinho de 18 cm em 19/10/2026 (veja abaixo).
 - **Interior das casas** segue o pedido do Thiago (sala, cozinha, banheiro e quarto num
   container de 7 × 3 m); os móveis são proposta e mudam em `container` no `build.py`.
 - **Lado do sol**: ainda não informado. Na página dá para escolher em
@@ -238,3 +239,28 @@ Para conferir: `window.__chacara.renderer.info.programs.length` e `window.__chac
   mais 8,6 MB de pessoas e adereços na primeira vez que se liga um cenário.
 - **Placa de vídeo**: na qualidade alta, pede uma placa de computador razoável;
   no celular a página começa na baixa (sem grama 3D, sem oclusão e sem pelo).
+
+## Quintal de baixo: laguinho, muro de pedra e banheiro (19/10 e 08/11/2026)
+
+Todas as medidas da obra ficam em `modelo/obra.py`, a fonte única do `build.py` (maquete e passeio) e das folhas
+para o pedreiro. Eixos: x a partir da beira da laje (`EDGE` = 46), y a partir do muro lateral do lado da amendoeira.
+
+- **Medidas reais** (Thiago, tijolinho de 18 cm): beira da laje até a ponta da escada 1,60; escada com 1,40 de
+  largura; da ponta da escada ao poço 1,08; poço até o muro da amendoeira 4,14; tronco até o poço 2,34. Diâmetro do
+  poço (1,25), posição do tronco e lado exato da escada são estimados pelas fotos.
+- **Projeto aprovado em 08/11/2026** (opção A, sem deck): lago orgânico de 6,4 m² (2.600 L, 0,90 m na parte funda,
+  prateleira de plantas a 25 cm) entre a amendoeira e a escada, a 1,54 m da boca do poço e 1,26 m do centro do
+  tronco; cascata de três lajes de pedra descendo do alto do muro (de 3,00 a 3,60 do muro da amendoeira); muro de
+  arrimo novo revestido de pedra arredondada; guarda-corpo de madeira de 1,10 m na beira da laje. Saíram a casa na
+  árvore, o balanço e o deck.
+- **Scripts**: `render_deck.py PASTA --vistas quintal,cascata,laje,planta,estrutura` (fotos Cycles só da área; a vista
+  `estrutura` é o lago vazio, numerado por `legenda_lago.py`); `desenhos_obra.py PASTA` (3 folhas A3 + PDF: locação
+  com 18 piquetes, cortes A–A e B–B, detalhes do muro, da cascata e do guarda-corpo).
+- **Passeio**: o `extra.quintal` do `terreno.json` leva escada, lago (contorno, nível, grade onde as carpas nadam) e
+  lugares; `mundo.js` tira daí o chão, a colisão do lago, do poço e da amendoeira (`extra.circulos`), `agua.js` o
+  espelho do lago e `bichos.js` as carpas e as ninfeias.
+- **Banheiro duplo externo** (pedido em 08/11/2026, ainda sem projeto): do outro lado da escada, encostado no muro de
+  pedra, embaixo da churrasqueira; área de uns 4,28 × 2,00 m no modelo (a largura ainda vai ser medida).
+  `render_banheiro.py PASTA` marca a área em laranja e `legenda_banheiro.py PASTA` escreve os rótulos.
+- **Ficha técnica para o pedreiro**: doc "Ficha técnica do laguinho" no Claude (materiais, quantidades, ordem da obra).
+
