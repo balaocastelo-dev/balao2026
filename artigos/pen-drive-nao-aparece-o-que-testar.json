@@ -1,0 +1,166 @@
+{
+  "slug": "pen-drive-nao-aparece-o-que-testar",
+  "titulo": "Pen drive não aparece: o que testar antes de dar como perdido",
+  "resumo": "Pen drive que não aparece nem sempre está morto. Veja o que testar na porta, no Gerenciamento de Disco do Windows e no Utilitário de Disco do Mac, sem formatar.",
+  "categoria": "assistencia",
+  "etiquetas": [
+    "armazenamento",
+    "windows",
+    "mac",
+    "recuperação de dados",
+    "diagnóstico"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-11-09T21:00:00.000Z",
+  "formato": "dica",
+  "roteiro": {
+    "fala": "Pen drive não aparece no computador? Calma, nem sempre ele morreu. Primeiro, troque de porta e ligue direto no computador, sem extensão nem hub. Teste em outro computador. No Windows, abra o Gerenciamento de Disco: se ele aparece lá sem letra, é só dar uma letra. E o mais importante: se o computador pedir para formatar e tem arquivo importante ali, não formate. Formatar apaga tudo e complica a recuperação.",
+    "titulo": "Pen drive sumiu? Teste isto",
+    "destaques": [
+      "Troque de porta, sem hub",
+      "Teste em outro computador",
+      "Gerenciamento de Disco",
+      "Não formate com arquivo dentro"
+    ],
+    "legenda": "Pen drive que não aparece nem sempre está perdido. Veja o que testar no Windows e no Mac antes de formatar. A dica completa está no blog.",
+    "hashtags": [
+      "pendrive",
+      "windows",
+      "mac",
+      "dicas",
+      "informatica",
+      "campinas"
+    ]
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Quando o pen drive não aparece, o primeiro passo é descobrir se o computador não enxerga o aparelho ou se só não mostra a unidade. Trocar de porta, testar em outro computador e olhar o Gerenciamento de Disco do Windows ou o Utilitário de Disco do Mac resolvem boa parte dos casos, sem perder nenhum arquivo."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é aceitar a primeira oferta de formatar que aparece na tela. Formatar apaga tudo o que está no pen drive e dificulta muito a recuperação depois. Se há arquivo importante ali, a regra é testar sem gravar nada e, se não der certo, parar e procurar ajuda antes de qualquer formatação."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "Teste **outra porta**, ligado direto no computador, sem extensão nem hub, e depois **em outro computador**.",
+        "No Windows, o **Gerenciamento de Disco** mostra se o pen drive existe mas está **sem letra de unidade**.",
+        "No Mac, o **Utilitário de Disco** com a opção de mostrar todos os dispositivos revela o pen drive que não aparece no Finder.",
+        "Com arquivo importante dentro, **não formate**: formatar apaga tudo."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que testar primeiro, em qualquer computador"
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "Tire o pen drive e ligue em **outra porta USB**, de preferência atrás do gabinete, que vai direto na placa-mãe. As portas da frente dependem de um cabo interno que às vezes está solto.",
+        "Retire **extensão, hub e adaptador**. Se o pen drive funciona sem eles, o problema está no acessório.",
+        "Olhe o conector: sujeira, pino torto ou folga. Se o pen drive mexe solto na porta, não force.",
+        "Teste **em outro computador**. Se lá ele aparece, o problema está no primeiro computador; se não aparece em nenhum, o problema costuma ser o próprio pen drive."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como ver se o Windows enxerga o pen drive"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Às vezes o Windows reconhece o pen drive, mas ele fica sem letra de unidade, como E: ou F:, e por isso não aparece no Explorador de Arquivos. Para conferir, procure **Gerenciamento de Disco** no menu Iniciar e abra. A documentação da Microsoft vale para o Windows 10 e o Windows 11, e pede uma conta de administrador."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "Procure o pen drive na lista pelo tamanho; ele costuma aparecer como **Removível**.",
+        "Se ele aparece com uma partição sem letra, clique com o botão direito nela e escolha **Alterar Letra de Unidade e Caminho**.",
+        "Clique em **Adicionar**, escolha uma letra livre e confirme. O pen drive deve surgir no Explorador.",
+        "Se o espaço aparece como **não alocado** ou a opção fica cinza, pare aqui: os caminhos seguintes envolvem apagar dados."
+      ]
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "Se o computador avisar que é preciso formatar o disco antes de usar, e o pen drive guarda algo importante, clique em Cancelar. O aviso costuma indicar que o sistema não consegue ler a organização dos arquivos, e não que eles sumiram. Formatar grava por cima dessa organização.",
+      "titulo": "Pediu para formatar? Leia antes de clicar"
+    },
+    {
+      "tipo": "chamada",
+      "tema": "dados"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "No Mac, e quando a dica não resolve"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "No Mac, abra o **Utilitário de Disco** e, no menu Visualizar, escolha **Mostrar Todos os Dispositivos**. Se o pen drive aparece ali, a Apple indica rodar o **Primeiros Socorros** no volume e depois no dispositivo. Se o Utilitário de Disco avisar que o disco vai falhar, a orientação da Apple é copiar o que der e trocar o dispositivo."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Um pen drive formatado em um sistema pode não ser lido em outro. Para usar o mesmo pen drive no Mac e no Windows, a Apple recomenda o formato **MS-DOS (FAT)** em pen drives de até 32 GB e o **ExFAT** nos maiores. Só que trocar o formato apaga tudo: faça isso só com o pen drive vazio ou com a cópia dos arquivos já feita em outro lugar."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "Trocar de porta, testar em outro computador e dar letra pelo Gerenciamento de Disco não apagam nada.",
+        "Se o pen drive só guarda cópias de arquivos que você tem em outro lugar, formatar é uma saída aceitável."
+      ],
+      "contras": [
+        "Programas de reparo e formatação gravam no pen drive e podem piorar a recuperação.",
+        "Pen drive que esquenta, some e volta ou não aparece em nenhum computador costuma ter defeito físico."
+      ],
+      "titulo": "Vale insistir em casa ou levar para avaliar?"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se o pen drive não aparece em nenhum computador, ou aparece sem os arquivos e você precisa deles, não insista com programas de reparo. Na Balão da Informática, no Cambuí, em Campinas, o serviço de [recuperação de dados](/recuperacaodados) avalia o pen drive, e a [assistência técnica](/manutencao) verifica as portas USB do seu computador. Para outros cuidados, veja [o que nunca fazer com um HD externo](/blog/o-que-nunca-fazer-com-um-hd-externo)."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Em uma linha: teste porta, computador e letra de unidade; se houver arquivo importante, não formate."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "O pen drive acende a luz, mas não aparece. Ele está bom?",
+      "resposta": "A luz mostra que ele recebe energia pela porta, mas não garante que a memória esteja boa. Confira no Gerenciamento de Disco, no Windows, ou no Utilitário de Disco, no Mac, se o sistema enxerga o dispositivo."
+    },
+    {
+      "pergunta": "Formatei sem querer. Ainda dá para recuperar os arquivos?",
+      "resposta": "Muitas vezes dá, desde que você pare de usar o pen drive na hora e não grave nada nele. Quanto mais se grava depois, menor a chance. Nesse caso, leve para uma avaliação de recuperação de dados."
+    },
+    {
+      "pergunta": "Por que o pen drive funciona no Mac e não no Windows?",
+      "resposta": "Costuma ser o formato. Um pen drive formatado com um sistema próprio do Mac não é lido pelo Windows. Para usar nos dois, a Apple recomenda MS-DOS (FAT) ou ExFAT, mas trocar o formato apaga o conteúdo."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Change a drive letter — Microsoft Learn",
+      "url": "https://learn.microsoft.com/windows-server/storage/disk-management/change-a-drive-letter",
+      "data": "junho de 2025"
+    },
+    {
+      "nome": "Repair a storage device in Disk Utility on Mac — Suporte da Apple",
+      "url": "https://support.apple.com/en-in/guide/disk-utility/dskutl1040/22.7/mac/26",
+      "data": "novembro de 2026"
+    },
+    {
+      "nome": "Format a disk for Windows computers in Disk Utility on Mac — Suporte da Apple",
+      "url": "https://support.apple.com/en-in/guide/disk-utility/dskutl1010/22.7/mac/26",
+      "data": "novembro de 2026"
+    }
+  ]
+}
