@@ -52,9 +52,9 @@ chácara), hospedado no site; não faz parte da loja.
   `claude/diagnostico-e-ideias-terreno.md` e `claude/album-chacara-pronta.md`
   (álbum de imagens, planta numerada, posição de cada coisa e pendências).
 
-- **Quintal de baixo (19/10 e 08/11/2026)**: laguinho orgânico de pedras de 6,4 m² com cascata no pé de um muro
-  de arrimo novo revestido de pedra, entre a amendoeira e a escada, e guarda-corpo de madeira na beira da laje
-  (o deck saiu). Medidas reais tiradas pelo Thiago com tijolinho; todas em `chacara3d/modelo/obra.py`. Folhas
+- **Quintal de baixo (19/10 e 08/11/2026)**: laguinho orgânico de pedras de 5,75 m² (2.400 L) com cascata, na
+  frente de um muro de arrimo novo revestido de pedra (o muro fica na frente da beira da laje, não embaixo dela),
+  entre a amendoeira e a escada, e guarda-corpo de madeira no topo do muro (o deck saiu). Medidas reais tiradas pelo Thiago com tijolinho; todas em `chacara3d/modelo/obra.py`. Folhas
   para o pedreiro em `desenhos_obra.py`, fotos em `render_deck.py`; ficha técnica no doc "Ficha técnica do
   laguinho" do Claude. Área do futuro banheiro duplo externo marcada por `render_banheiro.py`. Detalhes na seção
   "Quintal de baixo" do `chacara3d/README.md`.

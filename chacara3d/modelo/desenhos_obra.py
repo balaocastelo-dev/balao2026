@@ -107,23 +107,34 @@ def base_planta(ax, u_max, v0=0.0, v1=None, grade=True):
         for v in np.arange(math.ceil(v0 * 2) / 2, v1 + 0.01, 0.5):
             ax.plot([0, u_max], [v, v], color='#e3e3e3', lw=0.5 if v % 1 else 0.9, zorder=0)
     ax.add_patch(Rectangle((-1.4, v0), 1.4, v1 - v0, fc='#ecebe7', ec='none', hatch='..', zorder=1))
-    # muro de arrimo de pedra (faixa de 20 cm na frente da beira da laje), sem a boca da escada
+    # muro de arrimo de pedra na frente da beira da laje (bloco de 0 a 0,19 e pedra até 0,33), sem a boca da escada
     for a_, b_ in O.MURO_TRECHOS:
         a_, b_ = max(a_, v0), min(b_, v1)
         if b_ > a_:
-            ax.add_patch(Rectangle((0, a_), 0.20, b_ - a_, fc=PEDRA, ec='#555', lw=0.6, hatch='oo', zorder=6))
+            ax.add_patch(Rectangle((0, a_), O.BLOCO, b_ - a_, fc='#bdbdbd', ec='#555', lw=0.6, hatch='xx', zorder=6))
+            ax.add_patch(Rectangle((O.BLOCO, a_), O.REVEST, b_ - a_, fc=PEDRA, ec='#555', lw=0.6, hatch='oo', zorder=6))
     ax.plot([0, 0], [v0, v1], color='#6b4a2b', lw=1.6, zorder=7)
-    # guarda-corpo na laje
+    # guarda-corpo preso no topo do muro novo
     for a_, b_ in ((0.12, O.ESCADA_Y0), (O.ESCADA_Y1, 9.95)):
         a_, b_ = max(a_, v0), min(b_, v1)
         if b_ > a_:
-            ax.plot([-0.04, -0.04], [a_, b_], color='#7a5326', lw=3.0, zorder=8, solid_capstyle='butt')
+            ax.plot([O.GUARDA_U, O.GUARDA_U], [a_, b_], color='#7a5326', lw=3.0, zorder=8, solid_capstyle='butt')
+    # caixa do filtro, sumidouro, tomada e o trajeto do cano da cascata e do dreno (junto ao muro lateral)
+    cf, sm, tm = O.CAIXA_FILTRO, O.SUMIDOURO, O.TOMADA
+    if v0 < 1.0:
+        ax.plot([U(cf[0]), U(O.EDGE) + 0.05, U(O.EDGE) + 0.05], [0.12, 0.12, O.CASCATA['origem'][1]], color='#1f5f8b', lw=1.2,
+                ls=(0, (4, 2)), zorder=7)
+        ax.plot([U(O.EDGE) - 0.08, U(O.EDGE) - 0.08, U(sm[0])], [O.MURO_TRECHOS[0][1] - 0.1, 0.08, 0.08], color='#6b4a2b', lw=1.2,
+                ls=(0, (1, 1.5)), zorder=7)
+        ax.add_patch(Rectangle((U(cf[0]) - 0.25, cf[1] - 0.20), 0.50, 0.40, fc='#e8e8e8', ec='#222', lw=0.9, zorder=8))
+        ax.add_patch(Rectangle((U(sm[0]) - 0.30, sm[1] - 0.30), 0.60, 0.60, fc='#e9e6df', ec='#6b4a2b', lw=0.9, hatch='..', zorder=8))
+        ax.add_patch(Rectangle((U(tm[0]) - 0.08, 0.0), 0.16, 0.10, fc='#ffd54a', ec='#222', lw=0.9, zorder=8))
     # escada, poço, amendoeira
-    e_u1 = U(O.FACE) + O.ESCADA_N * O.ESCADA_PISO
+    e_u1 = U(O.ESCADA_X0) + O.ESCADA_N * O.ESCADA_PISO
     if O.ESCADA_Y1 > v0 and O.ESCADA_Y0 < v1:
         ax.add_patch(Rectangle((0, O.ESCADA_Y0), e_u1, O.ESCADA_Y1 - O.ESCADA_Y0, fc='#e2d5c3', ec='#555', lw=0.8, zorder=6))
         for i in range(1, O.ESCADA_N + 1):
-            uu = U(O.FACE) + i * O.ESCADA_PISO
+            uu = U(O.ESCADA_X0) + i * O.ESCADA_PISO
             ax.plot([uu, uu], [O.ESCADA_Y0, O.ESCADA_Y1], color='#777', lw=0.6, zorder=6)
         ax.text(e_u1 / 2, (O.ESCADA_Y0 + O.ESCADA_Y1) / 2, 'escada', ha='center', va='center', fontsize=8.5, zorder=7)
     ax.add_patch(Circle((U(O.POCO[0]), O.POCO[1]), O.POCO_R, fc='#d6d6d6', ec='k', lw=0.9, zorder=6))
@@ -150,7 +161,7 @@ def folha1():
     fig = folha(1, 'Planta de locação (vista de cima)', 'Marcar a linha d\'água com piquetes nos pontos P1…; ligar os pontos com uma mangueira deitada no chão, em curva.')
     ax = fig.add_axes([0.03, 0.105, 0.60, 0.87])
     ax.set_aspect('equal'); ax.axis('off')
-    u_max = max(U(O.POCO[0]) + O.POCO_R + 1.0, U(O.LAGO[:, 0].max()) + 1.0)
+    u_max = max(U(O.POCO[0]) + O.POCO_R + 1.0, U(O.LAGO[:, 0].max()) + 1.0, U(O.TOMADA[0]) + 0.4)
     v_top = min(O.LARGURA, O.ESCADA_Y1 + 1.5)
     base_planta(ax, u_max, 0.0, v_top)
     for u in range(0, int(u_max) + 1):
@@ -164,8 +175,12 @@ def folha1():
     ax.text(u_max - 0.1, -0.22, 'muro lateral do lado da amendoeira (referência 2)', ha='right', va='top', fontsize=8.5, color='#333')
     ax.text(-0.7, v_top / 2 + 0.6, f'LAJE DA PISCINA  ·  nível +{br(A)}', rotation=90, ha='center', va='center', fontsize=11, color='#666')
     rotulo(ax, (0, v_top - 0.4), 'beira da laje\n(referência 1)', (-1.35, v_top + 0.25), fs=8.5, cor='#6b4a2b')
-    rotulo(ax, (-0.04, 1.0), f'guarda-corpo\n{br(O.GUARDA_H)} m', (-1.35, 0.55), fs=8, cor='#7a5326')
-    rotulo(ax, (0.10, O.ESCADA_Y1 + 0.7), 'muro de arrimo\nde pedra (novo)', (0.6, v_top + 0.25), fs=8)
+    rotulo(ax, (O.GUARDA_U, 1.0), f'guarda-corpo\n{br(O.GUARDA_H)} m (no muro)', (-1.35, 0.55), fs=8, cor='#7a5326')
+    cf, sm, tm = O.CAIXA_FILTRO, O.SUMIDOURO, O.TOMADA
+    rotulo(ax, (U(cf[0]), cf[1] + 0.2), 'caixa do filtro', (U(cf[0]) - 0.9, -0.62), fs=7.8)
+    rotulo(ax, (U(sm[0]), sm[1] + 0.3), 'sumidouro', (U(sm[0]) + 0.2, -0.62), fs=7.8)
+    rotulo(ax, (U(tm[0]), 0.1), 'tomada com DR\n(2 m da água)', (U(tm[0]) - 0.35, 0.85), fs=7.8, ha='right')
+    rotulo(ax, (0.17, O.ESCADA_Y1 + 0.7), 'muro de arrimo de pedra (novo),\nna frente da beira da laje', (0.6, v_top + 0.25), fs=8)
     co = O.CASCATA['origem']
     rotulo(ax, (U(co[0]) + 0.4, co[1] + 0.1), 'cascata', (U(co[0]) + 0.55, co[1] + 1.15), fs=8.5)
     rotulo(ax, (U(O.ARVORE[0]) + 0.18, O.ARVORE[1] - 0.1), 'amendoeira\n(pontilhado: 1,20\ndo tronco)', (U(O.ARVORE[0]) + 0.45, 1.05), fs=8)
@@ -179,15 +194,15 @@ def folha1():
         ax.text(*(c + dd * 0.28), f'P{i + 1}', ha='center', va='center', fontsize=8, color=VERMELHO, fontweight='bold', zorder=10)
     # medidas
     lu0, lu1 = U(O.LAGO[:, 0].min()), U(O.LAGO[:, 0].max()); lv0, lv1 = O.LAGO[:, 1].min(), O.LAGO[:, 1].max()
-    cota(ax, (0, lv0), (lu1, lv0), -0.42, g=0.14, txt=f'{br(lu1)} até a ponta do lago')
-    cota(ax, (lu1, 0), (lu1, lv0), -0.25, g=0.14)
     cota(ax, (lu1, lv0), (lu1, lv1), -0.6, g=0.14, txt=f'lago: {br(lv1 - lv0)}')
     w2 = O.CASCATA['largura'] / 2
     cota(ax, (0.9, co[1] - w2), (0.9, co[1] + w2), 0.0, g=-0.16, txt=br(2 * w2)) if False else None
     d_poco = float(np.min(np.hypot(O.LAGO[:, 0] - O.POCO[0], O.LAGO[:, 1] - O.POCO[1]))) - O.POCO_R
     d_arv = float(np.min(np.hypot(O.LAGO[:, 0] - O.ARVORE[0], O.LAGO[:, 1] - O.ARVORE[1])))
-    cota(ax, (U(O.FACE) + O.ESCADA_N * O.ESCADA_PISO, O.POCO[1]), (U(O.POCO[0]) - O.POCO_R, O.POCO[1]), 0.0, g=0.15)
-    cota(ax, (0, O.ESCADA_Y1 + 0.25), (U(O.FACE) + O.ESCADA_N * O.ESCADA_PISO, O.ESCADA_Y1 + 0.25), 0.0, g=0.15)
+    cota(ax, (U(O.ESCADA_X0) + O.ESCADA_N * O.ESCADA_PISO, O.POCO[1]), (U(O.POCO[0]) - O.POCO_R, O.POCO[1]), 0.0, g=0.15)
+    cota(ax, (0, O.ESCADA_Y1 + 0.25), (U(O.ESCADA_X0) + O.ESCADA_N * O.ESCADA_PISO, O.ESCADA_Y1 + 0.25), 0.0, g=0.15)
+    cota(ax, (0, 4.0), (U(O.FACE), 4.0), 0.0, g=0.13, tick=0.035, fs=7.5, txt=br(U(O.FACE)))
+    cota(ax, (U(O.FACE), CORTE_A_V + 0.45), (U(O.LAGO[:, 0].min()), CORTE_A_V + 0.45), 0.0, g=0.13, tick=0.035, fs=7.5)
     cota(ax, (U(O.POCO[0]) + O.POCO_R + 0.35, 0), (U(O.POCO[0]) + O.POCO_R + 0.35, O.POCO[1] - O.POCO_R), 0.0, g=-0.16) if False else None
     # linhas dos cortes
     for (p0, p1, nome) in (((-1.3, CORTE_A_V), (u_max - 0.1, CORTE_A_V), 'A'), ((CORTE_B_U, 0.05), (CORTE_B_U, v_top - 0.05), 'B')):
@@ -218,7 +233,9 @@ def folha1():
              (VERDE, '#6aa35a', '', 'grama em volta do lago'),
              (PEDRA, '#555', 'oo', 'muro de arrimo novo, revestido de pedra'),
              ('#b9b4aa', '#444', '////', 'cascata de lajes de pedra (desce do alto do muro)'),
-             ('#7a5326', '#7a5326', '', f'guarda-corpo de madeira de {br(O.GUARDA_H)} m na beira da laje')]
+             ('#7a5326', '#7a5326', '', f'guarda-corpo de madeira de {br(O.GUARDA_H)} m, preso no topo do muro'),
+             ('white', '#1f5f8b', '', 'tracejado azul: cano da cascata (embutido no revestimento do muro)'),
+             ('white', '#6b4a2b', '', 'pontilhado marrom: dreno do muro até o sumidouro')]
     for k, (fc, ec, h, t) in enumerate(itens):
         yy = y_leg - 0.04 - 0.03 * k
         tx.add_patch(Rectangle((0.0, yy - 0.011), 0.06, 0.021, fc=fc, ec=ec, hatch=h, lw=0.8))
@@ -275,28 +292,44 @@ def nv(ax, s, z, txt, lado=1, fs=8.5):
 
 
 def muro_corte(ax, laje_s=0.0, com_cascata=True):
-    """Muro de arrimo de pedra no corte (face na beira da laje), sapata, dreno, capa e guarda-corpo."""
-    zA = O.ZAGUA - O.LOW
-    ax.add_patch(Rectangle((laje_s - 3.3, A - 0.12), 3.3, 0.12, fc='#cfcfcf', ec='#555', lw=0.8, hatch='////', zorder=5))
-    ax.add_patch(Rectangle((laje_s - 0.19, -0.75), 0.19, A - 0.12 + 0.75, fc='#bdbdbd', ec='#444', lw=0.8, hatch='xx', zorder=6))   # bloco grauteado
-    ax.add_patch(Rectangle((laje_s, -0.62), 0.14, A - 0.06 + 0.62, fc=PEDRA, ec='#444', lw=0.8, hatch='oo', zorder=6))            # revestimento de pedra
-    ax.add_patch(Rectangle((laje_s - 0.40, -0.95), 0.75, 0.20, fc='#cfcfcf', ec='#444', lw=0.8, hatch='////', zorder=6))            # sapata corrida
-    ax.add_patch(Rectangle((laje_s - 0.19, A - 0.06), 0.36, 0.06, fc='#e8e2d4', ec='#444', lw=0.8, zorder=7))                     # capa de pedra
-    ax.add_patch(Rectangle((laje_s - 0.55, -0.70), 0.34, A - 0.2 + 0.70, fc='#e9e6df', ec='#888', lw=0.6, hatch='..', zorder=5))   # brita do dreno
-    ax.add_patch(Circle((laje_s - 0.38, -0.55), 0.05, fc='white', ec='#333', lw=0.8, zorder=7))
-    # guarda-corpo
-    gx = laje_s - 0.04
+    """Muro de arrimo de pedra no corte: bloco na frente da beira da laje, revestimento, sapata, dreno, capa e guarda-corpo.
+
+    Com a cascata: as três lajes presas no muro, o pilar de pedras embaixo da de baixo, a face do bloco impermeabilizada
+    e a manta do lago atravessando o vão e subindo nela."""
+    zA = O.ZAGUA - O.LOW; S = O.SAPATA; f = laje_s + O.BLOCO + O.REVEST
+    ax.add_patch(Rectangle((laje_s - 3.3, A - 0.12), 3.3, 0.12, fc='#cfcfcf', ec='#555', lw=0.8, hatch='////', zorder=5))   # laje que já existe
+    ax.add_patch(Rectangle((laje_s - 0.22, A - 0.30), 0.22, 0.18, fc='#dcdcd4', ec='#888', lw=0.5, hatch='..', zorder=5))   # concreto magro nos vãos
+    ax.add_patch(Rectangle((laje_s + S['u0'], -S['fundo']), S['u1'] - S['u0'], S['fundo'] - S['topo'], fc='#cfcfcf', ec='#444',
+                           lw=0.8, hatch='////', zorder=6))                                                                  # sapata corrida
+    ax.add_patch(Rectangle((laje_s, -S['topo']), O.BLOCO, A - 0.06 + S['topo'], fc='#bdbdbd', ec='#444', lw=0.8, hatch='xx', zorder=6))
+    ax.add_patch(Rectangle((laje_s + O.BLOCO, -S['topo']), O.REVEST, A - 0.06 + S['topo'], fc=PEDRA, ec='#444', lw=0.8, hatch='oo', zorder=6))
+    ax.add_patch(Rectangle((laje_s, A - 0.06), O.CAPA, 0.06, fc='#e8e2d4', ec='#444', lw=0.8, zorder=7))                       # capa de pedra
+    ax.plot([laje_s - 0.012] * 2, [-S['topo'] + 0.2, A - 0.14], color='#2e7d32', lw=2.2, zorder=7)                         # manta drenante
+    ax.add_patch(Rectangle((laje_s + S['u0'], -S['topo']), -S['u0'], 0.22, fc='#e9e6df', ec='#888', lw=0.6, hatch='..', zorder=6))
+    ax.add_patch(Circle((laje_s + S['u0'] / 2, -S['topo'] + 0.09), 0.05, fc='white', ec='#333', lw=0.8, zorder=7))         # dreno
+    # guarda-corpo: poste no meio do bloco, preso com barra roscada grauteada
+    gx = laje_s + O.GUARDA_U
+    ax.plot([gx, gx], [A - 0.40, A], color='#333', lw=1.4, zorder=8)
     ax.add_patch(Rectangle((gx - 0.0375, A), 0.075, O.GUARDA_H, fc=MADEIRA, ec='#5a3a17', lw=0.7, zorder=8))
     ax.add_patch(Rectangle((gx - 0.06, A + O.GUARDA_H - 0.045), 0.12, 0.045, fc='#a37b46', ec='#5a3a17', lw=0.7, zorder=8))
     if com_cascata:
-        zt_prev = None
-        for av, zt in O.CASCATA['lajes']:
+        ax.plot([laje_s + O.BLOCO + 0.004] * 2, [-S['topo'], A - 0.06], color='#1f5f8b', lw=1.6, zorder=7)                 # impermeabilização
+        lj = O.CASCATA['lajes']
+        for av, zt in lj:
             z_ = zt - O.LOW
-            ax.add_patch(Rectangle((laje_s + 0.14, z_ - 0.08), av - 0.14 + 0.08, 0.08, fc='#9e9a92', ec='#333', lw=0.8, zorder=8))
-        for k, (av, zt) in enumerate(O.CASCATA['lajes']):
-            z0 = zt - O.LOW; z1 = (O.CASCATA['lajes'][k + 1][1] - O.LOW) if k + 1 < len(O.CASCATA['lajes']) else zA
+            ax.add_patch(Rectangle((laje_s + O.BLOCO, z_ - 0.07), f + av - laje_s - O.BLOCO, 0.07, fc='#9e9a92', ec='#333', lw=0.8, zorder=8))
+        for k, (av, zt) in enumerate(lj):
+            z0 = zt - O.LOW; z1 = (lj[k + 1][1] - O.LOW) if k + 1 < len(lj) else zA
             t = np.linspace(0, 1, 12)
-            ax.plot(laje_s + av + 0.08 + 0.10 * t, z0 - (z0 - z1) * t * t, color='#5aa0cf', lw=2.2, alpha=0.8, zorder=9)
+            ax.plot(f + av + 0.03 + 0.08 * t, z0 - (z0 - z1) * t * t, color='#5aa0cf', lw=2.2, alpha=0.8, zorder=9)
+        z3 = lj[-1][1] - O.LOW - 0.07; n_ = 3
+        for k in range(n_):
+            h_ = (z3 + 0.02) / n_
+            ax.add_patch(Rectangle((f + 0.04, -0.02 + k * h_), 0.24, h_ - 0.01, fc=PEDRA, ec='#444', lw=0.7, zorder=8))   # pilar de pedras
+        # manta do lago: atravessa o vão por baixo do pilar e sobe 25 cm na face do bloco impermeabilizada (perfil e selante)
+        ax.plot([f + 0.34, f + 0.30, laje_s + O.BLOCO + 0.01, laje_s + O.BLOCO + 0.01], [zA - 0.12, -0.04, -0.04, 0.25], color='#111',
+                lw=2.0, zorder=9)
+        ax.plot([laje_s + O.BLOCO + 0.01] * 2, [0.21, 0.27], color='#888', lw=4.0, zorder=10)
 
 
 CORTE_A_V = round(O.CASCATA['origem'][1], 2)      # corte A–A: do alto da laje, passando pela cascata e pelo lago
@@ -318,14 +351,17 @@ def folha2():
         nv(ax, ud[-1] - 0.5, zA, f'{br(zA)} nível da água')
         nv(ax, u[k] + 0.1, zA - float(O.prof_lago(x[k], y[k])), f'{br(zA - float(O.prof_lago(x[k], y[k])))} fundo')
     for k, (av, zt) in enumerate(O.CASCATA['lajes']):
-        nv(ax, av + 0.42, zt - O.LOW, f'+{br(zt - O.LOW)} laje {k + 1}', fs=7.8)
-    cota(ax, (-0.04 + 0.3, A), (-0.04 + 0.3, A + O.GUARDA_H), 0.0, g=-0.13, tick=0.035)
-    rotulo(ax, (-0.04, A + 0.75), 'guarda-corpo de madeira\n(balaústres a cada 11,4 cm)', (-1.6, A + 1.0), fs=8, ha='right')
-    rotulo(ax, (0.07, 0.62), 'revestimento de pedra\narredondada, com argamassa', (-1.6, 0.55), fs=8, ha='right')
-    rotulo(ax, (-0.1, 0.25), 'bloco de concreto\ngrauteado com ferro', (-1.6, 0.15), fs=8, ha='right')
-    rotulo(ax, (-0.38, -0.55), 'dreno: tubo furado\n+ brita atrás do muro', (-1.6, -0.45), fs=8, ha='right')
-    rotulo(ax, (-0.05, -0.85), 'sapata corrida, abaixo\ndo fundo do lago', (-1.6, -1.05), fs=8, ha='right')
-    rotulo(ax, (O.CASCATA['lajes'][0][0] - 0.1, O.CASCATA['lajes'][0][1] - O.LOW - 0.04), 'cascata: 3 lajes de pedra\n(a água sai atrás da laje de cima)',
+        nv(ax, O.BLOCO + O.REVEST + av + 0.42, zt - O.LOW, f'+{br(zt - O.LOW)} laje {k + 1}', fs=7.8)
+    cota(ax, (O.GUARDA_U + 0.3, A), (O.GUARDA_U + 0.3, A + O.GUARDA_H), 0.0, g=-0.13, tick=0.035)
+    f_ = O.BLOCO + O.REVEST
+    rotulo(ax, (O.GUARDA_U, A + 0.75), 'guarda-corpo de madeira, preso no\ntopo do muro (balaústres a cada 11,4 cm)', (-1.6, A + 1.0), fs=8, ha='right')
+    rotulo(ax, (O.BLOCO + 0.07, 0.62), 'revestimento de pedra\narredondada, com argamassa', (-1.6, 0.62), fs=8, ha='right')
+    rotulo(ax, (0.09, 0.30), 'bloco de concreto grauteado com ferro,\nna frente da beira da laje', (-1.6, 0.25), fs=8, ha='right')
+    rotulo(ax, (-0.075, -O.SAPATA['topo'] + 0.09), 'dreno: tubo furado em brita, 1% de\ncaimento até o sumidouro; manta drenante', (-1.6, -0.35), fs=8, ha='right')
+    rotulo(ax, (0.2, -0.9), f'sapata corrida: topo a {br(O.SAPATA["topo"])} e fundo a\n{br(O.SAPATA["fundo"])} abaixo do chão (abaixo do lago)', (-1.6, -1.05), fs=8, ha='right')
+    rotulo(ax, (O.BLOCO + 0.01, 0.2), 'face do bloco impermeabilizada; a manta do\nlago sobe 25 cm nela, presa com perfil', (1.75, -1.15), fs=8)
+    rotulo(ax, (f_ + 0.16, 0.08), 'pilar de pedras\nembaixo da laje 3', (1.75, -0.45), fs=8)
+    rotulo(ax, (f_ + O.CASCATA['lajes'][0][0] - 0.05, O.CASCATA['lajes'][0][1] - O.LOW - 0.04), 'cascata: 3 lajes de pedra presas no muro\n(a água sai entre a capa e a laje de cima)',
            (1.9, A + 0.55), fs=8)
     ax.set_xlim(u[0], u[-1]); ax.set_ylim(-1.45, A + O.GUARDA_H + 0.3)
     ax.set_yticks([]); ax.tick_params(labelsize=8)
@@ -355,7 +391,7 @@ def folha2():
         rotulo(ax, (v[j0] + 0.06, zA - 0.12), f'beira de {round(O.BEIRA * 100)} cm para as pedras', (vd[0] - 0.35, -0.45), fs=7.8, ha='right')
         rotulo(ax, ((s1 + s2) / 2, zA - O.PRAT_PROF), f'prateleira de plantas: {round((O.PRAT_FIM - O.BEIRA) * 100)} cm', (vd[0] - 0.35, -0.8), fs=7.8, ha='right')
         rotulo(ax, ((s2 + s3) / 2, zA - (O.PRAT_PROF + O.PROF) / 2), f'talude: {round((O.PAREDE_FIM - O.PRAT_FIM) * 100)} cm', (vd[0] - 0.35, -1.15), fs=7.8, ha='right')
-        rotulo(ax, (v[k] + 0.2, zf[k] - 0.03), 'manta impermeável sobre manta de proteção\ne 5 cm de areia (cavar 8 cm a mais que o fundo)',
+        rotulo(ax, (v[k] + 0.2, zf[k] - 0.03), 'manta impermeável sobre manta de proteção\ne 5 cm de areia (cavar 6 cm a mais que o fundo)',
                (vd[-1] + 0.35, -1.3), fs=7.8)
     ax.set_xlim(-2.2, v_fim + 0.2); ax.set_ylim(-1.5, 2.6)
     ax.set_yticks([]); ax.tick_params(labelsize=8)
@@ -370,21 +406,26 @@ def folha3():
                 'Desenho de referência; estrutura do muro (ferro, sapata e graute) conferir com engenheiro antes de executar.')
     # ---- corte típico do muro
     ax = fig.add_axes([0.03, 0.12, 0.40, 0.82]); ax.set_aspect('equal'); ax.axis('off')
-    ax.fill_between([-1.3, 0.0], [-1.1, -1.1], [A - 0.12, A - 0.12], color=TERRA, lw=0)
-    ax.fill_between([0.0, 1.4], [-1.1, -1.1], [0, 0], color=TERRA, lw=0)
+    S = O.SAPATA; f_ = O.BLOCO + O.REVEST
+    ax.fill_between([-1.3, 0.0], [-1.2, -1.2], [A - 0.12, A - 0.12], color=TERRA, lw=0)
+    ax.fill_between([0.0, 1.5], [-1.2, -1.2], [0, 0], color=TERRA, lw=0)
     muro_corte(ax, 0.0, False)
-    ax.plot([0.14, 1.4], [0, 0], color='#5b4a33', lw=1.2)
-    cota(ax, (0.6, 0), (0.6, A), 0.0, g=0.16, tick=0.035, txt=f'{br(A)} desnível')
-    cota(ax, (-0.40, -1.05), (0.35, -1.05), -0.12, g=-0.1, tick=0.03, fs=7.5, txt='sapata 75 x 20')
-    cota(ax, (0.9, -0.75), (0.9, 0.0), 0.0, g=-0.16, tick=0.035, txt='0,75 abaixo')
-    cota(ax, (-0.04 - 0.35, A), (-0.04 - 0.35, A + O.GUARDA_H), 0.0, g=0.13, tick=0.035)
-    rotulo(ax, (0.07, 0.25), 'pedra arredondada (seixo\ngrande / pedra de rio),\n10 a 15 cm, com argamassa', (0.75, 0.3), fs=8.5)
-    rotulo(ax, (-0.1, 0.3), 'bloco de concreto\n19 cm, grauteado\ncom ferro', (-1.25, 0.6), fs=8.5)
-    rotulo(ax, (-0.38, -0.55), 'dreno: tubo furado 100 mm\nem brita, com manta,\nsaindo nas pontas', (-1.25, -0.4), fs=8.5)
-    rotulo(ax, (-0.02, -0.85), 'sapata corrida de\nconcreto armado', (0.5, -0.65), fs=8.5)
-    rotulo(ax, (0.0, A - 0.03), 'capa de pedra lisa no\nnível do piso da laje', (0.45, A + 0.45), fs=8.5)
+    ax.plot([f_, 1.5], [0, 0], color='#5b4a33', lw=1.2)
+    cota(ax, (1.38, 0), (1.38, A), 0.0, g=-0.15, tick=0.035, txt=f'{br(A)} desnível')
+    cota(ax, (S['u0'], -S['fundo'] - 0.08), (S['u1'], -S['fundo'] - 0.08), 0.0, g=-0.1, tick=0.03, fs=7.5, txt='sapata 75 x 20')
+    cota(ax, (1.05, -S['topo']), (1.05, 0.0), 0.0, g=-0.16, tick=0.035, txt=f'{br(S["topo"])} até o topo da sapata')
+    rotulo(ax, (f_ / 2 + 0.06, A + 0.03), f'{br(f_)} da beira da laje até a face da pedra', (0.55, A + 0.2), fs=8.5)
+    cota(ax, (O.GUARDA_U - 0.45, A), (O.GUARDA_U - 0.45, A + O.GUARDA_H), 0.0, g=0.13, tick=0.035)
+    rotulo(ax, (O.BLOCO + 0.07, 0.25), 'pedra arredondada (seixo\ngrande / pedra de rio),\n10 a 15 cm, com argamassa,\napoiada na sapata', (0.62, 0.42), fs=8.5)
+    rotulo(ax, (0.09, 0.45), 'bloco de concreto 19 cm,\ngrauteado com ferro; a face\nde trás no prumo da beira', (-1.25, 0.75), fs=8.5)
+    rotulo(ax, (-0.075, -S['topo'] + 0.09), 'dreno: tubo furado 100 mm em\nbrita e manta, 1% de caimento\naté o sumidouro', (-1.25, -0.45), fs=8.5)
+    rotulo(ax, (-0.012, 0.1), 'manta drenante\n(geocomposto) no barranco', (-1.25, 0.2), fs=8.5)
+    rotulo(ax, (-0.1, A - 0.22), 'concreto magro nos vãos\nembaixo da laje', (-1.25, A - 0.55), fs=8.5)
+    rotulo(ax, (0.25, -0.92), 'sapata corrida de\nconcreto armado', (0.62, -0.7), fs=8.5)
+    rotulo(ax, (0.3, A - 0.03), f'capa de pedra lisa de {round(O.CAPA * 100)} cm\nno nível do piso da laje', (0.55, A + 0.55), fs=8.5)
+    rotulo(ax, (O.GUARDA_U, A - 0.2), 'poste preso com 2 barras\nroscadas de 1/2" grauteadas', (0.55, A + 0.95), fs=8.5)
     ax.text(0.0, A + O.GUARDA_H + 0.45, 'Corte típico do muro de arrimo', ha='center', fontsize=12, fontweight='bold')
-    ax.set_xlim(-1.35, 1.5); ax.set_ylim(-1.35, A + O.GUARDA_H + 0.6)
+    ax.set_xlim(-1.35, 1.6); ax.set_ylim(-1.35, A + O.GUARDA_H + 0.6)
     # ---- guarda-corpo em vista
     ax = fig.add_axes([0.47, 0.56, 0.50, 0.38]); ax.set_aspect('equal'); ax.axis('off')
     L_ = 2.5
@@ -403,28 +444,29 @@ def folha3():
     cota(ax, (0, -0.25), (1.25, -0.25), 0.0, g=-0.1, tick=0.03, fs=8, txt='postes a cada 1,25')
     vao = 1.25 / m - 0.028
     rotulo(ax, (0.6, 0.6), f'balaústres 2,8 x 2,8 a cada {br(1.25 / m * 100, 1)} cm\n(vão de {br(vao * 100, 1)} cm: criança não passa)', (0.2, O.GUARDA_H + 0.3), fs=8.5)
-    rotulo(ax, (1.25, 0.05), 'poste 7,5 x 7,5 chumbado na laje,\na 4 cm da beira (chapa e parabolt)', (1.55, -0.55), fs=8.5)
+    rotulo(ax, (1.25, 0.05), 'poste 7,5 x 7,5 no topo do muro novo, com 2 barras\nroscadas de 1/2" grauteadas no bloco e chapa em L', (1.0, -0.55), fs=8.5)
     ax.text(L_ / 2, O.GUARDA_H + 0.65, 'Guarda-corpo em vista (madeira tratada)', ha='center', fontsize=12, fontweight='bold')
     ax.set_xlim(-0.3, L_ + 0.7); ax.set_ylim(-0.85, O.GUARDA_H + 0.85)
     # ---- notas
     tx = fig.add_axes([0.47, 0.12, 0.50, 0.40]); tx.axis('off')
     lj = O.CASCATA['lajes']
     notas = ['Cascata e bomba',
-             f'• Três lajes de pedra de {round(O.CASCATA["largura"] * 100)} cm de largura, saindo {", ".join(br(a) for a, _ in lj)} m da face do muro,',
-             f'  com o topo a +{", +".join(br(z - O.LOW) for _, z in lj)} do chão do quintal; a de baixo cai direto na água.',
-             '• A bomba fica no fundo, na parte funda do lado da amendoeira; o cano (PVC 25 mm) vai enterrado',
-             '  até atrás do muro e sobe por dentro das pedras até a laje de cima, escondido.',
-             '• Ladrão (saída da água que sobra) do lado do muro da amendoeira, longe do poço.',
-             '• Tomada para a bomba com DR, no alto do muro, protegida da chuva.',
+             f'• Três lajes de pedra de {round(O.CASCATA["largura"] * 100)} cm de largura, saindo {", ".join(br(a) for a, _ in lj)} m da face da pedra,',
+             f'  com o topo a +{", +".join(br(z - O.LOW) for _, z in lj)} do chão; as 2 de cima com chumbadores no graute (engenheiro).',
+             '• A de baixo vai depois da manta, apoiada num pilar de pedras no vão; a ponta fica 25 cm na água.',
+             '• Face do bloco impermeabilizada no trecho da cascata; a manta sobe nela até 25 cm do chão.',
+             '• Bomba de 3.000 L/h a 2,5 m na parte funda; cano de 40 mm embutido no revestimento.',
+             '• Ladrão de 50 mm por cima da manta, até o sumidouro, longe do poço.',
+             '• Tomada com DR a 2 m ou mais da água (no muro lateral, embaixo do pergolado).',
              '',
-             'Ordem da obra',
-             '1. Marcar os piquetes (folha 1) e conferir as folgas do poço e da amendoeira.',
-             '2. Fazer o muro de arrimo com a sapata abaixo do fundo do lago no trecho do lago.',
-             '3. Cavar o lago (à mão perto da árvore, sem cortar raiz grossa), areia, mantas.',
-             '4. Assentar a borda de pedras e a cascata; encher e testar a bomba.',
-             '5. Guarda-corpo na beira da laje antes de liberar a área de cima.']
+             'Ordem da obra (resumo; o passo a passo está na ficha)',
+             '1. Conferir medidas, marcar referências no muro lateral, guarda-corpo provisório.',
+             '2. Muro em trechos de até 1,5 m, com escoramento (método do engenheiro).',
+             '3. Revestimento, lajes da cascata e capa; guarda-corpo no topo do muro.',
+             '4. Piquetes, escavação, valas, caixa do filtro e sumidouro; areia e mantas.',
+             '5. Pedras, cascata, bomba e filtro; encher; plantas; peixes depois de 2 semanas.']
     for k, t in enumerate(notas):
-        bold = t in ('Cascata e bomba', 'Ordem da obra')
+        bold = t.startswith(('Cascata e bomba', 'Ordem da obra'))
         tx.text(0, 1 - k * 0.07, t, fontsize=12 if bold else 9.3, fontweight='bold' if bold else 'normal', va='top', transform=tx.transAxes)
     return fig
 
