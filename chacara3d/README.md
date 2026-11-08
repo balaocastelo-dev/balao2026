@@ -277,6 +277,12 @@ para o pedreiro. Eixos: x a partir da beira da laje (`EDGE` = 46), y a partir do
     da linha da garagem: nas fotos a cobertura da garagem encolhe 0,80 m.
   - **5 modelos** com a mesma planta (`banheiro.MODELOS`): 1 pedra clara e jardineira, 2 tijolinho e telha,
     3 tropical ripado, 4 moderno de cimento queimado, 5 fazenda (duas águas de telha colonial).
+  - **Estudo 4 (08/11/2026, aguardando o OK)**: o Thiago escolheu o **modelo 2** e pediu **chuveiro** nos banheiros e o
+    banheiro **emendado na garagem, com um telhado só**. Banheiros de 1,70 × 2,30 m livres, com chuveiro sem degrau
+    no canto da frente (1,00 × 0,95, banco articulado 0,70 × 0,45), vaso no canto do fundo e portas de 0,90 entre o
+    chuveiro e a bancada. Total 6,02 × 2,58 m, a 2,02 m do poço. O telhado continua o plano da garagem de hoje
+    (2,30 no muro, 21,2%) desde 0,25 m antes do banheiro até o fim da garagem, com viga e pilares de madeira na frente
+    (varanda). O banheiro entra 1,05 m na garagem: ficam 5,35 m cobertos e 6,75 m até o portão.
   - Medidas no `banheiro.py`. `render_banheiro.py PASTA --estudo --modelo N` faz as fotos (vistas `quintal`, `laje`,
     `nicho`, `alto`); sem `--estudo`, marca a área em laranja. `legenda_banheiro.py PASTA` põe o selo do modelo e o
     rodapé; `desenho_banheiro.py PASTA` faz a planta baixa A3.

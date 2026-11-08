@@ -69,6 +69,8 @@ if args.estudo:
     import banheiro as B
     TIRAR.append((B.XB0 - 0.02, B.XB1 + 0.05, B.YB0 - B.PISO_FRENTE - 0.02, B.YB1, LOW + 0.012, LOW + 3.2))  # o que estava no lugar
     TIRAR.append((52.2, B.XB1 + 0.15, 6.7, 10.2, LOW - 0.03, 4.0, ('rooftile', 'wood_y', 'wood_x', 'wood_z', 'stone_cut')))  # garagem encolhe
+    if B.MODELOS[args.modelo]['cobertura'] == 'telha_garagem':
+        TIRAR.append((52.2, 58.8, 6.4, 10.1, 1.0, 2.7, ('rooftile',)))     # telhado da garagem: vira um só com o banheiro
 COPA = ('leaf_amend', 'leaf_amend_red', 'leaf_core_big')
 ARVORES = ('leaf_mango', 'leaf_core', 'leaf_bg', 'leaf_palm', 'leaf_palm_base', 'leaf_palm_rachis', 'leaf_areca', 'leaf_citrus',
            'leaf_goiaba', 'leaf_jabu', 'leaf_vine', 'leaf_vine_light', 'bark_palm', 'bark_jabu', 'bark_goiaba', 'fruit_mango',
@@ -89,7 +91,10 @@ if args.estudo:
     B.construir(geo, P, np.random.default_rng(31), args.modelo)
     BZ1 = B.topo(args.modelo)
     # a cobertura da garagem encolhe até o banheiro: vigas, piso e pilares refeitos a partir de GX
+    # (no telhado único do modelo 2 quem refaz é o próprio banheiro.construir)
     GX = B.XB1 + 0.15; zbm = ns['zbm']; GZH = ns['GZH']
+    assert abs(GZH - B.GZH) < 1e-6 and abs(ns['GS_'] - B.GS) < 1e-6, 'telhado da garagem mudou no build.py'
+if args.estudo and B.MODELOS[args.modelo]['cobertura'] != 'telha_garagem':
     geo.box('wood_x', GX, 58.7, 6.92, 7.08, zbm - 0.18, zbm)
     geo.box('wood_x', GX, 58.7, 9.9, 9.98, GZH - 0.32, GZH - 0.13)
     geo.box('wood_z', GX, GX + 0.16, 6.92, 7.08, LOW, zbm - 0.18)
@@ -153,7 +158,7 @@ VISTAS = {
 }
 if args.estudo:                                        # o estudo fica de frente para o poço: câmeras viradas para ele
     VISTAS.update({
-        'quintal': ((52.1, 2.9, LOW + 1.75), (50.0, 8.7, LOW + 1.15), 16, 215, 52, 0.1),
+        'quintal': ((52.4, 2.5, LOW + 1.75), (50.2, 8.7, LOW + 1.25), 15, 215, 52, 0.1),
         'alto': ((54.2, 2.4, LOW + 3.7), (49.9, 8.6, LOW + 0.9), 17, 215, 52, 0.1),
         'nicho': (((B.XN0 + B.XN1) / 2, 5.85, LOW + 1.55), ((B.XN0 + B.XN1) / 2, 9.6, LOW + 1.0), 20, 215, 52, 0.1),
         'laje': ((44.1, 3.9, 1.7), (49.0, 8.6, -0.6), 17, 215, 55, 0.05),

@@ -1,4 +1,8 @@
-"""Banheiro duplo externo do quintal de baixo: estudo 3 com 5 modelos (08/11/2026).
+"""Banheiro duplo externo do quintal de baixo: estudo 4, o modelo 2 com chuveiro e um telhado só com a garagem (08/11/2026).
+
+Histórico: no estudo 3 o Thiago viu 5 modelos com a mesma planta e escolheu o 2 (tijolinho e telha), pedindo chuveiro
+nos banheiros e o banheiro emendado na garagem, debaixo de um telhado só. Com o chuveiro, os banheiros para
+cadeirante cresceram para 1,70 x 2,30 m livres. Os outros modelos continuam aqui como alternativa.
 
 Pedidos do Thiago: dois banheiros com a pia lavabo central do lado de fora, do outro lado da escada que sobe para a
 churrasqueira; de frente para o poço, a 1 m do muro de pedra da churrasqueira, com as costas no muro lateral. No
@@ -17,8 +21,8 @@ from obra import EDGE, FACE, LOW, LARGURA, POCO, POCO_R
 AFASTAMENTO = 1.00                 # do muro de pedra (face da pedra) até o banheiro
 PE, PI = 0.14, 0.12                # paredes de fora e de dentro (bloco rebocado)
 NICHO = 2.10                       # largura livre do nicho da pia (meio-termo: 50% maior que no estudo 1)
-CAB = 1.50                         # largura livre de cada banheiro (giro de 1,50 da cadeira de rodas)
-LIVRE = 2.00                       # fundo livre: giro de 1,50 na frente sem pegar no vaso (encostado na lateral)
+CAB = 1.70                         # largura livre de cada banheiro: vaso, chuveiro e giro de 1,50 da cadeira de rodas
+LIVRE = 2.30                       # fundo livre: chuveiro na frente, vaso no canto do fundo, giro de 1,50 sem pegar no vaso
 LARG = 2 * PE + 2 * PI + NICHO + 2 * CAB                      # 5,62 ao longo da fachada
 FUNDO = LIVRE + 2 * PE             # 2,14
 XB0 = FACE + AFASTAMENTO           # lado do muro de pedra
@@ -33,11 +37,22 @@ PD = 2.30                          # pé-direito
 LAJE = 0.12
 ZT = LOW + PD + LAJE               # topo da laje plana (modelos 1, 3 e 4), acima do 0,00 da churrasqueira
 PORTA_L, PORTA_H = 0.90, 2.10      # folha de 0,90 (vão livre de 0,80 ou mais), abrindo para fora, para o nicho
-PORTA_Y = (YI0 + 0.12, YI0 + 0.12 + PORTA_L)
+PORTA_Y = (YI0 + 0.80, YI0 + 0.80 + PORTA_L)                  # atrás do chuveiro, antes da bancada
 JAN_L, JAN_H, JAN_Z = 0.60, 0.40, LOW + 1.75                  # basculante no alto da fachada de cada banheiro
 BANC_P, BANC_Z = 0.55, LOW + 0.80                             # bancada acessível: 0,80 de altura, livre embaixo
 CUBAS = [(XN0 + NICHO * 0.27, YI1 - 0.28), (XN1 - NICHO * 0.27, YI1 - 0.28)]   # duas cubas na bancada de 2,10
 CANTEIRO = 0.45
+CHUV_X, CHUV_Y = 1.00, 0.95        # chuveiro sem degrau no canto da frente, do lado da parede de fora (mínimo 0,90 x 0,95)
+BANCO = (0.70, 0.45, 0.46)         # banco articulado do chuveiro: comprimento, profundidade, altura
+# telhado único com a garagem: o mesmo plano da cobertura de hoje (build.py: GZH, GS_ e 3,3 m de comprimento)
+GZH, GS, G_COMP, G_FIM = 2.3, 0.212, 3.3, 58.7
+
+
+def z_telhado(y):
+    """Altura (acima do 0,00 da churrasqueira) da face de cima do telhado único, que cai do muro lateral para o poço."""
+    return GZH - GS * (YB1 - y)
+
+
 VASO_EIXO = 0.40                   # eixo do vaso a 0,40 da parede de trás, vaso encostado na parede lateral de fora
 PISO_FRENTE = 0.90                                            # piso de pedra na frente do nicho (até perto dos pisantes)
 MARQUISE = 0.35                                               # avanço da laje do modelo 1 na frente (a jardineira)
@@ -51,9 +66,9 @@ MODELOS = {
         'parede': 'house_white', 'fachada': 'filete', 'fundo': 'filete', 'porta': 'wood_z', 'bancada': 'quartzo',
         'cobertura': 'laje_jardineira', 'luz': 'arandela', 'barrado': None, 'ripado': False},
     2: {'nome': 'Tijolinho e telha',
-        'desc': 'Tijolo aparente igual aos pilares da churrasqueira, telhado de telha de barro com caibros de madeira, forro de madeira.',
+        'desc': 'Tijolo como os pilares da churrasqueira, um telhado só com a garagem, varanda de madeira e chuveiro nos banheiros.',
         'parede': 'brick', 'fachada': 'brick', 'fundo': 'brick', 'porta': 'wood_z', 'bancada': 'granite',
-        'cobertura': 'telha_uma_agua', 'luz': 'arandela', 'barrado': None, 'ripado': False},
+        'cobertura': 'telha_garagem', 'luz': 'arandela', 'barrado': None, 'ripado': False},
     3: {'nome': 'Tropical ripado',
         'desc': 'Paredes verde-musgo, ripado de madeira na fachada, pergolado de madeira com trepadeira florida e teto-jardim.',
         'parede': 'chapa_verde', 'fachada': 'chapa_verde', 'fundo': 'filete', 'porta': 'wood_z', 'bancada': 'quartzo',
@@ -159,6 +174,26 @@ def construir(geo, P, rng, modelo=1):
                 box('cimento_queimado', a, b, c, d, ZT, ZT + 0.20)
             box('cimento_queimado', XN0 - 0.45, XN1 + 0.45, YB0 - 0.90, YB0, zp + 0.02, zp + 0.10)  # lâmina sobre a entrada
             box('bulb', XN0 - 0.40, XN1 + 0.40, YB0 - 0.86, YB0 - 0.84, zp + 0.005, zp + 0.02)
+    elif cob == 'telha_garagem':
+        zr = lambda y: z_telhado(y) - 0.13                                                 # embaixo dos caibros
+        box('forro', XB0, XB1, YB0, YB1 - 0.005, zp, zp + 0.06)
+        box(E['fachada'], XB0, XB1, YB0, YI0, zp, zr(YB0))                                  # tijolo até o telhado
+        box(E['parede'], XB0, XB1, YI1, YB1 - 0.005, zp, zr(YI1))
+        zo = lambda y: z_telhado(y) - 0.03                                                 # oitões fecham até a telha
+        for x0_, x1_ in ((XB0, XB0 + PE), (XB1 - PE, XB1)):                                # oitões das pontas
+            for xq in (x0_, x1_):
+                quad(E['parede'], (xq, YB0, zp), (xq, YB1 - 0.005, zp), (xq, YB1 - 0.005, zo(YB1)), (xq, YB0, zo(YB0)))
+        beam('wood_y', (XB0 - 0.24, YB1, GZH - 0.07), (XB0 - 0.24, YB1 - 3.28, GZH - GS * 3.28 - 0.07), 0.03, 0.16)  # testeira da ponta
+        vg = np.array([0, -1.0, -GS]); vg /= np.linalg.norm(vg)
+        tile_roof('rooftile', (XB0 - 0.25, YB1, GZH), (1, 0, 0), vg, G_FIM - (XB0 - 0.25), G_COMP * math.sqrt(1 + GS * GS))
+        for xr in np.arange(XB0 - 0.15, XB1 + 0.2, 0.6):                                   # caibros como os da garagem
+            beam('wood_y', (xr, YB1 - 0.02, GZH - 0.08), (xr, YB1 - 3.28, GZH - GS * 3.28 - 0.08), 0.06, 0.1)
+        zbm = GZH - GS * 3.0 - 0.13
+        box('wood_x', XB0 - 0.25, G_FIM, 6.92, 7.08, zbm - 0.18, zbm)                     # viga da frente, uma só
+        for xx in (XB0 - 0.10, XN0 - 0.10, XN1 + 0.10, XB1 + 0.10):                        # pilares da varanda
+            box('wood_z', xx - 0.08, xx + 0.08, 6.92, 7.08, LOW, zbm - 0.18)
+        box('wood_x', XB1, G_FIM, 9.9, 9.98, GZH - 0.32, GZH - 0.13)                       # viga do fundo da garagem
+        box('stone_cut', XB1, G_FIM, 6.9, 9.98, LOW - 0.01, LOW + 0.012)                    # piso da garagem
     elif cob == 'telha_uma_agua':
         s = 0.30; ye = YB0 - 0.60; ze = zp + 0.10
         z = lambda y: ze + s * (y - ye)
@@ -241,6 +276,8 @@ def construir(geo, P, rng, modelo=1):
 def topo(modelo=1):
     """Ponto mais alto do banheiro, acima do 0,00 da churrasqueira."""
     cob = MODELOS[modelo]['cobertura']
+    if cob == 'telha_garagem':
+        return GZH + 0.05
     if cob == 'telha_uma_agua':
         return LOW + PD + 0.10 + 0.30 * (YB1 - (YB0 - 0.60))
     if cob == 'telha_duas_aguas':
@@ -249,7 +286,7 @@ def topo(modelo=1):
 
 
 def resumo():
-    return {'largura': LARG, 'fundo': FUNDO, 'banheiro': (CAB, LIVRE), 'nicho': NICHO, 'pe_direito': PD,
+    return {'largura': LARG, 'fundo': FUNDO, 'banheiro': (CAB, LIVRE), 'nicho': NICHO, 'pe_direito': PD, 'portas': PORTA_Y,
             'afastamento': AFASTAMENTO, 'ate_poco': ATE_POCO, 'na_garagem': NA_GARAGEM,
             'topos': {m: round(topo(m), 2) for m in MODELOS}, 'x': (XB0, XB1), 'y': (YB0, YB1)}
 
