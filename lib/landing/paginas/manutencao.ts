@@ -1,47 +1,55 @@
 import type { PaginaDeCaptacao } from "../tipos";
 
+const MENSAGEM =
+  "Olá! Meu notebook ____ (marca/modelo) está com este problema: ____. Pode me dar uma ideia de preço e prazo?";
+
 export const manutencao: PaginaDeCaptacao = {
   slug: "manutencao",
-  nome: "Assistência técnica de computador e notebook",
-  chamada: "Lento, esquentando, sem ligar ou com tela quebrada: diagnóstico e orçamento antes de mexer.",
+  nome: "Conserto de notebook",
+  chamada: "Diga o defeito e receba a causa provável, o preço e o prazo pelo WhatsApp, antes de aprovar o serviço.",
   seo: {
-    titulo: "Assistência Técnica de Computador e Notebook em Campinas (Cambuí) | Balão da Informática",
+    titulo: "Conserto de Notebook em Campinas (Cambuí) | Orçamento pelo WhatsApp",
     descricao:
-      "Conserto de notebook e PC no Cambuí, em Campinas: lentidão, calor, tela, teclado, SSD, memória e formatação com backup. Orçamento no WhatsApp antes do serviço.",
+      "Conserto de notebook no Cambuí: diga o defeito e receba causa provável, preço e prazo pelo WhatsApp. Bancada própria, garantia e nota fiscal.",
     palavras: [
-      "assistência técnica de notebook em Campinas",
-      "conserto de computador Campinas",
-      "manutenção de notebook Cambuí",
-      "notebook esquentando Campinas",
-      "computador lento o que fazer",
-      "troca de tela de notebook Campinas",
-      "upgrade de SSD notebook",
-      "formatação com backup Campinas",
-      "limpeza de notebook e troca de pasta térmica",
-      "assistência técnica perto de mim Campinas",
+      "conserto notebook campinas",
+      "notebook não liga campinas",
+      "troca de tela notebook campinas",
+      "notebook esquentando e desligando",
+      "assistência técnica notebook cambuí",
+      "conserto de notebook perto de mim",
+      "notebook molhou o que fazer",
+      "orçamento de notebook campinas",
     ],
-    tipoDeServico: "Assistência técnica de computadores e notebooks",
+    tipoDeServico: "Conserto de notebook",
+    catalogo: [
+      "Notebook não liga ou não carrega",
+      "Limpeza e pasta térmica",
+      "Troca de tela",
+      "Teclado, dobradiça e líquido",
+      "Upgrade de SSD e memória",
+    ],
   },
   hero: {
     contexto: "Bancada própria no Cambuí, em Campinas",
-    titulo: "Seu computador de volta ao normal, sem susto no orçamento",
+    titulo: "Seu notebook de volta, sem susto no orçamento",
     texto:
-      "Notebook lento, esquentando, desligando sozinho ou que não liga: a bancada da Balão descobre a causa, manda o orçamento pelo WhatsApp e só começa o serviço depois que você aprovar.",
+      "Diga o sintoma. A Balão da Informática Anchieta aponta a causa provável, manda preço e prazo pelo WhatsApp e só começa depois da sua aprovação. A bancada fica na Av. Anchieta, 789.",
     imagem: { src: "/images/landing/v2/manutencao.jpg", alt: "Mãos de técnico limpando a ventoinha de um notebook aberto na bancada" },
-    mensagem: "Olá! Vim pela página de assistência técnica da Balão e quero um orçamento para o meu computador/notebook.",
-    botao: "Pedir orçamento no WhatsApp",
-    secundario: { rotulo: "Ver o que fazemos", href: "#secao-1" },
+    mensagem: MENSAGEM,
+    botao: "Descrever o defeito no WhatsApp",
+    secundario: { rotulo: "Escolher o sintoma", href: "#secao-2" },
     fatos: [
       { valor: "Orçamento antes", rotulo: "nada é feito sem a sua aprovação" },
-      { valor: "90 dias", rotulo: "de garantia no serviço, como manda a lei" },
-      { valor: "Backup", rotulo: "seus arquivos ficam com você" },
-      { valor: "Peças na loja", rotulo: "SSD e memória para trocar na hora" },
+      { valor: "Garantia legal", rotulo: "do serviço, com nota fiscal" },
+      { valor: "Seus dados", rotulo: "backup quando o serviço apaga disco" },
+      { valor: "Motoboy", rotulo: "coleta em Campinas e região, a combinar" },
     ],
   },
   assistente: {
-    titulo: "Orçamento em três toques",
-    texto: "Responda e a mensagem já vai pronta para o técnico.",
-    abertura: "Olá! Vim pela página de assistência técnica e quero um orçamento.",
+    titulo: "Qual é o defeito?",
+    texto: "Três toques e a mensagem já descreve o caso para o técnico.",
+    abertura: MENSAGEM,
     fecho: "Posso mandar foto ou vídeo do problema?",
     botao: "Enviar para o técnico",
     perguntas: [
@@ -50,60 +58,88 @@ export const manutencao: PaginaDeCaptacao = {
         rotulo: "Problema",
         pergunta: "O que está acontecendo?",
         varias: true,
-        opcoes: ["Muito lento", "Esquenta ou desliga", "Não liga", "Tela quebrada ou com listras", "Teclado falhando", "Vírus ou janelas estranhas", "Quero formatar", "Quero um upgrade"],
+        opcoes: ["Não liga", "Esquenta ou desliga", "Tela quebrada ou com listras", "Muito lento", "Teclado, dobradiça ou líquido"],
       },
-      { rotulo: "Urgência", pergunta: "Para quando você precisa?", opcoes: ["Hoje", "Esta semana", "Sem pressa"] },
+      { rotulo: "Marca", pergunta: "Qual a marca?", opcoes: ["Dell", "Lenovo", "Acer", "HP", "Asus", "Samsung", "Outra"] },
     ],
   },
   secoes: [
     {
+      tipo: "texto",
+      titulo: "Seu notebook de volta sem susto no orçamento",
+      paragrafos: [
+        "Quem procura conserto em Campinas compara três ou quatro assistências com pressa: o notebook parou e o trabalho ou a aula não esperam. O que dá para saber antes de sair de casa é a causa provável, não o preço fechado. Preço fechado pede o aparelho na bancada ou, no mínimo, o modelo e um vídeo do defeito.",
+        "Na Av. Anchieta, 789, a Balão da Informática Anchieta testa, explica e espera a aprovação no WhatsApp (19) 98751-0267. Peça, mão de obra e o prazo daquele caso vêm nessa mensagem. Nada começa antes do sim. Preço e prazo confirmados pelo WhatsApp.",
+      ],
+    },
+    {
       tipo: "dores",
-      titulo: "Os defeitos que mais chegam ao balcão",
-      texto:
-        "Quase todo problema de computador começa com um sinal pequeno. Quanto antes ele chega à bancada, mais barato costuma ser o conserto.",
+      titulo: "Qual é o defeito?",
+      texto: "Escolha o sintoma. A causa provável abaixo é o que a bancada mais separa no teste. O valor de cada um não está nesta página.",
       itens: [
         {
-          titulo: "Lento para ligar e para abrir tudo",
-          texto: "Na maioria das vezes é HD mecânico cansado, pouca memória ou sistema cheio de programas. Um SSD e uma limpeza de sistema mudam o dia a dia.",
-        },
-        {
-          titulo: "Esquenta, faz barulho ou desliga sozinho",
-          texto: "Poeira na ventoinha e pasta térmica ressecada. Limpeza interna e pasta nova devolvem a temperatura e evitam dano na placa.",
-        },
-        {
           titulo: "Não liga ou não carrega",
-          texto: "Pode ser carregador, conector, bateria ou placa. O teste separa o que é barato (fonte) do que exige reparo.",
+          texto: "As causas mais comuns são carregador, conector de energia, bateria ou placa-mãe. O teste separa o defeito de fonte do reparo de placa antes de qualquer gasto. Traga o carregador junto.",
+        },
+        {
+          titulo: "Esquenta e desliga sozinho",
+          texto: "Poeira e pasta térmica ressecada são a primeira hipótese. A bancada mede a temperatura. Limpeza entra quando o teste mostra calor; placa já danificada é outro orçamento, dito antes.",
         },
         {
           titulo: "Tela quebrada, com listras ou escura",
-          texto: "Trocamos tela e flat de notebook e conferimos se o defeito não está na placa de vídeo antes de você gastar.",
+          texto: "Pode ser a tela, o cabo (flat) ou a placa de vídeo. Trocar a tela sem esse teste é o jeito mais comum de gastar duas vezes. O modelo define a peça.",
         },
         {
-          titulo: "Teclado com teclas mortas",
-          texto: "Líquido derramado ou desgaste. Troca do teclado ou do conjunto, conforme o modelo.",
+          titulo: "Lento",
+          texto: "Se liga e só demora, o caminho costuma ser SSD e memória, não conserto de placa. A página de upgrade explica SATA, NVMe e quando formatar não resolve.",
         },
         {
-          titulo: "Vírus, propaganda e janelas sozinhas",
-          texto: "Limpeza do sistema ou formatação com backup dos documentos, fotos e favoritos do navegador.",
+          titulo: "Teclado, dobradiça ou líquido",
+          texto: "Tecla morta e dobradiça torta pedem o modelo para a peça. Líquido: desligue, tire da tomada, não ligue “para ver” e não seque com secador. Traga. Quanto menos ele ligar molhado, menor a chance de a placa entrar no orçamento.",
         },
+      ],
+    },
+    {
+      tipo: "retorno",
+      titulo: "Pedir retorno rápido",
+      texto: "Conte o que aconteceu e a marca. A equipe retorna no WhatsApp com a causa provável e pede o que faltar para fechar preço e prazo.",
+      assunto: "Conserto de notebook",
+      campos: [
+        { nome: "sintoma", rotulo: "O que aconteceu?", opcoes: ["Não liga", "Esquenta", "Tela", "Lento", "Outro"] },
+        { nome: "modelo", rotulo: "Marca e modelo" },
       ],
     },
     {
       tipo: "passos",
-      titulo: "Como o conserto acontece",
-      texto: "Sem chamado, sem protocolo e sem surpresa no fim. Você acompanha tudo pelo WhatsApp.",
+      titulo: "Como funciona o orçamento",
+      texto: "Você aprova pelo WhatsApp. Sem essa aprovação, o notebook espera.",
       itens: [
-        { titulo: "Conte o problema", texto: "Pelo WhatsApp, com foto ou vídeo se puder. Muitas vezes dá para adiantar a causa provável." },
-        { titulo: "Traga à loja", texto: "No Cambuí, de segunda a sábado. Se for em Campinas e região, combine a retirada." },
-        { titulo: "Receba o orçamento", texto: "O técnico testa, encontra a causa e manda valor e prazo. Você decide." },
-        { titulo: "Retire funcionando", texto: "Serviço feito, testado na sua frente e com garantia de 90 dias." },
+        { titulo: "Conte o sintoma", texto: "Mensagem, foto ou vídeo. Dá para adiantar a causa provável; o preço fecha com o modelo ou com o aparelho na banca." },
+        { titulo: "A bancada testa", texto: "Fonte, vídeo, disco, temperatura. O teste separa o conserto simples do reparo de placa." },
+        { titulo: "Você decide", texto: "Preço e prazo chegam no WhatsApp. Não aprovou, não mexe. A condição do diagnóstico é a que a equipe passar nessa conversa." },
+        { titulo: "Retire testado", texto: "Serviço feito, conferido no balcão, com nota fiscal e garantia legal." },
+      ],
+    },
+    {
+      tipo: "texto",
+      titulo: "Garantia, nota fiscal e seus dados",
+      paragrafos: [
+        "O serviço de assistência sai com nota fiscal e com a garantia legal do serviço. Peça nova segue a garantia de quem fabricou a peça. Esta página não publica um número de dias além do que a lei já prevê para o serviço: na dúvida, pergunte no balcão o que cobre o seu caso.",
+        "Formatação e troca de disco passam por backup do que for combinado: documentos, fotos e favoritos. Se o disco já não lê, o assunto vira recuperação de dados, e você autoriza antes. A loja não abre o notebook e descobre arquivo perdido no fim.",
+      ],
+    },
+    {
+      tipo: "texto",
+      titulo: "Moro fora de Campinas ou não posso ir",
+      paragrafos: [
+        "A loja busca notebook e PC com motoboy em Campinas e na região (Sumaré, Hortolândia, Valinhos, Vinhedo, Paulínia e cidades vizinhas que a equipe confirmar). O custo e o prazo dessa coleta não estão tabelados aqui. Preço e prazo confirmados pelo WhatsApp.",
+        "Quem pode vir, retira no balcão. Horário: segunda a sexta, 9h às 18h. Sábado, 9h às 13h. Atendimento urgente, quando a agenda permitir, está na página própria.",
       ],
     },
     {
       tipo: "vitrine",
-      titulo: "Peças para o upgrade, prontas na loja",
-      texto:
-        "SSD e memória são os dois upgrades que mais fazem diferença em computador lento. A bancada confere a compatibilidade com o seu modelo antes da troca.",
+      titulo: "Peças que a loja já tem para o upgrade",
+      texto: "SSD e memória saem do catálogo abaixo. A instalação é orçada à parte. Preço e prazo confirmados pelo WhatsApp.",
       regras: [
         {
           id: "ssd",
@@ -139,69 +175,68 @@ export const manutencao: PaginaDeCaptacao = {
       ],
     },
     {
-      tipo: "texto",
-      titulo: "Formatação não é o primeiro remédio",
-      paragrafos: [
-        "Muita gente chega pedindo formatação porque o computador ficou lento. Às vezes é isso mesmo; em muitos casos, porém, o gargalo está no disco. Um HD mecânico de cinco anos atrás faz o Windows atual parecer travado, e formatar só esconde o problema por algumas semanas.",
-        "Por isso o primeiro passo na bancada é o diagnóstico: saúde do disco, temperatura, memória em uso e o que está abrindo junto com o sistema. Com isso na mão, o técnico diz se compensa trocar o HD por um SSD, colocar mais memória, só limpar o sistema ou, em último caso, formatar com backup.",
-        "Quando o conserto não compensa — um notebook muito antigo com placa danificada, por exemplo — você ouve isso antes de gastar, junto com as opções de notebook novo ou seminovo da loja.",
-      ],
-      lista: [
-        "Backup de documentos, fotos e favoritos antes de qualquer formatação",
-        "Clonagem do sistema na troca de HD por SSD, quando o disco permite",
-        "Teste de temperatura depois da limpeza interna",
-      ],
-      imagem: { src: "/images/landing/v2/trocas-e-devolucoes.jpg", alt: "Mãos de luva conferindo um notebook na bancada antes do diagnóstico" },
-    },
-    {
-      tipo: "comparativo",
-      titulo: "Consertar, fazer upgrade ou trocar?",
-      texto: "A conta que o técnico faz com você no balcão.",
-      colunas: ["Situação", "O que costuma resolver", "Quando pensar em trocar"],
-      linhas: [
-        ["Lento, mas liga normal", "SSD e mais memória", "Processador muito antigo para o que você usa"],
-        ["Esquenta e desliga", "Limpeza interna e pasta térmica", "Placa já danificada pelo calor"],
-        ["Tela quebrada", "Troca da tela", "Quando a tela custa perto de um notebook novo"],
-        ["Não liga", "Fonte, conector ou bateria", "Placa sem reparo ou peça fora de linha"],
+      tipo: "atalhos",
+      titulo: "Siga pelo que você precisa",
+      itens: [
+        { titulo: "Upgrade de SSD e memória", texto: "Notebook lento com HD.", href: "/upgrade-ssd", imagem: "/images/landing/v2/manutencao.jpg" },
+        { titulo: "Formatação com backup", texto: "Vírus ou sistema, com arquivos salvos.", href: "/formatacao", imagem: "/images/landing/v2/sistemas.jpg" },
+        { titulo: "Urgente", texto: "Quando não dá para esperar a semana.", href: "/urgente" },
+        { titulo: "Recuperação de dados", texto: "Disco que já não abre.", href: "/recuperacaodados", imagem: "/images/landing/v2/recuperacaodados.jpg" },
+        { titulo: "Serviços Apple", texto: "iPhone, MacBook, iMac e o resto da linha.", href: "/reparoapple", imagem: "/images/landing/v2/reparoapple.jpg" },
+        { titulo: "MacBook", texto: "Air e Pro, na assistência independente.", href: "/macbook", imagem: "/images/apple/macbook-hero.webp" },
+        { titulo: "iPhone", texto: "Tela, bateria, carga e líquido.", href: "/iphone", imagem: "/images/landing/v2/telaiphone.jpg" },
+        { titulo: "Celular Android", texto: "Samsung, Motorola e outras marcas.", href: "/android", imagem: "/images/landing/v2/como-comprar.jpg" },
+        { titulo: "Carregadores", texto: "Fonte pela foto da etiqueta.", href: "/carregadores", imagem: "/images/landing/v2/carregadores.jpg" },
+        { titulo: "Dell", texto: "Inspiron, Latitude, Vostro, XPS e G.", href: "/notebook-dell", imagem: "/images/landing/v2/manutencao.jpg" },
+        { titulo: "Lenovo", texto: "IdeaPad, ThinkPad, Legion e Yoga.", href: "/notebook-lenovo", imagem: "/images/landing/v2/manutencao.jpg" },
+        { titulo: "Acer", texto: "Aspire, Nitro e Predator.", href: "/notebook-acer", imagem: "/images/landing/v2/manutencao.jpg" },
+        { titulo: "HP", texto: "Pavilion, Victus, ProBook e EliteBook.", href: "/notebook-hp", imagem: "/images/landing/v2/manutencao.jpg" },
+        { titulo: "Asus", texto: "VivoBook, TUF e ROG.", href: "/notebook-asus", imagem: "/images/landing/v2/manutencao.jpg" },
+        { titulo: "Samsung", texto: "Book, Galaxy Book e Odyssey.", href: "/notebook-samsung", imagem: "/images/landing/v2/manutencao.jpg" },
+        { titulo: "Fale conosco", texto: "Telefone e WhatsApp da loja.", href: "/fale-conosco" },
       ],
     },
   ],
   perguntas: [
     {
-      pergunta: "Quanto custa o diagnóstico?",
+      pergunta: "Quanto custa consertar um notebook em Campinas?",
       resposta:
-        "Pergunte pelo WhatsApp antes de trazer: a equipe passa a condição do momento. O importante é que nenhum serviço é feito sem você aprovar o orçamento.",
+        "Depende do defeito. Na Balão da Informática Anchieta (Av. Anchieta, 789, Cambuí) a troca de tela, a limpeza com pasta térmica e o reparo de conector ou fonte têm valores diferentes. O orçamento é enviado pelo WhatsApp (19) 98751-0267 e nada é feito sem aprovação. A loja também busca o equipamento com motoboy; o custo da coleta é confirmado na mesma conversa. Preço e prazo confirmados pelo WhatsApp.",
+    },
+    {
+      pergunta: "Meu notebook não liga, o que pode ser?",
+      resposta:
+        "As causas mais comuns são carregador, conector de energia, bateria ou placa-mãe. Na bancada da loja o teste separa o defeito de fonte do reparo de placa antes de qualquer serviço.",
+    },
+    {
+      pergunta: "A assistência cobra para fazer orçamento?",
+      resposta:
+        "O orçamento é enviado pelo WhatsApp antes de qualquer serviço, e nada é feito sem a sua aprovação. A condição do diagnóstico é confirmada pelo WhatsApp (19) 98751-0267.",
+    },
+    {
+      pergunta: "Vale a pena trocar a tela?",
+      resposta:
+        "Vale quando a tela custa menos do que seguir sem o notebook e o resto da máquina está saudável. A bancada avisa quando o valor da peça chega perto de um notebook novo ou seminovo.",
     },
     {
       pergunta: "Perco meus arquivos no conserto?",
       resposta:
-        "Não. Quando o serviço envolve formatação ou troca de disco, fazemos backup de documentos, fotos e favoritos antes. Se o disco já está falhando, o caso vira recuperação de dados e você fica sabendo antes.",
+        "Não, quando o serviço é combinado com backup. Se o disco já está falhando, o caso vira recuperação de dados e você fica sabendo antes.",
     },
     {
-      pergunta: "Trocar o HD por SSD vale a pena em notebook antigo?",
+      pergunta: "Consertam MacBook?",
       resposta:
-        "Na maioria das vezes, sim: é o upgrade que mais muda a velocidade de ligar e abrir programas. O técnico confere se o seu notebook aceita SSD SATA ou NVMe e se o resto da máquina acompanha.",
-    },
-    {
-      pergunta: "Qual é a garantia do serviço?",
-      resposta: "Serviço de assistência tem garantia de 90 dias, como prevê o Código de Defesa do Consumidor. As peças novas seguem a garantia do fabricante.",
-    },
-    {
-      pergunta: "Vocês atendem empresas?",
-      resposta:
-        "Sim. Para empresa, mande quantas máquinas e qual o problema principal; a equipe combina a melhor forma de atender, na loja ou retirando os equipamentos.",
-    },
-    {
-      pergunta: "Consertam MacBook e iMac?",
-      resposta: "Sim, a assistência Apple fica no mesmo endereço. Veja a página de reparo Apple para os detalhes.",
+        "Sim. MacBook, iMac e iPhone têm página própria, no mesmo endereço. A assistência é especializada e independente. Celular Android também é na mesma bancada.",
     },
   ],
+  tituloDasPerguntas: "Perguntas frequentes",
   temas: ["assistencia", "notebook", "pc", "upgrade", "ssd", "memoria", "manutencao", "dados"],
-  termosDoBlog: ["manutenção", "notebook", "ssd", "memória ram", "diagnóstico", "fonte", "esquenta", "lento", "upgrade", "pc não liga"],
-  relacionadas: ["recuperacaodados", "carregadores", "reparoapple", "notebooks"],
+  termosDoBlog: ["manutenção", "notebook", "ssd", "diagnóstico", "esquenta", "lento", "tela", "não liga"],
+  relacionadas: ["upgrade-ssd", "formatacao", "recuperacaodados", "carregadores"],
   final: {
-    titulo: "Traga o computador ou mande o problema agora",
-    texto: "Uma mensagem com o modelo e o defeito já adianta o diagnóstico. A bancada fica na loja do Cambuí, na Av. Anchieta.",
+    titulo: "Mande o modelo e o defeito",
+    texto: "Uma mensagem já adianta a causa provável. A bancada fica na Av. Anchieta, 789, Cambuí. Preço e prazo confirmados pelo WhatsApp.",
     botao: "Falar com a assistência",
+    mensagem: MENSAGEM,
   },
 };

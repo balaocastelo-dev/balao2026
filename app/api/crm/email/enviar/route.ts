@@ -23,7 +23,7 @@ export const maxDuration = 30;
 
 // E-mail de produtos mandado pelo vendedor, direto do CRM (lib/crm/email-produtos.ts explica).
 //
-// Sai de vendas@balao.info (domínio verificado na Resend). A resposta do
+// Sai pelo Gmail da loja (lib/mail.ts; Brevo como alternativa). A resposta do
 // cliente vai para a caixa da loja (balaocastelo@gmail.com), e a loja recebe
 // uma cópia oculta — o envio fica registrado lá também. `previa: true` monta
 // o e-mail sem mandar, para o vendedor ver antes.

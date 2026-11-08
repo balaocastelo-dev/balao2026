@@ -32,6 +32,25 @@ type Props = {
   }>;
 };
 
+// Subcategorias com nome genérico ("Mais Marcas", "Acessórios", "Portátil"…)
+// viravam títulos como "Mais Marcas em Campinas". Leva o nome da categoria-mãe.
+const NOMES_GENERICOS = new Set([
+  "mais marcas", "acessorios", "outros", "portatil", "bluetooth", "pessoal",
+  "corporativo", "externo", "interno", "equipamentos", "compacto", "torre",
+]);
+
+function semAcento(texto: string) {
+  return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+}
+
+function nomeDaCategoriaParaTitulo(nome: string, caminho?: string | null) {
+  if (!NOMES_GENERICOS.has(semAcento(nome))) return nome;
+  const partes = (caminho || "").split("/").map((p) => p.trim()).filter(Boolean);
+  const mae = partes.length >= 2 ? partes[partes.length - 2] : "";
+  if (!mae) return nome;
+  return semAcento(nome) === "mais marcas" ? `${mae} de outras marcas` : `${mae} ${nome}`;
+}
+
 function buildCategoryCanonical(slug: string, page: number, hasFacet: boolean) {
   if (hasFacet || page <= 1) {
     return `https://www.balao.info/categoria/${slug}`;
@@ -51,6 +70,9 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   
   let title = "Categoria";
   let description = "Encontre os melhores produtos de informática no Balão da Informática.";
+  // Categoria que não existe ou está vazia não vai para o Google
+  // ("Nenhum produto encontrado" indexado, achado na análise de 25/10).
+  let semConteudo = false;
 
   if (slug === 'todos-os-produtos') {
     title = "Todos os Produtos | Balão da Informática";
@@ -58,8 +80,16 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   } else {
     const category = categories.find(c => c.slug === slug);
     if (category) {
-      title = `${category.name} em Campinas | Balão da Informática`;
-      description = `Compre ${category.name} com o melhor preço de Campinas. Hardware, Periféricos e Computadores com entrega rápida.`;
+      const nome = nomeDaCategoriaParaTitulo(category.name, category.full_path);
+      title = `${nome} em Campinas | Balão da Informática`;
+      description = `Compre ${nome} com o melhor preço de Campinas. Retire na loja do Cambuí ou receba rápido na região.`;
+      if (!hasFacet && category.full_path) {
+        // Mesmo cache que a página usa: não abre conexão nova no banco.
+        const produtos = await getCachedProductsByCategoryFullPath(category.full_path);
+        semConteudo = produtos.length === 0;
+      }
+    } else {
+      semConteudo = true;
     }
   }
 
@@ -70,9 +100,11 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   const canonical = buildCategoryCanonical(slug, pageNumber, hasFacet);
 
   return {
-    title,
+    // O layout acrescenta " | Balão da Informática"; aqui a marca já vem no
+    // título, então ele vai inteiro (sem duplicar a marca).
+    title: { absolute: title },
     description,
-    robots: hasFacet ? { index: false, follow: true } : { index: true, follow: true },
+    robots: hasFacet || semConteudo ? { index: false, follow: true } : { index: true, follow: true },
     openGraph: {
       title,
       description,
@@ -104,6 +136,11 @@ export default async function CategoriaPage({
   let categoryName = selectedCat?.name;
   if (slug === 'todos-os-produtos') {
       categoryName = 'Todos os Produtos';
+  }
+  // Endereço de categoria que não existe (ex.: /categoria/gift-cards) é 404,
+  // não uma página "Nenhum produto encontrado".
+  if (!categoryName) {
+    notFound();
   }
 
   // `products.category` guarda o caminho completo (ex: "Hardware/Placas-mãe/

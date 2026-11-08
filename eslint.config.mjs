@@ -15,6 +15,10 @@ const eslintConfig = defineConfig([
     // Office 3D: página pronta (minificada) e o código dela, que não é React.
     "public/3d/**",
     "office3d/**",
+    // App mobile (Capacitor): projeto separado, com suas próprias dependências.
+    "app-mobile/**",
+    // Instalador Windows (Electron). Projeto Node à parte, não é página do site.
+    "mybots-desktop/**",
   ]),
 ]);
 

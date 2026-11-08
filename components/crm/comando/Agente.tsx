@@ -108,7 +108,7 @@ export default function Agente({ ponte }: { ponte: PonteComando }) {
 
       <Secao
         titulo="🤖 JUL.IA — vendedora digital"
-        ajuda="Entende texto, áudio, foto e vídeo do cliente, sugere só produtos do site, emite orçamento e pedido no Bling. Roda no computador da loja, sem serviço pago."
+        ajuda="Entende texto, áudio, foto e vídeo do cliente, sugere só produtos do site, emite orçamento e pedido no MEU BLING. Roda no computador da loja, sem serviço pago."
       >
         <div className="grid gap-3 md:grid-cols-2">
           <div
@@ -177,7 +177,7 @@ export default function Agente({ ponte }: { ponte: PonteComando }) {
                   <b>Só os números de teste</b> ({estado.numerosDeTeste.join(" e ")})
                   <span className="block text-[11px] text-[#5f6368]">
                     {config.publico === "teste"
-                      ? "Clientes não recebem nada. No teste o Bling é simulado (nada entra no relatório)."
+                      ? "Clientes não recebem nada. No teste o MEU BLING é simulado (nada entra no relatório)."
                       : "Atende clientes de verdade nas conversas sem vendedor."}
                   </span>
                 </span>
@@ -194,7 +194,7 @@ export default function Agente({ ponte }: { ponte: PonteComando }) {
                   <b>Fechar venda sozinha</b>
                   <span className="block text-[11px] text-[#5f6368]">
                     {config.vendaAutomatica
-                      ? "Com o \"sim\" do cliente e os dados completos, o pedido entra no Bling em aberto e você é avisado."
+                      ? "Com o \"sim\" do cliente e os dados completos, o pedido entra no MEU BLING em aberto e você é avisado."
                       : "Quando o cliente quiser fechar, ela chama um vendedor."}
                   </span>
                 </span>

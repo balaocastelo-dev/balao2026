@@ -82,14 +82,24 @@ export default function Footer() {
                     {isExpanded('departamentos') ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                 </span>
             </button>
-            <ul className={`space-y-3 text-sm overflow-hidden transition-all duration-300 ${isExpanded('departamentos') ? 'max-h-96 opacity-100 mt-4' : 'max-h-0 opacity-0 md:max-h-full md:opacity-100 md:mt-0'}`}>
+            <ul className={`space-y-3 text-sm overflow-hidden transition-all duration-300 ${isExpanded('departamentos') ? 'max-h-[40rem] opacity-100 mt-4' : 'max-h-0 opacity-0 md:max-h-full md:opacity-100 md:mt-0'}`}>
               <li><Link href="/departamentos" className="hover:text-[#E60012] transition-colors">Departamentos</Link></li>
               <li><Link href="/pcgamer" className="hover:text-[#E60012] transition-colors">Computadores Gamer</Link></li>
               <li><Link href="/notebooks" className="hover:text-[#E60012] transition-colors">Notebooks</Link></li>
+              <li><Link href="/upgrade-ssd" className="hover:text-[#E60012] transition-colors">Upgrade de SSD</Link></li>
+              <li><Link href="/formatacao" className="hover:text-[#E60012] transition-colors">Formatação</Link></li>
+              <li><Link href="/microsoft" className="hover:text-[#E60012] transition-colors">Licenças Microsoft</Link></li>
+              <li><Link href="/microsoft/windows" className="hover:text-[#E60012] transition-colors">Windows</Link></li>
+              <li><Link href="/microsoft/windows-server" className="hover:text-[#E60012] transition-colors">Windows Server</Link></li>
+              <li><Link href="/microsoft/office-365" className="hover:text-[#E60012] transition-colors">Office e Microsoft 365</Link></li>
+              <li><Link href="/montagempc" className="hover:text-[#E60012] transition-colors">Montagem de PC</Link></li>
+              <li><Link href="/qual-pc-gamer" className="hover:text-[#E60012] transition-colors">Qual PC gamer</Link></li>
+              <li><Link href="/toner" className="hover:text-[#E60012] transition-colors">Toner e cartucho</Link></li>
               <li><Link href="/premium" className="hover:text-[#E60012] transition-colors">Premium</Link></li>
               <li><Link href="/ia-local" className="hover:text-[#E60012] transition-colors">IA Local</Link></li>
               <li><Link href="/promocao" className="hover:text-[#E60012] transition-colors">Promoções</Link></li>
               <li><Link href="/seminovos" className="hover:text-[#E60012] transition-colors">Seminovos</Link></li>
+              <li><Link href="/consignados" className="hover:text-[#E60012] transition-colors">Consignados</Link></li>
             </ul>
           </div>
 

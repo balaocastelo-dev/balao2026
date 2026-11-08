@@ -36,7 +36,7 @@ const HUB_FAQS = [
 ];
 
 export const metadata: Metadata = {
-  title: "Atendimento Urgente de Informática em Campinas | Balão da Informática",
+  title: { absolute: "Atendimento Urgente de Informática em Campinas | Balão da Informática" },
   description:
     "Canal de atendimento expresso para computadores, notebooks, consoles e Apple no Cambuí, Campinas. Diagnóstico rápido e conserto no mesmo dia.",
   alternates: { canonical: "https://www.balao.info/urgente" },
@@ -148,6 +148,24 @@ export default async function UrgenteHubPage() {
                 <div className="inline-flex items-center gap-2 text-xs font-bold text-[#E60012] pt-4 border-t border-slate-800">
                   Ver Solução Imediata <ArrowRight className="w-4 h-4" />
                 </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl font-black text-white">Serviços da bancada</h2>
+          <div className="mt-4 flex flex-wrap gap-3">
+            {[
+              ["/manutencao", "Conserto de notebook"],
+              ["/upgrade-ssd", "Upgrade de SSD"],
+              ["/formatacao", "Formatação com backup"],
+              ["/notebook-dell", "Notebook Dell"],
+              ["/notebook-lenovo", "Notebook Lenovo"],
+              ["/pcgamer", "PC gamer"],
+            ].map(([href, nome]) => (
+              <Link key={href} href={href} className="rounded-2xl border border-slate-700 bg-[#161f32] px-4 py-2 text-sm font-bold text-slate-200 hover:border-[#E60012]">
+                {nome}
               </Link>
             ))}
           </div>

@@ -51,12 +51,15 @@ export const metadata: Metadata = {
     "montagem de pc gamer campinas",
     "hardware campinas",
     "loja de computadores cambuí",
-    "balão da informática castelo",
+    "balão da informática anchieta",
     "balão da informática",
   ],
   authors: [{ name: "Balão da Informática" }],
   creator: "Balão da Informática",
   publisher: "Balão da Informática",
+  verification: {
+    google: "TRpT6cALErdwYWtR1HWKQZJlVBmX0RFPlxi5g3ZDuyM",
+  },
   robots: {
     index: true,
     follow: true,
@@ -88,7 +91,8 @@ const jsonLd = {
     {
       "@type": ["ComputerStore", "Store", "LocalBusiness"],
       "@id": "https://www.balao.info/#store",
-      name: SITE_CONFIG.name,
+      name: SITE_CONFIG.companyName,
+      alternateName: SITE_CONFIG.name,
       image: "https://www.balao.info/logo.png",
       description:
         "Loja de informática em Campinas especializada em computadores, PC Gamer, notebooks, hardware, periféricos e assistência técnica, com atendimento pelo WhatsApp e retirada na loja física.",
@@ -205,6 +209,20 @@ export default async function RootLayout({
       }
     })();
   `;
+    // A raiz do soubots.com é a landing do MyBots (proxy.ts). O endereço na barra
+  // continua /, então o menu da loja não sabe que deve sair. Esta marca esconde
+  // o menu, o rodapé e o WhatsApp da loja antes da primeira pintura.
+  const soubotsRaizScript = `
+    (function () {
+      try {
+        var host = (location.hostname || "").toLowerCase();
+        var path = location.pathname || "/";
+        if ((host === "soubots.com" || host === "www.soubots.com") && (path === "/" || path === "")) {
+          document.documentElement.classList.add("soubots-raiz");
+        }
+      } catch (e) {}
+    })();
+  `;
   const googleTagConfigScript = `
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
@@ -226,6 +244,9 @@ export default async function RootLayout({
       >
         <Script id="theme-init" strategy="beforeInteractive">
           {themeInitScript}
+        </Script>
+        <Script id="soubots-raiz" strategy="beforeInteractive">
+          {soubotsRaizScript}
         </Script>
         {gtmId && (
           <>

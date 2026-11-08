@@ -185,7 +185,7 @@ test("cliente manda mais mensagem enquanto o PC pensa: nada é enviado e a conve
   assert.equal(t2.mensagens.at(-1).texto, "pra jogar");
 });
 
-test("vendedor assume no meio: a resposta não sai, mas o pedido emitido no Bling é registrado", async () => {
+test("vendedor assume no meio: a resposta não sai, mas o pedido emitido no MEU BLING é registrado", async () => {
   const b = bancada();
   await b.agente.configurar({ modo: "automatico", publico: "clientes" });
   await b.chega(CLIENTE, "pode fechar");
@@ -336,6 +336,26 @@ test("validarResultado corta o que passa do limite e ignora lixo", () => {
   assert.equal(r.acoes.length, 1);
   assert.equal(r.acoes[0].itens[0].quantidade, 2);
   assert.equal(R.validarResultado({}).ok, false);
+});
+
+test("validarResultado aceita sistemaId (MEU BLING) e o blingId antigo do PC", () => {
+  const base = { id: "t", chatId: CLIENTE, respostas: [{ tipo: "texto", texto: "ok" }] };
+  const novo = R.validarResultado({ ...base, acoes: [{ tipo: "venda", numero: "9001", sistemaId: 32, total: 10, itens: [] }] });
+  assert.equal(novo.acoes[0].sistemaId, "32");
+  const antigo = R.validarResultado({ ...base, acoes: [{ tipo: "orcamento", numero: "14400", blingId: "77", total: 10, itens: [] }] });
+  assert.equal(antigo.acoes[0].sistemaId, "77");
+  assert.equal("blingId" in antigo.acoes[0], false);
+  const sem = R.validarResultado({ ...base, acoes: [{ tipo: "orcamento", numero: "1", total: 1, itens: [] }] });
+  assert.equal(sem.acoes[0].sistemaId, null);
+});
+
+test("nota da ação fala do MEU BLING, não do Bling", () => {
+  const ok = R.notaDaAcao({ tipo: "venda", numero: "9001", total: 10, itens: [{ nome: "A", quantidade: 1, valor: 10 }] });
+  assert.match(ok, /MEU BLING \(\/sistema\)/);
+  assert.match(ok, /em aberto/);
+  const erro = R.notaDaAcao({ tipo: "orcamento", erro: "MEU BLING recusou (422): x", total: 0, itens: [] });
+  assert.match(erro, /no MEU BLING \(\/sistema\) e não conseguiu/);
+  assert.doesNotMatch(ok + erro, /no Bling/);
 });
 
 const URL_TESTE = process.env.CRM_TESTE_DB;

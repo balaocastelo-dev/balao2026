@@ -5,7 +5,7 @@ import JsonLd, { generateHomeAiAndGoogleSchema } from "@/components/JsonLd";
 import QuickLeadSection from "@/components/QuickLeadSection";
 import HomeLocalStoreInfo from "@/components/HomeLocalStoreInfo";
 import HomeHeroFullWidth from "@/components/HomeHeroFullWidth";
-import HomeMacbookM5Destaque from "@/components/HomeMacbookM5Destaque";
+import HomeAvellStorm480Destaque from "@/components/HomeAvellStorm480Destaque";
 import HomeTrustPillars from "@/components/HomeTrustPillars";
 import HomeBlogSection from "@/components/HomeBlogSection";
 
@@ -13,6 +13,7 @@ import Paginacao from "@/components/catalogo/Paginacao";
 import { BotaoDeFiltros, FiltrosLaterais } from "@/components/catalogo/FiltrosDoCatalogo";
 import HomeVitrines, { type Variante } from "@/components/home/HomeVitrines";
 import HomeQuedaDePreco from "@/components/home/HomeQuedaDePreco";
+import FaixaDeConsignados from "@/components/consignados/FaixaDeConsignados";
 import { produtosEmQueda } from "@/lib/precos/queda";
 import { aplicarFiltros, contarFiltros, lerFiltros, montarFacetas, ordenar, paraQuery, termosDaBusca } from "@/lib/catalogo/filtros";
 
@@ -67,7 +68,7 @@ export async function generateMetadata(props: { searchParams: SearchParams }): P
   const hasFacet = Boolean((sp?.category || "").trim() || (sp?.search || "").trim());
   const title = "Loja de Informática em Campinas | PC Gamer, Notebooks, Monitores e Assistência Técnica";
   const description =
-    "Balão da Informática Castelo: a loja mais completa de informática em Campinas. PC Gamer, Notebooks, Monitores, Smartphones e Peças. Compre com desconto no PIX ou até 10x sem juros e retire no Cambuí.";
+    "Balão da Informática Anchieta: a loja mais completa de informática em Campinas. PC Gamer, Notebooks, Monitores, Smartphones e Peças. Compre com desconto no PIX ou até 10x sem juros e retire no Cambuí.";
   const canonical = "https://www.balao.info/";
 
   return {
@@ -85,7 +86,7 @@ export async function generateMetadata(props: { searchParams: SearchParams }): P
       "assistência técnica cambuí",
       "placa de vídeo rtx",
       "processador ryzen intel",
-      "balão da informática castelo",
+      "balão da informática anchieta",
       "loja de computador campinas"
     ],
     openGraph: {
@@ -215,9 +216,14 @@ export default async function Home(props: {
           <HomeQuedaDePreco quedas={produtosEmQueda(quedasDePreco)} />
         )}
 
-        {/* 1.1 Destaque: MacBook M2 da vitrine (produto único da loja, fora do espelhamento) */}
+        {/* 1.07 Consignados em destaque: usados da consignação, vindos do MEU BLING (some quando não há nenhum ou o MEU BLING não responde) */}
         {!navegando && (
-          <HomeMacbookM5Destaque />
+          <FaixaDeConsignados />
+        )}
+
+        {/* 1.1 Destaque: notebook Avell Storm 480 da vitrine (produto único da loja, fora do espelhamento) */}
+        {!navegando && (
+          <HomeAvellStorm480Destaque />
         )}
 
         {/* 2. Trust Pillars (4 interactive cards) */}
@@ -301,7 +307,7 @@ export default async function Home(props: {
         {!navegando && (
           <SeoContent title="LOJA DE INFORMATICA EM CAMPINAS COM WHATSAPP, RETIRADA E ASSISTENCIA TECNICA">
             <p className="mb-4 text-slate-300">
-              A <strong>Balão da Informática Castelo</strong> é a principal <strong>loja de informática em Campinas</strong> para quem busca
+              A <strong>Balão da Informática Anchieta</strong> é a principal <strong>loja de informática em Campinas</strong> para quem busca
               <strong>PC Gamer em Campinas</strong>, <strong>notebooks</strong>, <strong>monitores gamer</strong>, <strong>smartphones</strong> e peças de hardware para upgrade (placas de vídeo RTX/Radeon,
               processadores Intel e AMD Ryzen, memórias RAM DDR4/DDR5, SSDs NVMe e fontes selo 80 Plus), periféricos gamer e <strong>assistência técnica especializada em Campinas</strong> com atendimento imediato no balcão e no WhatsApp.
               Compre online com desconto progressivo no PIX ou em até 10x sem juros no cartão de crédito e consulte nossa equipe no WhatsApp para conferir a disponibilidade imediata para retirada no balcão no Cambuí ou entrega express.

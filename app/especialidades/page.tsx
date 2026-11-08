@@ -28,6 +28,7 @@ import {
   Clock,
   Cpu,
   Gamepad2,
+  Key,
   HandCoins,
   Instagram,
   MapPin,
@@ -125,12 +126,14 @@ const PROBLEMAS = [
   { texto: "Notebook esquentando e desligando", href: "/manutencao" },
   { texto: "Tela do iPhone quebrada", href: "/telaiphone" },
   { texto: "Bateria do iPhone viciada", href: "/telaiphone" },
-  { texto: "MacBook não liga ou molhou", href: "/reparoapple" },
+  { texto: "MacBook não liga ou molhou", href: "/macbook" },
+  { texto: "iMac lento ou sem ligar", href: "/imac" },
+  { texto: "Celular Android com tela ou bateria", href: "/android" },
   { texto: "HD ou SSD não reconhece", href: "/recuperacaodados" },
   { texto: "Quero trocar para SSD", href: "/manutencao" },
   { texto: "PS5, Xbox ou controle com defeito", href: "/assistenciagames" },
   { texto: "Montar um PC gamer", href: "/montagempc" },
-  { texto: "Toner e impressora", href: "/tonner" },
+  { texto: "Toner e impressora", href: "/toner" },
   { texto: "Vender meu equipamento", href: "/consignacao" },
 ];
 
@@ -165,22 +168,24 @@ const ESPECIALIDADES: Especialidade[] = [
     mensagem: "Olá! Vim pela página de Especialidades. Preciso de conserto de computador/notebook.",
   },
   {
-    titulo: "Reparo Apple: iPhone, MacBook e iPad",
+    titulo: "Serviços Apple e celular Android",
     resumo:
-      "Troca de tela e bateria de iPhone em até 3 horas e reparo de placa lógica de MacBook, feitos na nossa bancada em Campinas.",
+      "Especialista em Apple, com assistência especializada e independente. Também faz celular Android. Reparo em média 60 minutos, conforme o defeito e a peça. Parcelamento em até 12x sem juros.",
     itens: [
-      "Troca de tela de iPhone com True Tone",
-      "Troca de bateria de iPhone, iPad e MacBook",
-      "Reparo de placa lógica de MacBook",
-      "Apple Watch, iMac e Mac mini",
+      "iPhone, iPad, MacBook, iMac, Mac mini e Apple Watch",
+      "Celular Android: tela, bateria, carga e líquido",
+      "Orçamento no WhatsApp antes de abrir",
+      "Preço confirmado pelo WhatsApp",
     ],
     imagem: "/images/apple/iphone/iphone-reparo-bancada.png",
     alt: "Reparo de iPhone na bancada da Balão da Informática",
     href: "/reparoapple",
     cta: "Ver reparo Apple",
     links: [
-      { rotulo: "Tela e bateria de iPhone", href: "/telaiphone" },
-      { rotulo: "Especialista Apple", href: "/wendell/apple" },
+      { rotulo: "MacBook", href: "/macbook" },
+      { rotulo: "iMac", href: "/imac" },
+      { rotulo: "iPhone", href: "/iphone" },
+      { rotulo: "Android", href: "/android" },
     ],
     mensagem: "Olá! Vim pela página de Especialidades. Preciso de reparo em aparelho Apple.",
   },
@@ -261,12 +266,13 @@ const ESPECIALIDADES: Especialidade[] = [
 
 const MAIS_SERVICOS = [
   { titulo: "Assistência de games", texto: "PS5, Xbox, Nintendo e controles", href: "/assistenciagames", icone: Gamepad2 },
-  { titulo: "Toners e impressão", texto: "Toner, cartucho original e impressora", href: "/tonner", icone: Printer },
+  { titulo: "Toners e impressão", texto: "Toner, cartucho original e impressora", href: "/toner", icone: Printer },
   { titulo: "Consignação", texto: "A loja vende o seu equipamento", href: "/consignacao", icone: HandCoins },
   { titulo: "Atendimento urgente", texto: "Prioridade para resolver no mesmo dia", href: "/urgente", icone: Zap },
   { titulo: "Monte seu PC", texto: "Escolha peça por peça com o preço na tela", href: "/monteseupc", icone: Cpu },
   { titulo: "Atendimento regional", texto: "Motoboy na Região de Campinas", href: "/regiao", icone: Truck },
   { titulo: "Sites e sistemas", texto: "Site, loja virtual e sistema sob medida", href: "/sistemas", icone: Briefcase },
+  { titulo: "Licenças Microsoft", texto: "Windows, Windows Server e Office", href: "/microsoft", icone: Key },
   { titulo: "Manutenção preventiva", texto: "Limpeza, pasta térmica e revisão", href: "/manutencao", icone: Wrench },
 ];
 
@@ -299,7 +305,7 @@ const FAQS = [
   {
     question: "Vocês trocam tela e bateria de iPhone em Campinas?",
     answer:
-      "Sim. A troca de tela (com True Tone) e de bateria de iPhone é feita na bancada da loja no Cambuí, em até 3 horas. Também fazemos reparo de placa lógica de MacBook e atendemos iPad, iMac, Mac mini e Apple Watch.",
+      "Sim. iPhone, MacBook, iMac, iPad, Mac mini e Apple Watch, com assistência especializada e independente. O reparo é rápido: em média 60 minutos, conforme o defeito e a peça. Parcelamento em até 12x sem juros. Preço confirmado pelo WhatsApp. A mesma bancada atende celular Android.",
   },
   {
     question: "Quanto tempo leva o conserto de um notebook?",

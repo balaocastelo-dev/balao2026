@@ -368,7 +368,7 @@ export default function EnviarPorEmail({
 
         <div className="border-t border-[#e3e3e3] px-4 py-3 flex flex-wrap items-center gap-2 justify-between">
           <p className="text-[11px] text-[#5f6368]">
-            Sai de vendas@balao.info. A resposta do cliente chega no balaocastelo@gmail.com, e a loja recebe uma cópia.
+            Sai pelo Gmail da loja (balaocastelo@gmail.com). A resposta do cliente chega lá, e a loja recebe uma cópia.
           </p>
           {erro && <p className="w-full text-xs text-red-600 font-semibold">⛔ {erro}</p>}
           <div className="flex gap-2 ml-auto">

@@ -6,9 +6,31 @@ import { Trash2, ArrowRight, ShoppingBag, Truck, CreditCard, User, Check, Chevro
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ApplyCoupon from "@/components/ApplyCoupon";
+import { useEhApp } from "@/lib/useEhApp";
+import { DESCONTO_APP_PIX, emCentavos, ROTULO_APP_PIX } from "@/lib/app-balao";
 import { calculateShipping as getShippingOptions } from "@/lib/shipping";
+import { quedaDoProduto } from "@/lib/precos/queda";
+import type { Product } from "@/lib/utils";
+
+const reaisBR = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+/** Preço do item no carrinho; em queda de preço mostra o "de" riscado. */
+function PrecoDoItem({ item, pequeno = false }: { item: Product; pequeno?: boolean }) {
+  const queda = quedaDoProduto(item);
+  return (
+    <span className="flex flex-col items-end leading-tight">
+      {queda && (
+        <s className={`${pequeno ? "text-[10px]" : "text-xs"} text-gray-400`}>{reaisBR(queda.de)}</s>
+      )}
+      <span className={`${pequeno ? "text-xs" : ""} font-bold text-[#E60012]`}>{item.price}</span>
+      {queda && (
+        <span className={`${pequeno ? "text-[10px]" : "text-xs"} font-semibold text-emerald-600`}>-{queda.porcentagem}% no Pix</span>
+      )}
+    </span>
+  );
+}
 
 type ShippingOption = {
   name: string;
@@ -17,8 +39,19 @@ type ShippingOption = {
 };
 
 export default function CartPage() {
-  const { items, removeFromCart, cartTotal, clearCart } = useCart();
+  const { items, removeFromCart, cartTotal, clearCart, atualizarPrecos, aplicarPrecosDoServidor } = useCart();
   const router = useRouter();
+  const [avisoDePreco, setAvisoDePreco] = useState("");
+
+  // O carrinho fica guardado no navegador: ao abrir esta página, os preços
+  // são trocados pelos de agora (ex.: produto que entrou em queda de preço).
+  useEffect(() => {
+    atualizarPrecos().then((mudaram) => {
+      if (mudaram.length > 0) {
+        setAvisoDePreco(`Atualizamos o preço de ${mudaram.length === 1 ? "1 item" : `${mudaram.length} itens`} para o valor de hoje do site.`);
+      }
+    });
+  }, [atualizarPrecos]);
   
   const [step, setStep] = useState<number>(1);
   const [loading, setLoading] = useState(false);
@@ -27,7 +60,12 @@ export default function CartPage() {
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [appliedCouponCode, setAppliedCouponCode] = useState("");
 
-  const finalTotal = Math.max(0, cartTotal - couponDiscount);
+  // No app, 15% a mais de desconto no Pix sobre o subtotal. O servidor recalcula
+  // esse mesmo desconto no checkout (lib/app-balao.ts), então os dois batem.
+  const ehApp = useEhApp();
+  const descontoApp = ehApp ? emCentavos(cartTotal * DESCONTO_APP_PIX) : 0;
+
+  const finalTotal = Math.max(0, cartTotal - couponDiscount - descontoApp);
   const [shippingOptions, setShippingOptions] = useState<ShippingOption[] | null>(null);
   const [shippingSelected, setShippingSelected] = useState<ShippingOption | null>(null);
   const totalWithShipping = Math.max(0, finalTotal + (shippingSelected?.cost ?? 0));
@@ -212,6 +250,13 @@ export default function CartPage() {
             // Pass orderId, total and customer name for Pix generation
             const totalToPix = typeof result.total === "number" ? result.total : totalWithShipping;
             router.push(`/thank-you?orderId=${result.orderId}&total=${totalToPix}&name=${encodeURIComponent(formData.name)}`);
+        } else if (response.status === 409 && Array.isArray(result.itens)) {
+            // O site reprecificou pelo banco: troca os preços do carrinho e
+            // pede para o cliente conferir o total antes de confirmar de novo.
+            aplicarPrecosDoServidor(result.itens);
+            const aviso = result.message || "O preço de algum item mudou. Confira o total e confirme de novo.";
+            setAvisoDePreco(aviso);
+            alert(aviso);
         } else {
             console.error("Order failed details:", result);
             alert(`Ocorreu um erro ao processar seu pedido: ${result.error || "Erro desconhecido"}`);
@@ -233,6 +278,12 @@ export default function CartPage() {
             <ShoppingBag className="text-[#E60012]" />
             Carrinho de Compras
         </h1>
+
+        {avisoDePreco && items.length > 0 && (
+          <div role="status" className="mb-4 rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
+            {avisoDePreco}
+          </div>
+        )}
 
         {items.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm p-12 text-center">
@@ -514,7 +565,7 @@ export default function CartPage() {
                                         <h3 className="font-medium text-gray-800 line-clamp-1">{item.name}</h3>
                                         <div className="flex justify-between items-center mt-1">
                                             <span className="text-sm text-gray-500">Qtd: {item.quantity}</span>
-                                            <span className="font-bold text-[#E60012]">{item.price}</span>
+                                            <PrecoDoItem item={item} />
                                         </div>
                                     </div>
                                 </div>
@@ -586,7 +637,7 @@ export default function CartPage() {
                                         </p>
                                         <div className="flex justify-between items-center">
                                             <span className="text-xs text-gray-500">Qtd: {item.quantity}</span>
-                                            <span className="text-xs font-bold text-[#E60012]">{item.price}</span>
+                                            <PrecoDoItem item={item} pequeno />
                                         </div>
                                     </div>
                                     <button 
@@ -615,6 +666,13 @@ export default function CartPage() {
                             <div className="flex justify-between text-green-600 font-medium">
                                 <span>Desconto ({appliedCouponCode})</span>
                                 <span>- {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(couponDiscount)}</span>
+                            </div>
+                        )}
+
+                        {descontoApp > 0 && (
+                            <div className="flex justify-between text-[#E60012] font-medium">
+                                <span>Desconto do app ({ROTULO_APP_PIX})</span>
+                                <span>- {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(descontoApp)}</span>
                             </div>
                         )}
 

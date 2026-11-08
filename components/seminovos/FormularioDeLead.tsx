@@ -1,5 +1,6 @@
 "use client";
 
+import { comOrigemDaPagina } from "@/lib/whatsapp/origem";
 import { useEffect, useId, useRef, useState } from "react";
 import { Check, MessageCircle } from "lucide-react";
 import { ORCAMENTOS, USOS, type Interesse } from "@/lib/seminovos/tipos";
@@ -90,7 +91,7 @@ export default function FormularioDeLead({
 
     const preferencias = [livre.trim(), anexo].filter(Boolean).join(" — ");
     const pedido = { nome, interesse, uso: uso || undefined, orcamento: orcamento || undefined, preferencias: preferencias || undefined, aparelhoNome: aparelho?.nome };
-    const wa = linkDoWhatsApp(mensagemDoPedido(pedido));
+    const wa = comOrigemDaPagina(linkDoWhatsApp(mensagemDoPedido(pedido)), "Seminovos");
 
     // Abre o WhatsApp ainda dentro do clique (fora dele o navegador bloqueia).
     // (Sem "noopener" no terceiro argumento: com ele o navegador devolve null

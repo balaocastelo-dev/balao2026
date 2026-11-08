@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const canonical = `https://www.balao.info/bairro/${neighborhood.slug}`;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     keywords: neighborhood.localKeywords,
     alternates: { canonical },

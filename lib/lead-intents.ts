@@ -50,7 +50,7 @@ export const LEAD_INTENTS: LeadIntent[] = [
       "Muita gente procura solução para PC lento quando já perdeu tempo demais. Essa é uma busca quente e com chance alta de conversão.",
     city: "Campinas",
     serviceLabel: "Otimização e Upgrade",
-    primaryHref: "/manutencao",
+    primaryHref: "/upgrade-ssd",
     problems: [
       "Computador demora para ligar",
       "Sistema trava com frequência",
@@ -106,7 +106,7 @@ export const LEAD_INTENTS: LeadIntent[] = [
       "Quem quebra a tela do iPhone normalmente busca solução no mesmo dia. Essa é uma das buscas mais quentes para reparo Apple.",
     city: "Campinas",
     serviceLabel: "Reparo Apple",
-    primaryHref: "/reparoapple",
+    primaryHref: "/iphone",
     problems: [
       "Tela trincada ou sem imagem",
       "Touch falhando",

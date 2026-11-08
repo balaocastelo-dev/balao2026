@@ -1,11 +1,11 @@
-"""Testes do trabalhador da JUL.IA sem Ollama, sem Bling e sem VPS de verdade.
+"""Testes do trabalhador da JUL.IA sem Ollama, sem MEU BLING e sem VPS de verdade.
 
     cd scripts/agente-local && python -m unittest discover -s testes -v
 
 O modelo de linguagem é trocado por um roteiro (FalsoOllama): a cada chamada
 ele devolve a próxima "fala" combinada. Assim dá para provar as travas que não
 dependem do modelo: preço inventado não sai, venda sem "sim" não sai, CPF
-inválido não entra, Bling simulado no modo teste, etc.
+inválido não entra, MEU BLING simulado no modo teste, etc.
 """
 from __future__ import annotations
 
@@ -20,10 +20,10 @@ AQUI = Path(__file__).resolve().parent
 sys.path.insert(0, str(AQUI.parent))
 
 import regras as R  # noqa: E402
-from bling import Bling  # noqa: E402
 from catalogo import Catalogo, preco, reais  # noqa: E402
 from cerebro import Atendimento  # noqa: E402
 from rede import ErroHttp  # noqa: E402
+from sistema import Sistema, caminhos_da_chave, id_externo, mensagem_de_erro  # noqa: E402
 
 AMOSTRA = json.loads((AQUI / "catalogo-amostra.json").read_text(encoding="utf-8"))
 CPF_BOM = "52998224725"  # CPF de exemplo com dígitos válidos (não é de ninguém)
@@ -65,10 +65,10 @@ def trabalho(*mensagens_do_cliente, dados=None, memoria=None, primeira=False, ve
     }
 
 
-def atender(t, roteiro, cat=None):
+def atender(t, roteiro, cat=None, sistema=None):
     o = FalsoOllama(roteiro)
     a = Atendimento(trabalho=t, ollama=o, modelo="qwen3:14b", catalogo=cat or catalogo(),
-                    bling=Bling("/nao/existe.json", simular=True), registrar=lambda *_: None)
+                    sistema=sistema or Sistema("/nao/existe.txt", simular=True), registrar=lambda *_: None)
     return a.responder(), o
 
 
@@ -223,6 +223,55 @@ class TestAtendimento(unittest.TestCase):
         self.assertIn("Pedido nº TESTE-", r["respostas"][-1]["texto"])
         self.assertIn("retirada", r["respostas"][-1]["texto"])
         self.assertIn("venda nº", r["transferir"]["motivo"])
+
+    def _sistema_de_mentira(self, respostas):
+        chave = Path(tempfile.mkdtemp()) / "chave.txt"
+        chave.write_text("k", encoding="ascii")
+        chamadas = []
+
+        def http(url, metodo="GET", dados=None, cabecalhos=None, espera=30):
+            chamadas.append(dados)
+            r = respostas.pop(0)
+            if isinstance(r, Exception):
+                raise r
+            return r
+
+        return Sistema(str(chave), http=http, dormir=lambda s: None), chamadas
+
+    def test_orcamento_e_venda_de_verdade_no_meu_bling(self):
+        nid = self.note["id"]
+        doc = lambda i, n: {"documento": {"id": i, "numero": n}, "criada": True}  # noqa: E731
+        s, chamadas = self._sistema_de_mentira([doc(31, 501), doc(31, 501), doc(32, 9001)])
+        roteiro = lambda: [chamada("emitir_orcamento", itens=[{"id": nid, "quantidade": 1}]), fala("Posso fechar?")]  # noqa: E731
+        r1, _ = atender(trabalho("quero esse"), roteiro(), self.cat, sistema=s)
+        self.assertEqual(r1["acoes"][0]["sistemaId"], "31")
+        self.assertNotIn("blingId", r1["acoes"][0])
+        self.assertEqual(r1["acoes"][0]["numero"], "501")
+        self.assertNotIn("(teste)", r1["respostas"][-1]["texto"])
+        self.assertEqual(chamadas[0]["tipo"], "ORCAMENTO")
+        self.assertEqual(chamadas[0]["itens"][0]["siteId"], nid)
+        # O mesmo trabalho refeito (outro id de trabalho) manda o mesmo idExterno.
+        r2, _ = atender({**trabalho("quero esse"), "id": "t2"}, roteiro(), self.cat, sistema=s)
+        self.assertEqual(chamadas[0]["idExterno"], chamadas[1]["idExterno"])
+        self.assertTrue(chamadas[0]["idExterno"].startswith("julia-orc-"))
+        # Venda a partir do orçamento: PEDIDO com idExterno ligado ao orçamento.
+        dados = {"nome": "Thiago Teste", "pagamento": "pix", "entrega": "retirada", "cpf_cnpj": CPF_BOM}
+        r3, _ = atender(trabalho("sim, pode fechar", dados=dados, memoria=r2["memoria"]),
+                        [chamada("emitir_venda"), fala("Obrigada!")], self.cat, sistema=s)
+        self.assertEqual(r3["acoes"][0], {**r3["acoes"][0], "tipo": "venda", "sistemaId": "32", "numero": "9001"})
+        self.assertEqual(chamadas[2]["tipo"], "PEDIDO")
+        self.assertTrue(chamadas[2]["idExterno"].startswith("julia-ped-"))
+        self.assertTrue(6 <= len(chamadas[2]["idExterno"]) <= 40)
+        self.assertEqual(chamadas[2]["cliente"]["documento"], CPF_BOM)
+        self.assertIn("Pix", chamadas[2]["observacoes"])
+
+    def test_meu_bling_recusou_chama_vendedor(self):
+        dados = {"nome": "Thiago Teste", "pagamento": "pix", "entrega": "retirada", "cpf_cnpj": CPF_BOM}
+        s, _ = self._sistema_de_mentira([ErroHttp(422, json.dumps({"erro": "item sem estoque"}), "x")])
+        r, _ = atender(trabalho("sim, pode fechar", dados=dados, memoria=self._com_orcamento()),
+                       [chamada("emitir_venda"), fala("Um vendedor vai finalizar.")], self.cat, sistema=s)
+        self.assertEqual(r["acoes"][0]["erro"], "MEU BLING recusou (422): item sem estoque")
+        self.assertIn("não entrou no MEU BLING", r["transferir"]["motivo"])
 
     def test_pedido_inventado_pelo_modelo_nao_sai(self):
         r, _ = atender(trabalho("e a garantia?", memoria=self._com_orcamento()), [
@@ -546,64 +595,157 @@ class TestPrioridadeNaPlaca(unittest.TestCase):
         self.assertEqual(fabrica_que_nao_cede(pasta), QUEM_CEDE[1:])
 
 
-class TestBling(unittest.TestCase):
+class TestSistema(unittest.TestCase):
+    """MEU BLING pelo site, com rede de mentira (nenhuma chamada de verdade)."""
+
+    CHAVE = "chave-de-mentira-123"
+
     def setUp(self):
-        self.tok = Path(tempfile.mkdtemp()) / "bling_tokens.json"
-        self.tok.write_text(json.dumps({"access_token": "abc"}))
+        self.casa = Path(tempfile.mkdtemp())
+        (self.casa / ".balao-arena").mkdir()
+        (self.casa / ".balao-arena" / "chave.txt").write_text(self.CHAVE + "\n", encoding="ascii")
         self.chamadas = []
         self.respostas = []
 
     def http(self, url, metodo="GET", dados=None, cabecalhos=None, espera=30):
-        self.chamadas.append((metodo, url, dados, cabecalhos))
+        self.chamadas.append((metodo, url, dados, cabecalhos, espera))
         r = self.respostas.pop(0)
         if isinstance(r, Exception):
             raise r
         return r
 
-    def bling(self):
-        return Bling(str(self.tok), http=self.http, dormir=lambda s: None, vendedor_id=123)
+    def sistema(self, **kw):
+        return Sistema(http=self.http, dormir=lambda s: None, base=self.casa, vendedor_id=7, **kw)
 
-    def test_proposta(self):
-        self.respostas = [{"data": [{"id": 77}]}, {"data": {"id": 9}}, {"data": {"numero": 14400}}]
-        b = self.bling()
-        c = b.contato_para({"cpf_cnpj": CPF_BOM}, "5519984515960")
-        p = b.criar_proposta(c, [{"id": "1", "nome": "Notebook", "quantidade": 1, "valor": 10.5}], observacoes="o", observacao_interna="i")
-        self.assertEqual(p, {"id": 9, "numero": "14400"})
-        metodo, url, corpo, cab = self.chamadas[1]
-        self.assertEqual(metodo, "POST")
-        self.assertTrue(url.endswith("/propostas-comerciais"))
-        self.assertEqual(corpo["contato"], {"id": 77})
-        self.assertEqual(corpo["itens"][0]["produto"], {"descricao": "Notebook"})
-        self.assertEqual(corpo["itens"][0]["codigo"], "SITE-1")
-        self.assertEqual(corpo["vendedor"], {"id": 123})
-        self.assertEqual(cab["Authorization"], "Bearer abc")
+    def resposta(self, ident=41, numero=1201, criada=True):
+        return {"documento": {"id": ident, "numero": numero, "tipo": "PEDIDO", "total": 21, "situacao": {"nome": "Em aberto"}},
+                "criada": criada}
 
-    def test_pedido_com_parcela_quando_a_conta_exige(self):
-        exige = ErroHttp(400, json.dumps({"error": {"description": "Informe as parcelas"}}), "x")
-        self.respostas = [exige, {"data": [{"id": 5, "descricao": "PIX"}]}, {"data": {"id": 3}}, {"data": {"numero": 24900}}]
-        p = self.bling().criar_pedido(1, [{"id": "1", "nome": "N", "quantidade": 2, "valor": 10}], observacoes="o",
-                                      observacoes_internas="i", pagamento="pix")
-        self.assertEqual(p["numero"], "24900")
-        corpo = self.chamadas[2][2]
-        self.assertEqual(corpo["parcelas"][0]["valor"], 20)
-        self.assertEqual(corpo["parcelas"][0]["formaPagamento"], {"id": 5})
+    def test_cliente_monta_o_objeto_e_valida_o_documento(self):
+        s = self.sistema()
+        c = s.contato_para({"nome": "Fulano de Tal", "cpf_cnpj": CPF_BOM, "cep": "13025-001", "uf": "sp",
+                            "cidade": "Campinas"}, "5519984515960")
+        self.assertEqual(c["nome"], "Fulano de Tal")
+        self.assertEqual(c["documento"], CPF_BOM)
+        self.assertEqual(c["telefone"], "19984515960")
+        self.assertEqual((c["cep"], c["uf"], c["cidade"]), ("13025001", "SP", "Campinas"))
+        for k in ("email", "endereco", "numero", "complemento", "bairro"):
+            self.assertIn(k, c)
+        self.assertEqual(s.contato_para({"cpf_cnpj": "52998224724"}, "5519984515960")["documento"], "",
+                         "CPF inválido não vai para o cadastro")
+        self.assertEqual(s.contato_para({}, "5519984515960")["nome"], "Cliente WhatsApp 5960")
+        self.assertEqual(self.chamadas, [], "montar o cliente não chama a rede")
 
-    def test_401_espera_a_sentinela_e_nunca_renova(self):
-        self.respostas = [ErroHttp(401, "invalid_token", "x"), {"data": []}]
-        self.bling().achar_contato(documento=CPF_BOM)
-        self.assertEqual(len(self.chamadas), 2)
-        self.assertNotIn("oauth", " ".join(c[1] for c in self.chamadas))
-        self.assertEqual(json.loads(self.tok.read_text()), {"access_token": "abc"}, "o arquivo de tokens não é tocado")
+    def test_pedido_vai_para_o_site_com_a_chave_e_siteId(self):
+        self.respostas = [self.resposta()]
+        s = self.sistema()
+        c = s.contato_para({"nome": "Fulano de Tal", "cpf_cnpj": CPF_BOM}, "5519984515960")
+        p = s.criar_pedido(c, [{"id": "SITE-55", "nome": "Notebook", "quantidade": 2, "valor": 10.499}],
+                           observacoes="o", observacoes_internas="i", pagamento="pix", id_externo="julia-ped-abc123")
+        self.assertEqual(p, {"id": 41, "numero": "1201", "criada": True})
+        metodo, url, corpo, cab, espera = self.chamadas[0]
+        self.assertEqual((metodo, url), ("POST", "https://www.balao.info/api/pc/sistema/documentos"))
+        self.assertEqual(cab, {"Authorization": f"Bearer {self.CHAVE}"})
+        self.assertLessEqual(espera, 30)
+        self.assertEqual(corpo["tipo"], "PEDIDO")
+        self.assertEqual(corpo["agente"], "JUL.IA")
+        self.assertEqual(corpo["idExterno"], "julia-ped-abc123")
+        self.assertEqual(corpo["vendedorId"], 7)
+        self.assertEqual(corpo["cliente"]["documento"], CPF_BOM)
+        self.assertEqual(corpo["itens"], [{"siteId": "55", "nome": "Notebook", "quantidade": 2, "valor": 10.5}])
+        self.assertEqual((corpo["observacoes"], corpo["observacoesInternas"]), ("o", "i"))
 
-    def test_mensagem_de_erro_legivel(self):
-        from bling import mensagem_de_erro
+    def test_orcamento_e_tipo_ORCAMENTO(self):
+        self.respostas = [self.resposta(ident=9, numero=77)]
+        s = self.sistema()
+        p = s.criar_proposta(s.contato_para({}, "5519984515960"), [{"id": "3", "nome": "N", "quantidade": 1, "valor": 5}],
+                             observacoes="o", observacao_interna="i", id_externo="julia-orc-xyz789")
+        self.assertEqual(p["numero"], "77")
+        self.assertEqual(self.chamadas[0][2]["tipo"], "ORCAMENTO")
+        self.assertEqual(self.chamadas[0][2]["itens"][0]["siteId"], "3")
 
-        e = ErroHttp(400, json.dumps({"error": {"description": "Contato inválido", "fields": [{"msg": "CPF já existe"}]}}), "x")
-        self.assertIn("Contato inválido; CPF já existe", mensagem_de_erro(e))
+    def test_id_externo(self):
+        a = id_externo("orc", "5519984515960@c.us", "2026-10-25", "[[1,1,10]]")
+        self.assertTrue(a.startswith("julia-orc-"))
+        self.assertTrue(6 <= len(a) <= 40, a)
+        self.assertRegex(a, r"^[A-Za-z0-9_-]+$")
+        self.assertEqual(a, id_externo("orc", "5519984515960@c.us", "2026-10-25", "[[1,1,10]]"), "o mesmo pedido, o mesmo id")
+        self.assertNotEqual(a, id_externo("orc", "5519984515960@c.us", "2026-10-25", "[[1,2,10]]"))
+        self.assertEqual(id_externo("ped", "t1"), "julia-ped-t1")
+        self.assertTrue(6 <= len(id_externo("ped", "x" * 100)) <= 40)
+
+    def test_repetir_manda_o_mesmo_idExterno_e_aceita_o_documento_existente(self):
+        self.respostas = [ErroHttp(503, json.dumps({"erro": "sistema fora do ar"}), "x"), self.resposta(),
+                          self.resposta(criada=False)]
+        s = self.sistema()
+        c = s.contato_para({}, "5519984515960")
+        itens = [{"id": "1", "nome": "N", "quantidade": 1, "valor": 10}]
+        p1 = s.criar_pedido(c, itens, observacoes="", observacoes_internas="")
+        p2 = s.criar_pedido(c, itens, observacoes="", observacoes_internas="")
+        ids = [ch[2]["idExterno"] for ch in self.chamadas]
+        self.assertEqual(len(set(ids)), 1, "fora do ar + nova tentativa + repetição: sempre o mesmo idExterno")
+        self.assertEqual(p1["id"], p2["id"])
+        self.assertFalse(p2["criada"])
+
+    def test_mensagens_de_erro(self):
+        e422 = ErroHttp(422, json.dumps({"erro": "produto 55 não existe no site"}), "x")
+        self.assertEqual(mensagem_de_erro(e422), "MEU BLING recusou (422): produto 55 não existe no site")
+        self.assertIn("fora do ar", mensagem_de_erro(ErroHttp(503, json.dumps({"erro": "sem conexão"}), "x")))
+        self.assertIn("vigia.py --parear", mensagem_de_erro(ErroHttp(401, "{}", "x")))
+        self.assertEqual(mensagem_de_erro(ErroHttp(500, "html", "x")), "MEU BLING respondeu 500")
+        self.assertIn("demorou", mensagem_de_erro(TimeoutError("t")))
+
+    def test_erro_do_sistema_sobe_para_a_julia(self):
+        self.respostas = [ErroHttp(422, json.dumps({"erro": "item sem preço"}), "x")]
+        s = self.sistema()
+        with self.assertRaises(ErroHttp):
+            s.criar_pedido(s.contato_para({}, "1"), [{"id": "1", "nome": "N", "quantidade": 1, "valor": 1}],
+                           observacoes="", observacoes_internas="")
+        self.assertEqual(len(self.chamadas), 1, "422 não repete")
+
+    def test_sem_chave_explica_o_que_fazer_e_nao_chama_a_rede(self):
+        vazia = Path(tempfile.mkdtemp())
+        s = Sistema(http=self.http, base=vazia)
+        r = s.conferir()
+        self.assertFalse(r["chave_lida"])
+        self.assertIn("vigia.py --parear", r["erro"])
+        self.assertIn("painel/arena", r["erro"])
+        with self.assertRaises(RuntimeError) as cx:
+            s.criar_pedido({}, [], observacoes="", observacoes_internas="")
+        self.assertIn("chave do PC da loja", str(cx.exception))
+        self.assertEqual(self.chamadas, [])
+
+    def test_conferir_le_o_status_e_nunca_mostra_a_chave(self):
+        self.respostas = [{"ok": True, "sistema": {"ligado": True, "motivo": None}}]
+        r = self.sistema().conferir()
+        self.assertTrue(r["ligado"])
+        self.assertNotIn("erro", r)
+        self.assertEqual(self.chamadas[0][:2], ("GET", "https://www.balao.info/api/pc/sistema/status"))
+        self.assertNotIn(self.CHAVE, json.dumps(r), "a chave não aparece no resultado")
+        self.respostas = [ErroHttp(401, "{}", "x")]
+        r = self.sistema().conferir()
+        self.assertIn("recusou a chave", r["erro"])
+        self.assertNotIn(self.CHAVE, json.dumps(r))
+        self.respostas = [{"ok": True, "sistema": {"ligado": False, "motivo": "manutenção"}}]
+        self.assertIn("manutenção", self.sistema().conferir()["erro"])
+
+    def test_chave_pelo_config_do_vigia_ou_caminho_explicito(self):
+        outra = Path(tempfile.mkdtemp()) / "minha.txt"
+        outra.write_text("chave-b", encoding="ascii")
+        (self.casa / "balao-arena-vigia").mkdir()
+        (self.casa / "balao-arena-vigia" / "config.json").write_text(json.dumps({"arquivo_chave": str(outra)}))
+        self.assertEqual(caminhos_da_chave(None, self.casa)[0], outra)
+        self.respostas = [{"sistema": {"ligado": True}}]
+        self.sistema().conferir()
+        self.assertEqual(self.chamadas[0][3], {"Authorization": "Bearer chave-b"})
+        self.assertEqual(caminhos_da_chave(str(outra)), [outra])
 
     def test_simulado_nao_chama_nada(self):
-        b = Bling(str(self.tok), simular=True, http=self.http)
-        self.assertTrue(b.criar_pedido(1, [], observacoes="", observacoes_internas="")["numero"].startswith("TESTE-"))
+        s = Sistema(simular=True, http=self.http, base=Path(tempfile.mkdtemp()))
+        p = s.criar_pedido(s.contato_para({}, "1"), [], observacoes="", observacoes_internas="")
+        self.assertTrue(p["numero"].startswith("TESTE-"))
+        self.assertTrue(p["simulado"])
+        self.assertTrue(s.criar_proposta({}, [], observacoes="", observacao_interna="")["simulado"])
         self.assertEqual(self.chamadas, [])
 
 
@@ -634,7 +776,7 @@ class TestTrabalhador(unittest.TestCase):
             def midia(self, ident):
                 return b"OggS-falso", "audio/ogg"
 
-        cfg = {"ollama_url": "http://x", "modelo": "qwen3:14b", "pasta_dados": tempfile.mkdtemp(), "bling_tokens": "/x",
+        cfg = {"ollama_url": "http://x", "modelo": "qwen3:14b", "pasta_dados": tempfile.mkdtemp(), "arquivo_chave_pc": "/x",
                "respeitar_placa": False, "contexto": 4096}
         vps = VpsFalsa()
         t = julia.Trabalhador(cfg, vps)
@@ -663,15 +805,30 @@ class TestTrabalhador(unittest.TestCase):
         self.assertIn("Não liste os produtos", primeira[-1]["content"], "e o recado para não repetir os cartões")
         self.assertEqual(vps.batidas[0]["modelo"], "qwen3:14b")
 
-    def test_bling_simulado_no_modo_teste(self):
+    def test_sistema_simulado_no_modo_teste(self):
         import julia
 
-        cfg = {"ollama_url": "http://x", "modelo": "m", "pasta_dados": tempfile.mkdtemp(), "bling_tokens": "/x", "respeitar_placa": False}
+        cfg = {"ollama_url": "http://x", "modelo": "m", "pasta_dados": tempfile.mkdtemp(), "arquivo_chave_pc": "/x",
+               "respeitar_placa": False, "vendedor_id_sistema": 12}
         t = julia.Trabalhador(cfg, None)
-        self.assertTrue(t.bling_para({"config": {"publico": "teste"}}).simular)
-        self.assertFalse(t.bling_para({"config": {"publico": "clientes"}}).simular)
-        t.cfg["bling_no_teste"] = True
-        self.assertFalse(t.bling_para({"config": {"publico": "teste"}}).simular)
+        self.assertTrue(t.sistema_para({"config": {"publico": "teste"}}).simular)
+        real = t.sistema_para({"config": {"publico": "clientes"}})
+        self.assertFalse(real.simular)
+        self.assertEqual(real.vendedor_id, 12)
+        self.assertEqual(real.site, "https://www.balao.info")
+        t.cfg["sistema_no_teste"] = True
+        self.assertFalse(t.sistema_para({"config": {"publico": "teste"}}).simular)
+
+    def test_config_sem_bling(self):
+        import config as C
+
+        for velho in ("bling_tokens", "bling_vendedor_id", "bling_no_teste"):
+            self.assertNotIn(velho, C.PADRAO)
+        self.assertIn("vendedor_id_sistema", C.PADRAO)
+        self.assertIn("sistema_no_teste", C.PADRAO)
+        exemplo = json.loads((AQUI.parent / "config.exemplo.json").read_text(encoding="utf-8"))
+        self.assertFalse([k for k in exemplo if "bling" in k])
+        self.assertFalse((AQUI.parent / "bling.py").exists(), "bling.py saiu")
 
 
 if __name__ == "__main__":

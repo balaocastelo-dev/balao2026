@@ -7,7 +7,9 @@ import FileiraDeProdutos from "@/components/catalogo/FileiraDeProdutos";
 import { GradeDeQuedas } from "@/components/home/HomeQuedaDePreco";
 import CapaArtigo from "@/components/blog/CapaArtigo";
 import JsonLd, {
+  generateArticleSchema,
   generateBreadcrumbSchema,
+  generateCollectionSchema,
   generateFAQSchema,
   generateItemListSchema,
   generateOrganizationSchema,
@@ -24,6 +26,7 @@ import PalcoDoTopo from "./PalcoDoTopo";
 import AssistenteDeOrcamento from "./AssistenteDeOrcamento";
 import ImagemComProfundidade from "./ImagemComProfundidade";
 import BarraDoCelular from "./BarraDoCelular";
+import FormularioDeRetorno from "./FormularioDeRetorno";
 import "./captacao.css";
 
 /**
@@ -87,6 +90,7 @@ function RenderSecao({
   especiais,
   origem,
   temAssistente,
+  mensagemDaPagina,
 }: {
   secao: Secao;
   indice: number;
@@ -95,6 +99,7 @@ function RenderSecao({
   especiais: Record<string, ReactNode>;
   origem: string;
   temAssistente: boolean;
+  mensagemDaPagina: string;
 }) {
   const painel = indice % 2 === 1 ? " cpt-secao--painel" : "";
   const id = `secao-${indice + 1}`;
@@ -314,7 +319,7 @@ function RenderSecao({
                 <li key={item.href}>
                   <Link href={item.href} className="cpt-vizinha h-full">
                     <span className="cpt-vizinha__foto">
-                      {item.imagem ? <Image src={item.imagem} alt="" fill sizes="88px" className="object-cover" /> : null}
+                      {item.imagem ? <Image src={item.imagem} alt={item.alt ?? ""} fill sizes="88px" className="object-cover" /> : null}
                     </span>
                     <span>
                       <span className="cpt-vizinha__nome block font-bold leading-snug text-white">{item.titulo}</span>
@@ -391,6 +396,16 @@ function RenderSecao({
         </section>
       );
     }
+
+    case "retorno":
+      return (
+        <section className={`cpt-secao${painel}`} aria-labelledby={id}>
+          <div className="cpt-miolo grid gap-8 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-start">
+            <Cabecalho id={id} titulo={secao.titulo} texto={secao.texto} />
+            <FormularioDeRetorno origem={origem} assunto={secao.assunto} mensagem={mensagemDaPagina} campos={secao.campos} />
+          </div>
+        </section>
+      );
 
     case "especial":
       return especiais[secao.id] ?? null;
@@ -491,6 +506,21 @@ export default function PaginaDeCaptacao({
                   description: pagina.seo.descricao,
                   url,
                   serviceType: pagina.seo.tipoDeServico,
+                  marca: pagina.seo.marca,
+                  catalogo: pagina.seo.catalogo,
+                }),
+              ]
+            : []),
+          ...(pagina.seo.artigo
+            ? [generateArticleSchema({ headline: pagina.seo.titulo, description: pagina.seo.descricao, url })]
+            : []),
+          ...(pagina.seo.partes?.length
+            ? [
+                generateCollectionSchema({
+                  name: pagina.seo.titulo.split("|")[0].trim(),
+                  description: pagina.seo.descricao,
+                  url,
+                  partes: pagina.seo.partes,
                 }),
               ]
             : []),
@@ -526,6 +556,7 @@ export default function PaginaDeCaptacao({
             especiais={especiais}
             origem={pagina.slug}
             temAssistente={Boolean(pagina.assistente)}
+            mensagemDaPagina={mensagem}
           />
         ))}
 
@@ -560,7 +591,11 @@ export default function PaginaDeCaptacao({
         {pagina.perguntas.length > 0 ? (
           <section className="cpt-secao cpt-secao--painel" aria-labelledby="perguntas">
             <div className="cpt-miolo grid gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
-              <Cabecalho id="perguntas" titulo="Perguntas que chegam no WhatsApp" texto="As dúvidas mais comuns de quem chega até esta página, respondidas como respondemos no balcão." />
+              <Cabecalho
+                id="perguntas"
+                titulo={pagina.tituloDasPerguntas || "Perguntas que chegam no WhatsApp"}
+                texto="As dúvidas mais comuns de quem chega até esta página, respondidas como respondemos no balcão."
+              />
               <div className="cpt-faq">
                 {pagina.perguntas.map((p, i) => (
                   <details key={p.pergunta} open={i === 0}>
@@ -596,7 +631,7 @@ export default function PaginaDeCaptacao({
           </section>
         ) : null}
 
-        <section className="cpt-secao cpt-secao--painel" aria-labelledby="fecho">
+        <section id="como-chegar" className="cpt-secao cpt-secao--painel scroll-mt-24" aria-labelledby="fecho">
           <div className="cpt-miolo grid gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-center">
             <div>
               <h2 id="fecho" className="cpt-titulo text-[2rem] sm:text-[2.75rem]">
@@ -608,6 +643,7 @@ export default function PaginaDeCaptacao({
                 {pagina.final.botao}
               </a>
             </div>
+            <div className="space-y-4">
             <ul className="space-y-4 text-[1rem] text-[var(--cpt-texto-2)]">
               <li className="flex gap-3">
                 <MapPin className="mt-0.5 h-5 w-5 flex-none text-white" aria-hidden />
@@ -629,6 +665,14 @@ export default function PaginaDeCaptacao({
                 </a>
               </li>
             </ul>
+            <iframe
+              title="Mapa da Balão da Informática Anchieta na Av. Anchieta, 789, Cambuí, Campinas"
+              src="https://maps.google.com/maps?q=Av.+Anchieta,+789,+Cambu%C3%AD,+Campinas+-+SP&output=embed"
+              className="aspect-[4/3] w-full rounded-[20px] border border-[var(--cpt-fio)]"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+            </div>
           </div>
         </section>
       </main>

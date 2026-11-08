@@ -35,8 +35,13 @@ export default function LayoutWrapper({
   // competiriam com o único botão que importa ali.
   // O Overclock (/overclock) é o sistema vendido para outras lojas: tem
   // identidade própria e não leva nada da cara da loja Balão.
+  // /mybots-app é a landing do aplicativo MyBots (visual próprio). O endereço
+  // /mybots é o Hub, via rewrite, e não passa por aqui.
   const isPaginaDeVendas =
-    pathname === "/sistemasdeia" || pathname === "/macbookm5" || pathname === "/overclock";
+    pathname === "/sistemasdeia" ||
+    pathname === "/overclock" ||
+    pathname === "/avellstorm480" ||
+    pathname === "/mybots-app";
   // O painel inteiro (/painel e tudo embaixo dele) é tela de trabalho: tem o
   // próprio menu e rola por dentro, sem o rodapé nem o botão da loja.
   const isPainel = pathname === "/painel" || pathname.startsWith("/painel/");
@@ -61,9 +66,13 @@ export default function LayoutWrapper({
       {!isRoletaPage && !isFullscreenPanel && !isPaginaDeVendas && (
         // O menu lê os filtros da URL; dentro do Suspense, só ele espera o
         // navegador — o resto da página continua saindo pronto do servidor.
-        <Suspense fallback={null}>
-          <Sidebar categories={categories} mobileOnly />
-        </Suspense>
+        // data-loja: no soubots.com a raiz é a landing e este bloco some
+        // (app/globals.css, html.soubots-raiz).
+        <div data-loja="">
+          <Suspense fallback={null}>
+            <Sidebar categories={categories} mobileOnly />
+          </Suspense>
+        </div>
       )}
       <div
         className={
@@ -95,9 +104,17 @@ export default function LayoutWrapper({
         >
           {children}
         </main>
-        {!isRoletaPage && !isFullscreenPanel && !isPaginaDeVendas && <Footer />}
+        {!isRoletaPage && !isFullscreenPanel && !isPaginaDeVendas && (
+          <div data-loja="">
+            <Footer />
+          </div>
+        )}
       </div>
-      {!isFullscreenPanel && !isPaginaDeVendas && <FloatingWhatsApp />}
+      {!isFullscreenPanel && !isPaginaDeVendas && (
+        <div data-loja="">
+          <FloatingWhatsApp />
+        </div>
+      )}
     </SidebarProvider>
   );
 }

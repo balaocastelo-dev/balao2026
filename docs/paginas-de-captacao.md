@@ -4,10 +4,34 @@ Pedido do Thiago: reformular 22 páginas (21 ficaram neste molde) do site para q
 com produtos com foto, bem preenchida, com palavras-chave para o Google e para as IAs, e que leve a
 pessoa a chamar no WhatsApp. Cada página é única.
 
+## Serviços Apple e Android (04/11/2026)
+
+O hub continua em `/reparoapple` (não abriu URL nova). MacBook, iMac e iPhone saíram de `/wendell/apple/...` para slugs curtos, com 301: `/macbook`, `/imac`, `/iphone`. Celular Android é página nova: `/android`. iPad, Mac mini e Apple Watch seguem em `/wendell/apple/...`. Tela e bateria de iPhone seguem em `/telaiphone`.
+
+Dado confirmado pelo dono e usado nas páginas: especialista em Apple; todos os serviços Apple e Android; reparo rápido em média 60 minutos, conforme o defeito e a peça; parcelamento em até 12x sem juros. O briefing de 04/11/2026 acrescenta, nas páginas de celular, diagnóstico grátis e coleta por motoboy (custo e prazo da coleta no WhatsApp). Sem "autorizada", "oficial", "credenciada" ou logo da Apple. Preço de serviço, tipo de peça e dias de garantia não são publicados: o texto fica neutro onde o briefing pedia para preencher. Hub Android: `/android`. Sem depoimento e sem número novo de avaliação.
+
+## Páginas de SEO/AEO (04/11/2026)
+
+Oito briefings entraram no mesmo molde. Onde já havia URL, o texto foi refeito nela:
+`/manutencao` (conserto por defeito), `/pcgamer`, `/montagempc` e `/toner` (o endereço antigo `/tonner` já redireciona).
+URLs novas: `/upgrade-ssd`, `/formatacao`, `/qual-pc-gamer` e uma por marca (`/notebook-dell`, `/notebook-lenovo`, `/notebook-acer`, `/notebook-hp`, `/notebook-asus`, `/notebook-samsung`).
+
+Preço de serviço, prazo fechado, FPS medido, tempo de boot e defeito “típico” de modelo não entram enquanto a loja não mandar o dado. O que falta está na descrição do PR. O formulário “Pedir retorno rápido” reaproveita `POST /api/leads/servicos`.
+
+## Licenciamento Microsoft (04/11/2026)
+
+`/microsoft` virou o hub. Os filhos são rotas próprias, então o endereço antigo continua:
+`/microsoft/windows`, `/microsoft/windows-server` e `/microsoft/office-365`.
+
+Texto confirmado pela loja: "licenças originais adquiridas de fornecedores oficiais Microsoft",
+nota fiscal de venda, 12x sem juros também para CNPJ, ativação e instalação. Não entra parceiro,
+CSP, revenda oficial, preço, certificação de técnico nem prazo de garantia.
+
 ## As páginas
 
-`/manutencao`, `/recuperacaodados`, `/reparoapple`, `/telaiphone`, `/wendell/apple`, `/assistenciagames`,
-`/montagempc`, `/pcgamer`, `/pcgamer3d`, `/notebooks`, `/carregadores`, `/tonner`, `/microsoft`,
+`/manutencao`, `/upgrade-ssd`, `/formatacao`, `/notebook-dell`, `/notebook-lenovo`, `/notebook-acer`, `/notebook-hp`, `/notebook-asus`, `/notebook-samsung`, `/qual-pc-gamer`, `/recuperacaodados`, `/reparoapple`, `/macbook`, `/imac`, `/iphone`, `/android`, `/telaiphone`, `/wendell/apple`, `/assistenciagames`,
+`/montagempc`, `/pcgamer`, `/pcgamer3d`, `/notebooks`, `/carregadores`, `/toner`, `/microsoft`,
+`/microsoft/windows`, `/microsoft/windows-server`, `/microsoft/office-365`,
 `/consignacao`, `/sistemas`, `/promocao`, `/envio-e-entrega`, `/trocas-e-devolucoes`, `/como-comprar`,
 `/sobre-a-empresa`, `/sobre-nos`.
 
@@ -40,16 +64,17 @@ próprio em `lib/servicos-e-ofertas/`); ficou a versão dela. O mesmo vale para 
   páginas pedidas no arquivo e as que dividem temas; "Antes de decidir, leia" acha os artigos do blog pelo
   assunto (etiquetas, título, endereço). No sentido contrário, as chamadas dos artigos (`lib/blog/chamadas.ts`)
   ganharam os temas carregadores, licenças, impressão e games, que levam para `/carregadores`, `/microsoft`,
-  `/tonner` e `/assistenciagames`.
+  `/toner` e `/assistenciagames`. O endereço antigo `/tonner` responde 301 para `/toner`.
 - **Velocidade:** as páginas saem prontas do servidor e são refeitas a cada 5 minutos (`revalidate = 300`),
   em vez de consultar o banco a cada visita. Antes, quase todas carregavam o catálogo inteiro (12 MB) por visita.
   O cabeçalho do site lia a URL direto e fazia as páginas estáticas saírem vazias do servidor; a leitura foi
   isolada num componente dentro de `Suspense` (`components/Header.tsx`), o que vale para o site inteiro.
 - **IA:** `/llms.txt` agora é gerado (`app/llms.txt/route.ts`) com todas as páginas, os contatos e as três
   primeiras perguntas de cada uma. O começo é o texto que estava em `public/llms.txt`.
-- **Fotos do topo:** `public/images/landing/v2/<slug>.jpg`, geradas na placa de vídeo do computador da loja
+- **Fotos do topo:** a maior parte continua em `public/images/landing/v2/<slug>.jpg`, geradas na placa de vídeo do computador da loja
   com o mesmo motor da capa do blog (Flux no ComfyUI + conferência do Ollama: sem texto, marca nem rosto).
   Script: `C:\Users\user\balao-content-factory\data\heros_landing\gerar_heros.py` (pedidos em `pedidos.json`).
+  Nove páginas usam arquivos novos em `public/images/landing/v3/` (04/11/2026): `/iphone`, `/android`, `/macbook`, `/imac`, `/reparoapple`, `/microsoft`, `/microsoft/windows`, `/microsoft/windows-server` e `/microsoft/office-365`. O `og:image` de cada uma é a foto do topo. `/android` tem hero próprio (`v3/android/android-hero.webp`). `/manutencao`, `/montagempc`, `/pcgamer`, a home e as demais páginas seguem nos arquivos antigos. Foto de produto da KaBuM, logo e capa de blog ficam de fora.
 
 ## Régua
 
@@ -72,7 +97,7 @@ recuperação de dados, percentuais e prazos da consignação, preços no texto.
 
 ## Para conferir com o Thiago
 
-- A página `/wendell/apple` diz que a Balão não é assistência autorizada Apple.
+- A página `/wendell/apple` diz que a assistência é especializada e independente, sem falar em nome do fabricante.
 - A recuperação de dados não diz se o trabalho é feito na loja ou num parceiro.
 - Troca de compra feita no balcão sem defeito: o texto diz "combinada com a loja".
 - O carrinho (`lib/shipping.ts`) ainda mostra "Entrega Flash (Campinas) — Até 24h" com um cálculo simulado,

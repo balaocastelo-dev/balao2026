@@ -22,7 +22,7 @@ import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema } from '@/
 import { getCachedCategories } from "@/lib/cache";
 
 export const metadata: Metadata = {
-  title: 'Departamentos e Categorias | Balão da Informática Campinas',
+  title: { absolute: 'Departamentos e Categorias | Balão da Informática Campinas' },
   description: 'Explore todos os departamentos de informática. Hardware, Periféricos, Computadores, Notebooks e muito mais. Encontre o que você precisa em Campinas.',
   keywords: ['departamentos informatica', 'categorias hardware', 'loja informatica campinas', 'comprar pc', 'peças computador'],
   alternates: {

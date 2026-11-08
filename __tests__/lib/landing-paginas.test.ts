@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { metadadosDaPagina } from "@/lib/landing/metadados";
 import { PAGINAS } from "@/lib/landing/paginas";
 import { montarFileiras } from "@/lib/landing/vitrine";
 import type { PaginaDeCaptacao, RegraDeVitrine } from "@/lib/landing/tipos";
@@ -26,6 +27,17 @@ const PROIBIDAS: [RegExp, string][] = [
   [/\bR\$ ?\d/i, "texto não fala preço; preço só na vitrine"],
 ];
 
+function fotosDaPagina(p: PaginaDeCaptacao): { src: string; alt?: string }[] {
+  const fotos: { src: string; alt?: string }[] = [p.hero.imagem];
+  for (const s of p.secoes) {
+    if ((s.tipo === "texto" || s.tipo === "beneficios") && s.imagem) fotos.push(s.imagem);
+    if (s.tipo === "atalhos") {
+      for (const item of s.itens) if (item.imagem) fotos.push({ src: item.imagem, alt: item.alt });
+    }
+  }
+  return fotos;
+}
+
 function textosDaPagina(p: PaginaDeCaptacao): string[] {
   const textos: string[] = [p.chamada, p.seo.titulo, p.seo.descricao, p.hero.titulo, p.hero.texto, p.hero.contexto, p.final.titulo, p.final.texto];
   for (const f of p.hero.fatos ?? []) textos.push(f.valor, f.rotulo);
@@ -35,8 +47,8 @@ function textosDaPagina(p: PaginaDeCaptacao): string[] {
 }
 
 describe("páginas de captação", () => {
-  it("são 21 e cada uma tem a rota em app/", () => {
-    expect(paginas.length).toBe(21);
+  it("cada uma tem a rota em app/", () => {
+    expect(paginas.length).toBe(37);
     for (const p of paginas) {
       expect(fs.existsSync(path.join(RAIZ, "app", p.slug, "page.tsx")), p.slug).toBe(true);
     }
@@ -70,11 +82,116 @@ describe("páginas de captação", () => {
     }
   });
 
+  it("nove páginas usam as fotos v3; as outras ficam nos arquivos antigos", () => {
+    const nove = [
+      "iphone",
+      "android",
+      "macbook",
+      "imac",
+      "reparoapple",
+      "microsoft",
+      "microsoft/windows",
+      "microsoft/windows-server",
+      "microsoft/office-365",
+    ];
+    const herois: Record<string, string> = {
+      iphone: "/images/landing/v3/iphone/telaiphone.webp",
+      android: "/images/landing/v3/android/android-hero.webp",
+      macbook: "/images/landing/v3/macbook/macbook-hero.webp",
+      imac: "/images/landing/v3/imac/imac-hero.webp",
+      reparoapple: "/images/landing/v3/reparoapple/reparoapple.webp",
+      microsoft: "/images/landing/v3/microsoft/microsoft.webp",
+      "microsoft/windows": "/images/landing/v3/microsoft/microsoft.webp",
+      "microsoft/windows-server": "/images/landing/v3/microsoft-windows-server/sistemas.webp",
+      "microsoft/office-365": "/images/landing/v3/microsoft-office-365/notebooks.webp",
+    };
+
+    for (const p of paginas) {
+      const fotos = fotosDaPagina(p);
+      if (nove.includes(p.slug)) {
+        expect(p.hero.imagem.src, p.slug).toBe(herois[p.slug]);
+        expect(p.hero.imagem.alt.length, p.slug).toBeGreaterThan(10);
+        expect(p.seo.imagem, p.slug).toBeUndefined();
+        const og = metadadosDaPagina(p).openGraph?.images;
+        const cartao = Array.isArray(og) ? og[0] : og;
+        const url = typeof cartao === "string" ? cartao : cartao?.url;
+        const alt = typeof cartao === "object" && cartao && "alt" in cartao ? cartao.alt : undefined;
+        expect(url, p.slug).toBe(p.hero.imagem.src);
+        expect(alt, p.slug).toBe(p.hero.imagem.alt);
+        for (const foto of fotos) {
+          expect(foto.src, `${p.slug} ${foto.src}`).toMatch(/^\/images\/landing\/v3\/.+\.webp$/);
+          expect(foto.alt && foto.alt.length > 10, `${p.slug} ${foto.src}`).toBeTruthy();
+        }
+      } else {
+        for (const foto of fotos) {
+          expect(foto.src.includes("/images/landing/v3/"), `${p.slug} ${foto.src}`).toBe(false);
+        }
+      }
+    }
+
+    expect(PAGINAS.manutencao.hero.imagem.src).toBe("/images/landing/v2/manutencao.jpg");
+    expect(PAGINAS.montagempc.hero.imagem.src).toBe("/images/landing/v2/montagempc.jpg");
+    expect(PAGINAS.pcgamer.hero.imagem.src).toBe("/images/landing/v2/pcgamer.jpg");
+  });
+
   it.each(paginas.map((p) => [p.slug, p] as const))("%s: sem promessa que a loja não confirmou", (_slug, p) => {
     const texto = textosDaPagina(p).join("\n");
     for (const [padrao, motivo] of PROIBIDAS) {
       const achado = texto.match(padrao);
       expect(achado ? `${achado[0]} (${motivo})` : null).toBeNull();
+    }
+  });
+
+  it("Apple e Android repetem só o que o dono confirmou", () => {
+    const slugs = ["reparoapple", "macbook", "imac", "iphone", "android"];
+    for (const slug of slugs) {
+      const pagina = PAGINAS[slug];
+      const texto = textosDaPagina(pagina).join("\n");
+      expect(texto, slug).toMatch(/em média 60 minutos/i);
+      expect(texto, slug).toMatch(/conforme o defeito e a peça/i);
+      expect(texto, slug).toMatch(/12x sem juros/);
+      expect(texto, slug).not.toMatch(/autorizad|credenciad|\boficial\b/i);
+      expect(pagina.seo.tipoDeServico, slug).toBeTruthy();
+      expect(pagina.secoes.some((s) => s.tipo === "retorno"), slug).toBe(true);
+      expect(pagina.perguntas.length, slug).toBeGreaterThanOrEqual(4);
+    }
+  });
+
+  it("licenciamento Microsoft usa só o que a loja confirmou", () => {
+    const frase = "licenças originais adquiridas de fornecedores oficiais Microsoft";
+    const proibidas: [RegExp, string][] = [
+      [/\bparceiro\b/i, "parceiro"],
+      [/\bpartner\b/i, "Partner"],
+      [/\bCSP\b/, "CSP"],
+      [/revenda (oficial|autorizada)/i, "revenda oficial ou autorizada"],
+      [/distribuidor oficial/i, "distribuidor oficial"],
+      [/autorizad/i, "autorizada"],
+      [/credenciad/i, "credenciada"],
+      [/certificad/i, "certificação"],
+      [/\[PREENCHER\]|\[CONFIRMAR\]/, "placeholder"],
+      [/\bR\$ ?\d/, "preço"],
+      [/ativador/i, "ativador"],
+      [/vital[ií]cia por/i, "vitalícia com preço"],
+    ];
+    const licencas = paginas.filter((p) => p.slug === "microsoft" || p.slug.startsWith("microsoft/"));
+    expect(licencas.map((p) => p.slug).sort()).toEqual([
+      "microsoft",
+      "microsoft/office-365",
+      "microsoft/windows",
+      "microsoft/windows-server",
+    ]);
+    for (const p of licencas) {
+      const texto = textosDaPagina(p).join("\n");
+      expect(texto, p.slug).toContain(frase);
+      expect(texto, p.slug).toContain("nota fiscal de venda");
+      expect(texto, p.slug).toContain("12x sem juros");
+      expect(p.secoes.some((s) => s.tipo === "retorno"), p.slug).toBe(true);
+      for (const [padrao, motivo] of proibidas) {
+        const achado = texto.match(padrao);
+        expect(achado ? `${p.slug}: ${achado[0]} (${motivo})` : null).toBeNull();
+      }
+      const foraDaFrase = texto.split(frase).join("");
+      expect(foraDaFrase, p.slug).not.toMatch(/oficial/i);
     }
   });
 

@@ -504,7 +504,7 @@ export default async function ServicosEOfertasPage() {
                   Balão da Informática: assistência técnica e loja de informática no Cambuí
                 </h2>
                 <p className="mt-4 leading-relaxed text-slate-300">
-                  A Balão da Informática Castelo é uma loja de informática com assistência técnica própria na{" "}
+                  A Balão da Informática Anchieta é uma loja de informática com assistência técnica própria na{" "}
                   {SITE_CONFIG.address}. Conserta notebooks, computadores, iPhones, MacBooks, iPads e videogames
                   (PlayStation, Xbox e Nintendo Switch), monta PC gamer sob medida, recupera dados de HD e SSD, faz upgrade
                   de SSD, memória e placa de vídeo, vende seminovos e consignados, cria sites e sistemas para empresas e

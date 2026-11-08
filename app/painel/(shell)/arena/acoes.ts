@@ -20,7 +20,7 @@ import {
   lancamentosEntre,
   lancarManual,
   lerConfig,
-  lerVigia,
+  lerSincronia,
   pedirVarredura,
   recalcularTudo,
   removerPiloto,
@@ -32,7 +32,9 @@ import {
   type DadosDoPiloto,
   type FiltroDeLancamentos,
 } from "@/lib/arena/dados";
-import { fotoPublica, reconstruirTelao, vigiaOnline, lerAvisos } from "@/lib/arena/estado";
+import { fotoPublica, reconstruirTelao, sistemaEmDia, lerAvisos } from "@/lib/arena/estado";
+import { sincronizarArena } from "@/lib/arena/sistema";
+import { vendedores as vendedoresDoSistema } from "@/lib/pdv/sistema";
 import { janela, mesAnterior, semanaAnterior } from "@/lib/arena/periodos";
 import { montarPlacar, sugerirMeta } from "@/lib/arena/placar";
 import { REGRAS_PADRAO } from "@/lib/arena/valores";
@@ -59,7 +61,14 @@ const mexeuNaArena = async () => {
 
 export async function carregarPainel() {
   return comSessao(async () => {
-    const [config, vigia, avisos] = await Promise.all([lerConfig({ tentarImportar: true }), lerVigia(), lerAvisos().catch(() => null)]);
+    const [config, sincronia, avisos, listaDoSistema] = await Promise.all([
+      lerConfig({ tentarImportar: true }),
+      lerSincronia(),
+      lerAvisos().catch(() => null),
+      // GET /vendedores do MEU BLING (com cópia de 5 min); fora do ar, fica a lista anotada na última leitura.
+      vendedoresDoSistema().catch(() => null),
+    ]);
+    const vendedoresSistema = listaDoSistema?.lista?.length ? listaDoSistema.lista : config.vendedoresSistema;
     const crus = config.pilotos;
     const pilotos = crus.map((p) => ({ ...p, fotoTelao: fotoPublica(p) }));
     const semana = janela("semana");
@@ -100,9 +109,12 @@ export async function carregarPainel() {
       premio: config.premio,
       whatsapp: config.whatsapp,
       avisos: avisos ? { ultimoErro: avisos.ultimoErro, ultimoEnvio: avisos.ultimoEnvio } : null,
-      vigia: { ...vigia, online: vigiaOnline(vigia.ultimaVez), temChave: Boolean(config.chaveHash), varrerDesde: config.varrerDesde },
+      sincronia: { ...sincronia, emDia: sistemaEmDia(sincronia.ultimoOk), varrerDesde: config.varrerDesde },
+      pc: { temChave: Boolean(config.chaveHash) },
       gaveta: { tipo: tipoDaGaveta(), importacaoPendente: Boolean(config.importacaoPendente) },
       vendedoresBling: config.vendedoresBling,
+      vendedoresSistema,
+      vendedoresSistemaAoVivo: Boolean(listaDoSistema?.doSistema),
       semPiloto: await vendedoresSemPiloto(crus, lancs),
       placarSemana,
       placarMes,
@@ -143,15 +155,15 @@ function nomeBonito(nome: string) {
     .join(" ");
 }
 
-/** Cria um piloto para cada vendedor do Bling que ainda não tem. */
-export async function criarPilotosDoBlingAcao(ids?: string[]) {
+/** Cria um piloto para cada vendedor do MEU BLING que ainda não tem (e que não foi ligado pelo nome). */
+export async function criarPilotosDoSistemaAcao(ids?: string[]) {
   return comSessao(async () => {
     const config = await lerConfig();
     const pilotos = config.pilotos;
-    const vendedores = config.vendedoresBling;
+    const vendedores = config.vendedoresSistema;
     const hoje = janela("mes");
     const semPiloto = await vendedoresSemPiloto(pilotos, await lancamentosEntre(mesAnterior(3).inicio, hoje.fim));
-    const ligados = new Set(pilotos.map((p) => p.blingVendedorId).filter(Boolean));
+    const ligados = new Set(pilotos.map((p) => p.sistemaVendedorId).filter(Boolean));
     const nomes = new Map(vendedores.map((v) => [v.id, v.nome]));
     const candidatos = [...new Set([...vendedores.map((v) => v.id), ...semPiloto.map((s) => s.id)])]
       .filter((id) => !ligados.has(id))
@@ -163,7 +175,7 @@ export async function criarPilotosDoBlingAcao(ids?: string[]) {
       await salvarPiloto(null, {
         nome: nome ? nomeBonito(nome) : `Vendedor ${id.slice(-4)}`,
         apelido: nome ? primeiroNome(nome) : null,
-        blingVendedorId: id,
+        sistemaVendedorId: id,
         cor: CORES_DE_KART[(n - 1) % CORES_DE_KART.length],
         kart: KARTS[(n - 1) % KARTS.length],
         numero: n,
@@ -288,15 +300,31 @@ export async function recalcularAcao() {
   });
 }
 
-/** Gera a chave nova (a antiga para de valer na hora). Aparece uma vez só. */
+/** Gera a chave nova do PC da loja (a antiga para de valer na hora). Aparece uma vez só. */
 export async function gerarChaveAcao() {
   return comSessao(() => gerarChaveDoVigia());
 }
 
+/**
+ * "Buscar desde": anota o pedido (config.varrerDesde) e já lê o MEU BLING desde
+ * a data. Se a leitura não terminar agora, o agendador (a cada 5 min) continua.
+ */
 export async function pedirVarreduraAcao(desde: string) {
   return comSessao(async () => {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(desde)) throw new Error("Data inválida.");
     await pedirVarredura(desde);
+    const r = await sincronizarArena({ limiteMs: 40_000, novaVarredura: true });
+    if (!r.ok) throw new Error(`Pedido anotado, mas a leitura falhou agora: ${r.erro}. O agendador tenta de novo em até 5 minutos.`);
+    return r;
+  });
+}
+
+/** "Ler agora": uma volta da leitura do MEU BLING, na hora. */
+export async function lerAgoraAcao() {
+  return comSessao(async () => {
+    const r = await sincronizarArena({ limiteMs: 40_000 });
+    if (!r.ok) throw new Error(r.erro || "A leitura do sistema falhou.");
+    return r;
   });
 }
 
@@ -338,7 +366,7 @@ export async function testarWhatsAppAcao(destino: string) {
   });
 }
 
-// ---------------------------------------------------------------- pareamento do vigia
+// ---------------------------------------------------------------- pareamento do PC da loja (antigo vigia)
 
 export async function pedidoDoVigiaAcao() {
   return comSessao(() => pedidoPendente());

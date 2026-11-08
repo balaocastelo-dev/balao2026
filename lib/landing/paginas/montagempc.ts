@@ -5,9 +5,9 @@ export const montagempc: PaginaDeCaptacao = {
   nome: "Montagem de PC sob medida",
   chamada: "Diga o que você joga ou faz e quanto quer gastar: a loja escolhe as peças, monta, testa e mostra o PC ligado antes de você pagar.",
   seo: {
-    titulo: "Montagem de PC Sob Medida em Campinas (Cambuí) | Balão da Informática",
+    titulo: "Montagem de PC em Campinas | Com Suas Peças ou as Nossas – Balão Anchieta",
     descricao:
-      "PC montado sob medida no Cambuí, em Campinas: você diz o uso e a faixa de orçamento, a loja escolhe as peças, monta, testa e mostra ligado antes de você pagar.",
+      "Montagem de PC no Cambuí com cable management e teste de estresse. Traga suas peças ou compre com a gente. Preço fechado pelo WhatsApp.",
     palavras: [
       "montagem de PC em Campinas",
       "montar PC gamer sob medida Campinas",
@@ -32,8 +32,9 @@ export const montagempc: PaginaDeCaptacao = {
       src: "/images/landing/v2/montagempc.jpg",
       alt: "Mãos encaixando uma placa de vídeo na placa-mãe durante a montagem de um PC",
     },
-    mensagem: "Olá! Vim pela página de montagem de PC da Balão e quero um orçamento de PC sob medida.",
-    botao: "Pedir orçamento do meu PC",
+    mensagem:
+      "Olá! Quero montar um PC. ( ) Já tenho as peças ( ) Quero comprar com vocês. Lista/uso: ____. Qual o preço e o prazo?",
+    botao: "Pedir preço e prazo",
     secundario: { rotulo: "Ver as peças em estoque", href: "#vitrine" },
     fatos: [
       { valor: "Você vê ligado", rotulo: "e testa antes de pagar" },
@@ -45,7 +46,8 @@ export const montagempc: PaginaDeCaptacao = {
   assistente: {
     titulo: "Monte o pedido do seu PC",
     texto: "Três respostas e o vendedor já chega com uma configuração na mão.",
-    abertura: "Olá! Vim pela página de montagem de PC e quero um orçamento de PC sob medida.",
+    abertura:
+      "Olá! Quero montar um PC. ( ) Já tenho as peças ( ) Quero comprar com vocês. Lista/uso: ____. Qual o preço e o prazo?",
     fecho: "Posso mandar a lista dos programas ou jogos que uso?",
     botao: "Enviar para o vendedor",
     perguntas: [
@@ -73,7 +75,7 @@ export const montagempc: PaginaDeCaptacao = {
   secoes: [
     {
       tipo: "passos",
-      titulo: "Como o seu PC sai da conversa para a mesa",
+      titulo: "Seu PC montado, testado e pronto para retirar",
       texto: "Você não precisa saber o nome de nenhuma peça. Precisa saber o que quer fazer com o computador.",
       itens: [
         {
@@ -131,7 +133,7 @@ export const montagempc: PaginaDeCaptacao = {
     },
     {
       tipo: "beneficios",
-      titulo: "O que acontece na bancada antes de você ver o PC",
+      titulo: "O que está incluso",
       texto: "Montar é a parte rápida. O que diferencia um PC bem montado é o cuidado antes e depois de encaixar as peças.",
       itens: [
         {
@@ -150,6 +152,41 @@ export const montagempc: PaginaDeCaptacao = {
           titulo: "Teste com carga",
           texto: "O PC é ligado, a memória é configurada na velocidade certa e a temperatura é observada com o computador trabalhando.",
         },
+      ],
+    },
+    {
+      tipo: "texto",
+      titulo: "Duas formas: suas peças ou as nossas",
+      paragrafos: [
+        "O caminho mais comum é comprar as peças na loja. A montagem entra no pacote que o vendedor fecha com você: organização dos cabos, conferência de compatibilidade, memória na velocidade certa e teste de temperatura antes de você ver o PC ligado.",
+        "Se as peças já foram compradas em outro lugar, mande a lista pelo WhatsApp. A equipe revisa a compatibilidade nessa conversa e diz se a bancada monta e qual é o valor da mão de obra. Essa condição não está tabelada nesta página. Preço e prazo confirmados pelo WhatsApp (19) 98751-0267.",
+        "Windows não vem escondido na montagem. Quem já tem licença, usa a sua. Quem não tem, inclui a licença da página de Microsoft no orçamento.",
+      ],
+    },
+    {
+      tipo: "texto",
+      titulo: "Antes de comprar as peças: checagem de compatibilidade",
+      paragrafos: [
+        "Mande a lista ou o link do carrinho antes de pagar em outro site. Soquete, tipo de memória, tamanho da placa de vídeo, altura do cooler e potência da fonte são conferidos nessa mensagem. É o jeito de não chegar com peça que não encaixa.",
+        "A coleta das peças ou do gabinete por motoboy, se você não puder trazer, é combinada à parte. Preço e prazo confirmados pelo WhatsApp.",
+      ],
+    },
+    {
+      tipo: "texto",
+      titulo: "Se uma peça vier com defeito",
+      paragrafos: [
+        "Peça comprada na loja volta para o mesmo balcão: a garantia é a do fabricante da peça, e o serviço de montagem tem a garantia legal. A equipe testa de novo e trata a troca com o fornecedor.",
+        "Peça que você trouxe de outra loja não entra na garantia da Balão. Se o teste mostrar defeito, a bancada para, te avisa e não troca a peça por conta própria. O que fazer com o vendedor de origem é com você. A loja não publica uma política diferente desta.",
+      ],
+    },
+    {
+      tipo: "retorno",
+      titulo: "Pedir retorno rápido",
+      texto: "Cole a lista de peças ou diga o uso. Diga se as peças já estão com você.",
+      assunto: "Montagem de PC",
+      campos: [
+        { nome: "lista", rotulo: "Cole a lista de peças ou o link do carrinho" },
+        { nome: "pecas", rotulo: "Já tem as peças?", opcoes: ["Não, quero comprar na loja", "Sim"] },
       ],
     },
     {
@@ -211,6 +248,35 @@ export const montagempc: PaginaDeCaptacao = {
           titulo: "PC gamer pronto",
           texto: "Configurações já montadas, separadas pela placa de vídeo. Escolha e leve.",
           href: "/pcgamer",
+          imagem: "/images/landing/v2/pcgamer.jpg",
+        },
+        {
+          titulo: "Qual PC gamer comprar",
+          texto: "Faixas de 3, 5 e 8 mil antes de fechar a lista.",
+          href: "/qual-pc-gamer",
+          imagem: "/images/landing/v2/pcgamer.jpg",
+        },
+        {
+          titulo: "Monte o seu",
+          texto: "Outro caminho para a configuração.",
+          href: "/monteseupc",
+        },
+        {
+          titulo: "Hardware",
+          texto: "Placa, processador, fonte e memória com filtro.",
+          href: "/categoria/hardware",
+        },
+        {
+          titulo: "Upgrade de SSD",
+          texto: "Quando o PC que você já tem só precisa de disco ou memória.",
+          href: "/upgrade-ssd",
+          imagem: "/images/landing/v2/manutencao.jpg",
+        },
+        {
+          titulo: "Licença Windows",
+          texto: "Windows original, com nota fiscal de venda, se a máquina ainda não tem.",
+          href: "/microsoft/windows",
+          imagem: "/images/landing/v2/microsoft.jpg",
         },
         {
           titulo: "Veja um PC por dentro em 3D",
@@ -226,6 +292,21 @@ export const montagempc: PaginaDeCaptacao = {
     },
   ],
   perguntas: [
+    {
+      pergunta: "Quanto custa montar um PC em Campinas?",
+      resposta:
+        "Na Balão da Informática Anchieta, no Cambuí, a montagem com peças da loja entra na compra combinada no orçamento e inclui organização dos cabos, atualização de BIOS quando cabe e teste de temperatura. Com peças do cliente, o valor da mão de obra é passado depois da lista. Preço e prazo confirmados pelo WhatsApp.",
+    },
+    {
+      pergunta: "Vocês montam PC com peças compradas em outra loja?",
+      resposta:
+        "Mande a lista pelo WhatsApp (19) 98751-0267. A bancada da Av. Anchieta, 789 revisa a compatibilidade e diz se monta e em que condição. A loja monta de rotina com as peças do próprio estoque.",
+    },
+    {
+      pergunta: "Quanto tempo leva a montagem?",
+      resposta:
+        "O prazo começa quando as peças estão na loja, com teste de temperatura e estabilidade antes da retirada. Preço e prazo confirmados pelo WhatsApp.",
+    },
     {
       pergunta: "Quanto custa montar um PC gamer?",
       resposta:
@@ -264,12 +345,13 @@ export const montagempc: PaginaDeCaptacao = {
     {
       pergunta: "Como funciona a garantia de um PC montado?",
       resposta:
-        "Cada peça nova tem a garantia do fabricante, e o serviço de montagem tem a garantia legal de 90 dias. Se algo der problema, você volta ao mesmo balcão no Cambuí.",
+        "Cada peça nova tem a garantia do fabricante, e o serviço de montagem tem a garantia legal. Se algo der problema, você volta ao mesmo balcão no Cambuí.",
     },
   ],
   temas: ["pc", "montagem", "pcgamer", "upgrade", "memoria", "ssd", "compra", "garantia", "licenca"],
   termosDoBlog: ["montagem", "montar pc", "pc gamer", "placa de vídeo", "fonte", "processador", "memória ram", "ia local", "upgrade", "vram"],
-  relacionadas: ["pcgamer", "pcgamer3d", "manutencao", "microsoft"],
+  tituloDasPerguntas: "Perguntas frequentes",
+  relacionadas: ["pcgamer", "qual-pc-gamer", "upgrade-ssd", "pcgamer3d"],
   final: {
     titulo: "Conte o que você quer fazer com o PC",
     texto:

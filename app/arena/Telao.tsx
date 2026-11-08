@@ -8,7 +8,8 @@
 // é a META DELE. Depois da chegada fica o outdoor com a viagem do Airbnb.
 // Pergunta ao site a cada 20 s e comemora o que mudou: venda, OS, orçamento,
 // licença (turbo dourado), ultrapassagem, meta batida e meta da equipe.
-// Desde 12/10 (tarde) a corrida é em reais (vendas do Bling + OS).
+// Desde 12/10 (tarde) a corrida é em reais (vendas + OS). Desde 25/10/2026 as
+// vendas vêm do MEU BLING (/sistema), lidas pelo site a cada 5 minutos.
 // ============================================================
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -543,7 +544,8 @@ export default function Telao({ inicial }: { inicial: EstadoDoTelao | null }) {
     );
   }
 
-  const vigiaVivo = Boolean(estado.vigiaUltimaVez && agora - Date.parse(estado.vigiaUltimaVez) < 15 * 60_000);
+  // Telão aberto antes do deploy de 25/10 ainda pode receber o estado antigo (sem o campo): não assusta.
+  const sistemaVivo = estado.sistemaUltimaVez === undefined || Boolean(estado.sistemaUltimaVez && agora - Date.parse(estado.sistemaUltimaVez) < 20 * 60_000);
   const hall = estado.hallDaFama.length ? estado.hallDaFama[hallI % estado.hallDaFama.length] : null;
   const falta = placarPremio ? Math.max(0, Math.ceil(placarPremio.equipe.meta - placarPremio.equipe.valor)) : 0;
   const recentes = estado.recentes.slice(0, 6);
@@ -831,9 +833,9 @@ export default function Telao({ inicial }: { inicial: EstadoDoTelao | null }) {
         <button onClick={() => setVista((v) => (v === "semana" ? "mes" : "semana"))}>{vista === "semana" ? "Ver o mês" : "Ver a semana"}</button>
         <button onClick={telaCheia}>⛶ Tela cheia</button>
       </div>
-      {(offline || !vigiaVivo) && (
+      {(offline || !sistemaVivo) && (
         <div style={{ position: "fixed", left: 14, bottom: 14, zIndex: 60, font: "700 13px Arial, sans-serif", color: "#fff", background: "rgba(26,20,64,.8)", padding: "6px 10px", borderRadius: 8 }}>
-          {offline ? "Sem conexão com o site — tentando de novo" : "Bling sem atualizar há mais de 15 min (o vigia do PC está ligado?)"}
+          {offline ? "Sem conexão com o site — tentando de novo" : "Vendas do sistema sem atualizar há mais de 20 min"}
         </div>
       )}
     </div>

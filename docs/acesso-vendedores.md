@@ -117,7 +117,7 @@ São quatro passos — os quatro precisam bater.
      id: "maria",
      nome: "Maria",
      cargo: "Consultora de Vendas",
-     assinatura: "Atenciosamente,\n*Maria* — Balão da Informática Castelo",
+     assinatura: "Atenciosamente,\n*Maria* — Balão da Informática Anchieta",
      envSenha: "VENDEDOR_MARIA_SENHA",
    }
    ```

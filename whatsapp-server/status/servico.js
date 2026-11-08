@@ -11,7 +11,7 @@ const path = require("path");
 const crypto = require("crypto");
 const R = require("./recorrencia");
 
-const ASSINATURA_PADRAO = "Balão da Informática Castelo\n🌐 balao.info\nConfira: https://balao.info";
+const ASSINATURA_PADRAO = "Balão da Informática Anchieta\n🌐 balao.info\nConfira: https://balao.info";
 const CONFIG_PADRAO = {
   assinatura: { ativa: true, texto: ASSINATURA_PADRAO },
   // Status atrasado além disto não sai (ex.: servidor ficou fora do ar de

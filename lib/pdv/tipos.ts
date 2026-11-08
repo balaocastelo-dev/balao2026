@@ -1,9 +1,10 @@
 // ============================================================
-// PDV (www.balao.info/pdv): os tipos que o balcão, a API e o Bling dividem.
+// PDV (www.balao.info/pdv): os tipos que o balcão, a API e o /sistema dividem.
 //
-// Pedido do Thiago (12/10/2026): produtos só do site; do Bling vêm os
-// vendedores, as vendas e a nota fiscal. Venda feita aqui vai para o Bling na
-// hora; venda feita no Bling aparece aqui. Ver docs/pdv.md.
+// Pedido do Thiago (12/10/2026): produtos só do site.
+// Pedido do Thiago (22/10/2026): as vendas vão para o /sistema (MEU BLING, o
+// ERP próprio da loja) e não mais para o Bling. Do /sistema vêm os vendedores,
+// os clientes, as vendas do dia e a nota fiscal. Ver docs/pdv.md.
 // ============================================================
 
 export type FormaDePagamento = "pix" | "dinheiro" | "credito" | "debito" | "boleto" | "outro";
@@ -65,8 +66,8 @@ export interface ClienteDaVenda {
   bairro: string;
   cidade: string;
   uf: string;
-  /** id do contato no Bling, quando já existe lá. */
-  blingId?: string | null;
+  /** id do contato no /sistema, quando já existe lá. */
+  sistemaId?: number | null;
 }
 
 export interface Desconto {
@@ -74,13 +75,13 @@ export interface Desconto {
   valor: number;
 }
 
-/** Situação da venda no caminho até o Bling. */
-export type EstadoNoBling = "pendente" | "enviando" | "no-bling" | "erro";
+/** Situação da venda no caminho até o /sistema. */
+export type EstadoNoSistema = "pendente" | "enviando" | "no-sistema" | "erro";
 
 export type EstadoDaNota =
   | "nao-pedida"
-  | "pendente" // pedida, ainda não gerada no Bling
-  | "gerada" // existe no Bling, ainda não foi para a Sefaz
+  | "pendente" // pedida, ainda não criada no /sistema
+  | "gerada" // criada no /sistema, ainda não foi para a Sefaz
   | "enviada" // na Sefaz, esperando o retorno
   | "autorizada"
   | "rejeitada"
@@ -89,12 +90,13 @@ export type EstadoDaNota =
 
 export interface NotaDaVenda {
   estado: EstadoDaNota;
-  blingId: string | null;
+  /** id da nota no /sistema */
+  notaId: number | null;
   numero: string | null;
   serie: string | null;
   chave: string | null;
+  /** link público (assinado) do DANFE em PDF — é o que o QR do cupom abre */
   linkDanfe: string | null;
-  linkPdf: string | null;
   mensagem: string | null;
   atualizadaEm: string | null;
 }
@@ -104,7 +106,7 @@ export interface VendaDoPdv {
   criadaEm: string; // ISO
   dia: string; // AAAA-MM-DD, relógio de Campinas
   operador: string; // quem estava logado (painel ou balcão)
-  vendedor: { id: string; nome: string } | null; // vendedor do Bling
+  vendedor: { id: string; nome: string } | null; // vendedor do /sistema
   cliente: ClienteDaVenda;
   tabela: Tabela;
   itens: ItemDaVenda[];
@@ -116,33 +118,34 @@ export interface VendaDoPdv {
   troco: number;
   observacao: string;
   pedirNota: boolean;
-  bling: {
-    estado: EstadoNoBling;
-    pedidoId: string | null;
+  sistema: {
+    estado: EstadoNoSistema;
+    /** id da venda no /sistema */
+    vendaId: number | null;
     numero: string | null;
-    contatoId: string | null;
     tentativas: number;
     ultimaTentativa: string | null;
     mensagem: string | null;
   };
+  /** venda feita antes de 22/10/2026, quando o PDV mandava para o Bling */
+  legadoBling?: { pedidoId: string | null; numero: string | null } | null;
   nota: NotaDaVenda;
   cancelada?: boolean;
 }
 
-/** Uma linha da lista "vendas do dia": do PDV, do Bling, ou dos dois. */
+/** Uma linha da lista "vendas do dia": do PDV, do /sistema, ou dos dois. */
 export interface LinhaDoDia {
-  chave: string; // id do PDV ou "bling-<id>"
-  origem: "pdv" | "bling";
+  chave: string; // id do PDV ou "sistema-<id>"
+  origem: "pdv" | "sistema";
   pdvId: string | null;
-  blingId: string | null;
+  vendaId: number | null;
   numero: string | null;
-  hora: string | null; // HH:MM (só as do PDV têm hora)
+  hora: string | null; // HH:MM
   cliente: string;
   vendedor: string | null;
   total: number;
   situacao: string; // texto para a tela
-  situacaoId: number | null;
-  estadoNoBling: EstadoNoBling;
+  estadoNoSistema: EstadoNoSistema;
   nota: { estado: EstadoDaNota; numero: string | null; linkDanfe: string | null } | null;
   cancelada: boolean;
 }
@@ -159,55 +162,37 @@ export const CLIENTE_VAZIO: ClienteDaVenda = {
   bairro: "",
   cidade: "",
   uf: "",
-  blingId: null,
+  sistemaId: null,
 };
 
 export const NOTA_NAO_PEDIDA: NotaDaVenda = {
   estado: "nao-pedida",
-  blingId: null,
+  notaId: null,
   numero: null,
   serie: null,
   chave: null,
   linkDanfe: null,
-  linkPdf: null,
   mensagem: null,
   atualizadaEm: null,
 };
 
-/** Situações de pedido da conta do Balão (módulo 98310), conferidas em 15/09. */
-export const SITUACOES_DO_PEDIDO: Record<number, string> = {
-  6: "Em aberto",
-  9: "Atendido",
-  12: "Cancelado",
-  15: "Em andamento",
-  18: "Venda agenciada",
-  21: "Em digitação",
-  24: "Verificado",
-  32597: "Aguardando estorno",
-  32598: "Estornado",
-};
-
-export const SITUACOES_CANCELADAS = new Set([12, 32597, 32598]);
-
-/** Situações de NF-e do Bling. */
-export function estadoDaNotaNoBling(situacao: number | null | undefined): EstadoDaNota {
-  switch (Number(situacao)) {
-    case 5:
-    case 6:
-    case 7:
+/** Situação da nota no /sistema (NotaFiscal.situacao) → estado do balcão. */
+export function estadoDaNotaNoSistema(situacao: string | null | undefined): EstadoDaNota {
+  switch (String(situacao || "").toUpperCase()) {
+    case "AUTORIZADA":
       return "autorizada";
-    case 2:
-      return "cancelada";
-    case 4:
-    case 9:
-      return "rejeitada";
-    case 3:
-    case 8:
-    case 10:
+    case "PROCESSANDO":
       return "enviada";
-    case 1:
-    case 0:
+    case "PENDENTE":
       return "gerada";
+    case "REJEITADA":
+    case "DENEGADA":
+      return "rejeitada";
+    case "CANCELADA":
+    case "INUTILIZADA":
+      return "cancelada";
+    case "ERRO":
+      return "erro";
     default:
       return "gerada";
   }

@@ -137,11 +137,19 @@ export type Secao =
       titulo: string;
       texto?: string;
       /** Slugs de páginas desta mesma rede (ou caminhos internos). */
-      itens: { titulo: string; texto: string; href: string; imagem?: string }[];
+      itens: { titulo: string; texto: string; href: string; imagem?: string; alt?: string }[];
     }
   | { tipo: "vitrine"; regras: RegraDeVitrine[]; titulo?: string; texto?: string }
   | { tipo: "quedas"; titulo: string; texto?: string; limite?: number }
-  | { tipo: "especial"; id: string };
+  | { tipo: "especial"; id: string }
+  | {
+      tipo: "retorno";
+      titulo: string;
+      texto?: string;
+      /** Rótulo curto do assunto, para o e-mail da loja. */
+      assunto: string;
+      campos: { nome: string; rotulo: string; opcoes?: string[]; valor?: string }[];
+    };
 
 export type Pergunta = { pergunta: string; resposta: string };
 
@@ -158,6 +166,14 @@ export type PaginaDeCaptacao = {
     palavras: string[];
     tipoDeServico?: string;
     imagem?: string;
+    /** Marca de que o serviço trata. Não indica vínculo com o fabricante. */
+    marca?: string;
+    /** Nomes de serviços do catálogo, sem preço. */
+    catalogo?: string[];
+    /** Guia com data de publicação no schema de artigo. */
+    artigo?: boolean;
+    /** Páginas que este hub reúne, para o schema CollectionPage. */
+    partes?: { nome: string; url: string }[];
   };
   hero: {
     /** Linha de contexto acima do título (local + o que é). */
@@ -176,6 +192,8 @@ export type PaginaDeCaptacao = {
   assistente?: Assistente;
   secoes: Secao[];
   perguntas: Pergunta[];
+  /** Título da seção de perguntas. Padrão: "Perguntas que chegam no WhatsApp". */
+  tituloDasPerguntas?: string;
   /** Temas que ligam esta página às outras e aos artigos do blog. */
   temas: string[];
   /** Termos para achar artigos do blog sobre o assunto. */

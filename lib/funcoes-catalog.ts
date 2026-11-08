@@ -151,9 +151,9 @@ export const FUNCOES_CATALOG: FuncaoCategory[] = [
         image: IMAGES.loja,
       },
       {
-        href: "/tonner",
-        title: "Tonner",
-        description: "Landing page para venda de tonner e suprimentos de impressao.",
+        href: "/toner",
+        title: "Toner",
+        description: "Landing page para venda de toner e suprimentos de impressao.",
         image: IMAGES.loja,
       },
       {
@@ -347,7 +347,7 @@ export const FUNCOES_CATALOG: FuncaoCategory[] = [
         image: "/images/apple/hub-hero.webp",
       },
       {
-        href: "/wendell/apple/iphone",
+        href: "/iphone",
         title: "Apple iPhone",
         description: "Pagina da linha iPhone na area Apple.",
         image: "/images/apple/subcategories/iphone-card.png",
@@ -359,7 +359,7 @@ export const FUNCOES_CATALOG: FuncaoCategory[] = [
         image: "/images/apple/subcategories/ipad-card.png",
       },
       {
-        href: "/wendell/apple/imac",
+        href: "/imac",
         title: "Apple iMac",
         description: "Pagina da linha iMac na area Apple.",
         image: "/images/apple/subcategories/imac-card.png",
@@ -371,10 +371,16 @@ export const FUNCOES_CATALOG: FuncaoCategory[] = [
         image: "/images/apple/subcategories/macmini-card.png",
       },
       {
-        href: "/wendell/apple/macbook",
+        href: "/macbook",
         title: "Apple MacBook",
         description: "Pagina da linha MacBook na area Apple.",
         image: "/images/apple/subcategories/macbook-card.png",
+      },
+      {
+        href: "/android",
+        title: "Celular Android",
+        description: "Conserto de celular Android na mesma bancada.",
+        image: "/images/landing/v2/como-comprar.jpg",
       },
       {
         href: "/wendell/apple/apple-watch",

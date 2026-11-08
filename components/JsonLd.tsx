@@ -102,7 +102,7 @@ export function generateHomeAiAndGoogleSchema() {
           name: "Onde comprar PC Gamer e peças de informática em Campinas?",
           acceptedAnswer: {
             "@type": "Answer",
-            text: "Na Balão da Informática Castelo no Cambuí em Campinas. Oferecemos computadores montados, placas de vídeo RTX/Radeon, processadores Intel/Ryzen, SSDs e periféricos com pronta entrega, desconto de 10% no PIX ou até 10x sem juros e retirada no balcão em até 30 minutos."
+            text: "Na Balão da Informática Anchieta no Cambuí em Campinas. Oferecemos computadores montados, placas de vídeo RTX/Radeon, processadores Intel/Ryzen, SSDs e periféricos com pronta entrega, desconto de 10% no PIX ou até 10x sem juros e retirada no balcão em até 30 minutos."
           }
         },
         {
@@ -211,12 +211,18 @@ export function generateServiceSchema({
   url,
   serviceType,
   areaServed = ["Campinas", "Sumaré", "Hortolândia", "Paulínia", "Valinhos", "Vinhedo", "Brasil"],
+  marca,
+  catalogo,
 }: {
   name: string;
   description: string;
   url: string;
   serviceType: string;
   areaServed?: string[];
+  /** Assunto do serviço. Não sugere vínculo com o fabricante. */
+  marca?: string;
+  /** Serviços oferecidos, sem preço. */
+  catalogo?: string[];
 }) {
   return {
     "@context": "https://schema.org",
@@ -227,12 +233,76 @@ export function generateServiceSchema({
     url,
     areaServed,
     provider: {
-      "@id": "https://www.balao.info/#organization",
+      "@id": "https://www.balao.info/#store",
     },
+    ...(marca ? { brand: { "@type": "Brand", name: marca } } : {}),
+    ...(catalogo?.length
+      ? {
+          hasOfferCatalog: {
+            "@type": "OfferCatalog",
+            name,
+            itemListElement: catalogo.map((item) => ({
+              "@type": "Offer",
+              itemOffered: { "@type": "Service", name: item },
+            })),
+          },
+        }
+      : {}),
     availableChannel: {
       "@type": "ServiceChannel",
       serviceUrl: url,
       servicePhone: `+${SITE_CONFIG.phone.number}`,
     },
+  };
+}
+
+export function generateCollectionSchema({
+  name,
+  description,
+  url,
+  partes,
+}: {
+  name: string;
+  description: string;
+  url: string;
+  partes: { nome: string; url: string }[];
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name,
+    description,
+    url,
+    isPartOf: { "@id": "https://www.balao.info/#store" },
+    about: { "@id": "https://www.balao.info/#store" },
+    hasPart: partes.map((parte) => ({
+      "@type": "WebPage",
+      name: parte.nome,
+      url: parte.url,
+    })),
+  };
+}
+
+export function generateArticleSchema({
+  headline,
+  description,
+  url,
+}: {
+  headline: string;
+  description: string;
+  url: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline,
+    description,
+    url,
+    mainEntityOfPage: url,
+    datePublished: "2026-11-04",
+    dateModified: "2026-11-04",
+    inLanguage: "pt-BR",
+    author: { "@id": "https://www.balao.info/#store" },
+    publisher: { "@id": "https://www.balao.info/#store" },
   };
 }

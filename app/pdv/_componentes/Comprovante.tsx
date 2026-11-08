@@ -2,7 +2,7 @@
 
 // O comprovante da venda, nos dois tamanhos que o balcão escolhe ao fechar:
 // cupom de 80 mm (impressora térmica) e folha A4. Não é documento fiscal — a
-// nota, quando emitida, sai pelo DANFE do Bling (o QR do cupom abre ele).
+// nota, quando emitida, sai pelo DANFE do /sistema (o QR do cupom abre ele).
 
 import { QRCodeSVG } from "qrcode.react";
 import { formatarDocumento, reais } from "@/lib/pdv/calculos";
@@ -27,7 +27,8 @@ function enderecoDoCliente(c: DadosDoComprovante["cliente"]) {
 }
 
 function identificacao(c: DadosDoComprovante) {
-  return [c.numeroBling ? `Pedido Bling nº ${c.numeroBling}` : null, c.pdvId].filter(Boolean).join(" / ");
+  const numero = c.numeroSistema ? (c.numeroSistema.startsWith("Bling") ? `Pedido ${c.numeroSistema}` : `Venda nº ${c.numeroSistema}`) : null;
+  return [numero, c.pdvId].filter(Boolean).join(" / ");
 }
 
 export function Cupom80({ c }: { c: DadosDoComprovante }) {

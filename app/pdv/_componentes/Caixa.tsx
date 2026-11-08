@@ -17,9 +17,9 @@ import { useImpressao } from "./impressao";
 
 interface Conexao {
   operador: string;
-  acesso: { ligado: boolean; motivo: string | null; expiraEm: string | null; maquina: string | null };
+  acesso: { ligado: boolean; motivo: string | null };
   vendedores: { id: string; nome: string }[];
-  vendedoresDoBling: boolean;
+  vendedoresDoSistema: boolean;
   erroVendedores: string | null;
 }
 
@@ -40,10 +40,10 @@ export default function Caixa({ operador }: { operador: string }) {
   const [ocupado, setOcupado] = useState(false);
   const { imprimir, area } = useImpressao();
 
-  // ---- Bling: acesso e vendedores
+  // ---- /sistema: ligação e vendedores
   const lerConexao = useCallback(async () => {
     try {
-      const r = await fetch("/api/pdv/bling", { cache: "no-store" });
+      const r = await fetch("/api/pdv/sistema", { cache: "no-store" });
       if (r.status === 401) return window.location.reload();
       setConexao(await r.json());
     } catch {
@@ -51,13 +51,13 @@ export default function Caixa({ operador }: { operador: string }) {
     }
   }, []);
   useEffect(() => {
-    setVendedorId(lerLocal("pdv-vendedor", ""));
+    setVendedorId(lerLocal("pdv-vendedor-sistema", ""));
     lerConexao();
     const t = setInterval(lerConexao, 60_000);
     return () => clearInterval(t);
   }, [lerConexao]);
 
-  // ---- vendas do dia (Bling + caixa)
+  // ---- vendas do dia (/sistema + caixa)
   const lerResumo = useCallback(async () => {
     setLendoResumo(true);
     try {
@@ -79,7 +79,7 @@ export default function Caixa({ operador }: { operador: string }) {
   const vendedor = useMemo(() => conexao?.vendedores.find((v) => v.id === vendedorId) ?? null, [conexao, vendedorId]);
   const noTicket = useMemo(() => Object.fromEntries(estado.itens.map((i) => [i.produtoId, i.quantidade])), [estado.itens]);
   const t = totaisDa(estado);
-  const blingLigado = Boolean(conexao?.acesso.ligado);
+  const sistemaLigado = Boolean(conexao?.acesso.ligado);
 
   async function finalizar() {
     setEnviando(true);
@@ -144,7 +144,11 @@ export default function Caixa({ operador }: { operador: string }) {
     window.location.reload();
   }
 
-  const avisoCobrar = !vendedor ? "Escolha o vendedor no alto para cobrar." : null;
+  const avisoCobrar = !vendedor
+    ? conexao && !conexao.vendedores.length
+      ? `Sem a lista de vendedores do sistema${conexao.erroVendedores ? `: ${conexao.erroVendedores}` : "."}`
+      : "Escolha o vendedor no alto para cobrar."
+    : null;
 
   return (
     <div className="pdv flex h-full min-h-0 flex-col print:hidden">
@@ -160,10 +164,10 @@ export default function Caixa({ operador }: { operador: string }) {
 
         <div
           className="flex items-center gap-2 rounded-full border border-[var(--linha)] px-3 py-1 text-sm"
-          title={conexao?.acesso.motivo ?? (conexao?.acesso.maquina ? `Acesso trazido por ${conexao.acesso.maquina}` : undefined)}
+          title={conexao?.acesso.motivo ?? "Vendas vão para www.balao.info/sistema"}
         >
-          <span className={`h-2.5 w-2.5 rounded-full ${blingLigado ? "bg-[var(--ceu)]" : "bg-[var(--vermelho)]"}`} aria-hidden />
-          {conexao ? (blingLigado ? "Bling ligado" : "Bling fora: vendas ficam guardadas") : "Conferindo o Bling…"}
+          <span className={`h-2.5 w-2.5 rounded-full ${sistemaLigado ? "bg-[var(--ceu)]" : "bg-[var(--vermelho)]"}`} aria-hidden />
+          {conexao ? (sistemaLigado ? "Sistema ligado" : "Sistema fora: vendas ficam guardadas") : "Conferindo o sistema…"}
         </div>
 
         <label className="ml-auto flex items-center gap-2 text-sm">
@@ -173,7 +177,7 @@ export default function Caixa({ operador }: { operador: string }) {
             value={vendedorId}
             onChange={(e) => {
               setVendedorId(e.target.value);
-              gravarLocal("pdv-vendedor", e.target.value);
+              gravarLocal("pdv-vendedor-sistema", e.target.value);
             }}
             className={`max-w-[14rem] rounded-xl border bg-[var(--carvao)] px-3 py-2 font-semibold outline-none ${
               vendedor ? "border-[var(--linha)]" : "border-[var(--vermelho)]"
@@ -197,7 +201,7 @@ export default function Caixa({ operador }: { operador: string }) {
             Hoje{resumo ? `: ${resumo.totais.vendas}, ${reais(resumo.totais.valor)}` : ""}
           </span>
           {resumo && resumo.totais.aguardando > 0 && (
-            <span className="pdv-numeros rounded-full bg-[var(--vermelho)] px-1.5 text-xs font-black text-white" title="Vendas esperando o Bling">
+            <span className="pdv-numeros rounded-full bg-[var(--vermelho)] px-1.5 text-xs font-black text-white" title="Vendas esperando o sistema">
               {resumo.totais.aguardando}
             </span>
           )}
@@ -259,7 +263,7 @@ export default function Caixa({ operador }: { operador: string }) {
               estado={estado}
               despachar={despachar}
               vendedor={vendedor}
-              blingLigado={blingLigado}
+              sistemaLigado={sistemaLigado}
               enviando={enviando}
               erro={erroEnvio}
               aoVoltar={() => setTela("venda")}
@@ -290,7 +294,7 @@ export default function Caixa({ operador }: { operador: string }) {
               <VendasDoDia
                 resumo={resumo}
                 carregando={lendoResumo}
-                blingLigado={blingLigado}
+                sistemaLigado={sistemaLigado}
                 aoAtualizar={lerResumo}
                 aoFechar={() => setPainelVendas(false)}
                 aoImprimir={imprimir}

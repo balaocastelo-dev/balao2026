@@ -1,16 +1,26 @@
 import type { PaginaDeCaptacao } from "../tipos";
+import { android } from "./android";
 import { assistenciagames } from "./assistenciagames";
 import { carregadores } from "./carregadores";
 import { comoComprar } from "./como-comprar";
 import { consignacao } from "./consignacao";
 import { envioEEntrega } from "./envio-e-entrega";
+import { formatacao } from "./formatacao";
+import { imac } from "./imac";
+import { iphone } from "./iphone";
+import { macbook } from "./macbook";
 import { manutencao } from "./manutencao";
+import { notebookAcer, notebookAsus, notebookDell, notebookHp, notebookLenovo, notebookSamsung } from "./marcas-notebook";
 import { microsoft } from "./microsoft";
+import { microsoftOffice365 } from "./microsoft-office-365";
+import { microsoftWindows } from "./microsoft-windows";
+import { microsoftWindowsServer } from "./microsoft-windows-server";
 import { montagempc } from "./montagempc";
 import { notebooks } from "./notebooks";
 import { pcgamer } from "./pcgamer";
 import { pcgamer3d } from "./pcgamer3d";
 import { promocao } from "./promocao";
+import { qualPcGamer } from "./qual-pc-gamer";
 import { recuperacaodados } from "./recuperacaodados";
 import { reparoapple } from "./reparoapple";
 import { sistemas } from "./sistemas";
@@ -19,6 +29,7 @@ import { sobreNos } from "./sobre-nos";
 import { telaiphone } from "./telaiphone";
 import { tonner } from "./tonner";
 import { trocasEDevolucoes } from "./trocas-e-devolucoes";
+import { upgradeSsd } from "./upgrade-ssd";
 import { wendellApple } from "./wendell-apple";
 
 /**
@@ -30,6 +41,19 @@ import { wendellApple } from "./wendell-apple";
 export const PAGINAS: Record<string, PaginaDeCaptacao> = Object.fromEntries(
   [
     manutencao,
+    upgradeSsd,
+    android,
+    macbook,
+    imac,
+    iphone,
+    formatacao,
+    notebookDell,
+    notebookLenovo,
+    notebookAcer,
+    notebookHp,
+    notebookAsus,
+    notebookSamsung,
+    qualPcGamer,
     recuperacaodados,
     reparoapple,
     telaiphone,
@@ -42,6 +66,9 @@ export const PAGINAS: Record<string, PaginaDeCaptacao> = Object.fromEntries(
     carregadores,
     tonner,
     microsoft,
+    microsoftWindows,
+    microsoftWindowsServer,
+    microsoftOffice365,
     consignacao,
     sistemas,
     promocao,

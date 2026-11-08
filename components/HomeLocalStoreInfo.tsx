@@ -45,7 +45,7 @@ export default function HomeLocalStoreInfo() {
               📍 Visite Nossa Loja Física
             </span>
             <h2 className="mt-4 text-2xl font-black tracking-tight text-white sm:text-3xl">
-              Balão da Informática Castelo
+              Balão da Informática Anchieta
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-[var(--home-muted)]">
               Traga seu equipamento para diagnóstico, retire seus produtos comprados pelo site ou monte sua máquina dos sonhos direto no nosso balcão.

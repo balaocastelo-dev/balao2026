@@ -6,7 +6,7 @@ import { escolherTema, resolverChamada } from "@/lib/blog/chamadas";
 import { artigosGuardadosDoSoro, extrairListaDoScript, inserirChamadas } from "@/lib/blog/fontes/soro";
 import { ajustarLink, htmlParaBlocos } from "@/lib/blog/html-para-blocos";
 import { avaliarArtigo } from "@/lib/blog/regua";
-import { contarPorCategoria, diarioNoAr, escolherDestaques, escolherRelacionados, prontoParaPublicar, resumir } from "@/lib/blog/repositorio";
+import { contarPorCategoria, diarioNoAr, temFoto, escolherDestaques, escolherRelacionados, prontoParaPublicar, resumir } from "@/lib/blog/repositorio";
 import { desenharFundo } from "@/lib/blog/fundo";
 import { fundoGerado, jsonLdDoArtigo, metadataDoArtigo } from "@/lib/blog/seo";
 import { hrefSeguro, lerTextoRico, linksDoTexto, minutosDeLeitura, montarSumario, textoPuro } from "@/lib/blog/texto";
@@ -541,5 +541,14 @@ describe("rotina diária", () => {
     expect(resolverChamada({ tipo: "chamada", tema: "apple" }, { titulo: "x", slug: "x", categoria: "apple", etiquetas: [] }).href).toBe("/reparoapple");
     expect(classificarPorTitulo("MacBook Air ou Pro: qual escolher")).toBe("apple");
     expect(classificarPorTitulo("Manutenção de MacBook em Campinas")).toBe("assistencia");
+  });
+});
+
+describe("nenhuma publicação sem foto (todas as fontes)", () => {
+  it("sem capa, ou com capa sem endereço, não aparece", () => {
+    expect(temFoto({ capa: null })).toBe(false);
+    expect(temFoto({ capa: { src: "" } })).toBe(false);
+    expect(temFoto({ capa: { src: "   " } })).toBe(false);
+    expect(temFoto({ capa: { src: "/blog/capas/x.webp" } })).toBe(true);
   });
 });

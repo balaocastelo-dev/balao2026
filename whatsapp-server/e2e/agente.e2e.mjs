@@ -4,7 +4,7 @@
 //   (scripts/agente-local/julia.py) -> Ollama FALSO (roteiro abaixo) -> servidor
 //   -> Evolution falsa (o que "sairia" para o cliente).
 //
-// Nada sai daqui: a Evolution é de mentira, o Bling é simulado (modo teste) e o
+// Nada sai daqui: a Evolution é de mentira, o MEU BLING é simulado (modo teste) e o
 // "Ollama" é um roteiro que responde como o modelo responderia. O que se testa
 // é o encanamento e as travas, não a inteligência do modelo.
 //
@@ -154,7 +154,7 @@ function subirPc() {
       JULIA_OLLAMA_URL: `http://localhost:${PORTA_OLLAMA}`,
       JULIA_PASTA_DADOS: path.join(pastaPc, "dados"),
       JULIA_RESPEITAR_PLACA: "0",
-      JULIA_BLING_TOKENS: path.join(pastaPc, "nao-existe.json"),
+      JULIA_ARQUIVO_CHAVE_PC: path.join(pastaPc, "nao-existe.txt"),
       JULIA_INTERVALO_S: "0.3",
       PYTHONIOENCODING: "utf-8",
     },
@@ -288,7 +288,7 @@ try {
   ok("a foto foi vista pelo modelo de visão", Boolean(comFoto) && /Vi a foto/.test(textoDe(comFoto[0])), comFoto && textoDe(comFoto[0]));
   ok("o modelo de visão recebeu a imagem", pedidosAoOllama.some((p) => p.messages?.some((m) => m.images?.length)));
 
-  console.log("\n— orçamento e venda (Bling simulado no modo teste) —");
+  console.log("\n— orçamento e venda (MEU BLING simulado no modo teste) —");
   await esperar(500);
   const antesOrc = enviadasPara(TESTE).length;
   await clienteEscreve(TESTE, "quero esse");

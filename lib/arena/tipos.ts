@@ -11,7 +11,7 @@ export const CORES_DE_KART = [
   "#00C2D1", "#FF7A00", "#2D2D2D", "#8BC34A",
 ];
 
-/** Quem corre: vendedor (vendas do Bling) ou técnico (ordens de serviço do Fechamento da assistência). */
+/** Quem corre: vendedor (vendas do MEU BLING) ou técnico (ordens de serviço do Fechamento da assistência). */
 export type FuncaoDoPiloto = "vendedor" | "tecnico";
 
 export interface Piloto {
@@ -24,7 +24,15 @@ export interface Piloto {
   cor: string;
   kart: ModeloDeKart;
   numero: number;
+  /** Vendedor do Bling (só para o histórico: a Arena leu o Bling até 24/10/2026). */
   blingVendedorId: string | null;
+  /** Vendedor do MEU BLING (/sistema), de onde a Arena lê as vendas desde 25/10/2026. */
+  sistemaVendedorId: string | null;
+  /**
+   * Quem fez a ligação com o MEU BLING: "auto" (pelo nome, na leitura das vendas) ou
+   * "manual" (no painel). A automática nunca mexe em piloto ligado (ou desligado) à mão.
+   */
+  sistemaLigadoPor?: "auto" | "manual" | null;
   funcao: FuncaoDoPiloto;
   /** Meta própria em reais. Vazio = a parte dele na divisão da meta da equipe. */
   metaSemana: number | null;
@@ -43,10 +51,13 @@ export type StatusGravado = "valido" | "cancelado" | "pendente" | "ignorado" | "
 export interface Lancamento {
   id: string;
   tipo: TipoDeLancamento;
-  origem: "bling" | "assistencia" | "manual";
+  /** "bling" = histórico (até 24/10/2026); "sistema" = MEU BLING (desde 25/10/2026). */
+  origem: "bling" | "sistema" | "assistencia" | "manual";
   blingId: string | null;
   numero: string | null;
   blingVendedorId: string | null;
+  /** Vendedor da venda no MEU BLING (só nas de origem "sistema"). */
+  sistemaVendedorId?: string | null;
   pilotoId: string | null;
   contatoId: string | null;
   contatoNome: string | null;
@@ -68,8 +79,14 @@ export interface Lancamento {
   anuladoManual: boolean;
   /** Valor trocado à mão no painel (null = o do documento). */
   valorManual: number | null;
-  /** Resumo do documento do Bling: se mudar, o valor é refeito. */
+  /** Resumo do documento de origem: se mudar, o valor é refeito. */
   assinatura?: string | null;
+  /** Venda do MEU BLING cancelada lá (situação de cancelamento). */
+  canceladoNaOrigem?: boolean;
+  /** Venda do MEU BLING que é a mesma de um pedido que já veio do Bling (migrada com o mesmo número). */
+  duplicadoDoBling?: boolean;
+  /** Venda do MEU BLING gravada sem os itens (as licenças são lidas numa próxima volta). */
+  semItens?: boolean;
 }
 
 export interface AjustesDaCorrida {
@@ -133,12 +150,25 @@ export const WHATSAPP_PADRAO: AjustesDoWhatsApp = {
   lideranca: false,
 };
 
-export interface SituacaoDoVigia {
+/** A última leitura das vendas no MEU BLING (cron /api/cron/arena-sistema ou "Ler agora" do painel). */
+export interface SituacaoDaSincronia {
+  /** Última tentativa. */
   ultimaVez: string | null;
-  versao: string | null;
-  maquina: string | null;
-  ultimoLote: number;
+  /** Última leitura que deu certo. */
+  ultimoOk: string | null;
+  vendasLidas: number;
+  gravadas: number;
   ultimoErro: string | null;
+  de: string | null;
+  ate: string | null;
+  /** Dia em que a leitura desde o começo do mês já foi feita. */
+  varreduraDoMesEm: string | null;
+  /** "periodo" (?de=&ate=) ou "por-dia" (?dia=, enquanto o MEU BLING não tem a forma nova). */
+  modo: string | null;
+  /** Vendas ainda sem os itens lidos (licenças): seguem nas próximas leituras. */
+  semItens: number;
+  /** Leitura dia a dia que não coube numa volta: a próxima continua deste dia. */
+  continuarDe?: string | null;
 }
 
 export interface LinhaDoPlacar {
@@ -195,6 +225,7 @@ export interface EstadoDoTelao {
   /** As últimas de cada piloto, para a página dele. */
   jogadasPorPiloto: Record<string, JogadaPublica[]>;
   hallDaFama: { rotulo: string; periodo: Periodo; campeao: string | null; foto: string | null; cor: string | null; valor: number; chegaram: number }[];
-  vigiaUltimaVez: string | null;
+  /** Última leitura do MEU BLING que deu certo (o telão avisa se ficar velha). */
+  sistemaUltimaVez: string | null;
   geradoEm: string;
 }

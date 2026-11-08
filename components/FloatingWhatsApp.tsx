@@ -1,5 +1,6 @@
 "use client";
 
+import { comOrigemDaPagina } from "@/lib/whatsapp/origem";
 import React from "react";
 import { usePathname } from "next/navigation";
 import { MessageCircle } from "lucide-react";
@@ -39,9 +40,9 @@ export default function FloatingWhatsApp() {
     });
 
     window.open(
-      `https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(
-        daPagina?.mensagem || mensagem
-      )}`,
+      comOrigemDaPagina(
+        `https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(daPagina?.mensagem || mensagem)}`
+      ),
       "_blank"
     );
   };

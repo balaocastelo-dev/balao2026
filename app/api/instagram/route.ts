@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { turso, isTursoActive } from '@/lib/turso';
 
 export async function GET() {
-  const PROFILE_URL = "https://www.instagram.com/balaodainformatica_castelo/";
+  const PROFILE_URL = "https://www.instagram.com/balaoanchieta/";
 
   // Busca produtos reais com imagem para simular o feed de posts recentes.
   try {

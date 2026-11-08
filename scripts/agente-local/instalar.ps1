@@ -34,6 +34,8 @@ Get-ChildItem -Path $origem -File | Where-Object { $_.Extension -in ".py", ".cmd
 if (-not (Test-Path (Join-Path $Destino "config.json"))) {
   Copy-Item (Join-Path $origem "config.exemplo.json") (Join-Path $Destino "config.json")
 }
+# 25/10/2026: o Bling saiu (a JUL.IA grava no MEU BLING pelo site, sistema.py).
+Remove-Item (Join-Path $Destino "bling.py") -Force -ErrorAction SilentlyContinue
 
 # 2. Python proprio (nao mexe no da URA nem no da fabrica)
 $venv = Join-Path $Destino ".venv"

@@ -147,8 +147,33 @@ export const notebooks: PaginaDeCaptacao = {
       ],
       lista: [
         "Upgrade de memória e SSD feito na bancada da loja, quando o modelo permite",
-        "Windows e Office originais instalados e ativados",
+        "Windows e Office originais instalados e ativados, na página de licenciamento",
         "Carregadores e fontes de notebook no balcão",
+      ],
+    },
+    {
+      tipo: "atalhos",
+      titulo: "Windows e Office no notebook",
+      texto: "Licença original, com nota fiscal de venda, instalada na loja se o aparelho não veio com ela.",
+      itens: [
+        {
+          titulo: "Licença Windows",
+          texto: "Windows 10 ou 11 Pro, com ativação e instalação.",
+          href: "/microsoft/windows",
+          imagem: "/images/landing/v2/microsoft.jpg",
+        },
+        {
+          titulo: "Office e Microsoft 365",
+          texto: "Compra única ou assinatura, para casa ou para a empresa.",
+          href: "/microsoft/office-365",
+          imagem: "/images/landing/v2/notebooks.jpg",
+        },
+        {
+          titulo: "Licenciamento Microsoft",
+          texto: "Windows, servidor e Office no mesmo levantamento.",
+          href: "/microsoft",
+          imagem: "/images/landing/v2/microsoft.jpg",
+        },
       ],
     },
   ],
@@ -191,7 +216,7 @@ export const notebooks: PaginaDeCaptacao = {
   ],
   temas: ["notebook", "compra", "upgrade", "ssd", "memoria", "assistencia", "apple", "licenca"],
   termosDoBlog: ["notebook", "escolher notebook", "ssd", "memória ram", "macbook", "bateria", "notebook gamer"],
-  relacionadas: ["manutencao", "microsoft", "carregadores", "consignacao"],
+  relacionadas: ["upgrade-ssd", "manutencao", "microsoft", "carregadores"],
   final: {
     titulo: "Conte para que é o notebook e receba as opções",
     texto: "Uma mensagem com o uso e o que pesa mais já basta para a equipe indicar os modelos certos. Depois, é só ver ligado na loja da Av. Anchieta, no Cambuí.",

@@ -55,7 +55,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const canonical = `https://www.balao.info${buildRegionalServicePath(city.slug, service.slug)}`;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     keywords: [
       `${service.shortName.toLowerCase()} ${city.name.toLowerCase()}`,
@@ -254,6 +254,36 @@ export default async function RegionalServicePage({ params }: Props) {
                   className="rounded-2xl border border-slate-700 bg-[#161f32] px-4 py-2 text-sm font-bold text-slate-300 hover:border-[#E60012] hover:text-white transition"
                 >
                   {service.shortName} em {nc.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="rounded-3xl border border-slate-800 bg-[#111827] p-8">
+            <h2 className="text-xl font-bold text-white">Páginas do serviço na loja do Cambuí</h2>
+            <div className="mt-4 flex flex-wrap gap-3">
+              {(service.slug === "pc-gamer"
+                ? [
+                    ["/pcgamer", "PC gamer pronto"],
+                    ["/qual-pc-gamer", "Guia de 3, 5 e 8 mil"],
+                    ["/montagempc", "Montagem de PC"],
+                  ]
+                : [
+                    ["/manutencao", "Conserto de notebook"],
+                    ["/upgrade-ssd", "Upgrade de SSD"],
+                    ["/formatacao", "Formatação com backup"],
+                    ["/notebook-dell", "Dell"],
+                    ["/notebook-lenovo", "Lenovo"],
+                    ["/notebook-acer", "Acer"],
+                    ["/notebook-hp", "HP"],
+                    ["/notebook-asus", "Asus"],
+                    ["/notebook-samsung", "Samsung"],
+                  ]
+              ).map(([href, nome]) => (
+                <Link key={href} href={href} className="rounded-2xl border border-slate-700 bg-[#161f32] px-4 py-2 text-sm font-bold text-slate-200 hover:border-[#E60012]">
+                  {nome}
                 </Link>
               ))}
             </div>

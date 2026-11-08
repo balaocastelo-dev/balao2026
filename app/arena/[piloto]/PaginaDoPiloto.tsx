@@ -202,7 +202,7 @@ export default function PaginaDoPiloto({ slug, inicial }: { slug: string; inicia
               ))}
             </ul>
             <p className="ap-miudo">
-              Conta o valor de cada venda no Bling{p.funcao === "tecnico" ? " e de cada OS (mão de obra + peças)" : ""}. A meta da equipe é dividida entre vendedores e técnicos.
+              Conta o valor de cada venda no sistema{p.funcao === "tecnico" ? " e de cada OS (mão de obra + peças)" : ""}. A meta da equipe é dividida entre vendedores e técnicos.
             </p>
           </section>
         )}

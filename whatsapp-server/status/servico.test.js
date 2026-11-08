@@ -44,7 +44,7 @@ const t = async (n, f) => { await f(); ok++; console.log("✓", n); };
 
   await t("assinatura entra uma vez e link vira linha própria", async () => {
     const c = await s.salvarConteudo({ texto: "Bom dia! Estamos abertos", link: "https://balao.info/pcgamer" }, vend);
-    assert.match(c.textoFinal, /Bom dia! Estamos abertos\n\n👉 https:\/\/balao.info\/pcgamer\n\nBalão da Informática Castelo/);
+    assert.match(c.textoFinal, /Bom dia! Estamos abertos\n\n👉 https:\/\/balao.info\/pcgamer\n\nBalão da Informática Anchieta/);
     const sem = await s.salvarConteudo({ texto: "Sem assinatura", assinar: false }, vend);
     assert.equal(sem.textoFinal, "Sem assinatura");
   });

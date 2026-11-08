@@ -8,11 +8,16 @@ import { useRouter } from "next/navigation";
 import { ShoppingCart } from "lucide-react";
 import { getProductHref } from "@/lib/utils";
 import SeloProntaEntrega, { AvisoImagemIlustrativa } from "@/components/SeloProntaEntrega";
+import { useEhApp } from "@/lib/useEhApp";
+import { lerReais, comDescontoApp, formatarReais, ROTULO_APP_PIX } from "@/lib/app-balao";
 
 export default function ProductCard({ product, variant = "grid" }: { product: Product, variant?: "grid" | "list" }) {
   const imageRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const productHref = getProductHref(product);
+  // No app, o preço Pix sai com 15% a mais de desconto. Fora do app, nada muda.
+  const ehApp = useEhApp();
+  const precoAppTexto = ehApp ? formatarReais(comDescontoApp(lerReais(product.price), true)) : "";
   // `product.category` guarda o caminho completo (ex: "Hardware/Placas-mãe/
   // AMD") — no card mostramos só o último nível, senão o card fica poluído
   // com a árvore inteira de categorias.
@@ -53,14 +58,24 @@ export default function ProductCard({ product, variant = "grid" }: { product: Pr
               </h3>
               
               <div className="mt-1">
+                  {ehApp && (
+                    <span className="mb-1 inline-block rounded bg-[#E60012] px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-white">
+                        {ROTULO_APP_PIX}
+                    </span>
+                  )}
                   <div className="flex items-baseline gap-1">
                       <span className="text-xs font-bold text-[#E60012]">R$</span>
                       <span className="text-lg font-extrabold text-[#E60012]">
-                          {product.price.replace("R$", "").trim()}
+                          {(ehApp ? precoAppTexto : product.price).replace("R$", "").trim()}
                       </span>
                   </div>
+                  {ehApp && (
+                    <p className="text-[10px] text-[var(--site-muted)] line-through">
+                        {product.price} no site
+                    </p>
+                  )}
                   <p className="text-[10px] text-[var(--site-soft)]">
-                      à vista no PIX
+                      à vista no PIX{ehApp ? " pelo app" : ""}
                   </p>
                   {product.price_card && (
                     <p className="text-[10px] text-[var(--site-muted)]">
@@ -110,14 +125,24 @@ export default function ProductCard({ product, variant = "grid" }: { product: Pr
             </h3>
             
             <div className="mt-2 sm:mt-4">
+                {ehApp && (
+                  <span className="mb-1 inline-block rounded bg-[#E60012] px-1.5 py-0.5 text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-white">
+                      {ROTULO_APP_PIX}
+                  </span>
+                )}
                 <div className="flex items-baseline gap-1">
                     <span className="text-xs sm:text-sm font-bold text-[#E60012]">R$</span>
                     <span className="text-lg sm:text-2xl font-extrabold text-[#E60012]">
-                        {product.price.replace("R$", "").trim()}
+                        {(ehApp ? precoAppTexto : product.price).replace("R$", "").trim()}
                     </span>
                 </div>
+                {ehApp && (
+                  <p className="text-[10px] sm:text-xs text-[var(--site-muted)] line-through">
+                      {product.price} no site
+                  </p>
+                )}
                 <p className="mt-1 text-[10px] sm:text-xs text-[var(--site-soft)]">
-                    à vista no PIX
+                    à vista no PIX{ehApp ? " pelo app" : ""}
                 </p>
                 {product.price_card && (
                   <p className="text-[10px] sm:text-xs text-[var(--site-muted)]">

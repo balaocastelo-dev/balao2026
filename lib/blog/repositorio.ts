@@ -71,8 +71,16 @@ export const listarArtigosDaCasa = cache(async (): Promise<Artigo[]> => {
   for (const artigo of importados) porSlug.set(artigo.slug, artigo);
   for (const artigo of ARTIGOS_AUTORAIS.filter(prontoParaPublicar)) porSlug.set(artigo.slug, artigo);
 
-  return [...porSlug.values()].filter(jaPublicado).sort(porDataDecrescente);
+  return [...porSlug.values()].filter(jaPublicado).filter(temFoto).sort(porDataDecrescente);
 });
+
+/**
+ * Regra do Thiago (16/10/2026, reforçada em 25/10): nenhuma publicação aparece
+ * sem imagem — vale para as três fontes, não só para a rotina diária.
+ */
+export function temFoto(a: { capa: { src?: string } | null }): boolean {
+  return Boolean(a.capa && String(a.capa.src || "").trim());
+}
 
 /** O site está sendo montado (`next build`), e não respondendo a uma visita. */
 function montandoOSite(): boolean {
@@ -86,7 +94,7 @@ function montandoOSite(): boolean {
  * faz a foto de noite; se a foto ainda não chegou, o artigo espera escondido.
  */
 export function diarioNoAr(resumo: ArtigoResumido, agora: number = Date.now()): boolean {
-  return resumo.capa !== null && (Date.parse(resumo.publicadoEm) || 0) <= agora;
+  return temFoto(resumo) && (Date.parse(resumo.publicadoEm) || 0) <= agora;
 }
 
 /**

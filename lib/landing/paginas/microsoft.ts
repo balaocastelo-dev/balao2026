@@ -1,205 +1,275 @@
 import type { PaginaDeCaptacao } from "../tipos";
 
-// Licença não está no catálogo de produtos: a página vende pelo WhatsApp e
-// pelo balcão. A única vitrine é de notebooks que já saem de fábrica com
-// Windows 11 (para quem vai trocar de máquina), sem PC montado.
+// Hub de licenciamento. A URL /microsoft já existia: aqui ela passa a
+// distribuir Windows, Windows Server e Office/365, em vez de misturar os
+// três num texto só. Licença não está no catálogo de produtos.
+//
+// Pode: "licenças originais adquiridas de fornecedores oficiais Microsoft",
+// nota fiscal de venda, 12x sem juros também para CNPJ, ativação e instalação.
+// Não pode: parceiro, Partner, CSP, revenda oficial/autorizada, distribuidor
+// oficial, certificação de técnico, preço, prazo de garantia, logo de fabricante.
+
+const MENSAGEM =
+  "Olá! Quero regularizar as licenças Microsoft da minha empresa: __ computadores, (  ) tem servidor, (  ) usa Office. Podem fazer um levantamento?";
+
 export const microsoft: PaginaDeCaptacao = {
   slug: "microsoft",
-  nome: "Windows e Office originais",
-  chamada: "Windows 11 Home ou Pro e Office originais, instalados e ativados na loja enquanto você espera.",
+  nome: "Licenciamento Microsoft",
+  chamada: "Windows, Windows Server e Office originais para empresa e pessoa física, com nota fiscal de venda e ativação no Cambuí.",
   seo: {
-    titulo: "Windows 11 e Office originais em Campinas (Cambuí) | Balão da Informática",
+    titulo: "Licenciamento Microsoft para Empresas em Campinas | Balão da Informática Anchieta",
     descricao:
-      "Licença original de Windows 11 Home e Pro, Office e Microsoft 365 no Cambuí, em Campinas. Traga o computador e saia com tudo instalado e ativado. Peça no WhatsApp.",
+      "Regularize Windows, Windows Server e Office com licença original, nota fiscal de venda e técnico no Cambuí. 12x sem juros também no CNPJ.",
     palavras: [
-      "licença Windows 11 original Campinas",
-      "comprar Windows 11 Pro Campinas",
-      "Windows 11 Home ou Pro qual escolher",
-      "Office original Campinas",
-      "Microsoft 365 Family Campinas",
-      "instalar Windows original no Cambuí",
-      "ativar Windows 11 Campinas",
-      "fim do suporte do Windows 10 o que fazer",
-      "licença Windows para empresa Campinas",
-      "Office vitalício ou Microsoft 365",
-      "formatar e instalar Windows original Campinas",
+      "licenciamento microsoft para empresas campinas",
+      "regularizar software empresa",
+      "licença microsoft original com nota fiscal",
+      "auditoria de software microsoft",
+      "comprar licenças microsoft campinas",
+      "windows server e office campinas",
+      "licença windows para empresa cambuí",
+      "nota fiscal de venda software campinas",
     ],
-    tipoDeServico: "Venda, instalação e ativação de licenças Microsoft",
+    tipoDeServico: "Licenciamento de Windows, Windows Server e Office",
+    catalogo: ["Licença Windows 10 e 11 Pro", "Licenciamento de Windows Server", "Office e Microsoft 365", "Ativação e instalação"],
+    partes: [
+      { nome: "Licença Windows 10 e 11 Pro", url: "https://www.balao.info/microsoft/windows" },
+      { nome: "Windows Server, núcleos e CALs", url: "https://www.balao.info/microsoft/windows-server" },
+      { nome: "Office 2024 e Microsoft 365", url: "https://www.balao.info/microsoft/office-365" },
+    ],
   },
   hero: {
-    contexto: "Licenças Microsoft no Cambuí, em Campinas",
-    titulo: "Windows e Office originais, ativados e funcionando no seu computador",
+    contexto: "Licenciamento Microsoft no Cambuí, em Campinas",
+    titulo: "Windows, Windows Server e Office originais, num só balcão",
     texto:
-      "Windows 11 Home ou Pro, Office e Microsoft 365 com licença original. Traga o computador à loja do Cambuí e a equipe instala e ativa na hora; se preferir, leve só a licença. Antes, a gente confere se a sua máquina roda o Windows 11.",
-    imagem: { src: "/images/landing/v2/microsoft.jpg", alt: "Mesa de escritório com monitor e notebook mostrando uma tela azul abstrata" },
-    mensagem: "Olá! Vim pela página de licenças Microsoft da Balão e quero Windows/Office original.",
-    botao: "Pedir licença no WhatsApp",
-    secundario: { rotulo: "Home ou Pro?", href: "#secao-1" },
+      "A Balão da Informática Anchieta é especialista em licenciamento de Windows, Windows Server e Microsoft Office. São licenças originais adquiridas de fornecedores oficiais Microsoft, com nota fiscal de venda, ativação e instalação. Para pessoa física e para CNPJ, o cartão parcela em 12x sem juros. O levantamento da sua empresa sai pelo WhatsApp.",
+    imagem: { src: "/images/landing/v3/microsoft/microsoft.webp", alt: "Escritório claro com notebook e monitor prontos para uso com Windows e Office" },
+    mensagem: MENSAGEM,
+    botao: "Pedir levantamento no WhatsApp",
+    secundario: { rotulo: "Escolher a licença", href: "#secao-2" },
     fatos: [
-      { valor: "Original", rotulo: "ativação que recebe todas as atualizações" },
-      { valor: "Instala na hora", rotulo: "traga o computador à loja" },
-      { valor: "Windows 10", rotulo: "sem suporte desde 14/10/2025" },
-      { valor: "Empresa", rotulo: "licenças para vários computadores" },
+      { valor: "Originais", rotulo: "licenças originais adquiridas de fornecedores oficiais Microsoft" },
+      { valor: "Nota de venda", rotulo: "a venda sai com nota fiscal de venda" },
+      { valor: "12x sem juros", rotulo: "no cartão, para pessoa física e CNPJ" },
+      { valor: "No Cambuí", rotulo: "ativação e instalação na Av. Anchieta" },
     ],
   },
   assistente: {
-    titulo: "Licença certa em três toques",
-    texto: "Com isso a equipe responde qual licença serve e como fica a instalação.",
-    abertura: "Olá! Vim pela página de licenças Microsoft e quero uma licença original.",
-    fecho: "Posso mandar foto da tela de configurações do computador (Sistema > Sobre)?",
+    titulo: "Diga o tamanho da empresa",
+    texto: "Com isso a equipe já sabe se o caso é um computador, um parque inteiro ou um servidor.",
+    abertura: MENSAGEM,
+    fecho: "Posso mandar a quantidade de computadores e se existe servidor?",
     botao: "Enviar para a loja",
     perguntas: [
       {
         rotulo: "Preciso de",
-        pergunta: "O que você precisa?",
+        pergunta: "O que a empresa precisa regularizar?",
         varias: true,
-        opcoes: ["Windows 11 Home", "Windows 11 Pro", "Office", "Microsoft 365", "Não sei, quero ajuda"],
+        opcoes: ["Windows nos PCs", "Windows Server", "Office ou Microsoft 365", "Ainda não sei"],
+      },
+      {
+        rotulo: "Servidor",
+        pergunta: "A empresa tem servidor?",
+        opcoes: ["Sim", "Não", "Não sei"],
       },
       {
         rotulo: "Computadores",
-        pergunta: "Para quantos computadores?",
-        opcoes: ["1", "2 a 5", "Mais de 5"],
-      },
-      {
-        rotulo: "Instalação",
-        pergunta: "Como prefere?",
-        opcoes: ["Instalar e ativar na loja", "Só a licença", "Formatar e instalar do zero"],
+        pergunta: "Quantos computadores entram na conta?",
+        opcoes: ["1", "2 a 10", "Mais de 10"],
       },
     ],
   },
   secoes: [
     {
-      tipo: "comparativo",
-      titulo: "Windows 11 Home ou Pro?",
-      texto: "Os dois são o mesmo Windows no dia a dia. O Pro acrescenta recursos de gestão e segurança que fazem diferença em empresa.",
-      colunas: ["Recurso", "Windows 11 Home", "Windows 11 Pro"],
-      linhas: [
-        ["Uso em casa, estudo e jogos", "Atende completo", "Atende completo"],
-        ["Criptografia do disco com BitLocker", "Não tem (alguns aparelhos têm só a criptografia básica do dispositivo)", "Tem"],
-        ["Acesso remoto ao computador (Área de Trabalho Remota)", "Só acessa outros computadores", "Pode ser acessado de fora"],
-        ["Entrar em domínio da empresa e políticas de grupo", "Não tem", "Tem"],
-        ["Máquinas virtuais (Hyper-V) e Área Restrita", "Não tem", "Tem"],
-        ["Passar de Home para Pro depois", "Dá, com uma licença de upgrade, sem formatar", "—"],
-      ],
-    },
-    {
       tipo: "texto",
-      titulo: "Licença original: por que a ativação importa",
+      titulo: "Software Microsoft original para a sua empresa, num só lugar",
       paragrafos: [
-        "O Windows sem ativação, ou ativado com programa de terceiros, até liga e funciona por um tempo. O problema aparece depois: atualizações de segurança que não chegam ou quebram a ativação, recursos bloqueados, aviso na tela e, nos casos de ativador pirata, programa malicioso escondido dentro do próprio ativador. Em computador de empresa, ainda há o risco legal de usar software sem licença.",
-        "Com a licença original, o Windows fica ligado à sua máquina ou à sua conta Microsoft, recebe todas as atualizações mensais de segurança e as atualizações de versão. Isso pesa ainda mais agora: a Microsoft encerrou o suporte do Windows 10 em 14 de outubro de 2025. Ele continua funcionando, mas deixou de receber as atualizações de segurança regulares, e quem usa o computador para banco, e-mail e trabalho fica mais exposto a cada mês.",
-        "Antes de vender o Windows 11, a equipe confere se o seu computador cumpre os requisitos: processador compatível, TPM 2.0 e inicialização segura. Muitas máquinas de poucos anos atrás passam; as muito antigas não. Nesses casos você fica sabendo antes de gastar, junto com as opções de upgrade ou de notebook novo.",
-      ],
-      lista: [
-        "Desconfie de chave muito barata vendida solta na internet: pode ser bloqueada depois",
-        "Licença original passa a acompanhar a máquina ou a sua conta Microsoft",
-        "Na troca de Windows 10 para 11, os arquivos podem ser mantidos; quando precisa formatar, a loja faz backup antes",
+        "Quem cuida de um escritório em Campinas quase nunca precisa de um produto só. O computador pede Windows Pro, cada pessoa pede Word, Excel e e-mail, e o servidor de arquivos ou do sistema pede Windows Server com as licenças de acesso. Comprar cada um num site diferente, sem saber a modalidade, é o caminho mais comum para uma chave que para de valer na atualização seguinte.",
+        "Nesta página a Balão da Informática Anchieta junta os três. A loja é especialista nesse licenciamento e trabalha com licenças originais adquiridas de fornecedores oficiais Microsoft. A venda sai com nota fiscal de venda. A ativação e a instalação são feitas pela equipe, na loja da Av. Anchieta, 789, no Cambuí. O valor de cada licença não está publicado aqui: o orçamento sai pelo WhatsApp (19) 98751-0267.",
+        "O levantamento começa com quatro números: quantos computadores, se existe servidor, quantas pessoas usam o Office e se alguém acessa o sistema de fora. Com isso a equipe separa o que é Windows, o que é servidor e o que é assinatura, e devolve uma proposta só. Pessoa física com um computador também é atendida: o caminho é o mesmo, com menos itens.",
       ],
     },
     {
-      tipo: "comparativo",
-      titulo: "Office vitalício ou Microsoft 365?",
-      texto: "Os dois trazem Word, Excel e PowerPoint. O que muda é a forma de pagar e o que vem junto.",
-      colunas: ["", "Office vitalício (compra única)", "Microsoft 365 (assinatura)"],
-      linhas: [
-        ["Como paga", "Uma vez só", "Por ano ou por mês, enquanto usar"],
-        ["Em quantos computadores", "Um computador", "Vários aparelhos; o plano Family atende até seis pessoas"],
-        ["Atualização de versão", "Fica na versão comprada, com correções de segurança", "Sempre na versão mais nova"],
-        ["Armazenamento em nuvem", "Não inclui", "Inclui espaço no OneDrive para cada pessoa"],
-        ["Para quem compensa", "Quem usa o básico num computador só, por anos", "Família, quem usa em vários aparelhos ou precisa da nuvem"],
+      tipo: "atalhos",
+      titulo: "O que você precisa",
+      texto: "Escolha o assunto. Cada página explica a regra de uso e leva ao mesmo WhatsApp, já com a mensagem do caso.",
+      itens: [
+        {
+          titulo: "Windows 10 e 11 Pro",
+          texto: "OEM, Retail e volume: qual licença fica no computador e qual pode mudar de máquina.",
+          href: "/microsoft/windows",
+          imagem: "/images/landing/v3/microsoft/microsoft.webp", alt: "Escritório claro com notebook e monitor prontos para uso com Windows e Office",
+        },
+        {
+          titulo: "Windows Server",
+          texto: "Standard ou Datacenter, núcleos mínimos e CALs por usuário ou por dispositivo.",
+          href: "/microsoft/windows-server",
+          imagem: "/images/landing/v3/microsoft-windows-server/sistemas.webp", alt: "Rack de servidor com cabos de rede organizados e luzes de status em sala técnica de empresa",
+        },
+        {
+          titulo: "Office e Microsoft 365",
+          texto: "Compra única ou assinatura, para casa, autônomo ou empresa, com instalação.",
+          href: "/microsoft/office-365",
+          imagem: "/images/landing/v3/microsoft-office-365/notebooks.webp", alt: "Pessoa trabalhando em planilha no notebook em mesa de escritório clara",
+        },
+        {
+          titulo: "Sites e suporte de TI",
+          texto: "Quando a empresa também precisa de rede, backup ou sistema, além da licença.",
+          href: "/sistemas",
+          imagem: "/images/landing/v3/microsoft-windows-server/sistemas.webp", alt: "Rack de servidor com cabos de rede organizados e luzes de status em sala técnica de empresa",
+        },
       ],
     },
     {
       tipo: "passos",
-      titulo: "Como funciona na loja",
-      texto: "Você sai com o computador ativado e conferido, sem precisar mexer em nada.",
+      titulo: "Regularização em 3 passos",
+      texto: "O levantamento não publica preço nesta página. A proposta, com nota fiscal de venda, sai na conversa.",
       itens: [
-        { titulo: "Conte o que precisa", texto: "Pelo assistente acima ou no WhatsApp: qual licença, para quantos computadores e se quer instalação." },
-        { titulo: "Confira a máquina", texto: "Mande foto de Configurações > Sistema > Sobre, ou traga o computador. A equipe confirma se ele roda o Windows 11." },
-        { titulo: "Instalação e ativação", texto: "Na loja do Cambuí, a equipe instala e ativa com você esperando, ou formata com backup se for o caso." },
-        { titulo: "Saia funcionando", texto: "Windows ativado, atualizações em dia e Office abrindo. Serviço com garantia legal de 90 dias." },
+        {
+          titulo: "Levantamento",
+          texto: "Você manda quantos computadores existem, se há servidor, qual Office está em uso e se o acesso remoto faz parte do dia. Pode ser pelo formulário ou pelo WhatsApp.",
+        },
+        {
+          titulo: "Proposta com nota fiscal de venda",
+          texto: "A equipe indica a modalidade de cada licença e manda o orçamento. A venda sai com nota fiscal de venda. No cartão, 12x sem juros para pessoa física e para CNPJ.",
+        },
+        {
+          titulo: "Ativação e instalação",
+          texto: "A equipe ativa e instala. O computador pode vir à loja do Cambuí. Se o caso pedir outro jeito de atendimento, isso entra no orçamento, sem prazo prometido nesta página.",
+        },
       ],
     },
     {
       tipo: "regras",
-      titulo: "Para empresas",
-      texto: "Escritório com computadores sem licença ou ainda no Windows 10 é o caso mais comum que chega.",
+      titulo: "Regras que todo gestor deve saber",
+      texto: "Três regras evitam comprar a licença errada. O detalhe de cada uma está na página do produto.",
       itens: [
         {
-          titulo: "Regularize de uma vez",
-          texto: "Mande quantos computadores são, qual Windows e Office cada um tem hoje e o que a equipe usa. A loja indica a combinação de licenças e combina a instalação.",
-          pontos: ["Windows 11 Pro para quem precisa de acesso remoto e BitLocker", "Microsoft 365 para quem trabalha com e-mail e arquivos compartilhados"],
+          titulo: "OEM, Retail e volume",
+          texto: "A OEM fica no primeiro computador em que é ativada e não muda de máquina. A Retail (ESD ou caixa) vale em um dispositivo por vez e pode ser transferida. O volume é contrato empresarial, para muitas máquinas. Nenhuma das três é uma chave solta sem modalidade.",
+          pontos: ["Veja a comparação na página de Windows", "Peça a modalidade por escrito no orçamento"],
         },
         {
-          titulo: "Instalação na loja ou retirada",
-          texto: "Os computadores podem ser trazidos ao Cambuí ou retirados em Campinas e região, combinando pelo WhatsApp. Computador que não roda o Windows 11 pode ganhar upgrade na bancada.",
-          pontos: ["Pagamento com 10% de desconto no Pix ou parcelado no cartão", "Assistência técnica no mesmo endereço"],
+          titulo: "Servidor pede núcleo e CAL",
+          texto: "Licenciar o Windows Server não basta. Cada pessoa ou cada aparelho que acessa o servidor precisa de uma CAL, e o acesso por área de trabalho remota pede outra licença em cima. Um escritório de dez pessoas quase nunca se resolve só com a licença do servidor.",
+          pontos: ["A conta de núcleos e CALs está na página de Windows Server"],
+        },
+        {
+          titulo: "Office de compra única não é assinatura",
+          texto: "O Office 2024 é pago uma vez e fica naquela versão. O Microsoft 365 é assinatura, com aplicativos atualizados e, nos planos de empresa, e-mail e Teams. Oferta de uso sem prazo, apresentada como se a assinatura fosse eterna, não é um produto da Microsoft.",
+          pontos: ["A escolha por perfil está na página de Office e Microsoft 365"],
         },
       ],
     },
     {
-      tipo: "vitrine",
-      titulo: "Vai trocar de computador? Notebooks que já saem com Windows 11",
-      texto: "Estes modelos vêm de fábrica com o Windows 11 ativado. Os que saem com Linux ou KeepOS recebem a licença original na loja, se você quiser.",
-      regras: [
+      tipo: "beneficios",
+      titulo: "Por que fechar com a loja do Cambuí",
+      texto: "O que a Balão da Informática Anchieta confirma neste atendimento, sem preço publicado na página.",
+      itens: [
         {
-          id: "notebooks-windows",
-          titulo: "Notebooks com Windows 11 de fábrica",
-          subtitulo: "Ativação original do fabricante, pronta para usar",
-          categorias: ["Computadores/Notebooks"],
-          nomeComeca: ["notebook"],
-          nomeContem: ["windows 11", "win 11", "win11", "w11", "win 11h", "w11h", "windows 11 home", "windows 11 pro"],
-          porMarca: 3,
-          ordem: "menor",
-          limite: 12,
-          verTodos: { rotulo: "Ver todos os notebooks", href: "/notebooks" },
+          titulo: "Licença com origem declarada",
+          texto: "São licenças originais adquiridas de fornecedores oficiais Microsoft, para Windows, Windows Server, Office e Microsoft 365.",
+        },
+        {
+          titulo: "Nota fiscal de venda",
+          texto: "A venda da licença sai com nota fiscal de venda. O documento acompanha o orçamento fechado, não um tipo de nota inventado no anúncio.",
+        },
+        {
+          titulo: "12x sem juros também no CNPJ",
+          texto: "O parcelamento em 12x sem juros no cartão vale para pessoa física e para empresa. O valor de cada item sai no orçamento pelo WhatsApp.",
+        },
+        {
+          titulo: "Ativação e instalação",
+          texto: "A equipe ativa e instala. Quem só manda a chave deixa a empresa na dúvida na hora de ligar o computador. Aqui o técnico da loja faz essa etapa.",
+        },
+      ],
+    },
+    {
+      tipo: "texto",
+      titulo: "O que uma auditoria costuma olhar",
+      paragrafos: [
+        "Uma revisão de software pergunta, em linguagem simples, se cada computador tem licença da edição que está instalada e se o servidor tem CALs para quem acessa. Planilha de controle, nota de compra e a modalidade (OEM, Retail ou volume) são o que a empresa mostra. Chave sem nota e sem modalidade é o item que mais atrapalha nessa hora.",
+        "A Balão da Informática Anchieta não substitui o contador nem o jurídico da empresa. O que a loja faz é o levantamento das licenças, a proposta com nota fiscal de venda e a ativação e instalação. Se o escritório está abrindo agora, se o contador pediu regularização ou se o parque ainda está no Windows 10, o caminho é o mesmo: mande os números pelo WhatsApp.",
+      ],
+    },
+    {
+      tipo: "retorno",
+      titulo: "Pedir retorno rápido",
+      texto: "CNPJ, quantidade de computadores, se existe servidor e qual Office a empresa usa. A equipe retorna no WhatsApp com o levantamento.",
+      assunto: "Licenciamento Microsoft",
+      campos: [
+        { nome: "cnpj", rotulo: "CNPJ" },
+        { nome: "computadores", rotulo: "Número de computadores" },
+        { nome: "servidor", rotulo: "Tem servidor?", opcoes: ["Sim", "Não", "Não sei"] },
+        { nome: "office", rotulo: "Usa Office? Qual?" },
+      ],
+    },
+    {
+      tipo: "atalhos",
+      titulo: "Quando a licença não é o único assunto",
+      itens: [
+        {
+          titulo: "Formatação com backup",
+          texto: "Sistema reinstalado, com os arquivos combinados antes.",
+          href: "/formatacao",
+          imagem: "/images/landing/v3/microsoft-windows-server/sistemas.webp", alt: "Rack de servidor com cabos de rede organizados e luzes de status em sala técnica de empresa",
+        },
+        {
+          titulo: "Montagem de PC",
+          texto: "Computador novo, e a licença de Windows entra no orçamento se você pedir.",
+          href: "/montagempc",
+          imagem: "/images/landing/v3/microsoft/montagempc.webp", alt: "Técnico instalando SSD na placa-mãe de um computador de mesa aberto",
+        },
+        {
+          titulo: "Notebooks",
+          texto: "Máquinas novas. As que saem sem Windows podem receber a licença na loja.",
+          href: "/notebooks",
+          imagem: "/images/landing/v3/microsoft-office-365/notebooks.webp", alt: "Pessoa trabalhando em planilha no notebook em mesa de escritório clara",
+        },
+        {
+          titulo: "Fale conosco",
+          texto: "Endereço, telefone e horário da loja no Cambuí.",
+          href: "/fale-conosco",
+          imagem: "/images/landing/v3/microsoft/sobre-nos.webp", alt: "Interior claro de loja de informática com balcão de madeira e prateleiras com notebooks",
         },
       ],
     },
   ],
   perguntas: [
     {
-      pergunta: "Qual a diferença entre Windows 11 Home e Pro?",
+      pergunta: "Onde regularizar licenças Microsoft de uma empresa em Campinas?",
       resposta:
-        "No dia a dia são iguais. O Pro acrescenta BitLocker para criptografar o disco, acesso remoto ao computador, entrada em domínio de empresa, políticas de grupo e máquinas virtuais. Para casa e estudo o Home basta; para empresa, o Pro costuma ser o certo.",
+        "A Balão da Informática Anchieta, na Av. Anchieta, 789, Cambuí, é especializada em licenciamento de Windows, Windows Server e Office, com licença original, nota fiscal de venda e instalação por técnico; levantamento pelo WhatsApp (19) 98751-0267.",
     },
     {
-      pergunta: "Ainda dá para usar o Windows 10?",
+      pergunta: "Quais licenças Microsoft uma pequena empresa precisa?",
       resposta:
-        "Ele continua ligando, mas a Microsoft encerrou o suporte em 14 de outubro de 2025 e as atualizações de segurança regulares acabaram. Para computador usado em banco, e-mail ou trabalho, o recomendado é passar para o Windows 11, se a máquina for compatível.",
+        "Normalmente: Windows Pro em cada PC, Office ou Microsoft 365 por usuário e, se houver servidor, Windows Server licenciado por núcleo mais CALs por usuário ou dispositivo.",
     },
     {
-      pergunta: "Meu computador roda o Windows 11?",
+      pergunta: "A venda da licença sai com nota fiscal?",
       resposta:
-        "Depende do processador, do TPM 2.0 e da inicialização segura. Mande foto da tela Configurações > Sistema > Sobre no WhatsApp, ou traga o computador, e a equipe confere antes de você comprar a licença.",
+        "Sim. A venda sai com nota fiscal de venda. São licenças originais adquiridas de fornecedores oficiais Microsoft. O orçamento, com a modalidade de cada item, sai pelo WhatsApp (19) 98751-0267.",
     },
     {
-      pergunta: "Office vitalício ou Microsoft 365: qual comprar?",
+      pergunta: "Empresa com CNPJ parcela em quantas vezes?",
       resposta:
-        "O vitalício é pago uma vez e vale para um computador, na versão comprada. O Microsoft 365 é assinatura, funciona em vários aparelhos, inclui espaço no OneDrive e está sempre atualizado. Para uma pessoa que só usa Word e Excel num computador, o vitalício costuma compensar.",
+        "Em 12x sem juros no cartão, tanto para pessoa física quanto para CNPJ. O valor de cada licença não está nesta página: ele sai no orçamento pelo WhatsApp.",
     },
     {
-      pergunta: "Vocês instalam e ativam o Windows na loja?",
+      pergunta: "Vocês instalam o que foi comprado?",
       resposta:
-        "Sim. Traga o computador à loja do Cambuí e a equipe instala e ativa a licença com você esperando, ou formata com backup quando for o caso. O serviço tem a garantia legal de 90 dias.",
-    },
-    {
-      pergunta: "Dá para passar do Windows 11 Home para o Pro sem formatar?",
-      resposta:
-        "Dá. Com uma licença de upgrade para o Pro, o Windows muda de edição mantendo arquivos e programas. A equipe faz a troca na loja ou orienta pelo WhatsApp.",
-    },
-    {
-      pergunta: "Qual o problema de ativar o Windows com programa da internet?",
-      resposta:
-        "Ativador pirata pode trazer vírus escondido, perder a ativação numa atualização e deixar a empresa exposta por usar software sem licença. Com a licença original, o Windows recebe todas as atualizações sem risco de bloqueio.",
+        "Sim. A ativação e a instalação são feitas pela equipe da loja. O computador pode vir ao Cambuí. Outra forma de atendimento, quando o caso pedir, é combinada no orçamento.",
     },
   ],
-  temas: ["licenca", "empresa", "notebook", "pc", "assistencia", "compra"],
-  termosDoBlog: ["windows", "windows 11", "windows 10", "office", "microsoft", "licença"],
-  relacionadas: ["notebooks", "manutencao", "sistemas", "tonner"],
+  tituloDasPerguntas: "Perguntas frequentes",
+  temas: ["licenca", "empresa", "windows", "office", "servidor"],
+  termosDoBlog: ["windows", "windows 11", "windows 10", "office", "microsoft", "licença", "servidor"],
+  relacionadas: ["microsoft/windows", "microsoft/windows-server", "microsoft/office-365", "sistemas"],
   final: {
-    titulo: "Peça a licença e saia com o computador ativado",
-    texto: "Diga qual licença precisa e para quantos computadores. A equipe confere a sua máquina e instala e ativa na loja da Av. Anchieta, no Cambuí.",
-    botao: "Pedir licença original",
+    titulo: "Mande os números da empresa e receba o levantamento",
+    texto: "Av. Anchieta, 789, Cambuí. Segunda a sexta, 9h às 18h. Sábado, 9h às 13h. Licenças originais, nota fiscal de venda e 12x sem juros também para CNPJ. Orçamento pelo WhatsApp.",
+    botao: "Chamar no WhatsApp",
+    mensagem: MENSAGEM,
   },
 };

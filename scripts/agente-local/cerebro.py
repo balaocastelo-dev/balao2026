@@ -2,7 +2,7 @@
 
 O modelo (Ollama, no PC) escreve a resposta e decide quando buscar produto,
 mostrar produto, guardar dado, emitir orçamento, fechar venda ou chamar um
-vendedor. Tudo o que é número, documento e Bling passa por código:
+vendedor. Tudo o que é número, documento e MEU BLING passa por código:
 
 - produto, preço, foto e link vêm do catálogo do site (catalogo.py);
 - a resposta só sai se cada "R$" dela veio de uma ferramenta;
@@ -17,7 +17,7 @@ import re
 import time
 
 import regras as R
-from bling import mensagem_de_erro
+from sistema import id_externo, mensagem_de_erro
 from catalogo import nome_curto, preco, reais
 
 LOJA = {
@@ -146,7 +146,7 @@ def agora_sp() -> str:
 class Atendimento:
     """Uma rodada: as mensagens novas do cliente viram uma resposta."""
 
-    def __init__(self, *, trabalho: dict, ollama, modelo: str, catalogo, bling, contexto: int = 8192, registrar=print,
+    def __init__(self, *, trabalho: dict, ollama, modelo: str, catalogo, sistema, contexto: int = 8192, registrar=print,
                  prazo_s: float = 70):
         trabalho = {**trabalho, "mensagens": conversa_atual(trabalho.get("mensagens"))}
         self.t = trabalho
@@ -155,7 +155,7 @@ class Atendimento:
         self.ollama = ollama
         self.modelo = modelo
         self.catalogo = catalogo
-        self.bling = bling
+        self.sistema = sistema
         self.contexto = contexto
         self.registrar = registrar
         self.dados = dict(trabalho.get("dados") or {})
@@ -432,17 +432,22 @@ class Atendimento:
             return {"ok": False, "erro": "sem itens"}
         total = round(sum(i["valor"] * i["quantidade"] for i in lista), 2)
         try:
-            contato = self.bling.contato_para({**self.dados, "nome": self.dados.get("nome") or self.t.get("nome")}, self.t.get("numero") or "")
-            prop = self.bling.criar_proposta(
+            # Mesma conversa, mesmo dia, mesmos itens = mesmo orçamento no MEU BLING: um
+            # trabalho refeito (prazo vencido, rede caiu) não duplica (idExterno).
+            ext = id_externo("orc", self.t.get("chatId") or self.t.get("numero") or self.t.get("id"), dia,
+                             json.dumps([[i["id"], i["quantidade"], i["valor"]] for i in lista]))
+            contato = self.sistema.contato_para({**self.dados, "nome": self.dados.get("nome") or self.t.get("nome")}, self.t.get("numero") or "")
+            prop = self.sistema.criar_proposta(
                 contato, lista,
                 observacoes=f"Orçamento feito pela JUL.IA (assistente digital) pelo WhatsApp. Preços à vista no Pix, do site www.balao.info em {dt.date.today():%d/%m/%Y}. Válido por 3 dias, sujeito a disponibilidade.",
                 observacao_interna=f"WhatsApp {self.t.get('numero')} · conversa da JUL.IA",
+                id_externo=ext,
             )
         except Exception as e:
             erro = mensagem_de_erro(e)
             self.acoes.append({"tipo": "orcamento", "erro": erro, "total": total, "itens": lista})
             return {"ok": False, "erro": erro, "instrucao": "Diga ao cliente que um vendedor vai conferir o orçamento e chame chamar_vendedor."}
-        self.memoria["orcamento"] = {"numero": str(prop["numero"]), "id": str(prop["id"]), "itens": lista, "total": total, "em": int(time.time())}
+        self.memoria["orcamento"] = {"numero": str(prop["numero"]), "id": str(prop["id"]), "ext": ext, "itens": lista, "total": total, "em": int(time.time())}
         self.memoria.pop("confirmou", None)
         self.memoria["orcamentosHoje"] = {"dia": dia, "n": (cont.get("n", 0) if cont.get("dia") == dia else 0) + 1}
         self.precos.add(total)
@@ -450,7 +455,7 @@ class Atendimento:
             self.precos.add(self._no_cartao(lista))
         for i in lista:
             self.precos.update({i["valor"], round(i["valor"] * i["quantidade"], 2)})
-        self.acoes.append({"tipo": "orcamento", "numero": str(prop["numero"]), "blingId": str(prop["id"]), "total": total, "itens": lista})
+        self.acoes.append({"tipo": "orcamento", "numero": str(prop["numero"]), "sistemaId": str(prop["id"]), "total": total, "itens": lista})
         self.extras.append(self._texto_do_orcamento(prop, lista, total))
         return {"ok": True, "numero": str(prop["numero"]), "total_a_vista": reais(total),
                 "instrucao": "O orçamento completo já vai para o cliente. Não repita itens nem valores: só pergunte se pode fechar o pedido."}
@@ -514,21 +519,24 @@ class Atendimento:
         total = round(sum(i["valor"] * i["quantidade"] for i in itens), 2)
         modo = "Retirada na loja" if self.dados.get("entrega") == "retirada" else "Entrega (frete a combinar)"
         try:
-            contato = self.bling.contato_para(self.dados, self.t.get("numero") or "")
-            ped = self.bling.criar_pedido(
+            # Um pedido por orçamento: confirmar de novo devolve o mesmo pedido.
+            ext = id_externo("ped", (orc.get("ext") or "").replace("julia-orc-", "") or orc.get("id"))
+            contato = self.sistema.contato_para(self.dados, self.t.get("numero") or "")
+            ped = self.sistema.criar_pedido(
                 contato, itens,
                 observacoes=f"Pedido feito pela JUL.IA (assistente digital) pelo WhatsApp, a partir do orçamento nº {orc['numero']}. Pagamento: {pagamento}. {modo}.",
                 observacoes_internas=f"WhatsApp {self.t.get('numero')}. Conferir pagamento e {modo.lower()} com o cliente.",
                 pagamento=self.dados.get("pagamento"),
                 entrega=entrega,
+                id_externo=ext,
             )
         except Exception as e:
             erro = mensagem_de_erro(e)
             self.acoes.append({"tipo": "venda", "erro": erro, "total": total, "itens": itens})
-            self.transferir = {"motivo": f"cliente confirmou a compra, mas o pedido não entrou no Bling: {erro}"}
+            self.transferir = {"motivo": f"cliente confirmou a compra, mas o pedido não entrou no MEU BLING: {erro}"}
             return {"ok": False, "instrucao": "Diga que o pedido está confirmado e que um vendedor vai finalizar agora."}
         self.memoria["venda"] = {"numero": str(ped["numero"]), "id": str(ped["id"]), "total": total, "em": int(time.time())}
-        self.acoes.append({"tipo": "venda", "numero": str(ped["numero"]), "blingId": str(ped["id"]), "total": total, "itens": itens})
+        self.acoes.append({"tipo": "venda", "numero": str(ped["numero"]), "sistemaId": str(ped["id"]), "total": total, "itens": itens})
         self.precos.add(total)
         self.extras.append(
             f"✅ *Pedido nº {ped['numero']} registrado*" + (" (teste)" if ped.get("simulado") else "") + "\n"

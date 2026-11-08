@@ -54,6 +54,13 @@ export function isTursoActive(): boolean {
   return Boolean(host && database && user && password);
 }
 
+/** Quanto tempo a conexão parada fica aberta (ver getConfig). */
+export const IDLE_MS = 5 * 60_000;
+
+/** Quantas conexões esta instância já abriu (aparece no log "[db] conexão nova"). */
+let conexoesAbertas = 0;
+const instancia = Math.random().toString(36).slice(2, 8);
+
 function getConfig() {
   return {
     host: process.env.MYSQL_HOST || '',
@@ -68,12 +75,32 @@ function getConfig() {
     // o banco recusa tudo até a hora virar. Era o que fazia o catálogo sumir
     // "só às vezes". Cada instância atende uma requisição por vez, então 2
     // conexões dão conta.
-    connectionLimit: 2,
-    // Devolve a conexão rápido, em vez de segurá-la ociosa até a instância
-    // ser reciclada.
-    idleTimeout: 20_000,
+    // 1 conexão por instância (26/10). Medido com o log "[db] conexão nova":
+    // quando a instância fica ~40 s sem visita, a conexão parada é fechada em
+    // silêncio e a próxima visita abre outra; com limite 2, abriam DUAS (as
+    // páginas fazem consultas em paralelo). Com 1, as consultas da mesma
+    // página entram em fila na mesma conexão — milissegundos a mais — e a
+    // cota gasta cai à metade. ATENÇÃO: dentro de turso.transaction(), use só
+    // tx.execute; turso.execute lá dentro esperaria a própria transação.
+    connectionLimit: 1,
+    // A cota da Hostinger conta CONEXÕES ABERTAS por hora, não consultas.
+    // Até 25/10 a conexão parada era destruída em 20 s (idleTimeout: 20_000
+    // com maxIdle < connectionLimit faz o mysql2 fechar até a única conexão
+    // livre) — cada visita que chegava 20 s depois da anterior abria conexão
+    // nova, e uma instância sozinha chegava a ~120 conexões/hora. Agora a
+    // conexão fica viva até 5 min parada: uma instância com movimento usa
+    // poucas conexões por hora. Se o banco derrubar a conexão antes disso,
+    // execute() tenta de novo uma vez quando é seguro (deveTentarDeNovo).
+    idleTimeout: IDLE_MS,
+    // maxIdle SEMPRE igual a connectionLimit. Medido em 25/10 pelo log "[db] conexão
+    // nova": com maxIdle 1 e limite 2, a página abria 2 conexões em paralelo
+    // (consultas em Promise.all), devolvia as 2, e a limpeza do mysql2 (que só
+    // roda quando maxIdle < connectionLimit) destruía uma em ~1 s. Na visita
+    // seguinte abria outra: ~1 conexão nova por visita, ~700/hora. Guardando as
+    // 2, a limpeza nem é criada e a instância reaproveita as mesmas conexões.
     maxIdle: 1,
-    enableKeepAlive: false,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 30_000,
     queueLimit: 0,
     charset: 'utf8mb4_unicode_ci',
     dateStrings: true,
@@ -90,6 +117,14 @@ function getPool(): Pool {
     try {
       _pool = createPool(cfg);
       _poolSignature = signature;
+      // Uma linha por conexão aberta, para medir a cota pelos logs da Vercel
+      // (procure "[db] conexão nova"); não toca no banco.
+      _pool.on('connection', () => {
+        conexoesAbertas += 1;
+        console.log(
+          `[db] conexão nova (instância ${instancia}, ${conexoesAbertas}ª desta instância, região ${process.env.VERCEL_REGION || '?'})`
+        );
+      });
     } catch (error) {
       console.error('[db] Erro ao inicializar pool MySQL:', error);
       throw error;
@@ -150,6 +185,23 @@ export function ehErroDeCota(erro: unknown) {
   return texto.includes("max_connections_per_hour") || texto.includes("max_user_connections");
 }
 
+const ERROS_DE_CONEXAO_CAIDA = ["PROTOCOL_CONNECTION_LOST", "ECONNRESET", "EPIPE"];
+
+/**
+ * Vale tentar a consulta de novo numa conexão nova?
+ * - "closed state": a conexão já estava morta e nada foi enviado → sempre seguro;
+ * - conexão caída (reset/lost): só para leitura (SELECT/SHOW), porque numa
+ *   gravação não dá para saber se o banco chegou a aplicar.
+ */
+export function deveTentarDeNovo(erro: unknown, sql: string): boolean {
+  const e = erro as { code?: string; message?: string } | null;
+  const msg = String(e?.message || "");
+  if (ehErroDeCota(erro)) return false;
+  if (/closed state/i.test(msg)) return true;
+  if (!ERROS_DE_CONEXAO_CAIDA.includes(String(e?.code || "")) && !/Connection lost/i.test(msg)) return false;
+  return /^\s*(select|show|with)\b/i.test(String(sql || ""));
+}
+
 /** Se o banco está em pausa por ter recusado conexão há pouco. */
 export function bancoEmPausa() {
   return cotaEstouradaEm > 0 && Date.now() - cotaEstouradaEm < PAUSA_APOS_COTA_MS;
@@ -163,7 +215,14 @@ async function execute(input: StatementInput | string): Promise<QueryResult> {
   }
 
   try {
-    return await runQuery(getPool(), input);
+    try {
+      return await runQuery(getPool(), input);
+    } catch (primeiro) {
+      // Conexão parada que o banco já tinha derrubado: tenta uma vez numa nova.
+      if (!deveTentarDeNovo(primeiro, typeof input === 'string' ? input : input.sql)) throw primeiro;
+      console.warn('[db] conexão parada tinha caído; tentando de novo:', (primeiro as Error)?.message);
+      return await runQuery(getPool(), input);
+    }
   } catch (erro) {
     if (ehErroDeCota(erro)) {
       if (!bancoEmPausa()) {

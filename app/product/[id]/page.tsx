@@ -1,4 +1,6 @@
 import { Metadata } from 'next';
+import { Suspense } from 'react';
+import SugestoesDoProduto from '@/components/produto/SugestoesDoProduto';
 import Header from '@/components/Header';
 import SeloProntaEntrega, { ehImagemIlustrativa } from "@/components/SeloProntaEntrega";
 import Sidebar from '@/components/Sidebar';
@@ -6,8 +8,10 @@ import { notFound, permanentRedirect } from 'next/navigation';
 import ShareButton from '@/components/ShareButton';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import ProductActions from '@/components/ProductActions';
+import AvisoDeQuedaDePreco from '@/components/AvisoDeQuedaDePreco';
 import ShippingCalculator from '@/components/ShippingCalculator';
 import ProductMediaSwitcher from '@/components/ProductMediaSwitcher';
+import SeloAppPix from '@/components/SeloAppPix';
 import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema, generateProductSchema } from '@/components/JsonLd';
 import { getProductHref } from '@/lib/utils';
 import { getCachedCategories, getCachedProductByIdentifier } from "@/lib/cache";
@@ -64,7 +68,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const canonical = getProductCanonicalPath(product.slug, product.id);
 
   return {
-    title: `${product.name} | Balão da Informática`,
+    title: { absolute: `${product.name} | Balão da Informática` },
     description: `Compre ${product.name} por ${product.price}`,
     alternates: { canonical },
     openGraph: {
@@ -192,6 +196,7 @@ export default async function ProductPage({ params }: Props) {
                              <div className="text-sm font-medium text-[var(--site-soft)] mt-1">
                                  à vista no PIX com <strong>{product.discount_pix || "10% de desconto"}</strong>
                              </div>
+                             <SeloAppPix price={product.price} />
                           </div>
 
                           {/* Installment Price */}
@@ -219,6 +224,7 @@ export default async function ProductPage({ params }: Props) {
                           </div>
 
                          <ProductActions product={product} />
+                         <AvisoDeQuedaDePreco produtoId={String(product.id)} produtoNome={product.name} />
                          
                          <ShippingCalculator />
                     </div>
@@ -256,6 +262,11 @@ export default async function ProductPage({ params }: Props) {
                 </div>
             </div>
           </div>
+
+          {/* Carrosséis de sugestões: chegam depois do produto, sem atrasar a página. */}
+          <Suspense fallback={null}>
+            <SugestoesDoProduto produto={product} />
+          </Suspense>
         </main>
       </div>
      </div>

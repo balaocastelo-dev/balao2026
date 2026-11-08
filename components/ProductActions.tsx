@@ -1,5 +1,6 @@
 "use client";
 
+import { comOrigemDaPagina } from "@/lib/whatsapp/origem";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 import { Product } from "@/lib/utils";
@@ -31,7 +32,7 @@ export default function ProductActions({ product }: { product: Product }) {
       product_name: product.name,
     });
 
-    window.open(`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(message)}`, "_blank");
+    window.open(comOrigemDaPagina(`https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(message)}`), "_blank");
   };
 
   const handleAddToCart = (e: React.MouseEvent) => {

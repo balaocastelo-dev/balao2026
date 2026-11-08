@@ -77,7 +77,8 @@ export const CHAMADAS: Record<TemaDeChamada, ChamadaPronta> = {
     titulo: "Na dúvida se a peça serve no seu computador?",
     texto:
       "Mande o modelo da placa-mãe ou do notebook. A equipe confere a compatibilidade antes de você comprar — e instala, se preferir.",
-    rotulo: "Conferir compatibilidade",
+    rotulo: "Ver upgrade de SSD",
+    href: "/upgrade-ssd",
   },
   empresas: {
     titulo: "Computadores para a empresa, com suporte por perto",
@@ -107,9 +108,9 @@ export const CHAMADAS: Record<TemaDeChamada, ChamadaPronta> = {
     href: "/carregadores",
   },
   licencas: {
-    titulo: "Windows e Office originais, ativados na loja",
+    titulo: "Windows, Windows Server e Office originais",
     texto:
-      "Traga o computador ao Cambuí: a equipe confere se ele roda o Windows 11, instala e ativa a licença original na hora.",
+      "Licenças originais adquiridas de fornecedores oficiais Microsoft, com nota fiscal de venda, ativação e instalação no Cambuí. 12x sem juros também para CNPJ.",
     rotulo: "Ver licenças",
     href: "/microsoft",
   },
@@ -117,7 +118,7 @@ export const CHAMADAS: Record<TemaDeChamada, ChamadaPronta> = {
     titulo: "Toner e cartucho para a sua impressora",
     texto: "Diga a marca e o modelo da impressora. A loja confere o suprimento certo e combina a entrega em Campinas e região.",
     rotulo: "Ver toner e cartucho",
-    href: "/tonner",
+    href: "/toner",
   },
   games: {
     titulo: "Console ou controle com defeito?",

@@ -1,7 +1,7 @@
 // ============================================================
-// PDV: vendas do dia (as daqui e as lançadas direto no Bling) e nova venda.
-// Nova venda: grava primeiro (nada se perde) e já leva ao Bling, com a nota
-// se pedida; sem acesso ao Bling no instante, fica aguardando e segue sozinha.
+// PDV: vendas do dia (as daqui e as lançadas direto no /sistema) e nova venda.
+// Nova venda: grava primeiro (nada se perde) e já leva ao /sistema, com a nota
+// se pedida; com o /sistema fora no instante, fica aguardando e segue sozinha.
 // ============================================================
 
 import { after, NextResponse } from "next/server";
@@ -20,7 +20,7 @@ export async function GET(req: Request) {
   const valido = dia && /^\d{4}-\d{2}-\d{2}$/.test(dia) ? dia : hojeNaLoja();
   try {
     const resumo = await vendasDoDia(valido);
-    // Quem estiver aguardando o Bling segue em segundo plano (no máximo 1 vez por minuto por servidor).
+    // Quem estiver aguardando o /sistema segue em segundo plano (no máximo 1 vez por minuto por servidor).
     if (resumo.totais.aguardando > 0 && Date.now() - ultimaVoltaAutomatica > 60_000) {
       ultimaVoltaAutomatica = Date.now();
       after(async () => {

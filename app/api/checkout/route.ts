@@ -4,6 +4,20 @@ import { sendEmail, sendNewOrderNotification } from "@/lib/mail";
 import { getOrderCustomerWhatsAppTemplate } from "@/lib/mail-templates";
 import { validateCoupon } from "@/lib/coupons";
 import { isTursoActive } from "@/lib/turso";
+import { getCachedProductByIdentifier } from "@/lib/cache";
+import { reprecificar, type ItemEnviado } from "@/lib/carrinho/precos";
+import { pedidoVeioDoApp, DESCONTO_APP_PIX, emCentavos } from "@/lib/app-balao";
+import type { Product } from "@/lib/utils";
+
+/**
+ * Preço do produto agora: banco direto (sem cache) e, se ele falhar, o cache do
+ * catálogo (que já cai no espelho da VPS). Ver lib/carrinho/precos.ts.
+ */
+async function buscarProdutoAtual(id: string): Promise<Product | null> {
+  const direto = await getProductById(id).catch(() => null);
+  if (direto) return direto;
+  return getCachedProductByIdentifier(id).catch(() => null);
+}
 
 type CheckoutCustomerInput = {
   name?: unknown;
@@ -73,20 +87,71 @@ export async function POST(req: Request) {
     console.log(`[Checkout] Values received - Total: ${total}, Discount: ${discountValue}, Coupon: ${couponCode}`);
 
     // --- Backend Validation Start ---
-    let calculatedTotalItems = 0;
-    const cleanItems = items.map((item) => {
+    // O preço vem do BANCO, nunca do navegador (lib/carrinho/precos.ts).
+    const enviados: ItemEnviado[] = items.map((item) => {
         const productId = typeof item.product_id === "string"
           ? item.product_id
           : (typeof item.id === "string" ? item.id : "");
-        const quantity = typeof item.quantity === "number" ? item.quantity : Number(item.quantity) || 1;
         let price = item.price;
         if (typeof price === "string") {
              price = parseFloat(price.replace("R$", "").replace(/\./g, "").replace(",", ".")) || 0;
         }
-        const parsedPrice = typeof price === "number" ? price : Number(price) || 0;
-        calculatedTotalItems += parsedPrice * quantity;
-        return { ...item, product_id: productId, quantity, price: parsedPrice };
+        return {
+          product_id: productId,
+          name: String(item.name ?? ""),
+          image: typeof item.image === "string" ? item.image : "",
+          quantity: Number(item.quantity) || 1,
+          price_enviado: typeof price === "number" ? price : Number(price) || 0,
+        };
     });
+
+    const repreco = await reprecificar(enviados, buscarProdutoAtual);
+
+    if (repreco.faltando.length > 0) {
+        console.warn(`[Checkout] Itens que não existem mais no site: ${repreco.faltando.join(", ")}`);
+        return NextResponse.json(
+          {
+            error: "produto_indisponivel",
+            message: "Algum produto do carrinho não está mais disponível no site. Remova-o ou fale com a gente no WhatsApp.",
+            faltando: repreco.faltando,
+            itens: repreco.itens.map((i) => i.atual),
+          },
+          { status: 409 }
+        );
+    }
+
+    if (repreco.algumMudou) {
+        console.warn(
+          `[Checkout] Preço do carrinho diferente do site, pedido não criado: ` +
+          repreco.itens.filter((i) => i.mudou).map((i) => `${i.product_id} ${i.price_enviado} -> ${i.price}`).join("; ")
+        );
+        return NextResponse.json(
+          {
+            error: "precos_atualizados",
+            message: "O preço de algum item mudou. Atualizamos o carrinho: confira o total e confirme de novo.",
+            itens: repreco.itens.map((i) => i.atual),
+          },
+          { status: 409 }
+        );
+    }
+
+    const cleanItems = repreco.itens.map((i) => ({
+      product_id: i.product_id,
+      name: i.name,
+      image: i.image,
+      quantity: i.quantity,
+      price: i.price,
+    }));
+    const calculatedTotalItems = repreco.subtotal;
+
+    // Desconto extra de 15% no Pix para quem comprou PELO APP. Lido do
+    // User-Agent no servidor (não do navegador), igual a loja já faz com o
+    // cron da Vercel. Ver lib/app-balao.ts. Fora do app, descontoApp = 0.
+    const ehApp = pedidoVeioDoApp(req);
+    const descontoApp = ehApp ? emCentavos(calculatedTotalItems * DESCONTO_APP_PIX) : 0;
+    if (ehApp) {
+        console.log(`[Checkout] Pedido pelo app: -15% no Pix = -R$ ${descontoApp.toFixed(2)}`);
+    }
 
     let calculatedDiscount = 0;
     if (couponCode) {
@@ -102,8 +167,11 @@ export async function POST(req: Request) {
         }
     }
 
-    const expectedTotal = Math.max(0, calculatedTotalItems - calculatedDiscount + parsedShippingCost);
-    
+    // Desconto do app + cupom somam. O piso de 0 e o recálculo pelo banco
+    // garantem que nunca saia um total negativo nem o valor que o cliente mandou.
+    const descontoTotal = emCentavos(calculatedDiscount + descontoApp);
+    const expectedTotal = Math.max(0, calculatedTotalItems - descontoTotal + parsedShippingCost);
+
     // Check for discrepancy (> 0.10 to allow minor rounding diffs)
     if (Math.abs(expectedTotal - Number(total)) > 0.1) {
         console.warn(`[Checkout] CRITICAL: Price mismatch! Received: ${total}, Calculated: ${expectedTotal}. Using calculated value.`);
@@ -131,8 +199,8 @@ export async function POST(req: Request) {
       },
       total: expectedTotal,
       status: 'pending' as const,
-      coupon_code: couponCode,
-      discount_value: discountValue
+      coupon_code: couponCode || (ehApp ? "APP15" : undefined),
+      discount_value: descontoTotal
     };
 
     const orderItems = cleanItems.map((item) => ({
@@ -180,7 +248,7 @@ export async function POST(req: Request) {
     
     // E-mail para o Cliente usando Template
     const emailHtml = getOrderCustomerWhatsAppTemplate(
-      { ...orderData, id: order.id, discount_value: calculatedDiscount },
+      { ...orderData, id: order.id, discount_value: descontoTotal },
       orderItems,
       relatedProducts,
       { whatsappNumber: "19987510267" }
@@ -215,7 +283,7 @@ export async function POST(req: Request) {
           cost: parsedShippingCost
         },
         couponCode: couponCode || null,
-        discountValue: typeof calculatedDiscount === "number" ? calculatedDiscount : null,
+        discountValue: typeof descontoTotal === "number" ? descontoTotal : null,
         total: expectedTotal,
         items: orderItems.map((it) => ({
           productId: it.product_id,

@@ -7,7 +7,10 @@ import { LEAD_INTENTS } from '@/lib/lead-intents'
 import { REGIONAL_CITIES, REGIONAL_SERVICES, buildRegionalServicePath } from '@/lib/local-seo'
 import { CAMPINAS_NEIGHBORHOODS } from '@/lib/neighborhood-seo'
 import { listVitrinePagesPublic } from '@/lib/vitrine/db'
+import { SETUPS_ASSINADOS } from '@/lib/vitrine/assinadas'
 import { PAGINAS } from '@/lib/landing/paginas'
+import { listarConsignados, urlDoConsignado } from '@/lib/consignados'
+import { URL_SITE } from '@/lib/soubots'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.balao.info'
@@ -19,12 +22,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/servicos-e-ofertas',
     '/promocao',
     '/manutencao',
+    '/upgrade-ssd',
+    '/formatacao',
+    '/notebook-dell',
+    '/notebook-lenovo',
+    '/notebook-acer',
+    '/notebook-hp',
+    '/notebook-asus',
+    '/notebook-samsung',
+    '/qual-pc-gamer',
     '/recuperacaodados',
     '/montagempc',
     '/sistemas',
     '/sistemasdeia',
     '/pcgamer3d',
     '/consignacao',
+    '/consignados',
     '/premium',
     '/ia-local',
     '/pcgamer',
@@ -42,16 +55,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/assistenciagames',
     '/carregadores',
     '/microsoft',
+    '/microsoft/windows',
+    '/microsoft/windows-server',
+    '/microsoft/office-365',
     '/reparoapple',
-    '/macbookm5',
+    '/macbook',
+    '/imac',
+    '/iphone',
+    '/android',
+    '/avellstorm480',
     '/telaiphone',
-    '/tonner',
+    '/toner',
     '/wendell/apple',
     '/wendell/apple/blog',
-    '/wendell/apple/macbook',
-    '/wendell/apple/imac',
     '/wendell/apple/ipad',
-    '/wendell/apple/iphone',
     '/wendell/apple/apple-watch',
     '/wendell/apple/mac-mini',
     '/como-comprar',
@@ -101,7 +118,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   ]
 
-  const vitrinePages = await listVitrinePagesPublic().catch(() => [])
+  const vitrinePages = [
+    ...SETUPS_ASSINADOS.map((s) => ({ slug: s.slug, data_publicacao: s.publicado_em, data_criacao: s.publicado_em })),
+    ...(await listVitrinePagesPublic().catch(() => [])),
+  ]
   const vitrineRoutes = vitrinePages.map((p) => ({
     url: `${baseUrl}/p/${p.slug}`,
     lastModified: new Date(p.data_publicacao || p.data_criacao || new Date()),
@@ -129,5 +149,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.85,
   }))
 
-  return [...staticRoutes, ...categoryRoutes, ...productRoutes, ...blogRoutes, ...vitrineRoutes, ...regionalRoutes, ...urgentRoutes, ...neighborhoodRoutes]
+  // Consignados (MEU BLING): giram rápido, então só entram os que estão à
+  // venda agora. Se o MEU BLING não responder, fica só a página da vitrine.
+  const consignados = await listarConsignados().catch(() => [])
+  const consignadoRoutes = consignados.map((item) => ({
+    url: urlDoConsignado(item),
+    lastModified: new Date(item.desde),
+    changeFrequency: 'daily' as const,
+    priority: 0.7,
+  }))
+
+  // A landing do MyBots tem endereço oficial no www. O /mybots-app do balao.info
+  // aponta para lá no canonical, então não entra de novo neste sitemap.
+  const landingMyBots = [{
+    url: URL_SITE,
+    changeFrequency: 'weekly' as const,
+    priority: 0.8,
+  }]
+
+  return [...staticRoutes, ...landingMyBots, ...consignadoRoutes, ...categoryRoutes, ...productRoutes, ...blogRoutes, ...vitrineRoutes, ...regionalRoutes, ...urgentRoutes, ...neighborhoodRoutes]
 }

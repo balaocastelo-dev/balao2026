@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { comOrigemDaPagina } from "@/lib/whatsapp/origem";
 import { MessageCircle } from "lucide-react";
 import { SITE_CONFIG } from "@/lib/config";
 import { trackWhatsAppClick } from "@/lib/tracking";
@@ -19,7 +20,7 @@ export default function WhatsAppButton({ productName }: { productName: string })
         label: productName,
         product_name: productName,
       });
-      window.open(url, "_blank");
+      window.open(comOrigemDaPagina(url), "_blank");
     }
   };
 

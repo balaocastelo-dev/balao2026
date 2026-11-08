@@ -67,6 +67,9 @@ export const consignacao: PaginaDeCaptacao = {
     ],
   },
   secoes: [
+    // Faixa "Consignados em destaque" (MEU BLING): o que já está à venda por
+    // consignação. Some sozinha quando não há nenhum. Ver app/consignacao/page.tsx.
+    { tipo: "especial", id: "faixa-consignados" },
     {
       tipo: "dores",
       titulo: "Por que tanta gente desiste de vender sozinha",

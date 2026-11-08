@@ -1,6 +1,6 @@
 // ============================================================
 // PDV: as contas da venda. Funções puras, usadas no balcão (para mostrar) e na
-// API (para gravar). O servidor refaz tudo: o total que vai para o Bling e
+// API (para gravar). O servidor refaz tudo: o total que vai para o /sistema e
 // para a nota nunca é o que o navegador mandou, é o que estas contas dão.
 // ============================================================
 
@@ -122,7 +122,7 @@ export function conferirVenda(v: {
   if (v.itens.length === 0) p.push({ campo: "itens", mensagem: "Coloque pelo menos um produto na venda." });
   for (const i of v.itens) {
     if (!(i.quantidade > 0) || !Number.isInteger(i.quantidade)) p.push({ campo: "itens", mensagem: `Quantidade inválida em "${i.nome}".` });
-    if (!(i.valor > 0)) p.push({ campo: "itens", mensagem: `"${i.nome}" está sem valor. Item a R$ 0,00 entra no Bling como venda válida.` });
+    if (!(i.valor > 0)) p.push({ campo: "itens", mensagem: `"${i.nome}" está sem valor. Item a R$ 0,00 não entra na venda.` });
   }
   const t = totaisDa(v);
   if (t.total <= 0 && v.itens.length) p.push({ campo: "desconto", mensagem: "O desconto não pode zerar a venda." });
