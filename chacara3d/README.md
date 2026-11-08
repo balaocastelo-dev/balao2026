@@ -267,8 +267,14 @@ para o pedreiro. Eixos: x a partir da beira da laje (`EDGE` = 46), y a partir do
 - **Passeio**: o `extra.quintal` do `terreno.json` leva escada, lago (contorno, nível, grade onde as carpas nadam) e
   lugares; `mundo.js` tira daí o chão, a colisão do lago, do poço e da amendoeira (`extra.circulos`), `agua.js` o
   espelho do lago e `bichos.js` as carpas e as ninfeias.
-- **Banheiro duplo externo** (pedido em 08/11/2026, ainda sem projeto): do outro lado da escada, encostado no muro de
-  pedra, embaixo da churrasqueira; área de uns 4,28 × 2,00 m no modelo (a largura ainda vai ser medida).
-  `render_banheiro.py PASTA` marca a área em laranja e `legenda_banheiro.py PASTA` escreve os rótulos.
+- **Banheiro duplo externo** (pedido em 08/11/2026): do outro lado da escada, encostado no muro de pedra, embaixo da
+  churrasqueira; área de uns 4,28 × 2,00 m no modelo (a largura ainda vai ser medida).
+  - **Estudo 1** (08/11/2026, aguardando o Thiago; ainda não entra no passeio): dois banheiros de 1,18 × 1,86 m com
+    um nicho aberto de 1,40 m no meio, com a bancada da pia lavabo no fundo, contra o muro de pedra; as portas ficam nas
+    paredes do nicho, uma de frente para a outra. Pé-direito 2,30: o banheiro sobe 1,42 m acima do piso da
+    churrasqueira e a parede de trás vira o parapeito daquele trecho (sai o guarda-corpo). Fachada em filete de pedra,
+    laje com marquise de 0,35 e jardineira de pendentes. Medidas no `banheiro.py`.
+  - `render_banheiro.py PASTA` marca a área em laranja; com `--estudo` põe o estudo e tem também a vista `nicho`;
+    `legenda_banheiro.py PASTA` escreve os rótulos; `desenho_banheiro.py PASTA` faz a planta baixa (A3).
 - **Ficha técnica para o pedreiro**: doc "Ficha técnica do laguinho" no Claude (materiais, quantidades, ordem da obra).
 

@@ -1,10 +1,11 @@
 """Fotos do projeto marcando a área do banheiro externo do quintal de baixo (ao lado da escada que sobe para a
 churrasqueira, do lado oposto ao laguinho).
 
-    python render_banheiro.py PASTA [--res 1400] [--samples 32] [--vistas planta,quintal,laje]
+    python render_banheiro.py PASTA [--res 1400] [--samples 32] [--vistas planta,quintal,laje] [--estudo]
 
 Roda o build.py inteiro, tira o que fica atrás de quem olha (garagem, pergolado, cinema e as árvores do gramado),
-põe uma caixa laranja transparente no lugar do banheiro e renderiza. Grava PASTA/<vista>.jpg e
+põe uma caixa laranja transparente no lugar do banheiro e renderiza. Com --estudo, no lugar da caixa entra o
+estudo do banheiro (medidas no banheiro.py) e há também a vista `nicho`. Grava PASTA/<vista>.jpg e
 PASTA/<vista>_pontos.json (onde caem na foto os cantos da área e os rótulos), que o legenda_banheiro.py usa.
 """
 import os, sys, math, json, argparse, time
@@ -17,7 +18,7 @@ from bpy_extras.object_utils import world_to_camera_view
 
 ap = argparse.ArgumentParser()
 ap.add_argument('saida'); ap.add_argument('--res', type=int, default=1400); ap.add_argument('--samples', type=int, default=32)
-ap.add_argument('--vistas', default='planta,quintal,laje')
+ap.add_argument('--vistas', default='planta,quintal,laje'); ap.add_argument('--estudo', action='store_true')
 args = ap.parse_args(sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else sys.argv[1:])
 os.makedirs(args.saida, exist_ok=True)
 
@@ -63,6 +64,10 @@ TIRAR = [(51.3, 60.5, -0.3, 10.3, LOW + 0.006, 9.0),          # garagem, pergola
          (51.3, 60.5, -0.3, 10.3, LOW - 0.05, 9.0, ('wood_z', 'bark_cane', 'stone_cut', 'screen', 'wood_x', 'cushion', 'cushion_teal', 'couro', 'wood_y'))]
 if planta_so:
     TIRAR.append((44.0, 52.0, -0.3, 4.5, 1.25, 12.0, ('bark_dark',)))          # na planta fica só o tronco da amendoeira
+if args.estudo:
+    import banheiro as B
+    TIRAR.append((B.X0 + 0.06, B.X1 + 1.1, B.Y0, B.Y1, LOW + 0.012, LOW + 3.2))     # o que estava no lugar do banheiro
+    TIRAR.append((EDGE - 0.15, B.X0, O.ESCADA_Y1 + 0.03, B.Y1, 0.02, 1.3, ('wood_x', 'wood_y', 'wood_z')))  # guarda-corpo: vira parede
 COPA = ('leaf_amend', 'leaf_amend_red', 'leaf_core_big')
 ARVORES = ('leaf_mango', 'leaf_core', 'leaf_bg', 'leaf_palm', 'leaf_palm_base', 'leaf_palm_rachis', 'leaf_areca', 'leaf_citrus',
            'leaf_goiaba', 'leaf_jabu', 'leaf_vine', 'leaf_vine_light', 'bark_palm', 'bark_jabu', 'bark_goiaba', 'fruit_mango',
@@ -77,18 +82,23 @@ for y0_, y1_ in ((-0.15, 0.0), (10.0, 10.15)):                              # mu
     geo.box('wall_sand', 24.0, EDGE, y0_, y1_, -0.04, WH)
     geo.box('wall_sand', EDGE, 60.15, y0_, y1_, LOW - 0.04, LOW + WH)
 
-# ---- a marca do banheiro: piso laranja, caixa transparente e as arestas
+# ---- a marca do banheiro: piso laranja, caixa transparente e as arestas (ou o estudo, com --estudo)
+if args.estudo:
+    import plants as P
+    B.construir(geo, P, np.random.default_rng(31))
+    BZ1 = B.ZT
 geo.m_plain('marca_piso', (1.0, 0.42, 0.04), 0.6, **{'Alpha': 0.55})
 geo.m_plain('marca_caixa', (1.0, 0.45, 0.06), 0.5, **{'Alpha': 0.16})
 geo.m_emit('marca_aresta', (1.0, 0.38, 0.02), 2.2)
-geo.box('marca_piso', BX0, BX1, BY0, BY1 - 0.005, LOW + 0.006, LOW + 0.016)
-geo.box('marca_caixa', BX0 + 0.005, BX1, BY0, BY1 - 0.01, LOW + 0.02, BZ1)
-cantos = [(BX0, BY0), (BX1, BY0), (BX1, BY1), (BX0, BY1)]
-for i in range(4):
-    (xa, ya), (xb, yb) = cantos[i], cantos[(i + 1) % 4]
-    for zz in (LOW + 0.02, BZ1):
-        geo.tube('marca_aresta', [(xa, ya, zz), (xb, yb, zz)], 0.018, seg=6)
-    geo.tube('marca_aresta', [(xa, ya, LOW + 0.02), (xa, ya, BZ1)], 0.018, seg=6)
+if not args.estudo:
+    geo.box('marca_piso', BX0, BX1, BY0, BY1 - 0.005, LOW + 0.006, LOW + 0.016)
+    geo.box('marca_caixa', BX0 + 0.005, BX1, BY0, BY1 - 0.01, LOW + 0.02, BZ1)
+    cantos = [(BX0, BY0), (BX1, BY0), (BX1, BY1), (BX0, BY1)]
+    for i in range(4):
+        (xa, ya), (xb, yb) = cantos[i], cantos[(i + 1) % 4]
+        for zz in (LOW + 0.02, BZ1):
+            geo.tube('marca_aresta', [(xa, ya, zz), (xb, yb, zz)], 0.018, seg=6)
+        geo.tube('marca_aresta', [(xa, ya, LOW + 0.02), (xa, ya, BZ1)], 0.018, seg=6)
 
 objs = geo.build_objects()
 scene = bpy.context.scene
@@ -131,6 +141,7 @@ VISTAS = {
     'planta': (((PX0 + PX1) / 2, (PY0 + PY1) / 2, 14.0), ((PX0 + PX1) / 2, (PY0 + PY1) / 2 + 0.0001, -1.0), 0, 215, 62, 0.15),
     'quintal': ((52.0, 5.6, LOW + 1.7), (46.6, 7.5, -0.3), 18, 215, 52, 0.1),
     'laje': ((44.0, 3.0, 1.65), (47.2, 7.9, -0.75), 17, 215, 55, 0.05),
+    'nicho': ((50.9, 6.3, LOW + 1.55), (46.5, 8.3, LOW + 1.05), 22, 215, 52, 0.1),
 }
 # pontos que o legenda_banheiro.py usa (cantos do piso e do topo da área, e onde ficam as coisas em volta)
 PONTOS = {
@@ -142,6 +153,16 @@ PONTOS = {
     'churrasqueira': [(43.6, 8.3, 2.6)],
 }
 MEDIDAS = {'largura': BY1 - BY0, 'fundo': BX1 - BX0, 'altura': BZ1 - LOW}
+if args.estudo:
+    PONTOS.update({
+        'banheiro1': [(B.X1 + 0.02, (B.YA0 + B.YA1) / 2, LOW + 1.3)],
+        'banheiro2': [(B.X1 + 0.02, (B.YB0 + B.YB1) / 2, LOW + 1.3)],
+        'pia': [(B.CUBA[0], B.CUBA[1], B.BANC_Z + 0.1)],
+        'jardineira': [(B.X1 + B.MARQUISE - 0.2, (B.Y0 + B.Y1) / 2 + 0.9, B.ZT + 0.3)],
+        'parapeito': [(EDGE + 0.04, B.Y0 + 0.4, B.ZT - 0.45)],
+    })
+    MEDIDAS.update({'estudo': True, 'banheiro': [B.CAB, B.FUNDO - B.PE], 'nicho': B.NICHO, 'pe_direito': B.PD,
+                    'acima_da_laje': B.ZT})
 
 
 def mirar(v):
