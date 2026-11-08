@@ -158,23 +158,23 @@ def mangueira(pos, rng):
     fruits_in('fruit_mango', wb, 45, 0.055, rng, stretch=1.5)
 
 
-def amendoeira(pos, rng):
+def amendoeira(pos, rng, r0=0.34, r1=0.27, incl=(0.3, 0.2)):
     pos = np.asarray(pos, float)
-    top = pos + np.array([0.3, 0.2, 3.4])
-    trunk('bark_dark', pos, top, 0.34, 0.27, 0.12, rng)
+    top = pos + np.array([incl[0], incl[1], 3.4])
+    trunk('bark_dark', pos, top, r0, r1, 0.12, rng)
     tiers = [(4.4, 4.1, 7), (5.6, 4.0, 7), (6.8, 3.2, 6), (7.9, 2.2, 4), (8.8, 1.1, 1)]
     blobs = []
     for z, R, n in tiers:
         for k in range(n):
             a = 2 * math.pi * (k + rng.uniform(-0.25, 0.25)) / n + z
             rr = R * rng.uniform(0.55, 0.72) if n > 1 else 0
-            c = pos + np.array([0.3 + rr * math.cos(a), 0.2 + rr * math.sin(a), z + rng.uniform(-0.15, 0.15)])
+            c = pos + np.array([incl[0] + rr * math.cos(a), incl[1] + rr * math.sin(a), z + rng.uniform(-0.15, 0.15)])
             r = np.array([R * 0.42, R * 0.42, 0.55])
             blobs.append((c, r))
             limb('bark_dark', top + np.array([0, 0, min(z - 3.6, 3.0) * 0.6]), c - np.array([0, 0, 0.2]), 0.13, 0.03, rng, bend=0.05)
             ellipsoid('leaf_core_big', c, r * 0.6, seg=10, rings=5)
-        ellipsoid('leaf_core_big', pos + np.array([0.3, 0.2, z]), (R * 0.45, R * 0.45, 0.5), seg=10, rings=5)
-    tube('bark_dark', [top, pos + np.array([0.3, 0.2, 8.6])], [0.24, 0.05], seg=8)
+        ellipsoid('leaf_core_big', pos + np.array([incl[0], incl[1], z]), (R * 0.45, R * 0.45, 0.5), seg=10, rings=5)
+    tube('bark_dark', [top, pos + np.array([incl[0], incl[1], 8.6])], [r1 - 0.03, 0.05], seg=8)
     crown('leaf_amend', blobs, 85, 0.30, 0.16, 0.12, rng, flat=0.75)
     crown('leaf_amend_red', blobs, 3.5, 0.30, 0.16, 0.12, rng, flat=0.75)
     return blobs

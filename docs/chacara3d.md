@@ -52,6 +52,12 @@ chácara), hospedado no site; não faz parte da loja.
   `claude/diagnostico-e-ideias-terreno.md` e `claude/album-chacara-pronta.md`
   (álbum de imagens, planta numerada, posição de cada coisa e pendências).
 
-Pendências que dependem do Thiago: de que lado o sol nasce, e duas medidas
-(borda da piscina até o poço, poço até o tronco da amendoeira) para acertar o
-deck e o laguinho.
+- **Quintal de baixo (19/10 e 08/11/2026)**: laguinho orgânico de pedras de 6,4 m² com cascata no pé de um muro
+  de arrimo novo revestido de pedra, entre a amendoeira e a escada, e guarda-corpo de madeira na beira da laje
+  (o deck saiu). Medidas reais tiradas pelo Thiago com tijolinho; todas em `chacara3d/modelo/obra.py`. Folhas
+  para o pedreiro em `desenhos_obra.py`, fotos em `render_deck.py`; ficha técnica no doc "Ficha técnica do
+  laguinho" do Claude. Área do futuro banheiro duplo externo marcada por `render_banheiro.py`. Detalhes na seção
+  "Quintal de baixo" do `chacara3d/README.md`.
+
+Pendências que dependem do Thiago: de que lado o sol nasce; conferir com trena o tronco da amendoeira, o lado da
+escada e o diâmetro do poço; medir a largura da área do banheiro (da escada ao muro lateral).

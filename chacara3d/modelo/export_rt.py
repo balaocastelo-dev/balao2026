@@ -376,7 +376,7 @@ ns = {'__file__': os.path.join(HERE, 'build.py'), '__name__': 'build_rt'}
 exec(compile(src[:cut], 'build.py', 'exec'), ns)
 INFO['leaf_areca'] = dict(INFO['leaf_palm'])
 
-SKIP = {'terrain', 'street', 'hen_b', 'hen_w', 'crista', 'koi_o', 'koi_w', 'koi_k'}
+SKIP = {'terrain', 'street', 'hen_b', 'hen_w', 'crista', 'koi_o', 'koi_w', 'koi_k', 'ninfeia', 'flor_ninfeia'}
 pos_chunks, idx_chunks, uv_chunks, nrm_chunks, groups = [], [], [], [], []
 vo = io = uvo = no = 0
 tris_total = 0

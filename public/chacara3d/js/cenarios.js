@@ -501,8 +501,8 @@ export function criarCenarios(ctx) {
     [[28.45, 6.7], [29.65, 6.7]].forEach(([x, y]) => gente(cn, r, tipoAdulto(r), 'praia', 'piscina', x, y, Math.PI, fixo(['deitado'], 30), { z: 0.0, anim: 'deitado', bloqueia: false }));
     // dançando perto da caixa de som
     [[44.95, 4.95], [45.35, 5.55], [44.55, 5.95]].slice(0, qtd(3)).forEach(([x, y]) => { const t = tipoAdulto(r); const p = gente(cn, r, t, escolher(VIS.piscina[t], r), 'piscina', x, y, 0, danca(['dancando_2', 'dancando_1'], { olhar: [44.75, 5.65] })); p.desvioOlhar = 0; });
-    // deck, olhando o laguinho
-    [[46.6, 4.2], [47.4, 5.4]].slice(0, qtd(2)).forEach(([x, y]) => { const t = tipoAdulto(r); const p = gente(cn, r, t, escolher(VIS.piscina[t], r), 'piscina', x, y, 0.1, fixo(['bebendo', 'parado', 'conversando'], 7)); p.segurar(aderecoBruto('copo_drink')); p.copo = true; });
+    // na beira da laje, olhando o laguinho por cima do guarda-corpo
+    [[45.45, 2.85], [45.5, 3.75]].slice(0, qtd(2)).forEach(([x, y]) => { const t = tipoAdulto(r); const p = gente(cn, r, t, escolher(VIS.piscina[t], r), 'piscina', x, y, 0.1, fixo(['bebendo', 'parado', 'conversando'], 7)); p.segurar(aderecoBruto('copo_drink')); p.copo = true; });
     // crianças correndo no gramado
     const pontosCorre = espalhar(sorteio(9), 14, [17.0, 30.5, 3.5, 7.4], 0.9, null, (x, y) => Math.hypot(x - 20.6, y - 6.2) > 1.9);
     for (let i = 0; i < qtd(3); i++) { const [x, y] = pontosCorre[i]; gente(cn, r, 'crianca', escolher(VIS.piscina.crianca, r), 'piscina', x, y, r() * 6, passeio(pontosCorre, { vel: 2.3, anim: 'correndo', pausa: 1.5, parados: ['parado', 'acenando'] }), { raio: 0.16 }); }

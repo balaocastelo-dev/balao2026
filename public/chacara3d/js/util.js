@@ -46,3 +46,13 @@ export const estado = {
   qualidade: 2,    // 0 baixa, 1 média, 2 alta
   dentroDeCasa: null,
 };
+
+// ponto dentro de um polígono (lista de [x, y])
+export function dentroPoli(x, y, P) {
+  let d = false;
+  for (let i = 0, j = P.length - 1; i < P.length; j = i++) {
+    const a = P[i], b = P[j];
+    if ((a[1] > y) !== (b[1] > y) && x < (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1] + 1e-12) + a[0]) d = !d;
+  }
+  return d;
+}
