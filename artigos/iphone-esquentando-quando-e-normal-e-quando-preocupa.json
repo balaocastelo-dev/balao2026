@@ -1,0 +1,180 @@
+{
+  "slug": "iphone-esquentando-quando-e-normal-e-quando-preocupa",
+  "titulo": "iPhone esquentando: quando é normal e quando preocupa",
+  "resumo": "iPhone esquentando ao carregar, jogar ou atualizar costuma ser normal. Veja o que a Apple considera esperado, o que fazer no aviso de temperatura e quando levar.",
+  "categoria": "apple",
+  "etiquetas": [
+    "iphone",
+    "bateria",
+    "temperatura",
+    "assistência"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-11-10T21:00:00.000Z",
+  "formato": "dica",
+  "roteiro": {
+    "fala": "Seu iPhone esquenta e você fica preocupado? Na maioria das vezes é normal. Ele esquenta ao carregar sem fio, em jogo, com a câmera ligada por muito tempo e logo depois de uma atualização grande. O que não é normal é esquentar parado, sem uso, ou mostrar o aviso de que precisa esfriar com frequência. Se aparecer, desligue, tire a capa e deixe na sombra. Nada de geladeira. E se isso virar rotina, vale trazer para uma avaliação.",
+    "titulo": "iPhone quente: normal ou não?",
+    "destaques": [
+      "Carregar e jogar esquenta",
+      "Aviso: desligue e tire a capa",
+      "Nunca na geladeira",
+      "Quente parado pede avaliação"
+    ],
+    "legenda": "iPhone quente nem sempre é defeito. Veja quando o calor é esperado, o que fazer no aviso de temperatura e quando vale levar para avaliar. A dica completa está no blog.",
+    "hashtags": [
+      "iphone",
+      "apple",
+      "bateria",
+      "dicas",
+      "assistencia",
+      "campinas"
+    ]
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "O iPhone esquentando na mão é uma das perguntas mais comuns no balcão, e a resposta curta tranquiliza: na maior parte das vezes é normal. Carregar sem fio, jogar, gravar vídeo longo, assistir a vídeo em alta qualidade ou terminar uma atualização grande aquece o aparelho, e ele volta ao normal quando a tarefa acaba."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano é achar que todo calor é defeito, ou, no outro extremo, ignorar sinais que pedem atenção. A própria Apple separa as duas coisas: o aquecimento durante uma tarefa pesada é esperado; o aviso de temperatura na tela, o calor sem motivo e o aparelho quente o tempo todo merecem cuidado. O que muda é o contexto."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "Esquentar ao **carregar sem fio, jogar, usar a câmera ou atualizar** é esperado, segundo a Apple.",
+        "A Apple indica usar o iPhone em ambientes de **0 °C a 35 °C**; calor acima disso pode encurtar a vida da bateria de vez.",
+        "No **aviso de temperatura**, desligue, tire da capa e deixe em lugar fresco, longe do sol. Nunca na geladeira.",
+        "Esquentar **parado, sem uso**, ou com o aviso se repetindo, pede avaliação técnica."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando o calor é normal"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A página de suporte da Apple lista as situações em que é comum o iPhone ficar mais quente: a configuração inicial, a restauração de um backup, a instalação de uma atualização (principalmente as grandes), o carregamento sem fio, aplicativos e jogos pesados, a câmera e o vídeo em alta qualidade. Se nenhum aviso aparece, dá para continuar usando normalmente."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Quando o aparelho esquenta demais, ele mesmo se protege. A Apple descreve o que pode acontecer: o carregamento fica mais lento ou para, a tela escurece, o sinal do celular enfraquece, o flash da câmera é desativado por um tempo e alguns aplicativos ficam mais lentos. Ver o carregamento em espera no calor, portanto, é proteção, e não defeito."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Situação",
+        "O que costuma ser",
+        "O que fazer"
+      ],
+      "linhas": [
+        [
+          "Quente ao carregar sem fio",
+          "Normal",
+          "Se esquentar muito, tire a capa durante a carga"
+        ],
+        [
+          "Quente em jogo, câmera ou vídeo longo",
+          "Normal",
+          "Faça uma pausa, principalmente no sol"
+        ],
+        [
+          "Quente nas horas depois de uma atualização",
+          "Normal",
+          "Espere o sistema terminar as tarefas"
+        ],
+        [
+          "GPS no painel do carro, sob o sol",
+          "Risco de aviso",
+          "Tire do sol direto e da frente do para-brisa"
+        ],
+        [
+          "Aviso de temperatura na tela",
+          "Proteção ativada",
+          "Desligue e deixe esfriar em lugar fresco"
+        ],
+        [
+          "Quente parado, sem uso",
+          "Atenção",
+          "Observe e leve para avaliação se repetir"
+        ]
+      ],
+      "titulo": "Calor esperado ou sinal de atenção",
+      "colunaDestaque": 1,
+      "fonte": {
+        "nome": "Suporte da Apple",
+        "url": "https://support.apple.com/118431"
+      },
+      "nota": "A tabela resume as orientações da Apple; o que fazer em cada caso é prática comum de assistência."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que fazer quando aparece o aviso de temperatura"
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "Pare o que estava fazendo e tire o iPhone do carregador.",
+        "Desligue o aparelho, como a Apple recomenda para ele voltar a funcionar mais depressa.",
+        "Tire da capa e deixe em um lugar fresco e à sombra, sobre uma superfície que não acumule calor.",
+        "Espere esfriar sozinho. **Não coloque na geladeira nem no congelador**: a mudança brusca de temperatura pode condensar umidade dentro do aparelho.",
+        "Ligue de novo e, se possível, adie o que exige mais do aparelho até sair do calor."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mesmo com a tela de aviso, a Apple informa que o iPhone ainda pode conseguir fazer chamadas de emergência. Durante a navegação, a tela apaga, mas as instruções faladas continuam. O mais importante é prevenir: não deixe o celular no carro estacionado, onde a temperatura passa fácil do limite que a Apple indica para guardar o aparelho, de 45 °C."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "apple"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando o calor preocupa e é hora de levar"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A dica de esperar esfriar não vale quando o calor não tem explicação. Desconfie se o iPhone esquenta no bolso, sem uso; se a bateria cai rápido junto com o calor; se o aviso de temperatura aparece em ambiente fresco; ou se a tela parece levantar na borda. Nesses casos, pare de carregar, não aperte nem tente abrir o aparelho e leve a um técnico."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Calor e bateria andam juntos: a Apple lembra que temperaturas acima de 35 °C podem reduzir a capacidade da bateria de forma permanente. Se o seu iPhone já dura pouco, o artigo sobre [bateria de iPhone durando pouco](/blog/iphone-bateria-durando-pouco-quando-trocar) mostra quando a troca resolve."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Na Balão da Informática, no Cambuí, em Campinas, a [assistência de iPhone, iPad e Mac](/reparoapple) faz o diagnóstico do aparelho que esquenta sem motivo, inclusive da bateria. Em uma linha: calor durante tarefa pesada é normal; calor parado ou aviso frequente é sinal para avaliar."
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "É normal o iPhone esquentar enquanto carrega?",
+      "resposta": "É, principalmente no carregamento sem fio. Se ficar muito quente, a Apple sugere tirar a capa durante a carga. E, se o próprio iPhone colocar a carga em espera, ela volta sozinha quando a temperatura normaliza."
+    },
+    {
+      "pergunta": "Posso colocar o iPhone na geladeira para esfriar mais rápido?",
+      "resposta": "Não. A mudança brusca pode formar umidade dentro do aparelho. Desligue, tire a capa e deixe esfriar em um lugar fresco e à sombra."
+    },
+    {
+      "pergunta": "O calor estraga a bateria?",
+      "resposta": "Pode estragar com o tempo. A Apple diz que usar o aparelho em ambiente acima de 35 °C pode reduzir de vez a capacidade da bateria, e carregar no calor piora o desgaste."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "If your iPhone or iPad gets too hot or too cold — Suporte da Apple",
+      "url": "https://support.apple.com/118431",
+      "data": "maio de 2026"
+    },
+    {
+      "nome": "Batteries — Maximizing Performance — Apple",
+      "url": "https://www.apple.com/batteries/maximizing-performance/",
+      "data": "novembro de 2026"
+    }
+  ]
+}

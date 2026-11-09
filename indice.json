@@ -2,6 +2,22 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "iphone-esquentando-quando-e-normal-e-quando-preocupa",
+      "titulo": "iPhone esquentando: quando é normal e quando preocupa",
+      "resumo": "iPhone esquentando ao carregar, jogar ou atualizar costuma ser normal. Veja o que a Apple considera esperado, o que fazer no aviso de temperatura e quando levar.",
+      "categoria": "apple",
+      "etiquetas": [
+        "iphone",
+        "bateria",
+        "temperatura",
+        "assistência"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-11-10T21:00:00.000Z",
+      "minutos": 5,
+      "formato": "dica"
+    },
+    {
       "slug": "7-zip-26-06-falhas-de-seguranca-como-atualizar",
       "titulo": "7-Zip 26.06 fecha vulnerabilidades: veja quem deve instalar a versão",
       "resumo": "O 7-Zip 26.06 saiu em 6 de novembro de 2026 com correção de vulnerabilidades. Veja quem precisa atualizar e como fazer isso pelo site oficial.",
@@ -1475,5 +1491,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-11-09T22:44:15.508Z"
+  "atualizadoEm": "2026-11-09T22:54:34.991Z"
 }
