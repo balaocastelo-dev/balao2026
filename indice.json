@@ -2,6 +2,22 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "usb-c-usb4-e-thunderbolt-diferencas",
+      "titulo": "USB-C, USB4 e Thunderbolt: mesma porta, coisas diferentes",
+      "resumo": "USB-C é o formato do conector; USB4 e Thunderbolt são o que passa por ele. Veja como saber o que a porta do seu notebook faz antes de comprar cabo ou dock.",
+      "categoria": "hardware",
+      "etiquetas": [
+        "usb-c",
+        "thunderbolt",
+        "notebook",
+        "monitor",
+        "cabos"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-11-10T09:00:00.000Z",
+      "minutos": 10
+    },
+    {
       "slug": "pen-drive-nao-aparece-o-que-testar",
       "titulo": "Pen drive não aparece: o que testar antes de dar como perdido",
       "resumo": "Pen drive que não aparece nem sempre está morto. Veja o que testar na porta, no Gerenciamento de Disco do Windows e no Utilitário de Disco do Mac, sem formatar.",
@@ -1444,5 +1460,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-11-08T22:49:22.617Z"
+  "atualizadoEm": "2026-11-09T22:11:32.721Z"
 }

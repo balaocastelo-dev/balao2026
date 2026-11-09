@@ -1,0 +1,286 @@
+{
+  "slug": "usb-c-usb4-e-thunderbolt-diferencas",
+  "titulo": "USB-C, USB4 e Thunderbolt: mesma porta, coisas diferentes",
+  "resumo": "USB-C é o formato do conector; USB4 e Thunderbolt são o que passa por ele. Veja como saber o que a porta do seu notebook faz antes de comprar cabo ou dock.",
+  "categoria": "hardware",
+  "etiquetas": [
+    "usb-c",
+    "thunderbolt",
+    "notebook",
+    "monitor",
+    "cabos"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-11-10T09:00:00.000Z",
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Você comprou um cabo ou um adaptador **USB-C**, ligou no notebook e o monitor não acendeu, ou o HD externo copiou devagar, ou o carregador avisou que estava lento. A porta é a mesma oval de sempre, então parece que deveria funcionar. A diferença está no que essa porta foi feita para transportar, e é aí que entram os nomes USB4 e Thunderbolt."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que USB-C é uma velocidade ou um recurso. Não é: USB-C é só o **formato do conector**. Por dentro dele pode passar desde uma conexão USB simples, que só carrega e copia arquivos sem pressa, até um link capaz de ligar dois monitores, um dock e o carregador com um cabo só. Saber qual é o caso do seu aparelho evita compra errada."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "**USB-C** é o desenho do conector. A velocidade, o vídeo e a carga dependem do que o fabricante colocou atrás da porta.",
+        "**USB4** chega a 20 ou 40 Gbps na primeira versão e a 80 Gbps na versão 2.0, mas vários recursos, como vídeo, são opcionais.",
+        "**Thunderbolt 4 e 5** usam o mesmo conector e exigem um mínimo garantido de velocidade, monitores e carga, conferido em certificação.",
+        "Cabo também conta: um cabo fraco limita a porta mais rápida. Procure os selos de velocidade e de potência na embalagem."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "USB-C é o formato; o resto é o que passa por ele"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Pense no USB-C como uma tomada que aceita vários tipos de serviço. O conector é reversível, fino e o mesmo em celulares, notebooks, monitores e docks. Só que cada fabricante decide o que ligar por trás dele: dados em velocidades diferentes, sinal de vídeo, carga em potências diferentes ou tudo isso junto. Dois notebooks com portas idênticas por fora podem ter capacidades bem distantes."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O vídeo é o exemplo mais claro. A Microsoft explica que o USB-C pode levar sinal de outro padrão, como DisplayPort ou HDMI, pelos chamados **modos alternativos**. Para isso funcionar, o computador, o aparelho ligado e às vezes o próprio cabo precisam suportar o mesmo modo. Se um deles não suporta, o Windows costuma avisar que a conexão de vídeo pode estar limitada."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Com a carga acontece algo parecido. O padrão USB Power Delivery permite chegar a 240 W em um cabo USB-C, mas só quando o carregador, o cabo e o aparelho combinam. Um carregador de celular encaixa no notebook e às vezes até carrega, só que devagar ou apenas com ele desligado. Não é defeito: é a potência que não alcança o que o notebook pede."
+    },
+    {
+      "tipo": "destaque",
+      "tom": "dica",
+      "texto": "Muitos fabricantes marcam com um pequeno símbolo ao lado da porta USB-C o que ela faz: Thunderbolt, saída de vídeo ou carga. Como o desenho varia de marca para marca, confirme o significado no manual ou na página de especificações do modelo antes de comprar cabo ou dock.",
+      "titulo": "Olhe o símbolo ao lado da porta"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que o USB4 garante e o que deixa como opcional"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O **USB4** é a geração do USB que usa só o conector USB-C. Na primeira versão, uma porta USB4 pode trabalhar a 20 ou a 40 Gbps (gigabits por segundo, a unidade de velocidade de transmissão). Ele também consegue levar vídeo e dados de armazenamento rápido dentro da mesma conexão, o que permite docks com monitor, rede e USB pendurados em um único cabo."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O detalhe que confunde é que vários desses recursos são **opcionais** no USB4. Pela especificação, uma porta USB4 precisa garantir apenas um monitor, sem resolução mínima, e há portas USB4 que nem oferecem vídeo. Também não existe certificação obrigatória. Por isso, ler USB4 na ficha técnica ajuda, mas não responde sozinho se aquela porta liga dois monitores."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A versão 2.0 do USB4, publicada pelo USB-IF em outubro de 2022, dobrou o teto para 80 Gbps. Ela tem ainda um modo assimétrico opcional, que manda até 120 Gbps em um sentido e mantém 40 Gbps no outro, pensado para telas exigentes. Segundo o anúncio, funciona com os cabos passivos de 40 Gbps já existentes e com novos cabos ativos de 80 Gbps."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Thunderbolt 4 e 5: o mínimo vem garantido"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O **Thunderbolt** é uma tecnologia da Intel que usa o mesmo conector USB-C e é compatível com USB4. A diferença prática é que ele transforma em obrigação o que no USB4 é opcional: todo computador com Thunderbolt precisa passar em certificação e cumprir uma lista mínima de velocidade, monitores, dados e carga. Quem compra sabe o que vai receber."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "No **Thunderbolt 4**, essa lista inclui 40 Gbps, dois monitores 4K, conexão de 32 Gbps para armazenamento rápido e carga do notebook de até 100 W exigida em pelo menos uma porta. Ele também mantém compatibilidade com acessórios Thunderbolt 3. Os cabos universais de 40 Gbps podem ter até 2 metros."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O **Thunderbolt 5**, construído sobre o USB4 versão 2.0, sobe a régua: 80 Gbps nos dois sentidos, com um recurso chamado Bandwidth Boost que passa a 120 Gbps em um sentido quando os monitores pedem mais banda. A Intel exige dois monitores 6K, 64 Gbps para dados rápidos e carga de até 140 W em uma porta, podendo chegar a 240 W."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Requisito mínimo",
+        "USB4 (versão 1)",
+        "Thunderbolt 4",
+        "Thunderbolt 5"
+      ],
+      "linhas": [
+        [
+          "Velocidade",
+          "20 ou 40 Gbps",
+          "40 Gbps",
+          "80 Gbps, com até 120 Gbps em um sentido"
+        ],
+        [
+          "Monitores",
+          "Um, sem resolução mínima (vídeo pode faltar)",
+          "Dois 4K",
+          "Dois 6K"
+        ],
+        [
+          "Dados para armazenamento rápido (PCIe)",
+          "Opcional",
+          "32 Gbps",
+          "64 Gbps"
+        ],
+        [
+          "Carga do notebook em uma porta",
+          "Depende do fabricante",
+          "Até 100 W exigidos",
+          "Até 140 W exigidos, até 240 W possíveis"
+        ],
+        [
+          "Energia mínima para acessórios",
+          "7,5 W",
+          "15 W",
+          "15 W"
+        ],
+        [
+          "Certificação",
+          "Não obrigatória",
+          "Obrigatória",
+          "Obrigatória"
+        ]
+      ],
+      "titulo": "USB4 e Thunderbolt: o que cada um exige no computador",
+      "colunaDestaque": 2,
+      "fonte": {
+        "nome": "Intel — Thunderbolt 5 Technology Brief; Granite River Labs; Plugable",
+        "url": "https://intel.com/content/dam/www/central-libraries/us/en/documents/2023-09/thunderbolt-5-technology-brief.pdf"
+      },
+      "nota": "Valores mínimos exigidos do computador. Um notebook pode oferecer mais do que o mínimo; confira a ficha técnica do modelo."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "notebooks"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como escolher o cabo certo para a porta"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O cabo é a parte mais esquecida. Por fora, um cabo USB-C barato de carregar celular e um cabo Thunderbolt parecem iguais, mas o primeiro pode limitar a velocidade, impedir o vídeo ou segurar a carga. É comum o cabo que acompanha o carregador do celular servir bem para carregar e mal para monitor ou para SSD externo."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Para facilitar, o USB-IF, entidade que cuida do padrão, criou selos de velocidade para produtos certificados: USB 5Gbps, 10Gbps, 20Gbps, 40Gbps e 80Gbps. Nos cabos USB-C certificados, há ainda selos de potência de 60 W ou de 240 W, às vezes combinados com a velocidade em um selo só. Produto sem selo pode até funcionar, mas não passou pela certificação."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "Descubra o que a porta do computador faz: símbolo ao lado dela, manual ou página de especificações do modelo.",
+        "Defina o uso: só carga, cópia de arquivos, monitor ou dock com tudo junto.",
+        "Escolha o cabo pelo selo: velocidade igual ou maior que a da porta e potência que cubra o carregador do notebook.",
+        "Prefira cabo curto quando precisar de velocidade alta; os cabos universais de 40 Gbps e de 120 Gbps vão até 2 metros.",
+        "Ligue o monitor ou o SSD direto no computador para testar, sem hub no meio, antes de culpar o aparelho."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se a ligação é de monitor, vale ler também o guia sobre [HDMI ou DisplayPort](/blog/hdmi-ou-displayport-qual-cabo-usar): muitos adaptadores USB-C para monitor convertem o sinal para um desses dois padrões. E se o problema é a carga, o passo a passo para [saber se o carregador do notebook é o problema](/blog/como-saber-se-o-carregador-do-notebook-e-o-problema) ajuda a separar cabo, fonte e conector."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando vale pagar por Thunderbolt e quando USB comum basta"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Para quem usa o notebook para escritório, estudo e um monitor só, uma porta USB-C com saída de vídeo e carga já resolve. Thunderbolt começa a fazer diferença quando você quer ligar dois monitores, rede e periféricos em um dock com um cabo só, trabalhar com SSD externo rápido ou usar acessórios Thunderbolt que já tem. Mas o dock e o cabo também precisam acompanhar."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "Requisitos mínimos garantidos por certificação: você sabe quantos monitores e qual velocidade vai ter.",
+        "Um cabo só pode levar carga, vídeo, rede e periféricos por meio de um dock.",
+        "Compatível com acessórios USB4 e USB-C comuns, além dos Thunderbolt.",
+        "Dados rápidos para SSD externo e docks com várias telas."
+      ],
+      "contras": [
+        "Dock e cabo também precisam ser Thunderbolt, o que restringe a escolha de acessórios.",
+        "Quem usa só carga e um pen drive não aproveita o que está pagando.",
+        "Para ganhar a velocidade, porta, cabo e acessório precisam ser do mesmo nível.",
+        "Nem todo notebook novo traz Thunderbolt 5; confira a ficha antes de contar com ele."
+      ],
+      "titulo": "Notebook com Thunderbolt: o que pesa"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Outro ponto: o Windows ajuda a diagnosticar. Quando algo não combina, aparecem avisos como carregador lento, funcionalidade USB4 limitada, funcionalidade Thunderbolt limitada ou conexão de vídeo limitada. Segundo a Microsoft, a saída quase sempre é a mesma: usar a porta certa do computador, um cabo do nível adequado e ligar direto, sem hub. Esses avisos podem ser ativados em Configurações, na seção USB."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Antes de comprar notebook, dock ou cabo em Campinas"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Na Balão da Informática, no Cambuí, em Campinas, você pode ver os [notebooks](/notebooks) ligados e testar antes de pagar, inclusive conferir se a porta USB-C do modelo leva vídeo para um monitor. Se a ideia é um computador de mesa com mais portas, a loja também faz [montagem de PC sob medida](/montagempc), escolhendo a placa-mãe pelas conexões que você vai usar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se a porta USB-C parou de carregar, ficou frouxa ou deixou de reconhecer aparelhos, não force o conector nem use cabo improvisado. A [assistência técnica](/manutencao) da loja faz o diagnóstico no mesmo endereço, e precisando de reposição, há [carregadores de notebook](/carregadores). O atendimento no WhatsApp é feito por pessoas da equipe."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Em uma linha: confira o que a porta faz, escolha o cabo pelo selo e só pague por Thunderbolt se for usar o que ele garante."
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Todo cabo USB-C serve para ligar monitor?",
+      "resposta": "Não. Para levar vídeo, a porta do computador, o monitor ou adaptador e o cabo precisam suportar o mesmo modo de vídeo. Cabos simples de carga costumam não servir. Prefira um cabo com selo de velocidade de 20 Gbps ou mais, ou um cabo Thunderbolt."
+    },
+    {
+      "pergunta": "Posso ligar um acessório Thunderbolt em uma porta USB4?",
+      "resposta": "Em geral liga, porque Thunderbolt 4 e 5 são compatíveis com USB4. Mas o acessório pode funcionar com recursos limitados se a porta USB4 não oferecer o mesmo mínimo do Thunderbolt, como dois monitores. O Windows costuma avisar quando isso acontece."
+    },
+    {
+      "pergunta": "Thunderbolt e USB4 usam conector diferente?",
+      "resposta": "Não. Os dois usam o mesmo conector USB-C. A diferença está nos requisitos: o Thunderbolt exige um mínimo de velocidade, de monitores e de carga, conferido em certificação, enquanto no USB4 vários desses recursos são opcionais."
+    },
+    {
+      "pergunta": "Carregador de celular USB-C carrega notebook?",
+      "resposta": "Às vezes, mas devagar. O notebook pede mais potência do que a maioria dos carregadores de celular entrega, e o Windows pode mostrar o aviso de carregador lento. Para o uso diário, use o carregador do notebook ou um de potência igual ou maior, com cabo que suporte essa potência."
+    },
+    {
+      "pergunta": "Como sei se meu notebook tem Thunderbolt?",
+      "resposta": "Confira a página de especificações do modelo no site do fabricante e o símbolo ao lado da porta USB-C, se houver. Sem menção a Thunderbolt na ficha, trate a porta como USB-C comum e confira o que ela oferece de vídeo e carga."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Intel — Thunderbolt 5 Technology Brief",
+      "url": "https://intel.com/content/dam/www/central-libraries/us/en/documents/2023-09/thunderbolt-5-technology-brief.pdf",
+      "data": "consultado em novembro de 2026"
+    },
+    {
+      "nome": "USB-IF — anúncio da especificação USB4 versão 2.0 (Business Wire)",
+      "url": "https://www.businesswire.com/news/home/20221017006047/en/USB-IF-Announces-Publication-of-New-USB4-Specification-to-Enable-USB-80Gbps-Performance",
+      "data": "17 de outubro de 2022"
+    },
+    {
+      "nome": "USB-IF — USB Performance Logo Usage Guidelines",
+      "url": "https://usb.org/sites/default/files/usb_performance_logo_usage_guidelines_20240621.pdf",
+      "data": "junho de 2024"
+    },
+    {
+      "nome": "Microsoft — Corrigir problemas de USB-C no Windows",
+      "url": "https://support.microsoft.com/en-au/windows/fix-usb-c-problems-in-windows-f4e0e529-74f5-cdae-3194-43743f30eed2",
+      "data": "consultado em novembro de 2026"
+    },
+    {
+      "nome": "Granite River Labs — Differences between TBT5, TBT4 and USB4",
+      "url": "https://graniteriverlabs.com/en-us/technical-blog/a-complete-overview-of-differences-between-tbt5-tbt4-and-usb4",
+      "data": "5 de março de 2024"
+    },
+    {
+      "nome": "Plugable — Thunderbolt 3, Thunderbolt 4 and USB4",
+      "url": "https://plugable.com/en-ca/blogs/news/what-s-the-difference-between-thunderbolt-3-thunderbolt-4-and-usb4",
+      "data": "3 de fevereiro de 2021"
+    },
+    {
+      "nome": "Tom's Hardware — USB-IF reveals new USB Type-C power rating logos",
+      "url": "https://www.tomshardware.com/news/usb-if-reveals-new-usb-type-c-power-rating-logos",
+      "data": "1º de outubro de 2021"
+    }
+  ]
+}
