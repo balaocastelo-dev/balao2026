@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "7-zip-26-06-falhas-de-seguranca-como-atualizar",
+      "titulo": "7-Zip 26.06 fecha vulnerabilidades: veja quem deve instalar a versão",
+      "resumo": "O 7-Zip 26.06 saiu em 6 de novembro de 2026 com correção de vulnerabilidades. Veja quem precisa atualizar e como fazer isso pelo site oficial.",
+      "categoria": "noticias",
+      "etiquetas": [
+        "segurança",
+        "atualização",
+        "windows",
+        "programas"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-11-10T15:00:00.000Z",
+      "minutos": 3
+    },
+    {
       "slug": "usb-c-usb4-e-thunderbolt-diferencas",
       "titulo": "USB-C, USB4 e Thunderbolt: mesma porta, coisas diferentes",
       "resumo": "USB-C é o formato do conector; USB4 e Thunderbolt são o que passa por ele. Veja como saber o que a porta do seu notebook faz antes de comprar cabo ou dock.",
@@ -1460,5 +1475,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-11-09T22:11:32.721Z"
+  "atualizadoEm": "2026-11-09T22:44:15.508Z"
 }

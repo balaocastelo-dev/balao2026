@@ -1,0 +1,130 @@
+{
+  "slug": "7-zip-26-06-falhas-de-seguranca-como-atualizar",
+  "titulo": "7-Zip 26.06 fecha vulnerabilidades: veja quem deve instalar a versão",
+  "resumo": "O 7-Zip 26.06 saiu em 6 de novembro de 2026 com correção de vulnerabilidades. Veja quem precisa atualizar e como fazer isso pelo site oficial.",
+  "categoria": "noticias",
+  "etiquetas": [
+    "segurança",
+    "atualização",
+    "windows",
+    "programas"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-11-10T15:00:00.000Z",
+  "seo": {
+    "titulo": "7-Zip 26.06 fecha vulnerabilidades: quem deve instalar"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Em 6 de novembro de 2026, o 7-Zip, programa gratuito muito usado no Windows para abrir arquivos compactados (.zip, .7z, .rar e outros) e criar os seus, ganhou a versão 26.06. As notas da versão, publicadas pelo próprio autor do programa, dizem que ela corrige vários erros e vulnerabilidades, além de melhorar a leitura de arquivos divididos em partes."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que o Windows Update cuida disso. Não cuida: o 7-Zip instalado a partir do site é um programa à parte, e a versão nova só chega ao seu computador quando alguém baixa e instala. Quem abre arquivos recebidos por e-mail ou baixados da internet com ele deve atualizar."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que a versão 26.06 traz"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Segundo o site oficial e a página de lançamentos do projeto, a 26.06 tem duas mudanças: melhor suporte a arquivos divididos com a ferramenta *split*, comum no Linux, e a correção de vários erros e vulnerabilidades. Vulnerabilidade é uma falha no programa que, em tese, pode ser explorada por um arquivo preparado para isso."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A versão está disponível para Windows de 64 bits, de 32 bits e para processadores ARM, além de versões de linha de comando para Linux e macOS. O site recomenda o instalador do tipo .exe, e não o .msi, para quem instala em casa."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Não é um caso isolado. O histórico de versões mostra que a 26.04, de 5 de outubro, e a 26.05, de 21 de outubro, também traziam correção de vulnerabilidades. Quem parou em uma versão de setembro ou anterior está ao menos três versões atrás."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que isso muda para você"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem usa o 7-Zip:** atualize. O programa costuma ser usado justamente para abrir arquivos que vêm de fora, como anexos e downloads, que é onde um arquivo malicioso apareceria. Baixe somente pelo site oficial, 7-zip.org: sites de download com propaganda e botões falsos são um caminho conhecido para instalar programa indesejado."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem não sabe se tem:** muita gente instalou o 7-Zip anos atrás e esqueceu. Vale conferir a lista de aplicativos do Windows. Programa esquecido também precisa de atualização, como no caso do [TeamViewer 15.83](/blog/teamviewer-15-83-falhas-de-seguranca-atualizar); até o navegador, que se atualiza sozinho, só aplica a correção depois de reiniciado, como explicamos na notícia do [Chrome 156](/blog/chrome-156-atualizacao-falhas-de-seguranca)."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "**Para quem vai comprar um computador usado:** peça para ver a máquina com os programas em dia. Um computador com vários programas parados em versões antigas costuma indicar que ninguém cuidava das atualizações. Nos [seminovos](/seminovos), você pode ver o computador ligado e conferir isso antes de pagar."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como ver a versão e atualizar"
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "Abra o Gerenciador de Arquivos do 7-Zip pelo menu Iniciar e clique em Ajuda e depois em Sobre o 7-Zip: a janela mostra a versão instalada.",
+        "Se não for 26.06, entre no site oficial, 7-zip.org, e baixe o instalador .exe para o seu Windows (64 bits na maioria dos computadores atuais).",
+        "Feche o 7-Zip e execute o instalador, confirmando a instalação na mesma pasta da versão antiga.",
+        "Abra de novo a janela Sobre o 7-Zip e confira se aparece 26.06."
+      ]
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "Atualizar o 7-Zip não torna seguro um arquivo de origem desconhecida. Se um anexo compactado chegou sem você esperar, confirme com quem mandou antes de abrir.",
+      "titulo": "Na dúvida, não abra"
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que ainda não se sabe"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "As notas da versão não dizem quais falhas foram corrigidas, qual a gravidade de cada uma nem se alguma foi usada em ataques. Até a publicação desta notícia, o anúncio do autor não trazia esses detalhes. Por isso, o caminho seguro é atualizar agora, sem esperar a lista completa."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se o computador está lento, cheio de programas que você não reconhece ou com atualizações paradas, a [assistência técnica](/manutencao) da Balão da Informática, no Cambuí, em Campinas, faz o diagnóstico e a limpeza. Em uma linha: quem usa o 7-Zip deve instalar a 26.06 pelo site oficial."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "geral"
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "7-Zip — página oficial (versão 26.06, 2026-11-06)",
+      "url": "https://www.7-zip.org/",
+      "data": "6 de novembro de 2026"
+    },
+    {
+      "nome": "Download — 7-Zip",
+      "url": "https://7-zip.org/download.html",
+      "data": "6 de novembro de 2026"
+    },
+    {
+      "nome": "Release 7-Zip 26.06 — ip7z/7zip, GitHub",
+      "url": "https://github.com/ip7z/7zip/releases/tag/26.06",
+      "data": "novembro de 2026"
+    },
+    {
+      "nome": "7-Zip 26.06 — anúncio no fórum do projeto, SourceForge",
+      "url": "https://sourceforge.net/p/sevenzip/discussion/45797/thread/358f711c40/",
+      "data": "novembro de 2026"
+    },
+    {
+      "nome": "7-Zip Release Notes — Releasebot",
+      "url": "https://releasebot.io/updates/7-zip",
+      "data": "novembro de 2026"
+    }
+  ]
+}
