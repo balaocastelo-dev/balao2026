@@ -31,6 +31,9 @@ const nextConfig: NextConfig = {
       beforeFiles: [
         { source: "/3d", destination: "/3d/index.html" },
         { source: "/chacara3d", destination: "/chacara3d/index.html" },
+        // Convite de recompra enviado por e-mail aos clientes antigos: página
+        // pronta em public/convite (fonte e gerador em 08-Arquivos-Hermes\bling-clientes\convite).
+        { source: "/convite", destination: "/convite/index.html" },
         // Painel do MyBots em www.soubots.com/app (e no apex). O Hub fica no
         // mesmo túnel de /mybots e não vê o prefixo /app. Só esses hosts:
         // www.balao.info/app não é o painel. /app/api/auth/google/callback e
