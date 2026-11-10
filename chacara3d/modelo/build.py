@@ -88,6 +88,8 @@ m_plain('stem_green', (0.12, 0.30, 0.08), 0.6)
 m_plain('stem_purple', (0.14, 0.04, 0.11), 0.6)
 m_leaf('flower_red', (0.65, 0.015, 0.015), (0.95, 0.22, 0.03), rough=0.4, trans=0.1)
 m_leaf('flower_orange', (0.85, 0.25, 0.02), (1.0, 0.55, 0.05), rough=0.4, trans=0.1)
+m_leaf('flor_copo', (0.80, 0.80, 0.74), (0.95, 0.95, 0.90), rough=0.5, trans=0.15)
+m_leaf('flower_blue', (0.16, 0.20, 0.62), (0.34, 0.44, 0.86), rough=0.4, trans=0.1)
 m_plain('fruit_black', (0.012, 0.006, 0.018), 0.22)
 m_leaf('fruit_mango', (0.25, 0.42, 0.06), (0.85, 0.35, 0.06), rough=0.35, trans=0.0)
 m_leaf('fruit_goiaba', (0.40, 0.55, 0.14), (0.80, 0.78, 0.25), rough=0.5, trans=0.0)
@@ -141,6 +143,7 @@ m_plain('couro', (0.36, 0.17, 0.07), 0.5)                                      #
 m_plain('pedra_cinza', (0.15, 0.15, 0.14), 0.88, noise=0.4, nscale=5, bump=0.6)
 m_plain('pedra_ferrugem', (0.25, 0.15, 0.085), 0.88, noise=0.4, nscale=6, bump=0.6)
 m_plain('pedra_bege', (0.30, 0.24, 0.155), 0.88, noise=0.4, nscale=5, bump=0.6)
+m_plain('pedra_musgo', (0.115, 0.13, 0.075), 0.92, noise=0.5, nscale=7, bump=0.6)
 m_plain('argamassa', (0.30, 0.28, 0.25), 0.95, noise=0.3, nscale=18, bump=0.3)
 m_plain('veu_agua', (0.70, 0.84, 0.90), 0.03, **{'Alpha': 0.28})
 m_plain('ninfeia', (0.10, 0.28, 0.06), 0.35, noise=0.15, nscale=12)
@@ -413,7 +416,7 @@ from obra import GUARDA_H
 # arredondadas meio enterradas, cascata de lajes de pedra descendo do muro de arrimo, plantas na beira e na água.
 # Fundo em degraus: talude, prateleira de plantas a 30 cm e o meio com 1,00 m de água para as carpas; perto do
 # muro de arrimo fica raso (não cavar fundo junto ao pé do muro). Os pilares do deck ficam fora da água.
-from obra import ZAGUA, PROF, LAGO, catmull, dentro_lago, dist_borda, prof_lago, GRAMA, CASCATA
+from obra import ZAGUA, PROF, LAGO, catmull, dentro_lago, dist_borda, prof_lago, CANTEIRO, CASCATA, muro_pe, muro_frente, MURO_TOPO
 
 
 def pedra(mat, c, r, rng, R=None, seg=10, rings=6):
@@ -464,10 +467,48 @@ for y0m, y1m in obra.MURO_TRECHOS:
         z_ += h * rm.uniform(0.86, 0.94)
     box('stone_cut', EDGE, EDGE + obra.CAPA, y0m, y1m, -obra.MURO_CINTA, 0.0)                     # capa de pedra no topo
 
+# muro de pedras empilhadas (10/11/2026, pelas fotos de referência do Thiago): do muro da amendoeira até a escada,
+# pedras arredondadas em fiadas, inclinado para trás, fazendo uma barriga em volta do pé da amendoeira; no topo, terra
+# com plantas. Atrás das pedras, o barranco (aqui um enchimento escuro para não aparecer vão).
+PEDRAS_SECO = ('pedra_bege', 'pedra_cinza', 'pedra_musgo', 'pedra_bege', 'pedra_ferrugem', 'pedra_cinza', 'pedra_musgo')
+rs = np.random.default_rng(73)
+_vs = np.linspace(0.0, obra.ESCADA_Y0, 200)
+_tr = obra.ARVORE; _TR = 0.30                                   # o tronco (com a raiz grossa) fica livre das pedras
+for i in range(len(_vs) - 1):                                   # enchimento (barranco) atrás das pedras
+    v0_, v1_ = _vs[i], _vs[i + 1]; vm = (v0_ + v1_) / 2
+    u_ = float(muro_frente(vm, LOW + 0.3)) - 0.18
+    if u_ > 0.02:
+        box('mulch', EDGE, EDGE + u_, v0_, v1_, LOW - 0.02, MURO_TOPO - 0.03)
+_zf = LOW - 0.02; _fila = 0
+while _zf < MURO_TOPO - 0.06:
+    h = rs.uniform(0.17, 0.27); rz = min(h / 2 * rs.uniform(0.9, 1.08), (MURO_TOPO - _zf) / 2)
+    if rz < 0.045:
+        break
+    zc = _zf + rz
+    v_ = 0.04 + (0.0 if _fila % 2 == 0 else rs.uniform(0.06, 0.14)); _fila += 1
+    while v_ < obra.ESCADA_Y0 - 0.06:
+        ry = rs.uniform(0.13, 0.27); vc = min(v_ + ry, obra.ESCADA_Y0 - 0.08)
+        uf = float(muro_frente(vc, zc))                          # frente das pedras nesta altura
+        u_ = uf
+        while u_ > 0.05:                                         # da frente para trás (na barriga são várias)
+            rx = rs.uniform(0.11, 0.18); uc = u_ - rx * 0.80
+            if math.hypot(EDGE + uc - _tr[0], vc - _tr[1]) > _TR + rx * 0.8:
+                pedra(PEDRAS_SECO[int(rs.integers(len(PEDRAS_SECO)))], (EDGE + uc, vc, zc + rs.uniform(-0.01, 0.01)),
+                      (rx, ry * rs.uniform(0.92, 1.05), rz), rs, R=rotz(rs.uniform(-0.25, 0.25)) @ rotx(rs.uniform(-0.1, 0.1)),
+                      seg=9, rings=5)
+            if u_ == uf and uf - 0.0 < 0.55:
+                break                                            # no trecho reto basta a fiada da frente
+            u_ -= 2 * rx * 0.8
+        v_ += 2 * ry * rs.uniform(0.85, 0.95)
+    _zf += h * rs.uniform(0.82, 0.9)
+for i in range(len(_vs) - 1):                                   # terra com plantas no topo das pedras
+    v0_, v1_ = _vs[i], _vs[i + 1]; vm = (v0_ + v1_) / 2
+    box('mulch', EDGE - 0.01, EDGE + float(muro_frente(vm, MURO_TOPO)) - 0.04, v0_, v1_, MURO_TOPO - 0.03, MURO_TOPO + 0.005)
+
 rp = np.random.default_rng(31)
 # fundo (manta escura) e espelho d'água numa grade de 5 cm; a borda serrilhada fica embaixo das pedras
-LGX0, LGX1 = FACE, round(float(max(LAGO[:, 0].max(), GRAMA[:, 0].max())) + 0.3, 2)
-LGY0, LGY1 = round(max(0.0, float(min(LAGO[:, 1].min(), GRAMA[:, 1].min())) - 0.3), 2), round(min(10.0, float(max(LAGO[:, 1].max(), GRAMA[:, 1].max())) + 0.3), 2)
+LGX0, LGX1 = FACE, round(float(max(LAGO[:, 0].max(), CANTEIRO[:, 0].max())) + 0.3, 2)
+LGY0, LGY1 = round(max(0.0, float(min(LAGO[:, 1].min(), CANTEIRO[:, 1].min())) - 0.3), 2), round(min(10.0, float(max(LAGO[:, 1].max(), CANTEIRO[:, 1].max())) + 0.3), 2)
 gx = np.linspace(LGX0, LGX1, int(round((LGX1 - LGX0) / 0.05)) + 1); gy = np.linspace(LGY0, LGY1, int(round((LGY1 - LGY0) / 0.05)) + 1)
 GX, GY = np.meshgrid(gx, gy, indexing='ij')
 dentro = dentro_lago(GX, GY)
@@ -487,11 +528,11 @@ for i in range(len(gx) - 1):
 G['pond_floor'].add(vf, ff)
 G['water_pond'].add(vw, fw)
 G['pedrisco'].add(vp, fp)                               # chão da área do laguinho (com o buraco do lago)
-# faixa de grama de contorno livre em volta do laguinho (por cima do pedrisco): contorno de fora no obra.py (GRAMA)
+# canteiro de plantas em volta do laguinho (por cima do pedrisco): contorno de fora no obra.py (CANTEIRO)
 from mathutils import geometry as _mgeo, Vector as _V
 ZG = LOW + 0.003                                        # um pouco acima do pedrisco (sem brigar com ele no render)
-laco_f = [_V((x_, y_, ZG)) for x_, y_ in GRAMA]; laco_d = [_V((x_, y_, ZG)) for x_, y_ in LAGO]
-G['grass'].add([tuple(v) for v in laco_f + laco_d], [list(t) for t in _mgeo.tessellate_polygon([laco_f, laco_d])])
+laco_f = [_V((x_, y_, ZG)) for x_, y_ in CANTEIRO]; laco_d = [_V((x_, y_, ZG)) for x_, y_ in LAGO]
+G['mulch'].add([tuple(v) for v in laco_f + laco_d], [list(t) for t in _mgeo.tessellate_polygon([laco_f, laco_d])])
 # borda de pedras arredondadas, meio enterradas, uma encostada na outra
 PEDRAS = ('pedra_bege', 'pedra_cinza', 'pedra_bege', 'pedra_ferrugem', 'pedra_cinza')
 seg_len = np.sqrt(((np.roll(LAGO, -1, axis=0) - LAGO) ** 2).sum(axis=1)); s_acum = np.concatenate([[0], np.cumsum(seg_len)])
@@ -512,7 +553,9 @@ def beira_lago(frac, fora):
 def lugar_livre(c, folga=0.25):
     """Fora do deck, da escada, do poço, do tronco e do muro de arrimo."""
     x_, y_ = c
-    if x_ < FACE + 0.15 or y_ < 0.2 or y_ > 9.8:
+    if y_ < 0.2 or y_ > 9.8:
+        return False
+    if x_ < (EDGE + float(muro_pe(y_)) + 0.12 if y_ < obra.ESCADA_Y0 else FACE + 0.15):
         return False
     if x_ < obra.ESCADA_X0 + obra.ESCADA_N * obra.ESCADA_PISO + folga and obra.ESCADA_Y0 - folga < y_ < obra.ESCADA_Y1 + folga:
         return False
@@ -534,7 +577,7 @@ while s < per - 0.15:
         nrm = -nrm                                      # normal para fora
     r = rp.uniform(0.10, 0.22) if rp.random() < 0.8 else rp.uniform(0.20, 0.28)     # lago pequeno: pedras menores
     c = p + nrm * rp.uniform(0.0, 0.10)
-    if c[0] < FACE + 0.30:                              # no vão junto ao muro de arrimo as pedras são menores
+    if c[0] < EDGE + float(muro_pe(c[1])) + 0.30:       # no vão junto ao muro de pedras as pedras são menores
         r *= 0.75
     laje = rp.random() < 0.22                           # de vez em quando uma laje chata, de pisar
     pedra(PEDRAS[int(rp.integers(len(PEDRAS)))], (c[0], c[1], LOW - (0.03 if laje else 0.04)),
@@ -542,7 +585,7 @@ while s < per - 0.15:
           R=rotz(rp.uniform(0, math.pi)), seg=int(rp.integers(7, 11)))
     if rp.random() < 0.25:                              # algumas pedras de trás, maiores, fazendo o segundo nível
         c2 = p + nrm * rp.uniform(0.26, 0.38); r2 = rp.uniform(0.15, 0.24)
-        if c2[0] > FACE + 0.08 and lugar_livre(c2, 0.1):
+        if c2[0] > EDGE + float(muro_pe(c2[1])) + 0.08 and lugar_livre(c2, 0.1):
             pedra(PEDRAS[int(rp.integers(len(PEDRAS)))], (c2[0], c2[1], LOW + 0.02), (r2 * 1.2, r2, r2 * 0.7), rp, R=rotz(rp.uniform(0, math.pi)))
     s += r * rp.uniform(1.25, 1.6)
 # cascata de lajes de pedra (a água sai de um cano escondido entre as pedras, no alto, e cai de laje em laje)
@@ -565,7 +608,9 @@ for k, (av, zt) in enumerate(LJ):
         G['veu_agua'].add(vv, [[2 * i, 2 * i + 1, 2 * i + 3, 2 * i + 2] for i in range(len(ts) - 1)])
         l_ = lb + rp.uniform(0.01, 0.04)
 ztopo = LJ[0][1]
-for k in range(10):                                             # pedras empilhadas dos dois lados das lajes
+if not CASCATA.get('flancos', True):                            # uma queda só: pedra por cima da laje, encaixada no muro
+    pedra('pedra_cinza', (CO[0] + 0.06, CO[1], ztopo + 0.10), (0.20, CW / 2 + 0.10, 0.09), rp, R=rotz(CASCATA['ang']))
+for k in range(10 if CASCATA.get('flancos', True) else 0):     # pedras empilhadas dos dois lados das lajes
     lado = (CW / 2 + 0.16) * (1 if k % 2 == 0 else -1)
     nivel_ = k // 2
     c = CO + CD * (0.12 + 0.16 * nivel_) + CL * lado
@@ -593,13 +638,16 @@ if CASCATA.get('monte'):                                        # monte de pedra
     pedra('pedra_cinza', (CO[0], CO[1], ztopo + 0.04), (0.22, CW / 2 + 0.06, 0.12), rp, R=rotz(CASCATA['ang']))
 for lado in (1, -1):                                            # samambaias dos dois lados da cascata
     c = CO + CD * 0.15 + CL * lado * (CW / 2 + 0.42)
-    P.mound('leaf_fern', (c[0], c[1], LOW + 0.05), rng, n=20, L=0.5, W=0.11, e=(0.1, 1.2), droop=0.9, r0=0.06)
+    if CASCATA.get('flancos', True):
+        P.mound('leaf_fern', (c[0], c[1], LOW + 0.05), rng, n=20, L=0.5, W=0.11, e=(0.1, 1.2), droop=0.9, r0=0.06)
+    else:                                                       # no topo do muro de pedras, caindo por cima
+        P.mound('leaf_fern', (EDGE + 0.14, c[1], MURO_TOPO), rng, n=26, L=0.55, W=0.12, e=(0.0, 1.1), droop=1.1, r0=0.06)
 # carpas no fundo e ninfeias na parte rasa, fora de baixo do deck
 _cx, _cy = np.meshgrid(np.arange(LAGO[:, 0].min(), LAGO[:, 0].max(), 0.1), np.arange(LAGO[:, 1].min(), LAGO[:, 1].max(), 0.1), indexing='ij')
 _d = dentro_lago(_cx, _cy); _pr = np.where(_d, prof_lago(_cx, _cy), 0.0)
 _fora_deck = np.ones_like(_d)
 _fundo = np.argwhere(_d & (_pr >= PROF - 0.15) & _fora_deck)
-_raso = np.argwhere(_d & (_pr > 0.18) & (_pr < 0.4) & _fora_deck & (dist_borda(_cx, _cy) > 0.2))
+_raso = np.argwhere(_d & (_pr > 0.18) & (_pr < 0.4) & _fora_deck & (dist_borda(_cx, _cy) > 0.2) & (_cx > EDGE + 2.6))
 koi = []
 for n_, km in zip(range(4), ('koi_o', 'koi_w', 'koi_o', 'koi_k')):
     if len(_fundo):
@@ -613,7 +661,7 @@ for kx, ky, ka, km in koi:
     ellipsoid(km, tail, (0.08, 0.014, 0.05), seg=6, rings=4, R=R)
     ellipsoid('koi_w' if km != 'koi_w' else 'koi_o', np.array([kx, ky, zk + 0.03]) + R @ np.array([0.05, 0, 0]), (0.08, 0.045, 0.026), seg=7, rings=4, R=R)
 _ninf = []
-for n_ in range(4):
+for n_ in range(7):
     if len(_raso):
         i_, j_ = _raso[int(rp.integers(len(_raso)))]
         _ninf.append((float(_cx[i_, j_]), float(_cy[i_, j_]), rp.uniform(0.11, 0.18)))
@@ -641,33 +689,112 @@ for i in range(obra.ESCADA_N):
     box('stone_cut', EDGE + 0.08 + obra.ESCADA_PISO * i, EDGE + 0.08 + obra.ESCADA_PISO * (i + 1), obra.ESCADA_Y0, obra.ESCADA_Y1, LOW,
         LOW * (i + 1) / (obra.ESCADA_N + 1))
 box('stone_cut', EDGE - 0.3, EDGE + 0.08, obra.ESCADA_Y0, obra.ESCADA_Y1, -0.02, 0.02)
-# plantas na beira do laguinho (como na foto: samambaias, folhagens, moreia, papiro e taioba roxa), em volta do
-# contorno e só onde há lugar (fora do deck, da escada, do poço e do tronco)
-_pl = [(0.04, 'papiro', -0.25), (0.47, 'papiro', -0.22), (0.10, 'inhame', 0.55), (0.62, 'inhame', 0.60), (0.20, 'samambaia', 0.62),
-       (0.32, 'moreia', 0.60), (0.40, 'asplenio', 0.62), (0.52, 'xanadu', 0.65), (0.57, 'pacova', 0.80), (0.70, 'moreia', 0.62),
-       (0.78, 'samambaia', 0.62), (0.86, 'alpinia', 0.75), (0.93, 'xanadu', 0.62), (0.15, 'pacova', 0.95)]
-for frac, tipo, fora in _pl:
-    c = beira_lago(frac, fora)
-    if fora > 0 and not lugar_livre(c, 0.2):
+# plantas (redesenho de 10/11/2026, pelas fotos de referência: bem mais plantas na água, em volta e no topo do muro)
+def copo_de_leite(pos, rng_, n=7, H=0.55):
+    """Copo-de-leite: folhas em seta, em pé, e flores brancas (espata) em hastes."""
+    pos = np.asarray(pos, float)
+    for k in range(n):
+        az = rng_.uniform(0, 2 * math.pi); h = H * rng_.uniform(0.6, 1.0)
+        top = pos + np.array([0.10 * math.cos(az), 0.10 * math.sin(az), h])
+        tube('stem_green', [pos, top], 0.008, seg=4)
+        P.paddle('leaf_trop', top, az, 0.35, 0.26, 0.15, 0.7, nseg=4, shape='heart', fold=0.1)
+    for k in range(max(2, n // 2)):
+        az = rng_.uniform(0, 2 * math.pi)
+        top = pos + np.array([0.06 * math.cos(az), 0.06 * math.sin(az), H * rng_.uniform(0.95, 1.2)])
+        tube('stem_green', [pos, top], 0.006, seg=3)
+        P.paddle('flor_copo', top, az, 1.15, 0.13, 0.085, 0.5, nseg=3, shape='heart', fold=0.55)
+        ellipsoid('flower_orange', top + np.array([0, 0, 0.05]), (0.008, 0.008, 0.035), seg=5, rings=3)
+
+
+def agapanto(pos, rng_, s_=1.0):
+    """Agapanto: touceira de folhas em fita e bolas de flores azuis em hastes."""
+    P.blades('leaf_strap', pos, 26, 0.5 * s_, 0.03, rng_, droop=0.9, r0=0.08)
+    for k in range(3):
+        az = rng_.uniform(0, 2 * math.pi)
+        top = np.asarray(pos, float) + np.array([0.12 * math.cos(az), 0.12 * math.sin(az), 0.75 * s_ * rng_.uniform(0.85, 1.1)])
+        tube('stem_green', [pos, top], 0.006, seg=3)
+        for a in np.linspace(0, 2 * math.pi, 9, endpoint=False):
+            for e_ in (-0.5, 0.2, 0.9):
+                d_ = np.array([math.cos(a) * math.cos(e_), math.sin(a) * math.cos(e_), math.sin(e_)])
+                ellipsoid('flower_blue', top + d_ * 0.06, (0.018, 0.018, 0.03), seg=5, rings=3)
+
+
+_frac_l = np.arange(len(LAGO)) / len(LAGO)
+
+
+def na_beira(u, v, fora):
+    """Ponto na beira do lago mais perto de (u, v), afastado `fora` (negativo: dentro d'água)."""
+    k = int(np.argmin(np.hypot(LAGO[:, 0] - (EDGE + u), LAGO[:, 1] - v)))
+    return beira_lago(_frac_l[k] + 0.5 / len(LAGO), fora)
+
+
+# (u, v perto da beira, tipo, afastamento da beira; negativo = dentro d'água, na prateleira)
+_pl = [(0.75, 1.20, 'copo', -0.22), (0.72, 2.95, 'papiro', -0.22), (1.15, 3.55, 'copo', -0.24), (2.30, 3.95, 'copo', -0.24),
+       (3.30, 3.45, 'papiro', -0.22), (4.70, 1.18, 'papiro', -0.22), (5.75, 2.35, 'copo', -0.22), (3.30, 1.10, 'copo', -0.22),
+       (1.30, 4.00, 'asplenio', 0.42), (2.80, 3.80, 'xanadu', 0.45), (3.80, 3.30, 'moreia', 0.42), (4.70, 2.90, 'agapanto', 0.42),
+       (5.40, 2.60, 'xanadu', 0.40), (6.00, 2.10, 'asplenio', 0.40), (6.00, 1.50, 'pacova', 0.45), (2.20, 0.95, 'agapanto', 0.42),
+       (3.10, 1.00, 'moreia', 0.40), (4.20, 1.20, 'xanadu', 0.45), (5.10, 1.15, 'moreia', 0.40), (1.20, 0.95, 'samambaia', 0.45),
+       (2.10, 4.00, 'inhame', 0.55), (3.50, 3.40, 'agapanto', 0.65)]
+for u, v, tipo, fora in _pl:
+    c = na_beira(u, v, fora)
+    if fora > 0 and not lugar_livre(c, 0.18):
         continue
+    if fora < 0 and not (dentro_lago(*c) and lugar_livre(c, 0.08)):
+        continue
+    zc = ZAGUA - 0.25 if fora < 0 else LOW
     if tipo == 'papiro':
-        if not (dentro_lago(*c) and lugar_livre(c, 0.1)):
-            continue
-        P.papiro((c[0], c[1], ZAGUA - 0.25), rng, n=12, H=0.95)
+        P.papiro((c[0], c[1], zc), rng, n=12, H=0.95)
+    elif tipo == 'copo':
+        copo_de_leite((c[0], c[1], zc), rng, n=7, H=0.62 if fora < 0 else 0.5)
     elif tipo == 'inhame':
         P.inhame((c[0], c[1], LOW), rng, n=6)
     elif tipo == 'samambaia':
         P.mound('leaf_fern', (c[0], c[1], LOW), rng, n=24, L=0.58, W=0.12, e=(0.1, 1.2), droop=0.9, r0=0.06)
     elif tipo == 'moreia':
         P.moreia((c[0], c[1], LOW), rng, 0.9)
+    elif tipo == 'agapanto':
+        agapanto((c[0], c[1], LOW), rng, 0.95)
     elif tipo == 'asplenio':
         P.asplenio((c[0], c[1], LOW), rng, 1.0)
     elif tipo == 'xanadu':
         P.xanadu((c[0], c[1], LOW), rng, 0.95)
     elif tipo == 'pacova':
         P.pacova((c[0], c[1], LOW), rng, 0.95)
-    elif tipo == 'alpinia':
-        P.alpinia((c[0], c[1], LOW), rng, n=6, H=1.3)
+# faixa junto ao muro da amendoeira (entre o muro e a água), como nas fotos: papiro alto, moréia e agapanto
+for u, tipo in ((1.05, 'samambaia'), (1.75, 'papiro'), (2.55, 'moreia'), (3.35, 'agapanto'), (4.10, 'papiro'),
+                (4.85, 'moreia'), (5.55, 'agapanto'), (6.25, 'papiro'), (6.75, 'heliconia')):
+    c = (EDGE + u, 0.42)
+    if dentro_lago(*c):
+        continue
+    if tipo == 'papiro':
+        P.papiro((c[0], c[1], LOW), rng, n=14, H=1.1)
+    elif tipo == 'moreia':
+        P.moreia((c[0], c[1], LOW), rng, 1.0)
+    elif tipo == 'agapanto':
+        agapanto((c[0], c[1], LOW), rng, 1.0)
+    elif tipo == 'samambaia':
+        P.mound('leaf_fern', (c[0], c[1], LOW), rng, n=24, L=0.6, W=0.12, e=(0.1, 1.2), droop=0.9, r0=0.06)
+    else:
+        P.heliconia((c[0], c[1], LOW), rng, n=7, H=1.6)
+# topo do muro de pedras (terra): bromélias, samambaias caindo, grama-preta; na barriga da amendoeira, folhagens
+for v in np.arange(0.25, obra.ESCADA_Y0 - 0.2, 0.28):
+    u_ = 0.07
+    if math.hypot(EDGE + u_ - obra.ARVORE[0], v - obra.ARVORE[1]) > 0.4:
+        P.grama_preta((EDGE + u_, v, MURO_TOPO), rng)
+for v, u_, tipo in ((0.55, 0.16, 'bromelia'), (1.15, 0.15, 'samambaia'), (1.55, 0.16, 'bromelia_v'), (3.05, 0.16, 'bromelia'),
+                    (3.55, 0.15, 'samambaia'), (4.10, 0.30, 'bromelia_v'), (4.55, 0.48, 'samambaia'), (4.75, 0.62, 'bromelia'),
+                    (5.70, 0.55, 'xanadu'), (5.95, 0.42, 'bromelia'), (4.30, 0.15, 'asplenio')):
+    c = (EDGE + u_, v, MURO_TOPO)
+    if tipo == 'bromelia':
+        P.bromelia(c, rng, 0.85)
+    elif tipo == 'bromelia_v':
+        P.bromelia(c, rng, 0.75, red=False)
+    elif tipo == 'samambaia':
+        P.mound('leaf_fern', c, rng, n=26, L=0.55, W=0.12, e=(0.0, 1.1), droop=1.1, r0=0.06)
+    elif tipo == 'xanadu':
+        P.xanadu(c, rng, 0.85)
+    else:
+        P.asplenio(c, rng, 0.8)
 
 # ------------------------------------------------------------------ poço antigo com cara de poço de fazenda
 # o poço de verdade fica na frente da escada (boca de concreto com uns 1,25 de diâmetro, medidas no obra.py);
@@ -705,36 +832,37 @@ for xx in (52.45, 55.5, 58.55):
 box('stone_cut', 52.3, 58.7, 6.9, 9.98, LOW - 0.01, LOW + 0.012)
 
 # ------------------------------------------------------------------ pergolado + cinema no muro
-box('screen', 52.2, 55.8, 0.0, 0.025, -0.74, 1.27)
-for a in ((52.1, 55.9, -0.84, -0.74), (52.1, 55.9, 1.27, 1.37)):
+PDX = obra.PERGOLADO_DX          # 10/11/2026: andou 1,20 m para o portão para caber o lago mais comprido
+box('screen', 52.2 + PDX, 55.8 + PDX, 0.0, 0.025, -0.74, 1.27)
+for a in ((52.1 + PDX, 55.9 + PDX, -0.84, -0.74), (52.1 + PDX, 55.9 + PDX, 1.27, 1.37)):
     box('wood_x', a[0], a[1], 0.0, 0.05, a[2], a[3])
-for xx in (52.1, 55.8):
+for xx in (52.1 + PDX, 55.8 + PDX):
     box('wood_z', xx, xx + 0.1, 0.0, 0.05, -0.84, 1.37)
 PZ = 1.55
-for xx in (51.7, 56.3):
+for xx in (51.7 + PDX, 56.3 + PDX):
     for yy in (0.4, 4.0):
         box('wood_z', xx - 0.07, xx + 0.07, yy - 0.07, yy + 0.07, LOW, PZ)
 for yy in (0.4, 4.0):
-    box('wood_x', 51.35, 56.65, yy - 0.05, yy + 0.05, PZ, PZ + 0.18)
-for xx in np.arange(51.5, 56.6, 0.42):
+    box('wood_x', 51.35 + PDX, 56.65 + PDX, yy - 0.05, yy + 0.05, PZ, PZ + 0.18)
+for xx in np.arange(51.5 + PDX, 56.6 + PDX, 0.42):
     box('wood_y', xx - 0.03, xx + 0.03, 0.06, 4.35, PZ + 0.18, PZ + 0.3)
-P.vine_top('leaf_vine_light', 51.5, 56.5, 0.1, 4.3, PZ + 0.32, rng, density=120, flower='flower_red')
-for xx, yy in ((51.7, 4.0), (56.3, 4.0), (56.3, 0.4)):
+P.vine_top('leaf_vine_light', 51.5 + PDX, 56.5 + PDX, 0.1, 4.3, PZ + 0.32, rng, density=120, flower='flower_red')
+for xx, yy in ((51.7 + PDX, 4.0), (56.3 + PDX, 4.0), (56.3 + PDX, 0.4)):
     tube('bark_cane', [(xx + 0.09, yy, LOW), (xx + 0.1, yy + 0.02, 0.3), (xx + 0.08, yy, PZ + 0.2)], 0.02, seg=5)
     P.vine_wall('leaf_vine_light', yy - 0.2, yy + 0.2, LOW + 0.2, PZ, xx + 0.1, 1, rng, density=120, cover=0.5, axis='x')
-box('stone_cut', 51.4, 56.6, 0.0, 4.4, LOW - 0.01, LOW + 0.015)
+box('stone_cut', 51.4 + PDX, 56.6 + PDX, 0.0, 4.4, LOW - 0.01, LOW + 0.015)
 # sofá de frente para a tela + pufes + mesa baixa
-box('wood_x', 52.5, 55.5, 3.05, 3.85, LOW + 0.1, LOW + 0.3)
-box('cushion', 52.52, 55.48, 3.07, 3.7, LOW + 0.3, LOW + 0.44)
-box('wood_x', 52.5, 55.5, 3.72, 3.85, LOW + 0.3, LOW + 0.85)
+box('wood_x', 52.5 + PDX, 55.5 + PDX, 3.05, 3.85, LOW + 0.1, LOW + 0.3)
+box('cushion', 52.52 + PDX, 55.48 + PDX, 3.07, 3.7, LOW + 0.3, LOW + 0.44)
+box('wood_x', 52.5 + PDX, 55.5 + PDX, 3.72, 3.85, LOW + 0.3, LOW + 0.85)
 for i in range(4):
-    box('cushion' if i % 2 else 'cushion_teal', 52.6 + 0.72 * i, 53.25 + 0.72 * i, 3.52, 3.72, LOW + 0.44, LOW + 0.82)
-for xx in (52.5, 55.38):
+    box('cushion' if i % 2 else 'cushion_teal', 52.6 + PDX + 0.72 * i, 53.25 + PDX + 0.72 * i, 3.52, 3.72, LOW + 0.44, LOW + 0.82)
+for xx in (52.5 + PDX, 55.38 + PDX):
     box('wood_y', xx, xx + 0.12, 3.05, 3.85, LOW + 0.3, LOW + 0.62)
-for xx, yy in ((53.0, 1.75), (55.0, 1.75)):
+for xx, yy in ((53.0 + PDX, 1.75), (55.0 + PDX, 1.75)):
     cyl('cushion_teal', (xx, yy, LOW), 0.3, 0.4, seg=16)
-box('wood_x', 53.55, 54.45, 1.9, 2.5, LOW + 0.3, LOW + 0.36)
-for xx in (53.6, 54.35):
+box('wood_x', 53.55 + PDX, 54.45 + PDX, 1.9, 2.5, LOW + 0.3, LOW + 0.36)
+for xx in (53.6 + PDX, 54.35 + PDX):
     box('wood_z', xx, xx + 0.05, 1.95, 2.45, LOW, LOW + 0.3)
 
 # ------------------------------------------------------------------ treliça no poste de luz, plantio do canto, caminho
@@ -770,7 +898,6 @@ cyl('brick', (30.3, 2.1, 0), 1.1, 0.42, seg=32, cap=False)
 cyl('brick', (30.3, 2.1, 0), 0.74, 0.42, seg=32, cap=False)
 annulus('wood_x', (30.3, 2.1), 0.70, 1.16, 0.44, seg=40)
 am = P.amendoeira((obra.ARVORE[0], obra.ARVORE[1], LOW), rng, r0=0.25, r1=0.20, incl=(0.35, -0.12))   # tronco de uns 50 cm, inclinado para o quintal
-disc('seixo', obra.ARVORE, 0.75, LOW + 0.008, seg=36)
 # (o balanço e a casa na árvore saíram em 19/10/2026: a amendoeira de verdade fica colada na beira da laje, com o
 # deck e o laguinho do lado)
 
@@ -1632,7 +1759,10 @@ EXTRA['quintal'] = {
 EXTRA['quintal']['lugares'] = {'Beira do laguinho': [round(EDGE - 0.75, 2), round(CASCATA['origem'][1], 2), 0.0],
                                 'Lago': [round(float(LAGO[:, 0].max()) + 0.55, 2), round(float(obra.C_LAGO[1]), 2), round(math.pi, 4)]}
 EXTRA.setdefault('circulos', [])
-EXTRA['circulos'] += [[obra.ARVORE[0], obra.ARVORE[1], 0.45, LOW, 4.0], [obra.POCO[0], obra.POCO[1], obra.POCO_R + 0.03, LOW, 0.2]]
+EXTRA['circulos'] += [[obra.ARVORE[0] + 0.35, obra.ARVORE[1], 0.75, LOW, 4.0], [obra.POCO[0], obra.POCO[1], obra.POCO_R + 0.03, LOW, 0.2]]
+for _v0 in np.arange(0.0, obra.ESCADA_Y0 - 0.01, 0.5):       # muro de pedras (o pé dele vai para a frente na barriga da amendoeira)
+    _v1 = min(_v0 + 0.5, obra.ESCADA_Y0)
+    colisor(EDGE, EDGE + float(max(obra.muro_pe(_v0), obra.muro_pe(_v1))) - 0.05, _v0, _v1, LOW, -0.02)
 for _a, _b in GUARDA_BEIRA:                                   # guarda-corpo da beira da laje
     colisor(EDGE + obra.GUARDA_U - 0.06, EDGE + obra.GUARDA_U + 0.06, _a, _b, 0.0, 1.1)
 

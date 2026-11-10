@@ -52,10 +52,14 @@ def recortar(manter, tirar, tirar_mats=()):
 
 
 O = ns['obra']
-TIRAR = [(51.3, 60.5, -0.3, 10.3, LOW + 0.006, 9.0),     # garagem, pergolado e cinema (atrás de quem olha o lago)
+_XC = O.PERGOLADO_X0 + 0.05                                     # depois do canteiro do lago (o pergolado começa aqui)
+TIRAR = [(_XC, 60.5, -0.3, 10.3, LOW + 0.006, 9.0),      # garagem, pergolado e cinema (atrás de quem olha o lago)
+         (51.9, 60.5, 6.4, 10.3, LOW + 0.006, 9.0),       # garagem, do lado do muro da churrasqueira
+         (49.2, 51.2, 8.2, 10.0, LOW - 0.05, 9.0),        # pitangueira (sem as folhas, que saem no recorte, fica um galho seco)
          (30.0, 44.45, -0.3, 10.3, -3.0, 0.05),        # piscina
          (40.0, 45.85, -0.3, 10.3, -0.035, 9.0),        # churrasqueira, chuveirão e vasos acima do piso
-         (51.3, 60.5, -0.3, 10.3, LOW - 0.05, 9.0, ('wood_z', 'bark_cane', 'stone_cut', 'screen', 'wood_x', 'cushion', 'cushion_teal', 'couro', 'wood_y')),   # pés cortados do pergolado e do cinema
+         (_XC, 60.5, -0.3, 10.3, LOW - 0.05, 9.0, ('wood_z', 'bark_cane', 'stone_cut', 'screen', 'wood_x', 'cushion', 'cushion_teal', 'couro', 'wood_y')),   # pés cortados do pergolado e do cinema
+         (51.9, 60.5, 6.4, 10.3, LOW - 0.05, 9.0, ('wood_z', 'stone_cut', 'wood_x', 'wood_y')),
         ]
 sem_copa = set(args.vistas.split(',')) <= {'planta', 'estrutura'}
 estrutura = 'estrutura' in args.vistas.split(',') and len(args.vistas.split(',')) == 1
@@ -64,7 +68,7 @@ if estrutura:
     TIRAR.append((44.0, 52.0, -1.0, 11.0, -3.0, 9.0, ('ninfeia', 'flor_ninfeia')))
 COPA = ('leaf_amend', 'leaf_amend_red', 'leaf_core_big')       # a amendoeira fica nas vistas em perspectiva, sai na planta e na estrutura
 if sem_copa:
-    TIRAR.append((44.0, 52.0, -0.3, 4.5, 1.25, 12.0, ('bark_dark',)))   # na planta e na estrutura fica só o tronco
+    TIRAR.append((44.0, 52.0, -0.3, 8.0, 1.25, 12.0, ('bark_dark',)))   # na planta e na estrutura fica só o tronco
 ARVORES = ('leaf_mango', 'leaf_core', 'leaf_bg', 'leaf_palm', 'leaf_palm_base',
            'leaf_palm_rachis', 'leaf_areca', 'leaf_citrus', 'leaf_goiaba', 'leaf_jabu', 'leaf_vine', 'leaf_vine_light',
            'bark_palm', 'bark_jabu', 'bark_goiaba', 'fruit_mango', 'fruit_goiaba', 'fruit_black', 'fruit_lemon', 'fruit_red',
@@ -119,14 +123,15 @@ scene.camera = co
 
 # enquadramento a partir do lago (obra.py)
 LX0, LX1 = float(O.LAGO[:, 0].min()), float(O.LAGO[:, 0].max()); LY0, LY1 = float(O.LAGO[:, 1].min()), float(O.LAGO[:, 1].max())
-CXc, CYc = (EDGE - 0.4 + LX1) / 2, (LY0 + max(LY1, O.ESCADA_Y1)) / 2
-PLANTA_W, PLANTA_H = 6.6, 6.0
+CXc, CYc = (EDGE - 0.6 + O.PERGOLADO_X0 + 0.2) / 2, (-0.1 + O.ESCADA_Y1 + 0.3) / 2
+PLANTA_W, PLANTA_H = O.PERGOLADO_X0 + 0.8 - EDGE, O.ESCADA_Y1 + 0.4
 CY_ = O.CASCATA['origem'][1]
 VISTAS = {
     # nome: (câmera, alvo, lente, azimute do sol, elevação do sol, exposição)
+    'referencia': ((EDGE + 8.6, 3.3, LOW + 1.6), (EDGE + 0.2, 3.25, LOW + 0.55), 18, 215, 55, 0.1),   # como as fotos do Thiago
     'quintal': ((LX1 + 1.5, O.POCO[1] - 0.9, LOW + 1.7), (EDGE + 0.9, (LY0 + LY1) / 2 + 0.3, -0.85), 19, 215, 52, 0.1),
     'cascata': ((LX1 - 0.4, 0.45, LOW + 1.45), (EDGE + 0.2, CY_ + 0.1, -0.6), 19, 215, 50, 0.1),
-    'laje': ((EDGE - 0.35, O.ESCADA_Y0 + 0.45, 1.7), (EDGE + 2.1, (LY0 + LY1) / 2 - 0.2, -1.05), 18, 215, 55, 0.05),
+    'laje': ((EDGE - 0.3, 1.1, 1.95), (EDGE + 3.0, 2.7, -1.0), 16, 215, 55, 0.05),
     'estrutura': ((LX1 + 1.2, O.POCO[1] - 1.1, LOW + 1.9), (EDGE + 1.6, (LY0 + LY1) / 2 - 0.1, -1.15), 19, 215, 58, 0.2),
     'planta': ((CXc, CYc, 12.0), (CXc, CYc + 0.0001, -1.0), 0, 215, 62, 0.15),
 }
@@ -141,12 +146,12 @@ _co = np.array(O.CASCATA['origem']); _cd = np.array([math.cos(O.CASCATA['ang']),
 _br = lambda v: f'{v:.2f}'.replace('.', ',')
 PONTOS = [
     (1, f'Guarda-corpo de madeira de {_br(O.GUARDA_H)} m no topo do muro (vão entre balaústres até 9 cm)', (EDGE + O.GUARDA_U, CY_ - 0.9, 0.95)),
-    (2, 'Muro de arrimo novo na frente da beira da laje, revestido de pedra (desnível de 1,00 m)', (O.FACE - 0.05, 1.2, -0.55)),
-    (3, 'Cascata de lajes de pedra (3 quedas) descendo do alto do muro', tuple(_co + _cd * 0.45) + (O.CASCATA['lajes'][1][1],)),
+    (2, 'Muro de pedras empilhadas, inclinado, abraçando o pé da amendoeira (desnível de 1,00 m)', (EDGE + float(O.muro_frente(1.2, -0.55)), 1.2, -0.55)),
+    (3, 'Cascata de uma queda só, em lâmina de 50 cm, saindo do muro de pedras', tuple(_co + _cd * 0.40) + (O.CASCATA['lajes'][0][1] - 0.15,)),
     (4, 'Borda de pedras arredondadas, meio enterradas', (float(O.LAGO[_kb, 0]), float(O.LAGO[_kb, 1]), LOW + 0.1)),
     (5, f'Prateleira de plantas a {round(O.PRAT_PROF * 100)} cm de fundo', (float(_gx[_ks]), float(_gy[_ks]), O.ZAGUA - O.PRAT_PROF)),
     (6, f'Parte funda: {_br(O.PROF)} m de água', (float(_gx[_kf]), float(_gy[_kf]), O.ZAGUA - O.PROF)),
-    (7, 'Amendoeira: o lago fica a 1,20 m do tronco', (O.ARVORE[0], O.ARVORE[1], LOW + 1.3)),
+    (7, 'Amendoeira: perto dela só a parte rasa; sem vala nem fundação nas raízes', (O.ARVORE[0], O.ARVORE[1], LOW + 1.3)),
     (8, 'Poço: o lago fica a 1,50 m da boca', (O.POCO[0], O.POCO[1] - O.POCO_R, LOW + 0.5)),
 ]
 

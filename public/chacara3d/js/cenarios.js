@@ -360,28 +360,28 @@ export function criarCenarios(ctx) {
   function cineminha() {
     const cn = novoCenario('cinema'); cn.sombras = false;
     const r = sorteio(77), G = cn.grupo, Z = -1, ASS = -Math.PI / 2;   // todo mundo olha para a tela (y = 0)
-    por(G, 'manta', 54.05, 0.95, Z, -Math.PI / 2);
-    por(G, 'puff', 51.95, 2.55, Z, ASS + 0.35); por(G, 'puff', 56.05, 2.55, Z, ASS - 0.35);
-    for (const x of [52.7, 54.0, 55.3]) por(G, 'cadeira_dobravel', x, 4.55, Z, ASS);
-    const proj = por(G, 'projetor', 54.0, 5.2, Z, ASS);
-    por(G, 'cooler', 56.75, 3.35, Z, Math.PI); por(G, 'balde_pipoca', 54.0, 2.2, Z + 0.36, 0);
+    por(G, 'manta', 55.25, 0.95, Z, -Math.PI / 2);
+    por(G, 'puff', 53.15, 2.55, Z, ASS + 0.35); por(G, 'puff', 57.25, 2.55, Z, ASS - 0.35);
+    for (const x of [53.9, 55.2, 56.5]) por(G, 'cadeira_dobravel', x, 4.55, Z, ASS);
+    const proj = por(G, 'projetor', 55.2, 5.2, Z, ASS);
+    por(G, 'cooler', 57.95, 3.35, Z, Math.PI); por(G, 'balde_pipoca', 55.2, 2.2, Z + 0.36, 0);
     for (const m of materiaisPorNome(proj, 'lente_projetor')) m.emissiveIntensity = 3;
     const pipoca = p => { p.noColo(aderecoBruto('balde_pipoca'), p.notaPos('sentado_comendo', 'balde_m', 0.28)); };
     const sentar = (t, vis, x, y, z, a, anims) => gente(cn, r, t, vis, 'festa', x, y, a, fixo(anims, 9), { z, anim: anims[0] });
     // sofá (assento a 0,44 m)
-    [52.95, 53.65, 54.35, 55.05].forEach((x, i) => {
+    [54.15, 54.85, 55.55, 56.25].forEach((x, i) => {
       const t = i % 2 ? 'mulher' : 'homem';
       const p = sentar(t, escolher(VIS.festa[t], r), x, 3.6, Z - 0.01, ASS, i === 1 ? ['sentado_comendo'] : i === 3 ? ['sentado_conversando', 'sentado_assistindo'] : ['sentado_assistindo']);
       if (i === 1) pipoca(p);
     });
     // pufes redondos (crianças) e pufes grandes (adultos)
-    [[53.0, 1.85], [55.0, 1.85]].forEach(([x, y]) => sentar('crianca', escolher(VIS.festa.crianca, r), x, y, Z - 0.06, ASS, ['sentado_assistindo']));
-    [[51.95, 2.62, ASS + 0.35], [56.05, 2.62, ASS - 0.35]].forEach(([x, y, a], i) => { const t = i ? 'mulher' : 'homem'; const p = sentar(t, escolher(VIS.noite[t], r), x, y, Z - 0.1, a, ['sentado_comendo']); pipoca(p); });
+    [[54.2, 1.85], [56.2, 1.85]].forEach(([x, y]) => sentar('crianca', escolher(VIS.festa.crianca, r), x, y, Z - 0.06, ASS, ['sentado_assistindo']));
+    [[53.15, 2.62, ASS + 0.35], [57.25, 2.62, ASS - 0.35]].forEach(([x, y, a], i) => { const t = i ? 'mulher' : 'homem'; const p = sentar(t, escolher(VIS.noite[t], r), x, y, Z - 0.1, a, ['sentado_comendo']); pipoca(p); });
     // manta: duas crianças e um adulto sentados no chão
-    [[53.45, 1.0, 'crianca'], [54.15, 0.92, 'crianca'], [54.85, 1.05, 'mulher']].forEach(([x, y, t]) => sentar(t, escolher(VIS.festa[t], r), x, y, Z, ASS, ['sentado_chao']));
+    [[54.65, 1.0, 'crianca'], [55.35, 0.92, 'crianca'], [56.05, 1.05, 'mulher']].forEach(([x, y, t]) => sentar(t, escolher(VIS.festa[t], r), x, y, Z, ASS, ['sentado_chao']));
     // cadeiras de trás
-    if (estado.qualidade >= 1) [52.7, 54.0, 55.3].forEach((x, i) => { const t = i === 1 ? 'mulher' : 'homem'; sentar(t, escolher(VIS.noite[t], r), x, 4.5, Z, ASS, ['sentado_assistindo', 'sentado_conversando']); });
-    cn.hora = 20.8; cn.proj = 'cinema'; cn.vista = [54.0, 6.6, -Math.PI / 2, -1];
+    if (estado.qualidade >= 1) [53.9, 55.2, 56.5].forEach((x, i) => { const t = i === 1 ? 'mulher' : 'homem'; sentar(t, escolher(VIS.noite[t], r), x, 4.5, Z, ASS, ['sentado_assistindo', 'sentado_conversando']); });
+    cn.hora = 20.8; cn.proj = 'cinema'; cn.vista = [55.2, 6.6, -Math.PI / 2, -1];
     cn.telaCinema = 'boas_vindas'; cn.telaExtras = { texto: 'SESSÃO DE|CINEMA' };
     return cn;
   }

@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { $, W3, aviso, clamp } from './util.js';
 
-const SCR = { x0: 52.2, x1: 55.8, z0: -0.74, z1: 1.27, y: 0.045 };
+const SCR = { x0: 53.4, x1: 57.0, z0: -0.74, z1: 1.27, y: 0.045 };
 
 function texturaParada() {
   const c = document.createElement('canvas'); c.width = 1024; c.height = 576;
@@ -22,7 +22,7 @@ export function criarCinema(cena, som) {
   tela.position.copy(W3((SCR.x0 + SCR.x1) / 2, SCR.y, (SCR.z0 + SCR.z1) / 2)); tela.rotation.y = Math.PI;
   cena.add(tela);
   const cantos = [W3(SCR.x1, SCR.y, SCR.z1), W3(SCR.x0, SCR.y, SCR.z1), W3(SCR.x0, SCR.y, SCR.z0), W3(SCR.x1, SCR.y, SCR.z0)];
-  const luz = new THREE.PointLight(0xbfd4ff, 0, 9, 2); luz.position.copy(W3(54.0, 1.3, 0.4)); cena.add(luz);
+  const luz = new THREE.PointLight(0xbfd4ff, 0, 9, 2); luz.position.copy(W3(55.2, 1.3, 0.4)); cena.add(luz);
   const c = { modo: 'parada', video: null, vtex: null, vmat: null, yt: $('yt'), ytOK: true, url: null, tela, luz };
   function parar() {
     if (c.video) c.video.pause();

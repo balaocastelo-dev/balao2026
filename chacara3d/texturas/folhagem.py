@@ -108,6 +108,10 @@ TEXTURAS = [
      'Bráctea de helicônia bico-de-papagaio: vermelho cerado, borda e ponta verde-amareladas.', {}),
     ('flor_laranja', 'tira', tiras.tira_flor_laranja, 213, False, 0.38, [1.00, 0.55, 0.12],
      'Bráctea laranja (alpínia/helicônia): laranja com amarelo nas bordas e na ponta.', {}),
+    ('flor_branca', 'tira', tiras.tira_flor_branca, 214, False, 0.45, [0.95, 0.95, 0.85],
+     'Espata do copo-de-leite: branco-creme cerado com a base esverdeada (10/11/2026, laguinho novo).', {}),
+    ('flor_azul', 'tira', tiras.tira_flor_azul, 215, False, 0.40, [0.45, 0.50, 0.95],
+     'Flor do agapanto: azul-violeta com a borda mais clara (10/11/2026, laguinho novo).', {}),
     # ---------------------------------------------------------------- frondes
     ('coqueiro', 'fronde', frondes.fronde_coqueiro, 301, True, 0.45, [0.62, 0.74, 0.18],
      'Um lado da fronde do coqueiro: 86 folíolos estreitos, dobrados em V (no mapa normal), verde-amarelado '
