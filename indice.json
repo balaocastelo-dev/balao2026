@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "atualizacao-microsoft-novembro-2026-falha-outlook",
+      "titulo": "Atualização de novembro da Microsoft corrige falha do Outlook usada em ataques",
+      "resumo": "Em 10 de novembro de 2026 a Microsoft liberou as correções do mês, entre elas uma falha do Outlook já explorada. Veja quem precisa atualizar e como.",
+      "categoria": "noticias",
+      "etiquetas": [
+        "windows",
+        "atualização",
+        "segurança",
+        "office"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-11-11T15:00:00.000Z",
+      "minutos": 3
+    },
+    {
       "slug": "golpes-com-voz-e-video-falsos-como-reconhecer",
       "titulo": "Golpes com voz e vídeo falsos: como reconhecer e como se proteger",
       "resumo": "Golpes com voz clonada e vídeo falso usam IA para imitar parentes e autoridades. Veja os sinais, a defesa que funciona e o que fazer se você caiu.",
@@ -1506,5 +1521,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-11-10T22:15:43.677Z"
+  "atualizadoEm": "2026-11-10T22:40:04.391Z"
 }
