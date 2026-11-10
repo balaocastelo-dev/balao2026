@@ -111,6 +111,9 @@ const nextConfig: NextConfig = {
       // O MacBook Pro M5 foi vendido e a página dele saiu (25/10). Quem chegar
       // por um link antigo ou pelo Google cai na home, onde está o destaque da vez.
       { source: "/macbookm5", destination: "/", permanent: true },
+      // O Avell Storm 480 foi vendido e a página dele saiu (10/11). Quem chegar
+      // por um link antigo ou pelo Google cai no destaque da vez, o Acer Aspire Go 15.
+      { source: "/avellstorm480", destination: "/acer-aspire-go-15", permanent: true },
       // A administração inteira mora em /painel. Os endereços de antes
       // (/admin, /crm, /arena/admin…) continuam valendo e levam para lá.
       // Temporário (307) de propósito: são endereços internos, e um 308 fica

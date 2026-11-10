@@ -40,7 +40,6 @@ export default function LayoutWrapper({
   const isPaginaDeVendas =
     pathname === "/sistemasdeia" ||
     pathname === "/overclock" ||
-    pathname === "/avellstorm480" ||
     pathname === "/mybots-app";
   // O painel inteiro (/painel e tudo embaixo dele) é tela de trabalho: tem o
   // próprio menu e rola por dentro, sem o rodapé nem o botão da loja.
