@@ -75,7 +75,7 @@ const PARA_QUEM = [
 ];
 
 const FICHA: [string, string][] = [
-  ["Modelo", "Acer Aspire Go 15"],
+  ["Modelo", "Acer Aspire Go 15 (AG15-71P)"],
   ["Processador", "Intel Core i5 de 13ª geração"],
   ["Memória", "8GB DDR5"],
   ["Armazenamento", "SSD de 256GB"],
@@ -104,13 +104,17 @@ export default function AcerAspireGo15Landing() {
         />
 
         <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-2 lg:items-center lg:gap-14 lg:px-8">
-          <div className="relative order-last aspect-[948/818] w-full overflow-hidden rounded-3xl border border-slate-700 bg-black shadow-2xl shadow-black/60 lg:order-last">
+          <div className="relative order-last aspect-[1449/941] w-full overflow-hidden rounded-3xl border border-slate-700 bg-[#0a0d14] p-5 shadow-2xl shadow-black/60 sm:p-7 lg:order-last">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(230,0,18,0.18),transparent_65%)]"
+            />
             <Image
               src={`${MIDIA}/acer-aspire-go-15.webp`}
-              alt="Notebook Acer Aspire Go 15 novo e lacrado, aberto sobre uma mesa, na Balão da Informática"
+              alt="Notebook Acer Aspire Go 15 novo e lacrado, aberto, na Balão da Informática"
               fill
               sizes="(max-width: 1023px) 100vw, 50vw"
-              className="object-cover object-center"
+              className="object-contain object-center p-3 drop-shadow-[0_26px_40px_rgba(0,0,0,0.7)]"
               priority
             />
             <div
