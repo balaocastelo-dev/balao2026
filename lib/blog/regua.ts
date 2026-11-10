@@ -111,7 +111,7 @@ export const PAGINAS_DA_LOJA = [
   "/telaiphone",
   "/ia-local",
   "/premium",
-  "/avellstorm480",
+  "/acer-aspire-go-15",
   "/fale-conosco",
   "/sobre-nos",
   "/categoria/computadores",

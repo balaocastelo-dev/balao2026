@@ -5,7 +5,7 @@ import JsonLd, { generateHomeAiAndGoogleSchema } from "@/components/JsonLd";
 import QuickLeadSection from "@/components/QuickLeadSection";
 import HomeLocalStoreInfo from "@/components/HomeLocalStoreInfo";
 import HomeHeroFullWidth from "@/components/HomeHeroFullWidth";
-import HomeAvellStorm480Destaque from "@/components/HomeAvellStorm480Destaque";
+import HomeAcerAspireGo15Destaque from "@/components/HomeAcerAspireGo15Destaque";
 import HomeTrustPillars from "@/components/HomeTrustPillars";
 import HomeBlogSection from "@/components/HomeBlogSection";
 
@@ -221,9 +221,9 @@ export default async function Home(props: {
           <FaixaDeConsignados />
         )}
 
-        {/* 1.1 Destaque: notebook Avell Storm 480 da vitrine (produto único da loja, fora do espelhamento) */}
+        {/* 1.1 Destaque: notebook Acer Aspire Go 15 da vitrine (produto único da loja, fora do espelhamento) */}
         {!navegando && (
-          <HomeAvellStorm480Destaque />
+          <HomeAcerAspireGo15Destaque />
         )}
 
         {/* 2. Trust Pillars (4 interactive cards) */}

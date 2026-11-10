@@ -63,7 +63,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/imac',
     '/iphone',
     '/android',
-    '/avellstorm480',
+    '/acer-aspire-go-15',
     '/telaiphone',
     '/toner',
     '/wendell/apple',
