@@ -326,6 +326,8 @@ export function criarMateriais(info) {
     pedra_cinza: superficie('pedra_natural', { cor: new THREE.Color(0.62, 0.62, 0.6), relevo: 1.1, causticas: true }),
     pedra_bege: superficie('pedra_natural', { cor: new THREE.Color(1.05, 0.9, 0.7), relevo: 1.1, causticas: true }),
     pedra_ferrugem: superficie('pedra_natural', { cor: new THREE.Color(0.95, 0.62, 0.4), relevo: 1.1, causticas: true }),
+    // laguinho novo (10/11/2026): pedra do muro seco, escura e com musgo
+    pedra_musgo: superficie('pedra_natural', { cor: new THREE.Color(0.55, 0.62, 0.45), relevo: 1.1, causticas: true }),
     argamassa: superficie('concreto', { cor: new THREE.Color(0.62, 0.58, 0.52), relevo: 0.6 }),
     granite: superficie('granito'),
     pot_clay: superficie('barro'),
@@ -405,7 +407,7 @@ export function criarMateriais(info) {
   for (const [k, n] of Object.entries(cachos)) M[k] = folha(n, { semVirar: true });
   M.leaf_vine = folha('trepadeira', { vento: 0.0006 });
   M.leaf_vine_light = folha('maracuja', { vento: 0.0006 });
-  const tiras = { leaf_banana: 'banana', leaf_trop: 'tropical_larga', leaf_trop2: 'tropical', leaf_lime: 'lima', leaf_dracena: 'dracena', leaf_rafis: 'rafis', leaf_strap: 'capim', leaf_black: 'grama_preta', leaf_purple: 'taioba_roxa', leaf_brom: 'bromelia', leaf_fern: 'samambaia', flower_red: 'flor_vermelha', flower_orange: 'flor_laranja' };
+  const tiras = { leaf_banana: 'banana', leaf_trop: 'tropical_larga', leaf_trop2: 'tropical', leaf_lime: 'lima', leaf_dracena: 'dracena', leaf_rafis: 'rafis', leaf_strap: 'capim', leaf_black: 'grama_preta', leaf_purple: 'taioba_roxa', leaf_brom: 'bromelia', leaf_fern: 'samambaia', flower_red: 'flor_vermelha', flower_orange: 'flor_laranja', flor_copo: 'flor_branca', flower_blue: 'flor_azul' };
   for (const [k, n] of Object.entries(tiras)) M[k] = folha(n, { vento: 0.004 });
   M.leaf_palm = folha('coqueiro', { vento: 0.003, trans: 0.7 });
   M.leaf_areca = folha('areca', { vento: 0.004, trans: 0.7 });

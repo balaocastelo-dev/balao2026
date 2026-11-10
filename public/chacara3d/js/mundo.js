@@ -136,7 +136,7 @@ const BOX_FIXO = [ // x0, x1, y0, y1, z0, z1 (sem as tiny houses, que vêm do mo
   [35, 35.2, 6.71, 10, 0, 3], [35, 35.42, 6.29, 6.71, 0, 3], [38.29, 38.71, 6.29, 6.71, 0, 3], [41.59, 42.01, 6.29, 6.71, 0, 3], [44.79, 45.21, 6.29, 6.71, 0, 3], [44.79, 45.21, 9.58, 10, 0, 3],
   [35.5, 41.6, 6.3, 7.02, 0, 1.1], [35.2, 42.9, 9.0, 10, 0, 2.2],
   // guarda-corpo da beira da laje, lago, poço e amendoeira vêm do modelo (extra.quintal)
-  [52.5, 55.5, 3.05, 3.85, -1, -0.1], [44.6, 45.0, 0, 0.4, 0, 0.5],
+  [53.7, 56.7, 3.05, 3.85, -1, -0.1], [44.6, 45.0, 0, 0.4, 0, 0.5],
 ];
 const CIR = [ // x, y, raio, z0, z1
   [30.3, 2.1, 1.2, 0, 2], [21.2, 8.3, 0.28, 0, 8], [23.7, 8.95, 0.25, 0, 8], [26.4, 8.55, 0.28, 0, 8], [30.4, 8.75, 0.15, 0, 2],
@@ -236,7 +236,7 @@ export function criarColisao(extra) {
 
 export function lugares(extra) {
   const L = [['Portão do gramado', 1.6, 4.7, 0], ['Vilinha', 10.6, 4.9, -0.5], ['Gramado', 26, 5.2, 3.14], ['Piscina', 45.1, 3.6, 3.14], ['Churrasqueira', 43.4, 5.7, 2.2],
-    ['Beira do laguinho', 45.25, 3.3, 0], ['Lago', 50.4, 5.0, 3.14], ['Cineminha', 54, 2.7, -1.5708], ['Portão de baixo', 58.6, 5.1, 3.14]];
+    ['Beira do laguinho', 45.25, 3.3, 0], ['Lago', 50.4, 5.0, 3.14], ['Cineminha', 55.2, 2.7, -1.5708], ['Portão de baixo', 58.6, 5.1, 3.14]];
   const ql = (extra.quintal || {}).lugares || {};
   for (const l of L) if (ql[l[0]]) l.splice(1, 3, ...ql[l[0]]);
   for (const l of (extra.lugares || [])) L.splice(2, 0, l);
@@ -260,6 +260,6 @@ export function ondeEstou(x, y, extra, pes) {
   const Q = extra.quintal || QUINTAL_PADRAO, d = Q.deck;
   if (d && x <= d[1] && y >= d[2] && y <= d[3] && pes > d[4] - 0.4) return 'Deck';
   if (Q.lago && Math.hypot(x - (Q.lago.ret[0] + Q.lago.ret[1]) / 2, y - (Q.lago.ret[2] + Q.lago.ret[3]) / 2) < 3.2) return 'Laguinho';
-  if (y < 4.5 && x > 51) return 'Cineminha';
+  if (y < 4.5 && x > 52.5) return 'Cineminha';
   return 'Parte de baixo';
 }

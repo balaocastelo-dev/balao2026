@@ -1760,6 +1760,9 @@ EXTRA['quintal']['lugares'] = {'Beira do laguinho': [round(EDGE - 0.75, 2), roun
                                 'Lago': [round(float(LAGO[:, 0].max()) + 0.55, 2), round(float(obra.C_LAGO[1]), 2), round(math.pi, 4)]}
 EXTRA.setdefault('circulos', [])
 EXTRA['circulos'] += [[obra.ARVORE[0] + 0.35, obra.ARVORE[1], 0.75, LOW, 4.0], [obra.POCO[0], obra.POCO[1], obra.POCO_R + 0.03, LOW, 0.2]]
+for _v0 in np.arange(0.0, obra.ESCADA_Y0 - 0.01, 0.5):       # muro de pedras (o pé dele vai para a frente na barriga da amendoeira)
+    _v1 = min(_v0 + 0.5, obra.ESCADA_Y0)
+    colisor(EDGE, EDGE + float(max(obra.muro_pe(_v0), obra.muro_pe(_v1))) - 0.05, _v0, _v1, LOW, -0.02)
 for _a, _b in GUARDA_BEIRA:                                   # guarda-corpo da beira da laje
     colisor(EDGE + obra.GUARDA_U - 0.06, EDGE + obra.GUARDA_U + 0.06, _a, _b, 0.0, 1.1)
 

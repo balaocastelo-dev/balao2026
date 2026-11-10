@@ -463,6 +463,16 @@ def tira_flor_vermelha(rng):
     return _bractea(rng, cor('#8e0f17'), cor('#c8181e'), cor('#c4c040'), cor('#a8b83c'))
 
 
+def tira_flor_branca(rng):
+    """Espata do copo-de-leite: branco-creme cerado, base esverdeada e ponta branca."""
+    return _bractea(rng, cor('#9fb46a'), cor('#f2f1e6'), cor('#fbfaf3'), cor('#ffffff'), larg_borda=0.06)
+
+
+def tira_flor_azul(rng):
+    """Florzinhas do agapanto vistas de perto: azul-violeta com a borda mais clara."""
+    return _bractea(rng, cor('#3a3f9a'), cor('#5a6ad0'), cor('#9aa6ec'), cor('#7c88e0'), larg_borda=0.10)
+
+
 def tira_flor_laranja(rng):
     """Bráctea laranja (alpínia/helicônia): laranja com amarelo nas bordas e na ponta."""
     return _bractea(rng, cor('#c0401a'), cor('#ec6a1c'), cor('#f2b028'), cor('#f0c040'), larg_borda=0.12)
