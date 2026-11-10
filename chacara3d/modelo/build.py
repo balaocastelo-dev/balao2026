@@ -393,7 +393,7 @@ def guarda(p0, p1, zb, h=1.1, mat_long='wood_x'):
     beam(ml, p0 + np.array([0, 0, h + dz]), p1 + np.array([0, 0, h + dz]), 0.10, 0.045)
     beam(ml, p0 + np.array([0, 0, 0.1 + dz]), p1 + np.array([0, 0, 0.1 + dz]), 0.045, 0.05)
     beam(ml, p0 + np.array([0, 0, h - 0.1 + dz]), p1 + np.array([0, 0, h - 0.1 + dz]), 0.045, 0.05)
-    m = int(L / 0.115)
+    m = max(1, math.ceil(L / 0.115))          # vão entre balaústres de no máximo 9 cm
     for i in range(1, m):
         c = p0 + d * (L * i / m)
         obox('wood_z', c + np.array([0, 0, 0.1 + (h - 0.2) / 2]), (0.028, 0.028, h - 0.25))
@@ -407,8 +407,13 @@ for _a, _b in _cortes + [(9.95, 9.95)]:
     if _a - _y > 0.05:
         GUARDA_BEIRA.append((_y, _a))
     _y = max(_y, _b)
-for _a, _b in GUARDA_BEIRA:
-    guarda((EDGE + obra.GUARDA_U, _a), (EDGE + obra.GUARDA_U, _b), 0.0)          # postes presos no topo do muro novo
+# do muro da amendoeira até a escada o guarda-corpo segue obra.GUARDA_LINHA (contorna o tronco da amendoeira pelo lado
+# da laje); do outro lado da escada, reto na beira
+_GL = [(EDGE + u_, v_) for u_, v_ in obra.GUARDA_LINHA]
+GUARDA_SEGS = list(zip(_GL[:-1], _GL[1:])) + [((EDGE + obra.GUARDA_U, _a), (EDGE + obra.GUARDA_U, _b)) for _a, _b in GUARDA_BEIRA
+                                               if _a > obra.ESCADA_Y0]
+for _p0, _p1 in GUARDA_SEGS:
+    guarda(_p0, _p1, 0.0)                                                       # postes no piso da laje
 
 # (o deck sobre o laguinho saiu em 19/10/2026, a pedido do Thiago: fica só o guarda-corpo da beira da laje)
 from obra import GUARDA_H
@@ -1763,8 +1768,11 @@ EXTRA['circulos'] += [[obra.ARVORE[0] + 0.35, obra.ARVORE[1], 0.75, LOW, 4.0], [
 for _v0 in np.arange(0.0, obra.ESCADA_Y0 - 0.01, 0.5):       # muro de pedras (o pé dele vai para a frente na barriga da amendoeira)
     _v1 = min(_v0 + 0.5, obra.ESCADA_Y0)
     colisor(EDGE, EDGE + float(max(obra.muro_pe(_v0), obra.muro_pe(_v1))) - 0.05, _v0, _v1, LOW, -0.02)
-for _a, _b in GUARDA_BEIRA:                                   # guarda-corpo da beira da laje
-    colisor(EDGE + obra.GUARDA_U - 0.06, EDGE + obra.GUARDA_U + 0.06, _a, _b, 0.0, 1.1)
+for _p0, _p1 in GUARDA_SEGS:                                  # guarda-corpo da beira da laje (em pedaços nas diagonais)
+    _n = 1 if abs(_p0[0] - _p1[0]) < 1e-6 or abs(_p0[1] - _p1[1]) < 1e-6 else 6
+    for _i in range(_n):
+        _q0 = np.add(_p0, np.subtract(_p1, _p0) * _i / _n); _q1 = np.add(_p0, np.subtract(_p1, _p0) * (_i + 1) / _n)
+        colisor(min(_q0[0], _q1[0]) - 0.06, max(_q0[0], _q1[0]) + 0.06, min(_q0[1], _q1[1]) - 0.02, max(_q0[1], _q1[1]) + 0.02, 0.0, 1.1)
 
 objs = geo.build_objects()
 print('objects', len(objs), 'polys', sum(len(o.data.polygons) for o in objs))
