@@ -22,7 +22,9 @@ import {
  * afins). O preço fica em app/acer-aspire-go-15/dados.ts, junto com a página do
  * produto (/acer-aspire-go-15), para os dois nunca mostrarem valores diferentes.
  *
- * Mídia em public/images/acer-aspire-go-15/, tirada do encarte do fornecedor.
+ * Mídia em public/images/acer-aspire-go-15/: foto oficial da Acer do modelo
+ * AG15-71P-5939 (a mesma ficha do encarte), com o fundo branco recortado para
+ * o notebook assentar direto no painel escuro.
  */
 const PAGINA_DO_PRODUTO = "/acer-aspire-go-15";
 
@@ -55,25 +57,22 @@ export default function HomeAcerAspireGo15Destaque() {
       />
 
       <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
-        {/* Foto do produto: em cima no celular, à direita no computador */}
-        <div className="relative min-h-[230px] overflow-hidden bg-black sm:min-h-[340px] lg:order-last lg:min-h-[460px]">
+        {/* Foto do produto: em cima no celular, à direita no computador.
+            A foto tem fundo transparente, então o notebook aparece inteiro
+            (object-contain) assentado no próprio painel, sem moldura branca. */}
+        <div className="relative min-h-[250px] overflow-hidden px-5 py-6 sm:min-h-[360px] sm:px-8 lg:order-last lg:min-h-[470px]">
+          {/* Brilho atrás do produto, para ele não flutuar no vazio */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(230,0,18,0.16),transparent_62%)]"
+          />
           <Image
             src={`${MIDIA}/acer-aspire-go-15.webp`}
             alt="Notebook Acer Aspire Go 15 novo e lacrado à venda na Balão da Informática"
             fill
             sizes="(max-width: 1023px) 100vw, 55vw"
-            className="object-cover object-center"
+            className="object-contain object-center p-2 drop-shadow-[0_26px_40px_rgba(0,0,0,0.65)]"
             priority={false}
-          />
-
-          {/* Funde a foto com o painel, sem deixar emenda */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#06070b] to-transparent lg:hidden"
-          />
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-y-0 left-0 hidden w-24 bg-gradient-to-r from-[#06070b] to-transparent lg:block"
           />
 
           {/* Selo discreto no canto */}
