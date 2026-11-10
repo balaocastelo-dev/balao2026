@@ -43,6 +43,10 @@ ESCADA_N, ESCADA_PISO = 5, round((1.60 - (ESCADA_X0 - EDGE)) / 5, 3)    # cinco 
 # ------------------------------------------------------------------ guarda-corpo na beira da laje
 # (19/10/2026: o Thiago tirou o deck; fica só o guarda-corpo protegendo a laje de cima do lago)
 GUARDA_H = 1.10                                  # altura do guarda-corpo (vão entre balaústres até 9 cm)
+# 10/11/2026: o tronco da amendoeira fica na beira da laje, bem na linha dos postes; o guarda-corpo contorna o tronco
+# pelo lado da laje, a uns 35 cm da casca (deixa o tronco engrossar). Pontos (u da beira da laje, v do muro).
+GUARDA_LINHA = [(GUARDA_U, 0.12), (GUARDA_U, ARVORE[1] - 0.60), (-0.45, ARVORE[1] - 0.30), (-0.45, ARVORE[1] + 0.30),
+                (GUARDA_U, ARVORE[1] + 0.60), (GUARDA_U, ESCADA_Y0)]
 
 # ------------------------------------------------------------------ muro de pedras empilhadas (10/11/2026)
 # Pelas fotos de referência do Thiago: do muro da amendoeira até a escada, em vez do muro reto revestido, um muro de
@@ -69,7 +73,7 @@ def muro_frente(v, z):
 
 
 # ------------------------------------------------------------------ laguinho (redesenhado em 10/11/2026)
-# Pelas fotos de referência: no pé do muro de pedras, entre o muro da amendoeira e a árvore, mais comprido (5,24 m),
+# Pelas fotos de referência: no pé do muro de pedras, entre o muro da amendoeira e a árvore, mais comprido (5,38 m de ponta a ponta),
 # ao longo do muro lateral na direção do portão; 1,50 de folga da boca do poço e ~1,8 m do centro do tronco.
 ZAGUA = LOW - 0.06                # nível d'água (6 cm abaixo do chão do quintal de baixo)
 PROF = 0.90                       # lâmina d'água no meio
@@ -164,11 +168,15 @@ CASCATA = {'origem': (EDGE + 0.24, 2.25),        # frente das pedras na altura d
            'monte': False, 'pilar': False, 'flancos': False}
 
 # ------------------------------------------------------------------ hidráulica e elétrica (revisão de 10/11/2026)
-# caixa do filtro (50 x 40 cm) e sumidouro (60 x 60 cm) junto ao muro lateral, depois da ponta do lago e antes do piso
-# do pergolado; tomada no muro lateral, embaixo do pergolado, a mais de 2 m da água (NBR 5410)
-CAIXA_FILTRO = (EDGE + 7.00, 0.30)
+# caixa do filtro (50 x 40 cm) no canteiro junto ao muro lateral, depois da ponta do lago e antes do piso do pergolado
+# (a 1 m da água); sumidouro (60 x 60 cm) enterrado com tampa de concreto debaixo do futuro piso do pergolado, a 1,6 m
+# da água e 7 m do poço; tomada no muro lateral logo depois da tela do cineminha (a tela ocupa o muro de 7,30 a 11,10
+# da beira), a mais de 2 m da água (NBR 5410), com eletroduto enterrado junto ao muro até a caixa do filtro.
+# (revisão de 10/11/2026 à noite: antes a caixa e o sumidouro ficavam em 7,00 e 7,70 e a tomada em 8,70, tudo
+# debaixo do pergolado que andou 1,20 m, e a tomada atrás da tela)
+CAIXA_FILTRO = (EDGE + 6.05, 0.30)
 SUMIDOURO = (EDGE + 7.70, 0.38)
-TOMADA = (EDGE + 8.70, 0.03)
+TOMADA = (EDGE + 11.30, 0.03)
 
 # ------------------------------------------------------------------ muro de arrimo revestido de pedra na beira da laje
 # (aprovado pelo Thiago em 19/10/2026: hoje a beira é barranco de terra). Desde 10/11/2026 só do outro lado da escada:

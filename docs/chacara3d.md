@@ -52,12 +52,14 @@ chácara), hospedado no site; não faz parte da loja.
   `claude/diagnostico-e-ideias-terreno.md` e `claude/album-chacara-pronta.md`
   (álbum de imagens, planta numerada, posição de cada coisa e pendências).
 
-- **Quintal de baixo (19/10 e 08/11/2026)**: laguinho orgânico de pedras de 5,75 m² (2.400 L) com cascata, na
-  frente de um muro de arrimo novo revestido de pedra (o muro fica na frente da beira da laje, não embaixo dela),
-  entre a amendoeira e a escada, e guarda-corpo de madeira no topo do muro (o deck saiu). Medidas reais tiradas pelo Thiago com tijolinho; todas em `chacara3d/modelo/obra.py`. Folhas
-  para o pedreiro em `desenhos_obra.py`, fotos em `render_deck.py`; ficha técnica no doc "Ficha técnica do
-  laguinho" do Claude. Área do futuro banheiro duplo externo marcada por `render_banheiro.py`. Detalhes na seção
-  "Quintal de baixo" do `chacara3d/README.md`.
+- **Quintal de baixo (19/10, 08/11 e 10/11/2026)**: em 10/11 o laguinho foi redesenhado pelas fotos de referência do
+  Thiago e publicado no passeio (PR #134): muro de pedras arredondadas empilhadas do muro da amendoeira até a escada,
+  abraçando o pé da árvore sem vala nas raízes; lago de 11,4 m² (uns 6.300 L, 5,38 m de ponta a ponta) ao pé do
+  muro, raso perto da amendoeira; cascata de uma queda só em lâmina de 50 cm; canteiro de plantas em volta;
+  guarda-corpo no piso da laje contornando o tronco; pergolado do cineminha 1,20 m mais para o portão. Medidas em
+  `chacara3d/modelo/obra.py`, números em `quantidades_lago.py`, folhas em `desenhos_obra.py`, fotos em
+  `render_deck.py`; ficha técnica no doc "Ficha técnica do laguinho" do Claude. Detalhes na seção "Quintal de baixo"
+  do `chacara3d/README.md`. O banheiro duplo externo ainda não entra no passeio.
 
-Pendências que dependem do Thiago: de que lado o sol nasce; conferir com trena o tronco da amendoeira, o lado da
-escada e o diâmetro do poço; medir a largura da área do banheiro (da escada ao muro lateral).
+Pendências que dependem do Thiago: de que lado o sol nasce; conferir com trena a distância do muro da amendoeira até o
+centro do tronco e o diâmetro do poço; OK no banheiro no lugar do barracão.

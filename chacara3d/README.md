@@ -240,33 +240,43 @@ Para conferir: `window.__chacara.renderer.info.programs.length` e `window.__chac
 - **Placa de vídeo**: na qualidade alta, pede uma placa de computador razoável;
   no celular a página começa na baixa (sem grama 3D, sem oclusão e sem pelo).
 
-## Quintal de baixo: laguinho, muro de pedra e banheiro (19/10 e 08/11/2026)
+## Quintal de baixo: laguinho, muro de pedras e banheiro (19/10, 08/11 e 10/11/2026)
 
-Todas as medidas da obra ficam em `modelo/obra.py`, a fonte única do `build.py` (maquete e passeio) e das folhas
-para o pedreiro. Eixos: x a partir da beira da laje (`EDGE` = 46), y a partir do muro lateral do lado da amendoeira.
+Todas as medidas da obra ficam em `modelo/obra.py`, a fonte única do `build.py` (maquete e passeio), das folhas
+para o pedreiro e dos números da ficha. Eixos: u a partir da beira da laje (`EDGE` = 46), v a partir do muro lateral do
+lado da amendoeira.
 
-- **Medidas reais** (Thiago, tijolinho de 18 cm): beira da laje até a ponta da escada 1,60; escada com 1,40 de
-  largura; da ponta da escada ao poço 1,08; poço até o muro da amendoeira 4,14; tronco até o poço 2,34. Diâmetro do
-  poço (1,25), posição do tronco e lado exato da escada são estimados pelas fotos.
-- **Projeto aprovado em 08/11/2026** (opção A, sem deck), **revisado no mesmo dia** depois da revisão da ficha:
-  - muro de arrimo novo **na frente da beira da laje** (face de trás do bloco no prumo da beira, bloco 19 + pedra 14:
-    a face da pedra fica a 0,33 m da beira, `FACE` no `obra.py`); sapata 75 × 20 com topo a 0,80 abaixo do chão de
-    baixo; capa de 36 cm; dreno com 1% até o sumidouro;
-  - lago orgânico de **5,75 m²** (2.400 L, 0,90 m na parte funda, prateleira de plantas a 25 cm, até 0,55 m da face
-    no máximo 50 cm de água) entre a amendoeira e a escada: 0,30 m da face da pedra, 0,45 m da escada, 1,53 m da boca
-    do poço, 1,22 m do centro do tronco e fora do piso do pergolado do cineminha;
-  - cascata de três lajes (saem 0,22 / 0,38 / 0,55 da face, topos a +0,84 / +0,50 / +0,16 do chão, de 2,92 a 3,52
-    do muro da amendoeira), a de baixo num pilar de pedras; caixa do filtro, sumidouro e tomada (a 2,3 m da água) na
-    faixa junto ao muro da amendoeira;
-  - guarda-corpo de madeira de 1,10 m no topo do muro novo, com barras roscadas no graute. Saíram a casa na árvore, o
-    balanço e o deck.
-- **Scripts**: `render_deck.py PASTA --vistas quintal,cascata,laje,planta,estrutura` (fotos Cycles só da área; a vista
-  `estrutura` é o lago vazio, numerado por `legenda_lago.py`); `desenhos_obra.py PASTA` (3 folhas A3 + PDF: locação
-  com 17 piquetes, caixa do filtro, sumidouro, tomada e trajeto dos canos; cortes A–A e B–B; corte do muro, cascata e
-  guarda-corpo).
+- **Medidas reais** (Thiago, tijolinho em 19/10 e trena do celular em 10/11): pé da escada a 1,60 da beira; escada de
+  6,11 a 7,51 do muro da amendoeira; do degrau de baixo até a boca do poço 1,11; tronco da amendoeira na beira da laje
+  (trena: 5,04 do muro; pelas fotos parece 3–4 m, **conferir**); da boca do poço até o pé do tronco 2,21; da beira da
+  laje até o portão de baixo 13,88. Diâmetro do poço (1,25) e o centro do tronco são estimados.
+- **Redesenho de 10/11/2026** (pelas duas fotos de referência do Thiago; ele respondeu "Perfeito"):
+  - **muro de pedras empilhadas** do muro da amendoeira até a escada (`MURO_PE`, `muro_pe`, `muro_frente`): pedras
+    arredondadas de 25 a 50 cm, inclinado (o topo fica até 40 cm para trás do pé), 0,96 de altura, pé a 0,50 da beira
+    no trecho reto e uma barriga em volta do pé da amendoeira (pé a 1,12 da beira na frente do tronco), sem vala nem
+    fundação perto da árvore; terra e plantas no topo. O muro reto revestido (bloco + pedra) ficou só do outro lado
+    da escada (`MURO_TRECHOS`), para a obra do banheiro;
+  - **lago de 11,4 m²** (uns 6.300 L), de 0,64 a 6,02 da beira (5,38 de ponta a ponta) e de 0,91 a 4,04 do muro,
+    1,84 da boca do poço e 1,76 do centro do tronco; 0,90 na parte funda, prateleira de plantas a 25 cm, só 30 cm de
+    água a menos de 2,10 do tronco (`ARVORE_RASO`) e no máximo 50 cm junto ao pé do muro;
+  - **cascata de uma queda só** (`CASCATA`): laje de pedra encaixada no muro, lâmina de 50 cm de 2,00 a 2,50 do muro,
+    topo a +0,80; a manta do lago sobe atrás das pedras nesse trecho;
+  - **canteiro** em volta (`CANTEIRO`; `GRAMA` ficou como apelido) e o **pergolado do cineminha 1,20 m mais para o
+    portão** (`PERGOLADO_DX`);
+  - **guarda-corpo** no piso da laje, 10 cm antes da beira, contornando o tronco da amendoeira pelo lado da laje
+    (`GUARDA_LINHA`, a 0,45 da beira na volta do tronco);
+  - caixa do filtro em 6,05 / 0,30 (no canteiro, antes do pergolado), sumidouro em 7,70 / 0,38 (enterrado debaixo do
+    futuro piso do pergolado) e tomada com DR no muro lateral em 11,30, depois da tela do cineminha (5,5 m da água).
+- **Scripts**: `quantidades_lago.py` (todos os números e quantidades da ficha: área, volume, escavação, manta, pedras,
+  guarda-corpo, canos); `desenhos_obra.py PASTA` (3 folhas A3 + PDF: locação com os piquetes P do lago e M do pé do
+  muro; cortes A–A pela cascata e B–B até o poço; detalhes do muro, corte C–C pela amendoeira, cascata e
+  guarda-corpo); `render_deck.py PASTA --vistas referencia,quintal,cascata,laje,planta` (fotos Cycles só da área).
 - **Passeio**: o `extra.quintal` do `terreno.json` leva escada, lago (contorno, nível, grade onde as carpas nadam) e
-  lugares; `mundo.js` tira daí o chão, a colisão do lago, do poço e da amendoeira (`extra.circulos`), `agua.js` o
-  espelho do lago e `bichos.js` as carpas e as ninfeias.
+  lugares; `mundo.js` tira daí o chão, a colisão do lago, do poço e da amendoeira (`extra.circulos`); o muro de pedras
+  e o guarda-corpo entram como colisores. Posições escritas à mão no passeio que acompanham o pergolado: `cinema.js`,
+  `cenarios.js`, `mundo.js` (sofá e lugar "Cineminha"), `principal.js`, `som.js`, `bichos.js` e `projecoes.js`.
+- **Versão anterior (08/11/2026)**: muro de arrimo reto revestido na frente da beira (sapata 75 × 20), lago de 5,75 m²,
+  cascata de 3 lajes e guarda-corpo no topo do muro (PR #126); trocada pelo redesenho.
 - **Banheiro duplo externo** (pedido em 08/11/2026): dois banheiros com a pia lavabo central do lado de fora, do
   outro lado da escada. Ainda não entra no passeio (aguarda o Thiago escolher o modelo).
   - Estudo 1: encostado no muro de pedra, de frente para o estacionamento (descartado).
@@ -286,5 +296,6 @@ para o pedreiro. Eixos: x a partir da beira da laje (`EDGE` = 46), y a partir do
   - Medidas no `banheiro.py`. `render_banheiro.py PASTA --estudo --modelo N` faz as fotos (vistas `quintal`, `laje`,
     `nicho`, `alto`); sem `--estudo`, marca a área em laranja. `legenda_banheiro.py PASTA` põe o selo do modelo e o
     rodapé; `desenho_banheiro.py PASTA` faz a planta baixa A3.
-- **Ficha técnica para o pedreiro**: doc "Ficha técnica do laguinho" no Claude (materiais, quantidades, ordem da obra).
+- **Ficha técnica para o pedreiro**: doc "Ficha técnica do laguinho" no Claude (materiais, quantidades, ordem da obra),
+  refeita em 10/11/2026 para o redesenho.
 
