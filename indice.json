@@ -2,6 +2,21 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "golpes-com-voz-e-video-falsos-como-reconhecer",
+      "titulo": "Golpes com voz e vídeo falsos: como reconhecer e como se proteger",
+      "resumo": "Golpes com voz clonada e vídeo falso usam IA para imitar parentes e autoridades. Veja os sinais, a defesa que funciona e o que fazer se você caiu.",
+      "categoria": "ia",
+      "etiquetas": [
+        "golpes",
+        "segurança",
+        "deepfake",
+        "inteligência artificial"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-11-11T09:00:00.000Z",
+      "minutos": 11
+    },
+    {
       "slug": "iphone-esquentando-quando-e-normal-e-quando-preocupa",
       "titulo": "iPhone esquentando: quando é normal e quando preocupa",
       "resumo": "iPhone esquentando ao carregar, jogar ou atualizar costuma ser normal. Veja o que a Apple considera esperado, o que fazer no aviso de temperatura e quando levar.",
@@ -1491,5 +1506,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-11-09T22:54:34.991Z"
+  "atualizadoEm": "2026-11-10T22:15:43.677Z"
 }

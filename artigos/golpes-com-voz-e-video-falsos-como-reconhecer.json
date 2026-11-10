@@ -1,0 +1,307 @@
+{
+  "slug": "golpes-com-voz-e-video-falsos-como-reconhecer",
+  "titulo": "Golpes com voz e vídeo falsos: como reconhecer e como se proteger",
+  "resumo": "Golpes com voz clonada e vídeo falso usam IA para imitar parentes e autoridades. Veja os sinais, a defesa que funciona e o que fazer se você caiu.",
+  "categoria": "ia",
+  "etiquetas": [
+    "golpes",
+    "segurança",
+    "deepfake",
+    "inteligência artificial"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-11-11T09:00:00.000Z",
+  "seo": {
+    "titulo": "Golpes com voz e vídeo falsos: como reconhecer e se proteger"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "O telefone toca e a voz é a do seu filho, chorando, dizendo que se meteu em encrenca e precisa de um Pix agora. Ou chega um vídeo de alguém conhecido, de uma autoridade ou do seu gerente pedindo uma transferência urgente. Golpes com voz e vídeo falsos usam inteligência artificial para imitar pessoas reais, e ficaram baratos de fazer."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é achar que dá para perceber o falso pelo ouvido ou pelo olho. Às vezes dá, mas a imitação melhora a cada ano, e o golpe é desenhado para que você não tenha tempo de prestar atenção. A defesa que funciona não depende de reconhecer o defeito: depende de **confirmar por outro caminho** antes de pagar qualquer coisa."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "Poucos segundos de áudio publicados em rede social bastam para os golpistas clonarem uma voz.",
+        "Voz idêntica **não prova** quem está falando. Urgência, segredo e pedido de Pix são os sinais que pesam.",
+        "Combine uma **palavra de segurança** com a família e, na dúvida, desligue e ligue de volta para o número que você já tem.",
+        "Se caiu, conteste o Pix no aplicativo do banco o quanto antes, troque senhas, guarde provas e registre o boletim de ocorrência."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como funcionam os golpes com voz clonada e vídeo falso"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O nome técnico é **deepfake**: imagem, áudio ou vídeo criado por inteligência artificial para parecer uma pessoa real. A Cartilha de Segurança para Internet, do CERT.br, explica que golpistas usam esse recurso para imitar conhecidos ou famosos e pedir dinheiro, fazer propaganda enganosa ou espalhar informação falsa. O golpe em si é antigo; a novidade é a imitação convincente."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Para clonar uma voz, o golpista não precisa de muito. Segundo o WeLiveSecurity, portal de segurança da ESET, poucos segundos de áudio costumam bastar, e eles geralmente saem de vídeos e áudios publicados em redes sociais ou de conteúdo profissional aberto ao público. Com detalhes da sua vida colhidos nos mesmos perfis, a história ganha nomes, lugares e datas verdadeiros."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A forma mais conhecida é o parente em apuros: um acidente, uma prisão, um sequestro simulado, com choro e barulho ao fundo para confundir. A Comissão Federal de Comércio dos Estados Unidos, a FTC, alerta que uma voz idêntica à de um familiar deixa a pessoa mais propensa a agir sem pensar, e que essa semelhança não serve como prova de identidade."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Há também os vídeos. O FBI, em alerta publicado em julho de 2026, descreve golpistas usando vídeos falsos de autoridades para dar cara oficial a sites fraudulentos, videochamadas ao vivo com supostos executivos ou policiais e vozes geradas por IA combinadas com número de telefone falsificado no identificador de chamadas. Ou seja: nem o nome na tela do celular garante nada."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Golpe",
+        "Como chega",
+        "O que pedem",
+        "Como conferir"
+      ],
+      "linhas": [
+        [
+          "Parente em apuros",
+          "Ligação ou áudio de WhatsApp com a voz de um familiar",
+          "Pix urgente, muitas vezes em segredo",
+          "Pedir a palavra de segurança ou ligar de volta para o número salvo"
+        ],
+        [
+          "Falsa autoridade",
+          "Vídeo ou videochamada de policial, juiz ou servidor",
+          "Pagamento de taxa, dados pessoais ou clique em link",
+          "Procurar o órgão pelo site oficial, digitando o endereço"
+        ],
+        [
+          "Chefe ou colega falso",
+          "Vídeo, áudio ou videochamada de alguém da empresa",
+          "Transferência ou pagamento fora do processo normal",
+          "Confirmar por outro canal com a própria pessoa"
+        ],
+        [
+          "Famoso recomendando",
+          "Vídeo em rede social ou anúncio patrocinado",
+          "Investimento, compra ou cadastro em site",
+          "Desconfiar de anúncio; procurar o canal oficial da pessoa ou empresa"
+        ],
+        [
+          "Recuperação de dinheiro",
+          "Contato de quem já foi vítima de outro golpe",
+          "Taxa para recuperar o valor perdido",
+          "Ninguém sério cobra para devolver dinheiro de golpe"
+        ]
+      ],
+      "titulo": "As formas mais comuns do golpe e como conferir",
+      "colunaDestaque": 3,
+      "fonte": {
+        "nome": "FBI — alerta I-072026-PSA, Internet Crime Complaint Center",
+        "url": "https://www.ic3.gov/PSA/2026/PSA260720"
+      },
+      "nota": "Tabela montada a partir dos alertas do FBI, da FTC, do CERT.br e do WeLiveSecurity listados nas fontes do artigo."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Os sinais de que a voz ou o vídeo pode ser falso"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Os sinais mais confiáveis não estão na qualidade do áudio, e sim no que a mensagem pede. O CERT.br resume em três perguntas: a pessoa realmente diria isso? Há pedido de dinheiro, vantagem ou dados pessoais? Há urgência, ameaça ou apelo emocional? Se a resposta for sim para as duas últimas, trate como golpe até confirmar o contrário."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": false,
+      "itens": [
+        "**Pressa e emoção forte**: o golpe quer que você aja antes de pensar.",
+        "**Pedido de segredo**: não conte para ninguém, não ligue para a mãe, resolve só comigo.",
+        "**Forma de pagamento difícil de desfazer**: Pix, cartão-presente ou criptomoeda.",
+        "**Número, endereço ou nome quase igual** ao verdadeiro, com uma letra ou um dígito trocado.",
+        "**Falhas no vídeo**, que o FBI cita: mãos deformadas, rosto pouco natural, sombras incoerentes e áudio atrasado em relação à boca.",
+        "**Voz estranha ou fora do jeito da pessoa**, mesmo que o timbre pareça certo."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mas não conte com os defeitos. Em uma ligação curta, com choro e barulho de fundo, quase ninguém percebe falha nenhuma, e as ferramentas melhoram rápido. Por isso a orientação do CERT.br é direta: na dúvida, considere que é falso. Desconfiar e confirmar custa um minuto; pagar um golpe pode custar muito mais e nem sempre tem volta."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Palavra de segurança e as outras defesas que funcionam"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A defesa mais simples é a **palavra de segurança**: uma palavra ou frase combinada com a família para provar quem está do outro lado da linha. O WeLiveSecurity recomenda que ela seja fácil de lembrar, mas incomum, e que não possa ser descoberta nas redes sociais. Nome do cachorro ou do time do coração não serve, porque está nos perfis."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Combine a palavra pessoalmente e nunca a envie por mensagem ou publicação. Explique para pais e avós sem alarde: a tecnologia permite imitar vozes, e a palavra é só um jeito de conferir. Deixe claro quando pedir: em qualquer ligação inesperada com pedido de dinheiro ou de dados, mesmo que a voz pareça a de sempre."
+    },
+    {
+      "tipo": "pros-contras",
+      "pros": [
+        "Não depende de perceber defeito na voz ou no vídeo",
+        "Não custa nada e não precisa de aplicativo",
+        "Funciona com pais e avós que usam pouco a tecnologia",
+        "Serve também para conferir pedidos no WhatsApp"
+      ],
+      "contras": [
+        "Não impede que a voz seja clonada",
+        "Perde o efeito se for publicada ou enviada por mensagem",
+        "Na hora do susto, alguém pode esquecer a palavra",
+        "Precisa de um plano B combinado com antecedência"
+      ],
+      "titulo": "Palavra de segurança: o que ela resolve e o que não resolve"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O plano B é o mesmo que a FTC e o WeLiveSecurity recomendam: desligue e ligue de volta para o número que já está na sua agenda, ou confirme no grupo da família. Outra saída é uma pergunta que só a família saberia responder, desde que a resposta não esteja na internet. Parente de verdade não se ofende com a conferência."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Vale também diminuir a matéria-prima do golpe. Deixe perfis pessoais fechados, aceite como seguidores só quem você conhece e pense duas vezes antes de publicar vídeos longos falando, principalmente com nomes de parentes e rotina de viagem. Isso não elimina o risco, porque a voz pode vir de outro lugar, mas dificulta a montagem de uma história convincente."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 3,
+      "texto": "No trabalho: transferência pedida por vídeo ou áudio"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Em empresa, o golpe costuma chegar como o dono ou o gerente pedindo um pagamento fora da rotina, às vezes numa videochamada que parece normal. A regra é não aprovar pagamento só com base em áudio, vídeo ou mensagem. Combine que transferências fora do comum sempre passam por uma segunda confirmação, feita por um canal que a própria empresa já usa."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Na prática, isso significa ligar para o celular já cadastrado da pessoa, ou falar com ela pessoalmente, antes de pagar. Vale também para troca de dados bancários de fornecedor recebida por mensagem. Um procedimento escrito, que todos conhecem, tira do funcionário o peso de desconfiar do chefe, porque conferir passa a ser a regra, e não uma ofensa."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Caiu no golpe: o que fazer nas primeiras horas"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se você já pagou ou passou dados, a pressa agora joga a seu favor. O CERT.br publicou em 2026 um fascículo só sobre o que fazer depois de um golpe, e a ordem abaixo segue essa orientação. O ponto mais urgente é o Pix: quanto antes o banco for avisado, maior a chance de o dinheiro ainda estar na conta de destino."
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "**Corte o contato**: pare de responder, não mande mais dinheiro nem dados e bloqueie o número ou o perfil.",
+        "**Conteste o Pix** no aplicativo do banco, na opção de contestação da transação, ou pelos canais oficiais.",
+        "**Troque as senhas** das contas afetadas e encerre as sessões abertas em outros aparelhos.",
+        "**Guarde as provas**: números, prints, áudios, comprovantes, protocolos, datas e horários.",
+        "**Registre o boletim de ocorrência**, que na maioria dos casos pode ser feito pela internet, com as provas anexadas.",
+        "**Avise família e contatos**, para que ninguém mais caia na mesma história."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A contestação aciona o Mecanismo Especial de Devolução, o MED, do Banco Central. O Procon-SP explica que, na versão atualizada da regra, o banco consegue rastrear o dinheiro além da primeira conta que o recebeu e bloquear novas transferências. Mas o MED não garante a devolução: a fraude precisa ser comprovada e precisa haver saldo na conta de destino."
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "Quem acabou de perder dinheiro vira alvo de falsos serviços de recuperação, às vezes com vídeo falso de autoridade. O FBI e o WeLiveSecurity alertam: quem cobra uma taxa para devolver o dinheiro do golpe também é golpista.",
+      "titulo": "Cuidado com o segundo golpe"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Depois dos primeiros passos, acompanhe extratos, faturas e o histórico de acesso das suas contas por algumas semanas. O CERT.br lembra que o Registrato, sistema do Banco Central, mostra os relacionamentos financeiros ligados ao seu CPF, o que ajuda a perceber conta ou empréstimo aberto em seu nome. Os efeitos de uma fraude podem aparecer bem depois."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Instalou programa a pedido do golpista: o que fazer com o computador"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Muitos golpes terminam com um pedido para instalar um aplicativo de suporte ou acesso remoto, para que o falso atendente ajude a resolver o problema. Se isso aconteceu, considere o aparelho comprometido. O CERT.br orienta restaurar o celular para as configurações de fábrica e, no computador, fazer uma verificação completa e remover os programas que você não autorizou."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se a limpeza não der certo, a recomendação é reinstalar o sistema. O cuidado é não perder fotos e documentos no caminho e não restaurar junto um arquivo contaminado. Nessa hora, a [assistência técnica](/manutencao) da Balão da Informática, no Cambuí, em Campinas, faz o diagnóstico, a limpeza e a reinstalação, e separa os seus arquivos antes."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se os arquivos sumiram ou o disco ficou inacessível depois do episódio, não insista em programas baixados às pressas: cada tentativa pode piorar a situação. A loja também faz [recuperação de dados](/recuperacaodados) no mesmo endereço. E, para fechar a porta das contas, vale rever as dicas de [senha boa](/blog/senha-boa-o-que-realmente-protege) e de [proteção de dados ao usar assistentes de IA](/blog/como-proteger-seus-dados-ao-usar-assistentes-de-ia)."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como deixar a família e a equipe preparadas"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A melhor proteção é conversar antes do susto. Reúna a família, explique que vozes e vídeos podem ser imitados, combine a palavra de segurança e o plano B, e deixe claro que ninguém vai ficar bravo por uma ligação de conferência. Na empresa, escreva a regra da segunda confirmação e mostre para todos. Se precisar de ajuda com computadores, a equipe da loja atende pelo WhatsApp."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "geral"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Em uma linha: diante de voz ou vídeo pedindo dinheiro com pressa, desligue, confirme por um caminho que você já conhece e só então decida."
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "Dá para clonar a voz de alguém só com um áudio de WhatsApp?",
+      "resposta": "Segundo especialistas em segurança, poucos segundos de áudio costumam bastar para uma imitação convincente. Por isso a voz, sozinha, não prova quem está falando. Confirme pela palavra de segurança ou ligando de volta."
+    },
+    {
+      "pergunta": "O número do meu parente apareceu na tela. Então é ele?",
+      "resposta": "Não necessariamente. O FBI alerta que golpistas combinam voz gerada por IA com número falsificado no identificador de chamadas. Desligue e ligue você para o número salvo na agenda."
+    },
+    {
+      "pergunta": "Fiz um Pix para o golpista. Ainda dá para recuperar?",
+      "resposta": "Às vezes. Conteste a transação no aplicativo do banco o quanto antes, o que aciona o MED do Banco Central. A devolução depende de a fraude ser comprovada e de haver saldo na conta de destino."
+    },
+    {
+      "pergunta": "Existe programa que detecta vídeo falso?",
+      "resposta": "Existem verificadores, e o CERT.br sugere usá-los quando disponíveis, mas nenhum é infalível. Para pedidos de dinheiro, a conferência por outro canal continua sendo a proteção mais segura."
+    },
+    {
+      "pergunta": "Deixei o golpista acessar meu computador. Preciso formatar?",
+      "resposta": "Se a verificação completa não remover tudo, sim: a orientação do CERT.br é reinstalar o sistema. Antes, separe seus arquivos com cuidado para não perder nada nem levar junto um arquivo contaminado."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "FBI Internet Crime Complaint Center — alerta I-072026-PSA sobre deepfakes e falsos serviços de recuperação",
+      "url": "https://www.ic3.gov/PSA/2026/PSA260720",
+      "data": "20 de julho de 2026"
+    },
+    {
+      "nome": "FTC — Family emergency scams (golpes de emergência familiar)",
+      "url": "https://consumer.ftc.gov/scams/family-emergency-scams",
+      "data": "consultado em novembro de 2026"
+    },
+    {
+      "nome": "WeLiveSecurity (ESET) — Palavra de segurança: como se proteger de golpes com IA",
+      "url": "https://www.welivesecurity.com/pt/seguranca-digital/palavra-de-seguranca-como-se-proteger-de-golpes-com-ia/",
+      "data": "9 de setembro de 2026"
+    },
+    {
+      "nome": "CERT.br — Cartilha de Segurança para Internet, fascículo Inteligência Artificial",
+      "url": "https://cartilha.cert.br/fasciculos/ia/fasciculo-ia.pdf",
+      "data": "setembro de 2026"
+    },
+    {
+      "nome": "CERT.br — Cartilha de Segurança para Internet, fascículo Golpes: o que fazer",
+      "url": "https://cartilha.cert.br/fasciculos/golpes-o-que-fazer/fasciculo-golpes-o-que-fazer.pdf",
+      "data": "maio de 2026"
+    },
+    {
+      "nome": "Procon-SP — orientações sobre as novas regras do Pix (MED)",
+      "url": "https://www.procon.sp.gov.br/procon-sp-orienta-sobre-as-novas-regras-do-pix/",
+      "data": "9 de fevereiro de 2026"
+    }
+  ]
+}
