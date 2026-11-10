@@ -2,6 +2,22 @@
   "versao": 1,
   "artigos": [
     {
+      "slug": "luz-piscando-no-roteador-o-que-significa",
+      "titulo": "Luz piscando no roteador: o que cada luz significa e quando preocupar",
+      "resumo": "Luz piscando no roteador quase sempre é sinal de tráfego normal. Veja o que indicam as luzes de energia, internet, fibra e Wi-Fi, e qual cor pede ação.",
+      "categoria": "guias",
+      "etiquetas": [
+        "wi-fi",
+        "rede",
+        "internet",
+        "diagnóstico"
+      ],
+      "capa": null,
+      "publicadoEm": "2026-11-11T21:00:00.000Z",
+      "minutos": 5,
+      "formato": "dica"
+    },
+    {
       "slug": "atualizacao-microsoft-novembro-2026-falha-outlook",
       "titulo": "Atualização de novembro da Microsoft corrige falha do Outlook usada em ataques",
       "resumo": "Em 10 de novembro de 2026 a Microsoft liberou as correções do mês, entre elas uma falha do Outlook já explorada. Veja quem precisa atualizar e como.",
@@ -1521,5 +1537,5 @@
       "minutos": 10
     }
   ],
-  "atualizadoEm": "2026-11-10T22:40:04.391Z"
+  "atualizadoEm": "2026-11-10T22:48:19.298Z"
 }

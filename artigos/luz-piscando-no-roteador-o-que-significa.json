@@ -1,0 +1,186 @@
+{
+  "slug": "luz-piscando-no-roteador-o-que-significa",
+  "titulo": "Luz piscando no roteador: o que cada luz significa e quando preocupar",
+  "resumo": "Luz piscando no roteador quase sempre é sinal de tráfego normal. Veja o que indicam as luzes de energia, internet, fibra e Wi-Fi, e qual cor pede ação.",
+  "categoria": "guias",
+  "etiquetas": [
+    "wi-fi",
+    "rede",
+    "internet",
+    "diagnóstico"
+  ],
+  "capa": null,
+  "publicadoEm": "2026-11-11T21:00:00.000Z",
+  "formato": "dica",
+  "roteiro": {
+    "fala": "Luz piscando no roteador assusta, mas quase sempre é bom sinal. Wi-Fi e porta de rede piscando querem dizer que tem dado passando. O que preocupa é outra coisa: a luz de internet laranja ou apagada, ou a luz vermelha escrita LOS no aparelho da fibra. Aí o sinal da operadora não está chegando. Confira se o cabo da fibra não está dobrado, desligue o aparelho da tomada, espere um pouco e ligue de novo. Continuou vermelho? Chame a operadora.",
+    "titulo": "As luzes do roteador",
+    "destaques": [
+      "Piscando costuma ser normal",
+      "Internet laranja: sem sinal",
+      "LOS vermelha: chame a operadora",
+      "Não dobre o cabo da fibra"
+    ],
+    "legenda": "Luz piscando no roteador quase sempre é normal. Saiba qual cor indica problema e o que conferir antes de ligar para a operadora. A dica completa está no blog.",
+    "hashtags": [
+      "roteador",
+      "wifi",
+      "internet",
+      "fibra",
+      "dicas",
+      "campinas"
+    ]
+  },
+  "seo": {
+    "titulo": "Luz piscando no roteador: o que significa cada luz"
+  },
+  "blocos": [
+    {
+      "tipo": "paragrafo",
+      "texto": "Luz piscando no roteador, na maioria das vezes, não é defeito: as luzes de Wi-Fi e das portas de rede piscam quando há dados passando, e isso é o funcionamento normal. O que pede atenção é a luz de internet apagada ou em outra cor, como laranja, e, no aparelho de fibra da operadora, uma luz vermelha marcada LOS."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O engano comum é desligar e religar o roteador toda vez que vê uma luz piscando, ou culpar o aparelho quando o problema está no sinal que vem da rua. Cada fabricante tem o seu jeito de mostrar as luzes, e o manual do modelo é a palavra final. Mas o padrão se repete bastante, e saber ler as luzes poupa uma ligação para a operadora."
+    },
+    {
+      "tipo": "resumo",
+      "itens": [
+        "Wi-Fi e portas de rede **piscando** costumam indicar tráfego, não problema.",
+        "Luz de **internet laranja ou apagada**: o roteador está ligado, mas não recebe internet.",
+        "**LOS vermelha** no aparelho da fibra: o sinal óptico não está chegando; confira o cabo e chame a operadora.",
+        "Luz de energia piscando pode ser o roteador iniciando ou atualizando: **não tire da tomada** nesse momento."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que cada luz costuma indicar"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Em casa com fibra, muitas vezes há dois aparelhos: o da operadora, que recebe o cabo de fibra (chamado ONT), e o roteador, que espalha o Wi-Fi. Às vezes os dois vêm num aparelho só. A tabela junta o comportamento descrito no manual de um roteador da TP-Link, em guias de luzes de operadoras de fibra e no guia da Xataka Brasil."
+    },
+    {
+      "tipo": "tabela",
+      "colunas": [
+        "Luz",
+        "Normal",
+        "Pede atenção"
+      ],
+      "linhas": [
+        [
+          "Energia (Power)",
+          "Acesa fixa",
+          "Piscando por muito tempo: pode estar iniciando ou atualizando; espere antes de mexer"
+        ],
+        [
+          "Internet",
+          "Acesa, normalmente verde",
+          "Laranja: cabo ligado, mas sem internet. Apagada: cabo de internet desconectado"
+        ],
+        [
+          "PON ou Fibra",
+          "Acesa fixa",
+          "Piscando sem parar ou apagada: o aparelho não se conectou à rede da operadora"
+        ],
+        [
+          "LOS",
+          "Apagada",
+          "Vermelha, fixa ou piscando: o sinal da fibra não está chegando"
+        ],
+        [
+          "Wi-Fi (2,4 GHz e 5 GHz)",
+          "Acesa ou piscando com aparelhos conectados",
+          "Apagada: a rede sem fio foi desativada"
+        ],
+        [
+          "LAN (portas de rede)",
+          "Acesa ou piscando com um aparelho ligado no cabo",
+          "Apagada com o cabo ligado: cabo solto ou com defeito"
+        ],
+        [
+          "WPS",
+          "Apagada",
+          "Piscando: o roteador está aceitando um aparelho novo sem senha"
+        ]
+      ],
+      "titulo": "As luzes mais comuns e o que fazer",
+      "colunaDestaque": 2,
+      "fonte": {
+        "nome": "Manual do Archer C7 — TP-Link; guia de luzes da Tata Play Fiber",
+        "url": "https://www.tp-link.com/en/user-guides/Archer-C7/chapter-1-get-to-know-about-your-router"
+      },
+      "nota": "Cores e nomes mudam conforme o fabricante e a operadora. Na dúvida, vale o manual do seu modelo."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Um detalhe útil do guia da Xataka: se a luz de Wi-Fi está piscando, há aparelhos usando a rede. Antes de reiniciar o roteador, vale conferir se ninguém em casa está numa chamada de vídeo ou baixando algo importante."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Luz vermelha ou laranja: o que conferir antes de ligar para a operadora"
+    },
+    {
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "Veja **qual aparelho** está com a luz diferente: o da fibra ou o roteador do Wi-Fi.",
+        "No aparelho da fibra, confira se o cabo fino está bem encaixado nas duas pontas e se **não está dobrado, esmagado** por porta ou móvel nem preso apertado em grampo.",
+        "Confira o cabo de rede que liga o aparelho da fibra ao roteador: encaixe firme nas duas pontas.",
+        "Tire o aparelho da tomada, espere cerca de meio minuto, ligue de novo e dê alguns minutos para as luzes se acertarem.",
+        "Se a LOS continuar vermelha, pergunte a um vizinho da mesma operadora se a internet dele caiu e ligue para o suporte."
+      ]
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "texto": "Não puxe, não estique e não tente emendar o cabo de fibra, e não toque na ponta do conector. Cabo cortado ou muito dobrado é serviço da operadora, que tem técnico e ferramenta para isso.",
+      "titulo": "Onde parar"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A dica não resolve quando todas as luzes estão normais e só um aparelho não conecta. Aí o problema costuma estar no próprio computador ou no lugar onde ele fica, e o artigo sobre [Wi-Fi fraco em um cômodo](/blog/wi-fi-fraco-em-um-comodo-o-que-testar) mostra o que testar."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "manutencao"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se o notebook ou o PC é o único que fica sem rede, a [assistência técnica](/manutencao) da Balão da Informática, no Cambuí, em Campinas, faz o diagnóstico da placa de rede e do sistema. E se a máquina já está velha demais para o dia a dia, vale olhar os [notebooks](/notebooks) e os [seminovos](/seminovos). Em uma linha: piscar é normal; vermelho ou laranja fixo pede conferir o cabo e chamar a operadora."
+    }
+  ],
+  "perguntas": [
+    {
+      "pergunta": "A luz do Wi-Fi fica piscando o tempo todo. É defeito?",
+      "resposta": "Normalmente não. A luz de Wi-Fi pisca quando há aparelhos usando a rede, como celulares e TVs que trocam dados mesmo sem você perceber."
+    },
+    {
+      "pergunta": "Posso tirar o roteador da tomada com a luz de energia piscando?",
+      "resposta": "Melhor esperar. Em vários modelos, a luz de energia piscando indica que o roteador está iniciando ou atualizando o sistema, e o manual da TP-Link pede para não desligar nesse momento."
+    },
+    {
+      "pergunta": "A luz da fibra está verde, mas não tenho internet. E agora?",
+      "resposta": "Se a luz de fibra ou PON está normal, o sinal chega à sua casa. O problema tende a estar no roteador, no cabo entre os aparelhos ou na sua conta com a operadora."
+    }
+  ],
+  "fontes": [
+    {
+      "nome": "Archer C7 — Chapter 1: Get to Know About Your Router — TP-Link",
+      "url": "https://www.tp-link.com/en/user-guides/Archer-C7/chapter-1-get-to-know-about-your-router",
+      "data": "novembro de 2026"
+    },
+    {
+      "nome": "LOS Red Light on Router/ONT: What It Means and How to Fix It — Tata Play Fiber",
+      "url": "https://www.tataplayfiber.com/blog/los-red-light-routeront-what-it-means-and-how-fix-it",
+      "data": "novembro de 2026"
+    },
+    {
+      "nome": "Guia das luzes do seu roteador — Xataka Brasil",
+      "url": "https://www.xataka.com.br/informatica/guia-das-luzes-do-seu-roteador-que-cada-luz-indicadora-significa-e-quando-esta-acesa-ou-apagada",
+      "data": "maio de 2026"
+    }
+  ]
+}
