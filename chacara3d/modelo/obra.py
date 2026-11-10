@@ -1,4 +1,4 @@
-"""Medidas da obra do quintal de baixo: deck, laguinho, cascata, poço, escada e amendoeira.
+"""Medidas da obra do quintal de baixo: laguinho, muro de pedras, cascata, poço, escada e amendoeira.
 
 Fonte única para o build.py (maquete e passeio) e para o desenhos_obra.py (folhas com medidas para o pedreiro).
 Só numpy: roda no Python do Blender e no Python comum.
@@ -21,17 +21,22 @@ BLOCO, REVEST = 0.19, 0.14
 FACE = EDGE + BLOCO + REVEST      # face da pedra do muro novo
 SAPATA = {'u0': -0.15, 'u1': 0.60, 'topo': 0.80, 'fundo': 1.00}   # da beira da laje (m) e abaixo do chão de baixo (m)
 CAPA = 0.36                       # capa de pedra lisa no topo: da beira da laje até 3 cm além da face da pedra
-GUARDA_U = BLOCO / 2 + 0.005      # postes do guarda-corpo no meio do bloco, presos com barra roscada grauteada
+GUARDA_U = -0.10                  # postes do guarda-corpo no piso da laje, 10 cm antes da beira (10/11/2026: no trecho do
+                                  # lago o muro é de pedras empilhadas e não segura poste)
 
 # ------------------------------------------------------------------ o que já existe no quintal de baixo
 # medido pelo Thiago em 19/10/2026 com tijolinhos de 18 cm enfileirados no chão:
-#   beira da laje até a ponta da escada 1,60; da ponta da escada até o poço 6 tijolinhos (1,08);
-#   do poço até o muro do lado da amendoeira 23 tijolinhos (4,14); do tronco da amendoeira até o poço 13 (2,34);
-#   largura da escada 1,40. Diâmetro do poço, lado da escada e posição do tronco: estimados pelas fotos (conferir).
+#   beira da laje até a ponta da escada 1,60; largura da escada 1,40; do tronco da amendoeira até o poço 13 (2,34).
+# medido pelo Thiago em 10/11/2026 com a trena do celular:
+#   da escada até o muro do lado da amendoeira 6,11 e até o muro do outro lado 2,71 (6,11 + 1,40 + 2,71 = 10,22);
+#   do degrau de baixo até a boca do poço 1,11 (na frente da escada); do muro da amendoeira até o tronco 5,04; da
+#   boca do poço até o pé do tronco 2,21; da beira da laje até o portão de baixo 13,88; de muro a muro no portão 10,24.
+#   (Os 23 tijolinhos "do poço até o muro da amendoeira" de outubro só fecham se foram até o muro do outro lado.)
+# Diâmetro do poço e a posição exata do centro dele e do tronco: estimados (conferir).
 POCO_R = 0.63                     # raio por fora da boca do poço (diâmetro estimado 1,25)
-POCO = (EDGE + 1.60 + 1.08 + POCO_R, 4.14 + POCO_R)                 # centro do poço
-ARVORE = (EDGE + 0.80, 1.60)      # centro do tronco da amendoeira (estimado)
-ESCADA_Y0, ESCADA_Y1 = POCO[1] - 0.70, POCO[1] + 0.70              # escada de 1,40 de largura, de frente para o poço (estimado)
+POCO = (EDGE + 1.60 + 1.11 + POCO_R, 6.20)                         # centro do poço (na frente da escada)
+ARVORE = (EDGE + 0.20, 5.20)      # centro do tronco da amendoeira: na beira da laje, ~1 m ao lado da escada
+ESCADA_Y0, ESCADA_Y1 = 6.11, 7.51                                  # escada de 1,40 de largura
 ESCADA_X0 = EDGE + 0.08          # pé do primeiro degrau (a escada já existe)
 ESCADA_N, ESCADA_PISO = 5, round((1.60 - (ESCADA_X0 - EDGE)) / 5, 3)    # cinco degraus até 1,60 da beira da laje
 
@@ -39,17 +44,42 @@ ESCADA_N, ESCADA_PISO = 5, round((1.60 - (ESCADA_X0 - EDGE)) / 5, 3)    # cinco 
 # (19/10/2026: o Thiago tirou o deck; fica só o guarda-corpo protegendo a laje de cima do lago)
 GUARDA_H = 1.10                                  # altura do guarda-corpo (vão entre balaústres até 9 cm)
 
-# ------------------------------------------------------------------ laguinho (opção A, sem deck)
-# no pé do muro de arrimo, entre a amendoeira e a escada, abrindo para o quintal do lado da amendoeira; com 1,50 de
-# folga da boca do poço e a pelo menos 1,20 do centro do tronco
+# ------------------------------------------------------------------ muro de pedras empilhadas (10/11/2026)
+# Pelas fotos de referência do Thiago: do muro da amendoeira até a escada, em vez do muro reto revestido, um muro de
+# pedras arredondadas empilhadas, em curva, que abraça o pé da amendoeira. Inclinado: o pé do muro (no chão de baixo)
+# segue MURO_PE; o topo fica a TOPO_RECUO do pé (no máximo), sem passar da beira da laje. Em volta do tronco não se
+# abre vala: as pedras vão assentadas no barranco, sem fundação.
+MURO_PE = [(0.52, 0.00), (0.50, 1.00), (0.50, 2.00), (0.52, 3.00), (0.56, 3.80), (0.80, 4.35), (1.05, 4.85), (1.12, 5.25),
+           (1.00, 5.65), (0.78, 5.95), (0.62, ESCADA_Y0)]          # (u da beira da laje, v do muro da amendoeira)
+MURO_TOPO = -0.04                 # topo das pedras (4 cm abaixo do piso da laje)
+TOPO_RECUO = 0.40                 # o topo fica até 40 cm para trás do pé (muro inclinado)
+_MP = np.array(MURO_PE, float)
+
+
+def muro_pe(v):
+    """u do pé do muro de pedras (da beira da laje) na posição v."""
+    return np.interp(v, _MP[:, 1], _MP[:, 0])
+
+
+def muro_frente(v, z):
+    """u da frente das pedras na altura z (de LOW até MURO_TOPO)."""
+    pe = muro_pe(v); topo = np.maximum(0.15, pe - TOPO_RECUO)
+    t = np.clip((np.asarray(z, float) - LOW) / (MURO_TOPO - LOW), 0, 1)
+    return pe + (topo - pe) * t
+
+
+# ------------------------------------------------------------------ laguinho (redesenhado em 10/11/2026)
+# Pelas fotos de referência: no pé do muro de pedras, entre o muro da amendoeira e a árvore, mais comprido (5,24 m),
+# ao longo do muro lateral na direção do portão; 1,50 de folga da boca do poço e ~1,8 m do centro do tronco.
 ZAGUA = LOW - 0.06                # nível d'água (6 cm abaixo do chão do quintal de baixo)
 PROF = 0.90                       # lâmina d'água no meio
-# revisão de 08/11/2026: a água fica a 0,30 m da face da pedra do muro (lugar das pedras da borda e da manta) e a
-# 0,45 m da escada; para perder pouca área, o lago cresce para o lado do poço (sempre a 1,50 m da boca)
-_LAGO_UV = [(0.67, 2.95), (0.64, 3.25), (0.71, 3.52), (0.95, 3.62), (1.30, 3.50), (1.55, 3.22), (1.85, 2.92), (2.30, 2.74),
-            (2.90, 2.60), (3.55, 2.62), (4.15, 2.72), (4.65, 2.55), (4.92, 2.10), (4.98, 1.45), (4.75, 1.00), (4.20, 0.80),
-            (3.60, 0.66), (3.00, 0.70), (2.60, 1.05), (2.40, 1.55), (2.20, 2.05), (1.85, 2.42), (1.45, 2.68), (0.95, 2.82)]
+_LAGO_UV = [(0.82, 0.95), (0.76, 1.40), (0.66, 1.85), (0.64, 2.30), (0.68, 2.75), (0.86, 3.15), (1.10, 3.62), (1.48, 3.94),
+            (1.98, 4.04), (2.52, 3.86), (3.08, 3.52), (3.70, 3.22), (4.32, 2.98), (4.95, 2.74), (5.48, 2.52), (5.88, 2.22),
+            (6.02, 1.84), (5.90, 1.46), (5.55, 1.22), (5.02, 1.16), (4.45, 1.24), (3.95, 1.40), (3.45, 1.24), (2.90, 1.04),
+            (2.25, 0.95), (1.55, 0.94), (1.08, 0.94)]
 LAGO_CTRL = [(EDGE + u, v) for u, v in _LAGO_UV]
+# perto da amendoeira só a prateleira rasa (não cavar fundo na zona das raízes)
+ARVORE_RASO, ARVORE_RAMPA, ARVORE_PROF = 2.10, 2.70, 0.30
 # fundo: beira de 12 cm para as pedras (10 a 25 cm de água), prateleira de plantas a 25 cm até 35 cm da beira,
 # parede inclinada até 55 cm da beira e o fundo com 90 cm. Perto do muro: até 0,55 m da face da pedra no máximo
 # 50 cm de água (a escavação fica 18 cm acima do topo da sapata) e o fundo cheio só a 0,95 m da face, mais de 0,6 m
@@ -98,43 +128,51 @@ def prof_lago(X, Y):
     dm = np.asarray(X, float) - FACE                  # perto do muro de arrimo: raso, para não cavar junto ao pé do muro
     lim = np.where(dm < ARRIMO_RASO, ARRIMO_PROF,
                    np.where(dm < ARRIMO_RAMPA, ARRIMO_PROF + (dm - ARRIMO_RASO) / (ARRIMO_RAMPA - ARRIMO_RASO) * (PROF - ARRIMO_PROF), PROF))
-    return np.minimum(p, lim)
+    dt = np.hypot(np.asarray(X, float) - ARVORE[0], np.asarray(Y, float) - ARVORE[1])     # perto da amendoeira: raso
+    lim_t = np.where(dt < ARVORE_RASO, ARVORE_PROF,
+                     np.where(dt < ARVORE_RAMPA, ARVORE_PROF + (dt - ARVORE_RASO) / (ARVORE_RAMPA - ARVORE_RASO) * (PROF - ARVORE_PROF), PROF))
+    return np.minimum(np.minimum(p, lim), lim_t)
 
 
-# ------------------------------------------------------------------ grama em volta do lago
-# o contorno de fora sai de um raio medido do centro do lago (largura de 0,65 a 1,45 m, variando em volta), limitado
-# pelo pé do muro de arrimo, pelos muros laterais e pela boca do poço
+# ------------------------------------------------------------------ canteiro em volta do lago (10/11/2026)
+# como nas fotos de referência: uma faixa de plantas em volta da água (0,45 a 0,95 m, variando), limitada pelo pé do
+# muro de pedras, pela amendoeira, pelos muros laterais, pela escada, pela boca do poço e pelo piso do pergolado
+PERGOLADO_DX = 1.20               # o pergolado do cineminha andou 1,20 m para o portão para caber o lago mais comprido
+PERGOLADO_X0 = 51.35 + PERGOLADO_DX
 C_LAGO = LAGO.mean(axis=0)
 _ang = np.linspace(0, 2 * math.pi, 144, endpoint=False)
-_larg = 1.00 + 0.35 * np.sin(3 * _ang + 0.7) + 0.12 * np.sin(7 * _ang)
-_rr = np.arange(0.2, 4.2, 0.02)
+_larg = 0.70 + 0.22 * np.sin(3 * _ang + 0.7) + 0.08 * np.sin(7 * _ang)
+_rr = np.arange(0.2, 4.6, 0.02)
 _PX = C_LAGO[0] + np.cos(_ang)[:, None] * _rr[None, :]; _PY = C_LAGO[1] + np.sin(_ang)[:, None] * _rr[None, :]
 _cobre = dentro_lago(_PX, _PY) | (dist_borda(_PX, _PY) < _larg[:, None])
-_livre = ((_PX > FACE + 0.05) & (_PY > 0.25) & (_PY < LARGURA - 0.25) & (np.hypot(_PX - POCO[0], _PY - POCO[1]) > POCO_R + 0.07)
-          & ~((_PX > 51.3) & (_PY < 4.5)))          # piso do pergolado do cineminha
+_livre = ((_PX > EDGE + muro_pe(_PY) + 0.05) & (_PY > 0.25) & (_PY < LARGURA - 0.25)
+          & (np.hypot(_PX - POCO[0], _PY - POCO[1]) > POCO_R + 0.25) & (np.hypot(_PX - ARVORE[0], _PY - ARVORE[1]) > 0.55)
+          & ~((_PX < ESCADA_X0 + 1.75) & (_PY > ESCADA_Y0 - 0.1))
+          & ~((_PX > PERGOLADO_X0 - 0.05) & (_PY < 4.5)))          # piso do pergolado do cineminha
 _r_max = np.array([_rr[np.argmin(l)] if not l.all() else _rr[-1] for l in _livre])
 _r_out = np.minimum(np.array([_rr[np.nonzero(l)[0].max()] for l in _cobre]), _r_max)
 _r_out = np.minimum(np.convolve(np.concatenate([_r_out[-3:], _r_out, _r_out[:3]]), np.ones(7) / 7, mode='valid'), _r_max)
-GRAMA = np.stack([C_LAGO[0] + np.cos(_ang) * _r_out, C_LAGO[1] + np.sin(_ang) * _r_out], axis=1)
+CANTEIRO = np.stack([C_LAGO[0] + np.cos(_ang) * _r_out, C_LAGO[1] + np.sin(_ang) * _r_out], axis=1)
+GRAMA = CANTEIRO                  # nome antigo (desenhos_obra.py ainda usa; as folhas serão refeitas com o OK do Thiago)
 
-# ------------------------------------------------------------------ cascata de lajes de pedra
-# descendo do alto do muro para dentro do lago, em três quedas. Revisão de 08/11/2026: lajes 10 cm mais baixas (a de
-# cima fica abaixo da capa, com espaço para a água sair) e mais curtas; a de baixo também se apoia num pilar de pedras
-# assentado no vão entre o muro e a água, e a ponta dela fica 25 cm para dentro da água.
-CASCATA = {'origem': (FACE, 3.22),               # face da pedra, no meio da cascata
-           'ang': 0.0, 'largura': 0.60,           # a água corre para o quintal (+x)
-           'lajes': [(0.22, -0.16), (0.38, -0.50), (0.55, -0.84)],   # (avanço a partir da face da pedra, topo da laje)
-           'monte': False, 'pilar': True}
+# ------------------------------------------------------------------ cascata (10/11/2026: uma queda só, em lâmina)
+# como nas fotos de referência: a água sai de uma laje de pedra encaixada no muro de pedras, à esquerda da amendoeira,
+# e cai numa lâmina de 50 cm direto no lago (cano de 40 mm escondido atrás das pedras)
+CASCATA = {'origem': (EDGE + 0.24, 2.25),        # frente das pedras na altura da laje, no meio da cascata
+           'ang': 0.0, 'largura': 0.50,           # a água corre para o quintal (+x)
+           'lajes': [(0.42, -0.20)],              # (avanço a partir da frente das pedras, topo da laje)
+           'monte': False, 'pilar': False, 'flancos': False}
 
-# ------------------------------------------------------------------ hidráulica e elétrica (revisão de 08/11/2026)
-# caixa do filtro (50 x 40 cm) e sumidouro (60 x 60 cm) na faixa entre o lago e o muro lateral, do lado oposto ao
-# poço e antes do piso do pergolado; tomada no muro lateral, embaixo do pergolado, a mais de 2 m da água (NBR 5410)
-CAIXA_FILTRO = (EDGE + 4.45, 0.25)
-SUMIDOURO = (EDGE + 5.10, 0.33)
-TOMADA = (EDGE + 6.90, 0.03)
+# ------------------------------------------------------------------ hidráulica e elétrica (revisão de 10/11/2026)
+# caixa do filtro (50 x 40 cm) e sumidouro (60 x 60 cm) junto ao muro lateral, depois da ponta do lago e antes do piso
+# do pergolado; tomada no muro lateral, embaixo do pergolado, a mais de 2 m da água (NBR 5410)
+CAIXA_FILTRO = (EDGE + 7.00, 0.30)
+SUMIDOURO = (EDGE + 7.70, 0.38)
+TOMADA = (EDGE + 8.70, 0.03)
 
 # ------------------------------------------------------------------ muro de arrimo revestido de pedra na beira da laje
-# (aprovado pelo Thiago em 19/10/2026: hoje a beira é barranco de terra). Trechos ao longo do muro, sem a escada.
-MURO_TRECHOS = [(0.0, ESCADA_Y0), (ESCADA_Y1, LARGURA)]
+# (aprovado pelo Thiago em 19/10/2026: hoje a beira é barranco de terra). Desde 10/11/2026 só do outro lado da escada:
+# do muro da amendoeira até a escada fica o muro de pedras empilhadas (MURO_PE).
+MURO_TRECHOS = [(ESCADA_Y1, LARGURA)]
 MURO_CINTA = 0.06                 # capa de pedra lisa no topo do muro (fica no nível do piso da laje)
 
