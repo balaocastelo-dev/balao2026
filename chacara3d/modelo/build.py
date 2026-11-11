@@ -154,6 +154,9 @@ m_plain('reboco_amarelo', (0.68, 0.46, 0.11), 0.75, noise=0.05, nscale=2.0, bump
 m_plain('reboco_verde', (0.085, 0.235, 0.155), 0.75, noise=0.05, nscale=2.0, bump=0.05)
 m_plain('reboco_claro', (0.84, 0.81, 0.74), 0.8, noise=0.05, nscale=2.0, bump=0.06)   # oitões (recebem a projeção)
 m_plain('esquadria_branca', (0.86, 0.86, 0.84), 0.35)
+m_plain('chapa_verde', (0.026, 0.127, 0.07), 0.5)                               # ainda usados pelo banheiro e pelos carros
+m_plain('pintura_amarela', (0.95, 0.60, 0.012), 0.45)
+m_plain('pintura_marinho', (0.022, 0.036, 0.08), 0.45)
 
 # ------------------------------------------------------------------ constantes
 WH = 2.3                      # altura do muro

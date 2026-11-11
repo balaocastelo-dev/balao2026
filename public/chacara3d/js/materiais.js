@@ -381,6 +381,10 @@ export function criarMateriais(info) {
     reboco_verde: liso(new THREE.Color(0.085, 0.235, 0.155), 0.75),
     reboco_claro: liso(new THREE.Color(0.84, 0.81, 0.74), 0.8),
     esquadria_branca: liso(new THREE.Color(0.86, 0.86, 0.84), 0.35),
+    // ainda usados pelo banheiro de baixo e pelos dois carros
+    chapa_verde: liso(new THREE.Color(0.026, 0.127, 0.07), 0.5),
+    pintura_amarela: liso(new THREE.Color(0.95, 0.6, 0.012), 0.45),
+    pintura_marinho: liso(new THREE.Color(0.022, 0.036, 0.08), 0.45),
     mesh: null,
     leaf_core: liso(new THREE.Color(0.012, 0.03, 0.01), 1, { vento: 0.0016 }),
     leaf_core_big: liso(new THREE.Color(0.01, 0.025, 0.009), 1, { vento: 0.0016 }),
