@@ -1,10 +1,10 @@
-"""Planta baixa do banheiro duplo externo (medidas no banheiro.py): modelo 2 no lugar do barracão, com a vaga do carro
-na frente debaixo do mesmo telhado de duas águas (aprovado pelo Thiago em 10/11/2026).
+"""Planta baixa do banheiro duplo externo (medidas no banheiro.py): modelo 2 encostado no muro do barracão, logo depois
+da escada e perto do poço, com o estacionamento ao lado debaixo do mesmo telhado de uma água (10/11/2026).
 
     python3 desenho_banheiro.py PASTA        (grava PASTA/banheiro-planta.png e .pdf)
 
-Vista de cima com o muro do barracão no alto da folha: a escada e o poço à esquerda, o portão de baixo à direita e o
-pergolado do cineminha embaixo. Medidas a partir da beira da laje e do muro do barracão (o banheiro encosta nele).
+Vista de cima com o muro do barracão no alto da folha: a escada à esquerda, o portão de baixo à direita e o pergolado
+do cineminha embaixo. Medidas a partir da beira da laje e do muro do barracão (o banheiro encosta nele).
 """
 import os, sys, math, datetime
 import numpy as np
@@ -64,16 +64,16 @@ def rotulo(ax, xy, txt, xyt, fs=8.5, ha='left', va='center', cor='#222'):
 fig = plt.figure(figsize=(16.54, 11.69))                # A3 deitada
 fig.add_artist(Rectangle((0.012, 0.015), 0.976, 0.97, transform=fig.transFigure, fill=False, lw=1.4, ec='#222'))
 fig.add_artist(Rectangle((0.012, 0.015), 0.976, 0.075, transform=fig.transFigure, fill=False, lw=1.0, ec='#222'))
-fig.text(0.022, 0.066, 'Banheiro duplo externo — modelo 2, no lugar do barracão', fontsize=15, fontweight='bold', va='center')
-fig.text(0.022, 0.034, 'Planta baixa: encostado no muro do barracão, nicho da pia de 2,10 m, banheiros para cadeirante e vaga do carro coberta',
+fig.text(0.022, 0.066, 'Banheiro duplo externo — modelo 2, perto do poço, com o estacionamento ao lado', fontsize=15, fontweight='bold', va='center')
+fig.text(0.022, 0.034, 'Planta baixa: encostado no muro do barracão, nicho da pia de 2,10 m, banheiros para cadeirante e um telhado só de uma água',
          fontsize=10, va='center', color='#333')
-fig.text(0.66, 0.066, 'Quintal de baixo — junto ao muro do barracão, perto do portão', fontsize=10, va='center')
+fig.text(0.66, 0.066, 'Quintal de baixo — junto ao muro do barracão', fontsize=10, va='center')
 fig.text(0.66, 0.034, f'Medidas em metros · conferir no local antes de marcar · {datetime.date.today():%d/%m/%Y}', fontsize=8.5, va='center', color='#333')
 
 ax = fig.add_axes([0.012, 0.33, 0.976, 0.655])
 ax.set_aspect('equal'); ax.axis('off')
 H0, H1 = 45.55, 60.75
-V0, V1 = 3.05, 10.75
+V0, V1 = 3.05, 11.35
 ax.set_xlim(H0, H1); ax.set_ylim(V0, V1)
 YM = O.LARGURA                                     # muro do barracão (y = 10 no modelo)
 PORTAO = (YM - 2.82 - 4.04, YM - 2.82)            # portão de baixo: começa a 2,82 do muro do barracão, vão de 4,04
@@ -92,10 +92,8 @@ ax.add_patch(Polygon(O.LAGO, closed=True, fc=AGUA, ec='#4a7fa0', lw=0.8, zorder=
 ax.text(48.6, 3.55, 'laguinho', ha='center', va='center', fontsize=8.5, color='#2d5f80', zorder=5)
 ax.add_patch(Circle(O.POCO, O.POCO_R, fc='#f4f1ea', ec='#555', lw=0.9, zorder=3))
 ax.text(O.POCO[0], O.POCO[1], 'poço', ha='center', va='center', fontsize=9, zorder=5)
-ax.add_patch(Circle((50.2, 9.15), 0.8, fc=VERDE, ec='#6a8f5a', lw=0.6, ls='--', zorder=1))
-ax.text(50.2, 9.15, 'pitangueira', ha='center', va='center', fontsize=7.5, color='#3d6b2f', zorder=5)
 ret(ax, H0, 60.15, YM, YM + 0.15, fc='#9a958c', ec='#555', lw=0.6, zorder=3)
-ax.text(H0 + 0.1, YM + 0.32, 'muro do barracão (o barracão de madeira sai)', ha='left', va='center', fontsize=8.5, color='#555')
+ax.text(H0 + 0.1, YM + 1.1, 'muro do barracão (o barracão de madeira e a pitangueira saem)', ha='left', va='center', fontsize=8.5, color='#555')
 for a_, b_ in ((V0, PORTAO[0]), (PORTAO[1], YM + 0.15)):
     ret(ax, 60.0, 60.15, a_, b_, fc='#9a958c', ec='#555', lw=0.6, zorder=3)
 ax.plot([60.07, 60.07], PORTAO, color='#2e7d32', lw=3.0, zorder=4)
@@ -109,23 +107,27 @@ ret(ax, B.GARAGEM[0], B.GARAGEM[1], B.GARAGEM[2], B.GARAGEM[3], fc='#efede8', ec
 
 # piso da entrada, canteiros
 ret(ax, B.XN0 - 0.15, B.XN1 + 0.15, B.YB0 - B.PISO_FRENTE, B.YI1, fc=PISO, ec='#999', lw=0.5, zorder=1.5)
-for xa, xb in ((B.XB0, B.XN0 - 0.15), (B.XN1 + 0.15, B.XB1)):
+for lado, (xa, xb) in enumerate(((B.XB0, B.XN0 - 0.15), (B.XN1 + 0.15, B.XB1))):
+    if not B.CANTEIRO_LADOS[lado]:
+        continue
     ret(ax, xa, xb, B.YB0 - B.CANTEIRO, B.YB0, fc=VERDE, ec='#6a8f5a', lw=0.6, zorder=1.5)
     ax.text((xa + xb) / 2, B.YB0 - B.CANTEIRO / 2 - 0.02, 'canteiro', ha='center', va='center', fontsize=7.5, color='#3d6b2f', zorder=5)
-# telhado de duas águas (tracejado), cumeeira, caimento, calha, viga e pilares da frente
+# telhado de uma água (tracejado), caimento para o quintal, calha na frente, vigas e pilares do estacionamento
 TL = '#8a4b2a'
 ax.plot([B.T_X0, B.T_X1, B.T_X1, B.T_X0, B.T_X0], [B.T_YF, B.T_YF, B.T_YT, B.T_YT, B.T_YF], color=TL, lw=1.0, ls=(0, (7, 4)), zorder=6)
-ax.plot([B.T_X0, B.T_X1], [B.T_YC, B.T_YC], color=TL, lw=1.2, ls=(0, (10, 3, 2, 3)), zorder=6)
-for xa in (B.T_X0 + 0.55, B.T_X1 - 0.55):
-    ax.annotate('', xy=(xa, B.T_YF + 0.35), xytext=(xa, B.T_YC - 0.35), arrowprops=dict(arrowstyle='->', color=TL, lw=1.0), zorder=7)
-    ax.annotate('', xy=(xa, B.T_YT - 0.15), xytext=(xa, B.T_YC + 0.95), arrowprops=dict(arrowstyle='->', color=TL, lw=1.0), zorder=7)
-ax.plot([B.T_X0, B.T_X1], [B.T_YT - 0.08] * 2, color='#555', lw=2.0, zorder=7)
-ax.plot([B.T_X0, B.T_X1], [B.T_YP] * 2, color=MADEIRA, lw=1.4, zorder=6)
+for xa in (B.T_X0 + 0.45, B.XB1 + 0.8, B.T_X1 - 0.45):
+    ax.annotate('', xy=(xa, B.T_YF + 0.25), xytext=(xa, B.T_YT - 0.3), arrowprops=dict(arrowstyle='->', color=TL, lw=1.0), zorder=7)
+ax.plot([B.T_X0, B.T_X1], [B.T_YF + 0.07] * 2, color='#555', lw=2.0, zorder=7)
+ax.plot([B.XB1, B.T_X1], [B.T_YP] * 2, color=MADEIRA, lw=1.4, zorder=6)
+ax.plot([B.XB1, B.T_X1], [B.T_YT - 0.10] * 2, color=MADEIRA, lw=1.4, zorder=6)
 for xx in B.T_PILARES:
     ret(ax, xx - 0.08, xx + 0.08, B.T_YP - 0.08, B.T_YP + 0.08, fc=MADEIRA, ec='#6b4a22', lw=0.6, zorder=9)
-c_ = B.CARRO                                       # carro (contorno), no meio da linha do portão
+for xx in B.T_PILARES_MURO:
+    ret(ax, xx - 0.08, xx + 0.08, B.T_YT - 0.18, B.T_YT - 0.02, fc=MADEIRA, ec='#6b4a22', lw=0.6, zorder=9)
+c_ = B.CARRO                                       # carro (contorno), de frente para os banheiros
 ax.add_patch(Rectangle((c_[0], c_[2]), c_[1] - c_[0], c_[3] - c_[2], fill=False, ec='#666', lw=0.9, ls=(0, (4, 3)), zorder=8))
 ax.text((c_[0] + c_[1]) / 2, (c_[2] + c_[3]) / 2, 'carro\n4,40 × 1,80', ha='center', va='center', fontsize=8, color='#555', zorder=8)
+ax.text((B.XB1 + B.T_X1) / 2, B.T_YP + 0.28, 'ESTACIONAMENTO', ha='center', va='center', fontsize=10, fontweight='bold', color='#555', zorder=8)
 
 # paredes
 paredes = [(B.XB0, B.XB1, B.YI1, B.YB1), (B.XB0, B.XA0, B.YI0, B.YI1), (B.XC1, B.XB1, B.YI0, B.YI1),
@@ -174,33 +176,30 @@ ax.text((B.XN0 + B.XN1) / 2, B.YI0 + 0.40, 'NICHO DA PIA', ha='center', va='cent
 ax.text((B.XN0 + B.XN1) / 2, B.YB0 - 0.25, 'entrada', ha='center', va='center', fontsize=8.5, color='#555', zorder=12)
 
 # cotas
-yc_ = B.YB0 - B.CANTEIRO - 0.25
+yc_ = YM + 0.42                                   # cotas em cima do muro do barracão
 for a, b in ((B.XA0, B.XA1), (B.XN0, B.XN1), (B.XC0, B.XC1)):
     cota(ax, (a, yc_), (b, yc_), 0.0, fs=9)
-cota(ax, (B.XB0, yc_ - 0.38), (B.XB1, yc_ - 0.38), 0.0, txt=br(B.LARG), fs=9.5)
+cota(ax, (B.XB0, yc_ + 0.38), (B.XB1, yc_ + 0.38), 0.0, txt=br(B.LARG), fs=9.5)
 for xx in (B.XB0, B.XB1):
-    ax.plot([xx, xx], [yc_ - 0.45, B.YB0 - B.CANTEIRO], color='#222', lw=0.45)
-cota(ax, (O.EDGE, 10.45), (B.XB0, 10.45), 0.0, txt=f'{br(B.DA_BEIRA)} da beira da laje', fs=9)
-cota(ax, (B.XB1, 10.45), (60.0, 10.45), 0.0, txt=br(60.0 - B.XB1), fs=8.5)
-cota(ax, (B.XB1, B.YB0), (B.XB1, B.YB1), -0.22, fs=9)
+    ax.plot([xx, xx], [YM + 0.15, yc_ + 0.45], color='#222', lw=0.45)
+cota(ax, (O.EDGE, yc_ + 0.38), (B.XB0, yc_ + 0.38), 0.0, txt=f'{br(B.DA_BEIRA)} da beira', fs=9)
+cota(ax, (B.XB1, yc_ + 0.38), (B.T_X1, yc_ + 0.38), 0.0, txt=f'estacionamento {br(B.VAGA[0])}', fs=9)
+cota(ax, (59.35, B.T_YF), (59.35, B.T_YT), 0.0, txt=f'{br(B.T_YT - B.T_YF)} coberto', fs=8.5)
+cota(ax, (B.XB0 - 0.35, B.YB0), (B.XB0 - 0.35, B.YB1), 0.0, g=-0.16, fs=9)
 cota(ax, (B.XC1 - 0.10, B.YI0 + B.CHUV_Y), (B.XC1 - 0.10, B.YI1), 0.0, txt='', fs=8.5)
 cota(ax, (B.XC0 + 0.12, B.YI0), (B.XC0 + 0.12, B.YI1), 0.0, fs=8.5)
-cota(ax, (59.45, B.T_YP + 0.08), (59.45, B.YB0), 0.0, txt=f'vaga {br(B.VAGA)}', fs=8.5)
-cota(ax, (B.T_X0 - 0.55, B.T_YF), (B.T_X0 - 0.55, B.YB1), 0.0, g=-0.16, txt=f'telhado {br(B.YB1 - B.T_YF)} do muro', fs=8.5)
-cota(ax, (B.T_PILARES[1], B.T_YP - 0.35), (B.T_PILARES[2], B.T_YP - 0.35), 0.0, txt=f'vão {br(B.T_PILARES[2] - B.T_PILARES[1])}', fs=8)
-dp = np.array([B.XB0 - O.POCO[0], B.YB0 - O.POCO[1]]); dp /= np.linalg.norm(dp)
-pa = np.array(O.POCO) + dp * O.POCO_R
-cota(ax, pa, (B.XB0, B.YB0), 0.0, txt=br(B.ATE_POCO), fs=9)
+cota(ax, (ex1, O.ESCADA_Y1 - 0.12), (B.XB0, O.ESCADA_Y1 - 0.12), 0.0, g=-0.13, tick=0.035, txt=br(B.ATE_ESCADA), fs=8)
+cota(ax, (O.POCO[0], O.POCO[1] + O.POCO_R), (O.POCO[0], B.YB0), 0.0, g=0.13, tick=0.035, txt=br(B.ATE_POCO), fs=8)
 
 # rótulos
-rotulo(ax, (B.CUBAS[1][0] + 0.3, B.YI1 - 0.15), 'bancada de granito com 2 cubas a 0,80 m do chão,\nlivre embaixo (cadeirante), espelhos e pendentes', (49.9, 10.42), fs=8.5)
-rotulo(ax, (B.XN0 + 0.5, B.PORTA_Y[0] + 0.02), 'portas de 0,90 abrindo para fora,\nviradas uma para a outra', (47.9, 5.35), fs=8.5)
-rotulo(ax, (B.XC1 - 0.55, B.YI0 + 0.55), 'chuveiro sem degrau, com banco\narticulado de 0,70 × 0,45 e barras', (58.65, 7.25), fs=8.5, cor='#3b6f99')
-rotulo(ax, (B.XA0 + 0.85, B.YI0 + 1.15), 'giro de 1,50 da\ncadeira de rodas', (48.4, 7.95), fs=8.5, cor=AZ_AC)
-rotulo(ax, (B.XA0 + 0.62, B.YI1 - 0.85), 'área de transferência\n0,80 × 1,20 do vaso', (48.4, 7.35), fs=8.5, cor=AZ_AC)
-rotulo(ax, (B.T_PILARES[0], B.T_YP), 'pilares e viga de madeira\n(o engenheiro dimensiona)', (49.55, 4.85), fs=8.5, cor='#6b4a22')
-rotulo(ax, (B.T_X0 + 0.1, B.T_YC), f'cumeeira a {br(B.T_ZC - O.LOW)} m, em cima\nda parede da frente', (46.3, 8.35), fs=8.5, cor=TL)
-rotulo(ax, (B.T_X0 + 0.3, B.T_YT - 0.08), 'calha junto ao muro\n(a água não cai no vizinho)', (46.3, 9.45), fs=8.5, cor='#444')
+rotulo(ax, (B.CUBAS[1][0] + 0.3, B.YI1 - 0.15), 'bancada de granito com 2 cubas a 0,80 m do chão,\nlivre embaixo (cadeirante), espelhos e pendentes', (52.6, 4.95), fs=8.5)
+rotulo(ax, (B.XN0 + 0.5, B.PORTA_Y[0] + 0.02), 'portas de 0,90 abrindo para fora,\nviradas uma para a outra', (52.6, 5.85), fs=8.5)
+rotulo(ax, (B.XC1 - 0.55, B.YI0 + 0.55), 'chuveiro sem degrau, com banco\narticulado de 0,70 × 0,45 e barras', (55.95, 6.25), fs=8.5, cor='#3b6f99')
+rotulo(ax, (B.XA0 + 0.85, B.YI0 + 1.15), 'giro de 1,50 da\ncadeira de rodas', (45.75, 9.15), fs=8.5, cor=AZ_AC)
+rotulo(ax, (B.XA0 + 0.62, B.YI1 - 0.85), 'área de transferência\n0,80 × 1,20 do vaso', (45.75, 8.45), fs=8.5, cor=AZ_AC)
+rotulo(ax, (B.T_PILARES[0], B.T_YP), 'pilares e vigas de madeira na frente e\nencostados no muro (o engenheiro dimensiona)', (55.95, 4.55), fs=8.5, cor='#6b4a22')
+rotulo(ax, (B.XB1 + 0.8, (B.T_YF + B.T_YT) / 2 + 0.3), f'uma água só: {br(B.z_telhado(B.T_YT) - O.LOW)} m no muro,\n{br(B.z_telhado(B.T_YF) - O.LOW)} m no beiral da frente', (55.95, 5.3), fs=8.5, cor=TL)
+rotulo(ax, (B.T_X1 - 0.6, B.T_YF + 0.07), 'calha na frente', (57.2, 6.6), fs=8.5, cor='#444')
 
 # notas, embaixo da planta
 R = B.resumo(); T = R['telhado']
@@ -210,19 +209,19 @@ notas_e = [
     ('    sem degrau com banco articulado, barras de apoio e giro de 1,50 da cadeira.', False),
     (f'•  Nicho da pia de {br(B.NICHO)} m, aberto e coberto, bancada de granito, 2 cubas a 0,80 m.', False),
     ('•  Portas de 0,90 nas paredes do nicho, abrindo para fora.', False),
-    (f'•  {br(B.LARG)} × {br(B.FUNDO)} m encostado no muro do barracão, de {br(B.DA_BEIRA)} a {br(B.DA_BEIRA + B.LARG)} m da beira da laje;', False),
-    (f'    a frente fica a {br(B.FUNDO)} m do muro, 24 cm fora da linha do portão.', False),
-    (f'•  {br(B.ATE_POCO)} m da boca do poço e {br(60.0 - B.XB1)} m do muro do portão.', False),
+    (f'•  {br(B.LARG)} × {br(B.FUNDO)} m encostado no muro do barracão, de {br(B.DA_BEIRA)} a {br(B.DA_BEIRA + B.LARG)} m da beira da laje:', False),
+    (f'    {br(B.ATE_ESCADA)} m depois do pé da escada e {br(B.ATE_POCO)} m da boca do poço (frente do banheiro 1).', False),
+    ('•  A pitangueira e o barracão de madeira saem.', False),
     ('•  Tijolo aparente como os pilares da churrasqueira, forro de madeira, basculante no alto.', False),
 ]
 notas_d = [
-    ('Telhado e garagem', True),
-    (f'•  Duas águas de telha de barro com {round(B.T_S * 100)}% de caimento, cobrindo os banheiros e a vaga:', False),
-    (f'    {br(T["x"][1] - T["x"][0])} m de comprimento e {br(T["do_muro"])} m a partir do muro do barracão.', False),
-    (f'•  Cumeeira a {br(T["cumeeira"])} m em cima da parede da frente; beiral da vaga a {br(T["beiral_frente"])} m', False),
-    (f'    e beiral do muro a {br(T["beiral_muro"])} m, com calha (a água não pode cair no vizinho).', False),
-    (f'•  Vaga de {br(B.VAGA)} m entre os pilares e os banheiros, na linha do portão: o carro entra de', False),
-    (f'    frente e deixa {br(B.CARRO[0] - (B.XN0 - 0.15))} m livres na frente da pia. 3 pilares de madeira; vão maior de 4,3 m.', False),
+    ('Telhado e estacionamento', True),
+    (f'•  Um telhado só, de uma água, de telha de barro com {round(B.T_S * 100)}%: alto no muro do barracão', False),
+    (f'    ({br(T["alto"])} m), cai para o quintal até o beiral da frente ({br(T["beiral"])} m), com calha.', False),
+    (f'•  {br(T["x"][1] - T["x"][0])} m de comprimento, da ponta da escada até o muro do portão, e {br(T["do_muro"])} m de fundo.', False),
+    (f'•  Estacionamento ao lado dos banheiros: {br(B.VAGA[0])} × {br(B.VAGA[1])} m coberto, junto ao muro do', False),
+    ('    barracão até o muro do portão. A frente fica aberta (pilar só nas pontas).', False),
+    ('•  No muro o telhado fica 1,1 m acima dele: viga em pilares encostados no muro.', False),
     ('', False),
     ('A decidir', True),
     ('•  água quente: chuveiro elétrico (circuito próprio com DR) ou aquecedor a gás/solar;', False),

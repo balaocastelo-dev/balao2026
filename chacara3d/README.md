@@ -279,20 +279,24 @@ lado da amendoeira.
   cascata de 3 lajes e guarda-corpo no topo do muro (PR #126); trocada pelo redesenho.
 - **Banheiro duplo externo** (pedido em 08/11/2026; **no passeio desde 10/11/2026**): dois banheiros para cadeirante
   com a pia lavabo central do lado de fora. O Thiago escolheu o **modelo 2** (tijolinho e telha) com chuveiro e um
-  telhado só com a garagem, e em 10/11 aprovou pôr no passeio, no **lugar do barracão de madeira** (com as medidas reais
-  ele não cabia mais do outro lado da escada, perto do poço):
-  - encostado no muro do barracão, de 6,04 a 12,06 m da beira da laje, 6,02 × 2,58 m; a frente fica 24 cm fora da
-    linha do portão de baixo, 2,33 m da boca do poço e 1,94 m do muro do portão;
+  telhado só com a garagem. Em 10/11 entrou primeiro no lugar do barracão, com um telhado de duas águas cobrindo a vaga
+  na frente (PR #136); no mesmo dia ele corrigiu e ficou assim:
+  - encostado no muro do barracão **logo depois da escada**, de 2,20 a 8,22 m da beira da laje (0,60 depois do pé da
+    escada), 6,02 × 2,58 m, com a frente do banheiro 1 a 0,59 m da boca do poço; **a pitangueira e o barracão saem**;
+  - **estacionamento ao lado**, junto ao muro do barracão até o muro do portão: 5,63 × 3,01 m coberto, frente aberta
+    (pilares só nas pontas), carro de frente para os banheiros;
+  - **um telhado só, de uma água**, de telha de barro com 35%, cobrindo banheiros e estacionamento: alto no muro do
+    barracão (3,37 m; o muro tem 2,30, então a parte de trás apoia numa viga com pilares encostados no muro) e caindo
+    para o quintal até o beiral da frente (2,32 m), com calha na frente;
   - banheiros de 1,70 × 2,30 m livres com chuveiro sem degrau (1,00 × 0,95, banco articulado 0,70 × 0,45), vaso no
     canto do fundo, barras e giro de 1,50; nicho da pia de 2,10 m com bancada de 2 cubas a 0,80 m; portas de 0,90;
-  - telhado de duas águas de telha de barro (36%): cumeeira a 3,40 m em cima da parede da frente, uma água até o muro
-    do barracão (calha: a água não pode cair no vizinho) e outra cobrindo a vaga do carro na frente, até a linha dos 3
-    pilares de madeira (vão maior de 4,3 m, para a porta do motorista e a luz do projetor do cineminha); vaga de 2,74 m;
-  - saiu a cobertura de garagem que o passeio tinha ali (não existe no terreno). No passeio: lugar "Banheiros", áreas
-    "Banheiros" e "Garagem", colisão dos banheiros, da bancada e dos pilares; o projetor do portão foi para o pilar do
-    pergolado, a luz da garagem para debaixo do telhado e as cadeiras de trás do cenário do cinema recuaram para 4,2.
-  - Medidas no `banheiro.py` (o `build.py` chama `banheiro.construir(..., 2)`; os outros 4 modelos continuam lá).
-    Fotos: `render_banheiro.py PASTA --vistas frente,portao,laje,nicho` e `--vistas planta` + `legenda_banheiro.py PASTA`;
+    canteiro só na frente do banheiro 2 (o 1 fica de frente para o poço);
+  - no passeio: lugar "Banheiros", áreas "Banheiros" e "Estacionamento", colisão dos banheiros, da bancada e dos
+    pilares; os pisantes passam entre o poço e o canteiro do lago e pela frente da pia até o portão; o projetor da
+    amendoeira saiu da frente da pia e o do portão está no pilar do pergolado; saiu a cobertura de garagem fictícia.
+  - Medidas no `banheiro.py` (o `build.py` chama `banheiro.construir(..., 2)`; os outros 4 modelos continuam lá; a
+    pitangueira sai por `_so_sorteios`, que gasta os mesmos sorteios para o resto da cena não mudar).
+    Fotos: `render_banheiro.py PASTA --vistas frente` (uma vista por vez) + `legenda_banheiro.py PASTA`;
     planta A3: `desenho_banheiro.py PASTA`.
 - **Ficha técnica para o pedreiro**: doc "Ficha técnica do laguinho" no Claude (materiais, quantidades, ordem da obra),
   refeita em 10/11/2026 para o redesenho.
