@@ -1,4 +1,4 @@
-// Casas container da vilinha: portas de entrada que abrem quando a gente chega (ou com a tecla E),
+// Casas de dois andares da vilinha: portas de entrada que abrem quando a gente chega (ou com a tecla E),
 // ventiladores de teto girando e as luzes de dentro (acesas à noite).
 import * as THREE from 'three';
 import { W3, clamp } from './util.js';
@@ -20,7 +20,7 @@ export function criarCasas(cena, extra, M, colisao) {
     const L = d.largura, H = d.altura, E = 0.045;
     const metal = M.aluminio_preto || M.metal_dark;
     if (d.estilo === 'vidro') {
-      // porta de vidro com caixilho branco (como na foto da casa container) e puxador preto
+      // porta de vidro com caixilho branco e puxador preto
       const F = 0.06;
       for (const [w, h, x, y] of [[F, H, F / 2, H / 2], [F, H, L - F / 2, H / 2], [L - 2 * F, F, L / 2, F / 2], [L - 2 * F, F, L / 2, H - F / 2], [L - 2 * F, 0.18, L / 2, 0.09 + F]]) {
         const q = new THREE.Mesh(new THREE.BoxGeometry(w, h, E), cor); q.position.set(x, y, 0); q.castShadow = true; q.receiveShadow = true; folha.add(q);
@@ -73,7 +73,7 @@ export function criarCasas(cena, extra, M, colisao) {
     cena.add(g);
     ventiladores.push({ g, rotor, vel: 2.6 + Math.random() * 0.4 });
   }
-  // ---- luzes de dentro: são muitas (cada cômodo das três casas e o terraço), então só algumas
+  // ---- luzes de dentro: são muitas (cada cômodo dos dois andares das três casas), então só algumas
   // luzes de verdade revezam entre as mais próximas de quem anda; o resto da casa recebe um brilho
   // quente no shader (uLuzCasa), que também faz as janelas acenderem de longe
   const fontes = (extra.luzes || []).map(l => ({ l, p: W3(l.p[0], l.p[1], l.p[2]), cor: new THREE.Color(l.cor[0], l.cor[1], l.cor[2]) }));

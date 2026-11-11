@@ -130,7 +130,7 @@ export function chaoDeFora(cena, mat) {
 }
 
 // ---------------------------------------------------------------- o que barra a passagem e a altura do chão
-const BOX_FIXO = [ // x0, x1, y0, y1, z0, z1 (sem as tiny houses, que vêm do modelo)
+const BOX_FIXO = [ // x0, x1, y0, y1, z0, z1 (sem as casas da vilinha, que vêm do modelo)
   [0.35, 2.3, 7.5, 10, 0, 2.5], [2.3, 5.35, 7.5, 7.62, 0, 2.5], [5.25, 5.35, 7.5, 10, 0, 2.5],
   [33.75, 34.98, 7.0, 9.8, 0, 0.5], [32, 34.2, 1.1, 3.3, -0.4, 0.55], [38.6, 40.2, 0.8, 1.1, -1.4, 1.7], [31.6, 44.3, 0, 0.72, -0.2, 2.3],
   [35, 35.2, 6.71, 10, 0, 3], [35, 35.42, 6.29, 6.71, 0, 3], [38.29, 38.71, 6.29, 6.71, 0, 3], [41.59, 42.01, 6.29, 6.71, 0, 3], [44.79, 45.21, 6.29, 6.71, 0, 3], [44.79, 45.21, 9.58, 10, 0, 3],
@@ -185,7 +185,7 @@ export function criarColisao(extra) {
     return -1;
   }
   // altura do chão em (x, y) para quem está com os pés em `pes`: a superfície mais alta que dá para
-  // alcançar dali (as casas têm pisos empilhados: o de dentro, o terraço em cima e os degraus da escada)
+  // alcançar dali (as casas têm pisos empilhados: o térreo, os degraus da escada, o andar de cima e a varanda)
   function chaoEm(x, y, pes) {
     const lim = (pes === undefined ? 0 : pes) + SUBIDA;
     let z = chaoBase(x, y);
@@ -252,9 +252,9 @@ export function ondeEstou(x, y, extra, pes) {
     return 'Dentro da ' + nome;
   }
   for (const e of (extra.espirais || [])) if (pes > 0.4 && Math.hypot(x - e.cx, y - e.cy) < 1.3) return 'Escada do mirante (' + e.casa.toLowerCase() + ')';
-  for (const e of (extra.escadas || [])) if (pes > 0.15 && x > e.x[0] && x < e.x[1] && y > e.y[0] && y < e.y[1]) return 'Escada do terraço (' + e.casa.toLowerCase() + ')';
+  for (const e of (extra.escadas || [])) if (pes > 0.15 && x > e.x[0] && x < e.x[1] && y > e.y[0] && y < e.y[1]) return 'Escada da ' + e.casa.toLowerCase();
   for (const c of (extra.casas || [])) if (c.deck && pes > c.deck - 0.4 && x > c.x[0] - 0.6 && x < c.x[1] + 0.6 && y > c.y[0] - 0.6 && y < c.y[1] + 0.6) return 'Terraço da ' + c.nome.toLowerCase();
-  if (x < 21) return x < 2.6 ? 'Portão do gramado' : 'Vilinha';
+  if (x < 25.8) return x < 2.8 ? 'Portão do gramado' : 'Vilinha';
   if (x < 31.6) return 'Gramado';
   if (x < 46) return y > 6.2 ? 'Churrasqueira' : (x > 34.2 && x < 44 && y > 1.1 && y < 4.7 ? 'Dentro da piscina' : 'Piscina');
   const Q = extra.quintal || QUINTAL_PADRAO, d = Q.deck;

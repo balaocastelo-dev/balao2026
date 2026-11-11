@@ -167,10 +167,10 @@ async function carregar() {
   // casinhas: caixas para a luz de ambiente baixar lá dentro
   (extra.casas || []).forEach((c, i) => {
     U.uCasas.value[i].set(c.x[0], c.x[1], -c.y[1], -c.y[0]);
-    const frente = c.y[0] < 1 ? c.y[1] : c.y[0];
+    const frente = c.frente !== undefined ? c.frente : (c.y[0] < 1 ? c.y[1] : c.y[0]);
     U.uFrente.value[i] = -frente;
   });
-  // a luz de dentro só baixa até o forro (o terraço em cima do container fica com a luz de fora)
+  // a luz de dentro só baixa até o forro do andar de cima (a varanda, que fica para fora, pega a luz de fora)
   U.uTopoCasa.value = Math.max(...(extra.casas || []).map(c => (c.teto || 3.3) + 0.05), 0);
   casas = criarCasas(cena, extra, M, colisao);
   agua = criarAgua(cena, ceu, { reflexo: estado.qualidade >= 2, nivel: estado.qualidade }, extra.quintal);
@@ -493,7 +493,7 @@ function atualizarMundo(dt) {
   cinema.atualizar(estado.tempo, n);
   // dentro de casa de dia: o olho se acostuma com a pouca luz
   let dentro = null;
-  for (const c of (extra.casas || [])) if (eu.x > c.x[0] && eu.x < c.x[1] && eu.y > c.y[0] && eu.y < c.y[1] && eu.pes < (c.deck || 9) - 0.4) dentro = c.nome;
+  for (const c of (extra.casas || [])) if (eu.x > c.x[0] && eu.x < c.x[1] && eu.y > c.y[0] && eu.y < c.y[1] && eu.pes < (c.deck || (c.teto || 9)) - 0.4) dentro = c.nome;
   estado.dentroDeCasa = dentro;
   const alvo = info.exposicao * (dentro ? lerp(1.0, 2.3, estado.dia) : 1);
   exposicao += (alvo - exposicao) * Math.min(1, dt * 1.5);

@@ -1,6 +1,6 @@
 // Plano de iluminação noturna: projetores virtuais que lançam animações, cores de luz de jardim,
 // vídeos do computador ou o YouTube sobre as copas das árvores, o muro da piscina, os portões
-// e as paredes laterais lisas das casas container (projeção mapeada / video mapping).
+// e os oitões cegos das casas da vilinha (projeção mapeada / video mapping).
 //
 // Como funciona: cada projetor ocupa um ladrilho de 512² de um atlas (2048 × 1536). A cada quadro
 // o ladrilho é desenhado (animação procedural de projecoes_anim.js, vídeo do computador ou cor) e os
@@ -32,9 +32,9 @@ function definirLugares(extra) {
   for (const p of (extra.paredes_projecao || [])) {
     const id = cores[p.nome] || ('parede_' + L.length);
     const cx = (p.x0 + p.x1) / 2, cy = (p.y0 + p.y1) / 2;
-    const dist = id === 'parede_verde' ? 2.7 : 4.4;
+    const dist = p.dist || (id === 'parede_verde' ? 2.7 : 4.4);
     L.push({ id, nome: p.nome, tipo: 'plano', ret: { x0: p.x0, x1: p.x1, y0: p.y0, y1: p.y1, z0: p.z0, z1: p.z1 }, normal: p.normal,
-      de: [cx + p.normal[0] * dist, cy + p.normal[1] * dist + (id === 'parede_verde' ? -1.2 : 0), 0.25], fundo: 0.7, ganho: 1.5 });
+      de: [cx + p.normal[0] * dist, cy + p.normal[1] * dist + (p.dist ? 0 : (id === 'parede_verde' ? -1.2 : 0)), 0.25], fundo: 0.7, ganho: 1.5 });
   }
   return L.slice(0, NPROJ);
 }
