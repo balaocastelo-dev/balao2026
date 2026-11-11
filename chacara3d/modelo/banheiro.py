@@ -9,8 +9,10 @@ o lado da churrasqueira, perto do poço (a pitangueira sai), sem tomar o lugar d
 estacionamento ficam debaixo de um telhado só, de uma água só, caindo para o quintal (parte alta no muro do barracão).
 Os outros modelos continuam aqui como alternativa (com a cobertura deles).
 
-Banheiros para cadeirante de 1,70 x 2,30 m livres (NBR 9050: giro de 1,50, barras, área de transferência), chuveiro
-sem degrau com banco articulado, nicho da pia de 2,10 m aberto na frente com bancada de 2 cubas a 0,80 m. Fonte única
+Às 23h do mesmo dia ele pediu o banheiro menor, de tamanho padrão, sem acessibilidade para cadeirante, e mais longe do
+poço: banheiros de 1,30 x 2,00 m livres com box de 0,90 x 0,85 e vaso, portas de 0,70, nicho da pia de 1,50 m com
+bancada de 2 cubas a 0,90 m; o conjunto foi para 4,20 m da beira da laje, deixando o poço livre na frente do vão entre
+a escada e o banheiro (um canteiro junto ao muro). Fonte única
 das medidas para o build.py (maquete e passeio), o render_banheiro.py (fotos) e o desenho_banheiro.py (planta).
 
 Eixos e níveis como no obra.py (x saindo da beira da laje para o portão, y do muro da amendoeira ao muro do barracão);
@@ -20,13 +22,13 @@ import math
 import numpy as np
 from obra import EDGE, FACE, LOW, LARGURA, POCO, POCO_R
 
-DA_BEIRA = 2.20                    # da beira da laje até o banheiro: 0,60 depois do pé da escada (que acaba em 1,60)
+DA_BEIRA = 4.20                    # da beira da laje até o banheiro: o poço fica livre, na frente do vão escada-banheiro
 PE, PI = 0.14, 0.12                # paredes de fora e de dentro (bloco rebocado)
-NICHO = 2.10                       # largura livre do nicho da pia (meio-termo: 50% maior que no estudo 1)
-CAB = 1.70                         # largura livre de cada banheiro: vaso, chuveiro e giro de 1,50 da cadeira de rodas
-LIVRE = 2.30                       # fundo livre: chuveiro na frente, vaso no canto do fundo, giro de 1,50 sem pegar no vaso
-LARG = 2 * PE + 2 * PI + NICHO + 2 * CAB                      # 5,62 ao longo da fachada
-FUNDO = LIVRE + 2 * PE             # 2,14
+NICHO = 1.50                       # largura livre do nicho da pia (2 cubas)
+CAB = 1.30                         # largura livre de cada banheiro (padrão, sem acessibilidade): box e vaso
+LIVRE = 2.00                       # fundo livre: box na frente, porta no meio, vaso no canto do fundo
+LARG = 2 * PE + 2 * PI + NICHO + 2 * CAB                      # 4,62 ao longo da fachada
+FUNDO = LIVRE + 2 * PE             # 2,28
 XB0 = EDGE + DA_BEIRA              # lado da escada
 XB1 = XB0 + LARG                   # lado do portão
 YB1 = LARGURA                      # costas no muro do barracão
@@ -38,13 +40,13 @@ XC0 = XN1 + PI; XC1 = XC0 + CAB    # banheiro 2 (lado da garagem)
 PD = 2.30                          # pé-direito
 LAJE = 0.12
 ZT = LOW + PD + LAJE               # topo da laje plana (modelos 1, 3 e 4), acima do 0,00 da churrasqueira
-PORTA_L, PORTA_H = 0.90, 2.10      # folha de 0,90 (vão livre de 0,80 ou mais), abrindo para fora, para o nicho
-PORTA_Y = (YI0 + 0.80, YI0 + 0.80 + PORTA_L)                  # atrás do chuveiro, antes da bancada
+PORTA_L, PORTA_H = 0.70, 2.10      # porta padrão de 0,70, abrindo para fora, para o nicho
+PORTA_Y = (YI0 + 0.92, YI0 + 0.92 + PORTA_L)                  # atrás do box, antes da bancada
 JAN_L, JAN_H, JAN_Z = 0.60, 0.40, LOW + 1.75                  # basculante no alto da fachada de cada banheiro
-BANC_P, BANC_Z = 0.55, LOW + 0.80                             # bancada acessível: 0,80 de altura, livre embaixo
-CUBAS = [(XN0 + NICHO * 0.27, YI1 - 0.28), (XN1 - NICHO * 0.27, YI1 - 0.28)]   # duas cubas na bancada de 2,10
+BANC_P, BANC_Z = 0.50, LOW + 0.90                             # bancada padrão: 0,90 de altura
+CUBAS = [(XN0 + NICHO * 0.27, YI1 - 0.26), (XN1 - NICHO * 0.27, YI1 - 0.26)]   # duas cubas na bancada de 1,50
 CANTEIRO = 0.45
-CHUV_X, CHUV_Y = 1.00, 0.95        # chuveiro sem degrau no canto da frente, do lado da parede de fora (mínimo 0,90 x 0,95)
+CHUV_X, CHUV_Y = 0.90, 0.85        # box do chuveiro no canto da frente, do lado da parede de fora
 BANCO = (0.70, 0.45, 0.46)         # banco articulado do chuveiro: comprimento, profundidade, altura
 # telhado único de uma água só, banheiros + estacionamento (10/11/2026, pedido do Thiago): parte alta no muro do
 # barracão, a água cai para o quintal (calha na frente). Telha de barro: 35% de caimento. Do lado do estacionamento a
@@ -58,8 +60,9 @@ T_YP = T_YF + 0.12                 # viga e pilares da frente (só no trecho do 
 T_PILARES = (XB1 + 0.15, T_X1 - 0.12)                         # pilares da frente: a frente do estacionamento fica aberta
 T_PILARES_MURO = (XB1 + 0.15, (XB1 + T_X1) / 2, T_X1 - 0.12)  # pilares encostados no muro do barracão
 GARAGEM = (XB1, T_X1, T_YF, T_YT)                             # piso do estacionamento, ao lado dos banheiros
-CARRO = (XB1 + 0.55, XB1 + 0.55 + 4.40, 7.70, 7.70 + 1.80)   # carro (só no desenho): 4,40 x 1,80, de frente para os banheiros
-CANTEIRO_LADOS = (False, True)                                # canteiro só na frente do banheiro 2 (o 1 fica de frente pro poço)
+CARRO = (XB1 + 0.30, XB1 + 0.30 + 4.30, 7.85, 7.85 + 1.75)   # carro normal (carros.py): 4,30 x 1,75, coberto, de frente p/ banheiros
+CAMINHONETE = (59.75 - 5.33, 59.75, 5.50 - 0.93, 5.50 + 0.93)  # caminhonete de 5,33 x 1,86 na linha do portão: não cabe na coberta
+CANTEIRO_LADOS = (True, True)                                 # canteiro na frente dos dois banheiros
 
 
 def z_telhado(y):
@@ -81,7 +84,7 @@ MODELOS = {
         'parede': 'house_white', 'fachada': 'filete', 'fundo': 'filete', 'porta': 'wood_z', 'bancada': 'quartzo',
         'cobertura': 'laje_jardineira', 'luz': 'arandela', 'barrado': None, 'ripado': False},
     2: {'nome': 'Tijolinho e telha',
-        'desc': 'Tijolo como os pilares da churrasqueira, um telhado só de uma água com o estacionamento ao lado, chuveiro nos banheiros.',
+        'desc': 'Tijolo como os pilares da churrasqueira, um telhado só de uma água com o estacionamento ao lado, banheiros padrão com box.',
         'parede': 'brick', 'fachada': 'brick', 'fundo': 'brick', 'porta': 'wood_z', 'bancada': 'granite',
         'cobertura': 'telha_garagem', 'luz': 'arandela', 'barrado': None, 'ripado': False},
     3: {'nome': 'Tropical ripado',

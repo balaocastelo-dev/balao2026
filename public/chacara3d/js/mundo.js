@@ -236,7 +236,7 @@ export function criarColisao(extra) {
 
 export function lugares(extra) {
   const L = [['Portão do gramado', 1.6, 4.7, 0], ['Vilinha', 10.6, 4.9, -0.5], ['Gramado', 26, 5.2, 3.14], ['Piscina', 45.1, 3.6, 3.14], ['Churrasqueira', 43.4, 5.7, 2.2],
-    ['Beira do laguinho', 45.25, 3.3, 0], ['Lago', 50.4, 5.0, 3.14], ['Banheiros', 51.2, 5.6, 1.5708], ['Cineminha', 55.2, 2.7, -1.5708], ['Portão de baixo', 58.6, 5.1, 3.14]];
+    ['Beira do laguinho', 45.25, 3.3, 0], ['Lago', 50.4, 5.0, 3.14], ['Banheiros', 52.5, 5.4, 1.5708], ['Cineminha', 55.2, 2.7, -1.5708], ['Portão de baixo', 58.6, 5.1, 3.14]];
   const ql = (extra.quintal || {}).lugares || {};
   for (const l of L) if (ql[l[0]]) l.splice(1, 3, ...ql[l[0]]);
   for (const l of (extra.lugares || [])) L.splice(2, 0, l);
@@ -261,6 +261,6 @@ export function ondeEstou(x, y, extra, pes) {
   if (d && x <= d[1] && y >= d[2] && y <= d[3] && pes > d[4] - 0.4) return 'Deck';
   if (Q.lago && Math.hypot(x - (Q.lago.ret[0] + Q.lago.ret[1]) / 2, y - (Q.lago.ret[2] + Q.lago.ret[3]) / 2) < 3.2) return 'Laguinho';
   if (y < 4.5 && x > 52.5) return 'Cineminha';
-  if (y > 6.5 && x > 47.9) return x < 54.3 ? 'Banheiros' : 'Estacionamento';   // 10/11/2026: junto ao muro do barracão
+  if (y > 6.6 && x > 49.9) return x < 54.9 ? 'Banheiros' : 'Estacionamento';   // 10/11/2026: junto ao muro do barracão
   return 'Parte de baixo';
 }

@@ -829,6 +829,20 @@ for a in np.linspace(0, 2 * math.pi, 9)[:-1]:
 # próprio para não mexer no resto da cena.
 import banheiro as BANHEIRO
 BANHEIRO.construir(geo, P, np.random.default_rng(31), 2)
+# dois carros de referência (pedido do Thiago): o normal na vaga coberta e a caminhonete na linha do portão
+import carros as CARROS
+_CARROS = [CARROS.carro(geo, 'carro', BANHEIRO.CARRO[0], (BANHEIRO.CARRO[2] + BANHEIRO.CARRO[3]) / 2, LOW),
+           CARROS.carro(geo, 'caminhonete', BANHEIRO.CAMINHONETE[0], (BANHEIRO.CAMINHONETE[2] + BANHEIRO.CAMINHONETE[3]) / 2, LOW)]
+# canteiro junto ao muro do barracão no vão entre a escada e o banheiro (o poço fica livre na frente dele)
+_rb = np.random.default_rng(57)
+_cx0, _cx1 = obra.ESCADA_X0 + obra.ESCADA_N * obra.ESCADA_PISO + 0.35, BANHEIRO.XB0 - 0.30
+box('stone_cut', _cx0, _cx1, 8.45, 8.49, LOW, LOW + 0.12)
+box('mulch', _cx0, _cx1, 8.49, 9.98, LOW, LOW + 0.09)
+P.alpinia((_cx0 + 0.45, 9.55, LOW + 0.09), _rb, H=1.7)
+P.heliconia(((_cx0 + _cx1) / 2 + 0.1, 9.6, LOW + 0.09), _rb, n=8, H=1.8)
+P.alpinia((_cx1 - 0.40, 9.55, LOW + 0.09), _rb, H=1.6)
+for _k, _xx in enumerate(np.linspace(_cx0 + 0.30, _cx1 - 0.30, 4)):
+    (P.moreia if _k % 2 == 0 else P.xanadu)((_xx, 8.85, LOW + 0.09), _rb, 0.8 if _k % 2 == 0 else 0.7)
 
 # ------------------------------------------------------------------ pergolado + cinema no muro
 PDX = obra.PERGOLADO_DX          # 10/11/2026: andou 1,20 m para o portão para caber o lago mais comprido
@@ -1784,6 +1798,8 @@ for _xx in _B.T_PILARES:
     colisor(_xx - 0.1, _xx + 0.1, _B.T_YP - 0.1, _B.T_YP + 0.1, LOW, LOW + 2.4)
 for _xx in _B.T_PILARES_MURO:
     colisor(_xx - 0.1, _xx + 0.1, _B.T_YT - 0.2, _B.T_YT, LOW, LOW + 2.4)
+for _c in _CARROS:                                            # os dois carros
+    colisor(_c[0], _c[1], _c[2], _c[3], LOW, LOW + 1.8)
 for _p0, _p1 in GUARDA_SEGS:                                  # guarda-corpo da beira da laje (em pedaços nas diagonais)
     _n = 1 if abs(_p0[0] - _p1[0]) < 1e-6 or abs(_p0[1] - _p1[1]) < 1e-6 else 6
     for _i in range(_n):
