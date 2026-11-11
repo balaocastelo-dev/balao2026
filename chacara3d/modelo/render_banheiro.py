@@ -114,7 +114,7 @@ VISTAS = {
     # nome: (câmera, alvo, lente, azimute do sol, elevação do sol, exposição)
     'planta': (((PX0 + PX1) / 2, (PY0 + PY1) / 2, 14.0), ((PX0 + PX1) / 2, (PY0 + PY1) / 2 + 0.0001, -1.0), 0, 215, 62, 0.15),
     'frente': ((XM, 4.35, LOW + 1.6), (XM, 9.6, LOW + 1.4), 14, 215, 52, 0.1),
-    'portao': ((59.5, 4.1, LOW + 1.7), (52.6, 8.7, LOW + 1.25), 16, 215, 52, 0.1),
+    'portao': ((59.65, 6.95, LOW + 1.75), (50.8, 8.1, LOW + 1.0), 15, 215, 52, 0.1),   # entre a caminhonete e o carro
     'laje': ((44.4, 3.0, 1.75), (52.2, 8.6, -0.3), 21, 215, 55, 0.05),
     'nicho': ((XM, 5.5, LOW + 1.55), (XM, 9.7, LOW + 1.05), 20, 215, 52, 0.1),
 }

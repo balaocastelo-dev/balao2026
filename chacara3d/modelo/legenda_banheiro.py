@@ -60,7 +60,7 @@ for jp in sorted(glob.glob(os.path.join(pasta, '*_pontos.json'))):
                'vaga': 'carro normal\n(4,30 m, coberto)', 'caminhonete': 'caminhonete\n(5,33 m)', 'poco': 'poço', 'escada': 'escada\n(sobe para a churrasqueira)',
                'portao': 'portão de baixo', 'cinema': 'cineminha'}
         des = {'frente': {'pia': (170, 260), 'vaga': (60, -120), 'caminhonete': None, 'poco': None, 'escada': None, 'portao': None, 'cinema': None},
-               'portao': {'pia': None, 'vaga': (-160, -120), 'caminhonete': (-200, 120), 'escada': None, 'portao': None, 'cinema': None, 'poco': None, 'banheiro2': None},
+               'portao': {'pia': None, 'vaga': (60, -150), 'caminhonete': (60, 150), 'escada': None, 'portao': None, 'cinema': None, 'poco': None, 'banheiro2': None},
                'laje': {'pia': None, 'vaga': None, 'caminhonete': (60, -60), 'poco': None, 'escada': None, 'portao': None, 'cinema': (60, -70), 'banheiro2': None},
                'nicho': {'pia': (200, 250), 'vaga': None, 'caminhonete': None, 'poco': None, 'escada': None, 'portao': None, 'cinema': None},
                'planta': {'banheiro1': (0, 0), 'banheiro2': (0, 0), 'pia': (150, -110), 'vaga': (0, 0), 'poco': (90, 40),
