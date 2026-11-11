@@ -9,7 +9,13 @@ export function metadadosDaPagina(pagina: PaginaDeCaptacao): Metadata {
   const url = `${BASE}/${pagina.slug}`;
   const imagem = pagina.seo.imagem ?? pagina.hero.imagem.src;
   return {
-    title: pagina.seo.titulo,
+    // `absolute` porque o layout acrescenta " | Balão da Informática" ao título
+    // de toda página. Os títulos destas páginas já traziam a marca escrita,
+    // então saíam duplicados e com 85 a 105 caracteres — o Google corta por
+    // volta de 60 e o resultado aparecia truncado no meio da frase, justamente
+    // nas páginas feitas para trazer cliente. Aqui o título vai inteiro, como
+    // escrito em lib/landing/paginas, e a régua do teste garante o tamanho.
+    title: { absolute: pagina.seo.titulo },
     description: pagina.seo.descricao,
     keywords: pagina.seo.palavras,
     alternates: { canonical: url },

@@ -20,7 +20,7 @@ const MARCAS: Marca[] = [
     nome: "Notebook Dell",
     marca: "Dell",
     linhas: "Inspiron, Vostro, Latitude, XPS e G",
-    titulo: "Assistência Especializada em Notebook Dell em Campinas | Balão Anchieta",
+    titulo: "Conserto de Notebook Dell em Campinas (Cambuí)",
     descricao:
       "Conserto de notebook Dell em Campinas: tela, bateria, carregador e placa com bancada própria no Cambuí. Mande o modelo pelo WhatsApp.",
     palavras: [
@@ -65,7 +65,7 @@ const MARCAS: Marca[] = [
     nome: "Notebook Lenovo",
     marca: "Lenovo",
     linhas: "IdeaPad, ThinkPad, Legion, LOQ e Yoga",
-    titulo: "Assistência Especializada em Notebook Lenovo em Campinas | Balão Anchieta",
+    titulo: "Conserto de Notebook Lenovo em Campinas (Cambuí)",
     descricao:
       "Conserto de notebook Lenovo em Campinas: IdeaPad, ThinkPad e Legion na bancada do Cambuí. Mande o modelo pelo WhatsApp e receba o orçamento.",
     palavras: [
@@ -115,7 +115,7 @@ const MARCAS: Marca[] = [
     nome: "Notebook Acer",
     marca: "Acer",
     linhas: "Aspire, Nitro, Predator, Spin e TravelMate",
-    titulo: "Assistência Especializada em Notebook Acer em Campinas | Balão Anchieta",
+    titulo: "Conserto de Notebook Acer em Campinas (Cambuí)",
     descricao:
       "Conserto de notebook Acer em Campinas: Aspire, Nitro e Predator com bancada própria no Cambuí. Orçamento pelo WhatsApp, antes de abrir.",
     palavras: [
@@ -159,7 +159,7 @@ const MARCAS: Marca[] = [
     nome: "Notebook HP",
     marca: "HP",
     linhas: "Pavilion, Victus, Omen, ProBook e EliteBook",
-    titulo: "Assistência Especializada em Notebook HP em Campinas | Balão Anchieta",
+    titulo: "Conserto de Notebook HP em Campinas (Cambuí)",
     descricao:
       "Conserto de notebook HP em Campinas: Pavilion, Victus, ProBook e EliteBook no Cambuí. Mande o modelo e receba o orçamento no WhatsApp.",
     palavras: [
@@ -203,7 +203,7 @@ const MARCAS: Marca[] = [
     nome: "Notebook Asus",
     marca: "Asus",
     linhas: "VivoBook, Zenbook, TUF e ROG",
-    titulo: "Assistência Especializada em Notebook Asus em Campinas | Balão Anchieta",
+    titulo: "Conserto de Notebook Asus em Campinas (Cambuí)",
     descricao:
       "Conserto de notebook Asus em Campinas: VivoBook, TUF e ROG na bancada do Cambuí. Mande o modelo pelo WhatsApp para orçar.",
     palavras: [
@@ -247,7 +247,7 @@ const MARCAS: Marca[] = [
     nome: "Notebook Samsung",
     marca: "Samsung",
     linhas: "Book, Galaxy Book e Odyssey",
-    titulo: "Assistência Especializada em Notebook Samsung em Campinas | Balão Anchieta",
+    titulo: "Conserto de Notebook Samsung em Campinas (Cambuí)",
     descricao:
       "Conserto de notebook Samsung em Campinas: Book, Galaxy Book e Odyssey no Cambuí. Mande o modelo. A peça é confirmada no WhatsApp.",
     palavras: [

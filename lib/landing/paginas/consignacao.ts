@@ -5,7 +5,7 @@ export const consignacao: PaginaDeCaptacao = {
   nome: "Consignação de notebook, PC, console e iPhone usados",
   chamada: "Deixe o usado na vitrine da loja do Cambuí: a equipe avalia, expõe e atende o comprador por você.",
   seo: {
-    titulo: "Vender notebook, PC ou iPhone usado em consignação em Campinas | Balão",
+    titulo: "Vender Notebook ou PC Usado em Campinas | Avaliação Grátis",
     descricao:
       "Venda seu notebook, PC gamer, MacBook, iPhone ou console usado em consignação na loja do Cambuí, em Campinas. Avaliação pelo WhatsApp, vitrine e comprador atendidos.",
     palavras: [

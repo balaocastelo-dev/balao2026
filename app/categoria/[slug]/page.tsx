@@ -171,7 +171,12 @@ export default async function CategoriaPage({
   const totalProducts = filteredProducts.length;
   const totalPages = Math.max(1, Math.ceil(totalProducts / PRODUCTS_PER_PAGE));
 
-  if (currentPage > totalPages && totalProducts > 0) {
+  // Página fora da faixa é 404, inclusive quando a categoria está vazia. Antes
+  // o `totalProducts > 0` deixava passar qualquer `?page=N` de categoria vazia:
+  // o endereço respondia 200 com "Nenhum produto encontrado" e o Google
+  // rastreava página após página (`?page=57`, `?page=134`… em
+  // /categoria/hardware-disco-rigido-hd-corporativo-nas, achado em 11/11/2026).
+  if (currentPage > totalPages) {
     notFound();
   }
 

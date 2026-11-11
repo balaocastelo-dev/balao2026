@@ -8,7 +8,7 @@ export const macbook: PaginaDeCaptacao = {
   nome: "Conserto de MacBook",
   chamada: "MacBook Air e MacBook Pro no Cambuí: tela, bateria, teclado e o Mac que não liga, com orçamento antes.",
   seo: {
-    titulo: "Assistência Especializada em MacBook em Campinas | Balão Anchieta",
+    titulo: "Conserto de MacBook em Campinas | Assistência no Cambuí",
     descricao:
       "Conserto de MacBook Air e Pro no Cambuí: tela, bateria, teclado e placa. Reparo em média 60 minutos, conforme o defeito e a peça. Até 12x sem juros.",
     palavras: [

@@ -8,7 +8,7 @@ export const imac: PaginaDeCaptacao = {
   nome: "Conserto de iMac",
   chamada: "iMac no Cambuí: não liga, tela com mancha, lentidão ou fonte, com diagnóstico antes do orçamento.",
   seo: {
-    titulo: "Assistência Especializada em iMac em Campinas | Balão Anchieta",
+    titulo: "Conserto de iMac em Campinas | Assistência no Cambuí",
     descricao:
       "Conserto de iMac no Cambuí: não liga, tela, lentidão e fonte. Assistência independente. Reparo em média 60 minutos, conforme o defeito e a peça. Até 12x sem juros.",
     palavras: [

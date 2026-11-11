@@ -5,7 +5,7 @@ export const assistenciagames: PaginaDeCaptacao = {
   nome: "Conserto de videogame e controle",
   chamada: "PS5, PS4, Xbox e Switch esquentando, sem imagem ou com controle puxando sozinho: diagnóstico e orçamento antes do conserto.",
   seo: {
-    titulo: "Conserto de PS5, Xbox, Switch e Controle em Campinas (Cambuí) | Balão",
+    titulo: "Conserto de PS5, Xbox e Switch em Campinas (Cambuí)",
     descricao:
       "Conserto de PS5, PS4, Xbox Series, Xbox One e Switch no Cambuí, em Campinas: console esquentando, sem imagem, sem ler disco e controle com drift. Orçamento antes.",
     palavras: [

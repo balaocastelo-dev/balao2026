@@ -8,7 +8,7 @@ export const android: PaginaDeCaptacao = {
   nome: "Conserto de celular Android",
   chamada: "Hub do celular Android no Cambuí: Samsung, Motorola e Xiaomi, com diagnóstico grátis e reparo em média 60 minutos.",
   seo: {
-    titulo: "Assistência de Celular Android no Cambuí | Diagnóstico Grátis – Balão Anchieta",
+    titulo: "Conserto de Celular Android em Campinas | Diagnóstico Grátis",
     descricao:
       "Tela quebrada ou celular que não carrega? Conserto de Samsung, Motorola e Xiaomi em média em 60 minutos, conforme o defeito e a peça, diagnóstico grátis e 12x sem juros.",
     palavras: [

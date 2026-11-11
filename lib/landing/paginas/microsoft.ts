@@ -17,7 +17,7 @@ export const microsoft: PaginaDeCaptacao = {
   nome: "Licenciamento Microsoft",
   chamada: "Windows, Windows Server e Office originais para empresa e pessoa física, com nota fiscal de venda e ativação no Cambuí.",
   seo: {
-    titulo: "Licenciamento Microsoft para Empresas em Campinas | Balão da Informática Anchieta",
+    titulo: "Licenciamento Microsoft para Empresas em Campinas",
     descricao:
       "Regularize Windows, Windows Server e Office com licença original, nota fiscal de venda e técnico no Cambuí. 12x sem juros também no CNPJ.",
     palavras: [

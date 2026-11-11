@@ -5,7 +5,7 @@ export const pcgamer3d: PaginaDeCaptacao = {
   nome: "PC gamer por dentro, em 3D",
   chamada: "Gire um PC gamer em 3D e entenda o papel de cada peça, o caminho do ar e a organização dos cabos antes de comprar.",
   seo: {
-    titulo: "PC Gamer por Dentro em 3D: Peças, Airflow e Cabos | Balão Campinas",
+    titulo: "PC Gamer por Dentro em 3D: Peças, Airflow e Cabos",
     descricao:
       "Veja um PC gamer por dentro em 3D: o que faz cada peça, como o ar circula e por que os cabos ficam escondidos. Montagem explicada pela bancada da Balão, em Campinas.",
     palavras: [

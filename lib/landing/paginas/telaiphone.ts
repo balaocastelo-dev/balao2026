@@ -12,7 +12,7 @@ export const telaiphone: PaginaDeCaptacao = {
   nome: "Troca de tela e bateria de iPhone",
   chamada: "Tela trincada, toque falhando, bateria que não dura ou estufada: orçamento pelo modelo do seu iPhone.",
   seo: {
-    titulo: "Troca de Tela e Bateria de iPhone em Campinas (Cambuí) | Balão",
+    titulo: "Troca de Tela e Bateria de iPhone em Campinas",
     descricao:
       "Tela de iPhone trincada, toque falhando ou bateria que não dura? Troca de tela e de bateria no Cambuí, em Campinas, com orçamento pelo modelo antes do serviço.",
     palavras: [

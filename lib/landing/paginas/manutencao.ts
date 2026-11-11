@@ -8,7 +8,7 @@ export const manutencao: PaginaDeCaptacao = {
   nome: "Conserto de notebook",
   chamada: "Diga o defeito e receba a causa provável, o preço e o prazo pelo WhatsApp, antes de aprovar o serviço.",
   seo: {
-    titulo: "Conserto de Notebook em Campinas (Cambuí) | Orçamento pelo WhatsApp",
+    titulo: "Conserto e Assistência de Notebook em Campinas (Cambuí)",
     descricao:
       "Conserto de notebook no Cambuí: diga o defeito e receba causa provável, preço e prazo pelo WhatsApp. Bancada própria, garantia e nota fiscal.",
     palavras: [
