@@ -5,7 +5,7 @@ export const pcgamer: PaginaDeCaptacao = {
   nome: "PC gamer pronto",
   chamada: "PC gamer no Cambuí: escolha pelo jogo, veja ligado na loja e retire no balcão quando estiver em estoque.",
   seo: {
-    titulo: "PC Gamer em Campinas: Veja Rodando e Leve Hoje | Balão da Informática Anchieta",
+    titulo: "PC Gamer em Campinas: Veja Rodando e Leve Hoje",
     descricao:
       "PC gamer pronto no Cambuí: escolha pelo seu jogo, veja rodando na loja e leve hoje. 10% no Pix ou 10x sem juros. Fale no WhatsApp.",
     palavras: [

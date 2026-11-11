@@ -12,7 +12,7 @@ export const microsoftWindows: PaginaDeCaptacao = {
   nome: "Licença Windows",
   chamada: "Windows 10 e 11 Pro originais, com nota fiscal de venda, ativação e instalação no Cambuí.",
   seo: {
-    titulo: "Licença Windows 11 Pro Original com Nota Fiscal | Balão da Informática Anchieta",
+    titulo: "Licença Windows 11 Pro Original com Nota Fiscal",
     descricao:
       "Licença Windows 10 e 11 Pro original com nota fiscal de venda e técnico que instala e ativa. OEM, Retail ou volume em Campinas. 12x sem juros.",
     palavras: [

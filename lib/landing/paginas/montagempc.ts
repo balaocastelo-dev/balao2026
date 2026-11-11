@@ -5,7 +5,7 @@ export const montagempc: PaginaDeCaptacao = {
   nome: "Montagem de PC sob medida",
   chamada: "Diga o que você joga ou faz e quanto quer gastar: a loja escolhe as peças, monta, testa e mostra o PC ligado antes de você pagar.",
   seo: {
-    titulo: "Montagem de PC em Campinas | Com Suas Peças ou as Nossas – Balão Anchieta",
+    titulo: "Montagem de PC em Campinas | Suas Peças ou as Nossas",
     descricao:
       "Montagem de PC no Cambuí com cable management e teste de estresse. Traga suas peças ou compre com a gente. Preço fechado pelo WhatsApp.",
     palavras: [

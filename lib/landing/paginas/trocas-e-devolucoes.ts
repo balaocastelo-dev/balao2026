@@ -13,7 +13,7 @@ export const trocasEDevolucoes: PaginaDeCaptacao = {
   nome: "Trocas e devoluções",
   chamada: "Desistiu da compra ou o produto deu defeito? O que a lei garante e como pedir pelo WhatsApp.",
   seo: {
-    titulo: "Trocas, devoluções e garantia em Campinas | Balão da Informática",
+    titulo: "Trocas, Devoluções e Garantia em Campinas",
     descricao:
       "Desistência em 7 dias na compra pelo site ou WhatsApp, garantia legal de 90 dias e avaliação do defeito na bancada do Cambuí. Peça a troca pelo WhatsApp.",
     palavras: [

@@ -5,7 +5,7 @@ export const promocao: PaginaDeCaptacao = {
   nome: "Promoções de informática",
   chamada: "Só o que baixou de preço de verdade, com o \"de / por\" que estava no site, e o que tem para levar hoje.",
   seo: {
-    titulo: "Promoção de informática em Campinas: preços que baixaram | Balão",
+    titulo: "Promoções de Informática em Campinas: Preços que Baixaram",
     descricao:
       "Ofertas de informática em Campinas com queda de preço real (\"de / por\" do próprio site), pronta entrega no Cambuí, monitores, SSDs e periféricos.",
     palavras: [

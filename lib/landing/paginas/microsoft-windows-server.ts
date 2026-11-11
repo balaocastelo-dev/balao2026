@@ -13,7 +13,7 @@ export const microsoftWindowsServer: PaginaDeCaptacao = {
   nome: "Windows Server",
   chamada: "Windows Server com a conta de núcleos e CALs explicada, nota fiscal de venda e instalação no Cambuí.",
   seo: {
-    titulo: "Windows Server 2025: Licenças e CALs Explicadas | Balão da Informática Anchieta",
+    titulo: "Windows Server 2025: Licenças e CALs Explicadas",
     descricao:
       "Standard ou Datacenter, núcleos e CAL por usuário ou dispositivo, com exemplo de escritório. Nota fiscal de venda e 12x sem juros no CNPJ.",
     palavras: [

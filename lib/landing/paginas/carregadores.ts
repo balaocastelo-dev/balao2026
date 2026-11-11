@@ -5,7 +5,7 @@ export const carregadores: PaginaDeCaptacao = {
   nome: "Carregadores e fontes de notebook",
   chamada: "Notebook sem carga? Mande a foto da etiqueta da fonte e saiba qual serve, para retirar ou receber em Campinas.",
   seo: {
-    titulo: "Carregador e fonte de notebook em Campinas (Cambuí) | Balão da Informática",
+    titulo: "Carregador e Fonte de Notebook em Campinas (Cambuí)",
     descricao:
       "Fonte de notebook Dell, HP, Lenovo, Acer, Asus, Samsung, MacBook e USB-C no Cambuí, em Campinas. Mande foto da etiqueta no WhatsApp e confira a fonte certa.",
     palavras: [

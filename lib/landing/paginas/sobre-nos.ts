@@ -16,7 +16,7 @@ export const sobreNos: PaginaDeCaptacao = {
   nome: "Sobre a Balão",
   chamada: "Loja de bairro no Cambuí que vende e conserta, e mostra funcionando antes de você pagar.",
   seo: {
-    titulo: "Sobre a Balão da Informática: loja e assistência no Cambuí, Campinas",
+    titulo: "Sobre a Balão: Loja e Assistência no Cambuí, Campinas",
     descricao:
       "Mais de 25 anos de Balão da Informática em Campinas: loja de bairro no Cambuí que vende e conserta, mostra funcionando antes de cobrar e atende pelo WhatsApp.",
     palavras: [

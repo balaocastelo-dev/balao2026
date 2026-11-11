@@ -12,7 +12,7 @@ export const microsoftOffice365: PaginaDeCaptacao = {
   nome: "Office e Microsoft 365",
   chamada: "Office 2024 ou Microsoft 365, escolhido pelo perfil, com nota fiscal de venda e instalação no Cambuí.",
   seo: {
-    titulo: "Office 2024 ou Microsoft 365? Qual Comprar em 2026 | Balão da Informática Anchieta",
+    titulo: "Office 2024 ou Microsoft 365: Qual Comprar em 2026",
     descricao:
       "Compra única ou assinatura? Office para você ou sua empresa, com licença original, nota fiscal de venda e instalação no Cambuí. 12x sem juros.",
     palavras: [

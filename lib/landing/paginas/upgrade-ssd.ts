@@ -8,7 +8,7 @@ export const upgradeSsd: PaginaDeCaptacao = {
   nome: "Upgrade de SSD e memória",
   chamada: "Troca de HD por SSD e aumento de memória no Cambuí, com a peça da loja e os arquivos preservados quando o disco permite.",
   seo: {
-    titulo: "Upgrade de SSD e Memória em Campinas | Pronto no Dia – Balão Anchieta",
+    titulo: "Upgrade de SSD e Memória em Campinas | Pronto no Dia",
     descricao:
       "Notebook lento? Trocamos HD por SSD e aumentamos a memória no Cambuí, com peça na loja e seus arquivos preservados. Preço pelo WhatsApp.",
     palavras: [

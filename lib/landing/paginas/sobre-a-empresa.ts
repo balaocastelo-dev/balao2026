@@ -15,7 +15,7 @@ export const sobreAEmpresa: PaginaDeCaptacao = {
   nome: "Dados da empresa",
   chamada: "Razão social, CNPJ, endereço, horário e contatos oficiais da Balão da Informática no Cambuí.",
   seo: {
-    titulo: "Balão da Informática Anchieta: CNPJ, endereço e contatos em Campinas",
+    titulo: "Balão da Informática Anchieta: CNPJ, Endereço e Contato",
     descricao:
       "Dados oficiais da Balão da Informática Anchieta: CNPJ 34.397.947/0001-08, Av. Anchieta, 789, Cambuí, Campinas/SP, telefone, WhatsApp, horário e Instagram.",
     palavras: [

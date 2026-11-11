@@ -7,7 +7,7 @@ export const tonner: PaginaDeCaptacao = {
   nome: "Toner e cartucho em Campinas",
   chamada: "Toner original e compatível, cartucho e tinta originais, com entrega por motoboy para casa e escritório.",
   seo: {
-    titulo: "Toner e Cartucho em Campinas com Entrega Hoje | Balão da Informática Anchieta",
+    titulo: "Toner e Cartucho em Campinas com Entrega Hoje",
     descricao:
       "Acabou o toner? Diga o modelo da impressora e receba hoje por motoboy em Campinas e região. Original ou compatível, com nota fiscal.",
     palavras: [

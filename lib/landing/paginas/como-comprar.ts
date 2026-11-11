@@ -11,7 +11,7 @@ export const comoComprar: PaginaDeCaptacao = {
   nome: "Como comprar",
   chamada: "Pelo site no Pix com 10% de desconto, pelo WhatsApp em até 10x sem juros ou no balcão do Cambuí.",
   seo: {
-    titulo: "Como comprar na Balão: site, WhatsApp ou loja no Cambuí, Campinas",
+    titulo: "Como Comprar na Balão: Site, WhatsApp ou Loja no Cambuí",
     descricao:
       "Compre pelo site no Pix com 10% de desconto, pelo WhatsApp em até 10x sem juros no cartão ou no balcão do Cambuí, em Campinas, vendo o produto funcionando.",
     palavras: [

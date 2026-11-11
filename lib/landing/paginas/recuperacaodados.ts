@@ -10,7 +10,7 @@ export const recuperacaodados: PaginaDeCaptacao = {
   nome: "Recuperação de dados",
   chamada: "Perdeu fotos ou documentos? Pare de usar o disco e fale com a bancada antes de tentar qualquer coisa.",
   seo: {
-    titulo: "Recuperação de Dados em Campinas: HD, SSD, Pen Drive e Cartão | Balão",
+    titulo: "Recuperação de Dados em Campinas: HD, SSD e Pen Drive",
     descricao:
       "Perdeu arquivos de HD, SSD, pen drive, cartão de memória ou notebook que não liga? Pare de usar o disco e traga à bancada do Cambuí, em Campinas. Orçamento antes.",
     palavras: [

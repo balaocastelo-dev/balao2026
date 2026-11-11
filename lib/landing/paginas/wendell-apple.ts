@@ -12,7 +12,7 @@ export const wendellApple: PaginaDeCaptacao = {
   nome: "Especialista Apple",
   chamada: "iPhone, MacBook, iPad, iMac, Mac mini e Apple Watch: escolha o aparelho e fale com a bancada Apple da loja.",
   seo: {
-    titulo: "Especialista Apple em Campinas: iPhone, Mac, iPad e Watch | Balão",
+    titulo: "Especialista Apple em Campinas: iPhone, Mac, iPad e Watch",
     descricao:
       "Especialista Apple no Cambuí, em Campinas: iPhone, MacBook, iPad, iMac, Mac mini e Apple Watch. Escolha o aparelho, diga o modelo e receba o orçamento no WhatsApp.",
     palavras: [

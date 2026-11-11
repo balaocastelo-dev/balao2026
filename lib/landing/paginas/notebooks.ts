@@ -8,7 +8,7 @@ export const notebooks: PaginaDeCaptacao = {
   nome: "Notebooks em Campinas",
   chamada: "Diga para que vai usar e receba duas ou três opções que fazem sentido, para ver ligadas no balcão.",
   seo: {
-    titulo: "Notebook em Campinas (Cambuí): escolha pelo seu uso | Balão da Informática",
+    titulo: "Notebooks em Campinas (Cambuí): Escolha pelo Seu Uso",
     descricao:
       "Notebook para estudo, escritório, design, jogos e programação no Cambuí, em Campinas. Veja ligado antes de levar e conte com a assistência no mesmo endereço.",
     palavras: [

@@ -5,7 +5,7 @@ export const sistemas: PaginaDeCaptacao = {
   nome: "Criação de sites, lojas virtuais e sistemas",
   chamada: "Site, loja virtual, sistema interno e automação de WhatsApp feitos pela mesma equipe que roda a Balão.",
   seo: {
-    titulo: "Criação de sites, lojas virtuais e sistemas em Campinas | Balão",
+    titulo: "Criação de Sites e Sistemas para Empresas em Campinas",
     descricao:
       "Sites, lojas virtuais, sistemas internos e automação de WhatsApp para pequenas empresas de Campinas, feitos pela equipe que criou os sistemas da própria Balão.",
     palavras: [

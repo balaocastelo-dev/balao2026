@@ -8,7 +8,7 @@ export const qualPcGamer: PaginaDeCaptacao = {
   nome: "Qual PC gamer comprar",
   chamada: "Três faixas de orçamento para escolher um PC gamer e ver a máquina ligada na loja do Cambuí antes de pagar.",
   seo: {
-    titulo: "Qual PC Gamer Comprar com 3, 5 ou 8 Mil em 2026 | Balão Anchieta",
+    titulo: "Qual PC Gamer Comprar com 3, 5 ou 8 Mil em 2026",
     descricao:
       "Guia de PC gamer nas faixas de 3, 5 e 8 mil: o que observar em cada uma e onde ver a máquina ligada no Cambuí, em Campinas.",
     palavras: [

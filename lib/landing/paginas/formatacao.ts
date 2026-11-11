@@ -8,7 +8,7 @@ export const formatacao: PaginaDeCaptacao = {
   nome: "Formatação com backup",
   chamada: "Formatação de notebook e PC no Cambuí, com backup combinado antes e aviso quando o problema é o disco, não o sistema.",
   seo: {
-    titulo: "Formatação de Notebook em Campinas com Backup | Balão da Informática Anchieta",
+    titulo: "Formatação de Notebook em Campinas com Backup Incluído",
     descricao:
       "Formatação de notebook e PC com backup no Cambuí. Seus arquivos salvos, Windows instalado e retirada no balcão. Preço pelo WhatsApp.",
     palavras: [

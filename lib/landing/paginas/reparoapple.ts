@@ -14,7 +14,7 @@ export const reparoapple: PaginaDeCaptacao = {
   nome: "Serviços Apple",
   chamada: "Hub da assistência Apple no Cambuí: iPhone, MacBook, iMac, iPad, Mac mini e Apple Watch, com orçamento antes.",
   seo: {
-    titulo: "Serviços Apple em Campinas | Especialista no Cambuí – Balão Anchieta",
+    titulo: "Assistência Apple em Campinas | Especialista no Cambuí",
     descricao:
       "Especialista em Apple no Cambuí: iPhone, MacBook e iMac com assistência independente. Reparo em média 60 minutos, conforme o defeito e a peça. Até 12x sem juros.",
     palavras: [

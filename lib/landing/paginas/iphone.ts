@@ -8,7 +8,7 @@ export const iphone: PaginaDeCaptacao = {
   nome: "Conserto de iPhone",
   chamada: "iPhone no Cambuí: diagnóstico grátis, reparo em média 60 minutos, conforme o defeito e a peça, e 12x sem juros.",
   seo: {
-    titulo: "Conserto de iPhone em Campinas | Em média 60 min – Balão Anchieta",
+    titulo: "Conserto de iPhone em Campinas | Em Média 60 Minutos",
     descricao:
       "iPhone com tela quebrada ou bateria fraca? Diagnóstico grátis no Cambuí, reparo em média de 60 minutos, conforme o defeito e a peça, e 12x sem juros.",
     palavras: [

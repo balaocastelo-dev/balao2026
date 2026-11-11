@@ -10,7 +10,7 @@ export const envioEEntrega: PaginaDeCaptacao = {
   nome: "Envio e entrega",
   chamada: "Retire no Cambuí, receba por motoboy em Campinas e região ou calcule o frete pelo CEP.",
   seo: {
-    titulo: "Entrega em Campinas e região, retirada no Cambuí e envio | Balão",
+    titulo: "Entrega em Campinas e Região e Retirada no Cambuí",
     descricao:
       "Retire na loja do Cambuí, receba por motoboy em Campinas, Valinhos, Paulínia, Sumaré e região ou calcule o frete pelo CEP. Quer hoje? Chame no WhatsApp.",
     palavras: [
