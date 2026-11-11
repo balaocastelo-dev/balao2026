@@ -362,7 +362,7 @@ export function criarCenarios(ctx) {
     const r = sorteio(77), G = cn.grupo, Z = -1, ASS = -Math.PI / 2;   // todo mundo olha para a tela (y = 0)
     por(G, 'manta', 55.25, 0.95, Z, -Math.PI / 2);
     por(G, 'puff', 53.15, 2.55, Z, ASS + 0.35); por(G, 'puff', 57.25, 2.55, Z, ASS - 0.35);
-    for (const x of [53.9, 55.2, 56.5]) por(G, 'cadeira_dobravel', x, 4.2, Z, ASS);   // antes 4,55: a frente da garagem fica em 4,6
+    for (const x of [53.9, 55.2, 56.5]) por(G, 'cadeira_dobravel', x, 4.55, Z, ASS);
     const proj = por(G, 'projetor', 55.2, 5.2, Z, ASS);
     por(G, 'cooler', 57.95, 3.35, Z, Math.PI); por(G, 'balde_pipoca', 55.2, 2.2, Z + 0.36, 0);
     for (const m of materiaisPorNome(proj, 'lente_projetor')) m.emissiveIntensity = 3;
@@ -380,7 +380,7 @@ export function criarCenarios(ctx) {
     // manta: duas crianças e um adulto sentados no chão
     [[54.65, 1.0, 'crianca'], [55.35, 0.92, 'crianca'], [56.05, 1.05, 'mulher']].forEach(([x, y, t]) => sentar(t, escolher(VIS.festa[t], r), x, y, Z, ASS, ['sentado_chao']));
     // cadeiras de trás
-    if (estado.qualidade >= 1) [53.9, 55.2, 56.5].forEach((x, i) => { const t = i === 1 ? 'mulher' : 'homem'; sentar(t, escolher(VIS.noite[t], r), x, 4.15, Z, ASS, ['sentado_assistindo', 'sentado_conversando']); });
+    if (estado.qualidade >= 1) [53.9, 55.2, 56.5].forEach((x, i) => { const t = i === 1 ? 'mulher' : 'homem'; sentar(t, escolher(VIS.noite[t], r), x, 4.5, Z, ASS, ['sentado_assistindo', 'sentado_conversando']); });
     cn.hora = 20.8; cn.proj = 'cinema'; cn.vista = [55.2, 6.6, -Math.PI / 2, -1];
     cn.telaCinema = 'boas_vindas'; cn.telaExtras = { texto: 'SESSÃO DE|CINEMA' };
     return cn;

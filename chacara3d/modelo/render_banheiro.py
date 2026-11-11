@@ -1,4 +1,4 @@
-"""Fotos do banheiro duplo externo do quintal de baixo (modelo 2, no lugar do barracão, com a garagem na frente).
+"""Fotos do banheiro duplo externo do quintal de baixo (modelo 2, perto do poço, com o estacionamento ao lado).
 
     python render_banheiro.py PASTA [--res 1400] [--samples 32] [--vistas frente,portao,laje,nicho,planta]
 
@@ -54,7 +54,7 @@ import banheiro as B
 planta_so = set(args.vistas.split(',')) <= {'planta'}
 TIRAR = []
 if planta_so:                                          # na planta: sem o telhado dos banheiros e da vaga, sem a copa
-    TIRAR.append((B.T_X0 - 0.1, B.T_X1 + 0.1, B.T_YF - 0.1, B.YB1 + 0.05, LOW + B.PD + 0.005, 6.0,
+    TIRAR.append((B.T_X0 - 0.1, B.T_X1 + 0.1, B.T_YF - 0.2, B.YB1 + 0.05, LOW + B.PD + 0.005, 6.0,
                   ('rooftile', 'wood_x', 'wood_y', 'metal_dark', 'forro', 'brick')))
     TIRAR.append((44.0, 52.0, -0.3, 6.5, 1.25, 12.0, ('bark_dark',)))           # fica só o tronco da amendoeira
 COPA = ('leaf_amend', 'leaf_amend_red', 'leaf_core_big')
@@ -113,17 +113,17 @@ XM = (B.XN0 + B.XN1) / 2
 VISTAS = {
     # nome: (câmera, alvo, lente, azimute do sol, elevação do sol, exposição)
     'planta': (((PX0 + PX1) / 2, (PY0 + PY1) / 2, 14.0), ((PX0 + PX1) / 2, (PY0 + PY1) / 2 + 0.0001, -1.0), 0, 215, 62, 0.15),
-    'frente': ((XM - 0.6, 4.95, LOW + 1.6), (XM - 0.3, 9.6, LOW + 1.45), 13, 215, 52, 0.1),
-    'portao': ((59.5, 3.3, LOW + 1.7), (52.6, 8.8, LOW + 1.2), 16, 215, 52, 0.1),
-    'laje': ((44.4, 3.0, 1.75), (55.2, 8.6, -0.35), 21, 215, 55, 0.05),
-    'nicho': ((XM, 5.3, LOW + 1.55), (XM, 9.7, LOW + 1.05), 20, 215, 52, 0.1),
+    'frente': ((XM, 4.35, LOW + 1.6), (XM, 9.6, LOW + 1.4), 14, 215, 52, 0.1),
+    'portao': ((59.5, 4.1, LOW + 1.7), (52.6, 8.7, LOW + 1.25), 16, 215, 52, 0.1),
+    'laje': ((44.4, 3.0, 1.75), (52.2, 8.6, -0.3), 21, 215, 55, 0.05),
+    'nicho': ((XM, 5.5, LOW + 1.55), (XM, 9.7, LOW + 1.05), 20, 215, 52, 0.1),
 }
 # pontos que o legenda_banheiro.py usa
 PONTOS = {
     'banheiro1': [((B.XA0 + B.XA1) / 2, B.YB0 - 0.02, LOW + 1.3)],
     'banheiro2': [((B.XC0 + B.XC1) / 2, B.YB0 - 0.02, LOW + 1.3)],
     'pia': [(B.CUBAS[0][0], B.CUBAS[0][1], B.BANC_Z + 0.1)],
-    'vaga': [((B.T_X0 + B.T_X1) / 2 + 1.2, (B.T_YP + B.YB0) / 2 - 0.2, LOW + 0.05)],
+    'vaga': [((B.XB1 + B.T_X1) / 2, (B.T_YF + B.T_YT) / 2 - 0.3, LOW + 0.05)],
     'poco': [(O.POCO[0], O.POCO[1], LOW + 0.7)],
     'escada': [(O.ESCADA_X0 + O.ESCADA_N * O.ESCADA_PISO * 0.55, (O.ESCADA_Y0 + O.ESCADA_Y1) / 2, LOW * 0.45)],
     'portao': [(59.95, 5.2, LOW + 1.2)],

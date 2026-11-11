@@ -823,9 +823,10 @@ for a in np.linspace(0, 2 * math.pi, 9)[:-1]:
         P.moreia((c_[0], c_[1], LOW), rng, 0.6)
 
 # ------------------------------------------------------------------ banheiros e garagem (10/11/2026)
-# O banheiro duplo externo (modelo 2, aprovado pelo Thiago) vai no lugar do barracão de madeira, encostado no muro do
-# barracão, com a vaga do carro na frente debaixo do mesmo telhado de duas águas; saiu a cobertura de garagem que o
-# passeio tinha aqui (não existe no terreno). Medidas no banheiro.py; rng próprio para não mexer no resto da cena.
+# O banheiro duplo externo (modelo 2, aprovado pelo Thiago) fica encostado no muro do barracão logo depois da escada,
+# perto do poço, e o estacionamento ao lado dele (até o muro do portão), debaixo de um telhado só de uma água; saiu a
+# cobertura de garagem que o passeio tinha (não existe no terreno) e a pitangueira. Medidas no banheiro.py; rng
+# próprio para não mexer no resto da cena.
 import banheiro as BANHEIRO
 BANHEIRO.construir(geo, P, np.random.default_rng(31), 2)
 
@@ -871,12 +872,26 @@ P.vine_wall('white', 0.2, 2.6, LOW + 0.3, LOW + WH, 59.97, -1, rng, density=25, 
 P.bananeira((59.0, 9.0, LOW), rng, stems=3, H=2.9)
 P.bananeira((59.2, 7.75, LOW), rng, stems=2, H=2.2, bunch=False)
 P.heliconia((58.95, 7.2, LOW), rng, n=8, H=1.7)
-P.small_tree((50.2, 9.15, LOW), rng, fruit='fruit_red')          # pitangueira
-disc('mulch', (50.2, 9.15), 0.8, LOW + 0.006)
-# pisantes do pé da escada até o piso da garagem (e dali ao portão), contornando o poço pelo lado de lá (longe do laguinho)
+
+
+def _so_sorteios(fn, *a, **k):
+    """Roda fn só para gastar os mesmos sorteios do rng e desfaz o que ela pôs no modelo (o resto da cena fica igual)."""
+    antes = {id(st): {m: (len(g.v), {kk: len(vv) for kk, vv in g.f.items()}, g.n) for m, g in st.items()} for st in (geo.G, geo.GS)}
+    fn(*a, **k)
+    for st in (geo.G, geo.GS):
+        for m in list(st.keys()):
+            nv, nf, n = antes[id(st)].get(m, (0, {}, 0))
+            g = st[m]; del g.v[nv:]; g.n = n
+            for kk in list(g.f.keys()):
+                del g.f[kk][nf.get(kk, 0):]
+
+
+_so_sorteios(P.small_tree, (50.2, 9.15, LOW), rng, fruit='fruit_red')   # a pitangueira saiu em 10/11/2026 (lugar do banheiro)
+# pisantes do pé da escada até o portão: passam entre o poço e o canteiro do laguinho, pela frente da pia dos banheiros
 _e1 = obra.ESCADA_X0 + obra.ESCADA_N * obra.ESCADA_PISO
-_cam = [(_e1 + 0.25, obra.ESCADA_Y1 - 0.35), (obra.POCO[0] - 0.5, obra.POCO[1] + obra.POCO_R + 0.55),
-        (obra.POCO[0] + 0.6, obra.POCO[1] + obra.POCO_R + 0.6), (BANHEIRO.T_X0 - 0.35, 6.3)]   # até o piso da garagem
+_cam = [(_e1 + 0.25, obra.ESCADA_Y0 + 0.2), (obra.POCO[0] - 0.95, obra.POCO[1] - obra.POCO_R - 0.25),
+        (obra.POCO[0] + 0.05, obra.POCO[1] - obra.POCO_R - 0.42), (obra.POCO[0] + 1.15, obra.POCO[1] - obra.POCO_R - 0.15),
+        ((BANHEIRO.XN0 + BANHEIRO.XN1) / 2, BANHEIRO.YB0 - BANHEIRO.PISO_FRENTE - 0.55), (56.5, 6.0), (59.3, 5.2)]
 _cp = np.array(_cam, float); _amostra = []
 for i in range(len(_cp) - 1):
     p0, p1, p2, p3 = _cp[max(i - 1, 0)], _cp[i], _cp[i + 1], _cp[min(i + 2, len(_cp) - 1)]
@@ -1767,6 +1782,8 @@ colisor(_B.XN1, _B.XB1, _B.YB0, _B.YB1, LOW, LOW + 2.6)
 colisor(_B.XN0, _B.XN1, _B.YI1 - _B.BANC_P, _B.YB1, LOW, LOW + 2.6)
 for _xx in _B.T_PILARES:
     colisor(_xx - 0.1, _xx + 0.1, _B.T_YP - 0.1, _B.T_YP + 0.1, LOW, LOW + 2.4)
+for _xx in _B.T_PILARES_MURO:
+    colisor(_xx - 0.1, _xx + 0.1, _B.T_YT - 0.2, _B.T_YT, LOW, LOW + 2.4)
 for _p0, _p1 in GUARDA_SEGS:                                  # guarda-corpo da beira da laje (em pedaços nas diagonais)
     _n = 1 if abs(_p0[0] - _p1[0]) < 1e-6 or abs(_p0[1] - _p1[1]) < 1e-6 else 6
     for _i in range(_n):

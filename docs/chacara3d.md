@@ -60,10 +60,11 @@ chácara), hospedado no site; não faz parte da loja.
   `chacara3d/modelo/obra.py`, números em `quantidades_lago.py`, folhas em `desenhos_obra.py`, fotos em
   `render_deck.py`; ficha técnica no doc "Ficha técnica do laguinho" do Claude. Detalhes na seção "Quintal de baixo"
   do `chacara3d/README.md`.
-- **Banheiros e garagem (10/11/2026)**: o banheiro duplo externo (modelo 2, tijolinho e telha, aprovado pelo Thiago)
-  entrou no passeio no lugar do barracão de madeira, encostado no muro do barracão, com a vaga do carro na frente
-  debaixo do mesmo telhado de duas águas; saiu a cobertura de garagem fictícia. Medidas em `chacara3d/modelo/banheiro.py`;
-  seção "Quintal de baixo" do `chacara3d/README.md`.
+- **Banheiros e estacionamento (10/11/2026)**: o banheiro duplo externo (modelo 2, tijolinho e telha, aprovado pelo
+  Thiago) fica encostado no muro do barracão logo depois da escada, perto do poço, com o estacionamento ao lado até o
+  muro do portão, os dois debaixo de um telhado só de uma água (alto no muro, cai para o quintal). Saíram a pitangueira,
+  o barracão e a cobertura de garagem fictícia. Medidas em `chacara3d/modelo/banheiro.py`; seção "Quintal de baixo"
+  do `chacara3d/README.md`.
 
 Pendências que dependem do Thiago: de que lado o sol nasce; conferir com trena a distância do muro da amendoeira até o
 centro do tronco e o diâmetro do poço; de que calçada é a rede de esgoto; água quente dos banheiros.
