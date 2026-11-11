@@ -55,6 +55,43 @@ for jp in sorted(glob.glob(os.path.join(pasta, '*_pontos.json'))):
     s = W / 1600
     f1, f2, f3 = ImageFont.truetype(FB, int(30 * s) + 2), ImageFont.truetype(F, int(22 * s) + 2), ImageFont.truetype(F, int(19 * s) + 2)
     px = lambda p: (p[0] * W, p[1] * H)
+    if M.get('local') == 'barracao':                     # 10/11/2026: modelo 2 no lugar do barracão, com a vaga na frente
+        rot = {'banheiro1': 'BANHEIRO 1', 'banheiro2': 'BANHEIRO 2', 'pia': 'pia lavabo\n(do lado de fora)',
+               'vaga': 'vaga do carro\n(coberta)', 'poco': 'poço', 'escada': 'escada\n(sobe para a churrasqueira)',
+               'portao': 'portão de baixo', 'cinema': 'cineminha'}
+        des = {'frente': {'pia': (170, 260), 'vaga': (260, 40), 'poco': None, 'escada': None, 'portao': None, 'cinema': None},
+               'portao': {'pia': (-200, 200), 'vaga': (-160, 160), 'escada': None, 'portao': None, 'cinema': (60, -60), 'poco': None},
+               'laje': {'pia': None, 'vaga': (120, 140), 'poco': None, 'escada': None, 'portao': None, 'cinema': (60, -70), 'banheiro2': None},
+               'nicho': {'pia': (200, 250), 'vaga': None, 'poco': None, 'escada': None, 'portao': None, 'cinema': None},
+               'planta': {'banheiro1': (0, 0), 'banheiro2': (0, 0), 'pia': (150, -110), 'vaga': (0, 0), 'poco': (90, 40),
+                          'escada': (-60, -150), 'portao': (-150, 0), 'cinema': (0, 0)}}.get(nome, {})
+        if nome == 'laje':
+            rot['banheiro1'] = 'BANHEIROS'
+        for k, txt in rot.items():
+            if k in des and des[k] is None:
+                continue
+            for p in P.get(k, []):
+                x, y = px(p)
+                if p[2] <= 0 or not (0 <= x <= W and 0 <= y <= H):
+                    continue
+                dx, dy = des.get(k, (40, -40)) if not k.startswith('banheiro') else (0, 0)
+                ls = txt.split('\n'); fs = [f1] if k.startswith('banheiro') else [f2] + [f3] * (len(ls) - 1)
+                if (dx, dy) == (0, 0):
+                    caixa_texto(d, (x, y), ls, fs, ancora='mm')
+                    continue
+                r = caixa_texto(d, (x + dx * s, y + dy * s), ls, fs, ancora=('r' if dx < 0 else 'l') + 'm')
+                seta(d, ((r[2] if dx < 0 else r[0]), (r[1] + r[3]) / 2), (x, y), ESCURO, larg=2)
+        T = M['telhado']
+        d.text((24 * s, H + rod * 0.12), f"Banheiro duplo externo, modelo 2 ({M['modelo_nome'].lower()}), no lugar do barracão",
+               fill=ESCURO, font=f1)
+        d.text((24 * s, H + rod * 0.46), f"{br(M['largura'])} x {br(M['fundo'])} m encostado no muro do barracão, de {br(M['da_beira'][0])} a "
+               f"{br(M['da_beira'][1])} m da beira da laje, com a vaga do carro coberta na frente ({br(M['vaga'])} m).",
+               fill=(70, 70, 70), font=f3)
+        d.text((24 * s, H + rod * 0.72), f"Telhado de duas águas de telha de barro ({round(T['caimento'] * 100)}%), cumeeira a "
+               f"{br(T['cumeeira'])} m e calha junto ao muro.", fill=(70, 70, 70), font=f3)
+        out.save(os.path.join(pasta, nome + '_legenda.jpg'), quality=90)
+        print(nome, out.size)
+        continue
     piso = [px(p) for p in P['piso']]; topo = [px(p) for p in P['topo']]
     titulo = ['BANHEIRO DUPLO EXTERNO', '2 banheiros, com a pia lavabo central', 'do lado de fora',
               f"área de uns {br(M['largura'])} x {br(M['fundo'])} m"]

@@ -1,34 +1,36 @@
-"""Banheiro duplo externo do quintal de baixo: estudo 4, o modelo 2 com chuveiro e um telhado só com a garagem (08/11/2026).
+"""Banheiro duplo externo do quintal de baixo: modelo 2 no lugar do barracão, com a garagem na frente debaixo do mesmo
+telhado (aprovado pelo Thiago em 10/11/2026: "já coloca o banheiro também, aprovo o 2").
 
 Histórico: no estudo 3 o Thiago viu 5 modelos com a mesma planta e escolheu o 2 (tijolinho e telha), pedindo chuveiro
-nos banheiros e o banheiro emendado na garagem, debaixo de um telhado só. Com o chuveiro, os banheiros para
-cadeirante cresceram para 1,70 x 2,30 m livres. Os outros modelos continuam aqui como alternativa.
+nos banheiros e o banheiro emendado na garagem, debaixo de um telhado só (estudo 4, 08/11/2026). Com as medidas reais
+de 10/11 (escada a 6,11 m do muro da amendoeira e o poço na frente dela) o banheiro não cabia mais do outro lado da
+escada: foi para o lugar do barracão de madeira, encostado no muro do barracão, de 6,04 a 12,06 m da beira da laje,
+com a frente 2,58 m para dentro do quintal (24 cm fora da linha do portão). O carro fica na frente dele, na linha do
+portão, e um telhado de duas águas de telha de barro (36%) cobre os banheiros e a vaga. Os outros modelos continuam
+aqui como alternativa (com a cobertura deles).
 
-Pedidos do Thiago: dois banheiros com a pia lavabo central do lado de fora, do outro lado da escada que sobe para a
-churrasqueira; de frente para o poço, a 1 m do muro de pedra da churrasqueira, com as costas no muro lateral. No
-estudo 3 ele escolheu o "meio-termo": nicho da pia 50% maior (2,10 m) e banheiros acessíveis para cadeirante (1,50 m
-livres por dentro, NBR 9050); o banheiro passa 0,65 m da linha da cobertura da garagem, que encolhe. O formato é
-o mesmo nos 5 modelos; muda o estilo (MODELOS). Fonte única das medidas para o render_banheiro.py (fotos) e o
-desenho_banheiro.py (planta).
+Banheiros para cadeirante de 1,70 x 2,30 m livres (NBR 9050: giro de 1,50, barras, área de transferência), chuveiro
+sem degrau com banco articulado, nicho da pia de 2,10 m aberto na frente com bancada de 2 cubas a 0,80 m. Fonte única
+das medidas para o build.py (maquete e passeio), o render_banheiro.py (fotos) e o desenho_banheiro.py (planta).
 
-Eixos e níveis como no obra.py (x saindo do muro de pedra para o quintal, y de um muro lateral ao outro); a
-fachada fica ao longo de x, olhando para -y (para o poço).
+Eixos e níveis como no obra.py (x saindo da beira da laje para o portão, y do muro da amendoeira ao muro do barracão);
+a fachada fica ao longo de x, olhando para -y (para o meio do quintal e o portão).
 """
 import math
 import numpy as np
 from obra import EDGE, FACE, LOW, LARGURA, POCO, POCO_R
 
-AFASTAMENTO = 1.00                 # do muro de pedra (face da pedra) até o banheiro
+DA_BEIRA = 6.04                    # da beira da laje até o banheiro (onde começa o barracão de madeira hoje)
 PE, PI = 0.14, 0.12                # paredes de fora e de dentro (bloco rebocado)
 NICHO = 2.10                       # largura livre do nicho da pia (meio-termo: 50% maior que no estudo 1)
 CAB = 1.70                         # largura livre de cada banheiro: vaso, chuveiro e giro de 1,50 da cadeira de rodas
 LIVRE = 2.30                       # fundo livre: chuveiro na frente, vaso no canto do fundo, giro de 1,50 sem pegar no vaso
 LARG = 2 * PE + 2 * PI + NICHO + 2 * CAB                      # 5,62 ao longo da fachada
 FUNDO = LIVRE + 2 * PE             # 2,14
-XB0 = FACE + AFASTAMENTO           # lado do muro de pedra
-XB1 = XB0 + LARG                   # lado da garagem
-YB1 = LARGURA                      # costas no muro lateral do terreno
-YB0 = YB1 - FUNDO                  # fachada, de frente para o poço
+XB0 = EDGE + DA_BEIRA              # lado da escada e do poço
+XB1 = XB0 + LARG                   # lado do portão
+YB1 = LARGURA                      # costas no muro do barracão
+YB0 = YB1 - FUNDO                  # fachada, de frente para o meio do quintal
 YI0, YI1 = YB0 + PE, YB1 - PE      # faces de dentro da frente e do fundo
 XA0 = XB0 + PE; XA1 = XA0 + CAB    # banheiro 1 (lado do muro de pedra)
 XN0 = XA1 + PI; XN1 = XN0 + NICHO  # nicho da pia
@@ -44,21 +46,34 @@ CUBAS = [(XN0 + NICHO * 0.27, YI1 - 0.28), (XN1 - NICHO * 0.27, YI1 - 0.28)]   #
 CANTEIRO = 0.45
 CHUV_X, CHUV_Y = 1.00, 0.95        # chuveiro sem degrau no canto da frente, do lado da parede de fora (mínimo 0,90 x 0,95)
 BANCO = (0.70, 0.45, 0.46)         # banco articulado do chuveiro: comprimento, profundidade, altura
-# telhado único com a garagem: o mesmo plano da cobertura de hoje (build.py: GZH, GS_ e 3,3 m de comprimento)
-GZH, GS, G_COMP, G_FIM = 2.3, 0.212, 3.3, 58.7
+# telhado único de duas águas com a garagem (10/11/2026): cumeeira em cima da parede da frente dos banheiros, uma água
+# cai para o muro do barracão (calha junto ao muro: a água não pode cair no vizinho) e a outra cobre a vaga do carro
+# até a linha dos pilares, perto do pergolado do cineminha. Telha de barro: 36% de caimento.
+T_S = 0.36                         # caimento das duas águas
+T_YC = YB0                         # cumeeira (em cima da face da frente dos banheiros)
+T_ZC = LOW + 3.40                  # altura da cumeeira (face de baixo da telha), 3,40 acima do chão
+T_YF = 4.45                        # beiral da frente (a vaga fica entre os pilares e os banheiros)
+T_YP = 4.60                        # linha dos pilares e da viga da frente
+T_YT = YB1 - 0.02                  # beiral de trás, na calha junto ao muro do barracão
+T_X0, T_X1 = XB0 - 0.25, 58.70     # pontas do telhado (do lado da escada e do lado do portão)
+GARAGEM = (T_X0, T_X1, T_YP + 0.08, YB0 - 0.45)               # piso da vaga (até os canteiros da frente dos banheiros)
+T_PILARES = (T_X0 + 0.17, 54.25, T_X1 - 0.17)               # pilares da frente: o vão de 4,3 m deixa abrir a porta do
+                                                              # motorista e a luz do projetor do cineminha passar (viga: engenheiro)
+CARRO = (55.00, 59.40, T_YP + 0.12, T_YP + 0.12 + 1.80)       # carro na vaga (só no desenho): 4,40 x 1,80, na linha do portão,
+                                                              # deixando a frente do nicho da pia livre
 
 
 def z_telhado(y):
-    """Altura (acima do 0,00 da churrasqueira) da face de cima do telhado único, que cai do muro lateral para o poço."""
-    return GZH - GS * (YB1 - y)
+    """Altura da face de baixo das telhas na posição y (as duas águas descem da cumeeira)."""
+    return T_ZC - T_S * abs(y - T_YC)
 
 
 VASO_EIXO = 0.40                   # eixo do vaso a 0,40 da parede de trás, vaso encostado na parede lateral de fora
 PISO_FRENTE = 0.90                                            # piso de pedra na frente do nicho (até perto dos pisantes)
 MARQUISE = 0.35                                               # avanço da laje do modelo 1 na frente (a jardineira)
-GARAGEM_X = 52.3                                              # começo da cobertura da garagem hoje (build.py)
-ATE_POCO = YB0 - (POCO[1] + POCO_R)                           # da fachada até a boca do poço
-NA_GARAGEM = XB1 - GARAGEM_X                                  # quanto o banheiro entra na linha da garagem
+ATE_POCO = float(np.hypot(XB0 - POCO[0], YB0 - POCO[1]) - POCO_R)   # do canto do banheiro até a boca do poço
+ATE_PORTAO = 60.0 - XB1                                       # do lado do banheiro até o muro do portão (modelo)
+VAGA = YB0 - (T_YP + 0.08)                                    # da linha dos pilares até a frente dos banheiros
 
 MODELOS = {
     1: {'nome': 'Pedra clara e jardineira',
@@ -66,7 +81,7 @@ MODELOS = {
         'parede': 'house_white', 'fachada': 'filete', 'fundo': 'filete', 'porta': 'wood_z', 'bancada': 'quartzo',
         'cobertura': 'laje_jardineira', 'luz': 'arandela', 'barrado': None, 'ripado': False},
     2: {'nome': 'Tijolinho e telha',
-        'desc': 'Tijolo como os pilares da churrasqueira, um telhado só com a garagem, varanda de madeira e chuveiro nos banheiros.',
+        'desc': 'Tijolo como os pilares da churrasqueira, telhado de duas águas de telha de barro cobrindo os banheiros e a vaga do carro, chuveiro nos banheiros.',
         'parede': 'brick', 'fachada': 'brick', 'fundo': 'brick', 'porta': 'wood_z', 'bancada': 'granite',
         'cobertura': 'telha_garagem', 'luz': 'arandela', 'barrado': None, 'ripado': False},
     3: {'nome': 'Tropical ripado',
@@ -175,25 +190,36 @@ def construir(geo, P, rng, modelo=1):
             box('cimento_queimado', XN0 - 0.45, XN1 + 0.45, YB0 - 0.90, YB0, zp + 0.02, zp + 0.10)  # lâmina sobre a entrada
             box('bulb', XN0 - 0.40, XN1 + 0.40, YB0 - 0.86, YB0 - 0.84, zp + 0.005, zp + 0.02)
     elif cob == 'telha_garagem':
+        # duas águas de telha de barro: cumeeira na parede da frente, uma água para o muro (calha) e outra sobre a vaga
         zr = lambda y: z_telhado(y) - 0.13                                                 # embaixo dos caibros
         box('forro', XB0, XB1, YB0, YB1 - 0.005, zp, zp + 0.06)
-        box(E['fachada'], XB0, XB1, YB0, YI0, zp, zr(YB0))                                  # tijolo até o telhado
-        box(E['parede'], XB0, XB1, YI1, YB1 - 0.005, zp, zr(YI1))
-        zo = lambda y: z_telhado(y) - 0.03                                                 # oitões fecham até a telha
-        for x0_, x1_ in ((XB0, XB0 + PE), (XB1 - PE, XB1)):                                # oitões das pontas
-            for xq in (x0_, x1_):
-                quad(E['parede'], (xq, YB0, zp), (xq, YB1 - 0.005, zp), (xq, YB1 - 0.005, zo(YB1)), (xq, YB0, zo(YB0)))
-        beam('wood_y', (XB0 - 0.24, YB1, GZH - 0.07), (XB0 - 0.24, YB1 - 3.28, GZH - GS * 3.28 - 0.07), 0.03, 0.16)  # testeira da ponta
-        vg = np.array([0, -1.0, -GS]); vg /= np.linalg.norm(vg)
-        tile_roof('rooftile', (XB0 - 0.25, YB1, GZH), (1, 0, 0), vg, G_FIM - (XB0 - 0.25), G_COMP * math.sqrt(1 + GS * GS))
-        for xr in np.arange(XB0 - 0.15, XB1 + 0.2, 0.6):                                   # caibros como os da garagem
-            beam('wood_y', (xr, YB1 - 0.02, GZH - 0.08), (xr, YB1 - 3.28, GZH - GS * 3.28 - 0.08), 0.06, 0.1)
-        zbm = GZH - GS * 3.0 - 0.13
-        box('wood_x', XB0 - 0.25, G_FIM, 6.92, 7.08, zbm - 0.18, zbm)                     # viga da frente, uma só
-        for xx in (XB0 - 0.10, XN0 - 0.10, XN1 + 0.10, XB1 + 0.10):                        # pilares da varanda
-            box('wood_z', xx - 0.08, xx + 0.08, 6.92, 7.08, LOW, zbm - 0.18)
-        box('wood_x', XB1, G_FIM, 9.9, 9.98, GZH - 0.32, GZH - 0.13)                       # viga do fundo da garagem
-        box('stone_cut', XB1, G_FIM, 6.9, 9.98, LOW - 0.01, LOW + 0.012)                    # piso da garagem
+        box(E['fachada'], XB0, XB1, YB0, YI0, zp, zr(YI0))                                  # frente de tijolo até a cumeeira
+        box(E['parede'], XB0, XB1, YI1, YB1 - 0.005, zp, zr(YB1 - 0.005))                   # fundo até o telhado
+        for xq in (XB0, XB0 + PE, XB1 - PE, XB1):                                           # oitões das pontas
+            quad(E['parede'], (xq, YI0, zp), (xq, YI1, zp), (xq, YI1, zr(YI1) + 0.10), (xq, YI0, zr(YI0) + 0.10))
+        L_ = T_X1 - T_X0; k = math.sqrt(1 + T_S * T_S)
+        vf = np.array([0, -1.0, -T_S]); vf /= np.linalg.norm(vf)
+        vt = np.array([0, 1.0, -T_S]); vt /= np.linalg.norm(vt)
+        tile_roof('rooftile', (T_X0, T_YC, T_ZC), (1, 0, 0), vf, L_, (T_YC - T_YF) * k)    # água da frente (vaga)
+        tile_roof('rooftile', (T_X1, T_YC, T_ZC), (-1, 0, 0), vt, L_, (T_YT - T_YC) * k)   # água de trás (calha no muro)
+        tube('rooftile', [(T_X0, T_YC, T_ZC + 0.07), (T_X1, T_YC, T_ZC + 0.07)], 0.075, seg=8)   # cumeeira
+        box('wood_x', T_X0, T_X1, T_YC - 0.08, T_YC + 0.08, T_ZC - 0.36, T_ZC - 0.13)       # viga da cumeeira
+        zf = zr(T_YP)
+        box('wood_x', T_X0, T_X1, T_YP - 0.08, T_YP + 0.08, zf - 0.20, zf)                  # viga da frente
+        for xx in T_PILARES:                                                                # pilares de madeira
+            box('wood_z', xx - 0.08, xx + 0.08, T_YP - 0.08, T_YP + 0.08, LOW, zf - 0.20)
+        for xr in np.arange(T_X0 + 0.10, T_X1 - 0.05, 0.60):                                # caibros da água da frente
+            beam('wood_y', (xr, T_YF + 0.02, z_telhado(T_YF + 0.02) - 0.08), (xr, T_YC, T_ZC - 0.08), 0.06, 0.10)
+        for xr in list(np.arange(T_X0 + 0.10, XB0 - 0.02, 0.30)) + list(np.arange(XB1 + 0.12, T_X1 - 0.05, 0.30)):
+            beam('wood_y', (xr, T_YC, T_ZC - 0.08), (xr, T_YT - 0.02, z_telhado(T_YT - 0.02) - 0.08), 0.06, 0.10)
+        box('wood_x', T_X0, T_X1, T_YF, T_YF + 0.03, z_telhado(T_YF) - 0.16, z_telhado(T_YF) - 0.01)   # testeira da frente
+        for xq in (T_X0, T_X1):                                                             # testeiras das pontas
+            beam('wood_y', (xq, T_YF, z_telhado(T_YF) - 0.07), (xq, T_YC, T_ZC - 0.07), 0.03, 0.16)
+            beam('wood_y', (xq, T_YC, T_ZC - 0.07), (xq, T_YT, z_telhado(T_YT) - 0.07), 0.03, 0.16)
+        zc_ = z_telhado(T_YT)                                                               # calha junto ao muro
+        box('metal_dark', T_X0, T_X1, T_YT - 0.16, T_YT, zc_ - 0.14, zc_ - 0.02)
+        g = GARAGEM                                                                         # piso da vaga
+        box('stone_cut', g[0], g[1], g[2], g[3], LOW - 0.01, LOW + 0.012)
     elif cob == 'telha_uma_agua':
         s = 0.30; ye = YB0 - 0.60; ze = zp + 0.10
         z = lambda y: ze + s * (y - ye)
@@ -277,7 +303,7 @@ def topo(modelo=1):
     """Ponto mais alto do banheiro, acima do 0,00 da churrasqueira."""
     cob = MODELOS[modelo]['cobertura']
     if cob == 'telha_garagem':
-        return GZH + 0.05
+        return T_ZC + 0.15
     if cob == 'telha_uma_agua':
         return LOW + PD + 0.10 + 0.30 * (YB1 - (YB0 - 0.60))
     if cob == 'telha_duas_aguas':
@@ -287,7 +313,9 @@ def topo(modelo=1):
 
 def resumo():
     return {'largura': LARG, 'fundo': FUNDO, 'banheiro': (CAB, LIVRE), 'nicho': NICHO, 'pe_direito': PD, 'portas': PORTA_Y,
-            'afastamento': AFASTAMENTO, 'ate_poco': ATE_POCO, 'na_garagem': NA_GARAGEM,
+            'da_beira': (XB0 - EDGE, XB1 - EDGE), 'ate_poco': ATE_POCO, 'ate_portao': ATE_PORTAO, 'vaga': VAGA,
+            'telhado': {'x': (T_X0 - EDGE, T_X1 - EDGE), 'do_muro': YB1 - T_YF, 'cumeeira': T_ZC - LOW,
+                        'beiral_frente': z_telhado(T_YF) - LOW, 'beiral_muro': z_telhado(T_YT) - LOW, 'caimento': T_S},
             'topos': {m: round(topo(m), 2) for m in MODELOS}, 'x': (XB0, XB1), 'y': (YB0, YB1)}
 
 

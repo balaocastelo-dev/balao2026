@@ -277,25 +277,23 @@ lado da amendoeira.
   `cenarios.js`, `mundo.js` (sofá e lugar "Cineminha"), `principal.js`, `som.js`, `bichos.js` e `projecoes.js`.
 - **Versão anterior (08/11/2026)**: muro de arrimo reto revestido na frente da beira (sapata 75 × 20), lago de 5,75 m²,
   cascata de 3 lajes e guarda-corpo no topo do muro (PR #126); trocada pelo redesenho.
-- **Banheiro duplo externo** (pedido em 08/11/2026): dois banheiros com a pia lavabo central do lado de fora, do
-  outro lado da escada. Ainda não entra no passeio (aguarda o Thiago escolher o modelo).
-  - Estudo 1: encostado no muro de pedra, de frente para o estacionamento (descartado).
-  - Estudo 2: o Thiago pediu de frente para o poço, a 1 m do muro de pedra, com as costas no muro lateral.
-  - **Estudo 3 (08/11/2026)**: o "meio-termo" que ele escolheu. Nicho da pia de 2,10 m com bancada acessível de
-    2 cubas a 0,80 m. Banheiros para cadeirante de 1,50 × 2,00 m livres: vaso encostado na parede de fora, barras,
-    giro de 1,50 e portas de 0,90 abrindo para o nicho. Total 5,62 × 2,28 m, a 2,32 m da boca do poço. Passa 0,65 m
-    da linha da garagem: nas fotos a cobertura da garagem encolhe 0,80 m.
-  - **5 modelos** com a mesma planta (`banheiro.MODELOS`): 1 pedra clara e jardineira, 2 tijolinho e telha,
-    3 tropical ripado, 4 moderno de cimento queimado, 5 fazenda (duas águas de telha colonial).
-  - **Estudo 4 (08/11/2026, aguardando o OK)**: o Thiago escolheu o **modelo 2** e pediu **chuveiro** nos banheiros e o
-    banheiro **emendado na garagem, com um telhado só**. Banheiros de 1,70 × 2,30 m livres, com chuveiro sem degrau
-    no canto da frente (1,00 × 0,95, banco articulado 0,70 × 0,45), vaso no canto do fundo e portas de 0,90 entre o
-    chuveiro e a bancada. Total 6,02 × 2,58 m, a 2,02 m do poço. O telhado continua o plano da garagem de hoje
-    (2,30 no muro, 21,2%) desde 0,25 m antes do banheiro até o fim da garagem, com viga e pilares de madeira na frente
-    (varanda). O banheiro entra 1,05 m na garagem: ficam 5,35 m cobertos e 6,75 m até o portão.
-  - Medidas no `banheiro.py`. `render_banheiro.py PASTA --estudo --modelo N` faz as fotos (vistas `quintal`, `laje`,
-    `nicho`, `alto`); sem `--estudo`, marca a área em laranja. `legenda_banheiro.py PASTA` põe o selo do modelo e o
-    rodapé; `desenho_banheiro.py PASTA` faz a planta baixa A3.
+- **Banheiro duplo externo** (pedido em 08/11/2026; **no passeio desde 10/11/2026**): dois banheiros para cadeirante
+  com a pia lavabo central do lado de fora. O Thiago escolheu o **modelo 2** (tijolinho e telha) com chuveiro e um
+  telhado só com a garagem, e em 10/11 aprovou pôr no passeio, no **lugar do barracão de madeira** (com as medidas reais
+  ele não cabia mais do outro lado da escada, perto do poço):
+  - encostado no muro do barracão, de 6,04 a 12,06 m da beira da laje, 6,02 × 2,58 m; a frente fica 24 cm fora da
+    linha do portão de baixo, 2,33 m da boca do poço e 1,94 m do muro do portão;
+  - banheiros de 1,70 × 2,30 m livres com chuveiro sem degrau (1,00 × 0,95, banco articulado 0,70 × 0,45), vaso no
+    canto do fundo, barras e giro de 1,50; nicho da pia de 2,10 m com bancada de 2 cubas a 0,80 m; portas de 0,90;
+  - telhado de duas águas de telha de barro (36%): cumeeira a 3,40 m em cima da parede da frente, uma água até o muro
+    do barracão (calha: a água não pode cair no vizinho) e outra cobrindo a vaga do carro na frente, até a linha dos 3
+    pilares de madeira (vão maior de 4,3 m, para a porta do motorista e a luz do projetor do cineminha); vaga de 2,74 m;
+  - saiu a cobertura de garagem que o passeio tinha ali (não existe no terreno). No passeio: lugar "Banheiros", áreas
+    "Banheiros" e "Garagem", colisão dos banheiros, da bancada e dos pilares; o projetor do portão foi para o pilar do
+    pergolado, a luz da garagem para debaixo do telhado e as cadeiras de trás do cenário do cinema recuaram para 4,2.
+  - Medidas no `banheiro.py` (o `build.py` chama `banheiro.construir(..., 2)`; os outros 4 modelos continuam lá).
+    Fotos: `render_banheiro.py PASTA --vistas frente,portao,laje,nicho` e `--vistas planta` + `legenda_banheiro.py PASTA`;
+    planta A3: `desenho_banheiro.py PASTA`.
 - **Ficha técnica para o pedreiro**: doc "Ficha técnica do laguinho" no Claude (materiais, quantidades, ordem da obra),
   refeita em 10/11/2026 para o redesenho.
 

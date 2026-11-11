@@ -59,7 +59,11 @@ chácara), hospedado no site; não faz parte da loja.
   guarda-corpo no piso da laje contornando o tronco; pergolado do cineminha 1,20 m mais para o portão. Medidas em
   `chacara3d/modelo/obra.py`, números em `quantidades_lago.py`, folhas em `desenhos_obra.py`, fotos em
   `render_deck.py`; ficha técnica no doc "Ficha técnica do laguinho" do Claude. Detalhes na seção "Quintal de baixo"
-  do `chacara3d/README.md`. O banheiro duplo externo ainda não entra no passeio.
+  do `chacara3d/README.md`.
+- **Banheiros e garagem (10/11/2026)**: o banheiro duplo externo (modelo 2, tijolinho e telha, aprovado pelo Thiago)
+  entrou no passeio no lugar do barracão de madeira, encostado no muro do barracão, com a vaga do carro na frente
+  debaixo do mesmo telhado de duas águas; saiu a cobertura de garagem fictícia. Medidas em `chacara3d/modelo/banheiro.py`;
+  seção "Quintal de baixo" do `chacara3d/README.md`.
 
 Pendências que dependem do Thiago: de que lado o sol nasce; conferir com trena a distância do muro da amendoeira até o
-centro do tronco e o diâmetro do poço; OK no banheiro no lugar do barracão.
+centro do tronco e o diâmetro do poço; de que calçada é a rede de esgoto; água quente dos banheiros.
