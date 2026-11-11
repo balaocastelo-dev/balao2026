@@ -57,12 +57,12 @@ for jp in sorted(glob.glob(os.path.join(pasta, '*_pontos.json'))):
     px = lambda p: (p[0] * W, p[1] * H)
     if M.get('local') == 'barracao':                     # 10/11/2026: modelo 2 perto do poço, estacionamento ao lado
         rot = {'banheiro1': 'BANHEIRO 1', 'banheiro2': 'BANHEIRO 2', 'pia': 'pia lavabo\n(do lado de fora)',
-               'vaga': 'estacionamento\n(coberto)', 'poco': 'poço', 'escada': 'escada\n(sobe para a churrasqueira)',
+               'vaga': 'carro normal\n(4,30 m, coberto)', 'caminhonete': 'caminhonete\n(5,33 m)', 'poco': 'poço', 'escada': 'escada\n(sobe para a churrasqueira)',
                'portao': 'portão de baixo', 'cinema': 'cineminha'}
-        des = {'frente': {'pia': (170, 260), 'vaga': (260, 40), 'poco': None, 'escada': None, 'portao': None, 'cinema': None},
-               'portao': {'pia': None, 'vaga': (-160, 160), 'escada': None, 'portao': None, 'cinema': None, 'poco': None, 'banheiro2': None},
-               'laje': {'pia': None, 'vaga': None, 'poco': None, 'escada': None, 'portao': None, 'cinema': (60, -70), 'banheiro2': None},
-               'nicho': {'pia': (200, 250), 'vaga': None, 'poco': None, 'escada': None, 'portao': None, 'cinema': None},
+        des = {'frente': {'pia': (170, 260), 'vaga': (60, -120), 'caminhonete': None, 'poco': None, 'escada': None, 'portao': None, 'cinema': None},
+               'portao': {'pia': None, 'vaga': (-160, -120), 'caminhonete': (-200, 120), 'escada': None, 'portao': None, 'cinema': None, 'poco': None, 'banheiro2': None},
+               'laje': {'pia': None, 'vaga': None, 'caminhonete': (60, -60), 'poco': None, 'escada': None, 'portao': None, 'cinema': (60, -70), 'banheiro2': None},
+               'nicho': {'pia': (200, 250), 'vaga': None, 'caminhonete': None, 'poco': None, 'escada': None, 'portao': None, 'cinema': None},
                'planta': {'banheiro1': (0, 0), 'banheiro2': (0, 0), 'pia': (150, -110), 'vaga': (0, 0), 'poco': (90, 40),
                           'escada': (-60, -150), 'portao': (-150, 0), 'cinema': (0, 0)}}.get(nome, {})
         if nome in ('laje', 'portao'):
@@ -82,7 +82,7 @@ for jp in sorted(glob.glob(os.path.join(pasta, '*_pontos.json'))):
                 r = caixa_texto(d, (x + dx * s, y + dy * s), ls, fs, ancora=('r' if dx < 0 else 'l') + 'm')
                 seta(d, ((r[2] if dx < 0 else r[0]), (r[1] + r[3]) / 2), (x, y), ESCURO, larg=2)
         T = M['telhado']
-        d.text((24 * s, H + rod * 0.12), f"Banheiro duplo externo, modelo 2 ({M['modelo_nome'].lower()}), perto do poço",
+        d.text((24 * s, H + rod * 0.12), f"Banheiro duplo externo, modelo 2 ({M['modelo_nome'].lower()}), tamanho padrão",
                fill=ESCURO, font=f1)
         d.text((24 * s, H + rod * 0.46), f"{br(M['largura'])} x {br(M['fundo'])} m encostado no muro do barracão, de {br(M['da_beira'][0])} a "
                f"{br(M['da_beira'][1])} m da beira da laje; estacionamento coberto ao lado: {br(M['vaga'][0])} x {br(M['vaga'][1])} m.",

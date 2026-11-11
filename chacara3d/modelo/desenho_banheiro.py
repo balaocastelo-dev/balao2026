@@ -64,8 +64,8 @@ def rotulo(ax, xy, txt, xyt, fs=8.5, ha='left', va='center', cor='#222'):
 fig = plt.figure(figsize=(16.54, 11.69))                # A3 deitada
 fig.add_artist(Rectangle((0.012, 0.015), 0.976, 0.97, transform=fig.transFigure, fill=False, lw=1.4, ec='#222'))
 fig.add_artist(Rectangle((0.012, 0.015), 0.976, 0.075, transform=fig.transFigure, fill=False, lw=1.0, ec='#222'))
-fig.text(0.022, 0.066, 'Banheiro duplo externo — modelo 2, perto do poço, com o estacionamento ao lado', fontsize=15, fontweight='bold', va='center')
-fig.text(0.022, 0.034, 'Planta baixa: encostado no muro do barracão, nicho da pia de 2,10 m, banheiros para cadeirante e um telhado só de uma água',
+fig.text(0.022, 0.066, 'Banheiro duplo externo — modelo 2, tamanho padrão, com o estacionamento ao lado', fontsize=15, fontweight='bold', va='center')
+fig.text(0.022, 0.034, 'Planta baixa: banheiros padrão com box, nicho da pia de 1,50 m, estacionamento ao lado e um telhado só de uma água',
          fontsize=10, va='center', color='#333')
 fig.text(0.66, 0.066, 'Quintal de baixo — junto ao muro do barracão', fontsize=10, va='center')
 fig.text(0.66, 0.034, f'Medidas em metros · conferir no local antes de marcar · {datetime.date.today():%d/%m/%Y}', fontsize=8.5, va='center', color='#333')
@@ -112,6 +112,8 @@ for lado, (xa, xb) in enumerate(((B.XB0, B.XN0 - 0.15), (B.XN1 + 0.15, B.XB1))):
         continue
     ret(ax, xa, xb, B.YB0 - B.CANTEIRO, B.YB0, fc=VERDE, ec='#6a8f5a', lw=0.6, zorder=1.5)
     ax.text((xa + xb) / 2, B.YB0 - B.CANTEIRO / 2 - 0.02, 'canteiro', ha='center', va='center', fontsize=7.5, color='#3d6b2f', zorder=5)
+_cx0, _cx1 = ex1 + 0.35, B.XB0 - 0.30                 # canteiro no vão entre a escada e o banheiro (build.py)
+ret(ax, _cx0, _cx1, 8.45, YM, fc=VERDE, ec='#6a8f5a', lw=0.6, zorder=1.5)
 # telhado de uma água (tracejado), caimento para o quintal, calha na frente, vigas e pilares do estacionamento
 TL = '#8a4b2a'
 ax.plot([B.T_X0, B.T_X1, B.T_X1, B.T_X0, B.T_X0], [B.T_YF, B.T_YF, B.T_YT, B.T_YT, B.T_YF], color=TL, lw=1.0, ls=(0, (7, 4)), zorder=6)
@@ -124,9 +126,9 @@ for xx in B.T_PILARES:
     ret(ax, xx - 0.08, xx + 0.08, B.T_YP - 0.08, B.T_YP + 0.08, fc=MADEIRA, ec='#6b4a22', lw=0.6, zorder=9)
 for xx in B.T_PILARES_MURO:
     ret(ax, xx - 0.08, xx + 0.08, B.T_YT - 0.18, B.T_YT - 0.02, fc=MADEIRA, ec='#6b4a22', lw=0.6, zorder=9)
-c_ = B.CARRO                                       # carro (contorno), de frente para os banheiros
-ax.add_patch(Rectangle((c_[0], c_[2]), c_[1] - c_[0], c_[3] - c_[2], fill=False, ec='#666', lw=0.9, ls=(0, (4, 3)), zorder=8))
-ax.text((c_[0] + c_[1]) / 2, (c_[2] + c_[3]) / 2, 'carro\n4,40 × 1,80', ha='center', va='center', fontsize=8, color='#555', zorder=8)
+for c_, txt_ in ((B.CARRO, 'carro normal\n4,30 × 1,75'), (B.CAMINHONETE, 'caminhonete\n5,33 × 1,86')):   # os dois carros
+    ax.add_patch(Rectangle((c_[0], c_[2]), c_[1] - c_[0], c_[3] - c_[2], fc='#f4f4f4', ec='#555', lw=0.9, ls=(0, (4, 3)), zorder=8))
+    ax.text((c_[0] + c_[1]) / 2, (c_[2] + c_[3]) / 2, txt_, ha='center', va='center', fontsize=8.5, color='#444', zorder=8)
 ax.text((B.XB1 + B.T_X1) / 2, B.T_YP + 0.28, 'ESTACIONAMENTO', ha='center', va='center', fontsize=10, fontweight='bold', color='#555', zorder=8)
 
 # paredes
@@ -140,31 +142,24 @@ for xc in ((B.XA0 + B.XA1) / 2, (B.XC0 + B.XC1) / 2):                       # ba
     ret(ax, xc - B.JAN_L / 2, xc + B.JAN_L / 2, B.YB0, B.YI0, fc='white', ec='#6e3322', lw=0.6, zorder=9)
     for f in (0.35, 0.65):
         ax.plot([xc - B.JAN_L / 2, xc + B.JAN_L / 2], [B.YB0 + B.PE * f] * 2, color='#6e3322', lw=0.6, zorder=10)
-# portas de 0,90 abrindo para fora (para o nicho), dobradiça do lado da fachada
+# portas de 0,70 abrindo para fora (para o nicho), dobradiça do lado da fachada
 for xf, s in ((B.XN0, 1), (B.XN1, -1)):
     hy = B.PORTA_Y[0]
     ax.plot([xf, xf + s * B.PORTA_L], [hy, hy], color=MADEIRA, lw=2.2, zorder=11)
     ax.add_patch(Arc((xf, hy), 2 * B.PORTA_L, 2 * B.PORTA_L, theta1=(0 if s > 0 else 90), theta2=(90 if s > 0 else 180),
                      color='#888', lw=0.7, ls=(0, (3, 2)), zorder=11))
-# banheiros acessíveis: chuveiro no canto da frente, vaso no canto do fundo, barras, transferência e giro de 1,50
-AZ_AC, VERM = '#2a6fb0', '#b03a2e'
+# banheiros padrão: box do chuveiro no canto da frente, vaso no canto do fundo
 for xw, s in ((B.XA0, 1), (B.XC1, -1)):
     ret(ax, xw, xw + s * B.CHUV_X, B.YI0, B.YI0 + B.CHUV_Y, fc='#e3f0f8', ec='none', zorder=8.5)
-    ax.plot([xw + s * B.CHUV_X] * 2 + [xw], [B.YI0, B.YI0 + B.CHUV_Y, B.YI0 + B.CHUV_Y], color='#5b8fb9', lw=0.8, ls=(0, (3, 2)), zorder=10)
-    ret(ax, xw, xw + s * B.BANCO[1], B.YI0 + 0.15, B.YI0 + 0.15 + B.BANCO[0], fc='#d0d0d0', ec='#555', lw=0.7, zorder=10)
-    ax.add_patch(Circle((xw + s * 0.70, B.YI0 + 0.45), 0.05, fc='white', ec='#333', lw=0.6, zorder=10))          # ralo
-    ax.add_patch(Circle((xw + s * 0.05, B.YI0 + 0.88), 0.045, fc='#5b8fb9', ec='none', zorder=11))                # ducha
-    ax.plot([xw + s * 0.04] * 2, [B.YI0 + 0.10, B.YI0 + 0.80], color=VERM, lw=2.4, zorder=12, solid_capstyle='butt')
-    ax.plot([xw + s * 0.50, xw + s * 0.95], [B.YI0 + 0.04] * 2, color=VERM, lw=2.4, zorder=12, solid_capstyle='butt')
+    ax.plot([xw + s * B.CHUV_X] * 2 + [xw], [B.YI0, B.YI0 + B.CHUV_Y, B.YI0 + B.CHUV_Y], color='#5b8fb9', lw=1.0, zorder=10)
+    ax.add_patch(Circle((xw + s * B.CHUV_X / 2, B.YI0 + B.CHUV_Y / 2), 0.05, fc='white', ec='#333', lw=0.6, zorder=10))   # ralo
+    ax.add_patch(Circle((xw + s * 0.05, B.YI0 + B.CHUV_Y / 2), 0.045, fc='#5b8fb9', ec='none', zorder=11))                # ducha
     yv = B.YI1 - B.VASO_EIXO
     ret(ax, xw, xw + s * 0.18, yv - 0.20, yv + 0.20, fc='white', ec='#333', lw=0.8, zorder=9)
     ax.add_patch(Ellipse((xw + s * 0.45, yv), 0.54, 0.38, fc='white', ec='#333', lw=0.8, zorder=9))
     ax.add_patch(Ellipse((xw + s * 0.47, yv), 0.34, 0.24, fill=False, ec='#333', lw=0.6, zorder=10))
-    ax.plot([xw + s * 0.04] * 2, [yv - 0.50, yv + 0.30], color=VERM, lw=2.6, zorder=12, solid_capstyle='butt')
-    ax.plot([xw + s * 0.25, xw + s * 1.05], [B.YI1 - 0.04] * 2, color=VERM, lw=2.6, zorder=12, solid_capstyle='butt')
-    ret(ax, xw, xw + s * 1.20, yv - 0.20 - 0.80, yv - 0.20, fill=False, ec=AZ_AC, lw=0.8, ls=(0, (2, 2)), zorder=10)
-    ax.add_patch(Circle((xw + s * B.CAB / 2, B.YI0 + 0.95), 0.75, fill=False, ec=AZ_AC, lw=0.9, ls=(0, (5, 3)), zorder=10))
-# bancada acessível com duas cubas
+AZ_AC = '#2a6fb0'
+# bancada com duas cubas
 ret(ax, B.XN0, B.XN1, B.YI1 - B.BANC_P, B.YI1, fc='white', ec='#333', lw=0.8, zorder=9)
 for c in B.CUBAS:
     ax.add_patch(Circle(c, 0.19, fc='white', ec='#333', lw=0.8, zorder=10))
@@ -189,28 +184,27 @@ cota(ax, (B.XB0 - 0.35, B.YB0), (B.XB0 - 0.35, B.YB1), 0.0, g=-0.16, fs=9)
 cota(ax, (B.XC1 - 0.10, B.YI0 + B.CHUV_Y), (B.XC1 - 0.10, B.YI1), 0.0, txt='', fs=8.5)
 cota(ax, (B.XC0 + 0.12, B.YI0), (B.XC0 + 0.12, B.YI1), 0.0, fs=8.5)
 cota(ax, (ex1, O.ESCADA_Y1 - 0.12), (B.XB0, O.ESCADA_Y1 - 0.12), 0.0, g=-0.13, tick=0.035, txt=br(B.ATE_ESCADA), fs=8)
-cota(ax, (O.POCO[0], O.POCO[1] + O.POCO_R), (O.POCO[0], B.YB0), 0.0, g=0.13, tick=0.035, txt=br(B.ATE_POCO), fs=8)
+_d = np.array([B.XB0 - O.POCO[0], B.YB0 - O.POCO[1]]); _d /= np.linalg.norm(_d)
+cota(ax, np.array(O.POCO) + _d * O.POCO_R, (B.XB0, B.YB0), 0.0, g=-0.15, tick=0.035, txt=br(B.ATE_POCO), fs=8.5)
 
 # rótulos
-rotulo(ax, (B.CUBAS[1][0] + 0.3, B.YI1 - 0.15), 'bancada de granito com 2 cubas a 0,80 m do chão,\nlivre embaixo (cadeirante), espelhos e pendentes', (52.6, 4.95), fs=8.5)
-rotulo(ax, (B.XN0 + 0.5, B.PORTA_Y[0] + 0.02), 'portas de 0,90 abrindo para fora,\nviradas uma para a outra', (52.6, 5.85), fs=8.5)
-rotulo(ax, (B.XC1 - 0.55, B.YI0 + 0.55), 'chuveiro sem degrau, com banco\narticulado de 0,70 × 0,45 e barras', (55.95, 6.25), fs=8.5, cor='#3b6f99')
-rotulo(ax, (B.XA0 + 0.85, B.YI0 + 1.15), 'giro de 1,50 da\ncadeira de rodas', (45.75, 9.15), fs=8.5, cor=AZ_AC)
-rotulo(ax, (B.XA0 + 0.62, B.YI1 - 0.85), 'área de transferência\n0,80 × 1,20 do vaso', (45.75, 8.45), fs=8.5, cor=AZ_AC)
-rotulo(ax, (B.T_PILARES[0], B.T_YP), 'pilares e vigas de madeira na frente e\nencostados no muro (o engenheiro dimensiona)', (55.95, 4.55), fs=8.5, cor='#6b4a22')
-rotulo(ax, (B.XB1 + 0.8, (B.T_YF + B.T_YT) / 2 + 0.3), f'uma água só: {br(B.z_telhado(B.T_YT) - O.LOW)} m no muro,\n{br(B.z_telhado(B.T_YF) - O.LOW)} m no beiral da frente', (55.95, 5.3), fs=8.5, cor=TL)
-rotulo(ax, (B.T_X1 - 0.6, B.T_YF + 0.07), 'calha na frente', (57.2, 6.6), fs=8.5, cor='#444')
+rotulo(ax, (B.CUBAS[1][0] + 0.3, B.YI1 - 0.15), 'bancada de granito com 2 cubas a 0,90 m do chão,\nespelhos e pendentes', (51.2, 5.05), fs=8.5)
+rotulo(ax, (B.XN0 + 0.5, B.PORTA_Y[0] + 0.02), 'portas de 0,70 abrindo para fora,\nviradas uma para a outra', (51.2, 5.85), fs=8.5)
+rotulo(ax, (B.XA0 + 0.35, B.YI0 + 0.35), f'box do chuveiro\n{br(B.CHUV_X)} × {br(B.CHUV_Y)}', (50.25, 6.55), fs=8.5, cor='#3b6f99')
+rotulo(ax, ((_cx0 + _cx1) / 2, 9.2), 'canteiro junto ao muro\n(o poço fica livre)', (46.1, 9.9), fs=8.5, cor='#3d6b2f')
+rotulo(ax, (B.T_PILARES[0], B.T_YP), 'pilares e vigas de madeira na frente e\nencostados no muro (o engenheiro dimensiona)', (46.1, 4.6), fs=8.5, cor='#6b4a22')
+rotulo(ax, (B.XB1 + 0.8, (B.T_YF + B.T_YT) / 2 + 0.3), f'uma água só: {br(B.z_telhado(B.T_YT) - O.LOW)} m no muro,\n{br(B.z_telhado(B.T_YF) - O.LOW)} m no beiral da frente', (46.1, 5.3), fs=8.5, cor=TL)
+rotulo(ax, (B.T_X1 - 0.6, B.T_YF + 0.07), 'calha na frente', (59.1, 6.95), fs=8.5, cor='#444', ha='right')
 
 # notas, embaixo da planta
 R = B.resumo(); T = R['telhado']
 notas_e = [
     ('Como fica (modelo 2: tijolinho e telha)', True),
-    (f'•  Dois banheiros para cadeirante de {br(B.CAB)} × {br(B.LIVRE)} m (livre), com vaso, chuveiro', False),
-    ('    sem degrau com banco articulado, barras de apoio e giro de 1,50 da cadeira.', False),
-    (f'•  Nicho da pia de {br(B.NICHO)} m, aberto e coberto, bancada de granito, 2 cubas a 0,80 m.', False),
-    ('•  Portas de 0,90 nas paredes do nicho, abrindo para fora.', False),
-    (f'•  {br(B.LARG)} × {br(B.FUNDO)} m encostado no muro do barracão, de {br(B.DA_BEIRA)} a {br(B.DA_BEIRA + B.LARG)} m da beira da laje:', False),
-    (f'    {br(B.ATE_ESCADA)} m depois do pé da escada e {br(B.ATE_POCO)} m da boca do poço (frente do banheiro 1).', False),
+    (f'•  Dois banheiros de tamanho padrão, {br(B.CAB)} × {br(B.LIVRE)} m (livre), com box de {br(B.CHUV_X)} × {br(B.CHUV_Y)} e vaso.', False),
+    (f'•  Nicho da pia de {br(B.NICHO)} m, aberto e coberto, bancada de granito, 2 cubas a 0,90 m.', False),
+    (f'•  Portas de {br(B.PORTA_L)} nas paredes do nicho, abrindo para fora.', False),
+    (f'•  {br(B.LARG)} × {br(B.FUNDO)} m encostado no muro do barracão, de {br(B.DA_BEIRA)} a {br(B.DA_BEIRA + B.LARG)} m da beira da laje;', False),
+    (f'    {br(B.ATE_POCO)} m da boca do poço: o poço fica livre, na frente do canteiro entre a escada e o banheiro.', False),
     ('•  A pitangueira e o barracão de madeira saem.', False),
     ('•  Tijolo aparente como os pilares da churrasqueira, forro de madeira, basculante no alto.', False),
 ]
@@ -219,8 +213,8 @@ notas_d = [
     (f'•  Um telhado só, de uma água, de telha de barro com {round(B.T_S * 100)}%: alto no muro do barracão', False),
     (f'    ({br(T["alto"])} m), cai para o quintal até o beiral da frente ({br(T["beiral"])} m), com calha.', False),
     (f'•  {br(T["x"][1] - T["x"][0])} m de comprimento, da ponta da escada até o muro do portão, e {br(T["do_muro"])} m de fundo.', False),
-    (f'•  Estacionamento ao lado dos banheiros: {br(B.VAGA[0])} × {br(B.VAGA[1])} m coberto, junto ao muro do', False),
-    ('    barracão até o muro do portão. A frente fica aberta (pilar só nas pontas).', False),
+    (f'•  Estacionamento coberto ao lado dos banheiros: {br(B.VAGA[0])} × {br(B.VAGA[1])} m, cabe o carro normal', False),
+    ('    (4,30 m). A caminhonete (5,33 m) não cabe ali: fica na linha do portão, descoberta.', False),
     ('•  No muro o telhado fica 1,1 m acima dele: viga em pilares encostados no muro.', False),
     ('', False),
     ('A decidir', True),

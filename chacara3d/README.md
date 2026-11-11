@@ -277,23 +277,23 @@ lado da amendoeira.
   `cenarios.js`, `mundo.js` (sofá e lugar "Cineminha"), `principal.js`, `som.js`, `bichos.js` e `projecoes.js`.
 - **Versão anterior (08/11/2026)**: muro de arrimo reto revestido na frente da beira (sapata 75 × 20), lago de 5,75 m²,
   cascata de 3 lajes e guarda-corpo no topo do muro (PR #126); trocada pelo redesenho.
-- **Banheiro duplo externo** (pedido em 08/11/2026; **no passeio desde 10/11/2026**): dois banheiros para cadeirante
-  com a pia lavabo central do lado de fora. O Thiago escolheu o **modelo 2** (tijolinho e telha) com chuveiro e um
-  telhado só com a garagem. Em 10/11 entrou primeiro no lugar do barracão, com um telhado de duas águas cobrindo a vaga
-  na frente (PR #136); no mesmo dia ele corrigiu e ficou assim:
-  - encostado no muro do barracão **logo depois da escada**, de 2,20 a 8,22 m da beira da laje (0,60 depois do pé da
-    escada), 6,02 × 2,58 m, com a frente do banheiro 1 a 0,59 m da boca do poço; **a pitangueira e o barracão saem**;
-  - **estacionamento ao lado**, junto ao muro do barracão até o muro do portão: 5,63 × 3,01 m coberto, frente aberta
-    (pilares só nas pontas), carro de frente para os banheiros;
-  - **um telhado só, de uma água**, de telha de barro com 35%, cobrindo banheiros e estacionamento: alto no muro do
-    barracão (3,37 m; o muro tem 2,30, então a parte de trás apoia numa viga com pilares encostados no muro) e caindo
-    para o quintal até o beiral da frente (2,32 m), com calha na frente;
-  - banheiros de 1,70 × 2,30 m livres com chuveiro sem degrau (1,00 × 0,95, banco articulado 0,70 × 0,45), vaso no
-    canto do fundo, barras e giro de 1,50; nicho da pia de 2,10 m com bancada de 2 cubas a 0,80 m; portas de 0,90;
-    canteiro só na frente do banheiro 2 (o 1 fica de frente para o poço);
-  - no passeio: lugar "Banheiros", áreas "Banheiros" e "Estacionamento", colisão dos banheiros, da bancada e dos
-    pilares; os pisantes passam entre o poço e o canteiro do lago e pela frente da pia até o portão; o projetor da
-    amendoeira saiu da frente da pia e o do portão está no pilar do pergolado; saiu a cobertura de garagem fictícia.
+- **Banheiro duplo externo** (pedido em 08/11/2026; **no passeio desde 10/11/2026**): dois banheiros com a pia
+  lavabo central do lado de fora, **modelo 2** (tijolinho e telha). Em 10/11 passou por três versões (PRs #136, #137 e
+  o desta seção); a que vale, pedida pelo Thiago às 23h:
+  - **tamanho padrão, sem acessibilidade para cadeirante**: banheiros de 1,30 × 2,00 m livres com box de 0,90 × 0,85 e
+    vaso, portas de 0,70 abrindo para o nicho, nicho da pia de 1,50 m com bancada de 2 cubas a 0,90 m; total 4,62 ×
+    2,28 m;
+  - encostado no muro do barracão de **4,20 a 8,82 m da beira da laje**, a 1,12 m da boca do poço: o poço fica livre,
+    na frente de um canteiro junto ao muro (alpínias, helicônia, moréia e xanadu) no vão entre a escada e o banheiro;
+    a pitangueira e o barracão saem;
+  - **estacionamento coberto ao lado**, junto ao muro do barracão até o muro do portão: 5,03 × 2,71 m, frente aberta
+    (pilares só nas pontas); **um telhado só, de uma água**, telha de barro com 35%, alto no muro do barracão (3,27 m,
+    viga em pilares encostados no muro, que tem 2,30) e caindo para o quintal até o beiral (2,32 m), com calha;
+  - **dois carros de referência** (`carros.py`, pedido dele para ter noção do espaço): um carro normal de 4,30 × 1,75
+    na vaga coberta e uma caminhonete de cabine dupla de 5,33 × 1,86 (tipo Hilux/S10) na linha do portão — ela não
+    cabe na vaga coberta; os dois têm colisão no passeio;
+  - no passeio: lugar "Banheiros", áreas "Banheiros" e "Estacionamento"; pisantes entre o poço e o canteiro do lago e
+    pela frente da pia até o portão; no cenário do cinema o projetor e a vista de entrada saíram do lugar da caminhonete.
   - Medidas no `banheiro.py` (o `build.py` chama `banheiro.construir(..., 2)`; os outros 4 modelos continuam lá; a
     pitangueira sai por `_so_sorteios`, que gasta os mesmos sorteios para o resto da cena não mudar).
     Fotos: `render_banheiro.py PASTA --vistas frente` (uma vista por vez) + `legenda_banheiro.py PASTA`;
