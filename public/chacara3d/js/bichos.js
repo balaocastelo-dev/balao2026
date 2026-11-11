@@ -539,7 +539,7 @@ function criarBorboletas(cena) {
 // ---------------------------------------------------------------- vaga-lumes
 function criarVagalumes(cena) {
   const n = 46, g = new THREE.BufferGeometry(), sem = new Float32Array(n * 4), pos = new Float32Array(n * 3);
-  const areas = [[46.6, 52.0, 0.8, 4.4, -0.8], [31.8, 44, 0.1, 0.9, 0.2], [1, 30, 0.6, 9.4, 0.3], [50, 59, 6.5, 9.5, -0.7]];
+  const areas = [[46.6, 52.0, 0.8, 4.4, -0.8], [31.8, 44, 0.1, 0.9, 0.2], [1, 30, 0.6, 9.4, 0.3], [48.0, 51.6, 7.7, 9.7, -0.7]];
   for (let i = 0; i < n; i++) {
     const a = areas[i % areas.length];
     const p = W3(rnd(a[0], a[1]), rnd(a[2], a[3]), a[4] + rnd(0.2, 1.4));

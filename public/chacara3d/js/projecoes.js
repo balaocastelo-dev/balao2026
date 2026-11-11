@@ -26,7 +26,7 @@ function definirLugares(extra) {
     { id: 'amendoeira', nome: 'Amendoeira', tipo: 'arvore', de: [51.4, 6.6, -0.7], para: [46.4, 5.1, 4.6], raio: 4.6, ganho: 4.2 },
     { id: 'muro_piscina', nome: 'Muro da piscina', tipo: 'plano', ret: { x0: 31.4, x1: 44.8, y0: 0.0, y1: 0.0, z0: -0.1, z1: 2.32 }, normal: [0, 1], de: [38.1, 6.25, 2.5], fundo: 1.1, ganho: 1.7 },
     { id: 'portao_gramado', nome: 'Portão do gramado', tipo: 'plano', ret: { x0: 0.0, x1: 0.0, y0: 2.55, y1: 6.85, z0: 0.0, z1: 3.5 }, normal: [1, 0], de: [6.4, 4.7, 1.1], fundo: 0.9, ganho: 1.8 },
-    { id: 'portao_baixo', nome: 'Portão de baixo', tipo: 'plano', ret: { x0: 60.0, x1: 60.0, y0: 2.75, y1: 7.45, z0: -1.0, z1: 2.5 }, normal: [-1, 0], de: [54.4, 5.1, -0.1], fundo: 0.9, ganho: 1.8 },
+    { id: 'portao_baixo', nome: 'Portão de baixo', tipo: 'plano', ret: { x0: 60.0, x1: 60.0, y0: 2.75, y1: 7.45, z0: -1.0, z1: 2.5 }, normal: [-1, 0], de: [57.68, 4.0, 0.55], fundo: 0.9, ganho: 1.8 },
   ];
   const cores = { 'Parede da casa azul': 'parede_azul', 'Parede da casa amarela': 'parede_amarela', 'Parede da casa verde': 'parede_verde' };
   for (const p of (extra.paredes_projecao || [])) {

@@ -822,19 +822,12 @@ for a in np.linspace(0, 2 * math.pi, 9)[:-1]:
     if not (c_[0] < obra.ESCADA_X0 + obra.ESCADA_N * obra.ESCADA_PISO + 0.3 and obra.ESCADA_Y0 - 0.3 < c_[1] < obra.ESCADA_Y1 + 0.3) and not dentro_lago(*c_):
         P.moreia((c_[0], c_[1], LOW), rng, 0.6)
 
-# ------------------------------------------------------------------ cobertura da garagem (baixa, encostada no muro lateral)
-GZH, GS_ = 2.3, 0.212
-vg = np.array([0, -1, -GS_]); vg /= np.linalg.norm(vg)
-tile_roof('rooftile', (52.3, 10.0, GZH), (1, 0, 0), vg, 6.4, 3.3 * math.sqrt(1 + GS_ ** 2))
-for xr in np.arange(52.4, 58.75, 0.6):
-    beam('wood_y', (xr, 9.98, GZH - 0.08), (xr, 6.72, GZH - GS_ * 3.28 - 0.08), 0.06, 0.1)
-zbm = GZH - GS_ * 3.0 - 0.13
-box('wood_x', 52.3, 58.7, 6.92, 7.08, zbm - 0.18, zbm)
-box('wood_x', 52.3, 58.7, 9.9, 9.98, GZH - 0.32, GZH - 0.13)
-for xx in (52.45, 55.5, 58.55):
-    box('wood_z', xx - 0.08, xx + 0.08, 6.92, 7.08, LOW, zbm - 0.18)
-    box('wood_z', xx - 0.06, xx + 0.06, 9.86, 9.98, LOW, GZH - 0.32)
-box('stone_cut', 52.3, 58.7, 6.9, 9.98, LOW - 0.01, LOW + 0.012)
+# ------------------------------------------------------------------ banheiros e garagem (10/11/2026)
+# O banheiro duplo externo (modelo 2, aprovado pelo Thiago) vai no lugar do barracão de madeira, encostado no muro do
+# barracão, com a vaga do carro na frente debaixo do mesmo telhado de duas águas; saiu a cobertura de garagem que o
+# passeio tinha aqui (não existe no terreno). Medidas no banheiro.py; rng próprio para não mexer no resto da cena.
+import banheiro as BANHEIRO
+BANHEIRO.construir(geo, P, np.random.default_rng(31), 2)
 
 # ------------------------------------------------------------------ pergolado + cinema no muro
 PDX = obra.PERGOLADO_DX          # 10/11/2026: andou 1,20 m para o portão para caber o lago mais comprido
@@ -880,10 +873,10 @@ P.bananeira((59.2, 7.75, LOW), rng, stems=2, H=2.2, bunch=False)
 P.heliconia((58.95, 7.2, LOW), rng, n=8, H=1.7)
 P.small_tree((50.2, 9.15, LOW), rng, fruit='fruit_red')          # pitangueira
 disc('mulch', (50.2, 9.15), 0.8, LOW + 0.006)
-# pisantes do pé da escada até o portão, contornando o poço pelo lado de lá (longe do laguinho)
+# pisantes do pé da escada até o piso da garagem (e dali ao portão), contornando o poço pelo lado de lá (longe do laguinho)
 _e1 = obra.ESCADA_X0 + obra.ESCADA_N * obra.ESCADA_PISO
 _cam = [(_e1 + 0.25, obra.ESCADA_Y1 - 0.35), (obra.POCO[0] - 0.5, obra.POCO[1] + obra.POCO_R + 0.55),
-        (obra.POCO[0] + 0.6, obra.POCO[1] + obra.POCO_R + 0.6), (52.5, 6.0), (56.0, 5.5), (59.3, 5.1)]
+        (obra.POCO[0] + 0.6, obra.POCO[1] + obra.POCO_R + 0.6), (BANHEIRO.T_X0 - 0.35, 6.3)]   # até o piso da garagem
 _cp = np.array(_cam, float); _amostra = []
 for i in range(len(_cp) - 1):
     p0, p1, p2, p3 = _cp[max(i - 1, 0)], _cp[i], _cp[i + 1], _cp[min(i + 2, len(_cp) - 1)]
@@ -1768,6 +1761,12 @@ EXTRA['circulos'] += [[obra.ARVORE[0] + 0.35, obra.ARVORE[1], 0.75, LOW, 4.0], [
 for _v0 in np.arange(0.0, obra.ESCADA_Y0 - 0.01, 0.5):       # muro de pedras (o pé dele vai para a frente na barriga da amendoeira)
     _v1 = min(_v0 + 0.5, obra.ESCADA_Y0)
     colisor(EDGE, EDGE + float(max(obra.muro_pe(_v0), obra.muro_pe(_v1))) - 0.05, _v0, _v1, LOW, -0.02)
+_B = BANHEIRO                                                 # banheiros (portas fechadas), bancada e pilares da garagem
+colisor(_B.XB0, _B.XN0, _B.YB0, _B.YB1, LOW, LOW + 2.6)
+colisor(_B.XN1, _B.XB1, _B.YB0, _B.YB1, LOW, LOW + 2.6)
+colisor(_B.XN0, _B.XN1, _B.YI1 - _B.BANC_P, _B.YB1, LOW, LOW + 2.6)
+for _xx in _B.T_PILARES:
+    colisor(_xx - 0.1, _xx + 0.1, _B.T_YP - 0.1, _B.T_YP + 0.1, LOW, LOW + 2.4)
 for _p0, _p1 in GUARDA_SEGS:                                  # guarda-corpo da beira da laje (em pedaços nas diagonais)
     _n = 1 if abs(_p0[0] - _p1[0]) < 1e-6 or abs(_p0[1] - _p1[1]) < 1e-6 else 6
     for _i in range(_n):
