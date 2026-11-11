@@ -263,20 +263,20 @@ export function criarCenarios(ctx) {
   function aniversario() {
     const cn = novoCenario('aniversario'); cn.sombras = true;
     const r = sorteio(2026), G = cn.grupo;
-    const MESA = [14.0, 4.05];
-    por(G, 'arco_baloes', 14.0, 3.35, 0, Math.PI / 2);
-    por(G, 'faixa_parabens', 14.0, 3.32, 2.72, Math.PI / 2);
+    const MESA = [14.0, 8.55];
+    por(G, 'arco_baloes', 14.0, 9.25, 0, Math.PI / 2);
+    por(G, 'faixa_parabens', 14.0, 9.28, 2.72, Math.PI / 2);
     por(G, 'mesa_bolo', MESA[0], MESA[1], 0, Math.PI / 2);
     const bolo = por(G, 'bolo', MESA[0], MESA[1] - 0.05, 0.758, Math.PI / 2);
-    por(G, 'bandeja_doces', 13.35, 4.0, 0.758, Math.PI / 2); por(G, 'bandeja_doces', 14.65, 4.02, 0.758, Math.PI / 2);
-    for (const [x, y] of [[13.0, 4.25], [13.15, 3.85], [14.95, 4.25], [15.05, 3.88]]) por(G, 'copo_festa', x, y, 0.758, 0);
-    por(G, 'presentes', 15.75, 4.25, 0, Math.PI / 2 + 0.3);
-    for (const [x, y] of [[12.75, 4.45], [15.3, 4.6], [17.3, 3.6], [10.3, 4.0], [24.4, 4.1], [27.9, 6.2]]) por(G, 'cacho_baloes', x, y, 0, r() * 6);
-    const caixa = por(G, 'caixa_som', 12.2, 4.75, 0, Math.PI / 2 - 0.4);
+    por(G, 'bandeja_doces', 13.35, 8.6, 0.758, Math.PI / 2); por(G, 'bandeja_doces', 14.65, 8.58, 0.758, Math.PI / 2);
+    for (const [x, y] of [[13.0, 8.35], [13.15, 8.75], [14.95, 8.35], [15.05, 8.72]]) por(G, 'copo_festa', x, y, 0.758, 0);
+    por(G, 'presentes', 15.75, 8.35, 0, Math.PI / 2 + 0.3);
+    for (const [x, y] of [[12.75, 8.15], [15.3, 8.0], [17.3, 9.0], [10.3, 8.5], [24.4, 8.8], [29.6, 6.4]]) por(G, 'cacho_baloes', x, y, 0, r() * 6);
+    const caixa = por(G, 'caixa_som', 12.2, 7.85, 0, Math.PI / 2 - 0.4);
     const chamas = materiaisPorNome(bolo, 'chama');
     const ledSom = materiaisPorNome(caixa, 'led_som');
     // mesas redondas com cadeiras
-    const MESAS = [[17.4, 5.85], [24.1, 6.2], [26.6, 4.7], [10.1, 5.1]];
+    const MESAS = [[17.4, 7.3], [22.8, 7.1], [28.0, 7.0], [9.6, 7.3]];
     const assentos = [];
     MESAS.forEach(([mx, my], k) => {
       por(G, 'mesa_redonda_festa', mx, my, 0, 0);
@@ -297,7 +297,7 @@ export function criarCenarios(ctx) {
       p.tocar('sentado_conversando');
     });
     // rodas de conversa
-    const RODAS = [[11.6, 5.9, 3], [19.6, 4.1, 4], [25.4, 7.2, 3], [22.4, 3.9, 3]];
+    const RODAS = [[11.6, 6.6, 3], [19.6, 6.4, 4], [24.6, 6.3, 3], [30.0, 5.6, 3]];
     RODAS.slice(0, estado.qualidade >= 1 ? 4 : 2).forEach(([cx, cy, n]) => {
       const membros = [];
       for (let i = 0; i < n; i++) {
@@ -310,25 +310,25 @@ export function criarCenarios(ctx) {
       cn.rodas.push(roda(membros));
     });
     // anfitriões perto do bolo
-    const anf = [gente(cn, r, 'mulher', 'vestido', 'festa', 12.75, 4.95, -0.9, fixo(['conversando', 'parado', 'acenando'], 6)),
-      gente(cn, r, 'homem', 'camisa', 'festa', 15.25, 5.05, -2.3, fixo(['conversando', 'ouvindo', 'parado'], 6))];
+    const anf = [gente(cn, r, 'mulher', 'vestido', 'festa', 12.75, 7.85, 0.9, fixo(['conversando', 'parado', 'acenando'], 6)),
+      gente(cn, r, 'homem', 'camisa', 'festa', 15.25, 7.75, 2.3, fixo(['conversando', 'ouvindo', 'parado'], 6))];
     // crianças: três na mesa do bolo, o resto correndo pelo gramado
-    const AREA_CORRE = [16.8, 29.0, 3.5, 7.4];
-    const pontosCorre = espalhar(sorteio(7), 18, AREA_CORRE, 0.8, null, (x, y) => Math.hypot(x - 20.6, y - 6.2) > 1.9);
+    const AREA_CORRE = [8.0, 31.0, 6.0, 9.4];
+    const pontosCorre = espalhar(sorteio(7), 18, AREA_CORRE, 0.8, null, (x, y) => Math.hypot(x - 28.9, y - 4.0) > 1.9 && Math.hypot(x - 19.2, y - 8.2) > 1.1);
     const criancas = [];
-    [[13.45, 4.72], [14.1, 4.78], [14.75, 4.7]].forEach(([x, y]) => criancas.push(gente(cn, r, 'crianca', escolher(VIS.festa.crianca, r), 'festa', x, y, -Math.PI / 2, fixo(['parado', 'batendo_palmas', 'parado_2'], 5))));
+    [[13.45, 7.98], [14.1, 7.92], [14.75, 8.0]].forEach(([x, y]) => criancas.push(gente(cn, r, 'crianca', escolher(VIS.festa.crianca, r), 'festa', x, y, -Math.PI / 2, fixo(['parado', 'batendo_palmas', 'parado_2'], 5))));
     for (let i = 0; i < qtd(6); i++) {
       const [x, y] = pontosCorre[i] || [20, 4];
       criancas.push(gente(cn, r, 'crianca', escolher(VIS.festa.crianca, r), 'festa', x, y, r() * 6, passeio(pontosCorre, { vel: 2.4, anim: 'correndo', pausa: 1.2, parados: ['parado', 'acenando', 'rindo'] }), { raio: 0.16 }));
     }
     criancas.forEach(c => c.chapeu(aderecoBruto('chapeu_festa')));
     // dois adultos andando com copo
-    const pontosAnda = espalhar(sorteio(11), 10, [9.5, 28.0, 3.6, 7.0], 1.0, null, (x, y) => Math.hypot(x - 20.6, y - 6.2) > 2.0);
+    const pontosAnda = espalhar(sorteio(11), 10, [8.0, 31.0, 6.0, 9.2], 1.0, null, (x, y) => Math.hypot(x - 28.9, y - 4.0) > 2.0 && Math.hypot(x - 19.2, y - 8.2) > 1.2);
     for (let i = 0; i < qtd(2); i++) { const t = tipoAdulto(r), [x, y] = pontosAnda[i]; const p = gente(cn, r, t, escolher(VIS.festa[t], r), 'festa', x, y, 0, passeio(pontosAnda, { vel: 0.85, pausa: 6, parados: ['bebendo', 'parado'] })); p.segurar(aderecoBruto('copo_festa')); p.copo = true; }
     cn.hora = 18.6; cn.proj = 'aniversario';
-    cn.musica = { estilo: 'aniversario', pontos: [[12.2, 4.75, 0.4]], volume: 0.5 };
-    cn.vista = [21.5, 5.0, 3.22, 0];   // atrás da roda de conversa, olhando a mesa do bolo
-    cn.burburinho = [16.5, 5.2, cn.pessoas.length];
+    cn.musica = { estilo: 'aniversario', pontos: [[12.2, 7.85, 0.4]], volume: 0.5 };
+    cn.vista = [21.8, 7.4, 3.0, 0];   // atrás da roda de conversa, olhando a mesa do bolo
+    cn.burburinho = [16.5, 7.8, cn.pessoas.length];
     cn.atualizarExtra = (dt, t, c) => {
       for (const m of chamas) m.emissiveIntensity = 2.2 + 0.8 * Math.sin(t * 23) * Math.sin(t * 13.7);
       for (const m of ledSom) m.emissiveIntensity = 1 + 1.5 * Math.pow(1 - c.batida, 3);
@@ -392,9 +392,9 @@ export function criarCenarios(ctx) {
     const r = sorteio(5150), G = cn.grupo;
     // cortador de grama: faixas no gramado, longe da fogueira, da mangueira e dos coqueiros
     const faixas = [];
-    for (let k = 0; k < 8; k++) { const y = 3.65 + k * 0.5; faixas.push(k % 2 ? [29.0, y] : [24.6, y]); faixas.push(k % 2 ? [24.6, y] : [29.0, y]); }
-    const cortador = por(G, 'cortador_grama', 26, 3.65, 0, 0);
-    const pc = gente(cn, r, 'homem', 'trabalho', 'trabalho', 24.6, 3.65, 0, null);
+    for (let k = 0; k < 6; k++) { const y = 5.9 + k * 0.4; faixas.push(k % 2 ? [31.2, y] : [27.6, y]); faixas.push(k % 2 ? [27.6, y] : [31.2, y]); }
+    const cortador = por(G, 'cortador_grama', 29, 5.9, 0, 0);
+    const pc = gente(cn, r, 'homem', 'trabalho', 'trabalho', 27.6, 5.9, 0, null);
     let iF = 1, pausaF = 0;
     pc.cerebro = (p, dt) => {
       if (pausaF > 0) { pausaF -= dt; p.tocar('parado'); return; }
@@ -418,8 +418,8 @@ export function criarCenarios(ctx) {
     const pg = gente(cn, r, 'mulher', 'trabalho', 'trabalho', 19.25, 7.45, Math.PI / 2, fixo(['colhendo_alto'], 30), { anim: 'colhendo_alto' });
     pg.noColo(aderecoBruto('cesto_frutas'), pg.notaPos('colhendo_alto', 'cesto_m', 0.22));
     // na escada, colhendo manga
-    por(G, 'escada_aluminio', 28.55, 2.75, 0, 0);
-    const pe = gente(cn, r, 'homem', 'trabalho', 'trabalho', 28.7, 2.75, 0, fixo(['colhendo_alto'], 30), { z: 0.86, anim: 'colhendo_alto', bloqueia: false });
+    por(G, 'escada_aluminio', 29.1, 3.0, 0, 0);
+    const pe = gente(cn, r, 'homem', 'trabalho', 'trabalho', 29.25, 3.0, 0, fixo(['colhendo_alto'], 30), { z: 0.86, anim: 'colhendo_alto', bloqueia: false });
     pe.noColo(aderecoBruto('cesto_frutas'), pe.notaPos('colhendo_alto', 'cesto_m', 0.22));
     // limpando a piscina
     const spotsP = [[36.6, 4.95, -Math.PI / 2], [38.4, 4.95, -Math.PI / 2], [40.2, 4.95, -Math.PI / 2]];
@@ -439,7 +439,7 @@ export function criarCenarios(ctx) {
       pk.noColo(aderecoBruto('cesto_frutas'), pk.notaPos('carregando_cesto', 'cesto_m', 0.22));
     }
     por(G, 'mangueira_enrolada', 31.6, 7.9, 0, Math.PI); por(G, 'saco_lixo', 1.0, 2.6, 0, 1.0);
-    cn.hora = 8.6; cn.proj = null; cn.vista = [22.6, 5.2, 0.15, 0];
+    cn.hora = 8.6; cn.proj = null; cn.vista = [22.6, 7.6, 0.15, 0];
     cn.motor = pc;
     return cn;
   }
@@ -537,14 +537,14 @@ export function criarCenarios(ctx) {
       pan.traverse(k => { if (k.isMesh && [].concat(k.material).some(m => m.name === 'tela_led')) k.material = mt; });
       projecoes.tela(11, 'equalizador');
       cn.sair.push(() => projecoes.tela(11, null));
-      projecoes.projetorPalco({ de: [29.4, 5.9, 3.7], para: [23.0, 5.6, 0.4], raio: 5.2, aspecto: 1.4, anim: 'luz_batida', ganho: 1.1 });
+      projecoes.projetorPalco({ de: [29.4, 5.9, 3.7], para: [20.0, 7.6, 0.4], raio: 5.2, aspecto: 1.4, anim: 'luz_batida', ganho: 1.1 });
       cn.sair.push(() => projecoes.projetorPalco(null));
     }
     // DJ
     const dj = gente(cn, r, 'homem', 'noite', 'noite', DJ[0], DJ[1], Math.PI, danca(['dj']), { anim: 'dj' });
     // público: mais denso perto do palco, longe da fogueira e das árvores
     const n = qtd(70);
-    const pos = espalhar(sorteio(3), n, [19.6, 28.1, 3.35, 7.8], 0.52, (x) => 0.35 + 0.65 * clamp((x - 19.6) / 8.5, 0, 1), (x, y) => Math.hypot(x - 20.6, y - 6.2) > 1.8 && Math.hypot(x - 26.4, y - 8.55) > 0.7 && Math.hypot(x - 23.7, y - 8.95) > 0.7 && Math.hypot(x - 21.2, y - 8.3) > 0.7);
+    const pos = espalhar(sorteio(3), n, [8.0, 28.1, 5.85, 9.5], 0.52, (x) => 0.3 + 0.7 * clamp((x - 8.0) / 20.0, 0, 1), (x, y) => Math.hypot(x - 26.4, y - 8.55) > 0.7 && Math.hypot(x - 23.7, y - 8.95) > 0.7 && Math.hypot(x - 21.2, y - 8.3) > 0.7 && Math.hypot(x - 19.2, y - 8.2) > 0.9 && Math.hypot(x - 6.9, y - 8.9) > 0.9);
     const DANCAS = ['pulando', 'pulando', 'pulando', 'dancando_3', 'dancando_3', 'dancando_1', 'dancando_2'];
     pos.forEach(([x, y], i) => {
       const t = r() < 0.52 ? 'homem' : 'mulher';
@@ -555,9 +555,9 @@ export function criarCenarios(ctx) {
     // fachos das cabeças móveis e lasers
     const fx = criarLuzesDePalco(tre, las);
     G.add(fx.obj);
-    cn.hora = 22.6; cn.proj = 'rave'; cn.vista = [17.0, 5.0, 0.08, 0];   // no fundo da pista, ao lado da fogueira, olhando o palco
+    cn.hora = 22.6; cn.proj = 'rave'; cn.vista = [11.5, 7.7, -0.1, 0];   // no fundo da pista, em frente à vilinha, olhando o palco
     cn.musica = { estilo: 'rave', pontos: [[29.0, 3.4, 1.4], [29.0, 8.35, 1.4]], volume: 0.75, ref: 6 };
-    cn.burburinho = [23.5, 5.6, Math.round(n * 0.6)];
+    cn.burburinho = [22.0, 7.6, Math.round(n * 0.6)];
     let ultimaEnergia = 0.7;
     const corPalco = new THREE.Color(), PAL_PALCO = [[1, 0.15, 0.55], [0.25, 0.4, 1], [0.15, 0.9, 0.85], [0.75, 0.25, 1]].map(k => new THREE.Color(k[0], k[1], k[2]));
     cn.atualizarExtra = (dt, t, c) => {
@@ -573,7 +573,7 @@ export function criarCenarios(ctx) {
         corPalco.copy(PAL_PALCO[comp % PAL_PALCO.length]);
         projecoes.animPalco(c.energia > 0.95 ? 'estrobo_cores' : c.energia < 0.5 ? 'luz_cores' : 'luz_batida', { cor: corPalco });
       }
-      if (c.energia > 0.95 && ultimaEnergia <= 0.95) gritaria(23.5, 5.6);
+      if (c.energia > 0.95 && ultimaEnergia <= 0.95) gritaria(22.0, 7.6);
       ultimaEnergia = c.energia;
     };
     return cn;

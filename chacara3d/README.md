@@ -1,8 +1,8 @@
 # Chácara 3D — fonte da página `/chacara3d`
 
 Passeio em 3D pelo terreno do Thiago (60 × 10 m) como ele fica pronto: a
-vilinha de três casas container com terraço aberto no teto (dá para entrar nelas e
-subir pela escada reta de fora até o terraço), o gramado com o pomar, a
+vilinha de três casas de dois andares (dá para entrar nelas, subir a escada e sair na
+varanda), o gramado com o pomar, a
 piscina com a hidro e a cascata, a churrasqueira coberta, o laguinho de pedras com
 cascata no pé do muro de arrimo do quintal de baixo e o cineminha no muro. Anda-se com W A S D; tem dia e noite, foto,
 gravação da caminhada com vídeo renderizado e o cineminha passando vídeo do
@@ -11,7 +11,7 @@ borboletas e vaga-lumes se mexem sozinhos. No menu há **cenários com gente**
 (festa de aniversário, reunião no cineminha à noite, trabalhadores, festa na
 piscina com churrasco, rave lotada) e o **plano de iluminação noturna** com
 projeção mapeada nas árvores, no muro da piscina, nos portões e nas paredes
-laterais das casas container.
+cegos (oitões) das casas da vilinha.
 
 Não é página da loja: é um projeto pessoal dele hospedado no site. Por isso
 leva `noindex` e não entra no sitemap nem no menu.
@@ -33,7 +33,7 @@ Office 3D, `/3d`). Não usa o layout da loja nem o React.
 | `js/grama.js` | Grama de verdade (folhinhas desenhadas pela placa de vídeo em volta de quem anda), com vento e pisadas. |
 | `js/agua.js` | Piscina, hidro e laguinho (ondinhas, refração, cor pela profundidade, reflexo, brilho do sol, espuma), cascata, respingos, bolhas e ninfeias. |
 | `js/casas.js` | Portas de entrada das casas (de vidro com caixilho branco; abrem quando se chega perto ou com E), ventiladores de teto (se o modelo tiver) e luzes de dentro e do terraço: são ~27 pontos de luz, então 6 luzes de verdade revezam entre os mais próximos e o resto da casa recebe um brilho quente no shader (`uLuzCasa`). |
-| `js/projecoes.js` | Plano de iluminação noturna: 10 projetores (mangueira, jabuticabeira, coqueiros, amendoeira, muro da piscina, os dois portões e as paredes lisas das três casas container) lançam um ladrilho de um atlas 2048×1536 sobre o que estiver no tronco de visão de cada um (bloco `PROJECAO` em `materiais.js`). Em superfície plana o tronco é fora do eixo, encaixado na parede. Menu por lugar: animação, cor de luz, vídeo do computador ou YouTube (só nos planos, por um "furo" como no cineminha). Também fornece as telas de LED/cinema dos cenários e um projetor de palco. |
+| `js/projecoes.js` | Plano de iluminação noturna: 10 projetores (mangueira, jabuticabeira, coqueiros, amendoeira, muro da piscina, os dois portões e os oitões cegos das três casas da vilinha) lançam um ladrilho de um atlas 2048×1536 sobre o que estiver no tronco de visão de cada um (bloco `PROJECAO` em `materiais.js`). Em superfície plana o tronco é fora do eixo, encaixado na parede. Menu por lugar: animação, cor de luz, vídeo do computador ou YouTube (só nos planos, por um "furo" como no cineminha). Também fornece as telas de LED/cinema dos cenários e um projetor de palco. |
 | `js/projecoes_anim.js` | As animações dos projetores (26: carpas, ondas, fogo, aurora, galáxia, folhas, borboletas, neon, chuva de luz, cachoeira, mandala, vaga-lumes, aniversário, boas-vindas, equalizador, flashes, fogos, corações e oito cores de luz de jardim), todas procedurais. |
 | `js/cenarios.js` | Os cinco cenários: pessoas (`pessoas/`), adereços (`cenarios/`), comportamento (rodas de conversa, passeio, dança no tempo da música, trabalho), hora do dia, luzes de palco (fachos das cabeças móveis, lasers), fumaça da grelha, burburinho e motor do cortador. Carrega os 9 MB de pessoas e adereços só na primeira vez que se escolhe um cenário. |
 | `js/musica.js` | Música gerada no navegador e tocada pelas caixas de som do cenário: techno 128 bpm (rave), house tropical (piscina), pop alegre (aniversário) e a melodia do "Parabéns" com palmas e coro. Informa a batida para a dança, as luzes e as projeções. |
@@ -68,74 +68,78 @@ cp ../saida/terreno.json ../../public/chacara3d/dados/terreno.json
 
 - `build.py` — o terreno inteiro. Medidas em metros: `x` do portão do gramado (0)
   ao portão de baixo (60), `y` do muro da piscina (0) ao muro da churrasqueira (10),
-  `z` para cima; o quintal de baixo fica em `z = -1`. As casas container da vilinha (função
-  `container`, ver abaixo) são ocas e mobiliadas; o que barra a passagem, os pisos, a
-  escada de fora, as portas, as luzes, os ventiladores, os lugares de entrada e as
-  paredes de projeção saem em `EXTRA` e vão para o `terreno.json` (chave `extra`).
+  `z` para cima; o quintal de baixo fica em `z = -1`. As casas da vilinha (função
+  `casa`, ver abaixo) são ocas e mobiliadas nos dois andares; o que barra a passagem, os
+  pisos, os degraus da escada, as portas, as luzes, os lugares de entrada e as paredes de
+  projeção saem em `EXTRA` e vão para o `terreno.json` (chave `extra`).
 - `teste_casas.py` — conferência rápida do `terreno.json` publicado, sem Blender
-  (`python3 teste_casas.py [terreno.json]`): degraus da escada de fora (espelho até 0,20,
-  um encostado no outro, o último no patamar) e os caminhos porta → hall → sala, cozinha,
-  banheiro e quarto (raio de 0,20, como o passeio anda dentro de casa) e pé da escada →
-  patamar → terraço (raio de 0,27), numa grade de 5 cm.
+  (`python3 teste_casas.py [terreno.json]`): a escada interna (14 degraus com espelho até
+  0,20, um encostado no outro, o último encostado no piso de cima) e os caminhos da porta de
+  entrada até a sala, a cozinha, o lavabo, o patamar, o quarto, o banheiro e a varanda,
+  numa grade de 5 cm com o raio de 0,20 que o passeio usa dentro de casa.
 - `export_rt.py` — versão leve para o navegador: copas de "cachos" de folhas
   com textura, folhas em tira e frondes dos coqueiros com coordenadas de textura,
   troncos com casca; sem as galinhas e carpas de enfeite (no passeio elas são animadas).
 - `render.py` e `annotate.py` — as imagens do álbum (`python build.py`, que salva
   `chacara.blend`, e depois `python render.py piscina_tropical --res 1440 --samples 24 --out ../saida`).
 
-### As casas container da vilinha
+### As casas da vilinha
 
-Pedido do Thiago (15/10/2026, com a foto de uma "casa container com terraço"): as três casas no
-modelo container de um piso, com sala, cozinha, banheiro e quarto, e em cima um terraço a que se
-sobe por uma escada reta do lado de fora. No mesmo dia ele pediu para tirar o telhado metálico da
-foto: o deck fica aberto para o céu. Antes (12/10) eram sobrados de 42 m² com mirante de teto verde
-e escada caracol; o histórico está no git.
+Pedido do Thiago (09 a 10/11/2026): no lugar das três casas container, **três casas de dois andares**,
+uma para cada filho, boas para hospedagem. Ele escolheu crescer de 20 para **24,8 m² por piso**
+(6,20 × 4,00 m, ~50 m² por casa) para o quarto passar dos 9 m² que um dormitório precisa ter.
+O histórico (tiny houses em 11/10, sobrados com mirante em 12/10, containers com terraço em 15/10)
+está no git.
 
-- **Medidas**: 7 × 3 m (a medida que ele deu para a vilinha; o container da foto tem 5,5 m),
-  2,60 m de altura sobre sapatas de concreto de 10 cm. Piso de dentro a 0,25, forro a 2,55
-  (pé-direito de 2,30), terraço a 2,76, guarda-corpo de 1,10 (o da foto tem 0,80, abaixo da
-  norma), sem cobertura. Escada de 0,80 (a da foto tem 0,60): 14 espelhos de 0,197 e pisada de
-  0,23, sobe da frente para o fundo encostada na ponta da casa e chega a um patamar de 0,85 junto
-  ao muro, no nível do terraço; o pé fica 0,84 à frente da fachada.
-- **Onde**: azul em x 4,5–11,5 × y 0–3 (escada a oeste), amarela em x 16,5–23,5 × y 0–3 (escada a
-  leste), verde em x 8,5–15,5 × y 7–10 (escada a leste). A ponta sem escada ("ponta lisa", sem
-  abertura) da azul e da amarela dá para a pracinha (x 11,5–16,5, jabuticabeira em (14,0; 2,2) e
-  banco de cumaru no muro); as três estão em `EXTRA['paredes_projecao']` para a projeção mapeada.
-- **Coordenadas locais** (`Casa` no `build.py`): `u` ao longo do muro, 0 na ponta lisa e 7 na
-  ponta da escada; `d` do muro (0) à fachada (3). A azul é espelhada (X = 11,5 − u). Dentro,
-  `iu`/`id` contam da face interna das paredes (u = iu + 0,12).
-- **Cores**: chapa ondulada trapezoidal de verdade (`Casa.chapa`, passo de 0,28 e 3,5 cm de
-  fundo, crista no plano da parede para a projeção e o YouTube não ficarem atrás das ondas);
-  colunas de canto, longarinas e corrimãos em outra cor. Azul = azul-marinho
-  com amarelo (como na foto), amarela = amarelo com azul-marinho, verde = verde com amarelo.
-  Janelas de 1,00 × 1,00 e porta de vidro de 0,80 × 2,00 com caixilho e requadro brancos.
-- **Dentro** (proposta): hall na porta; quarto de casal na ponta lisa (cama 1,38 × 1,88 com
-  cabeceira estofada, criado-mudo suspenso com pendente, guarda-roupa, split); banheiro no fundo
-  (box de 1,42 × 0,85 com vidro fixo, bacia suspensa, bancada estreita com cuba e espelho redondo,
-  porta de correr embutida); sala com painel ripado, TV e rack suspenso, sofá de dois lugares
-  sob a janela e mesa de centro; cozinha linear na parede da escada (geladeira, cuba, cooktop de
-  duas bocas, aéreos com LED, despenseiro). Sem ventilador de teto (o forro é baixo): split no
-  quarto e na sala.
-- **Terraço**: réguas de cumaru, guarda-corpo de barras horizontais pretas com corrimão na cor
-  das quinas, mesa com quatro cadeiras (o lado da frente fica livre para passar), duas
-  espreguiçadeiras na ponta lisa viradas para o gramado, vasos com areca, moreia, bromélia e
-  xanadu (plantados depois da poda, senão a areca, que usa os materiais do coqueiro, seria podada
-  junto), fita de LED na base do guarda-corpo e duas luzes baixas para a noite.
-- **Poda**: no fim do `build.py`, `podar()` tira folhas e galhos das árvores grandes que
-  entrariam em cada casa até 2,5 m acima do terraço (cabeça livre de quem está em pé lá em cima)
-  e na escada.
-- **`extra` no `terreno.json`**: `pisos` `[x0, x1, y0, y1, z]` (dentro, soleira, degrau da porta,
-  terraço, patamar e cada degrau); `colisores` `[x0, x1, y0, y1, z0, z1]` (barram quando cruzam a
-  faixa [pé + 0,35; pé + 1,7]); `portas` (as três de entrada, com `estilo: 'vidro'`); `luzes`
-  `{p, cor, forca, alcance, casa, andar (0 dentro, 2 terraço), comodo}`; `ventiladores` (vazio);
-  `lugares` `[nome, x, y, rumo, z do pé]` (entrada e terraço de cada casa); `casas`
-  `{nome, x, y, piso, teto, deck, frente, volume}` (`volume` é a caixa da poda); `escadas` `{casa, x, y}` (para o "onde
-  estou"); `paredes_projecao` `{nome, x0, x1, y0, y1, z0, z1, normal}`; `espirais` (vazio).
-- **Como o passeio usa isso** (`js/`): `mundo.js` escolhe o chão como o piso mais alto que não
-  passe de pé + 0,5 (assim a escada reta sobe sozinha, degrau a degrau); dentro das casas o raio de
-  quem anda cai para 0,20 m. `casas.js` desenha a porta de vidro e reveza 6 luzes de verdade entre
-  os pontos de luz; `principal.js` faz a luz de ambiente baixar dentro das casas só até o forro
-  (`uTopoCasa` = teto + 0,05), para o terraço em cima ficar com a luz de fora.
+- **Orientação**: em 10/11 ele disse que o sol nasce no portão de baixo e se põe no portão do gramado.
+  Logo o terreno corre leste–oeste e o muro `y = 0` é o sul. Por isso as três ficam **em fita nesse
+  muro**: as fachadas olham para o norte (sol o dia inteiro) e a sombra cai no próprio muro, deixando
+  o gramado livre. O passeio já abre com "o sol nasce do lado do portão de baixo".
+- **Onde**: recuadas 1,50 m da divisa (dois pavimentos não encostam no muro) e com 1,80 m entre uma e
+  outra — azul em x 3,0–9,2, verde em x 11,0–17,2, amarela em x 19,0–25,2, todas em y 1,5–5,5. Sobram
+  os 6,4 m do fim do gramado (x 25,2–31,6), onde foram a pracinha da jabuticabeira com o banco de
+  cumaru e o fogo de chão, e a faixa de 4,5 m na frente das casas, por onde passa a trilha de pisantes.
+- **Medidas**: parede externa de 0,15 e divisória de 0,10 (interno 5,90 × 3,70). Piso do térreo a 0,20
+  com pé-direito de 2,62; laje de 0,14; piso de cima a 2,96 com forro a 5,26. Telhado de duas águas,
+  cumeeira paralela ao muro a 5,80, caimento de 27%, beiral de 0,60 (0,30 nos oitões), telha de barro.
+- **Coordenadas locais** (`Casa` no `build.py`): `u` ao longo do muro, 0 na ponta da cozinha e 6,20 na
+  ponta da entrada; `d` do muro de fundo (0) à fachada (4,00), já contando o recuo. Dentro, `iu`/`id`
+  contam da face interna das paredes (u = iu + 0,15).
+- **Térreo**: lavabo de 1,60 × 1,65 no canto do fundo (embaixo do banheiro de cima: uma prumada só);
+  mini cozinha ao fundo, com bancada de 1,62 m na parede de topo, cuba, cooktop de duas bocas, aéreos
+  e geladeira na parede do fundo; mesa de quatro lugares; sala com painel ripado de cumaru, TV e sofá
+  de dois lugares; hall da entrada; **escada reta de 14 degraus** (espelho de 0,184, pisada de 0,232,
+  0,90 de largura) encostada na parede do fundo, fechada por uma parede com o vão de entrada ao lado
+  do hall, subindo de iu 5,88 para iu 2,63.
+- **Superior**: patamar na chegada da escada; banheiro de 1,45 × 2,80 (box no fundo com a janela da
+  fachada, bancada com cuba e espelho redondo, bacia suspensa); suíte de 11,1 m² com cama de casal
+  encostada na parede da escada, guarda-roupa, criado-mudo suspenso e banco no pé da cama; porta de
+  correr de 1,60 para a varanda.
+- **Varanda**: laje em balanço de 3,40 × 1,20 sobre a entrada (que fica coberta), piso e corrimão de
+  cumaru, guarda-corpo de 1,10 com barras horizontais, banco com almofada, mesinha, dois vasos e fita
+  de LED. O beiral da fachada cobre boa parte dela.
+- **Cores**: fachada em reboco pintado (`reboco_azul`, `reboco_verde`, `reboco_amarelo`), oitões em
+  `reboco_claro` (é neles que cai a projeção), faixa de tijolinho no pé da fachada, brise de cumaru
+  sobre o janelão, caixilhos brancos.
+- **Projeção mapeada**: cada casa tem um oitão cego na lista `paredes_projecao` — o da azul vira para o
+  portão do gramado, o da verde e o da amarela para o leste. O oitão da verde dá para o vão de 1,80 m
+  entre ela e a amarela, então a parede traz um campo `dist` (1,45) com a distância do projetor;
+  o `projecoes.js` usa esse campo quando ele existe.
+- **Poda**: no fim do `build.py`, `podar()` tira folhas e galhos das árvores grandes que entrariam em
+  cada casa (a caixa da casa com os beirais) e na frente da varanda.
+- **`extra` no `terreno.json`**: `pisos` `[x0, x1, y0, y1, z]` (térreo, cada degrau, o piso de cima sem
+  o vão da escada, a varanda, a soleira e o degrau da entrada); `colisores`
+  `[x0, x1, y0, y1, z0, z1]` (barram quando cruzam a faixa [pé + 0,35; pé + 1,7]); `portas` (as três de
+  entrada, com `estilo: 'vidro'`); `luzes` `{p, cor, forca, alcance, casa, andar (0 térreo, 1 superior),
+  comodo}`; `ventiladores` (vazio); `lugares` `[nome, x, y, rumo, z do pé]` (entrada e varanda de cada
+  casa); `casas` `{nome, x, y, piso, teto, z1, frente, volume}` (`z1` é o piso de cima, `teto` o forro
+  do superior e `volume` a caixa da poda); `escadas` `{casa, x, y}` (para o "onde estou");
+  `paredes_projecao` `{nome, x0, x1, y0, y1, z0, z1, normal, dist}`; `espirais` (vazio).
+- **Como o passeio usa isso** (`js/`): `mundo.js` escolhe o chão como o piso mais alto que não passe de
+  pé + 0,5 (assim a escada sobe sozinha, degrau a degrau, e a varanda fica um degrau acima do quarto);
+  dentro das casas o raio de quem anda cai para 0,20 m. `casas.js` desenha a porta de vidro e reveza
+  6 luzes de verdade entre os pontos de luz; `principal.js` faz a luz de ambiente baixar dentro das
+  casas até o forro do andar de cima (`uTopoCasa` = teto + 0,05) e usa o campo `frente` da casa.
 
 ### As texturas
 
@@ -226,10 +230,14 @@ Para conferir: `window.__chacara.renderer.info.programs.length` e `window.__chac
 - **Medidas estimadas por foto.** Só são exatas as que o Thiago passou: terreno
   60 × 10 m, faixa do jardim com 80 cm, desnível de 1 m da laje ao quintal de baixo e as
   medidas do quintal de baixo tiradas com tijolinho de 18 cm em 19/10/2026 (veja abaixo).
-- **Interior das casas** segue o pedido do Thiago (sala, cozinha, banheiro e quarto num
-  container de 7 × 3 m); os móveis são proposta e mudam em `container` no `build.py`.
-- **Lado do sol**: ainda não informado. Na página dá para escolher em
-  "O sol nasce do lado"; o padrão é o muro da churrasqueira.
+- **Interior das casas** segue o pedido do Thiago (embaixo sala e cozinha ao fundo, em cima
+  quarto com banheiro, tudo aberto e moderno); a divisão e os móveis são proposta e mudam em
+  `casa` no `build.py`.
+- **Lado do sol**: o Thiago informou em 10/11/2026 — nasce no portão de baixo e se põe no
+  portão do gramado. É o padrão da página; dá para trocar em "O sol nasce do lado".
+- **Três casas no mesmo lote** tem regra própria de zoneamento em Campinas, e dois pavimentos
+  perto da divisa têm recuo e altura máxima a conferir na prefeitura. O modelo já desenha com
+  1,50 m de recuo, mas isso é hipótese, não consulta.
 - **YouTube no cineminha e nas projeções** aparece ao vivo, mas não sai nas
   fotos nem no vídeo renderizado, fica sem som e não recebe a luz da cena. Vídeo do
   computador sai nos dois. Nas paredes, muro e portões o YouTube ocupa um retângulo 16:9

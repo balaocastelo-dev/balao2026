@@ -139,7 +139,7 @@ class Bicho {
 // ---------------------------------------------------------------- cachorros
 function cerebroCachorro(b, mundo) {
   const st = { estado: 'parado', t: rnd(2, 5), alvo: null, marcha: 'andando', fase: 0 };
-  const LUGARES_DESCANSO = [[42.5, 8.2], [37, 8.0], [30.2, 3.0], [16.5, 7.2], [11.0, 3.4], [22.0, 2.2], [44.2, 5.4], [5.0, 5.0]];
+  const LUGARES_DESCANSO = [[42.5, 8.2], [37, 8.0], [30.2, 3.0], [16.5, 7.2], [11.0, 6.9], [22.0, 7.3], [44.2, 5.4], [5.0, 7.4]];
   function novoAlvo(longe) {
     for (let i = 0; i < 30; i++) {
       const x = rnd(1.0, 45.0), y = rnd(0.9, 9.2);
@@ -501,7 +501,7 @@ function texBorboleta(tipo) {
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
 }
 function criarBorboletas(cena) {
-  const pontos = [[33.5, 0.4, 0.6], [36.5, 0.5, 0.7], [40.5, 0.4, 0.6], [43.0, 0.5, 0.5], [1.2, 1.2, 1.2], [2.0, 1.0, 1.0], [5.0, 3.3, 1.0], [17.5, 3.3, 1.0], [11.0, 6.6, 1.0], [54, 2.0, 1.2], [49, 6.6, 0.4]];
+  const pontos = [[33.5, 0.4, 0.6], [36.5, 0.5, 0.7], [40.5, 0.4, 0.6], [43.0, 0.5, 0.5], [1.2, 1.2, 1.2], [2.0, 1.0, 1.0], [27.0, 2.6, 1.0], [19.0, 8.0, 1.0], [11.0, 6.6, 1.0], [54, 2.0, 1.2], [49, 6.6, 0.4]];
   const lista = [];
   const geo = new THREE.PlaneGeometry(0.06, 0.06); geo.translate(0.03, 0, 0);
   for (let i = 0; i < 8; i++) {
@@ -580,7 +580,7 @@ export async function criarBichos(cena, mundo, qualidade, progresso) {
     new Bicho(gC, { pelo: [c('#c78545'), c('#edd4a8'), c('#291c1a')], olho: c('#1a0e08') }, { camadas, comprPelo: 0.011 }),
     new Bicho(gC, { pelo: [c('#1c1712'), c('#e9e2d4'), c('#1a1210')], olho: c('#1a0e08') }, { camadas, comprPelo: 0.012 }),
   ];
-  cachorros[0].x = 18; cachorros[0].y = 5.2; cachorros[1].x = 40; cachorros[1].y = 8.0; cachorros[1].rumo = 2;
+  cachorros[0].x = 18; cachorros[0].y = 7.0; cachorros[1].x = 40; cachorros[1].y = 8.0; cachorros[1].rumo = 2;
   cachorros.forEach(b => { b.obj.scale.setScalar(b === cachorros[1] ? 0.93 : 1); cena.add(b.obj); b.tocar('parado'); b.pousar(); });
   const galinhas = [];
   const coresG = [['#8c421c', '#291a0f'], ['#8c421c', '#291a0f'], ['#d8cdb7', '#7a6b55'], ['#3a2a1e', '#120c08'], ['#a5622a', '#3a2412']];

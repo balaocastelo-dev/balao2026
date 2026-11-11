@@ -148,13 +148,15 @@ m_plain('argamassa', (0.30, 0.28, 0.25), 0.95, noise=0.3, nscale=18, bump=0.3)
 m_plain('veu_agua', (0.70, 0.84, 0.90), 0.03, **{'Alpha': 0.28})
 m_plain('ninfeia', (0.10, 0.28, 0.06), 0.35, noise=0.15, nscale=12)
 m_plain('flor_ninfeia', (0.95, 0.55, 0.70), 0.5)
-# casas container da vilinha (chapa pintada, quinas, caixilhos brancos)
-m_plain('chapa_azul', (0.024, 0.038, 0.082), 0.5)                                # azul-marinho da foto
-m_plain('chapa_amarela', (0.83, 0.46, 0.021), 0.5)
-m_plain('chapa_verde', (0.026, 0.127, 0.07), 0.5)
-m_plain('pintura_amarela', (0.95, 0.60, 0.012), 0.45)                           # quinas e requadros (azul e verde)
-m_plain('pintura_marinho', (0.022, 0.036, 0.08), 0.45)                          # quinas e requadros da amarela
+# casas de dois andares da vilinha (reboco pintado, oitões claros, caixilhos brancos)
+m_plain('reboco_azul', (0.075, 0.185, 0.335), 0.75, noise=0.05, nscale=2.0, bump=0.05)
+m_plain('reboco_amarelo', (0.68, 0.46, 0.11), 0.75, noise=0.05, nscale=2.0, bump=0.05)
+m_plain('reboco_verde', (0.085, 0.235, 0.155), 0.75, noise=0.05, nscale=2.0, bump=0.05)
+m_plain('reboco_claro', (0.84, 0.81, 0.74), 0.8, noise=0.05, nscale=2.0, bump=0.06)   # oitões (recebem a projeção)
 m_plain('esquadria_branca', (0.86, 0.86, 0.84), 0.35)
+m_plain('chapa_verde', (0.026, 0.127, 0.07), 0.5)                               # ainda usados pelo banheiro e pelos carros
+m_plain('pintura_amarela', (0.95, 0.60, 0.012), 0.45)
+m_plain('pintura_marinho', (0.022, 0.036, 0.08), 0.45)
 
 # ------------------------------------------------------------------ constantes
 WH = 2.3                      # altura do muro
@@ -958,8 +960,8 @@ P.asplenio((45.75, 0.5, 0), rng, 0.9)
 P.coqueiro((26.4, 8.55, 0), 6.4, rng, lean_az=-1.9, lean=1.0)
 P.coqueiro((23.7, 8.95, 0), 5.0, rng, lean_az=-1.2, lean=0.7)
 P.coqueiro((21.2, 8.3, 0), 7.3, rng, lean_az=-2.4, lean=1.2)
-JABU, GOIA, LIMAO = (14.0, 2.2), (19.2, 8.2), (27.2, 1.5)         # árvores do pomar que saíram do caminho das casas
-P.jabuticabeira((JABU[0], JABU[1], 0), rng)                       # centro da pracinha entre a casa azul e a amarela
+JABU, GOIA, LIMAO = (26.5, 2.4), (19.2, 8.2), (28.3, 1.5)         # árvores do pomar que saíram do caminho das casas
+P.jabuticabeira((JABU[0], JABU[1], 0), rng)                       # centro da pracinha no fim da fita
 
 
 def goiabeira_podada(pos, rng):
@@ -980,12 +982,12 @@ for c, r in (((26.4, 8.55), 0.8), ((23.7, 8.95), 0.7), ((21.2, 8.3), 0.8), (JABU
     disc('mulch', c, r, 0.006, seg=28)
     for a in np.linspace(0, 2 * math.pi, int(r * 9))[:-1]:
         P.grama_preta((c[0] + r * math.cos(a), c[1] + r * math.sin(a), 0.0), rng)
-for xx in np.arange(1.2, 31.4, 0.86):                            # pisantes ao longo da trilha batida
-    yy = 4.9 + 0.85 * math.sin(xx / 4.6)
-    obox('stone_step', (xx, yy, 0.012), (0.5, 0.85, 0.03), rotz(math.atan(0.85 / 4.6 * math.cos(xx / 4.6))))
-P.vine_wall('leaf_vine_light', 11.8, 16.2, 0.3, 2.2, 0.0, 1, rng, density=150, cover=0.5, seed=4.0, leaf=0.11)   # maracujá no muro da pracinha
+for xx in np.arange(1.2, 31.4, 0.86):                            # pisantes ao longo da trilha batida, na frente da fita
+    yy = 6.5 + 0.5 * math.sin(xx / 5.0)
+    obox('stone_step', (xx, yy, 0.012), (0.5, 0.85, 0.03), rotz(math.atan(0.5 / 5.0 * math.cos(xx / 5.0))))
+P.vine_wall('leaf_vine_light', 24.0, 26.0, 0.3, 2.2, 0.0, 1, rng, density=150, cover=0.5, seed=4.0, leaf=0.11)   # maracujá no muro da pracinha
 for i in range(12):
-    ellipsoid('fruit_goiaba', (rng.uniform(11.8, 16.2), 0.07, rng.uniform(0.95, 1.9)), 0.04, seg=7, rings=5)
+    ellipsoid('fruit_goiaba', (rng.uniform(24.0, 26.0), 0.07, rng.uniform(0.95, 1.9)), 0.04, seg=7, rings=5)
 # galinheiro no canto junto ao portão do gramado
 box('brick', 0.47, 2.18, 7.5, 7.62, 0, 1.9); box('brick', 0.35, 0.47, 7.5, 9.8, 0, 2.2); box('brick', 2.18, 2.3, 7.5, 9.8, 0, 2.2)
 box('wood_z', 1.0, 1.65, 7.47, 7.5, 0.05, 1.6)
@@ -1028,7 +1030,7 @@ def varal(p0, p1, sag, n=12):
 varal((34.65, 5.9, 2.5), (30.5, 2.5, 3.3), 0.45, 12)
 varal((34.65, 9.7, 3.5), (26.9, 8.6, 4.6), 0.7, 16)
 # fogueira com bancos de tora, longe das copas das árvores
-FC = (20.6, 6.2)
+FC = (28.9, 4.0)
 cyl('filete', (FC[0], FC[1], 0), 0.62, 0.3, seg=24, cap=False); annulus('stone_cut', FC, 0.42, 0.66, 0.3, seg=24)
 disc('soot', FC, 0.42, 0.2, seg=24); disc('pedrisco', FC, 1.7, 0.009, seg=40)
 for a in (0.3, 1.5, 2.7):
@@ -1049,39 +1051,49 @@ for vx, vy, kind in ((41.95, 5.9, 0), (44.72, 5.9, 1), (31.95, 5.55, 1), (0.75, 
     else:
         P.areca(top, rng, H=1.8, stems=5)
 # mais verde nos muros do gramado e ao pé deles
-P.vine_wall('leaf_vine', 26.0, 31.0, 0.05, WH, 0.0, 1, rng, density=200, cover=0.4, seed=7.7)
-P.vine_wall('leaf_vine_light', 17.9, 20.5, 0.3, 2.25, 10.0, -1, rng, density=150, cover=0.5, seed=9.1, leaf=0.11)
+P.vine_wall('leaf_vine', 27.0, 31.0, 0.05, WH, 0.0, 1, rng, density=200, cover=0.4, seed=7.7)
+P.vine_wall('leaf_vine_light', 12.0, 15.0, 0.3, 2.25, 10.0, -1, rng, density=150, cover=0.5, seed=9.1, leaf=0.11)
 # moreias ao pé dos muros, fora das casas, das escadas (com folga), do banco e das árvores
-for xx in np.arange(1.5, 28.0, 1.7):
-    if not (1.2 < xx < 13.7) and not (16.0 < xx < 26.0) and abs(xx - JABU[0]) > 0.9 and abs(xx - LIMAO[0]) > 1.2:
+for xx in np.arange(1.5, 31.0, 1.7):                             # moreias no pé do muro do sul, fora da fita e das árvores
+    if not (2.4 < xx < 25.6) and abs(xx - JABU[0]) > 1.3 and abs(xx - LIMAO[0]) > 1.2:
         P.moreia((xx, 0.45, 0.0), rng, 0.8)
 for xx in np.arange(7.8, 33.0, 1.7):
-    if not (8.1 < xx < 18.2) and min(abs(xx - c) for c in (6.9, GOIA[0], 21.2, 23.7, 26.4, 30.4)) > 1.2:
+    if min(abs(xx - c) for c in (6.9, GOIA[0], 21.2, 23.7, 26.4, 30.4)) > 1.2:
         P.moreia((xx, 9.5, 0.0), rng, 0.8)
 P.heliconia((1.0, 1.2, 0), rng, n=9, H=1.8, spread=0.3); P.heliconia((1.75, 0.55, 0), rng, n=7, H=1.5, flower='flower_orange', spread=0.3)
 
 
-# ------------------------------------------------------------------ a vilinha: três casas container com terraço aberto
-# Pedido do Thiago (15/10/2026): as casas da vilinha no modelo "casa container com terraço" da foto que ele mandou.
-# Um container por casa, de 7 x 3 m (a medida que ele deu para a vilinha), com sala, cozinha, banheiro e quarto;
-# em cima, um terraço de cumaru com guarda-corpo, mesa, cadeiras e vasos, sem cobertura (pedido do Thiago em
-# 15/10/2026, depois de ver o telhado metálico da foto: o deck fica aberto para o céu);
-# escada metálica reta do lado de fora, na lateral. Chapa ondulada pintada, quinas e requadros de outra cor,
-# janelas de 1,00 x 1,00 e porta de vidro de 0,80 x 2,00 com caixilho branco.
-# A ponta lisa (sem aberturas) de cada casa recebe projeção mapeada.
-CL, CD = 7.0, 3.0                       # comprimento ao longo do muro e fundo
-TP, TD = 0.12, 0.08                     # parede do container (chapa + isolamento + forro) e divisória interna
-IU, ID = CL - 2 * TP, CD - 2 * TP       # medidas internas: 6,76 x 2,76
-Z0C, ZTC = 0.10, 2.70                   # base e topo do container (apoiado em sapatas de concreto)
-PISO, FORRO = 0.25, 2.55                # piso e forro de dentro (pé-direito de 2,30)
-DECK = 2.76                             # piso do terraço (réguas de cumaru sobre o teto do container)
-GUARDA = DECK + 1.10                    # guarda-corpo (na foto é de 0,80; a norma pede 1,10)
-ONDA, FUNDO_ONDA = 0.28, 0.035          # chapa ondulada trapezoidal: passo e profundidade
-NESC, LARG = 14, 0.80                   # escada de fora: espelhos e largura (na foto é de 0,60)
-ESPE, PISE = DECK / NESC, 0.23          # espelho (0,197) e pisada
-PAT = 0.85                              # patamar da escada no alto, encostado no muro
+# ------------------------------------------------------------------ a vilinha: três casas de dois andares
+# Pedido do Thiago (09 a 10/11/2026): no lugar das casas container, três casas de dois andares, uma para cada
+# filho, boas para hospedagem. Embaixo sala com mini cozinha ao fundo e lavabo; em cima suíte com banheiro e
+# varanda em balanço sobre a entrada. Ele escolheu crescer de 20 para 24,8 m² por piso (6,20 x 4,00 m,
+# ~50 m² por casa) para o quarto passar dos 9 m² exigidos para dormitório.
+# Orientação (resposta dele em 10/11): o sol nasce no portão de baixo e se põe no portão do gramado, ou seja
+# o terreno corre leste-oeste e o muro y = 0 é o sul. Por isso as três ficam em fita nesse muro: as fachadas
+# olham para o norte (sol o dia inteiro) e a sombra cai no próprio muro, deixando o gramado livre.
+CL, CD = 6.20, 4.00                     # comprimento ao longo do muro e fundo
+TP, TD = 0.15, 0.10                     # parede externa (bloco + reboco) e divisória interna
+IU, ID = CL - 2 * TP, CD - 2 * TP       # medidas internas: 5,90 x 3,70
+RECUO = 1.50                            # afastamento do muro (dois pavimentos não encostam na divisa)
+VAO = 1.80                              # vão entre uma casa e a outra na fita
+Z0C = 0.12                              # baldrame acima do gramado
+PISO = 0.20                             # piso do térreo
+LAJE = PISO + 2.62                      # 2,82: face de baixo da laje (pé-direito de 2,62)
+PISO2 = LAJE + 0.14                     # 2,96: piso do pavimento superior
+FORRO = LAJE                            # forro do térreo
+FORRO2 = PISO2 + 2.30                   # 5,26: forro do superior, no nível do beiral
+CAI = 0.27                              # telhado de duas águas, cumeeira paralela ao muro (caimento de 27%)
+Z_CUM = FORRO2 + CAI * CD / 2           # 5,80: cumeeira
+BEIRAL, BEIRAL_O = 0.60, 0.30           # beiral nas águas e nos oitões
+VAR_U0, VAR_U1, VAR_D = 2.55, 5.95, 1.20          # varanda em balanço de 3,40 x 1,20 sobre a entrada
+GUARDA = PISO2 + 1.10                   # guarda-corpo da varanda
+NESC, LARG = 15, 0.90                   # escada interna: 15 espelhos e 0,90 de largura
+ESPE, PISE = (PISO2 - PISO) / NESC, 0.232         # espelho de 0,184 e pisada de 0,232
+ESC_U1 = 5.88                           # pé da escada em iu, junto ao hall da entrada (sobe no sentido -iu)
+ESC_U0 = ESC_U1 - (NESC - 1) * PISE     # 2,632: chegada no piso de cima
+ESC_D0, ESC_D1 = 0.15, 0.15 + LARG      # faixa da escada, encostada na parede do fundo
 rv = np.random.default_rng(23)
-PLANTIO_TERRACO = []                    # (tipo, topo do vaso) dos vasos do terraço, plantados depois da poda
+PLANTIO_TERRACO = []                    # (tipo, topo do vaso) dos vasos da varanda, plantados depois da poda
 LUZ_QUENTE, LUZ_LED = [1.0, 0.82, 0.62], [1.0, 0.72, 0.42]
 
 EXTRA = {'colisores': [], 'pisos': [], 'portas': [], 'luzes': [], 'ventiladores': [], 'lugares': [], 'casas': [],
@@ -1094,7 +1106,7 @@ def colisor(x0, x1, y0, y1, z0, z1):
 
 
 def path_y(x):
-    return 4.9 + 0.85 * math.sin(x / 4.6)
+    return 6.5 + 0.5 * math.sin(x / 5.0)
 
 
 def prisma_xy(mat, pts, z0, z1):
@@ -1128,38 +1140,17 @@ def solido(mat, verts, faces):
         G[mat].add(v, fs)
 
 
-def perfil_onda(a, a0, passo, prof):
-    """Recuo da chapa trapezoidal no ponto a (0 na crista, prof no vale)."""
-    q = passo / 4
-    t = ((a - a0) % passo) / q
-    if t < 1:
-        return 0.0
-    if t < 2:
-        return prof * (t - 1)
-    if t < 3:
-        return prof
-    return prof * (4 - t)
-
-
-def pontos_onda(a, b, a0, passo):
-    """Pontos do perfil entre a e b (as quebras da chapa trapezoidal e as duas pontas)."""
-    q = passo / 4
-    k0 = int(math.floor((a - a0) / q)) + 1
-    k1 = int(math.ceil((b - a0) / q))
-    return [a] + [a0 + k * q for k in range(k0, k1) if a + 1e-4 < a0 + k * q < b - 1e-4] + [b]
-
-
 class Casa:
-    """Referência local de uma casa: u corre ao longo do muro a partir da ponta lisa (u = 0) até a ponta da
-    escada (u = 7); d vai do muro de fundo (0) até a fachada (3). A casa azul é espelhada (X = x1 - u).
-    Dentro, (iu, id) contam a partir das faces de dentro das paredes: u = iu + 0,12 e d = id + 0,12."""
+    """Referência local de uma casa: u corre ao longo do muro (0 na ponta da cozinha, CL na ponta da entrada);
+    d vai do muro de fundo (0) até a fachada (CD), já contando o recuo da divisa.
+    Dentro, (iu, id) contam a partir das faces de dentro das paredes: u = iu + TP e d = id + TP."""
 
-    def __init__(self, x0, side, espelho):
+    def __init__(self, x0, side, espelho, recuo=0.0):
         self.x0, self.x1 = x0, x0 + CL
         self.esp = espelho
         self.su = -1 if espelho else 1
         self.sd = 1 if side == 0 else -1
-        self.yr = 0.0 if side == 0 else 10.0
+        self.yr = recuo if side == 0 else 10.0 - recuo
 
     # ---- mundo
     def X(self, u):
@@ -1262,22 +1253,8 @@ class Casa:
         else:
             self.caixa(mat, b0, b1, a, b, za, zb, col)
 
-    def chapa(self, mat, eixo, a0, a1, bfora, para_dentro, z0, z1, vaos=(), passo=ONDA, prof=FUNDO_ONDA):
-        """Chapa ondulada trapezoidal de container, de a0 a a1 ao longo do eixo ('u' ou 'd'), com a crista no
-        plano bfora e o vale para dentro (para_dentro = +1 ou -1 no outro eixo), de z0 a z1, com vãos."""
-        for a, b, za, zb in self._pedacos(a0, a1, z0, z1, vaos):
-            pts = pontos_onda(a, b, a0, passo)
-            verts, faces = [], []
-            for x, y in zip(pts[:-1], pts[1:]):
-                i = len(verts)
-                for aa, zz in ((x, za), (y, za), (y, zb), (x, zb)):
-                    bb = bfora + para_dentro * perfil_onda(aa, a0, passo, prof)
-                    verts.append(self.p(aa, bb, zz) if eixo == 'u' else self.p(bb, aa, zz))
-                faces.append([i, i + 1, i + 2, i + 3])
-            G[mat].add(verts, faces)
-
     def requadro(self, eixo, a0, a1, z0, z1, bfora, para_dentro, mat='esquadria_branca', larg=0.06, sai=0.015, peitoril=True):
-        """Requadro de chapa em volta de um vão: moldura por fora e o forro das quatro faces do vão."""
+        """Requadro em volta de um vão: moldura por fora e o forro das quatro faces do vão."""
         bo = bfora - para_dentro * sai                 # face de fora da moldura
         bi = bfora + para_dentro * TP                  # face de dentro da parede
         pecas = [(a0 - larg, a0, z0 - (larg if peitoril else 0.0), z1 + larg), (a1, a1 + larg, z0 - (larg if peitoril else 0.0), z1 + larg),
@@ -1366,348 +1343,337 @@ def florzinhas(pos, rng, cor='flower_red'):
         ellipsoid(cor, (pos[0] + r * math.cos(a), pos[1] + r * math.sin(a), pos[2] + rng.uniform(0.07, 0.13)), 0.022, seg=6, rings=4)
 
 
-def container(x0, side, espelho, nome, corpo, quina, tecido):
-    """Casa container de 7 x 3 m encostada no muro, frente para o gramado, terraço aberto em cima e escada
-    reta de fora na ponta u = 7 (sobe da frente para o fundo e chega a um patamar junto ao muro)."""
-    c = Casa(x0, side, espelho)
+def agua_telhado(c, sinal):
+    """Uma água do telhado: da cumeeira (d = CD/2) até o beiral, no sentido do muro (-1) ou da fachada (+1)."""
+    alc = CD / 2 + BEIRAL
+    p0 = np.array(c.p(-BEIRAL_O, CD / 2, Z_CUM), float)
+    p1 = np.array(c.p(CL + BEIRAL_O, CD / 2, Z_CUM), float)
+    pb = np.array(c.p(-BEIRAL_O, CD / 2 + sinal * alc, Z_CUM - CAI * alc), float)
+    u, v = p1 - p0, pb - p0
+    Lu, Lv = float(np.linalg.norm(u)), float(np.linalg.norm(v))
+    tile_roof('rooftile', p0 + np.array([0, 0, 0.03]), u / Lu, v / Lv, Lu, Lv)
+
+
+def casa(x0, nome, corpo, detalhe, tecido, proj):
+    """Casa de dois andares de 6,20 x 4,00 m, recuada 1,50 m do muro do sul, de frente para o gramado.
+
+    u corre ao longo do muro (0 na ponta da cozinha, 6,20 na ponta da entrada); d vai do muro (0) à fachada (4,00).
+    Térreo: sala, mini cozinha ao fundo, lavabo e a escada reta encostada na parede do fundo.
+    Superior: suíte com banheiro e varanda em balanço de 3,40 x 1,00 sobre a entrada coberta.
+    proj = 0 projeta no oitão u = 0, 1 no oitão u = CL."""
+    c = Casa(x0, 0, False, RECUO)
     I = c.i
     sg = c.sd
-    porta = (2.70, 3.50)                                   # vão da porta de entrada (iu): abre no hall
+    BF = CD - TP / 2                                       # meio da parede da fachada
+    porta = (4.55, 5.35)                                   # vão da porta de entrada (iu)
     pu0, pu1 = porta[0] + TP, porta[1] + TP
-    ZP = PISO + 2.00                                       # porta de 0,80 x 2,00, como na foto
-    jan_q = (0.65 + TP, 1.65 + TP, PISO + 1.00, PISO + 2.00)   # janelas de 1,00 x 1,00 com o topo na altura da porta
-    jan_s = (4.70 + TP, 5.70 + TP, PISO + 1.00, PISO + 2.00)
-    vaos_frente = [(pu0, pu1, 0.0, ZP), jan_q, jan_s]
-    BF = CD - TP / 2                                       # meio da parede da frente
-    z_ch0, z_ch1 = Z0C + 0.14, ZTC - 0.16                  # a chapa fica entre a longarina de baixo e a de cima
+    ZP = PISO + 2.10
+    jan_coz = (0.25 + TP, 1.15 + TP, PISO + 1.00, PISO + 2.20)
+    jan_sala = (1.60 + TP, 4.30 + TP, PISO + 0.40, PISO + 2.30)
+    jan_ban = (0.30 + TP, 1.15 + TP, PISO2 + 1.10, PISO2 + 1.90)
+    pvar = (3.00 + TP, 4.60 + TP, PISO2, PISO2 + 2.10)     # porta de correr da varanda: 1,60 de vão, 0,80 de passagem
+    jan_qua = (1.70 + TP, 2.50 + TP, PISO2 + 0.50, PISO2 + 2.10)
+    vaos_frente = [(pu0, pu1, 0.0, ZP), jan_coz, jan_sala, jan_ban, pvar, jan_qua]
 
-    # ============================================================ estrutura do container
-    # sapatas de concreto e chapa do fundo
-    for u in (0.10, CL / 2, CL - 0.10):
-        for d in (0.17, CD - 0.17):
-            c.caixa('concrete', u - 0.18, u + 0.18, d - 0.16, d + 0.16, 0.0, Z0C)
-    c.caixa('aluminio_preto', 0.05, CL - 0.05, 0.05, CD - 0.05, Z0C, Z0C + 0.02)
-    # chapa ondulada (crista no plano da parede, vale para dentro) e forro de dentro com isolamento
-    c.chapa(corpo, 'u', 0.0, CL, CD, -1, z_ch0, z_ch1, vaos_frente)
-    c.chapa(corpo, 'u', 0.0, CL, 0.0, 1, z_ch0, z_ch1)
-    c.chapa(corpo, 'd', 0.0, CD, 0.0, 1, z_ch0, z_ch1)                                    # ponta lisa (projeção)
-    c.chapa(corpo, 'd', 0.0, CD, CL, -1, z_ch0, z_ch1)
-    c.parede('house_white', 'u', 0.0, CL, CD - TP, CD - 0.04, Z0C, ZTC, vaos_frente)
-    c.parede('house_white', 'u', 0.0, CL, 0.04, TP, Z0C, ZTC)
-    c.parede('house_white', 'd', TP, CD - TP, 0.04, TP, Z0C, ZTC)
-    c.parede('house_white', 'd', TP, CD - TP, CL - TP, CL - 0.04, Z0C, ZTC)
-    # colunas de canto e longarinas (a moldura pintada da foto); a de cima vai até o piso do terraço
-    for ua, ub in ((-0.01, 0.15), (CL - 0.15, CL + 0.01)):
-        for da, db in ((0.0, 0.15), (CD - 0.15, CD + 0.01)):
-            c.caixa(quina, ua, ub, da, db, Z0C, ZTC)
-    for za, zb in ((Z0C, z_ch0), (z_ch1, DECK + 0.02)):
-        c.caixa(quina, 0.0, CL, CD - 0.12, CD + 0.012, za, zb)
-        c.caixa(quina, 0.0, CL, 0.0, 0.12, za, zb)
-        c.caixa(quina, -0.012, 0.12, 0.12, CD - 0.12, za, zb)
-        c.caixa(quina, CL - 0.12, CL + 0.012, 0.12, CD - 0.12, za, zb)
-    # piso e forro
-    I('piso_madeira', 0, IU, 0, ID, Z0C + 0.02, PISO)
+    # ============================================================ casco: baldrame, paredes e telhado
+    c.caixa('concrete', -0.10, CL + 0.10, -0.10, CD + 0.10, 0.0, Z0C)
+    for u_ in (0.25, CL / 2, CL - 0.25):                                           # sapatas aparentes de tijolinho
+        c.caixa('brick', u_ - 0.22, u_ + 0.22, -0.11, CD + 0.11, 0.0, Z0C + 0.02)
+    # oitões: trapézio do baldrame à linha do telhado (cumeeira no meio do fundo)
+    perfil = ((0.0, Z0C), (CD, Z0C), (CD, FORRO2), (CD / 2, Z_CUM), (0.0, FORRO2))
+    for ua, ub, mat in ((0.0, TP, corpo if proj == 1 else detalhe), (CL - TP, CL, corpo if proj == 0 else detalhe)):
+        for a, b, m in ((ua, ub, mat),):
+            v = [c.p(a, d, z) for d, z in perfil] + [c.p(b, d, z) for d, z in perfil]
+            solido(m, v, [[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [0, 1, 6, 5], [1, 2, 7, 6], [2, 3, 8, 7], [3, 4, 9, 8], [4, 0, 5, 9]])
+        c.colide(ua, ub, 0.0, CD, 0.0, Z_CUM)
+    # fachada (cor da casa) e parede do fundo (reboco claro)
+    c.parede(corpo, 'u', 0.0, CL, CD - TP, CD, Z0C, FORRO2, vaos_frente)
+    c.parede(detalhe, 'u', 0.0, CL, 0.0, TP, Z0C, FORRO2)
+    # reboco claro por dentro, 1 cm à frente da face interna de cada parede (senão briga com a pintura de fora)
+    c.parede('house_white', 'u', TP, CL - TP, CD - TP - 0.012, CD - TP + 0.02, Z0C, FORRO2, vaos_frente, col=False)
+    c.caixa('house_white', TP, CL - TP, TP - 0.02, TP + 0.012, Z0C, FORRO2)
+    for ua, ub in ((TP - 0.012, TP + 0.02), (CL - TP - 0.02, CL - TP + 0.012)):
+        c.parede('house_white', 'd', TP, CD - TP, ua, ub, Z0C, FORRO2, (), col=False)
+    # faixa de tijolinho no pé da fachada e pingadeira no nível da laje
+    c.caixa('brick', 0.0, CL, CD - 0.02, CD + 0.03, Z0C, PISO + 0.12)
+    c.caixa(detalhe, -0.02, CL + 0.02, CD - 0.02, CD + 0.06, LAJE, LAJE + 0.07)
+    # lajes e forros
+    I('piso_madeira', 0, IU, 0, ID, Z0C, PISO)
     c.ipiso(0, IU, 0, ID, PISO)
-    I('gesso', 0, IU, 0, ID, FORRO, FORRO + 0.03)
-    # terraço: réguas de cumaru sobre o teto do container, por dentro das longarinas
-    c.caixa('deck_ipe', 0.12, CL - 0.12, 0.12, CD - 0.12, ZTC - 0.04, DECK)
-    c.piso(0.0, CL, 0.0, CD, DECK)
-    # soleira, degrau de cumaru e pisantes até o caminho
-    c.caixa('aluminio_preto', pu0, pu1, CD - TP, CD + 0.012, PISO - 0.012, PISO)
-    c.piso(pu0, pu1, CD - TP - 0.01, CD + 0.012, PISO)
-    c.caixa('deck_ipe', pu0 - 0.15, pu1 + 0.15, CD + 0.012, CD + 0.47, 0.0, 0.13)
-    c.piso(pu0 - 0.15, pu1 + 0.15, CD + 0.012, CD + 0.47, 0.13)
-    xd = c.X((pu0 + pu1) / 2)
-    y0p, y1p = c.Y(CD + 0.47 + 0.40), path_y(xd)
-    npath = max(1, int(round(abs(y1p - y0p) / 0.8)))
-    for k in range(npath):
-        obox('stone_step', (xd, y0p + (y1p - y0p) * k / npath, 0.017), (0.8, 0.45, 0.03))
+    I('concrete', 0, IU, 0, ID, LAJE, PISO2)
+    I('gesso', 0, IU, 0, ID, LAJE - 0.03, LAJE)
+    c.ipiso(0, ESC_U0, 0, ID, PISO2)                                               # piso de cima, menos o vão da escada
+    c.ipiso(ESC_U0, IU, ESC_D1, ID, PISO2)
+    I('forro', 0, IU, 0, ID, FORRO2, FORRO2 + 0.03)
+    # telhado de duas águas com telha de barro, caibros e testeira
+    for s in (-1, 1):
+        agua_telhado(c, s)
+        for u_ in np.arange(0.25, CL, 0.55):
+            c.viga('wood_y', (u_, CD / 2, Z_CUM - 0.02), (u_, CD / 2 + s * (CD / 2 + BEIRAL), FORRO2 - CAI * BEIRAL - 0.02), 0.05, 0.08)
+        c.caixa(detalhe, -BEIRAL_O, CL + BEIRAL_O, CD / 2 + s * (CD / 2 + BEIRAL) - 0.05, CD / 2 + s * (CD / 2 + BEIRAL) + 0.05,
+                FORRO2 - CAI * BEIRAL - 0.06, FORRO2 - CAI * BEIRAL + 0.10)
+    c.caixa('rooftile', -BEIRAL_O, CL + BEIRAL_O, CD / 2 - 0.12, CD / 2 + 0.12, Z_CUM, Z_CUM + 0.08)   # cumeeira
+    # calha e condutor no lado do muro
+    c.caixa('aluminio_preto', -BEIRAL_O, CL + BEIRAL_O, -BEIRAL - 0.06, -BEIRAL + 0.06, FORRO2 - CAI * BEIRAL - 0.08, FORRO2 - CAI * BEIRAL + 0.04)
+    c.cil('aluminio_preto', (0.12, -BEIRAL, 0.0), 0.045, FORRO2 - CAI * BEIRAL - 0.05, seg=10)
 
-    # ============================================================ divisórias de drywall
-    c.iparede('house_white', 'd', 0.0, ID, 2.30, 2.30 + TD, PISO, FORRO, [(1.95, 2.70, PISO, PISO + 2.05)])   # quarto | banheiro e hall
-    c.iparede('house_white', 'u', 2.38, 3.80, 1.75, 1.75 + TD, PISO, FORRO, [(2.72, 3.32, PISO, PISO + 2.05)])  # frente do banheiro
-    I('house_white', 3.80, 3.80 + TD, 0.0, 1.83, PISO, FORRO, col=True)                                   # banheiro | sala
-    for a0, a1 in ((2.30, 2.38),):
-        I('aluminio_preto', a0 - 0.01, a1 + 0.01, 1.95, 2.70, PISO + 2.05, PISO + 2.07)
-    I('aluminio_preto', 2.72, 3.32, 1.74, 1.84, PISO + 2.05, PISO + 2.07)
+    # ============================================================ varanda em balanço sobre a entrada
+    I('concrete', VAR_U0 - TP, VAR_U1 - TP, ID, ID + VAR_D, PISO2 - 0.14, PISO2)
+    c.caixa('deck_ipe', VAR_U0, VAR_U1, CD, CD + VAR_D, PISO2, PISO2 + 0.03)
+    c.piso(VAR_U0, VAR_U1, CD - TP - 0.04, CD + VAR_D, PISO2 + 0.03)
+    for q0, q1 in (((VAR_U0, CD + VAR_D), (VAR_U1, CD + VAR_D)), ((VAR_U0, CD), (VAR_U0, CD + VAR_D)), ((VAR_U1, CD), (VAR_U1, CD + VAR_D))):
+        c.guarda_corpo(q0, q1, PISO2 + 0.03, 'deck_ipe')      # corrimão de cumaru, como o piso da varanda
+    for k, u_ in enumerate((VAR_U0 + 0.28, VAR_U1 - 0.28)):                        # vasos (plantados depois da poda)
+        top = P.pot(c.p(u_, CD + 0.78, PISO2 + 0.03), 0.20, 0.42, mat='pot_fiber')
+        PLANTIO_TERRACO.append((k + 1, top))                                       # moreia com bromélia e xanadu (areca não cabe)
+        c.colide(u_ - 0.21, u_ + 0.21, CD + 0.57, CD + 0.99, PISO2, PISO2 + 1.1)
+    # banco de cumaru e mesinha encostados no guarda-corpo (sobra 0,75 m de passagem até a porta)
+    c.caixa('deck_ipe', 4.60, 5.80, CD + 0.75, CD + 1.15, PISO2 + 0.42, PISO2 + 0.47)
+    for u_ in (4.66, 5.70):
+        c.caixa('aluminio_preto', u_, u_ + 0.05, CD + 0.78, CD + 1.12, PISO2 + 0.03, PISO2 + 0.42)
+    c.caixa_g(tecido, (5.20, CD + 0.80, PISO2 + 0.62), (0.80, 0.12, 0.28), 0.0)
+    c.colide(4.60, 5.80, CD + 0.75, CD + 1.15, PISO2, PISO2 + 0.50)
+    c.cil('madeira_clara', (4.25, CD + 0.95, PISO2 + 0.47), 0.17, 0.035, seg=18)
+    c.cil('aluminio_preto', (4.25, CD + 0.95, PISO2 + 0.03), 0.025, 0.45, seg=8)
+    c.colide(4.08, 4.42, CD + 0.78, CD + 1.12, PISO2, PISO2 + 0.50)
+    for u_ in (VAR_U0 + 0.12, VAR_U1 - 0.12):
+        c.caixa('bulb', u_ - 0.006, u_ + 0.006, CD + 0.1, CD + VAR_D - 0.1, PISO2 + 0.06, PISO2 + 0.075)
+    c.luz(nome, 5.20 - TP, ID + 0.5, PISO2 + 0.9, LUZ_LED, 0.45, 4.0, 1, 'varanda')
+    # arandela ao lado da porta, embaixo da varanda
+    c.cil('aluminio_preto', (pu1 + 0.32, CD + 0.08, 1.85), 0.045, 0.28, seg=12)
+    c.elip('bulb', (pu1 + 0.32, CD + 0.08, 1.847), (0.035, 0.035, 0.005), seg=10, rings=3)
+    c.elip('bulb', (pu1 + 0.32, CD + 0.08, 2.133), (0.035, 0.035, 0.005), seg=10, rings=3)
+    c.luz(nome, porta[1] + 0.32, ID - 0.2, 2.0, LUZ_LED, 0.4, 3.5, 0, 'entrada')
 
-    # ============================================================ quarto (iu 0–2,30): cama de casal, guarda-roupa
-    cu0, cu1 = 0.40, 1.78
-    I('tecido_grafite', cu0 - 0.04, cu1 + 0.04, 0.0, 0.08, PISO + 0.30, PISO + 1.10)                  # cabeceira estofada
-    I('laca_grafite', cu0 + 0.05, cu1 - 0.05, 0.10, 1.90, PISO, PISO + 0.28)
-    I('tecido_branco', cu0 + 0.02, cu1 - 0.02, 0.08, 1.96, PISO + 0.28, PISO + 0.50)
-    I(tecido, cu0, cu1, 0.75, 1.98, PISO + 0.44, PISO + 0.54)
-    I('tecido_terra', cu0 - 0.01, cu1 + 0.01, 1.52, 1.80, PISO + 0.49, PISO + 0.555)
-    for a in (cu0 + 0.36, cu1 - 0.36):
-        c.elip('tecido_branco', c.ip(a, 0.30, PISO + 0.58), (0.30, 0.15, 0.08), seg=12, rings=6)
-    c.caixa_g('cushion', c.ip((cu0 + cu1) / 2, 0.46, PISO + 0.62), (0.40, 0.12, 0.26), 0.0)
-    c.icol(cu0 - 0.04, cu1 + 0.04, 0.0, 1.98, PISO, PISO + 0.56)
-    I('madeira_clara', 0.0, 0.34, 0.03, 0.40, PISO + 0.40, PISO + 0.56, col=True)                     # criado-mudo suspenso
-    c.tubo('aluminio_preto', [c.ip(0.17, 0.22, FORRO), c.ip(0.17, 0.22, PISO + 1.15)], 0.004, seg=3)
-    c.elip('bulb', c.ip(0.17, 0.22, PISO + 1.08), (0.07, 0.07, 0.07), seg=10, rings=6)
-    c.luz(nome, 0.17, 0.22, PISO + 1.0, LUZ_LED, 0.3, 2.5, 0, 'quarto')
-    c.elip('louca', c.ip(0.20, 0.30, PISO + 0.61), (0.05, 0.05, 0.05), seg=8, rings=5)
-    I('laca_grafite', 1.84, 2.30, 0.0, 0.58, PISO, PISO + 2.20, col=True)                             # guarda-roupa
-    I('aluminio_preto', 1.84, 1.86, 0.58, 0.60, PISO + 0.10, PISO + 2.10)
-    I('white', 0.55, 1.45, 0.0, 0.22, PISO + 1.82, PISO + 2.10)                                       # ar-condicionado
-    I('aluminio_preto', 0.59, 1.41, 0.215, 0.22, PISO + 1.84, PISO + 1.87)
-    I('tapete', 0.10, 2.22, 2.02, 2.66, PISO, PISO + 0.008)
-    c.elip('bulb', c.ip(1.10, 1.30, FORRO - 0.004), (0.06, 0.06, 0.006), seg=12, rings=3)
-    c.luz(nome, 1.10, 1.30, FORRO - 0.12, LUZ_QUENTE, 0.7, 4.0, 0, 'quarto')
+    # ============================================================ térreo: divisórias
+    # lavabo (iu 0–1,60 x id 0–1,65), no canto do fundo, embaixo do banheiro de cima
+    c.iparede('house_white', 'd', 0.0, 1.65, 1.60, 1.60 + TD, PISO, FORRO)
+    c.iparede('house_white', 'u', 0.0, 1.70, 1.65, 1.65 + TD, PISO, FORRO, [(0.55, 1.45, PISO, PISO + 2.05)])
+    I('aluminio_preto', 0.54, 1.46, 1.64, 1.76, PISO + 2.05, PISO + 2.07)
+    # parede da escada, de frente para a sala, com o vão de entrada da escada
+    c.iparede('house_white', 'u', ESC_U0 - 0.10, IU, ESC_D1, ESC_D1 + TD, PISO, FORRO, [(5.05, ESC_U1, PISO, PISO + 2.10)])
 
-    # ============================================================ banheiro (iu 2,38–3,80 x id 0–1,75)
-    I('porcelanato', 2.38, 3.80, 0.0, 1.75, PISO, PISO + 0.005)
-    I('porcelanato', 2.38, 3.80, 0.0, 0.006, PISO, FORRO)
-    I('porcelanato', 2.38, 2.386, 0.0, 1.75, PISO, FORRO)
-    I('porcelanato', 3.794, 3.80, 0.0, 1.75, PISO, FORRO)
-    I('porcelanato', 2.38, 2.72, 1.744, 1.75, PISO, FORRO)
-    I('porcelanato', 3.32, 3.80, 1.744, 1.75, PISO, FORRO)
-    # box no fundo (1,42 x 0,85): vidro fixo de um lado, chuveiro de teto, ralo linear, nicho
-    I('vidro', 2.386, 3.05, 0.844, 0.856, PISO + 0.01, PISO + 2.0)
-    I('aluminio_preto', 2.386, 3.05, 0.84, 0.86, PISO + 2.0, PISO + 2.02)
-    I('aluminio_preto', 3.03, 3.05, 0.84, 0.86, PISO, PISO + 2.0)
-    c.icol(2.38, 3.06, 0.83, 0.87, PISO, PISO + 2.02)
-    I('aluminio_preto', 2.95, 3.25, 0.28, 0.58, FORRO - 0.02, FORRO)
-    I('aluminio_preto', 2.45, 3.74, 0.78, 0.82, PISO + 0.005, PISO + 0.008)
-    I('aluminio_preto', 3.05, 3.15, 0.006, 0.02, PISO + 0.95, PISO + 1.05)
-    I('laca_grafite', 2.50, 2.90, 0.006, 0.012, PISO + 1.20, PISO + 1.50)
-    I('porcelanato', 2.50, 2.90, 0.006, 0.10, PISO + 1.20, PISO + 1.22)
-    # bacia suspensa na parede da sala
-    I('louca', 3.62, 3.794, 1.04, 1.36, PISO + 0.24, PISO + 0.40)
-    c.elip('louca', c.ip(3.47, 1.20, PISO + 0.34), (0.19, 0.17, 0.07), seg=14, rings=6)
-    c.elip('white', c.ip(3.46, 1.20, PISO + 0.405), (0.18, 0.17, 0.012), seg=14, rings=4)
-    I('aluminio_preto', 3.786, 3.794, 1.11, 1.29, PISO + 0.95, PISO + 1.07)
-    c.icol(3.27, 3.80, 1.02, 1.38, PISO, PISO + 0.42)
-    # bancada estreita suspensa na parede do quarto, cuba de apoio, espelho redondo com LED
-    I('madeira_clara', 2.386, 2.73, 0.95, 1.50, PISO + 0.70, PISO + 0.74)
-    I('laca_grafite', 2.386, 2.71, 0.97, 1.48, PISO + 0.48, PISO + 0.70)
-    c.icol(2.38, 2.73, 0.93, 1.52, PISO + 0.48, PISO + 0.74)
-    c.cil('louca', c.ip(2.56, 1.225, PISO + 0.74), 0.14, 0.11, seg=18, r_top=0.16)
-    c.cil('granite', c.ip(2.56, 1.225, PISO + 0.85), 0.15, 0.003, seg=18)
-    c.tubo('aluminio_preto', [c.ip(2.386, 1.225, PISO + 0.98), c.ip(2.53, 1.225, PISO + 0.98), c.ip(2.56, 1.225, PISO + 0.95)], 0.011, seg=6)
-    c.disco_v('bulb', c.ip(2.390, 1.225, PISO + 1.48), 0.26, 'u', esp=0.004)
-    c.disco_v('espelho', c.ip(2.398, 1.225, PISO + 1.48), 0.24, 'u', esp=0.008)
-    c.tubo('aluminio_preto', [c.ip(3.40, 1.744, PISO + 1.0), c.ip(3.74, 1.744, PISO + 1.0)], 0.009, seg=5)      # toalheiro
-    c.caixa_g('tecido_branco', c.ip(3.57, 1.725, PISO + 0.86), (0.28, 0.03, 0.30))
-    I('aluminio_preto', 3.30, 3.50, 1.30, 1.50, FORRO - 0.01, FORRO)                                  # exaustor
-    c.elip('bulb', c.ip(3.10, 1.20, FORRO - 0.004), (0.05, 0.05, 0.006), seg=10, rings=3)
-    c.luz(nome, 3.10, 1.20, FORRO - 0.12, LUZ_QUENTE, 0.5, 3.0, 0, 'banheiro')
-    # porta de correr embutida (só o batente e a borda da folha aparecem)
-    for a0, a1 in ((2.72, 2.735), (3.305, 3.32)):
-        I('aluminio_preto', a0, a1, 1.75, 1.83, PISO, PISO + 2.05)
-    I('madeira_clara', 2.735, 2.775, 1.775, 1.805, PISO + 0.01, PISO + 2.03)
+    # ============================================================ térreo: mini cozinha ao fundo
+    I('inox', 1.80, 2.50, 0.0, 0.70, PISO, PISO + 1.88, col=True)                   # geladeira
+    I('aluminio_preto', 1.795, 1.80, 0.0, 0.70, PISO + 1.16, PISO + 1.165)
+    I('aluminio_preto', 0.0, 0.62, 1.88, 3.50, PISO, PISO + 0.12)                   # bancada na parede de topo
+    I('laca_grafite', 0.0, 0.58, 1.88, 3.50, PISO + 0.12, PISO + 0.88, col=True)
+    I('quartzo', 0.0, 0.62, 1.86, 3.52, PISO + 0.88, PISO + 0.92)
+    I('quartzo', 0.0, 0.012, 1.86, 3.52, PISO + 0.92, PISO + 1.46)                  # frontão
+    for zc in (PISO + 0.45, PISO + 0.84):
+        I('aluminio_preto', 0.578, 0.58, 1.88, 3.50, zc - 0.012, zc)
+    I('inox', 0.08, 0.52, 2.05, 2.52, PISO + 0.915, PISO + 0.922)                   # cuba
+    I('aluminio_preto', 0.12, 0.48, 2.09, 2.48, PISO + 0.921, PISO + 0.924)
+    c.tubo('aluminio_preto', [c.ip(0.06, 2.28, PISO + 0.92), c.ip(0.06, 2.28, PISO + 1.30), c.ip(0.10, 2.28, PISO + 1.42),
+                              c.ip(0.24, 2.28, PISO + 1.44), c.ip(0.32, 2.28, PISO + 1.36)], 0.014, seg=6)
+    I('tela_tv', 0.08, 0.52, 2.75, 3.30, PISO + 0.92, PISO + 0.926)                 # cooktop de duas bocas
+    for b in (2.90, 3.16):
+        c.anel('granite', 0.30 + TP, b + TP, 0.07, 0.085, PISO + 0.927, seg=16)
+    I('madeira_clara', 0.0, 0.36, 1.88, 3.50, PISO + 1.52, PISO + 2.16)             # aéreos
+    I('bulb', 0.36, 0.42, 1.90, 3.48, PISO + 1.515, PISO + 1.52)
+    c.luz(nome, 0.42, 2.60, PISO + 1.42, LUZ_LED, 0.45, 3.0, 0, 'cozinha')
+    # mesa de refeição para quatro, entre a cozinha e a janela
+    I('madeira_clara', 0.80, 1.90, 2.75, 3.65, PISO + 0.73, PISO + 0.77)
+    for a, b in ((0.86, 2.81), (1.78, 2.81), (0.86, 3.53), (1.78, 3.53)):
+        I('aluminio_preto', a, a + 0.05, b, b + 0.05, PISO, PISO + 0.73)
+    c.icol(0.80, 1.90, 2.75, 3.65, PISO, PISO + 0.77)
+    cadeira(c, 0.55, 3.20, 0.0)
+    cadeira(c, 2.15, 3.20, math.pi)
+    c.elip('louca', c.ip(1.35, 3.20, PISO + 0.80), (0.13, 0.13, 0.04), seg=14, rings=5, zmin=-0.2)
+    for k in range(3):
+        c.elip(('fruit_orange', 'fruit_lemon', 'fruit_red')[k], c.ip(1.30 + 0.06 * k, 3.18, PISO + 0.83), 0.035, seg=8, rings=5)
 
-    # ============================================================ hall da entrada
-    I('wood_x', 3.30, 3.76, 1.83, 1.855, PISO + 1.25, PISO + 1.80)                                    # quadro
-    I('quadro', 3.33, 3.73, 1.855, 1.86, PISO + 1.28, PISO + 1.77)
-    c.elip('bulb', c.ip(3.10, 2.30, FORRO - 0.004), (0.05, 0.05, 0.006), seg=10, rings=3)
-    c.luz(nome, 3.10, 2.30, FORRO - 0.12, LUZ_QUENTE, 0.45, 3.0, 0, 'hall')
+    # ============================================================ térreo: lavabo
+    I('porcelanato', 0.0, 1.60, 0.0, 1.65, PISO, PISO + 0.006)
+    for a0, a1, b0, b1 in ((0.0, 1.60, 0.0, 0.006), (0.0, 0.006, 0.0, 1.65), (1.594, 1.60, 0.0, 1.65), (0.0, 1.60, 1.644, 1.65)):
+        I('porcelanato', a0, a1, b0, b1, PISO, PISO + 1.55)
+    I('madeira_clara', 0.30, 1.10, 0.006, 0.45, PISO + 0.76, PISO + 0.80)          # bancada com cuba de apoio
+    I('laca_grafite', 0.33, 1.07, 0.02, 0.43, PISO + 0.52, PISO + 0.76)
+    c.icol(0.30, 1.10, 0.0, 0.45, PISO + 0.50, PISO + 0.80)
+    c.cil('louca', c.ip(0.70, 0.24, PISO + 0.80), 0.14, 0.11, seg=18, r_top=0.16)
+    c.tubo('aluminio_preto', [c.ip(0.70, 0.06, PISO + 0.80), c.ip(0.70, 0.06, PISO + 1.06), c.ip(0.70, 0.16, PISO + 1.14)], 0.011, seg=6)
+    c.disco_v('espelho', c.ip(0.70, 0.012, PISO + 1.44), 0.22, 'd', esp=0.008)
+    I('louca', 0.006, 0.35, 0.95, 1.27, PISO + 0.24, PISO + 0.40)                  # bacia suspensa na parede de topo
+    c.elip('louca', c.ip(0.50, 1.11, PISO + 0.34), (0.19, 0.17, 0.07), seg=14, rings=6)
+    c.icol(0.0, 0.40, 0.93, 1.29, PISO, PISO + 0.42)
+    c.elip('bulb', c.ip(1.05, 1.00, FORRO - 0.004), (0.05, 0.05, 0.006), seg=10, rings=3)
+    c.luz(nome, 1.05, 1.00, FORRO - 0.12, LUZ_QUENTE, 0.45, 2.5, 0, 'lavabo')
 
-    # ============================================================ sala e cozinha (iu 3,88–6,76)
-    # painel ripado de cumaru com a TV na parede do fundo e rack suspenso
-    for k in range(17):
-        a = 4.25 + k * 0.092
-        I('wood_z', a, a + 0.055, 0.0, 0.025, PISO + 0.25, PISO + 1.85)
-    I('aluminio_preto', 4.25, 5.82, 0.0, 0.012, PISO + 0.25, PISO + 1.85)
-    I('tela_tv', 4.48, 5.59, 0.025, 0.06, PISO + 0.92, PISO + 1.55)
-    I('aluminio_preto', 4.48, 5.59, 0.06, 0.062, PISO + 0.92, PISO + 0.935)
-    I('laca_grafite', 4.30, 5.78, 0.0, 0.36, PISO + 0.30, PISO + 0.48, col=True)
-    I('bulb', 4.33, 5.75, 0.28, 0.34, PISO + 0.295, PISO + 0.30)
-    c.elip('louca', c.ip(4.55, 0.20, PISO + 0.56), (0.06, 0.06, 0.08), seg=10, rings=6)
-    for k, m in enumerate(('quadro', 'cushion_teal', 'tecido_terra')):
-        I(m, 5.30 + 0.035 * k, 5.33 + 0.035 * k, 0.08, 0.30, PISO + 0.48, PISO + 0.72 - 0.03 * k)
-    # sofá de dois lugares sob a janela, de frente para a TV
-    s0, s1, sd0 = 4.45, 5.95, 2.00
-    I('aluminio_preto', s0 + 0.06, s1 - 0.06, sd0 + 0.06, ID - 0.04, PISO, PISO + 0.08)
-    I('tecido_grafite', s0, s1, sd0, ID, PISO + 0.08, PISO + 0.30)
+    # ============================================================ térreo: escada reta encostada na parede do fundo
+    for k in range(1, NESC):                                                        # 14 degraus; o 15º espelho chega ao piso
+        ua = ESC_U1 - k * PISE
+        c.caixa('deck_ipe', ua + TP, ua + PISE + TP + 0.02, ESC_D0 + TP, ESC_D1 + TP, PISO + k * ESPE - 0.04, PISO + k * ESPE)
+        c.caixa('house_white', ua + TP, ua + PISE + TP, ESC_D0 + TP, ESC_D1 + TP, PISO + (k - 1) * ESPE, PISO + k * ESPE - 0.04)
+        c.ipiso(ua, ua + PISE, ESC_D0, ESC_D1, PISO + k * ESPE)
+    c.luz(nome, 4.60, 1.60, FORRO - 0.12, LUZ_QUENTE, 0.5, 3.5, 0, 'escada')
+
+    # ============================================================ térreo: sala e hall
+    for k in range(14):                                                             # painel ripado de cumaru com a TV
+        a = 2.78 + k * 0.092
+        I('wood_z', a, a + 0.055, ESC_D1 + TD, ESC_D1 + TD + 0.025, PISO + 0.30, PISO + 1.95)
+    I('aluminio_preto', 2.78, 4.08, ESC_D1 + TD, ESC_D1 + TD + 0.012, PISO + 0.30, PISO + 1.95)
+    I('tela_tv', 2.92, 3.94, ESC_D1 + TD + 0.025, ESC_D1 + TD + 0.06, PISO + 0.95, PISO + 1.53)
+    I('laca_grafite', 2.84, 4.02, ESC_D1 + TD, ESC_D1 + TD + 0.30, PISO + 0.32, PISO + 0.50, col=True)
+    I('bulb', 2.87, 3.99, ESC_D1 + TD + 0.28, ESC_D1 + TD + 0.34, PISO + 0.315, PISO + 0.32)
+    # sofá de dois lugares de frente para a TV
+    s0, s1, sd0, sd1 = 2.60, 4.10, 2.75, 3.65
+    I('aluminio_preto', s0 + 0.06, s1 - 0.06, sd0 + 0.06, sd1 - 0.04, PISO, PISO + 0.08)
+    I('tecido_grafite', s0, s1, sd0, sd1, PISO + 0.08, PISO + 0.30)
     for k in range(2):
         a = s0 + 0.10 + k * (s1 - s0 - 0.20) / 2
-        I('tecido_grafite', a + 0.005, a + (s1 - s0 - 0.20) / 2 - 0.005, sd0 + 0.01, ID - 0.20, PISO + 0.30, PISO + 0.45)
-        I('tecido_grafite', a + 0.005, a + (s1 - s0 - 0.20) / 2 - 0.005, ID - 0.21, ID - 0.02, PISO + 0.30, PISO + 0.78)
+        I('tecido_grafite', a + 0.005, a + (s1 - s0 - 0.20) / 2 - 0.005, sd0 + 0.01, sd1 - 0.20, PISO + 0.30, PISO + 0.45)
+        I('tecido_grafite', a + 0.005, a + (s1 - s0 - 0.20) / 2 - 0.005, sd1 - 0.21, sd1 - 0.02, PISO + 0.30, PISO + 0.78)
     for a in (s0, s1 - 0.10):
-        I('tecido_grafite', a, a + 0.10, sd0, ID, PISO + 0.30, PISO + 0.60)
-    c.icol(s0, s1, sd0, ID, PISO, PISO + 0.78)
-    for k, (m, a) in enumerate(((tecido, 4.78), ('cushion', 5.20), ('tecido_terra', 5.62))):
-        c.caixa_g(m, c.ip(a, ID - 0.30, PISO + 0.62), (0.40, 0.13, 0.38), 0.25 * (k - 1))
-    # mesa de centro baixa e tapete
-    I('madeira_clara', 4.80, 5.55, 1.15, 1.55, PISO + 0.26, PISO + 0.30)
-    for a, b in ((4.83, 1.18), (5.49, 1.18), (4.83, 1.49), (5.49, 1.49)):
-        I('aluminio_preto', a, a + 0.03, b, b + 0.03, PISO, PISO + 0.26)
-    c.elip('louca', c.ip(5.05, 1.35, PISO + 0.33), (0.13, 0.13, 0.04), seg=14, rings=5, zmin=-0.2)
-    I('tapete', 4.25, 5.98, 0.55, 2.10, PISO, PISO + 0.008)
-    I('white', 3.88, 4.10, 0.35, 1.25, PISO + 1.82, PISO + 2.10)                                    # ar-condicionado na parede do banheiro
-    I('aluminio_preto', 4.095, 4.10, 0.39, 1.21, PISO + 1.84, PISO + 1.87)
-    # cozinha linear na parede da ponta da escada
-    I('inox', 6.10, IU, 0.0, 0.68, PISO, PISO + 1.85, col=True)                                       # geladeira
-    I('aluminio_preto', 6.095, 6.10, 0.0, 0.68, PISO + 1.15, PISO + 1.155)
-    I('aluminio_preto', 6.07, 6.09, 0.52, 0.55, PISO + 0.55, PISO + 1.05)
-    I('aluminio_preto', 6.07, 6.09, 0.52, 0.55, PISO + 1.25, PISO + 1.70)
-    I('aluminio_preto', 6.22, IU, 0.70, 2.30, PISO, PISO + 0.12)
-    I('laca_grafite', 6.16, IU, 0.70, 2.30, PISO + 0.12, PISO + 0.88, col=True)
-    I('quartzo', 6.14, IU, 0.70, 2.30, PISO + 0.88, PISO + 0.92)
-    I('quartzo', IU - 0.012, IU, 0.70, 2.30, PISO + 0.92, PISO + 1.50)                                # frontão
-    for zc in (PISO + 0.45, PISO + 0.82):
-        I('aluminio_preto', 6.158, 6.16, 0.70, 2.30, zc - 0.012, zc)
-    I('inox', 6.24, 6.66, 0.92, 1.38, PISO + 0.915, PISO + 0.922)                                   # cuba
-    I('aluminio_preto', 6.28, 6.62, 0.96, 1.34, PISO + 0.921, PISO + 0.924)
-    c.tubo('aluminio_preto', [c.ip(6.72, 1.15, PISO + 0.92), c.ip(6.72, 1.15, PISO + 1.30), c.ip(6.68, 1.15, PISO + 1.42),
-                              c.ip(6.54, 1.15, PISO + 1.44), c.ip(6.46, 1.15, PISO + 1.36)], 0.014, seg=6)
-    I('tela_tv', 6.24, 6.68, 1.62, 2.18, PISO + 0.92, PISO + 0.926)                                 # cooktop de duas bocas
-    for b in (1.76, 2.04):
-        c.anel('granite', 6.46 + TP, b + TP, 0.07, 0.085, PISO + 0.927, seg=16)
-    I('madeira_clara', 6.41, IU, 0.70, 2.30, PISO + 1.55, PISO + 2.20)                                # aéreos
-    I('bulb', 6.44, 6.50, 0.72, 2.28, PISO + 1.545, PISO + 1.55)
-    I('aluminio_preto', 6.408, 6.41, 0.70, 2.30, PISO + 1.55, PISO + 1.575)
-    I('laca_grafite', 6.30, IU, 2.32, ID, PISO, PISO + 2.20, col=True)                                # despenseiro
-    I('aluminio_preto', 6.295, 6.30, 2.36, 2.38, PISO + 0.6, PISO + 1.6)
-    c.luz(nome, 6.45, 1.50, PISO + 1.45, LUZ_LED, 0.45, 3.0, 0, 'cozinha')
-    for a, b in ((4.80, 0.90), (4.80, 1.90), (5.80, 1.40)):
+        I('tecido_grafite', a, a + 0.10, sd0, sd1, PISO + 0.30, PISO + 0.60)
+    c.icol(s0, s1, sd0, sd1, PISO, PISO + 0.78)
+    for k, (m, a) in enumerate(((tecido, 2.92), ('cushion', 3.35), ('tecido_terra', 3.78))):
+        c.caixa_g(m, c.ip(a, sd1 - 0.30, PISO + 0.62), (0.40, 0.13, 0.38), 0.25 * (k - 1))
+    I('madeira_clara', 4.20, 4.55, 3.00, 3.35, PISO + 0.46, PISO + 0.50)            # mesinha lateral do sofá
+    c.icol(4.20, 4.55, 3.00, 3.35, PISO, PISO + 0.50)
+    for a, b in ((4.22, 3.02), (4.50, 3.02), (4.22, 3.30), (4.50, 3.30)):
+        I('aluminio_preto', a, a + 0.03, b, b + 0.03, PISO, PISO + 0.46)
+    I('tapete', 2.45, 4.15, 1.50, 3.60, PISO, PISO + 0.008)
+    I('wood_x', 4.80, 5.60, ESC_D1 + TD, ESC_D1 + TD + 0.025, PISO + 1.30, PISO + 1.90)   # quadro no hall
+    I('quadro', 4.83, 5.57, ESC_D1 + TD + 0.025, ESC_D1 + TD + 0.03, PISO + 1.33, PISO + 1.87)
+    for a, b in ((2.00, 1.40), (3.40, 2.50), (4.90, 2.60)):
         c.elip('bulb', c.ip(a, b, FORRO - 0.004), (0.045, 0.045, 0.006), seg=10, rings=3)
-    c.luz(nome, 5.00, 1.40, FORRO - 0.12, LUZ_QUENTE, 0.9, 5.0, 0, 'sala')
+    c.luz(nome, 3.30, 2.40, FORRO - 0.14, LUZ_QUENTE, 0.95, 5.0, 0, 'sala')
+    c.luz(nome, 5.00, 2.90, FORRO - 0.14, LUZ_QUENTE, 0.5, 3.0, 0, 'hall')
+    I('white', 4.70, 5.60, ESC_D1 + TD, ESC_D1 + TD + 0.22, PISO + 2.10, PISO + 2.38)     # split da sala
+    I('aluminio_preto', 4.74, 5.56, ESC_D1 + TD + 0.215, ESC_D1 + TD + 0.22, PISO + 2.12, PISO + 2.15)
 
-    # ============================================================ fachada: janelas e porta de caixilho branco
-    for jan in (jan_q, jan_s):
-        c.esquadria('u', *jan, BF, folhas=2, mat_q='esquadria_branca')
+    # ============================================================ superior: divisórias
+    c.iparede('house_white', 'u', 0.0, 1.55, 0.90, 0.90 + TD, PISO2, FORRO2, [(0.55, 1.45, PISO2, PISO2 + 2.05)])  # frente do banheiro
+    c.iparede('house_white', 'd', 0.90, ID, 1.45, 1.45 + TD, PISO2, FORRO2)                                        # banheiro | quarto
+    c.iparede('house_white', 'u', 1.55, IU, 1.05, 1.05 + TD, PISO2, FORRO2, [(1.75, 2.55, PISO2, PISO2 + 2.05)])   # quarto | escada
+    for a0, a1, b0, b1 in ((0.54, 1.46, 0.89, 1.01), (1.74, 2.56, 1.04, 1.16)):
+        I('aluminio_preto', a0, a1, b0, b1, PISO2 + 2.05, PISO2 + 2.07)
+    c.luz(nome, 1.90, 0.55, FORRO2 - 0.12, LUZ_QUENTE, 0.45, 3.0, 1, 'patamar')
+
+    # ============================================================ superior: banheiro (iu 0–1,45 x id 0,90–3,70)
+    I('porcelanato', 0.0, 1.45, 0.90, ID, PISO2, PISO2 + 0.005)
+    for a0, a1, b0, b1 in ((0.0, 0.006, 0.90, ID), (1.444, 1.45, 0.90, ID), (0.0, 1.45, 0.90, 0.906), (0.0, 1.45, ID - 0.006, ID)):
+        I('porcelanato', a0, a1, b0, b1, PISO2, FORRO2)
+    # box no fundo (1,45 x 0,75), com a janela da fachada
+    I('vidro', 0.0, 0.80, 2.94, 2.95, PISO2 + 0.01, PISO2 + 2.0)
+    I('aluminio_preto', 0.0, 0.80, 2.935, 2.955, PISO2 + 2.0, PISO2 + 2.02)
+    c.icol(0.0, 0.82, 2.93, 2.96, PISO2, PISO2 + 2.02)
+    I('aluminio_preto', 0.45, 0.75, 3.20, 3.50, FORRO2 - 0.02, FORRO2)             # chuveiro de teto
+    I('aluminio_preto', 0.05, 1.40, 2.99, 3.03, PISO2 + 0.005, PISO2 + 0.008)      # ralo linear
+    I('porcelanato', 0.10, 0.60, ID - 0.10, ID - 0.006, PISO2 + 1.15, PISO2 + 1.17)   # nicho
+    I('laca_grafite', 0.10, 0.60, ID - 0.012, ID - 0.006, PISO2 + 1.17, PISO2 + 1.45)
+    I('madeira_clara', 0.0, 0.50, 1.05, 2.05, PISO2 + 0.76, PISO2 + 0.80)          # bancada com cuba e espelho redondo
+    I('laca_grafite', 0.0, 0.47, 1.07, 2.03, PISO2 + 0.52, PISO2 + 0.76)
+    c.icol(0.0, 0.50, 1.05, 2.05, PISO2 + 0.50, PISO2 + 0.80)
+    c.cil('louca', c.ip(0.25, 1.55, PISO2 + 0.80), 0.14, 0.11, seg=18, r_top=0.16)
+    c.tubo('aluminio_preto', [c.ip(0.012, 1.55, PISO2 + 0.98), c.ip(0.14, 1.55, PISO2 + 0.98), c.ip(0.18, 1.55, PISO2 + 0.95)], 0.011, seg=6)
+    c.disco_v('bulb', c.ip(0.012, 1.55, PISO2 + 1.52), 0.26, 'u', esp=0.004)
+    c.disco_v('espelho', c.ip(0.020, 1.55, PISO2 + 1.52), 0.24, 'u', esp=0.008)
+    I('louca', 0.006, 0.38, 2.25, 2.57, PISO2 + 0.24, PISO2 + 0.40)                # bacia suspensa na parede de topo
+    c.elip('louca', c.ip(0.53, 2.41, PISO2 + 0.34), (0.19, 0.17, 0.07), seg=14, rings=6)
+    c.icol(0.0, 0.42, 2.23, 2.59, PISO2, PISO2 + 0.42)
+    c.tubo('aluminio_preto', [c.ip(1.40, 1.30, PISO2 + 1.05), c.ip(1.40, 1.70, PISO2 + 1.05)], 0.009, seg=5)
+    c.caixa_g('tecido_branco', c.ip(1.42, 1.50, PISO2 + 0.90), (0.26, 0.03, 0.28))
+    c.elip('bulb', c.ip(1.00, 1.90, FORRO2 - 0.004), (0.05, 0.05, 0.006), seg=10, rings=3)
+    c.luz(nome, 1.00, 1.90, FORRO2 - 0.12, LUZ_QUENTE, 0.55, 3.0, 1, 'banheiro')
+
+    # ============================================================ superior: quarto (iu 1,55–5,90 x id 1,15–3,70)
+    cu0, cu1 = 4.40, 5.78                                                          # cama de casal 1,38 x 1,88, cabeceira na parede da escada
+    I('tecido_grafite', cu0 - 0.04, cu1 + 0.04, 1.15, 1.23, PISO2 + 0.30, PISO2 + 1.15)
+    I('laca_grafite', cu0 + 0.05, cu1 - 0.05, 1.25, 3.03, PISO2, PISO2 + 0.28)
+    I('tecido_branco', cu0 + 0.02, cu1 - 0.02, 1.23, 3.09, PISO2 + 0.28, PISO2 + 0.50)
+    I(tecido, cu0, cu1, 1.90, 3.11, PISO2 + 0.44, PISO2 + 0.54)
+    I('tecido_terra', cu0 - 0.01, cu1 + 0.01, 2.66, 2.94, PISO2 + 0.49, PISO2 + 0.555)
+    for a in (cu0 + 0.36, cu1 - 0.36):
+        c.elip('tecido_branco', c.ip(a, 1.45, PISO2 + 0.58), (0.30, 0.15, 0.08), seg=12, rings=6)
+    c.icol(cu0 - 0.04, cu1 + 0.04, 1.15, 3.11, PISO2, PISO2 + 0.56)
+    I('madeira_clara', 4.00, 4.36, 1.18, 1.58, PISO2 + 0.40, PISO2 + 0.56, col=True)     # criado-mudo suspenso
+    c.tubo('aluminio_preto', [c.ip(4.18, 1.38, FORRO2), c.ip(4.18, 1.38, PISO2 + 1.20)], 0.004, seg=3)
+    c.elip('bulb', c.ip(4.18, 1.38, PISO2 + 1.13), (0.07, 0.07, 0.07), seg=10, rings=6)
+    c.luz(nome, 4.18, 1.38, PISO2 + 1.05, LUZ_LED, 0.3, 2.5, 1, 'quarto')
+    I('laca_grafite', 1.55, 2.15, 1.90, 3.40, PISO2, PISO2 + 2.25, col=True)             # guarda-roupa na parede do banheiro
+    I('aluminio_preto', 2.15, 2.155, 1.94, 3.36, PISO2 + 0.10, PISO2 + 2.15)
+    I('madeira_clara', 4.60, 5.60, 3.15, 3.50, PISO2 + 0.42, PISO2 + 0.46)               # banco no pé da cama
+    for a in (4.64, 5.52):
+        I('aluminio_preto', a, a + 0.05, 3.19, 3.46, PISO2, PISO2 + 0.42)
+    c.icol(4.60, 5.60, 3.15, 3.50, PISO2, PISO2 + 0.46)
+    I('tapete', 2.60, 4.30, 1.70, 3.40, PISO2, PISO2 + 0.008)
+    I('white', 2.60, 3.50, 1.15, 1.37, PISO2 + 1.78, PISO2 + 2.06)                       # split
+    I('aluminio_preto', 2.64, 3.46, 1.365, 1.37, PISO2 + 1.80, PISO2 + 1.83)
+    c.elip('bulb', c.ip(3.40, 2.40, FORRO2 - 0.004), (0.06, 0.06, 0.006), seg=12, rings=3)
+    c.luz(nome, 3.40, 2.40, FORRO2 - 0.14, LUZ_QUENTE, 0.85, 4.5, 1, 'quarto')
+
+    # ============================================================ esquadrias da fachada
+    for jan, folhas in ((jan_coz, 2), (jan_sala, 3), (jan_ban, 1), (jan_qua, 2)):
+        c.esquadria('u', *jan, BF, folhas=folhas, vidro='vidro_jateado' if jan is jan_ban else 'vidro', mat_q='esquadria_branca')
         c.requadro('u', jan[0], jan[1], jan[2], jan[3], CD, -1)
     c.requadro('u', pu0, pu1, PISO, ZP, CD, -1, peitoril=False)
-    # arandela preta ao lado da porta (luz para cima e para baixo)
-    c.cil('aluminio_preto', (pu1 + 0.30, CD + 0.08, 1.80), 0.045, 0.30, seg=12)
-    c.caixa('aluminio_preto', pu1 + 0.28, pu1 + 0.32, CD, CD + 0.05, 1.92, 1.98)
-    c.elip('bulb', (pu1 + 0.30, CD + 0.08, 1.797), (0.035, 0.035, 0.005), seg=10, rings=3)
-    c.elip('bulb', (pu1 + 0.30, CD + 0.08, 2.103), (0.035, 0.035, 0.005), seg=10, rings=3)
-    c.luz(nome, porta[1] + 0.30, CD - TP + 0.25, 1.95, LUZ_LED, 0.4, 3.5, 0, 'entrada')
-    # canteiros ao pé da fachada (escondem a fresta das sapatas)
-    for lado, (ua, ub) in enumerate(((0.18, pu0 - 0.35), (pu1 + 0.50, CL - 0.18))):
-        c.caixa('mulch', ua, ub, CD + 0.012, CD + 0.48, 0.0, 0.012)
+    c.requadro('u', pvar[0], pvar[1], pvar[2], pvar[3], CD, -1, peitoril=False)
+    # porta de correr da varanda (fica aberta, encostada no lado do guarda-roupa)
+    c.esquadria('u', pvar[0], pvar[0] + 0.80, pvar[2] + 0.02, pvar[3] - 0.02, BF - 0.05, folhas=1, mat_q='esquadria_branca')
+    # brise de cumaru sobre o janelão, preso na laje da varanda
+    for k in range(9):
+        a = jan_sala[0] + 0.06 + k * (jan_sala[1] - jan_sala[0] - 0.12) / 8
+        c.caixa('deck_ipe', a - 0.02, a + 0.02, CD + 0.02, CD + 0.42, PISO + 2.42, PISO + 2.50)
+    # canteiros no pé da fachada
+    for ua, ub in ((0.10, pu0 - 0.30), (pu1 + 0.55, CL - 0.10)):
+        c.caixa('mulch', ua, ub, CD + 0.03, CD + 0.52, 0.0, 0.012)
         for k, a in enumerate(np.arange(ua + 0.25, ub - 0.1, 0.55)):
-            q = c.p(a, CD + 0.26, 0.012)
+            q = c.p(a, CD + 0.28, 0.012)
             if k % 3 == 0:
                 P.moreia(q, rv, 0.7)
             elif k % 3 == 1:
                 P.xanadu(q, rv, 0.65)
             else:
                 P.bromelia(q, rv, 0.85)
-
-    # ============================================================ terraço aberto (sem cobertura)
-    zg = DECK + 0.02
-    c.guarda_corpo((0.05, CD - 0.05), (CL - 0.05, CD - 0.05), zg, quina)
-    c.guarda_corpo((0.05, 0.05), (CL - 0.05, 0.05), zg, quina)
-    c.guarda_corpo((0.05, 0.05), (0.05, CD - 0.05), zg, quina)
-    c.guarda_corpo((CL - 0.05, PAT), (CL - 0.05, CD - 0.05), zg, quina)          # vão para o patamar da escada
-    # mesa de cumaru com quatro cadeiras pretas (o lado da frente fica livre para passar até as espreguiçadeiras)
-    tu0, tu1, td0, td1 = 2.70, 3.90, 1.30, 2.00
-    c.caixa('madeira_clara', tu0, tu1, td0, td1, DECK + 0.72, DECK + 0.76)
-    for a in (tu0 + 0.06, tu1 - 0.10):
-        for b in (td0 + 0.06, td1 - 0.10):
-            c.caixa('aluminio_preto', a, a + 0.04, b, b + 0.04, DECK, DECK + 0.72)
-    c.colide(tu0, tu1, td0, td1, DECK, DECK + 0.76)
-    for uu in (3.00, 3.60):
-        cadeira(c, uu - TP, 1.00 - TP, math.pi / 2, z=DECK, assento='aluminio_preto')
-    cadeira(c, 2.42 - TP, 1.65 - TP, 0.0, z=DECK, assento='aluminio_preto')
-    cadeira(c, 4.18 - TP, 1.65 - TP, math.pi, z=DECK, assento='aluminio_preto')
-    c.elip('louca', (3.20, 1.62, DECK + 0.80), (0.14, 0.14, 0.045), seg=14, rings=5, zmin=-0.3)
-    for k in range(5):
-        c.elip(('fruit_orange', 'fruit_lemon', 'fruit_red', 'fruit_orange', 'fruit_lemon')[k],
-               (3.12 + 0.05 * (k % 3), 1.57 + 0.05 * (k // 3), DECK + 0.83), 0.035, seg=8, rings=5)
-    # duas espreguiçadeiras na ponta lisa, viradas para o gramado, com mesinha
-    for a0 in (0.42, 1.32):
-        a1 = a0 + 0.62
-        c.caixa('aluminio_preto', a0, a0 + 0.03, 0.80, 2.58, zg, zg + 0.30)
-        c.caixa('aluminio_preto', a1 - 0.03, a1, 0.80, 2.58, zg, zg + 0.30)
-        c.caixa('aluminio_preto', a0, a1, 2.55, 2.58, zg, zg + 0.30)
-        c.caixa('cushion', a0 + 0.02, a1 - 0.02, 1.28, 2.57, zg + 0.28, zg + 0.38)
-        beam('cushion', c.p((a0 + a1) / 2, 1.30, zg + 0.34), c.p((a0 + a1) / 2, 0.80, zg + 0.92), 0.58, 0.09)
-        beam('aluminio_preto', c.p(a0 + 0.015, 1.30, zg + 0.30), c.p(a0 + 0.015, 0.84, zg + 0.82), 0.03, 0.03)
-        beam('aluminio_preto', c.p(a1 - 0.015, 1.30, zg + 0.30), c.p(a1 - 0.015, 0.84, zg + 0.82), 0.03, 0.03)
-        c.caixa_g(tecido, ((a0 + a1) / 2, 1.02, zg + 0.72), (0.12, 0.40, 0.22), 0.0)
-        c.colide(a0, a1, 0.72, 2.58, DECK, DECK + 0.95)
-    c.cil('madeira_clara', (1.18, 0.62, zg + 0.44), 0.15, 0.03, seg=18)
-    c.cil('aluminio_preto', (1.18, 0.62, zg), 0.02, 0.44, seg=6)
-    c.cil('aluminio_preto', (1.18, 0.62, zg), 0.11, 0.015, seg=14)
-    c.colide(1.03, 1.33, 0.47, 0.77, DECK, DECK + 0.47)
-    # vasos com plantas junto ao guarda-corpo (como na foto); as plantas entram depois da poda das árvores
-    # grandes (senão a areca, que usa os materiais do coqueiro, seria podada junto)
-    for k, (u, d) in enumerate(((0.40, 0.40), (2.15, 0.40), (5.60, 0.40), (6.52, 2.60))):
-        top = P.pot(c.p(u, d, zg), 0.24, 0.52, mat='pot_fiber')
-        PLANTIO_TERRACO.append((k, top))
-        c.colide(u - 0.25, u + 0.25, d - 0.25, d + 0.25, DECK, DECK + 1.2)
-
-    # fita de LED na base do guarda-corpo e duas luzes baixas (o terraço fica aberto para o céu)
-    for (ua, da), (ub, db) in (((0.10, CD - 0.10), (CL - 0.10, CD - 0.10)), ((0.10, 0.10), (CL - 0.10, 0.10)), ((0.10, 0.10), (0.10, CD - 0.10)),
-                               ((CL - 0.10, PAT + 0.05), (CL - 0.10, CD - 0.10))):
-        if abs(ub - ua) > abs(db - da):
-            c.caixa('bulb', ua, ub, da - 0.006, da + 0.006, DECK + 0.03, DECK + 0.045)
-        else:
-            c.caixa('bulb', ua - 0.006, ua + 0.006, da, db, DECK + 0.03, DECK + 0.045)
-    c.luz(nome, 1.60 - TP, 1.60 - TP, DECK + 0.6, LUZ_LED, 0.45, 4.0, 2, 'terraco')
-    c.luz(nome, 5.20 - TP, 1.60 - TP, DECK + 0.6, LUZ_LED, 0.45, 4.0, 2, 'terraco')
-
-    # ============================================================ escada de fora: reta, sobe da frente para o fundo
-    us0, us1 = CL + 0.02, CL + 0.02 + LARG                  # 7,02 a 7,82
-    dpe = PAT + (NESC - 1) * PISE                           # pé da escada (3,84: avança 0,84 à frente da casa)
-    for k in range(1, NESC):                                # 13 degraus; o 14º espelho chega ao patamar
-        d1 = PAT + (NESC - k) * PISE
-        d0 = d1 - PISE
-        zt = ESPE * k
-        c.caixa('deck_ipe', us0 + 0.03, us1 - 0.03, d0, d1 + 0.02, zt - 0.04, zt)
-        c.piso(us0, us1, d0, d1, zt)
-    # patamar no alto, encostado no muro, no nível do terraço
-    c.caixa('deck_ipe', CL, us1 + 0.04, 0.0, PAT, DECK - 0.05, DECK)
-    c.caixa('aluminio_preto', CL, us1 + 0.04, 0.0, PAT, DECK - 0.17, DECK - 0.05)
-    c.piso(CL, us1 + 0.04, 0.0, PAT, DECK)
-    # longarinas de aço preto e pilares do patamar
-    for u in (us0 + 0.02, us1 - 0.02):
-        c.viga('aluminio_preto', (u, dpe + 0.05, 0.02), (u, PAT, DECK - 0.15), 0.04, 0.24)
-    c.caixa('aluminio_preto', us1 - 0.04, us1 + 0.04, 0.0, 0.08, 0.0, DECK - 0.17)
-    c.colide(us1 - 0.05, us1 + 0.05, 0.0, 0.09, 0.0, DECK - 0.17)
-    c.caixa('aluminio_preto', us1 - 0.04, us1 + 0.04, PAT - 0.08, PAT, 0.0, DECK - 0.17)
-    c.caixa('concrete', us0, us1, dpe - 0.05, dpe + 0.25, 0.0, 0.02)
-    # guarda-corpo do lado de fora (montantes pretos e corrimão na cor das quinas)
-    for k in range(1, NESC):
-        d1 = PAT + (NESC - k) * PISE
-        c.tubo('aluminio_preto', [(us1 - 0.02, d1 - PISE / 2, ESPE * k), (us1 - 0.02, d1 - PISE / 2, ESPE * k + 0.90)], 0.011, seg=5)
-    c.viga(quina, (us1 - 0.02, dpe, 0.90 + ESPE), (us1 - 0.02, PAT, DECK + 0.90), 0.05, 0.04)
-    c.colide(us1 - 0.04, us1 + 0.04, PAT, dpe, 0.0, DECK + 1.0)
-    c.guarda_corpo((us1 + 0.0, PAT), (us1 + 0.0, 0.05), zg, quina)
-    c.guarda_corpo((us1 + 0.0, 0.05), (CL, 0.05), zg, quina)
-    xs_ = c.fx(CL, us1 + 0.05); ys_ = c.fy(0.0, dpe)
-    EXTRA['escadas'].append({'casa': nome, 'x': [round(xs_[0], 3), round(xs_[1], 3)], 'y': [round(ys_[0], 3), round(ys_[1], 3)]})
+    # soleira, degrau e pisantes até o caminho
+    c.caixa('granite', pu0 - 0.06, pu1 + 0.06, CD - TP, CD + 0.06, PISO - 0.03, PISO)
+    c.piso(pu0 - 0.06, pu1 + 0.06, CD - TP - 0.01, CD + 0.06, PISO)
+    c.caixa('stone_cut', pu0 - 0.20, pu1 + 0.20, CD + 0.06, CD + 0.62, 0.0, 0.11)
+    c.piso(pu0 - 0.20, pu1 + 0.20, CD + 0.06, CD + 0.62, 0.11)
+    xd = c.X((pu0 + pu1) / 2)
+    y0p, y1p = c.Y(CD + 0.62 + 0.40), path_y(xd)
+    npath = max(1, int(round(abs(y1p - y0p) / 0.8)))
+    for k in range(npath):
+        obox('stone_step', (xd, y0p + (y1p - y0p) * k / npath, 0.017), (0.8, 0.45, 0.03))
 
     # ============================================================ dados para o passeio
-    ah = porta[1] - 0.01 + TP                              # dobradiça do lado da sala
+    ah = porta[1] - 0.01 + TP
     EXTRA['portas'].append({'casa': nome, 'cor': 'esquadria_branca', 'estilo': 'vidro',
                             'dobradica': [round(v, 3) for v in c.p(ah, CD - 0.06, PISO)],
                             'fechada': [1.0 if c.X(pu0) > c.X(ah) else -1.0, 0.0],
                             'para_dentro': [0.0, -float(sg)], 'largura': round(porta[1] - porta[0] - 0.02, 3), 'altura': round(ZP - PISO - 0.01, 3)})
-    ex, ey = c.p(*c.ip(3.15, 2.25, 0))[:2]
-    bx, by = c.p(*c.ip(5.0, 1.0, 0))[:2]
+    ex, ey = c.p(*c.ip(5.10, 2.90, 0))[:2]
+    bx, by = c.p(*c.ip(3.20, 2.00, 0))[:2]
     EXTRA['lugares'].append([nome, round(ex, 3), round(ey, 3), round(math.atan2(by - ey, bx - ex), 4), PISO])
-    mx, my = c.p(5.30, 1.50, 0)[:2]
-    EXTRA['lugares'].append(['Terraço da ' + nome.lower(), round(mx, 3), round(my, 3), round(c.ang(math.pi / 2), 4), DECK])
+    mx, my = c.p(4.30, CD + 0.70, 0)[:2]
+    EXTRA['lugares'].append(['Varanda da ' + nome.lower(), round(mx, 3), round(my, 3), round(c.ang(math.pi / 2), 4), round(PISO2 + 0.03, 3)])
     EXTRA['casas'].append({'nome': nome, 'x': [round(c.x0, 3), round(c.x1, 3)], 'y': [round(v, 3) for v in c.fy(0.0, CD)],
-                           'piso': PISO, 'teto': FORRO, 'deck': DECK, 'frente': round(c.Y(CD), 3),
-                           'volume': [round(v, 3) for v in c.fx(0.0, us1 + 0.05)] + [round(v, 3) for v in c.fy(0.0, CD)] + [round(DECK + 2.2, 3)]})   # poda deixa 2,5 m livres sobre o terraço
-    EXTRA['paredes_projecao'].append({'nome': 'Parede da ' + nome.lower(), 'x0': round(c.X(0.0), 3), 'x1': round(c.X(0.0), 3),
-                                      'y0': round(c.fy(0.0, CD)[0], 3), 'y1': round(c.fy(0.0, CD)[1], 3), 'z0': Z0C, 'z1': ZTC,
-                                      'normal': [float(-c.su), 0.0]})
+                           'piso': PISO, 'teto': round(FORRO2, 3), 'z1': round(PISO2, 3), 'frente': round(c.Y(CD), 3),
+                           'volume': [round(v, 3) for v in c.fx(-BEIRAL_O, CL + BEIRAL_O)] + [round(v, 3) for v in c.fy(-BEIRAL, CD + BEIRAL)] + [round(Z_CUM + 0.4, 3)]})
+    xs_ = c.fx(ESC_U0 + TP, ESC_U1 + TP); ys_ = c.fy(ESC_D0 + TP, ESC_D1 + TP)
+    EXTRA['escadas'].append({'casa': nome, 'x': [round(xs_[0], 3), round(xs_[1], 3)], 'y': [round(ys_[0], 3), round(ys_[1], 3)]})
+    uo = CL if proj else 0.0
+    EXTRA['paredes_projecao'].append({'nome': 'Parede da ' + nome.lower(), 'x0': round(c.X(uo), 3), 'x1': round(c.X(uo), 3),
+                                      'y0': round(c.fy(0.0, CD)[0], 3), 'y1': round(c.fy(0.0, CD)[1], 3), 'z0': 0.4, 'z1': round(FORRO2 - 0.3, 3),
+                                      'normal': [float(c.su if proj else -c.su), 0.0], 'dist': 1.45 if proj and x0 < 15 else 4.2})
     return c
 
 
-CASAS = [container(4.5, 0, True, 'Casa azul', 'chapa_azul', 'pintura_amarela', 'tecido_azul'),          # escada a oeste, ponta lisa para a pracinha
-         container(16.5, 0, False, 'Casa amarela', 'chapa_amarela', 'pintura_marinho', 'tecido_amarelo'),
-         container(8.5, 1, False, 'Casa verde', 'chapa_verde', 'pintura_amarela', 'tecido_verde')]
-# pracinha entre a azul e a amarela: banco de cumaru encostado no muro, à esquerda da jabuticabeira
-box('wood_x', 11.95, 13.45, 0.20, 0.60, 0.41, 0.46)
-for xx in (12.05, 13.29):
+CASAS = [casa(3.0, 'Casa azul', 'reboco_azul', 'reboco_claro', 'tecido_azul', 0),         # projeção no oitão do portão
+         casa(3.0 + CL + VAO, 'Casa verde', 'reboco_verde', 'reboco_claro', 'tecido_verde', 1),
+         casa(3.0 + 2 * (CL + VAO), 'Casa amarela', 'reboco_amarelo', 'reboco_claro', 'tecido_amarelo', 1)]
+# pracinha da jabuticabeira no fim da fita, com banco de cumaru encostado no muro
+box('wood_x', 25.8, 27.3, 0.20, 0.60, 0.41, 0.46)
+for xx in (25.9, 27.14):
     box('aluminio_preto', xx, xx + 0.06, 0.24, 0.56, 0, 0.41)
-box('wood_x', 11.95, 13.45, 0.14, 0.20, 0.46, 0.85)
-colisor(11.95, 13.45, 0.14, 0.60, 0.0, 0.85)
+box('wood_x', 25.8, 27.3, 0.14, 0.20, 0.46, 0.85)
+colisor(25.8, 27.3, 0.14, 0.60, 0.0, 0.85)
 for (tx, ty), rr in ((JABU, 0.12), (GOIA, 0.12), (LIMAO, 0.08)):                   # troncos das árvores que mudaram de lugar
     colisor(tx - rr, tx + rr, ty - rr, ty + rr, 0.0, 2.0)
-# varal de luzes em zigue-zague entre as fachadas (2,6 m, preso entre os pisos, sem cruzar janelas)
-YA, YV = CD + 0.06, 10.0 - CD - 0.06
-for p0, p1 in (((6.4, YA), (9.6, YV)), ((9.6, YV), (11.2, YA)), ((11.2, YA), (13.8, YV)), ((13.8, YV), (17.2, YA))):
-    varal((p0[0], p0[1], 2.60), (p1[0], p1[1], 2.60), 0.25, 12)
+# varal de luzes ao longo da frente da fita, entre as varandas
+for p0, p1 in (((3.4, 6.0), (9.2, 6.4)), ((9.2, 6.4), (16.2, 6.0)), ((16.2, 6.0), (23.2, 6.4)), ((23.2, 6.4), (27.6, 5.6))):
+    varal((p0[0], p0[1], 3.30), (p1[0], p1[1], 3.30), 0.30, 12)
 
 # ------------------------------------------------------------------ entorno além dos muros
 r2 = np.random.default_rng(5)
@@ -1751,10 +1717,10 @@ def podar(mats, cilindros, caixas):
                     g.f[k] = [fa[~fora[fa].any(axis=1)] for fa in g.f[k]]
 
 
-podar(PODA_MATS, [], [(t[0] - 0.05, t[1] + 0.05, t[2] - 0.05, t[3] + 0.05, -0.1, t[4] + 0.3) for t in (cs['volume'] for cs in EXTRA['casas'])]
-      + [(e['x'][0] - 0.1, e['x'][1] + 0.1, e['y'][0] - 0.1, e['y'][1] + 0.1, -0.1, GUARDA + 0.3) for e in EXTRA['escadas']])
-podar(('leaf_vine',), [], [(cs['x'][0] + TP, cs['x'][1] - TP, cs['y'][0] + TP, cs['y'][1] - TP, 0.0, FORRO) for cs in EXTRA['casas']])
-for k, top in PLANTIO_TERRACO:                                  # plantas dos vasos do terraço, já depois da poda
+podar(PODA_MATS, [], [(t[0] - 0.05, t[1] + 0.05, t[2] - 0.05, t[3] + 0.05, -0.1, t[4]) for t in (cs['volume'] for cs in EXTRA['casas'])]
+      + [(c['x'][0] - 0.3, c['x'][1] + 0.3, c['frente'], c['frente'] + VAR_D + 0.5, -0.1, GUARDA + 1.2) for c in EXTRA['casas']])
+podar(('leaf_vine',), [], [(cs['x'][0] + TP, cs['x'][1] - TP, cs['y'][0] + TP, cs['y'][1] - TP, 0.0, FORRO2) for cs in EXTRA['casas']])
+for k, top in PLANTIO_TERRACO:                                  # plantas dos vasos da varanda, já depois da poda
     if k in (0, 3):
         P.areca(top, rv, H=1.6, stems=5)
     elif k == 1:
