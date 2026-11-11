@@ -140,7 +140,7 @@ const BOX_FIXO = [ // x0, x1, y0, y1, z0, z1 (sem as casas da vilinha, que vêm 
 ];
 const CIR = [ // x, y, raio, z0, z1
   [30.3, 2.1, 1.2, 0, 2], [21.2, 8.3, 0.28, 0, 8], [23.7, 8.95, 0.25, 0, 8], [26.4, 8.55, 0.28, 0, 8], [30.4, 8.75, 0.15, 0, 2],
-  [6.9, 8.9, 0.45, 0, 3], [20.6, 6.2, 0.7, 0, 0.4], [50.2, 9.15, 0.15, -1, 2],
+  [6.9, 8.9, 0.45, 0, 3], [28.9, 4.0, 0.7, 0, 0.4], [50.2, 9.15, 0.15, -1, 2],   // o fogo de chão foi para o fim do gramado
 ];
 
 const SUBIDA = 0.5;   // o que a pessoa consegue subir num passo (degrau, meio-fio)
@@ -235,7 +235,7 @@ export function criarColisao(extra) {
 }
 
 export function lugares(extra) {
-  const L = [['Portão do gramado', 1.6, 4.7, 0], ['Vilinha', 10.6, 4.9, -0.5], ['Gramado', 26, 5.2, 3.14], ['Piscina', 45.1, 3.6, 3.14], ['Churrasqueira', 43.4, 5.7, 2.2],
+  const L = [['Portão do gramado', 1.6, 4.7, 0], ['Vilinha', 13.0, 7.6, -1.2], ['Gramado', 28.5, 6.6, 3.14], ['Piscina', 45.1, 3.6, 3.14], ['Churrasqueira', 43.4, 5.7, 2.2],
     ['Beira do laguinho', 45.25, 3.3, 0], ['Lago', 50.4, 5.0, 3.14], ['Banheiros', 52.5, 5.4, 1.5708], ['Cineminha', 55.2, 2.7, -1.5708], ['Portão de baixo', 58.6, 5.1, 3.14]];
   const ql = (extra.quintal || {}).lugares || {};
   for (const l of L) if (ql[l[0]]) l.splice(1, 3, ...ql[l[0]]);
