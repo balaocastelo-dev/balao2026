@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next'
 import { getCachedCategories } from '@/lib/cache'
 import { lerProdutosDoSitemap, dataDoProduto } from '@/lib/sitemap/produtos'
+import { lerCaminhosComProduto, categoriaTemProduto } from '@/lib/sitemap/categorias'
 import { CATEGORIAS } from '@/lib/blog/categorias'
 import { listarResumos } from '@/lib/blog/repositorio'
 import { LEAD_INTENTS } from '@/lib/lead-intents'
@@ -83,13 +84,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: route === '' ? 1 : PAGINAS[route.slice(1)] ? 0.9 : 0.7,
   }))
 
-  // Categorias (com a cópia do catálogo de reserva quando o banco recusa)
+  // Categorias (com a cópia do catálogo de reserva quando o banco recusa).
+  // Só entram as que têm produto: categoria vazia já sai com `noindex` na
+  // própria página, então mandá-la aqui só gasta o rastreamento do Google
+  // (3.344 endereços "excluída pela tag noindex" em 11/11/2026). Se a lista de
+  // caminhos vier vazia — banco em pausa e cópia do catálogo fora do ar —,
+  // mantém todas, como era antes: sitemap a mais é melhor que sitemap a menos.
   const categories = await getCachedCategories().catch(() => [])
-  const categoryRoutes = categories.map((category) => ({
-    url: `${baseUrl}/categoria/${category.slug}`,
-    changeFrequency: 'weekly' as const,
-    priority: 0.7,
-  }))
+  const caminhosComProduto = await lerCaminhosComProduto().catch(() => [] as string[])
+  const categoryRoutes = categories
+    .filter((category) =>
+      caminhosComProduto.length === 0 ||
+      categoriaTemProduto(category.full_path, caminhosComProduto)
+    )
+    .map((category) => ({
+      url: `${baseUrl}/categoria/${category.slug}`,
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+    }))
 
   // Produtos: o catálogo inteiro. Se o banco recusar (cota de conexões),
   // vêm da cópia do catálogo — ver lib/sitemap/produtos.ts.
