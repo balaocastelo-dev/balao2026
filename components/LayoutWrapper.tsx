@@ -74,6 +74,7 @@ export default function LayoutWrapper({
         </div>
       )}
       <div
+        data-casca=""
         className={
           isFullscreenPanel
             ? // Altura fixa e sem overflow: a tela de atendimento manda no

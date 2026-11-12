@@ -83,6 +83,7 @@ export default function VendedorWorkspace({
               cargo: vendedor.cargo,
               assinatura: vendedor.assinatura,
             }}
+            comecarEmMeus
             onSair={sair}
             sairLabel="Sair"
           />

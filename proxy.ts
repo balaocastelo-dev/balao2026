@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { ehHostSoubots } from './lib/soubots'
+import { slugReservado } from './lib/vendedor-slug'
 
 /**
  * Tranca do administrativo.
@@ -176,9 +177,58 @@ function pedidoEhSoubots(request: NextRequest) {
   )
 }
 
+/**
+ * Endereço de uma palavra que não é página do site.
+ * Se for vendedor, segue para a página pessoal. Se não for, reescreve para
+ * um caminho que não existe, e o 404 normal (status 404, página de sempre)
+ * responde. Sem isto, a rota dinâmica /[slug] engole o endereço e o
+ * notFound() sai com status 200, porque o layout já começou a responder.
+ */
+async function paginaDeVendedorOu404(request: NextRequest) {
+  const metodo = request.method.toUpperCase()
+  if (metodo !== 'GET' && metodo !== 'HEAD') return null
+  const bruto = request.nextUrl.pathname.replace(/\/+$/, '')
+  if (!bruto || bruto === '/' || bruto.includes('.')) return null
+  const partes = bruto.split('/').filter(Boolean)
+  if (partes.length !== 1) return null
+  const slug = partes[0]
+  if (slugReservado(slug)) return null
+  if (!/^[a-z0-9]+$/i.test(slug)) {
+    const destino = request.nextUrl.clone()
+    destino.pathname = '/404/pagina'
+    destino.search = ''
+    return NextResponse.rewrite(destino)
+  }
+
+  const url = request.nextUrl.clone()
+  url.pathname = '/api/vendedor/existe'
+  url.search = `?slug=${encodeURIComponent(slug)}`
+  try {
+    const resposta = await fetch(url, { cache: 'no-store', headers: { 'x-balao-interno': '1' } })
+    if (resposta.ok) return null
+  } catch {
+    // Sem o servidor do CRM, a página ainda decide (os vendedores já
+    // publicados no código continuam abrindo). Não transformar isso em 404.
+    return null
+  }
+  const destino = request.nextUrl.clone()
+  destino.pathname = '/404/pagina'
+  destino.search = ''
+  return NextResponse.rewrite(destino)
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const metodo = request.method.toUpperCase()
+
+  // A consulta "este slug é de vendedor?" não pode voltar para cá, senão
+  // a tranca chama a si mesma e a página não abre.
+  if (pathname === '/api/vendedor/existe') {
+    return NextResponse.next({ request })
+  }
+
+  const vendedorOu404 = await paginaDeVendedorOu404(request)
+  if (vendedorOu404) return vendedorOu404
 
   // soubots.com e www.soubots.com: a raiz é a landing do MyBots. O endereço
   // na barra continua /. Os arquivos (vídeo, imagens, APK) ficam nos caminhos

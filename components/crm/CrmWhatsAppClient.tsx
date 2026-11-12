@@ -7,6 +7,8 @@ import CentralStatus from "@/components/crm/status/CentralStatus";
 import CentroDeComando from "@/components/crm/comando/CentroDeComando";
 import type { PonteComando } from "@/components/crm/comando/tipos";
 import { CHAVE_CONVERSA_PEDIDA } from "@/lib/painel/recados";
+import { atribuirSlugs } from "@/lib/vendedor-slug";
+import LinkDoVendedor from "@/components/vendedor/LinkDoVendedor";
 import {
   AvisoApagada,
   BarraDeEnvio,
@@ -277,18 +279,20 @@ interface PreferenciasVendedor {
 
 export interface CrmWhatsAppClientProps {
   /**
-   * Vendedor já autenticado por fora (páginas pessoais tipo /brendon, onde a
-   * senha é validada no servidor Next). Quando vem preenchido, o portão de
-   * PIN interno do CRM é dispensado e o painel abre direto no nome dele.
-   * Sem esta prop o componente segue com o comportamento antigo (login por
-   * PIN dentro da própria tela) — é o que a rota /crm usa.
+   * Vendedor já autenticado por fora (página pessoal, ex.: /gabriel), onde
+   * o PIN dele foi conferido no servidor Next. O portão interno do CRM é
+   * dispensado e o painel abre no nome dele, com a assinatura dele.
    */
   vendedorFixo?: CrmVendedorFixo;
   /**
-   * Visão de administração (/crm), onde a senha do painel já foi validada no
-   * servidor. Dispensa o portão de PIN: exigir uma segunda senha ali só
-   * trancava quem precisa ler o QR Code e cadastrar a equipe — ainda mais
-   * porque vendedor de página pessoal não tem PIN nenhum.
+   * Na página pessoal o filtro "Meus" já começa ligado. A preferência
+   * gravada não desliga isso na abertura: a tela é a daquele vendedor.
+   */
+  comecarEmMeus?: boolean;
+  /**
+   * Visão de administração (/painel/crm), onde a senha do painel já foi
+   * validada. Dispensa o portão de PIN interno: quem atende no dia a dia
+   * entra pela página pessoal, com o PIN do próprio vendedor.
    * Diferente de `vendedorFixo`, mantém a aba de gestão de vendedores.
    */
   admin?: boolean;
@@ -396,6 +400,7 @@ export default function CrmWhatsAppClient({
   sairLabel,
   sairTitulo,
   menuExtra,
+  comecarEmMeus = false,
 }: CrmWhatsAppClientProps = {}) {
   // Celular, tablet ou computador: muda o desenho da tela (ver tela.ts).
   const tela = useTamanhoTela();
@@ -561,6 +566,11 @@ export default function CrmWhatsAppClient({
     vendedorFixo || admin
       ? true
       : Boolean(vendedorAtivoId) && Boolean(vendedorAtivo0);
+  const slugPorVendedor = useMemo(() => {
+    const mapa = new Map<string, string>();
+    for (const v of atribuirSlugs(vendedores)) mapa.set(String(v.id), v.slug);
+    return mapa;
+  }, [vendedores]);
 
   const sairDoVendedor = () => {
     // Na página pessoal, sair significa encerrar a sessão no servidor.
@@ -836,7 +846,9 @@ export default function CrmWhatsAppClient({
   const [filtroNaoLidas, setFiltroNaoLidas] = useState(false);
   // A caixa é compartilhada (é o número da loja), então cada vendedor precisa
   // de um jeito rápido de ver só o que está com ele.
-  const [filtroMeus, setFiltroMeus] = useState(false);
+  const [filtroMeus, setFiltroMeus] = useState(() => Boolean(comecarEmMeus));
+  const comecarEmMeusRef = useRef(Boolean(comecarEmMeus));
+  comecarEmMeusRef.current = Boolean(comecarEmMeus);
   const [buscaChat, setBuscaChat] = useState("");
   // Leveza da lista: só as conversas dos últimos `janelaDias` ficam na tela,
   // e delas só as `limiteLista` primeiras são desenhadas (mais ao rolar).
@@ -1791,7 +1803,18 @@ export default function CrmWhatsAppClient({
 
     socket.on("whatsapp:vendedores", (lista: any[]) => {
       setVendedoresCarregados(true);
-      if (Array.isArray(lista)) setVendedores(lista);
+      if (Array.isArray(lista)) {
+        // O servidor já manda a ficha sem PIN. Se um dia vier um campo a
+        // mais, ele não entra no estado da tela.
+        setVendedores(
+          lista.map((v) => {
+            if (!v || typeof v !== "object") return v;
+            const copia = { ...v };
+            delete copia.pin;
+            return copia;
+          })
+        );
+      }
     });
 
     socket.on("whatsapp:armazenamento", (dados: EstadoArmazenamento | null) => {
@@ -1833,7 +1856,7 @@ export default function CrmWhatsAppClient({
         if (tamanho === "normal" || tamanho === "expandido" || tamanho === "recolhido") {
           setKanbanTamanho(tamanho);
         }
-        if (typeof prefs.filtroMeus === "boolean") {
+        if (typeof prefs.filtroMeus === "boolean" && !comecarEmMeusRef.current) {
           setFiltroMeus(prefs.filtroMeus);
         }
       }
@@ -3966,7 +3989,10 @@ export default function CrmWhatsAppClient({
           <label className="text-xs font-semibold whitespace-nowrap">
             👤 Atendendo:
           </label>
-          <span className="bg-white text-[#0a6e3d] rounded-full px-3 py-1 text-xs font-bold shadow-sm max-w-[170px] truncate">
+          <span
+            data-atendendo={vendedorAtivo0?.nome || ""}
+            className="bg-white text-[#0a6e3d] rounded-full px-3 py-1 text-xs font-bold shadow-sm max-w-[170px] truncate"
+          >
             {vendedorAtivo0?.nome || "—"}
           </span>
           <button
@@ -4372,6 +4398,7 @@ export default function CrmWhatsAppClient({
                   <button
                     onClick={() => setFiltroMeus(!filtroMeus)}
                     title="Mostrar só as conversas atribuídas a você"
+                    data-filtro-meus={filtroMeus ? "1" : "0"}
                     className={`flex-1 py-1 px-2 rounded-full text-xs font-bold border transition-colors cursor-pointer ${
                       filtroMeus
                         ? "bg-[#0f9d58] text-white border-[#0f9d58]"
@@ -5782,8 +5809,9 @@ export default function CrmWhatsAppClient({
                         vendedores.map((v) => (
                           <div
                             key={v.id}
-                            className="border border-[#e3e3e3] rounded-xl p-2.5 bg-white flex items-center justify-between"
+                            className="border border-[#e3e3e3] rounded-xl p-2.5 bg-white space-y-1.5"
                           >
+                            <div className="flex items-center justify-between gap-2">
                             <div>
                               <div className="font-bold text-xs text-[#202124]">👤 {v.nome}</div>
                               <div className="text-[10px] text-[#5f6368]">{v.cargo || "Atendente Balão"}</div>
@@ -5806,6 +5834,10 @@ export default function CrmWhatsAppClient({
                                 ✕
                               </button>
                             </div>
+                            </div>
+                            {slugPorVendedor.get(String(v.id)) && (
+                              <LinkDoVendedor slug={slugPorVendedor.get(String(v.id))!} />
+                            )}
                           </div>
                         ))
                       )}

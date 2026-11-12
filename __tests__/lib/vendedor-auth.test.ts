@@ -62,7 +62,7 @@ describe("registro de vendedores", () => {
   it("toda a equipe está cadastrada e cada um tem a própria variável de senha", () => {
     const slugs = VENDEDORES.map((v) => v.slug).sort();
     expect(slugs).toEqual(
-      ["brendon", "gabriel", "julia", "marcos", "thiago", "wendell"].sort()
+      ["brendon", "gabriel", "julia", "marcos", "mybots", "thiago", "wendell"].sort()
     );
 
     // Duas pessoas compartilharem a mesma variável faria uma senha abrir a
@@ -73,6 +73,11 @@ describe("registro de vendedores", () => {
 
   it("cada vendedor assina com o próprio nome", () => {
     for (const vendedor of VENDEDORES) {
+      // A equipe de IA avisa que é robô, em vez de assinar com o nome da pessoa.
+      if (vendedor.slug === "mybots") {
+        expect(vendedor.assinatura.toLowerCase()).toContain("ia");
+        continue;
+      }
       expect(vendedor.assinatura).toContain(vendedor.nome);
     }
   });

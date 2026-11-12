@@ -370,3 +370,18 @@ main {
   }
 }
 
+/* Página pessoal do vendedor (/gabriel e qualquer slug novo). O atributo
+   sai no HTML, então o menu da loja não aparece nem no primeiro desenho.
+   As rotas do site não têm esse atributo e seguem com o layout delas. */
+html:has([data-pagina-vendedor]) [data-loja] {
+  display: none !important;
+}
+html:has([data-pagina-vendedor]) [data-casca] {
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+}
+html:has([data-pagina-vendedor]) [data-casca] > main {
+  overflow: hidden;
+}
+

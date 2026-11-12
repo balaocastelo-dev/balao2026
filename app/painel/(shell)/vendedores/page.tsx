@@ -3,7 +3,7 @@ import Link from "next/link";
 import { BarChart3, Trophy } from "lucide-react";
 import { AreaEquipe } from "@/components/painel/AreasDoCrm";
 import PaginasDosVendedores from "@/components/painel/PaginasDosVendedores";
-import { VENDEDORES, temSenhaConfigurada } from "@/lib/vendedores";
+import { VENDEDORES } from "@/lib/vendedores";
 
 export const metadata: Metadata = {
   title: "Vendedores",
@@ -18,7 +18,6 @@ export default function PainelVendedoresPage() {
     slug: v.slug,
     nome: v.nome,
     cargo: v.cargo,
-    temSenha: temSenhaConfigurada(v),
   }));
 
   return (
@@ -45,8 +44,9 @@ export default function PainelVendedoresPage() {
         </div>
         <PaginasDosVendedores vendedores={vendedores} />
         <p className="border-t border-slate-200 px-4 py-3 text-sm text-slate-600">
-          Criar a página de um vendedor novo e trocar a senha de alguém não se faz por esta tela:
-          as duas coisas ficam na configuração do site.
+          Vendedor novo ganha a página sozinho, no slug do nome, sem publicar o site de novo.
+          O link de cada um, com o botão de copiar, fica na aba Vendedores do CRM. O acesso é o
+          PIN cadastrado ali, não a senha deste painel.
         </p>
       </section>
 

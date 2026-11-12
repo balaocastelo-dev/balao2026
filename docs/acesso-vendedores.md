@@ -9,24 +9,22 @@ O WhatsApp é conectado **uma única vez** por QR Code, no servidor
 (`whatsapp-server`). Ninguém precisa ler QR Code de novo depois disso, nem no
 próprio computador.
 
-Cada vendedor tem uma página própria e entra com a senha dele:
+Cada vendedor cadastrado na aba Vendedores do CRM tem uma página própria e entra com o PIN dele (não com a senha de administração):
 
-| Vendedor | Página | Onde fica a senha |
+| Vendedor | Página | Acesso |
 | --- | --- | --- |
-| Thiago | `www.balao.info/thiago` | `VENDEDOR_THIAGO_SENHA` |
-| Marcos | `www.balao.info/marcos` | `VENDEDOR_MARCOS_SENHA` |
-| Julia | `www.balao.info/julia` | `VENDEDOR_JULIA_SENHA` |
-| Gabriel | `www.balao.info/gabriel` | `VENDEDOR_GABRIEL_SENHA` |
-| Wendell | `www.balao.info/wendell` | `VENDEDOR_WENDELL_SENHA` |
-| Brendon | `www.balao.info/brendon` | `VENDEDOR_BRENDON_SENHA` |
+| Thiago | `www.balao.info/thiago` | PIN cadastrado no CRM |
+| Marcos | `www.balao.info/marcos` | PIN cadastrado no CRM |
+| Julia | `www.balao.info/julia` | PIN cadastrado no CRM |
+| Gabriel | `www.balao.info/gabriel` | PIN cadastrado no CRM |
+| Wendell | `www.balao.info/wendell` | PIN cadastrado no CRM |
+| Brendon | `www.balao.info/brendon` | PIN cadastrado no CRM |
 
-As senhas são variáveis de ambiente na hospedagem (Vercel), uma por pessoa.
+O slug sai do nome: minúsculo, sem acento, sem espaço. Dois "Thiago" ficam `thiago` e `thiago2`. "Thiago Herrera" fica `thiagoherrera`. O link de cada um, com botão de copiar, aparece na aba Vendedores do CRM. Vendedor novo ganha a página na hora, sem publicar o site de novo.
 
-> ⚠️ **A senha nunca vai no código.** Este repositório é público: senha
-> versionada vira senha pública, e o histórico do git não esquece. Enquanto a
-> variável de ambiente não existir, **nenhuma senha funciona** e a tela de login
-> avisa que falta configurar — é proposital, para o acesso nunca abrir sozinho
-> com um valor que qualquer um poderia adivinhar lendo o repositório.
+Um slug nunca ocupa rota que o site já tem (`/iphone`, `/android`, `/macbook`, `/imac`, `/microsoft`, `/painel`, `/sistema`, `/app`, `/downloads` e as demais em `lib/vendedor-slug.ts`). Essas páginas seguem no ar, com o SEO delas. Endereço que não é de vendedor continua 404.
+
+> ⚠️ **O PIN não vai no código nem na página.** Ele fica só no servidor do CRM. A tela pede o PIN e não mostra o de ninguém.
 
 Quem entra pela página pessoal recebe:
 
@@ -70,7 +68,7 @@ pessoal.
 
 | Rota | Para quem | Senha |
 | --- | --- | --- |
-| `/brendon` | O vendedor, no dia a dia | A senha pessoal dele |
+| `/brendon` | O vendedor, no dia a dia | O PIN dele, cadastrado no CRM |
 | `/painel/crm` | Administração: conectar QR Code, cadastrar vendedor, ver a caixa toda | `PAINEL_PASSWORD` |
 | `/whatsapp` | Painel simples do WhatsApp (QR + chat) | `PAINEL_PASSWORD` |
 
@@ -83,53 +81,16 @@ pessoal.
    apontando para esse servidor.
 3. **Abra `/painel/crm`** com a senha do painel e **leia o QR Code** com o celular da
    loja, o do número (19) 98751-0267. Isso é feito uma vez só.
-4. **Mande o link para o vendedor**: `www.balao.info/brendon`. Ele entra com a
-   senha dele, no computador dele.
+4. **Mande o link para o vendedor**: `www.balao.info/brendon`. Ele entra com o
+   PIN dele, no computador dele.
 
-## Definir ou trocar a senha de um vendedor
+## Trocar o PIN de um vendedor
 
-A senha mora só numa variável de ambiente na hospedagem (Vercel → Settings →
-Environment Variables, ou o `.env` do servidor). Nunca no código.
-
-```
-VENDEDOR_BRENDON_SENHA=aSenhaQueVoceEscolher
-```
-
-Depois de salvar, **publique o site de novo** — variável de ambiente só passa a
-valer no próximo deploy.
-
-Trocar a senha derruba as sessões abertas daquele vendedor: ele entra de novo
-com a senha nova. É assim que você tira o acesso de alguém no mesmo dia.
-
-**Enquanto a variável não existir, ninguém entra** — nem com a senha certa,
-porque não há senha certa. A tela de login mostra um aviso amarelo dizendo
-exatamente qual variável falta.
+O PIN é o que foi cadastrado na aba Vendedores do CRM. Ele não fica em variável de ambiente e não precisa de publicação do site. Não apague o vendedor para trocar o PIN: o id é a chave do funil dele.
 
 ## Adicionar um vendedor novo
 
-São quatro passos — os quatro precisam bater.
-
-1. **`lib/vendedores.ts`** — acrescente o registro:
-
-   ```ts
-   {
-     slug: "maria",
-     id: "maria",
-     nome: "Maria",
-     cargo: "Consultora de Vendas",
-     assinatura: "Atenciosamente,\n*Maria* — Balão da Informática Anchieta",
-     envSenha: "VENDEDOR_MARIA_SENHA",
-   }
-   ```
-
-2. **`app/maria/page.tsx`** — copie `app/brendon/page.tsx` e troque só a
-   constante `SLUG` para `"maria"`.
-
-3. **`whatsapp-server/vendedores-fixos.json`** — espelhe `id`, `nome`, `cargo`
-   e `assinatura`. Reinicie o servidor de WhatsApp para o seed rodar.
-
-4. **Defina `VENDEDOR_MARIA_SENHA`** na hospedagem e publique. Sem isso a
-   página existe, mas ninguém entra.
+Na aba Vendedores do CRM (`/painel/crm`): nome, cargo, assinatura e PIN. A página `www.balao.info/<slug>` passa a existir na hora. O link fica na própria lista, com o botão de copiar. Não é preciso criar pasta, variável de ambiente nem publicar o site.
 
 ⚠️ **O `id` nunca deve mudar** depois que a pessoa começou a atender. Ele é a
 chave do kanban pessoal (`kanbanPorVendedor[id]`) e da atribuição de conversas
@@ -137,12 +98,7 @@ chave do kanban pessoal (`kanbanPorVendedor[id]`) e da atribuição de conversas
 
 ## Tirar o acesso de alguém
 
-Remova o registro de `lib/vendedores.ts`, apague a pasta `app/<slug>/` e tire a
-entrada de `whatsapp-server/vendedores-fixos.json`. Publique o site.
-
-Remover pelo painel do CRM **não** funciona para esses vendedores: o seed do
-servidor recria o registro no próximo boot, e o painel avisa isso em vez de
-fingir que deu certo.
+Quem foi cadastrado só no CRM sai pela aba Vendedores. Quem está no seed do servidor (a equipe fixa) é recriado no próximo boot: o painel avisa em vez de fingir que removeu. Para esses, o acesso acaba quando o PIN deixa de ser o que a pessoa conhece.
 
 ## Perguntas que sempre aparecem
 
@@ -153,7 +109,7 @@ atendimento, para não ficarem dois respondendo o mesmo cliente.
 
 **Brendon precisa ler algum QR Code?**
 Não. O QR Code é do servidor, lido uma vez pelo celular da loja. Ele só entra
-com a senha.
+com o PIN.
 
 **Se o Brendon sair, o histórico some?**
 Não. As conversas são do número da loja e ficam. O que é dele é o kanban

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import PaginasDosVendedores from "@/components/painel/PaginasDosVendedores";
 import { isPainelConfigurado } from "@/lib/painel-auth";
-import { VENDEDORES, temSenhaConfigurada } from "@/lib/vendedores";
+import { VENDEDORES } from "@/lib/vendedores";
 
 export const metadata: Metadata = {
   title: "Usuários e acessos",
@@ -48,9 +48,7 @@ export default function PainelUsuariosPage() {
     slug: v.slug,
     nome: v.nome,
     cargo: v.cargo,
-    temSenha: temSenhaConfigurada(v),
   }));
-  const semSenha = vendedores.filter((v) => !v.temSenha).length;
   const temTokenDeAutomacao = Boolean(process.env.ADMIN_API_TOKEN);
 
   return (
@@ -92,16 +90,17 @@ export default function PainelUsuariosPage() {
         quem="Para quem atende cliente no WhatsApp da loja."
       >
         <dl className="divide-y divide-slate-200">
-          <Linha rotulo="Como entra">Cada um na sua página pessoal, com a própria senha.</Linha>
+          <Linha rotulo="Como entra">
+            Cada um na sua página (www.balao.info/gabriel, por exemplo), com o próprio PIN.
+          </Linha>
           <Linha rotulo="O que abre">
             Só o atendimento: as conversas, o funil dele e o catálogo para enviar ao cliente. Não
             abre o painel.
           </Linha>
           <Linha rotulo="Quanto dura">30 dias no computador em que entrou.</Linha>
           <Linha rotulo="Situação">
-            {semSenha === 0
-              ? `Os ${vendedores.length} vendedores estão com senha definida.`
-              : `${semSenha} de ${vendedores.length} sem senha definida.`}
+            O acesso é o PIN de cada um, cadastrado na aba Vendedores do CRM. Vendedor novo ganha a
+            página sozinho, sem publicar o site de novo.
           </Linha>
         </dl>
         <div className="border-t border-slate-200">
@@ -158,9 +157,9 @@ export default function PainelUsuariosPage() {
       >
         <div className="space-y-2 px-4 py-3 text-sm text-slate-700">
           <p>
-            A senha do painel e a de cada vendedor ficam guardadas na configuração da hospedagem do
-            site, fora do banco de dados. Trocar qualquer uma delas, ou criar a página de um
-            vendedor novo, é uma alteração na configuração seguida de uma publicação do site.
+            A senha deste painel fica na configuração da hospedagem. O PIN de cada vendedor fica no
+            CRM, na aba Vendedores, e a página pessoal dele aparece na hora — não precisa publicar
+            o site de novo.
           </p>
           <p>
             Acesso por programa (sem navegador):{" "}

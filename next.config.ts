@@ -19,6 +19,36 @@ const nextConfig: NextConfig = {
   // public/ e continuam servidos como estáticos.
   outputFileTracingExcludes: {
     "/mybots-app": ["./public/**/*"],
+    // A página /<vendedor> e o login por PIN não leem arquivo estático.
+    // Sem isto o rastreador pode levar vídeo e apk de public/ para dentro
+    // da função e estourar o limite de 250 MB da Vercel.
+    "/[slug]": [
+      "./public/**/*",
+      "./whatsapp-server/**/*",
+      "./office3d/**/*",
+      "./mybots-desktop/**/*",
+      "./chacara3d/**/*",
+      "./docs/**/*",
+      "./data/**/*",
+    ],
+    "/api/vendedor/existe": [
+      "./public/**/*",
+      "./whatsapp-server/**/*",
+      "./office3d/**/*",
+      "./mybots-desktop/**/*",
+      "./chacara3d/**/*",
+      "./docs/**/*",
+      "./data/**/*",
+    ],
+    "/api/vendedor/login": [
+      "./public/**/*",
+      "./whatsapp-server/**/*",
+      "./office3d/**/*",
+      "./mybots-desktop/**/*",
+      "./chacara3d/**/*",
+      "./docs/**/*",
+      "./data/**/*",
+    ],
   },
   // O Office 3D (escritório virtual) é uma página pronta, em public/3d: não
   // passa pelo layout da loja. O endereço /3d abre o index.html dela.
