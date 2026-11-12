@@ -13,6 +13,7 @@ import {
   CorpoDaMensagem,
   LinhaDeLigacao,
   Reacoes,
+  SeloDeEnvio,
   TrechoCitado,
   aplicarMudanca,
   extrasDaMensagem,
@@ -1581,6 +1582,10 @@ export default function CrmWhatsAppClient({
                 // tinha fica, e o que veio agora do servidor manda.
                 ...extrasDaMensagem(existing as unknown as Record<string, unknown>),
                 ...extrasDaMensagem(sm),
+                motivoFalha:
+                  (sm.status || "sent") === "failed"
+                    ? sm.motivoFalha || existing?.motivoFalha || null
+                    : null,
               });
             });
           // Teto de segurança: um painel aberto a semana inteira acumulava
@@ -1759,7 +1764,8 @@ export default function CrmWhatsAppClient({
       atualizarStatusMensagem(
         payload.tempId,
         payload.success ? "sent" : "failed",
-        payload.id
+        payload.id,
+        payload.success ? null : payload.error
       );
       if (!payload.success) {
         showToast(`⛔ Mensagem não chegou ao WhatsApp: ${payload.error || "falha desconhecida"}`);
@@ -1780,7 +1786,7 @@ export default function CrmWhatsAppClient({
         );
         return;
       }
-      atualizarStatusMensagem(payload.id, payload.status);
+      atualizarStatusMensagem(payload.id, payload.status, null, payload.motivo || null);
     });
 
     socket.on("whatsapp:vendedores", (lista: any[]) => {
@@ -2030,7 +2036,7 @@ export default function CrmWhatsAppClient({
         })
           .then((r) => r.json().catch(() => ({})).then((d) => ({ ok: r.ok, d })))
           .then(({ ok, d }) => {
-            atualizarStatusMensagem(tempId, ok ? "sent" : "failed", d?.msgId);
+            atualizarStatusMensagem(tempId, ok ? "sent" : "failed", d?.msgId, ok ? null : d?.erro);
             if (!ok) showToast(`⛔ Arquivo não enviado: ${d?.erro || "erro desconhecido"}`);
           })
           .catch(() => atualizarStatusMensagem(tempId, "failed"));
@@ -2065,7 +2071,7 @@ export default function CrmWhatsAppClient({
         } else if (r.usarReserva) {
           enviarPeloCaminhoAntigo();
         } else {
-          atualizarStatusMensagem(tempId, "failed");
+          atualizarStatusMensagem(tempId, "failed", null, r.erro);
           showToast(`⛔ Arquivo não enviado: ${r.erro || "erro desconhecido"}`);
         }
       } catch {
@@ -2966,7 +2972,8 @@ export default function CrmWhatsAppClient({
   const atualizarStatusMensagem = (
     id: string,
     status: CrmMensagem["status"],
-    idReal?: string | null
+    idReal?: string | null,
+    motivo?: string | null
   ) => {
     setMensagens((prev) => {
       // Assim que o WhatsApp confirma o envio, o balão otimista assume o id
@@ -2978,19 +2985,27 @@ export default function CrmWhatsAppClient({
       // uma virava um balão novo: a mensagem aparecia repetida, uma cópia por
       // etapa de entrega (✓, ✓✓, ✓✓), enquanto no celular havia só uma.
       const trocarPara = idReal && idReal !== id ? idReal : null;
+      const aplicar = (m: CrmMensagem): CrmMensagem => {
+        const proximo: CrmMensagem = { ...m, status };
+        if (status === "failed") {
+          const texto = String(motivo || m.motivoFalha || "").trim();
+          if (texto) proximo.motivoFalha = texto;
+        } else if (status) {
+          proximo.motivoFalha = null;
+        }
+        return proximo;
+      };
 
       if (trocarPara) {
         // Se a definitiva já chegou, o balão otimista simplesmente sai.
         const jaExiste = prev.some((m) => m.id === trocarPara);
         if (jaExiste) {
-          return prev
-            .filter((m) => m.id !== id)
-            .map((m) => (m.id === trocarPara ? { ...m, status } : m));
+          return prev.filter((m) => m.id !== id).map((m) => (m.id === trocarPara ? aplicar(m) : m));
         }
-        return prev.map((m) => (m.id === id ? { ...m, id: trocarPara, status } : m));
+        return prev.map((m) => (m.id === id ? aplicar({ ...m, id: trocarPara }) : m));
       }
 
-      return prev.map((m) => (m.id === id ? { ...m, status } : m));
+      return prev.map((m) => (m.id === id ? aplicar(m) : m));
     });
   };
 
@@ -3201,7 +3216,7 @@ export default function CrmWhatsAppClient({
       })
         .then((r) => r.json().catch(() => ({})).then((data) => ({ ok: r.ok, data })))
         .then(({ ok, data }) => {
-          atualizarStatusMensagem(tempId, ok ? "sent" : "failed", data?.id);
+          atualizarStatusMensagem(tempId, ok ? "sent" : "failed", data?.id, ok ? null : data?.erro);
           if (!ok) showToast(`⛔ Falha ao enviar "${prod.nome}": ${data?.erro || "erro desconhecido"}`);
         })
         .catch(() => atualizarStatusMensagem(tempId, "failed"));
@@ -3278,7 +3293,7 @@ export default function CrmWhatsAppClient({
       })
         .then((r) => r.json().catch(() => ({})).then((data) => ({ ok: r.ok, data })))
         .then(({ ok, data }) => {
-          atualizarStatusMensagem(tempId, ok ? "sent" : "failed");
+          atualizarStatusMensagem(tempId, ok ? "sent" : "failed", null, ok ? null : data?.erro);
           if (!ok) showToast(`⛔ Falha ao enviar mensagem: ${data?.erro || "erro desconhecido"}`);
         })
         .catch(() => atualizarStatusMensagem(tempId, "failed"));
@@ -3347,7 +3362,7 @@ export default function CrmWhatsAppClient({
         })
           .then((r) => r.json().catch(() => ({})).then((data) => ({ ok: r.ok, data })))
           .then(({ ok, data }) => {
-            atualizarStatusMensagem(tempId, ok ? "sent" : "failed", data?.msgId);
+            atualizarStatusMensagem(tempId, ok ? "sent" : "failed", data?.msgId, ok ? null : data?.erro);
             concluir({ ok, erro: ok ? null : data?.erro || "erro desconhecido" });
           })
           .catch(() => {
@@ -4989,42 +5004,11 @@ export default function CrmWhatsAppClient({
                             <BarraDeEnvio valor={progressoEnvio[m.id]} />
                             <Reacoes m={m} />
                             <span
-                              className="flex items-center justify-end gap-1 text-[10px] text-[#5f6368] mt-1 font-mono"
+                              className="flex items-start justify-end gap-1 text-[10px] text-[#5f6368] mt-1 font-mono"
                               title={formatHora(m.timestamp, true)}
                             >
                               {formatHora(m.timestamp)}
-                              {isEu && (
-                                <span
-                                  title={
-                                    m.status === "failed"
-                                      ? "Falha no envio — não chegou ao WhatsApp do cliente"
-                                      : m.status === "pending"
-                                      ? "Enviando…"
-                                      : m.status === "read"
-                                      ? "Lida"
-                                      : m.status === "delivered"
-                                      ? "Entregue"
-                                      : "Enviada ao WhatsApp"
-                                  }
-                                  className={
-                                    m.status === "failed"
-                                      ? "text-red-600 font-bold cursor-help"
-                                      : m.status === "read"
-                                      ? "text-[#53bdeb] cursor-help"
-                                      : "text-[#5f6368] cursor-help"
-                                  }
-                                >
-                                  {m.status === "failed"
-                                    ? "⚠ Falhou"
-                                    : m.status === "pending"
-                                    ? "🕐"
-                                    : m.status === "read"
-                                    ? "✓✓"
-                                    : m.status === "delivered"
-                                    ? "✓✓"
-                                    : "✓"}
-                                </span>
-                              )}
+                              {isEu && <SeloDeEnvio status={m.status} motivo={m.motivoFalha} />}
                             </span>
                           </div>
                         );
@@ -6900,7 +6884,10 @@ export default function CrmWhatsAppClient({
                       legenda: legendaFinal,
                     }),
                   })
-                    .then((r) => atualizarStatusMensagem(tempId, r.ok ? "sent" : "failed"))
+                    .then((r) => r.json().catch(() => ({})).then((data) => ({ ok: r.ok, data })))
+                    .then(({ ok, data }) =>
+                      atualizarStatusMensagem(tempId, ok ? "sent" : "failed", data?.msgId, ok ? null : data?.erro)
+                    )
                     .catch(() => atualizarStatusMensagem(tempId, "failed"));
                 }
 

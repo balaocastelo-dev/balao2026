@@ -5,7 +5,27 @@ const N = require("./normalizar");
 const lids = { "123456789012345@lid": "5519984515960" };
 const lidParaNumero = (l) => lids[l] || null;
 let ok = 0;
-const t = (nome, fn) => { fn(); ok++; console.log("✓", nome); };
+const pendentes = [];
+const t = (nome, fn) => {
+  const r = fn();
+  if (r && typeof r.then === "function") {
+    pendentes.push(
+      r.then(
+        () => {
+          ok++;
+          console.log("✓", nome);
+        },
+        (e) => {
+          console.error("✗", nome);
+          throw e;
+        }
+      )
+    );
+    return;
+  }
+  ok++;
+  console.log("✓", nome);
+};
 
 t("texto recebido de número normal", () => {
   const m = N.normalizarMensagem({
@@ -43,6 +63,94 @@ t("@lid desconhecido continua @lid", () => {
   const m = N.normalizarMensagem({ key: { id: "L3", remoteJid: "777@lid" }, messageType: "conversation", message: { conversation: "z" } });
   assert.equal(m.chatId, "777@lid");
   assert.equal(N.paraDestino(m.chatId), "777@lid");
+});
+
+t("celular com DDD 31 ou maior sai como JID completo, com o nono dígito", () => {
+  // O createJid da Evolution 2.3.7 tiraria o 9: 5531999828420 → 553199828420.
+  assert.equal(N.paraDestino("5531999828420"), "5531999828420@s.whatsapp.net");
+  assert.equal(N.paraDestino("5531999828420@c.us"), "5531999828420@s.whatsapp.net");
+  assert.equal(N.paraDestino("+55 (31) 99982-8420"), "5531999828420@s.whatsapp.net");
+  assert.equal(N.paraDestino("5531999828420@s.whatsapp.net"), "5531999828420@s.whatsapp.net");
+  assert.equal(N.paraDestino("5519984515960@c.us"), "5519984515960@s.whatsapp.net");
+  assert.equal(N.paraDestino("120363012345678901@g.us"), "120363012345678901@g.us");
+  assert.equal(N.paraDestino("120363012345678901-123@g.us"), "120363012345678901-123@g.us");
+  assert.equal(N.paraDestino(""), "");
+});
+
+t("motivo da falha: código 463, corpo do 400, ERROR sem número", () => {
+  assert.equal(N.motivoDaFalha({ status: "ERROR", messageStubParameters: ["463"] }), "código 463");
+  assert.equal(N.motivoDaFalha(463), "código 463");
+  const corpo = '{"exists":false,"jid":"553199828420@s.whatsapp.net","number":"5531999828420"}';
+  assert.equal(N.motivoDaFalha({ status: 400, message: corpo }), `código 400 — ${corpo}`);
+  assert.equal(N.motivoDaFalha({ status: "ERROR" }), "ERROR");
+  assert.equal(N.motivoDaFalha("Evolution fora do ar"), "Evolution fora do ar");
+});
+
+t("retentativa única no 400 ou ERROR, e não em outro erro", async () => {
+  const jid = "5531999828420@s.whatsapp.net";
+  let chamadas = 0;
+  const erro400 = () => Object.assign(new Error("número não existe"), { status: 400 });
+  const ok = await N.enviarComRetentativa("5531999828420@c.us", async (destino) => {
+    chamadas++;
+    assert.equal(destino, jid);
+    if (chamadas === 1) throw erro400();
+    return { key: { id: "OK" } };
+  });
+  assert.equal(ok.key.id, "OK");
+  assert.equal(chamadas, 2);
+
+  chamadas = 0;
+  await assert.rejects(
+    N.enviarComRetentativa("5531999828420", async () => {
+      chamadas++;
+      throw erro400();
+    }),
+    (e) => e.retentou === true && e.status === 400
+  );
+  assert.equal(chamadas, 2, "a segunda falha não gera uma terceira chamada");
+
+  chamadas = 0;
+  await assert.rejects(
+    N.enviarComRetentativa("5531999828420", async () => {
+      chamadas++;
+      throw Object.assign(new Error("fora"), { status: 500 });
+    }),
+    (e) => e.status === 500
+  );
+  assert.equal(chamadas, 1);
+
+  chamadas = 0;
+  const recibo = await N.enviarComRetentativa("777@lid", async (destino) => {
+    chamadas++;
+    assert.equal(destino, "777@lid");
+    if (chamadas === 1) throw Object.assign(new Error("nack"), { status: "ERROR" });
+    return { key: { id: "LID" } };
+  });
+  assert.equal(recibo.key.id, "LID");
+  assert.equal(chamadas, 2);
+});
+
+t("recibo ERROR reenvia o texto uma vez; foto de catálogo não reenvia a oferta", () => {
+  assert.equal(
+    N.deveRetentarEntrega({ id: "T1", status: "ERROR", corpo: "oi", enviadaNestaSessao: true }),
+    true
+  );
+  assert.equal(
+    N.deveRetentarEntrega({ id: "T1", status: "failed", corpo: "oi", jaRetentou: true }),
+    false
+  );
+  assert.equal(
+    N.deveRetentarEntrega({ id: "T1", status: "failed", corpo: "oi", retentativa: true }),
+    false
+  );
+  assert.equal(
+    N.deveRetentarEntrega({ id: "F1", status: "ERROR", corpo: "⚡ oferta", fotoDeOferta: true }),
+    false
+  );
+  assert.equal(N.deveRetentarEntrega({ id: "F2", status: "ERROR", corpo: "", fotoDeOferta: true }), false);
+  assert.equal(N.deveRetentarEntrega({ id: "V1", status: "ERROR", corpo: "oi", enviadaNestaSessao: false }), false);
+  assert.equal(N.deveRetentarEntrega({ id: "E1", status: "DELIVERY_ACK", corpo: "oi" }), false);
+  assert.equal(N.deveRetentarEntrega({ id: "C1", status: "ERROR", deSaida: false, corpo: "oi" }), false);
 });
 
 t("mensagem de voz", () => {
@@ -178,4 +286,11 @@ t("vídeo-recado é vídeo, marcado para transcrição", () => {
   assert.equal(m.videoRecado, true);
 });
 
-console.log(`\n${ok} testes ok`);
+Promise.all(pendentes)
+  .then(() => {
+    console.log(`\n${ok} testes ok`);
+  })
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });

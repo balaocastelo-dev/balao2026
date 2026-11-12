@@ -14,7 +14,7 @@ num container ao lado, sem porta pública.
 | `evo/amostras/` | foto, vídeo, áudio falado e PDF do teste cruzado |
 | `docker-compose.evo.yml` | Evolution + Postgres + Redis + servidor |
 | `deploy-evo.sh` / `deploy-evo.ps1` | instala, atualiza, sobe um commit (`REF=`/`-Commit`), `importar`, `diagnostico` |
-| `evolution/` | a imagem da Evolution 2.3.7 com o remendo da fila offline do Baileys |
+| `evolution/` | imagem da Evolution 2.3.7 com Baileys 7.0.0-rc13 (tctoken / erro 463) e o remendo da fila offline, que vira no-op nesse Baileys |
 | `evo/indices.sql` | índices em `"Message"` (o deploy aplica) |
 | `evo/consultas-quentes.sql` · `diagnostico-banco.sh` | raio-X do banco (EXPLAIN, sem dado de cliente) |
 | `medicao.js` | latência por mensagem e caminho, no `/health` |

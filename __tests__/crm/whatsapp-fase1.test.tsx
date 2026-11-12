@@ -4,6 +4,7 @@ import {
   AvisoApagada,
   BarraDeEnvio,
   CorpoDaMensagem,
+  SeloDeEnvio,
   LinhaDeLigacao,
   Reacoes,
   TrechoCitado,
@@ -20,6 +21,8 @@ const base: CrmMensagem = { id: "M1", chatId: "5500000000101@c.us", from: "x", b
 describe("juntar o que o servidor manda", () => {
   it("extrasDaMensagem só traz o que veio (não apaga o que a tela tinha)", () => {
     expect(extrasDaMensagem({ id: "M1", body: "oi" })).toEqual({});
+    expect(extrasDaMensagem({ motivoFalha: "código 463" })).toEqual({ motivoFalha: "código 463" });
+    expect(extrasDaMensagem({ motivoFalha: "  " })).toEqual({});
     expect(
       extrasDaMensagem({ seq: 7, reacoes: [{ emoji: "👍", de: "cliente" }], apagada: true, editadaEm: 5, citada: { id: "Q", trecho: "t" }, ligacao: { estado: "perdida" } })
     ).toEqual({ seq: 7, reacoes: [{ emoji: "👍", de: "cliente" }], apagada: true, editadaEm: 5, citada: { id: "Q", trecho: "t" }, ligacao: { estado: "perdida" } });
@@ -68,6 +71,20 @@ describe("desenho do balão", () => {
     expect(screen.getByText("Loja")).toBeTruthy();
     expect(screen.getByText(/Ligação de voz · perdida/)).toBeTruthy();
     expect(screen.getByTitle("Enviando… 42%")).toBeTruthy();
+  });
+
+  it("Falhou mostra o motivo: código 463 e o corpo do 400", () => {
+    render(
+      <>
+        <SeloDeEnvio status="failed" motivo="código 463" />
+        <SeloDeEnvio status="failed" motivo='código 400 — {"exists":false,"jid":"553199828420@s.whatsapp.net"}' />
+        <SeloDeEnvio status="sent" />
+      </>
+    );
+    expect(screen.getByTitle("Falha no envio: código 463").textContent).toContain("⚠ Falhou");
+    expect(screen.getByText("código 463")).toBeTruthy();
+    expect(screen.getByText(/553199828420@s.whatsapp.net/)).toBeTruthy();
+    expect(screen.getByTitle("Enviada ao WhatsApp").textContent).toBe("✓");
   });
 
   it("sem extras, nada a desenhar", () => {

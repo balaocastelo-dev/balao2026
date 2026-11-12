@@ -16,6 +16,7 @@ function paraOBanco(msg) {
   if (msg.videoRecado) midia.videoRecado = true;
   if (msg.produto) midia.produto = msg.produto;
   if (msg.ligacao) midia.ligacao = msg.ligacao;
+  if (msg.motivoFalha) midia.motivoFalha = String(msg.motivoFalha).slice(0, 500);
   return {
     id: msg.id,
     chatId: msg.chatId,
@@ -83,6 +84,7 @@ function paraOPainel(linha, { numeroDaLoja = null, nomeDe = () => null } = {}) {
   if (midia.videoRecado) msg.videoRecado = true;
   if (midia.produto) msg.produto = midia.produto;
   if (midia.ligacao) msg.ligacao = midia.ligacao;
+  if (msg.status === "failed" && midia.motivoFalha) msg.motivoFalha = String(midia.motivoFalha).slice(0, 500);
   return msg;
 }
 

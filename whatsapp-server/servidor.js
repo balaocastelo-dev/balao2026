@@ -24,6 +24,7 @@ const { Server } = require("socket.io");
 const { criarEvolution, ErroEvolution } = require("./evo/evolution");
 const { criarAcesso } = require("./evo/acesso");
 const N = require("./evo/normalizar");
+const { enviarOferta } = require("./evo/envio");
 const { criarEspelhoDoCatalogo } = require("./catalogo");
 const { abrirBanco } = require("./status/db");
 const { criarServicoDeStatus } = require("./status/servico");
@@ -355,6 +356,7 @@ function guardarMensagem(msg) {
         body: anterior.editadaEm && !msg.editadaEm ? anterior.body : msg.body,
         apagada: msg.apagada || anterior.apagada,
         ligacao: msg.ligacao || anterior.ligacao,
+        motivoFalha: msg.status && msg.status !== "failed" ? null : msg.motivoFalha || anterior.motivoFalha || null,
         transcricao: msg.transcricao || anterior.transcricao,
         seq: Math.max(Number(msg.seq) || 0, Number(anterior.seq) || 0) || undefined,
       }
@@ -1873,7 +1875,7 @@ const vigia = criarVigia({
     //    existe nesta hora. Só para o número configurado — nunca um cliente.
     if (VIGIA_WHATSAPP && estado.connected) {
       await evolution
-        .enviarTexto(INSTANCIA, VIGIA_WHATSAPP, `${voltou ? "✅" : "🚨"} ${titulo}\n\n${corpo}`)
+        .enviarTexto(INSTANCIA, N.paraDestino(VIGIA_WHATSAPP), `${voltou ? "✅" : "🚨"} ${titulo}\n\n${corpo}`)
         .catch((e) => console.warn("[vigia] aviso por WhatsApp falhou:", e.message));
     }
 
@@ -1966,6 +1968,58 @@ app.post("/evolution/webhook", express.json({ limit: "60mb" }), (req, res) => {
     .catch((erro) => console.error("[webhook] Falha ao tratar", evento, erro));
 });
 
+// Ids que este processo enviou. Um ERROR antigo (histórico, ou de antes do
+// boot) não pode disparar um reenvio para o cliente.
+const enviadasAgora = new Set();
+const retentouEntrega = new Set();
+const fotosDeOferta = new Set();
+
+function lembrarId(conjunto, id) {
+  if (!id) return;
+  conjunto.add(String(id));
+  if (conjunto.size > 4000) conjunto.delete(conjunto.values().next().value);
+}
+
+function motivoDoErro(erro) {
+  if (!erro) return "falha desconhecida";
+  if (erro instanceof ErroEvolution) {
+    return N.motivoDaFalha({ status: erro.status, message: erro.message, resposta: erro.resposta }) || erro.message;
+  }
+  return N.motivoDaFalha(erro.message || String(erro)) || erro.message || "falha desconhecida";
+}
+
+/**
+ * O WhatsApp devolveu ERROR (o 463 do tctoken entra aqui, quando a Evolution
+ * repassa o código). Uma mensagem nova, com o JID completo, e só uma.
+ * A foto do catálogo não reenvia o texto da oferta.
+ */
+async function retentarEntrega(m) {
+  const id = m?.id ? String(m.id) : "";
+  const corpo = String(m?.body || "");
+  const segue = N.deveRetentarEntrega({
+    id,
+    status: "failed",
+    deSaida: m?.direction === "out",
+    retentativa: Boolean(m?.retentativa),
+    jaRetentou: retentouEntrega.has(id),
+    fotoDeOferta: fotosDeOferta.has(id),
+    enviadaNestaSessao: enviadasAgora.has(id),
+    corpo,
+  });
+  lembrarId(retentouEntrega, id);
+  if (!segue) return;
+  try {
+    const rec = await N.enviarComRetentativa(m.chatId, (jid) => evolution.enviarTexto(INSTANCIA, jid, corpo));
+    const nova = registrarEnviada(rec, { produto: m.produto || undefined });
+    if (nova?.id) {
+      nova.retentativa = true;
+      lembrarId(retentouEntrega, nova.id);
+    }
+  } catch (erro) {
+    console.warn("[envio] retentativa única não saiu:", erro.message);
+  }
+}
+
 /** Recibo (entregue/lida/tocada) e, às vezes, edição: a 2.3.7 manda os dois por MESSAGES_UPDATE. */
 async function tratarAtualizacao(u) {
   const id = u?.keyId || u?.key?.id;
@@ -1979,12 +2033,27 @@ async function tratarAtualizacao(u) {
   }
   if (!u.status) return;
   const status = N.statusDoPainel(u.status, u.fromMe);
+  const motivo = status === "failed" ? N.motivoDaFalha(u) || "ERROR" : "";
   const m = acharNaMemoria(id);
-  if (m) m.status = status;
-  const r = await mudarNoBanco(id, { situacao: status });
+  if (m) {
+    m.status = status;
+    m.motivoFalha = motivo || null;
+  }
+  const mudanca = { situacao: status };
+  if (motivo) mudanca.midia = { motivoFalha: motivo };
+  const r = await mudarNoBanco(id, mudanca);
   if (r?.seq && m) m.seq = r.seq;
   const chatId = m?.chatId || r?.chatId;
-  if (chatId) paraPainel().emit("whatsapp:message-status", { id, chatId, status, ...(r?.seq ? { seq: r.seq } : {}) });
+  if (chatId) {
+    paraPainel().emit("whatsapp:message-status", {
+      id,
+      chatId,
+      status,
+      ...(motivo ? { motivo } : {}),
+      ...(r?.seq ? { seq: r.seq } : {}),
+    });
+  }
+  if (status === "failed") await retentarEntrega(m);
   // Mensagem do CLIENTE marcada como lida: foi lida no celular da loja.
   const leitura = String(u.status).toUpperCase();
   if (u.fromMe === false && (leitura === "READ" || leitura === "PLAYED")) await conversaLidaNoCelular(id, u.remoteJid);
@@ -2143,7 +2212,7 @@ async function testeCruzado({ produtoId } = {}) {
   const destino = teste.numero;
   const tag = `[TESTE ${Date.now().toString(36).toUpperCase()}]`;
   const casos = [
-    { nome: "texto", tipo: "texto", enviar: () => evolution.enviarTexto(INSTANCIA, destino, `${tag} texto`) },
+    { nome: "texto", tipo: "texto", enviar: () => evolution.enviarTexto(INSTANCIA, N.paraDestino(destino), `${tag} texto`) },
     {
       nome: "foto (arquivo)",
       tipo: "image",
@@ -2213,7 +2282,7 @@ async function testeCruzado({ produtoId } = {}) {
   const desdeVolta = Date.now();
   const volta = { caso: "cliente -> loja (texto)", enviado: false, chegou: false };
   try {
-    const rec = await evolution.enviarTexto(INSTANCIA_TESTE, estado.phoneNumber, tagVolta);
+    const rec = await evolution.enviarTexto(INSTANCIA_TESTE, N.paraDestino(estado.phoneNumber), tagVolta);
     volta.enviado = Boolean(rec?.key?.id);
     const fim = Date.now() + 30_000;
     while (Date.now() < fim && !volta.chegou) {
@@ -2439,7 +2508,9 @@ montarRotaDeUpload(app, {
       comoVoz: campos.comoVoz === "1" || campos.comoVoz === "true",
       comoDocumento: campos.comoDocumento === "1" || campos.comoDocumento === "true",
     }).catch((erro) => {
-      throw Object.assign(new Error(erro.message), { status: erro instanceof ErroEvolution && erro.status >= 400 && erro.status < 500 ? 422 : 502 });
+      throw Object.assign(new Error(motivoDoErro(erro)), {
+        status: erro instanceof ErroEvolution && erro.status >= 400 && erro.status < 500 ? 422 : 502,
+      });
     });
     const msg = registrarEnviada(rec, {
       tempId: campos.tempId || undefined,
@@ -2687,14 +2758,14 @@ function registrarEnviada(rec, extrasComOrigem = {}) {
     if (r?.seq && !(final.seq >= r.seq)) final.seq = r.seq;
   });
   tocarConversa(final);
+  lembrarId(enviadasAgora, final.id);
   agente?.aoEnviarPelaLoja(final, { vendedorId: extras.vendedorId || null, automatico }).catch(() => {});
   return final;
 }
 
 async function enviarTexto({ destino, texto, signatureId, responderA }) {
   exigirConectado();
-  const numero = N.paraDestino(destino);
-  if (!numero) throw new Error("Número de destino inválido.");
+  if (!N.paraDestino(destino)) throw new Error("Número de destino inválido.");
   const corpo = assinar(String(texto || "").trim(), signatureId);
   if (!corpo) throw new Error("Mensagem vazia.");
   const extras = {};
@@ -2703,7 +2774,7 @@ async function enviarTexto({ destino, texto, signatureId, responderA }) {
     const original = await acharMensagem(responderA);
     if (original?.chave) extras.quoted = { key: original.chave, message: { conversation: original.body || "" } };
   }
-  return evolution.enviarTexto(INSTANCIA, numero, corpo, extras);
+  return N.enviarComRetentativa(destino, (jid) => evolution.enviarTexto(INSTANCIA, jid, corpo, extras));
 }
 
 async function fonteDaMidia({ dataUrl, url, base64, mimetype }) {
@@ -2715,8 +2786,7 @@ async function fonteDaMidia({ dataUrl, url, base64, mimetype }) {
 
 async function enviarMidia({ destino, dataUrl, url, base64, mimetype, filename, caption, comoVoz, comoDocumento }) {
   exigirConectado();
-  const numero = N.paraDestino(destino);
-  if (!numero) throw new Error("Número de destino inválido.");
+  if (!N.paraDestino(destino)) throw new Error("Número de destino inválido.");
   const fonte = await fonteDaMidia({ dataUrl, url, base64, mimetype });
   const mime = fonte.mimetype || "application/octet-stream";
   let tipo = comoDocumento ? "document" : N.tipoPeloMime(mime, filename);
@@ -2724,16 +2794,18 @@ async function enviarMidia({ destino, dataUrl, url, base64, mimetype, filename, 
 
   if (tipo === "audio" && comoVoz !== false) {
     // Vira mensagem de voz: a Evolution converte para ogg/opus.
-    return evolution.enviarAudio(INSTANCIA, numero, fonte.media);
+    return N.enviarComRetentativa(destino, (jid) => evolution.enviarAudio(INSTANCIA, jid, fonte.media));
   }
   const nome = filename || `arquivo.${N.extensaoDoMime(mime)}`;
-  return evolution.enviarMidia(INSTANCIA, numero, {
-    mediatype: tipo,
-    mimetype: mime,
-    media: fonte.media,
-    caption: tipo === "audio" ? undefined : String(caption || "") || undefined,
-    fileName: nome,
-  });
+  return N.enviarComRetentativa(destino, (jid) =>
+    evolution.enviarMidia(INSTANCIA, jid, {
+      mediatype: tipo,
+      mimetype: mime,
+      media: fonte.media,
+      caption: tipo === "audio" ? undefined : String(caption || "") || undefined,
+      fileName: nome,
+    })
+  );
 }
 
 // Produto: nome, foto e link vêm do site, não de quem pede — assim ninguém
@@ -2809,29 +2881,27 @@ async function montarOferta({ product = {}, price, obs }) {
 
 async function enviarProduto({ destino, product, price, obs, signatureId }) {
   exigirConectado();
-  const numero = N.paraDestino(destino);
-  if (!numero) throw new Error("Número de destino inválido.");
+  if (!N.paraDestino(destino)) throw new Error("Número de destino inválido.");
   const oferta = await montarOferta({ product, price, obs });
   const legenda = assinar(oferta.texto, signatureId);
-
-  if (oferta.imagem) {
-    try {
-      const rec = await evolution.enviarMidia(INSTANCIA, numero, {
+  // Texto primeiro, foto à parte. O painel registra o texto. Se a foto
+  // falhar, esse texto não vira "Falhou".
+  const r = await enviarOferta({
+    destino,
+    legenda,
+    imagem: oferta.imagem,
+    enviarTexto: (jid) => evolution.enviarTexto(INSTANCIA, jid, legenda),
+    enviarMidia: (jid) =>
+      evolution.enviarMidia(INSTANCIA, jid, {
         mediatype: "image",
         mimetype: "image/jpeg",
         media: oferta.imagem,
-        caption: legenda,
         fileName: "produto.jpg",
-      });
-      return { rec, oferta, comFoto: true };
-    } catch (erro) {
-      console.warn("[produto] Foto recusada, mando só o texto:", erro.message);
-      const rec = await evolution.enviarTexto(INSTANCIA, numero, legenda);
-      return { rec, oferta, comFoto: false, motivoSemFoto: erro.message };
-    }
-  }
-  const rec = await evolution.enviarTexto(INSTANCIA, numero, legenda);
-  return { rec, oferta, comFoto: false, motivoSemFoto: "produto sem foto no site" };
+      }),
+    marcarFoto: (id) => lembrarId(fotosDeOferta, id),
+  });
+  if (!r.comFoto && oferta.imagem) console.warn("[produto] Foto recusada; o texto da oferta permanece:", r.motivoSemFoto);
+  return { rec: r.rec, oferta, comFoto: r.comFoto, motivoSemFoto: r.motivoSemFoto };
 }
 
 async function reiniciarSessao() {
@@ -2852,7 +2922,7 @@ const rotaHttp = (fn) => async (req, res) => {
     res.json({ ok: true, ...(await fn(req.body || {}, req)) });
   } catch (erro) {
     const status = erro instanceof ErroEvolution && erro.status >= 400 && erro.status < 500 ? 422 : 500;
-    res.status(status).json({ ok: false, erro: erro.message });
+    res.status(status).json({ ok: false, erro: motivoDoErro(erro) });
   }
 };
 const json = express.json({ limit: "80mb" });
@@ -2876,7 +2946,7 @@ function destinoDaArena(v) {
   const s = String(v || "").trim();
   if (/^[0-9-]{10,40}@g\.us$/.test(s)) return s;
   const d = s.replace(/\D/g, "");
-  return d.length >= 12 && d.length <= 13 && d.startsWith("55") ? d : null;
+  return d.length >= 12 && d.length <= 13 && d.startsWith("55") ? N.paraDestino(d) : null;
 }
 
 app.get("/api/arena/grupos", acesso.exigir(["admin"]), rotaHttp(async () => {
@@ -3277,8 +3347,9 @@ io.on("connection", (socket) => {
       const msg = registrarEnviada(rec, { tempId: p.tempId, vendedorId: quem.vendedor?.id || p.vendedorId || null });
       ack(p, true, msg.id);
     } catch (erro) {
-      ack(p, false, null, erro.message);
-      emitirToast(`⛔ Mensagem não enviada: ${erro.message}`, socket);
+      const motivo = motivoDoErro(erro);
+      ack(p, false, null, motivo);
+      emitirToast(`⛔ Mensagem não enviada: ${motivo}`, socket);
     }
   });
 
@@ -3304,8 +3375,9 @@ io.on("connection", (socket) => {
         gravarMidia(msg.id, Buffer.from(partes.base64, "base64"), p.mimetype || partes.mimetype, p.filename).catch(() => {});
       }
     } catch (erro) {
-      ack(p, false, null, erro.message);
-      emitirToast(`⛔ Arquivo não enviado: ${erro.message}`, socket);
+      const motivo = motivoDoErro(erro);
+      ack(p, false, null, motivo);
+      emitirToast(`⛔ Arquivo não enviado: ${motivo}`, socket);
     }
   });
 
@@ -3327,8 +3399,9 @@ io.on("connection", (socket) => {
         socket
       );
     } catch (erro) {
-      ack(p, false, null, erro.message);
-      emitirToast(`⛔ Produto não enviado: ${erro.message}`, socket);
+      const motivo = motivoDoErro(erro);
+      ack(p, false, null, motivo);
+      emitirToast(`⛔ Produto não enviado: ${motivo}`, socket);
     }
   });
 
@@ -3813,18 +3886,24 @@ async function enviarProdutoDoAgente({ chatId, produto, vendedorId, aoMontar }) 
   if (!numero) throw new Error("Número de destino inválido.");
   const legenda = legendaDoProdutoDoAgente(produto);
   aoMontar?.(legenda);
-  let rec;
-  if (produto.image && /^https?:\/\//i.test(String(produto.image))) {
-    rec = await evolution
-      .enviarMidia(INSTANCIA, numero, { mediatype: "image", mimetype: "image/jpeg", media: produto.image, caption: legenda, fileName: "produto.jpg" })
-      .catch((erro) => {
-        console.warn("[agente] foto do produto recusada, mando só o texto:", erro.message);
-        return null;
-      });
-  }
-  if (!rec) rec = await evolution.enviarTexto(INSTANCIA, numero, legenda);
+  const imagem = produto.image && /^https?:\/\//i.test(String(produto.image)) ? produto.image : null;
+  const r = await enviarOferta({
+    destino: chatId,
+    legenda,
+    imagem,
+    enviarTexto: (jid) => evolution.enviarTexto(INSTANCIA, jid, legenda),
+    enviarMidia: (jid) =>
+      evolution.enviarMidia(INSTANCIA, jid, {
+        mediatype: "image",
+        mimetype: "image/jpeg",
+        media: imagem,
+        fileName: "produto.jpg",
+      }),
+    marcarFoto: (id) => lembrarId(fotosDeOferta, id),
+  });
+  if (!r.comFoto && imagem) console.warn("[agente] foto do produto recusada; o texto da oferta permanece:", r.motivoSemFoto);
   const p = { id: produto.id, nome: produto.name, preco: lerPreco(produto.price), imagem: produto.image || null };
-  return registrarEnviada(rec, { vendedorId, automatico: "agente", produto: p });
+  return registrarEnviada(r.rec, { vendedorId, automatico: "agente", produto: p });
 }
 
 async function ligarAgente(db) {

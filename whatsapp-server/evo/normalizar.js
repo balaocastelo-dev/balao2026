@@ -65,11 +65,140 @@ function paraChatId(jid, lidParaNumero) {
   return d ? `${d}@c.us` : null;
 }
 
-/** O que a Evolution aceita no campo `number`. */
+function jidQueAEvolutionPreserva(s) {
+  return ehLid(s) || s.endsWith("@g.us") || s.endsWith("@newsletter") || s.endsWith("@broadcast");
+}
+
+/**
+ * O que a Evolution aceita no campo `number`.
+ *
+ * Número puro e `@c.us` NÃO podem ir só com os dígitos. O `createJid` da
+ * Evolution 2.3.7 chama `formatBRNumber`, que tira o nono dígito de celular
+ * com DDD 31 ou maior: `5531999828420` vira `553199828420`. O número mutilado
+ * não existe no WhatsApp e o sendText/sendMedia responde 400. JID completo
+ * (`…@s.whatsapp.net`) o `createJid` devolve como está, sem esse corte.
+ * `@lid` e `@g.us` também já passam direto.
+ */
 function paraDestino(chatIdOuNumero) {
   const s = String(chatIdOuNumero || "").trim();
-  if (ehLid(s)) return s;
-  return digitos(s);
+  if (!s) return "";
+  if (jidQueAEvolutionPreserva(s)) return s;
+  const d = digitos(s);
+  if (!d) return "";
+  return `${d}@s.whatsapp.net`;
+}
+
+function textoCurto(valor, limite = 380) {
+  if (valor == null || valor === "") return "";
+  let s;
+  if (typeof valor === "string") s = valor;
+  else {
+    try {
+      s = JSON.stringify(valor);
+    } catch {
+      s = String(valor);
+    }
+  }
+  s = s.replace(/\s+/g, " ").trim();
+  if (!s || s === "{}" || s === "[]" || s === "null") return "";
+  return s.length > limite ? `${s.slice(0, limite - 1)}…` : s;
+}
+
+function codigoNumerico(valor) {
+  const s = String(valor ?? "").trim();
+  return /^\d{3,4}$/.test(s) ? s : "";
+}
+
+/**
+ * Frase curta para o balão "Falhou": "código 463", "código 400 — {corpo}",
+ * ou "ERROR" quando o recibo não trouxe o número.
+ */
+function motivoDaFalha(info) {
+  if (info == null || info === "") return "";
+  if (typeof info !== "object") {
+    const c = codigoNumerico(info);
+    return c ? `código ${c}` : textoCurto(info);
+  }
+  const recibos = [];
+  const olhar = (v) => {
+    if (Array.isArray(v)) {
+      v.forEach(olhar);
+      return;
+    }
+    const c = codigoNumerico(v);
+    if (c && !recibos.includes(c)) recibos.push(c);
+  };
+  olhar(info.error);
+  olhar(info.errorCode);
+  olhar(info.code);
+  olhar(info.messageStubParameters);
+  olhar(info.update?.messageStubParameters);
+  olhar(info.message?.messageStubParameters);
+  olhar(info.attrs?.error);
+
+  const http = Number(info.status);
+  const httpOk = Number.isInteger(http) && http >= 400 && http < 600;
+  const recibo = recibos.find((c) => c !== String(http)) || "";
+  const resposta = info.resposta?.response?.message ?? info.resposta?.message ?? info.resposta;
+  let corpo = textoCurto(info.message) || textoCurto(resposta);
+  if (corpo === recibo || corpo === `código ${recibo}` || (httpOk && corpo === String(http))) corpo = "";
+
+  const partes = [];
+  if (recibo) partes.push(`código ${recibo}`);
+  else if (httpOk) partes.push(`código ${http}`);
+  else if (String(info.status || "").toUpperCase() === "ERROR") partes.push("ERROR");
+  if (corpo) partes.push(corpo);
+  return partes.join(" — ").slice(0, 500);
+}
+
+/** 400 da Evolution ou recibo ERROR. A segunda falha da mesma tentativa não entra. */
+function falhaQueRetenta(erro) {
+  if (!erro || typeof erro !== "object" || erro.retentou) return false;
+  if (Number(erro.status) === 400) return true;
+  return String(erro.status || "").trim().toUpperCase() === "ERROR";
+}
+
+/**
+ * Uma chamada e, se vier 400 ou ERROR, mais uma com o mesmo JID completo.
+ * A segunda falha é relançada com `retentou` — quem chamou não tenta de novo.
+ */
+async function enviarComRetentativa(destino, enviar) {
+  const jid = paraDestino(destino);
+  if (!jid) throw new Error("Número de destino inválido.");
+  try {
+    return await enviar(jid);
+  } catch (erro) {
+    if (!falhaQueRetenta(erro)) throw erro;
+    try {
+      return await enviar(jid);
+    } catch (segunda) {
+      if (segunda && typeof segunda === "object") segunda.retentou = true;
+      throw segunda;
+    }
+  }
+}
+
+/**
+ * Recibo ERROR de uma mensagem que este processo acabou de enviar: vale uma
+ * nova tentativa com o JID completo. Foto de catálogo não reenvia o texto da
+ * oferta (são mensagens diferentes; a foto falhar não falha o texto). Sem
+ * corpo, sem segunda mensagem, e nunca uma terceira.
+ */
+function deveRetentarEntrega({
+  id,
+  status,
+  deSaida = true,
+  retentativa = false,
+  jaRetentou = false,
+  fotoDeOferta = false,
+  enviadaNestaSessao = true,
+  corpo = "",
+} = {}) {
+  if (!id || !deSaida || !enviadaNestaSessao) return false;
+  if (retentativa || jaRetentou || fotoDeOferta) return false;
+  const s = String(status || "").toLowerCase();
+  if (s !== "error" && s !== "failed") return false;
+  return Boolean(String(corpo || "").trim());
 }
 
 /** Escolhe entre remoteJid e remoteJidAlt o que tem o número de telefone. */
@@ -268,6 +397,15 @@ function normalizarMensagem(record, { lidParaNumero, numeroDaLoja } = {}) {
   const fromMe = Boolean(record.key.fromMe);
   const numero = chatId.endsWith("@c.us") ? digitos(chatId) : null;
   const statusCru = record.status || record.MessageUpdate?.[record.MessageUpdate.length - 1]?.status || null;
+  const status = statusDoPainel(statusCru, fromMe);
+  const motivoFalha =
+    status === "failed"
+      ? motivoDaFalha({
+          status: statusCru,
+          messageStubParameters: record.messageStubParameters,
+          error: record.error,
+        }) || undefined
+      : undefined;
 
   return {
     id: String(record.key.id),
@@ -290,7 +428,8 @@ function normalizarMensagem(record, { lidParaNumero, numeroDaLoja } = {}) {
     // na primeira vez e guarda em disco). O painel só precisa do caminho.
     mediaUrl: conteudo.mediaType ? `/midia/${encodeURIComponent(String(record.key.id))}` : null,
     videoRecado: conteudo.videoRecado || undefined,
-    status: statusDoPainel(statusCru, fromMe),
+    status,
+    motivoFalha,
     chave: { id: String(record.key.id), remoteJid: record.key.remoteJid, fromMe },
     citada: extrairCitada(record, conteudo, numeroDaLoja),
   };
@@ -401,6 +540,10 @@ module.exports = {
   ehConversaDireta,
   paraChatId,
   paraDestino,
+  motivoDaFalha,
+  falhaQueRetenta,
+  enviarComRetentativa,
+  deveRetentarEntrega,
   jidDaChave,
   extrairConteudo,
   normalizarMensagem,

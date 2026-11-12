@@ -12,8 +12,10 @@
 //   2. o script troca exatamente o trecho, e o arquivo remendado continua
 //      sendo JavaScript válido;
 //   3. no arquivo REMENDADO, o erro é registrado e a fila segue;
-//   4. o script falha (build vermelho) se o trecho aparecer 0 ou 2 vezes, ou
-//      se o dist/ da Evolution embutir o Baileys.
+//   4. o script falha (build vermelho) se o trecho aparecer 2 vezes, ou se
+//      sumir sem o catch no lugar, ou se o dist/ da Evolution embutir o
+//      Baileys. Se o catch já existir (rc10+, e o 7.0.0-rc13 da imagem),
+//      o script sai 0 sem mexer no arquivo.
 //
 // Para usar um pacote já baixado: BAILEYS_TGZ=/caminho/baileys-7.0.0-rc.9.tgz
 
@@ -156,10 +158,12 @@ test("remendo do Baileys contra o pacote real 7.0.0-rc.9", { skip: pular }, asyn
     assert.deepStrictEqual(erros, ["processing offline message"]);
   });
 
-  await t.test("rodar de novo no arquivo já remendado falha (o trecho não está mais lá)", () => {
+  await t.test("rodar de novo no arquivo já remendado é no-op (a correção já está lá)", () => {
+    const antes = fs.readFileSync(arquivoDaFila(raizRemendada), "utf8");
     const r = spawnSync(process.execPath, [SCRIPT, raizRemendada], { encoding: "utf8" });
-    assert.strictEqual(r.status, 1);
-    assert.match(r.stderr, /aparece 0 vez/);
+    assert.strictEqual(r.status, 0, r.stderr);
+    assert.match(r.stdout, /no-op/);
+    assert.strictEqual(fs.readFileSync(arquivoDaFila(raizRemendada), "utf8"), antes);
   });
 
   await t.test("trecho repetido também falha", () => {
@@ -190,6 +194,53 @@ test("remendo do Baileys contra o pacote real 7.0.0-rc.9", { skip: pular }, asyn
     const texto = fs.readFileSync(path.join(outra, "lib", "Socket", "messages-recv.js"), "utf8");
     assert.ok(texto.includes("onUnexpectedError(err, `processing offline ${type}`)"));
   });
+});
+
+const INTEGRIDADE_RC13 =
+  "sha512-v8k74K8B5R7WNYGa26MyJAYEu3Wc4BSuK01QaK8lr30lhE8Nga31nWNu8KN0NDDt+Fsvkq4SQFFI8Q13ghjKmA==";
+
+function obterRc13() {
+  try {
+    const nome = execFileSync("npm", ["pack", "baileys@7.0.0-rc13", "--pack-destination", tmp, "--silent"], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+      timeout: 120_000,
+    })
+      .trim()
+      .split("\n")
+      .pop();
+    return path.join(tmp, nome);
+  } catch {
+    return null;
+  }
+}
+
+const tgz13 = obterRc13();
+
+test("Baileys 7.0.0-rc13 já tem o catch: o remendo é no-op e não quebra o build", { skip: tgz13 ? false : "sem rede para o npm pack do rc13" }, () => {
+  const hash = "sha512-" + crypto.createHash("sha512").update(fs.readFileSync(tgz13)).digest("base64");
+  assert.strictEqual(hash, INTEGRIDADE_RC13);
+  const raiz = path.join(tmp, "rc13", "evolution");
+  const pacote = path.join(tmp, "pacote-rc13");
+  fs.mkdirSync(pacote, { recursive: true });
+  execFileSync("tar", ["-xzf", tgz13, "-C", pacote]);
+  fs.mkdirSync(path.join(raiz, "node_modules"), { recursive: true });
+  fs.cpSync(path.join(pacote, "package"), path.join(raiz, "node_modules", "baileys"), { recursive: true });
+  fs.mkdirSync(path.join(raiz, "dist"), { recursive: true });
+  fs.writeFileSync(path.join(raiz, "dist", "main.js"), 'const b=require("baileys");module.exports=b;');
+  const proc = path.join(raiz, "node_modules", "baileys", "lib", "Utils", "offline-node-processor.js");
+  const recv = path.join(raiz, "node_modules", "baileys", "lib", "Socket", "messages-recv.js");
+  const antesProc = fs.readFileSync(proc, "utf8");
+  const antesRecv = fs.readFileSync(recv, "utf8");
+  assert.match(antesProc, /await nodeProcessor\(node\)\.catch\(/);
+  assert.match(antesProc, /tctoken|processing offline/);
+  const envio = fs.readFileSync(path.join(raiz, "node_modules", "baileys", "lib", "Socket", "messages-send.js"), "utf8");
+  assert.match(envio, /tctoken/);
+  const r = spawnSync(process.execPath, [SCRIPT, raiz], { encoding: "utf8" });
+  assert.strictEqual(r.status, 0, r.stderr);
+  assert.match(r.stdout, /no-op/);
+  assert.strictEqual(fs.readFileSync(proc, "utf8"), antesProc);
+  assert.strictEqual(fs.readFileSync(recv, "utf8"), antesRecv);
 });
 
 test.after(() => fs.rmSync(tmp, { recursive: true, force: true }));

@@ -122,6 +122,8 @@ export interface CrmMensagem {
   } | null;
   produto?: CrmProdutoResumo | null;
   status?: "pending" | "sent" | "delivered" | "read" | "failed" | "deleted";
+  /** Por que o envio falhou (código 463, corpo do 400, ERROR…). Só quando status é failed. */
+  motivoFalha?: string | null;
   // ---- Fase 1 do WhatsApp (whatsapp-server; desenho em components/crm/mensagem-extras.tsx) ----
   /** Número de sequência do banco da loja: o painel guarda o maior e pede o que veio depois (panel:desde). */
   seq?: number;
