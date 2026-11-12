@@ -1,6 +1,8 @@
 import { createHash, createHmac, timingSafeEqual } from "crypto";
+import { cookies } from "next/headers";
 import { isPainelAuthenticated } from "@/lib/painel-auth";
-import { getVendedorLogado } from "@/lib/vendedor-auth";
+import { VENDEDOR_COOKIE_NAME, getVendedorLogado } from "@/lib/vendedor-auth";
+import { lerSessaoVendedor } from "@/lib/vendedor-sessao";
 
 // ============================================================
 // Ingresso do servidor de WhatsApp.
@@ -71,6 +73,13 @@ export async function ticketDaSessao(): Promise<{ ticket: string; exp: number; p
   if (await isPainelAuthenticated()) {
     const t = emitirTicket({ papel: "admin" });
     return t ? { ...t, papel: "admin" } : null;
+  }
+  // Página pessoal: o PIN já foi conferido e a sessão não carrega o PIN.
+  const store = await cookies();
+  const sessaoPin = lerSessaoVendedor(store.get(VENDEDOR_COOKIE_NAME)?.value);
+  if (sessaoPin) {
+    const t = emitirTicket({ papel: "vendedor", vendedor: sessaoPin.slug });
+    return t ? { ...t, papel: "vendedor" } : null;
   }
   const vendedor = await getVendedorLogado();
   if (vendedor) {

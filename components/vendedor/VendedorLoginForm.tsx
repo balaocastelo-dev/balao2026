@@ -8,12 +8,8 @@ type VendedorLoginFormProps = {
   cargo?: string;
   /** Número da loja, já formatado para leitura. Ex.: "(19) 98751-0267" */
   numeroLoja?: string;
-  /** Para onde ir depois de entrar. Ex.: "/brendon/atender". */
+  /** Para onde ir depois de entrar. Ex.: "/gabriel". */
   redirectTo?: string;
-  /** Falso quando a variável de ambiente da senha ainda não foi definida. */
-  senhaConfigurada?: boolean;
-  /** Nome dessa variável, para o aviso dizer exatamente o que falta. */
-  nomeVariavelSenha?: string;
 };
 
 export default function VendedorLoginForm({
@@ -22,10 +18,8 @@ export default function VendedorLoginForm({
   cargo,
   numeroLoja,
   redirectTo,
-  senhaConfigurada = true,
-  nomeVariavelSenha,
 }: VendedorLoginFormProps) {
-  const [senha, setSenha] = useState("");
+  const [pin, setPin] = useState("");
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState("");
 
@@ -38,18 +32,18 @@ export default function VendedorLoginForm({
       const resposta = await fetch("/api/vendedor/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slug, senha }),
+        body: JSON.stringify({ slug, pin }),
       });
 
       const dados = (await resposta.json()) as { success?: boolean; error?: string };
 
       if (!resposta.ok || !dados.success) {
-        setErro(dados.error || "Senha incorreta.");
-        setSenha("");
+        setErro(dados.error || "PIN incorreto.");
+        setPin("");
         return;
       }
 
-      // Recarrega para o servidor montar a página já autenticada.
+      // Recarrega para o servidor montar o CRM já no nome deste vendedor.
       window.location.href = redirectTo || `/${slug}`;
     } catch {
       setErro("Sem conexão com o servidor. Confira a internet e tente de novo.");
@@ -71,48 +65,29 @@ export default function VendedorLoginForm({
             <h1 className="mt-4 text-xl font-bold text-[#202124]">Olá, {nome}</h1>
             {cargo && <p className="mt-0.5 text-xs text-[#5f6368]">{cargo}</p>}
             <p className="mt-3 text-sm text-[#5f6368]">
-              Digite sua senha para abrir o atendimento.
+              Digite seu PIN para abrir o atendimento.
             </p>
           </div>
-
-          {!senhaConfigurada && (
-            <div className="mt-5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5">
-              <p className="text-xs font-bold text-amber-900">
-                ⚠️ Acesso ainda não liberado
-              </p>
-              <p className="mt-1 text-[11px] leading-relaxed text-amber-800">
-                A senha deste vendedor não foi definida na hospedagem, então
-                nenhuma senha vai funcionar por enquanto.
-                {nomeVariavelSenha && (
-                  <>
-                    {" "}
-                    Quem administra o site precisa criar a variável{" "}
-                    <code className="rounded bg-amber-100 px-1 font-mono">
-                      {nomeVariavelSenha}
-                    </code>
-                    .
-                  </>
-                )}
-              </p>
-            </div>
-          )}
 
           <form onSubmit={enviar} className="mt-6 space-y-3">
             <div>
               <label
-                htmlFor="senha-vendedor"
+                htmlFor="pin-vendedor"
                 className="mb-1.5 block text-xs font-semibold text-[#5f6368]"
               >
-                Sua senha
+                PIN
               </label>
               <input
-                id="senha-vendedor"
+                id="pin-vendedor"
+                name="pin"
                 type="password"
+                inputMode="numeric"
+                autoComplete="off"
                 autoFocus
-                autoComplete="current-password"
-                value={senha}
-                onChange={(e) => setSenha(e.target.value)}
-                placeholder="••••••••"
+                maxLength={6}
+                value={pin}
+                onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                placeholder="••••"
                 className="w-full rounded-lg border border-[#e3e3e3] px-3 py-2.5 text-center text-lg tracking-widest outline-none transition-colors focus:border-[#0f9d58]"
               />
             </div>
@@ -128,7 +103,7 @@ export default function VendedorLoginForm({
 
             <button
               type="submit"
-              disabled={carregando || senha.length === 0}
+              disabled={carregando || pin.length < 4}
               className="w-full cursor-pointer rounded-lg bg-[#0f9d58] py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#0a6e3d] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {carregando ? "Entrando…" : "Entrar no atendimento"}
@@ -146,7 +121,7 @@ export default function VendedorLoginForm({
               </>
             )}
             <br />
-            Cada vendedor entra com a própria senha, no próprio computador.
+            Cada vendedor entra com o próprio PIN, no próprio computador.
           </p>
         </div>
       </div>

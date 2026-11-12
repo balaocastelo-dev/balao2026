@@ -1,46 +1,56 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import VendedorLoginForm from "@/components/vendedor/VendedorLoginForm";
 import VendedorWorkspace from "@/components/vendedor/VendedorWorkspace";
-import { isVendedorAutenticado } from "@/lib/vendedor-auth";
-import {
-  getVendedorPorSlug,
-  temSenhaConfigurada,
-  vendedorPublico,
-} from "@/lib/vendedores";
+import { resolverVendedor, vendedorAutenticadoNaPagina } from "@/lib/vendedor-pagina";
 import { SITE_CONFIG } from "@/lib/config";
 
 /**
- * Página pessoal de atendimento de um vendedor.
+ * Página pessoal de atendimento.
  *
- * Cada rota `app/<slug>/page.tsx` é só uma casca chamando este componente —
- * assim as seis páginas não saem de sincronia quando algo muda aqui.
+ * O endereço é o slug do nome no CRM (www.balao.info/gabriel). Sem o PIN
+ * daquele vendedor, fica na tela de entrada. Com o PIN, o CRM abre já
+ * atendendo como ele, com a assinatura dele e o filtro "Meus".
+ * A senha de administração do painel não entra aqui.
  */
 export default async function PaginaVendedor({ slug }: { slug: string }) {
-  const vendedor = getVendedorPorSlug(slug);
+  const limpo = String(slug || "").trim().toLowerCase();
+  if (slug !== limpo && limpo) {
+    const canonico = await resolverVendedor(limpo);
+    if (canonico) redirect(`/${canonico.slug}`);
+    notFound();
+  }
+
+  const vendedor = await resolverVendedor(limpo);
   if (!vendedor) notFound();
 
-  const autenticado = await isVendedorAutenticado(slug);
+  const autenticado = await vendedorAutenticadoNaPagina(vendedor);
 
   if (!autenticado) {
     return (
-      <VendedorLoginForm
-        slug={vendedor.slug}
-        nome={vendedor.nome}
-        cargo={vendedor.cargo}
-        redirectTo={`/${vendedor.slug}`}
-        numeroLoja={SITE_CONFIG.whatsapp.display}
-        // Sem a variável de ambiente, nenhuma senha entra. Avisar isso na tela
-        // evita o vendedor ficar tentando senha achando que errou a dele.
-        senhaConfigurada={temSenhaConfigurada(vendedor)}
-        nomeVariavelSenha={vendedor.envSenha}
-      />
+      <div data-pagina-vendedor="">
+        <VendedorLoginForm
+          slug={vendedor.slug}
+          nome={vendedor.nome}
+          cargo={vendedor.cargo}
+          redirectTo={`/${vendedor.slug}`}
+          numeroLoja={SITE_CONFIG.whatsapp.display}
+        />
+      </div>
     );
   }
 
   return (
-    <VendedorWorkspace
-      vendedor={vendedorPublico(vendedor)}
-      caminho={`/${vendedor.slug}`}
-    />
+    <div data-pagina-vendedor="" className="h-full min-h-0">
+      <VendedorWorkspace
+        vendedor={{
+          id: vendedor.id,
+          slug: vendedor.slug,
+          nome: vendedor.nome,
+          cargo: vendedor.cargo,
+          assinatura: vendedor.assinatura,
+        }}
+        caminho={`/${vendedor.slug}`}
+      />
+    </div>
   );
 }

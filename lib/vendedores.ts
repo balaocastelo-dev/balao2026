@@ -10,11 +10,11 @@
 //   - a SUA assinatura automática nas mensagens;
 //   - o filtro "Meus" e as conversas atribuídas a ele.
 //
-// Para adicionar um vendedor novo:
-//   1. acrescente o registro nesta lista;
-//   2. crie a pasta `app/<slug>/page.tsx` copiando outra existente;
-//   3. espelhe o `id` e o `nome` em `whatsapp-server/vendedores-fixos.json`;
-//   4. defina a variável de ambiente da senha na hospedagem e publique.
+// Vendedor novo não passa por esta lista. Quem é cadastrado na aba
+// Vendedores do CRM (nome, cargo, assinatura e PIN) ganha a página
+// www.balao.info/<slug> na hora, sem publicar o site de novo. O slug sai
+// do nome. Esta lista só segura a tela de PIN dos que já estavam aqui
+// quando o servidor do WhatsApp não responde.
 // ============================================================
 
 export interface VendedorRegistro {
