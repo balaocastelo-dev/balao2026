@@ -9,7 +9,7 @@
 
 import type { CrmMensagem } from "@/types/crm";
 
-type Extras = Pick<CrmMensagem, "seq" | "reacoes" | "editadaEm" | "apagada" | "citada" | "ligacao" | "videoRecado">;
+type Extras = Pick<CrmMensagem, "seq" | "reacoes" | "editadaEm" | "apagada" | "citada" | "ligacao" | "videoRecado" | "motivoFalha">;
 
 /** Os campos novos que vêm do servidor, só os que vieram (para não apagar o que a tela já tinha). */
 export function extrasDaMensagem(sm: Record<string, unknown> | null | undefined): Partial<Extras> {
@@ -22,6 +22,7 @@ export function extrasDaMensagem(sm: Record<string, unknown> | null | undefined)
   if (sm.citada && typeof sm.citada === "object") saida.citada = sm.citada as Extras["citada"];
   if (sm.ligacao && typeof sm.ligacao === "object") saida.ligacao = sm.ligacao as Extras["ligacao"];
   if (sm.videoRecado === true) saida.videoRecado = true;
+  if (typeof sm.motivoFalha === "string" && sm.motivoFalha.trim()) saida.motivoFalha = sm.motivoFalha.trim();
   return saida;
 }
 
@@ -133,6 +134,40 @@ export function Reacoes({ m }: { m: CrmMensagem }) {
         </span>
       ))}
     </div>
+  );
+}
+
+/** ✓, ✓✓ ou "Falhou", com o motivo em texto pequeno e no tooltip. */
+export function SeloDeEnvio({ status, motivo }: { status?: CrmMensagem["status"]; motivo?: string | null }) {
+  const falhou = status === "failed";
+  const motivoTexto = falhou ? String(motivo || "").trim() : "";
+  const titulo = falhou
+    ? motivoTexto
+      ? `Falha no envio: ${motivoTexto}`
+      : "Falha no envio — não chegou ao WhatsApp do cliente"
+    : status === "pending"
+      ? "Enviando…"
+      : status === "read"
+        ? "Lida"
+        : status === "delivered"
+          ? "Entregue"
+          : "Enviada ao WhatsApp";
+  const classe = falhou
+    ? "text-red-600 font-bold cursor-help"
+    : status === "read"
+      ? "text-[#53bdeb] cursor-help"
+      : "text-[#5f6368] cursor-help";
+  const simbolo =
+    falhou ? "⚠ Falhou" : status === "pending" ? "🕐" : status === "read" || status === "delivered" ? "✓✓" : "✓";
+  return (
+    <span title={titulo} className={`inline-flex flex-col items-end ${classe}`}>
+      <span>{simbolo}</span>
+      {motivoTexto ? (
+        <span className="max-w-[220px] text-[10px] font-normal leading-tight text-red-700 whitespace-normal text-right line-clamp-4">
+          {motivoTexto}
+        </span>
+      ) : null}
+    </span>
   );
 }
 

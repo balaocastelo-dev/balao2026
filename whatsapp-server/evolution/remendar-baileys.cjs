@@ -22,17 +22,20 @@
 //
 //     await nodeProcessor(node).catch(err => deps.onUnexpectedError(err, `processing offline ${type}`));
 //
-// Nenhuma versão lançada da Evolution traz essa correção. Este script aplica
-// exatamente a mesma troca no arquivo compilado que está dentro da imagem.
+// No Baileys 7.0.0-rc.9 (o da imagem oficial) este script aplica exatamente
+// a mesma troca. A partir do rc10 a correção já vem em
+// lib/Utils/offline-node-processor.js — aí o script vira no-op e o build
+// segue. A imagem da loja instala o 7.0.0-rc13 por causa do tctoken (erro
+// 463); sem o no-op, o build quebraria numa correção que já está feita.
 //
-// Ele é desconfiado de propósito — se qualquer coisa não for como esperado, o
-// BUILD falha e o deploy nem troca o container (a Evolution antiga continua
-// no ar):
-//   - o trecho tem de aparecer EXATAMENTE uma vez (nem zero, nem dois);
+// Ele continua desconfiado: se não achar nem o trecho vulnerável nem o
+// catch, o BUILD falha e o deploy nem troca o container (a Evolution antiga
+// continua no ar):
+//   - o trecho vulnerável, se existir, tem de aparecer EXATAMENTE uma vez;
 //   - depois de gravar, relê o arquivo e confere a troca;
 //   - confere que o código da Evolution (dist/) não embute uma cópia própria
 //     do Baileys, que ficaria sem remendo;
-//   - remenda toda cópia do Baileys que existir em node_modules.
+//   - olha toda cópia do Baileys que existir em node_modules.
 //
 // Uso: node remendar-baileys.cjs [raiz-da-evolution]   (padrão: /evolution)
 
@@ -115,6 +118,50 @@ function arquivosJs(pasta) {
   return saida;
 }
 
+function correcaoJaEsta(texto) {
+  return texto.includes("await nodeProcessor(node).catch(") && texto.includes("processing offline");
+}
+
+const ARQUIVOS_DA_FILA = [
+  path.join("lib", "Socket", "messages-recv.js"),
+  path.join("lib", "Utils", "offline-node-processor.js"),
+];
+
+function remendarUmArquivo(arquivo, versao, raiz) {
+  const original = fs.readFileSync(arquivo, "utf8");
+  const vezes = contar(original, TRECHO_ANTIGO);
+  const corrigido = correcaoJaEsta(original);
+  if (vezes === 0) return { arquivo, versao, noop: corrigido, ausente: !corrigido };
+  if (vezes !== 1) {
+    falhar(
+      `em ${path.relative(raiz, arquivo)} (Baileys ${versao}) o trecho "${TRECHO_ANTIGO}" aparece ${vezes} vez(es); ` +
+        `esperava exatamente 1.`
+    );
+  }
+  // O laço offline tem de estar onde imaginamos: o trecho fica dentro do
+  // `while` que lê `nodes.shift()`, com `onUnexpectedError` e `type` à mão.
+  const pos = original.indexOf(TRECHO_ANTIGO);
+  const antes = original.slice(Math.max(0, pos - 600), pos);
+  if (!/nodes\.shift\(\)/.test(antes) || !/const \{ type, node \}/.test(antes)) {
+    falhar(`o trecho em ${path.relative(raiz, arquivo)} não está dentro do laço da fila offline`);
+  }
+  if (!/onUnexpectedError/.test(original.slice(0, pos))) {
+    falhar(`onUnexpectedError não está disponível antes do trecho em ${path.relative(raiz, arquivo)}`);
+  }
+
+  const remendado = original.replace(TRECHO_ANTIGO, TRECHO_NOVO);
+  fs.writeFileSync(arquivo, remendado);
+
+  const relido = fs.readFileSync(arquivo, "utf8");
+  if (contar(relido, TRECHO_ANTIGO) !== 0 || contar(relido, TRECHO_NOVO) !== 1) {
+    falhar(`a troca em ${path.relative(raiz, arquivo)} não ficou gravada como esperado`);
+  }
+  if (relido.length !== original.length - TRECHO_ANTIGO.length + TRECHO_NOVO.length) {
+    falhar(`o tamanho de ${path.relative(raiz, arquivo)} depois do remendo não confere`);
+  }
+  return { arquivo, versao, aplicado: true };
+}
+
 function remendar(raiz) {
   const nodeModules = path.join(raiz, "node_modules");
   if (!fs.existsSync(nodeModules)) falhar(`não achei ${nodeModules}`);
@@ -145,50 +192,37 @@ function remendar(raiz) {
     );
   }
 
-  const feitos = [];
+  const aplicados = [];
+  const noops = [];
   for (const { pasta, versao } of copias) {
-    const arquivo = path.join(pasta, "lib", "Socket", "messages-recv.js");
-    if (!fs.existsSync(arquivo)) falhar(`o Baileys ${versao} em ${pasta} não tem lib/Socket/messages-recv.js`);
-    const original = fs.readFileSync(arquivo, "utf8");
-    const vezes = contar(original, TRECHO_ANTIGO);
-    if (vezes !== 1) {
+    const arquivos = ARQUIVOS_DA_FILA.map((rel) => path.join(pasta, rel)).filter((a) => fs.existsSync(a));
+    if (!arquivos.length) {
+      falhar(`o Baileys ${versao} em ${pasta} não tem a fila offline (messages-recv.js nem offline-node-processor.js)`);
+    }
+    const resultados = arquivos.map((a) => remendarUmArquivo(a, versao, raiz));
+    const destaCopia = resultados.filter((r) => r.aplicado);
+    const jaTinha = resultados.filter((r) => r.noop);
+    if (!destaCopia.length && !jaTinha.length) {
       falhar(
-        `em ${path.relative(raiz, arquivo)} (Baileys ${versao}) o trecho "${TRECHO_ANTIGO}" aparece ${vezes} vez(es); ` +
-          `esperava exatamente 1. ` +
-          (versao !== VERSAO_CONHECIDA
-            ? `Esta versão não é a ${VERSAO_CONHECIDA}: confira se ela já traz a correção e, se trouxer, tire este remendo.`
-            : "O arquivo não é o que este remendo conhece.")
+        `Baileys ${versao} em ${pasta} não tem o trecho vulnerável nem o catch da fila offline. ` +
+          `Esperava o ${VERSAO_CONHECIDA} (para remendar) ou o rc10+ (no-op).`
       );
     }
-    // O laço offline tem de estar onde imaginamos: o trecho fica dentro do
-    // `while` que lê `nodes.shift()`, com `onUnexpectedError` e `type` à mão.
-    const pos = original.indexOf(TRECHO_ANTIGO);
-    const antes = original.slice(Math.max(0, pos - 600), pos);
-    if (!/nodes\.shift\(\)/.test(antes) || !/const \{ type, node \}/.test(antes)) {
-      falhar(`o trecho em ${path.relative(raiz, arquivo)} não está dentro do laço da fila offline`);
-    }
-    if (!/onUnexpectedError/.test(original.slice(0, pos))) {
-      falhar(`onUnexpectedError não está disponível antes do trecho em ${path.relative(raiz, arquivo)}`);
-    }
-
-    const remendado = original.replace(TRECHO_ANTIGO, TRECHO_NOVO);
-    fs.writeFileSync(arquivo, remendado);
-
-    // Confere o que ficou gravado, não o que achamos que gravamos.
-    const relido = fs.readFileSync(arquivo, "utf8");
-    if (contar(relido, TRECHO_ANTIGO) !== 0 || contar(relido, TRECHO_NOVO) !== 1) {
-      falhar(`a troca em ${path.relative(raiz, arquivo)} não ficou gravada como esperado`);
-    }
-    if (relido.length !== original.length - TRECHO_ANTIGO.length + TRECHO_NOVO.length) {
-      falhar(`o tamanho de ${path.relative(raiz, arquivo)} depois do remendo não confere`);
-    }
-    feitos.push(`${path.relative(raiz, arquivo)} (Baileys ${versao})`);
+    for (const r of destaCopia) aplicados.push(`${path.relative(raiz, r.arquivo)} (Baileys ${versao})`);
+    if (jaTinha.length) noops.push(`${versao} em ${path.relative(raiz, pasta)}`);
   }
 
-  console.log(`  Remendo do Baileys aplicado em ${feitos.length} arquivo(s):`);
-  for (const f of feitos) console.log(`    - ${f}`);
-  console.log("  A fila offline agora registra a mensagem que não decodifica e segue para a próxima.");
-  return feitos;
+  if (aplicados.length) {
+    console.log(`  Remendo do Baileys aplicado em ${aplicados.length} arquivo(s):`);
+    for (const f of aplicados) console.log(`    - ${f}`);
+    console.log("  A fila offline agora registra a mensagem que não decodifica e segue para a próxima.");
+  }
+  if (noops.length && !aplicados.length) {
+    console.log(`  Baileys já traz a correção da fila offline. Remendo em no-op (${noops.length} cópia(s)).`);
+  } else if (noops.length) {
+    console.log(`  Correção já presente (no-op) em: ${noops.join(", ")}.`);
+  }
+  return aplicados;
 }
 
 if (require.main === module) {

@@ -1,17 +1,22 @@
-# Evolution API 2.3.7 com o remendo da fila offline do Baileys.
+# Evolution API 2.3.7 com dois ajustes, e só estes.
 #
-# É a MESMA imagem oficial, com uma linha trocada dentro do Baileys 7.0.0-rc.9
-# (o que travou o recebimento em 29/09 — remendar-baileys.cjs explica). Nada
-# mais muda: mesmas variáveis, mesmos volumes, mesmo comando de partida.
+# 1. Baileys 7.0.0-rc13 no lugar do 7.0.0-rc.9 da imagem oficial. O rc.9 não
+#    manda o tctoken; o recibo do WhatsApp volta com erro 463 e o CRM marca
+#    "Falhou" (Baileys #2441, Evolution #2638). O rc13 manda.
+# 2. O remendo da fila offline (apagão de 29/09, remendar-baileys.cjs). No
+#    rc13 a correção já está em lib/Utils/offline-node-processor.js, então o
+#    script vira no-op. Se a cópia ainda for o rc.9, ele aplica o catch. Se
+#    não achar nem o trecho vulnerável nem o catch, o build falha e o
+#    container que está no ar não é trocado.
 #
-# Conferido na imagem oficial (camadas baixadas do Docker Hub em 11/10/2026):
-# o Dockerfile da tag 2.3.7 copia node_modules para /evolution/node_modules, o
-# Baileys mora em /evolution/node_modules/baileys (uma cópia só) e o dist/ da
-# Evolution faz require("baileys") — não embute o código. O script confere
-# tudo isso de novo a cada build e FALHA se algo mudar.
+# Quem recria o container é o dono, depois do merge. Este arquivo não faz deploy.
 FROM evoapicloud/evolution-api:v2.3.7
+
+WORKDIR /evolution
+RUN npm install baileys@7.0.0-rc13 --no-save --no-audit --no-fund
 
 COPY remendar-baileys.cjs /tmp/remendar-baileys.cjs
 RUN node /tmp/remendar-baileys.cjs /evolution && rm /tmp/remendar-baileys.cjs
 
-LABEL balao.remendo="baileys-7.0.0-rc.9 fila offline com catch (igual ao rc10)"
+LABEL balao.baileys="7.0.0-rc13"
+LABEL balao.remendo="fila offline: aplica no rc.9, no-op quando o catch já existe"

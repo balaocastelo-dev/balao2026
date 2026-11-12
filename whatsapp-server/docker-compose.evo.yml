@@ -65,10 +65,10 @@ services:
     mem_limit: 256m
 
   evolution:
-    # A imagem oficial evoapicloud/evolution-api:v2.3.7 com UMA linha trocada
-    # no Baileys: a fila offline que travava o recebimento (apagão de 29/09).
-    # Ver evolution/Dockerfile e evolution/remendar-baileys.cjs. O build falha
-    # se o remendo não encaixar — e aí a Evolution antiga continua no ar.
+    # A imagem oficial evoapicloud/evolution-api:v2.3.7 com o Baileys
+    # 7.0.0-rc13 (o rc.9 não manda tctoken e o recibo volta 463) e o remendo
+    # da fila offline, que nesse Baileys vira no-op. Ver evolution/Dockerfile.
+    # O build falha se o remendo não encaixar — e aí a Evolution antiga continua no ar.
     build:
       context: ./evolution
     image: balao-evolution:2.3.7-remendo
