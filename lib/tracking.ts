@@ -91,6 +91,42 @@ export function trackLeadEvent(
   };
 
   trackEvent(event, eventPayload);
+
+  // Eventos recomendados do GA4/Google Ads. O rastreador interno continua
+  // recebendo os nomes detalhados acima, enquanto o Google recebe sinais
+  // padronizados que podem ser importados como conversões.
+  const standardEvent =
+    event === "lead_form_success"
+      ? "generate_lead"
+      : event === "whatsapp_click" || event === "phone_click" || event === "email_click"
+        ? "contact"
+        : null;
+
+  if (standardEvent) {
+    const standardPayload = cleanPayload({
+      ...payload,
+      event_category: "lead",
+      method:
+        event === "whatsapp_click"
+          ? "WhatsApp"
+          : event === "phone_click"
+            ? "Telefone"
+            : event === "email_click"
+              ? "E-mail"
+              : "Formulário",
+      value,
+      currency: "BRL",
+    });
+
+    if (Array.isArray(window.dataLayer)) {
+      window.dataLayer.push({ event: standardEvent, ...standardPayload });
+    }
+
+    if (typeof window.gtag === "function") {
+      window.gtag("event", standardEvent, standardPayload);
+    }
+  }
+
   persistTrackingEvent(event, cleanPayload(eventPayload));
 }
 
