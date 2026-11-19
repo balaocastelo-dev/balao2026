@@ -1,261 +1,233 @@
-import type { Artigo, Fonte } from "@/lib/blog/tipos";
-
-const TAKETWO: Fonte = {
-  nome: "Take-Two Interactive — comunicado de pré-venda de Grand Theft Auto VI",
-  url: "https://taketwointeractivesoftwareinc.gcs-web.com/news-releases/news-release-details/rockstar-games-announces-pre-orders-grand-theft-auto-vi/",
-  data: "24 de junho de 2026",
-};
-
-const PLAYSTATION: Fonte = {
-  nome: "PlayStation — página de Grand Theft Auto VI",
-  url: "https://www.playstation.com/en-us/games/grand-theft-auto-vi/",
-  data: "consulta em 19 de novembro de 2026",
-};
-
-const ROCKSTARDATA: Fonte = {
-  nome: "Rockstar Games — “Grand Theft Auto VI is Now Set to Launch November 19, 2026”",
-  url: "https://www.rockstargames.com/newswire/article/ak3ak31a49a221/grand-theft-auto-vi-is-now-set-to-launch-november-19-2026",
-  data: "6 de novembro de 2025",
-};
+import type { Artigo } from "@/lib/blog/tipos";
 
 const artigo: Artigo = {
-  slug: "gta-6-preco-e-edicoes",
-  titulo: "Preço de GTA 6: Standard, Ultimate e o que vem junto",
-  resumo: "A Take-Two anunciou a Standard a 79,99 dólares e a Ultimate a 99,99 dólares. O valor em reais não está nesse comunicado.",
-  categoria: "noticias",
-  etiquetas: [
+  "slug": "gta-6-preco-e-edicoes",
+  "titulo": "Preço do GTA 6: Standard, Ultimate e o pacote Vintage",
+  "resumo": "O preço do GTA 6 anunciado pela Take-Two é US$ 79,99 na Standard e US$ 99,99 na Ultimate. Veja o que entra em cada edição e o que não vira preço em reais.",
+  "categoria": "noticias",
+  "etiquetas": [
     "GTA 6",
     "Preço",
     "Edições",
+    "Take-Two"
   ],
-  capa: {
-    src: "/blog/capas/gta-6-preco-e-edicoes.webp",
-    alt: "Console branco com o controle na frente.",
-    largura: 1536,
-    altura: 1024,
-    pronta: false,
+  "capa": {
+    "src": "/blog/capas/gta-6-preco-e-edicoes.webp",
+    "alt": "Console com o controle na frente, para quem compara o preço do GTA 6 nas duas edições.",
+    "largura": 1536,
+    "altura": 1024,
+    "pronta": false
   },
-  publicadoEm: "2026-11-15T12:00:00.000Z",
-  autor: {
-    nome: "Equipe Balão da Informática",
-    url: "/sobre-nos",
+  "publicadoEm": "2026-11-15T12:00:00.000Z",
+  "atualizadoEm": "2026-11-19T12:00:00.000Z",
+  "autor": {
+    "nome": "Balão da Informática Anchieta",
+    "cargo": "Loja de informática em Campinas",
+    "url": "/sobre-nos"
   },
-  origem: "autoral",
-  seo: {
-    titulo: "Preço de GTA 6: Standard e Ultimate",
-    palavrasChave: [
-      "preço gta 6",
-      "gta 6 standard",
+  "origem": "autoral",
+  "seo": {
+    "titulo": "Preço do GTA 6: edições e o que cada uma inclui",
+    "descricao": "O preço do GTA 6 anunciado pela Take-Two é US$ 79,99 na Standard e US$ 99,99 na Ultimate. Veja o que entra em cada edição e o que não vira preço em reais.",
+    "palavrasChave": [
+      "preço do gta 6",
       "gta 6 ultimate",
-      "pré-venda gta 6",
-    ],
+      "gta 6 standard",
+      "edições gta 6"
+    ]
   },
-  blocos: [
+  "blocos": [
     {
-      tipo: "paragrafo",
-      texto: "Quem procura o preço de GTA 6 encontra número em real e conversão feita em casa. O documento que fixa valor é outro. Em 24 de junho de 2026, a Take-Two anunciou a edição Standard a 79,99 dólares e a Ultimate a 99,99 dólares. O valor em reais não está nesse comunicado, e este texto não inventa a conversão.",
+      "tipo": "paragrafo",
+      "texto": "O preço do GTA 6 que a Take-Two publicou no comunicado de pré-venda, em 24 de junho de 2026, é de US$ 79,99 na edição padrão e US$ 99,99 na Ultimate Edition. Os dois valores são em dólar, para PlayStation 5 e Xbox Series X|S. O preço em reais é o da PlayStation Store, da Microsoft Store ou da loja onde você compra, e muda. Um número em real copiado de anúncio envelhece e vira promessa falsa."
     },
     {
-      tipo: "paragrafo",
-      texto: "O mesmo texto chama o jogo solo de maior e mais imersiva evolução da série, abre a pré-venda em 25 de junho de 2026 e descreve dois acréscimos de compra: o Vintage Vice City Pack antes de 20 de novembro de 2026, e um mês de GTA+ na pré-venda digital. Não descreve o miolo do pacote nem uma ficha completa do que separa as edições além do preço.",
+      "tipo": "resumo",
+      "titulo": "Resposta rápida",
+      "itens": [
+        "Standard: US$ 79,99, o jogo base. Ultimate: US$ 99,99, com veículos, armas, roupas e ações extras na história de Jason e Lucia.",
+        "Quem compra até 19 de novembro de 2026, pelo comunicado, leva o Vintage Vice City Pack. Reserva digital inclui um mês de GTA+.",
+        "Não existe preço de PC porque não existe versão de PC anunciada."
+      ]
     },
     {
-      tipo: "resumo",
-      itens: [
-        "**Standard: 79,99 dólares. Ultimate: 99,99 dólares.** Os dois números são do comunicado da Take-Two.",
-        "**Reais não estão no comunicado.** Converter o dólar por conta própria não cria preço oficial.",
-        "**Pré-venda desde 25 de junho de 2026.** A digital inclui um mês de GTA+.",
-        "**Antes de 20 de novembro entra o pacote.** O nome é Vintage Vice City Pack. O conteúdo não está descrito aqui.",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Preço do GTA 6: as duas edições do comunicado"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Qual número está no comunicado",
+      "tipo": "paragrafo",
+      "texto": "A edição padrão é o jogo. A Ultimate, no texto da Take-Two, “amplifica a experiência” com uma coleção exclusiva de veículos, armas, roupas e ações espalhadas pela história de Jason e Lucia. A diferença de US$ 20, no preço americano, é essa coleção. Não é um segundo mapa e não é um passe de um ano inteiro: é o que a frase lista. Se a loja brasileira descrever outro pacote, vale a descrição da loja na hora da compra, não um print antigo."
     },
     {
-      tipo: "paragrafo",
-      texto: "A [Take-Two](https://taketwointeractivesoftwareinc.gcs-web.com/news-releases/news-release-details/rockstar-games-announces-pre-orders-grand-theft-auto-vi/) publicou dois preços em dólares para o jogo de console, com lançamento em 19 de novembro de 2026 no PS5 e no Xbox Series X|S. Standard fica em 79,99 dólares. Ultimate fica em 99,99 dólares. Não há terceira edição nesse texto, e não há linha em real ao lado.",
+      "tipo": "paragrafo",
+      "texto": "A página da PlayStation repete o gancho da Ultimate: coleção exclusiva de veículos, armas, roupas e ações na história dos dois. O suporte da PlayStation ainda avisa que a melhoria da Standard para a Ultimate, tanto na digital quanto na caixa com código, só é vendida na PlayStation Store. Ou seja, quem comprou a padrão e se arrependeu não resolve isso na prateleira física."
     },
     {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/gta-6-preco-e-edicoes-precos.webp",
-        alt: "PlayStation 5 em pé, com o controle ao lado, numa mesa.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/gta-6-preco-e-edicoes-precos.webp",
+        "alt": "PlayStation 5 em pé com o controle ao lado, console do preço do GTA 6 anunciado.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "PlayStation 5 em pé, com o controle ao lado, numa mesa. Foto de Pascal (Pexels).",
+      "legenda": "PS5 na mesa: a edição que você escolhe é a do console, não uma caixa de PC."
     },
     {
-      tipo: "tabela",
-      titulo: "Preços e acréscimos no comunicado de junho",
-      colunas: [
-        "Item",
-        "O que está escrito",
+      "tipo": "tabela",
+      "titulo": "O que a Take-Two colocou no comunicado",
+      "colunas": [
+        "Edição ou bônus",
+        "Valor anunciado",
+        "O que o texto promete"
       ],
-      linhas: [
+      "linhas": [
         [
           "Standard",
-          "79,99 dólares",
+          "US$ 79,99",
+          "O jogo, campanha single-player"
         ],
         [
-          "Ultimate",
-          "99,99 dólares",
+          "Ultimate Edition",
+          "US$ 99,99",
+          "Veículos, armas, roupas e ações extras na história"
         ],
         [
-          "Pré-venda",
-          "Desde 25 de junho de 2026",
-        ],
-        [
-          "Pré-venda digital",
-          "Um mês de GTA+",
-        ],
-        [
-          "Antes de 20 nov 2026",
           "Vintage Vice City Pack",
+          "Incluso nas compras até 19/11/2026",
+          "Itens que citam a Vice City antiga, de quando o neon brilhava mais"
         ],
         [
-          "Valor em reais",
-          "Não está no comunicado",
-        ],
+          "Um mês de GTA+",
+          "Reserva digital",
+          "Mês grátis, já resgatável, com a biblioteca de jogos do GTA+"
+        ]
       ],
-      fonte: TAKETWO,
-      nota: "Preços em dólares, como no comunicado. Este texto não converte para real.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "No mesmo comunicado, a franquia, e não só GTA V, aparece com mais de 470 milhões de unidades vendidas. O número mede o histórico da marca. Não diz quantas pessoas vão comprar GTA 6 e não muda os 79,99 dólares. Também não produz um valor em reais. Tratar esse total como escassez seria acrescentar uma frase que a Take-Two não escreveu.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Por que esse número não vira real",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "O preço anunciado é o preço em dólares. Câmbio e imposto não estão no comunicado, e mudam sem a Rockstar reeditar o texto. Copiar um valor em reais de um anúncio antigo, ou multiplicar 79,99 por um câmbio do dia, fabrica um número que esta matéria não pode assinar. Em dólares, está escrito. Em reais, não está.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 3,
-      texto: "Dólar no comunicado, real fora dele",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Quando alguém perguntar “quanto custa em reais”, a frase completa é que o comunicado não diz. A matéria do [lançamento](/blog/gta-6-lancamento-19-novembro-2026) separa a data, que a Rockstar fixou, do que continua em aberto. Preço em reais entra nesse segundo grupo, junto com a versão de PC, que até 19 de novembro de 2026 não tinha sido anunciada.",
-    },
-    {
-      tipo: "destaque",
-      tom: "atencao",
-      titulo: "Não converta o comunicado",
-      texto: "79,99 dólares e 99,99 dólares são os preços publicados. Não são valores em reais. Este texto não faz a conta e não publica o resultado.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que a data da compra muda",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/gta-6-preco-e-edicoes-incluso.webp",
-        alt: "Console Xbox branco e controle, em close.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "fonte": {
+        "nome": "Take-Two — “Rockstar Games Announces Pre-Orders for Grand Theft Auto VI”",
+        "url": "https://taketwointeractivesoftwareinc.gcs-web.com/news-releases/news-release-details/rockstar-games-announces-pre-orders-grand-theft-auto-vi",
+        "data": "24 de junho de 2026"
       },
-      legenda: "Console Xbox branco e controle, em close. Foto de Nathan J Hilton (Pexels).",
+      "nota": "Valores em dólar, do comunicado de 24 de junho de 2026. O preço em reais fica na loja em que você paga."
     },
     {
-      tipo: "paragrafo",
-      texto: "A pré-venda começou em 25 de junho de 2026. Na pré-venda digital, o comunicado inclui um mês de GTA+. Ele não descreve o que a assinatura entrega além desse mês. Compras antes de 20 de novembro de 2026 incluem o Vintage Vice City Pack. O nome do pacote está escrito. O conteúdo, não.",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Caixa, código e o que não está incluso"
     },
     {
-      tipo: "paragrafo",
-      texto: "Esses acréscimos estão ligados à data e ao tipo de compra. O comunicado não diz que valem só para a Ultimate. A diferença explícita entre as edições é o preço: 79,99 dólares e 99,99 dólares. Os nomes da descrição da Ultimate estão na matéria do [mapa](/blog/gta-6-mapa-leonida-e-vice-city). Nome na descrição não é a ficha do dólar a mais.",
+      "tipo": "paragrafo",
+      "texto": "A versão de loja física é uma caixa com código de download. A Take-Two marcou a chegada dessa caixa para 12 de novembro de 2026, para dar tempo de pré-carga. Você não leva o jogo gravado num disco cheio. Leva o direito de baixar, e o console precisa dos gigabytes. O espaço está na matéria de [pré-carga](/blog/gta-6-pre-carga-e-tamanho)."
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que as duas edições não esclarecem",
+      "tipo": "paragrafo",
+      "texto": "GTA+ é o serviço da série em GTA Online, não um modo novo do GTA 6. O mês grátis da reserva digital serve para quem já joga GTA V e quer a biblioteca do serviço. Se você não liga para GTA Online, esse bônus não muda a campanha de Lucia e Jason."
     },
     {
-      tipo: "paragrafo",
-      texto: "Falta, nestes trechos, um inventário fechado da Ultimate. Dá para pagar o preço publicado. Não dá para montar, só com este comunicado, a lista de roupa, veículo ou missão que separa as edições. Quem precisar dessa lista tem de ir à página da edição no dia da compra e ler o que estiver escrito ali, não completar com catálogo antigo.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "O comunicado de junho citava pré-carga em 12 de novembro. Em novembro de 2026, a PlayStation e a Rockstar falam em 10 de novembro. Data e espaço estão na matéria de [pré-carga](/blog/gta-6-pre-carga-e-tamanho). Preço e arquivo são decisões diferentes, uma em dólares e a outra em gigabytes. Nenhuma está em reais. A série segue em [GTA 6 no blog](/blog/gta-6).",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/gta-6-preco-e-edicoes-fecho.webp",
-        alt: "Praia da Flórida vista de cima, com água azul.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/gta-6-preco-e-edicoes-incluso.webp",
+        "alt": "Console Xbox branco e controle, outra vitrine do preço do GTA 6.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Praia da Flórida vista de cima, com água azul. Foto de Chris The Island (Pexels).",
+      "legenda": "No Xbox a conta é a mesma: duas edições, preço de dólar no comunicado, preço de real na Microsoft Store."
     },
     {
-      tipo: "pros-contras",
-      pros: [
-        "Os dois preços têm dono e moeda: o comunicado da Take-Two, em dólares",
-        "O pacote e o mês de GTA+ ficam ligados à data da compra, como o texto escreve",
-        "O valor em reais fica de fora, em vez de uma conversão feita para esta matéria",
-      ],
-      contras: [
-        "Não há, aqui, a lista do que a Ultimate acrescenta além do preço",
-        "O conteúdo do Vintage Vice City Pack não está descrito no trecho usado",
-        "A pré-carga citada em junho como 12 de novembro foi depois falada como 10 de novembro",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como escolher sem se perder no extra"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Se o preço do jogo virou conversa de computador",
+      "tipo": "lista",
+      "itens": [
+        "Quer só a campanha: Standard resolve. A história é a mesma.",
+        "Quer os itens espalhados na história dos dois: Ultimate. Leia a lista na loja no dia, porque o comunicado fala em coleção, não enumera cada carro.",
+        "Vai comprar até o dia 19: o Vintage Vice City Pack entra nas compras feitas antes de 20 de novembro de 2026, pelo texto da Take-Two.",
+        "Joga no PC e espera uma chave: não há edição de computador à venda. Desconfie de anúncio com preço de PC."
+      ]
     },
     {
-      tipo: "paragrafo",
-      texto: "O número em dólares fica no comunicado da Take-Two. Na Balão da Informática Anchieta, Av. Anchieta, 789, Cambuí, Campinas, esta conversa não converte esse número e não publica valor de peça. Você vê a máquina ligada e fala dos jogos que já roda.",
+      "tipo": "paragrafo",
+      "texto": "Os aparelhos estão em [GTA 6 vai sair para PC?](/blog/gta-6-plataformas-ps5-xbox-e-pc). O dia e a hora no Brasil estão no [lançamento](/blog/gta-6-lancamento-19-novembro-2026)."
     },
     {
-      tipo: "paragrafo",
-      texto: "A [montagem](/montagempc) parte desse uso. Chame no WhatsApp (19) 98751-0267 e diga o monitor. GTA 6 no computador entra na conta quando existir versão e requisito publicados. Até lá, o preço do jogo de console e a máquina da sua casa são assuntos separados, e só o primeiro tem número oficial, em dólares.",
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/gta-6-preco-e-edicoes-fecho.webp",
+        "alt": "Praia da Flórida vista de cima, clima do pacote Vintage no preço do GTA 6.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
+      },
+      "legenda": "O pacote Vintage cita a Vice City antiga. A praia da foto é Flórida de verdade, só o clima."
     },
     {
-      tipo: "chamada",
-      titulo: "Quer montar para os jogos que você já tem?",
-      texto: "Diga o monitor e os jogos de hoje. A equipe monta por esse uso e mostra a máquina ligada.",
-      rotulo: "Pedir orçamento no WhatsApp",
+      "tipo": "destaque",
+      "tom": "atencao",
+      "titulo": "Preço em reais",
+      "texto": "Não fixamos valor em real. A cotação e a política de cada loja mudam, e um número velho neste blog viraria promessa. Confira na PlayStation Store, na Microsoft Store ou no varejo na hora de pagar."
     },
+    {
+      "tipo": "chamada",
+      "tema": "games",
+      "titulo": "Dúvida na hora de pagar a edição?",
+      "texto": "A Balão da Informática Anchieta, loja de informática em Campinas não vende a chave do jogo, e também não inventa preço. Se o console precisa de revisão antes da estreia, o balcão é na Av. Anchieta, 789, Cambuí. WhatsApp (19) 98751-0267.",
+      "rotulo": "Falar com a loja",
+      "href": "/assistenciagames",
+      "mensagem": "Olá! Li a matéria do preço do GTA 6 e quero ver se meu console está pronto."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mais respostas curtas estão nas [perguntas frequentes](/blog/gta-6-perguntas-frequentes). A série inteira fica em [GTA 6 no blog](/blog/gta-6)."
+    }
   ],
-  perguntas: [
+  "perguntas": [
     {
-      pergunta: "Quanto custa GTA 6?",
-      resposta: "No comunicado da Take-Two, de 24 de junho de 2026, a Standard custa 79,99 dólares e a Ultimate custa 99,99 dólares. O valor em reais não está nesse texto.",
+      "pergunta": "Qual é o preço do GTA 6?",
+      "resposta": "No comunicado da Take-Two, a edição padrão custa US$ 79,99 e a Ultimate custa US$ 99,99. O valor em reais é o da loja em que você compra."
     },
     {
-      pergunta: "Qual a diferença entre Standard e Ultimate?",
-      resposta: "A diferença explícita no comunicado é o preço em dólares. O texto não traz, nos trechos usados aqui, um inventário do que a Ultimate acrescenta. Pacote e mês de GTA+ estão ligados à data e à pré-venda, não a uma edição só.",
+      "pergunta": "O que a Ultimate tem a mais?",
+      "resposta": "A Take-Two descreve uma coleção exclusiva de veículos, armas, roupas e ações espalhadas pela história de Jason e Lucia. Não é outro mapa."
     },
     {
-      pergunta: "O que vem na pré-venda de GTA 6?",
-      resposta: "A pré-venda começou em 25 de junho de 2026. A pré-venda digital inclui um mês de GTA+. Compras antes de 20 de novembro de 2026 incluem o Vintage Vice City Pack. O comunicado não descreve o conteúdo desse pacote.",
+      "pergunta": "O que é o Vintage Vice City Pack?",
+      "resposta": "É o bônus de quem compra até 19 de novembro de 2026, com itens que remetem à Vice City antiga. Entra nas compras feitas antes de 20 de novembro, pelo comunicado."
     },
     {
-      pergunta: "GTA 6 vai custar quanto em reais?",
-      resposta: "O comunicado não publica valor em reais. Converter 79,99 dólares por câmbio do dia não cria um preço oficial. O número que dá para citar continua sendo o dólar anunciado.",
+      "pergunta": "A caixa já vem com o jogo no disco?",
+      "resposta": "Não. A versão física anunciada é uma caixa com código de download. O console ainda precisa de espaço para a pré-carga."
     },
+    {
+      "pergunta": "Tem preço de GTA 6 para PC?",
+      "resposta": "Não. A pré-venda publicada é de PlayStation 5 e Xbox Series X|S. Anúncio de preço para computador, antes de a Rockstar anunciar essa versão, não é oficial."
+    }
   ],
-  fontes: [
-    TAKETWO,
-    PLAYSTATION,
-    ROCKSTARDATA,
-  ],
+  "fontes": [
+    {
+      "nome": "Take-Two — “Rockstar Games Announces Pre-Orders for Grand Theft Auto VI”",
+      "url": "https://taketwointeractivesoftwareinc.gcs-web.com/news-releases/news-release-details/rockstar-games-announces-pre-orders-grand-theft-auto-vi",
+      "data": "24 de junho de 2026"
+    },
+    {
+      "nome": "PlayStation — página de Grand Theft Auto VI",
+      "url": "https://www.playstation.com/en-us/games/grand-theft-auto-vi/",
+      "data": "consulta em 19 de novembro de 2026"
+    },
+    {
+      "nome": "PlayStation — suporte de Grand Theft Auto VI",
+      "url": "https://www.playstation.com/en-us/support/games/gta-vi-support/",
+      "data": "consulta em 19 de novembro de 2026"
+    },
+    {
+      "nome": "Rockstar Games — página oficial de Grand Theft Auto VI",
+      "url": "https://www.rockstargames.com/VI",
+      "data": "consulta em 19 de novembro de 2026"
+    }
+  ]
 };
 
 export default artigo;

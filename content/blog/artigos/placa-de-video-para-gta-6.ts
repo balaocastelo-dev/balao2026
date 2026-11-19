@@ -1,284 +1,253 @@
-import type { Artigo, Fonte } from "@/lib/blog/tipos";
-
-const ROCKSTARVI: Fonte = {
-  nome: "Rockstar Games — página oficial de Grand Theft Auto VI",
-  url: "https://www.rockstargames.com/VI",
-  data: "consulta em 19 de novembro de 2026",
-};
-
-const YAHOOPC: Fonte = {
-  nome: "Yahoo / Just Jared — “GTA 6 PC Release Date: Is Grand Theft Auto VI Coming to PC?”",
-  url: "https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html",
-  data: "15 de novembro de 2026",
-};
-
-const STEAM: Fonte = {
-  nome: "Steam — Pesquisa de hardware e software",
-  url: "https://store.steampowered.com/hwsurvey/",
-  data: "setembro de 2026",
-};
+import type { Artigo } from "@/lib/blog/tipos";
 
 const artigo: Artigo = {
-  slug: "placa-de-video-para-gta-6",
-  titulo: "Placa de vídeo para GTA 6: o que dá para decidir",
-  resumo: "Sem ficha de GTA 6, a placa se escolhe pela tela e pelos jogos atuais. A diferença de 8 e 16 GB é lição da Steam e da RTX 5060 Ti.",
-  categoria: "hardware",
-  etiquetas: [
+  "slug": "placa-de-video-para-gta-6",
+  "titulo": "Placa de vídeo para GTA 6: o que olhar na hora de comprar",
+  "resumo": "Placa de vídeo para GTA 6: ainda sem ficha oficial. Escolha pela tela, Full HD, Quad HD ou 4K, e pela VRAM que os jogos grandes de hoje já pedem.",
+  "categoria": "hardware",
+  "etiquetas": [
     "GTA 6",
     "Placa de vídeo",
     "VRAM",
+    "NVIDIA",
+    "AMD"
   ],
-  capa: {
-    src: "/blog/capas/placa-de-video-para-gta-6.webp",
-    alt: "Placa de vídeo NVIDIA em close, com o dissipador à mostra.",
-    largura: 1536,
-    altura: 1024,
-    pronta: false,
+  "capa": {
+    "src": "/blog/capas/placa-de-video-para-gta-6.webp",
+    "alt": "Placa de vídeo na bancada, a peça central de um PC pensado para GTA 6 no futuro.",
+    "largura": 1536,
+    "altura": 1024,
+    "pronta": false
   },
-  publicadoEm: "2026-11-13T18:00:00.000Z",
-  autor: {
-    nome: "Equipe Balão da Informática",
-    url: "/sobre-nos",
+  "publicadoEm": "2026-11-13T18:00:00.000Z",
+  "atualizadoEm": "2026-11-19T12:00:00.000Z",
+  "autor": {
+    "nome": "Balão da Informática Anchieta",
+    "cargo": "Loja de informática em Campinas",
+    "url": "/sobre-nos"
   },
-  origem: "autoral",
-  seo: {
-    titulo: "Placa de vídeo para GTA 6 sem requisito oficial",
-    palavrasChave: [
+  "origem": "autoral",
+  "seo": {
+    "titulo": "Placa de vídeo para GTA 6: VRAM e resolução",
+    "descricao": "Placa de vídeo para GTA 6: ainda sem ficha oficial. Escolha pela tela, Full HD, Quad HD ou 4K, e pela VRAM que os jogos grandes de hoje já pedem.",
+    "palavrasChave": [
       "placa de vídeo para gta 6",
-      "vram para gta 6",
-      "8gb ou 16gb",
-      "placa de vídeo full hd",
-    ],
+      "gpu gta 6",
+      "vram gta 6",
+      "nvidia ou amd gta 6"
+    ]
   },
-  blocos: [
+  "blocos": [
     {
-      tipo: "paragrafo",
-      texto: "A pergunta da placa de vídeo para GTA 6 chega antes da única informação que a responderia. Consulta feita até 19 de novembro de 2026: a Rockstar ainda não tinha versão de PC, nem pré-venda, nem lista de hardware. Sem essa lista, nenhuma placa é “a de GTA 6”. Dá para escolher a placa por outra porta, e ela está na sua mesa.",
+      "tipo": "paragrafo",
+      "texto": "A placa de vídeo para GTA 6 é a pergunta que chega na loja junto com o trailer. A resposta honesta, dita uma vez: a Rockstar não publicou versão de PC nem a placa mínima. Dá para escolher a GPU pelos jogos de mundo aberto que você já roda e pela resolução do monitor que está na mesa. É essa escolha que muda o quanto a rua, o carro e a chuva aparecem nítidos."
     },
     {
-      tipo: "paragrafo",
-      texto: "A porta é a resolução em que você joga agora e os jogos que você já abre. Full HD pede menos placa do que Quad HD. Memória de vídeo de 8 GB ou de 16 GB entra como lição desses jogos, não como linha de uma ficha inexistente. A [página oficial](https://www.rockstargames.com/VI) continua listando console.",
+      "tipo": "resumo",
+      "titulo": "Resposta rápida",
+      "itens": [
+        "Sem ficha de PC, a placa se escolhe pela tela: Full HD, Quad HD ou 4K.",
+        "Em jogo grande atual, a memória de vídeo decide se a textura alta cabe ou se o jogo começa a piscar e a buscar dado no disco.",
+        "NVIDIA e AMD disputam o mesmo trabalho. O que importa é o modelo na sua resolução, não o adesivo da marca."
+      ]
     },
     {
-      tipo: "resumo",
-      itens: [
-        "**Não existe placa oficial de GTA 6.** Até 19 de novembro de 2026 não havia versão de PC nem requisito.",
-        "**A tela manda na escolha.** Full HD e Quad HD não pedem a mesma placa nos jogos que você já roda.",
-        "**8 GB e 16 GB são lição atual.** A Steam de setembro e a comparação da RTX 5060 Ti descrevem jogos de hoje.",
-        "**Fonte e gabinete entram juntos.** Placa nova em fonte curta só troca o problema de lugar.",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Placa de vídeo para GTA 6: a tela manda na compra"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "A resolução escolhe a placa",
+      "tipo": "paragrafo",
+      "texto": "A GPU desenha cada quadro. Quanto mais pixels, mais trabalho. Um monitor Full HD, de 1920 por 1080, pede bem menos do que um Quad HD de 2560 por 1440, e os dois pedem menos do que um 4K. Por isso a primeira pergunta na bancada não é “qual a placa mais cara”. É “qual monitor você vai usar nos próximos anos”. Se a tela é Full HD de 60 Hz, uma placa de vitrine 4K é dinheiro parado. Se você já olha um Quad HD, a placa de entrada sofre para segurar qualidade alta."
     },
     {
-      tipo: "paragrafo",
-      texto: "Comece pelo monitor, não pelo nome do chip. Se a tela é Full HD, a placa precisa segurar os jogos que você já joga nessa resolução. Se a tela é Quad HD, a mesma sessão ocupa mais a placa. GTA 6 não muda essa conta enquanto não tiver versão de PC.",
+      "tipo": "paragrafo",
+      "texto": "GTA V no PC, desde 14 de abril de 2015, já mostrava esse desenho: a Rockstar liberou resolução além de 4K, taxa alta e um controle de densidade de carros e pedestres. Aquilo é histórico do GTA V, não uma prévia técnica do GTA 6. Serve para lembrar que, quando a Rockstar leva um mundo aberto ao computador, a placa e a tela conversam o tempo todo. O anúncio está no newswire de 2015."
     },
     {
-      tipo: "paragrafo",
-      texto: "Quem está para trocar os dois ao mesmo tempo decide a tela primeiro. Levar a placa e só depois ver que o monitor continua em Full HD não muda a imagem. O caminho inverso, Quad HD com placa curta, deixa o ajuste no chão nos jogos de agora. A matéria de [monitor](/blog/monitor-para-gta-6) trata a tela como essa primeira escolha.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/placa-de-video-para-gta-6-cenario.webp",
-        alt: "Caixas de placa de vídeo nas prateleiras do meio, na parede vermelha.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/placa-de-video-para-gta-6-cenario.webp",
+        "alt": "Caixas de placa de vídeo na parede da Balão da Informática Anchieta, opções de placa de vídeo para GTA 6 no futuro.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Caixas de placa de vídeo nas prateleiras do meio, na parede vermelha. Foto da loja, na Av. Anchieta, 789, Cambuí.",
+      "legenda": "Na loja, as caixas de placa ficam na parede vermelha. Dá para ver o modelo antes de fechar."
     },
     {
-      tipo: "paragrafo",
-      texto: "Há um atalho ruim: olhar um vídeo de console e concluir a placa de PC. O console não publica a peça equivalente, e a Rockstar não publicou requisito. A [checagem do Yahoo em 15 de novembro de 2026](https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html) ainda não achou data de PC, pré-venda nem ficha. Sem ficha, o atalho é chute com capa de comparação.",
+      "tipo": "tabela",
+      "titulo": "Como a resolução puxa a placa, nos jogos grandes de hoje",
+      "colunas": [
+        "Sua tela",
+        "O que a placa faz",
+        "Memória de vídeo que costuma sobrar"
+      ],
+      "linhas": [
+        [
+          "Full HD",
+          "Qualidade alta em mundo aberto atual, com folga para o navegador",
+          "8 GB ainda aparece; 12 GB deixa textura alta mais tranquila"
+        ],
+        [
+          "Quad HD",
+          "Quase o dobro de pixels do Full HD",
+          "12 GB é o piso confortável; 16 GB é a folga"
+        ],
+        [
+          "4K",
+          "A placa trabalha o quadro inteiro, o tempo todo",
+          "16 GB é o que quem joga em 4K separa hoje"
+        ]
+      ],
+      "nota": "Leitura de jogos atuais, não ficha de Grand Theft Auto VI. A Rockstar não publicou GPU, VRAM nem resolução oficial de PC."
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que a Steam de setembro realmente mede",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "VRAM: o número que a geração atual já cobrou"
     },
     {
-      tipo: "paragrafo",
-      texto: "A pesquisa de hardware da Steam de setembro de 2026, já comentada no [artigo da loja](/blog/steam-setembro-2026-vram-16gb), mostra placas de 16 GB de VRAM em 27,21% dos PCs e placas de 8 GB em 26,71%. Na mesma amostra, Full HD está em 47,91% e 1440p em 27,04%. São fatias do parque da Steam, não o mínimo de GTA 6.",
+      "tipo": "paragrafo",
+      "texto": "Memória de vídeo guarda textura, resolução e os efeitos que ficam ligados ao mesmo tempo. Quando ela acaba, o jogo não “fica só um pouco mais feio”: ele busca textura no meio do movimento, e a cidade parece que carregou atrasada. A matéria da [RTX 5060 Ti de 8 GB ou 16 GB](/blog/rtx-5060-ti-8gb-ou-16gb) mostra, com teste de terceiros, onde os 8 GB empatam e onde ficam para trás. A ficha da família está no site da NVIDIA. Nada disso é número de GTA 6. É o motivo para não repetir a economia de memória numa placa que você pretende manter por anos."
     },
     {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/placa-de-video-para-gta-6-vram.webp",
-        alt: "Placa GeForce instalada dentro do computador.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "paragrafo",
+      "texto": "DLSS, da NVIDIA, e FSR, da AMD, desenham o quadro numa resolução menor e reconstroem a imagem. Eles ajudam a segurar fluidez. Não transformam uma placa de Full HD em placa de 4K, e não substituem memória de vídeo quando a textura não cabe. Use o recurso como folga, não como desculpa para comprar o modelo errado para a sua tela."
+    },
+    {
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/placa-de-video-para-gta-6-vram.webp",
+        "alt": "Placa de vídeo em detalhe, com foco na memória usada em jogos de mundo aberto e, no futuro, em GTA 6.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Placa GeForce instalada dentro do computador. Foto de Matheus Bertelli (Pexels).",
+      "legenda": "VRAM é o número pequeno na ficha que decide a textura. Vale ler antes do adesivo luminoso."
     },
     {
-      tipo: "paragrafo",
-      texto: "A leitura útil é modesta. Memória de 16 GB já é tão comum quanto a de 8 GB entre quem joga na plataforma, e a tela mais comum continua sendo Full HD. Estúdios olham para esse parque quando ajustam textura dos jogos atuais. Isso não autoriza a frase “GTA 6 pede 16 GB”. Autoriza a frase “seu monitor e seus jogos de hoje cabem em quanto”.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 3,
-      texto: "Parque instalado não é exigência",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Uma pesquisa de hardware conta máquinas que aceitaram participar. Ela não mede venda da semana e não recebe um documento da Rockstar. Se amanhã a fatia de 16 GB subir, o jogo de PC de GTA 6 continua sem número até alguém da empresa publicar. Use o gráfico para se localizar no parque. Não use para preencher uma ficha em branco.",
-    },
-    {
-      tipo: "destaque",
-      tom: "nota",
-      titulo: "O percentual não é requisito",
-      texto: "27,21% e 26,71% descrevem PCs na Steam em setembro de 2026. Eles não dizem quanta memória de vídeo GTA 6 vai usar, porque essa versão de PC não foi anunciada até 19 de novembro de 2026.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "A lição da RTX 5060 Ti fica nos jogos atuais",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "A [comparação entre a RTX 5060 Ti de 8 GB e a de 16 GB](/blog/rtx-5060-ti-8gb-ou-16gb) serve aqui como aula de jogo que já existe. As duas versões dividem o chip, e a memória é o que separa. Em Full HD, com ajuste moderado, 8 GB costumam acompanhar. Quando a tela sobe ou a textura vai ao máximo, a de menos memória fica sem espaço.",
-    },
-    {
-      tipo: "tabela",
-      titulo: "O que a lição atual permite decidir",
-      colunas: [
-        "Situação de hoje",
-        "O que observar",
-        "O que não concluir",
+      "tipo": "pros-contras",
+      "titulo": "Na hora de comparar duas placas",
+      "pros": [
+        "A mais cara só vale se a sua tela e os seus jogos usam essa folga.",
+        "16 GB de VRAM envelhecem melhor em Quad HD do que 8 GB no mesmo chip.",
+        "Dá para ver a placa ligada na loja, no gabinete, antes de pagar."
       ],
-      linhas: [
-        [
-          "Full HD e ajuste moderado",
-          "8 GB ainda acompanham vários jogos",
-          "Que GTA 6 cabe em 8 GB",
-        ],
-        [
-          "Quad HD ou textura no alto",
-          "16 GB seguram o que 8 GB esgotam",
-          "Que 16 GB são a ficha oficial",
-        ],
-        [
-          "Steam, setembro de 2026",
-          "16 GB em 27,21% e 8 GB em 26,71%",
-          "Que o parque é o requisito",
-        ],
-        [
-          "PC sem anúncio",
-          "Não há placa “de GTA 6”",
-          "Escolher um modelo pelo nome do jogo",
-        ],
-      ],
-      colunaDestaque: 1,
-      fonte: STEAM,
-      nota: "Percentuais da pesquisa de setembro de 2026. A coluna da direita é a conclusão que a fonte não autoriza.",
+      "contras": [
+        "Não existe modelo “certificado para GTA 6”.",
+        "Marca não ganha sozinha: um modelo de entrada de qualquer uma sofre em 4K.",
+        "Fonte fraca ou gabinete sem ar derruba a placa nova no primeiro verão."
+      ]
     },
     {
-      tipo: "paragrafo",
-      texto: "Essa aula não migra para GTA 6. O jogo não está na tabela de testes dessa comparação, e não poderia estar: não há versão de PC com requisito para encaixar numa bancada. Quem transformar aqueles resultados em “placa recomendada para GTA 6” muda o assunto no meio da frase. O assunto era jogo atual.",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que levar anotado para a loja"
     },
     {
-      tipo: "chamada",
-      tema: "placas-de-video",
+      "tipo": "lista",
+      "itens": [
+        "Resolução e taxa do monitor. Sem isso, a indicação é chute.",
+        "Fonte: potência real e conector. Placa nova às vezes pede cabo que a fonte antiga não tem.",
+        "Tamanho do gabinete. Tem placa que não fecha a tampa.",
+        "Os dois ou três jogos que você mais abre hoje, para a máquina servir antes de qualquer anúncio futuro."
+      ]
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Fonte, gabinete e conector entram juntos",
+      "tipo": "paragrafo",
+      "texto": "O processador que acompanha essa placa está em [processador para GTA 6](/blog/processador-para-gta-6). A tela, que deveria ser a primeira compra consciente, está em [monitor para GTA 6](/blog/monitor-para-gta-6). As máquinas fechadas por faixa estão no [PC de entrada](/blog/pc-gamer-entrada-para-gta-6), no [intermediário](/blog/pc-gamer-intermediario-para-gta-6) e no [alto desempenho](/blog/pc-gamer-alto-desempenho-gta-6)."
     },
     {
-      tipo: "paragrafo",
-      texto: "A placa que a sua tela pede ainda tem de caber e de ligar. Comprimento, slots e conector variam na mesma família de chip. A fonte precisa de folga e do cabo certo, não de um número de jogo sem ficha. A categoria de [fontes](/categoria/hardware-fontes) e a de [placas de vídeo](/categoria/hardware-placa-de-video-vga) cruzam as duas peças.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Gabinete apertado e fonte no limite são o tipo de erro que aparece na primeira semana, nos jogos que você já tem. Não aparece numa lista de GTA 6. Se a fonte atual foi dimensionada para uma placa antiga, a troca da placa puxa a fonte junto. Ignorar isso e falar só em gigabytes de VRAM é decidir metade da máquina.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Quando a placa atual ainda serve",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "A placa atual serve quando os jogos que você abre, na sua resolução e no ajuste que você aceita, rodam sem a memória de vídeo estourar. Trocar agora para chegar “preparada no GTA 6” antecipa uma ficha que não existe. Espere saber o que a tela, se mudar, vai pedir.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "A placa pede troca quando o limite já está nos jogos de hoje: Quad HD com ajuste que você quer e uma placa que só segura Full HD, ou 8 GB esgotados nas texturas que você já usa. A referência de PC inteiro, sem transformar isso em requisito, está em [PC para GTA 6](/blog/pc-para-gta-6-sem-requisito-oficial). A decisão continua sendo a sessão desta semana.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/placa-de-video-para-gta-6-fecho.webp",
-        alt: "Close de uma placa GeForce RTX, com os coolers.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/placa-de-video-para-gta-6-fecho.webp",
+        "alt": "Gabinete de PC aberto na loja, mostrando a placa de vídeo escolhida para jogos como GTA 6.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Close de uma placa GeForce RTX, com os coolers. Foto de Matheus Bertelli (Pexels).",
+      "legenda": "Gabinete aberto no balcão: é assim que a placa aparece de verdade, não só na caixa."
     },
     {
-      tipo: "pros-contras",
-      pros: [
-        "A placa fica amarrada à tela e aos jogos que você já abre",
-        "8 GB e 16 GB entram com fonte, como lição da Steam e da 5060 Ti",
-        "Fonte, cabo e gabinete entram na mesma decisão da placa",
-      ],
-      contras: [
-        "Nenhuma linha desta página diz qual placa GTA 6 vai exigir",
-        "Quad HD de hoje pode pedir troca mesmo sem o jogo novo",
-        "Uma pesquisa de parque não vira mínimo oficial no mês seguinte",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como ler a caixa da placa na loja"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Antes de levar a placa",
+      "tipo": "paragrafo",
+      "texto": "Na parede da loja a caixa traz três números que mudam a compra mais do que o adesivo luminoso. O comprimento, em milímetros, diz se a tampa do seu gabinete fecha. A potência recomendada da fonte diz se o cabo que você tem em casa existe ou se a troca da placa puxa a fonte junto. A memória de vídeo, em gigabytes, diz a folga de textura na resolução da sua tela. Se um desses três não está na caixa, peça a ficha no site do fabricante antes de pagar. Não precisa ser o modelo do GTA 6. Precisa ser o modelo que cabe na sua máquina."
     },
     {
-      tipo: "paragrafo",
-      texto: "Leve o modelo da fonte, o tamanho do gabinete e a resolução do monitor à Balão da Informática Anchieta, Av. Anchieta, 789, Cambuí, Campinas, ou chame no WhatsApp (19) 98751-0267. Com esses três dados a equipe vê se a placa dos seus jogos de hoje cabe na máquina que você já tem.",
+      "tipo": "paragrafo",
+      "texto": "Depois da instalação, o driver é parte da placa. Uma GPU nova com o driver que veio no Windows costuma funcionar e ficar para trás do que o fabricante já corrigiu. Baixe o pacote atual da NVIDIA ou da AMD, reinicie, e abra um jogo que você já conhece o comportamento. Se a imagem pisca ou o PC desliga no pico, o suspeito é cabo e fonte, não “incompatibilidade com um jogo que ainda não tem versão de PC”."
     },
     {
-      tipo: "paragrafo",
-      texto: "Não há, até 19 de novembro de 2026, uma placa para separar da prateleira com o nome de GTA 6. Se alguém oferecer nesse rótulo, peça a página da Rockstar. A decisão é escolher a placa pela resolução e pelos jogos que você já roda, e tratar 8 ou 16 GB como lição de jogo atual.",
+      "tipo": "lista",
+      "itens": [
+        "Meça o gabinete antes de escolher a placa de três ventoinhas.",
+        "Confira conector de 8 pinos, ou o padrão novo, na fonte que já está aí.",
+        "Atualize o driver e teste um jogo conhecido no mesmo dia."
+      ]
     },
     {
-      tipo: "chamada",
-      titulo: "A placa é para qual tela?",
-      texto: "Diga a resolução e dois jogos que você abre toda semana. A indicação sai desses dois dados, não de um requisito que a Rockstar não publicou.",
-      rotulo: "Pedir orçamento no WhatsApp",
+      "tipo": "chamada",
+      "tema": "placas-de-video",
+      "titulo": "Quer ver a placa antes de decidir?",
+      "texto": "Na Balão da Informática Anchieta, loja de informática em Campinas você olha a placa na parede e, se quiser, no computador ligado. Av. Anchieta, 789, Cambuí. WhatsApp (19) 98751-0267.",
+      "rotulo": "Ver placas de vídeo",
+      "href": "/categoria/hardware-placa-de-video-vga",
+      "mensagem": "Olá! Li a matéria de placa de vídeo para GTA 6 e quero indicação para o meu monitor."
     },
+    {
+      "tipo": "paragrafo",
+      "texto": "Placa de vídeo para GTA 6 segue, com o restante da série, em [GTA 6 no blog](/blog/gta-6)."
+    }
   ],
-  perguntas: [
+  "perguntas": [
     {
-      pergunta: "Qual placa de vídeo roda GTA 6?",
-      resposta: "Nenhuma foi anunciada para isso. Até 19 de novembro de 2026 não havia versão de PC nem requisito. A placa se escolhe pela resolução e pelos jogos que você já joga. Chamar um modelo de placa de GTA 6 é chute.",
+      "pergunta": "Qual placa de vídeo roda GTA 6?",
+      "resposta": "A Rockstar não publicou essa ficha. Escolha a placa pela resolução do seu monitor e pelos jogos de mundo aberto que você já joga."
     },
     {
-      pergunta: "8 GB de VRAM vão bastar para GTA 6?",
-      resposta: "Não há como saber pela ficha, porque a ficha não existe. Em jogos atuais, 8 GB acompanham Full HD com ajuste moderado e ficam curtos quando a tela ou a textura sobem. Essa lição está na comparação da RTX 5060 Ti e não migra para GTA 6.",
+      "pergunta": "8 GB de VRAM ainda servem?",
+      "resposta": "Em Full HD, muita placa de 8 GB ainda joga bem os títulos atuais. Em Quad HD e em textura alta, 12 GB ou 16 GB deixam mais folga. Isso é leitura da geração atual, não número oficial do GTA 6."
     },
     {
-      pergunta: "A pesquisa da Steam diz o que o jogo exige?",
-      resposta: "Não. Em setembro de 2026, 16 GB de VRAM estavam em 27,21% dos PCs e 8 GB em 26,71%. É uma foto do parque da Steam. Não é mínimo, recomendado nem ideal de um jogo cuja versão de PC não foi anunciada.",
+      "pergunta": "NVIDIA ou AMD?",
+      "resposta": "As duas fazem o trabalho. Compare o modelo na sua resolução, a memória de vídeo e se a sua fonte aguenta. O adesivo não decide sozinho."
     },
     {
-      pergunta: "A RTX 5060 Ti de 16 GB é a placa de GTA 6?",
-      resposta: "Não. A comparação de 8 GB e 16 GB mostra como a memória se comporta em jogos que já existem, com o mesmo chip. GTA 6 não entra nessa tabela. Usar o nome do jogo na conclusão troca o assunto.",
+      "pergunta": "DLSS ou FSR dispensam uma placa melhor?",
+      "resposta": "Ajudam a ganhar fluidez. Não criam memória de vídeo que a placa não tem e não fazem milagre em 4K numa placa de entrada."
     },
+    {
+      "pergunta": "Preciso trocar a fonte junto?",
+      "resposta": "Às vezes sim. Leve o modelo da fonte. Conector e potência têm de combinar com a placa, senão o PC desliga no pico."
+    }
   ],
-  fontes: [
-    ROCKSTARVI,
-    YAHOOPC,
-    STEAM,
-  ],
+  "fontes": [
+    {
+      "nome": "Rockstar Games — página oficial de Grand Theft Auto VI",
+      "url": "https://www.rockstargames.com/VI",
+      "data": "consulta em 19 de novembro de 2026"
+    },
+    {
+      "nome": "Yahoo / Just Jared — “GTA 6 PC Release Date: Is Grand Theft Auto VI Coming to PC?”",
+      "url": "https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html",
+      "data": "15 de novembro de 2026"
+    },
+    {
+      "nome": "NVIDIA — família GeForce RTX 5060",
+      "url": "https://www.nvidia.com/en-us/geforce/graphics-cards/50-series/rtx-5060-family/",
+      "data": "consulta em 19 de novembro de 2026"
+    },
+    {
+      "nome": "Rockstar Games — “Grand Theft Auto V Is Now Available for PC”",
+      "url": "https://www.rockstargames.com/newswire/article/25o2411812a31k/grand-theft-auto-v-is-now-available-for-pc",
+      "data": "14 de abril de 2015"
+    }
+  ]
 };
 
 export default artigo;

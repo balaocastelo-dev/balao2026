@@ -1,251 +1,263 @@
-import type { Artigo, Fonte } from "@/lib/blog/tipos";
-
-const ROCKSTARDATA: Fonte = {
-  nome: "Rockstar Games — “Grand Theft Auto VI is Now Set to Launch November 19, 2026”",
-  url: "https://www.rockstargames.com/newswire/article/ak3ak31a49a221/grand-theft-auto-vi-is-now-set-to-launch-november-19-2026",
-  data: "6 de novembro de 2025",
-};
-
-const VERGEATRASO: Fonte = {
-  nome: "The Verge — “Grand Theft Auto VI launch delayed until November 2026”, Jay Peters",
-  url: "https://www.theverge.com/news/816005/grand-theft-auto-vi-gta-g-delayed-november-2026",
-  data: "6 de novembro de 2025",
-};
-
-const REUTERS: Fonte = {
-  nome: "Reuters — “Take-Two delays GTA VI for second time to November next year”",
-  url: "https://www.reuters.com/business/media-telecom/take-two-interactive-further-delays-gta-vi-november-next-year-2025-11-06/",
-  data: "6 de novembro de 2025",
-};
-
-const PLAYSTATION: Fonte = {
-  nome: "PlayStation — página de Grand Theft Auto VI",
-  url: "https://www.playstation.com/en-us/games/grand-theft-auto-vi/",
-  data: "consulta em 19 de novembro de 2026",
-};
-
-const TAKETWO: Fonte = {
-  nome: "Take-Two Interactive — comunicado de pré-venda de Grand Theft Auto VI",
-  url: "https://taketwointeractivesoftwareinc.gcs-web.com/news-releases/news-release-details/rockstar-games-announces-pre-orders-grand-theft-auto-vi/",
-  data: "24 de junho de 2026",
-};
+import type { Artigo } from "@/lib/blog/tipos";
 
 const artigo: Artigo = {
-  slug: "gta-6-lancamento-19-novembro-2026",
-  titulo: "GTA 6 chega em 19 de novembro de 2026: o que foi confirmado",
-  resumo: "A Rockstar fixou GTA 6 para 19 de novembro de 2026, no PS5 e no Xbox Series. Veja qual data vale e o que ainda não foi anunciado.",
-  categoria: "noticias",
-  etiquetas: [
+  "slug": "gta-6-lancamento-19-novembro-2026",
+  "titulo": "Lançamento do GTA 6: o que acontece em 19 de novembro",
+  "resumo": "O lançamento do GTA 6 é 19 de novembro de 2026, no PS5 e no Xbox Series X|S. Veja o horário, a pré-carga e o que a Rockstar ainda não anunciou.",
+  "categoria": "noticias",
+  "etiquetas": [
     "GTA 6",
     "Lançamento",
     "Rockstar",
+    "PlayStation 5",
+    "Xbox Series"
   ],
-  capa: {
-    src: "/blog/capas/gta-6-lancamento-19-novembro-2026.webp",
-    alt: "Controle de PlayStation 5 apoiado no console.",
-    largura: 1536,
-    altura: 1024,
-    pronta: false,
+  "capa": {
+    "src": "/blog/capas/gta-6-lancamento-19-novembro-2026.webp",
+    "alt": "Controle de PlayStation 5 sobre o console, no dia do lançamento do GTA 6.",
+    "largura": 1536,
+    "altura": 1024,
+    "pronta": false
   },
-  publicadoEm: "2026-11-18T16:00:00.000Z",
-  autor: {
-    nome: "Equipe Balão da Informática",
-    url: "/sobre-nos",
+  "publicadoEm": "2026-11-18T16:00:00.000Z",
+  "atualizadoEm": "2026-11-19T12:00:00.000Z",
+  "autor": {
+    "nome": "Balão da Informática Anchieta",
+    "cargo": "Loja de informática em Campinas",
+    "url": "/sobre-nos"
   },
-  origem: "autoral",
-  seo: {
-    titulo: "GTA 6 em 19 de novembro de 2026: o que foi confirmado",
-    palavrasChave: [
-      "gta 6 lançamento",
-      "data gta 6",
+  "origem": "autoral",
+  "seo": {
+    "titulo": "Lançamento do GTA 6: 19 de novembro de 2026",
+    "descricao": "O lançamento do GTA 6 é 19 de novembro de 2026, no PS5 e no Xbox Series X|S. Veja o horário, a pré-carga e o que a Rockstar ainda não anunciou.",
+    "palavrasChave": [
+      "lançamento do gta 6",
       "gta 6 19 de novembro",
-      "quando sai gta 6",
-    ],
+      "data gta 6",
+      "grand theft auto vi lançamento"
+    ]
   },
-  blocos: [
+  "blocos": [
     {
-      tipo: "paragrafo",
-      texto: "Quem pesquisa a data de GTA 6 ainda encontra maio de 2026 no meio dos resultados. Essa data existiu: a Rockstar chegou a anunciá-la e depois a trocou. O lançamento marcado para os consoles é 19 de novembro de 2026, uma quinta-feira.",
+      "tipo": "paragrafo",
+      "texto": "O lançamento do GTA 6 é 19 de novembro de 2026. A Rockstar Games deixou a data na página oficial de Grand Theft Auto VI e no newswire: o jogo chega nesse dia para PlayStation 5 e Xbox Series X|S. Se você quer jogar na estreia, o caminho anunciado é o console."
     },
     {
-      tipo: "paragrafo",
-      texto: "A resposta curta está no comunicado da própria Rockstar, de 6 de novembro de 2025: o jogo passa a sair nessa data, no PlayStation 5 e no Xbox Series X|S. Até 19 de novembro de 2026 não havia versão de PC anunciada. O resto desta matéria é o caminho das datas e o que isso muda para quem está montando computador.",
+      "tipo": "resumo",
+      "titulo": "Resposta rápida",
+      "itens": [
+        "Grand Theft Auto VI estreia em 19 de novembro de 2026 para PlayStation 5, PS5 Pro e Xbox Series X|S.",
+        "No PS5, o suporte da PlayStation marca a liberação à meia-noite no fuso de quem joga. No Brasil, isso é 00:00 de Brasília.",
+        "A página oficial não lista computador. Versão de PC e ficha técnica de PC não foram anunciadas."
+      ]
     },
     {
-      tipo: "resumo",
-      itens: [
-        "**A data de console é 19 de novembro de 2026.** Foi a Rockstar quem fixou, depois de duas janelas anteriores.",
-        "**PS5 e Xbox Series estão no lançamento.** A página oficial lista essas plataformas, não o PC.",
-        "**Maio de 2026 ficou para trás.** A Reuters registrou essa data como a promessa anterior.",
-        "**Requisito de PC não existe.** Sem versão anunciada, não há configuração oficial para copiar.",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que o lançamento do GTA 6 confirma"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Qual data vale quando as notícias se contradizem",
+      "tipo": "paragrafo",
+      "texto": "A data vigente saiu no newswire da Rockstar em 6 de novembro de 2025, com o título de que Grand Theft Auto VI passava a estrear em 19 de novembro de 2026. A Reuters tratou o aviso como mais um adiamento. A The Verge, no mesmo dia, registrou que a data anterior era 26 de maio de 2026. Por isso um guia antigo ainda pode falar em maio: a data mudou, e a que vale é a de novembro."
     },
     {
-      tipo: "paragrafo",
-      texto: "A regra prática é ficar com o comunicado mais novo da empresa que faz o jogo. Em 6 de novembro de 2025 a Rockstar escreveu que Grand Theft Auto VI passaria a sair na quinta-feira, 19 de novembro de 2026. O texto pede desculpas pela espera extra e diz que os meses a mais serviriam para terminar o jogo no nível de acabamento que o público espera.",
+      "tipo": "paragrafo",
+      "texto": "A página da PlayStation confirma o jogo para PS5 e PS5 Pro. A da Rockstar coloca PlayStation 5 e Xbox Series X|S lado a lado, com o selo de que roda melhor no PS5. Isso é marketing da própria Rockstar, não um teste nosso. O que dá para afirmar é a lista de aparelhos, não qual dos dois consoles fica mais bonito na sua sala."
     },
     {
-      tipo: "citacao",
-      texto: "Lamentamos acrescentar mais tempo a uma espera que sabemos já ser longa, mas esses meses a mais vão permitir terminar o jogo com o nível de acabamento que vocês esperam e merecem.",
-      autor: "Rockstar Games",
-      cargo: "comunicado de 6 de novembro de 2025",
-      fonte: ROCKSTARDATA,
-      traduzida: true,
-    },
-    {
-      tipo: "paragrafo",
-      texto: "A [The Verge](https://www.theverge.com/news/816005/grand-theft-auto-vi-gta-g-delayed-november-2026) publicou a mesma frase no mesmo dia e lembrou o que vinha antes: a data vigente era 26 de maio de 2026, e antes disso havia uma janela em 2025. A [Reuters](https://www.reuters.com/business/media-telecom/take-two-interactive-further-delays-gta-vi-november-next-year-2025-11-06/) tratou o anúncio como o segundo adiamento. Por isso um guia antigo ainda pode dizer maio. Não é que o autor tenha inventado: é que a data mudou.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/gta-6-lancamento-19-novembro-2026-datas.webp",
-        alt: "Orla de Miami Beach, com prédios e água, de dia.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/gta-6-lancamento-19-novembro-2026-datas.webp",
+        "alt": "Controle de PlayStation 5 apoiado no console, aparelho do lançamento do GTA 6.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Orla de Miami Beach, com prédios e água, de dia. Foto de Abhishek Navlakha (Pexels).",
+      "legenda": "O controle do PS5 é o caminho anunciado para jogar GTA 6 no dia 19."
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que essa quinta-feira inclui",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Que horas o jogo destrava no Brasil"
     },
     {
-      tipo: "paragrafo",
-      texto: "A [página oficial](https://www.rockstargames.com/VI) mostra PlayStation 5 e Xbox Series X|S, com a chamada de que o jogo rende melhor no PS5. A [PlayStation](https://www.playstation.com/en-us/games/grand-theft-auto-vi/) confirma o dia 19 de novembro de 2026 também para o PS5 Pro e diz que o jogo não roda no PlayStation 4. Não é um detalhe de compatibilidade escondido: está na pergunta frequente da loja.",
+      "tipo": "paragrafo",
+      "texto": "No PlayStation 5, o suporte oficial diz que Grand Theft Auto VI libera à meia-noite no horário local de 19 de novembro de 2026. Para quem está em Campinas, em São Paulo ou em qualquer cidade no horário de Brasília, a virada é 00:00 do dia 19. Não é meio-dia, e não é o horário da costa leste dos Estados Unidos."
     },
     {
-      tipo: "paragrafo",
-      texto: "O mesmo texto da PlayStation responde que Grand Theft Auto VI é uma experiência de um jogador. Quem espera um modo online no dia do lançamento não encontra essa promessa ali. O [comunicado da Take-Two](https://taketwointeractivesoftwareinc.gcs-web.com/news-releases/news-release-details/rockstar-games-announces-pre-orders-grand-theft-auto-vi/), de 24 de junho de 2026, repete a data, as duas famílias de console e o preço em dólares da edição padrão. O preço em reais não está nesse comunicado.",
+      "tipo": "paragrafo",
+      "texto": "No Xbox Series X|S a Rockstar detalhou o fuso da pré-carga (meia-noite de GMT em 10 de novembro), não uma frase igual à da PlayStation para a hora de abrir o jogo. Na dúvida, o horário que manda é o da Microsoft Store na sua conta. Chegar meia hora antes e deixar o console ligado evita a corrida de baixar um pedaço que faltou."
     },
     {
-      tipo: "titulo",
-      nivel: 3,
-      texto: "Meia-noite local, não um horário único no mundo",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "O suporte da PlayStation marca o lançamento à meia-noite no fuso de quem joga, no PlayStation 5. Não dá para transformar isso num único horário de Brasília e achar que vale para todas as lojas: cada vitrine pode liberar o download no fuso dela. O que não muda é o dia.",
-    },
-    {
-      tipo: "destaque",
-      tom: "atencao",
-      titulo: "Como ler uma data antiga",
-      texto: "Se o texto diz 26 de maio de 2026 e não cita o comunicado de novembro de 2025, ele descreve uma promessa que a Rockstar substituiu. A data de console que ficou de pé é 19 de novembro de 2026.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que o dia do lançamento não responde",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/gta-6-lancamento-19-novembro-2026-confirmado.webp",
-        alt: "Controle de Xbox em close, carregando.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
-      },
-      legenda: "Controle de Xbox em close, carregando. Foto de Ruben Boekeloo (Pexels).",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Três perguntas continuam sem página oficial. A primeira é a versão de PC: o site da Rockstar, o comunicado da Take-Two e a matéria da PlayStation listam console. A segunda é o requisito de hardware, que só faria sentido depois de uma versão de computador. A terceira é o preço em reais, que cada loja define e que este blog não copia de anúncio velho.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Há relatos de imprensa sobre uma janela de PC em 2027. Enquanto a Rockstar não publicar data, isso permanece relato, não calendário. O artigo sobre [plataformas de GTA 6](/blog/gta-6-plataformas-ps5-xbox-e-pc) separa o que cada aparelho faz no lançamento, e o de [PC para GTA 6](/blog/pc-para-gta-6-sem-requisito-oficial) explica o que dá para decidir sem requisito.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que muda para quem está comprando computador",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Comprar uma placa “porque o GTA 6 pede” é decidir com um número que não foi publicado. O que dá para fazer agora é outro: escolher a máquina pelos jogos que você já roda e pela tela que você já tem, e deixar folga de memória e de SSD para quando a ficha oficial existir. Trocar de peça no susto, na semana do console, não aproxima o PC de um jogo que ainda não tem versão de PC.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "A série inteira está em [GTA 6 no blog](/blog/gta-6). A data de console responde quando o jogo chega na sala. Não responde qual fonte, qual placa ou qual quantidade de memória comprar.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/gta-6-lancamento-19-novembro-2026-fecho.webp",
-        alt: "Pessoa segurando um controle, com a mesa de jogo ao lado.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
-      },
-      legenda: "Pessoa segurando um controle, com a mesa de jogo ao lado. Foto de Ron Lach (Pexels).",
-    },
-    {
-      tipo: "pros-contras",
-      pros: [
-        "A data de console tem dono: o comunicado da Rockstar, não um fórum",
-        "Dá para ignorar guias que ainda citam maio de 2026 como se fosse o plano atual",
-        "Fica claro o que não comprar enquanto o PC não for anunciado",
+      "tipo": "tabela",
+      "titulo": "Calendário oficial até a estreia",
+      "colunas": [
+        "Quando",
+        "O que acontece",
+        "Onde está escrito"
       ],
-      contras: [
-        "Quem quer jogar no dia 19 precisa de console, não de um PC montado no escuro",
-        "A data já mudou duas vezes; um novo comunicado pode mudá-la de novo",
-        "Preço em reais e requisito de PC continuam fora do anúncio",
+      "linhas": [
+        [
+          "6 de novembro de 2025",
+          "A data passa a ser 19 de novembro de 2026",
+          "Newswire da Rockstar e Reuters"
+        ],
+        [
+          "10 de novembro de 2026",
+          "Começa a pré-carga de quem reservou",
+          "Página Pre-Load Now e suporte da PlayStation"
+        ],
+        [
+          "12 de novembro de 2026",
+          "Caixa com código de download nas lojas",
+          "Comunicado de pré-venda da Take-Two"
+        ],
+        [
+          "19 de novembro de 2026",
+          "Estreia em PS5 e Xbox Series X|S",
+          "Página oficial de Grand Theft Auto VI"
+        ]
       ],
+      "fonte": {
+        "nome": "Rockstar Games — página oficial de Grand Theft Auto VI",
+        "url": "https://www.rockstargames.com/VI",
+        "data": "consulta em 19 de novembro de 2026"
+      },
+      "nota": "A linha da caixa está no comunicado de pré-venda da Take-Two, de 24 de junho de 2026. O restante está na Rockstar e na PlayStation."
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Antes de decidir na loja",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que fazer na noite da estreia"
     },
     {
-      tipo: "paragrafo",
-      texto: "Na Balão da Informática Anchieta, na Av. Anchieta, 789, no Cambuí, em Campinas, a conversa começa pelo uso: quais jogos você roda hoje, em que monitor, e se a máquina também vai transmitir. O computador sai montado para isso. GTA 6 entra na conta quando a Rockstar publicar versão e requisito, não antes.",
+      "tipo": "paragrafo",
+      "texto": "Atualize o sistema do console de dia, não às 23h50. A pré-carga, para quem reservou o digital, começou em 10 de novembro. Se a barra ainda não chegou ao fim, o jogo não vai estar pronto só porque o relógio virou. O guia de [pré-carga e espaço](/blog/gta-6-pre-carga-e-tamanho) explica os 212 GB."
     },
     {
-      tipo: "paragrafo",
-      texto: "O orçamento é do dia em que você pergunta, no WhatsApp (19) 98751-0267 ou no balcão. Este texto não trava preço de peça. A decisão honesta, hoje, é tratar 19 de novembro de 2026 como a data de console e deixar o PC fora dessa fila até haver ficha oficial.",
+      "tipo": "paragrafo",
+      "texto": "A caixa física leva um código para baixar, não o jogo inteiro no disco. Comprar a caixa em 12 de novembro serviu para entrar na pré-carga. Comprar a caixa na semana da estreia ainda exige download. Separe espaço antes de raspar o código."
     },
     {
-      tipo: "chamada",
-      titulo: "Quer montar sem chutar requisito de GTA 6?",
-      texto: "Diga quais jogos você joga hoje e qual é o seu monitor. A equipe indica a máquina por esse uso e mostra ela ligada antes do pagamento.",
-      rotulo: "Pedir orçamento no WhatsApp",
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/gta-6-lancamento-19-novembro-2026-confirmado.webp",
+        "alt": "Orla de Miami de dia, clima visual de Vice City no lançamento do GTA 6.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
+      },
+      "legenda": "Vice City pega o clima de uma cidade costeira da Flórida. A foto é Miami, não um mapa do jogo."
     },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que ainda não tem data"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Computador não aparece na lista. Não há pré-venda de PC, nem página de requisitos, nem anúncio de Steam ou de Rockstar Launcher para Grand Theft Auto VI. Quem vender chave de PC nesta semana não está vendendo o jogo que a Rockstar pôs à venda."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O histórico da empresa é outro assunto, e vale como histórico: GTA V chegou ao PC em 14 de abril de 2015, depois dos consoles, e Red Dead Redemption 2 em 5 de novembro de 2019. Isso não marca um mês para o GTA 6. A conta de quanto tempo demorou está na matéria de [plataformas](/blog/gta-6-plataformas-ps5-xbox-e-pc)."
+    },
+    {
+      "tipo": "lista",
+      "itens": [
+        "Jogo base, edições e o pacote Vintage Vice City: matéria de [preço](/blog/gta-6-preco-e-edicoes).",
+        "Lucia Caminos e Jason Duval, com a sinopse oficial: [a dupla](/blog/gta-6-lucia-e-jason).",
+        "Leonida e Vice City, sem completar o mapa no chute: [o cenário](/blog/gta-6-mapa-leonida-e-vice-city)."
+      ]
+    },
+    {
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/gta-6-lancamento-19-novembro-2026-fecho.webp",
+        "alt": "Pessoa segurando um controle, com a mesa de jogo ao lado, na estreia do GTA 6.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
+      },
+      "legenda": "Quem vai jogar no sofá já pode deixar o controle carregado antes da meia-noite."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "E se o seu plano é o computador"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Dá para montar ou melhorar o PC para os jogos de mundo aberto que você já joga, para GTA V e para uma live. Não dá para gravar na nota que a máquina foi feita para o GTA 6. A Rockstar não publicou essa ficha. O ponto de partida está em [PC para GTA 6](/blog/pc-para-gta-6-sem-requisito-oficial)."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "pc-gamer",
+      "titulo": "Quer um PC para os jogos que você já roda?",
+      "texto": "Na Balão da Informática Anchieta, loja de informática em Campinas, a conversa começa pelo monitor e pelos jogos de hoje. O orçamento sai no WhatsApp (19) 98751-0267 ou no balcão da Av. Anchieta, 789, Cambuí.",
+      "rotulo": "Pedir um orçamento",
+      "href": "/montagempc",
+      "mensagem": "Olá! Li a matéria do lançamento do GTA 6 e quero orçamento de um PC para os jogos que eu já rodo."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A série inteira está em [GTA 6 no blog](/blog/gta-6). A loja fica na Av. Anchieta, 789, Cambuí, Campinas, com telefone (19) 3255-1661."
+    }
   ],
-  perguntas: [
+  "perguntas": [
     {
-      pergunta: "GTA 6 já lançou?",
-      resposta: "O lançamento de console marcado pela Rockstar é 19 de novembro de 2026, para PlayStation 5 e Xbox Series X|S. Uma matéria antiga que ainda cita 26 de maio de 2026 está desatualizada: essa data foi substituída em novembro de 2025.",
+      "pergunta": "Qual é a data do lançamento do GTA 6?",
+      "resposta": "19 de novembro de 2026. A Rockstar publicou essa data no newswire de 6 de novembro de 2025 e ela continua na página oficial do jogo."
     },
     {
-      pergunta: "Dá para jogar GTA 6 no PC nesse dia?",
-      resposta: "Até 19 de novembro de 2026 a Rockstar não tinha anunciado versão de PC, nem pré-venda, nem requisito. O que está à venda para o dia do lançamento é o jogo de console.",
+      "pergunta": "GTA 6 sai para PC no lançamento?",
+      "resposta": "Não foi anunciado. A página oficial lista PlayStation 5 e Xbox Series X|S. Não há pré-venda de computador nem ficha técnica de PC."
     },
     {
-      pergunta: "Por que tanta gente ainda fala em maio de 2026?",
-      resposta: "Porque essa foi a data anunciada antes. A Reuters e a The Verge registram a troca para 19 de novembro de 2026. Quando duas datas circulam, vale a do comunicado mais novo.",
+      "pergunta": "A que horas libera no PS5 no Brasil?",
+      "resposta": "O suporte da PlayStation marca meia-noite no horário local de 19 de novembro de 2026. No horário de Brasília, isso é 00:00 do dia 19."
     },
     {
-      pergunta: "O jogo tem modo online no lançamento?",
-      resposta: "A página da PlayStation descreve Grand Theft Auto VI como uma experiência de um jogador. Um modo online no dia do lançamento não está nessa resposta.",
+      "pergunta": "A caixa física já traz o jogo instalado?",
+      "resposta": "Não. A Take-Two descreveu a versão de loja como uma caixa com código de download. Você ainda precisa de espaço livre no console."
     },
+    {
+      "pergunta": "Dá para confiar numa data de maio que ainda circula?",
+      "resposta": "Não. Maio de 2026 foi uma data anterior. A The Verge registrou a troca, e a data que a Rockstar mantém no ar é 19 de novembro de 2026."
+    }
   ],
-  fontes: [
-    ROCKSTARDATA,
-    VERGEATRASO,
-    REUTERS,
-    PLAYSTATION,
-    TAKETWO,
-  ],
+  "fontes": [
+    {
+      "nome": "Rockstar Games — página oficial de Grand Theft Auto VI",
+      "url": "https://www.rockstargames.com/VI",
+      "data": "consulta em 19 de novembro de 2026"
+    },
+    {
+      "nome": "Rockstar Games — “Grand Theft Auto VI is Now Set to Launch November 19, 2026”",
+      "url": "https://www.rockstargames.com/newswire/article/ak3ak31a49a221/grand-theft-auto-vi-is-now-set-to-launch-november-19-2026",
+      "data": "6 de novembro de 2025"
+    },
+    {
+      "nome": "PlayStation — página de Grand Theft Auto VI",
+      "url": "https://www.playstation.com/en-us/games/grand-theft-auto-vi/",
+      "data": "consulta em 19 de novembro de 2026"
+    },
+    {
+      "nome": "PlayStation — suporte de Grand Theft Auto VI",
+      "url": "https://www.playstation.com/en-us/support/games/gta-vi-support/",
+      "data": "consulta em 19 de novembro de 2026"
+    },
+    {
+      "nome": "The Verge — cobertura do adiamento para novembro de 2026",
+      "url": "https://www.theverge.com/news/816005/grand-theft-auto-vi-gta-g-delayed-november-2026",
+      "data": "6 de novembro de 2025"
+    },
+    {
+      "nome": "Reuters — Take-Two adia GTA VI para novembro do ano seguinte",
+      "url": "https://www.reuters.com/business/media-telecom/take-two-interactive-further-delays-gta-vi-november-next-year-2025-11-06/",
+      "data": "6 de novembro de 2025"
+    }
+  ]
 };
 
 export default artigo;

@@ -1,275 +1,255 @@
-import type { Artigo, Fonte } from "@/lib/blog/tipos";
-
-const OBS: Fonte = {
-  nome: "OBS Project — OBS Studio",
-  url: "https://obsproject.com/",
-  data: "consulta em 19 de novembro de 2026",
-};
-
-const ROCKSTARVI: Fonte = {
-  nome: "Rockstar Games — página oficial de Grand Theft Auto VI",
-  url: "https://www.rockstargames.com/VI",
-  data: "consulta em 19 de novembro de 2026",
-};
+import type { Artigo } from "@/lib/blog/tipos";
 
 const artigo: Artigo = {
-  slug: "microfone-para-live-de-jogo",
-  titulo: "Microfone para live de jogo: o que muda a voz",
-  resumo: "Dinâmico costuma ignorar mais a sala. Condensador pega mais detalhe e mais ruído. Perto da boca muda a voz mais do que a marca do microfone.",
-  categoria: "guias",
-  etiquetas: [
-    "GTA 6",
+  "slug": "microfone-para-live-de-jogo",
+  "titulo": "Microfone para live de jogo: como a voz chega limpa",
+  "resumo": "Microfone para live de jogo: dinâmico aguenta quarto barulhento, condensador pede sala quieta. Veja distância, suporte e o teste de um minuto no OBS.",
+  "categoria": "guias",
+  "etiquetas": [
     "Microfone",
     "Live",
+    "Áudio",
+    "GTA 6"
   ],
-  capa: {
-    src: "/blog/capas/microfone-para-live-de-jogo.webp",
-    alt: "Microfone e fone num setup de gravação.",
-    largura: 1536,
-    altura: 1024,
-    pronta: false,
+  "capa": {
+    "src": "/blog/capas/microfone-para-live-de-jogo.webp",
+    "alt": "Microfone e fone num setup de gravação, escolha de microfone para live de jogo.",
+    "largura": 1536,
+    "altura": 1024,
+    "pronta": false
   },
-  publicadoEm: "2026-11-08T18:00:00.000Z",
-  autor: {
-    nome: "Equipe Balão da Informática",
-    url: "/sobre-nos",
+  "publicadoEm": "2026-11-08T18:00:00.000Z",
+  "atualizadoEm": "2026-11-19T12:00:00.000Z",
+  "autor": {
+    "nome": "Balão da Informática Anchieta",
+    "cargo": "Loja de informática em Campinas",
+    "url": "/sobre-nos"
   },
-  origem: "autoral",
-  seo: {
-    titulo: "Microfone para live: o que muda a voz de fato",
-    palavrasChave: [
-      "microfone para live",
-      "microfone dinâmico ou condensador",
-      "voz na live de jogo",
-      "posição do microfone",
-    ],
+  "origem": "autoral",
+  "seo": {
+    "titulo": "Microfone para live de jogo: dinâmico ou condensador",
+    "descricao": "Microfone para live de jogo: dinâmico aguenta quarto barulhento, condensador pede sala quieta. Veja distância, suporte e o teste de um minuto no OBS.",
+    "palavrasChave": [
+      "microfone para live de jogo",
+      "microfone para stream",
+      "dinâmico ou condensador",
+      "mic para gta"
+    ]
   },
-  blocos: [
+  "blocos": [
     {
-      tipo: "paragrafo",
-      texto: "A voz da sua live fica inteligível ou fica um murmúrio, e isso aparece antes de qualquer desenho na tela. Quem assiste perdoa gráfico simples. Não perdoa frase que precisa adivinhar. O que muda esse resultado, na prática, é a distância da boca, o tipo de microfone e o barulho da sala. O logotipo entra por último, e não há um modelo obrigatório para começar.",
+      "tipo": "paragrafo",
+      "texto": "Microfone para live de jogo decide se a plateia entende a chamada ou ouve o teclado. O GTA, no PC, ainda é o GTA V na hora de treinar: a versão nova não foi anunciada para computador. O microfone que você escolhe agora vale para essa live e para a próxima. A regra curta é distância e tipo, não a marca mais falada do mês."
     },
     {
-      tipo: "paragrafo",
-      texto: "Este texto não elege um aparelho. Dinâmico e condensador fazem trabalhos diferentes, e os dois podem servir, conforme o quarto em que você senta. A [página da Rockstar](https://www.rockstargames.com/VI) também não indica microfone de GTA 6: a versão de computador não estava anunciada até 19 de novembro de 2026. A voz que você arruma é a da live que já existe.",
+      "tipo": "resumo",
+      "titulo": "Resposta rápida",
+      "itens": [
+        "Quarto com ventilador, rua e teclado alto: microfone dinâmico, perto da boca.",
+        "Sala quieta e tratada: condensador revela detalhe, e também revela o cachorro.",
+        "Fone fechado. Caixa de som aberta volta o jogo para o microfone e vira eco."
+      ]
     },
     {
-      tipo: "resumo",
-      itens: [
-        "**Perto da boca pesa mais que a marca.** A distância muda a voz antes do logotipo.",
-        "**Dinâmico costuma ignorar mais a sala.** Teclado e eco entram menos.",
-        "**Condensador pega detalhe e ruído.** Sala quieta combina mais com ele.",
-        "**Não há modelo obrigatório.** Você ouve uma gravação curta e decide.",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Microfone para live de jogo: dinâmico ou condensador"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que a outra pessoa escuta de fato",
+      "tipo": "paragrafo",
+      "texto": "Dinâmico perdoa ambiente. Ele quer a voz perto e ignora boa parte do que está longe, inclusive o clique da tecla e o carro na rua. É a escolha da maioria das mesas de quarto, que não têm parede acústica. Condensador é mais sensível. Em sala quieta, a voz fica cheia. Em quarto comum, ele grava o ventilador do PC, a cadeira e a conversa do lado. Se você não tratou a sala, comece pelo dinâmico."
     },
     {
-      tipo: "paragrafo",
-      texto: "Do outro lado, a pessoa não vê a caixa do microfone. Ela ouve frase, respiração e o que a sala acrescenta: ventilador, teclado, rua, eco. Se a frase se entende de primeira, a voz cumpriu o papel. Se ela pede repetição, o problema está nesse caminho, não num overlay que ainda nem entrou. Grave um minuto no lugar em que você realmente joga.",
+      "tipo": "paragrafo",
+      "texto": "USB facilita: liga e aparece no OBS. Interface de áudio com microfone XLR dá mais controle e mais cabo. Para a primeira live séria, USB dinâmico resolve. XLR entra quando você já sabe que o gargalo é o pré-amp, não o hábito de falar longe. O guia rápido da OBS mostra onde o dispositivo de áudio é escolhido. Se o programa está no microfone do monitor, nenhum dinâmico caro entra na live."
     },
     {
-      tipo: "paragrafo",
-      texto: "Grave com o jogo aberto ou com o teclado em uso, porque é assim que a live acontece. Uma frase lida em silêncio, longe da mesa, descreve outro cômodo. Ouça no fone, não só na caixa do monitor, e anote o que sobra: sopro na letra P, clique de tecla, ou voz fina demais. Esse bilhete vale mais do que a lista de recursos impressa na embalagem.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Dinâmico e condensador em salas reais",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/microfone-para-live-de-jogo-tipos.webp",
-        alt: "Microfone e câmera apontados para a mesma mesa.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/microfone-para-live-de-jogo-tipos.webp",
+        "alt": "Microfone e câmera na mesma mesa, posição de um microfone para live de jogo.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Microfone e câmera apontados para a mesma mesa. Foto de Abdellah Benziane (Pexels).",
+      "legenda": "Microfone e câmera apontados para o mesmo lugar: os dois precisam ver você, não o teto."
     },
     {
-      tipo: "paragrafo",
-      texto: "O microfone dinâmico costuma ignorar mais a sala. Ele favorece o que está perto e deixa teclado, cadeira e janela um pouco mais de fora. Em quarto sem tratamento, com eco e com gente passando, esse comportamento ajuda. Você não ganha um estúdio. Você ganha uma voz em que o quarto ocupa menos espaço. A posição perto da boca continua obrigatória, senão o dinâmico também fica opaco.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "O condensador pega mais detalhe da voz e, junto, mais ruído. Respiração, mouse, ventilador e a parede que devolve o som aparecem com mais clareza. Num cômodo quieto, isso pode soar presente e próximo. Num cômodo vivo, a mesma qualidade vira distração. Nenhum dos dois tipos apaga uma sala ruim sozinho. Eles só escolhem o quanto dessa sala viaja com a sua frase.",
-    },
-    {
-      tipo: "tabela",
-      titulo: "Qual comportamento combina com qual sala",
-      colunas: [
+      "tipo": "tabela",
+      "titulo": "Qual tipo combina com a sua sala",
+      "colunas": [
         "Sua sala",
-        "Comportamento que costuma caber",
-        "O que você ainda ajusta",
+        "Tipo",
+        "Distância"
       ],
-      linhas: [
+      "linhas": [
         [
-          "Eco, teclado, rua",
-          "Dinâmico, que ignora mais o quarto",
-          "Chegar da boca",
+          "Ventilador, janela para a rua, teclado mecânico",
+          "Dinâmico",
+          "Perto da boca, ao lado, não na frente do sopro"
         ],
         [
-          "Quarto quieto",
-          "Condensador, mais detalhe e mais ruído",
-          "Ganho e posição",
+          "Quarto fechado, PC silencioso",
+          "Condensador serve",
+          "Um palmo, com o ganho mais baixo"
         ],
         [
-          "Sem tratamento nenhum",
-          "Nenhum tipo apaga a sala sozinho",
-          "Posição primeiro",
+          "Você anda pela sala enquanto fala",
+          "Headset, por enquanto",
+          "O de mesa vai ficar para trás"
         ],
         [
-          "Qualquer logotipo",
-          "Não há modelo obrigatório",
-          "Ouvir a gravação",
-        ],
+          "Caixa de som em vez de fone",
+          "Nenhum fica limpo",
+          "Troque para fone fechado antes de trocar o mic"
+        ]
       ],
-      nota: "Comparação de uso para você escolher o comportamento. Não é ranking de marca nem medição de bancada.",
+      "nota": "Escolha de formato. Modelo e preço mudam. A loja mostra o que está no balcão no dia."
     },
     {
-      tipo: "titulo",
-      nivel: 3,
-      texto: "Sala pequena não é estúdio",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Posição, ganho e o teste de um minuto"
     },
     {
-      tipo: "paragrafo",
-      texto: "Tapete, cortina e estante cheia mudam o eco mais do que um adesivo no microfone. Você não precisa reformar o quarto para transmitir. Precisa saber o que a gravação está captando. Se a voz volta como se estivesse num banheiro, aproxime o microfone e tire a fonte do som de trás de você. Tratar a sala inteira é outro projeto, e não é o primeiro passo.",
+      "tipo": "paragrafo",
+      "texto": "O microfone fica ao lado da boca, apontado para ela, não de frente para o sopro das plosivas. Um palmo de distância no dinâmico é ponto de partida. Mais longe, você aumenta o ganho e o quarto entra junto. No OBS, fale a frase que você usa quando morre no jogo, no volume real, e olhe a barra. Verde no meio, sem bater no teto. Se bate, baixe. Se nem se mexe, aproxime, não só aumente o ganho."
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Perto da boca, antes da marca",
+      "tipo": "paragrafo",
+      "texto": "Filtro de ruído ajuda um ventilador constante. Não faz milagre em teclado colado na cápsula. Afaste primeiro, filtre depois. Suporte de braço tira o mic da mesa e do impacto do mouse. Pedestal de mesa também serve se não dançar quando você apoia o pulso. Choque mecânico, aquele suporte que segura o mic por elástico, corta a batida na mesa."
     },
     {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/microfone-para-live-de-jogo-ordem-voz.webp",
-        alt: "Headset e teclado iluminado na frente de dois monitores.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/microfone-para-live-de-jogo-ordem-voz.webp",
+        "alt": "Headset e teclado na frente de dois monitores, comparação com um microfone para live de jogo.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Headset e teclado iluminado na frente de dois monitores. Foto de Matheus Bertelli (Pexels).",
+      "legenda": "Headset na frente de dois monitores: o microfone do fone é o ensaio. O de mesa é o passo seguinte."
     },
     {
-      tipo: "paragrafo",
-      texto: "A posição perto da boca muda mais a voz do que a marca. Um palmo a mais de distância já mistura o quarto na frase, e um microfone caro no fundo da mesa continua longe. Deixe a cápsula na direção da boca, um pouco ao lado, para o sopro não estourar, e firme o suporte. Essa regulagem você faz hoje, com o aparelho que já tem.",
+      "tipo": "pros-contras",
+      "titulo": "Voz limpa",
+      "pros": [
+        "Dinâmico perto da boca em quarto comum.",
+        "Fone fechado, para o jogo não voltar ao mic.",
+        "Teste de um minuto no OBS antes de abrir a live."
+      ],
+      "contras": [
+        "Condensador no máximo no meio da sala, longe da boca.",
+        "Microfone em cima do teclado mecânico.",
+        "Caixa de som alta e microfone sensível no mesmo metro."
+      ]
     },
     {
-      tipo: "paragrafo",
-      texto: "Trocar de marca sem mudar a distância repete o mesmo defeito com outra logo. Se a gravação só ficou clara quando você aproximou, o passo seguinte não é um modelo novo: é um braço ou um apoio que mantenha essa distância. Se aproximar piorou o sopro e o clique, aí o tipo e o ganho entram na conversa. A marca, sozinha, não decide nenhum dos dois casos.",
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "Escolha o tipo pela sala, não pelo vídeo de unboxing.",
+        "Posicione ao lado da boca e prenda o cabo.",
+        "Selecione esse dispositivo no OBS, não o do monitor.",
+        "Grave um minuto, assista de fone, e ajuste ganho."
+      ]
     },
     {
-      tipo: "destaque",
-      tom: "nota",
-      titulo: "Ouça antes de trocar",
-      texto: "Grave um minuto no lugar real, com teclado e cadeira. Se a frase se entende perto da boca, a marca não é o próximo passo. Se a sala domina mesmo perto, o tipo do microfone passa a importar.",
+      "tipo": "paragrafo",
+      "texto": "A cena inteira está em [OBS para live](/blog/obs-para-live-de-jogo). A mesa, em [setup de streamer](/blog/setup-de-streamer-para-gta-6)."
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que o computador faz com essa voz",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "O microfone precisa de uma entrada livre, e o programa de captura precisa receber essa fonte. No OBS, a voz entra na cena no mesmo lugar em que o jogo entra. O guia de [OBS para live de jogo](/blog/obs-para-live-de-jogo) mostra essa organização. Se o processador já está no limite com o jogo, a voz disputa espaço com a partida. A folga está no [setup de streamer](/blog/setup-de-streamer-para-gta-6).",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Filtro no programa ajuda depois que a distância está certa. Reduzir ruído num microfone que está do outro lado da mesa deixa a voz abafada e o teclado ainda presente. Use o filtro para aparar o que sobrou, não para compensar um aparelho longe. A câmera, que é outro ingrediente da cena, tem página própria em [webcam para stream](/blog/webcam-para-stream). Uma não conserta a outra.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que não vale decidir no escuro",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Não há produto obrigatório nesta página. Dois dinâmicos de marcas diferentes podem se parecer mais entre si do que um dinâmico e um condensador da mesma prateleira. Por isso a primeira pergunta é o quarto, não o catálogo. Você descreve eco, teclado e o quanto consegue aproximar da boca. Com isso, o tipo fica óbvio na maior parte das vezes, e a marca vira preferência, não salvação.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Quem está começando no [Twitch, YouTube ou Kick](/blog/comecar-no-twitch-youtube-ou-kick) precisa de áudio inteligível antes de overlay. Essa exigência não muda com a plataforma. Um título honesto com voz opaca continua difícil de acompanhar. Acerte a gravação de um minuto, no horário em que você joga, e só então abra a transmissão. A plataforma não devolve a frase que o microfone não captou.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/microfone-para-live-de-jogo-fecho.webp",
-        alt: "Fone, teclado mecânico e acessórios sobre o mousepad.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/microfone-para-live-de-jogo-fecho.webp",
+        "alt": "Fone, teclado mecânico e mousepad, mesa em que o microfone para live de jogo precisa sair de cima das teclas.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Fone, teclado mecânico e acessórios sobre o mousepad. Foto de Pew Nguyen (Pexels).",
+      "legenda": "Fone, teclado e mousepad: se o mic mora aqui no meio, ele grava a tecla. Puxe para o lado da boca."
     },
     {
-      tipo: "pros-contras",
-      pros: [
-        "A distância da boca é um ajuste que você faz sem trocar de aparelho",
-        "Dinâmico e condensador ficam ligados ao tipo de sala, não a um ranking de marca",
-        "Uma gravação de um minuto no lugar real mostra o defeito antes da compra",
-      ],
-      contras: [
-        "Nenhum tipo apaga eco, teclado e rua se o microfone está longe",
-        "Filtro no programa não substitui posição",
-        "Não existe modelo oficial para GTA 6 nem um aparelho obrigatório para começar",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O minuto de teste que vale a compra"
     },
     {
-      tipo: "chamada",
-      tema: "geral",
+      "tipo": "paragrafo",
+      "texto": "Grave no OBS a frase que você diz quando erra a curva, no volume real, com o teclado do lado, como na partida. Assista de fone. Se a tecla aparece mais do que a palavra, afaste o mic ou troque para um dinâmico. Se a voz estoura nos P e nos B, afaste um dedo e use o filtro de pop, aquela tela redonda, ou só o ângulo de lado. Se o ventilador vira um ronco constante, baixe o ganho antes de comprar outro microfone. Muita troca é posição."
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Levar a voz para quem monta",
+      "tipo": "paragrafo",
+      "texto": "Confira se o OBS está no dispositivo certo. Monitor com microfone embutido sequestra a live quando o USB do mic pisca e o programa volta para o padrão. Trave o dispositivo nas configurações. Fone fechado na orelha, volume do jogo abaixo da voz. Caixa de som e microfone sensível no mesmo metro produzem eco que nenhum filtro apaga direito. Esse teste cabe na loja, no balcão, antes de você levar o modelo para casa e descobrir no quarto."
     },
     {
-      tipo: "paragrafo",
-      texto: "Na Balão da Informática Anchieta, na Av. Anchieta, 789, no Cambuí, em Campinas, leve a gravação de um minuto ou descreva o quarto: eco, teclado, janela, distância que o braço alcança. A conversa é sobre o comportamento do microfone, não sobre um modelo único. A máquina, se entrar, é a que ainda tem folga para a voz.",
+      "tipo": "lista",
+      "itens": [
+        "Grave uma frase no volume da partida, com o teclado perto.",
+        "Trave o dispositivo no OBS.",
+        "Fone fechado, não caixa, na hora do teste."
+      ]
     },
     {
-      tipo: "paragrafo",
-      texto: "O WhatsApp da loja é (19) 98751-0267. A decisão é esta: se a frase se entende perto da boca, mantenha o aparelho e fixe a posição. Se a sala domina mesmo assim, escolha o tipo pelo quarto. Marca vem depois, e só se ainda fizer diferença nessa gravação.",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Ganho, distância e a barra verde"
     },
     {
-      tipo: "chamada",
-      titulo: "A Balão da Informática Anchieta ouve o problema da sala.",
-      texto: "No WhatsApp (19) 98751-0267, conte a distância e o barulho do quarto. A decisão é a voz inteligível no lugar em que você joga.",
-      rotulo: "Pedir orçamento no WhatsApp",
+      "tipo": "paragrafo",
+      "texto": "Fale a frase alta e a frase baixa, as duas que você usa na partida. A barra do OBS fica verde nas duas, sem bater no teto na alta e sem sumir na baixa. Se só uma funciona, aproxime o mic em vez de subir o ganho até o quarto entrar. Dinâmico perto da boca perdoa. Longe, nenhum modelo salva."
     },
+    {
+      "tipo": "paragrafo",
+      "texto": "Grave com o jogo no fone, no volume real. Se o microfone pega o vazamento do fone aberto, troque para fechado ou abaixe o jogo. Esse teste leva um minuto e evita a compra do “microfone melhor” quando o problema era o fone. Na loja, dá para fazer no balcão antes de levar."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Suporte de braço só vale se a mesa não balança. Mesa bamba transforma o braço num pêndulo e a voz sai oscilando. Nesse caso, um pedestal firme na mesa, com o mic ao lado da boca, é mais estável do que o braço longo."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "geral",
+      "titulo": "Quer ouvir o microfone antes de levar?",
+      "texto": "Na Balão da Informática Anchieta, loja de informática em Campinas você testa o mic no balcão do Cambuí. Av. Anchieta, 789. WhatsApp (19) 98751-0267.",
+      "rotulo": "Falar com a loja",
+      "href": "/fale-conosco",
+      "mensagem": "Olá! Li a matéria de microfone para live de jogo e quero testar um modelo na loja."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Microfone para live de jogo segue, com o restante da série, em [GTA 6 no blog](/blog/gta-6)."
+    }
   ],
-  perguntas: [
+  "perguntas": [
     {
-      pergunta: "Microfone dinâmico ou condensador para um quarto comum?",
-      resposta: "No quarto com eco, teclado e rua, o dinâmico costuma ignorar mais a sala. O condensador entrega mais detalhe e também mais ruído, e combina mais com um cômodo quieto. Os dois ainda dependem de ficar perto da boca.",
+      "pergunta": "Dinâmico ou condensador para live de jogo?",
+      "resposta": "Dinâmico se o quarto tem barulho de teclado, ventilador ou rua. Condensador se a sala é quieta. Na dúvida, dinâmico perdoa mais."
     },
     {
-      pergunta: "A marca do microfone muda mais do que a posição?",
-      resposta: "Não. Chegar a cápsula da boca muda mais a voz do que trocar o logotipo. Um aparelho caro no fundo da mesa continua longe. Primeiro fixe a distância. Depois avalie se a marca ainda faz alguma diferença.",
+      "pergunta": "USB ou XLR?",
+      "resposta": "USB para começar: liga e aparece no OBS. XLR com interface quando você já sabe que quer mais controle. Os dois ficam ruins se o mic está longe."
     },
     {
-      pergunta: "Existe um microfone obrigatório para live de jogo?",
-      resposta: "Não. Não há modelo obrigatório, e GTA 6 de PC não publicou uma indicação porque a versão de computador não estava anunciada até 19 de novembro de 2026. A escolha começa pela sala e pela gravação.",
+      "pergunta": "O microfone do headset serve?",
+      "resposta": "Serve para ensaiar e para call. Para uma live em que a voz é parte do canal, um microfone dedicado perto da boca é outro patamar."
     },
     {
-      pergunta: "O computador influencia a voz da live?",
-      resposta: "Influencia na folga. O programa de captura precisa receber o microfone, e o processador precisa sobrar para a voz com o jogo aberto. Filtro ajuda depois da posição certa. Não conserta um microfone do outro lado da mesa.",
+      "pergunta": "Por que o teclado sai mais alto que eu?",
+      "resposta": "Porque o mic está em cima das teclas ou o ganho está alto demais. Afaste, abaixe o ganho e só então pense em filtro."
     },
     {
-      pergunta: "Devo colocar overlay antes de acertar o áudio?",
-      resposta: "Não. A pessoa do outro lado precisa entender a frase antes de ver alerta e borda. Grave um minuto no lugar real. Se a voz falha, o próximo passo é distância, tipo ou folga da máquina.",
-    },
+      "pergunta": "Preciso de mesa de som?",
+      "resposta": "Não para a primeira live. O misturador do OBS e um mic decente resolvem. Mesa entra quando há mais de uma fonte de verdade."
+    }
   ],
-  fontes: [
-    OBS,
-    ROCKSTARVI,
-  ],
+  "fontes": [
+    {
+      "nome": "OBS Studio — guia de início rápido",
+      "url": "https://obsproject.com/kb/quick-start-guide",
+      "data": "consulta em 19 de novembro de 2026"
+    }
+  ]
 };
 
 export default artigo;

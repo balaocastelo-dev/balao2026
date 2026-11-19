@@ -1,294 +1,251 @@
-import type { Artigo, Fonte } from "@/lib/blog/tipos";
-
-const PSSUPORTE: Fonte = {
-  nome: "PlayStation — suporte de Grand Theft Auto VI",
-  url: "https://www.playstation.com/en-us/support/games/gta-vi-support/",
-  data: "consulta em 19 de novembro de 2026",
-};
-
-const VERGETAMANHO: Fonte = {
-  nome: "The Verge — “GTA VI’s download will need up to 212GB of hard drive space”",
-  url: "https://www.theverge.com/games/1025271/gta-vi-storage-space-rockstar-games",
-  data: "novembro de 2026",
-};
-
-const PLAYSTATION: Fonte = {
-  nome: "PlayStation — página de Grand Theft Auto VI",
-  url: "https://www.playstation.com/en-us/games/grand-theft-auto-vi/",
-  data: "consulta em 19 de novembro de 2026",
-};
-
-const ROCKSTARVI: Fonte = {
-  nome: "Rockstar Games — página oficial de Grand Theft Auto VI",
-  url: "https://www.rockstargames.com/VI",
-  data: "consulta em 19 de novembro de 2026",
-};
-
-const YAHOOPC: Fonte = {
-  nome: "Yahoo / Just Jared — “GTA 6 PC Release Date: Is Grand Theft Auto VI Coming to PC?”",
-  url: "https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html",
-  data: "15 de novembro de 2026",
-};
+import type { Artigo } from "@/lib/blog/tipos";
 
 const artigo: Artigo = {
-  slug: "ssd-para-gta-6",
-  titulo: "SSD para GTA 6: o que o tamanho no console ensina",
-  resumo: "O PS5 pede pelo menos 212 GB, e isso é número de console. Num PC, o hábito útil para jogo grande é SSD com folga, não um HD.",
-  categoria: "hardware",
-  etiquetas: [
+  "slug": "ssd-para-gta-6",
+  "titulo": "SSD para GTA 6: por que o disco muda a hora de jogar",
+  "resumo": "SSD para GTA 6: no PS5 são pelo menos 212 GB. No PC, o NVMe evita a cidade carregando na curva. Veja a folga e o que não deixar no HD.",
+  "categoria": "hardware",
+  "etiquetas": [
     "GTA 6",
     "SSD",
-    "Armazenamento",
+    "Armazenamento"
   ],
-  capa: {
-    src: "/blog/capas/ssd-para-gta-6.webp",
-    alt: "SSD NVMe Lexar encaixado numa placa.",
-    largura: 1536,
-    altura: 1024,
-    pronta: false,
+  "capa": {
+    "src": "/blog/capas/ssd-para-gta-6.webp",
+    "alt": "SSD NVMe encaixado numa placa, o disco que muda o carregamento de jogos como GTA 6.",
+    "largura": 1536,
+    "altura": 1024,
+    "pronta": false
   },
-  publicadoEm: "2026-11-12T18:00:00.000Z",
-  autor: {
-    nome: "Equipe Balão da Informática",
-    url: "/sobre-nos",
+  "publicadoEm": "2026-11-12T18:00:00.000Z",
+  "atualizadoEm": "2026-11-19T12:00:00.000Z",
+  "autor": {
+    "nome": "Balão da Informática Anchieta",
+    "cargo": "Loja de informática em Campinas",
+    "url": "/sobre-nos"
   },
-  origem: "autoral",
-  seo: {
-    titulo: "SSD para GTA 6: o que o console ensina",
-    palavrasChave: [
+  "origem": "autoral",
+  "seo": {
+    "titulo": "SSD para GTA 6: espaço, NVMe e o que instalar",
+    "descricao": "SSD para GTA 6: no PS5 são pelo menos 212 GB. No PC, o NVMe evita a cidade carregando na curva. Veja a folga e o que não deixar no HD.",
+    "palavrasChave": [
       "ssd para gta 6",
-      "gta 6 212 gb",
-      "ssd ou hd para jogo",
-      "espaço em disco para jogo",
-    ],
+      "espaço em disco gta 6",
+      "nvme para jogo",
+      "hd ou ssd gta 6"
+    ]
   },
-  blocos: [
+  "blocos": [
     {
-      tipo: "paragrafo",
-      texto: "O número 212 GB já saiu do console e entrou em lista de PC. Ele não nasceu nessa lista. Até 19 de novembro de 2026 ninguém da Rockstar publicou tamanho de instalação para computador, porque o PC não estava anunciado. O que existe, com fonte, é espaço de console. Tratar os dois como a mesma conta é o erro que esta página desfaz.",
+      "tipo": "paragrafo",
+      "texto": "SSD para GTA 6 entra na conversa por um número que já existe, e por um que ainda não existe. No PlayStation 5, a PlayStation pede pelo menos 212 GB livres para a pré-carga. No computador, a Rockstar não publicou instalador nem versão. O que já dá para fazer é tirar jogo grande de HD antigo e deixar folga num SSD NVMe, porque mundo aberto lê a cidade enquanto você dirige."
     },
     {
-      tipo: "paragrafo",
-      texto: "No computador, o hábito que presta para jogo grande é outro: SSD no lugar de HD, com folga sobrando depois da instalação. Isso vale para os jogos que você já tem e que ocupam dezenas de gigabytes. Não é um requisito oficial de GTA 6. É a diferença entre abrir o jogo e esperar o disco mecânico alcançar o arquivo.",
+      "tipo": "resumo",
+      "titulo": "Resposta rápida",
+      "itens": [
+        "212 GB é o piso do PS5, publicado pela PlayStation. Não é o tamanho de um futuro instalador de PC.",
+        "No computador, jogo grande vai para SSD. HD fica para arquivo, foto e o que você não abre toda noite.",
+        "Deixe espaço livre além do instalador. Disco cheio até a tampa fica lento e falha na atualização."
+      ]
     },
     {
-      tipo: "resumo",
-      itens: [
-        "**212 GB são número de console.** O suporte da PlayStation fala em pelo menos 212 GB no PS5.",
-        "**Até 212 GB, conforme o aparelho.** É o que a The Verge atribui à Rockstar. Continua sendo console.",
-        "**Dá para inferir um jogo grande.** Se um dia houver PC, a instalação tende a ser pesada. A inferência está rotulada.",
-        "**O hábito útil é SSD com folga.** HD fica para arquivo. Nenhum dos dois é ficha oficial.",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "SSD para GTA 6: o que o número do console ensina"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "212 GB é conta de console",
+      "tipo": "paragrafo",
+      "texto": "Duzentos e doze gigabytes, no console, já incluem o cuidado de apagar coisa antes da estreia. A The Verge registrou a frase da Rockstar de “até 212 GB, conforme o aparelho”. A página da PlayStation é mais direta: libere no mínimo 212 GB. Quem tem o PS5 encontra o calendário na matéria de [pré-carga](/blog/gta-6-pre-carga-e-tamanho). Quem está no PC usa o número como aviso de escala. Um jogo desse tamanho, mais o sistema, mais a captura da jogada, não cabe num SSD de 256 GB que já guarda o Windows e dois lançamentos."
     },
     {
-      tipo: "paragrafo",
-      texto: "O suporte da PlayStation pede pelo menos 212 GB livres no PS5 para Grand Theft Auto VI. A [página de suporte](https://www.playstation.com/en-us/support/games/gta-vi-support/) é o lugar dessa frase, não um fórum. A [The Verge](https://www.theverge.com/games/1025271/gta-vi-storage-space-rockstar-games) registra outro recorte: a Rockstar falou em um arquivo de até 212 GB, conforme o aparelho. As duas frases não são a mesma medida com duas palavras.",
+      "tipo": "paragrafo",
+      "texto": "HD mecânico ainda guarda arquivo com competência. Ele não serve como disco do jogo quando a cidade é transmitida do armazenamento para a memória no meio do movimento. A pausa para “ler” a próxima quadra é o sintoma clássico. SSD, em especial NVMe encaixado na placa-mãe, corta essa espera nos jogos atuais. Quando a versão de PC do GTA 6 existir, a tendência de a Rockstar pedir SSD já apareceu em GTA V e em Red Dead no computador. Tendência não é ficha. É motivo para não comprar HD “porque tem mais terabyte pelo mesmo dinheiro”."
     },
     {
-      tipo: "paragrafo",
-      texto: "“Pelo menos 212 GB” é o espaço que o console precisa ter livre. “Até 212 GB” é o teto do arquivo conforme o aparelho, do jeito que a The Verge reportou. Um PS5 e um Xbox Series não são obrigados a ocupar o mesmo número. Nenhum dos dois textos descreve uma pasta no Windows. A [página do jogo](https://www.rockstargames.com/VI) segue sem versão de PC.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/ssd-para-gta-6-gigas.webp",
-        alt: "HD externo com cabo USB, em close.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/ssd-para-gta-6-gigas.webp",
+        "alt": "HD externo com cabo USB, armazenamento que não substitui o SSD para GTA 6 e jogos de mundo aberto.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "HD externo com cabo USB, em close. Foto de Nothing Ahead (Pexels).",
+      "legenda": "HD externo resolve backup. Não resolve a cidade carregando no meio da avenida."
     },
     {
-      tipo: "paragrafo",
-      texto: "A [página da PlayStation](https://www.playstation.com/en-us/games/grand-theft-auto-vi/) confirma o jogo no console e não converte esse espaço em disco de computador. Em 15 de novembro de 2026, a [reportagem no Yahoo](https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html) ainda não achava data de PC, pré-venda nem requisito. Sem requisito, 212 GB não migram para a lista de peças.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "A inferência cabe numa frase, e só nela",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Dá para inferir uma coisa, e ela precisa ir rotulada. Um jogo que pede centenas de gigabytes no console tende, se um dia existir em PC, a ser um jogo grande também. Textura, áudio e mundo aberto não encolhem só porque o sistema operacional mudou. Isso é inferência. Não é tamanho de instalação, não é requisito e não é cota para comprar um SSD de uma capacidade cravada.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 3,
-      texto: "Inferência rotulada, não ficha",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "A frase permitida é: “se houver versão de PC, espere um jogo grande”. A frase proibida é: “o PC precisa de 212 GB porque o PS5 precisa”. A primeira admite que o número de computador não foi publicado. A segunda cola o console na peça. Até 19 de novembro de 2026 só a primeira sobrevive ao contato com a fonte.",
-    },
-    {
-      tipo: "destaque",
-      tom: "atencao",
-      titulo: "Console não vira requisito",
-      texto: "Pelo menos 212 GB no PS5 e até 212 GB conforme o aparelho são dados de console, com fonte. Não são o tamanho de uma futura instalação no PC, que a Rockstar não publicou.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "SSD com folga é o hábito que presta",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Jogo grande em HD mecânico é a sessão que não começa: a tela de carregamento espera o disco achar o arquivo. SSD lê esse arquivo sem essa espera, e é assim que PC de jogo é montado hoje. A troca está em [upgrade de SSD](/upgrade-ssd) e na categoria de [SSDs](/categoria/hardware-ssd). O motivo é o jogo que você já instalou, não uma ficha de GTA 6.",
-    },
-    {
-      tipo: "tabela",
-      titulo: "O que o número é e o que ele não é",
-      colunas: [
-        "Frase",
-        "O que ela é",
-        "O que ela não é",
+      "tipo": "tabela",
+      "titulo": "Onde colocar cada tipo de arquivo",
+      "colunas": [
+        "Arquivo",
+        "Disco certo",
+        "Motivo"
       ],
-      linhas: [
+      "linhas": [
         [
-          "Pelo menos 212 GB no PS5",
-          "Espaço livre publicado pela PlayStation",
-          "Requisito de computador",
+          "Windows e o jogo que você abre toda noite",
+          "SSD NVMe",
+          "Leitura o tempo todo, inclusive enquanto você dirige"
         ],
         [
-          "Até 212 GB conforme o aparelho",
-          "Teto citado pela The Verge",
-          "Tamanho de instalação no Windows",
+          "Jogo que você abre uma vez por mês",
+          "SSD, se couber",
+          "Ainda sofre em HD, só dói menos"
         ],
         [
-          "Jogo grande, se houver PC",
-          "Inferência, rotulada como inferência",
-          "Cota oficial de disco",
+          "Foto, vídeo da família, instalador velho",
+          "HD ou nuvem",
+          "Não precisa da velocidade do NVMe"
         ],
         [
-          "SSD com faixa livre",
-          "Hábito para jogo grande hoje",
-          "Ficha de GTA 6",
-        ],
+          "Captura de gameplay",
+          "SSD com folga",
+          "Gravar em disco cheio derruba o quadro"
+        ]
       ],
-      colunaDestaque: 1,
-      fonte: PSSUPORTE,
-      nota: "A linha da The Verge está na matéria dela. Nenhuma linha informa gigabytes de PC.",
+      "nota": "Organização para o PC de hoje. O tamanho oficial de um GTA 6 de computador não foi publicado."
     },
     {
-      tipo: "paragrafo",
-      texto: "Capacidade do SSD é outra decisão, e ela olha para a sua biblioteca. Se os jogos que você mantém instalados já enchem o disco atual, o próximo precisa caber essa biblioteca e ainda sobrar. Se você apaga o jogo ao terminar, um SSD menor resolve. GTA 6 não entra nessa soma enquanto o tamanho de PC não existir.",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quanta folga deixar"
     },
     {
-      tipo: "chamada",
-      tema: "upgrade",
+      "tipo": "paragrafo",
+      "texto": "Uma regra simples, sem inventar o instalador futuro: separe um SSD de 1 TB para sistema e jogos se você guarda mais de dois títulos grandes, ou de 2 TB se você não apaga nada. Encha no máximo até sobrar uns 15% a 20% livres. Atualização de jogo e o arquivo de paginação precisam desse ar. Disco em 98% falha do jeito mais chato, no meio do patch, na sexta à noite."
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "HD fica para arquivo, não para o jogo",
+      "tipo": "paragrafo",
+      "texto": "NVMe e SATA são os dois formatos comuns. NVMe é o pente na placa-mãe, mais rápido. SATA é o de 2,5 polegadas, ainda ótimo para jogo, desde que não seja HDD. Se a placa-mãe só tem um slot NVMe e ele já está ocupado pelo sistema, um segundo SSD SATA continua sendo um salto enorme em relação ao HD. A loja olha os slots antes de vender um pente que não tem onde morar."
     },
     {
-      tipo: "paragrafo",
-      texto: "HD mecânico continua útil para foto, vídeo antigo e backup. Ele guarda arquivo grande e é lento para textura. Deixar o sistema e os jogos no SSD, e o arquivo morto no HD, é um arranjo que a máquina de hoje aguenta bem. O jogo que você abre toda semana não mora nesse arquivo morto.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/ssd-para-gta-6-disco.webp",
-        alt: "HD portátil com o cabo ao lado.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/ssd-para-gta-6-disco.webp",
+        "alt": "HD portátil com cabo ao lado, backup separado do SSD para GTA 6 e do sistema.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "HD portátil com o cabo ao lado. Foto de Aleksander Dumała (Pexels).",
+      "legenda": "Disco portátil é cópia de segurança. O jogo do dia a dia fica dentro da máquina."
     },
     {
-      tipo: "paragrafo",
-      texto: "Há quem some 212 GB, o Windows e uma margem redonda e saia com um SSD “oficial”. A soma parece cuidadosa e continua sendo chute, porque o primeiro termo não é de PC. A matéria de [PC sem requisito](/blog/pc-para-gta-6-sem-requisito-oficial) recusa a mesma operação na máquina inteira. Disco é só o lugar onde ela fica mais tentadora, porque o número existe.",
+      "tipo": "pros-contras",
+      "titulo": "Sinais de que o disco é o gargalo",
+      "pros": [
+        "A partida demora minutos numa tela de carregamento.",
+        "A textura da rua chega atrasada, borrosa, e fica nítida dois segundos depois.",
+        "O jogo está num HD e o Windows, num SSD pequeno demais para recebê-lo."
+      ],
+      "contras": [
+        "Comprar o NVMe mais rápido da tabela e deixar 40 GB livres.",
+        "Instalar o jogo num HD externo USB porque “é de um terabyte”.",
+        "Apagar a pasta do jogo à mão em vez de desinstalar pela loja. Sobra arquivo quebrado."
+      ]
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Quanto deixar livre sem inventar número",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como migrar sem perder a save"
     },
     {
-      tipo: "paragrafo",
-      texto: "Encher o SSD até o último arquivo piora a vida útil prática: o disco precisa de espaço para gravar e apagar sem viver no limite. Deixar uma faixa livre é hábito, não uma porcentagem oficial de GTA 6. Não há, nesta página, um percentual mágico. Há o conselho de não instalar a biblioteca inteira em cima do último gigabyte livre.",
+      "tipo": "lista",
+      "itens": [
+        "Desinstale pela Steam, pela Epic ou pelo launcher, e instale de novo no SSD. É mais limpo do que copiar pasta.",
+        "Save na nuvem, quando o jogo oferece, tira o medo da troca.",
+        "Anote quanto espaço o título ocupa hoje e some a folga. Não compre o disco do tamanho exato.",
+        "Se o Windows está num SSD de 240 GB lotado, o ganho maior é clonar o sistema para um NVMe maior, serviço que a bancada faz."
+      ]
     },
     {
-      tipo: "paragrafo",
-      texto: "Na hora de trocar, o formato também importa. Notebook fino e PC de mesa não usam a mesma peça, e um SSD de gaveta não entra num encaixe soldado. O [upgrade de SSD](/upgrade-ssd) começa pelo modelo da máquina. A memória, que é outra falta, está em [RAM para GTA 6](/blog/memoria-ram-para-gta-6), com o mesmo aviso: piso de hoje não é ficha do jogo.",
+      "tipo": "paragrafo",
+      "texto": "A memória que segura o pedaço já carregado está em [memória RAM para GTA 6](/blog/memoria-ram-para-gta-6). A ordem de troca da máquina inteira está no [upgrade](/blog/upgrade-do-pc-antes-do-gta-6)."
     },
     {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/ssd-para-gta-6-fecho.webp",
-        alt: "Interior de um gabinete com ventoinhas e luz colorida.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/ssd-para-gta-6-fecho.webp",
+        "alt": "Interior de gabinete com ventoinhas, onde o SSD para GTA 6 é instalado na placa-mãe.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Interior de um gabinete com ventoinhas e luz colorida. Foto de Timur Kozmenko (Pexels).",
+      "legenda": "Por dentro do gabinete, o NVMe fica escondido na placa. O espaço livre é que aparece na hora de jogar."
     },
     {
-      tipo: "pros-contras",
-      pros: [
-        "212 GB ficam com a fonte e com o aparelho certo, o console",
-        "A inferência de jogo grande está escrita como inferência",
-        "SSD com folga serve aos jogos que você já instalou",
-      ],
-      contras: [
-        "Não há tamanho oficial de instalação no PC",
-        "Somar 212 GB ao Windows não produz uma cota",
-        "HD mecânico segue lento para o jogo, mesmo com muito espaço",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Clonar o Windows ou instalar de novo"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Antes de trocar o disco",
+      "tipo": "paragrafo",
+      "texto": "Se o sistema está num SSD pequeno e lotado, há dois caminhos. Clonar copia o Windows para o NVMe novo e você liga como se nada tivesse mudado, com os programas no lugar. Instalar de novo é mais limpo e mais trabalhoso: você baixa o que usa e perde a bagunça acumulada. Os dois pedem backup do que não está na nuvem. Save de jogo, quando a plataforma sincroniza, volta sozinho. Documento que só existe na área de trabalho não volta. Copie isso antes de apagar o disco antigo."
     },
     {
-      tipo: "paragrafo",
-      texto: "A troca de disco é serviço de upgrade na Balão da Informática Anchieta, Av. Anchieta, 789, Cambuí, Campinas. Chame no WhatsApp (19) 98751-0267 com o modelo do computador e diga se o jogo está num HD. A equipe confere o encaixe antes de indicar o SSD.",
+      "tipo": "paragrafo",
+      "texto": "Não formate o disco velho no mesmo dia. Deixe-o no gaveteiro por uma semana, com o PC já bootando no novo. Se faltou um arquivo, ele ainda está lá. Só então apague e use o disco antigo como arquivo, se for SSD, ou aposente se for HD barulhento. Jogo grande, na reinstalação, vai direto para o NVMe. Repetir o erro de instalar no disco lento é o jeito de não sentir a troca."
     },
     {
-      tipo: "paragrafo",
-      texto: "Não leve os 212 GB como tamanho do pedido. Leve a biblioteca que você quer manter instalada e uma faixa livre em cima dela. A decisão é sair do HD para um SSD com espaço sobrando, e deixar os 212 GB como dado de console.",
+      "tipo": "lista",
+      "itens": [
+        "Backup do que não está na nuvem, antes de qualquer clone.",
+        "Não apague o disco antigo no mesmo dia.",
+        "Instale o jogo do dia a dia no NVMe, não no que sobrou."
+      ]
     },
     {
-      tipo: "chamada",
-      titulo: "O jogo grande ainda está num HD?",
-      texto: "Mande o modelo da máquina. A troca vai para um SSD com folga, sem usar o número do console como se fosse requisito de PC.",
-      rotulo: "Pedir orçamento no WhatsApp",
+      "tipo": "chamada",
+      "tema": "upgrade",
+      "titulo": "Quer o jogo no SSD e o Windows junto?",
+      "texto": "A Balão da Informática Anchieta, loja de informática em Campinas instala e clona disco no Cambuí. Av. Anchieta, 789. WhatsApp (19) 98751-0267. Traga o gabinete ou o notebook.",
+      "rotulo": "Ver upgrade de SSD",
+      "href": "/upgrade-ssd",
+      "mensagem": "Olá! Li a matéria de SSD para GTA 6 e quero instalar um NVMe no meu PC."
     },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mais da série em [GTA 6 no blog](/blog/gta-6)."
+    }
   ],
-  perguntas: [
+  "perguntas": [
     {
-      pergunta: "GTA 6 ocupa 212 GB no PC?",
-      resposta: "Esse número não foi publicado para PC. Até 19 de novembro de 2026 não havia versão de computador. No PS5, o suporte pede pelo menos 212 GB, e a The Verge fala em até 212 GB conforme o aparelho. Os dois dados são de console.",
+      "pergunta": "GTA 6 vai ocupar quanto no PC?",
+      "resposta": "Não há número oficial. No PS5, a PlayStation pede pelo menos 212 GB. Use isso como escala, não como ficha de computador."
     },
     {
-      pergunta: "HD ainda serve para um jogo grande?",
-      resposta: "Serve para arquivo e backup. Para o jogo que você abre, o HD mecânico deixa a sessão esperando o disco. SSD é o hábito atual de PC de jogo. Isso não é um requisito oficial de GTA 6, é prática para os jogos que já existem.",
+      "pergunta": "HD ainda serve para jogo grande?",
+      "resposta": "Serve para arquivo. Para mundo aberto, o SSD evita a cidade carregando no meio do movimento. HD externo USB é backup, não disco de jogo."
     },
     {
-      pergunta: "Quanto de SSD deixar livre?",
-      resposta: "O bastante para a biblioteca que você mantém instalada, mais uma faixa livre para o disco não viver no último arquivo. Não há percentual oficial de GTA 6. Copiar 212 GB para essa conta mistura console e PC.",
+      "pergunta": "NVMe ou SSD SATA?",
+      "resposta": "NVMe é mais rápido e é a primeira escolha se a placa-mãe tem slot livre. SATA ainda é um salto grande em relação ao HD e cabe quando o slot NVMe já está ocupado."
     },
     {
-      pergunta: "Posso comprar o SSD já contando o tamanho do console?",
-      resposta: "Pode comprar o SSD que a sua biblioteca de hoje pede, com folga. Não pode tratar 212 GB como cota de PC. Se um dia a Rockstar publicar o tamanho da versão de computador, esse número substitui a inferência. Até lá, a inferência não vira pedido.",
+      "pergunta": "Preciso deixar espaço sobrando?",
+      "resposta": "Sim. Disco cheio fica lento e a atualização falha. Mire em sobrar uma folga clara, não em encher até o último gigabyte."
     },
+    {
+      "pergunta": "Dá para mudar o jogo de disco sem perder o save?",
+      "resposta": "Dá, desinstalando pela loja e instalando no SSD, com o save na nuvem quando o jogo oferece. Copiar a pasta à mão costuma deixar arquivo pela metade."
+    }
   ],
-  fontes: [
-    PSSUPORTE,
-    VERGETAMANHO,
-    PLAYSTATION,
-    ROCKSTARVI,
-    YAHOOPC,
-  ],
+  "fontes": [
+    {
+      "nome": "PlayStation — página de Grand Theft Auto VI",
+      "url": "https://www.playstation.com/en-us/games/grand-theft-auto-vi/",
+      "data": "consulta em 19 de novembro de 2026"
+    },
+    {
+      "nome": "The Verge — “GTA VI’s download will need up to 212GB of hard drive space”",
+      "url": "https://www.theverge.com/games/1025271/gta-vi-storage-space-rockstar-games",
+      "data": "novembro de 2026"
+    },
+    {
+      "nome": "Rockstar Games — página oficial de Grand Theft Auto VI",
+      "url": "https://www.rockstargames.com/VI",
+      "data": "consulta em 19 de novembro de 2026"
+    }
+  ]
 };
 
 export default artigo;

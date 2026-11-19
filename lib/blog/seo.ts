@@ -118,6 +118,8 @@ export function jsonLdDoArtigo(artigo: Artigo): Record<string, unknown>[] {
   const idDoArtigo = `${url}#artigo`;
 
   // Assinatura de pessoa só quando o artigo tem uma; "Equipe Balão" é a loja.
+  // Na série local o nome publicado é o da loja (com Anchieta), não o nome curto do site.
+  const nomeDaMarca = artigo.autor.nome.includes("Anchieta") ? artigo.autor.nome : SITE_CONFIG.name;
   const autor = artigo.autor.pessoa
     ? {
         "@type": "Person",
@@ -126,7 +128,7 @@ export function jsonLdDoArtigo(artigo: Artigo): Record<string, unknown>[] {
         ...(artigo.autor.url ? { url: urlAbsoluta(artigo.autor.url) } : {}),
         worksFor: { "@id": ID_DA_LOJA },
       }
-    : { "@type": "Organization", "@id": ID_DA_LOJA, name: SITE_CONFIG.name, url: SITE };
+    : { "@type": "Organization", "@id": ID_DA_LOJA, name: nomeDaMarca, url: SITE };
 
   const nos: Record<string, unknown>[] = [
     {
@@ -205,6 +207,43 @@ export function jsonLdDoArtigo(artigo: Artigo): Record<string, unknown>[] {
         name: p.pergunta,
         acceptedAnswer: { "@type": "Answer", text: p.resposta },
       })),
+    });
+  }
+
+  const local =
+    artigo.slug.includes("campinas") || artigo.etiquetas.some((e) => e.toLowerCase() === "campinas");
+  if (local) {
+    nos.push({
+      "@type": ["Store", "LocalBusiness"],
+      "@id": `${SITE}/#loja`,
+      name: SITE_CONFIG.companyName,
+      url: SITE,
+      image: `${SITE}/logo.png`,
+      telephone: SITE_CONFIG.phone.display,
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: "Av. Anchieta, 789",
+        addressLocality: "Campinas",
+        addressRegion: "SP",
+        postalCode: SITE_CONFIG.postalCode,
+        addressCountry: "BR",
+      },
+      openingHours: "Mo-Fr 09:00-18:00, Sa 09:00-13:00",
+      contactPoint: [
+        {
+          "@type": "ContactPoint",
+          telephone: SITE_CONFIG.phone.display,
+          contactType: "customer service",
+          areaServed: "BR",
+          availableLanguage: "Portuguese",
+        },
+        {
+          "@type": "ContactPoint",
+          telephone: SITE_CONFIG.whatsapp.display,
+          contactType: "customer support",
+          url: `https://wa.me/${SITE_CONFIG.whatsapp.number}`,
+        },
+      ],
     });
   }
 

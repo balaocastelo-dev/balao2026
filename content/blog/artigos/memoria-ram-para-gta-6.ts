@@ -1,272 +1,260 @@
-import type { Artigo, Fonte } from "@/lib/blog/tipos";
-
-const ROCKSTARVI: Fonte = {
-  nome: "Rockstar Games — página oficial de Grand Theft Auto VI",
-  url: "https://www.rockstargames.com/VI",
-  data: "consulta em 19 de novembro de 2026",
-};
-
-const YAHOOPC: Fonte = {
-  nome: "Yahoo / Just Jared — “GTA 6 PC Release Date: Is Grand Theft Auto VI Coming to PC?”",
-  url: "https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html",
-  data: "15 de novembro de 2026",
-};
+import type { Artigo } from "@/lib/blog/tipos";
 
 const artigo: Artigo = {
-  slug: "memoria-ram-para-gta-6",
-  titulo: "Memória RAM para GTA 6: 16 GB, 32 GB e o chute",
-  resumo: "16 GB é o piso comum num PC de jogo hoje e 32 GB é folga para multitarefa e captura. Nenhum dos dois é requisito de GTA 6.",
-  categoria: "hardware",
-  etiquetas: [
+  "slug": "memoria-ram-para-gta-6",
+  "titulo": "Memória RAM para GTA 6: quanto deixa o jogo folgado",
+  "resumo": "Memória RAM para GTA 6: sem número oficial. Nos jogos de hoje, 16 GB é o piso e 32 GB é a folga para navegador, Discord e live.",
+  "categoria": "hardware",
+  "etiquetas": [
     "GTA 6",
     "Memória RAM",
+    "Upgrade"
   ],
-  capa: {
-    src: "/blog/capas/memoria-ram-para-gta-6.webp",
-    alt: "Processador e módulos de memória lado a lado.",
-    largura: 1536,
-    altura: 1024,
-    pronta: false,
+  "capa": {
+    "src": "/blog/capas/memoria-ram-para-gta-6.webp",
+    "alt": "Pentes de memória RAM sobre a mesa, a folga de um PC que vai encarar jogos como GTA 6.",
+    "largura": 1536,
+    "altura": 1024,
+    "pronta": false
   },
-  publicadoEm: "2026-11-13T12:00:00.000Z",
-  autor: {
-    nome: "Equipe Balão da Informática",
-    url: "/sobre-nos",
+  "publicadoEm": "2026-11-13T12:00:00.000Z",
+  "atualizadoEm": "2026-11-19T12:00:00.000Z",
+  "autor": {
+    "nome": "Balão da Informática Anchieta",
+    "cargo": "Loja de informática em Campinas",
+    "url": "/sobre-nos"
   },
-  origem: "autoral",
-  seo: {
-    titulo: "RAM para GTA 6: 16 GB, 32 GB e o chute",
-    palavrasChave: [
+  "origem": "autoral",
+  "seo": {
+    "titulo": "Memória RAM para GTA 6: 16 GB ou 32 GB",
+    "descricao": "Memória RAM para GTA 6: sem número oficial. Nos jogos de hoje, 16 GB é o piso e 32 GB é a folga para navegador, Discord e live.",
+    "palavrasChave": [
       "memória ram para gta 6",
-      "16 gb ou 32 gb",
-      "ram para pc gamer",
-      "quanta ram para jogar",
-    ],
+      "16 ou 32 gb gta 6",
+      "quanta ram para gta 6",
+      "ddr5 gta 6"
+    ]
   },
-  blocos: [
+  "blocos": [
     {
-      tipo: "paragrafo",
-      texto: "Memória RAM para GTA 6 virou uma briga entre dois números, 16 GB e 32 GB, antes de existir o terceiro dado que decidiria a briga. O corte desta página é 19 de novembro de 2026. Até esse dia, memória de GTA 6 no PC não tinha número oficial, porque o PC não estava anunciado na [página da Rockstar](https://www.rockstargames.com/VI). Os dois números são outra conversa.",
+      "tipo": "paragrafo",
+      "texto": "Memória RAM para GTA 6 é uma conta que a Rockstar ainda não fez em público: não há versão de PC nem quantidade oficial. A conta que dá para fazer hoje é a dos jogos grandes que já estão instalados, mais tudo o que você deixa aberto junto. Dezesseis gigabytes viraram o piso. Trinta e dois são a folga de quem joga, conversa e ainda deixa um navegador com o mapa."
     },
     {
-      tipo: "paragrafo",
-      texto: "A conversa é o PC de jogo de hoje. Dezesseis gigabytes são o piso comum: dá para jogar com pouco aberto ao lado. Trinta e dois são folga para quem deixa navegador, Discord e captura ligados. Nenhum dos dois é requisito de GTA 6. Tratar um deles como se fosse é o chute que o título desta matéria nomeia.",
+      "tipo": "resumo",
+      "titulo": "Resposta rápida",
+      "itens": [
+        "16 GB jogam a maior parte dos títulos atuais, se o sistema estiver enxuto.",
+        "32 GB cabem jogo, Discord, navegador e um programa de captura sem o Windows começar a usar o disco como memória.",
+        "Dois pentes iguais batem um pente só do mesmo tamanho. Canal duplo é ganho grátis."
+      ]
     },
     {
-      tipo: "resumo",
-      itens: [
-        "**16 GB são o piso comum.** É de onde um PC de jogo sai hoje quando a sessão é o jogo.",
-        "**32 GB são folga de multitarefa.** Navegador, Discord e captura cabem com mais calma.",
-        "**Os dois não são ficha.** Até 19 de novembro de 2026 a Rockstar não publicou requisito de PC.",
-        "**A placa-mãe limita a conta.** Slots e máximo suportado decidem se a folga cabe.",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Memória RAM para GTA 6: 16 GB ou 32 GB"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Dezesseis gigabytes são o piso de hoje",
+      "tipo": "paragrafo",
+      "texto": "O jogo em si, nos mundos abertos recentes, cabe em 16 GB quando você fecha o resto. O problema é que quase ninguém joga assim. Fica o Discord, fica um vídeo em segundo plano, fica a loja da Steam aberta, fica o OBS se você grava a corrida. Cada um come um pedaço. Quando a soma passa do que está instalado, o Windows empurra dado para o SSD. Aí a cidade, que deveria estar fluida, troca textura no meio da curva."
     },
     {
-      tipo: "paragrafo",
-      texto: "Num computador montado para jogar agora, 16 GB deixaram de ser luxo e passaram a ser o chão. O sistema, o jogo e uma janela ou outra cabem. Abaixo disso, a máquina começa a empurrar dados para o disco no meio da sessão, e a sessão tropeça nos jogos que você já tem. Isso se observa sem precisar de GTA 6 na história.",
+      "tipo": "paragrafo",
+      "texto": "A pesquisa de hardware da Steam mostra, mês a mês, o que os PCs da plataforma usam de verdade. Vale olhar a página antes de decidir, porque o número se move. O que não se move é o conselho prático: se você já está em 16 GB e o gerenciador de tarefas passa de 80% assim que o jogo abre com o navegador do lado, o próximo passo é 32 GB, não um pente avulso de 8 GB numa máquina que já mistura frequências."
     },
     {
-      tipo: "paragrafo",
-      texto: "Chegar nos 16 GB pode ser um pente só ou dois de 8 GB. Dois pentes iguais, nos slots certos, deixam a placa-mãe acessar os dois ao mesmo tempo. É prática de máquina atual, não uma exigência publicada pela Rockstar. A categoria de [memória RAM](/categoria/hardware-memoria-ram) é onde essa combinação se confere com o modelo da placa-mãe, antes de o pente ir para o carrinho.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/memoria-ram-para-gta-6-usos.webp",
-        alt: "Módulos de memória DDR5 com iluminação, sobre fundo amarelo.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/memoria-ram-para-gta-6-usos.webp",
+        "alt": "Pentes de memória RAM encaixados na placa-mãe, configuração de memória RAM para GTA 6 e jogos atuais.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Módulos de memória DDR5 com iluminação, sobre fundo amarelo. Foto de Andrey Matveev (Pexels).",
+      "legenda": "Dois pentes iguais, instalados no par certo de slots, entregam o canal duplo."
     },
     {
-      tipo: "paragrafo",
-      texto: "Subir para 16 GB quando você está abaixo desse piso melhora os jogos de hoje. Não “prepara para GTA 6” no sentido de cumprir um requisito, porque o requisito não existe. A [checagem do Yahoo em 15 de novembro de 2026](https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html) não encontrou versão de PC, pré-venda nem lista de hardware. O piso é do parque atual.",
+      "tipo": "tabela",
+      "titulo": "Quanto de RAM combina com cada jeito de usar o PC",
+      "colunas": [
+        "Jeito de usar",
+        "Quantidade que faz sentido",
+        "Por quê"
+      ],
+      "linhas": [
+        [
+          "Jogo em tela cheia, resto fechado",
+          "16 GB",
+          "Os jogos atuais cabem, com o sistema enxuto"
+        ],
+        [
+          "Jogo, Discord e navegador",
+          "32 GB",
+          "A soma estoura 16 GB com facilidade"
+        ],
+        [
+          "Jogo e live ou gravação",
+          "32 GB",
+          "O codificador e a cena do OBS comem um bloco à parte"
+        ],
+        [
+          "8 GB hoje",
+          "Trocar, não completar com outro pente diferente",
+          "8 GB já briga com o próprio Windows"
+        ]
+      ],
+      "nota": "Faixas para o PC que você usa agora. Grand Theft Auto VI não tem quantidade de RAM publicada."
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Trinta e dois entram com a sessão cheia",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Dois pentes, mesma velocidade"
     },
     {
-      tipo: "paragrafo",
-      texto: "Trinta e dois gigabytes passam a fazer sentido quando a sessão não é só o jogo. Navegador com várias abas, Discord aberto e uma captura de tela gravando ao mesmo tempo somam um uso que 16 GB apertam. Quem transmite ou grava clipe enquanto joga reconhece o sintoma: o jogo está bem e o resto da tela tropeça.",
+      "tipo": "paragrafo",
+      "texto": "Um pente de 16 GB deixa o processador conversando por um canal só. Dois de 8 GB, ou dois de 16 GB, abrem o canal duplo. Em jogo, a diferença aparece na estabilidade dos quadros mínimos, aquele número que você sente quando a câmera gira, mais do que na média bonita do benchmark. Os pentes precisam ser iguais em capacidade e, de preferência, no mesmo kit. Misturar um pente velho com um novo faz os dois rodarem na velocidade do mais lento."
     },
     {
-      tipo: "titulo",
-      nivel: 3,
-      texto: "Captura e navegador não são o jogo",
+      "tipo": "paragrafo",
+      "texto": "DDR4 ou DDR5 não é escolha solta: é a que a placa-mãe aceita. Não existe adaptador honesto. Se a máquina é DDR4 e você quer DDR5, o conjunto inteiro muda, processador incluído na maioria dos casos. Aí a conversa deixa de ser “só memória” e vira a do [upgrade](/blog/upgrade-do-pc-antes-do-gta-6). Frequência altíssima, com tempo de resposta ruim, também engana. Um kit equilibrado, no perfil XMP ou EXPO ligado na BIOS, rende mais do que o número maior da caixa com o perfil desligado."
     },
     {
-      tipo: "paragrafo",
-      texto: "Convém separar as duas contas. A memória que o jogo usa e a memória que a sessão inteira usa não são o mesmo número. Dizer que 32 GB são necessários para GTA 6 mistura as contas e ainda inventa a ficha. Dizer que 32 GB cabem quando você não fecha nada é uma descrição do seu hábito, e essa dá para checar hoje.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/memoria-ram-para-gta-6-pilha.webp",
-        alt: "Computador montado sobre uma mesa preparada para jogar.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/memoria-ram-para-gta-6-pilha.webp",
+        "alt": "Caixa de kit de memória RAM, o jeito certo de comprar memória RAM para GTA 6 sem misturar pente.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Computador montado sobre uma mesa preparada para jogar. Foto de Pramod Tiwari (Pexels).",
+      "legenda": "Kit vendido junto evita misturar velocidade. A caixinha combina os dois pentes."
     },
     {
-      tipo: "destaque",
-      tom: "atencao",
-      titulo: "Não transforme o hábito em ficha",
-      texto: "16 GB são ponto de partida comum e 32 GB são folga de quem deixa programa aberto. Até 19 de novembro de 2026 nenhum dos dois foi publicado como requisito de GTA 6.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Nenhum dos dois é número de GTA 6",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Os dois números vão continuar circulando como se fossem oficiais, porque são redondos e fáceis de repetir. A página da Rockstar não escolheu entre eles. O comunicado de pré-venda também não. Quando uma versão de PC existir, a ficha pode cair num, no outro, ou numa frase diferente. Até lá, repetir “o jogo pede 32 GB” é escrever no lugar da empresa.",
-    },
-    {
-      tipo: "tabela",
-      titulo: "16 GB, 32 GB e o que seria chute",
-      colunas: [
-        "O que fica aberto",
-        "16 GB",
-        "32 GB",
+      "tipo": "pros-contras",
+      "titulo": "Quando subir para 32 GB",
+      "pros": [
+        "Você transmite ou grava e o jogo já ocupa a maior parte dos 16 GB.",
+        "O disco acende toda hora no meio da partida, sinal de memória estourada.",
+        "Vai ficar nessa plataforma por alguns anos e quer folga."
       ],
-      linhas: [
-        [
-          "Quase só o jogo",
-          "Costuma caber no piso atual",
-          "Folga que você pode não usar",
-        ],
-        [
-          "Navegador e Discord",
-          "Aperta no meio da sessão",
-          "Cabe com mais calma",
-        ],
-        [
-          "Captura ou transmissão",
-          "Estoura com facilidade",
-          "É o caso em que a folga se justifica",
-        ],
-        [
-          "Frase sobre GTA 6",
-          "Não é requisito oficial",
-          "Também não é requisito oficial",
-        ],
-      ],
-      colunaDestaque: 2,
-      fonte: ROCKSTARVI,
-      nota: "A última linha é o corte: a página do jogo, em 19 de novembro de 2026, não informa memória de PC.",
+      "contras": [
+        "Completar 16 GB com um terceiro pente de outra marca.",
+        "Comprar a frequência mais alta da prateleira e esquecer de ligar o perfil na BIOS.",
+        "Trocar RAM achando que isso substitui placa de vídeo numa tela 4K."
+      ]
     },
     {
-      tipo: "paragrafo",
-      texto: "A matéria de [PC sem requisito](/blog/pc-para-gta-6-sem-requisito-oficial) aplica o mesmo corte à máquina inteira. Memória é a peça em que o chute parece mais inocente, porque 16 e 32 já são conselho de loja para outros usos. O conselho continua válido. O rótulo “para GTA 6” é que não cola.",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que fotografar antes de pedir o pente"
     },
     {
-      tipo: "chamada",
-      tema: "upgrade",
+      "tipo": "lista",
+      "itens": [
+        "A tela do Gerenciador de Tarefas com o jogo aberto e o que você costuma deixar junto.",
+        "O modelo da placa-mãe, para saber se é DDR4 ou DDR5 e quantos slots sobram.",
+        "Uma foto dos pentes já instalados. Dá para ler capacidade e velocidade sem desmontar no escuro."
+      ]
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Dois pentes e o limite da placa-mãe",
+      "tipo": "paragrafo",
+      "texto": "O disco que segura a instalação está em [SSD para GTA 6](/blog/ssd-para-gta-6). O chip que conversa com essa memória está em [processador para GTA 6](/blog/processador-para-gta-6). Quem vai transmitir soma esta folga com a do [PC para live](/blog/pc-para-live-de-gta-6)."
     },
     {
-      tipo: "paragrafo",
-      texto: "Antes de dobrar a memória, leia o que a placa-mãe aceita: quantos slots existem, qual o máximo e se os pentes atuais ocupam os dois canais. Dois slots já preenchidos com 8 GB cada um não recebem mais 16 GB sem você tirar os antigos. Quatro slots com dois ocupados deixam caminho. É uma conta de manual, não de boato.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Velocidade e latência só importam dentro do que a plataforma aceita. Um pente mais rápido do que a placa-mãe reconhece desce para a velocidade suportada. Comprar o número maior da embalagem, sem olhar o manual, não aumenta a memória útil. Na [montagem](/montagempc) essa leitura acontece antes do pedido, com o modelo da placa em mãos.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Notebook não ganha memória do mesmo jeito",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Em parte dos notebooks a memória vem soldada. Não há slot, e o anúncio de “dá para pôr 32 GB” é falso para aquela máquina. Em outros há um slot livre ao lado de um pente soldado, e a conta muda. A página de [notebooks](/notebooks) é o lugar para cruzar o modelo com essa possibilidade, em vez de repetir a regra do PC de mesa.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "PC de mesa e notebook também não compartilham um requisito de GTA 6, porque esse requisito não foi escrito para nenhum dos dois. Se a dúvida é só espaço em disco, ela está na matéria de [SSD](/blog/ssd-para-gta-6), e os 212 GB de lá são número de console. Memória e disco são faltas diferentes: uma aperta no meio do jogo, a outra na hora de instalar.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/memoria-ram-para-gta-6-fecho.webp",
-        alt: "Memórias instaladas ao lado do processador num servidor.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/memoria-ram-para-gta-6-fecho.webp",
+        "alt": "Bancada com placa-mãe e memória, instalação de memória RAM para quem espera jogos como GTA 6.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Memórias instaladas ao lado do processador num servidor. Foto de Domaintechnik Ledl.net (Pexels).",
+      "legenda": "Memória é barata de instalar e fácil de errar o slot. A bancada faz os dois em minutos."
     },
     {
-      tipo: "pros-contras",
-      pros: [
-        "16 GB ficam no lugar certo: piso do PC de jogo de hoje",
-        "32 GB ficam no lugar certo: folga de navegador, Discord e captura",
-        "A placa-mãe entra na conta antes da compra do pente",
-      ],
-      contras: [
-        "Nenhum dos dois números é requisito de GTA 6",
-        "Notebook soldado não aceita o upgrade do PC de mesa",
-        "Pente mais rápido que a placa-mãe não entrega o que a caixa promete",
-      ],
+      "tipo": "destaque",
+      "tom": "dica",
+      "titulo": "Ligue o perfil",
+      "texto": "Depois de instalar, entre na BIOS e ative XMP, no Intel, ou EXPO, na AMD. Sem isso, o pente novo pode rodar na velocidade padrão, bem abaixo do que a caixa anuncia."
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Antes de comprar memória",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como conferir os slots sem abrir no escuro"
     },
     {
-      tipo: "paragrafo",
-      texto: "Diga o que fica aberto junto do jogo. Na Balão da Informática Anchieta, Av. Anchieta, 789, Cambuí, Campinas, a equipe confere quantos slots a placa-mãe ainda tem e se o pente novo combina com o que já está lá. O WhatsApp é (19) 98751-0267. Mande o modelo da placa-mãe ou do notebook.",
+      "tipo": "paragrafo",
+      "texto": "No Windows, o Gerenciador de Tarefas mostra a memória instalada e a velocidade. Se aparece metade da velocidade do anúncio, o perfil XMP ou EXPO está desligado na BIOS, ou os pentes são diferentes e o conjunto desceu para o mais lento. A tela de desempenho também mostra quantos slots estão em uso quando você cruza com o manual da placa-mãe. Dois slots ocupados num par certo é o que a gente quer. Um slot só, mesmo com 16 GB, deixa desempenho na mesa."
     },
     {
-      tipo: "paragrafo",
-      texto: "Sem esse modelo, 16 GB e 32 GB são só dois números redondos. Com ele, dá para saber qual dos dois cabe na sua sessão de hoje. A decisão é 16 GB para o jogo com pouco ao lado e 32 GB se a sessão vive com outras janelas, sem chamar nenhum dos dois de requisito.",
+      "tipo": "paragrafo",
+      "texto": "Antes de comprar outro pente “para completar”, anote a capacidade, a velocidade e se é DDR4 ou DDR5. Pente avulso de outra leva mistura e o PC pode nem ligar, ou ligar instável. Kit vendido junto custa um pouco mais e evita essa roleta. Se os dois slots já estão cheios com 8 GB cada, o caminho é trocar o kit por 2x16 GB, não enfiar um terceiro pente num slot que a placa trata como exceção."
     },
     {
-      tipo: "chamada",
-      titulo: "Você joga com mais coisa aberta ao lado?",
-      texto: "Conte as janelas que ficam ligadas e mande o modelo da placa-mãe. A quantidade sai desse uso, não de uma ficha de GTA 6.",
-      rotulo: "Pedir orçamento no WhatsApp",
+      "tipo": "lista",
+      "itens": [
+        "Anote DDR4 ou DDR5 antes de sair de casa.",
+        "Prefira kit de dois pentes iguais.",
+        "Ligue XMP ou EXPO depois de instalar e confira a velocidade de novo."
+      ]
     },
+    {
+      "tipo": "paragrafo",
+      "texto": "Depois de instalar, abra o jogo que enchia a memória e o Discord junto. A barra do Gerenciador de Tarefas precisa de folga, não pode ficar colada no topo. Se continuar no talo, falta pente reconhecido ou o perfil de velocidade desligado. Os dois aparecem na hora. Anote o número e guarde com a nota."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "upgrade",
+      "titulo": "Manda uma foto do pente que já está aí",
+      "texto": "A Balão da Informática Anchieta, loja de informática em Campinas diz se cabe mais memória ou se o caminho é um kit novo. Av. Anchieta, 789, Cambuí. WhatsApp (19) 98751-0267.",
+      "rotulo": "Ver memória RAM",
+      "href": "/categoria/hardware-memoria-ram",
+      "mensagem": "Olá! Li a matéria de memória RAM para GTA 6 e quero saber se meu PC aceita 32 GB."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Memória RAM para GTA 6 segue, com o restante da série, em [GTA 6 no blog](/blog/gta-6)."
+    }
   ],
-  perguntas: [
+  "perguntas": [
     {
-      pergunta: "GTA 6 vai precisar de 32 GB de RAM?",
-      resposta: "Não há essa informação. Até 19 de novembro de 2026 a Rockstar não anunciou versão de PC nem requisito. 32 GB são folga para quem deixa navegador, Discord e captura abertos. Chamar isso de requisito do jogo é chute.",
+      "pergunta": "Quantos GB de RAM o GTA 6 vai pedir?",
+      "resposta": "A Rockstar não publicou. Para os jogos grandes de hoje, 16 GB é o piso e 32 GB é a folga de quem deixa outros programas abertos."
     },
     {
-      pergunta: "16 GB ainda servem para jogar?",
-      resposta: "Servem como piso comum de um PC de jogo hoje, quando a sessão é o jogo e pouca coisa ao lado. Não são um carimbo oficial de GTA 6. Se o computador está abaixo de 16 GB, o aperto já aparece nos jogos que você tem.",
+      "pergunta": "16 GB ainda jogam?",
+      "resposta": "Jogam, se você fecha navegador e captura. Com Discord, guia de mapa e o jogo juntos, 16 GB enchem e o disco vira memória improvisada."
     },
     {
-      pergunta: "Dois pentes são melhores que um?",
-      resposta: "Em PC de mesa, dois pentes iguais nos slots certos deixam a placa-mãe acessar os dois ao mesmo tempo. É prática de máquina atual. Os slots livres e o máximo da placa-mãe decidem se isso cabe, e notebook soldado fica de fora dessa regra.",
+      "pergunta": "Um pente de 16 GB ou dois de 8 GB?",
+      "resposta": "Dois pentes iguais. O canal duplo ajuda nos quadros mínimos. Um pente só deixa metade da conversa com o processador parada."
     },
     {
-      pergunta: "Dá para aumentar a memória depois?",
-      resposta: "No PC de mesa, sim, se sobrar slot ou se você trocar os pentes dentro do máximo da placa-mãe. Em notebook, só quando existe slot. Por isso o modelo da máquina vem antes da quantidade, e a quantidade não espera uma ficha de GTA 6.",
+      "pergunta": "DDR4 ou DDR5?",
+      "resposta": "O que a sua placa-mãe aceita. Não dá para misturar. Se a troca de geração exigir placa-mãe nova, o orçamento muda de figura."
     },
+    {
+      "pergunta": "Subir a RAM melhora o gráfico?",
+      "resposta": "Melhora a estabilidade quando o problema era falta de memória. Não aumenta a qualidade visual: isso é placa de vídeo e monitor."
+    }
   ],
-  fontes: [
-    ROCKSTARVI,
-    YAHOOPC,
-  ],
+  "fontes": [
+    {
+      "nome": "Rockstar Games — página oficial de Grand Theft Auto VI",
+      "url": "https://www.rockstargames.com/VI",
+      "data": "consulta em 19 de novembro de 2026"
+    },
+    {
+      "nome": "Steam — pesquisa de hardware e software",
+      "url": "https://store.steampowered.com/hwsurvey/",
+      "data": "consulta em 19 de novembro de 2026"
+    },
+    {
+      "nome": "Yahoo / Just Jared — “GTA 6 PC Release Date: Is Grand Theft Auto VI Coming to PC?”",
+      "url": "https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html",
+      "data": "15 de novembro de 2026"
+    }
+  ]
 };
 
 export default artigo;

@@ -1,271 +1,250 @@
-import type { Artigo, Fonte } from "@/lib/blog/tipos";
-
-const OBS: Fonte = {
-  nome: "OBS Project — OBS Studio",
-  url: "https://obsproject.com/",
-  data: "consulta em 19 de novembro de 2026",
-};
-
-const YAHOOPC: Fonte = {
-  nome: "Yahoo / Just Jared — “GTA 6 PC Release Date: Is Grand Theft Auto VI Coming to PC?”",
-  url: "https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html",
-  data: "15 de novembro de 2026",
-};
+import type { Artigo } from "@/lib/blog/tipos";
 
 const artigo: Artigo = {
-  slug: "webcam-para-stream",
-  titulo: "Webcam para stream: o que olhar antes de comprar",
-  resumo: "1080p é o piso comum de uma câmera de rosto. Luz na cara pesa mais que megapixel, e nenhuma marca é obrigatória para a live começar inteligível.",
-  categoria: "guias",
-  etiquetas: [
-    "GTA 6",
+  "slug": "webcam-para-stream",
+  "titulo": "Webcam para stream: o rosto nítido sem complicar a cena",
+  "resumo": "Webcam para stream fica nítida com luz na cara, câmera na altura dos olhos e 1080p. Veja enquadramento, fundo e o que deixar para depois da primeira live.",
+  "categoria": "guias",
+  "etiquetas": [
     "Webcam",
     "Live",
+    "Streaming"
   ],
-  capa: {
-    src: "/blog/capas/webcam-para-stream.webp",
-    alt: "Monitor com uma câmera pequena ao lado e fone na mesa.",
-    largura: 1536,
-    altura: 1024,
-    pronta: false,
+  "capa": {
+    "src": "/blog/capas/webcam-para-stream.webp",
+    "alt": "Monitor com uma câmera ao lado e fone na mesa, webcam para stream na altura dos olhos.",
+    "largura": 1536,
+    "altura": 1024,
+    "pronta": false
   },
-  publicadoEm: "2026-11-08T15:00:00.000Z",
-  autor: {
-    nome: "Equipe Balão da Informática",
-    url: "/sobre-nos",
+  "publicadoEm": "2026-11-08T15:00:00.000Z",
+  "atualizadoEm": "2026-11-19T12:00:00.000Z",
+  "autor": {
+    "nome": "Balão da Informática Anchieta",
+    "cargo": "Loja de informática em Campinas",
+    "url": "/sobre-nos"
   },
-  origem: "autoral",
-  seo: {
-    titulo: "Webcam para stream: o que olhar antes de comprar",
-    palavrasChave: [
+  "origem": "autoral",
+  "seo": {
+    "titulo": "Webcam para stream: luz, enquadramento e 1080p",
+    "descricao": "Webcam para stream fica nítida com luz na cara, câmera na altura dos olhos e 1080p. Veja enquadramento, fundo e o que deixar para depois da primeira live.",
+    "palavrasChave": [
       "webcam para stream",
       "câmera para live",
-      "webcam 1080p",
-      "luz na webcam",
-    ],
+      "iluminação para webcam",
+      "webcam 1080p"
+    ]
   },
-  blocos: [
+  "blocos": [
     {
-      tipo: "paragrafo",
-      texto: "Antes de comparar caixa de webcam, olhe para a sua cara na luz em que você joga. Uma câmera de rosto tem um trabalho pequeno e difícil: mostrar quem fala, com traço reconhecível, sem transformar o quarto num cenário. Se a testa some na sombra, nenhum número impresso na embalagem acende a lâmpada. A compra começa por essa imagem, não pelo adesivo de megapixel.",
+      "tipo": "paragrafo",
+      "texto": "Webcam para stream mostra a sua cara enquanto o jogo ocupa o resto da tela. 1080p já basta para uma janela no canto. O que separa a imagem aceitável da silhueta escura é a luz na frente do rosto e a câmera na altura dos olhos, não o sensor mais caro. Dá para acertar isso hoje, numa live de GTA V ou de qualquer jogo. O GTA 6 de PC ainda não tem data."
     },
     {
-      tipo: "paragrafo",
-      texto: "1080p é o piso comum dessa câmera de rosto. Abaixo disso, o rosto em tamanho de live fica mole com facilidade. Acima disso pode existir, e não é o que separa uma cara legível de uma cara escura. Não há marca obrigatória. Uma checagem republicada no [Yahoo](https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html) em 15 de novembro de 2026 também não achou webcam oficial de GTA 6, porque o PC do jogo não estava anunciado.",
+      "tipo": "resumo",
+      "titulo": "Resposta rápida",
+      "itens": [
+        "Luz difusa na sua frente. Janela atrás vira você num vulto.",
+        "Câmera na altura dos olhos, ou um pouco acima. No peito, o ângulo é de reunião cansada.",
+        "1080p a 30 quadros está ótimo numa janela pequena. 4K na webcam não salva luz ruim."
+      ]
     },
     {
-      tipo: "resumo",
-      itens: [
-        "**1080p é o piso comum do rosto.** É o chão da câmera, não um troféu.",
-        "**Luz na cara pesa mais.** Megapixel não acende a testa.",
-        "**A altura é a dos olhos.** Câmera baixa filma queixo e narina.",
-        "**Não há marca obrigatória.** A cena no OBS recebe a câmera depois da luz.",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Webcam para stream: luz antes de resolução"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que a câmera de rosto tem de mostrar",
+      "tipo": "paragrafo",
+      "texto": "Sensor de webcam enxerga pouco no escuro. Se a única luz é o monitor, o rosto fica azul e granulado, e você aumenta o ganho digital até aparecer ruído. Uma luminária difusa, ou um ring light fraco, na sua frente e um pouco acima, resolve a maior parte dos quartos. Não aponte o LED cru para o olho a dez centímetros. Difunda com um papel, uma cúpula ou só recuando a luz."
     },
     {
-      tipo: "paragrafo",
-      texto: "Quem assiste precisa reconhecer o seu rosto enquanto você fala, não ler a marca da câmera. Olho, boca e a direção do olhar bastam. O jogo segue no centro da tela. A câmera ocupa um recorte. Se nesse recorte você vira silhueta, o recorte atrapalha. O teste é o recorte, na luz real, não a foto de estúdio da caixa.",
+      "tipo": "paragrafo",
+      "texto": "Fundo bagunçado compete com você. Não precisa de estúdio: precisa de uma parede, uma estante arrumada ou a profundidade desfocada se a câmera oferecer. No OBS, a fonte de vídeo entra por cima do jogo, pequena, num canto que não tape o que importa no GTA, como o minimapa. A matéria de [OBS](/blog/obs-para-live-de-jogo) mostra essa cena mínima."
     },
     {
-      tipo: "paragrafo",
-      texto: "Você não é obrigado a aparecer. Se a live for só jogo e voz, a câmera pode esperar. Quando decidir aparecer, trate o rosto como uma fonte a mais, do mesmo jeito que o microfone é uma fonte. O texto de [microfone para live](/blog/microfone-para-live-de-jogo) continua valendo ao lado: voz inteligível primeiro. Uma cara nítida com frase muda não segura ninguém na conversa.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "1080p como piso, não como troféu",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "1080p, aqui, é uma imagem de rosto com pontos suficientes para o recorte da live. É o piso comum, o chão a partir do qual a cara não nasce já borrada. Não é ordem para caçar o maior número da prateleira. Duas câmeras em 1080p podem diferir na sua mesa por causa da luz e da altura. O piso evita o erro grosseiro. Não escolhe vencedor.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Megapixel a mais não fura sombra. Um sensor mais capaz pode ajudar em pouca luz, e mesmo assim a lâmpada na cara muda mais do que a linha de especificação. Se a página do produto só grita resolução e não mostra o rosto numa sala parecida com a sua, ela não respondeu. Grave você mesmo com a luz que já tem.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/webcam-para-stream-passos-rosto.webp",
-        alt: "Pessoa de headset sentada numa mesa de jogo, à noite.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/webcam-para-stream-passos-rosto.webp",
+        "alt": "Pessoa de headset numa mesa de jogo à noite, situação em que a webcam para stream precisa de luz frontal.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Pessoa de headset sentada numa mesa de jogo, à noite. Foto de Yan Krukau (Pexels).",
+      "legenda": "Headset e mesa à noite: sem uma luz na cara, a câmera só registra o brilho do monitor."
     },
     {
-      tipo: "titulo",
-      nivel: 3,
-      texto: "Resolução não é luz",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Luz e resolução se confundem na embalagem porque as duas usam número. São coisas distintas. Resolução é quantos pontos desenham o rosto. Luz é se esses pontos enxergam o olho ou só a sombra do capuz. Você pode ter 1080p e uma cara preta. Pode ter luz boa e um piso modesto que ainda assim apresenta você. Ajuste a luz antes de discutir o segundo número.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Luz na cara, antes do megapixel",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "A luz que importa está na cara, não atrás de você. Janela nas costas transforma você em silhueta mesmo com uma câmera capaz. Uma luminária simples, à frente e um pouco acima, ou a própria janela de frente, devolve olho e boca. Evite o único ponto forte bem no topo, que cava a órbita. Você confere isso na câmera do celular, na mesma cadeira, antes de gastar com webcam.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Fundo bagunçado incomoda menos do que rosto escuro. Dá para girar a cadeira, fechar uma cortina ou tirar o abajur de trás da cabeça sem comprar cenário. Fundo virtual, no programa, recorta mal quando a luz é desigual e quando o cabelo se mistura com a parede. Ele é um efeito depois da imagem pronta. Não é o primeiro conserto. A ordem do desenho acima começa na luz de propósito.",
-    },
-    {
-      tipo: "tabela",
-      titulo: "O que conferir na sua mesa antes da webcam",
-      colunas: [
-        "Conferência",
-        "Pronto",
-        "Ainda cedo para comprar",
+      "tipo": "tabela",
+      "titulo": "Ajuste da câmera, do mais barato ao mais caro",
+      "colunas": [
+        "Ajuste",
+        "Efeito",
+        "Custo"
       ],
-      linhas: [
+      "linhas": [
         [
-          "Rosto",
-          "Olho e boca visíveis na sua luz",
-          "Testa some na sombra",
+          "Luz na frente do rosto",
+          "Acaba com o grão e a silhueta",
+          "Uma luminária que você já pode ter"
         ],
         [
-          "Altura",
-          "Lente na linha dos olhos",
-          "Câmera filma o queixo",
+          "Altura dos olhos",
+          "Para de filmar a narina",
+          "Um apoio ou o monitor com a câmera em cima"
         ],
         [
-          "Piso",
-          "1080p como chão do rosto",
-          "Caçar megapixel no escuro",
+          "1080p e janela pequena",
+          "Nítido no canto da live",
+          "A webcam de entrada atual"
         ],
         [
-          "Cena",
-          "Fonte separada no programa",
-          "Overlay no lugar da luz",
-        ],
+          "Câmera de foto com captura",
+          "Mais controle, mais cabo e atraso para configurar",
+          "Só quando a webcam já está bem iluminada e ainda não basta"
+        ]
       ],
-      nota: "1080p é o piso comum citado neste guia. A tabela não indica marca.",
+      "nota": "Ordem prática. Especificação de modelo muda. Prove a imagem no OBS, não na caixa."
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Onde a câmera entra na cena",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Enquadramento e o que cortar"
     },
     {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/webcam-para-stream-olhar.webp",
-        alt: "Teclado e monitor do caixa, no balcão vermelho da loja.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "paragrafo",
+      "texto": "Do peito para cima, com um pouco de ar acima da cabeça, é o quadro clássico de comentário. Colado no queixo, qualquer gesto sai da tela. Largo demais, você vira um ponto e o quarto vira o assunto. Se você olha para o monitor e não para a lente, tudo bem: a plateia entende que você está jogando. A lente um pouco acima do monitor faz esse olhar ficar natural, não para baixo."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Fundo virtual come processamento e falha no cabelo e no fone. Use quando a parede for impossível, e teste se o PC da live, descrito em [PC para live](/blog/pc-para-live-de-gta-6), ainda segura o jogo. Às vezes desligar o fundo devolve o quadro que faltava. A mesa em volta da câmera está no [setup](/blog/setup-de-streamer-para-gta-6)."
+    },
+    {
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/webcam-para-stream-olhar.webp",
+        "alt": "Teclado e monitor no balcão da loja, referência de altura para a webcam para stream.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Teclado e monitor do caixa, no balcão vermelho da loja. Foto da loja, na Av. Anchieta, 789, Cambuí.",
+      "legenda": "No balcão, teclado e monitor mostram a altura certa: a câmera mora em cima da tela, não no colo."
     },
     {
-      tipo: "paragrafo",
-      texto: "No OBS, a webcam é uma fonte da cena, ao lado do jogo e do microfone. Você pode deixá-la numa cena e tirá-la de outra. O programa é gratuito em [obsproject.com](https://obsproject.com/), e o uso de cenas está em [OBS para live de jogo](/blog/obs-para-live-de-jogo). Encaixe o recorte depois que o rosto está legível. Aumentar a janela não cria a luz que a lente não viu.",
+      "tipo": "pros-contras",
+      "titulo": "Imagem que a gente assiste",
+      "pros": [
+        "Luz frontal difusa e câmera na altura dos olhos.",
+        "Janela pequena, sem tapar a interface do jogo.",
+        "Fundo simples, que não pisca nem compete com você."
+      ],
+      "contras": [
+        "Única luz é o monitor, e o ganho da câmera no máximo.",
+        "Webcam 4K no escuro, achando que resolução cria luz.",
+        "Fundo virtual pesado num PC que já luta com o jogo."
+      ]
     },
     {
-      tipo: "paragrafo",
-      texto: "A altura física importa tanto quanto a fonte no programa. Câmera em cima do monitor, na linha dos olhos, conversa com quem assiste. Câmera baixa, na mesa, filma narina e queixo e parece outro gesto. Se o monitor é alto demais para apoiar a câmera, use um apoio que suba até os olhos. Isso é ajuste de [setup](/blog/setup-de-streamer-para-gta-6), não um modelo novo.",
+      "tipo": "paragrafo",
+      "texto": "O áudio que acompanha essa cara está em [microfone para live](/blog/microfone-para-live-de-jogo). Um rosto nítido com voz de teclado ainda é uma live pela metade."
     },
     {
-      tipo: "destaque",
-      tom: "atencao",
-      titulo: "Celular na mesma cadeira",
-      texto: "Antes da webcam, grave o rosto com o celular na altura dos olhos e com a luz que você realmente usa. Se a cara some, compre luz ou mude a janela de lugar. A câmera nova herdaria a mesma sombra.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que a troca de câmera não conserta",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Trocar de webcam não conserta envio instável, voz longe da boca nem jogo que ocupa o processador inteiro. São falhas vizinhas. A rede está em [internet para fazer live](/blog/internet-para-fazer-live). A voz está no guia do microfone. A folga está no setup. Cara escura espera a luz. Cara clara abaixo do piso de 1080p é que pede câmera nova.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "GTA 6 não publicou câmera de referência para PC, e o computador do jogo seguia sem anúncio nessa checagem de novembro de 2026. Comprar webcam para esse jogo é decidir com um uso que a Rockstar não descreveu. Compre para o rosto da live de agora, na luz da sua mesa. A câmera continua sendo câmera de rosto, não peça de requisito.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/webcam-para-stream-fecho.webp",
-        alt: "Teto escuro da loja com as luminárias cruzadas em X.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/webcam-para-stream-fecho.webp",
+        "alt": "Luminárias no teto da Balão da Informática Anchieta, lembrete de que a webcam para stream depende da luz.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Teto escuro da loja com as luminárias cruzadas em X. Foto da loja, na Av. Anchieta, 789, Cambuí.",
+      "legenda": "As luminárias em X no teto da loja são ambiente. Na sua mesa, a luz que vale é a que bate na cara, de frente."
     },
     {
-      tipo: "pros-contras",
-      pros: [
-        "1080p funciona como piso do rosto, e você não precisa caçar o maior número",
-        "A luz na cara se testa com o que você já tem, na cadeira em que joga",
-        "A webcam entra como fonte da cena, depois da imagem legível",
-      ],
-      contras: [
-        "Megapixel não substitui lâmpada nem janela de frente",
-        "Nenhuma marca é obrigatória, e não há modelo oficial de GTA 6",
-        "Fundo virtual e aro colorido não corrigem silhueta",
-      ],
+      "tipo": "destaque",
+      "tom": "dica",
+      "titulo": "Teste de trinta segundos",
+      "texto": "Grave no OBS com a luz que você vai usar de noite, não ao meio-dia. Assista mudo. Se der para ver o olho e o fone, a câmera passou."
     },
     {
-      tipo: "chamada",
-      tema: "geral",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Cor, exposição e o canto da tela"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Ver o rosto na luz da sua casa",
+      "tipo": "paragrafo",
+      "texto": "No software da câmera, ou nas propriedades da fonte no OBS, trave a exposição. No automático, a tela do jogo clareia e o seu rosto escurece a cada explosão. Exposição manual, com a luz da cara ligada, deixa a imagem estável. Balanço de branco no tom da sua lâmpada evita o rosto azul. Não precisa parecer estúdio. Precisa o olho aparecer e a cor não mudar no meio da frase."
     },
     {
-      tipo: "paragrafo",
-      texto: "Na Balão da Informática Anchieta, Av. Anchieta, 789, Cambuí, Campinas, descreva a luz da mesa: janela na frente ou nas costas, luminária, horário em que você joga. Se puder, leve o recorte filmado na mesma cadeira. A conversa usa 1080p como piso e não empurra uma marca. A câmera só faz sentido se o rosto já tem luz.",
+      "tipo": "paragrafo",
+      "texto": "O tamanho da janela no OBS é o outro ajuste. Grande demais, tapa o minimapa do GTA e a câmera vira o assunto. Pequena demais, ninguém vê a reação. Um retângulo do peito para cima, num canto, é o padrão que funciona. Recorte no próprio OBS se a câmera filma teto demais. Fundo virtual só se a parede for impossível e o teste de quadro, com o jogo aberto, continuar liso. Se o quadro cair, desligue o fundo. A cara com a parede real é melhor do que a cara recortada com o jogo engasgando."
     },
     {
-      tipo: "paragrafo",
-      texto: "WhatsApp (19) 98751-0267. A decisão é direta. Se a cara está escura, arrume a luz antes da webcam. Se a cara está clara e a câmera atual fica abaixo do piso comum de 1080p, aí você escolhe um modelo sem tratar logotipo como obrigação.",
+      "tipo": "lista",
+      "itens": [
+        "Exposição manual, para o rosto não pulsar com o jogo.",
+        "Janela pequena, sem tapar a interface.",
+        "Fundo virtual só se o quadro continuar liso."
+      ]
     },
     {
-      tipo: "chamada",
-      titulo: "A Balão da Informática Anchieta olha a luz da sua mesa.",
-      texto: "No WhatsApp (19) 98751-0267, diga se a janela está na cara ou nas costas. A decisão é o rosto legível, com 1080p como piso.",
-      rotulo: "Pedir orçamento no WhatsApp",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "A imagem que você aguentaria assistir"
     },
+    {
+      "tipo": "paragrafo",
+      "texto": "Assista trinta segundos mudos da sua câmera, do lado do jogo. Se você não se reconhece no escuro, a luz vem antes de outra webcam. Se o enquadramento corta a testa toda vez que você comemora, recule a cadeira ou diminua o zoom. Reação cortada é pior do que janela pequena."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Trave a exposição e o balanço de branco, e confirme depois de uma hora: a lâmpada esquenta e a cor muda. Um retoque no meio da semana deixa a live consistente. Consistente ganha de perfeito num dia e azul no seguinte. A plateia acostuma com a sua cara, não com um filtro novo toda quinta."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se a câmera filma a janela atrás de você ao meio-dia, feche a cortina ou mude de lugar. Nenhuma regulagem ganha de uma janela estourada. À noite, a luminária de frente devolve o rosto que a janela apagou de dia. Teste os dois horários se você transmite de dia e de noite. A regulagem que ficou boa às 15h costuma estourar às 21h, quando só a luminária está acesa."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "geral",
+      "titulo": "Quer ver a webcam na tela da loja?",
+      "texto": "A Balão da Informática Anchieta, loja de informática em Campinas mostra a imagem no balcão do Cambuí. Av. Anchieta, 789. WhatsApp (19) 98751-0267.",
+      "rotulo": "Chamar a loja",
+      "href": "/fale-conosco",
+      "mensagem": "Olá! Li a matéria de webcam para stream e quero ver um modelo na loja."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Webcam para stream segue, com o restante da série, em [GTA 6 no blog](/blog/gta-6)."
+    }
   ],
-  perguntas: [
+  "perguntas": [
     {
-      pergunta: "720p serve como câmera de rosto na live?",
-      resposta: "O piso comum de uma câmera de rosto é 1080p. Abaixo disso o recorte tende a ficar mole. 1080p é chão, não troféu: passar disso não compensa uma cara sem luz.",
+      "pergunta": "Qual webcam comprar para stream?",
+      "resposta": "Uma de 1080p já serve na janela do canto, desde que haja luz na sua frente e a câmera esteja na altura dos olhos."
     },
     {
-      pergunta: "Mais megapixel resolve quarto escuro?",
-      resposta: "Não. Megapixel desenha o que a lente viu. Se a janela está nas suas costas, a câmera vê silhueta, em qualquer número. Ponha luz na cara e teste de novo antes de trocar de aparelho.",
+      "pergunta": "Preciso de 4K?",
+      "resposta": "Não para começar. 4K na webcam não corrige quarto escuro e pesa mais no PC. Luz boa em 1080p aparece melhor."
     },
     {
-      pergunta: "Qual marca de webcam é obrigatória?",
-      resposta: "Nenhuma. Não há marca obrigatória nem câmera oficial de GTA 6, já que a versão de PC não estava anunciada. Olhe luz, altura dos olhos e o piso de 1080p.",
+      "pergunta": "A câmera do celular serve?",
+      "resposta": "Serve de ensaio, com um app que o OBS enxergue como câmera. Para a rotina, uma webcam fixa no monitor treme menos e liga sozinha."
     },
     {
-      pergunta: "Onde a webcam fica no programa de live?",
-      resposta: "No OBS ela é uma fonte dentro da cena, junto do jogo e do microfone. Dá para ter uma cena com rosto e outra sem. O recorte só entra depois que o rosto está legível na luz real.",
+      "pergunta": "Onde posicionar?",
+      "resposta": "Em cima do monitor, na altura dos olhos, filmando do peito para cima. Embaixo, o ângulo filma o nariz e o teto some."
     },
+    {
+      "pergunta": "Fundo virtual vale a pena?",
+      "resposta": "Só se a parede for impossível e o PC ainda sobrar quadro. Ele erra no cabelo e no fone e gasta processamento."
+    }
   ],
-  fontes: [
-    OBS,
-    YAHOOPC,
-  ],
+  "fontes": [
+    {
+      "nome": "OBS Studio — guia de início rápido",
+      "url": "https://obsproject.com/kb/quick-start-guide",
+      "data": "consulta em 19 de novembro de 2026"
+    }
+  ]
 };
 
 export default artigo;

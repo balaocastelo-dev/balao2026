@@ -88,6 +88,7 @@ export default async function PaginaDoArtigo({ params }: Props) {
 
             <p className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[0.875rem] text-[var(--b-tinta-3)]">
               <span className="font-bold text-white">{artigo.autor.nome}</span>
+              {artigo.autor.cargo ? <span>{artigo.autor.cargo}</span> : null}
               <span aria-hidden className="h-3 w-px bg-[var(--b-linha-forte)]" />
               <time dateTime={artigo.publicadoEm}>{dataPorExtenso(artigo.publicadoEm)}</time>
               {artigo.atualizadoEm ? (

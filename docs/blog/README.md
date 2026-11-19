@@ -146,7 +146,14 @@ aparece primeiro). Sem nenhum marcado, a vitrine mostra os quatro mais recentes.
 
 `npm test` roda tudo; `npm run blog:conferir` roda só o blog: conversão do HTML
 importado, links, categorias, chamadas, a régua em cada artigo e os dados
-estruturados.
+estruturados. `npm run blog:checar-gta6` confere a série GTA 6 (title, meta,
+H1, palavra-chave, FAQ, schema e tom).
+
+A série de 30 matérias em `/blog/gta-6` foi reescrita em 19 de novembro de 2026.
+Os endereços e as fotos reais ficaram. O texto fala com o leitor, diz uma vez
+o que a Rockstar confirmou e segue com conteúdo útil. A loja assina como
+Balão da Informática Anchieta. Nas matérias de Campinas o JSON-LD inclui a loja
+da Av. Anchieta, 789.
 
 ## Limite conhecido
 

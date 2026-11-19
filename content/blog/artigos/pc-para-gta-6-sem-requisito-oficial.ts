@@ -1,295 +1,275 @@
-import type { Artigo, Fonte } from "@/lib/blog/tipos";
-
-const ROCKSTARVI: Fonte = {
-  nome: "Rockstar Games — página oficial de Grand Theft Auto VI",
-  url: "https://www.rockstargames.com/VI",
-  data: "consulta em 19 de novembro de 2026",
-};
-
-const YAHOOPC: Fonte = {
-  nome: "Yahoo / Just Jared — “GTA 6 PC Release Date: Is Grand Theft Auto VI Coming to PC?”",
-  url: "https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html",
-  data: "15 de novembro de 2026",
-};
-
-const TAKETWO: Fonte = {
-  nome: "Take-Two Interactive — comunicado de pré-venda de Grand Theft Auto VI",
-  url: "https://taketwointeractivesoftwareinc.gcs-web.com/news-releases/news-release-details/rockstar-games-announces-pre-orders-grand-theft-auto-vi/",
-  data: "24 de junho de 2026",
-};
-
-const POLYGON: Fonte = {
-  nome: "Polygon — “GTA 6 Sets PC Release Date, New Report Says”",
-  url: "https://www.polygon.com/gta-6-pc-release-q1-2027-rumor/",
-  data: "2026",
-};
+import type { Artigo } from "@/lib/blog/tipos";
 
 const artigo: Artigo = {
-  slug: "pc-para-gta-6-sem-requisito-oficial",
-  titulo: "PC para GTA 6: requisito oficial ainda não existe",
-  resumo: "Até 19 de novembro de 2026 não há requisito de PC para GTA 6. Veja o que dá para decidir pelos jogos e pelo monitor de hoje, com folga.",
-  categoria: "guias",
-  etiquetas: [
+  "slug": "pc-para-gta-6-sem-requisito-oficial",
+  "titulo": "PC para GTA 6: como escolher a máquina enquanto espera",
+  "resumo": "PC para GTA 6 sem ficha oficial: escolha pela sua tela e pelos jogos que você já roda. Veja o histórico de GTA V e RDR2 e o que montar agora.",
+  "categoria": "guias",
+  "etiquetas": [
     "GTA 6",
-    "PC",
-    "Requisitos",
+    "PC gamer",
+    "Montagem"
   ],
-  capa: {
-    src: "/blog/capas/pc-para-gta-6-sem-requisito-oficial.webp",
-    alt: "Estação de jogo no escuro, com gabinete e periféricos iluminados.",
-    largura: 1536,
-    altura: 1024,
-    pronta: false,
+  "capa": {
+    "src": "/blog/capas/pc-para-gta-6-sem-requisito-oficial.webp",
+    "alt": "Estação de jogo no escuro, com gabinete iluminado, um PC para GTA 6 quando a versão existir.",
+    "largura": 1536,
+    "altura": 1024,
+    "pronta": false
   },
-  publicadoEm: "2026-11-18T14:00:00.000Z",
-  autor: {
-    nome: "Equipe Balão da Informática",
-    url: "/sobre-nos",
+  "publicadoEm": "2026-11-18T14:00:00.000Z",
+  "atualizadoEm": "2026-11-19T12:00:00.000Z",
+  "autor": {
+    "nome": "Balão da Informática Anchieta",
+    "cargo": "Loja de informática em Campinas",
+    "url": "/sobre-nos"
   },
-  origem: "autoral",
-  seo: {
-    titulo: "PC para GTA 6: ainda não há requisito oficial",
-    palavrasChave: [
+  "origem": "autoral",
+  "seo": {
+    "titulo": "PC para GTA 6: o que decidir sem ficha oficial",
+    "descricao": "PC para GTA 6 sem ficha oficial: escolha pela sua tela e pelos jogos que você já roda. Veja o histórico de GTA V e RDR2 e o que montar agora.",
+    "palavrasChave": [
       "pc para gta 6",
-      "requisito gta 6 pc",
-      "gta 6 vai ter pc",
-      "configuração de pc para gta 6",
-    ],
+      "qual pc roda gta 6",
+      "computador para gta 6",
+      "pc gamer gta 6"
+    ]
   },
-  blocos: [
+  "blocos": [
     {
-      tipo: "paragrafo",
-      texto: "A busca por um PC para GTA 6 devolve tabelas de peça com cara de ficha oficial. Essa ficha não tem dono. Até 19 de novembro de 2026 a Rockstar não anunciou versão de computador, pré-venda de PC nem requisito. A [página do jogo](https://www.rockstargames.com/VI) lista PlayStation 5 e Xbox Series. O dia 19 é lançamento de console.",
+      "tipo": "paragrafo",
+      "texto": "PC para GTA 6, hoje, é uma escolha de bom senso e não de ficha técnica. A Rockstar não anunciou versão de computador, nem pré-venda, nem a lista de peças. Dá para montar uma máquina excelente para os mundos abertos que já estão no PC, para GTA V e para uma live, e deixar essa máquina pronta para o dia em que o anúncio sair."
     },
     {
-      tipo: "paragrafo",
-      texto: "Dá para comprar agora por outro critério. Você escolhe a máquina pelos jogos que já roda e pelo monitor que já usa, e deixa folga de memória e de disco. Trocar placa no susto, copiando um número de console, não aproxima o computador de um jogo sem versão.",
+      "tipo": "resumo",
+      "titulo": "Resposta rápida",
+      "itens": [
+        "Na estreia de 19 de novembro de 2026, Grand Theft Auto VI está no PS5 e no Xbox Series X|S.",
+        "GTA V chegou ao PC em 14 de abril de 2015 e Red Dead Redemption 2 em 5 de novembro de 2019, ambos depois dos consoles. É histórico, não calendário do GTA 6.",
+        "A compra certa agora começa pela resolução do monitor e pelos jogos que você abre toda semana."
+      ]
     },
     {
-      tipo: "resumo",
-      itens: [
-        "**Não há requisito de PC.** Até 19 de novembro de 2026 a Rockstar não publicou versão, pré-venda nem configuração.",
-        "**19 de novembro é console.** PS5 e Xbox Series estão na página oficial. O computador não está.",
-        "**O precedente não marca mês.** GTA V e Red Dead Redemption 2 chegaram ao PC depois, em intervalos diferentes.",
-        "**A compra de hoje tem outro critério.** Jogos atuais, tela atual e folga. O resto espera a ficha.",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Qual PC para GTA 6 faz sentido comprar agora"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que estava publicado até 19 de novembro de 2026",
+      "tipo": "paragrafo",
+      "texto": "Comece pela tela. Full HD pede uma placa mais contida e ainda entrega cidade nítida em 24 polegadas. Quad HD, em 27, pede mais GPU e mais memória de vídeo. 4K pede o topo. Essa conta vale para os jogos grandes de hoje e está detalhada em [monitor para GTA 6](/blog/monitor-para-gta-6) e em [placa de vídeo](/blog/placa-de-video-para-gta-6). Sem a tela definida, qualquer lista de peças é vitrine."
     },
     {
-      tipo: "paragrafo",
-      texto: "A página da Rockstar mostra PlayStation 5 e Xbox Series X|S, com a chamada de que o jogo rende melhor no PS5. O [comunicado da Take-Two](https://taketwointeractivesoftwareinc.gcs-web.com/news-releases/news-release-details/rockstar-games-announces-pre-orders-grand-theft-auto-vi/), de 24 de junho de 2026, repete essas plataformas na pré-venda e não abre linha para Windows. Não há uma terceira coluna escondida no rodapé.",
+      "tipo": "paragrafo",
+      "texto": "O segundo passo é o uso real. Só jogar, de noite, com o Discord fechado, é uma máquina. Jogar com navegador, mapa e captura é outra, com 32 GB de RAM e um processador que não esteja no limite. A matéria de [memória](/blog/memoria-ram-para-gta-6) e a de [processador](/blog/processador-para-gta-6) separam os dois casos. O disco, quase sempre, é SSD NVMe com folga, como está em [SSD](/blog/ssd-para-gta-6)."
     },
     {
-      tipo: "paragrafo",
-      texto: "Em 15 de novembro de 2026, a [reportagem do Just Jared no Yahoo](https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html) conferiu o site oficial e um relatório da Take-Two. Seguia sem data de PC, sem pré-venda de PC e sem requisito. O corte desta página é essa data de propósito: um comunicado novo muda o quadro, e um guia eterno envelhece mal.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/pc-para-gta-6-sem-requisito-oficial-precedente.webp",
-        alt: "Computador, notebook e teclado sobre uma mesa de jogo.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/pc-para-gta-6-sem-requisito-oficial-precedente.webp",
+        "alt": "Computador, notebook e teclado numa mesa, opções de PC para GTA 6 enquanto a ficha não sai.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Computador, notebook e teclado sobre uma mesa de jogo. Foto de Pramod Tiwari (Pexels).",
+      "legenda": "Notebook e desktop na mesma mesa: os dois jogam. A escolha é mobilidade contra peça trocável."
     },
     {
-      tipo: "paragrafo",
-      texto: "O histórico que essa reportagem resume serve para uma coisa só. GTA V saiu em console em setembro de 2013 e no PC em abril de 2015. Red Dead Redemption 2 saiu em console em outubro de 2018 e no PC em novembro de 2019. Os dois chegaram ao computador depois. A espera não teve a mesma duração, então não vira régua.",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que a Rockstar já fez no PC, como histórico"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Precedente de PC não marca o mês",
+      "tipo": "paragrafo",
+      "texto": "GTA V saiu nos consoles em 17 de setembro de 2013 e no PC em 14 de abril de 2015. O newswire da versão de computador fala em resolução alta, 60 quadros, muitos ajustes gráficos e controle de densidade de carros e pedestres. Red Dead Redemption 2 saiu nos consoles em 26 de outubro de 2018 e no PC em 5 de novembro de 2019, com melhorias gráficas anunciadas pela própria Rockstar. As datas de PC estão nos newswires. As de console, na Wikipedia, só como calendário."
     },
     {
-      tipo: "paragrafo",
-      texto: "A [Polygon](https://www.polygon.com/gta-6-pc-release-q1-2027-rumor/) publicou um relato de PC no início de 2027, apoiado em fontes que não se identificam. A Rockstar não confirmou a janela. Tratar o começo de 2027 como mês de compra é decidir em cima de um boato. Precedente mostra que a espera já ocorreu. Não mostra em qual mês este jogo aparece no computador.",
+      "tipo": "paragrafo",
+      "texto": "O intervalo foi de cerca de 19 meses no GTA V e de pouco mais de um ano no Red Dead. Ninguém prometeu que Grand Theft Auto VI vai repetir a conta. O uso prático desse histórico é outro: não pare a sua vida de jogador esperando um mês que não foi marcado, e não compre uma chave de PC que não está à venda. Quem quer a campanha em novembro usa console. Quem quer o computador monta para o que já joga."
     },
     {
-      tipo: "titulo",
-      nivel: 3,
-      texto: "O intervalo antigo não é régua",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "De GTA V foram cerca de um ano e meio entre o console e o PC. De Red Dead Redemption 2, pouco mais de um ano. Se os dois prazos fossem regra, eles coincidiriam. Não coincidem. A única data que entra num plano é a que a Rockstar escrever. Sem essa frase, o calendário de PC fica em branco.",
-    },
-    {
-      tipo: "destaque",
-      tom: "atencao",
-      titulo: "Relato não é calendário",
-      texto: "Início de 2027 circula como matéria, não como comunicado. Até 19 de novembro de 2026 a Rockstar não confirmou versão de PC. Comprar peça com essa janela como prazo é chute.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que dá para decidir sem ficha",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "A tabela abaixo separa o que você observa na própria mesa do que exigiria uma ficha. Jogos que já abrem, tela em Full HD ou Quad HD, memória no piso comum de 16 GB e jogo num SSD são decisões de PC atual. Requisito de GTA 6, data de computador e modelo “certo” do jogo não são. As duas colunas não se misturam.",
-    },
-    {
-      tipo: "tabela",
-      titulo: "O que dá para decidir e o que seria chute",
-      colunas: [
-        "Pergunta",
-        "Dá para decidir",
-        "Seria chute",
+      "tipo": "tabela",
+      "titulo": "Três caminhos, sem ficha inventada",
+      "colunas": [
+        "Seu plano",
+        "O que fazer agora",
+        "O que não fazer"
       ],
-      linhas: [
+      "linhas": [
         [
-          "Uso de hoje",
-          "Jogos e monitor que você já tem",
-          "Tratar GTA 6 como se tivesse ficha",
+          "Jogar a campanha na semana da estreia",
+          "PS5 ou Xbox Series X|S",
+          "Comprar “chave de PC” em anúncio"
         ],
         [
-          "Tela",
-          "Full HD ou Quad HD muda a placa",
-          "Inventar a resolução que o jogo vai exigir",
+          "Jogar no PC e topar esperar",
+          "Montar para a sua tela e para o GTA V",
+          "Guardar o dinheiro parado sem usar a máquina"
         ],
         [
-          "Memória e disco",
-          "16 GB e SSD são hábito atual",
-          "Copiar o número do console para o PC",
-        ],
-        [
-          "Data de PC",
-          "Sem anúncio até 19 nov 2026",
-          "Marcar início de 2027 como plano",
-        ],
+          "Transmitir os jogos que já tem",
+          "Folga de CPU, 32 GB e um SSD com espaço",
+          "Gravar em disco cheio achando que a live espera o GTA 6"
+        ]
       ],
-      colunaDestaque: 1,
-      fonte: YAHOOPC,
-      nota: "A coluna do meio é critério de compra. A da direita não tem página da Rockstar.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "A [montagem](/montagempc) cabe na coluna do meio: a máquina sai para os jogos que você descreve, não para um requisito imaginado. Há um chute fácil de não perceber, que é colar os 212 GB do console na lista de peças. Esse número é de aparelho de console. A matéria de [SSD](/blog/ssd-para-gta-6) desmonta essa conta com a fonte.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Folga também tem limite. Dezesseis gigabytes de memória são ponto de partida comum. Trinta e dois cabem quando navegador, Discord e captura ficam abertos. SSD no lugar de HD é prática para jogo grande. Nada disso é “o que GTA 6 pede”. É o que um computador de agora aguenta sem viver no limite o tempo todo.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "A tela e os jogos de hoje mandam na compra",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Se o monitor é Full HD e os jogos que você abre cabem nele, a máquina não sobe de faixa por um título sem versão de PC. Se você já quer Quad HD nos jogos atuais, a placa muda por causa dessa tela. A ordem é a tela primeiro. Invertida, a compra acerta o boato e erra a mesa.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "O contexto da série está em [GTA 6 no blog](/blog/gta-6). As plataformas do dia 19 estão em [PS5, Xbox e o PC](/blog/gta-6-plataformas-ps5-xbox-e-pc). Quem quer computador para o uso de agora segue para [PC gamer](/pcgamer) ou para [qual PC gamer](/qual-pc-gamer). Nenhum desses caminhos exige uma ficha que a Rockstar não escreveu.",
-    },
-    {
-      tipo: "chamada",
-      tema: "pc-gamer",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Folga útil e folga que é desculpa",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "A folga útil é a que o seu uso de hoje já explica. Memória para as janelas abertas, SSD para o jogo não morar num HD, fonte com sobra para a placa dessa tela. A desculpa começa quando a folga ganha nome de modelo cravado como o chip de GTA 6. Sem ficha, não há chip certo.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "O processador que não limita os jogos que você já joga, a placa que combina com a sua tela e a fonte que alimenta essa placa fecham a conta. O detalhe de cada uma está nas matérias de [placa de vídeo](/blog/placa-de-video-para-gta-6), [processador](/blog/processador-para-gta-6) e [memória](/blog/memoria-ram-para-gta-6). Elas repetem o mesmo corte: decisão de PC atual, nunca requisito oficial.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/pc-para-gta-6-sem-requisito-oficial-decisao.webp",
-        alt: "Monitor, gabinete com luz e headset numa mesa de demonstração.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "fonte": {
+        "nome": "Rockstar Games — página oficial de Grand Theft Auto VI",
+        "url": "https://www.rockstargames.com/VI",
+        "data": "consulta em 19 de novembro de 2026"
       },
-      legenda: "Monitor, gabinete com luz e headset numa mesa de demonstração. Foto de Matheus Bertelli (Pexels).",
+      "nota": "A coluna do console segue a lista oficial. A coluna do PC é preparação, não requisito publicado."
     },
     {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/pc-para-gta-6-sem-requisito-oficial-fecho.webp",
-        alt: "Placa de vídeo dentro de um gabinete escuro, com luz colorida.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/pc-para-gta-6-sem-requisito-oficial-decisao.webp",
+        "alt": "Monitor, gabinete com luz e headset, demonstração de um PC para GTA 6 na prática.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Placa de vídeo dentro de um gabinete escuro, com luz colorida. Foto de Andrey Matveev (Pexels).",
+      "legenda": "Mesa de demonstração: gabinete, tela e fone juntos. É assim que a configuração fecha, não peça por peça no escuro."
     },
     {
-      tipo: "pros-contras",
-      pros: [
-        "A data de console fica fora da lista de peças do computador",
-        "Dá para montar pelos jogos e pela tela que você já usa",
-        "Memória e SSD entram como folga de máquina atual, com limite claro",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "As três faixas que a loja usa"
+    },
+    {
+      "tipo": "lista",
+      "itens": [
+        "[PC gamer de entrada](/blog/pc-gamer-entrada-para-gta-6): Full HD, jogos atuais no alto, sem transmitir em qualidade pesada.",
+        "[PC intermediário](/blog/pc-gamer-intermediario-para-gta-6): Quad HD e folga de memória de vídeo.",
+        "[Alto desempenho](/blog/pc-gamer-alto-desempenho-gta-6): tela exigente, captura e anos de folga."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se a máquina atual só precisa de uma peça, o caminho é o [upgrade](/blog/upgrade-do-pc-antes-do-gta-6), não uma torre nova. Notebook contra desktop está em [notebook ou desktop](/blog/notebook-gamer-ou-desktop-gta-6)."
+    },
+    {
+      "tipo": "pros-contras",
+      "titulo": "Montar agora é uma boa ideia quando",
+      "pros": [
+        "O PC atual já sofre nos jogos que você abre toda semana.",
+        "Você sabe a resolução do monitor e o que mais roda junto do jogo.",
+        "A máquina nova vai ser usada, não embalada à espera de um anúncio."
       ],
-      contras: [
-        "Quem quer jogar no dia 19 não resolve isso com um PC",
-        "Um anúncio posterior de PC deixa a parte da ficha deste guia para trás",
-        "Adiar a máquina que você usa hoje também não melhora a sessão desta semana",
-      ],
+      "contras": [
+        "A única frase do orçamento é “tem de rodar GTA 6 no ultra”.",
+        "Você viu uma lista de peças num vídeo sem fonte.",
+        "O console da sala resolveria a estreia e o PC está ótimo para o que você joga."
+      ]
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Antes de fechar o computador",
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/pc-para-gta-6-sem-requisito-oficial-fecho.webp",
+        "alt": "Placa de vídeo dentro de um gabinete escuro, coração de um PC para GTA 6 no futuro.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
+      },
+      "legenda": "A placa dentro do gabinete é o pedaço que a resolução da tela vai cobrar."
     },
     {
-      tipo: "paragrafo",
-      texto: "Na Balão da Informática Anchieta, na Av. Anchieta, 789, no Cambuí, em Campinas, a conversa começa pela lista de jogos que você abre hoje e pelo monitor que está na mesa. O WhatsApp é (19) 98751-0267. Traga também se a máquina grava ou só joga: isso muda memória e disco, e não depende de GTA 6.",
+      "tipo": "destaque",
+      "tom": "dica",
+      "titulo": "O que dizer no WhatsApp",
+      "texto": "Resolução do monitor, três jogos que você mais abre, e se vai transmitir. Com isso a equipe fecha uma configuração. Sem isso, qualquer lista é genérica."
     },
     {
-      tipo: "paragrafo",
-      texto: "Você vê a configuração pensada para esse uso, não uma ficha emprestada de fórum. Se a meta for jogar no dia 19, o caminho publicado até aqui é o console, e a loja diz isso com clareza. A decisão é montar para o uso atual, com folga, e deixar GTA 6 fora da lista até existir ficha oficial.",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Um pedido de orçamento que a loja consegue atender"
     },
     {
-      tipo: "chamada",
-      titulo: "Quer montar para os jogos de hoje, com folga?",
-      texto: "Diga a tela e os jogos que você já abre. A máquina sai desse uso, e GTA 6 só entra na conversa quando houver requisito publicado.",
-      rotulo: "Pedir orçamento no WhatsApp",
+      "tipo": "paragrafo",
+      "texto": "Mensagem útil no WhatsApp cabe em quatro linhas. A resolução do monitor, por exemplo 1920 por 1080. O tamanho, se você sabe, 24 ou 27 polegadas. Dois jogos que você abre toda semana, com o GTA V na lista se for o caso. E se o Discord, o navegador ou a live ficam abertos junto. Com isso a equipe separa entrada, intermediário ou alto desempenho sem chutar. “Quero o melhor para o GTA 6” não tem resposta honesta. “Quero Quad HD com live” tem."
     },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se você já tem PC, mande também o modelo da placa de vídeo e uma foto da etiqueta da fonte. Muita visita que pedia torre nova sai com uma placa e um SSD, e o resto fica. O contrário também acontece: plataforma de 2017 que não aceita a GPU atual vira montagem, e é melhor saber isso antes de comprar peça solta na internet. O balcão em Campinas faz essa leitura. O texto geral das faixas está nas matérias de entrada, intermediário e alto desempenho."
+    },
+    {
+      "tipo": "lista",
+      "itens": [
+        "Resolução, dois jogos, e se há live.",
+        "Foto da fonte se a máquina é antiga.",
+        "Peça para ver ligada, não só a lista de peças."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Guarde o orçamento com a data. Peça muda, e um print antigo não é a prateleira de hoje. Ver a máquina ligada no mesmo dia pega ventoinha que raspa e cabo curto. Leve em conta a tomada e o espaço embaixo da mesa. Tela, placa, memória e disco têm matéria própria nesta série, para a decisão não depender de uma lista única."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "pc-gamer",
+      "titulo": "Quer a configuração em cima da sua tela?",
+      "texto": "A Balão da Informática Anchieta, loja de informática em Campinas monta e mostra a máquina ligada. Av. Anchieta, 789, Cambuí, Campinas. WhatsApp (19) 98751-0267. Telefone (19) 3255-1661.",
+      "rotulo": "Pedir orçamento",
+      "href": "/montagempc",
+      "mensagem": "Olá! Li a matéria de PC para GTA 6 e quero uma configuração para o meu monitor."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Em Campinas, o atendimento presencial está em [PC gamer no Cambuí](/blog/pc-gamer-gta-6-campinas). A série inteira fica em [GTA 6 no blog](/blog/gta-6)."
+    }
   ],
-  perguntas: [
+  "perguntas": [
     {
-      pergunta: "GTA 6 já tem requisito de PC?",
-      resposta: "Não. Até 19 de novembro de 2026 a Rockstar não anunciou versão de computador, pré-venda de PC nem requisito. A página oficial e o comunicado da Take-Two listam PlayStation 5 e Xbox Series. Lista de peça com cara de ficha oficial não tem essa origem.",
+      "pergunta": "Qual PC roda GTA 6?",
+      "resposta": "Ainda não há ficha. A Rockstar não anunciou a versão de PC. Dá para montar pela resolução da sua tela e pelos jogos de mundo aberto que você já joga."
     },
     {
-      pergunta: "Posso copiar o hardware do PS5 para montar o PC?",
-      resposta: "Não há equivalência publicada. O console não informa a peça de computador correspondente, e a Rockstar não publicou configuração de PC. Usar o aparelho da Sony como lista de compra é chute, do mesmo tipo que inventar um requisito.",
+      "pergunta": "GTA 6 vai sair para PC?",
+      "resposta": "Não foi anunciado. A estreia de 19 de novembro de 2026 é em PS5 e Xbox Series X|S. GTA V e Red Dead Redemption 2 chegaram ao PC depois, e isso não marca a data deste jogo."
     },
     {
-      pergunta: "O PC de GTA 6 chega no começo de 2027?",
-      resposta: "A Polygon publicou um relato nesse sentido, com fontes não identificadas. A Rockstar não confirmou. GTA V e Red Dead Redemption 2 chegaram ao PC depois do console, em intervalos diferentes. Precedente não é calendário.",
+      "pergunta": "Vale montar um PC antes do anúncio?",
+      "resposta": "Vale se ele melhora o que você já joga. Não vale se a máquina for ficar parada esperando uma ficha que não existe."
     },
     {
-      pergunta: "Vale comprar peça agora por causa de GTA 6?",
-      resposta: "Vale comprar o que os seus jogos e o seu monitor de hoje pedem, com folga de memória e de SSD. Não vale trocar peça porque um número de GTA 6 “pede”, já que esse número não foi publicado até 19 de novembro de 2026.",
+      "pergunta": "Quanto custa um PC para GTA 6?",
+      "resposta": "Não publicamos preço de peça nem de máquina pronta: muda toda semana. O orçamento sai na loja, em cima do seu monitor e dos seus jogos."
     },
     {
-      pergunta: "19 de novembro de 2026 é a data do PC?",
-      resposta: "Não. É a data de lançamento marcada para PlayStation 5 e Xbox Series. Tratar esse dia como estreia de computador contradiz a página da Rockstar e o comunicado de pré-venda da Take-Two.",
-    },
+      "pergunta": "Por onde começo a escolha?",
+      "resposta": "Pela tela. Full HD, Quad HD ou 4K mudam a placa, a memória de vídeo e o restante da configuração."
+    }
   ],
-  fontes: [
-    ROCKSTARVI,
-    YAHOOPC,
-    TAKETWO,
-    POLYGON,
-  ],
+  "fontes": [
+    {
+      "nome": "Rockstar Games — página oficial de Grand Theft Auto VI",
+      "url": "https://www.rockstargames.com/VI",
+      "data": "consulta em 19 de novembro de 2026"
+    },
+    {
+      "nome": "Yahoo / Just Jared — “GTA 6 PC Release Date: Is Grand Theft Auto VI Coming to PC?”",
+      "url": "https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html",
+      "data": "15 de novembro de 2026"
+    },
+    {
+      "nome": "Rockstar Games — “Grand Theft Auto V Is Now Available for PC”",
+      "url": "https://www.rockstargames.com/newswire/article/25o2411812a31k/grand-theft-auto-v-is-now-available-for-pc",
+      "data": "14 de abril de 2015"
+    },
+    {
+      "nome": "Rockstar Games — “Red Dead Redemption 2 Coming to PC November 5th”",
+      "url": "https://www.rockstargames.com/newswire/article/9k1248838o2974/Red-Dead-Redemption-2-Coming-to-PC-November-5th",
+      "data": "4 de outubro de 2019"
+    },
+    {
+      "nome": "Wikipedia — Grand Theft Auto V (datas de lançamento)",
+      "url": "https://en.wikipedia.org/wiki/Grand_Theft_Auto_V",
+      "data": "consulta em 19 de novembro de 2026"
+    },
+    {
+      "nome": "Wikipedia — Red Dead Redemption 2 (datas de lançamento)",
+      "url": "https://en.wikipedia.org/wiki/Red_Dead_Redemption_2",
+      "data": "consulta em 19 de novembro de 2026"
+    }
+  ]
 };
 
 export default artigo;
