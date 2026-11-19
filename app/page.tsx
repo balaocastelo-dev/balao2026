@@ -5,7 +5,7 @@ import JsonLd, { generateHomeAiAndGoogleSchema } from "@/components/JsonLd";
 import QuickLeadSection from "@/components/QuickLeadSection";
 import HomeLocalStoreInfo from "@/components/HomeLocalStoreInfo";
 import HomeHeroFullWidth from "@/components/HomeHeroFullWidth";
-import HomePcGamerGta6Destaque from "@/components/HomePcGamerGta6Destaque";
+import HomePs5Gta6Destaque from "@/components/HomePs5Gta6Destaque";
 import HomeTrustPillars from "@/components/HomeTrustPillars";
 import HomeBlogSection from "@/components/HomeBlogSection";
 
@@ -221,9 +221,9 @@ export default async function Home(props: {
           <FaixaDeConsignados />
         )}
 
-        {/* 1.1 Destaque: PC gamer pronto pro GTA 6 (sem preço; o botão abre o WhatsApp) */}
+        {/* 1.1 Destaque: PlayStation 5 + jogo GTA 6 (R$ 5.999 à vista ou 12x de R$ 599) */}
         {!navegando && (
-          <HomePcGamerGta6Destaque />
+          <HomePs5Gta6Destaque />
         )}
 
         {/* 2. Trust Pillars (4 interactive cards) */}
