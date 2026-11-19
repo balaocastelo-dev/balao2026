@@ -51,8 +51,8 @@ const cinema = criarCinema(cena, som);
 
 // luminárias de fora (acesas à noite)
 const LAMPS = [ // x, y, z no terreno, cor, força, alcance
-  [39.5, 8.2, 2.3, 0xffc98a, 1.6, 12], [32.6, 4.4, 2.6, 0xffc98a, 1.0, 10], [8.5, 5.0, 2.3, 0xffc98a, 1.1, 11], [14.2, 5.0, 2.3, 0xffc98a, 1.1, 11],
-  [20.6, 6.2, 0.7, 0xff7a2a, 1.6, 10], [39.0, 2.9, -0.4, 0x49d6ff, 1.2, 10], [48.6, 4.5, -0.5, 0xffc98a, 0.9, 9],
+  [39.5, 8.2, 2.3, 0xffc98a, 1.6, 12], [32.6, 4.4, 2.6, 0xffc98a, 1.0, 10], [8.5, 7.0, 2.3, 0xffc98a, 1.1, 11], [16.5, 6.9, 2.3, 0xffc98a, 1.1, 11],
+  [28.9, 4.0, 0.7, 0xff7a2a, 1.6, 10], [39.0, 2.9, -0.4, 0x49d6ff, 1.2, 10], [48.6, 4.5, -0.5, 0xffc98a, 0.9, 9],
   [57.0, 8.6, 1.2, 0xffc98a, 0.8, 10], [2.2, 5.0, 2.2, 0xffc98a, 0.8, 10],
 ].map(l => { const p = new THREE.PointLight(l[3], 0, l[5], 2); p.position.copy(W3(l[0], l[1], l[2])); p.userData.k = l[4]; cena.add(p); return p; });
 const fogueira = LAMPS[4];
@@ -167,10 +167,10 @@ async function carregar() {
   // casinhas: caixas para a luz de ambiente baixar lá dentro
   (extra.casas || []).forEach((c, i) => {
     U.uCasas.value[i].set(c.x[0], c.x[1], -c.y[1], -c.y[0]);
-    const frente = c.y[0] < 1 ? c.y[1] : c.y[0];
+    const frente = c.frente !== undefined ? c.frente : (c.y[0] < 1 ? c.y[1] : c.y[0]);
     U.uFrente.value[i] = -frente;
   });
-  // a luz de dentro só baixa até o forro (o terraço em cima do container fica com a luz de fora)
+  // a luz de dentro só baixa até o forro do andar de cima (a varanda, que fica para fora, pega a luz de fora)
   U.uTopoCasa.value = Math.max(...(extra.casas || []).map(c => (c.teto || 3.3) + 0.05), 0);
   casas = criarCasas(cena, extra, M, colisao);
   agua = criarAgua(cena, ceu, { reflexo: estado.qualidade >= 2, nivel: estado.qualidade }, extra.quintal);
@@ -493,7 +493,7 @@ function atualizarMundo(dt) {
   cinema.atualizar(estado.tempo, n);
   // dentro de casa de dia: o olho se acostuma com a pouca luz
   let dentro = null;
-  for (const c of (extra.casas || [])) if (eu.x > c.x[0] && eu.x < c.x[1] && eu.y > c.y[0] && eu.y < c.y[1] && eu.pes < (c.deck || 9) - 0.4) dentro = c.nome;
+  for (const c of (extra.casas || [])) if (eu.x > c.x[0] && eu.x < c.x[1] && eu.y > c.y[0] && eu.y < c.y[1] && eu.pes < (c.deck || (c.teto || 9)) - 0.4) dentro = c.nome;
   estado.dentroDeCasa = dentro;
   const alvo = info.exposicao * (dentro ? lerp(1.0, 2.3, estado.dia) : 1);
   exposicao += (alvo - exposicao) * Math.min(1, dt * 1.5);

@@ -39,7 +39,7 @@ export function carimbo() {
 
 // estado global compartilhado entre os módulos
 export const estado = {
-  hora: 10, leste: Math.PI / 2, auto: false, mudouHora: true,
+  hora: 10, leste: 0, auto: false, mudouHora: true,   // o sol nasce no portão de baixo (resposta do Thiago, 10/11/2026)
   dia: 1,          // 1 de dia, 0 de noite
   noite: 0,        // 0 de dia, 1 de noite (acende as luzes)
   tempo: 0,        // segundos desde o começo

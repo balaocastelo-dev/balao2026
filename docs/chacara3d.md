@@ -15,15 +15,20 @@ chácara), hospedado no site; não faz parte da loja.
   oclusão de ambiente, materiais com textura de verdade, grama 3D, vento nas plantas,
   água com reflexo e refração, cascata, bolhas, carpas, cachorros, galinhas, galo,
   passarinhos, borboletas, vaga-lumes, e a vilinha mobiliada por dentro.
-- **Vilinha (15/10/2026)**: as três casas viraram **casas container** no modelo da foto que o
-  Thiago mandou ("casa container com terraço"): um container de 7 × 3 m por casa (sala, cozinha,
-  banheiro e quarto de casal), chapa ondulada pintada com quinas de outra cor (azul-marinho com
-  amarelo, amarelo com azul-marinho, verde com amarelo), janelas e porta de vidro com caixilho
-  branco; em cima, terraço de cumaru aberto para o céu (o telhado metálico da foto saiu a pedido dele),
-  com guarda-corpo, mesa, cadeiras, espreguiçadeiras e vasos; escada metálica reta de fora, na lateral. Azul em x 4,5–11,5
-  e amarela em x 16,5–23,5 no muro y = 0, verde em x 8,5–15,5 no muro y = 10. Antes (12/10) eram
-  sobrados com mirante e escada caracol. Detalhes e o formato do `extra`: seção "As casas container
-  da vilinha" do `chacara3d/README.md`; conferência sem Blender em `chacara3d/modelo/teste_casas.py`.
+- **Vilinha (10/11/2026)**: as três casas container deram lugar a **três casas de dois andares**,
+  uma para cada filho, boas para hospedagem. Cada uma tem 6,20 × 4,00 m (24,8 m² por piso, ~50 m²
+  no total): embaixo sala com mini cozinha ao fundo, lavabo e a escada reta encostada na parede do
+  fundo; em cima suíte com banheiro e **varanda em balanço de 3,40 × 1,20 m** sobre a entrada coberta.
+  Telhado de duas águas com telha de barro, reboco pintado na fachada (azul, verde e amarela),
+  oitões claros (é neles que cai a projeção mapeada) e caixilhos brancos.
+  Ficam **em fita no muro do sul** (y = 0), recuadas 1,50 m da divisa, com 1,80 m entre uma e outra:
+  azul em x 3,0–9,2, verde em x 11,0–17,2 e amarela em x 19,0–25,2, todas de frente para o gramado.
+  A orientação veio do Thiago em 10/11: o sol nasce no portão de baixo e se põe no portão do gramado,
+  então esse muro é o sul — as fachadas pegam sol o dia inteiro e a sombra das casas cai no próprio
+  muro, deixando livres o gramado da frente e os 6,4 m do fim (a pracinha da jabuticabeira foi para lá).
+  Antes: tiny houses (11/10), sobrados com mirante (12/10) e casas container com terraço (15/10).
+  Detalhes e o formato do `extra`: seção "As casas da vilinha" do `chacara3d/README.md`;
+  conferência sem Blender em `chacara3d/modelo/teste_casas.py`.
 - **Cenários (12/10/2026)**: botão no menu liga um de cinco, com gente animada (corpos
   MakeHuman CC0, movimentos da captura da CMU), música gerada no navegador e a hora certa:
   festa de aniversário (18h36), reunião no cineminha (20h48), trabalhadores limpando,

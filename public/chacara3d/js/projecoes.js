@@ -1,6 +1,6 @@
 // Plano de iluminação noturna: projetores virtuais que lançam animações, cores de luz de jardim,
 // vídeos do computador ou o YouTube sobre as copas das árvores, o muro da piscina, os portões
-// e as paredes laterais lisas das casas container (projeção mapeada / video mapping).
+// e os oitões cegos das casas da vilinha (projeção mapeada / video mapping).
 //
 // Como funciona: cada projetor ocupa um ladrilho de 512² de um atlas (2048 × 1536). A cada quadro
 // o ladrilho é desenhado (animação procedural de projecoes_anim.js, vídeo do computador ou cor) e os
@@ -21,20 +21,20 @@ const GUARDA = 'chacara3d.projecoes.v1';
 function definirLugares(extra) {
   const L = [
     { id: 'mangueira', nome: 'Mangueira', tipo: 'arvore', de: [25.2, 6.8, 0.35], para: [30.3, 2.4, 5.8], raio: 4.6, ganho: 4.2 },
-    { id: 'jabuticabeira', nome: 'Jabuticabeira', tipo: 'arvore', de: [14.0, 5.9, 0.25], para: [14.0, 2.2, 1.75], raio: 2.1, ganho: 4.0 },
-    { id: 'coqueiros', nome: 'Coqueiros', tipo: 'arvore', de: [23.8, 4.3, 0.25], para: [23.6, 8.2, 6.0], raio: 4.3, ganho: 4.4 },
+    { id: 'jabuticabeira', nome: 'Jabuticabeira', tipo: 'arvore', de: [26.5, 6.3, 0.25], para: [26.5, 2.4, 1.75], raio: 2.1, ganho: 4.0 },
+    { id: 'coqueiros', nome: 'Coqueiros', tipo: 'arvore', de: [23.8, 6.1, 0.25], para: [23.6, 8.4, 6.0], raio: 4.3, ganho: 4.4 },
     { id: 'amendoeira', nome: 'Amendoeira', tipo: 'arvore', de: [51.9, 4.8, -0.75], para: [46.4, 5.1, 4.6], raio: 4.6, ganho: 4.2 },
     { id: 'muro_piscina', nome: 'Muro da piscina', tipo: 'plano', ret: { x0: 31.4, x1: 44.8, y0: 0.0, y1: 0.0, z0: -0.1, z1: 2.32 }, normal: [0, 1], de: [38.1, 6.25, 2.5], fundo: 1.1, ganho: 1.7 },
-    { id: 'portao_gramado', nome: 'Portão do gramado', tipo: 'plano', ret: { x0: 0.0, x1: 0.0, y0: 2.55, y1: 6.85, z0: 0.0, z1: 3.5 }, normal: [1, 0], de: [6.4, 4.7, 1.1], fundo: 0.9, ganho: 1.8 },
+    { id: 'portao_gramado', nome: 'Portão do gramado', tipo: 'plano', ret: { x0: 0.0, x1: 0.0, y0: 2.55, y1: 6.85, z0: 0.0, z1: 3.5 }, normal: [1, 0], de: [5.0, 7.8, 1.1], fundo: 0.9, ganho: 1.8 },
     { id: 'portao_baixo', nome: 'Portão de baixo', tipo: 'plano', ret: { x0: 60.0, x1: 60.0, y0: 2.75, y1: 7.45, z0: -1.0, z1: 2.5 }, normal: [-1, 0], de: [57.68, 4.0, 0.55], fundo: 0.9, ganho: 1.8 },
   ];
   const cores = { 'Parede da casa azul': 'parede_azul', 'Parede da casa amarela': 'parede_amarela', 'Parede da casa verde': 'parede_verde' };
   for (const p of (extra.paredes_projecao || [])) {
     const id = cores[p.nome] || ('parede_' + L.length);
     const cx = (p.x0 + p.x1) / 2, cy = (p.y0 + p.y1) / 2;
-    const dist = id === 'parede_verde' ? 2.7 : 4.4;
+    const dist = p.dist || (id === 'parede_verde' ? 2.7 : 4.4);
     L.push({ id, nome: p.nome, tipo: 'plano', ret: { x0: p.x0, x1: p.x1, y0: p.y0, y1: p.y1, z0: p.z0, z1: p.z1 }, normal: p.normal,
-      de: [cx + p.normal[0] * dist, cy + p.normal[1] * dist + (id === 'parede_verde' ? -1.2 : 0), 0.25], fundo: 0.7, ganho: 1.5 });
+      de: [cx + p.normal[0] * dist, cy + p.normal[1] * dist + (p.dist ? 0 : (id === 'parede_verde' ? -1.2 : 0)), 0.25], fundo: 0.7, ganho: 1.5 });
   }
   return L.slice(0, NPROJ);
 }
